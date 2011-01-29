@@ -250,12 +250,12 @@ void Remap_image_highlevel(byte * conversion_table)
   int layer;
 
   // Remap the flatenned image view
-  Remap_general_lowlevel(conversion_table,Main_screen,
+  Remap_general_lowlevel(conversion_table,Main_screen,Main_screen,
                          Main_image_width,Main_image_height,Main_image_width);
 
   // Remap all layers
   for (layer=0; layer<Main_backups->Pages->Nb_layers; layer++)
-    Remap_general_lowlevel(conversion_table,Main_backups->Pages->Image[layer],Main_image_width,Main_image_height,Main_image_width);
+    Remap_general_lowlevel(conversion_table,Main_backups->Pages->Image[layer],Main_backups->Pages->Image[layer],Main_image_width,Main_image_height,Main_image_width);
 
   // Remap transparent color
   Main_backups->Pages->Transparent_color = 

@@ -430,8 +430,16 @@ GFX2_GLOBAL T_List_of_pages * Spare_backups;
 
 // -- Brush data
 
-/// Pixel data of the current brush.
+/// Pixel data of the current brush (remapped).
 GFX2_GLOBAL byte * Brush;
+/// Pixel data of the current brush (before remap).
+GFX2_GLOBAL byte * Brush_original_pixels;
+/// Palette of the brush, from when it was grabbed.
+GFX2_GLOBAL T_Palette Brush_original_palette;
+/// Back_color used when the brush was grabbed
+GFX2_GLOBAL byte Brush_original_back_color;
+/// Color mapping from ::Brush_original_pixels to ::Brush
+GFX2_GLOBAL byte Brush_colormap[256];
 /// X coordinate of the brush's "hot spot". It is < ::Brush_width
 GFX2_GLOBAL word Brush_offset_X;
 /// Y coordinate of the brush's "hot spot". It is < ::Brush_height

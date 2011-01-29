@@ -340,7 +340,7 @@ void Rotate_270_deg_lowlevel(byte * source, byte * dest, short width, short heig
 
 // Replace une couleur par une autre dans un buffer
 
-void Remap_general_lowlevel(byte * conversion_table,byte * buffer,short width,short height,short buffer_width)
+void Remap_general_lowlevel(byte * conversion_table,byte * in_buffer, byte *out_buffer,short width,short height,short buffer_width)
 {
   int dx,cx;
 
@@ -350,10 +350,12 @@ void Remap_general_lowlevel(byte * conversion_table,byte * buffer,short width,sh
     // Pour chaque pixel
     for(cx=width;cx>0;cx--)
     {
-      *buffer = conversion_table[*buffer];
-      buffer++;
+      *out_buffer = conversion_table[*in_buffer];
+      in_buffer++;
+      out_buffer++;
     }
-    buffer += buffer_width-width;
+    in_buffer += buffer_width-width;
+    out_buffer += buffer_width-width;
   }
 }
 

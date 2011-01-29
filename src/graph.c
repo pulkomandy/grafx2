@@ -681,7 +681,7 @@ void Remap_spare(void)
   // qui craint un peu, on peut faire l'échange dans la brosse de toutes les
   // teintes.
   for (layer=0; layer<Spare_backups->Pages->Nb_layers; layer++)
-    Remap_general_lowlevel(used,Spare_backups->Pages->Image[layer],Spare_image_width,Spare_image_height,Spare_image_width);
+    Remap_general_lowlevel(used,Spare_backups->Pages->Image[layer],Spare_backups->Pages->Image[layer],Spare_image_width,Spare_image_height,Spare_image_width);
     
   // Change transparent color index
   Spare_backups->Pages->Transparent_color=used[Spare_backups->Pages->Transparent_color];

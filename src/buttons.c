@@ -4991,7 +4991,11 @@ void Button_Text(void)
     
       Brush_offset_X=Brush_width>>1;
       Brush_offset_Y=Brush_height>>1;
- 
+      
+      // TODO: Import original palette
+      // Remap to current screen palette
+      Remap_brush();
+      
       // Fermeture
       Close_window();
       Unselect_button(BUTTON_TEXT);
@@ -5283,8 +5287,9 @@ byte Restore_brush(int index)
     if (!Realloc_brush(Brush_container[index].Width,Brush_container[index].Height,NULL,NULL))
     {
       // Realloc sets Brush_width and Brush_height to new size.
-      memcpy(Brush, Brush_container[index].Brush, Brush_height*Brush_width);
-      
+      memcpy(Brush_original_pixels, Brush_container[index].Brush, (long)Brush_height*Brush_width);
+      // Copy without remap
+      memcpy(Brush, Brush_original_pixels, (long)Brush_height*Brush_width);
       Brush_offset_X=Brush_width>>1;
       Brush_offset_Y=Brush_height>>1;
     }

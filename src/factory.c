@@ -165,9 +165,9 @@ int L_SetBrushSize(lua_State* L)
   {
     return luaL_error(L, "setbrushsize: Resize failed");
   }
-  
   Brush_was_altered=1;
   // Fill with Back_color
+  memset(Brush_original_pixels,Back_color,(long)Brush_width*Brush_height);
   memset(Brush,Back_color,(long)Brush_width*Brush_height);
   // Center the handle
   Brush_offset_X=(Brush_width>>1);

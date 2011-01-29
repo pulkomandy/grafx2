@@ -780,6 +780,8 @@ void Load_image(T_IO_Context *context)
       File_error=3;
       free(context->Buffer_image);
     }
+    memcpy(Brush_original_palette, context->Palette, sizeof(T_Palette));
+
     context->Buffer_image = NULL;
   }
   else if (context->Type == CONTEXT_SURFACE)

@@ -1082,6 +1082,8 @@ void Button_Sieve_menu(void)
           for (x_pos=0; x_pos<Sieve_width; x_pos++)
             Pixel_in_brush(x_pos,y_pos,(Sieve[x_pos][y_pos])?Fore_color:Back_color);
         
+        // Copy without remap
+        memcpy(Brush_original_pixels, Brush, (long)Brush_height*Brush_width);
         Brush_offset_X=(Brush_width>>1);
         Brush_offset_Y=(Brush_height>>1);
         

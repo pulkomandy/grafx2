@@ -754,8 +754,11 @@ int Init_program(int argc,char * argv[])
   // On initialise la brosse initiale à 1 pixel blanc:
   Brush_width=1;
   Brush_height=1;
+  for (temp=0;temp<256;temp++)
+    Brush_colormap[temp]=temp;
   Capture_brush(0,0,0,0,0);
   *Brush=MC_White;
+  *Brush_original_pixels=MC_White;
   
   // Test de recuperation de fichiers sauvés
   switch (Check_recovery())

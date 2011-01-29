@@ -494,10 +494,14 @@ byte Realloc_brush(word new_brush_width, word new_brush_height, byte *new_brush,
 {
 
   byte *new_smear_brush;
+  byte *new_brush_remapped;
   word new_smear_brush_width;
   word new_smear_brush_height;
+  byte new_brush_is_provided;
   
-  if (new_brush==NULL)
+  new_brush_is_provided = (new_brush!=NULL);
+  
+  if (!new_brush_is_provided)
   {
     new_brush=(byte *)malloc(((long)new_brush_height)*new_brush_width);
     if (new_brush == NULL)
@@ -512,8 +516,8 @@ byte Realloc_brush(word new_brush_width, word new_brush_height, byte *new_brush,
   new_smear_brush_width=(new_brush_width>MAX_PAINTBRUSH_SIZE)?new_brush_width:MAX_PAINTBRUSH_SIZE;
   new_smear_brush_height=(new_brush_height>MAX_PAINTBRUSH_SIZE)?new_brush_height:MAX_PAINTBRUSH_SIZE;
   new_smear_brush=NULL;
-  if ( (((long)Brush_height)*Brush_width) !=
-       (((long)new_brush_height)*new_brush_width) )
+  if ( (((long)Smear_brush_height)*Smear_brush_width) !=
+       (((long)new_smear_brush_width)*new_smear_brush_height) )
   {
     new_smear_brush=(byte *)malloc(((long)new_smear_brush_height)*new_smear_brush_width);
     if (new_smear_brush == NULL)
@@ -521,13 +525,33 @@ byte Realloc_brush(word new_brush_width, word new_brush_height, byte *new_brush,
       Error(0);
       if (old_brush)
         *old_brush=NULL;
+      if (!new_brush_is_provided)
+        free(new_brush);
       return 2;
+    }
+  }
+  new_brush_remapped=NULL;
+  if ( (((long)Brush_height)*Brush_width) !=
+       (((long)new_brush_height)*new_brush_width) )
+  {
+    new_brush_remapped=(byte *)malloc(((long)new_brush_height)*new_brush_width);
+    if (new_brush_remapped == NULL)
+    {
+      Error(0);
+      free(new_smear_brush);
+      if (old_brush)
+        *old_brush=NULL;  
+      if (!new_brush_is_provided)
+        free(new_brush);
+      return 3;
     }
   }
 
   // All allocations successful: can replace globals
   Brush_width=new_brush_width;
   Brush_height=new_brush_height;
+  memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
+  Brush_original_back_color=Back_color;
   
   if (new_smear_brush)
   {
@@ -539,12 +563,22 @@ byte Realloc_brush(word new_brush_width, word new_brush_height, byte *new_brush,
 
   // Save or free the old brush pixels
   if (old_brush)
-    *old_brush=Brush;
+    *old_brush=Brush_original_pixels;
   else
     free(old_brush);
+  Brush_original_pixels=new_brush;
   // Assign new brush
-  Brush=new_brush;
-
+  if (new_brush_remapped)
+  {
+    free(Brush);
+    Brush=new_brush_remapped;
+  }
+  if (new_brush_is_provided)
+  {
+    // Copy from Brush_original_pixels to Brush, using the last defined colmap.
+    Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
+    //memcpy(Brush, Brush_original_pixels,(long)Brush_width*Brush_height);
+  }
   return 0;
 }
 
@@ -742,6 +776,8 @@ void Capture_brush(short start_x,short start_y,short end_x,short end_y,short cle
         }
       Update_part_of_screen(start_x,start_y,Brush_width,Brush_height);
     }
+    // Copy without remap
+    memcpy(Brush_original_pixels, Brush, (long)Brush_height*Brush_width);
 
     // On centre la prise sur la brosse
     Brush_offset_X=(Brush_width>>1);
@@ -759,9 +795,12 @@ void Rotate_90_deg(void)
     Error(0);
     return;
   }
-  Rotate_90_deg_lowlevel(old_brush,Brush,Brush_height,Brush_width);
+  Rotate_90_deg_lowlevel(old_brush,Brush_original_pixels,Brush_height,Brush_width);
   
   free(old_brush);
+
+  // Copy without remap
+  memcpy(Brush, Brush_original_pixels, (long)Brush_height*Brush_width);
 
   // On centre la prise sur la brosse
   Brush_offset_X=(Brush_width>>1);
@@ -773,34 +812,45 @@ void Remap_brush(void)
 {
   short x_pos; // Variable de balayage de la brosse
   short y_pos; // Variable de balayage de la brosse
-  byte  used[256]; // Tableau de booléens "La couleur est utilisée"
   int   color;
 
 
   // On commence par initialiser le tableau de booléens à faux
   for (color=0;color<=255;color++)
-    used[color]=0;
+    Brush_colormap[color]=0;
 
   // On calcule la table d'utilisation des couleurs
   for (y_pos=0;y_pos<Brush_height;y_pos++)
     for (x_pos=0;x_pos<Brush_width;x_pos++)
-      used[Read_pixel_from_brush(x_pos,y_pos)]=1;
+      Brush_colormap[*(Brush_original_pixels + y_pos * Brush_width + x_pos)]=1;
 
   //  On n'est pas censé remapper la couleur de transparence, sinon la brosse
   // changera de forme, donc on dit pour l'instant qu'elle n'est pas utilisée
   // ainsi on ne s'embêtera pas à la recalculer
-  used[Back_color]=0;
+  Brush_colormap[Back_color]=0;
 
-  //   On va maintenant se servir de la table "used" comme table de
+  //   On va maintenant se servir de la table comme table de
   // conversion: pour chaque indice, la table donne une couleur de
   // remplacement.
   // Note : Seules les couleurs utilisées on besoin d'êtres recalculées: les
   //       autres ne seront jamais consultées dans la nouvelle table de
   //       conversion puisque elles n'existent pas dans la brosse, donc elles
-  //       ne seront pas utilisées par Remap_brush_LOWLEVEL.
+  //       ne seront pas utilisées par Remap_general_lowlevel.
   for (color=0;color<=255;color++)
-    if (used[color] != 0)
-      used[color]=Best_color_perceptual(Spare_palette[color].R,Spare_palette[color].G,Spare_palette[color].B);
+    if (Brush_colormap[color] != 0)
+    {
+      byte r,g,b;
+      r=Brush_original_palette[color].R;
+      g=Brush_original_palette[color].G;
+      b=Brush_original_palette[color].B;
+      
+      // When remapping to same palette, ensure we keep same color index
+      if (r==Main_palette[color].R && g==Main_palette[color].G && b==Main_palette[color].B)
+        Brush_colormap[color]=color;
+      else
+        // Usual method: closest by r g b
+        Brush_colormap[color]=Best_color_perceptual(r,g,b);
+    }
 
   //   Il reste une couleur non calculée dans la table qu'il faut mettre à
   // jour: c'est la couleur de fond. On l'avait inhibée pour éviter son
@@ -808,13 +858,13 @@ void Remap_brush(void)
   // la brosse, on va mettre dans la table une relation d'équivalence entre
   // les deux palettes: comme on ne veut pas que la couleur soit remplacée,
   // on va dire qu'on veut qu'elle soit remplacée par la couleur en question.
-  used[Back_color]=Back_color;
+  Brush_colormap[Back_color]=Back_color;
 
   //   Maintenant qu'on a une super table de conversion qui n'a que le nom
   // qui craint un peu, on peut faire l'échange dans la brosse de toutes les
   // teintes.
-  Remap_general_lowlevel(used,Brush,Brush_width,Brush_height,Brush_width);
-  //Remap_brush_LOWLEVEL(used);
+  Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
+  
 }
 
 
@@ -898,6 +948,8 @@ void Outline_brush(void)
         Pixel_in_brush(x_pos,y_pos,Fore_color);
     }
   }
+  // Copy without remap
+  memcpy(Brush_original_pixels, Brush, (long)Brush_height*Brush_width);
 
   // On recentre la prise sur la brosse
   Brush_offset_X=(Brush_width>>1);
@@ -997,7 +1049,9 @@ void Nibble_brush(void)
     }
 
     free(old_brush);
-    
+    // Copy without remap
+    memcpy(Brush_original_pixels, Brush, (long)Brush_height*Brush_width);
+
     // On recentre la prise sur la brosse
     Brush_offset_X=(Brush_width>>1);
     Brush_offset_Y=(Brush_height>>1);
@@ -1096,6 +1150,8 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
           if (clear)
             Pixel_in_current_screen(x_pos,y_pos,Back_color,0);
         }
+    // Copy without remap
+    memcpy(Brush_original_pixels, Brush, (long)Brush_height*Brush_width);
 
     // On centre la prise sur la brosse
     Brush_offset_X=(Brush_width>>1);
