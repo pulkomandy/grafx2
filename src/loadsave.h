@@ -194,12 +194,8 @@ T_Format * Get_fileformat(byte format);
 
 // -- File formats
 
-#ifndef __no_pnglib__
-#define NB_KNOWN_FORMATS 19 ///< Total number of known file formats.
-#else
-// Without pnglib
-#define NB_KNOWN_FORMATS 18 ///< Total number of known file formats.
-#endif
+/// Total number of known file formats
+unsigned int Nb_known_formats(void);
 
 // Internal use
 

@@ -1226,6 +1226,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
   T_Dropdown_button * formats_dropdown;
   T_Dropdown_button * bookmark_dropdown[4];
   short temp;
+  unsigned int format;
   int dummy=0;       // Sert à appeler SDL_GetKeyState
   byte  save_or_load_image=0;
   byte  has_clicked_ok=0;// Indique si on a clické sur Load ou Save ou sur
@@ -1304,11 +1305,11 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
       Get_fileformat(Main_format)->Label,
       1,0,1,RIGHT_SIDE|LEFT_SIDE,0); // 6
 
-  for (temp=0; temp < NB_KNOWN_FORMATS; temp++)
+  for (format=0; format < Nb_known_formats(); format++)
   {
-    if ((load && (File_formats[temp].Identifier <= FORMAT_ALL_FILES || File_formats[temp].Load)) || 
-      (!load && File_formats[temp].Save))
-        Window_dropdown_add_item(formats_dropdown,File_formats[temp].Identifier,File_formats[temp].Label);
+    if ((load && (File_formats[format].Identifier <= FORMAT_ALL_FILES || File_formats[format].Load)) || 
+      (!load && File_formats[format].Save))
+        Window_dropdown_add_item(formats_dropdown,File_formats[format].Identifier,File_formats[format].Label);
   }
   Print_in_window(70,18,"Format",MC_Dark,MC_Light);
   

@@ -139,7 +139,7 @@ void Save_PNG(T_IO_Context *);
 void Load_SDL_Image(T_IO_Context *);
 
 // ENUM     Name  TestFunc LoadFunc SaveFunc PalOnly Comment Layers Ext Exts  
-T_Format File_formats[NB_KNOWN_FORMATS] = {
+T_Format File_formats[] = {
   {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, 0, "", "gif;png;bmp;pcx;pkm;lbm;ilbm;iff;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;kcf;pal;c64;koa;tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico"},
   {FORMAT_ALL_FILES, "(*.*)", NULL, NULL, NULL, 0, 0, 0, "", "*"},
   {FORMAT_GIF, " gif", Test_GIF, Load_GIF, Save_GIF, 0, 1, 1, "gif", "gif"},
@@ -163,6 +163,12 @@ T_Format File_formats[NB_KNOWN_FORMATS] = {
   {FORMAT_XPM, " xpm", NULL,     NULL,     Save_XPM, 0, 0, 0, "xpm", "xpm"},
   {FORMAT_MISC,"misc.",NULL,     NULL,     NULL,     0, 0, 0, "",    "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico"},
 };
+
+/// Total number of known file formats
+unsigned int Nb_known_formats(void)
+{
+  return sizeof(File_formats)/sizeof(File_formats[0]);
+}
 
 /// Set the color of a pixel (on load)
 void Set_pixel(T_IO_Context *context, short x_pos, short y_pos, byte color)
@@ -567,7 +573,7 @@ void Load_image(T_IO_Context *context)
   {
     //  Sinon, on va devoir scanner les différents formats qu'on connait pour
     // savoir à quel format est le fichier:
-    for (index=0; index < NB_KNOWN_FORMATS; index++)
+    for (index=0; index < Nb_known_formats(); index++)
     {
       format = Get_fileformat(index);
       // Loadable format
@@ -1089,7 +1095,7 @@ T_Format * Get_fileformat(byte format)
   unsigned int i;
   T_Format * safe_default = File_formats;
   
-  for (i=0; i < NB_KNOWN_FORMATS; i++)
+  for (i=0; i < Nb_known_formats(); i++)
   {
     if (File_formats[i].Identifier == format)
       return &(File_formats[i]);
