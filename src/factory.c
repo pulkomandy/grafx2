@@ -1411,7 +1411,11 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   lua_close(L);
   
   if (Brush_was_altered)
+  {
+    // Copy Brush to original
+    memcpy(Brush_original_pixels, Brush, (long)Brush_width*Brush_height);
     Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
+  }
 
   Hide_cursor();
   Display_all_screen();
