@@ -781,6 +781,7 @@ void Load_image(T_IO_Context *context)
       free(context->Buffer_image);
     }
     memcpy(Brush_original_palette, context->Palette, sizeof(T_Palette));
+    Remap_brush();
 
     context->Buffer_image = NULL;
   }

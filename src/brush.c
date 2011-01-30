@@ -550,7 +550,6 @@ byte Realloc_brush(word new_brush_width, word new_brush_height, byte *new_brush,
   // All allocations successful: can replace globals
   Brush_width=new_brush_width;
   Brush_height=new_brush_height;
-  memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
   Brush_original_back_color=Back_color;
   
   if (new_smear_brush)
@@ -572,12 +571,6 @@ byte Realloc_brush(word new_brush_width, word new_brush_height, byte *new_brush,
   {
     free(Brush);
     Brush=new_brush_remapped;
-  }
-  if (new_brush_is_provided)
-  {
-    // Copy from Brush_original_pixels to Brush, using the last defined colmap.
-    Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
-    //memcpy(Brush, Brush_original_pixels,(long)Brush_width*Brush_height);
   }
   return 0;
 }
@@ -776,8 +769,10 @@ void Capture_brush(short start_x,short start_y,short end_x,short end_y,short cle
         }
       Update_part_of_screen(start_x,start_y,Brush_width,Brush_height);
     }
-    // Copy without remap
-    memcpy(Brush_original_pixels, Brush, (long)Brush_height*Brush_width);
+    // Grab palette
+    memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
+    // Remap (no change)
+    Remap_brush();
 
     // On centre la prise sur la brosse
     Brush_offset_X=(Brush_width>>1);
@@ -799,8 +794,8 @@ void Rotate_90_deg(void)
   
   free(old_brush);
 
-  // Copy without remap
-  memcpy(Brush, Brush_original_pixels, (long)Brush_height*Brush_width);
+  // Remap according to the last used remap table
+  Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
 
   // On centre la prise sur la brosse
   Brush_offset_X=(Brush_width>>1);
@@ -876,13 +871,16 @@ void Outline_brush(void)
   byte * old_brush;
   word old_width;
   word old_height;
+  int i;
 
   old_width=Brush_width;
   old_height=Brush_height;
   
+  SWAP_PBYTES(Brush, Brush_original_pixels);
   if(Realloc_brush(Brush_width+2, Brush_height+2, NULL, &old_brush))
   {
     Error(0);
+    SWAP_PBYTES(Brush, Brush_original_pixels);
     return;
   }
 
@@ -948,8 +946,12 @@ void Outline_brush(void)
         Pixel_in_brush(x_pos,y_pos,Fore_color);
     }
   }
-  // Copy without remap
-  memcpy(Brush_original_pixels, Brush, (long)Brush_height*Brush_width);
+  // Adopt the current palette.
+  memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
+  memcpy(Brush_original_pixels, Brush, (long)Brush_width*Brush_height);
+  for (i=0; i<256; i++)
+    Brush_colormap[i]=i;
+  //--
 
   // On recentre la prise sur la brosse
   Brush_offset_X=(Brush_width>>1);
@@ -967,15 +969,18 @@ void Nibble_brush(void)
   byte * old_brush;
   word old_width;
   word old_height;
+  int i;
 
   if ( (Brush_width>2) && (Brush_height>2) )
   {
     old_width=Brush_width;
     old_height=Brush_height;
     
+    SWAP_PBYTES(Brush, Brush_original_pixels);
     if (Realloc_brush(Brush_width-2, Brush_height-2, NULL, &old_brush))
     {
       Error(0);
+      SWAP_PBYTES(Brush, Brush_original_pixels);
       return;
     }
     // On copie l'ancienne brosse dans la nouvelle
@@ -1049,8 +1054,12 @@ void Nibble_brush(void)
     }
 
     free(old_brush);
-    // Copy without remap
-    memcpy(Brush_original_pixels, Brush, (long)Brush_height*Brush_width);
+    // Adopt the current palette.
+    memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
+    memcpy(Brush_original_pixels, Brush, (long)Brush_width*Brush_height);
+    for (i=0; i<256; i++)
+      Brush_colormap[i]=i;
+    //--
 
     // On recentre la prise sur la brosse
     Brush_offset_X=(Brush_width>>1);
@@ -1150,8 +1159,10 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
           if (clear)
             Pixel_in_current_screen(x_pos,y_pos,Back_color,0);
         }
-    // Copy without remap
-    memcpy(Brush_original_pixels, Brush, (long)Brush_height*Brush_width);
+    // Grab palette
+    memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
+    // Remap (no change)
+    Remap_brush();
 
     // On centre la prise sur la brosse
     Brush_offset_X=(Brush_width>>1);
@@ -1192,7 +1203,7 @@ void Stretch_brush(short x1, short y1, short x2, short y2)
     return;
   }
   
-  Rescale(Brush, Brush_width, Brush_height, new_brush, new_brush_width, new_brush_height, x2<x1, y2<y1);
+  Rescale(Brush_original_pixels, Brush_width, Brush_height, new_brush, new_brush_width, new_brush_height, x2<x1, y2<y1);
 
   if (Realloc_brush(new_brush_width, new_brush_height, new_brush, NULL))
   {
@@ -1200,6 +1211,8 @@ void Stretch_brush(short x1, short y1, short x2, short y2)
     Error(0);
     return;
   }
+  // Remap according to the last used remap table
+  Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
   
   Brush_offset_X=(Brush_width>>1);
   Brush_offset_Y=(Brush_height>>1);
@@ -1477,6 +1490,8 @@ void Distort_brush(short x1, short y1, short x2, short y2, short x3, short y3, s
     Error(0);
     return;
   }
+  // Remap according to the last used remap table
+  Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
 
   // Re-center brush handle  
   Brush_offset_X=(Brush_width>>1);
@@ -1701,7 +1716,7 @@ void Compute_quad_texture(int x1,int y1,int xt1,int yt1,
       xt=Round((float)(ScanY_Xt[0][y])+(temp*(ScanY_Xt[1][y]-ScanY_Xt[0][y])));
       yt=Round((float)(ScanY_Yt[0][y])+(temp*(ScanY_Yt[1][y]-ScanY_Yt[0][y])));
       if (xt>=0 && yt>=0)
-        buffer[x+(y*width)]=Read_pixel_from_brush(xt,yt);
+        buffer[x+(y*width)]=*(Brush_original_pixels + yt * Brush_width + xt);
     }
     for (; x<width; x++)
       buffer[x+(y*width)]=Back_color;
@@ -1773,6 +1788,8 @@ void Rotate_brush(float angle)
     free(new_brush);
     return;
   }
+  // Remap according to the last used remap table
+  Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
 
   // Center offsets
   Brush_offset_X=(Brush_width>>1);
@@ -1900,3 +1917,25 @@ void Rotate_brush_preview(float angle)
   end_y=Max(Max(y1,y2),Max(y3,y4));
   Update_part_of_screen(start_x,start_y,end_x-start_x+1,end_y-start_y+1);
 }
+/*
+/// Sets brush's original palette and color mapping.
+void Brush_set_palette(T_Palette *palette)
+{
+  int i;
+  byte need_remap;
+  
+  need_remap=0;
+  
+  memcpy(Brush_original_palette,palette,sizeof(T_Palette));
+  for (i=0;i<256;i++)
+  {
+    if (Brush_original_palette[i].R!=Main_palette[i].R
+     || Brush_original_palette[i].G!=Main_palette[i].G
+     || Brush_original_palette[i].B!=Main_palette[i].B)
+    {
+      need_remap=1;
+    }
+  }
+  
+}
+*/

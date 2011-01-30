@@ -122,6 +122,8 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear);
 ///        (after transferring pixels to Brush, usually).
 byte Realloc_brush(word new_brush_width, word new_brush_height, byte *new_brush, byte **old_brush);
 
+/// Sets brush's original palette and color mapping.
+void Brush_set_palette(T_Palette *palette);
 
 
 #endif

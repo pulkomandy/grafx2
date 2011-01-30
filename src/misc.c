@@ -362,7 +362,7 @@ void Remap_general_lowlevel(byte * conversion_table,byte * in_buffer, byte *out_
 void Copy_image_to_brush(short start_x,short start_y,short Brush_width,short Brush_height,word image_width)
 {
   byte* src=start_y*image_width+start_x+Main_backups->Pages->Image[Main_current_layer]; //Adr départ image (ESI)
-  byte* dest=Brush; //Adr dest brosse (EDI)
+  byte* dest=Brush_original_pixels; //Adr dest brosse (EDI)
   int dx;
 
   for (dx=Brush_height;dx!=0;dx--)

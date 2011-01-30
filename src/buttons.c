@@ -3098,7 +3098,6 @@ void Load_picture(byte image)
   // Image=0 => On charge/sauve une brosse
 {
   byte  confirm;
-  byte  use_brush_palette = 0;
   byte  old_cursor_shape;
   int   new_mode;
   T_IO_Context context;
@@ -3126,8 +3125,6 @@ void Load_picture(byte image)
       if (Main_image_is_modified)
         confirm=Confirmation_box("Discard unsaved changes?");
     }
-    else
-      use_brush_palette=Confirmation_box("Use the palette of the brush?");
   }
 
   // confirm is modified inside the first if, that's why we check it
@@ -3149,9 +3146,6 @@ void Load_picture(byte image)
 
     if (!image)
     {
-      //if (!use_brush_palette)
-      //  memcpy(Main_palette,initial_palette,sizeof(T_Palette));
-
       if (File_error==3) // Memory allocation error when loading brush
       {
         // Nothing to do here.
@@ -3926,10 +3920,14 @@ void Button_Brush_FX(void)
   switch (clicked_button)
   {
     case  2 : // Flip X
-      Flip_X_lowlevel(Brush, Brush_width, Brush_height);
+      Flip_X_lowlevel(Brush_original_pixels, Brush_width, Brush_height);
+      // Remap according to the last used remap table
+      Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
       break;
     case  3 : // Flip Y
-      Flip_Y_lowlevel(Brush, Brush_width, Brush_height);
+      Flip_Y_lowlevel(Brush_original_pixels, Brush_width, Brush_height);
+      // Remap according to the last used remap table
+      Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
       break;
     case  4 : // 90° Rotation
       Rotate_90_deg();
@@ -4988,13 +4986,13 @@ void Button_Text(void)
         Display_cursor();
         Error(0);
       }
+      // Grab palette
+      memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
+      // Remap (no change)
+      Remap_brush();
     
       Brush_offset_X=Brush_width>>1;
       Brush_offset_Y=Brush_height>>1;
-      
-      // TODO: Import original palette
-      // Remap to current screen palette
-      Remap_brush();
       
       // Fermeture
       Close_window();
@@ -5144,19 +5142,19 @@ void Store_brush(int index)
       Brush_container[index].Width=Brush_width;
       Brush_container[index].Height=Brush_height;
 
-      memcpy(Brush_container[index].Brush, Brush,Brush_height*Brush_width);
+      memcpy(Brush_container[index].Brush, Brush_original_pixels,Brush_height*Brush_width);
 
       // Scale for preview
       if (Brush_width>BRUSH_CONTAINER_PREVIEW_WIDTH ||
           Brush_height>BRUSH_CONTAINER_PREVIEW_HEIGHT)
       {
         // Scale
-        Rescale(Brush, Brush_width, Brush_height, (byte *)(Brush_container[index].Thumbnail), BRUSH_CONTAINER_PREVIEW_WIDTH, BRUSH_CONTAINER_PREVIEW_HEIGHT, 0, 0);
+        Rescale(Brush_original_pixels, Brush_width, Brush_height, (byte *)(Brush_container[index].Thumbnail), BRUSH_CONTAINER_PREVIEW_WIDTH, BRUSH_CONTAINER_PREVIEW_HEIGHT, 0, 0);
       }
       else
       {
         // Direct copy
-        Copy_part_of_image_to_another(Brush, 0,0,Brush_width, Brush_height,Brush_width,(byte *)(Brush_container[index].Thumbnail),0,0,BRUSH_CONTAINER_PREVIEW_WIDTH);
+        Copy_part_of_image_to_another(Brush_original_pixels, 0,0,Brush_width, Brush_height,Brush_width,(byte *)(Brush_container[index].Thumbnail),0,0,BRUSH_CONTAINER_PREVIEW_WIDTH);
       }
     }
     else
@@ -5286,10 +5284,14 @@ byte Restore_brush(int index)
     Paintbrush_shape=shape;
     if (!Realloc_brush(Brush_container[index].Width,Brush_container[index].Height,NULL,NULL))
     {
-      // Realloc sets Brush_width and Brush_height to new size.
+      // Recover pixels
       memcpy(Brush_original_pixels, Brush_container[index].Brush, (long)Brush_height*Brush_width);
-      // Copy without remap
-      memcpy(Brush, Brush_original_pixels, (long)Brush_height*Brush_width);
+      // Grab palette (TODO: get saved palette from brush container)
+      memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
+      // Remap (no change)
+      Remap_brush();
+      
+      
       Brush_offset_X=Brush_width>>1;
       Brush_offset_Y=Brush_height>>1;
     }

@@ -168,7 +168,11 @@ int L_SetBrushSize(lua_State* L)
   Brush_was_altered=1;
   // Fill with Back_color
   memset(Brush_original_pixels,Back_color,(long)Brush_width*Brush_height);
-  memset(Brush,Back_color,(long)Brush_width*Brush_height);
+  // Grab palette
+  memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
+  // Remap (no change)
+  Remap_brush();
+
   // Center the handle
   Brush_offset_X=(Brush_width>>1);
   Brush_offset_Y=(Brush_height>>1);
@@ -200,7 +204,19 @@ int L_PutBrushPixel(lua_State* L)
   LUA_ARG_NUMBER(2, "putbrushpixel", y, INT_MIN, INT_MAX);
   LUA_ARG_NUMBER(3, "putbrushpixel", c, INT_MIN, INT_MAX);
 
-  Brush_was_altered=1;
+  if (!Brush_was_altered)
+  {
+    int i;
+    
+    // First time writing in brush:
+    // Adopt the current palette.
+    memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
+    memcpy(Brush_original_pixels, Brush, Brush_width*Brush_height);
+    for (i=0; i<256; i++)
+      Brush_colormap[i]=i;
+    //--
+    Brush_was_altered=1;
+  }
   
   if (x<0 || y<0 || x>=Brush_width || y>=Brush_height)
   ;

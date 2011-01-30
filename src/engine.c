@@ -894,13 +894,17 @@ void Main_handler(void)
                 break;
               case SPECIAL_FLIP_X : // Flip X
                 Hide_cursor();
-                Flip_X_lowlevel(Brush, Brush_width, Brush_height);
+                Flip_X_lowlevel(Brush_original_pixels, Brush_width, Brush_height);
+                // Remap according to the last used remap table
+                Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
                 Display_cursor();
                 action++;
                 break;
               case SPECIAL_FLIP_Y : // Flip Y
                 Hide_cursor();
-                Flip_Y_lowlevel(Brush, Brush_width, Brush_height);
+                Flip_Y_lowlevel(Brush_original_pixels, Brush_width, Brush_height);
+                // Remap according to the last used remap table
+                Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
                 Display_cursor();
                 action++;
                 break;
@@ -913,6 +917,8 @@ void Main_handler(void)
               case SPECIAL_ROTATE_180 : // 180° brush rotation
                 Hide_cursor();
                 Rotate_180_deg_lowlevel(Brush, Brush_width, Brush_height);
+                // Remap according to the last used remap table
+                Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
                 Brush_offset_X=(Brush_width>>1);
                 Brush_offset_Y=(Brush_height>>1);
                 Display_cursor();
