@@ -424,6 +424,7 @@ typedef struct
   word Height;
   byte * Brush; /// < Color brush (if any)
   T_Palette Palette;
+  byte Colormap[256];
   byte Transp_color;
 } T_Brush_template;
 

@@ -2656,7 +2656,7 @@ void Init_brush_container(void)
   
   for (i=0; i<BRUSH_CONTAINER_COLUMNS*BRUSH_CONTAINER_ROWS; i++)
   {
-    int x,y;
+    int x,y,c;
     
     Brush_container[i].Paintbrush_shape=PAINTBRUSH_SHAPE_MAX;
     Brush_container[i].Width=0;
@@ -2666,6 +2666,8 @@ void Init_brush_container(void)
     for (y=0; y<BRUSH_CONTAINER_PREVIEW_WIDTH; y++)
       for (x=0; x<BRUSH_CONTAINER_PREVIEW_HEIGHT; x++)
         Brush_container[i].Thumbnail[y][x]=0;
+    for (c=0; c<256; c++)
+        Brush_container[i].Colormap[c]=c;
         
     Brush_container[i].Brush = NULL;
   }

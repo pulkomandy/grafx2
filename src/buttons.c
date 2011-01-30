@@ -5072,7 +5072,7 @@ void Display_stored_brush_in_window(word x_pos,word y_pos,int index)
         if (Brush_container[index].Paintbrush_shape <= PAINTBRUSH_SHAPE_MISC)
           color = Brush_container[index].Thumbnail[y][x]?MC_Black:MC_Light;
         else
-          color = Brush_container[index].Thumbnail[y][x];
+          color = Brush_container[index].Colormap[Brush_container[index].Thumbnail[y][x]];
         Pixel_in_window(x_pos+x+offset_x,y_pos+y+offset_y,color);
       }
     }
@@ -5134,16 +5134,20 @@ void Store_brush(int index)
   else if (Paintbrush_shape == PAINTBRUSH_SHAPE_COLOR_BRUSH ||
      Paintbrush_shape == PAINTBRUSH_SHAPE_MONO_BRUSH)
   {
-    // Color brush
-    Brush_container[index].Brush=(byte *)malloc(Brush_width*Brush_height);
-    if (Brush_container[index].Brush)
+    // Color brush : saved bitmap and palette
+    byte * buffer;
+    buffer=(byte *)malloc(Brush_width*Brush_height);
+    if (buffer)
     {
+      Brush_container[index].Brush=buffer;
       Brush_container[index].Paintbrush_shape=Paintbrush_shape;
       Brush_container[index].Width=Brush_width;
       Brush_container[index].Height=Brush_height;
 
       memcpy(Brush_container[index].Brush, Brush_original_pixels,Brush_height*Brush_width);
-
+      memcpy(Brush_container[index].Palette, Brush_original_palette,sizeof(T_Palette));
+      memcpy(Brush_container[index].Colormap, Brush_colormap,256);
+      
       // Scale for preview
       if (Brush_width>BRUSH_CONTAINER_PREVIEW_WIDTH ||
           Brush_height>BRUSH_CONTAINER_PREVIEW_HEIGHT)
@@ -5286,11 +5290,12 @@ byte Restore_brush(int index)
     {
       // Recover pixels
       memcpy(Brush_original_pixels, Brush_container[index].Brush, (long)Brush_height*Brush_width);
-      // Grab palette (TODO: get saved palette from brush container)
-      memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
-      // Remap (no change)
-      Remap_brush();
-      
+      // Grab palette
+      memcpy(Brush_original_palette, Brush_container[index].Palette, sizeof(T_Palette));
+      // Recover colormap
+      memcpy(Brush_colormap, Brush_container[index].Colormap, 256);
+      // Remap using current colormap
+      Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
       
       Brush_offset_X=Brush_width>>1;
       Brush_offset_Y=Brush_height>>1;
