@@ -1161,8 +1161,11 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
         }
     // Grab palette
     memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
-    // Remap (no change)
-    Remap_brush();
+    // Init colormap
+    for (temp=0; temp<256; temp++)
+      Brush_colormap[temp]=temp;
+    // Copy Brush to original
+    memcpy(Brush_original_pixels, Brush, (long)Brush_width*Brush_height);
 
     // On centre la prise sur la brosse
     Brush_offset_X=(Brush_width>>1);
