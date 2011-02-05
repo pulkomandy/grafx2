@@ -216,6 +216,13 @@ byte Get_SDL_pixel_8(SDL_Surface *bmp, int x, int y)
   return ((byte *)(bmp->pixels))[(y*bmp->pitch+x)];
 }
 
+/// Writes a pixel in a 8-bit SDL surface.
+void Set_SDL_pixel_8(SDL_Surface *bmp, int x, int y, byte color)
+{
+  ((byte *)(bmp->pixels))[(y*bmp->pitch+x)]=color;
+}
+
+
 /// Reads a pixel in a multi-byte SDL surface.
 dword Get_SDL_pixel_hicolor(SDL_Surface *bmp, int x, int y)
 {

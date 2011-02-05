@@ -4857,7 +4857,7 @@ void Button_Text(void)
       new_brush = Render_text(preview_string, selected_font_index, font_size, antialias, is_bold, is_italic, &new_width, &new_height, text_palette);
       if (new_brush)
       {
-        if (is_truetype&&antialias)
+        if (!is_truetype || (is_truetype&&antialias))
         {
           // Display brush in remapped form.
           byte *remapped_brush;

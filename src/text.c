@@ -510,65 +510,94 @@ byte *Render_text_TTF(const char *str, int font_number, int size, int antialias,
 byte *Render_text_SFont(const char *str, int font_number, int *width, int *height, T_Palette palette)
 {
   SFont_Font *font;
-  SDL_Surface * TexteColore;
   SDL_Surface * text_surface;
-  SDL_Surface *Surface_fonte;
+  SDL_Surface *font_surface;
   byte * new_brush;
   SDL_Rect rectangle;
 
   // Chargement de la fonte
-  Surface_fonte=IMG_Load(Font_name(font_number));
-  if (!Surface_fonte)
+  font_surface=IMG_Load(Font_name(font_number));
+  if (!font_surface)
   {
     Verbose_message("Warning","Error loading font.\nThe file may be corrupt.");
     return NULL;
   }
-  font=SFont_InitFont(Surface_fonte);
+  // Font is 24bit: Perform a color reduction
+  if (font_surface->format->BitsPerPixel>8)
+  {
+    SDL_Surface * reduced_surface;
+    int x,y,color;
+    SDL_Color rgb;
+    
+    reduced_surface=SDL_CreateRGBSurface(SDL_SWSURFACE, font_surface->w, font_surface->h, 8, 0, 0, 0, 0);
+    if (!reduced_surface)
+    {
+      SDL_FreeSurface(font_surface);
+      return NULL;
+    }
+    // Set the quick palette
+    for (color=0;color<256;color++)
+    {
+      rgb.r=((color & 0xE0)>>5)<<5;
+      rgb.g=((color & 0x1C)>>2)<<5;
+      rgb.b=((color & 0x03)>>0)<<6;
+      SDL_SetColors(reduced_surface, &rgb, color, 1);
+    }
+    // Perform reduction
+    for (y=0; y<font_surface->h; y++)
+      for (x=0; x<font_surface->w; x++)
+      {
+        SDL_GetRGB(Get_SDL_pixel_hicolor(font_surface, x, y), font_surface->format, &rgb.r, &rgb.g, &rgb.b);
+        color=((rgb.r >> 5) << 5) |
+                ((rgb.g >> 5) << 2) |
+                ((rgb.b >> 6));
+        Set_SDL_pixel_8(reduced_surface, x, y, color);
+      }
+    
+    SDL_FreeSurface(font_surface);
+    font_surface=reduced_surface;
+  }
+  font=SFont_InitFont(font_surface);
   if (!font)
   {
     DEBUG("Font init failed",1);
+    SDL_FreeSurface(font_surface);
     return NULL;
   }
   
-  memcpy(palette, Main_palette, sizeof(T_Palette));
-
   // Calcul des dimensions
   *height=SFont_TextHeight(font);
   *width=SFont_TextWidth(font, str);
   // Allocation d'une surface SDL
-  TexteColore=SDL_CreateRGBSurface(SDL_SWSURFACE, *width, *height, 24, 0, 0, 0, 0);
+  text_surface=SDL_CreateRGBSurface(SDL_SWSURFACE, *width, *height, 8, 0, 0, 0, 0);
+  // Copy palette
+  SDL_SetPalette(text_surface, SDL_LOGPAL, font_surface->format->palette->colors, 0, 256);
   // Fill with backcolor
   rectangle.x=0;
   rectangle.y=0;
   rectangle.w=*width;
   rectangle.h=*height;
-  SDL_FillRect(TexteColore, &rectangle, SDL_MapRGB(
-    TexteColore->format, 
-    Main_palette[Back_color].R, 
-    Main_palette[Back_color].G, 
-    Main_palette[Back_color].B
-    ));
+  SDL_FillRect(text_surface, &rectangle, Back_color);
   // Rendu du texte
-  SFont_Write(TexteColore, font, 0, 0, str);
-  if (!TexteColore)
+  SFont_Write(text_surface, font, 0, 0, str);
+  if (!text_surface)
   {
     DEBUG("Rendering failed",2);
     SFont_FreeFont(font);
     return NULL;
   }
-  
-  text_surface=SDL_DisplayFormat(TexteColore);
-  SDL_FreeSurface(TexteColore);
     
   new_brush=Surface_to_bytefield(text_surface, NULL);
   if (!new_brush)
   {
     DEBUG("Converting failed",3);
-    SDL_FreeSurface(TexteColore);
     SDL_FreeSurface(text_surface);
     SFont_FreeFont(font);
     return NULL;
   }
+
+  Get_SDL_Palette(font_surface->format->palette, palette);
+
   SDL_FreeSurface(text_surface);
   SFont_FreeFont(font);
 
