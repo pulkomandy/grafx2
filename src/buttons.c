@@ -4767,6 +4767,7 @@ void Button_Text(void)
   static short is_italic=0;
 
   byte * new_brush=NULL;
+  T_Palette text_palette;
   int new_width;
   int new_height;
   int clicked_button;  
@@ -4846,23 +4847,86 @@ void Button_Text(void)
     if (preview_is_needed)
     {
       const char * preview_string = "AaBbCcDdEeFf012345";
+      byte is_truetype;
+      
       if (str[0])
         preview_string=str;
-      Window_rectangle(8, 106, 273, 50,Back_color);
+      is_truetype=TrueType_font(selected_font_index);
+      Window_rectangle(8, 106, 273, 50,(antialias&&is_truetype)?MC_Black:Back_color);
       free(new_brush);
-      new_brush = Render_text(preview_string, selected_font_index, font_size, antialias, is_bold, is_italic, &new_width, &new_height);
+      new_brush = Render_text(preview_string, selected_font_index, font_size, antialias, is_bold, is_italic, &new_width, &new_height, text_palette);
       if (new_brush)
       {
-        Display_brush(
-          new_brush,
-          Window_pos_X+preview_button->Pos_X*Menu_factor_X,
-          Window_pos_Y+preview_button->Pos_Y*Menu_factor_Y,
-          0,
-          0,
-          Min(preview_button->Width*Menu_factor_X, new_width),
-          Min(preview_button->Height*Menu_factor_Y, new_height),
-          Back_color,
-          new_width);
+        if (is_truetype&&antialias)
+        {
+          // Display brush in remapped form.
+          byte *remapped_brush;
+          
+          remapped_brush=(byte *)malloc(new_width*new_height);
+          if (remapped_brush)
+          {
+            // This code is mostly copied from Remap_brush()
+            short x_pos;
+            short y_pos;
+            int   color;
+            byte colmap[256];
+            
+            for (color=0;color<=255;color++)
+              colmap[color]=0;
+  
+            for (y_pos=0;y_pos<new_height;y_pos++)
+              for (x_pos=0;x_pos<new_width;x_pos++)
+                colmap[*(new_brush + y_pos * new_width + x_pos)]=1;
+          
+            colmap[Back_color]=0;
+          
+            for (color=0;color<=255;color++)
+              if (colmap[color] != 0)
+              {
+                byte r,g,b;
+                r=text_palette[color].R;
+                g=text_palette[color].G;
+                b=text_palette[color].B;
+                
+                //if (r==Main_palette[color].R && g==Main_palette[color].G && b==Main_palette[color].B)
+                //  colmap[color]=color;
+                //else
+                  colmap[color]=Best_color_perceptual(r,g,b);
+              }
+          
+            colmap[Back_color]=Back_color;
+            Remap_general_lowlevel(colmap,new_brush,remapped_brush,new_width,new_height,new_width);
+          
+            Display_brush(
+              remapped_brush,
+              Window_pos_X+preview_button->Pos_X*Menu_factor_X,
+              Window_pos_Y+preview_button->Pos_Y*Menu_factor_Y,
+              0,
+              0,
+              Min(preview_button->Width*Menu_factor_X, new_width),
+              Min(preview_button->Height*Menu_factor_Y, new_height),
+              Back_color,
+              new_width);
+          
+            free(remapped_brush);
+          }
+          
+        }
+        else
+        {
+          // Solid
+          Display_brush(
+            new_brush,
+            Window_pos_X+preview_button->Pos_X*Menu_factor_X,
+            Window_pos_Y+preview_button->Pos_Y*Menu_factor_Y,
+            0,
+            0,
+            Min(preview_button->Width*Menu_factor_X, new_width),
+            Min(preview_button->Height*Menu_factor_Y, new_height),
+            Back_color,
+            new_width);
+        }
+        
       }
       Update_rect(
         Window_pos_X+preview_button->Pos_X*Menu_factor_X,
@@ -4987,8 +5051,8 @@ void Button_Text(void)
         Error(0);
       }
       // Grab palette
-      memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
-      // Remap (no change)
+      memcpy(Brush_original_palette, text_palette,sizeof(T_Palette));
+      // Remap to image's palette
       Remap_brush();
     
       Brush_offset_X=Brush_width>>1;

@@ -56,6 +56,7 @@
 #include "io.h"
 #include "errors.h"
 #include "windows.h"
+#include "misc.h"
 
 typedef struct T_Font
 {
@@ -373,13 +374,11 @@ int TrueType_is_supported()
 
   
 #ifndef NOTTF
-byte *Render_text_TTF(const char *str, int font_number, int size, int antialias, int bold, int italic, int *width, int *height)
+byte *Render_text_TTF(const char *str, int font_number, int size, int antialias, int bold, int italic, int *width, int *height, T_Palette palette)
 {
- TTF_Font *font;
-  SDL_Surface * TexteColore;
-  SDL_Surface * Texte8Bit;
+  TTF_Font *font;
+  SDL_Surface * text_surface;
   byte * new_brush;
-  int index;
   int style;
   
   SDL_Color fg_color;
@@ -400,64 +399,119 @@ byte *Render_text_TTF(const char *str, int font_number, int size, int antialias,
     style|=TTF_STYLE_BOLD;
   TTF_SetFontStyle(font, style);
   
-  // Couleurs
+  // Colors: Text will be generated as white on black.
   fg_color.r=fg_color.g=fg_color.b=255;
   bg_color.r=bg_color.g=bg_color.b=0;
   // The following is alpha, supposedly unused
   bg_color.unused=fg_color.unused=255;
   
-  // Rendu du texte: crée une surface SDL RGB 24bits
+  // Text rendering: creates a 8bit surface with its dedicated palette
   if (antialias)
-    TexteColore=TTF_RenderText_Shaded(font, str, fg_color, bg_color );
+    text_surface=TTF_RenderText_Shaded(font, str, fg_color, bg_color );
   else
-    TexteColore=TTF_RenderText_Solid(font, str, fg_color);
-  if (!TexteColore)
+    text_surface=TTF_RenderText_Solid(font, str, fg_color);
+  if (!text_surface)
   {
+    TTF_CloseFont(font);
+    return NULL;
+  }
+    
+  new_brush=Surface_to_bytefield(text_surface, NULL);
+  if (!new_brush)
+  {
+    SDL_FreeSurface(text_surface);
     TTF_CloseFont(font);
     return NULL;
   }
   
-  Texte8Bit=SDL_DisplayFormat(TexteColore);
-
-  SDL_FreeSurface(TexteColore);
+  // Import palette
+  Get_SDL_Palette(text_surface->format->palette, palette);
+  
+  if (antialias)
+  {
+    int black_col;
+    // Shaded text: X-Swap the color that is pure black with the BG color number,
+    // so that the brush is immediately 'transparent'
     
-  new_brush=Surface_to_bytefield(Texte8Bit, NULL);
-  if (!new_brush)
-  {
-    SDL_FreeSurface(TexteColore);
-    SDL_FreeSurface(Texte8Bit);
-    TTF_CloseFont(font);
-    return NULL;
-  }
-  if (!antialias)
-  {
-    // Map colors: white->fg, black->bg
-    for (index=0; index < Texte8Bit->w * Texte8Bit->h; index++)
+    // Find black (c)
+    for (black_col=0; black_col<256; black_col++)
     {
-      int sum;
-      sum = Main_palette[*(new_brush+index)].R
-        + Main_palette[*(new_brush+index)].G
-        + Main_palette[*(new_brush+index)].B;
-      if (sum < 128 * 3)
-        *(new_brush+index)=Back_color;
-      else
-        *(new_brush+index)=Fore_color;
+      if (palette[black_col].R==0 && palette[black_col].G==0 && palette[black_col].B==0)
+        break;
+    } // If not found: c = 256 = 0 (byte)
+    
+    if (black_col != Back_color)
+    {
+      int c;
+      byte colmap[256];
+      // Swap palette entries
+      
+      SWAP_BYTES(palette[black_col].R, palette[Back_color].R)
+      SWAP_BYTES(palette[black_col].G, palette[Back_color].G)
+      SWAP_BYTES(palette[black_col].B, palette[Back_color].B)
+      
+      // Define a colormap
+      for (c=0; c<256; c++)
+        colmap[c]=c;
+      
+      // The swap
+      colmap[black_col]=Back_color;
+      colmap[Back_color]=black_col;
+      
+      Remap_general_lowlevel(colmap, new_brush, new_brush, text_surface->w,text_surface->h, text_surface->w);
+      
+      // Also, make the BG color in brush palette have same RGB values as
+      // the current BG color : this will help for remaps.
+      palette[Back_color].R=Main_palette[Back_color].R;
+      palette[Back_color].G=Main_palette[Back_color].G;
+      palette[Back_color].B=Main_palette[Back_color].B;
     }
   }
-  *width=Texte8Bit->w;
-  *height=Texte8Bit->h;
-  SDL_FreeSurface(Texte8Bit);
+  else
+  {
+    // Solid text: Was rendered as white on black. Now map colors:
+    // White becomes FG color, black becomes BG. 2-color palette.
+    // Exception: if BG==FG, FG will be set to black or white - any different color.
+    long index;
+    byte new_fore=Fore_color;
+
+    if (Fore_color==Back_color)
+    {
+      if (Main_palette[Back_color].R+Main_palette[Back_color].G+Main_palette[Back_color].B > 128*3)
+        // Back color is rather light:
+        new_fore=MC_Black;
+      else
+        // Back color is rather dark:
+        new_fore=MC_White;
+    }
+    
+    for (index=0; index < text_surface->w * text_surface->h; index++)
+    {
+      if (palette[*(new_brush+index)].G < 128)
+        *(new_brush+index)=Back_color;
+      else
+        *(new_brush+index)=new_fore;
+    }
+    
+    // Now copy the current palette to brushe's, for consistency
+    // with the indices.
+    memcpy(palette, Main_palette, sizeof(T_Palette));
+    
+  }
+  *width=text_surface->w;
+  *height=text_surface->h;
+  SDL_FreeSurface(text_surface);
   TTF_CloseFont(font);
   return new_brush;
 }
 #endif
 
 
-byte *Render_text_SFont(const char *str, int font_number, int *width, int *height)
+byte *Render_text_SFont(const char *str, int font_number, int *width, int *height, T_Palette palette)
 {
   SFont_Font *font;
   SDL_Surface * TexteColore;
-  SDL_Surface * Texte8Bit;
+  SDL_Surface * text_surface;
   SDL_Surface *Surface_fonte;
   byte * new_brush;
   SDL_Rect rectangle;
@@ -476,6 +530,8 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
     return NULL;
   }
   
+  memcpy(palette, Main_palette, sizeof(T_Palette));
+
   // Calcul des dimensions
   *height=SFont_TextHeight(font);
   *width=SFont_TextWidth(font, str);
@@ -501,19 +557,19 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
     return NULL;
   }
   
-  Texte8Bit=SDL_DisplayFormat(TexteColore);
+  text_surface=SDL_DisplayFormat(TexteColore);
   SDL_FreeSurface(TexteColore);
     
-  new_brush=Surface_to_bytefield(Texte8Bit, NULL);
+  new_brush=Surface_to_bytefield(text_surface, NULL);
   if (!new_brush)
   {
     DEBUG("Converting failed",3);
     SDL_FreeSurface(TexteColore);
-    SDL_FreeSurface(Texte8Bit);
+    SDL_FreeSurface(text_surface);
     SFont_FreeFont(font);
     return NULL;
   }
-  SDL_FreeSurface(Texte8Bit);
+  SDL_FreeSurface(text_surface);
   SFont_FreeFont(font);
 
   return new_brush;
@@ -528,7 +584,7 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
 // Crée une brosse à partir des paramètres de texte demandés.
 // Si cela réussit, la fonction place les dimensions dans width et height, 
 // et retourne l'adresse du bloc d'octets.
-byte *Render_text(const char *str, int font_number, TTFONLY int size, int TTFONLY antialias, TTFONLY int bold, TTFONLY int italic, int *width, int *height)
+byte *Render_text(const char *str, int font_number, TTFONLY int size, int TTFONLY antialias, TTFONLY int bold, TTFONLY int italic, int *width, int *height, T_Palette palette)
 {
   T_Font *font = font_list_start;
   int index=font_number;
@@ -542,14 +598,14 @@ byte *Render_text(const char *str, int font_number, TTFONLY int size, int TTFONL
   if (font->Is_truetype)
   {
   #ifndef NOTTF 
-    return Render_text_TTF(str, font_number, size, antialias, bold, italic, width, height);
+    return Render_text_TTF(str, font_number, size, antialias, bold, italic, width, height, palette);
   #else
     return NULL;
   #endif
   }
   else
   {
-    return Render_text_SFont(str, font_number, width, height);
+    return Render_text_SFont(str, font_number, width, height, palette);
   }
 }
 
