@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2009 Petter Lindquist
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
@@ -47,7 +48,7 @@
 #include "struct.h"
 #include "windows.h"
 #include "engine.h"
-
+#include "setup.h"
 // -- PKM -------------------------------------------------------------------
 void Test_PKM(T_IO_Context *);
 void Load_PKM(T_IO_Context *);
@@ -1002,10 +1003,12 @@ void Emergency_backup(const char *fname, byte *source, int width, int height, T_
 
 void Image_emergency_backup()
 {
+#ifndef NOLAYERS
   if (Main_backups && Main_backups->Pages && Main_backups->Pages->Nb_layers == 1)
-    Emergency_backup("a999999.bkp",Main_screen, Main_image_width, Main_image_height, &Main_palette);
+    Emergency_backup(SAFETYBACKUP_PREFIX_A "999999" BACKUP_FILE_EXTENSION,Main_screen, Main_image_width, Main_image_height, &Main_palette);
   if (Spare_backups && Spare_backups->Pages && Spare_backups->Pages->Nb_layers == 1)
-    Emergency_backup("b999999.bkp",Spare_visible_image.Image, Spare_image_width, Spare_image_height, &Spare_palette);
+    Emergency_backup(SAFETYBACKUP_PREFIX_B "999999" BACKUP_FILE_EXTENSION,Spare_visible_image.Image, Spare_image_width, Spare_image_height, &Spare_palette);
+#endif
 }
 
 T_Format * Get_fileformat(byte format)
@@ -1310,8 +1313,13 @@ int Check_recovery(void)
   int restored_main;
   
   // First check if can write backups
-  if (Create_lock_file(Config_directory))
+#if defined (__MINT__) 
+   //TODO: enable file lock under Freemint only
+   return 0;
+#else  
+if (Create_lock_file(Config_directory))
     return -1;
+#endif
 
   Safety_backup_active=1;
     
@@ -1367,7 +1375,7 @@ void Rotate_safety_backups(void)
   {
     
     // Clear a previous save (rotating saves)
-    sprintf(deleted_file, "%s%c%6.6d.bkp",
+    sprintf(deleted_file, "%s%c%6.6d" BACKUP_FILE_EXTENSION,
       Config_directory,
       Main_safety_backup_prefix,
       (Uint32)(Main_safety_number + 1000000l - Rotation_safety_backup) % (Uint32)1000000l);
@@ -1378,7 +1386,7 @@ void Rotate_safety_backups(void)
     Main_time_of_safety_backup=now;
 
     // Create a new file name and save
-    sprintf(file_name, "%c%6.6d.bkp",
+    sprintf(file_name, "%c%6.6d" BACKUP_FILE_EXTENSION,
       Main_safety_backup_prefix,
       (Uint32)Main_safety_number);
     Init_context_layered_image(&context, file_name, Config_directory);
@@ -1416,6 +1424,10 @@ void Delete_safety_backups(void)
   }
   
   // Release lock file
+#if defined (__MINT__) 
+  //TODO: release file lock under Freemint only
+#else 
   Release_lock_file(Config_directory);
+#endif
   
 }

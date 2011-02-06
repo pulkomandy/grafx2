@@ -203,7 +203,6 @@ void Set_layer(T_IO_Context *context, byte layer);
 // =================================================================
 
 // This is here and not in fileformats.c because the emergency save uses it...
-#pragma pack(1)
 typedef struct
 {
   byte Filler1[6];
@@ -212,7 +211,6 @@ typedef struct
   byte Filler2[118];
   T_Palette Palette;
 } T_IMG_Header;
-#pragma pack()
 
 // Data for 24bit loading
 

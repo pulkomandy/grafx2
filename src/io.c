@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2008 Yves Rizoud
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
@@ -38,6 +39,10 @@
 #elif defined(__WIN32__)
     #include <dirent.h>
     #include <windows.h>
+#elif defined(__MINT__)
+    #include <mint/osbind.h>
+    #include <mint/sysbind.h>
+    #include <dirent.h>
 #else
     #include <dirent.h>
 #endif

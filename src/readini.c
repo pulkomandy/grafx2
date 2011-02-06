@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2008 Peter Gordon
     Copyright 2008 Yves Rizoud
     Copyright 2007 Adrien Destugues
@@ -32,6 +33,7 @@
 #include "global.h"
 #include "misc.h"
 #include "readini.h"
+#include "setup.h"
 
 void Load_INI_clear_string(char * str, byte keep_comments)
 {
@@ -439,14 +441,14 @@ int Load_INI(T_Config * conf)
 
   // On calcule le nom du fichier qu'on manipule:
   strcpy(filename,Config_directory);
-  strcat(filename,"gfx2.ini");
+  strcat(filename,INI_FILENAME);
 
   file=fopen(filename,"r");
   if (file==0)
   {
     // Si le fichier ini est absent on le relit depuis gfx2def.ini
     strcpy(filename,Data_directory);
-    strcat(filename,"gfx2def.ini");
+    strcat(filename,INIDEF_FILENAME);
     file=fopen(filename,"r");
     if (file == 0)
     {

@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2008 Peter Gordon
     Copyright 2008 Yves Rizoud
     Copyright 2009 Franck Charlet
@@ -47,6 +48,9 @@
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
   #include <proto/exec.h>
   #include <proto/dos.h>
+#endif
+#if defined (__MINT__)
+  #include <mint/osbind.h>
 #endif
 #ifdef GRAFX2_CATCHES_SIGNALS
   #include <signal.h>
@@ -818,7 +822,7 @@ T_Gui_skin * Load_graphics(const char * skin_file)
   
   // Read the "skin" file
   strcpy(filename,Data_directory);
-  strcat(filename,"skins" PATH_SEPARATOR);
+  strcat(filename,SKINS_SUBDIRECTORY PATH_SEPARATOR);
   strcat(filename,skin_file);
   
   gui=Load_surface(filename);
@@ -897,7 +901,7 @@ byte * Load_font(const char * font_name)
   }
   
   // Read the file containing the image
-  sprintf(filename,"%sskins%s%s", Data_directory, PATH_SEPARATOR, font_name);
+  sprintf(filename,"%s" SKINS_SUBDIRECTORY "%s%s", Data_directory, PATH_SEPARATOR, font_name);
   
   image=Load_surface(filename);
   if (!image)
@@ -1984,7 +1988,7 @@ int Load_CFG(int reload_all)
   if ((Handle=fopen(filename,"rb"))==NULL)
     return ERROR_CFG_MISSING;
 
-  if ( (file_size<(long)sizeof(cfg_header))
+  if ( (file_size<7)
     || (!Read_bytes(Handle, &cfg_header.Signature, 3))
     || memcmp(cfg_header.Signature,"CFG",3)
     || (!Read_byte(Handle, &cfg_header.Version1))
@@ -2025,7 +2029,7 @@ int Load_CFG(int reload_all)
       case CHUNK_KEYS: // Touches
         if (reload_all)
         {
-          for (index=0; index<(long)(Chunk.Size/sizeof(cfg_shortcut_info)); index++)
+          for (index=0; index<(long)(Chunk.Size/6); index++)
           {
             if (!Read_word_le(Handle, &cfg_shortcut_info.Number) ||
                 !Read_word_le(Handle, &cfg_shortcut_info.Key) ||
@@ -2078,7 +2082,7 @@ int Load_CFG(int reload_all)
         }
         break;
       case CHUNK_VIDEO_MODES: // Modes vidéo
-        for (index=0; index<(long)(Chunk.Size/sizeof(cfg_video_mode)); index++)
+        for (index=0; index<(long)(Chunk.Size/5 ); index++)
         {
           if (!Read_byte(Handle, &cfg_video_mode.State) ||
               !Read_word_le(Handle, &cfg_video_mode.Width) ||
@@ -2270,7 +2274,7 @@ int Save_CFG(void)
   T_Config_video_mode   cfg_video_mode={0,0,0};
 
   strcpy(filename,Config_directory);
-  strcat(filename,"gfx2.cfg");
+  strcat(filename,CONFIG_FILENAME);
 
   if ((Handle=fopen(filename,"wb"))==NULL)
     return ERROR_SAVING_CFG;
@@ -2290,7 +2294,7 @@ int Save_CFG(void)
 
   // Enregistrement des touches
   Chunk.Number=CHUNK_KEYS;
-  Chunk.Size=NB_SHORTCUTS*sizeof(cfg_shortcut_info);
+  Chunk.Size=NB_SHORTCUTS*6;
 
   if (!Write_byte(Handle, Chunk.Number) ||
       !Write_word_le(Handle, Chunk.Size) )
@@ -2332,7 +2336,7 @@ int Save_CFG(void)
 
   // Sauvegarde de l'état de chaque mode vidéo
   Chunk.Number=CHUNK_VIDEO_MODES;
-  Chunk.Size=modes_to_save * sizeof(cfg_video_mode);
+  Chunk.Size=modes_to_save * 5;
 
   if (!Write_byte(Handle, Chunk.Number) ||
       !Write_word_le(Handle, Chunk.Size) )
@@ -2357,7 +2361,7 @@ int Save_CFG(void)
 
   // Ecriture des données du Shade (précédées du shade en cours)
   Chunk.Number=CHUNK_SHADE;
-  Chunk.Size=sizeof(Shade_list)+sizeof(Shade_current);
+  Chunk.Size=(512*2+2)*8+1;
   if (!Write_byte(Handle, Chunk.Number) ||
       !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
@@ -2377,7 +2381,7 @@ int Save_CFG(void)
 
   // Sauvegarde des informations du Masque
   Chunk.Number=CHUNK_MASK;
-  Chunk.Size=sizeof(Mask_table);
+  Chunk.Size=256;
   if (!Write_byte(Handle, Chunk.Number) ||
       !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
@@ -2386,7 +2390,7 @@ int Save_CFG(void)
 
   // Sauvegarde des informations du Stencil
   Chunk.Number=CHUNK_STENCIL;
-  Chunk.Size=sizeof(Stencil);
+  Chunk.Size=256;
   if (!Write_byte(Handle, Chunk.Number) ||
       !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
@@ -2395,7 +2399,7 @@ int Save_CFG(void)
 
   // Sauvegarde des informations des dégradés
   Chunk.Number=CHUNK_GRADIENTS;
-  Chunk.Size=sizeof(Gradient_array)+1;
+  Chunk.Size=14*16+1;
   if (!Write_byte(Handle, Chunk.Number) ||
       !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
@@ -2413,7 +2417,7 @@ int Save_CFG(void)
 
   // Sauvegarde de la matrice du Smooth
   Chunk.Number=CHUNK_SMOOTH;
-  Chunk.Size=sizeof(Smooth_matrix);
+  Chunk.Size=9;
   if (!Write_byte(Handle, Chunk.Number) ||
       !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
@@ -2424,7 +2428,7 @@ int Save_CFG(void)
 
   // Sauvegarde des couleurs à exclure
   Chunk.Number=CHUNK_EXCLUDE_COLORS;
-  Chunk.Size=sizeof(Exclude_color);
+  Chunk.Size=256;
   if (!Write_byte(Handle, Chunk.Number) ||
       !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;
@@ -2433,7 +2437,7 @@ int Save_CFG(void)
 
   // Sauvegarde des informations du Quick-shade
   Chunk.Number=CHUNK_QUICK_SHADE;
-  Chunk.Size=sizeof(Quick_shade_step)+sizeof(Quick_shade_loop);
+  Chunk.Size=1+1;
   if (!Write_byte(Handle, Chunk.Number) ||
       !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;

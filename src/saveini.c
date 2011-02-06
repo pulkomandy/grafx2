@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2008 Peter Gordon
     Copyright 2008 Yves Rizoud
     Copyright 2007 Adrien Destugues
@@ -30,6 +31,7 @@
 #include "errors.h"
 #include "misc.h"
 #include "saveini.h"
+#include "setup.h"
 
 int Save_INI_reach_group(FILE * old_file,FILE * new_file,char * buffer,char * group)
 {
@@ -409,13 +411,13 @@ int Save_INI(T_Config * conf)
   
   // On calcule les noms des fichiers qu'on manipule:
   strcpy(filename,Config_directory);
-  strcat(filename,"gfx2.ini");
+  strcat(filename,INI_FILENAME);
 
   // On vérifie si le fichier INI existe
   if ((ini_file_exists = File_exists(filename)))
   {
     strcpy(temp_filename,Config_directory);
-    strcat(temp_filename,"gfx2.$$$");
+    strcat(temp_filename,INISAVE_FILENAME);
     
     // On renome l'ancienne version du fichier INI vers un fichier temporaire:
     if (rename(filename,temp_filename)!=0)
@@ -425,7 +427,7 @@ int Save_INI(T_Config * conf)
   }
   // On récupère un fichier INI "propre" à partir de gfx2def.ini
   strcpy(ref_ini_file,Data_directory);
-  strcat(ref_ini_file,"gfx2def.ini");
+  strcat(ref_ini_file,INIDEF_FILENAME);
   Ancien_fichier=fopen(ref_ini_file,"rb");
   if (Ancien_fichier==0)
   {

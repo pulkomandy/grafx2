@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
     Copyright 2008 Adrien Destugues
@@ -56,6 +57,7 @@
 #include "sdlscreen.h"
 #include "io.h"
 #include "errors.h"
+#include "setup.h"
 
 typedef struct T_Font
 {
@@ -282,7 +284,7 @@ void Init_text(void)
   Nb_fonts=0;
   // Parcours du répertoire "fonts"
   strcpy(directory_name, Data_directory);
-  strcat(directory_name, "fonts");
+  strcat(directory_name, FONTS_SUBDIRECTORY);
   For_each_file(directory_name, Add_font);
   
   #if defined(__WIN32__)
@@ -351,6 +353,10 @@ void Init_text(void)
   #elif defined(__SKYOS__)
     #ifndef NOTTF
       For_each_file("/boot/system/fonts", Add_font);
+    #endif
+  #elif defined(__MINT__)
+    #ifndef NOTTF
+      For_each_file("C:/BTFONTS", Add_font);
     #endif
 
   #endif

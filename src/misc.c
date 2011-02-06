@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
     Copyright 2007 Adrien Destugues
@@ -732,13 +733,26 @@ void Zoom_a_line(byte* original_line, byte* zoomed_line,
   // sysinfo not implemented
 #elif defined(__AROS__) || defined(__amigaos4__) || defined(__MORPHOS__) || defined(__amigaos__)
   #include <proto/exec.h>
+#elif defined(__MINT__)
+  #include <mint/osbind.h>
+  #include <mint/sysbind.h>
 #elif defined(__SKYOS__)
   #include <skyos/sysinfo.h>
 #else
   #include <sys/sysinfo.h> // sysinfo() for free RAM
 #endif
 
+#if defined (__MINT__)
+// atari have two kinds of memory
+// standard and fast ram
+void Atari_Memory_free(unsigned long *stRam,unsigned long *ttRam){
+  //TODO: return STRAM/TT-RAM
+  unsigned long mem=0;
+  *stRam=Mxalloc(-1L,0);
+  *ttRam = Mxalloc(-1L,1);
 
+}
+#else
 // Indique quelle est la mémoire disponible
 unsigned long Memory_free(void)
 {
@@ -778,6 +792,8 @@ unsigned long Memory_free(void)
   return info.freeram*info.mem_unit;
 #endif
 }
+#endif
+
 
 
 // Arrondir un nombre réel à la valeur entière la plus proche

@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
@@ -39,13 +40,14 @@ extern byte * FX_feedback_screen;
 /////////////////////////// BACKUP ///////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
+#ifndef NOLAYERS
 /// The pixels of visible layers, flattened copy.
 extern T_Bitmap Main_visible_image;
 /// The pixels of visible layers, flattened copy, used for no-feedback effects.
 extern T_Bitmap Main_visible_image_backup;
 /// The index of visible pixels from ::Visible image. Points to the right layer.
 extern T_Bitmap Main_visible_image_depth_buffer;
-
+#endif
 /// The pixels of visible layers for the spare page, flattened copy.
 extern T_Bitmap Spare_visible_image;
 

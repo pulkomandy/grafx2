@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2009 Petter Lindquist
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
@@ -59,11 +60,11 @@ void Test_IMG(T_IO_Context * context)
   if ((file=fopen(filename, "rb")))
   {
     // Lecture et vérification de la signature
-    if (Read_bytes(file,IMG_header.Filler1,sizeof(IMG_header.Filler1))
+    if (Read_bytes(file,IMG_header.Filler1,6)
     && Read_word_le(file,&(IMG_header.Width))
     && Read_word_le(file,&(IMG_header.Height))
-    && Read_bytes(file,IMG_header.Filler2,sizeof(IMG_header.Filler2))
-    && Read_bytes(file,IMG_header.Palette,sizeof(IMG_header.Palette))
+    && Read_bytes(file,IMG_header.Filler2,118)
+    && Read_bytes(file,IMG_header.Palette,sizeof(T_Palette))
     )
     {
       if ( (!memcmp(IMG_header.Filler1,signature,6))
@@ -94,11 +95,11 @@ void Load_IMG(T_IO_Context * context)
   {
     file_size=File_length_file(file);
 
-    if (Read_bytes(file,IMG_header.Filler1,sizeof(IMG_header.Filler1))
+    if (Read_bytes(file,IMG_header.Filler1,6)
     && Read_word_le(file,&(IMG_header.Width))
     && Read_word_le(file,&(IMG_header.Height))
-    && Read_bytes(file,IMG_header.Filler2,sizeof(IMG_header.Filler2))
-    && Read_bytes(file,IMG_header.Palette,sizeof(IMG_header.Palette))
+    && Read_bytes(file,IMG_header.Filler2,118)
+    && Read_bytes(file,IMG_header.Palette,sizeof(T_Palette))
     )
     {
 
@@ -167,11 +168,11 @@ void Save_IMG(T_IO_Context * context)
 
     memcpy(IMG_header.Palette,context->Palette,sizeof(T_Palette));
 
-    if (Write_bytes(file,IMG_header.Filler1,sizeof(IMG_header.Filler1))
+    if (Write_bytes(file,IMG_header.Filler1,6)
     && Write_word_le(file,IMG_header.Width)
     && Write_word_le(file,IMG_header.Height)
-    && Write_bytes(file,IMG_header.Filler2,sizeof(IMG_header.Filler2))
-    && Write_bytes(file,IMG_header.Palette,sizeof(IMG_header.Palette))
+    && Write_bytes(file,IMG_header.Filler2,118)
+    && Write_bytes(file,IMG_header.Palette,sizeof(T_Palette))
     )
 
     {
@@ -204,7 +205,6 @@ void Save_IMG(T_IO_Context * context)
 
 
 //////////////////////////////////// LBM ////////////////////////////////////
-#pragma pack(1)
 typedef struct
 {
   word  Width;
@@ -221,7 +221,6 @@ typedef struct
   word  X_screen;
   word  Y_screen;
 } T_LBM_Header;
-#pragma pack()
 
 byte * LBM_buffer;
 FILE *LBM_file;
@@ -1554,7 +1553,6 @@ void Save_BMP(T_IO_Context * context)
 
 
 //////////////////////////////////// GIF ////////////////////////////////////
-#pragma pack(1)
 typedef struct
 {
   word Width;   // Width of the complete image area
@@ -1573,7 +1571,6 @@ typedef struct
   byte Indicator;     // Misc image information
   byte Nb_bits_pixel; // Nb de bits par pixel
 } T_GIF_IDB;          // Image Descriptor Block
-#pragma pack()
 
 typedef struct
 {
@@ -2191,9 +2188,16 @@ void Save_GIF(T_IO_Context * context)
           Write_byte(GIF_file,LSDB.Aspect) )
       {
         // Le LSDB a été correctement écrit.
-
+        int i;
         // On sauve la palette
-        if (Write_bytes(GIF_file,context->Palette,768))
+        for(i=0;i<256 && !File_error;i++)
+        {
+          if (!Write_byte(GIF_file,context->Palette[i].R)
+            ||!Write_byte(GIF_file,context->Palette[i].G)
+            ||!Write_byte(GIF_file,context->Palette[i].B))
+            File_error=1;
+        }
+        if (!File_error)
         {
           // La palette a été correctement écrite.
 
@@ -2457,7 +2461,6 @@ void Save_GIF(T_IO_Context * context)
 
 
 //////////////////////////////////// PCX ////////////////////////////////////
-#pragma pack(1)
 typedef struct
   {
     byte Manufacturer;       // |_ Il font chier ces cons! Ils auraient pu
@@ -2479,7 +2482,6 @@ typedef struct
     word Screen_Y;           // |  l'écran d'origine
     byte Filler[54];         // Ca... J'adore!
   } T_PCX_Header;
-#pragma pack()
 
 T_PCX_Header PCX_header;
 
@@ -2925,14 +2927,14 @@ void Save_PCX(T_IO_Context * context)
         Write_word_le(file,PCX_header.Y_max) &&
         Write_word_le(file,PCX_header.X_dpi) &&
         Write_word_le(file,PCX_header.Y_dpi) &&
-        Write_bytes(file,&(PCX_header.Palette_16c),sizeof(PCX_header.Palette_16c)) &&        
+        Write_bytes(file,&(PCX_header.Palette_16c),48) &&
         Write_bytes(file,&(PCX_header.Reserved),1) &&
         Write_bytes(file,&(PCX_header.Plane),1) &&
         Write_word_le(file,PCX_header.Bytes_per_plane_line) &&
         Write_word_le(file,PCX_header.Palette_info) &&
         Write_word_le(file,PCX_header.Screen_X) &&
         Write_word_le(file,PCX_header.Screen_Y) &&
-        Write_bytes(file,&(PCX_header.Filler),sizeof(PCX_header.Filler)) )
+        Write_bytes(file,&(PCX_header.Filler),54) )
     {
       line_size=PCX_header.Bytes_per_plane_line*PCX_header.Plane;
      
@@ -3017,7 +3019,7 @@ void Test_SCx(T_IO_Context * context)
   if ((file=fopen(filename, "rb")))
   {
     // Lecture et vérification de la signature
-    if (Read_bytes(file,SCx_header.Filler1,sizeof(SCx_header.Filler1))
+    if (Read_bytes(file,SCx_header.Filler1,4)
     && Read_word_le(file, &(SCx_header.Width))
     && Read_word_le(file, &(SCx_header.Height))
     && Read_byte(file, &(SCx_header.Filler2))
@@ -3053,7 +3055,7 @@ void Load_SCx(T_IO_Context * context)
   {
     file_size=File_length_file(file);
 
-    if (Read_bytes(file,SCx_header.Filler1,sizeof(SCx_header.Filler1))
+    if (Read_bytes(file,SCx_header.Filler1,4)
     && Read_word_le(file, &(SCx_header.Width))
     && Read_word_le(file, &(SCx_header.Height))
     && Read_byte(file, &(SCx_header.Filler2))
@@ -3174,7 +3176,7 @@ void Save_SCx(T_IO_Context * context)
     SCx_header.Filler2=0xAF;
     SCx_header.Planes=0x00;
 
-    if (Write_bytes(file,SCx_header.Filler1,sizeof(SCx_header.Filler1))
+    if (Write_bytes(file,SCx_header.Filler1,4)
     && Write_word_le(file, SCx_header.Width)
     && Write_word_le(file, SCx_header.Height)
     && Write_byte(file, SCx_header.Filler2)
@@ -3286,8 +3288,8 @@ void Load_PNG(T_IO_Context * context)
             
               // Load file information
               png_read_info(png_ptr, info_ptr);
-              color_type = info_ptr->color_type;
-              bit_depth = info_ptr->bit_depth;
+              color_type = png_get_color_type(png_ptr,info_ptr);
+              bit_depth = png_get_bit_depth(png_ptr,info_ptr);
               
               // If it's any supported file
               // (Note: As of writing this, this test covers every possible 
@@ -3340,9 +3342,9 @@ void Load_PNG(T_IO_Context * context)
                   }
                 }
                 if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_RGB_ALPHA)
-                  Pre_load(context,info_ptr->width,info_ptr->height,File_length_file(file),FORMAT_PNG,PIXEL_SIMPLE,1);
+                  Pre_load(context,png_get_image_width(png_ptr,info_ptr),png_get_image_height(png_ptr,info_ptr),File_length_file(file),FORMAT_PNG,PIXEL_SIMPLE,1);
                 else
-                  Pre_load(context, info_ptr->width,info_ptr->height,File_length_file(file),FORMAT_PNG,context->Ratio,0);
+                  Pre_load(context,png_get_image_width(png_ptr,info_ptr),png_get_image_height(png_ptr,info_ptr),File_length_file(file),FORMAT_PNG,context->Ratio,0);
 
                 if (File_error==0)
                 {
@@ -3421,6 +3423,8 @@ void Load_PNG(T_IO_Context * context)
                   // Transparency (tRNS)
                   if (png_get_tRNS(png_ptr, info_ptr, &trans, &num_trans, &trans_values))
                   {
+                    if (color_type == PNG_COLOR_TYPE_PALETTE && trans!=NULL)
+                    {
                     int i;
                     for (i=0; i<num_trans; i++)
                     {
@@ -3432,9 +3436,24 @@ void Load_PNG(T_IO_Context * context)
                       }
                     }
                   }
+                    else if ((color_type == PNG_COLOR_TYPE_GRAY
+                      || color_type == PNG_COLOR_TYPE_RGB) && trans_values!=NULL)
+                    {
+                      // In this case, num_trans is supposed to be "1", 
+                      // and trans_values[0] contains the reference color
+                      // (RGB triplet) that counts as transparent.
                   
-                  context->Width=info_ptr->width;
-                  context->Height=info_ptr->height;
+                      // Ideally, we should reserve this color in the palette,
+                      // (so it's not merged and averaged with a neighbor one)
+                      // and after creating the optimized palette, find its
+                      // index and mark it transparent.
+                      
+                      // Current implementation: ignore.
+                    }
+                  }
+                  
+                  context->Width=png_get_image_width(png_ptr,info_ptr);
+                  context->Height=png_get_image_height(png_ptr,info_ptr);
                   
                   png_set_interlace_handling(png_ptr);
                   png_read_update_info(png_ptr, info_ptr);
@@ -3454,7 +3473,7 @@ void Load_PNG(T_IO_Context * context)
                       // 8bpp
                       
                       for (y=0; y<context->Height; y++)
-                        Row_pointers[y] = (png_byte*) malloc(info_ptr->rowbytes);
+                        Row_pointers[y] = (png_byte*) malloc(png_get_rowbytes(png_ptr,info_ptr));
                       row_pointers_allocated = 1;
                       
                       png_read_image(png_ptr, Row_pointers);
@@ -3473,7 +3492,7 @@ void Load_PNG(T_IO_Context * context)
                           // It's a preview
                           // Unfortunately we need to allocate loads of memory
                           for (y=0; y<context->Height; y++)
-                            Row_pointers[y] = (png_byte*) malloc(info_ptr->rowbytes);
+                            Row_pointers[y] = (png_byte*) malloc(png_get_rowbytes(png_ptr,info_ptr));
                           row_pointers_allocated = 1;
                           
                           png_read_image(png_ptr, Row_pointers);
@@ -3572,9 +3591,15 @@ void Save_PNG(T_IO_Context * context)
           {
             // Commentaires texte PNG
             // Cette partie est optionnelle
+            #ifdef PNG_iTXt_SUPPORTED
+              png_text text_ptr[2] = {
+                {-1, "Software", "Grafx2", 6, 0, NULL, NULL},
+                {-1, "Title", NULL, 0, 0, NULL, NULL}
+            #else
             png_text text_ptr[2] = {
               {-1, "Software", "Grafx2", 6},
               {-1, "Title", NULL, 0}
+            #endif
             };
             int nb_text_chunks=1;
             if (context->Comment[0])

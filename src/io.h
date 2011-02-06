@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2008 Yves Rizoud
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
@@ -70,6 +71,8 @@ void Extract_path(char *dest, const char *source);
 char * Find_last_slash(const char * str);
 
 #if defined(__WIN32__)
+  #define PATH_SEPARATOR "\\"
+#elif defined(__MINT__)
   #define PATH_SEPARATOR "\\"
 #else
   #define PATH_SEPARATOR "/"

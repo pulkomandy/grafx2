@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2008 Peter Gordon
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
@@ -31,6 +32,10 @@
     #include <sys/mount.h>
 #elif defined (__linux__)
     #include <sys/vfs.h>
+#elif defined (__MINT__)
+    #include <mint/sysbind.h>
+    #include <mint/osbind.h>
+    #include <mint/ostruct.h>
 #endif
 
 #include "const.h"
@@ -627,7 +632,51 @@ void Button_Stats(void)
   Print_in_window(10,35,"Build options:",STATS_TITLE_COLOR,MC_Black);
   Print_in_window(146,35,TrueType_is_supported()?"TTF fonts":"no TTF fonts",STATS_DATA_COLOR,MC_Black);
 
+#if defined (__MINT__)
+  // Affichage de la mémoire restante
+  Print_in_window(10,43,"Free memory: ",STATS_TITLE_COLOR,MC_Black);
 
+  freeRam=0;
+  char helpBuf[64];
+  
+  unsigned long STRAM,TTRAM;
+  Atari_Memory_free(&STRAM,&TTRAM);
+  freeRam=STRAM+TTRAM;
+  buffer[0]='\0';
+  
+  if(STRAM > (100*1024*1024))
+        sprintf(helpBuf,"ST:%u Mb ",(unsigned int)(STRAM/(1024*1024)));
+  else if(freeRam > 100*1024)
+        sprintf(helpBuf,"ST:%u Kb ",(unsigned int)(STRAM/1024));
+  else
+        sprintf(helpBuf,"ST:%u b ",(unsigned int)STRAM);
+
+  strncat(buffer,helpBuf,sizeof(char)*37);
+  
+  if(TTRAM > (100ULL*1024*1024*1024))
+        sprintf(helpBuf,"TT:%u Gb",(unsigned int)(TTRAM/(1024*1024*1024)));
+  else if(TTRAM > (100*1024*1024))
+        sprintf(helpBuf,"TT:%u Mb",(unsigned int)(TTRAM/(1024*1024)));
+  else if(freeRam > 100*1024)
+        sprintf(helpBuf,"TT:%u Kb",(unsigned int)(TTRAM/1024));
+  else
+        sprintf(helpBuf,"TT:%u b",(unsigned int)TTRAM);
+
+  strncat(buffer,helpBuf,sizeof(char)*37);
+
+  if(freeRam > (100ULL*1024*1024*1024))
+        sprintf(helpBuf,"(%u Gb)",(unsigned int)(freeRam/(1024*1024*1024)));
+  else if(freeRam > (100*1024*1024))
+        sprintf(helpBuf,"(%u Mb)",(unsigned int)(freeRam/(1024*1024)));
+  else if(freeRam > 100*1024)
+        sprintf(helpBuf,"(%u Kb)",(unsigned int)(freeRam/1024));
+  else
+        sprintf(helpBuf,"(%u b)",(unsigned int)freeRam);
+    strncat(buffer,helpBuf,sizeof(char)*37);
+ 
+   Print_in_window(18,51,buffer,STATS_DATA_COLOR,MC_Black);
+
+#else
   // Affichage de la mémoire restante
   Print_in_window(10,51,"Free memory: ",STATS_TITLE_COLOR,MC_Black);
 
@@ -641,8 +690,12 @@ void Button_Stats(void)
         sprintf(buffer,"%u Kilobytes",(unsigned int)(freeRam/1024));
   else
         sprintf(buffer,"%u bytes",(unsigned int)freeRam);
+  
   Print_in_window(114,51,buffer,STATS_DATA_COLOR,MC_Black);
 
+  #endif
+  
+  
   // Used memory
   Print_in_window(10,59,"Used memory pages: ",STATS_TITLE_COLOR,MC_Black);
   if(Stats_pages_memory > (100LL*1024*1024*1024))
@@ -670,6 +723,14 @@ void Button_Stats(void)
       statfs(Main_current_directory,&disk_info);
       mem_size=(qword) disk_info.f_bfree * (qword) disk_info.f_bsize;
     }
+#elif defined (__MINT__)
+   _DISKINFO drvInfo;
+   mem_size=0;
+   Dfree(&drvInfo,0);
+   //number of free clusters*sectors per cluster*bytes per sector;
+   // reports current drive
+   mem_size=drvInfo.b_free*drvInfo.b_clsiz*drvInfo.b_secsiz;
+   
 #else
     // Free disk space is only for shows. Other platforms can display 0.
     #warning "Missing code for your platform !!! Check and correct please :)"
