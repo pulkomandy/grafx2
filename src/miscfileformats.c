@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2009 Petter Lindquist
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
@@ -733,7 +734,7 @@ void Load_CEL(T_IO_Context * context)
   short y_pos;
   byte  last_byte=0;
   long  file_size;
-  const long int header_size = (long int)(sizeof(header1.Width)+sizeof(header1.Height));
+  const long int header_size = 4;
 
   File_error=0;
   Get_full_filename(filename, context->File_name, context->File_directory);
@@ -773,7 +774,7 @@ void Load_CEL(T_IO_Context * context)
         // On réessaye avec le nouveau format
 
         fseek(file,0,SEEK_SET);
-        if (Read_bytes(file,header2.Signature,sizeof(header2.Signature))
+        if (Read_bytes(file,header2.Signature,4)
         && Read_byte(file,&(header2.Kind))
         && Read_byte(file,&(header2.Nb_bits))
         && Read_word_le(file,&(header2.Filler1))
@@ -781,7 +782,7 @@ void Load_CEL(T_IO_Context * context)
         && Read_word_le(file,&(header2.Height))
         && Read_word_le(file,&(header2.X_offset))
         && Read_word_le(file,&(header2.Y_offset))
-        && Read_bytes(file,header2.Filler2,sizeof(header2.Filler2))
+        && Read_bytes(file,header2.Filler2,16)
         )
         {
           // Chargement d'un fichier CEL avec signature (nouveaux fichiers)
@@ -940,7 +941,7 @@ void Save_CEL(T_IO_Context * context)
       for (x_pos=0;x_pos<16;x_pos++)  // Initialisation du filler 2 (?)
         header2.Filler2[x_pos]=0;
 
-      if (Write_bytes(file,header2.Signature,sizeof(header2.Signature))
+      if (Write_bytes(file,header2.Signature,4)
       && Write_byte(file,header2.Kind)
       && Write_byte(file,header2.Nb_bits)
       && Write_word_le(file,header2.Filler1)
@@ -948,7 +949,7 @@ void Save_CEL(T_IO_Context * context)
       && Write_word_le(file,header2.Height)
       && Write_word_le(file,header2.X_offset)
       && Write_word_le(file,header2.Y_offset)
-      && Write_bytes(file,header2.Filler2,sizeof(header2.Filler2))
+      && Write_bytes(file,header2.Filler2,14)
       )
       {
         // Sauvegarde de l'image
@@ -1014,7 +1015,7 @@ void Test_KCF(T_IO_Context * context)
     }
     else
     {
-      if (Read_bytes(file,header2.Signature,sizeof(header2.Signature))
+      if (Read_bytes(file,header2.Signature,4)
         && Read_byte(file,&(header2.Kind))
         && Read_byte(file,&(header2.Nb_bits))
         && Read_word_le(file,&(header2.Filler1))
@@ -1022,7 +1023,7 @@ void Test_KCF(T_IO_Context * context)
         && Read_word_le(file,&(header2.Height))
         && Read_word_le(file,&(header2.X_offset))
         && Read_word_le(file,&(header2.Y_offset))
-        && Read_bytes(file,header2.Filler2,sizeof(header2.Filler2))
+        && Read_bytes(file,header2.Filler2,14)
         )
       {
         if (memcmp(header2.Signature,"KiSS",4)==0)
@@ -1105,7 +1106,7 @@ void Load_KCF(T_IO_Context * context)
     {
       // Fichier KCF au nouveau format
 
-      if (Read_bytes(file,header2.Signature,sizeof(header2.Signature))
+      if (Read_bytes(file,header2.Signature,4)
         && Read_byte(file,&(header2.Kind))
         && Read_byte(file,&(header2.Nb_bits))
         && Read_word_le(file,&(header2.Filler1))
@@ -1113,7 +1114,7 @@ void Load_KCF(T_IO_Context * context)
         && Read_word_le(file,&(header2.Height))
         && Read_word_le(file,&(header2.X_offset))
         && Read_word_le(file,&(header2.Y_offset))
-        && Read_bytes(file,header2.Filler2,sizeof(header2.Filler2))
+        && Read_bytes(file,header2.Filler2,14)
         )
       {
         // Pre_load(context, ?); // Pas possible... pas d'image...
@@ -1227,7 +1228,7 @@ void Save_KCF(T_IO_Context * context)
       for (index=0;index<16;index++) // Initialisation du filler 2 (?)
         header2.Filler2[index]=0;
 
-      if (!Write_bytes(file,header2.Signature,sizeof(header2.Signature))
+      if (!Write_bytes(file,header2.Signature,4)
       || !Write_byte(file,header2.Kind)
       || !Write_byte(file,header2.Nb_bits)
       || !Write_word_le(file,header2.Filler1)
@@ -1235,7 +1236,7 @@ void Save_KCF(T_IO_Context * context)
       || !Write_word_le(file,header2.Height)
       || !Write_word_le(file,header2.X_offset)
       || !Write_word_le(file,header2.Y_offset)
-      || !Write_bytes(file,header2.Filler2,sizeof(header2.Filler2))
+      || !Write_bytes(file,header2.Filler2,14)
       )
         File_error=1;
 
@@ -1331,17 +1332,29 @@ void PI1_decode_palette(byte * src,byte * palette)
   //    Low        High
   // VVVV RRRR | 0000 BBBB
   // 0321 0321 |      0321
-
+  
   ip=0;
   for (i=0;i<16;i++)
   {
-    w=((word)src[(i*2)+1]<<8) | src[(i*2)+0];
-
-    // Traitement des couleurs rouge, verte et bleue:
-    palette[ip++]=(((w & 0x0007) <<  1) | ((w & 0x0008) >>  3)) << 4;
-    palette[ip++]=(((w & 0x7000) >> 11) | ((w & 0x8000) >> 15)) << 4;
-    palette[ip++]=(((w & 0x0700) >>  7) | ((w & 0x0800) >> 11)) << 4;
-  }
+    #if SDL_BYTEORDER == SDL_LIL_ENDIAN 
+   
+      w=(((word)src[(i*2)+1]<<8) | (src[(i*2)+0]));
+    
+      // Traitement des couleurs rouge, verte et bleue:
+      palette[ip++]=(((w & 0x0007) <<  1) | ((w & 0x0008) >>  3)) << 4;
+      palette[ip++]=(((w & 0x7000) >> 11) | ((w & 0x8000) >> 15)) << 4;
+      palette[ip++]=(((w & 0x0700) >>  7) | ((w & 0x0800) >> 11)) << 4;
+   
+    #else
+      w=(((word)src[(i*2+1)])|(((word)src[(i*2)])<<8));
+    
+      palette[ip++] = (((w & 0x0700)>>7) | ((w & 0x0800) >> 7))<<4 ;
+      palette[ip++]=(((w & 0x0070)>>3) | ((w & 0x0080) >> 3))<<4 ;
+      palette[ip++] = (((w & 0x0007)<<1) | ((w & 0x0008)))<<4 ;
+    #endif
+    
+    
+  } 
 }
 
 //// CODAGE de la PALETTE ////
@@ -1354,20 +1367,31 @@ void PI1_code_palette(byte * palette,byte * dest)
 
   // Schéma d'un word =
   //
-  //    Low        High
+  // Low        High
   // VVVV RRRR | 0000 BBBB
   // 0321 0321 |      0321
-
+    
   ip=0;
   for (i=0;i<16;i++)
   {
+    #if SDL_BYTEORDER == SDL_LIL_ENDIAN
+   
     // Traitement des couleurs rouge, verte et bleue:
     w =(((word)(palette[ip]>>2) & 0x38) >> 3) | (((word)(palette[ip]>>2) & 0x04) <<  1); ip++;
     w|=(((word)(palette[ip]>>2) & 0x38) << 9) | (((word)(palette[ip]>>2) & 0x04) << 13); ip++;
     w|=(((word)(palette[ip]>>2) & 0x38) << 5) | (((word)(palette[ip]>>2) & 0x04) <<  9); ip++;
-
+    
     dest[(i*2)+0]=w & 0x00FF;
     dest[(i*2)+1]=(w>>8);
+    #else
+   
+     w=(((word)(palette[ip]<<3))&0x0700);ip++;
+     w|=(((word)(palette[ip]>>1))&0x0070);ip++;
+     w|=(((word)(palette[ip]>>5))&0x0007);ip++;
+ 
+    dest[(i*2)+1]=w & 0x00FF;
+    dest[(i*2)+0]=(w>>8);
+    #endif
   }
 }
 

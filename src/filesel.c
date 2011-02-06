@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2009 Franck Charlet
     Copyright 2008 Peter Gordon
     Copyright 2008 Yves Rizoud
@@ -27,6 +28,11 @@
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     #include <proto/dos.h>
     #include <sys/types.h>
+    #include <dirent.h>
+    #define isHidden(x) (0)
+
+#elif defined (__MINT__)
+    #include <mint/sysbind.h>
     #include <dirent.h>
     #define isHidden(x) (0)
 #elif defined(__WIN32__)
@@ -354,8 +360,25 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   // Après effacement, il ne reste ni fichier ni répertoire dans la liste
 
   // On lit tous les répertoires:
+
+#if defined (__MINT__)
+  static char path[1024];
+  static char path2[1024];
+  path[0]='\0';
+  path2[0]='\0';
+  
+  char currentDrive='A';
+  currentDrive=currentDrive+Dgetdrv(); 
+  
+  Dgetpath(path,0);
+  sprintf(path2,"%c:\%s",currentDrive,path);
+ 
+  strcat(path2,PATH_SEPARATOR);
+  current_directory=opendir(path2);
+#else  
   current_path=getcwd(NULL,0);
   current_directory=opendir(current_path);
+#endif
   while ((entry=readdir(current_directory)))
   {
     // On ignore le répertoire courant
@@ -404,10 +427,33 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
 #if defined(__MORPHOS__) || defined(__AROS__) || defined (__amigaos4__) || defined(__amigaos__)
   Add_element_to_list(list, "/", Format_filename("/",19,1), 1, ICON_NONE); // on amiga systems, / means parent. And there is no ..
   list->Nb_directories ++;
+#elif defined (__MINT__)
+  T_Fileselector_item *item=NULL;
+  // check if ".." exists if not add it
+  // FreeMinT lists ".." already, but this is not so for TOS 
+  // simply adding it will cause double PARENT_DIR under FreeMiNT
+  
+  bool bFound= false;
+  
+  for (item = list->First; (((item != NULL) && (bFound==false))); item = item->Next){
+    if (item->Type == 1){
+	if(strncmp(item->Full_name,"..",(sizeof(char)*2))==0) bFound=true;
+    }
+  }
+  
+  if(!bFound){
+    Add_element_to_list(list, "..",1); // add if not present
+    list->Nb_directories ++;  
+  }
+  
 #endif
 
   closedir(current_directory);
+#if defined (__MINT__)  
+
+#else
   free(current_path);
+#endif
   current_path = NULL;
 
   Recount_files(list);
@@ -504,6 +550,23 @@ void Read_list_of_drives(T_Fileselector *list)
       }
     }
   }
+  #elif defined(__MINT__)
+    char drive_name[]="A:\\";
+    unsigned long drive_bits = Drvmap(); //get drive map bitfield
+    int drive_index;
+    int bit_index;
+    drive_index = 0;
+    for (bit_index=0; bit_index<32; bit_index++)
+    {
+      if ( (1 << bit_index) & drive_bits )
+      {
+        drive_name[0]='A'+bit_index;
+        Add_element_to_list(list, drive_name,2);
+        list->Nb_directories++;
+        drive_index++;
+      }
+    }
+  
   #else
   {
     //Sous les différents unix, on va mettre
@@ -1342,13 +1405,30 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
   // On prend bien soin de passer dans le répertoire courant (le bon qui faut! Oui madame!)
   if (load)
   {
+  #if defined(__MINT__)    
+    chdir(Main_current_directory);
+    static char path[1024]={0};
+    Dgetpath(path,0);
+    strcat(path,PATH_SEPARATOR);
+    strcpy(Main_current_directory,path);  
+  #else
     chdir(Main_current_directory);
     getcwd(Main_current_directory,256);
+  #endif
   }
   else
   {
+    #if defined(__MINT__)    
     chdir(context->File_directory);
+    static char path[1024]={0};
+    Dgetpath(path,0);
+    strcat(path,PATH_SEPARATOR);
+    strcpy(Main_current_directory,path);  
+ #else
     getcwd(Main_current_directory,256);
+  #endif
+
+
   }
   
   // Affichage des premiers fichiers visibles:
@@ -1832,8 +1912,15 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
         // On doit rentrer dans le répertoire:
         if (!chdir(Selector_filename))
         {
+        #if defined (__MINT__)          
+          static char path[1024]={0};
+          char currentDrive='A';
+          currentDrive=currentDrive+Dgetdrv();
+          Dgetpath(path,0);
+         sprintf(Main_current_directory,"%c:\%s",currentDrive,path);
+        #else
           getcwd(Main_current_directory,256);
-  
+        #endif
           // On lit le nouveau répertoire
           Read_list_of_files(&Filelist, Main_format);
           Sort_list_of_files(&Filelist);

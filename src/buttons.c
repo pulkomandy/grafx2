@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2008 Yves Rizoud
     Copyright 2007-2010 Adrien Destugues (PulkoMandy)
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
@@ -72,11 +73,28 @@
 #include "brush.h"
 #include "input.h"
 #include "special.h"
+#include "setup.h"
 
 #ifdef __VBCC__
     #define __attribute__(x)
 #endif
 
+#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+    #include <proto/dos.h>
+    #include <dirent.h>
+    #define isHidden(x) (0)
+#elif defined(__MINT__)
+    #include <mint/sysbind.h>
+    #include <dirent.h>
+    #define isHidden(x) (0)
+#elif defined(__WIN32__)
+    #include <dirent.h>
+    #include <windows.h>
+    #define isHidden(x) (GetFileAttributesA((x)->d_name)&FILE_ATTRIBUTE_HIDDEN)
+#else
+    #include <dirent.h>
+    #define isHidden(x) ((x)->d_name[0]=='.')
+#endif
 
 extern char Program_version[]; // generated in pversion.c
 
@@ -1176,7 +1194,7 @@ char * Format_font_filename(const char * fname)
   int c;
   int length;
   
-  fname+=5; // Assume "font_" prefix
+  fname+=strlen(FONT_PREFIX); // Omit file prefix
   length=strlen(fname) - 4; // assume .png extension
   
   for (c=0;c<11 && c<length ;c++)
@@ -1203,7 +1221,7 @@ void Add_font_or_skin(const char *name)
   else
     fname = name;
   namelength = strlen(fname);
-  if (namelength>=10 && fname[0]!='_' && !strncasecmp(fname, "skin_", 5)
+  if (namelength>=10 && fname[0]!='_' && !strncasecmp(fname, SKIN_PREFIX, strlen(SKIN_PREFIX))
     && (!strcasecmp(fname + namelength - 4,".png")
     || !strcasecmp(fname + namelength - 4,".gif")))
   {
@@ -1212,7 +1230,7 @@ void Add_font_or_skin(const char *name)
     if (fname[0]=='\0')
       return;
   }
-  else if (namelength>=10 && !strncasecmp(fname, "font_", 5)
+  else if (namelength>=10 && !strncasecmp(fname, FONT_PREFIX, strlen(FONT_PREFIX))
     && (!strcasecmp(fname + namelength - 4, ".png")))
   {
     Add_element_to_list(&Font_files_list, fname, Format_font_filename(fname), 0, ICON_NONE);
@@ -1269,7 +1287,7 @@ void Button_Skins(void)
   Free_fileselector_list(&Font_files_list);
   // Browse the "skins" directory
   strcpy(skinsdir, Data_directory);
-  strcat(skinsdir, "skins");
+  strcat(skinsdir, SKINS_SUBDIRECTORY);
   // Add each found file to the list
   For_each_file(skinsdir, Add_font_or_skin);
   // Sort it
@@ -1514,9 +1532,11 @@ void Button_Page(void)
   Exchange_main_and_spare();
 
   // On fait le reste du travail "à la main":
+#ifndef NOLAYERS
   SWAP_PBYTES(Main_visible_image.Image,Spare_visible_image.Image)
   SWAP_WORDS (Main_visible_image.Width,Spare_visible_image.Width)
   SWAP_WORDS (Main_visible_image.Height,Spare_visible_image.Height)
+#endif 
   SWAP_SHORTS(Main_offset_X,Spare_offset_X)
   SWAP_SHORTS(Main_offset_Y,Spare_offset_Y)
   SWAP_SHORTS(Main_separator_position,Spare_separator_position)

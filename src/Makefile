@@ -1,5 +1,6 @@
 #  Grafx2 - The Ultimate 256-color bitmap paint program
 #  
+#  Copyright 2011 Pawel Góralski
 #  Copyright 2009 Per Olofsson
 #  Copyright 2008 Peter Gordon
 #  Copyright 2008-2010 Yves Rizoud
@@ -206,6 +207,7 @@ else
       CP = cp
       ZIP = zip
       PLATFORMFILES = gfx2.png
+      ifneq ($(ATARICROSS),1)
       ifeq ($(NOLUA),1)
         LUACOPT =
         LUALOPT =
@@ -213,7 +215,7 @@ else
             LUACOPT = `pkg-config lua --cflags --silence-errors ||pkg-config lua5.1 --cflags --silence-errors ||pkg-config lua-5.1 --cflags`
             LUALOPT = `pkg-config lua --libs --silence-errors ||pkg-config lua5.1 --libs --silence-errors ||pkg-config lua-5.1 --libs`
       endif
-
+      endif
       # These can only be used under linux and maybe freebsd. They allow to compile for the gp2x or to create a windows binary
       ifdef WIN32CROSS
         #cross compile a Win32 executable
@@ -248,6 +250,17 @@ else
         PLATFORM = AROS
         ZIP = lha
         ZIPOPT = a
+      else ifdef ATARICROSS
+        #cross compile an exec for atari TOS/MiNT machine
+        CC = m68k-atari-mint-gcc
+        BIN = ../bin/grafx2.ttp
+	LUALOPT = -llua
+        OBJDIR = ../obj/m68k-atari-mint
+        PLATFORM = m68k-atari-mint
+        STRIP = m68k-atari-mint-strip -s 
+	X11LOPT = 
+	COPT = -W -Wall -m68020-60 -fomit-frame-pointer -pedantic -std=c99 -Wdeclaration-after-statement -D__MINT__ -DNO_INLINE_MATH -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $() $(JOYCOPT) $(LAYERCOPT) $(LUACOPT)
+    	LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) $(LAYERLOPT)
       else
 
         # Compiles a regular linux executable for the native platform
@@ -274,6 +287,7 @@ endif
 ### BUILD SETTINGS are set according to vars set in the platform selection, the "overridable defaults", and environment variables set before launching make
 
 #TrueType is optional: make NOTTF=1 to disable support and dependencies.
+ifndef ($(ATARICROSS,1))
 ifeq ($(NOTTF),1)
   TTFCOPT = -DNOTTF=1
   TTFLOPT =
@@ -281,9 +295,22 @@ ifeq ($(NOTTF),1)
   TTFLABEL = -nottf
 else
   TTFCOPT = 
-  TTFLOPT = -L/usr/local/lib -lSDL_ttf $(X11LOPT)
+  TTFLOPT = -L$(prefix)/lib -lSDL_ttf $(X11LOPT)
   TTFLIBS = bin/libfreetype-6.dll bin/SDL_ttf.dll
   TTFLABEL = 
+endif
+else
+ifeq ($(NOTTF),1)
+  TTFCOPT = -DNOTTF=1
+  TTFLOPT =
+  TTFLIBS =
+  TTFLABEL = -nottf
+else
+  TTFCOPT = 
+  TTFLOPT = -L$(prefix)/lib -lSDL_ttf $(X11LOPT)
+  TTFLIBS =  
+  TTFLABEL = 
+endif
 endif
 
 #Lua scripting is optional too

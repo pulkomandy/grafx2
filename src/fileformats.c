@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2009 Petter Lindquist
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
@@ -72,11 +73,11 @@ void Test_IMG(T_IO_Context * context)
   if ((file=fopen(filename, "rb")))
   {
     // Lecture et vérification de la signature
-    if (Read_bytes(file,IMG_header.Filler1,sizeof(IMG_header.Filler1))
+    if (Read_bytes(file,IMG_header.Filler1,6)
     && Read_word_le(file,&(IMG_header.Width))
     && Read_word_le(file,&(IMG_header.Height))
-    && Read_bytes(file,IMG_header.Filler2,sizeof(IMG_header.Filler2))
-    && Read_bytes(file,IMG_header.Palette,sizeof(IMG_header.Palette))
+    && Read_bytes(file,IMG_header.Filler2,118)
+    && Read_bytes(file,IMG_header.Palette,sizeof(T_Palette))
     )
     {
       if ( (!memcmp(IMG_header.Filler1,signature,6))
@@ -107,11 +108,11 @@ void Load_IMG(T_IO_Context * context)
   {
     file_size=File_length_file(file);
 
-    if (Read_bytes(file,IMG_header.Filler1,sizeof(IMG_header.Filler1))
+    if (Read_bytes(file,IMG_header.Filler1,6)
     && Read_word_le(file,&(IMG_header.Width))
     && Read_word_le(file,&(IMG_header.Height))
-    && Read_bytes(file,IMG_header.Filler2,sizeof(IMG_header.Filler2))
-    && Read_bytes(file,IMG_header.Palette,sizeof(IMG_header.Palette))
+    && Read_bytes(file,IMG_header.Filler2,118)
+    && Read_bytes(file,IMG_header.Palette,sizeof(T_Palette))
     )
     {
 
@@ -180,11 +181,11 @@ void Save_IMG(T_IO_Context * context)
 
     memcpy(IMG_header.Palette,context->Palette,sizeof(T_Palette));
 
-    if (Write_bytes(file,IMG_header.Filler1,sizeof(IMG_header.Filler1))
+    if (Write_bytes(file,IMG_header.Filler1,6)
     && Write_word_le(file,IMG_header.Width)
     && Write_word_le(file,IMG_header.Height)
-    && Write_bytes(file,IMG_header.Filler2,sizeof(IMG_header.Filler2))
-    && Write_bytes(file,IMG_header.Palette,sizeof(IMG_header.Palette))
+    && Write_bytes(file,IMG_header.Filler2,118)
+    && Write_bytes(file,IMG_header.Palette,sizeof(T_Palette))
     )
 
     {
@@ -2379,9 +2380,16 @@ void Save_GIF(T_IO_Context * context)
           Write_byte(GIF_file,LSDB.Aspect) )
       {
         // Le LSDB a été correctement écrit.
-
+        int i;
         // On sauve la palette
-        if (Write_bytes(GIF_file,context->Palette,768))
+        for(i=0;i<256 && !File_error;i++)
+        {
+          if (!Write_byte(GIF_file,context->Palette[i].R)
+            ||!Write_byte(GIF_file,context->Palette[i].G)
+            ||!Write_byte(GIF_file,context->Palette[i].B))
+            File_error=1;
+        }
+        if (!File_error)
         {
           // La palette a été correctement écrite.
 
@@ -3153,14 +3161,14 @@ void Save_PCX(T_IO_Context * context)
         Write_word_le(file,PCX_header.Y_max) &&
         Write_word_le(file,PCX_header.X_dpi) &&
         Write_word_le(file,PCX_header.Y_dpi) &&
-        Write_bytes(file,&(PCX_header.Palette_16c),sizeof(PCX_header.Palette_16c)) &&        
+        Write_bytes(file,&(PCX_header.Palette_16c),48) &&
         Write_bytes(file,&(PCX_header.Reserved),1) &&
         Write_bytes(file,&(PCX_header.Plane),1) &&
         Write_word_le(file,PCX_header.Bytes_per_plane_line) &&
         Write_word_le(file,PCX_header.Palette_info) &&
         Write_word_le(file,PCX_header.Screen_X) &&
         Write_word_le(file,PCX_header.Screen_Y) &&
-        Write_bytes(file,&(PCX_header.Filler),sizeof(PCX_header.Filler)) )
+        Write_bytes(file,&(PCX_header.Filler),54) )
     {
       line_size=PCX_header.Bytes_per_plane_line*PCX_header.Plane;
      
@@ -3245,7 +3253,7 @@ void Test_SCx(T_IO_Context * context)
   if ((file=fopen(filename, "rb")))
   {
     // Lecture et vérification de la signature
-    if (Read_bytes(file,SCx_header.Filler1,sizeof(SCx_header.Filler1))
+    if (Read_bytes(file,SCx_header.Filler1,4)
     && Read_word_le(file, &(SCx_header.Width))
     && Read_word_le(file, &(SCx_header.Height))
     && Read_byte(file, &(SCx_header.Filler2))
@@ -3281,7 +3289,7 @@ void Load_SCx(T_IO_Context * context)
   {
     file_size=File_length_file(file);
 
-    if (Read_bytes(file,SCx_header.Filler1,sizeof(SCx_header.Filler1))
+    if (Read_bytes(file,SCx_header.Filler1,4)
     && Read_word_le(file, &(SCx_header.Width))
     && Read_word_le(file, &(SCx_header.Height))
     && Read_byte(file, &(SCx_header.Filler2))
@@ -3402,7 +3410,7 @@ void Save_SCx(T_IO_Context * context)
     SCx_header.Filler2=0xAF;
     SCx_header.Planes=0x00;
 
-    if (Write_bytes(file,SCx_header.Filler1,sizeof(SCx_header.Filler1))
+    if (Write_bytes(file,SCx_header.Filler1,4)
     && Write_word_le(file, SCx_header.Width)
     && Write_word_le(file, SCx_header.Height)
     && Write_byte(file, SCx_header.Filler2)
@@ -3860,9 +3868,9 @@ void Save_PNG(T_IO_Context * context)
                 {-1, "Software", "Grafx2", 6, 0, NULL, NULL},
                 {-1, "Title", NULL, 0, 0, NULL, NULL}
             #else
-              png_text text_ptr[2] = {
-                {-1, "Software", "Grafx2", 6},
-                {-1, "Title", NULL, 0}
+            png_text text_ptr[2] = {
+              {-1, "Software", "Grafx2", 6},
+              {-1, "Title", NULL, 0}
             #endif
             };
             int nb_text_chunks=1;

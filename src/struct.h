@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2008 Yves Rizoud
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
@@ -73,14 +74,23 @@ typedef void (* Func_draw_brush) (byte *,word,word,word,word,word,word,byte,word
 typedef void (* Func_draw_list_item) (word,word,word,byte); ///< Draw an item inside a list button. This is done with a callback so it is possible to draw anything, as the list itself doesn't handle the content
 
 /// A set of RGB values.
+#ifdef __GNUC__
+typedef struct
+{
+  byte R; ///< Red
+  byte G; ///< Green
+  byte B; ///< Blue
+} __attribute__((__packed__)) T_Components, T_Palette[256] ; ///< A complete 256-entry RGB palette (768 bytes).
+#else
 #pragma pack(1)
 typedef struct
 {
   byte R; ///< Red
   byte G; ///< Green
   byte B; ///< Blue
-} T_Components, T_Palette[256]; ///< A complete 256-entry RGB palette (768 bytes).
+} T_Components, T_Palette[256] ; ///< A complete 256-entry RGB palette (768 bytes).
 #pragma pack()
+#endif
 
 /// A normal rectangular button in windows and menus.
 typedef struct T_Normal_button
@@ -277,7 +287,6 @@ typedef struct
   word Height;///< Videomode height in pixels. 
 } T_Config_video_mode;
 
-
 /// Header for gfx2.cfg
 typedef struct
 {
@@ -287,7 +296,6 @@ typedef struct
   byte Beta1;        ///< Major beta version number (ex: 96)
   byte Beta2;        ///< Major beta version number (ex: 5)
 } T_Config_header;
-
 
 /// Header for a config chunk in for gfx2.cfg
 typedef struct

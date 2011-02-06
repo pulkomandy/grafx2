@@ -336,11 +336,11 @@ fstype_to_string (int t)
   #define BROKEN
 #endif
 
+
 #if defined MOUNTED_GETMNTENT1 || defined MOUNTED_GETMNTENT2
 
 /* Return the device number from MOUNT_OPTIONS, if possible.
    Otherwise return (dev_t) -1.  */
-
 
 static dev_t
 dev_from_mount_options (BROKEN char const *mount_options)

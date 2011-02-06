@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2008 Peter Gordon
     Copyright 2008 Yves Rizoud
     Copyright 2009 Franck Charlet
@@ -53,7 +54,9 @@
 #ifndef __GP2X__
     #include <SDL_syswm.h>
 #endif
-
+#if defined (__MINT__)
+  #include <mint/osbind.h>
+#endif
 #ifdef GRAFX2_CATCHES_SIGNALS
   #include <signal.h>
 #endif
@@ -653,7 +656,7 @@ T_Gui_skin * Load_graphics(const char * skin_file)
   
   // Read the "skin" file
   strcpy(filename,Data_directory);
-  strcat(filename,"skins" PATH_SEPARATOR);
+  strcat(filename,SKINS_SUBDIRECTORY PATH_SEPARATOR);
   strcat(filename,skin_file);
   
   gui=Load_surface(filename);
@@ -732,7 +735,7 @@ byte * Load_font(const char * font_name)
   }
   
   // Read the file containing the image
-  sprintf(filename,"%sskins%s%s", Data_directory, PATH_SEPARATOR, font_name);
+  sprintf(filename,"%s" SKINS_SUBDIRECTORY "%s%s", Data_directory, PATH_SEPARATOR, font_name);
   
   image=Load_surface(filename);
   if (!image)
@@ -2203,7 +2206,7 @@ int Save_CFG(void)
   T_Config_video_mode   cfg_video_mode={0,0,0};
 
   strcpy(filename,Config_directory);
-  strcat(filename,"gfx2.cfg");
+  strcat(filename,CONFIG_FILENAME);
 
   if ((Handle=fopen(filename,"wb"))==NULL)
     return ERROR_SAVING_CFG;
@@ -2331,7 +2334,7 @@ int Save_CFG(void)
   // is now loaded/saved in GIF and LBM formats.
   /*
   Chunk.Number=CHUNK_GRADIENTS;
-  Chunk.Size=241;
+  Chunk.Size=14*16+1;
   if (!Write_byte(Handle, Chunk.Number) ||
       !Write_word_le(Handle, Chunk.Size) )
     goto Erreur_sauvegarde_config;

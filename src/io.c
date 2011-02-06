@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2008 Yves Rizoud
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
@@ -42,6 +43,11 @@
     #include <windows.h>
     //#include <commdlg.h>
     #define isHidden(x) (GetFileAttributesA((x)->d_name)&FILE_ATTRIBUTE_HIDDEN)
+#elif defined(__MINT__)
+    #include <mint/osbind.h>
+    #include <mint/sysbind.h>
+    #include <dirent.h>
+    #define isHidden(x) (0)
 #else
     #include <dirent.h>
     #define isHidden(x) ((x)->d_name[0]=='.')

@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2009 Pasi Kallinen
     Copyright 2008 Peter Gordon
     Copyright 2008 Franck Charlet
@@ -71,6 +72,8 @@
     #include <windows.h>
     #include <shlwapi.h>
     #define chdir(dir) SetCurrentDirectory(dir)
+#elif defined (__MINT__)
+    #include <mint/osbind.h>
 #elif defined(__macosx__)
     #import <corefoundation/corefoundation.h>
     #import <sys/param.h>
@@ -85,6 +88,8 @@
   // a compilation warning.
   extern DECLSPEC int SDLCALL SDL_putenv(const char *variable);
 #endif
+
+extern char Program_version[]; // generated in pversion.c
 
 //--- Affichage de la syntaxe, et de la liste des modes vidéos disponibles ---
 void Display_syntax(void)
@@ -401,11 +406,21 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
   return file_in_command_line;
 }
 
+// Compile-time assertions:
+#define CT_ASSERT(e) extern char (*ct_assert(void)) [sizeof(char[1 - 2*!(e)])]
+
+// This line will raise an error at compile time
+// when sizeof(T_Components) is not 3.
+CT_ASSERT(sizeof(T_Components)==3);
+
+// This line will raise an error at compile time
+// when sizeof(T_Palette) is not 768.
+CT_ASSERT(sizeof(T_Palette)==768);
 
 // ------------------------ Initialiser le programme -------------------------
 // Returns 0 on fail
 int Init_program(int argc,char * argv[])
-{
+{   
   int temp;
   int starting_videomode;
   static char program_directory[MAX_PATH_CHARACTERS];
@@ -415,9 +430,14 @@ int Init_program(int argc,char * argv[])
   static char main_directory[MAX_PATH_CHARACTERS];
   static char spare_filename [MAX_PATH_CHARACTERS];
   static char spare_directory[MAX_PATH_CHARACTERS];
-  
-  
-
+ 
+  #if defined(__MINT__)  
+  printf("===============================\n");
+  printf(" /|\\ GrafX2 %.19s\n", Program_version);
+  printf(" compilation date: %.16s\n", __DATE__);
+  printf("===============================\n");
+  #endif 
+ 
   // On crée dès maintenant les descripteurs des listes de pages pour la page
   // principale et la page de brouillon afin que leurs champs ne soient pas
   // invalide lors des appels aux multiples fonctions manipulées à
@@ -433,9 +453,12 @@ int Init_program(int argc,char * argv[])
   Set_data_directory(program_directory,Data_directory);
   // Choose directory for settings (read/write)
   Set_config_directory(program_directory,Config_directory);
-
-  // On détermine le répertoire courant:
+#if defined(__MINT__)
+  strcpy(Main_current_directory,program_directory);
+#else
+// On détermine le répertoire courant:
   getcwd(Main_current_directory,256);
+#endif
 
   // On en profite pour le mémoriser dans le répertoire principal:
   strcpy(Initial_directory,Main_current_directory);
@@ -497,8 +520,8 @@ int Init_program(int argc,char * argv[])
   Spare_magnifier_offset_Y=0;
   Keyboard_click_allowed = 1;
   
-  Main_safety_backup_prefix = 'a';
-  Spare_safety_backup_prefix = 'b';
+  Main_safety_backup_prefix = SAFETYBACKUP_PREFIX_A[0];
+  Spare_safety_backup_prefix = SAFETYBACKUP_PREFIX_B[0];
   Main_time_of_safety_backup = 0;
   Spare_time_of_safety_backup = 0;
   
@@ -646,7 +669,7 @@ int Init_program(int argc,char * argv[])
   gfx = Load_graphics(Config.Skin_file);
   if (gfx == NULL)
   {
-    gfx = Load_graphics("skin_DPaint.png");
+    gfx = Load_graphics(DEFAULT_SKIN_FILENAME);
     if (gfx == NULL)
     {
       printf("%s", Gui_loading_error_message);
@@ -670,9 +693,9 @@ int Init_program(int argc,char * argv[])
 
   // Font
   if (!(Menu_font=Load_font(Config.Font_file)))
-    if (!(Menu_font=Load_font("font_DPaint.png")))
+    if (!(Menu_font=Load_font(DEFAULT_FONT_FILENAME)))
       {
-        printf("Unable to open the default font file: %s\n", "font_Classic.png");
+        printf("Unable to open the default font file: %s\n", DEFAULT_FONT_FILENAME);
         Error(ERROR_GUI_MISSING);
       }
 

@@ -62,7 +62,11 @@ static const T_Help_table helptable_about[] =
   HELP_BOLD ("         \"Dragon's Layers\" Edition")
   HELP_BOLD ("  THE ULTIMATE MULTI-RESOLUTION GFX EDITOR")
   HELP_TEXT ("       http://grafx2.googlecode.com")
+#if defined(__MINT__)
+  HELP_TEXT ("                atari build                ")
+#else
   HELP_TEXT ("")
+#endif
   HELP_TEXT ("Copyright 2007-2010, the Grafx2 project team")
   HELP_TEXT ("    Copyright 1996-2001, SUNSET DESIGN")
 };
@@ -438,6 +442,10 @@ static const T_Help_table helptable_credits[] =
   HELP_BOLD ("              WIZ & CAANOO PORT")
   HELP_TEXT ("")
   HELP_TEXT ("  Alexander Filyanov (PheeL)")
+  HELP_TEXT ("")
+  HELP_BOLD ("                 ATARI PORT")
+  HELP_TEXT ("")
+  HELP_TEXT ("  Pawel Goralski (Saulot)")
   HELP_TEXT ("")
   HELP_TEXT ("")
   HELP_TEXT ("  ... made it work on your favourite toaster")

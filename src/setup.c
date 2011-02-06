@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2008 Peter Gordon
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
@@ -35,6 +36,9 @@
   #import <sys/param.h>
 #elif defined(__FreeBSD__)
   #import <sys/param.h>
+#elif defined(__MINT__)
+    #include <mint/osbind.h>
+    #include <mint/sysbind.h>
 #elif defined(__linux__)
   #include <limits.h>
   #include <unistd.h>
@@ -84,7 +88,16 @@ void Set_program_directory(ARG_UNUSED const char * argv0,char * program_dir)
   // AmigaOS and alike: hard-coded volume name.
   #elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     strcpy(program_dir,"PROGDIR:");
+  #elif defined(__MINT__)
 
+  static char path[1024]={0};
+  char currentDrive='A';
+  currentDrive=currentDrive+Dgetdrv();
+  
+  Dgetpath(path,0);
+  sprintf(program_dir,"%c:\%s",currentDrive,path);
+  // Append trailing slash
+  strcat(program_dir,PATH_SEPARATOR);
   // Linux: argv[0] unreliable
   #elif defined(__linux__)
   if (argv0[0]!='/')
@@ -117,6 +130,9 @@ void Set_data_directory(const char * program_dir, char * data_dir)
   // On GP2X, executable is not in bin/
   #elif defined (__GP2X__) || defined (__gp2x__) || defined (__WIZ__) || defined (__CAANOO__)
     strcat(data_dir,"share/grafx2/");
+  //on tos the same directory
+  #elif defined (__MINT__)
+    strcpy(data_dir, program_dir);
   // All other targets, program is in a "bin" subdirectory
   #elif defined (__AROS__)
     strcat(data_dir,"/share/grafx2/");
@@ -146,6 +162,8 @@ void Set_config_directory(const char * program_dir, char * config_dir)
     // On the GP2X, the program is installed to the sdcard, and we don't want to mess with the system tree which is
     // on an internal flash chip. So, keep these settings locals.
     strcpy(config_dir,program_dir);
+  #elif defined(__MINT__)  
+    strcpy(config_dir,program_dir);
   #else
     char filename[MAX_PATH_CHARACTERS];
 
@@ -156,7 +174,7 @@ void Set_config_directory(const char * program_dir, char * config_dir)
     strcat(config_dir, "../");
     #endif
     strcpy(filename, config_dir);
-    strcat(filename, "gfx2.cfg");
+    strcat(filename, CONFIG_FILENAME);
 
     if (!File_exists(filename))
     {
@@ -173,6 +191,10 @@ void Set_config_directory(const char * program_dir, char * config_dir)
         // "~/Library/Preferences/com.googlecode.grafx2"
         const char* Config_SubDir = "Library/Preferences/com.googlecode.grafx2";
         config_parent_dir = getenv("HOME");
+      #elif defined(__MINT__)
+         const char* Config_SubDir = "";
+         printf("GFX2.CFG not found in %s\n",filename);
+         strcpy(config_parent_dir, config_dir);
       #else
         // "~/.grafx2"      
         const char* Config_SubDir = ".grafx2";
