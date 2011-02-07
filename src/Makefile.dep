@@ -23,7 +23,8 @@ $(OBJDIR)/filesel.o: filesel.c const.h struct.h global.h misc.h errors.h io.h \
  help.h filesel.h
 $(OBJDIR)/graph.o: graph.c global.h struct.h const.h engine.h buttons.h pages.h \
  errors.h sdlscreen.h graph.h misc.h pxsimple.h pxtall.h pxwide.h \
- pxdouble.h pxtriple.h pxwide2.h pxtall2.h pxquad.h windows.h input.h
+ pxdouble.h pxtriple.h pxwide2.h pxtall2.h pxquad.h windows.h input.h \
+ brush.h
 $(OBJDIR)/help.o: help.c const.h struct.h global.h misc.h engine.h helpfile.h \
  help.h sdlscreen.h text.h keyboard.h windows.h input.h hotkeys.h \
  errors.h pages.h
@@ -31,7 +32,7 @@ $(OBJDIR)/hotkeys.o: hotkeys.c struct.h const.h global.h hotkeys.h
 $(OBJDIR)/init.o: init.c buttons.h struct.h const.h errors.h global.h graph.h \
  init.h io.h factory.h help.h hotkeys.h keyboard.h loadsave.h misc.h \
  mountlist.h operatio.h palette.h sdlscreen.h setup.h transform.h \
- windows.h layers.h
+ windows.h layers.h special.h
 $(OBJDIR)/input.o: input.c global.h struct.h const.h keyboard.h sdlscreen.h \
  windows.h errors.h misc.h buttons.h input.h loadsave.h
 $(OBJDIR)/io.o: io.c struct.h const.h io.h realpath.h

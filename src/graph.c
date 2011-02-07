@@ -48,6 +48,7 @@
 #include "pxquad.h"
 #include "windows.h"
 #include "input.h"
+#include "brush.h"
 
 #ifdef __VBCC__
     #define __attribute__(x)

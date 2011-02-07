@@ -83,6 +83,8 @@
 #include "transform.h"
 #include "windows.h"
 #include "layers.h"
+#include "special.h"
+#include "buttons.h"
 
 char Gui_loading_error_message[512];
 
@@ -2889,7 +2891,7 @@ void Define_icon(void)
     // Find the bits for the nID icon. 
     hresource = FindResource(hInstance, 
         MAKEINTRESOURCE(nID), 
-        MAKEINTRESOURCE(RT_ICON)); 
+        MAKEINTRESOURCE((long)RT_ICON)); 
     if (hresource==NULL)
       break;
      
@@ -2925,7 +2927,7 @@ void Define_icon(void)
     // Find the bits for the nID icon. 
     hresource = FindResource(hInstance, 
         MAKEINTRESOURCE(nID), 
-        MAKEINTRESOURCE(RT_ICON)); 
+        MAKEINTRESOURCE((long)RT_ICON)); 
     if (hresource==NULL)
       break;
      

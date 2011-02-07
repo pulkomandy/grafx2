@@ -129,10 +129,6 @@ void Bouton_***(void)
 }
 */
 
-void Select_paintbrush(int index);
-byte Store_paintbrush(int index);
-
-
 void Message_out_of_memory(void)
 {
   short clicked_button;
