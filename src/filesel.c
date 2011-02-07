@@ -442,7 +442,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   }
   
   if(!bFound){
-    Add_element_to_list(list, "..",1); // add if not present
+    Add_element_to_list(list, "..",1,Format_filename("/",19,1),ICON_NONE); // add if not present
     list->Nb_directories ++;  
   }
   
@@ -561,7 +561,7 @@ void Read_list_of_drives(T_Fileselector *list)
       if ( (1 << bit_index) & drive_bits )
       {
         drive_name[0]='A'+bit_index;
-        Add_element_to_list(list, drive_name,2);
+        Add_element_to_list(list, drive_name,Format_filename(drive_name,19,2),2,ICON_NONE);
         list->Nb_directories++;
         drive_index++;
       }
