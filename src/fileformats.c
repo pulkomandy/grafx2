@@ -3511,7 +3511,71 @@ void Test_PNG(T_IO_Context * context)
     fclose(file);
   }
 }
+
+/// Used by a callback in Load_PNG
+T_IO_Context * PNG_current_context;
+
+int PNG_read_unknown_chunk(__attribute__((unused)) png_structp ptr, png_unknown_chunkp chunk)
+{
+  // png_unknown_chunkp members:
+  //    png_byte name[5];
+  //    png_byte *data;
+  //    png_size_t size;
   
+  if (!strcmp((const char *)chunk->name, "crNg"))
+  {
+    // Color animation. Similar to a LBM CRNG chunk.
+    unsigned int i;
+    byte *chunk_ptr = chunk->data;
+    
+    // Should be a multiple of 6
+    if (chunk->size % 6)
+      return (-1);
+    
+    
+    for(i=0;i<chunk->size/6 && i<16; i++)
+    {
+      word rate;
+      word flags;
+      byte min_col;
+      byte max_col;
+      
+      // Rate (big-endian word)
+      rate = *(chunk_ptr++) << 8;
+      rate |= *(chunk_ptr++);
+      
+      // Flags (big-endian)
+      flags = *(chunk_ptr++) << 8;
+      flags |= *(chunk_ptr++);
+
+      // Min color
+      min_col = *(chunk_ptr++);
+      // Max color
+      max_col = *(chunk_ptr++);
+
+      // Check validity
+      if (min_col != max_col)
+      {
+        // Valid cycling range
+        if (max_col<min_col)
+          SWAP_BYTES(min_col,max_col)
+        
+          PNG_current_context->Cycle_range[i].Start=min_col;
+          PNG_current_context->Cycle_range[i].End=max_col;
+          PNG_current_context->Cycle_range[i].Inverse=(flags&2)?1:0;
+          PNG_current_context->Cycle_range[i].Speed=(flags&1) ? rate/78 : 0;
+                              
+          PNG_current_context->Color_cycles=i+1;
+      }
+    }
+  
+    return (1); // >0 = success
+  }
+  return (0); /* did not recognize */
+  
+}
+
+
 png_bytep * Row_pointers;
 // -- Lire un fichier au format PNG -----------------------------------------
 void Load_PNG(T_IO_Context * context)
@@ -3549,6 +3613,7 @@ void Load_PNG(T_IO_Context * context)
           {
             png_byte color_type;
             png_byte bit_depth;
+            png_voidp user_chunk_ptr;
             
             // Setup a return point. If a pnglib loading error occurs
             // in this if(), the else will be executed.
@@ -3557,7 +3622,14 @@ void Load_PNG(T_IO_Context * context)
               png_init_io(png_ptr, file);
               // Inform pnglib we already loaded the header.
               png_set_sig_bytes(png_ptr, 8);
-            
+              
+              // Hook the handler for unknown chunks
+              user_chunk_ptr = png_get_user_chunk_ptr(png_ptr);
+              png_set_read_user_chunk_fn(png_ptr, user_chunk_ptr, &PNG_read_unknown_chunk);
+              // This is a horrid way to pass parameters, but we don't get 
+              // much choice. PNG loader can't be reintrant.
+              PNG_current_context=context;
+
               // Load file information
               png_read_info(png_ptr, info_ptr);
               color_type = png_get_color_type(png_ptr,info_ptr);
@@ -3835,6 +3907,8 @@ void Save_PNG(T_IO_Context * context)
   byte * pixel_ptr;
   png_structp png_ptr;
   png_infop info_ptr;
+  png_unknown_chunk crng_chunk;
+  byte cycle_data[16*6]; // Storage for color-cycling data, referenced by crng_chunk
   
   Get_full_filename(filename, context->File_name, context->File_directory);
   File_error=0;
@@ -3905,7 +3979,58 @@ void Save_PNG(T_IO_Context * context)
               break;
             default:
               break;
-          }          
+          }
+          // Write cycling colors
+          if (context->Color_cycles)
+          {
+            // Save a chunk called 'crNg'
+            // The case is selected by the following rules from PNG standard:
+            // char 1: non-mandatory = lowercase
+            // char 2: private (not standard) = lowercase
+            // char 3: reserved = always uppercase
+            // char 4: can be copied by editors = lowercase
+
+            // First, turn our nice structure into byte array
+            // (just to avoid padding in structures)
+            
+            byte *chunk_ptr = cycle_data;
+            int i;
+            
+            for (i=0; i<context->Color_cycles; i++)
+            {
+              word flags=0;
+              flags|= context->Cycle_range[i].Speed?1:0; // Cycling or not
+              flags|= context->Cycle_range[i].Inverse?2:0; // Inverted
+              
+              // Big end of Rate
+              *(chunk_ptr++) = (context->Cycle_range[i].Speed*78) >> 8;
+              // Low end of Rate
+              *(chunk_ptr++) = (context->Cycle_range[i].Speed*78) & 0xFF;
+              
+              // Big end of Flags
+              *(chunk_ptr++) = (flags) >> 8;
+              // Low end of Flags
+              *(chunk_ptr++) = (flags) & 0xFF;
+              
+              // Min color
+              *(chunk_ptr++) = context->Cycle_range[i].Start;
+              // Max color
+              *(chunk_ptr++) = context->Cycle_range[i].End;
+            }
+
+            // Build one unknown_chuck structure        
+            memcpy(crng_chunk.name, "crNg",5);
+            crng_chunk.data=cycle_data;
+            crng_chunk.size=context->Color_cycles*6;
+            crng_chunk.location=PNG_HAVE_PLTE;
+            
+            // Give it to libpng
+            png_set_unknown_chunks(png_ptr, info_ptr, &crng_chunk, 1);
+            // libpng seems to ignore the location I provided earlier.
+	          png_set_unknown_chunk_location(png_ptr, info_ptr, 0, PNG_HAVE_PLTE);
+          }
+          
+          
           png_write_info(png_ptr, info_ptr);
 
           /* ecriture des pixels de l'image */
