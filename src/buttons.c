@@ -2768,7 +2768,6 @@ void Button_Gradients(void)
   {
     Current_gradient=old_current_gradient;
     memcpy(Main_backups->Pages->Gradients,&backup_gradients,sizeof(T_Gradient_array));
-    Load_gradient_data(Current_gradient);
   }
 }
 

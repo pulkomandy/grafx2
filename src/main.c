@@ -762,7 +762,6 @@ int Init_program(int argc,char * argv[])
   Gradient_bounds_range=1;
 
   Current_gradient=0;
-  Load_gradient_data(0);
 
   // Initialisation de diverses variables par calcul:
   Compute_magnifier_data();

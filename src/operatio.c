@@ -2911,6 +2911,7 @@ void Grad_circle_12_0(void)
 
   Init_start_operation();
   Backup();
+  Load_gradient_data(Current_gradient);
 
   Shade_table=(Mouse_K==LEFT_SIDE)?Shade_table_left:Shade_table_right;
   color=(Mouse_K==LEFT_SIDE)?Fore_color:Back_color;
@@ -3168,6 +3169,8 @@ void Grad_ellipse_12_0(void)
 
   Init_start_operation();
   Backup();
+  Load_gradient_data(Current_gradient);
+
 
   Shade_table=(Mouse_K==LEFT_SIDE)?Shade_table_left:Shade_table_right;
   color=(Mouse_K==LEFT_SIDE)?Fore_color:Back_color;
@@ -3392,6 +3395,7 @@ void Grad_rectangle_12_0(void)
 {
   Init_start_operation();
   Backup();
+  Load_gradient_data(Current_gradient);
 
   if ((Config.Coords_rel) && (Menu_is_visible))
     Print_in_menu("\035:   1   \022:   1",0);
