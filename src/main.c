@@ -426,6 +426,7 @@ int Init_program(int argc,char * argv[])
   static char program_directory[MAX_PATH_CHARACTERS];
   T_Gui_skin *gfx;
   int file_in_command_line;
+  T_Gradient_array initial_gradients;
   static char main_filename [MAX_PATH_CHARACTERS];
   static char main_directory[MAX_PATH_CHARACTERS];
   static char spare_filename [MAX_PATH_CHARACTERS];
@@ -666,10 +667,10 @@ int Init_program(int argc,char * argv[])
   Help_position=0;
 
   // Load sprites, palette etc.
-  gfx = Load_graphics(Config.Skin_file);
+  gfx = Load_graphics(Config.Skin_file, &initial_gradients);
   if (gfx == NULL)
   {
-    gfx = Load_graphics(DEFAULT_SKIN_FILENAME);
+    gfx = Load_graphics(DEFAULT_SKIN_FILENAME, &initial_gradients);
     if (gfx == NULL)
     {
       printf("%s", Gui_loading_error_message);
@@ -749,6 +750,19 @@ int Init_program(int argc,char * argv[])
 
   // Nettoyage de l'écran virtuel (les autres recevront celui-ci par copie)
   memset(Main_screen,0,Main_image_width*Main_image_height);
+
+  // Now that the backup system is there, we can store the gradients.
+  memcpy(Main_backups->Pages->Gradients->Range, initial_gradients.Range, sizeof(initial_gradients.Range));
+  memcpy(Spare_backups->Pages->Gradients->Range, initial_gradients.Range, sizeof(initial_gradients.Range));
+
+  Gradient_function=Gradient_basic;
+  Gradient_lower_bound=0;
+  Gradient_upper_bound=0;
+  Gradient_random_factor=1;
+  Gradient_bounds_range=1;
+
+  Current_gradient=0;
+  Load_gradient_data(0);
 
   // Initialisation de diverses variables par calcul:
   Compute_magnifier_data();

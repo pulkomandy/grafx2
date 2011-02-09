@@ -1363,7 +1363,7 @@ void Button_Skins(void)
       strcpy(skinsdir, Get_item_by_index(&Skin_files_list,
         skin_list->List_start + skin_list->Cursor_position)->Full_name);
 
-      gfx = Load_graphics(skinsdir);
+      gfx = Load_graphics(skinsdir, NULL);
       if (gfx == NULL) // Error
       {
         Display_cursor();
@@ -2668,7 +2668,7 @@ void Button_Gradients(void)
         Hide_cursor();
         // On inverse le sens (par un XOR de 1)
         Main_backups->Pages->Gradients->Range[Current_gradient].Inverse^=1;
-        Print_in_window(12,25,(Main_backups->Pages->Gradients->Range[Current_gradient].Inverse)?"\033":"\032",MC_Black,MC_Light);
+        Print_in_window(12,23,(Main_backups->Pages->Gradients->Range[Current_gradient].Inverse)?"\033":"\032",MC_Black,MC_Light);
         // On affiche la nouvelle preview
         Draw_gradient_preview(8,128,108,14,Current_gradient);
         Display_cursor();

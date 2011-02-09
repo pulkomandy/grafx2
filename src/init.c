@@ -643,7 +643,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   return 0;
 }
 
-T_Gui_skin * Load_graphics(const char * skin_file)
+T_Gui_skin * Load_graphics(const char * skin_file, T_Gradient_array *gradients)
 {
   T_Gui_skin * gfx;
   char filename[MAX_PATH_CHARACTERS];
@@ -661,7 +661,7 @@ T_Gui_skin * Load_graphics(const char * skin_file)
   strcat(filename,SKINS_SUBDIRECTORY PATH_SEPARATOR);
   strcat(filename,skin_file);
   
-  gui=Load_surface(filename);
+  gui=Load_surface(filename, gradients);
   if (!gui)
   {
     sprintf(Gui_loading_error_message, "Unable to load the skin image (missing? not an image file?)\n");
@@ -739,7 +739,7 @@ byte * Load_font(const char * font_name)
   // Read the file containing the image
   sprintf(filename,"%s" SKINS_SUBDIRECTORY "%s%s", Data_directory, PATH_SEPARATOR, font_name);
   
-  image=Load_surface(filename);
+  image=Load_surface(filename, NULL);
   if (!image)
   {
     sprintf(Gui_loading_error_message, "Unable to load the skin image (missing? not an image file?)\n");
@@ -2557,28 +2557,6 @@ void Set_config_defaults(void)
   // Stencil
   for (index=0; index<256; index++)
     Stencil[index]=1;
-
-  // Dégradés
-  /* TODO
-  Current_gradient=0;
-  for(index=0;index<16;index++)
-  {
-    Gradient_array[index].Start=0;
-    Gradient_array[index].End=0;
-    Gradient_array[index].Inverse=0;
-    Gradient_array[index].Mix=0;
-    Gradient_array[index].Technique=0;
-  }
-  Load_gradient_data(Current_gradient);
-  */
-  // Can't Load_gradient_data(), it depends on Backup system
-  // and this function can be called before Backup system is ready.
-  Gradient_function=Gradient_basic;
-  Gradient_lower_bound=0;
-  Gradient_upper_bound=0;
-  Gradient_random_factor=1;
-  Gradient_bounds_range=1;
-  
   
   // Smooth
   Smooth_matrix[0][0]=1;

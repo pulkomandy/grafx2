@@ -181,8 +181,10 @@ extern T_Format File_formats[];
 /// is too high.
 void Image_emergency_backup(void);
 
+///
 /// Load an arbitrary SDL_Surface.
-SDL_Surface * Load_surface(char *full_name);
+/// @param gradients Pass the address of a target T_Gradient_array if you want the gradients, NULL otherwise
+SDL_Surface * Load_surface(char *full_name, T_Gradient_array *gradients);
 
 
 /*

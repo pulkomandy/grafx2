@@ -24,7 +24,7 @@
 /// Initialization (and some de-initialization) functions.
 //////////////////////////////////////////////////////////////////////////////
   
-T_Gui_skin *Load_graphics(const char * skin_file);
+T_Gui_skin *Load_graphics(const char * skin_file, T_Gradient_array *gradients);
 void Set_current_skin(const char *skinfile, T_Gui_skin *gfx);
 void Init_buttons(void);
 void Init_operations(void);

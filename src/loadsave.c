@@ -1013,8 +1013,10 @@ void Load_SDL_Image(T_IO_Context *context)
   SDL_FreeSurface(surface);
 }
 
+///
 /// Load an arbitrary SDL_Surface.
-SDL_Surface * Load_surface(char *full_name)
+/// @param gradients Pass the address of a target T_Gradient_array if you want the gradients, NULL otherwise
+SDL_Surface * Load_surface(char *full_name, T_Gradient_array *gradients)
 {
   SDL_Surface * bmp=NULL;
   T_IO_Context context;
@@ -1023,8 +1025,23 @@ SDL_Surface * Load_surface(char *full_name)
   Load_image(&context);
   
   if (context.Surface)
+  {
     bmp=context.Surface;
-    
+    // Caller wants the gradients:
+    if (gradients != NULL)
+    {
+      int i;
+      
+      memset(gradients, 0, sizeof(T_Gradient_array));
+      for (i=0; i<context.Color_cycles; i++)
+      {
+        gradients->Range[i].Start=context.Cycle_range[i].Start;
+        gradients->Range[i].End=context.Cycle_range[i].End;
+        gradients->Range[i].Inverse=context.Cycle_range[i].Inverse;
+        gradients->Range[i].Speed=context.Cycle_range[i].Speed;
+      }
+    }
+  } 
   Destroy_context(&context);
 
   return bmp;
