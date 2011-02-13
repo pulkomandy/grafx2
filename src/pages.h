@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
@@ -39,13 +40,14 @@ extern byte * FX_feedback_screen;
 /////////////////////////// BACKUP ///////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
+#ifndef NOLAYERS
 /// The pixels of visible layers, flattened copy.
 extern T_Bitmap Main_visible_image;
 /// The pixels of visible layers, flattened copy, used for no-feedback effects.
 extern T_Bitmap Main_visible_image_backup;
 /// The index of visible pixels from ::Visible image. Points to the right layer.
 extern T_Bitmap Main_visible_image_depth_buffer;
-
+#endif
 /// The pixels of visible layers for the spare page, flattened copy.
 extern T_Bitmap Spare_visible_image;
 
@@ -93,7 +95,13 @@ void Free_page_of_a_list(T_List_of_pages * list);
 
 int Init_all_backup_lists(int width,int height);
 void Set_number_of_backups(int nb_backups);
-int Backup_with_new_dimensions(int upload,byte layers,int width,int height);
+int Backup_new_image(byte layers,int width,int height);
+int Backup_with_new_dimensions(int width,int height);
+///
+/// Resizes a backup step in-place (doesn't add a Undo/Redo step).
+/// Should only be called after an actual backup, because it loses the current.
+/// pixels. This function is meant to be used from within Lua scripts.
+int Backup_in_place(int width,int height);
 /// Backup the spare image, the one you don't see.
 void Backup_the_spare(dword layer_mask);
 int Backup_and_resize_the_spare(int width,int height);

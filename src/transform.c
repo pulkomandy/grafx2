@@ -273,7 +273,7 @@ void Button_Transform_menu(void)
           input_button[clicked_button-10]->Pos_Y+2,
           buffer,
           4,
-          1))
+          INPUT_TYPE_INTEGER))
         {
           // Accept entered value
           *(input_value[clicked_button-10])=atoi(buffer);
@@ -369,8 +369,9 @@ void Button_Transform_menu(void)
     old_width=Main_image_width;
     old_height=Main_image_height;
     
+    Upload_infos_page_main(Main_backups->Pages);
     // Allocate a new page
-    if (Backup_with_new_dimensions(1,Main_backups->Pages->Nb_layers,new_width,new_height))
+    if (Backup_with_new_dimensions(new_width,new_height))
     {
       // The new image is allocated, the new dimensions are already updated.
       

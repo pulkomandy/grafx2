@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2009 Pasi Kallinen
     Copyright 2008 Peter Gordon
     Copyright 2008 Franck Charlet
@@ -40,7 +41,7 @@
 
 
 // There is no WM on the GP2X...
-#ifndef __GP2X__
+#if !defined(__GP2X__) && !defined(__WIZ__) && !defined(__CAANOO__)
     #include <SDL_syswm.h>
 #endif
 
@@ -65,11 +66,14 @@
 #include "brush.h"
 #include "palette.h"
 #include "realpath.h"
+#include "input.h"
 
 #if defined(__WIN32__)
     #include <windows.h>
     #include <shlwapi.h>
     #define chdir(dir) SetCurrentDirectory(dir)
+#elif defined (__MINT__)
+    #include <mint/osbind.h>
 #elif defined(__macosx__)
     #import <corefoundation/corefoundation.h>
     #import <sys/param.h>
@@ -84,6 +88,8 @@
   // a compilation warning.
   extern DECLSPEC int SDLCALL SDL_putenv(const char *variable);
 #endif
+
+extern char Program_version[]; // generated in pversion.c
 
 //--- Affichage de la syntaxe, et de la liste des modes vidéos disponibles ---
 void Display_syntax(void)
@@ -139,7 +145,7 @@ void Error_function(int error_code, const char *filename, int line_number, const
     for (index=0;index<=255;index++)
       temp_palette[index].R=255;
     Set_palette(temp_palette);
-    SDL_Delay(500);
+    Delay_with_active_mouse(50); // Half a second of red flash
     Set_palette(Main_palette);
   }
   else
@@ -400,22 +406,39 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
   return file_in_command_line;
 }
 
+// Compile-time assertions:
+#define CT_ASSERT(e) extern char (*ct_assert(void)) [sizeof(char[1 - 2*!(e)])]
+
+// This line will raise an error at compile time
+// when sizeof(T_Components) is not 3.
+CT_ASSERT(sizeof(T_Components)==3);
+
+// This line will raise an error at compile time
+// when sizeof(T_Palette) is not 768.
+CT_ASSERT(sizeof(T_Palette)==768);
+
 // ------------------------ Initialiser le programme -------------------------
 // Returns 0 on fail
 int Init_program(int argc,char * argv[])
-{
+{   
   int temp;
   int starting_videomode;
   static char program_directory[MAX_PATH_CHARACTERS];
   T_Gui_skin *gfx;
   int file_in_command_line;
+  T_Gradient_array initial_gradients;
   static char main_filename [MAX_PATH_CHARACTERS];
   static char main_directory[MAX_PATH_CHARACTERS];
   static char spare_filename [MAX_PATH_CHARACTERS];
   static char spare_directory[MAX_PATH_CHARACTERS];
-  
-  
-
+ 
+  #if defined(__MINT__)  
+  printf("===============================\n");
+  printf(" /|\\ GrafX2 %.19s\n", Program_version);
+  printf(" compilation date: %.16s\n", __DATE__);
+  printf("===============================\n");
+  #endif 
+ 
   // On crée dès maintenant les descripteurs des listes de pages pour la page
   // principale et la page de brouillon afin que leurs champs ne soient pas
   // invalide lors des appels aux multiples fonctions manipulées à
@@ -431,9 +454,12 @@ int Init_program(int argc,char * argv[])
   Set_data_directory(program_directory,Data_directory);
   // Choose directory for settings (read/write)
   Set_config_directory(program_directory,Config_directory);
-
-  // On détermine le répertoire courant:
+#if defined(__MINT__)
+  strcpy(Main_current_directory,program_directory);
+#else
+// On détermine le répertoire courant:
   getcwd(Main_current_directory,256);
+#endif
 
   // On en profite pour le mémoriser dans le répertoire principal:
   strcpy(Initial_directory,Main_current_directory);
@@ -473,8 +499,6 @@ int Init_program(int argc,char * argv[])
   // On initialise d'ot' trucs
   Main_offset_X=0;
   Main_offset_Y=0;
-  Old_main_offset_X=0;
-  Old_main_offset_Y=0;
   Main_separator_position=0;
   Main_X_zoom=0;
   Main_separator_proportion=INITIAL_SEPARATOR_PROPORTION;
@@ -486,8 +510,6 @@ int Init_program(int argc,char * argv[])
   Main_magnifier_offset_Y=0;
   Spare_offset_X=0;
   Spare_offset_Y=0;
-  Old_spare_offset_X=0;
-  Old_spare_offset_Y=0;
   Spare_separator_position=0;
   Spare_X_zoom=0;
   Spare_separator_proportion=INITIAL_SEPARATOR_PROPORTION;
@@ -497,62 +519,27 @@ int Init_program(int argc,char * argv[])
   Spare_magnifier_width=0;
   Spare_magnifier_offset_X=0;
   Spare_magnifier_offset_Y=0;
-  Keyboard_click_allowed = 0;
+  Keyboard_click_allowed = 1;
   
-  Main_safety_backup_prefix = 'a';
-  Spare_safety_backup_prefix = 'b';
+  Main_safety_backup_prefix = SAFETYBACKUP_PREFIX_A[0];
+  Spare_safety_backup_prefix = SAFETYBACKUP_PREFIX_B[0];
   Main_time_of_safety_backup = 0;
   Spare_time_of_safety_backup = 0;
   
 
   // SDL
-  if(SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
+  if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
   {
     // The program can't continue without that anyway
     printf("Couldn't initialize SDL.\n");
     return(0);
   }
-
+  
   Joystick = SDL_JoystickOpen(0);
   SDL_EnableKeyRepeat(250, 32);
   SDL_EnableUNICODE(SDL_ENABLE);
   SDL_WM_SetCaption("GrafX2","GrafX2");
-
-  {
-    // Routine pour définir l'icone.
-    char icon_path[MAX_PATH_CHARACTERS];
-    SDL_Surface * icon;
-    sprintf(icon_path, "%s%s", Data_directory, "gfx2.gif");
-    icon = IMG_Load(icon_path);
-    if (icon && icon->w == 32 && icon->h == 32)
-    {
-      Uint32 pink;
-      pink = SDL_MapRGB(icon->format, 255, 0, 255);
-      
-      if (icon->format->BitsPerPixel == 8)
-      {
-        SDL_SetColorKey(icon, SDL_SRCCOLORKEY, pink);
-        SDL_WM_SetIcon(icon,NULL);
-      }
-      else
-      {
-        byte *icon_mask;
-        int x,y;
-        
-        icon_mask=malloc(128);
-        memset(icon_mask,0,128);
-        for (y=0;y<32;y++)
-          for (x=0;x<32;x++)
-            if (Get_SDL_pixel_hicolor(icon, x, y) != pink)
-              icon_mask[(y*32+x)/8] |=0x80>>(x&7);
-        SDL_WM_SetIcon(icon,icon_mask);
-        free(icon_mask);
-        icon_mask = NULL;
-      }
-
-      SDL_FreeSurface(icon);
-    }
-  }
+  Define_icon();
   
   // Texte
   Init_text();
@@ -574,7 +561,6 @@ int Init_program(int argc,char * argv[])
   // Données sur le pinceau:
   Paintbrush_X=0;
   Paintbrush_Y=0;
-  Paintbrush_shape=PAINTBRUSH_SHAPE_ROUND;
   Paintbrush_hidden=0;
 
   // On initialise tout ce qui concerne les opérations et les effets
@@ -634,6 +620,25 @@ int Init_program(int argc,char * argv[])
 
   Windows_open=0;
   
+  // Paintbrush
+  if (!(Paintbrush_sprite=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE))) Error(ERROR_MEMORY);
+  
+  // Load preset paintbrushes (uses Paintbrush_ variables)
+  Init_paintbrushes();
+  
+  // Set a valid paintbrush afterwards
+  *Paintbrush_sprite=1;
+  Paintbrush_width=1;
+  Paintbrush_height=1;
+  Paintbrush_offset_X=0;
+  Paintbrush_offset_Y=0;
+  Paintbrush_shape=PAINTBRUSH_SHAPE_ROUND;
+  
+  #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
+  // Prefer cycling active by default
+  Cycling_mode=1;
+  #endif
+
   // Charger la configuration des touches
   Set_config_defaults();
 
@@ -662,10 +667,10 @@ int Init_program(int argc,char * argv[])
   Help_position=0;
 
   // Load sprites, palette etc.
-  gfx = Load_graphics(Config.Skin_file);
+  gfx = Load_graphics(Config.Skin_file, &initial_gradients);
   if (gfx == NULL)
   {
-    gfx = Load_graphics("skin_DPaint.png");
+    gfx = Load_graphics(DEFAULT_SKIN_FILENAME, &initial_gradients);
     if (gfx == NULL)
     {
       printf("%s", Gui_loading_error_message);
@@ -678,7 +683,10 @@ int Init_program(int argc,char * argv[])
   // Gfx->Default_palette[MC_Dark] =Config.Fav_menu_colors[1];
   // Gfx->Default_palette[MC_Light]=Config.Fav_menu_colors[2];
   // Gfx->Default_palette[MC_White]=Config.Fav_menu_colors[3];
-//  Compute_optimal_menu_colors(Gfx->Default_palette);
+  
+  // Even when using the skin's palette, if RGB range is small
+  // the colors will be unusable.
+  Compute_optimal_menu_colors(Gfx->Default_palette);
     
   // Infos sur les trames (Sieve)
   Sieve_mode=0;
@@ -686,9 +694,9 @@ int Init_program(int argc,char * argv[])
 
   // Font
   if (!(Menu_font=Load_font(Config.Font_file)))
-    if (!(Menu_font=Load_font("font_DPaint.png")))
+    if (!(Menu_font=Load_font(DEFAULT_FONT_FILENAME)))
       {
-        printf("Unable to open the default font file: %s\n", "font_Classic.png");
+        printf("Unable to open the default font file: %s\n", DEFAULT_FONT_FILENAME);
         Error(ERROR_GUI_MISSING);
       }
 
@@ -701,11 +709,6 @@ int Init_program(int argc,char * argv[])
   if (!(Brush         =(byte *)malloc(   1*   1))) Error(ERROR_MEMORY);
   if (!(Smear_brush   =(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE))) Error(ERROR_MEMORY);
 
-  // Pinceau
-  if (!(Paintbrush_sprite=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE))) Error(ERROR_MEMORY);
-  *Paintbrush_sprite=1;
-  Paintbrush_width=1;
-  Paintbrush_height=1;
 
   starting_videomode=Current_resolution;
   Horizontal_line_buffer=NULL;
@@ -731,6 +734,9 @@ int Init_program(int argc,char * argv[])
       SetWindowPos(pInfo.window, 0, Config.Window_pos_x, Config.Window_pos_y, 0, 0, SWP_NOSIZE);
     }
   }
+
+  // Open a console for debugging...
+  //ActivateConsole();
   #endif
   
   Main_image_width=Screen_width/Pixel_width;
@@ -745,15 +751,29 @@ int Init_program(int argc,char * argv[])
   // Nettoyage de l'écran virtuel (les autres recevront celui-ci par copie)
   memset(Main_screen,0,Main_image_width*Main_image_height);
 
+  // Now that the backup system is there, we can store the gradients.
+  memcpy(Main_backups->Pages->Gradients->Range, initial_gradients.Range, sizeof(initial_gradients.Range));
+  memcpy(Spare_backups->Pages->Gradients->Range, initial_gradients.Range, sizeof(initial_gradients.Range));
+
+  Gradient_function=Gradient_basic;
+  Gradient_lower_bound=0;
+  Gradient_upper_bound=0;
+  Gradient_random_factor=1;
+  Gradient_bounds_range=1;
+
+  Current_gradient=0;
+
   // Initialisation de diverses variables par calcul:
   Compute_magnifier_data();
   Compute_limits();
   Compute_paintbrush_coordinates();
 
   // On affiche le menu:
-  Display_menu();
   Display_paintbrush_in_menu();
-  Display_sprite_in_menu(BUTTON_PAL_LEFT,18+(Config.Palette_vertical!=0));
+  Display_sprite_in_menu(BUTTON_PAL_LEFT,Config.Palette_vertical?MENU_SPRITE_VERTICAL_PALETTE_SCROLL:-1);
+  Display_menu();
+  Draw_menu_button(BUTTON_PAL_LEFT,BUTTON_RELEASED);
+  Draw_menu_button(BUTTON_PAL_RIGHT,BUTTON_RELEASED);
 
   // On affiche le curseur pour débutter correctement l'état du programme:
   Display_cursor();
@@ -770,8 +790,11 @@ int Init_program(int argc,char * argv[])
   // On initialise la brosse initiale à 1 pixel blanc:
   Brush_width=1;
   Brush_height=1;
+  for (temp=0;temp<256;temp++)
+    Brush_colormap[temp]=temp;
   Capture_brush(0,0,0,0,0);
   *Brush=MC_White;
+  *Brush_original_pixels=MC_White;
   
   // Test de recuperation de fichiers sauvés
   switch (Check_recovery())
@@ -843,6 +866,9 @@ int Init_program(int argc,char * argv[])
           break;
       }
   }
+
+  Allow_drag_and_drop(1);
+
   return(1);
 }
 
@@ -908,6 +934,12 @@ void Program_shutdown(void)
     Error(ERROR_MISSING_DIRECTORY);
     
   SDL_Quit();
+  
+  #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
+  chdir("/usr/gp2x");
+  execl("/usr/gp2x/gp2xmenu", "/usr/gp2x/gp2xmenu", NULL);
+  #endif
+  
 }
 
 

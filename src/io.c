@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2008 Yves Rizoud
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
@@ -32,14 +33,24 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#if defined(__amigaos4__)
+#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     #include <proto/dos.h>
+    #include <sys/types.h>
     #include <dirent.h>
+    #define isHidden(x) (0)
 #elif defined(__WIN32__)
     #include <dirent.h>
     #include <windows.h>
+    //#include <commdlg.h>
+    #define isHidden(x) (GetFileAttributesA((x)->d_name)&FILE_ATTRIBUTE_HIDDEN)
+#elif defined(__MINT__)
+    #include <mint/osbind.h>
+    #include <mint/sysbind.h>
+    #include <dirent.h>
+    #define isHidden(x) (0)
 #else
     #include <dirent.h>
+    #define isHidden(x) ((x)->d_name[0]=='.')
 #endif
 
 #include "struct.h"
@@ -276,6 +287,38 @@ void For_each_file(const char * directory_name, void Callback(const char *))
   closedir(current_directory);
 }
 
+/// Scans a directory, calls Callback for each file or directory in it,
+void For_each_directory_entry(const char * directory_name, void Callback(const char *, byte is_file, byte is_directory, byte is_hidden))
+{
+  // Pour scan de répertoire
+  DIR*  current_directory; //Répertoire courant
+  struct dirent* entry; // Structure de lecture des éléments
+  char full_filename[MAX_PATH_CHARACTERS];
+  int filename_position;
+  strcpy(full_filename, directory_name);
+  current_directory=opendir(directory_name);
+  if(current_directory == NULL) return;        // Répertoire invalide ...
+  filename_position = strlen(full_filename);
+  if (filename_position==0 || strcmp(full_filename+filename_position-1,PATH_SEPARATOR))
+  {
+    strcat(full_filename, PATH_SEPARATOR);
+    filename_position = strlen(full_filename);
+  }
+  while ((entry=readdir(current_directory)))
+  {
+    struct stat Infos_enreg;
+    strcpy(&full_filename[filename_position], entry->d_name);
+    stat(full_filename,&Infos_enreg);
+    Callback(
+      full_filename, 
+      S_ISREG(Infos_enreg.st_mode), 
+      S_ISDIR(Infos_enreg.st_mode), 
+      isHidden(entry)?1:0);
+  }
+  closedir(current_directory);
+}
+
+
 void Get_full_filename(char * output_name, char * file_name, char * directory_name)
 {
   strcpy(output_name,directory_name);
@@ -299,7 +342,7 @@ int Lock_file_handle = -1;
 
 byte Create_lock_file(const char *file_directory)
 {
-  #ifdef __amigaos__
+  #if defined (__amigaos__)||(__AROS__)
     #warning "Missing code for your platform, please check and correct!"
   #else
   char lock_filename[MAX_PATH_CHARACTERS];
@@ -336,7 +379,7 @@ byte Create_lock_file(const char *file_directory)
     return -1;
   }
   #endif
-  #endif // __amigaos__
+  #endif // __amigaos__ or __AROS__
   return 0;
 }
 

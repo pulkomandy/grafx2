@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2010 Alexander Filyanov
     Copyright 2009 Franck Charlet
     Copyright 2008 Yves Rizoud
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
@@ -465,38 +466,93 @@ const char * Key_name(word key)
   
   key=key & ~(MOD_CTRL|MOD_ALT|MOD_SHIFT);
   
-  if (key>=KEY_JOYBUTTON && key<=KEY_JOYBUTTON+18)
+  // 99 is only a sanity check
+  if (key>=KEY_JOYBUTTON && key<=KEY_JOYBUTTON+99)
   {
-#ifdef __GP2X__
     
     char *button_name;
     switch(key-KEY_JOYBUTTON)
-    {    
-      case GP2X_BUTTON_UP: button_name="[UP]"; break;
-      case GP2X_BUTTON_DOWN: button_name="[DOWN]"; break;
-      case GP2X_BUTTON_LEFT: button_name="[LEFT]"; break;
-      case GP2X_BUTTON_RIGHT: button_name="[RIGHT]"; break;
-      case GP2X_BUTTON_UPLEFT: button_name="[UP-LEFT]"; break;
-      case GP2X_BUTTON_UPRIGHT: button_name="[UP-RIGHT]"; break;
-      case GP2X_BUTTON_DOWNLEFT: button_name="[DOWN-LEFT]"; break;
-      case GP2X_BUTTON_DOWNRIGHT: button_name="[DOWN-RIGHT]"; break;
-      case GP2X_BUTTON_CLICK: button_name="[CLICK]"; break;
-      case GP2X_BUTTON_A: button_name="[A]"; break;
-      case GP2X_BUTTON_B: button_name="[B]"; break;
-      case GP2X_BUTTON_X: button_name="[X]"; break;
-      case GP2X_BUTTON_Y: button_name="[Y]"; break;
-      case GP2X_BUTTON_L: button_name="[L]"; break;
-      case GP2X_BUTTON_R: button_name="[R]"; break;
-      case GP2X_BUTTON_START: button_name="[START]"; break;
-      case GP2X_BUTTON_SELECT: button_name="[SELECT]"; break;
-      case GP2X_BUTTON_VOLUP: button_name="[VOL UP]"; break;
-      case GP2X_BUTTON_VOLDOWN: button_name="[VOL DOWN]"; break;
-      default: sprintf(buffer+strlen(buffer), "[B%d]", key);return buffer;
+    {
+      #ifdef JOY_BUTTON_UP
+      case JOY_BUTTON_UP: button_name="[UP]"; break;
+      #endif
+      #ifdef JOY_BUTTON_DOWN
+      case JOY_BUTTON_DOWN: button_name="[DOWN]"; break;
+      #endif
+      #ifdef JOY_BUTTON_LEFT
+      case JOY_BUTTON_LEFT: button_name="[LEFT]"; break;
+      #endif
+      #ifdef JOY_BUTTON_RIGHT
+      case JOY_BUTTON_RIGHT: button_name="[RIGHT]"; break;
+      #endif
+      #ifdef JOY_BUTTON_UPLEFT
+      case JOY_BUTTON_UPLEFT: button_name="[UP-LEFT]"; break;
+      #endif
+      #ifdef JOY_BUTTON_UPRIGHT
+      case JOY_BUTTON_UPRIGHT: button_name="[UP-RIGHT]"; break;
+      #endif
+      #ifdef JOY_BUTTON_DOWNLEFT
+      case JOY_BUTTON_DOWNLEFT: button_name="[DOWN-LEFT]"; break;
+      #endif
+      #ifdef JOY_BUTTON_DOWNRIGHT
+      case JOY_BUTTON_DOWNRIGHT: button_name="[DOWN-RIGHT]"; break;
+      #endif
+      #ifdef JOY_BUTTON_CLICK
+      case JOY_BUTTON_CLICK: button_name="[CLICK]"; break;
+      #endif
+      #ifdef JOY_BUTTON_A
+      case JOY_BUTTON_A: button_name="[A]"; break;
+      #endif
+      #ifdef JOY_BUTTON_B
+      case JOY_BUTTON_B: button_name="[B]"; break;
+      #endif
+      #ifdef JOY_BUTTON_X
+      case JOY_BUTTON_X: button_name="[X]"; break;
+      #endif
+      #ifdef JOY_BUTTON_Y
+      case JOY_BUTTON_Y: button_name="[Y]"; break;
+      #endif
+      #ifdef JOY_BUTTON_L
+      case JOY_BUTTON_L: button_name="[L]"; break;
+      #endif
+      #ifdef JOY_BUTTON_R
+      case JOY_BUTTON_R: button_name="[R]"; break;
+      #endif
+      #ifdef JOY_BUTTON_START
+      case JOY_BUTTON_START: button_name="[START]"; break;
+      #endif
+      #ifdef JOY_BUTTON_SELECT
+      case JOY_BUTTON_SELECT: button_name="[SELECT]"; break;
+      #endif
+      #ifdef JOY_BUTTON_VOLUP
+      case JOY_BUTTON_VOLUP: button_name="[VOL UP]"; break;
+      #endif
+      #ifdef JOY_BUTTON_VOLDOWN
+      case JOY_BUTTON_VOLDOWN: button_name="[VOL DOWN]"; break;
+      #endif
+      #ifdef JOY_BUTTON_MENU
+      case JOY_BUTTON_MENU: button_name="[MENU]"; break;
+      #endif
+      #ifdef JOY_BUTTON_HOME
+      case JOY_BUTTON_HOME: button_name="[HOME]"; break;
+      #endif
+      #ifdef JOY_BUTTON_HOLD
+      case JOY_BUTTON_HOLD: button_name="[HOLD]"; break;
+      #endif
+      #ifdef JOY_BUTTON_I
+      case JOY_BUTTON_I: button_name="[BUTTON I]"; break;
+      #endif
+      #ifdef JOY_BUTTON_II
+      case JOY_BUTTON_II: button_name="[BUTTON II]"; break;
+      #endif
+      #ifdef JOY_BUTTON_JOY
+      case JOY_BUTTON_JOY: button_name="[THUMB JOY]"; break;
+      #endif
+      
+      default: sprintf(buffer+strlen(buffer), "[B%d]", key-KEY_JOYBUTTON);return buffer;
     }
     strcat(buffer,button_name);
-#else    
-    sprintf(buffer+strlen(buffer), "[B%d]", key-KEY_JOYBUTTON);
-#endif
+
     return buffer;
   }
   

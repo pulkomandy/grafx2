@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2008 Yves Rizoud
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
@@ -73,14 +74,23 @@ typedef void (* Func_draw_brush) (byte *,word,word,word,word,word,word,byte,word
 typedef void (* Func_draw_list_item) (word,word,word,byte); ///< Draw an item inside a list button. This is done with a callback so it is possible to draw anything, as the list itself doesn't handle the content
 
 /// A set of RGB values.
+#ifdef __GNUC__
+typedef struct
+{
+  byte R; ///< Red
+  byte G; ///< Green
+  byte B; ///< Blue
+} __attribute__((__packed__)) T_Components, T_Palette[256] ; ///< A complete 256-entry RGB palette (768 bytes).
+#else
 #pragma pack(1)
 typedef struct
 {
   byte R; ///< Red
   byte G; ///< Green
   byte B; ///< Blue
-} T_Components, T_Palette[256]; ///< A complete 256-entry RGB palette (768 bytes).
+} T_Components, T_Palette[256] ; ///< A complete 256-entry RGB palette (768 bytes).
 #pragma pack()
+#endif
 
 /// A normal rectangular button in windows and menus.
 typedef struct T_Normal_button
@@ -105,17 +115,18 @@ typedef struct T_Palette_button
   struct T_Palette_button * Next;///< Pointer to the next palette of current window.
 } T_Palette_button;
 
-/// A window control that represents a vertical scrollbar, with a slider, and two arrow buttons.
+/// A window control that represents a scrollbar, with a slider, and two arrow buttons.
 typedef struct T_Scroller_button
 {
   short Number;                   ///< Unique identifier for all controls
+  byte Is_horizontal;             ///< Boolean: True if slider is horizontal instead of vertical.
   word Pos_X;                     ///< Coordinate for top of button, relative to the window, before scaling.
   word Pos_Y;                     ///< Coordinate for left of button, relative to the window, before scaling.
-  word Height;                    ///< Height before scaling.
+  word Length;                    ///< Length before scaling.
   word Nb_elements;               ///< Number of distinct values it can take.
   word Nb_visibles;               ///< If this slider is meant to show several elements of a collection, this is their number (otherwise, it's 1).
   word Position;                  ///< Current position of the slider: which item it's pointing.
-  word Cursor_height;             ///< Vertical dimension of the slider, in pixels before scaling.
+  word Cursor_length;             ///< Dimension of the slider, in pixels before scaling.
   struct T_Scroller_button * Next;///< Pointer to the next scroller of current window.
 } T_Scroller_button;
 
@@ -162,12 +173,20 @@ typedef struct T_Dropdown_button
 /// Data for one item (file, directory) in a fileselector.
 typedef struct T_Fileselector_item
 {
-  char Short_name[19]; ///< Name to display.
   char Full_name[256]; ///< Filesystem value.
   byte Type;           ///< Type of item: 0 = File, 1 = Directory, 2 = Drive
+  byte Icon;           ///< One of ::ICON_TYPES, ICON_NONE for none.
 
   struct T_Fileselector_item * Next;    ///< Pointer to next item of the current fileselector.
   struct T_Fileselector_item * Previous;///< Pointer to previous item of the current fileselector.
+  
+  word  Length_short_name; ///< Number of bytes allocated for :Short_name
+  #if __GNUC__ < 3
+  char Short_name[0]; ///< Name to display.
+#else
+  char Short_name[]; ///< Name to display.
+#endif
+  // No field after Short_name[] ! Dynamic allocation according to name length.
 } T_Fileselector_item;
 
 /// Data for a fileselector
@@ -201,6 +220,25 @@ typedef struct T_List_button
   struct T_List_button * Next;    ///< Pointer to the next list button of current window.
 } T_List_button;
 
+/// A stackable window (editor screen)
+typedef struct
+{
+  word Pos_X;
+  word Pos_Y;
+  word Width;
+  word Height;
+  word Nb_buttons;
+  T_Normal_button   *Normal_button_list;
+  T_Palette_button  *Palette_button_list;
+  T_Scroller_button *Scroller_button_list;
+  T_Special_button  *Special_button_list;
+  T_Dropdown_button *Dropdown_button_list;
+  T_List_button     *List_button_list;
+  int Attribute1;
+  int Attribute2;
+  byte Draggable;
+} T_Window;
+
 /// Data for one line of the "Help" screens.
 typedef struct {
   char Line_type;     ///< Kind of line: 'N' for normal line, 'S' for a bold line, 'K' for a line with keyboard shortcut, 'T' and '-' for upper and lower titles.
@@ -223,7 +261,15 @@ typedef struct
   dword Inverse;  ///< Boolean, true if the gradient goes in descending order
   dword Mix;      ///< Amount of randomness to add to the mix (0-255)
   dword Technique;///< Gradient technique: 0 (no pattern) 1 (dithering), or 2 (big dithering)
-} T_Gradient_array;
+  byte  Speed;    ///< Speed of cycling. 0 for disabled, 1-64 otherwise.
+} T_Gradient_range;
+
+/// Data for a full set of gradients.
+typedef struct
+{
+  int Used; ///< Reference count
+  T_Gradient_range Range[16];
+}  T_Gradient_array;
 
 /// Data for one setting of shade. Warning, this one is saved/loaded as binary.
 typedef struct
@@ -233,7 +279,6 @@ typedef struct
   byte Mode;      ///< Shade mode: Normal, Loop, or No-saturation see ::SHADE_MODES
 } T_Shade;
 
-#pragma pack(1) // is it useful ?
 /// Data for one fullscreen video mode in configuration file. Warning, this one is saved/loaded as binary.
 typedef struct
 {
@@ -242,8 +287,7 @@ typedef struct
   word Height;///< Videomode height in pixels. 
 } T_Config_video_mode;
 
-
-/// Header for gfx2.cfg. Warning, this one is saved/loaded as binary.
+/// Header for gfx2.cfg
 typedef struct
 {
   char Signature[3]; ///< Signature for the file format. "CFG".
@@ -253,24 +297,22 @@ typedef struct
   byte Beta2;        ///< Major beta version number (ex: 5)
 } T_Config_header;
 
-#pragma pack()
-
-/// Header for a config chunk in for gfx2.cfg. Warning, this one is saved/loaded as binary.
+/// Header for a config chunk in for gfx2.cfg
 typedef struct
 {
   byte Number; ///< Section identfier. Possible values are in enum ::CHUNKS_CFG
   word Size;   ///< Size of the configuration block that follows, in bytes.
 } T_Config_chunk;
 
-#pragma pack(1)
-/// Configuration for one keyboard shortcut in gfx2.cfg. Warning, this one is saved/loaded as binary.
+
+/// Configuration for one keyboard shortcut in gfx2.cfg
 typedef struct
 {
   word Number; ///< Indicates the shortcut action. This is a number starting from 0, which matches ::T_Key_config.Number
   word Key;    ///< Keyboard shortcut: SDLK_something, or -1 for none
   word Key2;   ///< Alternate keyboard shortcut: SDLK_something, or -1 for none
 } T_Config_shortcut_info;
-#pragma pack()
+
 
 /// This structure holds all the settings saved and loaded as gfx2.ini.
 typedef struct
@@ -321,6 +363,10 @@ typedef struct
   word Double_click_speed;               ///< Maximum delay for double-click, in ms.
   word Double_key_speed;                 ///< Maximum delay for double-keypress, in ms.
   byte Grid_XOR_color;                   ///< XOR value to apply for grid color.
+  byte Right_click_colorpick;            ///< Boolean, true to enable a "tablet" mode, where RMB acts as instant colorpicker
+  byte Sync_views;                       ///< Boolean, true when the Main and Spare should share their viewport settings.
+  byte Stylus_mode;                      ///< Boolean, true to tweak some tools (eg:Curve) for single-button stylus.
+  word Swap_buttons;                     ///< Sets which key swaps mouse buttons : 0=none, or MOD_CTRL, or MOD_ALT.
 } T_Config;
 
 // Structures utilisées pour les descriptions de pages et de liste de pages.
@@ -347,6 +393,7 @@ typedef struct T_Page
   byte      File_format;                        ///< File format, in enum ::FILE_FORMATS
   struct T_Page *Next; ///< Pointer to the next backup
   struct T_Page *Prev; ///< Pointer to the previous backup
+  T_Gradient_array *Gradients; ///< Pointer to the gradients used by the image.
   byte      Background_transparent; ///< Boolean, true if Layer 0 should have transparent pixels
   byte      Transparent_color; ///< Index of transparent color. 0 to 255.
   byte      Nb_layers; ///< Number of layers
@@ -381,6 +428,7 @@ typedef struct
   word Height;
   byte * Brush; /// < Color brush (if any)
   T_Palette Palette;
+  byte Colormap[256];
   byte Transp_color;
 } T_Brush_template;
 
@@ -396,21 +444,6 @@ typedef struct
   /// Graphic resources for the mouse cursor.
   byte Cursor_sprite[NB_CURSOR_SPRITES][CURSOR_SPRITE_HEIGHT][CURSOR_SPRITE_WIDTH];
 
-  // Preset paintbrushes
-  
-  /// Graphic resources for the preset paintbrushes.
-  byte  Paintbrush_sprite [NB_PAINTBRUSH_SPRITES][PAINTBRUSH_HEIGHT][PAINTBRUSH_WIDTH];
-  /// Width of the preset paintbrushes.
-  word  Preset_paintbrush_width[NB_PAINTBRUSH_SPRITES];
-  /// Height of the preset paintbrushes.
-  word  Preset_paintbrush_height[NB_PAINTBRUSH_SPRITES];
-  /// Type of the preset paintbrush: index in enum PAINTBRUSH_SHAPES
-  byte  Paintbrush_type[NB_PAINTBRUSH_SPRITES];
-  /// Brush handle for the preset brushes. Generally ::Preset_paintbrush_width[]/2
-  word  Preset_paintbrush_offset_X[NB_PAINTBRUSH_SPRITES];
-  /// Brush handle for the preset brushes. Generally ::Preset_paintbrush_height[]/2
-  word  Preset_paintbrush_offset_Y[NB_PAINTBRUSH_SPRITES];
-
   // Sieve patterns
   
   /// Preset sieve patterns, stored as binary (one word per line)
@@ -419,13 +452,13 @@ typedef struct
   // Menu and other graphics
   
   /// Bitmap data for the menu, a single rectangle.
-  byte Menu_block[35][MENU_WIDTH];
-  byte Layerbar_block[10][144];
-  byte Statusbar_block[9][20];
+  byte Menu_block[3][35][MENU_WIDTH];
+  byte Layerbar_block[3][10][144];
+  byte Statusbar_block[3][9][20];
   /// Bitmap data for the icons that are displayed over the menu.
-  byte Menu_sprite[NB_MENU_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
+  byte Menu_sprite[2][NB_MENU_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
   /// Bitmap data for the different "effects" icons.
-  byte Effect_sprite[NB_EFFECTS_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
+  byte Effect_sprite[NB_EFFECTS_SPRITES][EFFECT_SPRITE_HEIGHT][EFFECT_SPRITE_WIDTH];
   /// Bitmap data for the different Layer icons.
   byte Layer_sprite[3][16][LAYER_SPRITE_HEIGHT][LAYER_SPRITE_WIDTH];
   /// Bitmap data for the Grafx2 logo that appears on splash screen. All 256 colors allowed.
@@ -458,8 +491,25 @@ typedef struct
   /// Transparent GUI color index in skin file
   byte Color_trans;
 
-
 } T_Gui_skin;
+
+typedef struct {
+  // Preset paintbrushes
+  
+  /// Graphic resources for the preset paintbrushes.
+  byte  Sprite[PAINTBRUSH_HEIGHT][PAINTBRUSH_WIDTH];
+  /// Width of the preset paintbrushes.
+  word  Width;
+  /// Height of the preset paintbrushes.
+  word  Height;
+  /// Type of the preset paintbrush: index in enum PAINTBRUSH_SHAPES
+  byte  Shape;
+  /// Brush handle for the preset brushes. Generally ::Width[]/2
+  word  Offset_X;
+  /// Brush handle for the preset brushes. Generally ::Height[]/2
+  word  Offset_Y;
+
+} T_Paintbrush;
 
 // A menubar.
 typedef struct {
@@ -467,7 +517,7 @@ typedef struct {
   word Height;
   byte Visible;
   word Top; ///< Relative to the top line of the menu, hidden bars don't count.
-  byte* Skin;
+  byte* Skin[3]; ///< [0] has normal buttons, [1] has selected buttons, [2] is current.
   word Skin_width;
   byte Last_button_index;
 } T_Menu_Bar;

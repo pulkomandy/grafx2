@@ -89,7 +89,7 @@ void Window_display_frame_in(word x_pos,word y_pos,word width,word height);
 void Window_display_frame_out(word x_pos,word y_pos,word width,word height);
 void Window_display_frame(word x_pos,word y_pos,word width,word height);
 
-void Display_sprite_in_menu(int btn_number,int sprite_number);
+void Display_sprite_in_menu(int btn_number,char sprite_number);
 void Display_paintbrush_in_menu(void);
 void Display_paintbrush_in_window(word x,word y,int number);
 
@@ -99,6 +99,7 @@ void Window_display_icon_sprite(word x_pos,word y_pos,byte type);
 
 byte Best_color(byte red,byte green,byte blue);
 byte Best_color_nonexcluded(byte red,byte green,byte blue);
+byte Best_color_perceptual(byte r,byte g,byte b);
 
 void Horizontal_XOR_line_zoom(short x_pos, short y_pos, short width);
 void Vertical_XOR_line_zoom(short x_pos, short y_pos, short height);
@@ -107,5 +108,8 @@ void Change_magnifier_factor(byte factor_index, byte point_at_mouse);
 
 /// Width of one layer button, in pixels before scaling
 extern word Layer_button_width;
+
+/// Copy viewport settings and offsets from the Main to the Spare.
+void Copy_view_to_spare(void);
 
 #endif

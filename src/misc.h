@@ -33,7 +33,7 @@
 #define SWAP_PBYTES(a,b) { byte * c=a; a=b; b=c;}
 
 void Copy_image_to_brush(short start_x,short start_y,short Brush_width,short Brush_height,word image_width);
-void Remap_general_lowlevel(byte * conversion_table,byte * buffer,short width,short height,short buffer_width);
+void Remap_general_lowlevel(byte * conversion_table,byte * in_buffer, byte *out_buffer,short width,short height,short buffer_width);
 void Scroll_picture(byte * main_src, byte * main_dest, short x_offset,short y_offset);
 void Wait_end_of_click(void);
 void Set_color(byte color, byte red, byte green, byte blue);
@@ -42,7 +42,6 @@ void Palette_256_to_64(T_Palette palette);
 void Palette_64_to_256(T_Palette palette);
 void Clear_current_image(byte color);
 void Clear_current_image_with_stencil(byte color, byte * stencil);
-void Slider_timer(byte speed);
 dword Round_div(dword numerator,dword divisor);
 word Count_used_colors(dword * usage);
 word Count_used_colors_area(dword* usage, word start_x, word start_y, word width, word height);
@@ -86,6 +85,7 @@ void Replace_colors_within_limits(byte * replace_table);
 byte Effect_interpolated_colorize  (word x,word y,byte color);
 byte Effect_additive_colorize    (word x,word y,byte color);
 byte Effect_substractive_colorize(word x,word y,byte color);
+byte Effect_alpha_colorize(word x,word y,byte color);
 byte Effect_sieve(word x,word y);
 
 ///

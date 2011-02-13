@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
     Copyright 2008 Adrien Destugues
@@ -36,19 +37,18 @@
   #include <SDL_ttf.h>
 #endif
 
-#if defined(__linux__)
-#if defined(__macosx__)
+#if defined(__CAANOO__) || defined(__WIZ__) || defined(__GP2X__)
+// No X11
+#elif defined(__macosx__)
   #include <Carbon/Carbon.h>
   #import <corefoundation/corefoundation.h>
   #import <sys/param.h>
-#else
+#elif defined(__linux__)
   #include <X11/Xlib.h>
-#endif
 #endif
 #endif
 
 #include <SDL_image.h>
-// SFont
 #include "SFont.h"
 
 #include "struct.h"
@@ -56,6 +56,9 @@
 #include "sdlscreen.h"
 #include "io.h"
 #include "errors.h"
+#include "windows.h"
+#include "misc.h"
+#include "setup.h"
 
 typedef struct T_Font
 {
@@ -282,7 +285,7 @@ void Init_text(void)
   Nb_fonts=0;
   // Parcours du répertoire "fonts"
   strcpy(directory_name, Data_directory);
-  strcat(directory_name, "fonts");
+  strcat(directory_name, FONTS_SUBDIRECTORY);
   For_each_file(directory_name, Add_font);
   
   #if defined(__WIN32__)
@@ -321,6 +324,8 @@ void Init_text(void)
       CFRelease(url);
     #endif
 
+  #elif defined(__CAANOO__) || defined(__WIZ__) || defined(__GP2X__)
+  // No X11 : Only use fonts from Grafx2
   #elif defined(__linux__)
     #ifndef NOTTF
        #define USE_XLIB
@@ -343,14 +348,21 @@ void Init_text(void)
     #ifndef NOTTF
       For_each_file( "FONTS:_TrueType", Add_font );
     #endif
-  #elif defined(__BEOS__) || defined(__HAIKU__)
+  #elif defined(__BEOS__)
     #ifndef NOTTF
       For_each_file("/etc/fonts/ttfonts", Add_font);
     #endif
-
+  #elif defined(__HAIKU__)
+    #ifndef NOTTF
+      For_each_file("/boot/system/data/fonts/ttfonts/", Add_font);
+    #endif
   #elif defined(__SKYOS__)
     #ifndef NOTTF
       For_each_file("/boot/system/fonts", Add_font);
+    #endif
+  #elif defined(__MINT__)
+    #ifndef NOTTF
+      For_each_file("C:/BTFONTS", Add_font);
     #endif
 
   #endif
@@ -368,17 +380,15 @@ int TrueType_is_supported()
 
   
 #ifndef NOTTF
-byte *Render_text_TTF(const char *str, int font_number, int size, int antialias, int bold, int italic, int *width, int *height)
+byte *Render_text_TTF(const char *str, int font_number, int size, int antialias, int bold, int italic, int *width, int *height, T_Palette palette)
 {
- TTF_Font *font;
-  SDL_Surface * TexteColore;
-  SDL_Surface * Texte8Bit;
+  TTF_Font *font;
+  SDL_Surface * text_surface;
   byte * new_brush;
-  int index;
   int style;
   
-  SDL_Color Couleur_Avant;
-  SDL_Color Couleur_Arriere;
+  SDL_Color fg_color;
+  SDL_Color bg_color;
 
   // Chargement de la fonte
   font=TTF_OpenFont(Font_name(font_number), size);
@@ -386,6 +396,7 @@ byte *Render_text_TTF(const char *str, int font_number, int size, int antialias,
   {
     return NULL;
   }
+  
   // Style
   style=0;
   if (italic)
@@ -393,82 +404,170 @@ byte *Render_text_TTF(const char *str, int font_number, int size, int antialias,
   if (bold)
     style|=TTF_STYLE_BOLD;
   TTF_SetFontStyle(font, style);
-  // Couleurs
-  if (antialias)
-  {
-    Couleur_Avant = Color_to_SDL_color(Fore_color);
-    Couleur_Arriere = Color_to_SDL_color(Back_color);
-  }
-  else
-  {
-    Couleur_Avant = Color_to_SDL_color(MC_White);
-    Couleur_Arriere = Color_to_SDL_color(MC_Black);
-  }
-
   
-  // Rendu du texte: crée une surface SDL RGB 24bits
+  // Colors: Text will be generated as white on black.
+  fg_color.r=fg_color.g=fg_color.b=255;
+  bg_color.r=bg_color.g=bg_color.b=0;
+  // The following is alpha, supposedly unused
+  bg_color.unused=fg_color.unused=255;
+  
+  // Text rendering: creates a 8bit surface with its dedicated palette
   if (antialias)
-    TexteColore=TTF_RenderText_Shaded(font, str, Couleur_Avant, Couleur_Arriere );
+    text_surface=TTF_RenderText_Shaded(font, str, fg_color, bg_color );
   else
-    TexteColore=TTF_RenderText_Solid(font, str, Couleur_Avant);
-  if (!TexteColore)
+    text_surface=TTF_RenderText_Solid(font, str, fg_color);
+  if (!text_surface)
   {
     TTF_CloseFont(font);
     return NULL;
   }
-  
-  Texte8Bit=SDL_DisplayFormat(TexteColore);
-
-  SDL_FreeSurface(TexteColore);
     
-  new_brush=Surface_to_bytefield(Texte8Bit, NULL);
+  new_brush=Surface_to_bytefield(text_surface, NULL);
   if (!new_brush)
   {
-    SDL_FreeSurface(TexteColore);
-    SDL_FreeSurface(Texte8Bit);
+    SDL_FreeSurface(text_surface);
     TTF_CloseFont(font);
     return NULL;
   }
-  if (!antialias)
+  
+  // Import palette
+  Get_SDL_Palette(text_surface->format->palette, palette);
+  
+  if (antialias)
   {
-    // Mappage des couleurs
-    for (index=0; index < Texte8Bit->w * Texte8Bit->h; index++)
+    int black_col;
+    // Shaded text: X-Swap the color that is pure black with the BG color number,
+    // so that the brush is immediately 'transparent'
+    
+    // Find black (c)
+    for (black_col=0; black_col<256; black_col++)
     {
-      if (*(new_brush+index) == MC_Black)
-      *(new_brush+index)=Back_color;
-      else if (*(new_brush+index) == MC_White)
-      *(new_brush+index)=Fore_color;
+      if (palette[black_col].R==0 && palette[black_col].G==0 && palette[black_col].B==0)
+        break;
+    } // If not found: c = 256 = 0 (byte)
+    
+    if (black_col != Back_color)
+    {
+      int c;
+      byte colmap[256];
+      // Swap palette entries
+      
+      SWAP_BYTES(palette[black_col].R, palette[Back_color].R)
+      SWAP_BYTES(palette[black_col].G, palette[Back_color].G)
+      SWAP_BYTES(palette[black_col].B, palette[Back_color].B)
+      
+      // Define a colormap
+      for (c=0; c<256; c++)
+        colmap[c]=c;
+      
+      // The swap
+      colmap[black_col]=Back_color;
+      colmap[Back_color]=black_col;
+      
+      Remap_general_lowlevel(colmap, new_brush, new_brush, text_surface->w,text_surface->h, text_surface->w);
+      
+      // Also, make the BG color in brush palette have same RGB values as
+      // the current BG color : this will help for remaps.
+      palette[Back_color].R=Main_palette[Back_color].R;
+      palette[Back_color].G=Main_palette[Back_color].G;
+      palette[Back_color].B=Main_palette[Back_color].B;
     }
   }
-  *width=Texte8Bit->w;
-  *height=Texte8Bit->h;
-  SDL_FreeSurface(Texte8Bit);
+  else
+  {
+    // Solid text: Was rendered as white on black. Now map colors:
+    // White becomes FG color, black becomes BG. 2-color palette.
+    // Exception: if BG==FG, FG will be set to black or white - any different color.
+    long index;
+    byte new_fore=Fore_color;
+
+    if (Fore_color==Back_color)
+    {
+      if (Main_palette[Back_color].R+Main_palette[Back_color].G+Main_palette[Back_color].B > 128*3)
+        // Back color is rather light:
+        new_fore=MC_Black;
+      else
+        // Back color is rather dark:
+        new_fore=MC_White;
+    }
+    
+    for (index=0; index < text_surface->w * text_surface->h; index++)
+    {
+      if (palette[*(new_brush+index)].G < 128)
+        *(new_brush+index)=Back_color;
+      else
+        *(new_brush+index)=new_fore;
+    }
+    
+    // Now copy the current palette to brushe's, for consistency
+    // with the indices.
+    memcpy(palette, Main_palette, sizeof(T_Palette));
+    
+  }
+  *width=text_surface->w;
+  *height=text_surface->h;
+  SDL_FreeSurface(text_surface);
   TTF_CloseFont(font);
   return new_brush;
 }
 #endif
 
 
-byte *Render_text_SFont(const char *str, int font_number, int *width, int *height)
+byte *Render_text_SFont(const char *str, int font_number, int *width, int *height, T_Palette palette)
 {
   SFont_Font *font;
-  SDL_Surface * TexteColore;
-  SDL_Surface * Texte8Bit;
-  SDL_Surface *Surface_fonte;
+  SDL_Surface * text_surface;
+  SDL_Surface *font_surface;
   byte * new_brush;
   SDL_Rect rectangle;
 
   // Chargement de la fonte
-  Surface_fonte=IMG_Load(Font_name(font_number));
-  if (!Surface_fonte)
+  font_surface=IMG_Load(Font_name(font_number));
+  if (!font_surface)
   {
-    DEBUG("Font loading failed",0);
+    Verbose_message("Warning","Error loading font.\nThe file may be corrupt.");
     return NULL;
   }
-  font=SFont_InitFont(Surface_fonte);
+  // Font is 24bit: Perform a color reduction
+  if (font_surface->format->BitsPerPixel>8)
+  {
+    SDL_Surface * reduced_surface;
+    int x,y,color;
+    SDL_Color rgb;
+    
+    reduced_surface=SDL_CreateRGBSurface(SDL_SWSURFACE, font_surface->w, font_surface->h, 8, 0, 0, 0, 0);
+    if (!reduced_surface)
+    {
+      SDL_FreeSurface(font_surface);
+      return NULL;
+    }
+    // Set the quick palette
+    for (color=0;color<256;color++)
+    {
+      rgb.r=((color & 0xE0)>>5)<<5;
+      rgb.g=((color & 0x1C)>>2)<<5;
+      rgb.b=((color & 0x03)>>0)<<6;
+      SDL_SetColors(reduced_surface, &rgb, color, 1);
+    }
+    // Perform reduction
+    for (y=0; y<font_surface->h; y++)
+      for (x=0; x<font_surface->w; x++)
+      {
+        SDL_GetRGB(Get_SDL_pixel_hicolor(font_surface, x, y), font_surface->format, &rgb.r, &rgb.g, &rgb.b);
+        color=((rgb.r >> 5) << 5) |
+                ((rgb.g >> 5) << 2) |
+                ((rgb.b >> 6));
+        Set_SDL_pixel_8(reduced_surface, x, y, color);
+      }
+    
+    SDL_FreeSurface(font_surface);
+    font_surface=reduced_surface;
+  }
+  font=SFont_InitFont(font_surface);
   if (!font)
   {
     DEBUG("Font init failed",1);
+    SDL_FreeSurface(font_surface);
     return NULL;
   }
   
@@ -476,40 +575,36 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   *height=SFont_TextHeight(font);
   *width=SFont_TextWidth(font, str);
   // Allocation d'une surface SDL
-  TexteColore=SDL_CreateRGBSurface(SDL_SWSURFACE, *width, *height, 24, 0, 0, 0, 0);
+  text_surface=SDL_CreateRGBSurface(SDL_SWSURFACE, *width, *height, 8, 0, 0, 0, 0);
+  // Copy palette
+  SDL_SetPalette(text_surface, SDL_LOGPAL, font_surface->format->palette->colors, 0, 256);
   // Fill with backcolor
   rectangle.x=0;
   rectangle.y=0;
   rectangle.w=*width;
   rectangle.h=*height;
-  SDL_FillRect(TexteColore, &rectangle, SDL_MapRGB(
-    TexteColore->format, 
-    Main_palette[Back_color].R, 
-    Main_palette[Back_color].G, 
-    Main_palette[Back_color].B
-    ));
+  SDL_FillRect(text_surface, &rectangle, Back_color);
   // Rendu du texte
-  SFont_Write(TexteColore, font, 0, 0, str);
-  if (!TexteColore)
+  SFont_Write(text_surface, font, 0, 0, str);
+  if (!text_surface)
   {
     DEBUG("Rendering failed",2);
     SFont_FreeFont(font);
     return NULL;
   }
-  
-  Texte8Bit=SDL_DisplayFormat(TexteColore);
-  SDL_FreeSurface(TexteColore);
     
-  new_brush=Surface_to_bytefield(Texte8Bit, NULL);
+  new_brush=Surface_to_bytefield(text_surface, NULL);
   if (!new_brush)
   {
     DEBUG("Converting failed",3);
-    SDL_FreeSurface(TexteColore);
-    SDL_FreeSurface(Texte8Bit);
+    SDL_FreeSurface(text_surface);
     SFont_FreeFont(font);
     return NULL;
   }
-  SDL_FreeSurface(Texte8Bit);
+
+  Get_SDL_Palette(font_surface->format->palette, palette);
+
+  SDL_FreeSurface(text_surface);
   SFont_FreeFont(font);
 
   return new_brush;
@@ -524,7 +619,7 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
 // Crée une brosse à partir des paramètres de texte demandés.
 // Si cela réussit, la fonction place les dimensions dans width et height, 
 // et retourne l'adresse du bloc d'octets.
-byte *Render_text(const char *str, int font_number, TTFONLY int size, int TTFONLY antialias, TTFONLY int bold, TTFONLY int italic, int *width, int *height)
+byte *Render_text(const char *str, int font_number, TTFONLY int size, int TTFONLY antialias, TTFONLY int bold, TTFONLY int italic, int *width, int *height, T_Palette palette)
 {
   T_Font *font = font_list_start;
   int index=font_number;
@@ -538,14 +633,14 @@ byte *Render_text(const char *str, int font_number, TTFONLY int size, int TTFONL
   if (font->Is_truetype)
   {
   #ifndef NOTTF 
-    return Render_text_TTF(str, font_number, size, antialias, bold, italic, width, height);
+    return Render_text_TTF(str, font_number, size, antialias, bold, italic, width, height, palette);
   #else
     return NULL;
   #endif
   }
   else
   {
-    return Render_text_SFont(str, font_number, width, height);
+    return Render_text_SFont(str, font_number, width, height, palette);
   }
 }
 

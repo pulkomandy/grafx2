@@ -40,6 +40,10 @@
 #include "engine.h"
 #include "pages.h"
 #include "layers.h"
+#include "factory.h"
+#include "loadsave.h"
+#include "io.h"
+
 
 
 // we need this as global
@@ -210,19 +214,20 @@ int Button_under_mouse(void)
 }
 
 
-///Draw the frame for a menu button
-void Draw_menu_button_frame(byte btn_number,byte pressed)
+///Draw a menu button, selected or not
+void Draw_menu_button(byte btn_number,byte pressed)
 {
-  byte color_top_left;
-  byte color_bottom_right;
-  byte color_diagonal;
   word start_x;
   word start_y;
-  word end_x;
-  word end_y;
+  word width;
+  word height;
+  byte * bitmap;
+  word bitmap_width;
   word x_pos;
   word y_pos;
   byte current_menu;
+  byte color;
+  char icon;
 
   // Find in which menu the button is
   for (current_menu = 0; current_menu < MENUBAR_COUNT; current_menu++)
@@ -235,22 +240,114 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
     }
   }
 
-  start_x=Buttons_Pool[btn_number].X_offset;
-  start_y=Buttons_Pool[btn_number].Y_offset;
-  end_x  =start_x+Buttons_Pool[btn_number].Width;
-  end_y  =start_y+Buttons_Pool[btn_number].Height;
+  start_x = Buttons_Pool[btn_number].X_offset;
+  start_y = Buttons_Pool[btn_number].Y_offset;
+  width = Buttons_Pool[btn_number].Width+1;
+  height = Buttons_Pool[btn_number].Height+1;
+  icon = Buttons_Pool[btn_number].Icon;
 
-  if (!pressed)
+  if (icon==-1)
   {
-    color_top_left=MC_White;
-    color_bottom_right=MC_Dark;
-    color_diagonal=MC_Light;
+    // Standard button
+    bitmap_width = Menu_bars[current_menu].Skin_width;
+    bitmap=&(Menu_bars[current_menu].Skin[pressed][start_y*Menu_bars[current_menu].Skin_width+start_x]);
   }
   else
   {
+    // From Menu_buttons
+    bitmap_width = MENU_SPRITE_WIDTH;
+    bitmap=Gfx->Menu_sprite[pressed][(byte)icon][0];
+    // For bottom right: offset +1,+1
+    if (Buttons_Pool[btn_number].Shape==BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT)
+      bitmap += MENU_SPRITE_WIDTH+1;
+  } 
+     
+  switch(Buttons_Pool[btn_number].Shape)
+  {
+    case BUTTON_SHAPE_NO_FRAME :
+      break;
+    case BUTTON_SHAPE_RECTANGLE  :
+    for (y_pos=0;y_pos<height;y_pos++)
+      for (x_pos=0;x_pos<width;x_pos++)
+      {
+        color=bitmap[x_pos+y_pos*bitmap_width];
+        Pixel_in_menu_and_skin(current_menu, start_x+x_pos, start_y+y_pos, color);
+      }
+    break;
+    case BUTTON_SHAPE_TRIANGLE_TOP_LEFT:
+    for (y_pos=0;y_pos<15;y_pos++)
+      for (x_pos=0;x_pos<15-y_pos;x_pos++)
+      {
+        color=bitmap[x_pos+y_pos*bitmap_width];
+        Pixel_in_menu_and_skin(current_menu, start_x+x_pos, start_y+y_pos, color);
+      }
+    break;
+    case BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT:
+    for (y_pos=0;y_pos<15;y_pos++)
+      for (x_pos=14-y_pos;x_pos<15;x_pos++)
+      {
+        color=bitmap[(x_pos)+(y_pos)*bitmap_width];
+        Pixel_in_menu_and_skin(current_menu, start_x+x_pos, start_y+y_pos, color);
+      }
+    break;
+  }
+  // Special: Show specific shape
+  if (btn_number==BUTTON_PAINTBRUSHES
+    && Paintbrush_shape!=PAINTBRUSH_SHAPE_COLOR_BRUSH
+    && Paintbrush_shape!=PAINTBRUSH_SHAPE_MONO_BRUSH)
+  {
+    short x_pos,y_pos;
+    short start_x;
+    short menu_x_pos,menu_y_pos;
+    short menu_start_x;
+  
+    // Print paintbrush shape
+    menu_start_x=8-Paintbrush_offset_X;
+    if (menu_start_x<1)
+    {
+      start_x=Paintbrush_offset_X-7;
+      menu_start_x=1;
+    }
+    else
+      start_x=0;
+
+    menu_y_pos=9-Paintbrush_offset_Y;
+    if (menu_y_pos<2)
+    {
+      y_pos=Paintbrush_offset_Y-7;
+      menu_y_pos=2;
+    }
+    else
+      y_pos=0;
+
+    for (;((y_pos<Paintbrush_height) && (menu_y_pos<16));menu_y_pos++,y_pos++)
+      for (menu_x_pos=menu_start_x,x_pos=start_x;((x_pos<Paintbrush_width) && (menu_x_pos<15));menu_x_pos++,x_pos++)
+      {
+        if (Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos])
+        Pixel_in_menu_and_skin(MENUBAR_TOOLS, menu_x_pos, menu_y_pos, MC_Black);
+      }
+  }
+  
+  if (Menu_is_visible && Menu_bars[current_menu].Visible)
+    Update_rect(Menu_factor_X*(Buttons_Pool[btn_number].X_offset),
+      (Buttons_Pool[btn_number].Y_offset+Menu_bars[MENUBAR_TOOLS].Top)*Menu_factor_Y+Menu_Y,
+      width*Menu_factor_X,height*Menu_factor_Y);
+
+/*
+  switch (pressed)
+  {
+    default:
+    case BUTTON_RELEASED:
+    color_top_left=MC_White;
+    color_bottom_right=MC_Dark;
+    color_diagonal=MC_Light;
+    break;
+
+    case BUTTON_PRESSED:
     color_top_left=MC_Dark;
     color_bottom_right=MC_Black;
-    color_diagonal=MC_Dark;
+    color_diagonal=MC_Black;
+    break;    
   }
 
   switch(Buttons_Pool[btn_number].Shape)
@@ -282,9 +379,9 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
       break;
     case BUTTON_SHAPE_TRIANGLE_TOP_LEFT:
       // On colorie le point haut droit
-      Pixel_in_menu_and_skin(current_menu, end_x, start_y, color_diagonal);
+      Pixel_in_menu_and_skin(current_menu, end_x, start_y, color_top_left);
       // On colorie le point bas gauche
-      Pixel_in_menu_and_skin(current_menu, start_x, end_y, color_diagonal);
+      Pixel_in_menu_and_skin(current_menu, start_x, end_y, color_top_left);
       // On colorie le coin haut gauche
       for (x_pos=0;x_pos<Buttons_Pool[btn_number].Width;x_pos++)
       {
@@ -322,6 +419,7 @@ void Draw_menu_button_frame(byte btn_number,byte pressed)
       (end_x+1-start_x)*Menu_factor_X,
       (end_y+1-start_y)*Menu_factor_Y);
   }
+  */
 }
 
 
@@ -330,10 +428,10 @@ void Unselect_button(int btn_number)
 {
   if (Buttons_Pool[btn_number].Pressed)
   {
-    // On affiche le cadre autour du bouton de façon à ce qu'il paraisse relâché
-    Draw_menu_button_frame(btn_number,BUTTON_RELEASED);
     // On considère que le bouton est relâché
     Buttons_Pool[btn_number].Pressed=BUTTON_RELEASED;
+    // On affiche le cadre autour du bouton de façon à ce qu'il paraisse relâché
+    Draw_menu_button(btn_number,BUTTON_RELEASED);
     // On appelle le désenclenchement particulier au bouton:
     Buttons_Pool[btn_number].Unselect_action();
   }
@@ -355,17 +453,32 @@ void Select_button(int btn_number,byte click)
   {
     case BUTTON_POLYGONS:
     case BUTTON_POLYFILL:
-      icon=12;break;
+      icon=MENU_SPRITE_POLYFORM;
+      break;
     case BUTTON_FLOODFILL:
-      icon=14;break;
+      icon=MENU_SPRITE_REPLACE;
+      break;
     case BUTTON_CIRCLES:
     case BUTTON_FILLCIRC:
-      icon=10;break;
+      icon=MENU_SPRITE_ELLIPSES;
+      break;
     case BUTTON_SPHERES:
-      icon=16;break;
+      icon=MENU_SPRITE_GRAD_ELLIPSE;
+      break;
   }
   if (icon!=-1)
-    Display_sprite_in_menu(btn_number,icon+(click==RIGHT_SIDE));
+  {
+    // This changes the sprite number of both halves of a split button
+    Display_sprite_in_menu(btn_number,click==RIGHT_SIDE?icon:-1);
+
+    // Redraw the other half if Unselect_button() won't do it.
+    if (Buttons_Pool[btn_number].Shape==BUTTON_SHAPE_TRIANGLE_TOP_LEFT && 
+      !Buttons_Pool[btn_number+1].Pressed)
+      Draw_menu_button(btn_number+1, BUTTON_RELEASED);
+    else if (Buttons_Pool[btn_number].Shape==BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT &&
+      !Buttons_Pool[btn_number-1].Pressed)
+      Draw_menu_button(btn_number-1, BUTTON_RELEASED);
+  }
 
   // On note déjà la famille du bouton (La "Famiglia" c'est sacré)
   family=Buttons_Pool[btn_number].Family;
@@ -417,8 +530,11 @@ void Select_button(int btn_number,byte click)
           Unselect_button(b);
   }
 
+  // On considère que le bouton est enfoncé
+  Buttons_Pool[btn_number].Pressed=BUTTON_PRESSED;
+
   // On affiche le cadre autour du bouton de façon à ce qu'il paraisse enfoncé
-  Draw_menu_button_frame(btn_number,BUTTON_PRESSED);
+  Draw_menu_button(btn_number, BUTTON_PRESSED);
 
   Display_cursor();
 
@@ -428,9 +544,6 @@ void Select_button(int btn_number,byte click)
     // On attend ensuite que l'utilisateur lâche son bouton:
     Wait_end_of_click();
   }
-
-  // On considère que le bouton est enfoncé
-  Buttons_Pool[btn_number].Pressed=BUTTON_PRESSED;
 
   // Puis on se contente d'appeler l'action correspondant au bouton:
   if (click==1)
@@ -488,7 +601,7 @@ void Move_separator(void)
         Display_cursor();
       }
     }
-    if(!Get_input())SDL_Delay(20);
+    Get_input(20);
   }
 
   // Effacer la barre en XOR
@@ -548,8 +661,57 @@ void Main_handler(void)
       Display_all_screen();
       Display_cursor();
     }
+    else if (Drop_file_name)
+    {
+      // A file was dragged into Grafx2's window
+      if (Main_image_is_modified && !Confirmation_box("Discard unsaved changes ?"))
+      {
+        // do nothing
+      }
+      else
+      {
+        T_IO_Context context;
+        char* flimit;
+        byte old_cursor_shape;
+
+        Upload_infos_page_main(Main_backups->Pages);
+  
+        flimit = Find_last_slash(Drop_file_name);
+        *(flimit++) = '\0';
+  
+        Hide_cursor();
+        old_cursor_shape=Cursor_shape;
+        Cursor_shape=CURSOR_SHAPE_HOURGLASS;
+        Display_cursor();
+        
+        Init_context_layered_image(&context, flimit, Drop_file_name);
+        Load_image(&context);
+        if (File_error!=1)
+        {
+          Compute_limits();
+          Compute_paintbrush_coordinates();
+          Redraw_layered_image();
+          End_of_modification();
+          Display_all_screen();
+          Main_image_is_modified=0;
+        }
+        Destroy_context(&context);
+        
+        Compute_optimal_menu_colors(Main_palette);
+        Display_menu();
+        if (Config.Display_image_limits)
+          Display_image_limits();
+
+        Hide_cursor();
+        Cursor_shape=old_cursor_shape;
+        Display_all_screen();
+        Display_cursor();
+      }
+      free(Drop_file_name);
+      Drop_file_name=NULL;
+    }
     
-    if(Get_input())
+    if(Get_input(0))
     {
       action = 0;
 
@@ -732,13 +894,17 @@ void Main_handler(void)
                 break;
               case SPECIAL_FLIP_X : // Flip X
                 Hide_cursor();
-                Flip_X_lowlevel(Brush, Brush_width, Brush_height);
+                Flip_X_lowlevel(Brush_original_pixels, Brush_width, Brush_height);
+                // Remap according to the last used remap table
+                Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
                 Display_cursor();
                 action++;
                 break;
               case SPECIAL_FLIP_Y : // Flip Y
                 Hide_cursor();
-                Flip_Y_lowlevel(Brush, Brush_width, Brush_height);
+                Flip_Y_lowlevel(Brush_original_pixels, Brush_width, Brush_height);
+                // Remap according to the last used remap table
+                Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
                 Display_cursor();
                 action++;
                 break;
@@ -751,6 +917,8 @@ void Main_handler(void)
               case SPECIAL_ROTATE_180 : // 180° brush rotation
                 Hide_cursor();
                 Rotate_180_deg_lowlevel(Brush, Brush_width, Brush_height);
+                // Remap according to the last used remap table
+                Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
                 Brush_offset_X=(Brush_width>>1);
                 Brush_offset_Y=(Brush_height>>1);
                 Display_cursor();
@@ -772,6 +940,46 @@ void Main_handler(void)
                 Hide_cursor();
                 Start_operation_stack(OPERATION_ROTATE_BRUSH);
                 Display_cursor();
+                action++;
+                break;
+              case SPECIAL_BRUSH_DOUBLE:
+                if (Paintbrush_shape==PAINTBRUSH_SHAPE_COLOR_BRUSH
+                 || Paintbrush_shape==PAINTBRUSH_SHAPE_MONO_BRUSH)
+                {
+                  Hide_cursor();
+                  Stretch_brush(1,1,Brush_width*2,Brush_height*2);
+                  Display_cursor();
+                }
+                action++;
+                break;
+              case SPECIAL_BRUSH_DOUBLE_WIDTH:
+                if (Paintbrush_shape==PAINTBRUSH_SHAPE_COLOR_BRUSH
+                 || Paintbrush_shape==PAINTBRUSH_SHAPE_MONO_BRUSH)
+                {
+                  Hide_cursor();
+                  Stretch_brush(1,1,Brush_width*2,Brush_height);
+                  Display_cursor();
+                }
+                action++;
+                break;
+              case SPECIAL_BRUSH_DOUBLE_HEIGHT:
+                if (Paintbrush_shape==PAINTBRUSH_SHAPE_COLOR_BRUSH
+                 || Paintbrush_shape==PAINTBRUSH_SHAPE_MONO_BRUSH)
+                {
+                  Hide_cursor();
+                  Stretch_brush(1,1,Brush_width,Brush_height*2);
+                  Display_cursor();
+                }
+                action++;
+                break;
+              case SPECIAL_BRUSH_HALVE:
+                if (Paintbrush_shape==PAINTBRUSH_SHAPE_COLOR_BRUSH
+                 || Paintbrush_shape==PAINTBRUSH_SHAPE_MONO_BRUSH)
+                {
+                  Hide_cursor();
+                  Stretch_brush(1,1,Brush_width/2,Brush_height/2);
+                  Display_cursor();
+                }
                 action++;
                 break;
               case SPECIAL_OUTLINE : // Outline brush
@@ -1088,6 +1296,36 @@ void Main_handler(void)
                 C64_FLI_enforcer();
                 action++;
                 break;
+
+              case SPECIAL_REPEAT_SCRIPT:
+#ifdef __ENABLE_LUA__
+                Repeat_script();
+                action++;
+#endif
+                break;
+              case SPECIAL_RUN_SCRIPT_1:
+              case SPECIAL_RUN_SCRIPT_2:
+              case SPECIAL_RUN_SCRIPT_3:
+              case SPECIAL_RUN_SCRIPT_4:
+              case SPECIAL_RUN_SCRIPT_5:
+              case SPECIAL_RUN_SCRIPT_6:
+              case SPECIAL_RUN_SCRIPT_7:
+              case SPECIAL_RUN_SCRIPT_8:
+              case SPECIAL_RUN_SCRIPT_9:
+              case SPECIAL_RUN_SCRIPT_10:
+#ifdef __ENABLE_LUA__
+                Run_numbered_script(key_index-SPECIAL_RUN_SCRIPT_1);
+                action++;
+#endif
+                break;
+              case SPECIAL_CYCLE_MODE:
+                Cycling_mode= !Cycling_mode;
+                // Restore palette
+                if (!Cycling_mode)
+                  Set_palette(Main_palette);
+                action++;
+                break;
+
             }
           }
         } // End of special keys
@@ -1122,7 +1360,7 @@ void Main_handler(void)
         if (effect_modified)
         {
           Hide_cursor();
-          Draw_menu_button_frame(BUTTON_EFFECTS,
+          Draw_menu_button(BUTTON_EFFECTS,
             (Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode));
           Display_cursor();
         }
@@ -1132,21 +1370,8 @@ void Main_handler(void)
     }
     else
     {
-      // No event : we go asleep for a while, but we try to get waked up at constant intervals of time
-      // no matter the machine speed or system load. The time is fixed to 10ms (that should be about a cpu slice on most systems)
-      // This allows nice smooth mouse movement.
-        const int delay = 10;
-  
-      Uint32 debut;
-      debut = SDL_GetTicks();
-      // Première attente : le complément de "delay" millisecondes
-      SDL_Delay(delay - (debut % delay));
-      // Si ça ne suffit pas, on complète par des attentes successives de "1ms".
-      // (Remarque, Windows arrondit généralement aux 10ms supérieures)
-      while ( SDL_GetTicks()/delay <= debut/delay)
-      {
-        SDL_Delay(1);
-      }
+      // Removed all SDL_Delay() timing here: relying on Get_input()
+      SDL_Delay(10);
     }
 
     // Gestion de la souris
@@ -1175,6 +1400,11 @@ void Main_handler(void)
           {
             // On nettoie les coordonnées
             Hide_cursor();
+            
+            /*if (Gfx->Hover_effect && prev_button_number > -1 && !Buttons_Pool[prev_button_number].Pressed)
+              Draw_menu_button(prev_button_number, BUTTON_RELEASED);
+            */
+
             Block(18*Menu_factor_X,Menu_status_Y,192*Menu_factor_X,Menu_factor_Y<<3,MC_Light);
             Update_rect(18*Menu_factor_X,Menu_status_Y,192*Menu_factor_X,Menu_factor_Y<<3);
             Display_cursor();
@@ -1190,7 +1420,17 @@ void Main_handler(void)
             if (button_index!=BUTTON_CHOOSE_COL)
             {
               Hide_cursor();
+
+              /*if (Gfx->Hover_effect && prev_button_number > -1 && !Buttons_Pool[prev_button_number].Pressed)
+                Draw_menu_button(prev_button_number, BUTTON_RELEASED);
+              */
+              
               Print_in_menu(Menu_tooltip[button_index],0);
+
+              /*if (Gfx->Hover_effect && !Buttons_Pool[button_index].Pressed)
+                Draw_menu_button(button_index, BUTTON_HIGHLIGHTED);
+              */
+              
               Display_cursor();
             }
             else
@@ -1245,21 +1485,27 @@ void Main_handler(void)
     // Le curseur se trouve dans l'image
     if ( (!Cursor_in_menu) && (Menu_is_visible) && (Old_MY != Mouse_Y || Old_MX != Mouse_X || Key || Mouse_K)) // On ne met les coordonnées à jour que si l'utilisateur a fait un truc
     {
-       if ( (Current_operation!=OPERATION_COLORPICK) && (Current_operation!=OPERATION_REPLACE) )
-       {
-          if(Cursor_in_menu_previous)
-          {
-             Print_in_menu("X:       Y:             ",0);
-          }
-       }
-       else
-       {
-          if(Cursor_in_menu_previous)
-          {
-             Print_in_menu("X:       Y:       (    )",0);
-          }
-       }
-       Cursor_in_menu_previous = 0;
+      if(Cursor_in_menu_previous)
+      {
+        Hide_cursor();
+        
+        /*if (Gfx->Hover_effect && prev_button_number > -1 && !Buttons_Pool[prev_button_number].Pressed)
+          Draw_menu_button(prev_button_number, BUTTON_RELEASED);
+        */
+                
+        if ( (Current_operation!=OPERATION_COLORPICK) && (Current_operation!=OPERATION_REPLACE) )
+        {
+          Print_in_menu("X:       Y:             ",0);
+        }
+        else
+        {
+          Print_in_menu("X:       Y:       (    )",0);
+        }
+        
+        Display_cursor();
+        
+        Cursor_in_menu_previous = 0;
+      }
     }
 
     if(Cursor_in_menu)
@@ -1300,7 +1546,17 @@ void Open_window(word width,word height, const char * title)
   size_t title_length;
 
   Hide_cursor();
-
+  
+  /*if (Windows_open == 0 && Gfx->Hover_effect)
+  {
+    if (Cursor_in_menu)
+    {
+      int button_index=Button_under_mouse();
+      if (button_index > -1 && !Buttons_Pool[button_index].Pressed)
+              Draw_menu_button(button_index, BUTTON_RELEASED);
+    }
+  }*/
+    
   Windows_open++;
 
   Window_width=width;
@@ -1310,12 +1566,14 @@ void Open_window(word width,word height, const char * title)
   Window_pos_X=(Screen_width-(width*Menu_factor_X))>>1;
 
   Window_pos_Y=(Screen_height-(height*Menu_factor_Y))>>1;
+  
+  Window_draggable=1;
 
   // Sauvegarde de ce que la fenêtre remplace
   Save_background(&(Window_background[Windows_open-1]), Window_pos_X, Window_pos_Y, width, height);
 
   // Fenêtre grise
-  Block(Window_pos_X+(Menu_factor_X<<1),Window_pos_Y+(Menu_factor_Y<<1),(width-4)*Menu_factor_X,(height-4)*Menu_factor_Y,MC_Light);
+  Block(Window_pos_X+(Menu_factor_X<<1),Window_pos_Y+(Menu_factor_Y<<1),(width-4)*Menu_factor_X,(height-4)*Menu_factor_Y,MC_Window);
 
   // -- Frame de la fenêtre ----- --- -- -  -
 
@@ -1342,6 +1600,13 @@ void Open_window(word width,word height, const char * title)
     Cursor_shape=CURSOR_SHAPE_ARROW;
     Paintbrush_hidden_before_window=Paintbrush_hidden;
     Paintbrush_hidden=1;
+    if (Allow_colorcycling)
+    {
+      Allow_colorcycling=0;
+      // Restore palette
+      Set_palette(Main_palette);
+    }
+    Allow_drag_and_drop(0);
   }
 
   // Initialisation des listes de boutons de la fenêtre
@@ -1431,6 +1696,8 @@ void Close_window(void)
     
     Display_all_screen();
     Display_menu();
+    Allow_colorcycling=1;
+    Allow_drag_and_drop(1);
   }
 
   Key=0;
@@ -1445,7 +1712,7 @@ void Close_window(void)
 //---------------- Dessiner un bouton normal dans une fenêtre ----------------
 
 void Window_draw_normal_bouton(word x_pos,word y_pos,word width,word height,
-                                    char * title,byte undersc_letter,byte clickable)
+                                    const char * title,byte undersc_letter,byte clickable)
 {
   byte title_color;
   word text_x_pos,text_y_pos;
@@ -1532,14 +1799,14 @@ void Tag_color_range(byte start,byte end)
 
   // On efface les anciens TAGs
   for (index=0;index<=start;index++)
-    Block(Window_pos_X+(Window_palette_button_list->Pos_X+3+((index>>4)*10))*Menu_factor_X,
-          Window_pos_Y+(Window_palette_button_list->Pos_Y+3+((index&15)* 5))*Menu_factor_Y,
-          Menu_factor_X*3,Menu_factor_Y*5,MC_Light);
+    Window_rectangle(Window_palette_button_list->Pos_X+3+((index>>4)*10),
+          Window_palette_button_list->Pos_Y+3+((index&15)* 5),
+          3,5,MC_Light);
 
   for (index=end;index<256;index++)
-    Block(Window_pos_X+(Window_palette_button_list->Pos_X+3+((index>>4)*10))*Menu_factor_X,
-          Window_pos_Y+(Window_palette_button_list->Pos_Y+3+((index&15)* 5))*Menu_factor_Y,
-          Menu_factor_X*3,Menu_factor_Y*5,MC_Light);
+    Window_rectangle(Window_palette_button_list->Pos_X+3+((index>>4)*10),
+          Window_palette_button_list->Pos_Y+3+((index&15)* 5),
+          3,5,MC_Light);
 
   // On affiche le 1er TAG
   origin_x=(Window_palette_button_list->Pos_X+3)+(start>>4)*10;
@@ -1567,9 +1834,9 @@ void Tag_color_range(byte start,byte end)
     // On TAG toutes les couleurs intermédiaires
     for (index=start+1;index<end;index++)
     {
-      Block(Window_pos_X+(Window_palette_button_list->Pos_X+3+((index>>4)*10))*Menu_factor_X,
-            Window_pos_Y+(Window_palette_button_list->Pos_Y+3+((index&15)* 5))*Menu_factor_Y,
-            Menu_factor_X*2,Menu_factor_Y*5,MC_Black);
+      Window_rectangle(Window_palette_button_list->Pos_X+3+((index>>4)*10),
+            Window_palette_button_list->Pos_Y+3+((index&15)* 5),
+            2,5,MC_Black);
       // On efface l'éventuelle pointe d'une ancienne extrémité de l'intervalle
       Pixel_in_window(Window_palette_button_list->Pos_X+5+((index>>4)*10),
                          Window_palette_button_list->Pos_Y+5+((index&15)* 5),
@@ -1579,24 +1846,24 @@ void Tag_color_range(byte start,byte end)
 
   }
 
-  Update_rect(ToWinX(Window_palette_button_list->Pos_X+3),ToWinY(Window_palette_button_list->Pos_Y+3),ToWinL(12*16),ToWinH(5*16));
+  Update_window_area(Window_palette_button_list->Pos_X+3,Window_palette_button_list->Pos_Y+3,12*16,5*16);
 
 }
 
 
 //------------------ Dessiner un scroller dans une fenêtre -------------------
 
-void Compute_slider_cursor_height(T_Scroller_button * button)
+void Compute_slider_cursor_length(T_Scroller_button * button)
 {
   if (button->Nb_elements>button->Nb_visibles)
   {
-    button->Cursor_height=(button->Nb_visibles*(button->Height-24))/button->Nb_elements;
-    if (!(button->Cursor_height))
-      button->Cursor_height=1;
+    button->Cursor_length=(button->Nb_visibles*(button->Length-24))/button->Nb_elements;
+    if (!(button->Cursor_length))
+      button->Cursor_length=1;
   }
   else
   {
-    button->Cursor_height=button->Height-24;
+    button->Cursor_length=button->Length-24;
   }
 }
 
@@ -1604,32 +1871,70 @@ void Window_draw_slider(T_Scroller_button * button)
 {
   word slider_position;
 
-  slider_position=button->Pos_Y+12;
-
-  Block(Window_pos_X+(button->Pos_X*Menu_factor_X),
-        Window_pos_Y+(slider_position*Menu_factor_Y),
-        11*Menu_factor_X,(button->Height-24)*Menu_factor_Y,MC_Black/*MC_Dark*/);
-
-  if (button->Nb_elements>button->Nb_visibles)
-    slider_position+=Round_div(button->Position*(button->Height-24-button->Cursor_height),button->Nb_elements-button->Nb_visibles);
-
-  Block(Window_pos_X+(button->Pos_X*Menu_factor_X),
-        Window_pos_Y+(slider_position*Menu_factor_Y),
-        11*Menu_factor_X,button->Cursor_height*Menu_factor_Y,MC_Dark/*MC_White*/);
-
-  Update_rect(Window_pos_X+(button->Pos_X*Menu_factor_X),
-        Window_pos_Y+button->Pos_Y*Menu_factor_Y,
-        11*Menu_factor_X,(button->Height)*Menu_factor_Y);
+  if (button->Is_horizontal)
+  {
+    slider_position=button->Pos_X+12;
+  
+    Window_rectangle(slider_position,
+          button->Pos_Y,
+          button->Length-24,11,MC_Black/*MC_Dark*/);
+  
+    if (button->Nb_elements>button->Nb_visibles)
+      slider_position+=
+        ((button->Length-24-button->Cursor_length)*(button->Position)+(button->Nb_elements-button->Nb_visibles)/2)/(button->Nb_elements-button->Nb_visibles);
+  
+    Window_rectangle(slider_position,
+          button->Pos_Y,
+          button->Cursor_length,11,MC_OnBlack/*MC_White*/);
+  
+    Update_window_area(button->Pos_X,
+          button->Pos_Y,
+          button->Length,11);
+  }
+  else
+  {
+    slider_position=button->Pos_Y+12;
+  
+    Window_rectangle(button->Pos_X,
+          slider_position,
+          11,button->Length-24,MC_Black/*MC_Dark*/);
+  
+    if (button->Nb_elements>button->Nb_visibles)
+      slider_position+=
+        ((button->Length-24-button->Cursor_length)*(button->Position)+(button->Nb_elements-button->Nb_visibles)/2)/(button->Nb_elements-button->Nb_visibles);
+        //
+        //(button->Position*) / (button->Nb_elements-button->Nb_visibles));
+  
+    Window_rectangle(button->Pos_X,
+          slider_position,
+          11,button->Cursor_length,MC_OnBlack/*MC_White*/);
+  
+    Update_window_area(button->Pos_X,
+          button->Pos_Y,
+          11,button->Length);
+  }
 }
 
-void Window_draw_scroller_bouton(T_Scroller_button * button)
+void Window_draw_scroller_button(T_Scroller_button * button)
 {
-  Window_display_frame_generic(button->Pos_X-1,button->Pos_Y-1,13,button->Height+2,MC_Black,MC_Black,MC_Dark,MC_Dark,MC_Dark);
-  Window_display_frame_mono(button->Pos_X-1,button->Pos_Y+11,13,button->Height-22,MC_Black);
-  Window_display_frame_out(button->Pos_X,button->Pos_Y,11,11);
-  Window_display_frame_out(button->Pos_X,button->Pos_Y+button->Height-11,11,11);
-  Print_in_window(button->Pos_X+2,button->Pos_Y+2,"\030",MC_Black,MC_Light);
-  Print_in_window(button->Pos_X+2,button->Pos_Y+button->Height-9,"\031",MC_Black,MC_Light);
+  if (button->Is_horizontal)
+  {
+    Window_display_frame_generic(button->Pos_X-1,button->Pos_Y-1,button->Length+2,13,MC_Black,MC_Black,MC_Dark,MC_Dark,MC_Dark);
+    Window_display_frame_mono(button->Pos_X+11,button->Pos_Y-1,button->Length-22,13,MC_Black);
+    Window_display_frame_out(button->Pos_X,button->Pos_Y,11,11);
+    Window_display_frame_out(button->Pos_X+button->Length-11,button->Pos_Y,11,11);
+    Print_in_window(button->Pos_X+2,button->Pos_Y+2,"\033",MC_Black,MC_Light);
+    Print_in_window(button->Pos_X+button->Length-9,button->Pos_Y+2,"\032",MC_Black,MC_Light);
+  }
+  else
+  {
+    Window_display_frame_generic(button->Pos_X-1,button->Pos_Y-1,13,button->Length+2,MC_Black,MC_Black,MC_Dark,MC_Dark,MC_Dark);
+    Window_display_frame_mono(button->Pos_X-1,button->Pos_Y+11,13,button->Length-22,MC_Black);
+    Window_display_frame_out(button->Pos_X,button->Pos_Y,11,11);
+    Window_display_frame_out(button->Pos_X,button->Pos_Y+button->Length-11,11,11);
+    Print_in_window(button->Pos_X+2,button->Pos_Y+2,"\030",MC_Black,MC_Light);
+    Print_in_window(button->Pos_X+2,button->Pos_Y+button->Length-9,"\031",MC_Black,MC_Light);
+  }
   Window_draw_slider(button);
 }
 
@@ -1662,7 +1967,7 @@ void Window_clear_input_button(T_Special_button * button)
 
 T_Normal_button * Window_set_normal_button(word x_pos, word y_pos,
                                    word width, word height,
-                                   char * title, byte undersc_letter,
+                                   const char * title, byte undersc_letter,
                                    byte clickable, word shortcut)
 {
   T_Normal_button * temp=NULL;
@@ -1692,7 +1997,7 @@ T_Normal_button * Window_set_normal_button(word x_pos, word y_pos,
 
 T_Normal_button * Window_set_repeatable_button(word x_pos, word y_pos,
                                    word width, word height,
-                                   char * title, byte undersc_letter,
+                                   const char * title, byte undersc_letter,
                                    byte clickable, word shortcut)
 {
   T_Normal_button * temp=NULL;
@@ -1745,21 +2050,47 @@ T_Scroller_button * Window_set_scroller_button(word x_pos, word y_pos,
 
   temp=(T_Scroller_button *)malloc(sizeof(T_Scroller_button));
   temp->Number        =++Window_nb_buttons;
+  temp->Is_horizontal =0;
   temp->Pos_X         =x_pos;
   temp->Pos_Y         =y_pos;
-  temp->Height       =height;
+  temp->Length        =height;
   temp->Nb_elements   =nb_elements;
   temp->Nb_visibles   =nb_elements_visible;
   temp->Position      =initial_position;
-  Compute_slider_cursor_height(temp);
+  Compute_slider_cursor_length(temp);
 
   temp->Next=Window_scroller_button_list;
   Window_scroller_button_list=temp;
 
-  Window_draw_scroller_bouton(temp);
+  Window_draw_scroller_button(temp);
   return temp;
 }
 
+T_Scroller_button * Window_set_horizontal_scroller_button(word x_pos, word y_pos,
+                                     word width,
+                                     word nb_elements,
+                                     word nb_elements_visible,
+                                     word initial_position)
+{
+  T_Scroller_button * temp;
+
+  temp=(T_Scroller_button *)malloc(sizeof(T_Scroller_button));
+  temp->Number        =++Window_nb_buttons;
+  temp->Is_horizontal =1;
+  temp->Pos_X         =x_pos;
+  temp->Pos_Y         =y_pos;
+  temp->Length        =width;
+  temp->Nb_elements   =nb_elements;
+  temp->Nb_visibles   =nb_elements_visible;
+  temp->Position      =initial_position;
+  Compute_slider_cursor_length(temp);
+
+  temp->Next=Window_scroller_button_list;
+  Window_scroller_button_list=temp;
+
+  Window_draw_scroller_button(temp);
+  return temp;
+}
 
 T_Special_button * Window_set_special_button(word x_pos,word y_pos,word width,word height)
 {
@@ -1888,6 +2219,15 @@ void Window_redraw_list(T_List_button * list)
       list->List_start + i,
       i == list->Cursor_position);
   }
+  // Remaining rectangle under list
+  i=list->Scroller->Nb_visibles-list->Scroller->Nb_elements;
+  if (i>0)
+    Window_rectangle(
+      list->Entry_button->Pos_X,
+      list->Entry_button->Pos_Y+list->Scroller->Nb_elements*8,
+      list->Entry_button->Width,
+      i*8,
+      MC_Light);
 }
 
 //----------------------- Ouverture d'un pop-up -----------------------
@@ -1908,6 +2248,7 @@ void Open_popup(word x_pos, word y_pos, word width,word height)
   Window_height=height;
   Window_pos_X=x_pos;
   Window_pos_Y=y_pos;
+  Window_draggable=0;
 
   // Sauvegarde de ce que la fenêtre remplace
   Save_background(&(Window_background[Windows_open-1]), Window_pos_X, Window_pos_Y, width, height);
@@ -2074,7 +2415,8 @@ short Wait_click_in_palette(T_Palette_button * button)
 
   for (;;)
   {
-    while(!Get_input())SDL_Delay(20);
+    while (Get_input(20))
+      ;
 
     if (Mouse_K==LEFT_SIDE)
     {
@@ -2155,7 +2497,7 @@ void Get_color_behind_window(byte * color, byte * click)
 
   do
   {
-    if(!Get_input())SDL_Delay(20);
+    Get_input(20);
 
     if ((Mouse_X!=old_x) || (Mouse_Y!=old_y))
     {
@@ -2242,7 +2584,10 @@ void Move_window(short dx, short dy)
     old_x=new_x;
     old_y=new_y;
 
-    while(!Get_input() && new_x==Mouse_X-dx && new_y==Mouse_Y-dy) SDL_Delay(20);
+    do
+    {
+      Get_input(20);
+    } while(Mouse_K && new_x==Mouse_X-dx && new_y==Mouse_Y-dy);
 
     new_x=Mouse_X-dx;
 
@@ -2444,7 +2789,7 @@ T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, sh
     do 
     {
       // Attente
-      if(!Get_input()) SDL_Delay(20);
+      Get_input(20);
       // Mise à jour du survol
       selected_index=Window_click_in_rectangle(2,2,button->Dropdown_width-2,box_height-1)?
         (((Mouse_Y-Window_pos_Y)/Menu_factor_Y-2)>>3) : -1;
@@ -2515,7 +2860,7 @@ short Window_normal_button_onclick(word x_pos, word y_pos, word width, word heig
     Display_cursor();
     while (Window_click_in_rectangle(x_pos,y_pos,x_pos+width-1,y_pos+height-1))
     {
-      if(!Get_input()) SDL_Delay(20);
+      Get_input(20);
       if (!Mouse_K)
       {
         Hide_cursor();
@@ -2529,7 +2874,7 @@ short Window_normal_button_onclick(word x_pos, word y_pos, word width, word heig
     Display_cursor();
     while (!(Window_click_in_rectangle(x_pos,y_pos,x_pos+width-1,y_pos+height-1)))
     {
-      if(!Get_input()) SDL_Delay(20);
+      Get_input(20);
       if (!Mouse_K)
         return 0;
     }
@@ -2545,8 +2890,6 @@ short Window_get_clicked_button(void)
   T_Special_button  * temp4;
   T_Dropdown_button * temp5;
 
-  long max_slider_height;
-
   Window_attribute1=Mouse_K;
 
   // Test click on normal buttons
@@ -2561,7 +2904,7 @@ short Window_get_clicked_button(void)
         Hide_cursor();
         Window_select_normal_button(temp1->Pos_X,temp1->Pos_Y,temp1->Width,temp1->Height);
         Display_cursor();
-        Slider_timer((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
+        Delay_with_active_mouse((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
         Hide_cursor();
         Window_unselect_normal_button(temp1->Pos_X,temp1->Pos_Y,temp1->Width,temp1->Height);
         Display_cursor();        
@@ -2585,7 +2928,7 @@ short Window_get_clicked_button(void)
     }
   }
 
-  // Test click oin slider/scroller bars
+  // Test click on slider/scroller bars
   for (temp3=Window_scroller_button_list; temp3; temp3=temp3->Next)
   {
     // Button Up arrow
@@ -2608,7 +2951,7 @@ short Window_get_clicked_button(void)
       
       Display_cursor();
 
-      Slider_timer((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
+      Delay_with_active_mouse((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
 
       Hide_cursor();
       Window_unselect_normal_button(temp3->Pos_X,temp3->Pos_Y,11,11);
@@ -2619,12 +2962,16 @@ short Window_get_clicked_button(void)
     
     // Button Down arrow
     if ((Input_sticky_control == 0 || Input_sticky_control == (temp3->Number|2048))
-      && Window_click_in_rectangle(temp3->Pos_X,temp3->Pos_Y+temp3->Height-11,temp3->Pos_X+10,temp3->Pos_Y+temp3->Height-1))
+      && ((temp3->Is_horizontal && Window_click_in_rectangle(temp3->Pos_X+temp3->Length-11,temp3->Pos_Y,temp3->Pos_X+temp3->Length-1,temp3->Pos_Y+10))
+      || (!temp3->Is_horizontal && Window_click_in_rectangle(temp3->Pos_X,temp3->Pos_Y+temp3->Length-11,temp3->Pos_X+10,temp3->Pos_Y+temp3->Length-1))))
     {
       Input_sticky_control = temp3->Number | 2048;
       Hide_cursor();
-      Window_select_normal_button(temp3->Pos_X,temp3->Pos_Y+temp3->Height-11,11,11);
-
+      if (temp3->Is_horizontal)
+        Window_select_normal_button(temp3->Pos_X+temp3->Length-11,temp3->Pos_Y,11,11);
+      else
+        Window_select_normal_button(temp3->Pos_X,temp3->Pos_Y+temp3->Length-11,11,11);
+      
       if (temp3->Position+temp3->Nb_visibles<temp3->Nb_elements)
       {
         temp3->Position++;
@@ -2637,38 +2984,50 @@ short Window_get_clicked_button(void)
 
       Display_cursor();
 
-      Slider_timer((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
+      Delay_with_active_mouse((Mouse_K==1)? Config.Delay_left_click_on_slider : Config.Delay_right_click_on_slider);
 
       Hide_cursor();
-      Window_unselect_normal_button(temp3->Pos_X,temp3->Pos_Y+temp3->Height-11,11,11);
+      if (temp3->Is_horizontal)
+        Window_unselect_normal_button(temp3->Pos_X+temp3->Length-11,temp3->Pos_Y,11,11);
+      else
+        Window_unselect_normal_button(temp3->Pos_X,temp3->Pos_Y+temp3->Length-11,11,11);
       Display_cursor();
       
       return (Window_attribute1)? temp3->Number : 0;
     }
     // Middle slider
     if ((Input_sticky_control == temp3->Number) || (Input_sticky_control==0 &&
-        Window_click_in_rectangle(temp3->Pos_X,temp3->Pos_Y+12,temp3->Pos_X+10,temp3->Pos_Y+temp3->Height-13)))
+        ((!temp3->Is_horizontal && Window_click_in_rectangle(temp3->Pos_X,temp3->Pos_Y+12,temp3->Pos_X+10,temp3->Pos_Y+temp3->Length-13))
+        ||(temp3->Is_horizontal && Window_click_in_rectangle(temp3->Pos_X+12,temp3->Pos_Y,temp3->Pos_X+temp3->Length-13,temp3->Pos_Y+10)))))
     {
       Input_sticky_control = temp3->Number;
       if (temp3->Nb_elements>temp3->Nb_visibles)
       {
         // If there is enough room to make the cursor move:
-
-        max_slider_height=(temp3->Height-24);
+        long mouse_pos;
+        long origin;
 
         // Window_attribute2 receives the position of the cursor.
-        Window_attribute2 =(Mouse_Y-Window_pos_Y) / Menu_factor_Y;
-        Window_attribute2-=(temp3->Pos_Y+12+((temp3->Cursor_height-1)>>1));
-        Window_attribute2*=(temp3->Nb_elements-temp3->Nb_visibles);
+        if (temp3->Is_horizontal)
+          mouse_pos =(Mouse_X-Window_pos_X) / Menu_factor_X - (temp3->Pos_X+12);
+        else
+          mouse_pos =(Mouse_Y-Window_pos_Y) / Menu_factor_Y - (temp3->Pos_Y+12);
 
+        // The following formula is wicked. The issue is that you want two
+        // different behaviors:
+        // *) If the range is bigger than the pixel precision, the last pixel
+        //    should map to max value, exactly.
+        // *) Otherwise, the possible cursor positions are separated by
+        //    at least one full pixel, so we should find the valid position
+        //    closest to the center of the mouse cursor position pixel.
+        
+        origin = (temp3->Nb_visibles-1)*(temp3->Length-24)/temp3->Nb_elements/2;
+        Window_attribute2 = (mouse_pos - origin) * (temp3->Nb_elements-(temp3->Cursor_length>1?0:1)) / (temp3->Length-24-1);
+        
         if (Window_attribute2<0)
           Window_attribute2=0;
-        else
-        {
-          Window_attribute2 =Round_div(Window_attribute2,max_slider_height-temp3->Cursor_height);
-          if (Window_attribute2+temp3->Nb_visibles>temp3->Nb_elements)
-            Window_attribute2=temp3->Nb_elements-temp3->Nb_visibles;
-        }
+        else if (Window_attribute2+temp3->Nb_visibles>temp3->Nb_elements)
+          Window_attribute2=temp3->Nb_elements-temp3->Nb_visibles;
 
         // If the cursor moved
 
@@ -2743,7 +3102,7 @@ short Window_get_button_shortcut(void)
       Window_select_normal_button(temp->Pos_X,temp->Pos_Y,temp->Width,temp->Height);
       Display_cursor();
       
-      Slider_timer(Config.Delay_right_click_on_slider);
+      Delay_with_active_mouse(Config.Delay_right_click_on_slider);
       
       Hide_cursor();
       Window_unselect_normal_button(temp->Pos_X,temp->Pos_Y,temp->Width,temp->Height);
@@ -2793,7 +3152,7 @@ short Window_clicked_button(void)
 {
   short Button;
 
-  if(!Get_input())SDL_Delay(20);
+  Get_input(20);
 
   // Handle clicks
   if (Mouse_K)
@@ -2813,7 +3172,7 @@ short Window_clicked_button(void)
       }
     }
      
-    if (!Input_sticky_control && Mouse_Y < Window_pos_Y+(12*Menu_factor_Y))
+    if (!Input_sticky_control && Window_draggable && Mouse_Y < Window_pos_Y+(12*Menu_factor_Y))
     {
       Move_window(Mouse_X-Window_pos_X,Mouse_Y-Window_pos_Y);
     }
@@ -3084,21 +3443,34 @@ void Remap_window_backgrounds(byte * conversion_table, int Min_Y, int Max_Y)
     EDI = Window_background[window_index];
   
         // Pour chaque ligne
-        for(dx=0; dx<Window_stack_height[window_index]*Menu_factor_Y;dx++)
+        for(dx=0; dx<Window_stack[window_index].Height*Menu_factor_Y;dx++)
         {
-          if (dx+Window_stack_pos_Y[window_index]>Max_Y)
+          if (dx+Window_stack[window_index].Pos_Y>Max_Y)
             return;
-          if (dx+Window_stack_pos_Y[window_index]<Min_Y)
+          if (dx+Window_stack[window_index].Pos_Y<Min_Y)
           {
-            EDI += Window_stack_width[window_index]*Menu_factor_X*Pixel_width;
+            EDI += Window_stack[window_index].Width*Menu_factor_X*Pixel_width;
           }
           else
                 // Pour chaque pixel
-                for(cx=Window_stack_width[window_index]*Menu_factor_X*Pixel_width;cx>0;cx--)
+                for(cx=Window_stack[window_index].Width*Menu_factor_X*Pixel_width;cx>0;cx--)
                 {
                         *EDI = conversion_table[*EDI];
                         EDI ++;
                 }
         }
   }
+}
+
+void Delay_with_active_mouse(int speed)
+{
+  Uint32 end;
+  byte original_mouse_k = Mouse_K;
+  
+  end = SDL_GetTicks()+speed*10;
+  
+  do
+  {
+    Get_input(20);
+  } while (Mouse_K == original_mouse_k && SDL_GetTicks()<end);
 }

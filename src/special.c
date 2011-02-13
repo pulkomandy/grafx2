@@ -431,6 +431,9 @@ void Transparency_set(byte amount)
         break;
       case 2 :
         Effect_function=Effect_substractive_colorize;
+        break;
+      case 3 :
+        Effect_function=Effect_alpha_colorize;
     }
     Shade_mode=0;
     Quick_shade_mode=0;

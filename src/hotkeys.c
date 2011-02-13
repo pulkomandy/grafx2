@@ -884,7 +884,16 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   true,
   SDLK_u, // U
-  0},
+  // Secondary shortcut is button I on the Caanoo, L on the Wiz, unset on others
+  #if defined (__CAANOO__)
+    (KEY_JOYBUTTON+JOY_BUTTON_I)
+  #elif defined (__WIZ__)
+    (KEY_JOYBUTTON+JOY_BUTTON_L)
+  #else
+    0
+  #endif
+  // --
+  },
   {103,
   "Redo",
   "Redo the last undone action.",
@@ -892,7 +901,16 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   true,
   SDLK_u|MOD_SHIFT, // Shift + U
-  0},
+  // Secondary shortcut is button II on the Caanoo, R on the Wiz, unset on others
+  #if defined (__CAANOO__)
+    (KEY_JOYBUTTON+JOY_BUTTON_II)
+  #elif defined (__WIZ__)
+    (KEY_JOYBUTTON+JOY_BUTTON_R)
+  #else
+    0
+  #endif
+  // --
+  },
   {133,
   "Kill",
   "Kills the current page. It actually",
@@ -924,7 +942,17 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "confirmation is asked.",
   false,
   SDLK_q, // Q (A en AZERTY)
-  0},
+  // Secondary shortcut is button Home on the Caanoo, Menu on the Wiz, unset on others
+  #if defined (__CAANOO__)
+    (KEY_JOYBUTTON+JOY_BUTTON_HOME)
+  #elif defined (__WIZ__)
+    (KEY_JOYBUTTON+JOY_BUTTON_MENU)
+  #else
+    0
+  #endif
+  // --
+
+  },
   {107,
   "Palette menu",
   "Opens a menu which allows you to",
@@ -1478,13 +1506,149 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   SDLK_HOME|MOD_ALT, // Alt + Home
   0},
   {181,
+  "Brush factory",
+  "Opens a window where you can run a",
+  "Lua script.",
+  "",
+  true,
+  0, // No shortcut
+  0},
+  {182,
+  "Repeat script",
+  "Re-run the last script selected",
+  "in the Brush factory window.",
+  "",
+  true,
+  0, // No shortcut
+  0},
+  {183,
+  "Double brush size",
+  "Resizes the current user brush",
+  "by doubling width and height.",
+  "",
+  true,
+  SDLK_h|MOD_SHIFT, // Shift+H
+  0},
+  {184,
+  "Double brush width",
+  "Resizes the current user brush",
+  "by doubling its width.",
+  "",
+  true,
+  SDLK_x|MOD_SHIFT, // Shift+X
+  0},
+  {185,
+  "Double brush height",
+  "Resizes the current user brush",
+  "by doubling its height.",
+  "",
+  true,
+  SDLK_y|MOD_SHIFT, // Shift+Y
+  0},
+  {186,
+  "Halve brush size",
+  "Resizes the current user brush",
+  "by halving its width and height",
+  "",
+  true,
+  SDLK_h, // H
+  0},
+  {187,
+  "Run script #1",
+  "Runs a recorded Lua script.",
+  "",
+  "",
+  true,
+  0, // No shortcut
+  0},
+  {188,
+  "Run script #2",
+  "Runs a recorded Lua script.",
+  "",
+  "",
+  true,
+  0, // No shortcut
+  0},
+  {189,
+  "Run script #3",
+  "Runs a recorded Lua script.",
+  "",
+  "",
+  true,
+  0, // No shortcut
+  0},
+  {190,
+  "Run script #4",
+  "Runs a recorded Lua script.",
+  "",
+  "",
+  true,
+  0, // No shortcut
+  0},
+  {191,
+  "Run script #5",
+  "Runs a recorded Lua script.",
+  "",
+  "",
+  true,
+  0, // No shortcut
+  0},
+  {192,
+  "Run script #6",
+  "Runs a recorded Lua script.",
+  "",
+  "",
+  true,
+  0, // No shortcut
+  0},
+  {193,
+  "Run script #7",
+  "Runs a recorded Lua script.",
+  "",
+  "",
+  true,
+  0, // No shortcut
+  0},
+  {194,
+  "Run script #8",
+  "Runs a recorded Lua script.",
+  "",
+  "",
+  true,
+  0, // No shortcut
+  0},
+  {195,
+  "Run script #9",
+  "Runs a recorded Lua script.",
+  "",
+  "",
+  true,
+  0, // No shortcut
+  0},
+  {196,
+  "Run script #10",
+  "Runs a recorded Lua script.",
+  "",
+  "",
+  true,
+  0, // No shortcut
+  0},
+  {197,
+  "Toggle color cycling",
+  "Activates or desactivates color",
+  "cycling, if the current image has",
+  "cycling colors. (See gradient menu)",
+  true,
+  SDLK_BACKQUOTE|MOD_CTRL, // Ctrl + `~
+  0},
+  {198,
   "Format checker",
   "Performs a format check on the",
   "current image.",
   "",
   true,
   0,
-  0},
+  0}
 };
 
 word Ordering[NB_SHORTCUTS]=
@@ -1670,6 +1834,23 @@ word Ordering[NB_SHORTCUTS]=
   0x100+BUTTON_LAYER_UP,
   0x100+BUTTON_LAYER_DOWN,
   0x100+BUTTON_LAYER_MENU,
+  0x200+BUTTON_BRUSH_EFFECTS,
+  SPECIAL_REPEAT_SCRIPT,
+  SPECIAL_BRUSH_DOUBLE,
+  SPECIAL_BRUSH_DOUBLE_WIDTH,
+  SPECIAL_BRUSH_DOUBLE_HEIGHT,
+  SPECIAL_BRUSH_HALVE,
+  SPECIAL_RUN_SCRIPT_1,
+  SPECIAL_RUN_SCRIPT_2,
+  SPECIAL_RUN_SCRIPT_3,
+  SPECIAL_RUN_SCRIPT_4,
+  SPECIAL_RUN_SCRIPT_5,
+  SPECIAL_RUN_SCRIPT_6,
+  SPECIAL_RUN_SCRIPT_7,
+  SPECIAL_RUN_SCRIPT_8,
+  SPECIAL_RUN_SCRIPT_9,
+  SPECIAL_RUN_SCRIPT_10,
+  SPECIAL_CYCLE_MODE,
   SPECIAL_FORMAT_CHECKER,
   SPECIAL_FORMAT_CHECKER_MENU,
 };

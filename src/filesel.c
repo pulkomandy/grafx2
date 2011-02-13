@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2009 Franck Charlet
     Copyright 2008 Peter Gordon
     Copyright 2008 Yves Rizoud
@@ -22,14 +23,22 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 
+#include <SDL_syswm.h>
+
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     #include <proto/dos.h>
     #include <sys/types.h>
     #include <dirent.h>
     #define isHidden(x) (0)
+
+#elif defined (__MINT__)
+    #include <mint/sysbind.h>
+    #include <dirent.h>
+    #define isHidden(x) (0)
 #elif defined(__WIN32__)
     #include <dirent.h>
     #include <windows.h>
+    #include <commdlg.h>
     #define isHidden(x) (GetFileAttributesA((x)->d_name)&FILE_ATTRIBUTE_HIDDEN)
 #else
     #include <dirent.h>
@@ -62,12 +71,66 @@
 #include "help.h"
 #include "filesel.h"
 
-#define NORMAL_FILE_COLOR    MC_Light // color du texte pour une ligne de fichier non sélectionné
-#define NORMAL_DIRECTORY_COLOR MC_Dark // color du texte pour une ligne de répertoire non sélectionné
-#define NORMAL_BACKGROUND_COLOR       MC_Black  // color du fond  pour une ligne non sélectionnée
-#define SELECTED_FILE_COLOR    MC_White // color du texte pour une ligne de fichier    sélectionnée
-#define SELECTED_DIRECTORY_COLOR MC_Light // color du texte pour une ligne de repértoire sélectionnée
-#define SELECTED_BACKGROUND_COLOR       MC_Dark // color du fond  pour une ligne sélectionnée
+#define NORMAL_FILE_COLOR    MC_Light // color du texte pour une ligne de
+	// fichier non sélectionné
+#define NORMAL_DIRECTORY_COLOR MC_Dark // color du texte pour une ligne de
+	// répertoire non sélectionné
+#define NORMAL_BACKGROUND_COLOR       MC_Black  // color du fond  pour une ligne
+	// non sélectionnée
+#define SELECTED_FILE_COLOR    MC_White // color du texte pour une ligne de
+	// fichier sélectionnée
+#define SELECTED_DIRECTORY_COLOR MC_Light // color du texte pour une ligne de
+	// repértoire sélectionnée
+#define SELECTED_BACKGROUND_COLOR       MC_Dark // color du fond  pour une ligne
+	// sélectionnée
+
+// -- Native fileselector for WIN32
+
+// Returns 0 if all ok, something else if failed
+byte Native_filesel(byte load)
+{
+	//load = load;
+#ifdef __WIN32__
+  OPENFILENAME ofn;
+  char szFileName[MAX_PATH] = "";
+	SDL_SysWMinfo wminfo;
+	HWND hwnd;
+	
+	SDL_VERSION(&wminfo.version);
+	SDL_GetWMInfo(&wminfo);
+	hwnd = wminfo.window;
+
+  ZeroMemory(&ofn, sizeof(ofn));
+
+  ofn.lStructSize = sizeof(ofn);
+  ofn.hwndOwner = hwnd;
+  ofn.lpstrFilter = "Text Files (*.txt)\0*.txt\0All Files (*.*)\0*.*\0";
+  ofn.lpstrFile = szFileName;
+  ofn.nMaxFile = MAX_PATH;
+  ofn.Flags = OFN_EXPLORER;
+  if(load) ofn.Flags |= OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+  ofn.lpstrDefExt = "txt";
+
+  if(load)
+  {
+    if (GetOpenFileName(&ofn))
+      // Do something usefull with the filename stored in szFileName 
+      return 0;
+    else
+      // error - check if its just user pressing cancel or something else
+      return CommDlgExtendedError();
+  } else if(GetSaveFileName(&ofn)) {
+    return 0;
+  } else {
+    // Check if cancel
+    return CommDlgExtendedError();
+  }
+#else
+  return 255; // fail !
+#endif
+}  
+
+// -- "Standard" fileselector for other platforms
 
 // -- Fileselector data
 
@@ -86,7 +149,7 @@ static char Selector_filename[256];
 void Recount_files(T_Fileselector *list)
 {
   T_Fileselector_item *item;
-  
+
   list->Nb_files=0;
   list->Nb_directories=0;
   list->Nb_elements=0;
@@ -146,30 +209,48 @@ void Free_fileselector_list(T_Fileselector *list)
   Recount_files(list);
 }
 
-char * Format_filename(const char * fname, int type)
+char * Format_filename(const char * fname, word max_length, int type)
 {
-  static char result[19];
+  static char result[40];
   int         c;
   int         other_cursor;
   int         pos_last_dot;
 
+  // safety
+  if (max_length>40)
+    max_length=40;
+  
   if (strcmp(fname,PARENT_DIR)==0)
   {
     strcpy(result,"<-PARENT DIRECTORY");
+    // Append spaces
+    for (c=18; c<max_length-1; c++)
+      result[c]=' ';
+    result[c]='\0';
   }
   else if (fname[0]=='.' || type==1 || type==2)
   {
-    // Files ".something" or drives or directories: Aligned left on 18 chars max
-    strcpy(result,"                  ");
-    for (c=0;fname[c]!='\0' && c < 18;c++)
+    // Files ".something" or drives or directories: Aligned left on (max_length-1) chars max
+    // Initialize as all spaces
+    for (c=0; c<max_length-1; c++)
+      result[c]=' ';
+    result[c]='\0';
+    
+    for (c=0;fname[c]!='\0' && c < max_length-1;c++)
       result[c]=fname[c];
     // A special character indicates the filename is truncated
-    if (c >= 18)
-      result[17]=ELLIPSIS_CHARACTER;
+    if (c >= max_length-1)
+      result[max_length-2]=ELLIPSIS_CHARACTER;
   }
   else
   {
-    strcpy(result,"              .   ");
+    // Initialize as all spaces
+    for (c = 0; c<max_length-1; c++)
+      result[c]=' ';
+    result[c]='\0';
+       
+    result[max_length-5]='.';
+    
     // Look for the last dot in filename
     pos_last_dot = -1;
     for (c = 0; fname[c]!='\0'; c++)
@@ -179,9 +260,9 @@ char * Format_filename(const char * fname, int type)
     // Copy the part before the dot
     for (c=0; c!=pos_last_dot && fname[c]!='\0'; c++)
     {
-      if (c > 13)
+      if (c > max_length-6)
       {
-        result[13]=ELLIPSIS_CHARACTER;
+        result[max_length-6]=ELLIPSIS_CHARACTER;
         break;
       }
       result[c]=fname[c];
@@ -190,7 +271,7 @@ char * Format_filename(const char * fname, int type)
     // Ensuite on recopie la partie qui suit le point (si nécessaire):
     if (pos_last_dot != -1)
     {
-      for (c = pos_last_dot+1,other_cursor=15;fname[c]!='\0' && other_cursor < 18;c++,other_cursor++)
+      for (c = pos_last_dot+1,other_cursor=max_length-4;fname[c]!='\0' && other_cursor < max_length-1;c++,other_cursor++)
         result[other_cursor]=fname[c];
     }
   }
@@ -199,25 +280,29 @@ char * Format_filename(const char * fname, int type)
 
 
 // -- Rajouter a la liste des elements de la liste un element ---------------
-void Add_element_to_list(T_Fileselector *list, const char * fname, int type)
+void Add_element_to_list(T_Fileselector *list, const char * full_name, const char *short_name, int type, byte icon)
 //  Cette procedure ajoute a la liste chainee un fichier passé en argument.
 {
-  // Pointeur temporaire d'insertion
+  // Working element
   T_Fileselector_item * temp_item;
 
-  // On alloue de la place pour un nouvel element
-  temp_item=(T_Fileselector_item *)malloc(sizeof(T_Fileselector_item));
+  // Allocate enough room for one struct + the visible label
+  temp_item=(T_Fileselector_item *)malloc(sizeof(T_Fileselector_item)+strlen(short_name));
 
-  // On met a jour le nouvel emplacement:
-  strcpy(temp_item->Short_name,Format_filename(fname, type));
-  strcpy(temp_item->Full_name,fname);
+  // Initialize element
+  strcpy(temp_item->Short_name,short_name);
+  strcpy(temp_item->Full_name,full_name);
   temp_item->Type = type;
+  temp_item->Icon = icon;
 
+  // Doubly-linked
   temp_item->Next    =list->First;
   temp_item->Previous=NULL;
 
   if (list->First!=NULL)
     list->First->Previous=temp_item;
+    
+  // Put new element at the beginning
   list->First=temp_item;
 }
 
@@ -275,8 +360,25 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   // Après effacement, il ne reste ni fichier ni répertoire dans la liste
 
   // On lit tous les répertoires:
+
+#if defined (__MINT__)
+  static char path[1024];
+  static char path2[1024];
+  path[0]='\0';
+  path2[0]='\0';
+  
+  char currentDrive='A';
+  currentDrive=currentDrive+Dgetdrv(); 
+  
+  Dgetpath(path,0);
+  sprintf(path2,"%c:\%s",currentDrive,path);
+ 
+  strcat(path2,PATH_SEPARATOR);
+  current_directory=opendir(path2);
+#else  
   current_path=getcwd(NULL,0);
   current_directory=opendir(current_path);
+#endif
   while ((entry=readdir(current_directory)))
   {
     // On ignore le répertoire courant
@@ -294,7 +396,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
      !isHidden(entry)))
     {
       // On rajoute le répertoire à la liste
-      Add_element_to_list(list, entry->d_name, 1);
+      Add_element_to_list(list, entry->d_name, Format_filename(entry->d_name, 19, 1), 1, ICON_NONE);
       list->Nb_directories++;
     }
     else if (S_ISREG(Infos_enreg.st_mode) && //Il s'agit d'un fichier
@@ -307,7 +409,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
         if (Check_extension(entry->d_name, ext))
         {
           // On rajoute le fichier à la liste
-          Add_element_to_list(list, entry->d_name, 0);
+          Add_element_to_list(list, entry->d_name, Format_filename(entry->d_name, 19, 0), 0, ICON_NONE);
           list->Nb_files++;
           // Stop searching
           ext=NULL;
@@ -323,12 +425,35 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   }
 
 #if defined(__MORPHOS__) || defined(__AROS__) || defined (__amigaos4__) || defined(__amigaos__)
-  Add_element_to_list(list, "/",1); // on amiga systems, / means parent. And there is no ..
+  Add_element_to_list(list, "/", Format_filename("/",19,1), 1, ICON_NONE); // on amiga systems, / means parent. And there is no ..
   list->Nb_directories ++;
+#elif defined (__MINT__)
+  T_Fileselector_item *item=NULL;
+  // check if ".." exists if not add it
+  // FreeMinT lists ".." already, but this is not so for TOS 
+  // simply adding it will cause double PARENT_DIR under FreeMiNT
+  
+  bool bFound= false;
+  
+  for (item = list->First; (((item != NULL) && (bFound==false))); item = item->Next){
+    if (item->Type == 1){
+	if(strncmp(item->Full_name,"..",(sizeof(char)*2))==0) bFound=true;
+    }
+  }
+  
+  if(!bFound){
+    Add_element_to_list(list, "..",1,Format_filename("/",19,1),ICON_NONE); // add if not present
+    list->Nb_directories ++;  
+  }
+  
 #endif
 
   closedir(current_directory);
+#if defined (__MINT__)  
+
+#else
   free(current_path);
+#endif
   current_path = NULL;
 
   Recount_files(list);
@@ -375,7 +500,7 @@ void Read_list_of_drives(T_Fileselector *list)
       {
         bstrtostr( dl->dol_Name, tmp, 254 );
         strcat( tmp, ":" );
-        Add_element_to_list(list, tmp, 2 );
+        Add_element_to_list(list, tmp, Format_filename(tmp, 19, 2), 2, ICON_NONE );
         list->Nb_directories++;
       }
       UnLockDosList( LDF_VOLUMES | LDF_READ );
@@ -387,6 +512,8 @@ void Read_list_of_drives(T_Fileselector *list)
     int drive_bits = GetLogicalDrives();
     int drive_index;
     int bit_index;
+    byte icon;
+    
     // Sous Windows, on a la totale, presque aussi bien que sous DOS:
     drive_index = 0;
     for (bit_index=0; bit_index<26 && drive_index<23; bit_index++)
@@ -395,35 +522,51 @@ void Read_list_of_drives(T_Fileselector *list)
       {
         // On a ce lecteur, il faut maintenant déterminer son type "physique".
         // pour profiter des jolies icones de X-man.
-        int drive_type;
         char drive_path[]="A:\\";
         // Cette API Windows est étrange, je dois m'y faire...
         drive_path[0]='A'+bit_index;
         switch (GetDriveType(drive_path))
         {
           case DRIVE_CDROM:
-            drive_type=ICON_CDROM;
+            icon=ICON_CDROM;
             break;
           case DRIVE_REMOTE:
-            drive_type=ICON_NETWORK;
+            icon=ICON_NETWORK;
             break;
           case DRIVE_REMOVABLE:
-            drive_type=ICON_FLOPPY_3_5;
+            icon=ICON_FLOPPY_3_5;
             break;
           case DRIVE_FIXED:
-            drive_type=ICON_HDD;
+            icon=ICON_HDD;
             break;
           default:
-            drive_type=ICON_NETWORK;
+            icon=ICON_NETWORK;
             break;
         }
         drive_name[0]='A'+bit_index;
-        Add_element_to_list(list, drive_name,2);
+        Add_element_to_list(list, drive_name, Format_filename(drive_name,18,2), 2, icon);
         list->Nb_directories++;
         drive_index++;
       }
     }
   }
+  #elif defined(__MINT__)
+    char drive_name[]="A:\\";
+    unsigned long drive_bits = Drvmap(); //get drive map bitfield
+    int drive_index;
+    int bit_index;
+    drive_index = 0;
+    for (bit_index=0; bit_index<32; bit_index++)
+    {
+      if ( (1 << bit_index) & drive_bits )
+      {
+        drive_name[0]='A'+bit_index;
+        Add_element_to_list(list, drive_name,Format_filename(drive_name,19,2),2,ICON_NONE);
+        list->Nb_directories++;
+        drive_index++;
+      }
+    }
+  
   #else
   {
     //Sous les différents unix, on va mettre
@@ -440,11 +583,11 @@ void Read_list_of_drives(T_Fileselector *list)
     #else
         char * home_dir = getenv("HOME");
     #endif
-    Add_element_to_list(list, "/", 2);
+    Add_element_to_list(list, "/", Format_filename("/",19,2), 2, ICON_NONE);
     list->Nb_directories++;
     if(home_dir)
     {
-        Add_element_to_list(list, home_dir, 2);
+        Add_element_to_list(list, home_dir, Format_filename(home_dir, 19, 2), 2, ICON_NONE);
         list->Nb_directories++;
     }
 
@@ -454,7 +597,7 @@ void Read_list_of_drives(T_Fileselector *list)
     {
         if(mount_points_list->me_dummy == 0 && strcmp(mount_points_list->me_mountdir,"/") && strcmp(mount_points_list->me_mountdir,"/home"))
         {
-            Add_element_to_list(list, mount_points_list->me_mountdir,2);
+            Add_element_to_list(list, mount_points_list->me_mountdir, Format_filename(mount_points_list->me_mountdir, 19, 2), 2, ICON_NONE);
             list->Nb_directories++;
         }
         next = mount_points_list -> me_next;
@@ -472,6 +615,15 @@ void Read_list_of_drives(T_Fileselector *list)
 
   Recount_files(list);
 }
+
+// Comparison of file names:
+#ifdef WIN32
+// case-insensitive
+  #define FILENAME_COMPARE strcasecmp
+#else
+// case-sensitive
+  #define FILENAME_COMPARE strcmp
+#endif
 
 
 // -- Tri de la liste des fichiers et répertoires ---------------------------
@@ -514,7 +666,7 @@ void Sort_list_of_files(T_Fileselector *list)
           // Si les deux éléments sont de même type et que le nom du suivant
           // est plus petit que celui du courant -> need_swap
         else if ( (current_item->Type==next_item->Type) &&
-                  (strcmp(current_item->Full_name,next_item->Full_name)>0) )
+                  (FILENAME_COMPARE(current_item->Full_name,next_item->Full_name)>0) )
           need_swap=1;
 
 
@@ -640,7 +792,14 @@ void Display_file_list(T_Fileselector *list, short offset_first,short selector_o
       }
 
       // On affiche l'élément
-      Print_in_window(8,95+index*8,current_item->Short_name,text_color,background_color);
+      if (current_item->Icon != ICON_NONE)
+      {
+        // Name preceded by an icon
+        Print_in_window(16,95+index*8,current_item->Short_name,text_color,background_color);
+        Window_display_icon_sprite(8,95+index*8,current_item->Icon);
+      } else
+        // Name without icon
+        Print_in_window(8,95+index*8,current_item->Short_name,text_color,background_color);
 
       // On passe à la ligne suivante
       selector_offset--;
@@ -889,7 +1048,7 @@ void Prepare_and_display_filelist(short Position, short offset, T_Scroller_butto
 {
   button->Nb_elements=Filelist.Nb_elements;
   button->Position=Position;
-  Compute_slider_cursor_height(button);
+  Compute_slider_cursor_length(button);
   Window_draw_slider(button);
   // On efface les anciens noms de fichier:
   Window_rectangle(8-1,95-1,144+2,80+2,MC_Black);
@@ -984,12 +1143,8 @@ short Find_file_in_fileselector(T_Fileselector *list, const char * fname)
   return close_match;
 }
 
-
-void Highlight_file(char * fname)
+void Highlight_file(short index)
 {
-  short index;
-
-  index=Find_file_in_fileselector(&Filelist, fname);
 
   if ((Filelist.Nb_elements<=10) || (index<5))
   {
@@ -1012,15 +1167,17 @@ void Highlight_file(char * fname)
 }
 
 
-char * Find_filename_match(T_Fileselector *list, char * fname)
+short Find_filename_match(T_Fileselector *list, char * fname)
 {
-  char * best_name_ptr;
+  short best_match;
   T_Fileselector_item * current_item;
-  byte   matching_letters=0;
-  byte   counter;
+  short item_number;
+  byte matching_letters=0;
+  byte counter;
 
-  best_name_ptr=NULL;
-
+  best_match=-1;
+  item_number=0;
+  
   for (current_item=list->First; current_item!=NULL; current_item=current_item->Next)
   {
     if ( (!Config.Find_file_fast)
@@ -1031,12 +1188,96 @@ char * Find_filename_match(T_Fileselector *list, char * fname)
       if (counter>matching_letters)
       {
         matching_letters=counter;
-        best_name_ptr=current_item->Full_name;
+        best_match=item_number;
       }
     }
+    item_number++;
   }
 
-  return best_name_ptr;
+  return best_match;
+}
+
+// Quicksearch system
+char  quicksearch_filename[MAX_PATH_CHARACTERS]="";
+
+void Reset_quicksearch(void)
+{
+  quicksearch_filename[0]='\0';
+}
+
+short Quicksearch(T_Fileselector *selector)
+{
+  int len;
+  short most_matching_item;
+  
+  // Autre => On se place sur le nom de fichier qui correspond
+  len=strlen(quicksearch_filename);
+  if (Key_ANSI>= ' ' && Key_ANSI < 255 && len<50)
+  {
+    quicksearch_filename[len]=Key_ANSI;
+    quicksearch_filename[len+1]='\0';
+    most_matching_item=Find_filename_match(selector, quicksearch_filename);
+    if ( most_matching_item >= 0 )
+    {
+      return most_matching_item;
+    }
+    *quicksearch_filename=0;
+  }
+  return -1;
+}
+
+// Translated from Highlight_file
+void Locate_list_item(T_List_button * list, T_Fileselector * selector, short selected_item)
+{
+
+  // Safety bounds
+  if (selected_item<0)
+    selected_item=0;
+  else if (selected_item>=list->Scroller->Nb_elements)
+    selected_item=list->Scroller->Nb_elements-1;
+    
+    
+  if ((list->Scroller->Nb_elements<=list->Scroller->Nb_visibles) || (selected_item<(list->Scroller->Nb_visibles/2)))
+  {
+    list->List_start=0;
+    list->Cursor_position=selected_item;
+  }
+  else
+  {
+    if (selected_item>=list->Scroller->Nb_elements-(list->Scroller->Nb_visibles/2))
+    {
+      list->List_start=list->Scroller->Nb_elements-list->Scroller->Nb_visibles;
+      list->Cursor_position=selected_item-list->List_start;
+    }
+    else
+    {
+      list->List_start=selected_item-(list->Scroller->Nb_visibles/2-1);
+      list->Cursor_position=(list->Scroller->Nb_visibles/2-1);
+    }
+  }
+}
+
+int Quicksearch_list(T_List_button * list, T_Fileselector * selector)
+{
+  // Try Quicksearch
+  short selected_item=Quicksearch(selector);
+  if (selected_item>=0 && selected_item!=list->Cursor_position+list->List_start)
+  {
+    Locate_list_item(list, selector, selected_item);
+    
+    Hide_cursor();
+    // Mise à jour du scroller
+    list->Scroller->Position=list->List_start;
+    Window_draw_slider(list->Scroller);
+    
+    Window_redraw_list(list);
+    Display_cursor();
+    // Store the selected value as attribute2
+    Window_attribute2=list->List_start + list->Cursor_position;
+    // Return the control ID of the list.
+    return list->Number;
+  }
+  return 0;
 }
 
 byte Button_Load_or_Save(byte load, T_IO_Context *context)
@@ -1048,17 +1289,20 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
   T_Dropdown_button * formats_dropdown;
   T_Dropdown_button * bookmark_dropdown[4];
   short temp;
+  unsigned int format;
   int dummy=0;       // Sert à appeler SDL_GetKeyState
   byte  save_or_load_image=0;
   byte  has_clicked_ok=0;// Indique si on a clické sur Load ou Save ou sur
                              //un bouton enclenchant Load ou Save juste après.
   byte  initial_back_color;             // |  fout en l'air (c'te conne).
   char  previous_directory[MAX_PATH_CHARACTERS]; // Répertoire d'où l'on vient après un CHDIR
-  char  quicksearch_filename[MAX_PATH_CHARACTERS]="";
   char  save_filename[MAX_PATH_CHARACTERS];
   char  initial_comment[COMMENT_SIZE+1];
-  char * most_matching_filename;
   short window_shortcut;
+
+  Reset_quicksearch();
+  
+  // if (Native_filesel(load) != 0); // TODO : handle this
   
   if (context->Type == CONTEXT_MAIN_IMAGE)
     window_shortcut = load?(0x100+BUTTON_LOAD):(0x100+BUTTON_SAVE);
@@ -1099,7 +1343,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
     }
     // Affichage du commentaire
     if (Get_fileformat(Main_format)->Comment)
-      Print_in_window(47,70,context->Comment,MC_Black,MC_Light);      
+      Print_in_window(45,70,context->Comment,MC_Black,MC_Light);      
   }
 
   Window_set_normal_button(253,180,51,14,"Cancel",0,1,KEY_ESC); // 2
@@ -1124,11 +1368,11 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
       Get_fileformat(Main_format)->Label,
       1,0,1,RIGHT_SIDE|LEFT_SIDE,0); // 6
 
-  for (temp=0; temp < NB_KNOWN_FORMATS; temp++)
+  for (format=0; format < Nb_known_formats(); format++)
   {
-    if ((load && (File_formats[temp].Identifier <= FORMAT_ALL_FILES || File_formats[temp].Load)) || 
-      (!load && File_formats[temp].Save))
-        Window_dropdown_add_item(formats_dropdown,File_formats[temp].Identifier,File_formats[temp].Label);
+    if ((load && (File_formats[format].Identifier <= FORMAT_ALL_FILES || File_formats[format].Load)) || 
+      (!load && File_formats[format].Save))
+        Window_dropdown_add_item(formats_dropdown,File_formats[format].Identifier,File_formats[format].Label);
   }
   Print_in_window(70,18,"Format",MC_Dark,MC_Light);
   
@@ -1161,13 +1405,30 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
   // On prend bien soin de passer dans le répertoire courant (le bon qui faut! Oui madame!)
   if (load)
   {
+  #if defined(__MINT__)    
+    chdir(Main_current_directory);
+    static char path[1024]={0};
+    Dgetpath(path,0);
+    strcat(path,PATH_SEPARATOR);
+    strcpy(Main_current_directory,path);  
+  #else
     chdir(Main_current_directory);
     getcwd(Main_current_directory,256);
+  #endif
   }
   else
   {
+    #if defined(__MINT__)    
     chdir(context->File_directory);
+    static char path[1024]={0};
+    Dgetpath(path,0);
+    strcat(path,PATH_SEPARATOR);
+    strcpy(Main_current_directory,path);  
+ #else
     getcwd(Main_current_directory,256);
+  #endif
+
+
   }
   
   // Affichage des premiers fichiers visibles:
@@ -1181,7 +1442,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
     // On affiche le nouveau nom de fichier
     Print_filename_in_fileselector();
 
-    Highlight_file(context->File_name);
+    Highlight_file(Find_file_in_fileselector(&Filelist, context->File_name));
     Prepare_and_display_filelist(Main_fileselector_position,Main_fileselector_offset,file_scroller);
   }
 
@@ -1309,7 +1570,8 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
             // On vient de changer de nom de fichier, donc on doit s'appreter
             // a rafficher une preview
             New_preview_is_needed=1;
-            *quicksearch_filename=0;
+            Reset_quicksearch();
+            
           }
           else
           {
@@ -1322,7 +1584,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
 
             has_clicked_ok=1;
             New_preview_is_needed=1;
-            *quicksearch_filename=0;
+            Reset_quicksearch();
           }
         }
         Display_cursor();
@@ -1340,26 +1602,40 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
         Display_file_list(&Filelist, Main_fileselector_position,Main_fileselector_offset);
         Display_cursor();
         New_preview_is_needed=1;
-        *quicksearch_filename=0;
+        Reset_quicksearch();
         break;
 
-      case  6 : // Scroller des formats
-        Hide_cursor();
-        // On met à jour le format de browsing du fileselect:
-        Main_format=Window_attribute2;
-        // Comme on change de liste, on se place en début de liste:
-        Main_fileselector_position=0;
-        Main_fileselector_offset=0;
-        // Affichage des premiers fichiers visibles:
-        Reload_list_of_files(Main_format,file_scroller);
-        Display_cursor();
-        New_preview_is_needed=1;
-        *quicksearch_filename=0;
+	  case  6 : // Scroller des formats
+		// On met à jour le format de browsing du fileselect:
+		if (Main_format != Window_attribute2) {
+			char* savename = (char *)strdup(Selector_filename);
+			int nameLength = strlen(savename);
+			DEBUG(Selector_filename, 42);
+			Main_format = Window_attribute2;
+			// Comme on change de liste, on se place en début de liste:
+			Main_fileselector_position = 0;
+			Main_fileselector_offset = 0;
+			// Affichage des premiers fichiers visibles:
+			Hide_cursor();
+			Reload_list_of_files(Main_format, file_scroller);
+			New_preview_is_needed = 1;
+			Reset_quicksearch();
+			strcpy(Selector_filename, savename);
+			if (Get_fileformat(Main_format)->Default_extension[0] != '\0' &&
+				Selector_filename[nameLength - 4] == '.')
+			{
+				strcpy(Selector_filename + nameLength - 3,
+					Get_fileformat(Main_format)->Default_extension);
+			}
+			free(savename);
+			Print_filename_in_fileselector();
+        	Display_cursor();
+		}
         break;
       case  7 : // Saisie d'un commentaire pour la sauvegarde
         if ( (!load) && (Get_fileformat(Main_format)->Comment) )
         {
-          Readline(45,70,context->Comment,32,0);
+          Readline(45, 70, context->Comment, 32, INPUT_TYPE_STRING);
           Display_cursor();
         }
         break;
@@ -1368,7 +1644,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
         // Save the filename
         strcpy(save_filename, Selector_filename);
 
-        if (Readline(82,48,Selector_filename,27,2))
+        if (Readline(82,48,Selector_filename,27,INPUT_TYPE_FILENAME))
         {
           //   On regarde s'il faut rajouter une extension. C'est-à-dire s'il
           // n'y a pas de '.' dans le nom du fichier.
@@ -1382,7 +1658,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
               if(!Directory_exists(Selector_filename))
               {
                  strcat(Selector_filename, ".");
-                 strcat(Selector_filename,Get_fileformat(Main_format)->Default_extension);
+                strcat(Selector_filename, Get_fileformat(Main_format)->Default_extension);
               }
             }
             else
@@ -1438,7 +1714,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
           Prepare_and_display_filelist(Main_fileselector_position,Main_fileselector_offset,file_scroller);
           Display_cursor();
           New_preview_is_needed=1;
-          *quicksearch_filename=0;
+          Reset_quicksearch();
           break;
       default:
           if (clicked_button>=10 && clicked_button<10+NB_BOOKMARKS)
@@ -1451,11 +1727,10 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
               case -1: // bouton lui-même: aller au répertoire mémorisé
                 if (Config.Bookmark_directory[clicked_button-10])
                 {
-                  *quicksearch_filename=0;
                   strcpy(Selector_filename,Config.Bookmark_directory[clicked_button-10]);
                   Selected_type=1;
                   has_clicked_ok=1;
-                  *quicksearch_filename=0;
+                  Reset_quicksearch();
                 }
                 break;
                 
@@ -1490,7 +1765,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
                   strcpy(bookmark_label, Config.Bookmark_label[clicked_button-10]);
                   if (bookmark_label[7]==ELLIPSIS_CHARACTER)
                     bookmark_label[7]='\0';
-                  if (Readline_ex(bookmark_dropdown[clicked_button-10]->Pos_X+3+10,bookmark_dropdown[clicked_button-10]->Pos_Y+2,bookmark_label,8,8,0,0))
+                  if (Readline_ex(bookmark_dropdown[clicked_button-10]->Pos_X+3+10,bookmark_dropdown[clicked_button-10]->Pos_Y+2,bookmark_label,8,8,INPUT_TYPE_STRING,0))
                     strcpy(Config.Bookmark_label[clicked_button-10],bookmark_label);
                   Display_bookmark(bookmark_dropdown[clicked_button-10],clicked_button-10);
                   Display_cursor();
@@ -1515,63 +1790,63 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
     {
       case SDLK_UNKNOWN : break;
       case SDLK_DOWN : // Bas
-        *quicksearch_filename=0;
+        Reset_quicksearch();
         Hide_cursor();
         Selector_scroll_down(&Main_fileselector_position,&Main_fileselector_offset);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
       case SDLK_UP : // Haut
-        *quicksearch_filename=0;
+        Reset_quicksearch();
         Hide_cursor();
         Selector_scroll_up(&Main_fileselector_position,&Main_fileselector_offset);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
       case SDLK_PAGEDOWN : // PageDown
-        *quicksearch_filename=0;
+        Reset_quicksearch();
         Hide_cursor();
         Selector_page_down(&Main_fileselector_position,&Main_fileselector_offset,9);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
       case SDLK_PAGEUP : // PageUp
-        *quicksearch_filename=0;
+        Reset_quicksearch();
         Hide_cursor();
         Selector_page_up(&Main_fileselector_position,&Main_fileselector_offset,9);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
       case SDLK_END : // End
-        *quicksearch_filename=0;
+        Reset_quicksearch();
         Hide_cursor();
         Selector_end(&Main_fileselector_position,&Main_fileselector_offset);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
       case SDLK_HOME : // Home
-        *quicksearch_filename=0;
+        Reset_quicksearch();
         Hide_cursor();
         Selector_home(&Main_fileselector_position,&Main_fileselector_offset);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
       case KEY_MOUSEWHEELDOWN :
-        *quicksearch_filename=0;
+        Reset_quicksearch();
         Hide_cursor();
         Selector_page_down(&Main_fileselector_position,&Main_fileselector_offset,3);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
       case KEY_MOUSEWHEELUP :
-        *quicksearch_filename=0;
+        Reset_quicksearch();
         Hide_cursor();
         Selector_page_up(&Main_fileselector_position,&Main_fileselector_offset,3);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
       case SDLK_BACKSPACE : // Backspace
-        *quicksearch_filename=0;
+        Reset_quicksearch();
         // Si le choix ".." est bien en tête des propositions...
         if (!strcmp(Filelist.First->Full_name,PARENT_DIR))
         {                              
@@ -1585,6 +1860,8 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
       default:
         if (clicked_button<=0)
         {
+          short selected_item;
+          
           if (Is_shortcut(Key,0x100+BUTTON_HELP))
           {
             Window_help(load?BUTTON_LOAD:BUTTON_SAVE, NULL);
@@ -1595,30 +1872,22 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
             clicked_button=2;
             break;
           }
-          // Autre => On se place sur le nom de fichier qui correspond
-          temp=strlen(quicksearch_filename);
-          if (Key_ANSI>= ' ' && Key_ANSI < 255 && temp<50)
+          
+          selected_item=Quicksearch(&Filelist);
+          if (selected_item>=0)
           {
-            quicksearch_filename[temp]=Key_ANSI;
-            quicksearch_filename[temp+1]='\0';
-            most_matching_filename=Find_filename_match(&Filelist, quicksearch_filename);
-            if ( (most_matching_filename) )
-            {
               temp=Main_fileselector_position+Main_fileselector_offset;
               Hide_cursor();
-              Highlight_file(most_matching_filename);
+              Highlight_file(selected_item);
               Prepare_and_display_filelist(Main_fileselector_position,Main_fileselector_offset,file_scroller);
               Display_cursor();
               if (temp!=Main_fileselector_position+Main_fileselector_offset)
                 New_preview_is_needed=1;
-            }
-            else
-              *quicksearch_filename=0;
-            Key=0;
           }
+          // Key=0; ?
         }
         else
-          *quicksearch_filename=0;
+          Reset_quicksearch();
     }
 
     if (has_clicked_ok)
@@ -1643,13 +1912,20 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
         // On doit rentrer dans le répertoire:
         if (!chdir(Selector_filename))
         {
+        #if defined (__MINT__)          
+          static char path[1024]={0};
+          char currentDrive='A';
+          currentDrive=currentDrive+Dgetdrv();
+          Dgetpath(path,0);
+         sprintf(Main_current_directory,"%c:\%s",currentDrive,path);
+        #else
           getcwd(Main_current_directory,256);
-  
+        #endif
           // On lit le nouveau répertoire
           Read_list_of_files(&Filelist, Main_format);
           Sort_list_of_files(&Filelist);
           // On place la barre de sélection sur le répertoire d'où l'on vient
-          Highlight_file(previous_directory);
+          Highlight_file(Find_file_in_fileselector(&Filelist, previous_directory));
         }
         else
           Error(0);
@@ -1659,7 +1935,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
         New_preview_is_needed=1;
 
         // On est dans un nouveau répertoire, donc on remet le quicksearch à 0
-        *quicksearch_filename=0;
+        Reset_quicksearch();
       }
       else  // Sinon on essaye de charger ou sauver le fichier
       {
@@ -1681,7 +1957,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
         // On efface le commentaire précédent
         Window_rectangle(45,70,32*8,8,MC_Light);
         // On nettoie la zone où va s'afficher la preview:
-        Window_rectangle(183,95,120,80,MC_Light);
+        Window_rectangle(183,95,PREVIEW_WIDTH,PREVIEW_HEIGHT,MC_Light);
         // On efface les dimensions de l'image
         Window_rectangle(143,59,72,8,MC_Light);
         // On efface la taille du fichier
@@ -1697,7 +1973,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
         // Un update pour couvrir les 4 zones: 3 libellés plus le commentaire
         Update_window_area(45,48,256,30);
         // Zone de preview
-        Update_window_area(183,95,120,80);
+        Update_window_area(183,95,PREVIEW_WIDTH,PREVIEW_HEIGHT);
       }
 
       New_preview_is_needed=0;

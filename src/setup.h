@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2011 Pawel Góralski
     Copyright 2008 Peter Gordon
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
@@ -53,4 +54,104 @@ void Set_data_directory(const char * program_dir, char * data_dir);
 /// IN: The directory containing the executable
 /// OUT: Write into config_dir. Trailing / or \ is kept.
 void Set_config_directory(const char * program_dir, char * config_dir);
-  
+
+
+/// Name of the subdirectory containing fonts, under the data directory (::Set_data_directory())
+#if defined (__MINT__)
+  #define FONTS_SUBDIRECTORY "FONTS"
+#else
+  #define FONTS_SUBDIRECTORY "fonts"
+#endif
+
+/// Name of the subdirectory containing fonts, under the data directory (::Set_data_directory())
+#if defined (__MINT__)
+  #define SKINS_SUBDIRECTORY "SKINS"
+#else
+  #define SKINS_SUBDIRECTORY "skins"
+#endif
+
+/// Name of the binary file containing some configuration settings.
+#if defined (__MINT__)
+  #define CONFIG_FILENAME "GFX2.CFG"
+#else
+  #define CONFIG_FILENAME "gfx2.cfg"
+#endif
+
+/// Name of the text file containing some settings in INI format.
+#if defined (__MINT__)
+  #define INI_FILENAME "GFX2.INI"
+#else
+  #define INI_FILENAME "gfx2.ini"
+#endif
+
+/// Name of the backup of the INI file.
+#if defined (__MINT__)
+  #define INISAVE_FILENAME "GFX2.$$$"
+#else
+  #define INISAVE_FILENAME "gfx2.$$$"
+#endif
+
+/// Name of the default .INI file (read-only: gives .INI format and defaults)
+#if defined (__MINT__)
+  #define INIDEF_FILENAME "GFX2DEF.INI"
+#else
+  #define INIDEF_FILENAME "gfx2def.ini"
+#endif
+
+/// Prefix for filenames of safety backups (main)
+#if defined (__MINT__)
+  #define SAFETYBACKUP_PREFIX_A "A"
+#else
+  #define SAFETYBACKUP_PREFIX_A "a"
+#endif
+
+/// Prefix for filenames of safety backups (spare)
+#if defined (__MINT__)
+  #define SAFETYBACKUP_PREFIX_B "B"
+#else
+  #define SAFETYBACKUP_PREFIX_B "b"
+#endif
+
+/// Name of the image file that serves as an application icon.
+#if defined (__MINT__)
+  #define GFX2_ICON_FILENAME "GFX2.GIF"
+#else
+  #define GFX2_ICON_FILENAME "gfx2.gif"
+#endif
+
+/// Name of the image file for the default (and fallback) GUI skin.
+#if defined (__MINT__)
+  #define DEFAULT_SKIN_FILENAME "SDPAINT.PNG"
+#else
+  #define DEFAULT_SKIN_FILENAME "skin_DPaint.png"
+#endif
+
+/// Name of the image file for the default (and fallback) 8x8 font.
+#if defined (__MINT__)
+  #define DEFAULT_FONT_FILENAME "FDPAINT.PNG"
+#else
+  #define DEFAULT_FONT_FILENAME "font_DPaint.png"
+#endif
+
+/// File extension for safety backups
+#if defined (__MINT__)
+  #define BACKUP_FILE_EXTENSION ".BKP"
+#else
+  #define BACKUP_FILE_EXTENSION ".bkp"
+#endif
+
+/// File prefix for fonts
+#if defined (__MINT__)
+  #define FONT_PREFIX "F"
+#else
+  #define FONT_PREFIX "font_"
+#endif
+
+/// File prefix for skins
+#if defined (__MINT__)
+  #define SKIN_PREFIX "S"
+#else
+  #define SKIN_PREFIX "skin_"
+#endif
+
+

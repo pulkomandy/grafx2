@@ -73,6 +73,12 @@ GFX2_GLOBAL byte MC_Light; ///< Index of color to use as "light grey" in the GUI
 GFX2_GLOBAL byte MC_White; ///< Index of color to use as "white" in the GUI menus.
 GFX2_GLOBAL byte MC_Trans; ///< Index of color to use as "transparent" while loading the GUI file.
 
+GFX2_GLOBAL byte MC_OnBlack; ///< Index of color immediately lighter than "black" in the GUI menus.
+GFX2_GLOBAL byte MC_Window; ///< Index of color to use as window background in the GUI menus.
+GFX2_GLOBAL byte MC_Lighter; ///< Index of color lighter than window in the GUI menus.
+GFX2_GLOBAL byte MC_Darker; ///< Index of color darker than window in the GUI menus.
+
+
 // Input state
 GFX2_GLOBAL word Mouse_X; ///< Current mouse cursor position.
 GFX2_GLOBAL word Mouse_Y; ///< Current mouse cursor position.
@@ -294,10 +300,6 @@ GFX2_GLOBAL short Main_image_height;
 GFX2_GLOBAL short Main_offset_X;
 /// Y position (in image space) of the pixel to display in the top left corner of screen.
 GFX2_GLOBAL short Main_offset_Y;
-/// Backup of ::Main_offset_X, used to store it while the magnifier is open.
-GFX2_GLOBAL short Old_main_offset_X;
-/// Backup of ::Main_offset_Y, used to store it while the magnifier is open.
-GFX2_GLOBAL short Old_main_offset_Y;
 /// Name of the directory that holds the image currently edited.
 GFX2_GLOBAL char  Main_file_directory[1024];
 /// Filename (without directory) of the image currently edited.
@@ -364,10 +366,6 @@ GFX2_GLOBAL short Spare_image_height;
 GFX2_GLOBAL short Spare_offset_X;
 /// Y position (in image space) of the pixel to display in the top left corner of screen.
 GFX2_GLOBAL short Spare_offset_Y;
-/// Backup of ::Main_offset_X, used to store it while the magnifier is open.
-GFX2_GLOBAL short Old_spare_offset_X;
-/// Backup of ::Main_offset_Y, used to store it while the magnifier is open.
-GFX2_GLOBAL short Old_spare_offset_Y;
 /// Name of the directory that holds the image currently edited as spare page.
 GFX2_GLOBAL char  Spare_file_directory[MAX_PATH_CHARACTERS];
 /// Filename (without directory) of the image currently edited as spare page.
@@ -432,8 +430,16 @@ GFX2_GLOBAL T_List_of_pages * Spare_backups;
 
 // -- Brush data
 
-/// Pixel data of the current brush.
+/// Pixel data of the current brush (remapped).
 GFX2_GLOBAL byte * Brush;
+/// Pixel data of the current brush (before remap).
+GFX2_GLOBAL byte * Brush_original_pixels;
+/// Palette of the brush, from when it was grabbed.
+GFX2_GLOBAL T_Palette Brush_original_palette;
+/// Back_color used when the brush was grabbed
+GFX2_GLOBAL byte Brush_original_back_color;
+/// Color mapping from ::Brush_original_pixels to ::Brush
+GFX2_GLOBAL byte Brush_colormap[256];
 /// X coordinate of the brush's "hot spot". It is < ::Brush_width
 GFX2_GLOBAL word Brush_offset_X;
 /// Y coordinate of the brush's "hot spot". It is < ::Brush_height
@@ -492,9 +498,9 @@ GFX2_GLOBAL word  Menu_palette_cell_width;
 GFX2_GLOBAL T_Menu_Bar Menu_bars[MENUBAR_COUNT] 
 #ifdef GLOBAL_VARIABLES
   = 
-{{MENU_WIDTH,  9, 1, 45, NULL,  20, BUTTON_HIDE }, // Status
- {MENU_WIDTH, 10, 1, 35, NULL, 144, BUTTON_LAYER_SELECT }, // Layers
- {MENU_WIDTH, 35, 1,  0, NULL, 254, BUTTON_CHOOSE_COL }} // Main
+{{MENU_WIDTH,  9, 1, 45, {NULL,NULL,NULL},  20, BUTTON_HIDE }, // Status
+ {MENU_WIDTH, 10, 1, 35, {NULL,NULL,NULL}, 144, BUTTON_LAYER_SELECT }, // Layers
+ {MENU_WIDTH, 35, 1,  0, {NULL,NULL,NULL}, 254, BUTTON_CHOOSE_COL }} // Main
 #endif
  ;
 
@@ -510,71 +516,59 @@ GFX2_GLOBAL word Menu_Y_before_window;
 /// Backup of ::Paintbrush_hidden, used to store it while a window is open.
 GFX2_GLOBAL byte Paintbrush_hidden_before_window;
 
-GFX2_GLOBAL word Window_stack_pos_X[8];
+/// The global stack of editor screens.
+GFX2_GLOBAL T_Window Window_stack[8];
+
 /// Position of the left border of the topmost window (in screen coordinates)
-#define Window_pos_X Window_stack_pos_X[Windows_open-1]
+#define Window_pos_X Window_stack[Windows_open-1].Pos_X
 
-GFX2_GLOBAL word Window_stack_pos_Y[8];
 /// Position of the top border of the topmost window (in screen coordinates)
-#define Window_pos_Y Window_stack_pos_Y[Windows_open-1]
+#define Window_pos_Y Window_stack[Windows_open-1].Pos_Y
 
-GFX2_GLOBAL word Window_stack_width[8];
 ///
 /// Width of the topmost window, in "window pixels"
 /// (multiply by ::Menu_factor_X to get screen pixels)
-#define Window_width Window_stack_width[Windows_open-1]
+#define Window_width Window_stack[Windows_open-1].Width
 
-GFX2_GLOBAL word Window_stack_height[8];
 ///
 /// Height of the topmost window, in "window pixels"
 /// (multiply by ::Menu_factor_Y to get screen pixels)
-#define Window_height Window_stack_height[Windows_open-1]
+#define Window_height Window_stack[Windows_open-1].Height
 
-GFX2_GLOBAL word Window_stack_nb_buttons[8];
 /// Total number of buttons/controls in the topmost window.
-#define Window_nb_buttons Window_stack_nb_buttons[Windows_open-1]
+#define Window_nb_buttons Window_stack[Windows_open-1].Nb_buttons
 
-GFX2_GLOBAL T_Normal_button   * Window_stack_normal_button_list[8];
 /// List of normal buttons in the topmost window.
-#define Window_normal_button_list Window_stack_normal_button_list[Windows_open-1]
+#define Window_normal_button_list Window_stack[Windows_open-1].Normal_button_list
 
-GFX2_GLOBAL T_Palette_button  * Window_stack_palette_button_list[8];
 /// List of "palette" buttons in the topmost window.
-#define Window_palette_button_list Window_stack_palette_button_list[Windows_open-1]
+#define Window_palette_button_list Window_stack[Windows_open-1].Palette_button_list
 
-GFX2_GLOBAL T_Scroller_button * Window_stack_scroller_button_list[8];
 /// List of sliders (scrollers) in the topmost window.
-#define Window_scroller_button_list Window_stack_scroller_button_list[Windows_open-1]
+#define Window_scroller_button_list Window_stack[Windows_open-1].Scroller_button_list
 
-GFX2_GLOBAL T_Special_button  * Window_stack_special_button_list[8];
 /// List of special buttons in the topmost window.
-#define Window_special_button_list Window_stack_special_button_list[Windows_open-1]
+#define Window_special_button_list Window_stack[Windows_open-1].Special_button_list
 
-GFX2_GLOBAL T_Dropdown_button  * Window_stack_dropdown_button_list[8];
 /// List of dropdown buttons in the topmost window.
-#define Window_dropdown_button_list Window_stack_dropdown_button_list[Windows_open-1]
+#define Window_dropdown_button_list Window_stack[Windows_open-1].Dropdown_button_list
 
-GFX2_GLOBAL T_List_button  * Window_stack_list_button_list[8];
 /// List of list buttons in the topmost window.
-#define Window_list_button_list Window_stack_list_button_list[Windows_open-1]
+#define Window_list_button_list Window_stack[Windows_open-1].List_button_list
 
-
-
-GFX2_GLOBAL int Window_stack_attribute1[8];
 ///
 /// The function ::Window_clicked_button() set this to ::LEFT_SIDE or ::RIGHT_SIDE
 /// after a button is activated through left or right mouse click.
-#define Window_attribute1 Window_stack_attribute1[Windows_open-1]
+#define Window_attribute1 Window_stack[Windows_open-1].Attribute1
 
-GFX2_GLOBAL int Window_stack_attribute2[8];
 ///
 /// The function ::Window_clicked_button() set this to return extra information:
 /// - When a scroller was clicked: the scroller position (0-n)
 /// - When a palette was clicked: the color index (0-255)
 /// - When a dropdown was used: the selected item's number T_Dropdown_choice::Number
-#define Window_attribute2 Window_stack_attribute2[Windows_open-1]
+#define Window_attribute2 Window_stack[Windows_open-1].Attribute2
 
-
+#define Window_draggable Window_stack[Windows_open-1].Draggable
 
 
 /// Definition of the menu (toolbox)
@@ -587,6 +581,7 @@ GFX2_GLOBAL struct
   word            Height;           ///< Button's active heigth
   byte            Pressed;          ///< Button is currently pressed
   byte            Shape;            ///< Shape, listed in enum ::BUTTON_SHAPES
+  char            Icon;             ///< Which icon to display: Either the one from the toolbar (-1) or one of ::MENU_SPRITE
 
   // Triggers on mouse/keyboard
   Func_action     Left_action;      ///< Action triggered by a left mouseclick on the button
@@ -765,6 +760,8 @@ GFX2_GLOBAL long  Gradient_bounds_range;
 GFX2_GLOBAL long  Gradient_total_range;
 /// Amount of randomness to use in gradient (1-256+)
 GFX2_GLOBAL long  Gradient_random_factor;
+/// Gradient speed of cycling (0-64)
+GFX2_GLOBAL byte  Gradient_speed;
 /// Pointer to a gradient function, depending on the selected method.
 GFX2_GLOBAL Func_gradient Gradient_function;
 ///
@@ -772,10 +769,10 @@ GFX2_GLOBAL Func_gradient Gradient_function;
 /// either ::Pixel (if the gradient must be drawn on menus only)
 /// or ::Display_pixel (if the gradient must be drawn on the image)
 GFX2_GLOBAL Func_pixel Gradient_pixel;
-/// Settings for all gradients
-GFX2_GLOBAL T_Gradient_array Gradient_array[16];
 /// Index in ::Gradient_array of the currently selected gradient.
 GFX2_GLOBAL byte Current_gradient;
+/// Boolean, true when the color cycling is active.
+GFX2_GLOBAL byte Cycling_mode;
 
 // -- Airbrush data
 
@@ -822,6 +819,9 @@ GFX2_GLOBAL byte * Menu_font;
 
 /// Pointer to the current active skin.
 GFX2_GLOBAL T_Gui_skin * Gfx;
+
+/// Pointer to the current active skin.
+GFX2_GLOBAL T_Paintbrush Paintbrush[NB_PAINTBRUSH_SPRITES];
 
 // -- Help data
 
@@ -894,6 +894,7 @@ GFX2_GLOBAL T_Brush_template Brush_container[BRUSH_CONTAINER_COLUMNS*BRUSH_CONTA
     CURSOR_SHAPE_XOR_TARGET        , // Stretch brush
     CURSOR_SHAPE_TARGET            , // Distort brush
     CURSOR_SHAPE_XOR_TARGET        , // Gradient-filled rectangle
+    CURSOR_SHAPE_COLORPICKER       , // Colorpick on right mouse button
   };
 #else
   /// ::Cursor_shape to use for each operation.
@@ -950,34 +951,83 @@ GFX2_GLOBAL SDL_Joystick* Joystick;
 /// It was chosen to not conflict with any SDL key number.
 #define KEY_JOYBUTTON       (SDLK_LAST+4)
 
-/// Button definitions for the gp2x
-#define GP2X_BUTTON_UP              (0)
-#define GP2X_BUTTON_DOWN            (4)
-#define GP2X_BUTTON_LEFT            (2)
-#define GP2X_BUTTON_RIGHT           (6)
-#define GP2X_BUTTON_UPLEFT          (1)
-#define GP2X_BUTTON_UPRIGHT         (7)
-#define GP2X_BUTTON_DOWNLEFT        (3)
-#define GP2X_BUTTON_DOWNRIGHT       (5)
-#define GP2X_BUTTON_CLICK           (18)
-#define GP2X_BUTTON_A               (12)
-#define GP2X_BUTTON_B               (13)
-#define GP2X_BUTTON_Y               (14)
-#define GP2X_BUTTON_X               (15)
-#define GP2X_BUTTON_L               (10)
-#define GP2X_BUTTON_R               (11)
-#define GP2X_BUTTON_START           (8)
-#define GP2X_BUTTON_SELECT          (9)
-#define GP2X_BUTTON_VOLUP           (16)
-#define GP2X_BUTTON_VOLDOWN         (17)
+/// The joystick axis are {X,Y} - on all platforms so far.
+/// If there is ever a platform where they are reversed, put
+/// these lines in each platform "case" below.
+#define JOYSTICK_AXIS_X             (0)
+#define JOYSTICK_AXIS_Y             (1)
 
-#ifdef __gp2x__
-  #define KEY_ESC (KEY_JOYBUTTON+GP2X_BUTTON_X)
+#ifdef __GP2X__
+
+    #define JOYSTICK_THRESHOLD  (4096)
+
+    /// Button definitions for the gp2x
+    #define JOY_BUTTON_UP              (0)
+    #define JOY_BUTTON_DOWN            (4)
+    #define JOY_BUTTON_LEFT            (2)
+    #define JOY_BUTTON_RIGHT           (6)
+    #define JOY_BUTTON_UPLEFT          (1)
+    #define JOY_BUTTON_UPRIGHT         (7)
+    #define JOY_BUTTON_DOWNLEFT        (3)
+    #define JOY_BUTTON_DOWNRIGHT       (5)
+    #define JOY_BUTTON_CLICK           (18)
+    #define JOY_BUTTON_A               (12)
+    #define JOY_BUTTON_B               (13)
+    #define JOY_BUTTON_Y               (14)
+    #define JOY_BUTTON_X               (15)
+    #define JOY_BUTTON_L               (10)
+    #define JOY_BUTTON_R               (11)
+    #define JOY_BUTTON_START           (8)
+    #define JOY_BUTTON_SELECT          (9)
+    #define JOY_BUTTON_VOLUP           (16)
+    #define JOY_BUTTON_VOLDOWN         (17)
+    
+    #define KEY_ESC (KEY_JOYBUTTON+JOY_BUTTON_X)
+#elif defined(__WIZ__)
+    /// Button definitions for the Wiz
+    #define JOY_BUTTON_UP               (0)
+    #define JOY_BUTTON_DOWN             (4)
+    #define JOY_BUTTON_LEFT             (2)
+    #define JOY_BUTTON_RIGHT            (6)
+    #define JOY_BUTTON_UPLEFT           (1)
+    #define JOY_BUTTON_UPRIGHT          (7)
+    #define JOY_BUTTON_DOWNLEFT         (3)
+    #define JOY_BUTTON_DOWNRIGHT        (5)
+    #define JOY_BUTTON_L                (10)
+    #define JOY_BUTTON_R                (11)
+    #define JOY_BUTTON_A                (12)
+    #define JOY_BUTTON_B                (13)
+    #define JOY_BUTTON_X                (14)
+    #define JOY_BUTTON_Y                (15)
+    #define JOY_BUTTON_MENU             (8)
+    #define JOY_BUTTON_SELECT           (9)
+    #define JOY_BUTTON_VOLUP            (16)
+    #define JOY_BUTTON_VOLDOWN          (17)
+
+    #define KEY_ESC (KEY_JOYBUTTON+JOY_BUTTON_X)
+#elif defined (__CAANOO__)
+
+    #define JOYSTICK_THRESHOLD  (4096)
+
+    /// Button definitions for the Caanoo
+    #define JOY_BUTTON_A             (0)
+    #define JOY_BUTTON_X             (1)
+    #define JOY_BUTTON_B             (2)
+    #define JOY_BUTTON_Y             (3)
+    #define JOY_BUTTON_L             (4)
+    #define JOY_BUTTON_R             (5)
+    #define JOY_BUTTON_HOME          (6)
+    #define JOY_BUTTON_HOLD          (7)
+    #define JOY_BUTTON_I             (8)
+    #define JOY_BUTTON_II            (9)
+    #define JOY_BUTTON_JOY           (10)
+
+    #define KEY_ESC (KEY_JOYBUTTON+JOY_BUTTON_HOME)
 #else
   ///
   /// This is the key identifier for ESC. When hard-coding keyboard shortcuts
   /// for buttons, etc. we use this instead of SDLK_ESCAPE,
-  /// so the GP2X port can get a joybutton equivalent of it.
+  /// so the console ports can get a joybutton equivalent of it.
   #define KEY_ESC SDLK_ESCAPE
 #endif
 

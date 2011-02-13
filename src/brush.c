@@ -587,66 +587,97 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
   }
 }
 
-///
-/// Changes the Brush size, discarding its previous content.
-/// @return 0 OK, 1 Failed
-byte Realloc_brush(word new_brush_width, word new_brush_height)
+/// @return 0 on success, non-zero on failure (memory?).
+/// @param new_brush: Optionally, you can provide an already allocated new
+///        brush - otherwise, this function performs the allocation.
+/// @param old_brush: If the caller passes NULL, this function will free the old
+///        pixel data. If the caller provides the address of a (free) byte
+///        pointer, the function will make it point to the original pixel data,
+///        in this case it will be the caller's responsibility to free() it
+///        (after transferring pixels to Brush, usually).
+byte Realloc_brush(word new_brush_width, word new_brush_height, byte *new_brush, byte **old_brush)
 {
-  byte return_code=0;
+
+  byte *new_smear_brush;
+  byte *new_brush_remapped;
+  word new_smear_brush_width;
+  word new_smear_brush_height;
+  byte new_brush_is_provided;
   
+  new_brush_is_provided = (new_brush!=NULL);
+  
+  if (!new_brush_is_provided)
+  {
+    new_brush=(byte *)malloc(((long)new_brush_height)*new_brush_width);
+    if (new_brush == NULL)
+    {
+      Error(0);
+      if (old_brush)
+        *old_brush=NULL;
+      return 1;
+    }
+  }
+  
+  new_smear_brush_width=(new_brush_width>MAX_PAINTBRUSH_SIZE)?new_brush_width:MAX_PAINTBRUSH_SIZE;
+  new_smear_brush_height=(new_brush_height>MAX_PAINTBRUSH_SIZE)?new_brush_height:MAX_PAINTBRUSH_SIZE;
+  new_smear_brush=NULL;
+  if ( (((long)Smear_brush_height)*Smear_brush_width) !=
+       (((long)new_smear_brush_width)*new_smear_brush_height) )
+  {
+    new_smear_brush=(byte *)malloc(((long)new_smear_brush_height)*new_smear_brush_width);
+    if (new_smear_brush == NULL)
+    {
+      Error(0);
+      if (old_brush)
+        *old_brush=NULL;
+      if (!new_brush_is_provided)
+        free(new_brush);
+      return 2;
+    }
+  }
+  new_brush_remapped=NULL;
   if ( (((long)Brush_height)*Brush_width) !=
        (((long)new_brush_height)*new_brush_width) )
   {
-    free(Brush);
-    Brush=(byte *)malloc(((long)new_brush_height)*new_brush_width);
-    if (Brush == NULL)
+    new_brush_remapped=(byte *)malloc(((long)new_brush_height)*new_brush_width);
+    if (new_brush_remapped == NULL)
     {
       Error(0);
-      return_code=1;
-  
-      Brush=(byte *)malloc(1*1);
-      if(Brush == NULL)
-      {
-          Error(ERROR_MEMORY);
-          exit(ERROR_MEMORY);
-      }
-      new_brush_height=new_brush_width=1;
-      *Brush=Fore_color;
+      free(new_smear_brush);
+      if (old_brush)
+        *old_brush=NULL;  
+      if (!new_brush_is_provided)
+        free(new_brush);
+      return 3;
     }
   }
+
+  // All allocations successful: can replace globals
   Brush_width=new_brush_width;
   Brush_height=new_brush_height;
+  Brush_original_back_color=Back_color;
   
-  free(Smear_brush);
-  Smear_brush_width=(Brush_width>MAX_PAINTBRUSH_SIZE)?Brush_width:MAX_PAINTBRUSH_SIZE;
-  Smear_brush_height=(Brush_height>MAX_PAINTBRUSH_SIZE)?Brush_height:MAX_PAINTBRUSH_SIZE;
-  Smear_brush=(byte *)malloc(((long)Smear_brush_height)*Smear_brush_width);
-  
-  if (Smear_brush == NULL) // Failed to allocate the smear brush
+  if (new_smear_brush)
   {
-    Error(0);
-    return_code=1;
-  
-    free(Brush);
-    Brush=(byte *)malloc(1*1);
-    if(Brush == NULL)
-    {
-      Error(ERROR_MEMORY);
-      exit(ERROR_MEMORY);
-    }
-    Brush_height=1;
-    Brush_width=1;
-  
-    Smear_brush=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE);
-    if(Smear_brush == NULL)
-    {
-      Error(ERROR_MEMORY);
-      exit(ERROR_MEMORY);
-    }
-    Smear_brush_height=MAX_PAINTBRUSH_SIZE;
-    Smear_brush_width=MAX_PAINTBRUSH_SIZE;
+    free(Smear_brush);
+    Smear_brush=new_smear_brush;
   }
-  return return_code;
+  Smear_brush_width=new_smear_brush_width;
+  Smear_brush_height=new_smear_brush_height;
+
+  // Save or free the old brush pixels
+  if (old_brush)
+    *old_brush=Brush_original_pixels;
+  else
+    free(old_brush);
+  Brush_original_pixels=new_brush;
+  // Assign new brush
+  if (new_brush_remapped)
+  {
+    free(Brush);
+    Brush=new_brush_remapped;
+  }
+  return 0;
 }
 
 
@@ -828,7 +859,7 @@ void Capture_brush(short start_x,short start_y,short end_x,short end_y,short cle
     if (start_y+new_brush_height>Main_image_height)
       new_brush_height=Main_image_height-start_y;
 
-    if (Realloc_brush(new_brush_width, new_brush_height) != 0)
+    if (Realloc_brush(new_brush_width, new_brush_height, NULL, NULL))
       return; // Unable to allocate the new brush, keep the old one.
 
     Copy_image_to_brush(start_x,start_y,Brush_width,Brush_height,Main_image_width);
@@ -843,6 +874,10 @@ void Capture_brush(short start_x,short start_y,short end_x,short end_y,short cle
         }
       Update_part_of_screen(start_x,start_y,Brush_width,Brush_height);
     }
+    // Grab palette
+    memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
+    // Remap (no change)
+    Remap_brush();
 
     // On centre la prise sur la brosse
     Brush_offset_X=(Brush_width>>1);
@@ -851,32 +886,25 @@ void Capture_brush(short start_x,short start_y,short end_x,short end_y,short cle
 }
 
 
-void Rotate_90_deg()
+void Rotate_90_deg(void)
 {
-  short temp;
-  byte * new_brush;
-
-  new_brush=(byte *)malloc(((size_t)Brush_height)*Brush_width);
-  if (new_brush)
+  byte * old_brush;
+  
+  if (Realloc_brush(Brush_height, Brush_width, NULL, &old_brush))
   {
-    Rotate_90_deg_lowlevel(Brush,new_brush,Brush_width,Brush_height);
-    free(Brush);
-    Brush=new_brush;
-
-    temp=Brush_width;
-    Brush_width=Brush_height;
-    Brush_height=temp;
-
-    temp=Smear_brush_width;
-    Smear_brush_width=Smear_brush_height;
-    Smear_brush_height=temp;
-
-    // On centre la prise sur la brosse
-    Brush_offset_X=(Brush_width>>1);
-    Brush_offset_Y=(Brush_height>>1);
-  }
-  else
     Error(0);
+    return;
+  }
+  Rotate_90_deg_lowlevel(old_brush,Brush_original_pixels,Brush_height,Brush_width);
+  
+  free(old_brush);
+
+  // Remap according to the last used remap table
+  Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
+
+  // On centre la prise sur la brosse
+  Brush_offset_X=(Brush_width>>1);
+  Brush_offset_Y=(Brush_height>>1);
 }
 
 
@@ -884,34 +912,45 @@ void Remap_brush(void)
 {
   short x_pos; // Variable de balayage de la brosse
   short y_pos; // Variable de balayage de la brosse
-  byte  used[256]; // Tableau de booléens "La couleur est utilisée"
   int   color;
 
 
   // On commence par initialiser le tableau de booléens à faux
   for (color=0;color<=255;color++)
-    used[color]=0;
+    Brush_colormap[color]=0;
 
   // On calcule la table d'utilisation des couleurs
   for (y_pos=0;y_pos<Brush_height;y_pos++)
     for (x_pos=0;x_pos<Brush_width;x_pos++)
-      used[Read_pixel_from_brush(x_pos,y_pos)]=1;
+      Brush_colormap[*(Brush_original_pixels + y_pos * Brush_width + x_pos)]=1;
 
   //  On n'est pas censé remapper la couleur de transparence, sinon la brosse
   // changera de forme, donc on dit pour l'instant qu'elle n'est pas utilisée
   // ainsi on ne s'embêtera pas à la recalculer
-  used[Back_color]=0;
+  Brush_colormap[Back_color]=0;
 
-  //   On va maintenant se servir de la table "used" comme table de
+  //   On va maintenant se servir de la table comme table de
   // conversion: pour chaque indice, la table donne une couleur de
   // remplacement.
   // Note : Seules les couleurs utilisées on besoin d'êtres recalculées: les
   //       autres ne seront jamais consultées dans la nouvelle table de
   //       conversion puisque elles n'existent pas dans la brosse, donc elles
-  //       ne seront pas utilisées par Remap_brush_LOWLEVEL.
+  //       ne seront pas utilisées par Remap_general_lowlevel.
   for (color=0;color<=255;color++)
-    if (used[color] != 0)
-      used[color]=Best_color(Spare_palette[color].R,Spare_palette[color].G,Spare_palette[color].B);
+    if (Brush_colormap[color] != 0)
+    {
+      byte r,g,b;
+      r=Brush_original_palette[color].R;
+      g=Brush_original_palette[color].G;
+      b=Brush_original_palette[color].B;
+      
+      // When remapping to same palette, ensure we keep same color index
+      if (r==Main_palette[color].R && g==Main_palette[color].G && b==Main_palette[color].B)
+        Brush_colormap[color]=color;
+      else
+        // Usual method: closest by r g b
+        Brush_colormap[color]=Best_color_perceptual(r,g,b);
+    }
 
   //   Il reste une couleur non calculée dans la table qu'il faut mettre à
   // jour: c'est la couleur de fond. On l'avait inhibée pour éviter son
@@ -919,13 +958,13 @@ void Remap_brush(void)
   // la brosse, on va mettre dans la table une relation d'équivalence entre
   // les deux palettes: comme on ne veut pas que la couleur soit remplacée,
   // on va dire qu'on veut qu'elle soit remplacée par la couleur en question.
-  used[Back_color]=Back_color;
+  Brush_colormap[Back_color]=Back_color;
 
   //   Maintenant qu'on a une super table de conversion qui n'a que le nom
   // qui craint un peu, on peut faire l'échange dans la brosse de toutes les
   // teintes.
-  Remap_general_lowlevel(used,Brush,Brush_width,Brush_height,Brush_width);
-  //Remap_brush_LOWLEVEL(used);
+  Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
+  
 }
 
 
@@ -934,104 +973,97 @@ void Outline_brush(void)
 {
   long /*Pos,*/x_pos,y_pos;
   byte state;
-  byte * new_brush;
-  byte * temp;
-  word width;
-  word height;
+  byte * old_brush;
+  word old_width;
+  word old_height;
+  int i;
 
-
-  width=Brush_width+2;
-  height=Brush_height+2;
-  new_brush=(byte *)malloc(((long)width)*height);
-
-  if (new_brush)
+  old_width=Brush_width;
+  old_height=Brush_height;
+  
+  SWAP_PBYTES(Brush, Brush_original_pixels);
+  if(Realloc_brush(Brush_width+2, Brush_height+2, NULL, &old_brush))
   {
-    // On remplit la bordure ajoutée par la Backcolor
-    memset(new_brush,Back_color,((long)width)*height);
+    Error(0);
+    SWAP_PBYTES(Brush, Brush_original_pixels);
+    return;
+  }
 
-    // On copie la brosse courante dans la nouvelle
-    Copy_part_of_image_to_another(Brush, // source
-        0, 0, Brush_width, Brush_height, Brush_width,
-        new_brush, // Destination
-        1, 1, width);
+  // On remplit la bordure ajoutée par la Backcolor
+  memset(Brush,Back_color,((long)Brush_width)*Brush_height);
 
-    // On intervertit la nouvelle et l'ancienne brosse:
-    temp=Brush;
-    Brush=new_brush;
-    Brush_width+=2;
-    Brush_height+=2;
-    width-=2;
-    height-=2;
+  // On copie la brosse courante dans la nouvelle
+  Copy_part_of_image_to_another(old_brush, // source
+      0, 0, old_width, old_height, old_width,
+      Brush, // Destination
+      1, 1, Brush_width);
 
-    // Si on "outline" avec une couleur différente de la Back_color on y va!
-    if (Fore_color!=Back_color)
+  // Si on "outline" avec une couleur différente de la Back_color on y va!
+  if (Fore_color!=Back_color)
+  {
+    // 1er balayage (horizontal)
+    for (y_pos=1; y_pos<Brush_height-1; y_pos++)
     {
-      // 1er balayage (horizontal)
-      for (y_pos=1; y_pos<Brush_height-1; y_pos++)
-      {
-        state=0;
-        for (x_pos=1; x_pos<Brush_width-1; x_pos++)
-        {
-          if (temp[((y_pos-1)*width)+x_pos-1]==Back_color)
-          {
-            if (state != 0)
-            {
-              Pixel_in_brush(x_pos,y_pos,Fore_color);
-              state=0;
-            }
-          }
-          else if (state == 0)
-          {
-            Pixel_in_brush(x_pos-1,y_pos,Fore_color);
-            state=1;
-          }
-        }
-        // Cas du dernier pixel à droite de la ligne
-        if (state != 0)
-          Pixel_in_brush(x_pos,y_pos,Fore_color);
-      }
-
-      // 2ème balayage (vertical)
+      state=0;
       for (x_pos=1; x_pos<Brush_width-1; x_pos++)
       {
-        state=0;
-        for (y_pos=1; y_pos<Brush_height-1; y_pos++)
+        if (old_brush[((y_pos-1)*old_width)+x_pos-1]==Back_color)
         {
-          if (temp[((y_pos-1)*width)+x_pos-1]==Back_color)
+          if (state != 0)
           {
-            if (state != 0)
-            {
-              Pixel_in_brush(x_pos,y_pos,Fore_color);
-              state=0;
-            }
-          }
-          else if (state == 0)
-          {
-              Pixel_in_brush(x_pos,y_pos-1,Fore_color);
-              state=1;
+            Pixel_in_brush(x_pos,y_pos,Fore_color);
+            state=0;
           }
         }
-        // Cas du dernier pixel en bas de la colonne
-        if (state != 0)
-          Pixel_in_brush(x_pos,y_pos,Fore_color);
+        else if (state == 0)
+        {
+          Pixel_in_brush(x_pos-1,y_pos,Fore_color);
+          state=1;
+        }
       }
+      // Cas du dernier pixel à droite de la ligne
+      if (state != 0)
+        Pixel_in_brush(x_pos,y_pos,Fore_color);
     }
 
-    // On recentre la prise sur la brosse
-    Brush_offset_X=(Brush_width>>1);
-    Brush_offset_Y=(Brush_height>>1);
-
-    free(temp); // Libération de l'ancienne brosse
-    temp = NULL;
-
-    // Réallocation d'un buffer de Smear
-    free(Smear_brush);
-    Smear_brush_width=(Brush_width>MAX_PAINTBRUSH_SIZE)?Brush_width:MAX_PAINTBRUSH_SIZE;
-    Smear_brush_height=(Brush_height>MAX_PAINTBRUSH_SIZE)?Brush_height:MAX_PAINTBRUSH_SIZE;
-    Smear_brush=(byte *)malloc(((long)Smear_brush_width)*Smear_brush_height);
+    // 2ème balayage (vertical)
+    for (x_pos=1; x_pos<Brush_width-1; x_pos++)
+    {
+      state=0;
+      for (y_pos=1; y_pos<Brush_height-1; y_pos++)
+      {
+        if (old_brush[((y_pos-1)*old_width)+x_pos-1]==Back_color)
+        {
+          if (state != 0)
+          {
+            Pixel_in_brush(x_pos,y_pos,Fore_color);
+            state=0;
+          }
+        }
+        else if (state == 0)
+        {
+            Pixel_in_brush(x_pos,y_pos-1,Fore_color);
+            state=1;
+        }
+      }
+      // Cas du dernier pixel en bas de la colonne
+      if (state != 0)
+        Pixel_in_brush(x_pos,y_pos,Fore_color);
+    }
   }
-  else
-    Error(0); // Pas assez de mémoire!
+  // Adopt the current palette.
+  memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
+  memcpy(Brush_original_pixels, Brush, (long)Brush_width*Brush_height);
+  for (i=0; i<256; i++)
+    Brush_colormap[i]=i;
+  //--
+
+  // On recentre la prise sur la brosse
+  Brush_offset_X=(Brush_width>>1);
+  Brush_offset_Y=(Brush_height>>1);
+
+  free(old_brush); // Libération de l'ancienne brosse
+
 }
 
 
@@ -1039,112 +1071,105 @@ void Nibble_brush(void)
 {
   long x_pos,y_pos;
   byte state;
-  byte * new_brush;
-  byte * temp;
-  word width;
-  word height;
+  byte * old_brush;
+  word old_width;
+  word old_height;
+  int i;
 
   if ( (Brush_width>2) && (Brush_height>2) )
   {
-    width=Brush_width-2;
-    height=Brush_height-2;
-    new_brush=(byte *)malloc(((long)width)*height);
-
-    if (new_brush)
+    old_width=Brush_width;
+    old_height=Brush_height;
+    
+    SWAP_PBYTES(Brush, Brush_original_pixels);
+    if (Realloc_brush(Brush_width-2, Brush_height-2, NULL, &old_brush))
     {
-      // On copie la brosse courante dans la nouvelle
-      Copy_part_of_image_to_another(Brush, // source
-                                               1,
-                                               1,
-                                               width,
-                                               height,
-                                               Brush_width,
-                                               new_brush, // Destination
-                                               0,
-                                               0,
-                                               width);
+      Error(0);
+      SWAP_PBYTES(Brush, Brush_original_pixels);
+      return;
+    }
+    // On copie l'ancienne brosse dans la nouvelle
+    Copy_part_of_image_to_another(old_brush, // source
+                                             1,
+                                             1,
+                                             old_width-2,
+                                             old_height-2,
+                                             old_width,
+                                             Brush, // Destination
+                                             0,
+                                             0,
+                                             Brush_width);
 
-      // On intervertit la nouvelle et l'ancienne brosse:
-      temp=Brush;
-      Brush=new_brush;
-      Brush_width-=2;
-      Brush_height-=2;
-      width+=2;
-      height+=2;
-
-      // 1er balayage (horizontal)
-      for (y_pos=0; y_pos<Brush_height; y_pos++)
-      {
-        state=(temp[(y_pos+1)*width]!=Back_color);
-        for (x_pos=0; x_pos<Brush_width; x_pos++)
-        {
-          if (temp[((y_pos+1)*width)+x_pos+1]==Back_color)
-          {
-            if (state != 0)
-            {
-              if (x_pos>0)
-                Pixel_in_brush(x_pos-1,y_pos,Back_color);
-              state=0;
-            }
-          }
-          else
-          {
-            if (state == 0)
-            {
-              Pixel_in_brush(x_pos,y_pos,Back_color);
-              state=1;
-            }
-          }
-        }
-        // Cas du dernier pixel à droite de la ligne
-        if (temp[((y_pos+1)*width)+x_pos+1]==Back_color)
-          Pixel_in_brush(x_pos-1,y_pos,Back_color);
-      }
-
-      // 2ème balayage (vertical)
+    // 1er balayage (horizontal)
+    for (y_pos=0; y_pos<Brush_height; y_pos++)
+    {
+      state=(old_brush[(y_pos+1)*old_width]!=Back_color);
       for (x_pos=0; x_pos<Brush_width; x_pos++)
       {
-        state=(temp[width+x_pos+1]!=Back_color);;
-        for (y_pos=0; y_pos<Brush_height; y_pos++)
+        if (old_brush[((y_pos+1)*old_width)+x_pos+1]==Back_color)
         {
-          if (temp[((y_pos+1)*width)+x_pos+1]==Back_color)
+          if (state != 0)
           {
-            if (state)
-            {
-              if (y_pos>0)
-                Pixel_in_brush(x_pos,y_pos-1,Back_color);
-              state=0;
-            }
-          }
-          else
-          {
-            if (state == 0)
-            {
-              Pixel_in_brush(x_pos,y_pos,Back_color);
-              state=1;
-            }
+            if (x_pos>0)
+              Pixel_in_brush(x_pos-1,y_pos,Back_color);
+            state=0;
           }
         }
-        // Cas du dernier pixel en bas de la colonne
-        if (temp[((y_pos+1)*width)+x_pos+1]==Back_color)
-          Pixel_in_brush(x_pos,y_pos-1,Back_color);
+        else
+        {
+          if (state == 0)
+          {
+            Pixel_in_brush(x_pos,y_pos,Back_color);
+            state=1;
+          }
+        }
       }
-
-      // On recentre la prise sur la brosse
-      Brush_offset_X=(Brush_width>>1);
-      Brush_offset_Y=(Brush_height>>1);
-
-      free(temp); // Libération de l'ancienne brosse
-      temp = NULL;
-
-      // Réallocation d'un buffer de Smear
-      free(Smear_brush);
-      Smear_brush_width=(Brush_width>MAX_PAINTBRUSH_SIZE)?Brush_width:MAX_PAINTBRUSH_SIZE;
-      Smear_brush_height=(Brush_height>MAX_PAINTBRUSH_SIZE)?Brush_height:MAX_PAINTBRUSH_SIZE;
-      Smear_brush=(byte *)malloc(((long)Smear_brush_width)*Smear_brush_height);
+      // Cas du dernier pixel à droite de la ligne
+      if (old_brush[((y_pos+1)*old_width)+x_pos+1]==Back_color)
+        Pixel_in_brush(x_pos-1,y_pos,Back_color);
     }
-    else
-      Error(0);  // Pas assez de mémoire!
+
+    // 2ème balayage (vertical)
+    for (x_pos=0; x_pos<Brush_width; x_pos++)
+    {
+      state=(old_brush[old_width+x_pos+1]!=Back_color);;
+      for (y_pos=0; y_pos<Brush_height; y_pos++)
+      {
+        if (old_brush[((y_pos+1)*old_width)+x_pos+1]==Back_color)
+        {
+          if (state)
+          {
+            if (y_pos>0)
+              Pixel_in_brush(x_pos,y_pos-1,Back_color);
+            state=0;
+          }
+        }
+        else
+        {
+          if (state == 0)
+          {
+            Pixel_in_brush(x_pos,y_pos,Back_color);
+            state=1;
+          }
+        }
+      }
+      // Cas du dernier pixel en bas de la colonne
+      if (old_brush[((y_pos+1)*old_width)+x_pos+1]==Back_color)
+        Pixel_in_brush(x_pos,y_pos-1,Back_color);
+    }
+
+    free(old_brush);
+    // Adopt the current palette.
+    memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
+    memcpy(Brush_original_pixels, Brush, (long)Brush_width*Brush_height);
+    for (i=0; i<256; i++)
+      Brush_colormap[i]=i;
+    //--
+
+    // On recentre la prise sur la brosse
+    Brush_offset_X=(Brush_width>>1);
+    Brush_offset_Y=(Brush_height>>1);
+
   }
 }
 
@@ -1161,7 +1186,6 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
   short y_pos;
   word  new_brush_width;
   word  new_brush_height;
-
 
   // On recherche les bornes de la brosse:
   for (temp=0; temp<2*vertices; temp+=2)
@@ -1204,46 +1228,15 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
     new_brush_width=(end_x-start_x)+1;
     new_brush_height=(end_y-start_y)+1;
 
-    if ( (((long)Brush_height)*Brush_width) !=
-         (((long)new_brush_height)*new_brush_width) )
-    {
-      free(Brush);
-      Brush=(byte *)malloc(((long)new_brush_height)*new_brush_width);
-      if (!Brush)
-      {
-        Error(0);
-
-        Brush=(byte *)malloc(1*1);
-        if(Brush==NULL) Error(ERROR_MEMORY);
-        new_brush_height=new_brush_width=1;
-        *Brush=Fore_color;
-      }
-    }
-    Brush_width=new_brush_width;
-    Brush_height=new_brush_height;
-
-    free(Smear_brush);
-    Smear_brush_width=(Brush_width>MAX_PAINTBRUSH_SIZE)?Brush_width:MAX_PAINTBRUSH_SIZE;
-    Smear_brush_height=(Brush_height>MAX_PAINTBRUSH_SIZE)?Brush_height:MAX_PAINTBRUSH_SIZE;
-    Smear_brush=(byte *)malloc(((long)Smear_brush_height)*Smear_brush_width);
-
-    if (!Smear_brush) // On ne peut même pas allouer la brosse du smear!
+    if (Realloc_brush(new_brush_width, new_brush_height, NULL, NULL))
     {
       Error(0);
-
-      free(Brush);
-      Brush=(byte *)malloc(1*1);
-      if(Brush==NULL) Error(ERROR_MEMORY);
-      Brush_height=1;
-      Brush_width=1;
-
-      Smear_brush=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE);
-      Smear_brush_height=MAX_PAINTBRUSH_SIZE;
-      Smear_brush_width=MAX_PAINTBRUSH_SIZE;
+      return;
     }
 
     Brush_offset_X=start_x;
     Brush_offset_Y=start_y;
+    
     Pixel_figure=Pixel_figure_in_brush;
 
     memset(Brush,Back_color,(long)Brush_width*Brush_height);
@@ -1271,6 +1264,13 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
           if (clear)
             Pixel_in_current_screen(x_pos,y_pos,Back_color,0);
         }
+    // Grab palette
+    memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
+    // Init colormap
+    for (temp=0; temp<256; temp++)
+      Brush_colormap[temp]=temp;
+    // Copy Brush to original
+    memcpy(Brush_original_pixels, Brush, (long)Brush_width*Brush_height);
 
     // On centre la prise sur la brosse
     Brush_offset_X=(Brush_width>>1);
@@ -1304,50 +1304,27 @@ void Stretch_brush(short x1, short y1, short x2, short y2)
   }
   new_brush_height++;
 
-  // Free some memory
-  free(Smear_brush);
-  Smear_brush = NULL;
-
-  if ((new_brush=((byte *)malloc(new_brush_width*new_brush_height))))
+  new_brush=((byte *)malloc(new_brush_width*new_brush_height));
+  if (!new_brush)
   {
-    Rescale(Brush, Brush_width, Brush_height, new_brush, new_brush_width, new_brush_height, x2<x1, y2<y1);
-
-    free(Brush);
-    Brush=new_brush;
-
-    Brush_width=new_brush_width;
-    Brush_height=new_brush_height;
-
-    Smear_brush_width=(Brush_width>MAX_PAINTBRUSH_SIZE)?Brush_width:MAX_PAINTBRUSH_SIZE;
-    Smear_brush_height=(Brush_height>MAX_PAINTBRUSH_SIZE)?Brush_height:MAX_PAINTBRUSH_SIZE;
-    Smear_brush=(byte *)malloc(((long)Smear_brush_height)*Smear_brush_width);
-
-    if (!Smear_brush) // On ne peut même pas allouer la brosse du smear!
-    {
-      Error(0);
-
-      free(Brush);
-      Brush=(byte *)malloc(1*1);
-      Brush_height=1;
-      Brush_width=1;
-
-      Smear_brush=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE);
-      Smear_brush_height=MAX_PAINTBRUSH_SIZE;
-      Smear_brush_width=MAX_PAINTBRUSH_SIZE;
-    }
-
-    Brush_offset_X=(Brush_width>>1);
-    Brush_offset_Y=(Brush_height>>1);
-  }
-  else
-  {
-    // Ici la libération de mémoire n'a pas suffi donc on remet dans l'état
-    // où c'etait avant. On a juste à réallouer la Smear_brush car il y a
-    // normalement la place pour elle puisque rien d'autre n'a pu être alloué
-    // entre temps.
-    Smear_brush=(byte *)malloc(((long)Smear_brush_height)*Smear_brush_width);
     Error(0);
+    return;
   }
+  
+  Rescale(Brush_original_pixels, Brush_width, Brush_height, new_brush, new_brush_width, new_brush_height, x2<x1, y2<y1);
+
+  if (Realloc_brush(new_brush_width, new_brush_height, new_brush, NULL))
+  {
+    free(new_brush);
+    Error(0);
+    return;
+  }
+  // Remap according to the last used remap table
+  Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
+  
+  Brush_offset_X=(Brush_width>>1);
+  Brush_offset_Y=(Brush_height>>1);
+
 }
 
 
@@ -1578,9 +1555,6 @@ void Distort_brush(short x1, short y1, short x2, short y2, short x3, short y3, s
   short min_x, max_x, min_y, max_y;
   short width, height;
   byte * new_brush;
-  byte * new_smear_brush;
-  short new_smear_brush_width;
-  short new_smear_brush_height;
   
   // Move all coordinates to start on (0,0)
   min_x=Min4(x1,x2,x3,x4);
@@ -1601,24 +1575,11 @@ void Distort_brush(short x1, short y1, short x2, short y2, short x3, short y3, s
   width=Max(max_x-min_x, 1);
   height=Max(max_y-min_y, 1);
     
-  new_smear_brush_width=(width>MAX_PAINTBRUSH_SIZE)?width:MAX_PAINTBRUSH_SIZE;
-  new_smear_brush_height=(height>MAX_PAINTBRUSH_SIZE)?height:MAX_PAINTBRUSH_SIZE;
-
-  new_smear_brush=(byte *)malloc(((long)new_smear_brush_height)*new_smear_brush_width);
-  if (! new_smear_brush)
-  {
-    // Out of memory while allocating new smear brush
-    Error(0);
-    return;
-  }
-  
   new_brush=((byte *)malloc((long)width*height));
   if (!new_brush)
   {
     // Out of memory while allocating new brush
     Error(0);
-    free(new_smear_brush);
-    new_smear_brush = NULL;
     return;
   }
 
@@ -1631,18 +1592,14 @@ void Distort_brush(short x1, short y1, short x2, short y2, short x3, short y3, s
   Distort_buffer_width=width;
   Draw_brush_linear_distort(0, 0, (Brush_width<<16), (Brush_height<<16), (x1<<16), (y1<<16), (x2<<16), (y2<<16), (x3<<16), (y3<<16), (x4<<16), (y4<<16));
 
-  // Free old brushes
-  free(Smear_brush);
-  free(Brush);
-
-  // Point to the new ones
-  Brush=new_brush;
-  Brush_width=width;
-  Brush_height=height;
-
-  Smear_brush=new_smear_brush;
-  Smear_brush_width=new_smear_brush_width;
-  Smear_brush_height=new_smear_brush_height;
+  if (Realloc_brush(width, height, new_brush, NULL))
+  {
+    free(new_brush);
+    Error(0);
+    return;
+  }
+  // Remap according to the last used remap table
+  Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
 
   // Re-center brush handle  
   Brush_offset_X=(Brush_width>>1);
@@ -1867,7 +1824,7 @@ void Compute_quad_texture(int x1,int y1,int xt1,int yt1,
       xt=Round((float)(ScanY_Xt[0][y])+(temp*(ScanY_Xt[1][y]-ScanY_Xt[0][y])));
       yt=Round((float)(ScanY_Yt[0][y])+(temp*(ScanY_Yt[1][y]-ScanY_Yt[0][y])));
       if (xt>=0 && yt>=0)
-        buffer[x+(y*width)]=Read_pixel_from_brush(xt,yt);
+        buffer[x+(y*width)]=*(Brush_original_pixels + yt * Brush_width + xt);
     }
     for (; x<width; x++)
       buffer[x+(y*width)]=Back_color;
@@ -1920,54 +1877,32 @@ void Rotate_brush(float angle)
   new_brush_width=x_max+1-x_min;
   new_brush_height=y_max+1-y_min;
 
-  free(Smear_brush); // On libère un peu de mémoire
-  Smear_brush = NULL;
-
-  if ((new_brush=((byte *)malloc(new_brush_width*new_brush_height))))
+  new_brush=(byte *)malloc(new_brush_width*new_brush_height);
+  
+  if (!new_brush)
   {
-    // Et maintenant on calcule la nouvelle brosse tournée.
-    Compute_quad_texture(x1,y1,               0,               0,
-                          x2,y2,Brush_width-1,               0,
-                          x3,y3,               0,Brush_height-1,
-                          x4,y4,Brush_width-1,Brush_height-1,
-                          new_brush,new_brush_width,new_brush_height);
-
-    free(Brush);
-    Brush=new_brush;
-
-    Brush_width=new_brush_width;
-    Brush_height=new_brush_height;
-
-    Smear_brush_width=(Brush_width>MAX_PAINTBRUSH_SIZE)?Brush_width:MAX_PAINTBRUSH_SIZE;
-    Smear_brush_height=(Brush_height>MAX_PAINTBRUSH_SIZE)?Brush_height:MAX_PAINTBRUSH_SIZE;
-    Smear_brush=(byte *)malloc(((long)Smear_brush_height)*Smear_brush_width);
-
-    if (!Smear_brush) // On ne peut même pas allouer la brosse du smear!
-    {
-      Error(0);
-
-      free(Brush);
-      Brush=(byte *)malloc(1*1);
-      Brush_height=1;
-      Brush_width=1;
-
-      Smear_brush=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE);
-      Smear_brush_height=MAX_PAINTBRUSH_SIZE;
-      Smear_brush_width=MAX_PAINTBRUSH_SIZE;
-    }
-
-    Brush_offset_X=(Brush_width>>1);
-    Brush_offset_Y=(Brush_height>>1);
-  }
-  else
-  {
-    // Ici la libération de mémoire n'a pas suffit donc on remet dans l'état
-    // où c'etait avant. On a juste à réallouer la Smear_brush car il y a
-    // normalement la place pour elle puisque rien d'autre n'a pu être alloué
-    // entre temps.
-    Smear_brush=(byte *)malloc(((long)Smear_brush_height)*Smear_brush_width);
     Error(0);
+    return;
   }
+  // Et maintenant on calcule la nouvelle brosse tournée.
+  Compute_quad_texture(x1,y1,               0,               0,
+                        x2,y2,Brush_width-1,               0,
+                        x3,y3,               0,Brush_height-1,
+                        x4,y4,Brush_width-1,Brush_height-1,
+                        new_brush,new_brush_width,new_brush_height);
+  
+  if (Realloc_brush(new_brush_width, new_brush_height, new_brush, NULL))
+  {
+    free(new_brush);
+    return;
+  }
+  // Remap according to the last used remap table
+  Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
+
+  // Center offsets
+  Brush_offset_X=(Brush_width>>1);
+  Brush_offset_Y=(Brush_height>>1);
+
 }
 
 
@@ -2090,3 +2025,25 @@ void Rotate_brush_preview(float angle)
   end_y=Max(Max(y1,y2),Max(y3,y4));
   Update_part_of_screen(start_x,start_y,end_x-start_x+1,end_y-start_y+1);
 }
+/*
+/// Sets brush's original palette and color mapping.
+void Brush_set_palette(T_Palette *palette)
+{
+  int i;
+  byte need_remap;
+  
+  need_remap=0;
+  
+  memcpy(Brush_original_palette,palette,sizeof(T_Palette));
+  for (i=0;i<256;i++)
+  {
+    if (Brush_original_palette[i].R!=Main_palette[i].R
+     || Brush_original_palette[i].G!=Main_palette[i].G
+     || Brush_original_palette[i].B!=Main_palette[i].B)
+    {
+      need_remap=1;
+    }
+  }
+  
+}
+*/
