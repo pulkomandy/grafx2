@@ -826,6 +826,28 @@ double Fround(double n, unsigned d)
   return floor(n * exp + 0.5) / exp;
 }
 
+/// Count number of bits in a word (16bit).
+/// Based on Wikipedia article for Hamming_weight, it's optimized
+/// for cases when zeroes are more frequent.
+int Popcount_word(word x)
+{
+  word count;
+  for (count=0; x; count++)
+    x &= x-1;
+  return count;
+}
+
+/// Count number of bits in a dword (32bit).
+/// Based on Wikipedia article for Hamming_weight, it's optimized
+/// for cases when zeroes are more frequent.
+int Popcount_dword(dword x)
+{
+  dword count;
+  for (count=0; x; count++)
+    x &= x-1;
+  return count;
+}
+
 
 // Fonction retournant le libellé d'une mode (ex: " 320x200")
 char * Mode_label(int mode)

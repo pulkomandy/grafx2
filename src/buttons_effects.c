@@ -546,7 +546,7 @@ void Button_Colorize_mode(void)
     switch(Colorize_current_mode)
     {
       case 0 :
-        Effect_function=Effect_interpolated_colorize;
+        Effect_function=Effect_layer_copy;
         break;
       case 1 :
         Effect_function=Effect_additive_colorize;

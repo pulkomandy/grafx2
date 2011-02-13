@@ -312,6 +312,12 @@ static const T_Help_table helptable_help[] =
   HELP_LINK ("    6 : %s",   SPECIAL_LAYER6_TOGGLE)
   HELP_LINK ("    7 : %s",   SPECIAL_LAYER7_TOGGLE)
   HELP_LINK ("    8 : %s",   SPECIAL_LAYER8_TOGGLE)
+  HELP_TEXT ("")
+  HELP_LINK ("  Format check     : %s",   SPECIAL_FORMAT_CHECKER)
+  HELP_LINK ("  Format check menu: %s",   SPECIAL_FORMAT_CHECKER_MENU)
+  HELP_TEXT ("")
+  HELP_TEXT ("")
+  HELP_TEXT ("")
 };
 static const T_Help_table helptable_credits[] =
 {

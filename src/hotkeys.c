@@ -1477,6 +1477,14 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   true,
   SDLK_HOME|MOD_ALT, // Alt + Home
   0},
+  {181,
+  "Format checker",
+  "Performs a format check on the",
+  "current image.",
+  "",
+  true,
+  0,
+  0},
 };
 
 word Ordering[NB_SHORTCUTS]=
@@ -1662,4 +1670,6 @@ word Ordering[NB_SHORTCUTS]=
   0x100+BUTTON_LAYER_UP,
   0x100+BUTTON_LAYER_DOWN,
   0x100+BUTTON_LAYER_MENU,
+  SPECIAL_FORMAT_CHECKER,
+  SPECIAL_FORMAT_CHECKER_MENU,
 };
