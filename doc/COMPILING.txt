@@ -125,7 +125,7 @@ Zlib:
 Libpng
   Requires: Zlib
   http://www.mirrorservice.org/sites/download.sourceforge.net/pub/sourceforge/l/li/libpng/
-  libpng-1.0.23.tar.gz
+  libpng-1.4.2.tar.gz (Before June 2010, we were using libpng-1.0.23.tar.gz)
   Uncompress in temporary directory
   ./configure
   make
