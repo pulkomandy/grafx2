@@ -199,7 +199,7 @@ void Redraw_layered_image(void)
   // Re-construct the image with the visible layers
   byte layer=0;  
   // First layer
-  if (Main_layers_visible & (1<<4))
+  if (Constraint_mode && Main_layers_visible & (1<<4))
   {
     // The raster result layer is visible: start there
     // Copy it in Main_visible_image

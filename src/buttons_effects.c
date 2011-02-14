@@ -162,6 +162,19 @@ void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_ca
 }
 
 
+// Constaint enforcer/checker ------------------------------------------------
+void Button_Constraint_mode(void)
+{
+  Constraint_mode=!Constraint_mode;
+}
+
+
+void Button_Constraint_menu(void)
+{
+
+}
+
+
 //--------------------------------- Stencil ----------------------------------
 void Button_Stencil_mode(void)
 {
@@ -547,7 +560,7 @@ void Button_Colorize_mode(void)
     switch(Colorize_current_mode)
     {
       case 0 :
-        Effect_function=Effect_layer_copy;
+        Effect_function=Effect_interpolated_colorize;
         break;
       case 1 :
         Effect_function=Effect_additive_colorize;

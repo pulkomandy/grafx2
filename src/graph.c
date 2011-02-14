@@ -2977,7 +2977,24 @@ byte Read_pixel_from_current_screen  (word x,word y)
 void Pixel_in_current_screen      (word x,word y,byte color,int with_preview)
 {
   #ifndef NOLAYERS
-  if ( Main_current_layer == 4)
+  if (!Constraint_mode)
+  {
+    byte depth = *(Main_visible_image_depth_buffer.Image+x+y*Main_image_width);
+    *(Main_backups->Pages->Image[Main_current_layer] + x+y*Main_image_width)=color;
+    if ( depth <= Main_current_layer)
+    {
+      if (color == Main_backups->Pages->Transparent_color) // transparent color
+        // fetch pixel color from the topmost visible layer
+        color=*(Main_backups->Pages->Image[depth] + x+y*Main_image_width);
+      
+      *(x+y*Main_image_width+Main_screen)=color;
+      
+      if (with_preview)
+        Pixel_preview(x,y,color);
+    }
+    
+  }
+  else if ( Main_current_layer == 4)
   {
     if (color<4)
     {

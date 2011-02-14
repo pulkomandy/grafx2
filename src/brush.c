@@ -130,7 +130,7 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
   if (is_preview && Mouse_K) // pas de curseur si on est en preview et 
     return;                  // en train de cliquer
     
-  if (Main_current_layer < 4)
+  if (Constraint_mode && Main_current_layer < 4)
   {
     if (is_preview)
       goto single_pixel;
