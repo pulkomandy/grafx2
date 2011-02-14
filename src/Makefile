@@ -61,20 +61,19 @@ else
 #For all other platforms, we can rely on uname
   PLATFORM = $(shell uname)
 
-  #AmigaOS (3 or 4) specific
+  #AmigaOS4 specific
   ifeq ($(PLATFORM),AmigaOS) # 1
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
     RMDIR = rmdir
     CP = cp
     BIN = ../bin/grafx2
-    COPT = -Wall -c -gstabs `sdl-config --cflags` $(TTFCOPT)
+    COPT = -Wall -c -gstabs -mcrt=newlib `sdl-config --cflags` -I/SDK/Local/common/include/SDL -D__USE_INLINE__ $(TTFCOPT)
     LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lft2
     CC = gcc
     OBJDIR = ../obj/amiga
     ZIP = lha
     ZIPOPT = a
-    NOTTF = 1
 
   else
   ifeq ($(PLATFORM),Darwin) # 2
@@ -90,7 +89,7 @@ else
   FWDIR = /Library/Frameworks
   SDLCOPT = -arch i386 -I$(FWDIR)/SDL.framework/Headers -I$(FWDIR)/SDL_image.framework/Headers -I$(FWDIR)/SDL_ttf.framework/Headers -D_THREAD_SAFE
   SDLLOPT = -arch i386 -L/usr/lib -framework SDL -framework SDL_image -framework SDL_ttf -framework Cocoa -framework Carbon -framework OpenGL
-  COPT = -D_DARWIN_C_SOURCE -D__macosx__ -D__linux__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g $(SDLCOPT) $(TTFCOPT) -I/usr/X11/include
+  COPT = -D__macosx__ -D__linux__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g $(SDLCOPT) $(TTFCOPT) -I/usr/X11/include
   LOPT = $(SDLLOPT) -L/usr/X11/lib -R/usr/X11/lib -lpng
   # Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
   CC = gcc
@@ -133,6 +132,21 @@ else
     PLATFORMFILES = ../misc/grafx2.info
 
   else
+  ifeq ($(PLATFORM),AMIGA) # 5
+  # AmigaOS 3.x specific (building with gcc)
+    DELCOMMAND = rm -rf
+    MKDIR = mkdir -p
+    RMDIR = rmdir
+    CP = cp
+    BIN = ../bin/grafx2
+    COPT = -Wall -gstabs -c `sdl-config --cflags` $(TTFCOPT)
+    LOPT = -lSDL_image `sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT) -lfreetype
+    CC = gcc
+    OBJDIR = ../obj/amiga
+    ZIP = lha
+    ZIPOPT = a
+
+  else
   ifeq ($(PLATFORM),BeOS) # 6
   #BeOS specific
     DELCOMMAND = rm -rf
@@ -154,16 +168,8 @@ else
     RMDIR = rmdir
     CP = cp
     BIN = ../bin/grafx2
-    PLATFORMOBJ = $(OBJDIR)/haiku.o
-      ifeq ($(NOLUA),1)
-        LUACOPT =
-        LUALOPT =
-      else
-            LUACOPT = -D__ENABLE_LUA__
-            LUALOPT = -llua
-      endif
-    COPT = -W -Wall -c -g `sdl-config --cflags` $(TTFCOPT) -I/boot/common/include $(LUACOPT)
-    LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lfreetype -lbe $(LUALOPT)
+    COPT = -W -Wall -c -g `sdl-config --cflags` $(TTFCOPT) -I/boot/common/include
+    LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT)
     CC = gcc
     OBJDIR = ../obj/haiku
     ZIP = zip
@@ -197,6 +203,24 @@ else
       OBJDIR = ../obj/unix
       X11LOPT = -lX11
       CC = gcc
+
+  else
+  ifeq ($(findstring Kickstart,$(shell version)),Kickstart) # 9
+    # Classic amiga without gcc. Use vbcc.
+    PLATFORM = amiga-vbcc
+    DELCOMMAND = delete
+    MKDIR = makedir
+    RMDIR= delete
+    CP = copy
+    BIN = ../bin/grafx2
+    COPT = -c99 -Ivbcc:PosixLib/include -D__amigaos__ $(TTFCOPT)
+    CC = vc
+    OBJDIR = ../obj/amiga-vbcc
+    ZIP = lha
+    ZIPOPT = a
+
+    NOTTF = 1
+
   else
   
       # Finally, the default rules that work fine for most unix/gcc systems, linux and freebsd are tested.
@@ -274,6 +298,8 @@ else
         X11LOPT = -lX11
       endif
       endif
+  endif
+  endif
   endif
   endif
   endif
