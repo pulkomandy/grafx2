@@ -6,7 +6,7 @@
     Copyright 2009 Petter Lindquist
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
-    Copyright 2007 Adrien Destugues
+    Copyright 2007-2011 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
     Grafx2 is free software; you can redistribute it and/or
@@ -2925,4 +2925,173 @@ void Save_SCR(T_IO_Context * context)
   output = NULL;
 
     File_error = 0;
+}
+
+// CM5 - Amstrad CPC "Mode 5" picture
+// This is a format designed by SyX. There is one .SCR file in the usual amstrad format,
+// and a .CM5 file with the palette, which varies over time.
+
+void Test_CM5(T_IO_Context * context)
+{
+  // check cm5 file size == 2049 bytes
+  FILE *file;
+  char filename[MAX_PATH_CHARACTERS];
+  long file_size;
+
+  Get_full_filename(filename, context->File_name, context->File_directory);
+
+  File_error = 1;
+
+  if ((file = fopen(filename, "rb")))
+  {
+    file_size = File_length_file(file);
+    if (file_size == 2049)
+      File_error = 0;
+  }
+
+  // TODO: check existence of a .SCR file with the same name
+}
+
+
+void Load_CM5(T_IO_Context* context)
+{
+  // Ensure "8bit" constraint mode is switched on
+  // Set palette to the CPC hardware colors 
+  // Load the palette data to the 4 colorlayers
+  FILE *file;
+  char filename[MAX_PATH_CHARACTERS];
+  byte value = 0;
+  int mod;
+  short line = 0;
+  int tx, ty;
+  byte buffer[48*6/4];
+
+  Get_full_filename(filename, context->File_name, context->File_directory);
+
+  if (!(file = fopen(filename, "rb")))
+  {
+      File_error = 1;
+      return;
+  }
+
+  Pre_load(context, 48*6, 256, 2049, FORMAT_CM5, PIXEL_SIMPLE, 0);
+  context->Width=48*6;
+  context->Height=256;
+
+  // Setup the palette (amstrad hardware palette)
+  context->Palette[0x54].R = 0; context->Palette[0x54].G = 2; context->Palette[0x54].B = 1;
+  context->Palette[0x44].R = 0; context->Palette[0x44].G = 2; context->Palette[0x44].B = 0x6B;
+  context->Palette[0x55].R = 0x0C; context->Palette[0x55].G = 2; context->Palette[0x55].B = 0xF4;
+  context->Palette[0x5C].R = 0x6C; context->Palette[0x5C].G = 2; context->Palette[0x5C].B = 1;
+  context->Palette[0x58].R = 0x69; context->Palette[0x58].G = 2; context->Palette[0x58].B = 0x68;
+  context->Palette[0x5D].R = 0x6C; context->Palette[0x5D].G = 2; context->Palette[0x5D].B = 0xF2;
+  context->Palette[0x4C].R = 0xF3; context->Palette[0x4C].G = 5; context->Palette[0x4C].B = 6;
+  context->Palette[0x45].R = 0xF0; context->Palette[0x45].G = 2; context->Palette[0x45].B = 0x68;
+  context->Palette[0x4D].R = 0xF3; context->Palette[0x4D].G = 2; context->Palette[0x4D].B = 0xF4;
+  context->Palette[0x56].R = 2; context->Palette[0x56].G = 0x78; context->Palette[0x56].B = 1;
+  context->Palette[0x46].R = 0; context->Palette[0x46].G = 0x78; context->Palette[0x46].B = 0x68;
+  context->Palette[0x57].R = 0xC; context->Palette[0x57].G = 0x7B; context->Palette[0x57].B = 0xF4;
+  context->Palette[0x5E].R = 0x6E; context->Palette[0x5E].G = 0x7B; context->Palette[0x5E].B = 1;
+  context->Palette[0x40].R = 0x6E; context->Palette[0x40].G = 0x7D; context->Palette[0x40].B = 0x6B;
+  context->Palette[0x5F].R = 0x6E; context->Palette[0x5F].G = 0x7B; context->Palette[0x5F].B = 0xF6;
+  context->Palette[0x4E].R = 0xF3; context->Palette[0x4E].G = 0x7D; context->Palette[0x4E].B = 0xD;
+  context->Palette[0x47].R = 0xF3; context->Palette[0x47].G = 0x7D; context->Palette[0x47].B = 0x6B;
+  context->Palette[0x4F].R = 0xFA; context->Palette[0x4F].G = 0x80; context->Palette[0x4F].B = 0xF9;
+  context->Palette[0x52].R = 2; context->Palette[0x52].G = 0xF0; context->Palette[0x52].B = 1;
+  context->Palette[0x42].R = 0; context->Palette[0x42].G = 0xF3; context->Palette[0x42].B = 0x6B;
+  context->Palette[0x53].R = 0xF; context->Palette[0x53].G = 0xF3; context->Palette[0x53].B = 0xF2;
+  context->Palette[0x5A].R = 0x71; context->Palette[0x5A].G = 0xF5; context->Palette[0x5A].B = 4;
+  context->Palette[0x59].R = 0x71; context->Palette[0x59].G = 0xF3; context->Palette[0x59].B = 0x6B;
+  context->Palette[0x5B].R = 0x71; context->Palette[0x5B].G = 0xF3; context->Palette[0x5B].B = 0xF4;
+  context->Palette[0x4A].R = 0xF3; context->Palette[0x4A].G = 0xF3; context->Palette[0x4A].B = 0xD;
+  context->Palette[0x43].R = 0xF3; context->Palette[0x43].G = 0xF3; context->Palette[0x43].B = 0x6D;
+  context->Palette[0x4B].R = 255; context->Palette[0x4B].G = 0xF3; context->Palette[0x4B].B = 0xF9;
+
+  Palette_loaded(context);
+
+  if (Constraint_mode != 1)
+    Constraint_mode = 1;
+
+  if (Read_byte(file, &value)!=1)
+    File_error = 2;
+
+  Set_layer(context, 0);
+  for(ty=0; ty<context->Height; ty++)
+  for(tx=0; tx<context->Width; tx++)
+  {
+    Set_pixel(context, tx, ty, value);
+  }
+  // Fill layer with color we just read 
+
+  while(Read_byte(file, &value) == 1)
+  {
+    switch(mod)
+    {
+      case 0:
+        // This is color for layer 1
+        Set_layer(context, 1);
+        for(tx=0; tx<context->Width; tx++)
+          Set_pixel(context, tx, line, value);
+        break;
+      case 1:
+        // This is color for layer 2
+        Set_layer(context, 2);
+        for(tx=0; tx<context->Width; tx++)
+          Set_pixel(context, tx, line, value);
+        break;
+      default:
+        // This is color for a block in layer 4
+        Set_layer(context, 3);
+        for(tx=(mod-2)*48; tx<(mod-1)*48; tx++)
+          Set_pixel(context, tx, line, value);
+        break;
+    }
+    mod = mod + 1;
+    if (mod > 7)
+    {
+      mod = 0;
+      line ++;
+    }
+  }
+
+  fclose(file);
+
+  // Load the pixeldata to the 5th layer
+  filename[strlen(filename) - 3] = 0;
+  strcat(filename,"gfx");
+  if (!(file = fopen(filename, "rb")))
+  {
+      File_error = 1;
+      return;
+  }
+
+  Set_layer(context, 4);
+  
+  for (ty = 0; ty < 256; ty++)
+  {
+    Read_bytes(file, buffer, 48*6/4);
+    for (tx = 0; tx < 48*6; tx+=4)
+    {
+      Set_pixel(context, tx+0, ty, 3-(((buffer[tx/4]&0x80) >> 7) |((buffer[tx/4]&0x8)>>2)));
+      Set_pixel(context, tx+1, ty, 3-(((buffer[tx/4]&0x40) >> 6) |((buffer[tx/4]&0x4)>>1)));
+      Set_pixel(context, tx+2, ty, 3-(((buffer[tx/4]&0x20) >> 5) |((buffer[tx/4]&0x2)>>0)));
+      Set_pixel(context, tx+3, ty, 3-(((buffer[tx/4]&0x10) >> 4) |((buffer[tx/4]&0x1)<<1)));
+    }
+  }
+
+  fclose(file);
+
+}
+
+
+void Save_CM5(T_IO_Context* context)
+{
+  // Check picture has 5 layers
+  // Check the constraints on the layers 
+  // Layer 1 : 1 color Only
+  // Layer 2 and 3 : 1 color/line
+  // Layer 4 : 1 color / 48x1 block 
+  // Layer 5 : colors 1 to 4 only used 
+  // Layer 1..4 are written to the .CM5 file, then layer 5 is written to .scr file using
+  // the Save_SCR function.
 }
