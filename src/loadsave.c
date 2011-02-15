@@ -128,6 +128,7 @@ void Save_SCR(T_IO_Context *);
 // -- CM5 (Amstrad CPC)
 void Test_CM5(T_IO_Context *);
 void Load_CM5(T_IO_Context *);
+void Save_CM5(T_IO_Context *);
 
 // -- XPM (X PixMap)
 // Loading is done through SDL_Image 
@@ -166,7 +167,7 @@ T_Format File_formats[] = {
   {FORMAT_PAL, " pal", Test_PAL, Load_PAL, Save_PAL, 1, 0, 0, "pal", "pal"},
   {FORMAT_C64, " c64", Test_C64, Load_C64, Save_C64, 0, 1, 0, "c64", "c64;koa;koala;fli;bml;cdu;prg"},
   {FORMAT_SCR, " cpc", NULL,     NULL,     Save_SCR, 0, 0, 0, "cpc", "cpc;scr"},
-  {FORMAT_CM5, " cm5", Test_CM5, Load_CM5, NULL,     0, 0, 1, "cm5", "cm5"},
+  {FORMAT_CM5, " cm5", Test_CM5, Load_CM5, Save_CM5, 0, 0, 1, "cm5", "cm5"},
   {FORMAT_XPM, " xpm", NULL,     NULL,     Save_XPM, 0, 0, 0, "xpm", "xpm"},
   {FORMAT_MISC,"misc.",NULL,     NULL,     NULL,     0, 0, 0, "",    "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico"},
 };

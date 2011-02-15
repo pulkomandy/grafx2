@@ -3086,12 +3086,74 @@ void Load_CM5(T_IO_Context* context)
 
 void Save_CM5(T_IO_Context* context)
 {
-  // Check picture has 5 layers
-  // Check the constraints on the layers 
+  char filename[MAX_PATH_CHARACTERS];
+  FILE* file;
+  int tx, ty;
+
+
+  Get_full_filename(filename, context->File_name, context->File_directory);
+  // TODO: Check picture has 5 layers
+  // TODO: Check the constraints on the layers 
   // Layer 1 : 1 color Only
   // Layer 2 and 3 : 1 color/line
   // Layer 4 : 1 color / 48x1 block 
-  // Layer 5 : colors 1 to 4 only used 
-  // Layer 1..4 are written to the .CM5 file, then layer 5 is written to .scr file using
-  // the Save_SCR function.
+  // TODO: handle filesize
+  
+  if (!(file = fopen(filename,"wb")))
+  {
+    File_error = 1;
+    return;
+  }
+
+  // Write layer 0
+  Set_layer(context, 0);
+  Write_byte(file, Get_pixel(context, 0, 0));
+  for(ty = 0; ty < 256; ty++)
+  {
+    Set_layer(context, 1);
+    Write_byte(file, Get_pixel(context, 0, ty));
+    Set_layer(context, 2);
+    Write_byte(file, Get_pixel(context, 0, ty));
+    Set_layer(context, 3);
+    for(tx = 0; tx < 6; tx++)
+    {
+      Write_byte(file, Get_pixel(context, tx*48, ty));
+    }
+  }
+
+  fclose(file);
+
+  // Now the pixeldata
+  filename[strlen(filename) - 3] = 0;
+  strcat(filename,"gfx");
+  if (!(file = fopen(filename, "wb")))
+  {
+      File_error = 2;
+      return;
+  }
+
+  Set_layer(context, 4);
+  
+  for (ty = 0; ty < 256; ty++)
+  {
+    for (tx = 0; tx < 48*6; tx+=4)
+    {
+      byte code = 0;
+      byte pixel;
+
+      pixel = 3-Get_pixel(context, tx+3, ty);
+      code |= (pixel&2)>>1 | ((pixel & 1)<<4);
+      pixel = 3-Get_pixel(context, tx+2, ty);
+      code |= ((pixel&2)<<0) | ((pixel & 1)<<5);
+      pixel = 3-Get_pixel(context, tx+1, ty);
+      code |= ((pixel&2)<<1) | ((pixel & 1)<<6);
+      pixel = 3-Get_pixel(context, tx, ty);
+      code |= ((pixel&2)<<2) | ((pixel & 1)<<7);
+      Write_byte(file, code);
+    }
+  }
+
+  fclose(file);
+  File_error = 0;
+  
 }
