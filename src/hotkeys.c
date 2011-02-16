@@ -1642,21 +1642,21 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   SDLK_BACKQUOTE|MOD_CTRL, // Ctrl + `~
   0},
   {198,
-  "Toggle color cycling",
-  "Activates or desactivates color",
-  "cycling, if the current image has",
-  "cycling colors. (See gradient menu)",
-  true,
-  SDLK_BACKQUOTE|MOD_CTRL, // Ctrl + `~
-  0},
-  {199,
   "Format checker",
   "Performs a format check on the",
   "current image.",
   "",
   true,
   0,
-  0}
+  0},
+  {199,
+  "Format checker menu",
+  "Allows you to setup the checks",
+  "performed by the format checker.",
+  "",
+  true,
+  0,
+  0},
 };
 
 word Ordering[NB_SHORTCUTS]=
