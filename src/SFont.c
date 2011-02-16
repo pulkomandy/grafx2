@@ -117,7 +117,9 @@ SFont_Font* SFont_InitFont(SDL_Surface* Surface)
     
     pixel = GetPixel(Surface, 0, Surface->h-1);
     SDL_UnlockSurface(Surface);
-    SDL_SetColorKey(Surface, SDL_SRCCOLORKEY, pixel);
+    // No longer use SDL color keying
+    //SDL_SetColorKey(Surface, SDL_SRCCOLORKEY, pixel);
+    Font->Transparent=pixel;
 
     return Font;
 }

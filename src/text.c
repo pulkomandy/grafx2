@@ -483,12 +483,7 @@ byte *Render_text_TTF(const char *str, int font_number, int size, int antialias,
 
     if (Fore_color==Back_color)
     {
-      if (Main_palette[Back_color].R+Main_palette[Back_color].G+Main_palette[Back_color].B > 128*3)
-        // Back color is rather light:
-        new_fore=MC_Black;
-      else
-        // Back color is rather dark:
-        new_fore=MC_White;
+      new_fore=Best_color_perceptual_except(Main_palette[Back_color].R, Main_palette[Back_color].G, Main_palette[Back_color].B, Back_color);
     }
     
     for (index=0; index < text_surface->w * text_surface->h; index++)
@@ -578,12 +573,12 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   text_surface=SDL_CreateRGBSurface(SDL_SWSURFACE, *width, *height, 8, 0, 0, 0, 0);
   // Copy palette
   SDL_SetPalette(text_surface, SDL_LOGPAL, font_surface->format->palette->colors, 0, 256);
-  // Fill with backcolor
+  // Fill with transparent color
   rectangle.x=0;
   rectangle.y=0;
   rectangle.w=*width;
   rectangle.h=*height;
-  SDL_FillRect(text_surface, &rectangle, Back_color);
+  SDL_FillRect(text_surface, &rectangle, font->Transparent);
   // Rendu du texte
   SFont_Write(text_surface, font, 0, 0, str);
   if (!text_surface)
@@ -603,6 +598,29 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   }
 
   Get_SDL_Palette(font_surface->format->palette, palette);
+
+  // Swap current BG color with font's transparent color
+  if (font->Transparent != Back_color)
+  {
+    int c;
+    byte colmap[256];
+    // Swap palette entries
+    
+    SWAP_BYTES(palette[font->Transparent].R, palette[Back_color].R)
+    SWAP_BYTES(palette[font->Transparent].G, palette[Back_color].G)
+    SWAP_BYTES(palette[font->Transparent].B, palette[Back_color].B)
+    
+    // Define a colormap
+    for (c=0; c<256; c++)
+      colmap[c]=c;
+    
+    // The swap
+    colmap[font->Transparent]=Back_color;
+    colmap[Back_color]=font->Transparent;
+    
+    Remap_general_lowlevel(colmap, new_brush, new_brush, text_surface->w,text_surface->h, text_surface->w);
+    
+  }
 
   SDL_FreeSurface(text_surface);
   SFont_FreeFont(font);

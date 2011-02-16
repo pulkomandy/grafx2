@@ -4867,9 +4867,22 @@ void Button_Text(void)
       if (str[0])
         preview_string=str;
       is_truetype=TrueType_font(selected_font_index);
-      Window_rectangle(8, 106, 273, 50,(antialias&&is_truetype)?MC_Black:Back_color);
       free(new_brush);
       new_brush = Render_text(preview_string, selected_font_index, font_size, antialias, is_bold, is_italic, &new_width, &new_height, text_palette);
+      // Background:
+      if (antialias&&is_truetype)
+        // Solid
+        Window_rectangle(8, 106, 273, 50,MC_Black);
+      else if (is_truetype)
+      {
+        long l = text_palette[Fore_color].R+text_palette[Fore_color].G+text_palette[Fore_color].B;
+        Window_rectangle(8, 106, 273, 50,l>128*3? MC_Black:MC_Light);
+      }
+      else
+      {
+        long l = text_palette[Back_color].R+text_palette[Back_color].G+text_palette[Back_color].B;
+        Window_rectangle(8, 106, 273, 50,l>128*3? MC_Light:MC_Black);
+      }
       if (new_brush)
       {
         if (!is_truetype || (is_truetype&&antialias))
@@ -4906,7 +4919,7 @@ void Button_Text(void)
                 //if (r==Main_palette[color].R && g==Main_palette[color].G && b==Main_palette[color].B)
                 //  colmap[color]=color;
                 //else
-                  colmap[color]=Best_color_perceptual(r,g,b);
+                  colmap[color]=Best_color_perceptual_except(r,g,b,Back_color);
               }
           
             colmap[Back_color]=Back_color;

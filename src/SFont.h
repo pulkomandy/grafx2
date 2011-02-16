@@ -59,6 +59,7 @@ typedef struct {
         int CharBegin[256];
         int CharWidth[256];
         int Space;
+        unsigned char Transparent;
 } SFont_Font;
 
 ///

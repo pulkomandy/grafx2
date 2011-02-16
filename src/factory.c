@@ -153,6 +153,7 @@ void Update_colors_during_script(void)
 
 int L_SetBrushSize(lua_State* L)
 {
+  int i;
   int w;
   int h;
   int nb_args=lua_gettop(L);
@@ -168,10 +169,12 @@ int L_SetBrushSize(lua_State* L)
   Brush_was_altered=1;
   // Fill with Back_color
   memset(Brush_original_pixels,Back_color,(long)Brush_width*Brush_height);
-  // Grab palette
+  memset(Brush,Back_color,(long)Brush_width*Brush_height);
+  // Adopt the current palette.
   memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
-  // Remap (no change)
-  Remap_brush();
+  for (i=0; i<256; i++)
+    Brush_colormap[i]=i;
+  //--
 
   // Center the handle
   Brush_offset_X=(Brush_width>>1);
