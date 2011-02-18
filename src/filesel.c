@@ -1610,7 +1610,6 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
 		if (Main_format != Window_attribute2) {
 			char* savename = (char *)strdup(Selector_filename);
 			int nameLength = strlen(savename);
-			DEBUG(Selector_filename, 42);
 			Main_format = Window_attribute2;
 			// Comme on change de liste, on se place en début de liste:
 			Main_fileselector_position = 0;
@@ -1940,7 +1939,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
       else  // Sinon on essaye de charger ou sauver le fichier
       {
         strcpy(context->File_directory,Main_current_directory);
-        if (!load)
+        if (!load && !Get_fileformat(Main_format)->Palette_only)
           Main_fileformat=Main_format;
         save_or_load_image=1;
       }
