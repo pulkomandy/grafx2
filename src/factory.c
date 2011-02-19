@@ -1175,7 +1175,8 @@ int L_StatusMessage(lua_State* L)
 	LUA_ARG_LIMIT(1,"statusmessage");
 
 	LUA_ARG_STRING(1, "statusmessage", msg);
-	Print_in_menu(msg,0);
+  if(strlen(msg)<=24)
+	  Print_in_menu(msg,0);
 	return 0;
 }
 
@@ -1507,6 +1508,7 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   Brush_backup=NULL;
   Update_colors_during_script();
   End_of_modification();
+	Print_in_menu("                        ",0);
 
   lua_close(L);
   
