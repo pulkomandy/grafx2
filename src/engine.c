@@ -3145,9 +3145,10 @@ short Window_get_button_shortcut(void)
 short Window_clicked_button(void)
 {
   short Button;
+  byte old_mouse_k;
 
+  old_mouse_k=Mouse_K;
   Get_input(20);
-
   // Handle clicks
   if (Mouse_K)
   {
@@ -3174,6 +3175,9 @@ short Window_clicked_button(void)
     {
       short clicked_button;
       T_List_button * list;
+      static Uint32 time_last_click = 0;
+      static int last_list_number = -1;
+      Uint32 time_now;
       
       // Check which controls was clicked (by rectangular area)
       clicked_button = Window_get_clicked_button();
@@ -3186,9 +3190,25 @@ short Window_clicked_button(void)
           // Click in the textual part of a list.
           short clicked_line;            
           clicked_line = (((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-list->Entry_button->Pos_Y)>>3;
-          if (clicked_line == list->Cursor_position ||   // Same as before
-            clicked_line >= list->Scroller->Nb_elements) // Below last line              
+          if (clicked_line >= list->Scroller->Nb_elements) // Below last line
             return 0;
+          time_now = SDL_GetTicks();
+          if (clicked_line == list->Cursor_position)
+          {
+            // Double click check
+            if (old_mouse_k==0 && last_list_number==list->Number && time_now - time_last_click < Config.Double_click_speed)
+            {
+              time_last_click = time_now;
+              // Store the selected value as attribute2
+              Window_attribute2=list->List_start + list->Cursor_position;
+              // Return the control ID of the list.
+              return list->Number;
+            }
+            time_last_click = time_now;
+            last_list_number=list->Number;
+            // Already selected : don't activate anything
+            return 0;
+          }
           
           Hide_cursor();
           // Redraw one item as disabled

@@ -1632,7 +1632,7 @@ void Button_Brush_Factory(void)
   T_Special_button* scriptarea;
   char scriptdir[MAX_PATH_CHARACTERS];
   T_Fileselector_item *item;
-  
+  int last_selected_item=-1;
   // Reinitialize the list
   Free_fileselector_list(&Scripts_selector);
   strcpy(scriptdir, Data_directory);
@@ -1675,6 +1675,12 @@ void Button_Brush_Factory(void)
     
     Update_window_area(0, 0, Window_width, Window_height);
     Display_cursor();
+    // Wait for mouse release (needed for example after a double-click
+    // that navigates to a subdirectory)
+    while (last_selected_item==-1 && Mouse_K)
+    {
+      Get_input(20);
+    }
     
     Reset_quicksearch();
   
@@ -1701,28 +1707,17 @@ void Button_Brush_Factory(void)
       switch (clicked_button)
       {
         case 4:
+          if (last_selected_item == scriptlist->List_start + scriptlist->Cursor_position)
+          {
+            // Double click
+            clicked_button=5;
+            break;
+          }
+          last_selected_item = scriptlist->List_start + scriptlist->Cursor_position;
           Hide_cursor();
           Draw_script_information(Get_item_by_index(&Scripts_selector,
             scriptlist->List_start + scriptlist->Cursor_position));
           Display_cursor();
-          {
-            // Test double-click
-            static long time_click = 0;
-            static int last_selected_item=-1;
-            static long time_previous;
-            
-            time_previous = time_click;
-            time_click = SDL_GetTicks();
-            if (scriptlist->List_start + scriptlist->Cursor_position == last_selected_item)
-            {
-              if (time_click - time_previous < Config.Double_click_speed)
-                clicked_button=5;
-            }
-            else
-            {
-              last_selected_item=scriptlist->List_start + scriptlist->Cursor_position;
-            }
-          }
           break;
         
         case 6:
@@ -1807,7 +1802,7 @@ void Button_Brush_Factory(void)
       
       scriptlist->Scroller->Nb_elements=Scripts_selector.Nb_elements;
       Compute_slider_cursor_length(scriptlist->Scroller);
-      
+      last_selected_item = -1;
       Hide_cursor();
     }
   }
