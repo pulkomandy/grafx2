@@ -601,6 +601,7 @@ word Keysym_to_ANSI(SDL_keysym keysym)
   #if !(defined(__macosx__) || defined(__FreeBSD__))
   if ( keysym.unicode == 0)
   {
+
     switch(keysym.sym)
     {
       case SDLK_DELETE:
@@ -610,7 +611,11 @@ word Keysym_to_ANSI(SDL_keysym keysym)
       case SDLK_END:
       case SDLK_BACKSPACE:
       case KEY_ESC:
+        return keysym.sym;
       case SDLK_RETURN:
+        // Case alt-enter
+        if (SDL_GetModState() & (KMOD_ALT|KMOD_META))
+          return '\n';
         return keysym.sym;
       default:
         return 0;      

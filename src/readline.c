@@ -509,7 +509,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
           switch(input_type)
           {
             case INPUT_TYPE_STRING :
-              if (input_key>=' ' && input_key<= 255)
+              if ((input_key>=' ' && input_key<= 255)||input_key=='\n')
                 is_authorized=1;
               break;
             case INPUT_TYPE_INTEGER :

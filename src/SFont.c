@@ -145,8 +145,13 @@ void SFont_Write(SDL_Surface *Surface, const SFont_Font *Font,
     srcrect.h = dstrect.h = Font->Surface->h - 1;
 
     for(c = text; *c != '\0' && x <= Surface->w ; c++) {
+        if (*c == '\n') {
+          dstrect.y += Font->Surface->h-1;
+          x=0;
+          continue;
+        }
         // skip spaces and nonprintable characters
-        if (*c == ' ' || Font->CharWidth[(int)*c]==0) {
+        else if (*c == ' ' || Font->CharWidth[(int)*c]==0) {
             x += Font->Space;
             continue;
         }
@@ -166,13 +171,23 @@ int SFont_TextWidth(const SFont_Font *Font, const char *text)
 {
     const char* c;
     int width = 0;
+    int previous_width = 0;
 
     if(text == NULL)
         return 0;
 
-    for(c = text; *c != '\0'; c++) {
+    for(c = text; *c != '\0'; c++)
+    {
+        if (*c == '\n')
+        {
+          if (previous_width<width)
+            previous_width=width;
+          width=0;
+        }
+        else
         // skip spaces and nonprintable characters
-        if (*c == ' ' || Font->CharWidth[(int)*c]==0) {
+        if (*c == ' ' || Font->CharWidth[(int)*c]==0)
+        {
             width += Font->Space;
             continue;
         }
@@ -180,13 +195,25 @@ int SFont_TextWidth(const SFont_Font *Font, const char *text)
         width += Font->CharWidth[(int)*c];
     }
 
-    return width;
+    return previous_width<width ? width : previous_width;
 }
 
-int SFont_TextHeight(const SFont_Font* Font)
+int SFont_TextHeight(const SFont_Font* Font, const char *text)
 {
-    return Font->Surface->h - 1;
+    // Count occurences of '\n'
+    int nb_cr=0;
+    while (*text!='\0')
+    {
+      if (*text=='\n')
+        nb_cr++;
+      text++;
+    }
+    
+    return (Font->Surface->h - 1) * (nb_cr+1);
 }
+
+/*
+// Do not use: Doesn't implement carriage returns
 
 void SFont_WriteCenter(SDL_Surface *Surface, const SFont_Font *Font,
                        int y, const char *text)
@@ -194,4 +221,4 @@ void SFont_WriteCenter(SDL_Surface *Surface, const SFont_Font *Font,
     SFont_Write(Surface, Font, Surface->w/2 - SFont_TextWidth(Font, text)/2,
                 y, text);
 }
-
+*/

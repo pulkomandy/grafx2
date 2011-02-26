@@ -567,7 +567,7 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   }
   
   // Calcul des dimensions
-  *height=SFont_TextHeight(font);
+  *height=SFont_TextHeight(font, str);
   *width=SFont_TextWidth(font, str);
   // Allocation d'une surface SDL
   text_surface=SDL_CreateRGBSurface(SDL_SWSURFACE, *width, *height, 8, 0, 0, 0, 0);
