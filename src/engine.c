@@ -227,7 +227,7 @@ void Draw_menu_button(byte btn_number,byte pressed)
   word y_pos;
   byte current_menu;
   byte color;
-  char icon;
+  signed char icon;
 
   // Find in which menu the button is
   for (current_menu = 0; current_menu < MENUBAR_COUNT; current_menu++)

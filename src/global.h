@@ -581,7 +581,7 @@ GFX2_GLOBAL struct
   word            Height;           ///< Button's active heigth
   byte            Pressed;          ///< Button is currently pressed
   byte            Shape;            ///< Shape, listed in enum ::BUTTON_SHAPES
-  char            Icon;             ///< Which icon to display: Either the one from the toolbar (-1) or one of ::MENU_SPRITE
+  signed char     Icon;             ///< Which icon to display: Either the one from the toolbar (-1) or one of ::MENU_SPRITE
 
   // Triggers on mouse/keyboard
   Func_action     Left_action;      ///< Action triggered by a left mouseclick on the button
