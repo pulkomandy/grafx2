@@ -1706,13 +1706,10 @@ void Button_Brush_Factory(void)
   
       switch (clicked_button)
       {
-        case 4:
-          if (last_selected_item == scriptlist->List_start + scriptlist->Cursor_position)
-          {
-            // Double click
-            clicked_button=5;
-            break;
-          }
+        case 2: // Double-click an entry in script list
+          clicked_button=5;
+          break;
+        case 4: // Select script
           last_selected_item = scriptlist->List_start + scriptlist->Cursor_position;
           Hide_cursor();
           Draw_script_information(Get_item_by_index(&Scripts_selector,

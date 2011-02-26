@@ -3199,10 +3199,11 @@ short Window_clicked_button(void)
             if (old_mouse_k==0 && last_list_number==list->Number && time_now - time_last_click < Config.Double_click_speed)
             {
               time_last_click = time_now;
+              Input_sticky_control=0;
               // Store the selected value as attribute2
               Window_attribute2=list->List_start + list->Cursor_position;
-              // Return the control ID of the list.
-              return list->Number;
+              // Return the control ID of the "special button" that covers the list.
+              return list->Entry_button->Number;
             }
             time_last_click = time_now;
             last_list_number=list->Number;

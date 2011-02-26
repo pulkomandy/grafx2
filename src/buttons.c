@@ -1424,12 +1424,12 @@ void Button_Skins(void)
     {
       case 1 : // OK
         break;
-      case 2 : // doesn't happen
+      case 2 : // double-click file: do nothing
         break;
       case 3 : // doesn't happen
         break;
       case 4 : // a file is selected
-        need_load=1;
+          need_load=1;
         break;
       case 5 : // Font dropdown
         selected_font = Window_attribute2; // Get the index of the chosen font.
@@ -5009,10 +5009,6 @@ void Button_Text(void)
       /* Cannot happen, event is catched by the list control */
       break;
       
-      case 6: // Selecteur de fonte
-      /* Cannot happen, event is catched by the list control */
-      break;
-      
       case 13: // Font selection
         selected_font_index = Window_attribute2;
         Hide_cursor();
@@ -5056,6 +5052,7 @@ void Button_Text(void)
       break;
       
     
+      case 6: // Double-click font selector
       case 11: // OK
       // Save the selector settings
       list_start = font_list->List_start;
