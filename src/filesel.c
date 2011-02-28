@@ -1236,12 +1236,13 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
   else
   {
     #if defined(__MINT__)    
-    chdir(context->File_directory);
     static char path[1024]={0};
+    chdir(context->File_directory);
     Dgetpath(path,0);
     strcat(path,PATH_SEPARATOR);
     strcpy(Main_current_directory,path);  
  #else
+    chdir(context->File_directory);
     getcwd(Main_current_directory,256);
   #endif
 
