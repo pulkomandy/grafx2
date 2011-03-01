@@ -4066,7 +4066,7 @@ void Refresh_airbrush_settings(byte selected_color, byte update_slider)
 
 void Button_Airbrush_menu(void)
 {
-  static byte spray_init=0;
+  static byte spray_init=1;
   short  clicked_button;
   char   str[4];
   word   index;
@@ -4326,6 +4326,12 @@ void Button_Airbrush_menu(void)
         if (spray_init>=50)
         {
           spray_init=49;
+          Num2str(spray_init,str,2);
+          Window_input_content(input_init_button,str);
+        }
+        else if (spray_init<1)
+        {
+          spray_init=1;
           Num2str(spray_init,str,2);
           Window_input_content(input_init_button,str);
         }
