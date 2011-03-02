@@ -215,7 +215,9 @@ void Set_pixel(T_IO_Context *context, short x, short y, byte c);
 /// Set the color of a 24bit pixel (on load)
 void Set_pixel_24b(T_IO_Context *context, short x, short y, byte r, byte g, byte b);
 /// Function to call when need to switch layers.
-void Set_layer(T_IO_Context *context, byte layer);
+void Set_loading_layer(T_IO_Context *context, byte layer);
+/// Function to call when need to switch layers.
+void Set_saving_layer(T_IO_Context *context, byte layer);
 
 
 // =================================================================

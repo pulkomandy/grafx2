@@ -436,7 +436,7 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
         context->Nb_layers=1;
         Main_current_layer=0;
         Main_layers_visible=1<<0;
-        Set_layer(context,0);
+        Set_loading_layer(context,0);
         
         // Remove previous comment, unless we load just a palette
         if (! Get_fileformat(context->Format)->Palette_only)
@@ -1261,7 +1261,18 @@ void Init_context_surface(T_IO_Context * context, char *file_name, char *file_di
 
 }
 /// Function to call when need to switch layers.
-void Set_layer(T_IO_Context *context, byte layer)
+void Set_saving_layer(T_IO_Context *context, byte layer)
+{
+  context->Current_layer = layer;
+
+  if (context->Type == CONTEXT_MAIN_IMAGE)
+  {
+    context->Target_address=Main_backups->Pages->Image[layer];
+  }
+}
+
+/// Function to call when need to switch layers.
+void Set_loading_layer(T_IO_Context *context, byte layer)
 {
   context->Current_layer = layer;
 
@@ -1280,9 +1291,8 @@ void Set_layer(T_IO_Context *context, byte layer)
       context->Nb_layers = Main_backups->Pages->Nb_layers;
       Main_layers_visible = (2<<layer)-1;
     }
-    context->Target_address=Main_backups->Pages->Image[layer];
-
     Main_current_layer = layer;
+    context->Target_address=Main_backups->Pages->Image[layer];
   }
 }
 

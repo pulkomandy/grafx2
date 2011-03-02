@@ -2206,7 +2206,7 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
     }
   }
   
-  Set_layer(context, 1);
+  Set_loading_layer(context, 1);
   for(cy=0; cy<25; cy++)
   {
     for(cx=0; cx<40; cx++)
@@ -2222,7 +2222,7 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
     }
   }
 
-  Set_layer(context, 2);
+  Set_loading_layer(context, 2);
   for(cy=0; cy<25; cy++)
   {
     for(cx=0; cx<40; cx++)
@@ -2244,7 +2244,7 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
       }
     }
   }
-  Set_layer(context, 3);
+  Set_loading_layer(context, 3);
   for(y=0; y<200; y++)
   {
     for(x=0; x<160; x++)
@@ -3015,7 +3015,7 @@ void Load_CM5(T_IO_Context* context)
   if (Read_byte(file, &value)!=1)
     File_error = 2;
 
-  Set_layer(context, 0);
+  Set_loading_layer(context, 0);
   for(ty=0; ty<context->Height; ty++)
   for(tx=0; tx<context->Width; tx++)
   {
@@ -3029,19 +3029,19 @@ void Load_CM5(T_IO_Context* context)
     {
       case 0:
         // This is color for layer 1
-        Set_layer(context, 1);
+        Set_loading_layer(context, 1);
         for(tx=0; tx<context->Width; tx++)
           Set_pixel(context, tx, line, value);
         break;
       case 1:
         // This is color for layer 2
-        Set_layer(context, 2);
+        Set_loading_layer(context, 2);
         for(tx=0; tx<context->Width; tx++)
           Set_pixel(context, tx, line, value);
         break;
       default:
         // This is color for a block in layer 4
-        Set_layer(context, 3);
+        Set_loading_layer(context, 3);
         for(tx=(mod-2)*48; tx<(mod-1)*48; tx++)
           Set_pixel(context, tx, line, value);
         break;
@@ -3065,7 +3065,7 @@ void Load_CM5(T_IO_Context* context)
       return;
   }
 
-  Set_layer(context, 4);
+  Set_loading_layer(context, 4);
   
   for (ty = 0; ty < 256; ty++)
   {
@@ -3106,15 +3106,15 @@ void Save_CM5(T_IO_Context* context)
   }
 
   // Write layer 0
-  Set_layer(context, 0);
+  Set_saving_layer(context, 0);
   Write_byte(file, Get_pixel(context, 0, 0));
   for(ty = 0; ty < 256; ty++)
   {
-    Set_layer(context, 1);
+    Set_saving_layer(context, 1);
     Write_byte(file, Get_pixel(context, 0, ty));
-    Set_layer(context, 2);
+    Set_saving_layer(context, 2);
     Write_byte(file, Get_pixel(context, 0, ty));
-    Set_layer(context, 3);
+    Set_saving_layer(context, 3);
     for(tx = 0; tx < 6; tx++)
     {
       Write_byte(file, Get_pixel(context, tx*48, ty));
@@ -3132,7 +3132,7 @@ void Save_CM5(T_IO_Context* context)
       return;
   }
 
-  Set_layer(context, 4);
+  Set_saving_layer(context, 4);
   
   for (ty = 0; ty < 256; ty++)
   {

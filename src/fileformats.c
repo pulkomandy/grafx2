@@ -2085,7 +2085,7 @@ void Load_GIF(T_IO_Context * context)
                 // This a second layer/frame, or more.
                 // Attempt to add a layer to current image
                 current_layer++;
-                Set_layer(context, current_layer);
+                Set_loading_layer(context, current_layer);
               }
               number_LID++;
               
@@ -2444,7 +2444,7 @@ void Save_GIF(T_IO_Context * context)
               GCE_block[3] |= 1; // Transparent color flag
             GCE_block[6] = context->Transparent_color;
             
-            Set_layer(context, current_layer);
+            Set_saving_layer(context, current_layer);
             
             if (current_layer == context->Nb_layers -1)
             {
