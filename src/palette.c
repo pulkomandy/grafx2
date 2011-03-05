@@ -1741,7 +1741,7 @@ void Button_Palette(void)
          && (temp_color!=block_start))
         {
           Hide_cursor();
-          Palette_edit_step();// Not undoable if X-Swap
+          Palette_edit_step();
 
           // On calcule le nombre de couleurs a swapper sans risquer de sortir
           // de la palette (La var. first_color est utilisée pour économiser 1 var; c'est tout)
@@ -1796,6 +1796,7 @@ void Button_Palette(void)
           // En cas de X-Swap, tout l'ecran a pu changer de couleur.
           if (clicked_button==8)
           {
+            Palette_edit_step(); // Disable Undo
             Update_rect(0, 0, Screen_width, Menu_Y_before_window);
             End_of_modification();
           }
@@ -1918,7 +1919,7 @@ void Button_Palette(void)
             Draw_all_palette_sliders(red_slider, green_slider, blue_slider,
                     working_palette, block_start, block_end);
             memcpy(temp_palette, working_palette, sizeof(T_Palette));
-
+            Palette_edit_step(); // Disable Undo
             End_of_modification();
             need_to_remap = 1;
         }
@@ -2279,6 +2280,7 @@ void Button_Palette(void)
           Remap_image_highlevel(conversion_table);
           Display_cursor();
           End_of_modification();
+          Palette_edit_step(); // Disable Undo
         }
         // On prépare la "modifiabilité" des nouvelles couleurs
         Set_palette(working_palette);
@@ -2420,6 +2422,7 @@ void Button_Palette(void)
         // Maintenant, tous ces calculs doivent êtres pris en compte dans la
         // palette, l'image et à l'écran.
         Set_palette(working_palette);
+        Palette_edit_step(); // Disable Undo
         
         End_of_modification();
         need_to_remap=1;
