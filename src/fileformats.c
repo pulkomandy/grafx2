@@ -2195,14 +2195,18 @@ void Load_GIF(T_IO_Context * context)
                     }
                   }
                   else
+                  {
                     File_error=2;
+                    break;
+                  }
                 } // Code End-Of-Information ou erreur de fichier rencontré
-    
+                if (File_error==2 && GIF_pos_X==0 && GIF_pos_Y==IDB.Image_height)
+                  File_error=0;
                 /*Close_lecture();*/
     
                 if (File_error>=0)
                 if ( /* (GIF_pos_X!=0) || */
-                     ( ( (!GIF_interlaced) && (GIF_pos_Y!=IDB.Image_height) ) ||
+                     ( ( (!GIF_interlaced) && (GIF_pos_Y!=IDB.Image_height) && (GIF_pos_X!=0)) ||
                        (  (GIF_interlaced) && (!GIF_finished_interlaced_image) )
                      ) )
                   File_error=2;
@@ -2214,7 +2218,8 @@ void Load_GIF(T_IO_Context * context)
             break;
           }
           // Lecture du code de fonction suivant:
-          Read_byte(GIF_file,&block_identifier);
+          if (!Read_byte(GIF_file,&block_identifier))
+          File_error=2;
         }
       } // Le fichier contenait un LSDB
       else
