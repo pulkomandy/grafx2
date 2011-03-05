@@ -2760,7 +2760,16 @@ void Scroll_12_0(void)
   if (Mouse_K == LEFT_SIDE)
     Backup();
   else
-    Backup_layers(Main_layers_visible);
+  {
+    Backup_layers(-1); // Main_layers_visible
+    #ifndef NOLAYERS
+      // Ensure the backup visible image is up-to-date
+      // (after swapping some layers on/off, it gets outdated)
+      memcpy(Main_visible_image_backup.Image,
+             Main_visible_image.Image,
+             Main_image_width*Main_image_height);
+    #endif
+  }
   
   Cursor_hidden_before_scroll=Cursor_hidden;
   Cursor_hidden=1;
@@ -2818,7 +2827,6 @@ void Scroll_12_5(void)
     {
       // One layer at once
       Scroll_picture(Main_backups->Pages->Next->Image[Main_current_layer], Main_backups->Pages->Image[Main_current_layer], x_offset, y_offset);
-      //Redraw_layered_image();
       Redraw_current_layer();
     }
 
@@ -2874,6 +2882,7 @@ void Scroll_0_5(void)
     
     // Do the actual scroll operation on all layers.
     for (i=0; i<Main_backups->Pages->Nb_layers; i++)
+      //if ((1<<i) & Main_layers_visible)
       Scroll_picture(Main_backups->Pages->Next->Image[i], Main_backups->Pages->Image[i], x_offset, y_offset);
     // Update the depth buffer too ...
     // It would be faster to scroll it, but we don't have method
