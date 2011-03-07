@@ -1171,12 +1171,16 @@ int L_UpdateScreen(lua_State* L)
 int L_StatusMessage(lua_State* L)
 {
 	const char* msg;
+  char* msg2;
 	int nb_args = lua_gettop(L);
 	LUA_ARG_LIMIT(1,"statusmessage");
 
 	LUA_ARG_STRING(1, "statusmessage", msg);
-  if(strlen(msg)<=24)
-	  Print_in_menu(msg,0);
+  msg2 = strdup(msg);
+  if(strlen(msg)>24)
+    msg2[24] = 0; // Cut off long messages
+	Print_in_menu(msg2,0);
+  free(msg2);
 	return 0;
 }
 

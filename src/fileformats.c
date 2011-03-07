@@ -2079,7 +2079,6 @@ void Load_GIF(T_IO_Context * context)
             break;
             case 0x2C: // Local Image Descriptor
             {
-              // Si on a deja lu une image, c'est une GIF animée ou bizarroide, on sort.
               if (number_LID!=0)
               {
                 // This a second layer/frame, or more.
