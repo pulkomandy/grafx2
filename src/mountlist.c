@@ -25,6 +25,9 @@
 // We don't use autoconf and all that in grafx2, so let's do the config here ...
 #if defined(__macosx__) || defined(__FreeBSD__)                        // MacOS X is POSIX compliant
     #define MOUNTED_GETMNTINFO
+#if defined(__macosx__)
+    #include <sys/types.h>
+#endif
 #elif defined(__NetBSD__)
     #define MOUNTED_GETMNTINFO2
 #elif defined(__BEOS__) || defined(__HAIKU__)

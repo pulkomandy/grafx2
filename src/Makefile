@@ -1,5 +1,6 @@
 #  Grafx2 - The Ultimate 256-color bitmap paint program
 #  
+#  Copyright 2011 Franck Charlet
 #  Copyright 2011 Pawel Góralski
 #  Copyright 2009 Per Olofsson
 #  Copyright 2008 Peter Gordon
@@ -61,8 +62,8 @@ else
 #For all other platforms, we can rely on uname
   PLATFORM = $(shell uname)
 
-  #AmigaOS (3 or 4) specific
   ifeq ($(PLATFORM),AmigaOS) # 1
+    #AmigaOS (3 or 4) specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
     RMDIR = rmdir
@@ -78,31 +79,33 @@ else
 
   else
   ifeq ($(PLATFORM),Darwin) # 2
-  #Mac OS X specific
-  DELCOMMAND = rm -rf
-  MKDIR = mkdir -p
-  RMDIR = rmdir
-  CP = cp
-  ZIP = zip
-  PLATFORMFILES = gfx2.png
-  BIN = ../bin/grafx2
-  # Where the SDL frameworks are located
-  FWDIR = /Library/Frameworks
-  SDLCOPT = -arch i386 -I$(FWDIR)/SDL.framework/Headers -I$(FWDIR)/SDL_image.framework/Headers -I$(FWDIR)/SDL_ttf.framework/Headers -D_THREAD_SAFE
-  SDLLOPT = -arch i386 -L/usr/lib -framework SDL -framework SDL_image -framework SDL_ttf -framework Cocoa -framework Carbon -framework OpenGL
-  COPT = -D_DARWIN_C_SOURCE -D__macosx__ -D__linux__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g $(SDLCOPT) $(TTFCOPT) -I/usr/X11/include
-  LOPT = $(SDLLOPT) -L/usr/X11/lib -R/usr/X11/lib -lpng
-  # Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
-  CC = gcc
-  #CC = nccgen -ncgcc -ncld -ncfabs
-  OBJDIR = ../obj/macosx
-  PLATFORMOBJ = $(OBJDIR)/SDLMain.o
-  X11LOPT = 
-  MACAPPEXE = Grafx2.app/Contents/MacOS/Grafx2
+    #Mac OS X specific
+    DELCOMMAND = rm -rf
+    MKDIR = mkdir -p
+    RMDIR = rmdir
+    CP = cp
+    ZIP = zip
+    PLATFORMFILES = gfx2.png
+    BIN = ../bin/grafx2
+    # Where the SDL frameworks are located
+    FWDIR = /Library/Frameworks
+    SDLCOPT = -arch ppc -I$(FWDIR)/SDL.framework/Headers -I$(FWDIR)/SDL_image.framework/Headers -I$(FWDIR)/SDL_ttf.framework/Headers -D_THREAD_SAFE
+    #-framework SDL_ttf 
+    SDLLOPT = -arch ppc -L/usr/lib -framework SDL -framework SDL_image -framework Cocoa -framework Carbon -framework OpenGL
+    COPT = -D_DARWIN_C_SOURCE -D__macosx__ -D__linux__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g $(SDLCOPT) $(TTFCOPT) -I/usr/X11/include
+    LOPT = $(SDLLOPT) -lpng
+    # Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
+    CC = gcc
+    #CC = nccgen -ncgcc -ncld -ncfabs
+    OBJDIR = ../obj/macosx
+    PLATFORMOBJ = $(OBJDIR)/SDLMain.o
+    X11LOPT = 
+    MACAPPEXE = Grafx2.app/Contents/MacOS/Grafx2
+    NOTTF = 1
 
   else
   ifeq ($(PLATFORM),AROS) # 3
-  #AROS specific
+    #AROS specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
     RMDIR = rmdir
@@ -118,7 +121,7 @@ else
 
   else
   ifeq ($(PLATFORM),MorphOS) # 4
-  #MorphOS specific
+    #MorphOS specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
     RMDIR = rmdir
@@ -134,7 +137,7 @@ else
 
   else
   ifeq ($(PLATFORM),BeOS) # 6
-  #BeOS specific
+    #BeOS specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
     RMDIR = rmdir
@@ -148,7 +151,7 @@ else
 
   else
   ifeq ($(PLATFORM),Haiku) # 7
-  #Haiku specific
+    #Haiku specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
     RMDIR = rmdir
@@ -159,8 +162,8 @@ else
         LUACOPT =
         LUALOPT =
       else
-            LUACOPT = -D__ENABLE_LUA__
-            LUALOPT = -llua
+        LUACOPT = -D__ENABLE_LUA__
+        LUALOPT = -llua
       endif
     COPT = -W -Wall -c -g `sdl-config --cflags` $(TTFCOPT) -I/boot/common/include $(LUACOPT)
     LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lfreetype -lbe $(LUALOPT)
@@ -170,7 +173,7 @@ else
 
   else
   ifeq ($(PLATFORM),skyos) # 8
-  #SkyOS specific
+    #SkyOS specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
     RMDIR = rmdir
@@ -184,50 +187,50 @@ else
 
   else
   ifeq ($(PLATFORM),OSF1) #9
-  #OSF1 / tru64 alpha
-      DELCOMMAND = rm -rf
-      MKDIR = mkdir -p
-      RMDIR = rmdir
-      CP = cp
-      ZIP = zip
-      PLATFORMFILES = gfx2.png
-      BIN = ../bin/grafx2
-      COPT = -W -Wall -std=c99 -c -g -gstabs -D__TRU64__ `sdl-config --cflags` $(TTFCOPT) $(LUACOPT)
-      LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng $(LUALOPT) -lm
-      OBJDIR = ../obj/unix
-      X11LOPT = -lX11
-      CC = gcc
+    #OSF1 / tru64 alpha
+    DELCOMMAND = rm -rf
+    MKDIR = mkdir -p
+    RMDIR = rmdir
+    CP = cp
+    ZIP = zip
+    PLATFORMFILES = gfx2.png
+    BIN = ../bin/grafx2
+    COPT = -W -Wall -std=c99 -c -g -gstabs -D__TRU64__ `sdl-config --cflags` $(TTFCOPT) $(LUACOPT)
+    LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng $(LUALOPT) -lm
+    OBJDIR = ../obj/unix
+    X11LOPT = -lX11
+    CC = gcc
   else
   
-      # Finally, the default rules that work fine for most unix/gcc systems, linux and freebsd are tested.
-      # Linux and FreeBSD specific (default rules)
-      DELCOMMAND = rm -rf
-      MKDIR = mkdir -p
-      RMDIR = rmdir
-      CP = cp
-      ZIP = zip
-      PLATFORMFILES = gfx2.png
-      ifneq ($(ATARICROSS),1)
+    # Finally, the default rules that work fine for most unix/gcc systems, linux and freebsd are tested.
+    # Linux and FreeBSD specific (default rules)
+    DELCOMMAND = rm -rf
+    MKDIR = mkdir -p
+    RMDIR = rmdir
+    CP = cp
+    ZIP = zip
+    PLATFORMFILES = gfx2.png
+    ifneq ($(ATARICROSS),1)
       ifeq ($(NOLUA),1)
         LUACOPT =
         LUALOPT =
       else
-            LUACOPT = `pkg-config lua --cflags --silence-errors ||pkg-config lua5.1 --cflags --silence-errors ||pkg-config lua-5.1 --cflags`
-            LUALOPT = `pkg-config lua --libs --silence-errors ||pkg-config lua5.1 --libs --silence-errors ||pkg-config lua-5.1 --libs`
+        LUACOPT = `pkg-config lua --cflags --silence-errors ||pkg-config lua5.1 --cflags --silence-errors ||pkg-config lua-5.1 --cflags`
+        LUALOPT = `pkg-config lua --libs --silence-errors ||pkg-config lua5.1 --libs --silence-errors ||pkg-config lua-5.1 --libs`
       endif
-      endif
-      # These can only be used under linux and maybe freebsd. They allow to compile for the gp2x or to create a windows binary
-      ifdef WIN32CROSS
-        #cross compile a Win32 executable
-        CC = i586-mingw32msvc-gcc
-        BIN = ../bin/grafx2.exe
-        COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb -Dmain=SDL_main `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --cflags` $(TTFCOPT)
-        LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --libs` -lSDL_image $(TTFLOPT)
-        OBJDIR = ../obj/win32
-        PLATFORM = win32
-      else
+    endif
+    
+    # These can only be used under linux and maybe freebsd. They allow to compile for the gp2x or to create a windows binary
+    ifdef WIN32CROSS
+      #cross compile a Win32 executable
+      CC = i586-mingw32msvc-gcc
+      BIN = ../bin/grafx2.exe
+      COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb -Dmain=SDL_main `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --cflags` $(TTFCOPT)
+      LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --libs` -lSDL_image $(TTFLOPT)
+      OBJDIR = ../obj/win32
+      PLATFORM = win32
+    else
       ifdef GP2XCROSS
-
         #cross compile an exec for the gp2x
         CC = /opt/open2x/gcc-4.1.1-glibc-2.3.6/arm-open2x-linux/bin/arm-open2x-linux-gcc
         BIN = ../bin/grafx2.gpe
@@ -239,28 +242,30 @@ else
         STRIP = /opt/open2x/gcc-4.1.1-glibc-2.3.6/arm-open2x-linux/bin/arm-open2x-linux-strip
         JOYCOPT = -DUSE_JOYSTICK
 
-      else ifdef AROS32CROSS
-	#cross compile an Aros 32 bit executable
+      else
+      ifdef AROS32CROSS
+	    #cross compile an Aros 32 bit executable
         BIN = ../bin/grafx2
         COPT = -Wall -g `i386-linux-aros-sdl-config --cflags` $(TTFCOPT)
         LOPT = -lSDL_image `i386-linux-aros-sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT) -lfreetype2shared
         CC = i386-aros-gcc
         OBJDIR = ../obj/aros
-	STRIP = strip --strip-unneeded --remove-section .comment
+        STRIP = strip --strip-unneeded --remove-section .comment
         PLATFORM = AROS
         ZIP = lha
         ZIPOPT = a
-      else ifdef ATARICROSS
+      else
+      ifdef ATARICROSS
         #cross compile an exec for atari TOS/MiNT machine
         CC = m68k-atari-mint-gcc
         BIN = ../bin/grafx2.ttp
-	LUALOPT = -llua
+	    LUALOPT = -llua
         OBJDIR = ../obj/m68k-atari-mint
         PLATFORM = m68k-atari-mint
         STRIP = m68k-atari-mint-strip -s 
-	X11LOPT = 
-	COPT = -W -Wall -m68020-60 -fomit-frame-pointer -pedantic -std=c99 -Wdeclaration-after-statement -D__MINT__ -DNO_INLINE_MATH -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $() $(JOYCOPT) $(LAYERCOPT) $(LUACOPT)
-    	LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) $(LAYERLOPT)
+        X11LOPT = 
+        COPT = -W -Wall -m68020-60 -fomit-frame-pointer -pedantic -std=c99 -Wdeclaration-after-statement -D__MINT__ -DNO_INLINE_MATH -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $() $(JOYCOPT) $(LAYERCOPT) $(LUACOPT)
+        LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) $(LAYERLOPT)
       else
 
         # Compiles a regular linux executable for the native platform
@@ -274,6 +279,9 @@ else
         X11LOPT = -lX11
       endif
       endif
+      endif
+    endif
+
   endif
   endif
   endif
@@ -284,33 +292,34 @@ else
   endif
 endif
 
-### BUILD SETTINGS are set according to vars set in the platform selection, the "overridable defaults", and environment variables set before launching make
+### BUILD SETTINGS are set according to vars set in the platform selection, 
+### the "overridable defaults", and environment variables set before launching make
 
 #TrueType is optional: make NOTTF=1 to disable support and dependencies.
 ifndef ($(ATARICROSS,1))
-ifeq ($(NOTTF),1)
-  TTFCOPT = -DNOTTF=1
-  TTFLOPT =
-  TTFLIBS =
-  TTFLABEL = -nottf
+ ifeq ($(NOTTF),1)
+   TTFCOPT = -DNOTTF=1
+   TTFLOPT =
+   TTFLIBS =
+   TTFLABEL = -nottf
+ else
+   TTFCOPT = 
+   TTFLOPT = -L$(prefix)/lib -lSDL_ttf $(X11LOPT)
+   TTFLIBS = bin/libfreetype-6.dll bin/SDL_ttf.dll
+   TTFLABEL = 
+ endif
 else
-  TTFCOPT = 
-  TTFLOPT = -L$(prefix)/lib -lSDL_ttf $(X11LOPT)
-  TTFLIBS = bin/libfreetype-6.dll bin/SDL_ttf.dll
-  TTFLABEL = 
-endif
-else
-ifeq ($(NOTTF),1)
-  TTFCOPT = -DNOTTF=1
-  TTFLOPT =
-  TTFLIBS =
-  TTFLABEL = -nottf
-else
-  TTFCOPT = 
-  TTFLOPT = -L$(prefix)/lib -lSDL_ttf $(X11LOPT)
-  TTFLIBS =  
-  TTFLABEL = 
-endif
+ ifeq ($(NOTTF),1)
+   TTFCOPT = -DNOTTF=1
+   TTFLOPT =
+   TTFLIBS =
+   TTFLABEL = -nottf
+ else
+   TTFCOPT = 
+   TTFLOPT = -L$(prefix)/lib -lSDL_ttf $(X11LOPT)
+   TTFLIBS =  
+   TTFLABEL = 
+ endif
 endif
 
 #Lua scripting is optional too
@@ -377,9 +386,18 @@ $(MACAPPEXE) : $(BIN)
 	cp -r ../share/grafx2/fonts Grafx2.app/Contents/Resources
 	cp -r ../share/grafx2/skins Grafx2.app/Contents/Resources
 	cp -r ../share/grafx2/gfx2def.ini Grafx2.app/Contents/Resources
-	cp -Rp $(FWDIR)/SDL.framework Grafx2.app/Contents/Frameworks
-	cp -Rp $(FWDIR)/SDL_image.framework Grafx2.app/Contents/Frameworks
-	cp -Rp $(FWDIR)/SDL_ttf.framework Grafx2.app/Contents/Frameworks
+	mkdir -p Grafx2.app/Contents/Frameworks/SDL.framework/Versions
+	mkdir -p Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions
+#	mkdir -p Grafx2.app/Contents/Frameworks/SDL_ttf.framework/Versions
+	cp -Rp $(FWDIR)/SDL.framework/Versions/A Grafx2.app/Contents/Frameworks/SDL.framework/Versions
+	cp -Rp $(FWDIR)/SDL_image.framework/Versions/A Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions
+#	cp -Rp $(FWDIR)/SDL_ttf.framework/Versions/A Grafx2.app/Contents/Frameworks/SDL_ttf.framework/Versions
+	rm -fr Grafx2.app/Contents/Frameworks/SDL.framework/Versions/A/Headers
+	rm -fr Grafx2.app/Contents/Frameworks/SDL.framework/Versions/A/Resources
+	rm -fr Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions/A/Headers
+	rm -fr Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions/A/Resources
+#	rm -fr Grafx2.app/Contents/Frameworks/SDL_ttf.framework/Versions
+#	rm -fr Grafx2.app/Contents/Frameworks/SDL_ttf.framework/Versions
 	cp $(BIN) $(MACAPPEXE)
 else
 all : $(BIN)

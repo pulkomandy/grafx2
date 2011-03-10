@@ -39,6 +39,7 @@
 #include "readline.h"
 #include "windows.h"
 #include "input.h"
+#include "engine.h"
 
 // Virtual keyboard is mandatory on these platforms:
 #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)

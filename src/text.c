@@ -39,13 +39,15 @@
 
 #if defined(__CAANOO__) || defined(__WIZ__) || defined(__GP2X__)
 // No X11
-#elif defined(__macosx__)
-  #include <Carbon/Carbon.h>
-  #import <corefoundation/corefoundation.h>
-  #import <sys/param.h>
 #elif defined(__linux__)
   #include <X11/Xlib.h>
 #endif
+#endif
+
+#if defined(__macosx__)
+  #include <Carbon/Carbon.h>
+  #import <corefoundation/corefoundation.h>
+  #import <sys/param.h>
 #endif
 
 #include <SDL_image.h>
