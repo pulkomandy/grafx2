@@ -28,6 +28,9 @@
 
 #ifndef __no_pnglib__
 #include <png.h>
+#if !defined(PNG_HAVE_PLTE)
+#define PNG_HAVE_PLTE 0x02
+#endif
 #if (PNG_LIBPNG_VER_MAJOR <= 1) && (PNG_LIBPNG_VER_MINOR < 4)
   // Compatibility layer to allow us to use libng 1.4 or any older one.
   

@@ -32,6 +32,10 @@
 # Compile with OPTIM=0 to disable gcc optimizations, to enable debug.
   STRIP = strip
 
+### Specific to build MAC OS X universal binaries on Tiger ###
+### (may need to be changed on your OS) ###
+
+MACOSX_SYSROOT = /Developer/SDKs/MacOSX10.4u.sdk
 
 ### PLATFORM DETECTION AND CONFIGURATION ###
 
@@ -83,17 +87,19 @@ else
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
     RMDIR = rmdir
+    # Force it
+    #OPTIM = 3
     CP = cp
     ZIP = zip
     PLATFORMFILES = gfx2.png
-    BIN = ../bin/grafx2
     # Where the SDL frameworks are located
     FWDIR = /Library/Frameworks
-    SDLCOPT = -arch ppc -I$(FWDIR)/SDL.framework/Headers -I$(FWDIR)/SDL_image.framework/Headers -I$(FWDIR)/SDL_ttf.framework/Headers -D_THREAD_SAFE
+    BIN = ../bin/grafx2
+    SDLCOPT = -arch ppc -arch i386 -I$(FWDIR)/SDL.framework/Headers -I$(FWDIR)/SDL_image.framework/Headers -I$(FWDIR)/SDL_ttf.framework/Headers -D_THREAD_SAFE
     #-framework SDL_ttf 
-    SDLLOPT = -arch ppc -L/usr/lib -framework SDL -framework SDL_image -framework Cocoa -framework Carbon -framework OpenGL
+    SDLLOPT = -isysroot $(MACOSX_SYSROOT) -arch ppc -arch i386 -L/usr/lib -framework SDL -framework SDL_image -framework Cocoa -framework Carbon -framework OpenGL
     COPT = -D_DARWIN_C_SOURCE -D__macosx__ -D__linux__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g $(SDLCOPT) $(TTFCOPT) -I/usr/X11/include
-    LOPT = $(SDLLOPT) -lpng
+    LOPT = $(SDLLOPT) -lpng -lz
     # Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
     CC = gcc
     #CC = nccgen -ncgcc -ncld -ncfabs
@@ -382,6 +388,7 @@ $(MACAPPEXE) : $(BIN)
 	mkdir -p Grafx2.app Grafx2.app/Contents Grafx2.app/Contents/Frameworks Grafx2.app/Contents/MacOS Grafx2.app/Contents/Resources
 	echo 'APPL????' > Grafx2.app/Contents/PkgInfo
 	cp ../Info.plist Grafx2.app/Contents
+	cp -r Grafx2.icns Grafx2.app/Contents/Resources
 	cp -r English.lproj Grafx2.app/Contents/Resources
 	cp -r ../share/grafx2/fonts Grafx2.app/Contents/Resources
 	cp -r ../share/grafx2/skins Grafx2.app/Contents/Resources
@@ -399,6 +406,8 @@ $(MACAPPEXE) : $(BIN)
 #	rm -fr Grafx2.app/Contents/Frameworks/SDL_ttf.framework/Versions
 #	rm -fr Grafx2.app/Contents/Frameworks/SDL_ttf.framework/Versions
 	cp $(BIN) $(MACAPPEXE)
+	$(STRIP) -x -X -S $(MACAPPEXE)
+	chmod +x $(MACAPPEXE)
 else
 all : $(BIN)
 endif

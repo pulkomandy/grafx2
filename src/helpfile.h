@@ -67,7 +67,7 @@ static const T_Help_table helptable_about[] =
 #else
   HELP_TEXT ("")
 #endif
-  HELP_TEXT ("Copyright 2007-2010, the Grafx2 project team")
+  HELP_TEXT ("Copyright 2007-2011, the Grafx2 project team")
   HELP_TEXT ("    Copyright 1996-2001, SUNSET DESIGN")
 };
 static const T_Help_table helptable_licence[] =
