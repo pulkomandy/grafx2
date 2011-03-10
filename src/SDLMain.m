@@ -82,7 +82,7 @@ static NSString *getApplicationName(void)
 	if (NSKeyDown == [anEvent type] || NSKeyUp == [anEvent type]) {
 		if ([anEvent modifierFlags] & NSCommandKeyMask)
         {
-            SDL_SetModState(SDL_GetModState() | KMOD_META);
+//            SDL_SetModState(SDL_GetModState() /*| KMOD_META*/);
             [super sendEvent: anEvent];
         }
 	} else

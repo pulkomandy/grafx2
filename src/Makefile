@@ -33,9 +33,10 @@
   STRIP = strip
 
 ### Specific to build MAC OS X universal binaries on Tiger ###
-### (may need to be changed on your OS) ###
+### (may need to be changed or removed depedning on the OSX version) ###
 
 MACOSX_SYSROOT = /Developer/SDKs/MacOSX10.4u.sdk
+MACOSX_ARCH = -arch ppc -arch i386
 
 ### PLATFORM DETECTION AND CONFIGURATION ###
 
@@ -95,9 +96,9 @@ else
     # Where the SDL frameworks are located
     FWDIR = /Library/Frameworks
     BIN = ../bin/grafx2
-    SDLCOPT = -arch ppc -arch i386 -I$(FWDIR)/SDL.framework/Headers -I$(FWDIR)/SDL_image.framework/Headers -I$(FWDIR)/SDL_ttf.framework/Headers -D_THREAD_SAFE
+    SDLCOPT = $(MACOSX_ARCH) -I$(FWDIR)/SDL.framework/Headers -I$(FWDIR)/SDL_image.framework/Headers -I$(FWDIR)/SDL_ttf.framework/Headers -D_THREAD_SAFE
     #-framework SDL_ttf 
-    SDLLOPT = -isysroot $(MACOSX_SYSROOT) -arch ppc -arch i386 -L/usr/lib -framework SDL -framework SDL_image -framework Cocoa -framework Carbon -framework OpenGL
+    SDLLOPT = -isysroot $(MACOSX_SYSROOT) $(MACOSX_ARCH) -L/usr/lib -framework SDL -framework SDL_image -framework Cocoa -framework Carbon -framework OpenGL
     COPT = -D_DARWIN_C_SOURCE -D__macosx__ -D__linux__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g $(SDLCOPT) $(TTFCOPT) -I/usr/X11/include
     LOPT = $(SDLLOPT) -lpng -lz
     # Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
