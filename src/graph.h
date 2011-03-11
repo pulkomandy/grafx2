@@ -58,6 +58,8 @@ void Pixel_figure_preview_xor(word x_pos,word y_pos,byte color);
 void Pixel_figure_preview_xorback(word x_pos,word y_pos,byte color);
 void Pixel_figure_in_brush(word x_pos,word y_pos,byte color);
 
+void Draw_empty_circle_general(short center_x,short center_y,short radius,byte color);
+
 void Draw_empty_circle_permanent(short center_x,short center_y,short radius,byte color);
 void Draw_empty_circle_preview  (short center_x,short center_y,short radius,byte color);
 void Hide_empty_circle_preview (short center_x,short center_y,short radius);

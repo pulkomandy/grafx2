@@ -89,7 +89,7 @@ else
     MKDIR = mkdir -p
     RMDIR = rmdir
     # Force it
-    #OPTIM = 3
+    OPTIM = 3
     CP = cp
     ZIP = zip
     PLATFORMFILES = gfx2.png
@@ -99,8 +99,8 @@ else
     SDLCOPT = $(MACOSX_ARCH) -I$(FWDIR)/SDL.framework/Headers -I$(FWDIR)/SDL_image.framework/Headers -I$(FWDIR)/SDL_ttf.framework/Headers -D_THREAD_SAFE
     #-framework SDL_ttf 
     SDLLOPT = -isysroot $(MACOSX_SYSROOT) $(MACOSX_ARCH) -L/usr/lib -framework SDL -framework SDL_image -framework Cocoa -framework Carbon -framework OpenGL
-    COPT = -D_DARWIN_C_SOURCE -D__macosx__ -D__linux__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g $(SDLCOPT) $(TTFCOPT) -I/usr/X11/include
-    LOPT = $(SDLLOPT) -lpng -lz
+    COPT = -D_DARWIN_C_SOURCE -D__macosx__ -D__linux__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g $(LUACOPT) $(SDLCOPT) $(TTFCOPT) -I/usr/X11/include
+    LOPT = $(SDLLOPT) -llua-lpng -lz
     # Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
     CC = gcc
     #CC = nccgen -ncgcc -ncld -ncfabs
@@ -375,7 +375,7 @@ SKIN_FILES = ../share/grafx2/skins/skin_classic.png ../share/grafx2/skins/skin_m
 
 SCRIPT_FILES1 = ../share/grafx2/scripts/bru_db_Amigaball.lua ../share/grafx2/scripts/bru_db_ColorSphere.lua ../share/grafx2/scripts/bru_db_FindAA.lua ../share/grafx2/scripts/bru_db_Fisheye.lua ../share/grafx2/scripts/bru_db_GrayscaleAvg.lua ../share/grafx2/scripts/bru_db_GrayscaleDesat.lua ../share/grafx2/scripts/bru_db_Halfsmooth.lua ../share/grafx2/scripts/bru_db_Mandelbrot.lua ../share/grafx2/scripts/bru_db_Waves.lua ../share/grafx2/scripts/pal_db_Desaturate.lua ../share/grafx2/scripts/pal_db_ExpandColors.lua ../share/grafx2/scripts/pal_db_FillColorCube.lua ../share/grafx2/scripts/pal_db_InvertedRGB.lua ../share/grafx2/scripts/pal_db_Set3bit.lua ../share/grafx2/scripts/pal_db_Set6bit.lua ../share/grafx2/scripts/pal_db_SetC64Palette.lua ../share/grafx2/scripts/pal_db_ShiftHue.lua ../share/grafx2/scripts/pic_db_Pic2isometric.lua ../share/grafx2/scripts/pic_db_Rainbow-Dark2Bright.lua ../share/grafx2/scripts/pic_db_SierpinskyCarpet.lua
 SCRIPT_FILES2 = ../share/grafx2/scripts/pic_db_SierpinskyTriangle.lua ../share/grafx2/scripts/pic_ni_GlassGridFilter.lua ../share/grafx2/scripts/scn_db_RemapImage2RGB.lua ../share/grafx2/scripts/scn_db_RemapImage2RGB_ed.lua ../share/grafx2/scripts/scn_db_RemapImageTo3bitPal.lua
-SCRIPT_FILES= $(SCRIPT_FILES1) $(SCRIPT_FILES2)
+SCRIPT_FILES = $(SCRIPT_FILES1) $(SCRIPT_FILES2)
 
 SCRIPTLIB_FILES = ../share/grafx2/scripts/libs/memory.lua
 
@@ -386,7 +386,7 @@ ifeq ($(PLATFORM),Darwin)
 all : $(MACAPPEXE)
 $(MACAPPEXE) : $(BIN)
 	rm -rf Grafx2.app
-	mkdir -p Grafx2.app Grafx2.app/Contents Grafx2.app/Contents/Frameworks Grafx2.app/Contents/MacOS Grafx2.app/Contents/Resources
+	mkdir -p Grafx2.app Grafx2.app/Contents Grafx2.app/Contents/Frameworks Grafx2.app/Contents/MacOS Grafx2.app/Contents/Resources Grafx2.app/Contents/Resources/scripts
 	echo 'APPL????' > Grafx2.app/Contents/PkgInfo
 	cp ../Info.plist Grafx2.app/Contents
 	cp -r Grafx2.icns Grafx2.app/Contents/Resources
@@ -394,6 +394,7 @@ $(MACAPPEXE) : $(BIN)
 	cp -r ../share/grafx2/fonts Grafx2.app/Contents/Resources
 	cp -r ../share/grafx2/skins Grafx2.app/Contents/Resources
 	cp -r ../share/grafx2/gfx2def.ini Grafx2.app/Contents/Resources
+	cp -r $(SCRIPT_FILES) Grafx2.app/Contents/Resources/scripts
 	mkdir -p Grafx2.app/Contents/Frameworks/SDL.framework/Versions
 	mkdir -p Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions
 #	mkdir -p Grafx2.app/Contents/Frameworks/SDL_ttf.framework/Versions
