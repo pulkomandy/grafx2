@@ -100,7 +100,7 @@ else
     #-framework SDL_ttf 
     SDLLOPT = -isysroot $(MACOSX_SYSROOT) $(MACOSX_ARCH) -L/usr/lib -framework SDL -framework SDL_image -framework Cocoa -framework Carbon -framework OpenGL
     COPT = -D_DARWIN_C_SOURCE -D__macosx__ -D__linux__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g $(LUACOPT) $(SDLCOPT) $(TTFCOPT) -I/usr/X11/include
-    LOPT = $(SDLLOPT) -llua-lpng -lz
+    LOPT = $(SDLLOPT) -llua -lpng -lz
     # Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
     CC = gcc
     #CC = nccgen -ncgcc -ncld -ncfabs
