@@ -42,6 +42,7 @@
 #include "palette.h"
 #include "input.h" // Is_shortcut()
 #include "help.h" // Window_help()
+#include "graph.h"
 
 /// Lua scripts bound to shortcut keys.
 char * Bound_script[10];
@@ -146,6 +147,13 @@ void Update_colors_during_script(void)
     Display_menu();
     Palette_has_changed=0;
   }
+}
+
+/// Paint a pixel in image without updating the screen
+void Pixel_figure_no_screen(short x_pos,short y_pos,byte color)
+{
+  if (x_pos>0 && y_pos >0 && x_pos<Main_image_width && y_pos<Main_image_height)
+    Pixel_in_current_screen(x_pos,y_pos,color,0);
 }
 
 
@@ -362,7 +370,7 @@ int L_DrawLine(lua_State* L)
   LUA_ARG_NUMBER(4, "drawline", y2, INT_MIN, INT_MAX);
   LUA_ARG_NUMBER(5, "drawline", c,  INT_MIN, INT_MAX);
 
-  Pixel_figure = Display_pixel;
+  Pixel_figure = (void (*) (word,word,byte))Pixel_figure_no_screen;
   Draw_line_general(x1, y1, x2, y2, c);
 
   return 0;
@@ -372,6 +380,7 @@ int L_DrawLine(lua_State* L)
 int L_DrawFilledRect(lua_State* L)
 {
   int x1, y1, x2, y2, c;
+  int min_x,min_y,max_x,max_y, x_pos, y_pos;
 
   int nb_args = lua_gettop(L);
 
@@ -382,9 +391,44 @@ int L_DrawFilledRect(lua_State* L)
   LUA_ARG_NUMBER(4, "drawfilledrect", y2, INT_MIN, INT_MAX);
   LUA_ARG_NUMBER(5, "drawfilledrect", c,  INT_MIN, INT_MAX);
 
-  Draw_filled_rectangle(x1, y1, x2, y2, c);
+  // Put bounds in ascending order
+  if (x2>x1)
+  {
+    min_x=x1;
+    max_x=x2;
+  }
+  else
+  {
+    min_x=x2;
+    max_x=x1;
+  }
+  if (y2>y1)
+  {
+    min_y=y1;
+    max_y=y2;
+  }
+  else
+  {
+    min_y=y2;
+    max_y=y1;
+  }
 
+  // Clipping limits
+  if (max_x>Main_image_width)
+    max_x=Main_image_width-1;
+  if (max_y>Main_image_height)
+    max_y=Main_image_height-1;
+  if (min_x<0)
+    min_x=0;
+  if (min_y<0)
+    min_y=0;
+
+  // Perform drawing
+  for (y_pos=min_y; y_pos<=max_y;y_pos++)
+    for (x_pos=min_x; x_pos<=max_x;x_pos++)
+      Pixel_in_current_screen(x_pos,y_pos,c,0);
   return 0;
+  
 }
 
 
@@ -400,7 +444,7 @@ int L_DrawCircle(lua_State* L)
   LUA_ARG_NUMBER(3, "drawcircle", r, INT_MIN, INT_MAX);
   LUA_ARG_NUMBER(4, "drawcircle", c, INT_MIN, INT_MAX);
 
-  Pixel_figure = Display_pixel;
+  Pixel_figure = (void (*) (word,word,byte))Pixel_figure_no_screen;
   Circle_limit = r*r;
   Draw_empty_circle_general(x1, y1, r, c);
 
@@ -410,18 +454,30 @@ int L_DrawCircle(lua_State* L)
 
 int L_DrawDisk(lua_State* L)
 {
-  int x1, y1, r, c;
+  int center_x, center_y, r, c;
+  long circle_limit;
+  short x_pos,y_pos;
+  short min_x,max_x,min_y,max_y;
 
   int nb_args = lua_gettop(L);
 
   LUA_ARG_LIMIT(4, "drawdisk");
-  LUA_ARG_NUMBER(1, "drawdisk", x1, INT_MIN, INT_MAX);
-  LUA_ARG_NUMBER(2, "drawdisk", y1, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(1, "drawdisk", center_x, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(2, "drawdisk", center_y, INT_MIN, INT_MAX);
   LUA_ARG_NUMBER(3, "drawdisk", r, INT_MIN, INT_MAX);
   LUA_ARG_NUMBER(4, "drawdisk", c, INT_MIN, INT_MAX);
 
-  Circle_limit = r*r;
-  Draw_filled_circle(x1, y1, r, c);
+  circle_limit = r*r;
+  
+  // Compute clipping limits
+  min_x=center_x-r<0 ? 0 : center_x-r;
+  max_x=center_x+r>=Main_image_width? Main_image_width-1 : center_x+r;
+  min_y=center_y-r<0 ? 0 : center_y-r;
+  max_y=center_y+r>=Main_image_height? Main_image_height-1 : center_y+r;
+
+  for (y_pos=min_y;y_pos<=max_y;y_pos++)
+    for (x_pos=min_x;x_pos<=max_x;x_pos++)
+      Pixel_in_current_screen(x_pos,y_pos,c,0);
 
   return 0;
 }

@@ -61,6 +61,9 @@ $(OBJDIR)/pages.o: pages.c global.h struct.h const.h pages.h errors.h loadsave.h
 $(OBJDIR)/palette.o: palette.c const.h struct.h global.h misc.h engine.h readline.h \
  buttons.h pages.h help.h sdlscreen.h errors.h op_c.h windows.h input.h \
  palette.h shade.h
+$(OBJDIR)/palette_test.o: palette_test.c const.h struct.h global.h misc.h engine.h \
+ readline.h buttons.h pages.h help.h sdlscreen.h errors.h op_c.h \
+ windows.h input.h palette.h shade.h
 $(OBJDIR)/pversion.o: pversion.c
 $(OBJDIR)/pxdouble.o: pxdouble.c global.h struct.h const.h sdlscreen.h misc.h \
  graph.h pxdouble.h pxwide.h
@@ -81,7 +84,7 @@ $(OBJDIR)/pxwide2.o: pxwide2.c global.h struct.h const.h sdlscreen.h misc.h grap
 $(OBJDIR)/readini.o: readini.c const.h errors.h global.h struct.h misc.h readini.h \
  setup.h
 $(OBJDIR)/readline.o: readline.c const.h struct.h global.h misc.h errors.h \
- sdlscreen.h readline.h windows.h input.h
+ sdlscreen.h readline.h windows.h input.h engine.h
 $(OBJDIR)/realpath.o: realpath.c
 $(OBJDIR)/saveini.o: saveini.c const.h global.h struct.h readini.h io.h errors.h \
  misc.h saveini.h setup.h

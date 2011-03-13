@@ -1275,7 +1275,6 @@ void Draw_empty_circle_general(short center_x,short center_y,short radius,byte c
   Pixel_figure(center_x+radius,center_y,color); // Droite
   Pixel_figure(center_x,center_y+radius,color); // Bas
 
-  if(Main_magnifier_mode) Update_part_of_screen(center_x-radius,center_y-radius,2*radius+1,2*radius+1);
 }
 
   // -- Tracé définitif d'un cercle vide --

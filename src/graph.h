@@ -63,6 +63,7 @@ void Draw_empty_circle_general(short center_x,short center_y,short radius,byte c
 void Draw_empty_circle_permanent(short center_x,short center_y,short radius,byte color);
 void Draw_empty_circle_preview  (short center_x,short center_y,short radius,byte color);
 void Hide_empty_circle_preview (short center_x,short center_y,short radius);
+void Draw_empty_circle_general(short center_x,short center_y,short radius,byte color);
 void Draw_filled_circle         (short center_x,short center_y,short radius,byte color);
 
 void Draw_empty_ellipse_permanent(short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color);
