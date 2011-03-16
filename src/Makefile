@@ -96,6 +96,7 @@ else
     # Where the SDL frameworks are located
     FWDIR = /Library/Frameworks
     BIN = ../bin/grafx2
+    SVN_REVISION = $(shell svnversion | tr -d "M")
     SDLCOPT = $(MACOSX_ARCH) -I$(FWDIR)/SDL.framework/Headers -I$(FWDIR)/SDL_image.framework/Headers -I$(FWDIR)/SDL_ttf.framework/Headers -D_THREAD_SAFE
     #-framework SDL_ttf 
     SDLLOPT = -isysroot $(MACOSX_SYSROOT) $(MACOSX_ARCH) -L/usr/lib -framework SDL -framework SDL_image -framework Cocoa -framework Carbon -framework OpenGL
@@ -406,10 +407,10 @@ $(MACAPPEXE) : $(BIN)
 	rm -fr Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions/A/Headers
 	rm -fr Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions/A/Resources
 #	rm -fr Grafx2.app/Contents/Frameworks/SDL_ttf.framework/Versions
-#	rm -fr Grafx2.app/Contents/Frameworks/SDL_ttf.framework/Versions
 	cp $(BIN) $(MACAPPEXE)
 	$(STRIP) -x -X -S $(MACAPPEXE)
 	chmod +x $(MACAPPEXE)
+	tar cvzf grafx2-$(SVN_REVISION)-macosx.tgz Grafx2.app/*
 else
 all : $(BIN)
 endif
