@@ -90,6 +90,9 @@ int File_exists(char * fname);
 /// Returns true if a directory passed as a parameter exists in the current directory.
 int  Directory_exists(char * directory);
 
+/// Check if a file or directory is hidden.
+int File_is_hidden(const char *fname);
+
 /// Scans a directory, calls Callback for each file in it,
 void For_each_file(const char * directory_name, void Callback(const char *));
 

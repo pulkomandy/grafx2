@@ -37,20 +37,16 @@
     #include <proto/dos.h>
     #include <sys/types.h>
     #include <dirent.h>
-    #define isHidden(x) (0)
 #elif defined(__WIN32__)
     #include <dirent.h>
     #include <windows.h>
     //#include <commdlg.h>
-    #define isHidden(x) (GetFileAttributesA((x)->d_name)&FILE_ATTRIBUTE_HIDDEN)
 #elif defined(__MINT__)
     #include <mint/osbind.h>
     #include <mint/sysbind.h>
     #include <dirent.h>
-    #define isHidden(x) (0)
 #else
     #include <dirent.h>
-    #define isHidden(x) ((x)->d_name[0]=='.')
 #endif
 
 #include "struct.h"
@@ -242,6 +238,28 @@ int Directory_exists(char * directory)
   }
 }
 
+#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__) || defined(__MINT__)
+  #define FILE_IS_HIDDEN_ATTRIBUTE __attribute__((unused)) 
+#else
+  #define FILE_IS_HIDDEN_ATTRIBUTE
+#endif
+/// Check if a file or directory is hidden.
+int File_is_hidden(FILE_IS_HIDDEN_ATTRIBUTE const char *fname)
+{
+#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__) || defined(__MINT__)
+  // False (unable to determine, or irrrelevent for platform)
+  return 0;
+#elif defined(__WIN32__)
+  unsigned long att = GetFileAttributesA(fname);
+  if (att==INVALID_FILE_ATTRIBUTES)
+    return 0;
+  return att&FILE_ATTRIBUTE_HIDDEN?1:0;
+#else
+  return fname[0]=='.';
+#endif
+
+
+}
 // Taille de fichier, en octets
 int File_length(const char * fname)
 {
@@ -313,7 +331,7 @@ void For_each_directory_entry(const char * directory_name, void Callback(const c
       full_filename, 
       S_ISREG(Infos_enreg.st_mode), 
       S_ISDIR(Infos_enreg.st_mode), 
-      isHidden(entry)?1:0);
+      File_is_hidden(entry->d_name));
   }
   closedir(current_directory);
 }

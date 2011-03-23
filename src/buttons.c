@@ -25,14 +25,11 @@
     #include <proto/dos.h>
     #include <sys/types.h>
     #include <dirent.h>
-    #define isHidden(x) (0)
 #elif defined(__WIN32__)
     #include <dirent.h>
     #include <windows.h>
-    #define isHidden(x) (GetFileAttributesA((x)->d_name)&FILE_ATTRIBUTE_HIDDEN)
 #else
     #include <dirent.h>
-    #define isHidden(x) ((x)->d_name[0]=='.')
 #endif
 
 #define _XOPEN_SOURCE 500
@@ -82,18 +79,14 @@
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     #include <proto/dos.h>
     #include <dirent.h>
-    #define isHidden(x) (0)
 #elif defined(__MINT__)
     #include <mint/sysbind.h>
     #include <dirent.h>
-    #define isHidden(x) (0)
 #elif defined(__WIN32__)
     #include <dirent.h>
     #include <windows.h>
-    #define isHidden(x) (GetFileAttributesA((x)->d_name)&FILE_ATTRIBUTE_HIDDEN)
 #else
     #include <dirent.h>
-    #define isHidden(x) ((x)->d_name[0]=='.')
 #endif
 
 extern char Program_version[]; // generated in pversion.c

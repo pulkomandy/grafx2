@@ -1388,8 +1388,8 @@ void Add_script(const char *name, byte is_file, byte is_directory, byte is_hidde
     if (len<=4 || strcasecmp(file_name+len-4, ".lua"))
       return;
     // Hidden
-    //if (is_hidden && !Config.Show_hidden_files)
-    //  return;
+    if (is_hidden && !Config.Show_hidden_files)
+      return;
       
     Add_element_to_list(&Scripts_selector, file_name, Format_filename(file_name, NAME_WIDTH+1, 0), 0, ICON_NONE);
   }
@@ -1398,9 +1398,12 @@ void Add_script(const char *name, byte is_file, byte is_directory, byte is_hidde
     // Ignore current directory
     if ( !strcmp(file_name, "."))
       return;
+    // Ignore parent directory entry
+    if (!strcmp(file_name, PARENT_DIR))
+      return;
     // Hidden
-    //if (is_hidden && !Config.Show_hidden_directories)
-    //  return;
+    if (is_hidden && !Config.Show_hidden_directories)
+      return;
     
     Add_element_to_list(&Scripts_selector, file_name, Format_filename(file_name, NAME_WIDTH+1, 1), 1, ICON_NONE);
   }
@@ -1698,6 +1701,8 @@ void Button_Brush_Factory(void)
   strcpy(scriptdir, Data_directory);
   strcat(scriptdir, "scripts/");
   strcat(scriptdir, sub_directory);
+  if (sub_directory[0]!='\0')
+    Add_element_to_list(&Scripts_selector, PARENT_DIR, Format_filename(PARENT_DIR, NAME_WIDTH+1, 1), 1, ICON_NONE);
   // Add each found file to the list
   For_each_directory_entry(scriptdir, Add_script);
   // Sort it
@@ -1851,6 +1856,8 @@ void Button_Brush_Factory(void)
       strcpy(scriptdir, Data_directory);
       strcat(scriptdir, "scripts/");
       strcat(scriptdir, sub_directory);
+      if (sub_directory[0]!='\0')
+        Add_element_to_list(&Scripts_selector, PARENT_DIR, Format_filename(PARENT_DIR, NAME_WIDTH+1, 1), 1, ICON_NONE);
       // Add each found file to the list
       For_each_directory_entry(scriptdir, Add_script);
       // Sort it

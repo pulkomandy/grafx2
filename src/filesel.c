@@ -29,20 +29,15 @@
     #include <proto/dos.h>
     #include <sys/types.h>
     #include <dirent.h>
-    #define isHidden(x) (0)
-
 #elif defined (__MINT__)
     #include <mint/sysbind.h>
     #include <dirent.h>
-    #define isHidden(x) (0)
 #elif defined(__WIN32__)
     #include <dirent.h>
     #include <windows.h>
     #include <commdlg.h>
-    #define isHidden(x) (GetFileAttributesA((x)->d_name)&FILE_ATTRIBUTE_HIDDEN)
 #else
     #include <dirent.h>
-    #define isHidden(x) ((x)->d_name[0]=='.')
 #endif
 
 #include <stdlib.h>
@@ -393,7 +388,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
       (!strcmp(entry->d_name, PARENT_DIR) ||
       // ou qu'il n'est pas caché
        Config.Show_hidden_directories ||
-     !isHidden(entry)))
+     !File_is_hidden(entry->d_name)))
     {
       // On rajoute le répertoire à la liste
       Add_element_to_list(list, entry->d_name, Format_filename(entry->d_name, 19, 1), 1, ICON_NONE);
@@ -401,7 +396,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
     }
     else if (S_ISREG(Infos_enreg.st_mode) && //Il s'agit d'un fichier
       (Config.Show_hidden_files || //Il n'est pas caché
-      !isHidden(entry)))
+      File_is_hidden(entry->d_name)))
     {
       const char * ext = filter;
       while (ext!=NULL)
