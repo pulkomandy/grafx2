@@ -215,7 +215,8 @@ typedef struct T_List_button
   T_Special_button  * Entry_button; ///< Pointer to the associated selection control.
   T_Scroller_button * Scroller;     ///< Pointer to the associated scroller
   
-  Func_draw_list_item   Draw_list_item; ///< 
+  Func_draw_list_item   Draw_list_item; ///< Function to call for each item to draw its line
+  byte                  Color_index;    ///< Background color: From 0->MC_Black to 3->MC_White
 
   struct T_List_button * Next;    ///< Pointer to the next list button of current window.
 } T_List_button;

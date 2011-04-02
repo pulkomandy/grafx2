@@ -1307,7 +1307,7 @@ void Button_Skins(void)
     // Scroller for the fileselector
     (file_scroller = Window_set_scroller_button(155, FILESEL_Y - 1, 82,
     Skin_files_list.Nb_elements, 10, 0)), // 3
-    Draw_one_skin_name); // 4
+    Draw_one_skin_name, 2); // 4
   
   skin_list->Cursor_position = Find_file_in_fileselector(&Skin_files_list, Config.Skin_file);
 
@@ -4835,7 +4835,7 @@ void Button_Text(void)
   Window_set_normal_button(54,160,60,14,"Cancel",0,1,KEY_ESC); // 12
   
   // List of fonts
-  font_list = Window_set_list_button(font_list_button, font_scroller, Draw_one_font_name); // 13
+  font_list = Window_set_list_button(font_list_button, font_scroller, Draw_one_font_name, 2); // 13
   // Restore its settings from last passage in screen
   font_list->List_start = list_start;
   font_list->Cursor_position = cursor_position;

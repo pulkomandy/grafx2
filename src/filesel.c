@@ -388,7 +388,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
       (!strcmp(entry->d_name, PARENT_DIR) ||
       // ou qu'il n'est pas caché
        Config.Show_hidden_directories ||
-     !File_is_hidden(entry->d_name)))
+     !File_is_hidden(entry->d_name, entry->d_name)))
     {
       // On rajoute le répertoire à la liste
       Add_element_to_list(list, entry->d_name, Format_filename(entry->d_name, 19, 1), 1, ICON_NONE);
@@ -396,7 +396,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
     }
     else if (S_ISREG(Infos_enreg.st_mode) && //Il s'agit d'un fichier
       (Config.Show_hidden_files || //Il n'est pas caché
-      File_is_hidden(entry->d_name)))
+      !File_is_hidden(entry->d_name, entry->d_name)))
     {
       const char * ext = filter;
       while (ext!=NULL)
@@ -474,7 +474,7 @@ void bstrtostr( BSTR in, STRPTR out, TEXT max )
 #endif
 
 // -- Lecture d'une liste de lecteurs / volumes -----------------------------
-void Read_list_of_drives(T_Fileselector *list)
+void Read_list_of_drives(T_Fileselector *list, byte name_length)
 {
 
   // Empty the current content of fileselector:
@@ -495,7 +495,7 @@ void Read_list_of_drives(T_Fileselector *list)
       {
         bstrtostr( dl->dol_Name, tmp, 254 );
         strcat( tmp, ":" );
-        Add_element_to_list(list, tmp, Format_filename(tmp, 19, 2), 2, ICON_NONE );
+        Add_element_to_list(list, tmp, Format_filename(tmp, name_length, 2), 2, ICON_NONE );
         list->Nb_directories++;
       }
       UnLockDosList( LDF_VOLUMES | LDF_READ );
@@ -539,7 +539,7 @@ void Read_list_of_drives(T_Fileselector *list)
             break;
         }
         drive_name[0]='A'+bit_index;
-        Add_element_to_list(list, drive_name, Format_filename(drive_name,18,2), 2, icon);
+        Add_element_to_list(list, drive_name, Format_filename(drive_name,name_length-1,2), 2, icon);
         list->Nb_directories++;
         drive_index++;
       }
@@ -556,7 +556,7 @@ void Read_list_of_drives(T_Fileselector *list)
       if ( (1 << bit_index) & drive_bits )
       {
         drive_name[0]='A'+bit_index;
-        Add_element_to_list(list, drive_name,Format_filename(drive_name,19,2),2,ICON_NONE);
+        Add_element_to_list(list, drive_name,Format_filename(drive_name,name_length,2),2,ICON_NONE);
         list->Nb_directories++;
         drive_index++;
       }
@@ -578,11 +578,11 @@ void Read_list_of_drives(T_Fileselector *list)
     #else
         char * home_dir = getenv("HOME");
     #endif
-    Add_element_to_list(list, "/", Format_filename("/",19,2), 2, ICON_NONE);
+    Add_element_to_list(list, "/", Format_filename("/",name_length,2), 2, ICON_NONE);
     list->Nb_directories++;
     if(home_dir)
     {
-        Add_element_to_list(list, home_dir, Format_filename(home_dir, 19, 2), 2, ICON_NONE);
+        Add_element_to_list(list, home_dir, Format_filename(home_dir, name_length, 2), 2, ICON_NONE);
         list->Nb_directories++;
     }
 
@@ -592,7 +592,7 @@ void Read_list_of_drives(T_Fileselector *list)
     {
         if(mount_points_list->me_dummy == 0 && strcmp(mount_points_list->me_mountdir,"/") && strcmp(mount_points_list->me_mountdir,"/home"))
         {
-            Add_element_to_list(list, mount_points_list->me_mountdir, Format_filename(mount_points_list->me_mountdir, 19, 2), 2, ICON_NONE);
+            Add_element_to_list(list, mount_points_list->me_mountdir, Format_filename(mount_points_list->me_mountdir, name_length, 2), 2, ICON_NONE);
             list->Nb_directories++;
         }
         next = mount_points_list -> me_next;
@@ -1704,7 +1704,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
           Main_fileselector_position=0;
           Main_fileselector_offset=0;
           // Affichage des premiers fichiers visibles:
-          Read_list_of_drives(&Filelist);
+          Read_list_of_drives(&Filelist,19);
           Sort_list_of_files(&Filelist);
           Prepare_and_display_filelist(Main_fileselector_position,Main_fileselector_offset,file_scroller);
           Display_cursor();

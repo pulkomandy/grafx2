@@ -1268,15 +1268,23 @@ void Draw_script_name(word x, word y, word index, byte highlighted)
     
     current_item = Get_item_by_index(&Scripts_selector, index);
 
-    if (current_item->Type==1) // Directories
+    if (current_item->Type==0) // Files
     {
-      fg=(highlighted)?MC_Black:MC_Dark;
-      bg=(highlighted)?MC_Dark:MC_Light;
+      fg=(highlighted)?MC_White:MC_Light;
+      bg=(highlighted)?MC_Dark:MC_Black;
     }
-    else // Files
+    else if (current_item->Type==1) // Directories
     {
-      fg=MC_Black;
-      bg=(highlighted)?MC_Dark:MC_Light;
+      fg=(highlighted)?MC_Light:MC_Dark;
+      bg=(highlighted)?MC_Dark:MC_Black;
+    }
+    else // Drives
+    {
+      fg=(highlighted)?MC_Light:MC_Dark;
+      bg=(highlighted)?MC_Dark:MC_Black;
+      
+      Window_display_icon_sprite(x,y,current_item->Icon);
+      x+=8;
     }
     
     Print_in_window(x, y, current_item->Short_name, fg,bg);
@@ -1426,30 +1434,36 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   lua_State* L;
   const char* message;
   byte  old_cursor_shape=Cursor_shape;
-  char scriptdir[MAX_PATH_CHARACTERS];
-  
-  strcpy(scriptdir, Data_directory);
-  strcat(scriptdir, "scripts/");
+  char buf[MAX_PATH_CHARACTERS];
 
   // Some scripts are slow
   Cursor_shape=CURSOR_SHAPE_HOURGLASS;
   Display_cursor();
   Flush_update();
   
-  chdir(scriptdir);
-  
   if (script_subdirectory && script_subdirectory[0]!='\0')
   {
-    sprintf(Last_run_script, "%s%s%s", script_subdirectory, PATH_SEPARATOR, script_filename);
+    strcpy(Last_run_script, script_subdirectory);
+    Append_path(Last_run_script, script_filename, NULL);
   }
   else
   {
     strcpy(Last_run_script, script_filename);
   }
   
+  // This chdir is for the script's sake. Grafx2 itself will (try to)
+  // not rely on what is the system's current directory.
+  Extract_path(buf,Last_run_script);
+  chdir(buf);
 
   L = lua_open();
-  putenv("LUA_PATH=libs\\?.lua");
+  
+  strcpy(buf, "LUA_PATH=");
+  strcat(buf, Data_directory);
+  Append_path(buf+9, "scripts", NULL);
+  Append_path(buf+9, "libs", NULL);
+  Append_path(buf+9, "?.lua", NULL);
+  putenv(buf);
   
   // writing and reading pixels
   lua_register(L,"putbrushpixel",L_PutBrushPixel);
@@ -1687,24 +1701,34 @@ void Set_script_shortcut(T_Fileselector_item * script_item)
 void Button_Brush_Factory(void)
 {
   static char selected_file[MAX_PATH_CHARACTERS]="";
-  static char sub_directory[MAX_PATH_CHARACTERS]="";
+  static char sub_directory[MAX_PATH_CHARACTERS]="!";
 
   short clicked_button;
   T_List_button* scriptlist;
   T_Scroller_button* scriptscroll;
   T_Special_button* scriptarea;
-  char scriptdir[MAX_PATH_CHARACTERS];
   T_Fileselector_item *item;
   int last_selected_item=-1;
+  
+  if (sub_directory[0]=='!')
+  {
+    // Default directory
+    Realpath(Data_directory, sub_directory);
+    Append_path(sub_directory, "scripts", NULL);
+  }
+  
   // Reinitialize the list
   Free_fileselector_list(&Scripts_selector);
-  strcpy(scriptdir, Data_directory);
-  strcat(scriptdir, "scripts/");
-  strcat(scriptdir, sub_directory);
-  if (sub_directory[0]!='\0')
+  if (sub_directory[0]=='\0')
+  {
+    Read_list_of_drives(&Scripts_selector,NAME_WIDTH+1);
+  }
+  else
+  {
     Add_element_to_list(&Scripts_selector, PARENT_DIR, Format_filename(PARENT_DIR, NAME_WIDTH+1, 1), 1, ICON_NONE);
-  // Add each found file to the list
-  For_each_directory_entry(scriptdir, Add_script);
+    // Add each found file to the list
+    For_each_directory_entry(sub_directory, Add_script);
+  }
   // Sort it
   Sort_list_of_files(&Scripts_selector);
   //
@@ -1715,11 +1739,11 @@ void Button_Brush_Factory(void)
 
   Window_display_frame_in(6, FILESEL_Y - 2, NAME_WIDTH*8+4, 84); // File selector
   // Fileselector
-  scriptarea=Window_set_special_button(8, FILESEL_Y + 1, NAME_WIDTH*8, 80); // 2
+  scriptarea=Window_set_special_button(8, FILESEL_Y + 0, NAME_WIDTH*8, 80); // 2
   // Scroller for the fileselector
   scriptscroll = Window_set_scroller_button(NAME_WIDTH*8+14, FILESEL_Y - 1, 82,
       Scripts_selector.Nb_elements,10, 0); // 3
-  scriptlist = Window_set_list_button(scriptarea,scriptscroll,Draw_script_name); // 4
+  scriptlist = Window_set_list_button(scriptarea,scriptscroll,Draw_script_name, 0); // 4
 
   Window_set_normal_button(10, 149, 67, 14, "Run", 0, 1, SDLK_RETURN); // 5
 
@@ -1811,55 +1835,37 @@ void Button_Brush_Factory(void)
     
     if (item->Type==0) // File
     {
-      strcpy(selected_file, sub_directory);
-      strcat(selected_file, item->Full_name);
+      strcpy(selected_file, item->Full_name);
       break;
     }
-    else if (item->Type==1) // Directory
+    else if (item->Type==1 || item->Type==2) // Directory
     {
-      if (!strcmp(item->Full_name,PARENT_DIR))
+      if (item->Type==2)
       {
-        // Going up one directory
-        long len;
-        char * slash_pos;
-
-        // Remove trailing slash      
-        len=strlen(sub_directory);
-        if (len && !strcmp(sub_directory+len-1,PATH_SEPARATOR))
-          sub_directory[len-1]='\0';
-        
-        slash_pos=Find_last_slash(sub_directory);
-        if (slash_pos)
-        {
-          strcpy(selected_file, slash_pos+1);
-          *slash_pos='\0';
-        }
-        else
-        {
-          strcpy(selected_file, sub_directory);
-          sub_directory[0]='\0';
-        }
+        // Selecting one drive root
+        strcpy(selected_file, PARENT_DIR);
+        strcat(sub_directory, item->Full_name);
       }
       else
       {
-        // Going down one directory
-        strcpy(selected_file, PARENT_DIR);
-
-        strcat(sub_directory, item->Full_name);
-        strcat(sub_directory, PATH_SEPARATOR);
+        // Going down one or up by one directory
+        Append_path(sub_directory, item->Full_name, selected_file);
       }
 
       // No break: going back up to beginning of loop
       
       // Reinitialize the list
       Free_fileselector_list(&Scripts_selector);
-      strcpy(scriptdir, Data_directory);
-      strcat(scriptdir, "scripts/");
-      strcat(scriptdir, sub_directory);
-      if (sub_directory[0]!='\0')
+      if (sub_directory[0]=='\0')
+      {
+        Read_list_of_drives(&Scripts_selector,NAME_WIDTH+1);
+      }
+      else
+      {
         Add_element_to_list(&Scripts_selector, PARENT_DIR, Format_filename(PARENT_DIR, NAME_WIDTH+1, 1), 1, ICON_NONE);
-      // Add each found file to the list
-      For_each_directory_entry(scriptdir, Add_script);
+        // Add each found file to the list
+        For_each_directory_entry(sub_directory, Add_script);
+      }
       // Sort it
       Sort_list_of_files(&Scripts_selector); 
       //
@@ -1876,7 +1882,7 @@ void Button_Brush_Factory(void)
 
   if (clicked_button == 5) // Run the script
   {
-    Run_script("", selected_file);
+    Run_script(sub_directory, selected_file);
   }
   else
   {

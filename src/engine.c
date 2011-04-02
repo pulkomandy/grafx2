@@ -2184,7 +2184,7 @@ void Window_dropdown_clear_items(T_Dropdown_button * dropdown)
 // - entry_button is the textual area where the list values will be printed.
 // - scroller is a scroller button attached to it
 
-T_List_button * Window_set_list_button(T_Special_button * entry_button, T_Scroller_button * scroller, Func_draw_list_item draw_list_item)
+T_List_button * Window_set_list_button(T_Special_button * entry_button, T_Scroller_button * scroller, Func_draw_list_item draw_list_item, byte color_index)
 {
   T_List_button *temp;
 
@@ -2195,6 +2195,7 @@ T_List_button * Window_set_list_button(T_Special_button * entry_button, T_Scroll
   temp->Entry_button    = entry_button;
   temp->Scroller        = scroller;
   temp->Draw_list_item  = draw_list_item;
+  temp->Color_index     = color_index;
 
   temp->Next=Window_list_button_list;
   Window_list_button_list=temp;
@@ -2216,12 +2217,19 @@ void Window_redraw_list(T_List_button * list)
   // Remaining rectangle under list
   i=list->Scroller->Nb_visibles-list->Scroller->Nb_elements;
   if (i>0)
+  {
+    byte color;
+    color = list->Color_index == 0 ? MC_Black :
+           (list->Color_index == 1 ? MC_Dark :
+           (list->Color_index == 2 ? MC_Light : MC_White));
+    
     Window_rectangle(
       list->Entry_button->Pos_X,
       list->Entry_button->Pos_Y+list->Scroller->Nb_elements*8,
       list->Entry_button->Width,
       i*8,
-      MC_Light);
+      color);
+  }
 }
 
 //----------------------- Ouverture d'un pop-up -----------------------
