@@ -43,6 +43,9 @@
 #include "input.h" // Is_shortcut()
 #include "help.h" // Window_help()
 #include "graph.h"
+#include "filesel.h" // Read_list_of_drives()
+#include "realpath.h"
+
 
 /// Lua scripts bound to shortcut keys.
 char * Bound_script[10];
@@ -1295,26 +1298,24 @@ void Draw_script_name(word x, word y, word index, byte highlighted)
 
 ///
 /// Displays first lines of comments from a lua script in the window.
-void Draw_script_information(T_Fileselector_item * script_item)
+void Draw_script_information(T_Fileselector_item * script_item, const char *full_directory)
 {
   FILE *script_file;
-  char full_name[MAX_PATH_CHARACTERS];
   char text_block[3][DESC_WIDTH+1];
   int x, y;
   int i;
-  
+    
   // Blank the target area
   Window_rectangle(7, FILESEL_Y + 89, DESC_WIDTH*6+2, 4*8, MC_Black);
 
   if (script_item && script_item->Full_name && script_item->Full_name[0]!='\0')
   {
-    strcpy(full_name, Data_directory);
-    strcat(full_name, "scripts/");
-    strcat(full_name, script_item->Full_name);
-    
-    
+    char full_name[MAX_PATH_CHARACTERS];
+    strcpy(full_name, full_directory);
+    Append_path(full_name, script_item->Full_name, NULL);
+
     x=0;
-    y=0;
+    y=0;    
     text_block[0][0] = text_block[1][0] = text_block[2][0] = '\0';
     // Start reading
     script_file = fopen(full_name, "r");
@@ -1360,7 +1361,7 @@ void Draw_script_information(T_Fileselector_item * script_item)
     // Display a line with the keyboard shortcut
     Print_help(8, FILESEL_Y + 89+24, "Key:", 'N', 0, 0);
     for (i=0; i<10; i++)
-      if (Bound_script[i]!=NULL && !strcmp(Bound_script[i], script_item->Full_name))
+      if (Bound_script[i]!=NULL && !strcmp(Bound_script[i], full_name))
         break;
   
     if (i<10)
@@ -1646,20 +1647,19 @@ void Repeat_script(void)
   Run_script(NULL, Last_run_script);
 }
 
-void Set_script_shortcut(T_Fileselector_item * script_item)
+void Set_script_shortcut(T_Fileselector_item * script_item, const char *full_directory)
 {
   int i;
   char full_name[MAX_PATH_CHARACTERS];
   
   if (script_item && script_item->Full_name && script_item->Full_name[0]!='\0')
   {
-    strcpy(full_name, Data_directory);
-    strcat(full_name, "scripts/");
-    strcat(full_name, script_item->Full_name);
+    strcpy(full_name, full_directory);
+    Append_path(full_name, script_item->Full_name, NULL);
     
     // Find if it already has a shortcut
     for (i=0; i<10; i++)
-      if (Bound_script[i]!=NULL && !strcmp(Bound_script[i], script_item->Full_name))
+      if (Bound_script[i]!=NULL && !strcmp(Bound_script[i], full_name))
         break;
     if (i<10)
     {
@@ -1676,7 +1676,7 @@ void Set_script_shortcut(T_Fileselector_item * script_item)
       if (i<10)
       {
         free(Bound_script[i]);
-        Bound_script[i]=strdup(script_item->Full_name);
+        Bound_script[i]=strdup(full_name);
       }
       else
       {
@@ -1693,7 +1693,7 @@ void Set_script_shortcut(T_Fileselector_item * script_item)
     }
     // Refresh display
     Hide_cursor();
-    Draw_script_information(script_item);
+    Draw_script_information(script_item, full_directory);
     Display_cursor();
   }
 }
@@ -1760,7 +1760,7 @@ void Button_Brush_Factory(void)
     
     Window_redraw_list(scriptlist);
     Draw_script_information(Get_item_by_index(&Scripts_selector,
-      scriptlist->List_start + scriptlist->Cursor_position));
+      scriptlist->List_start + scriptlist->Cursor_position), sub_directory);
     
     Update_window_area(0, 0, Window_width, Window_height);
     Display_cursor();
@@ -1802,13 +1802,13 @@ void Button_Brush_Factory(void)
           last_selected_item = scriptlist->List_start + scriptlist->Cursor_position;
           Hide_cursor();
           Draw_script_information(Get_item_by_index(&Scripts_selector,
-            scriptlist->List_start + scriptlist->Cursor_position));
+            scriptlist->List_start + scriptlist->Cursor_position), sub_directory);
           Display_cursor();
           break;
         
         case 6:
           Set_script_shortcut(Get_item_by_index(&Scripts_selector,
-            scriptlist->List_start + scriptlist->Cursor_position));
+            scriptlist->List_start + scriptlist->Cursor_position), sub_directory);
           break;
           
         default:
