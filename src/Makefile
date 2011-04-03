@@ -47,7 +47,7 @@ PLATFORMOBJ =
 ifdef COMSPEC
   DELCOMMAND = rm -f
   MKDIR = mkdir -p
-  RMDIR = rmdir
+  RMDIR = rmdir --ignore-fail-on-non-empty
   CP = cp
   BIN = ../bin/grafx2.exe
   COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb `sdl-config --cflags` $(TTFCOPT) $(JOYCOPT) $(VKEYCOPT) $(LUACOPT) $(LAYERCOPT)
@@ -71,7 +71,7 @@ else
     #AmigaOS (3 or 4) specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
-    RMDIR = rmdir
+    RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     BIN = ../bin/grafx2
     COPT = -Wall -c -gstabs `sdl-config --cflags` $(TTFCOPT)
@@ -87,7 +87,7 @@ else
     #Mac OS X specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
-    RMDIR = rmdir
+    RMDIR = rmdir --ignore-fail-on-non-empty
     # Force it
     OPTIM = 3
     CP = cp
@@ -116,7 +116,7 @@ else
     #AROS specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
-    RMDIR = rmdir
+    RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     BIN = ../bin/grafx2
     COPT = -Wall -g `sdl-config --cflags` $(TTFCOPT)
@@ -132,7 +132,7 @@ else
     #MorphOS specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
-    RMDIR = rmdir
+    RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     BIN = ../bin/grafx2
     COPT = -Wall -gstabs -c `sdl-config --cflags` $(TTFCOPT)
@@ -148,7 +148,7 @@ else
     #BeOS specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
-    RMDIR = rmdir
+    RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     BIN = ../bin/grafx2
     COPT = -W -Wall -c -g `sdl-config --cflags` $(TTFCOPT) -I/boot/home/config/include
@@ -162,7 +162,7 @@ else
     #Haiku specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
-    RMDIR = rmdir
+    RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     BIN = ../bin/grafx2
     PLATFORMOBJ = $(OBJDIR)/haiku.o
@@ -184,7 +184,7 @@ else
     #SkyOS specific
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
-    RMDIR = rmdir
+    RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     BIN = ../bin/grafx2
     COPT = -W -Wall -Wdeclaration-after-statement -c -g `sdl-config --cflags` $(TTFCOPT)
@@ -198,7 +198,7 @@ else
     #OSF1 / tru64 alpha
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
-    RMDIR = rmdir
+    RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     ZIP = zip
     PLATFORMFILES = gfx2.png
@@ -214,7 +214,7 @@ else
     # Linux and FreeBSD specific (default rules)
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
-    RMDIR = rmdir
+    RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     ZIP = zip
     PLATFORMFILES = gfx2.png
@@ -425,14 +425,11 @@ release : version $(BIN)
 # Create a zip archive ready for upload to the website, including binaries and sourcecode
 ziprelease: version $(BIN) release
 	echo `sed "s/.*=\"\(.*\)\";/\1/" pversion.c`.`svnversion` | tr " :" "_-" | sed -e "s/\(wip\)\\./\1/I" > $(OBJDIR)/versiontag
-
 	tar cvzf "../src-`cat $(OBJDIR)/versiontag`.tgz" --strip=1 ../src/*.c ../src/*.h ../src/Makefile ../src/Makefile.dep ../src/gfx2.ico 
 	cd .. && $(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR:../%=%)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" $(BIN:../%=%) share/grafx2/gfx2def.ini $(SCRIPT_FILES:../%=%) $(SKIN_FILES:../%=%) share/grafx2/gfx2.gif share/icons/grafx2.svg doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt doc/PF_fonts.txt $(FONT_FILES:../%=%) doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt doc/README-lua.txt src-`cat $(OBJDIR:../%=%)/versiontag`.tgz $(PLATFORMFILES:../%=%)
 	$(DELCOMMAND) "../src-`cat $(OBJDIR)/versiontag`.tgz"
 	tar cvzf "../grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-src.tgz" --strip=1 --transform 's,^,grafx2/,g' ../src/*.c ../src/*.h ../src/Makefile ../src/Makefile.dep ../share/grafx2/gfx2def.ini $(SCRIPT_FILES) $(SKIN_FILES) ../src/gfx2.ico ../share/grafx2/gfx2.gif ../share/icons/grafx2.svg ../doc/README.txt ../doc/COMPILING.txt ../doc/gpl-2.0.txt ../doc/PF_fonts.txt ../misc/unix/grafx2.1 ../misc/unix/grafx2.xpm ../misc/unix/grafx2.desktop $(FONT_FILES)
 	$(DELCOMMAND) "$(OBJDIR)/versiontag"
-
-testsed :
 
 $(BIN) : $(OBJ)
 	test -d ../bin || $(MKDIR) ../bin
@@ -491,6 +488,13 @@ install : $(BIN)
 	test -d $(DESTDIR)$(datadir)/grafx2/skins || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/skins
 	test -d $(DESTDIR)$(datadir)/grafx2/scripts || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts
 	test -d $(DESTDIR)$(datadir)/grafx2/scripts/libs || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/libs
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3 || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/brush || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/brush
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/demo || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/demo
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/demo/brush || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/demo/brush
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/libs || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/libs
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/palette || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/palette
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/picture || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/picture
 	test -d $(DESTDIR)$(datadir)/applications || $(MKDIR) $(DESTDIR)$(datadir)/applications
 	test -d $(DESTDIR)$(pixmapdir) || $(MKDIR) $(DESTDIR)$(pixmapdir)
 	# Copy files
@@ -499,7 +503,7 @@ install : $(BIN)
 	$(CP) ../share/grafx2/gfx2.gif $(DESTDIR)$(datadir)/grafx2/
 	$(CP) ../share/grafx2/fonts/* $(DESTDIR)$(datadir)/grafx2/fonts/
 	$(CP) $(SKIN_FILES) $(DESTDIR)$(datadir)/grafx2/skins/
-	$(CP) $(SCRIPT_FILES) $(DESTDIR)$(datadir)/grafx2/scripts/
+	for f in $(SCRIPT_FILES); do cp "$$f" "$(DESTDIR)$(bindir)/$$f" ; done
 	# Icon and desktop file for debian
 	$(CP) ../misc/unix/grafx2.desktop $(DESTDIR)$(datadir)/applications/
 	$(CP) ../misc/unix/grafx2.xpm $(DESTDIR)$(pixmapdir)
@@ -512,12 +516,20 @@ uninstall :
 	$(DELCOMMAND) $(DESTDIR)$(datadir)/grafx2/gfx2def.ini
 	$(DELCOMMAND) $(DESTDIR)$(datadir)/grafx2/gfx2.gif
 	$(DELCOMMAND) $(DESTDIR)$(datadir)/grafx2/fonts/*
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/fonts),,$(RMDIR) $(DESTDIR)$(datadir)/grafx2/fonts)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/fonts),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/fonts,)
 	$(DELCOMMAND) $(SKIN_FILES:../share%=$(DESTDIR)$(datadir)%)
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/skins),,$(RMDIR) $(DESTDIR)$(datadir)/grafx2/skins)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/skins),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/skins,)
 	$(DELCOMMAND) $(SCRIPT_FILES:../share%=$(DESTDIR)$(datadir)%)
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts),,$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts)
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2),,$(RMDIR) $(DESTDIR)$(datadir)/grafx2)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/picture),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/picture,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/palette),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/palette,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/libs),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/libs,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/demo/brush),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/demo/brush,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/demo),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/demo,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/brush),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/brush,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/libs),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/libs,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2),$(RMDIR) $(DESTDIR)$(datadir)/grafx2,)
 	# Icon and desktop file for debian
 	$(DELCOMMAND) $(DESTDIR)$(datadir)/applications/grafx2.desktop
 	$(DELCOMMAND) $(DESTDIR)$(pixmapdir)/grafx2.xpm

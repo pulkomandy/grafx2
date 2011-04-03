@@ -619,7 +619,8 @@ void Load_image(T_IO_Context *context)
   if (File_error>0)
   {
     fprintf(stderr,"Unable to load file %s!\n",context->File_name);
-    Error(0);
+    if (context->Type!=CONTEXT_SURFACE)
+      Error(0);
   }
   
   // Post-load
