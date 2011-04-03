@@ -15,7 +15,7 @@
 -- "-" (Num):   Zoom Out
 -- Esc:		Exit script
 
-require("dawnbringer_lib")
+dofile("../libs/dawnbringer_lib.lua")
 
 
 BRIDIAG_SHOW = 1     -- Show brightness/Grayscale diagonal (1 = on, 0 = off)

@@ -3,7 +3,7 @@
 --   memory.save(tab) and tab=memory.load()
 --
 --   The data will be stored in file called
---     ZZZ<calling_function_name>.dat
+--     <calling_function_name>.dat
 --   in the lua directory 
 -- 
 -- Example 1:
@@ -74,12 +74,18 @@ memory =
     -- Get part after directory name
     last_slash=0
     while true do
-      local pos = string.find(info.short_src, "/", last_slash+1)
+      local pos = string.find(info.source, "/", last_slash+1)
       if (pos==nil) then break end
       last_slash=pos
     end
-    caller=string.sub(info.short_src, last_slash+1)
-
+    while true do
+      local pos = string.find(info.source, "\\", last_slash+1)
+      if (pos==nil) then break end
+      last_slash=pos
+    end
+    
+    caller=string.sub(info.source, last_slash+1)
+    
     -- Remove file extension
     if (string.sub(caller,-4, -1)==".lua") then
       caller=string.sub(caller, 1, -5)
@@ -94,7 +100,7 @@ memory =
     --    messagebox(tostring(k))
     --    messagebox(tostring(v))
     --end
-    local f, e = io.open("ZZZ"..caller..".dat", "w");
+    local f, e = io.open(caller..".dat", "w");
     if (f ~= nil) then
       f:write("Entry {\n")
       for k, v in pairs(o) do
@@ -119,7 +125,7 @@ memory =
         o[k]=v
       end
     end
-    local f = (loadfile("ZZZ"..caller..".dat"))
+    local f = (loadfile(caller..".dat"))
     if (f ~= nil) then
       f()
     end
