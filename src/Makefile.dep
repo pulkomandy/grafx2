@@ -15,7 +15,7 @@ $(OBJDIR)/engine.o: engine.c const.h struct.h global.h graph.h misc.h special.h 
  input.h engine.h pages.h layers.h factory.h loadsave.h io.h
 $(OBJDIR)/factory.o: factory.c brush.h struct.h const.h buttons.h engine.h errors.h \
  filesel.h loadsave.h global.h graph.h io.h misc.h pages.h readline.h \
- sdlscreen.h windows.h palette.h input.h help.h
+ sdlscreen.h windows.h palette.h input.h help.h realpath.h
 $(OBJDIR)/fileformats.o: fileformats.c errors.h global.h struct.h const.h \
  loadsave.h misc.h io.h windows.h pages.h
 $(OBJDIR)/filesel.o: filesel.c const.h struct.h global.h misc.h errors.h io.h \
@@ -82,7 +82,7 @@ $(OBJDIR)/pxwide.o: pxwide.c global.h struct.h const.h sdlscreen.h misc.h graph.
 $(OBJDIR)/pxwide2.o: pxwide2.c global.h struct.h const.h sdlscreen.h misc.h graph.h \
  pxwide2.h
 $(OBJDIR)/readini.o: readini.c const.h errors.h global.h struct.h misc.h readini.h \
- setup.h
+ setup.h realpath.h io.h
 $(OBJDIR)/readline.o: readline.c const.h struct.h global.h misc.h errors.h \
  sdlscreen.h readline.h windows.h input.h engine.h
 $(OBJDIR)/realpath.o: realpath.c

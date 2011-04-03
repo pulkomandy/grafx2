@@ -34,6 +34,8 @@
 #include "misc.h"
 #include "readini.h"
 #include "setup.h"
+#include "realpath.h"
+#include "io.h"
 
 void Load_INI_clear_string(char * str, byte keep_comments)
 {
@@ -933,7 +935,18 @@ int Load_INI(T_Config * conf)
     }
   }
   
-  
+  // Optional, Location of last directory used for Lua scripts browsing (>=2.3)
+  conf->Scripts_directory[0]='\0';
+  if (!Load_INI_get_string (file,buffer,"Scripts_directory",value_label, 1))
+  {
+    strcpy(conf->Scripts_directory,value_label);
+  }
+  if (conf->Scripts_directory[0]=='\0')
+  {
+    // Default when empty:
+    Realpath(Data_directory, conf->Scripts_directory);
+    Append_path(conf->Scripts_directory, "scripts", NULL);
+  }
   
   // Insert new values here
 

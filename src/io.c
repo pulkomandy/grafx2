@@ -219,7 +219,11 @@ void Append_path(char *path, const char *filename, char *reverse_path)
 
     // Remove trailing slash      
     len=strlen(path);
-    if (len && !strcmp(path+len-1,PATH_SEPARATOR))
+    if (len && (!strcmp(path+len-1,PATH_SEPARATOR) 
+    #ifdef __WIN32__
+      || path[len-1]=='/'
+    #endif
+      ))
       path[len-1]='\0';
     
     slash_pos=Find_last_slash(path);
@@ -249,7 +253,11 @@ void Append_path(char *path, const char *filename, char *reverse_path)
     long len;
     // Add trailing slash if needed
     len=strlen(path);
-    if (len && strcmp(path+len-1,PATH_SEPARATOR))
+    if (len && (strcmp(path+len-1,PATH_SEPARATOR) 
+    #ifdef __WIN32__
+      && path[len-1]!='/'
+    #endif
+      ))
     {
       strcpy(path+len, PATH_SEPARATOR);
       len+=strlen(PATH_SEPARATOR);

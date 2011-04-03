@@ -1308,7 +1308,7 @@ void Draw_script_information(T_Fileselector_item * script_item, const char *full
   // Blank the target area
   Window_rectangle(7, FILESEL_Y + 89, DESC_WIDTH*6+2, 4*8, MC_Black);
 
-  if (script_item && script_item->Full_name && script_item->Full_name[0]!='\0')
+  if (script_item && script_item->Type==0 && script_item->Full_name && script_item->Full_name[0]!='\0')
   {
     char full_name[MAX_PATH_CHARACTERS];
     strcpy(full_name, full_directory);
@@ -1698,28 +1698,11 @@ void Set_script_shortcut(T_Fileselector_item * script_item, const char *full_dir
   }
 }
 
-void Button_Brush_Factory(void)
+void Reload_scripts_list(void)
 {
-  static char selected_file[MAX_PATH_CHARACTERS]="";
-  static char sub_directory[MAX_PATH_CHARACTERS]="!";
-
-  short clicked_button;
-  T_List_button* scriptlist;
-  T_Scroller_button* scriptscroll;
-  T_Special_button* scriptarea;
-  T_Fileselector_item *item;
-  int last_selected_item=-1;
-  
-  if (sub_directory[0]=='!')
-  {
-    // Default directory
-    Realpath(Data_directory, sub_directory);
-    Append_path(sub_directory, "scripts", NULL);
-  }
-  
   // Reinitialize the list
   Free_fileselector_list(&Scripts_selector);
-  if (sub_directory[0]=='\0')
+  if (Config.Scripts_directory[0]=='\0')
   {
     Read_list_of_drives(&Scripts_selector,NAME_WIDTH+1);
   }
@@ -1727,11 +1710,25 @@ void Button_Brush_Factory(void)
   {
     Add_element_to_list(&Scripts_selector, PARENT_DIR, Format_filename(PARENT_DIR, NAME_WIDTH+1, 1), 1, ICON_NONE);
     // Add each found file to the list
-    For_each_directory_entry(sub_directory, Add_script);
+    For_each_directory_entry(Config.Scripts_directory, Add_script);
   }
   // Sort it
-  Sort_list_of_files(&Scripts_selector);
+  Sort_list_of_files(&Scripts_selector); 
   //
+}
+
+void Button_Brush_Factory(void)
+{
+  static char selected_file[MAX_PATH_CHARACTERS]="";
+  
+  short clicked_button;
+  T_List_button* scriptlist;
+  T_Scroller_button* scriptscroll;
+  T_Special_button* scriptarea;
+  T_Fileselector_item *item;
+  int last_selected_item=-1;
+  
+  Reload_scripts_list();
 
   Open_window(33+8*NAME_WIDTH, 180, "Brush Factory");
   
@@ -1760,7 +1757,7 @@ void Button_Brush_Factory(void)
     
     Window_redraw_list(scriptlist);
     Draw_script_information(Get_item_by_index(&Scripts_selector,
-      scriptlist->List_start + scriptlist->Cursor_position), sub_directory);
+      scriptlist->List_start + scriptlist->Cursor_position), Config.Scripts_directory);
     
     Update_window_area(0, 0, Window_width, Window_height);
     Display_cursor();
@@ -1776,7 +1773,7 @@ void Button_Brush_Factory(void)
     do
     {
       clicked_button = Window_clicked_button();
-      if (Key==SDLK_BACKSPACE && sub_directory[0]!='\0')
+      if (Key==SDLK_BACKSPACE && Config.Scripts_directory[0]!='\0')
       {
         // Make it select first entry (parent directory)
         scriptlist->List_start=0;
@@ -1802,13 +1799,13 @@ void Button_Brush_Factory(void)
           last_selected_item = scriptlist->List_start + scriptlist->Cursor_position;
           Hide_cursor();
           Draw_script_information(Get_item_by_index(&Scripts_selector,
-            scriptlist->List_start + scriptlist->Cursor_position), sub_directory);
+            scriptlist->List_start + scriptlist->Cursor_position), Config.Scripts_directory);
           Display_cursor();
           break;
         
         case 6:
           Set_script_shortcut(Get_item_by_index(&Scripts_selector,
-            scriptlist->List_start + scriptlist->Cursor_position), sub_directory);
+            scriptlist->List_start + scriptlist->Cursor_position), Config.Scripts_directory);
           break;
           
         default:
@@ -1844,31 +1841,17 @@ void Button_Brush_Factory(void)
       {
         // Selecting one drive root
         strcpy(selected_file, PARENT_DIR);
-        strcat(sub_directory, item->Full_name);
+        strcat(Config.Scripts_directory, item->Full_name);
       }
       else
       {
         // Going down one or up by one directory
-        Append_path(sub_directory, item->Full_name, selected_file);
+        Append_path(Config.Scripts_directory, item->Full_name, selected_file);
       }
 
       // No break: going back up to beginning of loop
       
-      // Reinitialize the list
-      Free_fileselector_list(&Scripts_selector);
-      if (sub_directory[0]=='\0')
-      {
-        Read_list_of_drives(&Scripts_selector,NAME_WIDTH+1);
-      }
-      else
-      {
-        Add_element_to_list(&Scripts_selector, PARENT_DIR, Format_filename(PARENT_DIR, NAME_WIDTH+1, 1), 1, ICON_NONE);
-        // Add each found file to the list
-        For_each_directory_entry(sub_directory, Add_script);
-      }
-      // Sort it
-      Sort_list_of_files(&Scripts_selector); 
-      //
+      Reload_scripts_list();
       
       scriptlist->Scroller->Nb_elements=Scripts_selector.Nb_elements;
       Compute_slider_cursor_length(scriptlist->Scroller);
@@ -1882,7 +1865,7 @@ void Button_Brush_Factory(void)
 
   if (clicked_button == 5) // Run the script
   {
-    Run_script(sub_directory, selected_file);
+    Run_script(Config.Scripts_directory, selected_file);
   }
   else
   {
