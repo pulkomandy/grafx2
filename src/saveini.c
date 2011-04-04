@@ -702,6 +702,10 @@ int Save_INI(T_Config * conf)
   if ((return_code=Save_INI_set_strings (old_file,new_file,buffer,"Scripts_directory",conf->Scripts_directory)))
       goto Erreur_Retour;
 
+  values[0]=(conf->Allow_multi_shortcuts);
+  if ((return_code=Save_INI_set_values (old_file,new_file,buffer,"Allow_multi_shortcuts",1,values,1)))
+    goto Erreur_Retour;
+  
   // Insert new values here
   
   Save_INI_flush(old_file,new_file,buffer);

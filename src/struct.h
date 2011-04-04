@@ -369,6 +369,7 @@ typedef struct
   byte Stylus_mode;                      ///< Boolean, true to tweak some tools (eg:Curve) for single-button stylus.
   word Swap_buttons;                     ///< Sets which key swaps mouse buttons : 0=none, or MOD_CTRL, or MOD_ALT.
   char Scripts_directory[MAX_PATH_CHARACTERS];///< Full pathname of directory for Lua scripts
+  byte Allow_multi_shortcuts;            ///< Boolean, true if the same key combination can trigger multiple shortcuts.
 } T_Config;
 
 // Structures utilisées pour les descriptions de pages et de liste de pages.

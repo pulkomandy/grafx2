@@ -942,7 +942,7 @@ void Button_Settings(void)
   {"Safety colors:",1,&(selected_config.Safety_colors),0,1,0,Lookup_YesNo},
   {"Grid XOR color:",1,&(selected_config.Grid_XOR_color),0,255,3,NULL},
   {"Sync views:",1,&(selected_config.Sync_views),0,1,0,Lookup_YesNo},
-  {"",0,NULL,0,0,0,NULL},
+  {"Multi shortcuts",1,&(selected_config.Allow_multi_shortcuts),0,1,0,Lookup_YesNo},
   {"",0,NULL,0,0,0,NULL},
   
   {"           --- Input  ---",0,NULL,0,0,0,NULL},

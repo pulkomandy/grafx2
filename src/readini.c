@@ -948,6 +948,13 @@ int Load_INI(T_Config * conf)
     Append_path(conf->Scripts_directory, "scripts", NULL);
   }
   
+  conf->Allow_multi_shortcuts=0;
+  // Optional, allow or disallow multiple shortcuts on same key (>=2.3)
+  if (!Load_INI_get_values (file,buffer,"Allow_multi_shortcuts",1,values))
+  {
+    conf->Allow_multi_shortcuts=(values[0]!=0);
+  }
+
   // Insert new values here
 
   fclose(file);
