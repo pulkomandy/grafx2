@@ -228,6 +228,32 @@ void Window_set_shortcut(int action_id)
         shortcut_ptr[0]=backup_shortcut[0];
         shortcut_ptr[1]=backup_shortcut[1];
       case 2: // OK
+        // Replace twice by single
+        if (shortcut_ptr[0]==shortcut_ptr[1])
+          shortcut_ptr[1]=0;
+        // Remove all other shortcuts that use same keys
+        if (!Config.Allow_multi_shortcuts)
+        {
+          int n;
+          for (n=0; n<2; n++)
+          {
+            if (shortcut_ptr[n]!=0)
+            {
+              int i;
+              for(i=0; i<NB_SHORTCUTS; i++)
+              {
+                word * other_shortcut_ptr;
+                if (Ordering[i]==action_id)
+                  continue;
+                other_shortcut_ptr=Shortcut(Ordering[i]);
+                if (other_shortcut_ptr[0]==shortcut_ptr[n])
+                  other_shortcut_ptr[0]=0;
+                if (other_shortcut_ptr[1]==shortcut_ptr[n])
+                  other_shortcut_ptr[1]=0;
+              }
+            }
+          }
+        }
       default:
         break;
     }
@@ -236,6 +262,41 @@ void Window_set_shortcut(int action_id)
   Key=0;
   Close_window();
   Display_cursor();
+}
+
+///
+/// Browse the complete list of shortcuts and ensure that a key only triggers
+/// one of them.
+void Remove_duplicate_shortcuts(void)
+{
+  int action_1;
+  // This algorithm favors shortcuts that are first in the list.
+  // The idea is that we, coders, append new shortcuts at the end with default
+  // values; they should be discarded if user has chosen the key first.
+  for (action_1=0; action_1<NB_SHORTCUTS-1; action_1++)
+  { 
+    int n;
+    word *shortcut_1 = Shortcut(Ordering[action_1]);
+    for (n=0; n<2; n++)
+    {
+      int action_2;
+      for (action_2=action_1+1; action_2<NB_SHORTCUTS; action_2++)
+      {
+        if (shortcut_1[n]!=0)
+        {
+          int i;
+          for(i=0; i<NB_SHORTCUTS; i++)
+          {
+            word *shortcut_2 = Shortcut(Ordering[action_2]);
+            if (shortcut_2[0]==shortcut_1[n])
+              shortcut_2[0]=0;
+            if (shortcut_2[1]==shortcut_1[n])
+              shortcut_2[1]=0;
+          }
+        }
+      }
+    }
+  }
 }
 
 ///

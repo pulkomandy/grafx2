@@ -2449,6 +2449,16 @@ static const T_Help_table helptable_settings_details[] =
   HELP_TEXT ("Background color.")
   HELP_TEXT ("This option is ignored when the Shade,")
   HELP_TEXT ("Quick-shade, or Tiling mode is used.")    
+  HELP_TEXT ("")
+  HELP_TEXT ("  Multi shortcuts")
+  HELP_TEXT ("When this setting is disabled, and you")
+  HELP_TEXT ("create a shortcut with a key that is already")
+  HELP_TEXT ("associated to another shortcut, Grafx2 will")
+  HELP_TEXT ("unset the latter. If you enable this mode,")
+  HELP_TEXT ("Grafx2 will not make such check, so you can")
+  HELP_TEXT ("design shortcuts that trigger several")
+  HELP_TEXT ("actions at once.")
+  HELP_TEXT ("")
 };
 
 static const T_Help_table helptable_clear[] =

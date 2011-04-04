@@ -942,7 +942,7 @@ void Button_Settings(void)
   {"Safety colors:",1,&(selected_config.Safety_colors),0,1,0,Lookup_YesNo},
   {"Grid XOR color:",1,&(selected_config.Grid_XOR_color),0,255,3,NULL},
   {"Sync views:",1,&(selected_config.Sync_views),0,1,0,Lookup_YesNo},
-  {"Multi shortcuts",1,&(selected_config.Allow_multi_shortcuts),0,1,0,Lookup_YesNo},
+  {"",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
   
   {"           --- Input  ---",0,NULL,0,0,0,NULL},
@@ -966,7 +966,7 @@ void Button_Settings(void)
   {"Auto discontinuous:",1,&(selected_config.Auto_discontinuous),0,1,0,Lookup_YesNo},
   {"Auto count colors:",1,&(selected_config.Auto_nb_used),0,1,0,Lookup_YesNo},
   {"Right click colorpick:",1,&(selected_config.Right_click_colorpick),0,1,0,Lookup_YesNo},
-  {"",0,NULL,0,0,0,NULL},
+  {"Multi shortcuts:",1,&(selected_config.Allow_multi_shortcuts),0,1,0,Lookup_YesNo},
   {"",0,NULL,0,0,0,NULL},
   
   {"      --- File selector  ---",0,NULL,0,0,0,NULL},
@@ -1151,6 +1151,11 @@ void Button_Settings(void)
     Main_fileselector_offset=0;
     Spare_fileselector_position=0;
     Spare_fileselector_offset=0;
+  }
+  if(Config.Allow_multi_shortcuts && !selected_config.Allow_multi_shortcuts)
+  {
+    // User just disabled multi shortcuts: make them unique now.
+    Remove_duplicate_shortcuts();
   }
   // Copy all
   Config=selected_config;
