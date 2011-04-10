@@ -1423,7 +1423,7 @@ void Highlight_script(T_Fileselector *selector, T_List_button *list, const char 
   short index;
 
   index=Find_file_in_fileselector(selector, selected_file);
-  Locate_list_item(list, selector, index);
+  Locate_list_item(list, index);
 }
 
 static char Last_run_script[MAX_PATH_CHARACTERS]="";

@@ -1222,7 +1222,7 @@ short Quicksearch(T_Fileselector *selector)
 }
 
 // Translated from Highlight_file
-void Locate_list_item(T_List_button * list, T_Fileselector * selector, short selected_item)
+void Locate_list_item(T_List_button * list, short selected_item)
 {
 
   // Safety bounds
@@ -1258,7 +1258,7 @@ int Quicksearch_list(T_List_button * list, T_Fileselector * selector)
   short selected_item=Quicksearch(selector);
   if (selected_item>=0 && selected_item!=list->Cursor_position+list->List_start)
   {
-    Locate_list_item(list, selector, selected_item);
+    Locate_list_item(list, selected_item);
     
     Hide_cursor();
     // Mise à jour du scroller

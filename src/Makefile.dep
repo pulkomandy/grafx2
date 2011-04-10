@@ -45,7 +45,8 @@ $(OBJDIR)/loadsave.o: loadsave.c buttons.h struct.h const.h errors.h global.h io
  engine.h brush.h setup.h
 $(OBJDIR)/main.o: main.c const.h struct.h global.h graph.h misc.h init.h buttons.h \
  engine.h pages.h loadsave.h sdlscreen.h errors.h readini.h saveini.h \
- io.h text.h setup.h windows.h brush.h palette.h realpath.h input.h
+ io.h text.h setup.h windows.h brush.h palette.h realpath.h input.h \
+ help.h
 $(OBJDIR)/misc.o: misc.c struct.h const.h sdlscreen.h global.h errors.h buttons.h \
  engine.h misc.h keyboard.h windows.h palette.h input.h graph.h pages.h
 $(OBJDIR)/miscfileformats.o: miscfileformats.c engine.h struct.h const.h errors.h \

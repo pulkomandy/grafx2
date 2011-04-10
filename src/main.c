@@ -67,6 +67,7 @@
 #include "palette.h"
 #include "realpath.h"
 #include "input.h"
+#include "help.h"
 
 #if defined(__WIN32__)
     #include <windows.h>
