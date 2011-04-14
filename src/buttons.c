@@ -898,6 +898,7 @@ void Settings_display_config(T_Setting *setting, T_Config * conf, T_Special_butt
       }
     }
   }
+  Update_window_area(panel->Pos_X, panel->Pos_Y, panel->Width, panel->Height+1);
 }
 
 void Settings_save_config(T_Config * conf)
