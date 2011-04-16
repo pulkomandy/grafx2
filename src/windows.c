@@ -697,11 +697,7 @@ void Print_in_window(short x,short y,const char * str,byte text_color,byte backg
 void Print_in_menu(const char * str, short position)
 {
   Print_general((18+(position<<3))*Menu_factor_X,Menu_status_Y,str,MC_Black,MC_Light);
-  Update_rect((18+(position<<3))*Menu_factor_X,Menu_status_Y,strlen(str)*8*Menu_factor_X,8*Menu_factor_Y);
-  // Might want to replace the above by:
-  //   SDL_UpdateRect(Screen_SDL, (18+(position<<3))*Menu_factor_X*Pixel_width,Menu_status_Y*Pixel_height,strlen(str)*8*Menu_factor_X*Pixel_width,8*Menu_factor_Y*Pixel_height);
-  // It can divide by 1000 the amount of pixels that are refreshed
-  // when you draw in top right of image.
+  Update_status_line(position, strlen(str));
 }
 
 /// Draws the mouse coordinates on the menu
@@ -728,7 +724,6 @@ void Print_coordinates(void)
       Num2str(Colorpicker_color,temp,3);
       Print_in_menu(temp,20);
       Print_general(170*Menu_factor_X,Menu_status_Y," ",0,Colorpicker_color);
-      Update_rect(170*Menu_factor_X,Menu_status_Y,8*Menu_factor_X,8*Menu_factor_Y);
     }
 
     Num2str((dword)Paintbrush_X,temp,4);
