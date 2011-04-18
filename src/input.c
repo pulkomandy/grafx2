@@ -85,12 +85,6 @@ word Input_new_mouse_Y;
 byte Input_new_mouse_K;
 byte Button_inverter=0; // State of the key that swaps mouse buttons.
 
-byte Mouse_mode = 0; ///< Mouse mode = 0:normal, 1:emulated with custom sensitivity.
-short Mouse_virtual_x_position;
-short Mouse_virtual_y_position;
-short Mouse_virtual_width;
-short Mouse_virtual_height;
-
 // Joystick/pad configurations for the various console ports.
 // See the #else for the documentation of fields.
 // TODO: Make these user-settable somehow.
@@ -306,30 +300,8 @@ void Handle_window_exit(__attribute__((unused)) SDL_QuitEvent event)
 
 int Handle_mouse_move(SDL_MouseMotionEvent event)
 {
-    if (Mouse_mode == 0)
-    {
-      Input_new_mouse_X = event.x/Pixel_width;
-      Input_new_mouse_Y = event.y/Pixel_height;
-    }
-    else
-    {
-      Mouse_virtual_x_position += event.xrel * 12 / Config.Mouse_sensitivity_index_x;
-      // Clip
-      if (Mouse_virtual_x_position > Mouse_virtual_width)
-        Mouse_virtual_x_position = Mouse_virtual_width;
-      else if (Mouse_virtual_x_position < 0)
-        Mouse_virtual_x_position = 0;
-        
-      Mouse_virtual_y_position += event.yrel * 12 / Config.Mouse_sensitivity_index_y;
-      // Clip
-      if (Mouse_virtual_y_position > Mouse_virtual_height)
-        Mouse_virtual_y_position = Mouse_virtual_height;
-      else if (Mouse_virtual_y_position < 0)
-        Mouse_virtual_y_position = 0;
-        
-      Input_new_mouse_X = Mouse_virtual_x_position / 12 / Pixel_width;
-      Input_new_mouse_Y = Mouse_virtual_y_position / 12 / Pixel_height;
-    }
+    Input_new_mouse_X = event.x/Pixel_width;
+    Input_new_mouse_Y = event.y/Pixel_height;
 
     return Move_cursor_with_constraints();
 }
@@ -1050,32 +1022,13 @@ int Get_input(int sleep_time)
 
 void Adjust_mouse_sensitivity(word fullscreen)
 {
-  if (fullscreen == 0)
-  {
-    Mouse_mode = 0;
-    return;
-  }
-  Mouse_mode = 1;
-  Mouse_virtual_x_position = 12*Mouse_X*Pixel_width;
-  Mouse_virtual_y_position = 12*Mouse_Y*Pixel_height;
-  Mouse_virtual_width = 12*(Screen_width-1)*Pixel_width;
-  Mouse_virtual_height = 12*(Screen_height-1)*Pixel_height;
+  // Deprecated
+  (void)fullscreen;
 }
 
 void Set_mouse_position(void)
 {
-    if (Mouse_mode == 0)
-    {
-      SDL_WarpMouse(
-          Mouse_X*Pixel_width,
-          Mouse_Y*Pixel_height
-      );
-    }
-    else
-    {
-      Mouse_virtual_x_position = 12*Mouse_X*Pixel_width;
-      Mouse_virtual_y_position = 12*Mouse_Y*Pixel_height;
-    }
+    SDL_WarpMouse(Mouse_X*Pixel_width, Mouse_Y*Pixel_height);
 }
 
 int Color_cycling(__attribute__((unused)) void* useless)
