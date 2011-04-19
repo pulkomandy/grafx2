@@ -1,4 +1,4 @@
-.TH GRAFX2 1 "February 23, 2009"
+.TH GRAFX2 1 "April 14, 2011"
 .SH NAME
 grafx2 \- Ultimate 256-color bitmap paint program
 .SH SYNOPSIS
@@ -23,24 +23,40 @@ little more difficult for you, but you should give it a try (or more, because
 most of the power of this program won't show up on the first try).
 .SH OPTIONS
 A summary of options is included below.
+They can be prefixed by either / - or --
 .TP
-.B /?, /h, /help
+.B -?, -h, -help
 Show summary of options.
 .TP
-.B /wide
+.B -wide
 To emulate a video mode with wide pixels (2 x 1).
 .TP
-.B /tall
+.B -tall
 To emulate a video mode with tall pixels (1 x 2).
 .TP
-.B /double
+.B -double
 To emulate a video mode with double pixels (2 x 2).
 .TP
-.B /skin <filename>
+.B -wide2
+To emulate a video mode with double wide pixels (4 x 2).
+.TP
+.B -tall2
+To emulate a video mode with double tall pixels (2 x 4).
+.TP
+.B -triple
+To emulate a video mode with triple pixels (3 x 3).
+.TP
+.B -quadruple
+To emulate a video mode with quadruple pixels (4 x 4).
+.TP
+.B -rgb <n>
+To reduce RGB precision from 256 to n levels.
+.TP
+.B -skin <filename>
 Use an alternate file for the menu graphics.
 .TP
-.B /mode <videomode>
-To set a video mode listed with the /help parameter.
+.B -mode <videomode>
+To set a video mode listed with the -help parameter.
 .SH FILES
 User settings are stored in ~/.grafx2/gfx2.ini. This file is really meant to
 be edited by the user and allows to tweak many aspects of the program.

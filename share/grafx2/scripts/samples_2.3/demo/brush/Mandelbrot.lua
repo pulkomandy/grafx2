@@ -1,4 +1,7 @@
 --BRUSH Scene: Mandelbrot fractal v0.5
+--
+--Draws a Mandelbrot fractal in the current brush.
+--
 --by Richard Fhager 
 --http://hem.fyristorg.com/dawnbringer/
 
