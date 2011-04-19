@@ -34,6 +34,8 @@
 #include "misc.h"
 #include "readini.h"
 #include "setup.h"
+#include "realpath.h"
+#include "io.h"
 
 void Load_INI_clear_string(char * str, byte keep_comments)
 {
@@ -434,6 +436,13 @@ int Load_INI(T_Config * conf)
   char   value_label[1024];
 
   Line_number_in_INI_file=0;
+  
+#if defined(__WIZ__) || defined(__CAANOO__)
+  conf->Stylus_mode = 1;
+#else
+  conf->Stylus_mode = 0;
+#endif
+
 
   // On alloue les zones de mémoire:
   buffer=(char *)malloc(1024);
@@ -540,19 +549,19 @@ int Load_INI(T_Config * conf)
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  conf->Show_hidden_files=values[0]?-1:0;
+  conf->Show_hidden_files=values[0]?1:0;
 
   if ((return_code=Load_INI_get_values (file,buffer,"Show_hidden_directories",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  conf->Show_hidden_directories=values[0]?-1:0;
+  conf->Show_hidden_directories=values[0]?1:0;
 
 /*  if ((return_code=Load_INI_get_values (file,buffer,"Show_system_directories",1,values)))
     goto Erreur_Retour;
   if ((values[0]<0) || (values[0]>1))
     goto Erreur_ERREUR_INI_CORROMPU;
-  conf->Show_system_directories=values[0]?-1:0;
+  conf->Show_system_directories=values[0]?1:0;
 */
   if ((return_code=Load_INI_get_values (file,buffer,"Preview_delay",1,values)))
     goto Erreur_Retour;
@@ -896,6 +905,57 @@ int Load_INI(T_Config * conf)
       Menu_bars[index].Visible = (values[0] & (1<<index)) ? 1 : 0;
     }
   }
+  
+  conf->Right_click_colorpick=0;
+  // Optional, right mouse button to pick colors (>=2.3)
+  if (!Load_INI_get_values (file,buffer,"Right_click_colorpick",1,values))
+  {
+    conf->Right_click_colorpick=(values[0]!=0);
+  }
+  
+  conf->Sync_views=1;
+  // Optional, synced view of main and spare (>=2.3)
+  if (!Load_INI_get_values (file,buffer,"Sync_views",1,values))
+  {
+    conf->Sync_views=(values[0]!=0);
+  }
+  
+  conf->Swap_buttons=0;
+  // Optional, key for swap buttons (>=2.3)
+  if (!Load_INI_get_values (file,buffer,"Swap_buttons",1,values))
+  {
+    switch(values[0])
+    {
+      case 1:
+        conf->Swap_buttons=MOD_CTRL;
+        break;
+      case 2:
+        conf->Swap_buttons=MOD_ALT;
+        break;
+    }
+  }
+  
+  // Optional, Location of last directory used for Lua scripts browsing (>=2.3)
+  conf->Scripts_directory[0]='\0';
+  if (!Load_INI_get_string (file,buffer,"Scripts_directory",value_label, 1))
+  {
+    strcpy(conf->Scripts_directory,value_label);
+  }
+  if (conf->Scripts_directory[0]=='\0')
+  {
+    // Default when empty:
+    Realpath(Data_directory, conf->Scripts_directory);
+    Append_path(conf->Scripts_directory, "scripts", NULL);
+  }
+  
+  conf->Allow_multi_shortcuts=0;
+  // Optional, allow or disallow multiple shortcuts on same key (>=2.3)
+  if (!Load_INI_get_values (file,buffer,"Allow_multi_shortcuts",1,values))
+  {
+    conf->Allow_multi_shortcuts=(values[0]!=0);
+  }
+
+  // Insert new values here
 
   fclose(file);
 

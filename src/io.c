@@ -33,12 +33,14 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#if defined(__amigaos4__)
+#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     #include <proto/dos.h>
+    #include <sys/types.h>
     #include <dirent.h>
 #elif defined(__WIN32__)
     #include <dirent.h>
     #include <windows.h>
+    //#include <commdlg.h>
 #elif defined(__MINT__)
     #include <mint/osbind.h>
     #include <mint/sysbind.h>
@@ -198,6 +200,75 @@ void Extract_path(char *dest, const char *source)
     strcat(dest, PATH_SEPARATOR);
 }
 
+///
+/// Appends a file or directory name to an existing directory name.
+/// As a special case, when the new item is equal to PARENT_DIR, this
+/// will remove the rightmost directory name.
+/// reverse_path is optional, if it's non-null, the function will
+/// write there :
+/// - if filename is ".." : The name of eliminated directory/file
+/// - else: ".."
+void Append_path(char *path, const char *filename, char *reverse_path)
+{
+  // Parent
+  if (!strcmp(filename, PARENT_DIR))
+  {
+    // Going up one directory
+    long len;
+    char * slash_pos;
+
+    // Remove trailing slash      
+    len=strlen(path);
+    if (len && (!strcmp(path+len-1,PATH_SEPARATOR) 
+    #ifdef __WIN32__
+      || path[len-1]=='/'
+    #endif
+      ))
+      path[len-1]='\0';
+    
+    slash_pos=Find_last_slash(path);
+    if (slash_pos)
+    {
+      if (reverse_path)
+        strcpy(reverse_path, slash_pos+1);
+      *slash_pos='\0';
+    }
+    else
+    {
+      if (reverse_path)
+        strcpy(reverse_path, path);
+      path[0]='\0';
+    }
+    #if defined(__WIN32__)
+    // Roots of drives need a pending antislash
+    if (path[0]!='\0' && path[1]==':' && path[2]=='\0')
+    {
+      strcat(path, PATH_SEPARATOR);
+    }
+    #endif
+  }
+  else
+  // Sub-directory
+  {
+    long len;
+    // Add trailing slash if needed
+    len=strlen(path);
+    if (len && (strcmp(path+len-1,PATH_SEPARATOR) 
+    #ifdef __WIN32__
+      && path[len-1]!='/'
+    #endif
+      ))
+    {
+      strcpy(path+len, PATH_SEPARATOR);
+      len+=strlen(PATH_SEPARATOR);
+    }
+    strcat(path, filename);
+    
+    if (reverse_path)
+      strcpy(reverse_path, PARENT_DIR);
+  }
+}
+
 int File_exists(char * fname)
 //   Détermine si un file passé en paramètre existe ou non dans le
 // répertoire courant.
@@ -236,6 +307,32 @@ int Directory_exists(char * directory)
   }
 }
 
+#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__) || defined(__MINT__)
+  #define FILE_IS_HIDDEN_ATTRIBUTE __attribute__((unused)) 
+#else
+  #define FILE_IS_HIDDEN_ATTRIBUTE
+#endif
+/// Check if a file or directory is hidden.
+int File_is_hidden(FILE_IS_HIDDEN_ATTRIBUTE const char *fname, const char *full_name)
+{
+#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__) || defined(__MINT__)
+  // False (unable to determine, or irrrelevent for platform)
+  return 0;
+#elif defined(__WIN32__)
+  unsigned long att;
+  if (full_name!=NULL)
+    att = GetFileAttributesA(full_name);
+  else
+    att = GetFileAttributesA(fname);
+  if (att==INVALID_FILE_ATTRIBUTES)
+    return 0;
+  return (att&FILE_ATTRIBUTE_HIDDEN)?1:0;
+#else
+  return fname[0]=='.';
+#endif
+
+
+}
 // Taille de fichier, en octets
 int File_length(const char * fname)
 {
@@ -281,6 +378,38 @@ void For_each_file(const char * directory_name, void Callback(const char *))
   closedir(current_directory);
 }
 
+/// Scans a directory, calls Callback for each file or directory in it,
+void For_each_directory_entry(const char * directory_name, void Callback(const char *, byte is_file, byte is_directory, byte is_hidden))
+{
+  // Pour scan de répertoire
+  DIR*  current_directory; //Répertoire courant
+  struct dirent* entry; // Structure de lecture des éléments
+  char full_filename[MAX_PATH_CHARACTERS];
+  int filename_position;
+  strcpy(full_filename, directory_name);
+  current_directory=opendir(full_filename);
+  if(current_directory == NULL) return;        // Répertoire invalide ...
+  filename_position = strlen(full_filename);
+  if (filename_position==0 || strcmp(full_filename+filename_position-1,PATH_SEPARATOR))
+  {
+    strcat(full_filename, PATH_SEPARATOR);
+    filename_position = strlen(full_filename);
+  }
+  while ((entry=readdir(current_directory)))
+  {
+    struct stat Infos_enreg;
+    strcpy(&full_filename[filename_position], entry->d_name);
+    stat(full_filename,&Infos_enreg);
+    Callback(
+      full_filename, 
+      S_ISREG(Infos_enreg.st_mode), 
+      S_ISDIR(Infos_enreg.st_mode), 
+      File_is_hidden(entry->d_name, full_filename));
+  }
+  closedir(current_directory);
+}
+
+
 void Get_full_filename(char * output_name, char * file_name, char * directory_name)
 {
   strcpy(output_name,directory_name);
@@ -304,6 +433,9 @@ int Lock_file_handle = -1;
 
 byte Create_lock_file(const char *file_directory)
 {
+  #if defined (__amigaos__)||(__AROS__)
+    #warning "Missing code for your platform, please check and correct!"
+  #else
   char lock_filename[MAX_PATH_CHARACTERS];
   
   strcpy(lock_filename,file_directory);
@@ -338,6 +470,7 @@ byte Create_lock_file(const char *file_directory)
     return -1;
   }
   #endif
+  #endif // __amigaos__ or __AROS__
   return 0;
 }
 

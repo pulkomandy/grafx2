@@ -48,7 +48,7 @@
 #include "io.h"
 #include "setup.h"
 
-#if defined(__GP2X__)
+#if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
     // This is a random default value ...
     #define PATH_MAX 32768
 #endif
@@ -128,12 +128,14 @@ void Set_data_directory(const char * program_dir, char * data_dir)
   #if defined(__macosx__)
     strcat(data_dir,"Contents/Resources/");
   // On GP2X, executable is not in bin/
-  #elif defined (__gp2x__)
+  #elif defined (__GP2X__) || defined (__gp2x__) || defined (__WIZ__) || defined (__CAANOO__)
     strcat(data_dir,"share/grafx2/");
   //on tos the same directory
   #elif defined (__MINT__)
     strcpy(data_dir, program_dir);
   // All other targets, program is in a "bin" subdirectory
+  #elif defined (__AROS__)
+    strcat(data_dir,"/share/grafx2/");
   #else
     strcat(data_dir,"../share/grafx2/");
   #endif
@@ -156,7 +158,7 @@ void Set_config_directory(const char * program_dir, char * config_dir)
   #if defined(__amigaos4__) || defined(__AROS__)
     strcpy(config_dir,"PROGDIR:");
   // GP2X
-  #elif defined(__GP2X__)
+  #elif defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
     // On the GP2X, the program is installed to the sdcard, and we don't want to mess with the system tree which is
     // on an internal flash chip. So, keep these settings locals.
     strcpy(config_dir,program_dir);
@@ -167,9 +169,9 @@ void Set_config_directory(const char * program_dir, char * config_dir)
 
     // In priority: check root directory
     strcpy(config_dir, program_dir);
-    // On all these targets except OSX and GP2X, the executable is in ./bin
-    #if !defined(__macosx__) && !defined(__gp2x__)
-      strcat(config_dir, "../");
+    // On all the remaining targets except OSX, the executable is in ./bin
+    #if !defined(__macosx__)
+    strcat(config_dir, "../");
     #endif
     strcpy(filename, config_dir);
     strcat(filename, CONFIG_FILENAME);
@@ -225,7 +227,7 @@ void Set_config_directory(const char * program_dir, char * config_dir)
           {
             // Echec: on se rabat sur le repertoire de l'executable.
             strcpy(config_dir,program_dir);
-            #if !defined(__macosx__) && !defined(__gp2x__)
+            #if defined(__macosx__)
               strcat(config_dir, "../");
             #endif
           }

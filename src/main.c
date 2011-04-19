@@ -24,17 +24,24 @@
 */
 #define GLOBAL_VARIABLES
 
+// time.h defines timeval which conflicts with the one in amiga SDK
+#ifdef __amigaos__
+  #include <devices/timer.h>
+#else
+  #include <time.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
-#include <time.h>
 #include <unistd.h>
 #include <SDL.h>
 #include <SDL_image.h>
 
+
 // There is no WM on the GP2X...
-#ifndef __GP2X__
+#if !defined(__GP2X__) && !defined(__WIZ__) && !defined(__CAANOO__)
     #include <SDL_syswm.h>
 #endif
 
@@ -59,6 +66,8 @@
 #include "brush.h"
 #include "palette.h"
 #include "realpath.h"
+#include "input.h"
+#include "help.h"
 
 #if defined(__WIN32__)
     #include <windows.h>
@@ -137,7 +146,7 @@ void Error_function(int error_code, const char *filename, int line_number, const
     for (index=0;index<=255;index++)
       temp_palette[index].R=255;
     Set_palette(temp_palette);
-    SDL_Delay(500);
+    Delay_with_active_mouse(50); // Half a second of red flash
     Set_palette(Main_palette);
   }
   else
@@ -418,6 +427,7 @@ int Init_program(int argc,char * argv[])
   static char program_directory[MAX_PATH_CHARACTERS];
   T_Gui_skin *gfx;
   int file_in_command_line;
+  T_Gradient_array initial_gradients;
   static char main_filename [MAX_PATH_CHARACTERS];
   static char main_directory[MAX_PATH_CHARACTERS];
   static char spare_filename [MAX_PATH_CHARACTERS];
@@ -490,8 +500,6 @@ int Init_program(int argc,char * argv[])
   // On initialise d'ot' trucs
   Main_offset_X=0;
   Main_offset_Y=0;
-  Old_main_offset_X=0;
-  Old_main_offset_Y=0;
   Main_separator_position=0;
   Main_X_zoom=0;
   Main_separator_proportion=INITIAL_SEPARATOR_PROPORTION;
@@ -503,8 +511,6 @@ int Init_program(int argc,char * argv[])
   Main_magnifier_offset_Y=0;
   Spare_offset_X=0;
   Spare_offset_Y=0;
-  Old_spare_offset_X=0;
-  Old_spare_offset_Y=0;
   Spare_separator_position=0;
   Spare_X_zoom=0;
   Spare_separator_proportion=INITIAL_SEPARATOR_PROPORTION;
@@ -514,7 +520,7 @@ int Init_program(int argc,char * argv[])
   Spare_magnifier_width=0;
   Spare_magnifier_offset_X=0;
   Spare_magnifier_offset_Y=0;
-  Keyboard_click_allowed = 0;
+  Keyboard_click_allowed = 1;
   
   Main_safety_backup_prefix = SAFETYBACKUP_PREFIX_A[0];
   Spare_safety_backup_prefix = SAFETYBACKUP_PREFIX_B[0];
@@ -523,53 +529,18 @@ int Init_program(int argc,char * argv[])
   
 
   // SDL
-  if(SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
+  if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
   {
     // The program can't continue without that anyway
     printf("Couldn't initialize SDL.\n");
     return(0);
   }
-
+  
   Joystick = SDL_JoystickOpen(0);
   SDL_EnableKeyRepeat(250, 32);
   SDL_EnableUNICODE(SDL_ENABLE);
   SDL_WM_SetCaption("GrafX2","GrafX2");
-
-  {
-    // Routine pour définir l'icone.
-    char icon_path[MAX_PATH_CHARACTERS];
-    SDL_Surface * icon;
-    sprintf(icon_path, "%s%s", Data_directory, GFX2_ICON_FILENAME);
-    icon = IMG_Load(icon_path);
-    if (icon && icon->w == 32 && icon->h == 32)
-    {
-      Uint32 pink;
-      pink = SDL_MapRGB(icon->format, 255, 0, 255);
-      
-      if (icon->format->BitsPerPixel == 8)
-      {
-        SDL_SetColorKey(icon, SDL_SRCCOLORKEY, pink);
-        SDL_WM_SetIcon(icon,NULL);
-      }
-      else
-      {
-        byte *icon_mask;
-        int x,y;
-        
-        icon_mask=malloc(128);
-        memset(icon_mask,0,128);
-        for (y=0;y<32;y++)
-          for (x=0;x<32;x++)
-            if (Get_SDL_pixel_hicolor(icon, x, y) != pink)
-              icon_mask[(y*32+x)/8] |=0x80>>(x&7);
-        SDL_WM_SetIcon(icon,icon_mask);
-        free(icon_mask);
-        icon_mask = NULL;
-      }
-
-      SDL_FreeSurface(icon);
-    }
-  }
+  Define_icon();
   
   // Texte
   Init_text();
@@ -591,7 +562,6 @@ int Init_program(int argc,char * argv[])
   // Données sur le pinceau:
   Paintbrush_X=0;
   Paintbrush_Y=0;
-  Paintbrush_shape=PAINTBRUSH_SHAPE_ROUND;
   Paintbrush_hidden=0;
 
   // On initialise tout ce qui concerne les opérations et les effets
@@ -651,6 +621,25 @@ int Init_program(int argc,char * argv[])
 
   Windows_open=0;
   
+  // Paintbrush
+  if (!(Paintbrush_sprite=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE))) Error(ERROR_MEMORY);
+  
+  // Load preset paintbrushes (uses Paintbrush_ variables)
+  Init_paintbrushes();
+  
+  // Set a valid paintbrush afterwards
+  *Paintbrush_sprite=1;
+  Paintbrush_width=1;
+  Paintbrush_height=1;
+  Paintbrush_offset_X=0;
+  Paintbrush_offset_Y=0;
+  Paintbrush_shape=PAINTBRUSH_SHAPE_ROUND;
+  
+  #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
+  // Prefer cycling active by default
+  Cycling_mode=1;
+  #endif
+
   // Charger la configuration des touches
   Set_config_defaults();
 
@@ -670,6 +659,11 @@ int Init_program(int argc,char * argv[])
   temp=Load_INI(&Config);
   if (temp)
     Error(temp);
+  
+  if(!Config.Allow_multi_shortcuts)
+  {
+    Remove_duplicate_shortcuts();
+  }
 
   Compute_menu_offsets();
 
@@ -679,10 +673,10 @@ int Init_program(int argc,char * argv[])
   Help_position=0;
 
   // Load sprites, palette etc.
-  gfx = Load_graphics(Config.Skin_file);
+  gfx = Load_graphics(Config.Skin_file, &initial_gradients);
   if (gfx == NULL)
   {
-    gfx = Load_graphics(DEFAULT_SKIN_FILENAME);
+    gfx = Load_graphics(DEFAULT_SKIN_FILENAME, &initial_gradients);
     if (gfx == NULL)
     {
       printf("%s", Gui_loading_error_message);
@@ -691,11 +685,14 @@ int Init_program(int argc,char * argv[])
   }
   Set_current_skin(Config.Skin_file, gfx);
   // Override colors
-  // Gfx->Default_palette[MC_Black]=Fav_menu_colors[0]=Config.Fav_menu_colors[0];
-  // Gfx->Default_palette[MC_Dark] =Fav_menu_colors[1]=Config.Fav_menu_colors[1];
-  // Gfx->Default_palette[MC_Light]=Fav_menu_colors[2]=Config.Fav_menu_colors[2];
-  // Gfx->Default_palette[MC_White]=Fav_menu_colors[3]=Config.Fav_menu_colors[3];
-//  Compute_optimal_menu_colors(Gfx->Default_palette);
+  // Gfx->Default_palette[MC_Black]=Config.Fav_menu_colors[0];
+  // Gfx->Default_palette[MC_Dark] =Config.Fav_menu_colors[1];
+  // Gfx->Default_palette[MC_Light]=Config.Fav_menu_colors[2];
+  // Gfx->Default_palette[MC_White]=Config.Fav_menu_colors[3];
+  
+  // Even when using the skin's palette, if RGB range is small
+  // the colors will be unusable.
+  Compute_optimal_menu_colors(Gfx->Default_palette);
     
   // Infos sur les trames (Sieve)
   Sieve_mode=0;
@@ -718,11 +715,6 @@ int Init_program(int argc,char * argv[])
   if (!(Brush         =(byte *)malloc(   1*   1))) Error(ERROR_MEMORY);
   if (!(Smear_brush   =(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE))) Error(ERROR_MEMORY);
 
-  // Pinceau
-  if (!(Paintbrush_sprite=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE))) Error(ERROR_MEMORY);
-  *Paintbrush_sprite=1;
-  Paintbrush_width=1;
-  Paintbrush_height=1;
 
   starting_videomode=Current_resolution;
   Horizontal_line_buffer=NULL;
@@ -748,6 +740,9 @@ int Init_program(int argc,char * argv[])
       SetWindowPos(pInfo.window, 0, Config.Window_pos_x, Config.Window_pos_y, 0, 0, SWP_NOSIZE);
     }
   }
+
+  // Open a console for debugging...
+  //ActivateConsole();
   #endif
   
   Main_image_width=Screen_width/Pixel_width;
@@ -762,15 +757,29 @@ int Init_program(int argc,char * argv[])
   // Nettoyage de l'écran virtuel (les autres recevront celui-ci par copie)
   memset(Main_screen,0,Main_image_width*Main_image_height);
 
+  // Now that the backup system is there, we can store the gradients.
+  memcpy(Main_backups->Pages->Gradients->Range, initial_gradients.Range, sizeof(initial_gradients.Range));
+  memcpy(Spare_backups->Pages->Gradients->Range, initial_gradients.Range, sizeof(initial_gradients.Range));
+
+  Gradient_function=Gradient_basic;
+  Gradient_lower_bound=0;
+  Gradient_upper_bound=0;
+  Gradient_random_factor=1;
+  Gradient_bounds_range=1;
+
+  Current_gradient=0;
+
   // Initialisation de diverses variables par calcul:
   Compute_magnifier_data();
   Compute_limits();
   Compute_paintbrush_coordinates();
 
   // On affiche le menu:
-  Display_menu();
   Display_paintbrush_in_menu();
-  Display_sprite_in_menu(BUTTON_PAL_LEFT,18+(Config.Palette_vertical!=0));
+  Display_sprite_in_menu(BUTTON_PAL_LEFT,Config.Palette_vertical?MENU_SPRITE_VERTICAL_PALETTE_SCROLL:-1);
+  Display_menu();
+  Draw_menu_button(BUTTON_PAL_LEFT,BUTTON_RELEASED);
+  Draw_menu_button(BUTTON_PAL_RIGHT,BUTTON_RELEASED);
 
   // On affiche le curseur pour débutter correctement l'état du programme:
   Display_cursor();
@@ -787,8 +796,11 @@ int Init_program(int argc,char * argv[])
   // On initialise la brosse initiale à 1 pixel blanc:
   Brush_width=1;
   Brush_height=1;
+  for (temp=0;temp<256;temp++)
+    Brush_colormap[temp]=temp;
   Capture_brush(0,0,0,0,0);
   *Brush=MC_White;
+  *Brush_original_pixels=MC_White;
   
   // Test de recuperation de fichiers sauvés
   switch (Check_recovery())
@@ -860,6 +872,9 @@ int Init_program(int argc,char * argv[])
           break;
       }
   }
+
+  Allow_drag_and_drop(1);
+
   return(1);
 }
 
@@ -925,6 +940,12 @@ void Program_shutdown(void)
     Error(ERROR_MISSING_DIRECTORY);
     
   SDL_Quit();
+  
+  #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
+  chdir("/usr/gp2x");
+  execl("/usr/gp2x/gp2xmenu", "/usr/gp2x/gp2xmenu", NULL);
+  #endif
+  
 }
 
 

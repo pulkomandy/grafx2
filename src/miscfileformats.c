@@ -368,6 +368,7 @@ void Load_PKM(T_IO_Context * context)
 
           Compteur_de_donnees_packees=0;
           Compteur_de_pixels=0;
+          // Header size is 780
           Taille_pack=(file_size)-780-header.Jump;
 
           // Boucle de décompression:
@@ -990,7 +991,7 @@ void Test_KCF(T_IO_Context * context)
 {
   char filename[MAX_PATH_CHARACTERS];
   FILE *file;
-  T_KCF_Header buffer;
+  T_KCF_Header header1;
   T_CEL_Header2 header2;
   int pal_index;
   int color_index;
@@ -1001,11 +1002,15 @@ void Test_KCF(T_IO_Context * context)
   {
     if (File_length_file(file)==320)
     {
-      Read_bytes(file,&buffer,320);
+      for (pal_index=0;pal_index<10 && !File_error;pal_index++)
+        for (color_index=0;color_index<16 && !File_error;color_index++)
+          if (!Read_byte(file,&header1.Palette[pal_index].color[color_index].Byte1) ||
+              !Read_byte(file,&header1.Palette[pal_index].color[color_index].Byte2))
+            File_error=1;
       // On vérifie une propriété de la structure de palette:
       for (pal_index=0;pal_index<10;pal_index++)
         for (color_index=0;color_index<16;color_index++)
-          if ((buffer.Palette[pal_index].color[color_index].Byte2>>4)!=0)
+          if ((header1.Palette[pal_index].color[color_index].Byte2>>4)!=0)
             File_error=1;
     }
     else
@@ -1045,7 +1050,7 @@ void Load_KCF(T_IO_Context * context)
 {
   char filename[MAX_PATH_CHARACTERS];
   FILE *file;
-  T_KCF_Header buffer;
+  T_KCF_Header header1;
   T_CEL_Header2 header2;
   byte bytes[3];
   int pal_index;
@@ -1062,8 +1067,13 @@ void Load_KCF(T_IO_Context * context)
     if (file_size==320)
     {
       // Fichier KCF à l'ancien format
+      for (pal_index=0;pal_index<10 && !File_error;pal_index++)
+        for (color_index=0;color_index<16 && !File_error;color_index++)
+          if (!Read_byte(file,&header1.Palette[pal_index].color[color_index].Byte1) ||
+              !Read_byte(file,&header1.Palette[pal_index].color[color_index].Byte2))
+            File_error=1;
 
-      if (Read_bytes(file,&buffer,320))
+      if (!File_error)
       {
         // Pre_load(context, ?); // Pas possible... pas d'image...
 
@@ -1075,9 +1085,9 @@ void Load_KCF(T_IO_Context * context)
           for (color_index=0;color_index<16;color_index++)
           {
             index=16+(pal_index*16)+color_index;
-            context->Palette[index].R=((buffer.Palette[pal_index].color[color_index].Byte1 >> 4) << 4);
-            context->Palette[index].B=((buffer.Palette[pal_index].color[color_index].Byte1 & 15) << 4);
-            context->Palette[index].G=((buffer.Palette[pal_index].color[color_index].Byte2 & 15) << 4);
+            context->Palette[index].R=((header1.Palette[pal_index].color[color_index].Byte1 >> 4) << 4);
+            context->Palette[index].B=((header1.Palette[pal_index].color[color_index].Byte1 & 15) << 4);
+            context->Palette[index].G=((header1.Palette[pal_index].color[color_index].Byte2 & 15) << 4);
           }
 
         for (index=0;index<16;index++)
@@ -1164,7 +1174,7 @@ void Save_KCF(T_IO_Context * context)
 {
   char filename[MAX_PATH_CHARACTERS];
   FILE *file;
-  T_KCF_Header buffer;
+  T_KCF_Header header1;
   T_CEL_Header2 header2;
   byte bytes[3];
   int pal_index;
@@ -1192,12 +1202,16 @@ void Save_KCF(T_IO_Context * context)
         for (color_index=0;color_index<16;color_index++)
         {
           index=16+(pal_index*16)+color_index;
-          buffer.Palette[pal_index].color[color_index].Byte1=((context->Palette[index].R>>4)<<4) | (context->Palette[index].B>>4);
-          buffer.Palette[pal_index].color[color_index].Byte2=context->Palette[index].G>>4;
+          header1.Palette[pal_index].color[color_index].Byte1=((context->Palette[index].R>>4)<<4) | (context->Palette[index].B>>4);
+          header1.Palette[pal_index].color[color_index].Byte2=context->Palette[index].G>>4;
         }
 
-      if (! Write_bytes(file,&buffer,320))
-        File_error=1;
+      // Write all
+      for (pal_index=0;pal_index<10 && !File_error;pal_index++)
+        for (color_index=0;color_index<16 && !File_error;color_index++)
+          if (!Write_byte(file,header1.Palette[pal_index].color[color_index].Byte1) ||
+              !Write_byte(file,header1.Palette[pal_index].color[color_index].Byte2))
+            File_error=1;
     }
     else
     {

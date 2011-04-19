@@ -21,6 +21,12 @@
 */
 
 #include <SDL.h>
+#include <SDL_syswm.h>
+
+#ifdef __WIN32__
+  #include <windows.h>
+  #include <ShellApi.h>
+#endif
 
 #include "global.h"
 #include "keyboard.h"
@@ -28,7 +34,9 @@
 #include "windows.h"
 #include "errors.h"
 #include "misc.h"
+#include "buttons.h"
 #include "input.h"
+#include "loadsave.h"
 
 #ifdef __VBCC__
   #define __attribute__(x)
@@ -36,6 +44,7 @@
 
 void Handle_window_resize(SDL_ResizeEvent event);
 void Handle_window_exit(SDL_QuitEvent event);
+int Color_cycling(__attribute__((unused)) void* useless);
 
 // public Globals (available as extern)
 
@@ -44,8 +53,11 @@ int Snap_axis = 0;
 int Snap_axis_origin_X;
 int Snap_axis_origin_Y;
 
+char * Drop_file_name = NULL;
+
 // --
 
+// Digital joystick state
 byte Directional_up;
 byte Directional_up_right;
 byte Directional_right;
@@ -56,35 +68,100 @@ byte Directional_left;
 byte Directional_up_left;
 byte Directional_click;
 
-long Directional_delay;
+// Emulated directional controller.
+// This has a distinct state from Directional_, because some joysticks send
+// "I'm not moving" SDL events when idle, thus stopping the emulated one.
+byte Directional_emulated_up;
+byte Directional_emulated_right;
+byte Directional_emulated_down;
+byte Directional_emulated_left;
+
+long Directional_first_move;
 long Directional_last_move;
-long Directional_step;
 int  Mouse_moved; ///< Boolean, Set to true if any cursor movement occurs.
 
 word Input_new_mouse_X;
 word Input_new_mouse_Y;
 byte Input_new_mouse_K;
+byte Button_inverter=0; // State of the key that swaps mouse buttons.
 
-byte Mouse_mode = 0; ///< Mouse mode = 0:normal, 1:emulated with custom sensitivity.
-short Mouse_virtual_x_position;
-short Mouse_virtual_y_position;
-short Mouse_virtual_width;
-short Mouse_virtual_height;
+// Joystick/pad configurations for the various console ports.
+// See the #else for the documentation of fields.
+// TODO: Make these user-settable somehow.
+#if defined(__GP2X__)
 
-// TODO: move to config
-#ifdef __GP2X__
-short Joybutton_shift=GP2X_BUTTON_L; // Button number that serves as a "shift" modifier
-short Joybutton_control=GP2X_BUTTON_R; // Button number that serves as a "ctrl" modifier
-short Joybutton_alt=GP2X_BUTTON_CLICK; // Button number that serves as a "alt" modifier
-short Joybutton_left_click=GP2X_BUTTON_B; // Button number that serves as left click
-short Joybutton_right_click=GP2X_BUTTON_Y; // Button number that serves as right-click
-#else
-short Joybutton_shift=-1; // Button number that serves as a "shift" modifier
-short Joybutton_control=-1; // Button number that serves as a "ctrl" modifier
-short Joybutton_alt=-1; // Button number that serves as a "alt" modifier
-short Joybutton_left_click=0; // Button number that serves as left click
-short Joybutton_right_click=0; // Button number that serves as right-click
+  #define JOYSTICK_THRESHOLD  (4096)
+  short Joybutton_shift=      JOY_BUTTON_L;
+  short Joybutton_control=    JOY_BUTTON_R;
+  short Joybutton_alt=        JOY_BUTTON_CLICK;
+  short Joybutton_left_click= JOY_BUTTON_B;
+  short Joybutton_right_click=JOY_BUTTON_Y;
+
+#elif defined(__WIZ__)
+
+  #define JOYSTICK_THRESHOLD  (4096)
+  short Joybutton_shift=      JOY_BUTTON_X;
+  short Joybutton_control=    JOY_BUTTON_SELECT;
+  short Joybutton_alt=        JOY_BUTTON_Y;
+  short Joybutton_left_click= JOY_BUTTON_A;
+  short Joybutton_right_click=JOY_BUTTON_B;
+
+#elif defined(__CAANOO__)
+
+  #define JOYSTICK_THRESHOLD  (4096)
+  short Joybutton_shift=      JOY_BUTTON_L;
+  short Joybutton_control=    JOY_BUTTON_R;
+  short Joybutton_alt=        JOY_BUTTON_Y;
+  short Joybutton_left_click= JOY_BUTTON_A;
+  short Joybutton_right_click=JOY_BUTTON_B;
+
+#else // Default : Any joystick on a computer platform
+  ///
+  /// This is the sensitivity threshold for the directional
+  /// pad of a cheap digital joypad on the PC. It has been set through
+  /// trial and error : If value is too large then the movement is
+  /// randomly interrupted; if the value is too low the cursor will
+  /// move by itself, controlled by parasits.
+  /// YR 04/11/2010: I just observed a -8700 when joystick is idle.
+  #define JOYSTICK_THRESHOLD  (10000)
+  
+  /// A button that is marked as "modifier" will 
+  short Joybutton_shift=-1; ///< Button number that serves as a "shift" modifier; -1 for none
+  short Joybutton_control=-1; ///< Button number that serves as a "ctrl" modifier; -1 for none
+  short Joybutton_alt=-1; ///< Button number that serves as a "alt" modifier; -1 for none
+  
+  short Joybutton_left_click=0; ///< Button number that serves as left click; -1 for none
+  short Joybutton_right_click=1; ///< Button number that serves as right-click; -1 for none
+
 #endif
+
+int Has_shortcut(word function)
+{
+  if (function == 0xFFFF)
+    return 0;
+    
+  if (function & 0x100)
+  {
+    if (Buttons_Pool[function&0xFF].Left_shortcut[0]!=KEY_NONE)
+      return 1;
+    if (Buttons_Pool[function&0xFF].Left_shortcut[1]!=KEY_NONE)
+      return 1;
+    return 0;
+  }
+  if (function & 0x200)
+  {
+    if (Buttons_Pool[function&0xFF].Right_shortcut[0]!=KEY_NONE)
+      return 1;
+    if (Buttons_Pool[function&0xFF].Right_shortcut[1]!=KEY_NONE)
+      return 1;
+    return 0;
+  }
+  if(Config_Key[function][0]!=KEY_NONE)
+    return 1;
+  if(Config_Key[function][1]!=KEY_NONE)
+    return 1;
+  return 0; 
+}
 
 int Is_shortcut(word key, word function)
 {
@@ -177,16 +254,18 @@ int Move_cursor_with_constraints()
       feedback=1;
       
       if (Input_new_mouse_K == 0)
+      {
         Input_sticky_control = 0;
+      }
     }
     // Hide cursor, because even just a click change needs it
     if (!Mouse_moved)
     {
-      Mouse_moved++;
       // Hide cursor (erasing icon and brush on screen
       // before changing the coordinates.
       Hide_cursor();
     }
+    Mouse_moved++;
     if (Input_new_mouse_X != Mouse_X || Input_new_mouse_Y != Mouse_Y)
     {
       Mouse_X=Input_new_mouse_X;
@@ -194,8 +273,8 @@ int Move_cursor_with_constraints()
     }
     Mouse_K=Input_new_mouse_K;
     
-    if (Mouse_moved > Config.Mouse_merge_movement)
-      if (! Operation[Current_operation][Mouse_K_unique]
+    if (Mouse_moved > Config.Mouse_merge_movement
+      && !Operation[Current_operation][Mouse_K_unique]
           [Operation_stack_size].Fast_mouse)
         feedback=1;
   }
@@ -221,30 +300,8 @@ void Handle_window_exit(__attribute__((unused)) SDL_QuitEvent event)
 
 int Handle_mouse_move(SDL_MouseMotionEvent event)
 {
-    if (Mouse_mode == 0)
-    {
-      Input_new_mouse_X = event.x/Pixel_width;
-      Input_new_mouse_Y = event.y/Pixel_height;
-    }
-    else
-    {
-      Mouse_virtual_x_position += event.xrel * 12 / Config.Mouse_sensitivity_index_x;
-      // Clip
-      if (Mouse_virtual_x_position > Mouse_virtual_width)
-        Mouse_virtual_x_position = Mouse_virtual_width;
-      else if (Mouse_virtual_x_position < 0)
-        Mouse_virtual_x_position = 0;
-        
-      Mouse_virtual_y_position += event.yrel * 12 / Config.Mouse_sensitivity_index_y;
-      // Clip
-      if (Mouse_virtual_y_position > Mouse_virtual_height)
-        Mouse_virtual_y_position = Mouse_virtual_height;
-      else if (Mouse_virtual_y_position < 0)
-        Mouse_virtual_y_position = 0;
-        
-      Input_new_mouse_X = Mouse_virtual_x_position / 12 / Pixel_width;
-      Input_new_mouse_Y = Mouse_virtual_y_position / 12 / Pixel_height;
-    }
+    Input_new_mouse_X = event.x/Pixel_width;
+    Input_new_mouse_Y = event.y/Pixel_height;
 
     return Move_cursor_with_constraints();
 }
@@ -254,11 +311,19 @@ int Handle_mouse_click(SDL_MouseButtonEvent event)
     switch(event.button)
     {
         case SDL_BUTTON_LEFT:
-            Input_new_mouse_K |= 1;
+            if (Button_inverter)
+              Input_new_mouse_K |= 2;
+            else
+              Input_new_mouse_K |= 1;
+            break;
             break;
 
         case SDL_BUTTON_RIGHT:
-            Input_new_mouse_K |= 2;
+            if (Button_inverter)
+              Input_new_mouse_K |= 1;
+            else
+              Input_new_mouse_K |= 2;
+            break;
             break;
 
         case SDL_BUTTON_MIDDLE:
@@ -284,11 +349,17 @@ int Handle_mouse_release(SDL_MouseButtonEvent event)
     switch(event.button)
     {
         case SDL_BUTTON_LEFT:
-            Input_new_mouse_K &= ~1;
+            if (Button_inverter)
+              Input_new_mouse_K &= ~2;
+            else
+              Input_new_mouse_K &= ~1;
             break;
 
         case SDL_BUTTON_RIGHT:
-            Input_new_mouse_K &= ~2;
+            if (Button_inverter)
+              Input_new_mouse_K &= ~1;
+            else
+              Input_new_mouse_K &= ~2;
             break;
     }
     
@@ -300,27 +371,64 @@ int Handle_mouse_release(SDL_MouseButtonEvent event)
 int Handle_key_press(SDL_KeyboardEvent event)
 {
     //Appui sur une touche du clavier
+    int modifier;
+  
     Key = Keysym_to_keycode(event.keysym);
     Key_ANSI = Keysym_to_ANSI(event.keysym);
+    switch(event.keysym.sym)
+    {
+      case SDLK_RSHIFT:
+      case SDLK_LSHIFT:
+        modifier=MOD_SHIFT;
+        break;
+
+      case SDLK_RCTRL:
+      case SDLK_LCTRL:
+        modifier=MOD_CTRL;
+        break;
+
+      case SDLK_RALT:
+      case SDLK_LALT:
+      case SDLK_MODE:
+        modifier=MOD_ALT;
+        break;
+
+      case SDLK_RMETA:
+      case SDLK_LMETA:
+        modifier=MOD_META;
+        break;
+
+      default:
+        modifier=0;
+    }
+    if (Config.Swap_buttons && modifier == Config.Swap_buttons && Button_inverter==0)
+    {
+      Button_inverter=1;
+      if (Input_new_mouse_K)
+      {
+        Input_new_mouse_K ^= 3; // Flip bits 0 and 1
+        return Move_cursor_with_constraints();
+      }
+    }
 
     if(Is_shortcut(Key,SPECIAL_MOUSE_UP))
     {
-      Directional_up=1;
+      Directional_emulated_up=1;
       return 0;
     }
     else if(Is_shortcut(Key,SPECIAL_MOUSE_DOWN))
     {
-      Directional_down=1;
+      Directional_emulated_down=1;
       return 0;
     }
     else if(Is_shortcut(Key,SPECIAL_MOUSE_LEFT))
     {
-      Directional_left=1;
+      Directional_emulated_left=1;
       return 0;
     }
     else if(Is_shortcut(Key,SPECIAL_MOUSE_RIGHT))
     {
-      Directional_right=1;
+      Directional_emulated_right=1;
       return 0;
     }
     else if(Is_shortcut(Key,SPECIAL_CLICK_LEFT) && Keyboard_click_allowed > 0)
@@ -349,26 +457,35 @@ int Release_control(int key_code, int modifier)
       Snap_axis = 0;
       need_feedback = 1;
     }
+    if (Config.Swap_buttons && modifier == Config.Swap_buttons && Button_inverter==1)
+    {
+      Button_inverter=0;
+      if (Input_new_mouse_K)
+      {      
+        Input_new_mouse_K ^= 3; // Flip bits 0 and 1
+        return Move_cursor_with_constraints();
+      }
+    }
 
     if((key_code && key_code == (Config_Key[SPECIAL_MOUSE_UP][0]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_UP][0]&modifier) ||
       (key_code && key_code == (Config_Key[SPECIAL_MOUSE_UP][1]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_UP][1]&modifier))
     {
-      Directional_up=0;
+      Directional_emulated_up=0;
     }
     if((key_code && key_code == (Config_Key[SPECIAL_MOUSE_DOWN][0]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_DOWN][0]&modifier) ||
       (key_code && key_code == (Config_Key[SPECIAL_MOUSE_DOWN][1]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_DOWN][1]&modifier))
     {
-      Directional_down=0;
+      Directional_emulated_down=0;
     }
     if((key_code && key_code == (Config_Key[SPECIAL_MOUSE_LEFT][0]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_LEFT][0]&modifier) ||
       (key_code && key_code == (Config_Key[SPECIAL_MOUSE_LEFT][1]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_LEFT][1]&modifier))
     {
-      Directional_left=0;
+      Directional_emulated_left=0;
     }
     if((key_code && key_code == (Config_Key[SPECIAL_MOUSE_RIGHT][0]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_RIGHT][0]&modifier) ||
       (key_code && key_code == (Config_Key[SPECIAL_MOUSE_RIGHT][1]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_RIGHT][1]&modifier))
     {
-      Directional_right=0;
+      Directional_emulated_right=0;
     }
     if((key_code && key_code == (Config_Key[SPECIAL_CLICK_LEFT][0]&0x0FFF)) || (Config_Key[SPECIAL_CLICK_LEFT][0]&modifier) ||
       (key_code && key_code == (Config_Key[SPECIAL_CLICK_LEFT][1]&0x0FFF)) || (Config_Key[SPECIAL_CLICK_LEFT][1]&modifier))
@@ -445,54 +562,88 @@ int Handle_joystick_press(SDL_JoyButtonEvent event)
     if (event.button == Joybutton_control)
     {
       SDL_SetModState(SDL_GetModState() | KMOD_CTRL);
+      if (Config.Swap_buttons == MOD_CTRL && Button_inverter==0)
+      {
+        Button_inverter=1;
+        if (Input_new_mouse_K)
+        {
+          Input_new_mouse_K ^= 3; // Flip bits 0 and 1
+          return Move_cursor_with_constraints();
+        }
+      }
       return 0;
     }
     if (event.button == Joybutton_alt)
     {
       SDL_SetModState(SDL_GetModState() | (KMOD_ALT|KMOD_META));
+      if (Config.Swap_buttons == MOD_ALT && Button_inverter==0)
+      {
+        Button_inverter=1;
+        if (Input_new_mouse_K)
+        {
+          Input_new_mouse_K ^= 3; // Flip bits 0 and 1
+          return Move_cursor_with_constraints();
+        }
+      }
       return 0;
     }
     if (event.button == Joybutton_left_click)
     {
-      Input_new_mouse_K=1;
+      Input_new_mouse_K = Button_inverter ? 2 : 1;
       return Move_cursor_with_constraints();
     }
     if (event.button == Joybutton_right_click)
     {
-      Input_new_mouse_K=2;
+      Input_new_mouse_K = Button_inverter ? 1 : 2;
       return Move_cursor_with_constraints();
     }
-    #ifdef __GP2X__
     switch(event.button)
     {
-      case GP2X_BUTTON_UP:
+      #ifdef JOY_BUTTON_UP
+      case JOY_BUTTON_UP:
         Directional_up=1;
         break;
-      case GP2X_BUTTON_UPRIGHT:
+      #endif
+      #ifdef JOY_BUTTON_UPRIGHT
+      case JOY_BUTTON_UPRIGHT:
         Directional_up_right=1;
         break;
-      case GP2X_BUTTON_RIGHT:
+      #endif
+      #ifdef JOY_BUTTON_RIGHT
+      case JOY_BUTTON_RIGHT:
         Directional_right=1;
         break;
-      case GP2X_BUTTON_DOWNRIGHT:
+      #endif
+      #ifdef JOY_BUTTON_DOWNRIGHT
+      case JOY_BUTTON_DOWNRIGHT:
         Directional_down_right=1;
         break;
-      case GP2X_BUTTON_DOWN:
+      #endif
+      #ifdef JOY_BUTTON_DOWN
+      case JOY_BUTTON_DOWN:
         Directional_down=1;
         break;
-      case GP2X_BUTTON_DOWNLEFT:
+      #endif
+      #ifdef JOY_BUTTON_DOWNLEFT
+      case JOY_BUTTON_DOWNLEFT:
         Directional_down_left=1;
         break;
-      case GP2X_BUTTON_LEFT:
+      #endif
+      #ifdef JOY_BUTTON_LEFT
+      case JOY_BUTTON_LEFT:
         Directional_left=1;
         break;
-      case GP2X_BUTTON_UPLEFT:
+      #endif
+      #ifdef JOY_BUTTON_UPLEFT
+      case JOY_BUTTON_UPLEFT:
         Directional_up_left=1;
         break;
+      #endif
+      
       default:
         break;
     }
-    #endif
+      
     Key = (KEY_JOYBUTTON+event.button)|Key_modifiers(SDL_GetModState());
     // TODO: systeme de répétition
     
@@ -527,58 +678,75 @@ int Handle_joystick_release(SDL_JoyButtonEvent event)
       return Move_cursor_with_constraints();
     }
   
-    #ifdef __GP2X__
     switch(event.button)
     {
-      case GP2X_BUTTON_UP:
-        Directional_up=0;
+      #ifdef JOY_BUTTON_UP
+      case JOY_BUTTON_UP:
+        Directional_up=1;
         break;
-      case GP2X_BUTTON_UPRIGHT:
-        Directional_up_right=0;
+      #endif
+      #ifdef JOY_BUTTON_UPRIGHT
+      case JOY_BUTTON_UPRIGHT:
+        Directional_up_right=1;
         break;
-      case GP2X_BUTTON_RIGHT:
-        Directional_right=0;
+      #endif
+      #ifdef JOY_BUTTON_RIGHT
+      case JOY_BUTTON_RIGHT:
+        Directional_right=1;
         break;
-      case GP2X_BUTTON_DOWNRIGHT:
-        Directional_down_right=0;
+      #endif
+      #ifdef JOY_BUTTON_DOWNRIGHT
+      case JOY_BUTTON_DOWNRIGHT:
+        Directional_down_right=1;
         break;
-      case GP2X_BUTTON_DOWN:
-        Directional_down=0;
+      #endif
+      #ifdef JOY_BUTTON_DOWN
+      case JOY_BUTTON_DOWN:
+        Directional_down=1;
         break;
-      case GP2X_BUTTON_DOWNLEFT:
-        Directional_down_left=0;
+      #endif
+      #ifdef JOY_BUTTON_DOWNLEFT
+      case JOY_BUTTON_DOWNLEFT:
+        Directional_down_left=1;
         break;
-      case GP2X_BUTTON_LEFT:
-        Directional_left=0;
+      #endif
+      #ifdef JOY_BUTTON_LEFT
+      case JOY_BUTTON_LEFT:
+        Directional_left=1;
         break;
-      case GP2X_BUTTON_UPLEFT:
-        Directional_up_left=0;
+      #endif
+      #ifdef JOY_BUTTON_UPLEFT
+      case JOY_BUTTON_UPLEFT:
+        Directional_up_left=1;
+        break;
+      #endif
+      
+      default:
         break;
     }
-    #endif
   return Move_cursor_with_constraints();
 }
 
 void Handle_joystick_movement(SDL_JoyAxisEvent event)
 {
-    if (event.axis==0) // X
+    if (event.axis==JOYSTICK_AXIS_X)
     {
       Directional_right=Directional_left=0;
-      if (event.value<-1000)
+      if (event.value<-JOYSTICK_THRESHOLD)
       {
         Directional_left=1;
       }
-      else if (event.value>1000)
+      else if (event.value>JOYSTICK_THRESHOLD)
         Directional_right=1;
     }
-    else if (event.axis==1) // Y
+    else if (event.axis==JOYSTICK_AXIS_Y)
     {
       Directional_up=Directional_down=0;
-      if (event.value<-1000)
+      if (event.value<-JOYSTICK_THRESHOLD)
       {
         Directional_up=1;
       }
-      else if (event.value>1000)
+      else if (event.value>JOYSTICK_THRESHOLD)
         Directional_down=1;
     }
 }
@@ -616,138 +784,222 @@ int Cursor_displace(short delta_x, short delta_y)
   return Move_cursor_with_constraints();
 }
 
+// This function is the acceleration profile for directional (digital) cursor
+// controllers.
+int Directional_acceleration(int msec)
+{
+  const int initial_delay = 250;
+  const int linear_factor = 200;
+  const int accel_factor = 10000;
+  // At beginning there is 1 pixel move, then nothing for N milliseconds
+  if (msec<initial_delay)
+    return 1;
+    
+  // After that, position over time is generally y = ax²+bx+c
+  // a = 1/accel_factor
+  // b = 1/linear_factor
+  // c = 1
+  return 1+(msec-initial_delay+linear_factor)/linear_factor+(msec-initial_delay)*(msec-initial_delay)/accel_factor;
+}
 
 // Main input handling function
 
-int Get_input(void)
+int Get_input(int sleep_time)
 {
     SDL_Event event;
     int user_feedback_required = 0; // Flag qui indique si on doit arrêter de traiter les évènements ou si on peut enchainer
                 
+    // Commit any pending screen update.
+    // This is done in this function because it's called after reading 
+    // some user input.
+    Flush_update();
+    Color_cycling(NULL);
     Key_ANSI = 0;
     Key = 0;
     Mouse_moved=0;
     Input_new_mouse_X = Mouse_X;
     Input_new_mouse_Y = Mouse_Y;
+    Input_new_mouse_K = Mouse_K;
+
+    // Not using SDL_PollEvent() because every call polls the input
+    // device. In some cases such as high-sensitivity mouse or cheap
+    // digital joypad, every call will see something subtly different in
+    // the state of the device, and thus it will enqueue a new event.
+    // The result is that the queue will never empty !!!
+
+    // Get new events from input devices.
+    SDL_PumpEvents();
 
     // Process as much events as possible without redrawing the screen.
     // This mostly allows us to merge mouse events for people with an high
     // resolution mouse
-    while( (!user_feedback_required) && SDL_PollEvent(&event)) // Try to cumulate for a full VBL except if there is a required feedback
+    while(!user_feedback_required && SDL_PeepEvents(&event, 1, SDL_GETEVENT, SDL_ALLEVENTS)==1)
     {
-        switch(event.type)
-        {
-            case SDL_VIDEORESIZE:
-                Handle_window_resize(event.resize);
-                user_feedback_required = 1;
-                break;
+      switch(event.type)
+      {
+          case SDL_VIDEORESIZE:
+              Handle_window_resize(event.resize);
+              user_feedback_required = 1;
+              break;
 
-            case SDL_QUIT:
-                Handle_window_exit(event.quit);
-                user_feedback_required = 1;
-                break;
+          case SDL_QUIT:
+              Handle_window_exit(event.quit);
+              user_feedback_required = 1;
+              break;
 
-            case SDL_MOUSEMOTION:
-                user_feedback_required = Handle_mouse_move(event.motion);
-                break;
+          case SDL_MOUSEMOTION:
+              user_feedback_required = Handle_mouse_move(event.motion);
+              break;
 
-            case SDL_MOUSEBUTTONDOWN:
-                Handle_mouse_click(event.button);
-                user_feedback_required = 1;
-                break;
+          case SDL_MOUSEBUTTONDOWN:
+              Handle_mouse_click(event.button);
+              user_feedback_required = 1;
+              break;
 
-            case SDL_MOUSEBUTTONUP:
-                Handle_mouse_release(event.button);
-                user_feedback_required = 1;
-                break;
+          case SDL_MOUSEBUTTONUP:
+              Handle_mouse_release(event.button);
+              user_feedback_required = 1;
+              break;
 
-            case SDL_KEYDOWN:
-                Handle_key_press(event.key);
-                user_feedback_required = 1;
-                break;
+          case SDL_KEYDOWN:
+              Handle_key_press(event.key);
+              user_feedback_required = 1;
+              break;
 
-            case SDL_KEYUP:
-                Handle_key_release(event.key);
-                break;
+          case SDL_KEYUP:
+              Handle_key_release(event.key);
+              break;
 
-            // Start of Joystik handling
-            #ifdef USE_JOYSTICK
+          // Start of Joystik handling
+          #ifdef USE_JOYSTICK
 
-            case SDL_JOYBUTTONUP:
-                Handle_joystick_release(event.jbutton);
-                user_feedback_required = 1;
-                break;
+          case SDL_JOYBUTTONUP:
+              Handle_joystick_release(event.jbutton);
+              user_feedback_required = 1;
+              break;
 
-            case SDL_JOYBUTTONDOWN:
-                Handle_joystick_press(event.jbutton);
-                user_feedback_required = 1;
-                break;
+          case SDL_JOYBUTTONDOWN:
+              Handle_joystick_press(event.jbutton);
+              user_feedback_required = 1;
+              break;
 
-            case SDL_JOYAXISMOTION:
-                Handle_joystick_movement(event.jaxis);
-                break;
+          case SDL_JOYAXISMOTION:
+              Handle_joystick_movement(event.jaxis);
+              break;
 
-            #endif
-            // End of Joystick handling
-            
-            default:
-            //    DEBUG("Unhandled SDL event number : ",event.type);
-                break;
-        }
+          #endif
+          // End of Joystick handling
+          
+          case SDL_SYSWMEVENT:
+#ifdef __WIN32__
+              if(event.syswm.msg->msg  == WM_DROPFILES)
+              {
+                int file_count;
+                HDROP hdrop = (HDROP)(event.syswm.msg->wParam);
+                if((file_count = DragQueryFile(hdrop,(UINT)-1,(LPTSTR) NULL ,(UINT) 0)) > 0)
+                {
+                  long len;
+                  // Query filename length
+                  len = DragQueryFile(hdrop,0 ,NULL ,0);
+                  if (len)
+                  {
+                    Drop_file_name=calloc(len+1,1);
+                    if (Drop_file_name)
+                    {
+                      if (DragQueryFile(hdrop,0 ,(LPTSTR) Drop_file_name ,(UINT) MAX_PATH))
+                      {
+                        // Success
+                      }
+                      else
+                      {
+                        free(Drop_file_name);
+                        // Don't report name copy error
+                      }
+                    }
+                    else
+                    {
+                      // Don't report alloc error (for a file name? :/ )
+                    }
+                  }
+                  else
+                  {
+                    // Don't report weird Windows error
+                  }
+                }
+                else
+                {
+                  // Drop of zero files. Thanks for the information, Bill.
+                }
+              }
+#endif
+              break;
+          
+          default:
+              //DEBUG("Unhandled SDL event number : ",event.type);
+              break;
+      }
     }
     // Directional controller
     if (!(Directional_up||Directional_up_right||Directional_right||
-    Directional_down_right||Directional_down||Directional_down_left||
-      Directional_left||Directional_up_left))
+      Directional_down_right||Directional_down||Directional_down_left||
+      Directional_left||Directional_up_left||Directional_emulated_up||
+      Directional_emulated_right||Directional_emulated_down||
+      Directional_emulated_left))
     {
-      Directional_delay=-1;
-      Directional_last_move=SDL_GetTicks();
+       Directional_first_move=0;
     }
     else
     {
       long time_now;
+      int step=0;
       
       time_now=SDL_GetTicks();
       
-      if (time_now>Directional_last_move+Directional_delay)
+      if (Directional_first_move==0)
       {
-        // Speed parameters, acceleration etc. are here
-        if (Directional_delay==-1)
-        {
-          Directional_delay=150;
-          Directional_step=16;
-        }
-        else if (Directional_delay==150)
-          Directional_delay=40;
-        else if (Directional_delay!=0)
-          Directional_delay=Directional_delay*8/10;
-        else if (Directional_step<16*4)
-          Directional_step++;
-        Directional_last_move = time_now;
-      
+        Directional_first_move=time_now;
+        step=1;
+      }
+      else
+      {
+        // Compute how much the cursor has moved since last call.
+        // This tries to make smooth cursor movement
+        // no matter the frequency of calls to Get_input()
+        step =
+          Directional_acceleration(time_now - Directional_first_move) -
+          Directional_acceleration(Directional_last_move - Directional_first_move);
+        
+        // Clip speed at 3 pixel per visible frame.
+        if (step > 3)
+          step=3;
+        
+      }
+      Directional_last_move = time_now;
+      if (step)
+      {
         // Directional controller UP
-        if ((Directional_up||Directional_up_left||Directional_up_right) &&
-           !(Directional_down_right||Directional_down||Directional_down_left))
+        if ((Directional_up||Directional_emulated_up||Directional_up_left||Directional_up_right) &&
+           !(Directional_down_right||Directional_down||Directional_emulated_down||Directional_down_left))
         {
-          Cursor_displace(0, -Directional_step/16);
+          Cursor_displace(0, -step);
         }
         // Directional controller RIGHT
-        if ((Directional_up_right||Directional_right||Directional_down_right) &&
-           !(Directional_down_left||Directional_left||Directional_up_left))
+        if ((Directional_up_right||Directional_right||Directional_emulated_right||Directional_down_right) &&
+           !(Directional_down_left||Directional_left||Directional_emulated_left||Directional_up_left))
         {
-          Cursor_displace(Directional_step/16,0);
+          Cursor_displace(step,0);
         }    
         // Directional controller DOWN
-        if ((Directional_down_right||Directional_down||Directional_down_left) &&
-           !(Directional_up_left||Directional_up||Directional_up_right))
+        if ((Directional_down_right||Directional_down||Directional_emulated_down||Directional_down_left) &&
+           !(Directional_up_left||Directional_up||Directional_emulated_up||Directional_up_right))
         {
-          Cursor_displace(0, Directional_step/16);
+          Cursor_displace(0, step);
         }
         // Directional controller LEFT
-        if ((Directional_down_left||Directional_left||Directional_up_left) &&
-           !(Directional_up_right||Directional_right||Directional_down_right))
+        if ((Directional_down_left||Directional_left||Directional_emulated_left||Directional_up_left) &&
+           !(Directional_up_right||Directional_right||Directional_emulated_right||Directional_down_right))
         {
-          Cursor_displace(-Directional_step/16,0);
+          Cursor_displace(-step,0);
         }
       }
     }
@@ -757,42 +1009,95 @@ int Get_input(void)
     {
       Compute_paintbrush_coordinates();
       Display_cursor();
+      return 1;
     }
-    // Commit any pending screen update.
-    // This is done in this function because it's called after reading 
-    // some user input.
-    Flush_update();
-
+    if (user_feedback_required)
+      return 1;
     
-    return (Mouse_moved!=0) || user_feedback_required;
+    // Nothing significant happened
+    if (sleep_time)
+      SDL_Delay(sleep_time);
+    return 0;
 }
 
 void Adjust_mouse_sensitivity(word fullscreen)
 {
-  if (fullscreen == 0)
-  {
-    Mouse_mode = 0;
-    return;
-  }
-  Mouse_mode = 1;
-  Mouse_virtual_x_position = 12*Mouse_X*Pixel_width;
-  Mouse_virtual_y_position = 12*Mouse_Y*Pixel_height;
-  Mouse_virtual_width = 12*(Screen_width-1)*Pixel_width;
-  Mouse_virtual_height = 12*(Screen_height-1)*Pixel_height;
+  // Deprecated
+  (void)fullscreen;
 }
 
 void Set_mouse_position(void)
 {
-    if (Mouse_mode == 0)
+    SDL_WarpMouse(Mouse_X*Pixel_width, Mouse_Y*Pixel_height);
+}
+
+int Color_cycling(__attribute__((unused)) void* useless)
+{
+  static byte offset[16];
+  int i, color;
+  static SDL_Color PaletteSDL[256];
+  int changed; // boolean : true if the palette needs a change in this tick.
+  
+  long now;
+  static long start=0;
+  
+  if (start==0)
+  {
+    // First run
+    start = SDL_GetTicks();
+    return 1;
+  }
+  if (!Allow_colorcycling || !Cycling_mode)
+    return 1;
+    
+
+  now = SDL_GetTicks();
+  changed=0;
+  
+  // Check all cycles for a change at this tick
+  for (i=0; i<16; i++)
+  {
+    int len;
+    
+    len=Main_backups->Pages->Gradients->Range[i].End-Main_backups->Pages->Gradients->Range[i].Start+1;
+    if (len>1 && Main_backups->Pages->Gradients->Range[i].Speed)
     {
-      SDL_WarpMouse(
-          Mouse_X*Pixel_width,
-          Mouse_Y*Pixel_height
-      );
+      int new_offset;
+      
+      new_offset=(now-start)/(int)(1000.0/(Main_backups->Pages->Gradients->Range[i].Speed*0.2856)) % len;
+      if (!Main_backups->Pages->Gradients->Range[i].Inverse)
+        new_offset=len - new_offset;
+      
+      if (new_offset!=offset[i])
+        changed=1;
+      offset[i]=new_offset;
     }
-    else
+  }
+  if (changed)
+  {
+    // Initialize the palette
+    for(color=0;color<256;color++)
     {
-      Mouse_virtual_x_position = 12*Mouse_X*Pixel_width;
-      Mouse_virtual_y_position = 12*Mouse_Y*Pixel_height;
+      PaletteSDL[color].r=Main_palette[color].R;
+      PaletteSDL[color].g=Main_palette[color].G;
+      PaletteSDL[color].b=Main_palette[color].B;
     }
+    for (i=0; i<16; i++)
+    {
+      int len;
+    
+      len=Main_backups->Pages->Gradients->Range[i].End-Main_backups->Pages->Gradients->Range[i].Start+1;
+      if (len>1 && Main_backups->Pages->Gradients->Range[i].Speed)
+      {
+        for(color=Main_backups->Pages->Gradients->Range[i].Start;color<=Main_backups->Pages->Gradients->Range[i].End;color++)
+        {
+          PaletteSDL[color].r=Main_palette[Main_backups->Pages->Gradients->Range[i].Start+((color-Main_backups->Pages->Gradients->Range[i].Start+offset[i])%len)].R;
+          PaletteSDL[color].g=Main_palette[Main_backups->Pages->Gradients->Range[i].Start+((color-Main_backups->Pages->Gradients->Range[i].Start+offset[i])%len)].G;
+          PaletteSDL[color].b=Main_palette[Main_backups->Pages->Gradients->Range[i].Start+((color-Main_backups->Pages->Gradients->Range[i].Start+offset[i])%len)].B;
+        }
+      }
+    }
+    SDL_SetPalette(Screen_SDL, SDL_PHYSPAL | SDL_LOGPAL, PaletteSDL,0,256);
+  }
+  return 0;
 }

@@ -33,6 +33,8 @@
 #endif
 #include <SDL.h>
 
+#define NB_SHORTCUTS 198   ///< Number of actions that can have a key combination associated to it.
+
 /*** Types definitions and structs ***/
 
 typedef struct

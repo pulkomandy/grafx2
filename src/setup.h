@@ -153,3 +153,5 @@ void Set_config_directory(const char * program_dir, char * config_dir);
 #else
   #define SKIN_PREFIX "skin_"
 #endif
+
+

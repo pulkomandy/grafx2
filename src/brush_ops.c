@@ -38,7 +38,7 @@
 #include "sdlscreen.h"
 #include "windows.h"
 
-#if defined(__VBCC__)||defined(__GP2X__)
+#if defined(__VBCC__) || defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
     #define M_PI 3.141592653589793238462643
 #endif
 
@@ -96,20 +96,11 @@ void Magnifier_12_0(void)
   Main_magnifier_offset_X=Mouse_X-(Main_magnifier_width>>1);
   Main_magnifier_offset_Y=Mouse_Y-(Main_magnifier_height>>1);
 
-  // Calcul du coin haut_gauche de la fenêtre devant être zoomée DANS L'ECRAN
-  if (Main_magnifier_offset_X+Main_magnifier_width>=Limit_right-Main_offset_X)
-    Main_magnifier_offset_X=Limit_right-Main_magnifier_width-Main_offset_X+1;
-  if (Main_magnifier_offset_Y+Main_magnifier_height>=Limit_bottom-Main_offset_Y)
-    Main_magnifier_offset_Y=Limit_bottom-Main_magnifier_height-Main_offset_Y+1;
-
   // Calcul des coordonnées absolues de ce coin DANS L'IMAGE
   Main_magnifier_offset_X+=Main_offset_X;
   Main_magnifier_offset_Y+=Main_offset_Y;
 
-  if (Main_magnifier_offset_X<0)
-    Main_magnifier_offset_X=0;
-  if (Main_magnifier_offset_Y<0)
-    Main_magnifier_offset_Y=0;
+  Clip_magnifier_offsets(&Main_magnifier_offset_X, &Main_magnifier_offset_Y);
 
   // On calcule les bornes visibles dans l'écran
   Position_screen_according_to_zoom();
@@ -260,6 +251,106 @@ void Colorpicker_0_1(void)
   Unselect_button(BUTTON_COLORPICKER);
 }
 
+/////////////////////////////////////////////////////////// OPERATION_RMB_COLORPICK
+
+
+byte Rightclick_colorpick(byte cursor_visible)
+{
+  // Check if the rightclick colorpick should take over:
+  if (!Config.Right_click_colorpick)
+    return 0;
+  if (Mouse_K!=RIGHT_SIDE)
+    return 0;    
+  // In these modes, the Foreground color is ignored,
+  // so the RMB should act as normal.
+  if (Shade_mode||Quick_shade_mode||Tiling_mode)
+    return 0;
+
+  Colorpicker_color=-1;
+  Colorpicker_X=-1;
+  Colorpicker_Y=-1;
+  
+  if (cursor_visible)
+    Hide_cursor();
+  Start_operation_stack(OPERATION_RMB_COLORPICK);
+  
+  Init_start_operation();
+  
+  // Just an indicator to go to next step
+  Operation_push(1);
+  Rightclick_colorpick_2_1();
+  
+  if (cursor_visible)
+    Display_cursor();
+    
+  return 1;
+}
+
+void Rightclick_colorpick_2_1(void)
+//
+// Opération   : OPERATION_RMB_COLORPICK
+// Click Souris: 2
+// Taille_Pile : 1
+//
+// Souris effacée: Non
+//
+{
+  char str[4];
+
+  if ( (Colorpicker_X!=Paintbrush_X)
+    || (Colorpicker_Y!=Paintbrush_Y) )
+  {
+    if ( (Paintbrush_X>=0) && (Paintbrush_Y>=0)
+      && (Paintbrush_X<Main_image_width)
+      && (Paintbrush_Y<Main_image_height) )
+      Colorpicker_color=Read_pixel_from_current_screen(Paintbrush_X,Paintbrush_Y);
+    else
+      Colorpicker_color=0;
+
+    Colorpicker_X=Paintbrush_X;
+    Colorpicker_Y=Paintbrush_Y;
+
+    if (Menu_is_visible)
+    {
+      Print_coordinates();
+      Num2str(Colorpicker_color,str,3);
+      Print_in_menu(str,20);
+      Print_general(170*Menu_factor_X,Menu_status_Y," ",0,Colorpicker_color);
+    }
+  }
+}
+
+
+
+void Rightclick_colorpick_0_1(void)
+//
+// Opération   : OPERATION_RMB_COLORPICK
+// Click Souris: 0
+// Taille_Pile : 1
+//
+// Souris effacée: Non
+//
+{
+  short dummy;
+
+  Hide_cursor();
+  
+  Operation_pop(&dummy);
+  Set_fore_color(Colorpicker_color);
+  
+  // Restore previous operation
+  Start_operation_stack(Operation_before_interrupt);
+  
+  // Erase the color block which shows the picked color
+  if (Operation_before_interrupt!=OPERATION_REPLACE)
+    if ( (Mouse_Y<Menu_Y) && (Menu_is_visible) &&
+         ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ) )
+      Print_in_menu("X:       Y:             ",0);
+
+  Print_coordinates();
+  
+  Display_cursor();
+}
 
 ////////////////////////////////////////////////////// OPERATION_GRAB_BRUSH
 
@@ -867,6 +958,10 @@ void Rotate_brush_1_5(void)
   Operation_pop(&old_y);
   Operation_pop(&old_x);
 
+  // On corrige les coordonnées de la ligne si la touche shift est appuyée...
+  if(SDL_GetModState() & KMOD_SHIFT)
+    Clamp_coordinates_regular_angle(Brush_rotation_center_X,Brush_rotation_center_Y,&Paintbrush_X,&Paintbrush_Y);
+
   if ( (Paintbrush_X!=old_x) || (Paintbrush_Y!=old_y) || (prev_state!=2) )
   {
     if ( (Brush_rotation_center_X==Paintbrush_X)
@@ -929,6 +1024,10 @@ void Rotate_brush_0_5(void)
   Operation_pop(&prev_state);
   Operation_pop(&old_y);
   Operation_pop(&old_x);
+
+  // On corrige les coordonnées de la ligne si la touche shift est appuyée...
+  if(SDL_GetModState() & KMOD_SHIFT)
+    Clamp_coordinates_regular_angle(Brush_rotation_center_X,Brush_rotation_center_Y,&Paintbrush_X,&Paintbrush_Y);
 
   if ((Paintbrush_X!=old_x) || (Paintbrush_Y!=old_y) || (prev_state!=3))
   {

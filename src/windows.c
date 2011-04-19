@@ -36,8 +36,11 @@
 #include "graph.h"
 #include "input.h"
 #include "misc.h"
+#include "op_c.h"
 #include "readline.h"
 #include "sdlscreen.h"
+#include "palette.h"
+
 
 /// Width of one layer button, in pixels before scaling
 word Layer_button_width = 1;
@@ -67,7 +70,7 @@ void Pixel_in_menu(word bar, word x, word y, byte color)
 void Pixel_in_menu_and_skin(word bar, word x, word y, byte color)
 {
   Pixel_in_menu(bar, x, y, color);
-  Menu_bars[bar].Skin[y*Menu_bars[bar].Skin_width + x] = color;  
+  Menu_bars[bar].Skin[2][y*Menu_bars[bar].Skin_width + x] = color;  
 }
 
 // Affichage d'un pixel dans la fenêtre (la fenêtre doit être visible)
@@ -416,7 +419,7 @@ void Change_palette_cells()
   // Mise à jour de la taille du bouton dans le menu. C'est pour pas que
   // la bordure noire soit active.
   Buttons_Pool[BUTTON_CHOOSE_COL].Width=(Menu_palette_cell_width*Menu_cells_X)-1;
-  Buttons_Pool[BUTTON_CHOOSE_COL].Height=(Menu_height-11)/Menu_cells_Y*Menu_cells_Y-1;
+  Buttons_Pool[BUTTON_CHOOSE_COL].Height=(MENU_HEIGHT-9)/Menu_cells_Y*Menu_cells_Y-1;
 }
 
 // Retrouve la couleur sur laquelle pointe le curseur souris.
@@ -431,7 +434,7 @@ int Pick_color_in_palette()
   int line;
   int column;
 
-  line=(((Mouse_Y-Menu_Y)/Menu_factor_Y)-2)/((Menu_bars[MENUBAR_TOOLS].Height)/Menu_cells_Y);
+  line=(((Mouse_Y-Menu_Y)/Menu_factor_Y)-1)/((Menu_bars[MENUBAR_TOOLS].Height)/Menu_cells_Y);
   column=(((Mouse_X/Menu_factor_X)-(MENU_WIDTH+1))/Menu_palette_cell_width);
   if (Config.Palette_vertical)
   {
@@ -454,7 +457,7 @@ void Draw_bar_remainder(word current_menu, word x_off)
 
   for (y_pos=0;y_pos<Menu_bars[current_menu].Height;y_pos++)
     for (x_pos=x_off;x_pos<Screen_width/Menu_factor_X;x_pos++)
-      Pixel_in_menu(current_menu, x_pos, y_pos, Menu_bars[current_menu].Skin[y_pos * Menu_bars[current_menu].Skin_width + Menu_bars[current_menu].Skin_width - 2 + (x_pos&1)]);
+      Pixel_in_menu(current_menu, x_pos, y_pos, Menu_bars[current_menu].Skin[0][y_pos * Menu_bars[current_menu].Skin_width + Menu_bars[current_menu].Skin_width - 2 + (x_pos&1)]);
 }
 
             
@@ -491,7 +494,7 @@ void Display_layerbar(void)
   x_off=Menu_bars[MENUBAR_LAYERS].Skin_width;
   for (current_button=0; current_button<button_number; current_button++)
   {
-    word x_pos;
+    word x_pos=0;
     word y_pos;
     word sprite_index;
     
@@ -566,7 +569,7 @@ void Display_menu(void)
         // Skinned area
         for (y_pos=0;y_pos<Menu_bars[current_menu].Height;y_pos++)
           for (x_pos=0;x_pos<Menu_bars[current_menu].Skin_width;x_pos++)
-            Pixel_in_menu(current_menu, x_pos, y_pos, Menu_bars[current_menu].Skin[y_pos * Menu_bars[current_menu].Skin_width + x_pos]);
+            Pixel_in_menu(current_menu, x_pos, y_pos, Menu_bars[current_menu].Skin[2][y_pos * Menu_bars[current_menu].Skin_width + x_pos]);
 
         if (current_menu == MENUBAR_LAYERS)
         {
@@ -694,7 +697,7 @@ void Print_in_window(short x,short y,const char * str,byte text_color,byte backg
 void Print_in_menu(const char * str, short position)
 {
   Print_general((18+(position<<3))*Menu_factor_X,Menu_status_Y,str,MC_Black,MC_Light);
-  Update_rect((18+(position<<3))*Menu_factor_X,Menu_status_Y,strlen(str)*8*Menu_factor_X,8*Menu_factor_Y);
+  Update_status_line(position, strlen(str));
 }
 
 /// Draws the mouse coordinates on the menu
@@ -706,6 +709,7 @@ void Print_coordinates(void)
   if (Menu_is_visible && !Cursor_in_menu)
   {
     if ( (Current_operation==OPERATION_COLORPICK)
+      || (Current_operation==OPERATION_RMB_COLORPICK)
       || (Current_operation==OPERATION_REPLACE) )
     {
       if ( (Paintbrush_X>=0) && (Paintbrush_Y>=0)
@@ -720,7 +724,6 @@ void Print_coordinates(void)
       Num2str(Colorpicker_color,temp,3);
       Print_in_menu(temp,20);
       Print_general(170*Menu_factor_X,Menu_status_Y," ",0,Colorpicker_color);
-      Update_rect(170*Menu_factor_X,Menu_status_Y,8*Menu_factor_X,8*Menu_factor_Y);
     }
 
     Num2str((dword)Paintbrush_X,temp,4);
@@ -1073,7 +1076,7 @@ int Requester_window(char* message, int initial_value)
   {
     clicked_button = Window_clicked_button();
     if (clicked_button == 1)
-      Readline(11, 39, str, 4, 1);
+      Readline(11, 39, str, 4, INPUT_TYPE_INTEGER);
     if (Key == SDLK_ESCAPE) clicked_button = 2;
   }
   while (clicked_button <= 0);
@@ -1179,90 +1182,34 @@ void Verbose_message(const char *caption, const char * message )
 
   // -- Redessiner le sprite d'un bouton dans le menu --
 
-void Display_sprite_in_menu(int btn_number,int sprite_number)
+void Display_sprite_in_menu(int btn_number,char sprite_number)
 {
-  word x_pos;
-  word y_pos;
-  word menu_x_pos;
-  word menu_y_pos;
-  byte color;
+  Buttons_Pool[btn_number].Icon=sprite_number;
 
-  menu_y_pos=Buttons_Pool[btn_number].Y_offset;
-  menu_x_pos=Buttons_Pool[btn_number].X_offset;
-  if (Buttons_Pool[btn_number].Shape != BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT)
-  {
-    menu_y_pos+=1;
-    menu_x_pos+=1;
-  }
-  
-  for (y_pos=0;y_pos<MENU_SPRITE_HEIGHT;y_pos++)
-    for (x_pos=0;x_pos<MENU_SPRITE_WIDTH;x_pos++)
-    {
-      color=Gfx->Menu_sprite[sprite_number][y_pos][x_pos];
-      Pixel_in_menu_and_skin(MENUBAR_TOOLS, menu_x_pos+x_pos, menu_y_pos+y_pos, color);
-    }
-if (Menu_is_visible && Menu_bars[MENUBAR_TOOLS].Visible)
-  Update_rect(Menu_factor_X*(Buttons_Pool[btn_number].X_offset+1),
-    (Buttons_Pool[btn_number].Y_offset+1+Menu_bars[MENUBAR_TOOLS].Top)*Menu_factor_Y+Menu_Y,
-    MENU_SPRITE_WIDTH*Menu_factor_X,MENU_SPRITE_HEIGHT*Menu_factor_Y);
+  if (Buttons_Pool[btn_number].Shape == BUTTON_SHAPE_TRIANGLE_TOP_LEFT)
+    Buttons_Pool[btn_number+1].Icon=sprite_number;
+
+  else if (Buttons_Pool[btn_number].Shape == BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT)
+    Buttons_Pool[btn_number-1].Icon=sprite_number;
 }
 
   // -- Redessiner la forme du pinceau dans le menu --
 
 void Display_paintbrush_in_menu(void)
 {
-  short x_pos,y_pos;
-  short start_x;
-  short menu_x_pos,menu_y_pos;
-  short menu_start_x;
-  byte color;
-    
-  switch (Paintbrush_shape)
+  switch(Paintbrush_shape)
   {
-    case PAINTBRUSH_SHAPE_COLOR_BRUSH    : // Brush en couleur
-    case PAINTBRUSH_SHAPE_MONO_BRUSH : // Brush monochrome
-      for (menu_y_pos=2,y_pos=0;y_pos<MENU_SPRITE_HEIGHT;menu_y_pos++,y_pos++)
-        for (menu_x_pos=1,x_pos=0;x_pos<MENU_SPRITE_WIDTH;menu_x_pos++,x_pos++)
-        {
-          color=Gfx->Menu_sprite[4][y_pos][x_pos];
-          Pixel_in_menu_and_skin(MENUBAR_TOOLS, menu_x_pos, menu_y_pos, color);
-        }
+    case PAINTBRUSH_SHAPE_COLOR_BRUSH:
+      Display_sprite_in_menu(BUTTON_PAINTBRUSHES, MENU_SPRITE_COLOR_BRUSH);
       break;
-    default : // Pinceau
-      // On efface le pinceau précédent
-      for (menu_y_pos=2,y_pos=0;y_pos<MENU_SPRITE_HEIGHT;menu_y_pos++,y_pos++)
-        for (menu_x_pos=1,x_pos=0;x_pos<MENU_SPRITE_WIDTH;menu_x_pos++,x_pos++)
-        {
-          Pixel_in_menu_and_skin(MENUBAR_TOOLS, menu_x_pos, menu_y_pos, MC_Light);
-        }
-      // On affiche le nouveau
-      menu_start_x=8-Paintbrush_offset_X;
-      if (menu_start_x<1)
-      {
-        start_x=Paintbrush_offset_X-7;
-        menu_start_x=1;
-      }
-      else
-        start_x=0;
-
-      menu_y_pos=9-Paintbrush_offset_Y;
-      if (menu_y_pos<2)
-      {
-        y_pos=Paintbrush_offset_Y-7;
-        menu_y_pos=2;
-      }
-      else
-        y_pos=0;
-
-      for (;((y_pos<Paintbrush_height) && (menu_y_pos<16));menu_y_pos++,y_pos++)
-        for (menu_x_pos=menu_start_x,x_pos=start_x;((x_pos<Paintbrush_width) && (menu_x_pos<15));menu_x_pos++,x_pos++)
-        {
-          color=(Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos])?MC_Black:MC_Light;
-          Pixel_in_menu_and_skin(MENUBAR_TOOLS, menu_x_pos, menu_y_pos, color);
-        }
+    case PAINTBRUSH_SHAPE_MONO_BRUSH:
+      Display_sprite_in_menu(BUTTON_PAINTBRUSHES, MENU_SPRITE_MONO_BRUSH);
+      break;
+    default:
+      Display_sprite_in_menu(BUTTON_PAINTBRUSHES, -1);
+      break;
   }
-  if (Menu_is_visible && Menu_bars[MENUBAR_TOOLS].Visible)
-    Update_rect(0,Menu_Y + Menu_bars[MENUBAR_TOOLS].Top*Menu_factor_Y,MENU_SPRITE_WIDTH*Menu_factor_X+3,MENU_SPRITE_HEIGHT*Menu_factor_Y+3);
+  Draw_menu_button(BUTTON_PAINTBRUSHES,BUTTON_RELEASED);
 }
 
   // -- Dessiner un pinceau prédéfini dans la fenêtre --
@@ -1278,6 +1225,8 @@ void Display_paintbrush_in_window(word x,word y,int number)
   int y_size;
   word origin_x;
   word origin_y;
+  word width;
+  word height;
 
   x_size=Menu_factor_X/Pixel_height;
   if (x_size<1)
@@ -1286,18 +1235,22 @@ void Display_paintbrush_in_window(word x,word y,int number)
   if (y_size<1)
     y_size=1;
 
-  origin_x = (x + 8)*Menu_factor_X - (Gfx->Preset_paintbrush_offset_X[number])*x_size+Window_pos_X;
-  origin_y = (y + 8)*Menu_factor_Y - (Gfx->Preset_paintbrush_offset_Y[number])*y_size+Window_pos_Y;
+  width=Min(Paintbrush[number].Width,PAINTBRUSH_WIDTH);
+  height=Min(Paintbrush[number].Height,PAINTBRUSH_WIDTH);
+  
+  origin_x = (x + 8)*Menu_factor_X - (width/2)*x_size+Window_pos_X;
+  origin_y = (y + 8)*Menu_factor_Y - (height/2)*y_size+Window_pos_Y;
 
-  for (window_y_pos=0,y_pos=0; y_pos<Gfx->Preset_paintbrush_height[number]; window_y_pos++,y_pos++)
-    for (window_x_pos=0,x_pos=0; x_pos<Gfx->Preset_paintbrush_width[number]; window_x_pos++,x_pos++)
-      Block(origin_x+window_x_pos*x_size,origin_y+window_y_pos*y_size,x_size,y_size,(Gfx->Paintbrush_sprite[number][y_pos][x_pos])?MC_Black:MC_Light);
+  for (window_y_pos=0,y_pos=0; y_pos<height; window_y_pos++,y_pos++)
+    for (window_x_pos=0,x_pos=0; x_pos<width; window_x_pos++,x_pos++)
+      if (Paintbrush[number].Sprite[y_pos][x_pos])
+        Block(origin_x+window_x_pos*x_size,origin_y+window_y_pos*y_size,x_size,y_size,MC_Black);
   // On n'utilise pas Pixel_in_window() car on ne dessine pas
   // forcément avec la même taille de pixel.
 
   Update_rect( ToWinX(origin_x), ToWinY(origin_y),
-        ToWinL(Gfx->Preset_paintbrush_width[number]),
-        ToWinH(Gfx->Preset_paintbrush_height[number])
+        ToWinL(Paintbrush[number].Width),
+        ToWinH(Paintbrush[number].Height)
   );
 }
 
@@ -1553,6 +1506,7 @@ void Compute_paintbrush_coordinates(void)
   {
     // Operations that don't implement it
     case OPERATION_LINE:
+	case OPERATION_ROTATE_BRUSH:
       Snap_axis=0;
       break;
     // Operations that implement it
@@ -1767,21 +1721,29 @@ void Compute_magnifier_data(void)
   if (Menu_Y%Main_magnifier_factor)
     Main_magnifier_height++;
 
-  if (Main_magnifier_mode && Main_magnifier_offset_X)
-  {
-    if (Main_image_width<Main_magnifier_offset_X+Main_magnifier_width)
-      Main_magnifier_offset_X=Main_image_width-Main_magnifier_width;
-    if (Main_magnifier_offset_X<0) Main_magnifier_offset_X=0;
-  }
-  if (Main_magnifier_mode && Main_magnifier_offset_Y)
-  {
-    if (Main_image_height<Main_magnifier_offset_Y+Main_magnifier_height)
-      Main_magnifier_offset_Y=Main_image_height-Main_magnifier_height;
-    if (Main_magnifier_offset_Y<0) Main_magnifier_offset_Y=0;
-  }
-  
+  Clip_magnifier_offsets(&Main_magnifier_offset_X, &Main_magnifier_offset_Y);
 }
 
+void Clip_magnifier_offsets(short *x_offset, short *y_offset)
+{
+  if (Main_magnifier_mode)
+  {
+    if (*x_offset)
+    {
+      if (Main_image_width<*x_offset+Main_magnifier_width)
+        *x_offset=Main_image_width-Main_magnifier_width;
+      if (*x_offset<0)
+        *x_offset=0;
+    }
+    if (*y_offset)
+    {
+      if (Main_image_height<*y_offset+Main_magnifier_height)
+        *y_offset=Main_image_height-Main_magnifier_height+(Main_magnifier_height*Main_magnifier_factor-Menu_Y>=Main_magnifier_factor/2);
+      if (*y_offset<0)
+        *y_offset=0;
+    }
+  }
+}
 
 /// Changes magnifier factor and updates everything needed
 void Change_magnifier_factor(byte factor_index, byte point_at_mouse)
@@ -1832,14 +1794,7 @@ void Change_magnifier_factor(byte factor_index, byte point_at_mouse)
       Main_magnifier_offset_Y = target_y-(Main_magnifier_height>>1);
     }
     // Fix cases where the image would overflow on edges
-    if (Main_magnifier_offset_X+Main_magnifier_width>Main_image_width)
-      Main_magnifier_offset_X=Main_image_width-Main_magnifier_width;
-    if (Main_magnifier_offset_Y+Main_magnifier_height>Main_image_height)
-      Main_magnifier_offset_Y=Main_image_height-Main_magnifier_height;
-    if (Main_magnifier_offset_X<0)
-      Main_magnifier_offset_X=0;
-    if (Main_magnifier_offset_Y<0)
-      Main_magnifier_offset_Y=0;
+    Clip_magnifier_offsets(&Main_magnifier_offset_X, &Main_magnifier_offset_Y);
 
     if (magnified_view_leads)
       Position_screen_according_to_zoom();
@@ -1856,7 +1811,36 @@ void Change_magnifier_factor(byte factor_index, byte point_at_mouse)
   Compute_paintbrush_coordinates();
 }
 
+void Copy_view_to_spare(void)
+{
+  
+  // Don't do anything if the pictures have different dimensions
+  if (Main_image_width!=Spare_image_width || Main_image_height!=Spare_image_height)
+    return;
+  
+  // Copie des décalages de la fenêtre principale (non zoomée) de l'image
+  Spare_offset_X=Main_offset_X;
+  Spare_offset_Y=Main_offset_Y;
 
+  // Copie du booléen "Mode loupe" de l'image
+  Spare_magnifier_mode=Main_magnifier_mode;
+
+  // Copie du facteur de zoom du brouillon
+  Spare_magnifier_factor=Main_magnifier_factor;
+
+  // Copie des dimensions de la fenêtre de zoom
+  Spare_magnifier_width=Main_magnifier_width;
+  Spare_magnifier_height=Main_magnifier_height;
+
+  // Copie des décalages de la fenêtre de zoom
+  Spare_magnifier_offset_X=Main_magnifier_offset_X;
+  Spare_magnifier_offset_Y=Main_magnifier_offset_Y;
+
+  // Copie des données du split du zoom
+  Spare_separator_position=Main_separator_position;
+  Spare_X_zoom=Main_X_zoom;
+  Spare_separator_proportion=Main_separator_proportion;
+}
 
   // -- Afficher la barre de séparation entre les parties zoomées ou non en
   //    mode Loupe --
@@ -1928,7 +1912,7 @@ void Vertical_XOR_line_zoom(short x_pos, short y_pos, short height)
 {
   short real_x_pos=Main_X_zoom+(x_pos-Main_magnifier_offset_X)*Main_magnifier_factor;
   short real_y_pos=(y_pos-Main_magnifier_offset_Y)*Main_magnifier_factor;
-  short end_y_pos=(real_y_pos+(height*Main_magnifier_factor<Menu_Y))?real_y_pos+(height*Main_magnifier_factor):Menu_Y;
+  short end_y_pos=(real_y_pos+height*Main_magnifier_factor<Menu_Y)?real_y_pos+(height*Main_magnifier_factor):Menu_Y;
   short index;
 
   for (index=real_y_pos; index<end_y_pos; index++)
@@ -2020,70 +2004,67 @@ void Display_cursor(void)
     case CURSOR_SHAPE_COLORPICKER:
       if (!Paintbrush_hidden)
         Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color,1);
-      if (!Cursor_hidden)
+      if (Config.Cursor==1)
       {
-        if (Config.Cursor==1)
+        // Barres formant la croix principale
+
+        start_y=(Mouse_Y<5)?5-Mouse_Y:0;
+        if (start_y<3)
+          Vertical_XOR_line  (Mouse_X,Mouse_Y+start_y-5,3-start_y);
+
+        start_x=(Mouse_X<5)?(short)5-Mouse_X:0;
+        if (start_x<3)
+          Horizontal_XOR_line(Mouse_X+start_x-5,Mouse_Y,3-start_x);
+
+        end_x=(Mouse_X+6>Screen_width)?Mouse_X+6-Screen_width:0;
+        if (end_x<3)
+          Horizontal_XOR_line(Mouse_X+3,Mouse_Y,3-end_x);
+
+        end_y=(Mouse_Y+6>Menu_Y/*Screen_height*/)?Mouse_Y+6-Menu_Y/*Screen_height*/:0;
+        if (end_y<3)
+          Vertical_XOR_line  (Mouse_X,Mouse_Y+3,3-end_y);
+
+        // Petites barres aux extrémités
+
+        start_x=(!Mouse_X);
+        start_y=(!Mouse_Y);
+        end_x=(Mouse_X>=Screen_width-1);
+        end_y=(Mouse_Y>=Menu_Y-1);
+
+        if (Mouse_Y>5)
+          Horizontal_XOR_line(start_x+Mouse_X-1,Mouse_Y-6,3-(start_x+end_x));
+
+        if (Mouse_X>5)
+          Vertical_XOR_line  (Mouse_X-6,start_y+Mouse_Y-1,3-(start_y+end_y));
+
+        if (Mouse_X<Screen_width-6)
+          Vertical_XOR_line  (Mouse_X+6,start_y+Mouse_Y-1,3-(start_y+end_y));
+
+        if (Mouse_Y<Menu_Y-6)
+          Horizontal_XOR_line(start_x+Mouse_X-1,Mouse_Y+6,3-(start_x+end_x));
+      }
+      else
+      {
+        temp=(Config.Cursor)?CURSOR_SHAPE_THIN_COLORPICKER:CURSOR_SHAPE_COLORPICKER;
+        start_x=Mouse_X-Gfx->Cursor_offset_X[temp];
+        start_y=Mouse_Y-Gfx->Cursor_offset_Y[temp];
+
+        for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
         {
-          // Barres formant la croix principale
-
-          start_y=(Mouse_Y<5)?5-Mouse_Y:0;
-          if (start_y<3)
-            Vertical_XOR_line  (Mouse_X,Mouse_Y+start_y-5,3-start_y);
-
-          start_x=(Mouse_X<5)?(short)5-Mouse_X:0;
-          if (start_x<3)
-            Horizontal_XOR_line(Mouse_X+start_x-5,Mouse_Y,3-start_x);
-
-          end_x=(Mouse_X+6>Screen_width)?Mouse_X+6-Screen_width:0;
-          if (end_x<3)
-            Horizontal_XOR_line(Mouse_X+3,Mouse_Y,3-end_x);
-
-          end_y=(Mouse_Y+6>Menu_Y/*Screen_height*/)?Mouse_Y+6-Menu_Y/*Screen_height*/:0;
-          if (end_y<3)
-            Vertical_XOR_line  (Mouse_X,Mouse_Y+3,3-end_y);
-
-          // Petites barres aux extrémités
-
-          start_x=(!Mouse_X);
-          start_y=(!Mouse_Y);
-          end_x=(Mouse_X>=Screen_width-1);
-          end_y=(Mouse_Y>=Menu_Y-1);
-
-          if (Mouse_Y>5)
-            Horizontal_XOR_line(start_x+Mouse_X-1,Mouse_Y-6,3-(start_x+end_x));
-
-          if (Mouse_X>5)
-            Vertical_XOR_line  (Mouse_X-6,start_y+Mouse_Y-1,3-(start_y+end_y));
-
-          if (Mouse_X<Screen_width-6)
-            Vertical_XOR_line  (Mouse_X+6,start_y+Mouse_Y-1,3-(start_y+end_y));
-
-          if (Mouse_Y<Menu_Y-6)
-            Horizontal_XOR_line(start_x+Mouse_X-1,Mouse_Y+6,3-(start_x+end_x));
-        }
-        else
-        {
-          temp=(Config.Cursor)?CURSOR_SHAPE_THIN_COLORPICKER:CURSOR_SHAPE_COLORPICKER;
-          start_x=Mouse_X-Gfx->Cursor_offset_X[temp];
-          start_y=Mouse_Y-Gfx->Cursor_offset_Y[temp];
-
-          for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
+          if(y_pos<0) continue;
+          if(y_pos>=Screen_height) break;
+          for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
           {
-            if(y_pos<0) continue;
-            if(y_pos>=Screen_height) break;
-            for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
-            {
-              if(x_pos<0) continue;
-              if(x_pos>=Screen_width) break;
-              color=Gfx->Cursor_sprite[temp][counter_y][counter_x];
-              // On sauvegarde dans Cursor_background pour restaurer plus tard
-              Cursor_background[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
-              if (color!=MC_Trans)
-                Pixel(x_pos,y_pos,color);
-            }
+            if(x_pos<0) continue;
+            if(x_pos>=Screen_width) break;
+            color=Gfx->Cursor_sprite[temp][counter_y][counter_x];
+            // On sauvegarde dans Cursor_background pour restaurer plus tard
+            Cursor_background[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
+            if (color!=MC_Trans)
+              Pixel(x_pos,y_pos,color);
           }
-          Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
         }
+        Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
       }
       break;
 
@@ -2108,7 +2089,7 @@ void Display_cursor(void)
           // On sauvegarde dans Cursor_background pour restaurer plus tard
           Cursor_background[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
           if (color!=MC_Trans)
-              Pixel(x_pos,y_pos,color);
+            Pixel(x_pos,y_pos,color);
         }
       }
       Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
@@ -2323,8 +2304,6 @@ void Hide_cursor(void)
       break;
 
     case CURSOR_SHAPE_COLORPICKER:
-      if (!Cursor_hidden)
-      {
         if (Config.Cursor==1)
         {
           // Barres formant la croix principale
@@ -2383,7 +2362,6 @@ void Hide_cursor(void)
           }
           Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
         }
-      }
       if (!Paintbrush_hidden)
         Hide_paintbrush(Paintbrush_X,Paintbrush_Y);
       break;
@@ -2607,9 +2585,12 @@ void Display_all_screen(void)
     // Calcul du nombre de lignes visibles de l'image zoomée
     if (Main_image_height<Main_magnifier_height)
       height=Main_image_height*Main_magnifier_factor;
+    else if (Main_image_height<Main_magnifier_offset_Y+Main_magnifier_height)
+      // Omit "last line" if it's outside picture limits
+      height=Menu_Y/Main_magnifier_factor*Main_magnifier_factor;
     else
       height=Menu_Y;
-
+    
     Display_zoomed_screen(width,height,Main_image_width,Horizontal_line_buffer);
 
     // Effacement de la partie non-image dans la partie zoomée:
@@ -2617,7 +2598,7 @@ void Display_all_screen(void)
       Block(Main_X_zoom+(Main_image_width*Main_magnifier_factor),0,
             (Main_magnifier_width-Main_image_width)*Main_magnifier_factor,
             Menu_Y,Main_backups->Pages->Transparent_color);
-    if (Main_image_height<Main_magnifier_height)
+    if (height<Menu_Y)
       Block(Main_X_zoom,height,width*Main_magnifier_factor,(Menu_Y-height),Main_backups->Pages->Transparent_color);
   }
 
@@ -2631,7 +2612,7 @@ void Display_all_screen(void)
 
 byte Best_color(byte r,byte g,byte b)
 {
-  short col;
+  int col;
   int   delta_r,delta_g,delta_b;
   int   dist;
   int   best_dist=0x7FFFFFFF;
@@ -2665,7 +2646,7 @@ byte Best_color(byte r,byte g,byte b)
 
 byte Best_color_nonexcluded(byte red,byte green,byte blue)
 {
-  short col;
+  int   col;  
   int   delta_r,delta_g,delta_b;
   int   dist;
   int   best_dist=0x7FFFFFFF;
@@ -2694,66 +2675,93 @@ byte Best_color_nonexcluded(byte red,byte green,byte blue)
   return best_color;
 }
 
-void Compute_4_best_colors_for_1_menu_color
-     (byte red, byte green, byte blue, T_Components * palette, byte * table)
+
+
+byte Best_color_perceptual(byte r,byte g,byte b)
 {
-  short col;
-  int   delta_r,delta_g,delta_b;
-  int   dist;
-  int   best_dist[4]={0x7FFFFFFF,0x7FFFFFFF,0x7FFFFFFF,0x7FFFFFFF};
+  
+  int col;  
+  float best_diff=255.0*1.56905;
+  byte  best_color=0;
+  float target_bri;
+  float bri;
+  float diff_b, diff_c, diff;
 
-
+  // Similar to Perceptual_lightness();
+  target_bri = sqrt(0.26*r*0.26*r + 0.55*g*0.55*g + 0.19*b*0.19*b);
+  
   for (col=0; col<256; col++)
   {
-    delta_r=(int)palette[col].R-red;
-    delta_g=(int)palette[col].G-green;
-    delta_b=(int)palette[col].B-blue;
+    if (Exclude_color[col])
+      continue;
 
-    dist=(delta_r*delta_r*30)+(delta_g*delta_g*59)+(delta_b*delta_b*11);
+    diff_c = sqrt(
+      (0.26*(Main_palette[col].R-r))*
+      (0.26*(Main_palette[col].R-r))+
+      (0.55*(Main_palette[col].G-g))*
+      (0.55*(Main_palette[col].G-g))+
+      (0.19*(Main_palette[col].B-b))*
+      (0.19*(Main_palette[col].B-b)));
+    // Exact match
+    if (diff_c==0)
+      return col;
 
-    if (dist<best_dist[0])
+    bri = sqrt(0.26*Main_palette[col].R*0.26*Main_palette[col].R + 0.55*Main_palette[col].G*0.55*Main_palette[col].G + 0.19*Main_palette[col].B*0.19*Main_palette[col].B);
+    diff_b = abs(target_bri-bri);
+
+    diff=0.25*(diff_b-diff_c)+diff_c;
+    if (diff<best_diff)
     {
-      best_dist[3]=best_dist[2];
-      best_dist[2]=best_dist[1];
-      best_dist[1]=best_dist[0];
-      best_dist[0]=dist;
-      table[3]=table[2];
-      table[2]=table[1];
-      table[1]=table[0];
-      table[0]=col;
-    }
-    else
-    {
-      if (dist<best_dist[1])
-      {
-        best_dist[3]=best_dist[2];
-        best_dist[2]=best_dist[1];
-        best_dist[1]=dist;
-        table[3]=table[2];
-        table[2]=table[1];
-        table[1]=col;
-      }
-      else
-      {
-        if (dist<best_dist[2])
-        {
-          best_dist[3]=best_dist[2];
-          best_dist[2]=dist;
-          table[3]=table[2];
-          table[2]=col;
-        }
-        else
-        if (dist<best_dist[3])
-        {
-          best_dist[3]=dist;
-          table[3]=col;
-        }
-      }
-    }
+      best_diff=diff;
+      best_color=col;
+    } 
   }
+
+  return best_color;
 }
 
+byte Best_color_perceptual_except(byte r,byte g,byte b, byte except)
+{
+  
+  int col;  
+  float best_diff=255.0*1.56905;
+  byte  best_color=0;
+  float target_bri;
+  float bri;
+  float diff_b, diff_c, diff;
 
+  // Similar to Perceptual_lightness();
+  target_bri = sqrt(0.26*r*0.26*r + 0.55*g*0.55*g + 0.19*b*0.19*b);
+  
+  for (col=0; col<256; col++)
+  {
+    if (col==except || Exclude_color[col])
+      continue;
+
+    diff_c = sqrt(
+      (0.26*(Main_palette[col].R-r))*
+      (0.26*(Main_palette[col].R-r))+
+      (0.55*(Main_palette[col].G-g))*
+      (0.55*(Main_palette[col].G-g))+
+      (0.19*(Main_palette[col].B-b))*
+      (0.19*(Main_palette[col].B-b)));
+    // Exact match
+    if (diff_c==0)
+      return col;
+
+    bri = sqrt(0.26*Main_palette[col].R*0.26*Main_palette[col].R + 0.55*Main_palette[col].G*0.55*Main_palette[col].G + 0.19*Main_palette[col].B*0.19*Main_palette[col].B);
+    diff_b = abs(target_bri-bri);
+
+    diff=0.25*(diff_b-diff_c)+diff_c;
+    if (diff<best_diff)
+    {
+      best_diff=diff;
+      best_color=col;
+    } 
+  }
+
+  return best_color;
+}
 
 byte Old_black;
 byte Old_dark;
@@ -2837,11 +2845,32 @@ void Remap_screen_after_menu_colors_change(void)
 }
 
 
-
+int Same_color(T_Components * palette, byte c1, byte c2)
+{
+  if (palette[c1].R==palette[c2].R &&
+    palette[c1].G==palette[c2].G &&
+    palette[c1].B==palette[c2].B)
+    return 1;
+  return 0;
+}
 
 void Compute_optimal_menu_colors(T_Components * palette)
 {
-  byte table[4];
+  int i;
+  byte l[256];
+  byte s[256];
+  byte h;
+  int max_l = -1, min_l = 256;
+  int low_l, hi_l;
+  int delta_low = 999999;
+  int delta_high = 999999;
+  const int tolerence=16;
+  const T_Components cpc_colors[4] = {
+    {  0,  0,  0},
+    {  0,  0,128}, // Dark blue
+    {128,128,128}, // Grey
+    {255,255,255}
+  };
 
   Old_black =MC_Black;
   Old_dark = MC_Dark;
@@ -2849,62 +2878,208 @@ void Compute_optimal_menu_colors(T_Components * palette)
   Old_white = MC_White;
   Old_trans = MC_Trans;
 
-  // Recherche du noir
-  Compute_4_best_colors_for_1_menu_color
-    (Config.Fav_menu_colors[0].R, Config.Fav_menu_colors[0].G, Config.Fav_menu_colors[0].B,palette,table);
-  MC_Black=table[0];
-
-  // Recherche du blanc
-  Compute_4_best_colors_for_1_menu_color
-    (Config.Fav_menu_colors[3].R, Config.Fav_menu_colors[3].G, Config.Fav_menu_colors[3].B,palette,table);
-  if (MC_Black!=table[0])
-    MC_White=table[0];
-  else
-    MC_White=table[1];
-
-  // Recherche du gris clair
-  Compute_4_best_colors_for_1_menu_color
-    (Config.Fav_menu_colors[2].R, Config.Fav_menu_colors[2].G, Config.Fav_menu_colors[2].B,palette,table);
-  if ( (MC_Black!=table[0]) && (MC_White!=table[0]) )
-    MC_Light=table[0];
-  else
+  // First method:
+  // If all close matches for the ideal colors exist, pick them.
+  for (i=255; i>=0; i--)
   {
-    if ( (MC_Black!=table[1]) && (MC_White!=table[1]) )
-      MC_Light=table[1];
-    else
-      MC_Light=table[2];
-  }
-
-  // Recherche du gris foncé
-  Compute_4_best_colors_for_1_menu_color
-    (Config.Fav_menu_colors[1].R, Config.Fav_menu_colors[1].G, Config.Fav_menu_colors[1].B,palette,table);
-  if ( (MC_Black!=table[0]) && (MC_White!=table[0]) && (MC_Light!=table[0]) )
-    MC_Dark=table[0];
-  else
-  {
-    if ( (MC_Black!=table[1]) && (MC_White!=table[1]) && (MC_Light!=table[1]) )
-      MC_Dark=table[1];
-    else
+    
+    if (Round_palette_component(palette[i].R)/tolerence==Gfx->Default_palette[Gfx->Color[3]].R/tolerence
+     && Round_palette_component(palette[i].G)/tolerence==Gfx->Default_palette[Gfx->Color[3]].G/tolerence
+     && Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[3]].B/tolerence)
     {
-      if ( (MC_Black!=table[2]) && (MC_White!=table[2]) && (MC_Light!=table[2]) )
-        MC_Dark=table[2];
-      else
-        MC_Dark=table[3];
+      MC_White=i;
+      for (i=255; i>=0; i--)
+      {
+        if (Round_palette_component(palette[i].R)/tolerence==Gfx->Default_palette[Gfx->Color[2]].R/tolerence
+         && Round_palette_component(palette[i].G)/tolerence==Gfx->Default_palette[Gfx->Color[2]].G/tolerence
+         && Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[2]].B/tolerence)
+        {
+          MC_Light=i;
+          for (i=255; i>=0; i--)
+          {
+            if (Round_palette_component(palette[i].R)/tolerence==Gfx->Default_palette[Gfx->Color[1]].R/tolerence
+             && Round_palette_component(palette[i].G)/tolerence==Gfx->Default_palette[Gfx->Color[1]].G/tolerence
+             && Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[1]].B/tolerence)
+            {
+              MC_Dark=i;
+              for (i=255; i>=0; i--)
+              {
+                if (Round_palette_component(palette[i].R)/tolerence==Gfx->Default_palette[Gfx->Color[0]].R/tolerence
+                 && Round_palette_component(palette[i].G)/tolerence==Gfx->Default_palette[Gfx->Color[0]].G/tolerence
+                 && Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[0]].B/tolerence)
+                {
+                  MC_Black=i;
+                  // On cherche une couleur de transparence différente des 4 autres.
+                  for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
+                                   (MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
+                  // Easy case
+                  MC_OnBlack=MC_Dark;
+                  MC_Window=MC_Light;
+                  MC_Lighter=MC_White;
+                  MC_Darker=MC_Dark;
+                  Remap_menu_sprites();
+                  return;
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
-
-  // C'est peu probable mais il est possible que MC_Light soit plus foncée que
-  // MC_Dark. Dans ce cas, on les inverse.
-  if ( ((palette[MC_Light].R*30)+(palette[MC_Light].G*59)+(palette[MC_Light].B*11)) <
-       ((palette[MC_Dark].R*30)+(palette[MC_Dark].G*59)+(palette[MC_Dark].B*11)) )
+  // Second method: For CPC 27-color modes only
+  // Try to find colors that just work
+  if (Get_palette_RGB_scale()==3)
+  for (i=255; i>=0; i--)
   {
-    SWAP_BYTES(MC_Light, MC_Dark);
+    
+    if (Round_palette_component(palette[i].R)/tolerence==cpc_colors[3].R/tolerence
+     && Round_palette_component(palette[i].G)/tolerence==cpc_colors[3].G/tolerence
+     && Round_palette_component(palette[i].B)/tolerence==cpc_colors[3].B/tolerence)
+    {
+      MC_White=i;
+      for (i=255; i>=0; i--)
+      {
+        if (Round_palette_component(palette[i].R)/tolerence==cpc_colors[2].R/tolerence
+         && Round_palette_component(palette[i].G)/tolerence==cpc_colors[2].G/tolerence
+         && Round_palette_component(palette[i].B)/tolerence==cpc_colors[2].B/tolerence)
+        {
+          MC_Light=i;
+          for (i=255; i>=0; i--)
+          {
+            if (Round_palette_component(palette[i].R)/tolerence==cpc_colors[1].R/tolerence
+             && Round_palette_component(palette[i].G)/tolerence==cpc_colors[1].G/tolerence
+             && Round_palette_component(palette[i].B)/tolerence==cpc_colors[1].B/tolerence)
+            {
+              MC_Dark=i;
+              for (i=255; i>=0; i--)
+              {
+                if (Round_palette_component(palette[i].R)/tolerence==cpc_colors[0].R/tolerence
+                 && Round_palette_component(palette[i].G)/tolerence==cpc_colors[0].G/tolerence
+                 && Round_palette_component(palette[i].B)/tolerence==cpc_colors[0].B/tolerence)
+                {
+                  MC_Black=i;
+                  // On cherche une couleur de transparence différente des 4 autres.
+                  for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
+                                   (MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
+                  // Easy case
+                  MC_OnBlack=MC_Dark;
+                  MC_Window=MC_Light;
+                  MC_Lighter=MC_White;
+                  MC_Darker=MC_Dark;
+                  Remap_menu_sprites();
+                  return;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
+  
+  // Third method:
+
+  // Compute luminance for whole palette
+  // Take the darkest as black, the brightest white
+  for(i = 0; i < 256; i++)
+  {
+    RGB_to_HSL(palette[i].R, palette[i].G, palette[i].B, &h, &s[i], &l[i]);
+    // Another formula for lightness, in 0-255 range
+    //l[i]=Perceptual_lightness(&palette[i])/4062/255;
+    if (l[i] > max_l)
+    {
+      max_l = l[i];
+      MC_White = i;
+    }
+  }
+  for(i = 0; i < 256; i++)
+  {
+    if (l[i] < min_l && i!=MC_White)
+    {
+      min_l = l[i];
+      MC_Black = i;
+    }
+  }
+  // Alter the S values according to the L range - this is for the future
+  // comparisons, so that highly variable saturation doesn't weigh
+  // too heavily when the the lightness is in a narrow range.
+  for(i = 0; i < 256; i++)
+  {
+    s[i]=s[i]*(max_l-min_l)/255;
+  }
+  for(i = 0; i < 256; i++)
+  {
+    // Adjust (reduce) perceived saturation at both ends of L spectrum
+    if (l[i]>192)
+      s[i]=s[i]*(255-l[i])/64;
+    else if (l[i]<64)
+      s[i]=s[i]*l[i]/64;
+  }
+  
+
+  // Find color nearest to min+2(max-min)/3
+  // but at the same time we try to minimize the saturation so that the menu
+  // still looks grey
+  hi_l = min_l + 2*(max_l - min_l)/3;
+
+  for (i = 0; i < 256; i++)
+  {
+    if ( abs(l[i] - hi_l) + s[i]/2 < delta_high && i!=MC_White && i!=MC_Black)
+    {
+      delta_high = abs(l[i] - hi_l) + s[i]/2;
+      MC_Light = i;
+    }
+  }
+  
+  // Target "Dark color" is 2/3 between Light and Black
+  low_l = ((int)l[MC_Light]*2+l[MC_Black])/3;
+  for (i = 0; i < 256; i++)
+  {
+    if ( abs((int)l[i] - low_l) + s[i]/6 < delta_low && i!=MC_White && i!=MC_Black && i!=MC_Light)
+    {
+      delta_low = abs((int)l[i] - low_l)+ s[i]/6;
+      MC_Dark = i;
+    }
+  }
+  
+  
+  //if (l[MC_Light]<l[MC_Dark])
+  //{
+  //  // Not sure if that can happen, but just in case:
+  //  SWAP_BYTES(MC_Light, MC_Dark)
+  //}
+
+  // Si deux des couleurs choisies ont le même index, c'est destructif car 
+  // on fait ensuite un remap de l'image. Donc on évite ce problème (un
+  // peu brutalement)
+  // On commence par déplacer les gris, comme ça on a plus de chances de garder au moins
+  // le blanc et le noir
+  //while (MC_Dark == MC_Light || MC_Dark == MC_White || MC_Black == MC_Dark || Same_color(palette, MC_Dark, MC_White)) MC_Dark--;
+  //while (MC_White == MC_Light || MC_Dark == MC_Light || MC_Black == MC_Light || Same_color(palette, MC_Light, MC_Black)) MC_Light--;
+  //while (MC_White == MC_Light || MC_Dark == MC_White || MC_Black == MC_White) MC_White--;
 
   // On cherche une couleur de transparence différente des 4 autres.
   for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
                    (MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
-
+  
+  if (Same_color(palette, MC_Black, MC_Dark))
+    MC_OnBlack=MC_Light;
+  else
+    MC_OnBlack=MC_Dark;
+  
+  if (Same_color(palette, MC_White, MC_Light))
+  {
+    MC_Window=MC_Dark;
+    MC_Darker=MC_Black;
+  }
+  else
+  {
+    MC_Window=MC_Light;
+    MC_Darker=MC_Dark;
+  }
+  MC_Lighter=MC_White;
+  
   Remap_menu_sprites();
 }
 
@@ -2925,18 +3100,20 @@ void Remap_menu_sprites()
         for (i=0; i<CURSOR_SPRITE_WIDTH; i++)
           Remap_pixel(&Gfx->Cursor_sprite[k][j][i]);
     // Main menu bar
-    for (j=0; j<Menu_bars[MENUBAR_TOOLS].Height; j++)
-      for (i=0; i<Menu_bars[MENUBAR_TOOLS].Skin_width; i++)
-        Remap_pixel(&Gfx->Menu_block[j][i]);
+    for (k=0; k<3; k++)
+      for (j=0; j<Menu_bars[MENUBAR_TOOLS].Height; j++)
+        for (i=0; i<Menu_bars[MENUBAR_TOOLS].Skin_width; i++)
+          Remap_pixel(&Gfx->Menu_block[k][j][i]);
     // Menu sprites
-    for (k=0; k<NB_MENU_SPRITES; k++)
-      for (j=0; j<MENU_SPRITE_HEIGHT; j++)
-        for (i=0; i<MENU_SPRITE_WIDTH; i++)
-          Remap_pixel(&Gfx->Menu_sprite[k][j][i]);
+    for (l=0; l<2; l++)
+      for (k=0; k<NB_MENU_SPRITES; k++)
+        for (j=0; j<MENU_SPRITE_HEIGHT; j++)
+          for (i=0; i<MENU_SPRITE_WIDTH; i++)
+            Remap_pixel(&Gfx->Menu_sprite[l][k][j][i]);
     // Effects sprites
     for (k=0; k<NB_EFFECTS_SPRITES; k++)
-      for (j=0; j<MENU_SPRITE_HEIGHT; j++)
-        for (i=0; i<MENU_SPRITE_WIDTH; i++)
+      for (j=0; j<EFFECT_SPRITE_HEIGHT; j++)
+        for (i=0; i<EFFECT_SPRITE_WIDTH; i++)
           Remap_pixel(&Gfx->Effect_sprite[k][j][i]);
     // Layers buttons
     for (l=0; l<3; l++)
@@ -2946,13 +3123,15 @@ void Remap_menu_sprites()
             Remap_pixel(&Gfx->Layer_sprite[l][k][j][i]);
     
     // Status bar
-    for (j=0; j<Menu_bars[MENUBAR_STATUS].Height; j++)
-      for (i=0; i<Menu_bars[MENUBAR_STATUS].Skin_width; i++)
-        Remap_pixel(&Gfx->Statusbar_block[j][i]);
+    for (k=0; k<3; k++)
+      for (j=0; j<Menu_bars[MENUBAR_STATUS].Height; j++)
+        for (i=0; i<Menu_bars[MENUBAR_STATUS].Skin_width; i++)
+          Remap_pixel(&Gfx->Statusbar_block[k][j][i]);
     // Layer bar
-    for (j=0; j<Menu_bars[MENUBAR_LAYERS].Height; j++)
-      for (i=0; i<Menu_bars[MENUBAR_LAYERS].Skin_width; i++)
-        Remap_pixel(&Gfx->Layerbar_block[j][i]);
+    for (k=0; k<3; k++)
+      for (j=0; j<Menu_bars[MENUBAR_LAYERS].Height; j++)
+        for (i=0; i<Menu_bars[MENUBAR_LAYERS].Skin_width; i++)
+          Remap_pixel(&Gfx->Layerbar_block[k][j][i]);
     
     // Help fonts
     for (k=0; k<256; k++)

@@ -25,6 +25,11 @@
 // We don't use autoconf and all that in grafx2, so let's do the config here ...
 #if defined(__macosx__) || defined(__FreeBSD__)                        // MacOS X is POSIX compliant
     #define MOUNTED_GETMNTINFO
+#if defined(__macosx__)
+    #include <sys/types.h>
+#endif
+#elif defined(__NetBSD__)
+    #define MOUNTED_GETMNTINFO2
 #elif defined(__BEOS__) || defined(__HAIKU__)
     #define MOUNTED_FS_STAT_DEV
 #elif defined(__TRU64__)
@@ -328,12 +333,12 @@ fstype_to_string (int t)
 }
 #endif /* MOUNTED_VMOUNT */
 
-
 #ifdef __linux__
   #define BROKEN __attribute__((unused))
 #else
   #define BROKEN
 #endif
+
 
 #if defined MOUNTED_GETMNTENT1 || defined MOUNTED_GETMNTENT2
 
@@ -485,10 +490,10 @@ read_file_system_list (BROKEN bool need_fs_type)
       return NULL;
     for (; entries-- > 0; fsp++)
       {
-        me = xmalloc (sizeof *me);
-        me->me_devname = xstrdup (fsp->f_mntfromname);
-        me->me_mountdir = xstrdup (fsp->f_mntonname);
-        me->me_type = xstrdup (fsp->f_fstypename);
+        me = malloc (sizeof *me);
+        me->me_devname = strdup (fsp->f_mntfromname);
+        me->me_mountdir = strdup (fsp->f_mntonname);
+        me->me_type = strdup (fsp->f_fstypename);
         me->me_type_malloced = 1;
         me->me_dummy = ME_DUMMY (me->me_devname, me->me_type);
         me->me_remote = ME_REMOTE (me->me_devname, me->me_type);

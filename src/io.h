@@ -90,13 +90,29 @@ int File_exists(char * fname);
 /// Returns true if a directory passed as a parameter exists in the current directory.
 int  Directory_exists(char * directory);
 
+/// Check if a file or directory is hidden. Full name (with directories) is optional.
+int File_is_hidden(const char *fname, const char *full_name);
+
 /// Scans a directory, calls Callback for each file in it,
 void For_each_file(const char * directory_name, void Callback(const char *));
+
+/// Scans a directory, calls Callback for each file or directory in it,
+void For_each_directory_entry(const char * directory_name, void Callback(const char *, byte is_file, byte is_directory, byte is_hidden));
 
 ///
 /// Creates a fully qualified name from a directory and filename.
 /// The point is simply to insert a PATH_SEPARATOR when needed.
 void Get_full_filename(char * output_name, char * file_name, char * directory_name);
+
+///
+/// Appends a file or directory name to an existing directory name.
+/// As a special case, when the new item is equal to PARENT_DIR, this
+/// will remove the rightmost directory name.
+/// reverse_path is optional, if it's non-null, the function will
+/// write there :
+/// - if filename is ".." : The name of eliminated directory/file
+/// - else: ".."
+void Append_path(char *path, const char *filename, char *reverse_path);
 
 ///
 /// Creates a lock file, to check if an other instance of Grafx2 is running.

@@ -48,12 +48,13 @@
 #include "pxquad.h"
 #include "windows.h"
 #include "input.h"
+#include "brush.h"
 
 #ifdef __VBCC__
     #define __attribute__(x)
 #endif
 
-#if defined(__VBCC__)||defined(__GP2X__)
+#if defined(__VBCC__) || defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
     #define M_PI 3.141592653589793238462643
 #endif
 
@@ -522,6 +523,8 @@ try_again:
       Menu_factor_Y=1;
       break;
     default: // Stay below some reasonable size
+      if (factor>Max(Pixel_width,Pixel_height))
+        factor/=Max(Pixel_width,Pixel_height);
       Menu_factor_X=Min(factor,abs(Config.Ratio));
       Menu_factor_Y=Min(factor,abs(Config.Ratio));
   }
@@ -617,7 +620,8 @@ void Resize_image(word chosen_width,word chosen_height)
   // |B| |    C   = Nouvelle image
   // +-+-+
 
-  if (Backup_with_new_dimensions(1,Main_backups->Pages->Nb_layers,chosen_width,chosen_height))
+  Upload_infos_page_main(Main_backups->Pages);
+  if (Backup_with_new_dimensions(chosen_width,chosen_height))
   {
     // La nouvelle page a pu être allouée, elle est pour l'instant pleine de
     // 0s. Elle fait Main_image_width de large.
@@ -672,13 +676,16 @@ void Remap_spare(void)
   //       ne seront pas utilisées par Remap_general_lowlevel.
   for (color=0;color<=255;color++)
     if (used[color])
-      used[color]=Best_color(Spare_palette[color].R,Spare_palette[color].G,Spare_palette[color].B);
+      used[color]=Best_color_perceptual(Spare_palette[color].R,Spare_palette[color].G,Spare_palette[color].B);
 
   //   Maintenant qu'on a une super table de conversion qui n'a que le nom
   // qui craint un peu, on peut faire l'échange dans la brosse de toutes les
   // teintes.
   for (layer=0; layer<Spare_backups->Pages->Nb_layers; layer++)
-    Remap_general_lowlevel(used,Spare_backups->Pages->Image[layer],Spare_image_width,Spare_image_height,Spare_image_width);
+    Remap_general_lowlevel(used,Spare_backups->Pages->Image[layer],Spare_backups->Pages->Image[layer],Spare_image_width,Spare_image_height,Spare_image_width);
+    
+  // Change transparent color index
+  Spare_backups->Pages->Transparent_color=used[Spare_backups->Pages->Transparent_color];
 }
 
 
@@ -687,43 +694,89 @@ void Get_colors_from_brush(void)
 {
   short x_pos; // Variable de balayage de la brosse
   short y_pos; // Variable de balayage de la brosse
-  byte  used[256]; // Tableau de booléens "La couleur est utilisée"
+  byte  brush_used[256]; // Tableau de booléens "La couleur est utilisée"
+  dword usage[256];
   int   color;
+  int   image_color;
 
-  if (Confirmation_box("Modify current palette ?"))
+  //if (Confirmation_box("Modify current palette ?"))
+  
+  // Backup with unchanged layers, only palette is modified
+  Backup_layers(0);
+
+  // Init array of new colors  
+  for (color=0;color<=255;color++)
+    brush_used[color]=0;
+
+  // Tag used colors
+  for (y_pos=0;y_pos<Brush_height;y_pos++)
+    for (x_pos=0;x_pos<Brush_width;x_pos++)
+      brush_used[*(Brush_original_pixels + y_pos * Brush_width + x_pos)]=1;
+
+  // Check used colors in picture (to know which palette entries are free)
+  Count_used_colors(usage);
+  
+  // First pass : omit colors that are already in palette
+  for (color=0; color<256; color++)
   {
-    // Backup with unchanged layers, only palette is modified
-    Backup_layers(0);
-
-    // On commence par initialiser le tableau de booléen à faux
-    for (color=0;color<=255;color++)
-      used[color]=0;
-
-    // On calcule la table d'utilisation des couleurs
-    for (y_pos=0;y_pos<Brush_height;y_pos++)
-      for (x_pos=0;x_pos<Brush_width;x_pos++)
-        used[Read_pixel_from_brush(x_pos,y_pos)]=1;
-
-    // On recopie dans la palette principale les teintes des couleurs utilisées
-    // dans la palette du brouillon
-    for (color=0;color<=255;color++)
-      if (used[color])
+    // For each color used in brush (to add in palette)
+    if (brush_used[color])
+    {
+      // Try locate it in current palette
+      for (image_color=0; image_color<256; image_color++)
       {
-        Main_palette[color].R=Spare_palette[color].R;
-        Main_palette[color].G=Spare_palette[color].G;
-        Main_palette[color].B=Spare_palette[color].B;
+        if (Brush_original_palette[color].R==Main_palette[image_color].R
+         && Brush_original_palette[color].G==Main_palette[image_color].G
+         && Brush_original_palette[color].B==Main_palette[image_color].B)
+        {
+          // Color already in main palette:
+          
+          // Tag as used, so that no new color will overwrite it
+          usage[image_color]=1;
+
+          // Tag as non-new, to avoid it in pass 2
+          brush_used[color]=0;
+          
+          break;
+        }
       }
-
-    Set_palette(Main_palette);
-    Compute_optimal_menu_colors(Main_palette);
-    Hide_cursor();
-    Display_all_screen();
-    Display_menu();
-    Display_cursor();
-    End_of_modification();
-
-    Main_image_is_modified=1;
+    }
   }
+  
+  // Second pass : For each color to add, find an empty slot in 
+  // main palette to add it
+  image_color=0;
+  for (color=0; color<256 && image_color<256; color++)
+  {
+    // For each color used in brush
+    if (brush_used[color])
+    {
+      for (; image_color<256; image_color++)
+      {
+        if (!usage[image_color])
+        {
+          // Copy from color to image_color
+          Main_palette[image_color].R=Brush_original_palette[color].R;
+          Main_palette[image_color].G=Brush_original_palette[color].G;
+          Main_palette[image_color].B=Brush_original_palette[color].B;
+          
+          image_color++;
+          break;
+        }
+      }
+    }
+  }
+  Remap_brush();
+
+  Set_palette(Main_palette);
+  Compute_optimal_menu_colors(Main_palette);
+  Hide_cursor();
+  Display_all_screen();
+  Display_menu();
+  Display_cursor();
+  End_of_modification();
+
+  Main_image_is_modified=1;
 }
 
 
@@ -1082,6 +1135,7 @@ void Fill_general(byte fill_color)
     if (! (Permanent_draw_count&7))
     {
       Uint32 now = SDL_GetTicks();
+      SDL_PumpEvents();
       if (now>= Permanent_draw_next_refresh)
       {
         Permanent_draw_next_refresh = now+100;
@@ -1221,7 +1275,6 @@ void Draw_empty_circle_general(short center_x,short center_y,short radius,byte c
   Pixel_figure(center_x+radius,center_y,color); // Droite
   Pixel_figure(center_x,center_y+radius,color); // Bas
 
-  if(Main_magnifier_mode) Update_part_of_screen(center_x-radius,center_y-radius,2*radius+1,2*radius+1);
 }
 
   // -- Tracé définitif d'un cercle vide --

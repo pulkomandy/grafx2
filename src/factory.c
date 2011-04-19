@@ -42,6 +42,13 @@
 #include "palette.h"
 #include "input.h" // Is_shortcut()
 #include "help.h" // Window_help()
+#include "graph.h"
+#include "filesel.h" // Read_list_of_drives()
+#include "realpath.h"
+
+
+/// Lua scripts bound to shortcut keys.
+char * Bound_script[10];
 
 #ifdef __ENABLE_LUA__
 
@@ -50,11 +57,14 @@
 #include <lualib.h>
 #include <float.h> // for DBL_MAX
 #include <unistd.h> // chdir()
+#include <limits.h> //for INT_MIN
 
 ///
 /// Number of characters for name in fileselector.
 /// Window is adjusted according to it.
 #define NAME_WIDTH 34
+/// Number of characters for the description block
+#define DESC_WIDTH ((NAME_WIDTH+2)*8/6)
 /// Position of fileselector top, in window space
 #define FILESEL_Y 18
 
@@ -64,6 +74,8 @@ static word Brush_backup_width;
 static word Brush_backup_height;
 static byte Palette_has_changed;
 static byte Brush_was_altered;
+static byte Original_fore_color;
+static byte Original_back_color;
 
 /// Helper function to clamp a double to 0-255 range
 static inline byte clamp_byte(double value)
@@ -109,6 +121,18 @@ do { \
   dest = lua_tostring(L, (index)); \
 } while (0)
 
+///
+/// This macro checks that a Lua argument is a function.
+/// If argument is invalid, it will break the caller and raise a verbose message.
+/// This macro uses 2 existing symbols: L for the context, and nb_args=lua_gettop(L)
+/// @param index     Index of the argument to check, starting at 1.
+/// @param func_name The name of the lua callback, to display a message in case of error.
+#define LUA_ARG_FUNCTION(index, func_name) \
+do { \
+  if (nb_args < (index)) return luaL_error(L, "%s: Argument %d is missing.", func_name, index); \
+  if (!lua_isfunction(L, (index))) return luaL_error(L, "%s: Argument %d is not a function.", func_name, index); \
+} while (0)
+
 /// Check if 'num' arguments were provided exactly
 #define LUA_ARG_LIMIT(num, func_name) \
 do { \
@@ -116,13 +140,31 @@ do { \
     return luaL_error(L, "%s: Expected %d arguments, but found %d.", func_name, (num), nb_args); \
 } while(0)
 
+// Updates the screen colors after a running screen has modified the palette.
+void Update_colors_during_script(void)
+{
+  if (Palette_has_changed)
+  {
+    Set_palette(Main_palette);
+    Compute_optimal_menu_colors(Main_palette);
+    Display_menu();
+    Palette_has_changed=0;
+  }
+}
 
+/// Paint a pixel in image without updating the screen
+void Pixel_figure_no_screen(short x_pos,short y_pos,byte color)
+{
+  if (x_pos>0 && y_pos >0 && x_pos<Main_image_width && y_pos<Main_image_height)
+    Pixel_in_current_screen(x_pos,y_pos,color,0);
+}
 
 
 // Wrapper functions to call C from Lua
 
 int L_SetBrushSize(lua_State* L)
 {
+  int i;
   int w;
   int h;
   int nb_args=lua_gettop(L);
@@ -131,13 +173,20 @@ int L_SetBrushSize(lua_State* L)
   LUA_ARG_NUMBER(1, "setbrushsize", w, 1, 10000);
   LUA_ARG_NUMBER(2, "setbrushsize", h, 1, 10000);
   
-  if (Realloc_brush(w, h))
+  if (Realloc_brush(w, h, NULL, NULL))
   {
     return luaL_error(L, "setbrushsize: Resize failed");
   }
   Brush_was_altered=1;
   // Fill with Back_color
+  memset(Brush_original_pixels,Back_color,(long)Brush_width*Brush_height);
   memset(Brush,Back_color,(long)Brush_width*Brush_height);
+  // Adopt the current palette.
+  memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
+  for (i=0; i<256; i++)
+    Brush_colormap[i]=i;
+  //--
+
   // Center the handle
   Brush_offset_X=(Brush_width>>1);
   Brush_offset_Y=(Brush_height>>1);
@@ -169,7 +218,19 @@ int L_PutBrushPixel(lua_State* L)
   LUA_ARG_NUMBER(2, "putbrushpixel", y, INT_MIN, INT_MAX);
   LUA_ARG_NUMBER(3, "putbrushpixel", c, INT_MIN, INT_MAX);
 
-  Brush_was_altered=1;
+  if (!Brush_was_altered)
+  {
+    int i;
+    
+    // First time writing in brush:
+    // Adopt the current palette.
+    memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
+    memcpy(Brush_original_pixels, Brush, Brush_width*Brush_height);
+    for (i=0; i<256; i++)
+      Brush_colormap[i]=i;
+    //--
+    Brush_was_altered=1;
+  }
   
   if (x<0 || y<0 || x>=Brush_width || y>=Brush_height)
   ;
@@ -232,12 +293,23 @@ int L_SetPictureSize(lua_State* L)
   int w;
   int h;
   int nb_args=lua_gettop(L);
+  int i;
   
   LUA_ARG_LIMIT (2, "setpicturesize");
   LUA_ARG_NUMBER(1, "setpicturesize", w, 1, 9999);
   LUA_ARG_NUMBER(2, "setpicturesize", h, 1, 9999);
     
-  Resize_image(w, h); // TODO: a return value to catch runtime errors
+  Backup_in_place(w, h);
+  // part of Resize_image() : the pixel copy part.
+  for (i=0; i<Main_backups->Pages->Nb_layers; i++)
+  {
+    Copy_part_of_image_to_another(
+      Main_backups->Pages->Next->Image[i],0,0,Min(Main_backups->Pages->Next->Width,Main_image_width),
+      Min(Main_backups->Pages->Next->Height,Main_image_height),Main_backups->Pages->Next->Width,
+      Main_backups->Pages->Image[i],0,0,Main_image_width);
+  }
+  Redraw_layered_image();
+  
   return 0;
 }
 
@@ -287,6 +359,133 @@ int L_PutPicturePixel(lua_State* L)
   return 0; // no values returned for lua
 }
 
+
+int L_DrawLine(lua_State* L)
+{
+  int x1, y1, x2, y2, c;
+
+  int nb_args = lua_gettop(L);
+
+  LUA_ARG_LIMIT(5, "drawline");
+  LUA_ARG_NUMBER(1, "drawline", x1, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(2, "drawline", y1, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(3, "drawline", x2, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(4, "drawline", y2, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(5, "drawline", c,  INT_MIN, INT_MAX);
+
+  Pixel_figure = (void (*) (word,word,byte))Pixel_figure_no_screen;
+  Draw_line_general(x1, y1, x2, y2, c);
+
+  return 0;
+}
+
+
+int L_DrawFilledRect(lua_State* L)
+{
+  int x1, y1, x2, y2, c;
+  int min_x,min_y,max_x,max_y, x_pos, y_pos;
+
+  int nb_args = lua_gettop(L);
+
+  LUA_ARG_LIMIT(5, "drawfilledrect");
+  LUA_ARG_NUMBER(1, "drawfilledrect", x1, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(2, "drawfilledrect", y1, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(3, "drawfilledrect", x2, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(4, "drawfilledrect", y2, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(5, "drawfilledrect", c,  INT_MIN, INT_MAX);
+
+  // Put bounds in ascending order
+  if (x2>x1)
+  {
+    min_x=x1;
+    max_x=x2;
+  }
+  else
+  {
+    min_x=x2;
+    max_x=x1;
+  }
+  if (y2>y1)
+  {
+    min_y=y1;
+    max_y=y2;
+  }
+  else
+  {
+    min_y=y2;
+    max_y=y1;
+  }
+
+  // Clipping limits
+  if (max_x>Main_image_width)
+    max_x=Main_image_width-1;
+  if (max_y>Main_image_height)
+    max_y=Main_image_height-1;
+  if (min_x<0)
+    min_x=0;
+  if (min_y<0)
+    min_y=0;
+
+  // Perform drawing
+  for (y_pos=min_y; y_pos<=max_y;y_pos++)
+    for (x_pos=min_x; x_pos<=max_x;x_pos++)
+      Pixel_in_current_screen(x_pos,y_pos,c,0);
+  return 0;
+  
+}
+
+
+int L_DrawCircle(lua_State* L)
+{
+  int x1, y1, r, c;
+
+  int nb_args = lua_gettop(L);
+
+  LUA_ARG_LIMIT(4, "drawcircle");
+  LUA_ARG_NUMBER(1, "drawcircle", x1, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(2, "drawcircle", y1, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(3, "drawcircle", r, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(4, "drawcircle", c, INT_MIN, INT_MAX);
+
+  Pixel_figure = (void (*) (word,word,byte))Pixel_figure_no_screen;
+  Circle_limit = r*r;
+  Draw_empty_circle_general(x1, y1, r, c);
+
+  return 0;
+}
+
+
+int L_DrawDisk(lua_State* L)
+{
+  int center_x, center_y, r, c;
+  long circle_limit;
+  short x_pos,y_pos;
+  short min_x,max_x,min_y,max_y;
+
+  int nb_args = lua_gettop(L);
+
+  LUA_ARG_LIMIT(4, "drawdisk");
+  LUA_ARG_NUMBER(1, "drawdisk", center_x, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(2, "drawdisk", center_y, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(3, "drawdisk", r, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(4, "drawdisk", c, INT_MIN, INT_MAX);
+
+  circle_limit = r*r;
+  
+  // Compute clipping limits
+  min_x=center_x-r<0 ? 0 : center_x-r;
+  max_x=center_x+r>=Main_image_width? Main_image_width-1 : center_x+r;
+  min_y=center_y-r<0 ? 0 : center_y-r;
+  max_y=center_y+r>=Main_image_height? Main_image_height-1 : center_y+r;
+
+  for (y_pos=min_y;y_pos<=max_y;y_pos++)
+    for (x_pos=min_x;x_pos<=max_x;x_pos++)
+      Pixel_in_current_screen(x_pos,y_pos,c,0);
+
+  return 0;
+}
+
+
 int L_GetPicturePixel(lua_State* L)
 {
   int x;
@@ -319,13 +518,16 @@ int L_GetBackupPixel(lua_State* L)
   LUA_ARG_NUMBER(2, "getbackuppixel", y, INT_MIN, INT_MAX);
   
   // Bound check
-  if (x<0 || y<0 || x>=Main_image_width || y>=Main_image_height)
+  if (x<0 || y<0 || x>=Main_backups->Pages->Next->Width || y>=Main_backups->Pages->Next->Height)
   {
     // Silently return the image's transparent color
-    lua_pushinteger(L, Main_backups->Pages->Transparent_color);
+    lua_pushinteger(L, Main_backups->Pages->Next->Transparent_color);
     return 1;
   }
-  lua_pushinteger(L, Read_pixel_from_backup_screen(x,y));
+  // Can't use Read_pixel_from_backup_screen(), because in a Lua script
+  // the "backup" can use a different screen dimension.
+  lua_pushinteger(L, *(Screen_backup + x + Main_backups->Pages->Next->Width * y));
+  
   return 1;
 }
 
@@ -506,6 +708,33 @@ int L_GetTransColor(lua_State* L)
   return 1;
 }
 
+int L_SetForeColor(lua_State* L)
+{
+  byte c;
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (1, "setforecolor");
+  LUA_ARG_NUMBER(1, "setforecolor", c, -DBL_MAX, DBL_MAX);
+
+  Fore_color = c;
+
+  return 0;
+}
+
+int L_SetBackColor(lua_State* L)
+{
+  byte c;
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (1, "setbackcolor");
+  LUA_ARG_NUMBER(1, "setbackcolor", c, -DBL_MAX, DBL_MAX);
+
+  Back_color = c;
+
+  return 0;
+}
+
+
 int L_InputBox(lua_State* L)
 {
   const int max_settings = 9;
@@ -577,6 +806,9 @@ int L_InputBox(lua_State* L)
     LUA_ARG_NUMBER(setting*args_per_setting+6, "inputbox", decimal_places[setting], -15.0, 15.0);
     if (decimal_places[setting]>15)
         decimal_places[setting]=15;
+    if (min_value[setting]!=0 || max_value[setting]!=1)
+      if (decimal_places[setting]<0)
+        decimal_places[setting]=0;
     // Keep current value in range
     if (decimal_places[setting]>=0)
       current_value[setting] = Fround(current_value[setting], decimal_places[setting]);
@@ -590,6 +822,7 @@ int L_InputBox(lua_State* L)
   if (max_label_length>25)
     max_label_length=25;
 
+  Update_colors_during_script();
   Open_window(115+max_label_length*8,44+nb_settings*17,window_caption);
 
   // Normally this index is unused, but this initialization avoids
@@ -672,7 +905,7 @@ int L_InputBox(lua_State* L)
         case CONTROL_INPUT:
 
           Sprint_double(str,current_value[setting],decimal_places[setting],0);
-          Readline_ex(12+max_label_length*8+23, 22+setting*17,str,7,40,3,decimal_places[setting]);
+          Readline_ex(12+max_label_length*8+23, 22+setting*17,str,7,40,INPUT_TYPE_DECIMAL,decimal_places[setting]);
           current_value[setting]=atof(str);
 
           if (current_value[setting] < min_value[setting])
@@ -766,6 +999,88 @@ int L_InputBox(lua_State* L)
   return 1 + nb_settings;
 }
 
+int L_SelectBox(lua_State* L)
+{
+  const int max_settings = 10;
+  const char * label[max_settings];
+
+  const char * window_caption;
+  unsigned int caption_length;
+  int nb_args;
+  
+  unsigned int max_label_length;
+  int button;
+  int nb_buttons;
+  short clicked_button;
+  //char  str[40];
+  //short close_window = 0;
+  
+  nb_args = lua_gettop (L);
+  
+  if (nb_args < 2)
+  {
+    return luaL_error(L, "selectbox: Less than 2 arguments");
+  }
+  if ((nb_args - 1) % 2)
+  {
+    return luaL_error(L, "selectbox: Wrong number of arguments");
+  }
+  
+  
+  nb_buttons=(nb_args-1) /2;
+  
+  max_label_length=4; // Minimum size
+  
+  // First argument is window caption
+  LUA_ARG_STRING(1, "selectbox", window_caption);
+  caption_length = strlen(window_caption);
+  if ( caption_length > max_label_length)
+    max_label_length = caption_length;
+  
+  for (button=0; button<nb_buttons; button++)
+  {
+    LUA_ARG_STRING(button*2+2, "selectbox", label[button]);
+    if (strlen(label[button]) > max_label_length)
+      max_label_length = strlen(label[button]);
+    LUA_ARG_FUNCTION(button*2+3, "selectbox");
+  }
+  // Max is 25 to keep window under 320 pixel wide
+  if (max_label_length>25)
+    max_label_length=25;
+
+  Update_colors_during_script();
+  Open_window(28+max_label_length*8,26+nb_buttons*17,window_caption);
+
+  for (button=0; button<nb_buttons; button++)
+  {
+    Window_set_normal_button( 7, 22 + 17 * button, 14+max_label_length*8,14,label[button], 0,1,KEY_NONE);
+  }
+
+  Update_window_area(0,0,Window_width, Window_height);
+  Cursor_shape=CURSOR_SHAPE_ARROW;
+  Display_cursor();
+ 
+  Key=0;
+  do
+  {
+    clicked_button=Window_clicked_button();
+  } while (clicked_button<1 && Key != KEY_ESC);
+    
+  Close_window();
+  Cursor_shape=CURSOR_SHAPE_HOURGLASS;
+  Display_cursor();
+
+  if (clicked_button)
+  {
+    // Push the function on top of the stack
+    lua_pushvalue(L, 1+2*clicked_button);
+    // Call it
+    lua_call(L, 0, 0);
+  }
+  // No return value:    
+  return 0;
+}
+
 int L_MessageBox(lua_State* L)
 {
   const char * caption;
@@ -787,31 +1102,195 @@ int L_MessageBox(lua_State* L)
     return luaL_error(L, "messagebox: Needs one or two arguments.");
   }
 
+  Update_colors_during_script();
   Verbose_message(caption, message);
   return 0;
 }
 
+int L_Wait(lua_State* L)
+{
+  float delay;
+  Uint32 end;
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (1, "wait");
+  LUA_ARG_NUMBER(1, "wait", delay, 0.0, 10.0);
+
+  // Simple 'yield'
+  if (delay == 0.0)
+  {
+    Get_input(0);
+    return 0;
+  }
+  // Wait specified time
+  end = SDL_GetTicks()+(int)(delay*1000.0);
+  
+  do
+  {
+    Get_input(20);
+  } while (SDL_GetTicks()<end);
+  return 0;
+}
+
+int L_WaitBreak(lua_State* L)
+{
+  float delay;
+  Uint32 end;
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (1, "waitbreak");
+  LUA_ARG_NUMBER(1, "waitbreak", delay, 0.0, DBL_MAX);
+
+  // Simple 'yield'
+  if (delay == 0.0)
+  {
+    Get_input(0);
+    lua_pushinteger(L, (Key == KEY_ESC));
+    return 1;
+  }
+  // Wait specified time
+  end = SDL_GetTicks()+(int)(delay*1000.0);
+  
+  do
+  {
+    Get_input(20);
+    if (Key == KEY_ESC)
+    {
+      lua_pushinteger(L, 1);
+      return 1;
+    }
+  } while (SDL_GetTicks()<end);
+
+  lua_pushinteger(L, 0);
+  return 1;
+}
+
+int L_WaitInput(lua_State* L)
+{
+  float delay;
+  Uint32 end;
+  int nb_args=lua_gettop(L);
+  int moved;
+  
+  /*word key;
+  word button;
+  word mouse_x;
+  word mouse_y;*/
+  
+  LUA_ARG_LIMIT (1, "waitinput");
+  LUA_ARG_NUMBER(1, "waitinput", delay, 0.0, DBL_MAX);
+
+  // Simple 'yield'
+  if (delay == 0.0)
+  {
+    moved=Get_input(0);
+  }
+  else
+  {
+    // Wait specified time
+    end = SDL_GetTicks()+(int)(delay*1000.0);
+  
+    moved=0;
+    do
+    {
+      moved=Get_input(20);
+    } while (!moved && SDL_GetTicks()<end);
+  }
+  
+  lua_pushboolean(L, moved ? 1 : 0);
+  lua_pushinteger(L, (Key == KEY_ESC) ? SDLK_ESCAPE : Key);
+  lua_pushinteger(L, Mouse_X);
+  lua_pushinteger(L, Mouse_Y);
+  lua_pushinteger(L, Mouse_K);
+  
+  // The event arguments are in the stack.
+  // Need to reset "Key" here, so that a key event will not be
+  // created again before an actual key repeat occurs.
+  Key=0;
+  
+  return 5;
+}
+
+int L_UpdateScreen(lua_State* L)
+{
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (0, "updatescreen");
+  
+  Update_colors_during_script();
+  Hide_cursor();
+  Display_all_screen();
+  Display_cursor();
+  //Flush_update();
+
+  return 0;
+}
+
+
+int L_StatusMessage(lua_State* L)
+{
+	const char* msg;
+  char* msg2;
+	int nb_args = lua_gettop(L);
+	LUA_ARG_LIMIT(1,"statusmessage");
+
+	LUA_ARG_STRING(1, "statusmessage", msg);
+  msg2 = strdup(msg);
+  if(strlen(msg)>24)
+    msg2[24] = 0; // Cut off long messages
+	Print_in_menu(msg2,0);
+  free(msg2);
+	return 0;
+}
+
+
+int L_FinalizePicture(lua_State* L)
+{
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (0, "finalizepicture");
+  
+  Update_colors_during_script();
+  End_of_modification();
+  Backup();
+  
+  return 0;
+}
 
 // Handlers for window internals
-T_Fileselector Scripts_list;
+T_Fileselector Scripts_selector;
 
 // Callback to display a skin name in the list
 void Draw_script_name(word x, word y, word index, byte highlighted)
 {
   T_Fileselector_item * current_item;
 
-  if (Scripts_list.Nb_elements)
+  if (Scripts_selector.Nb_elements)
   {
-    short name_size;
+    byte fg, bg;
     
-    current_item = Get_item_by_index(&Scripts_list, index);
+    current_item = Get_item_by_index(&Scripts_selector, index);
 
-    Print_in_window_limited(x, y, current_item->Full_name, NAME_WIDTH, MC_Black,
-      (highlighted)?MC_Dark:MC_Light);
-    name_size=strlen(current_item->Full_name);
-    // Clear remaining area on the right
-    if (name_size<NAME_WIDTH)
-      Window_rectangle(x+name_size*8,y,(NAME_WIDTH-name_size)*8,8,(highlighted)?MC_Dark:MC_Light);
+    if (current_item->Type==0) // Files
+    {
+      fg=(highlighted)?MC_White:MC_Light;
+      bg=(highlighted)?MC_Dark:MC_Black;
+    }
+    else if (current_item->Type==1) // Directories
+    {
+      fg=(highlighted)?MC_Light:MC_Dark;
+      bg=(highlighted)?MC_Dark:MC_Black;
+    }
+    else // Drives
+    {
+      fg=(highlighted)?MC_Light:MC_Dark;
+      bg=(highlighted)?MC_Dark:MC_Black;
+      
+      Window_display_icon_sprite(x,y,current_item->Icon);
+      x+=8;
+    }
+    
+    Print_in_window(x, y, current_item->Short_name, fg,bg);
 
     Update_window_area(x,y,NAME_WIDTH*8,8);
   }
@@ -819,25 +1298,24 @@ void Draw_script_name(word x, word y, word index, byte highlighted)
 
 ///
 /// Displays first lines of comments from a lua script in the window.
-void Draw_script_information(T_Fileselector_item * script_item)
+void Draw_script_information(T_Fileselector_item * script_item, const char *full_directory)
 {
   FILE *script_file;
-  char full_name[MAX_PATH_CHARACTERS];
-  char text_block[3][NAME_WIDTH+3];
+  char text_block[3][DESC_WIDTH+1];
   int x, y;
-  
+  int i;
+    
   // Blank the target area
-  Window_rectangle(7, FILESEL_Y + 89, (NAME_WIDTH+2)*8+2, 3*8, MC_Black);
+  Window_rectangle(7, FILESEL_Y + 89, DESC_WIDTH*6+2, 4*8, MC_Black);
 
-  if (script_item && script_item->Full_name && script_item->Full_name[0]!='\0')
+  if (script_item && script_item->Type==0 && script_item->Full_name && script_item->Full_name[0]!='\0')
   {
-    strcpy(full_name, Data_directory);
-    strcat(full_name, "scripts/");
-    strcat(full_name, script_item->Full_name);
-    
-    
+    char full_name[MAX_PATH_CHARACTERS];
+    strcpy(full_name, full_directory);
+    Append_path(full_name, script_item->Full_name, NULL);
+
     x=0;
-    y=0;
+    y=0;    
     text_block[0][0] = text_block[1][0] = text_block[2][0] = '\0';
     // Start reading
     script_file = fopen(full_name, "r");
@@ -862,7 +1340,7 @@ void Draw_script_information(T_Fileselector_item * script_item)
         }
         else
         {
-          if (x < NAME_WIDTH+4)
+          if (x < DESC_WIDTH+2)
           {
             // Adding character
             text_block[y][x-2] = (c<32 || c>255) ? ' ' : c;
@@ -876,250 +1354,523 @@ void Draw_script_information(T_Fileselector_item * script_item)
       fclose(script_file);
     }
     
-    Print_in_window(7, FILESEL_Y + 89   , text_block[0], MC_Light, MC_Black);
-    Print_in_window(7, FILESEL_Y + 89+ 8, text_block[1], MC_Light, MC_Black);
-    Print_in_window(7, FILESEL_Y + 89+16, text_block[2], MC_Light, MC_Black);
+    Print_help(8, FILESEL_Y + 89   , text_block[0], 'N', 0, 0);
+    Print_help(8, FILESEL_Y + 89+ 8, text_block[1], 'N', 0, 0);
+    Print_help(8, FILESEL_Y + 89+16, text_block[2], 'N', 0, 0);
   
+    // Display a line with the keyboard shortcut
+    Print_help(8, FILESEL_Y + 89+24, "Key:", 'N', 0, 0);
+    for (i=0; i<10; i++)
+      if (Bound_script[i]!=NULL && !strcmp(Bound_script[i], full_name))
+        break;
+  
+    if (i<10)
+    {
+      const char *shortcut;    
+      shortcut=Keyboard_shortcut_value(SPECIAL_RUN_SCRIPT_1+i);
+      Print_help(8+4*6, FILESEL_Y + 89+24, shortcut, 'K', 0, strlen(shortcut));
+    }
+    else
+    {
+      Print_help(8+4*6, FILESEL_Y + 89+24, "None", 'K', 0, 4);
+    }
   }
-  Update_window_area(7, FILESEL_Y + 89, (NAME_WIDTH+2)*8+2, 3*8);
+  
+
+  
+  Update_window_area(8, FILESEL_Y + 89, DESC_WIDTH*6+2, 4*8);
     
 }
 
 // Add a script to the list
-void Add_script(const char *name)
+void Add_script(const char *name, byte is_file, byte is_directory, byte is_hidden)
 {
-  Add_element_to_list(&Scripts_list, Find_last_slash(name)+1, 0);
+  const char * file_name;
+  int len;
+
+  file_name=Find_last_slash(name)+1;
+
+  if (is_file)
+  {
+    // Only files ending in ".lua"
+    len=strlen(file_name);
+    if (len<=4 || strcasecmp(file_name+len-4, ".lua"))
+      return;
+    // Hidden
+    if (is_hidden && !Config.Show_hidden_files)
+      return;
+      
+    Add_element_to_list(&Scripts_selector, file_name, Format_filename(file_name, NAME_WIDTH+1, 0), 0, ICON_NONE);
+  }
+  else if (is_directory)
+  {
+    // Ignore current directory
+    if ( !strcmp(file_name, "."))
+      return;
+    // Ignore parent directory entry
+    if (!strcmp(file_name, PARENT_DIR))
+      return;
+    // Hidden
+    if (is_hidden && !Config.Show_hidden_directories)
+      return;
+    
+    Add_element_to_list(&Scripts_selector, file_name, Format_filename(file_name, NAME_WIDTH+1, 1), 1, ICON_NONE);
+  }
 }
 
-void Highlight_script(T_Fileselector *selector, T_List_button *list, const char *selected_script)
+void Highlight_script(T_Fileselector *selector, T_List_button *list, const char *selected_file)
 {
   short index;
 
-  index=Find_file_in_fileselector(selector, selected_script);
+  index=Find_file_in_fileselector(selector, selected_file);
+  Locate_list_item(list, index);
+}
 
-  if ((list->Scroller->Nb_elements<=list->Scroller->Nb_visibles) || (index<list->Scroller->Nb_visibles/2))
+static char Last_run_script[MAX_PATH_CHARACTERS]="";
+
+// Before: Cursor hidden
+// After: Cursor shown
+void Run_script(const char *script_subdirectory, const char *script_filename)
+{
+  lua_State* L;
+  const char* message;
+  byte  old_cursor_shape=Cursor_shape;
+  char buf[MAX_PATH_CHARACTERS];
+
+  // Some scripts are slow
+  Cursor_shape=CURSOR_SHAPE_HOURGLASS;
+  Display_cursor();
+  Flush_update();
+  
+  if (script_subdirectory && script_subdirectory[0]!='\0')
   {
-    list->List_start=0;
-    list->Cursor_position=index;
+    strcpy(Last_run_script, script_subdirectory);
+    Append_path(Last_run_script, script_filename, NULL);
   }
   else
   {
-    if (index>=list->Scroller->Nb_elements-list->Scroller->Nb_visibles/2)
+    strcpy(Last_run_script, script_filename);
+  }
+  
+  // This chdir is for the script's sake. Grafx2 itself will (try to)
+  // not rely on what is the system's current directory.
+  Extract_path(buf,Last_run_script);
+  chdir(buf);
+
+  L = lua_open();
+  
+  strcpy(buf, "LUA_PATH=");
+  strcat(buf, Data_directory);
+  Append_path(buf+9, "scripts", NULL);
+  Append_path(buf+9, "libs", NULL);
+  Append_path(buf+9, "?.lua", NULL);
+  putenv(buf);
+  
+  // writing and reading pixels
+  lua_register(L,"putbrushpixel",L_PutBrushPixel);
+  lua_register(L,"putpicturepixel",L_PutPicturePixel);
+  lua_register(L, "drawline",L_DrawLine);
+  lua_register(L, "drawfilledrect",L_DrawFilledRect);
+  lua_register(L, "drawcircle",L_DrawCircle);
+  lua_register(L, "drawdisk",L_DrawDisk);
+
+  lua_register(L,"getbrushpixel",L_GetBrushPixel);
+  lua_register(L,"getbrushbackuppixel",L_GetBrushBackupPixel);
+  lua_register(L,"getpicturepixel",L_GetPicturePixel);
+  lua_register(L,"getlayerpixel",L_GetLayerPixel);
+  lua_register(L,"getbackuppixel",L_GetBackupPixel);
+  lua_register(L,"getsparelayerpixel",L_GetSpareLayerPixel);
+  lua_register(L,"getsparepicturepixel",L_GetSparePicturePixel);
+
+
+  // resizing stuff
+  lua_register(L,"setbrushsize",L_SetBrushSize);
+  lua_register(L,"setpicturesize",L_SetPictureSize);
+
+  lua_register(L,"getbrushsize",L_GetBrushSize);
+  lua_register(L,"getpicturesize",L_GetPictureSize);
+  lua_register(L,"getsparepicturesize",L_GetSparePictureSize);
+
+  // color and palette
+  lua_register(L,"setcolor",L_SetColor);
+  lua_register(L,"setforecolor",L_SetForeColor);
+  lua_register(L,"setbackcolor",L_SetBackColor);
+
+  lua_register(L,"getcolor",L_GetColor);
+  lua_register(L,"getbackupcolor",L_GetBackupColor);
+  lua_register(L,"getbrushtransparentcolor",L_GetBrushTransparentColor);
+  lua_register(L,"getsparecolor",L_GetSpareColor);
+  lua_register(L,"getsparetranscolor",L_GetSpareTransColor);
+  lua_register(L,"getforecolor",L_GetForeColor);
+  lua_register(L,"getbackcolor",L_GetBackColor);
+  lua_register(L,"gettranscolor",L_GetTransColor);
+  
+  lua_register(L,"matchcolor",L_MatchColor);
+
+  // ui
+  lua_register(L,"inputbox",L_InputBox);
+  lua_register(L,"messagebox",L_MessageBox);
+  lua_register(L,"statusmessage",L_StatusMessage);
+  lua_register(L,"selectbox",L_SelectBox);
+
+  // misc. stuff
+  lua_register(L,"clearpicture",L_ClearPicture);
+  lua_register(L,"wait",L_Wait);
+  lua_register(L,"waitbreak",L_WaitBreak);
+  lua_register(L,"waitinput",L_WaitInput);
+  lua_register(L,"updatescreen",L_UpdateScreen);
+  lua_register(L,"finalizepicture",L_FinalizePicture);
+  
+  // Load all standard libraries
+  luaL_openlibs(L);
+  
+  /*
+  luaopen_base(L);
+  //luaopen_package(L); // crashes on Windows, for unknown reason
+  luaopen_table(L);
+  //luaopen_io(L); // crashes on Windows, for unknown reason
+  //luaopen_os(L);
+  luaopen_string(L);
+  luaopen_math(L);
+  //luaopen_debug(L);
+  */
+
+  // TODO The script may modify the picture, so we do a backup here.
+  // If the script is only touching the brush, this isn't needed...
+  // The backup also allows the script to read from it to make something
+  // like a feedback off effect (convolution matrix comes to mind).
+  Backup();
+
+  Palette_has_changed=0;
+  Brush_was_altered=0;
+  Original_back_color=Back_color;
+  Original_fore_color=Fore_color;
+
+  // Backup the brush
+  Brush_backup=(byte *)malloc(((long)Brush_height)*Brush_width);
+  Brush_backup_width = Brush_width;
+  Brush_backup_height = Brush_height;
+  
+  if (Brush_backup == NULL)
+  {
+    Verbose_message("Error!", "Out of memory!");
+  }
+  else 
+  {
+    memcpy(Brush_backup, Brush, ((long)Brush_height)*Brush_width);
+  
+    if (luaL_loadfile(L,Last_run_script) != 0)
     {
-      list->List_start=list->Scroller->Nb_elements-list->Scroller->Nb_visibles;
-      list->Cursor_position=index-list->List_start;
+      int stack_size;
+      stack_size= lua_gettop(L);
+      if (stack_size>0 && (message = lua_tostring(L, stack_size))!=NULL)
+        Verbose_message("Error!", message);
+      else
+        Warning_message("Unknown error loading script!");
+    }
+    else if (lua_pcall(L, 0, 0, 0) != 0)
+    {
+      int stack_size;
+      stack_size= lua_gettop(L);
+      
+      Update_colors_during_script();
+      
+      if (stack_size>0 && (message = lua_tostring(L, stack_size))!=NULL)
+        Verbose_message("Error running script", message);
+      else
+        Warning_message("Unknown error running script!");
+    }
+  }
+  // Cleanup
+  free(Brush_backup);
+  Brush_backup=NULL;
+  Update_colors_during_script();
+  End_of_modification();
+	Print_in_menu("                        ",0);
+
+  lua_close(L);
+  
+  if (Brush_was_altered)
+  {
+    // Copy Brush to original
+    memcpy(Brush_original_pixels, Brush, (long)Brush_width*Brush_height);
+    Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
+  }
+
+  Hide_cursor();
+  Display_all_screen();
+  // Update changed pen colors.
+  if (Back_color!=Original_back_color || Fore_color!=Original_fore_color)
+  {
+    // This is done at end of script, in case somebody would use the
+    // functions in a custom window.
+    if (Back_color!=Original_back_color)
+    {
+      byte new_color = Back_color;
+      Back_color = Original_back_color;
+      Set_back_color(new_color);
+    }
+    if (Fore_color!=Original_fore_color)
+    {
+      byte new_color = Fore_color;
+      Fore_color = Original_fore_color;
+      Set_fore_color(new_color);
+    }
+    
+  }
+  Cursor_shape=old_cursor_shape;
+  Display_cursor();
+}
+
+void Run_numbered_script(byte index)
+{
+
+  if (index>=10)
+    return;
+  if (Bound_script[index]==NULL)
+    return;
+    
+  Hide_cursor();
+  Run_script(NULL, Bound_script[index]);
+}               
+
+void Repeat_script(void)
+{
+
+  if (Last_run_script==NULL || Last_run_script[0]=='\0')
+  {
+    Warning_message("No script to repeat.");
+    return;
+  }
+  
+  Hide_cursor();
+  Run_script(NULL, Last_run_script);
+}
+
+void Set_script_shortcut(T_Fileselector_item * script_item, const char *full_directory)
+{
+  int i;
+  char full_name[MAX_PATH_CHARACTERS];
+  
+  if (script_item && script_item->Full_name && script_item->Full_name[0]!='\0')
+  {
+    strcpy(full_name, full_directory);
+    Append_path(full_name, script_item->Full_name, NULL);
+    
+    // Find if it already has a shortcut
+    for (i=0; i<10; i++)
+      if (Bound_script[i]!=NULL && !strcmp(Bound_script[i], full_name))
+        break;
+    if (i<10)
+    {
+      // Existing shortcut
     }
     else
     {
-      list->List_start=index-(list->Scroller->Nb_visibles-1)/2;
-      list->Cursor_position=(list->Scroller->Nb_visibles-1)/2;
+      // Try to find a "free" one.
+      for (i=0; i<10; i++)
+        if (Bound_script[i]==NULL
+          || !Has_shortcut(SPECIAL_RUN_SCRIPT_1+i)
+          || !File_exists(full_name))
+          break;
+      if (i<10)
+      {
+        free(Bound_script[i]);
+        Bound_script[i]=strdup(full_name);
+      }
+      else
+      {
+        Warning_message("Already 10 scripts have shortcuts.");
+        return;
+      }
     }
+    Window_set_shortcut(SPECIAL_RUN_SCRIPT_1+i);
+    if (!Has_shortcut(SPECIAL_RUN_SCRIPT_1+i))
+    {
+      // User cancelled or deleted all shortcuts
+      free(Bound_script[i]);
+      Bound_script[i]=NULL;
+    }
+    // Refresh display
+    Hide_cursor();
+    Draw_script_information(script_item, full_directory);
+    Display_cursor();
   }
+}
+
+void Reload_scripts_list(void)
+{
+  // Reinitialize the list
+  Free_fileselector_list(&Scripts_selector);
+  if (Config.Scripts_directory[0]=='\0')
+  {
+    Read_list_of_drives(&Scripts_selector,NAME_WIDTH+1);
+  }
+  else
+  {
+    Add_element_to_list(&Scripts_selector, PARENT_DIR, Format_filename(PARENT_DIR, NAME_WIDTH+1, 1), 1, ICON_NONE);
+    // Add each found file to the list
+    For_each_directory_entry(Config.Scripts_directory, Add_script);
+  }
+  // Sort it
+  Sort_list_of_files(&Scripts_selector); 
+  //
 }
 
 void Button_Brush_Factory(void)
 {
+  static char selected_file[MAX_PATH_CHARACTERS]="";
+  
   short clicked_button;
   T_List_button* scriptlist;
   T_Scroller_button* scriptscroll;
-  char scriptdir[MAX_PATH_CHARACTERS];
-  static char selected_script[MAX_PATH_CHARACTERS]="";
+  T_Special_button* scriptarea;
+  T_Fileselector_item *item;
+  int last_selected_item=-1;
+  
+  Reload_scripts_list();
 
-  Open_window(33+8*NAME_WIDTH, 162, "Brush Factory");
-
-  // Here we use the same data container as the fileselectors.
-  // Reinitialize the list
-  Free_fileselector_list(&Scripts_list);
-  strcpy(scriptdir, Data_directory);
-  strcat(scriptdir, "scripts/");
-  // Add each found file to the list
-  For_each_file(scriptdir, Add_script);
-  // Sort it
-  Sort_list_of_files(&Scripts_list);
-
-  Window_set_normal_button(85, 141, 67, 14, "Cancel", 0, 1, KEY_ESC); // 1
+  Open_window(33+8*NAME_WIDTH, 180, "Brush Factory");
+  
+  Window_set_normal_button(85, 149, 67, 14, "Cancel", 0, 1, KEY_ESC); // 1
 
   Window_display_frame_in(6, FILESEL_Y - 2, NAME_WIDTH*8+4, 84); // File selector
-  scriptlist = Window_set_list_button(
-    // Fileselector
-    Window_set_special_button(8, FILESEL_Y + 1, NAME_WIDTH*8, 80), // 2
-    // Scroller for the fileselector
-    (scriptscroll = Window_set_scroller_button(NAME_WIDTH*8+14, FILESEL_Y - 1, 82,
-      Scripts_list.Nb_elements,10, 0)), // 3
-    Draw_script_name); // 4
+  // Fileselector
+  scriptarea=Window_set_special_button(8, FILESEL_Y + 0, NAME_WIDTH*8, 80); // 2
+  // Scroller for the fileselector
+  scriptscroll = Window_set_scroller_button(NAME_WIDTH*8+14, FILESEL_Y - 1, 82,
+      Scripts_selector.Nb_elements,10, 0); // 3
+  scriptlist = Window_set_list_button(scriptarea,scriptscroll,Draw_script_name, 0); // 4
 
-  Window_set_normal_button(10, 141, 67, 14, "Run", 0, Scripts_list.Nb_elements!=0, SDLK_RETURN); // 5
+  Window_set_normal_button(10, 149, 67, 14, "Run", 0, 1, SDLK_RETURN); // 5
 
-  Window_display_frame_in(6, FILESEL_Y + 88, (NAME_WIDTH+2)*8+4, 3*8+2); // Descr.
+  Window_display_frame_in(6, FILESEL_Y + 88, DESC_WIDTH*6+4, 4*8+2); // Descr.
+  Window_set_special_button(7, FILESEL_Y + 89+24,DESC_WIDTH*6,8); // 6
   
-  // Update position
-  Highlight_script(&Scripts_list, scriptlist, selected_script);
-  // Update the scroller position
-  scriptscroll->Position=scriptlist->List_start;
-  if (scriptscroll->Position)
-    Window_draw_slider(scriptscroll);
-  
-  Window_redraw_list(scriptlist);
-  Draw_script_information(Get_item_by_index(&Scripts_list,
-    scriptlist->List_start + scriptlist->Cursor_position));
-  
-  Update_window_area(0, 0, Window_width, Window_height);
-  Display_cursor();
-
-  do
+  while (1)
   {
-    clicked_button = Window_clicked_button();
-    if (Is_shortcut(Key,0x100+BUTTON_HELP))
-      Window_help(BUTTON_BRUSH_EFFECTS, "BRUSH FACTORY");
-
-    switch (clicked_button)
+    // Locate selected file in view
+    Highlight_script(&Scripts_selector, scriptlist, selected_file);
+    // Update the scroller position
+    scriptscroll->Position=scriptlist->List_start;
+    Window_draw_slider(scriptscroll);
+    
+    Window_redraw_list(scriptlist);
+    Draw_script_information(Get_item_by_index(&Scripts_selector,
+      scriptlist->List_start + scriptlist->Cursor_position), Config.Scripts_directory);
+    
+    Update_window_area(0, 0, Window_width, Window_height);
+    Display_cursor();
+    // Wait for mouse release (needed for example after a double-click
+    // that navigates to a subdirectory)
+    while (last_selected_item==-1 && Mouse_K)
     {
-      case 4:
-        Hide_cursor();
-        Draw_script_information(Get_item_by_index(&Scripts_list,
-          scriptlist->List_start + scriptlist->Cursor_position));
-        Display_cursor();
-        break;
-        
-        
-      default:
-        break;
+      Get_input(20);
     }
     
-  } while (clicked_button != 1 && clicked_button != 5);
+    Reset_quicksearch();
+  
+    do
+    {
+      clicked_button = Window_clicked_button();
+      if (Key==SDLK_BACKSPACE && Config.Scripts_directory[0]!='\0')
+      {
+        // Make it select first entry (parent directory)
+        scriptlist->List_start=0;
+        scriptlist->Cursor_position=0;
+        clicked_button=5;
+      }
+      if (Is_shortcut(Key,0x100+BUTTON_HELP))
+        Window_help(BUTTON_BRUSH_EFFECTS, "BRUSH FACTORY");
+      else if (Is_shortcut(Key,0x200+BUTTON_BRUSH_EFFECTS))
+        clicked_button=1; // Cancel
+      // Quicksearch
+      if (clicked_button==4)
+        Reset_quicksearch();
+      else if (clicked_button==0 && Key_ANSI)
+        clicked_button=Quicksearch_list(scriptlist, &Scripts_selector);
+  
+      switch (clicked_button)
+      {
+        case 2: // Double-click an entry in script list
+          clicked_button=5;
+          break;
+        case 4: // Select script
+          last_selected_item = scriptlist->List_start + scriptlist->Cursor_position;
+          Hide_cursor();
+          Draw_script_information(Get_item_by_index(&Scripts_selector,
+            scriptlist->List_start + scriptlist->Cursor_position), Config.Scripts_directory);
+          Display_cursor();
+          break;
+        
+        case 6:
+          Set_script_shortcut(Get_item_by_index(&Scripts_selector,
+            scriptlist->List_start + scriptlist->Cursor_position), Config.Scripts_directory);
+          break;
+          
+        default:
+          break;
+      }
+      
+    } while (clicked_button != 1 && clicked_button != 5);
+    
+    // Cancel
+    if (clicked_button==1)
+      break;
+      
+    // OK
+    if (Scripts_selector.Nb_elements == 0)
+    {
+      // No items : same as Cancel
+      clicked_button=1;
+      break;
+    }
+  
+    // Examine selected file
+    item = Get_item_by_index(&Scripts_selector,
+      scriptlist->List_start + scriptlist->Cursor_position);
+    
+    if (item->Type==0) // File
+    {
+      strcpy(selected_file, item->Full_name);
+      break;
+    }
+    else if (item->Type==1 || item->Type==2) // Directory
+    {
+      if (item->Type==2)
+      {
+        // Selecting one drive root
+        strcpy(selected_file, PARENT_DIR);
+        strcat(Config.Scripts_directory, item->Full_name);
+      }
+      else
+      {
+        // Going down one or up by one directory
+        Append_path(Config.Scripts_directory, item->Full_name, selected_file);
+      }
 
-  if (Scripts_list.Nb_elements == 0)
-    selected_script[0]='\0';
-  else
-    strcpy(selected_script, Get_item_by_index(&Scripts_list,
-      scriptlist->List_start + scriptlist->Cursor_position)-> Full_name);
-            
+      // No break: going back up to beginning of loop
+      
+      Reload_scripts_list();
+      
+      scriptlist->Scroller->Nb_elements=Scripts_selector.Nb_elements;
+      Compute_slider_cursor_length(scriptlist->Scroller);
+      last_selected_item = -1;
+      Hide_cursor();
+    }
+  }
+  
+  Close_window();
+  Unselect_button(BUTTON_BRUSH_EFFECTS);
+
   if (clicked_button == 5) // Run the script
   {
-    lua_State* L;
-    const char* message;
-
-    // Some scripts are slow
-    Hide_cursor();
-    Cursor_shape=CURSOR_SHAPE_HOURGLASS;
-    Display_cursor();
-    Flush_update();
-    
-    chdir(scriptdir);
-
-    L = lua_open();
-
-    lua_register(L,"putbrushpixel",L_PutBrushPixel);
-    lua_register(L,"getbrushpixel",L_GetBrushPixel);
-    lua_register(L,"getbrushbackuppixel",L_GetBrushBackupPixel);
-    lua_register(L,"putpicturepixel",L_PutPicturePixel);
-    lua_register(L,"getpicturepixel",L_GetPicturePixel);
-    lua_register(L,"getlayerpixel",L_GetLayerPixel);
-    lua_register(L,"getbackuppixel",L_GetBackupPixel);
-    lua_register(L,"setbrushsize",L_SetBrushSize);
-    lua_register(L,"setpicturesize",L_SetPictureSize);
-    lua_register(L,"getbrushsize",L_GetBrushSize);
-    lua_register(L,"getpicturesize",L_GetPictureSize);
-    lua_register(L,"setcolor",L_SetColor);
-    lua_register(L,"getcolor",L_GetColor);
-    lua_register(L,"getbackupcolor",L_GetBackupColor);
-    lua_register(L,"matchcolor",L_MatchColor);
-    lua_register(L,"getbrushtransparentcolor",L_GetBrushTransparentColor);
-    lua_register(L,"inputbox",L_InputBox);
-    lua_register(L,"messagebox",L_MessageBox);
-    lua_register(L,"getforecolor",L_GetForeColor);
-    lua_register(L,"getbackcolor",L_GetBackColor);
-    lua_register(L,"gettranscolor",L_GetTransColor);
-    lua_register(L,"getsparepicturesize ",L_GetSparePictureSize);
-    lua_register(L,"getsparelayerpixel ",L_GetSpareLayerPixel);
-    lua_register(L,"getsparepicturepixel",L_GetSparePicturePixel);
-    lua_register(L,"getsparecolor",L_GetSpareColor);
-    lua_register(L,"getsparetranscolor",L_GetSpareTransColor);
-    lua_register(L,"clearpicture",L_ClearPicture);
-    
-
-    // For debug only
-    // luaL_openlibs(L);
-    
-    luaopen_base(L);
-    //luaopen_package(L); // crashes on Windows, for unknown reason
-    luaopen_table(L);
-    //luaopen_io(L); // crashes on Windows, for unknown reason
-    //luaopen_os(L);
-    //luaopen_string(L);
-    luaopen_math(L);
-    //luaopen_debug(L);
-
-    strcat(scriptdir, selected_script);
-
-    // TODO The script may modify the picture, so we do a backup here.
-    // If the script is only touching the brush, this isn't needed...
-    // The backup also allows the script to read from it to make something
-    // like a feedback off effect (convolution matrix comes to mind).
-    Backup();
-
-    Palette_has_changed=0;
-    Brush_was_altered=0;
-
-    // Backup the brush
-    Brush_backup=(byte *)malloc(((long)Brush_height)*Brush_width);
-    Brush_backup_width = Brush_width;
-    Brush_backup_height = Brush_height;
-    
-    if (Brush_backup == NULL)
-    {
-      Verbose_message("Error!", "Out of memory!");
-    }
-    else 
-    {
-      memcpy(Brush_backup, Brush, ((long)Brush_height)*Brush_width);
-    
-      if (luaL_loadfile(L,scriptdir) != 0)
-      {
-        int stack_size;
-        stack_size= lua_gettop(L);
-        if (stack_size>0 && (message = lua_tostring(L, stack_size))!=NULL)
-          Verbose_message("Error!", message);
-        else
-          Warning_message("Unknown error loading script!");
-      }
-      else if (lua_pcall(L, 0, 0, 0) != 0)
-      {
-        int stack_size;
-        stack_size= lua_gettop(L);
-        if (stack_size>0 && (message = lua_tostring(L, stack_size))!=NULL)
-          Verbose_message("Error running script", message);
-        else
-          Warning_message("Unknown error running script!");
-      }
-    }
-    // Cleanup
-    free(Brush_backup);
-    Brush_backup=NULL;
-    if (Palette_has_changed)
-    {
-      Set_palette(Main_palette);
-      Compute_optimal_menu_colors(Main_palette);
-    }
-    End_of_modification();
-
-    lua_close(L);
+    Run_script(Config.Scripts_directory, selected_file);
   }
-
-  Close_window();
-  if (Brush_was_altered)
-    Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
-  Unselect_button(BUTTON_BRUSH_EFFECTS);
-  // If the image has been resized, Compute_limits() has been called and it 
-  // has computed wrong values because a window was open : In this
-  // context, Menu_Y and Menu_is_visible are artificially set to "menu hidden".
-  // This whole "_before_window" looks like it's completely useless anyway,
-  // but we're too close to release to scrap it and re-test everything.
-  // So: call Compute_limits() one more time, and be done with it.
-  Compute_limits();
-
-  Display_all_screen();
-  Display_cursor();
+  else
+  {
+    Display_cursor();
+  }
 }
 
 #else // NOLUA

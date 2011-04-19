@@ -40,6 +40,7 @@
 #include "sdlscreen.h"
 #include "struct.h"
 #include "windows.h"
+#include "brush.h"
 
 //---------- Menu dans lequel on tagge des couleurs (genre Stencil) ----------
 void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_cancel, const char *help_section, word close_shortcut)
@@ -279,7 +280,7 @@ void Button_Grid_menu(void)
     {
       case 3 :
         Num2str(chosen_X,str,2);
-        Readline(39,26,str,2,1);
+        Readline(39,26,str,2,INPUT_TYPE_INTEGER);
         chosen_X=atoi(str);
         // On corrige les dimensions
         if ((!chosen_X) || (chosen_X>80))
@@ -301,7 +302,7 @@ void Button_Grid_menu(void)
         break;
       case 4 :
         Num2str(chosen_Y,str,2);
-        Readline(39,47,str,2,1);
+        Readline(39,47,str,2,INPUT_TYPE_INTEGER);
         chosen_Y=atoi(str);
         // On corrige les dimensions
         if ((!chosen_Y) || (chosen_Y>80))
@@ -323,7 +324,7 @@ void Button_Grid_menu(void)
         break;
       case 5 :
         Num2str(dx_selected,str,2);
-        Readline(97,26,str,2,1);
+        Readline(97,26,str,2,INPUT_TYPE_INTEGER);
         dx_selected=atoi(str);
         // On corrige les dimensions
         if (dx_selected>79)
@@ -338,7 +339,7 @@ void Button_Grid_menu(void)
         break;
       case 6 :
         Num2str(dy_selected,str,2);
-        Readline(97,47,str,2,1);
+        Readline(97,47,str,2,INPUT_TYPE_INTEGER);
         dy_selected=atoi(str);
         // On corrige les dimensions
         if (dy_selected>79)
@@ -479,7 +480,7 @@ void Button_Smooth_menu(void)
         Num2str(chosen_matrix[x][y],str,2);
         Readline(matrix_input[x][y]->Pos_X+2,
                  matrix_input[x][y]->Pos_Y+2,
-                 str,2,1);
+                 str,2,INPUT_TYPE_INTEGER);
         chosen_matrix[x][y]=atoi(str);
         Display_cursor();
       }
@@ -553,6 +554,9 @@ void Button_Colorize_mode(void)
         break;
       case 2 :
         Effect_function=Effect_substractive_colorize;
+        break;
+      case 3 :
+        Effect_function=Effect_alpha_colorize;
     }
     Shade_mode=0;
     Quick_shade_mode=0;
@@ -572,10 +576,12 @@ void Button_Colorize_display_selection(int mode)
   Print_in_window(4,37," ",MC_Black,MC_Light);
   Print_in_window(4,57," ",MC_Black,MC_Light);
   Print_in_window(4,74," ",MC_Black,MC_Light);
+  Print_in_window(4,91," ",MC_Black,MC_Light);
     // Partie droite
   Print_in_window(129,37," ",MC_Black,MC_Light);
   Print_in_window(129,57," ",MC_Black,MC_Light);
   Print_in_window(129,74," ",MC_Black,MC_Light);
+  Print_in_window(129,91," ",MC_Black,MC_Light);
 
   // Ensuite, on affiche la flèche là où il le faut:
   switch(mode)
@@ -588,6 +594,9 @@ void Button_Colorize_display_selection(int mode)
       break;
     case 2 : // Méthode soustractive
       y_pos=74;
+      break;
+    case 3 : // Méthode alpha
+      y_pos=91;
   }
   Print_in_window(4,y_pos,"\020",MC_Black,MC_Light);
   Print_in_window(129,y_pos,"\021",MC_Black,MC_Light);
@@ -600,7 +609,7 @@ void Button_Colorize_menu(void)
   short clicked_button;
   char  str[4];
 
-  Open_window(140,118,"Transparency");
+  Open_window(140,135,"Transparency");
 
   Print_in_window(16,23,"Opacity:",MC_Dark,MC_Light);
   Window_set_input_button(87,21,3);                               // 1
@@ -610,9 +619,10 @@ void Button_Colorize_menu(void)
 
   Window_set_normal_button(16,54,108,14,"Additive"   ,2,1,SDLK_d); // 3
   Window_set_normal_button(16,71,108,14,"Subtractive",1,1,SDLK_s); // 4
+  Window_set_normal_button(16,88,108,14,"Alpha",1,1,SDLK_a); // 4
 
-  Window_set_normal_button(16,94, 51,14,"Cancel"     ,0,1,KEY_ESC); // 5
-  Window_set_normal_button(73,94, 51,14,"OK"         ,0,1,SDLK_RETURN); // 6
+  Window_set_normal_button(16,111, 51,14,"Cancel"     ,0,1,KEY_ESC); // 5
+  Window_set_normal_button(73,111, 51,14,"OK"         ,0,1,SDLK_RETURN); // 6
 
   Num2str(Colorize_opacity,str,3);
   Window_input_content(Window_special_button_list,str);
@@ -632,7 +642,7 @@ void Button_Colorize_menu(void)
     {
       case 1: // Zone de saisie de l'opacité
         Num2str(chosen_opacity,str,3);
-        Readline(89,23,str,3,1);
+        Readline(89,23,str,3,INPUT_TYPE_INTEGER);
         chosen_opacity=atoi(str);
         // On corrige le pourcentage
         if (chosen_opacity>100)
@@ -643,9 +653,10 @@ void Button_Colorize_menu(void)
         }
         Display_cursor();
         break;
-      case 2: // Méthode interpolée
-      case 3: // Méthode additive
-      case 4: // Méthode soustractive
+      case 2: // Interpolated method
+      case 3: // Additive method
+      case 4: // Substractive method
+      case 5: // Alpha method
         selected_mode=clicked_button-2;
         Hide_cursor();
         Button_Colorize_display_selection(selected_mode);
@@ -654,13 +665,13 @@ void Button_Colorize_menu(void)
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       Window_help(BUTTON_EFFECTS, "TRANSPARENCY");
       else if (Is_shortcut(Key,SPECIAL_COLORIZE_MENU))
-        clicked_button=6;
+        clicked_button=7;
   }
-  while (clicked_button<5);
+  while (clicked_button<6);
 
   Close_window();
 
-  if (clicked_button==6) // OK
+  if (clicked_button==7) // OK
   {
     Colorize_opacity      =chosen_opacity;
     Colorize_current_mode=selected_mode;
@@ -724,7 +735,7 @@ void Button_Tiling_menu(void)
     if (clicked_button==3)  // Zone de saisie du décalage X
     {
       Num2str(chosen_offset_x,str,4);
-      Readline(93,23,str,4,1);
+      Readline(93,23,str,4,INPUT_TYPE_INTEGER);
       chosen_offset_x=atoi(str);
       // On corrige le décalage en X
       if (chosen_offset_x>=Brush_width)
@@ -739,7 +750,7 @@ void Button_Tiling_menu(void)
     if (clicked_button==4)  // Zone de saisie du décalage Y
     {
       Num2str(chosen_offset_y,str,4);
-      Readline(93,37,str,4,1);
+      Readline(93,37,str,4,INPUT_TYPE_INTEGER);
       chosen_offset_y=atoi(str);
       // On corrige le décalage en Y
       if (chosen_offset_y>=Brush_height)
@@ -975,8 +986,8 @@ void Button_Sieve_menu(void)
   {
     clicked_button=Window_clicked_button();
 
-  origin_x=Window_pos_X+(Menu_factor_X*Window_special_button_list->Pos_X);
-  origin_y=Window_pos_Y+(Menu_factor_Y*Window_special_button_list->Pos_Y);
+    origin_x=Window_pos_X+(Menu_factor_X*Window_special_button_list->Pos_X);
+    origin_y=Window_pos_Y+(Menu_factor_Y*Window_special_button_list->Pos_Y);
 
 
     switch (clicked_button)
@@ -1063,15 +1074,22 @@ void Button_Sieve_menu(void)
         break;
 
       case  7 : // Transfer to brush
-        Brush_width=Sieve_width;
-        Brush_height=Sieve_height;
-        free(Brush);
-        Brush=(byte *)malloc(((long)Brush_height)*Brush_width);
+      
+        if (Realloc_brush(Sieve_width, Sieve_height, NULL, NULL))
+          break;
+        
         for (y_pos=0; y_pos<Sieve_height; y_pos++)
           for (x_pos=0; x_pos<Sieve_width; x_pos++)
-            Pixel_in_brush(x_pos,y_pos,(Sieve[x_pos][y_pos])?Fore_color:Back_color);
+            *(Brush_original_pixels + y_pos * Brush_width + x_pos) = (Sieve[x_pos][y_pos])?Fore_color:Back_color;
+        
+        // Grab palette
+        memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
+        // Remap (no change)
+        Remap_brush();
+
         Brush_offset_X=(Brush_width>>1);
         Brush_offset_Y=(Brush_height>>1);
+        
         Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
         break;
 

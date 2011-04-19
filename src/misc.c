@@ -178,7 +178,8 @@ void Wait_end_of_click(void)
 {
   // On désactive tous les raccourcis clavier
 
-  while(Mouse_K) if(!Get_input()) SDL_Delay(20);
+  while(Mouse_K)
+    Get_input(20);
 }
 
 void Clear_current_image_with_stencil(byte color, byte * stencil)
@@ -340,7 +341,7 @@ void Rotate_270_deg_lowlevel(byte * source, byte * dest, short width, short heig
 
 // Replace une couleur par une autre dans un buffer
 
-void Remap_general_lowlevel(byte * conversion_table,byte * buffer,short width,short height,short buffer_width)
+void Remap_general_lowlevel(byte * conversion_table,byte * in_buffer, byte *out_buffer,short width,short height,short buffer_width)
 {
   int dx,cx;
 
@@ -350,17 +351,19 @@ void Remap_general_lowlevel(byte * conversion_table,byte * buffer,short width,sh
     // Pour chaque pixel
     for(cx=width;cx>0;cx--)
     {
-      *buffer = conversion_table[*buffer];
-      buffer++;
+      *out_buffer = conversion_table[*in_buffer];
+      in_buffer++;
+      out_buffer++;
     }
-    buffer += buffer_width-width;
+    in_buffer += buffer_width-width;
+    out_buffer += buffer_width-width;
   }
 }
 
 void Copy_image_to_brush(short start_x,short start_y,short Brush_width,short Brush_height,word image_width)
 {
   byte* src=start_y*image_width+start_x+Main_backups->Pages->Image[Main_current_layer]; //Adr départ image (ESI)
-  byte* dest=Brush; //Adr dest brosse (EDI)
+  byte* dest=Brush_original_pixels; //Adr dest brosse (EDI)
   int dx;
 
   for (dx=Brush_height;dx!=0;dx--)
@@ -498,6 +501,22 @@ byte Effect_substractive_colorize(word x,word y,byte color)
     red<red_under?red:red_under,
     green<green_under?green:green_under,
     blue<blue_under?blue:blue_under);
+}
+
+byte Effect_alpha_colorize    (word x,word y,byte color)
+{
+  byte color_under = Read_pixel_from_feedback_screen(x,y);
+  byte blue_under=Main_palette[color_under].B;
+  byte green_under=Main_palette[color_under].G;
+  byte red_under=Main_palette[color_under].R;
+  int factor=(Main_palette[color].R*76 + 
+    Main_palette[color].G*151 + 
+    Main_palette[color].B*28)/255;
+
+  return Best_color(
+    (Main_palette[Fore_color].R*factor + red_under*(255-factor))/255,
+    (Main_palette[Fore_color].G*factor + green_under*(255-factor))/255,
+    (Main_palette[Fore_color].B*factor + blue_under*(255-factor))/255);
 }
 
 void Check_timer(void)
@@ -660,17 +679,6 @@ void Rescale(byte *src_buffer, short src_width, short src_height, byte *dst_buff
   }
 }
 
-void Slider_timer(byte speed)
-  //Boucle d'attente pour faire bouger les scrollbars à une vitesse correcte
-{
-  Uint32 end;
-  byte original_mouse_k = Mouse_K;
-  end = SDL_GetTicks() + speed*10;
-  do
-  {
-    if (!Get_input()) SDL_Delay(20);
-  } while (Mouse_K == original_mouse_k && SDL_GetTicks()<end);
-}
 
 void Scroll_picture(byte * main_src, byte * main_dest, short x_offset,short y_offset)
 {
@@ -727,7 +735,7 @@ void Zoom_a_line(byte* original_line, byte* zoomed_line,
 #if defined(__WIN32__)
 #define _WIN32_WINNT 0x0500
 #include <windows.h>
-#elif defined(__macosx__) || defined(__FreeBSD__)
+#elif defined(__macosx__) || defined(__FreeBSD__) || defined(__NetBSD__)
   #include <sys/sysctl.h>
 #elif defined(__BEOS__) || defined(__HAIKU__)
   // sysinfo not implemented
@@ -769,7 +777,7 @@ unsigned long Memory_free(void)
   mstt.dwLength = sizeof(MEMORYSTATUS);
   GlobalMemoryStatus(&mstt);
   return mstt.dwAvailPhys;
-#elif defined(__macosx__) || defined(__FreeBSD__)
+#elif defined(__macosx__) || defined(__FreeBSD__) || defined(__NetBSD__)
   int mib[2];
   int maxmem;
   size_t len;

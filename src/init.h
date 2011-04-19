@@ -24,7 +24,7 @@
 /// Initialization (and some de-initialization) functions.
 //////////////////////////////////////////////////////////////////////////////
   
-T_Gui_skin *Load_graphics(const char * skin_file);
+T_Gui_skin *Load_graphics(const char * skin_file, T_Gradient_array *gradients);
 void Set_current_skin(const char *skinfile, T_Gui_skin *gfx);
 void Init_buttons(void);
 void Init_operations(void);
@@ -34,6 +34,10 @@ int  Save_CFG(void);
 void Set_all_video_modes(void);
 void Set_config_defaults(void);
 void Init_sighandler(void);
+void Init_paintbrushes(void);
+
+/// Set application icon(s)
+void Define_icon(void);
 
 extern char Gui_loading_error_message[512];
 

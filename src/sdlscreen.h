@@ -44,6 +44,8 @@ byte* Screen_pixels;
 
 void Update_rect(short x, short y, unsigned short width, unsigned short height);
 void Flush_update(void);
+void Update_status_line(short char_pos, short width);
+
 ///
 /// Converts a SDL_Surface (indexed colors or RGB) into an array of bytes
 /// (indexed colors).
@@ -56,6 +58,8 @@ SDL_Color Color_to_SDL_color(byte);
 byte Get_SDL_pixel_8(SDL_Surface *bmp, int x, int y);
 /// Reads a pixel in a multi-byte SDL surface.
 dword Get_SDL_pixel_hicolor(SDL_Surface *bmp, int x, int y);
+/// Writes a pixel in a 8-bit SDL surface.
+void Set_SDL_pixel_8(SDL_Surface *bmp, int x, int y, byte color);
 /// Convert a SDL Palette to a grafx2 palette
 void Get_SDL_Palette(const SDL_Palette * sdl_palette, T_Palette palette);
 
@@ -65,4 +69,9 @@ void Get_SDL_Palette(const SDL_Palette * sdl_palette, T_Palette palette);
 /// size, eg: 3x3 pixels in 1024x768 leaves 1 column on the right, 0 rows on bottom.
 void Clear_border(byte color);
   
+extern volatile int Allow_colorcycling;
+
+/// Activates or desactivates file drag-dropping in program window.
+void Allow_drag_and_drop(int flag);
+
 #endif // SDLSCREEN_H_INCLUDED

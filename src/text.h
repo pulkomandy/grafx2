@@ -41,15 +41,16 @@ void Add_font(const char *name);
 /// @param italic      Boolean, true to use italic rendering in TrueType
 /// @param width       Returns the width of the created brush, in pixels.
 /// @param height      Returns the height of the created brush, in pixels.
+/// @param palette     Returns the custom palette for the brush.
 /// Returns true on success.
-byte *Render_text(const char *str, int font_number, int size, int antialias, int bold, int italic, int *width, int *height);
+byte *Render_text(const char *str, int font_number, int size, int antialias, int bold, int italic, int *width, int *height, T_Palette palette);
 
 /// Finds a label to display for a font declared with ::Add_font().
 char * Font_label(int index);
 /// Finds the filename of a font declared with ::Add_font().
 char * Font_name(int index);
 /// Returns true if the font of this number is TrueType, false if it's a SFont bitmap.
-char * TrueType_font(int index);
+int TrueType_font(int index);
 ///
 /// Number of fonts declared with a series of ::Add_font(). This is public for
 /// convenience, but functionaly it is read-only.

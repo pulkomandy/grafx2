@@ -115,17 +115,18 @@ typedef struct T_Palette_button
   struct T_Palette_button * Next;///< Pointer to the next palette of current window.
 } T_Palette_button;
 
-/// A window control that represents a vertical scrollbar, with a slider, and two arrow buttons.
+/// A window control that represents a scrollbar, with a slider, and two arrow buttons.
 typedef struct T_Scroller_button
 {
   short Number;                   ///< Unique identifier for all controls
+  byte Is_horizontal;             ///< Boolean: True if slider is horizontal instead of vertical.
   word Pos_X;                     ///< Coordinate for top of button, relative to the window, before scaling.
   word Pos_Y;                     ///< Coordinate for left of button, relative to the window, before scaling.
-  word Height;                    ///< Height before scaling.
+  word Length;                    ///< Length before scaling.
   word Nb_elements;               ///< Number of distinct values it can take.
   word Nb_visibles;               ///< If this slider is meant to show several elements of a collection, this is their number (otherwise, it's 1).
   word Position;                  ///< Current position of the slider: which item it's pointing.
-  word Cursor_height;             ///< Vertical dimension of the slider, in pixels before scaling.
+  word Cursor_length;             ///< Dimension of the slider, in pixels before scaling.
   struct T_Scroller_button * Next;///< Pointer to the next scroller of current window.
 } T_Scroller_button;
 
@@ -172,12 +173,20 @@ typedef struct T_Dropdown_button
 /// Data for one item (file, directory) in a fileselector.
 typedef struct T_Fileselector_item
 {
-  char Short_name[19]; ///< Name to display.
   char Full_name[256]; ///< Filesystem value.
   byte Type;           ///< Type of item: 0 = File, 1 = Directory, 2 = Drive
+  byte Icon;           ///< One of ::ICON_TYPES, ICON_NONE for none.
 
   struct T_Fileselector_item * Next;    ///< Pointer to next item of the current fileselector.
   struct T_Fileselector_item * Previous;///< Pointer to previous item of the current fileselector.
+  
+  word  Length_short_name; ///< Number of bytes allocated for :Short_name
+  #if __GNUC__ < 3
+  char Short_name[0]; ///< Name to display.
+#else
+  char Short_name[]; ///< Name to display.
+#endif
+  // No field after Short_name[] ! Dynamic allocation according to name length.
 } T_Fileselector_item;
 
 /// Data for a fileselector
@@ -206,10 +215,30 @@ typedef struct T_List_button
   T_Special_button  * Entry_button; ///< Pointer to the associated selection control.
   T_Scroller_button * Scroller;     ///< Pointer to the associated scroller
   
-  Func_draw_list_item   Draw_list_item; ///< 
+  Func_draw_list_item   Draw_list_item; ///< Function to call for each item to draw its line
+  byte                  Color_index;    ///< Background color: From 0->MC_Black to 3->MC_White
 
   struct T_List_button * Next;    ///< Pointer to the next list button of current window.
 } T_List_button;
+
+/// A stackable window (editor screen)
+typedef struct
+{
+  word Pos_X;
+  word Pos_Y;
+  word Width;
+  word Height;
+  word Nb_buttons;
+  T_Normal_button   *Normal_button_list;
+  T_Palette_button  *Palette_button_list;
+  T_Scroller_button *Scroller_button_list;
+  T_Special_button  *Special_button_list;
+  T_Dropdown_button *Dropdown_button_list;
+  T_List_button     *List_button_list;
+  int Attribute1;
+  int Attribute2;
+  byte Draggable;
+} T_Window;
 
 /// Data for one line of the "Help" screens.
 typedef struct {
@@ -233,7 +262,15 @@ typedef struct
   dword Inverse;  ///< Boolean, true if the gradient goes in descending order
   dword Mix;      ///< Amount of randomness to add to the mix (0-255)
   dword Technique;///< Gradient technique: 0 (no pattern) 1 (dithering), or 2 (big dithering)
-} T_Gradient_array;
+  byte  Speed;    ///< Speed of cycling. 0 for disabled, 1-64 otherwise.
+} T_Gradient_range;
+
+/// Data for a full set of gradients.
+typedef struct
+{
+  int Used; ///< Reference count
+  T_Gradient_range Range[16];
+}  T_Gradient_array;
 
 /// Data for one setting of shade. Warning, this one is saved/loaded as binary.
 typedef struct
@@ -251,7 +288,7 @@ typedef struct
   word Height;///< Videomode height in pixels. 
 } T_Config_video_mode;
 
-/// Header for gfx2.cfg. Warning, this one is saved/loaded as binary.
+/// Header for gfx2.cfg
 typedef struct
 {
   char Signature[3]; ///< Signature for the file format. "CFG".
@@ -261,20 +298,22 @@ typedef struct
   byte Beta2;        ///< Major beta version number (ex: 5)
 } T_Config_header;
 
-/// Header for a config chunk in for gfx2.cfg. Warning, this one is saved/loaded as binary.
+/// Header for a config chunk in for gfx2.cfg
 typedef struct
 {
   byte Number; ///< Section identfier. Possible values are in enum ::CHUNKS_CFG
   word Size;   ///< Size of the configuration block that follows, in bytes.
 } T_Config_chunk;
 
-/// Configuration for one keyboard shortcut in gfx2.cfg. Warning, this one is saved/loaded as binary.
+
+/// Configuration for one keyboard shortcut in gfx2.cfg
 typedef struct
 {
   word Number; ///< Indicates the shortcut action. This is a number starting from 0, which matches ::T_Key_config.Number
   word Key;    ///< Keyboard shortcut: SDLK_something, or -1 for none
   word Key2;   ///< Alternate keyboard shortcut: SDLK_something, or -1 for none
 } T_Config_shortcut_info;
+
 
 /// This structure holds all the settings saved and loaded as gfx2.ini.
 typedef struct
@@ -318,20 +357,26 @@ typedef struct
   byte Screen_size_in_GIF;               ///< Boolean, true to store current resolution in GIF files.
   byte Auto_nb_used;                     ///< Boolean, true to count colors in Palette screen.
   byte Default_resolution;               ///< Default video mode to use on startup. Index in ::Video_mode.
-  char *Bookmark_directory[NB_BOOKMARKS];///< Bookmarked directories in fileselectors: This is the full dierctory name.
+  char *Bookmark_directory[NB_BOOKMARKS];///< Bookmarked directories in fileselectors: This is the full directory name.
   char Bookmark_label[NB_BOOKMARKS][8+1];///< Bookmarked directories in fileselectors: This is the displayed name.
   int  Window_pos_x;                     ///< Last window x position (9999 if unsupportd/irrelevant for the platform)
   int  Window_pos_y;                     ///< Last window y position (9999 if unsupportd/irrelevant for the platform)
   word Double_click_speed;               ///< Maximum delay for double-click, in ms.
   word Double_key_speed;                 ///< Maximum delay for double-keypress, in ms.
   byte Grid_XOR_color;                   ///< XOR value to apply for grid color.
+  byte Right_click_colorpick;            ///< Boolean, true to enable a "tablet" mode, where RMB acts as instant colorpicker
+  byte Sync_views;                       ///< Boolean, true when the Main and Spare should share their viewport settings.
+  byte Stylus_mode;                      ///< Boolean, true to tweak some tools (eg:Curve) for single-button stylus.
+  word Swap_buttons;                     ///< Sets which key swaps mouse buttons : 0=none, or MOD_CTRL, or MOD_ALT.
+  char Scripts_directory[MAX_PATH_CHARACTERS];///< Full pathname of directory for Lua scripts
+  byte Allow_multi_shortcuts;            ///< Boolean, true if the same key combination can trigger multiple shortcuts.
 } T_Config;
 
-// Structures utilisées pour les descriptions de pages et de liste de pages.
-// Lorsqu'on gèrera les animations, il faudra aussi des listes de listes de
+// Structures utilisÃ©es pour les descriptions de pages et de liste de pages.
+// Lorsqu'on gÃ©rera les animations, il faudra aussi des listes de listes de
 // pages.
 
-// Ces structures sont manipulées à travers des fonctions de gestion du
+// Ces structures sont manipulÃ©es Ã  travers des fonctions de gestion du
 // backup dans "graph.c".
 
 /// This is the data for one step of Undo/Redo, for one image.
@@ -351,10 +396,15 @@ typedef struct T_Page
   byte      File_format;                        ///< File format, in enum ::FILE_FORMATS
   struct T_Page *Next; ///< Pointer to the next backup
   struct T_Page *Prev; ///< Pointer to the previous backup
+  T_Gradient_array *Gradients; ///< Pointer to the gradients used by the image.
   byte      Background_transparent; ///< Boolean, true if Layer 0 should have transparent pixels
   byte      Transparent_color; ///< Index of transparent color. 0 to 255.
   byte      Nb_layers; ///< Number of layers
+#if __GNUC__ < 3
+  byte *    Image[0];
+#else
   byte *    Image[];  ///< Pixel data for the (first layer of) image.
+#endif
     // Define as Image[0] if you have an old gcc which is not C99.
   // No field after Image[] ! Dynamic layer allocation for Image[1], [2] etc.
 } T_Page;
@@ -385,6 +435,7 @@ typedef struct
   word Height;
   byte * Brush; /// < Color brush (if any)
   T_Palette Palette;
+  byte Colormap[256];
   byte Transp_color;
 } T_Brush_template;
 
@@ -400,21 +451,6 @@ typedef struct
   /// Graphic resources for the mouse cursor.
   byte Cursor_sprite[NB_CURSOR_SPRITES][CURSOR_SPRITE_HEIGHT][CURSOR_SPRITE_WIDTH];
 
-  // Preset paintbrushes
-  
-  /// Graphic resources for the preset paintbrushes.
-  byte  Paintbrush_sprite [NB_PAINTBRUSH_SPRITES][PAINTBRUSH_HEIGHT][PAINTBRUSH_WIDTH];
-  /// Width of the preset paintbrushes.
-  word  Preset_paintbrush_width[NB_PAINTBRUSH_SPRITES];
-  /// Height of the preset paintbrushes.
-  word  Preset_paintbrush_height[NB_PAINTBRUSH_SPRITES];
-  /// Type of the preset paintbrush: index in enum PAINTBRUSH_SHAPES
-  byte  Paintbrush_type[NB_PAINTBRUSH_SPRITES];
-  /// Brush handle for the preset brushes. Generally ::Preset_paintbrush_width[]/2
-  word  Preset_paintbrush_offset_X[NB_PAINTBRUSH_SPRITES];
-  /// Brush handle for the preset brushes. Generally ::Preset_paintbrush_height[]/2
-  word  Preset_paintbrush_offset_Y[NB_PAINTBRUSH_SPRITES];
-
   // Sieve patterns
   
   /// Preset sieve patterns, stored as binary (one word per line)
@@ -423,13 +459,13 @@ typedef struct
   // Menu and other graphics
   
   /// Bitmap data for the menu, a single rectangle.
-  byte Menu_block[35][MENU_WIDTH];
-  byte Layerbar_block[10][144];
-  byte Statusbar_block[9][20];
+  byte Menu_block[3][35][MENU_WIDTH];
+  byte Layerbar_block[3][10][144];
+  byte Statusbar_block[3][9][20];
   /// Bitmap data for the icons that are displayed over the menu.
-  byte Menu_sprite[NB_MENU_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
+  byte Menu_sprite[2][NB_MENU_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
   /// Bitmap data for the different "effects" icons.
-  byte Effect_sprite[NB_EFFECTS_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
+  byte Effect_sprite[NB_EFFECTS_SPRITES][EFFECT_SPRITE_HEIGHT][EFFECT_SPRITE_WIDTH];
   /// Bitmap data for the different Layer icons.
   byte Layer_sprite[3][16][LAYER_SPRITE_HEIGHT][LAYER_SPRITE_WIDTH];
   /// Bitmap data for the Grafx2 logo that appears on splash screen. All 256 colors allowed.
@@ -457,19 +493,30 @@ typedef struct
   /// Preview for displaying in the skin dialog
   byte Preview[16][173];
 
-  /// Black GUI color index in skin palette
-  byte Color_black;
-  /// Dark GUI color index in skin palette
-  byte Color_dark;
-  /// Light GUI color index in skin palette
-  byte Color_light;
-  /// White GUI color index in skin palette
-  byte Color_white;
+  /// GUI color indices in skin palette: black, dark, light, white.
+  byte Color[4];
   /// Transparent GUI color index in skin file
   byte Color_trans;
 
-
 } T_Gui_skin;
+
+typedef struct {
+  // Preset paintbrushes
+  
+  /// Graphic resources for the preset paintbrushes.
+  byte  Sprite[PAINTBRUSH_HEIGHT][PAINTBRUSH_WIDTH];
+  /// Width of the preset paintbrushes.
+  word  Width;
+  /// Height of the preset paintbrushes.
+  word  Height;
+  /// Type of the preset paintbrush: index in enum PAINTBRUSH_SHAPES
+  byte  Shape;
+  /// Brush handle for the preset brushes. Generally ::Width[]/2
+  word  Offset_X;
+  /// Brush handle for the preset brushes. Generally ::Height[]/2
+  word  Offset_Y;
+
+} T_Paintbrush;
 
 // A menubar.
 typedef struct {
@@ -477,7 +524,7 @@ typedef struct {
   word Height;
   byte Visible;
   word Top; ///< Relative to the top line of the menu, hidden bars don't count.
-  byte* Skin;
+  byte* Skin[3]; ///< [0] has normal buttons, [1] has selected buttons, [2] is current.
   word Skin_width;
   byte Last_button_index;
 } T_Menu_Bar;
