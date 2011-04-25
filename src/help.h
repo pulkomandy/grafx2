@@ -57,6 +57,10 @@ short Print_help(short x_pos, short y_pos, const char *line, char line_type, sho
 // de type 0x100+BOUTON_* ou SPECIAL_*
 const char * Keyboard_shortcut_value(word shortcut_number);
 
+///
+/// Browse the complete list of shortcuts and ensure that a key only triggers
+/// one of them.
+void Remove_duplicate_shortcuts(void);
 
 #endif
 

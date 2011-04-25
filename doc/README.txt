@@ -77,6 +77,7 @@ Sends greetings and glops to pouet.net : http://pouet.net/prod.php?which=51865
 === HISTORY ===
 
 Short revision history :
+  * 04/2011  2.3       Further improvements
   * 03/2010  2.2       Layers, Lua scripting
   * 09/2009  2.1       GUI improvements and some new features.
   * 06/2009  2.0       Completed the features planned by Sunset Design.

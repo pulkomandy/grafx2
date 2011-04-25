@@ -29,20 +29,15 @@
     #include <proto/dos.h>
     #include <sys/types.h>
     #include <dirent.h>
-    #define isHidden(x) (0)
-
 #elif defined (__MINT__)
     #include <mint/sysbind.h>
     #include <dirent.h>
-    #define isHidden(x) (0)
 #elif defined(__WIN32__)
     #include <dirent.h>
     #include <windows.h>
     #include <commdlg.h>
-    #define isHidden(x) (GetFileAttributesA((x)->d_name)&FILE_ATTRIBUTE_HIDDEN)
 #else
     #include <dirent.h>
-    #define isHidden(x) ((x)->d_name[0]=='.')
 #endif
 
 #include <stdlib.h>
@@ -393,7 +388,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
       (!strcmp(entry->d_name, PARENT_DIR) ||
       // ou qu'il n'est pas caché
        Config.Show_hidden_directories ||
-     !isHidden(entry)))
+     !File_is_hidden(entry->d_name, entry->d_name)))
     {
       // On rajoute le répertoire à la liste
       Add_element_to_list(list, entry->d_name, Format_filename(entry->d_name, 19, 1), 1, ICON_NONE);
@@ -401,7 +396,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
     }
     else if (S_ISREG(Infos_enreg.st_mode) && //Il s'agit d'un fichier
       (Config.Show_hidden_files || //Il n'est pas caché
-      !isHidden(entry)))
+      !File_is_hidden(entry->d_name, entry->d_name)))
     {
       const char * ext = filter;
       while (ext!=NULL)
@@ -479,7 +474,7 @@ void bstrtostr( BSTR in, STRPTR out, TEXT max )
 #endif
 
 // -- Lecture d'une liste de lecteurs / volumes -----------------------------
-void Read_list_of_drives(T_Fileselector *list)
+void Read_list_of_drives(T_Fileselector *list, byte name_length)
 {
 
   // Empty the current content of fileselector:
@@ -500,7 +495,7 @@ void Read_list_of_drives(T_Fileselector *list)
       {
         bstrtostr( dl->dol_Name, tmp, 254 );
         strcat( tmp, ":" );
-        Add_element_to_list(list, tmp, Format_filename(tmp, 19, 2), 2, ICON_NONE );
+        Add_element_to_list(list, tmp, Format_filename(tmp, name_length, 2), 2, ICON_NONE );
         list->Nb_directories++;
       }
       UnLockDosList( LDF_VOLUMES | LDF_READ );
@@ -544,7 +539,7 @@ void Read_list_of_drives(T_Fileselector *list)
             break;
         }
         drive_name[0]='A'+bit_index;
-        Add_element_to_list(list, drive_name, Format_filename(drive_name,18,2), 2, icon);
+        Add_element_to_list(list, drive_name, Format_filename(drive_name,name_length-1,2), 2, icon);
         list->Nb_directories++;
         drive_index++;
       }
@@ -561,7 +556,7 @@ void Read_list_of_drives(T_Fileselector *list)
       if ( (1 << bit_index) & drive_bits )
       {
         drive_name[0]='A'+bit_index;
-        Add_element_to_list(list, drive_name,Format_filename(drive_name,19,2),2,ICON_NONE);
+        Add_element_to_list(list, drive_name,Format_filename(drive_name,name_length,2),2,ICON_NONE);
         list->Nb_directories++;
         drive_index++;
       }
@@ -583,11 +578,11 @@ void Read_list_of_drives(T_Fileselector *list)
     #else
         char * home_dir = getenv("HOME");
     #endif
-    Add_element_to_list(list, "/", Format_filename("/",19,2), 2, ICON_NONE);
+    Add_element_to_list(list, "/", Format_filename("/",name_length,2), 2, ICON_NONE);
     list->Nb_directories++;
     if(home_dir)
     {
-        Add_element_to_list(list, home_dir, Format_filename(home_dir, 19, 2), 2, ICON_NONE);
+        Add_element_to_list(list, home_dir, Format_filename(home_dir, name_length, 2), 2, ICON_NONE);
         list->Nb_directories++;
     }
 
@@ -597,7 +592,7 @@ void Read_list_of_drives(T_Fileselector *list)
     {
         if(mount_points_list->me_dummy == 0 && strcmp(mount_points_list->me_mountdir,"/") && strcmp(mount_points_list->me_mountdir,"/home"))
         {
-            Add_element_to_list(list, mount_points_list->me_mountdir, Format_filename(mount_points_list->me_mountdir, 19, 2), 2, ICON_NONE);
+            Add_element_to_list(list, mount_points_list->me_mountdir, Format_filename(mount_points_list->me_mountdir, name_length, 2), 2, ICON_NONE);
             list->Nb_directories++;
         }
         next = mount_points_list -> me_next;
@@ -1227,7 +1222,7 @@ short Quicksearch(T_Fileselector *selector)
 }
 
 // Translated from Highlight_file
-void Locate_list_item(T_List_button * list, T_Fileselector * selector, short selected_item)
+void Locate_list_item(T_List_button * list, short selected_item)
 {
 
   // Safety bounds
@@ -1263,7 +1258,7 @@ int Quicksearch_list(T_List_button * list, T_Fileselector * selector)
   short selected_item=Quicksearch(selector);
   if (selected_item>=0 && selected_item!=list->Cursor_position+list->List_start)
   {
-    Locate_list_item(list, selector, selected_item);
+    Locate_list_item(list, selected_item);
     
     Hide_cursor();
     // Mise à jour du scroller
@@ -1419,12 +1414,13 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
   else
   {
     #if defined(__MINT__)    
-    chdir(context->File_directory);
     static char path[1024]={0};
+    chdir(context->File_directory);
     Dgetpath(path,0);
     strcat(path,PATH_SEPARATOR);
     strcpy(Main_current_directory,path);  
  #else
+    chdir(context->File_directory);
     getcwd(Main_current_directory,256);
   #endif
 
@@ -1610,7 +1606,6 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
 		if (Main_format != Window_attribute2) {
 			char* savename = (char *)strdup(Selector_filename);
 			int nameLength = strlen(savename);
-			DEBUG(Selector_filename, 42);
 			Main_format = Window_attribute2;
 			// Comme on change de liste, on se place en début de liste:
 			Main_fileselector_position = 0;
@@ -1709,7 +1704,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
           Main_fileselector_position=0;
           Main_fileselector_offset=0;
           // Affichage des premiers fichiers visibles:
-          Read_list_of_drives(&Filelist);
+          Read_list_of_drives(&Filelist,19);
           Sort_list_of_files(&Filelist);
           Prepare_and_display_filelist(Main_fileselector_position,Main_fileselector_offset,file_scroller);
           Display_cursor();
@@ -1940,7 +1935,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
       else  // Sinon on essaye de charger ou sauver le fichier
       {
         strcpy(context->File_directory,Main_current_directory);
-        if (!load)
+        if (!load && !Get_fileformat(Main_format)->Palette_only)
           Main_fileformat=Main_format;
         save_or_load_image=1;
       }

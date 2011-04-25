@@ -949,7 +949,7 @@ void Remap_brush(void)
         Brush_colormap[color]=color;
       else
         // Usual method: closest by r g b
-        Brush_colormap[color]=Best_color_perceptual(r,g,b);
+        Brush_colormap[color]=Best_color_perceptual_except(r,g,b,Back_color);
     }
 
   //   Il reste une couleur non calculée dans la table qu'il faut mettre à

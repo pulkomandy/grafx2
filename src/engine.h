@@ -98,7 +98,7 @@ void Window_dropdown_clear_items(T_Dropdown_button * dropdown);
 T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, short off_y);
 
 T_List_button * Window_set_list_button(T_Special_button * entry_button,
-  T_Scroller_button * scroller, Func_draw_list_item draw_list_item);
+  T_Scroller_button * scroller, Func_draw_list_item draw_list_item, byte color_index);
 void Window_redraw_list(T_List_button * list);
 byte Window_click_in_rectangle(short start_x, short start_y, short end_x,
   short end_y);

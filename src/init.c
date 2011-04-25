@@ -2512,7 +2512,7 @@ void Set_config_defaults(void)
 {
   int index, index2;
 
-  // Raccourcis clavier
+  // Keyboard shortcuts
   for (index=0; index<NB_SHORTCUTS; index++)
   {
     switch(Ordering[index]>>8)
@@ -2550,7 +2550,7 @@ void Set_config_defaults(void)
             Shade_list[Shade_current].Mode,
             Shade_table_left,Shade_table_right);
 
-  // Masque
+  // Mask
   for (index=0; index<256; index++)
     Mask_table[index]=0;
 
@@ -2577,7 +2577,7 @@ void Set_config_defaults(void)
   Quick_shade_step=1;
   Quick_shade_loop=0;
 
-  // Grille
+  // Grid
   Snap_width=Snap_height=8;
   Snap_offset_X=Snap_offset_Y=0;
 
@@ -2588,6 +2588,7 @@ void Set_config_defaults(void)
 #if defined(__WIN32__)
   #define SIGHANDLER_T __p_sig_fn_t
 #elif defined(__macosx__)
+  typedef void (*sig_t) (int);
   #define SIGHANDLER_T sig_t
 #else
   #define SIGHANDLER_T __sighandler_t

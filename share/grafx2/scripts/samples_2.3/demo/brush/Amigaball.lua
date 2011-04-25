@@ -1,4 +1,7 @@
 --BRUSH Scene: Amigaball 1.0
+--
+--Draws the famous 'Amiga ball' in the brush.
+--
 --by Richard Fhager 
 --http://hem.fyristorg.com/dawnbringer/
 
@@ -15,6 +18,11 @@
 
 
 w, h = getbrushsize()
+if (w<64 or h<64) then
+  setbrushsize(64,64)
+  w=64
+  h=64
+end
 
 for y = 0, h - 1, 1 do
   for x = 0, w - 1, 1 do

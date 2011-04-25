@@ -99,6 +99,8 @@ short Min_X=0;
 short Min_Y=0;
 short Max_X=10000;
 short Max_Y=10000;
+short Status_line_dirty_begin=0;
+short Status_line_dirty_end=0;
 #endif
 
 #if (UPDATE_METHOD == UPDATE_METHOD_FULL_PAGE)
@@ -131,6 +133,13 @@ void Flush_update(void)
     Min_X=Min_Y=10000;
     Max_X=Max_Y=0;
   }
+  if (Status_line_dirty_end)
+  {
+    SDL_UpdateRect(Screen_SDL, (18+(Status_line_dirty_begin*8))*Menu_factor_X*Pixel_width,Menu_status_Y*Pixel_height,(Status_line_dirty_end-Status_line_dirty_begin)*8*Menu_factor_X*Pixel_width,8*Menu_factor_Y*Pixel_height);
+  }
+  Status_line_dirty_begin=25;
+  Status_line_dirty_end=0;
+  
     #endif
 
 }
@@ -161,6 +170,28 @@ void Update_rect(short x, short y, unsigned short width, unsigned short height)
   #endif
 
   #if (UPDATE_METHOD == UPDATE_METHOD_FULL_PAGE)
+  update_is_required=1;
+  #endif
+
+}
+
+void Update_status_line(short char_pos, short width)
+{
+  #if (UPDATE_METHOD == UPDATE_METHOD_MULTI_RECTANGLE)
+  SDL_UpdateRect(Screen_SDL, (18+char_pos*8)*Menu_factor_X*Pixel_width,Menu_status_Y*Pixel_height,width*8*Menu_factor_X*Pixel_width,8*Menu_factor_Y*Pixel_height);
+  #endif
+
+  #if (UPDATE_METHOD == UPDATE_METHOD_CUMULATED)
+  // Merge the ranges
+  if (Status_line_dirty_end < char_pos+width)
+    Status_line_dirty_end=char_pos+width;
+  if (Status_line_dirty_begin > char_pos)
+    Status_line_dirty_begin=char_pos;
+  #endif
+
+  #if (UPDATE_METHOD == UPDATE_METHOD_FULL_PAGE)
+  (void)char_pos; // unused parameter
+  (void)width; // unused parameter
   update_is_required=1;
   #endif
 

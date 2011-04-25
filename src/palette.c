@@ -207,6 +207,66 @@ void Spread_colors(short start,short end,T_Palette palette)
   }
 }
 
+// FIXME: keep them in main function but pass them to Palette_edit_*()
+  T_Components * backup_palette;
+  T_Components * temp_palette;
+  T_Components * working_palette;
+  
+byte Palette_undo_state = 0;
+byte Palette_change_state = 0;
+
+/// Backup before doing one self-complete change.
+void Palette_edit_step()
+{
+  // back up
+  memcpy(backup_palette,working_palette,sizeof(T_Palette));
+  Palette_change_state=0;
+  Palette_undo_state=0;
+}
+
+/// Mode for incremental changes.
+void Palette_edit_select_range()
+{
+  if (Palette_change_state)
+  {/*
+    // acknowledge pending changes and back up
+    memcpy(backup_palette,working_palette,sizeof(T_Palette));
+    memcpy(temp_palette,working_palette,sizeof(T_Palette));
+  */}
+  Palette_change_state=0;
+}
+
+/// Perform incremental change in RGB channel of some color(s).
+void Palette_edit_alter_channel()
+{
+  if (!Palette_change_state)
+  {
+    memcpy(backup_palette,working_palette,sizeof(T_Palette));
+    memcpy(temp_palette,working_palette,sizeof(T_Palette));
+  }
+  Palette_change_state=1;
+}
+
+/// Undo
+void Palette_edit_undo_redo()
+{
+  if (Palette_change_state)
+  {
+    // swap backup and working (temp serves as intermediate)
+    memcpy(temp_palette,backup_palette,sizeof(T_Palette));
+    memcpy(backup_palette,working_palette,sizeof(T_Palette));
+    memcpy(working_palette,temp_palette,sizeof(T_Palette));
+  }
+  else
+  {
+    // swap backup and working (temp serves as intermediate)
+    memcpy(temp_palette,backup_palette,sizeof(T_Palette));
+    memcpy(backup_palette,working_palette,sizeof(T_Palette));
+    memcpy(working_palette,temp_palette,sizeof(T_Palette));
+  }
+  Palette_undo_state=(Palette_undo_state==0);
+}
+
 
 void Update_color_count(short * used_colors, dword * color_usage)
 {
@@ -1027,9 +1087,9 @@ void Button_Palette(void)
   short  used_colors = -1; // -1 <=> Inconnu
   byte   conversion_table[256];
 
-  T_Components * backup_palette;
-  T_Components * temp_palette;
-  T_Components * working_palette;
+  //T_Components * backup_palette;
+  //T_Components * temp_palette;
+  //T_Components * working_palette;
   
   static byte show_used_colors=0;
 
@@ -1042,8 +1102,7 @@ void Button_Palette(void)
   Open_window(299, 188,"Palette");
 
   memcpy(working_palette, Main_palette, sizeof(T_Palette));
-  memcpy(backup_palette, Main_palette, sizeof(T_Palette));
-  memcpy(temp_palette, Main_palette, sizeof(T_Palette));
+  Palette_edit_step();
 
   Window_set_palette_button(5, 79); // 1
 
@@ -1195,7 +1254,7 @@ void Button_Palette(void)
               int nb_colors;
               
               // Backup
-              memcpy(backup_palette,working_palette,sizeof(T_Palette));
+              Palette_edit_step();
               
               nb_colors = Get_clipboard_colors(working_palette, block_start);
               if (nb_colors>0)
@@ -1261,8 +1320,7 @@ void Button_Palette(void)
                 Window_rectangle(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,Fore_color);
                 Update_window_area(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H);
 
-                memcpy(backup_palette    ,working_palette,sizeof(T_Palette));
-                memcpy(temp_palette,working_palette,sizeof(T_Palette));
+                Palette_edit_select_range();
               }
             }
             else
@@ -1337,6 +1395,7 @@ void Button_Palette(void)
         break;
       case  2 : // Jauge rouge
         Hide_cursor();
+        Palette_edit_alter_channel();
         if (block_start==block_end)
         {
           if(Palette_view_is_RGB)
@@ -1417,6 +1476,7 @@ void Button_Palette(void)
         break;
       case  3 : // Jauge verte
         Hide_cursor();
+        Palette_edit_alter_channel();
         if (block_start==block_end)
         {
           if(Palette_view_is_RGB)
@@ -1497,6 +1557,7 @@ void Button_Palette(void)
 
       case  4 : // Jauge bleue
         Hide_cursor();
+        Palette_edit_alter_channel();
         if (block_start==block_end)
         {
           if(Palette_view_is_RGB)
@@ -1580,7 +1641,7 @@ void Button_Palette(void)
         {
           dword sum_r=0, sum_g=0, sum_b=0, used=0;
 
-          memcpy(backup_palette,working_palette,sizeof(T_Palette));
+          Palette_edit_step();
           // Compute weighted average
           for (i=block_start; i<=block_end; i++)
           {
@@ -1614,7 +1675,7 @@ void Button_Palette(void)
           if (temp_color>=0)
           {
             dword sum_r=0, sum_g=0, sum_b=0, used;
-            memcpy(backup_palette,working_palette,sizeof(T_Palette));
+            Palette_edit_step();
             
             // Compute weighted average
             used=color_usage[temp_color]+color_usage[Fore_color];
@@ -1656,7 +1717,7 @@ void Button_Palette(void)
 
       case 6 : // Grey scale
         // Backup
-        memcpy(backup_palette,working_palette,sizeof(T_Palette));
+        Palette_edit_step();
         // Grey Scale
         for (i=block_start;i<=block_end;i++)
         {
@@ -1680,7 +1741,7 @@ void Button_Palette(void)
          && (temp_color!=block_start))
         {
           Hide_cursor();
-          memcpy(backup_palette,working_palette,sizeof(T_Palette));
+          Palette_edit_step();
 
           // On calcule le nombre de couleurs a swapper sans risquer de sortir
           // de la palette (La var. first_color est utilisée pour économiser 1 var; c'est tout)
@@ -1735,6 +1796,7 @@ void Button_Palette(void)
           // En cas de X-Swap, tout l'ecran a pu changer de couleur.
           if (clicked_button==8)
           {
+            Palette_edit_step(); // Disable Undo
             Update_rect(0, 0, Screen_width, Menu_Y_before_window);
             End_of_modification();
           }
@@ -1742,12 +1804,12 @@ void Button_Palette(void)
         }
         break;
 
-      case  9 : // Copy
+      case  9 : // Copy (to other slot)
         temp_color=Wait_click_in_palette(Window_palette_button_list);
         if ((temp_color>=0) && (temp_color!=block_start))
         {
           Hide_cursor();
-          memcpy(backup_palette,working_palette,sizeof(T_Palette));
+          Palette_edit_step();
           memcpy(working_palette+temp_color,backup_palette+block_start,
                  ((temp_color+block_end-block_start<=255)?block_end+1-block_start:256-temp_color)*3);
           memcpy(temp_palette,working_palette,sizeof(T_Palette));
@@ -1788,7 +1850,7 @@ void Button_Palette(void)
       case 10 : // Spread
         if (block_start!=block_end)
         {
-          memcpy(backup_palette,working_palette,sizeof(T_Palette));
+          Palette_edit_step();
           Spread_colors(block_start,block_end,working_palette);
         }
         else
@@ -1796,7 +1858,7 @@ void Button_Palette(void)
           temp_color=Wait_click_in_palette(Window_palette_button_list);
           if (temp_color>=0)
           {
-            memcpy(backup_palette,working_palette,sizeof(T_Palette));
+            Palette_edit_step();
             if (temp_color<Fore_color)
               Spread_colors(temp_color,Fore_color,working_palette);
             else
@@ -1816,7 +1878,7 @@ void Button_Palette(void)
         break;
 
       case 11: // Reduce
-        memcpy(backup_palette, working_palette, sizeof(T_Palette));
+        Palette_edit_step();
         if (Window_attribute2==0) // User picked "other" choice
         {
           int choice;
@@ -1857,16 +1919,14 @@ void Button_Palette(void)
             Draw_all_palette_sliders(red_slider, green_slider, blue_slider,
                     working_palette, block_start, block_end);
             memcpy(temp_palette, working_palette, sizeof(T_Palette));
-
+            Palette_edit_step(); // Disable Undo
             End_of_modification();
             need_to_remap = 1;
         }
         break;
 
       case 12: // Undo
-        memcpy(temp_palette,backup_palette    ,sizeof(T_Palette));
-        memcpy(backup_palette    ,working_palette,sizeof(T_Palette));
-        memcpy(working_palette,temp_palette,sizeof(T_Palette));
+        Palette_edit_undo_redo();
         Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
         Set_palette(working_palette);
 
@@ -1879,7 +1939,7 @@ void Button_Palette(void)
         break;
 
       case 16 : // Zap unused
-        memcpy(backup_palette,working_palette,sizeof(T_Palette));
+        Palette_edit_step();
         if (used_colors==-1)
           Update_color_count(&used_colors,color_usage);
         for (i=0; i<256; i++)
@@ -1912,6 +1972,7 @@ void Button_Palette(void)
        if (!Palette_view_is_RGB)
           break;
         Hide_cursor();
+        Palette_edit_alter_channel();
         if (block_start==block_end)
         {
           if (red_slider->Position)
@@ -2037,6 +2098,7 @@ void Button_Palette(void)
         if (!Palette_view_is_RGB)
           break;
         Hide_cursor();
+        Palette_edit_alter_channel();
         if (block_start==block_end)
         {
           if (red_slider->Position<Color_max)
@@ -2160,7 +2222,7 @@ void Button_Palette(void)
 
       case 19 : // Negative
         // Backup
-        memcpy(backup_palette,working_palette,sizeof(T_Palette));
+        Palette_edit_step();
         // Negative
         for (i=block_start;i<=block_end;i++)
         {
@@ -2179,7 +2241,7 @@ void Button_Palette(void)
       case 20 : // Inversion
       case 21 : // X-Inversion
         // Backup
-        memcpy(backup_palette,working_palette,sizeof(T_Palette));
+        Palette_edit_step(); // Not undoable if X-Invert
         //   On initialise la table de conversion
         for (i=0; i<=255; i++)
           conversion_table[i]=i;
@@ -2218,6 +2280,7 @@ void Button_Palette(void)
           Remap_image_highlevel(conversion_table);
           Display_cursor();
           End_of_modification();
+          Palette_edit_step(); // Disable Undo
         }
         // On prépare la "modifiabilité" des nouvelles couleurs
         Set_palette(working_palette);
@@ -2229,8 +2292,7 @@ void Button_Palette(void)
       case 22 : // HSL <> RGB
         
         // Acte les changements en cours sur une ou plusieurs couleurs
-        memcpy(temp_palette,working_palette,sizeof(T_Palette));
-        memcpy(backup_palette, working_palette,sizeof(T_Palette));
+        Palette_edit_select_range();
 
         Hide_cursor();
         
@@ -2360,6 +2422,7 @@ void Button_Palette(void)
         // Maintenant, tous ces calculs doivent êtres pris en compte dans la
         // palette, l'image et à l'écran.
         Set_palette(working_palette);
+        Palette_edit_step(); // Disable Undo
         
         End_of_modification();
         need_to_remap=1;
@@ -2398,7 +2461,7 @@ void Button_Palette(void)
             new_blue=(new_color&0x0000FF);
             
             // Backup
-            memcpy(backup_palette,working_palette,sizeof(T_Palette));
+            Palette_edit_step();
             // Assign color
             for (i=block_start;i<=block_end;i++)
             {
@@ -2445,8 +2508,7 @@ void Button_Palette(void)
           Window_rectangle(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,Fore_color);
           Update_window_area(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H);
       
-          memcpy(backup_palette    ,working_palette,sizeof(T_Palette));
-          memcpy(temp_palette,working_palette,sizeof(T_Palette));
+          Palette_edit_select_range();
 
         }
         Display_cursor();
@@ -2541,7 +2603,7 @@ void Button_Palette(void)
           if (used_colors==-1)
             Update_color_count(&used_colors, color_usage);
 
-          memcpy(backup_palette,working_palette,sizeof(T_Palette));
+          Palette_edit_step();
           memcpy(temp_palette,Main_palette,sizeof(T_Palette));
           memcpy(Main_palette,working_palette,sizeof(T_Palette));
           Set_nice_menu_colors(color_usage,0);
@@ -2594,8 +2656,7 @@ void Button_Palette(void)
               Window_rectangle(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,Fore_color);
               Update_window_area(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H);
               
-              memcpy(backup_palette    ,working_palette,sizeof(T_Palette));
-              memcpy(temp_palette,working_palette,sizeof(T_Palette));
+              Palette_edit_select_range();
             }
             Display_cursor();
             Wait_end_of_click();
@@ -2622,7 +2683,7 @@ void Button_Palette(void)
 
           Hide_cursor();
           // Backup
-          memcpy(backup_palette,working_palette,sizeof(T_Palette));
+          Palette_edit_step();
           
           nb_colors = Get_clipboard_colors(working_palette, block_start);
           if (nb_colors>0)

@@ -2,12 +2,11 @@
 --Spare page holds data - Plays on current
 --by Richard Fhager
 
-require("memory")
+dofile("../libs/memory.lua")
 
 arg=memory.load({XS=16,YS=16,SPACE=1,FRAMES=8,XOFF=0,YOFF=0,FPS=10})
 
-OK, XS, YS, SPACE, FRAMES, XOFF, YOFF, FPS = inputbox("Sprite-Sheet
-Animator",
+OK, XS, YS, SPACE, FRAMES, XOFF, YOFF, FPS = inputbox("Sprite-Sheet Animator",
  "Sprite X-size",   arg.XS,    1, 256,0,
  "Sprite Y-size",   arg.YS,    1, 256,0,
  "Spacing",         arg.SPACE, 0,  32,0,

@@ -59,6 +59,7 @@ typedef struct {
         int CharBegin[256];
         int CharWidth[256];
         int Space;
+        unsigned char Transparent;
 } SFont_Font;
 
 ///
@@ -86,7 +87,7 @@ void SFont_Write(SDL_Surface *Surface, const SFont_Font *Font, int x, int y,
 /// Returns the width of "text" in pixels
 int SFont_TextWidth(const SFont_Font* Font, const char *text);
 /// Returns the height of "text" in pixels (which is always equal to Font->Surface->h)
-int SFont_TextHeight(const SFont_Font* Font);
+int SFont_TextHeight(const SFont_Font* Font, const char *text);
 
 /// Blits a string to Surface with centered x position
 void SFont_WriteCenter(SDL_Surface *Surface, const SFont_Font* Font, int y,

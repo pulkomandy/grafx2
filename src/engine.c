@@ -227,7 +227,7 @@ void Draw_menu_button(byte btn_number,byte pressed)
   word y_pos;
   byte current_menu;
   byte color;
-  char icon;
+  signed char icon;
 
   // Find in which menu the button is
   for (current_menu = 0; current_menu < MENUBAR_COUNT; current_menu++)
@@ -2190,7 +2190,7 @@ void Window_dropdown_clear_items(T_Dropdown_button * dropdown)
 // - entry_button is the textual area where the list values will be printed.
 // - scroller is a scroller button attached to it
 
-T_List_button * Window_set_list_button(T_Special_button * entry_button, T_Scroller_button * scroller, Func_draw_list_item draw_list_item)
+T_List_button * Window_set_list_button(T_Special_button * entry_button, T_Scroller_button * scroller, Func_draw_list_item draw_list_item, byte color_index)
 {
   T_List_button *temp;
 
@@ -2201,6 +2201,7 @@ T_List_button * Window_set_list_button(T_Special_button * entry_button, T_Scroll
   temp->Entry_button    = entry_button;
   temp->Scroller        = scroller;
   temp->Draw_list_item  = draw_list_item;
+  temp->Color_index     = color_index;
 
   temp->Next=Window_list_button_list;
   Window_list_button_list=temp;
@@ -2222,12 +2223,19 @@ void Window_redraw_list(T_List_button * list)
   // Remaining rectangle under list
   i=list->Scroller->Nb_visibles-list->Scroller->Nb_elements;
   if (i>0)
+  {
+    byte color;
+    color = list->Color_index == 0 ? MC_Black :
+           (list->Color_index == 1 ? MC_Dark :
+           (list->Color_index == 2 ? MC_Light : MC_White));
+    
     Window_rectangle(
       list->Entry_button->Pos_X,
       list->Entry_button->Pos_Y+list->Scroller->Nb_elements*8,
       list->Entry_button->Width,
       i*8,
-      MC_Light);
+      color);
+  }
 }
 
 //----------------------- Ouverture d'un pop-up -----------------------
@@ -3151,9 +3159,10 @@ short Window_get_button_shortcut(void)
 short Window_clicked_button(void)
 {
   short Button;
+  byte old_mouse_k;
 
+  old_mouse_k=Mouse_K;
   Get_input(20);
-
   // Handle clicks
   if (Mouse_K)
   {
@@ -3180,6 +3189,9 @@ short Window_clicked_button(void)
     {
       short clicked_button;
       T_List_button * list;
+      static Uint32 time_last_click = 0;
+      static int last_list_number = -1;
+      Uint32 time_now;
       
       // Check which controls was clicked (by rectangular area)
       clicked_button = Window_get_clicked_button();
@@ -3192,9 +3204,26 @@ short Window_clicked_button(void)
           // Click in the textual part of a list.
           short clicked_line;            
           clicked_line = (((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-list->Entry_button->Pos_Y)>>3;
-          if (clicked_line == list->Cursor_position ||   // Same as before
-            clicked_line >= list->Scroller->Nb_elements) // Below last line              
+          if (clicked_line >= list->Scroller->Nb_elements) // Below last line
             return 0;
+          time_now = SDL_GetTicks();
+          if (clicked_line == list->Cursor_position)
+          {
+            // Double click check
+            if (old_mouse_k==0 && last_list_number==list->Number && time_now - time_last_click < Config.Double_click_speed)
+            {
+              time_last_click = time_now;
+              Input_sticky_control=0;
+              // Store the selected value as attribute2
+              Window_attribute2=list->List_start + list->Cursor_position;
+              // Return the control ID of the "special button" that covers the list.
+              return list->Entry_button->Number;
+            }
+            time_last_click = time_now;
+            last_list_number=list->Number;
+            // Already selected : don't activate anything
+            return 0;
+          }
           
           Hide_cursor();
           // Redraw one item as disabled

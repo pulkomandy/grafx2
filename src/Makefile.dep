@@ -15,7 +15,7 @@ $(OBJDIR)/engine.o: engine.c const.h struct.h global.h graph.h misc.h special.h 
  input.h engine.h pages.h layers.h factory.h loadsave.h io.h
 $(OBJDIR)/factory.o: factory.c brush.h struct.h const.h buttons.h engine.h errors.h \
  filesel.h loadsave.h global.h graph.h io.h misc.h pages.h readline.h \
- sdlscreen.h windows.h palette.h input.h help.h
+ sdlscreen.h windows.h palette.h input.h help.h realpath.h
 $(OBJDIR)/fileformats.o: fileformats.c errors.h global.h struct.h const.h \
  loadsave.h misc.h io.h windows.h pages.h
 $(OBJDIR)/filesel.o: filesel.c const.h struct.h global.h misc.h errors.h io.h \
@@ -45,7 +45,8 @@ $(OBJDIR)/loadsave.o: loadsave.c buttons.h struct.h const.h errors.h global.h io
  engine.h brush.h setup.h
 $(OBJDIR)/main.o: main.c const.h struct.h global.h graph.h misc.h init.h buttons.h \
  engine.h pages.h loadsave.h sdlscreen.h errors.h readini.h saveini.h \
- io.h text.h setup.h windows.h brush.h palette.h realpath.h input.h
+ io.h text.h setup.h windows.h brush.h palette.h realpath.h input.h \
+ help.h
 $(OBJDIR)/misc.o: misc.c struct.h const.h sdlscreen.h global.h errors.h buttons.h \
  engine.h misc.h keyboard.h windows.h palette.h input.h graph.h pages.h
 $(OBJDIR)/miscfileformats.o: miscfileformats.c engine.h struct.h const.h errors.h \
@@ -61,6 +62,9 @@ $(OBJDIR)/pages.o: pages.c global.h struct.h const.h pages.h errors.h loadsave.h
 $(OBJDIR)/palette.o: palette.c const.h struct.h global.h misc.h engine.h readline.h \
  buttons.h pages.h help.h sdlscreen.h errors.h op_c.h windows.h input.h \
  palette.h shade.h
+$(OBJDIR)/palette_test.o: palette_test.c const.h struct.h global.h misc.h engine.h \
+ readline.h buttons.h pages.h help.h sdlscreen.h errors.h op_c.h \
+ windows.h input.h palette.h shade.h
 $(OBJDIR)/pversion.o: pversion.c
 $(OBJDIR)/pxdouble.o: pxdouble.c global.h struct.h const.h sdlscreen.h misc.h \
  graph.h pxdouble.h pxwide.h
@@ -79,9 +83,9 @@ $(OBJDIR)/pxwide.o: pxwide.c global.h struct.h const.h sdlscreen.h misc.h graph.
 $(OBJDIR)/pxwide2.o: pxwide2.c global.h struct.h const.h sdlscreen.h misc.h graph.h \
  pxwide2.h
 $(OBJDIR)/readini.o: readini.c const.h errors.h global.h struct.h misc.h readini.h \
- setup.h
+ setup.h realpath.h io.h
 $(OBJDIR)/readline.o: readline.c const.h struct.h global.h misc.h errors.h \
- sdlscreen.h readline.h windows.h input.h
+ sdlscreen.h readline.h windows.h input.h engine.h
 $(OBJDIR)/realpath.o: realpath.c
 $(OBJDIR)/saveini.o: saveini.c const.h global.h struct.h readini.h io.h errors.h \
  misc.h saveini.h setup.h

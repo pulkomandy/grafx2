@@ -215,7 +215,8 @@ typedef struct T_List_button
   T_Special_button  * Entry_button; ///< Pointer to the associated selection control.
   T_Scroller_button * Scroller;     ///< Pointer to the associated scroller
   
-  Func_draw_list_item   Draw_list_item; ///< 
+  Func_draw_list_item   Draw_list_item; ///< Function to call for each item to draw its line
+  byte                  Color_index;    ///< Background color: From 0->MC_Black to 3->MC_White
 
   struct T_List_button * Next;    ///< Pointer to the next list button of current window.
 } T_List_button;
@@ -356,7 +357,7 @@ typedef struct
   byte Screen_size_in_GIF;               ///< Boolean, true to store current resolution in GIF files.
   byte Auto_nb_used;                     ///< Boolean, true to count colors in Palette screen.
   byte Default_resolution;               ///< Default video mode to use on startup. Index in ::Video_mode.
-  char *Bookmark_directory[NB_BOOKMARKS];///< Bookmarked directories in fileselectors: This is the full dierctory name.
+  char *Bookmark_directory[NB_BOOKMARKS];///< Bookmarked directories in fileselectors: This is the full directory name.
   char Bookmark_label[NB_BOOKMARKS][8+1];///< Bookmarked directories in fileselectors: This is the displayed name.
   int  Window_pos_x;                     ///< Last window x position (9999 if unsupportd/irrelevant for the platform)
   int  Window_pos_y;                     ///< Last window y position (9999 if unsupportd/irrelevant for the platform)
@@ -367,6 +368,8 @@ typedef struct
   byte Sync_views;                       ///< Boolean, true when the Main and Spare should share their viewport settings.
   byte Stylus_mode;                      ///< Boolean, true to tweak some tools (eg:Curve) for single-button stylus.
   word Swap_buttons;                     ///< Sets which key swaps mouse buttons : 0=none, or MOD_CTRL, or MOD_ALT.
+  char Scripts_directory[MAX_PATH_CHARACTERS];///< Full pathname of directory for Lua scripts
+  byte Allow_multi_shortcuts;            ///< Boolean, true if the same key combination can trigger multiple shortcuts.
 } T_Config;
 
 // Structures utilisées pour les descriptions de pages et de liste de pages.

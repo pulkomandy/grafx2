@@ -25,14 +25,11 @@
     #include <proto/dos.h>
     #include <sys/types.h>
     #include <dirent.h>
-    #define isHidden(x) (0)
 #elif defined(__WIN32__)
     #include <dirent.h>
     #include <windows.h>
-    #define isHidden(x) (GetFileAttributesA((x)->d_name)&FILE_ATTRIBUTE_HIDDEN)
 #else
     #include <dirent.h>
-    #define isHidden(x) ((x)->d_name[0]=='.')
 #endif
 
 #define _XOPEN_SOURCE 500
@@ -82,18 +79,14 @@
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     #include <proto/dos.h>
     #include <dirent.h>
-    #define isHidden(x) (0)
 #elif defined(__MINT__)
     #include <mint/sysbind.h>
     #include <dirent.h>
-    #define isHidden(x) (0)
 #elif defined(__WIN32__)
     #include <dirent.h>
     #include <windows.h>
-    #define isHidden(x) (GetFileAttributesA((x)->d_name)&FILE_ATTRIBUTE_HIDDEN)
 #else
     #include <dirent.h>
-    #define isHidden(x) ((x)->d_name[0]=='.')
 #endif
 
 extern char Program_version[]; // generated in pversion.c
@@ -169,7 +162,7 @@ void Button_Message_initial(void)
     for (x=14,x_pos=0; x_pos<231; x_pos++,x++)
       Pixel_in_window(x,y,Gfx->Logo_grafx2[offs_y+x_pos]);
 
-  Print_in_window(130-4*26,88,"Copyright (c) 2007-2010 by",MC_Dark,MC_Light);
+  Print_in_window(130-4*26,88,"Copyright (c) 2007-2011 by",MC_Dark,MC_Light);
   Print_in_window(130-4*23,96,"the Grafx2 project team",MC_Black,MC_Light);
   Print_in_window(130-4*26,112,"Copyright (c) 1996-2001 by",MC_Dark,MC_Light);
   Print_in_window(130-4*13,120,"Sunset Design",MC_Black,MC_Light);
@@ -905,6 +898,7 @@ void Settings_display_config(T_Setting *setting, T_Config * conf, T_Special_butt
       }
     }
   }
+  Update_window_area(panel->Pos_X, panel->Pos_Y, panel->Width, panel->Height+1);
 }
 
 void Settings_save_config(T_Config * conf)
@@ -959,10 +953,13 @@ void Button_Settings(void)
   {"Merge movement:",1,&(selected_config.Mouse_merge_movement),0,100,4,NULL},
   {"Double click speed:",2,&(selected_config.Double_click_speed),1,1999,4,NULL},
   {"Double key speed:",2,&(selected_config.Double_key_speed),1,1999,4,NULL},
-  {"Mouse speed (fullscreen)",0,NULL,0,0,0,NULL},
-  {"  horizontally:",1,&(selected_config.Mouse_sensitivity_index_x),1,4,0,Lookup_MouseSpeed},
-  {"  vertically:",1,&(selected_config.Mouse_sensitivity_index_y),1,4,0,Lookup_MouseSpeed},
+  //{"Mouse speed (fullscreen)",0,NULL,0,0,0,NULL},
+  //{"  horizontally:",1,&(selected_config.Mouse_sensitivity_index_x),1,4,0,Lookup_MouseSpeed},
+  //{"  vertically:",1,&(selected_config.Mouse_sensitivity_index_y),1,4,0,Lookup_MouseSpeed},
   {"Key to swap buttons:",2,&(selected_config.Swap_buttons),0,0,0,Lookup_SwapButtons},
+  {"",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
   
   {"          --- Editing  ---",0,NULL,0,0,0,NULL},
   {"Adjust brush pick:",1,&(selected_config.Adjust_brush_pick),0,1,0,Lookup_YesNo},
@@ -973,7 +970,7 @@ void Button_Settings(void)
   {"Auto discontinuous:",1,&(selected_config.Auto_discontinuous),0,1,0,Lookup_YesNo},
   {"Auto count colors:",1,&(selected_config.Auto_nb_used),0,1,0,Lookup_YesNo},
   {"Right click colorpick:",1,&(selected_config.Right_click_colorpick),0,1,0,Lookup_YesNo},
-  {"",0,NULL,0,0,0,NULL},
+  {"Multi shortcuts:",1,&(selected_config.Allow_multi_shortcuts),0,1,0,Lookup_YesNo},
   {"",0,NULL,0,0,0,NULL},
   
   {"      --- File selector  ---",0,NULL,0,0,0,NULL},
@@ -1159,6 +1156,11 @@ void Button_Settings(void)
     Spare_fileselector_position=0;
     Spare_fileselector_offset=0;
   }
+  if(Config.Allow_multi_shortcuts && !selected_config.Allow_multi_shortcuts)
+  {
+    // User just disabled multi shortcuts: make them unique now.
+    Remove_duplicate_shortcuts();
+  }
   // Copy all
   Config=selected_config;
 
@@ -1314,7 +1316,7 @@ void Button_Skins(void)
     // Scroller for the fileselector
     (file_scroller = Window_set_scroller_button(155, FILESEL_Y - 1, 82,
     Skin_files_list.Nb_elements, 10, 0)), // 3
-    Draw_one_skin_name); // 4
+    Draw_one_skin_name, 2); // 4
   
   skin_list->Cursor_position = Find_file_in_fileselector(&Skin_files_list, Config.Skin_file);
 
@@ -1424,12 +1426,12 @@ void Button_Skins(void)
     {
       case 1 : // OK
         break;
-      case 2 : // doesn't happen
+      case 2 : // double-click file: do nothing
         break;
       case 3 : // doesn't happen
         break;
       case 4 : // a file is selected
-        need_load=1;
+          need_load=1;
         break;
       case 5 : // Font dropdown
         selected_font = Window_attribute2; // Get the index of the chosen font.
@@ -4066,7 +4068,7 @@ void Refresh_airbrush_settings(byte selected_color, byte update_slider)
 
 void Button_Airbrush_menu(void)
 {
-  static byte spray_init=0;
+  static byte spray_init=1;
   short  clicked_button;
   char   str[4];
   word   index;
@@ -4326,6 +4328,12 @@ void Button_Airbrush_menu(void)
         if (spray_init>=50)
         {
           spray_init=49;
+          Num2str(spray_init,str,2);
+          Window_input_content(input_init_button,str);
+        }
+        else if (spray_init<1)
+        {
+          spray_init=1;
           Num2str(spray_init,str,2);
           Window_input_content(input_init_button,str);
         }
@@ -4862,7 +4870,7 @@ void Button_Text(void)
   Window_set_normal_button(54,160,60,14,"Cancel",0,1,KEY_ESC); // 12
   
   // List of fonts
-  font_list = Window_set_list_button(font_list_button, font_scroller, Draw_one_font_name); // 13
+  font_list = Window_set_list_button(font_list_button, font_scroller, Draw_one_font_name, 2); // 13
   // Restore its settings from last passage in screen
   font_list->List_start = list_start;
   font_list->Cursor_position = cursor_position;
@@ -4893,9 +4901,22 @@ void Button_Text(void)
       if (str[0])
         preview_string=str;
       is_truetype=TrueType_font(selected_font_index);
-      Window_rectangle(8, 106, 273, 50,(antialias&&is_truetype)?MC_Black:Back_color);
       free(new_brush);
       new_brush = Render_text(preview_string, selected_font_index, font_size, antialias, is_bold, is_italic, &new_width, &new_height, text_palette);
+      // Background:
+      if (antialias&&is_truetype)
+        // Solid
+        Window_rectangle(8, 106, 273, 50,MC_Black);
+      else if (is_truetype)
+      {
+        long l = text_palette[Fore_color].R+text_palette[Fore_color].G+text_palette[Fore_color].B;
+        Window_rectangle(8, 106, 273, 50,l>128*3? MC_Black:MC_Light);
+      }
+      else
+      {
+        long l = text_palette[Back_color].R+text_palette[Back_color].G+text_palette[Back_color].B;
+        Window_rectangle(8, 106, 273, 50,l>128*3? MC_Light:MC_Black);
+      }
       if (new_brush)
       {
         if (!is_truetype || (is_truetype&&antialias))
@@ -4932,7 +4953,7 @@ void Button_Text(void)
                 //if (r==Main_palette[color].R && g==Main_palette[color].G && b==Main_palette[color].B)
                 //  colmap[color]=color;
                 //else
-                  colmap[color]=Best_color_perceptual(r,g,b);
+                  colmap[color]=Best_color_perceptual_except(r,g,b,Back_color);
               }
           
             colmap[Back_color]=Back_color;
@@ -5022,10 +5043,6 @@ void Button_Text(void)
       /* Cannot happen, event is catched by the list control */
       break;
       
-      case 6: // Selecteur de fonte
-      /* Cannot happen, event is catched by the list control */
-      break;
-      
       case 13: // Font selection
         selected_font_index = Window_attribute2;
         Hide_cursor();
@@ -5069,6 +5086,7 @@ void Button_Text(void)
       break;
       
     
+      case 6: // Double-click font selector
       case 11: // OK
       // Save the selector settings
       list_start = font_list->List_start;

@@ -419,7 +419,9 @@ int Save_INI(T_Config * conf)
     strcpy(temp_filename,Config_directory);
     strcat(temp_filename,INISAVE_FILENAME);
     
-    // On renome l'ancienne version du fichier INI vers un fichier temporaire:
+    // Delete gfx2.$$$
+    remove(temp_filename);
+    // Rename current config file as gfx2.$$$
     if (rename(filename,temp_filename)!=0)
     {
       goto Erreur_ERREUR_SAUVEGARDE_INI;
@@ -695,6 +697,13 @@ int Save_INI(T_Config * conf)
         values[0]=0;
   }
   if ((return_code=Save_INI_set_values (old_file,new_file,buffer,"Swap_buttons",1,values,0)))
+    goto Erreur_Retour;
+  
+  if ((return_code=Save_INI_set_strings (old_file,new_file,buffer,"Scripts_directory",conf->Scripts_directory)))
+      goto Erreur_Retour;
+
+  values[0]=(conf->Allow_multi_shortcuts);
+  if ((return_code=Save_INI_set_values (old_file,new_file,buffer,"Allow_multi_shortcuts",1,values,1)))
     goto Erreur_Retour;
   
   // Insert new values here

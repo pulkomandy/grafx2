@@ -46,9 +46,11 @@ void Recount_files(T_Fileselector *list);
 
 T_Fileselector_item * Get_item_by_index(T_Fileselector *list, short index);
 
+void Read_list_of_drives(T_Fileselector *list, byte name_length);
+
 short Find_file_in_fileselector(T_Fileselector *list, const char * fname);
 
-void Locate_list_item(T_List_button * list, T_Fileselector * selector, short selected_item);
+void Locate_list_item(T_List_button * list, short selected_item);
 
 int Quicksearch_list(T_List_button * list, T_Fileselector * selector);
 

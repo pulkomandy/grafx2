@@ -67,6 +67,7 @@
 #include "palette.h"
 #include "realpath.h"
 #include "input.h"
+#include "help.h"
 
 #if defined(__WIN32__)
     #include <windows.h>
@@ -658,6 +659,11 @@ int Init_program(int argc,char * argv[])
   temp=Load_INI(&Config);
   if (temp)
     Error(temp);
+  
+  if(!Config.Allow_multi_shortcuts)
+  {
+    Remove_duplicate_shortcuts();
+  }
 
   Compute_menu_offsets();
 

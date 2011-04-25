@@ -42,6 +42,10 @@
 #include "palette.h"
 #include "input.h" // Is_shortcut()
 #include "help.h" // Window_help()
+#include "graph.h"
+#include "filesel.h" // Read_list_of_drives()
+#include "realpath.h"
+
 
 /// Lua scripts bound to shortcut keys.
 char * Bound_script[10];
@@ -148,11 +152,19 @@ void Update_colors_during_script(void)
   }
 }
 
+/// Paint a pixel in image without updating the screen
+void Pixel_figure_no_screen(short x_pos,short y_pos,byte color)
+{
+  if (x_pos>0 && y_pos >0 && x_pos<Main_image_width && y_pos<Main_image_height)
+    Pixel_in_current_screen(x_pos,y_pos,color,0);
+}
+
 
 // Wrapper functions to call C from Lua
 
 int L_SetBrushSize(lua_State* L)
 {
+  int i;
   int w;
   int h;
   int nb_args=lua_gettop(L);
@@ -168,10 +180,12 @@ int L_SetBrushSize(lua_State* L)
   Brush_was_altered=1;
   // Fill with Back_color
   memset(Brush_original_pixels,Back_color,(long)Brush_width*Brush_height);
-  // Grab palette
+  memset(Brush,Back_color,(long)Brush_width*Brush_height);
+  // Adopt the current palette.
   memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
-  // Remap (no change)
-  Remap_brush();
+  for (i=0; i<256; i++)
+    Brush_colormap[i]=i;
+  //--
 
   // Center the handle
   Brush_offset_X=(Brush_width>>1);
@@ -344,6 +358,133 @@ int L_PutPicturePixel(lua_State* L)
   Pixel_in_current_screen(x, y, c, 0);
   return 0; // no values returned for lua
 }
+
+
+int L_DrawLine(lua_State* L)
+{
+  int x1, y1, x2, y2, c;
+
+  int nb_args = lua_gettop(L);
+
+  LUA_ARG_LIMIT(5, "drawline");
+  LUA_ARG_NUMBER(1, "drawline", x1, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(2, "drawline", y1, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(3, "drawline", x2, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(4, "drawline", y2, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(5, "drawline", c,  INT_MIN, INT_MAX);
+
+  Pixel_figure = (void (*) (word,word,byte))Pixel_figure_no_screen;
+  Draw_line_general(x1, y1, x2, y2, c);
+
+  return 0;
+}
+
+
+int L_DrawFilledRect(lua_State* L)
+{
+  int x1, y1, x2, y2, c;
+  int min_x,min_y,max_x,max_y, x_pos, y_pos;
+
+  int nb_args = lua_gettop(L);
+
+  LUA_ARG_LIMIT(5, "drawfilledrect");
+  LUA_ARG_NUMBER(1, "drawfilledrect", x1, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(2, "drawfilledrect", y1, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(3, "drawfilledrect", x2, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(4, "drawfilledrect", y2, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(5, "drawfilledrect", c,  INT_MIN, INT_MAX);
+
+  // Put bounds in ascending order
+  if (x2>x1)
+  {
+    min_x=x1;
+    max_x=x2;
+  }
+  else
+  {
+    min_x=x2;
+    max_x=x1;
+  }
+  if (y2>y1)
+  {
+    min_y=y1;
+    max_y=y2;
+  }
+  else
+  {
+    min_y=y2;
+    max_y=y1;
+  }
+
+  // Clipping limits
+  if (max_x>Main_image_width)
+    max_x=Main_image_width-1;
+  if (max_y>Main_image_height)
+    max_y=Main_image_height-1;
+  if (min_x<0)
+    min_x=0;
+  if (min_y<0)
+    min_y=0;
+
+  // Perform drawing
+  for (y_pos=min_y; y_pos<=max_y;y_pos++)
+    for (x_pos=min_x; x_pos<=max_x;x_pos++)
+      Pixel_in_current_screen(x_pos,y_pos,c,0);
+  return 0;
+  
+}
+
+
+int L_DrawCircle(lua_State* L)
+{
+  int x1, y1, r, c;
+
+  int nb_args = lua_gettop(L);
+
+  LUA_ARG_LIMIT(4, "drawcircle");
+  LUA_ARG_NUMBER(1, "drawcircle", x1, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(2, "drawcircle", y1, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(3, "drawcircle", r, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(4, "drawcircle", c, INT_MIN, INT_MAX);
+
+  Pixel_figure = (void (*) (word,word,byte))Pixel_figure_no_screen;
+  Circle_limit = r*r;
+  Draw_empty_circle_general(x1, y1, r, c);
+
+  return 0;
+}
+
+
+int L_DrawDisk(lua_State* L)
+{
+  int center_x, center_y, r, c;
+  long circle_limit;
+  short x_pos,y_pos;
+  short min_x,max_x,min_y,max_y;
+
+  int nb_args = lua_gettop(L);
+
+  LUA_ARG_LIMIT(4, "drawdisk");
+  LUA_ARG_NUMBER(1, "drawdisk", center_x, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(2, "drawdisk", center_y, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(3, "drawdisk", r, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(4, "drawdisk", c, INT_MIN, INT_MAX);
+
+  circle_limit = r*r;
+  
+  // Compute clipping limits
+  min_x=center_x-r<0 ? 0 : center_x-r;
+  max_x=center_x+r>=Main_image_width? Main_image_width-1 : center_x+r;
+  min_y=center_y-r<0 ? 0 : center_y-r;
+  max_y=center_y+r>=Main_image_height? Main_image_height-1 : center_y+r;
+
+  for (y_pos=min_y;y_pos<=max_y;y_pos++)
+    for (x_pos=min_x;x_pos<=max_x;x_pos++)
+      Pixel_in_current_screen(x_pos,y_pos,c,0);
+
+  return 0;
+}
+
 
 int L_GetPicturePixel(lua_State* L)
 {
@@ -1089,11 +1230,16 @@ int L_UpdateScreen(lua_State* L)
 int L_StatusMessage(lua_State* L)
 {
 	const char* msg;
+  char* msg2;
 	int nb_args = lua_gettop(L);
 	LUA_ARG_LIMIT(1,"statusmessage");
 
 	LUA_ARG_STRING(1, "statusmessage", msg);
-	Print_in_menu(msg,0);
+  msg2 = strdup(msg);
+  if(strlen(msg)>24)
+    msg2[24] = 0; // Cut off long messages
+	Print_in_menu(msg2,0);
+  free(msg2);
 	return 0;
 }
 
@@ -1125,15 +1271,23 @@ void Draw_script_name(word x, word y, word index, byte highlighted)
     
     current_item = Get_item_by_index(&Scripts_selector, index);
 
-    if (current_item->Type==1) // Directories
+    if (current_item->Type==0) // Files
     {
-      fg=(highlighted)?MC_Black:MC_Dark;
-      bg=(highlighted)?MC_Dark:MC_Light;
+      fg=(highlighted)?MC_White:MC_Light;
+      bg=(highlighted)?MC_Dark:MC_Black;
     }
-    else // Files
+    else if (current_item->Type==1) // Directories
     {
-      fg=MC_Black;
-      bg=(highlighted)?MC_Dark:MC_Light;
+      fg=(highlighted)?MC_Light:MC_Dark;
+      bg=(highlighted)?MC_Dark:MC_Black;
+    }
+    else // Drives
+    {
+      fg=(highlighted)?MC_Light:MC_Dark;
+      bg=(highlighted)?MC_Dark:MC_Black;
+      
+      Window_display_icon_sprite(x,y,current_item->Icon);
+      x+=8;
     }
     
     Print_in_window(x, y, current_item->Short_name, fg,bg);
@@ -1144,26 +1298,24 @@ void Draw_script_name(word x, word y, word index, byte highlighted)
 
 ///
 /// Displays first lines of comments from a lua script in the window.
-void Draw_script_information(T_Fileselector_item * script_item)
+void Draw_script_information(T_Fileselector_item * script_item, const char *full_directory)
 {
   FILE *script_file;
-  char full_name[MAX_PATH_CHARACTERS];
   char text_block[3][DESC_WIDTH+1];
   int x, y;
   int i;
-  
+    
   // Blank the target area
   Window_rectangle(7, FILESEL_Y + 89, DESC_WIDTH*6+2, 4*8, MC_Black);
 
-  if (script_item && script_item->Full_name && script_item->Full_name[0]!='\0')
+  if (script_item && script_item->Type==0 && script_item->Full_name && script_item->Full_name[0]!='\0')
   {
-    strcpy(full_name, Data_directory);
-    strcat(full_name, "scripts/");
-    strcat(full_name, script_item->Full_name);
-    
-    
+    char full_name[MAX_PATH_CHARACTERS];
+    strcpy(full_name, full_directory);
+    Append_path(full_name, script_item->Full_name, NULL);
+
     x=0;
-    y=0;
+    y=0;    
     text_block[0][0] = text_block[1][0] = text_block[2][0] = '\0';
     // Start reading
     script_file = fopen(full_name, "r");
@@ -1209,7 +1361,7 @@ void Draw_script_information(T_Fileselector_item * script_item)
     // Display a line with the keyboard shortcut
     Print_help(8, FILESEL_Y + 89+24, "Key:", 'N', 0, 0);
     for (i=0; i<10; i++)
-      if (Bound_script[i]!=NULL && !strcmp(Bound_script[i], script_item->Full_name))
+      if (Bound_script[i]!=NULL && !strcmp(Bound_script[i], full_name))
         break;
   
     if (i<10)
@@ -1245,8 +1397,8 @@ void Add_script(const char *name, byte is_file, byte is_directory, byte is_hidde
     if (len<=4 || strcasecmp(file_name+len-4, ".lua"))
       return;
     // Hidden
-    //if (is_hidden && !Config.Show_hidden_files)
-    //  return;
+    if (is_hidden && !Config.Show_hidden_files)
+      return;
       
     Add_element_to_list(&Scripts_selector, file_name, Format_filename(file_name, NAME_WIDTH+1, 0), 0, ICON_NONE);
   }
@@ -1255,9 +1407,12 @@ void Add_script(const char *name, byte is_file, byte is_directory, byte is_hidde
     // Ignore current directory
     if ( !strcmp(file_name, "."))
       return;
+    // Ignore parent directory entry
+    if (!strcmp(file_name, PARENT_DIR))
+      return;
     // Hidden
-    //if (is_hidden && !Config.Show_hidden_directories)
-    //  return;
+    if (is_hidden && !Config.Show_hidden_directories)
+      return;
     
     Add_element_to_list(&Scripts_selector, file_name, Format_filename(file_name, NAME_WIDTH+1, 1), 1, ICON_NONE);
   }
@@ -1268,7 +1423,7 @@ void Highlight_script(T_Fileselector *selector, T_List_button *list, const char 
   short index;
 
   index=Find_file_in_fileselector(selector, selected_file);
-  Locate_list_item(list, selector, index);
+  Locate_list_item(list, index);
 }
 
 static char Last_run_script[MAX_PATH_CHARACTERS]="";
@@ -1280,61 +1435,85 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   lua_State* L;
   const char* message;
   byte  old_cursor_shape=Cursor_shape;
-  char scriptdir[MAX_PATH_CHARACTERS];
-  
-  strcpy(scriptdir, Data_directory);
-  strcat(scriptdir, "scripts/");
+  char buf[MAX_PATH_CHARACTERS];
 
   // Some scripts are slow
   Cursor_shape=CURSOR_SHAPE_HOURGLASS;
   Display_cursor();
   Flush_update();
   
-  chdir(scriptdir);
-  
   if (script_subdirectory && script_subdirectory[0]!='\0')
   {
-    sprintf(Last_run_script, "%s%s%s", script_subdirectory, PATH_SEPARATOR, script_filename);
+    strcpy(Last_run_script, script_subdirectory);
+    Append_path(Last_run_script, script_filename, NULL);
   }
   else
   {
     strcpy(Last_run_script, script_filename);
   }
   
+  // This chdir is for the script's sake. Grafx2 itself will (try to)
+  // not rely on what is the system's current directory.
+  Extract_path(buf,Last_run_script);
+  chdir(buf);
 
   L = lua_open();
-  putenv("LUA_PATH=libs\\?.lua");
   
+  strcpy(buf, "LUA_PATH=");
+  strcat(buf, Data_directory);
+  Append_path(buf+9, "scripts", NULL);
+  Append_path(buf+9, "libs", NULL);
+  Append_path(buf+9, "?.lua", NULL);
+  putenv(buf);
+  
+  // writing and reading pixels
   lua_register(L,"putbrushpixel",L_PutBrushPixel);
+  lua_register(L,"putpicturepixel",L_PutPicturePixel);
+  lua_register(L, "drawline",L_DrawLine);
+  lua_register(L, "drawfilledrect",L_DrawFilledRect);
+  lua_register(L, "drawcircle",L_DrawCircle);
+  lua_register(L, "drawdisk",L_DrawDisk);
+
   lua_register(L,"getbrushpixel",L_GetBrushPixel);
   lua_register(L,"getbrushbackuppixel",L_GetBrushBackupPixel);
-  lua_register(L,"putpicturepixel",L_PutPicturePixel);
   lua_register(L,"getpicturepixel",L_GetPicturePixel);
   lua_register(L,"getlayerpixel",L_GetLayerPixel);
   lua_register(L,"getbackuppixel",L_GetBackupPixel);
+  lua_register(L,"getsparelayerpixel",L_GetSpareLayerPixel);
+  lua_register(L,"getsparepicturepixel",L_GetSparePicturePixel);
+
+
+  // resizing stuff
   lua_register(L,"setbrushsize",L_SetBrushSize);
   lua_register(L,"setpicturesize",L_SetPictureSize);
+
   lua_register(L,"getbrushsize",L_GetBrushSize);
   lua_register(L,"getpicturesize",L_GetPictureSize);
+  lua_register(L,"getsparepicturesize",L_GetSparePictureSize);
+
+  // color and palette
   lua_register(L,"setcolor",L_SetColor);
+  lua_register(L,"setforecolor",L_SetForeColor);
+  lua_register(L,"setbackcolor",L_SetBackColor);
+
   lua_register(L,"getcolor",L_GetColor);
   lua_register(L,"getbackupcolor",L_GetBackupColor);
-  lua_register(L,"matchcolor",L_MatchColor);
   lua_register(L,"getbrushtransparentcolor",L_GetBrushTransparentColor);
+  lua_register(L,"getsparecolor",L_GetSpareColor);
+  lua_register(L,"getsparetranscolor",L_GetSpareTransColor);
+  lua_register(L,"getforecolor",L_GetForeColor);
+  lua_register(L,"getbackcolor",L_GetBackColor);
+  lua_register(L,"gettranscolor",L_GetTransColor);
+  
+  lua_register(L,"matchcolor",L_MatchColor);
+
+  // ui
   lua_register(L,"inputbox",L_InputBox);
   lua_register(L,"messagebox",L_MessageBox);
   lua_register(L,"statusmessage",L_StatusMessage);
   lua_register(L,"selectbox",L_SelectBox);
-  lua_register(L,"getforecolor",L_GetForeColor);
-  lua_register(L,"getbackcolor",L_GetBackColor);
-  lua_register(L,"setforecolor",L_SetForeColor);
-  lua_register(L,"setbackcolor",L_SetBackColor);
-  lua_register(L,"gettranscolor",L_GetTransColor);
-  lua_register(L,"getsparepicturesize",L_GetSparePictureSize);
-  lua_register(L,"getsparelayerpixel",L_GetSpareLayerPixel);
-  lua_register(L,"getsparepicturepixel",L_GetSparePicturePixel);
-  lua_register(L,"getsparecolor",L_GetSpareColor);
-  lua_register(L,"getsparetranscolor",L_GetSpareTransColor);
+
+  // misc. stuff
   lua_register(L,"clearpicture",L_ClearPicture);
   lua_register(L,"wait",L_Wait);
   lua_register(L,"waitbreak",L_WaitBreak);
@@ -1407,6 +1586,7 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   Brush_backup=NULL;
   Update_colors_during_script();
   End_of_modification();
+	Print_in_menu("                        ",0);
 
   lua_close(L);
   
@@ -1467,20 +1647,19 @@ void Repeat_script(void)
   Run_script(NULL, Last_run_script);
 }
 
-void Set_script_shortcut(T_Fileselector_item * script_item)
+void Set_script_shortcut(T_Fileselector_item * script_item, const char *full_directory)
 {
   int i;
   char full_name[MAX_PATH_CHARACTERS];
   
   if (script_item && script_item->Full_name && script_item->Full_name[0]!='\0')
   {
-    strcpy(full_name, Data_directory);
-    strcat(full_name, "scripts/");
-    strcat(full_name, script_item->Full_name);
+    strcpy(full_name, full_directory);
+    Append_path(full_name, script_item->Full_name, NULL);
     
     // Find if it already has a shortcut
     for (i=0; i<10; i++)
-      if (Bound_script[i]!=NULL && !strcmp(Bound_script[i], script_item->Full_name))
+      if (Bound_script[i]!=NULL && !strcmp(Bound_script[i], full_name))
         break;
     if (i<10)
     {
@@ -1497,7 +1676,7 @@ void Set_script_shortcut(T_Fileselector_item * script_item)
       if (i<10)
       {
         free(Bound_script[i]);
-        Bound_script[i]=strdup(script_item->Full_name);
+        Bound_script[i]=strdup(full_name);
       }
       else
       {
@@ -1514,33 +1693,42 @@ void Set_script_shortcut(T_Fileselector_item * script_item)
     }
     // Refresh display
     Hide_cursor();
-    Draw_script_information(script_item);
+    Draw_script_information(script_item, full_directory);
     Display_cursor();
   }
+}
+
+void Reload_scripts_list(void)
+{
+  // Reinitialize the list
+  Free_fileselector_list(&Scripts_selector);
+  if (Config.Scripts_directory[0]=='\0')
+  {
+    Read_list_of_drives(&Scripts_selector,NAME_WIDTH+1);
+  }
+  else
+  {
+    Add_element_to_list(&Scripts_selector, PARENT_DIR, Format_filename(PARENT_DIR, NAME_WIDTH+1, 1), 1, ICON_NONE);
+    // Add each found file to the list
+    For_each_directory_entry(Config.Scripts_directory, Add_script);
+  }
+  // Sort it
+  Sort_list_of_files(&Scripts_selector); 
+  //
 }
 
 void Button_Brush_Factory(void)
 {
   static char selected_file[MAX_PATH_CHARACTERS]="";
-  static char sub_directory[MAX_PATH_CHARACTERS]="";
-
+  
   short clicked_button;
   T_List_button* scriptlist;
   T_Scroller_button* scriptscroll;
   T_Special_button* scriptarea;
-  char scriptdir[MAX_PATH_CHARACTERS];
   T_Fileselector_item *item;
+  int last_selected_item=-1;
   
-  // Reinitialize the list
-  Free_fileselector_list(&Scripts_selector);
-  strcpy(scriptdir, Data_directory);
-  strcat(scriptdir, "scripts/");
-  strcat(scriptdir, sub_directory);
-  // Add each found file to the list
-  For_each_directory_entry(scriptdir, Add_script);
-  // Sort it
-  Sort_list_of_files(&Scripts_selector);
-  //
+  Reload_scripts_list();
 
   Open_window(33+8*NAME_WIDTH, 180, "Brush Factory");
   
@@ -1548,11 +1736,11 @@ void Button_Brush_Factory(void)
 
   Window_display_frame_in(6, FILESEL_Y - 2, NAME_WIDTH*8+4, 84); // File selector
   // Fileselector
-  scriptarea=Window_set_special_button(8, FILESEL_Y + 1, NAME_WIDTH*8, 80); // 2
+  scriptarea=Window_set_special_button(8, FILESEL_Y + 0, NAME_WIDTH*8, 80); // 2
   // Scroller for the fileselector
   scriptscroll = Window_set_scroller_button(NAME_WIDTH*8+14, FILESEL_Y - 1, 82,
       Scripts_selector.Nb_elements,10, 0); // 3
-  scriptlist = Window_set_list_button(scriptarea,scriptscroll,Draw_script_name); // 4
+  scriptlist = Window_set_list_button(scriptarea,scriptscroll,Draw_script_name, 0); // 4
 
   Window_set_normal_button(10, 149, 67, 14, "Run", 0, 1, SDLK_RETURN); // 5
 
@@ -1569,17 +1757,23 @@ void Button_Brush_Factory(void)
     
     Window_redraw_list(scriptlist);
     Draw_script_information(Get_item_by_index(&Scripts_selector,
-      scriptlist->List_start + scriptlist->Cursor_position));
+      scriptlist->List_start + scriptlist->Cursor_position), Config.Scripts_directory);
     
     Update_window_area(0, 0, Window_width, Window_height);
     Display_cursor();
+    // Wait for mouse release (needed for example after a double-click
+    // that navigates to a subdirectory)
+    while (last_selected_item==-1 && Mouse_K)
+    {
+      Get_input(20);
+    }
     
     Reset_quicksearch();
   
     do
     {
       clicked_button = Window_clicked_button();
-      if (Key==SDLK_BACKSPACE && sub_directory[0]!='\0')
+      if (Key==SDLK_BACKSPACE && Config.Scripts_directory[0]!='\0')
       {
         // Make it select first entry (parent directory)
         scriptlist->List_start=0;
@@ -1598,34 +1792,20 @@ void Button_Brush_Factory(void)
   
       switch (clicked_button)
       {
-        case 4:
+        case 2: // Double-click an entry in script list
+          clicked_button=5;
+          break;
+        case 4: // Select script
+          last_selected_item = scriptlist->List_start + scriptlist->Cursor_position;
           Hide_cursor();
           Draw_script_information(Get_item_by_index(&Scripts_selector,
-            scriptlist->List_start + scriptlist->Cursor_position));
+            scriptlist->List_start + scriptlist->Cursor_position), Config.Scripts_directory);
           Display_cursor();
-          {
-            // Test double-click
-            static long time_click = 0;
-            static int last_selected_item=-1;
-            static long time_previous;
-            
-            time_previous = time_click;
-            time_click = SDL_GetTicks();
-            if (scriptlist->List_start + scriptlist->Cursor_position == last_selected_item)
-            {
-              if (time_click - time_previous < Config.Double_click_speed)
-                clicked_button=5;
-            }
-            else
-            {
-              last_selected_item=scriptlist->List_start + scriptlist->Cursor_position;
-            }
-          }
           break;
         
         case 6:
           Set_script_shortcut(Get_item_by_index(&Scripts_selector,
-            scriptlist->List_start + scriptlist->Cursor_position));
+            scriptlist->List_start + scriptlist->Cursor_position), Config.Scripts_directory);
           break;
           
         default:
@@ -1652,60 +1832,30 @@ void Button_Brush_Factory(void)
     
     if (item->Type==0) // File
     {
-      strcpy(selected_file, sub_directory);
-      strcat(selected_file, item->Full_name);
+      strcpy(selected_file, item->Full_name);
       break;
     }
-    else if (item->Type==1) // Directory
+    else if (item->Type==1 || item->Type==2) // Directory
     {
-      if (!strcmp(item->Full_name,PARENT_DIR))
+      if (item->Type==2)
       {
-        // Going up one directory
-        long len;
-        char * slash_pos;
-
-        // Remove trailing slash      
-        len=strlen(sub_directory);
-        if (len && !strcmp(sub_directory+len-1,PATH_SEPARATOR))
-          sub_directory[len-1]='\0';
-        
-        slash_pos=Find_last_slash(sub_directory);
-        if (slash_pos)
-        {
-          strcpy(selected_file, slash_pos+1);
-          *slash_pos='\0';
-        }
-        else
-        {
-          strcpy(selected_file, sub_directory);
-          sub_directory[0]='\0';
-        }
+        // Selecting one drive root
+        strcpy(selected_file, PARENT_DIR);
+        strcat(Config.Scripts_directory, item->Full_name);
       }
       else
       {
-        // Going down one directory
-        strcpy(selected_file, PARENT_DIR);
-
-        strcat(sub_directory, item->Full_name);
-        strcat(sub_directory, PATH_SEPARATOR);
+        // Going down one or up by one directory
+        Append_path(Config.Scripts_directory, item->Full_name, selected_file);
       }
 
       // No break: going back up to beginning of loop
       
-      // Reinitialize the list
-      Free_fileselector_list(&Scripts_selector);
-      strcpy(scriptdir, Data_directory);
-      strcat(scriptdir, "scripts/");
-      strcat(scriptdir, sub_directory);
-      // Add each found file to the list
-      For_each_directory_entry(scriptdir, Add_script);
-      // Sort it
-      Sort_list_of_files(&Scripts_selector); 
-      //
+      Reload_scripts_list();
       
       scriptlist->Scroller->Nb_elements=Scripts_selector.Nb_elements;
       Compute_slider_cursor_length(scriptlist->Scroller);
-      
+      last_selected_item = -1;
       Hide_cursor();
     }
   }
@@ -1715,7 +1865,7 @@ void Button_Brush_Factory(void)
 
   if (clicked_button == 5) // Run the script
   {
-    Run_script("", selected_file);
+    Run_script(Config.Scripts_directory, selected_file);
   }
   else
   {

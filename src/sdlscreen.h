@@ -44,6 +44,8 @@ byte* Screen_pixels;
 
 void Update_rect(short x, short y, unsigned short width, unsigned short height);
 void Flush_update(void);
+void Update_status_line(short char_pos, short width);
+
 ///
 /// Converts a SDL_Surface (indexed colors or RGB) into an array of bytes
 /// (indexed colors).

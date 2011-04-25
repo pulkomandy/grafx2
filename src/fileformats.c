@@ -28,6 +28,9 @@
 
 #ifndef __no_pnglib__
 #include <png.h>
+#if !defined(PNG_HAVE_PLTE)
+#define PNG_HAVE_PLTE 0x02
+#endif
 #if (PNG_LIBPNG_VER_MAJOR <= 1) && (PNG_LIBPNG_VER_MINOR < 4)
   // Compatibility layer to allow us to use libng 1.4 or any older one.
   
@@ -2079,7 +2082,6 @@ void Load_GIF(T_IO_Context * context)
             break;
             case 0x2C: // Local Image Descriptor
             {
-              // Si on a deja lu une image, c'est une GIF animée ou bizarroide, on sort.
               if (number_LID!=0)
               {
                 // This a second layer/frame, or more.
@@ -2195,14 +2197,18 @@ void Load_GIF(T_IO_Context * context)
                     }
                   }
                   else
+                  {
                     File_error=2;
+                    break;
+                  }
                 } // Code End-Of-Information ou erreur de fichier rencontré
-    
+                if (File_error==2 && GIF_pos_X==0 && GIF_pos_Y==IDB.Image_height)
+                  File_error=0;
                 /*Close_lecture();*/
     
                 if (File_error>=0)
                 if ( /* (GIF_pos_X!=0) || */
-                     ( ( (!GIF_interlaced) && (GIF_pos_Y!=IDB.Image_height) ) ||
+                     ( ( (!GIF_interlaced) && (GIF_pos_Y!=IDB.Image_height) && (GIF_pos_X!=0)) ||
                        (  (GIF_interlaced) && (!GIF_finished_interlaced_image) )
                      ) )
                   File_error=2;
@@ -2214,7 +2220,8 @@ void Load_GIF(T_IO_Context * context)
             break;
           }
           // Lecture du code de fonction suivant:
-          Read_byte(GIF_file,&block_identifier);
+          if (!Read_byte(GIF_file,&block_identifier))
+          File_error=2;
         }
       } // Le fichier contenait un LSDB
       else

@@ -23,18 +23,7 @@ function ellipse2(x,y,a,b,stp,rot,col)
   sa = m.sin(ast*n) * b; ca = m.cos(ast*n) * a
   x1 = x + ca * cb - sa * sb
   y1 = y + ca * sb + sa * cb
-  if (n > 0) then line(ox,oy,x1,y1,col); end
- end
-end
---
-
---
-function line(x1,y1,x2,y2,c)
- local n,st,m; m = math
- st = m.max(1,m.abs(x2-x1),m.abs(y2-y1));
- for n = 0, st, 1 do
-   putpicturepixel(m.floor(x1+n*(x2-x1)/st), m.floor(y1+n*(y2-y1)/st),
-c );
+  if (n > 0) then drawline(ox,oy,x1,y1,col); end
  end
 end
 --
