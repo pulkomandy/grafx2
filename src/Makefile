@@ -388,6 +388,12 @@ all : $(MACAPPEXE)
 $(MACAPPEXE) : $(BIN)
 	rm -rf Grafx2.app
 	mkdir -p Grafx2.app Grafx2.app/Contents Grafx2.app/Contents/Frameworks Grafx2.app/Contents/MacOS Grafx2.app/Contents/Resources Grafx2.app/Contents/Resources/scripts
+	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.3
+	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.3/brush
+	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.3/demo
+	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.3/libs
+	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.3/palette
+	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.3/picture
 	echo 'APPL????' > Grafx2.app/Contents/PkgInfo
 	cp ../Info.plist Grafx2.app/Contents
 	cp -r Grafx2.icns Grafx2.app/Contents/Resources
@@ -395,13 +401,18 @@ $(MACAPPEXE) : $(BIN)
 	cp -r ../share/grafx2/fonts Grafx2.app/Contents/Resources
 	cp -r ../share/grafx2/skins Grafx2.app/Contents/Resources
 	cp -r ../share/grafx2/gfx2def.ini Grafx2.app/Contents/Resources
-	cp -r $(SCRIPT_FILES) Grafx2.app/Contents/Resources/scripts
+	cp -r ../share/grafx2/scripts/samples_2.3/brush Grafx2.app/Contents/Resources/scripts/samples_2.3
+	cp -r ../share/grafx2/scripts/samples_2.3/demo Grafx2.app/Contents/Resources/scripts/samples_2.3
+	cp -r ../share/grafx2/scripts/samples_2.3/libs Grafx2.app/Contents/Resources/scripts/samples_2.3
+	cp -r ../share/grafx2/scripts/samples_2.3/palette Grafx2.app/Contents/Resources/scripts/samples_2.3
+	cp -r ../share/grafx2/scripts/samples_2.3/picture Grafx2.app/Contents/Resources/scripts/samples_2.3
 	mkdir -p Grafx2.app/Contents/Frameworks/SDL.framework/Versions
 	mkdir -p Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions
 #	mkdir -p Grafx2.app/Contents/Frameworks/SDL_ttf.framework/Versions
 	cp -Rp $(FWDIR)/SDL.framework/Versions/A Grafx2.app/Contents/Frameworks/SDL.framework/Versions
 	cp -Rp $(FWDIR)/SDL_image.framework/Versions/A Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions
 #	cp -Rp $(FWDIR)/SDL_ttf.framework/Versions/A Grafx2.app/Contents/Frameworks/SDL_ttf.framework/Versions
+    # remove those
 	rm -fr Grafx2.app/Contents/Frameworks/SDL.framework/Versions/A/Headers
 	rm -fr Grafx2.app/Contents/Frameworks/SDL.framework/Versions/A/Resources
 	rm -fr Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions/A/Headers
