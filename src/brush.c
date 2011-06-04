@@ -36,6 +36,10 @@
 #include "sdlscreen.h"
 #include "brush.h"
 
+// Data used during brush rotation operation
+static byte * Brush_rotate_buffer;
+static int Brush_rotate_width;
+static int Brush_rotate_height;
 
 // Calcul de redimensionnement du pinceau pour éviter les débordements de
 // l'écran et de l'image
@@ -1670,7 +1674,8 @@ void Interpolate_texture(int start_x,int start_y,int xt1,int yt1,
 
 
 
-void Compute_quad_texture(int x1,int y1,int xt1,int yt1,
+void Compute_quad_texture( byte *texture, int texture_width,
+                           int x1,int y1,int xt1,int yt1,
                            int x2,int y2,int xt2,int yt2,
                            int x3,int y3,int xt3,int yt3,
                            int x4,int y4,int xt4,int yt4,
@@ -1719,7 +1724,7 @@ void Compute_quad_texture(int x1,int y1,int xt1,int yt1,
       xt=Round((float)(ScanY_Xt[0][y])+(temp*(ScanY_Xt[1][y]-ScanY_Xt[0][y])));
       yt=Round((float)(ScanY_Yt[0][y])+(temp*(ScanY_Yt[1][y]-ScanY_Yt[0][y])));
       if (xt>=0 && yt>=0)
-        buffer[x+(y*width)]=*(Brush_original_pixels + yt * Brush_width + xt);
+        buffer[x+(y*width)]=*(texture + yt * texture_width + xt);
     }
     for (; x<width; x++)
       buffer[x+(y*width)]=Back_color;
@@ -1735,14 +1740,87 @@ void Compute_quad_texture(int x1,int y1,int xt1,int yt1,
   ScanY_Xt[0] = ScanY_Xt[1] = ScanY_Yt[0] = ScanY_Yt[1] = ScanY_X[0] = ScanY_X[1] = NULL;
 }
 
+void Scale2x(byte **bitmap, int *width, int *height)
+{
+  byte *new_bitmap;
+  int new_width;
+  int new_height;
+  int x_pos, y_pos;
+  
+  byte b,d,e,f,h;
 
+  new_width=(*width)*2;
+  new_height=(*height)*2;
+  new_bitmap=(byte *)(malloc(new_width*new_height));
+  if (!new_bitmap)
+    return;
+
+  // Algorithm from scale2x sourceforge project
+
+  for (y_pos=0; y_pos<*height; y_pos++)
+  {
+    for (x_pos=0; x_pos<*width; x_pos++)
+    {
+      // Check colors in pixels: (E is center)
+      //  A  B  C
+      //  D  E  F
+      //  G  H  I
+    
+      e=*(*bitmap + y_pos* *width + x_pos);
+      d = (x_pos==0) ? e : *(*bitmap + y_pos* *width + x_pos-1);
+      f = (x_pos==*width-1) ? e : *(*bitmap + y_pos* *width + x_pos+1);
+      b = (y_pos==0) ? e : *(*bitmap + (y_pos-1)* *width + x_pos);
+      h = (y_pos==*height-1) ? e : *(*bitmap + (y_pos+1)* *width + x_pos);
+      
+      if (b != h && d != f)
+      {
+      	*(new_bitmap + (y_pos*2)*new_width + x_pos*2)     = d == b ? d : e;
+      	*(new_bitmap + (y_pos*2)*new_width + x_pos*2+1)   = b == f ? f : e;
+      	*(new_bitmap + (y_pos*2+1)*new_width + x_pos*2)   = d == h ? d : e;
+      	*(new_bitmap + (y_pos*2+1)*new_width + x_pos*2+1) = h == f ? f : e;
+      }
+      else
+      {
+      	*(new_bitmap + (y_pos*2)*new_width + x_pos*2)     = e;
+      	*(new_bitmap + (y_pos*2)*new_width + x_pos*2+1)   = e;
+      	*(new_bitmap + (y_pos*2+1)*new_width + x_pos*2)   = e;
+      	*(new_bitmap + (y_pos*2+1)*new_width + x_pos*2+1) = e;
+      }
+    }
+  }
+  
+  *width=new_width;
+  *height=new_height;
+  *bitmap=new_bitmap;
+  
+}
+
+void Begin_brush_rotation(void)
+{
+  Brush_rotate_buffer=Brush_original_pixels;
+  Brush_rotate_width=Brush_width;
+  Brush_rotate_height=Brush_height;
+  Scale2x(&Brush_rotate_buffer, &Brush_rotate_width, &Brush_rotate_height);
+  Scale2x(&Brush_rotate_buffer, &Brush_rotate_width, &Brush_rotate_height);
+  Scale2x(&Brush_rotate_buffer, &Brush_rotate_width, &Brush_rotate_height);
+}
+
+void End_brush_rotation(void)
+{
+  if (Brush_rotate_buffer && Brush_rotate_buffer != Brush_original_pixels)
+  {
+    free(Brush_rotate_buffer);
+    Brush_rotate_buffer=NULL;
+  }
+}
 
 void Rotate_brush(float angle)
 {
   byte * new_brush;
   int    new_brush_width;  // Width de la nouvelle brosse
   int    new_brush_height;  // Height de la nouvelle brosse
-
+  int offset=0;
+  
   short x1,y1,x2,y2,x3,y3,x4,y4;
   int start_x,end_x,start_y,end_y;
   int x_min,x_max,y_min,y_max;
@@ -1757,6 +1835,7 @@ void Rotate_brush(float angle)
   start_y=1-(Brush_height>>1);
   end_x=start_x+Brush_width-1;
   end_y=start_y+Brush_height-1;
+  //offset = Brush_rotate_width/Brush_width-1;
 
   Transform_point(start_x,start_y, cos_a,sin_a, &x1,&y1);
   Transform_point(end_x  ,start_y, cos_a,sin_a, &x2,&y2);
@@ -1780,10 +1859,11 @@ void Rotate_brush(float angle)
     return;
   }
   // Et maintenant on calcule la nouvelle brosse tournée.
-  Compute_quad_texture(x1,y1,               0,               0,
-                        x2,y2,Brush_width-1,               0,
-                        x3,y3,               0,Brush_height-1,
-                        x4,y4,Brush_width-1,Brush_height-1,
+  Compute_quad_texture( Brush_rotate_buffer, Brush_rotate_width,
+                        x1,y1,               offset,               offset,
+                        x2,y2,Brush_rotate_width-offset-1,               offset,
+                        x3,y3,               offset,Brush_rotate_height-offset-1,
+                        x4,y4,Brush_rotate_width-offset-1,Brush_rotate_height-offset-1,
                         new_brush,new_brush_width,new_brush_height);
   
   if (Realloc_brush(new_brush_width, new_brush_height, new_brush, NULL))
@@ -1802,7 +1882,8 @@ void Rotate_brush(float angle)
 
 
 
-void Draw_quad_texture_preview(int x1,int y1,int xt1,int yt1,
+void Draw_quad_texture_preview(byte *texture, int texture_width,
+                                   int x1,int y1,int xt1,int yt1,
                                    int x2,int y2,int xt2,int yt2,
                                    int x3,int y3,int xt3,int yt3,
                                    int x4,int y4,int xt4,int yt4)
@@ -1861,7 +1942,7 @@ void Draw_quad_texture_preview(int x1,int y1,int xt1,int yt1,
       yt=Round((float)(ScanY_Yt[0][y])+(temp*(ScanY_Yt[1][y]-ScanY_Yt[0][y])));
       if (xt>=0 && yt>=0)
       {
-        color=Read_pixel_from_brush(xt,yt);
+        color=Brush_colormap[*(texture+xt+yt*texture_width)];
         if (color!=Back_color)
           Pixel_preview(x,y_,color);
       }
@@ -1885,6 +1966,7 @@ void Rotate_brush_preview(float angle)
   int start_x,end_x,start_y,end_y;
   float cos_a=cos(angle);
   float sin_a=sin(angle);
+  int offset=0;
 
   // Calcul des coordonnées des 4 coins:
   // 1 2
@@ -1894,6 +1976,7 @@ void Rotate_brush_preview(float angle)
   start_y=1-(Brush_height>>1);
   end_x=start_x+Brush_width-1;
   end_y=start_y+Brush_height-1;
+  //offset = Brush_rotate_width/Brush_width-1;
 
   Transform_point(start_x,start_y, cos_a,sin_a, &x1,&y1);
   Transform_point(end_x  ,start_y, cos_a,sin_a, &x2,&y2);
@@ -1910,10 +1993,11 @@ void Rotate_brush_preview(float angle)
   y4+=Brush_rotation_center_Y;
 
   // Et maintenant on dessine la brosse tournée.
-  Draw_quad_texture_preview(x1,y1,               0,               0,
-                                x2,y2,Brush_width-1,               0,
-                                x3,y3,               0,Brush_height-1,
-                                x4,y4,Brush_width-1,Brush_height-1);
+  Draw_quad_texture_preview(Brush_rotate_buffer, Brush_rotate_width,
+                            x1, y1, offset, offset,
+                            x2, y2, Brush_rotate_width-offset-1, offset,
+                            x3, y3, offset, Brush_rotate_height-offset-1,
+                            x4, y4, Brush_rotate_width-offset-1, Brush_rotate_height-offset-1);
   start_x=Min(Min(x1,x2),Min(x3,x4));
   end_x=Max(Max(x1,x2),Max(x3,x4));
   start_y=Min(Min(y1,y2),Min(y3,y4));

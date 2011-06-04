@@ -386,7 +386,7 @@ int OT_count_colors(T_Occurrence_table * t)
 
 // Cluster management
 // Clusters are boxes in the RGB spaces, defined by 6 corner coordinates :
-// Rmax, Rmin, Vmax (or Gmax), Vmin, Rmax, Rmin
+// Rmax, Rmin, vmax (or Vmax), vmin, Rmax, Rmin
 // The median cut algorithm start with a single cluster covering the whole
 // colorspace then split it in two smaller clusters on the longest axis until
 // there are 256 non-empty clusters (with some tricks if the original image
@@ -403,6 +403,7 @@ void Cluster_pack(T_Cluster * c,T_Occurrence_table * to)
 {
   int rmin,rmax,vmin,vmax,bmin,bmax;
   int r,g,b;
+  int nbocc;
 
   // Find min. and max. values actually used for each component in this cluster
 
@@ -411,15 +412,15 @@ void Cluster_pack(T_Cluster * c,T_Occurrence_table * to)
   // 256^3*sizeof(int) = 64MB table. If your computer has less free ram and
   // malloc fails, this will not work at all !
   // GIMP use only 6 bits for G and B components in this table.
-  rmin=c->rmax <<16; rmax=c->rmin << 16;
+  /*rmin=c->rmax <<16; rmax=c->rmin << 16;
   vmin=c->vmax << 8; vmax=c->vmin << 8;
   bmin=c->bmax; bmax=c->bmin;
   c->occurences=0;
-
+*/
   // Unoptimized code kept here for documentation purpose because the optimized
   // one is unreadable : run over the whole cluster and find the min and max,
   // and count the occurences at the same time.
-  /*
+  
   for (r=c->rmin<<16;r<=c->rmax<<16;r+=1<<16)
     for (g=c->vmin<<8;g<=c->vmax<<8;g+=1<<8)
       for (b=c->bmin;b<=c->bmax;b++)
@@ -436,8 +437,8 @@ void Cluster_pack(T_Cluster * c,T_Occurrence_table * to)
           c->occurences+=nbocc;
         }
       }
-  */
-
+  
+/*
   // Optimized version : find the extremums one at a time, so we can reduce the
   // area to seek for the next one. Start at the edges of the cluster and go to
   // the center until we find a pixel.
@@ -460,10 +461,10 @@ RMAX:
             if(to->table[r + g + b]) // OT_get
             {
                 rmax=r;
-                goto VMIN;
+                goto vmin;
             }
           }
-VMIN:
+vmin:
   for(g=c->vmin<<8;g<=c->vmax<<8;g+=1<<8)
       for(r=rmin;r<=rmax;r+=1<<16)
           for(b=c->bmin;b<=c->bmax;b++)
@@ -471,10 +472,10 @@ VMIN:
             if(to->table[r + g + b]) // OT_get
             {
                 vmin=g;
-                goto VMAX;
+                goto vmax;
             }
           }
-VMAX:
+vmax:
   for(g=c->vmax<<8;g>=vmin;g-=1<<8)
       for(r=rmin;r<=rmax;r+=1<<16)
           for(b=c->bmin;b<=c->bmax;b++)
@@ -521,7 +522,12 @@ ENDCRUSH:
   c->rmin=rmin>>16; c->rmax=rmax>>16;
   c->vmin=vmin>>8;  c->vmax=vmax>>8;
   c->bmin=bmin;     c->bmax=bmax;
+*/
 
+  c->rmin=rmin; c->rmax=rmax;
+  c->vmin=vmin; c->vmax=vmax;
+  c->bmin=bmin; c->bmax=bmax;
+  
   // Find the longest axis to know which way to split the cluster
   // This multiplications are supposed to improve the result, but may or may not
   // work, actually.
@@ -559,7 +565,133 @@ ENDCRUSH:
   }
 }
 
+void Cluster_split(T_Cluster * c,T_Cluster * c1,T_Cluster * c2,int teinte,T_Occurrence_table * to)
+{
+  int limite;
+  int cumul;
+  int r,v,b;
 
+  limite=(c->occurences)/2;
+  cumul=0;
+  if (teinte==0)
+  {
+
+    for (r=c->rmin;r<=c->rmax;r++)
+    {
+      for (v=c->vmin;v<=c->vmax;v++)
+      {
+        for (b=c->bmin;b<=c->bmax;b++)
+        {
+          cumul+=OT_get(to,r,v,b);
+          if (cumul>=limite)
+            break;
+        }
+        if (cumul>=limite)
+          break;
+      }
+      if (cumul>=limite)
+        break;
+    }
+
+
+    if (r==c->rmin)
+      r++;
+    // R est la valeur de début du 2nd cluster
+
+    c1->Rmin=c->Rmin; c1->Rmax=r-1;
+    c1->rmin=c->rmin; c1->rmax=r-1;
+    c1->Gmin=c->Gmin; c1->Vmax=c->Vmax;
+    c1->vmin=c->vmin; c1->vmax=c->vmax;
+    c1->Bmin=c->Bmin; c1->Bmax=c->Bmax;
+    c1->bmin=c->bmin; c1->bmax=c->bmax;
+    c2->Rmin=r;       c2->Rmax=c->Rmax;
+    c2->rmin=r;       c2->rmax=c->rmax;
+    c2->Gmin=c->Gmin; c2->Vmax=c->Vmax;
+    c2->vmin=c->vmin; c2->vmax=c->vmax;
+    c2->Bmin=c->Bmin; c2->Bmax=c->Bmax;
+    c2->bmin=c->bmin; c2->bmax=c->bmax;
+  }
+  else
+  if (teinte==1)
+  {
+
+    for (v=c->vmin;v<=c->vmax;v++)
+    {
+      for (r=c->rmin;r<=c->rmax;r++)
+      {
+        for (b=c->bmin;b<=c->bmax;b++)
+        {
+          cumul+=OT_get(to,r,v,b);
+          if (cumul>=limite)
+            break;
+        }
+        if (cumul>=limite)
+          break;
+      }
+      if (cumul>=limite)
+        break;
+    }
+
+
+    if (v==c->vmin)
+      v++;
+    // V est la valeur de début du 2nd cluster
+
+    c1->Rmin=c->Rmin; c1->Rmax=c->Rmax;
+    c1->rmin=c->rmin; c1->rmax=c->rmax;
+    c1->Gmin=c->Gmin; c1->Vmax=v-1;
+    c1->vmin=c->vmin; c1->vmax=v-1;
+    c1->Bmin=c->Bmin; c1->Bmax=c->Bmax;
+    c1->bmin=c->bmin; c1->bmax=c->bmax;
+    c2->Rmin=c->Rmin; c2->Rmax=c->Rmax;
+    c2->rmin=c->rmin; c2->rmax=c->rmax;
+    c2->Gmin=v;       c2->Vmax=c->Vmax;
+    c2->vmin=v;       c2->vmax=c->vmax;
+    c2->Bmin=c->Bmin; c2->Bmax=c->Bmax;
+    c2->bmin=c->bmin; c2->bmax=c->bmax;
+  }
+  else
+  {
+
+
+    for (b=c->bmin;b<=c->bmax;b++)
+    {
+      for (v=c->vmin;v<=c->vmax;v++)
+      {
+        for (r=c->rmin;r<=c->rmax;r++)
+        {
+          cumul+=OT_get(to,r,v,b);
+          if (cumul>=limite)
+            break;
+        }
+        if (cumul>=limite)
+          break;
+      }
+      if (cumul>=limite)
+        break;
+    }
+
+
+    if (b==c->bmin)
+      b++;
+    // B est la valeur de début du 2nd cluster
+
+    c1->Rmin=c->Rmin; c1->Rmax=c->Rmax;
+    c1->rmin=c->rmin; c1->rmax=c->rmax;
+    c1->Gmin=c->Gmin; c1->Vmax=c->Vmax;
+    c1->vmin=c->vmin; c1->vmax=c->vmax;
+    c1->Bmin=c->Bmin; c1->Bmax=b-1;
+    c1->bmin=c->bmin; c1->bmax=b-1;
+    c2->Rmin=c->Rmin; c2->Rmax=c->Rmax;
+    c2->rmin=c->rmin; c2->rmax=c->rmax;
+    c2->Gmin=c->Gmin; c2->Vmax=c->Vmax;
+    c2->vmin=c->vmin; c2->vmax=c->vmax;
+    c2->Bmin=b;       c2->Bmax=c->Bmax;
+    c2->bmin=b;       c2->bmax=c->bmax;
+  }
+}
+
+/*
 /// Split a cluster on its longest axis.
 /// c = source cluster, c1, c2 = output after split
 void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
@@ -603,14 +735,14 @@ void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
 
     c1->Rmin=c->Rmin; c1->Rmax=r-1;
     c1->rmin=c->rmin; c1->rmax=r-1;
-    c1->Gmin=c->Gmin; c1->Vmax=c->Vmax;
+    c1->Gmin=c->Gmin; c1->vmax=c->vmax;
     c1->vmin=c->vmin; c1->vmax=c->vmax;
     c1->Bmin=c->Bmin; c1->Bmax=c->Bmax;
     c1->bmin=c->bmin; c1->bmax=c->bmax;
 
     c2->Rmin=r;       c2->Rmax=c->Rmax;
     c2->rmin=r;       c2->rmax=c->rmax;
-    c2->Gmin=c->Gmin; c2->Vmax=c->Vmax;
+    c2->Gmin=c->Gmin; c2->vmax=c->vmax;
     c2->vmin=c->vmin; c2->vmax=c->vmax;
     c2->Bmin=c->Bmin; c2->Bmax=c->Bmax;
     c2->bmin=c->bmin; c2->bmax=c->bmax;
@@ -643,14 +775,14 @@ void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
 
     c1->Rmin=c->Rmin; c1->Rmax=c->Rmax;
     c1->rmin=c->rmin; c1->rmax=c->rmax;
-    c1->Gmin=c->Gmin; c1->Vmax=g-1;
+    c1->Gmin=c->Gmin; c1->vmax=g-1;
     c1->vmin=c->vmin; c1->vmax=g-1;
     c1->Bmin=c->Bmin; c1->Bmax=c->Bmax;
     c1->bmin=c->bmin; c1->bmax=c->bmax;
 
     c2->Rmin=c->Rmin; c2->Rmax=c->Rmax;
     c2->rmin=c->rmin; c2->rmax=c->rmax;
-    c2->Gmin=g;       c2->Vmax=c->Vmax;
+    c2->Gmin=g;       c2->vmax=c->vmax;
     c2->vmin=g;       c2->vmax=c->vmax;
     c2->Bmin=c->Bmin; c2->Bmax=c->Bmax;
     c2->bmin=c->bmin; c2->bmax=c->bmax;
@@ -682,20 +814,20 @@ void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
 
     c1->Rmin=c->Rmin; c1->Rmax=c->Rmax;
     c1->rmin=c->rmin; c1->rmax=c->rmax;
-    c1->Gmin=c->Gmin; c1->Vmax=c->Vmax;
+    c1->Gmin=c->Gmin; c1->vmax=c->vmax;
     c1->vmin=c->vmin; c1->vmax=c->vmax;
     c1->Bmin=c->Bmin; c1->Bmax=b-1;
     c1->bmin=c->bmin; c1->bmax=b-1;
 
     c2->Rmin=c->Rmin; c2->Rmax=c->Rmax;
     c2->rmin=c->rmin; c2->rmax=c->rmax;
-    c2->Gmin=c->Gmin; c2->Vmax=c->Vmax;
+    c2->Gmin=c->Gmin; c2->vmax=c->vmax;
     c2->vmin=c->vmin; c2->vmax=c->vmax;
     c2->Bmin=b;       c2->Bmax=c->Bmax;
     c2->bmin=b;       c2->bmax=c->bmax;
   }
 }
-
+*/
 
 /// Compute the mean R, G, B (for palette generation) and H, L (for palette sorting)
 void Cluster_compute_hue(T_Cluster * c,T_Occurrence_table * to)
@@ -757,7 +889,7 @@ void CS_Init(T_Cluster_set * cs, T_Occurrence_table * to)
   cs->clusters->Gmin = cs->clusters->vmin = 0;
   cs->clusters->Bmin = cs->clusters->bmin = 0;
   cs->clusters->Rmax = cs->clusters->rmax = to->rng_r - 1;
-  cs->clusters->Vmax = cs->clusters->vmax = to->rng_g - 1;
+  cs->clusters->vmax = cs->clusters->vmax = to->rng_g - 1;
   cs->clusters->Bmax = cs->clusters->bmax = to->rng_b - 1;
   cs->clusters->next = NULL;
   Cluster_pack(cs->clusters, to);
@@ -1007,7 +1139,7 @@ void CS_Generate_color_table_and_palette(T_Cluster_set * cs,T_Conversion_table *
     palette[index].B=current->b;
 
     for (r=current->Rmin; r<=current->Rmax; r++)
-      for (g=current->Gmin;g<=current->Vmax;g++)
+      for (g=current->Gmin;g<=current->vmax;g++)
         for (b=current->Bmin;b<=current->Bmax;b++)
           CT_set(tc,r,g,b,index);
     current = current->next;
@@ -1338,8 +1470,6 @@ void Convert_24b_bitmap_to_256_nearest_neighbor(T_Bitmap256 dest,
 // For some of them only the first one may work because of ugly optimizations
 static const byte precision_24b[]=
 {
- 8,8,8,
- 6,6,6,
  6,6,5,
  5,6,5,
  5,5,5,
