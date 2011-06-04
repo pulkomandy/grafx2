@@ -70,6 +70,10 @@ void Start_operation_stack(word new_operation)
     case OPERATION_GRAB_BRUSH:
     case OPERATION_POLYBRUSH:
     case OPERATION_STRETCH_BRUSH:
+      Operation_before_interrupt=Current_operation;
+      // On passe à l'operation demandée
+      Current_operation=new_operation;
+      break;
     case OPERATION_ROTATE_BRUSH:
       Begin_brush_rotation();
       Operation_before_interrupt=Current_operation;
