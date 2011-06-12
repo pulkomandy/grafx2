@@ -1102,7 +1102,7 @@ typedef struct
 
     dword Size_2; // 40
     dword Width;
-    dword Height;
+    int32_t Height; // signed: negative means a top-down bitmap (rare)
     word  Planes; // 1
     word  Nb_bits; // 1,4,8 ou 24
     dword Compression;
@@ -1132,7 +1132,7 @@ void Test_BMP(T_IO_Context * context)
      && Read_dword_le(file,&(header.Offset))
      && Read_dword_le(file,&(header.Size_2))
      && Read_dword_le(file,&(header.Width))
-     && Read_dword_le(file,&(header.Height))
+     && Read_dword_le(file,(dword *)&(header.Height))
      && Read_word_le(file,&(header.Planes))
      && Read_word_le(file,&(header.Nb_bits))
      && Read_dword_le(file,&(header.Compression))
@@ -1209,6 +1209,7 @@ void Load_BMP(T_IO_Context * context)
   word  line_size;
   byte  a,b,c=0;
   long  file_size;
+  byte  negative_height;
 
   Get_full_filename(filename, context->File_name, context->File_directory);
 
@@ -1225,7 +1226,7 @@ void Load_BMP(T_IO_Context * context)
      && Read_dword_le(file,&(header.Offset))
      && Read_dword_le(file,&(header.Size_2))
      && Read_dword_le(file,&(header.Width))
-     && Read_dword_le(file,&(header.Height))
+     && Read_dword_le(file,(dword *)&(header.Height))
      && Read_word_le(file,&(header.Planes))
      && Read_word_le(file,&(header.Nb_bits))
      && Read_dword_le(file,&(header.Compression))
@@ -1249,6 +1250,16 @@ void Load_BMP(T_IO_Context * context)
         default:
           File_error=1;
       }
+      
+      if (header.Height < 0)
+      {
+        negative_height=1;
+        header.Height = -header.Height;
+      }
+      else
+      {
+        negative_height=0;
+      }
 
       if (!File_error)
       {
@@ -1271,6 +1282,9 @@ void Load_BMP(T_IO_Context * context)
             context->Width=header.Width;
             context->Height=header.Height;
 
+            if (fseek(file, header.Offset, SEEK_SET))
+              File_error=2;
+
             switch (header.Compression)
             {
               case 0 : // Pas de compression
@@ -1283,26 +1297,29 @@ void Load_BMP(T_IO_Context * context)
                 line_size=(line_size*header.Nb_bits)>>3;
 
                 buffer=(byte *)malloc(line_size);
-                for (y_pos=context->Height-1; ((y_pos>=0) && (!File_error)); y_pos--)
+                for (y_pos=0; (y_pos < context->Height && !File_error); y_pos++)
                 {
+                  short target_y;
+                  target_y = negative_height ? y_pos : context->Height-1-y_pos;
+                  
                   if (Read_bytes(file,buffer,line_size))
                     for (x_pos=0; x_pos<context->Width; x_pos++)
                       switch (header.Nb_bits)
                       {
                         case 8 :
-                          Set_pixel(context, x_pos,y_pos,buffer[x_pos]);
+                          Set_pixel(context, x_pos,target_y,buffer[x_pos]);
                           break;
                         case 4 :
                           if (x_pos & 1)
-                            Set_pixel(context, x_pos,y_pos,buffer[x_pos>>1] & 0xF);
+                            Set_pixel(context, x_pos,target_y,buffer[x_pos>>1] & 0xF);
                           else
-                            Set_pixel(context, x_pos,y_pos,buffer[x_pos>>1] >> 4 );
+                            Set_pixel(context, x_pos,target_y,buffer[x_pos>>1] >> 4 );
                           break;
                         case 1 :
                           if ( buffer[x_pos>>3] & (0x80>>(x_pos&7)) )
-                            Set_pixel(context, x_pos,y_pos,1);
+                            Set_pixel(context, x_pos,target_y,1);
                           else
-                            Set_pixel(context, x_pos,y_pos,0);
+                            Set_pixel(context, x_pos,target_y,0);
                       }
                   else
                     File_error=2;
@@ -1481,11 +1498,14 @@ void Load_BMP(T_IO_Context * context)
                 line_size+=(4-x_pos);
     
               buffer=(byte *)malloc(line_size);
-              for (y_pos=context->Height-1; ((y_pos>=0) && (!File_error)); y_pos--)
+              for (y_pos=0; (y_pos < context->Height && !File_error); y_pos++)
               {
+                short target_y;
+                target_y = negative_height ? y_pos : context->Height-1-y_pos;
+                
                 if (Read_bytes(file,buffer,line_size))
                   for (x_pos=0,index=0; x_pos<context->Width; x_pos++,index+=3)
-                    Set_pixel_24b(context, x_pos,y_pos,buffer[index+2],buffer[index+1],buffer[index+0]);
+                    Set_pixel_24b(context, x_pos,target_y,buffer[index+2],buffer[index+1],buffer[index+0]);
                 else
                   File_error=2;
               }
@@ -1495,13 +1515,15 @@ void Load_BMP(T_IO_Context * context)
             case 32:
               line_size=context->Width*4;
               buffer=(byte *)malloc(line_size);
-              for (y_pos=context->Height-1; ((y_pos>=0) && (!File_error)); y_pos--)
+              for (y_pos=0; (y_pos < context->Height && !File_error); y_pos++)
               {
+                short target_y;
+                target_y = negative_height ? y_pos : context->Height-1-y_pos;
                 if (Read_bytes(file,buffer,line_size))
                   for (x_pos=0; x_pos<context->Width; x_pos++)
                   {
                     dword pixel=*(((dword *)buffer)+x_pos);
-                    Set_pixel_24b(context, x_pos,y_pos,Bitmap_mask(pixel,red_mask),Bitmap_mask(pixel,green_mask),Bitmap_mask(pixel,blue_mask));
+                    Set_pixel_24b(context, x_pos,target_y,Bitmap_mask(pixel,red_mask),Bitmap_mask(pixel,green_mask),Bitmap_mask(pixel,blue_mask));
                   }
                 else
                   File_error=2;
@@ -1512,13 +1534,15 @@ void Load_BMP(T_IO_Context * context)
             case 16:
               line_size=(context->Width*2) + (context->Width&1)*2;
               buffer=(byte *)malloc(line_size);
-              for (y_pos=context->Height-1; ((y_pos>=0) && (!File_error)); y_pos--)
+              for (y_pos=0; (y_pos < context->Height && !File_error); y_pos++)
               {
+                short target_y;
+                target_y = negative_height ? y_pos : context->Height-1-y_pos;
                 if (Read_bytes(file,buffer,line_size))
                   for (x_pos=0; x_pos<context->Width; x_pos++)
                   {
                     word pixel=*(((word *)buffer)+x_pos);
-                    Set_pixel_24b(context, x_pos,y_pos,Bitmap_mask(pixel,red_mask),Bitmap_mask(pixel,green_mask),Bitmap_mask(pixel,blue_mask));
+                    Set_pixel_24b(context, x_pos,target_y,Bitmap_mask(pixel,red_mask),Bitmap_mask(pixel,green_mask),Bitmap_mask(pixel,blue_mask));
                   }
                 else
                   File_error=2;
