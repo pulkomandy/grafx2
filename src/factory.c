@@ -690,6 +690,22 @@ int L_MatchColor(lua_State* L)
   return 1;
 }
 
+int L_MatchColor2(lua_State* L)
+{
+  double r, g, b;
+  int c;
+  int nb_args=lua_gettop(L);
+
+  LUA_ARG_LIMIT (3, "matchcolor2");
+  LUA_ARG_NUMBER(1, "matchcolor2", r, -DBL_MAX, DBL_MAX);
+  LUA_ARG_NUMBER(2, "matchcolor2", g, -DBL_MAX, DBL_MAX);
+  LUA_ARG_NUMBER(3, "matchcolor2", b, -DBL_MAX, DBL_MAX);
+  
+  c = Best_color_perceptual(clamp_byte(r),clamp_byte(g),clamp_byte(b));
+  lua_pushinteger(L, c);
+  return 1;
+}
+
 int L_GetForeColor(lua_State* L)
 {
   lua_pushinteger(L, Fore_color);
@@ -1506,6 +1522,7 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   lua_register(L,"gettranscolor",L_GetTransColor);
   
   lua_register(L,"matchcolor",L_MatchColor);
+  lua_register(L,"matchcolor2",L_MatchColor2);
 
   // ui
   lua_register(L,"inputbox",L_InputBox);

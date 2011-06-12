@@ -374,11 +374,11 @@ OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o $(OBJDIR)/sdlscreen.o 
 
 SKIN_FILES = ../share/grafx2/skins/skin_classic.png ../share/grafx2/skins/skin_modern.png ../share/grafx2/skins/skin_DPaint.png ../share/grafx2/skins/font_Classic.png ../share/grafx2/skins/font_Fun.png ../share/grafx2/skins/font_Fairlight.png ../share/grafx2/skins/font_Melon.png ../share/grafx2/skins/font_DPaint.png ../share/grafx2/skins/skin_scenish.png ../share/grafx2/skins/font_Seen.png ../share/grafx2/skins/skin_Aurora.png
 
-SCRIPT_FILES = ../share/grafx2/scripts/samples_2.3/brush/ApplyColor.lua ../share/grafx2/scripts/samples_2.3/brush/Fisheye.lua ../share/grafx2/scripts/samples_2.3/brush/GrayscaleAvg.lua ../share/grafx2/scripts/samples_2.3/brush/GrayscaleDesat.lua ../share/grafx2/scripts/samples_2.3/brush/Halfsmooth.lua ../share/grafx2/scripts/samples_2.3/brush/Waves.lua ../share/grafx2/scripts/samples_2.3/demo/3DPalette.lua ../share/grafx2/scripts/samples_2.3/demo/Ellipse.lua ../share/grafx2/scripts/samples_2.3/demo/FlipPicture.lua \
-../share/grafx2/scripts/samples_2.3/demo/SierpinskyCarpet.lua ../share/grafx2/scripts/samples_2.3/demo/SierpinskyTriangle.lua ../share/grafx2/scripts/samples_2.3/demo/Spritesheet.lua ../share/grafx2/scripts/samples_2.3/demo/brush/Amigaball.lua ../share/grafx2/scripts/samples_2.3/demo/brush/ColorSphere.lua ../share/grafx2/scripts/samples_2.3/demo/brush/FindAA.lua ../share/grafx2/scripts/samples_2.3/demo/brush/Mandelbrot.lua ../share/grafx2/scripts/samples_2.3/libs/dawnbringer_lib.lua ../share/grafx2/scripts/samples_2.3/libs/memory.lua \
-../share/grafx2/scripts/samples_2.3/palette/Desaturate.lua ../share/grafx2/scripts/samples_2.3/palette/ExpandColors.lua ../share/grafx2/scripts/samples_2.3/palette/FillColorCube.lua ../share/grafx2/scripts/samples_2.3/palette/InvertedRGB.lua ../share/grafx2/scripts/samples_2.3/palette/Set3bit.lua ../share/grafx2/scripts/samples_2.3/palette/Set6bit.lua ../share/grafx2/scripts/samples_2.3/palette/SetC64Palette.lua ../share/grafx2/scripts/samples_2.3/palette/ShiftHue.lua ../share/grafx2/scripts/samples_2.3/picture/CellColourReducer.lua \
-../share/grafx2/scripts/samples_2.3/picture/DrawGridIsometric.lua ../share/grafx2/scripts/samples_2.3/picture/DrawgridOrthogonal_Index.lua ../share/grafx2/scripts/samples_2.3/picture/DrawGridOrthogonal_RGB.lua ../share/grafx2/scripts/samples_2.3/picture/GlassGridFilter.lua ../share/grafx2/scripts/samples_2.3/picture/PaletteToPicture.lua ../share/grafx2/scripts/samples_2.3/picture/Pic2isometric.lua ../share/grafx2/scripts/samples_2.3/picture/Rainbow-Dark2Bright.lua ../share/grafx2/scripts/samples_2.3/picture/RemapImage2RGB.lua \
-../share/grafx2/scripts/samples_2.3/picture/RemapImage2RGB_ed.lua ../share/grafx2/scripts/samples_2.3/picture/RemapImageTo3bitPal.lua ../share/grafx2/scripts/samples_2.3/picture/XBitColourXpaceFromPalette.lua
+SCRIPT_FILES = ../share/grafx2/scripts/samples_2.4/brush/ApplyColor.lua ../share/grafx2/scripts/samples_2.4/brush/Fisheye.lua ../share/grafx2/scripts/samples_2.4/brush/GrayscaleAvg.lua ../share/grafx2/scripts/samples_2.4/brush/GrayscaleDesat.lua ../share/grafx2/scripts/samples_2.4/brush/Halfsmooth.lua ../share/grafx2/scripts/samples_2.4/brush/Waves.lua ../share/grafx2/scripts/samples_2.4/demo/3DPalette.lua ../share/grafx2/scripts/samples_2.4/demo/Ellipse.lua ../share/grafx2/scripts/samples_2.4/demo/FlipPicture.lua \
+../share/grafx2/scripts/samples_2.4/demo/SierpinskyCarpet.lua ../share/grafx2/scripts/samples_2.4/demo/SierpinskyTriangle.lua ../share/grafx2/scripts/samples_2.4/demo/Spritesheet.lua ../share/grafx2/scripts/samples_2.4/demo/brush/Amigaball.lua ../share/grafx2/scripts/samples_2.4/demo/brush/ColorSphere.lua ../share/grafx2/scripts/samples_2.4/demo/brush/FindAA.lua ../share/grafx2/scripts/samples_2.4/demo/brush/Mandelbrot.lua ../share/grafx2/scripts/samples_2.4/libs/dawnbringer_lib.lua ../share/grafx2/scripts/samples_2.4/libs/memory.lua \
+../share/grafx2/scripts/samples_2.4/palette/Desaturate.lua ../share/grafx2/scripts/samples_2.4/palette/ExpandColors.lua ../share/grafx2/scripts/samples_2.4/palette/FillColorCube.lua ../share/grafx2/scripts/samples_2.4/palette/InvertedRGB.lua ../share/grafx2/scripts/samples_2.4/palette/Set3bit.lua ../share/grafx2/scripts/samples_2.4/palette/Set6bit.lua ../share/grafx2/scripts/samples_2.4/palette/SetC64Palette.lua ../share/grafx2/scripts/samples_2.4/palette/ShiftHue.lua ../share/grafx2/scripts/samples_2.4/picture/CellColourReducer.lua \
+../share/grafx2/scripts/samples_2.4/picture/DrawGridIsometric.lua ../share/grafx2/scripts/samples_2.4/picture/DrawgridOrthogonal_Index.lua ../share/grafx2/scripts/samples_2.4/picture/DrawGridOrthogonal_RGB.lua ../share/grafx2/scripts/samples_2.4/picture/GlassGridFilter.lua ../share/grafx2/scripts/samples_2.4/picture/PaletteToPicture.lua ../share/grafx2/scripts/samples_2.4/picture/Pic2isometric.lua ../share/grafx2/scripts/samples_2.4/picture/Rainbow-Dark2Bright.lua ../share/grafx2/scripts/samples_2.4/picture/RemapImage2RGB.lua \
+../share/grafx2/scripts/samples_2.4/picture/RemapImage2RGB_ed.lua ../share/grafx2/scripts/samples_2.4/picture/RemapImageTo3bitPal.lua ../share/grafx2/scripts/samples_2.4/picture/XBitColourXpaceFromPalette.lua
 
 FONT_FILES = ../share/grafx2/fonts/8pxfont.png ../share/grafx2/fonts/Tuffy.ttf ../share/grafx2/fonts/PF_Arma_5__.png ../share/grafx2/fonts/PF_Easta_7_.png ../share/grafx2/fonts/PF_Easta_7__.png ../share/grafx2/fonts/PF_Ronda_7__.png ../share/grafx2/fonts/PF_Tempesta_5.png ../share/grafx2/fonts/PF_Tempesta_5_.png ../share/grafx2/fonts/PF_Tempesta_5__.png ../share/grafx2/fonts/PF_Tempesta_5___.png ../share/grafx2/fonts/PF_Tempesta_7.png ../share/grafx2/fonts/PF_Tempesta_7_.png ../share/grafx2/fonts/PF_Tempesta_7__.png ../share/grafx2/fonts/PF_Tempesta_7___.png ../share/grafx2/fonts/PF_Westa_7_.png ../share/grafx2/fonts/PF_Westa_7__.png
 
@@ -388,12 +388,12 @@ all : $(MACAPPEXE)
 $(MACAPPEXE) : $(BIN)
 	rm -rf Grafx2.app
 	mkdir -p Grafx2.app Grafx2.app/Contents Grafx2.app/Contents/Frameworks Grafx2.app/Contents/MacOS Grafx2.app/Contents/Resources Grafx2.app/Contents/Resources/scripts
-	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.3
-	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.3/brush
-	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.3/demo
-	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.3/libs
-	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.3/palette
-	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.3/picture
+	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.4
+	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.4/brush
+	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.4/demo
+	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.4/libs
+	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.4/palette
+	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.4/picture
 	echo 'APPL????' > Grafx2.app/Contents/PkgInfo
 	cp ../Info.plist Grafx2.app/Contents
 	cp -r Grafx2.icns Grafx2.app/Contents/Resources
@@ -401,11 +401,11 @@ $(MACAPPEXE) : $(BIN)
 	cp -r ../share/grafx2/fonts Grafx2.app/Contents/Resources
 	cp -r ../share/grafx2/skins Grafx2.app/Contents/Resources
 	cp -r ../share/grafx2/gfx2def.ini Grafx2.app/Contents/Resources
-	cp -r ../share/grafx2/scripts/samples_2.3/brush Grafx2.app/Contents/Resources/scripts/samples_2.3
-	cp -r ../share/grafx2/scripts/samples_2.3/demo Grafx2.app/Contents/Resources/scripts/samples_2.3
-	cp -r ../share/grafx2/scripts/samples_2.3/libs Grafx2.app/Contents/Resources/scripts/samples_2.3
-	cp -r ../share/grafx2/scripts/samples_2.3/palette Grafx2.app/Contents/Resources/scripts/samples_2.3
-	cp -r ../share/grafx2/scripts/samples_2.3/picture Grafx2.app/Contents/Resources/scripts/samples_2.3
+	cp -r ../share/grafx2/scripts/samples_2.4/brush Grafx2.app/Contents/Resources/scripts/samples_2.4
+	cp -r ../share/grafx2/scripts/samples_2.4/demo Grafx2.app/Contents/Resources/scripts/samples_2.4
+	cp -r ../share/grafx2/scripts/samples_2.4/libs Grafx2.app/Contents/Resources/scripts/samples_2.4
+	cp -r ../share/grafx2/scripts/samples_2.4/palette Grafx2.app/Contents/Resources/scripts/samples_2.4
+	cp -r ../share/grafx2/scripts/samples_2.4/picture Grafx2.app/Contents/Resources/scripts/samples_2.4
 	mkdir -p Grafx2.app/Contents/Frameworks/SDL.framework/Versions
 	mkdir -p Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions
 #	mkdir -p Grafx2.app/Contents/Frameworks/SDL_ttf.framework/Versions
@@ -499,13 +499,13 @@ install : $(BIN)
 	test -d $(DESTDIR)$(datadir)/grafx2/skins || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/skins
 	test -d $(DESTDIR)$(datadir)/grafx2/scripts || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts
 	test -d $(DESTDIR)$(datadir)/grafx2/scripts/libs || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/libs
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3 || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/brush || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/brush
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/demo || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/demo
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/demo/brush || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/demo/brush
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/libs || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/libs
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/palette || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/palette
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/picture || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/picture
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4 || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/brush || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/brush
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/demo || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/demo
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/demo/brush || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/demo/brush
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/libs || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/libs
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/palette || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/palette
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture
 	test -d $(DESTDIR)$(datadir)/applications || $(MKDIR) $(DESTDIR)$(datadir)/applications
 	test -d $(DESTDIR)$(pixmapdir) || $(MKDIR) $(DESTDIR)$(pixmapdir)
 	# Copy files
@@ -531,13 +531,13 @@ uninstall :
 	$(DELCOMMAND) $(SKIN_FILES:../share%=$(DESTDIR)$(datadir)%)
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/skins),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/skins,)
 	$(DELCOMMAND) $(SCRIPT_FILES:../share%=$(DESTDIR)$(datadir)%)
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/picture),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/picture,)
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/palette),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/palette,)
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/libs),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/libs,)
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/demo/brush),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/demo/brush,)
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/demo),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/demo,)
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/brush),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/brush,)
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/palette),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/palette,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/libs),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/libs,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/demo/brush),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/demo/brush,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/demo),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/demo,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/brush),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/brush,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4,)
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/libs),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/libs,)
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts,)
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2),$(RMDIR) $(DESTDIR)$(datadir)/grafx2,)
