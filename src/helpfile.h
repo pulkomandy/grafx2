@@ -405,6 +405,7 @@ static const T_Help_table helptable_credits[] =
   HELP_TEXT ("")
   HELP_BOLD ("                 AROS PORT")
   HELP_TEXT ("")
+  HELP_TEXT ("  Yannick")
   HELP_TEXT ("  Fernando Mastandrea (masta.uy)")
   HELP_TEXT ("  Markus Weiss")
   HELP_TEXT ("")
