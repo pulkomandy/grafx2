@@ -45,7 +45,7 @@
 #include "graph.h"
 #include "filesel.h" // Read_list_of_drives()
 #include "realpath.h"
-
+#include "setup.h"
 
 /// Lua scripts bound to shortcut keys.
 char * Bound_script[10];
@@ -1491,8 +1491,8 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   
   strcpy(buf, "LUA_PATH=");
   strcat(buf, Data_directory);
-  Append_path(buf+9, "scripts", NULL);
-  Append_path(buf+9, "libs", NULL);
+  Append_path(buf+9, SCRIPTS_SUBDIRECTORY, NULL);
+  Append_path(buf+9, LUALIB_SUBDIRECTORY, NULL);
   Append_path(buf+9, "?.lua", NULL);
   putenv(buf);
   
