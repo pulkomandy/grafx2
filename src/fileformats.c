@@ -46,6 +46,11 @@
 #endif
 #endif
 
+#ifndef png_jmpbuf
+#  define png_jmpbuf(png_ptr) ((png_ptr)->jmpbuf)
+#endif
+
+
 #include <stdlib.h>
 
 #include "errors.h"

@@ -754,11 +754,8 @@ void Zoom_a_line(byte* original_line, byte* zoomed_line,
 // atari have two kinds of memory
 // standard and fast ram
 void Atari_Memory_free(unsigned long *stRam,unsigned long *ttRam){
-  //TODO: return STRAM/TT-RAM
-  unsigned long mem=0;
   *stRam=Mxalloc(-1L,0);
   *ttRam = Mxalloc(-1L,1);
-
 }
 #else
 // Indique quelle est la mémoire disponible

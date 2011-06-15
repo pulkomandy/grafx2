@@ -209,7 +209,24 @@ else
     X11LOPT = -lX11
     CC = gcc
   else
-  
+  ifeq ($(PLATFORM),FreeMiNT) #10
+  	#Atari FreeMiNT/TOS specific
+        DELCOMMAND = rm -rf
+        MKDIR = mkdir -p
+        RMDIR = rmdir
+        CP = cp
+        ZIP = zip
+        PLATFORMFILES = gfx2.png
+        CC = gcc
+        BIN = ../bin/grafx2.ttp
+	LUALOPT = -llua
+        OBJDIR = ../obj/m68k-atari-mint
+        PLATFORM = m68k-atari-mint
+        STRIP = strip -s 
+	X11LOPT = 
+	COPT = -W -Wall -m68020-60 -fomit-frame-pointer -pedantic -std=c99 -Wdeclaration-after-statement -D__MINT__ -DNO_INLINE_MATH -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $(JOYCOPT) $(LAYERCOPT) $(LUACOPT)
+    	LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) $(LAYERLOPT)
+  else
     # Finally, the default rules that work fine for most unix/gcc systems, linux and freebsd are tested.
     # Linux and FreeBSD specific (default rules)
     DELCOMMAND = rm -rf
@@ -267,13 +284,13 @@ else
         #cross compile an exec for atari TOS/MiNT machine
         CC = m68k-atari-mint-gcc
         BIN = ../bin/grafx2.ttp
-	    LUALOPT = -llua
+	LUALOPT = -llua
         OBJDIR = ../obj/m68k-atari-mint
         PLATFORM = m68k-atari-mint
         STRIP = m68k-atari-mint-strip -s 
-        X11LOPT = 
-        COPT = -W -Wall -m68020-60 -fomit-frame-pointer -pedantic -std=c99 -Wdeclaration-after-statement -D__MINT__ -DNO_INLINE_MATH -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $() $(JOYCOPT) $(LAYERCOPT) $(LUACOPT)
-        LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) $(LAYERLOPT)
+	X11LOPT = 
+	COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -ffast-math -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $(JOYCOPT) $(LAYERCOPT) $(LUACOPT)
+    	LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) -lm $(LAYERLOPT) -Wl,--stack,32k 
       else
 
         # Compiles a regular linux executable for the native platform
@@ -290,6 +307,7 @@ else
       endif
     endif
 
+  endif
   endif
   endif
   endif

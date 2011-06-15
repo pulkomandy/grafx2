@@ -437,7 +437,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   }
   
   if(!bFound){
-    Add_element_to_list(list, "..",1,Format_filename("/",19,1),ICON_NONE); // add if not present
+    Add_element_to_list(list, "..",Format_filename("/",19,1),1,ICON_NONE); // add if not present
     list->Nb_directories ++;  
   }
   
@@ -1401,8 +1401,9 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
   if (load)
   {
   #if defined(__MINT__)    
-    chdir(Main_current_directory);
     static char path[1024]={0};
+  
+    chdir(Main_current_directory);
     Dgetpath(path,0);
     strcat(path,PATH_SEPARATOR);
     strcpy(Main_current_directory,path);  
