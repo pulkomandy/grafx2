@@ -184,3 +184,67 @@ Lua:
   Copy liblua.a to c:\msys\mingw\lib
   Copy lua51.dll to c:\msys\mingw\bin
 
+== Atari TOS machines ==
+The Atari build is very similar to the Linux one. The build might work on native machine with gcc 4.3> compiler, 
+but it wasn't tested. You can also build binary for Coldfire based machines(e.g. Firebee) by 
+replacing '-m68020-60' in makefile to '-mcpu=5475'.
+ 
+Preferable way is to build GRAFX2 with use of cross compiler, you can get one from Vincent Riviere site:
+(URL: http://vincent.riviere.free.fr/soft/m68k-atari-mint). There are versions for win32 (Cygwin) and 
+debian packages for latest Ubuntu (32/64bit).
+
+Before compilation you have to build all the needed libraries mentioned in requirements. 
+
+To compile a Atari TOS executable, type in
+	make ATARICROSS=1
+You can also add other options like NOTTF,NOLUA,NOLAYERS etc. to enable/disable program features..
+
+If you don't know how build libraries here's some hints. Please note that prefix path in examples below is valid only under Linux, 
+in case of Cygwin the path will be '/opt/m68k-atari-mint'. There will be no prefix when building on native machine.
+You have to omit 'sudo' under Cygwin and native build. Stick to this order and you will be fine ;> ... 
+The versions of libraries were tested, you can also try newer versions. As I mentioned earlier, replace '-m68020-60' with '-mcpu=5475' 
+if you want to target Coldfire machines.
+
+libpng [optional](for png reading in SDL_image):
+------------------------------------------------
+note: you will need libzip too
+libpng 1.2.44 
+./configure --prefix=/usr/m68k-atari-mint --disable-shared --enable-static --host=m68k-atari-mint CFLAGS="-m68020-60 -O2 -fomit-frame-pointer"
+sudo make install 
+or 
+libpng 1.4.44 
+./configure --prefix=/usr/m68k-atari-mint --disable-shared --enable-static --host=m68k-atari-mint CFLAGS="-m68020-60 -O2 -fomit-frame-pointer -DPNG_NO_SETJMP"
+sudo make install
+
+libjpeg, libtiff [optional] (for jpeg/tiff support in SDL_image) 
+----------------------------------------------------------------
+./configure --prefix=/usr/m68k-atari-mint --disable-shared --enable-static --host=m68k-atari-mint CFLAGS="-m68020-60 -O2 -fomit-frame-pointer"
+sudo make install
+
+freetype 2.4.4 [optional] (for TTF fonts support, required by SDL_ttf)
+----------------------------------------------------------------------
+./configure --prefix=/usr/m68k-atari-mint --disable-shared --enable-static --host=m68k-atari-mint CFLAGS="-m68020-60 -O2 -fomit-frame-pointer" 
+sudo make install 
+
+lua 5.0.4 [optional] (for LUA scripting support)
+------------------------------------------------
+Here you have to customize makefiles, add prefixes, platform has to be set as generic. 
+
+SDL 1.2 [mandatory]
+--------------------
+note: best is to grab it directly from Mercurial repository 
+./configure --prefix=/usr/m68k-atari-mint --disable-shared --enable-static --host=m68k-atari-mint --disable-video-opengl --disable-shared --enable-static --disable-threads CFLAGS="-m68020-60 -O2 -fomit-frame-pointer"
+sudo make install 
+
+SDL_ttf [optional] (for ttf fonts support, depends on SDL and freetype) 
+-------------------------------------------
+./configure --prefix=/usr/m68k-atari-mint --disable-shared --enable-static --host=m68k-atari-mint --disable-shared --enable-static --with-sdl-prefix=/usr/m68k-atari-mint --with-freetype-prefix=/usr/m68k-atari-mint CFLAGS=" -m68020-60 -O2 -fomit-frame-pointer"
+sudo make install 
+
+SDL_image 1.2.10 [mandatory] 
+----------------------------
+./configure --prefix=/usr/m68k-atari-mint --disable-shared --enable-static --host=m68k-atari-mint --disable-shared --enable-static --with-sdl-prefix=/usr/m68k-atari-mint CFLAGS="-DHAVE_OPENGL=0 -m68020-60 -O2 -fomit-frame-pointer"
+sudo make install 
+
+And that's it! :)
+
