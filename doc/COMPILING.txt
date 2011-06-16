@@ -196,7 +196,7 @@ debian packages for latest Ubuntu (32/64bit).
 Before compilation you have to build all the needed libraries mentioned in requirements. 
 
 To compile a Atari TOS executable, type in
-	make ATARICROSS=1
+	make ATARICROSS=1 prefix=/usr/m68k-atari-mint
 You can also add other options like NOTTF,NOLUA,NOLAYERS etc. to enable/disable program features..
 
 If you don't know how build libraries here's some hints. Please note that prefix path in examples below is valid only under Linux, 
