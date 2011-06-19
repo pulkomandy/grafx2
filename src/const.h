@@ -120,6 +120,7 @@ enum FILE_FORMATS
   FORMAT_KCF,
   FORMAT_PAL,
   FORMAT_SCR,
+  FORMAT_CM5,
   FORMAT_XPM,
   FORMAT_MISC, ///< Must be last of enum: others formats recognized by SDL_image
 };
@@ -483,6 +484,10 @@ enum SPECIAL_ACTIONS
   SPECIAL_RUN_SCRIPT_9,
   SPECIAL_RUN_SCRIPT_10,
   SPECIAL_CYCLE_MODE,
+
+  SPECIAL_FORMAT_CHECKER,
+  SPECIAL_FORMAT_CHECKER_MENU,
+
   NB_SPECIAL_SHORTCUTS            ///< Number of special shortcuts
 };
 

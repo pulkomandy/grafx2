@@ -125,6 +125,11 @@ void Save_C64(T_IO_Context *);
 // -- SCR (Amstrad CPC)
 void Save_SCR(T_IO_Context *);
 
+// -- CM5 (Amstrad CPC)
+void Test_CM5(T_IO_Context *);
+void Load_CM5(T_IO_Context *);
+void Save_CM5(T_IO_Context *);
+
 // -- XPM (X PixMap)
 // Loading is done through SDL_Image 
 void Save_XPM(T_IO_Context*);
@@ -142,7 +147,7 @@ void Load_SDL_Image(T_IO_Context *);
 
 // ENUM     Name  TestFunc LoadFunc SaveFunc PalOnly Comment Layers Ext Exts  
 T_Format File_formats[] = {
-  {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, 0, "", "gif;png;bmp;pcx;pkm;lbm;ilbm;iff;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;kcf;pal;c64;koa;tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico"},
+  {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, 0, "", "gif;png;bmp;pcx;pkm;lbm;iff;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;kcf;pal;c64;koa;koala;fli;bml;cdu;prg;tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico;cm5"},
   {FORMAT_ALL_FILES, "(*.*)", NULL, NULL, NULL, 0, 0, 0, "", "*"},
   {FORMAT_GIF, " gif", Test_GIF, Load_GIF, Save_GIF, 0, 1, 1, "gif", "gif"},
 #ifndef __no_pnglib__
@@ -160,8 +165,9 @@ T_Format File_formats[] = {
   {FORMAT_NEO, " neo", Test_NEO, Load_NEO, Save_NEO, 0, 0, 0, "neo", "neo"},
   {FORMAT_KCF, " kcf", Test_KCF, Load_KCF, Save_KCF, 1, 0, 0, "kcf", "kcf"},
   {FORMAT_PAL, " pal", Test_PAL, Load_PAL, Save_PAL, 1, 0, 0, "pal", "pal"},
-  {FORMAT_C64, " c64", Test_C64, Load_C64, Save_C64, 0, 1, 0, "c64", "c64;koa"},
+  {FORMAT_C64, " c64", Test_C64, Load_C64, Save_C64, 0, 1, 0, "c64", "c64;koa;koala;fli;bml;cdu;prg"},
   {FORMAT_SCR, " cpc", NULL,     NULL,     Save_SCR, 0, 0, 0, "cpc", "cpc;scr"},
+  {FORMAT_CM5, " cm5", Test_CM5, Load_CM5, Save_CM5, 0, 0, 1, "cm5", "cm5"},
   {FORMAT_XPM, " xpm", NULL,     NULL,     Save_XPM, 0, 0, 0, "xpm", "xpm"},
   {FORMAT_MISC,"misc.",NULL,     NULL,     NULL,     0, 0, 0, "",    "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico"},
 };
@@ -427,7 +433,7 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
         context->Nb_layers=1;
         Main_current_layer=0;
         Main_layers_visible=1<<0;
-        Set_layer(context,0);
+        Set_loading_layer(context,0);
         
         // Remove previous comment, unless we load just a palette
         if (! Get_fileformat(context->Format)->Palette_only)
@@ -1274,14 +1280,25 @@ void Init_context_surface(T_IO_Context * context, char *file_name, char *file_di
 
 }
 /// Function to call when need to switch layers.
-void Set_layer(T_IO_Context *context, byte layer)
+void Set_saving_layer(T_IO_Context *context, byte layer)
+{
+  context->Current_layer = layer;
+
+  if (context->Type == CONTEXT_MAIN_IMAGE)
+  {
+    context->Target_address=Main_backups->Pages->Image[layer];
+  }
+}
+
+/// Function to call when need to switch layers.
+void Set_loading_layer(T_IO_Context *context, byte layer)
 {
   context->Current_layer = layer;
 
   if (context->Type == CONTEXT_MAIN_IMAGE)
   {
     // This awful thing is the part that happens on load
-    while (layer > (context->Nb_layers-1))
+    while (layer >= context->Nb_layers)
     {
       if (Add_layer(Main_backups, layer))
       {
@@ -1291,9 +1308,9 @@ void Set_layer(T_IO_Context *context, byte layer)
         break;
       }
       context->Nb_layers = Main_backups->Pages->Nb_layers;
-      Main_current_layer = layer;
       Main_layers_visible = (2<<layer)-1;
     }
+    Main_current_layer = layer;
     context->Target_address=Main_backups->Pages->Image[layer];
   }
 }

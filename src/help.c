@@ -32,7 +32,7 @@
     #include <sys/mount.h>
 #elif defined (__linux__)
     #include <sys/vfs.h>
-#elif defined(__HAIKU__)
+#elif defined (__HAIKU__)
 	#include "haiku.h"
 #elif defined (__MINT__)
     #include <mint/sysbind.h>
@@ -69,7 +69,7 @@ word * Shortcut(word shortcut_number)
   return &(Config_Key[shortcut_number & 0xFF][0]);
 }
 
-// Nom de la touche actuallement assignÃ©e Ã  un raccourci d'aprÃ¨s son numÃ©ro
+// Nom de la touche actuallement assignée à un raccourci d'après son numéro
 // de type 0x100+BOUTON_* ou SPECIAL_*
 const char * Keyboard_shortcut_value(word shortcut_number)
 {
@@ -707,7 +707,7 @@ void Button_Stats(void)
   Print_in_window(146,35,TrueType_is_supported()?"TTF fonts":"no TTF fonts",STATS_DATA_COLOR,MC_Black);
 
 #if defined (__MINT__)
-  // Affichage de la mémoire restante
+  // Display free TT/ST RAM
   Print_in_window(10,43,"Free memory: ",STATS_TITLE_COLOR,MC_Black);
 
   freeRam=0;
@@ -751,7 +751,7 @@ void Button_Stats(void)
    Print_in_window(18,51,buffer,STATS_DATA_COLOR,MC_Black);
 
 #else
-  // Affichage de la mémoire restante
+  // Display free RAM (generic)
   Print_in_window(10,51,"Free memory: ",STATS_TITLE_COLOR,MC_Black);
 
   freeRam = Memory_free();
@@ -780,10 +780,6 @@ void Button_Stats(void)
         sprintf(buffer,"%ld (%lld Kb)",Stats_pages_number, Stats_pages_memory/1024);
   Print_in_window(162,59,buffer,STATS_DATA_COLOR,MC_Black);
   
-  // Affichage de l'espace disque libre
-  sprintf(buffer,"Free space on %c:",Main_current_directory[0]);
-  Print_in_window(10,67,buffer,STATS_TITLE_COLOR,MC_Black);
-
 #if defined(__WIN32__)
     {
       ULARGE_INTEGER tailleU;
@@ -791,7 +787,6 @@ void Button_Stats(void)
       mem_size = tailleU.QuadPart;
     }
 #elif defined(__linux__) || defined(__macosx__) || defined(__FreeBSD__)
-    // Note: under MacOSX, both macros are defined anyway.
     {
       struct statfs disk_info;
       statfs(Main_current_directory,&disk_info);
@@ -808,10 +803,18 @@ void Button_Stats(void)
    mem_size=drvInfo.b_free*drvInfo.b_clsiz*drvInfo.b_secsiz;
    
 #else
+	#define NODISKSPACESUPPORT
     // Free disk space is only for shows. Other platforms can display 0.
     #warning "Missing code for your platform !!! Check and correct please :)"
     mem_size=0;
 #endif
+
+  // Display free space
+  if (mem_size != 0)
+  {
+	sprintf(buffer,"Free space on %c:",Main_current_directory[0]);
+	Print_in_window(10,67,buffer,STATS_TITLE_COLOR,MC_Black);
+
   
     if(mem_size > (100ULL*1024*1024*1024))
         sprintf(buffer,"%u Gigabytes",(unsigned int)(mem_size/(1024*1024*1024)));
@@ -822,6 +825,12 @@ void Button_Stats(void)
     else 
         sprintf(buffer,"%u bytes",(unsigned int)mem_size);
     Print_in_window(146,67,buffer,STATS_DATA_COLOR,MC_Black);
+  } else {
+	#ifndef NODISKSPACESUPPORT
+	  Print_in_window(10,67,"Disk full!",STATS_TITLE_COLOR,MC_Black);
+	#endif
+	#undef NODISKSPACESUPPORT
+  }
 
   // Affichage des informations sur l'image
   Print_in_window(10,83,"Picture info.:",STATS_TITLE_COLOR,MC_Black);

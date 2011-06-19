@@ -438,6 +438,9 @@ void Button_Tiling_mode(void);
 */
 void Button_Tiling_menu(void);
 
+void Button_Constraint_mode(void);
+void Button_Constraint_menu(void);
+
 /*!
     Callback for the command that turns off all drawaing effects.
 */

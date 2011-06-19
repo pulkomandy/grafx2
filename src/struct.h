@@ -372,11 +372,11 @@ typedef struct
   byte Allow_multi_shortcuts;            ///< Boolean, true if the same key combination can trigger multiple shortcuts.
 } T_Config;
 
-// Structures utilisÃ©es pour les descriptions de pages et de liste de pages.
-// Lorsqu'on gÃ©rera les animations, il faudra aussi des listes de listes de
+// Structures utilisées pour les descriptions de pages et de liste de pages.
+// Lorsqu'on gèrera les animations, il faudra aussi des listes de listes de
 // pages.
 
-// Ces structures sont manipulÃ©es Ã  travers des fonctions de gestion du
+// Ces structures sont manipulées à travers des fonctions de gestion du
 // backup dans "graph.c".
 
 /// This is the data for one step of Undo/Redo, for one image.
@@ -401,11 +401,11 @@ typedef struct T_Page
   byte      Transparent_color; ///< Index of transparent color. 0 to 255.
   byte      Nb_layers; ///< Number of layers
 #if __GNUC__ < 3
-  byte *    Image[0];
+  // gcc2 doesn't suport [], but supports [0] which does the same thing.
+  byte *    Image[0];  ///< Pixel data for the (first layer of) image.
 #else
   byte *    Image[];  ///< Pixel data for the (first layer of) image.
 #endif
-    // Define as Image[0] if you have an old gcc which is not C99.
   // No field after Image[] ! Dynamic layer allocation for Image[1], [2] etc.
 } T_Page;
 

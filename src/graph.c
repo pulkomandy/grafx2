@@ -2920,6 +2920,15 @@ byte Effect_smooth(word x,word y,__attribute__((unused)) byte color)
                                        // l'écran feedback car il s'agit de ne
 }                                      // pas modifier l'écran courant.
 
+byte Effect_layer_copy(word x,word y,byte color)
+{
+  if (color<Main_backups->Pages->Nb_layers)
+  {
+    return *((y)*Main_image_width+(x)+Main_backups->Pages->Image[color]);
+  }
+  return Read_pixel_from_feedback_screen(x,y);
+}
+
 void Horizontal_grid_line(word x_pos,word y_pos,word width)
 {
   int x;
@@ -2963,6 +2972,10 @@ byte Read_pixel_from_current_screen  (word x,word y)
   #ifndef NOLAYERS
   byte depth;
   byte color;
+  
+  if (Main_current_layer==4)
+    return *(Main_backups->Pages->Image[Main_current_layer] + x+y*Main_image_width);
+    
   color = *(Main_screen+y*Main_image_width+x);
   if (color != Main_backups->Pages->Transparent_color) // transparent color
     return color;
@@ -2976,7 +2989,9 @@ byte Read_pixel_from_current_screen  (word x,word y)
 
 void Pixel_in_current_screen      (word x,word y,byte color,int with_preview)
 {
-    #ifndef NOLAYERS
+  #ifndef NOLAYERS
+  if (!Constraint_mode)
+  {
     byte depth = *(Main_visible_image_depth_buffer.Image+x+y*Main_image_width);
     *(Main_backups->Pages->Image[Main_current_layer] + x+y*Main_image_width)=color;
     if ( depth <= Main_current_layer)
@@ -2990,12 +3005,68 @@ void Pixel_in_current_screen      (word x,word y,byte color,int with_preview)
       if (with_preview)
         Pixel_preview(x,y,color);
     }
-    #else
-    *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer])=color;
-    if (with_preview)
+    
+  }
+  else if ( Main_current_layer == 4)
+  {
+    if (color<4)
+    {
+      // Paste in layer
+      *(Main_backups->Pages->Image[Main_current_layer] + x+y*Main_image_width)=color;
+      // Paste in depth buffer
+      *(Main_visible_image_depth_buffer.Image+x+y*Main_image_width)=color;
+      // Fetch pixel color from the target raster layer
+      color=*(Main_backups->Pages->Image[color] + x+y*Main_image_width);
+      // Draw that color on the visible image buffer
+      *(x+y*Main_image_width+Main_screen)=color;
+      
+      if (with_preview)
         Pixel_preview(x,y,color);
-    #endif
+    }
+  }
+  else if (Main_current_layer<4 && (Main_layers_visible & (1<<4)))
+  {
+    byte depth;
+    
+    // Paste in layer
+    *(Main_backups->Pages->Image[Main_current_layer] + x+y*Main_image_width)=color;
+    // Search depth
+    depth = *(Main_backups->Pages->Image[4] + x+y*Main_image_width);
+    
+    if ( depth == Main_current_layer)
+    {
+      // Draw that color on the visible image buffer
+      *(x+y*Main_image_width+Main_screen)=color;
+      
+      if (with_preview)
+        Pixel_preview(x,y,color);
+    }
+  }  
+  else
+  {
+    byte depth;
+    
+    *(Main_backups->Pages->Image[Main_current_layer] + x+y*Main_image_width)=color;
+    depth = *(Main_visible_image_depth_buffer.Image+x+y*Main_image_width);
+    if ( depth <= Main_current_layer)
+    {
+      if (color == Main_backups->Pages->Transparent_color) // transparent color
+        // fetch pixel color from the topmost visible layer
+        color=*(Main_backups->Pages->Image[depth] + x+y*Main_image_width);
+      
+      *(x+y*Main_image_width+Main_screen)=color;
+      
+      if (with_preview)
+        Pixel_preview(x,y,color);
+    }
+  }
+  #else
+  *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer])=color;
+  if (with_preview)
+      Pixel_preview(x,y,color);
+  #endif
 }
+
 
 void Pixel_in_current_layer(word x,word y, byte color)
 {

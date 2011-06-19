@@ -168,3 +168,6 @@ int Max(int a,int b);
 
 char* Mode_label(int mode);
 int Convert_videomode_arg(const char *argument);
+
+int Popcount_word(word x);
+int Popcount_dword(dword x);

@@ -129,14 +129,119 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
   byte  temp_color; // color de la brosse en cours d'affichage
   int position;
   byte * temp;
+  byte old_color;
 
-  if (is_preview==0 || Mouse_K==0) // pas de curseur si on est en preview et 
-                                     // en train de cliquer
+  if (is_preview && Mouse_K) // pas de curseur si on est en preview et 
+    return;                  // en train de cliquer
+    
+  if (Constraint_mode && Main_current_layer < 4)
+  {
+    if (is_preview)
+      goto single_pixel;
+    else
+    {
+      // Flood-fill the enclosing area
+      if (x<Main_image_width && y<Main_image_height && x>= 0 && y >= 0
+       && (color=Effect_function(x,y,color)) != (old_color=Read_pixel_from_current_layer(x,y))
+       && (!((Stencil_mode) && (Stencil[old_color])))
+       && (!((Mask_mode)    && (Mask_table[Read_pixel_from_spare_screen(x,y)])))
+       )
+      {
+        short min_x,width,min_y,height;
+        short xx,yy;
+        
+        // determine area
+        switch(Main_current_layer)
+        {
+          case 0:
+          default:
+            // Full layer
+            min_x=0;
+            min_y=0;
+            width=Main_image_width;
+            height=Main_image_height;
+            break;
+          case 1:
+          case 2:
+            // Line
+            min_x=0;
+            min_y=y;
+            width=Main_image_width;
+            height=1;
+            break;
+          case 3:
+            // Segment
+            min_x=x / 48 * 48;
+            min_y=y;
+            width=48;
+            height=1;
+            break;
+          //case 4:
+          //  // 8x8
+          //  min_x=x / 8 * 8;
+          //  min_y=y / 8 * 8;
+          //  width=8;
+          //  height=8;
+          //  break;
+        }
+        // Clip the bottom edge.
+        // (Necessary if image height is not a multiple)
+        if (min_y+height>=Main_image_height)
+          height=Main_image_height-min_y;
+        // Clip the right edge.
+        // (Necessary if image width is not a multiple)
+        if (min_x+width>=Main_image_width)
+          width=Main_image_width-min_x;
+          
+        for (yy=min_y; yy<min_y+height; yy++)
+          for (xx=min_x; xx<min_x+width; xx++)
+          {
+            Pixel_in_current_screen(xx,yy,color,0);
+          }
+        // Feedback
+        // This part is greatly taken from Hide_paintbrush()
+        Compute_clipped_dimensions(&min_x,&min_y,&width,&height);
+  
+        if ( (width>0) && (height>0) )
+          Clear_brush(min_x-Main_offset_X,
+                      min_y-Main_offset_Y,
+                      0,0,
+                      width,height,0,
+                      Main_image_width);
+  
+        if (Main_magnifier_mode != 0)
+        {
+          Compute_clipped_dimensions_zoom(&min_x,&min_y,&width,&height);
+          xx=min_x;
+          yy=min_y;
+  
+          if ( (width>0) && (height>0) )
+          {
+            // Corrections dues au Zoom:
+            min_x=(min_x-Main_magnifier_offset_X)*Main_magnifier_factor;
+            min_y=(min_y-Main_magnifier_offset_Y)*Main_magnifier_factor;
+            height=min_y+(height*Main_magnifier_factor);
+            if (height>Menu_Y)
+              height=Menu_Y;
+  
+            Clear_brush_scaled(Main_X_zoom+min_x,min_y,
+                             xx,yy,
+                             width,height,0,
+                             Main_image_width,
+                             Horizontal_line_buffer);
+          }
+        }
+        // End of graphic feedback
+      }
+    }
+    return;
+  }
   switch (Paintbrush_shape)
   {
     case PAINTBRUSH_SHAPE_NONE : // No paintbrush. for colorpicker for example
       break;
     case PAINTBRUSH_SHAPE_POINT : // !!! TOUJOURS EN PREVIEW !!!
+    single_pixel:
       if ( (Paintbrush_X>=Limit_left)
         && (Paintbrush_X<=Limit_right)
         && (Paintbrush_Y>=Limit_top)

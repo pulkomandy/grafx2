@@ -162,6 +162,19 @@ void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_ca
 }
 
 
+// Constaint enforcer/checker ------------------------------------------------
+void Button_Constraint_mode(void)
+{
+  Constraint_mode=!Constraint_mode;
+}
+
+
+void Button_Constraint_menu(void)
+{
+
+}
+
+
 //--------------------------------- Stencil ----------------------------------
 void Button_Stencil_mode(void)
 {

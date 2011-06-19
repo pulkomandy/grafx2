@@ -4473,23 +4473,27 @@ void Display_effect_state(short x, short y, char * label, byte state)
 
   Print_in_window(x,y,label,(state)?MC_White:MC_Black,MC_Light);
   if (state)
-    Print_in_window(x+56,y,":ON ",MC_White,MC_Light);
+    Window_select_normal_button(x-23, y-5, 16, 16);
   else
-    Print_in_window(x+56,y,":OFF",MC_Black,MC_Light);
+    Window_unselect_normal_button(x-23, y-5, 16, 16);
 }
+
+#define C2 92
 
 void Display_effect_states(void)
 {
-  Display_effect_state( 30, 24,"Shade"  ,Shade_mode);
-  Display_effect_state( 30, 43,"Q-shade",Quick_shade_mode);
-  Display_effect_state( 30, 62,"Transp.",Colorize_mode);
-  Display_effect_state( 30, 81,"Smooth" ,Smooth_mode);
-  Display_effect_state( 30,100,"Smear"  ,Smear_mode);
-  Display_effect_state(176, 24,"Stencil",Stencil_mode);
-  Display_effect_state(176, 43,"Mask"   ,Mask_mode);
-  Display_effect_state(176, 62,"Sieve"  ,Sieve_mode);
-  Display_effect_state(176, 81,"Grid"   ,Snap_mode);
-  Display_effect_state(176,100,"Tiling" ,Tiling_mode);
+  Display_effect_state( 30, 24,   "Shade"  ,Shade_mode);
+  Display_effect_state( 30, 43,   "Q-shade",Quick_shade_mode);
+  Display_effect_state( 30, 62,   "Transp.",Colorize_mode);
+  Display_effect_state( 30, 81,   "Smooth" ,Smooth_mode);
+  Display_effect_state( 30,100,   "Smear"  ,Smear_mode);
+  Display_effect_state(C2+23, 24, "Stencil",Stencil_mode);
+  Display_effect_state(C2+23, 43, "Mask"   ,Mask_mode);
+  Display_effect_state(C2+23, 62, "Sieve"  ,Sieve_mode);
+  Display_effect_state(C2+23, 81, "Grid"   ,Snap_mode);
+  Display_effect_state(C2+23,100, "Tiling" ,Tiling_mode);
+
+  Display_effect_state(177+23,24, "8 bit" ,Constraint_mode);
 }
 
 
@@ -4511,25 +4515,29 @@ void Button_Effects(void)
   Window_set_normal_button(  7, 57, 16,16,"",0,1,Config_Key[SPECIAL_COLORIZE_MODE][0]); // 3
   Window_set_normal_button(  7, 76, 16,16,"",0,1,Config_Key[SPECIAL_SMOOTH_MODE][0]); // 4
   Window_set_normal_button(  7, 95, 16,16,"",0,1,Config_Key[SPECIAL_SMEAR_MODE][0]); // 5
-  Window_set_normal_button(153, 19, 16,16,"",0,1,Config_Key[SPECIAL_STENCIL_MODE][0]); // 6
-  Window_set_normal_button(153, 38, 16,16,"",0,1,Config_Key[SPECIAL_MASK_MODE][0]); // 7
-  Window_set_normal_button(153, 57, 16,16,"",0,1,Config_Key[SPECIAL_SIEVE_MODE][0]); // 8
-  Window_set_normal_button(153, 76, 16,16,"",0,1,Config_Key[SPECIAL_GRID_MODE][0]); // 9
-  Window_set_normal_button(153, 95, 16,16,"",0,1,Config_Key[SPECIAL_TILING_MODE][0]); // 10
+  Window_set_normal_button(C2, 19, 16,16,"",0,1,Config_Key[SPECIAL_STENCIL_MODE][0]); // 6
+  Window_set_normal_button(C2, 38, 16,16,"",0,1,Config_Key[SPECIAL_MASK_MODE][0]); // 7
+  Window_set_normal_button(C2, 57, 16,16,"",0,1,Config_Key[SPECIAL_SIEVE_MODE][0]); // 8
+  Window_set_normal_button(C2, 76, 16,16,"",0,1,Config_Key[SPECIAL_GRID_MODE][0]); // 9
+  Window_set_normal_button(C2, 95, 16,16,"",0,1,Config_Key[SPECIAL_TILING_MODE][0]); // 10
+
   Window_set_normal_button(195,131, 68,14,"Close",0,1,SDLK_RETURN); // 11
   Window_set_normal_button(  7,131, 68,14,"All off",0,1,SDLK_DELETE); // 12
   Window_set_normal_button( 83,131,104,14,"Feedback:   ",1,1,SDLK_f); // 13
+
+  Window_set_normal_button(177, 19, 16,16,"",0,1,Config_Key[SPECIAL_FORMAT_CHECKER_MENU][0]); // 14
+
   Display_feedback_state();
   Display_effect_sprite(0,  8,20);
   Display_effect_sprite(0,  8,39);
   Display_effect_sprite(1,  8,58);
   Display_effect_sprite(2,  8,77);
   Display_effect_sprite(8,  8,96);
-  Display_effect_sprite(4,154,20);
-  Display_effect_sprite(7,154,39);
-  Display_effect_sprite(5,154,58);
-  Display_effect_sprite(6,154,77);
-  Display_effect_sprite(3,154,96);
+  Display_effect_sprite(4,C2+1,20);
+  Display_effect_sprite(7,C2+1,39);
+  Display_effect_sprite(5,C2+1,58);
+  Display_effect_sprite(6,C2+1,77);
+  Display_effect_sprite(3,C2+1,96);
   Display_effect_states();
 
   Print_in_window(12,117,"click: Left:Switch / Right:Edit",MC_Dark,MC_Light);
@@ -4666,7 +4674,7 @@ void Button_Effects(void)
         {
           Button_Stencil_mode();
           Hide_cursor();
-          Display_effect_state(176,24,"Stencil",Stencil_mode);
+          Display_effect_state(C2+23,24,"Stencil",Stencil_mode);
           Display_cursor();
         }
         else
@@ -4682,7 +4690,7 @@ void Button_Effects(void)
         {
           Button_Mask_mode();
           Hide_cursor();
-          Display_effect_state(176,43,"Mask",Mask_mode);
+          Display_effect_state(C2+23,43,"Mask",Mask_mode);
           Display_cursor();
         }
         else
@@ -4698,7 +4706,7 @@ void Button_Effects(void)
         {
           Button_Sieve_mode();
           Hide_cursor();
-          Display_effect_state(176,62,"Sieve",Sieve_mode);
+          Display_effect_state(C2+23,62,"Sieve",Sieve_mode);
           Display_cursor();
         }
         else
@@ -4714,7 +4722,7 @@ void Button_Effects(void)
         {
           Button_Snap_mode();
           Hide_cursor();
-          Display_effect_state(176,81,"Grid",Snap_mode);
+          Display_effect_state(C2+23,81,"Grid",Snap_mode);
           Display_cursor();
         }
         else
@@ -4757,6 +4765,22 @@ void Button_Effects(void)
         Display_feedback_state();
         Display_cursor();
         break;
+
+
+      case 14: // Constraint checker/enforcer
+        if (Window_attribute1==LEFT_SIDE)
+        {
+          Button_Constraint_mode();
+          Hide_cursor();
+          Display_effect_state(177+23,24, "8 bit" ,Constraint_mode);
+          Display_cursor();
+        } else {
+          Close_window();
+          Display_cursor();
+          // Contraint checker/enforcer menu
+          clicked_button = 11;
+        }
+        break;
     }
   }
   while (clicked_button!=11);
@@ -4766,11 +4790,13 @@ void Button_Effects(void)
   else
     Hide_cursor();
 
-  if (!(Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode))
+  if (!(Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode||Constraint_mode))
     Unselect_button(BUTTON_EFFECTS);
 
   Display_cursor();
 }
+
+#undef C2
 
 // Callback to display a font name in the list
 void Draw_one_font_name(word x, word y, word index, byte highlighted)

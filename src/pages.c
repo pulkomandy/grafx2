@@ -197,25 +197,47 @@ void Redraw_layered_image(void)
 {
   #ifndef NOLAYERS
   // Re-construct the image with the visible layers
-  byte layer;  
+  byte layer=0;  
   // First layer
-  for (layer=0; layer<Main_backups->Pages->Nb_layers; layer++)
+  if (Constraint_mode && Main_layers_visible & (1<<4))
   {
-    if ((1<<layer) & Main_layers_visible)
+    // The raster result layer is visible: start there
+    // Copy it in Main_visible_image
+    int i;
+    for (i=0; i< Main_image_width*Main_image_height; i++)
     {
-       // Copy it in Main_visible_image
-       memcpy(Main_visible_image.Image,
-         Main_backups->Pages->Image[layer],
-         Main_image_width*Main_image_height);
-       
-       // Initialize the depth buffer
-       memset(Main_visible_image_depth_buffer.Image,
-         layer,
-         Main_image_width*Main_image_height);
-       
-       // skip all other layers
-       layer++;
-       break;
+      layer = *(Main_backups->Pages->Image[4]+i);
+      Main_visible_image.Image[i]=*(Main_backups->Pages->Image[layer]+i);
+    }
+      
+    // Copy it to the depth buffer
+    memcpy(Main_visible_image_depth_buffer.Image,
+      Main_backups->Pages->Image[4],
+      Main_image_width*Main_image_height);
+      
+    // Next
+    layer= (1<<4)+1;
+  }
+  else
+  {
+    for (layer=0; layer<Main_backups->Pages->Nb_layers; layer++)
+    {
+      if ((1<<layer) & Main_layers_visible)
+      {
+         // Copy it in Main_visible_image
+         memcpy(Main_visible_image.Image,
+           Main_backups->Pages->Image[layer],
+           Main_image_width*Main_image_height);
+         
+         // Initialize the depth buffer
+         memset(Main_visible_image_depth_buffer.Image,
+           layer,
+           Main_image_width*Main_image_height);
+         
+         // skip all other layers
+         layer++;
+         break;
+      }
     }
   }
   // subsequent layer(s)
