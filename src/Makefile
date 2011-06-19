@@ -50,8 +50,8 @@ ifdef COMSPEC
   RMDIR = rmdir --ignore-fail-on-non-empty
   CP = cp
   BIN = ../bin/grafx2.exe
-  COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb `sdl-config --cflags` $(TTFCOPT) $(JOYCOPT) $(VKEYCOPT) $(LUACOPT) $(LAYERCOPT)
-  LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng14 $(LUALOPT)
+  COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb $(shell sdl-config --cflags) $(TTFCOPT) $(JOYCOPT) $(VKEYCOPT) $(LUACOPT) $(LAYERCOPT)
+  LOPT = $(shell sdl-config --libs) -lSDL_image $(TTFLOPT) -lpng14 $(LUALOPT)
   LUALOPT = -llua
   CC = gcc
   OBJDIR = ../obj/win32
@@ -74,8 +74,8 @@ else
     RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     BIN = ../bin/grafx2
-    COPT = -Wall -c -gstabs `sdl-config --cflags` $(TTFCOPT)
-    LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lft2
+    COPT = -Wall -c -gstabs $(shell sdl-config --cflags) $(TTFCOPT)
+    LOPT = $(shell sdl-config --libs) -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lft2
     CC = gcc
     OBJDIR = ../obj/amiga
     ZIP = lha
@@ -100,8 +100,8 @@ else
     SDLCOPT = $(MACOSX_ARCH) -I$(FWDIR)/SDL.framework/Headers -I$(FWDIR)/SDL_image.framework/Headers -I$(FWDIR)/SDL_ttf.framework/Headers -D_THREAD_SAFE
     #-framework SDL_ttf 
     SDLLOPT = -isysroot $(MACOSX_SYSROOT) $(MACOSX_ARCH) -L/usr/lib -framework SDL -framework SDL_image -framework Cocoa -framework Carbon -framework OpenGL
-    COPT = -D_DARWIN_C_SOURCE -D__macosx__ -D__linux__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g $(LUACOPT) $(SDLCOPT) $(TTFCOPT) -I/usr/X11/include
-    LOPT = $(SDLLOPT) -llua -lpng -lz
+    COPT = -D_DARWIN_C_SOURCE -D__macosx__ -D__linux__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g $(LUACOPT) $(shell sdlCOPT) $(TTFCOPT) -I/usr/X11/include
+    LOPT = $(shell sdlLOPT) -llua -lpng -lz
     # Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
     CC = gcc
     #CC = nccgen -ncgcc -ncld -ncfabs
@@ -119,8 +119,8 @@ else
     RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     BIN = ../bin/grafx2
-    COPT = -Wall -g `sdl-config --cflags` $(TTFCOPT)
-    LOPT = -lSDL_image `sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT) -lfreetype2shared
+    COPT = -Wall -g $(shell sdl-config --cflags) $(TTFCOPT)
+    LOPT = -lSDL_image $(shell sdl-config --libs) -lpng -ljpeg -lz $(TTFLOPT) -lfreetype2shared
     CC = gcc
     OBJDIR = ../obj/aros
     STRIP = strip --strip-unneeded --remove-section .comment
@@ -135,8 +135,8 @@ else
     RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     BIN = ../bin/grafx2
-    COPT = -Wall -gstabs -c `sdl-config --cflags` $(TTFCOPT)
-    LOPT = -lSDL_image `sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT)
+    COPT = -Wall -gstabs -c $(shell sdl-config --cflags) $(TTFCOPT)
+    LOPT = -lSDL_image $(shell sdl-config --libs) -lpng -ljpeg -lz $(TTFLOPT)
     CC = gcc
     OBJDIR = ../obj/morphos
     ZIP = lha
@@ -151,8 +151,8 @@ else
     RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     BIN = ../bin/grafx2
-    COPT = -W -Wall -c -g `sdl-config --cflags` $(TTFCOPT) -I/boot/home/config/include
-    LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT)
+    COPT = -W -Wall -c -g $(shell sdl-config --cflags) $(TTFCOPT) -I/boot/home/config/include
+    LOPT = $(shell sdl-config --libs) -lSDL_image -lpng -ljpeg -lz $(TTFLOPT)
     CC = gcc
     OBJDIR = ../obj/beos
     ZIP = zip
@@ -172,8 +172,8 @@ else
         LUACOPT = -D__ENABLE_LUA__
         LUALOPT = -llua
       endif
-    COPT = -W -Wall -c -g `sdl-config --cflags` $(TTFCOPT) -I/boot/common/include $(LUACOPT)
-    LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lfreetype -lbe $(LUALOPT)
+    COPT = -W -Wall -c -g $(shell sdl-config --cflags) $(TTFCOPT) -I/boot/common/include $(LUACOPT)
+    LOPT = $(shell sdl-config --libs) -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lfreetype -lbe $(LUALOPT)
     CC = gcc
     OBJDIR = ../obj/haiku
     ZIP = zip
@@ -186,8 +186,8 @@ else
     RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     BIN = ../bin/grafx2
-    COPT = -W -Wall -Wdeclaration-after-statement -c -g `sdl-config --cflags` $(TTFCOPT)
-    LOPT = `sdl-config --libs` -lSDL_image -lpng -ljpeg -lz $(TTFLOPT)
+    COPT = -W -Wall -Wdeclaration-after-statement -c -g $(shell sdl-config --cflags) $(TTFCOPT)
+    LOPT = $(shell sdl-config --libs) -lSDL_image -lpng -ljpeg -lz $(TTFLOPT)
     CC = gcc
     OBJDIR = ../obj/skyos
     ZIP = zip
@@ -202,13 +202,30 @@ else
     ZIP = zip
     PLATFORMFILES = gfx2.png
     BIN = ../bin/grafx2
-    COPT = -W -Wall -std=c99 -c -g -gstabs -D__TRU64__ `sdl-config --cflags` $(TTFCOPT) $(LUACOPT)
-    LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng $(LUALOPT) -lm
+    COPT = -W -Wall -std=c99 -c -g -gstabs -D__TRU64__ $(shell sdl-config --cflags) $(TTFCOPT) $(LUACOPT)
+    LOPT = $(shell sdl-config --libs) -lSDL_image $(TTFLOPT) -lpng $(LUALOPT) -lm
     OBJDIR = ../obj/unix
     X11LOPT = -lX11
     CC = gcc
   else
-  
+  ifeq ($(PLATFORM),FreeMiNT) #10
+  	#Atari FreeMiNT/TOS specific
+        DELCOMMAND = rm -rf
+        MKDIR = mkdir -p
+        RMDIR = rmdir
+        CP = cp
+        ZIP = zip
+        PLATFORMFILES = gfx2.png
+        CC = gcc
+        BIN = ../bin/grafx2.ttp
+	LUALOPT = -llua
+        OBJDIR = ../obj/m68k-atari-mint
+        PLATFORM = m68k-atari-mint
+        STRIP = strip -s 
+	X11LOPT = 
+	COPT = -W -Wall -m68020-60 -fomit-frame-pointer -pedantic -std=c99 -Wdeclaration-after-statement -D__MINT__ -DNO_INLINE_MATH -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $(JOYCOPT) $(LAYERCOPT) $(LUACOPT)
+    	LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) $(LAYERLOPT)
+  else
     # Finally, the default rules that work fine for most unix/gcc systems, linux and freebsd are tested.
     # Linux and FreeBSD specific (default rules)
     DELCOMMAND = rm -rf
@@ -232,8 +249,8 @@ else
       #cross compile a Win32 executable
       CC = i586-mingw32msvc-gcc
       BIN = ../bin/grafx2.exe
-      COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb -Dmain=SDL_main `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --cflags` $(TTFCOPT)
-      LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi `/usr/local/cross-tools/i386-mingw32/bin/sdl-config --libs` -lSDL_image $(TTFLOPT)
+      COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb -Dmain=SDL_main $(shell /usr/local/cross-tools/i386-mingw32/bin/sdl-config --cflags) $(TTFCOPT)
+      LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi $(shell /usr/local/cross-tools/i386-mingw32/bin/sdl-config --libs) -lSDL_image $(TTFLOPT)
       OBJDIR = ../obj/win32
       PLATFORM = win32
     else
@@ -266,13 +283,13 @@ else
         #cross compile an exec for atari TOS/MiNT machine
         CC = m68k-atari-mint-gcc
         BIN = ../bin/grafx2.ttp
-	    LUALOPT = -llua
+	LUALOPT = -llua
         OBJDIR = ../obj/m68k-atari-mint
         PLATFORM = m68k-atari-mint
         STRIP = m68k-atari-mint-strip -s 
-        X11LOPT = 
-        COPT = -W -Wall -m68020-60 -fomit-frame-pointer -pedantic -std=c99 -Wdeclaration-after-statement -D__MINT__ -DNO_INLINE_MATH -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $() $(JOYCOPT) $(LAYERCOPT) $(LUACOPT)
-        LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) $(LAYERLOPT)
+	X11LOPT = 
+	COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -ffast-math -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $(JOYCOPT) $(LAYERCOPT) $(LUACOPT)
+    	LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) -lm $(LAYERLOPT) -Wl,--stack,8k 
       else
 
         # Compiles a regular linux executable for the native platform
@@ -289,6 +306,7 @@ else
       endif
     endif
 
+  endif
   endif
   endif
   endif
@@ -373,11 +391,11 @@ OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o $(OBJDIR)/sdlscreen.o 
 
 SKIN_FILES = ../share/grafx2/skins/skin_classic.png ../share/grafx2/skins/skin_modern.png ../share/grafx2/skins/skin_DPaint.png ../share/grafx2/skins/font_Classic.png ../share/grafx2/skins/font_Fun.png ../share/grafx2/skins/font_Fairlight.png ../share/grafx2/skins/font_Melon.png ../share/grafx2/skins/font_DPaint.png ../share/grafx2/skins/skin_scenish.png ../share/grafx2/skins/font_Seen.png ../share/grafx2/skins/skin_Aurora.png
 
-SCRIPT_FILES = ../share/grafx2/scripts/samples_2.3/brush/ApplyColor.lua ../share/grafx2/scripts/samples_2.3/brush/Fisheye.lua ../share/grafx2/scripts/samples_2.3/brush/GrayscaleAvg.lua ../share/grafx2/scripts/samples_2.3/brush/GrayscaleDesat.lua ../share/grafx2/scripts/samples_2.3/brush/Halfsmooth.lua ../share/grafx2/scripts/samples_2.3/brush/Waves.lua ../share/grafx2/scripts/samples_2.3/demo/3DPalette.lua ../share/grafx2/scripts/samples_2.3/demo/Ellipse.lua ../share/grafx2/scripts/samples_2.3/demo/FlipPicture.lua \
-../share/grafx2/scripts/samples_2.3/demo/SierpinskyCarpet.lua ../share/grafx2/scripts/samples_2.3/demo/SierpinskyTriangle.lua ../share/grafx2/scripts/samples_2.3/demo/Spritesheet.lua ../share/grafx2/scripts/samples_2.3/demo/brush/Amigaball.lua ../share/grafx2/scripts/samples_2.3/demo/brush/ColorSphere.lua ../share/grafx2/scripts/samples_2.3/demo/brush/FindAA.lua ../share/grafx2/scripts/samples_2.3/demo/brush/Mandelbrot.lua ../share/grafx2/scripts/samples_2.3/libs/dawnbringer_lib.lua ../share/grafx2/scripts/samples_2.3/libs/memory.lua \
-../share/grafx2/scripts/samples_2.3/palette/Desaturate.lua ../share/grafx2/scripts/samples_2.3/palette/ExpandColors.lua ../share/grafx2/scripts/samples_2.3/palette/FillColorCube.lua ../share/grafx2/scripts/samples_2.3/palette/InvertedRGB.lua ../share/grafx2/scripts/samples_2.3/palette/Set3bit.lua ../share/grafx2/scripts/samples_2.3/palette/Set6bit.lua ../share/grafx2/scripts/samples_2.3/palette/SetC64Palette.lua ../share/grafx2/scripts/samples_2.3/palette/ShiftHue.lua ../share/grafx2/scripts/samples_2.3/picture/CellColourReducer.lua \
-../share/grafx2/scripts/samples_2.3/picture/DrawGridIsometric.lua ../share/grafx2/scripts/samples_2.3/picture/DrawgridOrthogonal_Index.lua ../share/grafx2/scripts/samples_2.3/picture/DrawGridOrthogonal_RGB.lua ../share/grafx2/scripts/samples_2.3/picture/GlassGridFilter.lua ../share/grafx2/scripts/samples_2.3/picture/PaletteToPicture.lua ../share/grafx2/scripts/samples_2.3/picture/Pic2isometric.lua ../share/grafx2/scripts/samples_2.3/picture/Rainbow-Dark2Bright.lua ../share/grafx2/scripts/samples_2.3/picture/RemapImage2RGB.lua \
-../share/grafx2/scripts/samples_2.3/picture/RemapImage2RGB_ed.lua ../share/grafx2/scripts/samples_2.3/picture/RemapImageTo3bitPal.lua ../share/grafx2/scripts/samples_2.3/picture/XBitColourXpaceFromPalette.lua
+SCRIPT_FILES = ../share/grafx2/scripts/samples_2.4/brush/ApplyColor.lua ../share/grafx2/scripts/samples_2.4/brush/Fisheye.lua ../share/grafx2/scripts/samples_2.4/brush/GrayscaleAvg.lua ../share/grafx2/scripts/samples_2.4/brush/GrayscaleDesat.lua ../share/grafx2/scripts/samples_2.4/brush/Halfsmooth.lua ../share/grafx2/scripts/samples_2.4/brush/Waves.lua ../share/grafx2/scripts/samples_2.4/demo/3DPalette.lua ../share/grafx2/scripts/samples_2.4/demo/Ellipse.lua ../share/grafx2/scripts/samples_2.4/demo/FlipPicture.lua \
+../share/grafx2/scripts/samples_2.4/demo/SierpinskyCarpet.lua ../share/grafx2/scripts/samples_2.4/demo/SierpinskyTriangle.lua ../share/grafx2/scripts/samples_2.4/demo/Spritesheet.lua ../share/grafx2/scripts/samples_2.4/demo/brush/Amigaball.lua ../share/grafx2/scripts/samples_2.4/demo/brush/ColorSphere.lua ../share/grafx2/scripts/samples_2.4/demo/brush/FindAA.lua ../share/grafx2/scripts/samples_2.4/demo/brush/Mandelbrot.lua ../share/grafx2/scripts/samples_2.4/libs/dawnbringer_lib.lua ../share/grafx2/scripts/samples_2.4/libs/memory.lua \
+../share/grafx2/scripts/samples_2.4/palette/Desaturate.lua ../share/grafx2/scripts/samples_2.4/palette/ExpandColors.lua ../share/grafx2/scripts/samples_2.4/palette/FillColorCube.lua ../share/grafx2/scripts/samples_2.4/palette/InvertedRGB.lua ../share/grafx2/scripts/samples_2.4/palette/Set3bit.lua ../share/grafx2/scripts/samples_2.4/palette/Set6bit.lua ../share/grafx2/scripts/samples_2.4/palette/SetC64Palette.lua ../share/grafx2/scripts/samples_2.4/palette/ShiftHue.lua ../share/grafx2/scripts/samples_2.4/picture/CellColourReducer.lua \
+../share/grafx2/scripts/samples_2.4/picture/DrawGridIsometric.lua ../share/grafx2/scripts/samples_2.4/picture/DrawgridOrthogonal_Index.lua ../share/grafx2/scripts/samples_2.4/picture/DrawGridOrthogonal_RGB.lua ../share/grafx2/scripts/samples_2.4/picture/GlassGridFilter.lua ../share/grafx2/scripts/samples_2.4/picture/PaletteToPicture.lua ../share/grafx2/scripts/samples_2.4/picture/Pic2isometric.lua ../share/grafx2/scripts/samples_2.4/picture/Rainbow-Dark2Bright.lua ../share/grafx2/scripts/samples_2.4/picture/RemapImage2RGB.lua \
+../share/grafx2/scripts/samples_2.4/picture/RemapImage2RGB_ed.lua ../share/grafx2/scripts/samples_2.4/picture/RemapImageTo3bitPal.lua ../share/grafx2/scripts/samples_2.4/picture/XBitColourXpaceFromPalette.lua
 
 FONT_FILES = ../share/grafx2/fonts/8pxfont.png ../share/grafx2/fonts/Tuffy.ttf ../share/grafx2/fonts/PF_Arma_5__.png ../share/grafx2/fonts/PF_Easta_7_.png ../share/grafx2/fonts/PF_Easta_7__.png ../share/grafx2/fonts/PF_Ronda_7__.png ../share/grafx2/fonts/PF_Tempesta_5.png ../share/grafx2/fonts/PF_Tempesta_5_.png ../share/grafx2/fonts/PF_Tempesta_5__.png ../share/grafx2/fonts/PF_Tempesta_5___.png ../share/grafx2/fonts/PF_Tempesta_7.png ../share/grafx2/fonts/PF_Tempesta_7_.png ../share/grafx2/fonts/PF_Tempesta_7__.png ../share/grafx2/fonts/PF_Tempesta_7___.png ../share/grafx2/fonts/PF_Westa_7_.png ../share/grafx2/fonts/PF_Westa_7__.png
 
@@ -387,6 +405,12 @@ all : $(MACAPPEXE)
 $(MACAPPEXE) : $(BIN)
 	rm -rf Grafx2.app
 	mkdir -p Grafx2.app Grafx2.app/Contents Grafx2.app/Contents/Frameworks Grafx2.app/Contents/MacOS Grafx2.app/Contents/Resources Grafx2.app/Contents/Resources/scripts
+	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.4
+	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.4/brush
+	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.4/demo
+	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.4/libs
+	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.4/palette
+	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.4/picture
 	echo 'APPL????' > Grafx2.app/Contents/PkgInfo
 	cp ../Info.plist Grafx2.app/Contents
 	cp -r Grafx2.icns Grafx2.app/Contents/Resources
@@ -394,13 +418,18 @@ $(MACAPPEXE) : $(BIN)
 	cp -r ../share/grafx2/fonts Grafx2.app/Contents/Resources
 	cp -r ../share/grafx2/skins Grafx2.app/Contents/Resources
 	cp -r ../share/grafx2/gfx2def.ini Grafx2.app/Contents/Resources
-	cp -r $(SCRIPT_FILES) Grafx2.app/Contents/Resources/scripts
+	cp -r ../share/grafx2/scripts/samples_2.4/brush Grafx2.app/Contents/Resources/scripts/samples_2.4
+	cp -r ../share/grafx2/scripts/samples_2.4/demo Grafx2.app/Contents/Resources/scripts/samples_2.4
+	cp -r ../share/grafx2/scripts/samples_2.4/libs Grafx2.app/Contents/Resources/scripts/samples_2.4
+	cp -r ../share/grafx2/scripts/samples_2.4/palette Grafx2.app/Contents/Resources/scripts/samples_2.4
+	cp -r ../share/grafx2/scripts/samples_2.4/picture Grafx2.app/Contents/Resources/scripts/samples_2.4
 	mkdir -p Grafx2.app/Contents/Frameworks/SDL.framework/Versions
 	mkdir -p Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions
 #	mkdir -p Grafx2.app/Contents/Frameworks/SDL_ttf.framework/Versions
 	cp -Rp $(FWDIR)/SDL.framework/Versions/A Grafx2.app/Contents/Frameworks/SDL.framework/Versions
 	cp -Rp $(FWDIR)/SDL_image.framework/Versions/A Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions
 #	cp -Rp $(FWDIR)/SDL_ttf.framework/Versions/A Grafx2.app/Contents/Frameworks/SDL_ttf.framework/Versions
+    # remove those
 	rm -fr Grafx2.app/Contents/Frameworks/SDL.framework/Versions/A/Headers
 	rm -fr Grafx2.app/Contents/Frameworks/SDL.framework/Versions/A/Resources
 	rm -fr Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions/A/Headers
@@ -483,13 +512,13 @@ install : $(BIN)
 	test -d $(DESTDIR)$(datadir)/grafx2/skins || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/skins
 	test -d $(DESTDIR)$(datadir)/grafx2/scripts || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts
 	test -d $(DESTDIR)$(datadir)/grafx2/scripts/libs || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/libs
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3 || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/brush || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/brush
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/demo || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/demo
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/demo/brush || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/demo/brush
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/libs || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/libs
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/palette || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/palette
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/picture || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/picture
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4 || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/brush || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/brush
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/demo || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/demo
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/demo/brush || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/demo/brush
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/libs || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/libs
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/palette || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/palette
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture
 	test -d $(DESTDIR)$(datadir)/applications || $(MKDIR) $(DESTDIR)$(datadir)/applications
 	test -d $(DESTDIR)$(pixmapdir) || $(MKDIR) $(DESTDIR)$(pixmapdir)
 	# Copy files
@@ -515,13 +544,13 @@ uninstall :
 	$(DELCOMMAND) $(SKIN_FILES:../share%=$(DESTDIR)$(datadir)%)
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/skins),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/skins,)
 	$(DELCOMMAND) $(SCRIPT_FILES:../share%=$(DESTDIR)$(datadir)%)
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/picture),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/picture,)
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/palette),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/palette,)
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/libs),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/libs,)
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/demo/brush),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/demo/brush,)
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/demo),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/demo,)
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/brush),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3/brush,)
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.3,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/palette),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/palette,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/libs),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/libs,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/demo/brush),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/demo/brush,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/demo),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/demo,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/brush),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/brush,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4,)
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/libs),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/libs,)
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts,)
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2),$(RMDIR) $(DESTDIR)$(datadir)/grafx2,)

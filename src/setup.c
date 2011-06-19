@@ -89,7 +89,6 @@ void Set_program_directory(ARG_UNUSED const char * argv0,char * program_dir)
   #elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     strcpy(program_dir,"PROGDIR:");
   #elif defined(__MINT__)
-
   static char path[1024]={0};
   char currentDrive='A';
   currentDrive=currentDrive+Dgetdrv();

@@ -70,6 +70,22 @@ void Set_config_directory(const char * program_dir, char * config_dir);
   #define SKINS_SUBDIRECTORY "skins"
 #endif
 
+/// Name of the subdirectory containing scripts
+#if defined (__MINT__)
+  #define SCRIPTS_SUBDIRECTORY "SCRIPTS"
+#else
+  #define SCRIPTS_SUBDIRECTORY "scripts"
+#endif
+
+/// LUA directory prefix
+#if defined (__MINT__)
+  #define LUALIB_SUBDIRECTORY "LIBS"
+#else
+  #define LUALIB_SUBDIRECTORY "libs"
+#endif
+
+
+
 /// Name of the binary file containing some configuration settings.
 #if defined (__MINT__)
   #define CONFIG_FILENAME "GFX2.CFG"

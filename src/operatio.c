@@ -49,7 +49,17 @@ Uint32 Airbrush_next_time;
 
 void Start_operation_stack(word new_operation)
 {
+  // This part handles things that must be done when exiting an operation. 
   Brush_rotation_center_is_defined=0;
+  switch(Current_operation)
+  {
+    case OPERATION_ROTATE_BRUSH:
+      End_brush_rotation();
+    break;
+
+    default:
+    break;  
+  }
 
   // On mémorise l'opération précédente si on démarre une interruption
   switch(new_operation)
@@ -60,7 +70,12 @@ void Start_operation_stack(word new_operation)
     case OPERATION_GRAB_BRUSH:
     case OPERATION_POLYBRUSH:
     case OPERATION_STRETCH_BRUSH:
+      Operation_before_interrupt=Current_operation;
+      // On passe à l'operation demandée
+      Current_operation=new_operation;
+      break;
     case OPERATION_ROTATE_BRUSH:
+      Begin_brush_rotation();
       Operation_before_interrupt=Current_operation;
       // On passe à l'operation demandée
       Current_operation=new_operation;

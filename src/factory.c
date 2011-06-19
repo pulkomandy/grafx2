@@ -45,7 +45,7 @@
 #include "graph.h"
 #include "filesel.h" // Read_list_of_drives()
 #include "realpath.h"
-
+#include "setup.h"
 
 /// Lua scripts bound to shortcut keys.
 char * Bound_script[10];
@@ -457,30 +457,44 @@ int L_DrawCircle(lua_State* L)
 
 int L_DrawDisk(lua_State* L)
 {
-  int center_x, center_y, r, c;
+  int center_x, center_y, diameter, c, r, even;
   long circle_limit;
   short x_pos,y_pos;
   short min_x,max_x,min_y,max_y;
+  double r_float;
 
   int nb_args = lua_gettop(L);
 
   LUA_ARG_LIMIT(4, "drawdisk");
   LUA_ARG_NUMBER(1, "drawdisk", center_x, INT_MIN, INT_MAX);
   LUA_ARG_NUMBER(2, "drawdisk", center_y, INT_MIN, INT_MAX);
-  LUA_ARG_NUMBER(3, "drawdisk", r, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(3, "drawdisk", r_float, INT_MIN, INT_MAX);
   LUA_ARG_NUMBER(4, "drawdisk", c, INT_MIN, INT_MAX);
 
-  circle_limit = r*r;
+  if (r_float<0.0)
+    return 0;
+  diameter=(int)(floor(r_float*2.0+1.0));
+  r=diameter/2;
+  even=!(diameter&1);
+  
+  circle_limit = Circle_squared_diameter(diameter);
   
   // Compute clipping limits
-  min_x=center_x-r<0 ? 0 : center_x-r;
+  min_x=center_x-r+even<0 ? 0 : center_x-r+even;
   max_x=center_x+r>=Main_image_width? Main_image_width-1 : center_x+r;
-  min_y=center_y-r<0 ? 0 : center_y-r;
+  min_y=center_y-r+even<0 ? 0 : center_y-r+even;
   max_y=center_y+r>=Main_image_height? Main_image_height-1 : center_y+r;
 
   for (y_pos=min_y;y_pos<=max_y;y_pos++)
+  {
+    short y=(y_pos-center_y)*2-even;
     for (x_pos=min_x;x_pos<=max_x;x_pos++)
-      Pixel_in_current_screen(x_pos,y_pos,c,0);
+    {
+      short x=(x_pos-center_x)*2-even;
+      if (x*x+y*y <= circle_limit)
+        Pixel_in_current_screen(x_pos,y_pos,c,0);
+    }
+  }
 
   return 0;
 }
@@ -686,6 +700,22 @@ int L_MatchColor(lua_State* L)
   LUA_ARG_NUMBER(3, "matchcolor", b, -DBL_MAX, DBL_MAX);
   
   c = Best_color_nonexcluded(clamp_byte(r),clamp_byte(g),clamp_byte(b));
+  lua_pushinteger(L, c);
+  return 1;
+}
+
+int L_MatchColor2(lua_State* L)
+{
+  double r, g, b;
+  int c;
+  int nb_args=lua_gettop(L);
+
+  LUA_ARG_LIMIT (3, "matchcolor2");
+  LUA_ARG_NUMBER(1, "matchcolor2", r, -DBL_MAX, DBL_MAX);
+  LUA_ARG_NUMBER(2, "matchcolor2", g, -DBL_MAX, DBL_MAX);
+  LUA_ARG_NUMBER(3, "matchcolor2", b, -DBL_MAX, DBL_MAX);
+  
+  c = Best_color_perceptual(clamp_byte(r),clamp_byte(g),clamp_byte(b));
   lua_pushinteger(L, c);
   return 1;
 }
@@ -1461,8 +1491,8 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   
   strcpy(buf, "LUA_PATH=");
   strcat(buf, Data_directory);
-  Append_path(buf+9, "scripts", NULL);
-  Append_path(buf+9, "libs", NULL);
+  Append_path(buf+9, SCRIPTS_SUBDIRECTORY, NULL);
+  Append_path(buf+9, LUALIB_SUBDIRECTORY, NULL);
   Append_path(buf+9, "?.lua", NULL);
   putenv(buf);
   
@@ -1506,6 +1536,7 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   lua_register(L,"gettranscolor",L_GetTransColor);
   
   lua_register(L,"matchcolor",L_MatchColor);
+  lua_register(L,"matchcolor2",L_MatchColor2);
 
   // ui
   lua_register(L,"inputbox",L_InputBox);

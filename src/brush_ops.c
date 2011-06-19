@@ -42,7 +42,6 @@
     #define M_PI 3.141592653589793238462643
 #endif
 
-
 /// Simulates clicking the "Draw" button.
 void Return_to_draw_mode(void)
 {
@@ -971,8 +970,7 @@ void Rotate_brush_1_5(void)
     {
       dx=Paintbrush_X-Brush_rotation_center_X;
       dy=Paintbrush_Y-Brush_rotation_center_Y;
-      angle=acos(((float)dx)/sqrt((dx*dx)+(dy*dy)));
-      if (dy>0) angle=M_2PI-angle;
+      angle=M_2PI-atan2(dy,dx);
     }
 
     if (Menu_is_visible)

@@ -37,21 +37,6 @@
 
 //---------------------- Modifier le pinceau spécial -------------------------
 
-int Circle_squared_diameter(int diameter)
-{
-  int result = diameter*diameter;
-  // Trick to make some circles rounder, even though
-  // mathematically incorrect.
-  if (diameter==3 || diameter==9)
-    return result-2;
-  if (diameter==11)
-    return result-6;
-  if (diameter==14)
-    return result-4;
-  
-  return result;
-}
-
 void Set_paintbrush_size(int width, int height)
 {
   int x_pos,y_pos;

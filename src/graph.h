@@ -67,6 +67,8 @@ void Hide_empty_circle_preview (short center_x,short center_y,short radius);
 void Draw_empty_circle_general(short center_x,short center_y,short radius,byte color);
 void Draw_filled_circle         (short center_x,short center_y,short radius,byte color);
 
+int Circle_squared_diameter(int diameter);
+
 void Draw_empty_ellipse_permanent(short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color);
 void Draw_empty_ellipse_preview  (short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color);
 void Hide_empty_ellipse_preview (short center_x,short center_y,short horizontal_radius,short vertical_radius);

@@ -945,7 +945,7 @@ int Load_INI(T_Config * conf)
   {
     // Default when empty:
     Realpath(Data_directory, conf->Scripts_directory);
-    Append_path(conf->Scripts_directory, "scripts", NULL);
+    Append_path(conf->Scripts_directory, SCRIPTS_SUBDIRECTORY, NULL);
   }
   
   conf->Allow_multi_shortcuts=0;

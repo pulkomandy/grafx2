@@ -437,7 +437,7 @@ void Cluster_pack(T_Cluster * c,T_Occurrence_table * to)
         }
       }
   */
-
+  
   // Optimized version : find the extremums one at a time, so we can reduce the
   // area to seek for the next one. Start at the edges of the cluster and go to
   // the center until we find a pixel.
@@ -521,7 +521,7 @@ ENDCRUSH:
   c->rmin=rmin>>16; c->rmax=rmax>>16;
   c->vmin=vmin>>8;  c->vmax=vmax>>8;
   c->bmin=bmin;     c->bmax=bmax;
-
+  
   // Find the longest axis to know which way to split the cluster
   // This multiplications are supposed to improve the result, but may or may not
   // work, actually.

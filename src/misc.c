@@ -738,7 +738,7 @@ void Zoom_a_line(byte* original_line, byte* zoomed_line,
 #elif defined(__macosx__) || defined(__FreeBSD__) || defined(__NetBSD__)
   #include <sys/sysctl.h>
 #elif defined(__BEOS__) || defined(__HAIKU__)
-  // sysinfo not implemented
+  #include <kernel/OS.h>
 #elif defined(__AROS__) || defined(__amigaos4__) || defined(__MORPHOS__) || defined(__amigaos__)
   #include <proto/exec.h>
 #elif defined(__MINT__)
@@ -754,11 +754,8 @@ void Zoom_a_line(byte* original_line, byte* zoomed_line,
 // atari have two kinds of memory
 // standard and fast ram
 void Atari_Memory_free(unsigned long *stRam,unsigned long *ttRam){
-  //TODO: return STRAM/TT-RAM
-  unsigned long mem=0;
   *stRam=Mxalloc(-1L,0);
   *ttRam = Mxalloc(-1L,1);
-
 }
 #else
 // Indique quelle est la mémoire disponible
@@ -787,17 +784,23 @@ unsigned long Memory_free(void)
   len = sizeof(maxmem);
   sysctl(mib,2,&maxmem,&len,NULL,0);
   return maxmem;
-#elif defined(__BEOS__) || defined(__HAIKU__) || defined(__SKYOS__) || defined(__amigaos4__) || defined(__TRU64__)
-  // No <sys/sysctl.h> on BeOS or Haiku
-  // AvailMem is misleading on os4 (os4 caches stuff in memory that you can still allocate)
-#warning "There is missing code there for your platform ! please check and correct :)"
-  return 10*1024*1024;
+#elif defined(__HAIKU__) || defined(__BEOS__)
+  int pages;
+  system_info systemInfo;
+  get_system_info(&systemInfo);
+
+  pages = systemInfo.max_pages - systemInfo.used_pages;
+  return pages * B_PAGE_SIZE;
 #elif defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
   return AvailMem(MEMF_ANY);
-#else
+#elif defined(__linux__)
   struct sysinfo info;
   sysinfo(&info);
   return info.freeram*info.mem_unit;
+#else
+  // AvailMem is misleading on os4 (os4 caches stuff in memory that you can still allocate)
+#warning "There is missing code there for your platform ! please check and correct :)"
+  return 10*1024*1024;
 #endif
 }
 #endif

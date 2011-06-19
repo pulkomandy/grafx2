@@ -1340,6 +1340,20 @@ void Draw_filled_circle(short center_x,short center_y,short radius,byte color)
   Update_part_of_screen(start_x,start_y,end_x+1-start_x,end_y+1-start_y);
 }
 
+int Circle_squared_diameter(int diameter)
+{
+  int result = diameter*diameter;
+  // Trick to make some circles rounder, even though
+  // mathematically incorrect.
+  if (diameter==3 || diameter==9)
+    return result-2;
+  if (diameter==11)
+    return result-6;
+  if (diameter==14)
+    return result-4;
+  
+  return result;
+}
 
   // -- Tracer général d'une ellipse vide -----------------------------------
 

@@ -146,8 +146,11 @@ dword Timer_start;       // Heure de départ du chrono
 byte New_preview_is_needed; // Booléen "Il faut relancer le chrono de preview"
 
 
+#if defined (__MINT__)
+void Atari_Memory_free(unsigned long *stRam,unsigned long *ttRam);
+#else
 unsigned long Memory_free(void);
-
+#endif
 #define Num2str(a,b,c) sprintf(b,"%*lu",c,(long)(a))
 
 #define Dec2str(a,b,c) sprintf(b,"%.*f",c,(double)(a))
