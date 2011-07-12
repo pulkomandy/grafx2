@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "brush.h"
 #include "buttons.h"
 #include "engine.h"
 #include "global.h"
@@ -36,11 +37,11 @@
 #include "help.h"
 #include "input.h"
 #include "misc.h"
+#include "pages.h"
 #include "readline.h"
 #include "sdlscreen.h"
 #include "struct.h"
 #include "windows.h"
-#include "brush.h"
 
 //---------- Menu dans lequel on tagge des couleurs (genre Stencil) ----------
 void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_cancel, const char *help_section, word close_shortcut)
@@ -166,6 +167,20 @@ void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_ca
 void Button_Constraint_mode(void)
 {
   Constraint_mode=!Constraint_mode;
+  
+  if (Constraint_mode)
+  {
+  	// TODO backup
+  	// CPC Mode 5 - ensure there are at least 5 layers
+  	while(Main_backups->Pages->Nb_layers < 5)
+  	{
+  		Add_layer(Main_backups, 0);
+  			// Add layers below, so the picture is kept on the top one
+  			// (the valuable pixel data)
+  	}
+  	
+  	// TODO set the palette to a CPC one ?
+  }
 }
 
 

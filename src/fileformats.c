@@ -636,14 +636,14 @@ void Load_LBM(T_IO_Context * context)
             // On lit l'octet de padding du CMAP si la taille est impaire
             if (nb_colors&1)
               if (Read_byte(LBM_file,&temp_byte))
-                File_error=2;
+                File_error=20;
 
             // Keep reading sections until we find the body
             while (1)
             {
               if (! Read_bytes(LBM_file,section,4))
               {
-                File_error=2;
+                File_error=46;
                 break;
               }
               // Found body : stop searching
@@ -683,7 +683,7 @@ void Load_LBM(T_IO_Context * context)
                 }
                 else
                 {
-                  File_error=2;
+                  File_error=47;
                   break;
                 }
               }
@@ -692,7 +692,7 @@ void Load_LBM(T_IO_Context * context)
                 // ignore any number of unknown sections
                 if (!LBM_Skip_section())
                 {
-                  File_error=2;
+                  File_error=48;
                   break;
                 }
               }
@@ -733,7 +733,7 @@ void Load_LBM(T_IO_Context * context)
                       if (Read_bytes(LBM_file,LBM_buffer,line_size))
                         Draw_ILBM_line(context, y_pos,real_line_size);
                       else
-                        File_error=2;
+                        File_error=21;
                     }
                     free(LBM_buffer);
                     LBM_buffer = NULL;
@@ -750,7 +750,7 @@ void Load_LBM(T_IO_Context * context)
                       {
                         if(Read_byte(LBM_file, &temp_byte)!=1)
                         {
-                          File_error=2;
+                          File_error=22;
                           break;
                         }
                         // Si temp_byte > 127 alors il faut répéter 256-'temp_byte' fois la couleur de l'octet suivant
@@ -759,7 +759,7 @@ void Load_LBM(T_IO_Context * context)
                         {
                           if(Read_byte(LBM_file, &color)!=1)
                           {
-                            File_error=2;
+                            File_error=23;
                             break;
                           }
                           b256=(short)(256-temp_byte);
@@ -767,12 +767,12 @@ void Load_LBM(T_IO_Context * context)
                             if (x_pos<line_size)
                               LBM_buffer[x_pos++]=color;
                             else
-                              File_error=2;
+                              File_error=24;
                         }
                         else
                           for (counter=0; counter<=(short)(temp_byte); counter++)
                             if (x_pos>=line_size || Read_byte(LBM_file, &(LBM_buffer[x_pos++]))!=1)
-                              File_error=2;
+                              File_error=25;
                       }
                       if (!File_error)
                         Draw_ILBM_line(context, y_pos,real_line_size);
@@ -796,7 +796,7 @@ void Load_LBM(T_IO_Context * context)
                         for (x_pos=0; x_pos<context->Width; x_pos++)
                           Set_pixel(context, x_pos,y_pos,LBM_buffer[x_pos]);
                       else
-                        File_error=2;
+                        File_error=26;
                     }
                     free(LBM_buffer);
                     LBM_buffer = NULL;
@@ -810,14 +810,14 @@ void Load_LBM(T_IO_Context * context)
                       {
                         if(Read_byte(LBM_file, &temp_byte)!=1)
                         {
-                          File_error=2;
+                          File_error=27;
                           break;
                         }
                         if (temp_byte>127)
                         {
                           if(Read_byte(LBM_file, &color)!=1)
                           {
-                            File_error=2;
+                            File_error=28;
                             break;
                           }
                           b256=256-temp_byte;
@@ -830,7 +830,7 @@ void Load_LBM(T_IO_Context * context)
                             byte byte_read=0;
                             if(Read_byte(LBM_file, &byte_read)!=1)
                             {
-                              File_error=2;
+                              File_error=29;
                               break;
                             }
                             Set_pixel(context, x_pos++,y_pos,byte_read);
