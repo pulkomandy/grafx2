@@ -58,6 +58,7 @@ char * Bound_script[10];
 #include <float.h> // for DBL_MAX
 #include <unistd.h> // chdir()
 #include <limits.h> //for INT_MIN
+#include <string.h> // strncpy()
 
 ///
 /// Number of characters for name in fileselector.
@@ -1261,18 +1262,28 @@ int L_UpdateScreen(lua_State* L)
 
 int L_StatusMessage(lua_State* L)
 {
-	const char* msg;
-  char* msg2;
-	int nb_args = lua_gettop(L);
-	LUA_ARG_LIMIT(1,"statusmessage");
+  const char* msg;
+  char msg2[25];
+  int len;
+  int nb_args = lua_gettop(L);
+  LUA_ARG_LIMIT(1,"statusmessage");
 
-	LUA_ARG_STRING(1, "statusmessage", msg);
-  msg2 = strdup(msg);
-  if(strlen(msg)>24)
-    msg2[24] = 0; // Cut off long messages
-	Print_in_menu(msg2,0);
-  free(msg2);
-	return 0;
+  LUA_ARG_STRING(1, "statusmessage", msg);
+  len=strlen(msg);
+  if (len<=24)
+  {
+    strcpy(msg2, msg);
+    // fill remainder with spaces
+    for (;len<24;len++)
+      msg2[len]=' ';
+    msg2[24]='\0';
+  }
+  else
+  {
+    strncpy(msg2, msg, 24);
+  }
+  Print_in_menu(msg2,0);
+  return 0;
 }
 
 
