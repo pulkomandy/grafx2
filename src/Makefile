@@ -50,8 +50,8 @@ ifdef COMSPEC
   RMDIR = rmdir --ignore-fail-on-non-empty
   CP = cp
   BIN = ../bin/grafx2.exe
-  COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb $(shell sdl-config --cflags) $(TTFCOPT) $(JOYCOPT) $(VKEYCOPT) $(LUACOPT) $(LAYERCOPT)
-  LOPT = $(shell sdl-config --libs) -lSDL_image $(TTFLOPT) -lpng14 $(LUALOPT)
+  COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb `sdl-config --cflags` $(TTFCOPT) $(JOYCOPT) $(VKEYCOPT) $(LUACOPT) $(LAYERCOPT)
+  LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng14 $(LUALOPT)
   LUALOPT = -llua
   CC = gcc
   OBJDIR = ../obj/win32

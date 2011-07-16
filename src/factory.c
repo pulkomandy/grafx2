@@ -1232,13 +1232,15 @@ int L_WaitInput(lua_State* L)
   lua_pushinteger(L, Mouse_X);
   lua_pushinteger(L, Mouse_Y);
   lua_pushinteger(L, Mouse_K);
+  lua_pushinteger(L, Paintbrush_X);
+  lua_pushinteger(L, Paintbrush_Y);
   
   // The event arguments are in the stack.
   // Need to reset "Key" here, so that a key event will not be
   // created again before an actual key repeat occurs.
   Key=0;
   
-  return 5;
+  return 7;
 }
 
 int L_UpdateScreen(lua_State* L)
