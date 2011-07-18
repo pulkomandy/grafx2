@@ -711,12 +711,23 @@ int L_MatchColor2(lua_State* L)
   int c;
   int nb_args=lua_gettop(L);
 
-  LUA_ARG_LIMIT (3, "matchcolor2");
+  if (nb_args < 3 || nb_args > 4)
+  {
+    return luaL_error(L, "matchcolor2: Expected 3 or 4 arguments, but found %d.", nb_args);
+  }
   LUA_ARG_NUMBER(1, "matchcolor2", r, -DBL_MAX, DBL_MAX);
   LUA_ARG_NUMBER(2, "matchcolor2", g, -DBL_MAX, DBL_MAX);
   LUA_ARG_NUMBER(3, "matchcolor2", b, -DBL_MAX, DBL_MAX);
-  
-  c = Best_color_perceptual(clamp_byte(r),clamp_byte(g),clamp_byte(b));
+  if (nb_args == 3)
+  {
+    c = Best_color_perceptual(clamp_byte(r),clamp_byte(g),clamp_byte(b));
+  }
+  else // nb_args == 4
+  {
+    float weight;
+    LUA_ARG_NUMBER(4, "matchcolor2", weight, -DBL_MAX, DBL_MAX);
+    c = Best_color_perceptual_weighted(clamp_byte(r),clamp_byte(g),clamp_byte(b),weight);
+  }   
   lua_pushinteger(L, c);
   return 1;
 }

@@ -2720,6 +2720,49 @@ byte Best_color_perceptual(byte r,byte g,byte b)
   return best_color;
 }
 
+byte Best_color_perceptual_weighted(byte r,byte g,byte b,float l_weight)
+{
+  
+  int col;  
+  float best_diff=255.0*1.56905;
+  byte  best_color=0;
+  float target_bri;
+  float bri;
+  float diff_b, diff_c, diff;
+
+  // Similar to Perceptual_lightness();
+  target_bri = sqrt(0.26*r*0.26*r + 0.55*g*0.55*g + 0.19*b*0.19*b);
+  
+  for (col=0; col<256; col++)
+  {
+    if (Exclude_color[col])
+      continue;
+
+    diff_c = sqrt(
+      (0.26*(Main_palette[col].R-r))*
+      (0.26*(Main_palette[col].R-r))+
+      (0.55*(Main_palette[col].G-g))*
+      (0.55*(Main_palette[col].G-g))+
+      (0.19*(Main_palette[col].B-b))*
+      (0.19*(Main_palette[col].B-b)));
+    // Exact match
+    if (diff_c==0)
+      return col;
+
+    bri = sqrt(0.26*Main_palette[col].R*0.26*Main_palette[col].R + 0.55*Main_palette[col].G*0.55*Main_palette[col].G + 0.19*Main_palette[col].B*0.19*Main_palette[col].B);
+    diff_b = abs(target_bri-bri);
+
+    diff=l_weight*(diff_b-diff_c)+diff_c;
+    if (diff<best_diff)
+    {
+      best_diff=diff;
+      best_color=col;
+    } 
+  }
+
+  return best_color;
+}
+
 byte Best_color_perceptual_except(byte r,byte g,byte b, byte except)
 {
   

@@ -101,6 +101,7 @@ byte Best_color(byte red,byte green,byte blue);
 byte Best_color_nonexcluded(byte red,byte green,byte blue);
 byte Best_color_perceptual(byte r,byte g,byte b);
 byte Best_color_perceptual_except(byte r,byte g,byte b, byte except);
+byte Best_color_perceptual_weighted(byte r,byte g,byte b, float weight);
 
 void Horizontal_XOR_line_zoom(short x_pos, short y_pos, short width);
 void Vertical_XOR_line_zoom(short x_pos, short y_pos, short height);
