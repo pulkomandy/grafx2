@@ -110,7 +110,6 @@ else
     X11LOPT = 
     MACAPPEXE = Grafx2.app/Contents/MacOS/Grafx2
     NOTTF = 1
-
   else
   ifeq ($(PLATFORM),AROS) # 3
     #AROS specific
@@ -223,8 +222,10 @@ else
         OBJDIR = ../obj/m68k-atari-mint
         PLATFORM = m68k-atari-mint
         STRIP = strip -s 
+	STACK = stack
+	FIX_FLAGS = flags
 	X11LOPT = 
-	COPT = -W -Wall -m68020-60 -fomit-frame-pointer -pedantic -std=c99 -Wdeclaration-after-statement -D__MINT__ -DNO_INLINE_MATH -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $(JOYCOPT) $(LAYERCOPT) $(LUACOPT)
+	COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -DNO_INLINE_MATH -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $(JOYCOPT) $(LAYERCOPT) $(LUACOPT)
     	LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) $(LAYERLOPT)
   else
     # Finally, the default rules that work fine for most unix/gcc systems, linux and freebsd are tested.
@@ -288,6 +289,8 @@ else
         OBJDIR = ../obj/m68k-atari-mint
         PLATFORM = m68k-atari-mint
         STRIP = m68k-atari-mint-strip -s 
+	STACK = m68k-atari-mint-stack
+	FIX_FLAGS = m68k-atari-mint-flags
 	X11LOPT = 
 	COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -ffast-math -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $(JOYCOPT) $(LAYERCOPT) $(LUACOPT)
     	LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) -lm $(LAYERLOPT) -Wl,--stack,8k 
@@ -442,10 +445,26 @@ $(MACAPPEXE) : $(BIN)
 	tar cvzf grafx2-svn$(SVN_REVISION)-macosx.tgz --exclude '*svn*' --exclude '*DS_Store*' Grafx2.app/*
 else
 all : $(BIN)
+ifeq ($(ATARICROSS),1)
+	$(STACK) -S 128k $(BIN)
+	$(FIX_FLAGS) -S $(BIN)
+else ifeq ($(PLATFORM),FreeMiNT)  
+	$(STACK) -S 128k $(BIN)
+	$(FIX_FLAGS) -S $(BIN)
+endif
+
 endif
 
 
 debug : $(BIN)
+ifeq ($(ATARICROSS),1)
+	$(STACK) -S 128k $(BIN)
+	$(FIX_FLAGS) -S $(BIN)
+else ifeq ($(PLATFORM),FreeMiNT)  
+	$(STACK) -S 128k $(BIN)
+	$(FIX_FLAGS) -S $(BIN)
+endif
+
 
 # Make release will strip the executable to make it smaller but non-debugable
 release : version $(BIN)
@@ -526,6 +545,7 @@ install : $(BIN)
 	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture
 	test -d $(DESTDIR)$(datadir)/applications || $(MKDIR) $(DESTDIR)$(datadir)/applications
 	test -d $(DESTDIR)$(pixmapdir) || $(MKDIR) $(DESTDIR)$(pixmapdir)
+	
 	# Copy files
 	$(CP) $(BIN) $(DESTDIR)$(bindir)
 	$(CP) ../share/grafx2/gfx2def.ini $(DESTDIR)$(datadir)/grafx2/
