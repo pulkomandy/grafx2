@@ -636,46 +636,47 @@ void Rescale(byte *src_buffer, short src_width, short src_height, byte *dst_buff
 
   int    x_pos_in_brush;   // Position courante dans l'ancienne brosse
   int    y_pos_in_brush;
-  int    delta_x_in_brush; // "Vecteur incrémental" du point précédent
-  int    delta_y_in_brush;
   int    initial_x_pos;       // Position X de début de parcours de ligne
+  int    initial_y_pos;       // Position Y de début de parcours de ligne
 
-  // Calcul du "vecteur incrémental":
-  delta_x_in_brush=(src_width<<16) * (x_flipped?-1:1) / (dst_width);
-  delta_y_in_brush=(src_height<<16) * (y_flipped?-1:1) / (dst_height);
+  int	delta_x, delta_y;
 
   offset=0;
 
   // Calcul de la valeur initiale de y_pos:
-  if (y_flipped)
-    y_pos_in_brush=(src_height<<16)-1; // Inversion en Y de la brosse
-  else
-    y_pos_in_brush=0;                // Pas d'inversion en Y de la brosse
+  if (y_flipped) {
+    initial_y_pos=(src_height)-1; // Inversion en Y de la brosse
+	delta_y = -1 * src_height;
+  } else {
+    initial_y_pos=0;                // Pas d'inversion en Y de la brosse
+	delta_y = src_height;
+  }
 
   // Calcul de la valeur initiale de x_pos pour chaque ligne:
-  if (x_flipped)
-    initial_x_pos = (src_width<<16)-1; // Inversion en X de la brosse
-  else
+  if (x_flipped) {
+    initial_x_pos = (src_width)-1; // Inversion en X de la brosse
+	delta_x = -1 * src_width;
+  } else {
     initial_x_pos = 0;                // Pas d'inversion en X de la brosse
+	delta_x = src_width;
+  }
 
   // Pour chaque ligne
   for (line=0;line<dst_height;line++)
   {
-    // On repart du début de la ligne:
-    x_pos_in_brush=initial_x_pos;
+    // On passe à la ligne de brosse suivante:
+    y_pos_in_brush = initial_y_pos + line * delta_y / dst_height;
 
     // Pour chaque colonne:
     for (column=0;column<dst_width;column++)
     {
-      // On copie le pixel:
-      dst_buffer[offset]=*(src_buffer + (x_pos_in_brush>>16) + (y_pos_in_brush>>16)*src_width);
       // On passe à la colonne de brosse suivante:
-      x_pos_in_brush+=delta_x_in_brush;
+      x_pos_in_brush = initial_x_pos + column * delta_x / dst_width;
+      // On copie le pixel:
+      dst_buffer[offset]=*(src_buffer + x_pos_in_brush + y_pos_in_brush * src_width);
       // On passe au pixel suivant de la nouvelle brosse:
       offset++;
     }
-    // On passe à la ligne de brosse suivante:
-    y_pos_in_brush+=delta_y_in_brush;
   }
 }
 
