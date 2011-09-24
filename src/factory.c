@@ -1311,6 +1311,18 @@ int L_FinalizePicture(lua_State* L)
   return 0;
 }
 
+
+int L_GetFileName(lua_State* L)
+{
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (0, "getfilename");
+  
+  lua_pushstring(L, Main_backups->Pages->Filename);
+  lua_pushstring(L, Main_backups->Pages->File_directory);
+  return 2;
+}
+
 // Handlers for window internals
 T_Fileselector Scripts_selector;
 
@@ -1575,6 +1587,7 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   lua_register(L,"waitinput",L_WaitInput);
   lua_register(L,"updatescreen",L_UpdateScreen);
   lua_register(L,"finalizepicture",L_FinalizePicture);
+  lua_register(L,"getfilename",L_GetFileName);
   
   // Load all standard libraries
   luaL_openlibs(L);
