@@ -300,10 +300,6 @@ GFX2_GLOBAL short Main_image_height;
 GFX2_GLOBAL short Main_offset_X;
 /// Y position (in image space) of the pixel to display in the top left corner of screen.
 GFX2_GLOBAL short Main_offset_Y;
-/// Name of the directory that holds the image currently edited.
-GFX2_GLOBAL char  Main_file_directory[1024];
-/// Filename (without directory) of the image currently edited.
-GFX2_GLOBAL char  Main_filename[256];
 /// File format of the image currently edited. It's a value of enum ::FILE_FORMATS
 GFX2_GLOBAL byte  Main_fileformat;
 ///
