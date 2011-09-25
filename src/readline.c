@@ -41,6 +41,11 @@
 #include "input.h"
 #include "engine.h"
 
+#ifdef __WIN32__
+#include <Windows.h>
+#include <SDL_syswm.h>
+#endif
+
 // Virtual keyboard is mandatory on these platforms:
 #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
   #ifndef VIRT_KEY
@@ -143,9 +148,45 @@ void Init_virtual_keyboard(word y_pos, word keyboard_width, word keyboard_height
   }
 }
 
+
+// Inspired from http://www.libsdl.org/projects/scrap/
+// TODO X11 and others
+char* getClipboard()
+{
+  char* dst = NULL;
+  #ifdef __WIN32__
+    SDL_SysWMinfo info;
+    HWND SDL_Window;
+
+    SDL_VERSION(&info.version);
+
+    if ( SDL_GetWMInfo(&info) )
+    {
+      SDL_Window = info.window;
+
+      if ( IsClipboardFormatAvailable(CF_TEXT) && OpenClipboard(SDL_Window) )
+      {
+        HANDLE hMem;
+        char *src;
+
+        hMem = GetClipboardData(CF_TEXT);
+        if ( hMem != NULL )
+        {
+          src = (char *)GlobalLock(hMem);
+          dst = strdup(src);
+          GlobalUnlock(hMem);
+        }
+        CloseClipboard();
+      }    
+    }
+  #endif
+  return dst;
+}
+
+
 /****************************************************************************
-*           Enhanced super scanf deluxe pro plus giga mieux :-)             *
-****************************************************************************/
+ *           Enhanced super scanf deluxe pro plus giga mieux :-)             *
+ ****************************************************************************/
 byte Readline(word x_pos,word y_pos,char * str,byte visible_size,byte input_type)
 // Paramètres:
 //   x_pos, y_pos : Coordonnées de la saisie dans la fenêtre
@@ -410,9 +451,23 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
         input_key=Key_ANSI;
         if (Mouse_K)
           input_key=SDLK_RETURN;
+
+        // Handle paste request on CTRL+v
+        if ((Key & MOD_CTRL) && ((Key & 0xFFF) == 'v'))
+        {
+          char* data = getClipboard();
+          if (data == NULL) continue; // No clipboard data
+          // TODO Insert it at the cursor position, not at the end 
+          // TODO Update cursor position 
+          // TODO This doesn't respect the "allowed chars" restriction
+          strncat(str, data, max_size - size);    
+          free(data);
+          goto affichage;
+        }
       } while(input_key==0);
     }
     Hide_cursor();
+
     switch (input_key)
     {
       case SDLK_DELETE : // Suppr.
@@ -529,6 +584,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
               // On regarde si la touche est autorisée
               if ( Valid_character(input_key))
                 is_authorized=1;
+              break;
             case INPUT_TYPE_HEXA:
               if ( (input_key>='0') && (input_key<='9') )
                 is_authorized=1;

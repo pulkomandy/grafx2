@@ -120,9 +120,11 @@ byte Native_filesel(byte load)
     // Check if cancel
     return CommDlgExtendedError();
   }
-#else ifndef(__linux__) // This makes no sense on X11-oriented platform. Nothing is really native there.
-  #warning "EXPERIMENTAL function for native fileselector not available for this platform!"
-  return 255; // fail !
+#else
+  #ifndef(__linux__) // This makes no sense on X11-oriented platform. Nothing is really native there.
+    #warning "EXPERIMENTAL function for native fileselector not available for this platform!"
+  #endif
+    return 255; // fail !
 #endif
 }  
 
@@ -1298,7 +1300,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
 
   Reset_quicksearch();
   
-  // if (Native_filesel(load) != 0); // TODO : handle this
+  //if (Native_filesel(load) != 0); // TODO : handle this
   
   if (context->Type == CONTEXT_MAIN_IMAGE)
     window_shortcut = load?(0x100+BUTTON_LOAD):(0x100+BUTTON_SAVE);
