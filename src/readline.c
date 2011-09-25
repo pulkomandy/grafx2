@@ -179,6 +179,10 @@ char* getClipboard()
         CloseClipboard();
       }    
     }
+  #elif defined __HAIKU__
+	return haiku_get_clipboard();
+  #else
+    #warning "Missing platform-specific code in getClipboard function"
   #endif
   return dst;
 }
@@ -453,7 +457,12 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
           input_key=SDLK_RETURN;
 
         // Handle paste request on CTRL+v
-        if ((Key & MOD_CTRL) && ((Key & 0xFFF) == 'v'))
+#if defined __HAIKU__
+	#define SHORTCUTKEY MOD_ALT
+#else
+	#define SHORTCUTKEY MOD_CTRL
+#endif
+        if ((Key & SHORTCUTKEY) && ((Key & 0xFFF) == 'v'))
         {
           char* data = getClipboard();
           if (data == NULL) continue; // No clipboard data
@@ -465,6 +474,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
           goto affichage;
         }
       } while(input_key==0);
+#undef SHORTCUTKEY
     }
     Hide_cursor();
 

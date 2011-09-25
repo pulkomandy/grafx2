@@ -121,7 +121,7 @@ byte Native_filesel(byte load)
     return CommDlgExtendedError();
   }
 #else
-  #ifndef(__linux__) // This makes no sense on X11-oriented platform. Nothing is really native there.
+  #ifndef __linux__ // This makes no sense on X11-oriented platforms. Nothing is really native there.
     #warning "EXPERIMENTAL function for native fileselector not available for this platform!"
   #endif
     return 255; // fail !
