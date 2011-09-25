@@ -14,29 +14,28 @@
 
 -- Grid size
 -- TODO : get it from GrafX2
-xgrid = 8;
-ygrid = 16;
+xgrid = 17;
+ygrid = 17;
 
 -- picture size
-w, h = getsparepicturesize();
+w, h = getpicturesize();
 
 -- We may need less if there are duplicates
-setpicturesize(xgrid, w*h/xgrid);
-clearpicture(255);
+setsparepicturesize(xgrid, w*h/xgrid);
 
 tileid = 0;
 
 -- blit part of the spare to picture
-function blitsparetopicture(srcx, srcy, dstx, dsty, width, height)
+function blitpicturetospare(srcx, srcy, dstx, dsty, width, height)
 	local x,y;
 	for y = 0, height - 1, 1 do
 		for x = 0, width - 1, 1 do
-			putpicturepixel(dstx+x, dsty+y, getsparepicturepixel(srcx + x, srcy + y));
+			putsparepicturepixel(dstx+x, dsty+y, getpicturepixel(srcx + x, srcy + y));
 		end
 	end
 end
 
-function comparesparetopicture(srcx, srcy, dstx, dsty, width, height)
+function comparesparewithpicture(srcx, srcy, dstx, dsty, width, height)
 	local x,y,color
 	for y = 0, height - 1, 1 do
 		for x = 0, width - 1, 1 do
@@ -58,7 +57,7 @@ function checksum(srcx, srcy, width, height)
 	sum = 0;
 	for y = 0, height - 1, 1 do
 		for x = 0, width - 1, 1 do
-			sum = sum + getsparepicturepixel(srcx+x, srcy+y);
+			sum = sum + getpicturepixel(srcx+x, srcy+y);
 		end
 	end
 
@@ -78,7 +77,7 @@ for y = 0, h-1, ygrid do
 			found = false;
 			for id in pairs(tilemap[csum]) do
 				-- is it a match ?
-				if comparesparetopicture(x,y,0,id*ygrid, xgrid, ygrid) then
+				if comparesparewithpicture(x,y,0,id*ygrid, xgrid, ygrid) then
 					-- found it !
 					tilemap[csum][id] = tilemap[csum][id] + 1;
 					found = true;
@@ -88,7 +87,7 @@ for y = 0, h-1, ygrid do
 			-- Add tile anyway if needed
 			if not found then
 				desty = tileid * ygrid;
-				blitsparetopicture(x, y, 0, desty, xgrid, ygrid);
+				blitpicturetospare(x, y, 0, desty, xgrid, ygrid);
 
 				-- add it to the tilemap
 				tilemap[csum][tileid] = 1;
@@ -98,7 +97,7 @@ for y = 0, h-1, ygrid do
 		else
 			-- Copy to spare
 			desty = tileid * ygrid;
-			blitsparetopicture(x, y, 0, desty, xgrid, ygrid);
+			blitpicturetospare(x, y, 0, desty, xgrid, ygrid);
 
 			-- add it to the tilemap
 			tilemap[csum] = {}
@@ -109,6 +108,5 @@ for y = 0, h-1, ygrid do
 	end
 end
 
-finalizepicture(); -- resize from what we just did
-setpicturesize(xgrid, (tileid-1)*ygrid)
-updatescreen();
+setsparepicturesize(xgrid, (tileid-1)*ygrid)
+--updatescreen();

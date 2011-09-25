@@ -3067,6 +3067,10 @@ void Pixel_in_current_screen      (word x,word y,byte color,int with_preview)
   #endif
 }
 
+void Pixel_in_spare(word x,word y, byte color)
+{
+  *((y)*Spare_image_width+(x)+Spare_backups->Pages->Image[Spare_current_layer])=color;
+}
 
 void Pixel_in_current_layer(word x,word y, byte color)
 {

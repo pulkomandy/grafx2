@@ -2,7 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
-    Copyright 2009 Adrien Destugues
+    Copyright 2009-2011 Adrien Destugues
 
     Grafx2 is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -308,6 +308,33 @@ int L_SetPictureSize(lua_State* L)
   return 0;
 }
 
+
+int L_SetSparePictureSize(lua_State* L)
+{
+  
+  int w;
+  int h;
+  int nb_args=lua_gettop(L);
+  int i;
+  
+  LUA_ARG_LIMIT (2, "setsparepicturesize");
+  LUA_ARG_NUMBER(1, "setsparepicturesize", w, 1, 9999);
+  LUA_ARG_NUMBER(2, "setsparepicturesize", h, 1, 9999);
+    
+  Backup_and_resize_the_spare(w, h);
+  // part of Resize_image() : the pixel copy part.
+  for (i=0; i<Spare_backups->Pages->Nb_layers; i++)
+  {
+    Copy_part_of_image_to_another(
+      Spare_backups->Pages->Next->Image[i],0,0,Min(Spare_backups->Pages->Next->Width,Spare_image_width),
+      Min(Spare_backups->Pages->Next->Height,Spare_image_height),Spare_backups->Pages->Next->Width,
+      Spare_backups->Pages->Image[i],0,0,Spare_image_width);
+  }
+  Redraw_spare_image();
+  
+  return 0;
+}
+
 int L_GetPictureSize(lua_State* L)
 {
   lua_pushinteger(L, Main_image_width);
@@ -351,6 +378,29 @@ int L_PutPicturePixel(lua_State* L)
     return 0;
   }
   Pixel_in_current_screen(x, y, c, 0);
+  return 0; // no values returned for lua
+}
+
+
+int L_PutSparePicturePixel(lua_State* L)
+{
+  int x;
+  int y;
+  int c;
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (3, "putsparepicturepixel");
+  LUA_ARG_NUMBER(1, "putsparepicturepixel", x, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(2, "putsparepicturepixel", y, INT_MIN, INT_MAX);
+  LUA_ARG_NUMBER(3, "putsparepicturepixel", c, INT_MIN, INT_MAX);
+  
+  // Bound check
+  if (x<0 || y<0 || x>=Spare_image_width || y>=Spare_image_height)
+  {
+    // Silently ignored
+    return 0;
+  }
+  Pixel_in_spare(x, y, c);
   return 0; // no values returned for lua
 }
 
@@ -1292,6 +1342,19 @@ int L_StatusMessage(lua_State* L)
 }
 
 
+int L_SelectLayer(lua_State* L)
+{
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (1, "selectlayer");
+  LUA_ARG_NUMBER(1, "selectlayer", Main_current_layer, 0, Main_backups->Pages->Nb_layers - 1);
+
+  // TODO create layer if it doesn't exist yet ?
+
+  return 0;
+}
+
+
 int L_FinalizePicture(lua_State* L)
 {
   int nb_args=lua_gettop(L);
@@ -1529,6 +1592,7 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   // Drawing
   lua_register(L,"putbrushpixel",L_PutBrushPixel);
   lua_register(L,"putpicturepixel",L_PutPicturePixel);
+  lua_register(L,"putsparepicturepixel",L_PutSparePicturePixel);
   lua_register(L, "drawline",L_DrawLine);
   lua_register(L, "drawfilledrect",L_DrawFilledRect);
   lua_register(L, "drawcircle",L_DrawCircle);
@@ -1547,6 +1611,7 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   // Sizes
   lua_register(L,"setbrushsize",L_SetBrushSize);
   lua_register(L,"setpicturesize",L_SetPictureSize);
+  lua_register(L,"setsparepicturesize",L_SetSparePictureSize);
 
   lua_register(L,"getbrushsize",L_GetBrushSize);
   lua_register(L,"getpicturesize",L_GetPictureSize);
@@ -1582,6 +1647,7 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   lua_register(L,"updatescreen",L_UpdateScreen);
   lua_register(L,"finalizepicture",L_FinalizePicture);
   lua_register(L,"getfilename",L_GetFileName);
+  lua_register(L,"selectlayer",L_SelectLayer);
   
   // Load all standard libraries
   luaL_openlibs(L);
@@ -1602,6 +1668,7 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   // The backup also allows the script to read from it to make something
   // like a feedback off effect (convolution matrix comes to mind).
   Backup();
+  Backup_the_spare(-1);
 
   Palette_has_changed=0;
   Brush_was_altered=0;
