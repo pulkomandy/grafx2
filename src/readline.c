@@ -85,6 +85,21 @@ void Insert_character(char * str, char letter, byte position)
   str[position]='\0';
 }
 
+void Prepend_string(char* dest, char* src, int max)
+{
+	// Insert src before dest
+	int sized = strlen(dest);
+	int sizes = strlen(src);
+
+	if (sized + sizes >= max)
+	{
+		sizes = max - sized;
+	}
+
+	memmove(dest+sizes, dest, sized);
+	memcpy(dest, src, sizes);
+}
+
 int Valid_character(int c)
 {
   // Sous Linux: Seul le / est strictement interdit, mais beaucoup
@@ -466,10 +481,11 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
         {
           char* data = getClipboard();
           if (data == NULL) continue; // No clipboard data
-          // TODO Insert it at the cursor position, not at the end 
+          // Insert it at the cursor position
+		  Prepend_string(str + position, data, max_size - position);
           // TODO Update cursor position 
           // TODO This doesn't respect the "allowed chars" restriction
-          strncat(str, data, max_size - size);    
+          //strncat(str, data, max_size - size);    
           free(data);
           goto affichage;
         }

@@ -46,6 +46,7 @@ char* haiku_get_clipboard()
 		ssize_t len;
 		be_clipboard->Data()->FindData("text/plain", B_MIME_TYPE, &(const void*)value, &len);
 
+		be_clipboard->Unlock();
 		return strdup(value);
 	}
 	return NULL;
