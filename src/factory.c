@@ -201,12 +201,6 @@ int L_GetBrushSize(lua_State* L)
   return 2;
 }
 
-int L_GetBrushTransparentColor(lua_State* L)
-{
-  lua_pushinteger(L, Back_color);
-  return 1;
-}
-
 int L_PutBrushPixel(lua_State* L)
 {
   int x;
@@ -1532,14 +1526,16 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   Append_path(buf+9, "?.lua", NULL);
   putenv(buf);
   
-  // writing and reading pixels
+  // Drawing
   lua_register(L,"putbrushpixel",L_PutBrushPixel);
   lua_register(L,"putpicturepixel",L_PutPicturePixel);
   lua_register(L, "drawline",L_DrawLine);
   lua_register(L, "drawfilledrect",L_DrawFilledRect);
   lua_register(L, "drawcircle",L_DrawCircle);
   lua_register(L, "drawdisk",L_DrawDisk);
+  lua_register(L,"clearpicture",L_ClearPicture);
 
+  // Reading pixels
   lua_register(L,"getbrushpixel",L_GetBrushPixel);
   lua_register(L,"getbrushbackuppixel",L_GetBrushBackupPixel);
   lua_register(L,"getpicturepixel",L_GetPicturePixel);
@@ -1548,8 +1544,7 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   lua_register(L,"getsparelayerpixel",L_GetSpareLayerPixel);
   lua_register(L,"getsparepicturepixel",L_GetSparePicturePixel);
 
-
-  // resizing stuff
+  // Sizes
   lua_register(L,"setbrushsize",L_SetBrushSize);
   lua_register(L,"setpicturesize",L_SetPictureSize);
 
@@ -1558,18 +1553,18 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   lua_register(L,"getsparepicturesize",L_GetSparePictureSize);
 
   // color and palette
+  lua_register(L,"getforecolor",L_GetForeColor);
+  lua_register(L,"getbackcolor",L_GetBackColor);
+  lua_register(L,"gettranscolor",L_GetTransColor);
+
   lua_register(L,"setcolor",L_SetColor);
   lua_register(L,"setforecolor",L_SetForeColor);
   lua_register(L,"setbackcolor",L_SetBackColor);
 
   lua_register(L,"getcolor",L_GetColor);
   lua_register(L,"getbackupcolor",L_GetBackupColor);
-  lua_register(L,"getbrushtransparentcolor",L_GetBrushTransparentColor);
   lua_register(L,"getsparecolor",L_GetSpareColor);
   lua_register(L,"getsparetranscolor",L_GetSpareTransColor);
-  lua_register(L,"getforecolor",L_GetForeColor);
-  lua_register(L,"getbackcolor",L_GetBackColor);
-  lua_register(L,"gettranscolor",L_GetTransColor);
   
   lua_register(L,"matchcolor",L_MatchColor);
   lua_register(L,"matchcolor2",L_MatchColor2);
@@ -1581,7 +1576,6 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   lua_register(L,"selectbox",L_SelectBox);
 
   // misc. stuff
-  lua_register(L,"clearpicture",L_ClearPicture);
   lua_register(L,"wait",L_Wait);
   lua_register(L,"waitbreak",L_WaitBreak);
   lua_register(L,"waitinput",L_WaitInput);
