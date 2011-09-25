@@ -85,7 +85,9 @@ void Insert_character(char * str, char letter, byte position)
   str[position]='\0';
 }
 
-void Prepend_string(char* dest, char* src, int max)
+int Prepend_string(char* dest, char* src, int max)
+// Insert a string at the start of another. Up to MAX characters only
+// Returns actual number of chars inserted
 {
 	// Insert src before dest
 	int sized = strlen(dest);
@@ -98,69 +100,114 @@ void Prepend_string(char* dest, char* src, int max)
 
 	memmove(dest+sizes, dest, sized);
 	memcpy(dest, src, sizes);
+
+	return sizes;
 }
 
-int Valid_character(int c)
+int Valid_character(int c, int input_type)
+	// returns 0 = Not allowed
+	// returns 1 = Allowed
+	// returns 2 = Allowed only once at start of string (for - sign in numbers)
 {
-  // Sous Linux: Seul le / est strictement interdit, mais beaucoup
-  // d'autres poseront des problèmes au shell, alors on évite.
-  // Sous Windows : c'est moins grave car le fopen() échouerait de toutes façons.
-  // AmigaOS4: Pas de ':' car utilisé pour les volumes.
-  #if defined(__WIN32__)
-  char forbidden_char[] = {'/', '|', '?', '*', '<', '>', ':', '\\'};
-  #elif defined (__amigaos4__)
-  char forbidden_char[] = {'/', '|', '?', '*', '<', '>', ':'};
-  #else
-  char forbidden_char[] = {'/', '|', '?', '*', '<', '>'};
-  #endif
-  int position;
-  
-  if (c < ' ' || c > 255)
-    return 0;
-  
-  for (position=0; position<(long)sizeof(forbidden_char); position++)
-    if (c == forbidden_char[position])
-      return 0;
-  return 1;
+	// On va regarder si l'utilisateur le droit de se servir de cette touche
+	switch(input_type)
+	{
+		case INPUT_TYPE_STRING :
+			if ((c>=' ' && c<= 255) || c=='\n')
+				return 1;
+			break;
+		case INPUT_TYPE_INTEGER :
+			if ( (c>='0') && (c<='9') )
+				return 1;
+			break;
+		case INPUT_TYPE_DECIMAL:
+			if ( (c>='0') && (c<='9') )
+				return 1;
+			else if (c=='-')
+				return 2;
+			else if (c=='.')
+				return 1;
+			break;
+		case INPUT_TYPE_FILENAME:
+		{
+			// On regarde si la touche est autorisée
+			// Sous Linux: Seul le / est strictement interdit, mais beaucoup
+			// d'autres poseront des problèmes au shell, alors on évite.
+			// Sous Windows : c'est moins grave car le fopen() échouerait de toutes façons.
+			// AmigaOS4: Pas de ':' car utilisé pour les volumes.
+#if defined(__WIN32__)
+			char forbidden_char[] = {'/', '|', '?', '*', '<', '>', ':', '\\'};
+#elif defined (__amigaos4__)
+			char forbidden_char[] = {'/', '|', '?', '*', '<', '>', ':'};
+#else
+			char forbidden_char[] = {'/', '|', '?', '*', '<', '>'};
+#endif
+			int position;
+
+			if (c < ' ' || c > 255)
+				return 0;
+
+			for (position=0; position<(long)sizeof(forbidden_char); position++)
+				if (c == forbidden_char[position])
+					return 0;
+			return 1;
+		}
+		case INPUT_TYPE_HEXA:
+			if ( (c>='0') && (c<='9') )
+				return 1;
+			else if ( (c>='A') && (c<='F') )
+				return 1;
+			else if ( (c>='a') && (c<='f') )
+				return 1;
+			break;
+	} // End du "switch(input_type)"
+	return 0;
+}
+
+void Cleanup_string(char* str, int input_type)
+{
+	int pos = 0;
+	while(Valid_character(str[pos++], input_type));
+	str[--pos] = 0;
 }
 
 void Display_whole_string(word x_pos,word y_pos,char * str,byte position)
 {
-  char cursor[2];
-  Print_general(x_pos,y_pos,str,TEXT_COLOR,BACKGROUND_COLOR);
+	char cursor[2];
+	Print_general(x_pos,y_pos,str,TEXT_COLOR,BACKGROUND_COLOR);
 
-  cursor[0]=str[position] ? str[position] : ' ';
-  cursor[1]='\0';
-  Print_general(x_pos+(position<<3)*Menu_factor_X,y_pos,cursor,CURSOR_COLOR,CURSOR_BACKGROUND_COLOR);
+	cursor[0]=str[position] ? str[position] : ' ';
+	cursor[1]='\0';
+	Print_general(x_pos+(position<<3)*Menu_factor_X,y_pos,cursor,CURSOR_COLOR,CURSOR_BACKGROUND_COLOR);
 }
 
 void Init_virtual_keyboard(word y_pos, word keyboard_width, word keyboard_height)
 {
-  int h_pos;
-  int v_pos;
-  int parent_window_x=Window_pos_X+2;
-  
-  h_pos= Window_pos_X+(keyboard_width-Window_width)*Menu_factor_X/-2;
-  if (h_pos<0)
-    h_pos=0;
-  else if (h_pos+keyboard_width*Menu_factor_X>Screen_width)
-    h_pos=Screen_width-keyboard_width*Menu_factor_X;
-  v_pos=Window_pos_Y+(y_pos+9)*Menu_factor_Y;
-  if (v_pos+(keyboard_height*Menu_factor_Y)>Screen_height)
-    v_pos=Window_pos_Y+(y_pos-keyboard_height-4)*Menu_factor_Y;
+	int h_pos;
+	int v_pos;
+	int parent_window_x=Window_pos_X+2;
 
-  Hide_cursor();
-  Open_popup(h_pos,v_pos,keyboard_width,keyboard_height);
-  Window_rectangle(1,0,Window_width-1, Window_height-1, MC_Light);
-  Window_rectangle(0,0,1,Window_height-2, MC_White);
-  // white border on top left angle, when it exceeds border.
-  if (parent_window_x>Window_pos_X)
-    Window_rectangle(0,0,(parent_window_x-Window_pos_X)/Menu_factor_X, 1, MC_White);
-  Window_rectangle(2,Window_height-2,Window_width-2, 2, MC_Black);
-  if(keyboard_width<320)
-  {
-    Window_rectangle(Window_width-2,2,2,Window_height-2, MC_Black);
-  }
+	h_pos= Window_pos_X+(keyboard_width-Window_width)*Menu_factor_X/-2;
+	if (h_pos<0)
+		h_pos=0;
+	else if (h_pos+keyboard_width*Menu_factor_X>Screen_width)
+		h_pos=Screen_width-keyboard_width*Menu_factor_X;
+	v_pos=Window_pos_Y+(y_pos+9)*Menu_factor_Y;
+	if (v_pos+(keyboard_height*Menu_factor_Y)>Screen_height)
+		v_pos=Window_pos_Y+(y_pos-keyboard_height-4)*Menu_factor_Y;
+
+	Hide_cursor();
+	Open_popup(h_pos,v_pos,keyboard_width,keyboard_height);
+	Window_rectangle(1,0,Window_width-1, Window_height-1, MC_Light);
+	Window_rectangle(0,0,1,Window_height-2, MC_White);
+	// white border on top left angle, when it exceeds border.
+	if (parent_window_x>Window_pos_X)
+		Window_rectangle(0,0,(parent_window_x-Window_pos_X)/Menu_factor_X, 1, MC_White);
+	Window_rectangle(2,Window_height-2,Window_width-2, 2, MC_Black);
+	if(keyboard_width<320)
+	{
+		Window_rectangle(Window_width-2,2,2,Window_height-2, MC_Black);
+	}
 }
 
 
@@ -168,8 +215,8 @@ void Init_virtual_keyboard(word y_pos, word keyboard_width, word keyboard_height
 // TODO X11 and others
 char* getClipboard()
 {
-  char* dst = NULL;
-  #ifdef __WIN32__
+	char* dst = NULL;
+#ifdef __WIN32__
     SDL_SysWMinfo info;
     HWND SDL_Window;
 
@@ -243,7 +290,6 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   byte position;
   byte size;
   word input_key=0;
-  byte is_authorized;
   word window_x=Window_pos_X;
   word window_y=Window_pos_Y;
   byte offset=0; // index du premier caractère affiché
@@ -481,11 +527,9 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
         {
           char* data = getClipboard();
           if (data == NULL) continue; // No clipboard data
+		  Cleanup_string(data, input_type);
           // Insert it at the cursor position
-		  Prepend_string(str + position, data, max_size - position);
-          // TODO Update cursor position 
-          // TODO This doesn't respect the "allowed chars" restriction
-          //strncat(str, data, max_size - size);    
+		  position += Prepend_string(str + position, data, max_size - position);
           free(data);
           goto affichage;
         }
@@ -586,43 +630,9 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
       default :
         if (size<max_size)
         {
-          // On va regarder si l'utilisateur le droit de se servir de cette touche
-          is_authorized=0; // On commence par supposer qu'elle est interdite
-          switch(input_type)
-          {
-            case INPUT_TYPE_STRING :
-              if ((input_key>=' ' && input_key<= 255)||input_key=='\n')
-                is_authorized=1;
-              break;
-            case INPUT_TYPE_INTEGER :
-              if ( (input_key>='0') && (input_key<='9') )
-                is_authorized=1;
-              break;
-            case INPUT_TYPE_DECIMAL:
-              if ( (input_key>='0') && (input_key<='9') )
-                is_authorized=1;
-              else if (input_key=='-' && position==0 && str[0]!='-')
-                is_authorized=1;
-              else if (input_key=='.')
-                is_authorized=1;
-              break;
-            case INPUT_TYPE_FILENAME:
-              // On regarde si la touche est autorisée
-              if ( Valid_character(input_key))
-                is_authorized=1;
-              break;
-            case INPUT_TYPE_HEXA:
-              if ( (input_key>='0') && (input_key<='9') )
-                is_authorized=1;
-              else if ( (input_key>='A') && (input_key<='F') )
-                is_authorized=1;
-              else if ( (input_key>='a') && (input_key<='f') )
-                is_authorized=1;
-              break;
-          } // End du "switch(input_type)"
-
           // Si la touche était autorisée...
-          if (is_authorized)
+		  byte is_authorized = Valid_character(input_key, input_type);
+          if (is_authorized == 1 || (is_authorized == 2 && position == 0 && str[position] != '-'))
           {
             // ... alors on l'insère ...
             Insert_character(str,input_key,position/*,size*/);
