@@ -1,10 +1,8 @@
---PICTURE: Tiler
---By Adrien Destugues
+--Picture Tiler by Adrien Destugues
+--Extract unique tiles from the spare page
+--to the main one. Main page is erased.
 --
---Extract unique tiles from the spare page to the main one
---Main page is erased.
---
--- Copyright 2010 Adrien Destugues <pulkomandy@pulkomandy.ath.cx>
+-- Copyright 2011 Adrien Destugues <pulkomandy@pulkomandy.ath.cx>
 --
 -- This program is free software; you can redistribute it and/or
 -- modify it under the terms of the GNU General Public License
@@ -16,24 +14,24 @@
 
 -- Grid size
 -- TODO : get it from GrafX2
-xgrid = 8
-ygrid = 16
+xgrid = 8;
+ygrid = 16;
 
 -- picture size
-w, h = getsparepicturesize()
+w, h = getsparepicturesize();
 
 -- We may need less if there are duplicates
-setpicturesize(xgrid, w*h/xgrid)
+setpicturesize(xgrid, w*h/xgrid);
+clearpicture(255);
 
-tileid = 0
+tileid = 0;
 
 -- blit part of the spare to picture
 function blitsparetopicture(srcx, srcy, dstx, dsty, width, height)
-	local x,y,color
+	local x,y;
 	for y = 0, height - 1, 1 do
 		for x = 0, width - 1, 1 do
-			color = getsparepicturepixel(srcx + x, srcy + y);
-			putpicturepixel(dstx+x, dsty+y, color);
+			putpicturepixel(dstx+x, dsty+y, getsparepicturepixel(srcx + x, srcy + y));
 		end
 	end
 end
@@ -72,7 +70,7 @@ tilemap = {}
 -- foreach tile
 for y = 0, h-1, ygrid do
 	for x = 0, w - 1, xgrid do
-		--TODO - existing one ?
+		-- existing one ?
 		csum = checksum(x,y,xgrid,ygrid);
 		if tilemap[csum] ~= nil then
 			-- potential match
@@ -108,12 +106,9 @@ for y = 0, h-1, ygrid do
 			-- give it a tile id
 			tileid = tileid + 1;
 		end
-		--statusmessage("processed " .. tileid .. " tiles");
-		--updatescreen();
 	end
 end
 
+finalizepicture(); -- resize from what we just did
 setpicturesize(xgrid, (tileid-1)*ygrid)
-
-finalizepicture()
-updatescreen()
+updatescreen();
