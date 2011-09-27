@@ -104,7 +104,7 @@ int Prepend_string(char* dest, char* src, int max)
 	return sizes;
 }
 
-int Valid_character(int c, int input_type)
+int Valid_character(word c, int input_type)
 	// returns 0 = Not allowed
 	// returns 1 = Allowed
 	// returns 2 = Allowed only once at start of string (for - sign in numbers)
@@ -166,9 +166,17 @@ int Valid_character(int c, int input_type)
 
 void Cleanup_string(char* str, int input_type)
 {
-	int pos = 0;
-	while(Valid_character(str[pos++], input_type));
-	str[--pos] = 0;
+	int i,j=0;
+	
+	for(i=0; str[i]!='\0'; i++)
+	{
+	  if (Valid_character((unsigned char)(str[i]), input_type))
+	  {
+	    str[j]=str[i];
+	    j++;
+	  }
+	}
+	str[j] = '\0';
 }
 
 void Display_whole_string(word x_pos,word y_pos,char * str,byte position)
