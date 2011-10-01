@@ -526,23 +526,30 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
           input_key=SDLK_RETURN;
 
         // Handle paste request on CTRL+v
-#if defined __HAIKU__
-	#define SHORTCUTKEY MOD_ALT
-#else
-	#define SHORTCUTKEY MOD_CTRL
-#endif
-        if ((Key & SHORTCUTKEY) && ((Key & 0xFFF) == 'v'))
+        if (Key == SHORTCUT_PASTE)
         {
+          int nb_added;
           char* data = getClipboard();
           if (data == NULL) continue; // No clipboard data
-		  Cleanup_string(data, input_type);
+            Cleanup_string(data, input_type);
           // Insert it at the cursor position
-		  position += Prepend_string(str + position, data, max_size - position);
+          nb_added = Prepend_string(str + position, data, max_size - position);
+          while (nb_added)
+          {
+            size++;
+            if (size<max_size)
+            {
+              position++;
+              if (display_string[position-offset]==RIGHT_TRIANGLE_CHARACTER || position-offset>=visible_size)
+                offset++;
+            }
+            nb_added--;
+          }
           free(data);
           goto affichage;
         }
+        
       } while(input_key==0);
-#undef SHORTCUTKEY
     }
     Hide_cursor();
 
@@ -639,7 +646,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
         if (size<max_size)
         {
           // Si la touche était autorisée...
-		  byte is_authorized = Valid_character(input_key, input_type);
+          byte is_authorized = Valid_character(input_key, input_type);
           if (is_authorized == 1 || (is_authorized == 2 && position == 0 && str[position] != '-'))
           {
             // ... alors on l'insère ...

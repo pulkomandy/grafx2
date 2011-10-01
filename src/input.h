@@ -64,3 +64,16 @@ extern int Snap_axis_origin_Y;
 /// This malloced string is set when a drag-and-drop event
 /// brings a file to Grafx2's window.
 extern char * Drop_file_name;
+
+#if defined __HAIKU__
+	#define SHORTCUT_COPY (SDLK_c|MOD_ALT)
+#else
+	#define SHORTCUT_COPY (SDLK_c|MOD_CTRL)
+#endif
+
+#if defined __HAIKU__
+	#define SHORTCUT_PASTE (SDLK_v|MOD_ALT)
+#else
+	#define SHORTCUT_PASTE (SDLK_v|MOD_CTRL)
+#endif
+
