@@ -340,7 +340,7 @@ GFX2_GLOBAL short Main_magnifier_offset_X;
 /// Y position (in image space) of the pixel to display in the top left corner of the magnified view.
 GFX2_GLOBAL short Main_magnifier_offset_Y;
 /// Index of layer currently being edited
-GFX2_GLOBAL byte Main_current_layer;
+GFX2_GLOBAL int Main_current_layer;
 /// Bitfield that records which layers are visible. 2^0 for 0, 2^1 for 1, 2^2 for 2, etc.
 GFX2_GLOBAL dword Main_layers_visible;
 /// Index to use next time, when creating incremental backups, to make unique filename.
@@ -406,7 +406,7 @@ GFX2_GLOBAL short Spare_magnifier_offset_X;
 /// Y position (in image space) of the pixel to display in the top left corner of the magnified view.
 GFX2_GLOBAL short Spare_magnifier_offset_Y;
 /// Index of layer currently being edited
-GFX2_GLOBAL byte Spare_current_layer;
+GFX2_GLOBAL int Spare_current_layer;
 /// Bitfield that records which layers are visible. 2^0 for 0, 2^1 for 1, 2^2 for 2, etc.
 GFX2_GLOBAL dword Spare_layers_visible;
 /// Index to use next time, when creating incremental backups, to make unique filename.
@@ -499,7 +499,11 @@ GFX2_GLOBAL T_Menu_Bar Menu_bars[MENUBAR_COUNT]
 #ifdef GLOBAL_VARIABLES
   = 
 {{MENU_WIDTH,  9, 1, 45, {NULL,NULL,NULL},  20, BUTTON_HIDE }, // Status
+#ifdef NOLAYERS 
+ {MENU_WIDTH, 14, 1, 35, {NULL,NULL,NULL}, 236, BUTTON_LAYER_SELECT }, // Animation
+#else
  {MENU_WIDTH, 10, 1, 35, {NULL,NULL,NULL}, 144, BUTTON_LAYER_SELECT }, // Layers
+#endif
  {MENU_WIDTH, 35, 1,  0, {NULL,NULL,NULL}, 254, BUTTON_CHOOSE_COL }} // Main
 #endif
  ;

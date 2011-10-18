@@ -30,6 +30,12 @@ void Button_Layer_up(void);
 void Button_Layer_down(void);
 void Button_Layer_select(void);
 void Button_Layer_toggle(void);
-void Layer_activate(byte layer, short side);
-
-
+void Layer_activate(int layer, short side);
+void Button_Anim_time(void);
+void Button_Anim_first_frame(void);
+void Button_Anim_prev_frame(void);
+void Button_Anim_next_frame(void);
+void Button_Anim_last_frame(void);
+void Button_Anim_play(void);
+void Button_Anim_continuous_prev(void);
+void Button_Anim_continuous_next(void);

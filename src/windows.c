@@ -464,6 +464,7 @@ void Draw_bar_remainder(word current_menu, word x_off)
 /// Display / update the layer menubar
 void Display_layerbar(void)
 {
+#ifndef NOLAYERS
   word x_off=0;
   word button_width = LAYER_SPRITE_WIDTH;
   word button_number = Main_backups->Pages->Nb_layers;
@@ -547,6 +548,21 @@ void Display_layerbar(void)
     Menu_Y+Menu_bars[MENUBAR_LAYERS].Top*Menu_factor_Y, 
     horiz_space*Menu_factor_X, 
     Menu_bars[MENUBAR_LAYERS].Height*Menu_factor_Y);
+#else
+  char str[8];
+  // Rest of horizontal line
+  Draw_bar_remainder(MENUBAR_LAYERS, Menu_bars[MENUBAR_LAYERS].Skin_width);
+  // Frame# background rectangle
+  // Block((Menu_bars[MENUBAR_LAYERS].Skin_width)*Menu_factor_X,(0+Menu_bars[MENUBAR_LAYERS].Top)*Menu_factor_Y+Menu_Y,8*8*Menu_factor_X,8*Menu_factor_Y,MC_Light);
+  // Frame #/#
+  snprintf(str, 5, "#%3d", Main_current_layer+1);
+  Print_general((82)*Menu_factor_X,(Menu_bars[MENUBAR_LAYERS].Top+3)*Menu_factor_Y+Menu_Y,str,MC_Black,MC_Light);
+  Update_rect(
+    (82)*Menu_factor_X,
+    (Menu_bars[MENUBAR_LAYERS].Top+3)*Menu_factor_Y+Menu_Y,
+    4*8*Menu_factor_X, 
+    8*Menu_factor_Y);
+#endif
 }
 
 
@@ -3129,10 +3145,14 @@ void Remap_menu_sprites()
           Remap_pixel(&Gfx->Statusbar_block[k][j][i]);
     // Layer bar
     for (k=0; k<3; k++)
-      for (j=0; j<Menu_bars[MENUBAR_LAYERS].Height; j++)
-        for (i=0; i<Menu_bars[MENUBAR_LAYERS].Skin_width; i++)
+      for (j=0; j<10; j++)
+        for (i=0; i<144; i++)
           Remap_pixel(&Gfx->Layerbar_block[k][j][i]);
-    
+    // Anim bar
+    for (k=0; k<3; k++)
+      for (j=0; j<14; j++)
+        for (i=0; i<236; i++)
+          Remap_pixel(&Gfx->Animbar_block[k][j][i]);
     // Help fonts
     for (k=0; k<256; k++)
       for (j=0; j<8; j++)

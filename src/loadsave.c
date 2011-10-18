@@ -315,6 +315,29 @@ void Set_palette_fake_24b(T_Palette palette)
   }
 }
 
+void Set_frame_duration(T_IO_Context *context, int duration)
+{
+  switch(context->Type)
+  {
+    case CONTEXT_MAIN_IMAGE:
+      Main_backups->Pages->Image[context->Current_layer].Duration = duration;
+      break;
+    default:
+      break;
+  }
+}
+
+int Get_frame_duration(T_IO_Context *context)
+{
+  switch(context->Type)
+  {
+    case CONTEXT_MAIN_IMAGE:
+      return Main_backups->Pages->Image[context->Current_layer].Duration;
+    default:
+      return 0;
+  }
+}
+
 ///
 /// Generic allocation and similar stuff, done at beginning of image load,
 /// as soon as size is known.
@@ -638,7 +661,7 @@ void Load_image(T_IO_Context *context)
           Cursor_shape=CURSOR_SHAPE_HOURGLASS;
           Display_cursor();
           Flush_update();
-          if (Convert_24b_bitmap_to_256(Main_backups->Pages->Image[0],context->Buffer_image_24b,context->Width,context->Height,context->Palette))
+          if (Convert_24b_bitmap_to_256(Main_backups->Pages->Image[0].Pixels,context->Buffer_image_24b,context->Width,context->Height,context->Palette))
             File_error=2;
           else
           {
@@ -1207,7 +1230,7 @@ void Init_context_layered_image(T_IO_Context * context, char *file_name, char *f
     context->Ratio=PIXEL_TALL;
   else
     context->Ratio=PIXEL_SIMPLE;
-  context->Target_address=Main_backups->Pages->Image[0];
+  context->Target_address=Main_backups->Pages->Image[0].Pixels;
   context->Pitch=Main_image_width;
   
   // Color cyling ranges:
@@ -1274,7 +1297,7 @@ void Init_context_surface(T_IO_Context * context, char *file_name, char *file_di
 
 }
 /// Function to call when need to switch layers.
-void Set_layer(T_IO_Context *context, byte layer)
+void Set_layer(T_IO_Context *context, int layer)
 {
   context->Current_layer = layer;
 
@@ -1294,7 +1317,7 @@ void Set_layer(T_IO_Context *context, byte layer)
       Main_current_layer = layer;
       Main_layers_visible = (2<<layer)-1;
     }
-    context->Target_address=Main_backups->Pages->Image[layer];
+    context->Target_address=Main_backups->Pages->Image[layer].Pixels;
   }
 }
 

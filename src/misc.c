@@ -61,7 +61,7 @@ word Count_used_colors(dword* usage)
   // For each layer
   for (layer = 0; layer < Main_backups->Pages->Nb_layers; layer++)
   {
-    current_pixel = Main_backups->Pages->Image[layer];
+    current_pixel = Main_backups->Pages->Image[layer].Pixels;
     // For each pixel in picture
     for (i = 0; i < nb_pixels; i++)
     {
@@ -188,7 +188,7 @@ void Clear_current_image_with_stencil(byte color, byte * stencil)
   int nb_pixels=0; //ECX
   //al=color
   //edi=Screen_pixels
-  byte* pixel=Main_backups->Pages->Image[Main_current_layer];
+  byte* pixel=Main_backups->Pages->Image[Main_current_layer].Pixels;
   int i;
 
   nb_pixels=Main_image_height*Main_image_width;
@@ -205,7 +205,7 @@ void Clear_current_image(byte color)
   // Effacer l'image courante avec une certaine couleur
 {
   memset(
-    Main_backups->Pages->Image[Main_current_layer],
+    Main_backups->Pages->Image[Main_current_layer].Pixels,
     color ,
     Main_image_width * Main_image_height
     );
@@ -306,7 +306,7 @@ byte Read_pixel_from_spare_screen(word x,word y)
 #ifndef NOLAYERS
   return *(Spare_visible_image.Image + y*Spare_image_width + x);
 #else
-  return *(Spare_backups->Pages->Image[Spare_current_layer] + y*Spare_image_width + x);
+  return *(Spare_backups->Pages->Image[Spare_current_layer].Pixels + y*Spare_image_width + x);
 #endif
 
 }
@@ -362,7 +362,7 @@ void Remap_general_lowlevel(byte * conversion_table,byte * in_buffer, byte *out_
 
 void Copy_image_to_brush(short start_x,short start_y,short Brush_width,short Brush_height,word image_width)
 {
-  byte* src=start_y*image_width+start_x+Main_backups->Pages->Image[Main_current_layer]; //Adr départ image (ESI)
+  byte* src=start_y*image_width+start_x+Main_backups->Pages->Image[Main_current_layer].Pixels; //Adr départ image (ESI)
   byte* dest=Brush_original_pixels; //Adr dest brosse (EDI)
   int dx;
 
@@ -407,7 +407,7 @@ void Replace_colors_within_limits(byte * replace_table)
     // Pour chaque pixel sur la ligne :
     for (x = Limit_left;x <= Limit_right;x ++)
     {
-      pixel = Main_backups->Pages->Image[Main_current_layer]+y*Main_image_width+x;
+      pixel = Main_backups->Pages->Image[Main_current_layer].Pixels+y*Main_image_width+x;
       *pixel = replace_table[*pixel];
     }
   }
