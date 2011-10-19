@@ -1641,54 +1641,6 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   true,
   SDLK_BACKQUOTE|MOD_CTRL, // Ctrl + `~
   0},
-  {198,
-  "Set frame time",
-  "Opens a window where you",
-  "can set the current animation",
-  "frame duration.",
-  true,
-  0, // No shortcut
-  0},
-  {199,
-  "Go to first frame",
-  "Edits the first frame of",
-  "an animation",
-  "",
-  true,
-  0, // No shortcut
-  0},
-  {200,
-  "Go to last frame",
-  "Edits the last frame of",
-  "an animation",
-  "",
-  true,
-  0, // No shortcut
-  0},
-  {201,
-  "Go to previous frame",
-  "Edits the previous frame of",
-  "an animation",
-  "",
-  true,
-  0, // No shortcut
-  0},
-  {202,
-  "Go to next frame",
-  "Edits the next frame of",
-  "an animation",
-  "",
-  true,
-  0, // No shortcut
-  0},
-  {203,
-  "Preview animation",
-  "Runs the current animation.",
-  "",
-  "",
-  true,
-  0, // No shortcut
-  0},
 };
 
 word Ordering[NB_SHORTCUTS]=
@@ -1891,10 +1843,4 @@ word Ordering[NB_SHORTCUTS]=
   SPECIAL_RUN_SCRIPT_9,
   SPECIAL_RUN_SCRIPT_10,
   SPECIAL_CYCLE_MODE,
-  0x100+BUTTON_ANIM_TIME,
-  0x100+BUTTON_ANIM_FIRST_FRAME,
-  0x100+BUTTON_ANIM_LAST_FRAME,
-  0x100+BUTTON_ANIM_PREV_FRAME,
-  0x100+BUTTON_ANIM_NEXT_FRAME,
-  0x100+BUTTON_ANIM_PLAY,
 };

@@ -1620,15 +1620,15 @@ void Copy_image_only(void)
       if (i == Spare_current_layer)
       {
         // Copy the current layer
-        memcpy(Spare_backups->Pages->Image[i].Pixels,Main_backups->Pages->Image[Main_current_layer].Pixels,Main_image_width*Main_image_height);
+        memcpy(Spare_backups->Pages->Image[i],Main_backups->Pages->Image[Main_current_layer],Main_image_width*Main_image_height);
       }
       else
       {
         // Resize the original layer
         Copy_part_of_image_to_another(
-        Spare_backups->Pages->Next->Image[i].Pixels,0,0,Min(old_width,Spare_image_width),
+        Spare_backups->Pages->Next->Image[i],0,0,Min(old_width,Spare_image_width),
         Min(old_height,Spare_image_height),old_width,
-        Spare_backups->Pages->Image[i].Pixels,0,0,Spare_image_width);
+        Spare_backups->Pages->Image[i],0,0,Spare_image_width);
       }
     }
 

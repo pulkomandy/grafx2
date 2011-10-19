@@ -2826,7 +2826,7 @@ void Scroll_12_5(void)
     else
     {
       // One layer at once
-      Scroll_picture(Main_backups->Pages->Next->Image[Main_current_layer].Pixels, Main_backups->Pages->Image[Main_current_layer].Pixels, x_offset, y_offset);
+      Scroll_picture(Main_backups->Pages->Next->Image[Main_current_layer], Main_backups->Pages->Image[Main_current_layer], x_offset, y_offset);
       Redraw_current_layer();
     }
 
@@ -2883,7 +2883,7 @@ void Scroll_0_5(void)
     // Do the actual scroll operation on all layers.
     for (i=0; i<Main_backups->Pages->Nb_layers; i++)
       //if ((1<<i) & Main_layers_visible)
-      Scroll_picture(Main_backups->Pages->Next->Image[i].Pixels, Main_backups->Pages->Image[i].Pixels, x_offset, y_offset);
+      Scroll_picture(Main_backups->Pages->Next->Image[i], Main_backups->Pages->Image[i], x_offset, y_offset);
     // Update the depth buffer too ...
     // It would be faster to scroll it, but we don't have method
     // for in-place scrolling.

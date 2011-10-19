@@ -304,9 +304,9 @@ int L_SetPictureSize(lua_State* L)
   for (i=0; i<Main_backups->Pages->Nb_layers; i++)
   {
     Copy_part_of_image_to_another(
-      Main_backups->Pages->Next->Image[i].Pixels,0,0,Min(Main_backups->Pages->Next->Width,Main_image_width),
+      Main_backups->Pages->Next->Image[i],0,0,Min(Main_backups->Pages->Next->Width,Main_image_width),
       Min(Main_backups->Pages->Next->Height,Main_image_height),Main_backups->Pages->Next->Width,
-      Main_backups->Pages->Image[i].Pixels,0,0,Main_image_width);
+      Main_backups->Pages->Image[i],0,0,Main_image_width);
   }
   Redraw_layered_image();
   
@@ -578,7 +578,7 @@ int L_GetSpareLayerPixel(lua_State* L)
     lua_pushinteger(L, Spare_backups->Pages->Transparent_color);
     return 1;
   }
-  lua_pushinteger(L, *(Spare_backups->Pages->Image[Spare_current_layer].Pixels + y*Spare_image_width + x));
+  lua_pushinteger(L, *(Spare_backups->Pages->Image[Spare_current_layer] + y*Spare_image_width + x));
   return 1;
 }
 

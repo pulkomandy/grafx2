@@ -71,7 +71,7 @@
 /// Character to display in menus for an ellipsis.
 #define ELLIPSIS_CHARACTER       '…'
 #define NB_LAYERS                  1    ///< Initial number of layers for a new image
-#define MAX_NB_LAYERS            999    ///< Maximum number of layers that can be used in grafx2. Note that 32 is upper limit because of a few bit fields.
+#define MAX_NB_LAYERS             16    ///< Maximum number of layers that can be used in grafx2. Note that 32 is upper limit because of a few bit fields.
 #define BRUSH_CONTAINER_PREVIEW_WIDTH    16  ///< Size for preview of a brush in Brush container
 #define BRUSH_CONTAINER_PREVIEW_HEIGHT   16  ///< Size for preview of a brush in Brush container
 #define BRUSH_CONTAINER_COLUMNS          4  ///< Number of columns in the Brush container
@@ -288,12 +288,6 @@ enum BUTTON_NUMBERS
   BUTTON_LAYER_REMOVE,
   BUTTON_LAYER_UP,
   BUTTON_LAYER_DOWN,
-  BUTTON_ANIM_TIME,
-  BUTTON_ANIM_FIRST_FRAME,
-  BUTTON_ANIM_PREV_FRAME,
-  BUTTON_ANIM_NEXT_FRAME,
-  BUTTON_ANIM_LAST_FRAME,
-  BUTTON_ANIM_PLAY,
   BUTTON_LAYER_SELECT,
 
   // Main menu

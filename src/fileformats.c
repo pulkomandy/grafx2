@@ -1701,25 +1701,17 @@ typedef struct
 
 typedef struct
 {
-  byte Block_identifier;  // 0x21
-  byte Function;          // 0xF9
-  byte Block_size;        // 4
+  // byte Block_identifier : 0x21
+  // byte Function         : 0xF9
+  // byte Block_size         // 4
   byte Packed_fields;     // 11100000 : Reserved
                           // 00011100 : Disposal method
                           // 00000010 : User input flag
                           // 00000001 : Transparent flag
   word Delay_time;        // Time for this frame to stay displayed
   byte Transparent_color; // Which color index acts as transparent
-  word Block_terminator;  // 0x00
+  //word Bloc_terminator; // 0x00
 } T_GIF_GCE;              // Graphic Control Extension
-
-enum DISPOSAL_METHOD
-{
-  DISPOSAL_METHOD_UNDEFINED = 0,
-  DISPOSAL_METHOD_DO_NOT_DISPOSE = 1,
-  DISPOSAL_METHOD_RESTORE_BGCOLOR = 2,
-  DISPOSAL_METHOD_RESTORE_PREVIOUS = 3,
-};
 
 // -- Tester si un fichier est au format GIF --------------------------------
 
@@ -1804,10 +1796,9 @@ word GIF_get_next_code(void)
 
 // -- Affiche un nouveau pixel --
 
-void GIF_new_pixel(T_IO_Context * context, T_GIF_IDB *idb, int is_transparent, byte color)
+void GIF_new_pixel(T_IO_Context * context, T_GIF_IDB *idb, byte color)
 {
-  if (!is_transparent || color!=context->Transparent_color)
-    Set_pixel(context, idb->Pos_X+GIF_pos_X, idb->Pos_Y+GIF_pos_Y,color);
+  Set_pixel(context, idb->Pos_X+GIF_pos_X, idb->Pos_Y+GIF_pos_Y,color);
 
   GIF_pos_X++;
 
@@ -1876,11 +1867,7 @@ void Load_GIF(T_IO_Context * context)
   word value_eof;        // Valeur <=> End d'image
   long file_size;
   int number_LID; // Nombre d'images trouvées dans le fichier
-  int current_layer = 0;
-  int last_delay = 0;
-  byte is_transparent = 0;
-  byte disposal_method = DISPOSAL_METHOD_RESTORE_BGCOLOR;
-  byte previous_disposal_method = DISPOSAL_METHOD_RESTORE_BGCOLOR;
+  short current_layer = 0;
 
   /////////////////////////////////////////////////// FIN DES DECLARATIONS //
 
@@ -1980,23 +1967,19 @@ void Load_GIF(T_IO_Context * context)
                       && Read_word_le(GIF_file,&(GCE.Delay_time))
                       && Read_byte(GIF_file,&(GCE.Transparent_color)))
                     {
-                      previous_disposal_method = disposal_method;
-                      disposal_method = (GCE.Packed_fields >> 2) & 7;
-                      last_delay = GCE.Delay_time;
-                      context->Transparent_color= GCE.Transparent_color;
                       if (GCE.Packed_fields & 1)
                       {
                         if (number_LID == 0)
                           context->Background_transparent = 1;
+                        context->Transparent_color= GCE.Transparent_color;
                       }
                       else
                       {
                         if (number_LID == 0)
                           context->Background_transparent = 0;
+                        context->Transparent_color = 0; // Reset transparent color
                       }
-                      is_transparent =
-                        (previous_disposal_method==DISPOSAL_METHOD_DO_NOT_DISPOSE
-                        ||previous_disposal_method==DISPOSAL_METHOD_UNDEFINED);
+                    
                     }
                     else
                       File_error=2;
@@ -2129,35 +2112,7 @@ void Load_GIF(T_IO_Context * context)
                 // Attempt to add a layer to current image
                 current_layer++;
                 Set_layer(context, current_layer);
-#ifdef NOLAYERS
-                if (context->Type == CONTEXT_MAIN_IMAGE)
-                {
-                  if (is_transparent)
-                  // Copy the content of previous layer, in case of loading a GIF
-                  // that uses transparency compression
-                    memcpy(
-                      Main_backups->Pages->Image[Main_current_layer].Pixels,
-                      Main_backups->Pages->Image[Main_current_layer-1].Pixels,
-                      Main_backups->Pages->Width*Main_backups->Pages->Height);
-                  else
-                    memset(
-                      Main_backups->Pages->Image[Main_current_layer].Pixels,
-                      LSDB.Backcol,
-                      Main_backups->Pages->Width*Main_backups->Pages->Height);
-                }
-#endif
               }
-              else
-              {
-                if (context->Type == CONTEXT_MAIN_IMAGE)
-                  memset(
-                    Main_backups->Pages->Image[Main_current_layer].Pixels,
-                    LSDB.Backcol,
-                    Main_backups->Pages->Width*Main_backups->Pages->Height);
-              }
-              
-              // Duration was set in the previously loaded GCE
-              Set_frame_duration(context, last_delay*10);
               number_LID++;
               
               // lecture de 10 derniers octets
@@ -2242,7 +2197,7 @@ void Load_GIF(T_IO_Context * context)
                       special_case=alphabet_stack[alphabet_stack_pos++]=GIF_current_code;
     
                       do
-                        GIF_new_pixel(context, &IDB, is_transparent, alphabet_stack[--alphabet_stack_pos]);
+                        GIF_new_pixel(context, &IDB, alphabet_stack[--alphabet_stack_pos]);
                       while (alphabet_stack_pos!=0);
     
                       alphabet_prefix[alphabet_free  ]=old_code;
@@ -2262,7 +2217,7 @@ void Load_GIF(T_IO_Context * context)
                       alphabet_free     =(1<<initial_nb_bits)+2;
                       special_case       =GIF_get_next_code();
                       old_code       =GIF_current_code;
-                      GIF_new_pixel(context, &IDB, is_transparent, GIF_current_code);
+                      GIF_new_pixel(context, &IDB, GIF_current_code);
                     }
                   }
                   else
@@ -2411,7 +2366,7 @@ void Save_GIF(T_IO_Context * context)
   word current_string;   // Code de la chaîne en cours de traitement
   byte current_char;         // Caractère à coder
   word index;            // index de recherche de chaîne
-  int current_layer;
+  short current_layer;
 
   /////////////////////////////////////////////////// FIN DES DECLARATIONS //
   
@@ -2476,11 +2431,7 @@ void Save_GIF(T_IO_Context * context)
           //  Write_bytes(GIF_file,"\x21\xFF\x0BNETSCAPE2.0\x03\xLL\xSS\xSS\x00",19);
           // LL : 01 to loop
           // SSSS : number of loops
-#ifdef NOLAYERS
-          if (context->Nb_layers>1)
-            Write_bytes(GIF_file,"\x21\xFF\x0BNETSCAPE2.0\x03\x01\x00\x00\x00",19);
-#endif          
-          
+            
           // Ecriture du commentaire
           if (context->Comment[0])
           {
@@ -2515,36 +2466,24 @@ void Save_GIF(T_IO_Context * context)
             current_layer++)
           {
             // Write a Graphic Control Extension
-            T_GIF_GCE GCE;
+            byte GCE_block[] = "\x21\xF9\x04\x04\x05\x00\x00\x00";
+            // 'Default' values:
+            //    Disposal method "Do not dispose"
+            //    Duration 5/100s (minimum viable value for current web browsers)
+            
+            if (current_layer > 0 || context->Background_transparent)
+              GCE_block[3] |= 1; // Transparent color flag
+            GCE_block[6] = context->Transparent_color;
             
             Set_layer(context, current_layer);
             
-            GCE.Block_identifier = 0x21;
-            GCE.Function = 0xF9;
-            GCE.Block_size=4;
-#ifdef NOLAYERS
-            GCE.Packed_fields=(2<<2)|(context->Background_transparent);
-            GCE.Delay_time=Get_frame_duration(context)/10;
-#else
-            if (current_layer==0)
-              GCE.Packed_fields=(1<<2)|(context->Background_transparent);
-            else
-              GCE.Packed_fields=(1<<2)|(1);
-            GCE.Delay_time=5; // Duration 5/100s (minimum viable value for current web browsers)
             if (current_layer == context->Nb_layers -1)
-              GCE.Delay_time=0xFFFF; // Infinity (10 minutes)
-#endif
-            GCE.Transparent_color=context->Transparent_color;
-            GCE.Block_terminator=0x00;
-            
-            if (Write_byte(GIF_file,GCE.Block_identifier)
-             && Write_byte(GIF_file,GCE.Function)
-             && Write_byte(GIF_file,GCE.Block_size)
-             && Write_byte(GIF_file,GCE.Packed_fields)
-             && Write_word_le(GIF_file,GCE.Delay_time)
-             && Write_byte(GIF_file,GCE.Transparent_color)
-             && Write_byte(GIF_file,GCE.Block_terminator)
-             )
+            {
+              // "Infinite" delay for last frame
+              GCE_block[4] = 255;
+              GCE_block[5] = 255;
+            }
+            if (Write_bytes(GIF_file,GCE_block,8))
             {
             
               // On va écrire un block indicateur d'IDB et l'IDB du fichier

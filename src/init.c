@@ -374,16 +374,9 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   // Layerbar
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "layer bar"))
     return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layerbar_block[0], 144, 10,"layer bar",0))
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layerbar_block[0], Menu_bars[MENUBAR_LAYERS].Skin_width, Menu_bars[MENUBAR_LAYERS].Height,"layer bar",0))
     return 1;
-  cursor_y+= 10;
-
-  // Animbar
-  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "anim bar"))
-    return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Animbar_block[0], 236, 14,"anim bar",0))
-    return 1;
-  cursor_y+= 14;
+  cursor_y+= Menu_bars[MENUBAR_LAYERS].Height;
 
   // Status bar
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "status bar"))
@@ -402,16 +395,9 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   // Layerbar (selected)
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "selected layer bar"))
     return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layerbar_block[1], 144, 10,"selected layer bar",0))
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layerbar_block[1], Menu_bars[MENUBAR_LAYERS].Skin_width, Menu_bars[MENUBAR_LAYERS].Height,"selected layer bar",0))
     return 1;
-  cursor_y+= 10;
-
-  // Animbar (selected)
-  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "selected anim bar"))
-    return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Animbar_block[1], 236, 14,"selected anim bar",0))
-    return 1;
-  cursor_y+= 14;
+  cursor_y+= Menu_bars[MENUBAR_LAYERS].Height;
 
   // Status bar (selected)
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "selected status bar"))
@@ -649,9 +635,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   memcpy(gfx->Menu_block[2], gfx->Menu_block[0], 
     Menu_bars[MENUBAR_TOOLS].Skin_width*Menu_bars[MENUBAR_TOOLS].Height);
   memcpy(gfx->Layerbar_block[2], gfx->Layerbar_block[0],
-    sizeof(gfx->Layerbar_block[0]));
-  memcpy(gfx->Animbar_block[2], gfx->Animbar_block[0],
-    sizeof(gfx->Animbar_block[0]));
+    Menu_bars[MENUBAR_LAYERS].Skin_width*Menu_bars[MENUBAR_LAYERS].Height);
   memcpy(gfx->Statusbar_block[2], gfx->Statusbar_block[0],
     Menu_bars[MENUBAR_STATUS].Skin_width*Menu_bars[MENUBAR_STATUS].Height);
   
@@ -1162,7 +1146,6 @@ void Init_buttons(void)
                      FAMILY_INSTANT);
 
   // Layer bar
-#ifndef NOLAYERS
   Init_button(BUTTON_LAYER_MENU,
                      0,0,
                      57,9,
@@ -1227,89 +1210,6 @@ void Init_buttons(void)
                      0,0,
                      Do_nothing,
                      FAMILY_INSTANT);
-#else
- // Anim bar
-  Init_button(BUTTON_LAYER_MENU,
-                     0,0,
-                     44,13,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Layer_menu, Button_Layer_menu,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
-  Init_button(BUTTON_ANIM_TIME,
-                     45,0,
-                     13,13,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Anim_time, Button_Anim_time,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
-  Init_button(BUTTON_ANIM_FIRST_FRAME,
-                     116,0,
-                     13,13,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Anim_first_frame, Button_Anim_first_frame,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
-  Init_button(BUTTON_ANIM_PREV_FRAME,
-                     130,0,
-                     13,13,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Anim_prev_frame, Button_Anim_continuous_prev,
-                     0,1,
-                     Do_nothing,
-                     FAMILY_INSTANT);
-  Init_button(BUTTON_ANIM_NEXT_FRAME,
-                     144,0,
-                     13,13,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Anim_next_frame, Button_Anim_continuous_next,
-                     0,1,
-                     Do_nothing,
-                     FAMILY_INSTANT);
-  Init_button(BUTTON_ANIM_LAST_FRAME,
-                     158,0,
-                     13,13,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Anim_last_frame, Button_Anim_last_frame,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
-  Init_button(BUTTON_LAYER_ADD,
-                     177,0,
-                     13,13,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Layer_add, Button_Layer_add,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
-  Init_button(BUTTON_LAYER_REMOVE,
-                     191,0,
-                     13,13,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Layer_remove, Button_Layer_remove,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
-  Init_button(BUTTON_LAYER_DOWN,
-                     205,0,
-                     13,13,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Layer_down, Button_Layer_down,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
-  Init_button(BUTTON_LAYER_UP,
-                     219,0,
-                     13,13,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Layer_up, Button_Layer_up,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
-#endif
   // Status bar
   Init_button(BUTTON_HIDE,
                      0,0,
@@ -2795,11 +2695,7 @@ void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
   for (i=0; i<3; i++)
   {
     Menu_bars[MENUBAR_TOOLS ].Skin[i] = (byte*)&(gfx->Menu_block[i]);
-#ifndef NOLAYERS
     Menu_bars[MENUBAR_LAYERS].Skin[i] = (byte*)&(gfx->Layerbar_block[i]);
-#else
-    Menu_bars[MENUBAR_LAYERS].Skin[i] = (byte*)&(gfx->Animbar_block[i]);
-#endif
     Menu_bars[MENUBAR_STATUS].Skin[i] = (byte*)&(gfx->Statusbar_block[i]);
   }
 }
