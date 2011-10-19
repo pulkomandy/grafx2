@@ -379,6 +379,12 @@ typedef struct
 // Ces structures sont manipulées à travers des fonctions de gestion du
 // backup dans "graph.c".
 
+typedef struct T_Image
+{
+  byte * Pixels;
+  int Duration;
+} T_Image;
+
 /// This is the data for one step of Undo/Redo, for one image.
 /// This structure is resized dynamically to hold pointers to all of the layers in the picture.
 /// The pointed layers are just byte* holding the raw pixel data. But at Image[0]-1 you will find a short that is used as a reference counter for each layer.
@@ -399,12 +405,12 @@ typedef struct T_Page
   T_Gradient_array *Gradients; ///< Pointer to the gradients used by the image.
   byte      Background_transparent; ///< Boolean, true if Layer 0 should have transparent pixels
   byte      Transparent_color; ///< Index of transparent color. 0 to 255.
-  byte      Nb_layers; ///< Number of layers
+  int       Nb_layers; ///< Number of layers
 #if __GNUC__ < 3
   // gcc2 doesn't suport [], but supports [0] which does the same thing.
-  byte *    Image[0];  ///< Pixel data for the (first layer of) image.
+  T_Image    Image[0];  ///< Pixel data for the (first layer of) image.
 #else
-  byte *    Image[];  ///< Pixel data for the (first layer of) image.
+  T_Image    Image[];  ///< Pixel data for the (first layer of) image.
 #endif
   // No field after Image[] ! Dynamic layer allocation for Image[1], [2] etc.
 } T_Page;
@@ -461,6 +467,7 @@ typedef struct
   /// Bitmap data for the menu, a single rectangle.
   byte Menu_block[3][35][MENU_WIDTH];
   byte Layerbar_block[3][10][144];
+  byte Animbar_block[3][14][236];
   byte Statusbar_block[3][9][20];
   /// Bitmap data for the icons that are displayed over the menu.
   byte Menu_sprite[2][NB_MENU_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];

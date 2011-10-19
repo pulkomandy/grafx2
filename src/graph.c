@@ -632,9 +632,9 @@ void Resize_image(word chosen_width,word chosen_height)
     for (i=0; i<Main_backups->Pages->Nb_layers; i++)
     {
       Copy_part_of_image_to_another(
-        Main_backups->Pages->Next->Image[i],0,0,Min(old_width,Main_image_width),
+        Main_backups->Pages->Next->Image[i].Pixels,0,0,Min(old_width,Main_image_width),
         Min(old_height,Main_image_height),old_width,
-        Main_backups->Pages->Image[i],0,0,Main_image_width);
+        Main_backups->Pages->Image[i].Pixels,0,0,Main_image_width);
     }
     Redraw_layered_image();
   }
@@ -655,7 +655,7 @@ void Remap_spare(void)
   short y_pos; // Variable de balayage de la brosse
   byte  used[256]; // Tableau de booléens "La couleur est utilisée"
   int   color;
-  byte layer;
+  int   layer;
 
   // On commence par initialiser le tableau de booléens à faux
   for (color=0;color<=255;color++)
@@ -665,7 +665,7 @@ void Remap_spare(void)
   for (layer=0; layer<Spare_backups->Pages->Nb_layers; layer++)
     for (y_pos=0;y_pos<Spare_image_height;y_pos++)
       for (x_pos=0;x_pos<Spare_image_width;x_pos++)
-        used[*(Spare_backups->Pages->Image[layer]+(y_pos*Spare_image_width+x_pos))]=1;
+        used[*(Spare_backups->Pages->Image[layer].Pixels+(y_pos*Spare_image_width+x_pos))]=1;
 
   //   On va maintenant se servir de la table "used" comme table de
   // conversion: pour chaque indice, la table donne une couleur de
@@ -682,7 +682,7 @@ void Remap_spare(void)
   // qui craint un peu, on peut faire l'échange dans la brosse de toutes les
   // teintes.
   for (layer=0; layer<Spare_backups->Pages->Nb_layers; layer++)
-    Remap_general_lowlevel(used,Spare_backups->Pages->Image[layer],Spare_backups->Pages->Image[layer],Spare_image_width,Spare_image_height,Spare_image_width);
+    Remap_general_lowlevel(used,Spare_backups->Pages->Image[layer].Pixels,Spare_backups->Pages->Image[layer].Pixels,Spare_image_width,Spare_image_height,Spare_image_width);
     
   // Change transparent color index
   Spare_backups->Pages->Transparent_color=used[Spare_backups->Pages->Transparent_color];
@@ -979,7 +979,7 @@ void Fill(short * top_reached  , short * bottom_reached,
 
 byte Read_pixel_from_backup_layer(word x,word y)
 {
-  return *((y)*Main_image_width+(x)+Main_backups->Pages->Next->Image[Main_current_layer]);
+  return *((y)*Main_image_width+(x)+Main_backups->Pages->Next->Image[Main_current_layer].Pixels);
 }
 
 void Fill_general(byte fill_color)
@@ -1035,34 +1035,34 @@ void Fill_general(byte fill_color)
     //  Il va maintenant falloir qu'on "turn" ce gros caca "into" un truc qui
     // ressemble un peu plus à ce à quoi l'utilisateur peut s'attendre.
     if (top_reached>Limit_top)
-      Copy_part_of_image_to_another(Main_backups->Pages->Next->Image[Main_current_layer], // source
+      Copy_part_of_image_to_another(Main_backups->Pages->Next->Image[Main_current_layer].Pixels, // source
                                                Limit_left,Limit_top,       // Pos X et Y dans source
                                                (Limit_right-Limit_left)+1, // width copie
                                                top_reached-Limit_top,// height copie
                                                Main_image_width,         // width de la source
-                                               Main_backups->Pages->Image[Main_current_layer], // Destination
+                                               Main_backups->Pages->Image[Main_current_layer].Pixels, // Destination
                                                Limit_left,Limit_top,       // Pos X et Y destination
                                                Main_image_width);        // width destination
     if (bottom_reached<Limit_bottom)
-      Copy_part_of_image_to_another(Main_backups->Pages->Next->Image[Main_current_layer],
+      Copy_part_of_image_to_another(Main_backups->Pages->Next->Image[Main_current_layer].Pixels,
                                                Limit_left,bottom_reached+1,
                                                (Limit_right-Limit_left)+1,
                                                Limit_bottom-bottom_reached,
-                                               Main_image_width,Main_backups->Pages->Image[Main_current_layer],
+                                               Main_image_width,Main_backups->Pages->Image[Main_current_layer].Pixels,
                                                Limit_left,bottom_reached+1,Main_image_width);
     if (left_reached>Limit_left)
-      Copy_part_of_image_to_another(Main_backups->Pages->Next->Image[Main_current_layer],
+      Copy_part_of_image_to_another(Main_backups->Pages->Next->Image[Main_current_layer].Pixels,
                                                Limit_left,top_reached,
                                                left_reached-Limit_left,
                                                (bottom_reached-top_reached)+1,
-                                               Main_image_width,Main_backups->Pages->Image[Main_current_layer],
+                                               Main_image_width,Main_backups->Pages->Image[Main_current_layer].Pixels,
                                                Limit_left,top_reached,Main_image_width);
     if (right_reached<Limit_right)
-      Copy_part_of_image_to_another(Main_backups->Pages->Next->Image[Main_current_layer],
+      Copy_part_of_image_to_another(Main_backups->Pages->Next->Image[Main_current_layer].Pixels,
                                                right_reached+1,top_reached,
                                                Limit_right-right_reached,
                                                (bottom_reached-top_reached)+1,
-                                               Main_image_width,Main_backups->Pages->Image[Main_current_layer],
+                                               Main_image_width,Main_backups->Pages->Image[Main_current_layer].Pixels,
                                                right_reached+1,top_reached,Main_image_width);
 
     for (y_pos=top_reached;y_pos<=bottom_reached;y_pos++)
@@ -2924,7 +2924,7 @@ byte Effect_layer_copy(word x,word y,byte color)
 {
   if (color<Main_backups->Pages->Nb_layers)
   {
-    return *((y)*Main_image_width+(x)+Main_backups->Pages->Image[color]);
+    return *((y)*Main_image_width+(x)+Main_backups->Pages->Image[color].Pixels);
   }
   return Read_pixel_from_feedback_screen(x,y);
 }
@@ -2974,16 +2974,16 @@ byte Read_pixel_from_current_screen  (word x,word y)
   byte color;
   
   if (Main_current_layer==4)
-    return *(Main_backups->Pages->Image[Main_current_layer] + x+y*Main_image_width);
+    return *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width);
     
   color = *(Main_screen+y*Main_image_width+x);
   if (color != Main_backups->Pages->Transparent_color) // transparent color
     return color;
   
   depth = *(Main_visible_image_depth_buffer.Image+x+y*Main_image_width);
-  return *(Main_backups->Pages->Image[depth] + x+y*Main_image_width);
+  return *(Main_backups->Pages->Image[depth].Pixels + x+y*Main_image_width);
   #else
-  return *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer]);
+  return *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer].Pixels);
   #endif
 }
 
@@ -2993,30 +2993,29 @@ void Pixel_in_current_screen      (word x,word y,byte color,int with_preview)
   if (!Constraint_mode)
   {
     byte depth = *(Main_visible_image_depth_buffer.Image+x+y*Main_image_width);
-    *(Main_backups->Pages->Image[Main_current_layer] + x+y*Main_image_width)=color;
+    *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width)=color;
     if ( depth <= Main_current_layer)
     {
       if (color == Main_backups->Pages->Transparent_color) // transparent color
         // fetch pixel color from the topmost visible layer
-        color=*(Main_backups->Pages->Image[depth] + x+y*Main_image_width);
+        color=*(Main_backups->Pages->Image[depth].Pixels + x+y*Main_image_width);
       
       *(x+y*Main_image_width+Main_screen)=color;
       
       if (with_preview)
         Pixel_preview(x,y,color);
     }
-    
   }
   else if ( Main_current_layer == 4)
   {
     if (color<4)
     {
       // Paste in layer
-      *(Main_backups->Pages->Image[Main_current_layer] + x+y*Main_image_width)=color;
+      *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width)=color;
       // Paste in depth buffer
       *(Main_visible_image_depth_buffer.Image+x+y*Main_image_width)=color;
       // Fetch pixel color from the target raster layer
-      color=*(Main_backups->Pages->Image[color] + x+y*Main_image_width);
+      color=*(Main_backups->Pages->Image[color].Pixels + x+y*Main_image_width);
       // Draw that color on the visible image buffer
       *(x+y*Main_image_width+Main_screen)=color;
       
@@ -3029,9 +3028,9 @@ void Pixel_in_current_screen      (word x,word y,byte color,int with_preview)
     byte depth;
     
     // Paste in layer
-    *(Main_backups->Pages->Image[Main_current_layer] + x+y*Main_image_width)=color;
+    *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width)=color;
     // Search depth
-    depth = *(Main_backups->Pages->Image[4] + x+y*Main_image_width);
+    depth = *(Main_backups->Pages->Image[4].Pixels + x+y*Main_image_width);
     
     if ( depth == Main_current_layer)
     {
@@ -3046,13 +3045,13 @@ void Pixel_in_current_screen      (word x,word y,byte color,int with_preview)
   {
     byte depth;
     
-    *(Main_backups->Pages->Image[Main_current_layer] + x+y*Main_image_width)=color;
+    *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width)=color;
     depth = *(Main_visible_image_depth_buffer.Image+x+y*Main_image_width);
     if ( depth <= Main_current_layer)
     {
       if (color == Main_backups->Pages->Transparent_color) // transparent color
         // fetch pixel color from the topmost visible layer
-        color=*(Main_backups->Pages->Image[depth] + x+y*Main_image_width);
+        color=*(Main_backups->Pages->Image[depth].Pixels + x+y*Main_image_width);
       
       *(x+y*Main_image_width+Main_screen)=color;
       
@@ -3061,7 +3060,7 @@ void Pixel_in_current_screen      (word x,word y,byte color,int with_preview)
     }
   }
   #else
-  *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer])=color;
+  *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer].Pixels)=color;
   if (with_preview)
       Pixel_preview(x,y,color);
   #endif
@@ -3069,15 +3068,15 @@ void Pixel_in_current_screen      (word x,word y,byte color,int with_preview)
 
 void Pixel_in_spare(word x,word y, byte color)
 {
-  *((y)*Spare_image_width+(x)+Spare_backups->Pages->Image[Spare_current_layer])=color;
+  *((y)*Spare_image_width+(x)+Spare_backups->Pages->Image[Spare_current_layer].Pixels)=color;
 }
 
 void Pixel_in_current_layer(word x,word y, byte color)
 {
-  *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer])=color;
+  *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer].Pixels)=color;
 }
 
 byte Read_pixel_from_current_layer(word x,word y)
 {
-  return *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer]);
+  return *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer].Pixels);
 }

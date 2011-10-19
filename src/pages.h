@@ -58,14 +58,14 @@ extern T_Bitmap Spare_visible_image;
 void Download_infos_page_main(T_Page * page);
 void Upload_infos_page_main(T_Page * page);
 /// Add a new layer to latest page of a list. Returns 0 on success.
-byte Add_layer(T_List_of_pages *list, byte layer);
+byte Add_layer(T_List_of_pages *list, int layer);
 /// Delete a layer from the latest page of a list. Returns 0 on success.
-byte Delete_layer(T_List_of_pages *list, byte layer);
+byte Delete_layer(T_List_of_pages *list, int layer);
 /// Merges the current layer onto the one below it.
 byte Merge_layer();
 
 // private
-T_Page * New_page(byte nb_layers);
+T_Page * New_page(int nb_layers);
 void Download_infos_page_spare(T_Page * page);
 void Upload_infos_page_spare(T_Page * page);
 void Clear_page(T_Page * page);
@@ -95,7 +95,7 @@ void Free_page_of_a_list(T_List_of_pages * list);
 
 int Init_all_backup_lists(int width,int height);
 void Set_number_of_backups(int nb_backups);
-int Backup_new_image(byte layers,int width,int height);
+int Backup_new_image(int layers,int width,int height);
 int Backup_with_new_dimensions(int width,int height);
 ///
 /// Resizes a backup step in-place (doesn't add a Undo/Redo step).

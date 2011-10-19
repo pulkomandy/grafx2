@@ -33,7 +33,7 @@
 
 void Pixel_in_layer(word x,word y, byte layer, byte color)
 {
-  *((y)*Main_image_width+(x)+Main_backups->Pages->Image[layer])=color;
+  *((y)*Main_image_width+(x)+Main_backups->Pages->Image[layer].Pixels)=color;
 }
 
 byte C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
@@ -73,7 +73,7 @@ byte C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
     {
       for (x=0;x<4;x++)
       {
-        byte c=*((row)*Main_image_width+(col*4+x)+Main_backups->Pages->Image[2]);
+        byte c=*((row)*Main_image_width+(col*4+x)+Main_backups->Pages->Image[2].Pixels);
         used_colors[row][col] |= 1<<c;
       }
     }
@@ -81,7 +81,7 @@ byte C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
   // Get "mandatory colors" from layer 1
   for (row=0;row<200;row++)
   {
-    byte c=*((row)*Main_image_width+0+Main_backups->Pages->Image[0]);
+    byte c=*((row)*Main_image_width+0+Main_backups->Pages->Image[0].Pixels);
     if (c<16)
     {
       line_color[row]=c;
@@ -97,7 +97,7 @@ byte C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
   {
     for (col=0;col<40;col++)
     {
-      byte c=*((row)*Main_image_width+(col*4)+Main_backups->Pages->Image[1]);
+      byte c=*((row)*Main_image_width+(col*4)+Main_backups->Pages->Image[1].Pixels);
       if (c<16)
       {
         block_color[row/8][col]=c;
@@ -309,7 +309,7 @@ byte C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
           for(x=0; x<4; x++)
           {
             byte bits;
-            byte c=*((row*8+y)*Main_image_width+(col*4+x)+Main_backups->Pages->Image[2]);
+            byte c=*((row*8+y)*Main_image_width+(col*4+x)+Main_backups->Pages->Image[2].Pixels);
            
             if (c==line_color[row*8+y])
               // BG color
