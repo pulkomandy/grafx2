@@ -1713,6 +1713,14 @@ typedef struct
   word Block_terminator;  // 0x00
 } T_GIF_GCE;              // Graphic Control Extension
 
+enum DISPOSAL_METHOD
+{
+  DISPOSAL_METHOD_UNDEFINED = 0,
+  DISPOSAL_METHOD_DO_NOT_DISPOSE = 1,
+  DISPOSAL_METHOD_RESTORE_BGCOLOR = 2,
+  DISPOSAL_METHOD_RESTORE_PREVIOUS = 3,
+};
+
 // -- Tester si un fichier est au format GIF --------------------------------
 
 void Test_GIF(T_IO_Context * context)
@@ -1871,6 +1879,8 @@ void Load_GIF(T_IO_Context * context)
   int current_layer = 0;
   int last_delay = 0;
   byte is_transparent = 0;
+  byte disposal_method = DISPOSAL_METHOD_RESTORE_BGCOLOR;
+  byte previous_disposal_method = DISPOSAL_METHOD_RESTORE_BGCOLOR;
 
   /////////////////////////////////////////////////// FIN DES DECLARATIONS //
 
@@ -1970,7 +1980,8 @@ void Load_GIF(T_IO_Context * context)
                       && Read_word_le(GIF_file,&(GCE.Delay_time))
                       && Read_byte(GIF_file,&(GCE.Transparent_color)))
                     {
-                      byte disposal_method = (GCE.Packed_fields >> 2) & 7;
+                      previous_disposal_method = disposal_method;
+                      disposal_method = (GCE.Packed_fields >> 2) & 7;
                       last_delay = GCE.Delay_time;
                       context->Transparent_color= GCE.Transparent_color;
                       if (GCE.Packed_fields & 1)
@@ -1983,7 +1994,9 @@ void Load_GIF(T_IO_Context * context)
                         if (number_LID == 0)
                           context->Background_transparent = 0;
                       }
-                      is_transparent = (disposal_method!=1);
+                      is_transparent =
+                        (previous_disposal_method==DISPOSAL_METHOD_DO_NOT_DISPOSE
+                        ||previous_disposal_method==DISPOSAL_METHOD_UNDEFINED);
                     }
                     else
                       File_error=2;
