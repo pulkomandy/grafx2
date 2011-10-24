@@ -2785,6 +2785,7 @@ void Scroll_12_0(void)
              Main_image_width*Main_image_height);
     #endif
   }
+  Update_screen_targets();
   
   Cursor_hidden_before_scroll=Cursor_hidden;
   Cursor_hidden=1;
