@@ -14,8 +14,8 @@
 
 -- Grid size
 -- TODO : get it from GrafX2
-xgrid = 17;
-ygrid = 17;
+xgrid = 16;
+ygrid = 16;
 
 -- picture size
 w, h = getpicturesize();

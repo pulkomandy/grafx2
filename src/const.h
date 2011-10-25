@@ -43,7 +43,6 @@
 #define NB_CURSOR_SPRITES         8     ///< Number of available mouse cursor sprites.
 #define CURSOR_SPRITE_WIDTH       15    ///< Width of a mouse cursor sprite.
 #define CURSOR_SPRITE_HEIGHT      15    ///< Height of a mouse cursor sprite.
-#define NB_EFFECTS_SPRITES        9     ///< Number of effect sprites.
 #define MENU_SPRITE_WIDTH         16    ///< Width of a menu sprite in pixels
 #define MENU_SPRITE_HEIGHT        16    ///< Height of a menu sprite in pixels
 #define EFFECT_SPRITE_WIDTH       14    ///< Width of an effect sprite in pixels
@@ -277,6 +276,21 @@ enum ICON_TYPES
   ICON_DROPDOWN,     ///< Dropdown arrow
   NB_ICON_SPRITES,   ///< Number of 8x8 icons
   ICON_NONE          ///< None of the above
+};
+
+enum EFFECT_SPRITES
+{
+  EFFECTS_SPRITE_SHADE,
+  EFFECTS_SPRITE_TRANSP,
+  EFFECTS_SPRITE_SMOOTH,
+  EFFECTS_SPRITE_TILING,
+  EFFECTS_SPRITE_STENCIL,
+  EFFECTS_SPRITE_SIEVE,
+  EFFECTS_SPRITE_GRID,
+  EFFECTS_SPRITE_MASK,
+  EFFECTS_SPRITE_SMEAR,
+  EFFECTS_SPRITE_8BIT,
+  NB_EFFECTS_SPRITES ///< Number of effect sprites.
 };
 
 /// Identifiers for the buttons in the menu.

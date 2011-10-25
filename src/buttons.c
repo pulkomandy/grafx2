@@ -4454,7 +4454,7 @@ void Button_Adjust(void)
 
 // -- Menu des effets (Shade, Stencil, etc...) ------------------------------
 
-void Display_effect_sprite(short sprite_number, short start_x, short start_y)
+void Display_effect_sprite(int sprite_number, short start_x, short start_y)
 {
   short x,y,x_pos,y_pos;
 
@@ -4528,16 +4528,17 @@ void Button_Effects(void)
   Window_set_normal_button(177, 19, 16,16,"",0,1,Config_Key[SPECIAL_FORMAT_CHECKER_MENU][0]); // 14
 
   Display_feedback_state();
-  Display_effect_sprite(0,  8,20);
-  Display_effect_sprite(0,  8,39);
-  Display_effect_sprite(1,  8,58);
-  Display_effect_sprite(2,  8,77);
-  Display_effect_sprite(8,  8,96);
-  Display_effect_sprite(4,C2+1,20);
-  Display_effect_sprite(7,C2+1,39);
-  Display_effect_sprite(5,C2+1,58);
-  Display_effect_sprite(6,C2+1,77);
-  Display_effect_sprite(3,C2+1,96);
+  Display_effect_sprite(EFFECTS_SPRITE_SHADE,   8,20);
+  Display_effect_sprite(EFFECTS_SPRITE_SHADE,   8,39);
+  Display_effect_sprite(EFFECTS_SPRITE_TRANSP,  8,58);
+  Display_effect_sprite(EFFECTS_SPRITE_SMOOTH,  8,77);
+  Display_effect_sprite(EFFECTS_SPRITE_SMEAR,   8,96);
+  Display_effect_sprite(EFFECTS_SPRITE_STENCIL,C2+1,20);
+  Display_effect_sprite(EFFECTS_SPRITE_MASK,   C2+1,39);
+  Display_effect_sprite(EFFECTS_SPRITE_SIEVE,  C2+1,58);
+  Display_effect_sprite(EFFECTS_SPRITE_GRID,   C2+1,77);
+  Display_effect_sprite(EFFECTS_SPRITE_TILING, C2+1,96);
+  Display_effect_sprite(EFFECTS_SPRITE_8BIT,  177+1,20);
   Display_effect_states();
 
   Print_in_window(12,117,"click: Left:Switch / Right:Edit",MC_Dark,MC_Light);
