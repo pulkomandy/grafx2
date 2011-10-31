@@ -1884,6 +1884,7 @@ void Load_GIF(T_IO_Context * context)
   int current_layer = 0;
   int last_delay = 0;
   byte is_transparent = 0;
+  enum PIXEL_RATIO ratio;
   byte disposal_method = DISPOSAL_METHOD_RESTORE_BGCOLOR;
   byte previous_disposal_method = DISPOSAL_METHOD_RESTORE_BGCOLOR;
 
@@ -1919,7 +1920,14 @@ void Load_GIF(T_IO_Context * context)
         Original_screen_X=LSDB.Width;
         Original_screen_Y=LSDB.Height;
 
-        Pre_load(context, LSDB.Width,LSDB.Height,file_size,FORMAT_GIF,PIXEL_SIMPLE,0);
+        if (LSDB.Aspect==17)
+           ratio=PIXEL_TALL;
+        else if (LSDB.Aspect==113)
+           ratio=PIXEL_WIDE;
+        else
+           ratio=PIXEL_SIMPLE;
+
+        Pre_load(context, LSDB.Width,LSDB.Height,file_size,FORMAT_GIF,ratio,0);
         context->Width=LSDB.Width;
         context->Height=LSDB.Height;
 
@@ -2450,7 +2458,18 @@ void Save_GIF(T_IO_Context * context)
       }
       LSDB.Resol  =0x97;          // Image en 256 couleurs, avec une palette
       LSDB.Backcol=context->Transparent_color;
-      LSDB.Aspect =0;             // Palette normale
+      switch(context->Ratio)
+      {
+        case PIXEL_TALL:
+          LSDB.Aspect = 17; // 1:2 
+          break;
+        case PIXEL_WIDE:
+          LSDB.Aspect = 113; // 2:1
+          break;
+        default:
+          LSDB.Aspect = 0; // undefined, which is most frequent.
+          // 49 would be 1:1 ratio
+      }
 
       // On sauve le LSDB dans le fichier
 
