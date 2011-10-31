@@ -682,7 +682,11 @@ void Update_screen_targets(void)
 /// Update all the special image buffers, if necessary.
 int Update_buffers(int width, int height)
 {
-#ifndef NOLAYERS
+#ifdef NOLAYERS
+  // unused args
+  (void) width;
+  (void) height;
+#else
   // At least one dimension is different
   if (Main_visible_image.Width*Main_visible_image.Height != width*height)
   {
@@ -724,7 +728,11 @@ int Update_buffers(int width, int height)
 /// Update all the special image buffers of the spare page, if necessary.
 int Update_spare_buffers(int width, int height)
 {
-#ifndef NOLAYERS
+#ifdef NOLAYERS
+  // unused args
+  (void) width;
+  (void) height;
+#else
   // At least one dimension is different
   if (Spare_visible_image.Width*Spare_visible_image.Height != width*height)
   {

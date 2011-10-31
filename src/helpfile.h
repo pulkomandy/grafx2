@@ -2900,6 +2900,82 @@ static const T_Help_table helptable_layerdown[] =
   HELP_TEXT ("below it. This has no effect if this")
   HELP_TEXT ("layer is already on the bottom.")
 };
+static const T_Help_table helptable_animtime[] =
+{
+
+  HELP_TITLE("ANIMATION SPEED")
+  HELP_TEXT ("")
+  HELP_LINK ("(Key:%s)",0x100+BUTTON_ANIM_TIME)
+  HELP_TEXT ("")
+  HELP_TEXT ("Opens the 'animation speed' window.")
+  HELP_TEXT ("This window displays the duration of the")
+  HELP_TEXT ("current animation frame, in milliseconds.")
+  HELP_TEXT ("You can:")
+  HELP_TEXT ("* Change this frame's duration.")
+  HELP_TEXT ("* Change the duration of all frames.")
+  HELP_TEXT ("* Alter the duration of all frames by adding")
+  HELP_TEXT ("a number of milliseconds. You can use")
+  HELP_TEXT ("negative numbers to reduce the durations")
+  HELP_TEXT ("instead.")
+};
+static const T_Help_table helptable_firstframe[] =
+{
+
+  HELP_TITLE("FIRST FRAME")
+  HELP_TEXT ("")
+  HELP_LINK ("(Key:%s)",0x100+BUTTON_ANIM_FIRST_FRAME)
+  HELP_TEXT ("")
+  HELP_TEXT ("Goes to the first frame of animation.")
+};
+static const T_Help_table helptable_prevframe[] =
+{
+
+  HELP_TITLE("PREVIOUS FRAME")
+  HELP_TEXT ("")
+  HELP_BOLD ("LEFT CLICK")
+  HELP_TEXT ("")  HELP_LINK ("(Key:%s)",0x100+BUTTON_ANIM_PREV_FRAME)
+  HELP_TEXT ("")
+  HELP_TEXT ("Selects the previous frame of animation")
+  HELP_TEXT ("for editing. If the first frame was already")
+  HELP_TEXT ("selected, this wraps back to the last frame.")
+  HELP_TEXT ("")
+  HELP_BOLD ("RIGHT CLICK")
+  HELP_TEXT ("")
+  HELP_TEXT ("Hold a right-click on this button to run the")
+  HELP_TEXT ("animation continuously backwards. This can")
+  HELP_TEXT ("be used to preview the animation at its")
+  HELP_TEXT ("intended speed, or to quickly navigate in")
+  HELP_TEXT ("a long animation with many frames.")
+};
+static const T_Help_table helptable_nextframe[] =
+{
+
+  HELP_TITLE("NEXT FRAME")
+  HELP_TEXT ("")
+  HELP_LINK ("(Key:%s)",0x100+BUTTON_ANIM_NEXT_FRAME)
+  HELP_TEXT ("")
+  HELP_TEXT ("Selects the last frame of animation")
+  HELP_TEXT ("for editing. If the last frame was already")
+  HELP_TEXT ("selected, this wraps back to the first")
+  HELP_TEXT ("frame.")
+  HELP_TEXT ("")
+  HELP_BOLD ("RIGHT CLICK")
+  HELP_TEXT ("")
+  HELP_TEXT ("Hold a right-click on this button to run the")
+  HELP_TEXT ("animation continuously forward. This can")
+  HELP_TEXT ("be used to preview the animation at its")
+  HELP_TEXT ("intended speed, or to quickly navigate in")
+  HELP_TEXT ("a long animation with many frames.")
+};
+static const T_Help_table helptable_lastframe[] =
+{
+
+  HELP_TITLE("LAST FRAME")
+  HELP_TEXT ("")
+  HELP_LINK ("(Key:%s)",0x100+BUTTON_ANIM_LAST_FRAME)
+  HELP_TEXT ("")
+  HELP_TEXT ("Goes to the last frame of animation.")
+};
 static const T_Help_table helptable_layerselect[] =
 {
 
@@ -2934,14 +3010,14 @@ T_Help_section Help_section[] =
   HELP_TABLE_DECLARATION(helptable_layerdel)
   HELP_TABLE_DECLARATION(helptable_layerup)
   HELP_TABLE_DECLARATION(helptable_layerdown)
-  // TODO: implement specific help sections for anim buttons
-  HELP_TABLE_DECLARATION(helptable_layerselect)
-  HELP_TABLE_DECLARATION(helptable_layerselect)
-  HELP_TABLE_DECLARATION(helptable_layerselect)
-  HELP_TABLE_DECLARATION(helptable_layerselect)
-  HELP_TABLE_DECLARATION(helptable_layerselect)
-  HELP_TABLE_DECLARATION(helptable_layerselect)
-  //
+  // Anim-specific
+  HELP_TABLE_DECLARATION(helptable_animtime)
+  HELP_TABLE_DECLARATION(helptable_firstframe)
+  HELP_TABLE_DECLARATION(helptable_prevframe)
+  HELP_TABLE_DECLARATION(helptable_nextframe)
+  HELP_TABLE_DECLARATION(helptable_lastframe)
+  HELP_TABLE_DECLARATION(helptable_animtime) // reserved for future button
+  // end of anim-specific
   HELP_TABLE_DECLARATION(helptable_layerselect)
   HELP_TABLE_DECLARATION(helptable_paintbrush)
   HELP_TABLE_DECLARATION(helptable_adjust)

@@ -644,6 +644,6 @@ void Button_Anim_continuous_prev(void)
   } while (Mouse_K);
 
   Hide_cursor();
-  Unselect_button(BUTTON_ANIM_NEXT_FRAME);
+  Unselect_button(BUTTON_ANIM_PREV_FRAME);
   Display_cursor();
 }
