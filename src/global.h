@@ -726,8 +726,18 @@ GFX2_GLOBAL byte Mask_mode;
 /// Array of booleans. True if the indexed color is protected by the mask.
 GFX2_GLOBAL byte Mask_table[256];
 
-// -- Constraint enforcer
+// -- Constraint mode
+
+/// Constraint enforcer
 GFX2_GLOBAL byte Constraint_mode;
+
+// -- Tilemap mode
+
+/// Tilemap mode
+GFX2_GLOBAL byte Tilemap_mode;
+
+/// Tilemap allows swapped tiles : 0:No 1:Horizontal 2:Vertical 3:Both 
+GFX2_GLOBAL byte Tilemap_allow_swap;
 
 // -- Magnifier data
 

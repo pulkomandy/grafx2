@@ -189,6 +189,16 @@ void Button_Constraint_menu(void)
 
 }
 
+// Tilemap mode
+void Button_Tilemap_mode(void)
+{
+  Tilemap_mode=!Tilemap_mode;
+}
+
+void Button_Tilemap_menu(void)
+{
+
+}
 
 //--------------------------------- Stencil ----------------------------------
 void Button_Stencil_mode(void)

@@ -4493,7 +4493,8 @@ void Display_effect_states(void)
   Display_effect_state(C2+23, 81, "Grid"   ,Snap_mode);
   Display_effect_state(C2+23,100, "Tiling" ,Tiling_mode);
 
-  Display_effect_state(177+23,24, "8 bit" ,Constraint_mode);
+  Display_effect_state(177+23,24, "8 bit"  ,Constraint_mode);
+  Display_effect_state(177+23,43, "Tilemap",Tilemap_mode);
 }
 
 
@@ -4526,6 +4527,7 @@ void Button_Effects(void)
   Window_set_normal_button( 83,131,104,14,"Feedback:   ",1,1,SDLK_f); // 13
 
   Window_set_normal_button(177, 19, 16,16,"",0,1,Config_Key[SPECIAL_FORMAT_CHECKER_MENU][0]); // 14
+  Window_set_normal_button(177, 38, 16,16,"",0,1,KEY_NONE); // 15
 
   Display_feedback_state();
   Display_effect_sprite(EFFECTS_SPRITE_SHADE,   8,20);
@@ -4590,6 +4592,9 @@ void Button_Effects(void)
         case 10:
           Window_help(BUTTON_EFFECTS, "TILING");
           break;
+        case 15:
+          Window_help(BUTTON_EFFECTS, "TILEMAP");
+          break;        
         default:
           Window_help(BUTTON_EFFECTS, NULL);
       }
@@ -4782,6 +4787,12 @@ void Button_Effects(void)
           clicked_button = 11;
         }
         break;
+      case 15: // Tilemap
+          Button_Tilemap_mode();
+          Hide_cursor();
+          Display_effect_state(177+23,43, "Tilemap" ,Tilemap_mode);
+          Display_cursor();
+        break;
     }
   }
   while (clicked_button!=11);
@@ -4791,7 +4802,7 @@ void Button_Effects(void)
   else
     Hide_cursor();
 
-  if (!(Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode||Constraint_mode))
+  if (!(Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode||Constraint_mode||Tilemap_mode))
     Unselect_button(BUTTON_EFFECTS);
 
   Display_cursor();
