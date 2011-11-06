@@ -1968,7 +1968,7 @@ void Display_cursor(void)
   {
     case CURSOR_SHAPE_TARGET :
       if (!Paintbrush_hidden)
-        Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color,1);
+        Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color);
       if (!Cursor_hidden)
       {
         if (Config.Cursor==1)
@@ -2019,7 +2019,7 @@ void Display_cursor(void)
 
     case CURSOR_SHAPE_COLORPICKER:
       if (!Paintbrush_hidden)
-        Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color,1);
+        Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color);
       if (Config.Cursor==1)
       {
         // Barres formant la croix principale

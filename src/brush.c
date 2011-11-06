@@ -97,12 +97,173 @@ void Compute_clipped_dimensions_zoom(short * x,short * y,short * width,short * h
 }
 
 
-  // -- Afficher le pinceau (de façon définitive ou non) --
-
-void Display_paintbrush(short x,short y,byte color,byte is_preview)
+/// Display the paintbrush (preview : on screen only)
+void Display_paintbrush(short x,short y,byte color)
   // x,y: position du centre du pinceau
   // color: couleur à appliquer au pinceau
-  // is_preview: "Il ne faut l'afficher qu'à l'écran"
+{
+  short start_x; // Position X (dans l'image) à partir de laquelle on
+        // affiche la brosse/pinceau
+  short start_y; // Position Y (dans l'image) à partir de laquelle on
+        // affiche la brosse/pinceau
+  short width; // width dans l'écran selon laquelle on affiche la
+        // brosse/pinceau
+  short height; // height dans l'écran selon laquelle on affiche la
+        // brosse/pinceau
+  short start_x_counter; // Position X (dans la brosse/pinceau) à partir
+        // de laquelle on affiche la brosse/pinceau
+  short start_y_counter; // Position Y (dans la brosse/pinceau) à partir
+        // de laquelle on affiche la brosse/pinceau
+  short end_counter_x; // Position X ou s'arrête l'affichade de la
+        // brosse/pinceau
+  short end_counter_y; // Position Y ou s'arrête l'affichade de la
+        // brosse/pinceau
+  byte * temp;
+
+  if (Mouse_K) // pas de curseur si on est en preview et 
+    return;                  // en train de cliquer
+    
+  if (Constraint_mode && Main_current_layer < 4)
+  {
+    goto single_pixel;
+  }
+  switch (Paintbrush_shape)
+  {
+    case PAINTBRUSH_SHAPE_NONE : // No paintbrush. for colorpicker for example
+      break;
+    case PAINTBRUSH_SHAPE_POINT : // A single point
+    single_pixel:
+      if ( (Paintbrush_X>=Limit_left)
+        && (Paintbrush_X<=Limit_right)
+        && (Paintbrush_Y>=Limit_top)
+        && (Paintbrush_Y<=Limit_bottom) )
+        {
+                Pixel_preview(Paintbrush_X,Paintbrush_Y,color);
+                Update_part_of_screen(x,y,1,1);
+        }
+      break;
+
+    case PAINTBRUSH_SHAPE_COLOR_BRUSH : // The color brush, displayed in color
+    case PAINTBRUSH_SHAPE_MONO_BRUSH : // or in monochrome with FG color
+    
+      start_x=x-Brush_offset_X;
+      start_y=y-Brush_offset_Y;
+      width=Brush_width;
+      height=Brush_height;
+      Compute_clipped_dimensions(&start_x,&start_y,&width,&height);
+      if (width<=0 || height<=0)
+        break;
+      start_x_counter=start_x-(x-Brush_offset_X);
+      start_y_counter=start_y-(y-Brush_offset_Y);
+      end_counter_x=start_x_counter+width;
+      end_counter_y=start_y_counter+height;
+      if (Paintbrush_shape==PAINTBRUSH_SHAPE_COLOR_BRUSH)
+        Display_brush_color(
+            start_x-Main_offset_X,
+            start_y-Main_offset_Y,
+            start_x_counter,
+            start_y_counter,
+            width,
+            height,
+            Back_color,
+            Brush_width);
+      else // mono preview
+        Display_brush_mono(start_x-Main_offset_X,
+                           start_y-Main_offset_Y,
+                           start_x_counter,
+                           start_y_counter,
+                           width,
+                           height,
+                           Back_color,
+                           Fore_color,
+                           Brush_width);
+
+      Update_part_of_screen(x-Brush_offset_X,y-Brush_offset_Y,Brush_width,Brush_height);
+      
+      if (Main_magnifier_mode != 0)
+      {
+        Compute_clipped_dimensions_zoom(&start_x,&start_y,&width,&height);
+        start_x_counter=start_x-(x-Brush_offset_X);
+        start_y_counter=start_y-(y-Brush_offset_Y);
+        if ( (width>0) && (height>0) )
+        {
+          // Corrections dues au Zoom:
+          start_x=(start_x-Main_magnifier_offset_X)*Main_magnifier_factor;
+          start_y=(start_y-Main_magnifier_offset_Y)*Main_magnifier_factor;
+          height=start_y+(height*Main_magnifier_factor);
+          if (height>Menu_Y)
+            height=Menu_Y;
+          if (Paintbrush_shape==PAINTBRUSH_SHAPE_COLOR_BRUSH)
+            Display_brush_color_zoom(Main_X_zoom+start_x,start_y,
+                                   start_x_counter,start_y_counter,
+                                   width,height,Back_color,
+                                   Brush_width,
+                                   Horizontal_line_buffer);
+          else // mono preview
+           Display_brush_mono_zoom(Main_X_zoom+start_x,start_y,
+                                  start_x_counter,start_y_counter,
+                                  width,height,
+                                  Back_color,Fore_color,
+                                  Brush_width,
+                                  Horizontal_line_buffer); 
+        }
+      }
+
+      break;
+      
+    default : // a paintbrush
+      start_x=x-Paintbrush_offset_X;
+      start_y=y-Paintbrush_offset_Y;
+      width=Paintbrush_width;
+      height=Paintbrush_height;
+      Compute_clipped_dimensions(&start_x,&start_y,&width,&height);
+      start_x_counter=start_x-(x-Paintbrush_offset_X);
+      start_y_counter=start_y-(y-Paintbrush_offset_Y);
+      end_counter_x=start_x_counter+width;
+      end_counter_y=start_y_counter+height;
+      temp=Brush;
+      Brush=Paintbrush_sprite;
+
+      if ( (width>0) && (height>0) )
+        Display_brush_mono(start_x-Main_offset_X,
+                           start_y-Main_offset_Y,
+                           start_x_counter,start_y_counter,
+                           width,height,
+                           0,Fore_color,
+                           MAX_PAINTBRUSH_SIZE);
+
+      if (Main_magnifier_mode != 0)
+      {
+        Compute_clipped_dimensions_zoom(&start_x,&start_y,&width,&height);
+        start_x_counter=start_x-(x-Paintbrush_offset_X);
+        start_y_counter=start_y-(y-Paintbrush_offset_Y);
+
+        if ( (width>0) && (height>0) )
+        {
+          // Corrections dues au Zoom:
+          start_x=(start_x-Main_magnifier_offset_X)*Main_magnifier_factor;
+          start_y=(start_y-Main_magnifier_offset_Y)*Main_magnifier_factor;
+          height=start_y+(height*Main_magnifier_factor);
+          if (height>Menu_Y)
+            height=Menu_Y;
+
+          Display_brush_mono_zoom(Main_X_zoom+start_x,start_y,
+                                  start_x_counter,start_y_counter,
+                                  width,height,
+                                  0,Fore_color,
+                                  MAX_PAINTBRUSH_SIZE,
+                                  Horizontal_line_buffer);
+
+        }
+      }
+      Brush=temp;
+  }
+}
+
+/// Draw the paintbrush in the image buffer
+void Draw_paintbrush(short x,short y,byte color)
+  // x,y: position du centre du pinceau
+  // color: couleur à appliquer au pinceau
 {
   short start_x; // Position X (dans l'image) à partir de laquelle on
         // affiche la brosse/pinceau
@@ -128,130 +289,110 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
         // brosse/pinceau
   byte  temp_color; // color de la brosse en cours d'affichage
   int position;
-  byte * temp;
   byte old_color;
 
-  if (is_preview && Mouse_K) // pas de curseur si on est en preview et 
-    return;                  // en train de cliquer
-    
   if (Constraint_mode && Main_current_layer < 4)
   {
-    if (is_preview)
-      goto single_pixel;
-    else
+    // Flood-fill the enclosing area
+    if (x<Main_image_width && y<Main_image_height && x>= 0 && y >= 0
+     && (color=Effect_function(x,y,color)) != (old_color=Read_pixel_from_current_layer(x,y))
+     && (!((Stencil_mode) && (Stencil[old_color])))
+     && (!((Mask_mode)    && (Mask_table[Read_pixel_from_spare_screen(x,y)])))
+     )
     {
-      // Flood-fill the enclosing area
-      if (x<Main_image_width && y<Main_image_height && x>= 0 && y >= 0
-       && (color=Effect_function(x,y,color)) != (old_color=Read_pixel_from_current_layer(x,y))
-       && (!((Stencil_mode) && (Stencil[old_color])))
-       && (!((Mask_mode)    && (Mask_table[Read_pixel_from_spare_screen(x,y)])))
-       )
+      short min_x,width,min_y,height;
+      short xx,yy;
+      
+      // determine area
+      switch(Main_current_layer)
       {
-        short min_x,width,min_y,height;
-        short xx,yy;
-        
-        // determine area
-        switch(Main_current_layer)
-        {
-          case 0:
-          default:
-            // Full layer
-            min_x=0;
-            min_y=0;
-            width=Main_image_width;
-            height=Main_image_height;
-            break;
-          case 1:
-          case 2:
-            // Line
-            min_x=0;
-            min_y=y;
-            width=Main_image_width;
-            height=1;
-            break;
-          case 3:
-            // Segment
-            min_x=x / 48 * 48;
-            min_y=y;
-            width=48;
-            height=1;
-            break;
-          //case 4:
-          //  // 8x8
-          //  min_x=x / 8 * 8;
-          //  min_y=y / 8 * 8;
-          //  width=8;
-          //  height=8;
-          //  break;
-        }
-        // Clip the bottom edge.
-        // (Necessary if image height is not a multiple)
-        if (min_y+height>=Main_image_height)
-          height=Main_image_height-min_y;
-        // Clip the right edge.
-        // (Necessary if image width is not a multiple)
-        if (min_x+width>=Main_image_width)
-          width=Main_image_width-min_x;
-          
-        for (yy=min_y; yy<min_y+height; yy++)
-          for (xx=min_x; xx<min_x+width; xx++)
-          {
-            Pixel_in_current_screen(xx,yy,color,0);
-          }
-        // Feedback
-        // This part is greatly taken from Hide_paintbrush()
-        Compute_clipped_dimensions(&min_x,&min_y,&width,&height);
-  
-        if ( (width>0) && (height>0) )
-          Clear_brush(min_x-Main_offset_X,
-                      min_y-Main_offset_Y,
-                      0,0,
-                      width,height,0,
-                      Main_image_width);
-  
-        if (Main_magnifier_mode != 0)
-        {
-          Compute_clipped_dimensions_zoom(&min_x,&min_y,&width,&height);
-          xx=min_x;
-          yy=min_y;
-  
-          if ( (width>0) && (height>0) )
-          {
-            // Corrections dues au Zoom:
-            min_x=(min_x-Main_magnifier_offset_X)*Main_magnifier_factor;
-            min_y=(min_y-Main_magnifier_offset_Y)*Main_magnifier_factor;
-            height=min_y+(height*Main_magnifier_factor);
-            if (height>Menu_Y)
-              height=Menu_Y;
-  
-            Clear_brush_scaled(Main_X_zoom+min_x,min_y,
-                             xx,yy,
-                             width,height,0,
-                             Main_image_width,
-                             Horizontal_line_buffer);
-          }
-        }
-        // End of graphic feedback
+        case 0:
+        default:
+          // Full layer
+          min_x=0;
+          min_y=0;
+          width=Main_image_width;
+          height=Main_image_height;
+          break;
+        case 1:
+        case 2:
+          // Line
+          min_x=0;
+          min_y=y;
+          width=Main_image_width;
+          height=1;
+          break;
+        case 3:
+          // Segment
+          min_x=x / 48 * 48;
+          min_y=y;
+          width=48;
+          height=1;
+          break;
+        //case 4:
+        //  // 8x8
+        //  min_x=x / 8 * 8;
+        //  min_y=y / 8 * 8;
+        //  width=8;
+        //  height=8;
+        //  break;
       }
+      // Clip the bottom edge.
+      // (Necessary if image height is not a multiple)
+      if (min_y+height>=Main_image_height)
+        height=Main_image_height-min_y;
+      // Clip the right edge.
+      // (Necessary if image width is not a multiple)
+      if (min_x+width>=Main_image_width)
+        width=Main_image_width-min_x;
+        
+      for (yy=min_y; yy<min_y+height; yy++)
+        for (xx=min_x; xx<min_x+width; xx++)
+        {
+          Pixel_in_current_screen(xx,yy,color,0);
+        }
+      // Feedback
+      // This part is greatly taken from Hide_paintbrush()
+      Compute_clipped_dimensions(&min_x,&min_y,&width,&height);
+
+      if ( (width>0) && (height>0) )
+        Clear_brush(min_x-Main_offset_X,
+                    min_y-Main_offset_Y,
+                    0,0,
+                    width,height,0,
+                    Main_image_width);
+
+      if (Main_magnifier_mode != 0)
+      {
+        Compute_clipped_dimensions_zoom(&min_x,&min_y,&width,&height);
+        xx=min_x;
+        yy=min_y;
+
+        if ( (width>0) && (height>0) )
+        {
+          // Corrections dues au Zoom:
+          min_x=(min_x-Main_magnifier_offset_X)*Main_magnifier_factor;
+          min_y=(min_y-Main_magnifier_offset_Y)*Main_magnifier_factor;
+          height=min_y+(height*Main_magnifier_factor);
+          if (height>Menu_Y)
+            height=Menu_Y;
+
+          Clear_brush_scaled(Main_X_zoom+min_x,min_y,
+                           xx,yy,
+                           width,height,0,
+                           Main_image_width,
+                           Horizontal_line_buffer);
+        }
+      }
+      // End of graphic feedback
     }
     return;
   }
   switch (Paintbrush_shape)
   {
     case PAINTBRUSH_SHAPE_NONE : // No paintbrush. for colorpicker for example
-      break;
     case PAINTBRUSH_SHAPE_POINT : // !!! TOUJOURS EN PREVIEW !!!
-    single_pixel:
-      if ( (Paintbrush_X>=Limit_left)
-        && (Paintbrush_X<=Limit_right)
-        && (Paintbrush_Y>=Limit_top)
-        && (Paintbrush_Y<=Limit_bottom) )
-        {
-                Pixel_preview(Paintbrush_X,Paintbrush_Y,color);
-                Update_part_of_screen(x,y,1,1);
-        }
       break;
-
     case PAINTBRUSH_SHAPE_COLOR_BRUSH : // Brush en couleur
 
       start_x=x-Brush_offset_X;
@@ -265,120 +406,72 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
       start_y_counter=start_y-(y-Brush_offset_Y);
       end_counter_x=start_x_counter+width;
       end_counter_y=start_y_counter+height;
-
-      if (is_preview != 0)
+      if ((Smear_mode != 0) && (Shade_table==Shade_table_left))
       {
-        if ( (width>0) && (height>0) )
-          Display_brush_color(
-                start_x-Main_offset_X,
-                start_y-Main_offset_Y,
-                start_x_counter,
-                start_y_counter,
-                width,
-                height,
-                Back_color,
-                Brush_width
-          );
-
-        if (Main_magnifier_mode != 0)
+        if (Smear_start != 0)
         {
-          Compute_clipped_dimensions_zoom(&start_x,&start_y,&width,
-                &height
-          );
-
-          start_x_counter=start_x-(x-Brush_offset_X);
-          start_y_counter=start_y-(y-Brush_offset_Y);
-
-          if ( (width>0) && (height>0) )
+          if ((width>0) && (height>0))
           {
-            // Corrections dues au Zoom:
-            start_x=(start_x-Main_magnifier_offset_X)*Main_magnifier_factor;
-            start_y=(start_y-Main_magnifier_offset_Y)*Main_magnifier_factor;
-            height=start_y+(height*Main_magnifier_factor);
-            if (height>Menu_Y)
-              height=Menu_Y;
+            Copy_part_of_image_to_another(
+              Main_screen, start_x, start_y, width, height,
+              Main_image_width, Smear_brush,
+              start_x_counter, start_y_counter,
+              Smear_brush_width
+            );
 
-            Display_brush_color_zoom(Main_X_zoom+start_x,start_y,
-                                     start_x_counter,start_y_counter,
-                                     width,height,Back_color,
-                                     Brush_width,
-                                     Horizontal_line_buffer);
+            Update_part_of_screen(start_x,start_y,width,height);
           }
-        }
-
-        Update_part_of_screen(x-Brush_offset_X,y-Brush_offset_Y,Brush_width,Brush_height);
-
-      }
-      else
-      {
-        if ((Smear_mode != 0) && (Shade_table==Shade_table_left))
-        {
-          if (Smear_start != 0)
-          {
-            if ((width>0) && (height>0))
-            {
-              Copy_part_of_image_to_another(
-                Main_screen, start_x, start_y, width, height,
-                Main_image_width, Smear_brush,
-                start_x_counter, start_y_counter,
-                Smear_brush_width
-              );
-
-              Update_part_of_screen(start_x,start_y,width,height);
-            }
-            Smear_start=0;
-          }
-          else
-          {
-            for (y_pos = start_y, counter_y = start_y_counter;
-                counter_y < end_counter_y;
-                y_pos++, counter_y++
-            )
-              for (x_pos = start_x, counter_x = start_x_counter;
-                counter_x < end_counter_x;
-                x_pos++, counter_x++
-              )
-              {
-                temp_color = Read_pixel_from_current_screen(
-                        x_pos,y_pos
-                );
-                position = (counter_y * Smear_brush_width)+ counter_x;
-                if ( (Read_pixel_from_brush(counter_x,counter_y) != Back_color)
-                  && (counter_y<Smear_max_Y) && (counter_x<Smear_max_X)
-                  && (counter_y>=Smear_min_Y) && (counter_x>=Smear_min_X) )
-                        Display_pixel(x_pos,y_pos,Smear_brush[position]);
-                Smear_brush[position]=temp_color;
-              }
-
-              Update_part_of_screen(start_x,start_y,width,height);
-          }
-
-          Smear_min_X=start_x_counter;
-          Smear_min_Y=start_y_counter;
-          Smear_max_X=end_counter_x;
-          Smear_max_Y=end_counter_y;
+          Smear_start=0;
         }
         else
         {
-          if (Shade_table==Shade_table_left)
-            for (y_pos=start_y,counter_y=start_y_counter;counter_y<end_counter_y;y_pos++,counter_y++)
-              for (x_pos=start_x,counter_x=start_x_counter;counter_x<end_counter_x;x_pos++,counter_x++)
-              {
-                temp_color=Read_pixel_from_brush(counter_x,counter_y);
-                if (temp_color!=Back_color)
-                  Display_pixel(x_pos,y_pos,temp_color);
-              }
-          else
-            for (y_pos=start_y,counter_y=start_y_counter;counter_y<end_counter_y;y_pos++,counter_y++)
-              for (x_pos=start_x,counter_x=start_x_counter;counter_x<end_counter_x;x_pos++,counter_x++)
-              {
-                if (Read_pixel_from_brush(counter_x,counter_y)!=Back_color)
-                  Display_pixel(x_pos,y_pos,color);
-              }
-        }
-        Update_part_of_screen(start_x,start_y,width,height);
+          for (y_pos = start_y, counter_y = start_y_counter;
+              counter_y < end_counter_y;
+              y_pos++, counter_y++
+          )
+            for (x_pos = start_x, counter_x = start_x_counter;
+              counter_x < end_counter_x;
+              x_pos++, counter_x++
+            )
+            {
+              temp_color = Read_pixel_from_current_screen(
+                      x_pos,y_pos
+              );
+              position = (counter_y * Smear_brush_width)+ counter_x;
+              if ( (Read_pixel_from_brush(counter_x,counter_y) != Back_color)
+                && (counter_y<Smear_max_Y) && (counter_x<Smear_max_X)
+                && (counter_y>=Smear_min_Y) && (counter_x>=Smear_min_X) )
+                      Display_pixel(x_pos,y_pos,Smear_brush[position]);
+              Smear_brush[position]=temp_color;
+            }
 
+            Update_part_of_screen(start_x,start_y,width,height);
+        }
+
+        Smear_min_X=start_x_counter;
+        Smear_min_Y=start_y_counter;
+        Smear_max_X=end_counter_x;
+        Smear_max_Y=end_counter_y;
       }
+      else
+      {
+        if (Shade_table==Shade_table_left)
+          for (y_pos=start_y,counter_y=start_y_counter;counter_y<end_counter_y;y_pos++,counter_y++)
+            for (x_pos=start_x,counter_x=start_x_counter;counter_x<end_counter_x;x_pos++,counter_x++)
+            {
+              temp_color=Read_pixel_from_brush(counter_x,counter_y);
+              if (temp_color!=Back_color)
+                Display_pixel(x_pos,y_pos,temp_color);
+            }
+        else
+          for (y_pos=start_y,counter_y=start_y_counter;counter_y<end_counter_y;y_pos++,counter_y++)
+            for (x_pos=start_x,counter_x=start_x_counter;counter_x<end_counter_x;x_pos++,counter_x++)
+            {
+              if (Read_pixel_from_brush(counter_x,counter_y)!=Back_color)
+                Display_pixel(x_pos,y_pos,color);
+            }
+      }
+      Update_part_of_screen(start_x,start_y,width,height);
       break;
     case PAINTBRUSH_SHAPE_MONO_BRUSH : // Brush monochrome
       start_x=x-Brush_offset_X;
@@ -390,96 +483,56 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
       start_y_counter=start_y-(y-Brush_offset_Y);
       end_counter_x=start_x_counter+width;
       end_counter_y=start_y_counter+height;
-      if (is_preview != 0)
+      if ((Smear_mode != 0) && (Shade_table==Shade_table_left))
       {
-        if ( (width>0) && (height>0) )
-          Display_brush_mono(start_x-Main_offset_X,
-                             start_y-Main_offset_Y,
-                             start_x_counter,start_y_counter,
-                             width,height,
-                             Back_color,Fore_color,
-                             Brush_width);
-
-        if (Main_magnifier_mode != 0)
+        if (Smear_start != 0)
         {
-          Compute_clipped_dimensions_zoom(&start_x,&start_y,&width,&height);
-          start_x_counter=start_x-(x-Brush_offset_X);
-          start_y_counter=start_y-(y-Brush_offset_Y);
-
-          if ( (width>0) && (height>0) )
+          if ((width>0) && (height>0))
           {
-            // Corrections dues au Zoom:
-            start_x=(start_x-Main_magnifier_offset_X)*Main_magnifier_factor;
-            start_y=(start_y-Main_magnifier_offset_Y)*Main_magnifier_factor;
-            height=start_y+(height*Main_magnifier_factor);
-            if (height>Menu_Y)
-              height=Menu_Y;
-
-            Display_brush_mono_zoom(Main_X_zoom+start_x,start_y,
-                                    start_x_counter,start_y_counter,
-                                    width,height,
-                                    Back_color,Fore_color,
-                                    Brush_width,
-                                    Horizontal_line_buffer);
-
-          }
-        }
-
-        Update_part_of_screen(x-Brush_offset_X,y-Brush_offset_Y,Brush_width,Brush_height);
-      }
-      else
-      {
-        if ((Smear_mode != 0) && (Shade_table==Shade_table_left))
-        {
-          if (Smear_start != 0)
-          {
-            if ((width>0) && (height>0))
-            {
-              Copy_part_of_image_to_another(Main_screen,
-                                                       start_x,start_y,
-                                                       width,height,
-                                                       Main_image_width,
-                                                       Smear_brush,
-                                                       start_x_counter,
-                                                       start_y_counter,
-                                                       Smear_brush_width);
-              Update_part_of_screen(start_x,start_y,width,height);
-            }
-            Smear_start=0;
-          }
-          else
-          {
-            for (y_pos=start_y,counter_y=start_y_counter;counter_y<end_counter_y;y_pos++,counter_y++)
-              for (x_pos=start_x,counter_x=start_x_counter;counter_x<end_counter_x;x_pos++,counter_x++)
-              {
-                temp_color=Read_pixel_from_current_screen(x_pos,y_pos);
-                position=(counter_y*Smear_brush_width)+counter_x;
-                if ( (Read_pixel_from_brush(counter_x,counter_y)!=Back_color)
-                  && (counter_y<Smear_max_Y) && (counter_x<Smear_max_X)
-                  && (counter_y>=Smear_min_Y) && (counter_x>=Smear_min_X) )
-                  Display_pixel(x_pos,y_pos,Smear_brush[position]);
-                Smear_brush[position]=temp_color;
-              }
-
+            Copy_part_of_image_to_another(Main_screen,
+                                                     start_x,start_y,
+                                                     width,height,
+                                                     Main_image_width,
+                                                     Smear_brush,
+                                                     start_x_counter,
+                                                     start_y_counter,
+                                                     Smear_brush_width);
             Update_part_of_screen(start_x,start_y,width,height);
-
           }
-
-          Smear_min_X=start_x_counter;
-          Smear_min_Y=start_y_counter;
-          Smear_max_X=end_counter_x;
-          Smear_max_Y=end_counter_y;
+          Smear_start=0;
         }
         else
         {
           for (y_pos=start_y,counter_y=start_y_counter;counter_y<end_counter_y;y_pos++,counter_y++)
             for (x_pos=start_x,counter_x=start_x_counter;counter_x<end_counter_x;x_pos++,counter_x++)
             {
-              if (Read_pixel_from_brush(counter_x,counter_y)!=Back_color)
-                Display_pixel(x_pos,y_pos,color);
+              temp_color=Read_pixel_from_current_screen(x_pos,y_pos);
+              position=(counter_y*Smear_brush_width)+counter_x;
+              if ( (Read_pixel_from_brush(counter_x,counter_y)!=Back_color)
+                && (counter_y<Smear_max_Y) && (counter_x<Smear_max_X)
+                && (counter_y>=Smear_min_Y) && (counter_x>=Smear_min_X) )
+                Display_pixel(x_pos,y_pos,Smear_brush[position]);
+              Smear_brush[position]=temp_color;
             }
+
           Update_part_of_screen(start_x,start_y,width,height);
+
         }
+
+        Smear_min_X=start_x_counter;
+        Smear_min_Y=start_y_counter;
+        Smear_max_X=end_counter_x;
+        Smear_max_Y=end_counter_y;
+      }
+      else
+      {
+        for (y_pos=start_y,counter_y=start_y_counter;counter_y<end_counter_y;y_pos++,counter_y++)
+          for (x_pos=start_x,counter_x=start_x_counter;counter_x<end_counter_x;x_pos++,counter_x++)
+          {
+            if (Read_pixel_from_brush(counter_x,counter_y)!=Back_color)
+              Display_pixel(x_pos,y_pos,color);
+          }
+        Update_part_of_screen(start_x,start_y,width,height);
       }
       break;
     default : // Pinceau
@@ -492,101 +545,58 @@ void Display_paintbrush(short x,short y,byte color,byte is_preview)
       start_y_counter=start_y-(y-Paintbrush_offset_Y);
       end_counter_x=start_x_counter+width;
       end_counter_y=start_y_counter+height;
-      if (is_preview != 0)
+      if ((Smear_mode != 0) && (Shade_table==Shade_table_left))
       {
-        temp=Brush;
-        Brush=Paintbrush_sprite;
-
-        if ( (width>0) && (height>0) )
-          Display_brush_mono(start_x-Main_offset_X,
-                             start_y-Main_offset_Y,
-                             start_x_counter,start_y_counter,
-                             width,height,
-                             0,Fore_color,
-                             MAX_PAINTBRUSH_SIZE);
-
-        if (Main_magnifier_mode != 0)
+        if (Smear_start != 0)
         {
-          Compute_clipped_dimensions_zoom(&start_x,&start_y,&width,&height);
-          start_x_counter=start_x-(x-Paintbrush_offset_X);
-          start_y_counter=start_y-(y-Paintbrush_offset_Y);
-
-          if ( (width>0) && (height>0) )
+          if ((width>0) && (height>0))
           {
-            // Corrections dues au Zoom:
-            start_x=(start_x-Main_magnifier_offset_X)*Main_magnifier_factor;
-            start_y=(start_y-Main_magnifier_offset_Y)*Main_magnifier_factor;
-            height=start_y+(height*Main_magnifier_factor);
-            if (height>Menu_Y)
-              height=Menu_Y;
-
-            Display_brush_mono_zoom(Main_X_zoom+start_x,start_y,
-                                    start_x_counter,start_y_counter,
-                                    width,height,
-                                    0,Fore_color,
-                                    MAX_PAINTBRUSH_SIZE,
-                                    Horizontal_line_buffer);
-
+            Copy_part_of_image_to_another(Main_screen,
+                                                     start_x,start_y,
+                                                     width,height,
+                                                     Main_image_width,
+                                                     Smear_brush,
+                                                     start_x_counter,
+                                                     start_y_counter,
+                                                     Smear_brush_width);
+            Update_part_of_screen(start_x,start_y,width,height);
           }
-        }
-
-        Brush=temp;
-      }
-      else
-      {
-        if ((Smear_mode != 0) && (Shade_table==Shade_table_left))
-        {
-          if (Smear_start != 0)
-          {
-            if ((width>0) && (height>0))
-            {
-              Copy_part_of_image_to_another(Main_screen,
-                                                       start_x,start_y,
-                                                       width,height,
-                                                       Main_image_width,
-                                                       Smear_brush,
-                                                       start_x_counter,
-                                                       start_y_counter,
-                                                       Smear_brush_width);
-              Update_part_of_screen(start_x,start_y,width,height);
-            }
-            Smear_start=0;
-          }
-          else
-          {
-            for (y_pos=start_y,counter_y=start_y_counter;counter_y<end_counter_y;y_pos++,counter_y++)
-              for (x_pos=start_x,counter_x=start_x_counter;counter_x<end_counter_x;x_pos++,counter_x++)
-              {
-                temp_color=Read_pixel_from_current_screen(x_pos,y_pos);
-                position=(counter_y*Smear_brush_width)+counter_x;
-                if ( (Paintbrush_sprite[(MAX_PAINTBRUSH_SIZE*counter_y)+counter_x] != 0) 
-                    // Le pinceau sert de masque pour dire quels pixels on doit traiter dans le rectangle
-                    && (counter_y<Smear_max_Y) && (counter_x<Smear_max_X)
-                    && (counter_y>=Smear_min_Y) && (counter_x>=Smear_min_X)
-                    // On clippe l'effet smear entre Smear_Min et Smear_Max
-                )
-                    Display_pixel(x_pos,y_pos,Smear_brush[position]);
-                Smear_brush[position]=temp_color;
-              }
-              Update_part_of_screen(start_x, start_y, width, height);
-          }
-
-
-          Smear_min_X=start_x_counter;
-          Smear_min_Y=start_y_counter;
-          Smear_max_X=end_counter_x;
-          Smear_max_Y=end_counter_y;
+          Smear_start=0;
         }
         else
         {
           for (y_pos=start_y,counter_y=start_y_counter;counter_y<end_counter_y;y_pos++,counter_y++)
             for (x_pos=start_x,counter_x=start_x_counter;counter_x<end_counter_x;x_pos++,counter_x++)
             {
-              if (Paintbrush_sprite[(MAX_PAINTBRUSH_SIZE*counter_y)+counter_x] != 0)
-                Display_pixel(x_pos,y_pos,color);
+              temp_color=Read_pixel_from_current_screen(x_pos,y_pos);
+              position=(counter_y*Smear_brush_width)+counter_x;
+              if ( (Paintbrush_sprite[(MAX_PAINTBRUSH_SIZE*counter_y)+counter_x] != 0) 
+                  // Le pinceau sert de masque pour dire quels pixels on doit traiter dans le rectangle
+                  && (counter_y<Smear_max_Y) && (counter_x<Smear_max_X)
+                  && (counter_y>=Smear_min_Y) && (counter_x>=Smear_min_X)
+                  // On clippe l'effet smear entre Smear_Min et Smear_Max
+              )
+                  Display_pixel(x_pos,y_pos,Smear_brush[position]);
+              Smear_brush[position]=temp_color;
             }
-          Update_part_of_screen(start_x,start_y,width,height);
+            Update_part_of_screen(start_x, start_y, width, height);
         }
+
+
+        Smear_min_X=start_x_counter;
+        Smear_min_Y=start_y_counter;
+        Smear_max_X=end_counter_x;
+        Smear_max_Y=end_counter_y;
+      }
+      else
+      {
+        for (y_pos=start_y,counter_y=start_y_counter;counter_y<end_counter_y;y_pos++,counter_y++)
+          for (x_pos=start_x,counter_x=start_x_counter;counter_x<end_counter_x;x_pos++,counter_x++)
+          {
+            if (Paintbrush_sprite[(MAX_PAINTBRUSH_SIZE*counter_y)+counter_x] != 0)
+              Display_pixel(x_pos,y_pos,color);
+          }
+        Update_part_of_screen(start_x,start_y,width,height);
       }
   }
 }

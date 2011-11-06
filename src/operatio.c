@@ -192,7 +192,7 @@ void Freehand_mode1_1_0(void)
   Backup();
   Shade_table=Shade_table_left;
   // On affiche définitivement le pinceau
-  Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color,0);
+  Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color);
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
 }
@@ -250,7 +250,7 @@ void Freehand_mode1_2_0(void)
   Backup();
   Shade_table=Shade_table_right;
   // On affiche définitivement le pinceau
-  Display_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color,0);
+  Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color);
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
 }
@@ -295,7 +295,7 @@ void Freehand_mode2_1_0(void)
   Backup();
   Shade_table=Shade_table_left;
   // On affiche définitivement le pinceau
-  Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color,0);
+  Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color);
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
   Print_coordinates();
@@ -324,7 +324,7 @@ void Freehand_mode2_1_2(void)
       Airbrush_next_time+=Airbrush_delay*10;
       Hide_cursor();
       // On affiche définitivement le pinceau
-      Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color,0);
+      Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color);
       Display_cursor();
     }
   }
@@ -353,7 +353,7 @@ void Freehand_mode2_2_0(void)
   Print_coordinates();
   Airbrush_next_time = SDL_GetTicks() + Airbrush_delay*10;
   // On affiche définitivement le pinceau
-  Display_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color,0);
+  Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color);
 }
 
 
@@ -378,7 +378,7 @@ void Freehand_mode2_2_2(void)
       Airbrush_next_time+=Airbrush_delay*10;
       Hide_cursor();
       // On affiche définitivement le pinceau
-      Display_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color,0);
+      Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color);
       Display_cursor();
     }
   }
@@ -401,7 +401,7 @@ void Freehand_mode3_1_0(void)
   Backup();
   Shade_table=Shade_table_left;
   // On affiche définitivement le pinceau
-  Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color,0);
+  Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color);
   Operation_push(0);  // On change simplement l'état de la pile...
 }
 
@@ -420,7 +420,7 @@ void Freehand_Mode3_2_0(void)
   Backup();
   Shade_table=Shade_table_right;
   // On affiche définitivement le pinceau
-  Display_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color,0);
+  Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color);
   Operation_push(0);  // On change simplement l'état de la pile...
 }
 
@@ -572,7 +572,7 @@ void Line_0_5(void)
 
   Pixel_figure_preview_auto  (start_x,start_y);
   Hide_line_preview (start_x,start_y,end_x,end_y);
-  Display_paintbrush      (start_x,start_y,color,0);
+  Draw_paintbrush            (start_x,start_y,color);
   Draw_line_permanent(start_x,start_y,end_x,end_y,color);
 
   End_of_modification();
@@ -696,7 +696,7 @@ void K_line_0_6(void)
   Paintbrush_shape=Paintbrush_shape_before_operation;
   if (direction & 0x80)
   {
-    Display_paintbrush(start_x,start_y,color,0);
+    Draw_paintbrush(start_x,start_y,color);
     direction=(direction & 0x7F);
   }
   Draw_line_permanent(start_x,start_y,Paintbrush_X,Paintbrush_Y,color);
@@ -2360,7 +2360,7 @@ void Polyform_12_0(void)
   color=(Mouse_K==LEFT_SIDE)?Fore_color:Back_color;
 
   // On place un premier pinceau en (Paintbrush_X,Paintbrush_Y):
-  Display_paintbrush(Paintbrush_X,Paintbrush_Y,color,0);
+  Draw_paintbrush(Paintbrush_X,Paintbrush_Y,color);
   // Et on affiche un pixel de preview en (Paintbrush_X,Paintbrush_Y):
   Pixel_figure_preview(Paintbrush_X,Paintbrush_Y,color);
 
@@ -3931,7 +3931,7 @@ void Centered_lines_12_7(void)
             Hide_line_preview (start_x,start_y,last_x,last_y);
 
             Smear_start=1;
-            Display_paintbrush      (start_x,start_y,color,0);
+            Draw_paintbrush            (start_x,start_y,color);
             Draw_line_permanent(start_x,start_y,Paintbrush_X,Paintbrush_Y,color);
 
             Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;

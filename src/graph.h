@@ -45,7 +45,8 @@ void Display_foreback(void);
 
 void Display_pixel(word x,word y,byte color);
 
-void Display_paintbrush(short x,short y,byte color,byte is_preview);
+void Display_paintbrush(short x,short y,byte color);
+void Draw_paintbrush(short x,short y,byte color);
 void Hide_paintbrush(short x,short y);
 
 void Resize_image(word chosen_width,word chosen_height);

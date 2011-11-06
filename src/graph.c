@@ -1128,7 +1128,7 @@ void Fill_general(byte fill_color)
   // Affichage d'un point de façon définitive (utilisation du pinceau)
   void Pixel_figure_permanent(word x_pos,word y_pos,byte color)
   {
-    Display_paintbrush(x_pos,y_pos,color,0);
+    Draw_paintbrush(x_pos,y_pos,color);
     Permanent_draw_count ++;
     
     // Check every 8 pixels
@@ -1961,9 +1961,9 @@ void Airbrush(short clicked_button)
         x_pos+=Paintbrush_X;
         y_pos+=Paintbrush_Y;
         if (clicked_button==1)
-          Display_paintbrush(x_pos,y_pos,Fore_color,0);
+          Draw_paintbrush(x_pos,y_pos,Fore_color);
         else
-          Display_paintbrush(x_pos,y_pos,Back_color,0);
+          Draw_paintbrush(x_pos,y_pos,Back_color);
       }
     }
   }
@@ -1984,9 +1984,9 @@ void Airbrush(short clicked_button)
           x_pos+=Paintbrush_X;
           y_pos+=Paintbrush_Y;
           if (clicked_button==LEFT_SIDE)
-            Display_paintbrush(x_pos,y_pos,color_index,0);
+            Draw_paintbrush(x_pos,y_pos,color_index);
           else
-            Display_paintbrush(x_pos,y_pos,Back_color,0);
+            Draw_paintbrush(x_pos,y_pos,Back_color);
         }
       }
       if (direction)
