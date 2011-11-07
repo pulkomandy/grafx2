@@ -2746,7 +2746,16 @@ void Display_pixel(word x,word y,byte color)
     && (!((Mask_mode)    && (Mask_table[Read_pixel_from_spare_screen(x,y)]))) )
   {
     color=Effect_function(x,y,color);
-    Pixel_in_current_screen(x,y,color,1);
+    if (Tilemap_mode)
+    {
+      int xx,yy;
+      for (yy=(y-Snap_offset_Y)%Snap_height+Snap_offset_Y;yy<Main_image_height;yy+=Snap_height)
+        for (xx=(x-Snap_offset_X)%Snap_width+Snap_offset_X;xx<Main_image_width;xx+=Snap_width)
+          Pixel_in_current_screen(xx,yy,color,yy>=Limit_top&&yy<=Limit_bottom&&xx>=Limit_left&&xx<=Limit_right);
+      Update_rect(0,0,0,0);
+    }
+    else
+      Pixel_in_current_screen(x,y,color,1);
   }
 }
 

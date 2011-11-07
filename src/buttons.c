@@ -4541,6 +4541,7 @@ void Button_Effects(void)
   Display_effect_sprite(EFFECTS_SPRITE_GRID,   C2+1,77);
   Display_effect_sprite(EFFECTS_SPRITE_TILING, C2+1,96);
   Display_effect_sprite(EFFECTS_SPRITE_8BIT,  177+1,20);
+  Display_effect_sprite(EFFECTS_SPRITE_TILING,177+1,39);
   Display_effect_states();
 
   Print_in_window(12,117,"click: Left:Switch / Right:Edit",MC_Dark,MC_Light);
