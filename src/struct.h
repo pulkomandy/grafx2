@@ -543,4 +543,11 @@ typedef enum {
   MENUBAR_COUNT
 } T_Menubars;
 
+typedef struct
+{
+  int Previous_occurence;
+  int Next_occurence;
+  int First_occurence;
+} T_Tile;
+
 #endif

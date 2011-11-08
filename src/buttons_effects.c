@@ -193,6 +193,8 @@ void Button_Constraint_menu(void)
 void Button_Tilemap_mode(void)
 {
   Tilemap_mode=!Tilemap_mode;
+  if (Tilemap_mode)
+    Tilemap_create();
 }
 
 void Button_Tilemap_menu(void)
@@ -830,7 +832,9 @@ void Effects_off(void)
   Stencil_mode=0;
   Mask_mode=0;
   Sieve_mode=0;
-  Snap_mode=0;  
+  Snap_mode=0;
+  Constraint_mode=0;
+  Tilemap_mode=0;
 }
 
 

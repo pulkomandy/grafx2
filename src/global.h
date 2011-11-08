@@ -348,6 +348,12 @@ GFX2_GLOBAL Uint32 Main_time_of_safety_backup;
 /// Letter prefix for the filenames of safety backups. a or b
 GFX2_GLOBAL byte Main_safety_backup_prefix;
 
+/// Tilemap for the main screen
+GFX2_GLOBAL T_Tile * Main_tilemap;
+
+GFX2_GLOBAL short Main_tilemap_width;
+GFX2_GLOBAL short Main_tilemap_height;
+
 // -- Spare page data
 
 /// Palette of the spare page
