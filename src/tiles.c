@@ -152,7 +152,7 @@ void Tilemap_draw(word x, word y, byte color)
     xx = (tile % Main_tilemap_width)*Snap_width+Snap_offset_X + rel_x;
     yy = (tile / Main_tilemap_width)*Snap_height+Snap_offset_Y + rel_y;
     Pixel_in_current_screen(xx,yy,color,yy>=Limit_top&&yy<=Limit_bottom&&xx>=Limit_left&&xx<=Limit_right);
-    tile = Main_tilemap[tile].Next_occurence;
+    tile = Main_tilemap[tile].Next;
   } while (tile != first_tile);
 
   Update_rect(0,0,0,0);
@@ -164,8 +164,8 @@ int Tile_is_same(int t1, int t2)
   byte *bmp1,*bmp2;
   int y;
   
-  bmp1 = Main_screen+(TILE_Y(t1))*Main_image_width+(TILE_X(t1));
-  bmp2 = Main_screen+(TILE_Y(t2))*Main_image_width+(TILE_X(t2));
+  bmp1 = Main_backups->Pages->Image[Main_current_layer].Pixels+(TILE_Y(t1))*Main_image_width+(TILE_X(t1));
+  bmp2 = Main_backups->Pages->Image[Main_current_layer].Pixels+(TILE_Y(t2))*Main_image_width+(TILE_X(t2));
   
   for (y=0; y < Snap_height; y++)
   {
@@ -189,8 +189,14 @@ void Tilemap_create(void)
   if (width<1 || height<1 || width*height>1000000l
    || (tile_ptr=(T_Tile *)malloc(width*height*sizeof(T_Tile))) == NULL)
   {
+    // Cannot enable tilemap because either the image is too small
+    // for the grid settings (and I don't want to implement partial tiles)
+    // Or the number of tiles seems unreasonable (one million) : This can
+    // happen if you set grid 1x1 for example.
+  
     if (Main_tilemap)
     {
+      // Recycle existing tilemap
       free(Main_tilemap);
       Main_tilemap=NULL;
     }
@@ -199,43 +205,51 @@ void Tilemap_create(void)
     Tilemap_mode=0;
     return;
   }
-  Main_tilemap_width=width;
-  Main_tilemap_height=height;
+  
+  if (Main_tilemap)
+  {
+    // Recycle existing tilemap
+    free(Main_tilemap);
+    Main_tilemap=NULL;
+  }
   Main_tilemap=tile_ptr;
   
-  // Init array
+  Main_tilemap_width=width;
+  Main_tilemap_height=height;
+
+  // Init array with all tiles unique by default
   for (tile=0; tile<width*height; tile++)
   {
-    Main_tilemap[tile].Previous_occurence = tile;
-    Main_tilemap[tile].Next_occurence = tile;
-    //Main_tilemap[tile].First_occurence = 1;
+    Main_tilemap[tile].Previous = tile;
+    Main_tilemap[tile].Next = tile;
   }
   
+  // Now find similar tiles and link them in circular linked list
+  //It will be used to modify all tiles whenever you draw on one.
   for (tile=1; tile<width*height; tile++)
   {
     int ref_tile=0;
     while(1)
     {
-      if (Main_tilemap[ref_tile].Previous_occurence<=ref_tile && Tile_is_same(ref_tile, tile))
+      if (Main_tilemap[ref_tile].Previous<=ref_tile && Tile_is_same(ref_tile, tile))
       {
-        // Insert at end
-        int last_tile=Main_tilemap[ref_tile].Previous_occurence;
-        Main_tilemap[tile].Previous_occurence=last_tile;
-        Main_tilemap[tile].Next_occurence=ref_tile;
-        //Main_tilemap[tile].First_occurence=0;
-        
-        Main_tilemap[ref_tile].Previous_occurence=tile;
-        Main_tilemap[last_tile].Next_occurence=tile;
+        // Insert at the end. classic doubly-linked-list.
+        int last_tile=Main_tilemap[ref_tile].Previous;
+        Main_tilemap[tile].Previous=last_tile;
+        Main_tilemap[tile].Next=ref_tile;
+        Main_tilemap[ref_tile].Previous=tile;
+        Main_tilemap[last_tile].Next=tile;
         
         break;
       }
-
+      // next
       ref_tile++;
 
+      // end of loop without finding a match
       if (ref_tile>=tile)
       {
-        // New unique tile
-        //Main_tilemap[tile].First_occurence=1;
+        // This tile is really unique.
+        // Nothing to do at the moment
         break;
       }
     }

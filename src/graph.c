@@ -49,6 +49,7 @@
 #include "windows.h"
 #include "input.h"
 #include "brush.h"
+#include "tiles.h"
 
 #ifdef __VBCC__
     #define __attribute__(x)

@@ -545,9 +545,8 @@ typedef enum {
 
 typedef struct
 {
-  int Previous_occurence;
-  int Next_occurence;
-  int First_occurence;
+  int Previous;
+  int Next;
 } T_Tile;
 
 #endif
