@@ -144,8 +144,8 @@ void Tilemap_draw(word x, word y, byte color)
     return;
   
   tile = first_tile = TILE_FOR_COORDS(x,y);
-  rel_x = (x + Snap_offset_X + Snap_width) % Snap_width;
-  rel_y = (y + Snap_offset_Y + Snap_height) % Snap_height;
+  rel_x = (x - Snap_offset_X + Snap_width) % Snap_width;
+  rel_y = (y - Snap_offset_Y + Snap_height) % Snap_height;
   do
   {
     int xx,yy;
