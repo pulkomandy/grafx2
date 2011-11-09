@@ -448,11 +448,12 @@ all : $(BIN)
 ifeq ($(ATARICROSS),1)
 	$(STACK) -S 128k $(BIN)
 	$(FIX_FLAGS) -S $(BIN)
-else ifeq ($(PLATFORM),FreeMiNT)  
+else
+ifeq ($(PLATFORM),FreeMiNT)  
 	$(STACK) -S 128k $(BIN)
 	$(FIX_FLAGS) -S $(BIN)
 endif
-
+endif
 endif
 
 
@@ -460,9 +461,11 @@ debug : $(BIN)
 ifeq ($(ATARICROSS),1)
 	$(STACK) -S 128k $(BIN)
 	$(FIX_FLAGS) -S $(BIN)
-else ifeq ($(PLATFORM),FreeMiNT)  
+else
+ifeq ($(PLATFORM),FreeMiNT)  
 	$(STACK) -S 128k $(BIN)
 	$(FIX_FLAGS) -S $(BIN)
+endif
 endif
 
 
