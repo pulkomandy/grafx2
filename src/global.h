@@ -353,6 +353,7 @@ GFX2_GLOBAL T_Tile * Main_tilemap;
 
 GFX2_GLOBAL short Main_tilemap_width;
 GFX2_GLOBAL short Main_tilemap_height;
+GFX2_GLOBAL byte Main_tilemap_allow_flip; ///< 0:no, 1:horizontally, 2:vertically, 3:both
 
 // -- Spare page data
 

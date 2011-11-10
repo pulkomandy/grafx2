@@ -547,6 +547,7 @@ typedef struct
 {
   int Previous;
   int Next;
+  byte Flipped; ///< 0:no, 1:horizontally, 2:vertically, 3:both
 } T_Tile;
 
 #endif
