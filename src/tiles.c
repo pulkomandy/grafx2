@@ -23,6 +23,10 @@
 #include "global.h"
 #include "graph.h"
 #include "sdlscreen.h"
+#include "engine.h"
+#include "windows.h"
+#include "input.h"
+#include "misc.h"
 #include "tiles.h"
 
 
@@ -248,13 +252,17 @@ int Tile_is_same_flipped_xy(int t1, int t2)
   return 1;
 }
 
-/// Create or update a tilemap based on current screen pixels.
+/// Create or update a tilemap based on current screen (layer)'s pixels.
 void Tilemap_create(void)
 {
   int width;
   int height;
   int tile;
+  int count=1;
   T_Tile * tile_ptr;
+  
+  int wait_window=0;
+  byte old_cursor;
 
   width=(Main_image_width-Snap_offset_X)/Snap_width;
   height=(Main_image_height-Snap_offset_Y)/Snap_height;
@@ -290,6 +298,18 @@ void Tilemap_create(void)
   Main_tilemap_width=width;
   Main_tilemap_height=height;
 
+  if (width*height > 1000 || 1)
+  {
+    wait_window=1;
+    Open_window(180,36,"Creating tileset");
+    Print_in_window(26, 20, "Please wait...",MC_Black,MC_Light);
+    old_cursor=Cursor_shape;
+    Cursor_shape=CURSOR_SHAPE_HOURGLASS;
+    Update_window_area(0,0,Window_width, Window_height);
+    Display_cursor();
+    Get_input(0);
+  }
+  
   // Initialize array with all tiles unique by default
   for (tile=0; tile<width*height; tile++)
   {
@@ -395,5 +415,29 @@ void Tilemap_create(void)
     // This tile is really unique.
     // Nothing to do at this time: the initialization
     // has already set the right data for Main_tilemap[tile].
+    count++;
+  }
+  
+  if (wait_window)
+  {
+    char   str[8];
+    Uint32 end;
+    
+    Num2str(count,str,7);
+    Hide_cursor();
+    Print_in_window(6, 20, "Unique tiles: ",MC_Black,MC_Light);
+    Print_in_window(6+8*14,20,str,MC_Black,MC_Light);
+    Display_cursor();
+    
+    // Wait a moment to display count
+    end = SDL_GetTicks()+750;
+    do
+    {
+      Get_input(20);
+    } while (SDL_GetTicks()<end);
+
+    Close_window();
+    Cursor_shape=old_cursor;
+    Display_cursor();
   }
 }
