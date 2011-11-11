@@ -348,13 +348,6 @@ GFX2_GLOBAL Uint32 Main_time_of_safety_backup;
 /// Letter prefix for the filenames of safety backups. a or b
 GFX2_GLOBAL byte Main_safety_backup_prefix;
 
-/// Tilemap for the main screen
-GFX2_GLOBAL T_Tile * Main_tilemap;
-
-GFX2_GLOBAL short Main_tilemap_width;
-GFX2_GLOBAL short Main_tilemap_height;
-GFX2_GLOBAL byte Main_tilemap_allow_flip; ///< 0:no, 1:horizontally, 2:vertically, 3:both
-
 // -- Spare page data
 
 /// Palette of the spare page
@@ -740,11 +733,11 @@ GFX2_GLOBAL byte Constraint_mode;
 
 // -- Tilemap mode
 
-/// Tilemap mode
-GFX2_GLOBAL byte Tilemap_mode;
+/// Tilemap mode for main page
+GFX2_GLOBAL byte Main_tilemap_mode;
 
-/// Tilemap allows swapped tiles : 0:No 1:Horizontal 2:Vertical 3:Both 
-GFX2_GLOBAL byte Tilemap_allow_swap;
+/// Tilemap mode for spare page
+GFX2_GLOBAL byte Spare_tilemap_mode;
 
 // -- Magnifier data
 

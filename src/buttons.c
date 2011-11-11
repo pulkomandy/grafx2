@@ -70,6 +70,7 @@
 #include "brush.h"
 #include "input.h"
 #include "special.h"
+#include "tiles.h"
 #include "setup.h"
 
 #ifdef __VBCC__
@@ -210,7 +211,7 @@ void Button_Undo(void)
 {
   Hide_cursor();
   Undo();
-
+  Tilemap_update();
   Set_palette(Main_palette);
   Compute_optimal_menu_colors(Main_palette);
 
@@ -225,7 +226,7 @@ void Button_Redo(void)
 {
   Hide_cursor();
   Redo();
-
+  Tilemap_update();
   Set_palette(Main_palette);
   Compute_optimal_menu_colors(Main_palette);
 
@@ -1529,6 +1530,9 @@ void Button_Page(void)
   // On dégrossit le travail avec les infos des listes de pages
   Exchange_main_and_spare();
 
+  // Tilemap info
+  Swap_tilemap();
+  
   // On fait le reste du travail "à la main":
 #ifndef NOLAYERS
   SWAP_PBYTES(Main_visible_image.Image,Spare_visible_image.Image)
@@ -1724,6 +1728,8 @@ void Button_Copy_page(void)
       Update_spare_buffers(Spare_image_width,Spare_image_height);
       Redraw_spare_image();
       Spare_image_is_modified=1;
+      if (Spare_tilemap_mode)
+        Disable_spare_tilemap();
       break;
       
     case 2: // Pixels only
@@ -1733,6 +1739,8 @@ void Button_Copy_page(void)
       Update_spare_buffers(Spare_image_width,Spare_image_height);
       Redraw_spare_image();
       Spare_image_is_modified=1;
+      if (Spare_tilemap_mode)
+        Disable_spare_tilemap();
       break;
       
     case 3: // Palette only
@@ -2185,7 +2193,8 @@ void Button_Resolution(void)
       || (chosen_height!=Main_image_height) )
     {
       Resize_image(chosen_width,chosen_height);
-      End_of_modification(); 
+      End_of_modification();
+      Tilemap_update();
     }
     
     if ((Video_mode[selected_mode].State & 3) == 3 ||
@@ -3275,6 +3284,7 @@ void Button_Load(void)
   Upload_infos_page_main(Main_backups->Pages);
 
   Load_picture(1);
+  Tilemap_update();
 }
 
 
@@ -3346,6 +3356,7 @@ void Button_Reload(void)
         Compute_limits();
         Compute_paintbrush_coordinates();
       }
+      Tilemap_update();
       Redraw_layered_image();
       End_of_modification();
       Display_all_screen();
@@ -4494,7 +4505,7 @@ void Display_effect_states(void)
   Display_effect_state(C2+23,100, "Tiling" ,Tiling_mode);
 
   Display_effect_state(177+23,24, "8 bit"  ,Constraint_mode);
-  Display_effect_state(177+23,43, "Tilemap",Tilemap_mode);
+  Display_effect_state(177+23,43, "Tilemap",Main_tilemap_mode);
 }
 
 
@@ -4791,7 +4802,7 @@ void Button_Effects(void)
       case 15: // Tilemap
           Button_Tilemap_mode();
           Hide_cursor();
-          Display_effect_state(177+23,43, "Tilemap" ,Tilemap_mode);
+          Display_effect_state(177+23,43, "Tilemap" ,Main_tilemap_mode);
           Display_cursor();
         break;
     }
@@ -4803,7 +4814,7 @@ void Button_Effects(void)
   else
     Hide_cursor();
 
-  if (!(Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode||Constraint_mode||Tilemap_mode))
+  if (!(Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode||Constraint_mode||Main_tilemap_mode))
     Unselect_button(BUTTON_EFFECTS);
 
   Display_cursor();

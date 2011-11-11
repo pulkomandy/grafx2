@@ -2747,7 +2747,7 @@ void Display_pixel(word x,word y,byte color)
     && (!((Mask_mode)    && (Mask_table[Read_pixel_from_spare_screen(x,y)]))) )
   {
     color=Effect_function(x,y,color);
-    if (Tilemap_mode)
+    if (Main_tilemap_mode)
     {
       Tilemap_draw(x,y, color);
     }

@@ -27,19 +27,42 @@
 int compare_tiles(word x1, word y1, word x2, word y2);
 
 /// Create or update a tilemap based on current screen pixels.
-void Tilemap_create(void);
+void Tilemap_update(void);
 
 void Tilemap_draw(word x, word y, byte color);
+
+void Swap_tilemap(void);
+
+void Disable_main_tilemap(void);
+
+void Disable_spare_tilemap(void);
 
 #define TILE_FOR_COORDS(x,y) (((y)-Snap_offset_Y)/Snap_height*Main_tilemap_width+((x)-Snap_offset_X)/Snap_width)
 #define TILE_AT(x,y) (y)*Main_tilemap_width+(x)
 #define TILE_X(t) (((t)%Main_tilemap_width)*Snap_width+Snap_offset_X)
 #define TILE_Y(t) (((t)/Main_tilemap_width)*Snap_height+Snap_offset_Y)
 
-enum TILE_FLIPPED
+typedef struct
 {
-  TILE_FLIPPED_NONE = 0,
-  TILE_FLIPPED_X = 1,
-  TILE_FLIPPED_Y = 2,
-  TILE_FLIPPED_XY = 3, // needs be TILE_FLIPPED_X|TILE_FLIPPED_Y
-};
+  byte Allow_flipped_x;
+  byte Allow_flipped_y;
+  byte Allow_flipped_xy;
+  byte Show_tile_count;
+  
+} T_Tilemap_settings;
+
+
+  
+extern T_Tilemap_settings Tilemap_settings;
+
+/// Tilemap for the main screen
+
+extern T_Tile * Main_tilemap;
+
+extern short Main_tilemap_width;
+extern short Main_tilemap_height;
+
+extern T_Tile * Spare_tilemap;
+
+extern short Spare_tilemap_width;
+extern short Spare_tilemap_height;

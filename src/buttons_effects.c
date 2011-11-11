@@ -42,6 +42,7 @@
 #include "sdlscreen.h"
 #include "struct.h"
 #include "windows.h"
+#include "tiles.h"
 
 //---------- Menu dans lequel on tagge des couleurs (genre Stencil) ----------
 void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_cancel, const char *help_section, word close_shortcut)
@@ -192,9 +193,8 @@ void Button_Constraint_menu(void)
 // Tilemap mode
 void Button_Tilemap_mode(void)
 {
-  Tilemap_mode=!Tilemap_mode;
-  if (Tilemap_mode)
-    Tilemap_create();
+  Main_tilemap_mode=!Main_tilemap_mode;
+  Tilemap_update();
 }
 
 void Button_Tilemap_menu(void)
@@ -413,12 +413,25 @@ void Button_Grid_menu(void)
 
   if (clicked_button==2) // OK
   {
+    byte modified;
+    
+    modified = Snap_width!=chosen_X
+    || Snap_height!=chosen_Y
+    || Snap_offset_X!=dx_selected
+    || Snap_offset_Y!=dy_selected;
+    
     Snap_width=chosen_X;
     Snap_height=chosen_Y;
     Snap_offset_X=dx_selected;
     Snap_offset_Y=dy_selected;
     Snap_mode=snapgrid;
     Show_grid=showgrid;
+    
+    if (modified)
+    {
+      Tilemap_update();
+      Disable_spare_tilemap();
+    }
   }
 
   Close_window();
@@ -834,7 +847,7 @@ void Effects_off(void)
   Sieve_mode=0;
   Snap_mode=0;
   Constraint_mode=0;
-  Tilemap_mode=0;
+  Main_tilemap_mode=0;
 }
 
 
