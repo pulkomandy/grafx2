@@ -36,3 +36,10 @@ void Tilemap_draw(word x, word y, byte color);
 #define TILE_X(t) (((t)%Main_tilemap_width)*Snap_width+Snap_offset_X)
 #define TILE_Y(t) (((t)/Main_tilemap_width)*Snap_height+Snap_offset_Y)
 
+enum TILE_FLIPPED
+{
+  TILE_FLIPPED_NONE = 0,
+  TILE_FLIPPED_X = 1,
+  TILE_FLIPPED_Y = 2,
+  TILE_FLIPPED_XY = 3, // needs be TILE_FLIPPED_X|TILE_FLIPPED_Y
+};

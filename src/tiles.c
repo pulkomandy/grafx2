@@ -195,7 +195,25 @@ int Tile_is_same(int t1, int t2)
 }
 
 ///
-int Tile_is_same_y(int t1, int t2)
+int Tile_is_same_flipped_x(int t1, int t2)
+{
+  byte *bmp1,*bmp2;
+  int y, x;
+  
+  bmp1 = Main_backups->Pages->Image[Main_current_layer].Pixels+(TILE_Y(t1))*Main_image_width+(TILE_X(t1));
+  bmp2 = Main_backups->Pages->Image[Main_current_layer].Pixels+(TILE_Y(t2))*Main_image_width+(TILE_X(t2)+Snap_width-1);
+  
+  for (y=0; y < Snap_height; y++)
+  {
+    for (x=0; x < Snap_width; x++)
+      if (*(bmp1+y*Main_image_width+x) != *(bmp2+y*Main_image_width-x))
+        return 0;
+  }
+  return 1;
+}
+
+///
+int Tile_is_same_flipped_y(int t1, int t2)
 {
   byte *bmp1,*bmp2;
   int y;
@@ -207,6 +225,25 @@ int Tile_is_same_y(int t1, int t2)
   {
     if (memcmp(bmp1+y*Main_image_width, bmp2-y*Main_image_width, Snap_width))
       return 0;
+  }
+  return 1;
+}
+
+
+///
+int Tile_is_same_flipped_xy(int t1, int t2)
+{
+  byte *bmp1,*bmp2;
+  int y, x;
+  
+  bmp1 = Main_backups->Pages->Image[Main_current_layer].Pixels+(TILE_Y(t1))*Main_image_width+(TILE_X(t1));
+  bmp2 = Main_backups->Pages->Image[Main_current_layer].Pixels+(TILE_Y(t2)+Snap_height-1)*Main_image_width+(TILE_X(t2)+Snap_width-1);
+  
+  for (y=0; y < Snap_height; y++)
+  {
+    for (x=0; x < Snap_width; x++)
+      if (*(bmp1+y*Main_image_width+x) != *(bmp2-y*Main_image_width-x))
+        return 0;
   }
   return 1;
 }
@@ -293,7 +330,7 @@ void Tilemap_create(void)
     
     for (ref_tile=0; ref_tile<tile; ref_tile++)
     {
-      if (Main_tilemap[ref_tile].Previous<=ref_tile && Tile_is_same_y(ref_tile, tile))
+      if (Main_tilemap[ref_tile].Previous<=ref_tile && Tile_is_same_flipped_y(ref_tile, tile))
       {
         break; // stop loop on ref_tile
       }
@@ -305,7 +342,51 @@ void Tilemap_create(void)
       int last_tile=Main_tilemap[ref_tile].Previous;
       Main_tilemap[tile].Previous=last_tile;
       Main_tilemap[tile].Next=ref_tile;
-      Main_tilemap[tile].Flipped=Main_tilemap[ref_tile].Flipped ^ 2;
+      Main_tilemap[tile].Flipped=Main_tilemap[ref_tile].Flipped ^ TILE_FLIPPED_Y;
+      Main_tilemap[ref_tile].Previous=tile;
+      Main_tilemap[last_tile].Next=tile;
+      continue; // next tile
+    }
+    
+    // Try flipped-x comparison
+    
+    for (ref_tile=0; ref_tile<tile; ref_tile++)
+    {
+      if (Main_tilemap[ref_tile].Previous<=ref_tile && Tile_is_same_flipped_x(ref_tile, tile))
+      {
+        break; // stop loop on ref_tile
+      }
+    }
+    if (ref_tile<tile)
+    {
+      // New occurence of a known tile
+      // Insert at the end. classic doubly-linked-list.
+      int last_tile=Main_tilemap[ref_tile].Previous;
+      Main_tilemap[tile].Previous=last_tile;
+      Main_tilemap[tile].Next=ref_tile;
+      Main_tilemap[tile].Flipped=Main_tilemap[ref_tile].Flipped ^ TILE_FLIPPED_X;
+      Main_tilemap[ref_tile].Previous=tile;
+      Main_tilemap[last_tile].Next=tile;
+      continue; // next tile
+    }
+    
+    // Try flipped-xy comparison
+    
+    for (ref_tile=0; ref_tile<tile; ref_tile++)
+    {
+      if (Main_tilemap[ref_tile].Previous<=ref_tile && Tile_is_same_flipped_xy(ref_tile, tile))
+      {
+        break; // stop loop on ref_tile
+      }
+    }
+    if (ref_tile<tile)
+    {
+      // New occurence of a known tile
+      // Insert at the end. classic doubly-linked-list.
+      int last_tile=Main_tilemap[ref_tile].Previous;
+      Main_tilemap[tile].Previous=last_tile;
+      Main_tilemap[tile].Next=ref_tile;
+      Main_tilemap[tile].Flipped=Main_tilemap[ref_tile].Flipped ^ TILE_FLIPPED_XY;
       Main_tilemap[ref_tile].Previous=tile;
       Main_tilemap[last_tile].Next=tile;
       continue; // next tile
