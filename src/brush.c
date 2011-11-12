@@ -35,6 +35,7 @@
 #include "windows.h"
 #include "sdlscreen.h"
 #include "brush.h"
+#include "tiles.h"
 
 // Data used during brush rotation operation
 static byte * Brush_rotate_buffer;
@@ -879,14 +880,25 @@ void Capture_brush(short start_x,short start_y,short end_x,short end_y,short cle
     Copy_image_to_brush(start_x,start_y,Brush_width,Brush_height,Main_image_width);
 
     // On regarde s'il faut effacer quelque chose:
-    if (clear != 0)
+    if (clear)
     {
-      for (y_pos=start_y;y_pos<start_y+Brush_height;y_pos++)
-        for (x_pos=start_x;x_pos<start_x+Brush_width;x_pos++)
-        {
-          Pixel_in_current_screen(x_pos,y_pos,Back_color,1);
-        }
-      Update_part_of_screen(start_x,start_y,Brush_width,Brush_height);
+      if (Main_tilemap_mode)
+      {
+        for (y_pos=start_y;y_pos<start_y+Brush_height;y_pos++)
+          for (x_pos=start_x;x_pos<start_x+Brush_width;x_pos++)
+          {
+            Tilemap_draw(x_pos,y_pos, Back_color);
+          }
+      }
+      else
+      {
+        for (y_pos=start_y;y_pos<start_y+Brush_height;y_pos++)
+          for (x_pos=start_x;x_pos<start_x+Brush_width;x_pos++)
+          {
+            Pixel_in_current_screen(x_pos,y_pos,Back_color,1);
+          }
+        Update_part_of_screen(start_x,start_y,Brush_width,Brush_height);
+      }
     }
     // Grab palette
     memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
@@ -1276,7 +1288,16 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
           Pixel_in_brush(x_pos-start_x,y_pos-start_y,Read_pixel_from_current_layer(x_pos,y_pos));
           // On regarde s'il faut effacer quelque chose:
           if (clear)
-            Pixel_in_current_screen(x_pos,y_pos,Back_color,0);
+          {
+            if (Main_tilemap_mode)
+            {
+              Tilemap_draw(x_pos,y_pos,Back_color);
+            }
+            else
+            {
+              Pixel_in_current_screen(x_pos,y_pos,Back_color,0);
+            }
+          }
         }
     // Grab palette
     memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
