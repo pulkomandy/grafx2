@@ -994,6 +994,10 @@ void Fill_general(byte fill_color)
   short  top_reached  ,bottom_reached;
   short  left_reached,right_reached;
   byte   replace_table[256];
+  int old_limit_right=Limit_right;
+  int old_limit_left=Limit_left;
+  int old_limit_top=Limit_top;
+  int old_limit_bottom=Limit_bottom;
 
 
   // Avant toute chose, on vérifie que l'on n'est pas en train de remplir
@@ -1004,6 +1008,19 @@ void Fill_general(byte fill_color)
        (Paintbrush_Y>=Limit_top)   &&
        (Paintbrush_Y<=Limit_bottom) )
   {
+    // If tilemap mode is ON, ignore action if it's outside grid limits
+    if (Main_tilemap_mode)
+    {
+      if (Paintbrush_X<Snap_offset_X)
+        return;
+      if (Paintbrush_X >= (Main_image_width-Snap_offset_X)/Snap_width*Snap_width+Snap_offset_X)
+        return;
+      if (Paintbrush_Y<Snap_offset_Y)
+        return;
+      if (Paintbrush_Y >= (Main_image_height-Snap_offset_Y)/Snap_height*Snap_height+Snap_offset_Y)
+        return;
+    }
+    
     // On suppose que le curseur est déjà caché.
     // Hide_cursor();
 
@@ -1018,6 +1035,15 @@ void Fill_general(byte fill_color)
 
     // On fait attention au Feedback qui DOIT se faire avec le backup.
     Update_FX_feedback(0);
+
+    // If tilemap mode is ON, adapt limits to current tile only
+    if (Main_tilemap_mode)
+    {
+      Limit_right = Min(Limit_right, (Paintbrush_X-Snap_offset_X)/Snap_width*Snap_width+Snap_width-1+Snap_offset_X);
+      Limit_left = Max(Limit_left, (Paintbrush_X-Snap_offset_X)/Snap_width*Snap_width+Snap_offset_X);
+      Limit_bottom = Min(Limit_bottom, (Paintbrush_Y-Snap_offset_Y)/Snap_height*Snap_height+Snap_height-1+Snap_offset_Y);
+      Limit_top = Max(Limit_top, (Paintbrush_Y-Snap_offset_Y)/Snap_height*Snap_height+Snap_offset_Y);
+    }
 
     // On va maintenant "épurer" la zone visible de l'image:
     memset(replace_table,0,256);
@@ -1066,25 +1092,29 @@ void Fill_general(byte fill_color)
                                                Main_image_width,Main_backups->Pages->Image[Main_current_layer].Pixels,
                                                right_reached+1,top_reached,Main_image_width);
 
+    // Restore image limits : this is needed by the tilemap effect,
+    // otherwise it will not display other modified tiles.
+    Limit_right=old_limit_right;
+    Limit_left=old_limit_left;
+    Limit_top=old_limit_top;
+    Limit_bottom=old_limit_bottom;
+  
     for (y_pos=top_reached;y_pos<=bottom_reached;y_pos++)
+    {
       for (x_pos=left_reached;x_pos<=right_reached;x_pos++)
-        if (Read_pixel_from_current_layer(x_pos,y_pos)==2)
+      {
+        byte filled = Read_pixel_from_current_layer(x_pos,y_pos);
+
+        // First, restore the color.
+        Pixel_in_current_screen(x_pos,y_pos,Read_pixel_from_backup_layer(x_pos,y_pos),0);
+          
+        if (filled==2)
         {
-          //   Si le pixel en cours de traitement a été touché par le Fill()
-          // on se doit d'afficher le pixel modifié par la couleur de
-          // remplissage:
-
-          //  Ceci se fait en commençant par restaurer la couleur qu'il y avait
-          // précédemment (c'est important pour que les effets ne s'emmèlent
-          // pas le pinceaux)
-          Pixel_in_current_screen(x_pos,y_pos,Read_pixel_from_backup_layer(x_pos,y_pos),0);
-
-          //  Enfin, on peut afficher le pixel, en le soumettant aux effets en
-          // cours:
+          // Update the color according to the fill color and all effects
           Display_pixel(x_pos,y_pos,fill_color);
         }
-        else
-          Pixel_in_current_screen(x_pos,y_pos,Read_pixel_from_backup_layer(x_pos,y_pos),0);
+      }
+    }
 
     // Restore original feedback value
     Update_FX_feedback(Config.FX_Feedback);
