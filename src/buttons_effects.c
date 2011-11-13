@@ -271,41 +271,41 @@ void Button_Grid_menu(void)
   T_Special_button * input_dx_button;
   T_Special_button * input_dy_button;
 
-  char str[3];
+  char str[4];
 
 
-  Open_window(133,118,"Grid");
+  Open_window(149,118,"Grid");
 
   Window_set_normal_button(12,92,51,14,"Cancel",0,1,KEY_ESC);  // 1
-  Window_set_normal_button(70,92,51,14,"OK"    ,0,1,SDLK_RETURN); // 2
+  Window_set_normal_button(86,92,51,14,"OK"    ,0,1,SDLK_RETURN); // 2
 
-  Print_in_window(19,26, "X:",MC_Dark,MC_Light);
-  input_x_button = Window_set_input_button(37,24,2); // 3
-  Num2str(chosen_X,str,2);
+  Print_in_window(11,26, "X:",MC_Dark,MC_Light);
+  input_x_button = Window_set_input_button(29,24,3); // 3
+  Num2str(chosen_X,str,3);
   Window_input_content(input_x_button,str);
 
-  Print_in_window(19,47, "Y:",MC_Dark,MC_Light);
-  input_y_button = Window_set_input_button(37,45,2); // 4
-  Num2str(chosen_Y,str,2);
+  Print_in_window(11,47, "Y:",MC_Dark,MC_Light);
+  input_y_button = Window_set_input_button(29,45,3); // 4
+  Num2str(chosen_Y,str,3);
   Window_input_content(input_y_button,str);
 
-  Print_in_window(69,26,"dX:",MC_Dark,MC_Light);
-  input_dx_button = Window_set_input_button(95,24,2); // 5
-  Num2str(dx_selected,str,2);
+  Print_in_window(77,26,"dX:",MC_Dark,MC_Light);
+  input_dx_button = Window_set_input_button(103,24,3); // 5
+  Num2str(dx_selected,str,3);
   Window_input_content(input_dx_button,str);
 
-  Print_in_window(69,47,"dY:",MC_Dark,MC_Light);
-  input_dy_button = Window_set_input_button(95,45,2); // 6
-  Num2str(dy_selected,str,2);
+  Print_in_window(77,47,"dY:",MC_Dark,MC_Light);
+  input_dy_button = Window_set_input_button(103,45,3); // 6
+  Num2str(dy_selected,str,3);
 
   Window_set_normal_button(12, 62, 14, 14, " ", 0, 1, 0);  // 7
-  Window_set_normal_button(70, 62, 14, 14, " ", 0, 1, 0); // 8
+  Window_set_normal_button(78, 62, 14, 14, " ", 0, 1, 0); // 8
   if (snapgrid)
     Print_in_window(16, 65, "X", MC_Black, MC_Light);
   if (Show_grid)
-    Print_in_window(74, 65, "X", MC_Black, MC_Light);
+    Print_in_window(82, 65, "X", MC_Black, MC_Light);
   Print_in_window(32, 65,"Snap",MC_Dark,MC_Light);
-  Print_in_window(90, 65,"Show",MC_Dark,MC_Light);
+  Print_in_window(98, 65,"Show",MC_Dark,MC_Light);
 
   Window_input_content(input_dy_button,str);
   Update_window_area(0,0,Window_width, Window_height);
@@ -319,75 +319,71 @@ void Button_Grid_menu(void)
     switch (clicked_button)
     {
       case 3 :
-        Num2str(chosen_X,str,2);
-        Readline(39,26,str,2,INPUT_TYPE_INTEGER);
+        Num2str(chosen_X,str,3);
+        Readline(31,26,str,3,INPUT_TYPE_INTEGER);
         chosen_X=atoi(str);
         // On corrige les dimensions
-        if ((!chosen_X) || (chosen_X>80))
+        if ((!chosen_X) || (chosen_X>999))
         {
           if (!chosen_X)
             chosen_X=1;
           else
-            chosen_X=80;
-          Num2str(chosen_X,str,2);
+            chosen_X=999;
+          Num2str(chosen_X,str,3);
           Window_input_content(input_x_button,str);
         }
         if (dx_selected>=chosen_X)
         {
           dx_selected=chosen_X-1;
-          Num2str(dx_selected,str,2);
+          Num2str(dx_selected,str,3);
           Window_input_content(input_dx_button,str);
         }
         Display_cursor();
         break;
       case 4 :
-        Num2str(chosen_Y,str,2);
-        Readline(39,47,str,2,INPUT_TYPE_INTEGER);
+        Num2str(chosen_Y,str,3);
+        Readline(31,47,str,3,INPUT_TYPE_INTEGER);
         chosen_Y=atoi(str);
         // On corrige les dimensions
-        if ((!chosen_Y) || (chosen_Y>80))
+        if ((!chosen_Y) || (chosen_Y>999))
         {
           if (!chosen_Y)
             chosen_Y=1;
           else
-            chosen_Y=80;
-          Num2str(chosen_Y,str,2);
+            chosen_Y=999;
+          Num2str(chosen_Y,str,3);
           Window_input_content(input_y_button,str);
         }
         if (dy_selected>=chosen_Y)
         {
           dy_selected=chosen_Y-1;
-          Num2str(dy_selected,str,2);
+          Num2str(dy_selected,str,3);
           Window_input_content(input_dy_button,str);
         }
         Display_cursor();
         break;
       case 5 :
-        Num2str(dx_selected,str,2);
-        Readline(97,26,str,2,INPUT_TYPE_INTEGER);
+        Num2str(dx_selected,str,3);
+        Readline(105,26,str,3,INPUT_TYPE_INTEGER);
         dx_selected=atoi(str);
         // On corrige les dimensions
-        if (dx_selected>79)
-          dx_selected=79;
         if (dx_selected>=chosen_X)
           dx_selected=chosen_X-1;
 
-        Num2str(dx_selected,str,2);
+        Num2str(dx_selected,str,3);
         Window_input_content(input_dx_button,str);
 
         Display_cursor();
         break;
       case 6 :
-        Num2str(dy_selected,str,2);
-        Readline(97,47,str,2,INPUT_TYPE_INTEGER);
+        Num2str(dy_selected,str,3);
+        Readline(105,47,str,3,INPUT_TYPE_INTEGER);
         dy_selected=atoi(str);
         // On corrige les dimensions
-        if (dy_selected>79)
-          dy_selected=79;
         if (dy_selected>=chosen_Y)
           dy_selected=chosen_Y-1;
 
-        Num2str(dy_selected,str,2);
+        Num2str(dy_selected,str,3);
         Window_input_content(input_dy_button,str);
 
         Display_cursor();
@@ -401,7 +397,7 @@ void Button_Grid_menu(void)
       case 8:
         showgrid = !showgrid;
         Hide_cursor();
-        Print_in_window(74, 65, showgrid?"X":" ", MC_Black, MC_Light);
+        Print_in_window(82, 65, showgrid?"X":" ", MC_Black, MC_Light);
         Display_cursor();
         break;
 
