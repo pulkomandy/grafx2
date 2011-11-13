@@ -314,9 +314,9 @@ void Tilemap_update(void)
   if (width*height > 1000 || Config.Tilemap_show_count)
   {
     wait_window=1;
+    old_cursor=Cursor_shape;
     Open_window(180,36,"Creating tileset");
     Print_in_window(26, 20, "Please wait...",MC_Black,MC_Light);
-    old_cursor=Cursor_shape;
     Cursor_shape=CURSOR_SHAPE_HOURGLASS;
     Update_window_area(0,0,Window_width, Window_height);
     Display_cursor();
