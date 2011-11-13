@@ -199,7 +199,71 @@ void Button_Tilemap_mode(void)
 
 void Button_Tilemap_menu(void)
 {
+  short clicked_button;
 
+  byte flip_x=Config.Tilemap_allow_flipped_x;
+  byte flip_y=Config.Tilemap_allow_flipped_y;
+  byte count=Config.Tilemap_show_count;
+
+  Open_window(166,138,"Tilemap options");
+
+  Window_set_normal_button(6,120,51,14,"Cancel",0,1,KEY_ESC);  // 1
+  Window_set_normal_button(110,120,51,14,"OK"    ,0,1,SDLK_RETURN); // 2
+
+  Print_in_window(24,21, "Detect mirrored",MC_Dark,MC_Light);
+  Window_display_frame(5,17,155,74);
+  
+  Print_in_window(37,37, "Horizontally",MC_Black,MC_Light);
+  Window_set_normal_button(18,34,13,13,flip_x?"X":"",0,1,0);  // 3
+
+  Print_in_window(37,55, "Vertically",MC_Black,MC_Light);
+  Window_set_normal_button(18,52,13,13,flip_y?"X":"",0,1,0);  // 4
+
+  Print_in_window(27,99, "Show count",MC_Black,MC_Light);
+  Window_set_normal_button(7,96,13,13,count?"X":"",0,1,0);  // 5
+
+  Update_window_area(0,0,Window_width, Window_height);
+
+  Display_cursor();
+
+  do
+  {
+    clicked_button=Window_clicked_button();
+
+    switch (clicked_button)
+    {
+      case 3 :
+        flip_x=!flip_x;
+        Hide_cursor();
+        Print_in_window(21,37,flip_x?"X":" ", MC_Black, MC_Light);
+        Display_cursor();
+        break;
+      case 4 :
+        flip_y=!flip_y;
+        Hide_cursor();
+        Print_in_window(21,55,flip_y?"X":" ", MC_Black, MC_Light);
+        Display_cursor();
+        break;
+      case 5 :
+        count=!count;
+        Hide_cursor();
+        Print_in_window(10,99,count?"X":" ", MC_Black, MC_Light);
+        Display_cursor();
+        break;
+    }
+    if (Is_shortcut(Key,0x100+BUTTON_HELP))
+      Window_help(BUTTON_EFFECTS, "TILEMAP");
+  }
+  while ( (clicked_button!=1) && (clicked_button!=2) );
+
+  if (clicked_button==2) // OK
+  {
+    Config.Tilemap_allow_flipped_x=flip_x;
+    Config.Tilemap_allow_flipped_y=flip_y;
+    Config.Tilemap_show_count=count;
+  }
+  Close_window();
+  Display_cursor();
 }
 
 //--------------------------------- Stencil ----------------------------------

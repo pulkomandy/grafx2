@@ -954,6 +954,29 @@ int Load_INI(T_Config * conf)
   {
     conf->Allow_multi_shortcuts=(values[0]!=0);
   }
+  
+  conf->Tilemap_allow_flipped_x=0;
+  // Optional, makes tilemap effect detect x-flipped tiles (>=2.4)
+  if (!Load_INI_get_values (file,buffer,"Tilemap_detect_mirrored_x",1,values))
+  {
+    conf->Tilemap_allow_flipped_x=(values[0]!=0);
+  }
+  
+  conf->Tilemap_allow_flipped_y=0;
+  // Optional, makes tilemap effect detect y-flipped tiles (>=2.4)
+  if (!Load_INI_get_values (file,buffer,"Tilemap_detect_mirrored_y",1,values))
+  {
+    conf->Tilemap_allow_flipped_y=(values[0]!=0);
+  }
+  
+  conf->Tilemap_show_count=0;
+  // Optional, makes tilemap effect display tile count (>=2.4)
+  if (!Load_INI_get_values (file,buffer,"Tilemap_count",1,values))
+  {
+    conf->Tilemap_show_count=(values[0]!=0);
+  }
+  
+  
 
   // Insert new values here
 

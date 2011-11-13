@@ -370,6 +370,12 @@ typedef struct
   word Swap_buttons;                     ///< Sets which key swaps mouse buttons : 0=none, or MOD_CTRL, or MOD_ALT.
   char Scripts_directory[MAX_PATH_CHARACTERS];///< Full pathname of directory for Lua scripts
   byte Allow_multi_shortcuts;            ///< Boolean, true if the same key combination can trigger multiple shortcuts.
+  byte Tilemap_allow_flipped_x;          ///< Boolean, true if the Tilemap tool should detect x-flipped tiles.
+  byte Tilemap_allow_flipped_y;          ///< Boolean, true if the Tilemap tool should detect y-flipped tiles.
+  byte Tilemap_show_count;               ///< Boolean, true if the Tilemap tool should display tile count after analysis.
+  
+
+
 } T_Config;
 
 // Structures utilisées pour les descriptions de pages et de liste de pages.

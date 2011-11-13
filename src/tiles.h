@@ -42,19 +42,6 @@ void Disable_spare_tilemap(void);
 #define TILE_X(t) (((t)%Main_tilemap_width)*Snap_width+Snap_offset_X)
 #define TILE_Y(t) (((t)/Main_tilemap_width)*Snap_height+Snap_offset_Y)
 
-typedef struct
-{
-  byte Allow_flipped_x;
-  byte Allow_flipped_y;
-  byte Allow_flipped_xy;
-  byte Show_tile_count;
-  
-} T_Tilemap_settings;
-
-
-  
-extern T_Tilemap_settings Tilemap_settings;
-
 /// Tilemap for the main screen
 
 extern T_Tile * Main_tilemap;

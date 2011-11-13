@@ -705,6 +705,19 @@ int Save_INI(T_Config * conf)
   values[0]=(conf->Allow_multi_shortcuts);
   if ((return_code=Save_INI_set_values (old_file,new_file,buffer,"Allow_multi_shortcuts",1,values,1)))
     goto Erreur_Retour;
+
+  values[0]=conf->Tilemap_allow_flipped_x;
+  if ((return_code=Save_INI_set_values (old_file,new_file,buffer,"Tilemap_detect_mirrored_x",1,values,1)))
+    goto Erreur_Retour;
+  
+  values[0]=conf->Tilemap_allow_flipped_y;
+  if ((return_code=Save_INI_set_values (old_file,new_file,buffer,"Tilemap_detect_mirrored_y",1,values,1)))
+    goto Erreur_Retour;
+  
+  values[0]=conf->Tilemap_show_count;
+  if ((return_code=Save_INI_set_values (old_file,new_file,buffer,"Tilemap_count",1,values,1)))
+    goto Erreur_Retour;
+  
   
   // Insert new values here
   

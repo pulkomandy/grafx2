@@ -1169,6 +1169,16 @@ void Main_handler(void)
                 Button_Tiling_menu();
                 action++;
                 break;
+              case SPECIAL_TILEMAP_MODE :
+                Button_Tilemap_mode();
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_TILEMAP_MENU :
+                effect_modified = 1;
+                Button_Tilemap_menu();
+                action++;
+                break;
               case SPECIAL_EFFECTS_OFF :
                 Effects_off();
                 effect_modified = 1;

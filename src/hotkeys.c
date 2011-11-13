@@ -597,6 +597,22 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   true,
   SDLK_b|MOD_SHIFT|MOD_ALT, // Shift + Alt + B
   0},
+  {206,
+  "Tilemap mode",
+  "Enables or disables the Tilemap",
+  "mode.",
+  "",
+  true,
+  0, // No key
+  0},
+  {207,
+  "Tilemap menu",
+  "Opens a menu where you can configure",
+  "the tilemap settings.",
+  "",
+  true,
+  0, // No key
+  0},
   {67,
   "Classical brush grabbing",
   "Allows you to pick a brush defined",
@@ -1780,6 +1796,8 @@ word Ordering[NB_SHORTCUTS]=
   SPECIAL_SMEAR_MODE,               // Smear mode
   SPECIAL_TILING_MODE,              // Tiling mode
   SPECIAL_TILING_MENU,              // Tiling menu
+  SPECIAL_TILEMAP_MODE,             // Tilemap mode
+  SPECIAL_TILEMAP_MENU,             // Tilemap menu
   0x100+BUTTON_BRUSH,               // Pick brush
   0x100+BUTTON_POLYBRUSH,           // Pick polyform brush
   0x200+BUTTON_BRUSH,               // Restore brush

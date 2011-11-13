@@ -46,8 +46,6 @@ T_Tile * Spare_tilemap;
 short Spare_tilemap_width;
 short Spare_tilemap_height;
 
-T_Tilemap_settings Tilemap_settings = { 0, 0, 0, 0};
-
 //
 
 /// Build the tile-area from the current picture 
@@ -313,7 +311,7 @@ void Tilemap_update(void)
   Main_tilemap_width=width;
   Main_tilemap_height=height;
 
-  if (width*height > 1000 || Tilemap_settings.Show_tile_count)
+  if (width*height > 1000 || Config.Tilemap_show_count)
   {
     wait_window=1;
     Open_window(180,36,"Creating tileset");
@@ -362,7 +360,7 @@ void Tilemap_update(void)
     }
     
     // Try flipped-y comparison
-    if (Tilemap_settings.Allow_flipped_y)
+    if (Config.Tilemap_allow_flipped_y)
     {
       for (ref_tile=0; ref_tile<tile; ref_tile++)
       {
@@ -386,7 +384,7 @@ void Tilemap_update(void)
     }
     
     // Try flipped-x comparison
-    if (Tilemap_settings.Allow_flipped_x)
+    if (Config.Tilemap_allow_flipped_x)
     {
       for (ref_tile=0; ref_tile<tile; ref_tile++)
       {
@@ -410,7 +408,7 @@ void Tilemap_update(void)
     }
     
     // Try flipped-xy comparison
-    if (Tilemap_settings.Allow_flipped_xy)
+    if (Config.Tilemap_allow_flipped_x && Config.Tilemap_allow_flipped_y)
     {
       for (ref_tile=0; ref_tile<tile; ref_tile++)
       {
@@ -444,18 +442,21 @@ void Tilemap_update(void)
     char   str[8];
     Uint32 end;
     
-    Num2str(count,str,7);
-    Hide_cursor();
-    Print_in_window(6, 20, "Unique tiles: ",MC_Black,MC_Light);
-    Print_in_window(6+8*14,20,str,MC_Black,MC_Light);
-    Display_cursor();
-    
-    // Wait a moment to display count
-    end = SDL_GetTicks()+750;
-    do
+    if (Config.Tilemap_show_count)
     {
-      Get_input(20);
-    } while (SDL_GetTicks()<end);
+      Num2str(count,str,7);
+      Hide_cursor();
+      Print_in_window(6, 20, "Unique tiles: ",MC_Black,MC_Light);
+      Print_in_window(6+8*14,20,str,MC_Black,MC_Light);
+      Display_cursor();
+      
+      // Wait a moment to display count
+      end = SDL_GetTicks()+750;
+      do
+      {
+        Get_input(20);
+      } while (SDL_GetTicks()<end);
+    }
 
     Close_window();
     Cursor_shape=old_cursor;

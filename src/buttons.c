@@ -4538,7 +4538,7 @@ void Button_Effects(void)
   Window_set_normal_button( 83,131,104,14,"Feedback:   ",1,1,SDLK_f); // 13
 
   Window_set_normal_button(177, 19, 16,16,"",0,1,Config_Key[SPECIAL_FORMAT_CHECKER_MENU][0]); // 14
-  Window_set_normal_button(177, 38, 16,16,"",0,1,KEY_NONE); // 15
+  Window_set_normal_button(177, 38, 16,16,"",0,1,Config_Key[SPECIAL_TILEMAP_MODE][0]); // 15
 
   Display_feedback_state();
   Display_effect_sprite(EFFECTS_SPRITE_SHADE,   8,20);
@@ -4800,10 +4800,20 @@ void Button_Effects(void)
         }
         break;
       case 15: // Tilemap
+        if (Window_attribute1==LEFT_SIDE)
+        {
           Button_Tilemap_mode();
           Hide_cursor();
           Display_effect_state(177+23,43, "Tilemap" ,Main_tilemap_mode);
           Display_cursor();
+        }
+        else
+        {
+          Close_window();
+          Display_cursor();
+          Button_Tilemap_menu();
+          clicked_button=11;
+        }
         break;
     }
   }

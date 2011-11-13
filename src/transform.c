@@ -34,6 +34,8 @@
 #include "readline.h"
 #include "buttons.h" // Message_out_of_memory()
 #include "pages.h" // Backup_with_new_dimensions()
+#include "tiles.h"
+
 
 /// Reduces a fraction A/B to its smallest representation. ie (40,60) becomes (2/3)
 void Factorize(short *a, short *b)
