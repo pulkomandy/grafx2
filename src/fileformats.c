@@ -617,20 +617,17 @@ void Load_LBM(T_IO_Context * context)
           // Deluxe paint le fait... alors on le fait...
           Back_color=header.Transp_col;
 
-          // On commence par passer la palette en 256 comme ça, si la nouvelle
-          // palette a moins de 256 coul, la précédente ne souffrira pas d'un
-          // assombrissement préjudiciable.
           if (Config.Clear_palette)
             memset(context->Palette,0,sizeof(T_Palette));
-          else
-            Palette_64_to_256(context->Palette);
           //   On peut maintenant charger la nouvelle palette
           if (Read_bytes(LBM_file,context->Palette,3*nb_colors))
           {
-            Palette_256_to_64(context->Palette);
             if (Image_HAM)
+            {
+              Palette_256_to_64(context->Palette);
               Adapt_palette_HAM(context);
-            Palette_64_to_256(context->Palette);
+              Palette_64_to_256(context->Palette);
+            }
             Palette_loaded(context);
 
             // On lit l'octet de padding du CMAP si la taille est impaire
