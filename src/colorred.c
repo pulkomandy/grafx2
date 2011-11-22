@@ -23,6 +23,7 @@
 */
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "colorred.h"
 
@@ -35,11 +36,19 @@ but :
 
 CT_Node* CT_new() {return NULL;}
 
-void CT_set(CT_Node* colorTree, byte Rmin, byte Gmin, byte Bmin,
+// debug helper
+void CT_Print(CT_Node* node)
+{
+	printf("R %d %d\tG %d %d\tB %d %d\ti %d\n",
+		node->Rmin, node->Rmax, node->Gmin, node->Gmax,
+		node->Bmin, node->Bmax, node->index);
+}
+
+void CT_set(CT_Node** colorTree, byte Rmin, byte Gmin, byte Bmin,
 	byte Rmax, byte Gmax, byte Bmax, byte index)
 {
 	int i;
-	CT_Node* parent = colorTree;
+	CT_Node* parent;
 	// Create and setup node
 	CT_Node* node = malloc(sizeof(CT_Node));
 	
@@ -51,65 +60,77 @@ void CT_set(CT_Node* colorTree, byte Rmin, byte Gmin, byte Bmin,
 	node->Bmax = Bmax;
 	node->index = index;
 	
-	for(i = 0; i < 7; i++)
+	printf("Add node:");
+	CT_Print(node);
+	
+	for(i = 0; i < 2; i++)
 		node->children[i] = NULL;
 	
 	// Now insert it in tree
-	
+	parent = *colorTree;
 	if (parent == NULL) {
 		// This is our first node.
-		colorTree = node;
+		*colorTree = node;
 	} else for(;;) {
 		// Find where to insert ourselves
-		// (clusters are non-intersecting, so there is no need to check for that)
-		int where = 0;
-		if (parent->Rmin < node->Rmin)
-			where += 4;
-		if (parent->Gmin < node->Gmin)
-			where += 2;
-		if (parent->Bmin < node->Bmin)
-			where += 1;
-			
-		// TODO - we always insert downwards, maybe we should try to keep
-		// the tree balanced...
-			
-		if (parent->children[where] == NULL)
+		
+		// pre-condition: the parent we're looking at is a superset of the node we're inserting
+		// it may have 0, 1, or 2 child
+		
+		// 0 child: insert as child 0
+		// 1 child: either we're included in the child, and recurse, or we''re not, and insert at child 1
+		// 2 child: one of them has to be a superset of the node.
+		
+		if (parent->children[0] == NULL)
 		{
-			// insert!	
-			parent->children[where] = node;
+			parent->children[0] = node;	
 			break;
 		} else {
-			// recurse
-			parent = parent->children[where];	
+			CT_Node* child0 = parent->children[0];
+			if (child0->Rmin <= node->Rmin
+				&& child0->Gmin <= node->Gmin
+				&& child0->Bmin <= node->Bmin
+				&& child0->Rmax >= node->Rmax
+				&& child0->Gmax >= node->Gmax
+				&& child0->Bmax >= node->Bmax
+			) {
+				parent = child0;
+			} else if(parent->children[1] == NULL)
+			{
+				parent->children[1] = node;	
+				break;
+			} else {
+				parent = parent->children[1];
+			}
 		}
 	}
 }
 
 byte CT_get(CT_Node* node, byte r, byte g, byte b)
 {	
-	int wheremin = 0;
-	int wheremax = 0;
+	// pre condition: node contains (rgb)
+	// find the leaf that also contains (rgb)
 	
-	if (node->Rmin < r)
-		wheremin += 4;
-	if (node->Gmin < g)
-		wheremin += 2;
-	if (node->Bmin < b)
-		wheremin += 1;
-		
-	if (node->Rmax < r)
-		wheremin += 4;
-	if (node->Gmax < g)
-		wheremin += 2;
-	if (node->Bmax < b)
-		wheremin += 1;
-		
-	if (wheremin == 7 && wheremax == 0)
-	{
-		// Found it!
-		return node->index;	
-	} else {
-		return CT_get(node->children[wheremin], r, g, b);	
+	for(;;) {
+		if(node->children[0] == NULL)
+			return node->index;
+		else {
+			// Left or right ?
+			CT_Node* child0 = node->children[0];
+			if (child0->Rmin <= r
+				&& child0->Gmin <= g
+				&& child0->Bmin <= b
+				&& child0->Rmax >= r
+				&& child0->Gmax >= g
+				&& child0->Bmax >= b
+			) {
+				// left
+				node = child0;
+			} else {
+				// right
+				node = node->children[1];
+			}
+		}
 	}
 }
 
@@ -118,7 +139,7 @@ void CT_delete(CT_Node* tree)
 	int i;
 	if (tree == NULL)
 		return;
-	for	(i = 0; i < 8; i++)
+	for	(i = 0; i < 2; i++)
 	{
 		CT_delete(tree->children[i]);
 	}

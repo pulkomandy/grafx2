@@ -30,37 +30,12 @@
 #define _OP_C_H_
 
 #include "struct.h"
+#include "colorred.h"
 
 //////////////////////////////////////////////// Définition des types de base
 
 typedef T_Components * T_Bitmap24B;
 typedef byte * T_Bitmap256;
-
-
-
-//////////////////////////////////////// Définition d'une table de conversion
-
-typedef struct
-{
-  int nbb_r; // Nb de bits de précision sur les rouges
-  int nbb_g; // Nb de bits de précision sur les verts
-  int nbb_b; // Nb de bits de précision sur les bleu
-
-  int rng_r; // Nb de valeurs sur les rouges (= 1<<nbb_r)
-  int rng_g; // Nb de valeurs sur les verts  (= 1<<nbb_g)
-  int rng_b; // Nb de valeurs sur les bleus  (= 1<<nbb_b)
-
-  int dec_r; // Coefficient multiplicateur d'accès dans la table (= nbb_g+nbb_b)
-  int dec_g; // Coefficient multiplicateur d'accès dans la table (= nbb_b)
-  int dec_b; // Coefficient multiplicateur d'accès dans la table (= 0)
-
-  int red_r; // Coefficient réducteur de traduction d'une couleur rouge (= 8-nbb_r)
-  int red_g; // Coefficient réducteur de traduction d'une couleur verte (= 8-nbb_g)
-  int red_b; // Coefficient réducteur de traduction d'une couleur bleue (= 8-nbb_b)
-
-  byte * table;
-} T_Conversion_table;
-
 
 
 ///////////////////////////////////////// Définition d'une table d'occurences
@@ -146,17 +121,6 @@ typedef struct
   T_Gradient * gradients; // Les dégradés
 } T_Gradient_set;
 
-
-
-/////////////////////////////////////////////////////////////////////////////
-///////////////////////////// Méthodes de gestion des tables de conversion //
-/////////////////////////////////////////////////////////////////////////////
-
-T_Conversion_table * CT_new(int nbb_r,int nbb_g,int nbb_b);
-void CT_delete(T_Conversion_table * t);
-byte CT_get(T_Conversion_table * t,int r,int g,int b);
-void CT_set(T_Conversion_table * t,int r,int g,int b,byte i);
-
 void RGB_to_HSL(int r, int g,int b, byte* h, byte*s, byte* l);
 void HSL_to_RGB(byte h, byte s, byte l, byte* r, byte* g, byte* b);
 
@@ -194,9 +158,9 @@ T_Cluster_set * CS_New(int nbmax,T_Occurrence_table * to);
 void CS_Delete(T_Cluster_set * cs);
 void CS_Get(T_Cluster_set * cs,T_Cluster * c);
 void CS_Set(T_Cluster_set * cs,T_Cluster * c);
-void CS_Generate(T_Cluster_set * cs,T_Occurrence_table * to);
+void CS_Generate(T_Cluster_set * cs,T_Occurrence_table * to, CT_Node** colorTree);
 void CS_Compute_colors(T_Cluster_set * cs,T_Occurrence_table * to);
-void CS_Generate_color_table_and_palette(T_Cluster_set * cs,T_Conversion_table * tc,T_Components * palette);
+void CS_Generate_color_table_and_palette(T_Cluster_set * cs,CT_Node** tc,T_Components * palette);
 
 /////////////////////////////////////////////////////////////////////////////
 //////////////////////////// Méthodes de gestion des ensembles de dégradés //

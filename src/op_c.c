@@ -30,6 +30,7 @@
 
 #include "op_c.h"
 #include "errors.h"
+#include "colorred.h"
 
 int Convert_24b_bitmap_to_256_fast(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette);
 
@@ -177,95 +178,6 @@ long Perceptual_lightness(T_Components *color)
          55*color->G*55*color->G +
          19*color->B*19*color->B;
 }
-
-// Conversion table handlers
-// The conversion table is built after a run of the median cut algorithm and is
-// used to find the best color index for a given (RGB) color. GIMP avoids
-// creating the whole table and only create parts of it when they are actually
-// needed. This may or may not be faster
-
-/// Creates a new conversion table
-/// params: bumber of bits for R, G, B (precision)
-T_Conversion_table * CT_new(int nbb_r,int nbb_g,int nbb_b)
-{
-  T_Conversion_table * n;
-  int size;
-
-  n=(T_Conversion_table *)malloc(sizeof(T_Conversion_table));
-  if (n!=NULL)
-  {
-    // Copy the passed parameters
-    n->nbb_r=nbb_r;
-    n->nbb_g=nbb_g;
-    n->nbb_b=nbb_b;
-
-    // Calculate the others
-
-    // Value ranges (max value actually)
-    n->rng_r=(1<<nbb_r);
-    n->rng_g=(1<<nbb_g);
-    n->rng_b=(1<<nbb_b);
-
-    // Shifts
-    n->dec_r=nbb_g+nbb_b;
-    n->dec_g=nbb_b;
-    n->dec_b=0;
-
-    // Reductions (how many bits are lost)
-    n->red_r=8-nbb_r;
-    n->red_g=8-nbb_g;
-    n->red_b=8-nbb_b;
-
-    // Allocate the table
-    size=(n->rng_r)*(n->rng_g)*(n->rng_b);
-    n->table=(byte *)calloc(size, 1);
-    if (n->table == NULL)
-    {
-      // Not enough memory
-      free(n);
-      n=NULL;
-    }
-  }
-
-  return n;
-}
-
-
-/// Delete a conversion table and release its memory
-void CT_delete(T_Conversion_table * t)
-{
-  free(t->table);
-  free(t);
-  t = NULL;
-}
-
-
-/// Get the best palette index for an (R, G, B) color
-byte CT_get(T_Conversion_table * t,int r,int g,int b)
-{
-  int index;
-
-  // Reduce the number of bits to the table precision
-  r=(r>>t->red_r);
-  g=(g>>t->red_g);
-  b=(b>>t->red_b);
-  
-  // Find the nearest color
-  index=(r<<t->dec_r) | (g<<t->dec_g) | (b<<t->dec_b);
-
-  return t->table[index];
-}
-
-
-/// Set an entry of the table, index (RGB), value i
-void CT_set(T_Conversion_table * t,int r,int g,int b,byte i)
-{
-  int index;
-
-  index=(r<<t->dec_r) | (g<<t->dec_g) | (b<<t->dec_b);
-  t->table[index]=i;
-}
-
 
 // Handlers for the occurences tables
 // This table is used to count the occurence of an (RGB) pixel value in the
@@ -883,7 +795,8 @@ void CS_Set(T_Cluster_set * cs,T_Cluster * c)
 // 4) We pack the 2 resulting boxes again to leave no empty space between the box border and the first pixel
 // 5) We take the box with the biggest number of pixels inside and we split it again
 // 6) Iterate until there are 256 boxes. Associate each of them to its middle color
-void CS_Generate(T_Cluster_set * cs, T_Occurrence_table * to)
+// At the same time, put the split clusters in the color tree for later palette lookup
+void CS_Generate(T_Cluster_set * cs, T_Occurrence_table * to, CT_Node** colorTree)
 {
   T_Cluster current;
   T_Cluster Nouveau1;
@@ -894,6 +807,10 @@ void CS_Generate(T_Cluster_set * cs, T_Occurrence_table * to)
   {
     // Get the biggest one
     CS_Get(cs,&current);
+    
+    // We're going to split, so add the cluster to the colortree
+    CT_set(colorTree,current.Rmin, current.Gmin, current.Bmin,
+       current.Rmax, current.Vmax, current.Bmax, 0);
 
     // Split it
     Cluster_split(&current, &Nouveau1, &Nouveau2, current.plus_large, to);
@@ -994,10 +911,9 @@ void CS_Sort_by_luminance(T_Cluster_set * cs)
 
 
 /// Generates the palette from the clusters, then the conversion table to map (RGB) to a palette index
-void CS_Generate_color_table_and_palette(T_Cluster_set * cs,T_Conversion_table * tc,T_Components * palette)
+void CS_Generate_color_table_and_palette(T_Cluster_set * cs,CT_Node** tc,T_Components * palette)
 {
   int index;
-  int r,g,b;
   T_Cluster* current = cs->clusters;
 
   for (index=0;index<cs->nb;index++)
@@ -1006,10 +922,8 @@ void CS_Generate_color_table_and_palette(T_Cluster_set * cs,T_Conversion_table *
     palette[index].G=current->g;
     palette[index].B=current->b;
 
-    for (r=current->Rmin; r<=current->Rmax; r++)
-      for (g=current->Gmin;g<=current->Vmax;g++)
-        for (b=current->Bmin;b<=current->Bmax;b++)
-          CT_set(tc,r,g,b,index);
+    CT_set(tc,current->Rmin, current->Gmin, current->Bmin,
+       current->Rmax, current->Vmax, current->Bmax, index);
     current = current->next;
   }
 }
@@ -1120,11 +1034,11 @@ void GS_Generate(T_Gradient_set * ds,T_Cluster_set * cs)
 
 
 /// Compute best palette for given picture.
-T_Conversion_table * Optimize_palette(T_Bitmap24B image, int size,
+CT_Node* Optimize_palette(T_Bitmap24B image, int size,
   T_Components * palette, int r, int g, int b)
-{
+{	
   T_Occurrence_table * to;
-  T_Conversion_table * tc;
+  CT_Node* tc;
   T_Cluster_set * cs;
   T_Gradient_set * ds;
 
@@ -1135,13 +1049,14 @@ T_Conversion_table * Optimize_palette(T_Bitmap24B image, int size,
   if (to == NULL)
     return 0;
 
-  tc = CT_new(r, g, b);
+  tc = CT_new();
+  /*
   if (tc == NULL)
   {
-    OT_delete(to);
-    return 0;
+  	OT_delete(to);
+  	return NULL;
   }
-
+*/
   // Count pixels for each color
   OT_count_occurrences(to, image, size);
 
@@ -1156,7 +1071,7 @@ T_Conversion_table * Optimize_palette(T_Bitmap24B image, int size,
   // Ok, everything was allocated
 
   // Generate the cluster set with median cut algorithm
-  CS_Generate(cs, to);
+  CS_Generate(cs, to, &tc);
   //CS_Check(cs);
 
   // Compute the color data for each cluster (palette entry + HL)
@@ -1174,11 +1089,11 @@ T_Conversion_table * Optimize_palette(T_Bitmap24B image, int size,
   //CS_Check(cs);
   CS_Sort_by_chrominance(cs);
   //CS_Check(cs);
-
+  
   // And finally generate the conversion table to map RGB > pal. index
-  CS_Generate_color_table_and_palette(cs, tc, palette);
+  CS_Generate_color_table_and_palette(cs, &tc, palette);
   //CS_Check(cs);
-
+  
   CS_Delete(cs);
   OT_delete(to);
   return tc;
@@ -1204,7 +1119,7 @@ int Modified_value(int value,int modif)
 /// Convert a 24b image to 256 colors (with a given palette and conversion table)
 /// This destroys the 24b picture !
 /// Uses floyd steinberg dithering.
-void Convert_24b_bitmap_to_256_Floyd_Steinberg(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette,T_Conversion_table * tc)
+void Convert_24b_bitmap_to_256_Floyd_Steinberg(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette,CT_Node* tc)
 {
   T_Bitmap24B current;
   T_Bitmap24B c_plus1;
@@ -1300,7 +1215,7 @@ void Convert_24b_bitmap_to_256_Floyd_Steinberg(T_Bitmap256 dest,T_Bitmap24B sour
 /// Converts from 24b to 256c without dithering, using given conversion table
 void Convert_24b_bitmap_to_256_nearest_neighbor(T_Bitmap256 dest,
   T_Bitmap24B source, int width, int height, __attribute__((unused)) T_Components * palette,
-  T_Conversion_table * tc)
+  CT_Node* tc)
 {
   T_Bitmap24B current;
   T_Bitmap256 d;
@@ -1359,19 +1274,20 @@ int Convert_24b_bitmap_to_256(T_Bitmap256 dest,T_Bitmap24B source,int width,int 
   return Convert_24b_bitmap_to_256_fast(dest, source, width, height, palette);  
 
   #else
-  T_Conversion_table * table; // table de conversion
+  CT_Node* table; // table de conversion
   int                ip;    // index de précision pour la conversion
 
   // On essaye d'obtenir une table de conversion qui loge en mémoire, avec la
   // meilleure précision possible
   for (ip=0;ip<(10*3);ip+=3)
   {
-    table=Optimize_palette(source,width*height,palette,precision_24b[ip+0],
-                            precision_24b[ip+1],precision_24b[ip+2]);
-    if (table!=0)
-      break;
+	table = Optimize_palette(source,width*height,palette,
+		precision_24b[ip], precision_24b[ip+1], precision_24b[ip+2]);
+	if (table != NULL)
+		break;
   }
-  if (table!=0)
+
+  if (table!=NULL)
   {
     //Convert_24b_bitmap_to_256_Floyd_Steinberg(dest,source,width,height,palette,table);
     Convert_24b_bitmap_to_256_nearest_neighbor(dest,source,width,height,palette,table);

@@ -46,18 +46,26 @@ typedef struct CT_Node_s
 	byte Gmax;
 	byte Bmax;
 	
+	// possible optimization: a cluster has either two childs or a color index.
+	// if the first child is NULL, then the other can be used to store the index
+	// when the tree is being built, a node may have child0 set and not child1, but not the reverse)
+	
+	// possible optimization: there can't be more than 511 clusters in the tree
+	// for a 256 color picture, so use int16 as pointers and store everything in a table :
+	// * makes them smaller
+	// * helps with cache locality
+	
 	// palette index (valid iff any child is NULL)
 	byte index;
 	
 	// child nodes
-	struct CT_Node_s* children[8];
-	//rgb rgB rGb rGB Rgb RgB RGb RGB
+	struct CT_Node_s* children[2];
 } CT_Node;
 
 CT_Node* CT_new();
 void CT_delete(CT_Node* t);
 byte CT_get(CT_Node* t,byte r,byte g,byte b);
-void CT_set(CT_Node* colorTree, byte Rmin, byte Gmin, byte Bmin,
+void CT_set(CT_Node** colorTree, byte Rmin, byte Gmin, byte Bmin,
 	byte Rmax, byte Gmax, byte Bmax, byte index);
 
 #endif
