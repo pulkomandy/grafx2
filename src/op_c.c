@@ -435,11 +435,9 @@ ENDCRUSH:
   c->bmin=bmin;     c->bmax=bmax;
   
   // Find the longest axis to know which way to split the cluster
-  // This multiplications are supposed to improve the result, but may or may not
-  // work, actually.
-  r=(c->rmax-c->rmin)*299;
-  g=(c->vmax-c->vmin)*587;
-  b=(c->bmax-c->bmin)*114;
+  r=(c->rmax-c->rmin);
+  g=(c->vmax-c->vmin);
+  b=(c->bmax-c->bmin);
 
   if (g>=r)
   {
@@ -796,7 +794,7 @@ void CS_Set(T_Cluster_set * cs,T_Cluster * c)
 // 5) We take the box with the biggest number of pixels inside and we split it again
 // 6) Iterate until there are 256 boxes. Associate each of them to its middle color
 // At the same time, put the split clusters in the color tree for later palette lookup
-void CS_Generate(T_Cluster_set * cs, T_Occurrence_table * to, CT_Node** colorTree)
+void CS_Generate(T_Cluster_set * cs, T_Occurrence_table * to, CT_Tree* colorTree)
 {
   T_Cluster current;
   T_Cluster Nouveau1;
@@ -911,7 +909,7 @@ void CS_Sort_by_luminance(T_Cluster_set * cs)
 
 
 /// Generates the palette from the clusters, then the conversion table to map (RGB) to a palette index
-void CS_Generate_color_table_and_palette(T_Cluster_set * cs,CT_Node** tc,T_Components * palette)
+void CS_Generate_color_table_and_palette(T_Cluster_set * cs,CT_Tree* tc,T_Components * palette)
 {
   int index;
   T_Cluster* current = cs->clusters;
@@ -1034,11 +1032,11 @@ void GS_Generate(T_Gradient_set * ds,T_Cluster_set * cs)
 
 
 /// Compute best palette for given picture.
-CT_Node* Optimize_palette(T_Bitmap24B image, int size,
+CT_Tree* Optimize_palette(T_Bitmap24B image, int size,
   T_Components * palette, int r, int g, int b)
 {	
   T_Occurrence_table * to;
-  CT_Node* tc;
+  CT_Tree* tc;
   T_Cluster_set * cs;
   T_Gradient_set * ds;
 
@@ -1050,13 +1048,13 @@ CT_Node* Optimize_palette(T_Bitmap24B image, int size,
     return 0;
 
   tc = CT_new();
-  /*
+  
   if (tc == NULL)
   {
   	OT_delete(to);
   	return NULL;
   }
-*/
+
   // Count pixels for each color
   OT_count_occurrences(to, image, size);
 
@@ -1071,7 +1069,7 @@ CT_Node* Optimize_palette(T_Bitmap24B image, int size,
   // Ok, everything was allocated
 
   // Generate the cluster set with median cut algorithm
-  CS_Generate(cs, to, &tc);
+  CS_Generate(cs, to, tc);
   //CS_Check(cs);
 
   // Compute the color data for each cluster (palette entry + HL)
@@ -1091,7 +1089,7 @@ CT_Node* Optimize_palette(T_Bitmap24B image, int size,
   //CS_Check(cs);
   
   // And finally generate the conversion table to map RGB > pal. index
-  CS_Generate_color_table_and_palette(cs, &tc, palette);
+  CS_Generate_color_table_and_palette(cs, tc, palette);
   //CS_Check(cs);
   
   CS_Delete(cs);
@@ -1119,7 +1117,7 @@ int Modified_value(int value,int modif)
 /// Convert a 24b image to 256 colors (with a given palette and conversion table)
 /// This destroys the 24b picture !
 /// Uses floyd steinberg dithering.
-void Convert_24b_bitmap_to_256_Floyd_Steinberg(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette,CT_Node* tc)
+void Convert_24b_bitmap_to_256_Floyd_Steinberg(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette,CT_Tree* tc)
 {
   T_Bitmap24B current;
   T_Bitmap24B c_plus1;
@@ -1215,7 +1213,7 @@ void Convert_24b_bitmap_to_256_Floyd_Steinberg(T_Bitmap256 dest,T_Bitmap24B sour
 /// Converts from 24b to 256c without dithering, using given conversion table
 void Convert_24b_bitmap_to_256_nearest_neighbor(T_Bitmap256 dest,
   T_Bitmap24B source, int width, int height, __attribute__((unused)) T_Components * palette,
-  CT_Node* tc)
+  CT_Tree* tc)
 {
   T_Bitmap24B current;
   T_Bitmap256 d;
@@ -1274,7 +1272,7 @@ int Convert_24b_bitmap_to_256(T_Bitmap256 dest,T_Bitmap24B source,int width,int 
   return Convert_24b_bitmap_to_256_fast(dest, source, width, height, palette);  
 
   #else
-  CT_Node* table; // table de conversion
+  CT_Tree* table; // table de conversion
   int                ip;    // index de précision pour la conversion
 
   // On essaye d'obtenir une table de conversion qui loge en mémoire, avec la

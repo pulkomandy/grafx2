@@ -55,17 +55,22 @@ typedef struct CT_Node_s
 	// * makes them smaller
 	// * helps with cache locality
 	
-	// palette index (valid iff any child is NULL)
-	byte index;
-	
-	// child nodes
-	struct CT_Node_s* children[2];
+	// Child nodes :
+	// Either two indices in the colorTree array, or
+	// 0 and a palette index
+	// 0 is not a valid array index, because no node points to the root !
+	word children[2];
 } CT_Node;
 
-CT_Node* CT_new();
-void CT_delete(CT_Node* t);
-byte CT_get(CT_Node* t,byte r,byte g,byte b);
-void CT_set(CT_Node** colorTree, byte Rmin, byte Gmin, byte Bmin,
+typedef struct ColorTree_S {
+	short nodecount;
+	CT_Node nodes[511];
+} CT_Tree;
+
+CT_Tree* CT_new();
+void CT_delete(CT_Tree* t);
+byte CT_get(CT_Tree* t,byte r,byte g,byte b);
+void CT_set(CT_Tree* colorTree, byte Rmin, byte Gmin, byte Bmin,
 	byte Rmax, byte Gmax, byte Bmax, byte index);
 
 #endif

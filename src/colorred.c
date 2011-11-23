@@ -34,23 +34,24 @@ but :
   * No loss of precision
 */
 
-CT_Node* CT_new() {return NULL;}
+CT_Tree* CT_new() {return calloc(1, sizeof(CT_Tree));}
 
 // debug helper
+/*
 void CT_Print(CT_Node* node)
 {
 	printf("R %d %d\tG %d %d\tB %d %d\ti %d\n",
 		node->Rmin, node->Rmax, node->Gmin, node->Gmax,
 		node->Bmin, node->Bmax, node->index);
 }
+*/
 
-void CT_set(CT_Node** colorTree, byte Rmin, byte Gmin, byte Bmin,
+void CT_set(CT_Tree* colorTree, byte Rmin, byte Gmin, byte Bmin,
 	byte Rmax, byte Gmax, byte Bmax, byte index)
 {
-	int i;
 	CT_Node* parent;
 	// Create and setup node
-	CT_Node* node = malloc(sizeof(CT_Node));
+	CT_Node* node = &colorTree->nodes[++colorTree->nodecount];
 	
 	node->Rmin = Rmin;
 	node->Gmin = Gmin;
@@ -58,20 +59,11 @@ void CT_set(CT_Node** colorTree, byte Rmin, byte Gmin, byte Bmin,
 	node->Rmax = Rmax;
 	node->Gmax = Gmax;
 	node->Bmax = Bmax;
-	node->index = index;
-	
-	printf("Add node:");
-	CT_Print(node);
-	
-	for(i = 0; i < 2; i++)
-		node->children[i] = NULL;
+	node->children[1] = index;
 	
 	// Now insert it in tree
-	parent = *colorTree;
-	if (parent == NULL) {
-		// This is our first node.
-		*colorTree = node;
-	} else for(;;) {
+	parent = &colorTree->nodes[0];
+	if (parent != NULL) for(;;) {
 		// Find where to insert ourselves
 		
 		// pre-condition: the parent we're looking at is a superset of the node we're inserting
@@ -81,12 +73,12 @@ void CT_set(CT_Node** colorTree, byte Rmin, byte Gmin, byte Bmin,
 		// 1 child: either we're included in the child, and recurse, or we''re not, and insert at child 1
 		// 2 child: one of them has to be a superset of the node.
 		
-		if (parent->children[0] == NULL)
+		if (parent->children[0] == 0)
 		{
-			parent->children[0] = node;	
+			parent->children[0] = colorTree->nodecount;	
 			break;
 		} else {
-			CT_Node* child0 = parent->children[0];
+			CT_Node* child0 = &colorTree->nodes[parent->children[0]];
 			if (child0->Rmin <= node->Rmin
 				&& child0->Gmin <= node->Gmin
 				&& child0->Bmin <= node->Bmin
@@ -95,28 +87,31 @@ void CT_set(CT_Node** colorTree, byte Rmin, byte Gmin, byte Bmin,
 				&& child0->Bmax >= node->Bmax
 			) {
 				parent = child0;
-			} else if(parent->children[1] == NULL)
+			} else if(parent->children[1] == 0)
 			{
-				parent->children[1] = node;	
+				parent->children[1] = colorTree->nodecount;	
 				break;
 			} else {
-				parent = parent->children[1];
+				parent = &colorTree->nodes[parent->children[1]];
 			}
 		}
 	}
 }
 
-byte CT_get(CT_Node* node, byte r, byte g, byte b)
+byte CT_get(CT_Tree* tree, byte r, byte g, byte b)
 {	
 	// pre condition: node contains (rgb)
 	// find the leaf that also contains (rgb)
 	
+	CT_Node* node = &tree->nodes[0];
+	
 	for(;;) {
-		if(node->children[0] == NULL)
-			return node->index;
+		if(node->children[0] == 0)
+			// return the palette index
+			return node->children[1];
 		else {
 			// Left or right ?
-			CT_Node* child0 = node->children[0];
+			CT_Node* child0 = &tree->nodes[node->children[0]];
 			if (child0->Rmin <= r
 				&& child0->Gmin <= g
 				&& child0->Bmin <= b
@@ -128,20 +123,13 @@ byte CT_get(CT_Node* node, byte r, byte g, byte b)
 				node = child0;
 			} else {
 				// right
-				node = node->children[1];
+				node = &tree->nodes[node->children[1]];
 			}
 		}
 	}
 }
 
-void CT_delete(CT_Node* tree)
+void CT_delete(CT_Tree* tree)
 {
-	int i;
-	if (tree == NULL)
-		return;
-	for	(i = 0; i < 2; i++)
-	{
-		CT_delete(tree->children[i]);
-	}
 	free(tree);
 }
