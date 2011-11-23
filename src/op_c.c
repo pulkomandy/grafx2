@@ -1303,7 +1303,7 @@ int Convert_24b_bitmap_to_256(T_Bitmap256 dest,T_Bitmap24B source,int width,int 
 
 //Really small, fast and ugly converter(just for handhelds)
 #include "global.h"
-#include "limits.h"
+#include <limits.h>
 #include "engine.h"
 #include "windows.h"
 

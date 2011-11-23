@@ -34,7 +34,7 @@
 #include "global.h"
 #include "io.h"
 #include "libraw2crtc.h"
-#include "limits.h"
+#include <limits.h>
 #include "loadsave.h"
 #include "misc.h"
 #include "sdlscreen.h"
