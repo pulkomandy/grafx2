@@ -211,7 +211,6 @@ void Button_Undo(void)
 {
   Hide_cursor();
   Undo();
-  Tilemap_update();
   Set_palette(Main_palette);
   Compute_optimal_menu_colors(Main_palette);
 
@@ -226,7 +225,6 @@ void Button_Redo(void)
 {
   Hide_cursor();
   Redo();
-  Tilemap_update();
   Set_palette(Main_palette);
   Compute_optimal_menu_colors(Main_palette);
 

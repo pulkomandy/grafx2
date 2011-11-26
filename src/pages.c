@@ -33,6 +33,7 @@
 #include "loadsave.h"
 #include "misc.h"
 #include "windows.h"
+#include "tiles.h"
 
 // -- Layers data
 
@@ -1155,6 +1156,9 @@ void Check_layers_limits()
     
 void Undo(void)
 {
+  int width = Main_image_width;
+  int height = Main_image_height;
+
   if (Last_backed_up_layers)
   {
     Free_page_of_a_list(Main_backups);
@@ -1179,11 +1183,16 @@ void Undo(void)
   Check_layers_limits();
   Redraw_layered_image();
   End_of_modification();
-  
+
+  if (width != Main_image_width || height != Main_image_height)
+    Tilemap_update();
 }
 
 void Redo(void)
 {
+  int width = Main_image_width;
+  int height = Main_image_height;
+
   if (Last_backed_up_layers)
   {
     Free_page_of_a_list(Main_backups);
@@ -1208,6 +1217,8 @@ void Redo(void)
   Redraw_layered_image();
   End_of_modification();
 
+  if (width != Main_image_width || height != Main_image_height)
+    Tilemap_update();
 }
 
 void Free_current_page(void)

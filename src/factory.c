@@ -46,6 +46,8 @@
 #include "filesel.h" // Read_list_of_drives()
 #include "realpath.h"
 #include "setup.h"
+#include "tiles.h"
+
 
 /// Lua scripts bound to shortcut keys.
 char * Bound_script[10];
@@ -1559,6 +1561,8 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   const char* message;
   byte  old_cursor_shape=Cursor_shape;
   char buf[MAX_PATH_CHARACTERS];
+  int original_image_width=Main_image_width;
+  int original_image_height=Main_image_height;
 
   // Some scripts are slow
   Cursor_shape=CURSOR_SHAPE_HOURGLASS;
@@ -1728,6 +1732,14 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
 
   Hide_cursor();
   Display_all_screen();
+  
+  // Update tilemap if image size has changed
+  if (original_image_width!=Main_image_width
+   || original_image_height!=Main_image_height)
+  {
+    Tilemap_update();
+  }
+
   // Update changed pen colors.
   if (Back_color!=Original_back_color || Fore_color!=Original_fore_color)
   {
