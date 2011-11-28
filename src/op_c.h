@@ -65,26 +65,46 @@ typedef struct
 
 ///////////////////////////////////////// Définition d'un ensemble de couleur
 
-typedef struct S_Cluster
+struct S_Cluster_CutData
 {
-  int occurences; // Nb total d'occurences des couleurs de l'ensemble
+  // informations used while median-cutting
+  int volume; // volume of narrow covering (without margins where there are no pixels)
+ 
+  // Widest component : 0 red, 1 green, 2 blue
+  byte plus_large;
+  
+};
 
-  // Grande couverture
-  byte Rmin,Rmax;
-  byte Gmin,Vmax;
-  byte Bmin,Bmax;
-
-  // Couverture minimale
-  byte rmin,rmax;
-  byte vmin,vmax;
-  byte bmin,bmax;
-
-  byte plus_large; // Composante ayant la plus grande variation (0=red,1=green,2=blue)
+struct S_Cluster_PalData
+{
+  //  information used while color reducing	
   byte r,g,b;      // color synthétisant l'ensemble
   byte h;          // Chrominance
   byte l;          // Luminosité
+};
 
+union U_Cluster_Data
+{
+	struct S_Cluster_CutData cut;
+	struct S_Cluster_PalData pal;
+};
+
+typedef struct S_Cluster
+{
   struct S_Cluster* next;
+  int occurences; // Numbers of pixels in picture part of this cluster
+  
+  // Narrow covering (remove margins that don't hold any pixel)
+  byte rmin,rmax;
+  byte vmin,vmax;
+  byte bmin,bmax;
+  
+  // Wide covering (how far it extends before touching another cluster wide covering)
+  byte Rmin,Rmax;
+  byte Gmin,Vmax;
+  byte Bmin,Bmax;
+ 
+  union U_Cluster_Data data;
 } T_Cluster;
 
 
@@ -156,7 +176,7 @@ void Cluster_compute_hue(T_Cluster * c,T_Occurrence_table * to);
 void CS_Init(T_Cluster_set * cs,T_Occurrence_table * to);
 T_Cluster_set * CS_New(int nbmax,T_Occurrence_table * to);
 void CS_Delete(T_Cluster_set * cs);
-void CS_Get(T_Cluster_set * cs,T_Cluster * c);
+void CS_Get(T_Cluster_set * cs,T_Cluster ** c);
 void CS_Set(T_Cluster_set * cs,T_Cluster * c);
 void CS_Generate(T_Cluster_set * cs,T_Occurrence_table * to, CT_Tree* colorTree);
 void CS_Compute_colors(T_Cluster_set * cs,T_Occurrence_table * to);

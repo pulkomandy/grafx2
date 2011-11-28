@@ -439,18 +439,20 @@ ENDCRUSH:
   g=(c->vmax-c->vmin);
   b=(c->bmax-c->bmin);
 
+   c->data.cut.volume = r*g*b;
+
   if (g>=r)
   {
     // G>=R
     if (g>=b)
     {
       // G>=R et G>=B
-      c->plus_large=1;
+      c->data.cut.plus_large=1;
     }
     else
     {
       // G>=R et G<B
-      c->plus_large=2;
+      c->data.cut.plus_large=2;
     }
   }
   else
@@ -459,12 +461,12 @@ ENDCRUSH:
     if (r>=b)
     {
       // R>G et R>=B
-      c->plus_large=0;
+      c->data.cut.plus_large=0;
     }
     else
     {
       // R>G et R<B
-      c->plus_large=2;
+      c->data.cut.plus_large=2;
     }
   }
 }
@@ -504,12 +506,9 @@ void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
 
     r>>=16;
     g>>=8;
-
-    // We tried to split on red, but found half of the pixels with r = rmin
-    // so we enforce some split to happen anyway, instead of creating an empty
-    // c2 and c1 == c
-    if (r==c->rmin)
-      r++;
+    
+    // More than half of the cluster pixel have r = rmin. Ensure we split somewhere anyway.
+    if (r == c->rmin) r++;
 
     c1->Rmin=c->Rmin; c1->Rmax=r-1;
     c1->rmin=c->rmin; c1->rmax=r-1;
@@ -547,9 +546,8 @@ void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
     }
 
     r>>=16; g>>=8;
-
-    if (g==c->vmin)
-      g++;
+    
+    if (g == c->vmin) g++;
 
     c1->Rmin=c->Rmin; c1->Rmax=c->Rmax;
     c1->rmin=c->rmin; c1->rmax=c->rmax;
@@ -586,9 +584,8 @@ void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
     }
 
     r>>=16; g>>=8;
-
-    if (b==c->bmin)
-      b++;
+    
+    if (b == c->bmin) b++;
 
     c1->Rmin=c->Rmin; c1->Rmax=c->Rmax;
     c1->rmin=c->rmin; c1->rmax=c->rmax;
@@ -630,10 +627,10 @@ void Cluster_compute_hue(T_Cluster * c,T_Occurrence_table * to)
         }
       }
   
-  c->r=(cumul_r<<to->red_r)/c->occurences;
-  c->g=(cumul_g<<to->red_g)/c->occurences;
-  c->b=(cumul_b<<to->red_b)/c->occurences;
-  RGB_to_HSL(c->r, c->g, c->b, &c->h, &s, &c->l);
+  c->data.pal.r=(cumul_r<<to->red_r)/c->occurences;
+  c->data.pal.g=(cumul_g<<to->red_g)/c->occurences;
+  c->data.pal.b=(cumul_b<<to->red_b)/c->occurences;
+  RGB_to_HSL(c->data.pal.r, c->data.pal.g, c->data.pal.b, &c->data.pal.h, &s, &c->data.pal.l);
 }
 
 
@@ -656,6 +653,15 @@ void CS_Check(T_Cluster_set* cs)
     }
 
     assert(c == NULL);
+}
+*/
+
+/*
+void Cluster_Print(T_Cluster* node)
+{
+	printf("R %d %d\tG %d %d\tB %d %d\n",
+		node->Rmin, node->Rmax, node->Gmin, node->Vmax,
+		node->Bmin, node->Bmax);
 }
 */
 
@@ -703,7 +709,6 @@ T_Cluster_set * CS_New(int nbmax, T_Occurrence_table * to)
       n = NULL;
     }
   }
-
   return n;
 }
 
@@ -723,39 +728,13 @@ void CS_Delete(T_Cluster_set * cs)
 
 
 /// Pop a cluster from the cluster list
-void CS_Get(T_Cluster_set * cs, T_Cluster * c)
-{
-  T_Cluster* current = cs->clusters;
-  T_Cluster* prev = NULL;
-
-  // Search a cluster with at least 2 distinct colors so we can split it
-  // Clusters are sorted by number of occurences, so a cluster may end up
-  // with a lot of pixelsand on top of the list, but only one color. We can't
-  // split it in that case. It should probably be stored on a list of unsplittable
-  // clusters to avoid running on it again on each iteration.
-  do
-  {
-    if ( (current->rmin < current->rmax) ||
-         (current->vmin < current->vmax) ||
-         (current->bmin < current->bmax) )
-      break;
-
-    prev = current;
-    
-  } while((current = current -> next));
-
-  // copy it to c
-  *c = *current;
-
-  // remove it from the list
-  cs->nb--;
-
-  if(prev)
-    prev->next = current->next;
-  else
-    cs->clusters = current->next;
-  free(current);
-  current = NULL;
+void CS_Get(T_Cluster_set * cs, T_Cluster ** c)
+{  
+  // Just remove and return the first cluster, which has the biggest volume.
+  *c = cs->clusters;
+  
+  cs->clusters = (*c)->next;
+  --cs->nb;
 }
 
 
@@ -765,8 +744,8 @@ void CS_Set(T_Cluster_set * cs,T_Cluster * c)
   T_Cluster* current = cs->clusters;
   T_Cluster* prev = NULL;
 
-  // Search the first cluster that is smaller than ours (less pixels)
-  while (current && current->occurences > c->occurences)
+  // Search the first cluster that is smaller than ours
+  while (current && current->data.cut.volume > c->data.cut.volume)
   {
     prev = current;
     current = current->next;
@@ -796,31 +775,43 @@ void CS_Set(T_Cluster_set * cs,T_Cluster * c)
 // At the same time, put the split clusters in the color tree for later palette lookup
 void CS_Generate(T_Cluster_set * cs, T_Occurrence_table * to, CT_Tree* colorTree)
 {
-  T_Cluster current;
-  T_Cluster Nouveau1;
-  T_Cluster Nouveau2;
+  T_Cluster* current;
+  T_Cluster* Nouveau1 = malloc(sizeof(T_Cluster));
+  T_Cluster* Nouveau2 = malloc(sizeof(T_Cluster));
 
   // There are less than 256 boxes
   while (cs->nb<cs->nb_max)
   {
     // Get the biggest one
     CS_Get(cs,&current);
+    //Cluster_Print(current);
     
     // We're going to split, so add the cluster to the colortree
-    CT_set(colorTree,current.Rmin, current.Gmin, current.Bmin,
-       current.Rmax, current.Vmax, current.Bmax, 0);
+    CT_set(colorTree,current->Rmin, current->Gmin, current->Bmin,
+       current->Rmax, current->Vmax, current->Bmax, 0);
 
     // Split it
-    Cluster_split(&current, &Nouveau1, &Nouveau2, current.plus_large, to);
+    if (current->data.cut.volume <= 1)
+    {
+    	// Sorry, but there's nothing more to split !
+    	// The biggest cluster only has one color...
+    	free(current);
+    	break;
+    }
+    Cluster_split(current, Nouveau1, Nouveau2, current->data.cut.plus_large, to);
+    free(current);
 
     // Pack the 2 new clusters (the split may leave some empty space between the
     // box border and the first actual pixel)
-    Cluster_pack(&Nouveau1, to);
-    Cluster_pack(&Nouveau2, to);
+    Cluster_pack(Nouveau1, to);
+    Cluster_pack(Nouveau2, to);
 
     // Put them back in the list
-    CS_Set(cs,&Nouveau1);
-    CS_Set(cs,&Nouveau2);
+    if (Nouveau1->occurences != 0)
+      CS_Set(cs,Nouveau1);
+      
+    if (Nouveau2->occurences != 0)
+      CS_Set(cs,Nouveau2);
     
   }
 }
@@ -856,7 +847,7 @@ void CS_Sort_by_chrominance(T_Cluster_set * cs)
     // Find his position in the new list
     for (place = newlist; place != NULL; place = place->next)
     {
-      if (place->h > nc->h) break;
+      if (place->data.pal.h > nc->data.pal.h) break;
       prev = place;
     }
 
@@ -890,7 +881,7 @@ void CS_Sort_by_luminance(T_Cluster_set * cs)
     // Find its position in the new list
     for (place = newlist; place != NULL; place = place->next)
     {
-      if (place->l > nc->l) break;
+      if (place->data.pal.l > nc->data.pal.l) break;
       prev = place;
     }
 
@@ -916,9 +907,9 @@ void CS_Generate_color_table_and_palette(T_Cluster_set * cs,CT_Tree* tc,T_Compon
 
   for (index=0;index<cs->nb;index++)
   {
-    palette[index].R=current->r;
-    palette[index].G=current->g;
-    palette[index].B=current->b;
+    palette[index].R=current->data.pal.r;
+    palette[index].G=current->data.pal.g;
+    palette[index].B=current->data.pal.b;
 
     CT_set(tc,current->Rmin, current->Gmin, current->Bmin,
        current->Rmax, current->Vmax, current->Bmax, index);
@@ -933,9 +924,9 @@ void CS_Generate_color_table_and_palette(T_Cluster_set * cs,CT_Tree* tc,T_Compon
 void GS_Init(T_Gradient_set * ds,T_Cluster_set * cs)
 {
     ds->gradients[0].nb_colors=1;
-    ds->gradients[0].min=cs->clusters->h;
-    ds->gradients[0].max=cs->clusters->h;
-    ds->gradients[0].hue=cs->clusters->h;
+    ds->gradients[0].min=cs->clusters->data.pal.h;
+    ds->gradients[0].max=cs->clusters->data.pal.h;
+    ds->gradients[0].hue=cs->clusters->data.pal.h;
     // Et hop : le 1er ensemble de d‚grad‚s est initialis‚
     ds->nb=1;
 }
@@ -988,7 +979,7 @@ void GS_Generate(T_Gradient_set * ds,T_Cluster_set * cs)
         best_diff=99999999;
         for (id=0;id<ds->nb;id++)
         {
-            diff=abs(current->h - ds->gradients[id].hue);
+            diff=abs(current->data.pal.h - ds->gradients[id].hue);
             if ((best_diff>diff) && (diff<16))
             {
                 best_gradient=id;
@@ -1000,13 +991,13 @@ void GS_Generate(T_Gradient_set * ds,T_Cluster_set * cs)
         if (best_gradient!=-1)
         {
             // On met … jour le d‚grad‚
-            if (current->h < ds->gradients[best_gradient].min)
-                ds->gradients[best_gradient].min=current->h;
-            if (current->h > ds->gradients[best_gradient].max)
-                ds->gradients[best_gradient].max=current->h;
+            if (current->data.pal.h < ds->gradients[best_gradient].min)
+                ds->gradients[best_gradient].min=current->data.pal.h;
+            if (current->data.pal.h > ds->gradients[best_gradient].max)
+                ds->gradients[best_gradient].max=current->data.pal.h;
             ds->gradients[best_gradient].hue=((ds->gradients[best_gradient].hue*
                         ds->gradients[best_gradient].nb_colors)
-                    +current->h)
+                    +current->data.pal.h)
                 /(ds->gradients[best_gradient].nb_colors+1);
             ds->gradients[best_gradient].nb_colors++;
         }
@@ -1015,18 +1006,18 @@ void GS_Generate(T_Gradient_set * ds,T_Cluster_set * cs)
             // On cr‚e un nouveau d‚grad‚
             best_gradient=ds->nb;
             ds->gradients[best_gradient].nb_colors=1;
-            ds->gradients[best_gradient].min=current->h;
-            ds->gradients[best_gradient].max=current->h;
-            ds->gradients[best_gradient].hue=current->h;
+            ds->gradients[best_gradient].min=current->data.pal.h;
+            ds->gradients[best_gradient].max=current->data.pal.h;
+            ds->gradients[best_gradient].hue=current->data.pal.h;
             ds->nb++;
         }
-        current->h=best_gradient;
+        current->data.pal.h=best_gradient;
     } while((current = current->next));
 
     // On redistribue les valeurs dans les clusters
     current = cs -> clusters;
     do
-        current->h=ds->gradients[current->h].hue;
+        current->data.pal.h=ds->gradients[current->data.pal.h].hue;
     while((current = current ->next));
 }
 
