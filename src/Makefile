@@ -228,6 +228,24 @@ else
 	COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -DNO_INLINE_MATH -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $(JOYCOPT) $(LAYERCOPT) $(LUACOPT)
     	LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) $(LAYERLOPT)
   else
+  ifeq ($(PLATFORM),syllable) #10
+	#Syllable
+    DELCOMMAND = rm -rf
+    MKDIR = mkdir -p
+    RMDIR = rmdir --ignore-fail-on-non-empty
+    CP = cp
+    ZIP = zip
+    PLATFORMFILES = gfx2.png
+    LUACOPT = -I/resources/indexes/include
+    LUALOPT = -llua
+
+        BIN = ../bin/grafx2
+        COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g `sdl-config --cflags` -I/resources/indexes/include/SDL $(TTFCOPT) $(LUACOPT) $(JOYCOPT) $(VKEYCOPT) -O$(OPTIM)
+        LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng -lz $(LUALOPT) -lm
+        CC = gcc
+        OBJDIR = ../obj/syllable
+        X11LOPT = 
+  else
     # Finally, the default rules that work fine for most unix/gcc systems, linux and freebsd are tested.
     # Linux and FreeBSD specific (default rules)
     DELCOMMAND = rm -rf
@@ -310,6 +328,7 @@ else
       endif
     endif
 
+  endif
   endif
   endif
   endif
