@@ -22,6 +22,7 @@
     24bit RGB to 8bit indexed functions
 */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -40,9 +41,9 @@ CT_Tree* CT_new() {return calloc(1, sizeof(CT_Tree));}
 /*
 void CT_Print(CT_Node* node)
 {
-	printf("R %d %d\tG %d %d\tB %d %d\ti %d\n",
+	printf("R %d %d\tG %d %d\tB %d %d\tc %d/%d\n",
 		node->Rmin, node->Rmax, node->Gmin, node->Gmax,
-		node->Bmin, node->Bmax, node->index);
+		node->Bmin, node->Bmax, node->children[0], node->children[1]);
 }
 */
 
@@ -51,7 +52,7 @@ void CT_set(CT_Tree* colorTree, byte Rmin, byte Gmin, byte Bmin,
 {
 	CT_Node* parent;
 	// Create and setup node
-	CT_Node* node = &colorTree->nodes[++colorTree->nodecount];
+	CT_Node* node = &colorTree->nodes[colorTree->nodecount];
 	
 	node->Rmin = Rmin;
 	node->Gmin = Gmin;
@@ -61,9 +62,9 @@ void CT_set(CT_Tree* colorTree, byte Rmin, byte Gmin, byte Bmin,
 	node->Bmax = Bmax;
 	node->children[1] = index;
 	
-	// Now insert it in tree
+	// Now insert it in tree (if we're not the root node)
 	parent = &colorTree->nodes[0];
-	if (parent != NULL) for(;;) {
+	if (colorTree->nodecount != 0) for(;;) {
 		// Find where to insert ourselves
 		
 		// pre-condition: the parent we're looking at is a superset of the node we're inserting
@@ -72,10 +73,11 @@ void CT_set(CT_Tree* colorTree, byte Rmin, byte Gmin, byte Bmin,
 		// 0 child: insert as child 0
 		// 1 child: either we're included in the child, and recurse, or we''re not, and insert at child 1
 		// 2 child: one of them has to be a superset of the node.
-		
+    
 		if (parent->children[0] == 0)
 		{
 			parent->children[0] = colorTree->nodecount;	
+      // We KNOW children[1] was set to 0, because the parent was a split cluster.
 			break;
 		} else {
 			CT_Node* child0 = &colorTree->nodes[parent->children[0]];
@@ -96,6 +98,8 @@ void CT_set(CT_Tree* colorTree, byte Rmin, byte Gmin, byte Bmin,
 			}
 		}
 	}
+
+  ++colorTree->nodecount;
 }
 
 byte CT_get(CT_Tree* tree, byte r, byte g, byte b)

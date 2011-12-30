@@ -153,8 +153,8 @@ long Perceptual_lightness(T_Components *color);
 void OT_init(T_Occurrence_table * t);
 T_Occurrence_table * OT_new(int nbb_r,int nbb_g,int nbb_b);
 void OT_delete(T_Occurrence_table * t);
-int OT_get(T_Occurrence_table * t,int r,int g,int b);
-void OT_inc(T_Occurrence_table * t,int r,int g,int b);
+int OT_get(T_Occurrence_table * t,byte r,byte g,byte b);
+void OT_inc(T_Occurrence_table * t,byte r,byte g,byte b);
 void OT_count_occurrences(T_Occurrence_table * t,T_Bitmap24B image,int size);
 
 
@@ -163,8 +163,8 @@ void OT_count_occurrences(T_Occurrence_table * t,T_Bitmap24B image,int size);
 ///////////////////////////////////////// Méthodes de gestion des clusters //
 /////////////////////////////////////////////////////////////////////////////
 
-void Cluster_pack(T_Cluster * c,T_Occurrence_table * to);
-void Cluster_split(T_Cluster * c,T_Cluster * c1,T_Cluster * c2,int hue,T_Occurrence_table * to);
+void Cluster_pack(T_Cluster * c,const T_Occurrence_table * const to);
+void Cluster_split(T_Cluster * c,T_Cluster * c1,T_Cluster * c2,int hue,const T_Occurrence_table * const to);
 void Cluster_compute_hue(T_Cluster * c,T_Occurrence_table * to);
 
 
@@ -178,7 +178,7 @@ T_Cluster_set * CS_New(int nbmax,T_Occurrence_table * to);
 void CS_Delete(T_Cluster_set * cs);
 void CS_Get(T_Cluster_set * cs,T_Cluster ** c);
 void CS_Set(T_Cluster_set * cs,T_Cluster * c);
-void CS_Generate(T_Cluster_set * cs,T_Occurrence_table * to, CT_Tree* colorTree);
+void CS_Generate(T_Cluster_set * cs,const T_Occurrence_table * const to, CT_Tree* colorTree);
 void CS_Compute_colors(T_Cluster_set * cs,T_Occurrence_table * to);
 void CS_Generate_color_table_and_palette(T_Cluster_set * cs,CT_Tree* tc,T_Components * palette);
 

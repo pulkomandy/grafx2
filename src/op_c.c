@@ -219,8 +219,8 @@ T_Occurrence_table * OT_new(int nbb_r,int nbb_g,int nbb_b)
     n->red_b=8-nbb_b;
 
     // Allocate the table
-    size=(n->rng_r)*(n->rng_g)*(n->rng_b)*sizeof(int);
-    n->table=(int *)calloc(size, 1);
+    size=(n->rng_r)*(n->rng_g)*(n->rng_b);
+    n->table=(int *)calloc(size, sizeof(int));
     if (n->table == NULL)
     {
       // Not enough memory !
@@ -243,7 +243,7 @@ void OT_delete(T_Occurrence_table * t)
 
 
 /// Get number of occurences for a given color
-int OT_get(T_Occurrence_table * t, int r, int g, int b)
+int OT_get(T_Occurrence_table * t, byte r, byte g, byte b)
 {
   int index;
 
@@ -254,7 +254,7 @@ int OT_get(T_Occurrence_table * t, int r, int g, int b)
 
 
 /// Add 1 to the count for a color
-void OT_inc(T_Occurrence_table * t,int r,int g,int b)
+void OT_inc(T_Occurrence_table * t,byte r,byte g,byte b)
 {
   int index;
 
@@ -262,6 +262,7 @@ void OT_inc(T_Occurrence_table * t,int r,int g,int b)
   r=(r>>t->red_r);
   g=(g>>t->red_g);
   b=(b>>t->red_b);
+
   // Compute the address
   index=(r<<t->dec_r) | (g<<t->dec_g) | (b<<t->dec_b);
   t->table[index]++;
@@ -311,7 +312,7 @@ int OT_count_colors(T_Occurrence_table * t)
 
 
 /// Pack a cluster, ie compute its {r,v,b}{min,max} values
-void Cluster_pack(T_Cluster * c,T_Occurrence_table * to)
+void Cluster_pack(T_Cluster * c,const T_Occurrence_table * const to)
 {
   int rmin,rmax,vmin,vmax,bmin,bmax;
   int r,g,b;
@@ -475,7 +476,7 @@ ENDCRUSH:
 /// Split a cluster on its longest axis.
 /// c = source cluster, c1, c2 = output after split
 void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
-  T_Occurrence_table * to)
+  const T_Occurrence_table * const to)
 {
   int limit;
   int cumul;
@@ -738,7 +739,7 @@ void CS_Get(T_Cluster_set * cs, T_Cluster ** c)
 }
 
 
-/// Push a cluster in the list
+/// Push a copy of a cluster in the list
 void CS_Set(T_Cluster_set * cs,T_Cluster * c)
 {
   T_Cluster* current = cs->clusters;
@@ -773,11 +774,11 @@ void CS_Set(T_Cluster_set * cs,T_Cluster * c)
 // 5) We take the box with the biggest number of pixels inside and we split it again
 // 6) Iterate until there are 256 boxes. Associate each of them to its middle color
 // At the same time, put the split clusters in the color tree for later palette lookup
-void CS_Generate(T_Cluster_set * cs, T_Occurrence_table * to, CT_Tree* colorTree)
+void CS_Generate(T_Cluster_set * cs, const T_Occurrence_table * const to, CT_Tree* colorTree)
 {
   T_Cluster* current;
-  T_Cluster* Nouveau1 = malloc(sizeof(T_Cluster));
-  T_Cluster* Nouveau2 = malloc(sizeof(T_Cluster));
+  T_Cluster Nouveau1;
+  T_Cluster Nouveau2;
 
   // There are less than 256 boxes
   while (cs->nb<cs->nb_max)
@@ -786,7 +787,9 @@ void CS_Generate(T_Cluster_set * cs, T_Occurrence_table * to, CT_Tree* colorTree
     CS_Get(cs,&current);
     //Cluster_Print(current);
     
-    // We're going to split, so add the cluster to the colortree
+    // We are going to split this cluster, so add it to the color tree. It is a split cluster,
+    // not a final one. We KNOW its two child will get added later (either because they are split,
+    // or because they are part of the final cluster set). So, we add thiscluster with a NULL index.
     CT_set(colorTree,current->Rmin, current->Gmin, current->Bmin,
        current->Rmax, current->Vmax, current->Bmax, 0);
 
@@ -798,22 +801,22 @@ void CS_Generate(T_Cluster_set * cs, T_Occurrence_table * to, CT_Tree* colorTree
     	free(current);
     	break;
     }
-    Cluster_split(current, Nouveau1, Nouveau2, current->data.cut.plus_large, to);
+    Cluster_split(current, &Nouveau1, &Nouveau2, current->data.cut.plus_large, to);
     free(current);
 
     // Pack the 2 new clusters (the split may leave some empty space between the
     // box border and the first actual pixel)
-    Cluster_pack(Nouveau1, to);
-    Cluster_pack(Nouveau2, to);
+    Cluster_pack(&Nouveau1, to);
+    Cluster_pack(&Nouveau2, to);
 
     // Put them back in the list
-    if (Nouveau1->occurences != 0)
-      CS_Set(cs,Nouveau1);
+    if (Nouveau1.occurences != 0)
+      CS_Set(cs,&Nouveau1);
       
-    if (Nouveau2->occurences != 0)
-      CS_Set(cs,Nouveau2);
-    
+    if (Nouveau2.occurences != 0)
+      CS_Set(cs,&Nouveau2);
   }
+
 }
 
 
@@ -822,8 +825,9 @@ void CS_Compute_colors(T_Cluster_set * cs, T_Occurrence_table * to)
 {
   T_Cluster * c;
 
-  for (c=cs->clusters;c!=NULL;c=c->next)
+  for (c=cs->clusters;c!=NULL;c=c->next) {
     Cluster_compute_hue(c,to);
+  }
 }
 
 
@@ -1023,6 +1027,7 @@ void GS_Generate(T_Gradient_set * ds,T_Cluster_set * cs)
 
 
 /// Compute best palette for given picture.
+/// @param size in pixels
 CT_Tree* Optimize_palette(T_Bitmap24B image, int size,
   T_Components * palette, int r, int g, int b)
 {	
