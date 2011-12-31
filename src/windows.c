@@ -1132,7 +1132,7 @@ void Warning_message(char * message)
   Display_cursor();
 }
 
-/// Window that shows a big message (up to 34x12), and waits for a click on OK.
+/// Window that shows a big message (up to 35x13), and waits for a click on OK.
 /// On call: Cursor must be displayed
 /// On exit: Cursor is displayed
 void Verbose_message(const char *caption, const char * message )
@@ -1148,7 +1148,7 @@ void Verbose_message(const char *caption, const char * message )
   Open_window(300,160,caption);
   
   // Word-wrap the message
-  for (line=0; line < 12 && *message!='\0'; line++)
+  for (line=0; line < 13 && *message!='\0'; line++)
   {
     last_space = -1;
     for (nb_char=0; nb_char<35 && message[nb_char]!='\0'; nb_char++)
