@@ -1272,7 +1272,7 @@ void Button_Skins(void)
   
   char * cursors[] = { "Solid", "Transparent", "Thin" };
   T_Gui_skin * gfx = NULL;
-
+  byte * new_font;
 
   #define FILESEL_Y 34
 
@@ -1433,8 +1433,22 @@ void Button_Skins(void)
           need_load=1;
         break;
       case 5 : // Font dropdown
+      {
+        T_Fileselector_item* fontName;
         selected_font = Window_attribute2; // Get the index of the chosen font.
+        fontName = Get_item_by_index(&Font_files_list,selected_font);
+        new_font = Load_font(fontName->Full_name);
+        if (new_font)
+        {
+          free(Menu_font);
+          Menu_font = new_font;
+          Print_in_window( 172, 33,"Font:"            ,MC_Black,MC_Light);
+          Print_in_window_limited(font_dropdown->Pos_X+2,font_dropdown->Pos_Y+(font_dropdown->Height-7)/2,
+            fontName->Short_name,strlen(fontName->Short_name) ,MC_Black,MC_Light);
+          Update_window_area(172, 33, 8 * 5, 8);
+        }
         break;
+      }
       // 6: Cancel
       case 7 : // Cursor
         selected_cursor = Window_attribute2;
@@ -1457,8 +1471,6 @@ void Button_Skins(void)
 
   if(clicked_button == 1)
   {
-    byte * new_font;
-
     if (gfx != NULL)
     {
       Set_current_skin(skinsdir, gfx);
