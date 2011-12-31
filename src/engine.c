@@ -1439,7 +1439,44 @@ void Main_handler(void)
               /*if (Gfx->Hover_effect && prev_button_number > -1 && !Buttons_Pool[prev_button_number].Pressed)
                 Draw_menu_button(prev_button_number, BUTTON_RELEASED);
               */
-              
+
+              if (button_index == BUTTON_LAYER_SELECT)
+              {
+                int x,y;
+                short layer, prev_layer;
+                Open_popup((Buttons_Pool[BUTTON_LAYER_SELECT].X_offset + 2)*Menu_factor_X,
+                    Menu_Y,Buttons_Pool[BUTTON_LAYER_SELECT].Width / Main_backups->Pages->Nb_layers,
+                    Menu_bars[MENUBAR_COUNT - 1].Height);
+
+                prev_layer = -1;
+
+                // Make the system think the menu is visible (Open_popup hides it)
+                // so Button_under_mouse still works
+                Menu_is_visible=Menu_is_visible_before_window;
+                Menu_Y=Menu_Y_before_window;
+                while(Button_under_mouse() == BUTTON_LAYER_SELECT)
+                {
+                  layer = Layer_under_mouse();
+                  if (layer != prev_layer)
+                  {
+                    for (x = 0; x < Window_width; x++)
+                      for (y = 0; y < Window_height; y++)
+                      {
+                        int imgx = x * Main_image_width / Window_width;
+                        int imgy = y * Main_image_height / Window_height;
+                        Pixel_in_window(x, y, *(Main_backups->Pages->Image[layer].Pixels
+                            + imgx + imgy * Main_image_width));
+                      }
+
+                    Update_window_area(0,0,Window_width, Window_height);
+                    prev_layer = layer;
+                  }
+                  Get_input(20);
+                };
+
+                Close_popup();
+              }
+
               Print_in_menu(Menu_tooltip[button_index],0);
 
               /*if (Gfx->Hover_effect && !Buttons_Pool[button_index].Pressed)

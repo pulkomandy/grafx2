@@ -39,3 +39,5 @@ void Button_Anim_last_frame(void);
 void Button_Anim_play(void);
 void Button_Anim_continuous_prev(void);
 void Button_Anim_continuous_next(void);
+
+short Layer_under_mouse(void);

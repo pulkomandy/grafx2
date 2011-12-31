@@ -147,7 +147,7 @@ void Button_Layer_remove(void)
   Display_cursor();
 }
 
-void Button_Layer_select(void)
+short Layer_under_mouse(void)
 {
   short layer;
   // Determine which button is clicked according to mouse position
@@ -160,6 +160,12 @@ void Button_Layer_select(void)
   else if (layer > Main_backups->Pages->Nb_layers-1)
     layer=Main_backups->Pages->Nb_layers-1;
 
+  return layer;
+}
+
+void Button_Layer_select(void)
+{
+  short layer = Layer_under_mouse;
   Layer_activate(layer, LEFT_SIDE);
 }
 
