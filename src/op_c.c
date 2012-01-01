@@ -436,9 +436,9 @@ ENDCRUSH:
   c->bmin=bmin;     c->bmax=bmax;
   
   // Find the longest axis to know which way to split the cluster
-  r=(c->rmax-c->rmin);
-  g=(c->vmax-c->vmin);
-  b=(c->bmax-c->bmin);
+  r=(c->rmax-c->rmin) + 1;
+  g=(c->vmax-c->vmin) + 1;
+  b=(c->bmax-c->bmin) + 1;
 
    c->data.cut.volume = r*g*b;
 
