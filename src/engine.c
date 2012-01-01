@@ -1484,7 +1484,6 @@ void Main_handler(void)
                 Close_popup();
 
                 Mouse_K = x; // Close_popup waits for end of click and resets Mouse_K...
-                goto HANDLE_CLICK;
               }
 
               Print_in_menu(Menu_tooltip[button_index],0);

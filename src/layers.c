@@ -165,7 +165,7 @@ short Layer_under_mouse(void)
 
 void Button_Layer_select(void)
 {
-  short layer = Layer_under_mouse;
+  short layer = Layer_under_mouse();
   Layer_activate(layer, LEFT_SIDE);
 }
 
