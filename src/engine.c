@@ -1443,10 +1443,15 @@ void Main_handler(void)
               if (button_index == BUTTON_LAYER_SELECT)
               {
                 int x,y;
+                int previewW, previewH;
                 short layer, prev_layer;
+
+                previewW = Buttons_Pool[BUTTON_LAYER_SELECT].Width / Main_backups->Pages->Nb_layers;
+                previewH = previewW * Main_image_height / Main_image_width;
+                  // TODO this will give stupid out of screen results for very narrow images...
+
                 Open_popup((Buttons_Pool[BUTTON_LAYER_SELECT].X_offset + 2)*Menu_factor_X,
-                    Menu_Y,Buttons_Pool[BUTTON_LAYER_SELECT].Width / Main_backups->Pages->Nb_layers,
-                    Menu_bars[MENUBAR_COUNT - 1].Height);
+                  Menu_Y - previewH, previewW, previewH);
 
                 prev_layer = -1;
 
@@ -1454,7 +1459,7 @@ void Main_handler(void)
                 // so Button_under_mouse still works
                 Menu_is_visible=Menu_is_visible_before_window;
                 Menu_Y=Menu_Y_before_window;
-                while(Button_under_mouse() == BUTTON_LAYER_SELECT)
+                while(Button_under_mouse() == BUTTON_LAYER_SELECT && Mouse_K == 0)
                 {
                   layer = Layer_under_mouse();
                   if (layer != prev_layer)
@@ -1474,7 +1479,12 @@ void Main_handler(void)
                   Get_input(20);
                 };
 
+                x = Mouse_K;
+
                 Close_popup();
+
+                Mouse_K = x; // Close_popup waits for end of click and resets Mouse_K...
+                goto HANDLE_CLICK;
               }
 
               Print_in_menu(Menu_tooltip[button_index],0);
@@ -1514,6 +1524,7 @@ void Main_handler(void)
       // Gestion des clicks
       if (Mouse_K)
       {
+HANDLE_CLICK:
         if (Mouse_Y>=Menu_Y)
         {
           if (button_index>=0)
