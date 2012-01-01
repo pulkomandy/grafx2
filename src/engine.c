@@ -1523,7 +1523,6 @@ void Main_handler(void)
       // Gestion des clicks
       if (Mouse_K)
       {
-HANDLE_CLICK:
         if (Mouse_Y>=Menu_Y)
         {
           if (button_index>=0)
