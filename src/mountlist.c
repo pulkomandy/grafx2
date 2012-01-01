@@ -23,9 +23,14 @@
 #if(!defined(__WIN32__))&&(!defined(__amigaos4__))&&(!defined(__AROS__))&&(!defined(__MORPHOS__))&&(!defined(__amigaos__))
 
 // We don't use autoconf and all that in grafx2, so let's do the config here ...
-#if defined(__macosx__) || defined(__FreeBSD__)                        // MacOS X is POSIX compliant
+#if defined(__macosx__) || defined(__FreeBSD__) || defined(__OpenBSD__)                       // MacOS X is POSIX compliant
     #define MOUNTED_GETMNTINFO
 #if defined(__macosx__)
+    #include <sys/types.h>
+#endif
+#if defined(__OpenBSD__)
+    #define HAVE_STRUCT_STATFS_F_FSTYPENAME 1
+    #include <sys/param.h> /* types.h needs this */
     #include <sys/types.h>
 #endif
 #elif defined(__NetBSD__)
@@ -463,7 +468,7 @@ read_file_system_list (BROKEN bool need_fs_type)
         me = malloc (sizeof *me);
         me->me_devname = strdup (fsp->f_mntfromname);
         me->me_mountdir = strdup (fsp->f_mntonname);
-#if defined(__macosx__)
+#if defined(__macosx__) || defined(__OpenBSD__)
         me->me_type = fsp->f_fstypename;
 #else
         me->me_type = fsp->fs_typename;
