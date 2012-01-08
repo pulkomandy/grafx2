@@ -32,11 +32,11 @@
 # Compile with OPTIM=0 to disable gcc optimizations, to enable debug.
   STRIP = strip
 
-### Specific to build MAC OS X universal binaries on Tiger ###
+### Specific to build MAC OS X universal binaries on Lion ###
 ### (may need to be changed or removed depedning on the OSX version) ###
 
-MACOSX_SYSROOT = /Developer/SDKs/MacOSX10.4u.sdk
-MACOSX_ARCH = -arch ppc -arch i386
+MACOSX_SYSROOT = /Developer/SDKs/MacOSX10.6.sdk
+MACOSX_ARCH = -arch x86_64 -arch i386
 
 ### PLATFORM DETECTION AND CONFIGURATION ###
 
@@ -97,11 +97,24 @@ else
     FWDIR = /Library/Frameworks
     BIN = ../bin/grafx2
     SVN_REVISION = $(shell svnversion | cut -f2 -d ":" - | tr -d "M")
-    SDLCOPT = $(MACOSX_ARCH) -I$(FWDIR)/SDL.framework/Headers -I$(FWDIR)/SDL_image.framework/Headers -I$(FWDIR)/SDL_ttf.framework/Headers -D_THREAD_SAFE
+
+    # these are for use with macports
+    #SDLCOPT = $(shell sdl-config --cflags)
+    #SDLLOPT = $(shell sdl-config --libs) $(shell pkg-config --libs SDL_image)
+    #LUACOPT = $(shell pkg-config lua --cflags --silence-errors ||pkg-config lua5.1 --cflags --silence-errors ||pkg-config lua-5.1 --cflags)
+    #LUALOPT = $(shell pkg-config lua --libs --silence-errors ||pkg-config lua5.1 --libs --silence-errors ||pkg-config lua-5.1 --libs)
+
+    # these are for use with Mac OS X native frameworks
     #-framework SDL_ttf 
     SDLLOPT = -isysroot $(MACOSX_SYSROOT) $(MACOSX_ARCH) -L/usr/lib -framework SDL -framework SDL_image -framework Cocoa -framework Carbon -framework OpenGL
-    COPT = -D_DARWIN_C_SOURCE -D__macosx__ -D__linux__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g $(LUACOPT) $(shell sdlCOPT) $(TTFCOPT) -I/usr/X11/include
-    LOPT = $(shell sdlLOPT) -llua -lpng -lz
+    SDLCOPT = $(MACOSX_ARCH) -I$(FWDIR)/SDL.framework/Headers -I$(FWDIR)/SDL_image.framework/Headers -I$(FWDIR)/SDL_ttf.framework/Headers -D_THREAD_SAFE
+    LUACOPT =
+    LUALOPT = 
+
+
+    # these are for everyone
+    COPT = -D_DARWIN_C_SOURCE -D__macosx__ -D__linux__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g $(LUACOPT) $(SDLCOPT) $(TTFCOPT) -I/usr/X11/include
+    LOPT = $(SDLLOPT) $(LUALOPT) -lpng -lz
     # Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
     CC = gcc
     #CC = nccgen -ncgcc -ncld -ncfabs
