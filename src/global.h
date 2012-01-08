@@ -887,8 +887,8 @@ GFX2_GLOBAL T_Brush_template Brush_container[BRUSH_CONTAINER_COLUMNS*BRUSH_CONTA
     CURSOR_SHAPE_XOR_TARGET        , // Filled circle
     CURSOR_SHAPE_XOR_TARGET        , // Empty ellipse
     CURSOR_SHAPE_XOR_TARGET        , // Filled ellipse
-    CURSOR_SHAPE_TARGET            , // Fill
-    CURSOR_SHAPE_TARGET            , // Color replacer
+    CURSOR_SHAPE_BUCKET            , // Fill
+    CURSOR_SHAPE_BUCKET            , // Color replacer
     CURSOR_SHAPE_XOR_TARGET        , // Rectangular brush grabbing
     CURSOR_SHAPE_TARGET            , // Polygonal brush grabbing
     CURSOR_SHAPE_COLORPICKER       , // Colorpicker

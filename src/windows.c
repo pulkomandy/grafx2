@@ -2086,6 +2086,7 @@ void Display_cursor(void)
 
     case CURSOR_SHAPE_MULTIDIRECTIONAL :
     case CURSOR_SHAPE_HORIZONTAL :
+    case CURSOR_SHAPE_BUCKET :
       if (Cursor_hidden)
         break;
 
@@ -2093,11 +2094,11 @@ void Display_cursor(void)
     case CURSOR_SHAPE_HOURGLASS :
       start_x=Mouse_X-Gfx->Cursor_offset_X[shape];
       start_y=Mouse_Y-Gfx->Cursor_offset_Y[shape];
-      for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
+      for (y_pos=start_y,counter_y=0;counter_y<CURSOR_SPRITE_HEIGHT;y_pos++,counter_y++)
       {
         if(y_pos<0) continue;
         if(y_pos>=Screen_height) break;
-        for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
+        for (x_pos=start_x,counter_x=0;counter_x<CURSOR_SPRITE_WIDTH;x_pos++,counter_x++)
         {
           if(x_pos<0) continue;
           if(x_pos>=Screen_width) break;
@@ -2384,6 +2385,7 @@ void Hide_cursor(void)
 
     case CURSOR_SHAPE_MULTIDIRECTIONAL :
     case CURSOR_SHAPE_HORIZONTAL :
+    case CURSOR_SHAPE_BUCKET :
       if (Cursor_hidden)
         break;
 
@@ -2392,11 +2394,11 @@ void Hide_cursor(void)
       start_x=Mouse_X-Gfx->Cursor_offset_X[shape];
       start_y=Mouse_Y-Gfx->Cursor_offset_Y[shape];
 
-      for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
+      for (y_pos=start_y,counter_y=0;counter_y<CURSOR_SPRITE_HEIGHT;y_pos++,counter_y++)
       {
         if(y_pos<0) continue;
         if(y_pos>=Screen_height) break;
-        for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
+        for (x_pos=start_x,counter_x=0;counter_x<CURSOR_SPRITE_WIDTH;x_pos++,counter_x++)
         {
           if(x_pos<0) continue;
           if(x_pos>=Screen_width) break;

@@ -267,7 +267,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   int char_2=0;  // grands titres de l'aide. Chaque indice avance dans 
   int char_3=0;  // l'une des fontes dans l'ordre :  1 2
   int char_4=0;  //                                  3 4
-  byte mouse_cursor_area[29][29];
+  byte mouse_cursor_area[31][29];
   SDL_Palette * SDLPal;
   
   // Default palette
@@ -475,12 +475,12 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "mouse cursor"))
         return 1;
     }
-    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, mouse_cursor_area, 29, 29, "mouse cursor",1))
+    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, mouse_cursor_area, 29, 31, "mouse cursor",1))
       return 1;
     Center_GUI_cursor(gfx, (byte *)mouse_cursor_area,i);
     cursor_x+=29;
   }
-  cursor_y+=29;
+  cursor_y+=31;
 
   // Menu sprites
   for (i=0; i<NB_MENU_SPRITES; i++)

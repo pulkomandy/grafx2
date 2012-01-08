@@ -40,9 +40,9 @@
 #define NB_ZOOM_FACTORS           15    ///< Number of zoom levels available in the magnifier.
 #define MENU_WIDTH                254   ///< Width of the menu (not counting the palette)
 #define MENU_HEIGHT               44    ///< Height of the menu.
-#define NB_CURSOR_SPRITES         8     ///< Number of available mouse cursor sprites.
-#define CURSOR_SPRITE_WIDTH       15    ///< Width of a mouse cursor sprite.
-#define CURSOR_SPRITE_HEIGHT      15    ///< Height of a mouse cursor sprite.
+#define NB_CURSOR_SPRITES         9     ///< Number of available mouse cursor sprites.
+#define CURSOR_SPRITE_WIDTH       16    ///< Width of a mouse cursor sprite.
+#define CURSOR_SPRITE_HEIGHT      16    ///< Height of a mouse cursor sprite.
 #define MENU_SPRITE_WIDTH         16    ///< Width of a menu sprite in pixels
 #define MENU_SPRITE_HEIGHT        16    ///< Height of a menu sprite in pixels
 #define EFFECT_SPRITE_WIDTH       14    ///< Width of an effect sprite in pixels
@@ -187,17 +187,21 @@ enum BUTTON_SHAPES
 /// The different "mouse cursor" shapes
 enum CURSOR_SHAPES
 {
+  // Sprite based cursors first (also used as index in cursor sprite array)
   CURSOR_SHAPE_ARROW,
   CURSOR_SHAPE_TARGET,           ///< This one uses the paintbrush
-  CURSOR_SHAPE_COLORPICKER,      ///< This one uses the paintbrush
+  CURSOR_SHAPE_COLORPICKER,
   CURSOR_SHAPE_HOURGLASS,
   CURSOR_SHAPE_MULTIDIRECTIONAL,
   CURSOR_SHAPE_HORIZONTAL,
   CURSOR_SHAPE_THIN_TARGET,      ///< This one uses the paintbrush
   CURSOR_SHAPE_THIN_COLORPICKER, ///< This one uses the paintbrush
+  CURSOR_SHAPE_BUCKET,
+
+  // XOR/runtime-generated cursors last
   CURSOR_SHAPE_XOR_TARGET,
   CURSOR_SHAPE_XOR_RECTANGLE,
-  CURSOR_SHAPE_XOR_ROTATION
+  CURSOR_SHAPE_XOR_ROTATION,
 };
 
 /// The different shapes that can be used as a paintbrush (paintbrush types go in the beginning)
