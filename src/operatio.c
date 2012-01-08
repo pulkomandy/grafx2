@@ -1005,6 +1005,7 @@ void Circle_12_5(void)
   if ( (tangent_x!=Paintbrush_X) || (tangent_y!=Paintbrush_Y) )
   {
     Hide_cursor();
+    Cursor_shape=CURSOR_SHAPE_TARGET;
     if ((Config.Coords_rel) && (Menu_is_visible))
     {
       Num2str(Distance(center_x,center_y,Paintbrush_X,Paintbrush_Y),str,4);
@@ -1178,10 +1179,12 @@ void Ellipse_12_5(void)
   Operation_pop(&center_y);
   Operation_pop(&center_x);
   Operation_pop(&color);
+ 
 
   if ( (tangent_x!=Paintbrush_X) || (tangent_y!=Paintbrush_Y) )
   {
     Hide_cursor();
+    Cursor_shape=CURSOR_SHAPE_TARGET;
     Display_coords_rel_or_abs(center_x,center_y);
 
     horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
@@ -2982,9 +2985,11 @@ void Grad_circle_12_6(void)
   Operation_pop(&center_x);
   Operation_pop(&color);
 
+
   if ( (tangent_x!=Paintbrush_X) || (tangent_y!=Paintbrush_Y) )
   {
     Hide_cursor();
+    Cursor_shape=CURSOR_SHAPE_TARGET;
     if ((Config.Coords_rel) && (Menu_is_visible))
     {
       Num2str(Distance(center_x,center_y,Paintbrush_X,Paintbrush_Y),str,4);
@@ -3244,6 +3249,7 @@ void Grad_ellipse_12_6(void)
   if ( (tangent_x!=Paintbrush_X) || (tangent_y!=Paintbrush_Y) )
   {
     Hide_cursor();
+    Cursor_shape=CURSOR_SHAPE_TARGET;
     Display_coords_rel_or_abs(center_x,center_y);
 
     horizontal_radius=(tangent_x>center_x)?tangent_x-center_x

@@ -883,10 +883,10 @@ GFX2_GLOBAL T_Brush_template Brush_container[BRUSH_CONTAINER_COLUMNS*BRUSH_CONTA
     CURSOR_SHAPE_TARGET            , // Centered lines
     CURSOR_SHAPE_XOR_TARGET        , // Empty rectangle
     CURSOR_SHAPE_XOR_TARGET        , // Filled rectangle
-    CURSOR_SHAPE_TARGET            , // Empty circle
-    CURSOR_SHAPE_TARGET            , // Filled circle
-    CURSOR_SHAPE_TARGET            , // Empty ellipse
-    CURSOR_SHAPE_TARGET            , // Filled ellipse
+    CURSOR_SHAPE_XOR_TARGET        , // Empty circle
+    CURSOR_SHAPE_XOR_TARGET        , // Filled circle
+    CURSOR_SHAPE_XOR_TARGET        , // Empty ellipse
+    CURSOR_SHAPE_XOR_TARGET        , // Filled ellipse
     CURSOR_SHAPE_TARGET            , // Fill
     CURSOR_SHAPE_TARGET            , // Color replacer
     CURSOR_SHAPE_XOR_TARGET        , // Rectangular brush grabbing
@@ -901,8 +901,8 @@ GFX2_GLOBAL T_Brush_template Brush_container[BRUSH_CONTAINER_COLUMNS*BRUSH_CONTA
     CURSOR_SHAPE_TARGET            , // Filled polygon
     CURSOR_SHAPE_TARGET            , // Filled polyform
     CURSOR_SHAPE_MULTIDIRECTIONAL  , // Scroll (pan)
-    CURSOR_SHAPE_TARGET            , // Gradient-filled circle
-    CURSOR_SHAPE_TARGET            , // Gradient-filled ellipse
+    CURSOR_SHAPE_XOR_TARGET        , // Gradient-filled circle
+    CURSOR_SHAPE_XOR_TARGET        , // Gradient-filled ellipse
     CURSOR_SHAPE_XOR_ROTATION      , // Rotate brush
     CURSOR_SHAPE_XOR_TARGET        , // Stretch brush
     CURSOR_SHAPE_TARGET            , // Distort brush
