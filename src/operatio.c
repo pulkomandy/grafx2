@@ -1073,6 +1073,7 @@ void Empty_circle_0_5(void)
     Print_in_menu("X:       Y:",0);
     Print_coordinates();
   }
+  Cursor_shape=CURSOR_SHAPE_XOR_TARGET;
 }
 
 
@@ -1113,6 +1114,7 @@ void Filled_circle_0_5(void)
     Print_in_menu("X:       Y:",0);
     Print_coordinates();
   }
+  Cursor_shape=CURSOR_SHAPE_XOR_TARGET;
 }
 
 
@@ -1250,6 +1252,7 @@ void Empty_ellipse_0_5(void)
     Print_in_menu("X:       Y:             ",0);
     Print_coordinates();
   }
+  Cursor_shape=CURSOR_SHAPE_XOR_TARGET;
 }
 
 
@@ -1292,6 +1295,7 @@ void Filled_ellipse_0_5(void)
     Print_in_menu("X:       Y:             ",0);
     Print_coordinates();
   }
+  Cursor_shape=CURSOR_SHAPE_XOR_TARGET;
 }
 
 
@@ -3134,6 +3138,7 @@ void Grad_circle_12_8(void)
 
   if (Mouse_K==old_mouse_k)
     Draw_grad_circle(center_x,center_y,radius,Paintbrush_X,Paintbrush_Y);
+  Cursor_shape=CURSOR_SHAPE_XOR_TARGET;
 
   Display_cursor();
   End_of_modification();
@@ -3390,7 +3395,7 @@ void Grad_ellipse_12_8(void)
   Hide_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius);
 
   Paintbrush_hidden=Paintbrush_hidden_before_scroll;
-  Cursor_shape=CURSOR_SHAPE_TARGET;
+  Cursor_shape=CURSOR_SHAPE_XOR_TARGET;
 
   if (Mouse_K==old_mouse_k)
     Draw_grad_ellipse(center_x,center_y,horizontal_radius,vertical_radius,Paintbrush_X,Paintbrush_Y);
