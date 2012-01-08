@@ -108,13 +108,13 @@ else
     #-framework SDL_ttf 
     SDLLOPT = -isysroot $(MACOSX_SYSROOT) $(MACOSX_ARCH) -L/usr/lib -framework SDL -framework SDL_image -framework Cocoa -framework Carbon -framework OpenGL
     SDLCOPT = $(MACOSX_ARCH) -I$(FWDIR)/SDL.framework/Headers -I$(FWDIR)/SDL_image.framework/Headers -I$(FWDIR)/SDL_ttf.framework/Headers -D_THREAD_SAFE
-    LUACOPT =
-    LUALOPT = 
+    LUACOPT = -I$(FWDIR)/Lua.framework/Headers
+    LUALOPT = -framework lua
 
 
     # these are for everyone
     COPT = -D_DARWIN_C_SOURCE -D__macosx__ -D__linux__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g $(LUACOPT) $(SDLCOPT) $(TTFCOPT) -I/usr/X11/include
-    LOPT = $(SDLLOPT) $(LUALOPT) -lpng -lz
+    LOPT = $(SDLLOPT) $(LUALOPT) -framework libpng14 -lz
     # Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
     CC = gcc
     #CC = nccgen -ncgcc -ncld -ncfabs
@@ -459,9 +459,13 @@ $(MACAPPEXE) : $(BIN)
 	cp -r ../share/grafx2/scripts/samples_2.4/libs Grafx2.app/Contents/Resources/scripts/samples_2.4
 	cp -r ../share/grafx2/scripts/samples_2.4/palette Grafx2.app/Contents/Resources/scripts/samples_2.4
 	cp -r ../share/grafx2/scripts/samples_2.4/picture Grafx2.app/Contents/Resources/scripts/samples_2.4
+	mkdir -p Grafx2.app/Contents/Frameworks/Lua.framework/Versions
+	mkdir -p Grafx2.app/Contents/Frameworks/libpng14.framework/Versions
 	mkdir -p Grafx2.app/Contents/Frameworks/SDL.framework/Versions
 	mkdir -p Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions
 #	mkdir -p Grafx2.app/Contents/Frameworks/SDL_ttf.framework/Versions
+	cp -Rp $(FWDIR)/Lua.framework/Versions/A Grafx2.app/Contents/Frameworks/Lua.framework/Versions
+	cp -Rp $(FWDIR)/libpng14.framework/Versions/1.4.8 Grafx2.app/Contents/Frameworks/libpng14.framework/Versions
 	cp -Rp $(FWDIR)/SDL.framework/Versions/A Grafx2.app/Contents/Frameworks/SDL.framework/Versions
 	cp -Rp $(FWDIR)/SDL_image.framework/Versions/A Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions
 #	cp -Rp $(FWDIR)/SDL_ttf.framework/Versions/A Grafx2.app/Contents/Frameworks/SDL_ttf.framework/Versions
@@ -470,6 +474,10 @@ $(MACAPPEXE) : $(BIN)
 	rm -fr Grafx2.app/Contents/Frameworks/SDL.framework/Versions/A/Resources
 	rm -fr Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions/A/Headers
 	rm -fr Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions/A/Resources
+	rm -fr Grafx2.app/Contents/Frameworks/Lua.framework/Versions/A/Resources
+	rm -fr Grafx2.app/Contents/Frameworks/Lua.framework/Versions/A/Headers
+	rm -fr Grafx2.app/Contents/Frameworks/libpng14.framework/Versions/A/Resources
+	rm -fr Grafx2.app/Contents/Frameworks/libpng14.framework/Versions/A/Headers
 #	rm -fr Grafx2.app/Contents/Frameworks/SDL_ttf.framework/Versions
 	cp $(BIN) $(MACAPPEXE)
 	$(STRIP) -x -X -S $(MACAPPEXE)
