@@ -476,8 +476,8 @@ $(MACAPPEXE) : $(BIN)
 	rm -fr Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions/A/Resources
 	rm -fr Grafx2.app/Contents/Frameworks/Lua.framework/Versions/A/Resources
 	rm -fr Grafx2.app/Contents/Frameworks/Lua.framework/Versions/A/Headers
-	rm -fr Grafx2.app/Contents/Frameworks/libpng14.framework/Versions/A/Resources
-	rm -fr Grafx2.app/Contents/Frameworks/libpng14.framework/Versions/A/Headers
+	rm -fr Grafx2.app/Contents/Frameworks/libpng14.framework/Versions/1.4.8/Resources
+	rm -fr Grafx2.app/Contents/Frameworks/libpng14.framework/Versions/1.4.8/Headers
 #	rm -fr Grafx2.app/Contents/Frameworks/SDL_ttf.framework/Versions
 	cp $(BIN) $(MACAPPEXE)
 	$(STRIP) -x -X -S $(MACAPPEXE)
