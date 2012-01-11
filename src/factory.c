@@ -1333,12 +1333,12 @@ int L_StatusMessage(lua_State* L)
     // fill remainder with spaces
     for (;len<24;len++)
       msg2[len]=' ';
-    msg2[24]='\0';
   }
   else
   {
     strncpy(msg2, msg, 24);
   }
+  msg2[24]='\0';
   Print_in_menu(msg2,0);
   return 0;
 }
