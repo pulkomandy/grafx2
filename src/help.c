@@ -30,7 +30,7 @@
 #elif defined(__macosx__) || defined(__FreeBSD__)
     #include <sys/param.h>
     #include <sys/mount.h>
-#elif defined (__linux__)
+#elif defined (__linux__) || defined(__SYLLABLE__)
     #include <sys/vfs.h>
 #elif defined (__HAIKU__)
 	#include "haiku.h"
@@ -786,7 +786,7 @@ void Button_Stats(void)
       GetDiskFreeSpaceEx(Main_current_directory,&tailleU,NULL,NULL);
       mem_size = tailleU.QuadPart;
     }
-#elif defined(__linux__) || defined(__macosx__) || defined(__FreeBSD__)
+#elif defined(__linux__) || defined(__macosx__) || defined(__FreeBSD__) || defined(__SYLLABLE__)
     {
       struct statfs disk_info;
       statfs(Main_current_directory,&disk_info);

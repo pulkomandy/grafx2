@@ -251,13 +251,12 @@ else
     PLATFORMFILES = gfx2.png
     LUACOPT = -I/resources/indexes/include
     LUALOPT = -llua
-
-        BIN = ../bin/grafx2
-        COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g `sdl-config --cflags` -I/resources/indexes/include/SDL $(TTFCOPT) $(LUACOPT) $(JOYCOPT) $(VKEYCOPT) -O$(OPTIM)
-        LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng -lz $(LUALOPT) -lm
-        CC = gcc
-        OBJDIR = ../obj/syllable
-        X11LOPT = 
+    BIN = ../bin/grafx2
+    COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g `sdl-config --cflags` -I/resources/indexes/include/SDL $(TTFCOPT) $(LUACOPT) $(JOYCOPT) $(VKEYCOPT) -O$(OPTIM)
+    LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng -lz $(LUALOPT) -lm
+    CC = gcc
+    OBJDIR = ../obj/syllable
+    X11LOPT = 
   else
     # Finally, the default rules that work fine for most unix/gcc systems, linux and freebsd are tested.
     # Linux and FreeBSD specific (default rules)
