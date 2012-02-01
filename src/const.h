@@ -518,6 +518,8 @@ enum SPECIAL_ACTIONS
   SPECIAL_FORMAT_CHECKER,
   SPECIAL_FORMAT_CHECKER_MENU,
 
+  SPECIAL_HOLD_PAN,
+  
   NB_SPECIAL_SHORTCUTS            ///< Number of special shortcuts
 };
 
@@ -558,6 +560,7 @@ enum OPERATIONS
   OPERATION_DISTORT_BRUSH,     ///< Distort brush
   OPERATION_GRAD_RECTANGLE,    ///< Gradient-filled rectangle
   OPERATION_RMB_COLORPICK,     ///< Colorpick on right mouse button
+  OPERATION_PAN_VIEW,          ///< Pan view
   NB_OPERATIONS                ///< Number of operations handled by the engine
 };
 

@@ -1737,9 +1737,20 @@ void Init_operations(void)
                         Centered_lines_12_7,0,FAST_MOUSE);
   Init_operation(OPERATION_CENTERED_LINES,0,7,
                         Centered_lines_0_7,0,FAST_MOUSE);
-                        
   Init_operation(OPERATION_RMB_COLORPICK,0,1,
                         Rightclick_colorpick_0_1,0,FAST_MOUSE);
+  Init_operation(OPERATION_PAN_VIEW,0,0,
+                        Pan_view_0_0,0,FAST_MOUSE);
+  Init_operation(OPERATION_PAN_VIEW,1,0,
+                        Pan_view_12_0,0,FAST_MOUSE);
+  Init_operation(OPERATION_PAN_VIEW,2,0,
+                        Pan_view_12_0,0,FAST_MOUSE);
+  Init_operation(OPERATION_PAN_VIEW,1,2,
+                        Pan_view_12_2,0,FAST_MOUSE);
+  Init_operation(OPERATION_PAN_VIEW,2,2,
+                        Pan_view_12_2,0,FAST_MOUSE);
+  Init_operation(OPERATION_PAN_VIEW,0,2,
+                        Pan_view_0_2,0,FAST_MOUSE);
                         
 }
 

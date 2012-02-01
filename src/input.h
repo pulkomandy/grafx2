@@ -53,6 +53,10 @@ void Set_mouse_position(void);
 /// that will record and retrieve a real control ID.
 extern int Input_sticky_control;
 
+///
+/// State of the shortcut for panning (SPECIAL_HOLD_PAN) : pressed or not.
+extern byte Pan_shortcut_pressed;
+
 /// Allows locking movement to X or Y axis: 0=normal, 1=lock on next move, 2=locked horizontally, 3=locked vertically.
 extern int Snap_axis;
 /// For the :Snap_axis mode, sets the origin's point (in image coordinates)

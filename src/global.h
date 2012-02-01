@@ -900,7 +900,7 @@ GFX2_GLOBAL T_Brush_template Brush_container[BRUSH_CONTAINER_COLUMNS*BRUSH_CONTA
     CURSOR_SHAPE_TARGET            , // Polyform
     CURSOR_SHAPE_TARGET            , // Filled polygon
     CURSOR_SHAPE_TARGET            , // Filled polyform
-    CURSOR_SHAPE_MULTIDIRECTIONAL  , // Scroll (pan)
+    CURSOR_SHAPE_MULTIDIRECTIONAL  , // Scroll image
     CURSOR_SHAPE_XOR_TARGET        , // Gradient-filled circle
     CURSOR_SHAPE_XOR_TARGET        , // Gradient-filled ellipse
     CURSOR_SHAPE_XOR_ROTATION      , // Rotate brush
@@ -908,6 +908,7 @@ GFX2_GLOBAL T_Brush_template Brush_container[BRUSH_CONTAINER_COLUMNS*BRUSH_CONTA
     CURSOR_SHAPE_TARGET            , // Distort brush
     CURSOR_SHAPE_XOR_TARGET        , // Gradient-filled rectangle
     CURSOR_SHAPE_COLORPICKER       , // Colorpick on right mouse button
+    CURSOR_SHAPE_MULTIDIRECTIONAL  , // Pan view
   };
 #else
   /// ::Cursor_shape to use for each operation.

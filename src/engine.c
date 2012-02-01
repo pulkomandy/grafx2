@@ -734,7 +734,14 @@ void Main_handler(void)
         Button_Quit();
       }
       
-      if (Key)
+      if (Pan_shortcut_pressed && Current_operation!=OPERATION_PAN_VIEW)
+      {
+        Hide_cursor();
+        Start_operation_stack(OPERATION_PAN_VIEW);
+        Display_cursor();
+        action++;
+      }
+      else if (Key)
       {
         effect_modified = 0;
         
@@ -1340,6 +1347,9 @@ void Main_handler(void)
                 if (!Cycling_mode)
                   Set_palette(Main_palette);
                 action++;
+                break;
+              case SPECIAL_HOLD_PAN:
+                // already handled by Pan_shortcut_pressed
                 break;
             }
           }

@@ -70,6 +70,7 @@ void Start_operation_stack(word new_operation)
     case OPERATION_GRAB_BRUSH:
     case OPERATION_POLYBRUSH:
     case OPERATION_STRETCH_BRUSH:
+    case OPERATION_PAN_VIEW:
       Operation_before_interrupt=Current_operation;
       // On passe à l'operation demandée
       Current_operation=new_operation;
@@ -4031,3 +4032,92 @@ void Centered_lines_0_7(void)
     Operation_push(Paintbrush_Y);
 }
 
+///////////////////////////////////////////////////////////// OPERATION_PAN_VIEW
+
+void Pan_view_0_0(void)
+// Opération   : OPERATION_PAN_VIEW
+// Click Souris: 0
+// Taille_Pile : 0
+//
+//  Souris effacée: Non
+{
+  if (Pan_shortcut_pressed)
+  {
+    Print_coordinates();
+  }
+  else
+  {
+    // End of operation, return to previous
+    Hide_cursor();
+    Start_operation_stack(Operation_before_interrupt);
+    Display_cursor();
+  }
+}
+
+void Pan_view_12_0(void)
+// Opération   : OPERATION_PAN_VIEW
+// Click Souris: 1 ou 2
+// Taille_Pile : 0
+//
+//  Souris effacée: Non
+
+//  First time the user clicks
+{
+  Init_start_operation();
+  
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+}
+
+void Pan_view_12_2(void)
+// Opération   : OPERATION_PAN_VIEW
+// Click Souris: 1 ou 2
+// Taille_Pile : 2
+//
+//  Souris effacée: Non
+
+//  While dragging view
+{
+  short start_x;
+  short start_y;
+  
+  Operation_pop(&start_y);
+  Operation_pop(&start_x);
+  
+  if (Paintbrush_X!=start_x || Paintbrush_Y!=start_y)
+  {
+    // User moved
+    if (Main_magnifier_mode)
+      Scroll_magnifier(start_x-Paintbrush_X,start_y-Paintbrush_Y);
+    else
+      Scroll_screen(start_x-Paintbrush_X,start_y-Paintbrush_Y);
+  }
+  // The "scroll" functions have actualized the Paintbrush_X and Y
+  
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+}
+
+void Pan_view_0_2(void)
+// Opération   : OPERATION_PAN_VIEW
+// Click Souris: 0
+// Taille_Pile : 2
+//
+//  Souris effacée: Non
+
+//  When releasing after dragging
+{
+  short start_x;
+  short start_y;
+
+  Operation_pop(&start_y);
+  Operation_pop(&start_x);
+  
+  if (!Pan_shortcut_pressed)
+  {
+    // End of operation, return to previous
+    Hide_cursor();
+    Start_operation_stack(Operation_before_interrupt);
+    Display_cursor();
+  }
+}

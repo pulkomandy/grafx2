@@ -85,6 +85,8 @@ word Input_new_mouse_Y;
 byte Input_new_mouse_K;
 byte Button_inverter=0; // State of the key that swaps mouse buttons.
 
+byte Pan_shortcut_pressed;
+
 // Joystick/pad configurations for the various console ports.
 // See the #else for the documentation of fields.
 // TODO: Make these user-settable somehow.
@@ -443,7 +445,11 @@ int Handle_key_press(SDL_KeyboardEvent event)
         Directional_click=2;
         return Move_cursor_with_constraints();
     }
-
+    else if(Is_shortcut(Key,SPECIAL_HOLD_PAN))
+    {
+      Pan_shortcut_pressed=1;
+      return 0;
+    }
     return 0;
 }
 
@@ -507,7 +513,13 @@ int Release_control(int key_code, int modifier)
             return Move_cursor_with_constraints() || need_feedback;
         }
     }
-  
+    if((key_code && key_code == (Config_Key[SPECIAL_HOLD_PAN][0]&0x0FFF)) || (Config_Key[SPECIAL_HOLD_PAN][0]&modifier) ||
+      (key_code && key_code == (Config_Key[SPECIAL_HOLD_PAN][1]&0x0FFF)) || (Config_Key[SPECIAL_HOLD_PAN][1]&modifier))
+    {
+      Pan_shortcut_pressed=0;
+      need_feedback = 1;
+    }
+    
     // Other keys don't need to be released : they are handled as "events" and procesed only once.
     // These clicks are apart because they need to be continuous (ie move while key pressed)
     // We are relying on "hardware" keyrepeat to achieve that.

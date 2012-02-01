@@ -163,7 +163,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "left mouse button. It's useful",
   "when you want ultra-high precision.",
   true,
-  SDLK_SPACE, // Space
+  SDLK_SPACE|MOD_CTRL, // Ctrl + Space
   0},
   {17,
   "Simulate right mouse click",
@@ -1721,6 +1721,14 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   true,
   0, // No shortcut
   0},
+  {208,
+  "Pan view",
+  "While this key is being held,",
+  "click and drag the mouse to",
+  "pan the view.",
+  true,
+  SDLK_SPACE, // Space
+  0},
 };
 
 word Ordering[NB_SHORTCUTS]=
@@ -1933,4 +1941,5 @@ word Ordering[NB_SHORTCUTS]=
   0x100+BUTTON_ANIM_PREV_FRAME,
   0x100+BUTTON_ANIM_NEXT_FRAME,
   0x100+BUTTON_ANIM_PLAY,
+  SPECIAL_HOLD_PAN,
 };

@@ -122,6 +122,7 @@ static const T_Help_table helptable_help[] =
   HELP_LINK ("  down slower:       %s",   SPECIAL_SCROLL_DOWN_SLOW)
   HELP_LINK ("  left slower:       %s",   SPECIAL_SCROLL_LEFT_SLOW)
   HELP_LINK ("  right slower:      %s",   SPECIAL_SCROLL_RIGHT_SLOW)
+  HELP_LINK ("Mouse pan:           %s",   SPECIAL_HOLD_PAN)
   HELP_TEXT ("Emulate mouse")
   HELP_LINK ("  Up:                %s",   SPECIAL_MOUSE_UP)
   HELP_LINK ("  Down:              %s",   SPECIAL_MOUSE_DOWN)
