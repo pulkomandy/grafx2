@@ -4093,7 +4093,10 @@ void Pan_view_12_2(void)
       Scroll_screen(start_x-Paintbrush_X,start_y-Paintbrush_Y);
   }
   // The "scroll" functions have actualized the Paintbrush_X and Y
-  
+  if (Paintbrush_X!=start_x || Paintbrush_Y!=start_y)
+  {
+    Print_coordinates();
+  }
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
 }

@@ -270,17 +270,17 @@ void Window_set_shortcut(int action_id)
 void Remove_duplicate_shortcuts(void)
 {
   int action_1;
-  // This algorithm favors shortcuts that are first in the list.
+  // This algorithm favors shortcuts that are last in the list.
   // The idea is that we, coders, append new shortcuts at the end with default
-  // values; they should be discarded if user has chosen the key first.
-  for (action_1=0; action_1<NB_SHORTCUTS-1; action_1++)
+  // values; they take priority as they are new functions.
+  for (action_1=NB_SHORTCUTS-1; action_1>0; action_1--)
   { 
     int n;
     word *shortcut_1 = Shortcut(Ordering[action_1]);
     for (n=0; n<2; n++)
     {
       int action_2;
-      for (action_2=action_1+1; action_2<NB_SHORTCUTS; action_2++)
+      for (action_2=0; action_2<action_1; action_2++)
       {
         if (shortcut_1[n]!=0)
         {
