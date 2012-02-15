@@ -801,6 +801,12 @@ int Init_program(int argc,char * argv[])
   Capture_brush(0,0,0,0,0);
   *Brush=MC_White;
   *Brush_original_pixels=MC_White;
+
+  // Make sure the load dialog pointsto the right place when first shown.
+  // Done after loading everything else, but before checking for emergency
+  // backups
+  if (file_in_command_line > 0)
+    chdir(main_directory);
   
   // Test de recuperation de fichiers sauvés
   switch (Check_recovery())
