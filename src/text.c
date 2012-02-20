@@ -45,7 +45,6 @@
 #endif
 
 #if defined(__macosx__)
-  #include <Carbon/Carbon.h>
   #import <corefoundation/corefoundation.h>
   #import <sys/param.h>
 #endif
