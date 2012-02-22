@@ -350,7 +350,7 @@ void Draw_paintbrush(short x,short y,byte color)
       for (yy=min_y; yy<min_y+height; yy++)
         for (xx=min_x; xx<min_x+width; xx++)
         {
-          Pixel_in_current_screen(xx,yy,color,0);
+          Pixel_in_current_screen(xx,yy,color);
         }
       // Feedback
       // This part is greatly taken from Hide_paintbrush()
@@ -895,7 +895,7 @@ void Capture_brush(short start_x,short start_y,short end_x,short end_y,short cle
         for (y_pos=start_y;y_pos<start_y+Brush_height;y_pos++)
           for (x_pos=start_x;x_pos<start_x+Brush_width;x_pos++)
           {
-            Pixel_in_current_screen(x_pos,y_pos,Back_color,1);
+            Pixel_in_current_screen_with_preview(x_pos,y_pos,Back_color);
           }
         Update_part_of_screen(start_x,start_y,Brush_width,Brush_height);
       }
@@ -1295,7 +1295,7 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
             }
             else
             {
-              Pixel_in_current_screen(x_pos,y_pos,Back_color,0);
+              Pixel_in_current_screen_with_preview(x_pos,y_pos,Back_color);
             }
           }
         }

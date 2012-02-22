@@ -159,7 +159,7 @@ void Update_colors_during_script(void)
 void Pixel_figure_no_screen(short x_pos,short y_pos,byte color)
 {
   if (x_pos>0 && y_pos >0 && x_pos<Main_image_width && y_pos<Main_image_height)
-    Pixel_in_current_screen(x_pos,y_pos,color,0);
+    Pixel_in_current_screen(x_pos,y_pos,color);
 }
 
 
@@ -379,7 +379,7 @@ int L_PutPicturePixel(lua_State* L)
     // Silently ignored
     return 0;
   }
-  Pixel_in_current_screen(x, y, c, 0);
+  Pixel_in_current_screen(x, y, c);
   return 0; // no values returned for lua
 }
 
@@ -476,7 +476,7 @@ int L_DrawFilledRect(lua_State* L)
   // Perform drawing
   for (y_pos=min_y; y_pos<=max_y;y_pos++)
     for (x_pos=min_x; x_pos<=max_x;x_pos++)
-      Pixel_in_current_screen(x_pos,y_pos,c,0);
+      Pixel_in_current_screen(x_pos,y_pos,c);
   return 0;
   
 }
@@ -539,7 +539,7 @@ int L_DrawDisk(lua_State* L)
     {
       short x=(x_pos-center_x)*2-even;
       if (x*x+y*y <= circle_limit)
-        Pixel_in_current_screen(x_pos,y_pos,c,0);
+        Pixel_in_current_screen(x_pos,y_pos,c);
     }
   }
 

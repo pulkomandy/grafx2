@@ -192,7 +192,11 @@ void Tilemap_draw(word x, word y, byte color)
         yy = (tile / Main_tilemap_width)*Snap_height+Snap_offset_Y + Snap_height - rel_y - 1;
         break;
     }
-    Pixel_in_current_screen(xx,yy,color,yy>=Limit_top&&yy<=Limit_bottom&&xx>=Limit_left&&xx<=Limit_right);
+    if (yy>=Limit_top&&yy<=Limit_bottom&&xx>=Limit_left&&xx<=Limit_right)
+      Pixel_in_current_screen_with_preview(xx,yy,color);
+    else
+      Pixel_in_current_screen(xx,yy,color);
+      
     tile = Main_tilemap[tile].Next;
   } while (tile != first_tile);
 

@@ -1106,7 +1106,7 @@ void Fill_general(byte fill_color)
         byte filled = Read_pixel_from_current_layer(x_pos,y_pos);
 
         // First, restore the color.
-        Pixel_in_current_screen(x_pos,y_pos,Read_pixel_from_backup_layer(x_pos,y_pos),0);
+        Pixel_in_current_screen(x_pos,y_pos,Read_pixel_from_backup_layer(x_pos,y_pos));
           
         if (filled==2)
         {
@@ -2782,7 +2782,7 @@ void Display_pixel(word x,word y,byte color)
       Tilemap_draw(x,y, color);
     }
     else
-      Pixel_in_current_screen(x,y,color,1);
+      Pixel_in_current_screen_with_preview(x,y,color);
   }
 }
 
@@ -3008,9 +3008,10 @@ byte Read_pixel_from_current_screen  (word x,word y)
   #ifndef NOLAYERS
   byte depth;
   byte color;
-  
-  if (Main_current_layer==4)
-    return *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width);
+
+  if (Constraint_mode)  
+    if (Main_current_layer==4)
+      return *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width);
     
   color = *(Main_screen+y*Main_image_width+x);
   if (color != Main_backups->Pages->Transparent_color) // transparent color
@@ -3023,84 +3024,126 @@ byte Read_pixel_from_current_screen  (word x,word y)
   #endif
 }
 
-void Pixel_in_current_screen      (word x,word y,byte color,int with_preview)
+/// Paint a a single pixel in image only : as-is.
+void Pixel_in_screen_direct(word x,word y,byte color)
 {
-  #ifndef NOLAYERS
-  if (!Constraint_mode)
+  *((y)*Main_image_width+(x)+/*Main_backups->Pages->Image[Main_current_layer].Pixels*/Main_screen)=color;
+}
+
+/// Paint a a single pixel in image and on screen: as-is.
+void Pixel_in_screen_direct_with_preview(word x,word y,byte color)
+{
+  *((y)*Main_image_width+(x)+/*Main_backups->Pages->Image[Main_current_layer].Pixels*/Main_screen)=color;
+  Pixel_preview(x,y,color);
+}
+
+#ifndef NOLAYERS
+
+/// Paint a a single pixel in image only : using layered display.
+void Pixel_in_screen_layered(word x,word y,byte color)
+{
+  byte depth = *(Main_visible_image_depth_buffer.Image+x+y*Main_image_width);
+  *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width)=color;
+  if ( depth <= Main_current_layer)
   {
-    byte depth = *(Main_visible_image_depth_buffer.Image+x+y*Main_image_width);
-    *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width)=color;
-    if ( depth <= Main_current_layer)
-    {
-      if (color == Main_backups->Pages->Transparent_color) // transparent color
-        // fetch pixel color from the topmost visible layer
-        color=*(Main_backups->Pages->Image[depth].Pixels + x+y*Main_image_width);
-      
-      *(x+y*Main_image_width+Main_screen)=color;
-      
-      if (with_preview)
-        Pixel_preview(x,y,color);
-    }
-  }
-  else if ( Main_current_layer == 4)
-  {
-    if (color<4)
-    {
-      // Paste in layer
-      *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width)=color;
-      // Paste in depth buffer
-      *(Main_visible_image_depth_buffer.Image+x+y*Main_image_width)=color;
-      // Fetch pixel color from the target raster layer
-      color=*(Main_backups->Pages->Image[color].Pixels + x+y*Main_image_width);
-      // Draw that color on the visible image buffer
-      *(x+y*Main_image_width+Main_screen)=color;
-      
-      if (with_preview)
-        Pixel_preview(x,y,color);
-    }
-  }
-  else if (Main_current_layer<4 && (Main_layers_visible & (1<<4)))
-  {
-    byte depth;
+    if (color == Main_backups->Pages->Transparent_color) // transparent color
+      // fetch pixel color from the topmost visible layer
+      color=*(Main_backups->Pages->Image[depth].Pixels + x+y*Main_image_width);
     
+    *(x+y*Main_image_width+Main_screen)=color;
+  }
+}
+
+/// Paint a a single pixel in image and on screen : using layered display.
+void Pixel_in_screen_layered_with_preview(word x,word y,byte color)
+{
+  byte depth = *(Main_visible_image_depth_buffer.Image+x+y*Main_image_width);
+  *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width)=color;
+  if ( depth <= Main_current_layer)
+  {
+    if (color == Main_backups->Pages->Transparent_color) // transparent color
+      // fetch pixel color from the topmost visible layer
+      color=*(Main_backups->Pages->Image[depth].Pixels + x+y*Main_image_width);
+    
+    *(x+y*Main_image_width+Main_screen)=color;
+    
+    Pixel_preview(x,y,color);
+  }
+}
+
+/// Paint a a single pixel in image only : in a layer under one that acts as a layer-selector (mode 5).
+void Pixel_in_screen_underlay(word x,word y,byte color)
+{
+  byte depth;
+    
+  // Paste in layer
+  *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width)=color;
+  // Search depth
+  depth = *(Main_backups->Pages->Image[4].Pixels + x+y*Main_image_width);
+  
+  if ( depth == Main_current_layer)
+  {
+    // Draw that color on the visible image buffer
+    *(x+y*Main_image_width+Main_screen)=color;
+  }
+}
+
+/// Paint a a single pixel in image and on screen : in a layer under one that acts as a layer-selector (mode 5).
+void Pixel_in_screen_underlay_with_preview(word x,word y,byte color)
+{
+  byte depth;
+    
+  // Paste in layer
+  *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width)=color;
+  // Search depth
+  depth = *(Main_backups->Pages->Image[4].Pixels + x+y*Main_image_width);
+  
+  if ( depth == Main_current_layer)
+  {
+    // Draw that color on the visible image buffer
+    *(x+y*Main_image_width+Main_screen)=color;
+    
+    Pixel_preview(x,y,color);
+  }
+}
+
+/// Paint a a single pixel in image only : in a layer that acts as a layer-selector (mode 5).
+void Pixel_in_screen_overlay(word x,word y,byte color)
+{
+  if (color<4)
+  {
     // Paste in layer
     *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width)=color;
-    // Search depth
-    depth = *(Main_backups->Pages->Image[4].Pixels + x+y*Main_image_width);
-    
-    if ( depth == Main_current_layer)
-    {
-      // Draw that color on the visible image buffer
-      *(x+y*Main_image_width+Main_screen)=color;
-      
-      if (with_preview)
-        Pixel_preview(x,y,color);
-    }
-  }  
-  else
-  {
-    byte depth;
-    
-    *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width)=color;
-    depth = *(Main_visible_image_depth_buffer.Image+x+y*Main_image_width);
-    if ( depth <= Main_current_layer)
-    {
-      if (color == Main_backups->Pages->Transparent_color) // transparent color
-        // fetch pixel color from the topmost visible layer
-        color=*(Main_backups->Pages->Image[depth].Pixels + x+y*Main_image_width);
-      
-      *(x+y*Main_image_width+Main_screen)=color;
-      
-      if (with_preview)
-        Pixel_preview(x,y,color);
-    }
+    // Paste in depth buffer
+    *(Main_visible_image_depth_buffer.Image+x+y*Main_image_width)=color;
+    // Fetch pixel color from the target raster layer
+    color=*(Main_backups->Pages->Image[color].Pixels + x+y*Main_image_width);
+    // Draw that color on the visible image buffer
+    *(x+y*Main_image_width+Main_screen)=color;
   }
-  #else
-  *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer].Pixels)=color;
-  if (with_preview)
-      Pixel_preview(x,y,color);
-  #endif
 }
+
+/// Paint a a single pixel in image and on screen : in a layer that acts as a layer-selector (mode 5).
+void Pixel_in_screen_overlay_with_preview(word x,word y,byte color)
+{
+  if (color<4)
+  {
+    // Paste in layer
+    *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width)=color;
+    // Paste in depth buffer
+    *(Main_visible_image_depth_buffer.Image+x+y*Main_image_width)=color;
+    // Fetch pixel color from the target raster layer
+    color=*(Main_backups->Pages->Image[color].Pixels + x+y*Main_image_width);
+    // Draw that color on the visible image buffer
+    *(x+y*Main_image_width+Main_screen)=color;
+    
+    Pixel_preview(x,y,color);
+  }
+}
+#endif
+
+Func_pixel Pixel_in_current_screen=Pixel_in_screen_direct;
+Func_pixel Pixel_in_current_screen_with_preview=Pixel_in_screen_direct_with_preview;
 
 void Pixel_in_spare(word x,word y, byte color)
 {
@@ -3115,4 +3158,38 @@ void Pixel_in_current_layer(word x,word y, byte color)
 byte Read_pixel_from_current_layer(word x,word y)
 {
   return *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer].Pixels);
+}
+
+void Update_pixel_renderer(void)
+{
+  #ifndef NOLAYERS
+  if (!Constraint_mode)
+  {
+    // layered
+    Pixel_in_current_screen = Pixel_in_screen_layered;
+    Pixel_in_current_screen_with_preview = Pixel_in_screen_layered_with_preview;
+  }
+  else if ( Main_current_layer == 4)
+  {
+    // overlay
+    Pixel_in_current_screen = Pixel_in_screen_overlay;
+    Pixel_in_current_screen_with_preview = Pixel_in_screen_overlay_with_preview;
+  }
+  else if (Main_current_layer<4 && (Main_layers_visible & (1<<4)))
+  {
+    // underlay
+    Pixel_in_current_screen = Pixel_in_screen_underlay;
+    Pixel_in_current_screen_with_preview = Pixel_in_screen_underlay_with_preview;
+  }
+  else
+  {
+    // layered (again)
+    Pixel_in_current_screen = Pixel_in_screen_layered;
+    Pixel_in_current_screen_with_preview = Pixel_in_screen_layered_with_preview;
+  }
+  #else
+  // direct
+  Pixel_in_current_screen = Pixel_in_screen_direct;
+  Pixel_in_current_screen_with_preview = Pixel_in_screen_direct_with_preview;
+  #endif
 }

@@ -121,8 +121,17 @@ void Update_part_of_screen(short x, short y, short width, short height);
 
 void Redraw_grid(short x, short y, unsigned short w, unsigned short h);
 
-void Pixel_in_current_screen      (word x,word y,byte color,int with_preview);
 void Pixel_in_spare(word x,word y, byte color);
 void Pixel_in_current_layer(word x,word y, byte color);
 byte Read_pixel_from_current_screen  (word x,word y);
 byte Read_pixel_from_current_layer(word x,word y);
+
+/// Paint a single pixel in image only.
+extern Func_pixel Pixel_in_current_screen;
+
+/// Paint a single pixel in image AND on screen.
+extern Func_pixel Pixel_in_current_screen_with_preview;
+
+/// Sets ::Pixel_in_current_screen and ::Pixel_in_current_screen_with_preview
+void Update_pixel_renderer(void);
+

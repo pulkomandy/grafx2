@@ -238,7 +238,7 @@ void Replace_a_color(byte old_color, byte new_color)
   for (y=0; y<Main_image_height; y++)
     for (x=0; x<Main_image_width; x++)
       if (Read_pixel_from_current_layer(x,y) == old_color)
-        Pixel_in_current_screen(x,y,new_color,0);
+        Pixel_in_current_screen(x,y,new_color);
   Update_rect(0,0,0,0); // On peut TOUT a jour
   // C'est pas un problème car il n'y a pas de preview
 }

@@ -3011,13 +3011,19 @@ void Load_CM5(T_IO_Context* context)
 
   Palette_loaded(context);
 
-  if (Constraint_mode != 1)
-    Constraint_mode = 1;
 
   if (Read_byte(file, &value)!=1)
     File_error = 2;
 
+  // This forces the creation of 5 layers total :
+  // Needed because the "pixel" functions will seek layer 4
+  Set_loading_layer(context, 4);
+  // Now select layer 0 again
   Set_loading_layer(context, 0);
+
+  if (Constraint_mode != 1)
+    Constraint_mode = 1;
+
   for(ty=0; ty<context->Height; ty++)
   for(tx=0; tx<context->Width; tx++)
   {

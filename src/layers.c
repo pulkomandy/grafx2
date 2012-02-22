@@ -89,6 +89,7 @@ void Layer_activate(int layer, short side)
     Update_depth_buffer(); // Only need the depth buffer
   //Download_infos_page_main(Main_backups->Pages);
   //Update_FX_feedback(Config.FX_Feedback);
+  Update_pixel_renderer();
   Display_all_screen();
   Display_layerbar();
   Display_cursor();

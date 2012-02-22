@@ -678,6 +678,7 @@ void Update_screen_targets(void)
     Main_screen=Main_backups->Pages->Image[Main_current_layer].Pixels;
     Screen_backup=Main_backups->Pages->Next->Image[Main_current_layer].Pixels;
   #endif
+  Update_pixel_renderer();
 }
 
 /// Update all the special image buffers, if necessary.

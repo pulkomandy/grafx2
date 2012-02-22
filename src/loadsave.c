@@ -189,7 +189,7 @@ void Set_pixel(T_IO_Context *context, short x_pos, short y_pos, byte color)
   {
     // Chargement des pixels dans l'écran principal
     case CONTEXT_MAIN_IMAGE:
-      Pixel_in_current_screen(x_pos,y_pos,color,0);
+      Pixel_in_current_screen(x_pos,y_pos,color);
       break;
       
     // Chargement des pixels dans la brosse
@@ -1335,6 +1335,8 @@ void Set_loading_layer(T_IO_Context *context, int layer)
     }
     Main_current_layer = layer;
     context->Target_address=Main_backups->Pages->Image[layer].Pixels;
+    
+    Update_pixel_renderer();
   }
 }
 
