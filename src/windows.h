@@ -114,4 +114,33 @@ extern word Layer_button_width;
 /// Copy viewport settings and offsets from the Main to the Spare.
 void Copy_view_to_spare(void);
 
+/// Definition of a toolbar button
+typedef struct
+{
+  // Button aspect
+  word            X_offset;         ///< Position relative to menu's left
+  word            Y_offset;         ///< Position relative to menu's top
+  word            Width;            ///< Button's active width
+  word            Height;           ///< Button's active heigth
+  byte            Pressed;          ///< Button is currently pressed
+  byte            Shape;            ///< Shape, listed in enum ::BUTTON_SHAPES
+  signed char     Icon;             ///< Which icon to display: Either the one from the toolbar (-1) or one of ::MENU_SPRITE
+
+  // Triggers on mouse/keyboard
+  Func_action     Left_action;      ///< Action triggered by a left mouseclick on the button
+  Func_action     Right_action;     ///< Action triggered by a right mouseclick on the button
+  word            Left_shortcut[2]; ///< Keyboard shortcut for a left mouseclick
+  word            Right_shortcut[2];///< Keyboard shortcut for a right mouseclick
+  byte            Left_instant;     ///< Will not wait for mouse release before triggering action
+  byte            Right_instant;    ///< Will not wait for mouse release before triggering action
+  const char *    Tooltip;          ///< Text in status bar when button is hovered
+
+  // Data used when the button is unselected
+  Func_action     Unselect_action;  ///< Action triggered by unselecting the button
+  byte            Family;           ///< enum ::FAMILY_OF_BUTTONS.
+
+} T_Toolbar_button;
+
+extern T_Toolbar_button Buttons_Pool[NB_BUTTONS];
+
 #endif

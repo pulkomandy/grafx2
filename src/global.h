@@ -570,35 +570,6 @@ GFX2_GLOBAL T_Window Window_stack[8];
 
 #define Window_draggable Window_stack[Windows_open-1].Draggable
 
-
-/// Definition of the menu (toolbox)
-GFX2_GLOBAL struct
-{
-  // Button aspect
-  word            X_offset;         ///< Position relative to menu's left
-  word            Y_offset;         ///< Position relative to menu's top
-  word            Width;            ///< Button's active width
-  word            Height;           ///< Button's active heigth
-  byte            Pressed;          ///< Button is currently pressed
-  byte            Shape;            ///< Shape, listed in enum ::BUTTON_SHAPES
-  signed char     Icon;             ///< Which icon to display: Either the one from the toolbar (-1) or one of ::MENU_SPRITE
-
-  // Triggers on mouse/keyboard
-  Func_action     Left_action;      ///< Action triggered by a left mouseclick on the button
-  Func_action     Right_action;     ///< Action triggered by a right mouseclick on the button
-  word            Left_shortcut[2]; ///< Keyboard shortcut for a left mouseclick
-  word            Right_shortcut[2];///< Keyboard shortcut for a right mouseclick
-  byte            Left_instant;     ///< Will not wait for mouse release before triggering action
-  byte            Right_instant;    ///< Will not wait for mouse release before triggering action
-
-  // Data used when the button is unselected
-  Func_action     Unselect_action;  ///< Action triggered by unselecting the button
-  byte            Family;           ///< enum ::FAMILY_OF_BUTTONS.
-
-} Buttons_Pool[NB_BUTTONS];
-
-
-
 // -- Information about the different drawing modes (effects)
 
 /// Current effecting function. When no effect is selected this is ::No_effect()

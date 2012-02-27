@@ -66,68 +66,6 @@ Func_effect Effect_function_before_cancel;
 ///This table holds pointers to the saved window backgrounds. We can have up to 8 windows open at a time.
 byte* Window_background[8];
 
-
-///Table of tooltip texts for menu buttons
-char * Menu_tooltip[NB_BUTTONS]=
-{
-  "Hide toolbars / Select  ",
-
-  "Layers manager          ",
-  "Get/Set transparent col.",
-  "Merge layer             ",
-  "Add layer               ",
-  "Drop layer              ",
-  "Raise layer             ",
-  "Lower layer             ",
-  "Set frame time          ",
-  "Go to first frame       ",
-  "Go to previous frame    ",
-  "Go to next frame        ",
-  "Go to last frame        ",
-  "Preview animation       ",
-  "Layer select / toggle   ",
-  "Paintbrush choice       ",
-  "Adjust / Transform menu ",
-  "Freehand draw. / Toggle ",
-  "Splines / Toggle        ",
-  "Lines / Toggle          ",
-  "Spray / Menu            ",
-  "Floodfill / Replace col.",
-  "Polylines / Polyforms   ",
-  "Polyfill / Filled Pforms",
-  "Empty rectangles        ",
-  "Filled rectangles       ",
-  "Empty circles / ellipses",
-  "Filled circles / ellips.",
-  "Grad. rect / Grad. menu ",
-  "Grad. spheres / ellipses",
-  "Brush grab. / Restore   ",
-  "Lasso / Restore brush   ",
-#ifdef __ENABLE_LUA__
-  "Brush effects / factory ",
-#else
-  "Brush effects           ",
-#endif
-  "Drawing modes (effects) ",
-  "Text                    ",
-  "Magnify mode / Menu     ",
-  "Pipette / Invert colors ",
-  "Screen size / Safe. res.",
-  "Go / Copy to other page ",
-  "Save as / Save          ",
-  "Load / Re-load          ",
-  "Settings / Skins        ",
-  "Clear / with backcolor  ",
-  "Help / Statistics       ",
-  "Undo / Redo             ",
-  "Kill current page       ",
-  "Quit                    ",
-  "Palette editor / setup  ",
-  "Scroll pal. bkwd / Fast ",
-  "Scroll pal. fwd / Fast  ",
-  "Color #"                 ,
-};
-
 ///Save a screen block (usually before erasing it with a new window or a dropdown menu)
 void Save_background(byte **buffer, int x_pos, int y_pos, int width, int height)
 {
@@ -631,7 +569,7 @@ void Status_print_palette_color(byte color)
   char str[25];
   int i;
   
-  strcpy(str,Menu_tooltip[BUTTON_CHOOSE_COL]);
+  strcpy(str,Buttons_Pool[BUTTON_CHOOSE_COL].Tooltip);
   sprintf(str+strlen(str),"%d (%d,%d,%d)",color,Main_palette[color].R,Main_palette[color].G,Main_palette[color].B);
   // Pad spaces
   for (i=strlen(str); i<24; i++)
@@ -1496,7 +1434,7 @@ void Main_handler(void)
                 Mouse_K = x; // Close_popup waits for end of click and resets Mouse_K...
               }
 
-              Print_in_menu(Menu_tooltip[button_index],0);
+              Print_in_menu(Buttons_Pool[button_index].Tooltip,0);
 
               /*if (Gfx->Hover_effect && !Buttons_Pool[button_index].Pressed)
                 Draw_menu_button(button_index, BUTTON_HIGHLIGHTED);
@@ -2570,7 +2508,7 @@ void Get_color_behind_window(byte * color, byte * click)
   Paintbrush_hidden=1;
   c=-1; // color pointée: au début aucune, comme ça on initialise tout
   if (Menu_is_visible_before_window)
-    Print_in_menu(Menu_tooltip[BUTTON_CHOOSE_COL],0);
+    Print_in_menu(Buttons_Pool[BUTTON_CHOOSE_COL].Tooltip,0);
 
   Display_cursor();
 
@@ -2600,9 +2538,9 @@ void Get_color_behind_window(byte * color, byte * click)
           for (index=strlen(str); index<a; index++)
             str[index]=' ';
           str[a]=0;
-          Print_in_menu(str,strlen(Menu_tooltip[BUTTON_CHOOSE_COL]));
+          Print_in_menu(str,strlen(Buttons_Pool[BUTTON_CHOOSE_COL].Tooltip));
 
-          Print_general((26+((d+strlen(Menu_tooltip[BUTTON_CHOOSE_COL]))<<3))*Menu_factor_X,
+          Print_general((26+((d+strlen(Buttons_Pool[BUTTON_CHOOSE_COL].Tooltip))<<3))*Menu_factor_X,
               Menu_status_Y," ",0,c);
         }
       }

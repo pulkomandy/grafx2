@@ -41,6 +41,7 @@
 #include "sdlscreen.h"
 #include "palette.h"
 
+T_Toolbar_button Buttons_Pool[NB_BUTTONS];
 
 /// Width of one layer button, in pixels before scaling
 word Layer_button_width = 1;
