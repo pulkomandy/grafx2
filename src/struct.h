@@ -533,24 +533,6 @@ typedef struct {
 
 } T_Paintbrush;
 
-// A menubar.
-typedef struct {
-  word Width;
-  word Height;
-  byte Visible;
-  word Top; ///< Relative to the top line of the menu, hidden bars don't count.
-  byte* Skin[3]; ///< [0] has normal buttons, [1] has selected buttons, [2] is current.
-  word Skin_width;
-  byte Last_button_index;
-} T_Menu_Bar;
-
-typedef enum {
-  MENUBAR_STATUS = 0, // MUST be 0
-  MENUBAR_LAYERS,
-  MENUBAR_TOOLS,
-  MENUBAR_COUNT
-} T_Menubars;
-
 typedef struct
 {
   int Previous;

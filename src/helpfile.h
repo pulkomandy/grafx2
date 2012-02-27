@@ -314,13 +314,10 @@ static const T_Help_table helptable_help[] =
   HELP_LINK ("  Menu      : %s",   0x100+BUTTON_LAYER_MENU)
   HELP_LINK ("  Add new   : %s",   0x100+BUTTON_LAYER_ADD)
   HELP_LINK ("  Delete    : %s",   0x100+BUTTON_LAYER_REMOVE)
-#ifndef NOLAYERS
   HELP_LINK ("  Merge     : %s",   0x100+BUTTON_LAYER_MERGE)
-#endif
   HELP_LINK ("  Move up   : %s",   0x100+BUTTON_LAYER_UP)
   HELP_LINK ("  Move down : %s",   0x100+BUTTON_LAYER_DOWN)
   //HELP_LINK ("  Set transp: %s",   0x100+BUTTON_LAYER_COLOR)
-#ifndef NOLAYERS
   HELP_TEXT ("  Select :")
   HELP_LINK ("    1 : %s",   SPECIAL_LAYER1_SELECT)
   HELP_LINK ("    2 : %s",   SPECIAL_LAYER2_SELECT)
@@ -339,13 +336,11 @@ static const T_Help_table helptable_help[] =
   HELP_LINK ("    6 : %s",   SPECIAL_LAYER6_TOGGLE)
   HELP_LINK ("    7 : %s",   SPECIAL_LAYER7_TOGGLE)
   HELP_LINK ("    8 : %s",   SPECIAL_LAYER8_TOGGLE)
-#else
   HELP_LINK ("  Go to first:       %s",   0x100+BUTTON_ANIM_FIRST_FRAME)
   HELP_LINK ("  Go to previous:    %s",   0x100+BUTTON_ANIM_PREV_FRAME)
   HELP_LINK ("  Go to next:        %s",   0x100+BUTTON_ANIM_NEXT_FRAME)
   HELP_LINK ("  Go to last:        %s",   0x100+BUTTON_ANIM_LAST_FRAME)
   HELP_LINK ("  Set duration:      %s",   0x100+BUTTON_ANIM_TIME)
-#endif
   HELP_TEXT ("")
   HELP_LINK ("  Format check     : %s",   SPECIAL_FORMAT_CHECKER)
   HELP_LINK ("  Format check menu: %s",   SPECIAL_FORMAT_CHECKER_MENU)
@@ -3056,6 +3051,19 @@ T_Help_section Help_section[] =
 
   // Attention, keep the same order as BUTTON_NUMBERS:
   HELP_TABLE_DECLARATION(helptable_hide)
+
+  HELP_TABLE_DECLARATION(helptable_layermenu)
+  HELP_TABLE_DECLARATION(helptable_animtime)
+  HELP_TABLE_DECLARATION(helptable_firstframe)
+  HELP_TABLE_DECLARATION(helptable_prevframe)
+  HELP_TABLE_DECLARATION(helptable_nextframe)
+  HELP_TABLE_DECLARATION(helptable_lastframe)
+  HELP_TABLE_DECLARATION(helptable_layeradd)
+  HELP_TABLE_DECLARATION(helptable_layerdel)
+  HELP_TABLE_DECLARATION(helptable_layerup)
+  HELP_TABLE_DECLARATION(helptable_layerdown)
+  HELP_TABLE_DECLARATION(helptable_animtime) // reserved for future button
+
   HELP_TABLE_DECLARATION(helptable_layermenu)
   HELP_TABLE_DECLARATION(helptable_layertrans)
   HELP_TABLE_DECLARATION(helptable_layermerge)
@@ -3063,15 +3071,8 @@ T_Help_section Help_section[] =
   HELP_TABLE_DECLARATION(helptable_layerdel)
   HELP_TABLE_DECLARATION(helptable_layerup)
   HELP_TABLE_DECLARATION(helptable_layerdown)
-  // Anim-specific
-  HELP_TABLE_DECLARATION(helptable_animtime)
-  HELP_TABLE_DECLARATION(helptable_firstframe)
-  HELP_TABLE_DECLARATION(helptable_prevframe)
-  HELP_TABLE_DECLARATION(helptable_nextframe)
-  HELP_TABLE_DECLARATION(helptable_lastframe)
-  HELP_TABLE_DECLARATION(helptable_animtime) // reserved for future button
-  // end of anim-specific
   HELP_TABLE_DECLARATION(helptable_layerselect)
+
   HELP_TABLE_DECLARATION(helptable_paintbrush)
   HELP_TABLE_DECLARATION(helptable_adjust)
   HELP_TABLE_DECLARATION(helptable_draw)

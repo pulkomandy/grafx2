@@ -575,16 +575,6 @@ void Button_Anim_last_frame(void)
   Display_cursor();
 }
 
-void Button_Anim_play(void)
-{
-  Hide_cursor();
-
-  //
-
-  Unselect_button(BUTTON_ANIM_PLAY);
-  Display_cursor();
-}
-
 void Button_Anim_continuous_next(void)
 {
   Uint32 time_start;

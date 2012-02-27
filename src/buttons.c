@@ -510,13 +510,14 @@ void Button_Toggle_toolbar(void)
 {  
   T_Dropdown_button dropdown;
   T_Dropdown_choice *item;
-  static char menu_name[2][9]= {
-    " Tools",
-    " Layers"
-  };
+  static char menu_name_tools[9] = " Tools";
+  static char menu_name_layers[9]= " Layers";
+  static char menu_name_anim[9]  = " Anim";
   
-  menu_name[0][0] = Menu_bars[MENUBAR_TOOLS ].Visible ? 22 : ' ';
-  menu_name[1][0] = Menu_bars[MENUBAR_LAYERS].Visible ? 22 : ' ';
+  
+  menu_name_tools[0]  = Menu_bars[MENUBAR_TOOLS ].Visible ? 22 : ' ';
+  menu_name_layers[0] = Menu_bars[MENUBAR_LAYERS].Visible ? 22 : ' ';
+  menu_name_anim[0]   = Menu_bars[MENUBAR_ANIMATION].Visible ? 22 : ' ';
 
   Hide_cursor();
   
@@ -527,8 +528,16 @@ void Button_Toggle_toolbar(void)
   dropdown.First_item    =NULL;
   dropdown.Bottom_up     =1;
 
-  Window_dropdown_add_item(&dropdown, 0, menu_name[0]);
-  Window_dropdown_add_item(&dropdown, 1, menu_name[1]);
+  Window_dropdown_add_item(&dropdown, 0, menu_name_tools);
+  
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED ||
+      Main_backups->Pages->Image_mode == IMAGE_MODE_MODE5 ||
+    (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION && Main_backups->Pages->Nb_layers==1))
+    Window_dropdown_add_item(&dropdown, 1, menu_name_layers);
+  
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION ||
+    (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED && Main_backups->Pages->Nb_layers==1))
+    Window_dropdown_add_item(&dropdown, 2, menu_name_anim);
 
   item=Dropdown_activate(&dropdown,0,Menu_Y+Menu_bars[MENUBAR_STATUS].Top*Menu_factor_Y);
   
@@ -536,11 +545,33 @@ void Button_Toggle_toolbar(void)
   {
     switch (item->Number)
     {
-      case 0:
+      case 0: // tools
         Set_bar_visibility(MENUBAR_TOOLS, !Menu_bars[MENUBAR_TOOLS].Visible);
         break;
-      case 1:
+      case 1: // anim
+        if (Menu_bars[MENUBAR_ANIMATION].Visible && !Menu_bars[MENUBAR_LAYERS].Visible)
+          Set_bar_visibility(MENUBAR_ANIMATION, 0);
         Set_bar_visibility(MENUBAR_LAYERS, !Menu_bars[MENUBAR_LAYERS].Visible);
+
+        if (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED)
+        {
+          // Exceptionally, this doesn't require a backup because a single-frame
+          // animation is the same as a single-layer image.
+          Main_backups->Pages->Image_mode = IMAGE_MODE_ANIMATION;
+        }
+        
+        break;
+      case 2: // layers
+        if (Menu_bars[MENUBAR_LAYERS].Visible && !Menu_bars[MENUBAR_ANIMATION].Visible)
+          Set_bar_visibility(MENUBAR_LAYERS, 0);
+        Set_bar_visibility(MENUBAR_ANIMATION, !Menu_bars[MENUBAR_ANIMATION].Visible);
+
+        if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+        {
+          // Exceptionally, this doesn't require a backup because a single-layer
+          // image is the same as a single-frame animation.
+          Main_backups->Pages->Image_mode = IMAGE_MODE_LAYERED;
+        }
         break;
     }
   }
@@ -1544,11 +1575,9 @@ void Button_Page(void)
   Swap_tilemap();
   
   // On fait le reste du travail "à la main":
-#ifndef NOLAYERS
   SWAP_PBYTES(Main_visible_image.Image,Spare_visible_image.Image)
   SWAP_WORDS (Main_visible_image.Width,Spare_visible_image.Width)
   SWAP_WORDS (Main_visible_image.Height,Spare_visible_image.Height)
-#endif 
   SWAP_SHORTS(Main_offset_X,Spare_offset_X)
   SWAP_SHORTS(Main_offset_Y,Spare_offset_Y)
   SWAP_SHORTS(Main_separator_position,Spare_separator_position)

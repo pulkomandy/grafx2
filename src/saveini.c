@@ -32,6 +32,7 @@
 #include "misc.h"
 #include "saveini.h"
 #include "setup.h"
+#include "windows.h"
 
 int Save_INI_reach_group(FILE * old_file,FILE * new_file,char * buffer,char * group)
 {
@@ -665,15 +666,13 @@ int Save_INI(T_Config * conf)
   }
   
   values[0]=0;
-  for (index=0; index<MENUBAR_COUNT;index++)
-  {
-    values[0] |= Menu_bars[index].Visible ? (1<<index) : 0;
-  }
-  // Fill out the remaining bits. When new toolbars get implemented, they will
+  if (!Menu_bars[MENUBAR_LAYERS].Visible && !Menu_bars[MENUBAR_ANIMATION].Visible)
+    values[0]|=2;
+  if (!Menu_bars[MENUBAR_TOOLS].Visible)
+    values[0]|=4;
+  values[0]=255 ^ values[0];
+  // Remaining bits are filled so that when new toolbars get implemented, they will
   // be visible by default.
-  for (; index<8;index++)
-    values[0] |= (1<<index);
-    
   if ((return_code=Save_INI_set_values (old_file,new_file,buffer,"Menubars_visible",1,values,0)))
     goto Erreur_Retour;
 

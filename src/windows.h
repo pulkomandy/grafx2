@@ -143,4 +143,25 @@ typedef struct
 
 extern T_Toolbar_button Buttons_Pool[NB_BUTTONS];
 
+// A menubar.
+typedef struct {
+  word Width;
+  word Height;
+  byte Visible;
+  word Top; ///< Relative to the top line of the menu, hidden bars don't count.
+  byte* Skin[3]; ///< [0] has normal buttons, [1] has selected buttons, [2] is current.
+  word Skin_width;
+  byte Last_button_index;
+} T_Menu_Bar;
+
+enum {
+  MENUBAR_STATUS = 0, // MUST be 0
+  MENUBAR_ANIMATION,
+  MENUBAR_LAYERS,
+  MENUBAR_TOOLS,
+  MENUBAR_COUNT
+};
+
+extern T_Menu_Bar Menu_bars[MENUBAR_COUNT];
+
 #endif

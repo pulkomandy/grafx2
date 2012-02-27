@@ -42,6 +42,13 @@
 #include "palette.h"
 
 T_Toolbar_button Buttons_Pool[NB_BUTTONS];
+T_Menu_Bar Menu_bars[MENUBAR_COUNT] = 
+  {{MENU_WIDTH,  9, 1, 45, {NULL,NULL,NULL},  20, BUTTON_HIDE }, // Status
+  {MENU_WIDTH, 14, 1, 35, {NULL,NULL,NULL}, 236, BUTTON_ANIM_PLAY }, // Animation
+  {MENU_WIDTH, 10, 1, 35, {NULL,NULL,NULL}, 144, BUTTON_LAYER_SELECT }, // Layers
+  {MENU_WIDTH, 35, 1,  0, {NULL,NULL,NULL}, 254, BUTTON_CHOOSE_COL }} // Main
+  ;
+
 
 /// Width of one layer button, in pixels before scaling
 word Layer_button_width = 1;
@@ -465,105 +472,106 @@ void Draw_bar_remainder(word current_menu, word x_off)
 /// Display / update the layer menubar
 void Display_layerbar(void)
 {
-#ifndef NOLAYERS
-  word x_off=0;
-  word button_width = LAYER_SPRITE_WIDTH;
-  word button_number = Main_backups->Pages->Nb_layers;
-  word horiz_space;
-  word current_button;
-  word repeats=1;
   
-  if (! Menu_bars[MENUBAR_LAYERS].Visible)
-    return;
-  
-  // Available space in pixels
-  horiz_space = Screen_width / Menu_factor_X - Menu_bars[MENUBAR_LAYERS].Skin_width;
-  
-  // Don't display all buttons if not enough room
-  if (horiz_space/button_width < button_number)
-    button_number = horiz_space/button_width;
-  // Only 16 icons at the moment
-  if (button_number > 16) // can be different from MAX_NB_LAYERS
-    button_number = 16;
-
-  // Enlarge the buttons themselves if there's enough room
-  while (button_number*(button_width+2) < horiz_space && repeats < 20)
+  if (Menu_bars[MENUBAR_LAYERS].Visible)
   {
-    repeats+=1;
-    button_width+=2;
-  }
+    word x_off=0;
+    word button_width = LAYER_SPRITE_WIDTH;
+    word button_number = Main_backups->Pages->Nb_layers;
+    word horiz_space;
+    word current_button;
+    word repeats=1;
+    
+    // Available space in pixels
+    horiz_space = Screen_width / Menu_factor_X - Menu_bars[MENUBAR_LAYERS].Skin_width;
+    
+    // Don't display all buttons if not enough room
+    if (horiz_space/button_width < button_number)
+      button_number = horiz_space/button_width;
+    // Only 16 icons at the moment
+    if (button_number > 16) // can be different from MAX_NB_LAYERS
+      button_number = 16;
   
-  x_off=Menu_bars[MENUBAR_LAYERS].Skin_width;
-  for (current_button=0; current_button<button_number; current_button++)
-  {
-    word x_pos=0;
-    word y_pos;
-    word sprite_index;
-    
-    if (Main_current_layer == current_button)
-      sprite_index=1;
-    else if (Main_layers_visible & (1 << current_button))
-      sprite_index=0;
-    else
-      sprite_index=2;
-    
-    
-    for (y_pos=0;y_pos<LAYER_SPRITE_HEIGHT;y_pos++)
+    // Enlarge the buttons themselves if there's enough room
+    while (button_number*(button_width+2) < horiz_space && repeats < 20)
     {
-      word source_x=0;
+      repeats+=1;
+      button_width+=2;
+    }
+    
+    x_off=Menu_bars[MENUBAR_LAYERS].Skin_width;
+    for (current_button=0; current_button<button_number; current_button++)
+    {
+      word x_pos=0;
+      word y_pos;
+      word sprite_index;
       
-      for (source_x=0;source_x<LAYER_SPRITE_WIDTH;source_x++)
+      if (Main_current_layer == current_button)
+        sprite_index=1;
+      else if (Main_layers_visible & (1 << current_button))
+        sprite_index=0;
+      else
+        sprite_index=2;
+      
+      
+      for (y_pos=0;y_pos<LAYER_SPRITE_HEIGHT;y_pos++)
       {
-        short i = 1;
+        word source_x=0;
         
-        // This stretches a button, by duplicating the 2nd from right column 
-        // and 3rd column from left.    
-        if (source_x == 1 || (source_x == LAYER_SPRITE_WIDTH-3))
-          i=repeats;
-        
-        for (;i>0; i--)
+        for (source_x=0;source_x<LAYER_SPRITE_WIDTH;source_x++)
         {
-          Pixel_in_menu(MENUBAR_LAYERS, x_pos + x_off, y_pos, Gfx->Layer_sprite[sprite_index][current_button][y_pos][source_x]);
-          x_pos++;
+          short i = 1;
+          
+          // This stretches a button, by duplicating the 2nd from right column 
+          // and 3rd column from left.    
+          if (source_x == 1 || (source_x == LAYER_SPRITE_WIDTH-3))
+            i=repeats;
+          
+          for (;i>0; i--)
+          {
+            Pixel_in_menu(MENUBAR_LAYERS, x_pos + x_off, y_pos, Gfx->Layer_sprite[sprite_index][current_button][y_pos][source_x]);
+            x_pos++;
+          }
         }
-      }
-      // Next line
-      x_pos=0;
-    }    
-    // Next button
-    x_off+=button_width;
+        // Next line
+        x_pos=0;
+      }    
+      // Next button
+      x_off+=button_width;
+    }
+    // Texture any remaining space to the right.
+    // This overwrites any junk like deleted buttons.
+    Draw_bar_remainder(MENUBAR_LAYERS, x_off);
+    
+    // Update the active area of the layers pseudo-button
+    Buttons_Pool[BUTTON_LAYER_SELECT].Width = button_number * button_width;
+    
+    // Required to determine which layer button is clicked
+    Layer_button_width = button_width;
+    
+    // A screen refresh required by some callers
+    Update_rect(
+      Menu_bars[MENUBAR_LAYERS].Skin_width, 
+      Menu_Y+Menu_bars[MENUBAR_LAYERS].Top*Menu_factor_Y, 
+      horiz_space*Menu_factor_X, 
+      Menu_bars[MENUBAR_LAYERS].Height*Menu_factor_Y);
   }
-  // Texture any remaining space to the right.
-  // This overwrites any junk like deleted buttons.
-  Draw_bar_remainder(MENUBAR_LAYERS, x_off);
-  
-  // Update the active area of the layers pseudo-button
-  Buttons_Pool[BUTTON_LAYER_SELECT].Width = button_number * button_width;
-  
-  // Required to determine which layer button is clicked
-  Layer_button_width = button_width;
-  
-  // A screen refresh required by some callers
-  Update_rect(
-    Menu_bars[MENUBAR_LAYERS].Skin_width, 
-    Menu_Y+Menu_bars[MENUBAR_LAYERS].Top*Menu_factor_Y, 
-    horiz_space*Menu_factor_X, 
-    Menu_bars[MENUBAR_LAYERS].Height*Menu_factor_Y);
-#else
-  char str[8];
-  // Rest of horizontal line
-  Draw_bar_remainder(MENUBAR_LAYERS, Menu_bars[MENUBAR_LAYERS].Skin_width);
-  // Frame# background rectangle
-  // Block((Menu_bars[MENUBAR_LAYERS].Skin_width)*Menu_factor_X,(0+Menu_bars[MENUBAR_LAYERS].Top)*Menu_factor_Y+Menu_Y,8*8*Menu_factor_X,8*Menu_factor_Y,MC_Light);
-  // Frame #/#
-  snprintf(str, 5, "#%3d", Main_current_layer+1);
-  Print_general((82)*Menu_factor_X,(Menu_bars[MENUBAR_LAYERS].Top+3)*Menu_factor_Y+Menu_Y,str,MC_Black,MC_Light);
-  Update_rect(
-    (82)*Menu_factor_X,
-    (Menu_bars[MENUBAR_LAYERS].Top+3)*Menu_factor_Y+Menu_Y,
-    4*8*Menu_factor_X, 
-    8*Menu_factor_Y);
-#endif
+  if (Menu_bars[MENUBAR_ANIMATION].Visible)
+  {
+    char str[8];
+    // Rest of horizontal line
+    Draw_bar_remainder(MENUBAR_ANIMATION, Menu_bars[MENUBAR_ANIMATION].Skin_width);
+    // Frame# background rectangle
+    // Block((Menu_bars[MENUBAR_ANIMATION].Skin_width)*Menu_factor_X,(0+Menu_bars[MENUBAR_ANIMATION].Top)*Menu_factor_Y+Menu_Y,8*8*Menu_factor_X,8*Menu_factor_Y,MC_Light);
+    // Frame #/#
+    snprintf(str, 5, "#%3d", Main_current_layer+1);
+    Print_general((82)*Menu_factor_X,(Menu_bars[MENUBAR_ANIMATION].Top+3)*Menu_factor_Y+Menu_Y,str,MC_Black,MC_Light);
+    Update_rect(
+      (82)*Menu_factor_X,
+      (Menu_bars[MENUBAR_ANIMATION].Top+3)*Menu_factor_Y+Menu_Y,
+      4*8*Menu_factor_X, 
+      8*Menu_factor_Y);
+  }
 }
 
 
@@ -588,7 +596,7 @@ void Display_menu(void)
           for (x_pos=0;x_pos<Menu_bars[current_menu].Skin_width;x_pos++)
             Pixel_in_menu(current_menu, x_pos, y_pos, Menu_bars[current_menu].Skin[2][y_pos * Menu_bars[current_menu].Skin_width + x_pos]);
 
-        if (current_menu == MENUBAR_LAYERS)
+        if (current_menu == MENUBAR_LAYERS || current_menu == MENUBAR_ANIMATION)
         {
           // The layerbar has its own display, for the whole length.
           Display_layerbar();

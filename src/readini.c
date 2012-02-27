@@ -36,6 +36,8 @@
 #include "setup.h"
 #include "realpath.h"
 #include "io.h"
+#include "windows.h"
+
 
 void Load_INI_clear_string(char * str, byte keep_comments)
 {
@@ -898,12 +900,13 @@ int Load_INI(T_Config * conf)
   // Optional, Menu bars visibility (> 2.1)
   if (!Load_INI_get_values (file, buffer,"Menubars_visible",1,values))
   {
-    int index;
-    for (index=MENUBAR_STATUS+1; index<MENUBAR_COUNT;index++)
-    {
-      // Note that I skip the status bar, always enabled.
-      Menu_bars[index].Visible = (values[0] & (1<<index)) ? 1 : 0;
-    }
+    byte anim_visible = (values[0] & 2)!=0;
+    byte tools_visible = (values[0] & 4)!=0;
+    
+    // Skip status bar, always enabled.
+    Menu_bars[MENUBAR_LAYERS].Visible = anim_visible;
+    Menu_bars[MENUBAR_ANIMATION].Visible = 0;
+    Menu_bars[MENUBAR_TOOLS].Visible = tools_visible;
   }
   
   conf->Right_click_colorpick=0;

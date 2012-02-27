@@ -491,20 +491,6 @@ GFX2_GLOBAL byte  Menu_factor_Y;
 /// Size of a color cell in the menu's palette.
 GFX2_GLOBAL word  Menu_palette_cell_width;
 
-GFX2_GLOBAL T_Menu_Bar Menu_bars[MENUBAR_COUNT] 
-#ifdef GLOBAL_VARIABLES
-  = 
-{{MENU_WIDTH,  9, 1, 45, {NULL,NULL,NULL},  20, BUTTON_HIDE }, // Status
-#ifdef NOLAYERS 
- {MENU_WIDTH, 14, 1, 35, {NULL,NULL,NULL}, 236, BUTTON_LAYER_SELECT }, // Animation
-#else
- {MENU_WIDTH, 10, 1, 35, {NULL,NULL,NULL}, 144, BUTTON_LAYER_SELECT }, // Layers
-#endif
- {MENU_WIDTH, 35, 1,  0, {NULL,NULL,NULL}, 254, BUTTON_CHOOSE_COL }} // Main
-#endif
- ;
-
-
 // -- Window data
 
 /// Number of stacked windows currently displayed. 0 when no window is present.

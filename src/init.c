@@ -376,14 +376,14 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
     return 1;
   if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layerbar_block[0], 144, 10,"layer bar",0))
     return 1;
-  cursor_y+= 10;
+  cursor_y+= Menu_bars[MENUBAR_LAYERS].Height;
 
   // Animbar
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "anim bar"))
     return 1;
   if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Animbar_block[0], 236, 14,"anim bar",0))
     return 1;
-  cursor_y+= 14;
+  cursor_y+= Menu_bars[MENUBAR_ANIMATION].Height;
 
   // Status bar
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "status bar"))
@@ -404,14 +404,14 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
     return 1;
   if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layerbar_block[1], 144, 10,"selected layer bar",0))
     return 1;
-  cursor_y+= 10;
+  cursor_y+= Menu_bars[MENUBAR_LAYERS].Height;
 
   // Animbar (selected)
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "selected anim bar"))
     return 1;
   if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Animbar_block[1], 236, 14,"selected anim bar",0))
     return 1;
-  cursor_y+= 14;
+  cursor_y+= Menu_bars[MENUBAR_ANIMATION].Height;
 
   // Status bar (selected)
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "selected status bar"))
@@ -1205,7 +1205,7 @@ void Init_buttons(void)
               FAMILY_INSTANT);
 
   // Layer bar
-#ifndef NOLAYERS
+
   Init_button(BUTTON_LAYER_MENU,
               "Layers manager          ",
               0,0,
@@ -1278,9 +1278,10 @@ void Init_buttons(void)
               0,0,
               Do_nothing,
               FAMILY_INSTANT);
-#else
+
  // Anim bar
-  Init_button(BUTTON_LAYER_MENU,
+
+  Init_button(BUTTON_LAYER_MENU2,
               "Layers manager          ",
               0,0,
               44,13,
@@ -1334,8 +1335,8 @@ void Init_buttons(void)
               0,0,
               Do_nothing,
               FAMILY_INSTANT);
-  Init_button(BUTTON_LAYER_ADD,
-              "Add layer               ",
+  Init_button(BUTTON_ANIM_ADD_FRAME,
+              "Add frame               ",
               177,0,
               13,13,
               BUTTON_SHAPE_RECTANGLE,
@@ -1343,8 +1344,8 @@ void Init_buttons(void)
               0,0,
               Do_nothing,
               FAMILY_INSTANT);
-  Init_button(BUTTON_LAYER_REMOVE,
-              "Drop layer              ",
+  Init_button(BUTTON_ANIM_REMOVE_FRAME,
+              "Drop frame              ",
               191,0,
               13,13,
               BUTTON_SHAPE_RECTANGLE,
@@ -1352,8 +1353,8 @@ void Init_buttons(void)
               0,0,
               Do_nothing,
               FAMILY_INSTANT);
-  Init_button(BUTTON_LAYER_DOWN,
-              "Lower layer             ",
+  Init_button(BUTTON_ANIM_DOWN_FRAME,
+              "Move frame back         ",
               205,0,
               13,13,
               BUTTON_SHAPE_RECTANGLE,
@@ -1361,8 +1362,8 @@ void Init_buttons(void)
               0,0,
               Do_nothing,
               FAMILY_INSTANT);
-  Init_button(BUTTON_LAYER_UP,
-              "Raise layer             ",
+  Init_button(BUTTON_ANIM_UP_FRAME,
+              "Move frame forwards     ",
               219,0,
               13,13,
               BUTTON_SHAPE_RECTANGLE,
@@ -1370,7 +1371,7 @@ void Init_buttons(void)
               0,0,
               Do_nothing,
               FAMILY_INSTANT);
-#endif
+
   // Status bar
   Init_button(BUTTON_HIDE,
               "Hide toolbars / Select  ",
@@ -2868,11 +2869,8 @@ void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
   for (i=0; i<3; i++)
   {
     Menu_bars[MENUBAR_TOOLS ].Skin[i] = (byte*)&(gfx->Menu_block[i]);
-#ifndef NOLAYERS
     Menu_bars[MENUBAR_LAYERS].Skin[i] = (byte*)&(gfx->Layerbar_block[i]);
-#else
-    Menu_bars[MENUBAR_LAYERS].Skin[i] = (byte*)&(gfx->Animbar_block[i]);
-#endif
+    Menu_bars[MENUBAR_ANIMATION].Skin[i] = (byte*)&(gfx->Animbar_block[i]);
     Menu_bars[MENUBAR_STATUS].Skin[i] = (byte*)&(gfx->Statusbar_block[i]);
   }
 }
