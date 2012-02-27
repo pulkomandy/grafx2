@@ -3009,7 +3009,7 @@ byte Read_pixel_from_current_screen  (word x,word y)
   byte depth;
   byte color;
 
-  if (Constraint_mode)  
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_MODE5)  
     if (Main_current_layer==4)
       return *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width);
     
@@ -3163,12 +3163,13 @@ byte Read_pixel_from_current_layer(word x,word y)
 void Update_pixel_renderer(void)
 {
   #ifndef NOLAYERS
-  if (!Constraint_mode)
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED)
   {
     // layered
     Pixel_in_current_screen = Pixel_in_screen_layered;
     Pixel_in_current_screen_with_preview = Pixel_in_screen_layered_with_preview;
   }
+  // Implicit else : Image_mode must be IMAGE_MODE_MODE5
   else if ( Main_current_layer == 4)
   {
     // overlay

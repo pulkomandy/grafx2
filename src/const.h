@@ -564,4 +564,11 @@ enum OPERATIONS
   NB_OPERATIONS                ///< Number of operations handled by the engine
 };
 
+enum IMAGE_MODES
+{
+  IMAGE_MODE_LAYERED=0, ///< Layered image
+  IMAGE_MODE_ANIMATION, ///< Animation
+  IMAGE_MODE_MODE5,     ///< CPC mode 5
+};
+
 #endif

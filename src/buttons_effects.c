@@ -167,10 +167,9 @@ void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_ca
 // Constaint enforcer/checker ------------------------------------------------
 void Button_Constraint_mode(void)
 {
-  Constraint_mode=!Constraint_mode;
-  
-  if (Constraint_mode)
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED)
   {
+    Main_backups->Pages->Image_mode = IMAGE_MODE_MODE5;
   	// TODO backup
   	// CPC Mode 5 - ensure there are at least 5 layers
   	while(Main_backups->Pages->Nb_layers < 5)
@@ -181,6 +180,11 @@ void Button_Constraint_mode(void)
   	}
   	
   	// TODO set the palette to a CPC one ?
+  }
+  else if (Main_backups->Pages->Image_mode == IMAGE_MODE_MODE5)
+  {
+    // Disable
+    Main_backups->Pages->Image_mode = IMAGE_MODE_LAYERED;
   }
 }
 
@@ -906,7 +910,6 @@ void Effects_off(void)
   Mask_mode=0;
   Sieve_mode=0;
   Snap_mode=0;
-  Constraint_mode=0;
   Main_tilemap_mode=0;
 }
 

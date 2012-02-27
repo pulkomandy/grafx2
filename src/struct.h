@@ -401,6 +401,8 @@ typedef struct T_Page
   int       Height;  ///< Image height in pixels.
   T_Palette Palette; ///< Image palette.
 
+  byte      Image_mode; ///< 0= layered image, 1=animation,
+
   char      Comment[COMMENT_SIZE+1]; ///< Comment to store in the image file.
 
   char      File_directory[MAX_PATH_CHARACTERS];///< Directory that contains the file.

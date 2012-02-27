@@ -73,6 +73,7 @@ T_Page * New_page(int nb_layers)
     }
     page->Width=0;
     page->Height=0;
+    page->Image_mode = IMAGE_MODE_LAYERED;
     memset(page->Palette,0,sizeof(T_Palette));
     page->Comment[0]='\0';
     page->File_directory[0]='\0';
@@ -203,7 +204,7 @@ void Redraw_layered_image(void)
   // Re-construct the image with the visible layers
   byte layer=0;  
   // First layer
-  if (Constraint_mode && Main_layers_visible & (1<<4))
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_MODE5 && Main_layers_visible & (1<<4))
   {
     // The raster result layer is visible: start there
     // Copy it in Main_visible_image
@@ -484,7 +485,7 @@ int Allocate_list_of_pages(T_List_of_pages * list)
   T_Page * page;
 
   // On initialise chacune des nouvelles pages
-  page=New_page(NB_LAYERS);
+  page=New_page(1);
   if (!page)
     return 0;
   
@@ -911,6 +912,7 @@ int Backup_with_new_dimensions(int width,int height)
   Main_backups->Pages->Gradients=Dup_gradient(Main_backups->Pages->Next);
   Main_backups->Pages->Background_transparent=Main_backups->Pages->Next->Background_transparent;
   Main_backups->Pages->Transparent_color=Main_backups->Pages->Next->Transparent_color;
+  Main_backups->Pages->Image_mode=Main_backups->Pages->Next->Image_mode;
   
   // Fill with transparent color
   for (i=0; i<Main_backups->Pages->Nb_layers;i++)

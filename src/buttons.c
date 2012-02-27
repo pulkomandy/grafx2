@@ -4514,7 +4514,7 @@ void Display_effect_states(void)
   Display_effect_state(C2+23, 81, "Grid"   ,Snap_mode);
   Display_effect_state(C2+23,100, "Tiling" ,Tiling_mode);
 
-  Display_effect_state(177+23,24, "8 bit"  ,Constraint_mode);
+  Display_effect_state(177+23,24, "8 bit"  ,Main_backups->Pages->Image_mode > IMAGE_MODE_ANIMATION);
   Display_effect_state(177+23,43, "Tilemap",Main_tilemap_mode);
 }
 
@@ -4800,7 +4800,7 @@ void Button_Effects(void)
         {
           Button_Constraint_mode();
           Hide_cursor();
-          Display_effect_state(177+23,24, "8 bit" ,Constraint_mode);
+          Display_effect_state(177+23,24, "8 bit" ,Main_backups->Pages->Image_mode > IMAGE_MODE_ANIMATION);
           Display_cursor();
         } else {
           Close_window();
@@ -4834,7 +4834,7 @@ void Button_Effects(void)
   else
     Hide_cursor();
 
-  if (!(Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode||Constraint_mode||Main_tilemap_mode))
+  if (!(Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode||Main_tilemap_mode))
     Unselect_button(BUTTON_EFFECTS);
 
   Display_cursor();

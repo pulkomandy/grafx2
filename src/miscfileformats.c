@@ -3021,8 +3021,8 @@ void Load_CM5(T_IO_Context* context)
   // Now select layer 0 again
   Set_loading_layer(context, 0);
 
-  if (Constraint_mode != 1)
-    Constraint_mode = 1;
+  if (context->Type == CONTEXT_MAIN_IMAGE)
+    Main_backups->Pages->Image_mode = IMAGE_MODE_MODE5;
 
   for(ty=0; ty<context->Height; ty++)
   for(tx=0; tx<context->Width; tx++)
