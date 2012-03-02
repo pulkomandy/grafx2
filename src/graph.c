@@ -3005,39 +3005,39 @@ void Redraw_grid(short x, short y, unsigned short w, unsigned short h)
 
 byte Read_pixel_from_current_screen  (word x,word y)
 {
-  #ifndef NOLAYERS
+  
   byte depth;
   byte color;
 
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+  {
+    return *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer].Pixels);  
+  }
+  
   if (Main_backups->Pages->Image_mode == IMAGE_MODE_MODE5)  
     if (Main_current_layer==4)
       return *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width);
-    
+
   color = *(Main_screen+y*Main_image_width+x);
   if (color != Main_backups->Pages->Transparent_color) // transparent color
     return color;
   
   depth = *(Main_visible_image_depth_buffer.Image+x+y*Main_image_width);
   return *(Main_backups->Pages->Image[depth].Pixels + x+y*Main_image_width);
-  #else
-  return *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer].Pixels);
-  #endif
 }
 
 /// Paint a a single pixel in image only : as-is.
 void Pixel_in_screen_direct(word x,word y,byte color)
 {
-  *((y)*Main_image_width+(x)+/*Main_backups->Pages->Image[Main_current_layer].Pixels*/Main_screen)=color;
+  *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer].Pixels)=color;
 }
 
 /// Paint a a single pixel in image and on screen: as-is.
 void Pixel_in_screen_direct_with_preview(word x,word y,byte color)
 {
-  *((y)*Main_image_width+(x)+/*Main_backups->Pages->Image[Main_current_layer].Pixels*/Main_screen)=color;
+  *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer].Pixels)=color;
   Pixel_preview(x,y,color);
 }
-
-#ifndef NOLAYERS
 
 /// Paint a a single pixel in image only : using layered display.
 void Pixel_in_screen_layered(word x,word y,byte color)
@@ -3140,7 +3140,6 @@ void Pixel_in_screen_overlay_with_preview(word x,word y,byte color)
     Pixel_preview(x,y,color);
   }
 }
-#endif
 
 Func_pixel Pixel_in_current_screen=Pixel_in_screen_direct;
 Func_pixel Pixel_in_current_screen_with_preview=Pixel_in_screen_direct_with_preview;
@@ -3162,7 +3161,13 @@ byte Read_pixel_from_current_layer(word x,word y)
 
 void Update_pixel_renderer(void)
 {
-  #ifndef NOLAYERS
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+  {
+    // direct
+    Pixel_in_current_screen = Pixel_in_screen_direct;
+    Pixel_in_current_screen_with_preview = Pixel_in_screen_direct_with_preview;
+  }
+  else
   if (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED)
   {
     // layered
@@ -3188,9 +3193,4 @@ void Update_pixel_renderer(void)
     Pixel_in_current_screen = Pixel_in_screen_layered;
     Pixel_in_current_screen_with_preview = Pixel_in_screen_layered_with_preview;
   }
-  #else
-  // direct
-  Pixel_in_current_screen = Pixel_in_screen_direct;
-  Pixel_in_current_screen_with_preview = Pixel_in_screen_direct_with_preview;
-  #endif
 }

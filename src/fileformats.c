@@ -60,7 +60,6 @@
 #include "struct.h"
 #include "io.h"
 #include "windows.h" // Best_color()
-#include "pages.h" // Add_layer()
 
 //////////////////////////////////// IMG ////////////////////////////////////
 
@@ -2025,7 +2024,13 @@ void Load_GIF(T_IO_Context * context)
                       else if (!memcmp(aeb,"NETSCAPE2.0",0x0B))
                       {
                         // The well-known Netscape extension.
-                        // Nothing to do, just skip sub-block
+                        // Load as an animation
+                        if (context->Type == CONTEXT_MAIN_IMAGE)
+                        {
+                          Main_backups->Pages->Image_mode = IMAGE_MODE_ANIMATION;
+                          Update_screen_targets();
+                        }
+                        // Skip sub-block
                         do
                         {
                           if (! Read_byte(GIF_file,&size_to_read))
@@ -2139,8 +2144,7 @@ void Load_GIF(T_IO_Context * context)
                 // Attempt to add a layer to current image
                 current_layer++;
                 Set_loading_layer(context, current_layer);
-#ifdef NOLAYERS
-                if (context->Type == CONTEXT_MAIN_IMAGE)
+                if (context->Type == CONTEXT_MAIN_IMAGE && Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
                 {
                   if (is_transparent)
                   // Copy the content of previous layer, in case of loading a GIF
@@ -2155,7 +2159,6 @@ void Load_GIF(T_IO_Context * context)
                       LSDB.Backcol,
                       Main_backups->Pages->Width*Main_backups->Pages->Height);
                 }
-#endif
               }
               else
               {
@@ -2165,7 +2168,6 @@ void Load_GIF(T_IO_Context * context)
                     LSDB.Backcol,
                     Main_backups->Pages->Width*Main_backups->Pages->Height);
               }
-              
               // Duration was set in the previously loaded GCE
               Set_frame_duration(context, last_delay*10);
               number_LID++;
@@ -2497,10 +2499,9 @@ void Save_GIF(T_IO_Context * context)
           //  Write_bytes(GIF_file,"\x21\xFF\x0BNETSCAPE2.0\x03\xLL\xSS\xSS\x00",19);
           // LL : 01 to loop
           // SSSS : number of loops
-#ifdef NOLAYERS
-          if (context->Nb_layers>1)
-            Write_bytes(GIF_file,"\x21\xFF\x0BNETSCAPE2.0\x03\x01\x00\x00\x00",19);
-#endif          
+          if (context->Type == CONTEXT_MAIN_IMAGE && Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+            if (context->Nb_layers>1)
+              Write_bytes(GIF_file,"\x21\xFF\x0BNETSCAPE2.0\x03\x01\x00\x00\x00",19);
             
           // Ecriture du commentaire
           if (context->Comment[0])
@@ -2543,18 +2544,24 @@ void Save_GIF(T_IO_Context * context)
             GCE.Block_identifier = 0x21;
             GCE.Function = 0xF9;
             GCE.Block_size=4;
-#ifdef NOLAYERS
-            GCE.Packed_fields=(2<<2)|(context->Background_transparent);
-            GCE.Delay_time=Get_frame_duration(context)/10;
-#else
-            if (current_layer==0)
-              GCE.Packed_fields=(1<<2)|(context->Background_transparent);
+            
+            if (context->Type == CONTEXT_MAIN_IMAGE && Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+            {
+              // Animation frame
+              GCE.Packed_fields=(2<<2)|(context->Background_transparent);
+              GCE.Delay_time=Get_frame_duration(context)/10;
+            }
             else
-              GCE.Packed_fields=(1<<2)|(1);
-            GCE.Delay_time=5; // Duration 5/100s (minimum viable value for current web browsers)
-            if (current_layer == context->Nb_layers -1)
-              GCE.Delay_time=0xFFFF; // Infinity (10 minutes)
-#endif
+            {
+              // Layered image
+              if (current_layer==0)
+                GCE.Packed_fields=(1<<2)|(context->Background_transparent);
+              else
+                GCE.Packed_fields=(1<<2)|(1);
+              GCE.Delay_time=5; // Duration 5/100s (minimum viable value for current web browsers)
+              if (current_layer == context->Nb_layers -1)
+                GCE.Delay_time=0xFFFF; // Infinity (10 minutes)
+            }
             GCE.Transparent_color=context->Transparent_color;
             GCE.Block_terminator=0x00;
             

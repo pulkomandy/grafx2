@@ -548,10 +548,22 @@ void Button_Toggle_toolbar(void)
       case 0: // tools
         Set_bar_visibility(MENUBAR_TOOLS, !Menu_bars[MENUBAR_TOOLS].Visible);
         break;
-      case 1: // anim
+      case 1: // layers
         if (Menu_bars[MENUBAR_ANIMATION].Visible && !Menu_bars[MENUBAR_LAYERS].Visible)
           Set_bar_visibility(MENUBAR_ANIMATION, 0);
         Set_bar_visibility(MENUBAR_LAYERS, !Menu_bars[MENUBAR_LAYERS].Visible);
+
+        if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+        {
+          // Exceptionally, this doesn't require a backup because a single-layer
+          // image is the same as a single-frame animation.
+          Main_backups->Pages->Image_mode = IMAGE_MODE_LAYERED;
+        }
+        break;
+      case 2: // anim
+        if (Menu_bars[MENUBAR_LAYERS].Visible && !Menu_bars[MENUBAR_ANIMATION].Visible)
+          Set_bar_visibility(MENUBAR_LAYERS, 0);
+        Set_bar_visibility(MENUBAR_ANIMATION, !Menu_bars[MENUBAR_ANIMATION].Visible);
 
         if (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED)
         {
@@ -560,18 +572,6 @@ void Button_Toggle_toolbar(void)
           Main_backups->Pages->Image_mode = IMAGE_MODE_ANIMATION;
         }
         
-        break;
-      case 2: // layers
-        if (Menu_bars[MENUBAR_LAYERS].Visible && !Menu_bars[MENUBAR_ANIMATION].Visible)
-          Set_bar_visibility(MENUBAR_LAYERS, 0);
-        Set_bar_visibility(MENUBAR_ANIMATION, !Menu_bars[MENUBAR_ANIMATION].Visible);
-
-        if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
-        {
-          // Exceptionally, this doesn't require a backup because a single-layer
-          // image is the same as a single-frame animation.
-          Main_backups->Pages->Image_mode = IMAGE_MODE_LAYERED;
-        }
         break;
     }
   }

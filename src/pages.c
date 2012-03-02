@@ -38,12 +38,10 @@
 // -- Layers data
 
 /// Array of two images, that contains the "flattened" version of the visible layers.
-#ifndef NOLAYERS
 T_Bitmap Main_visible_image;
 T_Bitmap Main_visible_image_backup;
 T_Bitmap Main_visible_image_depth_buffer;
 T_Bitmap Spare_visible_image;
-#endif
 
   ///
   /// GESTION DES PAGES
@@ -200,40 +198,92 @@ void Download_infos_page_main(T_Page * page)
 
 void Redraw_layered_image(void)
 {
-  #ifndef NOLAYERS
-  // Re-construct the image with the visible layers
-  byte layer=0;  
-  // First layer
-  if (Main_backups->Pages->Image_mode == IMAGE_MODE_MODE5 && Main_layers_visible & (1<<4))
+  if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
   {
-    // The raster result layer is visible: start there
-    // Copy it in Main_visible_image
-    int i;
-    for (i=0; i< Main_image_width*Main_image_height; i++)
+    // Re-construct the image with the visible layers
+    byte layer=0;  
+    // First layer
+    if (Main_backups->Pages->Image_mode == IMAGE_MODE_MODE5 && Main_layers_visible & (1<<4))
     {
-      layer = *(Main_backups->Pages->Image[4].Pixels+i);
-      Main_visible_image.Image[i]=*(Main_backups->Pages->Image[layer].Pixels+i);
+      // The raster result layer is visible: start there
+      // Copy it in Main_visible_image
+      int i;
+      for (i=0; i< Main_image_width*Main_image_height; i++)
+      {
+        layer = *(Main_backups->Pages->Image[4].Pixels+i);
+        Main_visible_image.Image[i]=*(Main_backups->Pages->Image[layer].Pixels+i);
+      }
+        
+      // Copy it to the depth buffer
+      memcpy(Main_visible_image_depth_buffer.Image,
+        Main_backups->Pages->Image[4].Pixels,
+        Main_image_width*Main_image_height);
+        
+      // Next
+      layer= (1<<4)+1;
     }
-      
-    // Copy it to the depth buffer
-    memcpy(Main_visible_image_depth_buffer.Image,
-      Main_backups->Pages->Image[4].Pixels,
-      Main_image_width*Main_image_height);
-      
-    // Next
-    layer= (1<<4)+1;
+    else
+    {
+      for (layer=0; layer<Main_backups->Pages->Nb_layers; layer++)
+      {
+        if ((1<<layer) & Main_layers_visible)
+        {
+           // Copy it in Main_visible_image
+           memcpy(Main_visible_image.Image,
+             Main_backups->Pages->Image[layer].Pixels,
+             Main_image_width*Main_image_height);
+           
+           // Initialize the depth buffer
+           memset(Main_visible_image_depth_buffer.Image,
+             layer,
+             Main_image_width*Main_image_height);
+           
+           // skip all other layers
+           layer++;
+           break;
+        }
+      }
+    }
+    // subsequent layer(s)
+    for (; layer<Main_backups->Pages->Nb_layers; layer++)
+    {
+      if ((1<<layer) & Main_layers_visible)
+      {
+        int i;
+        for (i=0; i<Main_image_width*Main_image_height; i++)
+        {
+          byte color = *(Main_backups->Pages->Image[layer].Pixels+i);
+          if (color != Main_backups->Pages->Transparent_color) // transparent color
+          {
+            *(Main_visible_image.Image+i) = color;
+            if (layer != Main_current_layer)
+              *(Main_visible_image_depth_buffer.Image+i) = layer;
+          }
+        }
+      }
+    }
   }
   else
   {
+    Update_screen_targets();
+  }
+  Update_FX_feedback(Config.FX_Feedback);
+}
+
+void Update_depth_buffer(void)
+{
+  if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+  {
+    // Re-construct the depth buffer with the visible layers.
+    // This function doesn't touch the visible buffer, it assumes
+    // that it was already up-to-date. (Ex. user only changed active layer)
+  
+    int layer;  
+    // First layer
     for (layer=0; layer<Main_backups->Pages->Nb_layers; layer++)
     {
       if ((1<<layer) & Main_layers_visible)
       {
-         // Copy it in Main_visible_image
-         memcpy(Main_visible_image.Image,
-           Main_backups->Pages->Image[layer].Pixels,
-           Main_image_width*Main_image_height);
-         
          // Initialize the depth buffer
          memset(Main_visible_image_depth_buffer.Image,
            layer,
@@ -244,145 +294,99 @@ void Redraw_layered_image(void)
          break;
       }
     }
-  }
-  // subsequent layer(s)
-  for (; layer<Main_backups->Pages->Nb_layers; layer++)
-  {
-    if ((1<<layer) & Main_layers_visible)
+    // subsequent layer(s)
+    for (; layer<Main_backups->Pages->Nb_layers; layer++)
     {
-      int i;
-      for (i=0; i<Main_image_width*Main_image_height; i++)
+      // skip the current layer, whenever we reach it
+      if (layer == Main_current_layer)
+        continue;
+        
+      if ((1<<layer) & Main_layers_visible)
       {
-        byte color = *(Main_backups->Pages->Image[layer].Pixels+i);
-        if (color != Main_backups->Pages->Transparent_color) // transparent color
+        int i;
+        for (i=0; i<Main_image_width*Main_image_height; i++)
         {
-          *(Main_visible_image.Image+i) = color;
-          if (layer != Main_current_layer)
+          byte color = *(Main_backups->Pages->Image[layer].Pixels+i);
+          if (color != Main_backups->Pages->Transparent_color) // transparent color
+          {
             *(Main_visible_image_depth_buffer.Image+i) = layer;
+          }
         }
       }
     }
   }
-  #else
-  Update_screen_targets();
-  #endif
-  Update_FX_feedback(Config.FX_Feedback);
-}
-
-void Update_depth_buffer(void)
-{
-  #ifndef NOLAYERS
-  // Re-construct the depth buffer with the visible layers.
-  // This function doesn't touch the visible buffer, it assumes
-  // that it was already up-to-date. (Ex. user only changed active layer)
-
-  int layer;  
-  // First layer
-  for (layer=0; layer<Main_backups->Pages->Nb_layers; layer++)
-  {
-    if ((1<<layer) & Main_layers_visible)
-    {
-       // Initialize the depth buffer
-       memset(Main_visible_image_depth_buffer.Image,
-         layer,
-         Main_image_width*Main_image_height);
-       
-       // skip all other layers
-       layer++;
-       break;
-    }
-  }
-  // subsequent layer(s)
-  for (; layer<Main_backups->Pages->Nb_layers; layer++)
-  {
-    // skip the current layer, whenever we reach it
-    if (layer == Main_current_layer)
-      continue;
-      
-    if ((1<<layer) & Main_layers_visible)
-    {
-      int i;
-      for (i=0; i<Main_image_width*Main_image_height; i++)
-      {
-        byte color = *(Main_backups->Pages->Image[layer].Pixels+i);
-        if (color != Main_backups->Pages->Transparent_color) // transparent color
-        {
-          *(Main_visible_image_depth_buffer.Image+i) = layer;
-        }
-      }
-    }
-  }
-  #endif
   Update_FX_feedback(Config.FX_Feedback);
 }
 
 void Redraw_spare_image(void)
 {
-  #ifndef NOLAYERS
-  // Re-construct the image with the visible layers
-  byte layer;  
-  // First layer
-  for (layer=0; layer<Spare_backups->Pages->Nb_layers; layer++)
+  if (Spare_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
   {
-    if ((1<<layer) & Spare_layers_visible)
+    // Re-construct the image with the visible layers
+    byte layer;  
+    // First layer
+    for (layer=0; layer<Spare_backups->Pages->Nb_layers; layer++)
     {
-       // Copy it in Spare_visible_image
-       memcpy(Spare_visible_image.Image,
-         Spare_backups->Pages->Image[layer].Pixels,
-         Spare_image_width*Spare_image_height);
-       
-       // No depth buffer in the spare
-       //memset(Spare_visible_image_depth_buffer.Image,
-       //  layer,
-       //  Spare_image_width*Spare_image_height);
-       
-       // skip all other layers
-       layer++;
-       break;
-    }
-  }
-  // subsequent layer(s)
-  for (; layer<Spare_backups->Pages->Nb_layers; layer++)
-  {
-    if ((1<<layer) & Spare_layers_visible)
-    {
-      int i;
-      for (i=0; i<Spare_image_width*Spare_image_height; i++)
+      if ((1<<layer) & Spare_layers_visible)
       {
-        byte color = *(Spare_backups->Pages->Image[layer].Pixels+i);
-        if (color != Spare_backups->Pages->Transparent_color) // transparent color
+         // Copy it in Spare_visible_image
+         memcpy(Spare_visible_image.Image,
+           Spare_backups->Pages->Image[layer].Pixels,
+           Spare_image_width*Spare_image_height);
+         
+         // No depth buffer in the spare
+         //memset(Spare_visible_image_depth_buffer.Image,
+         //  layer,
+         //  Spare_image_width*Spare_image_height);
+         
+         // skip all other layers
+         layer++;
+         break;
+      }
+    }
+    // subsequent layer(s)
+    for (; layer<Spare_backups->Pages->Nb_layers; layer++)
+    {
+      if ((1<<layer) & Spare_layers_visible)
+      {
+        int i;
+        for (i=0; i<Spare_image_width*Spare_image_height; i++)
         {
-          *(Spare_visible_image.Image+i) = color;
-          //if (layer != Spare_current_layer)
-          //  *(Spare_visible_image_depth_buffer.Image+i) = layer;
+          byte color = *(Spare_backups->Pages->Image[layer].Pixels+i);
+          if (color != Spare_backups->Pages->Transparent_color) // transparent color
+          {
+            *(Spare_visible_image.Image+i) = color;
+            //if (layer != Spare_current_layer)
+            //  *(Spare_visible_image_depth_buffer.Image+i) = layer;
+          }
         }
       }
     }
   }
-  #endif
 }
 
 void Redraw_current_layer(void)
 {
-#ifndef NOLAYERS
-  int i;
-  for (i=0; i<Main_image_width*Main_image_height; i++)
+  if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
   {
-    byte depth = *(Main_visible_image_depth_buffer.Image+i);
-    if (depth<=Main_current_layer)
+    int i;
+    for (i=0; i<Main_image_width*Main_image_height; i++)
     {
-      byte color = *(Main_backups->Pages->Image[Main_current_layer].Pixels+i);
-      if (color != Main_backups->Pages->Transparent_color) // transparent color
+      byte depth = *(Main_visible_image_depth_buffer.Image+i);
+      if (depth<=Main_current_layer)
       {
-        *(Main_visible_image.Image+i) = color;
-      }
-      else
-      {
-        *(Main_visible_image.Image+i) = *(Main_backups->Pages->Image[depth].Pixels+i);
+        byte color = *(Main_backups->Pages->Image[Main_current_layer].Pixels+i);
+        if (color != Main_backups->Pages->Transparent_color) // transparent color
+        {
+          *(Main_visible_image.Image+i) = color;
+        }
+        else
+        {
+          *(Main_visible_image.Image+i) = *(Main_backups->Pages->Image[depth].Pixels+i);
+        }
       }
     }
   }
-#endif
 }
 
 void Upload_infos_page_main(T_Page * page)
@@ -672,83 +676,79 @@ void Free_page_of_a_list(T_List_of_pages * list)
 
 void Update_screen_targets(void)
 {
-  #ifndef NOLAYERS
+  if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+  {
     Main_screen=Main_visible_image.Image;
     Screen_backup=Main_visible_image_backup.Image;
-  #else
+  }
+  else
+  {
     Main_screen=Main_backups->Pages->Image[Main_current_layer].Pixels;
     Screen_backup=Main_backups->Pages->Next->Image[Main_current_layer].Pixels;
-  #endif
+  }
   Update_pixel_renderer();
 }
 
 /// Update all the special image buffers, if necessary.
 int Update_buffers(int width, int height)
 {
-#ifdef NOLAYERS
-  // unused args
-  (void) width;
-  (void) height;
-#else
-  // At least one dimension is different
-  if (Main_visible_image.Width*Main_visible_image.Height != width*height)
+  if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
   {
-    // Current image
-    free(Main_visible_image.Image);
-    Main_visible_image.Image = (byte *)malloc(width * height);
-    if (Main_visible_image.Image == NULL)
-      return 0;
-  }
-  Main_visible_image.Width = width;
-  Main_visible_image.Height = height;
-      
-  if (Main_visible_image_backup.Width*Main_visible_image_backup.Height != width*height)
-  {
-    // Previous image
-    free(Main_visible_image_backup.Image);
-    Main_visible_image_backup.Image = (byte *)malloc(width * height);
-    if (Main_visible_image_backup.Image == NULL)
-      return 0;
-  }
-  Main_visible_image_backup.Width = width;
-  Main_visible_image_backup.Height = height;
-
-  if (Main_visible_image_depth_buffer.Width*Main_visible_image_depth_buffer.Height != width*height)
-  {      
-    // Depth buffer
-    free(Main_visible_image_depth_buffer.Image);
-    Main_visible_image_depth_buffer.Image = (byte *)malloc(width * height);
-    if (Main_visible_image_depth_buffer.Image == NULL)
-      return 0;
-  }
-  Main_visible_image_depth_buffer.Width = width;
-  Main_visible_image_depth_buffer.Height = height;
+    // At least one dimension is different
+    if (Main_visible_image.Width*Main_visible_image.Height != width*height)
+    {
+      // Current image
+      free(Main_visible_image.Image);
+      Main_visible_image.Image = (byte *)malloc(width * height);
+      if (Main_visible_image.Image == NULL)
+        return 0;
+    }
+    Main_visible_image.Width = width;
+    Main_visible_image.Height = height;
+        
+    if (Main_visible_image_backup.Width*Main_visible_image_backup.Height != width*height)
+    {
+      // Previous image
+      free(Main_visible_image_backup.Image);
+      Main_visible_image_backup.Image = (byte *)malloc(width * height);
+      if (Main_visible_image_backup.Image == NULL)
+        return 0;
+    }
+    Main_visible_image_backup.Width = width;
+    Main_visible_image_backup.Height = height;
   
-#endif
+    if (Main_visible_image_depth_buffer.Width*Main_visible_image_depth_buffer.Height != width*height)
+    {      
+      // Depth buffer
+      free(Main_visible_image_depth_buffer.Image);
+      Main_visible_image_depth_buffer.Image = (byte *)malloc(width * height);
+      if (Main_visible_image_depth_buffer.Image == NULL)
+        return 0;
+    }
+    Main_visible_image_depth_buffer.Width = width;
+    Main_visible_image_depth_buffer.Height = height;
+  }
   Update_screen_targets();
   return 1;
 }
 /// Update all the special image buffers of the spare page, if necessary.
 int Update_spare_buffers(int width, int height)
 {
-#ifdef NOLAYERS
-  // unused args
-  (void) width;
-  (void) height;
-#else
-  // At least one dimension is different
-  if (Spare_visible_image.Width*Spare_visible_image.Height != width*height)
+  if (Spare_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
   {
-    // Current image
-    free(Spare_visible_image.Image);
-    Spare_visible_image.Image = (byte *)malloc(width * height);
-    if (Spare_visible_image.Image == NULL)
-      return 0;
+    // At least one dimension is different
+    if (Spare_visible_image.Width*Spare_visible_image.Height != width*height)
+    {
+      // Current image
+      free(Spare_visible_image.Image);
+      Spare_visible_image.Image = (byte *)malloc(width * height);
+      if (Spare_visible_image.Image == NULL)
+        return 0;
+    }
+    Spare_visible_image.Width = width;
+    Spare_visible_image.Height = height;
+    
   }
-  Spare_visible_image.Width = width;
-  Spare_visible_image.Height = height;
-  
-#endif
   return 1;
 }
 
@@ -783,7 +783,6 @@ int Init_all_backup_lists(int width,int height)
       return 0;
     memset(Main_backups->Pages->Image[i].Pixels, 0, width*height);
   }
-#ifndef NOLAYERS
   Main_visible_image.Width = 0;
   Main_visible_image.Height = 0;
   Main_visible_image.Image = NULL;
@@ -793,20 +792,17 @@ int Init_all_backup_lists(int width,int height)
   Spare_visible_image.Height = 0;
   Spare_visible_image.Image = NULL;
 
-#endif
   if (!Update_buffers(width, height))
     return 0;
   if (!Update_spare_buffers(width, height))
     return 0;
     
-#ifndef NOLAYERS
   // For speed, instead of Redraw_layered_image() we'll directly set the buffers.
   memset(Main_visible_image.Image, 0, width*height);
   memset(Main_visible_image_backup.Image, 0, width*height);
   memset(Main_visible_image_depth_buffer.Image, 0, width*height);
   memset(Spare_visible_image.Image, 0, width*height);
-  
-#endif      
+    
   Download_infos_page_main(Main_backups->Pages); 
   Update_FX_feedback(Config.FX_Feedback);
 
@@ -872,6 +868,7 @@ int Backup_new_image(int layers,int width,int height)
   }
   
   Update_buffers(width, height);
+  memset(Main_visible_image_depth_buffer.Image, 0, width*height);
   
   Download_infos_page_main(Main_backups->Pages);
   
@@ -926,13 +923,21 @@ int Backup_with_new_dimensions(int width,int height)
   
   // Same code as in End_of_modification(),
   // Without saving a safety backup:
-  #ifndef NOLAYERS
+  if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+  {
     memcpy(Main_visible_image_backup.Image,
            Main_visible_image.Image,
            Main_image_width*Main_image_height);
-  #else
+  }
+  else
+  {
+    // Clear the depth buffer anyway, because we may use it later
+    memset(Main_visible_image_depth_buffer.Image, 0,
+      Main_image_width*Main_image_height);
+    
+  
     Update_screen_targets();
-  #endif
+  }
   Update_FX_feedback(Config.FX_Feedback);
   // --
   
@@ -989,31 +994,32 @@ int Backup_in_place(int width,int height)
   
   // The following is part of Update_buffers()
   // (without changing the backup buffer)
-  #ifndef NOLAYERS
-  // At least one dimension is different
-  if (Main_visible_image.Width*Main_visible_image.Height != width*height)
+  if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
   {
-    // Current image
-    free(Main_visible_image.Image);
-    Main_visible_image.Image = (byte *)malloc(width * height);
-    if (Main_visible_image.Image == NULL)
-      return 0;
-  }
-  Main_visible_image.Width = width;
-  Main_visible_image.Height = height;
-
-  if (Main_visible_image_depth_buffer.Width*Main_visible_image_depth_buffer.Height != width*height)
-  {      
-    // Depth buffer
-    free(Main_visible_image_depth_buffer.Image);
-    Main_visible_image_depth_buffer.Image = (byte *)malloc(width * height);
-    if (Main_visible_image_depth_buffer.Image == NULL)
-      return 0;
-  }
-  Main_visible_image_depth_buffer.Width = width;
-  Main_visible_image_depth_buffer.Height = height;
+    // At least one dimension is different
+    if (Main_visible_image.Width*Main_visible_image.Height != width*height)
+    {
+      // Current image
+      free(Main_visible_image.Image);
+      Main_visible_image.Image = (byte *)malloc(width * height);
+      if (Main_visible_image.Image == NULL)
+        return 0;
+    }
+    Main_visible_image.Width = width;
+    Main_visible_image.Height = height;
   
-#endif
+    if (Main_visible_image_depth_buffer.Width*Main_visible_image_depth_buffer.Height != width*height)
+    {      
+      // Depth buffer
+      free(Main_visible_image_depth_buffer.Image);
+      Main_visible_image_depth_buffer.Image = (byte *)malloc(width * height);
+      if (Main_visible_image_depth_buffer.Image == NULL)
+        return 0;
+    }
+    Main_visible_image_depth_buffer.Width = width;
+    Main_visible_image_depth_buffer.Height = height;
+    
+  }
   Update_screen_targets();
   
   return 1;
@@ -1278,19 +1284,21 @@ void End_of_modification(void)
 
   //Update_buffers(Main_image_width, Main_image_height);
   
-#ifndef NOLAYERS
-  // Backup buffer can have "wrong" size if a Lua script
-  // performs a resize.
-  Update_buffers(Main_image_width, Main_image_height);
-  //
-
-  memcpy(Main_visible_image_backup.Image,
-         Main_visible_image.Image,
-         Main_image_width*Main_image_height);
-#else
-  Update_screen_targets();
-#endif
+  if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+  {
+    // Backup buffer can have "wrong" size if a Lua script
+    // performs a resize.
+    Update_buffers(Main_image_width, Main_image_height);
+    //
   
+    memcpy(Main_visible_image_backup.Image,
+           Main_visible_image.Image,
+           Main_image_width*Main_image_height);
+  }
+  else
+  {
+    Update_screen_targets();
+  }
   Update_FX_feedback(Config.FX_Feedback);
 /*  
   Last_backed_up_layers = 0;
@@ -1306,6 +1314,7 @@ void End_of_modification(void)
 /// Add a new layer to latest page of a list. Returns 0 on success.
 byte Add_layer(T_List_of_pages *list, int layer)
 {
+  int max[] = {MAX_NB_LAYERS, MAX_NB_FRAMES, 5};
   T_Page * source_page;
   T_Page * new_page;
   byte * new_image;
@@ -1313,7 +1322,7 @@ byte Add_layer(T_List_of_pages *list, int layer)
   
   source_page = list->Pages;
   
-  if (list->Pages->Nb_layers == MAX_NB_LAYERS)
+  if (list->Pages->Nb_layers >= max[list->Pages->Image_mode]) // MAX_NB_LAYERS
     return 1;
    
   // Keep the position reasonable

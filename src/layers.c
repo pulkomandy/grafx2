@@ -41,46 +41,48 @@ void Layer_activate(int layer, short side)
   // Keep a copy of which layers were visible
   old_layers = Main_layers_visible;
   
-  #ifndef NOLAYERS
-  
-  if (side == RIGHT_SIDE)
+  if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
   {
-    // Right-click on current layer
-    if (Main_current_layer == layer)
+    if (side == RIGHT_SIDE)
     {
-      if (Main_layers_visible == (dword)(1<<layer))
+      // Right-click on current layer
+      if (Main_current_layer == layer)
       {
-        // Set all layers visible
-        Main_layers_visible = 0xFFFFFFFF;
+        if (Main_layers_visible == (dword)(1<<layer))
+        {
+          // Set all layers visible
+          Main_layers_visible = 0xFFFFFFFF;
+        }
+        else
+        {
+          // Set only this one visible
+          Main_layers_visible = 1<<layer;
+        }
       }
       else
       {
-        // Set only this one visible
-        Main_layers_visible = 1<<layer;
+        // Right-click on an other layer : toggle its visibility
+        Main_layers_visible ^= 1<<layer;
       }
     }
     else
     {
-      // Right-click on an other layer : toggle its visibility
-      Main_layers_visible ^= 1<<layer;
+      // Left-click on any layer
+      Main_current_layer = layer;
+      Main_layers_visible |= 1<<layer;
     }
   }
   else
   {
-    // Left-click on any layer
-    Main_current_layer = layer;
-    Main_layers_visible |= 1<<layer;
+    // Only allow one visible at a time
+    if (side == LEFT_SIDE)
+    {
+      Main_current_layer = layer;
+      Main_layers_visible = 1<<layer;
+      
+      Update_screen_targets();
+    }
   }
-  #else
-  // Handler for limited layers support: only allow one visible at a time
-  if (side == LEFT_SIDE)
-  {
-    Main_current_layer = layer;
-    Main_layers_visible = 1<<layer;
-    
-    Update_screen_targets();
-  }
-  #endif
 
   Hide_cursor();
   if (Main_layers_visible != old_layers)
@@ -97,26 +99,31 @@ void Layer_activate(int layer, short side)
 
 void Button_Layer_add(void)
 {
+  int max[] = {MAX_NB_LAYERS, MAX_NB_FRAMES, 5};
+  
   Hide_cursor();
 
-  if (Main_backups->Pages->Nb_layers < MAX_NB_LAYERS)
+  if (Main_backups->Pages->Nb_layers < max[Main_backups->Pages->Image_mode])
   {
     // Backup with unchanged layers
     Backup_layers(0);
     if (!Add_layer(Main_backups,Main_current_layer+1))
     {
-      #ifdef NOLAYERS
-      // Make a copy of current image, so the display is unchanged
-      memcpy(
-        Main_backups->Pages->Image[Main_current_layer].Pixels,
-        Main_backups->Pages->Image[Main_current_layer-1].Pixels,
-        Main_backups->Pages->Width*Main_backups->Pages->Height);
-      #else
-      Update_depth_buffer();
-      // I just noticed this might be unneeded, since the new layer
-      // is transparent, it shouldn't have any visible effect.
-      Display_all_screen();
-      #endif
+      if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+      {
+        // Make a copy of current image, so the display is unchanged
+        memcpy(
+          Main_backups->Pages->Image[Main_current_layer].Pixels,
+          Main_backups->Pages->Image[Main_current_layer-1].Pixels,
+          Main_backups->Pages->Width*Main_backups->Pages->Height);
+      }
+      else
+      {
+        Update_depth_buffer();
+        // I just noticed this might be unneeded, since the new layer
+        // is transparent, it shouldn't have any visible effect.
+        Display_all_screen();
+      }
       Display_layerbar();
       End_of_modification();
     }

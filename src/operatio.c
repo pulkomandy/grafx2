@@ -2785,13 +2785,14 @@ void Scroll_12_0(void)
   else
   {
     Backup_layers(-1); // Main_layers_visible
-    #ifndef NOLAYERS
+    if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+    {
       // Ensure the backup visible image is up-to-date
       // (after swapping some layers on/off, it gets outdated)
       memcpy(Main_visible_image_backup.Image,
              Main_visible_image.Image,
              Main_image_width*Main_image_height);
-    #endif
+    }
   }
   Update_screen_targets();
   

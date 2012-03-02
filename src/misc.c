@@ -303,12 +303,14 @@ byte Read_pixel_from_spare_screen(word x,word y)
   // (can be a bigger or smaller image)
   if (x>=Spare_image_width || y>=Spare_image_height)
     return Spare_backups->Pages->Transparent_color;
-#ifndef NOLAYERS
-  return *(Spare_visible_image.Image + y*Spare_image_width + x);
-#else
-  return *(Spare_backups->Pages->Image[Spare_current_layer].Pixels + y*Spare_image_width + x);
-#endif
-
+  if (Spare_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+  {
+    return *(Spare_backups->Pages->Image[Spare_current_layer].Pixels + y*Spare_image_width + x);
+  }
+  else
+  {
+    return *(Spare_visible_image.Image + y*Spare_image_width + x);
+  }
 }
 
 void Rotate_90_deg_lowlevel(byte * source, byte * dest, short width, short height)
