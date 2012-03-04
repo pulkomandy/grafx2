@@ -30,6 +30,7 @@
 #include "help.h"
 #include "misc.h"
 #include "readline.h"
+#include "graph.h"
 
 void Layer_activate(int layer, short side)
 {
@@ -130,6 +131,7 @@ void Button_Layer_add(void)
   }
 
   Unselect_button(BUTTON_LAYER_ADD);
+  Unselect_button(BUTTON_ANIM_ADD_FRAME);
   Display_cursor();
 }
 
@@ -152,6 +154,7 @@ void Button_Layer_remove(void)
     }
   }
   Unselect_button(BUTTON_LAYER_REMOVE);
+  Unselect_button(BUTTON_ANIM_REMOVE_FRAME);
   Display_cursor();
 }
 
@@ -232,7 +235,8 @@ void Button_Layer_menu(void)
   Window_set_normal_button(63, 78, 51,14,"Cancel", 0,1,KEY_ESC); // 4
   
   Update_window_area(0,0,Window_width, Window_height);
-
+  Display_cursor();
+  
   do
   {
     
@@ -281,6 +285,7 @@ void Button_Layer_menu(void)
     }
   }
   Unselect_button(BUTTON_LAYER_MENU);
+  Unselect_button(BUTTON_LAYER_MENU2);
   Display_cursor();
 }
 
@@ -373,6 +378,7 @@ void Button_Layer_up(void)
   }
   
   Unselect_button(BUTTON_LAYER_UP);
+  Unselect_button(BUTTON_ANIM_UP_FRAME);
   Display_cursor();
 }
 
@@ -412,6 +418,7 @@ void Button_Layer_down(void)
   }
   
   Unselect_button(BUTTON_LAYER_DOWN);
+  Unselect_button(BUTTON_ANIM_DOWN_FRAME);
   Display_cursor();
 }
 
@@ -454,7 +461,8 @@ void Button_Anim_time(void)
   Window_set_normal_button(63, 92, 51,14,"Cancel", 0,1,KEY_ESC); // 6
   
   Update_window_area(0,0,Window_width, Window_height);
-
+  Display_cursor();
+  
   do
   {
     
