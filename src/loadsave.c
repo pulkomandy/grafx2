@@ -788,8 +788,15 @@ void Load_image(T_IO_Context *context)
         //Main_image_width= context->Width;
         //Main_image_height= context->Height;
         
-        Main_current_layer = context->Nb_layers - 1;
-        Main_layers_visible = (2<<Main_current_layer)-1;
+        if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+        {
+          Main_current_layer = 0;
+        }
+        else
+        {
+          Main_current_layer = context->Nb_layers - 1;
+          Main_layers_visible = (2<<Main_current_layer)-1;
+        }
         
         // Load the transparency data
         Main_backups->Pages->Transparent_color = context->Transparent_color;
