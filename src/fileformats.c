@@ -1882,7 +1882,12 @@ void Load_GIF(T_IO_Context * context)
   byte is_transparent = 0;
   enum PIXEL_RATIO ratio;
   byte disposal_method = DISPOSAL_METHOD_RESTORE_BGCOLOR;
+
   byte previous_disposal_method = DISPOSAL_METHOD_RESTORE_BGCOLOR;
+  word previous_width=0;
+  word previous_height=0;
+  word previous_pos_x=0;
+  word previous_pos_y=0;
 
   /////////////////////////////////////////////////// FIN DES DECLARATIONS //
 
@@ -2146,18 +2151,11 @@ void Load_GIF(T_IO_Context * context)
                 Set_loading_layer(context, current_layer);
                 if (context->Type == CONTEXT_MAIN_IMAGE && Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
                 {
-                  if (is_transparent)
-                  // Copy the content of previous layer, in case of loading a GIF
-                  // that uses transparency compression
-                    memcpy(
-                      Main_backups->Pages->Image[Main_current_layer].Pixels,
-                      Main_backups->Pages->Image[Main_current_layer-1].Pixels,
-                      Main_backups->Pages->Width*Main_backups->Pages->Height);
-                  else
-                    memset(
-                      Main_backups->Pages->Image[Main_current_layer].Pixels,
-                      LSDB.Backcol,
-                      Main_backups->Pages->Width*Main_backups->Pages->Height);
+                  // Copy the content of previous layer.
+                  memcpy(
+                    Main_backups->Pages->Image[Main_current_layer].Pixels,
+                    Main_backups->Pages->Image[Main_current_layer-1].Pixels,
+                    Main_backups->Pages->Width*Main_backups->Pages->Height);
                 }
               }
               else
@@ -2203,7 +2201,29 @@ void Load_GIF(T_IO_Context * context)
                   }
                   
                 }
-    
+                if (number_LID!=1)
+                {
+                  // This a second layer/frame, or more.
+                  if (context->Type == CONTEXT_MAIN_IMAGE && Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+                  {
+                    // Need to clear previous image to back-color.
+                    if (previous_disposal_method==DISPOSAL_METHOD_RESTORE_BGCOLOR)
+                    {
+                      int y;
+                      for (y=0; y<previous_height; y++)
+                        memset(
+                          Main_backups->Pages->Image[Main_current_layer].Pixels
+                           + (previous_pos_y+y)* Main_backups->Pages->Width+previous_pos_x,
+                          LSDB.Backcol,
+                          previous_width);
+                    }
+                  }
+                  previous_height=IDB.Image_height;
+                  previous_width=IDB.Image_width;
+                  previous_pos_x=IDB.Pos_X;
+                  previous_pos_y=IDB.Pos_Y;
+                }
+                
                 Palette_loaded(context);
 
                 File_error=0;
