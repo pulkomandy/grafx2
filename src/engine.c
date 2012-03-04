@@ -636,12 +636,12 @@ void Main_handler(void)
           Compute_paintbrush_coordinates();
           Redraw_layered_image();
           End_of_modification();
-          Display_all_screen();
           Main_image_is_modified=0;
         }
         Destroy_context(&context);
         
         Compute_optimal_menu_colors(Main_palette);
+        Check_menu_mode();
         Display_menu();
         if (Config.Display_image_limits)
           Display_image_limits();
@@ -1703,6 +1703,7 @@ void Close_window(void)
     Menu_is_visible=Menu_is_visible_before_window;
     Cursor_shape=Cursor_shape_before_window;
     
+    Check_menu_mode();
     Display_all_screen();
     Display_menu();
     Allow_colorcycling=1;
@@ -3511,4 +3512,125 @@ void Delay_with_active_mouse(int speed)
   {
     Get_input(20);
   } while (Mouse_K == original_mouse_k && SDL_GetTicks()<end);
+}
+
+///
+/// Based on which toolbars are visible, updates their offsets and
+/// computes ::Menu_height and ::Menu_Y
+void Compute_menu_offsets(void)
+{
+  int i;
+  int offset;
+  
+  // Recompute all offsets    
+  offset=0;
+  Menu_height=0;
+  for (i = MENUBAR_COUNT-1; i >=0; i--)
+  {
+    Menu_bars[i].Top = offset;
+    if(Menu_bars[i].Visible)
+    {
+      offset += Menu_bars[i].Height;
+      Menu_height += Menu_bars[i].Height;
+    }
+  }
+  // Update global menu coordinates
+  Menu_Y = Screen_height - Menu_height * Menu_factor_Y;
+}
+
+///
+/// Shows or hides a tolbar from the menu.
+/// If with_redraw is set to zero, the caller should
+/// redraw itself using Display_menu() and Display_all_screen().
+void Set_bar_visibility(word bar, int visible, int with_redraw)
+{  
+  if (!visible && Menu_bars[bar].Visible)
+  {
+    // Hide it
+    Menu_bars[bar].Visible=0;
+
+    Compute_menu_offsets();
+
+    if (Main_magnifier_mode)
+    {
+      Compute_magnifier_data();
+    }
+
+    //   On repositionne le décalage de l'image pour qu'il n'y ait pas d'in-
+    // -cohérences lorsqu'on sortira du mode Loupe.
+    if (Main_offset_Y+Screen_height>Main_image_height)
+    {
+      if (Screen_height>Main_image_height)
+        Main_offset_Y=0;
+      else
+        Main_offset_Y=Main_image_height-Screen_height;
+    }
+    // On fait pareil pour le brouillon
+    if (Spare_offset_Y+Screen_height>Spare_image_height)
+    {
+      if (Screen_height>Spare_image_height)
+        Spare_offset_Y=0;
+      else
+        Spare_offset_Y=Spare_image_height-Screen_height;
+    }
+
+    Compute_magnifier_data();
+    if (Main_magnifier_mode)
+      Position_screen_according_to_zoom();
+    Compute_limits();
+    Compute_paintbrush_coordinates();
+    if (with_redraw)
+    {
+      Display_menu();
+      Display_all_screen();
+    }
+  }
+  else if (visible && !Menu_bars[bar].Visible)
+  {
+    // Show it
+    Menu_bars[bar].Visible = 1;
+    
+    Compute_menu_offsets();
+    Compute_magnifier_data();
+    if (Main_magnifier_mode)
+      Position_screen_according_to_zoom();
+    Compute_limits();
+    Compute_paintbrush_coordinates();
+    if (with_redraw)
+    {
+      Display_menu();
+      if (Main_magnifier_mode)
+        Display_all_screen();
+    }
+  }
+}
+
+///
+/// Checks if the current menu toolbars suit the current image type :
+/// layered vs anim. If they don't fit, swap the toolbars and return 1:
+/// The caller is then responsible for refreshing the screen by calling
+/// Display_menu() and Display_all_screen()
+int Check_menu_mode(void)
+{
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION
+    && Main_backups->Pages->Nb_layers>1 )
+  {
+    if (Menu_bars[MENUBAR_LAYERS].Visible)
+    {
+      Set_bar_visibility(MENUBAR_LAYERS, 0, 0);
+      Set_bar_visibility(MENUBAR_ANIMATION, 1, 0);
+      return 1;
+    }
+  }
+  else if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION
+    && Main_backups->Pages->Nb_layers>1 )
+  {
+    if (Menu_bars[MENUBAR_ANIMATION].Visible)
+    {
+      Set_bar_visibility(MENUBAR_ANIMATION, 0, 0);
+      Set_bar_visibility(MENUBAR_LAYERS, 1, 0);
+      return 1;
+    }
+  }
+  return 0;
 }

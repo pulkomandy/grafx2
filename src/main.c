@@ -817,6 +817,7 @@ int Init_program(int argc,char * argv[])
       // Some files were loaded from last crash-exit.
       // Do not load files from command-line, nor show splash screen.
       Compute_optimal_menu_colors(Main_palette);
+      Check_menu_mode();
       Display_all_screen();
       Display_menu();
       Display_cursor();
@@ -868,6 +869,7 @@ int Init_program(int argc,char * argv[])
           
           Hide_cursor();
           Compute_optimal_menu_colors(Main_palette);
+          Check_menu_mode();
           Display_all_screen();
           Display_menu();
           Display_cursor();

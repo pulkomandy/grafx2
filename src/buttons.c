@@ -214,6 +214,7 @@ void Button_Undo(void)
   Set_palette(Main_palette);
   Compute_optimal_menu_colors(Main_palette);
 
+  Check_menu_mode();
   Display_all_screen();
   Unselect_button(BUTTON_UNDO);
   Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
@@ -228,6 +229,7 @@ void Button_Redo(void)
   Set_palette(Main_palette);
   Compute_optimal_menu_colors(Main_palette);
 
+  Check_menu_mode();
   Display_all_screen();
   Unselect_button(BUTTON_UNDO);
   Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
@@ -448,64 +450,6 @@ void Button_Hide_menu(void)
   Display_cursor();
 }
 
-
-void Set_bar_visibility(word bar, byte visible)
-{  
-  if (!visible && Menu_bars[bar].Visible)
-  {
-    // Hide it
-    Menu_bars[bar].Visible=0;
-
-    Compute_menu_offsets();
-
-    if (Main_magnifier_mode)
-    {
-      Compute_magnifier_data();
-    }
-
-    //   On repositionne le décalage de l'image pour qu'il n'y ait pas d'in-
-    // -cohérences lorsqu'on sortira du mode Loupe.
-    if (Main_offset_Y+Screen_height>Main_image_height)
-    {
-      if (Screen_height>Main_image_height)
-        Main_offset_Y=0;
-      else
-        Main_offset_Y=Main_image_height-Screen_height;
-    }
-    // On fait pareil pour le brouillon
-    if (Spare_offset_Y+Screen_height>Spare_image_height)
-    {
-      if (Screen_height>Spare_image_height)
-        Spare_offset_Y=0;
-      else
-        Spare_offset_Y=Spare_image_height-Screen_height;
-    }
-
-    Compute_magnifier_data();
-    if (Main_magnifier_mode)
-      Position_screen_according_to_zoom();
-    Compute_limits();
-    Compute_paintbrush_coordinates();
-    Display_menu();
-    Display_all_screen();
-  }
-  else if (visible && !Menu_bars[bar].Visible)
-  {
-    // Show it
-    Menu_bars[bar].Visible = 1;
-    
-    Compute_menu_offsets();
-    Compute_magnifier_data();
-    if (Main_magnifier_mode)
-      Position_screen_according_to_zoom();
-    Compute_limits();
-    Compute_paintbrush_coordinates();
-    Display_menu();
-    if (Main_magnifier_mode)
-      Display_all_screen();
-  }
-}
-
 void Button_Toggle_toolbar(void)
 {  
   T_Dropdown_button dropdown;
@@ -546,12 +490,12 @@ void Button_Toggle_toolbar(void)
     switch (item->Number)
     {
       case 0: // tools
-        Set_bar_visibility(MENUBAR_TOOLS, !Menu_bars[MENUBAR_TOOLS].Visible);
+        Set_bar_visibility(MENUBAR_TOOLS, !Menu_bars[MENUBAR_TOOLS].Visible, 0);
         break;
       case 1: // layers
         if (Menu_bars[MENUBAR_ANIMATION].Visible && !Menu_bars[MENUBAR_LAYERS].Visible)
-          Set_bar_visibility(MENUBAR_ANIMATION, 0);
-        Set_bar_visibility(MENUBAR_LAYERS, !Menu_bars[MENUBAR_LAYERS].Visible);
+          Set_bar_visibility(MENUBAR_ANIMATION, 0, 0);
+        Set_bar_visibility(MENUBAR_LAYERS, !Menu_bars[MENUBAR_LAYERS].Visible, 0);
 
         if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
         {
@@ -562,8 +506,8 @@ void Button_Toggle_toolbar(void)
         break;
       case 2: // anim
         if (Menu_bars[MENUBAR_LAYERS].Visible && !Menu_bars[MENUBAR_ANIMATION].Visible)
-          Set_bar_visibility(MENUBAR_LAYERS, 0);
-        Set_bar_visibility(MENUBAR_ANIMATION, !Menu_bars[MENUBAR_ANIMATION].Visible);
+          Set_bar_visibility(MENUBAR_LAYERS, 0, 0);
+        Set_bar_visibility(MENUBAR_ANIMATION, !Menu_bars[MENUBAR_ANIMATION].Visible, 0);
 
         if (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED)
         {
@@ -574,6 +518,9 @@ void Button_Toggle_toolbar(void)
         
         break;
     }
+    // redraw image and menu
+    Display_menu();
+    Display_all_screen();
   }
   
   // Closing
@@ -603,14 +550,17 @@ void Button_Toggle_all_toolbars(void)
     // At least one is visible: Hide all
     Last_visibility=current_visibility;
     for (i=MENUBAR_STATUS+1;i<MENUBAR_COUNT;i++)
-      Set_bar_visibility(i,0);
+      Set_bar_visibility(i,0, 0);
   }
   else
   {
     // Restore all
     for (i=MENUBAR_STATUS+1;i<MENUBAR_COUNT;i++)
-      Set_bar_visibility(i,(Last_visibility & (1<<i)) ? 1 : 0);
+      Set_bar_visibility(i,(Last_visibility & (1<<i)) ? 1 : 0, 0);
   }
+  Check_menu_mode();
+  Display_menu();
+  Display_all_screen();
   
   Unselect_button(BUTTON_HIDE);
   Display_cursor();
@@ -1638,6 +1588,7 @@ void Button_Page(void)
 
   Set_palette(Main_palette);
   Compute_optimal_menu_colors(Main_palette);
+  Check_menu_mode();
   Display_all_screen();
   Unselect_button(BUTTON_PAGE);
   Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
@@ -3295,6 +3246,7 @@ void Load_picture(byte image)
       Compute_optimal_menu_colors(Main_palette);
       Redraw_layered_image();
       End_of_modification();
+      Check_menu_mode();
       Display_all_screen();
 
       if (image)
@@ -3398,6 +3350,7 @@ void Button_Reload(void)
       Tilemap_update();
       Redraw_layered_image();
       End_of_modification();
+      Check_menu_mode();
       Display_all_screen();
 
       Main_image_is_modified=0;
