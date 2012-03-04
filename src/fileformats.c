@@ -1880,6 +1880,7 @@ void Load_GIF(T_IO_Context * context)
   int current_layer = 0;
   int last_delay = 0;
   byte is_transparent = 0;
+  byte is_looping=0;
   enum PIXEL_RATIO ratio;
   byte disposal_method = DISPOSAL_METHOD_RESTORE_BGCOLOR;
 
@@ -2028,6 +2029,7 @@ void Load_GIF(T_IO_Context * context)
                         ;
                       else if (!memcmp(aeb,"NETSCAPE2.0",0x0B))
                       {
+                        is_looping=1;
                         // The well-known Netscape extension.
                         // Load as an animation
                         if (context->Type == CONTEXT_MAIN_IMAGE)
@@ -2313,6 +2315,13 @@ void Load_GIF(T_IO_Context * context)
                        (  (GIF_interlaced) && (!GIF_finished_interlaced_image) )
                      ) )
                   File_error=2;
+                
+                // No need to read more than one frame in animation preview mode
+                if (context->Type == CONTEXT_PREVIEW && is_looping)
+                {
+                  goto early_exit;
+                }
+                
               } // Le fichier contenait un IDB
               else
                 File_error=2;
@@ -2328,6 +2337,8 @@ void Load_GIF(T_IO_Context * context)
       else
         File_error=1;
 
+      early_exit:
+      
       // Libération de la mémoire utilisée par les tables & piles de traitement:
       free(alphabet_suffix);
       free(alphabet_prefix);
