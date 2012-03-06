@@ -43,6 +43,8 @@
         return path;
     }
 
+	// Find the real path of _path by chdir to it and then getcwd.
+	// If resolved_path is null, it is allocated.
     char *Realpath(const char *_path, char *resolved_path)
     {
         int fd = open(".", O_RDONLY), l;
@@ -62,23 +64,23 @@
                     l = -1;
                 #else
                     l = readlink(path, lnk, PATH_MAX);
-                    #endif
-                    if (!(tmp = sep(path))) {
+                #endif
+                if (!(tmp = sep(path))) {
+                    resolved_path = NULL;
+                    goto abort;
+                }
+                if (l < 0) {
+                    if (errno != EINVAL) {
                         resolved_path = NULL;
                         goto abort;
                     }
-                    if (l < 0) {
-                        if (errno != EINVAL) {
-                            resolved_path = NULL;
-                            goto abort;
-                        }
-                    } else {
-                        lnk[l] = 0;
-                        if (!(tmp = sep(lnk))) {
-                            resolved_path = NULL;
-                            goto abort;
-                        }
+                } else {
+                    lnk[l] = 0;
+                    if (!(tmp = sep(lnk))) {
+                        resolved_path = NULL;
+                        goto abort;
                     }
+                }
             } else {
                 resolved_path = NULL;
                 goto abort;
@@ -114,6 +116,12 @@
 // Use the stdlib function.
     char *Realpath(const char *_path, char *resolved_path)
     {
+		// While linux version of realpath handles the resolved_path being a
+		// null pointer, this is not the case for other platforms (Haiku), nor
+		// specified by the open group in POSIX. So, be safe and allocate
+		// ourselves.
+        if(resolved_path==NULL) // if we called realpath with null as a 2nd arg
+            resolved_path = (char*) malloc( PATH_MAX );
         return realpath(_path, resolved_path);
     }
 #endif

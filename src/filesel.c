@@ -1292,7 +1292,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
   byte  save_or_load_image=0;
   byte  has_clicked_ok=0;// Indique si on a clické sur Load ou Save ou sur
                              //un bouton enclenchant Load ou Save juste après.
-  byte  initial_back_color;             // |  fout en l'air (c'te conne).
+  byte  initial_back_color;	// preview destroys it (how nice)
   char  previous_directory[MAX_PATH_CHARACTERS]; // Répertoire d'où l'on vient après un CHDIR
   char  save_filename[MAX_PATH_CHARACTERS];
   char  initial_comment[COMMENT_SIZE+1];

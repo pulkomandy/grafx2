@@ -378,7 +378,9 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
         else if (File_exists(argv[index]))
         {
           file_in_command_line ++;
+		  printf("PATH RESOLVE %s\n", argv[index]);
           buffer = Realpath(argv[index], NULL);
+		  printf("returns : %p\n", buffer);
         
           if (file_in_command_line == 1)
           {
@@ -802,11 +804,13 @@ int Init_program(int argc,char * argv[])
   *Brush=MC_White;
   *Brush_original_pixels=MC_White;
 
-  // Make sure the load dialog pointsto the right place when first shown.
+  // Make sure the load dialog points to the right place when first shown.
   // Done after loading everything else, but before checking for emergency
   // backups
   if (file_in_command_line > 0)
-    chdir(main_directory);
+  {
+	strcpy(Main_current_directory, main_directory);
+  }
   
   // Test de recuperation de fichiers sauvés
   switch (Check_recovery())
