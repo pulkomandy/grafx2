@@ -256,33 +256,49 @@ void Test_LBM(T_IO_Context * context)
 
   Get_full_filename(filename, context->File_name, context->File_directory);
 
-  File_error=0;
+  File_error=1;
 
   if ((LBM_file=fopen(filename, "rb")))
   {
-    if (! Read_bytes(LBM_file,section,4))
-      File_error=1;
-    else
-    if (memcmp(section,"FORM",4))
-      File_error=1;
-    else
+    do // Dummy loop, so that all breaks jump to end.
     {
-      Read_dword_be(LBM_file, &dummy);
-                   //   On aurait pu vérifier que ce long est égal à la taille
-                   // du fichier - 8, mais ça aurait interdit de charger des
-                   // fichiers tronqués (et déjà que c'est chiant de perdre
-                   // une partie du fichier il faut quand même pouvoir en
-                   // garder un peu... Sinon, moi je pleure :'( !!! )
+      if (! Read_bytes(LBM_file,section,4))
+        break;
+      if (memcmp(section,"FORM",4))
+        break;
+      
+      if (! Read_dword_be(LBM_file, &dummy))
+        break;
+      //   On aurait pu vérifier que ce long est égal à la taille
+      // du fichier - 8, mais ça aurait interdit de charger des
+      // fichiers tronqués (et déjà que c'est chiant de perdre
+      // une partie du fichier il faut quand même pouvoir en
+      // garder un peu... Sinon, moi je pleure :'( !!! )
       if (! Read_bytes(LBM_file,format,4))
-        File_error=1;
-      else
+        break;
+        
+      if (!memcmp(format,"ANIM",4))
+      {
+        // An ANIM header: need to check that it encloses an ILBM
+        if (! Read_bytes(LBM_file,section,4))
+          break;
+        if (memcmp(section,"FORM",4))
+          break;
+        if (! Read_dword_be(LBM_file, &dummy))
+          break;
+        if (! Read_bytes(LBM_file,format,4))
+          break;
+      }
       if ( (memcmp(format,"ILBM",4)) && (memcmp(format,"PBM ",4)) )
-        File_error=1;
-    }
+        break;
+      
+      // If we reach this part, file is indeed ILBM or ANIM
+      File_error=0;
+      
+    } while (0);
+    
     fclose(LBM_file);
   }
-  else
-    File_error=1;
 }
 
 
@@ -551,6 +567,7 @@ void Load_LBM(T_IO_Context * context)
   byte  color;
   long  file_size;
   dword dummy;
+  byte  is_anim=0;
 
   Get_full_filename(filename, context->File_name, context->File_directory);
 
@@ -560,10 +577,20 @@ void Load_LBM(T_IO_Context * context)
   {
     file_size=File_length_file(LBM_file);
 
-    // On avance dans le fichier (pas besoin de tester ce qui l'a déjà été)
+    // FORM + size(4)
     Read_bytes(LBM_file,section,4);
     Read_dword_be(LBM_file,&dummy);
+    
     Read_bytes(LBM_file,format,4);
+    if (!memcmp(format,"ANIM",4))
+    {
+      is_anim=1;
+      // Skip a bit, brother
+      Read_bytes(LBM_file,section,4);
+      Read_dword_be(LBM_file,&dummy);
+      Read_bytes(LBM_file,format,4);
+    }
+    
     if (!LBM_Wait_for((byte *)"BMHD"))
       File_error=1;
     Read_dword_be(LBM_file,&dummy);
@@ -705,6 +732,11 @@ void Load_LBM(T_IO_Context * context)
               Original_screen_Y = header.Y_screen;
 
               Pre_load(context, context->Width,context->Height,file_size,FORMAT_LBM,PIXEL_SIMPLE,0);
+              if (context->Type == CONTEXT_MAIN_IMAGE)
+              {
+                Main_backups->Pages->Image_mode = IMAGE_MODE_ANIMATION;
+                Update_screen_targets();
+              }
               if (File_error==0)
               {
                 if (!memcmp(format,"ILBM",4))    // "ILBM": InterLeaved BitMap
@@ -836,6 +868,31 @@ void Load_LBM(T_IO_Context * context)
                     /*Close_lecture();*/
                   }
                 }
+                /*
+                while (!File_error && is_anim)
+                {
+                  dword delta_size;
+                  
+                  // Just loaded the first image successfully : now keep reading
+                  
+                  // FORM + size(4)
+                  if (!Read_bytes(LBM_file,section,4))
+                    break;
+                  Read_dword_be(LBM_file,&dummy);
+
+                  // ILBM, hopefully
+                  Read_bytes(LBM_file,format,4);
+                  if (!LBM_Wait_for((byte *)"DLTA"))
+                  {
+                    File_error=1;
+                    break;
+                  }
+                  Set_loading_layer(context, context->Current_layer+1);
+
+                  Read_dword_be(LBM_file,&delta_size);
+                  fseek(LBM_file, delta_size + (delta_size & 1), SEEK_CUR);
+                }
+                */
               }
             }
             else
