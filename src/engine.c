@@ -592,6 +592,9 @@ void Main_handler(void)
   byte action;
   dword key_pressed;
 
+  static int preview_is_visible;
+  	// This is used for the layer preview
+
   do
   {
     // Resize requested
@@ -1371,8 +1374,17 @@ void Main_handler(void)
             Block(18*Menu_factor_X,Menu_status_Y,192*Menu_factor_X,Menu_factor_Y<<3,MC_Light);
             Update_rect(18*Menu_factor_X,Menu_status_Y,192*Menu_factor_X,Menu_factor_Y<<3);
             Display_cursor();
-          }
-        }
+
+			// If we get here, we mayjust have left the layerbar (towards the
+			// main menu or statusbar). If so, close the popup.
+			if (preview_is_visible) {
+				int x = Mouse_K;
+				Close_popup();
+				Mouse_K = x; // Close_popup waits for end of click and resets Mouse_K...
+				preview_is_visible = 0;
+			}
+		  }
+		}
         else
         {
           if ( (prev_button_number!=BUTTON_CHOOSE_COL)
@@ -1392,46 +1404,48 @@ void Main_handler(void)
               {
                 int x,y;
                 int previewW, previewH;
-                short layer, prev_layer;
+                short layer;
+				short layercount = Main_backups->Pages->Nb_layers;
 
-                previewW = Buttons_Pool[BUTTON_LAYER_SELECT].Width / Main_backups->Pages->Nb_layers;
-                previewH = previewW * Main_image_height / Main_image_width;
-                  // TODO this will give stupid out of screen results for very narrow images...
+				if (!preview_is_visible)
+				{
+                	previewW = Buttons_Pool[BUTTON_LAYER_SELECT].Width / Main_backups->Pages->Nb_layers;
+                	previewH = previewW * Main_image_height / Main_image_width;
+					if (previewH > Menu_Y) previewH = Menu_Y;
 
-                Open_popup((Buttons_Pool[BUTTON_LAYER_SELECT].X_offset + 2)*Menu_factor_X,
-                  Menu_Y - previewH, previewW, previewH);
+                	Open_popup((Buttons_Pool[BUTTON_LAYER_SELECT].X_offset + 2)*Menu_factor_X,
+                  		Menu_Y - previewH * Menu_factor_Y, previewW * layercount, previewH);
+					preview_is_visible = 1;
 
-                prev_layer = -1;
+					// Make the system think the menu is visible (Open_popup hides it)
+					// so Button_under_mouse still works
+					Menu_is_visible=Menu_is_visible_before_window;
+					Menu_Y=Menu_Y_before_window;
+				}
 
-                // Make the system think the menu is visible (Open_popup hides it)
-                // so Button_under_mouse still works
-                Menu_is_visible=Menu_is_visible_before_window;
-                Menu_Y=Menu_Y_before_window;
-                while(Button_under_mouse() == BUTTON_LAYER_SELECT && Mouse_K == 0)
-                {
-                  layer = Layer_under_mouse();
-                  if (layer != prev_layer)
-                  {
-                    for (x = 0; x < Window_width; x++)
-                      for (y = 0; y < Window_height; y++)
-                      {
-                        int imgx = x * Main_image_width / Window_width;
-                        int imgy = y * Main_image_height / Window_height;
-                        Pixel_in_window(x, y, *(Main_backups->Pages->Image[layer].Pixels
-                            + imgx + imgy * Main_image_width));
-                      }
+			  	// NOT an else of the previous if - variable may have changed
+			  	if (preview_is_visible)
+				{
+					layer = Layer_under_mouse();
+					for(layer = 0; layer < layercount; ++layer)
+					{
+						for (x = 0; x < Window_width; x++)
+						for (y = 0; y < Window_height; y++)
+						{
+							int imgx = x * Main_image_width / Window_width;
+							int imgy = y * Main_image_height / Window_height;
+							Pixel_in_window(x + previewW*layer, y, *(Main_backups->Pages->Image[layer].Pixels
+								+ imgx + imgy * Main_image_width));
+						}
 
-                    Update_window_area(0,0,Window_width, Window_height);
-                    prev_layer = layer;
-                  }
-                  Get_input(20);
-                };
-
-                x = Mouse_K;
-
+						Update_window_area(0,0,Window_width, Window_height);
+					}
+				}
+			  } else if (preview_is_visible) {
+                int x = Mouse_K;
                 Close_popup();
-
                 Mouse_K = x; // Close_popup waits for end of click and resets Mouse_K...
+				preview_is_visible = 0;
               }
 
               Print_in_menu(Buttons_Pool[button_index].Tooltip,0);
@@ -1460,6 +1474,15 @@ void Main_handler(void)
                   Update_rect(18*Menu_factor_X,Menu_status_Y,192*Menu_factor_X,8*Menu_factor_Y);
                   Display_cursor();
                 }
+              }
+
+			  // If we get here, we mayjust have left the layerbar (towards the
+			  // main menu or statusbar). If so, close the popup.
+			  if (preview_is_visible) {
+                int x = Mouse_K;
+                Close_popup();
+                Mouse_K = x; // Close_popup waits for end of click and resets Mouse_K...
+				preview_is_visible = 0;
               }
             }
           }
