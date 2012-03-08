@@ -593,6 +593,7 @@ void Main_handler(void)
   dword key_pressed;
 
   static int preview_is_visible;
+  static int previewW, previewH;
   	// This is used for the layer preview
 
   do
@@ -1403,7 +1404,6 @@ void Main_handler(void)
               if (button_index == BUTTON_LAYER_SELECT)
               {
                 int x,y;
-                int previewW, previewH;
                 short layer;
 				short layercount = Main_backups->Pages->Nb_layers;
 
@@ -1411,7 +1411,7 @@ void Main_handler(void)
 				{
                 	previewW = Buttons_Pool[BUTTON_LAYER_SELECT].Width / Main_backups->Pages->Nb_layers;
                 	previewH = previewW * Main_image_height / Main_image_width;
-					if (previewH > Menu_Y) previewH = Menu_Y;
+					if (previewH * Menu_factor_Y > Menu_Y) previewH = Menu_Y / Menu_factor_Y;
 
                 	Open_popup((Buttons_Pool[BUTTON_LAYER_SELECT].X_offset + 2)*Menu_factor_X,
                   		Menu_Y - previewH * Menu_factor_Y, previewW * layercount, previewH);
@@ -1432,8 +1432,8 @@ void Main_handler(void)
 						for (x = 0; x < Window_width; x++)
 						for (y = 0; y < Window_height; y++)
 						{
-							int imgx = x * Main_image_width / Window_width;
-							int imgy = y * Main_image_height / Window_height;
+							int imgx = x * Main_image_width / previewW;
+							int imgy = y * Main_image_height / previewH;
 							Pixel_in_window(x + previewW*layer, y, *(Main_backups->Pages->Image[layer].Pixels
 								+ imgx + imgy * Main_image_width));
 						}
