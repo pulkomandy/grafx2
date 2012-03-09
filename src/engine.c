@@ -1409,12 +1409,12 @@ void Main_handler(void)
 
 				if (!preview_is_visible)
 				{
-                	previewW = Buttons_Pool[BUTTON_LAYER_SELECT].Width / Main_backups->Pages->Nb_layers;
+                	previewW = Layer_button_width;
                 	previewH = previewW * Main_image_height / Main_image_width;
 					if (previewH * Menu_factor_Y > Menu_Y) previewH = Menu_Y / Menu_factor_Y;
 
                 	Open_popup((Buttons_Pool[BUTTON_LAYER_SELECT].X_offset + 2)*Menu_factor_X,
-                  		Menu_Y - previewH * Menu_factor_Y, previewW * layercount, previewH);
+                  		Menu_Y - previewH * Menu_factor_Y, Buttons_Pool[BUTTON_LAYER_SELECT].Width, previewH);
 					preview_is_visible = 1;
 
 					// Make the system think the menu is visible (Open_popup hides it)
@@ -1426,20 +1426,24 @@ void Main_handler(void)
 			  	// NOT an else of the previous if - variable may have changed
 			  	if (preview_is_visible)
 				{
-					layer = Layer_under_mouse();
+					//layer = Layer_under_mouse();
 					for(layer = 0; layer < layercount; ++layer)
 					{
-						for (x = 0; x < Window_width; x++)
-						for (y = 0; y < Window_height; y++)
+					    // Stop if the window is too small to show the
+					    // layer button (ex: 320x200 can only display 12 layers)
+					    if (layer*Layer_button_width+previewW > Window_width)
+					        break;
+					        
+						for (x = 0; x < previewW; x++)
+						for (y = 0; y < previewH; y++)
 						{
 							int imgx = x * Main_image_width / previewW;
 							int imgy = y * Main_image_height / previewH;
-							Pixel_in_window(x + previewW*layer, y, *(Main_backups->Pages->Image[layer].Pixels
+							Pixel_in_window(layer*Layer_button_width + x, y, *(Main_backups->Pages->Image[layer].Pixels
 								+ imgx + imgy * Main_image_width));
 						}
-
-						Update_window_area(0,0,Window_width, Window_height);
 					}
+					Update_window_area(0,0,Window_width, Window_height);
 				}
 			  } else if (preview_is_visible) {
                 int x = Mouse_K;
