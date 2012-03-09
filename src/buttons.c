@@ -3129,8 +3129,8 @@ void Load_picture(byte image)
   else
   {
     strcpy(filename, Brush_filename);
-    strcpy(directory, Main_current_directory);
-    Init_context_brush(&context, Brush_filename, Main_current_directory);
+    strcpy(directory, Brush_file_directory);
+    Init_context_brush(&context, filename, directory);
   }
   confirm=Button_Load_or_Save(1, &context);
 
@@ -3162,13 +3162,8 @@ void Load_picture(byte image)
 
     if (!image)
     {
-      if (File_error==3) // Memory allocation error when loading brush
-      {
-        // Nothing to do here.
-        // Previous versions of Grafx2 would have damaged the Brush,
-        // and need reset it here, but now the loading is done in separate
-        // memory buffers.
-      }
+      strcpy(Brush_filename, context.File_name);
+      strcpy(Brush_file_directory, context.File_directory);
 
       Tiling_offset_X=0;
       Tiling_offset_Y=0;
@@ -3469,7 +3464,11 @@ void Save_picture(byte image)
       strcpy(Main_backups->Pages->Filename, save_context.File_name);
       strcpy(Main_backups->Pages->File_directory, save_context.File_directory);
     }
-    
+    if (!image)
+    {
+      strcpy(Brush_filename, save_context.File_name);
+      strcpy(Brush_file_directory, save_context.File_directory);
+    }
     Hide_cursor();
     Cursor_shape=old_cursor_shape;
     Display_cursor();

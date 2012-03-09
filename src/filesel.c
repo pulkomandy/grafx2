@@ -1400,36 +1400,21 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
     Window_display_icon_sprite(bookmark_dropdown[temp]->Pos_X+3,bookmark_dropdown[temp]->Pos_Y+2,ICON_STAR);
     Display_bookmark(bookmark_dropdown[temp],temp);
   }
-  // On prend bien soin de passer dans le répertoire courant (le bon qui faut! Oui madame!)
-  if (load)
-  {
-  #if defined(__MINT__)    
-    static char path[1024]={0};
   
-    chdir(Main_current_directory);
-    Dgetpath(path,0);
-    strcat(path,PATH_SEPARATOR);
-    strcpy(Main_current_directory,path);  
-  #else
-    chdir(Main_current_directory);
-    getcwd(Main_current_directory,256);
-  #endif
-  }
-  else
+  #if defined(__MINT__)
   {
-    #if defined(__MINT__)    
     static char path[1024]={0};
     chdir(context->File_directory);
     Dgetpath(path,0);
     strcat(path,PATH_SEPARATOR);
     strcpy(Main_current_directory,path);  
- #else
+  }
+  #else
+  {
     chdir(context->File_directory);
     getcwd(Main_current_directory,256);
-  #endif
-
-
   }
+  #endif
   
   // Affichage des premiers fichiers visibles:
   Reload_list_of_files(Main_format,file_scroller);
