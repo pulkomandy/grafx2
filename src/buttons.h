@@ -680,5 +680,7 @@ byte Store_paintbrush(int index);
 
 void Select_paintbrush(int index);
 
+byte Any_effect_active(void);
+
 #endif
 

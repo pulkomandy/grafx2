@@ -1327,8 +1327,7 @@ void Main_handler(void)
         if (effect_modified)
         {
           Hide_cursor();
-          Draw_menu_button(BUTTON_EFFECTS,
-            (Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode));
+          Draw_menu_button(BUTTON_EFFECTS, Any_effect_active());
           Display_cursor();
         }
       }

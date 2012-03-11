@@ -1498,7 +1498,7 @@ void Button_Skins(void)
         state|=Main_magnifier_mode;
         break;
       case BUTTON_EFFECTS:
-        state|=(Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode);
+        state|=Any_effect_active();
         break;
     }
     Draw_menu_button(button,state);
@@ -1592,6 +1592,8 @@ void Button_Page(void)
   Display_all_screen();
   Unselect_button(BUTTON_PAGE);
   Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
+  // Tilemap mode might be different
+  Draw_menu_button(BUTTON_EFFECTS,Any_effect_active());
   Display_menu();
 
   Display_cursor();
@@ -4815,7 +4817,7 @@ void Button_Effects(void)
   else
     Hide_cursor();
 
-  if (!(Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode||Main_tilemap_mode))
+  if (!Any_effect_active())
     Unselect_button(BUTTON_EFFECTS);
 
   Display_cursor();
@@ -5526,4 +5528,9 @@ void Button_Brush_container(void)
 
   //Unselect_button(BUTTON_PAINTBRUSHES);
   Display_cursor();
+}
+
+byte Any_effect_active(void)
+{
+    return Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode||Main_tilemap_mode;
 }
