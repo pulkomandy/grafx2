@@ -182,9 +182,29 @@ void Update_part_of_screen(short x, short y, short width, short height)
     r.h=effective_h;
     r.w=effective_w;
     SDL_FillRect(Screen_SDL,&r,3);*/
+    
+    // When the grid is displayed in Tilemap mode, this tests if
+    // one edge of the grid has been touched :
+    // In this case, the whole magnified area requires a refreshed grid.
+    // This could be optimized further, but at the moment this seemed
+    // fast enough.
+    if (Show_grid && Main_tilemap_mode && (
+        x/Snap_width <(x+width )/Snap_width ||
+        y/Snap_height<(y+height)/Snap_height))
+    {
+      short w,h;
+      
+      w=Min(Screen_width-Main_X_zoom, (Main_image_width-Main_magnifier_offset_X)*Main_magnifier_factor);
+      h=Min(Menu_Y, (Main_image_height-Main_magnifier_offset_Y)*Main_magnifier_factor);
 
-    Redraw_grid(effective_X,effective_Y,effective_w,effective_h);
-    Update_rect(effective_X,effective_Y,effective_w,effective_h);
+      Redraw_grid(Main_X_zoom,0,w,h);
+      Update_rect(Main_X_zoom,0,w,h);
+    }
+    else
+    {
+      Redraw_grid(effective_X,effective_Y,effective_w,effective_h);
+      Update_rect(effective_X,effective_Y,effective_w,effective_h);
+    }
   }
 }
 
