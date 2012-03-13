@@ -691,6 +691,13 @@ void Main_handler(void)
         {
           if (Is_shortcut(Key,key_index))
           {
+            if (preview_is_visible)
+            {
+			  int x = Mouse_K;
+			  Close_popup();
+			  Mouse_K = x; // Close_popup waits for end of click and resets Mouse_K...
+			  preview_is_visible = 0;
+			}
             // Special keys (functions not hooked to a UI button)
             switch(key_index)
             {
@@ -1308,13 +1315,27 @@ void Main_handler(void)
           for (button_index=0;button_index<NB_BUTTONS;button_index++)
           {
             if (Is_shortcut(key_pressed,0x100+button_index))
-            {          
+            {
+              if (preview_is_visible)
+              {
+				int x = Mouse_K;
+				Close_popup();
+				Mouse_K = x; // Close_popup waits for end of click and resets Mouse_K...
+				preview_is_visible = 0;
+			  }
               Select_button(button_index,LEFT_SIDE);
               prev_button_number=-1;
               action++;
             }
             else if (Is_shortcut(key_pressed,0x200+button_index))
             {
+              if (preview_is_visible)
+              {
+				int x = Mouse_K;
+				Close_popup();
+				Mouse_K = x; // Close_popup waits for end of click and resets Mouse_K...
+				preview_is_visible = 0;
+			  }
               Select_button(button_index,RIGHT_SIDE);
               prev_button_number=-1;
               action++;
