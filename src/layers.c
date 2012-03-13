@@ -436,16 +436,16 @@ void Button_Anim_time(void)
   short clicked_button;
   int mode=0;
   int frame;
-  char buffer[5+1];
+  char buffer[6+1];
   T_Special_button * input_duration_button;
   int duration=Main_backups->Pages->Image[Main_current_layer].Duration;
   
   Open_window(166,110,"Animation speed");
 
-  Print_in_window(80,20,"ms",MC_Black,MC_Light);
-  input_duration_button = Window_set_input_button(33,18,5); // 1
+  Print_in_window(88,20,"ms",MC_Black,MC_Light);
+  input_duration_button = Window_set_input_button(33,18,6); // 1
 
-  Num2str(duration,buffer,5);
+  Num2str(duration,buffer,6);
   Print_in_window_limited(input_duration_button->Pos_X+2,input_duration_button->Pos_Y+2,buffer,input_duration_button->Width/8,MC_Black,MC_Light);
   
   Print_in_window(24,37,"Set this frame",MC_Black,MC_Light);
@@ -472,12 +472,18 @@ void Button_Anim_time(void)
     switch(clicked_button)
     {
       case 1: // duration
-        Num2str(duration,buffer,5);
+        // safety
+        if (duration <= -10000)
+          sprintf(buffer,"-99999");
+        else if (duration >= 1000000)
+          sprintf(buffer,"999999");
+        else
+          sprintf(buffer,"%d", duration);
         Hide_cursor();
         if (Readline(input_duration_button->Pos_X+2, 
           input_duration_button->Pos_Y+2,
           buffer,
-          5,
+          6,
           INPUT_TYPE_DECIMAL))
         {
           duration=atoi(buffer);
@@ -509,13 +515,17 @@ void Button_Anim_time(void)
     switch(mode)
     {
       case 0:
-        if (duration<1)
-          duration=1;
+        if (duration<0)
+          duration=0;
+        else if (duration>655350)
+          duration=655350;
         Main_backups->Pages->Image[Main_current_layer].Duration = duration;
         break;
       case 1:
-        if (duration<1)
-          duration=1;
+        if (duration<0)
+          duration=0;
+        else if (duration>655350)
+          duration=655350;
         for (frame=0; frame<Main_backups->Pages->Nb_layers; frame++)
         {
           Main_backups->Pages->Image[frame].Duration = duration;
@@ -525,10 +535,10 @@ void Button_Anim_time(void)
         for (frame=0; frame<Main_backups->Pages->Nb_layers; frame++)
         {
           int cur_duration = Main_backups->Pages->Image[frame].Duration+duration;
-          if (cur_duration<1)
-            cur_duration=1;
-          else if (cur_duration>32767)
-            cur_duration=32767;
+          if (cur_duration<0)
+            cur_duration=0;
+          else if (cur_duration>655350)
+            cur_duration=655350;
           Main_backups->Pages->Image[frame].Duration = cur_duration;
         }
         break;

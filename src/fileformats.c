@@ -2636,8 +2636,10 @@ void Save_GIF(T_IO_Context * context)
             if (context->Type == CONTEXT_MAIN_IMAGE && Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
             {
               // Animation frame
+              int duration;
               GCE.Packed_fields=(2<<2)|(context->Background_transparent);
-              GCE.Delay_time=Get_frame_duration(context)/10;
+              duration=Get_frame_duration(context)/10;
+              GCE.Delay_time=duration<0xFFFF?duration:0xFFFF;
             }
             else
             {

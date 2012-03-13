@@ -67,7 +67,7 @@ T_Page * New_page(int nb_layers)
     for (i=0; i<nb_layers; i++)
     {
       page->Image[i].Pixels=NULL;
-      page->Image[i].Duration=1;
+      page->Image[i].Duration=100;
     }
     page->Width=0;
     page->Height=0;
@@ -445,7 +445,7 @@ void Clear_page(T_Page * page)
   {
     Free_layer(page, i);
     page->Image[i].Pixels=NULL;
-    page->Image[i].Duration=1;
+    page->Image[i].Duration=0;
   }
 
   // Free_gradient() : This data is reference-counted
@@ -1319,6 +1319,7 @@ byte Add_layer(T_List_of_pages *list, int layer)
   T_Page * new_page;
   byte * new_image;
   int i;
+  int duration;
   
   source_page = list->Pages;
   
@@ -1359,7 +1360,13 @@ byte Add_layer(T_List_of_pages *list, int layer)
     new_page->Image[i]=new_page->Image[i-1];
   }
   new_page->Image[layer].Pixels=new_image;
-  new_page->Image[layer].Duration=1;
+  if (list->Pages->Nb_layers==0)
+    duration=100;
+  else if (layer>0)
+    duration=new_page->Image[layer-1].Duration;
+  else
+    duration=new_page->Image[1].Duration;
+  new_page->Image[layer].Duration=duration;
   // Fill with transparency, initially
   memset(new_image, Main_backups->Pages->Transparent_color, list->Pages->Height*list->Pages->Width); // transparent color
   

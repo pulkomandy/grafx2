@@ -1308,7 +1308,7 @@ void Init_buttons(void)
               Do_nothing,
               FAMILY_INSTANT);
   Init_button(BUTTON_ANIM_PREV_FRAME,
-              "Go to previous frame    ",
+              "Go to prev. frame/Rewind",
               130,0,
               13,13,
               BUTTON_SHAPE_RECTANGLE,
@@ -1317,7 +1317,7 @@ void Init_buttons(void)
               Do_nothing,
               FAMILY_INSTANT);
   Init_button(BUTTON_ANIM_NEXT_FRAME,
-              "Go to next frame        ",
+              "Go to next frame / Play ",
               144,0,
               13,13,
               BUTTON_SHAPE_RECTANGLE,
