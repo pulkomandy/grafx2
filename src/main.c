@@ -378,9 +378,7 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
         else if (File_exists(argv[index]))
         {
           file_in_command_line ++;
-		  printf("PATH RESOLVE %s\n", argv[index]);
           buffer = Realpath(argv[index], NULL);
-		  printf("returns : %p\n", buffer);
         
           if (file_in_command_line == 1)
           {

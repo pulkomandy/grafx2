@@ -2963,7 +2963,7 @@ void Load_CM5(T_IO_Context* context)
   FILE *file;
   char filename[MAX_PATH_CHARACTERS];
   byte value = 0;
-  int mod;
+  int mod=0;
   short line = 0;
   int tx, ty;
   byte buffer[48*6/4];
