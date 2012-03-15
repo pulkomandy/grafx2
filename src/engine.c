@@ -3659,8 +3659,7 @@ void Set_bar_visibility(word bar, int visible, int with_redraw)
 /// Display_menu() and Display_all_screen()
 int Check_menu_mode(void)
 {
-  if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION
-    && Main_backups->Pages->Nb_layers>1 )
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
   {
     if (Menu_bars[MENUBAR_LAYERS].Visible)
     {
@@ -3669,8 +3668,7 @@ int Check_menu_mode(void)
       return 1;
     }
   }
-  else if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION
-    && Main_backups->Pages->Nb_layers>1 )
+  else
   {
     if (Menu_bars[MENUBAR_ANIMATION].Visible)
     {
