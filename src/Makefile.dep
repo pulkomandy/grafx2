@@ -13,7 +13,7 @@ $(OBJDIR)/buttons_effects.o: buttons_effects.c brush.h struct.h const.h buttons.
 $(OBJDIR)/colorred.o: colorred.c colorred.h struct.h const.h
 $(OBJDIR)/engine.o: engine.c const.h struct.h global.h graph.h misc.h special.h \
  buttons.h operatio.h shade.h errors.h sdlscreen.h windows.h brush.h \
- input.h engine.h pages.h layers.h factory.h loadsave.h io.h
+ input.h engine.h pages.h layers.h factory.h loadsave.h io.h pxsimple.h
 $(OBJDIR)/factory.o: factory.c brush.h struct.h const.h buttons.h engine.h errors.h \
  filesel.h loadsave.h global.h graph.h io.h misc.h pages.h readline.h \
  sdlscreen.h windows.h palette.h input.h help.h realpath.h setup.h \

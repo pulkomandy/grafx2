@@ -43,7 +43,7 @@
 #include "factory.h"
 #include "loadsave.h"
 #include "io.h"
-
+#include "pxsimple.h"
 
 
 // we need this as global
@@ -1429,9 +1429,13 @@ void Main_handler(void)
 
 				if (!preview_is_visible)
 				{
-                	previewW = Layer_button_width;
+                	previewW = Min(Main_image_width/Menu_factor_X,Layer_button_width);
                 	previewH = previewW * Main_image_height / Main_image_width * Menu_factor_X / Menu_factor_Y;
-					if (previewH * Menu_factor_Y > Menu_Y) previewH = Menu_Y / Menu_factor_Y;
+					if (previewH > Screen_height/4)
+					{
+					  previewH = Screen_height/4;
+					  previewW = Main_image_width*previewH/Main_image_height*Menu_factor_Y/Menu_factor_X;
+					}
 
                 	Open_popup((Buttons_Pool[BUTTON_LAYER_SELECT].X_offset + 2)*Menu_factor_X,
                   		Menu_Y - previewH * Menu_factor_Y, Buttons_Pool[BUTTON_LAYER_SELECT].Width, previewH);
@@ -1449,20 +1453,20 @@ void Main_handler(void)
 					//layer = Layer_under_mouse();
 					for(layer = 0; layer < layercount; ++layer)
 					{
-					    // Stop if the window is too small to show the
+					    int offset;
+                        // Stop if the window is too small to show the
 					    // layer button (ex: 320x200 can only display 12 layers)
 					    if (layer*Layer_button_width+previewW > Window_width)
 					        break;
-					        
+					    
+					    offset=(Layer_button_width-previewW)/2;
 						for (y = 0; y < previewH*Pixel_height*Menu_factor_Y; y++)
 						for (x = 0; x < previewW*Pixel_width*Menu_factor_X; x++)
 						{
 							int imgx = x * Main_image_width / previewW/Pixel_width/Menu_factor_X;
 							int imgy = y * Main_image_height / previewH/Pixel_height/Menu_factor_Y;
-							// Use Pixel_simple() instead of Pixel_in_window() in order to get higher resolution
-							//Pixel_in_window(layer*Layer_button_width + x, y, *(Main_backups->Pages->Image[layer].Pixels
-							//	+ imgx + imgy * Main_image_width));
-							Pixel_simple(x+(layer*Layer_button_width*Menu_factor_X+Window_pos_X)*Pixel_width, y+Window_pos_Y*Pixel_height, *(Main_backups->Pages->Image[layer].Pixels
+							// Use Pixel_simple() in order to get highest resolution
+							Pixel_simple(x+((layer*Layer_button_width+offset)*Menu_factor_X+Window_pos_X)*Pixel_width, y+Window_pos_Y*Pixel_height, *(Main_backups->Pages->Image[layer].Pixels
 								+ imgx + imgy * Main_image_width));
 						}
 					}
