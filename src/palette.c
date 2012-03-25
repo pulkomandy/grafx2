@@ -1227,7 +1227,23 @@ void Button_Palette(void)
         {
           Hide_cursor();
           temp_color=(clicked_button==1) ? Window_attribute2 : Read_pixel(Mouse_X,Mouse_Y);
-          if (Mouse_K==RIGHT_SIDE)
+          // Right click outside the window
+          if (Mouse_K==RIGHT_SIDE && clicked_button==-1)
+          {
+            if (Back_color!=temp_color)
+            {
+              Back_color=temp_color;
+              // 4 blocks de back_color entourant la fore_color
+              Window_rectangle(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_Y-BGCOLOR_DISPLAY_Y,Back_color);
+              Window_rectangle(BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y+FGCOLOR_DISPLAY_H,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_Y+BGCOLOR_DISPLAY_H-FGCOLOR_DISPLAY_Y-FGCOLOR_DISPLAY_H,Back_color);
+              Window_rectangle(BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_X-BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_H,Back_color);
+              Window_rectangle(FGCOLOR_DISPLAY_X+FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_X+BGCOLOR_DISPLAY_W-FGCOLOR_DISPLAY_X-FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,Back_color);
+              Update_window_area(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_H);
+            }
+            Display_cursor();
+          }
+          // Right-click inside the palette
+          else if (Mouse_K==RIGHT_SIDE)
           {
             // Contextual menu
             T_Dropdown_button dropdown;
@@ -1291,8 +1307,6 @@ void Button_Palette(void)
             {
               Display_cursor();
             }
-            
-            
             Window_dropdown_clear_items(&dropdown);
           }
           else
