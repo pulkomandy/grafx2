@@ -178,6 +178,7 @@ void Button_Layer_select(void)
 {
   short layer = Layer_under_mouse();
   Layer_activate(layer, LEFT_SIDE);
+  Mouse_K=0;
 }
 
 void Button_Layer_toggle(void)
@@ -194,6 +195,7 @@ void Button_Layer_toggle(void)
     layer=Main_backups->Pages->Nb_layers-1;
   
   Layer_activate(layer, RIGHT_SIDE);
+  Mouse_K=0;
 }
 
 static void Draw_transparent_color(byte color)

@@ -579,6 +579,71 @@ void Status_print_palette_color(byte color)
   Print_in_menu(str,0);
 }
 
+void Layer_preview_on(int * preview_is_visible)
+{
+  int x,y;
+  short layer;
+  short layercount = Main_backups->Pages->Nb_layers;
+  static int previewW=0, previewH=0;
+
+  if (! *preview_is_visible)
+  {
+    previewW = Min(Main_image_width/Menu_factor_X,Layer_button_width);
+    previewH = previewW * Main_image_height / Main_image_width * Menu_factor_X / Menu_factor_Y;
+    if (previewH > Screen_height/4)
+    {
+      previewH = Screen_height/4;
+      previewW = Main_image_width*previewH/Main_image_height*Menu_factor_Y/Menu_factor_X;
+    }
+  
+    Open_popup((Buttons_Pool[BUTTON_LAYER_SELECT].X_offset + 2)*Menu_factor_X,
+  	Menu_Y - previewH * Menu_factor_Y, Buttons_Pool[BUTTON_LAYER_SELECT].Width, previewH);
+    *preview_is_visible = 1;
+  
+    // Make the system think the menu is visible (Open_popup hides it)
+    // so Button_under_mouse still works
+    Menu_is_visible=Menu_is_visible_before_window;
+    Menu_Y=Menu_Y_before_window;
+  }
+
+  // NOT an else of the previous if - variable may have changed
+  if (*preview_is_visible)
+  {
+    //layer = Layer_under_mouse();
+    for(layer = 0; layer < layercount; ++layer)
+    {
+      int offset;
+      // Stop if the window is too small to show the
+      // layer button (ex: 320x200 can only display 12 layers)
+      if (layer*Layer_button_width+previewW > Window_width)
+        break;
+      
+      offset=(Layer_button_width-previewW)/2;
+      for (y = 0; y < previewH*Pixel_height*Menu_factor_Y; y++)
+      for (x = 0; x < previewW*Pixel_width*Menu_factor_X; x++)
+      {
+      	int imgx = x * Main_image_width / previewW/Pixel_width/Menu_factor_X;
+      	int imgy = y * Main_image_height / previewH/Pixel_height/Menu_factor_Y;
+      	// Use Pixel_simple() in order to get highest resolution
+      	Pixel_simple(x+((layer*Layer_button_width+offset)*Menu_factor_X+Window_pos_X)*Pixel_width, y+Window_pos_Y*Pixel_height, *(Main_backups->Pages->Image[layer].Pixels
+      		+ imgx + imgy * Main_image_width));
+      }
+    }
+    Update_window_area(0,0,Window_width, Window_height);
+  }
+}
+
+void Layer_preview_off(int * preview_is_visible)
+{
+  if (*preview_is_visible)
+  {
+    int x = Mouse_K;
+    Close_popup();
+    Mouse_K = x; // Close_popup waits for end of click and resets Mouse_K...
+    *preview_is_visible = 0;
+  }
+}
+
 ///Main handler for everything. This is the main loop of the program
 void Main_handler(void)
 {
@@ -592,9 +657,8 @@ void Main_handler(void)
   byte action;
   dword key_pressed;
 
-  static int preview_is_visible;
-  static int previewW, previewH;
-  	// This is used for the layer preview
+  int preview_is_visible=0;
+  // This is used for the layer preview
 
   do
   {
@@ -691,13 +755,8 @@ void Main_handler(void)
         {
           if (Is_shortcut(Key,key_index))
           {
-            if (preview_is_visible)
-            {
-			  int x = Mouse_K;
-			  Close_popup();
-			  Mouse_K = x; // Close_popup waits for end of click and resets Mouse_K...
-			  preview_is_visible = 0;
-			}
+            Layer_preview_off(&preview_is_visible);
+
             // Special keys (functions not hooked to a UI button)
             switch(key_index)
             {
@@ -1316,26 +1375,14 @@ void Main_handler(void)
           {
             if (Is_shortcut(key_pressed,0x100+button_index))
             {
-              if (preview_is_visible)
-              {
-				int x = Mouse_K;
-				Close_popup();
-				Mouse_K = x; // Close_popup waits for end of click and resets Mouse_K...
-				preview_is_visible = 0;
-			  }
+              Layer_preview_off(&preview_is_visible);
               Select_button(button_index,LEFT_SIDE);
               prev_button_number=-1;
               action++;
             }
             else if (Is_shortcut(key_pressed,0x200+button_index))
             {
-              if (preview_is_visible)
-              {
-				int x = Mouse_K;
-				Close_popup();
-				Mouse_K = x; // Close_popup waits for end of click and resets Mouse_K...
-				preview_is_visible = 0;
-			  }
+              Layer_preview_off(&preview_is_visible);
               Select_button(button_index,RIGHT_SIDE);
               prev_button_number=-1;
               action++;
@@ -1398,12 +1445,7 @@ void Main_handler(void)
 
 			// If we get here, we mayjust have left the layerbar (towards the
 			// main menu or statusbar). If so, close the popup.
-			if (preview_is_visible) {
-				int x = Mouse_K;
-				Close_popup();
-				Mouse_K = x; // Close_popup waits for end of click and resets Mouse_K...
-				preview_is_visible = 0;
-			}
+			Layer_preview_off(&preview_is_visible);
 		  }
 		}
         else
@@ -1423,60 +1465,11 @@ void Main_handler(void)
 
               if (button_index == BUTTON_LAYER_SELECT)
               {
-                int x,y;
-                short layer;
-				short layercount = Main_backups->Pages->Nb_layers;
-
-				if (!preview_is_visible)
-				{
-                	previewW = Min(Main_image_width/Menu_factor_X,Layer_button_width);
-                	previewH = previewW * Main_image_height / Main_image_width * Menu_factor_X / Menu_factor_Y;
-					if (previewH > Screen_height/4)
-					{
-					  previewH = Screen_height/4;
-					  previewW = Main_image_width*previewH/Main_image_height*Menu_factor_Y/Menu_factor_X;
-					}
-
-                	Open_popup((Buttons_Pool[BUTTON_LAYER_SELECT].X_offset + 2)*Menu_factor_X,
-                  		Menu_Y - previewH * Menu_factor_Y, Buttons_Pool[BUTTON_LAYER_SELECT].Width, previewH);
-					preview_is_visible = 1;
-
-					// Make the system think the menu is visible (Open_popup hides it)
-					// so Button_under_mouse still works
-					Menu_is_visible=Menu_is_visible_before_window;
-					Menu_Y=Menu_Y_before_window;
-				}
-
-			  	// NOT an else of the previous if - variable may have changed
-			  	if (preview_is_visible)
-				{
-					//layer = Layer_under_mouse();
-					for(layer = 0; layer < layercount; ++layer)
-					{
-					    int offset;
-                        // Stop if the window is too small to show the
-					    // layer button (ex: 320x200 can only display 12 layers)
-					    if (layer*Layer_button_width+previewW > Window_width)
-					        break;
-					    
-					    offset=(Layer_button_width-previewW)/2;
-						for (y = 0; y < previewH*Pixel_height*Menu_factor_Y; y++)
-						for (x = 0; x < previewW*Pixel_width*Menu_factor_X; x++)
-						{
-							int imgx = x * Main_image_width / previewW/Pixel_width/Menu_factor_X;
-							int imgy = y * Main_image_height / previewH/Pixel_height/Menu_factor_Y;
-							// Use Pixel_simple() in order to get highest resolution
-							Pixel_simple(x+((layer*Layer_button_width+offset)*Menu_factor_X+Window_pos_X)*Pixel_width, y+Window_pos_Y*Pixel_height, *(Main_backups->Pages->Image[layer].Pixels
-								+ imgx + imgy * Main_image_width));
-						}
-					}
-					Update_window_area(0,0,Window_width, Window_height);
-				}
-			  } else if (preview_is_visible) {
-                int x = Mouse_K;
-                Close_popup();
-                Mouse_K = x; // Close_popup waits for end of click and resets Mouse_K...
-				preview_is_visible = 0;
+				Layer_preview_on(&preview_is_visible);
+			  }
+			  else
+			  {
+			    Layer_preview_off(&preview_is_visible);
               }
 
               Print_in_menu(Buttons_Pool[button_index].Tooltip,0);
@@ -1509,12 +1502,7 @@ void Main_handler(void)
 
 			  // If we get here, we mayjust have left the layerbar (towards the
 			  // main menu or statusbar). If so, close the popup.
-			  if (preview_is_visible) {
-                int x = Mouse_K;
-                Close_popup();
-                Mouse_K = x; // Close_popup waits for end of click and resets Mouse_K...
-				preview_is_visible = 0;
-              }
+			  Layer_preview_off(&preview_is_visible);
             }
           }
         }
@@ -1551,6 +1539,7 @@ void Main_handler(void)
       if(Cursor_in_menu_previous)
       {
         Hide_cursor();
+        Layer_preview_off(&preview_is_visible);
         
         /*if (Gfx->Hover_effect && prev_button_number > -1 && !Buttons_Pool[prev_button_number].Pressed)
           Draw_menu_button(prev_button_number, BUTTON_RELEASED);
