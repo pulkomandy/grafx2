@@ -29,6 +29,12 @@
 #include "misc.h"
 #include "tiles.h"
 
+// These helpers are only needed internally at the moment
+#define TILE_FOR_COORDS(x,y) (((y)-Snap_offset_Y)/Snap_height*Main_tilemap_width+((x)-Snap_offset_X)/Snap_width)
+#define TILE_AT(x,y) (y)*Main_tilemap_width+(x)
+#define TILE_X(t) (((t)%Main_tilemap_width)*Snap_width+Snap_offset_X)
+#define TILE_Y(t) (((t)/Main_tilemap_width)*Snap_height+Snap_offset_Y)
+
 enum TILE_FLIPPED
 {
   TILE_FLIPPED_NONE = 0,
@@ -38,122 +44,25 @@ enum TILE_FLIPPED
 };
 
 // globals
+
+/// Tilemap for the main screen
 T_Tile * Main_tilemap;
+/// Number of tiles (horizontally) for the main page's tilemap
 short Main_tilemap_width;
+/// Number of tiles (vertically) for the main page's tilemap
 short Main_tilemap_height;
 
+/// Tilemap for the spare
 T_Tile * Spare_tilemap;
+/// Number of tiles (horizontally) for the spare page's tilemap
 short Spare_tilemap_width;
+/// Number of tiles (vertically) for the spare page's tilemap
 short Spare_tilemap_height;
 
-//
 
-/// Build the tile-area from the current picture 
-void build_tile_area()
-{
-	word tileAreaWidth = Main_image_width / Snap_width + 1;
-	word tileAreaHeight = Main_image_height / Snap_height + 1;
-
-	int* tileArea = malloc(tileAreaWidth*tileAreaHeight*sizeof(int));
-
-	word tile_x, tile_y;
-
-	// For each tile, we have to crawl up to the top of the picture and
-	// find the first identical tile
-	for (tile_y = 0; tile_y < tileAreaWidth; tile_y++)
-		for(tile_x = 0; tile_x < tileAreaHeight; tile_x++)
-		{
-			// So, this is the "for each tile"
-			short ctx, cty;
-			// First we compare the tile with the others one in the same line at the left
-			for(ctx = tile_x - 1; ctx >= 0; ctx--)
-			if(compare_tiles(tile_x*Snap_width, tile_y*Snap_height, ctx*Snap_width, tile_y*Snap_height))
-			{
-				// We found a match !
-				tileArea[tile_y*tileAreaWidth+tile_x] = tile_y*tileAreaWidth+ctx;
-				goto found;
-			}
-
-			// Then we look at all the lines above
-			for(cty = tile_y - 1; cty >= 0; cty--)
-			for(ctx = tileAreaWidth - 1; ctx >= 0; ctx--)
-			if(compare_tiles(tile_x*Snap_width, tile_y*Snap_height, ctx*Snap_width, cty*Snap_height))
-			{
-				// We found a match !
-				tileArea[tile_y*tileAreaWidth+tile_x] = cty*tileAreaWidth+ctx;
-				goto found;
-			}
-
-			// Then we look at all the lines below
-			for(cty = tileAreaHeight - 1; cty >= tile_y; cty--)
-			for(ctx = tileAreaWidth - 1; ctx >= 0; ctx--)
-			if(compare_tiles(tile_x*Snap_width, tile_y*Snap_height, ctx*Snap_width, cty*Snap_height))
-			{
-				// We found a match !
-				tileArea[tile_y*tileAreaWidth+tile_x] = cty*tileAreaWidth+ctx;
-				goto found;
-			}
-			
-			// Then we look at the tiles at the right of this one
-			// (including the tile itself, so we are sure we match something this time)
-			for(ctx = tileAreaHeight; ctx >= tile_x; ctx--)
-			if(compare_tiles(tile_x*Snap_width, tile_y*Snap_height, ctx*Snap_width, tile_y*Snap_height))
-			{
-				// We found a match !
-				tileArea[tile_y*tileAreaWidth+tile_x] = tile_y*tileAreaWidth+ctx;
-			}
-			
-      found:
-      ;
-		}
-}
-
-
-// Compare tiles
-// The parameters are in pixel-space.
-int compare_tiles(word x1, word y1, word x2, word y2)
-{
-	word pixel_x, pixel_y;
-	byte c1, c2;
-
-	for (pixel_y = 0; pixel_y < Snap_width; pixel_y++)
-	for (pixel_x = 0; pixel_x < Snap_height; pixel_x++)
-	{
-		c1 = *(Main_screen + (y1+pixel_y) * Main_image_width + (x1+pixel_x));
-		c2 = *(Main_screen + (y2+pixel_y) * Main_image_width + (x2+pixel_x));
-		if (c1 != c2) return 0;
-	}
-
-	return 1;
-}
-/*
-/// Copy a tile pixeldata to all the identical ones
-// Call this after the end of an operation
-void update_tile(word pixel_x, word pixel_y)
-{
-	int tileOffset = (pixel_y/Snap_height)*tileAreaHeight + pixel_x/Snap_width;
-	int firstTileOffset = tileOffset + 1; // to make sure they are not equal
-
-	while(firstTileOffset != tileOffset)
-	{
-		tileOffset = tileArea[tileOffset];
-		
-		//do the copy of a block starting at (pixel_x, pixel_y)
-	}
-}
-*/
-
-/* Basic repeat-all
-void Tilemap_draw(word x, word y, byte color)
-{
-  int xx,yy;
-  for (yy=(y+Snap_height-Snap_offset_Y)%Snap_height+Snap_offset_Y;yy<Main_image_height;yy+=Snap_height)
-    for (xx=(x+Snap_width-Snap_offset_X)%Snap_width+Snap_offset_X;xx<Main_image_width;xx+=Snap_width)
-      Pixel_in_current_screen(xx,yy,color,yy>=Limit_top&&yy<=Limit_bottom&&xx>=Limit_left&&xx<=Limit_right);
-  Update_rect(0,0,0,0);
-}
-*/
-
+///
+/// Draw a pixel while Tilemap mode is active : This will paint on all
+/// similar tiles of the layer, visible on the screen or not.
 void Tilemap_draw(word x, word y, byte color)
 {
   int tile, first_tile;
@@ -468,6 +377,9 @@ void Tilemap_update(void)
   }
 }
 
+///
+/// This exchanges the tilemap settings of the main and spare, it should
+/// be called when swapping pages.
 void Swap_tilemap(void)
 {
   SWAP_BYTES(Main_tilemap_mode, Spare_tilemap_mode)
@@ -481,6 +393,9 @@ void Swap_tilemap(void)
   SWAP_SHORTS(Main_tilemap_height, Spare_tilemap_height)
 }
 
+///
+/// Clears all tilemap data and settings for the main page.
+/// Safe to call again.
 void Disable_main_tilemap(void)
 {
   if (Main_tilemap)
@@ -494,6 +409,9 @@ void Disable_main_tilemap(void)
   Main_tilemap_mode=0;
 }
 
+///
+/// Clears all tilemap data and settings for the spare.
+/// Safe to call again.
 void Disable_spare_tilemap(void)
 {
     if (Spare_tilemap)

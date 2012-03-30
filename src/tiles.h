@@ -24,32 +24,40 @@
 /// Functions for tilemap effect
 //////////////////////////////////////////////////////////////////////////////
 
-int compare_tiles(word x1, word y1, word x2, word y2);
-
 /// Create or update a tilemap based on current screen pixels.
 void Tilemap_update(void);
 
+///
+/// Draw a pixel while Tilemap mode is active : This will paint on all
+/// similar tiles of the layer, visible on the screen or not.
 void Tilemap_draw(word x, word y, byte color);
 
+///
+/// This exchanges the tilemap settings of the main and spare, it should
+/// be called when swapping pages.
 void Swap_tilemap(void);
 
+///
+/// Clears all tilemap data and settings for the main page.
+/// Safe to call again.
 void Disable_main_tilemap(void);
 
+///
+/// Clears all tilemap data and settings for the spare.
+/// Safe to call again.
 void Disable_spare_tilemap(void);
 
-#define TILE_FOR_COORDS(x,y) (((y)-Snap_offset_Y)/Snap_height*Main_tilemap_width+((x)-Snap_offset_X)/Snap_width)
-#define TILE_AT(x,y) (y)*Main_tilemap_width+(x)
-#define TILE_X(t) (((t)%Main_tilemap_width)*Snap_width+Snap_offset_X)
-#define TILE_Y(t) (((t)/Main_tilemap_width)*Snap_height+Snap_offset_Y)
 
 /// Tilemap for the main screen
-
 extern T_Tile * Main_tilemap;
-
+/// Number of tiles (horizontally) for the main page's tilemap
 extern short Main_tilemap_width;
+/// Number of tiles (vertically) for the main page's tilemap
 extern short Main_tilemap_height;
 
+/// Tilemap for the spare
 extern T_Tile * Spare_tilemap;
-
+/// Number of tiles (horizontally) for the spare page's tilemap
 extern short Spare_tilemap_width;
+/// Number of tiles (vertically) for the spare page's tilemap
 extern short Spare_tilemap_height;

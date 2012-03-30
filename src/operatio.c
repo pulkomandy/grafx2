@@ -37,6 +37,8 @@
 #include "brush.h"
 #include "windows.h"
 #include "input.h"
+#include "special.h"
+#include "tiles.h"
 
 // PI is NOT part of math.h according to C standards...
 #if defined(__GP2X__) || defined(__VBCC__)
@@ -2826,7 +2828,7 @@ void Scroll_12_5(void)
   Operation_pop(&x_pos);
   Operation_pop(&center_y);
   Operation_pop(&center_x);
-
+  
   if ( (Paintbrush_X!=x_pos) || (Paintbrush_Y!=y_pos) )
   {
     // L'utilisateur a bougé, il faut scroller l'image
@@ -2890,21 +2892,21 @@ void Scroll_0_5(void)
   Operation_pop(&x_pos);
   Operation_pop(&center_y);
   Operation_pop(&center_x);
-  
+
   if (side == RIGHT_SIDE)
     {
-      // All layers at once
-    if (x_pos>=center_x)
-      x_offset=(x_pos-center_x)%Main_image_width;
-    else
-      x_offset=Main_image_width-((center_x-x_pos)%Main_image_width);
+  // All layers at once
+  if (x_pos>=center_x)
+    x_offset=(x_pos-center_x)%Main_image_width;
+  else
+    x_offset=Main_image_width-((center_x-x_pos)%Main_image_width);
   
-    if (y_pos>=center_y)
-      y_offset=(y_pos-center_y)%Main_image_height;
-    else
-      y_offset=Main_image_height-((center_y-y_pos)%Main_image_height);
+  if (y_pos>=center_y)
+    y_offset=(y_pos-center_y)%Main_image_height;
+  else
+    y_offset=Main_image_height-((center_y-y_pos)%Main_image_height);
     
-    
+  
     // Do the actual scroll operation on all layers.
     for (i=0; i<Main_backups->Pages->Nb_layers; i++)
       //if ((1<<i) & Main_layers_visible)
@@ -2918,6 +2920,8 @@ void Scroll_0_5(void)
   {
     // One layer : everything was done while dragging the mouse
   }
+  if (Main_tilemap_mode)
+    Tilemap_update();
   
   Cursor_hidden=Cursor_hidden_before_scroll;
 
