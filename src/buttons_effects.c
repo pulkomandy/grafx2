@@ -169,16 +169,13 @@ void Button_Constraint_mode(void)
 {
   if (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED)
   {
-    Main_backups->Pages->Image_mode = IMAGE_MODE_MODE5;
+    if (Main_backups->Pages->Nb_layers!=5 || (Main_image_width%48))
+    {
+      Verbose_message("Error!", "This emulation of Amstrad CPC's Mode5 can only be used on a 5-layer image whose width is a multiple of 48.");
+      return;
+    }
   	// TODO backup
-  	// CPC Mode 5 - ensure there are at least 5 layers
-  	while(Main_backups->Pages->Nb_layers < 5)
-  	{
-  		Add_layer(Main_backups, 0);
-  			// Add layers below, so the picture is kept on the top one
-  			// (the valuable pixel data)
-  	}
-  	
+    Main_backups->Pages->Image_mode = IMAGE_MODE_MODE5;
   	// TODO set the palette to a CPC one ?
   }
   else if (Main_backups->Pages->Image_mode == IMAGE_MODE_MODE5)
