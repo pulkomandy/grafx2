@@ -209,13 +209,13 @@ void Button_Tilemap_menu(void)
   byte flip_y=Config.Tilemap_allow_flipped_y;
   byte count=Config.Tilemap_show_count;
 
-  Open_window(166,138,"Tilemap options");
+  Open_window(166,120,"Tilemap options");
 
-  Window_set_normal_button(6,120,51,14,"Cancel",0,1,KEY_ESC);  // 1
-  Window_set_normal_button(110,120,51,14,"OK"    ,0,1,SDLK_RETURN); // 2
+  Window_set_normal_button(6,102,51,14,"Cancel",0,1,KEY_ESC);  // 1
+  Window_set_normal_button(110,102,51,14,"OK"    ,0,1,SDLK_RETURN); // 2
 
   Print_in_window(24,21, "Detect mirrored",MC_Dark,MC_Light);
-  Window_display_frame(5,17,155,74);
+  Window_display_frame(5,17,155,56);
   
   Print_in_window(37,37, "Horizontally",MC_Black,MC_Light);
   Window_set_normal_button(18,34,13,13,flip_x?"X":"",0,1,0);  // 3
@@ -223,8 +223,8 @@ void Button_Tilemap_menu(void)
   Print_in_window(37,55, "Vertically",MC_Black,MC_Light);
   Window_set_normal_button(18,52,13,13,flip_y?"X":"",0,1,0);  // 4
 
-  Print_in_window(27,99, "Show count",MC_Black,MC_Light);
-  Window_set_normal_button(7,96,13,13,count?"X":"",0,1,0);  // 5
+  Print_in_window(27,81, "Show count",MC_Black,MC_Light);
+  Window_set_normal_button(7,78,13,13,count?"X":"",0,1,0);  // 5
 
   Update_window_area(0,0,Window_width, Window_height);
 
@@ -236,24 +236,24 @@ void Button_Tilemap_menu(void)
 
     switch (clicked_button)
     {
-      case 3 :
+      case 3 : // Horizontal flip
         flip_x=!flip_x;
         Hide_cursor();
         Print_in_window(21,37,flip_x?"X":" ", MC_Black, MC_Light);
         Display_cursor();
         break;
-      case 4 :
+      case 4 : // Vertical flip
         flip_y=!flip_y;
         Hide_cursor();
         Print_in_window(21,55,flip_y?"X":" ", MC_Black, MC_Light);
         Display_cursor();
         break;
-      case 5 :
+      case 5 : // Count
         count=!count;
         Hide_cursor();
-        Print_in_window(10,99,count?"X":" ", MC_Black, MC_Light);
+        Print_in_window(10,81,count?"X":" ", MC_Black, MC_Light);
         Display_cursor();
-        break;
+        break;      
     }
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       Window_help(BUTTON_EFFECTS, "TILEMAP");
@@ -262,9 +262,20 @@ void Button_Tilemap_menu(void)
 
   if (clicked_button==2) // OK
   {
+    byte changed =
+      Config.Tilemap_allow_flipped_x!=flip_x ||
+      Config.Tilemap_allow_flipped_y!=flip_y ||
+      !Main_tilemap_mode;
+    
     Config.Tilemap_allow_flipped_x=flip_x;
     Config.Tilemap_allow_flipped_y=flip_y;
     Config.Tilemap_show_count=count;
+    
+    if (changed)
+    {
+      Main_tilemap_mode=1;
+      Tilemap_update();
+    }
   }
   Close_window();
   Display_cursor();
