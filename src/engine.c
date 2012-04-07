@@ -586,7 +586,7 @@ void Layer_preview_on(int * preview_is_visible)
   short layercount = Main_backups->Pages->Nb_layers;
   static int previewW=0, previewH=0;
 
-  if (! *preview_is_visible)
+  if (! *preview_is_visible && layercount>1)
   {
     previewW = Min(Main_image_width/Menu_factor_X,Layer_button_width);
     previewH = previewW * Main_image_height / Main_image_width * Menu_factor_X / Menu_factor_Y;
@@ -604,12 +604,7 @@ void Layer_preview_on(int * preview_is_visible)
     // so Button_under_mouse still works
     Menu_is_visible=Menu_is_visible_before_window;
     Menu_Y=Menu_Y_before_window;
-  }
 
-  // NOT an else of the previous if - variable may have changed
-  if (*preview_is_visible)
-  {
-    //layer = Layer_under_mouse();
     for(layer = 0; layer < layercount; ++layer)
     {
       int offset;
@@ -1420,9 +1415,13 @@ void Main_handler(void)
 
       // On cherche sur quel bouton du menu se trouve la souris:
       button_index=Button_under_mouse();
+      
+      if (button_index == BUTTON_LAYER_SELECT)
+        Layer_preview_on(&preview_is_visible);
+      else
+        Layer_preview_off(&preview_is_visible);
 
       // Si le curseur vient de changer de zone
-
       if ( (button_index!=prev_button_number)
         || (!Cursor_in_menu_previous)
         || (prev_button_number==BUTTON_CHOOSE_COL) )
@@ -1438,14 +1437,9 @@ void Main_handler(void)
             /*if (Gfx->Hover_effect && prev_button_number > -1 && !Buttons_Pool[prev_button_number].Pressed)
               Draw_menu_button(prev_button_number, BUTTON_RELEASED);
             */
-
             Block(18*Menu_factor_X,Menu_status_Y,192*Menu_factor_X,Menu_factor_Y<<3,MC_Light);
             Update_rect(18*Menu_factor_X,Menu_status_Y,192*Menu_factor_X,Menu_factor_Y<<3);
             Display_cursor();
-
-            // If we get here, we mayjust have left the layerbar (towards the
-            // main menu or statusbar). If so, close the popup.
-            Layer_preview_off(&preview_is_visible);
           }
         }
         else
@@ -1462,15 +1456,6 @@ void Main_handler(void)
               /*if (Gfx->Hover_effect && prev_button_number > -1 && !Buttons_Pool[prev_button_number].Pressed)
                 Draw_menu_button(prev_button_number, BUTTON_RELEASED);
               */
-
-              if (button_index == BUTTON_LAYER_SELECT)
-              {
-                Layer_preview_on(&preview_is_visible);
-              }
-              else
-              {
-                Layer_preview_off(&preview_is_visible);
-              }
 
               Print_in_menu(Buttons_Pool[button_index].Tooltip,0);
 
@@ -1499,10 +1484,6 @@ void Main_handler(void)
                   Display_cursor();
                 }
               }
-
-              // If we get here, we mayjust have left the layerbar (towards the
-              // main menu or statusbar). If so, close the popup.
-              Layer_preview_off(&preview_is_visible);
             }
           }
         }
@@ -1526,6 +1507,10 @@ void Main_handler(void)
       }
 
     }
+    else // if (!Cursor_in_menu)
+    {
+      Layer_preview_off(&preview_is_visible);
+    }
 
     // we need to refresh that one as we may come from a sub window
     Cursor_in_menu=(Mouse_Y>=Menu_Y) ||
@@ -1539,12 +1524,9 @@ void Main_handler(void)
       if(Cursor_in_menu_previous)
       {
         Hide_cursor();
-        Layer_preview_off(&preview_is_visible);
-        
         /*if (Gfx->Hover_effect && prev_button_number > -1 && !Buttons_Pool[prev_button_number].Pressed)
           Draw_menu_button(prev_button_number, BUTTON_RELEASED);
-        */
-                
+        */    
         if ( (Current_operation!=OPERATION_COLORPICK) && (Current_operation!=OPERATION_REPLACE) )
         {
           Print_in_menu("X:       Y:             ",0);
