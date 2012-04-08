@@ -229,21 +229,6 @@ byte Read_pixel_from_brush (word x, word y)
   return *(Brush + y * Brush_width + x);
 }
 
-void Replace_a_color(byte old_color, byte new_color)
-{
-  word x;
-  word y;
-  
-  // Update all pixels
-  for (y=0; y<Main_image_height; y++)
-    for (x=0; x<Main_image_width; x++)
-      if (Read_pixel_from_current_layer(x,y) == old_color)
-        Pixel_in_current_screen(x,y,new_color);
-  Update_rect(0,0,0,0); // On peut TOUT a jour
-  // C'est pas un problème car il n'y a pas de preview
-}
-// FIXME: move to graph.c, it's the only caller
-
 void Ellipse_compute_limites(short horizontal_radius,short vertical_radius)
 {
   Ellipse_horizontal_radius_squared =

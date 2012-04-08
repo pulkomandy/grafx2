@@ -2693,7 +2693,7 @@ void Polyfill(int vertices, short * points, int color)
 
 //------------ Remplacement de la couleur pointée par une autre --------------
 
-void Replace(byte New_color)
+void Replace(byte new_color)
 {
   byte old_color;
 
@@ -2701,11 +2701,17 @@ void Replace(byte New_color)
    && (Paintbrush_Y<Main_image_height))
   {
     old_color=Read_pixel_from_current_layer(Paintbrush_X,Paintbrush_Y);
-    if ( (old_color!=New_color)
+    if ( (old_color!=new_color)
       && ((!Stencil_mode) || (!Stencil[old_color])) )
     {
-      Replace_a_color(old_color,New_color);
-      Display_all_screen();
+      word x;
+      word y;
+      
+      // Update all pixels
+      for (y=0; y<Main_image_height; y++)
+        for (x=0; x<Main_image_width; x++)
+          if (Read_pixel_from_current_layer(x,y) == old_color)
+            Pixel_in_current_screen(x,y,new_color);
     }
   }
 }

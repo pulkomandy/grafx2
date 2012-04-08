@@ -79,7 +79,6 @@ byte Pixel_in_circle(void);
 void Init_chrono(dword delay);
 void Check_timer(void);
 
-void Replace_a_color(byte old_color, byte New_color);
 void Replace_colors_within_limits(byte * replace_table);
 
 byte Effect_interpolated_colorize  (word x,word y,byte color);

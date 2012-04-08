@@ -1365,14 +1365,13 @@ void Replace_1_0(void)
 //
 {
   Hide_cursor();
-  // Pas besoin d'initialiser le début d'opération car le Smear n'affecte pas
-  // le Replace, et on se fout de savoir si on est dans la partie gauche ou
-  // droite de la loupe.
+  Init_start_operation();
   Backup();
 //  Shade_table=Shade_table_left;
   Replace(Fore_color);
-  Display_cursor();
   End_of_modification();
+  Display_all_screen();
+  Display_cursor();
   Wait_end_of_click();
 }
 
@@ -1390,14 +1389,13 @@ void Replace_2_0(void)
     return;
   
   Hide_cursor();
-  // Pas besoin d'initialiser le début d'opération car le Smear n'affecte pas
-  // le Replace, et on se fout de savoir si on est dans la partie gauche ou
-  // droite de la loupe.
+  Init_start_operation();
   Backup();
 //  Shade_table=Shade_table_right;
   Replace(Back_color);
-  Display_cursor();
   End_of_modification();
+  Display_all_screen();
+  Display_cursor();
   Wait_end_of_click();
 }
 
