@@ -492,7 +492,6 @@ void Brush_0_5(void)
   }
   
   End_of_modification();
-  End_of_modification();
   Return_to_draw_mode();
 }
 
@@ -605,6 +604,9 @@ void Polybrush_12_8(void)
     free(Polyfill_table_of_points);
     Polyfill_table_of_points = NULL;
 
+    if (click==RIGHT_SIDE)
+      End_of_modification();
+
     // On raffiche l'écran pour effacer les traits en xor et pour raffraichir
     // l'écran si on a découpé une partie de l'image en prenant la brosse.
     Display_all_screen();
@@ -617,8 +619,6 @@ void Polybrush_12_8(void)
       Brush_offset_Y=(Brush_offset_Y/Snap_height)*Snap_height;
     }
     
-    if (click==RIGHT_SIDE)
-      End_of_modification();
     Return_to_draw_mode();
     Display_cursor();
   }

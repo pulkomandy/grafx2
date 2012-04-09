@@ -1299,6 +1299,9 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
             }
           }
         }
+    if (clear)
+      Update_part_of_screen(start_x,start_y,end_x-start_x+1,end_y-start_y+1);
+
     // Grab palette
     memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
     // Init colormap
