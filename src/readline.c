@@ -89,133 +89,133 @@ int Prepend_string(char* dest, char* src, int max)
 // Insert a string at the start of another. Up to MAX characters only
 // Returns actual number of chars inserted
 {
-	// Insert src before dest
-	int sized = strlen(dest);
-	int sizes = strlen(src);
+  // Insert src before dest
+  int sized = strlen(dest);
+  int sizes = strlen(src);
 
-	if (sized + sizes >= max)
-	{
-		sizes = max - sized;
-	}
+  if (sized + sizes >= max)
+  {
+    sizes = max - sized;
+  }
 
-	memmove(dest+sizes, dest, sized);
-	memcpy(dest, src, sizes);
+  memmove(dest+sizes, dest, sized);
+  memcpy(dest, src, sizes);
 
-	return sizes;
+  return sizes;
 }
 
 int Valid_character(word c, int input_type)
-	// returns 0 = Not allowed
-	// returns 1 = Allowed
-	// returns 2 = Allowed only once at start of string (for - sign in numbers)
+  // returns 0 = Not allowed
+  // returns 1 = Allowed
+  // returns 2 = Allowed only once at start of string (for - sign in numbers)
 {
-	// On va regarder si l'utilisateur le droit de se servir de cette touche
-	switch(input_type)
-	{
-		case INPUT_TYPE_STRING :
-			if ((c>=' ' && c<= 255) || c=='\n')
-				return 1;
-			break;
-		case INPUT_TYPE_INTEGER :
-			if ( (c>='0') && (c<='9') )
-				return 1;
-			break;
-		case INPUT_TYPE_DECIMAL:
-			if ( (c>='0') && (c<='9') )
-				return 1;
-			else if (c=='-')
-				return 2;
-			else if (c=='.')
-				return 1;
-			break;
-		case INPUT_TYPE_FILENAME:
-		{
-			// On regarde si la touche est autorisée
-			// Sous Linux: Seul le / est strictement interdit, mais beaucoup
-			// d'autres poseront des problèmes au shell, alors on évite.
-			// Sous Windows : c'est moins grave car le fopen() échouerait de toutes façons.
-			// AmigaOS4: Pas de ':' car utilisé pour les volumes.
+  // On va regarder si l'utilisateur le droit de se servir de cette touche
+  switch(input_type)
+  {
+    case INPUT_TYPE_STRING :
+      if ((c>=' ' && c<= 255) || c=='\n')
+        return 1;
+      break;
+    case INPUT_TYPE_INTEGER :
+      if ( (c>='0') && (c<='9') )
+        return 1;
+      break;
+    case INPUT_TYPE_DECIMAL:
+      if ( (c>='0') && (c<='9') )
+        return 1;
+      else if (c=='-')
+        return 2;
+      else if (c=='.')
+        return 1;
+      break;
+    case INPUT_TYPE_FILENAME:
+    {
+      // On regarde si la touche est autorisée
+      // Sous Linux: Seul le / est strictement interdit, mais beaucoup
+      // d'autres poseront des problèmes au shell, alors on évite.
+      // Sous Windows : c'est moins grave car le fopen() échouerait de toutes façons.
+      // AmigaOS4: Pas de ':' car utilisé pour les volumes.
 #if defined(__WIN32__)
-			char forbidden_char[] = {'/', '|', '?', '*', '<', '>', ':', '\\'};
+      char forbidden_char[] = {'/', '|', '?', '*', '<', '>', ':', '\\'};
 #elif defined (__amigaos4__)
-			char forbidden_char[] = {'/', '|', '?', '*', '<', '>', ':'};
+      char forbidden_char[] = {'/', '|', '?', '*', '<', '>', ':'};
 #else
-			char forbidden_char[] = {'/', '|', '?', '*', '<', '>'};
+      char forbidden_char[] = {'/', '|', '?', '*', '<', '>'};
 #endif
-			int position;
+      int position;
 
-			if (c < ' ' || c > 255)
-				return 0;
+      if (c < ' ' || c > 255)
+        return 0;
 
-			for (position=0; position<(long)sizeof(forbidden_char); position++)
-				if (c == forbidden_char[position])
-					return 0;
-			return 1;
-		}
-		case INPUT_TYPE_HEXA:
-			if ( (c>='0') && (c<='9') )
-				return 1;
-			else if ( (c>='A') && (c<='F') )
-				return 1;
-			else if ( (c>='a') && (c<='f') )
-				return 1;
-			break;
-	} // End du "switch(input_type)"
-	return 0;
+      for (position=0; position<(long)sizeof(forbidden_char); position++)
+        if (c == forbidden_char[position])
+          return 0;
+      return 1;
+    }
+    case INPUT_TYPE_HEXA:
+      if ( (c>='0') && (c<='9') )
+        return 1;
+      else if ( (c>='A') && (c<='F') )
+        return 1;
+      else if ( (c>='a') && (c<='f') )
+        return 1;
+      break;
+  } // End du "switch(input_type)"
+  return 0;
 }
 
 void Cleanup_string(char* str, int input_type)
 {
-	int i,j=0;
-	
-	for(i=0; str[i]!='\0'; i++)
-	{
-	  if (Valid_character((unsigned char)(str[i]), input_type))
-	  {
-	    str[j]=str[i];
-	    j++;
-	  }
-	}
-	str[j] = '\0';
+  int i,j=0;
+  
+  for(i=0; str[i]!='\0'; i++)
+  {
+    if (Valid_character((unsigned char)(str[i]), input_type))
+    {
+      str[j]=str[i];
+      j++;
+    }
+  }
+  str[j] = '\0';
 }
 
 void Display_whole_string(word x_pos,word y_pos,char * str,byte position)
 {
-	char cursor[2];
-	Print_general(x_pos,y_pos,str,TEXT_COLOR,BACKGROUND_COLOR);
+  char cursor[2];
+  Print_general(x_pos,y_pos,str,TEXT_COLOR,BACKGROUND_COLOR);
 
-	cursor[0]=str[position] ? str[position] : ' ';
-	cursor[1]='\0';
-	Print_general(x_pos+(position<<3)*Menu_factor_X,y_pos,cursor,CURSOR_COLOR,CURSOR_BACKGROUND_COLOR);
+  cursor[0]=str[position] ? str[position] : ' ';
+  cursor[1]='\0';
+  Print_general(x_pos+(position<<3)*Menu_factor_X,y_pos,cursor,CURSOR_COLOR,CURSOR_BACKGROUND_COLOR);
 }
 
 void Init_virtual_keyboard(word y_pos, word keyboard_width, word keyboard_height)
 {
-	int h_pos;
-	int v_pos;
-	int parent_window_x=Window_pos_X+2;
+  int h_pos;
+  int v_pos;
+  int parent_window_x=Window_pos_X+2;
 
-	h_pos= Window_pos_X+(keyboard_width-Window_width)*Menu_factor_X/-2;
-	if (h_pos<0)
-		h_pos=0;
-	else if (h_pos+keyboard_width*Menu_factor_X>Screen_width)
-		h_pos=Screen_width-keyboard_width*Menu_factor_X;
-	v_pos=Window_pos_Y+(y_pos+9)*Menu_factor_Y;
-	if (v_pos+(keyboard_height*Menu_factor_Y)>Screen_height)
-		v_pos=Window_pos_Y+(y_pos-keyboard_height-4)*Menu_factor_Y;
+  h_pos= Window_pos_X+(keyboard_width-Window_width)*Menu_factor_X/-2;
+  if (h_pos<0)
+    h_pos=0;
+  else if (h_pos+keyboard_width*Menu_factor_X>Screen_width)
+    h_pos=Screen_width-keyboard_width*Menu_factor_X;
+  v_pos=Window_pos_Y+(y_pos+9)*Menu_factor_Y;
+  if (v_pos+(keyboard_height*Menu_factor_Y)>Screen_height)
+    v_pos=Window_pos_Y+(y_pos-keyboard_height-4)*Menu_factor_Y;
 
-	Hide_cursor();
-	Open_popup(h_pos,v_pos,keyboard_width,keyboard_height);
-	Window_rectangle(1,0,Window_width-1, Window_height-1, MC_Light);
-	Window_rectangle(0,0,1,Window_height-2, MC_White);
-	// white border on top left angle, when it exceeds border.
-	if (parent_window_x>Window_pos_X)
-		Window_rectangle(0,0,(parent_window_x-Window_pos_X)/Menu_factor_X, 1, MC_White);
-	Window_rectangle(2,Window_height-2,Window_width-2, 2, MC_Black);
-	if(keyboard_width<320)
-	{
-		Window_rectangle(Window_width-2,2,2,Window_height-2, MC_Black);
-	}
+  Hide_cursor();
+  Open_popup(h_pos,v_pos,keyboard_width,keyboard_height);
+  Window_rectangle(1,0,Window_width-1, Window_height-1, MC_Light);
+  Window_rectangle(0,0,1,Window_height-2, MC_White);
+  // white border on top left angle, when it exceeds border.
+  if (parent_window_x>Window_pos_X)
+    Window_rectangle(0,0,(parent_window_x-Window_pos_X)/Menu_factor_X, 1, MC_White);
+  Window_rectangle(2,Window_height-2,Window_width-2, 2, MC_Black);
+  if(keyboard_width<320)
+  {
+    Window_rectangle(Window_width-2,2,2,Window_height-2, MC_Black);
+  }
 }
 
 
@@ -223,8 +223,8 @@ void Init_virtual_keyboard(word y_pos, word keyboard_width, word keyboard_height
 // TODO X11 and others
 char* getClipboard()
 {
-	char* dst = NULL;
 #ifdef __WIN32__
+    char* dst = NULL;
     SDL_SysWMinfo info;
     HWND SDL_Window;
 
@@ -250,11 +250,11 @@ char* getClipboard()
       }    
     }
   #elif defined __HAIKU__
-	return haiku_get_clipboard();
+  return haiku_get_clipboard();
   #else
-    #warning "Missing platform-specific code in getClipboard function"
+  // Not implemented (no standard) on Linux systems. Maybe someday...
+  return NULL;
   #endif
-  return dst;
 }
 
 

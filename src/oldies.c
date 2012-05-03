@@ -30,6 +30,9 @@
 #include "errors.h"
 #include "misc.h"
 #include "palette.h"
+#include "pages.h"
+#include "windows.h"
+#include "layers.h"
 
 void Pixel_in_layer(word x,word y, byte layer, byte color)
 {

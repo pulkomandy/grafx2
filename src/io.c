@@ -317,6 +317,7 @@ int File_is_hidden(FILE_IS_HIDDEN_ATTRIBUTE const char *fname, const char *full_
 {
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__) || defined(__MINT__)
   // False (unable to determine, or irrrelevent for platform)
+  (void)full_name;//unused
   return 0;
 #elif defined(__WIN32__)
   unsigned long att;
@@ -328,6 +329,7 @@ int File_is_hidden(FILE_IS_HIDDEN_ATTRIBUTE const char *fname, const char *full_
     return 0;
   return (att&FILE_ATTRIBUTE_HIDDEN)?1:0;
 #else
+  (void)full_name;//unused
   return fname[0]=='.';
 #endif
 

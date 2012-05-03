@@ -34,6 +34,7 @@
 #include "misc.h"
 #include "windows.h"
 #include "tiles.h"
+#include "graph.h"
 
 // -- Layers data
 

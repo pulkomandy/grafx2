@@ -44,6 +44,7 @@
 #include "loadsave.h"
 #include "io.h"
 #include "pxsimple.h"
+#include "oldies.h"
 
 
 // we need this as global

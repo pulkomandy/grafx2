@@ -2086,8 +2086,8 @@ void Test_C64(T_IO_Context * context)
         file_size = File_length_file(file);
         switch (file_size)
         {
-			// case 1000: // screen or color
-			// case 1002: // (screen or color) + loadaddr
+      // case 1000: // screen or color
+      // case 1002: // (screen or color) + loadaddr
             case 8000: // raw bitmap
             case 8002: // raw bitmap with loadaddr
             case 9000: // bitmap + ScreenRAM
@@ -2434,7 +2434,7 @@ void Load_C64(T_IO_Context * context)
             // get load address
             word load_addr;
             load_addr = file_buffer[0] | (file_buffer[1] << 8);
-            sprintf(context->Comment+strlen(context->Comment),", load at $%04.4X",load_addr);
+            sprintf(context->Comment+strlen(context->Comment),", load at $%4.4X",load_addr);
         }
         else
         {

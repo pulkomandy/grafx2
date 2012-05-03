@@ -67,33 +67,33 @@
 #include "filesel.h"
 
 #define NORMAL_FILE_COLOR    MC_Light // color du texte pour une ligne de
-	// fichier non sélectionné
+  // fichier non sélectionné
 #define NORMAL_DIRECTORY_COLOR MC_Dark // color du texte pour une ligne de
-	// répertoire non sélectionné
+  // répertoire non sélectionné
 #define NORMAL_BACKGROUND_COLOR       MC_Black  // color du fond  pour une ligne
-	// non sélectionnée
+  // non sélectionnée
 #define SELECTED_FILE_COLOR    MC_White // color du texte pour une ligne de
-	// fichier sélectionnée
+  // fichier sélectionnée
 #define SELECTED_DIRECTORY_COLOR MC_Light // color du texte pour une ligne de
-	// repértoire sélectionnée
+  // repértoire sélectionnée
 #define SELECTED_BACKGROUND_COLOR       MC_Dark // color du fond  pour une ligne
-	// sélectionnée
+  // sélectionnée
 
 // -- Native fileselector for WIN32
 
 // Returns 0 if all ok, something else if failed
 byte Native_filesel(byte load)
 {
-	//load = load;
+  //load = load;
 #ifdef __WIN32__
   OPENFILENAME ofn;
   char szFileName[MAX_PATH] = "";
-	SDL_SysWMinfo wminfo;
-	HWND hwnd;
-	
-	SDL_VERSION(&wminfo.version);
-	SDL_GetWMInfo(&wminfo);
-	hwnd = wminfo.window;
+  SDL_SysWMinfo wminfo;
+  HWND hwnd;
+  
+  SDL_VERSION(&wminfo.version);
+  SDL_GetWMInfo(&wminfo);
+  hwnd = wminfo.window;
 
   ZeroMemory(&ofn, sizeof(ofn));
 
@@ -121,6 +121,7 @@ byte Native_filesel(byte load)
     return CommDlgExtendedError();
   }
 #else
+  (void)load; // unused
   #ifndef __linux__ // This makes no sense on X11-oriented platforms. Nothing is really native there.
     #warning "EXPERIMENTAL function for native fileselector not available for this platform!"
   #endif
@@ -435,7 +436,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   
   for (item = list->First; (((item != NULL) && (bFound==false))); item = item->Next){
     if (item->Type == 1){
-	if(strncmp(item->Full_name,"..",(sizeof(char)*2))==0) bFound=true;
+  if(strncmp(item->Full_name,"..",(sizeof(char)*2))==0) bFound=true;
     }
   }
   
@@ -1292,7 +1293,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
   byte  save_or_load_image=0;
   byte  has_clicked_ok=0;// Indique si on a clické sur Load ou Save ou sur
                              //un bouton enclenchant Load ou Save juste après.
-  byte  initial_back_color;	// preview destroys it (how nice)
+  byte  initial_back_color; // preview destroys it (how nice)
   char  previous_directory[MAX_PATH_CHARACTERS]; // Répertoire d'où l'on vient après un CHDIR
   char  save_filename[MAX_PATH_CHARACTERS];
   char  initial_comment[COMMENT_SIZE+1];
@@ -1590,31 +1591,31 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
         Reset_quicksearch();
         break;
 
-	  case  6 : // Scroller des formats
-		// On met à jour le format de browsing du fileselect:
-		if (Main_format != Window_attribute2) {
-			char* savename = (char *)strdup(Selector_filename);
-			int nameLength = strlen(savename);
-			Main_format = Window_attribute2;
-			// Comme on change de liste, on se place en début de liste:
-			Main_fileselector_position = 0;
-			Main_fileselector_offset = 0;
-			// Affichage des premiers fichiers visibles:
-			Hide_cursor();
-			Reload_list_of_files(Main_format, file_scroller);
-			New_preview_is_needed = 1;
-			Reset_quicksearch();
-			strcpy(Selector_filename, savename);
-			if (Get_fileformat(Main_format)->Default_extension[0] != '\0' &&
-				Selector_filename[nameLength - 4] == '.')
-			{
-				strcpy(Selector_filename + nameLength - 3,
-					Get_fileformat(Main_format)->Default_extension);
-			}
-			free(savename);
-			Print_filename_in_fileselector();
-        	Display_cursor();
-		}
+    case  6 : // Scroller des formats
+    // On met à jour le format de browsing du fileselect:
+    if (Main_format != Window_attribute2) {
+      char* savename = (char *)strdup(Selector_filename);
+      int nameLength = strlen(savename);
+      Main_format = Window_attribute2;
+      // Comme on change de liste, on se place en début de liste:
+      Main_fileselector_position = 0;
+      Main_fileselector_offset = 0;
+      // Affichage des premiers fichiers visibles:
+      Hide_cursor();
+      Reload_list_of_files(Main_format, file_scroller);
+      New_preview_is_needed = 1;
+      Reset_quicksearch();
+      strcpy(Selector_filename, savename);
+      if (Get_fileformat(Main_format)->Default_extension[0] != '\0' &&
+        Selector_filename[nameLength - 4] == '.')
+      {
+        strcpy(Selector_filename + nameLength - 3,
+          Get_fileformat(Main_format)->Default_extension);
+      }
+      free(savename);
+      Print_filename_in_fileselector();
+          Display_cursor();
+    }
         break;
       case  7 : // Saisie d'un commentaire pour la sauvegarde
         if ( (!load) && (Get_fileformat(Main_format)->Comment) )

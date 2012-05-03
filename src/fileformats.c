@@ -59,6 +59,7 @@
 #include "misc.h"
 #include "struct.h"
 #include "io.h"
+#include "pages.h"
 #include "windows.h" // Best_color()
 
 //////////////////////////////////// IMG ////////////////////////////////////
@@ -4237,7 +4238,7 @@ void Save_PNG(T_IO_Context * context)
             // Give it to libpng
             png_set_unknown_chunks(png_ptr, info_ptr, &crng_chunk, 1);
             // libpng seems to ignore the location I provided earlier.
-	          png_set_unknown_chunk_location(png_ptr, info_ptr, 0, PNG_HAVE_PLTE);
+            png_set_unknown_chunk_location(png_ptr, info_ptr, 0, PNG_HAVE_PLTE);
           }
           
           
