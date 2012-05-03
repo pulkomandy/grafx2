@@ -3456,7 +3456,8 @@ void Save_picture(byte image)
 
   if (confirm)
   {
-    
+    T_Format * format;
+     
     old_cursor_shape=Cursor_shape;
     Hide_cursor();
     Cursor_shape=CURSOR_SHAPE_HOURGLASS;
@@ -3464,7 +3465,8 @@ void Save_picture(byte image)
 
     Save_image(&save_context);
 
-    if (!File_error && image && !Get_fileformat(save_context.Format)->Palette_only)
+    format=Get_fileformat(save_context.Format);
+    if (!File_error && image && !format->Palette_only && (Main_backups->Pages->Nb_layers==1 || format->Supports_layers))
     {
       Main_image_is_modified=0;
       strcpy(Main_backups->Pages->Filename, save_context.File_name);

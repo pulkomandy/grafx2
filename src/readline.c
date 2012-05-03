@@ -249,6 +249,7 @@ char* getClipboard()
         CloseClipboard();
       }    
     }
+    return dst;
   #elif defined __HAIKU__
   return haiku_get_clipboard();
   #else
