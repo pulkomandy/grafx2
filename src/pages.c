@@ -932,11 +932,6 @@ int Backup_with_new_dimensions(int width,int height)
   }
   else
   {
-    // Clear the depth buffer anyway, because we may use it later
-    memset(Main_visible_image_depth_buffer.Image, 0,
-      Main_image_width*Main_image_height);
-    
-  
     Update_screen_targets();
   }
   Update_FX_feedback(Config.FX_Feedback);
