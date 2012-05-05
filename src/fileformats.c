@@ -2217,6 +2217,14 @@ void Load_GIF(T_IO_Context * context)
                     Main_backups->Pages->Image[Main_current_layer-1].Pixels,
                     Main_backups->Pages->Width*Main_backups->Pages->Height);
                 }
+                else
+                {
+                  if (context->Type == CONTEXT_MAIN_IMAGE)
+                    memset(
+                      Main_backups->Pages->Image[Main_current_layer].Pixels,
+                      LSDB.Backcol,
+                      Main_backups->Pages->Width*Main_backups->Pages->Height);
+                }
               }
               else
               {
