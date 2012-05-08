@@ -868,6 +868,10 @@ int Init_program(int argc,char * argv[])
           Destroy_context(&context);
           Redraw_layered_image();
           End_of_modification();
+
+          // If only one image was loaded, assume the spare has same image type
+          if (file_in_command_line==1)
+            Spare_backups->Pages->Image_mode = Main_backups->Pages->Image_mode;
           
           Hide_cursor();
           Compute_optimal_menu_colors(Main_palette);

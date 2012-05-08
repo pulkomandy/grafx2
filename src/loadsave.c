@@ -969,7 +969,8 @@ void Save_image(T_IO_Context *context)
   {
     case CONTEXT_MAIN_IMAGE:
       if (!File_formats[context->Format-1].Supports_layers
-        && Main_backups->Pages->Nb_layers > 1)
+        && Main_backups->Pages->Nb_layers > 1
+        && !File_formats[context->Format-1].Palette_only)
       {
         if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
         {
