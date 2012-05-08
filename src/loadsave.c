@@ -971,10 +971,57 @@ void Save_image(T_IO_Context *context)
       if (!File_formats[context->Format-1].Supports_layers
         && Main_backups->Pages->Nb_layers > 1)
       {
-        if (! Confirmation_box("This format doesn't support layers\nand will save a flattened copy of\nyour image. Proceed?"))
+        if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
         {
-          // File_error is already set to 1.
-          return;
+          if (! Confirmation_box("This format doesn't support\nanimation and will save only\ncurrent frame. Proceed?"))
+          {
+            // File_error is already set to 1.
+            return;
+          }
+          // current layer
+          context->Nb_layers=1;
+          context->Target_address=Main_backups->Pages->Image[Main_current_layer].Pixels;
+        }
+        else // all other layer-based formats
+        {
+          int clicked_button;
+          
+          Open_window(208,100,"Format warning");
+          Print_in_window( 8, 20,"This file format doesn't",MC_Black,MC_Light);
+          Print_in_window( 8, 30,"support layers.",MC_Black,MC_Light);
+          
+          Window_set_normal_button(23,44, 162,14,"Save flattened copy",0,1,KEY_NONE); // 1
+          Window_set_normal_button(23,62, 162,14,"Save current frame" ,0,1,KEY_NONE); // 2
+          Window_set_normal_button(23,80, 162,14,"Cancel"             ,0,1,KEY_ESC);  // 3
+          Update_window_area(0,0,Window_width, Window_height);
+          Display_cursor();
+          do
+          {
+            clicked_button=Window_clicked_button();
+            // Some help on file formats ?
+            //if (Is_shortcut(Key,0x100+BUTTON_HELP))
+            //{
+            //  Key=0;
+            //  Window_help(???, NULL);
+            //}
+          }
+          while (clicked_button<=0);
+          Close_window();
+          Display_cursor();
+          switch(clicked_button)
+          {
+            case 1: // flatten
+              context->Nb_layers=1;
+              context->Target_address=Main_visible_image.Image;
+              break;
+            case 2: // current layer
+              context->Nb_layers=1;
+              context->Target_address=Main_backups->Pages->Image[Main_current_layer].Pixels;
+              break;
+            default: // Cancel
+              // File_error is already set to 1.
+              return;
+          }
         }
       }
       break;
@@ -1314,7 +1361,14 @@ void Set_saving_layer(T_IO_Context *context, int layer)
 
   if (context->Type == CONTEXT_MAIN_IMAGE)
   {
-    context->Target_address=Main_backups->Pages->Image[layer].Pixels;
+    if (context->Nb_layers==1 && Main_backups->Pages->Nb_layers!=1)
+    {
+      // Context is set to saving a single layer: do nothing
+    }
+    else
+    {
+      context->Target_address=Main_backups->Pages->Image[layer].Pixels;
+    }
   }
 }
 

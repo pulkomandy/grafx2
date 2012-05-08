@@ -3493,7 +3493,7 @@ void Button_Save(void)
   Save_picture(1);
 }
 
-
+/// Save main image over existing file (no fileselector)
 void Button_Autosave(void)
 {
   byte old_cursor_shape;
