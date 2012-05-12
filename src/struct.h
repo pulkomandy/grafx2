@@ -44,13 +44,13 @@
 
 // Definition of the base data types
 ///  8bit unsigned integer
-#define byte  uint8_t  
+typedef uint8_t byte;
 /// 16bit unsigned integer
-#define word  uint16_t 
+typedef uint16_t word;
 /// 32bit unsigned integer
-#define dword uint32_t
+typedef uint32_t dword;
 /// 64bit unsigned integer
-#define qword uint64_t
+typedef uint64_t qword;
 
 // Named function prototypes
 // GrafX2 use a lot of function pointer to do the drawing depending in the "fake hardware zoom" and the magnifier status.

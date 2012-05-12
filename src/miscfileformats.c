@@ -26,6 +26,7 @@
 ///@file miscfileformats.c
 /// Formats that aren't fully saving, either because of palette restrictions or other things
 
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -34,7 +35,6 @@
 #include "global.h"
 #include "io.h"
 #include "libraw2crtc.h"
-#include <limits.h>
 #include "loadsave.h"
 #include "misc.h"
 #include "sdlscreen.h"
@@ -45,32 +45,46 @@
 //////////////////////////////////// PAL ////////////////////////////////////
 //
 
-// -- Tester si un fichier est au format PAL --------------------------------
+// -- Test wether a file is in PAL format --------------------------------
 void Test_PAL(T_IO_Context * context)
 {
-  FILE *file; // Fichier du fichier
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
-  long file_size; // Taille du fichier
+  FILE *file;
+  char filename[MAX_PATH_CHARACTERS];
+  long file_size;
 
   Get_full_filename(filename, context->File_name, context->File_directory);
 
   File_error = 1;
 
-  // Ouverture du fichier
   if ((file = fopen(filename, "rb")))
   {
-    // Lecture de la taille du fichier
     file_size = File_length_file(file);
-    // Le fichier ne peut être au format PAL que si sa taille vaut 768 octets
+    // First check for GrafX2 legacy palette format. The simplest one, 768 bytes
+	// of RGB data. It is a raw dump of the T_Palette structure. There is no
+	// header at all, so we check for the file size.
     if (file_size == sizeof(T_Palette))
       File_error = 0;
     else {
-      // Sinon c'est peut être un fichier palette ASCII "Jasc"
+	  // Bigger (or smaller ?) files may be in other formats. These have an
+	  // header, so look for it.
       fread(filename, 1, 8, file);
       if (strncmp(filename,"JASC-PAL",8) == 0)
       {
+		// JASC file format, used by Paint Shop Pro and GIMP. This is also the
+		// one used for saving, as it brings greater interoperability.
         File_error = 0;
-      }
+      } else if(strncmp(filename,"RIFF", 4) == 0)
+	  {
+		  // Microsoft RIFF file
+		  // This is a data container (similar to IFF). We only check the first
+		  // chunk header, and give up if that's not a palette.
+		  fseek(file, 8, SEEK_SET);
+		  fread(filename, 1, 8, file);
+		  if (strncmp(filename, "PAL data", 8) == 0)
+		  {
+		  	File_error = 0;
+		  }
+	  }
     }
     fclose(file);
   }
@@ -129,7 +143,29 @@ void Load_PAL(T_IO_Context * context)
           context->Palette[i].B = b;
         }
         Palette_loaded(context);
-      } else File_error = 2;
+      } else if(strncmp(filename, "RIFF", 4) == 0) {
+		// Microsoft RIFF format.
+		fseek(file, 8, SEEK_SET);
+      	fread(filename, 1, 8, file);
+		if (strncmp(filename, "PAL data", 8) == 0)
+		{
+			char buffer[4];
+			word color_count;
+			word i = 0;
+
+			fseek(file, 22, SEEK_SET);
+			Read_word_le(file, &color_count);
+			for(i = 0; i < color_count; i++)
+			{
+				Read_bytes(file, buffer, 4);
+          		context->Palette[i].R = buffer[0];
+          		context->Palette[i].G = buffer[1];
+          		context->Palette[i].B = buffer[2];
+			}
+
+		} else File_error = 2;
+	  } else
+	    File_error = 2;
     
     }
     
