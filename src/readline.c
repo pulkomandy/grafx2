@@ -44,6 +44,8 @@
 #ifdef __WIN32__
 #include <Windows.h>
 #include <SDL_syswm.h>
+#elif defined __HAIKU__
+#include "haiku.h"
 #endif
 
 // Virtual keyboard is mandatory on these platforms:

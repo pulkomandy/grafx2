@@ -1621,7 +1621,7 @@ void Open_window(word width,word height, const char * title)
   Block(Window_pos_X+(Menu_factor_X<<3),Window_pos_Y+(12*Menu_factor_Y),(width-16)*Menu_factor_X,Menu_factor_Y,MC_White);
 
   title_length = strlen(title);
-  if (title_length+2 > width/8)
+  if (title_length+2 > (size_t)(width/8))
     title_length = width/8-2;
   Print_in_window_limited((width-(title_length<<3))>>1,3,title,title_length,MC_Black,MC_Light);
 
