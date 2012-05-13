@@ -367,7 +367,6 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
         }
         break;
       default:
-        printf("[%s]\n", argv[index]);
         // Si ce n'est pas un paramètre, c'est le nom du fichier à ouvrir
         if (file_in_command_line > 1)
         {
