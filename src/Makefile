@@ -342,11 +342,9 @@ endif
 
         # Compiles a regular linux executable for the native platform
         BIN = ../bin/grafx2
-        COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT) $(LUACOPT) $(JOYCOPT) $(VKEYCOPT) -O$(OPTIM) -I/usr/local/include/libpng
-        LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng $(LUALOPT) -lm
-        # Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
+        COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT) $(LUACOPT) $(JOYCOPT) $(VKEYCOPT) -O$(OPTIM) `pkg-config --cflags libpng`
+        LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) `pkg-config --libs libpng` $(LUALOPT) -lm
         CC = gcc
-        #CC = nccgen -ncgcc -ncld -ncfabs
         OBJDIR = ../obj/unix
         X11LOPT = -lX11
       endif
