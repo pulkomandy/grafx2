@@ -422,6 +422,13 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
       }
     }
   }
+  if (list->Nb_files==0 && list->Nb_directories==0)
+  {
+    // This can happen on some empty network drives.
+    // Add a dummy entry because the fileselector doesn't
+    // seem to support empty list.
+    Add_element_to_list(list, ".",Format_filename(".",19,1),1,ICON_NONE);
+  }
 
 #if defined(__MORPHOS__) || defined(__AROS__) || defined (__amigaos4__) || defined(__amigaos__)
   Add_element_to_list(list, "/", Format_filename("/",19,1), 1, ICON_NONE); // on amiga systems, / means parent. And there is no ..
@@ -436,7 +443,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   
   for (item = list->First; (((item != NULL) && (bFound==false))); item = item->Next){
     if (item->Type == 1){
-  if(strncmp(item->Full_name,"..",(sizeof(char)*2))==0) bFound=true;
+      if(strncmp(item->Full_name,"..",(sizeof(char)*2))==0) bFound=true;
     }
   }
   
@@ -1833,7 +1840,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
       case SDLK_BACKSPACE : // Backspace
         Reset_quicksearch();
         // Si le choix ".." est bien en tête des propositions...
-        if (!strcmp(Filelist.First->Full_name,PARENT_DIR))
+        if (Filelist.Nb_elements && !strcmp(Filelist.First->Full_name,PARENT_DIR))
         {                              
           // On va dans le répertoire parent.
           strcpy(Selector_filename,PARENT_DIR);
