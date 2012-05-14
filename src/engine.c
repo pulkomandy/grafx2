@@ -635,6 +635,7 @@ void Layer_preview_off(int * preview_is_visible)
   {
     int x = Mouse_K;
     Close_popup();
+    Display_cursor();
     Mouse_K = x; // Close_popup waits for end of click and resets Mouse_K...
     *preview_is_visible = 0;
   }
@@ -1416,11 +1417,6 @@ void Main_handler(void)
 
       // On cherche sur quel bouton du menu se trouve la souris:
       button_index=Button_under_mouse();
-      
-      if (button_index == BUTTON_LAYER_SELECT)
-        Layer_preview_on(&preview_is_visible);
-      else
-        Layer_preview_off(&preview_is_visible);
 
       // Si le curseur vient de changer de zone
       if ( (button_index!=prev_button_number)
@@ -1489,7 +1485,7 @@ void Main_handler(void)
           }
         }
       }
-
+      
       prev_button_number=button_index;
 
       // Gestion des clicks
@@ -1499,6 +1495,7 @@ void Main_handler(void)
         {
           if (button_index>=0)
           {
+            Layer_preview_off(&preview_is_visible);
             Select_button(button_index,Mouse_K);
             prev_button_number=-1;
           }
@@ -1506,6 +1503,12 @@ void Main_handler(void)
         else
           if (Main_magnifier_mode) Move_separator();
       }
+      
+      if (button_index == BUTTON_LAYER_SELECT)
+        Layer_preview_on(&preview_is_visible);
+      else
+        Layer_preview_off(&preview_is_visible);
+      
 
     }
     else // if (!Cursor_in_menu)
