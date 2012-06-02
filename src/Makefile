@@ -202,7 +202,9 @@ endif
     COPT = -W -Wall -c -g $(shell sdl-config --cflags) $(TTFCOPT) -I/boot/common/include $(LUACOPT)
     LOPT = $(shell sdl-config --libs) -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lfreetype -lbe $(LUALOPT)
     CC = gcc
-    OBJDIR = ../obj/haiku
+	#Append the gcc kind to the objdir (gcc2 or gcc4) to avoid conflicts when switching from one to other.
+	OBJKIND = $(lastword $(shell setgcc))
+    OBJDIR = ../obj/haiku/$(OBJKIND)
     ZIP = zip
 
   else
