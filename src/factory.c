@@ -1433,7 +1433,7 @@ void Draw_script_information(T_Fileselector_item * script_item, const char *full
   // Blank the target area
   Window_rectangle(7, FILESEL_Y + 89, DESC_WIDTH*6+2, 4*8, MC_Black);
 
-  if (script_item && script_item->Type==0 && script_item->Full_name && script_item->Full_name[0]!='\0')
+  if (script_item && script_item->Full_name && script_item->Full_name[0]!='\0')
   {
     char full_name[MAX_PATH_CHARACTERS];
     strcpy(full_name, full_directory);
@@ -1442,69 +1442,78 @@ void Draw_script_information(T_Fileselector_item * script_item, const char *full
     x=0;
     y=0;    
     text_block[0][0] = text_block[1][0] = text_block[2][0] = '\0';
-    // Start reading
-    script_file = fopen(full_name, "r");
-    if (script_file != NULL)
-    {
-      int c;
-      c = fgetc(script_file);
-      while (c != EOF && y<3)
-      {
-        if (c == '\n')
-        {
-          if (x<2)
-            break; // Carriage return without comment: Stopping
-          y++;
-          x=0;
-        }
-        else if (x==0 || x==1)
-        {
-          if (c != '-')
-            break; // Non-comment line was encountered. Stopping.       
-          x++;
-        }
-        else
-        {
-          if (x < DESC_WIDTH+2)
-          {
-            // Adding character
-            text_block[y][x-2] = (c<32 || c>255) ? ' ' : c;
-            text_block[y][x-1] = '\0';
-          }
-          x++;
-        }
-        // Read next
-        c = fgetc(script_file);
-      }
-      fclose(script_file);
-    }
-    
-    Print_help(8, FILESEL_Y + 89   , text_block[0], 'N', 0, 0);
-    Print_help(8, FILESEL_Y + 89+ 8, text_block[1], 'N', 0, 0);
-    Print_help(8, FILESEL_Y + 89+16, text_block[2], 'N', 0, 0);
-  
-    // Display a line with the keyboard shortcut
-    Print_help(8, FILESEL_Y + 89+24, "Key:", 'N', 0, 0);
-    for (i=0; i<10; i++)
-      if (Bound_script[i]!=NULL && !strcmp(Bound_script[i], full_name))
-        break;
-  
-    if (i<10)
-    {
-      const char *shortcut;    
-      shortcut=Keyboard_shortcut_value(SPECIAL_RUN_SCRIPT_1+i);
-      Print_help(8+4*6, FILESEL_Y + 89+24, shortcut, 'K', 0, strlen(shortcut));
-    }
-    else
-    {
-      Print_help(8+4*6, FILESEL_Y + 89+24, "None", 'K', 0, 4);
-    }
-  }
-  
 
-  
+	if (script_item->Type == 0)
+	{
+		// Start reading
+		script_file = fopen(full_name, "r");
+		if (script_file != NULL)
+		{
+			int c;
+			c = fgetc(script_file);
+			while (c != EOF && y<3)
+			{
+				if (c == '\n')
+				{
+					if (x<2)
+						break; // Carriage return without comment: Stopping
+					y++;
+					x=0;
+				}
+				else if (x==0 || x==1)
+				{
+					if (c != '-')
+						break; // Non-comment line was encountered. Stopping.       
+					x++;
+				}
+				else
+				{
+					if (x < DESC_WIDTH+2)
+					{
+						// Adding character
+						text_block[y][x-2] = (c<32 || c>255) ? ' ' : c;
+						text_block[y][x-1] = '\0';
+					}
+					x++;
+				}
+				// Read next
+				c = fgetc(script_file);
+			}
+			fclose(script_file);
+		}
+		Print_help(8, FILESEL_Y + 89   , text_block[0], 'N', 0, 0);
+		Print_help(8, FILESEL_Y + 89+ 8, text_block[1], 'N', 0, 0);
+		Print_help(8, FILESEL_Y + 89+16, text_block[2], 'N', 0, 0);
+
+		// Display a line with the keyboard shortcut
+		Print_help(8, FILESEL_Y + 89+24, "Key:", 'N', 0, 0);
+		for (i=0; i<10; i++)
+			if (Bound_script[i]!=NULL && !strcmp(Bound_script[i], full_name))
+				break;
+
+		if (i<10)
+		{
+			const char *shortcut;    
+			shortcut=Keyboard_shortcut_value(SPECIAL_RUN_SCRIPT_1+i);
+			Print_help(8+4*6, FILESEL_Y + 89+24, shortcut, 'K', 0, strlen(shortcut));
+		}
+		else
+		{
+			Print_help(8+4*6, FILESEL_Y + 89+24, "None", 'K', 0, 4);
+		}
+	} else {
+	  int q = strlen(full_name);
+	  q -= DESC_WIDTH;
+	  if (q < 0)
+		  q = 0;
+	  else
+		  full_name[q] = ELLIPSIS_CHARACTER;
+	  Print_help(8, FILESEL_Y + 89   , full_name + q, 'N', 0, 0);
+	}
+  }
+
   Update_window_area(8, FILESEL_Y + 89, DESC_WIDTH*6+2, 4*8);
-    
+
 }
 
 // Add a script to the list

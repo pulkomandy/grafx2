@@ -257,7 +257,7 @@ endif
 	COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -DNO_INLINE_MATH -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $(JOYCOPT) $(LUACOPT)
     	LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) $(LAYERLOPT)
   else
-  ifeq ($(PLATFORM),syllable) #10
+  ifeq ($(PLATFORM),syllable) #11
 	#Syllable
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
