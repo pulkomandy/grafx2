@@ -221,7 +221,7 @@ char * Format_filename(const char * fname, word max_length, int type)
   
   if (strcmp(fname,PARENT_DIR)==0)
   {
-    strcpy(result,"<-PARENT DIRECTORY");
+    strcpy(result,"\x11 PARENT DIRECTORY");
     // Append spaces
     for (c=18; c<max_length-1; c++)
       result[c]=' ';
@@ -665,14 +665,17 @@ void Sort_list_of_files(T_Fileselector *list)
         // Ensuite, on vérifie si les deux éléments sont bien dans l'ordre ou
         // non:
 
-          // Si l'élément courant est un fichier est que le suivant est
-          // un répertoire -> need_swap
+          // Drives go at the top of the list, and files go after them
         if ( current_item->Type < next_item->Type )
           need_swap=1;
-          // Si les deux éléments sont de même type et que le nom du suivant
-          // est plus petit que celui du courant -> need_swap
+          // If both elements have the same type, compare the file names, if
+		  // current is alphabetically before, we need to swap, unless it is
+          // parent directory, which should always go first
         else if ( (current_item->Type==next_item->Type) &&
-                  (FILENAME_COMPARE(current_item->Full_name,next_item->Full_name)>0) )
+                  (((FILENAME_COMPARE(current_item->Full_name,next_item->Full_name)>0) &&
+				  (FILENAME_COMPARE(current_item->Full_name, PARENT_DIR) != 0)) ||
+				   (FILENAME_COMPARE(next_item->Full_name, PARENT_DIR) == 0))
+				  )
           need_swap=1;
 
 
