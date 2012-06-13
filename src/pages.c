@@ -212,7 +212,10 @@ void Redraw_layered_image(void)
       for (i=0; i< Main_image_width*Main_image_height; i++)
       {
         layer = *(Main_backups->Pages->Image[4].Pixels+i);
-        Main_visible_image.Image[i]=*(Main_backups->Pages->Image[layer].Pixels+i);
+		if (Main_layers_visible & (1 << layer))
+        	Main_visible_image.Image[i]=*(Main_backups->Pages->Image[layer].Pixels+i);
+		else
+			Main_visible_image.Image[i] = layer;
       }
         
       // Copy it to the depth buffer

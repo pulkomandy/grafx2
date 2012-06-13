@@ -3101,14 +3101,25 @@ void Load_CM5(T_IO_Context* context)
   fclose(file);
 
   // Load the pixeldata to the 5th layer
-  filename[strlen(filename) - 3] = 0;
-  strcat(filename,"gfx");
-  if (!(file = fopen(filename, "rb")))
   {
-      File_error = 1;
-      return;
-  }
+  	char* ext = filename + strlen(filename) - 3;
+	int idx = 8;
+ 	do {
+		if (-- idx < 0)
+  		{
+    		File_error = 1;
+    		return;
+  		}
 
+		ext[0] = (idx & 1) ? 'g':'G';
+		ext[1] = (idx & 2) ? 'f':'F';
+		ext[2] = (idx & 4) ? 'x':'X';
+
+		printf("trying to load %s...\n", filename);
+
+  		file = fopen(filename, "rb");
+  	} while(file == NULL);
+  }
   Set_loading_layer(context, 4);
   
   for (ty = 0; ty < 256; ty++)

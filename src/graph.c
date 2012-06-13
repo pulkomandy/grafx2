@@ -3143,7 +3143,8 @@ void Pixel_in_screen_overlay(word x,word y,byte color)
     // Paste in depth buffer
     *(Main_visible_image_depth_buffer.Image+x+y*Main_image_width)=color;
     // Fetch pixel color from the target raster layer
-    color=*(Main_backups->Pages->Image[color].Pixels + x+y*Main_image_width);
+	if (Main_layers_visible & (1 << color))
+    	color=*(Main_backups->Pages->Image[color].Pixels + x+y*Main_image_width);
     // Draw that color on the visible image buffer
     *(x+y*Main_image_width+Main_screen)=color;
   }
@@ -3159,7 +3160,8 @@ void Pixel_in_screen_overlay_with_preview(word x,word y,byte color)
     // Paste in depth buffer
     *(Main_visible_image_depth_buffer.Image+x+y*Main_image_width)=color;
     // Fetch pixel color from the target raster layer
-    color=*(Main_backups->Pages->Image[color].Pixels + x+y*Main_image_width);
+	if (Main_layers_visible & (1 << color))
+    	color=*(Main_backups->Pages->Image[color].Pixels + x+y*Main_image_width);
     // Draw that color on the visible image buffer
     *(x+y*Main_image_width+Main_screen)=color;
     
