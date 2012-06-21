@@ -957,7 +957,7 @@ int Backup_in_place(int width,int height)
 
   // Perform all allocations first
   
-  new_layer=calloc(Main_backups->Pages->Nb_layers,1);
+  new_layer=calloc(Main_backups->Pages->Nb_layers,sizeof(byte *));
   if (!new_layer)
     return 0;
   
