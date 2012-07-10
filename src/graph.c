@@ -1243,7 +1243,7 @@ void Fill_general(byte fill_color)
          (x_pos<=Limit_right) &&
          (y_pos>=Limit_top)   &&
          (y_pos<=Limit_bottom) )
-      Pixel_preview(x_pos,y_pos,~Screen_backup[x_pos+y_pos*Main_image_width]);
+      Pixel_preview(x_pos,y_pos,~Main_screen[x_pos+y_pos*Main_image_width]);
   }
   
 

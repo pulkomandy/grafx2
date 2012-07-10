@@ -688,7 +688,17 @@ void Update_screen_targets(void)
   else
   {
     Main_screen=Main_backups->Pages->Image[Main_current_layer].Pixels;
-    Screen_backup=Main_backups->Pages->Next->Image[Main_current_layer].Pixels;
+    // Sometimes this function will be called in situations where the
+    // current history step and previous one don't have as many layers.
+    // I don't like the idea of letting Screen_backup NULL or dangling,
+    // so in case Screen_backup was queried, it will point to a valid
+    // readable bitmap of correct size : current image.
+    if (Main_backups->Pages->Nb_layers != Main_backups->Pages->Next->Nb_layers
+     || Main_backups->Pages->Width != Main_backups->Pages->Next->Width
+     || Main_backups->Pages->Height != Main_backups->Pages->Next->Height)
+      Screen_backup=Main_screen;
+    else
+      Screen_backup=Main_backups->Pages->Next->Image[Main_current_layer].Pixels;
   }
   Update_pixel_renderer();
 }
