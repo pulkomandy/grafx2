@@ -2057,19 +2057,10 @@ void Load_GIF(T_IO_Context * context)
                       disposal_method = (GCE.Packed_fields >> 2) & 7;
                       last_delay = GCE.Delay_time;
                       context->Transparent_color= GCE.Transparent_color;
-                      if (GCE.Packed_fields & 1)
-                      {
-                        if (number_LID == 0)
-                          context->Background_transparent = 1;
-                      }
-                      else
-                      {
-                        if (number_LID == 0)
-                          context->Background_transparent = 0;
-                      }
-                      is_transparent =
-                        (previous_disposal_method==DISPOSAL_METHOD_DO_NOT_DISPOSE
-                        ||previous_disposal_method==DISPOSAL_METHOD_UNDEFINED);
+                      is_transparent = GCE.Packed_fields & 1;
+                      if (number_LID == 0)
+                        context->Background_transparent = is_transparent;
+                      is_transparent &= is_looping;
                     }
                     else
                       File_error=2;
@@ -2219,20 +2210,13 @@ void Load_GIF(T_IO_Context * context)
                 }
                 else
                 {
-                  if (context->Type == CONTEXT_MAIN_IMAGE)
-                    memset(
-                      Main_backups->Pages->Image[Main_current_layer].Pixels,
-                      LSDB.Backcol,
-                      Main_backups->Pages->Width*Main_backups->Pages->Height);
+                  Fill_canvas(context, LSDB.Backcol);
                 }
               }
               else
               {
-                if (context->Type == CONTEXT_MAIN_IMAGE)
-                  memset(
-                    Main_backups->Pages->Image[Main_current_layer].Pixels,
-                    LSDB.Backcol,
-                    Main_backups->Pages->Width*Main_backups->Pages->Height);
+                // First frame/layer, fill canvas with backcolor
+                Fill_canvas(context, LSDB.Backcol);
               }
               // Duration was set in the previously loaded GCE
               Set_frame_duration(context, last_delay*10);
@@ -2286,11 +2270,11 @@ void Load_GIF(T_IO_Context * context)
                           previous_width);
                     }
                   }
-                  previous_height=IDB.Image_height;
-                  previous_width=IDB.Image_width;
-                  previous_pos_x=IDB.Pos_X;
-                  previous_pos_y=IDB.Pos_Y;
                 }
+                previous_height=IDB.Image_height;
+                previous_width=IDB.Image_width;
+                previous_pos_x=IDB.Pos_X;
+                previous_pos_y=IDB.Pos_Y;
                 
                 Palette_loaded(context);
 
@@ -2384,6 +2368,11 @@ void Load_GIF(T_IO_Context * context)
                 
                 // No need to read more than one frame in animation preview mode
                 if (context->Type == CONTEXT_PREVIEW && is_looping)
+                {
+                  goto early_exit;
+                }
+                // Same with brush
+                if (context->Type == CONTEXT_BRUSH && is_looping)
                 {
                   goto early_exit;
                 }

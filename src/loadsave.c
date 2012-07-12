@@ -241,6 +241,28 @@ void Set_pixel(T_IO_Context *context, short x_pos, short y_pos, byte color)
 
 }
 
+void Fill_canvas(T_IO_Context *context, byte color)
+{
+  switch (context->Type)
+  {
+    case CONTEXT_PREVIEW:
+      if (context->Current_layer!=0)
+        return;
+      memset(context->Preview_bitmap, color, PREVIEW_WIDTH*PREVIEW_HEIGHT*Menu_factor_X*Menu_factor_Y);
+      break;
+    case CONTEXT_MAIN_IMAGE:
+      memset(
+        Main_backups->Pages->Image[Main_current_layer].Pixels,
+        color,
+        Main_backups->Pages->Width*Main_backups->Pages->Height);
+      break;
+    case CONTEXT_BRUSH:
+      memset(context->Buffer_image, color, (long)context->Height*context->Pitch);
+      break;
+    case CONTEXT_SURFACE:
+      break;
+  }
+}
 
 void Palette_loaded(T_IO_Context *context)
 {
@@ -365,10 +387,10 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
     case CONTEXT_PREVIEW:
       // Préparation du chargement d'une preview:
       
-      context->Preview_bitmap=malloc(PREVIEW_WIDTH*PREVIEW_HEIGHT*Menu_factor_X*Menu_factor_Y);
+      context->Preview_bitmap=calloc(1, PREVIEW_WIDTH*PREVIEW_HEIGHT*Menu_factor_X*Menu_factor_Y);
       if (!context->Preview_bitmap)
         File_error=1;
-      
+            
       // Affichage des données "Image size:"
       if ((width<10000) && (height<10000))
       {
