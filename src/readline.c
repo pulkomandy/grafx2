@@ -139,7 +139,7 @@ int Valid_character(word c, int input_type)
       // AmigaOS4: Pas de ':' car utilisé pour les volumes.
 #if defined(__WIN32__)
       char forbidden_char[] = {'/', '|', '?', '*', '<', '>', ':', '\\'};
-#elif defined (__amigaos4__)
+#elif defined (__amigaos4__) || defined(__AROS__)
       char forbidden_char[] = {'/', '|', '?', '*', '<', '>', ':'};
 #else
       char forbidden_char[] = {'/', '|', '?', '*', '<', '>'};

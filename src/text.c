@@ -349,6 +349,10 @@ void Init_text(void)
     #ifndef NOTTF
       For_each_file( "FONTS:_TrueType", Add_font );
     #endif
+  #elif defined(__AROS__)
+    #ifndef NOTTF
+      For_each_file( "FONTS:TrueType", Add_font );
+    #endif
   #elif defined(__BEOS__)
     #ifndef NOTTF
       For_each_file("/etc/fonts/ttfonts", Add_font);

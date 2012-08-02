@@ -317,10 +317,10 @@ endif
       else
       ifdef AROS32CROSS
 	    #cross compile an Aros 32 bit executable
-        BIN = ../bin/grafx2
-        COPT = -Wall -g `i386-linux-aros-sdl-config --cflags` $(TTFCOPT)
+        BIN = ../GrafX2
+        COPT = -Wall -Wno-pointer-sign -Wno-unused-but-set-variable -g `i386-linux-aros-sdl-config --cflags` $(TTFCOPT)
         LOPT = -lSDL_image `i386-linux-aros-sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT) -lfreetype2shared
-        CC = i386-aros-gcc
+        CC = i386-linux-aros-gcc
         OBJDIR = ../obj/aros
         STRIP = strip --strip-unneeded --remove-section .comment
         PLATFORM = AROS
