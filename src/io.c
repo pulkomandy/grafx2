@@ -362,7 +362,11 @@ void For_each_file(const char * directory_name, void Callback(const char *))
   current_directory=opendir(directory_name);
   if(current_directory == NULL) return;        // Répertoire invalide ...
   filename_position = strlen(full_filename);
+#if defined(__AROS__)
+  if (filename_position==0 || (strcmp(full_filename+filename_position-1,PATH_SEPARATOR) && strcmp(full_filename+filename_position-1,":")))
+#else
   if (filename_position==0 || strcmp(full_filename+filename_position-1,PATH_SEPARATOR))
+#endif
   {
     strcat(full_filename, PATH_SEPARATOR);
     filename_position = strlen(full_filename);
@@ -392,7 +396,11 @@ void For_each_directory_entry(const char * directory_name, void Callback(const c
   current_directory=opendir(full_filename);
   if(current_directory == NULL) return;        // Répertoire invalide ...
   filename_position = strlen(full_filename);
+#if defined(__AROS__)
+  if (filename_position==0 || (strcmp(full_filename+filename_position-1,PATH_SEPARATOR) && strcmp(full_filename+filename_position-1,":")))
+#else
   if (filename_position==0 || strcmp(full_filename+filename_position-1,PATH_SEPARATOR))
+#endif
   {
     strcat(full_filename, PATH_SEPARATOR);
     filename_position = strlen(full_filename);
