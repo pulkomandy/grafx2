@@ -38,6 +38,8 @@
     #include <mint/sysbind.h>
     #include <mint/osbind.h>
     #include <mint/ostruct.h>
+#elif defined(__AROS__)
+    #include <sys/mount.h>
 #endif
 
 #include "const.h"
@@ -786,7 +788,7 @@ void Button_Stats(void)
       GetDiskFreeSpaceEx(Main_current_directory,&tailleU,NULL,NULL);
       mem_size = tailleU.QuadPart;
     }
-#elif defined(__linux__) || defined(__macosx__) || defined(__FreeBSD__) || defined(__SYLLABLE__)
+#elif defined(__linux__) || defined(__macosx__) || defined(__FreeBSD__) || defined(__SYLLABLE__) || defined(__AROS__)
     {
       struct statfs disk_info;
       statfs(Main_current_directory,&disk_info);
@@ -801,7 +803,7 @@ void Button_Stats(void)
    //number of free clusters*sectors per cluster*bytes per sector;
    // reports current drive
    mem_size=drvInfo.b_free*drvInfo.b_clsiz*drvInfo.b_secsiz;
-   
+
 #else
 	#define NODISKSPACESUPPORT
     // Free disk space is only for shows. Other platforms can display 0.
@@ -812,10 +814,13 @@ void Button_Stats(void)
   // Display free space
   if (mem_size != 0)
   {
-	sprintf(buffer,"Free space on %c:",Main_current_directory[0]);
-	Print_in_window(10,67,buffer,STATS_TITLE_COLOR,MC_Black);
+#if defined(__AROS__)
+    sprintf(buffer,"Free space on %s",Main_current_directory);
+#else
+    sprintf(buffer,"Free space on %c:",Main_current_directory[0]);
+#endif
+    Print_in_window(10,67,buffer,STATS_TITLE_COLOR,MC_Black);
 
-  
     if(mem_size > (100ULL*1024*1024*1024))
         sprintf(buffer,"%u Gigabytes",(unsigned int)(mem_size/(1024*1024*1024)));
     else if(mem_size > (100*1024*1024))
@@ -824,7 +829,11 @@ void Button_Stats(void)
         sprintf(buffer,"%u Kilobytes",(unsigned int)(mem_size/1024));
     else 
         sprintf(buffer,"%u bytes",(unsigned int)mem_size);
+#if defined(__AROS__)
+    Print_in_window(192,67,buffer,STATS_DATA_COLOR,MC_Black);
+#else
     Print_in_window(146,67,buffer,STATS_DATA_COLOR,MC_Black);
+#endif
   } else {
 	#ifndef NODISKSPACESUPPORT
 	  Print_in_window(10,67,"Disk full!",STATS_TITLE_COLOR,MC_Black);
