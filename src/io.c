@@ -420,7 +420,12 @@ void Get_full_filename(char * output_name, char * file_name, char * directory_na
     // Append a separator at the end of path, if there isn't one already.
     // This handles the case of directory variables which contain one,
     // as well as directories like "/" on Unix.
+#if defined(__AROS__)
+    // additional check for ':' to avoid paths like PROGDIR:/unnamed.gif
+    if ((output_name[strlen(output_name)-1]!=PATH_SEPARATOR[0]) && (output_name[strlen(output_name)-1]!=':'))
+#else
     if (output_name[strlen(output_name)-1]!=PATH_SEPARATOR[0])
+#endif
         strcat(output_name,PATH_SEPARATOR);
   }
   strcat(output_name,file_name);
