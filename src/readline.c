@@ -46,6 +46,9 @@
 #include <SDL_syswm.h>
 #elif defined __HAIKU__
 #include "haiku.h"
+#elif defined(__AROS__)
+#include <proto/iffparse.h>
+#include <datatypes/textclass.h>
 #endif
 
 // Virtual keyboard is mandatory on these platforms:
@@ -252,6 +255,67 @@ char* getClipboard()
       }    
     }
     return dst;
+  #elif defined(__AROS__)
+
+    struct IFFHandle *iff = NULL;
+    struct ContextNode *cn;
+    long error=0, unitnumber=0;
+    char *dst = NULL;
+
+    if (!(iff = AllocIFF ()))
+    {
+      goto bye;
+    }
+
+    if (!(iff->iff_Stream = (IPTR) OpenClipboard (unitnumber)))
+    {
+      goto bye;
+    }
+
+    InitIFFasClip (iff);
+
+    if ((error = OpenIFF (iff, IFFF_READ)) != 0)
+    {
+      goto bye;
+    }
+
+    if ((error = StopChunk(iff, ID_FTXT, ID_CHRS)) != 0)
+    {
+      goto bye;
+    }
+
+    while(1)
+    {
+      error = ParseIFF(iff,IFFPARSE_SCAN);
+      if (error) break; // we're reading only the 1st chunk
+
+      cn = CurrentChunk(iff);
+
+      if (cn && (cn->cn_Type == ID_FTXT) && (cn->cn_ID == ID_CHRS))
+      {
+        if ((dst = malloc(cn->cn_Size + 1)) != NULL)
+        {
+          dst[0] = '\0';
+          if ((ReadChunkBytes(iff,dst,cn->cn_Size)) > 0)
+          {
+            dst[cn->cn_Size] = '\0';
+          }
+        }
+      }
+    }
+
+bye:
+    if (iff)
+    {
+      CloseIFF (iff);
+
+      if (iff->iff_Stream)
+        CloseClipboard ((struct ClipboardHandle *)iff->iff_Stream);
+      FreeIFF (iff);
+    }
+
+    return dst;
+
   #elif defined __HAIKU__
   return haiku_get_clipboard();
   #else
