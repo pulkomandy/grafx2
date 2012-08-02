@@ -815,7 +815,14 @@ void Button_Stats(void)
   if (mem_size != 0)
   {
 #if defined(__AROS__)
-    sprintf(buffer,"Free space on %s",Main_current_directory);
+    char *colon = strchr(Main_current_directory, ':');
+    int len = strlen(Main_current_directory);
+    if (colon)
+    {
+      len = (long)colon - (long)Main_current_directory;
+    }
+    if (len > 8) len = 8;
+    sprintf(buffer,"Free space on %.*s:",len,Main_current_directory);
 #else
     sprintf(buffer,"Free space on %c:",Main_current_directory[0]);
 #endif
