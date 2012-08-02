@@ -470,16 +470,21 @@ void bstrtostr( BSTR in, STRPTR out, TEXT max )
 {
   STRPTR iptr;
   dword i;
-
-  iptr = BADDR( in );
-
-  if( max > iptr[0] ) max = iptr[0];
+  dword len;
 
 #if defined(__AROS__)
-  for ( i=0 ; i<max ; i++ ) out[i] = *(AROS_BSTR_ADDR(iptr+i));
+  iptr = AROS_BSTR_ADDR( in );
+  len = AROS_BSTR_strlen( in );
 #else
-  for( i=0; i<max; i++ ) out[i] = iptr[i+1];
+  iptr = BADDR( in );
+  len = iptr[0];
+  iptr++;
 #endif
+
+  if( max > len ) max = len;
+
+  for( i=0; i<max; i++ , iptr++ ) out[i] = *iptr;
+
   out[i] = 0;
 }
 #endif

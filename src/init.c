@@ -664,6 +664,12 @@ T_Gui_skin * Load_graphics(const char * skin_file, T_Gradient_array *gradients)
   char filename[MAX_PATH_CHARACTERS];
   SDL_Surface * gui;
 
+  if (skin_file[0] == '\0')
+  {
+    sprintf(Gui_loading_error_message, "Wrong skin file name \"\"\n");
+    return NULL;
+  }
+
   gfx = (T_Gui_skin *)malloc(sizeof(T_Gui_skin));
   if (gfx == NULL)
   {
@@ -743,6 +749,12 @@ byte * Load_font(const char * font_name)
   byte * font;
   char filename[MAX_PATH_CHARACTERS];
   SDL_Surface * image;
+
+  if (font_name[0] == '\0')
+  {
+    sprintf(Gui_loading_error_message, "Wrong font name \"\"\n");
+    return NULL;
+  }
 
   font = (byte *)malloc(8*8*256);
   if (font == NULL)

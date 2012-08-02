@@ -134,7 +134,7 @@ void Set_data_directory(const char * program_dir, char * data_dir)
     strcpy(data_dir, program_dir);
   // All other targets, program is in a "bin" subdirectory
   #elif defined (__AROS__)
-    strcat(data_dir,"/share/grafx2/");
+    strcat(data_dir,"share/grafx2/");
   #else
     strcat(data_dir,"../share/grafx2/");
   #endif
