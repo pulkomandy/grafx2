@@ -172,6 +172,8 @@ char * Find_last_slash(const char * str)
     if (*str == PATH_SEPARATOR[0]
 #ifdef __WIN32__    
      || *str == '/'
+#elif __AROS__
+     || *str == ':'
 #endif
      )
       position = str;

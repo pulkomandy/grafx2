@@ -73,6 +73,8 @@ void Set_config_directory(const char * program_dir, char * config_dir);
 /// Name of the subdirectory containing scripts
 #if defined (__MINT__)
   #define SCRIPTS_SUBDIRECTORY "SCRIPTS"
+#elif defined(__AROS__)
+  #define SCRIPTS_SUBDIRECTORY "share/grafx2/scripts"
 #else
   #define SCRIPTS_SUBDIRECTORY "scripts"
 #endif

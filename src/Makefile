@@ -316,10 +316,12 @@ endif
 
       else
       ifdef AROS32CROSS
-	    #cross compile an Aros 32 bit executable
+        #cross compile an AROS 32 bit executable
         BIN = ../GrafX2
-        COPT = -Wall -Wno-pointer-sign -Wno-unused-but-set-variable -g `i386-linux-aros-sdl-config --cflags` $(TTFCOPT)
-        LOPT = -lSDL_image `i386-linux-aros-sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT) -lfreetype2shared
+        COPT = -Wall -Wno-pointer-sign -Wno-unused-but-set-variable -g `i386-linux-aros-sdl-config --cflags` $(TTFCOPT) $(LUACOPT)
+        LOPT = -lSDL_image `i386-linux-aros-sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT) -lfreetype2shared $(LUALOPT)
+        LUACOPT = -I/home/mazze/projects/fullaros/aros-linux-i386-dbg/bin/linux-i386/AROS/Development/include/lua
+        LUALOPT = -llua
         CC = i386-linux-aros-gcc
         OBJDIR = ../obj/aros
         STRIP = strip --strip-unneeded --remove-section .comment
