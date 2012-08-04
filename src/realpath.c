@@ -47,7 +47,12 @@
 	// If resolved_path is null, it is allocated.
     char *Realpath(const char *_path, char *resolved_path)
     {
-        int fd = open(".", O_RDONLY), l;
+        #if defined(__AROS__)
+        int fd = open("", O_RDONLY); // GrafX2 is compiled without Unix support
+        #else
+        int fd = open(".", O_RDONLY);
+        #endif
+        int l;
         char current_dir_path[PATH_MAX];
         char path[PATH_MAX], lnk[PATH_MAX], *tmp = (char *)"";
         
