@@ -165,7 +165,7 @@ int Write_dword_be(FILE *file, dword dw)
 // Attention, sous Windows, il faut s'attendre aux deux car 
 // par exemple un programme lancé sous GDB aura comme argv[0]:
 // d:\Data\C\GFX2\grafx2/grafx2.exe
-char * Find_last_slash(const char * str)
+char * Find_last_separator(const char * str)
 {
   const char * position = NULL;
   for (; *str != '\0'; str++)
@@ -182,7 +182,7 @@ char * Find_last_slash(const char * str)
 // Récupère la partie "nom de file seul" d'un chemin
 void Extract_filename(char *dest, const char *source)
 {
-  const char * position = Find_last_slash(source);
+  const char * position = Find_last_separator(source);
 
   if (position)
     strcpy(dest,position+1);
@@ -195,7 +195,7 @@ void Extract_path(char *dest, const char *source)
   char * position=NULL;
 
   Realpath(source,dest);
-  position = Find_last_slash(dest);
+  position = Find_last_separator(dest);
   if (position)
     *(position+1) = '\0';
   else
@@ -217,7 +217,7 @@ void Append_path(char *path, const char *filename, char *reverse_path)
   {
     // Going up one directory
     long len;
-    char * slash_pos;
+    char * separator_pos;
 
     // Remove trailing slash      
     len=strlen(path);
@@ -228,12 +228,18 @@ void Append_path(char *path, const char *filename, char *reverse_path)
       ))
       path[len-1]='\0';
     
-    slash_pos=Find_last_slash(path);
-    if (slash_pos)
+    separator_pos=Find_last_separator(path);
+    if (separator_pos)
     {
       if (reverse_path)
-        strcpy(reverse_path, slash_pos+1);
-      *slash_pos='\0';
+        strcpy(reverse_path, separator_pos+1);
+      #if 0
+      // Don't strip away the colon
+      if (*separator_pos == ':') *(separator_pos+1)='\0';
+      else *separator_pos='\0';
+      #else
+      *separator_pos='\0';
+      #endif
     }
     else
     {
@@ -258,6 +264,8 @@ void Append_path(char *path, const char *filename, char *reverse_path)
     if (len && (strcmp(path+len-1,PATH_SEPARATOR) 
     #ifdef __WIN32__
       && path[len-1]!='/'
+    #elif __AROS__
+      && path[len-1]!=':' // To avoid paths like volume:/dir
     #endif
       ))
     {

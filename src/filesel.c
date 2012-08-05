@@ -1742,7 +1742,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
                 Config.Bookmark_directory[clicked_button-10]=malloc(temp+1);
                 strcpy(Config.Bookmark_directory[clicked_button-10],Main_current_directory);
                 
-                directory_name=Find_last_slash(Main_current_directory);
+                directory_name=Find_last_separator(Main_current_directory);
                 if (directory_name && directory_name[1]!='\0')
                   directory_name++;
                 else

@@ -685,7 +685,7 @@ void Main_handler(void)
 
         Upload_infos_page_main(Main_backups->Pages);
   
-        flimit = Find_last_slash(Drop_file_name);
+        flimit = Find_last_separator(Drop_file_name);
         *(flimit++) = '\0';
   
         Hide_cursor();

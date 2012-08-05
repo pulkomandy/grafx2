@@ -168,7 +168,7 @@ void Add_font(const char *name)
   strcpy(font->Label, "                   ");
   if (font->Is_truetype)
     font->Label[17]=font->Label[18]='T'; // Logo TT
-  font_name=Find_last_slash(font->Name);
+  font_name=Find_last_separator(font->Name);
   if (font_name==NULL)
     font_name=font->Name;
   else

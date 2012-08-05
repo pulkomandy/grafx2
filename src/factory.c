@@ -33,7 +33,7 @@
 #include "filesel.h" // Get_item_by_index
 #include "global.h"
 #include "graph.h"
-#include "io.h"     // find_last_slash
+#include "io.h"     // find_last_separator
 #include "misc.h"
 #include "pages.h"  // Backup()
 #include "readline.h"
@@ -1522,7 +1522,7 @@ void Add_script(const char *name, byte is_file, byte is_directory, byte is_hidde
   const char * file_name;
   int len;
 
-  file_name=Find_last_slash(name)+1;
+  file_name=Find_last_separator(name)+1;
 
   if (is_file)
   {

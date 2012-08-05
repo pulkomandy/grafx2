@@ -1197,7 +1197,7 @@ void Add_font_or_skin(const char *name)
   int namelength;
   
   // Cut the long name to keep only filename (no directory)
-  fname = Find_last_slash(name);
+  fname = Find_last_separator(name);
   if (fname)
     fname++;
   else
