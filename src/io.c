@@ -233,7 +233,7 @@ void Append_path(char *path, const char *filename, char *reverse_path)
     {
       if (reverse_path)
         strcpy(reverse_path, separator_pos+1);
-      #if 0
+      #if defined(__AROS__)
       // Don't strip away the colon
       if (*separator_pos == ':') *(separator_pos+1)='\0';
       else *separator_pos='\0';
