@@ -1653,11 +1653,7 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   Extract_path(buf,Last_run_script);
   chdir(buf);
 
-#if defined(__AROS__)
-  L = luaL_newstate(); // lua_open() doesn't exist anymore in Lua-5.2
-#else
-  L = lua_open();
-#endif
+  L = luaL_newstate(); // used to be lua_open() on Lua 5.1, deprecated on 5.2
 
   strcpy(buf, "LUA_PATH=");
   strcat(buf, Data_directory);
