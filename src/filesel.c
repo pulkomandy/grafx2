@@ -1643,7 +1643,16 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
 
         // Save the filename
         strcpy(save_filename, Selector_filename);
-
+        // Check if the selected entry is a drive/directory :
+        // in, this case, clear the filename
+        if (Filelist.Nb_elements>0)
+        {
+          T_Fileselector_item * current_item;
+          current_item = Get_item_by_index(&Filelist, Main_fileselector_position + Main_fileselector_offset);
+          if (current_item->Type != 0)
+            // selected entry is note a filename
+            Selector_filename[0]='\0';
+        }
         if (Readline(82,48,Selector_filename,27,INPUT_TYPE_FILENAME))
         {
           //   On regarde s'il faut rajouter une extension. C'est-à-dire s'il
