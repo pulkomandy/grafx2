@@ -3723,8 +3723,9 @@ void Test_PNG(T_IO_Context * context)
 /// Used by a callback in Load_PNG
 T_IO_Context * PNG_current_context;
 
-int PNG_read_unknown_chunk(__attribute__((unused)) png_structp ptr, png_unknown_chunkp chunk)
+int PNG_read_unknown_chunk(png_structp ptr, png_unknown_chunkp chunk)
 {
+  (void)ptr; // unused
   // png_unknown_chunkp members:
   //    png_byte name[5];
   //    png_byte *data;

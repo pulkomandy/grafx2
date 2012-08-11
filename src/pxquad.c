@@ -33,9 +33,6 @@
 #define ZOOMX 4
 #define ZOOMY 4
 
-#ifdef __VBCC__
-  #define __attribute__(x)
-#endif
 
 void Pixel_quad (word x,word y,byte color)
 /* Affiche un pixel de la color aux coords x;y à l'écran */
@@ -231,12 +228,15 @@ void Display_brush_mono_quad(word x_pos, word y_pos,
   Update_rect(x_pos,y_pos,width,height);
 }
 
-void Clear_brush_quad(word x_pos,word y_pos,__attribute__((unused)) word x_offset,__attribute__((unused)) word y_offset,word width,word height,__attribute__((unused))byte transp_color,word image_width)
+void Clear_brush_quad(word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word image_width)
 {
   byte* dest=Screen_pixels+x_pos*ZOOMX+y_pos*ZOOMY*VIDEO_LINE_WIDTH; //On va se mettre en 0,0 dans l'écran (dest)
   byte* src = ( y_pos + Main_offset_Y ) * image_width + x_pos + Main_offset_X + Main_screen; //Coords de départ ds la source (src)
   int y;
   int x;
+  (void)x_offset; // unused
+  (void)y_offset; // unused
+  (void)transp_color; // unused
 
   for(y=height;y!=0;y--)
   // Pour chaque ligne
@@ -505,13 +505,14 @@ void Display_brush_mono_zoom_quad(word x_pos, word y_pos,
   }
 }
 
-void Clear_brush_scaled_quad(word x_pos,word y_pos,word x_offset,word y_offset,word width,word end_y_pos,__attribute__((unused)) byte transp_color,word image_width,byte * buffer)
+void Clear_brush_scaled_quad(word x_pos,word y_pos,word x_offset,word y_offset,word width,word end_y_pos,byte transp_color,word image_width,byte * buffer)
 {
 
   // En fait on va recopier l'image non zoomée dans la partie zoomée !
   byte* src = Main_screen + y_offset * image_width + x_offset;
   int y = y_pos;
   int bx;
+  (void)transp_color; // unused
 
   // Pour chaque ligne à zoomer
   while(1){

@@ -338,26 +338,18 @@ fstype_to_string (int t)
 }
 #endif /* MOUNTED_VMOUNT */
 
-#ifdef __linux__
-  #define BROKEN __attribute__((unused))
-#else
-  #define BROKEN
-#endif
-
-
 #if defined MOUNTED_GETMNTENT1 || defined MOUNTED_GETMNTENT2
 
 /* Return the device number from MOUNT_OPTIONS, if possible.
    Otherwise return (dev_t) -1.  */
 
 static dev_t
-dev_from_mount_options (BROKEN char const *mount_options)
+dev_from_mount_options (char const *mount_options)
 {
   /* GNU/Linux allows file system implementations to define their own
      meaning for "dev=" mount options, so don't trust the meaning
      here.  */
 # ifndef __linux__
-
   static char const dev_pattern[] = ",dev=";
   char const *devopt = strstr (mount_options, dev_pattern);
 
@@ -374,7 +366,8 @@ dev_from_mount_options (BROKEN char const *mount_options)
           && dev == (dev_t) dev)
         return dev;
     }
-
+#else
+  (void)mount_options; // unused
 # endif
 
   return -1;
@@ -388,11 +381,12 @@ dev_from_mount_options (BROKEN char const *mount_options)
    the returned list are valid.  Otherwise, they might not be.  */
 
 struct mount_entry *
-read_file_system_list (BROKEN bool need_fs_type)
+read_file_system_list (bool need_fs_type)
 {
   struct mount_entry *mount_list;
   struct mount_entry *me;
   struct mount_entry **mtail = &mount_list;
+  (void)need_fs_type; // may be unused
 
 #ifdef MOUNTED_LISTMNTENT
   {

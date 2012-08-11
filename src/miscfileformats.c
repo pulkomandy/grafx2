@@ -2879,7 +2879,7 @@ void Save_C64(T_IO_Context * context)
 
 // SCR (Amstrad CPC)
 
-void Test_SCR(__attribute__((unused)) T_IO_Context * context)
+void Test_SCR(T_IO_Context * context)
 {
     // Mmh... not sure what we could test. Any idea ?
     // The palette file can be tested, if it exists and have the right size it's
@@ -2888,9 +2888,10 @@ void Test_SCR(__attribute__((unused)) T_IO_Context * context)
     
     // An AMSDOS header would be a good indication but in some cases it may not
     // be there
+    (void)context; // unused
 }
 
-void Load_SCR(__attribute__((unused)) T_IO_Context * context)
+void Load_SCR(T_IO_Context * context)
 {
     // The Amstrad CPC screen memory is mapped in a weird mode, somewhere
     // between bitmap and textmode. Basically the only way to decode this is to
@@ -2919,6 +2920,7 @@ void Load_SCR(__attribute__((unused)) T_IO_Context * context)
     // 6) Open the file
     // 7) Run around the screen to untangle the pixeldata
     // 8) Close the file
+    (void)context; // unused
 }
 
 void Save_SCR(T_IO_Context * context)

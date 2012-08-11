@@ -38,13 +38,9 @@
 #include "input.h"
 #include "loadsave.h"
 
-#ifdef __VBCC__
-  #define __attribute__(x)
-#endif
-
 void Handle_window_resize(SDL_ResizeEvent event);
 void Handle_window_exit(SDL_QuitEvent event);
-int Color_cycling(__attribute__((unused)) void* useless);
+int Color_cycling(void);
 
 // public Globals (available as extern)
 
@@ -293,8 +289,10 @@ void Handle_window_resize(SDL_ResizeEvent event)
     Resize_height = event.h;
 }
 
-void Handle_window_exit(__attribute__((unused)) SDL_QuitEvent event)
+void Handle_window_exit(SDL_QuitEvent event)
 {
+    (void)event, // unused
+    
     Quit_is_required = 1;
 }
 
@@ -825,7 +823,7 @@ int Get_input(int sleep_time)
     // This is done in this function because it's called after reading 
     // some user input.
     Flush_update();
-    Color_cycling(NULL);
+    Color_cycling();
     Key_ANSI = 0;
     Key = 0;
     Mouse_moved=0;
@@ -1043,7 +1041,7 @@ void Set_mouse_position(void)
     SDL_WarpMouse(Mouse_X*Pixel_width, Mouse_Y*Pixel_height);
 }
 
-int Color_cycling(__attribute__((unused)) void* useless)
+int Color_cycling(void)
 {
   static byte offset[16];
   int i, color;

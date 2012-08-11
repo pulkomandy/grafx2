@@ -317,16 +317,12 @@ int Directory_exists(char * directory)
   }
 }
 
-#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__) || defined(__MINT__)
-  #define FILE_IS_HIDDEN_ATTRIBUTE __attribute__((unused)) 
-#else
-  #define FILE_IS_HIDDEN_ATTRIBUTE
-#endif
 /// Check if a file or directory is hidden.
-int File_is_hidden(FILE_IS_HIDDEN_ATTRIBUTE const char *fname, const char *full_name)
+int File_is_hidden(const char *fname, const char *full_name)
 {
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__) || defined(__MINT__)
   // False (unable to determine, or irrrelevent for platform)
+  (void)fname;//unused
   (void)full_name;//unused
   return 0;
 #elif defined(__WIN32__)

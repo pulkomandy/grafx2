@@ -63,20 +63,15 @@ int Create_ConfigDirectory(char * config_dir)
   #endif
 }
 
-#if defined(__macosx__) || defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__) && !defined(__VBCC__)
-  #define ARG_UNUSED __attribute__((unused))
-#else
-  #define ARG_UNUSED
-#endif
 // Determine which directory contains the executable.
 // IN: Main's argv[0], some platforms need it, some don't.
 // OUT: Write into program_dir. Trailing / or \ is kept.
 // Note : in fact this is only used to check for the datafiles and fonts in 
 // this same directory.
-void Set_program_directory(ARG_UNUSED const char * argv0,char * program_dir)
+void Set_program_directory(const char * argv0,char * program_dir)
 {
-  #undef ARG_UNUSED
-
+  (void)argv0; // unused sometimes
+  
   // MacOSX
   #if defined(__macosx__)
     CFURLRef url = CFBundleCopyBundleURL(CFBundleGetMainBundle());

@@ -51,10 +51,6 @@
 #include "brush.h"
 #include "tiles.h"
 
-#ifdef __VBCC__
-    #define __attribute__(x)
-#endif
-
 #if defined(__VBCC__) || defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
     #define M_PI 3.141592653589793238462643
 #endif
@@ -1225,8 +1221,10 @@ void Fill_general(byte fill_color)
   }
 
   // Affichage d'un point pour une preview en xor
-  void Pixel_figure_preview_xor(word x_pos,word y_pos,__attribute__((unused)) byte color)
+  void Pixel_figure_preview_xor(word x_pos,word y_pos,byte color)
   {
+    (void)color; // unused
+    
     if ( (x_pos>=Limit_left) &&
          (x_pos<=Limit_right) &&
          (y_pos>=Limit_top)   &&
@@ -1237,8 +1235,10 @@ void Fill_general(byte fill_color)
   
   // Affichage d'un point pour une preview en xor additif
   // (Il lit la couleur depuis la page backup)
-  void Pixel_figure_preview_xorback(word x_pos,word y_pos,__attribute__((unused)) byte color)
+  void Pixel_figure_preview_xorback(word x_pos,word y_pos,byte color)
   {
+    (void)color; // unused
+    
     if ( (x_pos>=Limit_left) &&
          (x_pos<=Limit_right) &&
          (y_pos>=Limit_top)   &&
@@ -1248,8 +1248,10 @@ void Fill_general(byte fill_color)
   
 
   // Effacement d'un point de preview
-  void Pixel_figure_clear_preview(word x_pos,word y_pos,__attribute__((unused)) byte color)
+  void Pixel_figure_clear_preview(word x_pos,word y_pos,byte color)
   {
+    (void)color; // unused
+    
     if ( (x_pos>=Limit_left) &&
          (x_pos<=Limit_right) &&
          (y_pos>=Limit_top)   &&
@@ -2818,15 +2820,20 @@ void Display_pixel(word x,word y,byte color)
 
   // -- Aucun effet en cours --
 
-byte No_effect(__attribute__((unused)) word x,__attribute__((unused)) word y,byte color)
+byte No_effect(word x, word y, byte color)
 {
+  (void)x; // unused
+  (void)y; // unused
+  
   return color;
 }
 
   // -- Effet de Shading --
 
-byte Effect_shade(word x,word y,__attribute__((unused)) byte color)
+byte Effect_shade(word x,word y,byte color)
 {
+  (void)color; // unused
+  
   return Shade_table[Read_pixel_from_feedback_screen(x,y)];
 }
 
@@ -2879,21 +2886,24 @@ byte Effect_quick_shade(word x,word y,byte color)
 
   // -- Effet de Tiling --
 
-byte Effect_tiling(word x,word y,__attribute__((unused)) byte color)
+byte Effect_tiling(word x,word y,byte color)
 {
+  (void)color; // unused
+  
   return Read_pixel_from_brush((x+Brush_width-Tiling_offset_X)%Brush_width,
                                (y+Brush_height-Tiling_offset_Y)%Brush_height);
 }
 
   // -- Effet de Smooth --
 
-byte Effect_smooth(word x,word y,__attribute__((unused)) byte color)
+byte Effect_smooth(word x,word y,byte color)
 {
   int r,g,b;
   byte c;
   int weight,total_weight;
   byte x2=((x+1)<Main_image_width);
   byte y2=((y+1)<Main_image_height);
+  (void)color; // unused
 
   // On commence par le pixel central
   c=Read_pixel_from_feedback_screen(x,y);

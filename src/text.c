@@ -633,17 +633,17 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   return new_brush;
 }
 
-#ifdef NOTTF
-  #define TTFONLY __attribute__((unused))
-#else
-  #define TTFONLY
-#endif
-
 // Crée une brosse à partir des paramètres de texte demandés.
 // Si cela réussit, la fonction place les dimensions dans width et height, 
 // et retourne l'adresse du bloc d'octets.
-byte *Render_text(const char *str, int font_number, TTFONLY int size, int TTFONLY antialias, TTFONLY int bold, TTFONLY int italic, int *width, int *height, T_Palette palette)
+byte *Render_text(const char *str, int font_number, int size, int antialias, int bold, int italic, int *width, int *height, T_Palette palette)
 {
+  #ifdef NOTTF
+    (void) size; // unused
+    (void) antialias; // unused
+    (void) bold; // unused
+    (void) italic; // unused
+  #endif
   T_Font *font = font_list_start;
   int index=font_number;
   
