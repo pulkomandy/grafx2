@@ -2210,13 +2210,13 @@ void Load_GIF(T_IO_Context * context)
                 }
                 else
                 {
-                  Fill_canvas(context, LSDB.Backcol);
+                  Fill_canvas(context, is_transparent ? context->Transparent_color : LSDB.Backcol);
                 }
               }
               else
               {
                 // First frame/layer, fill canvas with backcolor
-                Fill_canvas(context, LSDB.Backcol);
+                Fill_canvas(context, is_transparent ? context->Transparent_color : LSDB.Backcol);
               }
               // Duration was set in the previously loaded GCE
               Set_frame_duration(context, last_delay*10);
@@ -2266,7 +2266,7 @@ void Load_GIF(T_IO_Context * context)
                         memset(
                           Main_backups->Pages->Image[Main_current_layer].Pixels
                            + (previous_pos_y+y)* Main_backups->Pages->Width+previous_pos_x,
-                          LSDB.Backcol,
+                          is_transparent ? context->Transparent_color : LSDB.Backcol,
                           previous_width);
                     }
                   }
