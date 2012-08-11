@@ -1382,6 +1382,66 @@ int L_GetFileName(lua_State* L)
   return 2;
 }
 
+/// Run a script while changing the current directory
+int L_Run(lua_State* L)
+{
+  const char * script_arg;
+  const char * message;
+  char saved_directory[MAX_PATH_CHARACTERS];
+  // these are only needed before running script
+  // (which may call L_Run() again recursively)
+  // so it's safe to make them static to spare a few hundred bytes.
+  static char directory[MAX_PATH_CHARACTERS];
+  static char filename[MAX_PATH_CHARACTERS];
+  static int nested_calls = 0;
+    
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (1, "run");
+  LUA_ARG_STRING(1, "run", script_arg);
+  if (strlen(script_arg)>=MAX_PATH_CHARACTERS)
+    return luaL_error(L, "run: path is too long");
+
+  nested_calls++;
+  if (nested_calls > 100)
+    return luaL_error(L, "run: too many nested calls (100)");
+    
+  // store the current directory (on the stack)
+  getcwd(saved_directory,MAX_PATH_CHARACTERS);
+
+  Extract_path(directory, script_arg);
+  if (directory[0]!='\0')
+  {
+    if (!Directory_exists(directory))
+      return luaL_error(L, "run: directory of script doesn't exist");
+    chdir(directory);
+  }
+  Extract_filename(filename, script_arg);
+  if (luaL_loadfile(L,filename) != 0)
+  {
+    nb_args= lua_gettop(L);
+    if (nb_args>0 && (message = lua_tostring(L, nb_args))!=NULL)
+      return luaL_error(L, message);
+    else
+      return luaL_error(L, "run: Unknown error loading script %s", filename);
+  }
+  else if (lua_pcall(L, 0, 0, 0) != 0)
+  {
+    nb_args= lua_gettop(L);
+    // We COULD build the call stack, but I think this would be more
+    // confusing than helpful.
+
+    if (nb_args>0 && (message = lua_tostring(L, nb_args))!=NULL)
+      Verbose_message("Error running script", message);
+    else
+      Warning_message("Unknown error running script!");
+  }
+  nested_calls--;
+  // restore directory
+  chdir(saved_directory);
+  return 0;
+}
+
 // Handlers for window internals
 T_Fileselector Scripts_selector;
 
@@ -1665,6 +1725,8 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   lua_register(L,"finalizepicture",L_FinalizePicture);
   lua_register(L,"getfilename",L_GetFileName);
   lua_register(L,"selectlayer",L_SelectLayer);
+  lua_register(L,"run",L_Run);
+  
   
   // Load all standard libraries
   luaL_openlibs(L);
