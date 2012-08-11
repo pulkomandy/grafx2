@@ -9,7 +9,7 @@
 -- as published by the Free Software Foundation; version 2
 -- of the License. See <http://www.gnu.org/licenses/>
 
-dofile("../libs/dawnbringer_lib.lua")
+run("../libs/dawnbringer_lib.lua")
 
 OK,tin,clz,fade,amt,brikeep,falloff,nobg,briweight   = inputbox("Apply PenColor 2 Brush",
                         

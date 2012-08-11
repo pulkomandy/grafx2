@@ -1432,9 +1432,9 @@ int L_Run(lua_State* L)
     // confusing than helpful.
 
     if (nb_args>0 && (message = lua_tostring(L, nb_args))!=NULL)
-      Verbose_message("Error running script", message);
+      return luaL_error(L, message);
     else
-      Warning_message("Unknown error running script!");
+      return luaL_error(L, "run: Unknown error running script!");
   }
   nested_calls--;
   // restore directory

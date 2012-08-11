@@ -12,12 +12,10 @@
 -- You may access these functions in your own scripts by loading this library,
 -- just add the follwing line as one of the first instructions:
 --
--- require("dawnbringer_lib")
+-- run("dawnbringer_lib")
 --
--- or
---
--- dofile("dawnbringer_lib.lua") 
---
+-- If the script is not in the same directory, use a relative path
+-- like run("../libs/dawnbringer_lib.lua")
 --
 -- Note that the functions must be called with the full library object-name, "db.function_name..."
 --

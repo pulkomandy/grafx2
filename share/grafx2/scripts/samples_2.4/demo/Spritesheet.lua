@@ -2,7 +2,7 @@
 --Spare page holds data - Plays on current
 --by Richard Fhager
 
-dofile("../libs/memory.lua")
+run("../libs/memory.lua")
 
 arg=memory.load({XS=16,YS=16,SPACE=1,FRAMES=8,XOFF=0,YOFF=0,FPS=10})
 
