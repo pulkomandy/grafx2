@@ -504,17 +504,17 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
     struct DosList *dl;
     char tmp[256];
 
-    dl = LockDosList( LDF_VOLUMES | LDF_READ );
+    dl = LockDosList( LDF_VOLUMES | LDF_ASSIGNS | LDF_READ );
     if( dl )
     {
-      while( ( dl = NextDosEntry( dl, LDF_VOLUMES | LDF_READ ) ) )
+      while( ( dl = NextDosEntry( dl, LDF_VOLUMES | LDF_ASSIGNS | LDF_READ ) ) )
       {
         bstrtostr( dl->dol_Name, tmp, 254 );
         strcat( tmp, ":" );
         Add_element_to_list(list, tmp, Format_filename(tmp, name_length, 2), 2, ICON_NONE );
         list->Nb_directories++;
       }
-      UnLockDosList( LDF_VOLUMES | LDF_READ );
+      UnLockDosList( LDF_VOLUMES | LDF_ASSIGNS | LDF_READ );
     }
   }
   #elif defined (__WIN32__)
