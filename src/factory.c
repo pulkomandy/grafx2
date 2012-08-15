@@ -1391,8 +1391,8 @@ int L_Run(lua_State* L)
   // these are only needed before running script
   // (which may call L_Run() again recursively)
   // so it's safe to make them static to spare a few hundred bytes.
-  static char directory[MAX_PATH_CHARACTERS];
-  static char filename[MAX_PATH_CHARACTERS];
+  static char full_path[MAX_PATH_CHARACTERS];
+  static char path_element[MAX_PATH_CHARACTERS];
   static int nested_calls = 0;
     
   int nb_args=lua_gettop(L);
@@ -1409,21 +1409,63 @@ int L_Run(lua_State* L)
   // store the current directory (on the stack)
   getcwd(saved_directory,MAX_PATH_CHARACTERS);
 
-  Extract_path(directory, script_arg);
-  if (directory[0]!='\0')
+  #if defined (__AROS__)
+  // Convert path written on Linux/Windows norms to AROS norms :
+  // Each element like ../ and ..\ is replaced by /
+  // Each path separator \ is replaced by /
   {
-    if (!Directory_exists(directory))
-      return luaL_error(L, "run: directory of script doesn't exist");
-    chdir(directory);
+    const char *src = script_arg;
+    char *dst = full_path;
+    char c;
+    do
+    {
+      while (src[0]=='.' && src[1]=='.' && (src[2]=='/' || src[2]=='\\'))
+      {
+        *dst='/';
+        dst++;
+        src+=3;
+      }
+      // copy until / or \ or NUL included
+      do
+      {
+        c=*src;
+        *dst=c=='\\' ? '/' : c; // Replace \ by / anyway
+        src++;
+        dst++;
+      } while (c != '\0' && c != '/' && c != '\\');
+    } while (c!='\0');
   }
-  Extract_filename(filename, script_arg);
-  if (luaL_loadfile(L,filename) != 0)
+  #else
+  {
+    // Convert any number of '\' in the path to '/'
+    // It is not useful on Windows, but does no harm (both path separators work)
+    // On Linux/Unix, this ensures that scripts written and tested on Windows
+    // work similarly.
+    char *pos;
+    strcpy(full_path, script_arg);
+    pos=strchr(full_path, '\\');
+    while (pos!=NULL)
+    {
+      *pos='/';
+      pos=strchr(full_path, '\\');
+    }
+  }
+  #endif
+  Extract_path(path_element, full_path);
+  if (path_element[0]!='\0')
+  {
+    if (!Directory_exists(path_element))
+      return luaL_error(L, "run: directory of script doesn't exist");
+    chdir(path_element);
+  }
+  Extract_filename(path_element, full_path);
+  if (luaL_loadfile(L,path_element) != 0)
   {
     nb_args= lua_gettop(L);
     if (nb_args>0 && (message = lua_tostring(L, nb_args))!=NULL)
       return luaL_error(L, message);
     else
-      return luaL_error(L, "run: Unknown error loading script %s", filename);
+      return luaL_error(L, "run: Unknown error loading script %s", path_element);
   }
   else if (lua_pcall(L, 0, 0, 0) != 0)
   {
