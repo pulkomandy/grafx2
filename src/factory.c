@@ -840,6 +840,7 @@ int L_InputBox(lua_State* L)
     CONTROL_INPUT_MINUS = 0x0400,
     CONTROL_INPUT_PLUS  = 0x0500,
     CONTROL_CHECKBOX    = 0x0600,
+    CONTROL_LABEL       = 0x0700,
     CONTROL_VALUE_MASK  = 0x00FF,
     CONTROL_TYPE_MASK   = 0xFF00
   };
@@ -880,10 +881,11 @@ int L_InputBox(lua_State* L)
   
   for (setting=0; setting<nb_settings; setting++)
   {
-    LUA_ARG_STRING(setting*args_per_setting+2, "inputbox", label[setting]);
-    if (strlen(label[setting]) > max_label_length)
-      max_label_length = strlen(label[setting]);
+    int label_length;
     
+    LUA_ARG_STRING(setting*args_per_setting+2, "inputbox", label[setting]);
+    label_length=strlen(label[setting]);
+
     LUA_ARG_NUMBER(setting*args_per_setting+3, "inputbox", current_value[setting], -DBL_MAX, DBL_MAX);
     LUA_ARG_NUMBER(setting*args_per_setting+4, "inputbox", min_value[setting], -DBL_MAX, DBL_MAX);
     /*if (min_value[setting] < -999999999999999.0)
@@ -905,6 +907,11 @@ int L_InputBox(lua_State* L)
       current_value[setting] = min_value[setting];
     else if (current_value[setting] > max_value[setting])
       current_value[setting] = max_value[setting];
+
+    if (min_value[setting]==0 && max_value[setting]==0)
+      label_length-=12;
+    if (label_length > (int)max_label_length)
+      max_label_length = label_length;
   }
   // Max is 25 to keep window under 320 pixel wide
   if (max_label_length>25)
@@ -927,13 +934,20 @@ int L_InputBox(lua_State* L)
   
   for (setting=0; setting<nb_settings; setting++)
   {
-    Print_in_window_limited(12,22+setting*17,label[setting],max_label_length,MC_Black,MC_Light);
-    if (min_value[setting]==0 && max_value[setting]==1 && decimal_places[setting]<=0)
+    if (min_value[setting]==0 && max_value[setting]==0)
+    {
+      // Label
+      Print_in_window_limited(12,22+setting*17,label[setting],max_label_length+12,MC_Black,MC_Light);
+      control[Window_nb_buttons] = CONTROL_LABEL;
+    }
+    else if (min_value[setting]==0 && max_value[setting]==1 && decimal_places[setting]<=0)
     {
       // Checkbox or Radio button
       byte outline = decimal_places[setting]==0 ? 2 : 0;
       Window_set_normal_button(12+max_label_length*8+44-outline, 21+setting*17-outline, 12+outline*2,10+outline*2,current_value[setting]?"X":"", 0,1,KEY_NONE);
       control[Window_nb_buttons] = CONTROL_CHECKBOX | setting;
+
+      Print_in_window_limited(12,22+setting*17,label[setting],max_label_length,MC_Black,MC_Light);
     }
     else
     {
@@ -952,6 +966,8 @@ int L_InputBox(lua_State* L)
       // + Button
       Window_set_repeatable_button(12+max_label_length*8+84, 20+setting*17, 13,11,"+" , 0,1,KEY_NONE);
       control[Window_nb_buttons] = CONTROL_INPUT_PLUS | setting;
+
+      Print_in_window_limited(12,22+setting*17,label[setting],max_label_length,MC_Black,MC_Light);
     }
   }
   
