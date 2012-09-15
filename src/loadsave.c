@@ -57,10 +57,11 @@ void Test_PKM(T_IO_Context *);
 void Load_PKM(T_IO_Context *);
 void Save_PKM(T_IO_Context *);
 
-// -- LBM -------------------------------------------------------------------
+// -- IFF -------------------------------------------------------------------
 void Test_LBM(T_IO_Context *);
-void Load_LBM(T_IO_Context *);
-void Save_LBM(T_IO_Context *);
+void Test_PBM(T_IO_Context *);
+void Load_IFF(T_IO_Context *);
+void Save_IFF(T_IO_Context *);
 
 // -- GIF -------------------------------------------------------------------
 void Test_GIF(T_IO_Context *);
@@ -142,12 +143,12 @@ void Save_PNG(T_IO_Context *);
 #endif
 
 // -- SDL_Image -------------------------------------------------------------
-// (TGA, BMP, PNM, XPM, XCF, PCX, GIF, JPG, TIF, LBM, PNG, ICO)
+// (TGA, BMP, PNM, XPM, XCF, PCX, GIF, JPG, TIF, IFF, PNG, ICO)
 void Load_SDL_Image(T_IO_Context *);
 
 // ENUM     Name  TestFunc LoadFunc SaveFunc PalOnly Comment Layers Ext Exts  
 T_Format File_formats[] = {
-  {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, 0, "", "gif;png;bmp;pcx;pkm;lbm;iff;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;kcf;pal;c64;koa;koala;fli;bml;cdu;prg;tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico;cm5"},
+  {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, 0, "", "gif;png;bmp;pcx;pkm;iff;lbm;ilbm;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;kcf;pal;c64;koa;koala;fli;bml;cdu;prg;tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico;cm5"},
   {FORMAT_ALL_FILES, "(*.*)", NULL, NULL, NULL, 0, 0, 0, "", "*"},
   {FORMAT_GIF, " gif", Test_GIF, Load_GIF, Save_GIF, 0, 1, 1, "gif", "gif"},
 #ifndef __no_pnglib__
@@ -156,7 +157,8 @@ T_Format File_formats[] = {
   {FORMAT_BMP, " bmp", Test_BMP, Load_BMP, Save_BMP, 0, 0, 0, "bmp", "bmp"},
   {FORMAT_PCX, " pcx", Test_PCX, Load_PCX, Save_PCX, 0, 0, 0, "pcx", "pcx"},
   {FORMAT_PKM, " pkm", Test_PKM, Load_PKM, Save_PKM, 0, 1, 0, "pkm", "pkm"},
-  {FORMAT_LBM, " lbm", Test_LBM, Load_LBM, Save_LBM, 0, 0, 0, "lbm", "lbm;iff;ilbm"},
+  {FORMAT_LBM, " lbm", Test_LBM, Load_IFF, Save_IFF, 0, 0, 0, "iff", "iff;lbm;ilbm"},
+  {FORMAT_PBM, " pbm", Test_PBM, Load_IFF, Save_IFF, 0, 0, 0, "iff", "iff;pbm"},
   {FORMAT_IMG, " img", Test_IMG, Load_IMG, Save_IMG, 0, 0, 0, "img", "img"},
   {FORMAT_SCx, " sc?", Test_SCx, Load_SCx, Save_SCx, 0, 0, 0, "sc?", "sci;scq;scf;scn;sco"},
   {FORMAT_PI1, " pi1", Test_PI1, Load_PI1, Save_PI1, 0, 0, 0, "pi1", "pi1"},
@@ -556,35 +558,11 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
 //                    Gestion des lectures et écritures                    //
 /////////////////////////////////////////////////////////////////////////////
 
-byte * Write_buffer;
-word   Write_buffer_index;
-
-void Init_write_buffer(void)
-{
-  Write_buffer=(byte *)malloc(64000);
-  Write_buffer_index=0;
-}
-
 void Write_one_byte(FILE *file, byte b)
 {
-  Write_buffer[Write_buffer_index++]=b;
-  if (Write_buffer_index>=64000)
-  {
-    if (! Write_bytes(file,Write_buffer,64000))
+  if (! Write_byte(file,b))
       File_error=1;
-    Write_buffer_index=0;
-  }
 }
-
-void End_write(FILE *file)
-{
-  if (Write_buffer_index)
-    if (! Write_bytes(file,Write_buffer,Write_buffer_index))
-      File_error=1;
-  free(Write_buffer);
-  Write_buffer = NULL;
-}
-
 
 /////////////////////////////////////////////////////////////////////////////
 

@@ -192,6 +192,9 @@ void Save_PAL(T_IO_Context * context)
   if ((file=fopen(filename,"w")))
   {
     int i;
+    
+    setvbuf(file, NULL, _IOFBF, 64*1024);
+    
     if (fputs("JASC-PAL\n0100\n256\n", file)==EOF)
       File_error=1;
     for (i = 0; i < 256 && File_error==0; i++)
@@ -555,6 +558,8 @@ void Save_PKM(T_IO_Context * context)
   // Ouverture du fichier
   if ((file=fopen(filename,"wb")))
   {
+    setvbuf(file, NULL, _IOFBF, 64*1024);
+    
     // Ecriture du header
     if (Write_bytes(file,&header.Ident,3) &&
         Write_byte(file,header.Method) &&
@@ -565,7 +570,6 @@ void Save_PKM(T_IO_Context * context)
         Write_bytes(file,&header.Palette,sizeof(T_Palette)) &&
         Write_word_le(file,header.Jump))
     {
-      Init_write_buffer();
 
       // Ecriture du commentaire
       // (Compteur_de_pixels est utilisé ici comme simple index de comptage)
@@ -655,8 +659,6 @@ void Save_PKM(T_IO_Context * context)
           }
         }
       }
-
-      End_write(file);
     }
     else
       File_error=1;
@@ -909,6 +911,8 @@ void Save_CEL(T_IO_Context * context)
   Get_full_filename(filename, context->File_name, context->File_directory);
   if ((file=fopen(filename,"wb")))
   {
+    setvbuf(file, NULL, _IOFBF, 64*1024);
+    
     // On regarde si des couleurs >16 sont utilisées dans l'image
     for (x_pos=16;((x_pos<256) && (!color_usage[x_pos]));x_pos++);
 
@@ -924,7 +928,6 @@ void Save_CEL(T_IO_Context * context)
       )
       {
         // Sauvegarde de l'image
-        Init_write_buffer();
         for (y_pos=0;((y_pos<context->Height) && (!File_error));y_pos++)
         {
           for (x_pos=0;((x_pos<context->Width) && (!File_error));x_pos++)
@@ -939,7 +942,6 @@ void Save_CEL(T_IO_Context * context)
           if ((x_pos & 1)==1)
             Write_one_byte(file,last_byte);
         }
-        End_write(file);
       }
       else
         File_error=1;
@@ -990,11 +992,9 @@ void Save_CEL(T_IO_Context * context)
       )
       {
         // Sauvegarde de l'image
-        Init_write_buffer();
         for (y_pos=0;((y_pos<header2.Height) && (!File_error));y_pos++)
           for (x_pos=0;((x_pos<header2.Width) && (!File_error));x_pos++)
             Write_one_byte(file,Get_pixel(context, x_pos+header2.X_offset,y_pos+header2.Y_offset));
-        End_write(file);
       }
       else
         File_error=1;
@@ -1226,6 +1226,7 @@ void Save_KCF(T_IO_Context * context)
   Get_full_filename(filename, context->File_name, context->File_directory);
   if ((file=fopen(filename,"wb")))
   {
+    setvbuf(file, NULL, _IOFBF, 64*1024);
     // Sauvegarde de la palette
 
     // On regarde si des couleurs >16 sont utilisées dans l'image
@@ -1545,6 +1546,8 @@ void Save_PI1(T_IO_Context * context)
   // Ouverture du fichier
   if ((file=fopen(filename,"wb")))
   {
+    setvbuf(file, NULL, _IOFBF, 64*1024);
+    
     // allocation d'un buffer mémoire
     buffer=(byte *)malloc(32066);
     // Codage de la résolution
@@ -1882,6 +1885,8 @@ void Save_PC1(T_IO_Context * context)
   // Ouverture du fichier
   if ((file=fopen(filename,"wb")))
   {
+    setvbuf(file, NULL, _IOFBF, 64*1024);
+    
     // Allocation des buffers mémoire
     bufferdecomp=(byte *)malloc(32000);
     buffercomp  =(byte *)malloc(64066);
@@ -2055,6 +2060,8 @@ void Save_NEO(T_IO_Context * context)
   // Ouverture du fichier
   if ((file=fopen(filename,"wb")))
   {
+    setvbuf(file, NULL, _IOFBF, 64*1024);
+    
     // allocation d'un buffer mémoire
     buffer=(byte *)malloc(32128);
     // Codage de la résolution
@@ -2656,6 +2663,8 @@ int Save_C64_hires(T_IO_Context *context, char *filename, byte saveWhat, byte lo
         return 1;
     }
     
+    setvbuf(file, NULL, _IOFBF, 64*1024);
+    
     if (loadAddr)
     {
         Write_byte(file,0);
@@ -2766,7 +2775,9 @@ int Save_C64_multi(T_IO_Context *context, char *filename, byte saveWhat, byte lo
         File_error = 1;
         return 1;
     }
-
+    
+    setvbuf(file, NULL, _IOFBF, 64*1024);
+    
     if (loadAddr)
     {
         Write_byte(file,0);
@@ -2812,7 +2823,9 @@ int Save_C64_fli(char *filename, byte saveWhat, byte loadAddr)
         File_error = 1;
         return 1;
     }
-
+    
+    setvbuf(file, NULL, _IOFBF, 64*1024);
+    
     if (loadAddr)
     {
         file_buffer[0]=0;
@@ -2962,7 +2975,7 @@ void Save_SCR(T_IO_Context * context)
     fclose(file);
 
     free (output);
-  output = NULL;
+    output = NULL;
 
     File_error = 0;
 }
@@ -3172,7 +3185,8 @@ void Save_CM5(T_IO_Context* context)
     File_error = 1;
     return;
   }
-
+  setvbuf(file, NULL, _IOFBF, 64*1024);
+  
   // Write layer 0
   Set_saving_layer(context, 0);
   Write_byte(file, Get_pixel(context, 0, 0));
@@ -3199,7 +3213,8 @@ void Save_CM5(T_IO_Context* context)
       File_error = 2;
       return;
   }
-
+  setvbuf(file, NULL, _IOFBF, 64*1024);
+  
   Set_saving_layer(context, 4);
   
   for (ty = 0; ty < 256; ty++)

@@ -2190,7 +2190,7 @@ int Load_CFG(int reload_all)
         break;
       case CHUNK_GRADIENTS: // Infos sur les dégradés
         // The gradients chunk is deprecated since the data
-        // is now loaded/saved in GIF and LBM formats.
+        // is now loaded/saved in GIF and IFF formats.
         // The chunk will be completely ignored.
         /*if (reload_all)
         {
@@ -2518,7 +2518,7 @@ int Save_CFG(void)
 
   // Sauvegarde des informations des dégradés
   // The gradients chunk is deprecated since the data
-  // is now loaded/saved in GIF and LBM formats.
+  // is now loaded/saved in GIF and IFF formats.
   /*
   Chunk.Number=CHUNK_GRADIENTS;
   Chunk.Size=14*16+1;
