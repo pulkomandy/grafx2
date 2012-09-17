@@ -321,7 +321,7 @@ int Directory_exists(char * directory)
 int File_is_hidden(const char *fname, const char *full_name)
 {
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__) || defined(__MINT__)
-  // False (unable to determine, or irrrelevent for platform)
+  // False (unable to determine, or irrelevent for platform)
   (void)fname;//unused
   (void)full_name;//unused
   return 0;
@@ -336,10 +336,11 @@ int File_is_hidden(const char *fname, const char *full_name)
   return (att&FILE_ATTRIBUTE_HIDDEN)?1:0;
 #else
   (void)full_name;//unused
-  return fname[0]=='.';
+   // On linux/unix (default), files are considered hidden if their name
+   // begins with a .
+   // As a special case, we'll consider 'parent directory' (..) never hidden.
+  return fname[0]=='.' && !strcmp(entry->d_name, PARENT_DIR);
 #endif
-
-
 }
 // Taille de fichier, en octets
 int File_length(const char * fname)

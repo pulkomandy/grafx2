@@ -380,26 +380,37 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
 #endif
   while ((entry=readdir(current_directory)))
   {
-    // On ignore le répertoire courant
+    // Ignore 'current directory' entry
     if ( !strcmp(entry->d_name, "."))
     {
       continue;
     }
     stat(entry->d_name,&Infos_enreg);
-    // et que l'élément trouvé est un répertoire
-    if( S_ISDIR(Infos_enreg.st_mode) &&
-      // et que c'est ".."
-      (!strcmp(entry->d_name, PARENT_DIR) ||
-      // ou qu'il n'est pas caché
-       Config.Show_hidden_directories ||
-     !File_is_hidden(entry->d_name, entry->d_name)))
+    // entries tagged "directory" :
+    if( S_ISDIR(Infos_enreg.st_mode))
     {
-      // On rajoute le répertoire à la liste
+      // On Windows, the presence of a "parent directory" entry has proven
+      // unreliable on non-physical drives :
+      // Sometimes it's missing, sometimes it's present even at root...
+      // We skip it here and add a specific check after the loop
+      #if defined(__WIN32__)
+      if (!strcmp(entry->d_name, PARENT_DIR))
+        continue;
+      #endif
+      
+      // Don't display hidden file, unless requested by options
+      if (!Config.Show_hidden_directories &&
+          File_is_hidden(entry->d_name, entry->d_name))
+      {
+        continue;
+      }
+
+      // Add to list
       Add_element_to_list(list, entry->d_name, Format_filename(entry->d_name, 19, 1), 1, ICON_NONE);
       list->Nb_directories++;
     }
-    else if (S_ISREG(Infos_enreg.st_mode) && //Il s'agit d'un fichier
-      (Config.Show_hidden_files || //Il n'est pas caché
+    else if (S_ISREG(Infos_enreg.st_mode) && // It's a file
+      (Config.Show_hidden_files || // Not hidden
       !File_is_hidden(entry->d_name, entry->d_name)))
     {
       const char * ext = filter;
@@ -407,7 +418,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
       {      
         if (Check_extension(entry->d_name, ext))
         {
-          // On rajoute le fichier à la liste
+          // Add to list
           Add_element_to_list(list, entry->d_name, Format_filename(entry->d_name, 19, 0), 0, ICON_NONE);
           list->Nb_files++;
           // Stop searching
@@ -422,17 +433,34 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
       }
     }
   }
-  if (list->Nb_files==0 && list->Nb_directories==0)
-  {
-    // This can happen on some empty network drives.
-    // Add a dummy entry because the fileselector doesn't
-    // seem to support empty list.
-    Add_element_to_list(list, ".",Format_filename(".",19,1),1,ICON_NONE);
-  }
+  
+  // Now here's OS-specific code to determine if "parent directory" entry
+  // should appear.
 
 #if defined(__MORPHOS__) || defined(__AROS__) || defined (__amigaos4__) || defined(__amigaos__)
-  Add_element_to_list(list, "/", Format_filename("/",19,1), 1, ICON_NONE); // on amiga systems, / means parent. And there is no ..
+  // Amiga systems: always
+  Add_element_to_list(list, PARENT_DIR, Format_filename(PARENT_DIR,19,1), 1, ICON_NONE);
   list->Nb_directories ++;
+  
+#elif defined (__WIN32__)
+  // Windows :
+  if (((current_path[0]>='a'&&current_path[0]<='z')||(current_path[0]>='A'&&current_path[0]<='Z')) &&
+    current_path[1]==':' &&
+    (
+      (current_path[2]=='\0') ||
+      (current_path[2]=='/'&&current_path[3]=='\0') ||
+      (current_path[2]=='\\'&&current_path[3]=='\0')
+    ))
+  {
+    // Path is X:\ or X:/ or X:
+    // so don't display parent directory
+  }
+  else
+  {
+    Add_element_to_list(list, PARENT_DIR, Format_filename(PARENT_DIR,19,1), 1, ICON_NONE);
+    list->Nb_directories ++;
+  }
+  
 #elif defined (__MINT__)
   T_Fileselector_item *item=NULL;
   // check if ".." exists if not add it
@@ -443,12 +471,12 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   
   for (item = list->First; (((item != NULL) && (bFound==false))); item = item->Next){
     if (item->Type == 1){
-      if(strncmp(item->Full_name,"..",(sizeof(char)*2))==0) bFound=true;
+      if(strncmp(item->Full_name,PARENT_DIR,(sizeof(char)*2))==0) bFound=true;
     }
   }
   
   if(!bFound){
-    Add_element_to_list(list, "..",Format_filename("/",19,1),1,ICON_NONE); // add if not present
+    Add_element_to_list(list,PARENT_DIR,Format_filename(PARENT_DIR,19,1),1,ICON_NONE); // add if not present
     list->Nb_directories ++;  
   }
   
@@ -461,6 +489,14 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   free(current_path);
 #endif
   current_path = NULL;
+
+  if (list->Nb_files==0 && list->Nb_directories==0)
+  {
+    // This can happen on some empty network drives.
+    // Add a dummy entry because the fileselector doesn't
+    // seem to support empty list.
+    Add_element_to_list(list, ".",Format_filename(".",19,1),1,ICON_NONE);
+  }
 
   Recount_files(list);
 }
