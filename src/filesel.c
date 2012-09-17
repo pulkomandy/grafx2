@@ -208,6 +208,17 @@ void Free_fileselector_list(T_Fileselector *list)
   Recount_files(list);
 }
 
+int Position_last_dot(const char * fname)
+{
+  int pos_last_dot = -1;
+  int c = 0;
+  
+  for (c = 0; fname[c]!='\0'; c++)
+    if (fname[c]=='.')
+      pos_last_dot = c;
+  return pos_last_dot;
+}
+     
 char * Format_filename(const char * fname, word max_length, int type)
 {
   static char result[40];
@@ -251,10 +262,7 @@ char * Format_filename(const char * fname, word max_length, int type)
     result[max_length-5]='.';
     
     // Look for the last dot in filename
-    pos_last_dot = -1;
-    for (c = 0; fname[c]!='\0'; c++)
-      if (fname[c]=='.')
-        pos_last_dot = c;
+    pos_last_dot = Position_last_dot(fname);
 
     // Copy the part before the dot
     for (c=0; c!=pos_last_dot && fname[c]!='\0'; c++)
@@ -311,15 +319,14 @@ void Add_element_to_list(T_Fileselector *list, const char * full_name, const cha
 /// This function allows wildcard '?', and '*' if it's the only character.
 int Check_extension(const char *filename, const char * filter)
 {
-  int pos_last_dot = -1;
+  int pos_last_dot;
   int c = 0;
   
   if (filter[0] == '*')
     return 1;
   // On recherche la position du dernier . dans le nom
-  for (c = 0; filename[c]!='\0'; c++)
-    if (filename[c]=='.')
-      pos_last_dot = c;
+  pos_last_dot = Position_last_dot(filename);
+  
   // Fichier sans extension (ca arrive)
   if (pos_last_dot == -1)
     return (filter[0] == '\0' || filter[0] == ';');
@@ -1642,31 +1649,57 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
         Reset_quicksearch();
         break;
 
-    case  6 : // Scroller des formats
-    // On met à jour le format de browsing du fileselect:
-    if (Main_format != Window_attribute2) {
-      char* savename = (char *)strdup(Selector_filename);
-      int nameLength = strlen(savename);
-      Main_format = Window_attribute2;
-      // Comme on change de liste, on se place en début de liste:
-      Main_fileselector_position = 0;
-      Main_fileselector_offset = 0;
-      // Affichage des premiers fichiers visibles:
-      Hide_cursor();
-      Reload_list_of_files(Main_format, file_scroller);
-      New_preview_is_needed = 1;
-      Reset_quicksearch();
-      strcpy(Selector_filename, savename);
-      if (Get_fileformat(Main_format)->Default_extension[0] != '\0' &&
-        Selector_filename[nameLength - 4] == '.')
-      {
-        strcpy(Selector_filename + nameLength - 3,
-          Get_fileformat(Main_format)->Default_extension);
-      }
-      free(savename);
-      Print_filename_in_fileselector();
-          Display_cursor();
-    }
+    case  6 : // File Format dropdown
+        // Refresh fileselector according to new filter
+        if (Main_format != Window_attribute2)
+        {
+          int pos_last_dot;
+          char* savename = NULL;
+    
+          Main_format = Window_attribute2;
+          if (Filelist.Nb_elements>0)
+          {
+            T_Fileselector_item * current_item;
+            current_item = Get_item_by_index(&Filelist, Main_fileselector_position + Main_fileselector_offset);
+            // In "save" box, if current name is a (possible) filename
+            // with extension, set it to new format's extension
+            if (!load &&
+              current_item->Type == 0 &&
+              Get_fileformat(Main_format)->Default_extension[0] != '\0' &&
+              (pos_last_dot=Position_last_dot(Selector_filename))!=-1 &&
+              Selector_filename[pos_last_dot+1]!='\0')
+            {
+              strcpy(Selector_filename + pos_last_dot + 1,
+                Get_fileformat(Main_format)->Default_extension);
+            }
+          }
+          savename = (char *)strdup(Selector_filename);
+          // By default, position list at the beginning
+          Main_fileselector_position = 0;
+          Main_fileselector_offset = 0;
+          // Print the first visible files
+          Hide_cursor();
+          Reload_list_of_files(Main_format, file_scroller);
+          New_preview_is_needed = 1;
+          Reset_quicksearch();
+          if (savename != NULL)
+          {
+            // attempt to find the file name in new list
+            int pos=Find_file_in_fileselector(&Filelist, savename);
+            if (pos!=0)
+            {
+              Highlight_file(pos);
+              Prepare_and_display_filelist(Main_fileselector_position,Main_fileselector_offset,file_scroller);
+            }
+            // If the file is (still present) or it's a name with new
+            // extension, set it as the proposed file name.
+            if (pos!=0 || !load)
+              strcpy(Selector_filename, savename);
+            free(savename);
+          }
+          Print_filename_in_fileselector();
+              Display_cursor();
+        }
         break;
       case  7 : // Saisie d'un commentaire pour la sauvegarde
         if ( (!load) && (Get_fileformat(Main_format)->Comment) )
@@ -1685,8 +1718,8 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
         {
           T_Fileselector_item * current_item;
           current_item = Get_item_by_index(&Filelist, Main_fileselector_position + Main_fileselector_offset);
-          if (current_item->Type != 0)
-            // selected entry is note a filename
+          if (current_item->Type != 0 && !FILENAME_COMPARE(current_item->Full_name,Selector_filename))
+            // current name is a highlighted directory
             Selector_filename[0]='\0';
         }
         if (Readline(82,48,Selector_filename,27,INPUT_TYPE_FILENAME))
