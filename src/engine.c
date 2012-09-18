@@ -275,7 +275,7 @@ void Draw_menu_button(byte btn_number,byte pressed)
   
   if (Menu_is_visible && Menu_bars[current_menu].Visible)
     Update_rect(Menu_factor_X*(Buttons_Pool[btn_number].X_offset),
-      (Buttons_Pool[btn_number].Y_offset+Menu_bars[MENUBAR_TOOLS].Top)*Menu_factor_Y+Menu_Y,
+      (Buttons_Pool[btn_number].Y_offset+Menu_bars[current_menu].Top)*Menu_factor_Y+Menu_Y,
       width*Menu_factor_X,height*Menu_factor_Y);
 
 /*
