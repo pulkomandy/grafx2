@@ -51,11 +51,11 @@
 #include <datatypes/textclass.h>
 #endif
 
-// Virtual keyboard is mandatory on these platforms:
+// Virtual keyboard is ON by default on these platforms:
 #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
-  #ifndef VIRT_KEY
-    #define VIRT_KEY 1
-  #endif
+  #define VIRT_KEY_DEFAULT_ON 1
+#else
+  #define VIRT_KEY_DEFAULT_ON 0
 #endif
 
 #define TEXT_COLOR         MC_Black
@@ -369,7 +369,6 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   word window_y=Window_pos_Y;
   byte offset=0; // index du premier caractère affiché
   
-#ifdef VIRT_KEY
   // Virtual keyboard
   byte use_virtual_keyboard=0;
   static byte caps_lock=0;
@@ -386,7 +385,6 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
     ':',';','`','\'','"','~',
     '!','?','^','&','#','$'
   };
-#endif
 
   // Si on a commencé à editer par un clic-droit, on vide la chaine.
   if (Mouse_K==RIGHT_SIDE)
@@ -404,110 +402,112 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   }
   
   // Virtual keyboards
-#ifdef VIRT_KEY
-  if (input_type == INPUT_TYPE_STRING || input_type == INPUT_TYPE_FILENAME )
+  if (Config.Use_virtual_keyboard==1 ||
+    (VIRT_KEY_DEFAULT_ON && Config.Use_virtual_keyboard==0))
   {
-    int x,y;
-
-    Init_virtual_keyboard(y_pos, 320, 87);
-    
-    use_virtual_keyboard=1;
-    
-    // The order is important, see the array
-    
-    Window_set_normal_button(  7,67,43,15,"Clr", 0,1,KEY_NONE);
-    Window_set_normal_button( 51,67,43,15,"Del", 0,1,KEY_NONE);
-    Window_set_normal_button( 95,67,43,15,"OK",  0,1,KEY_NONE);
-    Window_set_normal_button(139,67,43,15,"Esc", 0,1,KEY_NONE);
-    Window_display_frame_in(5,65,179,19);
-
-    Window_set_normal_button(193,63,17,19,"0", 0,1,KEY_NONE);
-    Window_set_normal_button(193,43,17,19,"1", 0,1,KEY_NONE);
-    Window_set_normal_button(211,43,17,19,"2", 0,1,KEY_NONE);
-    Window_set_normal_button(229,43,17,19,"3", 0,1,KEY_NONE);
-    Window_set_normal_button(193,23,17,19,"4", 0,1,KEY_NONE);
-    Window_set_normal_button(211,23,17,19,"5", 0,1,KEY_NONE);
-    Window_set_normal_button(229,23,17,19,"6", 0,1,KEY_NONE);
-    Window_set_normal_button(193, 3,17,19,"7", 0,1,KEY_NONE);
-    Window_set_normal_button(211, 3,17,19,"8", 0,1,KEY_NONE);
-    Window_set_normal_button(229, 3,17,19,"9", 0,1,KEY_NONE);
-    Window_set_normal_button(211,63,17,19,".", 0,1,KEY_NONE);
-    Window_set_normal_button(229,63,17,19,",", 0,1,KEY_NONE);
- 
-    Window_set_normal_button(  3, 3,18,19,"Q", 0,1,KEY_NONE);
-    Window_set_normal_button( 22, 3,18,19,"W", 0,1,KEY_NONE);
-    Window_set_normal_button( 41, 3,18,19,"E", 0,1,KEY_NONE);
-    Window_set_normal_button( 60, 3,18,19,"R", 0,1,KEY_NONE);
-    Window_set_normal_button( 79, 3,18,19,"T", 0,1,KEY_NONE);
-    Window_set_normal_button( 98, 3,18,19,"Y", 0,1,KEY_NONE);
-    Window_set_normal_button(117, 3,18,19,"U", 0,1,KEY_NONE);
-    Window_set_normal_button(136, 3,18,19,"I", 0,1,KEY_NONE);
-    Window_set_normal_button(155, 3,18,19,"O", 0,1,KEY_NONE);
-    Window_set_normal_button(174, 3,18,19,"P", 0,1,KEY_NONE);
-
-    Window_set_normal_button( 12,23,18,19,"A", 0,1,KEY_NONE);
-    Window_set_normal_button( 31,23,18,19,"S", 0,1,KEY_NONE);
-    Window_set_normal_button( 50,23,18,19,"D", 0,1,KEY_NONE);
-    Window_set_normal_button( 69,23,18,19,"F", 0,1,KEY_NONE);
-    Window_set_normal_button( 88,23,18,19,"G", 0,1,KEY_NONE);
-    Window_set_normal_button(107,23,18,19,"H", 0,1,KEY_NONE);
-    Window_set_normal_button(126,23,18,19,"J", 0,1,KEY_NONE);
-    Window_set_normal_button(145,23,18,19,"K", 0,1,KEY_NONE);
-    Window_set_normal_button(164,23,18,19,"L", 0,1,KEY_NONE);
-    
-    Window_set_normal_button(  3,43,18,19,caps_lock?"\036":"\037", 0,1,KEY_NONE);
-    Window_set_normal_button( 22,43,18,19,"Z", 0,1,KEY_NONE);
-    Window_set_normal_button( 41,43,18,19,"X", 0,1,KEY_NONE);
-    Window_set_normal_button( 60,43,18,19,"C", 0,1,KEY_NONE);
-    Window_set_normal_button( 79,43,18,19,"V", 0,1,KEY_NONE);
-    Window_set_normal_button( 98,43,18,19,"B", 0,1,KEY_NONE);
-    Window_set_normal_button(117,43,18,19,"N", 0,1,KEY_NONE);
-    Window_set_normal_button(136,43,18,19,"M", 0,1,KEY_NONE);
-    Window_set_normal_button(155,43,18,19," ", 0,1,KEY_NONE);
-
-    for (y=0; y<5; y++)
+    if (input_type == INPUT_TYPE_STRING || input_type == INPUT_TYPE_FILENAME )
     {
-      for (x=0; x<6; x++)
+      int x,y;
+  
+      Init_virtual_keyboard(y_pos, 320, 87);
+      
+      use_virtual_keyboard=1;
+      
+      // The order is important, see the array
+      
+      Window_set_normal_button(  7,67,43,15,"Clr", 0,1,KEY_NONE);
+      Window_set_normal_button( 51,67,43,15,"Del", 0,1,KEY_NONE);
+      Window_set_normal_button( 95,67,43,15,"OK",  0,1,KEY_NONE);
+      Window_set_normal_button(139,67,43,15,"Esc", 0,1,KEY_NONE);
+      Window_display_frame_in(5,65,179,19);
+  
+      Window_set_normal_button(193,63,17,19,"0", 0,1,KEY_NONE);
+      Window_set_normal_button(193,43,17,19,"1", 0,1,KEY_NONE);
+      Window_set_normal_button(211,43,17,19,"2", 0,1,KEY_NONE);
+      Window_set_normal_button(229,43,17,19,"3", 0,1,KEY_NONE);
+      Window_set_normal_button(193,23,17,19,"4", 0,1,KEY_NONE);
+      Window_set_normal_button(211,23,17,19,"5", 0,1,KEY_NONE);
+      Window_set_normal_button(229,23,17,19,"6", 0,1,KEY_NONE);
+      Window_set_normal_button(193, 3,17,19,"7", 0,1,KEY_NONE);
+      Window_set_normal_button(211, 3,17,19,"8", 0,1,KEY_NONE);
+      Window_set_normal_button(229, 3,17,19,"9", 0,1,KEY_NONE);
+      Window_set_normal_button(211,63,17,19,".", 0,1,KEY_NONE);
+      Window_set_normal_button(229,63,17,19,",", 0,1,KEY_NONE);
+   
+      Window_set_normal_button(  3, 3,18,19,"Q", 0,1,KEY_NONE);
+      Window_set_normal_button( 22, 3,18,19,"W", 0,1,KEY_NONE);
+      Window_set_normal_button( 41, 3,18,19,"E", 0,1,KEY_NONE);
+      Window_set_normal_button( 60, 3,18,19,"R", 0,1,KEY_NONE);
+      Window_set_normal_button( 79, 3,18,19,"T", 0,1,KEY_NONE);
+      Window_set_normal_button( 98, 3,18,19,"Y", 0,1,KEY_NONE);
+      Window_set_normal_button(117, 3,18,19,"U", 0,1,KEY_NONE);
+      Window_set_normal_button(136, 3,18,19,"I", 0,1,KEY_NONE);
+      Window_set_normal_button(155, 3,18,19,"O", 0,1,KEY_NONE);
+      Window_set_normal_button(174, 3,18,19,"P", 0,1,KEY_NONE);
+  
+      Window_set_normal_button( 12,23,18,19,"A", 0,1,KEY_NONE);
+      Window_set_normal_button( 31,23,18,19,"S", 0,1,KEY_NONE);
+      Window_set_normal_button( 50,23,18,19,"D", 0,1,KEY_NONE);
+      Window_set_normal_button( 69,23,18,19,"F", 0,1,KEY_NONE);
+      Window_set_normal_button( 88,23,18,19,"G", 0,1,KEY_NONE);
+      Window_set_normal_button(107,23,18,19,"H", 0,1,KEY_NONE);
+      Window_set_normal_button(126,23,18,19,"J", 0,1,KEY_NONE);
+      Window_set_normal_button(145,23,18,19,"K", 0,1,KEY_NONE);
+      Window_set_normal_button(164,23,18,19,"L", 0,1,KEY_NONE);
+      
+      Window_set_normal_button(  3,43,18,19,caps_lock?"\036":"\037", 0,1,KEY_NONE);
+      Window_set_normal_button( 22,43,18,19,"Z", 0,1,KEY_NONE);
+      Window_set_normal_button( 41,43,18,19,"X", 0,1,KEY_NONE);
+      Window_set_normal_button( 60,43,18,19,"C", 0,1,KEY_NONE);
+      Window_set_normal_button( 79,43,18,19,"V", 0,1,KEY_NONE);
+      Window_set_normal_button( 98,43,18,19,"B", 0,1,KEY_NONE);
+      Window_set_normal_button(117,43,18,19,"N", 0,1,KEY_NONE);
+      Window_set_normal_button(136,43,18,19,"M", 0,1,KEY_NONE);
+      Window_set_normal_button(155,43,18,19," ", 0,1,KEY_NONE);
+  
+      for (y=0; y<5; y++)
       {
-        char label[2]=" ";
-        label[0]=keymapping[x+y*6+44];        
-        Window_set_normal_button(247+x*12, 3+y*16,11,15,label, 0,1,KEY_NONE);
+        for (x=0; x<6; x++)
+        {
+          char label[2]=" ";
+          label[0]=keymapping[x+y*6+44];        
+          Window_set_normal_button(247+x*12, 3+y*16,11,15,label, 0,1,KEY_NONE);
+        }
       }
+  
+      Update_window_area(0,0,Window_width, Window_height);
+      Display_cursor();
     }
-
-    Update_window_area(0,0,Window_width, Window_height);
-    Display_cursor();
+    else if (input_type == INPUT_TYPE_INTEGER || input_type == INPUT_TYPE_DECIMAL )
+    {
+      Init_virtual_keyboard(y_pos, 215, 47);
+      
+      use_virtual_keyboard=1;
+      
+      // The order is important, see the array
+      
+      Window_set_normal_button(  7,27,43,15,"Clr", 0,1,KEY_NONE);
+      Window_set_normal_button( 51,27,43,15,"Del", 0,1,KEY_NONE);
+      Window_set_normal_button( 95,27,43,15,"OK",  0,1,KEY_NONE);
+      Window_set_normal_button(139,27,43,15,"Esc", 0,1,KEY_NONE);
+      Window_display_frame_in(5,25,179,19);
+  
+      Window_set_normal_button(174, 3,18,19,"0", 0,1,KEY_NONE);
+      Window_set_normal_button(  3, 3,18,19,"1", 0,1,KEY_NONE);
+      Window_set_normal_button( 22, 3,18,19,"2", 0,1,KEY_NONE);
+      Window_set_normal_button( 41, 3,18,19,"3", 0,1,KEY_NONE);
+      Window_set_normal_button( 60, 3,18,19,"4", 0,1,KEY_NONE);
+      Window_set_normal_button( 79, 3,18,19,"5", 0,1,KEY_NONE);
+      Window_set_normal_button( 98, 3,18,19,"6", 0,1,KEY_NONE);
+      Window_set_normal_button(117, 3,18,19,"7", 0,1,KEY_NONE);
+      Window_set_normal_button(136, 3,18,19,"8", 0,1,KEY_NONE);
+      Window_set_normal_button(155, 3,18,19,"9", 0,1,KEY_NONE);
+      Window_set_normal_button(193, 3,18,19,".", 0,1,KEY_NONE);
+  
+      Update_window_area(0,0,Window_width, Window_height);
+      Display_cursor();
+    }
   }
-  else if (input_type == INPUT_TYPE_INTEGER || input_type == INPUT_TYPE_DECIMAL )
-  {
-    Init_virtual_keyboard(y_pos, 215, 47);
-    
-    use_virtual_keyboard=1;
-    
-    // The order is important, see the array
-    
-    Window_set_normal_button(  7,27,43,15,"Clr", 0,1,KEY_NONE);
-    Window_set_normal_button( 51,27,43,15,"Del", 0,1,KEY_NONE);
-    Window_set_normal_button( 95,27,43,15,"OK",  0,1,KEY_NONE);
-    Window_set_normal_button(139,27,43,15,"Esc", 0,1,KEY_NONE);
-    Window_display_frame_in(5,25,179,19);
-
-    Window_set_normal_button(174, 3,18,19,"0", 0,1,KEY_NONE);
-    Window_set_normal_button(  3, 3,18,19,"1", 0,1,KEY_NONE);
-    Window_set_normal_button( 22, 3,18,19,"2", 0,1,KEY_NONE);
-    Window_set_normal_button( 41, 3,18,19,"3", 0,1,KEY_NONE);
-    Window_set_normal_button( 60, 3,18,19,"4", 0,1,KEY_NONE);
-    Window_set_normal_button( 79, 3,18,19,"5", 0,1,KEY_NONE);
-    Window_set_normal_button( 98, 3,18,19,"6", 0,1,KEY_NONE);
-    Window_set_normal_button(117, 3,18,19,"7", 0,1,KEY_NONE);
-    Window_set_normal_button(136, 3,18,19,"8", 0,1,KEY_NONE);
-    Window_set_normal_button(155, 3,18,19,"9", 0,1,KEY_NONE);
-    Window_set_normal_button(193, 3,18,19,".", 0,1,KEY_NONE);
-
-    Update_window_area(0,0,Window_width, Window_height);
-    Display_cursor();
-  }
-#endif
   Keyboard_click_allowed = 0;
   Hide_cursor();
 
@@ -546,7 +546,6 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   while ((input_key!=SDLK_RETURN) && (input_key!=KEY_ESC))
   {
     Display_cursor();
-#ifdef VIRT_KEY
     if (use_virtual_keyboard)
     {
       int clicked_button;
@@ -583,7 +582,6 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
       }
     }
     else
-#endif
     {
       do
       {
@@ -751,7 +749,6 @@ affichage:
 
   } // End du "while"
   Keyboard_click_allowed = 1;
-  #ifdef VIRT_KEY
   if (use_virtual_keyboard)
   {
     byte old_mouse_k = Mouse_K;
@@ -759,7 +756,6 @@ affichage:
     Mouse_K=old_mouse_k;
     Input_sticky_control=0;
   }
-  #endif
   
   // Effacement de la chaîne
   Block(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),

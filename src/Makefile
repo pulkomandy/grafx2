@@ -57,7 +57,7 @@ ifdef COMSPEC
   RMDIR = rmdir --ignore-fail-on-non-empty
   CP = cp
   BIN = ../bin/grafx2.exe
-  COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb `sdl-config --cflags` $(TTFCOPT) $(JOYCOPT) $(VKEYCOPT) $(LUACOPT)
+  COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb `sdl-config --cflags` $(TTFCOPT) $(JOYCOPT) $(LUACOPT)
   LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng14 $(LUALOPT)
   LUALOPT = -llua
   CC = gcc
@@ -268,7 +268,7 @@ endif
     LUACOPT = -I/resources/indexes/include
     LUALOPT = -llua
     BIN = ../bin/grafx2
-    COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g `sdl-config --cflags` -I/resources/indexes/include/SDL $(TTFCOPT) $(LUACOPT) $(JOYCOPT) $(VKEYCOPT) -O$(OPTIM)
+    COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g `sdl-config --cflags` -I/resources/indexes/include/SDL $(TTFCOPT) $(LUACOPT) $(JOYCOPT) -O$(OPTIM)
     LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng -lz $(LUALOPT) -lm
     CC = gcc
     OBJDIR = ../obj/syllable
@@ -306,7 +306,7 @@ endif
         #cross compile an exec for the gp2x
         CC = /opt/open2x/gcc-4.1.1-glibc-2.3.6/arm-open2x-linux/bin/arm-open2x-linux-gcc
         BIN = ../bin/grafx2.gpe
-        COPT = -W -Wall -Wdeclaration-after-statement -pedantic -std=c99 -static -g -O$(OPTIM) -I/opt/open2x/gcc-4.1.1-glibc-2.3.6/include `/opt/open2x/gcc-4.1.1-glibc-2.3.6/bin/sdl-config --cflags` $(TTFCOPT) -D__GP2X__ $(TTFCOPT) $(JOYCOPT) $(VKEYCOPT) $(LUACOPT)
+        COPT = -W -Wall -Wdeclaration-after-statement -pedantic -std=c99 -static -g -O$(OPTIM) -I/opt/open2x/gcc-4.1.1-glibc-2.3.6/include `/opt/open2x/gcc-4.1.1-glibc-2.3.6/bin/sdl-config --cflags` $(TTFCOPT) -D__GP2X__ $(TTFCOPT) $(JOYCOPT) $(LUACOPT)
         LOPT = -static -lSDL_image `/opt/open2x/gcc-4.1.1-glibc-2.3.6/bin/sdl-config --static-libs` -ljpeg -lpng -lz -lm $(TTFLOPT) $(LUALOPT)
         OBJDIR = ../obj/gp2x
         NOTTF = 1
@@ -346,7 +346,7 @@ endif
 
         # Compiles a regular linux executable for the native platform
         BIN = ../bin/grafx2
-        COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT) $(LUACOPT) $(JOYCOPT) $(VKEYCOPT) -O$(OPTIM) `pkg-config --cflags libpng`
+        COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT) $(LUACOPT) $(JOYCOPT) -O$(OPTIM) `pkg-config --cflags libpng`
         LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) `pkg-config --libs libpng` $(LUALOPT) -lm
         CC = gcc
         OBJDIR = ../obj/unix
@@ -415,13 +415,6 @@ endif
 #is plugged in.
 ifeq ($(USE_JOYSTICK),1)
   JOYCOPT = -DUSE_JOYSTICK
-endif
-
-#To enable virtual keyboard input (mouse-driven), make VIRT_KEY=1
-#This is automatically enabled on some platforms, but this
-#switch allows you to test the virtual keyboard on any other platform.
-ifeq ($(VIRT_KEY),1)
-  VKEYCOPT = -DVIRT_KEY
 endif
 
 ### And now for the real build rules ###

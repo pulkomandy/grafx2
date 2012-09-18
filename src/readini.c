@@ -979,7 +979,13 @@ int Load_INI(T_Config * conf)
     conf->Tilemap_show_count=(values[0]!=0);
   }
   
-  
+  conf->Use_virtual_keyboard=0;
+  // Optional, enables virtual keyboard (>=2.4)
+  if (!Load_INI_get_values (file,buffer,"Use_virtual_keyboard",1,values))
+  {
+    if (values[0]>=0 && values[0]<=2)
+      conf->Use_virtual_keyboard=values[0];
+  }
 
   // Insert new values here
 

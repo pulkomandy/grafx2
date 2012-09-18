@@ -756,6 +756,13 @@ const T_Lookup Lookup_SwapButtons[] = {
   {NULL,-1},
 };
 
+const T_Lookup Lookup_VirtualKeyboard[] = {
+  {"Auto",0},
+  {"ON",1},
+  {"OFF",2},
+  {NULL,-1},
+};
+
 typedef struct {
   const char* Label;
   byte Type; // 0: label, 1+: setting (size in bytes) 
@@ -937,7 +944,7 @@ void Button_Settings(void)
   //{"  horizontally:",1,&(selected_config.Mouse_sensitivity_index_x),1,4,0,Lookup_MouseSpeed},
   //{"  vertically:",1,&(selected_config.Mouse_sensitivity_index_y),1,4,0,Lookup_MouseSpeed},
   {"Key to swap buttons:",2,&(selected_config.Swap_buttons),0,0,0,Lookup_SwapButtons},
-  {"",0,NULL,0,0,0,NULL},
+  {"Virtual keyboard",1,&(selected_config.Use_virtual_keyboard),0,2,0,Lookup_VirtualKeyboard},
   {"",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
   

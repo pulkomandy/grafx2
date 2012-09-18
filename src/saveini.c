@@ -717,6 +717,10 @@ int Save_INI(T_Config * conf)
   if ((return_code=Save_INI_set_values (old_file,new_file,buffer,"Tilemap_count",1,values,1)))
     goto Erreur_Retour;
   
+  values[0]=conf->Use_virtual_keyboard;
+  if ((return_code=Save_INI_set_values (old_file,new_file,buffer,"Use_virtual_keyboard",1,values,0)))
+    goto Erreur_Retour;
+  
   
   // Insert new values here
   
