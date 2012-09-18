@@ -840,7 +840,6 @@ int L_InputBox(lua_State* L)
     CONTROL_INPUT_MINUS = 0x0400,
     CONTROL_INPUT_PLUS  = 0x0500,
     CONTROL_CHECKBOX    = 0x0600,
-    CONTROL_LABEL       = 0x0700,
     CONTROL_VALUE_MASK  = 0x00FF,
     CONTROL_TYPE_MASK   = 0xFF00
   };
@@ -938,7 +937,6 @@ int L_InputBox(lua_State* L)
     {
       // Label
       Print_in_window_limited(12,22+setting*17,label[setting],max_label_length+12,MC_Black,MC_Light);
-      control[Window_nb_buttons] = CONTROL_LABEL;
     }
     else if (min_value[setting]==0 && max_value[setting]==1 && decimal_places[setting]<=0)
     {
