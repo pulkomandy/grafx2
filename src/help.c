@@ -57,6 +57,7 @@
 #include "hotkeys.h"
 #include "errors.h"
 #include "pages.h"
+#include "factory.h"
 
 extern char Program_version[]; // generated in pversion.c
 extern char SVN_revision[]; // generated in pversion.c
@@ -690,6 +691,7 @@ void Button_Stats(void)
   dword color_usage[256];
   unsigned long long freeRam;
   qword mem_size = 0;
+  int y;
 
   Open_window(310,174,"Statistics");
 
@@ -701,17 +703,20 @@ void Button_Stats(void)
 
   Window_set_normal_button(120,153,70,14,"OK",0,1,KEY_ESC); // 1
 
-  // Affichage du numéro de version
-  Print_in_window(10,19,"Program version:",STATS_TITLE_COLOR,MC_Black);
+  y=19; // row for first line
+  Print_in_window(10,y,"Program version:",STATS_TITLE_COLOR,MC_Black);
   sprintf(buffer,"%s.%s",Program_version, SVN_revision);
-  Print_in_window(146,19,buffer,STATS_DATA_COLOR,MC_Black);
-  Print_in_window(10,35,"Build options:",STATS_TITLE_COLOR,MC_Black);
-  Print_in_window(146,35,TrueType_is_supported()?"TTF fonts":"no TTF fonts",STATS_DATA_COLOR,MC_Black);
-
+  Print_in_window(146,y,buffer,STATS_DATA_COLOR,MC_Black);
+  y+=16;
+  Print_in_window(10,y,"Build options:",STATS_TITLE_COLOR,MC_Black);
+  Print_in_window(146,y,TrueType_is_supported()?"TTF fonts":"no TTF fonts",STATS_DATA_COLOR,MC_Black);
+  y+=8;
+  Print_in_window(10,y,"Lua version:",STATS_TITLE_COLOR,MC_Black);
+  Print_in_window_limited(146,y,Lua_version(),10,STATS_DATA_COLOR,MC_Black);
+  y+=16;
+  Print_in_window(10,y,"Free memory: ",STATS_TITLE_COLOR,MC_Black);
 #if defined (__MINT__)
   // Display free TT/ST RAM
-  Print_in_window(10,43,"Free memory: ",STATS_TITLE_COLOR,MC_Black);
-
   freeRam=0;
   char helpBuf[64];
   
@@ -750,12 +755,10 @@ void Button_Stats(void)
         sprintf(helpBuf,"(%u b)",(unsigned int)freeRam);
     strncat(buffer,helpBuf,sizeof(char)*37);
  
-   Print_in_window(18,51,buffer,STATS_DATA_COLOR,MC_Black);
+   Print_in_window(18,y,buffer,STATS_DATA_COLOR,MC_Black);
 
 #else
   // Display free RAM (generic)
-  Print_in_window(10,51,"Free memory: ",STATS_TITLE_COLOR,MC_Black);
-
   freeRam = Memory_free();
   
   if(freeRam > (100ULL*1024*1024*1024))
@@ -767,21 +770,22 @@ void Button_Stats(void)
   else
         sprintf(buffer,"%u bytes",(unsigned int)freeRam);
   
-  Print_in_window(114,51,buffer,STATS_DATA_COLOR,MC_Black);
+  Print_in_window(114,y,buffer,STATS_DATA_COLOR,MC_Black);
 
   #endif
   
-  
+  y+=8;
   // Used memory
-  Print_in_window(10,59,"Used memory pages: ",STATS_TITLE_COLOR,MC_Black);
+  Print_in_window(10,y,"Used memory pages: ",STATS_TITLE_COLOR,MC_Black);
   if(Stats_pages_memory > (100LL*1024*1024*1024))
         sprintf(buffer,"%ld (%lld Gb)",Stats_pages_number, Stats_pages_memory/(1024*1024*1024));
   else if(Stats_pages_memory > (100*1024*1024))
         sprintf(buffer,"%ld (%lld Mb)",Stats_pages_number, Stats_pages_memory/(1024*1024));
   else
         sprintf(buffer,"%ld (%lld Kb)",Stats_pages_number, Stats_pages_memory/1024);
-  Print_in_window(162,59,buffer,STATS_DATA_COLOR,MC_Black);
+  Print_in_window(162,y,buffer,STATS_DATA_COLOR,MC_Black);
   
+  y+=8;
 #if defined(__WIN32__)
     {
       ULARGE_INTEGER tailleU;
@@ -826,7 +830,7 @@ void Button_Stats(void)
 #else
     sprintf(buffer,"Free space on %c:",Main_current_directory[0]);
 #endif
-    Print_in_window(10,67,buffer,STATS_TITLE_COLOR,MC_Black);
+    Print_in_window(10,y,buffer,STATS_TITLE_COLOR,MC_Black);
 
     if(mem_size > (100ULL*1024*1024*1024))
         sprintf(buffer,"%u Gigabytes",(unsigned int)(mem_size/(1024*1024*1024)));
@@ -837,36 +841,40 @@ void Button_Stats(void)
     else 
         sprintf(buffer,"%u bytes",(unsigned int)mem_size);
 #if defined(__AROS__)
-    Print_in_window(192,67,buffer,STATS_DATA_COLOR,MC_Black);
+    Print_in_window(192,y,buffer,STATS_DATA_COLOR,MC_Black);
 #else
-    Print_in_window(146,67,buffer,STATS_DATA_COLOR,MC_Black);
+    Print_in_window(146,y,buffer,STATS_DATA_COLOR,MC_Black);
 #endif
   } else {
 	#ifndef NODISKSPACESUPPORT
-	  Print_in_window(10,67,"Disk full!",STATS_TITLE_COLOR,MC_Black);
+	  Print_in_window(10,y,"Disk full!",STATS_TITLE_COLOR,MC_Black);
 	#endif
 	#undef NODISKSPACESUPPORT
   }
-
+  
+  y+=16;
   // Affichage des informations sur l'image
-  Print_in_window(10,83,"Picture info.:",STATS_TITLE_COLOR,MC_Black);
-
+  Print_in_window(10,y,"Picture info.:",STATS_TITLE_COLOR,MC_Black);
+  y+=8;
+  
   // Affichage des dimensions de l'image
-  Print_in_window(18,91,"Dimensions :",STATS_TITLE_COLOR,MC_Black);
+  Print_in_window(18,y,"Dimensions :",STATS_TITLE_COLOR,MC_Black);
   sprintf(buffer,"%dx%d",Main_image_width,Main_image_height);
-  Print_in_window(122,91,buffer,STATS_DATA_COLOR,MC_Black);
-
+  Print_in_window(122,y,buffer,STATS_DATA_COLOR,MC_Black);
+  y+=8;
+  
   // Affichage du nombre de couleur utilisé
-  Print_in_window(18,99,"Colors used:",STATS_TITLE_COLOR,MC_Black);
+  Print_in_window(18,y,"Colors used:",STATS_TITLE_COLOR,MC_Black);
   memset(color_usage,0,sizeof(color_usage));
   sprintf(buffer,"%d",Count_used_colors(color_usage));
-  Print_in_window(122,99,buffer,STATS_DATA_COLOR,MC_Black);
-
+  Print_in_window(122,y,buffer,STATS_DATA_COLOR,MC_Black);
+  y+=16;
+  
   // Affichage des dimensions de l'écran
-  Print_in_window(10,115,"Resolution:",STATS_TITLE_COLOR,MC_Black);
+  Print_in_window(10,y,"Resolution:",STATS_TITLE_COLOR,MC_Black);
   sprintf(buffer,"%dx%d",Screen_width,Screen_height);
-  Print_in_window(106,115,buffer,STATS_DATA_COLOR,MC_Black);
-
+  Print_in_window(106,y,buffer,STATS_DATA_COLOR,MC_Black);
+  
   Update_rect(Window_pos_X,Window_pos_Y,Menu_factor_X*310,Menu_factor_Y*174);
 
   Display_cursor();

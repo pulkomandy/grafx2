@@ -10,7 +10,7 @@ Grafx2 compilation and installation
 * libpng (not on MacOSX)
 * FreeType library (optional, for truetype fonts)
 * SDL_ttf library (optional, for truetype fonts)
-* Lua library v5.1 (optional, for Lua scripting)
+* Lua library v5.1 or v5.2 (optional, for Lua scripting)
 
 Extra requirements for Windows:
 * a POSIX environment: MSYS is fine, maybe Cygwin would work as well.
@@ -175,7 +175,7 @@ SDL_ttf:
 
 Lua:
   (optional)
-  http://www.lua.org/ftp/lua-5.1.4.tar.gz
+  http://www.lua.org/ftp/lua-5.2.1.tar.gz
   Uncompress in temporary directory
   Use sh shell
   make mingw

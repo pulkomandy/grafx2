@@ -143,6 +143,11 @@ do { \
     return luaL_error(L, "%s: Expected %d arguments, but found %d.", func_name, (num), nb_args); \
 } while(0)
 
+const char * Lua_version(void)
+{
+  return LUA_VERSION_MAJOR "." LUA_VERSION_MINOR;
+}
+
 // Updates the screen colors after a running screen has modified the palette.
 void Update_colors_during_script(void)
 {
@@ -2142,9 +2147,18 @@ void Button_Brush_Factory(void)
 }
 
 #else // NOLUA
+
 void Button_Brush_Factory(void)
 {
     Verbose_message("Error!", "The brush factory is not available in this build of GrafX2.");
+}
+
+///
+/// Returns a string stating the included Lua engine version,
+/// or "Disabled" if Grafx2 is compiled without Lua.
+const char * Lua_version(void)
+{
+  return "Disabled";
 }
 
 #endif

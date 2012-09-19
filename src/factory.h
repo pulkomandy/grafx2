@@ -11,3 +11,8 @@ extern char * Bound_script[10];
 /// Before: Cursor hidden
 /// After: Cursor shown
 void Run_numbered_script(byte index);
+
+///
+/// Returns a string stating the included Lua engine version,
+/// or "Disabled" if Grafx2 is compiled without Lua.
+const char * Lua_version(void);
