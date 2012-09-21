@@ -502,6 +502,15 @@ void Button_Toggle_toolbar(void)
           // Exceptionally, this doesn't require a backup because a single-layer
           // image is the same as a single-frame animation.
           Main_backups->Pages->Image_mode = IMAGE_MODE_LAYERED;
+          Update_buffers(Main_image_width, Main_image_height);
+          // Refresh the buffer, special shortcut because only one layer exists.
+          memset(Main_visible_image_depth_buffer.Image, 0, Main_image_width*Main_image_height);
+          memcpy(Main_visible_image.Image,
+             Main_backups->Pages->Image[0].Pixels,
+             Main_image_width*Main_image_height);
+          
+          Update_pixel_renderer();
+          
         }
         break;
       case 2: // anim
@@ -514,6 +523,7 @@ void Button_Toggle_toolbar(void)
           // Exceptionally, this doesn't require a backup because a single-frame
           // animation is the same as a single-layer image.
           Main_backups->Pages->Image_mode = IMAGE_MODE_ANIMATION;
+          Update_pixel_renderer();
         }
         
         break;
