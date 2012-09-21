@@ -2018,8 +2018,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
       else  // Sinon on essaye de charger ou sauver le fichier
       {
         strcpy(context->File_directory,Main_current_directory);
-        if (!load && !Get_fileformat(Main_format)->Palette_only)
-          Main_fileformat=Main_format;
+        context->Format = Main_format;
         save_or_load_image=1;
       }
     }

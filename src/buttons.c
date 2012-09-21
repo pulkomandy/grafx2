@@ -3138,6 +3138,7 @@ void Load_picture(byte image)
   T_IO_Context context;
   static char filename [MAX_PATH_CHARACTERS];
   static char directory[MAX_PATH_CHARACTERS];
+  byte saved_main_format;
   
   if (image)
   {
@@ -3150,9 +3151,19 @@ void Load_picture(byte image)
     strcpy(filename, Brush_filename);
     strcpy(directory, Brush_file_directory);
     Init_context_brush(&context, filename, directory);
+    // back up the fileselector's format filter
+    saved_main_format=Main_format;
+    Main_format=Brush_format;
   }
   confirm=Button_Load_or_Save(1, &context);
 
+  if (!image)
+  {
+    // restore the fileselector's format filter
+    Brush_format=Main_format;
+    Main_format=saved_main_format;
+  }
+  
   if (confirm)
   {
     if (image)
@@ -3183,6 +3194,7 @@ void Load_picture(byte image)
     {
       strcpy(Brush_filename, context.File_name);
       strcpy(Brush_file_directory, context.File_directory);
+      Brush_fileformat = context.Format;
 
       Tiling_offset_X=0;
       Tiling_offset_Y=0;
@@ -3273,8 +3285,6 @@ void Load_picture(byte image)
     Display_cursor();
   }
 
-  //if (!image)
-  //  Swap_data_of_image_and_brush();
   Hide_cursor();
   Print_filename();
   Display_cursor();
@@ -3432,6 +3442,7 @@ void Save_picture(byte image)
   T_IO_Context save_context;
   static char filename [MAX_PATH_CHARACTERS];
   static char directory[MAX_PATH_CHARACTERS];
+  byte saved_main_format;
   
   if (image)
   {
@@ -3445,13 +3456,19 @@ void Save_picture(byte image)
     strcpy(filename, Brush_filename);
     strcpy(directory, Brush_file_directory);
     Init_context_brush(&save_context, filename, directory);
-    save_context.Format = Main_fileformat;
+    save_context.Format = Brush_fileformat;
+    // back up the fileselector's format filter
+    saved_main_format=Main_format;
+    Main_format=Brush_fileformat;
   }
-  
-  //if (!image)
-  //  Swap_data_of_image_and_brush();
 
   confirm=Button_Load_or_Save(0, &save_context);
+  if (!image)
+  {
+    // restore the fileselector's format filter
+    Brush_format=Main_format;
+    Main_format=saved_main_format;
+  }
 
   if (confirm && File_exists(save_context.File_name))
   {
@@ -3482,11 +3499,13 @@ void Save_picture(byte image)
     if (!File_error && image && !format->Palette_only && (Main_backups->Pages->Nb_layers==1 || format->Supports_layers))
     {
       Main_image_is_modified=0;
+      Main_fileformat=save_context.Format;
       strcpy(Main_backups->Pages->Filename, save_context.File_name);
       strcpy(Main_backups->Pages->File_directory, save_context.File_directory);
     }
     if (!image)
     {
+      Brush_fileformat=save_context.Format;
       strcpy(Brush_filename, save_context.File_name);
       strcpy(Brush_file_directory, save_context.File_directory);
     }
