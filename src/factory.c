@@ -145,7 +145,16 @@ do { \
 
 const char * Lua_version(void)
 {
-  return LUA_VERSION_MAJOR "." LUA_VERSION_MINOR;
+  // LUA_RELEASE is only available since 5.2+, with format "Lua x.y.z"
+  // The only version information available since Lua 5.0 is LUA_VERSION,
+  // with the format "Lua x.y"
+  #if defined(LUA_RELEASE)
+  return LUA_RELEASE;
+  #elif defined (LUA_VERSION)
+  return LUA_VERSION;
+  #else
+  return "Unknown";
+  #endif
 }
 
 // Updates the screen colors after a running screen has modified the palette.
