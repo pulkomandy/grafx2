@@ -339,7 +339,7 @@ int File_is_hidden(const char *fname, const char *full_name)
    // On linux/unix (default), files are considered hidden if their name
    // begins with a .
    // As a special case, we'll consider 'parent directory' (..) never hidden.
-  return fname[0]=='.' && !strcmp(fname, PARENT_DIR);
+  return fname[0]=='.' && strcmp(fname, PARENT_DIR);
 #endif
 }
 // Taille de fichier, en octets
