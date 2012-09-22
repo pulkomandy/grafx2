@@ -789,17 +789,17 @@ void Button_Stats(void)
 #if defined(__WIN32__)
     {
       ULARGE_INTEGER tailleU;
-      GetDiskFreeSpaceEx(Main_current_directory,&tailleU,NULL,NULL);
+      GetDiskFreeSpaceEx(Main_selector.Directory,&tailleU,NULL,NULL);
       mem_size = tailleU.QuadPart;
     }
 #elif defined(__linux__) || defined(__macosx__) || defined(__FreeBSD__) || defined(__SYLLABLE__) || defined(__AROS__)
     {
       struct statfs disk_info;
-      statfs(Main_current_directory,&disk_info);
+      statfs(Main_selector.Directory,&disk_info);
       mem_size=(qword) disk_info.f_bfree * (qword) disk_info.f_bsize;
     }
 #elif defined(__HAIKU__)
-	mem_size = haiku_get_free_space(Main_current_directory);
+	mem_size = haiku_get_free_space(Main_selector.Directory);
 #elif defined (__MINT__)
    _DISKINFO drvInfo;
    mem_size=0;
@@ -819,16 +819,16 @@ void Button_Stats(void)
   if (mem_size != 0)
   {
 #if defined(__AROS__)
-    char *colon = strchr(Main_current_directory, ':');
-    int len = strlen(Main_current_directory);
+    char *colon = strchr(Main_selector.Directory, ':');
+    int len = strlen(Main_selector.Directory);
     if (colon)
     {
-      len = (long)colon - (long)Main_current_directory;
+      len = (long)colon - (long)Main_selector.Directory;
     }
     if (len > 8) len = 8;
-    sprintf(buffer,"Free space on %.*s:",len,Main_current_directory);
+    sprintf(buffer,"Free space on %.*s:",len,Main_selector.Directory);
 #else
-    sprintf(buffer,"Free space on %c:",Main_current_directory[0]);
+    sprintf(buffer,"Free space on %c:",Main_selector.Directory[0]);
 #endif
     Print_in_window(10,y,buffer,STATS_TITLE_COLOR,MC_Black);
 

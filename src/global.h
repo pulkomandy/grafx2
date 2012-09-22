@@ -302,21 +302,8 @@ GFX2_GLOBAL short Main_offset_X;
 GFX2_GLOBAL short Main_offset_Y;
 /// File format of the image currently edited. It's a value of enum ::FILE_FORMATS
 GFX2_GLOBAL byte  Main_fileformat;
-///
-/// Fileselector "filter" format, for the current image.
-/// (The spare page has its own separate settings)
-/// It's 0 for "*.*", or a value of enum ::FILE_FORMATS
-GFX2_GLOBAL byte  Main_format;
-/// Index of the first file/entry to display in the fileselector.
-GFX2_GLOBAL short Main_fileselector_position;
-///
-/// Position of the "highlight" bar in the fileselector. 10 Files can be visible,
-/// So it's a number in the [0-9] range.
-GFX2_GLOBAL short Main_fileselector_offset;
-/// Current directory for the fileselector.
-GFX2_GLOBAL char  Main_current_directory[1024];
-/// Main image's file comment (some image formats support text strings).
-GFX2_GLOBAL char  Main_comment[COMMENT_SIZE+1];
+/// File selector settings
+T_Selector_settings Main_selector;
 /// X position (in screen coordinates) of the separator between normal and magnified views.
 GFX2_GLOBAL short Main_separator_position;
 /// X position (in screen coordinates) of the first pixel of the magnified view.
@@ -368,21 +355,8 @@ GFX2_GLOBAL char  Spare_file_directory[MAX_PATH_CHARACTERS];
 GFX2_GLOBAL char  Spare_filename[MAX_PATH_CHARACTERS];
 /// File format of the image currently edited as spare page. It's a value of enum ::FILE_FORMATS
 GFX2_GLOBAL byte  Spare_fileformat;
-///
-/// Fileselector "filter" format, for the spare page.
-/// (The main image has its own separate settings)
-/// It's 0 for "*.*", or a value of enum ::FILE_FORMAT
-GFX2_GLOBAL byte  Spare_format;
-/// Index of the first file/entry to display in the fileselector.
-GFX2_GLOBAL short Spare_fileselector_position;
-///
-/// Position of the "highlight" bar in the fileselector. 10 Files can be visible,
-/// So it's a number in the [0-9] range.
-GFX2_GLOBAL short Spare_fileselector_offset;
-/// Current directory for the fileselector.
-GFX2_GLOBAL char  Spare_current_directory[MAX_PATH_CHARACTERS];
-/// Spare page's file comment  (some image formats support text strings).
-GFX2_GLOBAL char  Spare_comment[COMMENT_SIZE+1];
+/// File selector settings
+T_Selector_settings Spare_selector;
 /// X position (in screen coordinates) of the separator between normal and magnified views.
 GFX2_GLOBAL short Spare_separator_position;
 /// X position (in screen coordinates) of the first pixel of the magnified view.
@@ -450,20 +424,8 @@ GFX2_GLOBAL char  Brush_file_directory[MAX_PATH_CHARACTERS];
 GFX2_GLOBAL char  Brush_filename[MAX_PATH_CHARACTERS];
 /// File format of the brush. It's a value of enum ::FILE_FORMATS
 GFX2_GLOBAL byte  Brush_fileformat;
-///
-/// Fileselector "filter" format, for the brush.
-/// It's 0 for "*.*", or a value of enum ::FILE_FORMATS
-GFX2_GLOBAL byte  Brush_format;
-/// Index of the first file/entry to display in the brush's fileselector.
-GFX2_GLOBAL short Brush_fileselector_position;
-///
-/// Position of the "highlight" bar in the brush's fileselector. 10 Files can
-/// be visible, so it's a number in the [0-9] range.
-GFX2_GLOBAL short Brush_fileselector_offset;
-/// Current directory for the brush's fileselector.
-GFX2_GLOBAL char  Brush_current_directory[256];
-/// File comment in the brush's fileselector (some image formats support text strings).
-GFX2_GLOBAL char  Brush_comment[COMMENT_SIZE+1];
+/// Fileselector settings
+T_Selector_settings Brush_selector;
 /// Indicator used for the "Rotate brush" operation.
 GFX2_GLOBAL byte  Brush_rotation_center_is_defined;
 /// Position of the brush's rotation center, in screen coordinates.

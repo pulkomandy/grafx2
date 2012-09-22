@@ -135,6 +135,9 @@ byte Native_filesel(byte load)
 
 T_Fileselector Filelist;
 
+/// Selector settings to use, for all functions called by Load_or_save
+T_Selector_settings * Selector;
+
 /// Name of the current directory
 //static char Selector_directory[1024];
 /// Filename (without directory) of the highlighted file
@@ -1047,7 +1050,7 @@ void Display_bookmark(T_Dropdown_button * Button, int bookmark_number)
 
 void Print_current_directory(void)
 //
-// Affiche Main_current_directory sur 37 caractères
+// Affiche Selector->Directory sur 37 caractères
 //
 {
   char temp_name[MAX_DISPLAYABLE_PATH+1]; // Nom tronqué
@@ -1056,13 +1059,13 @@ void Print_current_directory(void)
 
   Window_rectangle(10,84,37*8,8,MC_Light);
 
-  length=strlen(Main_current_directory);
+  length=strlen(Selector->Directory);
   if (length>MAX_DISPLAYABLE_PATH)
   { // Doh! il va falloir tronquer le répertoire (bouh !)
 
     // On commence par copier bêtement les 3 premiers caractères (e.g. "C:\")
     for (index=0;index<3;index++)
-      temp_name[index]=Main_current_directory[index];
+      temp_name[index]=Selector->Directory[index];
 
     // On y rajoute 3 petits points:
     strcpy(temp_name+3,"...");
@@ -1070,12 +1073,12 @@ void Print_current_directory(void)
     //  Ensuite, on cherche un endroit à partir duquel on pourrait loger tout
     // le reste de la chaine (Ouaaaaaah!!! Vachement fort le mec!!)
     for (index++;index<length;index++)
-      if ( (Main_current_directory[index]==PATH_SEPARATOR[0]) &&
+      if ( (Selector->Directory[index]==PATH_SEPARATOR[0]) &&
            (length-index<=MAX_DISPLAYABLE_PATH-6) )
       {
         // Ouf: on vient de trouver un endroit dans la chaîne à partir duquel
         // on peut faire la copie:
-        strcpy(temp_name+6,Main_current_directory+index);
+        strcpy(temp_name+6,Selector->Directory+index);
         break;
       }
 
@@ -1083,7 +1086,7 @@ void Print_current_directory(void)
     Print_in_window(10,84,temp_name,MC_Black,MC_Light);
   }
   else // Ahhh! La chaîne peut loger tranquillement dans la fenêtre
-    Print_in_window(10,84,Main_current_directory,MC_Black,MC_Light);
+    Print_in_window(10,84,Selector->Directory,MC_Black,MC_Light);
     
   Update_window_area(10,84,37*8,8);
 }
@@ -1132,28 +1135,28 @@ void Reload_list_of_files(byte filter, T_Scroller_button * button)
   // the directory content may have changed.
   //
   // Make the offset absolute
-  Main_fileselector_offset += Main_fileselector_position;
+  Selector->Offset += Selector->Position;
   // Ensure it's within limits
-  if (Main_fileselector_offset >= Filelist.Nb_elements)
+  if (Selector->Offset >= Filelist.Nb_elements)
   {
-    Main_fileselector_offset = Filelist.Nb_elements-1;
+    Selector->Offset = Filelist.Nb_elements-1;
   }
   // Ensure the position doesn't show "too many files"
-  if (Main_fileselector_position!=0 && Main_fileselector_position>(Filelist.Nb_elements-10))
+  if (Selector->Position!=0 && Selector->Position>(Filelist.Nb_elements-10))
   {
     if (Filelist.Nb_elements<10)
     {
-      Main_fileselector_position=0;
+      Selector->Position=0;
     }
     else
     {
-      Main_fileselector_position=Filelist.Nb_elements-10;
+      Selector->Position=Filelist.Nb_elements-10;
     }
   }
   // Restore the offset as relative to the position.
-  Main_fileselector_offset -= Main_fileselector_position;
+  Selector->Offset -= Selector->Position;
 
-  Prepare_and_display_filelist(Main_fileselector_position,Main_fileselector_offset,button);
+  Prepare_and_display_filelist(Selector->Position,Selector->Offset,button);
 }
 
 void Scroll_fileselector(T_Scroller_button * file_scroller)
@@ -1163,14 +1166,14 @@ void Scroll_fileselector(T_Scroller_button * file_scroller)
   strcpy(old_filename,Selector_filename);
 
   // On regarde si la liste a bougé
-  if (file_scroller->Position!=Main_fileselector_position)
+  if (file_scroller->Position!=Selector->Position)
   {
     // Si c'est le cas, il faut mettre à jour la jauge
-    file_scroller->Position=Main_fileselector_position;
+    file_scroller->Position=Selector->Position;
     Window_draw_slider(file_scroller);
   }
   // On récupére le nom du schmilblick à "accéder"
-  Get_selected_item(&Filelist, Main_fileselector_position,Main_fileselector_offset,Selector_filename,&Selected_type);
+  Get_selected_item(&Filelist, Selector->Position,Selector->Offset,Selector_filename,&Selected_type);
   if (strcmp(old_filename,Selector_filename))
     New_preview_is_needed=1;
 
@@ -1205,20 +1208,20 @@ void Highlight_file(short index)
 
   if ((Filelist.Nb_elements<=10) || (index<5))
   {
-    Main_fileselector_position=0;
-    Main_fileselector_offset=index;
+    Selector->Position=0;
+    Selector->Offset=index;
   }
   else
   {
     if (index>=Filelist.Nb_elements-5)
     {
-      Main_fileselector_position=Filelist.Nb_elements-10;
-      Main_fileselector_offset=index-Main_fileselector_position;
+      Selector->Position=Filelist.Nb_elements-10;
+      Selector->Offset=index-Selector->Position;
     }
     else
     {
-      Main_fileselector_position=index-4;
-      Main_fileselector_offset=4;
+      Selector->Position=index-4;
+      Selector->Offset=4;
     }
   }
 }
@@ -1337,7 +1340,7 @@ int Quicksearch_list(T_List_button * list, T_Fileselector * selector)
   return 0;
 }
 
-byte Button_Load_or_Save(byte load, T_IO_Context *context)
+byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context *context)
   // load=1 => On affiche le menu du bouton LOAD
   // load=0 => On affiche le menu du bouton SAVE
 {
@@ -1356,6 +1359,8 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
   char  save_filename[MAX_PATH_CHARACTERS];
   char  initial_comment[COMMENT_SIZE+1];
   short window_shortcut;
+
+  Selector=settings;
 
   Reset_quicksearch();
   
@@ -1385,21 +1390,21 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
     else
       Open_window(310,200,"Save brush");
     Window_set_normal_button(198,180,51,14,"Save",0,1,SDLK_RETURN); // 1
-    if (Main_format<=FORMAT_ALL_FILES) // Correction du *.*
+    if (Selector->Format_filter<=FORMAT_ALL_FILES) // Correction du *.*
     {
-      Main_format=Main_fileformat;
-      Main_fileselector_position=0;
-      Main_fileselector_offset=0;
+      Selector->Format_filter=Main_fileformat;
+      Selector->Position=0;
+      Selector->Offset=0;
     }
 
-    if (Get_fileformat(Main_format)->Save == NULL) // Correction d'un format insauvable
+    if (Get_fileformat(Selector->Format_filter)->Save == NULL) // Correction d'un format insauvable
     {
-      Main_format=DEFAULT_FILEFORMAT;
-      Main_fileselector_position=0;
-      Main_fileselector_offset=0;
+      Selector->Format_filter=DEFAULT_FILEFORMAT;
+      Selector->Position=0;
+      Selector->Offset=0;
     }
     // Affichage du commentaire
-    if (Get_fileformat(Main_format)->Comment)
+    if (Get_fileformat(Selector->Format_filter)->Comment)
       Print_in_window(45,70,context->Comment,MC_Black,MC_Light);      
   }
 
@@ -1422,7 +1427,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
   // Dropdown pour les formats de fichier
   formats_dropdown=
     Window_set_dropdown_button(68,28,52,11,0,
-      Get_fileformat(Main_format)->Label,
+      Get_fileformat(Selector->Format_filter)->Label,
       1,0,1,RIGHT_SIDE|LEFT_SIDE,0); // 6
 
   for (format=0; format < Nb_known_formats(); format++)
@@ -1466,17 +1471,17 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
     chdir(context->File_directory);
     Dgetpath(path,0);
     strcat(path,PATH_SEPARATOR);
-    strcpy(Main_current_directory,path);  
+    strcpy(Selector->Directory,path);  
   }
   #else
   {
     chdir(context->File_directory);
-    getcwd(Main_current_directory,256);
+    getcwd(Selector->Directory,256);
   }
   #endif
   
   // Affichage des premiers fichiers visibles:
-  Reload_list_of_files(Main_format,file_scroller);
+  Reload_list_of_files(Selector->Format_filter,file_scroller);
 
   if (!load)
   {
@@ -1487,7 +1492,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
     Print_filename_in_fileselector();
 
     Highlight_file(Find_file_in_fileselector(&Filelist, context->File_name));
-    Prepare_and_display_filelist(Main_fileselector_position,Main_fileselector_offset,file_scroller);
+    Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller);
   }
 
   New_preview_is_needed=1;
@@ -1536,7 +1541,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
           char * message;
           Hide_cursor();
           // On affiche une demande de confirmation
-          if (Main_fileselector_position+Main_fileselector_offset>=Filelist.Nb_directories)
+          if (Selector->Position+Selector->Offset>=Filelist.Nb_directories)
           {
             message="Delete file ?";
           }
@@ -1547,7 +1552,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
           if (Confirmation_box(message))
           {
             // Si c'est un fichier
-            if (Main_fileselector_position+Main_fileselector_offset>=Filelist.Nb_directories)
+            if (Selector->Position+Selector->Offset>=Filelist.Nb_directories)
               // On efface le fichier (si on peut)
               temp=(!remove(Selector_filename));
             else // Si c'est un repertoire
@@ -1557,38 +1562,30 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
             if (temp) // temp indique si l'effacement s'est bien passé
             {
               // On remonte si c'était le dernier élément de la liste
-              if (Main_fileselector_position+Main_fileselector_offset==Filelist.Nb_elements-1)
+              if (Selector->Position+Selector->Offset==Filelist.Nb_elements-1)
               {
-                if (Main_fileselector_position)
-                  Main_fileselector_position--;
+                if (Selector->Position)
+                  Selector->Position--;
                 else
-                  if (Main_fileselector_offset)
-                    Main_fileselector_offset--;
+                  if (Selector->Offset)
+                    Selector->Offset--;
               }
               else // Si ce n'était pas le dernier, il faut faire gaffe à ce
               {    // que ses copains d'en dessous ne remontent pas trop.
-                if ( (Main_fileselector_position)
-                  && (Main_fileselector_position+10==Filelist.Nb_elements) )
+                if ( (Selector->Position)
+                  && (Selector->Position+10==Filelist.Nb_elements) )
                   {
-                    Main_fileselector_position--;
-                    Main_fileselector_offset++;
+                    Selector->Position--;
+                    Selector->Offset++;
                   }
               }
               // On relit les informations
-              Reload_list_of_files(Main_format,file_scroller);
+              Reload_list_of_files(Selector->Format_filter,file_scroller);
               // On demande la preview du nouveau fichier sur lequel on se trouve
               New_preview_is_needed=1;
             }
             else
               Error(0);
-
-            // On place la barre de sélection du brouillon au début s'il a le
-            // même répertoire que l'image principale.
-            if (!strcmp(Main_current_directory,Spare_current_directory))
-            {
-              Spare_fileselector_position=0;
-              Spare_fileselector_offset=0;
-            }
           }
         }
         break;
@@ -1599,17 +1596,17 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
         temp=Compute_click_offset_in_fileselector();
         if (temp>=0)
         {
-          if (temp!=Main_fileselector_offset)
+          if (temp!=Selector->Offset)
           {
             // On met à jour le décalage
-            Main_fileselector_offset=temp;
+            Selector->Offset=temp;
 
             // On récupére le nom du schmilblick à "accéder"
-            Get_selected_item(&Filelist, Main_fileselector_position,Main_fileselector_offset,Selector_filename,&Selected_type);
+            Get_selected_item(&Filelist, Selector->Position,Selector->Offset,Selector_filename,&Selected_type);
             // On affiche le nouveau nom de fichier
             Print_filename_in_fileselector();
             // On affiche à nouveau la liste
-            Display_file_list(&Filelist, Main_fileselector_position,Main_fileselector_offset);
+            Display_file_list(&Filelist, Selector->Position,Selector->Offset);
 
             // On vient de changer de nom de fichier, donc on doit s'appreter
             // a rafficher une preview
@@ -1623,8 +1620,8 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
             // faut mettre le nom de fichier au nom du répertoire. Sinon, dans
             // certains cas, on risque de sauvegarder avec le nom du fichier
             // actuel au lieu de changer de répertoire.
-            if (Main_fileselector_position+Main_fileselector_offset<Filelist.Nb_directories)
-              Get_selected_item(&Filelist, Main_fileselector_position,Main_fileselector_offset,Selector_filename,&Selected_type);
+            if (Selector->Position+Selector->Offset<Filelist.Nb_directories)
+              Get_selected_item(&Filelist, Selector->Position,Selector->Offset,Selector_filename,&Selected_type);
 
             has_clicked_ok=1;
             New_preview_is_needed=1;
@@ -1637,13 +1634,13 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
 
       case  5 : // Scroller de fichiers
         Hide_cursor();
-        Main_fileselector_position=Window_attribute2;
+        Selector->Position=Window_attribute2;
         // On récupére le nom du schmilblick à "accéder"
-        Get_selected_item(&Filelist, Main_fileselector_position,Main_fileselector_offset,Selector_filename,&Selected_type);
+        Get_selected_item(&Filelist, Selector->Position,Selector->Offset,Selector_filename,&Selected_type);
         // On affiche le nouveau nom de fichier
         Print_filename_in_fileselector();
         // On affiche à nouveau la liste
-        Display_file_list(&Filelist, Main_fileselector_position,Main_fileselector_offset);
+        Display_file_list(&Filelist, Selector->Position,Selector->Offset);
         Display_cursor();
         New_preview_is_needed=1;
         Reset_quicksearch();
@@ -1651,35 +1648,35 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
 
     case  6 : // File Format dropdown
         // Refresh fileselector according to new filter
-        if (Main_format != Window_attribute2)
+        if (Selector->Format_filter != Window_attribute2)
         {
           int pos_last_dot;
           char* savename = NULL;
     
-          Main_format = Window_attribute2;
+          Selector->Format_filter = Window_attribute2;
           if (Filelist.Nb_elements>0)
           {
             T_Fileselector_item * current_item;
-            current_item = Get_item_by_index(&Filelist, Main_fileselector_position + Main_fileselector_offset);
+            current_item = Get_item_by_index(&Filelist, Selector->Position + Selector->Offset);
             // In "save" box, if current name is a (possible) filename
             // with extension, set it to new format's extension
             if (!load &&
               current_item->Type == 0 &&
-              Get_fileformat(Main_format)->Default_extension[0] != '\0' &&
+              Get_fileformat(Selector->Format_filter)->Default_extension[0] != '\0' &&
               (pos_last_dot=Position_last_dot(Selector_filename))!=-1 &&
               Selector_filename[pos_last_dot+1]!='\0')
             {
               strcpy(Selector_filename + pos_last_dot + 1,
-                Get_fileformat(Main_format)->Default_extension);
+                Get_fileformat(Selector->Format_filter)->Default_extension);
             }
           }
           savename = (char *)strdup(Selector_filename);
           // By default, position list at the beginning
-          Main_fileselector_position = 0;
-          Main_fileselector_offset = 0;
+          Selector->Position = 0;
+          Selector->Offset = 0;
           // Print the first visible files
           Hide_cursor();
-          Reload_list_of_files(Main_format, file_scroller);
+          Reload_list_of_files(Selector->Format_filter, file_scroller);
           New_preview_is_needed = 1;
           Reset_quicksearch();
           if (savename != NULL)
@@ -1689,7 +1686,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
             if (pos!=0)
             {
               Highlight_file(pos);
-              Prepare_and_display_filelist(Main_fileselector_position,Main_fileselector_offset,file_scroller);
+              Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller);
             }
             // If the file is (still present) or it's a name with new
             // extension, set it as the proposed file name.
@@ -1702,7 +1699,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
         }
         break;
       case  7 : // Saisie d'un commentaire pour la sauvegarde
-        if ( (!load) && (Get_fileformat(Main_format)->Comment) )
+        if ( (!load) && (Get_fileformat(Selector->Format_filter)->Comment) )
         {
           Readline(45, 70, context->Comment, 32, INPUT_TYPE_STRING);
           Display_cursor();
@@ -1717,7 +1714,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
         if (Filelist.Nb_elements>0)
         {
           T_Fileselector_item * current_item;
-          current_item = Get_item_by_index(&Filelist, Main_fileselector_position + Main_fileselector_offset);
+          current_item = Get_item_by_index(&Filelist, Selector->Position + Selector->Offset);
           if (current_item->Type != 0 && !FILENAME_COMPARE(current_item->Full_name,Selector_filename))
             // current name is a highlighted directory
             Selector_filename[0]='\0';
@@ -1731,12 +1728,12 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
               dummy=1;
           if (!dummy)
           {
-            if (Get_fileformat(Main_format)->Default_extension)
+            if (Get_fileformat(Selector->Format_filter)->Default_extension)
             {
               if(!Directory_exists(Selector_filename))
               {
                  strcat(Selector_filename, ".");
-                strcat(Selector_filename, Get_fileformat(Main_format)->Default_extension);
+                strcat(Selector_filename, Get_fileformat(Selector->Format_filter)->Default_extension);
               }
             }
             else
@@ -1784,12 +1781,12 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
           Hide_cursor();
           //   Comme on tombe sur un disque qu'on connait pas, on se place en
           // début de liste:
-          Main_fileselector_position=0;
-          Main_fileselector_offset=0;
+          Selector->Position=0;
+          Selector->Offset=0;
           // Affichage des premiers fichiers visibles:
           Read_list_of_drives(&Filelist,19);
           Sort_list_of_files(&Filelist);
-          Prepare_and_display_filelist(Main_fileselector_position,Main_fileselector_offset,file_scroller);
+          Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller);
           Display_cursor();
           New_preview_is_needed=1;
           Reset_quicksearch();
@@ -1816,15 +1813,15 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
                 free(Config.Bookmark_directory[clicked_button-10]);
                 Config.Bookmark_directory[clicked_button-10] = NULL;
                 Config.Bookmark_label[clicked_button-10][0]='\0';
-                temp=strlen(Main_current_directory);
+                temp=strlen(Selector->Directory);
                 Config.Bookmark_directory[clicked_button-10]=malloc(temp+1);
-                strcpy(Config.Bookmark_directory[clicked_button-10],Main_current_directory);
+                strcpy(Config.Bookmark_directory[clicked_button-10],Selector->Directory);
                 
-                directory_name=Find_last_separator(Main_current_directory);
+                directory_name=Find_last_separator(Selector->Directory);
                 if (directory_name && directory_name[1]!='\0')
                   directory_name++;
                 else
-                  directory_name=Main_current_directory;
+                  directory_name=Selector->Directory;
                 temp=strlen(directory_name);
                 strncpy(Config.Bookmark_label[clicked_button-10],directory_name,8);
                 if (temp>8)
@@ -1870,56 +1867,56 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
       case SDLK_DOWN : // Bas
         Reset_quicksearch();
         Hide_cursor();
-        Selector_scroll_down(&Main_fileselector_position,&Main_fileselector_offset);
+        Selector_scroll_down(&Selector->Position,&Selector->Offset);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
       case SDLK_UP : // Haut
         Reset_quicksearch();
         Hide_cursor();
-        Selector_scroll_up(&Main_fileselector_position,&Main_fileselector_offset);
+        Selector_scroll_up(&Selector->Position,&Selector->Offset);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
       case SDLK_PAGEDOWN : // PageDown
         Reset_quicksearch();
         Hide_cursor();
-        Selector_page_down(&Main_fileselector_position,&Main_fileselector_offset,9);
+        Selector_page_down(&Selector->Position,&Selector->Offset,9);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
       case SDLK_PAGEUP : // PageUp
         Reset_quicksearch();
         Hide_cursor();
-        Selector_page_up(&Main_fileselector_position,&Main_fileselector_offset,9);
+        Selector_page_up(&Selector->Position,&Selector->Offset,9);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
       case SDLK_END : // End
         Reset_quicksearch();
         Hide_cursor();
-        Selector_end(&Main_fileselector_position,&Main_fileselector_offset);
+        Selector_end(&Selector->Position,&Selector->Offset);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
       case SDLK_HOME : // Home
         Reset_quicksearch();
         Hide_cursor();
-        Selector_home(&Main_fileselector_position,&Main_fileselector_offset);
+        Selector_home(&Selector->Position,&Selector->Offset);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
       case KEY_MOUSEWHEELDOWN :
         Reset_quicksearch();
         Hide_cursor();
-        Selector_page_down(&Main_fileselector_position,&Main_fileselector_offset,3);
+        Selector_page_down(&Selector->Position,&Selector->Offset,3);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
       case KEY_MOUSEWHEELUP :
         Reset_quicksearch();
         Hide_cursor();
-        Selector_page_up(&Main_fileselector_position,&Main_fileselector_offset,3);
+        Selector_page_up(&Selector->Position,&Selector->Offset,3);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
@@ -1954,12 +1951,12 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
           selected_item=Quicksearch(&Filelist);
           if (selected_item>=0)
           {
-              temp=Main_fileselector_position+Main_fileselector_offset;
+              temp=Selector->Position+Selector->Offset;
               Hide_cursor();
               Highlight_file(selected_item);
-              Prepare_and_display_filelist(Main_fileselector_position,Main_fileselector_offset,file_scroller);
+              Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller);
               Display_cursor();
-              if (temp!=Main_fileselector_position+Main_fileselector_offset)
+              if (temp!=Selector->Position+Selector->Offset)
                 New_preview_is_needed=1;
           }
           // Key=0; ?
@@ -1984,7 +1981,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
         }
         else
         {
-            Extract_filename(previous_directory, Main_current_directory);
+            Extract_filename(previous_directory, Selector->Directory);
         }
 
         // On doit rentrer dans le répertoire:
@@ -1995,12 +1992,12 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
           char currentDrive='A';
           currentDrive=currentDrive+Dgetdrv();
           Dgetpath(path,0);
-         sprintf(Main_current_directory,"%c:\%s",currentDrive,path);
+         sprintf(Selector->Directory,"%c:\%s",currentDrive,path);
         #else
-          getcwd(Main_current_directory,256);
+          getcwd(Selector->Directory,256);
         #endif
           // On lit le nouveau répertoire
-          Read_list_of_files(&Filelist, Main_format);
+          Read_list_of_files(&Filelist, Selector->Format_filter);
           Sort_list_of_files(&Filelist);
           // On place la barre de sélection sur le répertoire d'où l'on vient
           Highlight_file(Find_file_in_fileselector(&Filelist, previous_directory));
@@ -2008,7 +2005,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
         else
           Error(0);
         // Affichage des premiers fichiers visibles:
-        Prepare_and_display_filelist(Main_fileselector_position,Main_fileselector_offset,file_scroller);
+        Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller);
         Display_cursor();
         New_preview_is_needed=1;
 
@@ -2017,8 +2014,8 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
       }
       else  // Sinon on essaye de charger ou sauver le fichier
       {
-        strcpy(context->File_directory,Main_current_directory);
-        context->Format = Main_format;
+        strcpy(context->File_directory,Selector->Directory);
+        context->Format = Selector->Format_filter;
         save_or_load_image=1;
       }
     }
@@ -2042,7 +2039,7 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
         // On efface le format du fichier
         Window_rectangle(59,59,5*8,8,MC_Light);
         // Affichage du commentaire
-        if ( (!load) && (Get_fileformat(Main_format)->Comment) )
+        if ( (!load) && (Get_fileformat(Selector->Format_filter)->Comment) )
         {
           Print_in_window(45,70,context->Comment,MC_Black,MC_Light);
         }
@@ -2064,11 +2061,11 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
 
     if (Timer_state==1) // Il faut afficher la preview
     {
-      if ( (Main_fileselector_position+Main_fileselector_offset>=Filelist.Nb_directories) && (Filelist.Nb_elements) )
+      if ( (Selector->Position+Selector->Offset>=Filelist.Nb_directories) && (Filelist.Nb_elements) )
       {
         T_IO_Context preview_context;
       
-        Init_context_preview(&preview_context, Selector_filename, Main_current_directory);
+        Init_context_preview(&preview_context, Selector_filename, Selector->Directory);
         Hide_cursor();
 
         Load_image(&preview_context);
@@ -2087,9 +2084,9 @@ byte Button_Load_or_Save(byte load, T_IO_Context *context)
   if (has_clicked_ok)
   {
     strcpy(context->File_name, Selector_filename);
-    strcpy(context->File_directory, Main_current_directory);
+    strcpy(context->File_directory, Selector->Directory);
     if (!load)
-      context->Format = Main_format;
+      context->Format = Selector->Format_filter;
   }
   else
   {

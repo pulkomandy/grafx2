@@ -1148,10 +1148,12 @@ void Button_Settings(void)
   {
     // Reset fileselector offsets
     // since different files are shown now
-    Main_fileselector_position=0;
-    Main_fileselector_offset=0;
-    Spare_fileselector_position=0;
-    Spare_fileselector_offset=0;
+    Main_selector.Position=0;
+    Main_selector.Offset=0;
+    Spare_selector.Position=0;
+    Spare_selector.Offset=0;
+    Brush_selector.Position=0;
+    Brush_selector.Offset=0;
   }
   if(Config.Allow_multi_shortcuts && !selected_config.Allow_multi_shortcuts)
   {
@@ -1562,14 +1564,14 @@ void Button_Page(void)
   // Swap du booléen "Image modifiée"
   SWAP_BYTES (Main_image_is_modified,Spare_image_is_modified)
 
-  // Swap des infos sur les fileselects
-  strcpy(Temp_buffer            ,Spare_current_directory);
-  strcpy(Spare_current_directory,Main_current_directory);
-  strcpy(Main_current_directory,Temp_buffer             );
+  // Swap fileselector data
+  SWAP_BYTES (Main_selector.Format_filter,Spare_selector.Format_filter)
+  SWAP_WORDS (Main_selector.Position,Spare_selector.Position)
+  SWAP_WORDS (Main_selector.Offset,Spare_selector.Offset)
+  strcpy(Temp_buffer            ,Spare_selector.Directory);
+  strcpy(Spare_selector.Directory,Main_selector.Directory);
+  strcpy(Main_selector.Directory,Temp_buffer             );
 
-  SWAP_BYTES (Main_format,Spare_format)
-  SWAP_WORDS (Main_fileselector_position,Spare_fileselector_position)
-  SWAP_WORDS (Main_fileselector_offset,Spare_fileselector_offset)
 
   SWAP_BYTES (Main_current_layer,Spare_current_layer)
   SWAP_DWORDS(Main_layers_visible,Spare_layers_visible)
@@ -3138,7 +3140,6 @@ void Load_picture(byte image)
   T_IO_Context context;
   static char filename [MAX_PATH_CHARACTERS];
   static char directory[MAX_PATH_CHARACTERS];
-  byte saved_main_format;
   
   if (image)
   {
@@ -3151,19 +3152,9 @@ void Load_picture(byte image)
     strcpy(filename, Brush_filename);
     strcpy(directory, Brush_file_directory);
     Init_context_brush(&context, filename, directory);
-    // back up the fileselector's format filter
-    saved_main_format=Main_format;
-    Main_format=Brush_format;
   }
-  confirm=Button_Load_or_Save(1, &context);
+  confirm=Button_Load_or_Save(image?&Main_selector:&Brush_selector, 1, &context);
 
-  if (!image)
-  {
-    // restore the fileselector's format filter
-    Brush_format=Main_format;
-    Main_format=saved_main_format;
-  }
-  
   if (confirm)
   {
     if (image)
@@ -3442,7 +3433,6 @@ void Save_picture(byte image)
   T_IO_Context save_context;
   static char filename [MAX_PATH_CHARACTERS];
   static char directory[MAX_PATH_CHARACTERS];
-  byte saved_main_format;
   
   if (image)
   {
@@ -3457,18 +3447,9 @@ void Save_picture(byte image)
     strcpy(directory, Brush_file_directory);
     Init_context_brush(&save_context, filename, directory);
     save_context.Format = Brush_fileformat;
-    // back up the fileselector's format filter
-    saved_main_format=Main_format;
-    Main_format=Brush_fileformat;
   }
 
-  confirm=Button_Load_or_Save(0, &save_context);
-  if (!image)
-  {
-    // restore the fileselector's format filter
-    Brush_format=Main_format;
-    Main_format=saved_main_format;
-  }
+  confirm=Button_Load_or_Save(image?&Main_selector:&Brush_selector,0, &save_context);
 
   if (confirm && File_exists(save_context.File_name))
   {

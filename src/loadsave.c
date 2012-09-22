@@ -51,6 +51,7 @@
 #include "engine.h"
 #include "brush.h"
 #include "setup.h"
+#include "filesel.h"
 
 // -- PKM -------------------------------------------------------------------
 void Test_PKM(T_IO_Context *);
@@ -427,7 +428,7 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
       }
   
       // Affichage du vrai format
-      if (format!=Main_format)
+      if (format!=Selector->Format_filter)
       {
         Print_in_window( 59,59,Get_fileformat(format)->Label,MC_Black,MC_Light);
       }
@@ -820,7 +821,7 @@ void Load_image(T_IO_Context *context)
         }
         
         // Comment
-        strcpy(Main_comment, context->Comment);
+        strcpy(Main_backups->Pages->Comment, context->Comment);
 
       }
     }
@@ -1280,7 +1281,7 @@ void Init_context_layered_image(T_IO_Context * context, char *file_name, char *f
   context->Width = Main_image_width;
   context->Height = Main_image_height;
   context->Nb_layers = Main_backups->Pages->Nb_layers;
-  strcpy(context->Comment, Main_comment);
+  strcpy(context->Comment, Main_backups->Pages->Comment);
   context->Transparent_color=Main_backups->Pages->Transparent_color;
   context->Background_transparent=Main_backups->Pages->Background_transparent;
   if (Pixel_ratio == PIXEL_WIDE || Pixel_ratio == PIXEL_WIDE2)

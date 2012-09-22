@@ -68,6 +68,7 @@
 #include "realpath.h"
 #include "input.h"
 #include "help.h"
+#include "filesel.h"
 
 #if defined(__WIN32__)
     #include <windows.h>
@@ -456,46 +457,43 @@ int Init_program(int argc,char * argv[])
   // Choose directory for settings (read/write)
   Set_config_directory(program_directory,Config_directory);
 #if defined(__MINT__)
-  strcpy(Main_current_directory,program_directory);
+  strcpy(Main_selector.Directory,program_directory);
 #else
 // On détermine le répertoire courant:
-  getcwd(Main_current_directory,256);
+  getcwd(Main_selector.Directory,256);
 #endif
 
   // On en profite pour le mémoriser dans le répertoire principal:
-  strcpy(Initial_directory,Main_current_directory);
+  strcpy(Initial_directory,Main_selector.Directory);
 
   // On initialise les données sur le nom de fichier de l'image de brouillon:
-  strcpy(Spare_current_directory,Main_current_directory);
+  strcpy(Spare_selector.Directory,Main_selector.Directory);
   
   Main_fileformat=DEFAULT_FILEFORMAT;
   Spare_fileformat    =Main_fileformat;
   
-  strcpy(Brush_current_directory,Main_current_directory);
-  strcpy(Brush_file_directory,Main_current_directory);
+  strcpy(Brush_selector.Directory,Main_selector.Directory);
+  strcpy(Brush_file_directory,Main_selector.Directory);
   strcpy(Brush_filename       ,"NO_NAME.GIF");
   Brush_fileformat    =Main_fileformat;
 
   // On initialise ce qu'il faut pour que les fileselects ne plantent pas:
   
-  Main_fileselector_position=0; // Au début, le fileselect est en haut de la liste des fichiers
-  Main_fileselector_offset=0; // Au début, le fileselect est en haut de la liste des fichiers
-  Main_format=FORMAT_ALL_IMAGES;
+  Main_selector.Position=0; // Au début, le fileselect est en haut de la liste des fichiers
+  Main_selector.Offset=0; // Au début, le fileselect est en haut de la liste des fichiers
+  Main_selector.Format_filter=FORMAT_ALL_IMAGES;
+  
   Main_current_layer=0;
   Main_layers_visible=0xFFFFFFFF;
   Spare_current_layer=0;
   Spare_layers_visible=0xFFFFFFFF;
   
-  Spare_fileselector_position=0;
-  Spare_fileselector_offset=0;
-  Spare_format=FORMAT_ALL_IMAGES;
-  Brush_fileselector_position=0;
-  Brush_fileselector_offset=0;
-  Brush_format=FORMAT_ALL_IMAGES;
-
-  // On initialise les commentaires des images à des chaînes vides
-  Main_comment[0]='\0';
-  Brush_comment[0]='\0';
+  Spare_selector.Position=0;
+  Spare_selector.Offset=0;
+  Spare_selector.Format_filter=FORMAT_ALL_IMAGES;
+  Brush_selector.Position=0;
+  Brush_selector.Offset=0;
+  Brush_selector.Format_filter=FORMAT_ALL_IMAGES;
 
   // On initialise d'ot' trucs
   Main_offset_X=0;
@@ -807,7 +805,7 @@ int Init_program(int argc,char * argv[])
   // backups
   if (file_in_command_line > 0)
   {
-	strcpy(Main_current_directory, main_directory);
+	strcpy(Main_selector.Directory, main_directory);
   }
   
   // Test de recuperation de fichiers sauvés

@@ -540,4 +540,13 @@ typedef struct
   byte Flipped; ///< 0:no, 1:horizontally, 2:vertically, 3:both
 } T_Tile;
 
+/// Settings for an entire file selector screen
+typedef struct T_Selector_settings
+{
+  byte Format_filter; ///< 0 for "*.*", or a value of enum ::FILE_FORMATS
+  short Position; ///< Index of the first file/entry to display in list
+  short Offset; ///< Position of the "highlight" bar in the file list
+  char  Directory[256]; ///< Directory currently browsed
+} T_Selector_settings;
+
 #endif

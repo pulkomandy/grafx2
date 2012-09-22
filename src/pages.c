@@ -178,7 +178,6 @@ void Download_infos_page_main(T_Page * page)
     Main_image_width=page->Width;
     Main_image_height=page->Height;
     memcpy(Main_palette,page->Palette,sizeof(T_Palette));
-    strcpy(Main_comment,page->Comment);
     Main_fileformat=page->File_format;
 
     if (size_is_modified)
@@ -402,7 +401,6 @@ void Upload_infos_page_main(T_Page * page)
     page->Width=Main_image_width;
     page->Height=Main_image_height;
     memcpy(page->Palette,Main_palette,sizeof(T_Palette));
-    strcpy(page->Comment,Main_comment);
     page->File_format=Main_fileformat;
   }
 }
@@ -786,7 +784,7 @@ int Init_all_backup_lists(int width,int height)
   // On y met les infos sur la dimension de démarrage
   Main_backups->Pages->Width=width;
   Main_backups->Pages->Height=height;
-  strcpy(Main_backups->Pages->File_directory,Main_current_directory);
+  strcpy(Main_backups->Pages->File_directory,Main_selector.Directory);
   strcpy(Main_backups->Pages->Filename,"NO_NAME.GIF");
 
 
@@ -825,7 +823,7 @@ int Init_all_backup_lists(int width,int height)
   Spare_backups->Pages->Height = height;
   memcpy(Spare_backups->Pages->Palette,Main_palette,sizeof(T_Palette));
   strcpy(Spare_backups->Pages->Comment,"");
-  strcpy(Spare_backups->Pages->File_directory,Main_current_directory);
+  strcpy(Spare_backups->Pages->File_directory,Main_selector.Directory);
   strcpy(Spare_backups->Pages->Filename,"NO_NAME2.GIF");
   Spare_backups->Pages->File_format=DEFAULT_FILEFORMAT;
   // Copy this informations in the global Spare_ variables
