@@ -76,6 +76,7 @@
 #include "special.h"
 #include "tiles.h"
 #include "setup.h"
+#include "layers.h"
 
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     #include <proto/dos.h>
@@ -150,6 +151,7 @@ void Button_Message_initial(void)
 {
   char  str[30];
   int   x_pos,offs_y,x,y;
+  int clicked_button=0;
 
   strcpy(str,"GrafX2 version ");
   strcat(str,Program_version);
@@ -170,6 +172,9 @@ void Button_Message_initial(void)
   //Print_in_window( 120-4*13,128,"(placeholder)",MC_Dark,MC_Light);
   Print_in_window(130-4*28,136,"http://grafx2.googlecode.com",MC_Dark,MC_Light);
 
+  Window_set_normal_button(56, 151, 71, 14, "Anim", 0, (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION), KEY_NONE);
+  Window_set_normal_button(133, 151, 71, 14, "Layers", 0, (Main_backups->Pages->Image_mode != IMAGE_MODE_LAYERED), KEY_NONE);
+  
   Update_window_area(0,0,Window_width, Window_height);
 
   Display_cursor();
@@ -177,9 +182,35 @@ void Button_Message_initial(void)
   while(!Mouse_K && !Key)
     Get_input(20);
   if (Mouse_K)
+  {
+    clicked_button = Window_get_clicked_button();
     Wait_end_of_click();
-
+  }
   Close_window();
+  
+  if (clicked_button == 1)
+  {
+    if (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED)
+    {
+      // Set to anim mode
+      if (Menu_bars[MENUBAR_LAYERS].Visible && !Menu_bars[MENUBAR_ANIMATION].Visible)
+        Set_bar_visibility(MENUBAR_LAYERS, 0, 0);
+      Set_bar_visibility(MENUBAR_ANIMATION, !Menu_bars[MENUBAR_ANIMATION].Visible, 0);
+  
+      Switch_layer_mode(IMAGE_MODE_ANIMATION);
+    }  
+    else
+    {
+      // Set to layer mode
+      if (Menu_bars[MENUBAR_ANIMATION].Visible && !Menu_bars[MENUBAR_LAYERS].Visible)
+        Set_bar_visibility(MENUBAR_ANIMATION, 0, 0);
+      Set_bar_visibility(MENUBAR_LAYERS, !Menu_bars[MENUBAR_LAYERS].Visible, 0);
+  
+      Switch_layer_mode(IMAGE_MODE_LAYERED);
+    }
+    Display_menu();
+    Display_all_screen();
+  }
   Display_cursor();
 }
 
@@ -498,20 +529,8 @@ void Button_Toggle_toolbar(void)
         Set_bar_visibility(MENUBAR_LAYERS, !Menu_bars[MENUBAR_LAYERS].Visible, 0);
 
         if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
-        {
-          // Exceptionally, this doesn't require a backup because a single-layer
-          // image is the same as a single-frame animation.
-          Main_backups->Pages->Image_mode = IMAGE_MODE_LAYERED;
-          Update_buffers(Main_image_width, Main_image_height);
-          // Refresh the buffer, special shortcut because only one layer exists.
-          memset(Main_visible_image_depth_buffer.Image, 0, Main_image_width*Main_image_height);
-          memcpy(Main_visible_image.Image,
-             Main_backups->Pages->Image[0].Pixels,
-             Main_image_width*Main_image_height);
+          Switch_layer_mode(IMAGE_MODE_LAYERED);
           
-          Update_pixel_renderer();
-          
-        }
         break;
       case 2: // anim
         if (Menu_bars[MENUBAR_LAYERS].Visible && !Menu_bars[MENUBAR_ANIMATION].Visible)
@@ -519,12 +538,7 @@ void Button_Toggle_toolbar(void)
         Set_bar_visibility(MENUBAR_ANIMATION, !Menu_bars[MENUBAR_ANIMATION].Visible, 0);
 
         if (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED)
-        {
-          // Exceptionally, this doesn't require a backup because a single-frame
-          // animation is the same as a single-layer image.
-          Main_backups->Pages->Image_mode = IMAGE_MODE_ANIMATION;
-          Update_pixel_renderer();
-        }
+          Switch_layer_mode(IMAGE_MODE_ANIMATION);
         
         break;
     }

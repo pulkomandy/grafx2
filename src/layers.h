@@ -41,3 +41,5 @@ void Button_Anim_continuous_prev(void);
 void Button_Anim_continuous_next(void);
 
 short Layer_under_mouse(void);
+
+void Switch_layer_mode(enum IMAGE_MODES new_mode);
