@@ -3987,7 +3987,8 @@ void Button_Brush_FX(void)
       Rotate_90_deg();
       break;
     case  5 : // 180° Rotation
-      Rotate_180_deg_lowlevel(Brush, Brush_width, Brush_height);
+      Rotate_180_deg_lowlevel(Brush_original_pixels, Brush_width, Brush_height);
+      Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
       Brush_offset_X=(Brush_width>>1);
       Brush_offset_Y=(Brush_height>>1);
       break;

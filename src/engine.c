@@ -934,7 +934,7 @@ void Main_handler(void)
                 break;
               case SPECIAL_ROTATE_180 : // 180° brush rotation
                 Hide_cursor();
-                Rotate_180_deg_lowlevel(Brush, Brush_width, Brush_height);
+                Rotate_180_deg_lowlevel(Brush_original_pixels, Brush_width, Brush_height);
                 // Remap according to the last used remap table
                 Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
                 Brush_offset_X=(Brush_width>>1);
