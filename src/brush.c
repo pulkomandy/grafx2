@@ -1462,6 +1462,7 @@ int Min4(long int a, long int b, long int c, long int d)
 
 // That's a lot of globals, but it saves stack space in the recursive calls.
 static Func_pixel Pixel_for_distort;
+static byte *     Distort_source;
 static byte *     Distort_buffer;
 static short      Distort_buffer_width;
 
@@ -1514,7 +1515,7 @@ void Draw_brush_linear_distort(unsigned long int tex_min_x,
   {
     if ((min_x<(max_x&0x7FFF0000)) && (min_y<(max_y&0x7FFF0000)))  
     {
-      color=Read_pixel_from_brush((tex_min_x)>>16,(tex_min_y)>>16);
+      color=*(Distort_source + (tex_min_y>>16)*Brush_width + (tex_min_x>>16));
       if (color!=Back_color)
         Pixel_for_distort(min_x>>16,min_y>>16,color);
     }
@@ -1584,6 +1585,7 @@ void Draw_brush_linear_distort(unsigned long int tex_min_x,
 void Distort_brush_preview(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4)
 {
   Pixel_for_distort=Pixel_figure_preview;
+  Distort_source=Brush; // show pixels from currently-remapped brush
   Draw_brush_linear_distort(0, 0, (Brush_width<<16), (Brush_height<<16), (x1<<16), (y1<<16), (x2<<16), (y2<<16), (x3<<16), (y3<<16), (x4<<16), (y4<<16));
 }
 
@@ -1626,6 +1628,7 @@ void Distort_brush(short x1, short y1, short x2, short y2, short x3, short y3, s
   
   // Call distort routine
   Pixel_for_distort=Pixel_in_distort_buffer;
+  Distort_source=Brush_original_pixels; // alter pixels before remapping
   Distort_buffer=new_brush;
   Distort_buffer_width=width;
   Draw_brush_linear_distort(0, 0, (Brush_width<<16), (Brush_height<<16), (x1<<16), (y1<<16), (x2<<16), (y2<<16), (x3<<16), (y3<<16), (x4<<16), (y4<<16));
