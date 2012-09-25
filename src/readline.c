@@ -103,9 +103,8 @@ int Prepend_string(char* dest, char* src, int max)
     sizes = max - sized;
   }
 
-  memmove(dest+sizes, dest, sized);
+  memmove(dest+sizes, dest, sized+1);
   memcpy(dest, src, sizes);
-
   return sizes;
 }
 
@@ -595,8 +594,9 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
         {
           int nb_added;
           char* data = getClipboard();
-          if (data == NULL) continue; // No clipboard data
-            Cleanup_string(data, input_type);
+          if (data == NULL)
+            continue; // No clipboard data
+          Cleanup_string(data, input_type);
           // Insert it at the cursor position
           nb_added = Prepend_string(str + position, data, max_size - position);
           while (nb_added)
@@ -611,6 +611,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
             nb_added--;
           }
           free(data);
+          Hide_cursor();
           goto affichage;
         }
         
