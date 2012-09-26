@@ -1781,7 +1781,11 @@ void Draw_line_preview(short start_x,short start_y,short end_x,short end_y,byte 
 void Draw_line_preview_xor(short start_x,short start_y,short end_x,short end_y,byte color)
 {
   int w, h;
-  Pixel_figure=Pixel_figure_preview_xor;
+  
+  Pixel_figure=(Func_pixel)Pixel_figure_preview_xor;
+  // Needed a cast because this function supports signed shorts,
+  // (it's usually in image space), while this time it's in screen space
+  // and some line endpoints can be out of screen.
   Draw_line_general(start_x,start_y,end_x,end_y,color);
   
   if (start_x<Limit_left)
