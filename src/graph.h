@@ -56,7 +56,7 @@ void Replace(byte New_color);
 
 void Pixel_figure_preview    (word x_pos,word y_pos,byte color);
 void Pixel_figure_preview_auto(word x_pos,word y_pos);
-void Pixel_figure_preview_xor(word x_pos,word y_pos,byte color);
+void Pixel_figure_preview_xor(short x_pos,short y_pos,byte color);
 void Pixel_figure_preview_xorback(word x_pos,word y_pos,byte color);
 void Pixel_figure_in_brush(word x_pos,word y_pos,byte color);
 

@@ -1221,7 +1221,7 @@ void Fill_general(byte fill_color)
   }
 
   // Affichage d'un point pour une preview en xor
-  void Pixel_figure_preview_xor(word x_pos,word y_pos,byte color)
+  void Pixel_figure_preview_xor(short x_pos,short y_pos,byte color)
   {
     (void)color; // unused
     
@@ -1783,14 +1783,17 @@ void Draw_line_preview_xor(short start_x,short start_y,short end_x,short end_y,b
   int w, h;
   Pixel_figure=Pixel_figure_preview_xor;
   Draw_line_general(start_x,start_y,end_x,end_y,color);
-  if (start_x<0)
-    start_x=0;
-  if (start_y<0)
-    start_y=0;
-  if (end_x<0)
-    end_x=0;
-  if (end_y<0)
-    end_y=0;
+  
+  if (start_x<Limit_left)
+    start_x=Limit_left;
+  if (start_y<Limit_top)
+    start_y=Limit_top;
+  if (end_x<Limit_left)
+    end_x=Limit_left;
+  if (end_y<Limit_top)
+    end_y=Limit_top;
+  // bottom & right limits are handled by Update_part_of_screen()  
+  
   w = end_x-start_x;
   h = end_y-start_y;
   Update_part_of_screen((start_x<end_x)?start_x:end_x,(start_y<end_y)?start_y:end_y,abs(w)+1,abs(h)+1);
