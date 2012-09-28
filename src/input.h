@@ -71,12 +71,16 @@ extern char * Drop_file_name;
 
 #if defined __HAIKU__
 	#define SHORTCUT_COPY (SDLK_c|MOD_ALT)
+#elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+	#define SHORTCUT_COPY (SDLK_c|MOD_META)
 #else
 	#define SHORTCUT_COPY (SDLK_c|MOD_CTRL)
 #endif
 
 #if defined __HAIKU__
 	#define SHORTCUT_PASTE (SDLK_v|MOD_ALT)
+#elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+	#define SHORTCUT_PASTE (SDLK_v|MOD_META)
 #else
 	#define SHORTCUT_PASTE (SDLK_v|MOD_CTRL)
 #endif
