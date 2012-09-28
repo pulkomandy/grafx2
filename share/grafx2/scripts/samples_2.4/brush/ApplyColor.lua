@@ -11,7 +11,7 @@
 
 run("../libs/dawnbringer_lib.lua")
 
-OK,tin,clz,fade,amt,brikeep,falloff,nobg,briweight   = inputbox("Apply PenColor 2 Brush",
+OK,tin,clz,fade,amt,brikeep,falloff,nobg,nopen,briweight   = inputbox("Apply PenColor 2 Brush",
                         
                            "1. Tint",               1,  0,1,-1,
                            "2. Colorize",           0,  0,1,-1,
@@ -20,6 +20,7 @@ OK,tin,clz,fade,amt,brikeep,falloff,nobg,briweight   = inputbox("Apply PenColor 
                            "Preserve Brightness", 1,  0,1,0,
                            "Bri/Dark FallOff", 1,  0,1,0,
                            "Exclude Background",     1,0,1,0,
+                           "Exclude PenColor",       0,0,1,0,
                            "ColMatch Bri-Weight %", 25,  0,100,0                                                     
 );
 
@@ -40,6 +41,10 @@ if OK == true then
  if nobg == 1 then
   pal = db.stripIndexFromPalList(pal,bg) -- Remove background color from pallist
  end
+ if nopen == 1 then
+  pal = db.stripIndexFromPalList(pal,fg) -- Remove  Pencolor from pallist
+ end
+
 
  amtA = amt / 100
  amtR = 1 - amtA
