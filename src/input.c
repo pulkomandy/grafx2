@@ -38,6 +38,16 @@
 #include "input.h"
 #include "loadsave.h"
 
+
+#define RSUPER_EMULATES_META_MOD
+// Keyboards with a Super key never seem to have a Meta key at the same time.
+// This setting allows the right 'Super' key (the one with a 'Windows' or
+// 'Amiga' label to be used as a modifier instead of a normal key.
+// This feature is especially useful for AROS where applications should use
+// generic defaults like "Right Amiga+Q = Quit".
+// In case this is annoying for some platforms, disable it.
+#endif
+
 void Handle_window_resize(SDL_ResizeEvent event);
 void Handle_window_exit(SDL_QuitEvent event);
 int Color_cycling(void);
@@ -410,6 +420,13 @@ int Handle_key_press(SDL_KeyboardEvent event)
         return Move_cursor_with_constraints();
       }
     }
+    #ifdef RSUPER_EMULATES_META_MOD
+    if (Key==SDLK_RSUPER)
+    {
+      SDL_SetModState(SDL_GetModState() | KMOD_META);
+      Key=0;
+    }
+    #endif
 
     if(Is_shortcut(Key,SPECIAL_MOUSE_UP))
     {
@@ -548,6 +565,13 @@ int Handle_key_release(SDL_KeyboardEvent event)
         modifier=MOD_ALT;
         break;
 
+      #ifdef RSUPER_EMULATES_META_MOD
+      case SDLK_RSUPER:
+        SDL_SetModState(SDL_GetModState() & ~KMOD_META);
+        modifier=MOD_META;
+        break;
+      #endif
+      
       case SDLK_RMETA:
       case SDLK_LMETA:
         modifier=MOD_META;

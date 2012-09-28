@@ -620,7 +620,12 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   true,
   SDLK_b, // B
-  0},
+  #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+  SDLK_C|MOD_META // Right-Amiga + C
+  #else
+  0
+  #endif
+  },
   {68,
   "\"Lasso\" brush grabbing",
   "Allows you to pick a brush defined",
@@ -844,7 +849,12 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "path-name.",
   true,
   SDLK_F2, // F2
-  0},
+  #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+  SDLK_A|MOD_META // Right-Amiga + A
+  #else
+  0
+  #endif
+  },
   {96,
   "Save picture",
   "Saves your picture with the last",
@@ -852,7 +862,12 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   true,
   SDLK_F2|MOD_SHIFT, // Shift + F2
-  0},
+  #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+  SDLK_S|MOD_META // Right-Amiga + S
+  #else
+  0
+  #endif
+  },
   {97,
   "Load picture",
   "Opens a file-selector that allows",
@@ -860,7 +875,12 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   true,
   SDLK_F3, // F3
-  0},
+  #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+  SDLK_O|MOD_META // Right-Amiga + O
+  #else
+  0
+  #endif
+  },
   {98,
   "Re-load picture",
   "Re-load the current picture. This",
@@ -905,8 +925,10 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
     (KEY_JOYBUTTON+JOY_BUTTON_I)
   #elif defined (__WIZ__)
     (KEY_JOYBUTTON+JOY_BUTTON_L)
+  #elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+  SDLK_Z|MOD_META // Right-Amiga + Z
   #else
-    0
+  0
   #endif
   // --
   },
@@ -963,8 +985,10 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
     (KEY_JOYBUTTON+JOY_BUTTON_HOME)
   #elif defined (__WIZ__)
     (KEY_JOYBUTTON+JOY_BUTTON_MENU)
+  #eif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+  SDLK_Q|MOD_META // Right-Amiga + Q
   #else
-    0
+  0
   #endif
   // --
 
