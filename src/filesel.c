@@ -635,11 +635,7 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
     struct mount_entry* mount_points_list;
     struct mount_entry* next;
 
-    #if defined(__BEOS__) || defined(__HAIKU__)
-        char * home_dir = getenv("$HOME");
-    #else
-        char * home_dir = getenv("HOME");
-    #endif
+    char * home_dir = getenv("HOME");
     Add_element_to_list(list, "/", Format_filename("/",name_length,2), 2, ICON_NONE);
     list->Nb_directories++;
     if(home_dir)
@@ -652,9 +648,20 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
 
     while(mount_points_list != NULL)
     {
+		byte icon = ICON_NONE;
+		if (strcmp(mount_points_list->me_type, "cd9660") == 0)
+				icon = ICON_CDROM;
+		else if (strcmp(mount_points_list->me_type, "nfs") == 0)
+				icon = ICON_NETWORK;
+		else if (strcmp(mount_points_list->me_type, "msdos") == 0)
+				icon = ICON_FLOPPY_3_5; // Only a guess...
+		else if (strcmp(mount_points_list->me_type, "ext2fs") == 0)
+				icon = ICON_HDD; // Only a guess...
+
         if(mount_points_list->me_dummy == 0 && strcmp(mount_points_list->me_mountdir,"/") && strcmp(mount_points_list->me_mountdir,"/home"))
         {
-            Add_element_to_list(list, mount_points_list->me_mountdir, Format_filename(mount_points_list->me_mountdir, name_length, 2), 2, ICON_NONE);
+            Add_element_to_list(list, mount_points_list->me_mountdir,
+				Format_filename(mount_points_list->me_mountdir, name_length, 2), 2, icon);
             list->Nb_directories++;
         }
         next = mount_points_list -> me_next;

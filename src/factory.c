@@ -1541,8 +1541,11 @@ void Draw_script_name(word x, word y, word index, byte highlighted)
       fg=(highlighted)?MC_Light:MC_Dark;
       bg=(highlighted)?MC_Dark:MC_Black;
       
-      Window_display_icon_sprite(x,y,current_item->Icon);
-      x+=8;
+      if (current_item->Icon != ICON_NONE)
+	  {
+      	Window_display_icon_sprite(x,y,current_item->Icon);
+      	x+=8;
+	  }
     }
     
     Print_in_window(x, y, current_item->Short_name, fg,bg);
