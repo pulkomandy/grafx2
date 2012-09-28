@@ -425,6 +425,7 @@ int Init_program(int argc,char * argv[])
 {   
   int temp;
   int starting_videomode;
+  enum IMAGE_MODES starting_image_mode;
   static char program_directory[MAX_PATH_CHARACTERS];
   T_Gui_skin *gfx;
   int file_in_command_line;
@@ -748,10 +749,14 @@ int Init_program(int argc,char * argv[])
   Spare_image_width=Screen_width/Pixel_width;
   Spare_image_height=Screen_height/Pixel_height;
   
+  starting_image_mode = Config.Default_mode_layers ? 
+    IMAGE_MODE_LAYERED : IMAGE_MODE_ANIMATION;
   // Allocation de mémoire pour les différents écrans virtuels (et brosse)
-  if (Init_all_backup_lists(Screen_width,Screen_height)==0)
+  if (Init_all_backup_lists(starting_image_mode , Screen_width, Screen_height)==0)
     Error(ERROR_MEMORY);
-
+  // Update toolbars' visibility, now that the current image has a mode
+  Check_menu_mode();
+  
   // Nettoyage de l'écran virtuel (les autres recevront celui-ci par copie)
   memset(Main_screen,0,Main_image_width*Main_image_height);
 
@@ -779,7 +784,7 @@ int Init_program(int argc,char * argv[])
   Draw_menu_button(BUTTON_PAL_LEFT,BUTTON_RELEASED);
   Draw_menu_button(BUTTON_PAL_RIGHT,BUTTON_RELEASED);
 
-  // On affiche le curseur pour débutter correctement l'état du programme:
+  // On affiche le curseur pour débuter correctement l'état du programme:
   Display_cursor();
 
   Spare_image_is_modified=0;

@@ -374,7 +374,7 @@ typedef struct
   byte Tilemap_allow_flipped_y;          ///< Boolean, true if the Tilemap tool should detect y-flipped tiles.
   byte Tilemap_show_count;               ///< Boolean, true if the Tilemap tool should display tile count after analysis.
   byte Use_virtual_keyboard;             ///< 0: Auto, 1: On, 2: Off
-
+  byte Default_mode_layers;              ///< Indicates if default new image has layers (alternative is animation)
 
 } T_Config;
 

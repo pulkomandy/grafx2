@@ -671,29 +671,3 @@ void Button_Anim_continuous_prev(void)
   Unselect_button(BUTTON_ANIM_PREV_FRAME);
   Display_cursor();
 }
-
-void Switch_layer_mode(enum IMAGE_MODES new_mode)
-{
-  if (new_mode == Main_backups->Pages->Image_mode)
-    return;
-
-  switch (new_mode)
-  {
-    case IMAGE_MODE_LAYERED:
-      Update_buffers(Main_image_width, Main_image_height);
-      // Refresh the buffer, special shortcut because only one layer exists.
-      memset(Main_visible_image_depth_buffer.Image, 0, Main_image_width*Main_image_height);
-      memcpy(Main_visible_image.Image,
-        Main_backups->Pages->Image[0].Pixels,
-        Main_image_width*Main_image_height);
-      break;
-    case IMAGE_MODE_ANIMATION:
-      // nothing to do
-      break;
-    case IMAGE_MODE_MODE5:
-      break;
-  }
-  
-  Main_backups->Pages->Image_mode = new_mode;
-  Update_pixel_renderer();      
-}

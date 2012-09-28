@@ -987,6 +987,13 @@ int Load_INI(T_Config * conf)
       conf->Use_virtual_keyboard=values[0];
   }
 
+  conf->Default_mode_layers=0;
+  // Optional, remembers if the user last chose layers or anim (>=2.4)
+  if (!Load_INI_get_values (file,buffer,"Default_mode_layers",1,values))
+  {
+    conf->Default_mode_layers=(values[0]!=0);
+  }
+  
   // Insert new values here
 
   fclose(file);

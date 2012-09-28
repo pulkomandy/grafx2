@@ -91,7 +91,7 @@ void Free_page_of_a_list(T_List_of_pages * list);
 /// BACKUP HIGH-LEVEL FUNCTIONS
 ///
 
-int Init_all_backup_lists(int width,int height);
+int Init_all_backup_lists(enum IMAGE_MODES image_mode,int width,int height);
 void Set_number_of_backups(int nb_backups);
 int Backup_new_image(int layers,int width,int height);
 int Backup_with_new_dimensions(int width,int height);
@@ -126,6 +126,8 @@ void Redraw_spare_image(void);
 /// Must be called after changing the head of Main_backups list, or
 /// Main_current_layer
 void Update_FX_feedback(byte with_feedback);
+
+void Switch_layer_mode(enum IMAGE_MODES new_mode);
 
 ///
 /// STATISTICS

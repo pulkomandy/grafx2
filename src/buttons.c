@@ -76,7 +76,6 @@
 #include "special.h"
 #include "tiles.h"
 #include "setup.h"
-#include "layers.h"
 
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     #include <proto/dos.h>
@@ -188,28 +187,27 @@ void Button_Message_initial(void)
   }
   Close_window();
   
-  if (clicked_button == 1)
+  if (clicked_button > 0)
   {
     if (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED)
     {
-      // Set to anim mode
-      if (Menu_bars[MENUBAR_LAYERS].Visible && !Menu_bars[MENUBAR_ANIMATION].Visible)
-        Set_bar_visibility(MENUBAR_LAYERS, 0, 0);
-      Set_bar_visibility(MENUBAR_ANIMATION, !Menu_bars[MENUBAR_ANIMATION].Visible, 0);
-  
       Switch_layer_mode(IMAGE_MODE_ANIMATION);
+      Config.Default_mode_layers = 0;
     }  
     else
     {
-      // Set to layer mode
-      if (Menu_bars[MENUBAR_ANIMATION].Visible && !Menu_bars[MENUBAR_LAYERS].Visible)
-        Set_bar_visibility(MENUBAR_ANIMATION, 0, 0);
-      Set_bar_visibility(MENUBAR_LAYERS, !Menu_bars[MENUBAR_LAYERS].Visible, 0);
-  
       Switch_layer_mode(IMAGE_MODE_LAYERED);
+      Config.Default_mode_layers = 1;
     }
-    Display_menu();
-    Display_all_screen();
+    if (Check_menu_mode())
+    {
+      Display_menu();
+      Display_all_screen();
+    }
+    // Modify the mode for the spare too
+    Spare_backups->Pages->Image_mode = Main_backups->Pages->Image_mode;
+    Update_spare_buffers(Spare_image_width,Spare_image_height);
+    Redraw_spare_image();
   }
   Display_cursor();
 }
@@ -524,8 +522,11 @@ void Button_Toggle_toolbar(void)
         Set_bar_visibility(MENUBAR_TOOLS, !Menu_bars[MENUBAR_TOOLS].Visible, 0);
         break;
       case 1: // layers
-        if (Menu_bars[MENUBAR_ANIMATION].Visible && !Menu_bars[MENUBAR_LAYERS].Visible)
+        if (Menu_bars[MENUBAR_ANIMATION].Visible)
+        {
           Set_bar_visibility(MENUBAR_ANIMATION, 0, 0);
+          Config.Default_mode_layers=1;
+        }
         Set_bar_visibility(MENUBAR_LAYERS, !Menu_bars[MENUBAR_LAYERS].Visible, 0);
 
         if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
@@ -533,8 +534,11 @@ void Button_Toggle_toolbar(void)
           
         break;
       case 2: // anim
-        if (Menu_bars[MENUBAR_LAYERS].Visible && !Menu_bars[MENUBAR_ANIMATION].Visible)
+        if (Menu_bars[MENUBAR_LAYERS].Visible)
+        {
           Set_bar_visibility(MENUBAR_LAYERS, 0, 0);
+          Config.Default_mode_layers=0;
+        }
         Set_bar_visibility(MENUBAR_ANIMATION, !Menu_bars[MENUBAR_ANIMATION].Visible, 0);
 
         if (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED)
@@ -4820,10 +4824,10 @@ void Button_Effects(void)
           Display_effect_state(177+23,24, "8 bit" ,Main_backups->Pages->Image_mode > IMAGE_MODE_ANIMATION);
           Display_cursor();
         } else {
-          Close_window();
-          Display_cursor();
+          //Close_window();
+          //Display_cursor();
           // Contraint checker/enforcer menu
-          clicked_button = 11;
+          //clicked_button = 11;
         }
         break;
       case 15: // Tilemap

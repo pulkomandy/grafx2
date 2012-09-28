@@ -768,7 +768,7 @@ int Update_spare_buffers(int width, int height)
 /// GESTION DES BACKUPS
 ///
 
-int Init_all_backup_lists(int width,int height)
+int Init_all_backup_lists(enum IMAGE_MODES image_mode, int width, int height)
 {
   // width et height correspondent à la dimension des images de départ.
   int i;
@@ -800,9 +800,11 @@ int Init_all_backup_lists(int width,int height)
   Main_visible_image.Image = NULL;
   Main_visible_image_backup.Image = NULL;
   Main_visible_image_depth_buffer.Image = NULL;
+  Main_backups->Pages->Image_mode = image_mode;
   Spare_visible_image.Width = 0;
   Spare_visible_image.Height = 0;
   Spare_visible_image.Image = NULL;
+  Spare_backups->Pages->Image_mode = image_mode;
 
   if (!Update_buffers(width, height))
     return 0;
@@ -810,11 +812,15 @@ int Init_all_backup_lists(int width,int height)
     return 0;
     
   // For speed, instead of Redraw_layered_image() we'll directly set the buffers.
-  memset(Main_visible_image.Image, 0, width*height);
-  memset(Main_visible_image_backup.Image, 0, width*height);
-  memset(Main_visible_image_depth_buffer.Image, 0, width*height);
-  memset(Spare_visible_image.Image, 0, width*height);
-    
+  if (Main_visible_image.Image != NULL)
+  {
+    memset(Main_visible_image.Image, 0, width*height);
+    memset(Main_visible_image_backup.Image, 0, width*height);
+    memset(Main_visible_image_depth_buffer.Image, 0, width*height);
+  }
+  if (Spare_visible_image.Image != NULL)
+    memset(Spare_visible_image.Image, 0, width*height);
+      
   Download_infos_page_main(Main_backups->Pages); 
   Update_FX_feedback(Config.FX_Feedback);
 
@@ -1488,4 +1494,26 @@ byte Merge_layer()
       *(Main_backups->Pages->Image[Main_current_layer-1].Pixels+i) = color;
   }
   return Delete_layer(Main_backups,Main_current_layer);
+}
+
+void Switch_layer_mode(enum IMAGE_MODES new_mode)
+{
+  if (new_mode == Main_backups->Pages->Image_mode)
+    return;
+
+  Main_backups->Pages->Image_mode = new_mode;
+
+  switch (new_mode)
+  {
+    case IMAGE_MODE_MODE5:
+    case IMAGE_MODE_LAYERED:
+      Update_buffers(Main_image_width, Main_image_height);
+      Redraw_layered_image();
+      break;
+    case IMAGE_MODE_ANIMATION:
+      // nothing to do.
+      // Eventually, we may clear the buffers to save a bit of memory...
+      break;
+  }
+  Update_pixel_renderer();      
 }

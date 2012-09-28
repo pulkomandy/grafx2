@@ -167,22 +167,31 @@ void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_ca
 // Constaint enforcer/checker ------------------------------------------------
 void Button_Constraint_mode(void)
 {
-  if (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED)
-  {
-    if (Main_backups->Pages->Nb_layers!=5 || (Main_image_width%48))
-    {
-      Verbose_message("Error!", "This emulation of Amstrad CPC's Mode5 can only be used on a 5-layer image whose width is a multiple of 48.");
-      return;
-    }
-  	// TODO backup
-    Main_backups->Pages->Image_mode = IMAGE_MODE_MODE5;
-  	// TODO set the palette to a CPC one ?
-  }
-  else if (Main_backups->Pages->Image_mode == IMAGE_MODE_MODE5)
+  int pixel;
+  
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_MODE5)
   {
     // Disable
-    Main_backups->Pages->Image_mode = IMAGE_MODE_LAYERED;
+    Switch_layer_mode(IMAGE_MODE_LAYERED);
+    return;
   }
+  if (Main_backups->Pages->Image_mode != IMAGE_MODE_LAYERED ||
+    Main_backups->Pages->Nb_layers!=5 || (Main_image_width%48))
+  {
+    Verbose_message("Error!", "This emulation of Amstrad CPC's Mode5 can only be used on a 5-layer image whose width is a multiple of 48.");
+    return;
+  }
+  for (pixel=0; pixel < Main_image_width*Main_image_height; pixel++)
+  {
+    if (Main_backups->Pages->Image[4].Pixels[pixel]>3)
+    {
+      Verbose_message("Error!", "This emulation of Amstrad CPC's Mode5 needs all pixels of layer 5 to use colors 0-3.");
+      return;
+    }
+  }
+	// TODO backup
+	Switch_layer_mode(IMAGE_MODE_MODE5);
+	// TODO set the palette to a CPC one ?
 }
 
 
