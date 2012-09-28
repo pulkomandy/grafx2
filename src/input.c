@@ -46,7 +46,6 @@
 // This feature is especially useful for AROS where applications should use
 // generic defaults like "Right Amiga+Q = Quit".
 // In case this is annoying for some platforms, disable it.
-#endif
 
 void Handle_window_resize(SDL_ResizeEvent event);
 void Handle_window_exit(SDL_QuitEvent event);
