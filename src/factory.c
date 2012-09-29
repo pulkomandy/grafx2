@@ -69,7 +69,7 @@ char * Bound_script[10];
 /// Number of characters for the description block
 #define DESC_WIDTH ((NAME_WIDTH+2)*8/6)
 /// Position of fileselector top, in window space
-#define FILESEL_Y 18
+#define FILESEL_Y 30
 
 // Work data that can be used during a script
 static byte * Brush_backup = NULL;
@@ -1634,14 +1634,6 @@ void Draw_script_information(T_Fileselector_item * script_item, const char *full
 		{
 			Print_help(8+4*6, FILESEL_Y + 89+24, "None", 'K', 0, 4);
 		}
-	} else {
-	  int q = strlen(full_name);
-	  q -= DESC_WIDTH;
-	  if (q < 0)
-		  q = 0;
-	  else
-		  full_name[q] = ELLIPSIS_CHARACTER;
-	  Print_help(8, FILESEL_Y + 89   , full_name + q, 'N', 0, 0);
 	}
   }
 
@@ -2012,12 +2004,14 @@ void Button_Brush_Factory(void)
   T_Special_button* scriptarea;
   T_Fileselector_item *item;
   int last_selected_item=-1;
+  char displayed_path[DESC_WIDTH+1];
+  int q;
   
   Reload_scripts_list();
 
   Open_window(33+8*NAME_WIDTH, 180, "Brush Factory");
   
-  Window_set_normal_button(85, 149, 67, 14, "Cancel", 0, 1, KEY_ESC); // 1
+  Window_set_normal_button(85, 161, 67, 14, "Cancel", 0, 1, KEY_ESC); // 1
 
   Window_display_frame_in(6, FILESEL_Y - 2, NAME_WIDTH*8+4, 84); // File selector
   // Fileselector
@@ -2027,10 +2021,13 @@ void Button_Brush_Factory(void)
       Scripts_selector.Nb_elements,10, 0); // 3
   scriptlist = Window_set_list_button(scriptarea,scriptscroll,Draw_script_name, 0); // 4
 
-  Window_set_normal_button(10, 149, 67, 14, "Run", 0, 1, SDLK_RETURN); // 5
+  Window_set_normal_button(10, 161, 67, 14, "Run", 0, 1, SDLK_RETURN); // 5
 
   Window_display_frame_in(6, FILESEL_Y + 88, DESC_WIDTH*6+4, 4*8+2); // Descr.
   Window_set_special_button(7, FILESEL_Y + 89+24,DESC_WIDTH*6,8); // 6
+  
+  // Box around path (slightly expands up left)
+  Window_rectangle(8, FILESEL_Y - 13, DESC_WIDTH*6+2, 9, MC_Black);
   
   while (1)
   {
@@ -2041,6 +2038,22 @@ void Button_Brush_Factory(void)
     Window_draw_slider(scriptscroll);
     
     Window_redraw_list(scriptlist);
+    // Display current path:
+    q = strlen(Config.Scripts_directory);
+    if (q<=DESC_WIDTH)
+    {
+      strcpy(displayed_path, Config.Scripts_directory);
+      for (; q<DESC_WIDTH; q++)
+        displayed_path[q]=' ';
+      displayed_path[q]='\0';
+    }
+    else
+    {
+      strcpy(displayed_path, Config.Scripts_directory+q-DESC_WIDTH);
+      displayed_path[0] = ELLIPSIS_CHARACTER;
+    }
+    Print_help(9, FILESEL_Y - 12, displayed_path, 'N', 0, 0);
+    
     Draw_script_information(Get_item_by_index(&Scripts_selector,
       scriptlist->List_start + scriptlist->Cursor_position), Config.Scripts_directory);
     
