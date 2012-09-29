@@ -685,7 +685,7 @@ void Load_image(T_IO_Context *context)
           Cursor_shape=CURSOR_SHAPE_HOURGLASS;
           Display_cursor();
           Flush_update();
-          if (Convert_24b_bitmap_to_256(Brush,context->Buffer_image_24b,context->Width,context->Height,context->Palette))
+          if (Convert_24b_bitmap_to_256(context->Buffer_image,context->Buffer_image_24b,context->Width,context->Height,context->Palette))
             File_error=2;
           Hide_cursor();
           Cursor_shape=CURSOR_SHAPE_ARROW;

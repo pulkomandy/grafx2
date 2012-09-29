@@ -3276,16 +3276,14 @@ void Load_picture(byte image)
           Compute_limits();
           Compute_paintbrush_coordinates();
         }
-      }
 
-      Compute_optimal_menu_colors(Main_palette);
-      Redraw_layered_image();
-      End_of_modification();
-      Check_menu_mode();
-      Display_all_screen();
-
-      if (image)
+        Compute_optimal_menu_colors(Main_palette);
+        Redraw_layered_image();
+        End_of_modification();
+        Check_menu_mode();
+        Display_all_screen();
         Main_image_is_modified=0;
+      }
     }
 
     Destroy_context(&context);
