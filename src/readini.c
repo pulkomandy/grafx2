@@ -750,7 +750,7 @@ int Load_INI(T_Config * conf)
     conf->Mouse_merge_movement=values[0];
   }
 
-  conf->Palette_cells_X=8;
+  conf->Palette_cells_X=16;
   // Optionnel, nombre de colonnes dans la palette (>98.0%)
   if (!Load_INI_get_values (file,buffer,"Palette_cells_X",1,values))
   {
@@ -758,7 +758,7 @@ int Load_INI(T_Config * conf)
       goto Erreur_ERREUR_INI_CORROMPU;
     conf->Palette_cells_X=values[0];
   }
-  conf->Palette_cells_Y=8;
+  conf->Palette_cells_Y=4;
   // Optionnel, nombre de lignes dans la palette (>98.0%)
   if (!Load_INI_get_values (file,buffer,"Palette_cells_Y",1,values))
   {
@@ -801,7 +801,7 @@ int Load_INI(T_Config * conf)
     else
       break;
   }
-  conf->Palette_vertical=0;
+  conf->Palette_vertical=1;
   // Optional, vertical palette option (>98.0%)
   if (!Load_INI_get_values (file,buffer,"Palette_vertical",1,values))
   {
