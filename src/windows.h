@@ -99,6 +99,7 @@ void Window_display_icon_sprite(word x_pos,word y_pos,byte type);
 
 byte Best_color(byte red,byte green,byte blue);
 byte Best_color_nonexcluded(byte red,byte green,byte blue);
+byte Best_color_range(byte red,byte green,byte blue,byte max);
 byte Best_color_perceptual(byte r,byte g,byte b);
 byte Best_color_perceptual_except(byte r,byte g,byte b, byte except);
 byte Best_color_perceptual_weighted(byte r,byte g,byte b, float weight);

@@ -707,8 +707,8 @@ int Init_program(int argc,char * argv[])
 
   memcpy(Main_palette, Gfx->Default_palette, sizeof(T_Palette));
 
-  Fore_color=Best_color_nonexcluded(255,255,255);
-  Back_color=Best_color_nonexcluded(0,0,0);
+  Fore_color=Best_color_range(255,255,255,Config.Palette_cells_X*Config.Palette_cells_Y);
+  Back_color=Best_color_range(0,0,0,Config.Palette_cells_X*Config.Palette_cells_Y);
 
   // Allocation de mémoire pour la brosse
   if (!(Brush         =(byte *)malloc(   1*   1))) Error(ERROR_MEMORY);
@@ -878,6 +878,12 @@ int Init_program(int argc,char * argv[])
           
           Hide_cursor();
           Compute_optimal_menu_colors(Main_palette);
+          Back_color=Main_backups->Pages->Background_transparent ?
+            Main_backups->Pages->Transparent_color :
+            Best_color_range(0,0,0,Config.Palette_cells_X*Config.Palette_cells_Y);
+          Fore_color=Main_palette[Back_color].R+Main_palette[Back_color].G+Main_palette[Back_color].B < 3*127 ?
+            Best_color_range(255,255,255,Config.Palette_cells_X*Config.Palette_cells_Y) :
+            Best_color_range(0,0,0,Config.Palette_cells_X*Config.Palette_cells_Y);  
           Check_menu_mode();
           Display_all_screen();
           Display_menu();
