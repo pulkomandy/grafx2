@@ -6,7 +6,7 @@ _/    _/  _/        _/    _/    _/        _/  _/      _/
 
 GrafX2 - The Ultimate 256-color bitmap paint program
 Copyright (C)1996-2001 Sunset Design (G.Dorme & K.Maritaud)
-Copyright (C)2007-2010 the Grafx2 Project Team (A.Destugues & Y.Rizoud)
+Copyright (C)2007-2012 the Grafx2 Project Team (A.Destugues & Y.Rizoud)
 -------------------------------------
 
 === ABOUT ===
@@ -31,7 +31,6 @@ Remember that right-clicking and left-clicking often have different functions,
 even on menu buttons. If you are in trouble when using the program, press <F1>
 to get contextual help. You can also check the wiki at
 http://code.google.com/p/grafx2/wiki for some more information.
-If you've hidden the menu and you're stuck, press <F10> to show it again.
 
 === LICENSE ===
 
@@ -77,6 +76,7 @@ Sends greetings and glops to pouet.net : http://pouet.net/prod.php?which=51865
 === HISTORY ===
 
 Short revision history :
+  * 10/2012  2.4       Animation
   * 04/2011  2.3       Further improvements
   * 03/2010  2.2       Layers, Lua scripting
   * 09/2009  2.1       GUI improvements and some new features.
