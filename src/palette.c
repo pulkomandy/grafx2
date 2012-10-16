@@ -310,9 +310,11 @@ void Remap_image_highlevel(byte * conversion_table)
   int layer;
 
   // Remap the flatenned image view
-  Remap_general_lowlevel(conversion_table,Main_screen,Main_screen,
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED)
+  {
+    Remap_general_lowlevel(conversion_table,Main_visible_image.Image,Main_visible_image.Image,
                          Main_image_width,Main_image_height,Main_image_width);
-
+  }
   // Remap all layers
   for (layer=0; layer<Main_backups->Pages->Nb_layers; layer++)
     Remap_general_lowlevel(conversion_table,Main_backups->Pages->Image[layer].Pixels,Main_backups->Pages->Image[layer].Pixels,Main_image_width,Main_image_height,Main_image_width);
