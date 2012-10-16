@@ -363,7 +363,7 @@ byte C64_FLI_enforcer(void)
   if (Main_backups->Pages->Nb_layers != 4)
     return 2;
   
-  Backup_layers(1<<3);
+  Backup_layers(3);
   
   memset(bitmap,0,8000);
   memset(background,0,200);

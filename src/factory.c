@@ -1808,7 +1808,7 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   // The backup also allows the script to read from it to make something
   // like a feedback off effect (convolution matrix comes to mind).
   Backup();
-  Backup_the_spare(-1);
+  Backup_the_spare(LAYER_ALL);
 
   Palette_has_changed=0;
   Brush_was_altered=0;

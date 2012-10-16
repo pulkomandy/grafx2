@@ -107,7 +107,7 @@ void Button_Layer_add(void)
   if (Main_backups->Pages->Nb_layers < max[Main_backups->Pages->Image_mode])
   {
     // Backup with unchanged layers
-    Backup_layers(0);
+    Backup_layers(LAYER_NONE);
     if (!Add_layer(Main_backups,Main_current_layer+1))
     {
       if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
@@ -142,7 +142,7 @@ void Button_Layer_remove(void)
   if (Main_backups->Pages->Nb_layers > 1)
   {
     // Backup with unchanged layers
-    Backup_layers(0);
+    Backup_layers(LAYER_NONE);
     if (!Delete_layer(Main_backups,Main_current_layer))
     {
       Update_screen_targets();
@@ -278,7 +278,7 @@ void Button_Layer_menu(void)
     if (Main_backups->Pages->Transparent_color != transparent_color ||
         Main_backups->Pages->Background_transparent != transparent_background)
     {
-      Backup_layers(-1);
+      Backup_layers(LAYER_NONE);
       Main_backups->Pages->Transparent_color = transparent_color;
       Main_backups->Pages->Background_transparent = transparent_background;
       Redraw_layered_image();
@@ -297,7 +297,7 @@ void Button_Layer_set_transparent(void)
 
   if (Main_backups->Pages->Transparent_color != Back_color)
   {
-    Backup_layers(-1);
+    Backup_layers(LAYER_ALL);
     Main_backups->Pages->Transparent_color = Back_color;
     
     Redraw_layered_image();
@@ -329,7 +329,7 @@ void Button_Layer_merge(void)
   if (Main_current_layer>0)
   {
     // Backup layer below the current
-    Backup_layers(1<<(Main_current_layer-1));
+    Backup_layers(Main_current_layer-1);
   
     Merge_layer();
     
@@ -354,7 +354,7 @@ void Button_Layer_up(void)
     dword layer_flags;
     
     // Backup with unchanged layers
-    Backup_layers(0);
+    Backup_layers(LAYER_NONE);
     
     // swap
     tmp = Main_backups->Pages->Image[Main_current_layer];
@@ -394,7 +394,7 @@ void Button_Layer_down(void)
     dword layer_flags;
   
     // Backup with unchanged layers
-    Backup_layers(0);
+    Backup_layers(LAYER_NONE);
     
     // swap
     tmp = Main_backups->Pages->Image[Main_current_layer];
@@ -513,7 +513,7 @@ void Button_Anim_time(void)
   if (clicked_button==5)
   {
     // Accept changes
-    Backup_layers(0);
+    Backup_layers(LAYER_NONE);
     switch(mode)
     {
       case 0:

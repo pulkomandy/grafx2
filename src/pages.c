@@ -609,8 +609,9 @@ void Free_last_page_of_list(T_List_of_pages * list)
   }
 }
 
-// layer_mask tells which layers have to be fresh copies instead of references
-int Create_new_page(T_Page * new_page, T_List_of_pages * list, dword layer_mask)
+// layer tells which layers have to be fresh copies instead of references :
+// it's a layer number (>=0) or LAYER_NONE or LAYER_ALL
+int Create_new_page(T_Page * new_page, T_List_of_pages * list, int layer)
 {
 
 //   This function fills the "Image" field of a new Page,
@@ -632,15 +633,15 @@ int Create_new_page(T_Page * new_page, T_List_of_pages * list, dword layer_mask)
     int i;
     for (i=0; i<new_page->Nb_layers; i++)
     {
-      if ((1<<i) & layer_mask)
+      if (layer == LAYER_ALL || i == layer)
         new_page->Image[i].Pixels=New_layer(new_page->Height*new_page->Width);
       else
         new_page->Image[i].Pixels=Dup_layer(list->Pages->Image[i].Pixels);
       new_page->Image[i].Duration=list->Pages->Image[i].Duration;
     }
   }
-
   
+
   // Insert as first
   new_page->Next = list->Pages;
   new_page->Prev = list->Pages->Prev;
@@ -879,7 +880,7 @@ int Backup_new_image(int layers,int width,int height)
   new_page->Height=height;
   new_page->Transparent_color=0;
   new_page->Gradients=Dup_gradient(NULL);
-  if (!Create_new_page(new_page,Main_backups,0xFFFFFFFF))
+  if (!Create_new_page(new_page,Main_backups,LAYER_ALL))
   {
     Error(0);
     return 0;
@@ -912,7 +913,7 @@ int Backup_with_new_dimensions(int width,int height)
   new_page->Width=width;
   new_page->Height=height;
   new_page->Transparent_color=0;
-  if (!Create_new_page(new_page,Main_backups,0xFFFFFFFF))
+  if (!Create_new_page(new_page,Main_backups,LAYER_ALL))
   {
     Error(0);
     return 0;
@@ -1062,7 +1063,7 @@ int Backup_and_resize_the_spare(int width,int height)
   
   new_page->Width=width;
   new_page->Height=height;
-  if (Create_new_page(new_page,Spare_backups,0xFFFFFFFF))
+  if (Create_new_page(new_page,Spare_backups,LAYER_ALL))
   {
     byte i;
     
@@ -1087,10 +1088,10 @@ void Backup(void)
 // Sauve la page courante comme première page de backup et crée une nouvelle page
 // pur continuer à dessiner. Utilisé par exemple pour le fill
 {
-  Backup_layers(1<<Main_current_layer);
+  Backup_layers(Main_current_layer);
 }
 
-void Backup_layers(dword layer_mask)
+void Backup_layers(int layer)
 {
   int i;
   T_Page *new_page;
@@ -1115,18 +1116,21 @@ void Backup_layers(dword layer_mask)
   // Fill it with a copy of the latest history
   Copy_S_page(new_page,Main_backups->Pages);
   new_page->Gradients=Dup_gradient(Main_backups->Pages);
-  Create_new_page(new_page,Main_backups,layer_mask);
+  Create_new_page(new_page,Main_backups,layer);
   Download_infos_page_main(new_page);
 
   Update_FX_feedback(Config.FX_Feedback);
 
   // Copy the actual pixels from the backup to the latest page
-  for (i=0; i<Main_backups->Pages->Nb_layers;i++)
+  if (layer != LAYER_NONE)
   {
-    if ((1<<i) & layer_mask)
-      memcpy(Main_backups->Pages->Image[i].Pixels,
-             Main_backups->Pages->Next->Image[i].Pixels,
-             Main_image_width*Main_image_height);
+    for (i=0; i<Main_backups->Pages->Nb_layers;i++)
+    {
+      if (layer == LAYER_ALL || i == layer)
+        memcpy(Main_backups->Pages->Image[i].Pixels,
+               Main_backups->Pages->Next->Image[i].Pixels,
+               Main_image_width*Main_image_height);
+    }
   }
   // Light up the 'has unsaved changes' indicator
   Main_image_is_modified=1;
@@ -1136,7 +1140,7 @@ void Backup_layers(dword layer_mask)
   */
 }
 
-void Backup_the_spare(dword layer_mask)
+void Backup_the_spare(int layer)
 {
   int i;
   T_Page *new_page;
@@ -1152,15 +1156,18 @@ void Backup_the_spare(dword layer_mask)
   // Fill it with a copy of the latest history
   Copy_S_page(new_page,Spare_backups->Pages);
   new_page->Gradients=Dup_gradient(Spare_backups->Pages);
-  Create_new_page(new_page,Spare_backups,layer_mask);
+  Create_new_page(new_page,Spare_backups,layer);
 
   // Copy the actual pixels from the backup to the latest page
-  for (i=0; i<Spare_backups->Pages->Nb_layers;i++)
+  if (layer != LAYER_NONE)
   {
-    if ((1<<i) & layer_mask)
-      memcpy(Spare_backups->Pages->Image[i].Pixels,
-             Spare_backups->Pages->Next->Image[i].Pixels,
-             Spare_image_width*Spare_image_height);
+    for (i=0; i<Spare_backups->Pages->Nb_layers;i++)
+    {
+      if (layer == LAYER_ALL || i == layer)
+        memcpy(Spare_backups->Pages->Image[i].Pixels,
+               Spare_backups->Pages->Next->Image[i].Pixels,
+               Spare_image_width*Spare_image_height);
+    }
   }
   // Light up the 'has unsaved changes' indicator
   Spare_image_is_modified=1;

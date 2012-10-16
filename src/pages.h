@@ -81,7 +81,7 @@ int Allocate_list_of_pages(T_List_of_pages * list);
 void Backward_in_list_of_pages(T_List_of_pages * list);
 void Advance_in_list_of_pages(T_List_of_pages * list);
 void Free_last_page_of_list(T_List_of_pages * list);
-int Create_new_page(T_Page * new_page,T_List_of_pages * current_list, dword layer_mask);
+int Create_new_page(T_Page * new_page,T_List_of_pages * current_list, int layer);
 void Change_page_number_of_list(T_List_of_pages * list,int number);
 void Free_page_of_a_list(T_List_of_pages * list);
 
@@ -90,6 +90,9 @@ void Free_page_of_a_list(T_List_of_pages * list);
 ///
 /// BACKUP HIGH-LEVEL FUNCTIONS
 ///
+
+static const int LAYER_NONE = -1;
+static const int LAYER_ALL = -2;
 
 int Init_all_backup_lists(enum IMAGE_MODES image_mode,int width,int height);
 void Set_number_of_backups(int nb_backups);
@@ -101,12 +104,12 @@ int Backup_with_new_dimensions(int width,int height);
 /// pixels. This function is meant to be used from within Lua scripts.
 int Backup_in_place(int width,int height);
 /// Backup the spare image, the one you don't see.
-void Backup_the_spare(dword layer_mask);
+void Backup_the_spare(int layer);
 int Backup_and_resize_the_spare(int width,int height);
 /// Backup with a new copy for the working layer, and references for all others.
 void Backup(void);
 /// Backup with a new copy of some layers (the others are references).
-void Backup_layers(dword layer_mask);
+void Backup_layers(int layer);
 void Undo(void);
 void Redo(void);
 void Free_current_page(void); // 'Kill' button

@@ -1705,7 +1705,7 @@ void Copy_some_colors(void)
   if (confirmation)
   {
     // Make a backup with the same pixel data as previous history steps
-    Backup_the_spare(0);
+    Backup_the_spare(LAYER_NONE);
     for (index=0; index<256; index++)
     {
       if (mask_color_to_copy[index])
@@ -1749,7 +1749,7 @@ void Button_Copy_page(void)
   switch (clicked_button)
   {
     case 1: // Pixels+palette
-      Backup_the_spare(-1);
+      // backup is done by the following function
       Copy_image_only();
       // copie de la palette
       memcpy(Spare_palette,Main_palette,sizeof(T_Palette));
@@ -1762,7 +1762,7 @@ void Button_Copy_page(void)
       break;
       
     case 2: // Pixels only
-      Backup_the_spare(-1);
+      // backup is done by the following function
       Copy_image_only();
       // Equivalent of 'end_of_modifications' for spare.
       Update_spare_buffers(Spare_image_width,Spare_image_height);
@@ -1773,7 +1773,7 @@ void Button_Copy_page(void)
       break;
       
     case 3: // Palette only
-      Backup_the_spare(0);
+      Backup_the_spare(LAYER_NONE);
       // Copy palette
       memcpy(Spare_palette,Main_palette,sizeof(T_Palette));
       // Equivalent of 'end_of_modifications' for spare.
@@ -1788,7 +1788,7 @@ void Button_Copy_page(void)
       break;
       
     case 5: // Palette and remap
-      Backup_the_spare(-1);
+      Backup_the_spare(LAYER_ALL);
       Remap_spare();
       // Copy palette
       memcpy(Spare_palette,Main_palette,sizeof(T_Palette));

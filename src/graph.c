@@ -719,7 +719,7 @@ void Get_colors_from_brush(void)
   //if (Confirmation_box("Modify current palette ?"))
   
   // Backup with unchanged layers, only palette is modified
-  Backup_layers(0);
+  Backup_layers(LAYER_NONE);
 
   // Init array of new colors  
   for (color=0;color<=255;color++)

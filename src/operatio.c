@@ -2784,7 +2784,7 @@ void Scroll_12_0(void)
     Backup();
   else
   {
-    Backup_layers(-1); // Main_layers_visible
+    Backup_layers(LAYER_ALL); // Main_layers_visible
     if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
     {
       // Ensure the backup visible image is up-to-date

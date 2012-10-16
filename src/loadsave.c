@@ -758,7 +758,7 @@ void Load_image(T_IO_Context *context)
       if (format->Palette_only)
       {
         // Make a backup step
-        Backup_layers(0);
+        Backup_layers(LAYER_NONE);
       }
       // Copy the loaded palette
       memcpy(Main_palette, context->Palette, sizeof(T_Palette));
