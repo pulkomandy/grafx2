@@ -586,6 +586,7 @@ void Load_image(T_IO_Context *context)
   unsigned int index; // index de balayage des formats
   T_Format *format = &(File_formats[2]); // Format du fichier à charger
   int i;
+  byte old_cursor_shape;
   
   // Not sure it's the best place...
   context->Color_cycles=0;
@@ -664,6 +665,7 @@ void Load_image(T_IO_Context *context)
       {
         case CONTEXT_MAIN_IMAGE:
           // Cas d'un chargement dans l'image
+          old_cursor_shape=Cursor_shape;
           Hide_cursor();
           Cursor_shape=CURSOR_SHAPE_HOURGLASS;
           Display_cursor();
@@ -675,12 +677,13 @@ void Load_image(T_IO_Context *context)
             Palette_loaded(context);
           }
           Hide_cursor();
-          Cursor_shape=CURSOR_SHAPE_ARROW;
+          Cursor_shape=old_cursor_shape;
           Display_cursor();
           break;
           
         case CONTEXT_BRUSH:
           // Cas d'un chargement dans la brosse
+          old_cursor_shape=Cursor_shape;
           Hide_cursor();
           Cursor_shape=CURSOR_SHAPE_HOURGLASS;
           Display_cursor();
@@ -688,7 +691,7 @@ void Load_image(T_IO_Context *context)
           if (Convert_24b_bitmap_to_256(context->Buffer_image,context->Buffer_image_24b,context->Width,context->Height,context->Palette))
             File_error=2;
           Hide_cursor();
-          Cursor_shape=CURSOR_SHAPE_ARROW;
+          Cursor_shape=old_cursor_shape;
           Display_cursor();
           break;
 
