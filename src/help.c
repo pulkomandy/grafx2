@@ -692,7 +692,12 @@ void Button_Stats(void)
   unsigned long long freeRam;
   qword mem_size = 0;
   int y;
-
+#if defined (__MINT__)
+  _DISKINFO drvInfo;
+  unsigned long STRAM=0,TTRAM=0;
+  char helpBuf[64]={0};
+#endif
+  
   Open_window(310,174,"Statistics");
 
   // Dessin de la fenetre ou va s'afficher le texte
@@ -718,9 +723,8 @@ void Button_Stats(void)
 #if defined (__MINT__)
   // Display free TT/ST RAM
   freeRam=0;
-  char helpBuf[64];
   
-  unsigned long STRAM,TTRAM;
+
   Atari_Memory_free(&STRAM,&TTRAM);
   freeRam=STRAM+TTRAM;
   buffer[0]='\0';
@@ -734,7 +738,7 @@ void Button_Stats(void)
 
   strncat(buffer,helpBuf,sizeof(char)*37);
   
-  if(TTRAM > (100ULL*1024*1024*1024))
+  if(TTRAM > (100UL*1024UL*1024UL*1024UL))
         sprintf(helpBuf,"TT:%u Gb",(unsigned int)(TTRAM/(1024*1024*1024)));
   else if(TTRAM > (100*1024*1024))
         sprintf(helpBuf,"TT:%u Mb",(unsigned int)(TTRAM/(1024*1024)));
@@ -799,17 +803,15 @@ void Button_Stats(void)
       mem_size=(qword) disk_info.f_bfree * (qword) disk_info.f_bsize;
     }
 #elif defined(__HAIKU__)
-	mem_size = haiku_get_free_space(Main_selector.Directory);
+   mem_size = haiku_get_free_space(Main_selector.Directory);
 #elif defined (__MINT__)
-   _DISKINFO drvInfo;
    mem_size=0;
    Dfree(&drvInfo,0);
    //number of free clusters*sectors per cluster*bytes per sector;
    // reports current drive
    mem_size=drvInfo.b_free*drvInfo.b_clsiz*drvInfo.b_secsiz;
-
 #else
-	#define NODISKSPACESUPPORT
+    #define NODISKSPACESUPPORT
     // Free disk space is only for shows. Other platforms can display 0.
     #warning "Missing code for your platform !!! Check and correct please :)"
     mem_size=0;

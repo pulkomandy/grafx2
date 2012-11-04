@@ -6,7 +6,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
-#if defined(__AROS__) || defined(__linux__) || defined(__GLIBC__)
+#if defined(__AROS__) || defined(__linux__) || defined(__GLIBC__)|| defined(__MINT__)
 #include <limits.h>
 #endif
 

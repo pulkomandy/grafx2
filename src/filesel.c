@@ -360,7 +360,16 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   char * filter = "*"; // Extension demandée
   struct stat Infos_enreg;
   char * current_path;
-
+#if defined (__MINT__)
+  char path[1024]={0};
+  char path2[1024]={0};
+  char currentDrive=0;
+  T_Fileselector_item *item=0;
+  bool bFound=false;
+  path[0]='\0';
+  path2[0]='\0';  
+#endif
+  
   // Tout d'abord, on déduit du format demandé un filtre à utiliser:
   filter = Get_fileformat(selected_format)->Extensions;
 
@@ -371,12 +380,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   // On lit tous les répertoires:
 
 #if defined (__MINT__)
-  static char path[1024];
-  static char path2[1024];
-  path[0]='\0';
-  path2[0]='\0';
-  
-  char currentDrive='A';
+  currentDrive='A';
   currentDrive=currentDrive+Dgetdrv(); 
   
   Dgetpath(path,0);
@@ -472,12 +476,11 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   }
   
 #elif defined (__MINT__)
-  T_Fileselector_item *item=NULL;
   // check if ".." exists if not add it
   // FreeMinT lists ".." already, but this is not so for TOS 
   // simply adding it will cause double PARENT_DIR under FreeMiNT
   
-  bool bFound= false;
+  bFound= false;
   
   for (item = list->First; (((item != NULL) && (bFound==false))); item = item->Next){
     if (item->Type == 1){
@@ -538,7 +541,13 @@ void bstrtostr( BSTR in, STRPTR out, TEXT max )
 // -- Lecture d'une liste de lecteurs / volumes -----------------------------
 void Read_list_of_drives(T_Fileselector *list, byte name_length)
 {
-
+#if defined(__MINT__)
+    char drive_name[]="A:\\";
+    unsigned long drive_bits=0;
+    int drive_index=0;
+    int bit_index=0;
+#endif
+  
   // Empty the current content of fileselector:
   Free_fileselector_list(list);
   // Reset number of items
@@ -608,11 +617,8 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
     }
   }
   #elif defined(__MINT__)
-    char drive_name[]="A:\\";
-    unsigned long drive_bits = Drvmap(); //get drive map bitfield
-    int drive_index;
-    int bit_index;
-    drive_index = 0;
+    drive_bits = Drvmap(); //get drive map bitfield
+  
     for (bit_index=0; bit_index<32; bit_index++)
     {
       if ( (1 << bit_index) & drive_bits )
