@@ -720,10 +720,11 @@ void Button_Stats(void)
   Print_in_window_limited(146,y,Lua_version(),10,STATS_DATA_COLOR,MC_Black);
   y+=16;
   Print_in_window(10,y,"Free memory: ",STATS_TITLE_COLOR,MC_Black);
+  y+=8;
+  
 #if defined (__MINT__)
   // Display free TT/ST RAM
   freeRam=0;
-  
 
   Atari_Memory_free(&STRAM,&TTRAM);
   freeRam=STRAM+TTRAM;
@@ -738,7 +739,7 @@ void Button_Stats(void)
 
   strncat(buffer,helpBuf,sizeof(char)*37);
   
-  if(TTRAM > (100UL*1024UL*1024UL*1024UL))
+  if(TTRAM > (100ULL*1024*1024*1024))
         sprintf(helpBuf,"TT:%u Gb",(unsigned int)(TTRAM/(1024*1024*1024)));
   else if(TTRAM > (100*1024*1024))
         sprintf(helpBuf,"TT:%u Mb",(unsigned int)(TTRAM/(1024*1024)));
@@ -757,7 +758,8 @@ void Button_Stats(void)
         sprintf(helpBuf,"(%u Kb)",(unsigned int)(freeRam/1024));
   else
         sprintf(helpBuf,"(%u b)",(unsigned int)freeRam);
-    strncat(buffer,helpBuf,sizeof(char)*37);
+   
+   strncat(buffer,helpBuf,sizeof(char)*37);
  
    Print_in_window(18,y,buffer,STATS_DATA_COLOR,MC_Black);
 
