@@ -525,7 +525,11 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   font_surface=IMG_Load(Font_name(font_number));
   if (!font_surface)
   {
-    Verbose_message("Warning","Error loading font.\nThe file may be corrupt.");
+	char buffer[256];
+	strcpy(buffer, "Error loading font.\n");
+	strcat(buffer,IMG_GetError());
+    Verbose_message("Warning",buffer);
+	// TODO this leaves a non-erased cursor when the window closes.
     return NULL;
   }
   // Font is 24bit: Perform a color reduction
