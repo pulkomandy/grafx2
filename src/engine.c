@@ -43,7 +43,8 @@
 #include "factory.h"
 #include "loadsave.h"
 #include "io.h"
-
+#include "pxsimple.h"
+#include "oldies.h"
 
 
 // we need this as global
@@ -65,62 +66,6 @@ Func_effect Effect_function_before_cancel;
 
 ///This table holds pointers to the saved window backgrounds. We can have up to 8 windows open at a time.
 byte* Window_background[8];
-
-
-///Table of tooltip texts for menu buttons
-char * Menu_tooltip[NB_BUTTONS]=
-{
-  "Hide toolbars / Select  ",
-
-  "Layers manager          ",
-  "Get/Set transparent col.",
-  "Merge layer             ",
-  "Add layer               ",
-  "Drop layer              ",
-  "Raise layer             ",
-  "Lower layer             ",
-  "Layer select / toggle   ",
-  "Paintbrush choice       ",
-  "Adjust / Transform menu ",
-  "Freehand draw. / Toggle ",
-  "Splines / Toggle        ",
-  "Lines / Toggle          ",
-  "Spray / Menu            ",
-  "Floodfill / Replace col.",
-  "Polylines / Polyforms   ",
-  "Polyfill / Filled Pforms",
-  "Empty rectangles        ",
-  "Filled rectangles       ",
-  "Empty circles / ellipses",
-  "Filled circles / ellips.",
-  "Grad. rect / Grad. menu ",
-  "Grad. spheres / ellipses",
-  "Brush grab. / Restore   ",
-  "Lasso / Restore brush   ",
-#ifdef __ENABLE_LUA__
-  "Brush effects / factory ",
-#else
-  "Brush effects           ",
-#endif
-  "Drawing modes (effects) ",
-  "Text                    ",
-  "Magnify mode / Menu     ",
-  "Pipette / Invert colors ",
-  "Screen size / Safe. res.",
-  "Go / Copy to other page ",
-  "Save as / Save          ",
-  "Load / Re-load          ",
-  "Settings / Skins        ",
-  "Clear / with backcolor  ",
-  "Help / Statistics       ",
-  "Undo / Redo             ",
-  "Kill current page       ",
-  "Quit                    ",
-  "Palette editor / setup  ",
-  "Scroll pal. bkwd / Fast ",
-  "Scroll pal. fwd / Fast  ",
-  "Color #"                 ,
-};
 
 ///Save a screen block (usually before erasing it with a new window or a dropdown menu)
 void Save_background(byte **buffer, int x_pos, int y_pos, int width, int height)
@@ -330,7 +275,7 @@ void Draw_menu_button(byte btn_number,byte pressed)
   
   if (Menu_is_visible && Menu_bars[current_menu].Visible)
     Update_rect(Menu_factor_X*(Buttons_Pool[btn_number].X_offset),
-      (Buttons_Pool[btn_number].Y_offset+Menu_bars[MENUBAR_TOOLS].Top)*Menu_factor_Y+Menu_Y,
+      (Buttons_Pool[btn_number].Y_offset+Menu_bars[current_menu].Top)*Menu_factor_Y+Menu_Y,
       width*Menu_factor_X,height*Menu_factor_Y);
 
 /*
@@ -625,7 +570,7 @@ void Status_print_palette_color(byte color)
   char str[25];
   int i;
   
-  strcpy(str,Menu_tooltip[BUTTON_CHOOSE_COL]);
+  strcpy(str,Buttons_Pool[BUTTON_CHOOSE_COL].Tooltip);
   sprintf(str+strlen(str),"%d (%d,%d,%d)",color,Main_palette[color].R,Main_palette[color].G,Main_palette[color].B);
   // Pad spaces
   for (i=strlen(str); i<24; i++)
@@ -633,6 +578,67 @@ void Status_print_palette_color(byte color)
   str[24]='\0';
   
   Print_in_menu(str,0);
+}
+
+void Layer_preview_on(int * preview_is_visible)
+{
+  int x,y;
+  short layer;
+  short layercount = Main_backups->Pages->Nb_layers;
+  static int previewW=0, previewH=0;
+
+  if (! *preview_is_visible && layercount>1)
+  {
+    previewW = Min(Main_image_width/Menu_factor_X,Layer_button_width);
+    previewH = previewW * Main_image_height / Main_image_width * Menu_factor_X / Menu_factor_Y;
+    if (previewH > Screen_height/4)
+    {
+      previewH = Screen_height/4;
+      previewW = Main_image_width*previewH/Main_image_height*Menu_factor_Y/Menu_factor_X;
+    }
+  
+    Open_popup((Buttons_Pool[BUTTON_LAYER_SELECT].X_offset + 2)*Menu_factor_X,
+    Menu_Y - previewH * Menu_factor_Y, Buttons_Pool[BUTTON_LAYER_SELECT].Width, previewH);
+    *preview_is_visible = 1;
+  
+    // Make the system think the menu is visible (Open_popup hides it)
+    // so Button_under_mouse still works
+    Menu_is_visible=Menu_is_visible_before_window;
+    Menu_Y=Menu_Y_before_window;
+
+    for(layer = 0; layer < layercount; ++layer)
+    {
+      int offset;
+      // Stop if the window is too small to show the
+      // layer button (ex: 320x200 can only display 12 layers)
+      if (layer*Layer_button_width+previewW > Window_width)
+        break;
+      
+      offset=(Layer_button_width-previewW)/2;
+      for (y = 0; y < previewH*Pixel_height*Menu_factor_Y; y++)
+      for (x = 0; x < previewW*Pixel_width*Menu_factor_X; x++)
+      {
+        int imgx = x * Main_image_width / previewW/Pixel_width/Menu_factor_X;
+        int imgy = y * Main_image_height / previewH/Pixel_height/Menu_factor_Y;
+        // Use Pixel_simple() in order to get highest resolution
+        Pixel_simple(x+((layer*Layer_button_width+offset)*Menu_factor_X+Window_pos_X)*Pixel_width, y+Window_pos_Y*Pixel_height, *(Main_backups->Pages->Image[layer].Pixels
+          + imgx + imgy * Main_image_width));
+      }
+    }
+    Update_window_area(0,0,Window_width, Window_height);
+  }
+}
+
+void Layer_preview_off(int * preview_is_visible)
+{
+  if (*preview_is_visible)
+  {
+    int x = Mouse_K;
+    Close_popup();
+    Display_cursor();
+    Mouse_K = x; // Close_popup waits for end of click and resets Mouse_K...
+    *preview_is_visible = 0;
+  }
 }
 
 ///Main handler for everything. This is the main loop of the program
@@ -647,6 +653,9 @@ void Main_handler(void)
   byte effect_modified;
   byte action;
   dword key_pressed;
+
+  int preview_is_visible=0;
+  // This is used for the layer preview
 
   do
   {
@@ -676,7 +685,7 @@ void Main_handler(void)
 
         Upload_infos_page_main(Main_backups->Pages);
   
-        flimit = Find_last_slash(Drop_file_name);
+        flimit = Find_last_separator(Drop_file_name);
         *(flimit++) = '\0';
   
         Hide_cursor();
@@ -692,12 +701,12 @@ void Main_handler(void)
           Compute_paintbrush_coordinates();
           Redraw_layered_image();
           End_of_modification();
-          Display_all_screen();
           Main_image_is_modified=0;
         }
         Destroy_context(&context);
         
         Compute_optimal_menu_colors(Main_palette);
+        Check_menu_mode();
         Display_menu();
         if (Config.Display_image_limits)
           Display_image_limits();
@@ -728,7 +737,14 @@ void Main_handler(void)
         Button_Quit();
       }
       
-      if (Key)
+      if (Pan_shortcut_pressed && Current_operation!=OPERATION_PAN_VIEW)
+      {
+        Hide_cursor();
+        Start_operation_stack(OPERATION_PAN_VIEW);
+        Display_cursor();
+        action++;
+      }
+      else if (Key)
       {
         effect_modified = 0;
         
@@ -736,6 +752,8 @@ void Main_handler(void)
         {
           if (Is_shortcut(Key,key_index))
           {
+            Layer_preview_off(&preview_is_visible);
+
             // Special keys (functions not hooked to a UI button)
             switch(key_index)
             {
@@ -916,7 +934,7 @@ void Main_handler(void)
                 break;
               case SPECIAL_ROTATE_180 : // 180° brush rotation
                 Hide_cursor();
-                Rotate_180_deg_lowlevel(Brush, Brush_width, Brush_height);
+                Rotate_180_deg_lowlevel(Brush_original_pixels, Brush_width, Brush_height);
                 // Remap according to the last used remap table
                 Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
                 Brush_offset_X=(Brush_width>>1);
@@ -1163,6 +1181,16 @@ void Main_handler(void)
                 Button_Tiling_menu();
                 action++;
                 break;
+              case SPECIAL_TILEMAP_MODE :
+                Button_Tilemap_mode();
+                effect_modified = 1;
+                action++;
+                break;
+              case SPECIAL_TILEMAP_MENU :
+                effect_modified = 1;
+                Button_Tilemap_menu();
+                action++;
+                break;
               case SPECIAL_EFFECTS_OFF :
                 Effects_off();
                 effect_modified = 1;
@@ -1292,6 +1320,11 @@ void Main_handler(void)
                 Layer_activate((key_index-SPECIAL_LAYER1_TOGGLE)/2, RIGHT_SIDE);
                 action++;
                 break;
+              case SPECIAL_FORMAT_CHECKER:
+                C64_FLI_enforcer();
+                action++;
+                break;
+
               case SPECIAL_REPEAT_SCRIPT:
 #ifdef __ENABLE_LUA__
                 Repeat_script();
@@ -1320,6 +1353,9 @@ void Main_handler(void)
                   Set_palette(Main_palette);
                 action++;
                 break;
+              case SPECIAL_HOLD_PAN:
+                // already handled by Pan_shortcut_pressed
+                break;
             }
           }
         } // End of special keys
@@ -1335,13 +1371,15 @@ void Main_handler(void)
           for (button_index=0;button_index<NB_BUTTONS;button_index++)
           {
             if (Is_shortcut(key_pressed,0x100+button_index))
-            {          
+            {
+              Layer_preview_off(&preview_is_visible);
               Select_button(button_index,LEFT_SIDE);
               prev_button_number=-1;
               action++;
             }
             else if (Is_shortcut(key_pressed,0x200+button_index))
             {
+              Layer_preview_off(&preview_is_visible);
               Select_button(button_index,RIGHT_SIDE);
               prev_button_number=-1;
               action++;
@@ -1354,8 +1392,7 @@ void Main_handler(void)
         if (effect_modified)
         {
           Hide_cursor();
-          Draw_menu_button(BUTTON_EFFECTS,
-            (Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode));
+          Draw_menu_button(BUTTON_EFFECTS, Any_effect_active());
           Display_cursor();
         }
       }
@@ -1382,7 +1419,6 @@ void Main_handler(void)
       button_index=Button_under_mouse();
 
       // Si le curseur vient de changer de zone
-
       if ( (button_index!=prev_button_number)
         || (!Cursor_in_menu_previous)
         || (prev_button_number==BUTTON_CHOOSE_COL) )
@@ -1398,7 +1434,6 @@ void Main_handler(void)
             /*if (Gfx->Hover_effect && prev_button_number > -1 && !Buttons_Pool[prev_button_number].Pressed)
               Draw_menu_button(prev_button_number, BUTTON_RELEASED);
             */
-
             Block(18*Menu_factor_X,Menu_status_Y,192*Menu_factor_X,Menu_factor_Y<<3,MC_Light);
             Update_rect(18*Menu_factor_X,Menu_status_Y,192*Menu_factor_X,Menu_factor_Y<<3);
             Display_cursor();
@@ -1418,8 +1453,8 @@ void Main_handler(void)
               /*if (Gfx->Hover_effect && prev_button_number > -1 && !Buttons_Pool[prev_button_number].Pressed)
                 Draw_menu_button(prev_button_number, BUTTON_RELEASED);
               */
-              
-              Print_in_menu(Menu_tooltip[button_index],0);
+
+              Print_in_menu(Buttons_Pool[button_index].Tooltip,0);
 
               /*if (Gfx->Hover_effect && !Buttons_Pool[button_index].Pressed)
                 Draw_menu_button(button_index, BUTTON_HIGHLIGHTED);
@@ -1450,7 +1485,7 @@ void Main_handler(void)
           }
         }
       }
-
+      
       prev_button_number=button_index;
 
       // Gestion des clicks
@@ -1460,6 +1495,7 @@ void Main_handler(void)
         {
           if (button_index>=0)
           {
+            Layer_preview_off(&preview_is_visible);
             Select_button(button_index,Mouse_K);
             prev_button_number=-1;
           }
@@ -1467,7 +1503,17 @@ void Main_handler(void)
         else
           if (Main_magnifier_mode) Move_separator();
       }
+      
+      if (button_index == BUTTON_LAYER_SELECT)
+        Layer_preview_on(&preview_is_visible);
+      else
+        Layer_preview_off(&preview_is_visible);
+      
 
+    }
+    else // if (!Cursor_in_menu)
+    {
+      Layer_preview_off(&preview_is_visible);
     }
 
     // we need to refresh that one as we may come from a sub window
@@ -1482,11 +1528,9 @@ void Main_handler(void)
       if(Cursor_in_menu_previous)
       {
         Hide_cursor();
-        
         /*if (Gfx->Hover_effect && prev_button_number > -1 && !Buttons_Pool[prev_button_number].Pressed)
           Draw_menu_button(prev_button_number, BUTTON_RELEASED);
-        */
-                
+        */    
         if ( (Current_operation!=OPERATION_COLORPICK) && (Current_operation!=OPERATION_REPLACE) )
         {
           Print_in_menu("X:       Y:             ",0);
@@ -1580,7 +1624,7 @@ void Open_window(word width,word height, const char * title)
   Block(Window_pos_X+(Menu_factor_X<<3),Window_pos_Y+(12*Menu_factor_Y),(width-16)*Menu_factor_X,Menu_factor_Y,MC_White);
 
   title_length = strlen(title);
-  if (title_length+2 > width/8)
+  if (title_length+2 > (size_t)(width/8))
     title_length = width/8-2;
   Print_in_window_limited((width-(title_length<<3))>>1,3,title,title_length,MC_Black,MC_Light);
 
@@ -1688,6 +1732,7 @@ void Close_window(void)
     Menu_is_visible=Menu_is_visible_before_window;
     Cursor_shape=Cursor_shape_before_window;
     
+    Check_menu_mode();
     Display_all_screen();
     Display_menu();
     Allow_colorcycling=1;
@@ -2493,7 +2538,7 @@ void Get_color_behind_window(byte * color, byte * click)
   Paintbrush_hidden=1;
   c=-1; // color pointée: au début aucune, comme ça on initialise tout
   if (Menu_is_visible_before_window)
-    Print_in_menu(Menu_tooltip[BUTTON_CHOOSE_COL],0);
+    Print_in_menu(Buttons_Pool[BUTTON_CHOOSE_COL].Tooltip,0);
 
   Display_cursor();
 
@@ -2523,9 +2568,9 @@ void Get_color_behind_window(byte * color, byte * click)
           for (index=strlen(str); index<a; index++)
             str[index]=' ';
           str[a]=0;
-          Print_in_menu(str,strlen(Menu_tooltip[BUTTON_CHOOSE_COL]));
+          Print_in_menu(str,strlen(Buttons_Pool[BUTTON_CHOOSE_COL].Tooltip));
 
-          Print_general((26+((d+strlen(Menu_tooltip[BUTTON_CHOOSE_COL]))<<3))*Menu_factor_X,
+          Print_general((26+((d+strlen(Buttons_Pool[BUTTON_CHOOSE_COL].Tooltip))<<3))*Menu_factor_X,
               Menu_status_Y," ",0,c);
         }
       }
@@ -3496,4 +3541,123 @@ void Delay_with_active_mouse(int speed)
   {
     Get_input(20);
   } while (Mouse_K == original_mouse_k && SDL_GetTicks()<end);
+}
+
+///
+/// Based on which toolbars are visible, updates their offsets and
+/// computes ::Menu_height and ::Menu_Y
+void Compute_menu_offsets(void)
+{
+  int i;
+  int offset;
+  
+  // Recompute all offsets    
+  offset=0;
+  Menu_height=0;
+  for (i = MENUBAR_COUNT-1; i >=0; i--)
+  {
+    Menu_bars[i].Top = offset;
+    if(Menu_bars[i].Visible)
+    {
+      offset += Menu_bars[i].Height;
+      Menu_height += Menu_bars[i].Height;
+    }
+  }
+  // Update global menu coordinates
+  Menu_Y = Screen_height - Menu_height * Menu_factor_Y;
+}
+
+///
+/// Shows or hides a tolbar from the menu.
+/// If with_redraw is set to zero, the caller should
+/// redraw itself using Display_menu() and Display_all_screen().
+void Set_bar_visibility(word bar, int visible, int with_redraw)
+{  
+  if (!visible && Menu_bars[bar].Visible)
+  {
+    // Hide it
+    Menu_bars[bar].Visible=0;
+
+    Compute_menu_offsets();
+
+    if (Main_magnifier_mode)
+    {
+      Compute_magnifier_data();
+    }
+
+    //   On repositionne le décalage de l'image pour qu'il n'y ait pas d'in-
+    // -cohérences lorsqu'on sortira du mode Loupe.
+    if (Main_offset_Y+Screen_height>Main_image_height)
+    {
+      if (Screen_height>Main_image_height)
+        Main_offset_Y=0;
+      else
+        Main_offset_Y=Main_image_height-Screen_height;
+    }
+    // On fait pareil pour le brouillon
+    if (Spare_offset_Y+Screen_height>Spare_image_height)
+    {
+      if (Screen_height>Spare_image_height)
+        Spare_offset_Y=0;
+      else
+        Spare_offset_Y=Spare_image_height-Screen_height;
+    }
+
+    Compute_magnifier_data();
+    if (Main_magnifier_mode)
+      Position_screen_according_to_zoom();
+    Compute_limits();
+    Compute_paintbrush_coordinates();
+    if (with_redraw)
+    {
+      Display_menu();
+      Display_all_screen();
+    }
+  }
+  else if (visible && !Menu_bars[bar].Visible)
+  {
+    // Show it
+    Menu_bars[bar].Visible = 1;
+    
+    Compute_menu_offsets();
+    Compute_magnifier_data();
+    if (Main_magnifier_mode)
+      Position_screen_according_to_zoom();
+    Compute_limits();
+    Compute_paintbrush_coordinates();
+    if (with_redraw)
+    {
+      Display_menu();
+      if (Main_magnifier_mode)
+        Display_all_screen();
+    }
+  }
+}
+
+///
+/// Checks if the current menu toolbars suit the current image type :
+/// layered vs anim. If they don't fit, swap the toolbars and return 1:
+/// The caller is then responsible for refreshing the screen by calling
+/// Display_menu() and Display_all_screen()
+int Check_menu_mode(void)
+{
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+  {
+    if (Menu_bars[MENUBAR_LAYERS].Visible)
+    {
+      Set_bar_visibility(MENUBAR_LAYERS, 0, 0);
+      Set_bar_visibility(MENUBAR_ANIMATION, 1, 0);
+      return 1;
+    }
+  }
+  else
+  {
+    if (Menu_bars[MENUBAR_ANIMATION].Visible)
+    {
+      Set_bar_visibility(MENUBAR_ANIMATION, 0, 0);
+      Set_bar_visibility(MENUBAR_LAYERS, 1, 0);
+      return 1;
+    }
+  }
+  return 0;
 }

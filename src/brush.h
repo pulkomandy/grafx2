@@ -125,5 +125,7 @@ byte Realloc_brush(word new_brush_width, word new_brush_height, byte *new_brush,
 /// Sets brush's original palette and color mapping.
 void Brush_set_palette(T_Palette *palette);
 
+void Begin_brush_rotation(void);
+void End_brush_rotation(void);
 
 #endif

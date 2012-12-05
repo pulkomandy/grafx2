@@ -36,6 +36,8 @@
 #include "setup.h"
 #include "realpath.h"
 #include "io.h"
+#include "windows.h"
+
 
 void Load_INI_clear_string(char * str, byte keep_comments)
 {
@@ -748,7 +750,7 @@ int Load_INI(T_Config * conf)
     conf->Mouse_merge_movement=values[0];
   }
 
-  conf->Palette_cells_X=8;
+  conf->Palette_cells_X=16;
   // Optionnel, nombre de colonnes dans la palette (>98.0%)
   if (!Load_INI_get_values (file,buffer,"Palette_cells_X",1,values))
   {
@@ -756,7 +758,7 @@ int Load_INI(T_Config * conf)
       goto Erreur_ERREUR_INI_CORROMPU;
     conf->Palette_cells_X=values[0];
   }
-  conf->Palette_cells_Y=8;
+  conf->Palette_cells_Y=4;
   // Optionnel, nombre de lignes dans la palette (>98.0%)
   if (!Load_INI_get_values (file,buffer,"Palette_cells_Y",1,values))
   {
@@ -799,7 +801,7 @@ int Load_INI(T_Config * conf)
     else
       break;
   }
-  conf->Palette_vertical=0;
+  conf->Palette_vertical=1;
   // Optional, vertical palette option (>98.0%)
   if (!Load_INI_get_values (file,buffer,"Palette_vertical",1,values))
   {
@@ -898,12 +900,13 @@ int Load_INI(T_Config * conf)
   // Optional, Menu bars visibility (> 2.1)
   if (!Load_INI_get_values (file, buffer,"Menubars_visible",1,values))
   {
-    int index;
-    for (index=MENUBAR_STATUS+1; index<MENUBAR_COUNT;index++)
-    {
-      // Note that I skip the status bar, always enabled.
-      Menu_bars[index].Visible = (values[0] & (1<<index)) ? 1 : 0;
-    }
+    byte anim_visible = (values[0] & 2)!=0;
+    byte tools_visible = (values[0] & 4)!=0;
+    
+    // Skip status bar, always enabled.
+    Menu_bars[MENUBAR_LAYERS].Visible = anim_visible;
+    Menu_bars[MENUBAR_ANIMATION].Visible = 0;
+    Menu_bars[MENUBAR_TOOLS].Visible = tools_visible;
   }
   
   conf->Right_click_colorpick=0;
@@ -945,7 +948,7 @@ int Load_INI(T_Config * conf)
   {
     // Default when empty:
     Realpath(Data_directory, conf->Scripts_directory);
-    Append_path(conf->Scripts_directory, "scripts", NULL);
+    Append_path(conf->Scripts_directory, SCRIPTS_SUBDIRECTORY, NULL);
   }
   
   conf->Allow_multi_shortcuts=0;
@@ -954,7 +957,43 @@ int Load_INI(T_Config * conf)
   {
     conf->Allow_multi_shortcuts=(values[0]!=0);
   }
+  
+  conf->Tilemap_allow_flipped_x=0;
+  // Optional, makes tilemap effect detect x-flipped tiles (>=2.4)
+  if (!Load_INI_get_values (file,buffer,"Tilemap_detect_mirrored_x",1,values))
+  {
+    conf->Tilemap_allow_flipped_x=(values[0]!=0);
+  }
+  
+  conf->Tilemap_allow_flipped_y=0;
+  // Optional, makes tilemap effect detect y-flipped tiles (>=2.4)
+  if (!Load_INI_get_values (file,buffer,"Tilemap_detect_mirrored_y",1,values))
+  {
+    conf->Tilemap_allow_flipped_y=(values[0]!=0);
+  }
+  
+  conf->Tilemap_show_count=0;
+  // Optional, makes tilemap effect display tile count (>=2.4)
+  if (!Load_INI_get_values (file,buffer,"Tilemap_count",1,values))
+  {
+    conf->Tilemap_show_count=(values[0]!=0);
+  }
+  
+  conf->Use_virtual_keyboard=0;
+  // Optional, enables virtual keyboard (>=2.4)
+  if (!Load_INI_get_values (file,buffer,"Use_virtual_keyboard",1,values))
+  {
+    if (values[0]>=0 && values[0]<=2)
+      conf->Use_virtual_keyboard=values[0];
+  }
 
+  conf->Default_mode_layers=0;
+  // Optional, remembers if the user last chose layers or anim (>=2.4)
+  if (!Load_INI_get_values (file,buffer,"Default_mode_layers",1,values))
+  {
+    conf->Default_mode_layers=(values[0]!=0);
+  }
+  
   // Insert new values here
 
   fclose(file);

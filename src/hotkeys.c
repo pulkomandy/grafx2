@@ -163,7 +163,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "left mouse button. It's useful",
   "when you want ultra-high precision.",
   true,
-  SDLK_SPACE, // Space
+  SDLK_SPACE|MOD_CTRL, // Ctrl + Space
   0},
   {17,
   "Simulate right mouse click",
@@ -597,6 +597,22 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   true,
   SDLK_b|MOD_SHIFT|MOD_ALT, // Shift + Alt + B
   0},
+  {206,
+  "Tilemap mode",
+  "Enables or disables the Tilemap",
+  "mode.",
+  "",
+  true,
+  0, // No key
+  0},
+  {207,
+  "Tilemap menu",
+  "Opens a menu where you can configure",
+  "the tilemap settings.",
+  "",
+  true,
+  0, // No key
+  0},
   {67,
   "Classical brush grabbing",
   "Allows you to pick a brush defined",
@@ -604,7 +620,12 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   true,
   SDLK_b, // B
-  0},
+  #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+  SDLK_C|MOD_META // Right-Amiga + C
+  #else
+  0
+  #endif
+  },
   {68,
   "\"Lasso\" brush grabbing",
   "Allows you to pick a brush defined",
@@ -828,7 +849,12 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "path-name.",
   true,
   SDLK_F2, // F2
-  0},
+  #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+  SDLK_A|MOD_META // Right-Amiga + A
+  #else
+  0
+  #endif
+  },
   {96,
   "Save picture",
   "Saves your picture with the last",
@@ -836,7 +862,12 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   true,
   SDLK_F2|MOD_SHIFT, // Shift + F2
-  0},
+  #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+  SDLK_S|MOD_META // Right-Amiga + S
+  #else
+  0
+  #endif
+  },
   {97,
   "Load picture",
   "Opens a file-selector that allows",
@@ -844,7 +875,12 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   true,
   SDLK_F3, // F3
-  0},
+  #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+  SDLK_O|MOD_META // Right-Amiga + O
+  #else
+  0
+  #endif
+  },
   {98,
   "Re-load picture",
   "Re-load the current picture. This",
@@ -889,8 +925,10 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
     (KEY_JOYBUTTON+JOY_BUTTON_I)
   #elif defined (__WIZ__)
     (KEY_JOYBUTTON+JOY_BUTTON_L)
+  #elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+  SDLK_Z|MOD_META // Right-Amiga + Z
   #else
-    0
+  0
   #endif
   // --
   },
@@ -947,8 +985,10 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
     (KEY_JOYBUTTON+JOY_BUTTON_HOME)
   #elif defined (__WIZ__)
     (KEY_JOYBUTTON+JOY_BUTTON_MENU)
+  #eif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+  SDLK_Q|MOD_META // Right-Amiga + Q
   #else
-    0
+  0
   #endif
   // --
 
@@ -1641,6 +1681,78 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   true,
   SDLK_BACKQUOTE|MOD_CTRL, // Ctrl + `~
   0},
+  {198,
+  "Format checker",
+  "Performs a format check on the",
+  "current image.",
+  "",
+  true,
+  0,
+  0},
+  {199,
+  "Format checker menu",
+  "Allows you to setup the checks",
+  "performed by the format checker.",
+  "",
+  true,
+  0,
+  0},
+  {200,
+  "Set frame time",
+  "Opens a window where you",
+  "can set the current animation",
+  "frame duration.",
+  true,
+  0, // No shortcut
+  0},
+  {201,
+  "Go to first frame",
+  "Edits the first frame of",
+  "an animation",
+  "",
+  true,
+  0, // No shortcut
+  0},
+  {202,
+  "Go to last frame",
+  "Edits the last frame of",
+  "an animation",
+  "",
+  true,
+  0, // No shortcut
+  0},
+  {203,
+  "Go to previous frame",
+  "Edits the previous frame of",
+  "an animation",
+  "",
+  true,
+  0, // No shortcut
+  0},
+  {204,
+  "Go to next frame",
+  "Edits the next frame of",
+  "an animation",
+  "",
+  true,
+  0, // No shortcut
+  0},
+  {205,
+  "Preview animation",
+  "Runs the current animation.",
+  "",
+  "",
+  true,
+  0, // No shortcut
+  0},
+  {208,
+  "Pan view",
+  "While this key is being held,",
+  "click and drag the mouse to",
+  "pan the view.",
+  true,
+  SDLK_SPACE, // Space
+  0},
 };
 
 word Ordering[NB_SHORTCUTS]=
@@ -1716,6 +1828,8 @@ word Ordering[NB_SHORTCUTS]=
   SPECIAL_SMEAR_MODE,               // Smear mode
   SPECIAL_TILING_MODE,              // Tiling mode
   SPECIAL_TILING_MENU,              // Tiling menu
+  SPECIAL_TILEMAP_MODE,             // Tilemap mode
+  SPECIAL_TILEMAP_MENU,             // Tilemap menu
   0x100+BUTTON_BRUSH,               // Pick brush
   0x100+BUTTON_POLYBRUSH,           // Pick polyform brush
   0x200+BUTTON_BRUSH,               // Restore brush
@@ -1843,4 +1957,13 @@ word Ordering[NB_SHORTCUTS]=
   SPECIAL_RUN_SCRIPT_9,
   SPECIAL_RUN_SCRIPT_10,
   SPECIAL_CYCLE_MODE,
+  SPECIAL_FORMAT_CHECKER,
+  SPECIAL_FORMAT_CHECKER_MENU,
+  0x100+BUTTON_ANIM_TIME,
+  0x100+BUTTON_ANIM_FIRST_FRAME,
+  0x100+BUTTON_ANIM_LAST_FRAME,
+  0x100+BUTTON_ANIM_PREV_FRAME,
+  0x100+BUTTON_ANIM_NEXT_FRAME,
+  0x100+BUTTON_ANIM_PLAY, // Unused at this time
+  SPECIAL_HOLD_PAN,
 };

@@ -42,7 +42,6 @@
     #define M_PI 3.141592653589793238462643
 #endif
 
-
 /// Simulates clicking the "Draw" button.
 void Return_to_draw_mode(void)
 {
@@ -493,7 +492,6 @@ void Brush_0_5(void)
   }
   
   End_of_modification();
-  End_of_modification();
   Return_to_draw_mode();
 }
 
@@ -606,6 +604,9 @@ void Polybrush_12_8(void)
     free(Polyfill_table_of_points);
     Polyfill_table_of_points = NULL;
 
+    if (click==RIGHT_SIDE)
+      End_of_modification();
+
     // On raffiche l'écran pour effacer les traits en xor et pour raffraichir
     // l'écran si on a découpé une partie de l'image en prenant la brosse.
     Display_all_screen();
@@ -618,8 +619,6 @@ void Polybrush_12_8(void)
       Brush_offset_Y=(Brush_offset_Y/Snap_height)*Snap_height;
     }
     
-    if (click==RIGHT_SIDE)
-      End_of_modification();
     Return_to_draw_mode();
     Display_cursor();
   }
@@ -953,26 +952,28 @@ void Rotate_brush_1_5(void)
   short prev_state;
   float angle;
   int dx,dy;
+  short cursor_x,cursor_y;
 
   Operation_pop(&prev_state);
   Operation_pop(&old_y);
   Operation_pop(&old_x);
 
   // On corrige les coordonnées de la ligne si la touche shift est appuyée...
+  cursor_x = Paintbrush_X;
+  cursor_y = Paintbrush_Y;
   if(SDL_GetModState() & KMOD_SHIFT)
-    Clamp_coordinates_regular_angle(Brush_rotation_center_X,Brush_rotation_center_Y,&Paintbrush_X,&Paintbrush_Y);
+    Clamp_coordinates_regular_angle(Brush_rotation_center_X,Brush_rotation_center_Y,&cursor_x,&cursor_y);
 
-  if ( (Paintbrush_X!=old_x) || (Paintbrush_Y!=old_y) || (prev_state!=2) )
+  if ( (cursor_x!=old_x) || (cursor_y!=old_y) || (prev_state!=2) )
   {
-    if ( (Brush_rotation_center_X==Paintbrush_X)
-      && (Brush_rotation_center_Y==Paintbrush_Y) )
+    if ( (Brush_rotation_center_X==cursor_x)
+      && (Brush_rotation_center_Y==cursor_y) )
       angle=0.0;
     else
     {
-      dx=Paintbrush_X-Brush_rotation_center_X;
-      dy=Paintbrush_Y-Brush_rotation_center_Y;
-      angle=acos(((float)dx)/sqrt((dx*dx)+(dy*dy)));
-      if (dy>0) angle=M_2PI-angle;
+      dx=cursor_x-Brush_rotation_center_X;
+      dy=cursor_y-Brush_rotation_center_Y;
+      angle=M_2PI-atan2(dy,dx);
     }
 
     if (Menu_is_visible)
@@ -991,12 +992,13 @@ void Rotate_brush_1_5(void)
     Display_cursor();
 
     Operation_stack_size-=2;
-    Operation_push(Paintbrush_X);
-    Operation_push(Paintbrush_Y);
+    Operation_push(cursor_x);
+    Operation_push(cursor_y);
   }
+  
 
-  Operation_push(Paintbrush_X);
-  Operation_push(Paintbrush_Y);
+  Operation_push(cursor_x);
+  Operation_push(cursor_y);
   Operation_push(2);
 }
 
@@ -1020,24 +1022,29 @@ void Rotate_brush_0_5(void)
   short prev_state;
   float angle=0.0;
   int dx,dy;
+  short cursor_x, cursor_y;
+  
 
   Operation_pop(&prev_state);
   Operation_pop(&old_y);
   Operation_pop(&old_x);
 
   // On corrige les coordonnées de la ligne si la touche shift est appuyée...
+  cursor_x = Paintbrush_X;
+  cursor_y = Paintbrush_Y;
   if(SDL_GetModState() & KMOD_SHIFT)
-    Clamp_coordinates_regular_angle(Brush_rotation_center_X,Brush_rotation_center_Y,&Paintbrush_X,&Paintbrush_Y);
+    Clamp_coordinates_regular_angle(Brush_rotation_center_X,Brush_rotation_center_Y,&cursor_x,&cursor_y);
 
-  if ((Paintbrush_X!=old_x) || (Paintbrush_Y!=old_y) || (prev_state!=3))
+  if ((cursor_x!=old_x) || (cursor_y!=old_y) || (prev_state!=3))
   {
-    if ( (Brush_rotation_center_X==Paintbrush_X)
-      && (Brush_rotation_center_Y==Paintbrush_Y) )
+    Hide_cursor();
+    if ( (Brush_rotation_center_X==cursor_x)
+      && (Brush_rotation_center_Y==cursor_y) )
       angle=0.0;
     else
     {
-      dx=Paintbrush_X-Brush_rotation_center_X;
-      dy=Paintbrush_Y-Brush_rotation_center_Y;
+      dx=cursor_x-Brush_rotation_center_X;
+      dy=cursor_y-Brush_rotation_center_Y;
       angle=acos(((float)dx)/sqrt((dx*dx)+(dy*dy)));
       if (dy>0) angle=M_2PI-angle;
     }
@@ -1052,6 +1059,7 @@ void Rotate_brush_0_5(void)
       else
         Print_coordinates();
     }
+    Display_cursor();
   }
 
   // Utilise Key_ANSI au lieu de Key, car Get_input() met ce dernier
@@ -1091,8 +1099,8 @@ void Rotate_brush_0_5(void)
     Operation_push(computed_y);
   }
 
-  Operation_push(Paintbrush_X);
-  Operation_push(Paintbrush_Y);
+  Operation_push(cursor_x);
+  Operation_push(cursor_y);
   Operation_push(3);
 }
 

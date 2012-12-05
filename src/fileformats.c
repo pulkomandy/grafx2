@@ -46,6 +46,11 @@
 #endif
 #endif
 
+#ifndef png_jmpbuf
+#  define png_jmpbuf(png_ptr) ((png_ptr)->jmpbuf)
+#endif
+
+
 #include <stdlib.h>
 
 #include "errors.h"
@@ -54,8 +59,8 @@
 #include "misc.h"
 #include "struct.h"
 #include "io.h"
+#include "pages.h"
 #include "windows.h" // Best_color()
-#include "pages.h" // Add_layer()
 
 //////////////////////////////////// IMG ////////////////////////////////////
 
@@ -171,6 +176,8 @@ void Save_IMG(T_IO_Context * context)
   // Ouverture du fichier
   if ((file=fopen(filename,"wb")))
   {
+    setvbuf(file, NULL, _IOFBF, 64*1024);
+    
     memcpy(IMG_header.Filler1,signature,6);
 
     IMG_header.Width=context->Width;
@@ -192,13 +199,10 @@ void Save_IMG(T_IO_Context * context)
     )
 
     {
-      Init_write_buffer();
-
       for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
         for (x_pos=0; x_pos<context->Width; x_pos++)
           Write_one_byte(file,Get_pixel(context, x_pos,y_pos));
 
-      End_write(file);
       fclose(file);
 
       if (File_error)
@@ -220,7 +224,7 @@ void Save_IMG(T_IO_Context * context)
 }
 
 
-//////////////////////////////////// LBM ////////////////////////////////////
+//////////////////////////////////// IFF ////////////////////////////////////
 typedef struct
 {
   word  Width;
@@ -236,14 +240,14 @@ typedef struct
   byte  Y_aspect;    // Inutile
   word  X_screen;
   word  Y_screen;
-} T_LBM_Header;
+} T_IFF_Header;
 
-byte * LBM_buffer;
-FILE *LBM_file;
+byte * IFF_buffer;
+FILE *IFF_file;
 
-// -- Tester si un fichier est au format LBM --------------------------------
+// -- Tester si un fichier est au format IFF --------------------------------
 
-void Test_LBM(T_IO_Context * context)
+void Test_IFF(T_IO_Context * context, const char *sub_type)
 {
   char filename[MAX_PATH_CHARACTERS];
   char  format[4];
@@ -252,37 +256,62 @@ void Test_LBM(T_IO_Context * context)
 
   Get_full_filename(filename, context->File_name, context->File_directory);
 
-  File_error=0;
+  File_error=1;
 
-  if ((LBM_file=fopen(filename, "rb")))
+  if ((IFF_file=fopen(filename, "rb")))
   {
-    if (! Read_bytes(LBM_file,section,4))
-      File_error=1;
-    else
-    if (memcmp(section,"FORM",4))
-      File_error=1;
-    else
+    do // Dummy loop, so that all breaks jump to end.
     {
-      Read_dword_be(LBM_file, &dummy);
-                   //   On aurait pu vérifier que ce long est égal à la taille
-                   // du fichier - 8, mais ça aurait interdit de charger des
-                   // fichiers tronqués (et déjà que c'est chiant de perdre
-                   // une partie du fichier il faut quand même pouvoir en
-                   // garder un peu... Sinon, moi je pleure :'( !!! )
-      if (! Read_bytes(LBM_file,format,4))
-        File_error=1;
-      else
-      if ( (memcmp(format,"ILBM",4)) && (memcmp(format,"PBM ",4)) )
-        File_error=1;
-    }
-    fclose(LBM_file);
+      if (! Read_bytes(IFF_file,section,4))
+        break;
+      if (memcmp(section,"FORM",4))
+        break;
+      
+      if (! Read_dword_be(IFF_file, &dummy))
+        break;
+      //   On aurait pu vérifier que ce long est égal à la taille
+      // du fichier - 8, mais ça aurait interdit de charger des
+      // fichiers tronqués (et déjà que c'est chiant de perdre
+      // une partie du fichier il faut quand même pouvoir en
+      // garder un peu... Sinon, moi je pleure :'( !!! )
+      if (! Read_bytes(IFF_file,format,4))
+        break;
+        
+      if (!memcmp(format,"ANIM",4))
+      {
+        // An ANIM header: need to check that it encloses an image
+        if (! Read_bytes(IFF_file,section,4))
+          break;
+        if (memcmp(section,"FORM",4))
+          break;
+        if (! Read_dword_be(IFF_file, &dummy))
+          break;
+        if (! Read_bytes(IFF_file,format,4))
+          break;
+      }
+      if ( memcmp(format,sub_type,4))
+        break;
+      
+      // If we reach this part, file is indeed ILBM/PBM or ANIM
+      File_error=0;
+      
+    } while (0);
+    
+    fclose(IFF_file);
   }
-  else
-    File_error=1;
+}
+
+void Test_PBM(T_IO_Context * context)
+{
+  Test_IFF(context, "PBM ");
+}
+void Test_LBM(T_IO_Context * context)
+{
+  Test_IFF(context, "ILBM");
 }
 
 
-// -- Lire un fichier au format LBM -----------------------------------------
+// -- Lire un fichier au format IFF -----------------------------------------
 
   byte Image_HAM;
 
@@ -393,35 +422,35 @@ void Test_LBM(T_IO_Context * context)
 // Inspired by Allegro: storing a 4-character identifier as a 32bit litteral
 #define ID4(a,b,c,d) ((((a)&255)<<24) | (((b)&255)<<16) | (((c)&255)<<8) | (((d)&255)))
 
-/// Skips the current section in an ILBM file.
+/// Skips the current section in an IFF file.
 /// This function should be called while the file pointer is right
 /// after the 4-character code that identifies the section.
-int LBM_Skip_section(void)
+int IFF_Skip_section(void)
 {
   dword size;
   
-  if (!Read_dword_be(LBM_file,&size))
+  if (!Read_dword_be(IFF_file,&size))
     return 0;
   if (size&1)
     size++;
-  if (fseek(LBM_file,size,SEEK_CUR))
+  if (fseek(IFF_file,size,SEEK_CUR))
     return 0;
   return 1;
 }
 
 // ------------------------- Attendre une section -------------------------
-byte LBM_Wait_for(byte * expected_section)
+byte IFF_Wait_for(byte * expected_section)
 {
   // Valeur retournée: 1=Section trouvée, 0=Section non trouvée (erreur)
   byte section_read[4];
 
-  if (! Read_bytes(LBM_file,section_read,4))
+  if (! Read_bytes(IFF_file,section_read,4))
     return 0;
   while (memcmp(section_read,expected_section,4)) // Sect. pas encore trouvée
   {
-    if (!LBM_Skip_section())
+    if (!IFF_Skip_section())
       return 0;
-    if (! Read_bytes(LBM_file,section_read,4))
+    if (! Read_bytes(IFF_file,section_read,4))
       return 0;
   }
   return 1;
@@ -430,30 +459,43 @@ byte LBM_Wait_for(byte * expected_section)
 // Les images ILBM sont stockés en bitplanes donc on doit trifouiller les bits pour
 // en faire du chunky
 
-byte Color_ILBM_line(word x_pos, word real_line_size, byte HBPm1)
+///
+/// Decodes the color of one pixel from the ILBM line buffer.
+/// @param x_pos           Position of the pixel in graphic line
+/// @param real_line_size  Width of one bitplane in memory, in bytes
+/// @param bitplanes       Number of bitplanes
+byte Get_IFF_color(word x_pos, word real_line_size, byte bitplanes)
 {
-  // Renvoie la couleur du pixel (ILBM) en x_pos.
-  // CL sera le rang auquel on extrait les bits de la couleur
-  byte cl = 7 - (x_pos & 7);
-  int ax,bh,dx;
-  byte bl=0;
+  byte shift = 7 - (x_pos & 7);
+  int address,masked_bit,plane;
+  byte color=0;
 
-  for(dx=HBPm1;dx>=0;dx--)
+  for(plane=bitplanes-1;plane>=0;plane--)
   {
-  //CIL_Loop
-    ax = (real_line_size * dx + x_pos) >> 3;
-    bh = (LBM_buffer[ax] >> cl) & 1;
+    address = (real_line_size * plane + x_pos) >> 3;
+    masked_bit = (IFF_buffer[address] >> shift) & 1;
 
-    bl = (bl << 1) + bh;
+    color = (color << 1) + masked_bit;
   }
 
-  return bl;
+  return color;
 }
 
-byte HBPm1; // header.BitPlanes-1
+void Set_IFF_color(word x_pos, byte color, word real_line_size, byte bitplanes)
+{
+  byte shift = 7 - (x_pos & 7);
+  int address, plane;
+
+  for(plane=0;plane<bitplanes;plane++)
+  {
+    address = (real_line_size * plane + x_pos) >> 3;
+    IFF_buffer[address] |= (color&1) << shift;
+    color = color >> 1;
+  }
+}
 
   // ----------------------- Afficher une ligne ILBM ------------------------
-  void Draw_ILBM_line(T_IO_Context *context, short y_pos, short real_line_size)
+  void Draw_IFF_line(T_IO_Context *context, short y_pos, short real_line_size, byte bitplanes)
   {
     byte  color;
     byte  red,green,blue;
@@ -464,7 +506,7 @@ byte HBPm1; // header.BitPlanes-1
     {
       for (x_pos=0; x_pos<context->Width; x_pos++)
       {
-        Set_pixel(context, x_pos,y_pos,Color_ILBM_line(x_pos,real_line_size, HBPm1));
+        Set_pixel(context, x_pos,y_pos,Get_IFF_color(x_pos,real_line_size, bitplanes));
       }
     }
     else
@@ -476,7 +518,7 @@ byte HBPm1; // header.BitPlanes-1
       if (Image_HAM==6)
       for (x_pos=0; x_pos<context->Width; x_pos++)         // HAM6
       {
-        temp=Color_ILBM_line(x_pos,real_line_size, HBPm1);
+        temp=Get_IFF_color(x_pos,real_line_size, bitplanes);
         switch (temp & 0xF0)
         {
           case 0x10: // blue
@@ -502,7 +544,7 @@ byte HBPm1; // header.BitPlanes-1
       else
       for (x_pos=0; x_pos<context->Width; x_pos++)         // HAM8
       {
-        temp=Color_ILBM_line(x_pos,real_line_size, HBPm1);
+        temp=Get_IFF_color(x_pos,real_line_size, bitplanes);
         switch (temp & 0x03)
         {
           case 0x01: // blue
@@ -529,10 +571,10 @@ byte HBPm1; // header.BitPlanes-1
   }
 
 
-void Load_LBM(T_IO_Context * context)
+void Load_IFF(T_IO_Context * context)
 {
   char filename[MAX_PATH_CHARACTERS];
-  T_LBM_Header header;
+  T_IFF_Header header;
   char  format[4];
   char  section[4];
   byte  temp_byte;
@@ -547,42 +589,58 @@ void Load_LBM(T_IO_Context * context)
   byte  color;
   long  file_size;
   dword dummy;
+  byte  is_anim=0;
+  int iff_format;
 
   Get_full_filename(filename, context->File_name, context->File_directory);
 
   File_error=0;
 
-  if ((LBM_file=fopen(filename, "rb")))
+  if ((IFF_file=fopen(filename, "rb")))
   {
-    file_size=File_length_file(LBM_file);
+    file_size=File_length_file(IFF_file);
 
-    // On avance dans le fichier (pas besoin de tester ce qui l'a déjà été)
-    Read_bytes(LBM_file,section,4);
-    Read_dword_be(LBM_file,&dummy);
-    Read_bytes(LBM_file,format,4);
-    if (!LBM_Wait_for((byte *)"BMHD"))
+    // FORM + size(4)
+    Read_bytes(IFF_file,section,4);
+    Read_dword_be(IFF_file,&dummy);
+    
+    Read_bytes(IFF_file,format,4);
+    if (!memcmp(format,"ANIM",4))
+    {
+      is_anim=1;
+      // Skip a bit, brother
+      Read_bytes(IFF_file,section,4);
+      Read_dword_be(IFF_file,&dummy);
+      Read_bytes(IFF_file,format,4);
+    }
+    if (!memcmp(format,"ILBM",4))
+      iff_format = FORMAT_LBM;
+    else
+      iff_format = FORMAT_PBM;
+    
+    if (!IFF_Wait_for((byte *)"BMHD"))
       File_error=1;
-    Read_dword_be(LBM_file,&dummy);
+    Read_dword_be(IFF_file,&dummy);
 
     // Maintenant on lit le header pour pouvoir commencer le chargement de l'image
-    if ( (Read_word_be(LBM_file,&header.Width))
-      && (Read_word_be(LBM_file,&header.Height))
-      && (Read_word_be(LBM_file,&header.X_org))
-      && (Read_word_be(LBM_file,&header.Y_org))
-      && (Read_byte(LBM_file,&header.BitPlanes))
-      && (Read_byte(LBM_file,&header.Mask))
-      && (Read_byte(LBM_file,&header.Compression))
-      && (Read_byte(LBM_file,&header.Pad1))
-      && (Read_word_be(LBM_file,&header.Transp_col))
-      && (Read_byte(LBM_file,&header.X_aspect))
-      && (Read_byte(LBM_file,&header.Y_aspect))
-      && (Read_word_be(LBM_file,&header.X_screen))
-      && (Read_word_be(LBM_file,&header.Y_screen))
+    if ( (Read_word_be(IFF_file,&header.Width))
+      && (Read_word_be(IFF_file,&header.Height))
+      && (Read_word_be(IFF_file,&header.X_org))
+      && (Read_word_be(IFF_file,&header.Y_org))
+      && (Read_byte(IFF_file,&header.BitPlanes))
+      && (Read_byte(IFF_file,&header.Mask))
+      && (Read_byte(IFF_file,&header.Compression))
+      && (Read_byte(IFF_file,&header.Pad1))
+      && (Read_word_be(IFF_file,&header.Transp_col))
+      && (Read_byte(IFF_file,&header.X_aspect))
+      && (Read_byte(IFF_file,&header.Y_aspect))
+      && (Read_word_be(IFF_file,&header.X_screen))
+      && (Read_word_be(IFF_file,&header.Y_screen))
       && header.Width && header.Height)
     {
-      if ( (header.BitPlanes) && (LBM_Wait_for((byte *)"CMAP")) )
+      if ( (header.BitPlanes) && (IFF_Wait_for((byte *)"CMAP")) )
       {
-        Read_dword_be(LBM_file,&nb_colors);
+        Read_dword_be(IFF_file,&nb_colors);
         nb_colors/=3;
 
         if (((dword)1<<header.BitPlanes)!=nb_colors)
@@ -605,40 +663,36 @@ void Load_LBM(T_IO_Context * context)
 
         if ( (!File_error) && (nb_colors>=2) && (nb_colors<=256) )
         {
-          HBPm1=header.BitPlanes-1;
           if (header.Mask==1)
             header.BitPlanes++;
 
           // Deluxe paint le fait... alors on le fait...
           Back_color=header.Transp_col;
 
-          // On commence par passer la palette en 256 comme ça, si la nouvelle
-          // palette a moins de 256 coul, la précédente ne souffrira pas d'un
-          // assombrissement préjudiciable.
           if (Config.Clear_palette)
             memset(context->Palette,0,sizeof(T_Palette));
-          else
-            Palette_64_to_256(context->Palette);
           //   On peut maintenant charger la nouvelle palette
-          if (Read_bytes(LBM_file,context->Palette,3*nb_colors))
+          if (Read_bytes(IFF_file,context->Palette,3*nb_colors))
           {
-            Palette_256_to_64(context->Palette);
             if (Image_HAM)
+            {
+              Palette_256_to_64(context->Palette);
               Adapt_palette_HAM(context);
-            Palette_64_to_256(context->Palette);
+              Palette_64_to_256(context->Palette);
+            }
             Palette_loaded(context);
 
             // On lit l'octet de padding du CMAP si la taille est impaire
             if (nb_colors&1)
-              if (Read_byte(LBM_file,&temp_byte))
-                File_error=2;
+              if (Read_byte(IFF_file,&temp_byte))
+                File_error=20;
 
             // Keep reading sections until we find the body
             while (1)
             {
-              if (! Read_bytes(LBM_file,section,4))
+              if (! Read_bytes(IFF_file,section,4))
               {
-                File_error=2;
+                File_error=46;
                 break;
               }
               // Found body : stop searching
@@ -655,12 +709,12 @@ void Load_LBM(T_IO_Context * context)
                 byte min_col;
                 byte max_col;
                 //
-                if ( (Read_dword_be(LBM_file,&section_size))
-                  && (Read_word_be(LBM_file,&padding))
-                  && (Read_word_be(LBM_file,&rate))
-                  && (Read_word_be(LBM_file,&flags))
-                  && (Read_byte(LBM_file,&min_col))
-                  && (Read_byte(LBM_file,&max_col)))
+                if ( (Read_dword_be(IFF_file,&section_size))
+                  && (Read_word_be(IFF_file,&padding))
+                  && (Read_word_be(IFF_file,&rate))
+                  && (Read_word_be(IFF_file,&flags))
+                  && (Read_byte(IFF_file,&min_col))
+                  && (Read_byte(IFF_file,&max_col)))
                 {
                   if (section_size == 8 && min_col != max_col)
                   {
@@ -678,16 +732,16 @@ void Load_LBM(T_IO_Context * context)
                 }
                 else
                 {
-                  File_error=2;
+                  File_error=47;
                   break;
                 }
               }
               else
               {
                 // ignore any number of unknown sections
-                if (!LBM_Skip_section())
+                if (!IFF_Skip_section())
                 {
-                  File_error=2;
+                  File_error=48;
                   break;
                 }
               }
@@ -696,14 +750,22 @@ void Load_LBM(T_IO_Context * context)
 
             if ( !File_error )
             {
-              Read_dword_be(LBM_file,&section_size);
+              Read_dword_be(IFF_file,&section_size);
               context->Width = header.Width;
               context->Height = header.Height;
 
               Original_screen_X = header.X_screen;
               Original_screen_Y = header.Y_screen;
 
-              Pre_load(context, context->Width,context->Height,file_size,FORMAT_LBM,PIXEL_SIMPLE,0);
+              Pre_load(context, context->Width,context->Height,file_size,iff_format,PIXEL_SIMPLE,0);
+              context->Background_transparent = header.Mask == 2;
+              context->Transparent_color = context->Background_transparent ? header.Transp_col : 0;
+
+              if (context->Type == CONTEXT_MAIN_IMAGE)
+              {
+                Main_backups->Pages->Image_mode = IMAGE_MODE_ANIMATION;
+                Update_screen_targets();
+              }
               if (File_error==0)
               {
                 if (!memcmp(format,"ILBM",4))    // "ILBM": InterLeaved BitMap
@@ -722,59 +784,59 @@ void Load_LBM(T_IO_Context * context)
 
                   if (!header.Compression)
                   {                                           // non compressé
-                    LBM_buffer=(byte *)malloc(line_size);
+                    IFF_buffer=(byte *)malloc(line_size);
                     for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
                     {
-                      if (Read_bytes(LBM_file,LBM_buffer,line_size))
-                        Draw_ILBM_line(context, y_pos,real_line_size);
+                      if (Read_bytes(IFF_file,IFF_buffer,line_size))
+                        Draw_IFF_line(context, y_pos,real_line_size, header.BitPlanes);
                       else
-                        File_error=2;
+                        File_error=21;
                     }
-                    free(LBM_buffer);
-                    LBM_buffer = NULL;
+                    free(IFF_buffer);
+                    IFF_buffer = NULL;
                   }
                   else
                   {                                               // compressé
                     /*Init_lecture();*/
 
-                    LBM_buffer=(byte *)malloc(line_size);
+                    IFF_buffer=(byte *)malloc(line_size);
 
                     for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
                     {
                       for (x_pos=0; ((x_pos<line_size) && (!File_error)); )
                       {
-                        if(Read_byte(LBM_file, &temp_byte)!=1)
+                        if(Read_byte(IFF_file, &temp_byte)!=1)
                         {
-                          File_error=2;
+                          File_error=22;
                           break;
                         }
                         // Si temp_byte > 127 alors il faut répéter 256-'temp_byte' fois la couleur de l'octet suivant
                         // Si temp_byte <= 127 alors il faut afficher directement les 'temp_byte' octets suivants
                         if (temp_byte>127)
                         {
-                          if(Read_byte(LBM_file, &color)!=1)
+                          if(Read_byte(IFF_file, &color)!=1)
                           {
-                            File_error=2;
+                            File_error=23;
                             break;
                           }
                           b256=(short)(256-temp_byte);
                           for (counter=0; counter<=b256; counter++)
                             if (x_pos<line_size)
-                              LBM_buffer[x_pos++]=color;
+                              IFF_buffer[x_pos++]=color;
                             else
-                              File_error=2;
+                              File_error=24;
                         }
                         else
                           for (counter=0; counter<=(short)(temp_byte); counter++)
-                            if (x_pos>=line_size || Read_byte(LBM_file, &(LBM_buffer[x_pos++]))!=1)
-                              File_error=2;
+                            if (x_pos>=line_size || Read_byte(IFF_file, &(IFF_buffer[x_pos++]))!=1)
+                              File_error=25;
                       }
                       if (!File_error)
-                        Draw_ILBM_line(context, y_pos,real_line_size);
+                        Draw_IFF_line(context, y_pos,real_line_size,header.BitPlanes);
                     }
 
-                    free(LBM_buffer);
-                    LBM_buffer = NULL;
+                    free(IFF_buffer);
+                    IFF_buffer = NULL;
                     /*Close_lecture();*/
                   }
                 }
@@ -784,17 +846,17 @@ void Load_LBM(T_IO_Context * context)
 
                   if (!header.Compression)
                   {                                           // non compressé
-                    LBM_buffer=(byte *)malloc(real_line_size);
+                    IFF_buffer=(byte *)malloc(real_line_size);
                     for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
                     {
-                      if (Read_bytes(LBM_file,LBM_buffer,real_line_size))
+                      if (Read_bytes(IFF_file,IFF_buffer,real_line_size))
                         for (x_pos=0; x_pos<context->Width; x_pos++)
-                          Set_pixel(context, x_pos,y_pos,LBM_buffer[x_pos]);
+                          Set_pixel(context, x_pos,y_pos,IFF_buffer[x_pos]);
                       else
-                        File_error=2;
+                        File_error=26;
                     }
-                    free(LBM_buffer);
-                    LBM_buffer = NULL;
+                    free(IFF_buffer);
+                    IFF_buffer = NULL;
                   }
                   else
                   {                                               // compressé
@@ -803,16 +865,16 @@ void Load_LBM(T_IO_Context * context)
                     {
                       for (x_pos=0; ((x_pos<real_line_size) && (!File_error)); )
                       {
-                        if(Read_byte(LBM_file, &temp_byte)!=1)
+                        if(Read_byte(IFF_file, &temp_byte)!=1)
                         {
-                          File_error=2;
+                          File_error=27;
                           break;
                         }
                         if (temp_byte>127)
                         {
-                          if(Read_byte(LBM_file, &color)!=1)
+                          if(Read_byte(IFF_file, &color)!=1)
                           {
-                            File_error=2;
+                            File_error=28;
                             break;
                           }
                           b256=256-temp_byte;
@@ -823,9 +885,9 @@ void Load_LBM(T_IO_Context * context)
                           for (counter=0; counter<=temp_byte; counter++)
                           {
                             byte byte_read=0;
-                            if(Read_byte(LBM_file, &byte_read)!=1)
+                            if(Read_byte(IFF_file, &byte_read)!=1)
                             {
-                              File_error=2;
+                              File_error=29;
                               break;
                             }
                             Set_pixel(context, x_pos++,y_pos,byte_read);
@@ -835,6 +897,31 @@ void Load_LBM(T_IO_Context * context)
                     /*Close_lecture();*/
                   }
                 }
+                /*
+                while (!File_error && is_anim)
+                {
+                  dword delta_size;
+                  
+                  // Just loaded the first image successfully : now keep reading
+                  
+                  // FORM + size(4)
+                  if (!Read_bytes(IFF_file,section,4))
+                    break;
+                  Read_dword_be(IFF_file,&dummy);
+
+                  // ILBM, hopefully
+                  Read_bytes(IFF_file,format,4);
+                  if (!IFF_Wait_for((byte *)"DLTA"))
+                  {
+                    File_error=1;
+                    break;
+                  }
+                  Set_loading_layer(context, context->Current_layer+1);
+
+                  Read_dword_be(IFF_file,&delta_size);
+                  fseek(IFF_file, delta_size + (delta_size & 1), SEEK_CUR);
+                }
+                */
               }
             }
             else
@@ -854,40 +941,40 @@ void Load_LBM(T_IO_Context * context)
     else
       File_error=1;
 
-    fclose(LBM_file);
+    fclose(IFF_file);
   }
   else
     File_error=1;
 }
 
 
-// -- Sauver un fichier au format LBM ---------------------------------------
+// -- Sauver un fichier au format IFF ---------------------------------------
 
-  byte LBM_color_list[129];
-  word LBM_list_size;
-  byte LBM_repetition_mode;
+  byte IFF_color_list[129];
+  word IFF_list_size;
+  byte IFF_repetition_mode;
 
   // ------------- Ecrire les couleurs que l'on vient de traiter ------------
   void Transfer_colors(void)
   {
     byte index;
 
-    if (LBM_list_size>0)
+    if (IFF_list_size>0)
     {
-      if (LBM_repetition_mode)
+      if (IFF_repetition_mode)
       {
-        Write_one_byte(LBM_file,257-LBM_list_size);
-        Write_one_byte(LBM_file,LBM_color_list[0]);
+        Write_one_byte(IFF_file,257-IFF_list_size);
+        Write_one_byte(IFF_file,IFF_color_list[0]);
       }
       else
       {
-        Write_one_byte(LBM_file,LBM_list_size-1);
-        for (index=0; index<LBM_list_size; index++)
-          Write_one_byte(LBM_file,LBM_color_list[index]);
+        Write_one_byte(IFF_file,IFF_list_size-1);
+        for (index=0; index<IFF_list_size; index++)
+          Write_one_byte(IFF_file,IFF_color_list[index]);
       }
     }
-    LBM_list_size=0;
-    LBM_repetition_mode=0;
+    IFF_list_size=0;
+    IFF_repetition_mode=0;
   }
 
   // - Compresion des couleurs encore plus performante que DP2e et que VPIC -
@@ -896,119 +983,144 @@ void Load_LBM(T_IO_Context * context)
     byte last_color;
     byte second_last_color;
 
-    switch (LBM_list_size)
+    switch (IFF_list_size)
     {
       case 0 : // Première couleur
-        LBM_color_list[0]=color;
-        LBM_list_size=1;
+        IFF_color_list[0]=color;
+        IFF_list_size=1;
         break;
       case 1 : // Deuxième couleur
-        last_color=LBM_color_list[0];
-        LBM_repetition_mode=(last_color==color);
-        LBM_color_list[1]=color;
-        LBM_list_size=2;
+        last_color=IFF_color_list[0];
+        IFF_repetition_mode=(last_color==color);
+        IFF_color_list[1]=color;
+        IFF_list_size=2;
         break;
       default: // Couleurs suivantes
-        last_color      =LBM_color_list[LBM_list_size-1];
-        second_last_color=LBM_color_list[LBM_list_size-2];
+        last_color      =IFF_color_list[IFF_list_size-1];
+        second_last_color=IFF_color_list[IFF_list_size-2];
         if (last_color==color)  // On a une répétition de couleur
         {
-          if ( (LBM_repetition_mode) || (second_last_color!=color) )
+          if ( (IFF_repetition_mode) || (second_last_color!=color) )
           // On conserve le mode...
           {
-            LBM_color_list[LBM_list_size]=color;
-            LBM_list_size++;
-            if (LBM_list_size==128)
+            IFF_color_list[IFF_list_size]=color;
+            IFF_list_size++;
+            if (IFF_list_size==128)
               Transfer_colors();
           }
           else // On est en mode <> et on a 3 couleurs qui se suivent
           {
-            LBM_list_size-=2;
+            IFF_list_size-=2;
             Transfer_colors();
-            LBM_color_list[0]=color;
-            LBM_color_list[1]=color;
-            LBM_color_list[2]=color;
-            LBM_list_size=3;
-            LBM_repetition_mode=1;
+            IFF_color_list[0]=color;
+            IFF_color_list[1]=color;
+            IFF_color_list[2]=color;
+            IFF_list_size=3;
+            IFF_repetition_mode=1;
           }
         }
         else // La couleur n'est pas la même que la précédente
         {
-          if (!LBM_repetition_mode)                 // On conserve le mode...
+          if (!IFF_repetition_mode)                 // On conserve le mode...
           {
-            LBM_color_list[LBM_list_size++]=color;
-            if (LBM_list_size==128)
+            IFF_color_list[IFF_list_size++]=color;
+            if (IFF_list_size==128)
               Transfer_colors();
           }
           else                                        // On change de mode...
           {
             Transfer_colors();
-            LBM_color_list[LBM_list_size]=color;
-            LBM_list_size++;
+            IFF_color_list[IFF_list_size]=color;
+            IFF_list_size++;
           }
         }
     }
   }
 
 
-void Save_LBM(T_IO_Context * context)
+void Save_IFF(T_IO_Context * context)
 {
   char filename[MAX_PATH_CHARACTERS];
-  T_LBM_Header header;
+  T_IFF_Header header;
   word x_pos;
   word y_pos;
   byte temp_byte;
-  word real_width;
   int file_size;
   int i;
+  int palette_entries;
+  byte bit_depth;
+
+  if (context->Format == FORMAT_LBM)
+  {
+    // Check how many bits are used by pixel colors
+    for (y_pos=0; y_pos<context->Height; y_pos++)
+      for (x_pos=0; x_pos<context->Width; x_pos++)
+        temp_byte |= Get_pixel(context, x_pos,y_pos);
+    bit_depth=0;
+    do
+    {
+      bit_depth++;
+      temp_byte>>=1;
+    } while (temp_byte);
+  }
+  else // FORMAT_PBM
+  {
+    bit_depth=8;
+  }
+  palette_entries = 1<<bit_depth;
 
   File_error=0;
+  
   Get_full_filename(filename, context->File_name, context->File_directory);
 
   // Ouverture du fichier
-  if ((LBM_file=fopen(filename,"wb")))
+  if ((IFF_file=fopen(filename,"wb")))
   {
-    Write_bytes(LBM_file,"FORM",4);
-    Write_dword_be(LBM_file,0); // On mettra la taille à jour à la fin
+    setvbuf(IFF_file, NULL, _IOFBF, 64*1024);
+    
+    Write_bytes(IFF_file,"FORM",4);
+    Write_dword_be(IFF_file,0); // On mettra la taille à jour à la fin
 
-    Write_bytes(LBM_file,"PBM BMHD",8);
-    Write_dword_be(LBM_file,20);
-
-    // On corrige la largeur de l'image pour qu'elle soit multiple de 2
-    real_width=context->Width+(context->Width&1);
+    if (context->Format == FORMAT_LBM)
+      Write_bytes(IFF_file,"ILBM",4);
+    else
+      Write_bytes(IFF_file,"PBM ",4);
+      
+    Write_bytes(IFF_file,"BMHD",4);
+    Write_dword_be(IFF_file,20);
 
     header.Width=context->Width;
     header.Height=context->Height;
     header.X_org=0;
     header.Y_org=0;
-    header.BitPlanes=8;
-    header.Mask=0;
+    header.BitPlanes=bit_depth;
+    header.Mask=context->Background_transparent ? 2 : 0;
     header.Compression=1;
     header.Pad1=0;
-    header.Transp_col=Back_color;
-    header.X_aspect=1;
-    header.Y_aspect=1;
-    header.X_screen = Screen_width;
-    header.Y_screen = Screen_height;
+    header.Transp_col=context->Background_transparent ? context->Transparent_color : 0;
+    header.X_aspect=context->Ratio == PIXEL_WIDE ? 2 : 1;
+    header.Y_aspect=context->Ratio == PIXEL_TALL ? 2 : 1;
+    header.X_screen = context->Width;// Screen_width?;
+    header.Y_screen = context->Height;// Screen_height?;
 
-    Write_word_be(LBM_file,header.Width);
-    Write_word_be(LBM_file,header.Height);
-    Write_word_be(LBM_file,header.X_org);
-    Write_word_be(LBM_file,header.Y_org);
-    Write_bytes(LBM_file,&header.BitPlanes,1);
-    Write_bytes(LBM_file,&header.Mask,1);
-    Write_bytes(LBM_file,&header.Compression,1);
-    Write_bytes(LBM_file,&header.Pad1,1);
-    Write_word_be(LBM_file,header.Transp_col);
-    Write_bytes(LBM_file,&header.X_aspect,1);
-    Write_bytes(LBM_file,&header.Y_aspect,1);
-    Write_word_be(LBM_file,header.X_screen);
-    Write_word_be(LBM_file,header.Y_screen);
+    Write_word_be(IFF_file,header.Width);
+    Write_word_be(IFF_file,header.Height);
+    Write_word_be(IFF_file,header.X_org);
+    Write_word_be(IFF_file,header.Y_org);
+    Write_bytes(IFF_file,&header.BitPlanes,1);
+    Write_bytes(IFF_file,&header.Mask,1);
+    Write_bytes(IFF_file,&header.Compression,1);
+    Write_bytes(IFF_file,&header.Pad1,1);
+    Write_word_be(IFF_file,header.Transp_col);
+    Write_bytes(IFF_file,&header.X_aspect,1);
+    Write_bytes(IFF_file,&header.Y_aspect,1);
+    Write_word_be(IFF_file,header.X_screen);
+    Write_word_be(IFF_file,header.Y_screen);
 
-    Write_bytes(LBM_file,"CMAP",4);
-    Write_dword_be(LBM_file,sizeof(T_Palette));
+    Write_bytes(IFF_file,"CMAP",4);
+    Write_dword_be(IFF_file,palette_entries*3);
 
-    Write_bytes(LBM_file,context->Palette,sizeof(T_Palette));
+    Write_bytes(IFF_file,context->Palette,palette_entries*3);
     
     for (i=0; i<context->Color_cycles; i++)
     {
@@ -1016,61 +1128,116 @@ void Save_LBM(T_IO_Context * context)
       flags|= context->Cycle_range[i].Speed?1:0; // Cycling or not
       flags|= context->Cycle_range[i].Inverse?2:0; // Inverted
               
-      Write_bytes(LBM_file,"CRNG",4);
-      Write_dword_be(LBM_file,8); // Section size
-      Write_word_be(LBM_file,0); // Padding
-      Write_word_be(LBM_file,context->Cycle_range[i].Speed*78); // Rate
-      Write_word_be(LBM_file,flags); // Flags
-      Write_byte(LBM_file,context->Cycle_range[i].Start); // Min color
-      Write_byte(LBM_file,context->Cycle_range[i].End); // Max color
+      Write_bytes(IFF_file,"CRNG",4);
+      Write_dword_be(IFF_file,8); // Section size
+      Write_word_be(IFF_file,0); // Padding
+      Write_word_be(IFF_file,context->Cycle_range[i].Speed*78); // Rate
+      Write_word_be(IFF_file,flags); // Flags
+      Write_byte(IFF_file,context->Cycle_range[i].Start); // Min color
+      Write_byte(IFF_file,context->Cycle_range[i].End); // Max color
       // No padding, size is multiple of 2
     }
     
-    Write_bytes(LBM_file,"BODY",4);
-    Write_dword_be(LBM_file,0); // On mettra la taille à jour à la fin
+    Write_bytes(IFF_file,"BODY",4);
+    Write_dword_be(IFF_file,0); // On mettra la taille à jour à la fin
 
-    Init_write_buffer();
-
-    LBM_list_size=0;
-
-    for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
+    if (context->Format == FORMAT_LBM)
     {
-      for (x_pos=0; ((x_pos<real_width) && (!File_error)); x_pos++)
-        New_color(Get_pixel(context, x_pos,y_pos));
+      short line_size; // Size of line in bytes
+      short real_line_size; // Size of line in pixels
+      
+      // Calcul de la taille d'une ligne ILBM (pour les images ayant des dimensions exotiques)
+      if (context->Width & 15)
+      {
+        real_line_size=( (context->Width+16) >> 4 ) << 4;
+        line_size=( (context->Width+16) >> 4 )*(header.BitPlanes<<1);
+      }
+      else
+      {
+        real_line_size=context->Width;
+        line_size=(context->Width>>3)*header.BitPlanes;
+      }
+      IFF_buffer=(byte *)malloc(line_size);
+      
+      // Start encoding
+      IFF_list_size=0;
+      for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
+      {
+        // Dispatch the pixel into planes
+        memset(IFF_buffer,0,line_size);
+        for (x_pos=0; x_pos<context->Width; x_pos++)
+          Set_IFF_color(x_pos, Get_pixel(context, x_pos,y_pos), real_line_size, header.BitPlanes);
+          
+        if (context->Width&1) // odd width fix
+          Set_IFF_color(x_pos, 0, real_line_size, header.BitPlanes);
+        
+        // encode the resulting sequence of bytes
+        if (header.Compression)
+        {
+          int plane_width=line_size/header.BitPlanes;
+          int plane;
+          
+          for (plane=0; plane<header.BitPlanes; plane++)
+          {
+            for (x_pos=0; x_pos<plane_width && !File_error; x_pos++)
+              New_color(IFF_buffer[x_pos+plane*plane_width]);
 
-      if (!File_error)
-        Transfer_colors();
+            if (!File_error)
+              Transfer_colors();
+          }
+        }
+        else
+        {
+          Write_bytes(IFF_file,IFF_buffer,line_size);
+        }
+      }
+      free(IFF_buffer);
+      IFF_buffer=NULL;
     }
-
-    End_write(LBM_file);
-    fclose(LBM_file);
+    else // PBM = chunky 8bpp
+    {
+      IFF_list_size=0;
+  
+      for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
+      {
+        for (x_pos=0; ((x_pos<context->Width) && (!File_error)); x_pos++)
+          New_color(Get_pixel(context, x_pos,y_pos));
+  
+        if (context->Width&1) // odd width fix
+          New_color(0);
+          
+        if (!File_error)
+          Transfer_colors();
+      }
+    }
+    fclose(IFF_file);
 
     if (!File_error)
     {
       file_size=File_length(filename);
       
-      LBM_file=fopen(filename,"rb+");
-      fseek(LBM_file,820+context->Color_cycles*16,SEEK_SET);
-      Write_dword_be(LBM_file,file_size-824-context->Color_cycles*16);
+      IFF_file=fopen(filename,"rb+");
+      fseek(IFF_file,52+palette_entries*3+context->Color_cycles*16,SEEK_SET);
+      Write_dword_be(IFF_file,file_size-56-palette_entries*3-context->Color_cycles*16);
 
       if (!File_error)
       {
-        fseek(LBM_file,4,SEEK_SET);
+        fseek(IFF_file,4,SEEK_SET);
 
         //   Si la taille de la section de l'image (taille fichier-8) est
         // impaire, on rajoute un 0 (Padding) à la fin.
         if ((file_size) & 1)
         {
-          Write_dword_be(LBM_file,file_size-7);
-          fseek(LBM_file,0,SEEK_END);
+          Write_dword_be(IFF_file,file_size-7);
+          fseek(IFF_file,0,SEEK_END);
           temp_byte=0;
-          if (! Write_bytes(LBM_file,&temp_byte,1))
+          if (! Write_bytes(IFF_file,&temp_byte,1))
             File_error=1;
         }
         else
-          Write_dword_be(LBM_file,file_size-8);
+          Write_dword_be(IFF_file,file_size-8);
 
-        fclose(LBM_file);
+        fclose(IFF_file);
 
         if (File_error)
           remove(filename);
@@ -1078,7 +1245,7 @@ void Save_LBM(T_IO_Context * context)
       else
       {
         File_error=1;
-        fclose(LBM_file);
+        fclose(IFF_file);
         remove(filename);
       }
     }
@@ -1586,7 +1753,8 @@ void Save_BMP(T_IO_Context * context)
   // Ouverture du fichier
   if ((file=fopen(filename,"wb")))
   {
-
+    setvbuf(file, NULL, _IOFBF, 64*1024);
+    
     // Image width must be a multiple of 4 bytes
     line_size = context->Width;
     if (line_size & 3)
@@ -1644,8 +1812,6 @@ void Save_BMP(T_IO_Context * context)
 
       if (Write_bytes(file,local_palette,1024))
       {
-        Init_write_buffer();
-
         // ... Et Bill, il a dit: "OK les gars! Mais seulement si vous rangez
         // les pixels dans l'ordre inverse, mais que sur les Y quand-même
         // parce que faut pas pousser."
@@ -1653,7 +1819,6 @@ void Save_BMP(T_IO_Context * context)
           for (x_pos=0; x_pos<line_size; x_pos++)
                 Write_one_byte(file,Get_pixel(context, x_pos,y_pos));
 
-        End_write(file);
         fclose(file);
 
         if (File_error)
@@ -1701,17 +1866,25 @@ typedef struct
 
 typedef struct
 {
-  // byte Block_identifier : 0x21
-  // byte Function         : 0xF9
-  // byte Block_size         // 4
+  byte Block_identifier;  // 0x21
+  byte Function;          // 0xF9
+  byte Block_size;        // 4
   byte Packed_fields;     // 11100000 : Reserved
                           // 00011100 : Disposal method
                           // 00000010 : User input flag
                           // 00000001 : Transparent flag
   word Delay_time;        // Time for this frame to stay displayed
   byte Transparent_color; // Which color index acts as transparent
-  //word Bloc_terminator; // 0x00
+  word Block_terminator;  // 0x00
 } T_GIF_GCE;              // Graphic Control Extension
+
+enum DISPOSAL_METHOD
+{
+  DISPOSAL_METHOD_UNDEFINED = 0,
+  DISPOSAL_METHOD_DO_NOT_DISPOSE = 1,
+  DISPOSAL_METHOD_RESTORE_BGCOLOR = 2,
+  DISPOSAL_METHOD_RESTORE_PREVIOUS = 3,
+};
 
 // -- Tester si un fichier est au format GIF --------------------------------
 
@@ -1796,8 +1969,9 @@ word GIF_get_next_code(void)
 
 // -- Affiche un nouveau pixel --
 
-void GIF_new_pixel(T_IO_Context * context, T_GIF_IDB *idb, byte color)
+void GIF_new_pixel(T_IO_Context * context, T_GIF_IDB *idb, int is_transparent, byte color)
 {
+  if (!is_transparent || color!=context->Transparent_color)
   Set_pixel(context, idb->Pos_X+GIF_pos_X, idb->Pos_Y+GIF_pos_Y,color);
 
   GIF_pos_X++;
@@ -1867,7 +2041,18 @@ void Load_GIF(T_IO_Context * context)
   word value_eof;        // Valeur <=> End d'image
   long file_size;
   int number_LID; // Nombre d'images trouvées dans le fichier
-  short current_layer = 0;
+  int current_layer = 0;
+  int last_delay = 0;
+  byte is_transparent = 0;
+  byte is_looping=0;
+  enum PIXEL_RATIO ratio;
+  byte disposal_method = DISPOSAL_METHOD_RESTORE_BGCOLOR;
+
+  byte previous_disposal_method = DISPOSAL_METHOD_RESTORE_BGCOLOR;
+  word previous_width=0;
+  word previous_height=0;
+  word previous_pos_x=0;
+  word previous_pos_y=0;
 
   /////////////////////////////////////////////////// FIN DES DECLARATIONS //
 
@@ -1901,7 +2086,14 @@ void Load_GIF(T_IO_Context * context)
         Original_screen_X=LSDB.Width;
         Original_screen_Y=LSDB.Height;
 
-        Pre_load(context, LSDB.Width,LSDB.Height,file_size,FORMAT_GIF,PIXEL_SIMPLE,0);
+        if (LSDB.Aspect==17)
+           ratio=PIXEL_TALL;
+        else if (LSDB.Aspect==113)
+           ratio=PIXEL_WIDE;
+        else
+           ratio=PIXEL_SIMPLE;
+
+        Pre_load(context, LSDB.Width,LSDB.Height,file_size,FORMAT_GIF,ratio,0);
         context->Width=LSDB.Width;
         context->Height=LSDB.Height;
 
@@ -1967,19 +2159,14 @@ void Load_GIF(T_IO_Context * context)
                       && Read_word_le(GIF_file,&(GCE.Delay_time))
                       && Read_byte(GIF_file,&(GCE.Transparent_color)))
                     {
-                      if (GCE.Packed_fields & 1)
-                      {
-                        if (number_LID == 0)
-                          context->Background_transparent = 1;
-                        context->Transparent_color= GCE.Transparent_color;
-                      }
-                      else
-                      {
-                        if (number_LID == 0)
-                          context->Background_transparent = 0;
-                        context->Transparent_color = 0; // Reset transparent color
-                      }
-                    
+                      previous_disposal_method = disposal_method;
+                      disposal_method = (GCE.Packed_fields >> 2) & 7;
+                      last_delay = GCE.Delay_time;
+                      context->Transparent_color= GCE.Transparent_color;
+                      is_transparent = GCE.Packed_fields & 1;
+                      if (number_LID == 0)
+                        context->Background_transparent = is_transparent;
+                      is_transparent &= is_looping;
                     }
                     else
                       File_error=2;
@@ -1997,8 +2184,15 @@ void Load_GIF(T_IO_Context * context)
                         ;
                       else if (!memcmp(aeb,"NETSCAPE2.0",0x0B))
                       {
+                        is_looping=1;
                         // The well-known Netscape extension.
-                        // Nothing to do, just skip sub-block
+                        // Load as an animation
+                        if (context->Type == CONTEXT_MAIN_IMAGE)
+                        {
+                          Main_backups->Pages->Image_mode = IMAGE_MODE_ANIMATION;
+                          Update_screen_targets();
+                        }
+                        // Skip sub-block
                         do
                         {
                           if (! Read_byte(GIF_file,&size_to_read))
@@ -2036,7 +2230,7 @@ void Load_GIF(T_IO_Context * context)
                       }
                       else if (!memcmp(aeb,"CRNG\0\0\0\0" "1.0",0x0B))
                       {            
-                        // Color animation. Similar to a LBM CRNG chunk.
+                        // Color animation. Similar to a CRNG chunk in IFF file format.
                         word rate;
                         word flags;
                         byte min_col;
@@ -2111,8 +2305,27 @@ void Load_GIF(T_IO_Context * context)
                 // This a second layer/frame, or more.
                 // Attempt to add a layer to current image
                 current_layer++;
-                Set_layer(context, current_layer);
+                Set_loading_layer(context, current_layer);
+                if (context->Type == CONTEXT_MAIN_IMAGE && Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+                {
+                  // Copy the content of previous layer.
+                  memcpy(
+                    Main_backups->Pages->Image[Main_current_layer].Pixels,
+                    Main_backups->Pages->Image[Main_current_layer-1].Pixels,
+                    Main_backups->Pages->Width*Main_backups->Pages->Height);
+                }
+                else
+                {
+                  Fill_canvas(context, is_transparent ? context->Transparent_color : LSDB.Backcol);
+                }
               }
+              else
+              {
+                // First frame/layer, fill canvas with backcolor
+                Fill_canvas(context, is_transparent ? context->Transparent_color : LSDB.Backcol);
+              }
+              // Duration was set in the previously loaded GCE
+              Set_frame_duration(context, last_delay*10);
               number_LID++;
               
               // lecture de 10 derniers octets
@@ -2146,7 +2359,29 @@ void Load_GIF(T_IO_Context * context)
                   }
                   
                 }
-    
+                if (number_LID!=1)
+                {
+                  // This a second layer/frame, or more.
+                  if (context->Type == CONTEXT_MAIN_IMAGE && Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+                  {
+                    // Need to clear previous image to back-color.
+                    if (previous_disposal_method==DISPOSAL_METHOD_RESTORE_BGCOLOR)
+                    {
+                      int y;
+                      for (y=0; y<previous_height; y++)
+                        memset(
+                          Main_backups->Pages->Image[Main_current_layer].Pixels
+                           + (previous_pos_y+y)* Main_backups->Pages->Width+previous_pos_x,
+                          is_transparent ? context->Transparent_color : LSDB.Backcol,
+                          previous_width);
+                    }
+                  }
+                }
+                previous_height=IDB.Image_height;
+                previous_width=IDB.Image_width;
+                previous_pos_x=IDB.Pos_X;
+                previous_pos_y=IDB.Pos_Y;
+                
                 Palette_loaded(context);
 
                 File_error=0;
@@ -2197,7 +2432,7 @@ void Load_GIF(T_IO_Context * context)
                       special_case=alphabet_stack[alphabet_stack_pos++]=GIF_current_code;
     
                       do
-                        GIF_new_pixel(context, &IDB, alphabet_stack[--alphabet_stack_pos]);
+                        GIF_new_pixel(context, &IDB, is_transparent, alphabet_stack[--alphabet_stack_pos]);
                       while (alphabet_stack_pos!=0);
     
                       alphabet_prefix[alphabet_free  ]=old_code;
@@ -2217,7 +2452,7 @@ void Load_GIF(T_IO_Context * context)
                       alphabet_free     =(1<<initial_nb_bits)+2;
                       special_case       =GIF_get_next_code();
                       old_code       =GIF_current_code;
-                      GIF_new_pixel(context, &IDB, GIF_current_code);
+                      GIF_new_pixel(context, &IDB, is_transparent, GIF_current_code);
                     }
                   }
                   else
@@ -2236,6 +2471,18 @@ void Load_GIF(T_IO_Context * context)
                        (  (GIF_interlaced) && (!GIF_finished_interlaced_image) )
                      ) )
                   File_error=2;
+                
+                // No need to read more than one frame in animation preview mode
+                if (context->Type == CONTEXT_PREVIEW && is_looping)
+                {
+                  goto early_exit;
+                }
+                // Same with brush
+                if (context->Type == CONTEXT_BRUSH && is_looping)
+                {
+                  goto early_exit;
+                }
+                
               } // Le fichier contenait un IDB
               else
                 File_error=2;
@@ -2251,6 +2498,8 @@ void Load_GIF(T_IO_Context * context)
       else
         File_error=1;
 
+      early_exit:
+      
       // Libération de la mémoire utilisée par les tables & piles de traitement:
       free(alphabet_suffix);
       free(alphabet_prefix);
@@ -2366,7 +2615,7 @@ void Save_GIF(T_IO_Context * context)
   word current_string;   // Code de la chaîne en cours de traitement
   byte current_char;         // Caractère à coder
   word index;            // index de recherche de chaîne
-  short current_layer;
+  int current_layer;
 
   /////////////////////////////////////////////////// FIN DES DECLARATIONS //
   
@@ -2376,6 +2625,8 @@ void Save_GIF(T_IO_Context * context)
 
   if ((GIF_file=fopen(filename,"wb")))
   {
+    setvbuf(GIF_file, NULL, _IOFBF, 64*1024);
+    
     // On écrit la signature du fichier
     if (Write_bytes(GIF_file,"GIF89a",6))
     {
@@ -2400,7 +2651,18 @@ void Save_GIF(T_IO_Context * context)
       }
       LSDB.Resol  =0x97;          // Image en 256 couleurs, avec une palette
       LSDB.Backcol=context->Transparent_color;
-      LSDB.Aspect =0;             // Palette normale
+      switch(context->Ratio)
+      {
+        case PIXEL_TALL:
+          LSDB.Aspect = 17; // 1:2 
+          break;
+        case PIXEL_WIDE:
+          LSDB.Aspect = 113; // 2:1
+          break;
+        default:
+          LSDB.Aspect = 0; // undefined, which is most frequent.
+          // 49 would be 1:1 ratio
+      }
 
       // On sauve le LSDB dans le fichier
 
@@ -2431,6 +2693,9 @@ void Save_GIF(T_IO_Context * context)
           //  Write_bytes(GIF_file,"\x21\xFF\x0BNETSCAPE2.0\x03\xLL\xSS\xSS\x00",19);
           // LL : 01 to loop
           // SSSS : number of loops
+          if (context->Type == CONTEXT_MAIN_IMAGE && Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+            if (context->Nb_layers>1)
+              Write_bytes(GIF_file,"\x21\xFF\x0BNETSCAPE2.0\x03\x01\x00\x00\x00",19);
             
           // Ecriture du commentaire
           if (context->Comment[0])
@@ -2466,24 +2731,44 @@ void Save_GIF(T_IO_Context * context)
             current_layer++)
           {
             // Write a Graphic Control Extension
-            byte GCE_block[] = "\x21\xF9\x04\x04\x05\x00\x00\x00";
-            // 'Default' values:
-            //    Disposal method "Do not dispose"
-            //    Duration 5/100s (minimum viable value for current web browsers)
+            T_GIF_GCE GCE;
             
-            if (current_layer > 0 || context->Background_transparent)
-              GCE_block[3] |= 1; // Transparent color flag
-            GCE_block[6] = context->Transparent_color;
+            Set_saving_layer(context, current_layer);
             
-            Set_layer(context, current_layer);
+            GCE.Block_identifier = 0x21;
+            GCE.Function = 0xF9;
+            GCE.Block_size=4;
             
-            if (current_layer == context->Nb_layers -1)
+            if (context->Type == CONTEXT_MAIN_IMAGE && Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
             {
-              // "Infinite" delay for last frame
-              GCE_block[4] = 255;
-              GCE_block[5] = 255;
+              // Animation frame
+              int duration;
+              GCE.Packed_fields=(2<<2)|(context->Background_transparent);
+              duration=Get_frame_duration(context)/10;
+              GCE.Delay_time=duration<0xFFFF?duration:0xFFFF;
             }
-            if (Write_bytes(GIF_file,GCE_block,8))
+            else
+            {
+              // Layered image
+              if (current_layer==0)
+                GCE.Packed_fields=(1<<2)|(context->Background_transparent);
+              else
+                GCE.Packed_fields=(1<<2)|(1);
+              GCE.Delay_time=5; // Duration 5/100s (minimum viable value for current web browsers)
+              if (current_layer == context->Nb_layers -1)
+                GCE.Delay_time=0xFFFF; // Infinity (10 minutes)
+            }
+            GCE.Transparent_color=context->Transparent_color;
+            GCE.Block_terminator=0x00;
+            
+            if (Write_byte(GIF_file,GCE.Block_identifier)
+             && Write_byte(GIF_file,GCE.Function)
+             && Write_byte(GIF_file,GCE.Block_size)
+             && Write_byte(GIF_file,GCE.Packed_fields)
+             && Write_word_le(GIF_file,GCE.Delay_time)
+             && Write_byte(GIF_file,GCE.Transparent_color)
+             && Write_byte(GIF_file,GCE.Block_terminator)
+             )
             {
             
               // On va écrire un block indicateur d'IDB et l'IDB du fichier
@@ -2506,7 +2791,6 @@ void Save_GIF(T_IO_Context * context)
                 //   Le block indicateur d'IDB et l'IDB ont étés correctements
                 // écrits.
     
-                Init_write_buffer();
                 GIF_pos_X=0;
                 GIF_pos_Y=0;
                 GIF_last_byte=0;
@@ -2646,7 +2930,6 @@ void Save_GIF(T_IO_Context * context)
                   if (GIF_remainder_bits!=0)
                     GIF_set_code(0);             // Code bidon permettant de s'assurer que tous les bits du dernier code aient bien étés inscris dans le buffer GIF
                   GIF_empty_buffer();         // On envoie les dernières données du buffer GIF dans le buffer KM
-                  End_write(GIF_file);   // On envoie les dernières données du buffer KM  dans le fichier
     
                   // On écrit un \0
                   if (! Write_byte(GIF_file,'\x00'))
@@ -2815,7 +3098,7 @@ void Test_PCX(T_IO_Context * context)
 
     for (x_pos=0; x_pos<context->Width; x_pos++)
     {
-      color=(LBM_buffer[x_pos/reduction]>>((reduction_minus_one-(x_pos%reduction))*depth)) & byte_mask;
+      color=(IFF_buffer[x_pos/reduction]>>((reduction_minus_one-(x_pos%reduction))*depth)) & byte_mask;
       Set_pixel(context, x_pos,y_pos,color);
     }
   }
@@ -2941,11 +3224,10 @@ void Load_PCX(T_IO_Context * context)
           {
             line_size=PCX_header.Bytes_per_plane_line*PCX_header.Plane;
             real_line_size=(short)PCX_header.Bytes_per_plane_line<<3;
-            //   On se sert de données LBM car le dessin de ligne en moins de 256
+            //   On se sert de données ILBM car le dessin de ligne en moins de 256
             // couleurs se fait comme avec la structure ILBM.
             Image_HAM=0;
-            HBPm1=PCX_header.Plane-1;
-            LBM_buffer=(byte *)malloc(line_size);
+            IFF_buffer=(byte *)malloc(line_size);
 
             // Chargement de l'image
             if (PCX_header.Compression)  // Image compressée
@@ -3004,7 +3286,7 @@ void Load_PCX(T_IO_Context * context)
                         {
                           for (index=0; index<byte1; index++)
                             if (x_pos<line_size)
-                              LBM_buffer[x_pos++]=byte2;
+                              IFF_buffer[x_pos++]=byte2;
                             else
                               File_error=2;
                         }
@@ -3012,12 +3294,12 @@ void Load_PCX(T_IO_Context * context)
                           Set_file_error(2);
                       }
                       else
-                        LBM_buffer[x_pos++]=byte1;
+                        IFF_buffer[x_pos++]=byte1;
                     }
                   }
                   // Affichage de la ligne par plan du buffer
                   if (PCX_header.Depth==1)
-                    Draw_ILBM_line(context, y_pos,real_line_size);
+                    Draw_IFF_line(context, y_pos,real_line_size,PCX_header.Plane);
                   else
                     Draw_PCX_line(context, y_pos,PCX_header.Depth);
                 }
@@ -3029,15 +3311,15 @@ void Load_PCX(T_IO_Context * context)
             {
               for (y_pos=0;(y_pos<context->Height) && (!File_error);y_pos++)
               {
-                if ((width_read=Read_bytes(file,LBM_buffer,line_size)))
+                if ((width_read=Read_bytes(file,IFF_buffer,line_size)))
                 {
                   if (PCX_header.Plane==1)
                     for (x_pos=0; x_pos<context->Width;x_pos++)
-                      Set_pixel(context, x_pos,y_pos,LBM_buffer[x_pos]);
+                      Set_pixel(context, x_pos,y_pos,IFF_buffer[x_pos]);
                   else
                   {
                     if (PCX_header.Depth==1)
-                      Draw_ILBM_line(context, y_pos,real_line_size);
+                      Draw_IFF_line(context, y_pos,real_line_size,PCX_header.Plane);
                     else
                       Draw_PCX_line(context, y_pos,PCX_header.Depth);
                   }
@@ -3047,8 +3329,8 @@ void Load_PCX(T_IO_Context * context)
               }
             }
 
-            free(LBM_buffer);
-            LBM_buffer = NULL;
+            free(IFF_buffer);
+            IFF_buffer = NULL;
           }
         }
       }
@@ -3162,7 +3444,8 @@ void Save_PCX(T_IO_Context * context)
 
   if ((file=fopen(filename,"wb")))
   {
-
+    setvbuf(file, NULL, _IOFBF, 64*1024);
+    
     PCX_header.Manufacturer=10;
     PCX_header.Version=5;
     PCX_header.Compression=1;
@@ -3203,8 +3486,6 @@ void Save_PCX(T_IO_Context * context)
     {
       line_size=PCX_header.Bytes_per_plane_line*PCX_header.Plane;
      
-      Init_write_buffer();
-     
       for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
       {
         pixel_read=Get_pixel(context, 0,y_pos);
@@ -3233,8 +3514,6 @@ void Save_PCX(T_IO_Context * context)
       // Ecriture de l'octet (12) indiquant que la palette arrive
       if (!File_error)
         Write_one_byte(file,12);
-      
-      End_write(file);
       
       // Ecriture de la palette
       if (!File_error)
@@ -3349,13 +3628,13 @@ void Load_SCx(T_IO_Context * context)
 
           if (!SCx_header.Planes)
           { // 256 couleurs (raw)
-            LBM_buffer=(byte *)malloc(context->Width);
+            IFF_buffer=(byte *)malloc(context->Width);
 
             for (y_pos=0;(y_pos<context->Height) && (!File_error);y_pos++)
             {
-              if (Read_bytes(file,LBM_buffer,context->Width))
+              if (Read_bytes(file,IFF_buffer,context->Width))
                 for (x_pos=0; x_pos<context->Width;x_pos++)
-                  Set_pixel(context, x_pos,y_pos,LBM_buffer[x_pos]);
+                  Set_pixel(context, x_pos,y_pos,IFF_buffer[x_pos]);
               else
                 File_error=2;
             }
@@ -3364,20 +3643,19 @@ void Load_SCx(T_IO_Context * context)
           { // moins de 256 couleurs (planar)
             size=((context->Width+7)>>3)*SCx_header.Planes;
             real_size=(size/SCx_header.Planes)<<3;
-            LBM_buffer=(byte *)malloc(size);
-            HBPm1=SCx_header.Planes-1;
+            IFF_buffer=(byte *)malloc(size);
             Image_HAM=0;
 
             for (y_pos=0;(y_pos<context->Height) && (!File_error);y_pos++)
             {
-              if (Read_bytes(file,LBM_buffer,size))
-                Draw_ILBM_line(context, y_pos,real_size);
+              if (Read_bytes(file,IFF_buffer,size))
+                Draw_IFF_line(context, y_pos,real_size,SCx_header.Planes);
               else
                 File_error=2;
             }
           }
-          free(LBM_buffer);
-          LBM_buffer = NULL;
+          free(IFF_buffer);
+          IFF_buffer = NULL;
         }
         else
           File_error=1;
@@ -3432,6 +3710,8 @@ void Save_SCx(T_IO_Context * context)
   if ((file=fopen(filename,"wb")))
   {
     T_Palette palette_64;
+    
+    setvbuf(file, NULL, _IOFBF, 64*1024);
     memcpy(palette_64,context->Palette,sizeof(T_Palette));
     Palette_256_to_64(palette_64);
     
@@ -3449,13 +3729,10 @@ void Save_SCx(T_IO_Context * context)
     && Write_bytes(file,&palette_64,sizeof(T_Palette))
     )
     {
-      Init_write_buffer();
-
       for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
         for (x_pos=0; x_pos<context->Width; x_pos++)
           Write_one_byte(file,Get_pixel(context, x_pos,y_pos));
 
-      End_write(file);
       fclose(file);
 
       if (File_error)
@@ -3492,7 +3769,7 @@ void Save_XPM(T_IO_Context* context)
     File_error = 1;
     return;
   }
-
+  setvbuf(file, NULL, _IOFBF, 64*1024);
   fprintf(file, "/* XPM */\nstatic char* pixmap[] = {\n");
   fprintf(file, "\"%d %d 256 2\",\n", context->Width, context->Height);
 
@@ -3546,8 +3823,9 @@ void Test_PNG(T_IO_Context * context)
 /// Used by a callback in Load_PNG
 T_IO_Context * PNG_current_context;
 
-int PNG_read_unknown_chunk(__attribute__((unused)) png_structp ptr, png_unknown_chunkp chunk)
+int PNG_read_unknown_chunk(png_structp ptr, png_unknown_chunkp chunk)
 {
+  (void)ptr; // unused
   // png_unknown_chunkp members:
   //    png_byte name[5];
   //    png_byte *data;
@@ -3555,7 +3833,7 @@ int PNG_read_unknown_chunk(__attribute__((unused)) png_structp ptr, png_unknown_
   
   if (!strcmp((const char *)chunk->name, "crNg"))
   {
-    // Color animation. Similar to a LBM CRNG chunk.
+    // Color animation. Similar to a CRNG chunk in an IFF file.
     unsigned int i;
     byte *chunk_ptr = chunk->data;
     
@@ -3800,8 +4078,8 @@ void Load_PNG(T_IO_Context * context)
                   {
                     if (color_type == PNG_COLOR_TYPE_PALETTE && trans!=NULL)
                     {
-                    int i;
-                    for (i=0; i<num_trans; i++)
+                      int i;
+                      for (i=0; i<num_trans; i++)
                       {
                         if (trans[i]==0)
                         {
@@ -3948,6 +4226,8 @@ void Save_PNG(T_IO_Context * context)
   // Ouverture du fichier
   if ((file=fopen(filename,"wb")))
   {
+    setvbuf(file, NULL, _IOFBF, 64*1024);
+    
     /* initialisation */
     if ((png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL))
       && (info_ptr = png_create_info_struct(png_ptr)))
@@ -4058,7 +4338,7 @@ void Save_PNG(T_IO_Context * context)
             // Give it to libpng
             png_set_unknown_chunks(png_ptr, info_ptr, &crng_chunk, 1);
             // libpng seems to ignore the location I provided earlier.
-	          png_set_unknown_chunk_location(png_ptr, info_ptr, 0, PNG_HAVE_PLTE);
+            png_set_unknown_chunk_location(png_ptr, info_ptr, 0, PNG_HAVE_PLTE);
           }
           
           

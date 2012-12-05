@@ -68,6 +68,7 @@
 #include "realpath.h"
 #include "input.h"
 #include "help.h"
+#include "filesel.h"
 
 #if defined(__WIN32__)
     #include <windows.h>
@@ -424,6 +425,7 @@ int Init_program(int argc,char * argv[])
 {   
   int temp;
   int starting_videomode;
+  enum IMAGE_MODES starting_image_mode;
   static char program_directory[MAX_PATH_CHARACTERS];
   T_Gui_skin *gfx;
   int file_in_command_line;
@@ -456,46 +458,43 @@ int Init_program(int argc,char * argv[])
   // Choose directory for settings (read/write)
   Set_config_directory(program_directory,Config_directory);
 #if defined(__MINT__)
-  strcpy(Main_current_directory,program_directory);
+  strcpy(Main_selector.Directory,program_directory);
 #else
 // On détermine le répertoire courant:
-  getcwd(Main_current_directory,256);
+  getcwd(Main_selector.Directory,256);
 #endif
 
   // On en profite pour le mémoriser dans le répertoire principal:
-  strcpy(Initial_directory,Main_current_directory);
+  strcpy(Initial_directory,Main_selector.Directory);
 
   // On initialise les données sur le nom de fichier de l'image de brouillon:
-  strcpy(Spare_current_directory,Main_current_directory);
+  strcpy(Spare_selector.Directory,Main_selector.Directory);
   
   Main_fileformat=DEFAULT_FILEFORMAT;
   Spare_fileformat    =Main_fileformat;
   
-  strcpy(Brush_current_directory,Main_current_directory);
-  strcpy(Brush_file_directory,Main_current_directory);
+  strcpy(Brush_selector.Directory,Main_selector.Directory);
+  strcpy(Brush_file_directory,Main_selector.Directory);
   strcpy(Brush_filename       ,"NO_NAME.GIF");
   Brush_fileformat    =Main_fileformat;
 
   // On initialise ce qu'il faut pour que les fileselects ne plantent pas:
   
-  Main_fileselector_position=0; // Au début, le fileselect est en haut de la liste des fichiers
-  Main_fileselector_offset=0; // Au début, le fileselect est en haut de la liste des fichiers
-  Main_format=FORMAT_ALL_IMAGES;
+  Main_selector.Position=0; // Au début, le fileselect est en haut de la liste des fichiers
+  Main_selector.Offset=0; // Au début, le fileselect est en haut de la liste des fichiers
+  Main_selector.Format_filter=FORMAT_ALL_IMAGES;
+  
   Main_current_layer=0;
   Main_layers_visible=0xFFFFFFFF;
   Spare_current_layer=0;
   Spare_layers_visible=0xFFFFFFFF;
   
-  Spare_fileselector_position=0;
-  Spare_fileselector_offset=0;
-  Spare_format=FORMAT_ALL_IMAGES;
-  Brush_fileselector_position=0;
-  Brush_fileselector_offset=0;
-  Brush_format=FORMAT_ALL_IMAGES;
-
-  // On initialise les commentaires des images à des chaînes vides
-  Main_comment[0]='\0';
-  Brush_comment[0]='\0';
+  Spare_selector.Position=0;
+  Spare_selector.Offset=0;
+  Spare_selector.Format_filter=FORMAT_ALL_IMAGES;
+  Brush_selector.Position=0;
+  Brush_selector.Offset=0;
+  Brush_selector.Format_filter=FORMAT_ALL_IMAGES;
 
   // On initialise d'ot' trucs
   Main_offset_X=0;
@@ -708,8 +707,8 @@ int Init_program(int argc,char * argv[])
 
   memcpy(Main_palette, Gfx->Default_palette, sizeof(T_Palette));
 
-  Fore_color=Best_color_nonexcluded(255,255,255);
-  Back_color=Best_color_nonexcluded(0,0,0);
+  Fore_color=Best_color_range(255,255,255,Config.Palette_cells_X*Config.Palette_cells_Y);
+  Back_color=Best_color_range(0,0,0,Config.Palette_cells_X*Config.Palette_cells_Y);
 
   // Allocation de mémoire pour la brosse
   if (!(Brush         =(byte *)malloc(   1*   1))) Error(ERROR_MEMORY);
@@ -750,10 +749,14 @@ int Init_program(int argc,char * argv[])
   Spare_image_width=Screen_width/Pixel_width;
   Spare_image_height=Screen_height/Pixel_height;
   
+  starting_image_mode = Config.Default_mode_layers ? 
+    IMAGE_MODE_LAYERED : IMAGE_MODE_ANIMATION;
   // Allocation de mémoire pour les différents écrans virtuels (et brosse)
-  if (Init_all_backup_lists(Screen_width,Screen_height)==0)
+  if (Init_all_backup_lists(starting_image_mode , Screen_width, Screen_height)==0)
     Error(ERROR_MEMORY);
-
+  // Update toolbars' visibility, now that the current image has a mode
+  Check_menu_mode();
+  
   // Nettoyage de l'écran virtuel (les autres recevront celui-ci par copie)
   memset(Main_screen,0,Main_image_width*Main_image_height);
 
@@ -781,7 +784,7 @@ int Init_program(int argc,char * argv[])
   Draw_menu_button(BUTTON_PAL_LEFT,BUTTON_RELEASED);
   Draw_menu_button(BUTTON_PAL_RIGHT,BUTTON_RELEASED);
 
-  // On affiche le curseur pour débutter correctement l'état du programme:
+  // On affiche le curseur pour débuter correctement l'état du programme:
   Display_cursor();
 
   Spare_image_is_modified=0;
@@ -801,6 +804,14 @@ int Init_program(int argc,char * argv[])
   Capture_brush(0,0,0,0,0);
   *Brush=MC_White;
   *Brush_original_pixels=MC_White;
+
+  // Make sure the load dialog points to the right place when first shown.
+  // Done after loading everything else, but before checking for emergency
+  // backups
+  if (file_in_command_line > 0)
+  {
+	strcpy(Main_selector.Directory, main_directory);
+  }
   
   // Test de recuperation de fichiers sauvés
   switch (Check_recovery())
@@ -811,6 +822,7 @@ int Init_program(int argc,char * argv[])
       // Some files were loaded from last crash-exit.
       // Do not load files from command-line, nor show splash screen.
       Compute_optimal_menu_colors(Main_palette);
+      Check_menu_mode();
       Display_all_screen();
       Display_menu();
       Display_cursor();
@@ -859,9 +871,20 @@ int Init_program(int argc,char * argv[])
           Destroy_context(&context);
           Redraw_layered_image();
           End_of_modification();
+
+          // If only one image was loaded, assume the spare has same image type
+          if (file_in_command_line==1)
+            Spare_backups->Pages->Image_mode = Main_backups->Pages->Image_mode;
           
           Hide_cursor();
           Compute_optimal_menu_colors(Main_palette);
+          Back_color=Main_backups->Pages->Background_transparent ?
+            Main_backups->Pages->Transparent_color :
+            Best_color_range(0,0,0,Config.Palette_cells_X*Config.Palette_cells_Y);
+          Fore_color=Main_palette[Back_color].R+Main_palette[Back_color].G+Main_palette[Back_color].B < 3*127 ?
+            Best_color_range(255,255,255,Config.Palette_cells_X*Config.Palette_cells_Y) :
+            Best_color_range(0,0,0,Config.Palette_cells_X*Config.Palette_cells_Y);  
+          Check_menu_mode();
           Display_all_screen();
           Display_menu();
           Display_cursor();

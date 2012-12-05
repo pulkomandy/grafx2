@@ -32,7 +32,11 @@
     #include <dirent.h>
 #endif
 
+// On Debian, this is already implied in dirent.h
+// I don't know which targets need it and what it does. - yr
+#ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE 500
+#endif
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -70,11 +74,8 @@
 #include "brush.h"
 #include "input.h"
 #include "special.h"
+#include "tiles.h"
 #include "setup.h"
-
-#ifdef __VBCC__
-    #define __attribute__(x)
-#endif
 
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     #include <proto/dos.h>
@@ -149,6 +150,7 @@ void Button_Message_initial(void)
 {
   char  str[30];
   int   x_pos,offs_y,x,y;
+  int clicked_button=0;
 
   strcpy(str,"GrafX2 version ");
   strcat(str,Program_version);
@@ -162,13 +164,16 @@ void Button_Message_initial(void)
     for (x=14,x_pos=0; x_pos<231; x_pos++,x++)
       Pixel_in_window(x,y,Gfx->Logo_grafx2[offs_y+x_pos]);
 
-  Print_in_window(130-4*26,88,"Copyright (c) 2007-2011 by",MC_Dark,MC_Light);
+  Print_in_window(130-4*26,88,"Copyright (c) 2007-2012 by",MC_Dark,MC_Light);
   Print_in_window(130-4*23,96,"the Grafx2 project team",MC_Black,MC_Light);
   Print_in_window(130-4*26,112,"Copyright (c) 1996-2001 by",MC_Dark,MC_Light);
   Print_in_window(130-4*13,120,"Sunset Design",MC_Black,MC_Light);
   //Print_in_window( 120-4*13,128,"(placeholder)",MC_Dark,MC_Light);
   Print_in_window(130-4*28,136,"http://grafx2.googlecode.com",MC_Dark,MC_Light);
 
+  Window_set_normal_button(56, 151, 71, 14, "Anim", 0, (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION), KEY_NONE);
+  Window_set_normal_button(133, 151, 71, 14, "Layers", 0, (Main_backups->Pages->Image_mode != IMAGE_MODE_LAYERED), KEY_NONE);
+  
   Update_window_area(0,0,Window_width, Window_height);
 
   Display_cursor();
@@ -176,9 +181,34 @@ void Button_Message_initial(void)
   while(!Mouse_K && !Key)
     Get_input(20);
   if (Mouse_K)
+  {
+    clicked_button = Window_get_clicked_button();
     Wait_end_of_click();
-
+  }
   Close_window();
+  
+  if (clicked_button > 0)
+  {
+    if (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED)
+    {
+      Switch_layer_mode(IMAGE_MODE_ANIMATION);
+      Config.Default_mode_layers = 0;
+    }  
+    else
+    {
+      Switch_layer_mode(IMAGE_MODE_LAYERED);
+      Config.Default_mode_layers = 1;
+    }
+    if (Check_menu_mode())
+    {
+      Display_menu();
+      Display_all_screen();
+    }
+    // Modify the mode for the spare too
+    Spare_backups->Pages->Image_mode = Main_backups->Pages->Image_mode;
+    Update_spare_buffers(Spare_image_width,Spare_image_height);
+    Redraw_spare_image();
+  }
   Display_cursor();
 }
 
@@ -210,10 +240,10 @@ void Button_Undo(void)
 {
   Hide_cursor();
   Undo();
-
   Set_palette(Main_palette);
   Compute_optimal_menu_colors(Main_palette);
 
+  Check_menu_mode();
   Display_all_screen();
   Unselect_button(BUTTON_UNDO);
   Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
@@ -225,10 +255,10 @@ void Button_Redo(void)
 {
   Hide_cursor();
   Redo();
-
   Set_palette(Main_palette);
   Compute_optimal_menu_colors(Main_palette);
 
+  Check_menu_mode();
   Display_all_screen();
   Unselect_button(BUTTON_UNDO);
   Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
@@ -449,75 +479,18 @@ void Button_Hide_menu(void)
   Display_cursor();
 }
 
-
-void Set_bar_visibility(word bar, byte visible)
-{  
-  if (!visible && Menu_bars[bar].Visible)
-  {
-    // Hide it
-    Menu_bars[bar].Visible=0;
-
-    Compute_menu_offsets();
-
-    if (Main_magnifier_mode)
-    {
-      Compute_magnifier_data();
-    }
-
-    //   On repositionne le décalage de l'image pour qu'il n'y ait pas d'in-
-    // -cohérences lorsqu'on sortira du mode Loupe.
-    if (Main_offset_Y+Screen_height>Main_image_height)
-    {
-      if (Screen_height>Main_image_height)
-        Main_offset_Y=0;
-      else
-        Main_offset_Y=Main_image_height-Screen_height;
-    }
-    // On fait pareil pour le brouillon
-    if (Spare_offset_Y+Screen_height>Spare_image_height)
-    {
-      if (Screen_height>Spare_image_height)
-        Spare_offset_Y=0;
-      else
-        Spare_offset_Y=Spare_image_height-Screen_height;
-    }
-
-    Compute_magnifier_data();
-    if (Main_magnifier_mode)
-      Position_screen_according_to_zoom();
-    Compute_limits();
-    Compute_paintbrush_coordinates();
-    Display_menu();
-    Display_all_screen();
-  }
-  else if (visible && !Menu_bars[bar].Visible)
-  {
-    // Show it
-    Menu_bars[bar].Visible = 1;
-    
-    Compute_menu_offsets();
-    Compute_magnifier_data();
-    if (Main_magnifier_mode)
-      Position_screen_according_to_zoom();
-    Compute_limits();
-    Compute_paintbrush_coordinates();
-    Display_menu();
-    if (Main_magnifier_mode)
-      Display_all_screen();
-  }
-}
-
 void Button_Toggle_toolbar(void)
 {  
   T_Dropdown_button dropdown;
   T_Dropdown_choice *item;
-  static char menu_name[2][9]= {
-    " Tools",
-    " Layers"
-  };
+  static char menu_name_tools[9] = " Tools";
+  static char menu_name_layers[9]= " Layers";
+  static char menu_name_anim[9]  = " Anim";
   
-  menu_name[0][0] = Menu_bars[MENUBAR_TOOLS ].Visible ? 22 : ' ';
-  menu_name[1][0] = Menu_bars[MENUBAR_LAYERS].Visible ? 22 : ' ';
+  
+  menu_name_tools[0]  = Menu_bars[MENUBAR_TOOLS ].Visible ? 22 : ' ';
+  menu_name_layers[0] = Menu_bars[MENUBAR_LAYERS].Visible ? 22 : ' ';
+  menu_name_anim[0]   = Menu_bars[MENUBAR_ANIMATION].Visible ? 22 : ' ';
 
   Hide_cursor();
   
@@ -528,8 +501,16 @@ void Button_Toggle_toolbar(void)
   dropdown.First_item    =NULL;
   dropdown.Bottom_up     =1;
 
-  Window_dropdown_add_item(&dropdown, 0, menu_name[0]);
-  Window_dropdown_add_item(&dropdown, 1, menu_name[1]);
+  Window_dropdown_add_item(&dropdown, 0, menu_name_tools);
+  
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED ||
+      Main_backups->Pages->Image_mode == IMAGE_MODE_MODE5 ||
+    (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION && Main_backups->Pages->Nb_layers==1))
+    Window_dropdown_add_item(&dropdown, 1, menu_name_layers);
+  
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION ||
+    (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED && Main_backups->Pages->Nb_layers==1))
+    Window_dropdown_add_item(&dropdown, 2, menu_name_anim);
 
   item=Dropdown_activate(&dropdown,0,Menu_Y+Menu_bars[MENUBAR_STATUS].Top*Menu_factor_Y);
   
@@ -537,13 +518,37 @@ void Button_Toggle_toolbar(void)
   {
     switch (item->Number)
     {
-      case 0:
-        Set_bar_visibility(MENUBAR_TOOLS, !Menu_bars[MENUBAR_TOOLS].Visible);
+      case 0: // tools
+        Set_bar_visibility(MENUBAR_TOOLS, !Menu_bars[MENUBAR_TOOLS].Visible, 0);
         break;
-      case 1:
-        Set_bar_visibility(MENUBAR_LAYERS, !Menu_bars[MENUBAR_LAYERS].Visible);
+      case 1: // layers
+        if (Menu_bars[MENUBAR_ANIMATION].Visible)
+        {
+          Set_bar_visibility(MENUBAR_ANIMATION, 0, 0);
+          Config.Default_mode_layers=1;
+        }
+        Set_bar_visibility(MENUBAR_LAYERS, !Menu_bars[MENUBAR_LAYERS].Visible, 0);
+
+        if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+          Switch_layer_mode(IMAGE_MODE_LAYERED);
+          
+        break;
+      case 2: // anim
+        if (Menu_bars[MENUBAR_LAYERS].Visible)
+        {
+          Set_bar_visibility(MENUBAR_LAYERS, 0, 0);
+          Config.Default_mode_layers=0;
+        }
+        Set_bar_visibility(MENUBAR_ANIMATION, !Menu_bars[MENUBAR_ANIMATION].Visible, 0);
+
+        if (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED)
+          Switch_layer_mode(IMAGE_MODE_ANIMATION);
+        
         break;
     }
+    // redraw image and menu
+    Display_menu();
+    Display_all_screen();
   }
   
   // Closing
@@ -573,14 +578,17 @@ void Button_Toggle_all_toolbars(void)
     // At least one is visible: Hide all
     Last_visibility=current_visibility;
     for (i=MENUBAR_STATUS+1;i<MENUBAR_COUNT;i++)
-      Set_bar_visibility(i,0);
+      Set_bar_visibility(i,0, 0);
   }
   else
   {
     // Restore all
     for (i=MENUBAR_STATUS+1;i<MENUBAR_COUNT;i++)
-      Set_bar_visibility(i,(Last_visibility & (1<<i)) ? 1 : 0);
+      Set_bar_visibility(i,(Last_visibility & (1<<i)) ? 1 : 0, 0);
   }
+  Check_menu_mode();
+  Display_menu();
+  Display_all_screen();
   
   Unselect_button(BUTTON_HIDE);
   Display_cursor();
@@ -776,6 +784,13 @@ const T_Lookup Lookup_SwapButtons[] = {
   {NULL,-1},
 };
 
+const T_Lookup Lookup_VirtualKeyboard[] = {
+  {"Auto",0},
+  {"ON",1},
+  {"OFF",2},
+  {NULL,-1},
+};
+
 typedef struct {
   const char* Label;
   byte Type; // 0: label, 1+: setting (size in bytes) 
@@ -957,7 +972,7 @@ void Button_Settings(void)
   //{"  horizontally:",1,&(selected_config.Mouse_sensitivity_index_x),1,4,0,Lookup_MouseSpeed},
   //{"  vertically:",1,&(selected_config.Mouse_sensitivity_index_y),1,4,0,Lookup_MouseSpeed},
   {"Key to swap buttons:",2,&(selected_config.Swap_buttons),0,0,0,Lookup_SwapButtons},
-  {"",0,NULL,0,0,0,NULL},
+  {"Virtual keyboard",1,&(selected_config.Use_virtual_keyboard),0,2,0,Lookup_VirtualKeyboard},
   {"",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
   
@@ -1151,10 +1166,12 @@ void Button_Settings(void)
   {
     // Reset fileselector offsets
     // since different files are shown now
-    Main_fileselector_position=0;
-    Main_fileselector_offset=0;
-    Spare_fileselector_position=0;
-    Spare_fileselector_offset=0;
+    Main_selector.Position=0;
+    Main_selector.Offset=0;
+    Spare_selector.Position=0;
+    Spare_selector.Offset=0;
+    Brush_selector.Position=0;
+    Brush_selector.Offset=0;
   }
   if(Config.Allow_multi_shortcuts && !selected_config.Allow_multi_shortcuts)
   {
@@ -1213,7 +1230,7 @@ void Add_font_or_skin(const char *name)
   int namelength;
   
   // Cut the long name to keep only filename (no directory)
-  fname = Find_last_slash(name);
+  fname = Find_last_separator(name);
   if (fname)
     fname++;
   else
@@ -1273,7 +1290,7 @@ void Button_Skins(void)
   
   char * cursors[] = { "Solid", "Transparent", "Thin" };
   T_Gui_skin * gfx = NULL;
-
+  byte * new_font;
 
   #define FILESEL_Y 34
 
@@ -1434,8 +1451,22 @@ void Button_Skins(void)
           need_load=1;
         break;
       case 5 : // Font dropdown
+      {
+        T_Fileselector_item* fontName;
         selected_font = Window_attribute2; // Get the index of the chosen font.
+        fontName = Get_item_by_index(&Font_files_list,selected_font);
+        new_font = Load_font(fontName->Full_name);
+        if (new_font)
+        {
+          free(Menu_font);
+          Menu_font = new_font;
+          Print_in_window( 172, 33,"Font:"            ,MC_Black,MC_Light);
+          Print_in_window_limited(font_dropdown->Pos_X+2,font_dropdown->Pos_Y+(font_dropdown->Height-7)/2,
+            fontName->Short_name,strlen(fontName->Short_name) ,MC_Black,MC_Light);
+          Update_window_area(172, 33, 8 * 5, 8);
+        }
         break;
+      }
       // 6: Cancel
       case 7 : // Cursor
         selected_cursor = Window_attribute2;
@@ -1458,8 +1489,6 @@ void Button_Skins(void)
 
   if(clicked_button == 1)
   {
-    byte * new_font;
-
     if (gfx != NULL)
     {
       Set_current_skin(skinsdir, gfx);
@@ -1506,7 +1535,7 @@ void Button_Skins(void)
         state|=Main_magnifier_mode;
         break;
       case BUTTON_EFFECTS:
-        state|=(Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode);
+        state|=Any_effect_active();
         break;
     }
     Draw_menu_button(button,state);
@@ -1529,12 +1558,13 @@ void Button_Page(void)
   // On dégrossit le travail avec les infos des listes de pages
   Exchange_main_and_spare();
 
+  // Tilemap info
+  Swap_tilemap();
+  
   // On fait le reste du travail "à la main":
-#ifndef NOLAYERS
   SWAP_PBYTES(Main_visible_image.Image,Spare_visible_image.Image)
   SWAP_WORDS (Main_visible_image.Width,Spare_visible_image.Width)
   SWAP_WORDS (Main_visible_image.Height,Spare_visible_image.Height)
-#endif 
   SWAP_SHORTS(Main_offset_X,Spare_offset_X)
   SWAP_SHORTS(Main_offset_Y,Spare_offset_Y)
   SWAP_SHORTS(Main_separator_position,Spare_separator_position)
@@ -1552,14 +1582,14 @@ void Button_Page(void)
   // Swap du booléen "Image modifiée"
   SWAP_BYTES (Main_image_is_modified,Spare_image_is_modified)
 
-  // Swap des infos sur les fileselects
-  strcpy(Temp_buffer            ,Spare_current_directory);
-  strcpy(Spare_current_directory,Main_current_directory);
-  strcpy(Main_current_directory,Temp_buffer             );
+  // Swap fileselector data
+  SWAP_BYTES (Main_selector.Format_filter,Spare_selector.Format_filter)
+  SWAP_WORDS (Main_selector.Position,Spare_selector.Position)
+  SWAP_WORDS (Main_selector.Offset,Spare_selector.Offset)
+  strcpy(Temp_buffer            ,Spare_selector.Directory);
+  strcpy(Spare_selector.Directory,Main_selector.Directory);
+  strcpy(Main_selector.Directory,Temp_buffer             );
 
-  SWAP_BYTES (Main_format,Spare_format)
-  SWAP_WORDS (Main_fileselector_position,Spare_fileselector_position)
-  SWAP_WORDS (Main_fileselector_offset,Spare_fileselector_offset)
 
   SWAP_BYTES (Main_current_layer,Spare_current_layer)
   SWAP_DWORDS(Main_layers_visible,Spare_layers_visible)
@@ -1595,9 +1625,12 @@ void Button_Page(void)
 
   Set_palette(Main_palette);
   Compute_optimal_menu_colors(Main_palette);
+  Check_menu_mode();
   Display_all_screen();
   Unselect_button(BUTTON_PAGE);
   Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
+  // Tilemap mode might be different
+  Draw_menu_button(BUTTON_EFFECTS,Any_effect_active());
   Display_menu();
 
   Display_cursor();
@@ -1620,15 +1653,15 @@ void Copy_image_only(void)
       if (i == Spare_current_layer)
       {
         // Copy the current layer
-        memcpy(Spare_backups->Pages->Image[i],Main_backups->Pages->Image[Main_current_layer],Main_image_width*Main_image_height);
+        memcpy(Spare_backups->Pages->Image[i].Pixels,Main_backups->Pages->Image[Main_current_layer].Pixels,Main_image_width*Main_image_height);
       }
       else
       {
         // Resize the original layer
         Copy_part_of_image_to_another(
-        Spare_backups->Pages->Next->Image[i],0,0,Min(old_width,Spare_image_width),
+        Spare_backups->Pages->Next->Image[i].Pixels,0,0,Min(old_width,Spare_image_width),
         Min(old_height,Spare_image_height),old_width,
-        Spare_backups->Pages->Image[i],0,0,Spare_image_width);
+        Spare_backups->Pages->Image[i].Pixels,0,0,Spare_image_width);
       }
     }
 
@@ -1672,7 +1705,7 @@ void Copy_some_colors(void)
   if (confirmation)
   {
     // Make a backup with the same pixel data as previous history steps
-    Backup_the_spare(0);
+    Backup_the_spare(LAYER_NONE);
     for (index=0; index<256; index++)
     {
       if (mask_color_to_copy[index])
@@ -1716,7 +1749,7 @@ void Button_Copy_page(void)
   switch (clicked_button)
   {
     case 1: // Pixels+palette
-      Backup_the_spare(-1);
+      // backup is done by the following function
       Copy_image_only();
       // copie de la palette
       memcpy(Spare_palette,Main_palette,sizeof(T_Palette));
@@ -1724,19 +1757,23 @@ void Button_Copy_page(void)
       Update_spare_buffers(Spare_image_width,Spare_image_height);
       Redraw_spare_image();
       Spare_image_is_modified=1;
+      if (Spare_tilemap_mode)
+        Disable_spare_tilemap();
       break;
       
     case 2: // Pixels only
-      Backup_the_spare(-1);
+      // backup is done by the following function
       Copy_image_only();
       // Equivalent of 'end_of_modifications' for spare.
       Update_spare_buffers(Spare_image_width,Spare_image_height);
       Redraw_spare_image();
       Spare_image_is_modified=1;
+      if (Spare_tilemap_mode)
+        Disable_spare_tilemap();
       break;
       
     case 3: // Palette only
-      Backup_the_spare(0);
+      Backup_the_spare(LAYER_NONE);
       // Copy palette
       memcpy(Spare_palette,Main_palette,sizeof(T_Palette));
       // Equivalent of 'end_of_modifications' for spare.
@@ -1751,7 +1788,7 @@ void Button_Copy_page(void)
       break;
       
     case 5: // Palette and remap
-      Backup_the_spare(-1);
+      Backup_the_spare(LAYER_ALL);
       Remap_spare();
       // Copy palette
       memcpy(Spare_palette,Main_palette,sizeof(T_Palette));
@@ -2185,7 +2222,8 @@ void Button_Resolution(void)
       || (chosen_height!=Main_image_height) )
     {
       Resize_image(chosen_width,chosen_height);
-      End_of_modification(); 
+      End_of_modification();
+      Tilemap_update();
     }
     
     if ((Video_mode[selected_mode].State & 3) == 3 ||
@@ -3130,10 +3168,10 @@ void Load_picture(byte image)
   else
   {
     strcpy(filename, Brush_filename);
-    strcpy(directory, Main_current_directory);
-    Init_context_brush(&context, Brush_filename, Main_current_directory);
+    strcpy(directory, Brush_file_directory);
+    Init_context_brush(&context, filename, directory);
   }
-  confirm=Button_Load_or_Save(1, &context);
+  confirm=Button_Load_or_Save(image?&Main_selector:&Brush_selector, 1, &context);
 
   if (confirm)
   {
@@ -3163,13 +3201,9 @@ void Load_picture(byte image)
 
     if (!image)
     {
-      if (File_error==3) // Memory allocation error when loading brush
-      {
-        // Nothing to do here.
-        // Previous versions of Grafx2 would have damaged the Brush,
-        // and need reset it here, but now the loading is done in separate
-        // memory buffers.
-      }
+      strcpy(Brush_filename, context.File_name);
+      strcpy(Brush_file_directory, context.File_directory);
+      Brush_fileformat = context.Format;
 
       Tiling_offset_X=0;
       Tiling_offset_Y=0;
@@ -3242,15 +3276,14 @@ void Load_picture(byte image)
           Compute_limits();
           Compute_paintbrush_coordinates();
         }
-      }
 
-      Compute_optimal_menu_colors(Main_palette);
-      Redraw_layered_image();
-      End_of_modification();
-      Display_all_screen();
-
-      if (image)
+        Compute_optimal_menu_colors(Main_palette);
+        Redraw_layered_image();
+        End_of_modification();
+        Check_menu_mode();
+        Display_all_screen();
         Main_image_is_modified=0;
+      }
     }
 
     Destroy_context(&context);
@@ -3259,8 +3292,6 @@ void Load_picture(byte image)
     Display_cursor();
   }
 
-  //if (!image)
-  //  Swap_data_of_image_and_brush();
   Hide_cursor();
   Print_filename();
   Display_cursor();
@@ -3275,6 +3306,7 @@ void Button_Load(void)
   Upload_infos_page_main(Main_backups->Pages);
 
   Load_picture(1);
+  Tilemap_update();
 }
 
 
@@ -3346,8 +3378,10 @@ void Button_Reload(void)
         Compute_limits();
         Compute_paintbrush_coordinates();
       }
+      Tilemap_update();
       Redraw_layered_image();
       End_of_modification();
+      Check_menu_mode();
       Display_all_screen();
 
       Main_image_is_modified=0;
@@ -3428,13 +3462,10 @@ void Save_picture(byte image)
     strcpy(filename, Brush_filename);
     strcpy(directory, Brush_file_directory);
     Init_context_brush(&save_context, filename, directory);
-    save_context.Format = Main_fileformat;
+    save_context.Format = Brush_fileformat;
   }
-  
-  //if (!image)
-  //  Swap_data_of_image_and_brush();
 
-  confirm=Button_Load_or_Save(0, &save_context);
+  confirm=Button_Load_or_Save(image?&Main_selector:&Brush_selector,0, &save_context);
 
   if (confirm && File_exists(save_context.File_name))
   {
@@ -3452,7 +3483,8 @@ void Save_picture(byte image)
 
   if (confirm)
   {
-    
+    T_Format * format;
+     
     old_cursor_shape=Cursor_shape;
     Hide_cursor();
     Cursor_shape=CURSOR_SHAPE_HOURGLASS;
@@ -3460,13 +3492,20 @@ void Save_picture(byte image)
 
     Save_image(&save_context);
 
-    if (!File_error && image && !Get_fileformat(save_context.Format)->Palette_only)
+    format=Get_fileformat(save_context.Format);
+    if (!File_error && image && !format->Palette_only && (Main_backups->Pages->Nb_layers==1 || format->Supports_layers))
     {
       Main_image_is_modified=0;
+      Main_fileformat=save_context.Format;
       strcpy(Main_backups->Pages->Filename, save_context.File_name);
       strcpy(Main_backups->Pages->File_directory, save_context.File_directory);
     }
-    
+    if (!image)
+    {
+      Brush_fileformat=save_context.Format;
+      strcpy(Brush_filename, save_context.File_name);
+      strcpy(Brush_file_directory, save_context.File_directory);
+    }
     Hide_cursor();
     Cursor_shape=old_cursor_shape;
     Display_cursor();
@@ -3483,7 +3522,7 @@ void Button_Save(void)
   Save_picture(1);
 }
 
-
+/// Save main image over existing file (no fileselector)
 void Button_Autosave(void)
 {
   byte old_cursor_shape;
@@ -3950,7 +3989,8 @@ void Button_Brush_FX(void)
       Rotate_90_deg();
       break;
     case  5 : // 180° Rotation
-      Rotate_180_deg_lowlevel(Brush, Brush_width, Brush_height);
+      Rotate_180_deg_lowlevel(Brush_original_pixels, Brush_width, Brush_height);
+      Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
       Brush_offset_X=(Brush_width>>1);
       Brush_offset_Y=(Brush_height>>1);
       break;
@@ -4454,7 +4494,7 @@ void Button_Adjust(void)
 
 // -- Menu des effets (Shade, Stencil, etc...) ------------------------------
 
-void Display_effect_sprite(short sprite_number, short start_x, short start_y)
+void Display_effect_sprite(int sprite_number, short start_x, short start_y)
 {
   short x,y,x_pos,y_pos;
 
@@ -4473,23 +4513,28 @@ void Display_effect_state(short x, short y, char * label, byte state)
 
   Print_in_window(x,y,label,(state)?MC_White:MC_Black,MC_Light);
   if (state)
-    Print_in_window(x+56,y,":ON ",MC_White,MC_Light);
+    Window_select_normal_button(x-23, y-5, 16, 16);
   else
-    Print_in_window(x+56,y,":OFF",MC_Black,MC_Light);
+    Window_unselect_normal_button(x-23, y-5, 16, 16);
 }
+
+#define C2 92
 
 void Display_effect_states(void)
 {
-  Display_effect_state( 30, 24,"Shade"  ,Shade_mode);
-  Display_effect_state( 30, 43,"Q-shade",Quick_shade_mode);
-  Display_effect_state( 30, 62,"Transp.",Colorize_mode);
-  Display_effect_state( 30, 81,"Smooth" ,Smooth_mode);
-  Display_effect_state( 30,100,"Smear"  ,Smear_mode);
-  Display_effect_state(176, 24,"Stencil",Stencil_mode);
-  Display_effect_state(176, 43,"Mask"   ,Mask_mode);
-  Display_effect_state(176, 62,"Sieve"  ,Sieve_mode);
-  Display_effect_state(176, 81,"Grid"   ,Snap_mode);
-  Display_effect_state(176,100,"Tiling" ,Tiling_mode);
+  Display_effect_state( 30, 24,   "Shade"  ,Shade_mode);
+  Display_effect_state( 30, 43,   "Q-shade",Quick_shade_mode);
+  Display_effect_state( 30, 62,   "Transp.",Colorize_mode);
+  Display_effect_state( 30, 81,   "Smooth" ,Smooth_mode);
+  Display_effect_state( 30,100,   "Smear"  ,Smear_mode);
+  Display_effect_state(C2+23, 24, "Stencil",Stencil_mode);
+  Display_effect_state(C2+23, 43, "Mask"   ,Mask_mode);
+  Display_effect_state(C2+23, 62, "Sieve"  ,Sieve_mode);
+  Display_effect_state(C2+23, 81, "Grid"   ,Snap_mode);
+  Display_effect_state(C2+23,100, "Tiling" ,Tiling_mode);
+
+  Display_effect_state(177+23,24, "8 bit"  ,Main_backups->Pages->Image_mode > IMAGE_MODE_ANIMATION);
+  Display_effect_state(177+23,43, "Tilemap",Main_tilemap_mode);
 }
 
 
@@ -4511,25 +4556,32 @@ void Button_Effects(void)
   Window_set_normal_button(  7, 57, 16,16,"",0,1,Config_Key[SPECIAL_COLORIZE_MODE][0]); // 3
   Window_set_normal_button(  7, 76, 16,16,"",0,1,Config_Key[SPECIAL_SMOOTH_MODE][0]); // 4
   Window_set_normal_button(  7, 95, 16,16,"",0,1,Config_Key[SPECIAL_SMEAR_MODE][0]); // 5
-  Window_set_normal_button(153, 19, 16,16,"",0,1,Config_Key[SPECIAL_STENCIL_MODE][0]); // 6
-  Window_set_normal_button(153, 38, 16,16,"",0,1,Config_Key[SPECIAL_MASK_MODE][0]); // 7
-  Window_set_normal_button(153, 57, 16,16,"",0,1,Config_Key[SPECIAL_SIEVE_MODE][0]); // 8
-  Window_set_normal_button(153, 76, 16,16,"",0,1,Config_Key[SPECIAL_GRID_MODE][0]); // 9
-  Window_set_normal_button(153, 95, 16,16,"",0,1,Config_Key[SPECIAL_TILING_MODE][0]); // 10
+  Window_set_normal_button(C2, 19, 16,16,"",0,1,Config_Key[SPECIAL_STENCIL_MODE][0]); // 6
+  Window_set_normal_button(C2, 38, 16,16,"",0,1,Config_Key[SPECIAL_MASK_MODE][0]); // 7
+  Window_set_normal_button(C2, 57, 16,16,"",0,1,Config_Key[SPECIAL_SIEVE_MODE][0]); // 8
+  Window_set_normal_button(C2, 76, 16,16,"",0,1,Config_Key[SPECIAL_GRID_MODE][0]); // 9
+  Window_set_normal_button(C2, 95, 16,16,"",0,1,Config_Key[SPECIAL_TILING_MODE][0]); // 10
+
   Window_set_normal_button(195,131, 68,14,"Close",0,1,SDLK_RETURN); // 11
   Window_set_normal_button(  7,131, 68,14,"All off",0,1,SDLK_DELETE); // 12
   Window_set_normal_button( 83,131,104,14,"Feedback:   ",1,1,SDLK_f); // 13
+
+  Window_set_normal_button(177, 19, 16,16,"",0,1,Config_Key[SPECIAL_FORMAT_CHECKER_MENU][0]); // 14
+  Window_set_normal_button(177, 38, 16,16,"",0,1,Config_Key[SPECIAL_TILEMAP_MODE][0]); // 15
+
   Display_feedback_state();
-  Display_effect_sprite(0,  8,20);
-  Display_effect_sprite(0,  8,39);
-  Display_effect_sprite(1,  8,58);
-  Display_effect_sprite(2,  8,77);
-  Display_effect_sprite(8,  8,96);
-  Display_effect_sprite(4,154,20);
-  Display_effect_sprite(7,154,39);
-  Display_effect_sprite(5,154,58);
-  Display_effect_sprite(6,154,77);
-  Display_effect_sprite(3,154,96);
+  Display_effect_sprite(EFFECTS_SPRITE_SHADE,   8,20);
+  Display_effect_sprite(EFFECTS_SPRITE_SHADE,   8,39);
+  Display_effect_sprite(EFFECTS_SPRITE_TRANSP,  8,58);
+  Display_effect_sprite(EFFECTS_SPRITE_SMOOTH,  8,77);
+  Display_effect_sprite(EFFECTS_SPRITE_SMEAR,   8,96);
+  Display_effect_sprite(EFFECTS_SPRITE_STENCIL,C2+1,20);
+  Display_effect_sprite(EFFECTS_SPRITE_MASK,   C2+1,39);
+  Display_effect_sprite(EFFECTS_SPRITE_SIEVE,  C2+1,58);
+  Display_effect_sprite(EFFECTS_SPRITE_GRID,   C2+1,77);
+  Display_effect_sprite(EFFECTS_SPRITE_TILING, C2+1,96);
+  Display_effect_sprite(EFFECTS_SPRITE_8BIT,  177+1,20);
+  Display_effect_sprite(EFFECTS_SPRITE_TILING,177+1,39);
   Display_effect_states();
 
   Print_in_window(12,117,"click: Left:Switch / Right:Edit",MC_Dark,MC_Light);
@@ -4581,6 +4633,9 @@ void Button_Effects(void)
         case 10:
           Window_help(BUTTON_EFFECTS, "TILING");
           break;
+        case 15:
+          Window_help(BUTTON_EFFECTS, "TILEMAP");
+          break;        
         default:
           Window_help(BUTTON_EFFECTS, NULL);
       }
@@ -4666,7 +4721,7 @@ void Button_Effects(void)
         {
           Button_Stencil_mode();
           Hide_cursor();
-          Display_effect_state(176,24,"Stencil",Stencil_mode);
+          Display_effect_state(C2+23,24,"Stencil",Stencil_mode);
           Display_cursor();
         }
         else
@@ -4682,7 +4737,7 @@ void Button_Effects(void)
         {
           Button_Mask_mode();
           Hide_cursor();
-          Display_effect_state(176,43,"Mask",Mask_mode);
+          Display_effect_state(C2+23,43,"Mask",Mask_mode);
           Display_cursor();
         }
         else
@@ -4698,7 +4753,7 @@ void Button_Effects(void)
         {
           Button_Sieve_mode();
           Hide_cursor();
-          Display_effect_state(176,62,"Sieve",Sieve_mode);
+          Display_effect_state(C2+23,62,"Sieve",Sieve_mode);
           Display_cursor();
         }
         else
@@ -4714,7 +4769,7 @@ void Button_Effects(void)
         {
           Button_Snap_mode();
           Hide_cursor();
-          Display_effect_state(176,81,"Grid",Snap_mode);
+          Display_effect_state(C2+23,81,"Grid",Snap_mode);
           Display_cursor();
         }
         else
@@ -4757,6 +4812,38 @@ void Button_Effects(void)
         Display_feedback_state();
         Display_cursor();
         break;
+
+
+      case 14: // Constraint checker/enforcer
+        if (Window_attribute1==LEFT_SIDE)
+        {
+          Button_Constraint_mode();
+          Hide_cursor();
+          Display_effect_state(177+23,24, "8 bit" ,Main_backups->Pages->Image_mode > IMAGE_MODE_ANIMATION);
+          Display_cursor();
+        } else {
+          //Close_window();
+          //Display_cursor();
+          // Contraint checker/enforcer menu
+          //clicked_button = 11;
+        }
+        break;
+      case 15: // Tilemap
+        if (Window_attribute1==LEFT_SIDE)
+        {
+          Button_Tilemap_mode();
+          Hide_cursor();
+          Display_effect_state(177+23,43, "Tilemap" ,Main_tilemap_mode);
+          Display_cursor();
+        }
+        else
+        {
+          Close_window();
+          Display_cursor();
+          Button_Tilemap_menu();
+          clicked_button=11;
+        }
+        break;
     }
   }
   while (clicked_button!=11);
@@ -4766,11 +4853,13 @@ void Button_Effects(void)
   else
     Hide_cursor();
 
-  if (!(Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode))
+  if (!Any_effect_active())
     Unselect_button(BUTTON_EFFECTS);
 
   Display_cursor();
 }
+
+#undef C2
 
 // Callback to display a font name in the list
 void Draw_one_font_name(word x, word y, word index, byte highlighted)
@@ -5475,4 +5564,9 @@ void Button_Brush_container(void)
 
   //Unselect_button(BUTTON_PAINTBRUSHES);
   Display_cursor();
+}
+
+byte Any_effect_active(void)
+{
+    return Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode||Main_tilemap_mode;
 }

@@ -45,7 +45,6 @@
 #endif
 
 #if defined(__macosx__)
-  #include <Carbon/Carbon.h>
   #import <corefoundation/corefoundation.h>
   #import <sys/param.h>
 #endif
@@ -169,7 +168,7 @@ void Add_font(const char *name)
   strcpy(font->Label, "                   ");
   if (font->Is_truetype)
     font->Label[17]=font->Label[18]='T'; // Logo TT
-  font_name=Find_last_slash(font->Name);
+  font_name=Find_last_separator(font->Name);
   if (font_name==NULL)
     font_name=font->Name;
   else
@@ -350,6 +349,10 @@ void Init_text(void)
     #ifndef NOTTF
       For_each_file( "FONTS:_TrueType", Add_font );
     #endif
+  #elif defined(__AROS__)
+    #ifndef NOTTF
+      For_each_file( "FONTS:TrueType", Add_font );
+    #endif
   #elif defined(__BEOS__)
     #ifndef NOTTF
       For_each_file("/etc/fonts/ttfonts", Add_font);
@@ -522,7 +525,11 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   font_surface=IMG_Load(Font_name(font_number));
   if (!font_surface)
   {
-    Verbose_message("Warning","Error loading font.\nThe file may be corrupt.");
+	char buffer[256];
+	strcpy(buffer, "Error loading font.\n");
+	strcat(buffer,IMG_GetError());
+    Verbose_message("Warning",buffer);
+	// TODO this leaves a non-erased cursor when the window closes.
     return NULL;
   }
   // Font is 24bit: Perform a color reduction
@@ -630,17 +637,17 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   return new_brush;
 }
 
-#ifdef NOTTF
-  #define TTFONLY __attribute__((unused))
-#else
-  #define TTFONLY
-#endif
-
 // Crée une brosse à partir des paramètres de texte demandés.
 // Si cela réussit, la fonction place les dimensions dans width et height, 
 // et retourne l'adresse du bloc d'octets.
-byte *Render_text(const char *str, int font_number, TTFONLY int size, int TTFONLY antialias, TTFONLY int bold, TTFONLY int italic, int *width, int *height, T_Palette palette)
+byte *Render_text(const char *str, int font_number, int size, int antialias, int bold, int italic, int *width, int *height, T_Palette palette)
 {
+  #ifdef NOTTF
+    (void) size; // unused
+    (void) antialias; // unused
+    (void) bold; // unused
+    (void) italic; // unused
+  #endif
   T_Font *font = font_list_start;
   int index=font_number;
   

@@ -38,13 +38,18 @@
 #include "input.h"
 #include "loadsave.h"
 
-#ifdef __VBCC__
-  #define __attribute__(x)
-#endif
+
+#define RSUPER_EMULATES_META_MOD
+// Keyboards with a Super key never seem to have a Meta key at the same time.
+// This setting allows the right 'Super' key (the one with a 'Windows' or
+// 'Amiga' label to be used as a modifier instead of a normal key.
+// This feature is especially useful for AROS where applications should use
+// generic defaults like "Right Amiga+Q = Quit".
+// In case this is annoying for some platforms, disable it.
 
 void Handle_window_resize(SDL_ResizeEvent event);
 void Handle_window_exit(SDL_QuitEvent event);
-int Color_cycling(__attribute__((unused)) void* useless);
+int Color_cycling(void);
 
 // public Globals (available as extern)
 
@@ -84,6 +89,8 @@ word Input_new_mouse_X;
 word Input_new_mouse_Y;
 byte Input_new_mouse_K;
 byte Button_inverter=0; // State of the key that swaps mouse buttons.
+
+byte Pan_shortcut_pressed;
 
 // Joystick/pad configurations for the various console ports.
 // See the #else for the documentation of fields.
@@ -291,8 +298,10 @@ void Handle_window_resize(SDL_ResizeEvent event)
     Resize_height = event.h;
 }
 
-void Handle_window_exit(__attribute__((unused)) SDL_QuitEvent event)
+void Handle_window_exit(SDL_QuitEvent event)
 {
+    (void)event, // unused
+    
     Quit_is_required = 1;
 }
 
@@ -410,6 +419,13 @@ int Handle_key_press(SDL_KeyboardEvent event)
         return Move_cursor_with_constraints();
       }
     }
+    #ifdef RSUPER_EMULATES_META_MOD
+    if (Key==SDLK_RSUPER)
+    {
+      SDL_SetModState(SDL_GetModState() | KMOD_META);
+      Key=0;
+    }
+    #endif
 
     if(Is_shortcut(Key,SPECIAL_MOUSE_UP))
     {
@@ -443,7 +459,11 @@ int Handle_key_press(SDL_KeyboardEvent event)
         Directional_click=2;
         return Move_cursor_with_constraints();
     }
-
+    else if(Is_shortcut(Key,SPECIAL_HOLD_PAN))
+    {
+      Pan_shortcut_pressed=1;
+      return 0;
+    }
     return 0;
 }
 
@@ -507,7 +527,13 @@ int Release_control(int key_code, int modifier)
             return Move_cursor_with_constraints() || need_feedback;
         }
     }
-  
+    if((key_code && key_code == (Config_Key[SPECIAL_HOLD_PAN][0]&0x0FFF)) || (Config_Key[SPECIAL_HOLD_PAN][0]&modifier) ||
+      (key_code && key_code == (Config_Key[SPECIAL_HOLD_PAN][1]&0x0FFF)) || (Config_Key[SPECIAL_HOLD_PAN][1]&modifier))
+    {
+      Pan_shortcut_pressed=0;
+      need_feedback = 1;
+    }
+    
     // Other keys don't need to be released : they are handled as "events" and procesed only once.
     // These clicks are apart because they need to be continuous (ie move while key pressed)
     // We are relying on "hardware" keyrepeat to achieve that.
@@ -538,6 +564,13 @@ int Handle_key_release(SDL_KeyboardEvent event)
         modifier=MOD_ALT;
         break;
 
+      #ifdef RSUPER_EMULATES_META_MOD
+      case SDLK_RSUPER:
+        SDL_SetModState(SDL_GetModState() & ~KMOD_META);
+        modifier=MOD_META;
+        break;
+      #endif
+      
       case SDLK_RMETA:
       case SDLK_LMETA:
         modifier=MOD_META;
@@ -813,7 +846,7 @@ int Get_input(int sleep_time)
     // This is done in this function because it's called after reading 
     // some user input.
     Flush_update();
-    Color_cycling(NULL);
+    Color_cycling();
     Key_ANSI = 0;
     Key = 0;
     Mouse_moved=0;
@@ -1031,7 +1064,7 @@ void Set_mouse_position(void)
     SDL_WarpMouse(Mouse_X*Pixel_width, Mouse_Y*Pixel_height);
 }
 
-int Color_cycling(__attribute__((unused)) void* useless)
+int Color_cycling(void)
 {
   static byte offset[16];
   int i, color;

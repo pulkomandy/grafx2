@@ -6,7 +6,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
-#if defined(__AROS__)
+#if defined(__AROS__) || defined(__linux__) || defined(__GLIBC__)|| defined(__MINT__)
 #include <limits.h>
 #endif
 
@@ -43,9 +43,16 @@
         return path;
     }
 
+	// Find the real path of _path by chdir to it and then getcwd.
+	// If resolved_path is null, it is allocated.
     char *Realpath(const char *_path, char *resolved_path)
     {
-        int fd = open(".", O_RDONLY), l;
+        #if defined(__AROS__)
+        int fd = open("", O_RDONLY); // GrafX2 is compiled without Unix support
+        #else
+        int fd = open(".", O_RDONLY);
+        #endif
+        int l;
         char current_dir_path[PATH_MAX];
         char path[PATH_MAX], lnk[PATH_MAX], *tmp = (char *)"";
         
@@ -62,23 +69,23 @@
                     l = -1;
                 #else
                     l = readlink(path, lnk, PATH_MAX);
-                    #endif
-                    if (!(tmp = sep(path))) {
+                #endif
+                if (!(tmp = sep(path))) {
+                    resolved_path = NULL;
+                    goto abort;
+                }
+                if (l < 0) {
+                    if (errno != EINVAL) {
                         resolved_path = NULL;
                         goto abort;
                     }
-                    if (l < 0) {
-                        if (errno != EINVAL) {
-                            resolved_path = NULL;
-                            goto abort;
-                        }
-                    } else {
-                        lnk[l] = 0;
-                        if (!(tmp = sep(lnk))) {
-                            resolved_path = NULL;
-                            goto abort;
-                        }
+                } else {
+                    lnk[l] = 0;
+                    if (!(tmp = sep(lnk))) {
+                        resolved_path = NULL;
+                        goto abort;
                     }
+                }
             } else {
                 resolved_path = NULL;
                 goto abort;
@@ -114,6 +121,12 @@
 // Use the stdlib function.
     char *Realpath(const char *_path, char *resolved_path)
     {
+		// While linux version of realpath handles the resolved_path being a
+		// null pointer, this is not the case for other platforms (Haiku), nor
+		// specified by the open group in POSIX. So, be safe and allocate
+		// ourselves.
+        if(resolved_path==NULL) // if we called realpath with null as a 2nd arg
+            resolved_path = (char*) malloc( PATH_MAX );
         return realpath(_path, resolved_path);
     }
 #endif

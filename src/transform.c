@@ -34,6 +34,8 @@
 #include "readline.h"
 #include "buttons.h" // Message_out_of_memory()
 #include "pages.h" // Backup_with_new_dimensions()
+#include "tiles.h"
+
 
 /// Reduces a fraction A/B to its smallest representation. ie (40,60) becomes (2/3)
 void Factorize(short *a, short *b)
@@ -385,40 +387,40 @@ void Button_Transform_menu(void)
         case  2 : // Flip X
           for (i=0; i<Main_backups->Pages->Nb_layers; i++)
           {
-            memcpy(Main_backups->Pages->Image[i],Main_backups->Pages->Next->Image[i],Main_image_width*Main_image_height);
-            Flip_X_lowlevel(Main_backups->Pages->Image[i], Main_image_width, Main_image_height);
+            memcpy(Main_backups->Pages->Image[i].Pixels,Main_backups->Pages->Next->Image[i].Pixels,Main_image_width*Main_image_height);
+            Flip_X_lowlevel(Main_backups->Pages->Image[i].Pixels, Main_image_width, Main_image_height);
           }
           break;
         case  3 : // Flip Y      
           for (i=0; i<Main_backups->Pages->Nb_layers; i++)
           {
-            memcpy(Main_backups->Pages->Image[i],Main_backups->Pages->Next->Image[i],Main_image_width*Main_image_height);
-            Flip_Y_lowlevel(Main_backups->Pages->Image[i], Main_image_width, Main_image_height);
+            memcpy(Main_backups->Pages->Image[i].Pixels,Main_backups->Pages->Next->Image[i].Pixels,Main_image_width*Main_image_height);
+            Flip_Y_lowlevel(Main_backups->Pages->Image[i].Pixels, Main_image_width, Main_image_height);
           }
           break;
         case  4 : // -90° Rotation
           for (i=0; i<Main_backups->Pages->Nb_layers; i++)
           {
-            Rotate_270_deg_lowlevel(Main_backups->Pages->Next->Image[i], Main_backups->Pages->Image[i], old_width, old_height);
+            Rotate_270_deg_lowlevel(Main_backups->Pages->Next->Image[i].Pixels, Main_backups->Pages->Image[i].Pixels, old_width, old_height);
           }
           break;
         case  5 : // +90° Rotation
           for (i=0; i<Main_backups->Pages->Nb_layers; i++)
           {
-            Rotate_90_deg_lowlevel(Main_backups->Pages->Next->Image[i], Main_backups->Pages->Image[i], old_width, old_height);
+            Rotate_90_deg_lowlevel(Main_backups->Pages->Next->Image[i].Pixels, Main_backups->Pages->Image[i].Pixels, old_width, old_height);
           }
           break;
         case  6 : // 180° Rotation
           for (i=0; i<Main_backups->Pages->Nb_layers; i++)
           {
-            memcpy(Main_backups->Pages->Image[i],Main_backups->Pages->Next->Image[i],Main_image_width*Main_image_height);
-            Rotate_180_deg_lowlevel(Main_backups->Pages->Image[i], Main_image_width, Main_image_height);
+            memcpy(Main_backups->Pages->Image[i].Pixels,Main_backups->Pages->Next->Image[i].Pixels,Main_image_width*Main_image_height);
+            Rotate_180_deg_lowlevel(Main_backups->Pages->Image[i].Pixels, Main_image_width, Main_image_height);
           }
           break;       
         case  7 : // Resize
           for (i=0; i<Main_backups->Pages->Nb_layers; i++)
           {
-            Rescale(Main_backups->Pages->Next->Image[i], old_width, old_height, Main_backups->Pages->Image[i], Main_image_width, Main_image_height, 0, 0);
+            Rescale(Main_backups->Pages->Next->Image[i].Pixels, old_width, old_height, Main_backups->Pages->Image[i].Pixels, Main_image_width, Main_image_height, 0, 0);
           }
           break;
       }
@@ -426,14 +428,15 @@ void Button_Transform_menu(void)
       for (i=0; i<NB_LAYERS; i++)
       {
         Copy_part_of_image_to_another(
-          Main_backups->Pages->Next->Image[i],0,0,Min(old_width,Main_image_width),
+          Main_backups->Pages->Next->Image[i].Pixels,0,0,Min(old_width,Main_image_width),
           Min(old_height,Main_image_height),old_width,
-          Main_backups->Pages->Image[i],0,0,Main_image_width);
+          Main_backups->Pages->Image[i].Pixels,0,0,Main_image_width);
       }
       */
       Redraw_layered_image();
       Display_all_screen();
       End_of_modification();
+      Tilemap_update();
     }
     else
     {

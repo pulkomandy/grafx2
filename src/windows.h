@@ -99,8 +99,10 @@ void Window_display_icon_sprite(word x_pos,word y_pos,byte type);
 
 byte Best_color(byte red,byte green,byte blue);
 byte Best_color_nonexcluded(byte red,byte green,byte blue);
+byte Best_color_range(byte red,byte green,byte blue,byte max);
 byte Best_color_perceptual(byte r,byte g,byte b);
 byte Best_color_perceptual_except(byte r,byte g,byte b, byte except);
+byte Best_color_perceptual_weighted(byte r,byte g,byte b, float weight);
 
 void Horizontal_XOR_line_zoom(short x_pos, short y_pos, short width);
 void Vertical_XOR_line_zoom(short x_pos, short y_pos, short height);
@@ -112,5 +114,55 @@ extern word Layer_button_width;
 
 /// Copy viewport settings and offsets from the Main to the Spare.
 void Copy_view_to_spare(void);
+
+/// Definition of a toolbar button
+typedef struct
+{
+  // Button aspect
+  word            X_offset;         ///< Position relative to menu's left
+  word            Y_offset;         ///< Position relative to menu's top
+  word            Width;            ///< Button's active width
+  word            Height;           ///< Button's active heigth
+  byte            Pressed;          ///< Button is currently pressed
+  byte            Shape;            ///< Shape, listed in enum ::BUTTON_SHAPES
+  signed char     Icon;             ///< Which icon to display: Either the one from the toolbar (-1) or one of ::MENU_SPRITE
+
+  // Triggers on mouse/keyboard
+  Func_action     Left_action;      ///< Action triggered by a left mouseclick on the button
+  Func_action     Right_action;     ///< Action triggered by a right mouseclick on the button
+  word            Left_shortcut[2]; ///< Keyboard shortcut for a left mouseclick
+  word            Right_shortcut[2];///< Keyboard shortcut for a right mouseclick
+  byte            Left_instant;     ///< Will not wait for mouse release before triggering action
+  byte            Right_instant;    ///< Will not wait for mouse release before triggering action
+  const char *    Tooltip;          ///< Text in status bar when button is hovered
+
+  // Data used when the button is unselected
+  Func_action     Unselect_action;  ///< Action triggered by unselecting the button
+  byte            Family;           ///< enum ::FAMILY_OF_BUTTONS.
+
+} T_Toolbar_button;
+
+extern T_Toolbar_button Buttons_Pool[NB_BUTTONS];
+
+// A menubar.
+typedef struct {
+  word Width;
+  word Height;
+  byte Visible;
+  word Top; ///< Relative to the top line of the menu, hidden bars don't count.
+  byte* Skin[3]; ///< [0] has normal buttons, [1] has selected buttons, [2] is current.
+  word Skin_width;
+  byte Last_button_index;
+} T_Menu_Bar;
+
+enum {
+  MENUBAR_STATUS = 0, // MUST be 0
+  MENUBAR_ANIMATION,
+  MENUBAR_LAYERS,
+  MENUBAR_TOOLS,
+  MENUBAR_COUNT
+};
+
+extern T_Menu_Bar Menu_bars[MENUBAR_COUNT];
 
 #endif

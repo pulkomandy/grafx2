@@ -84,7 +84,6 @@
 #include "windows.h"
 #include "layers.h"
 #include "special.h"
-#include "buttons.h"
 
 char Gui_loading_error_message[512];
 
@@ -267,7 +266,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   int char_2=0;  // grands titres de l'aide. Chaque indice avance dans 
   int char_3=0;  // l'une des fontes dans l'ordre :  1 2
   int char_4=0;  //                                  3 4
-  byte mouse_cursor_area[29][29];
+  byte mouse_cursor_area[31][29];
   SDL_Palette * SDLPal;
   
   // Default palette
@@ -374,9 +373,16 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   // Layerbar
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "layer bar"))
     return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layerbar_block[0], Menu_bars[MENUBAR_LAYERS].Skin_width, Menu_bars[MENUBAR_LAYERS].Height,"layer bar",0))
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layerbar_block[0], 144, 10,"layer bar",0))
     return 1;
   cursor_y+= Menu_bars[MENUBAR_LAYERS].Height;
+
+  // Animbar
+  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "anim bar"))
+    return 1;
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Animbar_block[0], 236, 14,"anim bar",0))
+    return 1;
+  cursor_y+= Menu_bars[MENUBAR_ANIMATION].Height;
 
   // Status bar
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "status bar"))
@@ -395,9 +401,16 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   // Layerbar (selected)
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "selected layer bar"))
     return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layerbar_block[1], Menu_bars[MENUBAR_LAYERS].Skin_width, Menu_bars[MENUBAR_LAYERS].Height,"selected layer bar",0))
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layerbar_block[1], 144, 10,"selected layer bar",0))
     return 1;
   cursor_y+= Menu_bars[MENUBAR_LAYERS].Height;
+
+  // Animbar (selected)
+  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "selected anim bar"))
+    return 1;
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Animbar_block[1], 236, 14,"selected anim bar",0))
+    return 1;
+  cursor_y+= Menu_bars[MENUBAR_ANIMATION].Height;
 
   // Status bar (selected)
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "selected status bar"))
@@ -461,12 +474,12 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "mouse cursor"))
         return 1;
     }
-    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, mouse_cursor_area, 29, 29, "mouse cursor",1))
+    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, mouse_cursor_area, 29, 31, "mouse cursor",1))
       return 1;
     Center_GUI_cursor(gfx, (byte *)mouse_cursor_area,i);
     cursor_x+=29;
   }
-  cursor_y+=29;
+  cursor_y+=31;
 
   // Menu sprites
   for (i=0; i<NB_MENU_SPRITES; i++)
@@ -635,7 +648,9 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   memcpy(gfx->Menu_block[2], gfx->Menu_block[0], 
     Menu_bars[MENUBAR_TOOLS].Skin_width*Menu_bars[MENUBAR_TOOLS].Height);
   memcpy(gfx->Layerbar_block[2], gfx->Layerbar_block[0],
-    Menu_bars[MENUBAR_LAYERS].Skin_width*Menu_bars[MENUBAR_LAYERS].Height);
+    sizeof(gfx->Layerbar_block[0]));
+  memcpy(gfx->Animbar_block[2], gfx->Animbar_block[0],
+    sizeof(gfx->Animbar_block[0]));
   memcpy(gfx->Statusbar_block[2], gfx->Statusbar_block[0],
     Menu_bars[MENUBAR_STATUS].Skin_width*Menu_bars[MENUBAR_STATUS].Height);
   
@@ -648,6 +663,12 @@ T_Gui_skin * Load_graphics(const char * skin_file, T_Gradient_array *gradients)
   T_Gui_skin * gfx;
   char filename[MAX_PATH_CHARACTERS];
   SDL_Surface * gui;
+
+  if (skin_file[0] == '\0')
+  {
+    sprintf(Gui_loading_error_message, "Wrong skin file name \"\"\n");
+    return NULL;
+  }
 
   gfx = (T_Gui_skin *)malloc(sizeof(T_Gui_skin));
   if (gfx == NULL)
@@ -729,6 +750,12 @@ byte * Load_font(const char * font_name)
   char filename[MAX_PATH_CHARACTERS];
   SDL_Surface * image;
 
+  if (font_name[0] == '\0')
+  {
+    sprintf(Gui_loading_error_message, "Wrong font name \"\"\n");
+    return NULL;
+  }
+
   font = (byte *)malloc(8*8*256);
   if (font == NULL)
   {
@@ -766,16 +793,17 @@ void Do_nothing(void)
 
   // Initialiseur d'un bouton:
 
-void Init_button(byte   btn_number,
-                        word   x_offset      , word   y_offset,
-                        word   width         , word   height,
-                        byte   shape,
-                        Func_action left_action,
-                        Func_action right_action,
-                        byte left_instant,
-                        byte right_instant,
-                        Func_action unselect_action,
-                        byte   family)
+void Init_button(byte        btn_number,
+                 const char* tooltip,
+                 word        x_offset, word   y_offset,
+                 word        width,    word   height,
+                 byte        shape,
+                 Func_action left_action,
+                 Func_action right_action,
+                 byte        left_instant,
+                 byte        right_instant,
+                 Func_action unselect_action,
+                 byte        family)
 {
   Buttons_Pool[btn_number].X_offset        =x_offset;
   Buttons_Pool[btn_number].Y_offset        =y_offset;
@@ -784,6 +812,7 @@ void Init_button(byte   btn_number,
   Buttons_Pool[btn_number].Pressed         =0;
   Buttons_Pool[btn_number].Icon            =-1;
   Buttons_Pool[btn_number].Shape           =shape;
+  Buttons_Pool[btn_number].Tooltip         =tooltip;
   Buttons_Pool[btn_number].Left_action     =left_action;
   Buttons_Pool[btn_number].Right_action    =right_action;
   Buttons_Pool[btn_number].Left_instant    =left_instant;
@@ -806,419 +835,564 @@ void Init_buttons(void)
     Buttons_Pool[button_index].Right_shortcut[0]=0;
     Buttons_Pool[button_index].Right_shortcut[1]=0;
     Init_button(button_index,
-                       0,0,
-                       1,1,
-                       BUTTON_SHAPE_RECTANGLE,
-                       Do_nothing,Do_nothing,
-                       0,0,
-                       Do_nothing,
-                       0);
+                "",
+                0,0,
+                1,1,
+                BUTTON_SHAPE_RECTANGLE,
+                Do_nothing,Do_nothing,
+                0,0,
+                Do_nothing,
+                0);
   }
 
   // Ici viennent les déclarations des boutons que l'on sait gérer
 
   Init_button(BUTTON_PAINTBRUSHES,
-                     0,1,
-                     16,16,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Paintbrush_menu,Button_Brush_monochrome,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
+              "Paintbrush choice       ",
+              0,1,
+              16,16,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Paintbrush_menu,Button_Brush_monochrome,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
 
   Init_button(BUTTON_ADJUST,
-                     0,18,
-                     16,16,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Adjust,Button_Transform_menu,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_TOOL);
+              "Adjust / Transform menu ",
+              0,18,
+              16,16,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Adjust,Button_Transform_menu,
+              0,0,
+              Do_nothing,
+              FAMILY_TOOL);
 
   Init_button(BUTTON_DRAW,
-                     17,1,
-                     16,16,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Draw,Button_Draw_switch_mode,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_TOOL);
+              "Freehand draw. / Toggle ",
+              17,1,
+              16,16,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Draw,Button_Draw_switch_mode,
+              0,0,
+              Do_nothing,
+              FAMILY_TOOL);
 
   Init_button(BUTTON_CURVES,
-                     17,18,
-                     16,16,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Curves,Button_Curves_switch_mode,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_TOOL);
+              "Splines / Toggle        ",
+              17,18,
+              16,16,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Curves,Button_Curves_switch_mode,
+              0,0,
+              Do_nothing,
+              FAMILY_TOOL);
 
   Init_button(BUTTON_LINES,
-                     34,1,
-                     16,16,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Lines,Button_Lines_switch_mode,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_TOOL);
+              "Lines / Toggle          ",
+              34,1,
+              16,16,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Lines,Button_Lines_switch_mode,
+              0,0,
+              Do_nothing,
+              FAMILY_TOOL);
 
   Init_button(BUTTON_AIRBRUSH,
-                     34,18,
-                     16,16,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Airbrush,Button_Airbrush_menu,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_TOOL);
+              "Spray / Menu            ",
+              34,18,
+              16,16,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Airbrush,Button_Airbrush_menu,
+              0,0,
+              Do_nothing,
+              FAMILY_TOOL);
 
   Init_button(BUTTON_FLOODFILL,
-                     51,1,
-                     16,16,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Fill,Button_Replace,
-                     0,0,
-                     Button_Unselect_fill,
-                     FAMILY_TOOL);
+              "Floodfill / Replace col.",
+              51,1,
+              16,16,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Fill,Button_Replace,
+              0,0,
+              Button_Unselect_fill,
+              FAMILY_TOOL);
 
   Init_button(BUTTON_POLYGONS,
-                     51,18,
-                     15,15,
-                     BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
-                     Button_polygon,Button_Polyform,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_TOOL);
+              "Polylines / Polyforms   ",
+              51,18,
+              15,15,
+              BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
+              Button_polygon,Button_Polyform,
+              0,0,
+              Do_nothing,
+              FAMILY_TOOL);
 
   Init_button(BUTTON_POLYFILL,
-                     52,19,
-                     15,15,
-                     BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
-                     Button_Polyfill,Button_Filled_polyform,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_TOOL);
+              "Polyfill / Filled Pforms",
+              52,19,
+              15,15,
+              BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
+              Button_Polyfill,Button_Filled_polyform,
+              0,0,
+              Do_nothing,
+              FAMILY_TOOL);
 
   Init_button(BUTTON_RECTANGLES,
-                     68,1,
-                     15,15,
-                     BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
-                     Button_Empty_rectangle,Button_Empty_rectangle,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_TOOL);
+              "Empty rectangles        ",
+              68,1,
+              15,15,
+              BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
+              Button_Empty_rectangle,Button_Empty_rectangle,
+              0,0,
+              Do_nothing,
+              FAMILY_TOOL);
 
   Init_button(BUTTON_FILLRECT,
-                     69,2,
-                     15,15,
-                     BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
-                     Button_Filled_rectangle,Button_Filled_rectangle,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_TOOL);
+              "Filled rectangles       ",
+              69,2,
+              15,15,
+              BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
+              Button_Filled_rectangle,Button_Filled_rectangle,
+              0,0,
+              Do_nothing,
+              FAMILY_TOOL);
 
   Init_button(BUTTON_CIRCLES,
-                     68,18,
-                     15,15,
-                     BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
-                     Button_Empty_circle,Button_Empty_ellipse,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_TOOL);
+              "Empty circles / ellipses",
+              68,18,
+              15,15,
+              BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
+              Button_Empty_circle,Button_Empty_ellipse,
+              0,0,
+              Do_nothing,
+              FAMILY_TOOL);
 
   Init_button(BUTTON_FILLCIRC,
-                     69,19,
-                     15,15,
-                     BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
-                     Button_Filled_circle,Button_Filled_ellipse,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_TOOL);
+              "Filled circles / ellips.",
+              69,19,
+              15,15,
+              BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
+              Button_Filled_circle,Button_Filled_ellipse,
+              0,0,
+              Do_nothing,
+              FAMILY_TOOL);
 
   Init_button(BUTTON_GRADRECT,
-                     85,1,
-                     16,16,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Grad_rectangle,Button_Gradients,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_TOOL);
+              "Grad. rect / Grad. menu ",
+              85,1,
+              16,16,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Grad_rectangle,Button_Gradients,
+              0,0,
+              Do_nothing,
+              FAMILY_TOOL);
 
   Init_button(BUTTON_SPHERES,
-                     85,18,
-                     16,16,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Grad_circle,Button_Grad_ellipse,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_TOOL);
+              "Grad. spheres / ellipses",
+              85,18,
+              16,16,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Grad_circle,Button_Grad_ellipse,
+              0,0,
+              Do_nothing,
+              FAMILY_TOOL);
 
   Init_button(BUTTON_BRUSH,
-                     106,1,
-                     15,15,
-                     BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
-                     Button_Brush,Button_Restore_brush,
-                     0,0,
-                     Button_Unselect_brush,
-                     FAMILY_INTERRUPTION);
+              "Brush grab. / Restore   ",
+              106,1,
+              15,15,
+              BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
+              Button_Brush,Button_Restore_brush,
+              0,0,
+              Button_Unselect_brush,
+              FAMILY_INTERRUPTION);
 
   Init_button(BUTTON_POLYBRUSH,
-                     107,2,
-                     15,15,
-                     BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
-                     Button_Lasso,Button_Restore_brush,
-                     0,0,
-                     Button_Unselect_lasso,
-                     FAMILY_INTERRUPTION);
+              "Lasso / Restore brush   ",
+              107,2,
+              15,15,
+              BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
+              Button_Lasso,Button_Restore_brush,
+              0,0,
+              Button_Unselect_lasso,
+              FAMILY_INTERRUPTION);
 
   Init_button(BUTTON_BRUSH_EFFECTS,
-                     106, 18,
-                     16, 16,
-                     BUTTON_SHAPE_RECTANGLE,
 #ifdef __ENABLE_LUA__
-                     Button_Brush_FX, Button_Brush_Factory,
+              "Brush effects / factory ",
 #else
-                     Button_Brush_FX, Button_Brush_FX,
+              "Brush effects           ",
 #endif
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
+              106, 18,
+              16, 16,
+              BUTTON_SHAPE_RECTANGLE,
+#ifdef __ENABLE_LUA__
+              Button_Brush_FX, Button_Brush_Factory,
+#else
+              Button_Brush_FX, Button_Brush_FX,
+#endif
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
 
   Init_button(BUTTON_EFFECTS,
-                     123,1,
-                     16,16,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Effects,Button_Effects,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_EFFECTS);
+              "Drawing modes (effects) ",
+              123,1,
+              16,16,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Effects,Button_Effects,
+              0,0,
+              Do_nothing,
+              FAMILY_EFFECTS);
 
   Init_button(BUTTON_TEXT,
-                     123,18,
-                     16,16,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Text,Button_Text,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
+              "Text                    ",
+              123,18,
+              16,16,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Text,Button_Text,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
 
   Init_button(BUTTON_MAGNIFIER,
-                     140,1,
-                     16,16,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Magnify,Button_Magnify_menu,
-                     0,1,
-                     Button_Unselect_magnifier,
-                     FAMILY_INTERRUPTION);
+              "Magnify mode / Menu     ",
+              140,1,
+              16,16,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Magnify,Button_Magnify_menu,
+              0,1,
+              Button_Unselect_magnifier,
+              FAMILY_INTERRUPTION);
 
   Init_button(BUTTON_COLORPICKER,
-                     140,18,
-                     16,16,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Colorpicker,Button_Invert_foreback,
-                     0,0,
-                     Button_Unselect_colorpicker,
-                     FAMILY_INTERRUPTION);
+              "Pipette / Invert colors ",
+              140,18,
+              16,16,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Colorpicker,Button_Invert_foreback,
+              0,0,
+              Button_Unselect_colorpicker,
+              FAMILY_INTERRUPTION);
 
   Init_button(BUTTON_RESOL,
-                     161,1,
-                     16,16,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Resolution,Button_Safety_resolution,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
-
+              "Screen size / Safe. res.",
+              161,1,
+              16,16,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Resolution,Button_Safety_resolution,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
+  
   Init_button(BUTTON_PAGE,
-                     161,18,
-                     16,16,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Page,Button_Copy_page,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
+              "Go / Copy to other page ",
+              161,18,
+              16,16,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Page,Button_Copy_page,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
 
   Init_button(BUTTON_SAVE,
-                     178,1,
-                     15,15,
-                     BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
-                     Button_Save,Button_Autosave,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
+              "Save as / Save          ",
+              178,1,
+              15,15,
+              BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
+              Button_Save,Button_Autosave,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
 
   Init_button(BUTTON_LOAD,
-                     179,2,
-                     15,15,
-                     BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
-                     Button_Load,Button_Reload,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
+              "Load / Re-load          ",
+              179,2,
+              15,15,
+              BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
+              Button_Load,Button_Reload,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
 
   Init_button(BUTTON_SETTINGS,
-                     178,18,
-                     16,16,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Settings,Button_Skins,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
+              "Settings / Skins        ",
+              178,18,
+              16,16,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Settings,Button_Skins,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
 
   Init_button(BUTTON_CLEAR,
-                     195,1,
-                     17,16,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Clear,Button_Clear_with_backcolor,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
+              "Clear / with backcolor  ",
+              195,1,
+              17,16,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Clear,Button_Clear_with_backcolor,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
 
   Init_button(BUTTON_HELP,
-                     195,18,
-                     17,16,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Help,Button_Stats,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
+              "Help / Statistics       ",
+              195,18,
+              17,16,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Help,Button_Stats,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
 
   Init_button(BUTTON_UNDO,
-                     213,1,
-                     19,12,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Undo,Button_Redo,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
+              "Undo / Redo             ",
+              213,1,
+              19,12,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Undo,Button_Redo,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
 
   Init_button(BUTTON_KILL,
-                     213,14,
-                     19,7,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Kill,Button_Kill,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
+              "Kill current page       ",
+              213,14,
+              19,7,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Kill,Button_Kill,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
 
   Init_button(BUTTON_QUIT,
-                     213,22,
-                     19,12,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Quit,Button_Quit,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
+              "Quit                    ",
+              213,22,
+              19,12,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Quit,Button_Quit,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
 
   Init_button(BUTTON_PALETTE,
-                     237,9,
-                     16,8,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Palette,Button_Secondary_palette,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
+              "Palette editor / setup  ",
+              237,9,
+              16,8,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Palette,Button_Secondary_palette,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
 
   Init_button(BUTTON_PAL_LEFT,
-                     237,18,
-                     15,15,
-                     BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
-                     Button_Pal_left,Button_Pal_left_fast,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
+              "Scroll pal. bkwd / Fast ",
+              237,18,
+              15,15,
+              BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
+              Button_Pal_left,Button_Pal_left_fast,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
 
   Init_button(BUTTON_PAL_RIGHT,
-                     238,19,
-                     15,15,
-                     BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
-                     Button_Pal_right,Button_Pal_right_fast,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
+              "Scroll pal. fwd / Fast  ",
+              238,19,
+              15,15,
+              BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
+              Button_Pal_right,Button_Pal_right_fast,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
 
   Init_button(BUTTON_CHOOSE_COL,
-                     MENU_WIDTH+1,1,
-                     1,32, // La largeur est mise à jour à chq chngmnt de mode
-                     BUTTON_SHAPE_NO_FRAME,
-                     Button_Select_forecolor,Button_Select_backcolor,
-                     1,1,
-                     Do_nothing,
-                     FAMILY_INSTANT);
+              "Color #"                 ,
+              MENU_WIDTH+1,1,
+              1,32, // La largeur est mise à jour à chq chngmnt de mode
+              BUTTON_SHAPE_NO_FRAME,
+              Button_Select_forecolor,Button_Select_backcolor,
+              1,1,
+              Do_nothing,
+              FAMILY_INSTANT);
 
   // Layer bar
+
   Init_button(BUTTON_LAYER_MENU,
-                     0,0,
-                     57,9,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Layer_menu, Button_Layer_menu,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
+              "Layers manager          ",
+              0,0,
+              57,9,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Layer_menu, Button_Layer_menu,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
   Init_button(BUTTON_LAYER_COLOR,
-                     58,0,
-                     13,9,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Layer_get_transparent, Button_Layer_set_transparent,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
+              "Get/Set transparent col.",
+              58,0,
+              13,9,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Layer_get_transparent, Button_Layer_set_transparent,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
   Init_button(BUTTON_LAYER_MERGE,
-                     72,0,
-                     13,9,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Layer_merge, Button_Layer_merge,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
+              "Merge layer             ",
+              72,0,
+              13,9,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Layer_merge, Button_Layer_merge,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
   Init_button(BUTTON_LAYER_ADD,
-                     86,0,
-                     13,9,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Layer_add, Button_Layer_add,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
+              "Add layer               ",
+              86,0,
+              13,9,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Layer_add, Button_Layer_add,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
   Init_button(BUTTON_LAYER_REMOVE,
-                     100,0,
-                     13,9,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Layer_remove, Button_Layer_remove,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
+              "Drop layer              ",
+              100,0,
+              13,9,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Layer_remove, Button_Layer_remove,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
   Init_button(BUTTON_LAYER_DOWN,
-                     114,0,
-                     13,9,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Layer_down, Button_Layer_down,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
+              "Lower layer             ",
+              114,0,
+              13,9,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Layer_down, Button_Layer_down,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
   Init_button(BUTTON_LAYER_UP,
-                     128,0,
-                     13,9,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Layer_up, Button_Layer_up,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
+              "Raise layer             ",
+              128,0,
+              13,9,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Layer_up, Button_Layer_up,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
   Init_button(BUTTON_LAYER_SELECT,
-                     142,0,
-                     13,9, // Will be updated according to actual number of layers
-                     BUTTON_SHAPE_NO_FRAME,
-                     Button_Layer_select, Button_Layer_toggle,
-                     0,0,
-                     Do_nothing,
-                     FAMILY_INSTANT);
+              "Layer select / toggle   ",
+              142,0,
+              13,9, // Will be updated according to actual number of layers
+              BUTTON_SHAPE_NO_FRAME,
+              Button_Layer_select, Button_Layer_toggle,
+              1,1,
+              Do_nothing,
+              FAMILY_INSTANT);
+
+ // Anim bar
+
+  Init_button(BUTTON_LAYER_MENU2,
+              "Layers manager          ",
+              0,0,
+              44,13,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Layer_menu, Button_Layer_menu,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
+  Init_button(BUTTON_ANIM_TIME,
+              "Set frame time          ",
+              45,0,
+              13,13,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Anim_time, Button_Anim_time,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
+  Init_button(BUTTON_ANIM_FIRST_FRAME,
+              "Go to first frame       ",
+              116,0,
+              13,13,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Anim_first_frame, Button_Anim_first_frame,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
+  Init_button(BUTTON_ANIM_PREV_FRAME,
+              "Go to prev. frame/Rewind",
+              130,0,
+              13,13,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Anim_prev_frame, Button_Anim_continuous_prev,
+              0,1,
+              Do_nothing,
+              FAMILY_INSTANT);
+  Init_button(BUTTON_ANIM_NEXT_FRAME,
+              "Go to next frame / Play ",
+              144,0,
+              13,13,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Anim_next_frame, Button_Anim_continuous_next,
+              0,1,
+              Do_nothing,
+              FAMILY_INSTANT);
+  Init_button(BUTTON_ANIM_LAST_FRAME,
+              "Go to last frame        ",
+              158,0,
+              13,13,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Anim_last_frame, Button_Anim_last_frame,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
+  Init_button(BUTTON_ANIM_ADD_FRAME,
+              "Add frame               ",
+              177,0,
+              13,13,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Layer_add, Button_Layer_add,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
+  Init_button(BUTTON_ANIM_REMOVE_FRAME,
+              "Drop frame              ",
+              191,0,
+              13,13,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Layer_remove, Button_Layer_remove,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
+  Init_button(BUTTON_ANIM_DOWN_FRAME,
+              "Move frame back         ",
+              205,0,
+              13,13,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Layer_down, Button_Layer_down,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
+  Init_button(BUTTON_ANIM_UP_FRAME,
+              "Move frame forwards     ",
+              219,0,
+              13,13,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Layer_up, Button_Layer_up,
+              0,0,
+              Do_nothing,
+              FAMILY_INSTANT);
+
   // Status bar
   Init_button(BUTTON_HIDE,
-                     0,0,
-                     16,9,
-                     BUTTON_SHAPE_RECTANGLE,
-                     Button_Toggle_all_toolbars, Button_Toggle_toolbar,
-                     0,1,
-                     Do_nothing,
-                     FAMILY_TOOLBAR);
+              "Hide toolbars / Select  ",
+              0,0,
+              16,9,
+              BUTTON_SHAPE_RECTANGLE,
+              Button_Toggle_all_toolbars, Button_Toggle_toolbar,
+              0,1,
+              Do_nothing,
+              FAMILY_TOOLBAR);
 }
 
 
@@ -1637,9 +1811,20 @@ void Init_operations(void)
                         Centered_lines_12_7,0,FAST_MOUSE);
   Init_operation(OPERATION_CENTERED_LINES,0,7,
                         Centered_lines_0_7,0,FAST_MOUSE);
-                        
   Init_operation(OPERATION_RMB_COLORPICK,0,1,
                         Rightclick_colorpick_0_1,0,FAST_MOUSE);
+  Init_operation(OPERATION_PAN_VIEW,0,0,
+                        Pan_view_0_0,0,FAST_MOUSE);
+  Init_operation(OPERATION_PAN_VIEW,1,0,
+                        Pan_view_12_0,0,FAST_MOUSE);
+  Init_operation(OPERATION_PAN_VIEW,2,0,
+                        Pan_view_12_0,0,FAST_MOUSE);
+  Init_operation(OPERATION_PAN_VIEW,1,2,
+                        Pan_view_12_2,0,FAST_MOUSE);
+  Init_operation(OPERATION_PAN_VIEW,2,2,
+                        Pan_view_12_2,0,FAST_MOUSE);
+  Init_operation(OPERATION_PAN_VIEW,0,2,
+                        Pan_view_0_2,0,FAST_MOUSE);
                         
 }
 
@@ -2005,7 +2190,7 @@ int Load_CFG(int reload_all)
         break;
       case CHUNK_GRADIENTS: // Infos sur les dégradés
         // The gradients chunk is deprecated since the data
-        // is now loaded/saved in GIF and LBM formats.
+        // is now loaded/saved in GIF and IFF formats.
         // The chunk will be completely ignored.
         /*if (reload_all)
         {
@@ -2333,7 +2518,7 @@ int Save_CFG(void)
 
   // Sauvegarde des informations des dégradés
   // The gradients chunk is deprecated since the data
-  // is now loaded/saved in GIF and LBM formats.
+  // is now loaded/saved in GIF and IFF formats.
   /*
   Chunk.Number=CHUNK_GRADIENTS;
   Chunk.Size=14*16+1;
@@ -2696,32 +2881,9 @@ void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
   {
     Menu_bars[MENUBAR_TOOLS ].Skin[i] = (byte*)&(gfx->Menu_block[i]);
     Menu_bars[MENUBAR_LAYERS].Skin[i] = (byte*)&(gfx->Layerbar_block[i]);
+    Menu_bars[MENUBAR_ANIMATION].Skin[i] = (byte*)&(gfx->Animbar_block[i]);
     Menu_bars[MENUBAR_STATUS].Skin[i] = (byte*)&(gfx->Statusbar_block[i]);
   }
-}
-
-///
-/// Based on which toolbars are visible, updates their offsets and
-/// computes ::Menu_height and ::Menu_Y
-void Compute_menu_offsets(void)
-{
-  int i;
-  int offset;
-  
-  // Recompute all offsets    
-  offset=0;
-  Menu_height=0;
-  for (i = MENUBAR_COUNT-1; i >=0; i--)
-  {
-    Menu_bars[i].Top = offset;
-    if(Menu_bars[i].Visible)
-    {
-      offset += Menu_bars[i].Height;
-      Menu_height += Menu_bars[i].Height;
-    }
-  }
-  // Update global menu coordinates
-  Menu_Y = Screen_height - Menu_height * Menu_factor_Y;
 }
 
 void Init_paintbrush(int index, int width, int height, byte shape, const char * bitmap)

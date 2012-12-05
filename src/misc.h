@@ -79,7 +79,6 @@ byte Pixel_in_circle(void);
 void Init_chrono(dword delay);
 void Check_timer(void);
 
-void Replace_a_color(byte old_color, byte New_color);
 void Replace_colors_within_limits(byte * replace_table);
 
 byte Effect_interpolated_colorize  (word x,word y,byte color);
@@ -146,8 +145,11 @@ dword Timer_start;       // Heure de départ du chrono
 byte New_preview_is_needed; // Booléen "Il faut relancer le chrono de preview"
 
 
+#if defined (__MINT__)
+void Atari_Memory_free(unsigned long *stRam,unsigned long *ttRam);
+#else
 unsigned long Memory_free(void);
-
+#endif
 #define Num2str(a,b,c) sprintf(b,"%*lu",c,(long)(a))
 
 #define Dec2str(a,b,c) sprintf(b,"%.*f",c,(double)(a))
@@ -165,3 +167,6 @@ int Max(int a,int b);
 
 char* Mode_label(int mode);
 int Convert_videomode_arg(const char *argument);
+
+int Popcount_word(word x);
+int Popcount_dword(dword x);

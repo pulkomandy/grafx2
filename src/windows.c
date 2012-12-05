@@ -41,6 +41,14 @@
 #include "sdlscreen.h"
 #include "palette.h"
 
+T_Toolbar_button Buttons_Pool[NB_BUTTONS];
+T_Menu_Bar Menu_bars[MENUBAR_COUNT] = 
+  {{MENU_WIDTH,  9, 1, 45, {NULL,NULL,NULL},  20, BUTTON_HIDE }, // Status
+  {MENU_WIDTH, 14, 1, 35, {NULL,NULL,NULL}, 236, BUTTON_ANIM_PLAY }, // Animation
+  {MENU_WIDTH, 10, 1, 35, {NULL,NULL,NULL}, 144, BUTTON_LAYER_SELECT }, // Layers
+  {MENU_WIDTH, 35, 1,  0, {NULL,NULL,NULL}, 254, BUTTON_CHOOSE_COL }} // Main
+  ;
+
 
 /// Width of one layer button, in pixels before scaling
 word Layer_button_width = 1;
@@ -464,89 +472,106 @@ void Draw_bar_remainder(word current_menu, word x_off)
 /// Display / update the layer menubar
 void Display_layerbar(void)
 {
-  word x_off=0;
-  word button_width = LAYER_SPRITE_WIDTH;
-  word button_number = Main_backups->Pages->Nb_layers;
-  word horiz_space;
-  word current_button;
-  word repeats=1;
   
-  if (! Menu_bars[MENUBAR_LAYERS].Visible)
-    return;
-  
-  // Available space in pixels
-  horiz_space = Screen_width / Menu_factor_X - Menu_bars[MENUBAR_LAYERS].Skin_width;
-  
-  // Don't display all buttons if not enough room
-  if (horiz_space/button_width < button_number)
-    button_number = horiz_space/button_width;
-  // Only 16 icons at the moment
-  if (button_number > 16) // can be different from MAX_NB_LAYERS
-    button_number = 16;
-
-  // Enlarge the buttons themselves if there's enough room
-  while (button_number*(button_width+2) < horiz_space && repeats < 20)
+  if (Menu_bars[MENUBAR_LAYERS].Visible)
   {
-    repeats+=1;
-    button_width+=2;
-  }
+    word x_off=0;
+    word button_width = LAYER_SPRITE_WIDTH;
+    word button_number = Main_backups->Pages->Nb_layers;
+    word horiz_space;
+    word current_button;
+    word repeats=1;
+    
+    // Available space in pixels
+    horiz_space = Screen_width / Menu_factor_X - Menu_bars[MENUBAR_LAYERS].Skin_width;
+    
+    // Don't display all buttons if not enough room
+    if (horiz_space/button_width < button_number)
+      button_number = horiz_space/button_width;
+    // Only 16 icons at the moment
+    if (button_number > 16) // can be different from MAX_NB_LAYERS
+      button_number = 16;
   
-  x_off=Menu_bars[MENUBAR_LAYERS].Skin_width;
-  for (current_button=0; current_button<button_number; current_button++)
-  {
-    word x_pos=0;
-    word y_pos;
-    word sprite_index;
-    
-    if (Main_current_layer == current_button)
-      sprite_index=1;
-    else if (Main_layers_visible & (1 << current_button))
-      sprite_index=0;
-    else
-      sprite_index=2;
-    
-    
-    for (y_pos=0;y_pos<LAYER_SPRITE_HEIGHT;y_pos++)
+    // Enlarge the buttons themselves if there's enough room
+    while (button_number*(button_width+2) < horiz_space && repeats < 20)
     {
-      word source_x=0;
+      repeats+=1;
+      button_width+=2;
+    }
+    
+    x_off=Menu_bars[MENUBAR_LAYERS].Skin_width;
+    for (current_button=0; current_button<button_number; current_button++)
+    {
+      word x_pos=0;
+      word y_pos;
+      word sprite_index;
       
-      for (source_x=0;source_x<LAYER_SPRITE_WIDTH;source_x++)
+      if (Main_current_layer == current_button)
+        sprite_index=1;
+      else if (Main_layers_visible & (1 << current_button))
+        sprite_index=0;
+      else
+        sprite_index=2;
+      
+      
+      for (y_pos=0;y_pos<LAYER_SPRITE_HEIGHT;y_pos++)
       {
-        short i = 1;
+        word source_x=0;
         
-        // This stretches a button, by duplicating the 2nd from right column 
-        // and 3rd column from left.    
-        if (source_x == 1 || (source_x == LAYER_SPRITE_WIDTH-3))
-          i=repeats;
-        
-        for (;i>0; i--)
+        for (source_x=0;source_x<LAYER_SPRITE_WIDTH;source_x++)
         {
-          Pixel_in_menu(MENUBAR_LAYERS, x_pos + x_off, y_pos, Gfx->Layer_sprite[sprite_index][current_button][y_pos][source_x]);
-          x_pos++;
+          short i = 1;
+          
+          // This stretches a button, by duplicating the 2nd from right column 
+          // and 3rd column from left.    
+          if (source_x == 1 || (source_x == LAYER_SPRITE_WIDTH-3))
+            i=repeats;
+          
+          for (;i>0; i--)
+          {
+            Pixel_in_menu(MENUBAR_LAYERS, x_pos + x_off, y_pos, Gfx->Layer_sprite[sprite_index][current_button][y_pos][source_x]);
+            x_pos++;
+          }
         }
-      }
-      // Next line
-      x_pos=0;
-    }    
-    // Next button
-    x_off+=button_width;
+        // Next line
+        x_pos=0;
+      }    
+      // Next button
+      x_off+=button_width;
+    }
+    // Texture any remaining space to the right.
+    // This overwrites any junk like deleted buttons.
+    Draw_bar_remainder(MENUBAR_LAYERS, x_off);
+    
+    // Update the active area of the layers pseudo-button
+    Buttons_Pool[BUTTON_LAYER_SELECT].Width = button_number * button_width;
+    
+    // Required to determine which layer button is clicked
+    Layer_button_width = button_width;
+    
+    // A screen refresh required by some callers
+    Update_rect(
+      Menu_bars[MENUBAR_LAYERS].Skin_width, 
+      Menu_Y+Menu_bars[MENUBAR_LAYERS].Top*Menu_factor_Y, 
+      horiz_space*Menu_factor_X, 
+      Menu_bars[MENUBAR_LAYERS].Height*Menu_factor_Y);
   }
-  // Texture any remaining space to the right.
-  // This overwrites any junk like deleted buttons.
-  Draw_bar_remainder(MENUBAR_LAYERS, x_off);
-  
-  // Update the active area of the layers pseudo-button
-  Buttons_Pool[BUTTON_LAYER_SELECT].Width = button_number * button_width;
-  
-  // Required to determine which layer button is clicked
-  Layer_button_width = button_width;
-  
-  // A screen refresh required by some callers
-  Update_rect(
-    Menu_bars[MENUBAR_LAYERS].Skin_width, 
-    Menu_Y+Menu_bars[MENUBAR_LAYERS].Top*Menu_factor_Y, 
-    horiz_space*Menu_factor_X, 
-    Menu_bars[MENUBAR_LAYERS].Height*Menu_factor_Y);
+  if (Menu_bars[MENUBAR_ANIMATION].Visible)
+  {
+    char str[8];
+    // Rest of horizontal line
+    Draw_bar_remainder(MENUBAR_ANIMATION, Menu_bars[MENUBAR_ANIMATION].Skin_width);
+    // Frame# background rectangle
+    // Block((Menu_bars[MENUBAR_ANIMATION].Skin_width)*Menu_factor_X,(0+Menu_bars[MENUBAR_ANIMATION].Top)*Menu_factor_Y+Menu_Y,8*8*Menu_factor_X,8*Menu_factor_Y,MC_Light);
+    // Frame #/#
+    snprintf(str, 5, "#%3d", Main_current_layer+1);
+    Print_general((82)*Menu_factor_X,(Menu_bars[MENUBAR_ANIMATION].Top+3)*Menu_factor_Y+Menu_Y,str,MC_Black,MC_Light);
+    Update_rect(
+      (82)*Menu_factor_X,
+      (Menu_bars[MENUBAR_ANIMATION].Top+3)*Menu_factor_Y+Menu_Y,
+      4*8*Menu_factor_X, 
+      8*Menu_factor_Y);
+  }
 }
 
 
@@ -571,7 +596,7 @@ void Display_menu(void)
           for (x_pos=0;x_pos<Menu_bars[current_menu].Skin_width;x_pos++)
             Pixel_in_menu(current_menu, x_pos, y_pos, Menu_bars[current_menu].Skin[2][y_pos * Menu_bars[current_menu].Skin_width + x_pos]);
 
-        if (current_menu == MENUBAR_LAYERS)
+        if (current_menu == MENUBAR_LAYERS || current_menu == MENUBAR_ANIMATION)
         {
           // The layerbar has its own display, for the whole length.
           Display_layerbar();
@@ -1116,7 +1141,7 @@ void Warning_message(char * message)
   Display_cursor();
 }
 
-/// Window that shows a big message (up to 34x12), and waits for a click on OK.
+/// Window that shows a big message (up to 35x13), and waits for a click on OK.
 /// On call: Cursor must be displayed
 /// On exit: Cursor is displayed
 void Verbose_message(const char *caption, const char * message )
@@ -1132,7 +1157,7 @@ void Verbose_message(const char *caption, const char * message )
   Open_window(300,160,caption);
   
   // Word-wrap the message
-  for (line=0; line < 12 && *message!='\0'; line++)
+  for (line=0; line < 13 && *message!='\0'; line++)
   {
     last_space = -1;
     for (nb_char=0; nb_char<35 && message[nb_char]!='\0'; nb_char++)
@@ -1952,7 +1977,7 @@ void Display_cursor(void)
   {
     case CURSOR_SHAPE_TARGET :
       if (!Paintbrush_hidden)
-        Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color,1);
+        Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color);
       if (!Cursor_hidden)
       {
         if (Config.Cursor==1)
@@ -2003,7 +2028,7 @@ void Display_cursor(void)
 
     case CURSOR_SHAPE_COLORPICKER:
       if (!Paintbrush_hidden)
-        Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color,1);
+        Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color);
       if (Config.Cursor==1)
       {
         // Barres formant la croix principale
@@ -2070,6 +2095,7 @@ void Display_cursor(void)
 
     case CURSOR_SHAPE_MULTIDIRECTIONAL :
     case CURSOR_SHAPE_HORIZONTAL :
+    case CURSOR_SHAPE_BUCKET :
       if (Cursor_hidden)
         break;
 
@@ -2077,11 +2103,11 @@ void Display_cursor(void)
     case CURSOR_SHAPE_HOURGLASS :
       start_x=Mouse_X-Gfx->Cursor_offset_X[shape];
       start_y=Mouse_Y-Gfx->Cursor_offset_Y[shape];
-      for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
+      for (y_pos=start_y,counter_y=0;counter_y<CURSOR_SPRITE_HEIGHT;y_pos++,counter_y++)
       {
         if(y_pos<0) continue;
         if(y_pos>=Screen_height) break;
-        for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
+        for (x_pos=start_x,counter_x=0;counter_x<CURSOR_SPRITE_WIDTH;x_pos++,counter_x++)
         {
           if(x_pos<0) continue;
           if(x_pos>=Screen_width) break;
@@ -2368,6 +2394,7 @@ void Hide_cursor(void)
 
     case CURSOR_SHAPE_MULTIDIRECTIONAL :
     case CURSOR_SHAPE_HORIZONTAL :
+    case CURSOR_SHAPE_BUCKET :
       if (Cursor_hidden)
         break;
 
@@ -2376,11 +2403,11 @@ void Hide_cursor(void)
       start_x=Mouse_X-Gfx->Cursor_offset_X[shape];
       start_y=Mouse_Y-Gfx->Cursor_offset_Y[shape];
 
-      for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
+      for (y_pos=start_y,counter_y=0;counter_y<CURSOR_SPRITE_HEIGHT;y_pos++,counter_y++)
       {
         if(y_pos<0) continue;
         if(y_pos>=Screen_height) break;
-        for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
+        for (x_pos=start_x,counter_x=0;counter_x<CURSOR_SPRITE_WIDTH;x_pos++,counter_x++)
         {
           if(x_pos<0) continue;
           if(x_pos>=Screen_width) break;
@@ -2675,7 +2702,48 @@ byte Best_color_nonexcluded(byte red,byte green,byte blue)
   return best_color;
 }
 
+byte Best_color_range(byte r, byte g, byte b, byte max)
+{
+  
+  int col;  
+  float best_diff=255.0*1.56905;
+  byte  best_color=0;
+  float target_bri;
+  float bri;
+  float diff_b, diff_c, diff;
 
+  // Similar to Perceptual_lightness();
+  target_bri = sqrt(0.26*r*0.26*r + 0.55*g*0.55*g + 0.19*b*0.19*b);
+  
+  for (col=0; col<max; col++)
+  {
+    if (Exclude_color[col])
+      continue;
+
+    diff_c = sqrt(
+      (0.26*(Main_palette[col].R-r))*
+      (0.26*(Main_palette[col].R-r))+
+      (0.55*(Main_palette[col].G-g))*
+      (0.55*(Main_palette[col].G-g))+
+      (0.19*(Main_palette[col].B-b))*
+      (0.19*(Main_palette[col].B-b)));
+    // Exact match
+    if (diff_c==0)
+      return col;
+
+    bri = sqrt(0.26*Main_palette[col].R*0.26*Main_palette[col].R + 0.55*Main_palette[col].G*0.55*Main_palette[col].G + 0.19*Main_palette[col].B*0.19*Main_palette[col].B);
+    diff_b = abs(target_bri-bri);
+
+    diff=0.25*(diff_b-diff_c)+diff_c;
+    if (diff<best_diff)
+    {
+      best_diff=diff;
+      best_color=col;
+    } 
+  }
+
+  return best_color;
+}
 
 byte Best_color_perceptual(byte r,byte g,byte b)
 {
@@ -2710,6 +2778,49 @@ byte Best_color_perceptual(byte r,byte g,byte b)
     diff_b = abs(target_bri-bri);
 
     diff=0.25*(diff_b-diff_c)+diff_c;
+    if (diff<best_diff)
+    {
+      best_diff=diff;
+      best_color=col;
+    } 
+  }
+
+  return best_color;
+}
+
+byte Best_color_perceptual_weighted(byte r,byte g,byte b,float l_weight)
+{
+  
+  int col;  
+  float best_diff=255.0*1.56905;
+  byte  best_color=0;
+  float target_bri;
+  float bri;
+  float diff_b, diff_c, diff;
+
+  // Similar to Perceptual_lightness();
+  target_bri = sqrt(0.26*r*0.26*r + 0.55*g*0.55*g + 0.19*b*0.19*b);
+  
+  for (col=0; col<256; col++)
+  {
+    if (Exclude_color[col])
+      continue;
+
+    diff_c = sqrt(
+      (0.26*(Main_palette[col].R-r))*
+      (0.26*(Main_palette[col].R-r))+
+      (0.55*(Main_palette[col].G-g))*
+      (0.55*(Main_palette[col].G-g))+
+      (0.19*(Main_palette[col].B-b))*
+      (0.19*(Main_palette[col].B-b)));
+    // Exact match
+    if (diff_c==0)
+      return col;
+
+    bri = sqrt(0.26*Main_palette[col].R*0.26*Main_palette[col].R + 0.55*Main_palette[col].G*0.55*Main_palette[col].G + 0.19*Main_palette[col].B*0.19*Main_palette[col].B);
+    diff_b = abs(target_bri-bri);
+
+    diff=l_weight*(diff_b-diff_c)+diff_c;
     if (diff<best_diff)
     {
       best_diff=diff;
@@ -3129,10 +3240,14 @@ void Remap_menu_sprites()
           Remap_pixel(&Gfx->Statusbar_block[k][j][i]);
     // Layer bar
     for (k=0; k<3; k++)
-      for (j=0; j<Menu_bars[MENUBAR_LAYERS].Height; j++)
-        for (i=0; i<Menu_bars[MENUBAR_LAYERS].Skin_width; i++)
+      for (j=0; j<10; j++)
+        for (i=0; i<144; i++)
           Remap_pixel(&Gfx->Layerbar_block[k][j][i]);
-    
+    // Anim bar
+    for (k=0; k<3; k++)
+      for (j=0; j<14; j++)
+        for (i=0; i<236; i++)
+          Remap_pixel(&Gfx->Animbar_block[k][j][i]);
     // Help fonts
     for (k=0; k<256; k++)
       for (j=0; j<8; j++)

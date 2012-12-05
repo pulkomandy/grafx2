@@ -300,27 +300,10 @@ GFX2_GLOBAL short Main_image_height;
 GFX2_GLOBAL short Main_offset_X;
 /// Y position (in image space) of the pixel to display in the top left corner of screen.
 GFX2_GLOBAL short Main_offset_Y;
-/// Name of the directory that holds the image currently edited.
-GFX2_GLOBAL char  Main_file_directory[1024];
-/// Filename (without directory) of the image currently edited.
-GFX2_GLOBAL char  Main_filename[256];
 /// File format of the image currently edited. It's a value of enum ::FILE_FORMATS
 GFX2_GLOBAL byte  Main_fileformat;
-///
-/// Fileselector "filter" format, for the current image.
-/// (The spare page has its own separate settings)
-/// It's 0 for "*.*", or a value of enum ::FILE_FORMATS
-GFX2_GLOBAL byte  Main_format;
-/// Index of the first file/entry to display in the fileselector.
-GFX2_GLOBAL short Main_fileselector_position;
-///
-/// Position of the "highlight" bar in the fileselector. 10 Files can be visible,
-/// So it's a number in the [0-9] range.
-GFX2_GLOBAL short Main_fileselector_offset;
-/// Current directory for the fileselector.
-GFX2_GLOBAL char  Main_current_directory[1024];
-/// Main image's file comment (some image formats support text strings).
-GFX2_GLOBAL char  Main_comment[COMMENT_SIZE+1];
+/// File selector settings
+T_Selector_settings Main_selector;
 /// X position (in screen coordinates) of the separator between normal and magnified views.
 GFX2_GLOBAL short Main_separator_position;
 /// X position (in screen coordinates) of the first pixel of the magnified view.
@@ -340,7 +323,7 @@ GFX2_GLOBAL short Main_magnifier_offset_X;
 /// Y position (in image space) of the pixel to display in the top left corner of the magnified view.
 GFX2_GLOBAL short Main_magnifier_offset_Y;
 /// Index of layer currently being edited
-GFX2_GLOBAL byte Main_current_layer;
+GFX2_GLOBAL int Main_current_layer;
 /// Bitfield that records which layers are visible. 2^0 for 0, 2^1 for 1, 2^2 for 2, etc.
 GFX2_GLOBAL dword Main_layers_visible;
 /// Index to use next time, when creating incremental backups, to make unique filename.
@@ -372,21 +355,8 @@ GFX2_GLOBAL char  Spare_file_directory[MAX_PATH_CHARACTERS];
 GFX2_GLOBAL char  Spare_filename[MAX_PATH_CHARACTERS];
 /// File format of the image currently edited as spare page. It's a value of enum ::FILE_FORMATS
 GFX2_GLOBAL byte  Spare_fileformat;
-///
-/// Fileselector "filter" format, for the spare page.
-/// (The main image has its own separate settings)
-/// It's 0 for "*.*", or a value of enum ::FILE_FORMAT
-GFX2_GLOBAL byte  Spare_format;
-/// Index of the first file/entry to display in the fileselector.
-GFX2_GLOBAL short Spare_fileselector_position;
-///
-/// Position of the "highlight" bar in the fileselector. 10 Files can be visible,
-/// So it's a number in the [0-9] range.
-GFX2_GLOBAL short Spare_fileselector_offset;
-/// Current directory for the fileselector.
-GFX2_GLOBAL char  Spare_current_directory[MAX_PATH_CHARACTERS];
-/// Spare page's file comment  (some image formats support text strings).
-GFX2_GLOBAL char  Spare_comment[COMMENT_SIZE+1];
+/// File selector settings
+T_Selector_settings Spare_selector;
 /// X position (in screen coordinates) of the separator between normal and magnified views.
 GFX2_GLOBAL short Spare_separator_position;
 /// X position (in screen coordinates) of the first pixel of the magnified view.
@@ -406,7 +376,7 @@ GFX2_GLOBAL short Spare_magnifier_offset_X;
 /// Y position (in image space) of the pixel to display in the top left corner of the magnified view.
 GFX2_GLOBAL short Spare_magnifier_offset_Y;
 /// Index of layer currently being edited
-GFX2_GLOBAL byte Spare_current_layer;
+GFX2_GLOBAL int Spare_current_layer;
 /// Bitfield that records which layers are visible. 2^0 for 0, 2^1 for 1, 2^2 for 2, etc.
 GFX2_GLOBAL dword Spare_layers_visible;
 /// Index to use next time, when creating incremental backups, to make unique filename.
@@ -454,20 +424,8 @@ GFX2_GLOBAL char  Brush_file_directory[MAX_PATH_CHARACTERS];
 GFX2_GLOBAL char  Brush_filename[MAX_PATH_CHARACTERS];
 /// File format of the brush. It's a value of enum ::FILE_FORMATS
 GFX2_GLOBAL byte  Brush_fileformat;
-///
-/// Fileselector "filter" format, for the brush.
-/// It's 0 for "*.*", or a value of enum ::FILE_FORMATS
-GFX2_GLOBAL byte  Brush_format;
-/// Index of the first file/entry to display in the brush's fileselector.
-GFX2_GLOBAL short Brush_fileselector_position;
-///
-/// Position of the "highlight" bar in the brush's fileselector. 10 Files can
-/// be visible, so it's a number in the [0-9] range.
-GFX2_GLOBAL short Brush_fileselector_offset;
-/// Current directory for the brush's fileselector.
-GFX2_GLOBAL char  Brush_current_directory[256];
-/// File comment in the brush's fileselector (some image formats support text strings).
-GFX2_GLOBAL char  Brush_comment[COMMENT_SIZE+1];
+/// Fileselector settings
+T_Selector_settings Brush_selector;
 /// Indicator used for the "Rotate brush" operation.
 GFX2_GLOBAL byte  Brush_rotation_center_is_defined;
 /// Position of the brush's rotation center, in screen coordinates.
@@ -494,16 +452,6 @@ GFX2_GLOBAL byte  Menu_factor_X;
 GFX2_GLOBAL byte  Menu_factor_Y;
 /// Size of a color cell in the menu's palette.
 GFX2_GLOBAL word  Menu_palette_cell_width;
-
-GFX2_GLOBAL T_Menu_Bar Menu_bars[MENUBAR_COUNT] 
-#ifdef GLOBAL_VARIABLES
-  = 
-{{MENU_WIDTH,  9, 1, 45, {NULL,NULL,NULL},  20, BUTTON_HIDE }, // Status
- {MENU_WIDTH, 10, 1, 35, {NULL,NULL,NULL}, 144, BUTTON_LAYER_SELECT }, // Layers
- {MENU_WIDTH, 35, 1,  0, {NULL,NULL,NULL}, 254, BUTTON_CHOOSE_COL }} // Main
-#endif
- ;
-
 
 // -- Window data
 
@@ -569,35 +517,6 @@ GFX2_GLOBAL T_Window Window_stack[8];
 #define Window_attribute2 Window_stack[Windows_open-1].Attribute2
 
 #define Window_draggable Window_stack[Windows_open-1].Draggable
-
-
-/// Definition of the menu (toolbox)
-GFX2_GLOBAL struct
-{
-  // Button aspect
-  word            X_offset;         ///< Position relative to menu's left
-  word            Y_offset;         ///< Position relative to menu's top
-  word            Width;            ///< Button's active width
-  word            Height;           ///< Button's active heigth
-  byte            Pressed;          ///< Button is currently pressed
-  byte            Shape;            ///< Shape, listed in enum ::BUTTON_SHAPES
-  signed char     Icon;             ///< Which icon to display: Either the one from the toolbar (-1) or one of ::MENU_SPRITE
-
-  // Triggers on mouse/keyboard
-  Func_action     Left_action;      ///< Action triggered by a left mouseclick on the button
-  Func_action     Right_action;     ///< Action triggered by a right mouseclick on the button
-  word            Left_shortcut[2]; ///< Keyboard shortcut for a left mouseclick
-  word            Right_shortcut[2];///< Keyboard shortcut for a right mouseclick
-  byte            Left_instant;     ///< Will not wait for mouse release before triggering action
-  byte            Right_instant;    ///< Will not wait for mouse release before triggering action
-
-  // Data used when the button is unselected
-  Func_action     Unselect_action;  ///< Action triggered by unselecting the button
-  byte            Family;           ///< enum ::FAMILY_OF_BUTTONS.
-
-} Buttons_Pool[NB_BUTTONS];
-
-
 
 // -- Information about the different drawing modes (effects)
 
@@ -725,6 +644,14 @@ GFX2_GLOBAL short Tiling_offset_Y;
 GFX2_GLOBAL byte Mask_mode;
 /// Array of booleans. True if the indexed color is protected by the mask.
 GFX2_GLOBAL byte Mask_table[256];
+
+// -- Tilemap mode
+
+/// Tilemap mode for main page
+GFX2_GLOBAL byte Main_tilemap_mode;
+
+/// Tilemap mode for spare page
+GFX2_GLOBAL byte Spare_tilemap_mode;
 
 // -- Magnifier data
 
@@ -870,12 +797,12 @@ GFX2_GLOBAL T_Brush_template Brush_container[BRUSH_CONTAINER_COLUMNS*BRUSH_CONTA
     CURSOR_SHAPE_TARGET            , // Centered lines
     CURSOR_SHAPE_XOR_TARGET        , // Empty rectangle
     CURSOR_SHAPE_XOR_TARGET        , // Filled rectangle
-    CURSOR_SHAPE_TARGET            , // Empty circle
-    CURSOR_SHAPE_TARGET            , // Filled circle
-    CURSOR_SHAPE_TARGET            , // Empty ellipse
-    CURSOR_SHAPE_TARGET            , // Filled ellipse
-    CURSOR_SHAPE_TARGET            , // Fill
-    CURSOR_SHAPE_TARGET            , // Color replacer
+    CURSOR_SHAPE_XOR_TARGET        , // Empty circle
+    CURSOR_SHAPE_XOR_TARGET        , // Filled circle
+    CURSOR_SHAPE_XOR_TARGET        , // Empty ellipse
+    CURSOR_SHAPE_XOR_TARGET        , // Filled ellipse
+    CURSOR_SHAPE_BUCKET            , // Fill
+    CURSOR_SHAPE_BUCKET            , // Color replacer
     CURSOR_SHAPE_XOR_TARGET        , // Rectangular brush grabbing
     CURSOR_SHAPE_TARGET            , // Polygonal brush grabbing
     CURSOR_SHAPE_COLORPICKER       , // Colorpicker
@@ -887,14 +814,15 @@ GFX2_GLOBAL T_Brush_template Brush_container[BRUSH_CONTAINER_COLUMNS*BRUSH_CONTA
     CURSOR_SHAPE_TARGET            , // Polyform
     CURSOR_SHAPE_TARGET            , // Filled polygon
     CURSOR_SHAPE_TARGET            , // Filled polyform
-    CURSOR_SHAPE_MULTIDIRECTIONAL  , // Scroll (pan)
-    CURSOR_SHAPE_TARGET            , // Gradient-filled circle
-    CURSOR_SHAPE_TARGET            , // Gradient-filled ellipse
+    CURSOR_SHAPE_MULTIDIRECTIONAL  , // Scroll image
+    CURSOR_SHAPE_XOR_TARGET        , // Gradient-filled circle
+    CURSOR_SHAPE_XOR_TARGET        , // Gradient-filled ellipse
     CURSOR_SHAPE_XOR_ROTATION      , // Rotate brush
     CURSOR_SHAPE_XOR_TARGET        , // Stretch brush
     CURSOR_SHAPE_TARGET            , // Distort brush
     CURSOR_SHAPE_XOR_TARGET        , // Gradient-filled rectangle
     CURSOR_SHAPE_COLORPICKER       , // Colorpick on right mouse button
+    CURSOR_SHAPE_MULTIDIRECTIONAL  , // Pan view
   };
 #else
   /// ::Cursor_shape to use for each operation.

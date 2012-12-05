@@ -61,7 +61,7 @@ word Count_used_colors(dword* usage)
   // For each layer
   for (layer = 0; layer < Main_backups->Pages->Nb_layers; layer++)
   {
-    current_pixel = Main_backups->Pages->Image[layer];
+    current_pixel = Main_backups->Pages->Image[layer].Pixels;
     // For each pixel in picture
     for (i = 0; i < nb_pixels; i++)
     {
@@ -188,7 +188,7 @@ void Clear_current_image_with_stencil(byte color, byte * stencil)
   int nb_pixels=0; //ECX
   //al=color
   //edi=Screen_pixels
-  byte* pixel=Main_backups->Pages->Image[Main_current_layer];
+  byte* pixel=Main_backups->Pages->Image[Main_current_layer].Pixels;
   int i;
 
   nb_pixels=Main_image_height*Main_image_width;
@@ -205,7 +205,7 @@ void Clear_current_image(byte color)
   // Effacer l'image courante avec une certaine couleur
 {
   memset(
-    Main_backups->Pages->Image[Main_current_layer],
+    Main_backups->Pages->Image[Main_current_layer].Pixels,
     color ,
     Main_image_width * Main_image_height
     );
@@ -228,21 +228,6 @@ byte Read_pixel_from_brush (word x, word y)
 {
   return *(Brush + y * Brush_width + x);
 }
-
-void Replace_a_color(byte old_color, byte new_color)
-{
-  word x;
-  word y;
-  
-  // Update all pixels
-  for (y=0; y<Main_image_height; y++)
-    for (x=0; x<Main_image_width; x++)
-      if (Read_pixel_from_current_layer(x,y) == old_color)
-        Pixel_in_current_screen(x,y,new_color,0);
-  Update_rect(0,0,0,0); // On peut TOUT a jour
-  // C'est pas un problème car il n'y a pas de preview
-}
-// FIXME: move to graph.c, it's the only caller
 
 void Ellipse_compute_limites(short horizontal_radius,short vertical_radius)
 {
@@ -303,12 +288,14 @@ byte Read_pixel_from_spare_screen(word x,word y)
   // (can be a bigger or smaller image)
   if (x>=Spare_image_width || y>=Spare_image_height)
     return Spare_backups->Pages->Transparent_color;
-#ifndef NOLAYERS
-  return *(Spare_visible_image.Image + y*Spare_image_width + x);
-#else
-  return *(Spare_backups->Pages->Image[Spare_current_layer] + y*Spare_image_width + x);
-#endif
-
+  if (Spare_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+  {
+    return *(Spare_backups->Pages->Image[Spare_current_layer].Pixels + y*Spare_image_width + x);
+  }
+  else
+  {
+    return *(Spare_visible_image.Image + y*Spare_image_width + x);
+  }
 }
 
 void Rotate_90_deg_lowlevel(byte * source, byte * dest, short width, short height)
@@ -362,7 +349,7 @@ void Remap_general_lowlevel(byte * conversion_table,byte * in_buffer, byte *out_
 
 void Copy_image_to_brush(short start_x,short start_y,short Brush_width,short Brush_height,word image_width)
 {
-  byte* src=start_y*image_width+start_x+Main_backups->Pages->Image[Main_current_layer]; //Adr départ image (ESI)
+  byte* src=start_y*image_width+start_x+Main_backups->Pages->Image[Main_current_layer].Pixels; //Adr départ image (ESI)
   byte* dest=Brush_original_pixels; //Adr dest brosse (EDI)
   int dx;
 
@@ -407,7 +394,7 @@ void Replace_colors_within_limits(byte * replace_table)
     // Pour chaque pixel sur la ligne :
     for (x = Limit_left;x <= Limit_right;x ++)
     {
-      pixel = Main_backups->Pages->Image[Main_current_layer]+y*Main_image_width+x;
+      pixel = Main_backups->Pages->Image[Main_current_layer].Pixels+y*Main_image_width+x;
       *pixel = replace_table[*pixel];
     }
   }
@@ -636,46 +623,47 @@ void Rescale(byte *src_buffer, short src_width, short src_height, byte *dst_buff
 
   int    x_pos_in_brush;   // Position courante dans l'ancienne brosse
   int    y_pos_in_brush;
-  int    delta_x_in_brush; // "Vecteur incrémental" du point précédent
-  int    delta_y_in_brush;
   int    initial_x_pos;       // Position X de début de parcours de ligne
+  int    initial_y_pos;       // Position Y de début de parcours de ligne
 
-  // Calcul du "vecteur incrémental":
-  delta_x_in_brush=(src_width<<16) * (x_flipped?-1:1) / (dst_width);
-  delta_y_in_brush=(src_height<<16) * (y_flipped?-1:1) / (dst_height);
+  int	delta_x, delta_y;
 
   offset=0;
 
   // Calcul de la valeur initiale de y_pos:
-  if (y_flipped)
-    y_pos_in_brush=(src_height<<16)-1; // Inversion en Y de la brosse
-  else
-    y_pos_in_brush=0;                // Pas d'inversion en Y de la brosse
+  if (y_flipped) {
+    initial_y_pos=(src_height)-1; // Inversion en Y de la brosse
+	delta_y = -1 * src_height;
+  } else {
+    initial_y_pos=0;                // Pas d'inversion en Y de la brosse
+	delta_y = src_height;
+  }
 
   // Calcul de la valeur initiale de x_pos pour chaque ligne:
-  if (x_flipped)
-    initial_x_pos = (src_width<<16)-1; // Inversion en X de la brosse
-  else
+  if (x_flipped) {
+    initial_x_pos = (src_width)-1; // Inversion en X de la brosse
+	delta_x = -1 * src_width;
+  } else {
     initial_x_pos = 0;                // Pas d'inversion en X de la brosse
+	delta_x = src_width;
+  }
 
   // Pour chaque ligne
   for (line=0;line<dst_height;line++)
   {
-    // On repart du début de la ligne:
-    x_pos_in_brush=initial_x_pos;
+    // On passe à la ligne de brosse suivante:
+    y_pos_in_brush = initial_y_pos + line * delta_y / dst_height;
 
     // Pour chaque colonne:
     for (column=0;column<dst_width;column++)
     {
-      // On copie le pixel:
-      dst_buffer[offset]=*(src_buffer + (x_pos_in_brush>>16) + (y_pos_in_brush>>16)*src_width);
       // On passe à la colonne de brosse suivante:
-      x_pos_in_brush+=delta_x_in_brush;
+      x_pos_in_brush = initial_x_pos + column * delta_x / dst_width;
+      // On copie le pixel:
+      dst_buffer[offset]=*(src_buffer + x_pos_in_brush + y_pos_in_brush * src_width);
       // On passe au pixel suivant de la nouvelle brosse:
       offset++;
     }
-    // On passe à la ligne de brosse suivante:
-    y_pos_in_brush+=delta_y_in_brush;
   }
 }
 
@@ -735,10 +723,13 @@ void Zoom_a_line(byte* original_line, byte* zoomed_line,
 #if defined(__WIN32__)
 #define _WIN32_WINNT 0x0500
 #include <windows.h>
-#elif defined(__macosx__) || defined(__FreeBSD__) || defined(__NetBSD__)
+#elif defined(__macosx__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+  #if defined(__OpenBSD__)
+  #include <sys/param.h>
+  #endif
   #include <sys/sysctl.h>
 #elif defined(__BEOS__) || defined(__HAIKU__)
-  // sysinfo not implemented
+  #include <kernel/OS.h>
 #elif defined(__AROS__) || defined(__amigaos4__) || defined(__MORPHOS__) || defined(__amigaos__)
   #include <proto/exec.h>
 #elif defined(__MINT__)
@@ -754,11 +745,8 @@ void Zoom_a_line(byte* original_line, byte* zoomed_line,
 // atari have two kinds of memory
 // standard and fast ram
 void Atari_Memory_free(unsigned long *stRam,unsigned long *ttRam){
-  //TODO: return STRAM/TT-RAM
-  unsigned long mem=0;
   *stRam=Mxalloc(-1L,0);
   *ttRam = Mxalloc(-1L,1);
-
 }
 #else
 // Indique quelle est la mémoire disponible
@@ -777,7 +765,7 @@ unsigned long Memory_free(void)
   mstt.dwLength = sizeof(MEMORYSTATUS);
   GlobalMemoryStatus(&mstt);
   return mstt.dwAvailPhys;
-#elif defined(__macosx__) || defined(__FreeBSD__) || defined(__NetBSD__)
+#elif defined(__macosx__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
   int mib[2];
   int maxmem;
   size_t len;
@@ -787,17 +775,23 @@ unsigned long Memory_free(void)
   len = sizeof(maxmem);
   sysctl(mib,2,&maxmem,&len,NULL,0);
   return maxmem;
-#elif defined(__BEOS__) || defined(__HAIKU__) || defined(__SKYOS__) || defined(__amigaos4__) || defined(__TRU64__)
-  // No <sys/sysctl.h> on BeOS or Haiku
-  // AvailMem is misleading on os4 (os4 caches stuff in memory that you can still allocate)
-#warning "There is missing code there for your platform ! please check and correct :)"
-  return 10*1024*1024;
+#elif defined(__HAIKU__) || defined(__BEOS__)
+  int pages;
+  system_info systemInfo;
+  get_system_info(&systemInfo);
+
+  pages = systemInfo.max_pages - systemInfo.used_pages;
+  return pages * B_PAGE_SIZE;
 #elif defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
   return AvailMem(MEMF_ANY);
-#else
+#elif defined(__linux__)
   struct sysinfo info;
   sysinfo(&info);
   return info.freeram*info.mem_unit;
+#else
+  // AvailMem is misleading on os4 (os4 caches stuff in memory that you can still allocate)
+#warning "There is missing code there for your platform ! please check and correct :)"
+  return 10*1024*1024;
 #endif
 }
 #endif
@@ -848,6 +842,28 @@ double Fround(double n, unsigned d)
   double exp;
   exp = pow(10.0, d);
   return floor(n * exp + 0.5) / exp;
+}
+
+/// Count number of bits in a word (16bit).
+/// Based on Wikipedia article for Hamming_weight, it's optimized
+/// for cases when zeroes are more frequent.
+int Popcount_word(word x)
+{
+  word count;
+  for (count=0; x; count++)
+    x &= x-1;
+  return count;
+}
+
+/// Count number of bits in a dword (32bit).
+/// Based on Wikipedia article for Hamming_weight, it's optimized
+/// for cases when zeroes are more frequent.
+int Popcount_dword(dword x)
+{
+  dword count;
+  for (count=0; x; count++)
+    x &= x-1;
+  return count;
 }
 
 

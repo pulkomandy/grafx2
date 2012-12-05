@@ -30,37 +30,12 @@
 #define _OP_C_H_
 
 #include "struct.h"
+#include "colorred.h"
 
 //////////////////////////////////////////////// Définition des types de base
 
 typedef T_Components * T_Bitmap24B;
 typedef byte * T_Bitmap256;
-
-
-
-//////////////////////////////////////// Définition d'une table de conversion
-
-typedef struct
-{
-  int nbb_r; // Nb de bits de précision sur les rouges
-  int nbb_g; // Nb de bits de précision sur les verts
-  int nbb_b; // Nb de bits de précision sur les bleu
-
-  int rng_r; // Nb de valeurs sur les rouges (= 1<<nbb_r)
-  int rng_g; // Nb de valeurs sur les verts  (= 1<<nbb_g)
-  int rng_b; // Nb de valeurs sur les bleus  (= 1<<nbb_b)
-
-  int dec_r; // Coefficient multiplicateur d'accès dans la table (= nbb_g+nbb_b)
-  int dec_g; // Coefficient multiplicateur d'accès dans la table (= nbb_b)
-  int dec_b; // Coefficient multiplicateur d'accès dans la table (= 0)
-
-  int red_r; // Coefficient réducteur de traduction d'une couleur rouge (= 8-nbb_r)
-  int red_g; // Coefficient réducteur de traduction d'une couleur verte (= 8-nbb_g)
-  int red_b; // Coefficient réducteur de traduction d'une couleur bleue (= 8-nbb_b)
-
-  byte * table;
-} T_Conversion_table;
-
 
 
 ///////////////////////////////////////// Définition d'une table d'occurences
@@ -90,26 +65,46 @@ typedef struct
 
 ///////////////////////////////////////// Définition d'un ensemble de couleur
 
-typedef struct S_Cluster
+struct S_Cluster_CutData
 {
-  int occurences; // Nb total d'occurences des couleurs de l'ensemble
+  // informations used while median-cutting
+  int volume; // volume of narrow covering (without margins where there are no pixels)
+ 
+  // Widest component : 0 red, 1 green, 2 blue
+  byte plus_large;
+  
+};
 
-  // Grande couverture
-  byte Rmin,Rmax;
-  byte Gmin,Vmax;
-  byte Bmin,Bmax;
-
-  // Couverture minimale
-  byte rmin,rmax;
-  byte vmin,vmax;
-  byte bmin,bmax;
-
-  byte plus_large; // Composante ayant la plus grande variation (0=red,1=green,2=blue)
+struct S_Cluster_PalData
+{
+  //  information used while color reducing	
   byte r,g,b;      // color synthétisant l'ensemble
   byte h;          // Chrominance
   byte l;          // Luminosité
+};
 
+union U_Cluster_Data
+{
+	struct S_Cluster_CutData cut;
+	struct S_Cluster_PalData pal;
+};
+
+typedef struct S_Cluster
+{
   struct S_Cluster* next;
+  int occurences; // Numbers of pixels in picture part of this cluster
+  
+  // Narrow covering (remove margins that don't hold any pixel)
+  byte rmin,rmax;
+  byte vmin,vmax;
+  byte bmin,bmax;
+  
+  // Wide covering (how far it extends before touching another cluster wide covering)
+  byte Rmin,Rmax;
+  byte Gmin,Vmax;
+  byte Bmin,Bmax;
+ 
+  union U_Cluster_Data data;
 } T_Cluster;
 
 
@@ -146,17 +141,6 @@ typedef struct
   T_Gradient * gradients; // Les dégradés
 } T_Gradient_set;
 
-
-
-/////////////////////////////////////////////////////////////////////////////
-///////////////////////////// Méthodes de gestion des tables de conversion //
-/////////////////////////////////////////////////////////////////////////////
-
-T_Conversion_table * CT_new(int nbb_r,int nbb_g,int nbb_b);
-void CT_delete(T_Conversion_table * t);
-byte CT_get(T_Conversion_table * t,int r,int g,int b);
-void CT_set(T_Conversion_table * t,int r,int g,int b,byte i);
-
 void RGB_to_HSL(int r, int g,int b, byte* h, byte*s, byte* l);
 void HSL_to_RGB(byte h, byte s, byte l, byte* r, byte* g, byte* b);
 
@@ -169,8 +153,8 @@ long Perceptual_lightness(T_Components *color);
 void OT_init(T_Occurrence_table * t);
 T_Occurrence_table * OT_new(int nbb_r,int nbb_g,int nbb_b);
 void OT_delete(T_Occurrence_table * t);
-int OT_get(T_Occurrence_table * t,int r,int g,int b);
-void OT_inc(T_Occurrence_table * t,int r,int g,int b);
+int OT_get(T_Occurrence_table * t,byte r,byte g,byte b);
+void OT_inc(T_Occurrence_table * t,byte r,byte g,byte b);
 void OT_count_occurrences(T_Occurrence_table * t,T_Bitmap24B image,int size);
 
 
@@ -179,8 +163,8 @@ void OT_count_occurrences(T_Occurrence_table * t,T_Bitmap24B image,int size);
 ///////////////////////////////////////// Méthodes de gestion des clusters //
 /////////////////////////////////////////////////////////////////////////////
 
-void Cluster_pack(T_Cluster * c,T_Occurrence_table * to);
-void Cluster_split(T_Cluster * c,T_Cluster * c1,T_Cluster * c2,int hue,T_Occurrence_table * to);
+void Cluster_pack(T_Cluster * c,const T_Occurrence_table * const to);
+void Cluster_split(T_Cluster * c,T_Cluster * c1,T_Cluster * c2,int hue,const T_Occurrence_table * const to);
 void Cluster_compute_hue(T_Cluster * c,T_Occurrence_table * to);
 
 
@@ -192,11 +176,11 @@ void Cluster_compute_hue(T_Cluster * c,T_Occurrence_table * to);
 void CS_Init(T_Cluster_set * cs,T_Occurrence_table * to);
 T_Cluster_set * CS_New(int nbmax,T_Occurrence_table * to);
 void CS_Delete(T_Cluster_set * cs);
-void CS_Get(T_Cluster_set * cs,T_Cluster * c);
+void CS_Get(T_Cluster_set * cs,T_Cluster ** c);
 void CS_Set(T_Cluster_set * cs,T_Cluster * c);
-void CS_Generate(T_Cluster_set * cs,T_Occurrence_table * to);
+void CS_Generate(T_Cluster_set * cs,const T_Occurrence_table * const to, CT_Tree* colorTree);
 void CS_Compute_colors(T_Cluster_set * cs,T_Occurrence_table * to);
-void CS_Generate_color_table_and_palette(T_Cluster_set * cs,T_Conversion_table * tc,T_Components * palette);
+void CS_Generate_color_table_and_palette(T_Cluster_set * cs,CT_Tree* tc,T_Components * palette);
 
 /////////////////////////////////////////////////////////////////////////////
 //////////////////////////// Méthodes de gestion des ensembles de dégradés //

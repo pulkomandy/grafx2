@@ -25,6 +25,19 @@
 #include "global.h"
 #include "keyboard.h"
 
+#if defined(__macosx__)
+  // Apple's "command" character is not present in the ANSI table, so we
+  // recycled an ANSI value that doesn't have any displayable character
+  // associated.
+  #define META_KEY_PREFIX "\201"
+#elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+  // 'Amiga' key: an outlined uppercase A. Drawn on 2 unused characters.
+  #define META_KEY_PREFIX "\215\216"
+#else
+  // All other platforms
+  #define META_KEY_PREFIX "Super+"
+#endif
+
 // Table de correspondance des scancode de clavier IBM PC AT vers
 // les symboles de touches SDL (sym).
 // La correspondance est bonne si le clavier est QWERTY US, ou si
@@ -458,11 +471,7 @@ const char * Key_name(word key)
   if (key & MOD_SHIFT)
     strcat(buffer, "Shift+");
   if (key & MOD_META)
-    strcat(buffer, "\201");
-  // Note: Apple's "command" character is not present in the ANSI table, so we
-  // recycled an ANSI value that doesn't have any displayable character
-  // associated.
-  
+    strcat(buffer, META_KEY_PREFIX);
   
   key=key & ~(MOD_CTRL|MOD_ALT|MOD_SHIFT);
   

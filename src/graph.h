@@ -38,13 +38,15 @@ byte Effect_shade(word x,word y,byte color);
 byte Effect_quick_shade(word x,word y,byte color);
 byte Effect_tiling(word x,word y,byte color);
 byte Effect_smooth(word x,word y,byte color);
+byte Effect_layer_copy(word x,word y,byte color);
 
 void Display_foreback(void);
 
 
 void Display_pixel(word x,word y,byte color);
 
-void Display_paintbrush(short x,short y,byte color,byte is_preview);
+void Display_paintbrush(short x,short y,byte color);
+void Draw_paintbrush(short x,short y,byte color);
 void Hide_paintbrush(short x,short y);
 
 void Resize_image(word chosen_width,word chosen_height);
@@ -54,7 +56,7 @@ void Replace(byte New_color);
 
 void Pixel_figure_preview    (word x_pos,word y_pos,byte color);
 void Pixel_figure_preview_auto(word x_pos,word y_pos);
-void Pixel_figure_preview_xor(word x_pos,word y_pos,byte color);
+void Pixel_figure_preview_xor(short x_pos,short y_pos,byte color);
 void Pixel_figure_preview_xorback(word x_pos,word y_pos,byte color);
 void Pixel_figure_in_brush(word x_pos,word y_pos,byte color);
 
@@ -65,6 +67,8 @@ void Draw_empty_circle_preview  (short center_x,short center_y,short radius,byte
 void Hide_empty_circle_preview (short center_x,short center_y,short radius);
 void Draw_empty_circle_general(short center_x,short center_y,short radius,byte color);
 void Draw_filled_circle         (short center_x,short center_y,short radius,byte color);
+
+int Circle_squared_diameter(int diameter);
 
 void Draw_empty_ellipse_permanent(short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color);
 void Draw_empty_ellipse_preview  (short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color);
@@ -117,7 +121,17 @@ void Update_part_of_screen(short x, short y, short width, short height);
 
 void Redraw_grid(short x, short y, unsigned short w, unsigned short h);
 
-void Pixel_in_current_screen      (word x,word y,byte color,int with_preview);
+void Pixel_in_spare(word x,word y, byte color);
 void Pixel_in_current_layer(word x,word y, byte color);
 byte Read_pixel_from_current_screen  (word x,word y);
 byte Read_pixel_from_current_layer(word x,word y);
+
+/// Paint a single pixel in image only.
+extern Func_pixel Pixel_in_current_screen;
+
+/// Paint a single pixel in image AND on screen.
+extern Func_pixel Pixel_in_current_screen_with_preview;
+
+/// Sets ::Pixel_in_current_screen and ::Pixel_in_current_screen_with_preview
+void Update_pixel_renderer(void);
+

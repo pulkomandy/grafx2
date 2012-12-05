@@ -41,11 +41,21 @@
 #include "input.h"
 #include "engine.h"
 
-// Virtual keyboard is mandatory on these platforms:
+#ifdef __WIN32__
+#include <Windows.h>
+#include <SDL_syswm.h>
+#elif defined __HAIKU__
+#include "haiku.h"
+#elif defined(__AROS__)
+#include <proto/iffparse.h>
+#include <datatypes/textclass.h>
+#endif
+
+// Virtual keyboard is ON by default on these platforms:
 #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
-  #ifndef VIRT_KEY
-    #define VIRT_KEY 1
-  #endif
+  #define VIRT_KEY_DEFAULT_ON 1
+#else
+  #define VIRT_KEY_DEFAULT_ON 0
 #endif
 
 #define TEXT_COLOR         MC_Black
@@ -80,28 +90,97 @@ void Insert_character(char * str, char letter, byte position)
   str[position]='\0';
 }
 
-int Valid_character(int c)
+int Prepend_string(char* dest, char* src, int max)
+// Insert a string at the start of another. Up to MAX characters only
+// Returns actual number of chars inserted
 {
-  // Sous Linux: Seul le / est strictement interdit, mais beaucoup
-  // d'autres poseront des problèmes au shell, alors on évite.
-  // Sous Windows : c'est moins grave car le fopen() échouerait de toutes façons.
-  // AmigaOS4: Pas de ':' car utilisé pour les volumes.
-  #if defined(__WIN32__)
-  char forbidden_char[] = {'/', '|', '?', '*', '<', '>', ':', '\\'};
-  #elif defined (__amigaos4__)
-  char forbidden_char[] = {'/', '|', '?', '*', '<', '>', ':'};
-  #else
-  char forbidden_char[] = {'/', '|', '?', '*', '<', '>'};
-  #endif
-  int position;
+  // Insert src before dest
+  int sized = strlen(dest);
+  int sizes = strlen(src);
+
+  if (sized + sizes >= max)
+  {
+    sizes = max - sized;
+  }
+
+  memmove(dest+sizes, dest, sized+1);
+  memcpy(dest, src, sizes);
+  return sizes;
+}
+
+int Valid_character(word c, int input_type)
+  // returns 0 = Not allowed
+  // returns 1 = Allowed
+  // returns 2 = Allowed only once at start of string (for - sign in numbers)
+{
+  // On va regarder si l'utilisateur le droit de se servir de cette touche
+  switch(input_type)
+  {
+    case INPUT_TYPE_STRING :
+      if ((c>=' ' && c<= 255) || c=='\n')
+        return 1;
+      break;
+    case INPUT_TYPE_INTEGER :
+      if ( (c>='0') && (c<='9') )
+        return 1;
+      break;
+    case INPUT_TYPE_DECIMAL:
+      if ( (c>='0') && (c<='9') )
+        return 1;
+      else if (c=='-')
+        return 2;
+      else if (c=='.')
+        return 1;
+      break;
+    case INPUT_TYPE_FILENAME:
+    {
+      // On regarde si la touche est autorisée
+      // Sous Linux: Seul le / est strictement interdit, mais beaucoup
+      // d'autres poseront des problèmes au shell, alors on évite.
+      // Sous Windows : c'est moins grave car le fopen() échouerait de toutes façons.
+      // AmigaOS4: Pas de ':' car utilisé pour les volumes.
+#if defined(__WIN32__)
+      char forbidden_char[] = {'/', '|', '?', '*', '<', '>', ':', '\\'};
+#elif defined (__amigaos4__) || defined(__AROS__)
+      char forbidden_char[] = {'/', '|', '?', '*', '<', '>', ':'};
+#else
+      char forbidden_char[] = {'/', '|', '?', '*', '<', '>'};
+#endif
+      int position;
+
+      if (c < ' ' || c > 255)
+        return 0;
+
+      for (position=0; position<(long)sizeof(forbidden_char); position++)
+        if (c == forbidden_char[position])
+          return 0;
+      return 1;
+    }
+    case INPUT_TYPE_HEXA:
+      if ( (c>='0') && (c<='9') )
+        return 1;
+      else if ( (c>='A') && (c<='F') )
+        return 1;
+      else if ( (c>='a') && (c<='f') )
+        return 1;
+      break;
+  } // End du "switch(input_type)"
+  return 0;
+}
+
+void Cleanup_string(char* str, int input_type)
+{
+  int i,j=0;
   
-  if (c < ' ' || c > 255)
-    return 0;
-  
-  for (position=0; position<(long)sizeof(forbidden_char); position++)
-    if (c == forbidden_char[position])
-      return 0;
-  return 1;
+  for(i=0; str[i]!='\0'; i++)
+  {
+    if (Valid_character((unsigned char)(str[i]), input_type))
+    {
+      str[j]=str[i];
+      j++;
+    }
+  }
+  str[j] = '\0';
 }
 
 void Display_whole_string(word x_pos,word y_pos,char * str,byte position)
@@ -119,7 +198,7 @@ void Init_virtual_keyboard(word y_pos, word keyboard_width, word keyboard_height
   int h_pos;
   int v_pos;
   int parent_window_x=Window_pos_X+2;
-  
+
   h_pos= Window_pos_X+(keyboard_width-Window_width)*Menu_factor_X/-2;
   if (h_pos<0)
     h_pos=0;
@@ -143,9 +222,111 @@ void Init_virtual_keyboard(word y_pos, word keyboard_width, word keyboard_height
   }
 }
 
+
+// Inspired from http://www.libsdl.org/projects/scrap/
+// TODO X11 and others
+char* getClipboard()
+{
+#ifdef __WIN32__
+    char* dst = NULL;
+    SDL_SysWMinfo info;
+    HWND SDL_Window;
+
+    SDL_VERSION(&info.version);
+
+    if ( SDL_GetWMInfo(&info) )
+    {
+      SDL_Window = info.window;
+
+      if ( IsClipboardFormatAvailable(CF_TEXT) && OpenClipboard(SDL_Window) )
+      {
+        HANDLE hMem;
+        char *src;
+
+        hMem = GetClipboardData(CF_TEXT);
+        if ( hMem != NULL )
+        {
+          src = (char *)GlobalLock(hMem);
+          dst = strdup(src);
+          GlobalUnlock(hMem);
+        }
+        CloseClipboard();
+      }    
+    }
+    return dst;
+  #elif defined(__AROS__)
+
+    struct IFFHandle *iff = NULL;
+    struct ContextNode *cn;
+    long error=0, unitnumber=0;
+    char *dst = NULL;
+
+    if (!(iff = AllocIFF ()))
+    {
+      goto bye;
+    }
+
+    if (!(iff->iff_Stream = (IPTR) OpenClipboard (unitnumber)))
+    {
+      goto bye;
+    }
+
+    InitIFFasClip (iff);
+
+    if ((error = OpenIFF (iff, IFFF_READ)) != 0)
+    {
+      goto bye;
+    }
+
+    if ((error = StopChunk(iff, ID_FTXT, ID_CHRS)) != 0)
+    {
+      goto bye;
+    }
+
+    while(1)
+    {
+      error = ParseIFF(iff,IFFPARSE_SCAN);
+      if (error) break; // we're reading only the 1st chunk
+
+      cn = CurrentChunk(iff);
+
+      if (cn && (cn->cn_Type == ID_FTXT) && (cn->cn_ID == ID_CHRS))
+      {
+        if ((dst = malloc(cn->cn_Size + 1)) != NULL)
+        {
+          dst[0] = '\0';
+          if ((ReadChunkBytes(iff,dst,cn->cn_Size)) > 0)
+          {
+            dst[cn->cn_Size] = '\0';
+          }
+        }
+      }
+    }
+
+bye:
+    if (iff)
+    {
+      CloseIFF (iff);
+
+      if (iff->iff_Stream)
+        CloseClipboard ((struct ClipboardHandle *)iff->iff_Stream);
+      FreeIFF (iff);
+    }
+
+    return dst;
+
+  #elif defined __HAIKU__
+  return haiku_get_clipboard();
+  #else
+  // Not implemented (no standard) on Linux systems. Maybe someday...
+  return NULL;
+  #endif
+}
+
+
 /****************************************************************************
-*           Enhanced super scanf deluxe pro plus giga mieux :-)             *
-****************************************************************************/
+ *           Enhanced super scanf deluxe pro plus giga mieux :-)             *
+ ****************************************************************************/
 byte Readline(word x_pos,word y_pos,char * str,byte visible_size,byte input_type)
 // Paramètres:
 //   x_pos, y_pos : Coordonnées de la saisie dans la fenêtre
@@ -183,12 +364,10 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   byte position;
   byte size;
   word input_key=0;
-  byte is_authorized;
   word window_x=Window_pos_X;
   word window_y=Window_pos_Y;
   byte offset=0; // index du premier caractère affiché
   
-#ifdef VIRT_KEY
   // Virtual keyboard
   byte use_virtual_keyboard=0;
   static byte caps_lock=0;
@@ -205,7 +384,6 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
     ':',';','`','\'','"','~',
     '!','?','^','&','#','$'
   };
-#endif
 
   // Si on a commencé à editer par un clic-droit, on vide la chaine.
   if (Mouse_K==RIGHT_SIDE)
@@ -223,110 +401,112 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   }
   
   // Virtual keyboards
-#ifdef VIRT_KEY
-  if (input_type == INPUT_TYPE_STRING || input_type == INPUT_TYPE_FILENAME )
+  if (Config.Use_virtual_keyboard==1 ||
+    (VIRT_KEY_DEFAULT_ON && Config.Use_virtual_keyboard==0))
   {
-    int x,y;
-
-    Init_virtual_keyboard(y_pos, 320, 87);
-    
-    use_virtual_keyboard=1;
-    
-    // The order is important, see the array
-    
-    Window_set_normal_button(  7,67,43,15,"Clr", 0,1,KEY_NONE);
-    Window_set_normal_button( 51,67,43,15,"Del", 0,1,KEY_NONE);
-    Window_set_normal_button( 95,67,43,15,"OK",  0,1,KEY_NONE);
-    Window_set_normal_button(139,67,43,15,"Esc", 0,1,KEY_NONE);
-    Window_display_frame_in(5,65,179,19);
-
-    Window_set_normal_button(193,63,17,19,"0", 0,1,KEY_NONE);
-    Window_set_normal_button(193,43,17,19,"1", 0,1,KEY_NONE);
-    Window_set_normal_button(211,43,17,19,"2", 0,1,KEY_NONE);
-    Window_set_normal_button(229,43,17,19,"3", 0,1,KEY_NONE);
-    Window_set_normal_button(193,23,17,19,"4", 0,1,KEY_NONE);
-    Window_set_normal_button(211,23,17,19,"5", 0,1,KEY_NONE);
-    Window_set_normal_button(229,23,17,19,"6", 0,1,KEY_NONE);
-    Window_set_normal_button(193, 3,17,19,"7", 0,1,KEY_NONE);
-    Window_set_normal_button(211, 3,17,19,"8", 0,1,KEY_NONE);
-    Window_set_normal_button(229, 3,17,19,"9", 0,1,KEY_NONE);
-    Window_set_normal_button(211,63,17,19,".", 0,1,KEY_NONE);
-    Window_set_normal_button(229,63,17,19,",", 0,1,KEY_NONE);
- 
-    Window_set_normal_button(  3, 3,18,19,"Q", 0,1,KEY_NONE);
-    Window_set_normal_button( 22, 3,18,19,"W", 0,1,KEY_NONE);
-    Window_set_normal_button( 41, 3,18,19,"E", 0,1,KEY_NONE);
-    Window_set_normal_button( 60, 3,18,19,"R", 0,1,KEY_NONE);
-    Window_set_normal_button( 79, 3,18,19,"T", 0,1,KEY_NONE);
-    Window_set_normal_button( 98, 3,18,19,"Y", 0,1,KEY_NONE);
-    Window_set_normal_button(117, 3,18,19,"U", 0,1,KEY_NONE);
-    Window_set_normal_button(136, 3,18,19,"I", 0,1,KEY_NONE);
-    Window_set_normal_button(155, 3,18,19,"O", 0,1,KEY_NONE);
-    Window_set_normal_button(174, 3,18,19,"P", 0,1,KEY_NONE);
-
-    Window_set_normal_button( 12,23,18,19,"A", 0,1,KEY_NONE);
-    Window_set_normal_button( 31,23,18,19,"S", 0,1,KEY_NONE);
-    Window_set_normal_button( 50,23,18,19,"D", 0,1,KEY_NONE);
-    Window_set_normal_button( 69,23,18,19,"F", 0,1,KEY_NONE);
-    Window_set_normal_button( 88,23,18,19,"G", 0,1,KEY_NONE);
-    Window_set_normal_button(107,23,18,19,"H", 0,1,KEY_NONE);
-    Window_set_normal_button(126,23,18,19,"J", 0,1,KEY_NONE);
-    Window_set_normal_button(145,23,18,19,"K", 0,1,KEY_NONE);
-    Window_set_normal_button(164,23,18,19,"L", 0,1,KEY_NONE);
-    
-    Window_set_normal_button(  3,43,18,19,caps_lock?"\036":"\037", 0,1,KEY_NONE);
-    Window_set_normal_button( 22,43,18,19,"Z", 0,1,KEY_NONE);
-    Window_set_normal_button( 41,43,18,19,"X", 0,1,KEY_NONE);
-    Window_set_normal_button( 60,43,18,19,"C", 0,1,KEY_NONE);
-    Window_set_normal_button( 79,43,18,19,"V", 0,1,KEY_NONE);
-    Window_set_normal_button( 98,43,18,19,"B", 0,1,KEY_NONE);
-    Window_set_normal_button(117,43,18,19,"N", 0,1,KEY_NONE);
-    Window_set_normal_button(136,43,18,19,"M", 0,1,KEY_NONE);
-    Window_set_normal_button(155,43,18,19," ", 0,1,KEY_NONE);
-
-    for (y=0; y<5; y++)
+    if (input_type == INPUT_TYPE_STRING || input_type == INPUT_TYPE_FILENAME )
     {
-      for (x=0; x<6; x++)
+      int x,y;
+  
+      Init_virtual_keyboard(y_pos, 320, 87);
+      
+      use_virtual_keyboard=1;
+      
+      // The order is important, see the array
+      
+      Window_set_normal_button(  7,67,43,15,"Clr", 0,1,KEY_NONE);
+      Window_set_normal_button( 51,67,43,15,"Del", 0,1,KEY_NONE);
+      Window_set_normal_button( 95,67,43,15,"OK",  0,1,KEY_NONE);
+      Window_set_normal_button(139,67,43,15,"Esc", 0,1,KEY_NONE);
+      Window_display_frame_in(5,65,179,19);
+  
+      Window_set_normal_button(193,63,17,19,"0", 0,1,KEY_NONE);
+      Window_set_normal_button(193,43,17,19,"1", 0,1,KEY_NONE);
+      Window_set_normal_button(211,43,17,19,"2", 0,1,KEY_NONE);
+      Window_set_normal_button(229,43,17,19,"3", 0,1,KEY_NONE);
+      Window_set_normal_button(193,23,17,19,"4", 0,1,KEY_NONE);
+      Window_set_normal_button(211,23,17,19,"5", 0,1,KEY_NONE);
+      Window_set_normal_button(229,23,17,19,"6", 0,1,KEY_NONE);
+      Window_set_normal_button(193, 3,17,19,"7", 0,1,KEY_NONE);
+      Window_set_normal_button(211, 3,17,19,"8", 0,1,KEY_NONE);
+      Window_set_normal_button(229, 3,17,19,"9", 0,1,KEY_NONE);
+      Window_set_normal_button(211,63,17,19,".", 0,1,KEY_NONE);
+      Window_set_normal_button(229,63,17,19,",", 0,1,KEY_NONE);
+   
+      Window_set_normal_button(  3, 3,18,19,"Q", 0,1,KEY_NONE);
+      Window_set_normal_button( 22, 3,18,19,"W", 0,1,KEY_NONE);
+      Window_set_normal_button( 41, 3,18,19,"E", 0,1,KEY_NONE);
+      Window_set_normal_button( 60, 3,18,19,"R", 0,1,KEY_NONE);
+      Window_set_normal_button( 79, 3,18,19,"T", 0,1,KEY_NONE);
+      Window_set_normal_button( 98, 3,18,19,"Y", 0,1,KEY_NONE);
+      Window_set_normal_button(117, 3,18,19,"U", 0,1,KEY_NONE);
+      Window_set_normal_button(136, 3,18,19,"I", 0,1,KEY_NONE);
+      Window_set_normal_button(155, 3,18,19,"O", 0,1,KEY_NONE);
+      Window_set_normal_button(174, 3,18,19,"P", 0,1,KEY_NONE);
+  
+      Window_set_normal_button( 12,23,18,19,"A", 0,1,KEY_NONE);
+      Window_set_normal_button( 31,23,18,19,"S", 0,1,KEY_NONE);
+      Window_set_normal_button( 50,23,18,19,"D", 0,1,KEY_NONE);
+      Window_set_normal_button( 69,23,18,19,"F", 0,1,KEY_NONE);
+      Window_set_normal_button( 88,23,18,19,"G", 0,1,KEY_NONE);
+      Window_set_normal_button(107,23,18,19,"H", 0,1,KEY_NONE);
+      Window_set_normal_button(126,23,18,19,"J", 0,1,KEY_NONE);
+      Window_set_normal_button(145,23,18,19,"K", 0,1,KEY_NONE);
+      Window_set_normal_button(164,23,18,19,"L", 0,1,KEY_NONE);
+      
+      Window_set_normal_button(  3,43,18,19,caps_lock?"\036":"\037", 0,1,KEY_NONE);
+      Window_set_normal_button( 22,43,18,19,"Z", 0,1,KEY_NONE);
+      Window_set_normal_button( 41,43,18,19,"X", 0,1,KEY_NONE);
+      Window_set_normal_button( 60,43,18,19,"C", 0,1,KEY_NONE);
+      Window_set_normal_button( 79,43,18,19,"V", 0,1,KEY_NONE);
+      Window_set_normal_button( 98,43,18,19,"B", 0,1,KEY_NONE);
+      Window_set_normal_button(117,43,18,19,"N", 0,1,KEY_NONE);
+      Window_set_normal_button(136,43,18,19,"M", 0,1,KEY_NONE);
+      Window_set_normal_button(155,43,18,19," ", 0,1,KEY_NONE);
+  
+      for (y=0; y<5; y++)
       {
-        char label[2]=" ";
-        label[0]=keymapping[x+y*6+44];        
-        Window_set_normal_button(247+x*12, 3+y*16,11,15,label, 0,1,KEY_NONE);
+        for (x=0; x<6; x++)
+        {
+          char label[2]=" ";
+          label[0]=keymapping[x+y*6+44];        
+          Window_set_normal_button(247+x*12, 3+y*16,11,15,label, 0,1,KEY_NONE);
+        }
       }
+  
+      Update_window_area(0,0,Window_width, Window_height);
+      Display_cursor();
     }
-
-    Update_window_area(0,0,Window_width, Window_height);
-    Display_cursor();
+    else if (input_type == INPUT_TYPE_INTEGER || input_type == INPUT_TYPE_DECIMAL )
+    {
+      Init_virtual_keyboard(y_pos, 215, 47);
+      
+      use_virtual_keyboard=1;
+      
+      // The order is important, see the array
+      
+      Window_set_normal_button(  7,27,43,15,"Clr", 0,1,KEY_NONE);
+      Window_set_normal_button( 51,27,43,15,"Del", 0,1,KEY_NONE);
+      Window_set_normal_button( 95,27,43,15,"OK",  0,1,KEY_NONE);
+      Window_set_normal_button(139,27,43,15,"Esc", 0,1,KEY_NONE);
+      Window_display_frame_in(5,25,179,19);
+  
+      Window_set_normal_button(174, 3,18,19,"0", 0,1,KEY_NONE);
+      Window_set_normal_button(  3, 3,18,19,"1", 0,1,KEY_NONE);
+      Window_set_normal_button( 22, 3,18,19,"2", 0,1,KEY_NONE);
+      Window_set_normal_button( 41, 3,18,19,"3", 0,1,KEY_NONE);
+      Window_set_normal_button( 60, 3,18,19,"4", 0,1,KEY_NONE);
+      Window_set_normal_button( 79, 3,18,19,"5", 0,1,KEY_NONE);
+      Window_set_normal_button( 98, 3,18,19,"6", 0,1,KEY_NONE);
+      Window_set_normal_button(117, 3,18,19,"7", 0,1,KEY_NONE);
+      Window_set_normal_button(136, 3,18,19,"8", 0,1,KEY_NONE);
+      Window_set_normal_button(155, 3,18,19,"9", 0,1,KEY_NONE);
+      Window_set_normal_button(193, 3,18,19,".", 0,1,KEY_NONE);
+  
+      Update_window_area(0,0,Window_width, Window_height);
+      Display_cursor();
+    }
   }
-  else if (input_type == INPUT_TYPE_INTEGER || input_type == INPUT_TYPE_DECIMAL )
-  {
-    Init_virtual_keyboard(y_pos, 215, 47);
-    
-    use_virtual_keyboard=1;
-    
-    // The order is important, see the array
-    
-    Window_set_normal_button(  7,27,43,15,"Clr", 0,1,KEY_NONE);
-    Window_set_normal_button( 51,27,43,15,"Del", 0,1,KEY_NONE);
-    Window_set_normal_button( 95,27,43,15,"OK",  0,1,KEY_NONE);
-    Window_set_normal_button(139,27,43,15,"Esc", 0,1,KEY_NONE);
-    Window_display_frame_in(5,25,179,19);
-
-    Window_set_normal_button(174, 3,18,19,"0", 0,1,KEY_NONE);
-    Window_set_normal_button(  3, 3,18,19,"1", 0,1,KEY_NONE);
-    Window_set_normal_button( 22, 3,18,19,"2", 0,1,KEY_NONE);
-    Window_set_normal_button( 41, 3,18,19,"3", 0,1,KEY_NONE);
-    Window_set_normal_button( 60, 3,18,19,"4", 0,1,KEY_NONE);
-    Window_set_normal_button( 79, 3,18,19,"5", 0,1,KEY_NONE);
-    Window_set_normal_button( 98, 3,18,19,"6", 0,1,KEY_NONE);
-    Window_set_normal_button(117, 3,18,19,"7", 0,1,KEY_NONE);
-    Window_set_normal_button(136, 3,18,19,"8", 0,1,KEY_NONE);
-    Window_set_normal_button(155, 3,18,19,"9", 0,1,KEY_NONE);
-    Window_set_normal_button(193, 3,18,19,".", 0,1,KEY_NONE);
-
-    Update_window_area(0,0,Window_width, Window_height);
-    Display_cursor();
-  }
-#endif
   Keyboard_click_allowed = 0;
   Hide_cursor();
 
@@ -365,7 +545,6 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   while ((input_key!=SDLK_RETURN) && (input_key!=KEY_ESC))
   {
     Display_cursor();
-#ifdef VIRT_KEY
     if (use_virtual_keyboard)
     {
       int clicked_button;
@@ -402,7 +581,6 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
       }
     }
     else
-#endif
     {
       do
       {
@@ -410,9 +588,37 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
         input_key=Key_ANSI;
         if (Mouse_K)
           input_key=SDLK_RETURN;
+
+        // Handle paste request on CTRL+v
+        if (Key == SHORTCUT_PASTE)
+        {
+          int nb_added;
+          char* data = getClipboard();
+          if (data == NULL)
+            continue; // No clipboard data
+          Cleanup_string(data, input_type);
+          // Insert it at the cursor position
+          nb_added = Prepend_string(str + position, data, max_size - position);
+          while (nb_added)
+          {
+            size++;
+            if (size<max_size)
+            {
+              position++;
+              if (display_string[position-offset]==RIGHT_TRIANGLE_CHARACTER || position-offset>=visible_size)
+                offset++;
+            }
+            nb_added--;
+          }
+          free(data);
+          Hide_cursor();
+          goto affichage;
+        }
+        
       } while(input_key==0);
     }
     Hide_cursor();
+
     switch (input_key)
     {
       case SDLK_DELETE : // Suppr.
@@ -505,42 +711,9 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
       default :
         if (size<max_size)
         {
-          // On va regarder si l'utilisateur le droit de se servir de cette touche
-          is_authorized=0; // On commence par supposer qu'elle est interdite
-          switch(input_type)
-          {
-            case INPUT_TYPE_STRING :
-              if ((input_key>=' ' && input_key<= 255)||input_key=='\n')
-                is_authorized=1;
-              break;
-            case INPUT_TYPE_INTEGER :
-              if ( (input_key>='0') && (input_key<='9') )
-                is_authorized=1;
-              break;
-            case INPUT_TYPE_DECIMAL:
-              if ( (input_key>='0') && (input_key<='9') )
-                is_authorized=1;
-              else if (input_key=='-' && position==0 && str[0]!='-')
-                is_authorized=1;
-              else if (input_key=='.')
-                is_authorized=1;
-              break;
-            case INPUT_TYPE_FILENAME:
-              // On regarde si la touche est autorisée
-              if ( Valid_character(input_key))
-                is_authorized=1;
-            case INPUT_TYPE_HEXA:
-              if ( (input_key>='0') && (input_key<='9') )
-                is_authorized=1;
-              else if ( (input_key>='A') && (input_key<='F') )
-                is_authorized=1;
-              else if ( (input_key>='a') && (input_key<='f') )
-                is_authorized=1;
-              break;
-          } // End du "switch(input_type)"
-
           // Si la touche était autorisée...
-          if (is_authorized)
+          byte is_authorized = Valid_character(input_key, input_type);
+          if (is_authorized == 1 || (is_authorized == 2 && position == 0 && str[position] != '-'))
           {
             // ... alors on l'insère ...
             Insert_character(str,input_key,position/*,size*/);
@@ -577,7 +750,6 @@ affichage:
 
   } // End du "while"
   Keyboard_click_allowed = 1;
-  #ifdef VIRT_KEY
   if (use_virtual_keyboard)
   {
     byte old_mouse_k = Mouse_K;
@@ -585,7 +757,6 @@ affichage:
     Mouse_K=old_mouse_k;
     Input_sticky_control=0;
   }
-  #endif
   
   // Effacement de la chaîne
   Block(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),

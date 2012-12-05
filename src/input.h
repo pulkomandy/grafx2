@@ -53,6 +53,10 @@ void Set_mouse_position(void);
 /// that will record and retrieve a real control ID.
 extern int Input_sticky_control;
 
+///
+/// State of the shortcut for panning (SPECIAL_HOLD_PAN) : pressed or not.
+extern byte Pan_shortcut_pressed;
+
 /// Allows locking movement to X or Y axis: 0=normal, 1=lock on next move, 2=locked horizontally, 3=locked vertically.
 extern int Snap_axis;
 /// For the :Snap_axis mode, sets the origin's point (in image coordinates)
@@ -64,3 +68,20 @@ extern int Snap_axis_origin_Y;
 /// This malloced string is set when a drag-and-drop event
 /// brings a file to Grafx2's window.
 extern char * Drop_file_name;
+
+#if defined __HAIKU__
+	#define SHORTCUT_COPY (SDLK_c|MOD_ALT)
+#elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+	#define SHORTCUT_COPY (SDLK_c|MOD_META)
+#else
+	#define SHORTCUT_COPY (SDLK_c|MOD_CTRL)
+#endif
+
+#if defined __HAIKU__
+	#define SHORTCUT_PASTE (SDLK_v|MOD_ALT)
+#elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+	#define SHORTCUT_PASTE (SDLK_v|MOD_META)
+#else
+	#define SHORTCUT_PASTE (SDLK_v|MOD_CTRL)
+#endif
+

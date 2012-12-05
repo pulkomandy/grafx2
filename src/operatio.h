@@ -230,3 +230,10 @@ void Centered_lines_0_7(void);
 byte Rightclick_colorpick(byte cursor_visible);
 void Rightclick_colorpick_2_1(void);
 void Rightclick_colorpick_0_1(void);
+
+/////////////////////////////////////////////////// OPERATION_PAN_VIEW
+
+void Pan_view_0_0(void);
+void Pan_view_12_0(void);
+void Pan_view_12_2(void);
+void Pan_view_0_2(void);

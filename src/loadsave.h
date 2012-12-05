@@ -62,7 +62,7 @@ typedef struct
   T_Palette Palette;
   short Width;
   short Height;
-  byte Nb_layers;
+  int  Nb_layers;
   char Comment[COMMENT_SIZE+1];
   byte Background_transparent;
   byte Transparent_color;
@@ -83,7 +83,7 @@ typedef struct
   T_Color_cycle Cycle_range[16];
 
   /// Internal: during load, marks which layer is being loaded.
-  short Current_layer;
+  int Current_layer;
 
   /// Internal: Used to mark truecolor images on loading. Only used by preview.
   //byte Is_truecolor;
@@ -207,6 +207,8 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
 void Palette_loaded(T_IO_Context *context);
 /// Generic cleanup done on end of loading (ex: color-conversion from the temporary 24b buffer)
 //void Post_load(T_IO_Context *context);
+/// Fill the entire current layer/frame of an image being loaded with a color.
+void Fill_canvas(T_IO_Context *context, byte color);
 
 /// Query the color of a pixel (to save)
 byte Get_pixel(T_IO_Context *context, short x, short y);
@@ -215,8 +217,13 @@ void Set_pixel(T_IO_Context *context, short x, short y, byte c);
 /// Set the color of a 24bit pixel (on load)
 void Set_pixel_24b(T_IO_Context *context, short x, short y, byte r, byte g, byte b);
 /// Function to call when need to switch layers.
-void Set_layer(T_IO_Context *context, byte layer);
-
+void Set_loading_layer(T_IO_Context *context, int layer);
+/// Function to call when need to switch layers.
+void Set_saving_layer(T_IO_Context *context, int layer);
+/// Function to call when loading an image's duration
+void Set_frame_duration(T_IO_Context *context, int duration);
+/// Function to call to get an image's duration for saving
+int Get_frame_duration(T_IO_Context *context);
 
 // =================================================================
 // What follows here are the definitions of functions and data
@@ -252,8 +259,6 @@ void Set_file_error(int value);
 /*
 void Init_preview(short width,short height,long size,int format,enum PIXEL_RATIO ratio);
 */
-void Init_write_buffer(void);
 void Write_one_byte(FILE *file, byte b);
-void End_write(FILE *file);
 
 #endif

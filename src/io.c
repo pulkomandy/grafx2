@@ -165,13 +165,15 @@ int Write_dword_be(FILE *file, dword dw)
 // Attention, sous Windows, il faut s'attendre aux deux car 
 // par exemple un programme lancé sous GDB aura comme argv[0]:
 // d:\Data\C\GFX2\grafx2/grafx2.exe
-char * Find_last_slash(const char * str)
+char * Find_last_separator(const char * str)
 {
   const char * position = NULL;
   for (; *str != '\0'; str++)
     if (*str == PATH_SEPARATOR[0]
 #ifdef __WIN32__    
      || *str == '/'
+#elif __AROS__
+     || *str == ':'
 #endif
      )
       position = str;
@@ -180,7 +182,7 @@ char * Find_last_slash(const char * str)
 // Récupère la partie "nom de file seul" d'un chemin
 void Extract_filename(char *dest, const char *source)
 {
-  const char * position = Find_last_slash(source);
+  const char * position = Find_last_separator(source);
 
   if (position)
     strcpy(dest,position+1);
@@ -193,7 +195,7 @@ void Extract_path(char *dest, const char *source)
   char * position=NULL;
 
   Realpath(source,dest);
-  position = Find_last_slash(dest);
+  position = Find_last_separator(dest);
   if (position)
     *(position+1) = '\0';
   else
@@ -215,7 +217,7 @@ void Append_path(char *path, const char *filename, char *reverse_path)
   {
     // Going up one directory
     long len;
-    char * slash_pos;
+    char * separator_pos;
 
     // Remove trailing slash      
     len=strlen(path);
@@ -226,12 +228,18 @@ void Append_path(char *path, const char *filename, char *reverse_path)
       ))
       path[len-1]='\0';
     
-    slash_pos=Find_last_slash(path);
-    if (slash_pos)
+    separator_pos=Find_last_separator(path);
+    if (separator_pos)
     {
       if (reverse_path)
-        strcpy(reverse_path, slash_pos+1);
-      *slash_pos='\0';
+        strcpy(reverse_path, separator_pos+1);
+      #if defined(__AROS__)
+      // Don't strip away the colon
+      if (*separator_pos == ':') *(separator_pos+1)='\0';
+      else *separator_pos='\0';
+      #else
+      *separator_pos='\0';
+      #endif
     }
     else
     {
@@ -256,6 +264,8 @@ void Append_path(char *path, const char *filename, char *reverse_path)
     if (len && (strcmp(path+len-1,PATH_SEPARATOR) 
     #ifdef __WIN32__
       && path[len-1]!='/'
+    #elif __AROS__
+      && path[len-1]!=':' // To avoid paths like volume:/dir
     #endif
       ))
     {
@@ -307,16 +317,13 @@ int Directory_exists(char * directory)
   }
 }
 
-#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__) || defined(__MINT__)
-  #define FILE_IS_HIDDEN_ATTRIBUTE __attribute__((unused)) 
-#else
-  #define FILE_IS_HIDDEN_ATTRIBUTE
-#endif
 /// Check if a file or directory is hidden.
-int File_is_hidden(FILE_IS_HIDDEN_ATTRIBUTE const char *fname, const char *full_name)
+int File_is_hidden(const char *fname, const char *full_name)
 {
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__) || defined(__MINT__)
-  // False (unable to determine, or irrrelevent for platform)
+  // False (unable to determine, or irrelevent for platform)
+  (void)fname;//unused
+  (void)full_name;//unused
   return 0;
 #elif defined(__WIN32__)
   unsigned long att;
@@ -328,10 +335,12 @@ int File_is_hidden(FILE_IS_HIDDEN_ATTRIBUTE const char *fname, const char *full_
     return 0;
   return (att&FILE_ATTRIBUTE_HIDDEN)?1:0;
 #else
-  return fname[0]=='.';
+  (void)full_name;//unused
+   // On linux/unix (default), files are considered hidden if their name
+   // begins with a .
+   // As a special case, we'll consider 'parent directory' (..) never hidden.
+  return fname[0]=='.' && strcmp(fname, PARENT_DIR);
 #endif
-
-
 }
 // Taille de fichier, en octets
 int File_length(const char * fname)
@@ -360,7 +369,11 @@ void For_each_file(const char * directory_name, void Callback(const char *))
   current_directory=opendir(directory_name);
   if(current_directory == NULL) return;        // Répertoire invalide ...
   filename_position = strlen(full_filename);
+#if defined(__AROS__)
+  if (filename_position==0 || (strcmp(full_filename+filename_position-1,PATH_SEPARATOR) && strcmp(full_filename+filename_position-1,":")))
+#else
   if (filename_position==0 || strcmp(full_filename+filename_position-1,PATH_SEPARATOR))
+#endif
   {
     strcat(full_filename, PATH_SEPARATOR);
     filename_position = strlen(full_filename);
@@ -390,7 +403,11 @@ void For_each_directory_entry(const char * directory_name, void Callback(const c
   current_directory=opendir(full_filename);
   if(current_directory == NULL) return;        // Répertoire invalide ...
   filename_position = strlen(full_filename);
+#if defined(__AROS__)
+  if (filename_position==0 || (strcmp(full_filename+filename_position-1,PATH_SEPARATOR) && strcmp(full_filename+filename_position-1,":")))
+#else
   if (filename_position==0 || strcmp(full_filename+filename_position-1,PATH_SEPARATOR))
+#endif
   {
     strcat(full_filename, PATH_SEPARATOR);
     filename_position = strlen(full_filename);
@@ -418,7 +435,12 @@ void Get_full_filename(char * output_name, char * file_name, char * directory_na
     // Append a separator at the end of path, if there isn't one already.
     // This handles the case of directory variables which contain one,
     // as well as directories like "/" on Unix.
+#if defined(__AROS__)
+    // additional check for ':' to avoid paths like PROGDIR:/unnamed.gif
+    if ((output_name[strlen(output_name)-1]!=PATH_SEPARATOR[0]) && (output_name[strlen(output_name)-1]!=':'))
+#else
     if (output_name[strlen(output_name)-1]!=PATH_SEPARATOR[0])
+#endif
         strcat(output_name,PATH_SEPARATOR);
   }
   strcat(output_name,file_name);

@@ -20,10 +20,14 @@
 #include "struct.h"
 
 #ifdef __HAIKU__
+#include <Clipboard.h>
 #include <Entry.h>
 #include <Volume.h>
 
+#include <string.h>
+
 extern "C" qword haiku_get_free_space(char* path);
+extern "C" char* haiku_get_clipboard();
 
 qword haiku_get_free_space(char* path)
 {
@@ -32,5 +36,19 @@ qword haiku_get_free_space(char* path)
 	bpath.GetRef(&ref);
 	BVolume disk(ref.device);
 	return (qword) disk.Capacity();	
+}
+
+char* haiku_get_clipboard()
+{
+	if (be_clipboard->Lock())
+	{
+		const char* value;
+		ssize_t len;
+		be_clipboard->Data()->FindData("text/plain", B_MIME_TYPE, (const void **)&value, &len);
+
+		be_clipboard->Unlock();
+		return strdup(value);
+	}
+	return NULL;
 }
 #endif

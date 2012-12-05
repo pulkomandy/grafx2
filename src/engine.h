@@ -120,4 +120,22 @@ void Status_print_palette_color(byte color);
 /// though the mouse still works.
 void Delay_with_active_mouse(int delay);
 
+///
+/// Based on which toolbars are visible, updates their offsets and
+/// computes ::Menu_height and ::Menu_Y
+void Compute_menu_offsets(void);
+
+///
+/// Shows or hides a tolbar from the menu.
+/// If with_redraw is set to zero, the caller should
+/// redraw itself using Display_menu() and Display_all_screen().
+void Set_bar_visibility(word bar, int visible, int with_redraw);
+
+///
+/// Checks if the current menu toolbars suit the current image type :
+/// layered vs anim. If they don't fit, swap the toolbars and return 1:
+/// The caller is then responsible for refreshing the screen by calling
+/// Display_menu() and Display_all_screen()
+int Check_menu_mode(void);
+
 #endif

@@ -40,10 +40,9 @@
 #define NB_ZOOM_FACTORS           15    ///< Number of zoom levels available in the magnifier.
 #define MENU_WIDTH                254   ///< Width of the menu (not counting the palette)
 #define MENU_HEIGHT               44    ///< Height of the menu.
-#define NB_CURSOR_SPRITES         8     ///< Number of available mouse cursor sprites.
-#define CURSOR_SPRITE_WIDTH       15    ///< Width of a mouse cursor sprite.
-#define CURSOR_SPRITE_HEIGHT      15    ///< Height of a mouse cursor sprite.
-#define NB_EFFECTS_SPRITES        9     ///< Number of effect sprites.
+#define NB_CURSOR_SPRITES         9     ///< Number of available mouse cursor sprites.
+#define CURSOR_SPRITE_WIDTH       16    ///< Width of a mouse cursor sprite.
+#define CURSOR_SPRITE_HEIGHT      16    ///< Height of a mouse cursor sprite.
 #define MENU_SPRITE_WIDTH         16    ///< Width of a menu sprite in pixels
 #define MENU_SPRITE_HEIGHT        16    ///< Height of a menu sprite in pixels
 #define EFFECT_SPRITE_WIDTH       14    ///< Width of an effect sprite in pixels
@@ -71,6 +70,7 @@
 /// Character to display in menus for an ellipsis.
 #define ELLIPSIS_CHARACTER       '…'
 #define NB_LAYERS                  1    ///< Initial number of layers for a new image
+#define MAX_NB_FRAMES            999    ///< Maximum number of frames that can be used in a grafx2 animation.
 #define MAX_NB_LAYERS             16    ///< Maximum number of layers that can be used in grafx2. Note that 32 is upper limit because of a few bit fields.
 #define BRUSH_CONTAINER_PREVIEW_WIDTH    16  ///< Size for preview of a brush in Brush container
 #define BRUSH_CONTAINER_PREVIEW_HEIGHT   16  ///< Size for preview of a brush in Brush container
@@ -92,7 +92,7 @@
 #define INITIAL_SEPARATOR_PROPORTION 0.3   ///< Proportion of the normal view width, relative to the whole screen width.
 #define NB_ZOOMED_PIXELS_MIN         4     ///< Minimal number of pixel shown (in width) by the zoomed view. (Note: below 4, you can't scroll!)
 
-#if defined(__MORPHOS__) || defined(__amigaos4__) || defined(__amigaos__)
+#if defined(__MORPHOS__) || defined(__amigaos4__) || defined(__amigaos__) || defined(__AROS__)
    #define PARENT_DIR "/"
 #else
    /// Filename that means "parent directory" for your operating system.
@@ -110,6 +110,7 @@ enum FILE_FORMATS
   FORMAT_PCX,
   FORMAT_PKM,
   FORMAT_LBM,
+  FORMAT_PBM,
   FORMAT_IMG,
   FORMAT_SCx,
   FORMAT_PI1,
@@ -120,6 +121,7 @@ enum FILE_FORMATS
   FORMAT_KCF,
   FORMAT_PAL,
   FORMAT_SCR,
+  FORMAT_CM5,
   FORMAT_XPM,
   FORMAT_MISC, ///< Must be last of enum: others formats recognized by SDL_image
 };
@@ -183,17 +185,21 @@ enum BUTTON_SHAPES
 /// The different "mouse cursor" shapes
 enum CURSOR_SHAPES
 {
+  // Sprite based cursors first (also used as index in cursor sprite array)
   CURSOR_SHAPE_ARROW,
   CURSOR_SHAPE_TARGET,           ///< This one uses the paintbrush
-  CURSOR_SHAPE_COLORPICKER,      ///< This one uses the paintbrush
+  CURSOR_SHAPE_COLORPICKER,
   CURSOR_SHAPE_HOURGLASS,
   CURSOR_SHAPE_MULTIDIRECTIONAL,
   CURSOR_SHAPE_HORIZONTAL,
   CURSOR_SHAPE_THIN_TARGET,      ///< This one uses the paintbrush
   CURSOR_SHAPE_THIN_COLORPICKER, ///< This one uses the paintbrush
+  CURSOR_SHAPE_BUCKET,
+
+  // XOR/runtime-generated cursors last
   CURSOR_SHAPE_XOR_TARGET,
   CURSOR_SHAPE_XOR_RECTANGLE,
-  CURSOR_SHAPE_XOR_ROTATION
+  CURSOR_SHAPE_XOR_ROTATION,
 };
 
 /// The different shapes that can be used as a paintbrush (paintbrush types go in the beginning)
@@ -274,11 +280,40 @@ enum ICON_TYPES
   ICON_NONE          ///< None of the above
 };
 
+enum EFFECT_SPRITES
+{
+  EFFECTS_SPRITE_SHADE,
+  EFFECTS_SPRITE_TRANSP,
+  EFFECTS_SPRITE_SMOOTH,
+  EFFECTS_SPRITE_TILING,
+  EFFECTS_SPRITE_STENCIL,
+  EFFECTS_SPRITE_SIEVE,
+  EFFECTS_SPRITE_GRID,
+  EFFECTS_SPRITE_MASK,
+  EFFECTS_SPRITE_SMEAR,
+  EFFECTS_SPRITE_8BIT,
+  NB_EFFECTS_SPRITES ///< Number of effect sprites.
+};
+
 /// Identifiers for the buttons in the menu.
 enum BUTTON_NUMBERS
 {
   // Status bar
   BUTTON_HIDE = 0,
+
+  // Anim bar
+  BUTTON_LAYER_MENU2,
+  BUTTON_ANIM_TIME,
+  BUTTON_ANIM_FIRST_FRAME,
+  BUTTON_ANIM_PREV_FRAME,
+  BUTTON_ANIM_NEXT_FRAME,
+  BUTTON_ANIM_LAST_FRAME,
+  BUTTON_ANIM_ADD_FRAME,
+  BUTTON_ANIM_REMOVE_FRAME,
+  BUTTON_ANIM_UP_FRAME,
+  BUTTON_ANIM_DOWN_FRAME,
+  
+  BUTTON_ANIM_PLAY, // unused at this time
 
   // Layer bar
   BUTTON_LAYER_MENU,
@@ -440,6 +475,8 @@ enum SPECIAL_ACTIONS
   SPECIAL_TRANSPARENCY_8,
   SPECIAL_TRANSPARENCY_9,
   SPECIAL_TRANSPARENCY_0,
+  SPECIAL_TILEMAP_MODE,
+  SPECIAL_TILEMAP_MENU,
   SPECIAL_TILING_MENU,            ///< This must be the last of the "effects" family
   SPECIAL_ZOOM_1,
   SPECIAL_ZOOM_2,
@@ -483,6 +520,12 @@ enum SPECIAL_ACTIONS
   SPECIAL_RUN_SCRIPT_9,
   SPECIAL_RUN_SCRIPT_10,
   SPECIAL_CYCLE_MODE,
+
+  SPECIAL_FORMAT_CHECKER,
+  SPECIAL_FORMAT_CHECKER_MENU,
+
+  SPECIAL_HOLD_PAN,
+  
   NB_SPECIAL_SHORTCUTS            ///< Number of special shortcuts
 };
 
@@ -523,7 +566,15 @@ enum OPERATIONS
   OPERATION_DISTORT_BRUSH,     ///< Distort brush
   OPERATION_GRAD_RECTANGLE,    ///< Gradient-filled rectangle
   OPERATION_RMB_COLORPICK,     ///< Colorpick on right mouse button
+  OPERATION_PAN_VIEW,          ///< Pan view
   NB_OPERATIONS                ///< Number of operations handled by the engine
+};
+
+enum IMAGE_MODES
+{
+  IMAGE_MODE_LAYERED=0, ///< Layered image
+  IMAGE_MODE_ANIMATION, ///< Animation
+  IMAGE_MODE_MODE5,     ///< CPC mode 5
 };
 
 #endif

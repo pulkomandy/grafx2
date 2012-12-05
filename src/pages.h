@@ -40,14 +40,12 @@ extern byte * FX_feedback_screen;
 /////////////////////////// BACKUP ///////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef NOLAYERS
 /// The pixels of visible layers, flattened copy.
 extern T_Bitmap Main_visible_image;
 /// The pixels of visible layers, flattened copy, used for no-feedback effects.
 extern T_Bitmap Main_visible_image_backup;
 /// The index of visible pixels from ::Visible image. Points to the right layer.
 extern T_Bitmap Main_visible_image_depth_buffer;
-#endif
 /// The pixels of visible layers for the spare page, flattened copy.
 extern T_Bitmap Spare_visible_image;
 
@@ -58,14 +56,14 @@ extern T_Bitmap Spare_visible_image;
 void Download_infos_page_main(T_Page * page);
 void Upload_infos_page_main(T_Page * page);
 /// Add a new layer to latest page of a list. Returns 0 on success.
-byte Add_layer(T_List_of_pages *list, byte layer);
+byte Add_layer(T_List_of_pages *list, int layer);
 /// Delete a layer from the latest page of a list. Returns 0 on success.
-byte Delete_layer(T_List_of_pages *list, byte layer);
+byte Delete_layer(T_List_of_pages *list, int layer);
 /// Merges the current layer onto the one below it.
 byte Merge_layer();
 
 // private
-T_Page * New_page(byte nb_layers);
+T_Page * New_page(int nb_layers);
 void Download_infos_page_spare(T_Page * page);
 void Upload_infos_page_spare(T_Page * page);
 void Clear_page(T_Page * page);
@@ -83,7 +81,7 @@ int Allocate_list_of_pages(T_List_of_pages * list);
 void Backward_in_list_of_pages(T_List_of_pages * list);
 void Advance_in_list_of_pages(T_List_of_pages * list);
 void Free_last_page_of_list(T_List_of_pages * list);
-int Create_new_page(T_Page * new_page,T_List_of_pages * current_list, dword layer_mask);
+int Create_new_page(T_Page * new_page,T_List_of_pages * current_list, int layer);
 void Change_page_number_of_list(T_List_of_pages * list,int number);
 void Free_page_of_a_list(T_List_of_pages * list);
 
@@ -93,9 +91,12 @@ void Free_page_of_a_list(T_List_of_pages * list);
 /// BACKUP HIGH-LEVEL FUNCTIONS
 ///
 
-int Init_all_backup_lists(int width,int height);
+static const int LAYER_NONE = -1;
+static const int LAYER_ALL = -2;
+
+int Init_all_backup_lists(enum IMAGE_MODES image_mode,int width,int height);
 void Set_number_of_backups(int nb_backups);
-int Backup_new_image(byte layers,int width,int height);
+int Backup_new_image(int layers,int width,int height);
 int Backup_with_new_dimensions(int width,int height);
 ///
 /// Resizes a backup step in-place (doesn't add a Undo/Redo step).
@@ -103,12 +104,12 @@ int Backup_with_new_dimensions(int width,int height);
 /// pixels. This function is meant to be used from within Lua scripts.
 int Backup_in_place(int width,int height);
 /// Backup the spare image, the one you don't see.
-void Backup_the_spare(dword layer_mask);
+void Backup_the_spare(int layer);
 int Backup_and_resize_the_spare(int width,int height);
 /// Backup with a new copy for the working layer, and references for all others.
 void Backup(void);
 /// Backup with a new copy of some layers (the others are references).
-void Backup_layers(dword layer_mask);
+void Backup_layers(int layer);
 void Undo(void);
 void Redo(void);
 void Free_current_page(void); // 'Kill' button
@@ -128,6 +129,8 @@ void Redraw_spare_image(void);
 /// Must be called after changing the head of Main_backups list, or
 /// Main_current_layer
 void Update_FX_feedback(byte with_feedback);
+
+void Switch_layer_mode(enum IMAGE_MODES new_mode);
 
 ///
 /// STATISTICS

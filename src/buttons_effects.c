@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "brush.h"
 #include "buttons.h"
 #include "engine.h"
 #include "global.h"
@@ -36,11 +37,12 @@
 #include "help.h"
 #include "input.h"
 #include "misc.h"
+#include "pages.h"
 #include "readline.h"
 #include "sdlscreen.h"
 #include "struct.h"
 #include "windows.h"
-#include "brush.h"
+#include "tiles.h"
 
 //---------- Menu dans lequel on tagge des couleurs (genre Stencil) ----------
 void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_cancel, const char *help_section, word close_shortcut)
@@ -162,6 +164,129 @@ void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_ca
 }
 
 
+// Constaint enforcer/checker ------------------------------------------------
+void Button_Constraint_mode(void)
+{
+  int pixel;
+  
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_MODE5)
+  {
+    // Disable
+    Switch_layer_mode(IMAGE_MODE_LAYERED);
+    return;
+  }
+  if (Main_backups->Pages->Image_mode != IMAGE_MODE_LAYERED ||
+    Main_backups->Pages->Nb_layers!=5 || (Main_image_width%48))
+  {
+    Verbose_message("Error!", "This emulation of Amstrad CPC's Mode5 can only be used on a 5-layer image whose width is a multiple of 48.");
+    return;
+  }
+  for (pixel=0; pixel < Main_image_width*Main_image_height; pixel++)
+  {
+    if (Main_backups->Pages->Image[4].Pixels[pixel]>3)
+    {
+      Verbose_message("Error!", "This emulation of Amstrad CPC's Mode5 needs all pixels of layer 5 to use colors 0-3.");
+      return;
+    }
+  }
+	// TODO backup
+	Switch_layer_mode(IMAGE_MODE_MODE5);
+	// TODO set the palette to a CPC one ?
+}
+
+
+void Button_Constraint_menu(void)
+{
+
+}
+
+// Tilemap mode
+void Button_Tilemap_mode(void)
+{
+  Main_tilemap_mode=!Main_tilemap_mode;
+  Tilemap_update();
+}
+
+void Button_Tilemap_menu(void)
+{
+  short clicked_button;
+
+  byte flip_x=Config.Tilemap_allow_flipped_x;
+  byte flip_y=Config.Tilemap_allow_flipped_y;
+  byte count=Config.Tilemap_show_count;
+
+  Open_window(166,120,"Tilemap options");
+
+  Window_set_normal_button(6,102,51,14,"Cancel",0,1,KEY_ESC);  // 1
+  Window_set_normal_button(110,102,51,14,"OK"    ,0,1,SDLK_RETURN); // 2
+
+  Print_in_window(24,21, "Detect mirrored",MC_Dark,MC_Light);
+  Window_display_frame(5,17,155,56);
+  
+  Print_in_window(37,37, "Horizontally",MC_Black,MC_Light);
+  Window_set_normal_button(18,34,13,13,flip_x?"X":"",0,1,0);  // 3
+
+  Print_in_window(37,55, "Vertically",MC_Black,MC_Light);
+  Window_set_normal_button(18,52,13,13,flip_y?"X":"",0,1,0);  // 4
+
+  Print_in_window(27,81, "Show count",MC_Black,MC_Light);
+  Window_set_normal_button(7,78,13,13,count?"X":"",0,1,0);  // 5
+
+  Update_window_area(0,0,Window_width, Window_height);
+
+  Display_cursor();
+
+  do
+  {
+    clicked_button=Window_clicked_button();
+
+    switch (clicked_button)
+    {
+      case 3 : // Horizontal flip
+        flip_x=!flip_x;
+        Hide_cursor();
+        Print_in_window(21,37,flip_x?"X":" ", MC_Black, MC_Light);
+        Display_cursor();
+        break;
+      case 4 : // Vertical flip
+        flip_y=!flip_y;
+        Hide_cursor();
+        Print_in_window(21,55,flip_y?"X":" ", MC_Black, MC_Light);
+        Display_cursor();
+        break;
+      case 5 : // Count
+        count=!count;
+        Hide_cursor();
+        Print_in_window(10,81,count?"X":" ", MC_Black, MC_Light);
+        Display_cursor();
+        break;      
+    }
+    if (Is_shortcut(Key,0x100+BUTTON_HELP))
+      Window_help(BUTTON_EFFECTS, "TILEMAP");
+  }
+  while ( (clicked_button!=1) && (clicked_button!=2) );
+
+  if (clicked_button==2) // OK
+  {
+    byte changed =
+      Config.Tilemap_allow_flipped_x!=flip_x ||
+      Config.Tilemap_allow_flipped_y!=flip_y ||
+      !Main_tilemap_mode;
+    
+    Config.Tilemap_allow_flipped_x=flip_x;
+    Config.Tilemap_allow_flipped_y=flip_y;
+    Config.Tilemap_show_count=count;
+    
+    if (changed)
+    {
+      Main_tilemap_mode=1;
+      Tilemap_update();
+    }
+  }
+  Close_window();
+  Display_cursor();
+}
+
 //--------------------------------- Stencil ----------------------------------
 void Button_Stencil_mode(void)
 {
@@ -231,41 +356,41 @@ void Button_Grid_menu(void)
   T_Special_button * input_dx_button;
   T_Special_button * input_dy_button;
 
-  char str[3];
+  char str[4];
 
 
-  Open_window(133,118,"Grid");
+  Open_window(149,118,"Grid");
 
   Window_set_normal_button(12,92,51,14,"Cancel",0,1,KEY_ESC);  // 1
-  Window_set_normal_button(70,92,51,14,"OK"    ,0,1,SDLK_RETURN); // 2
+  Window_set_normal_button(86,92,51,14,"OK"    ,0,1,SDLK_RETURN); // 2
 
-  Print_in_window(19,26, "X:",MC_Dark,MC_Light);
-  input_x_button = Window_set_input_button(37,24,2); // 3
-  Num2str(chosen_X,str,2);
+  Print_in_window(11,26, "X:",MC_Dark,MC_Light);
+  input_x_button = Window_set_input_button(29,24,3); // 3
+  Num2str(chosen_X,str,3);
   Window_input_content(input_x_button,str);
 
-  Print_in_window(19,47, "Y:",MC_Dark,MC_Light);
-  input_y_button = Window_set_input_button(37,45,2); // 4
-  Num2str(chosen_Y,str,2);
+  Print_in_window(11,47, "Y:",MC_Dark,MC_Light);
+  input_y_button = Window_set_input_button(29,45,3); // 4
+  Num2str(chosen_Y,str,3);
   Window_input_content(input_y_button,str);
 
-  Print_in_window(69,26,"dX:",MC_Dark,MC_Light);
-  input_dx_button = Window_set_input_button(95,24,2); // 5
-  Num2str(dx_selected,str,2);
+  Print_in_window(77,26,"dX:",MC_Dark,MC_Light);
+  input_dx_button = Window_set_input_button(103,24,3); // 5
+  Num2str(dx_selected,str,3);
   Window_input_content(input_dx_button,str);
 
-  Print_in_window(69,47,"dY:",MC_Dark,MC_Light);
-  input_dy_button = Window_set_input_button(95,45,2); // 6
-  Num2str(dy_selected,str,2);
+  Print_in_window(77,47,"dY:",MC_Dark,MC_Light);
+  input_dy_button = Window_set_input_button(103,45,3); // 6
+  Num2str(dy_selected,str,3);
 
   Window_set_normal_button(12, 62, 14, 14, " ", 0, 1, 0);  // 7
-  Window_set_normal_button(70, 62, 14, 14, " ", 0, 1, 0); // 8
+  Window_set_normal_button(78, 62, 14, 14, " ", 0, 1, 0); // 8
   if (snapgrid)
     Print_in_window(16, 65, "X", MC_Black, MC_Light);
   if (Show_grid)
-    Print_in_window(74, 65, "X", MC_Black, MC_Light);
+    Print_in_window(82, 65, "X", MC_Black, MC_Light);
   Print_in_window(32, 65,"Snap",MC_Dark,MC_Light);
-  Print_in_window(90, 65,"Show",MC_Dark,MC_Light);
+  Print_in_window(98, 65,"Show",MC_Dark,MC_Light);
 
   Window_input_content(input_dy_button,str);
   Update_window_area(0,0,Window_width, Window_height);
@@ -279,75 +404,71 @@ void Button_Grid_menu(void)
     switch (clicked_button)
     {
       case 3 :
-        Num2str(chosen_X,str,2);
-        Readline(39,26,str,2,INPUT_TYPE_INTEGER);
+        Num2str(chosen_X,str,3);
+        Readline(31,26,str,3,INPUT_TYPE_INTEGER);
         chosen_X=atoi(str);
         // On corrige les dimensions
-        if ((!chosen_X) || (chosen_X>80))
+        if ((!chosen_X) || (chosen_X>999))
         {
           if (!chosen_X)
             chosen_X=1;
           else
-            chosen_X=80;
-          Num2str(chosen_X,str,2);
+            chosen_X=999;
+          Num2str(chosen_X,str,3);
           Window_input_content(input_x_button,str);
         }
         if (dx_selected>=chosen_X)
         {
           dx_selected=chosen_X-1;
-          Num2str(dx_selected,str,2);
+          Num2str(dx_selected,str,3);
           Window_input_content(input_dx_button,str);
         }
         Display_cursor();
         break;
       case 4 :
-        Num2str(chosen_Y,str,2);
-        Readline(39,47,str,2,INPUT_TYPE_INTEGER);
+        Num2str(chosen_Y,str,3);
+        Readline(31,47,str,3,INPUT_TYPE_INTEGER);
         chosen_Y=atoi(str);
         // On corrige les dimensions
-        if ((!chosen_Y) || (chosen_Y>80))
+        if ((!chosen_Y) || (chosen_Y>999))
         {
           if (!chosen_Y)
             chosen_Y=1;
           else
-            chosen_Y=80;
-          Num2str(chosen_Y,str,2);
+            chosen_Y=999;
+          Num2str(chosen_Y,str,3);
           Window_input_content(input_y_button,str);
         }
         if (dy_selected>=chosen_Y)
         {
           dy_selected=chosen_Y-1;
-          Num2str(dy_selected,str,2);
+          Num2str(dy_selected,str,3);
           Window_input_content(input_dy_button,str);
         }
         Display_cursor();
         break;
       case 5 :
-        Num2str(dx_selected,str,2);
-        Readline(97,26,str,2,INPUT_TYPE_INTEGER);
+        Num2str(dx_selected,str,3);
+        Readline(105,26,str,3,INPUT_TYPE_INTEGER);
         dx_selected=atoi(str);
         // On corrige les dimensions
-        if (dx_selected>79)
-          dx_selected=79;
         if (dx_selected>=chosen_X)
           dx_selected=chosen_X-1;
 
-        Num2str(dx_selected,str,2);
+        Num2str(dx_selected,str,3);
         Window_input_content(input_dx_button,str);
 
         Display_cursor();
         break;
       case 6 :
-        Num2str(dy_selected,str,2);
-        Readline(97,47,str,2,INPUT_TYPE_INTEGER);
+        Num2str(dy_selected,str,3);
+        Readline(105,47,str,3,INPUT_TYPE_INTEGER);
         dy_selected=atoi(str);
         // On corrige les dimensions
-        if (dy_selected>79)
-          dy_selected=79;
         if (dy_selected>=chosen_Y)
           dy_selected=chosen_Y-1;
 
-        Num2str(dy_selected,str,2);
+        Num2str(dy_selected,str,3);
         Window_input_content(input_dy_button,str);
 
         Display_cursor();
@@ -361,7 +482,7 @@ void Button_Grid_menu(void)
       case 8:
         showgrid = !showgrid;
         Hide_cursor();
-        Print_in_window(74, 65, showgrid?"X":" ", MC_Black, MC_Light);
+        Print_in_window(82, 65, showgrid?"X":" ", MC_Black, MC_Light);
         Display_cursor();
         break;
 
@@ -373,12 +494,25 @@ void Button_Grid_menu(void)
 
   if (clicked_button==2) // OK
   {
+    byte modified;
+    
+    modified = Snap_width!=chosen_X
+    || Snap_height!=chosen_Y
+    || Snap_offset_X!=dx_selected
+    || Snap_offset_Y!=dy_selected;
+    
     Snap_width=chosen_X;
     Snap_height=chosen_Y;
     Snap_offset_X=dx_selected;
     Snap_offset_Y=dy_selected;
     Snap_mode=snapgrid;
     Show_grid=showgrid;
+    
+    if (modified)
+    {
+      Tilemap_update();
+      Disable_spare_tilemap();
+    }
   }
 
   Close_window();
@@ -792,7 +926,8 @@ void Effects_off(void)
   Stencil_mode=0;
   Mask_mode=0;
   Sieve_mode=0;
-  Snap_mode=0;  
+  Snap_mode=0;
+  Main_tilemap_mode=0;
 }
 
 

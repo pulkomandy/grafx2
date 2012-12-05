@@ -438,6 +438,12 @@ void Button_Tiling_mode(void);
 */
 void Button_Tiling_menu(void);
 
+void Button_Constraint_mode(void);
+void Button_Constraint_menu(void);
+
+void Button_Tilemap_mode(void);
+void Button_Tilemap_menu(void);
+
 /*!
     Callback for the command that turns off all drawaing effects.
 */
@@ -673,6 +679,8 @@ void Button_Brush_container(void);
 byte Store_paintbrush(int index);
 
 void Select_paintbrush(int index);
+
+byte Any_effect_active(void);
 
 #endif
 

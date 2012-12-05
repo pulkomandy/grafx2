@@ -51,16 +51,18 @@
 #include "engine.h"
 #include "brush.h"
 #include "setup.h"
+#include "filesel.h"
 
 // -- PKM -------------------------------------------------------------------
 void Test_PKM(T_IO_Context *);
 void Load_PKM(T_IO_Context *);
 void Save_PKM(T_IO_Context *);
 
-// -- LBM -------------------------------------------------------------------
+// -- IFF -------------------------------------------------------------------
 void Test_LBM(T_IO_Context *);
-void Load_LBM(T_IO_Context *);
-void Save_LBM(T_IO_Context *);
+void Test_PBM(T_IO_Context *);
+void Load_IFF(T_IO_Context *);
+void Save_IFF(T_IO_Context *);
 
 // -- GIF -------------------------------------------------------------------
 void Test_GIF(T_IO_Context *);
@@ -125,6 +127,11 @@ void Save_C64(T_IO_Context *);
 // -- SCR (Amstrad CPC)
 void Save_SCR(T_IO_Context *);
 
+// -- CM5 (Amstrad CPC)
+void Test_CM5(T_IO_Context *);
+void Load_CM5(T_IO_Context *);
+void Save_CM5(T_IO_Context *);
+
 // -- XPM (X PixMap)
 // Loading is done through SDL_Image 
 void Save_XPM(T_IO_Context*);
@@ -137,12 +144,12 @@ void Save_PNG(T_IO_Context *);
 #endif
 
 // -- SDL_Image -------------------------------------------------------------
-// (TGA, BMP, PNM, XPM, XCF, PCX, GIF, JPG, TIF, LBM, PNG, ICO)
+// (TGA, BMP, PNM, XPM, XCF, PCX, GIF, JPG, TIF, IFF, PNG, ICO)
 void Load_SDL_Image(T_IO_Context *);
 
 // ENUM     Name  TestFunc LoadFunc SaveFunc PalOnly Comment Layers Ext Exts  
 T_Format File_formats[] = {
-  {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, 0, "", "gif;png;bmp;pcx;pkm;lbm;ilbm;iff;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;kcf;pal;c64;koa;tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico"},
+  {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, 0, "", "gif;png;bmp;pcx;pkm;iff;lbm;ilbm;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;kcf;pal;c64;koa;koala;fli;bml;cdu;prg;tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico;cm5"},
   {FORMAT_ALL_FILES, "(*.*)", NULL, NULL, NULL, 0, 0, 0, "", "*"},
   {FORMAT_GIF, " gif", Test_GIF, Load_GIF, Save_GIF, 0, 1, 1, "gif", "gif"},
 #ifndef __no_pnglib__
@@ -151,7 +158,8 @@ T_Format File_formats[] = {
   {FORMAT_BMP, " bmp", Test_BMP, Load_BMP, Save_BMP, 0, 0, 0, "bmp", "bmp"},
   {FORMAT_PCX, " pcx", Test_PCX, Load_PCX, Save_PCX, 0, 0, 0, "pcx", "pcx"},
   {FORMAT_PKM, " pkm", Test_PKM, Load_PKM, Save_PKM, 0, 1, 0, "pkm", "pkm"},
-  {FORMAT_LBM, " lbm", Test_LBM, Load_LBM, Save_LBM, 0, 0, 0, "lbm", "lbm;iff;ilbm"},
+  {FORMAT_LBM, " lbm", Test_LBM, Load_IFF, Save_IFF, 0, 0, 0, "iff", "iff;lbm;ilbm"},
+  {FORMAT_PBM, " pbm", Test_PBM, Load_IFF, Save_IFF, 0, 0, 0, "iff", "iff;pbm"},
   {FORMAT_IMG, " img", Test_IMG, Load_IMG, Save_IMG, 0, 0, 0, "img", "img"},
   {FORMAT_SCx, " sc?", Test_SCx, Load_SCx, Save_SCx, 0, 0, 0, "sc?", "sci;scq;scf;scn;sco"},
   {FORMAT_PI1, " pi1", Test_PI1, Load_PI1, Save_PI1, 0, 0, 0, "pi1", "pi1"},
@@ -160,8 +168,9 @@ T_Format File_formats[] = {
   {FORMAT_NEO, " neo", Test_NEO, Load_NEO, Save_NEO, 0, 0, 0, "neo", "neo"},
   {FORMAT_KCF, " kcf", Test_KCF, Load_KCF, Save_KCF, 1, 0, 0, "kcf", "kcf"},
   {FORMAT_PAL, " pal", Test_PAL, Load_PAL, Save_PAL, 1, 0, 0, "pal", "pal"},
-  {FORMAT_C64, " c64", Test_C64, Load_C64, Save_C64, 0, 1, 0, "c64", "c64;koa"},
+  {FORMAT_C64, " c64", Test_C64, Load_C64, Save_C64, 0, 1, 0, "c64", "c64;koa;koala;fli;bml;cdu;prg"},
   {FORMAT_SCR, " cpc", NULL,     NULL,     Save_SCR, 0, 0, 0, "cpc", "cpc;scr"},
+  {FORMAT_CM5, " cm5", Test_CM5, Load_CM5, Save_CM5, 0, 0, 1, "cm5", "cm5"},
   {FORMAT_XPM, " xpm", NULL,     NULL,     Save_XPM, 0, 0, 0, "xpm", "xpm"},
   {FORMAT_MISC,"misc.",NULL,     NULL,     NULL,     0, 0, 0, "",    "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico"},
 };
@@ -183,7 +192,7 @@ void Set_pixel(T_IO_Context *context, short x_pos, short y_pos, byte color)
   {
     // Chargement des pixels dans l'écran principal
     case CONTEXT_MAIN_IMAGE:
-      Pixel_in_current_screen(x_pos,y_pos,color,0);
+      Pixel_in_current_screen(x_pos,y_pos,color);
       break;
       
     // Chargement des pixels dans la brosse
@@ -235,6 +244,28 @@ void Set_pixel(T_IO_Context *context, short x_pos, short y_pos, byte color)
 
 }
 
+void Fill_canvas(T_IO_Context *context, byte color)
+{
+  switch (context->Type)
+  {
+    case CONTEXT_PREVIEW:
+      if (context->Current_layer!=0)
+        return;
+      memset(context->Preview_bitmap, color, PREVIEW_WIDTH*PREVIEW_HEIGHT*Menu_factor_X*Menu_factor_Y);
+      break;
+    case CONTEXT_MAIN_IMAGE:
+      memset(
+        Main_backups->Pages->Image[Main_current_layer].Pixels,
+        color,
+        Main_backups->Pages->Width*Main_backups->Pages->Height);
+      break;
+    case CONTEXT_BRUSH:
+      memset(context->Buffer_image, color, (long)context->Height*context->Pitch);
+      break;
+    case CONTEXT_SURFACE:
+      break;
+  }
+}
 
 void Palette_loaded(T_IO_Context *context)
 {
@@ -315,6 +346,29 @@ void Set_palette_fake_24b(T_Palette palette)
   }
 }
 
+void Set_frame_duration(T_IO_Context *context, int duration)
+{
+  switch(context->Type)
+  {
+    case CONTEXT_MAIN_IMAGE:
+      Main_backups->Pages->Image[context->Current_layer].Duration = duration;
+      break;
+    default:
+      break;
+  }
+}
+
+int Get_frame_duration(T_IO_Context *context)
+{
+  switch(context->Type)
+  {
+    case CONTEXT_MAIN_IMAGE:
+      return Main_backups->Pages->Image[context->Current_layer].Duration;
+    default:
+      return 0;
+  }
+}
+
 ///
 /// Generic allocation and similar stuff, done at beginning of image load,
 /// as soon as size is known.
@@ -336,10 +390,10 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
     case CONTEXT_PREVIEW:
       // Préparation du chargement d'une preview:
       
-      context->Preview_bitmap=malloc(PREVIEW_WIDTH*PREVIEW_HEIGHT*Menu_factor_X*Menu_factor_Y);
+      context->Preview_bitmap=calloc(1, PREVIEW_WIDTH*PREVIEW_HEIGHT*Menu_factor_X*Menu_factor_Y);
       if (!context->Preview_bitmap)
         File_error=1;
-      
+            
       // Affichage des données "Image size:"
       if ((width<10000) && (height<10000))
       {
@@ -374,7 +428,7 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
       }
   
       // Affichage du vrai format
-      if (format!=Main_format)
+      if (format!=Selector->Format_filter)
       {
         Print_in_window( 59,59,Get_fileformat(format)->Label,MC_Black,MC_Light);
       }
@@ -427,7 +481,7 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
         context->Nb_layers=1;
         Main_current_layer=0;
         Main_layers_visible=1<<0;
-        Set_layer(context,0);
+        Set_loading_layer(context,0);
         
         // Remove previous comment, unless we load just a palette
         if (! Get_fileformat(context->Format)->Palette_only)
@@ -505,35 +559,11 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
 //                    Gestion des lectures et écritures                    //
 /////////////////////////////////////////////////////////////////////////////
 
-byte * Write_buffer;
-word   Write_buffer_index;
-
-void Init_write_buffer(void)
-{
-  Write_buffer=(byte *)malloc(64000);
-  Write_buffer_index=0;
-}
-
 void Write_one_byte(FILE *file, byte b)
 {
-  Write_buffer[Write_buffer_index++]=b;
-  if (Write_buffer_index>=64000)
-  {
-    if (! Write_bytes(file,Write_buffer,64000))
+  if (! Write_byte(file,b))
       File_error=1;
-    Write_buffer_index=0;
-  }
 }
-
-void End_write(FILE *file)
-{
-  if (Write_buffer_index)
-    if (! Write_bytes(file,Write_buffer,Write_buffer_index))
-      File_error=1;
-  free(Write_buffer);
-  Write_buffer = NULL;
-}
-
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -556,6 +586,7 @@ void Load_image(T_IO_Context *context)
   unsigned int index; // index de balayage des formats
   T_Format *format = &(File_formats[2]); // Format du fichier à charger
   int i;
+  byte old_cursor_shape;
   
   // Not sure it's the best place...
   context->Color_cycles=0;
@@ -618,7 +649,7 @@ void Load_image(T_IO_Context *context)
 
   if (File_error>0)
   {
-    fprintf(stderr,"Unable to load file %s!\n",context->File_name);
+    fprintf(stderr,"Unable to load file %s (error %d)!\n",context->File_name, File_error);
     if (context->Type!=CONTEXT_SURFACE)
       Error(0);
   }
@@ -634,31 +665,33 @@ void Load_image(T_IO_Context *context)
       {
         case CONTEXT_MAIN_IMAGE:
           // Cas d'un chargement dans l'image
+          old_cursor_shape=Cursor_shape;
           Hide_cursor();
           Cursor_shape=CURSOR_SHAPE_HOURGLASS;
           Display_cursor();
           Flush_update();
-          if (Convert_24b_bitmap_to_256(Main_backups->Pages->Image[0],context->Buffer_image_24b,context->Width,context->Height,context->Palette))
+          if (Convert_24b_bitmap_to_256(Main_backups->Pages->Image[0].Pixels,context->Buffer_image_24b,context->Width,context->Height,context->Palette))
             File_error=2;
           else
           {
             Palette_loaded(context);
           }
           Hide_cursor();
-          Cursor_shape=CURSOR_SHAPE_ARROW;
+          Cursor_shape=old_cursor_shape;
           Display_cursor();
           break;
           
         case CONTEXT_BRUSH:
           // Cas d'un chargement dans la brosse
+          old_cursor_shape=Cursor_shape;
           Hide_cursor();
           Cursor_shape=CURSOR_SHAPE_HOURGLASS;
           Display_cursor();
           Flush_update();
-          if (Convert_24b_bitmap_to_256(Brush,context->Buffer_image_24b,context->Width,context->Height,context->Palette))
+          if (Convert_24b_bitmap_to_256(context->Buffer_image,context->Buffer_image_24b,context->Width,context->Height,context->Palette))
             File_error=2;
           Hide_cursor();
-          Cursor_shape=CURSOR_SHAPE_ARROW;
+          Cursor_shape=old_cursor_shape;
           Display_cursor();
           break;
 
@@ -728,7 +761,7 @@ void Load_image(T_IO_Context *context)
       if (format->Palette_only)
       {
         // Make a backup step
-        Backup_layers(0);
+        Backup_layers(LAYER_NONE);
       }
       // Copy the loaded palette
       memcpy(Main_palette, context->Palette, sizeof(T_Palette));
@@ -759,8 +792,15 @@ void Load_image(T_IO_Context *context)
         //Main_image_width= context->Width;
         //Main_image_height= context->Height;
         
-        Main_current_layer = context->Nb_layers - 1;
-        Main_layers_visible = (2<<Main_current_layer)-1;
+        if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+        {
+          Main_current_layer = 0;
+        }
+        else
+        {
+          Main_current_layer = context->Nb_layers - 1;
+          Main_layers_visible = (2<<Main_current_layer)-1;
+        }
         
         // Load the transparency data
         Main_backups->Pages->Transparent_color = context->Transparent_color;
@@ -784,7 +824,7 @@ void Load_image(T_IO_Context *context)
         }
         
         // Comment
-        strcpy(Main_comment, context->Comment);
+        strcpy(Main_backups->Pages->Comment, context->Comment);
 
       }
     }
@@ -932,13 +972,61 @@ void Save_image(T_IO_Context *context)
   switch (context->Type)
   {
     case CONTEXT_MAIN_IMAGE:
-      if (!File_formats[context->Format-1].Supports_layers
-        && Main_backups->Pages->Nb_layers > 1)
+      if ((!Get_fileformat(context->Format)->Supports_layers)
+        && (Main_backups->Pages->Nb_layers > 1)
+        && (!Get_fileformat(context->Format)->Palette_only))
       {
-        if (! Confirmation_box("This format doesn't support layers\nand will save a flattened copy of\nyour image. Proceed?"))
+        if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
         {
-          // File_error is already set to 1.
-          return;
+          if (! Confirmation_box("This format doesn't support\nanimation and will save only\ncurrent frame. Proceed?"))
+          {
+            // File_error is already set to 1.
+            return;
+          }
+          // current layer
+          context->Nb_layers=1;
+          context->Target_address=Main_backups->Pages->Image[Main_current_layer].Pixels;
+        }
+        else // all other layer-based formats
+        {
+          int clicked_button;
+          
+          Open_window(208,100,"Format warning");
+          Print_in_window( 8, 20,"This file format doesn't",MC_Black,MC_Light);
+          Print_in_window( 8, 30,"support layers.",MC_Black,MC_Light);
+          
+          Window_set_normal_button(23,44, 162,14,"Save flattened copy",0,1,KEY_NONE); // 1
+          Window_set_normal_button(23,62, 162,14,"Save current frame" ,0,1,KEY_NONE); // 2
+          Window_set_normal_button(23,80, 162,14,"Cancel"             ,0,1,KEY_ESC);  // 3
+          Update_window_area(0,0,Window_width, Window_height);
+          Display_cursor();
+          do
+          {
+            clicked_button=Window_clicked_button();
+            // Some help on file formats ?
+            //if (Is_shortcut(Key,0x100+BUTTON_HELP))
+            //{
+            //  Key=0;
+            //  Window_help(???, NULL);
+            //}
+          }
+          while (clicked_button<=0);
+          Close_window();
+          Display_cursor();
+          switch(clicked_button)
+          {
+            case 1: // flatten
+              context->Nb_layers=1;
+              context->Target_address=Main_visible_image.Image;
+              break;
+            case 2: // current layer
+              context->Nb_layers=1;
+              context->Target_address=Main_backups->Pages->Image[Main_current_layer].Pixels;
+              break;
+            default: // Cancel
+              // File_error is already set to 1.
+              return;
+          }
         }
       }
       break;
@@ -1125,12 +1213,10 @@ void Emergency_backup(const char *fname, byte *source, int width, int height, T_
 
 void Image_emergency_backup()
 {
-#ifndef NOLAYERS
   if (Main_backups && Main_backups->Pages && Main_backups->Pages->Nb_layers == 1)
     Emergency_backup(SAFETYBACKUP_PREFIX_A "999999" BACKUP_FILE_EXTENSION,Main_screen, Main_image_width, Main_image_height, &Main_palette);
   if (Spare_backups && Spare_backups->Pages && Spare_backups->Pages->Nb_layers == 1)
     Emergency_backup(SAFETYBACKUP_PREFIX_B "999999" BACKUP_FILE_EXTENSION,Spare_visible_image.Image, Spare_image_width, Spare_image_height, &Spare_palette);
-#endif
 }
 
 T_Format * Get_fileformat(byte format)
@@ -1198,7 +1284,7 @@ void Init_context_layered_image(T_IO_Context * context, char *file_name, char *f
   context->Width = Main_image_width;
   context->Height = Main_image_height;
   context->Nb_layers = Main_backups->Pages->Nb_layers;
-  strcpy(context->Comment, Main_comment);
+  strcpy(context->Comment, Main_backups->Pages->Comment);
   context->Transparent_color=Main_backups->Pages->Transparent_color;
   context->Background_transparent=Main_backups->Pages->Background_transparent;
   if (Pixel_ratio == PIXEL_WIDE || Pixel_ratio == PIXEL_WIDE2)
@@ -1207,7 +1293,7 @@ void Init_context_layered_image(T_IO_Context * context, char *file_name, char *f
     context->Ratio=PIXEL_TALL;
   else
     context->Ratio=PIXEL_SIMPLE;
-  context->Target_address=Main_backups->Pages->Image[0];
+  context->Target_address=Main_backups->Pages->Image[0].Pixels;
   context->Pitch=Main_image_width;
   
   // Color cyling ranges:
@@ -1274,14 +1360,32 @@ void Init_context_surface(T_IO_Context * context, char *file_name, char *file_di
 
 }
 /// Function to call when need to switch layers.
-void Set_layer(T_IO_Context *context, byte layer)
+void Set_saving_layer(T_IO_Context *context, int layer)
+{
+  context->Current_layer = layer;
+
+  if (context->Type == CONTEXT_MAIN_IMAGE)
+  {
+    if (context->Nb_layers==1 && Main_backups->Pages->Nb_layers!=1)
+    {
+      // Context is set to saving a single layer: do nothing
+    }
+    else
+    {
+      context->Target_address=Main_backups->Pages->Image[layer].Pixels;
+    }
+  }
+}
+
+/// Function to call when need to switch layers.
+void Set_loading_layer(T_IO_Context *context, int layer)
 {
   context->Current_layer = layer;
 
   if (context->Type == CONTEXT_MAIN_IMAGE)
   {
     // This awful thing is the part that happens on load
-    while (layer > (context->Nb_layers-1))
+    while (layer >= context->Nb_layers)
     {
       if (Add_layer(Main_backups, layer))
       {
@@ -1291,10 +1395,12 @@ void Set_layer(T_IO_Context *context, byte layer)
         break;
       }
       context->Nb_layers = Main_backups->Pages->Nb_layers;
-      Main_current_layer = layer;
       Main_layers_visible = (2<<layer)-1;
     }
-    context->Target_address=Main_backups->Pages->Image[layer];
+    Main_current_layer = layer;
+    context->Target_address=Main_backups->Pages->Image[layer].Pixels;
+    
+    Update_pixel_renderer();
   }
 }
 

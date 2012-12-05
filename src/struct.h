@@ -44,13 +44,13 @@
 
 // Definition of the base data types
 ///  8bit unsigned integer
-#define byte  uint8_t  
+typedef uint8_t byte;
 /// 16bit unsigned integer
-#define word  uint16_t 
+typedef uint16_t word;
 /// 32bit unsigned integer
-#define dword uint32_t
+typedef uint32_t dword;
 /// 64bit unsigned integer
-#define qword uint64_t
+typedef uint64_t qword;
 
 // Named function prototypes
 // GrafX2 use a lot of function pointer to do the drawing depending in the "fake hardware zoom" and the magnifier status.
@@ -370,14 +370,26 @@ typedef struct
   word Swap_buttons;                     ///< Sets which key swaps mouse buttons : 0=none, or MOD_CTRL, or MOD_ALT.
   char Scripts_directory[MAX_PATH_CHARACTERS];///< Full pathname of directory for Lua scripts
   byte Allow_multi_shortcuts;            ///< Boolean, true if the same key combination can trigger multiple shortcuts.
+  byte Tilemap_allow_flipped_x;          ///< Boolean, true if the Tilemap tool should detect x-flipped tiles.
+  byte Tilemap_allow_flipped_y;          ///< Boolean, true if the Tilemap tool should detect y-flipped tiles.
+  byte Tilemap_show_count;               ///< Boolean, true if the Tilemap tool should display tile count after analysis.
+  byte Use_virtual_keyboard;             ///< 0: Auto, 1: On, 2: Off
+  byte Default_mode_layers;              ///< Indicates if default new image has layers (alternative is animation)
+
 } T_Config;
 
-// Structures utilisÃ©es pour les descriptions de pages et de liste de pages.
-// Lorsqu'on gÃ©rera les animations, il faudra aussi des listes de listes de
+// Structures utilisées pour les descriptions de pages et de liste de pages.
+// Lorsqu'on gèrera les animations, il faudra aussi des listes de listes de
 // pages.
 
-// Ces structures sont manipulÃ©es Ã  travers des fonctions de gestion du
+// Ces structures sont manipulées à travers des fonctions de gestion du
 // backup dans "graph.c".
+
+typedef struct T_Image
+{
+  byte * Pixels;
+  int Duration;
+} T_Image;
 
 /// This is the data for one step of Undo/Redo, for one image.
 /// This structure is resized dynamically to hold pointers to all of the layers in the picture.
@@ -389,6 +401,8 @@ typedef struct T_Page
   int       Height;  ///< Image height in pixels.
   T_Palette Palette; ///< Image palette.
 
+  byte      Image_mode; ///< 0= layered image, 1=animation,
+
   char      Comment[COMMENT_SIZE+1]; ///< Comment to store in the image file.
 
   char      File_directory[MAX_PATH_CHARACTERS];///< Directory that contains the file.
@@ -399,13 +413,13 @@ typedef struct T_Page
   T_Gradient_array *Gradients; ///< Pointer to the gradients used by the image.
   byte      Background_transparent; ///< Boolean, true if Layer 0 should have transparent pixels
   byte      Transparent_color; ///< Index of transparent color. 0 to 255.
-  byte      Nb_layers; ///< Number of layers
+  int       Nb_layers; ///< Number of layers
 #if __GNUC__ < 3
-  byte *    Image[0];
+  // gcc2 doesn't suport [], but supports [0] which does the same thing.
+  T_Image    Image[0];  ///< Pixel data for the (first layer of) image.
 #else
-  byte *    Image[];  ///< Pixel data for the (first layer of) image.
+  T_Image    Image[];  ///< Pixel data for the (first layer of) image.
 #endif
-    // Define as Image[0] if you have an old gcc which is not C99.
   // No field after Image[] ! Dynamic layer allocation for Image[1], [2] etc.
 } T_Page;
 
@@ -461,6 +475,7 @@ typedef struct
   /// Bitmap data for the menu, a single rectangle.
   byte Menu_block[3][35][MENU_WIDTH];
   byte Layerbar_block[3][10][144];
+  byte Animbar_block[3][14][236];
   byte Statusbar_block[3][9][20];
   /// Bitmap data for the icons that are displayed over the menu.
   byte Menu_sprite[2][NB_MENU_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
@@ -518,22 +533,20 @@ typedef struct {
 
 } T_Paintbrush;
 
-// A menubar.
-typedef struct {
-  word Width;
-  word Height;
-  byte Visible;
-  word Top; ///< Relative to the top line of the menu, hidden bars don't count.
-  byte* Skin[3]; ///< [0] has normal buttons, [1] has selected buttons, [2] is current.
-  word Skin_width;
-  byte Last_button_index;
-} T_Menu_Bar;
+typedef struct
+{
+  int Previous;
+  int Next;
+  byte Flipped; ///< 0:no, 1:horizontally, 2:vertically, 3:both
+} T_Tile;
 
-typedef enum {
-  MENUBAR_STATUS = 0, // MUST be 0
-  MENUBAR_LAYERS,
-  MENUBAR_TOOLS,
-  MENUBAR_COUNT
-} T_Menubars;
+/// Settings for an entire file selector screen
+typedef struct T_Selector_settings
+{
+  byte Format_filter; ///< 0 for "*.*", or a value of enum ::FILE_FORMATS
+  short Position; ///< Index of the first file/entry to display in list
+  short Offset; ///< Position of the "highlight" bar in the file list
+  char  Directory[256]; ///< Directory currently browsed
+} T_Selector_settings;
 
 #endif

@@ -23,9 +23,14 @@
 #if(!defined(__WIN32__))&&(!defined(__amigaos4__))&&(!defined(__AROS__))&&(!defined(__MORPHOS__))&&(!defined(__amigaos__))
 
 // We don't use autoconf and all that in grafx2, so let's do the config here ...
-#if defined(__macosx__) || defined(__FreeBSD__)                        // MacOS X is POSIX compliant
+#if defined(__macosx__) || defined(__FreeBSD__) || defined(__OpenBSD__)                       // MacOS X is POSIX compliant
     #define MOUNTED_GETMNTINFO
 #if defined(__macosx__)
+    #include <sys/types.h>
+#endif
+#if defined(__OpenBSD__)
+    #define HAVE_STRUCT_STATFS_F_FSTYPENAME 1
+    #include <sys/param.h> /* types.h needs this */
     #include <sys/types.h>
 #endif
 #elif defined(__NetBSD__)
@@ -333,26 +338,18 @@ fstype_to_string (int t)
 }
 #endif /* MOUNTED_VMOUNT */
 
-#ifdef __linux__
-  #define BROKEN __attribute__((unused))
-#else
-  #define BROKEN
-#endif
-
-
 #if defined MOUNTED_GETMNTENT1 || defined MOUNTED_GETMNTENT2
 
 /* Return the device number from MOUNT_OPTIONS, if possible.
    Otherwise return (dev_t) -1.  */
 
 static dev_t
-dev_from_mount_options (BROKEN char const *mount_options)
+dev_from_mount_options (char const *mount_options)
 {
   /* GNU/Linux allows file system implementations to define their own
      meaning for "dev=" mount options, so don't trust the meaning
      here.  */
 # ifndef __linux__
-
   static char const dev_pattern[] = ",dev=";
   char const *devopt = strstr (mount_options, dev_pattern);
 
@@ -369,7 +366,8 @@ dev_from_mount_options (BROKEN char const *mount_options)
           && dev == (dev_t) dev)
         return dev;
     }
-
+#else
+  (void)mount_options; // unused
 # endif
 
   return -1;
@@ -383,11 +381,12 @@ dev_from_mount_options (BROKEN char const *mount_options)
    the returned list are valid.  Otherwise, they might not be.  */
 
 struct mount_entry *
-read_file_system_list (BROKEN bool need_fs_type)
+read_file_system_list (bool need_fs_type)
 {
   struct mount_entry *mount_list;
   struct mount_entry *me;
   struct mount_entry **mtail = &mount_list;
+  (void)need_fs_type; // may be unused
 
 #ifdef MOUNTED_LISTMNTENT
   {
@@ -463,7 +462,7 @@ read_file_system_list (BROKEN bool need_fs_type)
         me = malloc (sizeof *me);
         me->me_devname = strdup (fsp->f_mntfromname);
         me->me_mountdir = strdup (fsp->f_mntonname);
-#if defined(__macosx__)
+#if defined(__macosx__) || defined(__OpenBSD__)
         me->me_type = fsp->f_fstypename;
 #else
         me->me_type = fsp->fs_typename;

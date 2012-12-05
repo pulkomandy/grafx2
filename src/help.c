@@ -30,14 +30,16 @@
 #elif defined(__macosx__) || defined(__FreeBSD__)
     #include <sys/param.h>
     #include <sys/mount.h>
-#elif defined (__linux__)
+#elif defined (__linux__) || defined(__SYLLABLE__)
     #include <sys/vfs.h>
-#elif defined(__HAIKU__)
+#elif defined (__HAIKU__)
 	#include "haiku.h"
 #elif defined (__MINT__)
     #include <mint/sysbind.h>
     #include <mint/osbind.h>
     #include <mint/ostruct.h>
+#elif defined(__AROS__)
+    #include <sys/mount.h>
 #endif
 
 #include "const.h"
@@ -55,6 +57,7 @@
 #include "hotkeys.h"
 #include "errors.h"
 #include "pages.h"
+#include "factory.h"
 
 extern char Program_version[]; // generated in pversion.c
 extern char SVN_revision[]; // generated in pversion.c
@@ -69,7 +72,7 @@ word * Shortcut(word shortcut_number)
   return &(Config_Key[shortcut_number & 0xFF][0]);
 }
 
-// Nom de la touche actuallement assignÃ©e Ã  un raccourci d'aprÃ¨s son numÃ©ro
+// Nom de la touche actuallement assignée à un raccourci d'après son numéro
 // de type 0x100+BOUTON_* ou SPECIAL_*
 const char * Keyboard_shortcut_value(word shortcut_number)
 {
@@ -270,17 +273,17 @@ void Window_set_shortcut(int action_id)
 void Remove_duplicate_shortcuts(void)
 {
   int action_1;
-  // This algorithm favors shortcuts that are first in the list.
+  // This algorithm favors shortcuts that are last in the list.
   // The idea is that we, coders, append new shortcuts at the end with default
-  // values; they should be discarded if user has chosen the key first.
-  for (action_1=0; action_1<NB_SHORTCUTS-1; action_1++)
+  // values; they take priority as they are new functions.
+  for (action_1=NB_SHORTCUTS-1; action_1>0; action_1--)
   { 
     int n;
     word *shortcut_1 = Shortcut(Ordering[action_1]);
     for (n=0; n<2; n++)
     {
       int action_2;
-      for (action_2=action_1+1; action_2<NB_SHORTCUTS; action_2++)
+      for (action_2=0; action_2<action_1; action_2++)
       {
         if (shortcut_1[n]!=0)
         {
@@ -688,7 +691,13 @@ void Button_Stats(void)
   dword color_usage[256];
   unsigned long long freeRam;
   qword mem_size = 0;
-
+  int y;
+#if defined (__MINT__)
+  _DISKINFO drvInfo;
+  unsigned long STRAM=0,TTRAM=0;
+  char helpBuf[64]={0};
+#endif
+  
   Open_window(310,174,"Statistics");
 
   // Dessin de la fenetre ou va s'afficher le texte
@@ -699,21 +708,24 @@ void Button_Stats(void)
 
   Window_set_normal_button(120,153,70,14,"OK",0,1,KEY_ESC); // 1
 
-  // Affichage du numéro de version
-  Print_in_window(10,19,"Program version:",STATS_TITLE_COLOR,MC_Black);
+  y=19; // row for first line
+  Print_in_window(10,y,"Program version:",STATS_TITLE_COLOR,MC_Black);
   sprintf(buffer,"%s.%s",Program_version, SVN_revision);
-  Print_in_window(146,19,buffer,STATS_DATA_COLOR,MC_Black);
-  Print_in_window(10,35,"Build options:",STATS_TITLE_COLOR,MC_Black);
-  Print_in_window(146,35,TrueType_is_supported()?"TTF fonts":"no TTF fonts",STATS_DATA_COLOR,MC_Black);
-
-#if defined (__MINT__)
-  // Affichage de la mémoire restante
-  Print_in_window(10,43,"Free memory: ",STATS_TITLE_COLOR,MC_Black);
-
-  freeRam=0;
-  char helpBuf[64];
+  Print_in_window(146,y,buffer,STATS_DATA_COLOR,MC_Black);
+  y+=16;
+  Print_in_window(10,y,"Build options:",STATS_TITLE_COLOR,MC_Black);
+  Print_in_window(146,y,TrueType_is_supported()?"TTF fonts":"no TTF fonts",STATS_DATA_COLOR,MC_Black);
+  y+=8;
+  Print_in_window(10,y,"Lua version:",STATS_TITLE_COLOR,MC_Black);
+  Print_in_window_limited(146,y,Lua_version(),10,STATS_DATA_COLOR,MC_Black);
+  y+=16;
+  Print_in_window(10,y,"Free memory: ",STATS_TITLE_COLOR,MC_Black);
+  y+=8;
   
-  unsigned long STRAM,TTRAM;
+#if defined (__MINT__)
+  // Display free TT/ST RAM
+  freeRam=0;
+
   Atari_Memory_free(&STRAM,&TTRAM);
   freeRam=STRAM+TTRAM;
   buffer[0]='\0';
@@ -746,14 +758,13 @@ void Button_Stats(void)
         sprintf(helpBuf,"(%u Kb)",(unsigned int)(freeRam/1024));
   else
         sprintf(helpBuf,"(%u b)",(unsigned int)freeRam);
-    strncat(buffer,helpBuf,sizeof(char)*37);
+   
+   strncat(buffer,helpBuf,sizeof(char)*37);
  
-   Print_in_window(18,51,buffer,STATS_DATA_COLOR,MC_Black);
+   Print_in_window(18,y,buffer,STATS_DATA_COLOR,MC_Black);
 
 #else
-  // Affichage de la mémoire restante
-  Print_in_window(10,51,"Free memory: ",STATS_TITLE_COLOR,MC_Black);
-
+  // Display free RAM (generic)
   freeRam = Memory_free();
   
   if(freeRam > (100ULL*1024*1024*1024))
@@ -765,54 +776,66 @@ void Button_Stats(void)
   else
         sprintf(buffer,"%u bytes",(unsigned int)freeRam);
   
-  Print_in_window(114,51,buffer,STATS_DATA_COLOR,MC_Black);
+  Print_in_window(114,y,buffer,STATS_DATA_COLOR,MC_Black);
 
   #endif
   
-  
+  y+=8;
   // Used memory
-  Print_in_window(10,59,"Used memory pages: ",STATS_TITLE_COLOR,MC_Black);
+  Print_in_window(10,y,"Used memory pages: ",STATS_TITLE_COLOR,MC_Black);
   if(Stats_pages_memory > (100LL*1024*1024*1024))
         sprintf(buffer,"%ld (%lld Gb)",Stats_pages_number, Stats_pages_memory/(1024*1024*1024));
   else if(Stats_pages_memory > (100*1024*1024))
         sprintf(buffer,"%ld (%lld Mb)",Stats_pages_number, Stats_pages_memory/(1024*1024));
   else
         sprintf(buffer,"%ld (%lld Kb)",Stats_pages_number, Stats_pages_memory/1024);
-  Print_in_window(162,59,buffer,STATS_DATA_COLOR,MC_Black);
+  Print_in_window(162,y,buffer,STATS_DATA_COLOR,MC_Black);
   
-  // Affichage de l'espace disque libre
-  sprintf(buffer,"Free space on %c:",Main_current_directory[0]);
-  Print_in_window(10,67,buffer,STATS_TITLE_COLOR,MC_Black);
-
+  y+=8;
 #if defined(__WIN32__)
     {
       ULARGE_INTEGER tailleU;
-      GetDiskFreeSpaceEx(Main_current_directory,&tailleU,NULL,NULL);
+      GetDiskFreeSpaceEx(Main_selector.Directory,&tailleU,NULL,NULL);
       mem_size = tailleU.QuadPart;
     }
-#elif defined(__linux__) || defined(__macosx__) || defined(__FreeBSD__)
-    // Note: under MacOSX, both macros are defined anyway.
+#elif defined(__linux__) || defined(__macosx__) || defined(__FreeBSD__) || defined(__SYLLABLE__) || defined(__AROS__)
     {
       struct statfs disk_info;
-      statfs(Main_current_directory,&disk_info);
+      statfs(Main_selector.Directory,&disk_info);
       mem_size=(qword) disk_info.f_bfree * (qword) disk_info.f_bsize;
     }
 #elif defined(__HAIKU__)
-	mem_size = haiku_get_free_space(Main_current_directory);
+   mem_size = haiku_get_free_space(Main_selector.Directory);
 #elif defined (__MINT__)
-   _DISKINFO drvInfo;
    mem_size=0;
    Dfree(&drvInfo,0);
    //number of free clusters*sectors per cluster*bytes per sector;
    // reports current drive
    mem_size=drvInfo.b_free*drvInfo.b_clsiz*drvInfo.b_secsiz;
-   
 #else
+    #define NODISKSPACESUPPORT
     // Free disk space is only for shows. Other platforms can display 0.
     #warning "Missing code for your platform !!! Check and correct please :)"
     mem_size=0;
 #endif
-  
+
+  // Display free space
+  if (mem_size != 0)
+  {
+#if defined(__AROS__)
+    char *colon = strchr(Main_selector.Directory, ':');
+    int len = strlen(Main_selector.Directory);
+    if (colon)
+    {
+      len = (long)colon - (long)Main_selector.Directory;
+    }
+    if (len > 8) len = 8;
+    sprintf(buffer,"Free space on %.*s:",len,Main_selector.Directory);
+#else
+    sprintf(buffer,"Free space on %c:",Main_selector.Directory[0]);
+#endif
+    Print_in_window(10,y,buffer,STATS_TITLE_COLOR,MC_Black);
+
     if(mem_size > (100ULL*1024*1024*1024))
         sprintf(buffer,"%u Gigabytes",(unsigned int)(mem_size/(1024*1024*1024)));
     else if(mem_size > (100*1024*1024))
@@ -821,27 +844,41 @@ void Button_Stats(void)
         sprintf(buffer,"%u Kilobytes",(unsigned int)(mem_size/1024));
     else 
         sprintf(buffer,"%u bytes",(unsigned int)mem_size);
-    Print_in_window(146,67,buffer,STATS_DATA_COLOR,MC_Black);
-
+#if defined(__AROS__)
+    Print_in_window(192,y,buffer,STATS_DATA_COLOR,MC_Black);
+#else
+    Print_in_window(146,y,buffer,STATS_DATA_COLOR,MC_Black);
+#endif
+  } else {
+	#ifndef NODISKSPACESUPPORT
+	  Print_in_window(10,y,"Disk full!",STATS_TITLE_COLOR,MC_Black);
+	#endif
+	#undef NODISKSPACESUPPORT
+  }
+  
+  y+=16;
   // Affichage des informations sur l'image
-  Print_in_window(10,83,"Picture info.:",STATS_TITLE_COLOR,MC_Black);
-
+  Print_in_window(10,y,"Picture info.:",STATS_TITLE_COLOR,MC_Black);
+  y+=8;
+  
   // Affichage des dimensions de l'image
-  Print_in_window(18,91,"Dimensions :",STATS_TITLE_COLOR,MC_Black);
+  Print_in_window(18,y,"Dimensions :",STATS_TITLE_COLOR,MC_Black);
   sprintf(buffer,"%dx%d",Main_image_width,Main_image_height);
-  Print_in_window(122,91,buffer,STATS_DATA_COLOR,MC_Black);
-
+  Print_in_window(122,y,buffer,STATS_DATA_COLOR,MC_Black);
+  y+=8;
+  
   // Affichage du nombre de couleur utilisé
-  Print_in_window(18,99,"Colors used:",STATS_TITLE_COLOR,MC_Black);
+  Print_in_window(18,y,"Colors used:",STATS_TITLE_COLOR,MC_Black);
   memset(color_usage,0,sizeof(color_usage));
   sprintf(buffer,"%d",Count_used_colors(color_usage));
-  Print_in_window(122,99,buffer,STATS_DATA_COLOR,MC_Black);
-
+  Print_in_window(122,y,buffer,STATS_DATA_COLOR,MC_Black);
+  y+=16;
+  
   // Affichage des dimensions de l'écran
-  Print_in_window(10,115,"Resolution:",STATS_TITLE_COLOR,MC_Black);
+  Print_in_window(10,y,"Resolution:",STATS_TITLE_COLOR,MC_Black);
   sprintf(buffer,"%dx%d",Screen_width,Screen_height);
-  Print_in_window(106,115,buffer,STATS_DATA_COLOR,MC_Black);
-
+  Print_in_window(106,y,buffer,STATS_DATA_COLOR,MC_Black);
+  
   Update_rect(Window_pos_X,Window_pos_Y,Menu_factor_X*310,Menu_factor_Y*174);
 
   Display_cursor();

@@ -310,12 +310,14 @@ void Remap_image_highlevel(byte * conversion_table)
   int layer;
 
   // Remap the flatenned image view
-  Remap_general_lowlevel(conversion_table,Main_screen,Main_screen,
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED)
+  {
+    Remap_general_lowlevel(conversion_table,Main_visible_image.Image,Main_visible_image.Image,
                          Main_image_width,Main_image_height,Main_image_width);
-
+  }
   // Remap all layers
   for (layer=0; layer<Main_backups->Pages->Nb_layers; layer++)
-    Remap_general_lowlevel(conversion_table,Main_backups->Pages->Image[layer],Main_backups->Pages->Image[layer],Main_image_width,Main_image_height,Main_image_width);
+    Remap_general_lowlevel(conversion_table,Main_backups->Pages->Image[layer].Pixels,Main_backups->Pages->Image[layer].Pixels,Main_image_width,Main_image_height,Main_image_width);
 
   // Remap transparent color
   Main_backups->Pages->Transparent_color = 
@@ -559,8 +561,8 @@ void Reduce_palette(short * used_colors,int nb_colors_asked,T_Palette palette,dw
   int   color_2;                // |  de la palette
   int   best_color_1=0;
   int   best_color_2=0;
-  int   difference;
-  int   best_difference;
+  long   difference;
+  long   best_difference;
   dword used;
   dword best_used;
 
@@ -621,16 +623,19 @@ void Reduce_palette(short * used_colors,int nb_colors_asked,T_Palette palette,dw
     // une seule couleur qui est la moyenne pondérée de ces 2 couleurs
     // en fonction de leur utilisation dans l'image.
 
-    best_difference =0x7FFF;
+    best_difference =26*255*26*255+55*255*255+19*255*19*255;
     best_used=0x7FFFFFFF;
 
     for (color_1=0;color_1<(*used_colors);color_1++)
       for (color_2=color_1+1;color_2<(*used_colors);color_2++)
         if (color_1!=color_2)
         {
-          difference =abs((short)palette[color_1].R-palette[color_2].R)+
-                      abs((short)palette[color_1].G-palette[color_2].G)+
-                      abs((short)palette[color_1].B-palette[color_2].B);
+          difference =26*abs((long)palette[color_1].R-palette[color_2].R)*
+                      26*abs((long)palette[color_1].R-palette[color_2].R)+
+                      55*abs((long)palette[color_1].G-palette[color_2].G)*
+                      55*abs((long)palette[color_1].G-palette[color_2].G)+
+                      19*abs((long)palette[color_1].B-palette[color_2].B)*
+                      19*abs((long)palette[color_1].B-palette[color_2].B);
 
           if (difference<=best_difference)
           {
@@ -1224,7 +1229,23 @@ void Button_Palette(void)
         {
           Hide_cursor();
           temp_color=(clicked_button==1) ? Window_attribute2 : Read_pixel(Mouse_X,Mouse_Y);
-          if (Mouse_K==RIGHT_SIDE)
+          // Right click outside the window
+          if (Mouse_K==RIGHT_SIDE && clicked_button==-1)
+          {
+            if (Back_color!=temp_color)
+            {
+              Back_color=temp_color;
+              // 4 blocks de back_color entourant la fore_color
+              Window_rectangle(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_Y-BGCOLOR_DISPLAY_Y,Back_color);
+              Window_rectangle(BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y+FGCOLOR_DISPLAY_H,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_Y+BGCOLOR_DISPLAY_H-FGCOLOR_DISPLAY_Y-FGCOLOR_DISPLAY_H,Back_color);
+              Window_rectangle(BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_X-BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_H,Back_color);
+              Window_rectangle(FGCOLOR_DISPLAY_X+FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_X+BGCOLOR_DISPLAY_W-FGCOLOR_DISPLAY_X-FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,Back_color);
+              Update_window_area(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_H);
+            }
+            Display_cursor();
+          }
+          // Right-click inside the palette
+          else if (Mouse_K==RIGHT_SIDE)
           {
             // Contextual menu
             T_Dropdown_button dropdown;
@@ -1288,8 +1309,6 @@ void Button_Palette(void)
             {
               Display_cursor();
             }
-            
-            
             Window_dropdown_clear_items(&dropdown);
           }
           else
@@ -1751,7 +1770,7 @@ void Button_Palette(void)
                                 // est en mode X-SWAP.
             if (!image_is_backed_up)
             {
-              Backup_layers(-1);
+              Backup_layers(LAYER_ALL);
               image_is_backed_up=1;
             }
 
@@ -1899,7 +1918,7 @@ void Button_Palette(void)
         {
             if (!image_is_backed_up)
             {
-                Backup_layers(-1);
+                Backup_layers(LAYER_ALL);
                 image_is_backed_up = 1;
             }
 
@@ -2273,7 +2292,7 @@ void Button_Palette(void)
         {
           if (!image_is_backed_up)
           {
-            Backup_layers(-1);
+            Backup_layers(LAYER_ALL);
             image_is_backed_up=1;
           }
           Hide_cursor();
@@ -2354,7 +2373,7 @@ void Button_Palette(void)
         // Make a backup because remapping is an undoable modification
         if (!image_is_backed_up)
         {
-          Backup_layers(-1);
+          Backup_layers(LAYER_ALL);
           image_is_backed_up=1;
         }
 
@@ -2597,7 +2616,7 @@ void Button_Palette(void)
         {
           if (!image_is_backed_up)
           {
-            Backup_layers(-1);
+            Backup_layers(LAYER_ALL);
             image_is_backed_up=1;
           }
           if (used_colors==-1)
@@ -2673,11 +2692,11 @@ void Button_Palette(void)
           // Close (confirm)
           clicked_button=14;
         }
-        else if (Key == (SDLK_c|MOD_CTRL)) // Ctrl-C
+        else if (Key == SHORTCUT_COPY)
         {
           Set_clipboard_colors(block_end+1-block_start,working_palette + block_start);
         }
-        else if (Key == (SDLK_v|MOD_CTRL)) // Ctrl-V
+        else if (Key == SHORTCUT_PASTE)
         {
           int nb_colors;
 
@@ -2726,7 +2745,7 @@ void Button_Palette(void)
   {
     if ( (!image_is_backed_up)
       && memcmp(Main_palette,working_palette,sizeof(T_Palette)) )
-      Backup_layers(-1);
+      Backup_layers(LAYER_NONE);
     memcpy(Main_palette,working_palette,sizeof(T_Palette));
     End_of_modification();
     // Not really needed, the change was in palette entries

@@ -1,4 +1,4 @@
---3D-Palette viwer V0.7 (HSL-models added, 3D-World added, Pen-color only cycles thru unique colors, InputBox)
+--3D-Palette viewer V0.72 (HSL-models added, 3D-World added, Pen-color only cycles thru unique colors, InputBox)
 --by Richard 'Dawnbringer' Fhager
 
 -- Mouse:	Rotate Cube (Stops animation)
@@ -15,7 +15,9 @@
 -- "-" (Num):   Zoom Out
 -- Esc:		Exit script
 
-dofile("../libs/dawnbringer_lib.lua")
+-- Drawing updated, rectangle missing, Sep11
+
+run("../libs/dawnbringer_lib.lua")
 
 
 BRIDIAG_SHOW = 1     -- Show brightness/Grayscale diagonal (1 = on, 0 = off)
@@ -25,7 +27,7 @@ BOX_BRI      = 112   -- Brightest color used for box (0-255)
 COLSIZE_BASE = 26    -- Colors base size (value to adjusted by palette-size, with 2 cols maxsize is v / 1.23)
 
 --
-OK,RGB,HSL,HSLC,BOX_BRI,COLSIZE_BASE,SET800x600 = inputbox("3D-Palette Viever Settings",
+OK,RGB,HSL,HSLC,BOX_BRI,COLSIZE_BASE,SET800x600 = inputbox("3D-Palette Viewer Settings",
                         
                            "1. RGB space [F9]",       1,  0,1,-1,
                            "2. HSL space [F10]",      0,  0,1,-1,
@@ -125,7 +127,7 @@ CX,CY = w/2, h/2
 
 
 function initAndReset()
- XANG, YANG, ZANG, ZOOM, COLSIZE_ADJ, XD, YD, WORLD_X, WORLD_Y = 0,0,0,0,0,0,0,0,0
+ XANG, YANG, ZANG, ZOOM, COLSIZE_ADJ, XD, YD, WORLD_X, WORLD_Y, ZSELECT = 0,0,0,0,0,0,0,0,0,0
 end
 
 initAndReset()
@@ -210,6 +212,7 @@ function draw3Dline(x1,y1,z1,x2,y2,z2,div,mult,depthlist)
     yt = y1 + yd*s -- + math.random()*8
     c = depthlist[depth]
     if c == null then c = 1; end -- Something isn't perfect, error is super rare but this controls it
+    --db.line(xf,yf,xt,yt,c)
     drawline(xf,yf,xt,yt,c)
     xf = xt
     yf = yt
@@ -226,9 +229,9 @@ end
  totz = minz * 2
  maxrad = CMAXSIZE - CMINSIZE
 
-q = 0
-delay = 4
-move = 0.03
+--q = 0
+--delay = 4
+--move = 0.03
 
 while 1 < 2 do
 
@@ -305,6 +308,16 @@ while 1 < 2 do
  -- draw3Dline(x1,y1,z1,x2,y2,z2,BOX_LINE_DIV,BOX_DIV_MULT,box_div)
  --end
 
+  --c1 = math.min(FG,BG)
+  --c2 = math.max(FG,BG)
+  --p = colz[26]
+  --XP1,YP1,zp1,c1 = p[1],p[2],p[3],p[4]
+  --for n = #colz, 1, -1 do
+  -- p = colz[27]
+  -- XP2,YP2,zp2,c2 = p[1],p[2],p[3],p[4]
+  -- drawline(XP1,YP1,XP2,YP2,c1)
+  --end
+
  -- sort on z
  db.sorti(colz,3) 
 
@@ -317,6 +330,7 @@ while 1 < 2 do
   dorad = math.floor(radius - ZOOM*2 +  COLSIZE_ADJ) 
 
   if dorad >= 1 then
+   --db.drawCircle(XP,YP,dorad,c) 
    drawdisk(XP,YP,dorad,c) 
    --db.drawRectangle(XP,YP,dorad,dorad,c)
    else putpicturepixel(XP,YP,c)
@@ -354,6 +368,7 @@ while 1 < 2 do
     old_mouse_b = mouse_b;
     
     updatescreen()
+  
     moved, key, mouse_x, mouse_y, mouse_b = waitinput(0)
     
     if mouse_b == 1 then ANIM = 0; end
@@ -366,6 +381,8 @@ while 1 < 2 do
     if (key==283) then  initAndReset();       end -- F2: Reset all values
     if (key==284) then  COLSIZE_ADJ = COLSIZE_ADJ + 0.5;       end -- F3
     if (key==285) then  COLSIZE_ADJ = COLSIZE_ADJ - 0.5;       end -- F4
+
+   --messagebox(key)
 
     if (key==286) then  
       --FG = (FG + 1) % 255; 
@@ -390,6 +407,18 @@ while 1 < 2 do
 
     if (key==269) then  ZOOM = ZOOM + 0.1;  end
     if (key==270) then  ZOOM = ZOOM - 0.1;  end
+
+    if (key==32) then  
+       ZSELECT = (ZSELECT + math.pi/2) % (2*math.pi);  
+       --YANG = ((YANG - math.pi/2) % (math.pi*2));
+       --XANG = ((XANG + math.pi/2) % (math.pi*2));
+    
+
+      YANG = ((YANG + math.pi/2) % (math.pi*2));
+      XANG = ((XANG + math.pi/2) % (math.pi*2));
+      YANG = ((YANG - math.pi/2) % (math.pi*2));
+    end -- Rotate Z 90 Degrees
+
     SPEED = math.pi / 100
  
 
@@ -411,7 +440,7 @@ while 1 < 2 do
   end
   XANG = ((XANG - XD) % (math.pi*2));
   YANG = ((YANG + YD) % (math.pi*2));
-  ZANG = 0
+  ZANG = ZSELECT
  end 
 
  if ANIM == 1 then
@@ -424,8 +453,8 @@ while 1 < 2 do
   --YANG = ((mouse_x - CX) / 200  % (math.pi*2));
   --ZANG = 0
 
+ statusmessage("x"..math.floor(XANG*57.3).."° y"..math.floor(YANG*57.3).."° z"..math.floor(ZANG*57.3).."° Zm: "..math.floor(-ZOOM*10).."   ")
 
-  statusmessage("X: "..math.floor(XANG*57.3).."°, Y: "..math.floor(YANG*57.3).."°, Z: "..math.floor(ZANG*57.3).."°, Zoom: "..math.floor(-ZOOM*10).."   ")
 end
 
 end -- OK

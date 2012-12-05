@@ -29,7 +29,7 @@
 #include "struct.h"
 #include "loadsave.h"
 
-byte Button_Load_or_Save(byte load, T_IO_Context *context);
+byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context *context);
 
 void Add_element_to_list(T_Fileselector *list, const char * full_name, const char *short_name, int type, byte icon);
 ///
@@ -55,5 +55,7 @@ void Locate_list_item(T_List_button * list, short selected_item);
 int Quicksearch_list(T_List_button * list, T_Fileselector * selector);
 
 void Reset_quicksearch(void);
+
+extern T_Selector_settings * Selector;
 
 #endif

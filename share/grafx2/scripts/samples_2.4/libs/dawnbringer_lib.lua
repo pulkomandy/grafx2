@@ -1,4 +1,4 @@
---DawnBringer function library v1.1
+--DawnBringer function library v1.14 (some drawing replaced)
 --** THIS IS NOT A RUNNABLE SCRIPT! **
 --by Richard Fhager 
 -- http://hem.fyristorg.com/dawnbringer/
@@ -12,11 +12,11 @@
 -- You may access these functions in your own scripts by loading this library,
 -- just add the follwing line as one of the first instructions:
 --
--- require("dawnbringer_lib")
+-- run("dawnbringer_lib")
 --
 -- or
 --
--- dofile("dawnbringer_lib.lua") 
+-- run("../libs/dawnbringer_lib.lua") 
 --
 --
 -- Note that the functions must be called with the full library object-name, "db.function_name..."
@@ -67,6 +67,8 @@ function db.sign(v)
 end
 --
 
+function db.distance(ax,ay,bx,by) return math.sqrt((ax-bx)^2 + (ay-by)^2); end
+
 --
 function db.rotation (rot_ang,hub_x,hub_y,x,y) -- Rotate coordinates x & y relative hub
   local new_ang,dist,m,xd,yd,v; m = math 
@@ -80,6 +82,18 @@ function db.rotation (rot_ang,hub_x,hub_y,x,y) -- Rotate coordinates x & y relat
    y = hub_y + m.cos(new_ang)*dist;
   end
   return math.floor(x),math.floor(y) -- For drawing purposes
+end
+--
+
+--
+function db.recursiveSum(div,rlev) -- divisons per recursion,recursion levels
+ local s,i,m
+ s,m = 1,1
+ for i = 1, rlev, 1 do
+  m = m*div
+  s = s + m
+ end
+ return s
 end
 --
 
@@ -175,6 +189,17 @@ end
 -- to add a set of my own of known performance.
 
 --
+function db.newArrayInit(xs,val) 
+  local x,ary; ary = {}
+   for x = 1, xs, 1 do
+     ary[x] = val
+   end
+  return ary
+end
+--
+
+
+--
 function db.newArrayInit2Dim(xs,ys,val) 
   local x,y,ary; ary = {}
   for y = 1, ys, 1 do
@@ -246,6 +271,45 @@ function db.ary2txt(ary) -- One & two dimensions supported [a,b] -> "a,b". [[a,b
 end
 --
 
+--
+-- *** Array data manipulation ***
+--
+
+--
+-- InsertionSort Array, this is chaos...I'm confused and stomped...don't understand how Lua works...
+-- ...sorting seem be to ok but this code is ugly...
+-- Sort LO-HI
+--
+-- Screwed up or confused thing here I think, perhaps lo-hi/hi-lo. This is working lo-hi but the code
+-- looks like hi-lo...edit this some day
+-- 
+function db.sorti(d,idx) 
+   local a,j,tmp,l,e
+   l = #d
+
+   for a=2, l, 1 do
+    tmp = d[a];
+    e = a
+    for j=a, 2, -1 do  
+      e = j
+      if d[j-1][idx] > tmp[idx] then d[j] = d[j-1]; e = j-1; else break; end;
+    end;
+    d[e] = tmp; -- WHY THE F**K CAN'T YOU READ j HERE!?! STUPID ASSUCKING LANGUAGE 
+      
+   end;
+   --return d
+end
+--
+
+--
+function db.shuffle(list)
+ local i,n,t
+ for n = #list, 2, -1 do
+  i = 1+math.floor(math.random() * n)
+  t = list[n]; list[n] = list[i]; list[i] = t
+ end
+end
+--
 
 --
 -- ... eof Custom Array Functions ...
@@ -442,7 +506,7 @@ end
 
 
 --
-function db.makeComplimentaryColor(r,g,b,brikeeplev) -- Lev: 0 = Normal, 1 = Loose, 2 = Strict
+function db.makeComplementaryColor(r,g,b,brikeeplev) -- Lev: 0 = Normal, 1 = Loose, 2 = Strict
 
  local bri_o,bri_n,bdiff
 
@@ -955,12 +1019,29 @@ end
 -- ****************************************
 
 
+--# of Unique colors in palette:
+--#db.fixPalette(db.makePalList(256))
+
+--# of Colors in Image:
+--#db.makePalListFromHistogram(db.makeHistogram())
+
+--# of Unique colors in Image:
+--#db.fixPalette(db.makePalListFromHistogram(db.makeHistogram()))
+
 --
 function db.rgbcap(r,g,b,mx,mi)
  local m = math
  return m.max(mi,m.min(r,mx)), m.max(mi,m.min(g,mx)), m.max(mi,m.min(b,mx))
 end
 --
+
+--
+function db.rgbcapInt(r,g,b,mx,mi)
+ local m = math
+ return m.floor(m.max(mi,m.min(r,mx))), m.floor(m.max(mi,m.min(g,mx))), m.floor(m.max(mi,m.min(b,mx)))
+end
+--
+
 
 --
 function db.makePalList(cols)
@@ -1072,6 +1153,35 @@ end
 --
 function db.getColorDistance_weight(r1,g1,b1,r2,g2,b2,rw,gw,bw)
  return math.sqrt( (rw*(r1-r2))^2 + (gw*(g1-g2))^2 + (bw*(b1-b2))^2 ) 
+end
+--
+
+--
+-- Since brightness is exponential, each channel may work as a "star" drowning the color
+-- of a lesser channel. This algorithm is an approximation to adjust distances for this phenomenon.
+-- Ex: Adding 32 red to black is visually obvious, but adding 64 red to full green is almost 
+-- impossible to detect by the naked eye.
+--
+-- However this isn't a complete solution so we may weigh in brightness as well...
+--
+-- If cv = 0 (0..1) then prox acts as ordinary perceptual colordistance
+-- if bri = 1 (0..1) then distance is only that of brightness
+function db.getColorDistanceProx(r1,g1,b1,r2,g2,b2,rw,gw,bw,normalizer, cv,briweight)
+ local rp1,gp1,bp1,rp2,gp2,bp2,v,m1,m2,prox,bdiff; v = 2*255*255
+ m1 = math.max(r1,g1,b1)
+ m2 = math.max(r2,g2,b2)
+ rp1 = 1 - math.sqrt((r1-m1)^2 / v) * cv
+ gp1 = 1 - math.sqrt((g1-m1)^2 / v) * cv
+ bp1 = 1 - math.sqrt((b1-m1)^2 / v) * cv
+
+ rp2 = 1 - math.sqrt((r2-m2)^2 / v) * cv
+ gp2 = 1 - math.sqrt((g2-m2)^2 / v) * cv
+ bp2 = 1 - math.sqrt((b2-m2)^2 / v) * cv
+
+ bdiff = math.abs(db.getBrightness(r1,g1,b1) - db.getBrightness(r2,g2,b2)) -- weights are hardcoded in function
+ prox = math.sqrt( (rw*(r1*rp1-r2*rp2))^2 + (gw*(g1*gp1-g2*gp2))^2 + (bw*(b1*bp1-b2*bp2))^2 ) * normalizer
+
+  return prox * (1-briweight) + bdiff * briweight
 end
 --
 
@@ -1234,7 +1344,7 @@ function db.matchcolorHSB(h,s,b,pallist,index_flag)
  end
 
  if index_flag == true then
-  bestcol = palList[bestcol][4] + 1 -- Since we detract 1 on return, God Lua is stupid 
+  bestcol = pallist[bestcol][4] + 1 -- Since we detract 1 on return, God Lua is stupid 
  end
 
  return bestcol-1
@@ -1243,7 +1353,8 @@ end
 --
 
 --
--- Used by PaletteAnalysis.lua, FindRamps(), MixColors()
+-- Used by PaletteAnalysis.lua, FindRamps(), MixColors() etc.
+-- Assigns is used by ApplySpare script
 --
 function db.fixPalette(pal,sortflag) -- Arrange palette & only keep unique colors
 
@@ -1251,7 +1362,8 @@ function db.fixPalette(pal,sortflag) -- Arrange palette & only keep unique color
  ulist = {}
  indexpal = {}
  newpal = {}
-  local doubles; doubles = {}
+  local doubles,assign 
+  doubles = {}; assign = {}
 
  l = #pal
 
@@ -1263,9 +1375,11 @@ function db.fixPalette(pal,sortflag) -- Arrange palette & only keep unique color
    bri = db.getBrightness(rgb[1],rgb[2],rgb[3])
    if indexpal[i] == nil then 
       indexpal[i] = rgb; ulist[unique] = {i,bri}; unique = unique+1;
+      assign[rgb[4]+1] = rgb[4] -- really n, but can we be sure?
       else
-        doubles[rgb[4]] = true; -- Mark as double
+        doubles[rgb[4]] = true; -- Mark as double (This is wrong; starts at 0...but col 0 cannot be a double so...)
         dtot = dtot + 1
+        assign[rgb[4]+1] = indexpal[i][4] -- Reassign removed color
    end
  end
 
@@ -1277,6 +1391,7 @@ function db.fixPalette(pal,sortflag) -- Arrange palette & only keep unique color
   newpal[n] = indexpal[ulist[n][1]]
  end
 
+ newpal["assigns"] = assign -- Complete list of image color assigns (removed cols will point to 1st occurence)
  newpal["doubles"] = doubles
  newpal.double_total = dtot
 
@@ -1284,32 +1399,6 @@ function db.fixPalette(pal,sortflag) -- Arrange palette & only keep unique color
 
  return newpal
 
-end
---
-
---
--- InsertionSort Array, this is chaos...I'm confused and stomped...don't understand how Lua works...
--- ...sorting seem be to ok but this code is ugly...
--- Sort LO-HI
---
--- Screwed up or confused thing here I think, perhaps lo-hi/hi-lo. This is working lo-hi but the code
--- looks like hi-lo...edit this some day
--- 
-function db.sorti(d,idx) 
-   local a,j,tmp,l,e
-   l = #d
-
-   for a=2, l, 1 do
-    tmp = d[a];
-    e = a
-    for j=a, 2, -1 do  
-      e = j
-      if d[j-1][idx] > tmp[idx] then d[j] = d[j-1]; e = j-1; else break; end;
-    end;
-    d[e] = tmp; -- WHY THE F**K CAN'T YOU READ j HERE!?! STUPID ASSUCKING LANGUAGE 
-      
-   end;
-   --return d
 end
 --
 
@@ -1353,6 +1442,59 @@ end
 --
 
 --
+function db.polarHSBdiagram(ox,oy,radius,pol,brilev,huelev,saturation,dark2bright_flag)
+
+local pal,bstep,bstep2,hstep,hstep2,bri,hue,sx,sy,cx,cy,x,y,p1,p2,c
+
+pal = db.addHSBtoPalette(db.fixPalette(db.makePalList(256)))
+
+bstep = radius / (brilev + pol)
+bstep2 = bstep / 2
+hstep = -360 / huelev
+hstep2 = hstep / 2
+
+c = 255; if dark2bright_flag then c = 0; end
+drawdisk(ox,oy,math.ceil(pol*bstep),matchcolor(c,c,c)) 
+
+for y=pol, brilev+pol-1,1 do
+ 
+ bri = (brilev - y + pol) * (256 / brilev)
+
+ if dark2bright_flag then
+  bri = (brilev - (brilev - y + pol)) * (256 / brilev)
+ end
+
+ for x=0, huelev-1,1 do
+
+  hue = x * (360 / huelev) * 255/360
+
+  c = db.matchcolorHSB(hue,saturation,bri,pal,true)
+
+  sx = ox
+  sy = oy - y*bstep
+
+  cx,cy = db.rotationFrac(x*hstep,ox,oy,sx,sy) 
+
+  x1,y1 = db.rotation(x*hstep-hstep2,ox,oy,ox, sy-bstep2) 
+  x2,y2 = db.rotation(x*hstep+hstep2,ox,oy,ox, sy-bstep2) 
+  x3,y3 = db.rotation(x*hstep-hstep2,ox,oy,ox, sy+bstep2) 
+  x4,y4 = db.rotation(x*hstep+hstep2,ox,oy,ox, sy+bstep2) 
+
+  p1 = {{x1,y1},{x2,y2},{x3,y3}}
+  p2 = {{x3,y3},{x4,y4},{x2,y2}}
+
+  db.fillTriangle(p1,c,0,true,false) -- triangle, fillcol, linecol, fill, wire
+  db.fillTriangle(p2,c,0,true,false)
+
+ end
+ updatescreen(); if (waitbreak(0)==1) then return; end
+end
+
+end -- polarHSB
+--
+
+
+--
 -- Histograms, remapping etc.
 --
 
@@ -1365,6 +1507,24 @@ function db.makeHistogram()
     for x = 0, w - 1, 1 do
       c = getpicturepixel(x,y)
       list[c+1] = list[c+1] + 1
+    end
+  end
+  return list
+end
+--
+
+--
+function db.makeHistogramIndexed() -- With color index so it can be sorted etc.
+  local n,y,x,c,w,h,r,g,b,list; list = {}
+  w, h = getpicturesize()
+  for n = 1, 256, 1 do
+   r,g,b = getcolor(n-1)
+   list[n] = {0,n-1,r,g,b}; 
+  end
+  for y = 0, h - 1, 1 do
+    for x = 0, w - 1, 1 do
+      c = getpicturepixel(x,y)
+      list[c+1][1] = list[c+1][1] + 1
     end
   end
   return list
@@ -1439,6 +1599,27 @@ function db.remap(org) -- Working with a remap-list there's no need of reading b
   end
   if s then messagebox("Remapping: Not all image colors were found in remap-list (re-assign), probably due to duplicate removal. Matchcolor was used, ex: col# "..col); 
   end
+end
+--
+
+--
+-- Same as db.remap but no comments
+--
+function db.remapImage(colassignlist) -- assignment list is optional
+ local x,y,c,w,i,h,assign
+ assign = false
+ if colassignlist ~= null then assign = true; end
+ w,h = getpicturesize()
+ for y = 0, h-1, 1 do
+   for x = 0, w-1, 1 do
+    c = getbackuppixel(x,y)
+    i = null; if assign then i = colassignlist[c+1]; end
+    if not assign or i == null then
+     i = matchcolor(getbackupcolor(c))
+    end
+    putpicturepixel(x,y,i)
+ end
+ end
 end
 --
 
@@ -1564,7 +1745,7 @@ function db.deCluster(pallist, hist, crad, prot_pow, pixels, rw,gw,bw)
     end
     cPalList = newPalList
     --messagebox("Pal length: "..#cPalList)
-   statusmessage("DeCluster - Image colors:"..#cPalList.."                       "); waitbreak(0)
+   statusmessage("DC - Image colors: "..#cPalList.."                       "); waitbreak(0)
   end -- fuse
 
  end -- while
@@ -1586,6 +1767,446 @@ function db.deCluster(pallist, hist, crad, prot_pow, pixels, rw,gw,bw)
 end; -- decluster
 
 
+
+-- ------------- MEDIAN CUT V1.0 ------------
+--
+--   256 color Palette Lua-version (converted from Evalion JS-script)
+--
+--   by Richard 'DawnBringer' Fhager
+--
+--
+-- pal:    [[r,g,b,i]]  Pallist
+-- cnum:                Target number of colors in reduced palette
+-- (step:)   1..          Pixel picks for processing, 1 = all pixels in image, best and slowest. 2 = 25% of pixels
+-- qual:   Flag         Qualitative color selection (Normal mode)
+-- quant:  Flag         Quantative color/pixel selection (Histogram) 100% mean that it count as much as quality
+--  (One of or both qual/quant must be selected)
+-- rgbw:   [3]          RGB-weights []. Weigh the color channels. ex: [1,1.333,0.75]
+-- bits:   1-8          Bits used for each color channel in palette
+-- quantpow:            0..1
+--
+-- return: A palette! A list of [r,g,b] values
+--
+-- NOTE: Quantity will act as a counterforce to altered colorspace (weights)...
+-- Ex: if Green is considered bigger, it will be split into more blocks 
+--     but each blocks will have less colors and thus less quantity.
+--
+-- Perceptual colorspace (rgb-weights) will generally produce the best quality of palettes, but if
+-- It's desirable to preserve stronger colors, esp. in small palettes, 
+-- it can be good to just use nominal space: 1,1,1
+--
+-- Histogram may be useful to assign more colors to an object that already covers most of the image,
+-- however; if the object of interest is small in relation to a large (unimportant) background, it's
+-- usually best not to have any histogram at all. Histogram will dampen strong infrequent colors.
+
+
+function db.medianCut(pal,cnum,qual,quant,rgbw,bits,quantpow)
+ local n,x,y,xs,ys,rgb,blocklist,blocks
+ local len,res,chan,diff,maxdiff,maxblock,split
+ local qualnorm, quantnorm 
+
+ -- Normalize 256 for quality/quantity relationship
+ qualnorm =  1 / math.sqrt(rgbw[1]^2 + rgbw[2]^2 + rgbw[3]^2)
+ quantnorm = 256 / #pal 
+
+ blocklist = {}
+ blocklist[1] = {}; blocks = 1
+
+ for n=1, #pal, 1 do 
+  blocklist[1][n] = pal[n]; 
+ end
+
+ analyzeBlock(blocklist[1],qual,quant,rgbw,qualnorm,quantnorm,quantpow)
+
+ failsafe = 0
+ while (blocks < cnum and failsafe < 256) do
+   failsafe = failsafe + 1
+  maxdiff  = -1
+  maxblock = -1
+  for n=1, blocks, 1 do
+    diff = blocklist[n].diff
+    if (diff > maxdiff) then maxdiff = diff; maxblock = n; end -- maxchan is stored as .chan in block
+  end
+  split = splitBlock(blocklist,maxblock,qual,quant,rgbw,qualnorm,quantnorm,quantpow)
+  --if (split == false){ alert("Only found " + blocks + " (24-bit) colors!"); break;  }
+  blocks = #blocklist
+  --status.value = "MC: " +blocks
+ end -- while
+
+ return blocks2Palette(blocklist,bits)
+
+end
+--
+
+--
+function blocks2Palette(blocklist,bits)
+ local n,r,g,b,c,pal,block,rgb,blen,M,dB,cB,rf,gf,bf
+ 
+ M = math
+ pal = {}
+
+ --bits = 1
+ dB = M.pow(2,8-bits)
+ cB = M.ceil(255 / (M.pow(2,bits) - 1))
+
+ for n=1, #blocklist, 1 do
+  block = blocklist[n]
+  r,g,b = 0,0,0
+  blen = #block
+  for c=1, blen, 1 do
+   rgb = block[c]
+   r = r + rgb[1]
+   g = g + rgb[2]
+   b = b + rgb[3]
+  end
+
+  rf = M.floor(M.min(255,M.max(0,M.floor(r/blen))) / dB) * cB
+  gf = M.floor(M.min(255,M.max(0,M.floor(g/blen))) / dB) * cB
+  bf = M.floor(M.min(255,M.max(0,M.floor(b/blen))) / dB) * cB
+
+  pal[n] = {rf, gf, bf, 0} -- col is avg. of all colors in block (index is set (to 0) for compatibility)
+ end -- blocklist
+
+ return pal
+end
+--
+
+--
+function analyzeBlock(block,qual,quant,rgbw,qualnorm,quantnorm,quantpow)
+ local r,g,b,n,rmin,gmin,bmin,rmax,gmax,bmax,rdif,gdif,bdif,chan,d,median,diff
+ local len,Mm,Mx,rgb,kv,qu
+ 
+ Mx,Mm = math.max, math.min
+ len = #block
+
+ rmin,gmin,bmin = 255,255,255
+ rmax,gmax,bmax = 0,0,0
+
+ for n=1, len, 1 do
+  rgb = block[n]
+  r = rgb[1] * rgbw[1] 
+  g = rgb[2] * rgbw[2] 
+  b = rgb[3] * rgbw[3] 
+  --if (!isNaN(r) and !isNaN(g) and !isNaN(b)) then -- Ignore any erroneous data
+   rmin = Mm(rmin,r)
+   gmin = Mm(gmin,g)
+   bmin = Mm(bmin,b)
+   rmax = Mx(rmax,r)
+   gmax = Mx(gmax,g)
+   bmax = Mx(bmax,b)
+  --end
+ end
+ 
+ rdif = (rmax - rmin) -- * rgbw[1] 
+ gdif = (gmax - gmin) -- * rgbw[2]
+ bdif = (bmax - bmin) -- * rgbw[3] 
+
+ d = {{rmin,rdif,rmax},{gmin,gdif,gmax},{bmin,bdif,bmax}}
+
+ chan = 1 -- Widest channel
+ if (gdif > rdif) then chan = 2; end 
+ if (bdif > rdif and bdif > gdif) then chan = 3; end
+ 
+ -- Ok, this is the average of the max/min value rather than an actual median
+ -- I guess this will fill the colorspace more uniformly and perhaps select extremes to a greater extent?
+ -- Which is better? 
+ --median = d[chan][1] + d[chan][2] / 2 -- OLD same as median with nominal weights
+ 
+ median = (d[chan][1] + d[chan][3]) / 2 
+
+ -- quantity and quality are normalized to 256 (256 is the total of colors in the set for quantity)
+ -- Note that, regardless of forumla, quality (distance) must always be greater in any block than quantity (colors/pixels)
+ -- Coz a block may contain many of only 1 unique color, thus rendering it impossible to split if selected.
+ kv = 1
+ qu = 1
+ if (quant) then kv = 1 + len*quantnorm*quantpow; end
+ if (qual)  then qu = d[chan][2] * qualnorm; end
+ diff = qu + qu*kv^2.5
+
+ block.chan   = chan
+ block.diff   = diff
+ block.median = median
+
+ return {chan,diff,median,len}
+
+end
+--
+
+function splitBlock(blocklist,maxblock,qual,quant,rgbw,qualnorm,quantnorm,quantpow)
+  local n,cmax,median,blockA,blockB,len,cB,block,rgb,res
+  
+  blockA,blockB = {},{}
+  block = blocklist[maxblock]
+
+  res = true
+
+  chan   = block.chan 
+  median = block.median  
+
+  cB = blocklist[maxblock] -- maxblock starts at 1 when called so it should not hava a +1
+  len = #cB
+
+  for n=1, len, 1 do
+    rgb = cB[n]
+    --if (rgb[chan] >= median) then blockA.push(rgb); end
+    --if (rgb[chan] <  median) then blockB.push(rgb); end
+    if (rgb[chan]*rgbw[chan] >= median) then table.insert(blockA,rgb); end
+    if (rgb[chan]*rgbw[chan] <  median) then table.insert(blockB,rgb); end
+  end
+
+  blocklist[maxblock] = blockA  -- Can't be empty right?
+  analyzeBlock(blocklist[maxblock],qual,quant,rgbw,qualnorm,quantnorm,quantpow)
+
+  if (#blockB > 0) then
+   table.insert(blocklist,blockB)
+   analyzeBlock(blocklist[#blocklist],qual,quant,rgbw,qualnorm,quantnorm,quantpow) -- no -1 on blocklist
+   else 
+    res = false
+  end
+
+  return res -- false = no split
+end
+
+------------ eof MEDIAN CUT --------------------------
+
+
+-- ------------- MEDIAN REDUX V1.0 ------------
+--
+--  Divide space by greatest distance of any two colors (rather than MC-method of any given channel)
+--  Basically it allows colorspace to be sliced at any angles rather than the "boxing" of MC.
+--
+--
+--   by Richard 'DawnBringer' Fhager
+--
+--
+-- pal:    [[r,g,b,i,h]]  Pallist (h = histogram/pixelcount)
+-- cnum:                Target number of colors in reduced palette
+-- (step:)   1..          Pixel picks for processing, 1 = all pixels in image, best and slowest. 2 = 25% of pixels
+-- qual:   Flag         Qualitative color selection (Normal mode)
+-- quant:  Flag         Quantative color/pixel selection (Histogram) 100% mean that it count as much as quality
+--  (One of or both qual/quant must be selected)
+-- rgbw:   [3]          RGB-weights []. Weigh the color channels. ex: [0.26, 0.55, 0.19]
+-- bits:   1-8          Bits used for each color channel in palette
+-- quantpow: 0..1	Quantity vs Quality (put weight into histogram/pixelcount)
+-- briweight: 0..1	Brightness distance weight in colordistance
+-- proxweight: 0..1	Primary Proximity distance weight in colordistance (ColorTheory-WIP: compensate for brightness of individual channels, the "extra power" of primary colors)	
+--
+-- return: A palette! A list of [r,g,b] values
+--
+-- NOTE: Quantity will act as a counterforce to altered colorspace (weights)...
+-- Ex: if Green is considered bigger, it will be split into more blocks 
+--     but each blocks will have less colors and thus less quantity.
+--
+-- Perceptual colorspace (rgb-weights) will generally produce the best quality of palettes, but if
+-- It's desirable to preserve stronger colors, esp. in small palettes, 
+-- it can be good to just use nominal space: 0.33, 0.33, 0.33
+--
+-- Histogram may be useful to assign more colors to an object that already covers most of the image,
+-- however; if the object of interest is small in relation to a large (unimportant) background, it's
+-- usually best not to have any histogram at all. Histogram will dampen strong infrequent colors.
+
+
+function db.medianRedux(pal,cnum,qual,quant,rgbw,bits,quantpow, briweight, proxweight) -- pal[r,g,b,i,pixelcount]
+ local n,x,y,xs,ys,rgb,blocklist,blocks
+ local len,res,chan,diff,maxdiff,maxblock,split
+ local qualnorm, quantnorm,count
+
+ blocklist = {}
+ blocklist[1] = {}; blocks = 1
+
+ count = 0
+ for n=1, #pal, 1 do 
+  blocklist[1][n] = pal[n]; 
+  count = count + pal[n][5]
+ end
+
+ -- Normalize 256 for quality/quantity relationship
+ qualnorm =  1 / math.sqrt(rgbw[1]^2 + rgbw[2]^2 + rgbw[3]^2)
+ quantnorm = 256 / count
+
+
+ -- Dist table
+ statusmessage("MR: Making Distance Table..."); updatescreen(); if (waitbreak(0)==1) then return; end
+ local dy,c,r1,g1,b1,i1,i2
+ dt = {}
+ for n=1, #pal, 1 do
+  c = pal[n]
+  r1,g1,b1,i1 = c[1],c[2],c[3],c[4]
+  dt[i1+1] = {}
+  for m=1, #pal, 1 do
+   dt[i1+1][pal[m][4]+1] = db.getColorDistanceProx(r1,g1,b1,pal[m][1],pal[m][2],pal[m][3],rgbw[1],rgbw[2],rgbw[3],qualnorm, proxweight, briweight) -- pri/bri
+  end
+ end
+ --
+
+ statusmessage("MR: Analyzing Block 1..."); updatescreen(); if (waitbreak(0)==1) then return; end
+ r_analyzeBlock(dt,blocklist[1],qual,quant,rgbw,qualnorm,quantnorm,quantpow)
+
+ statusmessage("MR: Analyzing Blocks..."); updatescreen(); if (waitbreak(0)==1) then return; end
+ failsafe = 0
+ while (blocks < cnum and failsafe < 256) do
+   failsafe = failsafe + 1
+  maxdiff  = -1
+  maxblock = -1
+  for n=1, blocks, 1 do
+    diff = blocklist[n].diff
+    if (diff > maxdiff) then maxdiff = diff; maxblock = n; end -- maxchan is stored as .chan in block
+  end
+  split = r_splitBlock(dt,blocklist,maxblock,qual,quant,rgbw,qualnorm,quantnorm,quantpow)
+  if (split == false) then messagebox("Only found "..blocks.." (24-bit) colors!"); break; end
+  blocks = #blocklist
+  statusmessage("MR: "..blocks); updatescreen(); if (waitbreak(0)==1) then return; end
+ end -- while
+
+ return r_blocks2Palette(blocklist,bits)
+
+end
+--
+
+--
+function r_blocks2Palette(blocklist,bits)
+ local n,r,g,b,c,pal,block,rgb,blen,M,dB,cB,rf,gf,bf
+ 
+ M = math
+ pal = {}
+
+ --bits = 1
+ dB = M.pow(2,8-bits)
+ cB = M.ceil(255 / (M.pow(2,bits) - 1))
+
+ for n=1, #blocklist, 1 do
+  block = blocklist[n]
+  r,g,b = 0,0,0
+  blen = #block
+  for c=1, blen, 1 do
+   rgb = block[c]
+   r = r + rgb[1]
+   g = g + rgb[2]
+   b = b + rgb[3]
+  end
+
+  rf = M.floor(M.min(255,M.max(0,M.floor(r/blen))) / dB) * cB
+  gf = M.floor(M.min(255,M.max(0,M.floor(g/blen))) / dB) * cB
+  bf = M.floor(M.min(255,M.max(0,M.floor(b/blen))) / dB) * cB
+
+  pal[n] = {rf, gf, bf} -- col is avg. of all colors in block
+ end -- blocklist
+
+ return pal
+end
+--
+
+--
+function r_analyzeBlock(dt,block,qual,quant,rgbw,qualnorm,quantnorm,quantpow)
+ local r,g,b,n,m,rmin,gmin,bmin,rmax,gmax,bmax,rdif,gdif,bdif,chan,d,median,diff
+ local len,Mm,Mx,rgb,kv,qu
+ local maxdist,dist,r1,g1,b1,r2,g2,b2,c1,c2,count
+
+ Mx,Mm = math.max, math.min
+ len = #block
+
+ rmin,gmin,bmin = 255,255,255
+ rmax,gmax,bmax = 0,0,0
+ 
+ maxdist,c1,c2,count = 0,-1,-1,0
+
+ for n=1, len, 1 do
+   rgb1 = block[n]
+   count = count + rgb1[5] -- pixelcount for color
+  for m=n+1, len, 1 do
+   rgb2 = block[m]
+   --dist = db.getColorDistanceProx(r1,g1,b1,r2,g2,b2,0.26,0.55,0.19,1.569, 0.1, 0.25) -- pri/bri
+   dist = dt[rgb1[4]+1][rgb2[4]+1] 
+
+   if dist > maxdist then
+    maxdist = dist
+    c1 = rgb1[4]+1
+    c2 = rgb2[4]+1
+   end 
+ 
+  end
+ end
+ 
+ -- quantity and quality are normalized to 256 (256 is the total of colors in the set for quantity)
+ -- Note that, regardless of forumla, quality (distance) must always be greater in any block than quantity (colors/pixels)
+ -- Coz a block may contain many of only 1 unique color, thus rendering it impossible to split if selected.
+ kv = 1
+ qu = 1
+ if (quant) then kv = math.pow(1 + count*quantnorm*quantpow, 0.5); end
+ if (qual)  then qu = maxdist * qualnorm; end
+ diff = qu*(1-quantpow) + qu*kv
+
+ block.chan   = -1
+ block.diff   = diff
+ block.median = -1
+ block.c1     = c1
+ block.c2     = c2 
+
+ return {diff,len}
+
+end
+--
+
+function r_splitBlock(dt,blocklist,maxblock,qual,quant,rgbw,qualnorm,quantnorm,quantpow)
+  local n,cmax,median,blockA,blockB,len,cB,block,rgb,res
+  local c1,c2,dist1,dist2,medr,medg,medb,r1,g1,b1,r2,g2,b2,rgb1,rgb2  
+
+  blockA,blockB = {},{}
+  block = blocklist[maxblock]
+
+  res = true
+
+  --chan   = block.chan 
+  --median = block.median  
+  c1 = block.c1
+  c2 = block.c2
+
+  --rgb1 = block[c1]
+  --r1,g1,b1 = rgb1[1],rgb1[2],rgb1[3]
+  --rgb2 = block[c2]
+  --r2,g2,b2 = rgb2[1],rgb2[2],rgb2[3]
+  --medr = (r1+r2)/2
+  --medg = (g1+g2)/2
+  --medb = (b1+b2)/2
+
+  cB = blocklist[maxblock] -- maxblock starts at 1 when called so it should not hava a +1
+  len = #cB
+
+  if len < 2 then return false; end
+
+  for n=1, len, 1 do
+    rgb = cB[n]
+  
+     dist1 = dt[rgb[4]+1][c1]
+     dist2 = dt[rgb[4]+1][c2]
+
+    if (dist1 <= dist2) 
+     then table.insert(blockA,rgb); 
+    end
+
+    if (dist1 > dist2) then 
+     table.insert(blockB,rgb); 
+    end
+  end
+
+  blocklist[maxblock] = blockA  -- Can't be empty right?
+  r_analyzeBlock(dt,blocklist[maxblock],qual,quant,rgbw,qualnorm,quantnorm,quantpow)
+
+  if (#blockB > 0) then
+   table.insert(blocklist,blockB)
+   r_analyzeBlock(dt,blocklist[#blocklist],qual,quant,rgbw,qualnorm,quantnorm,quantpow) -- no -1 on blocklist
+   else 
+    res = false
+  end
+
+  return res -- false = no split
+end
+
+------------ eof MEDIAN REDUX --------------------------
+
+
+
+
 --
 -- ... eof Custom Color / Palette functions ...
 --
@@ -1594,6 +2215,18 @@ end; -- decluster
 -- *****************************
 -- *** Custom Draw functions ***
 -- *****************************
+
+--
+function db.line(x1,y1,x2,y2,c) -- Coords should be integers or broken lines are possible
+ local n,st,m,xd,yd; m = math
+ st = m.max(1,m.abs(x2-x1),m.abs(y2-y1));
+ xd = (x2-x1) / st
+ yd = (y2-y1) / st
+ for n = 0, st, 1 do
+   putpicturepixel(m.floor(x1 + n*xd), m.floor(y1 + n*yd), c );
+ end
+end
+--
 
 --
 function db.lineTransp(x1,y1,x2,y2,c,amt) -- amt: 0-1, 1 = Full color
@@ -1624,7 +2257,12 @@ end
 
 --
 function db.drawRectangle(x1,y1,w,h,c)
-	drawfilledrect(x1, y1, x1+w, y1+w, c);
+   local x,y
+   for y = y1, y1+h-1, 1 do
+    for x = x1, x1+w-1, 1 do
+       putpicturepixel(x,y,c);
+    end
+   end
 end
 --
 
@@ -1647,10 +2285,10 @@ end
 function db.drawRectangleLine(x,y,w,h,c)
  w = w-1
  h = h-1
- drawline(x,y,x+w,y,c)
- drawline(x,y,x,y+h,c)
- drawline(x,y+h,x+w,y+h,c)
- drawline(x+w,y,x+w,y+h,c)
+ db.line(x,y,x+w,y,c)
+ db.line(x,y,x,y+h,c)
+ db.line(x,y+h,x+w,y+h,c)
+ db.line(x+w,y,x+w,y+h,c)
 end
 --
 
@@ -1665,6 +2303,19 @@ function db.drawRectangleMix(x1,y1,w,h,c1,c2)
     for x = x1, x1+w-1, 1 do
        n = n + 1
        putpicturepixel(x,y,c[n%2+1]);
+    end
+   end
+end
+--
+
+--
+function db.drawCircle(x1,y1,r,c) -- ok, lottsa weird adjustments here, can probably be optimized...
+   local x,y,d,r5,r25,r2,xr5,yr5
+   r5,r25,r2,xr5,yr5 = r+0.5,r-0.25,r*2, x1-r-0.5, y1-r-0.5
+   for y = 0, r2, 1 do
+    for x = 0, r2, 1 do
+       d = math.sqrt((x-r5)^2 + (y-r5)^2)
+       if d < r25 then putpicturepixel(x + xr5, y + yr5,c); end
     end
    end
 end
@@ -1695,6 +2346,7 @@ function db.ellipse2(x,y,a,b,stp,rot,col)
   sa = m.sin(ast*n) * b; ca = m.cos(ast*n) * a
   x1 = x + ca * cb - sa * sb
   y1 = y + ca * sb + sa * cb
+  --if (n > 0) then db.line(ox,oy,x1,y1,col); end
   if (n > 0) then drawline(ox,oy,x1,y1,col); end
  end
 end
@@ -1746,40 +2398,57 @@ function ellipse2(x,y,a,b,stp,rot,rgb,transp){
 
 
 
-function db.obliqueCube(side,x,y,r,g,b,bri)
+function db.obliqueCube(side,x,y,r,g,b,bri,cols)
  local n,c,depth,x1,y1,x2,y2,f
 
+ asscols = false
+ if cols >= 0 and cols<250 then
+  asscols = true
+  c = cols;                   setcolor(cols,r,g,b);       cols = cols + 1
+  cP50 = cols; q =  bri*0.5;  setcolor(cols,r+q,g+q,b+q); cols = cols + 1; 
+  cP75 = cols; q =  bri*0.75; setcolor(cols,r+q,g+q,b+q); cols = cols + 1; 
+  cM50 = cols; q = -bri*0.5;  setcolor(cols,r+q,g+q,b+q); cols = cols + 1; 
+  cM100= cols; q = -bri;      setcolor(cols,r+q,g+q,b+q); cols = cols + 1; 
+ end
+
   f = matchcolor
-  c = f(r,g,b)
-  cP50 =  f(r+bri*0.5,g+bri*0.5,b+bri*0.5)
-  cP75 =  f(r+bri*0.75,g+bri*0.75,b+bri*0.75)
-  cM50 =  f(r-bri*0.5,g-bri*0.5,b-bri*0.5)
-  cM100 = f(r-bri,g-bri,b-bri)
+  if asscols == false then
+   c = f(r,g,b)
+   cP50 =  f(r+bri*0.5,g+bri*0.5,b+bri*0.5)
+   cP75 =  f(r+bri*0.75,g+bri*0.75,b+bri*0.75)
+   cM50 =  f(r-bri*0.5,g-bri*0.5,b-bri*0.5)
+   cM100 = f(r-bri,g-bri,b-bri)
+  end
+
 
  depth = math.floor(side / 2)
 
  for n = 0, depth-1, 1 do
-  drawline(x+side+n,y-1-n,x+side+n,y+side-n-1,cM50)
+  db.line(x+side+n,y-1-n,x+side+n,y+side-n-1,cM50)
+  --drawline(x+side+n,y-1-n,x+side+n,y+side-n-1,cM50)
  end
 
  for n = 0, depth-1, 1 do
-  drawline(x+n,y-1-n,x+side+n-1,y-1-n,cP50)
+  db.line(x+n,y-1-n,x+side+n-1,y-1-n,cP50)
+  --drawline(x+n,y-1-n,x+side+n-1,y-1-n,cP50)
  end
 
  --  /
  --   
- --drawline(x+side,y-1,x+side+depth-1,y-depth,c)
+ --db.line(x+side,y-1,x+side+depth-1,y-depth,c)
 
  -- Smoothing & Shade
 
  --
  --  /
- --drawline(x+side,y+side-1,x+side+depth-1,y+side-depth,cM100)
+ --db.line(x+side,y+side-1,x+side+depth-1,y+side-depth,cM100)
 
- --drawline(x,y,x+side-2,y,cP75)
- --drawline(x,y,x,y+side-2,cP75)
+ --db.line(x,y,x+side-2,y,cP75)
+ --db.line(x,y,x,y+side-2,cP75)
 
  db.drawRectangle(x,y,side,side,c)
+
+ return cols
 
 end
 
@@ -1799,29 +2468,99 @@ function db.obliqueCubeBRI(side,x,y,r,g,b,bri,pallist,briweight,index_flag)
  db.drawRectangle(x,y,side,side,c)
 
  for n = 0, depth-1, 1 do
-  drawline(x+side+n,y-1-n,x+side+n,y+side-n-1,cM50)
+  db.line(x+side+n,y-1-n,x+side+n,y+side-n-1,cM50)
+  --drawline(x+side+n,y-1-n,x+side+n,y+side-n-1,cM50)
  end
 
  for n = 0, depth-1, 1 do
-  drawline(x+n,y-1-n,x+side+n-1,y-1-n,cP50)
+  db.line(x+n,y-1-n,x+side+n-1,y-1-n,cP50)
+  --drawline(x+n,y-1-n,x+side+n-1,y-1-n,cP50)
  end
 
  --  /
  --   
- drawline(x+side,y-1,x+side+depth-1,y-depth,c)
+ db.line(x+side,y-1,x+side+depth-1,y-depth,c)
+ --drawline(x+side,y-1,x+side+depth-1,y-depth,c)
+
 
  -- Smoothing & Shade
 
  --
  --  /
- --drawline(x+side,y+side-1,x+side+depth-1,y+side-depth,cM100)
+ --db.line(x+side,y+side-1,x+side+depth-1,y+side-depth,cM100)
 
- --drawline(x,y,x+side-2,y,cP75)
- --drawline(x,y,x,y+side-2,cP75)
+ --db.line(x,y,x+side-2,y,cP75)
+ --db.line(x,y,x,y+side-2,cP75)
 
 
 end
 
+
+--
+function db.fillTriangle(p,fcol,lcol,fill,wire) -- p = list of 3 points
+
+ local n,x,y,x1,x2,y1,y2,xf,yf,len,mr
+ 
+ mr = math.floor
+
+ -- Convert to screen/matrix-coordinates
+ --if (mode == 'percent')  then xf = xx / 100; yf = yy / 100; end
+ --if (mode == 'fraction') then xf = xx; yf = yy; end
+ --if (mode ~= 'absolute') then screenilizeTriangle(p,xf,yf); end 
+
+ if (fill) then
+  local Ax,Ay,Bx,By,Cx,Cy,xd,a,b,yc,ABdy,BCdy,ABix,BCix,ACix
+
+  xd = {}
+
+  --sort(p,1)                    -- Find top and middle y-point
+  db.sorti(p,2)   
+
+  Ay = p[1][2]; Ax = p[1][1]
+  By = p[2][2]; Bx = p[2][1]
+  Cy = p[3][2]; Cx = p[3][1]
+
+  ABdy = By - Ay 
+  BCdy = Cy - By
+  ABix = (Bx - Ax) / ABdy
+  BCix = (Cx - Bx) / BCdy
+  ACix = (Cx - Ax) / (Cy - Ay)
+
+  a=1; b=2; 
+  if (ACix < ABix) then a=2; b=1; end
+  for y = 0, ABdy-1, 1 do -- Upper -1
+   xd[a] = mr(Ax + ABix * y)
+   xd[b] = mr(Ax + ACix * y) 
+   yc = y+Ay; 
+   for x=xd[1], xd[2], 1 do 
+    putpicturepixel(x,yc,fcol)
+   end
+  end
+
+  a=1; b=2; 
+  if (BCix < ACix) then a=2; b=1; end
+  for y = 0, BCdy, 1 do -- Lower
+   xd[a] = mr(Cx - BCix * y); 
+   xd[b] = mr(Cx - ACix * y)
+   yc = Cy-y; 
+   for x = xd[1], xd[2], 1 do 
+    putpicturepixel(x,yc,fcol)
+   end
+  end
+
+ end -- eof fill
+ 
+ if (wire) then
+  for n = 0, 2, 1 do -- Outline
+   x1 = p[n+1][1]; y1 = p[n+1][2]
+   x2 = p[1 + (n+1) % 3][1]; y2 = p[1 + (n+1) % 3][2]
+   --db.line(x1,y1,x2,y2,lcol) 
+   drawline(x1,y1,x2,y2,lcol)
+  end
+ end
+
+end -- eof fillTriangle
+--
 
 --
 -- ... eof Custom Draw functions ...
@@ -1875,7 +2614,9 @@ function db.applyConvolution2Pic(convmx,divisor,bias,neg,amt)
    g = go*amtr + (n2 + (n1 * g) / div)*amt 
    b = bo*amtr + (n2 + (n1 * b) / div)*amt 
    putpicturepixel(x,y,matchcolor(r,g,b))
- end;end;
+ end;
+  updatescreen(); if (waitbreak(0)==1) then return; end
+ end;
 
 end
 
@@ -2181,7 +2922,7 @@ function db.colormixAnalysisEXT(SHADES,pallist,ilist,custom_max_distance) -- Sha
 
   pairs = db.pairsFromList(ilist,0)            -- 0 for unique pairs only, pairs are entries in pallist
 
-  --messagebox(#pairs.." will now add colors to cube")
+ --messagebox(#pairs.." will now add colors to cube")
 
  cube = db.initColorCube(SHADES,{true,9999})
  for n = 1, #pallist, 1 do
@@ -2298,10 +3039,12 @@ function db.colormixAnalysisEXTnoshade(pallist,ilist,custom_max_distance)
    maxi = total * (custom_max_distance / 100)
   end
 
+ statusmessage("Mixcol Analysis ("..#pairs.." pairs) "); 
+ updatescreen(); if (waitbreak(0)==1) then return; end
+
  mix = {}
  found = 0
  for n = 1, #pairs, 1 do
-
    c1 = pallist[pairs[n][1]]
    c2 = pallist[pairs[n][2]]
    --0.26,0.55,0.19
@@ -2445,7 +3188,7 @@ function db.Lsys_draw(set,data,cx,cy,size,rot,rgb,rng,transp, speed)
 
       cl = matchcolor(col[1],col[2],col[3])
       --putpicturepixel(cx*w,cy*h,cl); 
-      --drawline(cx*w,cy*h,tx*w,ty*h,cl)
+      --db.line(cx*w,cy*h,tx*w,ty*h,cl)
       db.lineTransp(cx*w,cy*h,tx*w,ty*h,cl,transp) 
   
       cx = tx; cy = ty
@@ -2459,13 +3202,519 @@ end -- draw
 
 
 --
--- eof L-system
+-- eof L-system 
+--
+---------------------------------------------------------------------------------------
+
+
+
+-- ********************************************
+-- ***      COMPLEX SPECIAL FUNCTIONS       ***
+-- ********************************************
+--
+
+---------------------------------------------------------------------------------------
+--
+-- Render engine for mathscenes (Full Floyd-Steinberg dither etc)
+--
+function db.fsrender(f,pal,ditherprc,xdith,ydith,percep,xonly, ord_bri,ord_hue,bri_change,hue_change,BRIWEIGHT, wd,ht,ofx,ofy) -- f is function
+
+local w,h,i,j,c,x,y,r,g,b,d,fl,v,v1,v2,vt,vt1,vt2,dither,m,mathfunc,dpow,fsdiv,ord,d1a,d1b,briweight
+local d1,d2,o1,o2,ox,oy
+
+  -- percep is no longer used, matchcolor2 is always active, but the code is kept if there's ever a need to
+  -- study the effect of perceptual colorspaces versus matchcolor
+
+  if ord_bri == null then ord_bri = 0; end
+  if ord_hue == null then ord_hue = 0; end
+  if bri_change == null then bri_change = 0; end
+  if hue_change == null then hue_change = 0; end
+  if BRIWEIGHT == null then BRIWEIGHT = 0; end  
+
+  briweight = BRIWEIGHT / 100
+
+  ord = {{0,4,1,5},
+         {6,2,7,3},
+         {1,5,0,4},
+         {7,3,6,2}}
+
+ 
+   --i = ((ord[y % 4 + 1][x % 4 + 1])*28.444 - 99.55556)/100 * 16
+   
+      function hue(r,g,b,deg)
+         local i,brin,diff,brio,r2,g2,b2
+         r2,g2,b2 = db.shiftHUE(r,g,b,deg)
+         brio = db.getBrightness(r,g,b)
+         for i = 0, 5, 1 do -- 6 iterations, fairly strict brightness preservation
+          brin = db.getBrightness(r2,g2,b2)
+          diff = brin - brio
+          r2,g2,b2 = db.rgbcap(r2-diff, g2-diff, b2-diff, 255,0)
+         end
+        return r2,g2,b2
+       end
+
+
+
+fsdiv = 16
+if xonly == 1 then fsdiv = 7; end -- Only horizontal dither 
+
+dither = 0; if ditherprc > 0 then dither = 1; end
+
+-- When using standard error-diffusion brightness-matching is not really compatible
+--matchfunc = matchcolor2
+--if dither == 1 then matchfunc = matchcolor; end
+
+dpow = ditherprc / 100
+
+
+if wd == null then
+ w,h = getpicturesize()
+  else w = wd; h = ht
+end
+
+if ofx == null then
+ ox,oy = 0,0
+  else ox = ofx; oy = ofy
+end
+
+
+function cap(v)
+  return math.min(255,math.max(0,v))
+ end
+
+
+
+ --
+ fl = {}
+ fl[1] = {}
+ fl[2] = {}
+ i = 1
+ j = 2
+ --
+
+  -- Read the first 2 lines
+  v1 = ydith/2 + 0%2 * -ydith
+  v2 = ydith/2 + 1%2 * -ydith
+  for x = 0, w - 1, 1 do
+    d1a,d1b = 0,0
+    if ord_bri > 0 then
+     o1 = ord[0 % 4 + 1][x % 4 + 1]
+     d1a = (o1*28.444 - 99.55556)/100 * ord_bri
+     o2 = ord[1 % 4 + 1][(x+2) % 4 + 1] -- +2 To get it in right sequence for some reason
+     d1b = (o2*28.444 - 99.55556)/100 * ord_bri
+    end 
+   -- We skip Hue-ordering for now
+   vt1 = v1 + xdith/2 + (x+math.floor(0/2))%2 * -xdith + d1a
+   vt2 = v2 + xdith/2 + (x+math.floor(1))%2 * -xdith + d1b -- Ok, not sure why 1/2 doesn't make for a nice pattern so we just use 1
+   r,g,b = f(x, 0, w, h)
+   fl[i][x] = {cap(r+vt1),cap(g+vt1),cap(b+vt1)}
+   r,g,b = f(x, 1, w, h)
+   fl[j][x] = {cap(r+vt2),cap(g+vt2),cap(b+vt2)}
+  end
+
+for y = 0, h-1, 1 do
+ for x = 0, w-1, 1 do
+
+  o = fl[i][x]
+  r = o[1] + bri_change
+  g = o[2] + bri_change
+  b = o[3] + bri_change
+
+  if hue_change ~= 0 then
+   r,g,b = hue(r,g,b,hue_change)
+  end
+ 
+
+  --if percep == 0 then c = matchfunc(r,g,b); end 
+  --if percep == 1 then
+   -- --c = db.getBestPalMatchHYBRID({r,g,b},pal,0,true)
+   --c = matchcolor2(r,g,b,briweight)
+  --end
+
+  c = matchcolor2(r,g,b,briweight)
+
+  putpicturepixel(x+ox,y+oy,c)
+
+  if dither == 1 then
+   if x>1 and x<w-1 and y<h-1 then
+     rn,gn,bn = getcolor(c)
+     re = ((r - rn) / fsdiv) * dpow
+     ge = ((g - gn) / fsdiv) * dpow
+     be = ((b - bn) / fsdiv) * dpow
+     o = fl[i][x+1]; r,g,b = o[1],o[2],o[3]  
+     fl[i][x+1] = {cap(r+re*7), cap(g+ge*7), cap(b+be*7)}
+     if xonly ~= 1 then
+       o = fl[j][x]; r,g,b = o[1],o[2],o[3]    
+       fl[j][x] =   {cap(r+re*5), cap(g+ge*5), cap(b+be*5)}
+       o = fl[j][x-1]; r,g,b = o[1],o[2],o[3]    
+       fl[j][x-1] = {cap(r+re*3), cap(g+ge*3), cap(b+be*3)}
+       o = fl[j][x+1]; r,g,b = o[1],o[2],o[3]    
+       fl[j][x+1] = {cap(r+re), cap(g+ge), cap(b+be)}
+     end
+    end
+   end
+
+ end
+
+  vt = 0
+  v = ydith/2 + y%2 * -ydith
+  -- Flip ED lines and read the nextline
+  i,j = j,i
+  for x = 0, w - 1, 1 do
+
+    d1,d2 = 0,0
+    if ord_bri > 0 then
+     o = ord[y % 4 + 1][x % 4 + 1]
+     d1 = (o*28.444 - 99.55556)/100 * ord_bri
+    end 
+   
+   vt = v + xdith/2 + (x+math.floor(y/2))%2 * -xdith + d1
+   r,g,b = f(x, y+2, w, h)
+
+   if ord_hue > 0 then
+    o = ord[y % 4 + 1][x % 4 + 1]
+    d2 = (((o + 3.5) % 7) / 7 - 0.5) * ord_hue
+    r,g,b = hue(r,g,b,d2)
+   end
+  
+   fl[j][x] = {cap(r+vt),cap(g+vt),cap(b+vt)}
+  end
+ updatescreen(); if (waitbreak(0)==1) then return; end
+end
+
+
+end
+-------------------------------------------------------------------------------
+
+--
+-- ROTATE Image or Brush
+--
+-- target:     1 = Brush, 2 = Picture, 3 = Brush-to-Picture
+-- rot:        Rotation in degrees
+-- mode:       1 = Simple, 2 = Cosine Interpolation, 2 = BiLinear Interpolation
+-- spritemode: 0 = Off, 1 = On (Only match adjacent colors, use with Bilinear-Ip. for good result)
+-- resize:     0 = No, 1 = Yes (Resize Image/Brush to fit all gfx, otherwise clip)
+-- update:     0 = No, 1 = Yes (Update screen while drawing)
+-- xoffset:    For use with Brush-to-Picture operations
+-- yoffset:    For use with Brush-to-Picture operations
+--
+function db.doRotation(target,rot,mode,spritemode,resize,update, xoffset,yoffset)
+
+ local trg,f,w,h,x,y,r,g,b,c,hub_x,hub_y,x1,y1,x2,y2,x3,y3,x4,y4,dX,dY,dXs,dYs,ox,oy,mx,my,xp,yp,pal,func
+
+ function donothing(n)
+ end
+
+func = {
+ {getsize=getbrushsize,   setsize=setbrushsize,   clear=donothing,    get=getbrushbackuppixel, put=putbrushpixel},
+ {getsize=getpicturesize, setsize=setpicturesize, clear=clearpicture, get=getbackuppixel,      put=putpicturepixel},
+ {getsize=getbrushsize,   setsize=donothing,      clear=donothing,    get=getbrushbackuppixel, put=putpicturepixel}
+}
+trg = func[target]
+
+--
+function bilinear(ox,oy,w,h,func,mode) 
+ local xp1,xp2,yp1,yp2,r1,r2,r3,r4,g1,g2,g3,g4,b1,b2,b3,b4,r,g,b, c1,c2,c3,c4,pal,adjx,adjy
+           xp2 = ox - math.floor(ox)
+           yp2 = oy - math.floor(oy)
+
+           if mode == 1 then -- Cosinus curve (rather than linear), slightly sharper result (probably same as Photoshop)
+            xp2 = 1 - (math.cos(xp2 * math.pi) + 1)/2
+            yp2 = 1 - (math.cos(yp2 * math.pi) + 1)/2
+           end
+
+           xp1 = 1 - xp2
+           yp1 = 1 - yp2
+
+           c1 = func(math.floor(ox),math.floor(oy));
+           c2 = func(math.ceil(ox),math.floor(oy));
+           c3 = func(math.floor(ox),math.ceil(oy));
+           c4 = func(math.ceil(ox),math.ceil(oy));
+
+           r1,g1,b1 = getcolor(c1);
+           r2,g2,b2 = getcolor(c2);
+           r3,g3,b3 = getcolor(c3);
+           r4,g4,b4 = getcolor(c4);
+ 
+           pal = {{r1,g1,b1,c1},{r2,g2,b2,c2},{r3,g3,b3,c3},{r4,g4,b4,c4}} -- for SpriteMode ColorMatching
+
+           r = (r1*xp1 + r2*xp2)*yp1 + (r3*xp1 + r4*xp2)*yp2;
+           g = (g1*xp1 + g2*xp2)*yp1 + (g3*xp1 + g4*xp2)*yp2;
+           b = (b1*xp1 + b2*xp2)*yp1 + (b3*xp1 + b4*xp2)*yp2;
+
+           return r,g,b, pal
+end
+--
+
+ f = db.rotationFrac
+ w,h = trg.getsize()
+ hub_x = w / 2 - 0.5 -- Rotates 90,180 perfectly, not 45
+ hub_y = h / 2 - 0.5
+ --hub_x = w / 2
+ --hub_y = h / 2
+ x1,y1 = f (-rot,hub_x,hub_y,0,0) -- Rot is negative coz we read destination and write to source
+ x2,y2 = f (-rot,hub_x,hub_y,w-1,0)
+ x3,y3 = f (-rot,hub_x,hub_y,0,h-1)
+ x4,y4 = f (-rot,hub_x,hub_y,w-1,h-1)
+ dX  = (x2 - x1) / w
+ dY  = (y2 - y1) / w
+ dXs = (x4 - x2) / h
+ dYs = (y3 - y1) / h
+
+ adjx,adjy = 0,0
+ ox,oy = 0,0
+ if resize == 1 then
+  mx = math.ceil(math.max(math.abs(x1-hub_x),math.abs(x3-hub_x))) * 2 + 2
+  my = math.ceil(math.max(math.abs(y1-hub_y),math.abs(y3-hub_y))) * 2 + 2
+   if target == 3 then -- Center gfx at Brush-to-Picture
+    adjx = -mx/2
+    adjy = -my/2
+   end
+  ox = (mx - w) / 2
+  oy = (my - h) / 2
+  trg.setsize(mx,my)
+ end
+
+ trg.clear(0)
+
+ for y = -oy, h-1+oy, 1 do
+   RE,GE,BE = 0,0,0
+   for x = -ox, w-1+ox, 1 do
+    
+    xp = x1 + dX * x + dXs * y
+    yp = y1 + dY * x + dYs * y
+
+    if mode == 2 or mode == 3 then
+      r,g,b,pal = bilinear(xp,yp,w,h,trg.get, mode_co)
+      if spritemode == 1 then
+       c = db.getBestPalMatchHYBRID({r+RE,g+GE,b+BE},pal,0.65,true) -- Brightness do very little in general with 4 set colors
+        else c = matchcolor2(r+RE,g+GE,b+BE)
+      end
+       else c = trg.get(xp,yp)
+    end
+
+     --rn,gn,bn = getcolor(c)
+     --RE = (r - rn)*0.5
+     --GE = (g - gn)*0.5
+     --BE = (b - bn)*0.5
+
+     trg.put(x+ox+xoffset+adjx,y+oy+yoffset+adjy, c)
+   
+  end 
+   if update == 1 then
+    statusmessage("Working... %"..math.floor(((y+oy) / (h-1+2*oy))*100))
+    updatescreen(); if (waitbreak(0)==1) then return; end
+   end
+ end
+
+end; -- doRotation
+
+-------------------------------------------------------------------------------
+
+--
+-- PARTICLE v1.0
+-- 
+-- Draw Sphere or Disc to any target with gradients that may fade to background
+--
+-- type: "sphere" - volmetric planet-like disc
+--       "disc"   - plain disc
+-- mode: "blend"  - mix graphics with background color
+--       "add"    - add graphics to background color
+-- wd,ht:         - Max Width/Height of drawing area, i.e. screen size (needed if drawing to an array-buffer)
+-- sx,sy:         - drawing coordinates (center)
+-- xrad,yrad:     - x & y radii
+-- rgba1:         - rgb+alpha array of center color: {r,g,b,a}, alpha is 0..1 where 1 is no transparency, Extreme rgb-values allowed
+-- rgba2:         - rgb+alpha array of edge color: {r,g,b,a}, alpha is 0..1 where 1 is no transparency, Extreme rgb-values allowed
+-- update_flag:	  - Display rendering option (and add break feature)
+-- f_get:	  - Get pixel function: use getpicturepixel if reading from image (set null for image default)
+-- f_put:	  - Put pixel function: use putpicturepixel if drawing to image (set null for image default)
+-- f_recur:       - Optional custom control-function for recursion (set null if not used)
+-- recur_count    - Recursion depth counter, for use in combination with a custom function (f_recur), 0 as default
+--
+-- Ex: particle("sphere","add", w,h, w/2,h/2, 40,40, {500,400,255, 0.8},{0,-150,-175, 0.0}, true, null, null, null, 0)
+--
+function db.particle(type,mode,wd,ht,sx,sy,xrad,yrad,rgba1,rgba2, update_flag, f_get, f_put, f_recur, recur_count)
+
+ local x,y,rev,dix,diy,r3,g3,b3,px,py,alpha,ralpha,add,q,rgb,rgb1,rgb2,rgb3,n,def_get,def_put
+
+  function def_get(x,y) 
+   local r,g,b  
+    r,g,b = getcolor(getpicturepixel(x,y)); 
+    return {r,g,b}
+  end
+  function def_put(x,y,r,g,b)     putpicturepixel(x,y, matchcolor2(r,g,b,0.65)); end 
+  if f_get == null then f_get = def_get; end
+  if f_put == null then f_put = def_put; end
+
+ q = {[true] = 1, [false] = 0}
+
+ rgb,rgb1,rgb2 = {},{},{}
+
+ if mode == 'blend' then
+   add = 1
+ end
+
+ if mode == 'add' then
+   add = 0
+ end
+
+ dix = xrad*2
+ diy = yrad*2
+
+ for y = 0, diy, 1 do
+  py = sy+y-yrad; oy = y / diy;
+  if (py >= 0 and py < ht) then
+
+  for x = 0, dix, 1 do
+   px = sx+x-xrad; ox = x / dix;
+   if (px >= 0 and px < wd) then
+
+   if type == 'sphere' then  -- Sphere
+    a = math.sqrt(math.max(0,0.25 - ((0.5-ox)^2+(0.5-oy)^2))) * 2
+   end
+  
+   if type == 'disc' then  -- Disc
+    a = 1-math.sqrt((0.5-ox)^2+(0.5-oy)^2)*2
+   end
+
+   if a>0 then
+
+    rev    = 1-a
+    rgb3   = f_get(px,py)
+    alpha  = rgba1[4] * a + rgba2[4] * rev
+    ralpha = 1 - alpha * add 
+
+    for n = 1, 3, 1 do 
+     rgb1[n] = q[rgba1[n]==-1]*rgb3[n] + q[rgba1[n]~=-1]*rgba1[n] -- Fade from background? 
+     rgb2[n] = q[rgba2[n]==-1]*rgb3[n] + q[rgba2[n]~=-1]*rgba2[n] -- Fade to background? 
+     rgb[n] = (rgb1[n] * a + rgb2[n] * rev) * alpha + rgb3[n] * ralpha
+    end
+
+    f_put(px, py, rgb[1],rgb[2],rgb[3]);
+    
+   end
+
+  end -- if x is good
+  end -- x
+  if update_flag then updatescreen(); if (waitbreak(0)==1) then return; end; end
+  end -- if y is good
+ end -- y
+
+ if f_recur ~= null then  -- recursion
+  f_recur(type,mode,wd,ht,sx,sy,xrad,yrad,rgba1,rgba2, update_flag, f_get, f_put, f_recur, recur_count); 
+  updatescreen(); if (waitbreak(0)==1) then return; end;
+ end
+
+end
+-- eof PARTICLE
+
+
+  --
+  -- MedianCut a larger palette-list from a MathScene to produce a high-quality BriSorted palette for the final render/colormatching
+  --
+  function db.makeSamplePal(w,h,colors,frend)
+   local n,x,y,r,g,b,pal
+   n,pal = 0,{}
+   for y = 0, h, math.ceil(h/63) do
+   for x = 0, w, math.ceil(w/63) do
+     r,g,b = frend(x,y,w,h)
+     n = n+1
+     r,g,b = db.rgbcapInt(r,g,b,255,0)
+     pal[n] = {r,g,b,0}
+    end;end
+   return db.fixPalette(db.medianCut(pal, colors, true, false, {0.26,0.55,0.19}, 8, 0),1) -- pal, cols, qual, quant, weights, bits, quantpower
+  end
+  --
+
+--
+-- Backdrop/Gradient Render (May be written to a matrix for rendering with db.fsrender)
+--
+ function db.backdrop(p0,p1,p2,p3,fput,ip_mode) -- points:{x,y,r,g,b}, IpMode "linear" is default
+
+   local x,y,ox,oy,xr,yr,r,g,b,ax,ay,w,h
+
+   ax,ay = p0[1],p0[2]
+
+   w = p1[1] - p0[1]
+   h = p2[2] - p0[2]
+
+  for y = 0, h, 1 do -- +1 to fill screen with FS-render
+
+    oy = y/h
+    if ip_mode == "cosine" then oy = 1 - (math.cos(oy * math.pi) + 1)/2; end
+    yr = 1 - oy
+
+   for x = 0, w, 1 do 
+
+    ox = x/w
+    if ip_mode == "cosine" then ox = 1 - (math.cos(ox * math.pi) + 1)/2; end
+    xr = 1 - ox
+
+    r = (p0[3]*xr + p1[3]*ox)*yr + (p2[3]*xr + p3[3]*ox)*oy;
+    g = (p0[4]*xr + p1[4]*ox)*yr + (p2[4]*xr + p3[4]*ox)*oy;
+    b = (p0[5]*xr + p1[5]*ox)*yr + (p2[5]*xr + p3[5]*ox)*oy;
+
+    fput(x+ax,y+ay,r,g,b)
+
+   end;end
+
+  end
+-- eof backdrop
+
+
+
+--
+-- SPLINES --
+--
+function db.splinePoint(x0,y0,x1,y1,x2,y2,points,point)
+ local x,y,sx1,sy1,sx2,sy2,f
+
+  f = point * 1 / points
+
+  sx1 = x0*(1-f) + x1*f  
+  sy1 = y0*(1-f) + y1*f 
+
+  sx2 = x1*(1-f) + x2*f  
+  sy2 = y1*(1-f) + y2*f 
+
+  x = sx1 * (1-f) + sx2 * f
+  y = sy1 * (1-f) + sy2 * f
+
+  return x,y
+end
 --
 
 
+-- zx = 2*x1 - (x0+x2)/2
+--
+function db.drawSplineSegment(x0,y0,x1,y1,x2,y2,x3,y3,points,col) -- Does spline segment p1-p2
+ local n,x,y,sx1,sy1,sx2,sy2,mid,zx1,zy1,zx2,zy2,fx,fy
+ 
+ mid = math.floor(points / 2) 
+ -- Extended Bezier points
+ zx1 = 2*x1 - (x0+x2)/2  
+ zy1 = 2*y1 - (y0+y2)/2
+ zx2 = 2*x2 - (x1+x3)/2
+ zy2 = 2*y2 - (y1+y3)/2
 
+ fx,fy = x1,y1 -- Segment to be drawn (0),1 - 2,(3)
+ for n = 0, mid, 1 do
 
+  f = n * 1 / points * 2
 
+  sx1,sy1 = db.splinePoint(x0,y0,zx1,zy1,x2,y2,mid*2, mid + n)
+  sx2,sy2 = db.splinePoint(x1,y1,zx2,zy2,x3,y3,mid*2, n)
 
+  x = sx1 * (1-f) + sx2 * f
+  y = sy1 * (1-f) + sy2 * f
 
+  --putpicturepixel(x,y,col)
+  db.line(fx,fy,x,y,col)
+  fx,fy = x,y
 
+ end
+
+end
+--
+
+-- eof Splines

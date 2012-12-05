@@ -37,6 +37,8 @@
 #include "brush.h"
 #include "windows.h"
 #include "input.h"
+#include "special.h"
+#include "tiles.h"
 
 // PI is NOT part of math.h according to C standards...
 #if defined(__GP2X__) || defined(__VBCC__)
@@ -49,7 +51,17 @@ Uint32 Airbrush_next_time;
 
 void Start_operation_stack(word new_operation)
 {
+  // This part handles things that must be done when exiting an operation. 
   Brush_rotation_center_is_defined=0;
+  switch(Current_operation)
+  {
+    case OPERATION_ROTATE_BRUSH:
+      End_brush_rotation();
+    break;
+
+    default:
+    break;  
+  }
 
   // On mémorise l'opération précédente si on démarre une interruption
   switch(new_operation)
@@ -60,7 +72,13 @@ void Start_operation_stack(word new_operation)
     case OPERATION_GRAB_BRUSH:
     case OPERATION_POLYBRUSH:
     case OPERATION_STRETCH_BRUSH:
+    case OPERATION_PAN_VIEW:
+      Operation_before_interrupt=Current_operation;
+      // On passe à l'operation demandée
+      Current_operation=new_operation;
+      break;
     case OPERATION_ROTATE_BRUSH:
+      Begin_brush_rotation();
       Operation_before_interrupt=Current_operation;
       // On passe à l'operation demandée
       Current_operation=new_operation;
@@ -177,7 +195,7 @@ void Freehand_mode1_1_0(void)
   Backup();
   Shade_table=Shade_table_left;
   // On affiche définitivement le pinceau
-  Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color,0);
+  Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color);
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
 }
@@ -235,7 +253,7 @@ void Freehand_mode1_2_0(void)
   Backup();
   Shade_table=Shade_table_right;
   // On affiche définitivement le pinceau
-  Display_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color,0);
+  Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color);
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
 }
@@ -280,7 +298,7 @@ void Freehand_mode2_1_0(void)
   Backup();
   Shade_table=Shade_table_left;
   // On affiche définitivement le pinceau
-  Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color,0);
+  Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color);
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
   Print_coordinates();
@@ -309,7 +327,7 @@ void Freehand_mode2_1_2(void)
       Airbrush_next_time+=Airbrush_delay*10;
       Hide_cursor();
       // On affiche définitivement le pinceau
-      Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color,0);
+      Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color);
       Display_cursor();
     }
   }
@@ -338,7 +356,7 @@ void Freehand_mode2_2_0(void)
   Print_coordinates();
   Airbrush_next_time = SDL_GetTicks() + Airbrush_delay*10;
   // On affiche définitivement le pinceau
-  Display_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color,0);
+  Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color);
 }
 
 
@@ -363,7 +381,7 @@ void Freehand_mode2_2_2(void)
       Airbrush_next_time+=Airbrush_delay*10;
       Hide_cursor();
       // On affiche définitivement le pinceau
-      Display_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color,0);
+      Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color);
       Display_cursor();
     }
   }
@@ -386,7 +404,7 @@ void Freehand_mode3_1_0(void)
   Backup();
   Shade_table=Shade_table_left;
   // On affiche définitivement le pinceau
-  Display_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color,0);
+  Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color);
   Operation_push(0);  // On change simplement l'état de la pile...
 }
 
@@ -405,7 +423,7 @@ void Freehand_Mode3_2_0(void)
   Backup();
   Shade_table=Shade_table_right;
   // On affiche définitivement le pinceau
-  Display_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color,0);
+  Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color);
   Operation_push(0);  // On change simplement l'état de la pile...
 }
 
@@ -557,7 +575,7 @@ void Line_0_5(void)
 
   Pixel_figure_preview_auto  (start_x,start_y);
   Hide_line_preview (start_x,start_y,end_x,end_y);
-  Display_paintbrush      (start_x,start_y,color,0);
+  Draw_paintbrush            (start_x,start_y,color);
   Draw_line_permanent(start_x,start_y,end_x,end_y,color);
 
   End_of_modification();
@@ -681,7 +699,7 @@ void K_line_0_6(void)
   Paintbrush_shape=Paintbrush_shape_before_operation;
   if (direction & 0x80)
   {
-    Display_paintbrush(start_x,start_y,color,0);
+    Draw_paintbrush(start_x,start_y,color);
     direction=(direction & 0x7F);
   }
   Draw_line_permanent(start_x,start_y,Paintbrush_X,Paintbrush_Y,color);
@@ -990,6 +1008,7 @@ void Circle_12_5(void)
   if ( (tangent_x!=Paintbrush_X) || (tangent_y!=Paintbrush_Y) )
   {
     Hide_cursor();
+    Cursor_shape=CURSOR_SHAPE_TARGET;
     if ((Config.Coords_rel) && (Menu_is_visible))
     {
       Num2str(Distance(center_x,center_y,Paintbrush_X,Paintbrush_Y),str,4);
@@ -1057,6 +1076,7 @@ void Empty_circle_0_5(void)
     Print_in_menu("X:       Y:",0);
     Print_coordinates();
   }
+  Cursor_shape=CURSOR_SHAPE_XOR_TARGET;
 }
 
 
@@ -1097,6 +1117,7 @@ void Filled_circle_0_5(void)
     Print_in_menu("X:       Y:",0);
     Print_coordinates();
   }
+  Cursor_shape=CURSOR_SHAPE_XOR_TARGET;
 }
 
 
@@ -1163,10 +1184,12 @@ void Ellipse_12_5(void)
   Operation_pop(&center_y);
   Operation_pop(&center_x);
   Operation_pop(&color);
+ 
 
   if ( (tangent_x!=Paintbrush_X) || (tangent_y!=Paintbrush_Y) )
   {
     Hide_cursor();
+    Cursor_shape=CURSOR_SHAPE_TARGET;
     Display_coords_rel_or_abs(center_x,center_y);
 
     horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
@@ -1232,6 +1255,7 @@ void Empty_ellipse_0_5(void)
     Print_in_menu("X:       Y:             ",0);
     Print_coordinates();
   }
+  Cursor_shape=CURSOR_SHAPE_XOR_TARGET;
 }
 
 
@@ -1274,6 +1298,7 @@ void Filled_ellipse_0_5(void)
     Print_in_menu("X:       Y:             ",0);
     Print_coordinates();
   }
+  Cursor_shape=CURSOR_SHAPE_XOR_TARGET;
 }
 
 
@@ -1340,14 +1365,13 @@ void Replace_1_0(void)
 //
 {
   Hide_cursor();
-  // Pas besoin d'initialiser le début d'opération car le Smear n'affecte pas
-  // le Replace, et on se fout de savoir si on est dans la partie gauche ou
-  // droite de la loupe.
+  Init_start_operation();
   Backup();
 //  Shade_table=Shade_table_left;
   Replace(Fore_color);
-  Display_cursor();
   End_of_modification();
+  Display_all_screen();
+  Display_cursor();
   Wait_end_of_click();
 }
 
@@ -1365,14 +1389,13 @@ void Replace_2_0(void)
     return;
   
   Hide_cursor();
-  // Pas besoin d'initialiser le début d'opération car le Smear n'affecte pas
-  // le Replace, et on se fout de savoir si on est dans la partie gauche ou
-  // droite de la loupe.
+  Init_start_operation();
   Backup();
 //  Shade_table=Shade_table_right;
   Replace(Back_color);
-  Display_cursor();
   End_of_modification();
+  Display_all_screen();
+  Display_cursor();
   Wait_end_of_click();
 }
 
@@ -2345,7 +2368,7 @@ void Polyform_12_0(void)
   color=(Mouse_K==LEFT_SIDE)?Fore_color:Back_color;
 
   // On place un premier pinceau en (Paintbrush_X,Paintbrush_Y):
-  Display_paintbrush(Paintbrush_X,Paintbrush_Y,color,0);
+  Draw_paintbrush(Paintbrush_X,Paintbrush_Y,color);
   // Et on affiche un pixel de preview en (Paintbrush_X,Paintbrush_Y):
   Pixel_figure_preview(Paintbrush_X,Paintbrush_Y,color);
 
@@ -2761,15 +2784,17 @@ void Scroll_12_0(void)
     Backup();
   else
   {
-    Backup_layers(-1); // Main_layers_visible
-    #ifndef NOLAYERS
+    Backup_layers(LAYER_ALL); // Main_layers_visible
+    if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+    {
       // Ensure the backup visible image is up-to-date
       // (after swapping some layers on/off, it gets outdated)
       memcpy(Main_visible_image_backup.Image,
              Main_visible_image.Image,
              Main_image_width*Main_image_height);
-    #endif
+    }
   }
+  Update_screen_targets();
   
   Cursor_hidden_before_scroll=Cursor_hidden;
   Cursor_hidden=1;
@@ -2801,7 +2826,7 @@ void Scroll_12_5(void)
   Operation_pop(&x_pos);
   Operation_pop(&center_y);
   Operation_pop(&center_x);
-
+  
   if ( (Paintbrush_X!=x_pos) || (Paintbrush_Y!=y_pos) )
   {
     // L'utilisateur a bougé, il faut scroller l'image
@@ -2826,7 +2851,7 @@ void Scroll_12_5(void)
     else
     {
       // One layer at once
-      Scroll_picture(Main_backups->Pages->Next->Image[Main_current_layer], Main_backups->Pages->Image[Main_current_layer], x_offset, y_offset);
+      Scroll_picture(Main_backups->Pages->Next->Image[Main_current_layer].Pixels, Main_backups->Pages->Image[Main_current_layer].Pixels, x_offset, y_offset);
       Redraw_current_layer();
     }
 
@@ -2865,25 +2890,25 @@ void Scroll_0_5(void)
   Operation_pop(&x_pos);
   Operation_pop(&center_y);
   Operation_pop(&center_x);
-  
+
   if (side == RIGHT_SIDE)
     {
-      // All layers at once
-    if (x_pos>=center_x)
-      x_offset=(x_pos-center_x)%Main_image_width;
-    else
-      x_offset=Main_image_width-((center_x-x_pos)%Main_image_width);
+  // All layers at once
+  if (x_pos>=center_x)
+    x_offset=(x_pos-center_x)%Main_image_width;
+  else
+    x_offset=Main_image_width-((center_x-x_pos)%Main_image_width);
   
-    if (y_pos>=center_y)
-      y_offset=(y_pos-center_y)%Main_image_height;
-    else
-      y_offset=Main_image_height-((center_y-y_pos)%Main_image_height);
+  if (y_pos>=center_y)
+    y_offset=(y_pos-center_y)%Main_image_height;
+  else
+    y_offset=Main_image_height-((center_y-y_pos)%Main_image_height);
     
-    
+  
     // Do the actual scroll operation on all layers.
     for (i=0; i<Main_backups->Pages->Nb_layers; i++)
       //if ((1<<i) & Main_layers_visible)
-      Scroll_picture(Main_backups->Pages->Next->Image[i], Main_backups->Pages->Image[i], x_offset, y_offset);
+      Scroll_picture(Main_backups->Pages->Next->Image[i].Pixels, Main_backups->Pages->Image[i].Pixels, x_offset, y_offset);
     // Update the depth buffer too ...
     // It would be faster to scroll it, but we don't have method
     // for in-place scrolling.
@@ -2893,6 +2918,8 @@ void Scroll_0_5(void)
   {
     // One layer : everything was done while dragging the mouse
   }
+  if (Main_tilemap_mode)
+    Tilemap_update();
   
   Cursor_hidden=Cursor_hidden_before_scroll;
 
@@ -2966,9 +2993,11 @@ void Grad_circle_12_6(void)
   Operation_pop(&center_x);
   Operation_pop(&color);
 
+
   if ( (tangent_x!=Paintbrush_X) || (tangent_y!=Paintbrush_Y) )
   {
     Hide_cursor();
+    Cursor_shape=CURSOR_SHAPE_TARGET;
     if ((Config.Coords_rel) && (Menu_is_visible))
     {
       Num2str(Distance(center_x,center_y,Paintbrush_X,Paintbrush_Y),str,4);
@@ -3113,6 +3142,7 @@ void Grad_circle_12_8(void)
 
   if (Mouse_K==old_mouse_k)
     Draw_grad_circle(center_x,center_y,radius,Paintbrush_X,Paintbrush_Y);
+  Cursor_shape=CURSOR_SHAPE_XOR_TARGET;
 
   Display_cursor();
   End_of_modification();
@@ -3228,6 +3258,7 @@ void Grad_ellipse_12_6(void)
   if ( (tangent_x!=Paintbrush_X) || (tangent_y!=Paintbrush_Y) )
   {
     Hide_cursor();
+    Cursor_shape=CURSOR_SHAPE_TARGET;
     Display_coords_rel_or_abs(center_x,center_y);
 
     horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
@@ -3368,7 +3399,7 @@ void Grad_ellipse_12_8(void)
   Hide_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius);
 
   Paintbrush_hidden=Paintbrush_hidden_before_scroll;
-  Cursor_shape=CURSOR_SHAPE_TARGET;
+  Cursor_shape=CURSOR_SHAPE_XOR_TARGET;
 
   if (Mouse_K==old_mouse_k)
     Draw_grad_ellipse(center_x,center_y,horizontal_radius,vertical_radius,Paintbrush_X,Paintbrush_Y);
@@ -3915,7 +3946,7 @@ void Centered_lines_12_7(void)
             Hide_line_preview (start_x,start_y,last_x,last_y);
 
             Smear_start=1;
-            Display_paintbrush      (start_x,start_y,color,0);
+            Draw_paintbrush            (start_x,start_y,color);
             Draw_line_permanent(start_x,start_y,Paintbrush_X,Paintbrush_Y,color);
 
             Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
@@ -4004,3 +4035,95 @@ void Centered_lines_0_7(void)
     Operation_push(Paintbrush_Y);
 }
 
+///////////////////////////////////////////////////////////// OPERATION_PAN_VIEW
+
+void Pan_view_0_0(void)
+// Opération   : OPERATION_PAN_VIEW
+// Click Souris: 0
+// Taille_Pile : 0
+//
+//  Souris effacée: Non
+{
+  if (Pan_shortcut_pressed)
+  {
+    Print_coordinates();
+  }
+  else
+  {
+    // End of operation, return to previous
+    Hide_cursor();
+    Start_operation_stack(Operation_before_interrupt);
+    Display_cursor();
+  }
+}
+
+void Pan_view_12_0(void)
+// Opération   : OPERATION_PAN_VIEW
+// Click Souris: 1 ou 2
+// Taille_Pile : 0
+//
+//  Souris effacée: Non
+
+//  First time the user clicks
+{
+  Init_start_operation();
+  
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+}
+
+void Pan_view_12_2(void)
+// Opération   : OPERATION_PAN_VIEW
+// Click Souris: 1 ou 2
+// Taille_Pile : 2
+//
+//  Souris effacée: Non
+
+//  While dragging view
+{
+  short start_x;
+  short start_y;
+  
+  Operation_pop(&start_y);
+  Operation_pop(&start_x);
+  
+  if (Paintbrush_X!=start_x || Paintbrush_Y!=start_y)
+  {
+    // User moved
+    if (Main_magnifier_mode)
+      Scroll_magnifier(start_x-Paintbrush_X,start_y-Paintbrush_Y);
+    else
+      Scroll_screen(start_x-Paintbrush_X,start_y-Paintbrush_Y);
+  }
+  // The "scroll" functions have actualized the Paintbrush_X and Y
+  if (Paintbrush_X!=start_x || Paintbrush_Y!=start_y)
+  {
+    Print_coordinates();
+  }
+  Operation_push(Paintbrush_X);
+  Operation_push(Paintbrush_Y);
+}
+
+void Pan_view_0_2(void)
+// Opération   : OPERATION_PAN_VIEW
+// Click Souris: 0
+// Taille_Pile : 2
+//
+//  Souris effacée: Non
+
+//  When releasing after dragging
+{
+  short start_x;
+  short start_y;
+
+  Operation_pop(&start_y);
+  Operation_pop(&start_x);
+  
+  if (!Pan_shortcut_pressed)
+  {
+    // End of operation, return to previous
+    Hide_cursor();
+    Start_operation_stack(Operation_before_interrupt);
+    Display_cursor();
+  }
+}
