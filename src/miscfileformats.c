@@ -2690,7 +2690,13 @@ int Save_C64_multi(T_IO_Context *context, char *filename, byte saveWhat, byte lo
     */
 
     int cx,cy,x,y,c[4]={0,0,0,0},color,lut[16],bits,pixel,pos=0;
+	int cand,n,used;
+	word cols, candidates = 0, invalids = 0;
+
+	// FIXME allocating this on the stack is not a good idea. On some platforms
+	// the stack has a rather small size...
     byte bitmap[8000],screen_ram[1000],color_ram[1000];
+
     word numcolors,count;
     dword cusage[256];
     byte i,background=0;
@@ -2699,81 +2705,144 @@ int Save_C64_multi(T_IO_Context *context, char *filename, byte saveWhat, byte lo
     numcolors=Count_used_colors(cusage);
   
     count=0;
-    for(x=0;x<16;x++)
-    {
-        //printf("color %d, pixels %d\n",x,cusage[x]);
-        if(cusage[x]>count)
-        {
-            count=cusage[x];
-            background=x;
-        }
-    }
   
-    for(cy=0; cy<25; cy++)
-    {
-        //printf("\ny:%2d ",cy);
-        for(cx=0; cx<40; cx++)
-        {
-            numcolors=Count_used_colors_area(cusage,cx*4,cy*8,4,8);
-            if(numcolors>4)
-            {
-                Warning_message("More than 4 colors in 4x8");
-                // TODO hilite offending block
-                return 1;
-            }
-            color=1;
-            c[0]=background;
-            for(i=0; i<16; i++)
-            {
-                lut[i]=0;
-                if(cusage[i])
-                {
-                    if(i!=background)
-                    {
-                        lut[i]=color;
-                        c[color]=i;
-                        color++;
-                    }
-                    else
-                    {
-                        lut[i]=0;
-                    }
-                }
-            }
-            // add to screen_ram and color_ram
-            screen_ram[cx+cy*40]=c[1]<<4|c[2];
-            color_ram[cx+cy*40]=c[3];
-            //printf("%x%x%x ",c[1],c[2],c[3]);
-            for(y=0;y<8;y++)
-            {
-                bits=0;
-                for(x=0;x<4;x++)
-                {                    
-                    pixel=Get_pixel(context, cx*4+x,cy*8+y);
-                    if(pixel>15) 
-                    { 
-                        Warning_message("Color above 15 used"); 
-                        // TODO hilite as in hires, you should stay to 
-                        // the fixed 16 color palette
-                        return 1;
-                    }
-                    bits=bits<<2;
-                    bits|=lut[pixel];
-        
-                }
-                //Write_byte(file,bits&255);
-                bitmap[pos++]=bits;
-            }
-        }
-    }
+	// Detect the ackground color the image should be using. It's the one that's
+	// used on all tiles having 4 colors.
+	for(y=0;y<200;y=y+8)
+	{
+		for (x = 0; x<160; x=x+4)
+		{
+			cols = 0;
+
+			// Compute the usage count of each color in the tile
+			for (cy=0;cy<8;cy++)
+			for (cx=0;cx<4;cx++)
+			{
+				pixel=Get_pixel(context, x+cx,y+cy);
+				cols |= (1 << pixel);
+			}
+
+			cand = 0;
+			used = 0;
+			// Count the number of used colors in the tile
+			for (n = 0; n<16; n++)
+			{
+				if (cols & (1 << pixel))
+					used++;
+			}
+
+			if (used>3)
+			{
+				// This is a tile that uses the background color (and 3 others)
+
+				// Try to guess which color is most likely the background one
+				for (n = 0; n<16; n++)
+				{
+					if ((cols & (1 << n)) && !((candidates | invalids) & (1 << n))) {
+						// This color was not used in any other tile yet,
+						// but it could be the background one.
+						candidates |= 1 << n;
+					}
+
+					if ((cols & 1 << n) == 0 ) {
+						// This color isn't used at all in this tile:
+						// Can't be the global 
+						invalids |= 1 << n;
+					}
+
+					if (candidates & (1 << n)) {
+						// We have a candidate, mark it as such
+						cand++;
+					}
+				}
+
+				// After checking the constraints for this tile, do we have
+				// candidate background colors left ?
+				if (cand==0)
+				{
+					Warning_message("No possible global background color found");
+					return 1;
+				}
+			}
+		}
+	}
+
+	// Now just pick the first valid candidate
+	for (n = 0; n<16; n++)
+	{
+		if (candidates & (1 << n)) {
+			background = n; 
+			break;
+		}
+	}
+
+
+	// Now that we know which color is the background, we can encode the cells
+	for(cy=0; cy<25; cy++)
+	{
+		//printf("\ny:%2d ",cy);
+		for(cx=0; cx<40; cx++)
+		{
+			numcolors=Count_used_colors_area(cusage,cx*4,cy*8,4,8);
+			if(numcolors>4)
+			{
+				Warning_message("More than 4 colors in 4x8");
+				// TODO hilite offending block
+				return 1;
+			}
+			color=1;
+			c[0]=background;
+			for(i=0; i<16; i++)
+			{
+				lut[i]=0;
+				if(cusage[i])
+				{
+					if(i!=background)
+					{
+						lut[i]=color;
+						c[color]=i;
+						color++;
+					}
+					else
+					{
+						lut[i]=0;
+					}
+				}
+			}
+			// add to screen_ram and color_ram
+			screen_ram[cx+cy*40]=c[1]<<4|c[2];
+			color_ram[cx+cy*40]=c[3];
+			//printf("%x%x%x ",c[1],c[2],c[3]);
+			for(y=0;y<8;y++)
+			{
+				bits=0;
+				for(x=0;x<4;x++)
+				{                    
+					pixel=Get_pixel(context, cx*4+x,cy*8+y);
+					if(pixel>15) 
+					{ 
+						Warning_message("Color above 15 used"); 
+						// TODO hilite as in hires, you should stay to 
+						// the fixed 16 color palette
+						return 1;
+					}
+					bits=bits<<2;
+					bits|=lut[pixel];
+
+				}
+				//Write_byte(file,bits&255);
+				bitmap[pos++]=bits;
+			}
+		}
+	}
   
     file = fopen(filename,"wb");
     
     if(!file)
     {
         Warning_message("File open failed");
-        File_error = 1;
-        return 1;
+        File_error = 2;
+        return 2;
     }
     
     setvbuf(file, NULL, _IOFBF, 64*1024);
@@ -2883,10 +2952,15 @@ void Save_C64(T_IO_Context * context)
     }
     //printf("saveWhat=%d, loadAddr=%d\n",saveWhat,loadAddr);
     
-    if (context->Width==320)
-        File_error = Save_C64_hires(context,filename,saveWhat,loadAddr);
-    else
+	if (strcasecmp(filename + strlen(filename) - 4, ".fli") == 0)
+	{
+		// FIXME moving FLI to a separate format in the fileselector would be smarter
         File_error = Save_C64_fli(filename,saveWhat,loadAddr);
+	} else if (context->Width==320)
+        File_error = Save_C64_hires(context,filename,saveWhat,loadAddr);
+    else {
+        File_error = Save_C64_multi(context, filename,saveWhat,loadAddr);
+	}
 }
 
 
