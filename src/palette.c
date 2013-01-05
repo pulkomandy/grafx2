@@ -3009,3 +3009,67 @@ const T_Components * Favorite_GUI_color(byte color_index)
     // Should be Config.Fav_menu_colors[index] if using user colors
       return &(Gfx->Default_palette[Gfx->Color[color_index]]);
 }
+
+byte xor_lut[256];
+int Diff(int i, int j) {
+	// TODO try out different difference operators to see if the results get
+	// better (weight the components, use ² instead of abs, use HSL or XYZ or )
+	int diff = 0;
+	diff += abs(Main_palette[i].R - Main_palette[j].R);
+	diff += abs(Main_palette[i].G - Main_palette[j].G);
+	diff += abs(Main_palette[i].B - Main_palette[j].B);
+
+	return diff;
+}
+
+void compute_xor_table()
+{
+	int i;
+	byte found;
+
+	// Initialize the table with some "random" values
+	for(i = 0; i < 256; i++)
+	{
+		xor_lut[i] = 255 - i;
+	}
+
+	do {
+		// Find the smallest difference in the table
+		int mindiff = INT_MAX;
+		int idx;
+		for(i = 0; i < 256; i++)
+		{
+			int diff = Diff(i, xor_lut[i]);
+			if (diff < mindiff) {
+				idx = i;
+				mindiff = diff;
+			}
+		}
+
+		// Try to pair these two colors better
+		found = 0;
+		for(i = 0; i < 256; i++)
+		{
+			// diffs before the swap
+			int before = Diff(idx, xor_lut[idx]) + Diff(i, xor_lut[i]);
+
+			// diffs after the swap
+			int after = Diff(idx, xor_lut[i])  + Diff(i, xor_lut[idx]);
+
+			if (after > before)
+			{
+				// Swapping these colors get us something "more different". Do it !
+				byte idx2 = xor_lut[i];
+				byte i2 = xor_lut[idx];
+
+				xor_lut[i] = i2;
+				xor_lut[i2] = i;
+				xor_lut[idx] = idx2;
+				xor_lut[idx2] = idx;
+
+				found = 1;
+				break;
+			}
+		}
+	} while(found);
+}
