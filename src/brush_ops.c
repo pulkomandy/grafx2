@@ -1156,7 +1156,7 @@ void Draw_stretch_spot(short x_pos, short y_pos)
     if (y>=Limit_top && y<=Limit_visible_bottom)
       for (x=x_pos-1;x<x_pos+1;x++)
         if (x>=Limit_left && x<=Limit_visible_right)
-          Pixel_preview(x,y,~Read_pixel(x-Main_offset_X,y-Main_offset_Y));
+          Pixel_preview(x,y,xor_lut[Read_pixel(x-Main_offset_X,y-Main_offset_Y)]);
   Update_part_of_screen(x_pos-1, y_pos-1, 2, 2);
 }
 

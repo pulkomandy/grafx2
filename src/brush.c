@@ -1266,18 +1266,18 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
     Pixel_figure=Pixel_figure_in_brush;
 
     memset(Brush,Back_color,(long)Brush_width*Brush_height);
-    Polyfill_general(vertices,points,~Back_color);
+    Polyfill_general(vertices,points,xor_lut[Back_color]);
 
     // On retrace les bordures du lasso:
     for (temp=1; temp<vertices; temp++)
     {
       Draw_line_general(points[(temp-1)<<1],points[((temp-1)<<1)+1],
                            points[temp<<1],points[(temp<<1)+1],
-                           ~Back_color);
+                           xor_lut[Back_color]);
     }
     Draw_line_general(points[(vertices-1)<<1],points[((vertices-1)<<1)+1],
                          points[0],points[1],
-                         ~Back_color);
+                         xor_lut[Back_color]);
 
     // On scanne la brosse pour remplacer tous les pixels affectés par le
     // polyfill par ceux de l'image:

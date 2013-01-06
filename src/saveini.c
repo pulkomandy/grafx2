@@ -655,10 +655,6 @@ int Save_INI(T_Config * conf)
   if ((return_code=Save_INI_set_strings (old_file,new_file,buffer,"Font_file",conf->Font_file)))
     goto Erreur_Retour;
 
-  values[0]=(conf->Grid_XOR_color);
-  if ((return_code=Save_INI_set_values (old_file,new_file,buffer,"Grid_XOR_color",1,values,0)))
-    goto Erreur_Retour;
-
   values[0]=(Pixel_ratio);
   if ((return_code=Save_INI_set_values (old_file,new_file,buffer,"Pixel_ratio",1,values,0))) {
     DEBUG("saving pixel ratio",return_code);

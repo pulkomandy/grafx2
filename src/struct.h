@@ -363,7 +363,6 @@ typedef struct
   int  Window_pos_y;                     ///< Last window y position (9999 if unsupportd/irrelevant for the platform)
   word Double_click_speed;               ///< Maximum delay for double-click, in ms.
   word Double_key_speed;                 ///< Maximum delay for double-keypress, in ms.
-  byte Grid_XOR_color;                   ///< XOR value to apply for grid color.
   byte Right_click_colorpick;            ///< Boolean, true to enable a "tablet" mode, where RMB acts as instant colorpicker
   byte Sync_views;                       ///< Boolean, true when the Main and Spare should share their viewport settings.
   byte Stylus_mode;                      ///< Boolean, true to tweak some tools (eg:Curve) for single-button stylus.

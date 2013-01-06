@@ -126,11 +126,11 @@ void Horizontal_XOR_line_tall(word x_pos,word y_pos,word width)
   int x;
 
   for (x=0;x<width;x++)
-    *(dest+x)=~*(dest+x);
+    *(dest+x)=xor_lut[*(dest+x)];
 
   dest=(y_pos*ZOOMY+1)*VIDEO_LINE_WIDTH+x_pos+Screen_pixels;
   for (x=0;x<width;x++)
-    *(dest+x)=~*(dest+x);
+    *(dest+x)=xor_lut[*(dest+x)];
 }
 
 void Vertical_XOR_line_tall(word x_pos,word y_pos,word height)
@@ -140,7 +140,7 @@ void Vertical_XOR_line_tall(word x_pos,word y_pos,word height)
   for (i=y_pos*ZOOMY;i<(y_pos+height)*ZOOMY;i++)
   {
     color=*(Screen_pixels+x_pos+i*VIDEO_LINE_WIDTH);
-    *(Screen_pixels+x_pos+i*VIDEO_LINE_WIDTH)=~color;
+    *(Screen_pixels+x_pos+i*VIDEO_LINE_WIDTH)=xor_lut[color];
   }
 }
 

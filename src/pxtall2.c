@@ -141,7 +141,7 @@ void Horizontal_XOR_line_tall2(word x_pos,word y_pos,word width)
   int x;
 
   for (x=0;x<width*ZOOMX;x+=ZOOMX)
-    *(dest+x+3*VIDEO_LINE_WIDTH+1)=*(dest+x+3*VIDEO_LINE_WIDTH)=*(dest+x+2*VIDEO_LINE_WIDTH+1)=*(dest+x+2*VIDEO_LINE_WIDTH)=*(dest+x+VIDEO_LINE_WIDTH+1)=*(dest+x+VIDEO_LINE_WIDTH)=*(dest+x+1)=*(dest+x)=~*(dest+x);
+    *(dest+x+3*VIDEO_LINE_WIDTH+1)=*(dest+x+3*VIDEO_LINE_WIDTH)=*(dest+x+2*VIDEO_LINE_WIDTH+1)=*(dest+x+2*VIDEO_LINE_WIDTH)=*(dest+x+VIDEO_LINE_WIDTH+1)=*(dest+x+VIDEO_LINE_WIDTH)=*(dest+x+1)=*(dest+x)=xor_lut[*(dest+x)];
 }
 
 void Vertical_XOR_line_tall2(word x_pos,word y_pos,word height)
@@ -150,7 +150,7 @@ void Vertical_XOR_line_tall2(word x_pos,word y_pos,word height)
   byte *dest=Screen_pixels+x_pos*ZOOMX+y_pos*VIDEO_LINE_WIDTH*ZOOMY;
   for (i=height;i>0;i--)
   {
-    *(dest+3*VIDEO_LINE_WIDTH+1)=*(dest+3*VIDEO_LINE_WIDTH)=*(dest+2*VIDEO_LINE_WIDTH+1)=*(dest+2*VIDEO_LINE_WIDTH)=*(dest+VIDEO_LINE_WIDTH+1)=*(dest+VIDEO_LINE_WIDTH)=*(dest+1)=*(dest)=~*(dest);
+    *(dest+3*VIDEO_LINE_WIDTH+1)=*(dest+3*VIDEO_LINE_WIDTH)=*(dest+2*VIDEO_LINE_WIDTH+1)=*(dest+2*VIDEO_LINE_WIDTH)=*(dest+VIDEO_LINE_WIDTH+1)=*(dest+VIDEO_LINE_WIDTH)=*(dest+1)=*(dest)=xor_lut[*(dest)];
     dest+=VIDEO_LINE_WIDTH*ZOOMY;
   }
 }

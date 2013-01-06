@@ -334,6 +334,8 @@ GFX2_GLOBAL long Main_edits_since_safety_backup;
 GFX2_GLOBAL Uint32 Main_time_of_safety_backup;
 /// Letter prefix for the filenames of safety backups. a or b
 GFX2_GLOBAL byte Main_safety_backup_prefix;
+/// Lookup table for XOR effects, pointing each color to the most different one
+GFX2_GLOBAL byte xor_lut[256];
 
 // -- Spare page data
 

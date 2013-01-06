@@ -1435,14 +1435,14 @@ void Draw_curve_cross(short x_pos, short y_pos)
     for (i=start_x; i<=end_x; i++)
     {
       temp=x_pos+i-3;
-      Pixel_preview(temp,y_pos,~Read_pixel(temp -Main_offset_X,
-                                          y_pos-Main_offset_Y));
+      Pixel_preview(temp,y_pos,xor_lut[Read_pixel(temp -Main_offset_X,
+                                          y_pos-Main_offset_Y)]);
     }
     for (i=start_y; i<=end_y; i++)
     {
       temp=y_pos+i-3;
-      Pixel_preview(x_pos,temp,~Read_pixel(x_pos-Main_offset_X,
-                                          temp -Main_offset_Y));
+      Pixel_preview(x_pos,temp,xor_lut[Read_pixel(x_pos-Main_offset_X,
+                                          temp -Main_offset_Y)]);
     }
     Update_part_of_screen(x_pos+start_x-3,y_pos+start_y-3,end_x-start_x+1,end_y-start_y+1);
   }

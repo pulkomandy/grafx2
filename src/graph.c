@@ -1100,8 +1100,8 @@ void Fill_general(byte fill_color)
          (x_pos<=Limit_right) &&
          (y_pos>=Limit_top)   &&
          (y_pos<=Limit_bottom) )
-      Pixel_preview(x_pos,y_pos,~Read_pixel(x_pos-Main_offset_X,
-                                           y_pos-Main_offset_Y));
+      Pixel_preview(x_pos,y_pos,xor_lut[Read_pixel(x_pos-Main_offset_X,
+                                           y_pos-Main_offset_Y)]);
   }
   
   // Affichage d'un point pour une preview en xor additif
@@ -1114,7 +1114,7 @@ void Fill_general(byte fill_color)
          (x_pos<=Limit_right) &&
          (y_pos>=Limit_top)   &&
          (y_pos<=Limit_bottom) )
-      Pixel_preview(x_pos,y_pos,~Main_screen[x_pos+y_pos*Main_image_width]);
+      Pixel_preview(x_pos,y_pos,xor_lut[Main_screen[x_pos+y_pos*Main_image_width]]);
   }
   
 
@@ -2884,7 +2884,7 @@ void Horizontal_grid_line(word x_pos,word y_pos,word width)
   int x;
 
   for (x=!(x_pos&1);x<width;x+=2)
-    Pixel(x_pos+x, y_pos, *((y_pos-1)*Pixel_height*VIDEO_LINE_WIDTH+x_pos*Pixel_width+Screen_pixels+x*Pixel_width)^Config.Grid_XOR_color);
+    Pixel(x_pos+x, y_pos, xor_lut[*((y_pos-1)*Pixel_height*VIDEO_LINE_WIDTH+x_pos*Pixel_width+Screen_pixels+x*Pixel_width)]);
 }
 
 void Vertical_grid_line(word x_pos,word y_pos,word height)
@@ -2892,7 +2892,7 @@ void Vertical_grid_line(word x_pos,word y_pos,word height)
   int y;
   
   for (y=!(y_pos&1);y<height;y+=2)
-    Pixel(x_pos, y_pos+y, *(Screen_pixels+(x_pos*Pixel_width-1)+(y_pos*Pixel_height+y*Pixel_height)*VIDEO_LINE_WIDTH)^Config.Grid_XOR_color);
+    Pixel(x_pos, y_pos+y, xor_lut[*(Screen_pixels+(x_pos*Pixel_width-1)+(y_pos*Pixel_height+y*Pixel_height)*VIDEO_LINE_WIDTH)]);
 }
 
 // Tile Grid

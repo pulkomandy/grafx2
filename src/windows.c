@@ -2956,82 +2956,153 @@ void Remap_screen_after_menu_colors_change(void)
 }
 
 
+static int Diff(int i, int j) {
+	int dr = Main_palette[i].R - Main_palette[j].R;
+	int dg = Main_palette[i].G - Main_palette[j].G;
+	int db = Main_palette[i].B - Main_palette[j].B;
+
+	return dr*dr + dg*dg + db*db;
+}
+
+static void compute_xor_table()
+{
+	int i;
+	byte found;
+
+	// Initialize the table with some "random" values
+	for(i = 0; i < 256; i++)
+	{
+		xor_lut[i] = 255 - i;
+	}
+
+	do {
+		// Find the smallest difference in the table
+		//int mindiff = INT_MAX;
+		int idx;
+		/*
+		for(i = 0; i < 256; i++)
+		{
+			int diff = Diff(i, xor_lut[i]);
+			if (diff < mindiff) {
+				idx = i;
+				mindiff = diff;
+			}
+		}*/
+
+		// Try to pair these two colors better
+		found = 0;
+		for(idx = 0; idx < 256; idx++)
+		{
+			int improvement = 0;
+			int betterpair = idx;
+			for(i = 0; i < 256; i++)
+			{
+				// diffs before the swap
+				int before = Diff(idx, xor_lut[idx]) + Diff(i, xor_lut[i]);
+
+				// diffs after the swap
+				int after = Diff(idx, xor_lut[i])  + Diff(i, xor_lut[idx]);
+
+				if (after - before > improvement)
+				{
+					improvement = after - before;
+					betterpair = i;
+				}
+			}
+
+			if (improvement > 0)
+			{
+				// Swapping these colors get us something "more different". Do it !
+				byte idx2 = xor_lut[betterpair];
+				byte i2 = xor_lut[idx];
+
+				xor_lut[betterpair] = i2;
+				xor_lut[i2] = betterpair;
+				xor_lut[idx] = idx2;
+				xor_lut[idx2] = idx;
+
+				found = 1;
+			}
+		}
+	} while(found);
+}
+
 int Same_color(T_Components * palette, byte c1, byte c2)
 {
-  if (palette[c1].R==palette[c2].R &&
-    palette[c1].G==palette[c2].G &&
-    palette[c1].B==palette[c2].B)
-    return 1;
-  return 0;
+	if (palette[c1].R==palette[c2].R &&
+			palette[c1].G==palette[c2].G &&
+			palette[c1].B==palette[c2].B)
+		return 1;
+	return 0;
 }
 
 void Compute_optimal_menu_colors(T_Components * palette)
 {
-  int i;
-  byte l[256];
-  byte s[256];
-  byte h;
-  int max_l = -1, min_l = 256;
-  int low_l, hi_l;
-  int delta_low = 999999;
-  int delta_high = 999999;
-  const int tolerence=16;
-  const T_Components cpc_colors[4] = {
-    {  0,  0,  0},
-    {  0,  0,128}, // Dark blue
-    {128,128,128}, // Grey
-    {255,255,255}
-  };
+	int i;
+	byte l[256];
+	byte s[256];
+	byte h;
+	int max_l = -1, min_l = 256;
+	int low_l, hi_l;
+	int delta_low = 999999;
+	int delta_high = 999999;
+	const int tolerence=16;
+	const T_Components cpc_colors[4] = {
+		{  0,  0,  0},
+		{  0,  0,128}, // Dark blue
+		{128,128,128}, // Grey
+		{255,255,255}
+	};
 
-  Old_black =MC_Black;
-  Old_dark = MC_Dark;
-  Old_light = MC_Light;
-  Old_white = MC_White;
-  Old_trans = MC_Trans;
+	Old_black =MC_Black;
+	Old_dark = MC_Dark;
+	Old_light = MC_Light;
+	Old_white = MC_White;
+	Old_trans = MC_Trans;
 
-  // First method:
-  // If all close matches for the ideal colors exist, pick them.
-  for (i=255; i>=0; i--)
-  {
-    
-    if (Round_palette_component(palette[i].R)/tolerence==Gfx->Default_palette[Gfx->Color[3]].R/tolerence
-     && Round_palette_component(palette[i].G)/tolerence==Gfx->Default_palette[Gfx->Color[3]].G/tolerence
-     && Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[3]].B/tolerence)
-    {
-      MC_White=i;
-      for (i=255; i>=0; i--)
-      {
-        if (Round_palette_component(palette[i].R)/tolerence==Gfx->Default_palette[Gfx->Color[2]].R/tolerence
-         && Round_palette_component(palette[i].G)/tolerence==Gfx->Default_palette[Gfx->Color[2]].G/tolerence
-         && Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[2]].B/tolerence)
-        {
-          MC_Light=i;
-          for (i=255; i>=0; i--)
-          {
-            if (Round_palette_component(palette[i].R)/tolerence==Gfx->Default_palette[Gfx->Color[1]].R/tolerence
-             && Round_palette_component(palette[i].G)/tolerence==Gfx->Default_palette[Gfx->Color[1]].G/tolerence
-             && Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[1]].B/tolerence)
-            {
-              MC_Dark=i;
-              for (i=255; i>=0; i--)
-              {
-                if (Round_palette_component(palette[i].R)/tolerence==Gfx->Default_palette[Gfx->Color[0]].R/tolerence
-                 && Round_palette_component(palette[i].G)/tolerence==Gfx->Default_palette[Gfx->Color[0]].G/tolerence
-                 && Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[0]].B/tolerence)
-                {
-                  MC_Black=i;
-                  // On cherche une couleur de transparence différente des 4 autres.
-                  for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
-                                   (MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
-                  // Easy case
-                  MC_OnBlack=MC_Dark;
-                  MC_Window=MC_Light;
-                  MC_Lighter=MC_White;
-                  MC_Darker=MC_Dark;
-                  Remap_menu_sprites();
-                  return;
-                }
-              }
+	// First method:
+	// If all close matches for the ideal colors exist, pick them.
+	for (i=255; i>=0; i--)
+	{
+
+		if (Round_palette_component(palette[i].R)/tolerence==Gfx->Default_palette[Gfx->Color[3]].R/tolerence
+				&& Round_palette_component(palette[i].G)/tolerence==Gfx->Default_palette[Gfx->Color[3]].G/tolerence
+				&& Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[3]].B/tolerence)
+		{
+			MC_White=i;
+			for (i=255; i>=0; i--)
+			{
+				if (Round_palette_component(palette[i].R)/tolerence==Gfx->Default_palette[Gfx->Color[2]].R/tolerence
+						&& Round_palette_component(palette[i].G)/tolerence==Gfx->Default_palette[Gfx->Color[2]].G/tolerence
+						&& Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[2]].B/tolerence)
+				{
+					MC_Light=i;
+					for (i=255; i>=0; i--)
+					{
+						if (Round_palette_component(palette[i].R)/tolerence==Gfx->Default_palette[Gfx->Color[1]].R/tolerence
+								&& Round_palette_component(palette[i].G)/tolerence==Gfx->Default_palette[Gfx->Color[1]].G/tolerence
+								&& Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[1]].B/tolerence)
+						{
+							MC_Dark=i;
+							for (i=255; i>=0; i--)
+							{
+								if (Round_palette_component(palette[i].R)/tolerence==Gfx->Default_palette[Gfx->Color[0]].R/tolerence
+										&& Round_palette_component(palette[i].G)/tolerence==Gfx->Default_palette[Gfx->Color[0]].G/tolerence
+										&& Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[0]].B/tolerence)
+								{
+									MC_Black=i;
+									// On cherche une couleur de transparence différente des 4 autres.
+									for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
+												(MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
+									// Easy case
+									MC_OnBlack=MC_Dark;
+									MC_Window=MC_Light;
+									MC_Lighter=MC_White;
+									MC_Darker=MC_Dark;
+									Remap_menu_sprites();
+									return;
+								}
+							}
             }
           }
         }
@@ -3199,6 +3270,7 @@ void Remap_menu_sprites()
 {
   int i, j, k, l;
 
+  compute_xor_table();
   if ( (MC_Light!=Old_light)
     || (MC_Dark!=Old_dark)
     || (MC_White!=Old_white)
