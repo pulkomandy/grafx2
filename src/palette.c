@@ -841,7 +841,6 @@ void Draw_all_palette_sliders(T_Scroller_button * red_slider,
     {
       RGB_to_HSL(j1,j2,j3,&j1,&j2,&j3);
     }
-    DEBUG("j1",j1);
     Format_component(j1*Color_count/256,str);
     red_slider->Position=Color_max-Expand_component(j1);
     Window_draw_slider(red_slider);

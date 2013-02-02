@@ -2972,22 +2972,12 @@ static void compute_xor_table()
 	// Initialize the table with some "random" values
 	for(i = 0; i < 256; i++)
 	{
-		xor_lut[i] = 255 - i;
+		xor_lut[i] = i;
 	}
 
 	do {
 		// Find the smallest difference in the table
-		//int mindiff = INT_MAX;
 		int idx;
-		/*
-		for(i = 0; i < 256; i++)
-		{
-			int diff = Diff(i, xor_lut[i]);
-			if (diff < mindiff) {
-				idx = i;
-				mindiff = diff;
-			}
-		}*/
 
 		// Try to pair these two colors better
 		found = 0;
