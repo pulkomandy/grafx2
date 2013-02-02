@@ -123,7 +123,7 @@ else
 endif
 
     # these are for everyone
-    COPT = -D_DARWIN_C_SOURCE -D__macosx__ -D__linux__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g $(LUACOPT) $(SDLCOPT) $(TTFCOPT) -I/usr/X11/include
+    COPT = -D_DARWIN_C_SOURCE -D__macosx__ -D__linux__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g $(LUACOPT) $(SDLCOPT) $(TTFCOPT) -I/usr/include
 ifdef MACOSX_LION
     LOPT = $(SDLLOPT) $(LUALOPT) -framework libpng14 -lz
 else
@@ -134,7 +134,7 @@ endif
     #CC = nccgen -ncgcc -ncld -ncfabs
     OBJDIR = ../obj/macosx
     PLATFORMOBJ = $(OBJDIR)/SDLMain.o
-    X11LOPT = 
+    FCLOPT = 
     MACAPPEXE = Grafx2.app/Contents/MacOS/Grafx2
     NOTTF = 1
   else
@@ -234,7 +234,7 @@ endif
     COPT = -W -Wall -std=c99 -c -g -gstabs -D__TRU64__ $(shell sdl-config --cflags) $(TTFCOPT) $(LUACOPT)
     LOPT = $(shell sdl-config --libs) -lSDL_image $(TTFLOPT) -lpng $(LUALOPT) -lm
     OBJDIR = ../obj/unix
-    X11LOPT = -lX11
+    FCLOPT = -lfontconfig
     CC = gcc
   else
   ifeq ($(PLATFORM),FreeMiNT) #10
@@ -253,7 +253,7 @@ endif
         STRIP = strip -s 
 	STACK = stack
 	FIX_FLAGS = flags
-	X11LOPT = 
+	FCLOPT = 
 	COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -DNO_INLINE_MATH -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $(JOYCOPT) $(LUACOPT)
     	LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) $(LAYERLOPT)
   else
@@ -272,7 +272,7 @@ endif
     LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng -lz $(LUALOPT) -lm
     CC = gcc
     OBJDIR = ../obj/syllable
-    X11LOPT = 
+    FCLOPT = 
   else
     # Finally, the default rules that work fine for most unix/gcc systems, linux and freebsd are tested.
     # Linux and FreeBSD specific (default rules)
@@ -339,7 +339,7 @@ endif
         STRIP = m68k-atari-mint-strip -s 
 	STACK = m68k-atari-mint-stack
 	FIX_FLAGS = m68k-atari-mint-flags
-	X11LOPT = 
+	FCLOPT = 
 	COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -ffast-math -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $(JOYCOPT) $(LUACOPT)
     	LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) -lm $(LAYERLOPT) -Wl,--stack,8k 
       else
@@ -350,7 +350,7 @@ endif
         LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) `pkg-config --libs libpng` $(LUALOPT) -lm
         CC = gcc
         OBJDIR = ../obj/unix
-        X11LOPT = -lX11
+        FCLOPT = -lfontconfig
       endif
       endif
       endif
@@ -380,7 +380,7 @@ ifndef ($(ATARICROSS,1))
    TTFLABEL = -nottf
  else
    TTFCOPT = 
-   TTFLOPT = -L$(prefix)/lib -lSDL_ttf $(X11LOPT)
+   TTFLOPT = -L$(prefix)/lib -lSDL_ttf $(FCLOPT)
    TTFLIBS = bin/libfreetype-6.dll bin/SDL_ttf.dll
    TTFLABEL = 
  endif
@@ -392,7 +392,7 @@ else
    TTFLABEL = -nottf
  else
    TTFCOPT = 
-   TTFLOPT = -L$(prefix)/lib -lSDL_ttf $(X11LOPT)
+   TTFLOPT = -L$(prefix)/lib -lSDL_ttf $(FCLOPT)
    TTFLIBS =  
    TTFLABEL = 
  endif

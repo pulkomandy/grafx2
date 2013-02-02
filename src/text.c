@@ -38,9 +38,9 @@
 #endif
 
 #if defined(__CAANOO__) || defined(__WIZ__) || defined(__GP2X__)
-// No X11
+// No fontconfig
 #elif defined(__linux__)
-  #include <X11/Xlib.h>
+  #include <fontconfig/fontconfig.h>
 #endif
 #endif
 
@@ -326,22 +326,23 @@ void Init_text(void)
     #endif
 
   #elif defined(__CAANOO__) || defined(__WIZ__) || defined(__GP2X__)
-  // No X11 : Only use fonts from Grafx2
+  // No fontconfig : Only use fonts from Grafx2
   #elif defined(__linux__)
     #ifndef NOTTF
-       #define USE_XLIB
+       #define USE_FC
     
-       #ifdef USE_XLIB
+       #ifdef USE_FC
        {
-        int i,number;
-        Display* dpy = XOpenDisplay(NULL);
-        char** font_path_list = XGetFontPath(dpy,&number);
-        XCloseDisplay(dpy);
+	FcStrList* dirs;
+	dirs = FcConfigGetFontDirs(NULL);
+	char* fdir = FcStrListNext(dirs);
+        while(fdir != NULL)
+	{
+            For_each_file(fdir,Add_font);
+	    fdir = FcStrListNext(dirs);
+	}
 
-        for(i=0;i<number;i++)
-            For_each_file(*(font_path_list+i),Add_font);
-
-        XFreeFontPath(font_path_list);
+        FcStrListDone(dirs);
        }
        #endif
     #endif
