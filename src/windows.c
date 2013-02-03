@@ -2972,7 +2972,7 @@ static void compute_xor_table()
 	// Initialize the table with some "random" values
 	for(i = 0; i < 256; i++)
 	{
-		xor_lut[i] = i;
+		xor_lut[i] = i ^ 1;
 	}
 
 	do {
