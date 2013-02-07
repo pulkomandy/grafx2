@@ -1140,6 +1140,26 @@ void Backup_layers(int layer)
   */
 }
 
+/// Backs up a layer, unless it's already different from previous history step.
+// This function checks if a layer/frame shares the same
+// bitmap as its Undo history parent.
+// If this is the case, it instanciates a new copy, and returns true.
+// Otherwise, it returns false.
+int Dup_layer_if_shared(T_Page * page, int layer)
+{
+  if (page->Image[layer].Pixels == page->Next->Image[layer].Pixels)
+  {
+    Free_layer(page, layer);
+    page->Image[layer].Pixels=New_layer(page->Height*page->Width);
+    memcpy(
+      page->Image[layer].Pixels,
+      page->Next->Image[layer].Pixels,
+      page->Width*page->Height);
+    return 1;
+  }
+  return 0;
+}
+
 void Backup_the_spare(int layer)
 {
   int i;

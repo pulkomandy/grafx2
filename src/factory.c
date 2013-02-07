@@ -48,7 +48,6 @@
 #include "setup.h"
 #include "tiles.h"
 
-
 /// Lua scripts bound to shortcut keys.
 char * Bound_script[10];
 
@@ -79,6 +78,9 @@ static byte Palette_has_changed;
 static byte Brush_was_altered;
 static byte Original_fore_color;
 static byte Original_back_color;
+static byte Is_backed_up;
+static T_Page * Main_backup_page;
+static byte * Main_backup_screen;
 
 /// Helper function to clamp a double to 0-255 range
 static inline byte clamp_byte(double value)
@@ -143,6 +145,22 @@ do { \
     return luaL_error(L, "%s: Expected %d arguments, but found %d.", func_name, (num), nb_args); \
 } while(0)
 
+/// Declares a function in the form BIND_unsaved() : for example L_PutPicturePixel_unsaved()
+#define DECLARE_UNSAVED(BIND) \
+int BIND ## _unsaved(lua_State* L) \
+{ \
+  Backup_if_necessary(L, Main_current_layer); \
+  Register_main_writable(L); \
+  return BIND(L); \
+}
+
+// forward declarations
+void Register_main_readonly(lua_State* L);
+void Register_main_writable(lua_State* L);
+int L_SetColor(lua_State* L);
+int L_SetColor_unsaved(lua_State* L);
+//
+
 const char * Lua_version(void)
 {
   // LUA_RELEASE is only available since 5.2+, with format "Lua x.y.z"
@@ -176,6 +194,34 @@ void Pixel_figure_no_screen(short x_pos,short y_pos,byte color)
     Pixel_in_current_screen(x_pos,y_pos,color);
 }
 
+void Backup_if_necessary(lua_State* L, int layer)
+{
+  if (!Is_backed_up)
+  {
+    Backup_layers(layer);
+    Is_backed_up = 1;
+    if (layer == Main_current_layer)
+    {
+      Main_backup_page = Main_backups->Pages->Next;
+      Main_backup_screen = Screen_backup;
+      Register_main_writable(L);
+    }
+  }
+  else
+  {
+    if (layer == LAYER_NONE)
+    {
+      // Already OK
+      return;
+    }
+    if (Dup_layer_if_shared(Main_backups->Pages, layer))
+    {
+      // Depth buffer etc to modify too ?
+
+      Register_main_writable(L);
+    }
+  }
+}
 
 // Wrapper functions to call C from Lua
 
@@ -309,8 +355,25 @@ int L_SetPictureSize(lua_State* L)
   LUA_ARG_LIMIT (2, "setpicturesize");
   LUA_ARG_NUMBER(1, "setpicturesize", w, 1, 9999);
   LUA_ARG_NUMBER(2, "setpicturesize", h, 1, 9999);
-    
-  Backup_in_place(w, h);
+  
+  if (w == Main_image_width && h == Main_image_height)
+  {
+    // nothing to do at all
+    return 0;
+  }
+  
+  if (Is_backed_up)
+  {
+    // Script has already modified pixels or palette :
+    // Resize without counting an additional Undo step.
+    Backup_in_place(w, h);
+  }
+  else
+  {
+    // Script has not modified the image/palette yet, so it's not backed up:
+    // Make a backup that counts as a new Undo step.
+    Backup_with_new_dimensions(w, h);
+  }
   // part of Resize_image() : the pixel copy part.
   for (i=0; i<Main_backups->Pages->Nb_layers; i++)
   {
@@ -320,6 +383,12 @@ int L_SetPictureSize(lua_State* L)
       Main_backups->Pages->Image[i].Pixels,0,0,Main_image_width);
   }
   Redraw_layered_image();
+
+  Is_backed_up = 1;
+  Main_backup_page = Main_backups->Pages->Next;
+  Main_backup_screen = Screen_backup;
+  Register_main_writable(L);
+  lua_register(L,"setcolor",L_SetColor);
   
   return 0;
 }
@@ -593,15 +662,15 @@ int L_GetBackupPixel(lua_State* L)
   LUA_ARG_NUMBER(2, "getbackuppixel", y, INT_MIN, INT_MAX);
   
   // Bound check
-  if (x<0 || y<0 || x>=Main_backups->Pages->Next->Width || y>=Main_backups->Pages->Next->Height)
+  if (x<0 || y<0 || x>=Main_backup_page->Width || y>=Main_backup_page->Height)
   {
     // Silently return the image's transparent color
-    lua_pushinteger(L, Main_backups->Pages->Next->Transparent_color);
+    lua_pushinteger(L, Main_backup_page->Transparent_color);
     return 1;
   }
   // Can't use Read_pixel_from_backup_screen(), because in a Lua script
   // the "backup" can use a different screen dimension.
-  lua_pushinteger(L, *(Screen_backup + x + Main_backups->Pages->Next->Width * y));
+  lua_pushinteger(L, *(Main_backup_screen + x + Main_backup_page->Width * y));
   
   return 1;
 }
@@ -699,7 +768,6 @@ int L_GetSpareTransColor(lua_State* L)
 }
 
 
-
 int L_SetColor(lua_State* L)
 {
   byte c;
@@ -720,6 +788,14 @@ int L_SetColor(lua_State* L)
   Palette_has_changed=1;
   return 0;
 }
+
+int L_SetColor_unsaved(lua_State* L)
+{
+  Backup_if_necessary(L, LAYER_NONE);
+  lua_register(L,"setcolor",L_SetColor);
+  return L_SetColor(L);
+}
+
 
 int L_GetColor(lua_State* L)
 {
@@ -743,9 +819,9 @@ int L_GetBackupColor(lua_State* L)
   LUA_ARG_LIMIT (1, "getbackupcolor");
   LUA_ARG_NUMBER(1, "getbackupcolor", c, INT_MIN, INT_MAX);
 
-  lua_pushinteger(L, Main_backups->Pages->Next->Palette[c].R);
-  lua_pushinteger(L, Main_backups->Pages->Next->Palette[c].G);
-  lua_pushinteger(L, Main_backups->Pages->Next->Palette[c].B);
+  lua_pushinteger(L, Main_backup_page->Palette[c].R);
+  lua_pushinteger(L, Main_backup_page->Palette[c].G);
+  lua_pushinteger(L, Main_backup_page->Palette[c].B);
   return 3;
 }
 
@@ -1379,8 +1455,21 @@ int L_SelectLayer(lua_State* L)
   LUA_ARG_LIMIT (1, "selectlayer");
   LUA_ARG_NUMBER(1, "selectlayer", Main_current_layer, 0, Main_backups->Pages->Nb_layers - 1);
 
-  // TODO create layer if it doesn't exist yet ?
-
+  Backup_if_necessary(L, Main_current_layer);
+  // 
+  if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+  {
+    if (! ((1 << Main_current_layer) & Main_layers_visible))
+    {
+      Main_layers_visible |= (1 << Main_current_layer);
+      Redraw_layered_image();
+    }
+    else
+    {
+      Update_depth_buffer(); // Only need the depth buffer
+    }
+  }
+  // Todo: mark the layer menu bar as 'needs to be refreshed'
   return 0;
 }
 
@@ -1392,8 +1481,15 @@ int L_FinalizePicture(lua_State* L)
   LUA_ARG_LIMIT (0, "finalizepicture");
   
   Update_colors_during_script();
-  End_of_modification();
-  Backup();
+  if (Is_backed_up)
+  {
+    End_of_modification();
+  }
+  Is_backed_up = 0;
+  Main_backup_page = Main_backups->Pages;
+  Main_backup_screen = Main_screen;
+  Register_main_readonly(L);
+  lua_register(L,"setcolor",L_SetColor_unsaved);
   
   return 0;
 }
@@ -1511,6 +1607,38 @@ int L_Run(lua_State* L)
   chdir(saved_directory);
   return 0;
 }
+
+// "unsaved" version of the bindings
+
+DECLARE_UNSAVED(L_ClearPicture)
+DECLARE_UNSAVED(L_DrawCircle)
+DECLARE_UNSAVED(L_DrawDisk)
+DECLARE_UNSAVED(L_DrawFilledRect)
+DECLARE_UNSAVED(L_DrawLine)
+DECLARE_UNSAVED(L_PutPicturePixel)
+
+/// Bindings for screen-drawing Lua functions, if the current image is backed up.
+void Register_main_writable(lua_State* L)
+{
+  lua_register(L,"putpicturepixel",L_PutPicturePixel);
+  lua_register(L,"drawline",L_DrawLine);
+  lua_register(L,"drawfilledrect",L_DrawFilledRect);
+  lua_register(L,"drawcircle",L_DrawCircle);
+  lua_register(L,"drawdisk",L_DrawDisk);
+  lua_register(L,"clearpicture",L_ClearPicture);
+}
+
+/// Bindings for screen-drawing Lua functions, if the current image is not backed up yet.
+void Register_main_readonly(lua_State* L)
+{
+  lua_register(L,"putpicturepixel",L_PutPicturePixel_unsaved);
+  lua_register(L,"drawline",L_DrawLine_unsaved);
+  lua_register(L,"drawfilledrect",L_DrawFilledRect_unsaved);
+  lua_register(L,"drawcircle",L_DrawCircle_unsaved);
+  lua_register(L,"drawdisk",L_DrawDisk_unsaved);
+  lua_register(L,"clearpicture",L_ClearPicture_unsaved);
+}
+
 
 // Handlers for window internals
 T_Fileselector Scripts_selector;
@@ -1729,13 +1857,8 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   
   // Drawing
   lua_register(L,"putbrushpixel",L_PutBrushPixel);
-  lua_register(L,"putpicturepixel",L_PutPicturePixel);
   lua_register(L,"putsparepicturepixel",L_PutSparePicturePixel);
-  lua_register(L, "drawline",L_DrawLine);
-  lua_register(L, "drawfilledrect",L_DrawFilledRect);
-  lua_register(L, "drawcircle",L_DrawCircle);
-  lua_register(L, "drawdisk",L_DrawDisk);
-  lua_register(L,"clearpicture",L_ClearPicture);
+  Register_main_readonly(L);
 
   // Reading pixels
   lua_register(L,"getbrushpixel",L_GetBrushPixel);
@@ -1760,7 +1883,7 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   lua_register(L,"getbackcolor",L_GetBackColor);
   lua_register(L,"gettranscolor",L_GetTransColor);
 
-  lua_register(L,"setcolor",L_SetColor);
+  lua_register(L,"setcolor",L_SetColor_unsaved);
   lua_register(L,"setforecolor",L_SetForeColor);
   lua_register(L,"setbackcolor",L_SetBackColor);
 
@@ -1807,7 +1930,10 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   // If the script is only touching the brush, this isn't needed...
   // The backup also allows the script to read from it to make something
   // like a feedback off effect (convolution matrix comes to mind).
-  Backup();
+  //Backup();
+  Is_backed_up = 0;
+  Main_backup_page = Main_backups->Pages;
+  Main_backup_screen = Main_screen;
   Backup_the_spare(LAYER_ALL);
 
   Palette_has_changed=0;
@@ -1854,7 +1980,8 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   free(Brush_backup);
   Brush_backup=NULL;
   Update_colors_during_script();
-  End_of_modification();
+  if (Is_backed_up)
+    End_of_modification();
 	Print_in_menu("                        ",0);
 
   lua_close(L);
