@@ -49,7 +49,7 @@ void Compute_slider_cursor_length(T_Scroller_button * button);
 void Window_draw_slider(T_Scroller_button * button);
 void Window_draw_scroller_button(T_Scroller_button * button);
 
-void Window_input_content(T_Special_button * button, char * content);
+void Window_input_content(T_Special_button * button, const char * content);
 void Window_clear_input_button(T_Special_button * button);
 void Window_draw_input_bouton(word x_pos, word y_pos, word width_in_characters);
 

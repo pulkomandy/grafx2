@@ -1988,7 +1988,7 @@ void Window_draw_input_bouton(word x_pos,word y_pos,word width_in_characters)
 
 //------------ Modifier le contenu (caption) d'une zone de saisie ------------
 
-void Window_input_content(T_Special_button * button, char * content)
+void Window_input_content(T_Special_button * button, const char * content)
 {
   Print_in_window_limited(button->Pos_X+2,button->Pos_Y+2,content,button->Width/8,MC_Black,MC_Light);
 }

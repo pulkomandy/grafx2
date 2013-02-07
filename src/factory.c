@@ -81,6 +81,8 @@ static byte Original_back_color;
 static byte Is_backed_up;
 static T_Page * Main_backup_page;
 static byte * Main_backup_screen;
+static byte Cursor_is_visible;
+static byte Window_needs_update;
 
 /// Helper function to clamp a double to 0-255 range
 static inline byte clamp_byte(double value)
@@ -1007,6 +1009,8 @@ int L_InputBox(lua_State* L)
     max_label_length=25;
 
   Update_colors_during_script();
+  if (!Cursor_is_visible)
+    Display_cursor();
   Open_window(115+max_label_length*8,44+nb_settings*17,window_caption);
 
   // Normally this index is unused, but this initialization avoids
@@ -1178,6 +1182,7 @@ int L_InputBox(lua_State* L)
   Close_window();
   Cursor_shape=CURSOR_SHAPE_HOURGLASS;
   Display_cursor();
+  Cursor_is_visible=1;
   
   // Return values:
 
@@ -1241,6 +1246,8 @@ int L_SelectBox(lua_State* L)
     max_label_length=25;
 
   Update_colors_during_script();
+  if (!Cursor_is_visible)
+    Display_cursor();
   Open_window(28+max_label_length*8,26+nb_buttons*17,window_caption);
 
   for (button=0; button<nb_buttons; button++)
@@ -1261,6 +1268,7 @@ int L_SelectBox(lua_State* L)
   Close_window();
   Cursor_shape=CURSOR_SHAPE_HOURGLASS;
   Display_cursor();
+  Cursor_is_visible=1;
 
   if (clicked_button)
   {
@@ -1295,7 +1303,10 @@ int L_MessageBox(lua_State* L)
   }
 
   Update_colors_during_script();
+  if (!Cursor_is_visible)
+    Display_cursor();
   Verbose_message(caption, message);
+  Cursor_is_visible=1;
   return 0;
 }
 
@@ -1308,6 +1319,11 @@ int L_Wait(lua_State* L)
   LUA_ARG_LIMIT (1, "wait");
   LUA_ARG_NUMBER(1, "wait", delay, 0.0, 10.0);
 
+  if (!Cursor_is_visible)
+  {
+    Display_cursor();
+    Cursor_is_visible=1;
+  }
   // Simple 'yield'
   if (delay == 0.0)
   {
@@ -1333,6 +1349,11 @@ int L_WaitBreak(lua_State* L)
   LUA_ARG_LIMIT (1, "waitbreak");
   LUA_ARG_NUMBER(1, "waitbreak", delay, 0.0, DBL_MAX);
 
+  if (!Cursor_is_visible)
+  {
+    Display_cursor();
+    Cursor_is_visible=1;
+  }
   // Simple 'yield'
   if (delay == 0.0)
   {
@@ -1372,6 +1393,11 @@ int L_WaitInput(lua_State* L)
   LUA_ARG_LIMIT (1, "waitinput");
   LUA_ARG_NUMBER(1, "waitinput", delay, 0.0, DBL_MAX);
 
+  if (!Cursor_is_visible)
+  {
+    Display_cursor();
+    Cursor_is_visible=1;
+  }
   // Simple 'yield'
   if (delay == 0.0)
   {
@@ -1405,6 +1431,268 @@ int L_WaitInput(lua_State* L)
   return 7;
 }
 
+int L_WindowOpen(lua_State* L)
+{
+  int w, h;
+  int nb_args = lua_gettop(L);
+  const char *title="";
+  
+  LUA_ARG_NUMBER(1, "windowopen", w, 10, 310);
+  LUA_ARG_NUMBER(2, "windowopen", h, 10, 190);
+  if (nb_args >= 3)
+  {
+    LUA_ARG_STRING(3, "windowopen", title);
+    LUA_ARG_LIMIT (3, "windowclose");
+  }
+  
+  if (Windows_open>=7)
+  {
+    return luaL_error(L, "windowopen: Too many nested windows!");
+  }
+  
+  if (!Cursor_is_visible)
+    Display_cursor();
+  Open_window(w,h,title);
+  Cursor_is_visible=0;
+
+  return 0;
+}
+
+int L_WindowClose(lua_State* L)
+{
+  int nb_args = lua_gettop(L);
+  
+  LUA_ARG_LIMIT (0, "windowclose");
+  
+  if (!Windows_open)
+    return luaL_error(L, "windowclose: No window is open");
+  
+  if (!Cursor_is_visible)
+    Display_cursor();
+  Close_window();
+  Cursor_is_visible=0;
+  
+  return 0;
+}
+
+int L_WindowDoDialog(lua_State* L)
+{
+  int button;
+  int nb_args = lua_gettop(L);
+  
+  LUA_ARG_LIMIT (0, "windowdodialog");
+  
+  if (!Windows_open)
+    return luaL_error(L, "windowdodialog: No window is open");
+  
+  //Update_window_area(0,0,Window_width, Window_height);
+  if (!Cursor_is_visible)
+  {
+    Display_cursor();
+    Cursor_is_visible=1;
+  }
+  if (Window_needs_update)
+  {
+    Update_window_area(0,0,Window_width, Window_height);
+    Window_needs_update=0;
+  }
+  button=Window_clicked_button();
+
+  lua_pushinteger(L, button);
+  lua_pushinteger(L, Window_attribute2);
+  lua_pushinteger(L, Key);
+  return 3;
+}
+
+int L_WindowButton(lua_State* L)
+{
+  int x, y, w, h, key=KEY_NONE;
+  const char *text="";
+  int nb_args = lua_gettop(L);
+  
+  LUA_ARG_NUMBER(1, "windowbutton", x, 1, Window_width-1);
+  LUA_ARG_NUMBER(2, "windowbutton", y, 1, Window_height-1);
+  LUA_ARG_NUMBER(3, "windowbutton", w, 1, Window_width-1-x);
+  LUA_ARG_NUMBER(4, "windowbutton", h, 1, Window_height-1-y);
+  if (nb_args >= 5)
+  {
+    LUA_ARG_STRING(5, "windowbutton", text);
+  }
+  if (nb_args >= 6)
+  {
+    LUA_ARG_NUMBER(6, "windowbutton", key, -1, INT_MAX);
+    LUA_ARG_LIMIT (6, "windowbutton");
+  }
+  
+  if (!Windows_open)
+    return luaL_error(L, "windowbutton: No window is open");
+  
+  if (Cursor_is_visible)
+  {
+    Hide_cursor();
+    Cursor_is_visible=0;
+  }
+  Window_set_normal_button(x, y, w, h, text, 0, 1, key);
+  Window_needs_update=1;
+
+  return 0;
+}
+
+int L_WindowRepeatButton(lua_State* L)
+{
+  int x, y, w, h, key=KEY_NONE;
+  const char *text="";
+  int nb_args = lua_gettop(L);
+  
+  LUA_ARG_NUMBER(1, "windowrepeatbutton", x, 1, Window_width-1);
+  LUA_ARG_NUMBER(2, "windowrepeatbutton", y, 1, Window_height-1);
+  LUA_ARG_NUMBER(3, "windowrepeatbutton", w, 1, Window_width-1-x);
+  LUA_ARG_NUMBER(4, "windowrepeatbutton", h, 1, Window_height-1-y);
+  if (nb_args >= 5)
+  {
+    LUA_ARG_STRING(5, "windowrepeatbutton", text);
+  }
+  if (nb_args >= 6)
+  {
+    LUA_ARG_NUMBER(6, "windowrepeatbutton", key, -1, INT_MAX);
+    LUA_ARG_LIMIT (6, "windowrepeatbutton");
+  }
+  
+  if (!Windows_open)
+    return luaL_error(L, "windowrepeatbutton: No window is open");
+  
+  if (Cursor_is_visible)
+  {
+    Hide_cursor();
+    Cursor_is_visible=0;
+  }
+  Window_set_repeatable_button(x, y, w, h, text, 0, 1, key);
+  Window_needs_update=1;
+
+  return 0;
+}
+
+int L_WindowInput(lua_State* L)
+{
+  int x, y, nbchar;
+  const char *text=NULL;
+  T_Special_button *button;
+  int nb_args = lua_gettop(L);
+  
+  LUA_ARG_NUMBER(1, "windowinput", x, 3, Window_width-3-8);
+  LUA_ARG_NUMBER(2, "windowinput", y, 3, Window_height-3-8);
+  LUA_ARG_NUMBER(3, "windowinput", nbchar, 1, (Window_width-3-8-x)/8);
+  if (nb_args >= 4)
+  {
+    LUA_ARG_STRING(4, "windowinput", text);
+    LUA_ARG_LIMIT (4, "windowinput");
+  }
+  
+  if (!Windows_open)
+    return luaL_error(L, "windowinput: No window is open");
+  
+  if (Cursor_is_visible)
+  {
+    Hide_cursor();
+    Cursor_is_visible=0;
+  }
+  button = Window_set_input_button(x-2, y-2, nbchar);
+  if (text!=NULL)
+    Window_input_content(button, text);
+  Window_needs_update=1;
+
+  return 0;
+}
+
+int L_WindowReadline(lua_State* L)
+{
+  int x, y, nbchar, maxchar;
+  const char *valuetext;
+  double valuenumber;
+  char text[255+1]="";
+  int result;
+  int input_type=0; // see Readline_ex()
+  int nb_args = lua_gettop(L);
+  
+  LUA_ARG_NUMBER(1, "windowreadline", x, 3, Window_width-3-8);
+  LUA_ARG_NUMBER(2, "windowreadline", y, 3, Window_height-3-8);
+  // arg 3 can be either string or number
+  if (nb_args < (3)) return luaL_error(L, "%s: Argument %d is missing.", "windowreadline", (3));
+  if (lua_isnumber(L, (3)))
+  {
+    valuenumber = lua_tonumber(L, (3));
+    sprintf(text, "%Lf", valuenumber);
+    input_type=3;
+  }
+  else if (lua_isstring(L, (3)))
+  {
+    valuetext = lua_tostring(L, (3));
+    if (strlen(valuetext)>255)
+      return luaL_error(L, "%s: Argument %d, string too long.", "windowreadline", (3));
+    strcpy(text, valuetext);
+  }
+  else
+    return luaL_error(L, "%s: Argument %d is neither a number nor a string.", "windowreadline", (3));
+  LUA_ARG_NUMBER(4, "windowreadline", nbchar, 1, (Window_height-3-8)/8);
+  maxchar = nbchar;
+  if (nb_args >= 5)
+  {
+    LUA_ARG_NUMBER(5, "windowreadline", maxchar, 1, 255);
+    LUA_ARG_LIMIT (5, "windowreadline");
+  }
+  
+  if (!Windows_open)
+    return luaL_error(L, "windowreadline: No window is open");
+  
+  if (Cursor_is_visible)
+  {
+    Hide_cursor();
+    Cursor_is_visible=0;
+  }
+  result = Readline_ex(x, y, text, nbchar, maxchar, input_type, 0);
+  Window_needs_update=1;
+
+  lua_pushinteger(L, result); // 0=ESC, 1= confirm
+  lua_pushstring(L, text);
+  return 2;
+}
+
+int L_WindowPrint(lua_State* L)
+{
+  int x, y, fg=0, bg=2;
+  int len;
+  int colors[4] = {MC_Black, MC_Dark, MC_Light, MC_White};
+  const char *text="";
+  int nb_args = lua_gettop(L);
+  
+  LUA_ARG_NUMBER(1, "windowprint", x, 1, Window_width-8);
+  LUA_ARG_NUMBER(2, "windowprint", y, 1, Window_height-8);
+  LUA_ARG_STRING(3, "windowprint", text);
+  if (nb_args >= 4)
+  {
+    LUA_ARG_NUMBER(4, "windowprint", fg, 0, 3);
+  }
+  if (nb_args >= 5)
+  {
+    LUA_ARG_NUMBER(5, "windowprint", bg, 0, 3);
+    LUA_ARG_LIMIT (5, "windowprint");
+  }
+  
+  if (!Windows_open)
+    return luaL_error(L, "windowprint: No window is open");
+  
+  if (Cursor_is_visible)
+  {
+    Hide_cursor();
+    Cursor_is_visible=0;
+  }
+  len=strlen(text);
+  Print_in_window_limited(x, y, text, (Window_width-x)/8,colors[fg], colors[bg]);
+  Window_needs_update=1;
+  
+  return 0;
+}
+
 int L_UpdateScreen(lua_State* L)
 {
   int nb_args=lua_gettop(L);
@@ -1412,9 +1700,11 @@ int L_UpdateScreen(lua_State* L)
   LUA_ARG_LIMIT (0, "updatescreen");
   
   Update_colors_during_script();
-  Hide_cursor();
+  if (Cursor_is_visible)
+    Hide_cursor();
   Display_all_screen();
   Display_cursor();
+  Cursor_is_visible=1;
   //Flush_update();
 
   return 0;
@@ -1443,7 +1733,10 @@ int L_StatusMessage(lua_State* L)
     strncpy(msg2, msg, 24);
   }
   msg2[24]='\0';
+  if (Cursor_is_visible)
+    Hide_cursor();
   Print_in_menu(msg2,0);
+  Cursor_is_visible=0;
   return 0;
 }
 
@@ -1830,6 +2123,7 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   Cursor_shape=CURSOR_SHAPE_HOURGLASS;
   Display_cursor();
   Flush_update();
+  Cursor_is_visible=1;
   
   if (script_subdirectory && script_subdirectory[0]!='\0')
   {
@@ -1911,6 +2205,15 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   lua_register(L,"selectlayer",L_SelectLayer);
   lua_register(L,"run",L_Run);
   
+  // dialog
+  lua_register(L,"windowopen",L_WindowOpen);
+  lua_register(L,"windowclose",L_WindowClose);
+  lua_register(L,"windowdodialog",L_WindowDoDialog);
+  lua_register(L,"windowbutton",L_WindowButton);
+  lua_register(L,"windowrepeatbutton",L_WindowRepeatButton);
+  lua_register(L,"windowinput",L_WindowInput);
+  lua_register(L,"windowreadline",L_WindowReadline);
+  lua_register(L,"windowprint",L_WindowPrint);
   
   // Load all standard libraries
   luaL_openlibs(L);
@@ -1975,6 +2278,9 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
       else
         Warning_message("Unknown error running script!");
     }
+    // Clean up any remaining dialog windows
+    while (Windows_open)
+      Close_window();
   }
   // Cleanup
   free(Brush_backup);
