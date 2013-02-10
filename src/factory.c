@@ -1606,7 +1606,7 @@ int L_WindowInput(lua_State* L)
 
 int L_WindowReadline(lua_State* L)
 {
-  int x, y, nbchar, maxchar;
+  int x, y, visible_size, max_size, decimal_places=0;
   const char *valuetext;
   double valuenumber;
   char text[255+1]="";
@@ -1616,31 +1616,29 @@ int L_WindowReadline(lua_State* L)
   
   LUA_ARG_NUMBER(1, "windowreadline", x, 3, Window_width-3-8);
   LUA_ARG_NUMBER(2, "windowreadline", y, 3, Window_height-3-8);
-  // arg 3 can be either string or number
+  // arg 3 can be either string or number, it's checked below
   if (nb_args < (3)) return luaL_error(L, "%s: Argument %d is missing.", "windowreadline", (3));
-  if (lua_isnumber(L, (3)))
+  LUA_ARG_NUMBER(4, "windowreadline", visible_size, 1, (Window_height-3-8)/8);
+  LUA_ARG_NUMBER(5, "windowreadline", max_size, 1, 255);
+  LUA_ARG_NUMBER(6, "windowreadline", decimal_places, 0, 16);
+  LUA_ARG_NUMBER(7, "windowreadline", input_type, 0, 4);
+  LUA_ARG_LIMIT (7, "windowreadline");
+  
+  if (input_type == 3 || input_type == 1)
   {
-    valuenumber = lua_tonumber(L, (3));
-    sprintf(text, "%Lf", valuenumber);
-    input_type=3;
+    // expect number
+    LUA_ARG_NUMBER(3, "windowreadline", valuenumber, -DBL_MAX, DBL_MAX);
+    Sprint_double(text, valuenumber, decimal_places, 0);
   }
-  else if (lua_isstring(L, (3)))
+  else
   {
-    valuetext = lua_tostring(L, (3));
+    // expect string
+    LUA_ARG_STRING(3, "windowreadline", valuetext);
     if (strlen(valuetext)>255)
       return luaL_error(L, "%s: Argument %d, string too long.", "windowreadline", (3));
     strcpy(text, valuetext);
   }
-  else
-    return luaL_error(L, "%s: Argument %d is neither a number nor a string.", "windowreadline", (3));
-  LUA_ARG_NUMBER(4, "windowreadline", nbchar, 1, (Window_height-3-8)/8);
-  maxchar = nbchar;
-  if (nb_args >= 5)
-  {
-    LUA_ARG_NUMBER(5, "windowreadline", maxchar, 1, 255);
-    LUA_ARG_LIMIT (5, "windowreadline");
-  }
-  
+    
   if (!Windows_open)
     return luaL_error(L, "windowreadline: No window is open");
   
@@ -1649,10 +1647,10 @@ int L_WindowReadline(lua_State* L)
     Hide_cursor();
     Cursor_is_visible=0;
   }
-  result = Readline_ex(x, y, text, nbchar, maxchar, input_type, 0);
+  result = Readline_ex(x, y, text, visible_size, max_size, input_type, decimal_places);
   Window_needs_update=1;
 
-  lua_pushinteger(L, result); // 0=ESC, 1= confirm
+  lua_pushboolean(L, result); // 0=ESC, 1= confirm
   lua_pushstring(L, text);
   return 2;
 }
@@ -2280,7 +2278,10 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
     }
     // Clean up any remaining dialog windows
     while (Windows_open)
+    {
       Close_window();
+      Display_cursor();
+    }
   }
   // Cleanup
   free(Brush_backup);
