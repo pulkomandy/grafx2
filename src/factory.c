@@ -129,6 +129,20 @@ do { \
 } while (0)
 
 ///
+/// This macro reads a Lua argument into a boolean.
+/// If argument is invalid, it will break the caller and raise a verbose message.
+/// This macro uses 2 existing symbols: L for the context, and nb_args=lua_gettop(L)
+/// @param index     Index of the argument to check, starting at 1.
+/// @param func_name The name of the lua callback, to display a message in case of error.
+/// @param dest      Destination variable, any numeric type.
+#define LUA_ARG_BOOL(index, func_name, dest) \
+do { \
+  if (nb_args < (index)) return luaL_error(L, "%s: Argument %d is missing.", func_name, index); \
+  if (!lua_isboolean(L, (index))) return luaL_error(L, "%s: Argument %d is not a boolean.", func_name, index); \
+  dest = lua_toboolean(L, (index)); \
+} while (0)
+
+///
 /// This macro checks that a Lua argument is a function.
 /// If argument is invalid, it will break the caller and raise a verbose message.
 /// This macro uses 2 existing symbols: L for the context, and nb_args=lua_gettop(L)
@@ -1442,7 +1456,7 @@ int L_WindowOpen(lua_State* L)
   if (nb_args >= 3)
   {
     LUA_ARG_STRING(3, "windowopen", title);
-    LUA_ARG_LIMIT (3, "windowclose");
+    LUA_ARG_LIMIT (3, "windowopen");
   }
   
   if (Windows_open>=7)
@@ -1688,6 +1702,91 @@ int L_WindowPrint(lua_State* L)
   Print_in_window_limited(x, y, text, (Window_width-x)/8,colors[fg], colors[bg]);
   Window_needs_update=1;
   
+  return 0;
+}
+
+int L_WindowSlider(lua_State* L)
+{
+  word x, y, height, nb_elements, nb_elements_visible, initial_position;
+  int horizontal;
+  T_Scroller_button *button;
+  int nb_args = lua_gettop(L);
+  
+  LUA_ARG_LIMIT (7, "windowslider");
+  LUA_ARG_BOOL  (7, "windowslider", horizontal);
+  if (horizontal)
+  {
+    LUA_ARG_NUMBER(1, "windowslider", x, 1, Window_width-27);
+    LUA_ARG_NUMBER(2, "windowslider", y, 1, Window_height-13);
+    LUA_ARG_NUMBER(3, "windowslider", height, 1, Window_width-27-x);
+  }
+  else
+  {
+    LUA_ARG_NUMBER(1, "windowslider", x, 1, Window_width-13);
+    LUA_ARG_NUMBER(2, "windowslider", y, 1, Window_height-27);
+    LUA_ARG_NUMBER(3, "windowslider", height, 1, Window_height-27-y);
+  }
+  LUA_ARG_NUMBER(4, "windowslider", nb_elements, 1, INT_MAX);
+  LUA_ARG_NUMBER(5, "windowslider", nb_elements_visible, 1, nb_elements);
+  LUA_ARG_NUMBER(6, "windowslider", initial_position, 0, nb_elements-nb_elements_visible);
+  
+  if (!Windows_open)
+    return luaL_error(L, "windowslider: No window is open");
+  
+  if (Cursor_is_visible)
+  {
+    Hide_cursor();
+    Cursor_is_visible=0;
+  }
+  if (horizontal)
+    button = Window_set_horizontal_scroller_button(x, y, height+24, nb_elements, nb_elements_visible, initial_position);
+  else
+    button = Window_set_scroller_button(x, y, height+24, nb_elements, nb_elements_visible, initial_position);
+  
+  Window_needs_update=1;
+
+  return 0;
+}
+
+int L_WindowMoveSlider(lua_State* L)
+{
+  word nb_elements, nb_elements_visible, position;
+  int slider_number;
+  T_Scroller_button *button = Window_scroller_button_list;
+  int nb_args = lua_gettop(L);
+  
+  if (!Windows_open)
+    return luaL_error(L, "windowmoveslider: No window is open");
+  
+  LUA_ARG_NUMBER(1, "windowmoveslider", slider_number, 1, 256);
+  button = Window_scroller_button_list;
+  if (! button)
+    return luaL_error(L, "windowmoveslider: No slider to move");
+  while (slider_number>1)
+  {
+    slider_number--;    
+    button = button->Next;
+    if (! button)
+      return luaL_error(L, "windowmoveslider: Not so many sliders in this window");
+  }
+  LUA_ARG_NUMBER(2, "windowmoveslider", nb_elements, 1, INT_MAX);
+  LUA_ARG_NUMBER(3, "windowmoveslider", nb_elements_visible, 1, nb_elements);
+  LUA_ARG_NUMBER(4, "windowmoveslider", position, 0, nb_elements-nb_elements_visible);
+  LUA_ARG_LIMIT (4, "windowmoveslider");
+  
+  if (Cursor_is_visible)
+  {
+    Hide_cursor();
+    Cursor_is_visible=0;
+  }
+  button->Nb_elements   =nb_elements;
+  button->Nb_visibles   =nb_elements_visible;
+  button->Position      =position;
+  Compute_slider_cursor_length(button);
+  Window_draw_slider(button);
+  
+  Window_needs_update=1;
+
   return 0;
 }
 
@@ -2212,6 +2311,8 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   lua_register(L,"windowinput",L_WindowInput);
   lua_register(L,"windowreadline",L_WindowReadline);
   lua_register(L,"windowprint",L_WindowPrint);
+  lua_register(L,"windowslider",L_WindowSlider);
+  lua_register(L,"windowmoveslider",L_WindowMoveSlider);
   
   // Load all standard libraries
   luaL_openlibs(L);
