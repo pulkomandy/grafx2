@@ -1638,58 +1638,62 @@ void PC1_uncompress_packbits(byte * src,byte * dest)
 
 void PC1_compress_packbits(byte * src,byte * dest,int source_size,int * dest_size)
 {
-  int is; // index dans la source
-  int id; // index dans la destination
-  int ir; // index de   la répétition
-  int n;  // Taille des séquences
-  int repet; // "Il y a répétition"
 
-  for (is=id=0;is<source_size;)
+  *dest_size = 0;
+  while (source_size > 0)
   {
-    // On recherche le 1er endroit où il y a répétition d'au moins 3 valeurs
-    // identiques
+    int is = 0; // index dans la source
+    int id = 0; // index dans la destination
+    int ir; // index de   la répétition
+    int n;  // Taille des séquences
+    int repet; // "Il y a répétition"
 
-    repet=0;
-    for (ir=is;ir<source_size-2;ir++)
+    while(is<40)
     {
-      if ((src[ir]==src[ir+1]) && (src[ir+1]==src[ir+2]))
+      // On recherche le 1er endroit où il y a répétition d'au moins 3 valeurs
+      // identiques
+  
+      repet=0;
+      for (ir=is;ir<40-2;ir++)
       {
-        repet=1;
-        break;
+        if ((src[ir]==src[ir+1]) && (src[ir+1]==src[ir+2]))
+        {
+          repet=1;
+          break;
+        }
       }
-      if ((ir-is)+1==40)
-        break;
-    }
-
-    // On code la partie sans répétitions
-    if (ir!=is)
-    {
-      n=(ir-is)+1;
-      dest[id++]=n-1;
-      for (;n>0;n--)
-        dest[id++]=src[is++];
-    }
-
-    // On code la partie sans répétitions
-    if (repet)
-    {
-      // On compte la quantité de fois qu'il faut répéter la valeur
-      for (ir+=3;ir<source_size;ir++)
+  
+      // On code la partie sans répétitions
+      if (!repet || ir!=is)
       {
-        if (src[ir]!=src[is])
-          break;
-        if ((ir-is)+1==40)
-          break;
+        n=(ir-is)+1;
+        dest[id++]=n-1;
+        for (;n>0;n--)
+          dest[id++]=src[is++];
       }
-      n=(ir-is);
-      dest[id++]=257-n;
-      dest[id++]=src[is];
-      is=ir;
+  
+      // On code la partie sans répétitions
+      if (repet)
+      {
+        // On compte la quantité de fois qu'il faut répéter la valeur
+        for (ir+=3;ir<40;ir++)
+        {
+          if (src[ir]!=src[is])
+            break;
+        }
+        n=(ir-is);
+        dest[id++]=257-n;
+        dest[id++]=src[is];
+        is=ir;
+      }
     }
+    // On renseigne la taille du buffer compressé
+    *dest_size+=id;
+    // Move for next 40-byte block
+    src += 40;
+    dest += id;
+    source_size -= 40;
   }
-
-  // On renseigne la taille du buffer compressé
-  *dest_size=id;
 }
 
 //// DECODAGE d'une partie d'IMAGE ////
