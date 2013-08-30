@@ -422,8 +422,13 @@ void Change_palette_cells()
   // la fin, il faut reculer First_color_in_palette pour montrer plein
   // de couleurs.
   if ((int)First_color_in_palette+(Menu_cells_Y)*Menu_cells_X*2>=256)
-    First_color_in_palette=255/Menu_cells_Y*Menu_cells_Y-(Menu_cells_X-1)*Menu_cells_Y;
-
+  {
+    if (Config.Palette_vertical)
+      First_color_in_palette=255/Menu_cells_X*Menu_cells_X-(Menu_cells_Y-1)*Menu_cells_X;
+    else
+      First_color_in_palette=255/Menu_cells_Y*Menu_cells_Y-(Menu_cells_X-1)*Menu_cells_Y;
+  }
+  
   // Mise à jour de la taille du bouton dans le menu. C'est pour pas que
   // la bordure noire soit active.
   Buttons_Pool[BUTTON_CHOOSE_COL].Width=(Menu_palette_cell_width*Menu_cells_X)-1;

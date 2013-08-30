@@ -333,7 +333,12 @@ void Button_Pal_right_fast(void)
     if ((int)First_color_in_palette+(cells_y)*cells_x*2<256)
       First_color_in_palette+=cells_x*cells_y;
     else
-      First_color_in_palette=255/cells_y*cells_y-(cells_x-1)*cells_y;
+    {
+      if (Config.Palette_vertical)
+        First_color_in_palette=255/cells_x*cells_x-(cells_y-1)*cells_x;
+      else
+        First_color_in_palette=255/cells_y*cells_y-(cells_x-1)*cells_y;
+    }
     Display_menu_palette();
   }
   Unselect_button(BUTTON_PAL_RIGHT);
