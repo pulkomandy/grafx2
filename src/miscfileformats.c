@@ -1433,7 +1433,74 @@ void PI1_code_palette(byte * palette,byte * dest)
   }
 }
 
+/// Load color ranges from a PI1 or PC1 image (Degas Elite format)
+void PI1_load_ranges(T_IO_Context * context, const byte * buffer, int size)
+{  
+  int range;
+  
+  if (buffer==NULL || size<32)
+    return;
+    
+  for (range=0; range < 4; range ++)
+  {
+    word min_col, max_col, direction, delay;
+    
+    min_col   = (buffer[size - 32 + range*2 +  0] << 8) | buffer[size - 32 + range*2 +  1];
+    max_col   = (buffer[size - 32 + range*2 +  8] << 8) | buffer[size - 32 + range*2 +  9];
+    direction = (buffer[size - 32 + range*2 + 16] << 8) | buffer[size - 32 + range*2 + 17];
+    delay     = (buffer[size - 32 + range*2 + 24] << 8) | buffer[size - 32 + range*2 + 25];
+  
+    if (max_col < min_col)
+      SWAP_WORDS(min_col,max_col)
+    // Sanity checks
+    if (min_col < 256 && max_col < 256 && direction < 3 && (direction == 1 || delay < 128))
+    {
+      int speed = 210/(128-delay);
+      // Grafx2's slider has a limit of 105
+      if (speed>105)
+        speed = 105;
+      context->Cycle_range[context->Color_cycles].Start=min_col;
+      context->Cycle_range[context->Color_cycles].End=max_col;
+      context->Cycle_range[context->Color_cycles].Inverse= (direction==0);
+      context->Cycle_range[context->Color_cycles].Speed=direction == 1 ? 0 : speed;
+      context->Color_cycles++;
+    }
+  }
+}
 
+/// Saves color ranges from a PI1 or PC1 image (Degas Elite format)
+void PI1_save_ranges(T_IO_Context * context, byte * buffer, int size)
+{
+  // empty by default
+  memset(buffer+size - 32, 0, 32);
+  if (context->Color_cycles)
+  {
+    int i; // index in context->Cycle_range[] : < context->Color_cycles
+    int saved_range; // index in resulting buffer : < 4
+    
+    for (i=0, saved_range=0; i<context->Color_cycles && saved_range<4; i++)
+    {
+      if (context->Cycle_range[i].Start < 16 && context->Cycle_range[i].End < 16)
+      {
+        int speed;
+        if (context->Cycle_range[i].Speed == 0)
+          speed = 0;
+        else if (context->Cycle_range[i].Speed == 1)
+          // has to "round" manually to closest valid number for this format
+          speed = 1;          
+        else
+          speed = 128 - 210 / context->Cycle_range[i].Speed;
+          
+        buffer[size - 32 + saved_range*2 +  1] = context->Cycle_range[i].Start;
+        buffer[size - 32 + saved_range*2 +  9] = context->Cycle_range[i].End;
+        buffer[size - 32 + saved_range*2 + 17] = (context->Cycle_range[i].Speed == 0) ? 1 : (context->Cycle_range[i].Inverse ? 0 : 2);
+        buffer[size - 32 + saved_range*2 + 25] = speed;
+        
+        saved_range ++;
+      }
+    }
+  }
+}
 // -- Tester si un fichier est au format PI1 --------------------------------
 void Test_PI1(T_IO_Context * context)
 {
@@ -1514,6 +1581,7 @@ void Load_PI1(T_IO_Context * context)
             for (x_pos=0;x_pos<320;x_pos++)
               Set_pixel(context, x_pos,y_pos,pixels[x_pos]);
           }
+          PI1_load_ranges(context, buffer, 32034);
         }
       }
       else
@@ -1549,7 +1617,7 @@ void Save_PI1(T_IO_Context * context)
     setvbuf(file, NULL, _IOFBF, 64*1024);
     
     // allocation d'un buffer mémoire
-    buffer=(byte *)malloc(32066);
+    buffer=(byte *)malloc(32034);
     // Codage de la résolution
     buffer[0]=0x00;
     buffer[1]=0x00;
@@ -1573,10 +1641,9 @@ void Save_PI1(T_IO_Context * context)
         ptr+=8;
       }
     }
+    PI1_save_ranges(context, buffer, 32034);
 
-    memset(buffer+32034,0,32); // 32 extra NULL bytes at the end of the file to make ST Deluxe Paint happy
-
-    if (Write_bytes(file,buffer,32066))
+    if (Write_bytes(file,buffer,32034))
     {
       fclose(file);
     }
@@ -1849,6 +1916,10 @@ void Load_PC1(T_IO_Context * context)
             for (x_pos=0;x_pos<320;x_pos++)
               Set_pixel(context, x_pos,y_pos,pixels[x_pos]);
           }
+          if (!File_error)
+          {
+            PI1_load_ranges(context, buffercomp, size);
+          }
         }
       }
       else
@@ -1918,10 +1989,10 @@ void Save_PC1(T_IO_Context * context)
 
     // Compression du buffer
     PC1_compress_packbits(bufferdecomp,buffercomp+34,32000,&size);
-    size+=34;
-    for (x_pos=0;x_pos<16;x_pos++)
-      buffercomp[size++]=0;
-
+    size += 34;
+    size += 32;
+    PI1_save_ranges(context, buffercomp,size);
+    
     if (Write_bytes(file,buffercomp,size))
     {
       fclose(file);
