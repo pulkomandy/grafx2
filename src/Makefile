@@ -58,7 +58,7 @@ ifdef COMSPEC
   CP = cp
   BIN = ../bin/grafx2.exe
   COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb `sdl-config --cflags` $(TTFCOPT) $(JOYCOPT) $(LUACOPT)
-  LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng14 $(LUALOPT)
+  LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng -lz $(LUALOPT)
   LUALOPT = -llua
   CC = gcc
   OBJDIR = ../obj/win32
