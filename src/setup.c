@@ -178,9 +178,14 @@ void Set_config_directory(const char * program_dir, char * config_dir)
         const char* Config_SubDir = "GrafX2";
         config_parent_dir = getenv("APPDATA");
       #elif defined(__BEOS__) || defined(__HAIKU__)
-        // "~/.grafx2", the BeOS way
-        const char* Config_SubDir = ".grafx2";
-        config_parent_dir = getenv("$HOME");
+        // "`finddir B_USER_SETTINGS_DIRECTORY`/grafx2"
+        const char* Config_SubDir = "grafx2";
+        {
+          static char parent[MAX_PATH_CHARACTERS];
+          find_directory(B_USER_SETTINGS_DIRECTORY, 0, false, parent,
+            MAX_PATH_CHARACTERS);
+          config_parent_dir = parent;
+        }
       #elif defined(__macosx__)
         // "~/Library/Preferences/com.googlecode.grafx2"
         const char* Config_SubDir = "Library/Preferences/com.googlecode.grafx2";

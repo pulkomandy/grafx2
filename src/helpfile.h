@@ -61,7 +61,7 @@ static const T_Help_table helptable_about[] =
   HELP_TITLE("        GRAFX 2   ")
   HELP_BOLD ("         \"Dragon's Layers\" Edition")
   HELP_BOLD ("  THE ULTIMATE MULTI-RESOLUTION GFX EDITOR")
-  HELP_TEXT ("       http://grafx2.googlecode.com")
+  HELP_TEXT ("             http://grafx2.org")
 #if defined(__MINT__)
   HELP_TEXT ("                atari build                ")
 #else

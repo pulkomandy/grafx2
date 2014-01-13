@@ -187,7 +187,7 @@ Section "Grafx2" SecProgram
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
                  "DisplayIcon" "$INSTDIR\gfx2.ico"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
-                 "URLInfoAbout" "http://grafx2.googlecode.com"
+                 "URLInfoAbout" "http://grafx2.org"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
                  "DisplayVersion" "2.4.wip2023"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \

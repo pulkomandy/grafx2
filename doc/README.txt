@@ -50,7 +50,7 @@ The source code of Grafx2 should always be distributed along with the
 executable; You can normally find it in a packed archive whose name begins by
 "src". The source code is also available on the web site, either by accessing
 the Subversion repository:
-http://grafx2.googlecode.com/svn/trunk/
+svn://pulkomandy.tk/GrafX2/
 or you can find the latest versions as packed archives:
 http://code.google.com/p/grafx2/wiki/Downloads
 
@@ -65,7 +65,7 @@ http://code.google.com/p/grafx2/wiki/Compiling
 To watch the full credits list, in the program, click '?' then 'Credits'.
 
 Please report bugs and request features on the bugtracker:
-http://code.google.com/p/grafx2/issues/list
+http://pulkomandy.tk/projects/GrafX2/query
 
 E-mail: grafx2@googlegroups.com
 It's a public mailing-list, so be aware that your message will be visible at:
@@ -92,9 +92,9 @@ Short revision history :
   * 11/1996  2.0b90%   First public release, at the Wired'96.
   * 09/1995            Project starts.
 
-Check http://code.google.com/p/grafx2/source/list for (very) detailed changelog.
-Check http://code.google.com/p/grafx2/wiki/History for an overview of the new 
-features and bugfixes in each numbered version.
+Check http://pulkomandy.tk/projects/GrafX2/log/ for (very) detailed changelog.
+Check http://pulkomandy.tk/projects/GrafX2/wiki/History for an overview of the
+new features and bugfixes in each numbered version.
 
 === FINAL WORDS ===
 
