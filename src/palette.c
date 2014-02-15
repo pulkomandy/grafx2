@@ -77,7 +77,7 @@ int Get_palette_RGB_scale(void)
 /// The result is also in the 0-255 range.
 byte Round_palette_component(byte comp)
 {
-  return ((comp+128/RGB_scale)*(RGB_scale-1)/255*255+(RGB_scale&1?1:0))/(RGB_scale-1);
+  return (comp*RGB_scale/256+(RGB_scale-(256-1)*RGB_scale/256)/2) * (255/(RGB_scale-1));
 }
 
 ///
