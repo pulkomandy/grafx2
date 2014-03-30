@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2014 Sergii Pylypenko
     Copyright 2011 Pawel Góralski
     Copyright 2008 Peter Gordon
     Copyright 2008 Yves Rizoud
@@ -92,6 +93,9 @@ void Set_program_directory(const char * argv0,char * program_dir)
   sprintf(program_dir,"%c:\%s",currentDrive,path);
   // Append trailing slash
   strcat(program_dir,PATH_SEPARATOR);
+  #elif defined(__ANDROID__)
+  getcwd(program_dir, MAX_PATH_CHARACTERS);
+  strcat(program_dir, "/");
   // Linux: argv[0] unreliable
   #elif defined(__linux__)
   if (argv0[0]!='/')
@@ -122,7 +126,7 @@ void Set_data_directory(const char * program_dir, char * data_dir)
   #if defined(__macosx__)
     strcat(data_dir,"Contents/Resources/");
   // On GP2X, executable is not in bin/
-  #elif defined (__GP2X__) || defined (__gp2x__) || defined (__WIZ__) || defined (__CAANOO__)
+  #elif defined (__GP2X__) || defined (__gp2x__) || defined (__WIZ__) || defined (__CAANOO__) || defined(__ANDROID__)
     strcat(data_dir,"share/grafx2/");
   //on tos the same directory
   #elif defined (__MINT__)

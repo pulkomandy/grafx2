@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2014 Sergii Pylypenko
     Copyright 2008 Yves Rizoud
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
@@ -49,6 +50,9 @@
 #elif defined(__AROS__)
 #include <proto/iffparse.h>
 #include <datatypes/textclass.h>
+#endif
+#if defined(__ANDROID__)
+#include <SDL_screenkeyboard.h>
 #endif
 
 // Virtual keyboard is ON by default on these platforms:
@@ -400,6 +404,10 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
     //  Nothing. The caller should have initialized a valid hexa number.
   }
   
+#if defined(__ANDROID__)
+	SDL_ANDROID_GetScreenKeyboardTextInput(str, max_size);
+	input_key = SDLK_RETURN;
+#else
   // Virtual keyboards
   if (Config.Use_virtual_keyboard==1 ||
     (VIRT_KEY_DEFAULT_ON && Config.Use_virtual_keyboard==0))
@@ -757,7 +765,7 @@ affichage:
     Mouse_K=old_mouse_k;
     Input_sticky_control=0;
   }
-  
+#endif // defined(__ANDROID__)  
   // Effacement de la chaîne
   Block(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
         visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);

@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2014 Sergii Pylypenko
     Copyright 2009 Franck Charlet
     Copyright 2009 Yves Rizoud
     Copyright 2007 Adrien Destugues
@@ -721,11 +722,11 @@ GFX2_GLOBAL byte  Airbrush_multi_flow[256];
 /// Boolean, set to true to exit the program.
 GFX2_GLOBAL byte Quitting;
 /// Name of the directory that was current when the program was run.
-GFX2_GLOBAL char Initial_directory[256];
+GFX2_GLOBAL char Initial_directory[MAX_PATH_CHARACTERS];
 /// Name of the directory that holds the program's (read-only) data: skins, icon, etc.
-GFX2_GLOBAL char Data_directory[256];
+GFX2_GLOBAL char Data_directory[MAX_PATH_CHARACTERS];
 /// Name of the directory where grafx2 reads and writes configuration (gfx2.ini, gfx2.cfg)
-GFX2_GLOBAL char Config_directory[256];
+GFX2_GLOBAL char Config_directory[MAX_PATH_CHARACTERS];
 /// Current foreground color for drawing.
 GFX2_GLOBAL byte Fore_color;
 /// Current background color for drawing.

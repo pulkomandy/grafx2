@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2014 Sergii Pylypenko
     Copyright 2011 Pawel Góralski
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
@@ -54,6 +55,8 @@
     #define UPDATE_METHOD     UPDATE_METHOD_FULL_PAGE
   #elif defined(__MINT__)
     #define UPDATE_METHOD     UPDATE_METHOD_CUMULATED
+  #elif defined(__ANDROID__)
+    #define UPDATE_METHOD     UPDATE_METHOD_FULL_PAGE
   #else
     #define UPDATE_METHOD     UPDATE_METHOD_CUMULATED
   #endif

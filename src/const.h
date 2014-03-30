@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2014 Sergii Pylypenko
     Copyright 2008 Yves Rizoud
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
@@ -28,6 +29,16 @@
 #ifndef _CONST_H_
 #define _CONST_H_
 
+#if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__) || defined(__amigaos__)
+  // These platforms don't seem to have PATH_MAX
+  #undef PATH_MAX
+  #define PATH_MAX 260
+#elif defined(__ANDROID__)
+  #include <sys/limits.h> // for PATH_MAX
+#else
+  #include <limits.h> // for PATH_MAX
+#endif
+
 #ifndef M_2PI
 #define M_2PI 6.28318530717958647692528676656 ///< Hmm, pie...
 #endif
@@ -36,7 +47,7 @@
 #define VERSION2                  0     ///< Version number for gfx2.cfg (2/4)
 #define BETA1                     98    ///< Version number for gfx2.cfg (3/4)
 #define BETA2                     0     ///< Version number for gfx2.cfg (4/4)
-#define MAX_VIDEO_MODES           100   ///< Maximum number of video modes Grafx2 can propose.
+#define MAX_VIDEO_MODES           200   ///< Maximum number of video modes Grafx2 can propose.
 #define NB_ZOOM_FACTORS           15    ///< Number of zoom levels available in the magnifier.
 #define MENU_WIDTH                254   ///< Width of the menu (not counting the palette)
 #define MENU_HEIGHT               44    ///< Height of the menu.
@@ -61,7 +72,7 @@
 #define COMMENT_SIZE              32    ///< Max number of characters for a comment in PKM or PNG file.
 #define NB_MAX_PAGES_UNDO         99    ///< Max number of undo pages
 #define DEFAULT_ZOOM_FACTOR        4    ///< Initial zoom factor for the magnifier.
-#define MAX_PATH_CHARACTERS      260    ///< Number of characters for a file+complete path. Adapt to your OS...
+#define MAX_PATH_CHARACTERS PATH_MAX    ///< Number of characters for a file+complete path. Adapt to your OS...
 #define NB_BOOKMARKS               4    ///< Number of bookmark buttons in Save/Load screen.
 // Character to show a right arrow, used when editing long strings. It's present in ::Gfx->System_font 
 #define RIGHT_TRIANGLE_CHARACTER  16

@@ -461,7 +461,7 @@ int Init_program(int argc,char * argv[])
   strcpy(Main_selector.Directory,program_directory);
 #else
 // On détermine le répertoire courant:
-  getcwd(Main_selector.Directory,256);
+  getcwd(Main_selector.Directory,MAX_PATH_CHARACTERS);
 #endif
 
   // On en profite pour le mémoriser dans le répertoire principal:

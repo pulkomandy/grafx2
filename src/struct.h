@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2014 Sergii Pylypenko
     Copyright 2011 Pawel Góralski
     Copyright 2008 Yves Rizoud
     Copyright 2007 Adrien Destugues
@@ -173,7 +174,7 @@ typedef struct T_Dropdown_button
 /// Data for one item (file, directory) in a fileselector.
 typedef struct T_Fileselector_item
 {
-  char Full_name[256]; ///< Filesystem value.
+  char Full_name[MAX_PATH_CHARACTERS]; ///< Filesystem value.
   byte Type;           ///< Type of item: 0 = File, 1 = Directory, 2 = Drive
   byte Icon;           ///< One of ::ICON_TYPES, ICON_NONE for none.
 
@@ -545,7 +546,7 @@ typedef struct T_Selector_settings
   byte Format_filter; ///< 0 for "*.*", or a value of enum ::FILE_FORMATS
   short Position; ///< Index of the first file/entry to display in list
   short Offset; ///< Position of the "highlight" bar in the file list
-  char  Directory[256]; ///< Directory currently browsed
+  char  Directory[MAX_PATH_CHARACTERS]; ///< Directory currently browsed
 } T_Selector_settings;
 
 #endif

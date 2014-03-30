@@ -41,7 +41,7 @@
     #define MOUNTED_GETFSSTAT 1 
     #define HAVE_SYS_MOUNT_H 1
     #include <sys/types.h>
-#elif defined(__SKYOS__)
+#elif defined(__SKYOS__)||defined(__ANDROID__)
     #warning "Your platform is missing some specific code here ! please check and fix :)"
 #else
     #define MOUNTED_GETMNTENT1

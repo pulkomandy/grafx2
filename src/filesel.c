@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2014 Sergii Pylypenko
     Copyright 2011 Pawel Góralski
     Copyright 2009 Franck Charlet
     Copyright 2008 Peter Gordon
@@ -359,7 +360,8 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   struct dirent* entry; // Structure de lecture des éléments
   char * filter = "*"; // Extension demandée
   struct stat Infos_enreg;
-  char * current_path;
+  char * current_path = NULL;
+  char curdir[MAX_PATH_CHARACTERS];
 #if defined (__MINT__)
   char path[1024]={0};
   char path2[1024]={0};
@@ -389,7 +391,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   strcat(path2,PATH_SEPARATOR);
   current_directory=opendir(path2);
 #else  
-  current_path=getcwd(NULL,0);
+  current_path=getcwd(curdir,MAX_PATH_CHARACTERS);
   current_directory=opendir(current_path);
 #endif
   while ((entry=readdir(current_directory)))
@@ -1489,7 +1491,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   #else
   {
     chdir(context->File_directory);
-    getcwd(Selector->Directory,256);
+    getcwd(Selector->Directory,MAX_PATH_CHARACTERS);
   }
   #endif
   
@@ -2007,7 +2009,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           Dgetpath(path,0);
          sprintf(Selector->Directory,"%c:\%s",currentDrive,path);
         #else
-          getcwd(Selector->Directory,256);
+          getcwd(Selector->Directory,MAX_PATH_CHARACTERS);
         #endif
           // On lit le nouveau répertoire
           Read_list_of_files(&Filelist, Selector->Format_filter);

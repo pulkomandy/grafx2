@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2014 Sergii Pylypenko
     Copyright 2011 Pawel Góralski
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
@@ -418,10 +419,17 @@ byte *Render_text_TTF(const char *str, int font_number, int size, int antialias,
   bg_color.unused=fg_color.unused=255;
   
   // Text rendering: creates a 8bit surface with its dedicated palette
+  #ifdef __ANDROID__
+  if (antialias)
+    text_surface=TTF_RenderUTF8_Shaded(font, str, fg_color, bg_color );
+  else
+    text_surface=TTF_RenderUTF8_Solid(font, str, fg_color);
+  #else
   if (antialias)
     text_surface=TTF_RenderText_Shaded(font, str, fg_color, bg_color );
   else
     text_surface=TTF_RenderText_Solid(font, str, fg_color);
+  #endif
   if (!text_surface)
   {
     TTF_CloseFont(font);
