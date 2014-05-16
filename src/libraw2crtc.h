@@ -9,6 +9,8 @@
 #ifndef LIBRAW2CRTC_H
 #define LIBRAW2CRTC_H 1
 
-unsigned char * raw2crtc(unsigned short width, unsigned short height, unsigned char mode, unsigned char r9, unsigned long *outSize, unsigned char *r1, unsigned char r12, unsigned char r13);
+#include "loadsave.h"
+
+unsigned char * raw2crtc(T_IO_Context* context, unsigned char mode, unsigned char r9, unsigned long *outSize, unsigned char *r1, unsigned char r12, unsigned char r13);
 
 #endif

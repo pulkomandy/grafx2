@@ -57,7 +57,7 @@ unsigned char mode3interlace(T_IO_Context * context, unsigned char x, unsigned c
 
 unsigned char (*ptrMode)(T_IO_Context * context, unsigned char x, unsigned char y);
 
-unsigned char *raw2crtc(T_IO_Context *context, unsigned short width, unsigned short height, unsigned char mode, unsigned char r9, unsigned long *outSize, unsigned char *r1, unsigned char r12, unsigned char r13)
+unsigned char *raw2crtc(T_IO_Context *context, unsigned char mode, unsigned char r9, unsigned long *outSize, unsigned char *r1, unsigned char r12, unsigned char r13)
 {
   unsigned char *outBuffer;
   unsigned char *tmpBuffer;
@@ -76,6 +76,9 @@ unsigned char *raw2crtc(T_IO_Context *context, unsigned short width, unsigned sh
   unsigned char rcc;
   unsigned char hcc;
   unsigned char cclk;
+
+  int width = context->Width;
+  int height = context->Height;
   
   switch(mode)
   {
