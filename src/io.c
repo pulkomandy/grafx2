@@ -24,8 +24,6 @@
 // Fonctions de lecture/ecriture file, gèrent les systèmes big-endian et
 // little-endian.
 
-#define _XOPEN_SOURCE 500
-
 #include <SDL_endian.h>
 #include <string.h>
 #include <sys/stat.h>

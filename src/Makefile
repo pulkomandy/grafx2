@@ -287,8 +287,8 @@ endif
         LUACOPT =
         LUALOPT =
       else
-        LUACOPT = `pkg-config lua --cflags --silence-errors ||pkg-config lua5.1 --cflags --silence-errors ||pkg-config lua-5.1 --cflags`
-        LUALOPT = `pkg-config lua --libs --silence-errors ||pkg-config lua5.1 --libs --silence-errors ||pkg-config lua-5.1 --libs`
+        LUACOPT = $(shell pkg-config lua --cflags --silence-errors ||pkg-config lua5.1 --cflags --silence-errors ||pkg-config lua-5.1 --cflags)
+        LUALOPT = $(shell pkg-config lua --libs --silence-errors ||pkg-config lua5.1 --libs --silence-errors ||pkg-config lua-5.1 --libs)
       endif
     endif
     
@@ -346,8 +346,8 @@ endif
 
         # Compiles a regular linux executable for the native platform
         BIN = ../bin/grafx2
-        COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g `sdl-config --cflags` $(TTFCOPT) $(LUACOPT) $(JOYCOPT) -O$(OPTIM) `pkg-config --cflags libpng`
-        LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) `pkg-config --libs libpng` $(LUALOPT) -lm
+        COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g $(shell sdl2-config --cflags) $(TTFCOPT) $(LUACOPT) $(JOYCOPT) -O$(OPTIM) $(shell pkg-config --cflags libpng) -D_XOPEN_SOURCE=700
+        LOPT = $(shell sdl2-config --libs) -lSDL2_image $(TTFLOPT) $(shell pkg-config --libs libpng) $(LUALOPT) -lm
         CC = gcc
         OBJDIR = ../obj/unix
         FCLOPT = -lfontconfig
