@@ -20,7 +20,7 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include <SDL_syswm.h>
 
 #ifdef __WIN32__
@@ -39,16 +39,7 @@
 #include "loadsave.h"
 
 
-#define RSUPER_EMULATES_META_MOD
-// Keyboards with a Super key never seem to have a Meta key at the same time.
-// This setting allows the right 'Super' key (the one with a 'Windows' or
-// 'Amiga' label to be used as a modifier instead of a normal key.
-// This feature is especially useful for AROS where applications should use
-// generic defaults like "Right Amiga+Q = Quit".
-// In case this is annoying for some platforms, disable it.
-
-void Handle_window_resize(SDL_ResizeEvent event);
-void Handle_window_exit(SDL_QuitEvent event);
+void Handle_window(SDL_WindowEvent event);
 int Color_cycling(void);
 
 // public Globals (available as extern)
@@ -292,17 +283,17 @@ int Move_cursor_with_constraints()
 
 // WM events management
 
-void Handle_window_resize(SDL_ResizeEvent event)
+void Handle_window(SDL_WindowEvent event)
 {
-    Resize_width = event.w;
-    Resize_height = event.h;
-}
-
-void Handle_window_exit(SDL_QuitEvent event)
-{
-    (void)event, // unused
-    
-    Quit_is_required = 1;
+    if(event.event == SDL_WINDOWEVENT_RESIZED)
+    {
+        Resize_width = event.data1;
+        Resize_height = event.data2;
+    }
+    else if(event.event == SDL_WINDOWEVENT_CLOSE)
+    {
+        Quit_is_required = 1;
+    }
 }
 
 // Mouse events management
@@ -340,13 +331,6 @@ int Handle_mouse_click(SDL_MouseButtonEvent event)
             // TODO: repeat system maybe?
             return 0;
 
-        case SDL_BUTTON_WHEELUP:
-            Key = KEY_MOUSEWHEELUP|Key_modifiers(SDL_GetModState());
-            return 0;
-
-        case SDL_BUTTON_WHEELDOWN:
-            Key = KEY_MOUSEWHEELDOWN|Key_modifiers(SDL_GetModState());
-            return 0;
         default:
         return 0;
     }
@@ -375,6 +359,21 @@ int Handle_mouse_release(SDL_MouseButtonEvent event)
     return Move_cursor_with_constraints();
 }
 
+int Handle_mouse_wheel(SDL_MouseWheelEvent event)
+{
+    if (event.y<0)
+    {
+        Key = KEY_MOUSEWHEELUP|Key_modifiers(SDL_GetModState());
+        return 0;
+    }
+    else if (event.y>0)
+    {
+        Key = KEY_MOUSEWHEELDOWN|Key_modifiers(SDL_GetModState());
+        return 0;
+    }
+    return 0;
+}
+
 // Keyboard management
 
 int Handle_key_press(SDL_KeyboardEvent event)
@@ -386,24 +385,24 @@ int Handle_key_press(SDL_KeyboardEvent event)
     Key_ANSI = Keysym_to_ANSI(event.keysym);
     switch(event.keysym.sym)
     {
-      case SDLK_RSHIFT:
-      case SDLK_LSHIFT:
+      case SDL_SCANCODE_RSHIFT:
+      case SDL_SCANCODE_LSHIFT:
         modifier=MOD_SHIFT;
         break;
 
-      case SDLK_RCTRL:
-      case SDLK_LCTRL:
+      case SDL_SCANCODE_RCTRL:
+      case SDL_SCANCODE_LCTRL:
         modifier=MOD_CTRL;
         break;
 
-      case SDLK_RALT:
-      case SDLK_LALT:
-      case SDLK_MODE:
+      case SDL_SCANCODE_RALT:
+      case SDL_SCANCODE_LALT:
+      case SDL_SCANCODE_MODE:
         modifier=MOD_ALT;
         break;
 
-      case SDLK_RMETA:
-      case SDLK_LMETA:
+      case SDL_SCANCODE_RGUI:
+      case SDL_SCANCODE_LGUI:
         modifier=MOD_META;
         break;
 
@@ -419,13 +418,6 @@ int Handle_key_press(SDL_KeyboardEvent event)
         return Move_cursor_with_constraints();
       }
     }
-    #ifdef RSUPER_EMULATES_META_MOD
-    if (Key==SDLK_RSUPER)
-    {
-      SDL_SetModState(SDL_GetModState() | KMOD_META);
-      Key=0;
-    }
-    #endif
 
     if(Is_shortcut(Key,SPECIAL_MOUSE_UP))
     {
@@ -548,31 +540,24 @@ int Handle_key_release(SDL_KeyboardEvent event)
   
     switch(event.keysym.sym)
     {
-      case SDLK_RSHIFT:
-      case SDLK_LSHIFT:
+      case SDL_SCANCODE_RSHIFT:
+      case SDL_SCANCODE_LSHIFT:
         modifier=MOD_SHIFT;
         break;
 
-      case SDLK_RCTRL:
-      case SDLK_LCTRL:
+      case SDL_SCANCODE_RCTRL:
+      case SDL_SCANCODE_LCTRL:
         modifier=MOD_CTRL;
         break;
 
-      case SDLK_RALT:
-      case SDLK_LALT:
-      case SDLK_MODE:
+      case SDL_SCANCODE_RALT:
+      case SDL_SCANCODE_LALT:
+      case SDL_SCANCODE_MODE:
         modifier=MOD_ALT;
         break;
-
-      #ifdef RSUPER_EMULATES_META_MOD
-      case SDLK_RSUPER:
-        SDL_SetModState(SDL_GetModState() & ~KMOD_META);
-        modifier=MOD_META;
-        break;
-      #endif
       
-      case SDLK_RMETA:
-      case SDLK_LMETA:
+      case SDL_SCANCODE_RGUI:
+      case SDL_SCANCODE_LGUI:
         modifier=MOD_META;
         break;
 
@@ -608,7 +593,7 @@ int Handle_joystick_press(SDL_JoyButtonEvent event)
     }
     if (event.button == Joybutton_alt)
     {
-      SDL_SetModState(SDL_GetModState() | (KMOD_ALT|KMOD_META));
+      SDL_SetModState(SDL_GetModState() | (KMOD_ALT|KMOD_GUI));
       if (Config.Swap_buttons == MOD_ALT && Button_inverter==0)
       {
         Button_inverter=1;
@@ -697,7 +682,7 @@ int Handle_joystick_release(SDL_JoyButtonEvent event)
     }
     if (event.button == Joybutton_alt)
     {
-      SDL_SetModState(SDL_GetModState() & ~(KMOD_ALT|KMOD_META));
+      SDL_SetModState(SDL_GetModState() & ~(KMOD_ALT|KMOD_GUI));
       return Release_control(0,MOD_ALT);
     }
     if (event.button == Joybutton_left_click)
@@ -866,17 +851,12 @@ int Get_input(int sleep_time)
     // Process as much events as possible without redrawing the screen.
     // This mostly allows us to merge mouse events for people with an high
     // resolution mouse
-    while(!user_feedback_required && SDL_PeepEvents(&event, 1, SDL_GETEVENT, SDL_ALLEVENTS)==1)
+    while(!user_feedback_required && SDL_PeepEvents(&event, 1, SDL_GETEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT)==1)
     {
       switch(event.type)
       {
-          case SDL_VIDEORESIZE:
-              Handle_window_resize(event.resize);
-              user_feedback_required = 1;
-              break;
-
-          case SDL_QUIT:
-              Handle_window_exit(event.quit);
+          case SDL_WINDOWEVENT:
+              Handle_window(event.window);
               user_feedback_required = 1;
               break;
 
@@ -893,7 +873,12 @@ int Get_input(int sleep_time)
               Handle_mouse_release(event.button);
               user_feedback_required = 1;
               break;
-
+              
+          case SDL_MOUSEWHEEL:
+              Handle_mouse_wheel(event.wheel);
+              user_feedback_required = 1;
+              break;
+          
           case SDL_KEYDOWN:
               Handle_key_press(event.key);
               user_feedback_required = 1;
@@ -924,8 +909,8 @@ int Get_input(int sleep_time)
           // End of Joystick handling
           
           case SDL_SYSWMEVENT:
-#ifdef __WIN32__
-              if(event.syswm.msg->msg  == WM_DROPFILES)
+#ifdef __WIN32__TODO
+              if(event.syswm.msg->win.msg  == WM_DROPFILES)
               {
                 int file_count;
                 HDROP hdrop = (HDROP)(event.syswm.msg->wParam);
@@ -1059,11 +1044,6 @@ void Adjust_mouse_sensitivity(word fullscreen)
   (void)fullscreen;
 }
 
-void Set_mouse_position(void)
-{
-    SDL_WarpMouse(Mouse_X*Pixel_width, Mouse_Y*Pixel_height);
-}
-
 int Color_cycling(void)
 {
   static byte offset[16];
@@ -1130,7 +1110,7 @@ int Color_cycling(void)
         }
       }
     }
-    SDL_SetPalette(Screen_SDL, SDL_PHYSPAL | SDL_LOGPAL, PaletteSDL,0,256);
+    Set_surface_palette(Screen_SDL, PaletteSDL);
   }
   return 0;
 }

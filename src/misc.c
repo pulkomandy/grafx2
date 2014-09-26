@@ -21,7 +21,7 @@
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include <string.h>
 #include <strings.h>
 #include <stdlib.h>
@@ -155,14 +155,12 @@ word Count_used_colors_area(dword* usage, word start_x, word start_y,
 void Set_palette(T_Palette palette)
 {
   register int i;
-  SDL_Color PaletteSDL[256];
   for(i=0;i<256;i++)
   {
-    PaletteSDL[i].r=(palette[i].R=Round_palette_component(palette[i].R));
-    PaletteSDL[i].g=(palette[i].G=Round_palette_component(palette[i].G));
-    PaletteSDL[i].b=(palette[i].B=Round_palette_component(palette[i].B));
+    Screen_SDL->format->palette->colors[i].r=(palette[i].R=Round_palette_component(palette[i].R));
+    Screen_SDL->format->palette->colors[i].g=(palette[i].G=Round_palette_component(palette[i].G));
+    Screen_SDL->format->palette->colors[i].b=(palette[i].B=Round_palette_component(palette[i].B));
   }
-  SDL_SetPalette(Screen_SDL, SDL_PHYSPAL | SDL_LOGPAL, PaletteSDL,0,256);
 }
 
 void Set_color(byte color, byte red, byte green, byte blue)
@@ -171,7 +169,7 @@ void Set_color(byte color, byte red, byte green, byte blue)
   comp.r=red;
   comp.g=green;
   comp.b=blue;
-  SDL_SetPalette(Screen_SDL, SDL_PHYSPAL | SDL_LOGPAL, &comp, color, 1);
+  Screen_SDL->format->palette->colors[color] = comp;
 }
 
 void Wait_end_of_click(void)

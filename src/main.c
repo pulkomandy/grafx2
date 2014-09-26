@@ -36,7 +36,7 @@
 #include <string.h>
 #include <signal.h>
 #include <unistd.h>
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include <SDL_image.h>
 
 
@@ -528,17 +528,20 @@ int Init_program(int argc,char * argv[])
   
 
   // SDL
-  if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
+  if(SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO|SDL_INIT_JOYSTICK|SDL_INIT_EVENTS) < 0)
   {
     // The program can't continue without that anyway
     printf("Couldn't initialize SDL.\n");
     return(0);
   }
-  
+  if (IMG_Init(IMG_INIT_JPG|IMG_INIT_PNG|IMG_INIT_TIF) != (IMG_INIT_JPG|IMG_INIT_PNG|IMG_INIT_TIF))
+  {
+    printf("Couldn't initialize SDL_image.\n");
+    return(0);
+  }
   Joystick = SDL_JoystickOpen(0);
-  SDL_EnableKeyRepeat(250, 32);
-  SDL_EnableUNICODE(SDL_ENABLE);
-  SDL_WM_SetCaption("GrafX2","GrafX2");
+  //SDL_EnableKeyRepeat(250, 32); // TODO
+  //SDL_WM_SetCaption("GrafX2","GrafX2"); // TODO
   Define_icon();
   
   // Texte
@@ -734,9 +737,9 @@ int Init_program(int argc,char * argv[])
       //RECT r;
       static SDL_SysWMinfo pInfo;
       SDL_VERSION(&pInfo.version);
-      SDL_GetWMInfo(&pInfo);
+      //SDL_GetWMInfo(&pInfo);
       //GetWindowRect(pInfo.window, &r);
-      SetWindowPos(pInfo.window, 0, Config.Window_pos_x, Config.Window_pos_y, 0, 0, SWP_NOSIZE);
+      //SetWindowPos(pInfo.window, 0, Config.Window_pos_x, Config.Window_pos_y, 0, 0, SWP_NOSIZE);
     }
   }
 
@@ -912,11 +915,11 @@ void Program_shutdown(void)
     RECT r;
     static SDL_SysWMinfo pInfo;
     
-    SDL_GetWMInfo(&pInfo);
-    GetWindowRect(pInfo.window, &r);
+    //SDL_GetWMInfo(&pInfo);
+    //GetWindowRect(pInfo.window, &r);
 
-    Config.Window_pos_x = r.left;
-    Config.Window_pos_y = r.top;
+    //Config.Window_pos_x = r.left;
+    //Config.Window_pos_y = r.top;
   }
   #else
   // All other targets: irrelevant dimensions.

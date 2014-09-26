@@ -57,8 +57,8 @@ ifdef COMSPEC
   RMDIR = rmdir --ignore-fail-on-non-empty
   CP = cp
   BIN = ../bin/grafx2.exe
-  COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb `sdl-config --cflags` $(TTFCOPT) $(JOYCOPT) $(LUACOPT)
-  LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng -lz $(LUALOPT)
+  COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb `sdl2-config --cflags` $(TTFCOPT) $(JOYCOPT) $(LUACOPT)
+  LOPT = `sdl2-config --libs` -lSDL2_image $(TTFLOPT) -lpng -lz $(LUALOPT)
   LUALOPT = -llua
   CC = gcc
   OBJDIR = ../obj/win32
@@ -67,7 +67,7 @@ ifdef COMSPEC
   PLATFORMOBJ = $(OBJDIR)/winres.o
   PLATFORM = win32
   #some misc files we have to add to the release archive under windows.
-  PLATFORMFILES = bin/SDL.dll bin/SDL_image.dll bin/libpng14-14.dll bin/zlib1.dll $(TTFLIBS)
+  PLATFORMFILES = bin/SDL2.dll bin/SDL2_image.dll bin/libpng16-16.dll bin/zlib1.dll $(TTFLIBS)
   ZIP = zip
 else
 

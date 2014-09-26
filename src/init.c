@@ -46,13 +46,10 @@
 
 #include <stdlib.h>
 #include <errno.h>
-#include <SDL_byteorder.h>
+#include <SDL2/SDL.h>
 #include <SDL_image.h>
 #if defined(__WIN32__)
   #include <windows.h> // GetLogicalDrives(), GetDriveType(), DRIVE_*
-#endif
-#ifndef __GP2X__
-    #include <SDL_syswm.h>
 #endif
 #if defined (__MINT__)
   #include <mint/osbind.h>
@@ -1848,13 +1845,13 @@ void Set_video_mode(short  width,
   }
   if (!fullscreen)
     supported = 128; // Prefere, non modifiable
-  else if (SDL_VideoModeOK(width, height, 8, SDL_FULLSCREEN))
+  else // if (SDL_VideoModeOK(width, height, 8, SDL_FULLSCREEN))
     supported = 1; // supported
-  else
-  {
-    // Non supporte : on ne le prend pas
-    return;
-  }
+  //else
+  //{
+  //  // Non supporte : on ne le prend pas
+  //  return;
+  //}
 
   Video_mode[Nb_video_modes].Width          = width;
   Video_mode[Nb_video_modes].Height          = height;
@@ -1959,7 +1956,7 @@ void Set_all_video_modes(void)
   Set_video_mode( 640,600,0, 1);
   Set_video_mode( 800,600,0, 1);
   Set_video_mode(1024,768,0, 1);
-
+/*
   Modes = SDL_ListModes(NULL, SDL_FULLSCREEN);
   if ((Modes != (SDL_Rect**)0) && (Modes!=(SDL_Rect**)-1))
   {
@@ -1973,7 +1970,7 @@ void Set_all_video_modes(void)
 #else
       index2=1;
 #endif
-      for (/**/; index2 < Nb_video_modes; index2++)
+      for (; index2 < Nb_video_modes; index2++)
         if (Modes[index]->w == Video_mode[index2].Width &&
             Modes[index]->h == Video_mode[index2].Height)
         {
@@ -1990,6 +1987,7 @@ void Set_all_video_modes(void)
     // Note that we voluntarily omit the first entry: the default mode.
     qsort(&Video_mode[1], Nb_video_modes - 1, sizeof(T_Video_mode), Compare_video_modes);
   }
+  */
 }
 
 //---------------------------------------------------------------------------
@@ -2980,7 +2978,7 @@ void Init_paintbrushes(void)
 /// Set application icon(s)
 void Define_icon(void)
 {
-#ifdef WIN32
+#ifdef WIN32_FIXME
   // Specific code for Win32:
   // Load icon from embedded resource.
   // This will provide both the 16x16 and 32x32 versions.
@@ -3096,7 +3094,7 @@ void Define_icon(void)
   } while (0);
   // Failure: fall back on normal SDL version:
   
-#endif
+#elif defined(OTHER_FIXME)
   // General version: Load icon from the file gfx2.gif
   {
     char icon_path[MAX_PATH_CHARACTERS];
@@ -3112,8 +3110,8 @@ void Define_icon(void)
       {
         // 8bit image: use color key
         
-        SDL_SetColorKey(icon, SDL_SRCCOLORKEY, pink);
-        SDL_WM_SetIcon(icon,NULL);
+        SDL_SetColorKey(icon, SDL_TRUE, pink);
+        SDL_SetWindowIcon(icon,NULL);
       }
       else
       {
@@ -3128,11 +3126,12 @@ void Define_icon(void)
           for (x=0;x<32;x++)
             if (Get_SDL_pixel_hicolor(icon, x, y) != pink)
               icon_mask[(y*32+x)/8] |=0x80>>(x&7);
-        SDL_WM_SetIcon(icon,icon_mask);
+        SDL_SetWindowIcon(icon,icon_mask);
         free(icon_mask);
         icon_mask = NULL;
       }
       SDL_FreeSurface(icon);
     }
   }
+#endif
 }

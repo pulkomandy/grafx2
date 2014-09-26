@@ -42,6 +42,7 @@
 #endif
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <fcntl.h>
 #include <string.h>
 #include <strings.h>
@@ -86,7 +87,7 @@
 byte Native_filesel(byte load)
 {
   //load = load;
-#ifdef __WIN32__
+#ifdef __WIN32__FIXME_SDL2
   OPENFILENAME ofn;
   char szFileName[MAX_PATH] = "";
   SDL_SysWMinfo wminfo;
@@ -1396,7 +1397,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
       Open_window(310,200,"Load picture");
     else
       Open_window(310,200,"Load brush");
-    Window_set_normal_button(198,180,51,14,"Load",0,1,SDLK_RETURN); // 1
+    Window_set_normal_button(198,180,51,14,"Load",0,1,SDL_SCANCODE_RETURN); // 1
   }
   else
   {
@@ -1404,7 +1405,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
       Open_window(310,200,"Save picture");
     else
       Open_window(310,200,"Save brush");
-    Window_set_normal_button(198,180,51,14,"Save",0,1,SDLK_RETURN); // 1
+    Window_set_normal_button(198,180,51,14,"Save",0,1,SDL_SCANCODE_RETURN); // 1
     if (Selector->Format_filter<=FORMAT_ALL_FILES) // Correction du *.*
     {
       Selector->Format_filter=Main_fileformat;
@@ -1424,7 +1425,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   }
 
   Window_set_normal_button(253,180,51,14,"Cancel",0,1,KEY_ESC); // 2
-  Window_set_normal_button(7,180,51,14,"Delete",0,1,SDLK_DELETE); // 3
+  Window_set_normal_button(7,180,51,14,"Delete",0,1,SDL_SCANCODE_DELETE); // 3
 
   // Frame autour des infos sur le fichier de dessin
   Window_display_frame_in(6, 44,299, 37);
@@ -1467,7 +1468,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   Print_in_window(292,59,")",MC_Dark,MC_Light);
 
   // Selecteur de Lecteur / Volume
-  Window_set_normal_button(7,18,53,23,"",0,1,SDLK_LAST); // 9
+  Window_set_normal_button(7,18,53,23,"",0,1,SDL_SCANCODE_LAST); // 9
   Print_in_window(10,22,"Select",MC_Black,MC_Light);
   Print_in_window(14,30,"drive",MC_Black,MC_Light);
  
@@ -1878,43 +1879,43 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 
     switch (Key)
     {
-      case SDLK_UNKNOWN : break;
-      case SDLK_DOWN : // Bas
+      case SDL_SCANCODE_UNKNOWN : break;
+      case SDL_SCANCODE_DOWN : // Bas
         Reset_quicksearch();
         Hide_cursor();
         Selector_scroll_down(&Selector->Position,&Selector->Offset);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
-      case SDLK_UP : // Haut
+      case SDL_SCANCODE_UP : // Haut
         Reset_quicksearch();
         Hide_cursor();
         Selector_scroll_up(&Selector->Position,&Selector->Offset);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
-      case SDLK_PAGEDOWN : // PageDown
+      case SDL_SCANCODE_PAGEDOWN : // PageDown
         Reset_quicksearch();
         Hide_cursor();
         Selector_page_down(&Selector->Position,&Selector->Offset,9);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
-      case SDLK_PAGEUP : // PageUp
+      case SDL_SCANCODE_PAGEUP : // PageUp
         Reset_quicksearch();
         Hide_cursor();
         Selector_page_up(&Selector->Position,&Selector->Offset,9);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
-      case SDLK_END : // End
+      case SDL_SCANCODE_END : // End
         Reset_quicksearch();
         Hide_cursor();
         Selector_end(&Selector->Position,&Selector->Offset);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
-      case SDLK_HOME : // Home
+      case SDL_SCANCODE_HOME : // Home
         Reset_quicksearch();
         Hide_cursor();
         Selector_home(&Selector->Position,&Selector->Offset);
@@ -1935,7 +1936,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
-      case SDLK_BACKSPACE : // Backspace
+      case SDL_SCANCODE_BACKSPACE : // Backspace
         Reset_quicksearch();
         // Si le choix ".." est bien en tête des propositions...
         if (Filelist.Nb_elements && !strcmp(Filelist.First->Full_name,PARENT_DIR))

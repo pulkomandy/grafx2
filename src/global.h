@@ -30,7 +30,7 @@
 #ifndef _GLOBAL_H_
 #define _GLOBAL_H_
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include "struct.h"
 
 // MAIN declares the variables,
@@ -866,21 +866,25 @@ GFX2_GLOBAL SDL_Joystick* Joystick;
 ///
 /// This is the "key identifier" for the mouse 3rd button.
 /// It was chosen to not conflict with any SDL key number.
-#define KEY_MOUSEMIDDLE     (SDLK_LAST+1)
+
+// FIXME
+#define SDL_SCANCODE_LAST           0x700
+
+#define KEY_MOUSEMIDDLE     (SDL_SCANCODE_LAST+1)
 ///
 /// This is the "key identifier" for the mouse wheelup.
 /// It was chosen to not conflict with any SDL key number.
-#define KEY_MOUSEWHEELUP    (SDLK_LAST+2)
+#define KEY_MOUSEWHEELUP    (SDL_SCANCODE_LAST+2)
 ///
 /// This is the "key identifier" for the mouse wheeldown.
 /// It was chosen to not conflict with any SDL key number.
-#define KEY_MOUSEWHEELDOWN  (SDLK_LAST+3)
+#define KEY_MOUSEWHEELDOWN  (SDL_SCANCODE_LAST+3)
 ///
 /// This is the "key identifier" for joystick button number 0.
 /// All numbers starting with this one are reserved for joystick buttons
 /// (since their is an unknown number of them, and for example 18 on GP2X)
 /// It was chosen to not conflict with any SDL key number.
-#define KEY_JOYBUTTON       (SDLK_LAST+4)
+#define KEY_JOYBUTTON       (SDL_SCANCODE_LAST+4)
 
 /// The joystick axis are {X,Y} - on all platforms so far.
 /// If there is ever a platform where they are reversed, put
@@ -957,9 +961,9 @@ GFX2_GLOBAL SDL_Joystick* Joystick;
 #else
   ///
   /// This is the key identifier for ESC. When hard-coding keyboard shortcuts
-  /// for buttons, etc. we use this instead of SDLK_ESCAPE,
+  /// for buttons, etc. we use this instead of SDL_SCANCODE_ESCAPE,
   /// so the console ports can get a joybutton equivalent of it.
-  #define KEY_ESC SDLK_ESCAPE
+  #define KEY_ESC SDL_SCANCODE_ESCAPE
 #endif
 
 #endif

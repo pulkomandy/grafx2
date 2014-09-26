@@ -70,18 +70,18 @@ extern int Snap_axis_origin_Y;
 extern char * Drop_file_name;
 
 #if defined __HAIKU__
-	#define SHORTCUT_COPY (SDLK_c|MOD_ALT)
+	#define SHORTCUT_COPY (SDL_SCANCODE_C|MOD_ALT)
 #elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
-	#define SHORTCUT_COPY (SDLK_c|MOD_META)
+	#define SHORTCUT_COPY (SDL_SCANCODE_C|MOD_META)
 #else
-	#define SHORTCUT_COPY (SDLK_c|MOD_CTRL)
+	#define SHORTCUT_COPY (SDL_SCANCODE_C|MOD_CTRL)
 #endif
 
 #if defined __HAIKU__
-	#define SHORTCUT_PASTE (SDLK_v|MOD_ALT)
+	#define SHORTCUT_PASTE (SDL_SCANCODE_V|MOD_ALT)
 #elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
-	#define SHORTCUT_PASTE (SDLK_v|MOD_META)
+	#define SHORTCUT_PASTE (SDL_SCANCODE_V|MOD_META)
 #else
-	#define SHORTCUT_PASTE (SDLK_v|MOD_CTRL)
+	#define SHORTCUT_PASTE (SDL_SCANCODE_V|MOD_CTRL)
 #endif
 

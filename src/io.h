@@ -34,6 +34,8 @@
 /// If you don't, you break another platform.
 //////////////////////////////////////////////////////////////////////////////
 
+#include <stdio.h>
+
 /// Reads a single byte from an open file. Returns true if OK, false if a file i/o error occurred.
 int Read_byte(FILE *file, byte *dest);
 /// Writes a single byte to an open file. Returns true if OK, false if a file i/o error occurred.

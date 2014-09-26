@@ -31,7 +31,7 @@
 #else
     #define bool char
 #endif
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #define NB_SHORTCUTS 209   ///< Number of actions that can have a key combination associated to it.
 

@@ -28,7 +28,7 @@
 #ifndef SDLSCREEN_H_INCLUDED
 #define SDLSCREEN_H_INCLUDED
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include "struct.h"
 
 ///
@@ -73,5 +73,9 @@ extern volatile int Allow_colorcycling;
 
 /// Activates or desactivates file drag-dropping in program window.
 void Allow_drag_and_drop(int flag);
+
+void Set_mouse_position(void);
+
+void Set_surface_palette(const SDL_Surface *surface, const SDL_Color *palette);
 
 #endif // SDLSCREEN_H_INCLUDED

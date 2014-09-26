@@ -560,7 +560,7 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
       rgb.r=((color & 0xE0)>>5)<<5;
       rgb.g=((color & 0x1C)>>2)<<5;
       rgb.b=((color & 0x03)>>0)<<6;
-      SDL_SetColors(reduced_surface, &rgb, color, 1);
+      // Set_surface_palette(reduced_surface, &rgb, color, 1); // TODO! single color
     }
     // Perform reduction
     for (y=0; y<font_surface->h; y++)
@@ -590,7 +590,7 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   // Allocation d'une surface SDL
   text_surface=SDL_CreateRGBSurface(SDL_SWSURFACE, *width, *height, 8, 0, 0, 0, 0);
   // Copy palette
-  SDL_SetPalette(text_surface, SDL_LOGPAL, font_surface->format->palette->colors, 0, 256);
+  Set_surface_palette(text_surface, font_surface->format->palette->colors);
   // Fill with transparent color
   rectangle.x=0;
   rectangle.y=0;

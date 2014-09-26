@@ -509,7 +509,7 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
       break;
       
     case CONTEXT_SURFACE:
-      context->Surface = SDL_CreateRGBSurface(SDL_SWSURFACE|SDL_SRCCOLORKEY, width, height, 8, 0, 0, 0, 0);
+      context->Surface = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, 8, 0, 0, 0, 0);
       if (! context->Surface)
       {
         File_error=1;
@@ -869,7 +869,7 @@ void Load_image(T_IO_Context *context)
         colors[i].g=context->Palette[i].G;
         colors[i].b=context->Palette[i].B;
       }
-      SDL_SetColors(context->Surface, colors, 0, 256);
+      Set_surface_palette(context->Surface, colors);
     }
   }
   else if (context->Type == CONTEXT_PREVIEW

@@ -24,7 +24,8 @@
 */
 #include <string.h>
 #include <stdlib.h>
-#include <SDL.h>
+#include <stdio.h>
+#include <SDL2/SDL.h>
 #include <SDL_endian.h>
 #if defined(__WIN32__)
     #include <windows.h>
@@ -63,6 +64,9 @@
 #endif
 
 volatile int Allow_colorcycling=1;
+static SDL_Window *Window_SDL=NULL;
+static SDL_Renderer *Renderer_SDL=NULL;
+static SDL_Texture *Texture_SDL=NULL;
 
 /// Sets the new screen/window dimensions.
 void Set_mode_SDL(int *width, int *height, int fullscreen)
@@ -70,17 +74,48 @@ void Set_mode_SDL(int *width, int *height, int fullscreen)
   static SDL_Cursor* cur = NULL;
   static byte cursorData = 0;
 
-  Screen_SDL=SDL_SetVideoMode(*width,*height,8,(fullscreen?SDL_FULLSCREEN:0)|SDL_RESIZABLE);
+  // (re-)allocate an indexed surface with the size of the screen
+  if(Screen_SDL != NULL && (Screen_SDL->w != *width || Screen_SDL->h != *height))
+  {
+    SDL_FreeSurface(Screen_SDL);
+    Screen_SDL = NULL;
+  }
+  if (Screen_SDL == NULL)
+  { 
+    Screen_SDL = SDL_CreateRGBSurface(0, *width, *height, 8, 0, 0, 0, 0);
+  }
+  Screen_pixels=Screen_SDL->pixels;
+  
+  if (Texture_SDL!=NULL)
+  {
+    SDL_DestroyTexture(Texture_SDL);
+    Texture_SDL=NULL;
+  }
+  // Renderer and window
+  if (Renderer_SDL!=NULL)
+  {
+    SDL_DestroyRenderer(Renderer_SDL);
+    Renderer_SDL=NULL;
+  }
+  if (Window_SDL!=NULL)
+  {
+    SDL_DestroyWindow(Window_SDL);
+    Window_SDL=NULL;
+  }
+  
+  Window_SDL = SDL_CreateWindow("GrafX2",
+    SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+    fullscreen?0:*width, fullscreen?0:*height,
+    (fullscreen?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_RESIZABLE)|SDL_WINDOW_SHOWN|SDL_WINDOW_INPUT_FOCUS|SDL_WINDOW_MOUSE_FOCUS);
+  Renderer_SDL = SDL_CreateRenderer(Window_SDL, -1, SDL_RENDERER_SOFTWARE);
+  //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+  SDL_RenderSetLogicalSize(Renderer_SDL, *width, *height);
+  Texture_SDL = SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, *width, *height);
+
   if(Screen_SDL != NULL)
   {
     // Check the mode we got, in case it was different from the one we requested.
-    if (Screen_SDL->w != *width || Screen_SDL->h != *height)
-    {
-      DEBUG("Error: Got a different video mode than the requested one!",0);
-      *width = Screen_SDL->w;
-      *height = Screen_SDL->h;
-    }
-    Screen_pixels=Screen_SDL->pixels;
+  
   }
   else
   {
@@ -95,6 +130,61 @@ void Set_mode_SDL(int *width, int *height, int fullscreen)
   SDL_FreeCursor(cur);
   cur = SDL_CreateCursor(&cursorData, &cursorData, 1,1,0,0);
   SDL_SetCursor(cur);
+}
+
+void Update_rectangle(SDL_Surface *surface, int x, int y, int width, int height)
+{
+
+  Uint32 * pixels;
+  int pitch;
+  int line, col;
+  SDL_Rect r;
+
+  // safety clipping
+  if (x==0 && width==0)
+    width = surface->w;
+  else if (x+width > surface->w)
+    width = surface->w - x;
+  if (y==0 && height==0)
+    height = surface->h;
+  else if (y+height > surface->h)
+    height = surface->h - y;
+  
+  r.x = x;
+  r.y = y;
+  r.w = width;
+  r.h = height;
+  
+  
+  SDL_LockTexture(Texture_SDL, &r, (void **)(&pixels), &pitch );
+  for (line = 0; line < r.h; line++)
+  {
+    for (col = 0; col < r.w; col++)
+    {
+      byte index = Get_SDL_pixel_8(surface, r.x + col, r.y + line);
+      //memcpy(pixels++, surface->format->palette->colors + index, 4);
+      //*(pixels++) = *(Uint32 *)(surface->format->palette->colors + index);
+      *((byte *)pixels) = surface->format->palette->colors[index].r;
+      *(((byte *)pixels) + 1) = surface->format->palette->colors[index].g;
+      *(((byte *)pixels) + 2) = surface->format->palette->colors[index].b;
+      pixels++;
+    }
+    pixels += pitch/sizeof(uint32_t) - r.w; 
+  }
+  SDL_UnlockTexture(Texture_SDL);
+  
+  /*
+  if (Texture_SDL!=NULL)
+  {
+    SDL_DestroyTexture(Texture_SDL);
+    Texture_SDL=NULL;
+  }  
+  Texture_SDL = SDL_CreateTextureFromSurface(Renderer_SDL, surface);
+  */
+  SDL_RenderCopy(Renderer_SDL, Texture_SDL, &r, &r);
+  SDL_RenderPresent(Renderer_SDL);
+  
+  
 }
 
 #if (UPDATE_METHOD == UPDATE_METHOD_CUMULATED)
@@ -116,7 +206,7 @@ void Flush_update(void)
   // Do a full screen update
   if (update_is_required)
   {
-    SDL_UpdateRect(Screen_SDL, 0, 0, 0, 0);
+    Update_rectangle(Screen_SDL, 0, 0, 0, 0);
     update_is_required=0;
   }
 #endif
@@ -131,14 +221,14 @@ void Flush_update(void)
       Min_X=0;
     if (Min_Y<0)
       Min_Y=0;
-    SDL_UpdateRect(Screen_SDL, Min_X*Pixel_width, Min_Y*Pixel_height, Min(Screen_width-Min_X, Max_X-Min_X)*Pixel_width, Min(Screen_height-Min_Y, Max_Y-Min_Y)*Pixel_height);
+    Update_rectangle(Screen_SDL, Min_X*Pixel_width, Min_Y*Pixel_height, Min(Screen_width-Min_X, Max_X-Min_X)*Pixel_width, Min(Screen_height-Min_Y, Max_Y-Min_Y)*Pixel_height);
 
     Min_X=Min_Y=10000;
     Max_X=Max_Y=0;
   }
   if (Status_line_dirty_end)
   {
-    SDL_UpdateRect(Screen_SDL, (18+(Status_line_dirty_begin*8))*Menu_factor_X*Pixel_width,Menu_status_Y*Pixel_height,(Status_line_dirty_end-Status_line_dirty_begin)*8*Menu_factor_X*Pixel_width,8*Menu_factor_Y*Pixel_height);
+    Update_rectangle(Screen_SDL, (18+(Status_line_dirty_begin*8))*Menu_factor_X*Pixel_width,Menu_status_Y*Pixel_height,(Status_line_dirty_end-Status_line_dirty_begin)*8*Menu_factor_X*Pixel_width,8*Menu_factor_Y*Pixel_height);
   }
   Status_line_dirty_begin=25;
   Status_line_dirty_end=0;
@@ -150,7 +240,7 @@ void Flush_update(void)
 void Update_rect(short x, short y, unsigned short width, unsigned short height)
 {
   #if (UPDATE_METHOD == UPDATE_METHOD_MULTI_RECTANGLE)
-    SDL_UpdateRect(Screen_SDL, x*Pixel_width, y*Pixel_height, width*Pixel_width, height*Pixel_height);
+    Update_rectangle(Screen_SDL, x*Pixel_width, y*Pixel_height, width*Pixel_width, height*Pixel_height);
   #endif
 
   #if (UPDATE_METHOD == UPDATE_METHOD_CUMULATED)
@@ -181,7 +271,7 @@ void Update_rect(short x, short y, unsigned short width, unsigned short height)
 void Update_status_line(short char_pos, short width)
 {
   #if (UPDATE_METHOD == UPDATE_METHOD_MULTI_RECTANGLE)
-  SDL_UpdateRect(Screen_SDL, (18+char_pos*8)*Menu_factor_X*Pixel_width,Menu_status_Y*Pixel_height,width*8*Menu_factor_X*Pixel_width,8*Menu_factor_Y*Pixel_height);
+  Update_rectangle(Screen_SDL, (18+char_pos*8)*Menu_factor_X*Pixel_width,Menu_status_Y*Pixel_height,width*8*Menu_factor_X*Pixel_width,8*Menu_factor_Y*Pixel_height);
   #endif
 
   #if (UPDATE_METHOD == UPDATE_METHOD_CUMULATED)
@@ -243,7 +333,7 @@ SDL_Color Color_to_SDL_color(byte index)
   color.r = Main_palette[index].R;
   color.g = Main_palette[index].G;
   color.b = Main_palette[index].B;
-  color.unused = 255;
+  color.a = 255;
   return color;
 }
 
@@ -322,7 +412,7 @@ void Clear_border(byte color)
     r.h=Screen_SDL->h;
     r.w=width;
     SDL_FillRect(Screen_SDL,&r,color);
-    SDL_UpdateRect(Screen_SDL, r.x, r.y, r.w, r.h);
+    Update_rectangle(Screen_SDL, r.x, r.y, r.w, r.h);
   }
   if (height)
   {
@@ -332,7 +422,7 @@ void Clear_border(byte color)
     r.h=height;
     r.w=Screen_SDL->w - height;
     SDL_FillRect(Screen_SDL,&r,color);
-    SDL_UpdateRect(Screen_SDL, r.x, r.y, r.w, r.h);
+    Update_rectangle(Screen_SDL, r.x, r.y, r.w, r.h);
   }  
 }
 
@@ -341,6 +431,7 @@ void Allow_drag_and_drop(int flag)
 {
   // Inform Windows that we accept drag-n-drop events or not
   #ifdef __WIN32__
+  /*
   SDL_SysWMinfo wminfo;
   HWND hwnd;
   
@@ -349,7 +440,25 @@ void Allow_drag_and_drop(int flag)
   hwnd = wminfo.window;
   DragAcceptFiles(hwnd,flag?TRUE:FALSE);
   SDL_EventState (SDL_SYSWMEVENT,flag?SDL_ENABLE:SDL_DISABLE );
+  */
   #else
   (void)flag; // unused
   #endif
+}
+
+void Set_mouse_position(void)
+{
+    SDL_WarpMouseInWindow(Window_SDL, Mouse_X*Pixel_width, Mouse_Y*Pixel_height);
+}
+
+void Set_surface_palette(const SDL_Surface *surface, const SDL_Color *palette)
+{
+  int i=0;
+  for (i=0; i<256; i++)
+  {
+    surface->format->palette->colors[i].r = palette[i].r;
+    surface->format->palette->colors[i].g = palette[i].g;
+    surface->format->palette->colors[i].b = palette[i].b;
+  }
+  //Update_rect(0, 0, Screen_SDL->w, Screen_SDL->h);
 }

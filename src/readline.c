@@ -231,7 +231,7 @@ void Init_virtual_keyboard(word y_pos, word keyboard_width, word keyboard_height
 // TODO X11 and others
 char* getClipboard()
 {
-#ifdef __WIN32__
+#if defined(__WIN32__FIXME)
     char* dst = NULL;
     SDL_SysWMinfo info;
     HWND SDL_Window;
@@ -377,11 +377,11 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   static byte caps_lock=0;
   word keymapping[] =
   {
-    SDLK_CLEAR,SDLK_BACKSPACE,SDLK_RETURN,KEY_ESC,
+    SDL_SCANCODE_CLEAR,SDL_SCANCODE_BACKSPACE,SDL_SCANCODE_RETURN,KEY_ESC,
     '0','1','2','3','4','5','6','7','8','9','.',',',
     'Q','W','E','R','T','Y','U','I','O','P',
     'A','S','D','F','G','H','J','K','L',
-    SDLK_CAPSLOCK,'Z','X','C','V','B','N','M',' ',
+    SDL_SCANCODE_CAPSLOCK,'Z','X','C','V','B','N','M',' ',
     '-','+','*','/','|','\\',
     '(',')','{','}','[',']',
     '_','=','<','>','%','@',
@@ -406,7 +406,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   
 #if defined(__ANDROID__)
 	SDL_ANDROID_GetScreenKeyboardTextInput(str, max_size);
-	input_key = SDLK_RETURN;
+	input_key = SDL_SCANCODE_RETURN;
 #else
   // Virtual keyboards
   if (Config.Use_virtual_keyboard==1 ||
@@ -550,7 +550,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
     Hide_cursor();
   }
 
-  while ((input_key!=SDLK_RETURN) && (input_key!=KEY_ESC))
+  while ((input_key!=SDL_SCANCODE_RETURN) && (input_key!=KEY_ESC))
   {
     Display_cursor();
     if (use_virtual_keyboard)
@@ -561,11 +561,11 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
       input_key=Key_ANSI;
 
       if (clicked_button==-1)
-        input_key=SDLK_RETURN;
+        input_key=SDL_SCANCODE_RETURN;
       else if (clicked_button>0)
       {
         input_key=keymapping[clicked_button-1];
-        if (input_key==SDLK_CAPSLOCK)
+        if (input_key==SDL_SCANCODE_CAPSLOCK)
         {
           // toggle uppercase
           caps_lock=!caps_lock;
@@ -573,14 +573,14 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
           Print_in_window(8, 49,caps_lock?"\036":"\037", MC_Black,MC_Light);
           Display_cursor();
         }
-        else if (input_key==SDLK_BACKSPACE)
+        else if (input_key==SDL_SCANCODE_BACKSPACE)
         {
           // A little hack: the button for backspace will:
           // - backspace if the cursor is at end of string
           // - delete otherwise
           // It's needed for those input boxes that are completely full.
           if (position<size)
-            input_key = SDLK_DELETE;
+            input_key = SDL_SCANCODE_DELETE;
         }
         else if (input_key>='A' && input_key<='Z' && !caps_lock)
         {
@@ -595,7 +595,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
         Get_input(20);
         input_key=Key_ANSI;
         if (Mouse_K)
-          input_key=SDLK_RETURN;
+          input_key=SDL_SCANCODE_RETURN;
 
         // Handle paste request on CTRL+v
         if (Key == SHORTCUT_PASTE)
@@ -629,7 +629,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
 
     switch (input_key)
     {
-      case SDLK_DELETE : // Suppr.
+      case SDL_SCANCODE_DELETE : // Suppr.
             if (position<size)
             {
               Remove_character(str,position);
@@ -641,7 +641,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
               goto affichage;
             }
       break;
-      case SDLK_LEFT : // Gauche
+      case SDL_SCANCODE_LEFT : // Gauche
             if (position>0)
             {
               // Effacement de la chaîne
@@ -654,7 +654,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
               goto affichage;
             }
       break;
-      case SDLK_RIGHT : // Droite
+      case SDL_SCANCODE_RIGHT : // Droite
             if ((position<size) && (position<max_size-1))
             {
               position++;
@@ -665,7 +665,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
               goto affichage;
             }
       break;
-      case SDLK_HOME : // Home
+      case SDL_SCANCODE_HOME : // Home
             if (position)
             {
               // Effacement de la chaîne
@@ -677,7 +677,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
               goto affichage;
             }
       break;
-      case SDLK_END : // End
+      case SDL_SCANCODE_END : // End
             if ((position<size) && (position<max_size-1))
             {
               position=(size<max_size)?size:size-1;
@@ -686,7 +686,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
               goto affichage;
             }
       break;
-      case  SDLK_BACKSPACE : // Backspace : combinaison de gauche + suppr
+      case  SDL_SCANCODE_BACKSPACE : // Backspace : combinaison de gauche + suppr
 
         if (position)
         {       
@@ -701,14 +701,14 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
           goto affichage;
         }
         break;
-      case  SDLK_CLEAR : // Clear
+      case  SDL_SCANCODE_CLEAR : // Clear
         str[0]='\0';
         position=offset=0;
         // Effacement de la chaîne
         Block(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
               visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);
         goto affichage;
-      case SDLK_RETURN :
+      case SDL_SCANCODE_RETURN :
         break;
         
       case KEY_ESC :
@@ -800,7 +800,7 @@ affichage:
   Update_rect(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
         visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
 
-  return (input_key==SDLK_RETURN);
+  return (input_key==SDL_SCANCODE_RETURN);
 }
 
 void Sprint_double(char *str, double value, byte decimal_places, byte min_positions)
