@@ -110,7 +110,7 @@ void Set_mode_SDL(int *width, int *height, int fullscreen)
   Renderer_SDL = SDL_CreateRenderer(Window_SDL, -1, SDL_RENDERER_SOFTWARE);
   //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
   SDL_RenderSetLogicalSize(Renderer_SDL, *width, *height);
-  Texture_SDL = SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, *width, *height);
+  Texture_SDL = SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, *width, *height);
 
   if(Screen_SDL != NULL)
   {
