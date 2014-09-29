@@ -104,7 +104,7 @@ void Bouton_***(void)
 
   Open_window(310,190,"***");
 
-  Window_set_normal_button(103,137,80,14,"OK",0,1,SDL_SCANCODE_RETURN); // 1
+  Window_set_normal_button(103,137,80,14,"OK",0,1,K2K(SDLK_RETURN)); // 1
   Window_set_scroller_button(18,44,88,16,4,0);             // 2
 
   Update_window_area(0,0,Window_width, Window_height);
@@ -132,13 +132,13 @@ void Message_out_of_memory(void)
   Print_in_window(8,20,"Please consult the manual",MC_Black,MC_Light);
   Print_in_window(24,28,"to know how to obtain",MC_Black,MC_Light);
   Print_in_window(36,36,"more memory space.",MC_Black,MC_Light);
-  Window_set_normal_button(60,53,40,14,"OK",1,1,SDL_SCANCODE_RETURN); // 1
+  Window_set_normal_button(60,53,40,14,"OK",1,1,K2K(SDLK_RETURN)); // 1
   Update_window_area(0,0,Window_width, Window_height);
   Display_cursor();
 
   do
     clicked_button=Window_clicked_button();
-  while ((clicked_button<=0) && (Key!=KEY_ESC) && (Key!=SDL_SCANCODE_O));
+  while ((clicked_button<=0) && (Key!=KEY_ESC) && (Key!=K2K(SDLK_o)));
 
   if(clicked_button<=0) Key=0;
   Close_window();
@@ -612,8 +612,8 @@ byte Button_Quit_local_function(void)
   // On commence par afficher la fenêtre de QUIT
   Open_window(160,84,"Quit ?");
   Window_set_normal_button(20,20,120,14,"Stay",0,1,KEY_ESC);          // 1
-  Window_set_normal_button(20,40,120,14,"Save & quit",1,1,SDL_SCANCODE_S);   // 2
-  Window_set_normal_button(20,60,120,14,"Discard (Quit)",1,1,SDL_SCANCODE_D);// 3
+  Window_set_normal_button(20,40,120,14,"Save & quit",1,1,K2K(SDLK_s));   // 2
+  Window_set_normal_button(20,60,120,14,"Discard (Quit)",1,1,K2K(SDLK_d));// 3
   Update_window_area(0,0,Window_width, Window_height);
   Display_cursor();
 
@@ -1033,11 +1033,11 @@ void Button_Settings(void)
   Open_window(307,182,"Settings");
 
     // Button Reload
-  Window_set_normal_button(  6,163, 51,14,"Reload"       ,0,1,SDL_SCANCODE_LAST); // 1
+  Window_set_normal_button(  6,163, 51,14,"Reload"       ,0,1,KEY_NONE); // 1
     // Button Auto-save
-  Window_set_normal_button( 73,163,107,14,"Auto-save:   ",0,1,SDL_SCANCODE_LAST); // 2
+  Window_set_normal_button( 73,163,107,14,"Auto-save:   ",0,1,KEY_NONE); // 2
     // Button Save
-  Window_set_normal_button(183,163, 51,14,"Save"         ,0,1,SDL_SCANCODE_LAST); // 3
+  Window_set_normal_button(183,163, 51,14,"Save"         ,0,1,KEY_NONE); // 3
     // Button Close
   Window_set_normal_button(250,163, 51,14,"Close"        ,0,1,KEY_ESC); // 4
 
@@ -1163,7 +1163,7 @@ void Button_Settings(void)
     else if (Is_shortcut(Key,0x100+BUTTON_SETTINGS))
       clicked_button=4;
   }
-  while ( (clicked_button!=4) && (Key!=SDL_SCANCODE_RETURN) );
+  while ( (clicked_button!=4) && (Key!=K2K(SDLK_RETURN)) );
 
   // Checks on change
   if (Config.Show_hidden_directories!=selected_config.Show_hidden_directories
@@ -1329,7 +1329,7 @@ void Button_Skins(void)
   Print_in_window( 172, 59,"Cursor:"          ,MC_Black,MC_Light);
 
   // Ok button
-  Window_set_normal_button(6, 120, 51, 14, "OK", 0, 1, SDL_SCANCODE_RETURN); // 1
+  Window_set_normal_button(6, 120, 51, 14, "OK", 0, 1, K2K(SDLK_RETURN)); // 1
 
   // List of skins
   skin_list = Window_set_list_button(
@@ -1348,7 +1348,7 @@ void Button_Skins(void)
     Window_dropdown_add_item(font_dropdown,temp,Get_item_by_index(&Font_files_list,temp)->Short_name);
 
   // Cancel
-  Window_set_normal_button(61, 120, 51,14,"Cancel",0,1,SDL_SCANCODE_ESCAPE); // 6
+  Window_set_normal_button(61, 120, 51,14,"Cancel",0,1,K2K(SDLK_ESCAPE)); // 6
 
   // Dropdown list to choose cursor type
   cursor_dropdown = Window_set_dropdown_button(172, 69, 104, 11, 0,
@@ -1357,12 +1357,12 @@ void Button_Skins(void)
     Window_dropdown_add_item(cursor_dropdown, temp, cursors[temp]);
 
   Window_set_normal_button(172, 87, 14, 14,
-    (Config.Display_image_limits)?"X":" ", -1, 1, SDL_SCANCODE_LAST); // 8
+    (Config.Display_image_limits)?"X":" ", -1, 1, KEY_NONE); // 8
   Print_in_window( 190, 85,"Draw picture", MC_Dark, MC_Light);
   Print_in_window( 190, 94,"limits", MC_Dark, MC_Light);
 
   Window_set_normal_button(172, 111, 14, 14,
-    (Config.Separate_colors)?"X":" ", -1, 1, SDL_SCANCODE_LAST); // 9
+    (Config.Separate_colors)?"X":" ", -1, 1, KEY_NONE); // 9
   Print_in_window( 190, 109,"Separate", MC_Dark, MC_Light);
   Print_in_window( 190, 118,"colors", MC_Dark, MC_Light);
   
@@ -1490,7 +1490,7 @@ void Button_Skins(void)
         break;
     }
   }
-  while ( (clicked_button!=1) && (clicked_button !=6) && (Key != SDL_SCANCODE_ESCAPE));
+  while ( (clicked_button!=1) && (clicked_button !=6) && (Key != K2K(SDLK_ESCAPE)));
 
   if(clicked_button == 1)
   {
@@ -1728,11 +1728,11 @@ void Button_Copy_page(void)
 
   Open_window(168,137,"Copy to spare page");
 
-  Window_set_normal_button(10, 20,148,14,"Pixels + palette" , 0,1,SDL_SCANCODE_RETURN); // 1
-  Window_set_normal_button(10, 37,148,14,"Pixels only"      , 3,1,SDL_SCANCODE_X); // 2
-  Window_set_normal_button(10, 54,148,14,"Palette only"     , 1,1,SDL_SCANCODE_P); // 3
-  Window_set_normal_button(10, 71,148,14,"Some colors only" , 6,1,SDL_SCANCODE_C); // 4
-  Window_set_normal_button(10, 88,148,14,"Palette and remap",13,1,SDL_SCANCODE_R); // 5
+  Window_set_normal_button(10, 20,148,14,"Pixels + palette" , 0,1,K2K(SDLK_RETURN)); // 1
+  Window_set_normal_button(10, 37,148,14,"Pixels only"      , 3,1,K2K(SDLK_x)); // 2
+  Window_set_normal_button(10, 54,148,14,"Palette only"     , 1,1,K2K(SDLK_p)); // 3
+  Window_set_normal_button(10, 71,148,14,"Some colors only" , 6,1,K2K(SDLK_c)); // 4
+  Window_set_normal_button(10, 88,148,14,"Palette and remap",13,1,K2K(SDLK_r)); // 5
   Window_set_normal_button(44,114, 80,14,"Cancel"           , 0,1,KEY_ESC); // 6
   Update_window_area(0,0,Window_width, Window_height);
 
@@ -1969,7 +1969,7 @@ void Button_Resolution(void)
   Print_in_window( 12, 21,"Picture size:"   ,MC_Dark,MC_Light);
   Window_display_frame      ( 8,17,195, 33);
 
-  Window_set_normal_button(223, 18,67,14,"OK"      ,0,1,SDL_SCANCODE_RETURN); // 1
+  Window_set_normal_button(223, 18,67,14,"OK"      ,0,1,K2K(SDLK_RETURN)); // 1
   Window_set_normal_button(223, 35,67,14,"Cancel"  ,0,1,KEY_ESC);  // 2
 
   Print_in_window( 12, 37,"Width:"          ,MC_Dark,MC_Light);
@@ -2020,7 +2020,7 @@ void Button_Resolution(void)
 
   // 10 little buttons for the state of each visible mode
   for (temp=0; temp<MODELIST_LINES && temp < Nb_video_modes; temp++)
-    Window_set_normal_button(17,86+(temp<<3),13,7,"",0,1,SDL_SCANCODE_LAST);// 8..17
+    Window_set_normal_button(17,86+(temp<<3),13,7,"",0,1,KEY_NONE);// 8..17
 
   // Dummy buttons as explainations of colors
   Window_draw_normal_bouton( 16,170,13,7,"",0,0);
@@ -2141,7 +2141,7 @@ void Button_Resolution(void)
     // Gestion des touches de déplacement dans la liste
     switch (Key)
     {
-      case SDL_SCANCODE_UP : // Haut
+      case K2K(SDLK_UP) : // Haut
         if (cursor_position>0)
           cursor_position--;
         else
@@ -2150,7 +2150,7 @@ void Button_Resolution(void)
         Scroll_list_of_modes(list_start,cursor_position,&selected_mode);
         Key=0;
         break;
-      case SDL_SCANCODE_DOWN : // Bas
+      case K2K(SDLK_DOWN) : // Bas
         if (cursor_position<(MODELIST_LINES-1) && cursor_position<(Nb_video_modes-1))
           cursor_position++;
         else
@@ -2159,7 +2159,7 @@ void Button_Resolution(void)
         Scroll_list_of_modes(list_start,cursor_position,&selected_mode);
         Key=0;
         break;
-      case SDL_SCANCODE_PAGEUP : // PageUp
+      case K2K(SDLK_PAGEUP) : // PageUp
         if (cursor_position>0)
           cursor_position=0;
         else
@@ -2172,7 +2172,7 @@ void Button_Resolution(void)
         Scroll_list_of_modes(list_start,cursor_position,&selected_mode);
         Key=0;
         break;
-      case SDL_SCANCODE_PAGEDOWN : // PageDown
+      case K2K(SDLK_PAGEDOWN) : // PageDown
         if (Nb_video_modes<MODELIST_LINES)
           cursor_position=Nb_video_modes-1;
         else if (cursor_position<(MODELIST_LINES-1))
@@ -2187,13 +2187,13 @@ void Button_Resolution(void)
         Scroll_list_of_modes(list_start,cursor_position,&selected_mode);
         Key=0;
         break;
-      case SDL_SCANCODE_HOME : // Home
+      case K2K(SDLK_HOME) : // Home
         list_start=0;
         cursor_position=0;
         Scroll_list_of_modes(list_start,cursor_position,&selected_mode);
         Key=0;
         break;
-      case SDL_SCANCODE_END : // End
+      case K2K(SDLK_END) : // End
         if (Nb_video_modes<MODELIST_LINES)
           cursor_position=Nb_video_modes-1;
         else
@@ -2561,12 +2561,12 @@ void Button_Gradients(void)
     Main_backups->Pages->Gradients->Range[Current_gradient].Mix);                      // 3
   // Direction
   Window_set_normal_button(8,20,15,14,
-    (Main_backups->Pages->Gradients->Range[Current_gradient].Inverse)?"\033":"\032",0,1,SDL_SCANCODE_TAB); // 4
+    (Main_backups->Pages->Gradients->Range[Current_gradient].Inverse)?"\033":"\032",0,1,K2K(SDLK_TAB)); // 4
   // Technique
-  Window_set_normal_button(8,90,15,14,"",0,1,SDL_SCANCODE_TAB|MOD_SHIFT); // 5
+  Window_set_normal_button(8,90,15,14,"",0,1,K2K(SDLK_TAB)|MOD_SHIFT); // 5
   Draw_button_gradient_style(8,90,Main_backups->Pages->Gradients->Range[Current_gradient].Technique);
 
-  Window_set_normal_button(178,128,51,14,"OK",0,1,SDL_SCANCODE_RETURN);     // 6
+  Window_set_normal_button(178,128,51,14,"OK",0,1,K2K(SDLK_RETURN));     // 6
   Window_set_normal_button(123,128,51,14,"Cancel",0,1,KEY_ESC);  // 7
   // Scrolling speed
   speed_scroller = Window_set_horizontal_scroller_button(99,111,130,106,1,Main_backups->Pages->Gradients->Range[Current_gradient].Speed);  // 8
@@ -2743,10 +2743,10 @@ void Button_Gradients(void)
     }
 
     if (!Mouse_K)
-    switch (Key)
     {
-      case SDL_SCANCODE_GRAVE : // Récupération d'une couleur derrière le menu
-      case SDL_SCANCODE_COMMA :
+      if (Is_shortcut(Key,0x100+BUTTON_COLORPICKER))
+      {
+        // Pick a color behind menu
         Get_color_behind_window(&color,&click);
         if (click)
         {
@@ -2763,39 +2763,38 @@ void Button_Gradients(void)
           Wait_end_of_click();
         }
         Key=0;
-        break;
-      case KEY_MOUSEWHEELUP:
+      }
+      else if (Key == KEY_MOUSEWHEELUP)
+      {
         if (Current_gradient>0)
         {
           Current_gradient--;
           changed_gradient_index=1;
         }
-        break;
-      case KEY_MOUSEWHEELDOWN:
+      }
+      else if (Key == KEY_MOUSEWHEELDOWN)
+      {
         if (Current_gradient<15)
         {
           Current_gradient++;
           changed_gradient_index=1;
         }
-        break;
-      
-      default:
-        if (Is_shortcut(Key,0x100+BUTTON_HELP))
-        {
-          Window_help(BUTTON_GRADRECT, NULL);
-          Key=0;
-          break;
-        }
-        else if (Is_shortcut(Key,0x200+BUTTON_GRADRECT))
-          clicked_button=6;
-        else if (Is_shortcut(Key,SPECIAL_CYCLE_MODE))
-        {
-          // Cycling on/off
-          cycling_mode = !cycling_mode;
-          Hide_cursor();
-          Print_in_window(11,112,"Cycling",cycling_mode?MC_Black:MC_Dark,MC_Light);
-          Display_cursor();
-        }
+      }
+      else if (Is_shortcut(Key,0x100+BUTTON_HELP))
+      {
+        Window_help(BUTTON_GRADRECT, NULL);
+        Key=0;
+      }
+      else if (Is_shortcut(Key,0x200+BUTTON_GRADRECT))
+        clicked_button=6;
+      else if (Is_shortcut(Key,SPECIAL_CYCLE_MODE))
+      {
+        // Cycling on/off
+        cycling_mode = !cycling_mode;
+        Hide_cursor();
+        Print_in_window(11,112,"Cycling",cycling_mode?MC_Black:MC_Dark,MC_Light);
+        Display_cursor();
+      }
     }
   }
   while (clicked_button!=6 && clicked_button!=7);
@@ -2948,7 +2947,7 @@ void Button_Paintbrush_menu(void)
   {
     x_pos=13+(index%12)*24;
     y_pos=27+(index/12)*25;
-    //Window_set_normal_button(x_pos  ,y_pos  ,20,20,"",0,1,SDL_SCANCODE_LAST);
+    //Window_set_normal_button(x_pos  ,y_pos  ,20,20,"",0,1,KEY_NONE);
     Window_set_dropdown_button(x_pos  ,y_pos  ,20,20,28,NULL, 0,0,0,RIGHT_SIDE,0);
     Window_dropdown_add_item(Window_dropdown_button_list, 1, "Set");
     // Highlight selected brush
@@ -4140,24 +4139,24 @@ void Button_Airbrush_menu(void)
   Open_window(226,170,"Spray");
 
   Window_set_normal_button(110,148,51,14,"Cancel"    ,0,1,KEY_ESC); // 1
-  Window_set_normal_button(166,148,51,14,"OK"        ,0,1,SDL_SCANCODE_RETURN); // 2
+  Window_set_normal_button(166,148,51,14,"OK"        ,0,1,K2K(SDLK_RETURN)); // 2
 
   Window_set_scroller_button(178,62,74,50,1,49-Airbrush_multi_flow[selected_color]); // 3
 
   Window_set_palette_button(7,56);                                 // 4
 
-  Window_set_normal_button(  8,148,83,14,"Mode:     ",0,1,SDL_SCANCODE_TAB); // 5
+  Window_set_normal_button(  8,148,83,14,"Mode:     ",0,1,K2K(SDLK_TAB)); // 5
   if (Airbrush_mode)
     Print_in_window(50,151," Mono",MC_Black,MC_Light);
   else
     Print_in_window(50,151,"Multi",MC_Black,MC_Light);
 
-  Window_set_normal_button(194, 62,19,14,"+1"        ,0,1,SDL_SCANCODE_KP_PLUS); // 6
-  Window_set_normal_button(194, 79,19,14,"-1"        ,0,1,SDL_SCANCODE_KP_MINUS); // 7
-  Window_set_normal_button(194, 96,19,14,"x2"        ,0,1,SDL_SCANCODE_KP_MULTIPLY); // 8
-  Window_set_normal_button(194,113,19,14,"÷2"        ,0,1,SDL_SCANCODE_KP_ENTER); // 9
+  Window_set_normal_button(194, 62,19,14,"+1"        ,0,1,K2K(SDLK_KP_PLUS)); // 6
+  Window_set_normal_button(194, 79,19,14,"-1"        ,0,1,K2K(SDLK_KP_MINUS)); // 7
+  Window_set_normal_button(194, 96,19,14,"x2"        ,0,1,K2K(SDLK_KP_MULTIPLY)); // 8
+  Window_set_normal_button(194,113,19,14,"÷2"        ,0,1,K2K(SDLK_KP_ENTER)); // 9
 
-  Window_set_normal_button(  8, 37,43,14,"Clear"     ,1,1,SDL_SCANCODE_C); // 10
+  Window_set_normal_button(  8, 37,43,14,"Clear"     ,1,1,K2K(SDLK_c)); // 10
 
   Print_in_window(142,25,"Size:"     ,MC_Dark,MC_Light);
   input_size_button = Window_set_input_button(186,23,3);                // 11
@@ -4387,10 +4386,10 @@ void Button_Airbrush_menu(void)
     }
 
     if (!Mouse_K)
-    switch (Key)
     {
-      case SDL_SCANCODE_GRAVE : // Récupération d'une couleur derrière le menu
-      case SDL_SCANCODE_COMMA :
+      if (Is_shortcut(Key,0x100+BUTTON_COLORPICKER))
+      {
+        // Pick color behind menu
         Get_color_behind_window(&color,&click);
         if (click)
         {
@@ -4413,18 +4412,15 @@ void Button_Airbrush_menu(void)
           Wait_end_of_click();
         }
         Key=0;
-        break;
-      default:
-      if (Is_shortcut(Key,0x100+BUTTON_HELP))
+      }
+      else if (Is_shortcut(Key,0x100+BUTTON_HELP))
       {
         Window_help(BUTTON_AIRBRUSH, NULL);
         Key=0;
-        break;
       }
-      if (Is_shortcut(Key,0x200+BUTTON_AIRBRUSH))
+      else if (Is_shortcut(Key,0x200+BUTTON_AIRBRUSH))
       {
         clicked_button=2;
-        break;
       }
     }
   }
@@ -4567,9 +4563,9 @@ void Button_Effects(void)
   Window_set_normal_button(C2, 76, 16,16,"",0,1,Config_Key[SPECIAL_GRID_MODE][0]); // 9
   Window_set_normal_button(C2, 95, 16,16,"",0,1,Config_Key[SPECIAL_TILING_MODE][0]); // 10
 
-  Window_set_normal_button(195,131, 68,14,"Close",0,1,SDL_SCANCODE_RETURN); // 11
-  Window_set_normal_button(  7,131, 68,14,"All off",0,1,SDL_SCANCODE_DELETE); // 12
-  Window_set_normal_button( 83,131,104,14,"Feedback:   ",1,1,SDL_SCANCODE_F); // 13
+  Window_set_normal_button(195,131, 68,14,"Close",0,1,K2K(SDLK_RETURN)); // 11
+  Window_set_normal_button(  7,131, 68,14,"All off",0,1,K2K(SDLK_DELETE)); // 12
+  Window_set_normal_button( 83,131,104,14,"Feedback:   ",1,1,K2K(SDLK_f)); // 13
 
   Window_set_normal_button(177, 19, 16,16,"",0,1,Config_Key[SPECIAL_FORMAT_CHECKER_MENU][0]); // 14
   Window_set_normal_button(177, 38, 16,16,"",0,1,Config_Key[SPECIAL_TILEMAP_MODE][0]); // 15
@@ -4910,13 +4906,13 @@ void Button_Text(void)
   Window_display_frame_in(182,34,100,68);
   Print_in_window(199,31,"TrueType", MC_Dark, MC_Light);
   // AA
-  Window_set_normal_button(188,58,13,11,antialias?"X":" ",0,1,SDL_SCANCODE_A); // 2
+  Window_set_normal_button(188,58,13,11,antialias?"X":" ",0,1,K2K(SDLK_a)); // 2
   Print_in_window(206,60,"AntiAlias", MC_Dark, MC_Light);
   // Bold
-  Window_set_normal_button(188,72,13,11,is_bold?"X":" ",0,1,SDL_SCANCODE_B); // 3
+  Window_set_normal_button(188,72,13,11,is_bold?"X":" ",0,1,K2K(SDLK_b)); // 3
   Print_in_window(206,75,"Bold", MC_Dark, MC_Light);
   // Italic
-  Window_set_normal_button(188,86,13,11,is_italic?"X":" ",0,1,SDL_SCANCODE_I); // 4
+  Window_set_normal_button(188,86,13,11,is_italic?"X":" ",0,1,K2K(SDLK_i)); // 4
   Print_in_window(206,89,"Italic", MC_Dark, MC_Light);
   
   // Scroller des fontes
@@ -4927,14 +4923,14 @@ void Button_Text(void)
   
   // Taille texte
   input_size_button = Window_set_input_button(220,43,3); // 7
-  Window_set_repeatable_button(202,43,13,11,"-",0,1,SDL_SCANCODE_LAST); // 8
-  Window_set_repeatable_button(251,43,13,11,"+",0,1,SDL_SCANCODE_LAST); // 9
+  Window_set_repeatable_button(202,43,13,11,"-",0,1,KEY_NONE); // 8
+  Window_set_repeatable_button(251,43,13,11,"+",0,1,KEY_NONE); // 9
   
   // Preview
   preview_button = Window_set_special_button(8,106,273,50); // 10
   Window_display_frame_in(7, 105, 275, 52);
   
-  Window_set_normal_button(8,160,40,14,"OK",0,1,SDL_SCANCODE_RETURN); // 11
+  Window_set_normal_button(8,160,40,14,"OK",0,1,K2K(SDLK_RETURN)); // 11
   Window_set_normal_button(54,160,60,14,"Cancel",0,1,KEY_ESC); // 12
   
   // List of fonts
@@ -5523,7 +5519,7 @@ void Button_Brush_container(void)
       y_pos,
       BRUSH_CONTAINER_PREVIEW_WIDTH+2,
       BRUSH_CONTAINER_PREVIEW_HEIGHT+2,
-      "",0,1,SDL_SCANCODE_LAST);
+      "",0,1,KEY_NONE);
     Display_stored_brush_in_window(x_pos+1, y_pos+1, index);
   }
   Update_window_area(0,0,Window_width, Window_height);

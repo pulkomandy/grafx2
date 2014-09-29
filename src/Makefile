@@ -380,8 +380,8 @@ ifndef ($(ATARICROSS,1))
    TTFLABEL = -nottf
  else
    TTFCOPT = 
-   TTFLOPT = -L$(prefix)/lib -lSDL_ttf $(FCLOPT)
-   TTFLIBS = bin/libfreetype-6.dll bin/SDL_ttf.dll
+   TTFLOPT = -L$(prefix)/lib -lSDL2_ttf $(FCLOPT)
+   TTFLIBS = bin/libfreetype-6.dll bin/SDL2_ttf.dll
    TTFLABEL = 
  endif
 else
@@ -392,7 +392,7 @@ else
    TTFLABEL = -nottf
  else
    TTFCOPT = 
-   TTFLOPT = -L$(prefix)/lib -lSDL_ttf $(FCLOPT)
+   TTFLOPT = -L$(prefix)/lib -lSDL2_ttf $(FCLOPT)
    TTFLIBS =  
    TTFLABEL = 
  endif

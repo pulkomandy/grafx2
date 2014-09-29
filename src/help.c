@@ -154,7 +154,7 @@ void Window_set_shortcut(int action_id)
   
   Open_window(302,131,"Keyboard shortcut");
   Window_set_normal_button(181,111,55,14,"Cancel",0,1,KEY_ESC); // 1
-  Window_set_normal_button(241,111,55,14,"OK",0,1,SDL_SCANCODE_RETURN); // 2
+  Window_set_normal_button(241,111,55,14,"OK",0,1,K2K(SDLK_RETURN)); // 2
 
   Window_set_normal_button(6,111,111,14,"Reset default",0,1,KEY_NONE); // 3
 
@@ -261,7 +261,7 @@ void Window_set_shortcut(int action_id)
         break;
     }
   }
-  while ((clicked_button!=1) && (clicked_button!=2) && (Key!=SDL_SCANCODE_RETURN));
+  while ((clicked_button!=1) && (clicked_button!=2) && (Key!=K2K(SDLK_RETURN)));
   Key=0;
   Close_window();
   Display_cursor();
@@ -535,11 +535,11 @@ void Window_help(int section, const char *sub_section)
   scroller=Window_set_scroller_button(290,18,130,nb_lines,
                                   16,Help_position);   // 2
 
-  Window_set_normal_button(  9,154, 6*8,14,"About"  ,1,1,SDL_SCANCODE_A); // 3
+  Window_set_normal_button(  9,154, 6*8,14,"About"  ,1,1,K2K(SDLK_a)); // 3
 
-  Window_set_normal_button( 9+6*8+4,154, 8*8,14,"License",1,1,SDL_SCANCODE_L); // 4
-  Window_set_normal_button( 9+6*8+4+8*8+4,154, 5*8,14,"Help",1,1,SDL_SCANCODE_H); // 5
-  Window_set_normal_button(9+6*8+4+8*8+4+5*8+4,154, 8*8,14,"Credits",1,1,SDL_SCANCODE_C); // 6
+  Window_set_normal_button( 9+6*8+4,154, 8*8,14,"License",1,1,K2K(SDLK_l)); // 4
+  Window_set_normal_button( 9+6*8+4+8*8+4,154, 5*8,14,"Help",1,1,K2K(SDLK_h)); // 5
+  Window_set_normal_button(9+6*8+4+8*8+4+5*8+4,154, 8*8,14,"Credits",1,1,K2K(SDLK_c)); // 6
 
   Window_set_special_button(9,18,272,130); // 7
 
@@ -606,19 +606,19 @@ void Window_help(int section, const char *sub_section)
     // Gestion des touches de déplacement dans la liste
     switch (Key)
     {
-      case SDL_SCANCODE_UP : // Haut
+      case K2K(SDLK_UP) : // Haut
         if (Help_position>0)
           Help_position--;
         Scroll_help(scroller);
         Key=0;
         break;
-      case SDL_SCANCODE_DOWN : // Bas
+      case K2K(SDLK_DOWN) : // Bas
         if (Help_position<nb_lines-16)
           Help_position++;
         Scroll_help(scroller);
         Key=0;
         break;
-      case SDL_SCANCODE_PAGEUP : // PageUp
+      case K2K(SDLK_PAGEUP) : // PageUp
         if (Help_position>15)
           Help_position-=15;
         else
@@ -634,7 +634,7 @@ void Window_help(int section, const char *sub_section)
         Scroll_help(scroller);
         Key=0;
         break;
-      case SDL_SCANCODE_PAGEDOWN : // PageDown
+      case K2K(SDLK_PAGEDOWN) : // PageDown
         if (nb_lines>16)
         {
           if (Help_position<nb_lines-16-15)
@@ -656,12 +656,12 @@ void Window_help(int section, const char *sub_section)
           Key=0;
         }
         break;
-      case SDL_SCANCODE_HOME : // Home
+      case K2K(SDLK_HOME) : // Home
         Help_position=0;
         Scroll_help(scroller);
         Key=0;
         break;
-      case SDL_SCANCODE_END : // End
+      case K2K(SDLK_END) : // End
       if (nb_lines>16)
       {
         Help_position=nb_lines-16;
@@ -673,7 +673,7 @@ void Window_help(int section, const char *sub_section)
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       clicked_button=1;
   }
-  while ((clicked_button!=1) && (Key!=SDL_SCANCODE_RETURN));
+  while ((clicked_button!=1) && (Key!=K2K(SDLK_RETURN)));
 
   Key=0;
   Close_window();
@@ -784,11 +784,11 @@ void Button_Stats(void)
   // Used memory
   Print_in_window(10,y,"Used memory pages: ",STATS_TITLE_COLOR,MC_Black);
   if(Stats_pages_memory > (100LL*1024*1024*1024))
-        sprintf(buffer,"%ld (%lld Gb)",Stats_pages_number, Stats_pages_memory/(1024*1024*1024));
+        sprintf(buffer,"%ld (%ld Gb)",Stats_pages_number, (long)(Stats_pages_memory/(1024*1024*1024)));
   else if(Stats_pages_memory > (100*1024*1024))
-        sprintf(buffer,"%ld (%lld Mb)",Stats_pages_number, Stats_pages_memory/(1024*1024));
+        sprintf(buffer,"%ld (%ld Mb)",Stats_pages_number, (long)(Stats_pages_memory/(1024*1024)));
   else
-        sprintf(buffer,"%ld (%lld Kb)",Stats_pages_number, Stats_pages_memory/1024);
+        sprintf(buffer,"%ld (%ld Kb)",Stats_pages_number, (long)(Stats_pages_memory/1024));
   Print_in_window(162,y,buffer,STATS_DATA_COLOR,MC_Black);
   
   y+=8;
@@ -889,9 +889,9 @@ void Button_Stats(void)
     if (Is_shortcut(Key,0x200+BUTTON_HELP))
       clicked_button=1;
   }
-  while ( (clicked_button!=1) && (Key!=SDL_SCANCODE_RETURN) );
+  while ( (clicked_button!=1) && (Key!=K2K(SDLK_RETURN)) );
 
-  if(Key==SDL_SCANCODE_RETURN)Key=0;
+  if(Key==K2K(SDLK_RETURN))Key=0;
 
   Close_window();
   Unselect_button(BUTTON_HELP);

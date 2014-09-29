@@ -473,11 +473,11 @@ int Menu_shade(void)
 
   // Déclaration & tracé des boutons de sortie
   Window_set_normal_button(207,17,51,14,"Cancel",0,1,KEY_ESC);   // 4
-  Window_set_normal_button(261,17,43,14,"OK"    ,0,1,SDL_SCANCODE_RETURN);  // 5
+  Window_set_normal_button(261,17,43,14,"OK"    ,0,1,K2K(SDLK_RETURN));  // 5
 
   // Déclaration & tracé des boutons de copie de shade
-  Window_set_normal_button(206,87,27,14,"Cpy"   ,1,1,SDL_SCANCODE_C);  // 6
-  Window_set_normal_button(234,87,43,14,"Paste" ,1,1,SDL_SCANCODE_P);  // 7
+  Window_set_normal_button(206,87,27,14,"Cpy"   ,1,1,K2K(SDLK_c));  // 6
+  Window_set_normal_button(234,87,43,14,"Paste" ,1,1,K2K(SDLK_p));  // 7
 
   // On tagge le bloc
   Tag_color_range(Fore_color,Fore_color);
@@ -494,16 +494,16 @@ int Menu_shade(void)
   Display_all_shade(first_color,last_color,selection_start,selection_end);
 
   // Déclaration & tracé des boutons d'édition de shade
-  Window_set_normal_button(  6,107,27,14,"Ins"  ,0,1,SDL_SCANCODE_INSERT);  // 8
-  Window_set_normal_button( 38,107,27,14,"Del"  ,0,1,SDL_SCANCODE_DELETE);  // 9
-  Window_set_normal_button( 66,107,43,14,"Blank",1,1,SDL_SCANCODE_B);  // 10
-  Window_set_normal_button(110,107,27,14,"Inv"  ,1,1,SDL_SCANCODE_I);  // 11
-  Window_set_normal_button(138,107,27,14,"Swp"  ,1,1,SDL_SCANCODE_S);  // 12
+  Window_set_normal_button(  6,107,27,14,"Ins"  ,0,1,K2K(SDLK_INSERT));  // 8
+  Window_set_normal_button( 38,107,27,14,"Del"  ,0,1,K2K(SDLK_DELETE));  // 9
+  Window_set_normal_button( 66,107,43,14,"Blank",1,1,K2K(SDLK_b));  // 10
+  Window_set_normal_button(110,107,27,14,"Inv"  ,1,1,K2K(SDLK_i));  // 11
+  Window_set_normal_button(138,107,27,14,"Swp"  ,1,1,K2K(SDLK_s));  // 12
 
   // Déclaration & tracé des boutons de taggage
   Print_in_window(268,123,"Disbl"/*"Dsabl"*/,MC_Dark,MC_Light);
-  Window_set_normal_button(274,133,27,14,"Set"   ,0,1,SDL_SCANCODE_F1); // 13
-  Window_set_normal_button(274,148,27,14,"Clr"   ,0,1,SDL_SCANCODE_F2); // 14
+  Window_set_normal_button(274,133,27,14,"Set"   ,0,1,K2K(SDLK_F1)); // 13
+  Window_set_normal_button(274,148,27,14,"Clr"   ,0,1,K2K(SDLK_F2)); // 14
 
   // Déclaration & tracé de la zone de saisie du pas
   Print_in_window(272,165,"Step",MC_Dark,MC_Light);
@@ -512,12 +512,12 @@ int Menu_shade(void)
   Window_input_content(input_button,str);
 
   // Button Undo
-  Window_set_normal_button(170,107,35,14,"Undo",1,1,SDL_SCANCODE_U);   // 16
+  Window_set_normal_button(170,107,35,14,"Undo",1,1,K2K(SDLK_u));   // 16
   // Button Clear
-  Window_set_normal_button(278,87,27,14,"Clr",0,1,SDL_SCANCODE_BACKSPACE);     // 17
+  Window_set_normal_button(278,87,27,14,"Clr",0,1,K2K(SDLK_BACKSPACE));     // 17
 
   // Button Mode
-  Window_set_normal_button(244,107,60,14,"",0,1,SDL_SCANCODE_TAB);       // 18
+  Window_set_normal_button(244,107,60,14,"",0,1,K2K(SDLK_TAB));       // 18
 
   // Affichage du n° de shade actif
   Num2str(Shade_current+1,str,1);
@@ -885,41 +885,15 @@ int Menu_shade(void)
     if (!Mouse_K)
     switch (Key)
     {
-      case SDL_SCANCODE_LEFTBRACKET : // Décaler couleur dans palette vers la gauche
-      case SDL_SCANCODE_RIGHTBRACKET : // Décaler couleur dans palette vers la droite
-        if (first_color==last_color)
-        {
-          if (Key==SDL_SCANCODE_LEFTBRACKET)
-          {
-            first_color--;
-            last_color--;
-          }
-          else
-          {
-            first_color++;
-            last_color++;
-          }
-          Hide_cursor();
-          Tag_color_range(first_color,first_color);
-          Block(Window_pos_X+(Menu_factor_X*172),
-                Window_pos_Y+(Menu_factor_Y*27),
-                Menu_factor_X<<4,Menu_factor_Y*64,first_color);
-          // On affiche le numéro de la couleur sélectionnée
-          Display_selected_color(first_color,last_color);
-          Display_cursor();
-        }
-        Key=0;
-        break;
-
-      case SDL_SCANCODE_UP    : // Select Haut
-      case SDL_SCANCODE_DOWN  : // Select Bas
-      case SDL_SCANCODE_LEFT  : // Select Gauche
-      case SDL_SCANCODE_RIGHT : // Select Droite
+      case K2K(SDLK_UP)    : // Select Haut
+      case K2K(SDLK_DOWN)  : // Select Bas
+      case K2K(SDLK_LEFT)  : // Select Gauche
+      case K2K(SDLK_RIGHT) : // Select Droite
         if (selection_start==selection_end)
         {
           switch (Key)
           {
-            case SDL_SCANCODE_UP : // Select Haut
+            case K2K(SDLK_UP) : // Select Haut
               if (selection_start>=64)
               {
                 selection_start-=64;
@@ -928,7 +902,7 @@ int Menu_shade(void)
               else
                 selection_start=selection_end=0;
               break;
-            case SDL_SCANCODE_DOWN : // Select Bas
+            case K2K(SDLK_DOWN) : // Select Bas
               if (selection_start<448)
               {
                 selection_start+=64;
@@ -937,7 +911,7 @@ int Menu_shade(void)
               else
                 selection_start=selection_end=511;
               break;
-            case SDL_SCANCODE_LEFT : // Select Gauche
+            case K2K(SDLK_LEFT) : // Select Gauche
               if (selection_start>0)
               {
                 selection_start--;
@@ -958,38 +932,68 @@ int Menu_shade(void)
         }
         Key=0;
         break;
-
-      case SDL_SCANCODE_GRAVE : // Récupération d'une couleur derrière le menu
-      case SDL_SCANCODE_COMMA :
-        Get_color_behind_window(&color,&click);
-        if (click)
+        
+        default:
+        
+        if (first_color==last_color && Is_shortcut(Key,SPECIAL_PREVIOUS_FORECOLOR))
         {
+          first_color--;
+          last_color--;
           Hide_cursor();
-          temp_color=color;
-
-          // On met à jour l'intervalle du Shade
-          first_color=last_color=temp_color;
-          // On tagge le bloc
-          Tag_color_range(first_color,last_color);
-          // Tracé du bloc dégradé:
-          Display_grad_block_in_window(172,27,first_color,last_color);
-
+          Tag_color_range(first_color,first_color);
+          Block(Window_pos_X+(Menu_factor_X*172),
+                Window_pos_Y+(Menu_factor_Y*27),
+                Menu_factor_X<<4,Menu_factor_Y*64,first_color);
           // On affiche le numéro de la couleur sélectionnée
           Display_selected_color(first_color,last_color);
-
           Display_cursor();
-          Wait_end_of_click();
-        }
-        Key=0;
-        break;
-      default:
-        if (Is_shortcut(Key,0x100+BUTTON_HELP))
-        {
           Key=0;
-          Window_help(BUTTON_EFFECTS, "SHADE");
         }
-        else if (Is_shortcut(Key,SPECIAL_SHADE_MENU))
-          clicked_button=5;
+        else if (first_color==last_color && Is_shortcut(Key,SPECIAL_NEXT_FORECOLOR))
+        {
+          first_color++;
+          last_color++;
+          Hide_cursor();
+          Tag_color_range(first_color,first_color);
+          Block(Window_pos_X+(Menu_factor_X*172),
+                Window_pos_Y+(Menu_factor_Y*27),
+                Menu_factor_X<<4,Menu_factor_Y*64,first_color);
+          // On affiche le numéro de la couleur sélectionnée
+          Display_selected_color(first_color,last_color);
+          Display_cursor();
+          Key=0;
+        }
+        else if (Is_shortcut(Key,0x100+BUTTON_COLORPICKER))
+          {
+            // Pick color behind menu
+            Get_color_behind_window(&color,&click);
+            if (click)
+            {
+              Hide_cursor();
+              temp_color=color;
+    
+              // On met à jour l'intervalle du Shade
+              first_color=last_color=temp_color;
+              // On tagge le bloc
+              Tag_color_range(first_color,last_color);
+              // Tracé du bloc dégradé:
+              Display_grad_block_in_window(172,27,first_color,last_color);
+    
+              // On affiche le numéro de la couleur sélectionnée
+              Display_selected_color(first_color,last_color);
+    
+              Display_cursor();
+              Wait_end_of_click();
+            }
+            Key=0;
+          }
+          else if (Is_shortcut(Key,0x100+BUTTON_HELP))
+          {
+            Key=0;
+            Window_help(BUTTON_EFFECTS, "SHADE");
+          }
+          else if (Is_shortcut(Key,SPECIAL_SHADE_MENU))
+            clicked_button=5;
     }
   }
   while ((clicked_button!=4) && (clicked_button!=5));
@@ -1059,9 +1063,9 @@ void Button_Quick_shade_menu(void)
 
   Open_window(142,56,"Quick-shade");
 
-  Window_set_normal_button(76,36,60,14,"OK",0,1,SDL_SCANCODE_RETURN);     // 1
+  Window_set_normal_button(76,36,60,14,"OK",0,1,K2K(SDLK_RETURN));     // 1
   Window_set_normal_button( 6,36,60,14,"Cancel",0,1,KEY_ESC);  // 2
-  Window_set_normal_button(76,18,60,14,"",0,1,SDL_SCANCODE_TAB);          // 3
+  Window_set_normal_button(76,18,60,14,"",0,1,K2K(SDLK_TAB));          // 3
   Display_shade_mode(83,21,Quick_shade_loop);
 
   // Déclaration & tracé de la zone de saisie du pas

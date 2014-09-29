@@ -311,8 +311,8 @@ typedef struct
 typedef struct
 {
   word Number; ///< Indicates the shortcut action. This is a number starting from 0, which matches ::T_Key_config.Number
-  word Key;    ///< Keyboard shortcut: SDL_SCANCODE_Something, or -1 for none
-  word Key2;   ///< Alternate keyboard shortcut: SDL_SCANCODE_Something, or -1 for none
+  word Key;    ///< Keyboard shortcut: K2K(SDLK_Something, or -1 for none
+  word Key2;   ///< Alternate keyboard shortcut: K2K(SDLK_Something, or -1 for none
 } T_Config_shortcut_info;
 
 

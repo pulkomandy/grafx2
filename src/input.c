@@ -316,7 +316,6 @@ int Handle_mouse_click(SDL_MouseButtonEvent event)
             else
               Input_new_mouse_K |= 1;
             break;
-            break;
 
         case SDL_BUTTON_RIGHT:
             if (Button_inverter)
@@ -324,11 +323,16 @@ int Handle_mouse_click(SDL_MouseButtonEvent event)
             else
               Input_new_mouse_K |= 2;
             break;
-            break;
 
         case SDL_BUTTON_MIDDLE:
             Key = KEY_MOUSEMIDDLE|Key_modifiers(SDL_GetModState());
             // TODO: repeat system maybe?
+            return 0;
+        case SDL_BUTTON_X1:
+            Key = KEY_MOUSEX1|Key_modifiers(SDL_GetModState());
+            return 0;
+        case SDL_BUTTON_X2:
+            Key = KEY_MOUSEX2|Key_modifiers(SDL_GetModState());
             return 0;
 
         default:
@@ -361,14 +365,24 @@ int Handle_mouse_release(SDL_MouseButtonEvent event)
 
 int Handle_mouse_wheel(SDL_MouseWheelEvent event)
 {
-    if (event.y<0)
+    if (event.y>0)
     {
         Key = KEY_MOUSEWHEELUP|Key_modifiers(SDL_GetModState());
         return 0;
     }
-    else if (event.y>0)
+    else if (event.y<0)
     {
         Key = KEY_MOUSEWHEELDOWN|Key_modifiers(SDL_GetModState());
+        return 0;
+    }
+    else if (event.x<0)
+    {
+        Key = KEY_MOUSEWHEELLEFT|Key_modifiers(SDL_GetModState());
+        return 0;
+    }
+    else if (event.x>0)
+    {
+        Key = KEY_MOUSEWHEELRIGHT|Key_modifiers(SDL_GetModState());
         return 0;
     }
     return 0;
@@ -385,24 +399,24 @@ int Handle_key_press(SDL_KeyboardEvent event)
     Key_ANSI = Keysym_to_ANSI(event.keysym);
     switch(event.keysym.sym)
     {
-      case SDL_SCANCODE_RSHIFT:
-      case SDL_SCANCODE_LSHIFT:
+      case SDLK_RSHIFT:
+      case SDLK_LSHIFT:
         modifier=MOD_SHIFT;
         break;
 
-      case SDL_SCANCODE_RCTRL:
-      case SDL_SCANCODE_LCTRL:
+      case SDLK_RCTRL:
+      case SDLK_LCTRL:
         modifier=MOD_CTRL;
         break;
 
-      case SDL_SCANCODE_RALT:
-      case SDL_SCANCODE_LALT:
-      case SDL_SCANCODE_MODE:
+      case SDLK_RALT:
+      case SDLK_LALT:
+      case SDLK_MODE:
         modifier=MOD_ALT;
         break;
 
-      case SDL_SCANCODE_RGUI:
-      case SDL_SCANCODE_LGUI:
+      case SDLK_RGUI:
+      case SDLK_LGUI:
         modifier=MOD_META;
         break;
 
@@ -540,24 +554,24 @@ int Handle_key_release(SDL_KeyboardEvent event)
   
     switch(event.keysym.sym)
     {
-      case SDL_SCANCODE_RSHIFT:
-      case SDL_SCANCODE_LSHIFT:
+      case SDLK_RSHIFT:
+      case SDLK_LSHIFT:
         modifier=MOD_SHIFT;
         break;
 
-      case SDL_SCANCODE_RCTRL:
-      case SDL_SCANCODE_LCTRL:
+      case SDLK_RCTRL:
+      case SDLK_LCTRL:
         modifier=MOD_CTRL;
         break;
 
-      case SDL_SCANCODE_RALT:
-      case SDL_SCANCODE_LALT:
-      case SDL_SCANCODE_MODE:
+      case SDLK_RALT:
+      case SDLK_LALT:
+      case SDLK_MODE:
         modifier=MOD_ALT;
         break;
       
-      case SDL_SCANCODE_RGUI:
-      case SDL_SCANCODE_LGUI:
+      case SDLK_RGUI:
+      case SDLK_LGUI:
         modifier=MOD_META;
         break;
 

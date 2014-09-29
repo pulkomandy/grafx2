@@ -867,24 +867,37 @@ GFX2_GLOBAL SDL_Joystick* Joystick;
 /// This is the "key identifier" for the mouse 3rd button.
 /// It was chosen to not conflict with any SDL key number.
 
-// FIXME
-#define SDL_SCANCODE_LAST           0x700
+///
+/// Convert an actual SDLK into grafx2 key code :
+/// SDL sets bit 0x40000000 to indicate a key identified by scancode, while
+/// grafx2 uses bit 0x0800.
+#define K2K(x) ((((x) & 0x40000000) >> 19) | ((x) & 0x1FF))
 
-#define KEY_MOUSEMIDDLE     (SDL_SCANCODE_LAST+1)
+#define KEY_MOUSEMIDDLE 0x0210
+#define KEY_MOUSEX1 0x0211
+#define KEY_MOUSEX2 0x0212
 ///
 /// This is the "key identifier" for the mouse wheelup.
 /// It was chosen to not conflict with any SDL key number.
-#define KEY_MOUSEWHEELUP    (SDL_SCANCODE_LAST+2)
+#define KEY_MOUSEWHEELUP 0x0200
 ///
 /// This is the "key identifier" for the mouse wheeldown.
 /// It was chosen to not conflict with any SDL key number.
-#define KEY_MOUSEWHEELDOWN  (SDL_SCANCODE_LAST+3)
+#define KEY_MOUSEWHEELDOWN 0x0201
+///
+/// This is the "key identifier" for the mouse wheelup.
+/// It was chosen to not conflict with any SDL key number.
+#define KEY_MOUSEWHEELLEFT 0x0202
+///
+/// This is the "key identifier" for the mouse wheeldown.
+/// It was chosen to not conflict with any SDL key number.
+#define KEY_MOUSEWHEELRIGHT 0x0203
 ///
 /// This is the "key identifier" for joystick button number 0.
 /// All numbers starting with this one are reserved for joystick buttons
 /// (since their is an unknown number of them, and for example 18 on GP2X)
 /// It was chosen to not conflict with any SDL key number.
-#define KEY_JOYBUTTON       (SDL_SCANCODE_LAST+4)
+#define KEY_JOYBUTTON       0x0100
 
 /// The joystick axis are {X,Y} - on all platforms so far.
 /// If there is ever a platform where they are reversed, put
@@ -961,9 +974,9 @@ GFX2_GLOBAL SDL_Joystick* Joystick;
 #else
   ///
   /// This is the key identifier for ESC. When hard-coding keyboard shortcuts
-  /// for buttons, etc. we use this instead of SDL_SCANCODE_ESCAPE,
+  /// for buttons, etc. we use this instead of SDLK_ESCAPE,
   /// so the console ports can get a joybutton equivalent of it.
-  #define KEY_ESC SDL_SCANCODE_ESCAPE
+  #define KEY_ESC SDLK_ESCAPE
 #endif
 
 #endif

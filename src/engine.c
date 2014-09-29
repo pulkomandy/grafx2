@@ -2176,7 +2176,7 @@ T_Dropdown_button * Window_set_dropdown_button(word x_pos,word y_pos,word width,
 
   temp->Next=Window_dropdown_button_list;
   Window_dropdown_button_list=temp;
-  Window_draw_normal_bouton(x_pos,y_pos,width,height,"",-1,1);
+  Window_draw_normal_bouton(x_pos,y_pos,width,height,"",0,1);
   if (label && label[0])
     Print_in_window(temp->Pos_X+2,temp->Pos_Y+(temp->Height-7)/2,label,MC_Black,MC_Light);
   if (display_arrow)
@@ -3323,7 +3323,7 @@ short Window_clicked_button(void)
       // FIXME: Make only one list have the keyboard focus.
       if (1)
       {
-        if (Key==SDL_SCANCODE_UP && (list->Cursor_position+list->List_start)>0)
+        if (Key==K2K(SDLK_UP) && (list->Cursor_position+list->List_start)>0)
         {
           Key=0;
           Hide_cursor();
@@ -3343,7 +3343,7 @@ short Window_clicked_button(void)
           // Return the control ID of the list.
           return list->Number;
         }
-        if (Key==SDL_SCANCODE_DOWN && (list->Cursor_position+list->List_start)<(list->Scroller->Nb_elements-1))
+        if (Key==K2K(SDLK_DOWN) && (list->Cursor_position+list->List_start)<(list->Scroller->Nb_elements-1))
         {
           Key=0;
           Hide_cursor();
@@ -3363,7 +3363,7 @@ short Window_clicked_button(void)
           // Return the control ID of the list.
           return list->Number;
         }
-        if (Key==SDL_SCANCODE_HOME && (list->Cursor_position!=0 || list->List_start!=0))
+        if (Key==K2K(SDLK_HOME) && (list->Cursor_position!=0 || list->List_start!=0))
         {
           Key=0;
           Hide_cursor();
@@ -3379,7 +3379,7 @@ short Window_clicked_button(void)
           // Return the control ID of the list.
           return list->Number;
         }
-        if (Key==SDL_SCANCODE_END && (list->Cursor_position+list->List_start)<(list->Scroller->Nb_elements-1))
+        if (Key==K2K(SDLK_END) && (list->Cursor_position+list->List_start)<(list->Scroller->Nb_elements-1))
         {
           Key=0;
           Hide_cursor();
@@ -3399,7 +3399,7 @@ short Window_clicked_button(void)
           // Return the control ID of the list.
           return list->Number;
         }
-        if (Key==SDL_SCANCODE_PAGEDOWN && (list->Cursor_position+list->List_start)<(list->Scroller->Nb_elements-1))
+        if (Key==K2K(SDLK_PAGEDOWN) && (list->Cursor_position+list->List_start)<(list->Scroller->Nb_elements-1))
         {
           Key=0;
           Hide_cursor();
@@ -3429,7 +3429,7 @@ short Window_clicked_button(void)
           // Return the control ID of the list.
           return list->Number;
         }
-        if (Key==SDL_SCANCODE_PAGEUP && (list->Cursor_position+list->List_start)>0)
+        if (Key==K2K(SDLK_PAGEUP) && (list->Cursor_position+list->List_start)>0)
         {
           Key=0;
           Hide_cursor();

@@ -2712,6 +2712,23 @@ void Set_config_defaults(void)
         break;
     }
   }
+  // Scancode-based shortcuts.
+  // Can't be put static in the table, because they are converted from physical
+  // key location into "local" keyboard key names.
+  Buttons_Pool[BUTTON_COLORPICKER].Left_shortcut[0]=K2K(SDL_GetKeyFromScancode(SDL_SCANCODE_GRAVE));
+  Buttons_Pool[BUTTON_COLORPICKER].Right_shortcut[0]=K2K(SDL_GetKeyFromScancode(SDL_SCANCODE_GRAVE))|MOD_SHIFT;
+  Config_Key[SPECIAL_CYCLE_MODE][0]=K2K(SDL_GetKeyFromScancode(SDL_SCANCODE_GRAVE))|MOD_CTRL;
+  Config_Key[SPECIAL_PREVIOUS_FORECOLOR][0]=K2K(SDL_GetKeyFromScancode(SDL_SCANCODE_LEFTBRACKET));
+  Config_Key[SPECIAL_NEXT_FORECOLOR][0]=K2K(SDL_GetKeyFromScancode(SDL_SCANCODE_RIGHTBRACKET));
+  Config_Key[SPECIAL_PREVIOUS_BACKCOLOR][0]=K2K(SDL_GetKeyFromScancode(SDL_SCANCODE_LEFTBRACKET))|MOD_SHIFT;
+  Config_Key[SPECIAL_NEXT_BACKCOLOR][0]=K2K(SDL_GetKeyFromScancode(SDL_SCANCODE_RIGHTBRACKET))|MOD_SHIFT;
+  Config_Key[SPECIAL_PREVIOUS_USER_FORECOLOR][0]=K2K(SDL_GetKeyFromScancode(SDL_SCANCODE_MINUS));
+  Config_Key[SPECIAL_NEXT_USER_FORECOLOR][0]=K2K(SDL_GetKeyFromScancode(SDL_SCANCODE_EQUALS));
+  Config_Key[SPECIAL_PREVIOUS_USER_BACKCOLOR][0]=K2K(SDL_GetKeyFromScancode(SDL_SCANCODE_MINUS))|MOD_SHIFT;
+  Config_Key[SPECIAL_NEXT_USER_BACKCOLOR][0]=K2K(SDL_GetKeyFromScancode(SDL_SCANCODE_EQUALS))|MOD_SHIFT;
+  Config_Key[SPECIAL_SMALLER_PAINTBRUSH][0]=K2K(SDL_GetKeyFromScancode(SDL_SCANCODE_PERIOD));
+  Config_Key[SPECIAL_BIGGER_PAINTBRUSH][0]=K2K(SDL_GetKeyFromScancode(SDL_SCANCODE_SLASH));
+    
   // Shade
   Shade_current=0;
   for (index=0; index<8; index++)

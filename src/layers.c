@@ -233,7 +233,7 @@ void Button_Layer_menu(void)
   Window_set_normal_button(95, 54, 15,13,"" , 0,1,KEY_NONE); // 2
   Draw_transparent_background(transparent_background);
   
-  Window_set_normal_button( 7, 78, 51,14,"OK" , 0,1,SDL_SCANCODE_RETURN); // 3
+  Window_set_normal_button( 7, 78, 51,14,"OK" , 0,1,K2K(SDLK_RETURN)); // 3
   Window_set_normal_button(63, 78, 51,14,"Cancel", 0,1,KEY_ESC); // 4
   
   Update_window_area(0,0,Window_width, Window_height);
@@ -459,7 +459,7 @@ void Button_Anim_time(void)
   Print_in_window(24,73,"Add to all frames",MC_Black,MC_Light);
   Window_set_normal_button(7, 70, 13,13,"" , 0,1,KEY_NONE); // 4
 
-  Window_set_normal_button( 7, 92, 51,14,"OK" , 0,1,SDL_SCANCODE_RETURN); // 5
+  Window_set_normal_button( 7, 92, 51,14,"OK" , 0,1,K2K(SDLK_RETURN)); // 5
   Window_set_normal_button(63, 92, 51,14,"Cancel", 0,1,KEY_ESC); // 6
   
   Update_window_area(0,0,Window_width, Window_height);

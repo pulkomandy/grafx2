@@ -897,7 +897,7 @@ int Window_Histogram(unsigned char block_start, unsigned char block_end, dword* 
   }
   
   Open_window(263, 150, "Histogram");
-  Window_set_normal_button(120, 130, 42, 14, "Close",-1,1,SDL_SCANCODE_RETURN);
+  Window_set_normal_button(120, 130, 42, 14, "Close",0,1,K2K(SDLK_RETURN));
 
   Print_in_window(6, 17, "Color:", MC_Dark, MC_Light);
   Print_in_window(110+12*8, 17, "Pixels", MC_Dark, MC_Light);
@@ -1149,12 +1149,12 @@ void Button_Palette(void)
   Num2str(Fore_color, str, 3);
   Print_in_window(COLOR_X, COLOR_Y, str, MC_Black, MC_Light);
 
-  Window_set_normal_button(  7,16,55,14,"Merge" ,0,1,SDL_SCANCODE_M);    // 5
-  Window_set_normal_button( 63,16,36,14,"Gray"   ,1,1,SDL_SCANCODE_G);   // 6
+  Window_set_normal_button(  7,16,55,14,"Merge" ,0,1,K2K(SDLK_m));    // 5
+  Window_set_normal_button( 63,16,36,14,"Gray"   ,1,1,K2K(SDLK_g));   // 6
   Window_set_normal_button(  7,46,55,14,"Swap"   ,0,1,KEY_NONE); // 7
-  Window_set_normal_button( 63,46,72,14,"X-Swap" ,1,1,SDL_SCANCODE_X);   // 8
-  Window_set_normal_button(136,31,54,14,"Copy"   ,1,1,SDL_SCANCODE_C);   // 9
-  Window_set_normal_button(136,46,54,14,"Spread" ,4,1,SDL_SCANCODE_E);   // 10
+  Window_set_normal_button( 63,46,72,14,"X-Swap" ,1,1,K2K(SDLK_x));   // 8
+  Window_set_normal_button(136,31,54,14,"Copy"   ,1,1,K2K(SDLK_c));   // 9
+  Window_set_normal_button(136,46,54,14,"Spread" ,4,1,K2K(SDLK_e));   // 10
 
   reduce_dropdown = Window_set_dropdown_button(209, 46, 83, 14, 84, "Reduce", 0,
     0, 1, RIGHT_SIDE|LEFT_SIDE, 0); // 11
@@ -1168,22 +1168,22 @@ void Button_Palette(void)
   Window_dropdown_add_item(reduce_dropdown,   2, "to 2");
   Window_dropdown_add_item(reduce_dropdown,   0, "Other");
 
-  Window_set_normal_button(  6,168,35,14,"Undo"  ,1,1,SDL_SCANCODE_U);  // 12
+  Window_set_normal_button(  6,168,35,14,"Undo"  ,1,1,K2K(SDLK_u));  // 12
   Window_set_normal_button( 62,168,51,14,"Cancel",0,1,KEY_ESC);  // 13
-  Window_set_normal_button(117,168,51,14,"OK"    ,0,1,SDL_SCANCODE_RETURN);  // 14
+  Window_set_normal_button(117,168,51,14,"OK"    ,0,1,K2K(SDLK_RETURN));  // 14
 
-  Window_set_normal_button(209,16,37,14,"Used",0,1,SDL_SCANCODE_D); // 15
-  Window_set_normal_button(209,31,83,14,"Zap unused",0,1,SDL_SCANCODE_DELETE);//16
+  Window_set_normal_button(209,16,37,14,"Used",0,1,K2K(SDLK_d)); // 15
+  Window_set_normal_button(209,31,83,14,"Zap unused",0,1,K2K(SDLK_DELETE));//16
   
-  Window_set_repeatable_button(BUTTON_PLUS_X, BUTTON_PLUS_Y,12,11,"+",0,1,SDL_SCANCODE_KP_PLUS);       // 17
-  Window_set_repeatable_button(BUTTON_MINUS_X,BUTTON_MINUS_Y,12,11,"-",0,1,SDL_SCANCODE_KP_MINUS);       // 18
+  Window_set_repeatable_button(BUTTON_PLUS_X, BUTTON_PLUS_Y,12,11,"+",0,1,K2K(SDLK_KP_PLUS));       // 17
+  Window_set_repeatable_button(BUTTON_MINUS_X,BUTTON_MINUS_Y,12,11,"-",0,1,K2K(SDLK_KP_MINUS));       // 18
 
-  Window_set_normal_button(100,16,35,14,"Neg"    ,1,1,SDL_SCANCODE_N);   // 19
-  Window_set_normal_button(7,31,55,14,"Invert"    ,1,1,SDL_SCANCODE_I);   // 20
-  Window_set_normal_button(63,31,72,14,"X-Invert" ,5,1,SDL_SCANCODE_V);   // 21
+  Window_set_normal_button(100,16,35,14,"Neg"    ,1,1,K2K(SDLK_n));   // 19
+  Window_set_normal_button(7,31,55,14,"Invert"    ,1,1,K2K(SDLK_i));   // 20
+  Window_set_normal_button(63,31,72,14,"X-Invert" ,5,1,K2K(SDLK_v));   // 21
 
   // Button without outline
-  Window_set_normal_button(175,66,81,11,""    ,0,1,SDL_SCANCODE_H);   // 22
+  Window_set_normal_button(175,66,81,11,""    ,0,1,K2K(SDLK_h));   // 22
   Window_display_frame_mono(175-1,66-1,81+2,11+2,MC_Light);
 
   sort_dropdown = Window_set_dropdown_button(136, 16, 54, 14, 80, " Sort", 0,
@@ -2609,7 +2609,7 @@ void Button_Palette(void)
           Display_cursor();
           Key=0;
         }
-        else if (Key == SDL_SCANCODE_BACKSPACE)
+        else if (Key == K2K(SDLK_BACKSPACE))
         // Remise des couleurs du menu à l'état normal en essayant
         // de ne pas trop modifier l'image.
         {
@@ -2799,9 +2799,9 @@ void Button_Secondary_palette(void)
   
   Open_window(200,146,"Palettes");
 
-  Window_set_normal_button(10,20,180,14,"Colors for best match",12,1,SDL_SCANCODE_B); // 1
-  Window_set_normal_button(10,37,180,14,"User's color series"  ,14,1,SDL_SCANCODE_S); // 2
-  Window_set_normal_button(139,126,53,14,"OK"                  , 0,1,SDL_SCANCODE_RETURN); // 3
+  Window_set_normal_button(10,20,180,14,"Colors for best match",12,1,K2K(SDLK_b)); // 1
+  Window_set_normal_button(10,37,180,14,"User's color series"  ,14,1,K2K(SDLK_s)); // 2
+  Window_set_normal_button(139,126,53,14,"OK"                  , 0,1,K2K(SDLK_RETURN)); // 3
   Window_set_normal_button( 80,126,53,14,"Cancel"              , 0,1,KEY_ESC); // 4
   Window_display_frame(10,55,122,66);
   Print_in_window(18,59,"Palette layout",MC_Dark,MC_Light);
@@ -2822,12 +2822,12 @@ void Button_Secondary_palette(void)
   Num2str(RGB_scale,str,3);
   Print_in_window(157,78,str,MC_Black,MC_Light);
 
-  Window_set_normal_button(35,106,13,11,"",-1,1,SDL_SCANCODE_LAST); // 8
+  Window_set_normal_button(35,106,13,11,"",0,1,KEY_NONE); // 8
   Print_in_window(38,108,(palette_vertical)?"X":" ",MC_Black,MC_Light);
   Print_in_window(51,108,"Vertical",MC_Dark,MC_Light);
 
-  Window_set_normal_button(152,88,18,14,"x2"                  , 1,1,SDL_SCANCODE_X); // 9
-  Window_set_normal_button(172,88,18,14,"÷2"                  , 0,1,SDL_SCANCODE_W); // 10
+  Window_set_normal_button(152,88,18,14,"x2"                  , 1,1,K2K(SDLK_x)); // 9
+  Window_set_normal_button(172,88,18,14,"÷2"                  , 0,1,K2K(SDLK_w)); // 10
   
   Update_window_area(0,0,200,146);
 
