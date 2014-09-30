@@ -157,9 +157,7 @@ void Button_Message_initial(void)
   Open_window(260,172,str);
 
   Window_display_frame_in(10,20,239,62);
-  Block(Window_pos_X+(Menu_factor_X*11),
-        Window_pos_Y+(Menu_factor_Y*21),
-        Menu_factor_X*237,Menu_factor_Y*60,MC_Black);
+  Window_rectangle(11,21,237,60,MC_Black);
   for (y=23,offs_y=0; y<79; offs_y+=231,y++)
     for (x=14,x_pos=0; x_pos<231; x_pos++,x++)
       Pixel_in_window(x,y,Gfx->Logo_grafx2[offs_y+x_pos]);
@@ -1852,11 +1850,8 @@ void Check_mode_button(short x_pos, short y_pos, byte state)
     case 2 : color=MC_Dark; break;
     default: color=MC_Black;
   }
-  Block(Window_pos_X+Menu_factor_X*x_pos,Window_pos_Y+Menu_factor_Y*y_pos,
-        Menu_factor_X*9,Menu_factor_Y*3,color);
-        
-  Update_rect(Window_pos_X+Menu_factor_X*x_pos,Window_pos_Y+Menu_factor_Y*y_pos,
-        Menu_factor_X*9,Menu_factor_Y*3);
+  Window_rectangle(x_pos, y_pos, 9, 3, color);
+  Update_window_area(x_pos, y_pos,9,3);
 }
 
 /// Number of video modes to display in the resolution menu
@@ -2422,15 +2417,9 @@ void Draw_button_gradient_style(short x_pos,short y_pos,int technique)
 
   // On commence par afficher les 2 côtés qui constituent le dégradé de base:
     // Côté gauche (noir)
-  Block(Window_pos_X+((x_pos+2)*Menu_factor_X),
-        Window_pos_Y+((y_pos+2)*Menu_factor_Y),
-        Menu_factor_X*6,
-        Menu_factor_Y*10,MC_Black);
+  Window_rectangle(x_pos+2, y_pos+2, 6, 10, MC_Black);
     // Côté droit (blanc)
-  Block(Window_pos_X+((x_pos+8)*Menu_factor_X),
-        Window_pos_Y+((y_pos+2)*Menu_factor_Y),
-        Menu_factor_X*5,
-        Menu_factor_Y*10,MC_White);
+  Window_rectangle(x_pos+8, y_pos+2, 5, 10, MC_White);
 
   switch(technique)
   {
@@ -2469,8 +2458,7 @@ void Draw_button_gradient_style(short x_pos,short y_pos,int technique)
         }
   }
   
-  Update_rect(Window_pos_X+((x_pos+2)*Menu_factor_X),Window_pos_Y+((y_pos+2)*Menu_factor_Y),
-                    Menu_factor_X*10,Menu_factor_Y*10);  
+  Update_window_area(x_pos+2,y_pos+2,10,10);  
 }
 
 void Load_gradient_data(int index)
@@ -3939,20 +3927,20 @@ void Button_Brush_FX(void)
   }
   // Dessin des coins et du centre pour les boutons du "brush handle"
     // Coin HG
-  Block(Window_pos_X+(Menu_factor_X* 77),Window_pos_Y+(Menu_factor_Y* 92),Menu_factor_X*7,Menu_factor_Y,MC_Black);
-  Block(Window_pos_X+(Menu_factor_X* 77),Window_pos_Y+(Menu_factor_Y* 92),Menu_factor_X,Menu_factor_Y*7,MC_Black);
+  Window_rectangle(77, 92, 7, 1, MC_Black);
+  Window_rectangle(77, 92, 1, 7, MC_Black);
     // Coin HD
-  Block(Window_pos_X+(Menu_factor_X*105),Window_pos_Y+(Menu_factor_Y* 92),Menu_factor_X*7,Menu_factor_Y,MC_Black);
-  Block(Window_pos_X+(Menu_factor_X*111),Window_pos_Y+(Menu_factor_Y* 92),Menu_factor_X,Menu_factor_Y*7,MC_Black);
+  Window_rectangle(105, 92, 7, 1, MC_Black);
+  Window_rectangle(111, 92, 1, 7, MC_Black);
     // Centre
-  Block(Window_pos_X+(Menu_factor_X* 91),Window_pos_Y+(Menu_factor_Y*109),Menu_factor_X*7,Menu_factor_Y,MC_Black);
-  Block(Window_pos_X+(Menu_factor_X* 94),Window_pos_Y+(Menu_factor_Y*106),Menu_factor_X,Menu_factor_Y*7,MC_Black);
+  Window_rectangle(91, 109, 7, 1, MC_Black);
+  Window_rectangle(94, 106, 1, 7, MC_Black);
     // Coin BG
-  Block(Window_pos_X+(Menu_factor_X* 77),Window_pos_Y+(Menu_factor_Y*126),Menu_factor_X*7,Menu_factor_Y,MC_Black);
-  Block(Window_pos_X+(Menu_factor_X* 77),Window_pos_Y+(Menu_factor_Y*120),Menu_factor_X,Menu_factor_Y*7,MC_Black);
+  Window_rectangle(77, 126, 7, 1, MC_Black);
+  Window_rectangle(77, 120, 1, 7, MC_Black);
     // Coin BD
-  Block(Window_pos_X+(Menu_factor_X*105),Window_pos_Y+(Menu_factor_Y*126),Menu_factor_X*7,Menu_factor_Y,MC_Black);
-  Block(Window_pos_X+(Menu_factor_X*111),Window_pos_Y+(Menu_factor_Y*120),Menu_factor_X,Menu_factor_Y*7,MC_Black);
+  Window_rectangle(105, 126, 7, 1, MC_Black);
+  Window_rectangle(111, 120, 1, 7, MC_Black);
   
   Update_window_area(0,0,Window_width, Window_height);
   
@@ -4509,8 +4497,7 @@ void Display_effect_sprite(int sprite_number, short start_x, short start_y)
 
 void Display_effect_state(short x, short y, char * label, byte state)
 {
-  Block(Window_pos_X+(x*Menu_factor_X),Window_pos_Y+(y*Menu_factor_Y),
-        12*Menu_factor_X,Menu_factor_Y<<3,MC_Light);
+  Window_rectangle(x,y,12,8,MC_Light);
 
   Print_in_window(x,y,label,(state)?MC_White:MC_Black,MC_Light);
   if (state)

@@ -84,13 +84,27 @@ void Pixel_in_menu_and_skin(word bar, word x, word y, byte color)
 // Affichage d'un pixel dans la fenêtre (la fenêtre doit être visible)
 void Pixel_in_window(word x,word y,byte color)
 {
-    Block((x*Menu_factor_X)+Window_pos_X,(y*Menu_factor_Y)+Window_pos_Y,Menu_factor_X,Menu_factor_Y,color);
+#ifndef MULTI_WINDOW
+  Block((x*Menu_factor_X)+Window_pos_X,(y*Menu_factor_Y)+Window_pos_Y,Menu_factor_X,Menu_factor_Y,color);
+#else
+  SDL_Surface* surf = SDL_GetWindowSurface(Window_handle);
+  T_Components c = Main_palette[color];
+  int32_t* pixels = (int32_t*)surf->pixels;
+  pixels[x + y * surf->pitch/4] = SDL_MapRGB(surf->format, c.R, c.G, c.B);
+#endif
 }
 
 // Affichage d'un rectangle dans la fenêtre (la fenêtre doit être visible)
 void Window_rectangle(word x_pos,word y_pos,word width,word height,byte color)
 {
+#ifndef MULTI_WINDOW
   Block((x_pos*Menu_factor_X)+Window_pos_X,(y_pos*Menu_factor_Y)+Window_pos_Y,width*Menu_factor_X,height*Menu_factor_Y,color);
+#else
+  SDL_Surface* surf = SDL_GetWindowSurface(Window_handle);
+  SDL_Rect r = {x_pos, y_pos, width, height};
+  T_Components c = Main_palette[color];
+  SDL_FillRect(surf, &r, SDL_MapRGB(surf->format, c.R, c.G, c.B));
+#endif
 }
 
 
@@ -108,24 +122,16 @@ void Window_display_frame_generic(word x_pos,word y_pos,word width,word height,
 // color_brc=Coin Bas-Droite
 {
   // Bord haut (sans les extrémités)
-  Block(Window_pos_X+((x_pos+1)*Menu_factor_X),
-        Window_pos_Y+(y_pos*Menu_factor_Y),
-        (width-2)*Menu_factor_X,Menu_factor_Y,color_tl);
+  Window_rectangle(x_pos+1,y_pos,width-2,1,color_tl);
 
   // Bord bas (sans les extrémités)
-  Block(Window_pos_X+((x_pos+1)*Menu_factor_X),
-        Window_pos_Y+((y_pos+height-1)*Menu_factor_Y),
-        (width-2)*Menu_factor_X,Menu_factor_Y,color_br);
+  Window_rectangle(x_pos+1,y_pos+height-1,width-2,1,color_br);
 
   // Bord gauche (sans les extrémités)
-  Block(Window_pos_X+(x_pos*Menu_factor_X),
-        Window_pos_Y+((y_pos+1)*Menu_factor_Y),
-        Menu_factor_X,(height-2)*Menu_factor_Y,color_tl);
+  Window_rectangle(x_pos, y_pos+1,1,height-2,color_tl);
 
   // Bord droite (sans les extrémités)
-  Block(Window_pos_X+((x_pos+width-1)*Menu_factor_X),
-        Window_pos_Y+((y_pos+1)*Menu_factor_Y),
-        Menu_factor_X,(height-2)*Menu_factor_Y,color_br);
+  Window_rectangle(x_pos+width-1,y_pos+1,1,height-2,color_br);
 
   // Coin haut gauche
   Pixel_in_window(x_pos,y_pos,color_tlc);
@@ -166,6 +172,24 @@ void Window_display_frame(word x_pos,word y_pos,word width,word height)
   Window_display_frame_out(x_pos+1,y_pos+1,width-2,height-2);
 }
 
+
+void Display_line_window(word x, word y, word width, byte* buffer)
+{
+#ifdef MULTI_WINDOW
+  SDL_Surface* surf = SDL_GetWindowSurface(Window_handle);
+  int32_t* pixels = (int32_t*)surf->pixels;
+  int i;
+
+  for(i = 0; i < width; i++) {
+    T_Components c = Main_palette[buffer[i]];
+    pixels[x + i + y * surf->pitch/4] = SDL_MapRGB(surf->format, c.R, c.G, c.B);
+  }
+#else
+  short  repeat_menu_y_factor;
+  for (repeat_menu_y_factor=0;repeat_menu_y_factor<Menu_factor_Y;repeat_menu_y_factor++)
+    Display_line_fast(x,y,width*Menu_factor_X,buffer);
+#endif
+}
 
 //-- Affichages relatifs à la palette dans le menu ---------------------------
 
@@ -688,15 +712,12 @@ void Print_char_in_window(short x_pos,short y_pos,const unsigned char c,byte tex
 {
   short x,y;
   byte *pixel;
-  x_pos=(x_pos*Menu_factor_X)+Window_pos_X;
-  y_pos=(y_pos*Menu_factor_Y)+Window_pos_Y;
   // Premier pixel du caractère
   pixel=Menu_font + (c<<6);
   
   for (y=0;y<8;y++)
     for (x=0;x<8;x++)
-      Block(x_pos+(x*Menu_factor_X), y_pos+(y*Menu_factor_Y),
-            Menu_factor_X, Menu_factor_Y,
+      Pixel_in_window(x_pos+x, y_pos+y,
             (*(pixel++)?text_color:background_color));
 }
 
@@ -717,10 +738,15 @@ void Print_in_window_limited(short x,short y,const char * str,byte size,byte tex
 /// Draws a string in a window
 void Print_in_window(short x,short y,const char * str,byte text_color,byte background_color)
 {
-  Print_general((x*Menu_factor_X)+Window_pos_X,
-                (y*Menu_factor_Y)+Window_pos_Y,
-                str,text_color,background_color);
-  Update_rect(x*Menu_factor_X+Window_pos_X,y*Menu_factor_Y+Window_pos_Y,8*Menu_factor_X*strlen(str),8*Menu_factor_Y);
+  short x_pos = x;
+  int index;
+
+  for (index=0;str[index]!='\0';index++)
+  {
+    Print_char_in_window(x,y,str[index],text_color,background_color);
+    x+=8;
+  }
+  Update_window_area(x_pos,y,8*strlen(str),8);
 }
 
 // Draws a string in the menu's status bar

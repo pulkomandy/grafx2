@@ -29,6 +29,8 @@
 #ifndef _STRUCT_H_
 #define _STRUCT_H_
 
+#include <SDL.h>
+
 #if defined(__BEOS__) || defined(__TRU64__)
     #include <inttypes.h>
 #else
@@ -239,6 +241,9 @@ typedef struct
   int Attribute1;
   int Attribute2;
   byte Draggable;
+#ifdef MULTI_WINDOW
+  SDL_Window* Handle;
+#endif
 } T_Window;
 
 /// Data for one line of the "Help" screens.

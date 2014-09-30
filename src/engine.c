@@ -1575,26 +1575,12 @@ void Main_handler(void)
 //////////////////////////////////////////////////////////////////////////////
 
 //----------------------- Tracer une fenêtre d'options -----------------------
-
 void Open_window(word width,word height, const char * title)
 // Lors de l'appel à cette procédure, la souris doit être affichée.
 // En sortie de cette procedure, la souris est effacée.
 {
-  //word i,j;
-  size_t title_length;
-
   Hide_cursor();
   
-  /*if (Windows_open == 0 && Gfx->Hover_effect)
-  {
-    if (Cursor_in_menu)
-    {
-      int button_index=Button_under_mouse();
-      if (button_index > -1 && !Buttons_Pool[button_index].Pressed)
-              Draw_menu_button(button_index, BUTTON_RELEASED);
-    }
-  }*/
-    
   Windows_open++;
 
   Window_width=width;
@@ -1610,6 +1596,8 @@ void Open_window(word width,word height, const char * title)
   // Sauvegarde de ce que la fenêtre remplace
   Save_background(&(Window_background[Windows_open-1]), Window_pos_X, Window_pos_Y, width, height);
 
+#ifndef MULTI_WINDOW
+  size_t title_length;
   // Fenêtre grise
   Block(Window_pos_X+(Menu_factor_X<<1),Window_pos_Y+(Menu_factor_Y<<1),(width-4)*Menu_factor_X,(height-4)*Menu_factor_Y,MC_Window);
 
@@ -1627,6 +1615,10 @@ void Open_window(word width,word height, const char * title)
   if (title_length+2 > (size_t)(width/8))
     title_length = width/8-2;
   Print_in_window_limited((width-(title_length<<3))>>1,3,title,title_length,MC_Black,MC_Light);
+#else
+  Window_handle = SDL_CreateWindow(title, Window_pos_X, Window_pos_Y, width, height, 0);
+  Window_rectangle(0, 0, width, height, MC_Window);
+#endif
 
   if (Windows_open == 1)
   {
@@ -1671,6 +1663,10 @@ void Close_window(void)
   T_List_button     * temp6;
 
   Hide_cursor();
+
+#ifdef MULTI_WINDOW
+  SDL_DestroyWindow(Window_handle);
+#endif
 
   while (Window_normal_button_list)
   {
@@ -1774,9 +1770,8 @@ void Window_draw_normal_bouton(word x_pos,word y_pos,word width,word height,
   Print_in_window(text_x_pos,text_y_pos,title,title_color,MC_Light);
 
   if (undersc_letter)
-    Block(Window_pos_X+((text_x_pos+((undersc_letter-1)<<3))*Menu_factor_X),
-          Window_pos_Y+((text_y_pos+8)*Menu_factor_Y),
-          Menu_factor_X<<3,Menu_factor_Y,MC_Dark);
+    Window_rectangle(text_x_pos+((undersc_letter-1)<<3),
+          text_y_pos+8,8,1,MC_Dark);
 }
 
 
@@ -1784,14 +1779,14 @@ void Window_draw_normal_bouton(word x_pos,word y_pos,word width,word height,
 void Window_select_normal_button(word x_pos,word y_pos,word width,word height)
 {
   Window_display_frame_generic(x_pos,y_pos,width,height,MC_Dark,MC_Black,MC_Dark,MC_Dark,MC_Black);
-  Update_rect(Window_pos_X+x_pos*Menu_factor_X, Window_pos_Y+y_pos*Menu_factor_Y, width*Menu_factor_X, height*Menu_factor_Y);
+  Update_window_area(x_pos, y_pos, width, height);
 }
 
 // -- Button normal désenfoncé dans la fenêtre --
 void Window_unselect_normal_button(word x_pos,word y_pos,word width,word height)
 {
   Window_display_frame_out(x_pos,y_pos,width,height);
-  Update_rect(Window_pos_X+x_pos*Menu_factor_X, Window_pos_Y+y_pos*Menu_factor_Y, width*Menu_factor_X, height*Menu_factor_Y);
+  Update_window_area(x_pos, y_pos, width, height);
 }
 
 
@@ -1801,7 +1796,7 @@ void Window_draw_palette_bouton(word x_pos,word y_pos)
   word color;
 
   for (color=0; color<=255; color++)
-    Block( Window_pos_X+((((color >> 4)*10)+x_pos+6)*Menu_factor_X),Window_pos_Y+((((color & 15)*5)+y_pos+3)*Menu_factor_Y),Menu_factor_X*5,Menu_factor_Y*5,color);
+    Window_rectangle( ((color >> 4)*10)+x_pos+6,((color & 15)*5)+y_pos+3,5,5,color);
 
   Window_display_frame(x_pos,y_pos,164,86);
 }
@@ -1817,11 +1812,11 @@ void Window_clear_tags(void)
   word window_x_pos;
   //word window_y_pos;
 
-  origin_x=Window_pos_X+(Window_palette_button_list->Pos_X+3)*Menu_factor_X;
-  origin_y=Window_pos_Y+(Window_palette_button_list->Pos_Y+3)*Menu_factor_Y;
-  for (x_pos=0,window_x_pos=origin_x;x_pos<16;x_pos++,window_x_pos+=(Menu_factor_X*10))
-    Block(window_x_pos,origin_y,Menu_factor_X*3,Menu_factor_Y*80,MC_Light);
-  Update_rect(origin_x,origin_y,ToWinL(160),ToWinH(80));
+  origin_x=Window_palette_button_list->Pos_X+3;
+  origin_y=Window_palette_button_list->Pos_Y+3;
+  for (x_pos=0,window_x_pos=origin_x;x_pos<16;x_pos++,window_x_pos+=10)
+    Window_rectangle(window_x_pos,origin_y,3,80,MC_Light);
+  Update_window_area(origin_x,origin_y,160,80);
 }
 
 
@@ -1997,8 +1992,8 @@ void Window_input_content(T_Special_button * button, const char * content)
 
 void Window_clear_input_button(T_Special_button * button)
 {
-  Block((button->Pos_X+2)*Menu_factor_X+Window_pos_X,(button->Pos_Y+2)*Menu_factor_Y+Window_pos_Y,(button->Width/8)*8*Menu_factor_X,8*Menu_factor_Y,MC_Light);
-  Update_rect((button->Pos_X+2)*Menu_factor_X+Window_pos_X,(button->Pos_Y+2)*Menu_factor_Y+Window_pos_Y,button->Width/8*8*Menu_factor_X,8*Menu_factor_Y);
+  Window_rectangle(button->Pos_X+2,button->Pos_Y+2,(button->Width/8)*8,8,MC_Light);
+  Update_window_area(button->Pos_X+2,button->Pos_Y+2,button->Width/8*8,8);
 }
 
 

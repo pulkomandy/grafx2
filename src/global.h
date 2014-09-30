@@ -470,6 +470,9 @@ GFX2_GLOBAL byte Paintbrush_hidden_before_window;
 /// The global stack of editor screens.
 GFX2_GLOBAL T_Window Window_stack[8];
 
+/// Native window handle
+#define Window_handle Window_stack[Windows_open-1].Handle
+
 /// Position of the left border of the topmost window (in screen coordinates)
 #define Window_pos_X Window_stack[Windows_open-1].Pos_X
 

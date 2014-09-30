@@ -28,13 +28,22 @@
 #define __WINDOWS_H_
 
 #include "struct.h"
+#include <SDL.h>
 
+
+#ifdef MULTI_WINDOW
+#define ToWinX(x) (x)
+#define ToWinY(y) (y)
+#define ToWinL(l) (l)
+#define ToWinH(h) (h)
+#define Update_window_area(x,y,w,h) SDL_UpdateWindowSurface(Window_handle)
+#else
 #define ToWinX(x) (((x)*Menu_factor_X)+Window_pos_X)
 #define ToWinY(y) (((y)*Menu_factor_Y)+Window_pos_Y)
 #define ToWinL(l) ((l)*Menu_factor_X)
 #define ToWinH(h) ((h)*Menu_factor_Y)
-
 #define Update_window_area(x,y,w,h) Update_rect(Window_pos_X+(x)*Menu_factor_X,Window_pos_Y+(y)*Menu_factor_Y,(w)*Menu_factor_X,(h)*Menu_factor_Y);
+#endif
 
 void Display_cursor(void);
 void Hide_cursor(void);
@@ -88,6 +97,8 @@ void Window_display_frame_mono(word x_pos,word y_pos,word width,word height,byte
 void Window_display_frame_in(word x_pos,word y_pos,word width,word height);
 void Window_display_frame_out(word x_pos,word y_pos,word width,word height);
 void Window_display_frame(word x_pos,word y_pos,word width,word height);
+
+void Display_line_window(word x, word y, word width, byte* buffer);
 
 void Display_sprite_in_menu(int btn_number,char sprite_number);
 void Display_paintbrush_in_menu(void);

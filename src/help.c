@@ -159,9 +159,7 @@ void Window_set_shortcut(int action_id)
   Window_set_normal_button(6,111,111,14,"Reset default",0,1,KEY_NONE); // 3
 
   // Titre
-  Block(Window_pos_X+(Menu_factor_X*5),
-        Window_pos_Y+(Menu_factor_Y*16),
-        Menu_factor_X*292,Menu_factor_Y*11,MC_Black);
+  Window_rectangle(5,16,292,11,MC_Black);
   Print_in_window(7,18,ConfigKey[config_index].Label,MC_White,MC_Black);
 
   // Zone de description
@@ -184,16 +182,12 @@ void Window_set_shortcut(int action_id)
     if (redraw_controls)
     {
       Hide_cursor();
-      Block(Window_pos_X+(Menu_factor_X*32),
-            Window_pos_Y+(Menu_factor_Y*33),
-            Menu_factor_X*21*8,Menu_factor_Y*8,MC_Light);
+      Window_rectangle(32,33,21*8,8,MC_Light);
       Print_in_window_limited(32,33,Key_name(shortcut_ptr[0]),21,MC_Black,MC_Light);
-      Block(Window_pos_X+(Menu_factor_X*32),
-            Window_pos_Y+(Menu_factor_Y*52),
-            Menu_factor_X*21*8,Menu_factor_Y*8,MC_Light);
+      Window_rectangle(32,52,21*8,8,MC_Light);
       Print_in_window_limited(32,52,Key_name(shortcut_ptr[1]),21,MC_Black,MC_Light);
     
-      Update_rect(Window_pos_X,Window_pos_Y,302*Menu_factor_X,131*Menu_factor_Y);
+      Update_window_area(0,0,302,131);
     
       Display_cursor();
       redraw_controls=0;
@@ -313,13 +307,19 @@ short Print_help(short x_pos, short y_pos, const char *line, char line_type, sho
   short  char_index; // Parcours des caractères d'une ligne
   byte * char_pixel;
   short  repeat_menu_x_factor;
-  short  repeat_menu_y_factor;
-  short  real_x_pos;
-  short  real_y_pos;
+  short real_x_pos;
+  short real_y_pos;
+#ifdef MULTI_WINDOW
+  short fx = 1;
+  short fy = 1;
+#else
+  short fx = Menu_factor_X;
+  short fy = Menu_factor_Y;
+#endif
 
-  real_x_pos=ToWinX(x_pos);
-  real_y_pos=ToWinY(y_pos);
-  
+  real_x_pos = ToWinX(x_pos);
+  real_y_pos = ToWinY(y_pos);
+
   // Calcul de la taille
   width=strlen(line);
   // Les lignes de titres prennent plus de place
@@ -362,10 +362,14 @@ short Print_help(short x_pos, short y_pos, const char *line, char line_type, sho
         char_pixel=&(Gfx->Help_font_norm['!'][0][0]); // Un garde-fou en cas de probleme
         
       for (x=0;x<6;x++)
-        for (repeat_menu_x_factor=0;repeat_menu_x_factor<Menu_factor_X;repeat_menu_x_factor++)
+        for (repeat_menu_x_factor=0;repeat_menu_x_factor<fx;repeat_menu_x_factor++)
         {
           byte color = *(char_pixel+x+y*6);
+#ifdef MULTI_WINDOW
+          byte repetition = 0;
+#else
           byte repetition = Pixel_width-1;
+#endif
           // Surlignement pour liens
           if (line_type=='K' && char_index>=link_position
             && char_index<(link_position+link_size))
@@ -378,13 +382,13 @@ short Print_help(short x_pos, short y_pos, const char *line, char line_type, sho
               color=MC_Dark;
           }
           Horizontal_line_buffer[x_position++]=color;
-          while (repetition--)
+          while(repetition--)
             Horizontal_line_buffer[x_position++]=color;
         }
     }
     // On la splotche
-    for (repeat_menu_y_factor=0;repeat_menu_y_factor<Menu_factor_Y;repeat_menu_y_factor++)
-      Display_line_fast(real_x_pos,real_y_pos++,width*Menu_factor_X*6,Horizontal_line_buffer);
+    Display_line_window(real_x_pos,real_y_pos,width*6,Horizontal_line_buffer);
+    real_y_pos += fy;
   }
   return width;
 }
@@ -527,9 +531,7 @@ void Window_help(int section, const char *sub_section)
 
   // dessiner de la fenêtre où va défiler le texte
   Window_display_frame_in(8,17,274,132);
-  Block(Window_pos_X+(Menu_factor_X*9),
-        Window_pos_Y+(Menu_factor_Y*18),
-        Menu_factor_X*272,Menu_factor_Y*130,MC_Black);
+  Window_rectangle(9, 18, 272, 130, MC_Black);
 
   Window_set_normal_button(266,153,35,14,"Exit",0,1,KEY_ESC); // 1
   scroller=Window_set_scroller_button(290,18,130,nb_lines,
@@ -702,9 +704,7 @@ void Button_Stats(void)
 
   // Dessin de la fenetre ou va s'afficher le texte
   Window_display_frame_in(8,17,294,132);
-  Block(Window_pos_X+(Menu_factor_X*9),
-        Window_pos_Y+(Menu_factor_Y*18),
-        Menu_factor_X*292,Menu_factor_Y*130,MC_Black);
+  Window_rectangle(9,18,292,130,MC_Black);
 
   Window_set_normal_button(120,153,70,14,"OK",0,1,KEY_ESC); // 1
 
