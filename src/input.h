@@ -85,3 +85,5 @@ extern char * Drop_file_name;
 	#define SHORTCUT_PASTE (K2K(SDLK_v)|MOD_CTRL)
 #endif
 
+/// Event Id when a single Unicode character is received
+extern Sint32 Id_event_unicode;

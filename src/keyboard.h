@@ -73,3 +73,10 @@ const char * Key_name(word key);
 */
 word Key_modifiers(SDL_Keymod mod);
 
+///
+/// Get the first unicode character at the begininng of an UTF-8 string.
+/// The character is written to 'character', and the function returns a
+/// pointer to the next character. If an invalid utf-8 sequence is found,
+/// the function returns NULL - it's unsafe to keep parsing from this point.
+const char * Parse_utf8_string(const char * str, word *character);
+

@@ -585,6 +585,53 @@ const char * Key_name(word key)
 
 }
 
+
+///
+/// Get the first unicode character at the begininng of an UTF-8 string.
+/// The character is written to 'character', and the function returns a
+/// pointer to the next character. If an invalid utf-8 sequence is found,
+/// the function returns NULL - it's unsafe to keep parsing from this point.
+const char * Parse_utf8_string(const char * str, word *character)
+{
+  int number_bytes = 0;
+  
+  if ((str[0] & 0x80) == 0)
+  {
+   // 0xxxxxxx
+    *character=str[0];
+    number_bytes=1;
+  }
+  // 110xxxxx 10xxxxxx
+  else if ((str[0] & 0xE0) == 0xC0)
+  {
+    *character=str[0] & 31;
+    number_bytes=2;    
+  }
+  // 1110xxxx 10xxxxxx 10xxxxxx
+  else if ((str[0] & 0xF0) == 0xE0)
+  {
+    *character=str[0] & 15;
+    number_bytes=3;
+  }
+  // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+  else if ((str[0] & 0xF8) == 0xF0)
+  {
+    *character=str[0] & 7;
+    number_bytes=4;
+  }
+  else
+    return NULL;
+  while(--number_bytes)
+  {
+    str++;
+    if ((str[0] & 0xC0) != 0x80)
+      return NULL;
+    *character = (*character << 6) | (str[0] & 0x3F);    
+  };
+  printf("[%X]\n",*character);
+  return str+1;
+}
+
 // Obtient le caractère ANSI tapé, à partir d'un keysym.
 // (Valeur 32 à 255)
 // Renvoie 0 s'il n'y a pas de caractère associé (shift, backspace, etc)

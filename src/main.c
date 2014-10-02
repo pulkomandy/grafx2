@@ -544,6 +544,9 @@ int Init_program(int argc,char * argv[])
   //SDL_WM_SetCaption("GrafX2","GrafX2"); // TODO
   Define_icon();
   
+  
+  Id_event_unicode = SDL_RegisterEvents(1);
+  
   // Texte
   Init_text();
 

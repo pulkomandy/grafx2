@@ -28,6 +28,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <math.h>
 
 #include "const.h"
@@ -388,7 +389,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
     ':',';','`','\'','"','~',
     '!','?','^','&','#','$'
   };
-
+  SDL_StartTextInput();
   // Si on a commencé à editer par un clic-droit, on vide la chaine.
   if (Mouse_K==RIGHT_SIDE)
     str[0]='\0';
@@ -558,7 +559,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
       int clicked_button;
 
       clicked_button=Window_clicked_button();
-      input_key=Key_ANSI;
+      input_key=Key ? Key : Key_ANSI;
 
       if (clicked_button==-1)
         input_key=K2K(SDLK_RETURN);
@@ -593,7 +594,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
       do
       {
         Get_input(20);
-        input_key=Key_ANSI;
+        input_key=Key ? Key : Key_ANSI;
         if (Mouse_K)
           input_key=K2K(SDLK_RETURN);
 
@@ -799,7 +800,8 @@ affichage:
   }
   Update_rect(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
         visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
-
+  
+  SDL_StopTextInput();
   return (input_key==K2K(SDLK_RETURN));
 }
 

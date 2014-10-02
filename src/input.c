@@ -20,6 +20,7 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 
+#include <stdlib.h>
 #include <SDL2/SDL.h>
 #include <SDL_syswm.h>
 
@@ -37,7 +38,7 @@
 #include "buttons.h"
 #include "input.h"
 #include "loadsave.h"
-
+#include "keyboard.h"
 
 void Handle_window(SDL_WindowEvent event);
 int Color_cycling(void);
@@ -50,6 +51,8 @@ int Snap_axis_origin_X;
 int Snap_axis_origin_Y;
 
 char * Drop_file_name = NULL;
+
+Sint32 Id_event_unicode;
 
 // --
 
@@ -396,7 +399,7 @@ int Handle_key_press(SDL_KeyboardEvent event)
     int modifier;
   
     Key = Keysym_to_keycode(event.keysym);
-    Key_ANSI = Keysym_to_ANSI(event.keysym);
+    //Key_ANSI = Keysym_to_ANSI(event.keysym);
     switch(event.keysym.sym)
     {
       case SDLK_RSHIFT:
@@ -965,7 +968,36 @@ int Get_input(int sleep_time)
               }
 #endif
               break;
-          
+          case SDL_TEXTINPUT:
+            {
+              const char *text = event.text.text;
+              printf("%s\n", text);
+
+              while (text && text[0])
+              {
+                SDL_Event event;
+                word character = 0;
+                text = Parse_utf8_string(text, &character);
+                
+                event.type = SDL_USEREVENT;
+                event.user.code = Id_event_unicode;
+                event.user.windowID = 0;
+                event.user.data1 = &character;
+                event.user.data2 = NULL;
+                
+                SDL_PushEvent(&event);
+              }
+            }
+              break;
+          case SDL_USEREVENT:
+              // This event indicates that a single unicode character was entered
+              if (event.user.code == Id_event_unicode)
+              {
+                Key_ANSI = *(word *)(event.user.data1);
+                //free(event.user.data1);
+                user_feedback_required = 1;
+              }
+              break;
           default:
               //DEBUG("Unhandled SDL event number : ",event.type);
               break;
