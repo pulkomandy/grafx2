@@ -415,8 +415,8 @@ byte *Render_text_TTF(const char *str, int font_number, int size, int antialias,
   // Colors: Text will be generated as white on black.
   fg_color.r=fg_color.g=fg_color.b=255;
   bg_color.r=bg_color.g=bg_color.b=0;
-  // The following is alpha, supposedly unused
-  bg_color.unused=fg_color.unused=255;
+  // The following is alpha
+  bg_color.a=fg_color.a=255;
   
   // Text rendering: creates a 8bit surface with its dedicated palette
   #ifdef __ANDROID__
