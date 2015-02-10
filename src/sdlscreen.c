@@ -55,6 +55,8 @@
     #define UPDATE_METHOD     UPDATE_METHOD_FULL_PAGE
   #elif defined(__MINT__)
     #define UPDATE_METHOD     UPDATE_METHOD_CUMULATED
+  #elif defined(GCWZERO)
+    #define UPDATE_METHOD     UPDATE_METHOD_FULL_PAGE
   #elif defined(__ANDROID__)
     #define UPDATE_METHOD     UPDATE_METHOD_FULL_PAGE
   #else
@@ -70,7 +72,11 @@ void Set_mode_SDL(int *width, int *height, int fullscreen)
   static SDL_Cursor* cur = NULL;
   static byte cursorData = 0;
 
+#ifdef GCWZERO
+  Screen_SDL=SDL_SetVideoMode(*width,*height,8,SDL_HWSURFACE|SDL_TRIPLEBUF|(fullscreen?SDL_FULLSCREEN:0)|SDL_RESIZABLE);
+#else
   Screen_SDL=SDL_SetVideoMode(*width,*height,8,(fullscreen?SDL_FULLSCREEN:0)|SDL_RESIZABLE);
+#endif
   if(Screen_SDL != NULL)
   {
     // Check the mode we got, in case it was different from the one we requested.
@@ -116,7 +122,11 @@ void Flush_update(void)
   // Do a full screen update
   if (update_is_required)
   {
+#ifdef GCWZERO
+    SDL_Flip(Screen_SDL);
+#else
     SDL_UpdateRect(Screen_SDL, 0, 0, 0, 0);
+#endif
     update_is_required=0;
   }
 #endif

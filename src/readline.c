@@ -56,7 +56,7 @@
 #endif
 
 // Virtual keyboard is ON by default on these platforms:
-#if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
+#if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__) || defined(GCWZERO)
   #define VIRT_KEY_DEFAULT_ON 1
 #else
   #define VIRT_KEY_DEFAULT_ON 0
@@ -515,7 +515,11 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
       Display_cursor();
     }
   }
+#ifdef GCWZERO //we cannot enter text into a field without using the virtual mouse otherwise so no saving etc
+  Keyboard_click_allowed = 1;
+#else
   Keyboard_click_allowed = 0;
+#endif
   Hide_cursor();
 
   // Effacement de la chaîne

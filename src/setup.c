@@ -134,6 +134,8 @@ void Set_data_directory(const char * program_dir, char * data_dir)
   // All other targets, program is in a "bin" subdirectory
   #elif defined (__AROS__)
     strcat(data_dir,"share/grafx2/");
+  #elif defined (GCWZERO)
+    strcat(data_dir,"share/grafx2/");
   #else
     strcat(data_dir,"../share/grafx2/");
   #endif
@@ -162,11 +164,15 @@ void Set_config_directory(const char * program_dir, char * config_dir)
     strcpy(config_dir,program_dir);
   #elif defined(__MINT__)  
     strcpy(config_dir,program_dir);
+
   #else
     char filename[MAX_PATH_CHARACTERS];
-
+  #ifdef GCWZERO
+    strcpy(config_dir, "/media/home/.grafx2/");
+  #else
     // In priority: check root directory
     strcpy(config_dir, program_dir);
+  #endif
     // On all the remaining targets except OSX, the executable is in ./bin
     #if !defined(__macosx__)
     strcat(config_dir, "../");

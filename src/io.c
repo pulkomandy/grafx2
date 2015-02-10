@@ -460,7 +460,11 @@ byte Create_lock_file(const char *file_directory)
   #else
   char lock_filename[MAX_PATH_CHARACTERS];
   
+ #ifdef GCWZERO
+  strcpy(lock_filename,"/media/home/.grafx2/");
+#else
   strcpy(lock_filename,file_directory);
+#endif
   strcat(lock_filename,"gfx2.lck");
   
   #ifdef __WIN32__

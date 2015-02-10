@@ -313,7 +313,20 @@ endif
         PLATFORM = gp2x
         STRIP = /opt/open2x/gcc-4.1.1-glibc-2.3.6/arm-open2x-linux/bin/arm-open2x-linux-strip
         JOYCOPT = -DUSE_JOYSTICK
-
+      else
+      ifdef GCWZERO
+        #cross compile an exec for the gcw0
+        CC = mipsel-linux-gcc
+        BIN = ../bin/grafx2
+        LUACOPT = 
+        LUALOPT = -lluajit-5.1
+        COPT = -DGCWZERO -W -Wall -Wdeclaration-after-statement -pedantic -std=c99 -g -O$(OPTIM) -I/opt/gcw0-toolchain/usr/mipsel-gcw0-linux-uclibc/sysroot/usr/include -I/opt/gcw0-toolchain/usr/mipsel-gcw0-linux-uclibc/sysroot/usr/include/SDL `/opt/gcw0-toolchain/usr/mipsel-gcw0-linux-uclibc/sysroot/usr/bin/sdl-config --cflags` $(TTFCOPT)  $(TTFCOPT) $(JOYCOPT) $(LUACOPT)
+        LOPT = -L/opt/gcw0-toolchain/usr/mipsel-gcw0-linux-uclibc/sysroot/usr/lib -lSDL_image `/opt/gcw0-toolchain/usr/mipsel-gcw0-linux-uclibc/sysroot/usr/bin/sdl-config --libs` -ljpeg -lpng -lz -lm $(TTFLOPT) $(LUALOPT)
+        OBJDIR = ../obj/gp2x
+        NOTTF = 1
+        PLATFORM = gp2x
+        STRIP = mipsel-linux-strip
+        JOYCOPT = -DUSE_JOYSTICK
       else
       ifdef AROS32CROSS
         #cross compile an AROS 32 bit executable
@@ -351,6 +364,7 @@ endif
         CC = gcc
         OBJDIR = ../obj/unix
         FCLOPT = -lfontconfig
+      endif
       endif
       endif
       endif

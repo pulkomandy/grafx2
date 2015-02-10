@@ -381,12 +381,21 @@ const char * Key_name(word key)
   } T_key_label;
   T_key_label key_labels[] =
   {
+#ifdef GCWZERO
+    { SDLK_BACKSPACE   , "Right-SP" },
+    { SDLK_TAB         , "Left-SP" },
+    { SDLK_CLEAR       , "Clear" },
+    { SDLK_RETURN      , "START" },
+    { SDLK_PAUSE       , "Power-Down" },
+    { SDLK_ESCAPE      , "SELECT" },
+#else
     { SDLK_BACKSPACE   , "Backspace" },
     { SDLK_TAB         , "Tab" },
     { SDLK_CLEAR       , "Clear" },
     { SDLK_RETURN      , "Return" },
     { SDLK_PAUSE       , "Pause" },
     { SDLK_ESCAPE      , "Esc" },
+#endif
     { SDLK_DELETE      , "Del" },
     { SDLK_KP0         , "KP 0" },
     { SDLK_KP1         , "KP 1" },
@@ -433,11 +442,19 @@ const char * Key_name(word key)
     { SDLK_CAPSLOCK    , "CapsLck" },
     { SDLK_SCROLLOCK   , "ScrlLock" },
     { SDLK_RSHIFT      , "RShift" },
+#ifdef GCWZERO
+    { SDLK_LSHIFT      , "X" },
+    { SDLK_RCTRL       , "RCtrl" },
+    { SDLK_LCTRL       , "A" },
+    { SDLK_RALT        , "RAlt" },
+    { SDLK_LALT        , "B" },
+#else
     { SDLK_LSHIFT      , "LShift" },
     { SDLK_RCTRL       , "RCtrl" },
     { SDLK_LCTRL       , "LCtrl" },
     { SDLK_RALT        , "RAlt" },
     { SDLK_LALT        , "LAlt" },
+#endif
     { SDLK_RMETA       , "RMeta" },
     { SDLK_LMETA       , "LMeta" },
     { SDLK_LSUPER      , "LWin" },
@@ -463,13 +480,22 @@ const char * Key_name(word key)
 
   if (key == SDLK_UNKNOWN)
     return "None";
-  
+
+#ifdef GCWZERO  
   if (key & MOD_CTRL)
-    strcat(buffer, "Ctrl+");
+    strcat(buffer, "A+");
+  if (key & MOD_ALT)
+    strcat(buffer, "B+");
+  if (key & MOD_SHIFT)
+    strcat(buffer, "X+");
+#else
+  if (key & MOD_CTRL)
+    strcat(buffer, "Ctl+");
   if (key & MOD_ALT)
     strcat(buffer, "Alt+");
   if (key & MOD_SHIFT)
     strcat(buffer, "Shift+");
+#endif  
   if (key & MOD_META)
     strcat(buffer, META_KEY_PREFIX);
   

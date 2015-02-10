@@ -61,13 +61,18 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   false,
   SDLK_RIGHT, // DROITE
   0},
+#ifdef GCWZERO
+#define FAST_MOD MOD_CTRL
+#else
+#define FAST_MOD MOD_SHIFT
+#endif
   {4,
   "Faster scroll up",
   "Used to scroll upwards in the",
   "picture fast, either in magnify and",
   "normal mode.",
   true,
-  SDLK_UP|MOD_SHIFT, // Shift + Haut
+  SDLK_UP|FAST_MOD, // Shift + Up
   0},
   {5,
   "Faster scroll down",
@@ -75,7 +80,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "picture fast, either in magnify and",
   "normal mode.",
   true,
-  SDLK_DOWN|MOD_SHIFT, // Shift + Bas
+  SDLK_DOWN|FAST_MOD, // Shift + Down
   0},
   {6,
   "Faster scroll left",
@@ -83,7 +88,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "picture fast, either in magnify and",
   "normal mode.",
   true,
-  SDLK_LEFT|MOD_SHIFT, // Shift + Gauche
+  SDLK_LEFT|FAST_MOD, // Shift + Left
   0},
   {7,
   "Faster scroll right",
@@ -91,8 +96,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "picture fast, either in magnify and",
   "normal mode.",
   true,
-  SDLK_RIGHT|MOD_SHIFT, // Shift + Droite
+  SDLK_RIGHT|FAST_MOD, // Shift + Right
   0},
+#undef FAST_MOD
   {8,
   "Slower scroll up",
   "Used to scroll upwards in the",
@@ -131,7 +137,11 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "deplacement up.It's very useful",
   "when you want ultra-high precision.",
   true,
+#ifdef GCWZERO
+  SDLK_UNKNOWN,
+#else
   SDLK_UP|MOD_CTRL, // Ctrl + Haut
+#endif
   0},
   {13,
   "Move mouse cursor 1 pixel down",
@@ -139,7 +149,11 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "deplacement down.It's very useful",
   "when you want ultra-high precision.",
   true,
+#ifdef GCWZERO
+  SDLK_UNKNOWN,
+#else
   SDLK_DOWN|MOD_CTRL, // Ctrl + Bas
+#endif
   0},
   {14,
   "Move mouse cursor 1 pixel left",
@@ -147,7 +161,11 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "deplacement left.It's very useful",
   "when you want ultra-high precision.",
   true,
+#ifdef GCWZERO
+  SDLK_UNKNOWN,
+#else
   SDLK_LEFT|MOD_CTRL, // Ctrl + Gauche
+#endif
   0},
   {15,
   "Move mouse cursor 1 pixel right",
@@ -155,7 +173,11 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "deplacement right.It's very useful",
   "when you want ultra-high precision.",
   true,
+#ifdef GCWZERO
+  SDLK_UNKNOWN,
+#else
   SDLK_RIGHT|MOD_CTRL, // Ctrl + Droite
+#endif
   0},
   {16,
   "Simulate left mouse click",
@@ -163,7 +185,11 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "left mouse button. It's useful",
   "when you want ultra-high precision.",
   true,
+#ifdef GCWZERO
+  SDLK_SPACE, // Space
+#else
   SDLK_SPACE|MOD_CTRL, // Ctrl + Space
+#endif
   0},
   {17,
   "Simulate right mouse click",
@@ -171,7 +197,11 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "right mouse button.. It's useful",
   "when you want ultra-high precision.",
   true,
+#ifdef GCWZERO
+  SDLK_BACKSPACE, // R-shoulderpad
+#else
   SDLK_SPACE|MOD_SHIFT, // Shift + Space
+#endif
   0},
   {18,
   "Show/hide menu toolbars",
@@ -816,7 +846,11 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "information about the program,",
   "or contextual help.",
   true,
+#ifdef GCWZERO
+  SDLK_TAB, // L-Shoulderpad
+#else
   SDLK_F1, // F1
+#endif
   0},
   {92,
   "Statistics",
@@ -832,7 +866,11 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
+#ifdef GCWZERO
+  SDLK_UNKNOWN,
+#else
   SDLK_TAB, // Tab
+#endif
   0},
   {94,
   "Copy current page to spare page",
@@ -963,7 +1001,11 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "or the transparent color if it's",
   "a layered image.",
   true,
+#ifdef GCWZERO
+  SDLK_UNKNOWN, // BackSpace
+#else
   SDLK_BACKSPACE, // BackSpace
+#endif
   0},
   {105,
   "Clear page with backcolor",
@@ -1095,7 +1137,11 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "in the palette.",
   "",
   true,
+#ifdef GCWZERO
+  SDLK_RIGHT|MOD_SHIFT,
+#else
   SDLK_RIGHTBRACKET, // ] (0x en AZERTY)
+#endif
   0},
   {118,
   "Previous foreground color",
@@ -1103,7 +1149,11 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "previous in the palette.",
   "",
   true,
+#ifdef GCWZERO
+  SDLK_LEFT|MOD_SHIFT,
+#else
   SDLK_LEFTBRACKET, // [ (^ en AZERTY)
+#endif
   0},
   {119,
   "Next background color",
@@ -1111,7 +1161,11 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "in the palette.",
   "",
   true,
+#ifdef GCWZERO
+  SDLK_DOWN|MOD_SHIFT,
+#else
   SDLK_RIGHTBRACKET|MOD_SHIFT, // Shift + ]
+#endif
   0},
   {120,
   "Previous background color",
@@ -1119,7 +1173,11 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "previous in the palette.",
   "",
   true,
+#ifdef GCWZERO
+  SDLK_UP|MOD_SHIFT,
+#else
   SDLK_LEFTBRACKET|MOD_SHIFT, // Shift + [
+#endif
   0},
   {126,
   "Next user-defined forecolor",
@@ -1751,7 +1809,11 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "click and drag the mouse to",
   "pan the view.",
   true,
+#ifdef GCWZERO
+  SDLK_F1, // Space
+#else
   SDLK_SPACE, // Space
+#endif
   0},
 };
 

@@ -41,7 +41,7 @@
 
 
 // There is no WM on the GP2X...
-#if !defined(__GP2X__) && !defined(__WIZ__) && !defined(__CAANOO__)
+#if !defined(__GP2X__) && !defined(__WIZ__) && !defined(__CAANOO__) && !defined(GCWZERO)
     #include <SDL_syswm.h>
 #endif
 

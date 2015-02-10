@@ -59,8 +59,7 @@ void Load_INI_clear_string(char * str, byte keep_comments)
       // Suppression d'un espace ou d'un tab:
       memmove(str+index,str+index+1,strlen(str+index));
     }
-    else
-    if (!keep_comments && ((str[index]==';') || (str[index]=='#')))
+    else if (!keep_comments && ((str[index]==';') || (str[index]=='#')))
     {
       // Comment
       str[index]='\0';
@@ -75,8 +74,9 @@ void Load_INI_clear_string(char * str, byte keep_comments)
       if (!equal_found)
       {
         // Passage en majuscule d'un caractère:
-  
+#ifndef GCWZERO  //this causes gcw to crash
         str[index]=toupper((int)str[index]);
+#endif
       }
       index++;
     }

@@ -1888,7 +1888,7 @@ void Set_all_video_modes(void)
   // The first mode will have index number 0.
   // It will be the default mode if an unsupported one
   // is requested in gfx2.ini
-  #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
+  #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__) || defined(GCWZERO)
   // Native GP2X resolution
   Set_video_mode( 320,240,0, 1);
   #else
@@ -1898,7 +1898,7 @@ void Set_all_video_modes(void)
 
   Set_video_mode( 320,200,0, 1);
   Set_video_mode( 320,224,0, 1);
-  #if !defined(__GP2X__) && !defined(__WIZ__) && !defined(__CAANOO__)
+  #if !defined(__GP2X__) && !defined(__WIZ__) && !defined(__CAANOO__) && !defined(GCWZERO)
   // For the GP2X, this one is already declared above.
   Set_video_mode( 320,240,0, 1);
   #endif
@@ -1967,7 +1967,7 @@ void Set_all_video_modes(void)
     for (index=0; Modes[index]; index++)
     {
       int index2;
-#if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
+#if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__) || defined(GCWZERO)
       // On the GP2X the first mode is not windowed, so include it in the search.
       index2=0;
 #else
