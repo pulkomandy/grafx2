@@ -860,7 +860,8 @@ int L_MatchColor(lua_State* L)
 int L_MatchColor2(lua_State* L)
 {
   double r, g, b;
-  int c;
+  double l_weight = 0.25;
+  byte best_color = 0;
   int nb_args=lua_gettop(L);
 
   if (nb_args < 3 || nb_args > 4)
@@ -870,17 +871,67 @@ int L_MatchColor2(lua_State* L)
   LUA_ARG_NUMBER(1, "matchcolor2", r, -DBL_MAX, DBL_MAX);
   LUA_ARG_NUMBER(2, "matchcolor2", g, -DBL_MAX, DBL_MAX);
   LUA_ARG_NUMBER(3, "matchcolor2", b, -DBL_MAX, DBL_MAX);
-  if (nb_args == 3)
+  if (nb_args > 3)
   {
-    c = Best_color_perceptual(clamp_byte(r),clamp_byte(g),clamp_byte(b));
+    LUA_ARG_NUMBER(4, "matchcolor2", l_weight, 0.0, 1.0);
   }
-  else // nb_args == 4
+  
+  // Similar to Best_color_perceptual(), but with floating point
   {
-    float weight;
-    LUA_ARG_NUMBER(4, "matchcolor2", weight, -DBL_MAX, DBL_MAX);
-    c = Best_color_perceptual_weighted(clamp_byte(r),clamp_byte(g),clamp_byte(b),weight);
-  }   
-  lua_pushinteger(L, c);
+    int col;  
+    double best_diff=9e99;
+    double target_bri;
+    double bri;
+    double diff_b, diff_c, diff;
+  
+    if (r<0.0)
+      r=0;
+    else if (r>255.0)
+      r=255.0;
+    if (g<0.0)
+      g=0;
+    else if (g>255.0)
+      g=255.0;
+    if (b<0.0)
+      b=0;
+    else if (b>255.0)
+      b=255.0;
+  
+    // Similar to Perceptual_lightness();
+    target_bri = sqrt(0.26*r*0.26*r + 0.55*g*0.55*g + 0.19*b*0.19*b);
+    
+    for (col=0; col<256; col++)
+    {
+      if (Exclude_color[col])
+        continue;
+  
+      diff_c = sqrt(
+        (0.26*(Main_palette[col].R-r))*
+        (0.26*(Main_palette[col].R-r))+
+        (0.55*(Main_palette[col].G-g))*
+        (0.55*(Main_palette[col].G-g))+
+        (0.19*(Main_palette[col].B-b))*
+        (0.19*(Main_palette[col].B-b)));
+      // Exact match
+      if (diff_c<1.0)
+      {
+          lua_pushinteger(L, col);
+          return 1;
+      }
+  
+      bri = sqrt(0.26*0.26*(Main_palette[col].R*Main_palette[col].R) + 0.55*0.55*(Main_palette[col].G*Main_palette[col].G) + 0.19*0.19*(Main_palette[col].B*Main_palette[col].B));
+      diff_b = fabs(target_bri-bri);
+  
+      diff=l_weight*(diff_b-diff_c)+diff_c;
+      if (diff<best_diff)
+      {
+        best_diff=diff;
+        best_color=col;
+      } 
+    }
+  }
+  
+  lua_pushinteger(L, best_color);
   return 1;
 }
 
