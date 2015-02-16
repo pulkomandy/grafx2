@@ -369,6 +369,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   byte position;
   byte size;
   word input_key=0;
+  word input_character=0;
   word window_x=Window_pos_X;
   word window_y=Window_pos_Y;
   byte offset=0; // index du premier caractère affiché
@@ -559,13 +560,15 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
       int clicked_button;
 
       clicked_button=Window_clicked_button();
-      input_key=Key ? Key : Key_ANSI;
+      input_key=Key;
+      input_character=Key_ANSI;
 
       if (clicked_button==-1)
         input_key=K2K(SDLK_RETURN);
       else if (clicked_button>0)
       {
-        input_key=keymapping[clicked_button-1];
+        input_character=keymapping[clicked_button-1];
+        input_key=input_character;
         if (input_key==K2K(SDLK_CAPSLOCK))
         {
           // toggle uppercase
@@ -585,7 +588,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
         }
         else if (input_key>='A' && input_key<='Z' && !caps_lock)
         {
-          input_key+='a'-'A';
+          input_character+='a'-'A';
         }
       }
     }
@@ -594,7 +597,8 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
       do
       {
         Get_input(20);
-        input_key=Key ? Key : Key_ANSI;
+        input_key=Key;
+        input_character=Key_ANSI;
         if (Mouse_K)
           input_key=K2K(SDLK_RETURN);
 
@@ -624,7 +628,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
           goto affichage;
         }
         
-      } while(input_key==0);
+      } while(input_key==0 && input_character==0);
     }
     Hide_cursor();
 
@@ -717,44 +721,45 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
         strcpy(str,initial_string);
         size=strlen(str);
         break;
-      default :
+    }
+      
+    if (input_character && size<max_size)
+    {
+      // Si la touche était autorisée...
+      byte is_authorized = Valid_character(input_character, input_type);
+      if (is_authorized == 1 || (is_authorized == 2 && position == 0 && str[position] != '-'))
+      {
+        // ... alors on l'insère ...
+        Insert_character(str,input_character,position/*,size*/);
+        // ce qui augmente la taille de la chaine
+        size++;
+        // et qui risque de déplacer le curseur vers la droite
         if (size<max_size)
         {
-          // Si la touche était autorisée...
-          byte is_authorized = Valid_character(input_key, input_type);
-          if (is_authorized == 1 || (is_authorized == 2 && position == 0 && str[position] != '-'))
-          {
-            // ... alors on l'insère ...
-            Insert_character(str,input_key,position/*,size*/);
-            // ce qui augmente la taille de la chaine
-            size++;
-            // et qui risque de déplacer le curseur vers la droite
-            if (size<max_size)
-            {
-              position++;
-              if (display_string[position-offset]==RIGHT_TRIANGLE_CHARACTER || position-offset>=visible_size)
-                offset++;
-            }
-            // Enfin, on raffiche la chaine
-            goto affichage;
-          } // End du test d'autorisation de touche
-        } // End du test de place libre
-        break;
+          position++;
+          if (display_string[position-offset]==RIGHT_TRIANGLE_CHARACTER || position-offset>=visible_size)
+            offset++;
+        }
+        // Enfin, on raffiche la chaine
+        goto affichage;
+      } // End du test d'autorisation de touche
+    } // End du test de place libre
+    if (0)
+    {
+      affichage:
+      size=strlen(str);
+      // Formatage d'une partie de la chaine (si trop longue pour tenir)
+      strncpy(display_string, str + offset, visible_size);
+      display_string[visible_size]='\0';
+      if (offset>0)
+        display_string[0]=LEFT_TRIANGLE_CHARACTER;
+      if (visible_size + offset + 0 < size )
+        display_string[visible_size-1]=RIGHT_TRIANGLE_CHARACTER;
       
-affichage:
-        size=strlen(str);
-        // Formatage d'une partie de la chaine (si trop longue pour tenir)
-        strncpy(display_string, str + offset, visible_size);
-        display_string[visible_size]='\0';
-        if (offset>0)
-          display_string[0]=LEFT_TRIANGLE_CHARACTER;
-        if (visible_size + offset + 0 < size )
-          display_string[visible_size-1]=RIGHT_TRIANGLE_CHARACTER;
-        
-        Display_whole_string(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),display_string,position - offset);
-        Update_rect(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
-        visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
-    } // End du "switch(input_key)"
+      Display_whole_string(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),display_string,position - offset);
+      Update_rect(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
+      visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
+    }
     Flush_update();
 
   } // End du "while"
