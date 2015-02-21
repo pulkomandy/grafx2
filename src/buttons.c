@@ -4092,9 +4092,9 @@ void Refresh_airbrush_settings(byte selected_color, byte update_slider)
   Num2str(Airbrush_multi_flow[selected_color],str,2);
   Print_in_window(196,130,str,MC_Black,MC_Light);
   
-  Update_rect(Window_pos_X+(Menu_factor_X*(Window_palette_button_list->Pos_X+4+(selected_color >> 4)*10)),
-      Window_pos_Y+(Menu_factor_Y*(Window_palette_button_list->Pos_Y+3+(selected_color & 15)* 5)),
-      Menu_factor_X<<1,Menu_factor_Y*5);
+  Update_window_area(Window_palette_button_list->Pos_X+4+(selected_color >> 4)*10,
+      Window_palette_button_list->Pos_Y+3+(selected_color & 15)* 5,
+      2,5);
 }
 
 
@@ -4241,7 +4241,7 @@ void Button_Airbrush_menu(void)
           Print_in_window(50,151," Mono",MC_Black,MC_Light);
         else
           Print_in_window(50,151,"Multi",MC_Black,MC_Light);
-        Update_rect(Window_pos_X+50*Menu_factor_X,Window_pos_Y+151*Menu_factor_Y,5*8*Menu_factor_X,8*Menu_factor_Y);
+        Update_window_area(50,151,5*8,8);
         Display_cursor();
         break;
 
@@ -5041,11 +5041,11 @@ void Button_Text(void)
         }
         
       }
-      Update_rect(
-        Window_pos_X+preview_button->Pos_X*Menu_factor_X,
-        Window_pos_Y+preview_button->Pos_Y*Menu_factor_Y,
-        preview_button->Width*Menu_factor_X,
-        preview_button->Height*Menu_factor_Y);
+      Update_window_area(
+        preview_button->Pos_X,
+        preview_button->Pos_Y,
+        preview_button->Width,
+        preview_button->Height);
     }
     if (redraw_is_needed || preview_is_needed)
     {    

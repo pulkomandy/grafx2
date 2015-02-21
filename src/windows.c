@@ -1013,7 +1013,7 @@ void Print_counter(short x,short y,const char * str,byte text_color,byte backgro
       }
     }
   }
-  Update_rect(Window_pos_X+x*Menu_factor_X,Window_pos_Y+y*Menu_factor_Y,strlen(str)*Menu_factor_X*6,8*Menu_factor_Y);
+  Update_window_area(x,y,strlen(str)*6,8);
 }
 
 
@@ -1082,7 +1082,7 @@ byte Confirmation_box(char * message)
   Window_set_normal_button((window_width/3)-20     ,29+(nb_lines<<3),40,14,"Yes",1,1,K2K(SDLK_y)); // 1
   Window_set_normal_button(((window_width<<1)/3)-20,29+(nb_lines<<3),40,14,"No" ,1,1,K2K(SDLK_n)); // 2
 
-  Update_rect(Window_pos_X, Window_pos_Y, Window_width*Menu_factor_X, Window_height*Menu_factor_Y);
+  Update_window_area(0, 0, Window_width, Window_height);
 
   Display_cursor();
 
@@ -1124,8 +1124,7 @@ int Requester_window(char* message, int initial_value)
   Window_set_normal_button(60 ,37,40,14,"OK",1,1,K2K(SDLK_y)); // 2
   Window_set_normal_button(130,37,60,14,"Cancel" ,1,1,K2K(SDLK_n)); // 3
 
-  Update_rect(Window_pos_X, Window_pos_Y, Menu_factor_X * window_width,
-    Menu_factor_Y * 60);
+  Update_window_area(0, 0, window_width, 60);
   Display_cursor();
 
   do
@@ -1160,7 +1159,7 @@ void Warning_message(char * message)
 
   Print_in_window((window_width>>1)-(strlen(message)<<2),20,message,MC_Black,MC_Light);
   Window_set_normal_button((window_width>>1)-20     ,37,40,14,"OK",1,1,K2K(SDLK_RETURN)); // 1
-  Update_rect(Window_pos_X,Window_pos_Y,Menu_factor_X*window_width,Menu_factor_Y*60);
+  Update_window_area(0,0,window_width,60);
   Display_cursor();
 
   do

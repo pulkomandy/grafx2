@@ -547,7 +547,7 @@ void Window_help(int section, const char *sub_section)
 
   Display_help();
 
-  Update_rect(Window_pos_X,Window_pos_Y,310*Menu_factor_X,175*Menu_factor_Y);
+  Update_window_area(0,0,310,175);
 
   Display_cursor();
 
@@ -879,7 +879,7 @@ void Button_Stats(void)
   sprintf(buffer,"%dx%d",Screen_width,Screen_height);
   Print_in_window(106,y,buffer,STATS_DATA_COLOR,MC_Black);
   
-  Update_rect(Window_pos_X,Window_pos_Y,Menu_factor_X*310,Menu_factor_Y*174);
+  Update_window_area(0,0,310,174);
 
   Display_cursor();
 

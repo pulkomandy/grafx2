@@ -134,10 +134,9 @@ void Shade_draw_grad_ranges(void)
   else
   {
     Window_display_frame_out(224,35,64,48);
-    Block(Window_pos_X+(Menu_factor_X*225),Window_pos_Y+(Menu_factor_Y*36),
-          Menu_factor_X*62,Menu_factor_Y*46,MC_Light);
+    Window_rectangle(225,36,62,46,MC_Light);
   }
-  Update_rect(Window_pos_X+(Menu_factor_X*224),Window_pos_Y+(Menu_factor_Y*35),Menu_factor_X*64,Menu_factor_Y*48);
+  Update_window_area(224,35,64,48);
 }
 
 
@@ -181,7 +180,7 @@ void Tag_shades(word selection_start,word selection_end)
           Block(x_pos,y_pos,Menu_factor_X<<2,Menu_factor_Y<<1,MC_Light);
       }
     }
-    Update_rect(Window_pos_X+8*Menu_factor_X,Window_pos_Y+131*Menu_factor_Y,Menu_factor_X*64<<2,Menu_factor_Y*8<<3);
+    Update_window_area(8,131,64<<2,8<<3);
 }
 
 
@@ -245,17 +244,17 @@ void Display_all_shade(word selection_start1,word selection_end1,
       if (Shade_list[Shade_current].List[position]&0x0100) // Vide
       {
         Window_display_frame_out((column<<2)+8,(line*7)+127,4,4);
-        Block(Window_pos_X+(Menu_factor_X*((column<<2)+9)),
-              Window_pos_Y+(Menu_factor_Y*((line*7)+128)),
-              Menu_factor_X<<1,Menu_factor_Y<<1,MC_Light);
+        Window_rectangle((column<<2)+9,
+              (line*7)+128,
+              2,2,MC_Light);
       }
       else // color
-        Block(Window_pos_X+(Menu_factor_X*((column<<2)+8)),
-              Window_pos_Y+(Menu_factor_Y*((line*7)+127)),
-              Menu_factor_X<<2,Menu_factor_Y<<2,
+        Window_rectangle((column<<2)+8,
+              (line*7)+127,
+              4,4,
               Shade_list[Shade_current].List[position]&0xFF);
     }
-  Update_rect(Window_pos_X+7*Menu_factor_X,Window_pos_Y+126*Menu_factor_Y,Menu_factor_X*((64<<2)+2),Menu_factor_Y*((8<<2)+2));
+  Update_window_area(7,126,(64<<2)+2,(8<<2)+2);
   Tag_shades(selection_start2,selection_end2);
   Shade_draw_grad_ranges();
   Display_selected_cell_color(selection_start2,selection_end2);
@@ -484,8 +483,7 @@ int Menu_shade(void)
 
   // Tracé d'un cadre creux autour du bloc dégradé
   Window_display_frame_in(171,26,18,66);
-  Block(Window_pos_X+(Menu_factor_X*172),Window_pos_Y+(Menu_factor_Y*27),
-        Menu_factor_X<<4,Menu_factor_Y<<6,MC_Black);
+  Window_rectangle(172,27,16,64,MC_Black);
   // Tracé d'un cadre creux autour de tous les dégradés
   Window_display_frame_in(223,34,66,50);
   Shade_draw_grad_ranges();
@@ -526,7 +524,7 @@ int Menu_shade(void)
   memcpy(buffer     ,Shade_list[Shade_current].List,512*sizeof(word));
   memcpy(undo_buffer,Shade_list[Shade_current].List,512*sizeof(word));
 
-  Update_rect(Window_pos_X,Window_pos_Y,Menu_factor_X*310,Menu_factor_Y*190);
+  Update_window_area(0,0,310,190);
 
   Display_cursor();
 
@@ -941,9 +939,7 @@ int Menu_shade(void)
           last_color--;
           Hide_cursor();
           Tag_color_range(first_color,first_color);
-          Block(Window_pos_X+(Menu_factor_X*172),
-                Window_pos_Y+(Menu_factor_Y*27),
-                Menu_factor_X<<4,Menu_factor_Y*64,first_color);
+          Window_rectangle(172,27,16,64,first_color);
           // On affiche le numéro de la couleur sélectionnée
           Display_selected_color(first_color,last_color);
           Display_cursor();
@@ -955,9 +951,7 @@ int Menu_shade(void)
           last_color++;
           Hide_cursor();
           Tag_color_range(first_color,first_color);
-          Block(Window_pos_X+(Menu_factor_X*172),
-                Window_pos_Y+(Menu_factor_Y*27),
-                Menu_factor_X<<4,Menu_factor_Y*64,first_color);
+          Window_rectangle(172,27,16,64,first_color);
           // On affiche le numéro de la couleur sélectionnée
           Display_selected_color(first_color,last_color);
           Display_cursor();
@@ -1074,7 +1068,7 @@ void Button_Quick_shade_menu(void)
   Num2str(Quick_shade_step,str,3);
   Window_input_content(step_button,str);
 
-  Update_rect(Window_pos_X,Window_pos_Y,Menu_factor_X*142,Menu_factor_Y*56);
+  Update_window_area(0,0,142,56);
 
   Display_cursor();
 

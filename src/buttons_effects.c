@@ -294,16 +294,16 @@ void Button_Stencil_mode(void)
 
 void Stencil_tag_color(byte color, byte tag_color)
 {
-  Block(Window_pos_X+(Menu_factor_X*(Window_palette_button_list->Pos_X+4+(color >> 4)*10)),
-        Window_pos_Y+(Menu_factor_Y*(Window_palette_button_list->Pos_Y+3+(color & 15)* 5)),
-        Menu_factor_X<<1,Menu_factor_Y*5,tag_color);
+  Window_rectangle(Window_palette_button_list->Pos_X+4+(color >> 4)*10,
+        Window_palette_button_list->Pos_Y+3+(color & 15)* 5,
+        2,5,tag_color);
 }
 
 void Stencil_update_color(byte color)
 {
-  Update_rect(Window_pos_X+(Menu_factor_X*(Window_palette_button_list->Pos_X+4+(color >> 4)*10)),
-      Window_pos_Y+(Menu_factor_Y*(Window_palette_button_list->Pos_Y+3+(color & 15)* 5)),
-      Menu_factor_X<<1,Menu_factor_Y*5);
+  Update_window_area(Window_palette_button_list->Pos_X+4+(color >> 4)*10,
+      Window_palette_button_list->Pos_Y+3+(color & 15)* 5,
+      2,5);
 }
 
 void Button_Stencil_menu(void)
@@ -1089,9 +1089,9 @@ void Button_Sieve_menu(void)
   Window_set_normal_button( 97,126,11,11,"\033",0,1,K2K(SDLK_LEFT)|MOD_SHIFT); // 10
   Window_set_normal_button(121,126,11,11,"\032",0,1,K2K(SDLK_RIGHT)|MOD_SHIFT); // 11
   button_bg_color = Window_set_normal_button(109,126,11,11,""    ,0,1,K2K(SDLK_INSERT)); // 12
-  Block(Window_pos_X+(Menu_factor_X*(button_bg_color->Pos_X+2)),
-        Window_pos_Y+(Menu_factor_Y*(button_bg_color->Pos_Y+2)),
-        Menu_factor_X*7, Menu_factor_Y*7, (default_bg_color)?MC_White:MC_Black);
+  Window_rectangle(button_bg_color->Pos_X+2,
+        button_bg_color->Pos_Y+2,
+        7, 7, (default_bg_color)?MC_White:MC_Black);
 
   Window_set_repeatable_button(109, 69,11,11,"\030",0,1,K2K(SDLK_UP)); // 13
   Window_set_repeatable_button(109, 93,11,11,"\031",0,1,K2K(SDLK_DOWN)); // 14
@@ -1285,15 +1285,15 @@ void Button_Sieve_menu(void)
       case 12 : // Toggle octets insérés
         Hide_cursor();
         default_bg_color=!default_bg_color;
-        Block(Window_pos_X+(Menu_factor_X*(button_bg_color->Pos_X+2)),
-              Window_pos_Y+(Menu_factor_Y*(button_bg_color->Pos_Y+2)),
-              Menu_factor_X*7, Menu_factor_Y*7, (default_bg_color)?MC_White:MC_Black);
+        Window_rectangle(button_bg_color->Pos_X+2,
+              button_bg_color->Pos_Y+2,
+              7, 7, (default_bg_color)?MC_White:MC_Black);
         Display_cursor();
-        Update_rect(
-          Window_pos_X+(Menu_factor_X*(button_bg_color->Pos_X+2)),
-          Window_pos_Y+(Menu_factor_Y*(button_bg_color->Pos_Y+2)),
-          Menu_factor_X*7,
-          Menu_factor_Y*7);
+        Update_window_area(
+          button_bg_color->Pos_X+2,
+          button_bg_color->Pos_Y+2,
+          7,
+          7);
 
         break;
 
