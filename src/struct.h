@@ -59,21 +59,9 @@ typedef uint64_t qword;
 // GrafX2 use a lot of function pointer to do the drawing depending in the "fake hardware zoom" and the magnifier status.
 typedef void (* Func_action)    (void); ///< An action. Used when you click a menu button or trigger a keyboard shortcut.
 typedef void (* Func_pixel) (word,word,byte); ///< Set pixel at position (x,y) to color c. Used in load screen to write the data to brush, picture, or preview area.
-typedef byte (* Func_read)   (word,word); ///< Read a pixel at position (x,y) on something. Used for example in save to tell if the data is a brush or a picture
-typedef void (* Func_clear)  (byte);
-typedef void (* Func_display)   (word,word,word);
 typedef byte (* Func_effect)     (word,word,byte); ///< Called by all drawing tools to draw with a special effect (smooth, transparency, shade, ...)
-typedef void (* Func_block)     (word,word,word,word,byte);
-typedef void (* Func_line_XOR) (word,word,word); ///< Draw an XOR line on the picture view of the screen. Use a different function when in magnify mode.
-typedef void (* Func_display_brush_color) (word,word,word,word,word,word,byte,word);
-typedef void (* Func_display_brush_mono)  (word,word,word,word,word,word,byte,byte,word);
 typedef void (* Func_gradient)   (long,short,short);
-typedef void (* Func_remap)     (word,word,word,word,byte *);
 typedef void (* Func_procsline) (word,word,word,byte *);
-typedef void (* Func_display_zoom) (word,word,word,byte *);
-typedef void (* Func_display_brush_color_zoom) (word,word,word,word,word,word,byte,word,byte *);
-typedef void (* Func_display_brush_mono_zoom)  (word,word,word,word,word,word,byte,byte,word,byte *);
-typedef void (* Func_draw_brush) (byte *,word,word,word,word,word,word,byte,word);
 typedef void (* Func_draw_list_item) (word,word,word,byte); ///< Draw an item inside a list button. This is done with a callback so it is possible to draw anything, as the list itself doesn't handle the content
 
 /// A set of RGB values.

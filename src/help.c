@@ -365,11 +365,6 @@ short Print_help(short x_pos, short y_pos, const char *line, char line_type, sho
         for (repeat_menu_x_factor=0;repeat_menu_x_factor<fx;repeat_menu_x_factor++)
         {
           byte color = *(char_pixel+x+y*6);
-#ifdef MULTI_WINDOW
-          byte repetition = 0;
-#else
-          byte repetition = Pixel_width-1;
-#endif
           // Surlignement pour liens
           if (line_type=='K' && char_index>=link_position
             && char_index<(link_position+link_size))
@@ -382,8 +377,6 @@ short Print_help(short x_pos, short y_pos, const char *line, char line_type, sho
               color=MC_Dark;
           }
           Horizontal_line_buffer[x_position++]=color;
-          while(repetition--)
-            Horizontal_line_buffer[x_position++]=color;
         }
     }
     // On la splotche

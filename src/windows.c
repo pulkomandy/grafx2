@@ -40,6 +40,7 @@
 #include "readline.h"
 #include "sdlscreen.h"
 #include "palette.h"
+#include "pxsimple.h"
 
 T_Toolbar_button Buttons_Pool[NB_BUTTONS];
 T_Menu_Bar Menu_bars[MENUBAR_COUNT] = 
@@ -699,7 +700,7 @@ void Print_general(short x,short y,const char * str,byte text_color,byte backgro
       // Pointeur sur le premier pixel du caractère
       font_pixel=Menu_font+(((unsigned char)str[index])<<6);
       for (x_pos=0;x_pos<8;x_pos+=1)
-        for (repeat_menu_x_factor=0;repeat_menu_x_factor<Menu_factor_X*Pixel_width;repeat_menu_x_factor++)
+        for (repeat_menu_x_factor=0;repeat_menu_x_factor<Menu_factor_X;repeat_menu_x_factor++)
           Horizontal_line_buffer[real_x++]=*(font_pixel+x_pos+y_pos)?text_color:background_color;
     }
     for (repeat_menu_y_factor=0;repeat_menu_y_factor<Menu_factor_Y;repeat_menu_y_factor++)
@@ -1283,12 +1284,8 @@ void Display_paintbrush_in_window(word x,word y,int number)
   word width;
   word height;
 
-  x_size=Menu_factor_X/Pixel_height;
-  if (x_size<1)
-    x_size=1;
-  y_size=Menu_factor_Y/Pixel_width;
-  if (y_size<1)
-    y_size=1;
+  x_size=Menu_factor_X;
+  y_size=Menu_factor_Y;
 
   width=Min(Paintbrush[number].Width,PAINTBRUSH_WIDTH);
   height=Min(Paintbrush[number].Height,PAINTBRUSH_WIDTH);
@@ -2648,7 +2645,7 @@ void Display_all_screen(void)
     else
       height=Menu_Y;
     
-    Display_zoomed_screen(width,height,Main_image_width,Horizontal_line_buffer);
+    Display_part_of_screen_scaled(width,height,Main_image_width,Horizontal_line_buffer);
 
     // Effacement de la partie non-image dans la partie zoomée:
     if (Main_image_width<Main_magnifier_width)

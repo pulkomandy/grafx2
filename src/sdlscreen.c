@@ -221,14 +221,14 @@ void Flush_update(void)
       Min_X=0;
     if (Min_Y<0)
       Min_Y=0;
-    Update_rectangle(Screen_SDL, Min_X*Pixel_width, Min_Y*Pixel_height, Min(Screen_width-Min_X, Max_X-Min_X)*Pixel_width, Min(Screen_height-Min_Y, Max_Y-Min_Y)*Pixel_height);
+    Update_rectangle(Screen_SDL, Min_X, Min_Y, Min(Screen_width-Min_X, Max_X-Min_X), Min(Screen_height-Min_Y, Max_Y-Min_Y));
 
     Min_X=Min_Y=10000;
     Max_X=Max_Y=0;
   }
   if (Status_line_dirty_end)
   {
-    Update_rectangle(Screen_SDL, (18+(Status_line_dirty_begin*8))*Menu_factor_X*Pixel_width,Menu_status_Y*Pixel_height,(Status_line_dirty_end-Status_line_dirty_begin)*8*Menu_factor_X*Pixel_width,8*Menu_factor_Y*Pixel_height);
+    Update_rectangle(Screen_SDL, (18+(Status_line_dirty_begin*8))*Menu_factor_X,Menu_status_Y,(Status_line_dirty_end-Status_line_dirty_begin)*8*Menu_factor_X,8*Menu_factor_Y);
   }
   Status_line_dirty_begin=25;
   Status_line_dirty_end=0;
@@ -240,7 +240,7 @@ void Flush_update(void)
 void Update_rect(short x, short y, unsigned short width, unsigned short height)
 {
   #if (UPDATE_METHOD == UPDATE_METHOD_MULTI_RECTANGLE)
-    Update_rectangle(Screen_SDL, x*Pixel_width, y*Pixel_height, width*Pixel_width, height*Pixel_height);
+    Update_rectangle(Screen_SDL, x, y, width, height);
   #endif
 
   #if (UPDATE_METHOD == UPDATE_METHOD_CUMULATED)
@@ -271,7 +271,7 @@ void Update_rect(short x, short y, unsigned short width, unsigned short height)
 void Update_status_line(short char_pos, short width)
 {
   #if (UPDATE_METHOD == UPDATE_METHOD_MULTI_RECTANGLE)
-  Update_rectangle(Screen_SDL, (18+char_pos*8)*Menu_factor_X*Pixel_width,Menu_status_Y*Pixel_height,width*8*Menu_factor_X*Pixel_width,8*Menu_factor_Y*Pixel_height);
+  Update_rectangle(Screen_SDL, (18+char_pos*8)*Menu_factor_X,Menu_status_Y,width*8*Menu_factor_X,8*Menu_factor_Y);
   #endif
 
   #if (UPDATE_METHOD == UPDATE_METHOD_CUMULATED)
@@ -402,8 +402,8 @@ void Clear_border(byte color)
   if (!Screen_SDL)
     return;
   
-  width = Screen_SDL->w - Screen_width*Pixel_width;
-  height = Screen_SDL->h - Screen_height*Pixel_height;
+  width = Screen_SDL->w - Screen_width;
+  height = Screen_SDL->h - Screen_height;
   if (width)
   {
     SDL_Rect r;
@@ -448,7 +448,7 @@ void Allow_drag_and_drop(int flag)
 
 void Set_mouse_position(void)
 {
-    SDL_WarpMouseInWindow(Window_SDL, Mouse_X*Pixel_width, Mouse_Y*Pixel_height);
+    SDL_WarpMouseInWindow(Window_SDL, Mouse_X, Mouse_Y);
 }
 
 void Set_surface_palette(const SDL_Surface *surface, const SDL_Color *palette)

@@ -72,10 +72,10 @@ void Save_background(byte **buffer, int x_pos, int y_pos, int width, int height)
 {
   int index;
   if(*buffer != NULL) DEBUG("WARNING : buffer already allocated !!!",0);
-  *buffer=(byte *) malloc(width*Menu_factor_X*height*Menu_factor_Y*Pixel_width);
+  *buffer=(byte *) malloc(width*Menu_factor_X*height*Menu_factor_Y);
   if(*buffer==NULL) Error(0);
   for (index=0; index<(height*Menu_factor_Y); index++)
-    Read_line(x_pos,y_pos+index,width*Menu_factor_X,(*buffer)+((int)index*width*Menu_factor_X*Pixel_width));
+    Read_line(x_pos,y_pos+index,width*Menu_factor_X,(*buffer)+((int)index*width*Menu_factor_X));
 }
 
 ///Restores a screen block
@@ -83,7 +83,7 @@ void Restore_background(byte *buffer, int x_pos, int y_pos, int width, int heigh
 {
   int index;
   for (index=0; index<height*Menu_factor_Y; index++)
-    Display_line_fast(x_pos,y_pos+index,width*Menu_factor_X,buffer+((int)index*width*Menu_factor_X*Pixel_width));
+    Display_line_fast(x_pos,y_pos+index,width*Menu_factor_X,buffer+((int)index*width*Menu_factor_X));
   free(buffer);
   buffer = NULL;
 }
@@ -91,9 +91,7 @@ void Restore_background(byte *buffer, int x_pos, int y_pos, int width, int heigh
 ///Draw a pixel in a saved screen block (when you sort colors in the palette, for example)
 void Pixel_background(int x_pos, int y_pos, byte color)
 {
-  int x_repetition=Pixel_width;
-  while (x_repetition--)
-    (Window_background[0][x_pos*Pixel_width+x_repetition+y_pos*Window_width*Pixel_width*Menu_factor_X])=color;
+  Window_background[0][x_pos+y_pos*Window_width*Menu_factor_X]=color;
 }
 
 
@@ -615,13 +613,13 @@ void Layer_preview_on(int * preview_is_visible)
         break;
       
       offset=(Layer_button_width-previewW)/2;
-      for (y = 0; y < previewH*Pixel_height*Menu_factor_Y; y++)
-      for (x = 0; x < previewW*Pixel_width*Menu_factor_X; x++)
+      for (y = 0; y < previewH*Menu_factor_Y; y++)
+      for (x = 0; x < previewW*Menu_factor_X; x++)
       {
-        int imgx = x * Main_image_width / previewW/Pixel_width/Menu_factor_X;
-        int imgy = y * Main_image_height / previewH/Pixel_height/Menu_factor_Y;
+        int imgx = x * Main_image_width / previewW/Menu_factor_X;
+        int imgy = y * Main_image_height / previewH/Menu_factor_Y;
         // Use Pixel_simple() in order to get highest resolution
-        Pixel_simple(x+((layer*Layer_button_width+offset)*Menu_factor_X+Window_pos_X)*Pixel_width, y+Window_pos_Y*Pixel_height, *(Main_backups->Pages->Image[layer].Pixels
+        Pixel(x+((layer*Layer_button_width+offset)*Menu_factor_X+Window_pos_X), y+Window_pos_Y, *(Main_backups->Pages->Image[layer].Pixels
           + imgx + imgy * Main_image_width));
       }
     }
@@ -3507,11 +3505,11 @@ void Remap_window_backgrounds(byte * conversion_table, int Min_Y, int Max_Y)
             return;
           if (dx+Window_stack[window_index].Pos_Y<Min_Y)
           {
-            EDI += Window_stack[window_index].Width*Menu_factor_X*Pixel_width;
+            EDI += Window_stack[window_index].Width*Menu_factor_X;
           }
           else
                 // Pour chaque pixel
-                for(cx=Window_stack[window_index].Width*Menu_factor_X*Pixel_width;cx>0;cx--)
+                for(cx=Window_stack[window_index].Width*Menu_factor_X;cx>0;cx--)
                 {
                         *EDI = conversion_table[*EDI];
                         EDI ++;

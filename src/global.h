@@ -171,47 +171,44 @@ GFX2_GLOBAL short Paintbrush_offset_Y;
 // -- Graphic commands
 
 /// On the screen, draw a point.
-GFX2_GLOBAL Func_pixel Pixel;
+void Pixel(word x,word y,byte color);
 /// Test a pixel color from screen.
-GFX2_GLOBAL Func_read Read_pixel;
+byte Read_pixel(word x,word y);
 /// Redraw all screen, without overwriting the menu.
-GFX2_GLOBAL Func_display Display_screen;
+void Display_screen (word width,word height,word image_width);
 /// Draw a rectangle on screen.
-GFX2_GLOBAL Func_block Block;
+void Block(word start_x,word start_y,word width,word height,byte color);
 /// Draw a point from the image to screen (no zoom).
-GFX2_GLOBAL Func_pixel Pixel_preview_normal;
+void Pixel_preview_normal(word x,word y,byte color);
 /// Draw a point from the image to screen (magnified part).
-GFX2_GLOBAL Func_pixel Pixel_preview_magnifier;
+void Pixel_preview_magnifier(word x,word y,byte color);
 /// Draw a point from the image to screen (zoomed if needed).
 GFX2_GLOBAL Func_pixel Pixel_preview;
 /// Draw a horizontal XOR line on screen.
-GFX2_GLOBAL Func_line_XOR Horizontal_XOR_line;
+void Horizontal_XOR_line(word x_pos,word y_pos,word width);
 /// Draw a vertical XOR line on screen.
-GFX2_GLOBAL Func_line_XOR Vertical_XOR_line;
+void Vertical_XOR_line(word x_pos,word y_pos,word height);
 /// Display part of the brush on screen, color mode.
-GFX2_GLOBAL Func_display_brush_color Display_brush_color;
+void Display_brush_color(word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word brush_width);
 /// Display part of the brush on screen, monochrome mode.
-GFX2_GLOBAL Func_display_brush_mono  Display_brush_mono;
+void Display_brush_mono(word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,byte color,word brush_width);
 /// Clear the brush currently displayed on screen, redrawing the image instead.
-GFX2_GLOBAL Func_display_brush_color Clear_brush;
+void Clear_brush(word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word image_width);
 /// Remap part of the screen after the menu colors have changed.
-GFX2_GLOBAL Func_remap     Remap_screen;
-/// Draw a line on screen.
-GFX2_GLOBAL Func_procsline Display_line;
+void Remap_screen(word x_pos,word y_pos,word width,word height,byte * conversion_table);
 /// Draw a line on screen, without doubling it if using wide pixels. (to be used when the line is already doubled in the input buffer)
-GFX2_GLOBAL Func_procsline Display_line_fast;
+void Display_line_fast(word x_pos,word y_pos,word width,byte * line);
 /// Read a line of pixels from screen.
-GFX2_GLOBAL Func_procsline Read_line;
-/// Redraw all magnified part on screen, without overwriting the menu.
-GFX2_GLOBAL Func_display_zoom Display_zoomed_screen;
+void Read_line(word x_pos,word y_pos,word width,byte * line);
 /// Display part of the brush on the magnified part of screen, color mode.
-GFX2_GLOBAL Func_display_brush_color_zoom Display_brush_color_zoom;
+void Display_brush_color_zoom   (word x_pos,word y_pos,word x_offset,word y_offset,word width,word end_y_pos,byte transp_color,word brush_width,byte * buffer);
 /// Display part of the brush on the magnified part of screen, monochrome mode.
-GFX2_GLOBAL Func_display_brush_mono_zoom  Display_brush_mono_zoom;
+void Display_brush_mono_zoom    (word x_pos,word y_pos,word x_offset,word y_offset,word width,word end_y_pos,byte transp_color,byte color,word brush_width,byte * buffer);
 /// Clear the brush currently displayed on the magnified part of screen, redrawing the image instead.
-GFX2_GLOBAL Func_display_brush_color_zoom Clear_brush_scaled;
+void Clear_brush_scaled           (word x_pos,word y_pos,word x_offset,word y_offset,word width,word end_y_pos,byte transp_color,word image_width,byte * buffer);
 /// Draw an arbitrary brush on screen (not the current brush)
-GFX2_GLOBAL Func_draw_brush Display_brush;
+void Display_brush             (byte * brush, word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word brush_width);
+
 
 // -- Screen data
 

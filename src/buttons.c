@@ -2093,11 +2093,11 @@ void Button_Resolution(void)
           if (Mouse_K==2)
           {
             // On affecte également les dimensions de l'image:
-            chosen_width=Video_mode[selected_mode].Width/Pixel_width;
+            chosen_width=Video_mode[selected_mode].Width;
             Num2str(chosen_width,str,4);
             Window_input_content(input_width_button,str);
 
-            chosen_height=Video_mode[selected_mode].Height/Pixel_height;
+            chosen_height=Video_mode[selected_mode].Height;
             Num2str(chosen_height,str,4);
             Window_input_content(input_button_height,str);
           }

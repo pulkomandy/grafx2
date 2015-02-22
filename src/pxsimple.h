@@ -26,28 +26,8 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "struct.h"
-
-  void Pixel_simple                      (word x,word y,byte color);
-  byte Read_pixel_simple                  (word x,word y);
-  void Block_simple                      (word start_x,word start_y,word width,word height,byte color);
-  void Pixel_preview_normal_simple       (word x,word y,byte color);
-  void Pixel_preview_magnifier_simple        (word x,word y,byte color);
-  void Horizontal_XOR_line_simple      (word x_pos,word y_pos,word width);
-  void Vertical_XOR_line_simple        (word x_pos,word y_pos,word height);
-  void Display_brush_color_simple        (word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word brush_width);
-  void Display_brush_mono_simple         (word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,byte color,word brush_width);
-  void Clear_brush_simple                (word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word image_width);
-  void Remap_screen_simple               (word x_pos,word y_pos,word width,word height,byte * conversion_table);
-  void Display_part_of_screen_simple (word width,word height,word image_width);
-  void Display_line_on_screen_simple   (word x_pos,word y_pos,word width,byte * line);
-  void Read_line_screen_simple       (word x_pos,word y_pos,word width,byte * line);
-  void Display_part_of_screen_scaled_simple(word width,word height,word image_width,byte * buffer);
-  void Display_brush_color_zoom_simple   (word x_pos,word y_pos,word x_offset,word y_offset,word width,word end_y_pos,byte transp_color,word brush_width,byte * buffer);
-  void Display_brush_mono_zoom_simple    (word x_pos,word y_pos,word x_offset,word y_offset,word width,word end_y_pos,byte transp_color,byte color,word brush_width,byte * buffer);
-  void Clear_brush_scaled_simple           (word x_pos,word y_pos,word x_offset,word y_offset,word width,word end_y_pos,byte transp_color,word image_width,byte * buffer);
-  void Display_brush_simple             (byte * brush, word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word brush_width);
-
-void Display_transparent_mono_line_on_screen_simple(
-        word x_pos, word y_pos, word width, byte* line, 
-        byte transp_color, byte color);
-void Display_transparent_line_on_screen_simple(word x_pos,word y_pos,word width,byte* line,byte transp_color);
+  
+/// Redraw all magnified part on screen, without overwriting the menu.
+void Display_part_of_screen_scaled(word width,word height,word image_width,byte * buffer);
+void Display_transparent_mono_line_on_screen(word x_pos, word y_pos, word width, byte* line, byte transp_color, byte color);
+void Display_transparent_line_on_screen(word x_pos,word y_pos,word width,byte* line,byte transp_color);

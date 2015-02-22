@@ -989,8 +989,8 @@ void Draw_preset_sieve_patterns(void)
   
   Zoom=Min(Menu_factor_X,Menu_factor_Y);
   
-  //x_size=1;//Menu_factor_X/Pixel_height;
-  //y_size=1;//Menu_factor_Y/Pixel_width;
+  //x_size=1;//Menu_factor_X;
+  //y_size=1;//Menu_factor_Y;
 
   for (index=0; index<12; index++)
     for (j=0; j<16*Menu_factor_Y/Zoom; j++)

@@ -39,13 +39,6 @@
 #include "graph.h"
 #include "misc.h"
 #include "pxsimple.h"
-#include "pxtall.h"
-#include "pxwide.h"
-#include "pxdouble.h"
-#include "pxtriple.h"
-#include "pxwide2.h"
-#include "pxtall2.h"
-#include "pxquad.h"
 #include "windows.h"
 #include "input.h"
 #include "brush.h"
@@ -224,8 +217,8 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
   int pix_height;
   byte screen_changed;
   byte pixels_changed;
-  int absolute_mouse_x=Mouse_X*Pixel_width;
-  int absolute_mouse_y=Mouse_Y*Pixel_height;
+  int absolute_mouse_x=Mouse_X;
+  int absolute_mouse_y=Mouse_Y;
   static int Wrong_resize;
 
 try_again:
@@ -267,14 +260,14 @@ try_again:
       break;
   }
 
-  screen_changed = (Screen_width*Pixel_width!=width ||
-                    Screen_height*Pixel_height!=height ||
+  screen_changed = (Screen_width!=width ||
+                    Screen_height!=height ||
                     Video_mode[Current_resolution].Fullscreen != fullscreen);
 
   // Valeurs raisonnables: minimum 320x200
   if (!fullscreen)
   {
-    if (Wrong_resize>20 && (width < 320*pix_width || height < 200*pix_height))
+    if (Wrong_resize>20 && (width < 320 || height < 200))
     {
       if(pix_ratio != PIXEL_SIMPLE) {
         pix_ratio = PIXEL_SIMPLE;
@@ -285,18 +278,18 @@ try_again:
       }
     }
     
-    if (width > 320*pix_width && height > 200*pix_height)
+    if (width > 320 && height > 200)
       Wrong_resize = 0;
 
-    if (width < 320*pix_width)
+    if (width < 320)
     {
-        width = 320*pix_width;
+        width = 320;
         screen_changed=1;
         Wrong_resize++;
     }
-    if (height < 200*pix_height)
+    if (height < 200)
     {
-        height = 200*pix_height;
+        height = 200;
         screen_changed=1;
         Wrong_resize++;
     }
@@ -306,7 +299,7 @@ try_again:
   }
   else
   {
-    if (width < 320*pix_width || height < 200*pix_height)
+    if (width < 320 || height < 200)
       return 1;
   }
   // La largeur doit être un multiple de 4
@@ -331,60 +324,9 @@ try_again:
     Pixel_ratio=pix_ratio;
     Pixel_width=pix_width;
     Pixel_height=pix_height;
-    switch (Pixel_ratio)
-    {
-        default:
-        case PIXEL_SIMPLE:
-#define Display_line_on_screen_fast_simple Display_line_on_screen_simple
-#define SETPIXEL(x) \
-            Pixel = Pixel_##x ; \
-            Read_pixel= Read_pixel_##x ; \
-            Display_screen = Display_part_of_screen_##x ; \
-            Block = Block_##x ; \
-            Pixel_preview_normal = Pixel_preview_normal_##x ; \
-            Pixel_preview_magnifier = Pixel_preview_magnifier_##x ; \
-            Horizontal_XOR_line = Horizontal_XOR_line_##x ; \
-            Vertical_XOR_line = Vertical_XOR_line_##x ; \
-            Display_brush_color = Display_brush_color_##x ; \
-            Display_brush_mono = Display_brush_mono_##x ; \
-            Clear_brush = Clear_brush_##x ; \
-            Remap_screen = Remap_screen_##x ; \
-            Display_line = Display_line_on_screen_##x ; \
-            Display_line_fast = Display_line_on_screen_fast_##x ; \
-            Read_line = Read_line_screen_##x ; \
-            Display_zoomed_screen = Display_part_of_screen_scaled_##x ; \
-            Display_brush_color_zoom = Display_brush_color_zoom_##x ; \
-            Display_brush_mono_zoom = Display_brush_mono_zoom_##x ; \
-            Clear_brush_scaled = Clear_brush_scaled_##x ; \
-            Display_brush = Display_brush_##x ;
-			SETPIXEL(simple)
-        break;
-        case PIXEL_TALL:
-#define Display_line_on_screen_fast_tall Display_line_on_screen_tall
-			SETPIXEL(tall)
-        break;
-        case PIXEL_WIDE:
-			SETPIXEL(wide)
-        break;
-        case PIXEL_DOUBLE:
-			SETPIXEL(double)
-        break;
-        case PIXEL_TRIPLE:
-			SETPIXEL(triple)
-        break;
-        case PIXEL_WIDE2:
-			SETPIXEL(wide2)
-        break;
-        case PIXEL_TALL2:
-			SETPIXEL(tall2)
-        break;
-        case PIXEL_QUAD:
-			SETPIXEL(quad)
-        break;
-    }
   }
-  Screen_width = width/Pixel_width;
-  Screen_height = height/Pixel_height;
+  Screen_width = width;
+  Screen_height = height;
 
   Clear_border(MC_Black); // Requires up-to-date Screen_* and Pixel_*
 
@@ -411,18 +353,12 @@ try_again:
       Menu_factor_Y=1;
       break;
     default: // Stay below some reasonable size
-      if (factor>Max(Pixel_width,Pixel_height))
-        factor/=Max(Pixel_width,Pixel_height);
       Menu_factor_X=Min(factor,abs(Config.Ratio));
       Menu_factor_Y=Min(factor,abs(Config.Ratio));
   }
-  if (Pixel_height>Pixel_width && Screen_width>=Menu_factor_X*2*320)
-    Menu_factor_X*=2;
-  else if (Pixel_width>Pixel_height && Screen_height>=Menu_factor_Y*2*200)
-    Menu_factor_Y*=2;
     
   free(Horizontal_line_buffer);
-  Horizontal_line_buffer=(byte *)malloc(Pixel_width * 
+  Horizontal_line_buffer=(byte *)malloc( 
     ((Screen_width>Main_image_width)?Screen_width:Main_image_width));
 
   Set_palette(Main_palette);
@@ -432,8 +368,8 @@ try_again:
   {
     for (index=1; index<Nb_video_modes; index++)
     {
-      if (Video_mode[index].Width/Pixel_width==Screen_width &&
-          Video_mode[index].Height/Pixel_height==Screen_height)
+      if (Video_mode[index].Width==Screen_width &&
+          Video_mode[index].Height==Screen_height)
       {
         Current_resolution=index;
         break;
@@ -450,10 +386,10 @@ try_again:
 
   Adjust_mouse_sensitivity(fullscreen);
 
-  Mouse_X=absolute_mouse_x/Pixel_width;
+  Mouse_X=absolute_mouse_x;
   if (Mouse_X>=Screen_width)
     Mouse_X=Screen_width-1;
-  Mouse_Y=absolute_mouse_y/Pixel_height;
+  Mouse_Y=absolute_mouse_y;
   if (Mouse_Y>=Screen_height)
     Mouse_Y=Screen_height-1;
   if (fullscreen)
@@ -2884,7 +2820,7 @@ void Horizontal_grid_line(word x_pos,word y_pos,word width)
   int x;
 
   for (x=!(x_pos&1);x<width;x+=2)
-    Pixel(x_pos+x, y_pos, xor_lut[*((y_pos-1)*Pixel_height*VIDEO_LINE_WIDTH+x_pos*Pixel_width+Screen_pixels+x*Pixel_width)]);
+    Pixel(x_pos+x, y_pos, xor_lut[*((y_pos-1)*VIDEO_LINE_WIDTH+x_pos+Screen_pixels+x)]);
 }
 
 void Vertical_grid_line(word x_pos,word y_pos,word height)
@@ -2892,7 +2828,7 @@ void Vertical_grid_line(word x_pos,word y_pos,word height)
   int y;
   
   for (y=!(y_pos&1);y<height;y+=2)
-    Pixel(x_pos, y_pos+y, xor_lut[*(Screen_pixels+(x_pos*Pixel_width-1)+(y_pos*Pixel_height+y*Pixel_height)*VIDEO_LINE_WIDTH)]);
+    Pixel(x_pos, y_pos+y, xor_lut[*(Screen_pixels+(x_pos-1)+(y_pos+y)*VIDEO_LINE_WIDTH)]);
 }
 
 // Tile Grid

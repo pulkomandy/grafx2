@@ -31,19 +31,19 @@
 #include "pxsimple.h"
 
 
-void Pixel_simple (word x,word y,byte color)
+void Pixel (word x,word y,byte color)
 /* Affiche un pixel de la color aux coords x;y à l'écran */
 {
   *(Screen_pixels + x + y * VIDEO_LINE_WIDTH)=color;
 }
 
-byte Read_pixel_simple (word x,word y)
+byte Read_pixel (word x,word y)
 /* On retourne la couleur du pixel aux coords données */
 {
   return *( Screen_pixels + y * VIDEO_LINE_WIDTH + x );
 }
 
-void Block_simple (word start_x,word start_y,word width,word height,byte color)
+void Block (word start_x,word start_y,word width,word height,byte color)
 /* On affiche un rectangle de la couleur donnée */
 {
   SDL_Rect rectangle;
@@ -54,7 +54,7 @@ void Block_simple (word start_x,word start_y,word width,word height,byte color)
   SDL_FillRect(Screen_SDL,&rectangle,color);
 }
 
-void Display_part_of_screen_simple (word width,word height,word image_width)
+void Display_screen (word width,word height,word image_width)
 /* Afficher une partie de l'image telle quelle sur l'écran */
 {
   byte* dest=Screen_pixels; //On va se mettre en 0,0 dans l'écran (dest)
@@ -74,20 +74,20 @@ void Display_part_of_screen_simple (word width,word height,word image_width)
   //Update_rect(0,0,width,height);
 }
 
-void Pixel_preview_normal_simple (word x,word y,byte color)
+void Pixel_preview_normal (word x,word y,byte color)
 /* Affichage d'un pixel dans l'écran, par rapport au décalage de l'image 
  * dans l'écran, en mode normal (pas en mode loupe)
  * Note: si on modifie cette procédure, il faudra penser à faire également 
  * la modif dans la procédure Pixel_Preview_Loupe_SDL. */
 {
 //  if(x-Main_offset_X >= 0 && y - Main_offset_Y >= 0)
-  Pixel_simple(x-Main_offset_X,y-Main_offset_Y,color);
+  Pixel(x-Main_offset_X,y-Main_offset_Y,color);
 }
 
-void Pixel_preview_magnifier_simple  (word x,word y,byte color)
+void Pixel_preview_magnifier (word x,word y,byte color)
 {
   // Affiche le pixel dans la partie non zoomée
-  Pixel_simple(x-Main_offset_X,y-Main_offset_Y,color);
+  Pixel(x-Main_offset_X,y-Main_offset_Y,color);
   
   // Regarde si on doit aussi l'afficher dans la partie zoomée
   if (y >= Limit_top_zoom && y <= Limit_visible_bottom_zoom
@@ -104,14 +104,14 @@ void Pixel_preview_magnifier_simple  (word x,word y,byte color)
     else
       height = Main_magnifier_factor;
 
-    Block_simple(
+    Block(
       Main_magnifier_factor * (x-Main_magnifier_offset_X) + Main_X_zoom, 
       y_zoom, Main_magnifier_factor, height, color
       );
   }
 }
 
-void Horizontal_XOR_line_simple(word x_pos,word y_pos,word width)
+void Horizontal_XOR_line(word x_pos,word y_pos,word width)
 {
   //On calcule la valeur initiale de dest:
   byte* dest=y_pos*VIDEO_LINE_WIDTH+x_pos+Screen_pixels;
@@ -122,7 +122,7 @@ void Horizontal_XOR_line_simple(word x_pos,word y_pos,word width)
     *(dest+x)=xor_lut[*(dest+x)];
 }
 
-void Vertical_XOR_line_simple(word x_pos,word y_pos,word height)
+void Vertical_XOR_line(word x_pos,word y_pos,word height)
 {
   int i;
   byte color;
@@ -133,7 +133,7 @@ void Vertical_XOR_line_simple(word x_pos,word y_pos,word height)
   }
 }
 
-void Display_brush_color_simple(word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word brush_width)
+void Display_brush_color(word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word brush_width)
 {
   // dest = Position à l'écran
   byte* dest = Screen_pixels + y_pos * VIDEO_LINE_WIDTH + x_pos;
@@ -165,7 +165,7 @@ void Display_brush_color_simple(word x_pos,word y_pos,word x_offset,word y_offse
   Update_rect(x_pos,y_pos,width,height);
 }
 
-void Display_brush_mono_simple(word x_pos, word y_pos,
+void Display_brush_mono(word x_pos, word y_pos,
         word x_offset, word y_offset, word width, word height,
         byte transp_color, byte color, word brush_width)
 /* On affiche la brosse en monochrome */
@@ -197,7 +197,7 @@ void Display_brush_mono_simple(word x_pos, word y_pos,
   Update_rect(x_pos,y_pos,width,height);
 }
 
-void Clear_brush_simple(word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word image_width)
+void Clear_brush(word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word image_width)
 {
   byte* dest=Screen_pixels+x_pos+y_pos*VIDEO_LINE_WIDTH; //On va se mettre en 0,0 dans l'écran (dest)
   byte* src = ( y_pos + Main_offset_Y ) * image_width + x_pos + Main_offset_X + Main_screen; //Coords de départ ds la source (src)
@@ -220,7 +220,7 @@ void Clear_brush_simple(word x_pos,word y_pos,word x_offset,word y_offset,word w
 }
 
 // Affiche une brosse (arbitraire) à l'écran
-void Display_brush_simple(byte * brush, word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word brush_width)
+void Display_brush(byte * brush, word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word brush_width)
 {
   // dest = Position à l'écran
   byte* dest = Screen_pixels + y_pos * VIDEO_LINE_WIDTH + x_pos;
@@ -251,7 +251,7 @@ void Display_brush_simple(byte * brush, word x_pos,word y_pos,word x_offset,word
   }
 }
 
-void Remap_screen_simple(word x_pos,word y_pos,word width,word height,byte * conversion_table)
+void Remap_screen(word x_pos,word y_pos,word width,word height,byte * conversion_table)
 {
   // dest = coords a l'écran
   byte* dest = Screen_pixels + y_pos * VIDEO_LINE_WIDTH + x_pos;
@@ -273,13 +273,13 @@ void Remap_screen_simple(word x_pos,word y_pos,word width,word height,byte * con
   Update_rect(x_pos,y_pos,width,height);
 }
 
-void Display_line_on_screen_simple(word x_pos,word y_pos,word width,byte * line)
+void Display_line_fast(word x_pos,word y_pos,word width,byte * line)
 /* On affiche toute une ligne de pixels. Utilisé pour les textes. */
 {
   memcpy(Screen_pixels+x_pos+y_pos*VIDEO_LINE_WIDTH,line,width);
 }
 
-void Display_transparent_mono_line_on_screen_simple(
+void Display_transparent_mono_line_on_screen(
         word x_pos, word y_pos, word width, byte* line, 
         byte transp_color, byte color)
 // Affiche une ligne à l'écran avec une couleur + transparence.
@@ -297,12 +297,12 @@ void Display_transparent_mono_line_on_screen_simple(
   }
 }
 
-void Read_line_screen_simple(word x_pos,word y_pos,word width,byte * line)
+void Read_line(word x_pos,word y_pos,word width,byte * line)
 {
   memcpy(line,VIDEO_LINE_WIDTH * y_pos + x_pos + Screen_pixels,width);
 }
 
-void Display_part_of_screen_scaled_simple(
+void Display_part_of_screen_scaled(
         word width, // width non zoomée
         word height, // height zoomée
         word image_width,byte * buffer)
@@ -323,7 +323,7 @@ void Display_part_of_screen_scaled_simple(
     // Pour chaque ligne
     do{
       // On affiche la ligne zoomée
-      Display_line_on_screen_simple(
+      Display_line_fast(
         Main_X_zoom, y, width*Main_magnifier_factor,
         buffer
       );
@@ -344,7 +344,7 @@ void Display_part_of_screen_scaled_simple(
 // ATTENTION on n'arrive jamais ici !
 }
 
-void Display_transparent_line_on_screen_simple(word x_pos,word y_pos,word width,byte* line,byte transp_color)
+void Display_transparent_line_on_screen(word x_pos,word y_pos,word width,byte* line,byte transp_color)
 {
   byte* src = line;
   byte* dest = Screen_pixels + y_pos * VIDEO_LINE_WIDTH + x_pos;
@@ -362,7 +362,7 @@ void Display_transparent_line_on_screen_simple(word x_pos,word y_pos,word width,
 }
 
 // Affiche une partie de la brosse couleur zoomée
-void Display_brush_color_zoom_simple(word x_pos,word y_pos,
+void Display_brush_color_zoom(word x_pos,word y_pos,
         word x_offset,word y_offset,
         word width, // width non zoomée
         word end_y_pos,byte transp_color,
@@ -380,7 +380,7 @@ void Display_brush_color_zoom_simple(word x_pos,word y_pos,
     // On affiche facteur fois la ligne zoomée
     for(bx=Main_magnifier_factor;bx>0;bx--)
     {
-      Display_transparent_line_on_screen_simple(x_pos,y,width*Main_magnifier_factor,buffer,transp_color);
+      Display_transparent_line_on_screen(x_pos,y,width*Main_magnifier_factor,buffer,transp_color);
       y++;
       if(y==end_y_pos)
       {
@@ -392,7 +392,7 @@ void Display_brush_color_zoom_simple(word x_pos,word y_pos,
   // ATTENTION zone jamais atteinte
 }
 
-void Display_brush_mono_zoom_simple(word x_pos, word y_pos,
+void Display_brush_mono_zoom(word x_pos, word y_pos,
         word x_offset, word y_offset, 
         word width, // width non zoomée 
         word end_y_pos,
@@ -421,7 +421,7 @@ void Display_brush_mono_zoom_simple(word x_pos, word y_pos,
     do
     {
       // On affiche la ligne zoomée
-      Display_transparent_mono_line_on_screen_simple(
+      Display_transparent_mono_line_on_screen(
         x_pos, y, width * Main_magnifier_factor, 
         buffer, transp_color, color
       );
@@ -445,7 +445,7 @@ void Display_brush_mono_zoom_simple(word x_pos, word y_pos,
   }
 }
 
-void Clear_brush_scaled_simple(word x_pos,word y_pos,word x_offset,word y_offset,word width,word end_y_pos,byte transp_color,word image_width,byte * buffer)
+void Clear_brush_scaled(word x_pos,word y_pos,word x_offset,word y_offset,word width,word end_y_pos,byte transp_color,word image_width,byte * buffer)
 {
   // En fait on va recopier l'image non zoomée dans la partie zoomée !
   byte* src = Main_screen + y_offset * image_width + x_offset;
@@ -461,7 +461,7 @@ void Clear_brush_scaled_simple(word x_pos,word y_pos,word x_offset,word y_offset
 
     // Pour chaque ligne
     do{
-      Display_line_on_screen_simple(x_pos,y,
+      Display_line_fast(x_pos,y,
         width * Main_magnifier_factor,buffer);
 
       // Ligne suivante

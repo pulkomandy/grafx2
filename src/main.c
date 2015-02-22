@@ -750,10 +750,10 @@ int Init_program(int argc,char * argv[])
   //ActivateConsole();
   #endif
   
-  Main_image_width=Screen_width/Pixel_width;
-  Main_image_height=Screen_height/Pixel_height;
-  Spare_image_width=Screen_width/Pixel_width;
-  Spare_image_height=Screen_height/Pixel_height;
+  Main_image_width=Screen_width;
+  Main_image_height=Screen_height;
+  Spare_image_width=Screen_width;
+  Spare_image_height=Screen_height;
   
   starting_image_mode = Config.Default_mode_layers ? 
     IMAGE_MODE_LAYERED : IMAGE_MODE_ANIMATION;

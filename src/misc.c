@@ -104,7 +104,7 @@ word Count_used_colors_screen_area(dword* usage, word start_x, word start_y,
     {
       // Get color in screen memory
       color=*(Screen_pixels+((start_x + x)+(start_y + y) * Screen_width
-        * Pixel_height) * Pixel_width);
+        * 1) * 1);
       usage[color]++; //Un point de plus pour cette couleur
     }
   }

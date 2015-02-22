@@ -303,8 +303,8 @@ void Handle_window(SDL_WindowEvent event)
 
 int Handle_mouse_move(SDL_MouseMotionEvent event)
 {
-    Input_new_mouse_X = event.x/Pixel_width;
-    Input_new_mouse_Y = event.y/Pixel_height;
+    Input_new_mouse_X = event.x;
+    Input_new_mouse_Y = event.y;
 
     return Move_cursor_with_constraints();
 }
