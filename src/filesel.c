@@ -498,11 +498,6 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
 #endif
 
   closedir(current_directory);
-#if defined (__MINT__)  
-
-#else
-  free(current_path);
-#endif
   current_path = NULL;
 
   if (list->Nb_files==0 && list->Nb_directories==0)
