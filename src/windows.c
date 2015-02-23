@@ -336,6 +336,10 @@ void Display_menu_palette(void)
   
   if (Menu_is_visible && Menu_bars[MENUBAR_TOOLS].Visible)
   {
+	uint8_t transparent = Main_backups->Pages->Transparent_color;
+	int cw,ch;
+
+	// Fill the whole palette area with black
     Block(
       Menu_bars[MENUBAR_TOOLS].Width*Menu_factor_X,
       Menu_Y,
@@ -343,20 +347,30 @@ void Display_menu_palette(void)
       (Menu_bars[MENUBAR_TOOLS].Height)*Menu_factor_Y,
       MC_Black);
 
-    if (Config.Separate_colors)
-      for (color=First_color_in_palette;color<256&&(color-First_color_in_palette)<Menu_cells_X*Menu_cells_Y;color++)
-        Block(Palette_cell_X(color),
+	// Compute the size of the color cells (they are smaller by 1px when using
+	// 'separate colors"
+    if (Config.Separate_colors) {
+		cw = Menu_palette_cell_width * Menu_factor_X - 1;
+        ch = cell_height * Menu_factor_Y - 1;
+	} else {
+		cw = (Menu_palette_cell_width)*Menu_factor_X;
+        ch = (cell_height)*Menu_factor_Y;
+	}
+
+	for (color=First_color_in_palette;color<256&&(color-First_color_in_palette)<Menu_cells_X*Menu_cells_Y;color++) {
+		// Draw the color block
+        Block(Palette_cell_X(color), Palette_cell_Y(color), cw, ch, color);
+
+		// Make the transparent color more visible by adding a MC_Dark/MC_Light pattern to it.
+		if (color == transparent) {
+        	Block(Palette_cell_X(color),
               Palette_cell_Y(color),
-              (Menu_palette_cell_width-1)*Menu_factor_X,
-              (cell_height-1)*Menu_factor_Y,
-              color);
-    else
-      for (color=First_color_in_palette;color<256&&color-First_color_in_palette<Menu_cells_X*Menu_cells_Y;color++)
-        Block(Palette_cell_X(color),
-              Palette_cell_Y(color),
-              Menu_palette_cell_width*Menu_factor_X,
-              cell_height * Menu_factor_Y,
-              color);
+              cw / 2, ch / 2, MC_Light);
+        	Block(Palette_cell_X(color) + cw / 2,
+              Palette_cell_Y(color) + ch / 2,
+              cw / 2, ch / 2, MC_Dark);
+		}
+	  }
 
     Frame_menu_color(Back_color);
     Frame_menu_color(Fore_color);
