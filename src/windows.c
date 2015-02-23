@@ -258,8 +258,8 @@ void Frame_menu_color(byte id)
   {
     if (Config.Separate_colors)
     {
-      start_x=Palette_cell_X(id)-1*Menu_factor_X;
-      start_y=Palette_cell_Y(id)-1*Menu_factor_Y;
+      start_x=Palette_cell_X(id)-1;
+      start_y=Palette_cell_Y(id)-1;
 
       // TODO: if color is black, we are unselecting a color. If another color next to it is selected, we
       // will erase one edge of its selection square.
@@ -267,14 +267,14 @@ void Frame_menu_color(byte id)
       // But we have to find which color is above and below (not so easy) and for the horizontal, check we
       // are not at the edge of the palette. This makes a lot of cases to handle.
       // Top
-      Block(start_x,start_y,(Menu_palette_cell_width+1)*Menu_factor_X,Menu_factor_Y,color);
+      Block(start_x,start_y,(Menu_palette_cell_width)*Menu_factor_X+1,1,color);
       // Bottom
-      Block(start_x,start_y+cell_height*Menu_factor_Y,(Menu_palette_cell_width+1)*Menu_factor_X,Menu_factor_Y,color);
+      Block(start_x,start_y+cell_height*Menu_factor_Y,(Menu_palette_cell_width)*Menu_factor_X+1,1,color);
 
       // Left
-      Block(start_x,start_y+Menu_factor_Y,Menu_factor_X,(cell_height -1)* Menu_factor_Y,color);
+      Block(start_x,start_y+1,1,(cell_height)* Menu_factor_Y,color);
       //Right
-      Block(start_x+(Menu_palette_cell_width*Menu_factor_X),start_y+Menu_factor_Y,Menu_factor_X,(cell_height -1)* Menu_factor_Y,color);
+      Block(start_x+(Menu_palette_cell_width*Menu_factor_X),start_y+1,1,(cell_height)* Menu_factor_Y,color);
 
       Update_rect(start_x,start_y,(Menu_palette_cell_width+1)*Menu_factor_X,(cell_height+1)* Menu_factor_Y);
     }
@@ -336,7 +336,7 @@ void Display_menu_palette(void)
   
   if (Menu_is_visible && Menu_bars[MENUBAR_TOOLS].Visible)
   {
-	uint8_t transparent = Main_backups->Pages->Transparent_color;
+	int transparent = -1;
 	int cw,ch;
 
 	// Fill the whole palette area with black
@@ -346,6 +346,10 @@ void Display_menu_palette(void)
       Screen_width-(Menu_bars[MENUBAR_TOOLS].Width*Menu_factor_X),
       (Menu_bars[MENUBAR_TOOLS].Height)*Menu_factor_Y,
       MC_Black);
+
+	if (Main_backups->Pages->Image_mode == 0
+		&& Main_backups->Pages->Nb_layers > 1)
+		transparent = Main_backups->Pages->Transparent_color;
 
 	// Compute the size of the color cells (they are smaller by 1px when using
 	// 'separate colors"
@@ -368,7 +372,7 @@ void Display_menu_palette(void)
               cw / 2, ch / 2, MC_Light);
         	Block(Palette_cell_X(color) + cw / 2,
               Palette_cell_Y(color) + ch / 2,
-              cw / 2, ch / 2, MC_Dark);
+              (cw+1) / 2, (ch+1) / 2, MC_Dark);
 		}
 	  }
 
