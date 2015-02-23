@@ -27,13 +27,6 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
 #include <SDL_endian.h>
-#if defined(__WIN32__)
-    #include <windows.h>
-#endif
-// There is no WM on the GP2X...
-#ifndef __GP2X__
-    #include <SDL_syswm.h>
-#endif
 
 #include "global.h"
 #include "sdlscreen.h"

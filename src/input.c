@@ -24,11 +24,6 @@
 #include <SDL2/SDL.h>
 #include <SDL_syswm.h>
 
-#ifdef __WIN32__
-  #include <windows.h>
-  #include <ShellApi.h>
-#endif
-
 #include "global.h"
 #include "keyboard.h"
 #include "sdlscreen.h"
