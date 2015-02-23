@@ -105,8 +105,8 @@ void Set_mode_SDL(int *width, int *height, int fullscreen)
   
   Window_SDL = SDL_CreateWindow("GrafX2",
     SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-    fullscreen?0:*width, fullscreen?0:*height,
-    (fullscreen?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_RESIZABLE)|SDL_WINDOW_SHOWN|SDL_WINDOW_INPUT_FOCUS|SDL_WINDOW_MOUSE_FOCUS);
+    *width, *height,
+    (fullscreen?SDL_WINDOW_FULLSCREEN:SDL_WINDOW_RESIZABLE)|SDL_WINDOW_SHOWN|SDL_WINDOW_INPUT_FOCUS|SDL_WINDOW_MOUSE_FOCUS);
   Renderer_SDL = SDL_CreateRenderer(Window_SDL, -1, SDL_RENDERER_SOFTWARE);
   //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
   SDL_RenderSetLogicalSize(Renderer_SDL, *width, *height);

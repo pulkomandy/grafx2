@@ -290,12 +290,20 @@ void Handle_window(SDL_WindowEvent event)
 {
     if(event.event == SDL_WINDOWEVENT_RESIZED)
     {
-        Resize_width = event.data1;
-        Resize_height = event.data2;
+        if (!Video_mode[Current_resolution].Fullscreen)
+        {
+          Resize_width = event.data1;
+          Resize_height = event.data2;
+        }
     }
     else if(event.event == SDL_WINDOWEVENT_CLOSE)
     {
         Quit_is_required = 1;
+    }
+    else if (event.event == SDL_WINDOWEVENT_RESTORED)
+    {
+        // Force screen refresh
+        Update_rect(0,0,0,0);
     }
 }
 
