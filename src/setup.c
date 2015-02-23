@@ -43,6 +43,8 @@
 #elif defined(__linux__)
   #include <limits.h>
   #include <unistd.h>
+#elif defined(__HAIKU__)
+  #include <FindDirectory.h>
 #endif
 
 #include "struct.h"

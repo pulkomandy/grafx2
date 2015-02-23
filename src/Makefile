@@ -203,8 +203,7 @@ endif
     LOPT = $(shell sdl-config --libs) -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lfreetype -lbe $(LUALOPT)
     CC = gcc
 	#Append the gcc kind to the objdir (gcc2 or gcc4) to avoid conflicts when switching from one to other.
-	OBJKIND = $(lastword $(shell setgcc))
-    OBJDIR = ../obj/haiku/$(OBJKIND)
+    OBJDIR = ../obj/haiku
     ZIP = zip
 
   else
