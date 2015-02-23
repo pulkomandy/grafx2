@@ -1245,11 +1245,11 @@ void Init_buttons(void)
               Do_nothing,
               FAMILY_INSTANT);
   Init_button(BUTTON_LAYER_ADD,
-              "Add layer               ",
+              "Add/Duplicate  layer    ",
               86,0,
               13,9,
               BUTTON_SHAPE_RECTANGLE,
-              Button_Layer_add, Button_Layer_add,
+              Button_Layer_add, Button_Layer_duplicate,
               0,0,
               Do_nothing,
               FAMILY_INSTANT);
@@ -1351,7 +1351,7 @@ void Init_buttons(void)
               177,0,
               13,13,
               BUTTON_SHAPE_RECTANGLE,
-              Button_Layer_add, Button_Layer_add,
+              Button_Layer_duplicate, Button_Layer_duplicate,
               0,0,
               Do_nothing,
               FAMILY_INSTANT);

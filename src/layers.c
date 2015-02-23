@@ -110,21 +110,45 @@ void Button_Layer_add(void)
     Backup_layers(LAYER_NONE);
     if (!Add_layer(Main_backups,Main_current_layer+1))
     {
-      if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
-      {
-        // Make a copy of current image, so the display is unchanged
-        memcpy(
-          Main_backups->Pages->Image[Main_current_layer].Pixels,
-          Main_backups->Pages->Image[Main_current_layer-1].Pixels,
-          Main_backups->Pages->Width*Main_backups->Pages->Height);
-      }
-      else
-      {
+      Update_depth_buffer();
+      // I just noticed this might be unneeded, since the new layer
+      // is transparent, it shouldn't have any visible effect.
+      Display_all_screen();
+      Display_layerbar();
+      End_of_modification();
+    }
+  }
+
+  Unselect_button(BUTTON_LAYER_ADD);
+  Unselect_button(BUTTON_ANIM_ADD_FRAME);
+  Display_cursor();
+}
+
+
+void Button_Layer_duplicate(void)
+{
+  int max[] = {MAX_NB_LAYERS, MAX_NB_FRAMES, 5};
+  
+  Hide_cursor();
+
+  if (Main_backups->Pages->Nb_layers < max[Main_backups->Pages->Image_mode])
+  {
+    // Backup with unchanged layers
+    Backup_layers(LAYER_NONE);
+    if (!Add_layer(Main_backups,Main_current_layer+1))
+    {
+      // Make a copy of current image
+      memcpy(
+        Main_backups->Pages->Image[Main_current_layer].Pixels,
+        Main_backups->Pages->Image[Main_current_layer-1].Pixels,
+        Main_backups->Pages->Width*Main_backups->Pages->Height);
+
+      if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION) {
         Update_depth_buffer();
         // I just noticed this might be unneeded, since the new layer
         // is transparent, it shouldn't have any visible effect.
         Display_all_screen();
-      }
+	  }
       Display_layerbar();
       End_of_modification();
     }
