@@ -429,21 +429,8 @@ void Clear_border(byte color)
 /// Activates or desactivates file drag-dropping in program window.
 void Allow_drag_and_drop(int flag)
 {
-  // Inform Windows that we accept drag-n-drop events or not
-  #ifdef __WIN32__
-  /*
-  SDL_SysWMinfo wminfo;
-  HWND hwnd;
-  
-  SDL_VERSION(&wminfo.version);
-  SDL_GetWMInfo(&wminfo);
-  hwnd = wminfo.window;
-  DragAcceptFiles(hwnd,flag?TRUE:FALSE);
-  SDL_EventState (SDL_SYSWMEVENT,flag?SDL_ENABLE:SDL_DISABLE );
-  */
-  #else
-  (void)flag; // unused
-  #endif
+  // Inform the system that we accept drag-n-drop events or not
+  SDL_EventState (SDL_DROPFILE,flag?SDL_ENABLE:SDL_DISABLE );
 }
 
 void Set_mouse_position(void)

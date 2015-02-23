@@ -933,48 +933,12 @@ int Get_input(int sleep_time)
           #endif
           // End of Joystick handling
           
-          case SDL_SYSWMEVENT:
-#ifdef __WIN32__TODO
-              if(event.syswm.msg->win.msg  == WM_DROPFILES)
-              {
-                int file_count;
-                HDROP hdrop = (HDROP)(event.syswm.msg->wParam);
-                if((file_count = DragQueryFile(hdrop,(UINT)-1,(LPTSTR) NULL ,(UINT) 0)) > 0)
-                {
-                  long len;
-                  // Query filename length
-                  len = DragQueryFile(hdrop,0 ,NULL ,0);
-                  if (len)
-                  {
-                    Drop_file_name=calloc(len+1,1);
-                    if (Drop_file_name)
-                    {
-                      if (DragQueryFile(hdrop,0 ,(LPTSTR) Drop_file_name ,(UINT) MAX_PATH))
-                      {
-                        // Success
-                      }
-                      else
-                      {
-                        free(Drop_file_name);
-                        // Don't report name copy error
-                      }
-                    }
-                    else
-                    {
-                      // Don't report alloc error (for a file name? :/ )
-                    }
-                  }
-                  else
-                  {
-                    // Don't report weird Windows error
-                  }
-                }
-                else
-                {
-                  // Drop of zero files. Thanks for the information, Bill.
-                }
-              }
-#endif
+          case SDL_DROPFILE:
+              free(Drop_file_name);
+              Drop_file_name=calloc(strlen(event.drop.file)+1,1);
+              strcpy(Drop_file_name, event.drop.file);
+              SDL_free(event.drop.file);
+              
               break;
           case SDL_TEXTINPUT:
             {
