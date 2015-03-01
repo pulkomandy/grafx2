@@ -81,8 +81,8 @@ else
     RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     BIN = ../bin/grafx2
-    COPT = -Wall -c -gstabs $(shell sdl-config --cflags) $(TTFCOPT)
-    LOPT = $(shell sdl-config --libs) -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lft2
+    COPT = -Wall -c -gstabs $(shell sdl2-config --cflags) $(TTFCOPT)
+    LOPT = $(shell sdl2-config --libs) -lSDL2_image -lpng -ljpeg -lz $(TTFLOPT) -lft2
     CC = gcc
     OBJDIR = ../obj/amiga
     ZIP = lha
@@ -106,15 +106,15 @@ else
     SVN_REVISION = $(shell svnversion | cut -f2 -d ":" - | tr -d "M")
 
     # these are for use with macports
-    #SDLCOPT = $(shell sdl-config --cflags)
-    #SDLLOPT = $(shell sdl-config --libs) $(shell pkg-config --libs SDL_image)
+    #SDLCOPT = $(shell sdl2-config --cflags)
+    #SDLLOPT = $(shell sdl2-config --libs) $(shell pkg-config --libs SDL2_image)
     #LUACOPT = $(shell pkg-config lua --cflags --silence-errors ||pkg-config lua5.1 --cflags --silence-errors ||pkg-config lua-5.1 --cflags)
     #LUALOPT = $(shell pkg-config lua --libs --silence-errors ||pkg-config lua5.1 --libs --silence-errors ||pkg-config lua-5.1 --libs)
 
     # these are for use with Mac OS X native frameworks
     #-framework SDL_ttf 
-    SDLLOPT = -isysroot $(MACOSX_SYSROOT) $(MACOSX_ARCH) -L/usr/lib -framework SDL -framework SDL_image -framework Cocoa -framework Carbon -framework OpenGL
-    SDLCOPT = $(MACOSX_ARCH) -I$(FWDIR)/SDL.framework/Headers -I$(FWDIR)/SDL_image.framework/Headers -I$(FWDIR)/SDL_ttf.framework/Headers -D_THREAD_SAFE
+    SDLLOPT = -isysroot $(MACOSX_SYSROOT) $(MACOSX_ARCH) -L/usr/lib -framework SDL -framework SDL2_image -framework Cocoa -framework Carbon -framework OpenGL
+    SDLCOPT = $(MACOSX_ARCH) -I$(FWDIR)/SDL.framework/Headers -I$(FWDIR)/SDL2_image.framework/Headers -I$(FWDIR)/SDL_ttf.framework/Headers -D_THREAD_SAFE
     LUACOPT = -I$(FWDIR)/Lua.framework/Headers
 ifdef MACOSX_LION
     LUALOPT = -framework lua
@@ -145,8 +145,8 @@ endif
     RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     BIN = ../bin/grafx2
-    COPT = -Wall -g $(shell sdl-config --cflags) $(TTFCOPT)
-    LOPT = -lSDL_image $(shell sdl-config --libs) -lpng -ljpeg -lz $(TTFLOPT) -lfreetype2shared
+    COPT = -Wall -g $(shell sdl2-config --cflags) $(TTFCOPT)
+    LOPT = -lSDL2_image $(shell sdl2-config --libs) -lpng -ljpeg -lz $(TTFLOPT) -lfreetype2shared
     CC = gcc
     OBJDIR = ../obj/aros
     STRIP = strip --strip-unneeded --remove-section .comment
@@ -161,8 +161,8 @@ endif
     RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     BIN = ../bin/grafx2
-    COPT = -Wall -gstabs -c $(shell sdl-config --cflags) $(TTFCOPT)
-    LOPT = -lSDL_image $(shell sdl-config --libs) -lpng -ljpeg -lz $(TTFLOPT)
+    COPT = -Wall -gstabs -c $(shell sdl2-config --cflags) $(TTFCOPT)
+    LOPT = -lSDL2_image $(shell sdl2-config --libs) -lpng -ljpeg -lz $(TTFLOPT)
     CC = gcc
     OBJDIR = ../obj/morphos
     ZIP = lha
@@ -177,8 +177,8 @@ endif
     RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     BIN = ../bin/grafx2
-    COPT = -W -Wall -c -g $(shell sdl-config --cflags) $(TTFCOPT) -I/boot/home/config/include
-    LOPT = $(shell sdl-config --libs) -lSDL_image -lpng -ljpeg -lz $(TTFLOPT)
+    COPT = -W -Wall -c -g $(shell sdl22-config --cflags) $(TTFCOPT) -I/boot/home/config/include
+    LOPT = $(shell sdl2-config --libs) -lSDL2_image -lpng -ljpeg -lz $(TTFLOPT)
     CC = gcc
     OBJDIR = ../obj/beos
     ZIP = zip
@@ -199,11 +199,10 @@ endif
         LUACOPT = -D__ENABLE_LUA__
         LUALOPT = -llua
       endif
-    COPT = -W -Wall -c -g $(shell sdl-config --cflags) $(TTFCOPT) -I/boot/common/include $(LUACOPT)
-    LOPT = $(shell sdl-config --libs) -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lfreetype -lbe $(LUALOPT)
+    COPT = -W -Wall -c -g $(shell sdl2-config --cflags) $(TTFCOPT) -I/boot/common/include $(LUACOPT)
+    LOPT = $(shell sdl2-config --libs) -lSDL2_image -lpng -ljpeg -lz $(TTFLOPT) -lfreetype -lbe $(LUALOPT)
     CC = gcc
-	#Append the gcc kind to the objdir (gcc2 or gcc4) to avoid conflicts when switching from one to other.
-	OBJKIND = $(lastword $(shell setgcc))
+	OBJKIND = $(shell gcc -dumpversion)
     OBJDIR = ../obj/haiku/$(OBJKIND)
     ZIP = zip
 
@@ -215,8 +214,8 @@ endif
     RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     BIN = ../bin/grafx2
-    COPT = -W -Wall -Wdeclaration-after-statement -c -g $(shell sdl-config --cflags) $(TTFCOPT)
-    LOPT = $(shell sdl-config --libs) -lSDL_image -lpng -ljpeg -lz $(TTFLOPT)
+    COPT = -W -Wall -Wdeclaration-after-statement -c -g $(shell sdl2-config --cflags) $(TTFCOPT)
+    LOPT = $(shell sdl2-config --libs) -lSDL2_image -lpng -ljpeg -lz $(TTFLOPT)
     CC = gcc
     OBJDIR = ../obj/skyos
     ZIP = zip
@@ -231,8 +230,8 @@ endif
     ZIP = zip
     PLATFORMFILES = gfx2.png
     BIN = ../bin/grafx2
-    COPT = -W -Wall -std=c99 -c -g -gstabs -D__TRU64__ $(shell sdl-config --cflags) $(TTFCOPT) $(LUACOPT)
-    LOPT = $(shell sdl-config --libs) -lSDL_image $(TTFLOPT) -lpng $(LUALOPT) -lm
+    COPT = -W -Wall -std=c99 -c -g -gstabs -D__TRU64__ $(shell sdl2-config --cflags) $(TTFCOPT) $(LUACOPT)
+    LOPT = $(shell sdl2-config --libs) -lSDL2_image $(TTFLOPT) -lpng $(LUALOPT) -lm
     OBJDIR = ../obj/unix
     FCLOPT = -lfontconfig
     CC = gcc
@@ -254,8 +253,8 @@ endif
 	STACK = stack
 	FIX_FLAGS = flags
 	FCLOPT = 
-	COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -DNO_INLINE_MATH -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $(JOYCOPT) $(LUACOPT)
-    	LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) $(LAYERLOPT)
+	COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -DNO_INLINE_MATH -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl2-config --cflags` $(JOYCOPT) $(LUACOPT)
+	LOPT = -static -m68020-60 -lSDL2_image `$(prefix)/bin/sdl2-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) $(LAYERLOPT)
   else
   ifeq ($(PLATFORM),syllable) #11
 	#Syllable
@@ -268,8 +267,8 @@ endif
     LUACOPT = -I/resources/indexes/include
     LUALOPT = -llua
     BIN = ../bin/grafx2
-    COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g `sdl-config --cflags` -I/resources/indexes/include/SDL $(TTFCOPT) $(LUACOPT) $(JOYCOPT) -O$(OPTIM)
-    LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng -lz $(LUALOPT) -lm
+    COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g `sdl2-config --cflags` -I/resources/indexes/include/SDL $(TTFCOPT) $(LUACOPT) $(JOYCOPT) -O$(OPTIM)
+    LOPT = `sdl2-config --libs` -lSDL2_image $(TTFLOPT) -lpng -lz $(LUALOPT) -lm
     CC = gcc
     OBJDIR = ../obj/syllable
     FCLOPT = 
@@ -297,8 +296,8 @@ endif
       #cross compile a Win32 executable
       CC = i586-mingw32msvc-gcc
       BIN = ../bin/grafx2.exe
-      COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb -Dmain=SDL_main $(shell /usr/local/cross-tools/i386-mingw32/bin/sdl-config --cflags) $(TTFCOPT)
-      LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi $(shell /usr/local/cross-tools/i386-mingw32/bin/sdl-config --libs) -lSDL_image $(TTFLOPT)
+      COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb -Dmain=SDL_main $(shell /usr/local/cross-tools/i386-mingw32/bin/sdl2-config --cflags) $(TTFCOPT)
+      LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi $(shell /usr/local/cross-tools/i386-mingw32/bin/sdl2-config --libs) -lSDL2_image $(TTFLOPT)
       OBJDIR = ../obj/win32
       PLATFORM = win32
     else
@@ -306,8 +305,8 @@ endif
         #cross compile an exec for the gp2x
         CC = /opt/open2x/gcc-4.1.1-glibc-2.3.6/arm-open2x-linux/bin/arm-open2x-linux-gcc
         BIN = ../bin/grafx2.gpe
-        COPT = -W -Wall -Wdeclaration-after-statement -pedantic -std=c99 -static -g -O$(OPTIM) -I/opt/open2x/gcc-4.1.1-glibc-2.3.6/include `/opt/open2x/gcc-4.1.1-glibc-2.3.6/bin/sdl-config --cflags` $(TTFCOPT) -D__GP2X__ $(TTFCOPT) $(JOYCOPT) $(LUACOPT)
-        LOPT = -static -lSDL_image `/opt/open2x/gcc-4.1.1-glibc-2.3.6/bin/sdl-config --static-libs` -ljpeg -lpng -lz -lm $(TTFLOPT) $(LUALOPT)
+        COPT = -W -Wall -Wdeclaration-after-statement -pedantic -std=c99 -static -g -O$(OPTIM) -I/opt/open2x/gcc-4.1.1-glibc-2.3.6/include `/opt/open2x/gcc-4.1.1-glibc-2.3.6/bin/sdl2-config --cflags` $(TTFCOPT) -D__GP2X__ $(TTFCOPT) $(JOYCOPT) $(LUACOPT)
+        LOPT = -static -lSDL2_image `/opt/open2x/gcc-4.1.1-glibc-2.3.6/bin/sdl2-config --static-libs` -ljpeg -lpng -lz -lm $(TTFLOPT) $(LUALOPT)
         OBJDIR = ../obj/gp2x
         NOTTF = 1
         PLATFORM = gp2x
@@ -318,8 +317,8 @@ endif
       ifdef AROS32CROSS
         #cross compile an AROS 32 bit executable
         BIN = ../GrafX2
-        COPT = -Wall -Wno-pointer-sign -Wno-unused-but-set-variable -g `i386-linux-aros-sdl-config --cflags` $(TTFCOPT) $(LUACOPT)
-        LOPT = -lSDL_image `i386-linux-aros-sdl-config --libs` -lpng -ljpeg -lz $(TTFLOPT) -lfreetype2shared $(LUALOPT)
+        COPT = -Wall -Wno-pointer-sign -Wno-unused-but-set-variable -g `i386-linux-aros-sdl2-config --cflags` $(TTFCOPT) $(LUACOPT)
+        LOPT = -lSDL2_image `i386-linux-aros-sdl2-config --libs` -lpng -ljpeg -lz $(TTFLOPT) -lfreetype2shared $(LUALOPT)
         LUACOPT = -I/home/mazze/projects/fullaros/aros-linux-i386-dbg/bin/linux-i386/AROS/Development/include/lua
         LUALOPT = -llua
         CC = i386-linux-aros-gcc
@@ -340,8 +339,8 @@ endif
 	STACK = m68k-atari-mint-stack
 	FIX_FLAGS = m68k-atari-mint-flags
 	FCLOPT = 
-	COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -ffast-math -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $(JOYCOPT) $(LUACOPT)
-    	LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) -lm $(LAYERLOPT) -Wl,--stack,8k 
+	COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -ffast-math -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl2-config --cflags` $(JOYCOPT) $(LUACOPT)
+    	LOPT = -static -m68020-60 -lSDL2_image `$(prefix)/bin/sdl2-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) -lm $(LAYERLOPT) -Wl,--stack,8k 
       else
 
         # Compiles a regular linux executable for the native platform
@@ -463,20 +462,20 @@ ifdef MACOSX_LION
 	mkdir -p Grafx2.app/Contents/Frameworks/libpng14.framework/Versions
 endif
 	mkdir -p Grafx2.app/Contents/Frameworks/SDL.framework/Versions
-	mkdir -p Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions
+	mkdir -p Grafx2.app/Contents/Frameworks/SDL2_image.framework/Versions
 #	mkdir -p Grafx2.app/Contents/Frameworks/SDL_ttf.framework/Versions
 ifdef MACOSX_LION
 	cp -Rp $(FWDIR)/Lua.framework/Versions/A Grafx2.app/Contents/Frameworks/Lua.framework/Versions
 	cp -Rp $(FWDIR)/libpng14.framework/Versions/1.4.8 Grafx2.app/Contents/Frameworks/libpng14.framework/Versions
 endif
 	cp -Rp $(FWDIR)/SDL.framework/Versions/A Grafx2.app/Contents/Frameworks/SDL.framework/Versions
-	cp -Rp $(FWDIR)/SDL_image.framework/Versions/A Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions
+	cp -Rp $(FWDIR)/SDL2_image.framework/Versions/A Grafx2.app/Contents/Frameworks/SDL2_image.framework/Versions
 #	cp -Rp $(FWDIR)/SDL_ttf.framework/Versions/A Grafx2.app/Contents/Frameworks/SDL_ttf.framework/Versions
     # remove those
 	rm -fr Grafx2.app/Contents/Frameworks/SDL.framework/Versions/A/Headers
 	rm -fr Grafx2.app/Contents/Frameworks/SDL.framework/Versions/A/Resources
-	rm -fr Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions/A/Headers
-	rm -fr Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions/A/Resources
+	rm -fr Grafx2.app/Contents/Frameworks/SDL2_image.framework/Versions/A/Headers
+	rm -fr Grafx2.app/Contents/Frameworks/SDL2_image.framework/Versions/A/Resources
 ifdef MACOSX_LION
 	rm -fr Grafx2.app/Contents/Frameworks/Lua.framework/Versions/A/Resources
 	rm -fr Grafx2.app/Contents/Frameworks/Lua.framework/Versions/A/Headers
@@ -568,7 +567,7 @@ $(OBJDIR)/winres.o : gfx2.ico
 
 # Compile the C++ file needed in Haiku to use the API
 $(OBJDIR)/haiku.o : haiku.cpp
-	g++ -c haiku.cpp -o $(OBJDIR)/haiku.o
+	g++ -c haiku.cpp -o $(OBJDIR)/haiku.o $(COPT) -Wno-multichar
 
 clean :
 	$(DELCOMMAND) $(OBJ)
