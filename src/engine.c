@@ -663,6 +663,8 @@ void Main_handler(void)
       Hide_cursor();
       Init_mode_video(Resize_width, Resize_height, 0, Pixel_ratio);
       // Reset the variables that indicate a resize was requested.
+      Resize_width=0;
+      Resize_height=0;
       Display_menu();
       Reposition_palette();
       Display_all_screen();

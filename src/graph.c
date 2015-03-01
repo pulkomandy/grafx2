@@ -423,8 +423,6 @@ try_again:
   Compute_limits();
   Compute_paintbrush_coordinates();
   
-  Resize_width=0;
-  Resize_height=0;
   return 0;
 }
 

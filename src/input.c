@@ -35,7 +35,7 @@
 #include "loadsave.h"
 #include "keyboard.h"
 
-void Handle_window(SDL_WindowEvent event);
+int Handle_window(SDL_WindowEvent event);
 int Color_cycling(void);
 
 // public Globals (available as extern)
@@ -281,7 +281,7 @@ int Move_cursor_with_constraints()
 
 // WM events management
 
-void Handle_window(SDL_WindowEvent event)
+int Handle_window(SDL_WindowEvent event)
 {
     if(event.event == SDL_WINDOWEVENT_RESIZED)
     {
@@ -290,16 +290,20 @@ void Handle_window(SDL_WindowEvent event)
           Resize_width = event.data1;
           Resize_height = event.data2;
         }
+        return 1;
     }
     else if(event.event == SDL_WINDOWEVENT_CLOSE)
     {
         Quit_is_required = 1;
+        return 1;
     }
     else if (event.event == SDL_WINDOWEVENT_RESTORED)
     {
         // Force screen refresh
         Update_rect(0,0,0,0);
+        return 1;
     }
+    return 0;
 }
 
 // Mouse events management
@@ -847,11 +851,11 @@ int Get_input(int sleep_time)
     SDL_Event event;
     int user_feedback_required = 0; // Flag qui indique si on doit arrêter de traiter les évènements ou si on peut enchainer
                 
+    Color_cycling();
     // Commit any pending screen update.
     // This is done in this function because it's called after reading 
     // some user input.
     Flush_update();
-    Color_cycling();
     Key_ANSI = 0;
     Key = 0;
     Mouse_moved=0;
@@ -876,8 +880,7 @@ int Get_input(int sleep_time)
       switch(event.type)
       {
           case SDL_WINDOWEVENT:
-              Handle_window(event.window);
-              user_feedback_required = 1;
+              user_feedback_required = Handle_window(event.window);
               break;
 
           case SDL_MOUSEMOTION:
@@ -933,7 +936,7 @@ int Get_input(int sleep_time)
               Drop_file_name=calloc(strlen(event.drop.file)+1,1);
               strcpy(Drop_file_name, event.drop.file);
               SDL_free(event.drop.file);
-              
+              user_feedback_required = 1;
               break;
           case SDL_TEXTINPUT:
             {
@@ -1124,6 +1127,7 @@ int Color_cycling(void)
       }
     }
     Set_surface_palette(Screen_SDL, PaletteSDL);
+    Update_rect(0,0,0,0);
   }
   return 0;
 }
