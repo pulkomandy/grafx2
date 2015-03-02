@@ -21,6 +21,7 @@
 */
 
 void Button_Layer_add(void);
+void Button_Layer_duplicate(void);
 void Button_Layer_remove(void);
 void Button_Layer_menu(void);
 void Button_Layer_set_transparent(void);
