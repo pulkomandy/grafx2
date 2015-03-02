@@ -76,6 +76,7 @@ void Print_counter(short x,short y,const char * str,byte text_color,byte backgro
 
 byte Confirmation_box(char * message);
 void Warning_message(char * message);
+void Warning_with_format(const char * message, ...);
 void Verbose_message(const char * caption, const char * message);
 int Requester_window(char* message, int initial_value);
 

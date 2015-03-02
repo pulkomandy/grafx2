@@ -2831,9 +2831,8 @@ int Save_C64_hires(T_IO_Context *context, char *filename, byte saveWhat, byte lo
             numcolors=Count_used_colors_area(cusage,cx*8,cy*8,8,8);
             if (numcolors>2)
             {
-                Warning_message("More than 2 colors in 8x8 pixels");
+                Warning_with_format("More than 2 colors\nin 8x8 pixel cell: (%d, %d)\nRect: (%d, %d, %d, %d)", cx, cy, cx * 8, cy * 8, cx * 8 + 7, cy * 8 + 7);
                 // TODO here we should hilite the offending block
-                printf("\nerror at %dx%d (%d colors)\n",cx*8,cy*8,numcolors);
                 return 1;
             }
             c1 = 0; c2 = 0;
@@ -3006,7 +3005,7 @@ int Save_C64_multi(T_IO_Context *context, char *filename, byte saveWhat, byte lo
 			numcolors=Count_used_colors_area(cusage,cx*4,cy*8,4,8);
 			if(numcolors>4)
 			{
-				Warning_message("More than 4 colors in 4x8");
+				Warning_with_format("More than 4 colors\nin 4x8 pixel cell: (%d, %d)\nRect: (%d, %d, %d, %d)", cx, cy, cx * 4, cy * 8, cx * 4 + 3, cy * 8 + 7);
 				// TODO hilite offending block
 				return 1;
 			}

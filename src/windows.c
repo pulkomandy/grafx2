@@ -25,6 +25,7 @@
 */
 
 #include <math.h>
+#include <stdarg.h> // va_args ...
 #include <stdlib.h> // atoi()
 #include <string.h> // strncpy() strlen()
 
@@ -1181,6 +1182,26 @@ void Warning_message(char * message)
 
   Close_window();
   Display_cursor();
+}
+
+/// Window that shows a warning message and waits for a click on the OK button
+/// This has the added advantage of supporting the printf interface.
+void Warning_with_format(const char *template, ...) {
+  va_list arg_ptr;
+  char *message;
+
+  message = malloc(sizeof(char) * 1024);  // a maximum of 1 KiB of complete message.
+  if (message) {
+    va_start(arg_ptr, template);
+    vsprintf(message, template, arg_ptr);
+    //Warning_message(message);
+    Verbose_message("Warning", message);
+    va_end(arg_ptr);
+    free(message);
+  } else {
+    //Warning_message(template);
+    Verbose_message("Warning", template);
+  }
 }
 
 /// Window that shows a big message (up to 35x13), and waits for a click on OK.
