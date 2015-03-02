@@ -325,14 +325,12 @@ int Handle_mouse_click(SDL_MouseButtonEvent event)
             else
               Input_new_mouse_K |= 1;
             break;
-            break;
 
         case SDL_BUTTON_RIGHT:
             if (Button_inverter)
               Input_new_mouse_K |= 1;
             else
               Input_new_mouse_K |= 2;
-            break;
             break;
 
         case SDL_BUTTON_MIDDLE:
@@ -347,6 +345,7 @@ int Handle_mouse_click(SDL_MouseButtonEvent event)
         case SDL_BUTTON_WHEELDOWN:
             Key = KEY_MOUSEWHEELDOWN|Key_modifiers(SDL_GetModState());
             return 0;
+
         default:
         return 0;
     }
@@ -842,11 +841,11 @@ int Get_input(int sleep_time)
     SDL_Event event;
     int user_feedback_required = 0; // Flag qui indique si on doit arrêter de traiter les évènements ou si on peut enchainer
                 
+    Color_cycling();
     // Commit any pending screen update.
     // This is done in this function because it's called after reading 
     // some user input.
     Flush_update();
-    Color_cycling();
     Key_ANSI = 0;
     Key = 0;
     Mouse_moved=0;

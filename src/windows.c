@@ -108,24 +108,16 @@ void Window_display_frame_generic(word x_pos,word y_pos,word width,word height,
 // color_brc=Coin Bas-Droite
 {
   // Bord haut (sans les extrémités)
-  Block(Window_pos_X+((x_pos+1)*Menu_factor_X),
-        Window_pos_Y+(y_pos*Menu_factor_Y),
-        (width-2)*Menu_factor_X,Menu_factor_Y,color_tl);
+  Window_rectangle(x_pos+1,y_pos,width-2,1,color_tl);
 
   // Bord bas (sans les extrémités)
-  Block(Window_pos_X+((x_pos+1)*Menu_factor_X),
-        Window_pos_Y+((y_pos+height-1)*Menu_factor_Y),
-        (width-2)*Menu_factor_X,Menu_factor_Y,color_br);
+  Window_rectangle(x_pos+1,y_pos+height-1,width-2,1,color_br);
 
   // Bord gauche (sans les extrémités)
-  Block(Window_pos_X+(x_pos*Menu_factor_X),
-        Window_pos_Y+((y_pos+1)*Menu_factor_Y),
-        Menu_factor_X,(height-2)*Menu_factor_Y,color_tl);
+  Window_rectangle(x_pos, y_pos+1,1,height-2,color_tl);
 
   // Bord droite (sans les extrémités)
-  Block(Window_pos_X+((x_pos+width-1)*Menu_factor_X),
-        Window_pos_Y+((y_pos+1)*Menu_factor_Y),
-        Menu_factor_X,(height-2)*Menu_factor_Y,color_br);
+  Window_rectangle(x_pos+width-1,y_pos+1,1,height-2,color_br);
 
   // Coin haut gauche
   Pixel_in_window(x_pos,y_pos,color_tlc);
@@ -706,15 +698,12 @@ void Print_char_in_window(short x_pos,short y_pos,const unsigned char c,byte tex
 {
   short x,y;
   byte *pixel;
-  x_pos=(x_pos*Menu_factor_X)+Window_pos_X;
-  y_pos=(y_pos*Menu_factor_Y)+Window_pos_Y;
   // Premier pixel du caractère
   pixel=Menu_font + (c<<6);
   
   for (y=0;y<8;y++)
     for (x=0;x<8;x++)
-      Block(x_pos+(x*Menu_factor_X), y_pos+(y*Menu_factor_Y),
-            Menu_factor_X, Menu_factor_Y,
+      Pixel_in_window(x_pos+x, y_pos+y,
             (*(pixel++)?text_color:background_color));
 }
 
@@ -735,10 +724,15 @@ void Print_in_window_limited(short x,short y,const char * str,byte size,byte tex
 /// Draws a string in a window
 void Print_in_window(short x,short y,const char * str,byte text_color,byte background_color)
 {
-  Print_general((x*Menu_factor_X)+Window_pos_X,
-                (y*Menu_factor_Y)+Window_pos_Y,
-                str,text_color,background_color);
-  Update_rect(x*Menu_factor_X+Window_pos_X,y*Menu_factor_Y+Window_pos_Y,8*Menu_factor_X*strlen(str),8*Menu_factor_Y);
+  short x_pos = x;
+  int index;
+
+  for (index=0;str[index]!='\0';index++)
+  {
+    Print_char_in_window(x,y,str[index],text_color,background_color);
+    x+=8;
+  }
+  Update_window_area(x_pos,y,8*strlen(str),8);
 }
 
 // Draws a string in the menu's status bar
@@ -1005,7 +999,7 @@ void Print_counter(short x,short y,const char * str,byte text_color,byte backgro
       }
     }
   }
-  Update_rect(Window_pos_X+x*Menu_factor_X,Window_pos_Y+y*Menu_factor_Y,strlen(str)*Menu_factor_X*6,8*Menu_factor_Y);
+  Update_window_area(x,y,strlen(str)*6,8);
 }
 
 
@@ -1074,7 +1068,7 @@ byte Confirmation_box(char * message)
   Window_set_normal_button((window_width/3)-20     ,29+(nb_lines<<3),40,14,"Yes",1,1,SDLK_y); // 1
   Window_set_normal_button(((window_width<<1)/3)-20,29+(nb_lines<<3),40,14,"No" ,1,1,SDLK_n); // 2
 
-  Update_rect(Window_pos_X, Window_pos_Y, Window_width*Menu_factor_X, Window_height*Menu_factor_Y);
+  Update_window_area(0, 0, Window_width, Window_height);
 
   Display_cursor();
 
@@ -1116,8 +1110,7 @@ int Requester_window(char* message, int initial_value)
   Window_set_normal_button(60 ,37,40,14,"OK",1,1,SDLK_y); // 2
   Window_set_normal_button(130,37,60,14,"Cancel" ,1,1,SDLK_n); // 3
 
-  Update_rect(Window_pos_X, Window_pos_Y, Menu_factor_X * window_width,
-    Menu_factor_Y * 60);
+  Update_window_area(0, 0, window_width, 60);
   Display_cursor();
 
   do
@@ -1152,7 +1145,7 @@ void Warning_message(char * message)
 
   Print_in_window((window_width>>1)-(strlen(message)<<2),20,message,MC_Black,MC_Light);
   Window_set_normal_button((window_width>>1)-20     ,37,40,14,"OK",1,1,SDLK_RETURN); // 1
-  Update_rect(Window_pos_X,Window_pos_Y,Menu_factor_X*window_width,Menu_factor_Y*60);
+  Update_window_area(0,0,window_width,60);
   Display_cursor();
 
   do

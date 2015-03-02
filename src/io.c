@@ -24,8 +24,6 @@
 // Fonctions de lecture/ecriture file, gèrent les systèmes big-endian et
 // little-endian.
 
-#define _XOPEN_SOURCE 500
-
 #include <SDL_endian.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -460,7 +458,7 @@ byte Create_lock_file(const char *file_directory)
   #else
   char lock_filename[MAX_PATH_CHARACTERS];
   
- #ifdef GCWZERO
+#ifdef GCWZERO
   strcpy(lock_filename,"/media/home/.grafx2/");
 #else
   strcpy(lock_filename,file_directory);

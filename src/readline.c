@@ -523,10 +523,8 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   Hide_cursor();
 
   // Effacement de la chaîne
-  Block(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
-        visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);
-  Update_rect(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
-        visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
+  Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
+  Update_window_area(x_pos,y_pos,visible_size<<3,8);
 
   // Mise à jour des variables se rapportant à la chaîne en fonction de la chaîne initiale
   strcpy(initial_string,str);
@@ -544,8 +542,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
     display_string[visible_size-1]=RIGHT_TRIANGLE_CHARACTER;
   
   Display_whole_string(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),display_string,position - offset);
-  Update_rect(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
-        visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
+  Update_window_area(x_pos,y_pos,visible_size<<3,8);
   Flush_update();
   if (Mouse_K)
   {
@@ -640,8 +637,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
               size--;
               
               // Effacement de la chaîne
-              Block(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
-                    visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);
+              Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
               goto affichage;
             }
       break;
@@ -650,8 +646,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
             {
               // Effacement de la chaîne
               if (position==size)
-                Block(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
-                      visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);
+                Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
               position--;
               if (offset > 0 && (position == 0 || position < (offset + 1)))
                 offset--;
@@ -674,8 +669,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
             {
               // Effacement de la chaîne
               if (position==size)
-                Block(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
-                      visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);
+                Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
               position = 0;
               offset = 0;
               goto affichage;
@@ -700,8 +694,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
           Remove_character(str,position);
           size--;
           // Effacement de la chaîne
-          Block(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
-                visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);
+          Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
           goto affichage;
         }
         break;
@@ -709,8 +702,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
         str[0]='\0';
         position=offset=0;
         // Effacement de la chaîne
-        Block(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
-              visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);
+        Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
         goto affichage;
       case SDLK_RETURN :
         break;
@@ -771,8 +763,7 @@ affichage:
   }
 #endif // defined(__ANDROID__)  
   // Effacement de la chaîne
-  Block(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
-        visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3),BACKGROUND_COLOR);
+  Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
   // On raffiche la chaine correctement
   if (input_type==INPUT_TYPE_INTEGER)
   {
@@ -801,9 +792,8 @@ affichage:
   {
     Print_in_window_limited(x_pos,y_pos,str,visible_size,TEXT_COLOR,BACKGROUND_COLOR);
   }
-  Update_rect(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
-        visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
-
+  Update_window_area(x_pos,y_pos,visible_size<<3,8);
+  
   return (input_key==SDLK_RETURN);
 }
 

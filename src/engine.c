@@ -1611,7 +1611,7 @@ void Open_window(word width,word height, const char * title)
   Save_background(&(Window_background[Windows_open-1]), Window_pos_X, Window_pos_Y, width, height);
 
   // Fenêtre grise
-  Block(Window_pos_X+(Menu_factor_X<<1),Window_pos_Y+(Menu_factor_Y<<1),(width-4)*Menu_factor_X,(height-4)*Menu_factor_Y,MC_Window);
+  Window_rectangle(2,2,width-4,height-4,MC_Window);
 
   // -- Frame de la fenêtre ----- --- -- -  -
 
@@ -1620,8 +1620,8 @@ void Open_window(word width,word height, const char * title)
   Window_display_frame_out(1,1,width-2,height-2);
 
   // Barre sous le titre
-  Block(Window_pos_X+(Menu_factor_X<<3),Window_pos_Y+(11*Menu_factor_Y),(width-16)*Menu_factor_X,Menu_factor_Y,MC_Dark);
-  Block(Window_pos_X+(Menu_factor_X<<3),Window_pos_Y+(12*Menu_factor_Y),(width-16)*Menu_factor_X,Menu_factor_Y,MC_White);
+  Window_rectangle(8,11,width-16,1,MC_Dark);
+  Window_rectangle(8,12,width-16,1,MC_White);
 
   title_length = strlen(title);
   if (title_length+2 > (size_t)(width/8))
@@ -1715,7 +1715,7 @@ void Close_window(void)
     // Restore de ce que la fenêtre cachait
     Restore_background(Window_background[Windows_open-1], Window_pos_X, Window_pos_Y, Window_width, Window_height);
     Window_background[Windows_open-1]=NULL;
-    Update_rect(Window_pos_X,Window_pos_Y,Window_width*Menu_factor_X,Window_height*Menu_factor_Y);
+    Update_window_area(0,0,Window_width,Window_height);
     Windows_open--;
   }
   else
@@ -1774,9 +1774,8 @@ void Window_draw_normal_bouton(word x_pos,word y_pos,word width,word height,
   Print_in_window(text_x_pos,text_y_pos,title,title_color,MC_Light);
 
   if (undersc_letter)
-    Block(Window_pos_X+((text_x_pos+((undersc_letter-1)<<3))*Menu_factor_X),
-          Window_pos_Y+((text_y_pos+8)*Menu_factor_Y),
-          Menu_factor_X<<3,Menu_factor_Y,MC_Dark);
+    Window_rectangle(text_x_pos+((undersc_letter-1)<<3),
+          text_y_pos+8,8,1,MC_Dark);
 }
 
 
@@ -1784,14 +1783,14 @@ void Window_draw_normal_bouton(word x_pos,word y_pos,word width,word height,
 void Window_select_normal_button(word x_pos,word y_pos,word width,word height)
 {
   Window_display_frame_generic(x_pos,y_pos,width,height,MC_Dark,MC_Black,MC_Dark,MC_Dark,MC_Black);
-  Update_rect(Window_pos_X+x_pos*Menu_factor_X, Window_pos_Y+y_pos*Menu_factor_Y, width*Menu_factor_X, height*Menu_factor_Y);
+  Update_window_area(x_pos, y_pos, width, height);
 }
 
 // -- Button normal désenfoncé dans la fenêtre --
 void Window_unselect_normal_button(word x_pos,word y_pos,word width,word height)
 {
   Window_display_frame_out(x_pos,y_pos,width,height);
-  Update_rect(Window_pos_X+x_pos*Menu_factor_X, Window_pos_Y+y_pos*Menu_factor_Y, width*Menu_factor_X, height*Menu_factor_Y);
+  Update_window_area(x_pos, y_pos, width, height);
 }
 
 
@@ -1801,7 +1800,7 @@ void Window_draw_palette_bouton(word x_pos,word y_pos)
   word color;
 
   for (color=0; color<=255; color++)
-    Block( Window_pos_X+((((color >> 4)*10)+x_pos+6)*Menu_factor_X),Window_pos_Y+((((color & 15)*5)+y_pos+3)*Menu_factor_Y),Menu_factor_X*5,Menu_factor_Y*5,color);
+    Window_rectangle( ((color >> 4)*10)+x_pos+6,((color & 15)*5)+y_pos+3,5,5,color);
 
   Window_display_frame(x_pos,y_pos,164,86);
 }
@@ -1817,11 +1816,11 @@ void Window_clear_tags(void)
   word window_x_pos;
   //word window_y_pos;
 
-  origin_x=Window_pos_X+(Window_palette_button_list->Pos_X+3)*Menu_factor_X;
-  origin_y=Window_pos_Y+(Window_palette_button_list->Pos_Y+3)*Menu_factor_Y;
-  for (x_pos=0,window_x_pos=origin_x;x_pos<16;x_pos++,window_x_pos+=(Menu_factor_X*10))
-    Block(window_x_pos,origin_y,Menu_factor_X*3,Menu_factor_Y*80,MC_Light);
-  Update_rect(origin_x,origin_y,ToWinL(160),ToWinH(80));
+  origin_x=Window_palette_button_list->Pos_X+3;
+  origin_y=Window_palette_button_list->Pos_Y+3;
+  for (x_pos=0,window_x_pos=origin_x;x_pos<16;x_pos++,window_x_pos+=10)
+    Window_rectangle(window_x_pos,origin_y,3,80,MC_Light);
+  Update_window_area(origin_x,origin_y,160,80);
 }
 
 
@@ -1997,8 +1996,8 @@ void Window_input_content(T_Special_button * button, const char * content)
 
 void Window_clear_input_button(T_Special_button * button)
 {
-  Block((button->Pos_X+2)*Menu_factor_X+Window_pos_X,(button->Pos_Y+2)*Menu_factor_Y+Window_pos_Y,(button->Width/8)*8*Menu_factor_X,8*Menu_factor_Y,MC_Light);
-  Update_rect((button->Pos_X+2)*Menu_factor_X+Window_pos_X,(button->Pos_Y+2)*Menu_factor_Y+Window_pos_Y,button->Width/8*8*Menu_factor_X,8*Menu_factor_Y);
+  Window_rectangle(button->Pos_X+2,button->Pos_Y+2,(button->Width/8)*8,8,MC_Light);
+  Update_window_area(button->Pos_X+2,button->Pos_Y+2,button->Width/8*8,8);
 }
 
 
@@ -2176,7 +2175,7 @@ T_Dropdown_button * Window_set_dropdown_button(word x_pos,word y_pos,word width,
 
   temp->Next=Window_dropdown_button_list;
   Window_dropdown_button_list=temp;
-  Window_draw_normal_bouton(x_pos,y_pos,width,height,"",-1,1);
+  Window_draw_normal_bouton(x_pos,y_pos,width,height,"",0,1);
   if (label && label[0])
     Print_in_window(temp->Pos_X+2,temp->Pos_Y+(temp->Height-7)/2,label,MC_Black,MC_Light);
   if (display_arrow)
@@ -2302,9 +2301,7 @@ void Open_popup(word x_pos, word y_pos, word width,word height)
 
 /*
   // Fenêtre grise
-  Block(Window_pos_X+1*Menu_factor_X,
-        Window_pos_Y+1*Menu_factor_Y,
-        (width-2)*Menu_factor_X,(height-2)*Menu_factor_Y,MC_Light);
+  Window_rectangle(1,1,width-2,height-2,MC_Light);
 
   // Frame noir puis en relief
   Window_display_frame_mono(0,0,width,height,MC_White);
@@ -2389,7 +2386,7 @@ void Close_popup(void)
     // Restore de ce que la fenêtre cachait
     Restore_background(Window_background[Windows_open-1], Window_pos_X, Window_pos_Y, Window_width, Window_height);
     Window_background[Windows_open-1]=NULL;
-    Update_rect(Window_pos_X,Window_pos_Y,Window_width*Menu_factor_X,Window_height*Menu_factor_Y);
+    Update_window_area(0,0,Window_width,Window_height);
     Windows_open--;
   }
   else
@@ -2594,7 +2591,7 @@ void Get_color_behind_window(byte * color, byte * click)
   }
 
   Restore_background(buffer,Window_pos_X,Window_pos_Y,Window_width,Window_height);
-  Update_rect(Window_pos_X, Window_pos_Y, Window_width*Menu_factor_X, Window_height*Menu_factor_Y);
+  Update_window_area(0, 0, Window_width, Window_height);
   Cursor_shape=CURSOR_SHAPE_ARROW;
   Paintbrush_hidden=b;
   Cursor_hidden=cursor_was_hidden;
@@ -2727,7 +2724,7 @@ void Move_window(short dx, short dy)
   else
   {
     // Update pour effacer le rectangle XOR
-    Update_rect(Window_pos_X, Window_pos_Y, Window_width*Menu_factor_X, Window_height*Menu_factor_Y);
+    Update_window_area(0, 0, Window_width, Window_height);
   }    
   Cursor_shape=CURSOR_SHAPE_ARROW;
   Display_cursor();
@@ -2771,34 +2768,34 @@ T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, sh
   // Dessin de la boite
 
   // Bord gauche
-  Block(Window_pos_X,Window_pos_Y,Menu_factor_X,box_height*Menu_factor_Y,MC_Black);
+  Window_rectangle(0,0,1,box_height,MC_Black);
   // Frame fonce et blanc
   Window_display_frame_out(1,0,button->Dropdown_width-1,box_height);
   // Ombre portée
   if (SHADOW_BOTTOM)
   {
-    Block(Window_pos_X+SHADOW_RIGHT*Menu_factor_X,
-        Window_pos_Y+box_height*Menu_factor_Y,
-        button->Dropdown_width*Menu_factor_X,
-        SHADOW_BOTTOM*Menu_factor_Y,
+    Window_rectangle(SHADOW_RIGHT,
+        box_height,
+        button->Dropdown_width,
+        SHADOW_BOTTOM,
         MC_Black);
-    Block(Window_pos_X,
-        Window_pos_Y+box_height*Menu_factor_Y,
-        SHADOW_RIGHT*Menu_factor_X,
-        Menu_factor_Y,
+    Window_rectangle(0,
+        box_height,
+        SHADOW_RIGHT,
+        1,
         MC_Black);
   }
   if (SHADOW_RIGHT)
   {
-    Block(Window_pos_X+button->Dropdown_width*Menu_factor_X,
-        Window_pos_Y+SHADOW_BOTTOM*Menu_factor_Y,
-        SHADOW_RIGHT*Menu_factor_X,
-        (box_height-SHADOW_BOTTOM)*Menu_factor_Y,
+    Window_rectangle(button->Dropdown_width,
+        SHADOW_BOTTOM,
+        SHADOW_RIGHT,
+        box_height-SHADOW_BOTTOM,
         MC_Black);
-    Block(Window_pos_X+button->Dropdown_width*Menu_factor_X,
-        Window_pos_Y,
-        Menu_factor_X,
-        SHADOW_BOTTOM*Menu_factor_Y,
+    Window_rectangle(button->Dropdown_width,
+        1,
+        1,
+        SHADOW_BOTTOM,
         MC_Black);
   }
 
@@ -2807,9 +2804,7 @@ T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, sh
   {
     old_selected_index = selected_index;
     // Fenêtre grise
-    Block(Window_pos_X+2*Menu_factor_X,
-        Window_pos_Y+1*Menu_factor_Y,
-        (button->Dropdown_width-3)*Menu_factor_X,(box_height-2)*Menu_factor_Y,MC_Light);
+    Window_rectangle(2,1,button->Dropdown_width-3,box_height-2,MC_Light);
     // Affichage des items
     for(item=button->First_item,choice_index=0; item!=NULL; item=item->Next,choice_index++)
     {
@@ -2819,9 +2814,8 @@ T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, sh
       {
         color_1=MC_White;
         color_2=MC_Dark;
-        Block(Window_pos_X+3*Menu_factor_X,
-        Window_pos_Y+((2+choice_index*8)*Menu_factor_Y),
-        (button->Dropdown_width-5)*Menu_factor_X,(8)*Menu_factor_Y,MC_Dark);
+        Window_rectangle(3,2+choice_index*8,
+        (button->Dropdown_width-5),8,MC_Dark);
       }
       else
       {
@@ -2830,7 +2824,7 @@ T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, sh
       }
       Print_in_window(3,2+choice_index*8,item->Label,color_1,color_2);
     }
-    Update_rect(Window_pos_X,Window_pos_Y,Window_width*Menu_factor_X,Window_height*Menu_factor_Y);
+    Update_window_area(0,0,Window_width,Window_height);
     Display_cursor();
 
     do 
