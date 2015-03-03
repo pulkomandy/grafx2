@@ -1312,14 +1312,14 @@ void Draw_thingumajig(word x,word y, byte color, short direction)
 
   // -- Dessiner un bloc de couleurs dégradé verticalement
 
-void Display_grad_block_in_window(word x_pos,word y_pos,word block_start,word block_end)
+void Display_grad_block_in_window(word x_pos,word y_pos,word width,word height,word block_start,word block_end)
 {
-  word total_lines  =Menu_factor_Y<<6; // <=> à 64 lignes fct(Menu_Facteur)
+  word total_lines  =Menu_factor_Y*height;
   word nb_colors   =(block_start<=block_end)?block_end-block_start+1:block_start-block_end+1;
   word Selected_line_mode=(block_start<=block_end)?0:total_lines-1;
 
   word start_x       =Window_pos_X+(Menu_factor_X*x_pos);
-  word line_width =Menu_factor_X<<4; // <=> à 16 pixels fct(Menu_Facteur)
+  word line_width =Menu_factor_X*width;
 
   word start_y       =Window_pos_Y+(Menu_factor_Y*y_pos);
   word end_y         =start_y+total_lines;
@@ -1335,7 +1335,7 @@ void Display_grad_block_in_window(word x_pos,word y_pos,word block_start,word bl
   for (index=start_y;index<end_y;index++,Selected_line_mode++)
     Block(start_x,index,line_width,1,block_start+(nb_colors*Selected_line_mode)/total_lines);
 
-  Update_rect(ToWinX(x_pos),ToWinY(y_pos),ToWinL(16),ToWinH(64));
+  Update_rect(ToWinX(x_pos),ToWinY(y_pos),line_width,total_lines);
 }
 
 

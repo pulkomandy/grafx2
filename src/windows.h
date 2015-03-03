@@ -94,7 +94,7 @@ void Display_paintbrush_in_menu(void);
 void Display_paintbrush_in_window(word x,word y,int number);
 
 void Draw_thingumajig(word x,word y, byte color, short direction);
-void Display_grad_block_in_window(word x_pos,word y_pos,word block_start,word block_end);
+void Display_grad_block_in_window(word x_pos,word y_pos,word width,word height,word block_start,word block_end);
 void Window_display_icon_sprite(word x_pos,word y_pos,byte type);
 
 byte Best_color(byte red,byte green,byte blue);

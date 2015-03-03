@@ -41,8 +41,8 @@
 byte Palette_view_is_RGB = 1; // Indique si on est en HSL ou en RGB
 
 // Coordinates of the color count (on histogram button)
-static const int COUNT_X = 258;
-static const int COUNT_Y = 49;
+static const int COUNT_X = 138;
+static const int COUNT_Y = 64;
   
 
 // Nombre de graduations pour une composante RGB
@@ -750,13 +750,13 @@ void Reduce_palette(short * used_colors,int nb_colors_asked,T_Palette palette,dw
 
 
 // Position of the numeric values of the R G B sliders
-static const int NUMERIC_R_X = 176;
-static const int NUMERIC_G_X = 203;
-static const int NUMERIC_B_X = 230;
-static const int NUMERIC_Y   = 171;
+static const int NUMERIC_R_X = 216;
+static const int NUMERIC_G_X = 243;
+static const int NUMERIC_B_X = 270;
+static const int NUMERIC_Y   = 183;
 // Position of the whole button
-static const int NUMERIC_BOX_X = 175;
-static const int NUMERIC_BOX_Y = 169;
+static const int NUMERIC_BOX_X = 215;
+static const int NUMERIC_BOX_Y = 181;
 static const int NUMERIC_BOX_W = 81;
 static const int NUMERIC_BOX_H = 12;
 
@@ -1018,9 +1018,9 @@ int Window_Histogram(unsigned char block_start, unsigned char block_end, dword* 
 
 void Print_RGB_or_HSL(byte mode)
 {
-  Print_in_window(184,68,mode?"H":"R",MC_Dark,MC_Light);
-  Print_in_window(211,68,mode?"S":"G",MC_Dark,MC_Light);
-  Print_in_window(238,68,mode?"L":"B",MC_Dark,MC_Light);
+  Print_in_window(224,16,mode?"H":"R",MC_Dark,MC_Light);
+  Print_in_window(251,16,mode?"S":"G",MC_Dark,MC_Light);
+  Print_in_window(278,16,mode?"L":"B",MC_Dark,MC_Light);
 }
 
 void Tag_used_colors(byte color, dword color_usage[])
@@ -1042,26 +1042,26 @@ void Tag_used_colors(byte color, dword color_usage[])
 
 void Button_Palette(void)
 {
-  static const int BUTTON_PLUS_X = 268;
-  static const int BUTTON_PLUS_Y = 74;
-  static const int BUTTON_MINUS_X = 268;
-  static const int BUTTON_MINUS_Y = 165;
+  static const int BUTTON_PLUS_X = 182;
+  static const int BUTTON_PLUS_Y = 163;
+  static const int BUTTON_MINUS_X = 198;
+  static const int BUTTON_MINUS_Y = 163;
 
   // Coordinates of the block that displays Backcolor
-  static const int BGCOLOR_DISPLAY_X = 262;
-  static const int BGCOLOR_DISPLAY_Y = 89;
-  static const int BGCOLOR_DISPLAY_W = 24;
-  static const int BGCOLOR_DISPLAY_H = 72;
+  static const int BGCOLOR_DISPLAY_X = 176;
+  static const int BGCOLOR_DISPLAY_Y = 65;
+  static const int BGCOLOR_DISPLAY_W = 40;
+  static const int BGCOLOR_DISPLAY_H = 96;
 
   // Coordinates of the block that displays Forecolor
-  static const int FGCOLOR_DISPLAY_X = 266;
-  static const int FGCOLOR_DISPLAY_Y = 93;
-  static const int FGCOLOR_DISPLAY_W = 16;
-  static const int FGCOLOR_DISPLAY_H = 64;
+  static const int FGCOLOR_DISPLAY_X = 180;
+  static const int FGCOLOR_DISPLAY_Y = 69;
+  static const int FGCOLOR_DISPLAY_W = 32;
+  static const int FGCOLOR_DISPLAY_H = 88;
   
   // Coordinates of the Color#
   static const int COLOR_X = 111;
-  static const int COLOR_Y = 69;
+  static const int COLOR_Y = 79;
   
   
   static short reduce_colors_number = 256;
@@ -1096,35 +1096,50 @@ void Button_Palette(void)
   
   static byte show_used_colors=0;
 
+  static const int C1_X = 5;
+  static const int C1_W = 45;
+  static const int C2_X = 51;
+  static const int C2_W = 53;
+  static const int C3_X = 105;
+  static const int C3_W = 53;
+  static const int C4_X = 159;
+  static const int C4_W = 53;
+
+  static const int L1 = 16;
+  static const int L2 = 31;
+  static const int L3 = 46;
+  static const int L4 = 61;
+
   backup_palette =(T_Components *)malloc(sizeof(T_Palette));
   temp_palette=(T_Components *)malloc(sizeof(T_Palette));
   working_palette=(T_Components *)malloc(sizeof(T_Palette));
 
   Component_unit(RGB_scale);
 
-  Open_window(299, 188,"Palette");
+  Open_window(299, 196,"Palette");
 
   memcpy(working_palette, Main_palette, sizeof(T_Palette));
   Palette_edit_step();
 
-  Window_set_palette_button(5, 79); // 1
+  Window_set_palette_button(5, 89); // 1
 
-  Window_display_frame (172, 63, 122, 121);
+  // Frame around the palette sliders
+  //Window_display_frame (172, 63, 122, 129);
 
   // Graduation des jauges de couleur
-  Window_rectangle(180,106,17,1,MC_Dark);
-  Window_rectangle(207,106,17,1,MC_Dark);
-  Window_rectangle(234,106,17,1,MC_Dark);
-  Window_rectangle(180,122,17,1,MC_Dark);
-  Window_rectangle(207,122,17,1,MC_Dark);
-  Window_rectangle(234,122,17,1,MC_Dark);
-  Window_rectangle(180,138,17,1,MC_Dark);
-  Window_rectangle(207,138,17,1,MC_Dark);
-  Window_rectangle(234,138,17,1,MC_Dark);
+  Window_rectangle(220,39+32,17,1,MC_Dark);
+  Window_rectangle(247,39+32,17,1,MC_Dark);
+  Window_rectangle(274,39+32,17,1,MC_Dark);
+  Window_rectangle(220,39+64,17,1,MC_Dark);
+  Window_rectangle(247,39+64,17,1,MC_Dark);
+  Window_rectangle(274,39+64,17,1,MC_Dark);
+  Window_rectangle(220,39+96,17,1,MC_Dark);
+  Window_rectangle(247,39+96,17,1,MC_Dark);
+  Window_rectangle(274,39+96,17,1,MC_Dark);
   // Jauges de couleur
-  red_slider = Window_set_scroller_button(183, 79, 88,Color_count,1,Color_max-Reduce_component(working_palette[Fore_color].R));// 2
-  green_slider = Window_set_scroller_button(210, 79, 88,Color_count,1,Color_max-Reduce_component(working_palette[Fore_color].G));// 3
-  blue_slider = Window_set_scroller_button(237, 79, 88,Color_count,1,Color_max-Reduce_component(working_palette[Fore_color].B));// 4
+  red_slider = Window_set_scroller_button(223, 27, 128+24,Color_count,1,Color_max-Reduce_component(working_palette[Fore_color].R));// 2
+  green_slider = Window_set_scroller_button(250, 27, 128+24,Color_count,1,Color_max-Reduce_component(working_palette[Fore_color].G));// 3
+  blue_slider = Window_set_scroller_button(277, 27, 128+24,Color_count,1,Color_max-Reduce_component(working_palette[Fore_color].B));// 4
 
   if(Palette_view_is_RGB==1) {
       Print_RGB_or_HSL(0);
@@ -1144,18 +1159,18 @@ void Button_Palette(void)
   // Affichage des valeurs de la couleur courante (pour 1 couleur)
   Display_sliders(red_slider,green_slider,blue_slider,(block_start!=block_end),working_palette);
 
-  Print_in_window(7, 69, "Color number:", MC_Dark, MC_Light);
+  Print_in_window(7, COLOR_Y, "Color number:", MC_Dark, MC_Light);
   Num2str(Fore_color, str, 3);
   Print_in_window(COLOR_X, COLOR_Y, str, MC_Black, MC_Light);
 
-  Window_set_normal_button(  7,16,55,14,"Merge" ,0,1,SDLK_m);    // 5
-  Window_set_normal_button( 63,16,36,14,"Gray"   ,1,1,SDLK_g);   // 6
-  Window_set_normal_button(  7,46,55,14,"Swap"   ,0,1,KEY_NONE); // 7
-  Window_set_normal_button( 63,46,72,14,"X-Swap" ,1,1,SDLK_x);   // 8
-  Window_set_normal_button(136,31,54,14,"Copy"   ,1,1,SDLK_c);   // 9
-  Window_set_normal_button(136,46,54,14,"Spread" ,4,1,SDLK_e);   // 10
+  Window_set_normal_button(C4_X,L3,C4_W,14,"Merge" ,0,1,SDLK_m);    // 5
+  Window_set_normal_button(C2_X,L3,C2_W,14,"Gray"   ,1,1,SDLK_g);   // 6
+  Window_set_normal_button(C1_X,L1,C1_W,14,"Swap"   ,0,1,KEY_NONE); // 7
+  Window_set_normal_button(C2_X,L1,C2_W,14,"X-Swap" ,1,1,SDLK_x);   // 8
+  Window_set_normal_button(C3_X,L1,C3_W,14,"Copy"   ,1,1,SDLK_c);   // 9
+  Window_set_normal_button(C3_X,L3,C3_W,14,"Spread" ,4,1,SDLK_e);   // 10
 
-  reduce_dropdown = Window_set_dropdown_button(209, 46, 83, 14, 84, "Reduce", 0,
+  reduce_dropdown = Window_set_dropdown_button(89, L4, 83, 14, 84, "Reduce", 0,
     0, 1, RIGHT_SIDE|LEFT_SIDE, 0); // 11
   Window_dropdown_add_item(reduce_dropdown, 256, "to uniques");
   Window_dropdown_add_item(reduce_dropdown, 128, "to 128");
@@ -1167,25 +1182,25 @@ void Button_Palette(void)
   Window_dropdown_add_item(reduce_dropdown,   2, "to 2");
   Window_dropdown_add_item(reduce_dropdown,   0, "Other");
 
-  Window_set_normal_button(  6,168,35,14,"Undo"  ,1,1,SDLK_u);  // 12
-  Window_set_normal_button( 62,168,51,14,"Cancel",0,1,KEY_ESC);  // 13
-  Window_set_normal_button(117,168,51,14,"OK"    ,0,1,SDLK_RETURN);  // 14
+  Window_set_normal_button(  5,178,35,14,"Undo"  ,1,1,SDLK_u);  // 12
+  Window_set_normal_button(122,178,51,14,"Cancel",0,1,KEY_ESC);  // 13
+  Window_set_normal_button(177,178,35,14,"OK"    ,0,1,SDLK_RETURN);  // 14
 
-  Window_set_normal_button(209,16,37,14,"Used",0,1,SDLK_d); // 15
-  Window_set_normal_button(209,31,83,14,"Zap unused",0,1,SDLK_DELETE);//16
+  Window_set_normal_button(C4_X,L2,C4_W,14,"Used",0,1,SDLK_d); // 15
+  Window_set_normal_button(C1_X,L4,83,14,"Zap unused",0,1,SDLK_DELETE);//16
   
   Window_set_repeatable_button(BUTTON_PLUS_X, BUTTON_PLUS_Y,12,11,"+",0,1,SDLK_KP_PLUS);       // 17
   Window_set_repeatable_button(BUTTON_MINUS_X,BUTTON_MINUS_Y,12,11,"-",0,1,SDLK_KP_MINUS);       // 18
 
-  Window_set_normal_button(100,16,35,14,"Neg"    ,1,1,SDLK_n);   // 19
-  Window_set_normal_button(7,31,55,14,"Invert"    ,1,1,SDLK_i);   // 20
-  Window_set_normal_button(63,31,72,14,"X-Invert" ,5,1,SDLK_v);   // 21
+  Window_set_normal_button(C1_X,L3,C1_W,14,"Neg"    ,1,1,SDLK_n);   // 19
+  Window_set_normal_button(C1_X,L2,C1_W,14,"Flip"    ,1,1,SDLK_i);   // 20
+  Window_set_normal_button(C2_X,L2,C2_W,14,"X-Flip" ,5,1,SDLK_v);   // 21
 
-  // Button without outline
-  Window_set_normal_button(175,66,81,11,""    ,0,1,SDLK_h);   // 22
-  Window_display_frame_mono(175-1,66-1,81+2,11+2,MC_Light);
+  // Button without outline (RGB/HSL switch)
+  Window_set_normal_button(NUMERIC_BOX_X,14,81,11,""    ,0,1,SDLK_h);   // 22
+  Window_display_frame_mono(NUMERIC_BOX_X-1,14-1,81+2,11+2,MC_Light);
 
-  sort_dropdown = Window_set_dropdown_button(136, 16, 54, 14, 80, " Sort", 0,
+  sort_dropdown = Window_set_dropdown_button(C3_X, L2, C3_W, 14, 80, " Sort", 0,
     1, 1, RIGHT_SIDE|LEFT_SIDE, 0); // 23
   Window_dropdown_add_item(sort_dropdown, 0, "Hue/Light");
   Window_dropdown_add_item(sort_dropdown, 1, "Lightness");
@@ -1195,13 +1210,14 @@ void Button_Palette(void)
   // Button without outline
   Window_display_frame_mono(NUMERIC_BOX_X-1,NUMERIC_BOX_Y-1,NUMERIC_BOX_W+2,NUMERIC_BOX_H+2,MC_Light);
 
-  Window_set_normal_button(247,16,45,14,"Histo",0,1,KEY_NONE);// 25
+  Window_set_normal_button(C4_X,L1,C4_W,14,"Histo",0,1,KEY_NONE);// 25
+
+  Window_set_normal_button( 44,178,35,14,"Load"  ,1,1,SDLK_l);  // 26
+  Window_set_normal_button( 83,178,35,14,"Save"  ,1,1,SDLK_s);  // 27
   
   // Dessin des petits effets spéciaux pour les boutons [+] et [-]
-  Draw_thingumajig(265, 74,MC_White,-1);
-  Draw_thingumajig(282, 74,MC_White,+1);
-  Draw_thingumajig(265,165,MC_Dark,-1);
-  Draw_thingumajig(282,165,MC_Dark,+1);
+  Draw_thingumajig(BUTTON_PLUS_X-5, BUTTON_PLUS_Y,MC_White,-1);
+  Draw_thingumajig(BUTTON_MINUS_X+16,BUTTON_MINUS_Y,MC_Dark,+1);
 
   Display_cursor();
 
@@ -1209,7 +1225,7 @@ void Button_Palette(void)
   if (show_used_colors)
     Tag_used_colors(1, color_usage);
     
-  Update_window_area(0,0,299,188);
+  Update_window_area(0,0,299,196);
   
   do
   {
@@ -1362,7 +1378,7 @@ void Button_Palette(void)
                   Display_sliders(red_slider,green_slider,blue_slider,1,NULL);
 
                   // Affichage dans le block de visu du bloc (dégradé) en cours
-                  Display_grad_block_in_window(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,block_start,block_end);
+                  Display_grad_block_in_window(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,block_start,block_end);
                 }
                 else if (first_color>temp_color)
                 {
@@ -1379,7 +1395,7 @@ void Button_Palette(void)
                   Display_sliders(red_slider,green_slider,blue_slider,1,NULL);
 
                   // Affichage dans le block de visu du bloc (dégradé) en cours
-                  Display_grad_block_in_window(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,block_start,block_end);
+                  Display_grad_block_in_window(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,block_start,block_end);
                 }
                 else
                 {
@@ -1788,7 +1804,7 @@ void Button_Palette(void)
             Num2str(block_end  ,str+4,3);
             str[3]=26; // Flèche vers la droite
             // Affichage dans le block de visu du bloc (dégradé) en cours
-            Display_grad_block_in_window(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,block_start,block_end);
+            Display_grad_block_in_window(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,block_start,block_end);
           }
           else
           {
@@ -1843,7 +1859,7 @@ void Button_Palette(void)
             Num2str(block_end  ,str+4,3);
             str[3]=26; // Flèche vers la droite
             // Affichage dans le block de visu du bloc (dégradé) en cours
-            Display_grad_block_in_window(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,block_start,block_end);
+            Display_grad_block_in_window(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,block_start,block_end);
           }
           else
           {
@@ -2749,13 +2765,13 @@ void Button_Palette(void)
         // On remappe brutalement
         Remap_screen_after_menu_colors_change();
         // Puis on remet les trucs qui ne devaient pas changer
-        Window_draw_palette_bouton(5,79);
+        Window_draw_palette_bouton(5,89);
         if (show_used_colors)
           Tag_used_colors(1, color_usage);
         Window_rectangle(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_H,Back_color);
         Update_window_area(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_H);
         
-        Display_grad_block_in_window(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,block_start,block_end);
+        Display_grad_block_in_window(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,block_start,block_end);
 
         Update_window_area(8,82,16*10,5*16);
 

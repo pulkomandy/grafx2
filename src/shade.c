@@ -555,7 +555,7 @@ int Menu_shade(void)
             // On tagge le bloc
             Tag_color_range(first_color,last_color);
             // Tracé du bloc dégradé:
-            Display_grad_block_in_window(172,27,first_color,last_color);
+            Display_grad_block_in_window(172,27,16,64,first_color,last_color);
           }
           else
           { // On maintient le click, on va donc tester si le curseur bouge
@@ -567,12 +567,12 @@ int Menu_shade(void)
               if (first_color<=temp_color)
               {
                 Tag_color_range(first_color,last_color);
-                Display_grad_block_in_window(172,27,first_color,last_color);
+                Display_grad_block_in_window(172,27,16,64,first_color,last_color);
               }
               else
               {
                 Tag_color_range(last_color,first_color);
-                Display_grad_block_in_window(172,27,last_color,first_color);
+                Display_grad_block_in_window(172,27,16,64,last_color,first_color);
               }
             }
           }
@@ -970,7 +970,7 @@ int Menu_shade(void)
           // On tagge le bloc
           Tag_color_range(first_color,last_color);
           // Tracé du bloc dégradé:
-          Display_grad_block_in_window(172,27,first_color,last_color);
+          Display_grad_block_in_window(172,27,16,64,first_color,last_color);
 
           // On affiche le numéro de la couleur sélectionnée
           Display_selected_color(first_color,last_color);
