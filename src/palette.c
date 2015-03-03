@@ -1078,7 +1078,6 @@ void Button_Palette(void)
   byte  last_color;
   char  str[10];
   word  i;
-  T_Normal_button   * button_used;
   T_Scroller_button * red_slider;
   T_Scroller_button * green_slider;
   T_Scroller_button * blue_slider;
@@ -1190,12 +1189,13 @@ void Button_Palette(void)
     1, 1, RIGHT_SIDE|LEFT_SIDE, 0); // 23
   Window_dropdown_add_item(sort_dropdown, 0, "Hue/Light");
   Window_dropdown_add_item(sort_dropdown, 1, "Lightness");
+  Window_dropdown_add_item(sort_dropdown, 2, "Histogram");
   
   Window_set_normal_button(NUMERIC_BOX_X,NUMERIC_BOX_Y,NUMERIC_BOX_W,NUMERIC_BOX_H,"" ,0,1,KEY_NONE);   // 24
   // Button without outline
   Window_display_frame_mono(NUMERIC_BOX_X-1,NUMERIC_BOX_Y-1,NUMERIC_BOX_W+2,NUMERIC_BOX_H+2,MC_Light);
 
-  button_used = Window_set_normal_button(247,16,45,14,"Histo",0,1,KEY_NONE);// 25
+  Window_set_normal_button(247,16,45,14,"Histo",0,1,KEY_NONE);// 25
   
   // Dessin des petits effets spéciaux pour les boutons [+] et [-]
   Draw_thingumajig(265, 74,MC_White,-1);
@@ -2408,7 +2408,7 @@ void Button_Palette(void)
           }
         }
 
-        else // Sort only on perceived lightness
+        else if(Window_attribute2==1) // Sort only on perceived lightness
         while(swap==1)
         {
           swap=0;
@@ -2417,6 +2417,32 @@ void Button_Palette(void)
           {
             old_lightness=lightness; 
             lightness=Perceptual_lightness(working_palette+temp_color);
+
+            if(lightness>old_lightness)
+            {
+              // Swap color with the previous one
+              SWAP_BYTES(working_palette[temp_color].R, working_palette[temp_color-1].R)
+              SWAP_BYTES(working_palette[temp_color].G, working_palette[temp_color-1].G)
+              SWAP_BYTES(working_palette[temp_color].B, working_palette[temp_color-1].B)
+      
+              SWAP_DWORDS(color_usage[temp_color], color_usage[temp_color-1])
+              
+              SWAP_BYTES(remap_table[temp_color], remap_table[temp_color-1])
+              
+              swap=1;
+            }
+          }
+        }
+
+        else // Sort by color usage in histogram
+        while(swap==1)
+        {
+          swap=0;
+          lightness=color_usage[begin];
+          for(temp_color=begin+1;temp_color<=end;temp_color++)
+          {
+            old_lightness=lightness; 
+            lightness=color_usage[temp_color];
 
             if(lightness>old_lightness)
             {
