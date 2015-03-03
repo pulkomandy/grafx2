@@ -1620,13 +1620,13 @@ void Open_window(word width,word height, const char * title)
   Window_display_frame_out(1,1,width-2,height-2);
 
   // Barre sous le titre
-  Window_rectangle(8,11,width-16,1,MC_Dark);
-  Window_rectangle(8,12,width-16,1,MC_White);
+  Window_rectangle(3,3,width-6,10,MC_White);
+  Window_rectangle(2,12,width-4,1,MC_Dark);
 
   title_length = strlen(title);
   if (title_length+2 > (size_t)(width/8))
     title_length = width/8-2;
-  Print_in_window_limited((width-(title_length<<3))>>1,3,title,title_length,MC_Black,MC_Light);
+  Print_in_window_limited((width-(title_length<<3))>>1,4,title,title_length,MC_Black,MC_White);
 
   if (Windows_open == 1)
   {
