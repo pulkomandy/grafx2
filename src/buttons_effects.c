@@ -346,10 +346,8 @@ void Button_Grid_menu(void)
   short dx_selected=Snap_offset_X;
   short dy_selected=Snap_offset_Y;
 
-  char showgrid = Show_grid;
-  // if grid is shown check if we snap
-  // if not snap by default (so the window work like before we introduced the "show" option)
-  char snapgrid = Show_grid?Snap_mode:1;
+  // Entering this window automatically enables "snap"
+  char snapgrid = 1;
 
   T_Special_button * input_x_button;
   T_Special_button * input_y_button;
@@ -384,13 +382,9 @@ void Button_Grid_menu(void)
   Num2str(dy_selected,str,3);
 
   Window_set_normal_button(12, 62, 14, 14, " ", 0, 1, 0);  // 7
-  Window_set_normal_button(78, 62, 14, 14, " ", 0, 1, 0); // 8
   if (snapgrid)
     Print_in_window(16, 65, "X", MC_Black, MC_Light);
-  if (Show_grid)
-    Print_in_window(82, 65, "X", MC_Black, MC_Light);
   Print_in_window(32, 65,"Snap",MC_Dark,MC_Light);
-  Print_in_window(98, 65,"Show",MC_Dark,MC_Light);
 
   Window_input_content(input_dy_button,str);
   Update_window_area(0,0,Window_width, Window_height);
@@ -479,13 +473,6 @@ void Button_Grid_menu(void)
         Print_in_window(16, 65, snapgrid?"X":" ", MC_Black, MC_Light);
         Display_cursor();
         break;
-      case 8:
-        showgrid = !showgrid;
-        Hide_cursor();
-        Print_in_window(82, 65, showgrid?"X":" ", MC_Black, MC_Light);
-        Display_cursor();
-        break;
-
     }
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       Window_help(BUTTON_EFFECTS, "GRID");
@@ -506,7 +493,6 @@ void Button_Grid_menu(void)
     Snap_offset_X=dx_selected;
     Snap_offset_Y=dy_selected;
     Snap_mode=snapgrid;
-    Show_grid=showgrid;
     
     if (modified)
     {
