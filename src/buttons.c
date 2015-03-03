@@ -4501,38 +4501,46 @@ void Display_effect_sprite(int sprite_number, short start_x, short start_y)
 
 void Display_effect_state(short x, short y, char * label, byte state)
 {
-  Window_rectangle(x,y,12,8,MC_Light);
+  Window_rectangle(x+22,y+5,12,8,MC_Light);
 
-  Print_in_window(x,y,label,(state)?MC_White:MC_Black,MC_Light);
+  Print_in_window(x+22,y+5,label,(state)?MC_White:MC_Black,MC_Light);
   if (state)
-    Window_select_normal_button(x-23, y-5, 16, 16);
+    Window_select_normal_button(x, y, 16, 16);
   else
-    Window_unselect_normal_button(x-23, y-5, 16, 16);
+    Window_unselect_normal_button(x, y, 16, 16);
 }
 
-#define C2 92
+#define C1 10
+#define C2 99
+#define C3 184
+
+#define L1 19
+#define L2 38
+#define L3 57
+#define L4 76
+#define L5 95
 
 void Display_effect_states(void)
 {
-  Display_effect_state( 30, 24,   "Shade"  ,Shade_mode);
-  Display_effect_state( 30, 43,   "Q-shade",Quick_shade_mode);
-  Display_effect_state( 30, 62,   "Transp.",Colorize_mode);
-  Display_effect_state( 30, 81,   "Smooth" ,Smooth_mode);
-  Display_effect_state( 30,100,   "Smear"  ,Smear_mode);
-  Display_effect_state(C2+23, 24, "Stencil",Stencil_mode);
-  Display_effect_state(C2+23, 43, "Mask"   ,Mask_mode);
-  Display_effect_state(C2+23, 62, "Sieve"  ,Sieve_mode);
-  Display_effect_state(C2+23, 81, "Grid"   ,Snap_mode);
-  Display_effect_state(C2+23,100, "Tiling" ,Tiling_mode);
+  Display_effect_state(C1, L2, "Shade"  ,Shade_mode);
+  Display_effect_state(C1, L3, "Q-shade",Quick_shade_mode);
+  Display_effect_state(C1, L4, "Transp.",Colorize_mode);
+  Display_effect_state(C1, L5, "Smooth" ,Smooth_mode);
+  Display_effect_state(C2, L5, "Smear"  ,Smear_mode);
+  Display_effect_state(C2, L1, "Stencil",Stencil_mode);
+  Display_effect_state(C2, L2, "Mask"   ,Mask_mode);
+  Display_effect_state(C2, L3, "Sieve"  ,Sieve_mode);
+  Display_effect_state(C3, L2, "Snap"   ,Snap_mode);
+  Display_effect_state(C3, L4, "Tiling" ,Tiling_mode);
 
-  Display_effect_state(177+23,24, "8 bit"  ,Main_backups->Pages->Image_mode > IMAGE_MODE_ANIMATION);
-  Display_effect_state(177+23,43, "Tilemap",Main_tilemap_mode);
+  Display_effect_state(C2,L4, "8 bit"  ,Main_backups->Pages->Image_mode > IMAGE_MODE_ANIMATION);
+  Display_effect_state(C3,L3, "Tilemap",Main_tilemap_mode);
 }
 
 
 void Display_feedback_state(void)
 {
-  Print_in_window(159,134,(Config.FX_Feedback)?"YES":" NO",MC_Black,MC_Light);
+  Print_in_window(14,24,(Config.FX_Feedback)?"X":" ",MC_Black,MC_Light);
 }
 
 
@@ -4543,40 +4551,54 @@ void Button_Effects(void)
 
   Open_window(270,152,"Drawing modes (effects)");
 
-  Window_set_normal_button(  7, 19, 16,16,"",0,1,Config_Key[SPECIAL_SHADE_MODE][0]); // 1
-  Window_set_normal_button(  7, 38, 16,16,"",0,1,Config_Key[SPECIAL_QUICK_SHADE_MODE][0]); // 2
-  Window_set_normal_button(  7, 57, 16,16,"",0,1,Config_Key[SPECIAL_COLORIZE_MODE][0]); // 3
-  Window_set_normal_button(  7, 76, 16,16,"",0,1,Config_Key[SPECIAL_SMOOTH_MODE][0]); // 4
-  Window_set_normal_button(  7, 95, 16,16,"",0,1,Config_Key[SPECIAL_SMEAR_MODE][0]); // 5
-  Window_set_normal_button(C2, 19, 16,16,"",0,1,Config_Key[SPECIAL_STENCIL_MODE][0]); // 6
-  Window_set_normal_button(C2, 38, 16,16,"",0,1,Config_Key[SPECIAL_MASK_MODE][0]); // 7
-  Window_set_normal_button(C2, 57, 16,16,"",0,1,Config_Key[SPECIAL_SIEVE_MODE][0]); // 8
-  Window_set_normal_button(C2, 76, 16,16,"",0,1,Config_Key[SPECIAL_GRID_MODE][0]); // 9
-  Window_set_normal_button(C2, 95, 16,16,"",0,1,Config_Key[SPECIAL_TILING_MODE][0]); // 10
+  Window_set_normal_button(C1, L2, 16,16,"",0,1,Config_Key[SPECIAL_SHADE_MODE][0]); // 1
+  Window_set_normal_button(C1, L3, 16,16,"",0,1,Config_Key[SPECIAL_QUICK_SHADE_MODE][0]); // 2
+  Window_set_normal_button(C1, L4, 16,16,"",0,1,Config_Key[SPECIAL_COLORIZE_MODE][0]); // 3
+  Window_set_normal_button(C1, L5, 16,16,"",0,1,Config_Key[SPECIAL_SMOOTH_MODE][0]); // 4
+  Window_set_normal_button(C2, L5, 16,16,"",0,1,Config_Key[SPECIAL_SMEAR_MODE][0]); // 5
+  Window_set_normal_button(C2, L1, 16,16,"",0,1,Config_Key[SPECIAL_STENCIL_MODE][0]); // 6
+  Window_set_normal_button(C2, L2, 16,16,"",0,1,Config_Key[SPECIAL_MASK_MODE][0]); // 7
+  Window_set_normal_button(C2, L3, 16,16,"",0,1,Config_Key[SPECIAL_SIEVE_MODE][0]); // 8
+  Window_set_normal_button(C3, L2, 16,16,"",0,1,Config_Key[SPECIAL_GRID_MODE][0]); // 9
+  Window_set_normal_button(C3, L4, 16,16,"",0,1,Config_Key[SPECIAL_TILING_MODE][0]); // 10
 
   Window_set_normal_button(195,131, 68,14,"Close",0,1,SDLK_RETURN); // 11
-  Window_set_normal_button(  7,131, 68,14,"All off",0,1,SDLK_DELETE); // 12
-  Window_set_normal_button( 83,131,104,14,"Feedback:   ",1,1,SDLK_f); // 13
+  Window_set_normal_button(118,131, 68,14,"All off",0,1,SDLK_DELETE); // 12
 
-  Window_set_normal_button(177, 19, 16,16,"",0,1,Config_Key[SPECIAL_FORMAT_CHECKER_MENU][0]); // 14
-  Window_set_normal_button(177, 38, 16,16,"",0,1,Config_Key[SPECIAL_TILEMAP_MODE][0]); // 15
+  // "Feedback" frame
+  Window_display_frame_mono(C1-5,L1+8,90,88,MC_Dark);
+  Window_rectangle(C1-1, L1+2, 78, 14, MC_Light);
+
+  Window_set_normal_button( 11,21,14,14," ",1,1,SDLK_f); // 13
+  Print_in_window(28,24,"Feedback",MC_Dark,MC_Light);
+
+  Window_set_normal_button(C2, L4, 16,16,"",0,1,Config_Key[SPECIAL_FORMAT_CHECKER_MENU][0]); // 14
+  Window_set_normal_button(C3, L3, 16,16,"",0,1,Config_Key[SPECIAL_TILEMAP_MODE][0]); // 15
+
+  // "Grid" frame
+  Window_display_frame_mono(C3-5,L1+8,86,88,MC_Dark);
+  Window_rectangle(C3-1, L1+2, 52, 14, MC_Light);
+  //Window_set_normal_button( 11,21,14,14," ",1,1,SDLK_f); // 13
+  Print_in_window(C3+17,L1+5,"Grid",MC_Dark,MC_Light);
 
   Display_feedback_state();
-  Display_effect_sprite(EFFECTS_SPRITE_SHADE,   8,20);
-  Display_effect_sprite(EFFECTS_SPRITE_SHADE,   8,39);
-  Display_effect_sprite(EFFECTS_SPRITE_TRANSP,  8,58);
-  Display_effect_sprite(EFFECTS_SPRITE_SMOOTH,  8,77);
-  Display_effect_sprite(EFFECTS_SPRITE_SMEAR,   8,96);
-  Display_effect_sprite(EFFECTS_SPRITE_STENCIL,C2+1,20);
-  Display_effect_sprite(EFFECTS_SPRITE_MASK,   C2+1,39);
-  Display_effect_sprite(EFFECTS_SPRITE_SIEVE,  C2+1,58);
-  Display_effect_sprite(EFFECTS_SPRITE_GRID,   C2+1,77);
-  Display_effect_sprite(EFFECTS_SPRITE_TILING, C2+1,96);
-  Display_effect_sprite(EFFECTS_SPRITE_8BIT,  177+1,20);
-  Display_effect_sprite(EFFECTS_SPRITE_TILING,177+1,39);
+  Display_effect_sprite(EFFECTS_SPRITE_SHADE,  C1+1,L2+1);
+  Display_effect_sprite(EFFECTS_SPRITE_SHADE,  C1+1,L3+1);
+  Display_effect_sprite(EFFECTS_SPRITE_TRANSP, C1+1,L4+1);
+  Display_effect_sprite(EFFECTS_SPRITE_SMOOTH, C1+1,L5+1);
+  Display_effect_sprite(EFFECTS_SPRITE_SMEAR,  C2+1,L5+1);
+  Display_effect_sprite(EFFECTS_SPRITE_STENCIL,C2+1,L1+1);
+  Display_effect_sprite(EFFECTS_SPRITE_MASK,   C2+1,L2+1);
+  Display_effect_sprite(EFFECTS_SPRITE_SIEVE,  C2+1,L3+1);
+  Display_effect_sprite(EFFECTS_SPRITE_GRID,   C3+1,L2+1);
+  Display_effect_sprite(EFFECTS_SPRITE_TILING, C3+1,L4+1);
+  Display_effect_sprite(EFFECTS_SPRITE_8BIT,   C2+1,L4+1);
+  Display_effect_sprite(EFFECTS_SPRITE_TILING, C3+1,L3+1); // tilemap
   Display_effect_states();
 
-  Print_in_window(12,117,"click: Left:Switch / Right:Edit",MC_Dark,MC_Light);
+  Print_in_window(12,118,"click:",MC_Dark,MC_Light);
+  Print_in_window(16,128,"Left:Switch",MC_Dark,MC_Light);
+  Print_in_window(16,138,"Right:Edit",MC_Dark,MC_Light);
 
   Update_window_area(0,0,Window_width, Window_height);
   Display_cursor();
