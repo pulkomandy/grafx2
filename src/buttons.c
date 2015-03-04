@@ -3466,8 +3466,6 @@ void Save_picture(enum CONTEXT_TYPE type)
       dotpos = filename + strlen(filename);
     strcpy(dotpos, ".pal");
 
-    printf("FILEN %s\n", filename);
-
     strcpy(directory, Main_backups->Pages->File_directory);
     Init_context_layered_image(&save_context, filename, directory);
     save_context.Type = CONTEXT_PALETTE;

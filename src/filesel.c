@@ -1500,14 +1500,14 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 
   if (!load)
   {
+    Highlight_file(Find_file_in_fileselector(&Filelist, context->File_name));
+    Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller);
+
     // On initialise le nom de fichier à celui en cours et non pas celui sous
     // la barre de sélection
     strcpy(Selector_filename,context->File_name);
     // On affiche le nouveau nom de fichier
     Print_filename_in_fileselector();
-
-    Highlight_file(Find_file_in_fileselector(&Filelist, context->File_name));
-    Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller);
   }
 
   New_preview_is_needed=1;
@@ -1710,7 +1710,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
             free(savename);
           }
           Print_filename_in_fileselector();
-              Display_cursor();
+          Display_cursor();
         }
         break;
       case  7 : // Saisie d'un commentaire pour la sauvegarde
