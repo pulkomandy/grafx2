@@ -90,6 +90,167 @@ void Test_PAL(T_IO_Context * context)
   }
 }
 
+void Test_GPL(T_IO_Context * context)
+{
+  FILE *file;
+  char filename[MAX_PATH_CHARACTERS];
+  long file_size;
+
+  Get_full_filename(filename, context->File_name, context->File_directory);
+
+  File_error = 1;
+
+  if ((file = fopen(filename, "rb")))
+  {
+    file_size = File_length_file(file);
+    if (file_size > 33) {
+       // minimum header length == 33
+       // "GIMP Palette" == 12
+       fread(filename, 1, 12, file);
+       if (strncmp(filename,"GIMP Palette",12) == 0)
+         File_error = 0;
+    }
+  }
+    fclose(file);
+}
+
+// skip the padding before a space-padded field.
+
+static int skip_padding(FILE *file, int max_chars)
+{
+  char buffer[1];
+  int chars_read = 0;
+  int latest_chars_read = 0;
+  size_t tmp;
+  buffer[0] = ' ';
+  while (buffer[0] == ' '){
+    latest_chars_read = fread(buffer, 1, 1, file);
+    if ((latest_chars_read != 1) || (chars_read == max_chars))
+      return chars_read; // eof
+    chars_read += latest_chars_read;
+  }
+  
+  if (chars_read > 0){
+    tmp = ftell(file);
+//    printf ("rewinding to %d", tmp - 1);
+    fseek(file, tmp - 1, SEEK_SET);
+  }
+  return chars_read;
+}
+
+// -- Load file with format GPL -----------------------------------------
+void Load_GPL(T_IO_Context * context)
+{
+  FILE *file;
+  char filename[MAX_PATH_CHARACTERS]; // full filename
+  long file_size;
+  long pos;
+
+  Get_full_filename(filename, context->File_name, context->File_directory);
+  File_error=0;
+
+  // Open file
+  if ((file=fopen(filename, "rb")))
+  {
+    fread(filename, 1, 13, file);
+    file_size = File_length_file(file);
+    if (strncmp(filename,"GIMP Palette\n",13) == 0)
+    {
+      int i, j, r, g, b, columns, chars_read;
+      fscanf(file, "Name: %s\n", filename);
+      printf("DBG: Escaped nominal destruction ~%s~\n", filename); // y
+      fscanf(file, "Columns: %d\n", &columns);
+      // TODO: set grafx2 columns setting to match.
+      printf("DBG: Escaped architectural destruction %d\n", columns); // y
+      // #<newline>
+      fread(filename,1, 2, file);
+      filename[2] = 0;
+      printf("DBG: Escaped grammatical destruction ~%s~\n", filename);
+
+      for (i = 0; i < 256; i++)
+      {
+      
+        pos = ftell(file);
+        skip_padding(file, 32);
+        fscanf(file, "%d", &r);
+        skip_padding(file, 32);
+        fscanf(file, "%d", &g);
+        skip_padding(file, 32);
+        fscanf(file, "%d\t", &b);
+        filename[0] = 0;
+        j = 0;
+        do {
+        
+            chars_read = fscanf(file, "%s", filename+j);
+            if (chars_read > 0){
+              j += chars_read;
+              // space or newline follows.
+              fread(filename+j, 1, 1, file);
+            }
+            else{
+              filename[j] = '\n';
+            }
+        } while (filename[j] != '\n');
+        filename[j] = 0;
+        if (ftell(file) == pos)
+          break; // no more colors.
+
+        // TODO: analyze color names to build shade table
+
+        printf("DBG: %d: %s\n", i, filename);
+        context->Palette[i].R = r;
+        context->Palette[i].G = g;
+        context->Palette[i].B = b;
+      }
+    } else
+      File_error = 2;
+
+    // close the file
+    fclose(file);
+  }
+  else
+    // Si on n'a pas réussi à ouvrir le fichier, alors il y a eu une erreur
+    File_error=1;
+}
+
+
+void
+Save_GPL (T_IO_Context * context)
+{
+  FILE *file;
+  char filename[MAX_PATH_CHARACTERS]; // full filename
+
+  Get_full_filename(filename, context->File_name, context->File_directory);
+
+  File_error=0;
+
+  // Open output file
+  if ((file=fopen(filename,"w"))){
+    int i;
+    fprintf (file, "GIMP Palette\n");
+    fprintf (file, "Name: %s\n", context->File_name);
+    // TODO: use actual columns value
+    fprintf (file, "Columns: %d\n#\n", 16); 
+
+    for (i = 0; i < 256 && File_error==0; i++)
+    {
+      // TODO: build names from shade table data
+      if (fprintf(file,"%d %d %d\tUntitled\n",context->Palette[i].R, context->Palette[i].G, context->Palette[i].B) <= 0)
+        File_error=1;
+    }
+    fclose(file);
+    
+    if (File_error)
+      remove(filename);
+  }
+  else
+  {
+    // unable to open output file, nothing saved.
+    File_error=1;
+  }
+}
+
+
 
 // -- Lire un fichier au format PAL -----------------------------------------
 void Load_PAL(T_IO_Context * context)

@@ -118,6 +118,7 @@
         return _fullpath(resolved_path,_path,260);
     }
 #else
+#include <limits.h>
 // Use the stdlib function.
     char *Realpath(const char *_path, char *resolved_path)
     {

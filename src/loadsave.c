@@ -103,6 +103,11 @@ void Test_PAL(T_IO_Context *);
 void Load_PAL(T_IO_Context *);
 void Save_PAL(T_IO_Context *);
 
+// -- GPL -------------------------------------------------------------------
+void Test_GPL(T_IO_Context *);
+void Load_GPL(T_IO_Context *);
+void Save_GPL(T_IO_Context *);
+
 // -- PI1 -------------------------------------------------------------------
 void Test_PI1(T_IO_Context *);
 void Load_PI1(T_IO_Context *);
@@ -148,7 +153,7 @@ void Load_SDL_Image(T_IO_Context *);
 
 // ENUM     Name  TestFunc LoadFunc SaveFunc PalOnly Comment Layers Ext Exts  
 T_Format File_formats[] = {
-  {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, 0, "", "gif;png;bmp;pcx;pkm;iff;lbm;ilbm;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;kcf;pal;c64;koa;koala;fli;bml;cdu;prg;tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico;cm5"},
+  {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, 0, "", "gif;png;bmp;pcx;pkm;iff;lbm;ilbm;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;kcf;pal;gpl;c64;koa;koala;fli;bml;cdu;prg;tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico;cm5"},
   {FORMAT_ALL_FILES, "(*.*)", NULL, NULL, NULL, 0, 0, 0, "", "*"},
   {FORMAT_GIF, " gif", Test_GIF, Load_GIF, Save_GIF, 0, 1, 1, "gif", "gif"},
 #ifndef __no_pnglib__
@@ -167,6 +172,7 @@ T_Format File_formats[] = {
   {FORMAT_NEO, " neo", Test_NEO, Load_NEO, Save_NEO, 0, 0, 0, "neo", "neo"},
   {FORMAT_KCF, " kcf", Test_KCF, Load_KCF, Save_KCF, 1, 0, 0, "kcf", "kcf"},
   {FORMAT_PAL, " pal", Test_PAL, Load_PAL, Save_PAL, 1, 0, 0, "pal", "pal"},
+  {FORMAT_GPL, " gpl", Test_GPL, Load_GPL, Save_GPL, 1, 0, 0, "gpl", "gpl"},
   {FORMAT_C64, " c64", Test_C64, Load_C64, Save_C64, 0, 1, 0, "c64", "c64;koa;koala;fli;bml;cdu;prg"},
   {FORMAT_SCR, " cpc", NULL,     NULL,     Save_SCR, 0, 0, 0, "cpc", "cpc;scr"},
   {FORMAT_CM5, " cm5", Test_CM5, Load_CM5, Save_CM5, 0, 0, 1, "cm5", "cm5"},
