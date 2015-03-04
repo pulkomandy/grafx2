@@ -1877,7 +1877,7 @@ int Compare_video_modes(const void *p1, const void *p2)
 // Initializes the list of available video modes
 void Set_all_video_modes(void)
 {
-  SDL_Rect** Modes;
+  int sdl_modes;
   Nb_video_modes=0;
   
   // The first mode will have index number 0.
@@ -1890,102 +1890,39 @@ void Set_all_video_modes(void)
   // Window mode, with default size of 640x480
   Set_video_mode( 640,480,0, 0);
   #endif
-
-  Set_video_mode( 320,200,0, 1);
-  Set_video_mode( 320,224,0, 1);
-  #if !defined(__GP2X__) && !defined(__WIZ__) && !defined(__CAANOO__) && !defined(GCWZERO)
-  // For the GP2X, this one is already declared above.
-  Set_video_mode( 320,240,0, 1);
-  #endif
-  Set_video_mode( 320,256,0, 1);
-  Set_video_mode( 320,270,0, 1);
-  Set_video_mode( 320,282,0, 1);
-  Set_video_mode( 320,300,0, 1);
-  Set_video_mode( 320,360,0, 1);
-  Set_video_mode( 320,400,0, 1);
-  Set_video_mode( 320,448,0, 1);
-  Set_video_mode( 320,480,0, 1);
-  Set_video_mode( 320,512,0, 1);
-  Set_video_mode( 320,540,0, 1);
-  Set_video_mode( 320,564,0, 1);
-  Set_video_mode( 320,600,0, 1);
-  Set_video_mode( 360,200,0, 1);
-  Set_video_mode( 360,224,0, 1);
-  Set_video_mode( 360,240,0, 1);
-  Set_video_mode( 360,256,0, 1);
-  Set_video_mode( 360,270,0, 1);
-  Set_video_mode( 360,282,0, 1);
-  Set_video_mode( 360,300,0, 1);
-  Set_video_mode( 360,360,0, 1);
-  Set_video_mode( 360,400,0, 1);
-  Set_video_mode( 360,448,0, 1);
-  Set_video_mode( 360,480,0, 1);
-  Set_video_mode( 360,512,0, 1);
-  Set_video_mode( 360,540,0, 1);
-  Set_video_mode( 360,564,0, 1);
-  Set_video_mode( 360,600,0, 1);
-  Set_video_mode( 400,200,0, 1);
-  Set_video_mode( 400,224,0, 1);
-  Set_video_mode( 400,240,0, 1);
-  Set_video_mode( 400,256,0, 1);
-  Set_video_mode( 400,270,0, 1);
-  Set_video_mode( 400,282,0, 1);
-  Set_video_mode( 400,300,0, 1);
-  Set_video_mode( 400,360,0, 1);
-  Set_video_mode( 400,400,0, 1);
-  Set_video_mode( 400,448,0, 1);
-  Set_video_mode( 400,480,0, 1);
-  Set_video_mode( 400,512,0, 1);
-  Set_video_mode( 400,540,0, 1);
-  Set_video_mode( 400,564,0, 1);
-  Set_video_mode( 400,600,0, 1);
-  Set_video_mode( 640,224,0, 1);
-  Set_video_mode( 640,240,0, 1);
-  Set_video_mode( 640,256,0, 1);
-  Set_video_mode( 640,270,0, 1);
-  Set_video_mode( 640,300,0, 1);
-  Set_video_mode( 640,350,0, 1);
-  Set_video_mode( 640,400,0, 1);
-  Set_video_mode( 640,448,0, 1);
-  Set_video_mode( 640,480,0, 1);
-  Set_video_mode( 640,512,0, 1);
-  Set_video_mode( 640,540,0, 1);
-  Set_video_mode( 640,564,0, 1);
-  Set_video_mode( 640,600,0, 1);
-  Set_video_mode( 800,600,0, 1);
-  Set_video_mode(1024,768,0, 1);
-/*
-  Modes = SDL_ListModes(NULL, SDL_FULLSCREEN);
-  if ((Modes != (SDL_Rect**)0) && (Modes!=(SDL_Rect**)-1))
+  
+  sdl_modes=SDL_GetNumDisplayModes(0);
+  if (sdl_modes)
   {
     int index;
-    for (index=0; Modes[index]; index++)
+    for (index=0; index<sdl_modes; index++)
     {
       int index2;
-#if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__) || defined(GCWZERO)
-      // On the GP2X the first mode is not windowed, so include it in the search.
-      index2=0;
-#else
-      index2=1;
-#endif
-      for (; index2 < Nb_video_modes; index2++)
-        if (Modes[index]->w == Video_mode[index2].Width &&
-            Modes[index]->h == Video_mode[index2].Height)
+      SDL_DisplayMode mode;
+
+      if (SDL_GetDisplayMode(0, index, &mode))
+      {
+        continue;
+      }
+      if (mode.format != SDL_PIXELFORMAT_RGB888)
+        continue;
+      for (index2=0; index2 < Nb_video_modes; index2++)
+        if (mode.w == Video_mode[index2].Width &&
+            mode.h == Video_mode[index2].Height)
         {
           // Was already in the hard-coded list: ok, don't add.
           break;
         }
-      if (index2 >= Nb_video_modes && Modes[index]->w>=320 && Modes[index]->h>=200)
+      if (index2 >= Nb_video_modes && mode.w >= 320 && mode.h >= 200)
       {
         // New mode to add to the list
-        Set_video_mode(Modes[index]->w,Modes[index]->h,0, 1);
+        Set_video_mode(mode.w, mode.h, 0, 1);
       }
     }
     // Sort the modes : those found by SDL were listed at the end.
     // Note that we voluntarily omit the first entry: the default mode.
     qsort(&Video_mode[1], Nb_video_modes - 1, sizeof(T_Video_mode), Compare_video_modes);
   }
-  */
 }
 
 //---------------------------------------------------------------------------
