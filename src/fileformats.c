@@ -130,7 +130,6 @@ void Load_IMG(T_IO_Context * context)
       if (File_error==0)
       {
         memcpy(context->Palette,IMG_header.Palette,sizeof(T_Palette));
-        Palette_loaded(context);
 
         context->Width=IMG_header.Width;
         context->Height=IMG_header.Height;
@@ -680,7 +679,6 @@ void Load_IFF(T_IO_Context * context)
               Adapt_palette_HAM(context);
               Palette_64_to_256(context->Palette);
             }
-            Palette_loaded(context);
 
             // On lit l'octet de padding du CMAP si la taille est impaire
             if (nb_colors&1)
@@ -1444,7 +1442,6 @@ void Load_BMP(T_IO_Context * context)
               context->Palette[index].G=local_palette[index][1];
               context->Palette[index].B=local_palette[index][0];
             }
-            Palette_loaded(context);
 
             context->Width=header.Width;
             context->Height=header.Height;
@@ -2382,8 +2379,6 @@ void Load_GIF(T_IO_Context * context)
                 previous_pos_x=IDB.Pos_X;
                 previous_pos_y=IDB.Pos_Y;
                 
-                Palette_loaded(context);
-
                 File_error=0;
                 if (!Read_byte(GIF_file,&(initial_nb_bits)))
                   File_error=1;
@@ -3215,7 +3210,6 @@ void Load_PCX(T_IO_Context * context)
                   }
               }
           }
-          Palette_loaded(context);
 
           //   Maintenant qu'on a lu la palette que ces crétins sont allés foutre
           // à la fin, on retourne juste après le header pour lire l'image.
@@ -3621,7 +3615,6 @@ void Load_SCx(T_IO_Context * context)
 
           Palette_64_to_256(SCx_Palette);
           memcpy(context->Palette,SCx_Palette,size);
-          Palette_loaded(context);
 
           context->Width=SCx_header.Width;
           context->Height=SCx_header.Height;
@@ -4068,10 +4061,6 @@ void Load_PNG(T_IO_Context * context)
                     }
                     free(palette);
                     palette = NULL;
-                  }
-                  if (color_type != PNG_COLOR_TYPE_RGB && color_type != PNG_COLOR_TYPE_RGB_ALPHA)
-                  {
-                    Palette_loaded(context);
                   }
                   // Transparency (tRNS)
                   if (png_get_tRNS(png_ptr, info_ptr, &trans, &num_trans, &trans_values))

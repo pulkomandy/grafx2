@@ -117,7 +117,6 @@ void Load_PAL(T_IO_Context * context)
       {
         Palette_64_to_256(palette_64);
         memcpy(context->Palette, palette_64, sizeof(T_Palette));
-        Palette_loaded(context);
       }
       else
         File_error = 2;
@@ -142,7 +141,6 @@ void Load_PAL(T_IO_Context * context)
           context->Palette[i].G = g;
           context->Palette[i].B = b;
         }
-        Palette_loaded(context);
       } else if(strncmp(filename, "RIFF", 4) == 0) {
 		// Microsoft RIFF format.
 		fseek(file, 8, SEEK_SET);
@@ -404,7 +402,6 @@ void Load_PKM(T_IO_Context * context)
           // Palette lue en 64
           memcpy(context->Palette,header.Palette,sizeof(T_Palette));
           Palette_64_to_256(context->Palette);
-          Palette_loaded(context);
 
           Compteur_de_donnees_packees=0;
           Compteur_de_pixels=0;
@@ -1134,7 +1131,6 @@ void Load_KCF(T_IO_Context * context)
           context->Palette[index].B=context->Palette[index+16].B;
         }
 
-        Palette_loaded(context);
       }
       else
         File_error=1;
@@ -1193,7 +1189,6 @@ void Load_KCF(T_IO_Context * context)
             context->Palette[index].B=context->Palette[index+16].B;
           }
 
-        Palette_loaded(context);
       }
       else
         File_error=1;
@@ -1564,7 +1559,6 @@ void Load_PI1(T_IO_Context * context)
           if (Config.Clear_palette)
             memset(context->Palette,0,sizeof(T_Palette));
           PI1_decode_palette(buffer+2,(byte *)context->Palette);
-          Palette_loaded(context);
 
           context->Width=320;
           context->Height=200;
@@ -1897,7 +1891,6 @@ void Load_PC1(T_IO_Context * context)
           if (Config.Clear_palette)
             memset(context->Palette,0,sizeof(T_Palette));
           PI1_decode_palette(buffercomp+2,(byte *)context->Palette);
-          Palette_loaded(context);
 
           context->Width=320;
           context->Height=200;
@@ -2088,7 +2081,6 @@ void Load_NEO(T_IO_Context * context)
             memset(context->Palette,0,sizeof(T_Palette));
           // on saute la résolution et le flag, chacun 2 bits
           PI1_decode_palette(buffer+4,(byte *)context->Palette);
-          Palette_loaded(context);
 
           context->Width=320;
           context->Height=200;
@@ -2568,8 +2560,6 @@ void Load_C64(T_IO_Context * context)
         context->Palette[16].G=20;
         context->Palette[16].B=20;
         
-        Palette_loaded(context); // Always call it if you change the palette
-                
         context->Width = width ;                
         context->Height = height;
         context->Transparent_color=16;
@@ -3219,8 +3209,6 @@ void Load_CM5(T_IO_Context* context)
   context->Palette[0x5D].R = 0x6C; context->Palette[0x5D].G = 2; context->Palette[0x5D].B = 0xF2;
   context->Palette[0x5E].R = 0x6E; context->Palette[0x5E].G = 0x7B; context->Palette[0x5E].B = 1;
   context->Palette[0x5F].R = 0x6E; context->Palette[0x5F].G = 0x7B; context->Palette[0x5F].B = 0xF6;
-
-  Palette_loaded(context);
 
 
   if (Read_byte(file, &value)!=1)

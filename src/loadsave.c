@@ -23,7 +23,6 @@
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
-#define _XOPEN_SOURCE 500
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -262,28 +261,6 @@ void Fill_canvas(T_IO_Context *context, byte color)
     case CONTEXT_BRUSH:
       memset(context->Buffer_image, color, (long)context->Height*context->Pitch);
       break;
-    case CONTEXT_SURFACE:
-      break;
-  }
-}
-
-void Palette_loaded(T_IO_Context *context)
-{
-  // Update the current screen to the loaded palette
-  switch (context->Type)
-  {
-    case CONTEXT_MAIN_IMAGE:
-    case CONTEXT_PREVIEW:
-    case CONTEXT_BRUSH:
-    case CONTEXT_SURFACE:
-      break;
-  }
-
-  switch (context->Type)
-  {
-    case CONTEXT_PREVIEW:      
-    case CONTEXT_MAIN_IMAGE:
-    case CONTEXT_BRUSH:
     case CONTEXT_SURFACE:
       break;
   }
@@ -549,7 +526,6 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
       case CONTEXT_PREVIEW:
         // Load palette
         Set_palette_fake_24b(context->Palette);
-        Palette_loaded(context);
         break;
     }
   }
@@ -672,10 +648,6 @@ void Load_image(T_IO_Context *context)
           Flush_update();
           if (Convert_24b_bitmap_to_256(Main_backups->Pages->Image[0].Pixels,context->Buffer_image_24b,context->Width,context->Height,context->Palette))
             File_error=2;
-          else
-          {
-            Palette_loaded(context);
-          }
           Hide_cursor();
           Cursor_shape=old_cursor_shape;
           Display_cursor();

@@ -203,10 +203,6 @@ unsigned int Nb_known_formats(void);
 
 /// Generic allocation and similar stuff, done at beginning of image load, as soon as size is known.
 void Pre_load(T_IO_Context *context, short width, short height, long file_size, int format, enum PIXEL_RATIO ratio, byte truecolor);
-/// Remaps the window. To call after palette (last) changes.
-void Palette_loaded(T_IO_Context *context);
-/// Generic cleanup done on end of loading (ex: color-conversion from the temporary 24b buffer)
-//void Post_load(T_IO_Context *context);
 /// Fill the entire current layer/frame of an image being loaded with a color.
 void Fill_canvas(T_IO_Context *context, byte color);
 
