@@ -871,7 +871,7 @@ void Init_buttons(void)
               16,16,
               BUTTON_SHAPE_RECTANGLE,
               Button_Draw,Button_Draw_switch_mode,
-              0,0,
+              0,1,
               Do_nothing,
               FAMILY_TOOL);
 

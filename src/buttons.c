@@ -2300,12 +2300,41 @@ void Button_Draw_switch_mode(void)
 {
   char icon;
   
-/* ANCIEN CODE SANS POPUPS */
-  Selected_freehand_mode++;
-  if (Selected_freehand_mode>OPERATION_FILLED_CONTOUR)
-    Selected_freehand_mode=OPERATION_CONTINUOUS_DRAW;
+  T_Dropdown_button dropdown;
+  T_Dropdown_choice *item = NULL;
+  int i;
+  static const char text[4][14] =
+    {"Continuous", "Discontinuous", "Single", "Contour fill"};
 
+  dropdown.Pos_X         =Buttons_Pool[BUTTON_DRAW].X_offset;
+  dropdown.Pos_Y         =Buttons_Pool[BUTTON_DRAW].Y_offset;
+  dropdown.Height        =Buttons_Pool[BUTTON_DRAW].Height;
+  dropdown.Dropdown_width=14*8;
+  dropdown.First_item    =NULL;
+  dropdown.Bottom_up     =1;
+  
   Hide_cursor();
+  
+  // If we get here from a keyboard shortcut, don't show the menu and directly
+  // switch to the next drawing mode.
+  if (Mouse_K != 0) {
+  
+    for(i = 0; i < 4; i++) {
+      Window_dropdown_add_item(&dropdown, i, text[i]);
+    }
+
+    item=Dropdown_activate(&dropdown,0,Menu_Y);
+  }
+  
+  if (item)
+  {
+    Selected_freehand_mode = item->Number;
+  } else {
+    Selected_freehand_mode++;
+    if (Selected_freehand_mode>OPERATION_FILLED_CONTOUR)
+      Selected_freehand_mode=OPERATION_CONTINUOUS_DRAW;
+  }
+  
   switch(Selected_freehand_mode)
   {
     default:
@@ -2325,36 +2354,9 @@ void Button_Draw_switch_mode(void)
   Display_sprite_in_menu(BUTTON_DRAW,icon);
   Draw_menu_button(BUTTON_DRAW,BUTTON_PRESSED);
   Start_operation_stack(Selected_freehand_mode);
+
   Display_cursor();
-/* NOUVEAU CODE AVEC POPUP (EN COURS DE TEST) ***
-    short clicked_button;
-    Open_popup(16,Menu_Y/Menu_factor_X-32,18,50);
-    Window_set_normal_button(1,1,16,16,"A",0,1,KEY_ESC); // 1
-    Display_cursor();
-
-    Update_rect(16*Menu_factor_X,Menu_Y-32*Menu_factor_X,18*Menu_factor_X,50*Menu_factor_X);
-
-    do
-    {
-        while(!Get_input())Wait_VBL();
-        clicked_button = Window_get_clicked_button();
-
-        switch(clicked_button)
-        {
-            case 1:
-                Selected_freehand_mode++;
-                if (Selected_freehand_mode>OPERATION_FILLED_CONTOUR)
-                    Selected_freehand_mode=OPERATION_CONTINUOUS_DRAW;
-                break;
-        }
-    }
-    while (Mouse_K);
-
-    Close_popup();
-    //Display_sprite_in_menu(BUTTON_DRAW,Selected_freehand_mode+2);
-    Start_operation_stack(Selected_freehand_mode);
-    Display_cursor();
-*/
+  Window_dropdown_clear_items(&dropdown);
 }
 
 
