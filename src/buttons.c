@@ -3433,32 +3433,52 @@ void Backup_existing_file(void)
 }
 
 
-void Save_picture(byte image)
-  // image=1 => On charge/sauve une image
-  // image=0 => On charge/sauve une brosse
+void Save_picture(enum CONTEXT_TYPE type)
 {
   byte  confirm;
   byte  old_cursor_shape;
   T_IO_Context save_context;
   static char filename [MAX_PATH_CHARACTERS];
   static char directory[MAX_PATH_CHARACTERS];
-  
-  if (image)
+
+  if (type == CONTEXT_MAIN_IMAGE)
   {
     strcpy(filename, Main_backups->Pages->Filename);
     strcpy(directory, Main_backups->Pages->File_directory);
     Init_context_layered_image(&save_context, filename, directory);
     save_context.Format = Main_fileformat;
   }
-  else
+  else if (type == CONTEXT_BRUSH)
   {
     strcpy(filename, Brush_filename);
     strcpy(directory, Brush_file_directory);
     Init_context_brush(&save_context, filename, directory);
     save_context.Format = Brush_fileformat;
   }
+  else if (type == CONTEXT_PALETTE)
+  {
+    char* dotpos;
+    strcpy(filename, Main_backups->Pages->Filename);
 
-  confirm=Button_Load_or_Save(image?&Main_selector:&Brush_selector,0, &save_context);
+    // Replace extension with PAL
+    dotpos = strrchr(filename, '.');
+    if (dotpos == NULL)
+      dotpos = filename + strlen(filename);
+    strcpy(dotpos, ".pal");
+
+    printf("FILEN %s\n", filename);
+
+    strcpy(directory, Main_backups->Pages->File_directory);
+    Init_context_layered_image(&save_context, filename, directory);
+    save_context.Type = CONTEXT_PALETTE;
+
+    // Set format to PAL
+    save_context.Format = FORMAT_PAL;
+  }
+  else
+    return;
+
+  confirm=Button_Load_or_Save((type==CONTEXT_MAIN_IMAGE)?&Main_selector:&Brush_selector,0, &save_context);
 
   if (confirm && File_exists(save_context.File_name))
   {
@@ -3486,14 +3506,14 @@ void Save_picture(byte image)
     Save_image(&save_context);
 
     format=Get_fileformat(save_context.Format);
-    if (!File_error && image && !format->Palette_only && (Main_backups->Pages->Nb_layers==1 || format->Supports_layers))
+    if (!File_error && type == CONTEXT_MAIN_IMAGE && !format->Palette_only && (Main_backups->Pages->Nb_layers==1 || format->Supports_layers))
     {
       Main_image_is_modified=0;
       Main_fileformat=save_context.Format;
       strcpy(Main_backups->Pages->Filename, save_context.File_name);
       strcpy(Main_backups->Pages->File_directory, save_context.File_directory);
     }
-    if (!image)
+    if (type == CONTEXT_BRUSH)
     {
       Brush_fileformat=save_context.Format;
       strcpy(Brush_filename, save_context.File_name);
@@ -3512,7 +3532,7 @@ void Save_picture(byte image)
 
 void Button_Save(void)
 {
-  Save_picture(1);
+  Save_picture(CONTEXT_MAIN_IMAGE);
 }
 
 /// Save main image over existing file (no fileselector)
@@ -4037,7 +4057,7 @@ void Button_Brush_FX(void)
       break;
     case 19 : // Save
       Display_cursor();
-      Save_picture(0);
+      Save_picture(CONTEXT_BRUSH);
       Hide_cursor();
       break;
   }

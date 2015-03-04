@@ -28,6 +28,7 @@
 #define __BOUTONS_H_
 
 #include "struct.h"
+#include "loadsave.h"
 
 void Stencil_update_color(byte color);
 void Stencil_tag_color(byte color, byte tag_color);
@@ -654,7 +655,7 @@ void Load_picture(byte image);
 /*!
     Save picture to file.
 */
-void Save_picture(byte image);
+void Save_picture(enum CONTEXT_TYPE type);
 
 
 /*!

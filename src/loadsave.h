@@ -35,6 +35,7 @@ enum CONTEXT_TYPE {
   CONTEXT_BRUSH,
   CONTEXT_PREVIEW,
   CONTEXT_SURFACE,
+  CONTEXT_PALETTE
 };
 
 /// Data for a cycling color series. Heavily cloned from T_Gradient_array.

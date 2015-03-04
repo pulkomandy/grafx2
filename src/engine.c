@@ -1027,7 +1027,7 @@ void Main_handler(void)
                 action++;
                 break;
               case SPECIAL_SAVE_BRUSH :
-                Save_picture(0);
+                Save_picture(CONTEXT_BRUSH);
                 action++;
                 break;
               case SPECIAL_ZOOM_IN : // Zoom in

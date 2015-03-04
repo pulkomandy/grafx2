@@ -41,6 +41,7 @@
     #include <dirent.h>
 #endif
 
+#include <assert.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <string.h>
@@ -1397,12 +1398,16 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   {
     if (context->Type == CONTEXT_MAIN_IMAGE)
       Open_window(310,200,"Save picture");
-    else
+    else if (context->Type == CONTEXT_BRUSH)
       Open_window(310,200,"Save brush");
+    else if (context->Type == CONTEXT_PALETTE)
+      Open_window(310,200,"Save palette");
+    else
+      assert(false);
     Window_set_normal_button(198,180,51,14,"Save",0,1,SDLK_RETURN); // 1
     if (Selector->Format_filter<=FORMAT_ALL_FILES) // Correction du *.*
     {
-      Selector->Format_filter=Main_fileformat;
+      Selector->Format_filter=context->Format;
       Selector->Position=0;
       Selector->Offset=0;
     }

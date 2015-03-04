@@ -2576,6 +2576,13 @@ void Button_Palette(void)
         Wait_end_of_click();
         break;
       }
+
+      case 26: // Load palette (TODO)
+        break;
+
+      case 27: // Save palette
+        Save_picture(CONTEXT_PALETTE);
+        break;
     }
 
 
