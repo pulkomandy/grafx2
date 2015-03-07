@@ -606,6 +606,8 @@ void Layer_preview_on(int * preview_is_visible)
     Menu_is_visible=Menu_is_visible_before_window;
     Menu_Y=Menu_Y_before_window;
 
+	Window_rectangle(0, 0, Window_width, Window_height, MC_Dark);
+
     for(layer = 0; layer < layercount; ++layer)
     {
       int offset;
@@ -615,13 +617,13 @@ void Layer_preview_on(int * preview_is_visible)
         break;
       
       offset=(Layer_button_width-previewW)/2;
-      for (y = 0; y < previewH*Pixel_height*Menu_factor_Y; y++)
-      for (x = 0; x < previewW*Pixel_width*Menu_factor_X; x++)
+      for (y = 0; y < previewH*Pixel_height*Menu_factor_Y-1; y++)
+      for (x = 0; x < previewW*Pixel_width*Menu_factor_X-1; x++)
       {
-        int imgx = x * Main_image_width / previewW/Pixel_width/Menu_factor_X;
-        int imgy = y * Main_image_height / previewH/Pixel_height/Menu_factor_Y;
+        int imgx = x * Main_image_width / (previewW*Pixel_width*Menu_factor_X-1);
+        int imgy = y * Main_image_height / (previewH*Pixel_height*Menu_factor_Y-1);
         // Use Pixel_simple() in order to get highest resolution
-        Pixel_simple(x+((layer*Layer_button_width+offset)*Menu_factor_X+Window_pos_X)*Pixel_width, y+Window_pos_Y*Pixel_height, *(Main_backups->Pages->Image[layer].Pixels
+        Pixel_simple(x+((layer*Layer_button_width+offset)*Menu_factor_X+Window_pos_X)*Pixel_width, y+Window_pos_Y*Pixel_height+1, *(Main_backups->Pages->Image[layer].Pixels
           + imgx + imgy * Main_image_width));
       }
     }
