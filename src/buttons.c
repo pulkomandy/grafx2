@@ -4756,7 +4756,7 @@ void Button_Effects(void)
         {
           Button_Stencil_mode();
           Hide_cursor();
-          Display_effect_state(C2+23,24,"Stencil",Stencil_mode);
+          Display_effect_state(C2,L1,"Stencil",Stencil_mode);
           Display_cursor();
         }
         else
@@ -4772,7 +4772,7 @@ void Button_Effects(void)
         {
           Button_Mask_mode();
           Hide_cursor();
-          Display_effect_state(C2+23,43,"Mask",Mask_mode);
+          Display_effect_state(C2,L2,"Mask",Mask_mode);
           Display_cursor();
         }
         else
@@ -4788,7 +4788,7 @@ void Button_Effects(void)
         {
           Button_Sieve_mode();
           Hide_cursor();
-          Display_effect_state(C2+23,62,"Sieve",Sieve_mode);
+          Display_effect_state(C2,L3,"Sieve",Sieve_mode);
           Display_cursor();
         }
         else
@@ -4804,7 +4804,7 @@ void Button_Effects(void)
         {
           Button_Snap_mode();
           Hide_cursor();
-          Display_effect_state(C2+23,81,"Grid",Snap_mode);
+          Display_effect_state(C3,L2,"Snap",Snap_mode);
           Display_cursor();
         }
         else
@@ -4854,7 +4854,7 @@ void Button_Effects(void)
         {
           Button_Constraint_mode();
           Hide_cursor();
-          Display_effect_state(177+23,24, "8 bit" ,Main_backups->Pages->Image_mode > IMAGE_MODE_ANIMATION);
+          Display_effect_state(C2,L4, "8 bit" ,Main_backups->Pages->Image_mode > IMAGE_MODE_ANIMATION);
           Display_cursor();
         } else {
           //Close_window();
@@ -4868,7 +4868,7 @@ void Button_Effects(void)
         {
           Button_Tilemap_mode();
           Hide_cursor();
-          Display_effect_state(177+23,43, "Tilemap" ,Main_tilemap_mode);
+          Display_effect_state(C3,L3, "Tilemap" ,Main_tilemap_mode);
           Display_cursor();
         }
         else
