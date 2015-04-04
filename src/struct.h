@@ -526,9 +526,9 @@ typedef struct {
   word  Height;
   /// Type of the preset paintbrush: index in enum PAINTBRUSH_SHAPES
   byte  Shape;
-  /// Brush handle for the preset brushes. Generally ::Width[]/2
+  /// Brush handle for the preset brushes. Generally ::T_Paintbrush::Width[]/2
   word  Offset_X;
-  /// Brush handle for the preset brushes. Generally ::Height[]/2
+  /// Brush handle for the preset brushes. Generally ::T_Paintbrush::Height[]/2
   word  Offset_Y;
 
 } T_Paintbrush;

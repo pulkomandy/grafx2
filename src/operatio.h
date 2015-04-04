@@ -138,7 +138,7 @@ void Colorpicker_1_1(void);
 void Colorpicker_2_1(void);
 void Colorpicker_0_1(void);
 
-/////////////////////////////////////////////////////////// OPERATION_K_LIGNE
+/////////////////////////////////////////////////////////// OPERATION_K_LINE
 
 void K_line_12_0(void);
 void K_line_12_6(void);

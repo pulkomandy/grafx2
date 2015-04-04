@@ -602,14 +602,7 @@ void Draw_paintbrush(short x,short y,byte color)
   }
 }
 
-/// @return 0 on success, non-zero on failure (memory?).
-/// @param new_brush: Optionally, you can provide an already allocated new
-///        brush - otherwise, this function performs the allocation.
-/// @param old_brush: If the caller passes NULL, this function will free the old
-///        pixel data. If the caller provides the address of a (free) byte
-///        pointer, the function will make it point to the original pixel data,
-///        in this case it will be the caller's responsibility to free() it
-///        (after transferring pixels to Brush, usually).
+
 byte Realloc_brush(word new_brush_width, word new_brush_height, byte *new_brush, byte **old_brush)
 {
 

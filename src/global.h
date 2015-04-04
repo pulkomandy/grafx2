@@ -149,7 +149,7 @@ GFX2_GLOBAL byte  Paintbrush_shape;
 GFX2_GLOBAL byte  Paintbrush_shape_before_fill;
 /// Backup of ::Paintbrush_shape, before color picker operation
 GFX2_GLOBAL byte  Paintbrush_shape_before_colorpicker;
-/// Backup of ::Paintbrush_shaper, before lasso operation
+/// Backup of ::Paintbrush_shape, before lasso operation
 GFX2_GLOBAL byte  Paintbrush_shape_before_lasso;
 /// Boolean, true when the preview paintbrush shouldn't be drawn.
 GFX2_GLOBAL byte  Paintbrush_hidden;
@@ -699,7 +699,7 @@ GFX2_GLOBAL Func_gradient Gradient_function;
 /// either ::Pixel (if the gradient must be drawn on menus only)
 /// or ::Display_pixel (if the gradient must be drawn on the image)
 GFX2_GLOBAL Func_pixel Gradient_pixel;
-/// Index in ::Gradient_array of the currently selected gradient.
+/// Index in ::T_Page::Gradient_array of the currently selected gradient.
 GFX2_GLOBAL byte Current_gradient;
 /// Boolean, true when the color cycling is active.
 GFX2_GLOBAL byte Cycling_mode;
@@ -735,7 +735,7 @@ GFX2_GLOBAL byte Back_color;
 GFX2_GLOBAL byte Selected_freehand_mode;
 /// For the Curve tool, this determines which variant is selected, either ::OPERATION_3_POINTS_CURVE or ::OPERATION_4_POINTS_CURVE
 GFX2_GLOBAL byte Selected_curve_mode;
-/// For the Line tool, this determines which variant is selected, either ::OPERATION_LINE, ::OPERATION_K_LIGNE or ::OPERATION_CENTERED_LINES
+/// For the Line tool, this determines which variant is selected, either ::OPERATION_LINE, ::OPERATION_K_LINE or ::OPERATION_CENTERED_LINES
 GFX2_GLOBAL byte Selected_line_mode;
 /// Determines which color appears in the first cell of the menu palette. Change this value to "scroll" the palette.
 GFX2_GLOBAL byte First_color_in_palette;
