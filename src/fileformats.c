@@ -4043,23 +4043,23 @@ void Load_PNG(T_IO_Context * context)
                   }
                   else if (color_type == PNG_COLOR_TYPE_PALETTE) // Palette images
                   {
-                    
                     if (bit_depth < 8)
                     {
                       // Clear unused colors
                       if (Config.Clear_palette)
                         memset(context->Palette,0,sizeof(T_Palette));
                     }
-                    // Load the palette
+                    // Get a pointer to the PNG palette
                     png_get_PLTE(png_ptr, info_ptr, &palette,
                        &num_palette);
+                    // Copy all colors to the context
                     for (x=0;x<num_palette;x++)
                     {
                       context->Palette[x].R=palette[x].red;
                       context->Palette[x].G=palette[x].green;
                       context->Palette[x].B=palette[x].blue;
                     }
-                    free(palette);
+                    // The palette must not be freed: it is owned by libpng.
                     palette = NULL;
                   }
                   // Transparency (tRNS)
@@ -4084,7 +4084,7 @@ void Load_PNG(T_IO_Context * context)
                       // In this case, num_trans is supposed to be "1", 
                       // and trans_values[0] contains the reference color
                       // (RGB triplet) that counts as transparent.
-                      
+
                       // Ideally, we should reserve this color in the palette,
                       // (so it's not merged and averaged with a neighbor one)
                       // and after creating the optimized palette, find its
