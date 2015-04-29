@@ -614,7 +614,7 @@ install : $(BIN)
 	$(CP) ../share/grafx2/gfx2.gif $(DESTDIR)$(datadir)/grafx2/
 	$(CP) ../share/grafx2/fonts/* $(DESTDIR)$(datadir)/grafx2/fonts/
 	$(CP) $(SKIN_FILES) $(DESTDIR)$(datadir)/grafx2/skins/
-	for f in $(SCRIPT_FILES); do cp "$$f" "$(DESTDIR)$(bindir)/$$f" ; done
+	for f in $(SCRIPT_FILES:../share/%=%); do cp "../share/$$f" "$(DESTDIR)$(datadir)/$$f" ; done
 	# Icon and desktop file for debian
 	$(CP) ../misc/unix/grafx2.desktop $(DESTDIR)$(datadir)/applications/
 	$(CP) ../misc/unix/grafx2.xpm $(DESTDIR)$(pixmapdir)
