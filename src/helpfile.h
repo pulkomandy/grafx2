@@ -313,6 +313,7 @@ static const T_Help_table helptable_help[] =
   HELP_TEXT ("")
   HELP_LINK ("  Menu      : %s",   0x100+BUTTON_LAYER_MENU)
   HELP_LINK ("  Add new   : %s",   0x100+BUTTON_LAYER_ADD)
+  HELP_LINK ("  Duplicate : %s",   0x200+BUTTON_LAYER_ADD)
   HELP_LINK ("  Delete    : %s",   0x100+BUTTON_LAYER_REMOVE)
   HELP_LINK ("  Merge     : %s",   0x100+BUTTON_LAYER_MERGE)
   HELP_LINK ("  Move up   : %s",   0x100+BUTTON_LAYER_UP)
@@ -2918,11 +2919,18 @@ static const T_Help_table helptable_layeradd[] =
 
   HELP_TITLE("ADD LAYER")
   HELP_TEXT ("")
+  HELP_BOLD ("LEFT CLICK")
   HELP_LINK ("(Key:%s)",0x100+BUTTON_LAYER_ADD)
   HELP_TEXT ("")
   HELP_TEXT ("Add a new layer above the current one,")
   HELP_TEXT ("and selects this new (empty) layer for")
   HELP_TEXT ("editing.")
+  HELP_TEXT ("")
+  HELP_BOLD ("RIGHT CLICK")
+  HELP_LINK ("(Key:%s)",0x200+BUTTON_LAYER_ADD)
+  HELP_TEXT ("")
+  HELP_TEXT ("Add a new layer, as a copy of the current")
+  HELP_TEXT ("layer.")
 
 };
 static const T_Help_table helptable_layerdel[] =

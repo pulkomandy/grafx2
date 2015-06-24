@@ -1563,6 +1563,14 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   true,
   SDLK_INSERT|MOD_ALT, // Alt + Insert
   0},
+  {209,
+  "Duplicate layer",
+  "Adds a new layer on top of the",
+  "active one. The new layer is a copy",
+  "of the current one.",
+  true,
+  0, // No shortcut
+  0},
   {176,
   "Delete a layer",
   "Delete the current layer.",
@@ -1997,6 +2005,7 @@ word Ordering[NB_SHORTCUTS]=
   SPECIAL_LAYER8_SELECT,
   SPECIAL_LAYER8_TOGGLE,
   0x100+BUTTON_LAYER_ADD,
+  0x200+BUTTON_LAYER_ADD,
   0x100+BUTTON_LAYER_REMOVE,
   0x100+BUTTON_LAYER_MERGE,
   0x100+BUTTON_LAYER_UP,
