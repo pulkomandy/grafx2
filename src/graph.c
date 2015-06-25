@@ -2434,14 +2434,19 @@ T_Polygon_edge * Remove_edge(T_Polygon_edge *list, T_Polygon_edge *edge)
 void Polyfill_general(int vertices, short * points, int color)
 {
   short c;
-  short top = 0x7FFF;
-  short bottom = 0;
+  short top;
+  short bottom;
   short *i1, *i2;
   short x_pos,end_x;
   T_Polygon_edge *edge, *next_edge, *initial_edge;
   T_Polygon_edge *active_edges = NULL;
   T_Polygon_edge *inactive_edges = NULL;
-
+  
+  if (vertices < 1)
+    return;
+    
+  top = bottom = points[1];
+  
   /* allocate some space and fill the edge table */
   initial_edge=edge=(T_Polygon_edge *) malloc(sizeof(T_Polygon_edge) * vertices);
 
