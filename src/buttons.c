@@ -4589,7 +4589,7 @@ void Button_Effects(void)
   Window_display_frame_mono(C1-5,L1+8,90,88,MC_Dark);
   Window_rectangle(C1-1, L1+2, 78, 14, MC_Light);
 
-  Window_set_normal_button(C1+1,L1+2,14,14," ",1,1,SDLK_f); // 13
+  Window_set_normal_button(C1+1,L1+2,14,14," ",0,1,SDLK_f); // 13
   Print_in_window(28,24,"Feedback",MC_Dark,MC_Light);
 
   Window_set_normal_button(C2, L4, 16,16,"",0,1,Config_Key[SPECIAL_FORMAT_CHECKER_MENU][0]); // 14
@@ -4599,7 +4599,7 @@ void Button_Effects(void)
   Window_display_frame_mono(C3-5,L1+8,86,88,MC_Dark);
   Window_rectangle(C3-1, L1+2, 52, 14, MC_Light);
 
-  Window_set_normal_button(C3+1,L1+2,14,14,Show_grid?"X":" ",1,1,Config_Key[SPECIAL_SHOW_GRID][0]); // 16
+  Window_set_normal_button(C3+1,L1+2,14,14,Show_grid?"X":" ",0,1,Config_Key[SPECIAL_SHOW_GRID][0]); // 16
   Print_in_window(C3+17,L1+5,"Grid",MC_Dark,MC_Light);
 
   Display_feedback_state();
