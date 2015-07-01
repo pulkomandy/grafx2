@@ -278,9 +278,22 @@ void Frame_menu_color(byte id)
 
       if (color==MC_Black)
       {
+        int transparent = -1;
+        int cw = (Menu_palette_cell_width)*Menu_factor_X;
+        int ch = (cell_height)*Menu_factor_Y;
+
+        if (Main_backups->Pages->Image_mode == 0 && Main_backups->Pages->Nb_layers > 1)
+            transparent = Main_backups->Pages->Transparent_color;
+
         // Color is not selected, no dotted lines
         Block(start_x,start_y,Menu_palette_cell_width*Menu_factor_X,
-              cell_height*Menu_factor_Y,id);
+            cell_height*Menu_factor_Y,id);
+        if (id == transparent) {
+            Block(start_x, start_y,
+              cw / 2, ch / 2, MC_Light);
+            Block(start_x + cw / 2, start_y + ch / 2,
+              (cw+1) / 2, (ch+1) / 2, MC_Dark);
+        }
 
         Update_rect(start_x,start_y,Menu_palette_cell_width*Menu_factor_X,cell_height*Menu_factor_Y);
       }
@@ -325,7 +338,7 @@ void Display_menu_palette(void)
   int color;
   byte cell_height=Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y;
   // width: Menu_palette_cell_width
-  
+
   if (Menu_is_visible && Menu_bars[MENUBAR_TOOLS].Visible)
   {
 	int transparent = -1;
@@ -1365,6 +1378,7 @@ void Display_menu_palette_avoiding_window(byte * table)
   word height;
   word corner_x=Window_pos_X+Window_width*Menu_factor_X; // |_ Coin bas-droit
   word corner_y=Window_pos_Y+Window_height*Menu_factor_Y; // |  de la fenêtre +1
+  int transparent = -1;
 
 
   if (Config.Separate_colors)
@@ -1377,6 +1391,10 @@ void Display_menu_palette_avoiding_window(byte * table)
     width=Menu_palette_cell_width*Menu_factor_X;
     height=Menu_factor_Y*((Menu_height-11)/Menu_cells_Y);
   }
+
+  if (Main_backups->Pages->Image_mode == 0 && Main_backups->Pages->Nb_layers > 1)
+    transparent = Main_backups->Pages->Transparent_color;
+
 
   for (color=0,real_color=First_color_in_palette;color<Menu_cells_X*Menu_cells_Y;color++,real_color++)
   {
