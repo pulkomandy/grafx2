@@ -153,7 +153,8 @@ void Load_SDL_Image(T_IO_Context *);
 
 // ENUM     Name  TestFunc LoadFunc SaveFunc PalOnly Comment Layers Ext Exts  
 T_Format File_formats[] = {
-  {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, 0, "", "gif;png;bmp;pcx;pkm;iff;lbm;ilbm;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;kcf;pal;gpl;c64;koa;koala;fli;bml;cdu;prg;tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico;cm5"},
+  {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, 0, "", "gif;png;bmp;pcx;pkm;iff;lbm;ilbm;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;c64;koa;koala;fli;bml;cdu;prg;tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico;cm5"},
+  {FORMAT_ALL_PALETTES, "(all)", NULL, NULL, NULL, 1, 0, 0, "", "kcf;pal;gpl"},
   {FORMAT_ALL_FILES, "(*.*)", NULL, NULL, NULL, 0, 0, 0, "", "*"},
   {FORMAT_GIF, " gif", Test_GIF, Load_GIF, Save_GIF, 0, 1, 1, "gif", "gif"},
 #ifndef __no_pnglib__
@@ -244,7 +245,9 @@ void Set_pixel(T_IO_Context *context, short x_pos, short y_pos, byte color)
       if (x_pos>=0 && y_pos>=0 && x_pos<context->Surface->w && y_pos<context->Surface->h)
         *(((byte *)(context->Surface->pixels)) + context->Surface->pitch * y_pos + x_pos) = color;
       break;
-  
+      
+    case CONTEXT_PALETTE:
+      break;
   }
 
 }
@@ -268,6 +271,8 @@ void Fill_canvas(T_IO_Context *context, byte color)
       memset(context->Buffer_image, color, (long)context->Height*context->Pitch);
       break;
     case CONTEXT_SURFACE:
+      break;
+    case CONTEXT_PALETTE:
       break;
   }
 }
@@ -566,7 +571,7 @@ void Set_file_error(int value)
 void Load_image(T_IO_Context *context)
 {
   unsigned int index; // index de balayage des formats
-  T_Format *format = &(File_formats[2]); // Format du fichier à charger
+  T_Format *format = &(File_formats[FORMAT_ALL_FILES+1]); // Format du fichier à charger
   int i;
   byte old_cursor_shape;
   

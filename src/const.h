@@ -113,8 +113,9 @@
 /// List of file formats recognized by grafx2
 enum FILE_FORMATS
 {
-  FORMAT_ALL_IMAGES=0, ///< This is not really a file format, it's reserverd for a compilation of all file extensions
-  FORMAT_ALL_FILES=1, ///< This is not really a file format, it's reserverd for the "*.*" filter option.
+  FORMAT_ALL_IMAGES=0, ///< This is not really a file format, it's reserverd for a compilation of all image file extensions
+  FORMAT_ALL_PALETTES=1, ///< This is not really a file format, it's reserverd for a compilation of all palette file extensions
+  FORMAT_ALL_FILES=2, ///< This is not really a file format, it's reserverd for the "*.*" filter option.
   FORMAT_PNG,
   FORMAT_GIF,
   FORMAT_BMP,

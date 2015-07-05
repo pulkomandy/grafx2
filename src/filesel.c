@@ -1447,8 +1447,8 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 
   for (format=0; format < Nb_known_formats(); format++)
   {
-    if ((load && (File_formats[format].Identifier <= FORMAT_ALL_FILES || File_formats[format].Load)) || 
-      (!load && File_formats[format].Save))
+    if (((context->Type == CONTEXT_PALETTE) == File_formats[format].Palette_only) &&
+        ((load && (File_formats[format].Load || File_formats[format].Identifier <= FORMAT_ALL_FILES)) || (!load && File_formats[format].Save)))
         Window_dropdown_add_item(formats_dropdown,File_formats[format].Identifier,File_formats[format].Label);
   }
   Print_in_window(70,18,"Format",MC_Dark,MC_Light);
