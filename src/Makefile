@@ -544,6 +544,11 @@ ziprelease: version $(BIN) release
 $(BIN) : $(OBJ)
 	test -d ../bin || $(MKDIR) ../bin
 	$(CC) $(OBJ) -o $(BIN) $(LOPT) $(LFLAGS)
+ifeq ($(PLATFORM),Haiku)
+	rc -o $(OBJDIR)/grafx2.rsrc grafx2.rdef
+	xres -o $(BIN) $(OBJDIR)/grafx2.rsrc
+	mimeset -f $(BIN)
+endif
 
 # SVN revision number
 version.c :

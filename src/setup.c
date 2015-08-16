@@ -127,17 +127,18 @@ void Set_data_directory(const char * program_dir, char * data_dir)
   // On MacOSX,  it is stored in a special folder:
   #if defined(__macosx__)
     strcat(data_dir,"Contents/Resources/");
-  // On GP2X, executable is not in bin/
-  #elif defined (__GP2X__) || defined (__gp2x__) || defined (__WIZ__) || defined (__CAANOO__) || defined(__ANDROID__)
+  // On GP2X, AROS and Android, executable is not in bin/
+  #elif defined (__GP2X__) || defined (__gp2x__) || defined (__WIZ__) || defined (__CAANOO__) || defined(GCWZERO) || defined(__AROS__) || defined(__ANDROID__)
     strcat(data_dir,"share/grafx2/");
-  //on tos the same directory
+  //on tos, the same directory is used for everything
   #elif defined (__MINT__)
     strcpy(data_dir, program_dir);
+  // Haiku provides us with an API to find it.
+  #elif defined(__HAIKU__)
+    if (find_path(Set_data_directory, B_FIND_PATH_DATA_DIRECTORY, "grafx2", data_dir, PATH_MAX) != B_OK)
+      strcat(data_dir,"../data/grafx2/");
+
   // All other targets, program is in a "bin" subdirectory
-  #elif defined (__AROS__)
-    strcat(data_dir,"share/grafx2/");
-  #elif defined (GCWZERO)
-    strcat(data_dir,"share/grafx2/");
   #else
     strcat(data_dir,"../share/grafx2/");
   #endif
@@ -156,7 +157,7 @@ void Set_data_directory(const char * program_dir, char * data_dir)
 // OUT: Write into config_dir. Trailing / or \ is kept.
 void Set_config_directory(const char * program_dir, char * config_dir)
 {
-  // AmigaOS4
+  // AmigaOS4 provides the PROGIR: alias to the directory where the executable is.
   #if defined(__amigaos4__) || defined(__AROS__)
     strcpy(config_dir,"PROGDIR:");
   // GP2X
@@ -164,20 +165,21 @@ void Set_config_directory(const char * program_dir, char * config_dir)
     // On the GP2X, the program is installed to the sdcard, and we don't want to mess with the system tree which is
     // on an internal flash chip. So, keep these settings locals.
     strcpy(config_dir,program_dir);
-  #elif defined(__MINT__)  
+  // For TOS we store everything in the program dir
+  #elif defined(__MINT__)
     strcpy(config_dir,program_dir);
-
+  // For all other platforms, there is some kind of settigns dir to store this.
   #else
     char filename[MAX_PATH_CHARACTERS];
-  #ifdef GCWZERO
-    strcpy(config_dir, "/media/home/.grafx2/");
-  #else
-    // In priority: check root directory
-    strcpy(config_dir, program_dir);
-  #endif
+    #ifdef GCWZERO
+      strcpy(config_dir, "/media/home/.grafx2/");
+    #else
+      // In priority: check root directory
+      strcpy(config_dir, program_dir);
+    #endif
     // On all the remaining targets except OSX, the executable is in ./bin
     #if !defined(__macosx__)
-    strcat(config_dir, "../");
+      strcat(config_dir, "../");
     #endif
     strcpy(filename, config_dir);
     strcat(filename, CONFIG_FILENAME);
@@ -207,7 +209,7 @@ void Set_config_directory(const char * program_dir, char * config_dir)
          printf("GFX2.CFG not found in %s\n",filename);
          strcpy(config_parent_dir, config_dir);
       #else
-        // "~/.grafx2"      
+        // "~/.grafx2"
         const char* Config_SubDir = ".grafx2";
         config_parent_dir = getenv("HOME");
       #endif
