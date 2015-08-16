@@ -135,7 +135,7 @@ void Set_data_directory(const char * program_dir, char * data_dir)
     strcpy(data_dir, program_dir);
   // Haiku provides us with an API to find it.
   #elif defined(__HAIKU__)
-    if (find_path(Set_data_directory, B_FIND_PATH_DATA_DIRECTORY, "grafx2", data_dir, PATH_MAX) != B_OK)
+    if (find_path(Set_data_directory, B_FIND_PATH_DATA_DIRECTORY, "grafx2/", data_dir, PATH_MAX) != B_OK)
       strcat(data_dir,"../data/grafx2/");
 
   // All other targets, program is in a "bin" subdirectory
