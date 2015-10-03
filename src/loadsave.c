@@ -1108,6 +1108,7 @@ void Load_SDL_Image(T_IO_Context *context)
 
 ///
 /// Load an arbitrary SDL_Surface.
+/// @param full_name Full (absolute) path of the file to load.
 /// @param gradients Pass the address of a target T_Gradient_array if you want the gradients, NULL otherwise
 SDL_Surface * Load_surface(char *full_name, T_Gradient_array *gradients)
 {

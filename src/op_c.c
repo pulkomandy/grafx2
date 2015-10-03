@@ -1027,7 +1027,19 @@ void GS_Generate(T_Gradient_set * ds,T_Cluster_set * cs)
 
 
 /// Compute best palette for given picture.
-/// @param size in pixels
+///
+/// The picture is first depth-reduced to the given
+/// r,g,b resolution, then the median cut algorithm is used to find 256 colors which are suitable
+/// for the given picture.
+///
+/// @returns a conversion tree to be used for converting the picture to indexed with the generated palette (with or without dithering).
+///
+/// @param image The true-color image for which the palette needs to be optimized
+/// @param size in pixels (number of pixels, the height/width doesn't matter)
+/// @param palette pointer to the space where the palette will be stored (256 entries at most)
+/// @param r Resolution for red
+/// @param g Resolution for green
+/// @param b Resolution for blue
 CT_Tree* Optimize_palette(T_Bitmap24B image, int size,
   T_Components * palette, int r, int g, int b)
 {	
