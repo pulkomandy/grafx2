@@ -80,6 +80,6 @@ void Set_surface_palette(const SDL_Surface *surface, const SDL_Color *palette);
 
 SDL_Texture * Create_texture(SDL_Surface *source, int x, int y, int w, int h);
 SDL_Texture * Create_rendering_texture(int width, int height);
-void Rectangle_on_texture(SDL_Texture *texture, int x, int y, int w, int h, int r, int g, int b);
+void Rectangle_on_texture(SDL_Texture *texture, int x, int y, int w, int h, int r, int g, int b, int a);
 
 #endif // SDLSCREEN_H_INCLUDED

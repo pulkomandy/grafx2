@@ -2775,28 +2775,26 @@ T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, sh
   // Ombre portée
   if (SHADOW_BOTTOM)
   {
-    Window_rectangle(SHADOW_RIGHT,
+    Window_rectangle_shadow(SHADOW_RIGHT,
         box_height,
         button->Dropdown_width,
-        SHADOW_BOTTOM,
-        MC_Black);
+        SHADOW_BOTTOM);
     Window_rectangle(0,
         box_height,
-        SHADOW_RIGHT,
+        button->Dropdown_width,
         1,
         MC_Black);
   }
   if (SHADOW_RIGHT)
   {
-    Window_rectangle(button->Dropdown_width,
+    Window_rectangle_shadow(button->Dropdown_width,
         SHADOW_BOTTOM,
         SHADOW_RIGHT,
-        box_height-SHADOW_BOTTOM,
-        MC_Black);
+        box_height-SHADOW_BOTTOM);
     Window_rectangle(button->Dropdown_width,
         1,
         1,
-        SHADOW_BOTTOM,
+        box_height,
         MC_Black);
   }
 

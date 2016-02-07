@@ -344,6 +344,7 @@ void Flush_update(void)
 
   // Stack of windows
   // -------------------------------
+  if (Cursor_shape != CURSOR_SHAPE_COLORPICKER)
   {
     int i;
     for (i=0; i < Windows_open; i++)
@@ -612,18 +613,21 @@ SDL_Texture * Create_texture(SDL_Surface *source, int x, int y, int w, int h)
 SDL_Texture * Create_rendering_texture(int width, int height)
 {
   SDL_Texture * texture = SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_TARGET, width*Menu_factor_X, height*Menu_factor_Y);
+  SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
+  // Fill with transparency : needed for popups
   SDL_SetRenderTarget(Renderer_SDL, texture);
-  SDL_SetRenderDrawColor(Renderer_SDL, 64*Windows_open, 64*Windows_open, 64*Windows_open, 255);
+  SDL_SetRenderDrawBlendMode(Renderer_SDL, SDL_BLENDMODE_NONE);
+  SDL_SetRenderDrawColor(Renderer_SDL, 0, 0, 0, 0);
   SDL_RenderFillRect(Renderer_SDL, NULL);
   
   return texture;
 }
  
-void Rectangle_on_texture(SDL_Texture *texture, int x, int y, int w, int h, int r, int g, int b)
+void Rectangle_on_texture(SDL_Texture *texture, int x, int y, int w, int h, int r, int g, int b, int a)
 {
   SDL_Rect rectangle;
   SDL_SetRenderTarget(Renderer_SDL, texture);
-  SDL_SetRenderDrawColor(Renderer_SDL, r, g, b, 255);
+  SDL_SetRenderDrawColor(Renderer_SDL, r, g, b, a);
   rectangle.x = x;
   rectangle.y = y;
   rectangle.w = w;

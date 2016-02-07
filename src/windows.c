@@ -87,7 +87,7 @@ void Pixel_in_window(word x,word y,byte color)
 {
 #ifndef MULTI_WINDOW
   Block((x*Menu_factor_X)+Window_pos_X,(y*Menu_factor_Y)+Window_pos_Y,Menu_factor_X,Menu_factor_Y,color);
-  Rectangle_on_texture(Window_texture, (x*Menu_factor_X), (y*Menu_factor_Y), Menu_factor_X, Menu_factor_Y, Main_palette[color].R, Main_palette[color].G, Main_palette[color].B);
+  Rectangle_on_texture(Window_texture, (x*Menu_factor_X), (y*Menu_factor_Y), Menu_factor_X, Menu_factor_Y, Main_palette[color].R, Main_palette[color].G, Main_palette[color].B, 255);
 #else
   SDL_Surface* surf = SDL_GetWindowSurface(Window_handle);
   T_Components c = Main_palette[color];
@@ -101,13 +101,20 @@ void Window_rectangle(word x_pos,word y_pos,word width,word height,byte color)
 {
 #ifndef MULTI_WINDOW
   Block((x_pos*Menu_factor_X)+Window_pos_X,(y_pos*Menu_factor_Y)+Window_pos_Y,width*Menu_factor_X,height*Menu_factor_Y,color);
-  Rectangle_on_texture(Window_texture, (x_pos*Menu_factor_X), (y_pos*Menu_factor_Y), width*Menu_factor_X, height*Menu_factor_Y, Main_palette[color].R, Main_palette[color].G, Main_palette[color].B);
+  Rectangle_on_texture(Window_texture, (x_pos*Menu_factor_X), (y_pos*Menu_factor_Y), width*Menu_factor_X, height*Menu_factor_Y, Main_palette[color].R, Main_palette[color].G, Main_palette[color].B, 255);
 #else
   SDL_Surface* surf = SDL_GetWindowSurface(Window_handle);
   SDL_Rect r = {x_pos, y_pos, width, height};
   T_Components c = Main_palette[color];
   SDL_FillRect(surf, &r, SDL_MapRGB(surf->format, c.R, c.G, c.B));
 #endif
+}
+
+// Affichage d'un rectangle dans la fenêtre (la fenêtre doit être visible)
+void Window_rectangle_shadow(word x_pos,word y_pos,word width,word height)
+{
+  Block((x_pos*Menu_factor_X)+Window_pos_X,(y_pos*Menu_factor_Y)+Window_pos_Y,width*Menu_factor_X,height*Menu_factor_Y,MC_Black);
+  Rectangle_on_texture(Window_texture, (x_pos*Menu_factor_X), (y_pos*Menu_factor_Y), width*Menu_factor_X, height*Menu_factor_Y, 0, 0, 0, 128);
 }
 
 
