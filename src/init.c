@@ -568,53 +568,30 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   cursor_y+=16;
 
   // Help font: Normal
+  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "help font (norm)"))
+        return 1;
   for (i=0; i<256; i++)
   {
-    // Each line holds 32 symbols
-    if ((i%32)==0)
-    {
-      if (i!=0)
-        cursor_y+=8;
-      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "help font (norm)"))
-        return 1;
-    }
-    else
-    {
-      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "help font (norm)"))
-        return 1;
-    }
-    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, &(gfx->Help_font_norm[i][0][0]), 6, 8, "help font (norm)",0))
-      return 1;
-    cursor_x+=6;
+    // Each line holds 32 symbols, 8 lines
+    gfx->Help_font_norm[i] = Create_texture(gui, cursor_x + (i%32)*6, cursor_y+(i/32)*8, 6, 8);
   }
-  cursor_y+=8;
+  cursor_y+=8*8;
   
   // Help font: Bold
+  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "help font (bold)"))
+        return 1;
   for (i=0; i<256; i++)
   {
-    // Each line holds 32 symbols
-    if ((i%32)==0)
-    {
-      if (i!=0)
-        cursor_y+=8;
-      if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "help font (bold)"))
-        return 1;
-    }
-    else
-    {
-      if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "help font (bold)"))
-        return 1;
-    }
-    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, &(gfx->Bold_font[i][0][0]), 6, 8, "help font (bold)",0))
-      return 1;
-    cursor_x+=6;
+    // Each line holds 32 symbols, 8 lines
+    gfx->Help_font_bold[i] = Create_texture(gui, cursor_x + (i%32)*6, cursor_y+(i/32)*8, 6, 8);
   }
-  cursor_y+=8;
+  cursor_y+=8*8;
+
+     
 
   // Help font: Title
   for (i=0; i<256; i++)
   {
-    byte * dest;
     // Each line holds 64 symbols
     if ((i%64)==0)
     {
@@ -631,17 +608,15 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
     
     if (i&1)
       if (i&64)
-        dest=&(gfx->Help_font_t4[char_4++][0][0]);
+        gfx->Help_font_t4[char_4++] = Create_texture(gui, cursor_x, cursor_y, 6, 8);
       else
-        dest=&(gfx->Help_font_t2[char_2++][0][0]);
+        gfx->Help_font_t2[char_2++] = Create_texture(gui, cursor_x, cursor_y, 6, 8);
     else
       if (i&64)
-        dest=&(gfx->Help_font_t3[char_3++][0][0]);
+        gfx->Help_font_t3[char_3++] = Create_texture(gui, cursor_x, cursor_y, 6, 8);
       else
-        dest=&(gfx->Help_font_t1[char_1++][0][0]);
+        gfx->Help_font_t1[char_1++] = Create_texture(gui, cursor_x, cursor_y, 6, 8);
     
-    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, dest, 6, 8, "help font (title)",0))
-      return 1;
     cursor_x+=6;
   }
   cursor_y+=8;

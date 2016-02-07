@@ -298,92 +298,46 @@ void Remove_duplicate_shortcuts(void)
 
 ///
 /// Print a line with the 'help' (6x8) font.
-short Print_help(short x_pos, short y_pos, const char *line, char line_type, short link_position, short link_size)
+void Print_help(short x_pos, short y_pos, const char *line, char line_type, short link_position, short link_size)
 {
-  short  width;             // Largeur physique d'une ligne de texte
-  short  x;                   // Indices d'affichage d'un caractère
-  short  y;
-  short  x_position;          // Parcours de remplissage du buffer de ligne
-  short  char_index; // Parcours des caractères d'une ligne
-  byte * char_pixel;
-  short  repeat_menu_x_factor;
-  short real_x_pos;
-  short real_y_pos;
-#ifdef MULTI_WINDOW
-  short fx = 1;
-  short fy = 1;
-#else
-  short fx = Menu_factor_X;
-  short fy = Menu_factor_Y;
-#endif
+  short  width;
+  short  char_index; // current printed character
 
-  real_x_pos = ToWinX(x_pos);
-  real_y_pos = ToWinY(y_pos);
-
-  // Calcul de la taille
+  // Compute size
   width=strlen(line);
-  // Les lignes de titres prennent plus de place
+  // Title lines take more space
   if (line_type == 'T' || line_type == '-')
     width = width*2;
 
-  // Pour chaque ligne dans la fenêtre:
-  for (y=0;y<8;y++)
+  for (char_index=0;char_index<width;char_index++)
   {
-    x_position=0;
-    // On crée une nouvelle ligne à splotcher
-    for (char_index=0;char_index<width;char_index++)
+    SDL_Texture *texture = Gfx->Help_font_norm['!'];
+    if (line_type=='N' || line_type=='K')
+      texture = Gfx->Help_font_norm[(unsigned char)(line[char_index])];
+    else if (line_type=='S')
+      texture = Gfx->Help_font_bold[(unsigned char)(line[char_index])];
+    else if (line_type=='T' && line[char_index/2]<='_' && line[char_index/2]>=' ')
     {
-      // Recherche du caractère dans les fontes de l'aide.
-      // Ligne titre : Si l'indice est impair on dessine le quart de caractère
-      // qui va a gauche, sinon celui qui va a droite.
-      if (line_type=='T')
-      {
-        if (line[char_index/2]>'_' || line[char_index/2]<' ')
-          char_pixel=&(Gfx->Help_font_norm['!'][0][0]); // Caractère pas géré
-        else if (char_index & 1)
-          char_pixel=&(Gfx->Help_font_t2[(unsigned char)(line[char_index/2])-' '][0][0]);
-        else
-          char_pixel=&(Gfx->Help_font_t1[(unsigned char)(line[char_index/2])-' '][0][0]);
-      }
-      else if (line_type=='-')
-      {
-        if (line[char_index/2]>'_' || line[char_index/2]<' ')
-          char_pixel=&(Gfx->Help_font_norm['!'][0][0]); // Caractère pas géré
-        else if (char_index & 1)
-          char_pixel=&(Gfx->Help_font_t4[(unsigned char)(line[char_index/2])-' '][0][0]);
-        else
-          char_pixel=&(Gfx->Help_font_t3[(unsigned char)(line[char_index/2])-' '][0][0]);
-      }
-      else if (line_type=='S')
-        char_pixel=&(Gfx->Bold_font[(unsigned char)(line[char_index])][0][0]);
-      else if (line_type=='N' || line_type=='K')
-        char_pixel=&(Gfx->Help_font_norm[(unsigned char)(line[char_index])][0][0]);
+      if (char_index & 1)
+        texture = Gfx->Help_font_t2[(unsigned char)(line[char_index/2])-' '];
       else
-        char_pixel=&(Gfx->Help_font_norm['!'][0][0]); // Un garde-fou en cas de probleme
-        
-      for (x=0;x<6;x++)
-        for (repeat_menu_x_factor=0;repeat_menu_x_factor<fx;repeat_menu_x_factor++)
-        {
-          byte color = *(char_pixel+x+y*6);
-          // Surlignement pour liens
-          if (line_type=='K' && char_index>=link_position
-            && char_index<(link_position+link_size))
-          {
-            if (color == MC_Light)
-              color=MC_White;
-            else if (color == MC_Dark)
-              color=MC_Light;
-            else if (y<7)
-              color=MC_Dark;
-          }
-          Horizontal_line_buffer[x_position++]=color;
-        }
+        texture = Gfx->Help_font_t1[(unsigned char)(line[char_index/2])-' '];
     }
-    // On la splotche
-    Display_line_window(real_x_pos,real_y_pos,width*6,Horizontal_line_buffer);
-    real_y_pos += fy;
+    else if (line_type=='-' && line[char_index/2]<='_' && line[char_index/2]>=' ')
+    {
+      if (char_index & 1)
+        texture = Gfx->Help_font_t4[(unsigned char)(line[char_index/2])-' '];
+      else
+        texture = Gfx->Help_font_t3[(unsigned char)(line[char_index/2])-' '];        
+    }
+    Window_draw_texture(texture, (x_pos+char_index*6)*Menu_factor_X, y_pos*Menu_factor_X, 6*Menu_factor_X, 8*Menu_factor_Y);
   }
-  return width;
+  // Highlight link
+  if (line_type=='K')
+  {
+    Rectangle_on_texture(Window_texture, (x_pos+link_position*6)*Menu_factor_X, y_pos*Menu_factor_X, 6*link_size*Menu_factor_X, 8*Menu_factor_Y, 255, 255, 255, 64, SDL_BLENDMODE_ADD);
+  }
+  return;
 }
 
 
@@ -402,20 +356,18 @@ void Display_help(void)
                               // raccourcis clavier
   short  link_position=0;     // Position du premier caractère "variable"
   short  link_size=0;       // Taille de la partie variable
-  short width;
+  
+  Window_rectangle(x_pos,
+           y_pos,
+           (44)*6,
+           16*8,
+           MC_Black);
   
   for (line_index=0;line_index<16;line_index++)
   {
     // Shortcut au cas ou la section fait moins de 16 lignes
     if (line_index >= Help_section[Current_help_section].Length)
     {
-      Window_rectangle (x_pos,
-           y_pos + line_index*8,
-           44*6,
-           // 44 = Nb max de char (+1 pour éviter les plantages en mode X
-           // causés par une largeur = 0)
-           (16 - line_index)*8,
-           MC_Black);
       break;
     }
     // On affiche la ligne
@@ -453,14 +405,7 @@ void Display_help(void)
       line = buffer;
     }
     
-    width=Print_help(x_pos, y_pos+(line_index<<3), line, line_type, link_position, link_size);
-    // On efface la fin de la ligne:
-    if (width<44)
-      Window_rectangle (x_pos+width*6,
-           y_pos+(line_index<<3),
-           (44-width)*6,
-           8,
-           MC_Black);
+    Print_help(x_pos, y_pos+(line_index<<3), line, line_type, link_position, link_size);
   }
   Update_window_area(x_pos,y_pos,44*6,16*8);
 }

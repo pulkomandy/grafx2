@@ -2561,9 +2561,6 @@ void Button_Brush_Factory(void)
   Window_display_frame_in(6, FILESEL_Y + 88, DESC_WIDTH*6+4, 4*8+2); // Descr.
   Window_set_special_button(7, FILESEL_Y + 89+24,DESC_WIDTH*6,8); // 6
   
-  // Box around path (slightly expands up left)
-  Window_rectangle(8, FILESEL_Y - 13, DESC_WIDTH*6+2, 9, MC_Black);
-  
   while (1)
   {
     // Locate selected file in view
@@ -2587,6 +2584,8 @@ void Button_Brush_Factory(void)
       strcpy(displayed_path, Config.Scripts_directory+q-DESC_WIDTH);
       displayed_path[0] = ELLIPSIS_CHARACTER;
     }
+    // Box around path (slightly expands up left)
+    Window_rectangle(8, FILESEL_Y - 13, DESC_WIDTH*6+2, 9, MC_Black);
     Print_help(9, FILESEL_Y - 12, displayed_path, 'N', 0, 0);
     
     Draw_script_information(Get_item_by_index(&Scripts_selector,

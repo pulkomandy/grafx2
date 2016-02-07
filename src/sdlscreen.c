@@ -208,6 +208,7 @@ void Update_rectangle(SDL_Surface *surface, int x, int y, int width, int height)
 void Render_out_rectangle(int x, int y, int w, int h, int alpha)
 {
   SDL_Rect rectangle = {x, y, w, h};
+  SDL_SetRenderDrawBlendMode(Renderer_SDL, SDL_BLENDMODE_BLEND);
   // Partie grise du milieu
   SDL_SetRenderDrawColor(Renderer_SDL, 128, 128, 128, alpha);
   SDL_RenderFillRect(Renderer_SDL, &rectangle);
@@ -624,11 +625,12 @@ SDL_Texture * Create_rendering_texture(int width, int height)
   return texture;
 }
  
-void Rectangle_on_texture(SDL_Texture *texture, int x, int y, int w, int h, int r, int g, int b, int a)
+void Rectangle_on_texture(SDL_Texture *texture, int x, int y, int w, int h, int r, int g, int b, int a, SDL_BlendMode blend_mode)
 {
   SDL_Rect rectangle = {x, y, w, h};
 
   SDL_SetRenderTarget(Renderer_SDL, texture);
+  SDL_SetRenderDrawBlendMode(Renderer_SDL, blend_mode);
   SDL_SetRenderDrawColor(Renderer_SDL, r, g, b, a);
   SDL_RenderFillRect(Renderer_SDL, &rectangle);
 }

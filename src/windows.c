@@ -87,7 +87,7 @@ void Pixel_in_window(word x,word y,byte color)
 {
 #ifndef MULTI_WINDOW
   Block((x*Menu_factor_X)+Window_pos_X,(y*Menu_factor_Y)+Window_pos_Y,Menu_factor_X,Menu_factor_Y,color);
-  Rectangle_on_texture(Window_texture, (x*Menu_factor_X), (y*Menu_factor_Y), Menu_factor_X, Menu_factor_Y, Main_palette[color].R, Main_palette[color].G, Main_palette[color].B, 255);
+  Rectangle_on_texture(Window_texture, (x*Menu_factor_X), (y*Menu_factor_Y), Menu_factor_X, Menu_factor_Y, Main_palette[color].R, Main_palette[color].G, Main_palette[color].B, 255, SDL_BLENDMODE_NONE);
 #else
   SDL_Surface* surf = SDL_GetWindowSurface(Window_handle);
   T_Components c = Main_palette[color];
@@ -101,7 +101,7 @@ void Window_rectangle(word x_pos,word y_pos,word width,word height,byte color)
 {
 #ifndef MULTI_WINDOW
   Block((x_pos*Menu_factor_X)+Window_pos_X,(y_pos*Menu_factor_Y)+Window_pos_Y,width*Menu_factor_X,height*Menu_factor_Y,color);
-  Rectangle_on_texture(Window_texture, (x_pos*Menu_factor_X), (y_pos*Menu_factor_Y), width*Menu_factor_X, height*Menu_factor_Y, Main_palette[color].R, Main_palette[color].G, Main_palette[color].B, 255);
+  Rectangle_on_texture(Window_texture, (x_pos*Menu_factor_X), (y_pos*Menu_factor_Y), width*Menu_factor_X, height*Menu_factor_Y, Main_palette[color].R, Main_palette[color].G, Main_palette[color].B, 255, SDL_BLENDMODE_NONE);
 #else
   SDL_Surface* surf = SDL_GetWindowSurface(Window_handle);
   SDL_Rect r = {x_pos, y_pos, width, height};
@@ -114,7 +114,7 @@ void Window_rectangle(word x_pos,word y_pos,word width,word height,byte color)
 void Window_rectangle_shadow(word x_pos,word y_pos,word width,word height)
 {
   Block((x_pos*Menu_factor_X)+Window_pos_X,(y_pos*Menu_factor_Y)+Window_pos_Y,width*Menu_factor_X,height*Menu_factor_Y,MC_Black);
-  Rectangle_on_texture(Window_texture, (x_pos*Menu_factor_X), (y_pos*Menu_factor_Y), width*Menu_factor_X, height*Menu_factor_Y, 0, 0, 0, 128);
+  Rectangle_on_texture(Window_texture, (x_pos*Menu_factor_X), (y_pos*Menu_factor_Y), width*Menu_factor_X, height*Menu_factor_Y, 0, 0, 0, 128, SDL_BLENDMODE_NONE);
 }
 
 
@@ -180,25 +180,6 @@ void Window_display_frame(word x_pos,word y_pos,word width,word height)
 {
   Window_display_frame_in(x_pos,y_pos,width,height);
   Window_display_frame_out(x_pos+1,y_pos+1,width-2,height-2);
-}
-
-
-void Display_line_window(word x, word y, word width, byte* buffer)
-{
-#ifdef MULTI_WINDOW
-  SDL_Surface* surf = SDL_GetWindowSurface(Window_handle);
-  int32_t* pixels = (int32_t*)surf->pixels;
-  int i;
-
-  for(i = 0; i < width; i++) {
-    T_Components c = Main_palette[buffer[i]];
-    pixels[x + i + y * surf->pitch/4] = SDL_MapRGB(surf->format, c.R, c.G, c.B);
-  }
-#else
-  short  repeat_menu_y_factor;
-  for (repeat_menu_y_factor=0;repeat_menu_y_factor<Menu_factor_Y;repeat_menu_y_factor++)
-    Display_line_fast(x,y,width*Menu_factor_X,buffer);
-#endif
 }
 
 //-- Affichages relatifs à la palette dans le menu ---------------------------
@@ -3364,32 +3345,6 @@ void Remap_menu_sprites()
       for (j=0; j<14; j++)
         for (i=0; i<236; i++)
           Remap_pixel(&Gfx->Animbar_block[k][j][i]);
-    // Help fonts
-    for (k=0; k<256; k++)
-      for (j=0; j<8; j++)
-        for (i=0; i<6; i++)
-          Remap_pixel(&Gfx->Help_font_norm[k][i][j]);
-    for (k=0; k<256; k++)
-      for (j=0; j<8; j++)
-        for (i=0; i<6; i++)
-          Remap_pixel(&Gfx->Bold_font[k][i][j]);
-    for (k=0; k<64; k++)
-      for (j=0; j<8; j++)
-        for (i=0; i<6; i++)
-          Remap_pixel(&Gfx->Help_font_t1[k][i][j]);
-    for (k=0; k<64; k++)
-      for (j=0; j<8; j++)
-        for (i=0; i<6; i++)
-          Remap_pixel(&Gfx->Help_font_t2[k][i][j]);
-    for (k=0; k<64; k++)
-      for (j=0; j<8; j++)
-        for (i=0; i<6; i++)
-          Remap_pixel(&Gfx->Help_font_t3[k][i][j]);
-    for (k=0; k<64; k++)
-      for (j=0; j<8; j++)
-        for (i=0; i<6; i++)
-          Remap_pixel(&Gfx->Help_font_t4[k][i][j]);
-        
     // Drives and other misc. 8x8 icons
     for (k=0; k<NB_ICON_SPRITES; k++)
       for (j=0; j<ICON_SPRITE_HEIGHT; j++)
