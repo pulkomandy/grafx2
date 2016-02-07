@@ -480,7 +480,7 @@ typedef struct
   /// Bitmap data for the different Layer icons.
   byte Layer_sprite[3][16][LAYER_SPRITE_HEIGHT][LAYER_SPRITE_WIDTH];
   /// Bitmap data for the Grafx2 logo that appears on splash screen. All 256 colors allowed.
-  byte Logo_grafx2[231*56];
+  SDL_Texture *Logo_grafx2;
   /// Bitmap data for the 6x8 font used in help screens.
   byte Help_font_norm [256][6][8];
   /// Bitmap data for the 6x8 font used in help screens ("bold" verstion).

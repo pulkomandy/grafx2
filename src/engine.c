@@ -507,7 +507,7 @@ void Move_separator(void)
 
   // Afficher la barre en XOR
   Hide_cursor();
-  //Windows_open=1;
+  Windows_open=1;
   Cursor_shape=CURSOR_SHAPE_HORIZONTAL;
   Vertical_XOR_line(Main_separator_position,0,Menu_Y);
   Vertical_XOR_line(Main_X_zoom-1,0,Menu_Y);
@@ -551,7 +551,7 @@ void Move_separator(void)
   Hide_cursor();
   Vertical_XOR_line(Main_separator_position,0,Menu_Y);
   Vertical_XOR_line(Main_X_zoom-1,0,Menu_Y);
-  //Windows_open=0;
+  Windows_open=0;
   Cursor_shape=old_cursor_shape;
   Compute_magnifier_data();
   Position_screen_according_to_zoom();
@@ -2608,6 +2608,8 @@ void Move_window(short dx, short dy)
   short new_y=Mouse_Y-dy;
   short old_x;
   short old_y;
+  short original_x = Window_pos_X;
+  short original_y = Window_pos_Y;
   short width=Window_width*Menu_factor_X;
   short height=Window_height*Menu_factor_Y;
   short a;
@@ -2677,6 +2679,9 @@ void Move_window(short dx, short dy)
       Display_cursor();
       Update_rect(old_x,old_y,width,height);
       Update_rect(new_x,new_y,width,height);
+      
+      Window_pos_X=new_x;
+      Window_pos_Y=new_y;
     }
   }
 
@@ -2686,9 +2691,12 @@ void Move_window(short dx, short dy)
   Vertical_XOR_line(new_x+width-1,new_y+1,height-2);
   Horizontal_XOR_line(new_x,new_y+height-1,width);
 
-  if ((new_x!=Window_pos_X)
-   || (new_y!=Window_pos_Y))
+  if ((original_x!=Window_pos_X)
+   || (original_y!=Window_pos_Y))
   {
+    Window_pos_X=original_x;
+    Window_pos_Y=original_y;
+  
     a=Menu_Y;
     Menu_Y=Menu_Y_before_window;
     b=Menu_is_visible;

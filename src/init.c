@@ -543,8 +543,9 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
 
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "logo menu"))
     return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Logo_grafx2, 231, 56, "logo menu",3))
-    return 1;
+  
+  gfx->Logo_grafx2 = Create_texture(gui, cursor_x, cursor_y, 231, 56);
+  
   cursor_y+=56;
   
   // Trames

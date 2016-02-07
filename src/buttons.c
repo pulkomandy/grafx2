@@ -149,7 +149,6 @@ void Message_out_of_memory(void)
 void Button_Message_initial(void)
 {
   char  str[30];
-  int   x_pos,offs_y,x,y;
   int clicked_button=0;
 
   strcpy(str,"GrafX2 version ");
@@ -158,9 +157,7 @@ void Button_Message_initial(void)
 
   Window_display_frame_in(10,20,239,62);
   Window_rectangle(11,21,237,60,MC_Black);
-  for (y=23,offs_y=0; y<79; offs_y+=231,y++)
-    for (x=14,x_pos=0; x_pos<231; x_pos++,x++)
-      Pixel_in_window(x,y,Gfx->Logo_grafx2[offs_y+x_pos]);
+  Window_draw_texture(Gfx->Logo_grafx2, 14*Menu_factor_X, 23*Menu_factor_Y, 231*Menu_factor_X, 56*Menu_factor_Y);
 
   Print_in_window(130-4*26,88,"Copyright (c) 2007-2012 by",MC_Dark,MC_Light);
   Print_in_window(130-4*23,96,"the Grafx2 project team",MC_Black,MC_Light);

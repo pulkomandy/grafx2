@@ -207,18 +207,12 @@ void Update_rectangle(SDL_Surface *surface, int x, int y, int width, int height)
 
 void Render_out_rectangle(int x, int y, int w, int h, int alpha)
 {
-  SDL_Rect rectangle;
+  SDL_Rect rectangle = {x, y, w, h};
   // Partie grise du milieu
   SDL_SetRenderDrawColor(Renderer_SDL, 128, 128, 128, alpha);
-  rectangle.x = x;
-  rectangle.y = y;
-  rectangle.w = w;
-  rectangle.h = h;
   SDL_RenderFillRect(Renderer_SDL, &rectangle);
 
   SDL_SetRenderDrawColor(Renderer_SDL, 255, 255, 255, alpha);
-  rectangle.x = x;
-  rectangle.y = y;
   rectangle.w = w - 1*Menu_factor_X;
   rectangle.h = 1*Menu_factor_X;
   SDL_RenderFillRect(Renderer_SDL, &rectangle);
@@ -362,6 +356,8 @@ void Flush_update(void)
   if (Cursor_shape <= CURSOR_SHAPE_BUCKET)
   {
     byte shape;
+    int x_factor = 1;
+    int y_factor = 1;
     if ( ( (Mouse_Y<Menu_Y)
       && ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ) )
       || (Windows_open) || (Cursor_shape==CURSOR_SHAPE_HOURGLASS) )
@@ -369,10 +365,15 @@ void Flush_update(void)
     else
       shape=CURSOR_SHAPE_ARROW;
     
-    r.x = Mouse_X-14;
-    r.y = Mouse_Y-15;
-    r.w = 29;
-    r.h = 31;
+    if (shape==CURSOR_SHAPE_ARROW || shape==CURSOR_SHAPE_HOURGLASS || shape==CURSOR_SHAPE_HORIZONTAL)
+    {
+      x_factor = Menu_factor_X;
+      y_factor = Menu_factor_Y;
+    }
+      r.x = Mouse_X-14*x_factor;
+      r.y = Mouse_Y-15*y_factor;
+      r.w = 29*x_factor;
+      r.h = 31*y_factor;
     SDL_RenderCopy(Renderer_SDL, Gfx->Mouse_cursor[shape], NULL, &r);
   }
   // Flip display
@@ -625,12 +626,17 @@ SDL_Texture * Create_rendering_texture(int width, int height)
  
 void Rectangle_on_texture(SDL_Texture *texture, int x, int y, int w, int h, int r, int g, int b, int a)
 {
-  SDL_Rect rectangle;
+  SDL_Rect rectangle = {x, y, w, h};
+
   SDL_SetRenderTarget(Renderer_SDL, texture);
   SDL_SetRenderDrawColor(Renderer_SDL, r, g, b, a);
-  rectangle.x = x;
-  rectangle.y = y;
-  rectangle.w = w;
-  rectangle.h = h;
   SDL_RenderFillRect(Renderer_SDL, &rectangle);
+}
+
+void Window_draw_texture(SDL_Texture *texture, int x, int y, int w, int h)
+{
+  SDL_Rect rectangle = {x, y, w, h};
+
+  SDL_SetRenderTarget(Renderer_SDL, Window_texture);
+  SDL_RenderCopy(Renderer_SDL, texture, NULL, &rectangle);
 }
