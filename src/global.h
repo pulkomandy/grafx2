@@ -521,6 +521,10 @@ GFX2_GLOBAL T_Window Window_stack[8];
 
 #define Window_draggable Window_stack[Windows_open-1].Draggable
 
+///
+/// Background texture of the window
+#define Window_texture Window_stack[Windows_open-1].Texture
+
 // -- Information about the different drawing modes (effects)
 
 /// Current effecting function. When no effect is selected this is ::No_effect()

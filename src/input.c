@@ -941,6 +941,7 @@ int Get_input(int sleep_time)
           case SDL_TEXTINPUT:
             {
               const char *text = event.text.text;
+              // DEBUG
               printf("%s\n", text);
 
               while (text && text[0])

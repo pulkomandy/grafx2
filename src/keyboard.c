@@ -628,6 +628,7 @@ const char * Parse_utf8_string(const char * str, word *character)
       return NULL;
     *character = (*character << 6) | (str[0] & 0x3F);    
   };
+  // DEBUG
   printf("[%X]\n",*character);
   return str+1;
 }

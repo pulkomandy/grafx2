@@ -677,44 +677,6 @@ int Init_program(int argc,char * argv[])
   Current_help_section=0;
   Help_position=0;
 
-  // Load sprites, palette etc.
-  gfx = Load_graphics(Config.Skin_file, &initial_gradients);
-  if (gfx == NULL)
-  {
-    gfx = Load_graphics(DEFAULT_SKIN_FILENAME, &initial_gradients);
-    if (gfx == NULL)
-    {
-      printf("%s", Gui_loading_error_message);
-      Error(ERROR_GUI_MISSING);
-    }
-  }
-  Set_current_skin(Config.Skin_file, gfx);
-  // Override colors
-  // Gfx->Default_palette[MC_Black]=Config.Fav_menu_colors[0];
-  // Gfx->Default_palette[MC_Dark] =Config.Fav_menu_colors[1];
-  // Gfx->Default_palette[MC_Light]=Config.Fav_menu_colors[2];
-  // Gfx->Default_palette[MC_White]=Config.Fav_menu_colors[3];
-  
-  // Even when using the skin's palette, if RGB range is small
-  // the colors will be unusable.
-  Compute_optimal_menu_colors(Gfx->Default_palette);
-    
-  // Infos sur les trames (Sieve)
-  Sieve_mode=0;
-  Copy_preset_sieve(0);
-
-  // Font
-  if (!(Menu_font=Load_font(Config.Font_file)))
-    if (!(Menu_font=Load_font(DEFAULT_FONT_FILENAME)))
-      {
-        printf("Unable to open the default font file: %s\n", DEFAULT_FONT_FILENAME);
-        Error(ERROR_GUI_MISSING);
-      }
-
-  memcpy(Main_palette, Gfx->Default_palette, sizeof(T_Palette));
-
-  Fore_color=Best_color_range(255,255,255,Config.Palette_cells_X*Config.Palette_cells_Y);
-  Back_color=Best_color_range(0,0,0,Config.Palette_cells_X*Config.Palette_cells_Y);
 
   // Allocation de mémoire pour la brosse
   if (!(Brush         =(byte *)malloc(   1*   1))) Error(ERROR_MEMORY);
@@ -754,6 +716,47 @@ int Init_program(int argc,char * argv[])
   Main_image_height=Screen_height;
   Spare_image_width=Screen_width;
   Spare_image_height=Screen_height;
+
+  // Load sprites, palette etc.
+  gfx = Load_graphics(Config.Skin_file, &initial_gradients);
+  if (gfx == NULL)
+  {
+    gfx = Load_graphics(DEFAULT_SKIN_FILENAME, &initial_gradients);
+    if (gfx == NULL)
+    {
+      printf("%s", Gui_loading_error_message);
+      Error(ERROR_GUI_MISSING);
+    }
+  }
+  Set_current_skin(Config.Skin_file, gfx);
+  
+  // Override colors
+  // Gfx->Default_palette[MC_Black]=Config.Fav_menu_colors[0];
+  // Gfx->Default_palette[MC_Dark] =Config.Fav_menu_colors[1];
+  // Gfx->Default_palette[MC_Light]=Config.Fav_menu_colors[2];
+  // Gfx->Default_palette[MC_White]=Config.Fav_menu_colors[3];
+  
+  // Even when using the skin's palette, if RGB range is small
+  // the colors will be unusable.
+  Compute_optimal_menu_colors(Gfx->Default_palette);
+    
+  // Infos sur les trames (Sieve)
+  Sieve_mode=0;
+  Copy_preset_sieve(0);
+
+  // Font
+  if (!(Menu_font=Load_font(Config.Font_file)))
+    if (!(Menu_font=Load_font(DEFAULT_FONT_FILENAME)))
+      {
+        printf("Unable to open the default font file: %s\n", DEFAULT_FONT_FILENAME);
+        Error(ERROR_GUI_MISSING);
+      }
+
+  memcpy(Main_palette, Gfx->Default_palette, sizeof(T_Palette));
+  Set_palette(Main_palette);
+
+  Fore_color=Best_color_range(255,255,255,Config.Palette_cells_X*Config.Palette_cells_Y);
+  Back_color=Best_color_range(0,0,0,Config.Palette_cells_X*Config.Palette_cells_Y);
   
   starting_image_mode = Config.Default_mode_layers ? 
     IMAGE_MODE_LAYERED : IMAGE_MODE_ANIMATION;
@@ -915,8 +918,8 @@ void Program_shutdown(void)
   // Windows only: Recover the window position.
   #if defined(__WIN32__)
   {
-    RECT r;
-    static SDL_SysWMinfo pInfo;
+    //RECT r;
+    //static SDL_SysWMinfo pInfo;
     
     //SDL_GetWMInfo(&pInfo);
     //GetWindowRect(pInfo.window, &r);

@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <SDL2/SDL.h>
+#include <SDL_image.h>
 #include <SDL_endian.h>
 
 #include "global.h"
@@ -60,6 +61,7 @@ volatile int Allow_colorcycling=1;
 static SDL_Window *Window_SDL=NULL;
 static SDL_Renderer *Renderer_SDL=NULL;
 static SDL_Texture *Texture_SDL=NULL;
+static SDL_Texture *Mouse_texture=NULL;
 
 /// Sets the new screen/window dimensions.
 void Set_mode_SDL(int *width, int *height, int fullscreen)
@@ -98,11 +100,11 @@ void Set_mode_SDL(int *width, int *height, int fullscreen)
   
   Window_SDL = SDL_CreateWindow("GrafX2",
     SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-    *width, *height,
+    *width, *height * 2,
     (fullscreen?SDL_WINDOW_FULLSCREEN:SDL_WINDOW_RESIZABLE)|SDL_WINDOW_SHOWN|SDL_WINDOW_INPUT_FOCUS|SDL_WINDOW_MOUSE_FOCUS);
-  Renderer_SDL = SDL_CreateRenderer(Window_SDL, -1, SDL_RENDERER_SOFTWARE);
+  Renderer_SDL = SDL_CreateRenderer(Window_SDL, -1, SDL_RENDERER_ACCELERATED);
   //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
-  SDL_RenderSetLogicalSize(Renderer_SDL, *width, *height);
+  SDL_RenderSetLogicalSize(Renderer_SDL, *width, *height * 2);
   Texture_SDL = SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, *width, *height);
 
   if(Screen_SDL != NULL)
@@ -123,15 +125,20 @@ void Set_mode_SDL(int *width, int *height, int fullscreen)
   SDL_FreeCursor(cur);
   cur = SDL_CreateCursor(&cursorData, &cursorData, 1,1,0,0);
   SDL_SetCursor(cur);
+  
+  {
+    SDL_Surface *mouse_icon = NULL;
+    mouse_icon = IMG_Load("pointer.png");
+    Mouse_texture = SDL_CreateTextureFromSurface(Renderer_SDL, mouse_icon);
+    SDL_FreeSurface(mouse_icon);
+  }
+
 }
 
 void Update_rectangle(SDL_Surface *surface, int x, int y, int width, int height)
 {
-
-  Uint32 * pixels;
-  int pitch;
-  int line, col;
-  SDL_Rect r;
+  SDL_Rect source_rect;
+  //SDL_Rect dest_rect;
 
   // safety clipping
   if (x==0 && width==0)
@@ -143,41 +150,110 @@ void Update_rectangle(SDL_Surface *surface, int x, int y, int width, int height)
   else if (y+height > surface->h)
     height = surface->h - y;
   
-  r.x = x;
-  r.y = y;
-  r.w = width;
-  r.h = height;
+  source_rect.x = x;
+  source_rect.y = y;
+  source_rect.w = width;
+  source_rect.h = height;
   
+  // This refreshes an existing Texture using a source Surface.
+  // Usually, recreating the texture using SDL_CreateTextureFromSurface()
+  // would be better, but only allows a complete surface (no rectangle)
+  // !!! This assumes SDL_PIXELFORMAT_ABGR8888
+  //{
+  //  Uint32 * pixels;
+  //  int pitch;
+  //  int line, col;
+  //  SDL_LockTexture(Texture_SDL, &source_rect, (void **)(&pixels), &pitch );
+  //  for (line = 0; line < source_rect.h; line++)
+  //  {
+  //    for (col = 0; col < source_rect.w; col++)
+  //    {
+  //      byte index = Get_SDL_pixel_8(surface, source_rect.x + col, source_rect.y + line);
+  //      //memcpy(pixels++, surface->format->palette->colors + index, 4);
+  //      //*(pixels++) = *(Uint32 *)(surface->format->palette->colors + index);
+  //      *((byte *)pixels) = surface->format->palette->colors[index].r;
+  //      *(((byte *)pixels) + 1) = surface->format->palette->colors[index].g;
+  //      *(((byte *)pixels) + 2) = surface->format->palette->colors[index].b;
+  //      pixels++;
+  //    }
+  //    pixels += pitch/sizeof(uint32_t) - source_rect.w; 
+  //  }
+  //  SDL_UnlockTexture(Texture_SDL);
+  //}
   
-  SDL_LockTexture(Texture_SDL, &r, (void **)(&pixels), &pitch );
-  for (line = 0; line < r.h; line++)
+  // Method 2
   {
-    for (col = 0; col < r.w; col++)
+    byte * pixels;
+    int pitch;
+    int line;
+    static SDL_Surface *RGBcopy = NULL;
+    if  (RGBcopy == NULL)
     {
-      byte index = Get_SDL_pixel_8(surface, r.x + col, r.y + line);
-      //memcpy(pixels++, surface->format->palette->colors + index, 4);
-      //*(pixels++) = *(Uint32 *)(surface->format->palette->colors + index);
-      *((byte *)pixels) = surface->format->palette->colors[index].r;
-      *(((byte *)pixels) + 1) = surface->format->palette->colors[index].g;
-      *(((byte *)pixels) + 2) = surface->format->palette->colors[index].b;
-      pixels++;
+      RGBcopy = SDL_CreateRGBSurface(0,
+      surface->w, surface->h,
+      32, 0, 0, 0, 0);
     }
-    pixels += pitch/sizeof(uint32_t) - r.w; 
-  }
-  SDL_UnlockTexture(Texture_SDL);
-  
-  /*
-  if (Texture_SDL!=NULL)
-  {
-    SDL_DestroyTexture(Texture_SDL);
-    Texture_SDL=NULL;
+    // conversion ARGB
+    SDL_BlitSurface(surface, &source_rect, RGBcopy, &source_rect);
+    // upload texture
+    SDL_LockTexture(Texture_SDL, &source_rect, (void **)(&pixels), &pitch );
+    for (line = 0; line < source_rect.h; line++)
+    {
+       memcpy(pixels + line * pitch, RGBcopy->pixels + source_rect.x * 4 + (source_rect.y+line)* RGBcopy->pitch, source_rect.w * 4 );
+    }
+    SDL_UnlockTexture(Texture_SDL);
   }  
-  Texture_SDL = SDL_CreateTextureFromSurface(Renderer_SDL, surface);
-  */
-  SDL_RenderCopy(Renderer_SDL, Texture_SDL, &r, &r);
-  SDL_RenderPresent(Renderer_SDL);
+}
+
+void Render_out_rectangle(int x, int y, int w, int h, int alpha)
+{
+  SDL_Rect rectangle;
+  // Partie grise du milieu
+  SDL_SetRenderDrawColor(Renderer_SDL, 128, 128, 128, alpha);
+  rectangle.x = x;
+  rectangle.y = y;
+  rectangle.w = w;
+  rectangle.h = h;
+  SDL_RenderFillRect(Renderer_SDL, &rectangle);
+
+  SDL_SetRenderDrawColor(Renderer_SDL, 255, 255, 255, alpha);
+  rectangle.x = x;
+  rectangle.y = y;
+  rectangle.w = w - 1*Menu_factor_X;
+  rectangle.h = 1*Menu_factor_X;
+  SDL_RenderFillRect(Renderer_SDL, &rectangle);
+  rectangle.w = 1*Menu_factor_X;
+  rectangle.h = h - 1*Menu_factor_Y;
+  SDL_RenderFillRect(Renderer_SDL, &rectangle);
+
+  SDL_SetRenderDrawColor(Renderer_SDL, 64, 64, 64, alpha);
+  rectangle.x = x + 1*Menu_factor_X;
+  rectangle.y = y + h - 1*Menu_factor_Y;
+  rectangle.w = w - 2*Menu_factor_X;
+  rectangle.h = 1*Menu_factor_X;
+  SDL_RenderFillRect(Renderer_SDL, &rectangle);
+  rectangle.x = x + w -1*Menu_factor_X;
+  rectangle.y = y + Menu_factor_Y;
+  rectangle.w = 1*Menu_factor_X;
+  rectangle.h = h - 1*Menu_factor_Y;
+  SDL_RenderFillRect(Renderer_SDL, &rectangle);
+}
+
+void Render_separator(int x, int alpha)
+{
+  SDL_Rect rectangle;
+  int height = (Windows_open == 0) ? Menu_Y : Menu_Y_before_window;
+  //SDL_SetRenderDrawBlendMode(Renderer_SDL, SDL_BLENDMODE_BLEND);
+  Render_out_rectangle(x+Menu_factor_X, 0, (SEPARATOR_WIDTH-2)*Menu_factor_X, height, alpha);
   
-  
+  SDL_SetRenderDrawColor(Renderer_SDL, 0, 0, 0, alpha);
+  rectangle.x = x;
+  rectangle.y = 0;
+  rectangle.w = Menu_factor_X;
+  rectangle.h = height;
+  SDL_RenderFillRect(Renderer_SDL, &rectangle);
+  rectangle.x = x + Menu_factor_X*(SEPARATOR_WIDTH-1);
+  SDL_RenderFillRect(Renderer_SDL, &rectangle);
 }
 
 #if (UPDATE_METHOD == UPDATE_METHOD_CUMULATED)
@@ -195,6 +271,8 @@ short Status_line_dirty_end=0;
 
 void Flush_update(void)
 {
+  SDL_Rect r;
+
 #if (UPDATE_METHOD == UPDATE_METHOD_FULL_PAGE)
   // Do a full screen update
   if (update_is_required)
@@ -227,6 +305,77 @@ void Flush_update(void)
   Status_line_dirty_end=0;
   
     #endif
+  
+  SDL_SetRenderTarget(Renderer_SDL, NULL);
+  // Clear - mostly for troubleshooting
+  {
+    static byte c=255;
+    //c = c ^ 32;
+    SDL_SetRenderDrawColor(Renderer_SDL, 0, 0, c, 255);
+    SDL_RenderClear(Renderer_SDL);
+  }
+
+  // Copy the fullscreen(old) at the bottom
+  r.x = 0;
+  r.y = Screen_SDL->h;
+  r.w = Screen_SDL->w;
+  r.h = Screen_SDL->h;
+  SDL_RenderCopy(Renderer_SDL, Texture_SDL, NULL, &r);
+  // Version with CreateTextureFromSurface
+  //SDL_Texture *temp_tx = SDL_CreateTextureFromSurface(Renderer_SDL, surface);
+  //dest_rect.x = 0;
+  //dest_rect.y = surface->h;
+  //dest_rect.w = surface->w;
+  //dest_rect.h = surface->h;
+  //SDL_RenderCopy(Renderer_SDL, temp_tx, NULL, &dest_rect);
+  //SDL_DestroyTexture(temp_tx);
+
+  // Separator
+  if (Main_magnifier_mode)
+  {
+    Render_separator(Main_separator_position, SDL_ALPHA_OPAQUE);
+  }
+
+  // While dragging separator - not needed
+  //if (Cursor_shape==CURSOR_SHAPE_HORIZONTAL)
+  //{
+  //  Render_separator(Mouse_X, 64);
+  //}
+
+  // Stack of windows
+  // -------------------------------
+  {
+    int i;
+    for (i=0; i < Windows_open; i++)
+    {
+      r.x = Window_stack[i].Pos_X;
+      r.y = Window_stack[i].Pos_Y;
+      r.w = Window_stack[i].Width*Menu_factor_X;
+      r.h = Window_stack[i].Height*Menu_factor_Y;
+      SDL_RenderCopy(Renderer_SDL, Window_stack[i].Texture, NULL, &r);
+    } 
+  }   
+      
+  // -------------------------------
+  // Mouse cursor
+  if (Cursor_shape <= CURSOR_SHAPE_BUCKET)
+  {
+    byte shape;
+    if ( ( (Mouse_Y<Menu_Y)
+      && ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ) )
+      || (Windows_open) || (Cursor_shape==CURSOR_SHAPE_HOURGLASS) )
+      shape=Cursor_shape;
+    else
+      shape=CURSOR_SHAPE_ARROW;
+    
+    r.x = Mouse_X-14;
+    r.y = Mouse_Y-15;
+    r.w = 29;
+    r.h = 31;
+    SDL_RenderCopy(Renderer_SDL, Gfx->Mouse_cursor[shape], NULL, &r);
+  }
+  // Flip display
+  SDL_RenderPresent(Renderer_SDL);  
 
 }
 
@@ -441,4 +590,43 @@ void Set_surface_palette(const SDL_Surface *surface, const SDL_Color *palette)
     surface->format->palette->colors[i].b = palette[i].b;
   }
   //Update_rect(0, 0, Screen_SDL->w, Screen_SDL->h);
+}
+
+SDL_Texture * Create_texture(SDL_Surface *source, int x, int y, int w, int h)
+{
+  SDL_Surface * sub_surface = NULL;
+  SDL_Texture * texture = NULL;
+  Uint32 transparent;
+  
+  sub_surface = SDL_CreateRGBSurfaceFrom((byte *)(source->pixels) + x + y*source->pitch, w, h, 8, source->pitch, 0, 0, 0, 0);
+  SDL_SetPaletteColors(sub_surface->format->palette, source->format->palette->colors, 0, 256);
+  if (!SDL_GetColorKey(source, &transparent))
+      SDL_SetColorKey(sub_surface, SDL_TRUE, transparent);
+  
+  texture = SDL_CreateTextureFromSurface(Renderer_SDL, sub_surface);
+  
+  SDL_FreeSurface(sub_surface);
+  return texture;  
+}
+
+SDL_Texture * Create_rendering_texture(int width, int height)
+{
+  SDL_Texture * texture = SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_TARGET, width*Menu_factor_X, height*Menu_factor_Y);
+  SDL_SetRenderTarget(Renderer_SDL, texture);
+  SDL_SetRenderDrawColor(Renderer_SDL, 64*Windows_open, 64*Windows_open, 64*Windows_open, 255);
+  SDL_RenderFillRect(Renderer_SDL, NULL);
+  
+  return texture;
+}
+ 
+void Rectangle_on_texture(SDL_Texture *texture, int x, int y, int w, int h, int r, int g, int b)
+{
+  SDL_Rect rectangle;
+  SDL_SetRenderTarget(Renderer_SDL, texture);
+  SDL_SetRenderDrawColor(Renderer_SDL, r, g, b, 255);
+  rectangle.x = x;
+  rectangle.y = y;
+  rectangle.w = w;
+  rectangle.h = h;
+  SDL_RenderFillRect(Renderer_SDL, &rectangle);
 }

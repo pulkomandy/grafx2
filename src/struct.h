@@ -229,6 +229,7 @@ typedef struct
   int Attribute1;
   int Attribute2;
   byte Draggable;
+  SDL_Texture *Texture;
 #ifdef MULTI_WINDOW
   SDL_Window* Handle;
 #endif
@@ -457,6 +458,8 @@ typedef struct
   word Cursor_offset_Y[NB_CURSOR_SPRITES];
   /// Graphic resources for the mouse cursor.
   byte Cursor_sprite[NB_CURSOR_SPRITES][CURSOR_SPRITE_HEIGHT][CURSOR_SPRITE_WIDTH];
+
+  SDL_Texture *Mouse_cursor[NB_CURSOR_SPRITES];
 
   // Sieve patterns
   

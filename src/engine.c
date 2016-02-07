@@ -507,7 +507,7 @@ void Move_separator(void)
 
   // Afficher la barre en XOR
   Hide_cursor();
-  Windows_open=1;
+  //Windows_open=1;
   Cursor_shape=CURSOR_SHAPE_HORIZONTAL;
   Vertical_XOR_line(Main_separator_position,0,Menu_Y);
   Vertical_XOR_line(Main_X_zoom-1,0,Menu_Y);
@@ -551,7 +551,7 @@ void Move_separator(void)
   Hide_cursor();
   Vertical_XOR_line(Main_separator_position,0,Menu_Y);
   Vertical_XOR_line(Main_X_zoom-1,0,Menu_Y);
-  Windows_open=0;
+  //Windows_open=0;
   Cursor_shape=old_cursor_shape;
   Compute_magnifier_data();
   Position_screen_according_to_zoom();
@@ -1585,6 +1585,8 @@ void Open_window(word width,word height, const char * title)
 
   Window_width=width;
   Window_height=height;
+  
+  Window_texture=Create_rendering_texture(width, height);
 
   // Positionnement de la fenêtre
   Window_pos_X=(Screen_width-(width*Menu_factor_X))>>1;
@@ -1705,6 +1707,8 @@ void Close_window(void)
     free(Window_list_button_list);
     Window_list_button_list=temp6;
   }
+  SDL_DestroyTexture(Window_texture);
+  Window_texture=NULL;
 
   if (Windows_open != 1)
   {
@@ -2295,6 +2299,7 @@ void Open_popup(word x_pos, word y_pos, word width,word height)
   // Sauvegarde de ce que la fenêtre remplace
   Save_background(&(Window_background[Windows_open-1]), Window_pos_X, Window_pos_Y, width, height);
 
+  Window_texture=Create_rendering_texture(width, height);
 /*
   // Fenêtre grise
   Window_rectangle(1,1,width-2,height-2,MC_Light);

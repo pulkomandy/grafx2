@@ -79,6 +79,7 @@
 #include "windows.h"
 #include "layers.h"
 #include "special.h"
+#include "sdlscreen.h"
 
 char Gui_loading_error_message[512];
 
@@ -338,6 +339,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   // Reste : couleur neutre
   neutral_color=color;
 
+  SDL_SetColorKey(gui, SDL_TRUE, gfx->Color_trans);
   
   cursor_x=0;
   cursor_y=1;
@@ -472,9 +474,13 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
     if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, mouse_cursor_area, 29, 31, "mouse cursor",1))
       return 1;
     Center_GUI_cursor(gfx, (byte *)mouse_cursor_area,i);
+    
+    gfx->Mouse_cursor[i] = Create_texture(gui, cursor_x, cursor_y, 29, 31);
     cursor_x+=29;
   }
   cursor_y+=31;
+
+  
 
   // Menu sprites
   for (i=0; i<NB_MENU_SPRITES; i++)

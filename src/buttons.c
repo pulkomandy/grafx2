@@ -1267,8 +1267,7 @@ void Draw_one_skin_name(word x, word y, word index, byte highlighted)
   if (Skin_files_list.Nb_elements)
   {
     current_item = Get_item_by_index(&Skin_files_list, index);
-    Print_in_window(x, y, current_item->Short_name, MC_Black,
-      (highlighted)?MC_Dark:MC_Light);
+    Print_in_window(x, y, current_item->Short_name, MC_Black, (highlighted)?MC_Dark:MC_Light);
   }
 }
 
