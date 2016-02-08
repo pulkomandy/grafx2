@@ -292,6 +292,8 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
   } while(color==gfx->Color[0]);
+  // The scale of the skin is define by the width of the blocks: 8px for scale 1, 16px for scale 2 etc.
+  gfx->Factor = (cursor_x+4)/8;
   // Carré "foncé"
   gfx->Color[1] = color;
   do
@@ -544,9 +546,9 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "logo menu"))
     return 1;
   
-  gfx->Logo_grafx2 = Create_texture(gui, cursor_x, cursor_y, 231, 56);
+  gfx->Logo_grafx2 = Create_texture(gui, cursor_x, cursor_y, 231*gfx->Factor, 56*gfx->Factor);
   
-  cursor_y+=56;
+  cursor_y+=56*gfx->Factor;
   
   // Trames
   for (i=0; i<NB_PRESET_SIEVE; i++)
@@ -573,9 +575,9 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   for (i=0; i<256; i++)
   {
     // Each line holds 32 symbols, 8 lines
-    gfx->Help_font_norm[i] = Create_texture(gui, cursor_x + (i%32)*6, cursor_y+(i/32)*8, 6, 8);
+    gfx->Help_font_norm[i] = Create_texture(gui, cursor_x + (i%32)*6*gfx->Factor, cursor_y+(i/32)*8*gfx->Factor, 6*gfx->Factor, 8*gfx->Factor);
   }
-  cursor_y+=8*8;
+  cursor_y+=8*8*gfx->Factor;
   
   // Help font: Bold
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "help font (bold)"))
@@ -583,9 +585,9 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   for (i=0; i<256; i++)
   {
     // Each line holds 32 symbols, 8 lines
-    gfx->Help_font_bold[i] = Create_texture(gui, cursor_x + (i%32)*6, cursor_y+(i/32)*8, 6, 8);
+    gfx->Help_font_bold[i] = Create_texture(gui, cursor_x + (i%32)*6*gfx->Factor, cursor_y+(i/32)*8*gfx->Factor, 6*gfx->Factor, 8*gfx->Factor);
   }
-  cursor_y+=8*8;
+  cursor_y+=8*8*gfx->Factor;
 
      
 
@@ -596,7 +598,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
     if ((i%64)==0)
     {
       if (i!=0)
-        cursor_y+=8;
+        cursor_y+=8*gfx->Factor;
       if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "help font (title)"))
         return 1;
     }
@@ -608,18 +610,18 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
     
     if (i&1)
       if (i&64)
-        gfx->Help_font_t4[char_4++] = Create_texture(gui, cursor_x, cursor_y, 6, 8);
+        gfx->Help_font_t4[char_4++] = Create_texture(gui, cursor_x, cursor_y, 6*gfx->Factor, 8*gfx->Factor);
       else
-        gfx->Help_font_t2[char_2++] = Create_texture(gui, cursor_x, cursor_y, 6, 8);
+        gfx->Help_font_t2[char_2++] = Create_texture(gui, cursor_x, cursor_y, 6*gfx->Factor, 8*gfx->Factor);
     else
       if (i&64)
-        gfx->Help_font_t3[char_3++] = Create_texture(gui, cursor_x, cursor_y, 6, 8);
+        gfx->Help_font_t3[char_3++] = Create_texture(gui, cursor_x, cursor_y, 6*gfx->Factor, 8*gfx->Factor);
       else
-        gfx->Help_font_t1[char_1++] = Create_texture(gui, cursor_x, cursor_y, 6, 8);
+        gfx->Help_font_t1[char_1++] = Create_texture(gui, cursor_x, cursor_y, 6*gfx->Factor, 8*gfx->Factor);
     
-    cursor_x+=6;
+    cursor_x+=6*gfx->Factor;
   }
-  cursor_y+=8;
+  cursor_y+=8*gfx->Factor;
   
   // Copy unselected bitmaps to current ones
   memcpy(gfx->Menu_block[2], gfx->Menu_block[0], 

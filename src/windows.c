@@ -90,9 +90,9 @@ void Pixel_in_window(word x,word y,byte color)
   Rectangle_on_texture(Window_texture, (x*Menu_factor_X), (y*Menu_factor_Y), Menu_factor_X, Menu_factor_Y, Main_palette[color].R, Main_palette[color].G, Main_palette[color].B, 255, SDL_BLENDMODE_NONE);
 #else
   SDL_Surface* surf = SDL_GetWindowSurface(Window_handle);
+  SDL_Rect r = {x*Menu_factor_X, y*Menu_factor_Y, 1*Menu_factor_X, 1*Menu_factor_Y};
   T_Components c = Main_palette[color];
-  int32_t* pixels = (int32_t*)surf->pixels;
-  pixels[x + y * surf->pitch/4] = SDL_MapRGB(surf->format, c.R, c.G, c.B);
+  SDL_FillRect(surf, &r, SDL_MapRGB(surf->format, c.R, c.G, c.B));
 #endif
 }
 
@@ -104,7 +104,7 @@ void Window_rectangle(word x_pos,word y_pos,word width,word height,byte color)
   Rectangle_on_texture(Window_texture, (x_pos*Menu_factor_X), (y_pos*Menu_factor_Y), width*Menu_factor_X, height*Menu_factor_Y, Main_palette[color].R, Main_palette[color].G, Main_palette[color].B, 255, SDL_BLENDMODE_NONE);
 #else
   SDL_Surface* surf = SDL_GetWindowSurface(Window_handle);
-  SDL_Rect r = {x_pos, y_pos, width, height};
+  SDL_Rect r = {x_pos*Menu_factor_X, y_pos*Menu_factor_Y, width*Menu_factor_X, height*Menu_factor_Y};
   T_Components c = Main_palette[color];
   SDL_FillRect(surf, &r, SDL_MapRGB(surf->format, c.R, c.G, c.B));
 #endif
@@ -747,7 +747,6 @@ void Print_in_window_limited(short x,short y,const char * str,byte size,byte tex
 /// Draws a string in a window
 void Print_in_window(short x,short y,const char * str,byte text_color,byte background_color)
 {
-  short x_pos = x;
   int index;
 
   for (index=0;str[index]!='\0';index++)
@@ -755,7 +754,7 @@ void Print_in_window(short x,short y,const char * str,byte text_color,byte backg
     Print_char_in_window(x,y,str[index],text_color,background_color);
     x+=8;
   }
-  Update_window_area(x_pos,y,8*strlen(str),8);
+  Update_window_area(x,y,8*strlen(str),8);
 }
 
 // Draws a string in the menu's status bar

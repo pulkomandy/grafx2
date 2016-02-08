@@ -450,6 +450,9 @@ typedef struct
 /// GUI skin data
 typedef struct
 {
+  /// Scaling factor: 1 for skin designed for 8px font, 2 for 16px font, etc.
+  int Factor;
+
   // Mouse
   
   /// X coordinate of the mouse cursor's "hot spot". It is < ::CURSOR_SPRITE_WIDTH

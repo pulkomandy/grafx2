@@ -1618,8 +1618,8 @@ void Open_window(word width,word height, const char * title)
     title_length = width/8-2;
   Print_in_window_limited((width-(title_length<<3))>>1,3,title,title_length,MC_Black,MC_Light);
 #else
-  Window_handle = SDL_CreateWindow(title, Window_pos_X, Window_pos_Y, width, height, 0);
-  Window_rectangle(0, 0, width, height, MC_Window);
+  Window_handle = SDL_CreateWindow(title, Window_pos_X, Window_pos_Y, width*Menu_factor_X, height*Menu_factor_Y, SDL_WINDOW_BORDERLESS);
+  Window_rectangle(0, 0, width*Menu_factor_X, height*Menu_factor_Y, MC_Window);
 #endif
 
   if (Windows_open == 1)
