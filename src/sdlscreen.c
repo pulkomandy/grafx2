@@ -61,7 +61,6 @@ volatile int Allow_colorcycling=1;
 static SDL_Window *Window_SDL=NULL;
 static SDL_Renderer *Renderer_SDL=NULL;
 static SDL_Texture *Texture_SDL=NULL;
-static SDL_Texture *Mouse_texture=NULL;
 
 /// Sets the new screen/window dimensions.
 void Set_mode_SDL(int *width, int *height, int fullscreen)
@@ -126,13 +125,6 @@ void Set_mode_SDL(int *width, int *height, int fullscreen)
   cur = SDL_CreateCursor(&cursorData, &cursorData, 1,1,0,0);
   SDL_SetCursor(cur);
   
-  {
-    SDL_Surface *mouse_icon = NULL;
-    mouse_icon = IMG_Load("pointer.png");
-    Mouse_texture = SDL_CreateTextureFromSurface(Renderer_SDL, mouse_icon);
-    SDL_FreeSurface(mouse_icon);
-  }
-
 }
 
 void Update_rectangle(SDL_Surface *surface, int x, int y, int width, int height)
@@ -605,7 +597,6 @@ SDL_Texture * Create_texture(SDL_Surface *source, int x, int y, int w, int h)
   SDL_SetPaletteColors(sub_surface->format->palette, source->format->palette->colors, 0, 256);
   if (!SDL_GetColorKey(source, &transparent))
       SDL_SetColorKey(sub_surface, SDL_TRUE, transparent);
-  
   texture = SDL_CreateTextureFromSurface(Renderer_SDL, sub_surface);
   
   SDL_FreeSurface(sub_surface);
