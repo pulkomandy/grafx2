@@ -77,7 +77,6 @@ word Palette_cells_Y(void);
 void Print_general(short x,short y,const char * str,byte text_color,byte background_color);
 void Print_in_window(short x,short y,const char * str,byte text_color,byte background_color);
 void Print_in_window_limited(short x,short y,const char * str,byte size,byte text_color,byte background_color);
-void Print_char_in_window(short x_pos,short y_pos,const unsigned char c,byte text_color,byte background_color);
 void Print_in_menu(const char * str, short position);
 void Print_coordinates(void);
 void Print_filename(void);
@@ -104,7 +103,6 @@ void Display_paintbrush_in_window(word x,word y,int number);
 
 void Draw_thingumajig(word x,word y, byte color, short direction);
 void Display_grad_block_in_window(word x_pos,word y_pos,word block_start,word block_end);
-void Window_display_icon_sprite(word x_pos,word y_pos,byte type);
 
 byte Best_color(byte red,byte green,byte blue);
 byte Best_color_nonexcluded(byte red,byte green,byte blue);

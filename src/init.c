@@ -535,11 +535,10 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "sprite drive"))
         return 1;
     }
-    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Icon_sprite[i], ICON_SPRITE_WIDTH, ICON_SPRITE_HEIGHT, "sprite drive",1))
-      return 1;
-    cursor_x+=ICON_SPRITE_WIDTH;
+    gfx->Icon_sprite[i] = Create_texture(gui, cursor_x, cursor_y, ICON_SPRITE_WIDTH*gfx->Factor, ICON_SPRITE_HEIGHT*gfx->Factor);
+    cursor_x+=ICON_SPRITE_WIDTH*gfx->Factor;
   }
-  cursor_y+=ICON_SPRITE_HEIGHT;
+  cursor_y+=ICON_SPRITE_HEIGHT*gfx->Factor;
 
   // Logo splash screen
 
@@ -568,6 +567,16 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
     cursor_x+=16;
   }
   cursor_y+=16;
+
+  // Font
+  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "font (normal)"))
+        return 1;
+  for (i=0; i<256; i++)
+  {
+    // Each line holds 32 symbols, 8 lines
+    gfx->Font[i] = Create_texture(gui, cursor_x + (i%32)*8*gfx->Factor, cursor_y+(i/32)*8*gfx->Factor, 8*gfx->Factor, 8*gfx->Factor);
+  }
+  cursor_y+=8*8*gfx->Factor;
 
   // Help font: Normal
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "help font (norm)"))
@@ -678,6 +687,32 @@ T_Gui_skin * Load_graphics(const char * skin_file, T_Gradient_array *gradients)
   }
   SDL_FreeSurface(gui);
   return gfx;
+}
+
+void Destroy_graphics(T_Gui_skin *skin)
+{
+  int i;
+  
+  if (!skin)
+    return;
+  
+  for(i=0; i< NB_CURSOR_SPRITES; i++)
+    SDL_DestroyTexture(skin->Mouse_cursor[i]);
+  SDL_DestroyTexture(skin->Logo_grafx2);
+  for(i=0; i< 256; i++)
+    SDL_DestroyTexture(skin->Help_font_norm[i]);
+  for(i=0; i< 256; i++)
+    SDL_DestroyTexture(skin->Help_font_bold[i]);
+  for(i=0; i< 64; i++)
+    SDL_DestroyTexture(skin->Help_font_t1[i]);
+  for(i=0; i< 64; i++)
+    SDL_DestroyTexture(skin->Help_font_t2[i]);
+  for(i=0; i< 64; i++)
+    SDL_DestroyTexture(skin->Help_font_t3[i]);
+  for(i=0; i< 64; i++)
+    SDL_DestroyTexture(skin->Help_font_t4[i]);
+  
+  free(skin);
 }
 
 // ---- font loading -----
@@ -2781,7 +2816,7 @@ void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
   int i;
   
   // Free previous one
-  free(Gfx);
+  Destroy_graphics(Gfx);
   
   // Assign main skin pointer
   Gfx = gfx;
@@ -2804,11 +2839,6 @@ void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
   MC_Light = gfx->Color[2];
   MC_White = gfx->Color[3];
   MC_Trans = gfx->Color_trans;
-  MC_OnBlack=MC_Dark;
-  MC_Window=MC_Light;
-  MC_Lighter=MC_White;
-  MC_Darker=MC_Dark;
-  
 
   // Set menubars to point to the new data
   for (i=0; i<3; i++)

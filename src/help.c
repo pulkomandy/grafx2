@@ -330,7 +330,7 @@ void Print_help(short x_pos, short y_pos, const char *line, char line_type, shor
       else
         texture = Gfx->Help_font_t3[(unsigned char)(line[char_index/2])-' '];        
     }
-    Window_draw_texture(texture, (x_pos+char_index*6)*Menu_factor_X, y_pos*Menu_factor_X, 6*Menu_factor_X, 8*Menu_factor_Y);
+    Window_draw_texture(texture, (x_pos+char_index*6), y_pos, 6, 8);
   }
   // Highlight link
   if (line_type=='K')

@@ -716,20 +716,6 @@ void Print_general(short x,short y,const char * str,byte text_color,byte backgro
   }
 }
 
-/// Draws a char in a window
-void Print_char_in_window(short x_pos,short y_pos,const unsigned char c,byte text_color,byte background_color)
-{
-  short x,y;
-  byte *pixel;
-  // Premier pixel du caractère
-  pixel=Menu_font + (c<<6);
-  
-  for (y=0;y<8;y++)
-    for (x=0;x<8;x++)
-      Pixel_in_window(x_pos+x, y_pos+y,
-            (*(pixel++)?text_color:background_color));
-}
-
 ///Draws a char in a window, checking for bounds
 void Print_in_window_limited(short x,short y,const char * str,byte size,byte text_color,byte background_color)
 {
@@ -751,7 +737,7 @@ void Print_in_window(short x,short y,const char * str,byte text_color,byte backg
 
   for (index=0;str[index]!='\0';index++)
   {
-    Print_char_in_window(x,y,str[index],text_color,background_color);
+    Window_print_char(x,y,str[index],text_color,background_color);
     x+=8;
   }
   Update_window_area(x,y,8*strlen(str),8);
@@ -1355,22 +1341,6 @@ void Display_grad_block_in_window(word x_pos,word y_pos,word block_start,word bl
 
   Update_rect(ToWinX(x_pos),ToWinY(y_pos),ToWinL(16),ToWinH(64));
 }
-
-
-
-  // -- Dessiner un petit sprite représentant le type d'un drive --
-
-void Window_display_icon_sprite(word x_pos,word y_pos,byte type)
-{
-  word i,j;
-
-  for (j=0; j<ICON_SPRITE_HEIGHT; j++)
-    for (i=0; i<ICON_SPRITE_WIDTH; i++)
-      Pixel_in_window(x_pos+i,y_pos+j,Gfx->Icon_sprite[type][j][i]);
-  Update_rect(ToWinX(x_pos),ToWinY(y_pos),ToWinL(ICON_SPRITE_WIDTH),ToWinH(ICON_SPRITE_HEIGHT));
-}
-
-
 
 void Display_menu_palette_avoiding_window(byte * table)
 {
@@ -3118,11 +3088,6 @@ void Compute_optimal_menu_colors(T_Components * palette)
 									// On cherche une couleur de transparence différente des 4 autres.
 									for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
 												(MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
-									// Easy case
-									MC_OnBlack=MC_Dark;
-									MC_Window=MC_Light;
-									MC_Lighter=MC_White;
-									MC_Darker=MC_Dark;
 									Remap_menu_sprites();
 									return;
 								}
@@ -3168,11 +3133,6 @@ void Compute_optimal_menu_colors(T_Components * palette)
                   // On cherche une couleur de transparence différente des 4 autres.
                   for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
                                    (MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
-                  // Easy case
-                  MC_OnBlack=MC_Dark;
-                  MC_Window=MC_Light;
-                  MC_Lighter=MC_White;
-                  MC_Darker=MC_Dark;
                   Remap_menu_sprites();
                   return;
                 }
@@ -3269,23 +3229,6 @@ void Compute_optimal_menu_colors(T_Components * palette)
   for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
                    (MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
   
-  if (Same_color(palette, MC_Black, MC_Dark))
-    MC_OnBlack=MC_Light;
-  else
-    MC_OnBlack=MC_Dark;
-  
-  if (Same_color(palette, MC_White, MC_Light))
-  {
-    MC_Window=MC_Dark;
-    MC_Darker=MC_Black;
-  }
-  else
-  {
-    MC_Window=MC_Light;
-    MC_Darker=MC_Dark;
-  }
-  MC_Lighter=MC_White;
-  
   Remap_menu_sprites();
 }
 
@@ -3344,11 +3287,6 @@ void Remap_menu_sprites()
       for (j=0; j<14; j++)
         for (i=0; i<236; i++)
           Remap_pixel(&Gfx->Animbar_block[k][j][i]);
-    // Drives and other misc. 8x8 icons
-    for (k=0; k<NB_ICON_SPRITES; k++)
-      for (j=0; j<ICON_SPRITE_HEIGHT; j++)
-        for (i=0; i<ICON_SPRITE_WIDTH; i++)
-          Remap_pixel(&Gfx->Icon_sprite[k][j][i]);
 
     // Skin preview
     for (j = 0; j < 173; j++)

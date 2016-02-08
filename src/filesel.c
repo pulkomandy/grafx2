@@ -867,7 +867,7 @@ void Display_file_list(T_Fileselector *list, short offset_first,short selector_o
       {
         // Name preceded by an icon
         Print_in_window(16,95+index*8,current_item->Short_name,text_color,background_color);
-        Window_display_icon_sprite(8,95+index*8,current_item->Icon);
+        Window_draw_texture(Gfx->Icon_sprite[current_item->Icon], 8, 95+index*8, ICON_SPRITE_WIDTH, ICON_SPRITE_HEIGHT);
       } else
         // Name without icon
         Print_in_window(8,95+index*8,current_item->Short_name,text_color,background_color);
@@ -1472,7 +1472,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   {
     bookmark_dropdown[temp]=
       Window_set_dropdown_button(127+(88+1)*(temp%2),18+(temp/2)*12,88,11,56,"",0,0,1,RIGHT_SIDE,0); // 10-13
-    Window_display_icon_sprite(bookmark_dropdown[temp]->Pos_X+3,bookmark_dropdown[temp]->Pos_Y+2,ICON_STAR);
+    Window_draw_texture(Gfx->Icon_sprite[ICON_STAR], bookmark_dropdown[temp]->Pos_X+3, bookmark_dropdown[temp]->Pos_Y+2, ICON_SPRITE_WIDTH, ICON_SPRITE_HEIGHT);
     Display_bookmark(bookmark_dropdown[temp],temp);
   }
   

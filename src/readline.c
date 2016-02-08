@@ -191,11 +191,11 @@ void Cleanup_string(char* str, int input_type)
 void Display_whole_string(word x_pos,word y_pos,char * str,byte position)
 {
   char cursor[2];
-  Print_general(x_pos,y_pos,str,TEXT_COLOR,BACKGROUND_COLOR);
+  Print_in_window(x_pos,y_pos,str,TEXT_COLOR,BACKGROUND_COLOR);
 
   cursor[0]=str[position] ? str[position] : ' ';
   cursor[1]='\0';
-  Print_general(x_pos+(position<<3)*Menu_factor_X,y_pos,cursor,CURSOR_COLOR,CURSOR_BACKGROUND_COLOR);
+  Print_in_window(x_pos+(position<<3),y_pos,cursor,CURSOR_COLOR,CURSOR_BACKGROUND_COLOR);
 }
 
 void Init_virtual_keyboard(word y_pos, word keyboard_width, word keyboard_height)
@@ -537,7 +537,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   if (visible_size + offset + 1 < size )
     display_string[visible_size-1]=RIGHT_TRIANGLE_CHARACTER;
   
-  Display_whole_string(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),display_string,position - offset);
+  Display_whole_string(x_pos,y_pos,display_string,position - offset);
   Update_window_area(x_pos,y_pos,visible_size<<3,8);
   Flush_update();
   if (Mouse_K)
@@ -746,7 +746,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
       if (visible_size + offset + 0 < size )
         display_string[visible_size-1]=RIGHT_TRIANGLE_CHARACTER;
       
-      Display_whole_string(Window_pos_X+(x_pos*Menu_factor_X),Window_pos_Y+(y_pos*Menu_factor_Y),display_string,position - offset);
+      Display_whole_string(x_pos,y_pos,display_string,position - offset);
       Update_window_area(x_pos,y_pos,visible_size<<3,8);
     }
     Flush_update();

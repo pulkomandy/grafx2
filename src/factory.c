@@ -2060,10 +2060,10 @@ void Draw_script_name(word x, word y, word index, byte highlighted)
       bg=(highlighted)?MC_Dark:MC_Black;
       
       if (current_item->Icon != ICON_NONE)
-	  {
-      	Window_display_icon_sprite(x,y,current_item->Icon);
+	    {
+      	Window_draw_texture(Gfx->Icon_sprite[current_item->Icon], x, y, ICON_SPRITE_WIDTH, ICON_SPRITE_HEIGHT);
       	x+=8;
-	  }
+	    }
     }
     
     Print_in_window(x, y, current_item->Short_name, fg,bg);

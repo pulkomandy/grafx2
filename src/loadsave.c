@@ -941,7 +941,7 @@ void Load_image(T_IO_Context *context)
 
           // Skip transparent if image has transparent background.
           if (color == context->Transparent_color && context->Background_transparent)
-            color=MC_Window;
+            color=MC_Light;
 
           Pixel(context->Preview_pos_X+x_pos,
                 context->Preview_pos_Y+y_pos,

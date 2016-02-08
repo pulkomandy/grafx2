@@ -1601,7 +1601,7 @@ void Open_window(word width,word height, const char * title)
 #ifndef MULTI_WINDOW
   size_t title_length;
   // Fenêtre grise
-  Window_rectangle(2,2,width-4,height-4,MC_Window);
+  Window_rectangle(2,2,width-4,height-4,MC_Light);
 
   // -- Frame de la fenêtre ----- --- -- -  -
 
@@ -1619,7 +1619,7 @@ void Open_window(word width,word height, const char * title)
   Print_in_window_limited((width-(title_length<<3))>>1,3,title,title_length,MC_Black,MC_Light);
 #else
   Window_handle = SDL_CreateWindow(title, Window_pos_X, Window_pos_Y, width*Menu_factor_X, height*Menu_factor_Y, SDL_WINDOW_BORDERLESS);
-  Window_rectangle(0, 0, width*Menu_factor_X, height*Menu_factor_Y, MC_Window);
+  Window_rectangle(0, 0, width*Menu_factor_X, height*Menu_factor_Y, MC_Light);
 #endif
 
   if (Windows_open == 1)
@@ -1923,7 +1923,7 @@ void Window_draw_slider(T_Scroller_button * button)
   
     Window_rectangle(slider_position,
           button->Pos_Y,
-          button->Cursor_length,11,MC_OnBlack/*MC_White*/);
+          button->Cursor_length,11,MC_Dark);
   
     Update_window_area(button->Pos_X,
           button->Pos_Y,
@@ -1945,7 +1945,7 @@ void Window_draw_slider(T_Scroller_button * button)
   
     Window_rectangle(button->Pos_X,
           slider_position,
-          11,button->Cursor_length,MC_OnBlack/*MC_White*/);
+          11,button->Cursor_length,MC_Dark);
   
     Update_window_area(button->Pos_X,
           button->Pos_Y,
@@ -2179,7 +2179,7 @@ T_Dropdown_button * Window_set_dropdown_button(word x_pos,word y_pos,word width,
   if (label && label[0])
     Print_in_window(temp->Pos_X+2,temp->Pos_Y+(temp->Height-7)/2,label,MC_Black,MC_Light);
   if (display_arrow)
-    Window_display_icon_sprite(temp->Pos_X+temp->Width-10,temp->Pos_Y+(temp->Height-7)/2,ICON_DROPDOWN);
+    Window_draw_texture(Gfx->Icon_sprite[ICON_DROPDOWN], temp->Pos_X+temp->Width-10,temp->Pos_Y+(temp->Height-7)/2, ICON_SPRITE_WIDTH, ICON_SPRITE_HEIGHT);
   
   return temp;
 }

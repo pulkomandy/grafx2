@@ -157,7 +157,7 @@ void Button_Message_initial(void)
 
   Window_display_frame_in(10,20,239,62);
   Window_rectangle(11,21,237,60,MC_Black);
-  Window_draw_texture(Gfx->Logo_grafx2, 14*Menu_factor_X, 23*Menu_factor_Y, 231*Menu_factor_X, 56*Menu_factor_Y);
+  Window_draw_texture(Gfx->Logo_grafx2, 14, 23, 231, 56);
 
   Print_in_window(130-4*26,88,"Copyright (c) 2007-2012 by",MC_Dark,MC_Light);
   Print_in_window(130-4*23,96,"the Grafx2 project team",MC_Black,MC_Light);

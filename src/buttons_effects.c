@@ -572,7 +572,7 @@ void Button_Smooth_menu(void)
     Window_set_normal_button(x,22,27,27,"",0,1,KEY_NONE);      // 3,4,5,6
     for (j=0; j<3; j++)
       for (i=0; i<3; i++)
-        Print_char_in_window(x+2+(i<<3),24+(j<<3),'0'+Smooth_default_matrices[y][i][j],MC_Black,MC_Light);
+        Window_print_char(x+2+(i<<3),24+(j<<3),'0'+Smooth_default_matrices[y][i][j],MC_Black,MC_Light);
   }
 
   Window_display_frame(6,58, 69,45);

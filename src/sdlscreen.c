@@ -628,8 +628,20 @@ void Rectangle_on_texture(SDL_Texture *texture, int x, int y, int w, int h, int 
 
 void Window_draw_texture(SDL_Texture *texture, int x, int y, int w, int h)
 {
-  SDL_Rect rectangle = {x, y, w, h};
+  SDL_Rect rectangle = {x*Menu_factor_X, y*Menu_factor_Y, w*Menu_factor_X, h*Menu_factor_Y};
 
   SDL_SetRenderTarget(Renderer_SDL, Window_texture);
   SDL_RenderCopy(Renderer_SDL, texture, NULL, &rectangle);
+}
+
+/// Draws a char in a window
+void Window_print_char(short x_pos,short y_pos,const unsigned char c,byte text_color,byte background_color)
+{
+  SDL_Rect rectangle = {x_pos*Menu_factor_X, y_pos*Menu_factor_Y, 8*Menu_factor_X, 8*Menu_factor_Y};
+  SDL_SetRenderTarget(Renderer_SDL, Window_texture);
+  SDL_SetRenderDrawBlendMode(Renderer_SDL, SDL_BLENDMODE_NONE);
+  SDL_SetRenderDrawColor(Renderer_SDL, Main_palette[background_color].R, Main_palette[background_color].G, Main_palette[background_color].B, 255);
+  SDL_RenderFillRect(Renderer_SDL, &rectangle);
+  SDL_SetTextureColorMod(Gfx->Font[c], Main_palette[text_color].R, Main_palette[text_color].G, Main_palette[text_color].B);
+  SDL_RenderCopy(Renderer_SDL, Gfx->Font[c], NULL, &rectangle);
 }
