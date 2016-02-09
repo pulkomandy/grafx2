@@ -519,9 +519,10 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   Hide_cursor();
 
   // Effacement de la chaîne
+  Windows_open -= use_virtual_keyboard;
   Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
   Update_window_area(x_pos,y_pos,visible_size<<3,8);
-
+  
   // Mise à jour des variables se rapportant à la chaîne en fonction de la chaîne initiale
   strcpy(initial_string,str);
 
@@ -539,6 +540,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   
   Display_whole_string(x_pos,y_pos,display_string,position - offset);
   Update_window_area(x_pos,y_pos,visible_size<<3,8);
+  Windows_open += use_virtual_keyboard;
   Flush_update();
   if (Mouse_K)
   {
@@ -636,7 +638,9 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
               size--;
               
               // Effacement de la chaîne
+              Windows_open -= use_virtual_keyboard;
               Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
+              Windows_open += use_virtual_keyboard;
               goto affichage;
             }
       break;
@@ -645,7 +649,11 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
             {
               // Effacement de la chaîne
               if (position==size)
+              {
+                Windows_open -= use_virtual_keyboard;
                 Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
+                Windows_open += use_virtual_keyboard;
+              }
               position--;
               if (offset > 0 && (position == 0 || position < (offset + 1)))
                 offset--;
@@ -668,7 +676,11 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
             {
               // Effacement de la chaîne
               if (position==size)
+              {
+                Windows_open -= use_virtual_keyboard;
                 Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
+                Windows_open += use_virtual_keyboard;
+              }
               position = 0;
               offset = 0;
               goto affichage;
@@ -693,7 +705,9 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
           Remove_character(str,position);
           size--;
           // Effacement de la chaîne
+          Windows_open -= use_virtual_keyboard;
           Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
+          Windows_open += use_virtual_keyboard;
           goto affichage;
         }
         break;
@@ -701,7 +715,9 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
         str[0]='\0';
         position=offset=0;
         // Effacement de la chaîne
+        Windows_open -= use_virtual_keyboard;
         Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
+        Windows_open += use_virtual_keyboard;
         goto affichage;
       case K2K(SDLK_RETURN) :
         break;
@@ -737,6 +753,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
     if (0)
     {
       affichage:
+      Windows_open -= use_virtual_keyboard;
       size=strlen(str);
       // Formatage d'une partie de la chaine (si trop longue pour tenir)
       strncpy(display_string, str + offset, visible_size);
@@ -748,6 +765,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
       
       Display_whole_string(x_pos,y_pos,display_string,position - offset);
       Update_window_area(x_pos,y_pos,visible_size<<3,8);
+      Windows_open += use_virtual_keyboard;
     }
     Flush_update();
 

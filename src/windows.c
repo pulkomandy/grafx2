@@ -111,10 +111,10 @@ void Window_rectangle(word x_pos,word y_pos,word width,word height,byte color)
 }
 
 // Affichage d'un rectangle dans la fenêtre (la fenêtre doit être visible)
-void Window_rectangle_shadow(word x_pos,word y_pos,word width,word height)
+void Window_rectangle_RGBA(word x_pos,word y_pos,word width,word height, byte r, byte g, byte b, byte a)
 {
   Block((x_pos*Menu_factor_X)+Window_pos_X,(y_pos*Menu_factor_Y)+Window_pos_Y,width*Menu_factor_X,height*Menu_factor_Y,MC_Black);
-  Rectangle_on_texture(Window_texture, (x_pos*Menu_factor_X), (y_pos*Menu_factor_Y), width*Menu_factor_X, height*Menu_factor_Y, 0, 0, 0, 128, SDL_BLENDMODE_NONE);
+  Rectangle_on_texture(Window_texture, (x_pos*Menu_factor_X), (y_pos*Menu_factor_Y), width*Menu_factor_X, height*Menu_factor_Y, r, g, b, a, SDL_BLENDMODE_NONE);
 }
 
 

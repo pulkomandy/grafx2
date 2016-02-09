@@ -90,6 +90,7 @@ int Requester_window(char* message, int initial_value);
 void Display_image_limits(void);
 void Display_all_screen(void);
 void Window_rectangle(word x_pos,word y_pos,word width,word height,byte color);
+void Window_rectangle_RGBA(word x_pos,word y_pos,word width,word height, byte r, byte g, byte b, byte a);
 void Window_display_frame_generic(word x_pos,word y_pos,word width,word height,
                                     byte color_tl,byte color_br,byte color_s,byte color_tlc,byte color_brc);
 void Window_display_frame_mono(word x_pos,word y_pos,word width,word height,byte color);
