@@ -1065,7 +1065,7 @@ int Color_cycling(void)
 {
   static byte offset[16];
   int i, color;
-  static SDL_Color PaletteSDL[256];
+  T_Palette palette;
   int changed; // boolean : true if the palette needs a change in this tick.
   
   long now;
@@ -1108,9 +1108,9 @@ int Color_cycling(void)
     // Initialize the palette
     for(color=0;color<256;color++)
     {
-      PaletteSDL[color].r=Main_palette[color].R;
-      PaletteSDL[color].g=Main_palette[color].G;
-      PaletteSDL[color].b=Main_palette[color].B;
+      palette[color].R=Main_palette[color].R;
+      palette[color].G=Main_palette[color].G;
+      palette[color].B=Main_palette[color].B;
     }
     for (i=0; i<16; i++)
     {
@@ -1121,13 +1121,13 @@ int Color_cycling(void)
       {
         for(color=Main_backups->Pages->Gradients->Range[i].Start;color<=Main_backups->Pages->Gradients->Range[i].End;color++)
         {
-          PaletteSDL[color].r=Main_palette[Main_backups->Pages->Gradients->Range[i].Start+((color-Main_backups->Pages->Gradients->Range[i].Start+offset[i])%len)].R;
-          PaletteSDL[color].g=Main_palette[Main_backups->Pages->Gradients->Range[i].Start+((color-Main_backups->Pages->Gradients->Range[i].Start+offset[i])%len)].G;
-          PaletteSDL[color].b=Main_palette[Main_backups->Pages->Gradients->Range[i].Start+((color-Main_backups->Pages->Gradients->Range[i].Start+offset[i])%len)].B;
+          palette[color].R=Main_palette[Main_backups->Pages->Gradients->Range[i].Start+((color-Main_backups->Pages->Gradients->Range[i].Start+offset[i])%len)].R;
+          palette[color].G=Main_palette[Main_backups->Pages->Gradients->Range[i].Start+((color-Main_backups->Pages->Gradients->Range[i].Start+offset[i])%len)].G;
+          palette[color].B=Main_palette[Main_backups->Pages->Gradients->Range[i].Start+((color-Main_backups->Pages->Gradients->Range[i].Start+offset[i])%len)].B;
         }
       }
     }
-    Set_surface_palette(Screen_SDL, PaletteSDL);
+    Set_palette(palette);
     Update_rect(0,0,0,0);
   }
   return 0;

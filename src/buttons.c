@@ -2484,27 +2484,28 @@ void Load_gradient_data(int index)
   }
 }
 
-void Draw_gradient_preview(short start_x,short start_y,short width,short height,int index)
+void Draw_gradient_preview()
 {
+  short start_x = 8;
+  short start_y = 128;
+  short width = 108;
+  short height = 14;
   short x_pos; // Variables de balayage du block en bas de l'écran.
   short y_pos;
   short end_x;
   short end_y;
 
-  Load_gradient_data(index);
+  Load_gradient_data(Current_gradient);
 
-  start_x=Window_pos_X+(start_x*Menu_factor_X);
-  start_y=Window_pos_Y+(start_y*Menu_factor_Y);
-
-  Gradient_total_range=width*Menu_factor_X;
+  Gradient_total_range=width;
 
   end_x=start_x+Gradient_total_range;
-  end_y=start_y+(height*Menu_factor_Y);
+  end_y=start_y+height;
 
   for (y_pos=start_y;y_pos<end_y;y_pos++)
     for (x_pos=start_x;x_pos<end_x;x_pos++)
       Gradient_function(x_pos-start_x,x_pos,y_pos);
-  Update_rect(start_x,start_y,width*Menu_factor_X,height*Menu_factor_Y);
+  Update_window_area(start_x,start_y,width,height);
 }
 
 void Button_Gradients(void)
@@ -2530,7 +2531,7 @@ void Button_Gradients(void)
   // Enable cycling while this window is open
   Cycling_mode=1;
   
-  Gradient_pixel=Pixel;
+  Gradient_pixel=Pixel_in_window;
   old_current_gradient=Current_gradient;
   changed_gradient_index=0;
   memcpy(&backup_gradients,Main_backups->Pages->Gradients,sizeof(T_Gradient_array));
@@ -2572,7 +2573,7 @@ void Button_Gradients(void)
   // On affiche le cadre autour de la préview
   Window_display_frame_in(7,127,110,16);
   // On affiche la preview
-  Draw_gradient_preview(8,128,108,14,Current_gradient);
+  Draw_gradient_preview();
 
   first_color=last_color=(Main_backups->Pages->Gradients->Range[Current_gradient].Inverse)?Main_backups->Pages->Gradients->Range[Current_gradient].End:Main_backups->Pages->Gradients->Range[Current_gradient].Start;
   Update_window_area(0,0,Window_width, Window_height);
@@ -2619,17 +2620,27 @@ void Button_Gradients(void)
       Draw_button_gradient_style(8,90,Main_backups->Pages->Gradients->Range[Current_gradient].Technique);
 
       // Rectangular gradient preview
-      Draw_gradient_preview(8,128,108,14,Current_gradient);
+      Draw_gradient_preview();
 
       Display_cursor();
     }
 
     clicked_button=Window_clicked_button();
-    if (Input_sticky_control!=8 || !Mouse_K)
+    if (Allow_colorcycling)
     {
-      Allow_colorcycling=0;
-      // Restore palette
-      Set_palette(Main_palette);
+      if (Input_sticky_control==8 && Mouse_K)
+      {
+        // Keep cycling
+        Draw_gradient_preview();
+        Window_draw_palette_bouton(48,19);
+        //Update_rectangle(Screen_SDL, 0, 0, 0, 0);
+      }
+      else
+      {
+        Allow_colorcycling=0;
+        // Restore palette
+        Set_palette(Main_palette);
+      }
     }
 
     switch(clicked_button)
@@ -2650,7 +2661,7 @@ void Button_Gradients(void)
             // On tagge le bloc
             Tag_color_range(Main_backups->Pages->Gradients->Range[Current_gradient].Start,Main_backups->Pages->Gradients->Range[Current_gradient].End);
             // Tracé de la preview:
-            Draw_gradient_preview(8,128,108,14,Current_gradient);
+            Draw_gradient_preview();
           }
           else
           {
@@ -2673,7 +2684,7 @@ void Button_Gradients(void)
               // On tagge le bloc
               Tag_color_range(Main_backups->Pages->Gradients->Range[Current_gradient].Start,Main_backups->Pages->Gradients->Range[Current_gradient].End);
               // Tracé de la preview:
-              Draw_gradient_preview(8,128,108,14,Current_gradient);
+              Draw_gradient_preview();
               last_color=temp_color;
             }
           }
@@ -2690,7 +2701,7 @@ void Button_Gradients(void)
         // Nouvel mélange dans Window_attribute2
         Main_backups->Pages->Gradients->Range[Current_gradient].Mix=Window_attribute2;
         // On affiche la nouvelle preview
-        Draw_gradient_preview(8,128,108,14,Current_gradient);
+        Draw_gradient_preview();
         Display_cursor();
         break;
       case  4 : // Changement de sens
@@ -2699,7 +2710,7 @@ void Button_Gradients(void)
         Main_backups->Pages->Gradients->Range[Current_gradient].Inverse^=1;
         Print_in_window(12,23,(Main_backups->Pages->Gradients->Range[Current_gradient].Inverse)?"\033":"\032",MC_Black,MC_Light);
         // On affiche la nouvelle preview
-        Draw_gradient_preview(8,128,108,14,Current_gradient);
+        Draw_gradient_preview();
         Display_cursor();
         break;
       case  5 : // Changement de technique
@@ -2708,7 +2719,7 @@ void Button_Gradients(void)
         Main_backups->Pages->Gradients->Range[Current_gradient].Technique=(Main_backups->Pages->Gradients->Range[Current_gradient].Technique+1)%3;
         Draw_button_gradient_style(8,90,Main_backups->Pages->Gradients->Range[Current_gradient].Technique);
         // On affiche la nouvelle preview
-        Draw_gradient_preview(8,128,108,14,Current_gradient);
+        Draw_gradient_preview();
         Display_cursor();
       case  8 : // Speed
         Main_backups->Pages->Gradients->Range[Current_gradient].Speed=Window_attribute2;
@@ -2717,6 +2728,7 @@ void Button_Gradients(void)
         Print_in_window(73,113,str,MC_Black,MC_Light);
         Display_cursor();
         Allow_colorcycling=1;
+        Draw_gradient_preview();
         break;
       case 9: // Cycling on/off
         cycling_mode = !cycling_mode;
@@ -2742,7 +2754,7 @@ void Button_Gradients(void)
           // On tagge le bloc
           Tag_color_range(Main_backups->Pages->Gradients->Range[Current_gradient].Start,Main_backups->Pages->Gradients->Range[Current_gradient].End);
           // Tracé de la preview:
-          Draw_gradient_preview(8,128,108,14,Current_gradient);
+          Draw_gradient_preview();
           Display_cursor();
           Wait_end_of_click();
         }

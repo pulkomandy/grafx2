@@ -87,7 +87,7 @@ void Pixel_in_window(word x,word y,byte color)
 {
 #ifndef MULTI_WINDOW
   Block((x*Menu_factor_X)+Window_pos_X,(y*Menu_factor_Y)+Window_pos_Y,Menu_factor_X,Menu_factor_Y,color);
-  Rectangle_on_texture(Window_texture, (x*Menu_factor_X), (y*Menu_factor_Y), Menu_factor_X, Menu_factor_Y, Main_palette[color].R, Main_palette[color].G, Main_palette[color].B, 255, SDL_BLENDMODE_NONE);
+  Rectangle_on_texture(Window_texture, (x*Menu_factor_X), (y*Menu_factor_Y), Menu_factor_X, Menu_factor_Y, Screen_SDL->format->palette->colors[color].r, Screen_SDL->format->palette->colors[color].g, Screen_SDL->format->palette->colors[color].b, 255, SDL_BLENDMODE_NONE);
 #else
   SDL_Surface* surf = SDL_GetWindowSurface(Window_handle);
   SDL_Rect r = {x*Menu_factor_X, y*Menu_factor_Y, 1*Menu_factor_X, 1*Menu_factor_Y};
@@ -101,7 +101,7 @@ void Window_rectangle(word x_pos,word y_pos,word width,word height,byte color)
 {
 #ifndef MULTI_WINDOW
   Block((x_pos*Menu_factor_X)+Window_pos_X,(y_pos*Menu_factor_Y)+Window_pos_Y,width*Menu_factor_X,height*Menu_factor_Y,color);
-  Rectangle_on_texture(Window_texture, (x_pos*Menu_factor_X), (y_pos*Menu_factor_Y), width*Menu_factor_X, height*Menu_factor_Y, Main_palette[color].R, Main_palette[color].G, Main_palette[color].B, 255, SDL_BLENDMODE_NONE);
+  Rectangle_on_texture(Window_texture, (x_pos*Menu_factor_X), (y_pos*Menu_factor_Y), width*Menu_factor_X, height*Menu_factor_Y, Screen_SDL->format->palette->colors[color].r, Screen_SDL->format->palette->colors[color].g, Screen_SDL->format->palette->colors[color].b, 255, SDL_BLENDMODE_NONE);
 #else
   SDL_Surface* surf = SDL_GetWindowSurface(Window_handle);
   SDL_Rect r = {x_pos*Menu_factor_X, y_pos*Menu_factor_Y, width*Menu_factor_X, height*Menu_factor_Y};
@@ -1283,20 +1283,17 @@ void Display_paintbrush_in_window(word x,word y,int number)
   width=Min(Paintbrush[number].Width,PAINTBRUSH_WIDTH);
   height=Min(Paintbrush[number].Height,PAINTBRUSH_WIDTH);
   
-  origin_x = (x + 8)*Menu_factor_X - (width/2)*x_size+Window_pos_X;
-  origin_y = (y + 8)*Menu_factor_Y - (height/2)*y_size+Window_pos_Y;
+  origin_x = (x + 8)*Menu_factor_X - (width/2)*x_size;
+  origin_y = (y + 8)*Menu_factor_Y - (height/2)*y_size;
 
   for (window_y_pos=0,y_pos=0; y_pos<height; window_y_pos++,y_pos++)
     for (window_x_pos=0,x_pos=0; x_pos<width; window_x_pos++,x_pos++)
       if (Paintbrush[number].Sprite[y_pos][x_pos])
-        Block(origin_x+window_x_pos*x_size,origin_y+window_y_pos*y_size,x_size,y_size,MC_Black);
+        {
+          Rectangle_on_texture(Window_texture, origin_x+window_x_pos*x_size, origin_y+window_y_pos*y_size, x_size, y_size, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
+        }
   // On n'utilise pas Pixel_in_window() car on ne dessine pas
   // forcément avec la même taille de pixel.
-
-  Update_rect( ToWinX(origin_x), ToWinY(origin_y),
-        ToWinL(Paintbrush[number].Width),
-        ToWinH(Paintbrush[number].Height)
-  );
 }
 
   // -- Dessiner des zigouigouis --
