@@ -191,8 +191,6 @@ void Display_brush_mono(word x_pos,word y_pos,word x_offset,word y_offset,word w
 void Clear_brush(word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word image_width);
 /// Draw a line on screen, without doubling it if using wide pixels. (to be used when the line is already doubled in the input buffer)
 void Display_line_fast(word x_pos,word y_pos,word width,byte * line);
-/// Read a line of pixels from screen.
-void Read_line(word x_pos,word y_pos,word width,byte * line);
 /// Display part of the brush on the magnified part of screen, color mode.
 void Display_brush_color_zoom   (word x_pos,word y_pos,word x_offset,word y_offset,word width,word end_y_pos,byte transp_color,word brush_width,byte * buffer);
 /// Display part of the brush on the magnified part of screen, monochrome mode.

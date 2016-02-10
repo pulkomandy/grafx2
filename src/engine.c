@@ -64,37 +64,6 @@ byte Smooth_mode_before_cancel;
 byte Tiling_mode_before_cancel;
 Func_effect Effect_function_before_cancel;
 
-///This table holds pointers to the saved window backgrounds. We can have up to 8 windows open at a time.
-byte* Window_background[8];
-
-///Save a screen block (usually before erasing it with a new window or a dropdown menu)
-void Save_background(byte **buffer, int x_pos, int y_pos, int width, int height)
-{
-  int index;
-  if(*buffer != NULL) DEBUG("WARNING : buffer already allocated !!!",0);
-  *buffer=(byte *) malloc(width*Menu_factor_X*height*Menu_factor_Y);
-  if(*buffer==NULL) Error(0);
-  for (index=0; index<(height*Menu_factor_Y); index++)
-    Read_line(x_pos,y_pos+index,width*Menu_factor_X,(*buffer)+((int)index*width*Menu_factor_X));
-}
-
-///Restores a screen block
-void Restore_background(byte *buffer, int x_pos, int y_pos, int width, int height)
-{
-  int index;
-  for (index=0; index<height*Menu_factor_Y; index++)
-    Display_line_fast(x_pos,y_pos+index,width*Menu_factor_X,buffer+((int)index*width*Menu_factor_X));
-  free(buffer);
-  buffer = NULL;
-}
-
-///Draw a pixel in a saved screen block (when you sort colors in the palette, for example)
-void Pixel_background(int x_pos, int y_pos, byte color)
-{
-  Window_background[0][x_pos+y_pos*Window_width*Menu_factor_X]=color;
-}
-
-
 ///Guess the number of the button that was just clicked
 int Button_under_mouse(void)
 {
@@ -1595,9 +1564,6 @@ void Open_window(word width,word height, const char * title)
   
   Window_draggable=1;
 
-  // Sauvegarde de ce que la fenêtre remplace
-  Save_background(&(Window_background[Windows_open-1]), Window_pos_X, Window_pos_Y, width, height);
-
 #ifndef MULTI_WINDOW
   size_t title_length;
   // Fenêtre grise
@@ -1712,16 +1678,10 @@ void Close_window(void)
 
   if (Windows_open != 1)
   {
-    // Restore de ce que la fenêtre cachait
-    Restore_background(Window_background[Windows_open-1], Window_pos_X, Window_pos_Y, Window_width, Window_height);
-    Window_background[Windows_open-1]=NULL;
-    Update_window_area(0,0,Window_width,Window_height);
     Windows_open--;
   }
   else
   {
-    free(Window_background[Windows_open-1]);
-    Window_background[Windows_open-1]=NULL;
     Windows_open--;
   
     Paintbrush_hidden=Paintbrush_hidden_before_window;
@@ -2296,9 +2256,6 @@ void Open_popup(word x_pos, word y_pos, word width,word height)
   Window_pos_Y=y_pos;
   Window_draggable=0;
 
-  // Sauvegarde de ce que la fenêtre remplace
-  Save_background(&(Window_background[Windows_open-1]), Window_pos_X, Window_pos_Y, width, height);
-
   Window_texture=Create_rendering_texture(width, height);
 /*
   // Fenêtre grise
@@ -2384,16 +2341,11 @@ void Close_popup(void)
   
   if (Windows_open != 1)
   {
-    // Restore de ce que la fenêtre cachait
-    Restore_background(Window_background[Windows_open-1], Window_pos_X, Window_pos_Y, Window_width, Window_height);
-    Window_background[Windows_open-1]=NULL;
     Update_window_area(0,0,Window_width,Window_height);
     Windows_open--;
   }
   else
   {
-    free(Window_background[Windows_open-1]);
-    Window_background[Windows_open-1] = NULL;
     Windows_open--;
   
     Paintbrush_hidden=Paintbrush_hidden_before_window;
@@ -2521,7 +2473,6 @@ void Get_color_behind_window(byte * color, byte * click)
   cursor_was_hidden=Cursor_hidden;
   Cursor_hidden=0;
 
-  Save_background(&buffer,Window_pos_X,Window_pos_Y,Window_width,Window_height);
   a=Menu_Y;
   Menu_Y=Menu_Y_before_window;
   b=Menu_is_visible;
@@ -2591,8 +2542,6 @@ void Get_color_behind_window(byte * color, byte * click)
     Hide_cursor();
   }
 
-  Restore_background(buffer,Window_pos_X,Window_pos_Y,Window_width,Window_height);
-  Update_window_area(0, 0, Window_width, Window_height);
   Cursor_shape=CURSOR_SHAPE_ARROW;
   Paintbrush_hidden=b;
   Cursor_hidden=cursor_was_hidden;
@@ -2614,15 +2563,8 @@ void Move_window(short dx, short dy)
   short height=Window_height*Menu_factor_Y;
   short a;
   byte  b;
-  byte  *buffer=NULL;
 
   Hide_cursor();
-
-  Horizontal_XOR_line(new_x,new_y,width);
-  Vertical_XOR_line(new_x,new_y+1,height-2);
-  Vertical_XOR_line(new_x+width-1,new_y+1,height-2);
-  Horizontal_XOR_line(new_x,new_y+height-1,width);
-  Update_rect(new_x,new_y,width,height);
   Cursor_shape=CURSOR_SHAPE_MULTIDIRECTIONAL;
   Display_cursor();
 
@@ -2664,32 +2606,10 @@ void Move_window(short dx, short dy)
 
     if ((new_x!=old_x) || (new_y!=old_y))
     {
-      Hide_cursor();
-
-      Horizontal_XOR_line(old_x,old_y,width);
-      Vertical_XOR_line(old_x,old_y+1,height-2);
-      Vertical_XOR_line(old_x+width-1,old_y+1,height-2);
-      Horizontal_XOR_line(old_x,old_y+height-1,width);
-
-      Horizontal_XOR_line(new_x,new_y,width);
-      Vertical_XOR_line(new_x,new_y+1,height-2);
-      Vertical_XOR_line(new_x+width-1,new_y+1,height-2);
-      Horizontal_XOR_line(new_x,new_y+height-1,width);
-
-      Display_cursor();
-      Update_rect(old_x,old_y,width,height);
-      Update_rect(new_x,new_y,width,height);
-      
       Window_pos_X=new_x;
       Window_pos_Y=new_y;
     }
   }
-
-  Hide_cursor();
-  Horizontal_XOR_line(new_x,new_y,width);
-  Vertical_XOR_line(new_x,new_y+1,height-2);
-  Vertical_XOR_line(new_x+width-1,new_y+1,height-2);
-  Horizontal_XOR_line(new_x,new_y+height-1,width);
 
   if ((original_x!=Window_pos_X)
    || (original_y!=Window_pos_Y))
@@ -2706,35 +2626,11 @@ void Move_window(short dx, short dy)
     Menu_Y=a;
     Menu_is_visible=b;
 
-    // Sauvegarde du contenu actuel de la fenêtre
-    Save_background(&buffer, Window_pos_X, Window_pos_Y, Window_width, Window_height);
-    
-    // Restore de ce que la fenêtre cachait
-    Restore_background(Window_background[Windows_open-1], Window_pos_X, Window_pos_Y, Window_width, Window_height);
-    Window_background[Windows_open-1] = NULL;
-
-    // Sauvegarde de ce que la fenêtre remplace
-    Save_background(&(Window_background[Windows_open-1]), new_x, new_y, Window_width, Window_height);
-
-    // Raffichage de la fenêtre
-    Restore_background(buffer, new_x, new_y, Window_width, Window_height);
-    buffer = NULL;
-
-    // Mise à jour du rectangle englobant
-    Update_rect(
-      (new_x>Window_pos_X)?Window_pos_X:new_x,
-      (new_y>Window_pos_Y)?Window_pos_Y:new_y,
-      ((new_x>Window_pos_X)?(new_x-Window_pos_X):(Window_pos_X-new_x)) + Window_width*Menu_factor_X,
-      ((new_y>Window_pos_Y)?(new_y-Window_pos_Y):(Window_pos_Y-new_y)) + Window_height*Menu_factor_Y);
     Window_pos_X=new_x;
     Window_pos_Y=new_y;
 
   }
-  else
-  {
-    // Update pour effacer le rectangle XOR
-    Update_window_area(0, 0, Window_width, Window_height);
-  }    
+  Hide_cursor();
   Cursor_shape=CURSOR_SHAPE_ARROW;
   Display_cursor();
 

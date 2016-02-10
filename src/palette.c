@@ -1076,7 +1076,6 @@ void Button_Palette(void)
   byte  last_color;
   char  str[10];
   word  i;
-  T_Normal_button   * button_used;
   T_Scroller_button * red_slider;
   T_Scroller_button * green_slider;
   T_Scroller_button * blue_slider;
@@ -1193,7 +1192,7 @@ void Button_Palette(void)
   // Button without outline
   Window_display_frame_mono(NUMERIC_BOX_X-1,NUMERIC_BOX_Y-1,NUMERIC_BOX_W+2,NUMERIC_BOX_H+2,MC_Light);
 
-  button_used = Window_set_normal_button(247,16,45,14,"Histo",0,1,KEY_NONE);// 25
+  Window_set_normal_button(247,16,45,14,"Histo",0,1,KEY_NONE);// 25
   
   // Dessin des petits effets spéciaux pour les boutons [+] et [-]
   Draw_thingumajig(265, 74,MC_White,-1);

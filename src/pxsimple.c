@@ -275,11 +275,6 @@ void Display_transparent_mono_line_on_screen(
   }
 }
 
-void Read_line(word x_pos,word y_pos,word width,byte * line)
-{
-  memcpy(line,VIDEO_LINE_WIDTH * y_pos + x_pos + Screen_pixels,width);
-}
-
 void Display_part_of_screen_scaled(
         word width, // width non zoomée
         word height, // height zoomée

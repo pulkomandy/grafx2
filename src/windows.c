@@ -86,7 +86,6 @@ void Pixel_in_menu_and_skin(word bar, word x, word y, byte color)
 void Pixel_in_window(word x,word y,byte color)
 {
 #ifndef MULTI_WINDOW
-  Block((x*Menu_factor_X)+Window_pos_X,(y*Menu_factor_Y)+Window_pos_Y,Menu_factor_X,Menu_factor_Y,color);
   Rectangle_on_texture(Window_texture, (x*Menu_factor_X), (y*Menu_factor_Y), Menu_factor_X, Menu_factor_Y, Screen_SDL->format->palette->colors[color].r, Screen_SDL->format->palette->colors[color].g, Screen_SDL->format->palette->colors[color].b, 255, SDL_BLENDMODE_NONE);
 #else
   SDL_Surface* surf = SDL_GetWindowSurface(Window_handle);
@@ -100,7 +99,6 @@ void Pixel_in_window(word x,word y,byte color)
 void Window_rectangle(word x_pos,word y_pos,word width,word height,byte color)
 {
 #ifndef MULTI_WINDOW
-  Block((x_pos*Menu_factor_X)+Window_pos_X,(y_pos*Menu_factor_Y)+Window_pos_Y,width*Menu_factor_X,height*Menu_factor_Y,color);
   Rectangle_on_texture(Window_texture, (x_pos*Menu_factor_X), (y_pos*Menu_factor_Y), width*Menu_factor_X, height*Menu_factor_Y, Screen_SDL->format->palette->colors[color].r, Screen_SDL->format->palette->colors[color].g, Screen_SDL->format->palette->colors[color].b, 255, SDL_BLENDMODE_NONE);
 #else
   SDL_Surface* surf = SDL_GetWindowSurface(Window_handle);
@@ -113,7 +111,6 @@ void Window_rectangle(word x_pos,word y_pos,word width,word height,byte color)
 // Affichage d'un rectangle dans la fenêtre (la fenêtre doit être visible)
 void Window_rectangle_RGBA(word x_pos,word y_pos,word width,word height, byte r, byte g, byte b, byte a)
 {
-  Block((x_pos*Menu_factor_X)+Window_pos_X,(y_pos*Menu_factor_Y)+Window_pos_Y,width*Menu_factor_X,height*Menu_factor_Y,MC_Black);
   Rectangle_on_texture(Window_texture, (x_pos*Menu_factor_X), (y_pos*Menu_factor_Y), width*Menu_factor_X, height*Menu_factor_Y, r, g, b, a, SDL_BLENDMODE_NONE);
 }
 
@@ -1340,113 +1337,6 @@ void Display_grad_block_in_window(word x_pos,word y_pos,word block_start,word bl
     Rectangle_on_texture(Window_texture, start_x, index, line_width, 1, color.r, color.g, color.b, 255, SDL_BLENDMODE_NONE);
   }
   Update_rect(ToWinX(x_pos),ToWinY(y_pos),ToWinL(16),ToWinH(64));
-}
-
-void Display_menu_palette_avoiding_window(byte * table)
-{
-  // On part du principe qu'il n'y a que le bas d'une fenêtre qui puisse
-  // empiéter sur la palette... Et c'est déjà pas mal!
-  word color,real_color;
-  word start_x,start_y;
-  word end_x,end_y;
-  word width;
-  word height;
-  word corner_x=Window_pos_X+Window_width*Menu_factor_X; // |_ Coin bas-droit
-  word corner_y=Window_pos_Y+Window_height*Menu_factor_Y; // |  de la fenêtre +1
-
-
-  if (Config.Separate_colors)
-  {
-    width=(Menu_palette_cell_width-1)*Menu_factor_X;
-    height=Menu_factor_Y*((Menu_height-11)/Menu_cells_Y-1);
-  }
-  else
-  {
-    width=Menu_palette_cell_width*Menu_factor_X;
-    height=Menu_factor_Y*((Menu_height-11)/Menu_cells_Y);
-  }
-
-  for (color=0,real_color=First_color_in_palette;color<Menu_cells_X*Menu_cells_Y;color++,real_color++)
-  {
-    if (table[real_color]!=real_color)
-    {
-      start_x=Palette_cell_X(real_color);
-      start_y=Palette_cell_Y(real_color);
-      end_x=start_x+width;
-      end_y=start_y+height;
-
-      //   On affiche le bloc en entier si on peut, sinon on le découpe autour
-      // de la fenêtre.
-      if ( (start_y>=corner_y) || (end_x<=Window_pos_X) || (start_x>=corner_x) )
-        Block(start_x,start_y,width,height,real_color);
-      else
-      {
-
-        if (start_x>=Window_pos_X)
-        {
-          if ( (end_x>corner_x) || (end_y>corner_y) )
-          {
-            if ( (end_x>corner_x) && (end_y>corner_y) )
-            {
-              Block(corner_x,start_y,end_x-corner_x,corner_y-start_y,real_color);
-              Block(start_x,corner_y,width,end_y-corner_y,real_color);
-            }
-            else
-            {
-              if (end_y>corner_y)
-                Block(start_x,corner_y,width,end_y-corner_y,real_color);
-              else
-                Block(corner_x,start_y,end_x-corner_x,height,real_color);
-            }
-          }
-        }
-        else
-        {
-          if (end_x<corner_x)
-          {
-            if (end_y>corner_y)
-            {
-              Block(start_x,start_y,Window_pos_X-start_x,corner_y-start_y,real_color);
-              Block(start_x,corner_y,width,end_y-corner_y,real_color);
-            }
-            else
-              Block(start_x,start_y,Window_pos_X-start_x,height,real_color);
-          }
-          else
-          {
-            if (end_y>corner_y)
-            {
-              Block(start_x,start_y,Window_pos_X-start_x,corner_y-start_y,real_color);
-              Block(corner_x,start_y,end_x-corner_x,corner_y-start_y,real_color);
-              Block(start_x,corner_y,width,end_y-corner_y,real_color);
-            }
-            else
-            {
-              Block(start_x,start_y,Window_pos_X-start_x,height,real_color);
-              Block(corner_x,start_y,end_x-corner_x,height,real_color);
-            }
-          }
-        }
-      }
-      {
-        // Affichage du bloc directement dans le "buffer de fond" de la fenetre.
-        // Cela permet au bloc de couleur d'apparaitre si on déplace la fenetre.
-        short x_pos;
-        short y_pos;
-        short relative_x; // besoin d'une variable signée
-        short relative_y; // besoin d'une variable signée
-        // Attention aux unités
-        relative_x = ((short)start_x - (short)Window_pos_X);
-        relative_y = ((short)start_y - (short)Window_pos_Y);
-
-        for (y_pos=relative_y;y_pos<(relative_y+height)&&y_pos<Window_height*Menu_factor_Y;y_pos++)
-          for (x_pos=relative_x;x_pos<(relative_x+width)&&x_pos<Window_width*Menu_factor_X;x_pos++)
-            if (x_pos>=0&&y_pos>=0)
-              Pixel_background(x_pos,y_pos,real_color);
-      }
-    }
-  }
-  Update_rect(MENU_WIDTH*Menu_factor_X,Menu_Y_before_window,Screen_width-(MENU_WIDTH*Menu_factor_X),(Menu_height-11)*Menu_factor_Y);
 }
 
 // -------- Calcul des bornes de la partie d'image visible à l'écran ---------
