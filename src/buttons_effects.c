@@ -943,40 +943,40 @@ void Draw_sieve_scaled(short origin_x, short origin_y)
   short y_pos;
   short x_size;
   short y_size;
-  short start_x=Window_pos_X+(Menu_factor_X*230);
-  short start_y=Window_pos_Y+(Menu_factor_Y*78);
+  short start_x=230;
+  short start_y=78;
 
-  x_size=Menu_factor_X*5; // |_ Taille d'une case
-  y_size=Menu_factor_Y*5; // |  de la trame zoomée
+  x_size=5; // |_ Taille d'une case
+  y_size=5; // |  de la trame zoomée
 
   // On efface de contenu précédent
-  Block(origin_x,origin_y,
-        Menu_factor_X*Window_special_button_list->Width,
-        Menu_factor_Y*Window_special_button_list->Height,MC_Light);
+  Window_rectangle(origin_x,origin_y,
+        Window_special_button_list->Width,
+        Window_special_button_list->Height,MC_Light);
 
   for (y_pos=0; y_pos<Sieve_height; y_pos++)
     for (x_pos=0; x_pos<Sieve_width; x_pos++)
     {
       // Bordures de la case
-      Block(origin_x+(x_pos*x_size),
-            origin_y+((y_pos+1)*y_size)-Menu_factor_Y,
-            x_size, Menu_factor_Y,MC_Dark);
-      Block(origin_x+((x_pos+1)*x_size)-Menu_factor_X,
+      Window_rectangle(origin_x+(x_pos*x_size),
+            origin_y+((y_pos+1)*y_size)-1,
+            x_size, 1,MC_Dark);
+      Window_rectangle(origin_x+((x_pos+1)*x_size)-1,
             origin_y+(y_pos*y_size),
-            Menu_factor_X, y_size-1,MC_Dark);
+            1, y_size-1,MC_Dark);
       // Contenu de la case
-      Block(origin_x+(x_pos*x_size), origin_y+(y_pos*y_size),
-            x_size-Menu_factor_X, y_size-Menu_factor_Y,
+      Window_rectangle(origin_x+(x_pos*x_size), origin_y+(y_pos*y_size),
+            x_size-1, y_size-1,
             (Sieve[x_pos][y_pos])?MC_White:MC_Black);
     }
 
   // Dessiner la preview de la trame
-  x_size=Menu_factor_X*51; // |_ Taille de la fenêtre
-  y_size=Menu_factor_Y*71; // |  de la preview
+  x_size=51; // |_ Taille de la fenêtre
+  y_size=71; // |  de la preview
   for (y_pos=0; y_pos<y_size; y_pos++)
     for (x_pos=0; x_pos<x_size; x_pos++)
-      Pixel(start_x+x_pos,start_y+y_pos,(Sieve[x_pos%Sieve_width][y_pos%Sieve_height])?MC_White:MC_Black);
-  Update_rect(start_x,start_y,x_size,y_size);
+      Pixel_in_window(start_x+x_pos,start_y+y_pos,(Sieve[x_pos%Sieve_width][y_pos%Sieve_height])?MC_White:MC_Black);
+  Update_window_area(start_x,start_y,x_size,y_size);
 }
 
 
@@ -984,22 +984,14 @@ void Draw_preset_sieve_patterns(void)
 {
   short index;
   short i,j;
-  //short x_size,y_size;
-  short Zoom;
-  
-  Zoom=Min(Menu_factor_X,Menu_factor_Y);
-  
-  //x_size=1;//Menu_factor_X;
-  //y_size=1;//Menu_factor_Y;
 
   for (index=0; index<12; index++)
-    for (j=0; j<16*Menu_factor_Y/Zoom; j++)
-      for (i=0; i<16*Menu_factor_X/Zoom; i++)
-        Block(((index*23+10)*Menu_factor_X)+i*Zoom+Window_pos_X,
-          (22*Menu_factor_Y)+j*Zoom+Window_pos_Y,Zoom,Zoom,
+    for (j=0; j<16; j++)
+      for (i=0; i<16; i++)
+        Pixel_in_window(10+index*23+i, 22+j,
           ((Gfx->Sieve_pattern[index][j&0xF]>>(15-(i&0xF)))&1)?MC_White:MC_Black);
 
-  Update_rect(ToWinX(10),ToWinY(22),ToWinL(12*23+16),ToWinH(16));
+  Update_window_area(10,22,12*23+16,16);
 }
 
 
@@ -1027,7 +1019,7 @@ void Invert_trame(void)
 // Rafraichit toute la zone correspondant à la trame zoomee.
 void Update_sieve_area(short x, short y)
 {
-  Update_rect(x,y,80*Menu_factor_X,80*Menu_factor_Y);
+  Update_window_area(x,y,80,80);
 }
 
 
@@ -1039,8 +1031,8 @@ void Button_Sieve_menu(void)
   short y_pos;
   short old_x_pos=0;
   short old_y_pos=0;
-  short origin_x;
-  short origin_y;
+  short origin_x=143;
+  short origin_y=69;
   static byte default_bg_color=0;
   T_Normal_button * button_bg_color;
   char  str[3];
@@ -1048,20 +1040,11 @@ void Button_Sieve_menu(void)
   short old_sieve_width=Sieve_width;
   short old_sieve_height=Sieve_height;
   byte  old_sieve[16][16];
-  short preview_x_start; // |  Données précalculées
-  short preview_y_start; // |_ pour la preview
-  short preview_x_end;   // |  => plus grande
-  short preview_y_end;   // |  rapidité.
 
 
   memcpy(old_sieve,Sieve,256);
 
   Open_window(290,179,"Sieve");
-
-  preview_x_start=Window_pos_X+(Menu_factor_X*230);
-  preview_y_start=Window_pos_Y+(Menu_factor_Y*78);
-  preview_x_end=preview_x_start+(Menu_factor_X*51);
-  preview_y_end=preview_y_start+(Menu_factor_Y*71);
 
   Window_display_frame      (  7, 65,130,43);
   Window_display_frame      (  7,110,130,43);
@@ -1073,7 +1056,7 @@ void Button_Sieve_menu(void)
   Print_in_window( 23,120,"Width:" ,MC_Dark,MC_Light);
   Print_in_window( 15,136,"Height:",MC_Dark,MC_Light);
 
-  Window_set_special_button(143,69,80,80);                     // 1
+  Window_set_special_button(origin_x,origin_y,80,80);                     // 1
 
   Window_set_normal_button(175,157,51,14,"Cancel",0,1,KEY_ESC); // 2
   Window_set_normal_button(230,157,51,14,"OK"    ,0,1,K2K(SDLK_RETURN)); // 3
@@ -1102,9 +1085,6 @@ void Button_Sieve_menu(void)
     Window_set_normal_button((index*23)+8,20,20,20,"",0,1,K2K(SDLK_F1)+index); // 17 -> 28
   Draw_preset_sieve_patterns();
 
-  origin_x=Window_pos_X+(Menu_factor_X*Window_special_button_list->Pos_X);
-  origin_y=Window_pos_Y+(Menu_factor_Y*Window_special_button_list->Pos_Y);
-
   Num2str(Sieve_width,str,2);
   Print_in_window(71,120,str,MC_Black,MC_Light);
   Num2str(Sieve_height,str,2);
@@ -1119,8 +1099,8 @@ void Button_Sieve_menu(void)
   {
     clicked_button=Window_clicked_button();
 
-    origin_x=Window_pos_X+(Menu_factor_X*Window_special_button_list->Pos_X);
-    origin_y=Window_pos_Y+(Menu_factor_Y*Window_special_button_list->Pos_Y);
+    origin_x=Window_special_button_list->Pos_X;
+    origin_y=Window_special_button_list->Pos_Y;
 
 
     switch (clicked_button)
@@ -1140,32 +1120,27 @@ void Button_Sieve_menu(void)
           if ( (x_pos<Sieve_width) && (y_pos<Sieve_height) )
         }
         */
-        x_pos=(Mouse_X-origin_x)/(Menu_factor_X*5);
-        y_pos=(Mouse_Y-origin_y)/(Menu_factor_Y*5);
+        x_pos=(((short)Mouse_X-Window_pos_X)/Menu_factor_X-origin_x)/5;
+        y_pos=(((short)Mouse_Y-Window_pos_Y)/Menu_factor_Y-origin_y)/5;
         if ( (x_pos<Sieve_width) && (y_pos<Sieve_height) )
         {
           temp=(Mouse_K==LEFT_SIDE);
           if ( (x_pos!=old_x_pos) || (y_pos!=old_y_pos)
             || (Sieve[x_pos][y_pos]!=temp) )
           {
-            old_x_pos=x_pos;
-            old_y_pos=y_pos;
             Sieve[x_pos][y_pos]=temp;
-            x_pos=Menu_factor_X*5;
-            y_pos=Menu_factor_Y*5;
             Hide_cursor();
             if (temp)
               temp=MC_White;
             else
               temp=MC_Black;
             // Affichage du pixel dans la fenêtre zoomée
-            Block(origin_x+(old_x_pos*x_pos), origin_y+(old_y_pos*y_pos),
-                  x_pos-Menu_factor_X, y_pos-Menu_factor_Y, temp);
+            Window_rectangle(origin_x+x_pos, origin_y+y_pos, 4, 4, temp);
             // Mise à jour de la preview
             Draw_sieve_scaled(origin_x,origin_y);
             Display_cursor();
             // Maj de la case seule
-            Update_rect(origin_x+(old_x_pos*x_pos), origin_y+(old_y_pos*y_pos),Menu_factor_X*5,Menu_factor_Y*5);
+            Update_window_area(origin_x+x_pos, origin_y+y_pos,5,5);
           }
         }
         break;
