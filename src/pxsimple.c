@@ -219,38 +219,6 @@ void Clear_brush(word x_pos,word y_pos,word x_offset,word y_offset,word width,wo
   Update_rect(x_pos,y_pos,width,height);
 }
 
-// Affiche une brosse (arbitraire) à l'écran
-void Display_brush(byte * brush, word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word brush_width)
-{
-  // dest = Position à l'écran
-  byte* dest = Screen_pixels + y_pos * VIDEO_LINE_WIDTH + x_pos;
-  // src = Position dans la brosse
-  byte* src = brush + y_offset * brush_width + x_offset;
-  
-  word x,y;
-  
-  // Pour chaque ligne
-  for(y = height;y > 0; y--)
-  {
-    // Pour chaque pixel
-    for(x = width;x > 0; x--)
-    {
-      // On vérifie que ce n'est pas la transparence
-      if(*src != transp_color)
-      {
-        *dest = *src;
-      }
-
-      // Pixel suivant
-      src++; dest++;
-    }
-
-    // On passe à la ligne suivante
-    dest = dest + VIDEO_LINE_WIDTH - width;
-    src = src + brush_width - width;
-  }
-}
-
 void Display_line_fast(word x_pos,word y_pos,word width,byte * line)
 /* On affiche toute une ligne de pixels. Utilisé pour les textes. */
 {

@@ -5018,15 +5018,14 @@ void Button_Text(void)
             colmap[Back_color]=Back_color;
             Remap_general_lowlevel(colmap,new_brush,remapped_brush,new_width,new_height,new_width);
           
-            Display_brush(
+            Brush_in_window(
               remapped_brush,
-              Window_pos_X+preview_button->Pos_X*Menu_factor_X,
-              Window_pos_Y+preview_button->Pos_Y*Menu_factor_Y,
+              preview_button->Pos_X,
+              preview_button->Pos_Y,
               0,
               0,
-              Min(preview_button->Width*Menu_factor_X, new_width),
-              Min(preview_button->Height*Menu_factor_Y, new_height),
-              Back_color,
+              Min(preview_button->Width*Menu_factor_X/Pixel_width, new_width),
+              Min(preview_button->Height*Menu_factor_Y/Pixel_height, new_height),
               new_width);
           
             free(remapped_brush);
@@ -5036,15 +5035,14 @@ void Button_Text(void)
         else
         {
           // Solid
-          Display_brush(
+          Brush_in_window(
             new_brush,
-            Window_pos_X+preview_button->Pos_X*Menu_factor_X,
-            Window_pos_Y+preview_button->Pos_Y*Menu_factor_Y,
+            preview_button->Pos_X,
+            preview_button->Pos_Y,
             0,
             0,
-            Min(preview_button->Width*Menu_factor_X, new_width),
-            Min(preview_button->Height*Menu_factor_Y, new_height),
-            Back_color,
+            Min(preview_button->Width*Menu_factor_X/Pixel_width, new_width),
+            Min(preview_button->Height*Menu_factor_Y/Pixel_height, new_height),
             new_width);
         }
         

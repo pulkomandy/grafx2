@@ -197,8 +197,6 @@ void Display_brush_color_zoom   (word x_pos,word y_pos,word x_offset,word y_offs
 void Display_brush_mono_zoom    (word x_pos,word y_pos,word x_offset,word y_offset,word width,word end_y_pos,byte transp_color,byte color,word brush_width,byte * buffer);
 /// Clear the brush currently displayed on the magnified part of screen, redrawing the image instead.
 void Clear_brush_scaled           (word x_pos,word y_pos,word x_offset,word y_offset,word width,word end_y_pos,byte transp_color,word image_width,byte * buffer);
-/// Draw an arbitrary brush on screen (not the current brush)
-void Display_brush             (byte * brush, word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word brush_width);
 
 
 // -- Screen data

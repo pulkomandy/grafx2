@@ -114,7 +114,6 @@ void Window_rectangle_RGBA(word x_pos,word y_pos,word width,word height, byte r,
   Rectangle_on_texture(Window_texture, (x_pos*Menu_factor_X), (y_pos*Menu_factor_Y), width*Menu_factor_X, height*Menu_factor_Y, r, g, b, a, SDL_BLENDMODE_NONE);
 }
 
-
 // -- Affichages de différents cadres dans une fenêtre -----------------------
 
   // -- Frame général avec couleurs paramètrables --

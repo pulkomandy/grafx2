@@ -611,3 +611,34 @@ void Window_print_char(short x_pos,short y_pos,const unsigned char c,byte text_c
   SDL_SetTextureColorMod(Gfx->Font[c], Main_palette[text_color].R, Main_palette[text_color].G, Main_palette[text_color].B);
   SDL_RenderCopy(Renderer_SDL, Gfx->Font[c], NULL, &rectangle);
 }
+
+// Display a brush in window, using the image's zoom level
+void Brush_in_window(byte * brush, word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,word brush_width)
+{
+  byte* src = brush + y_offset * brush_width + x_offset;
+  word x, y;
+
+  SDL_SetRenderTarget(Renderer_SDL, Window_texture);
+  SDL_SetRenderDrawBlendMode(Renderer_SDL, SDL_BLENDMODE_NONE);
+
+  // Pour chaque ligne
+  for(y = 0; y < height; y++)
+  {
+    // Pour chaque pixel
+    for(x = 0; x < width; x++)
+    {
+      // On vérifie que ce n'est pas la transparence
+      if(*src != Back_color)
+      {
+        SDL_Rect rectangle = {x_pos*Menu_factor_X+x*Pixel_width, y_pos*Menu_factor_Y+y*Pixel_height, Pixel_width, Pixel_height};
+        SDL_Color color = Screen_SDL->format->palette->colors[*src];
+        SDL_SetRenderDrawColor(Renderer_SDL, color.r, color.g, color.b, 255);
+        SDL_RenderFillRect(Renderer_SDL, &rectangle);
+      }
+      // Pixel suivant
+      src++;
+    }
+    // On passe à la ligne suivante
+    src = src + brush_width - width;
+  }
+}

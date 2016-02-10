@@ -3632,7 +3632,6 @@ void Grad_rectangle_0_5(void)
   short start_y;
   short end_x;
   short end_y;
-  short width,height;
 
 
   // Tracé propre du rectangle
@@ -3653,9 +3652,6 @@ void Grad_rectangle_0_5(void)
     SWAP_SHORTS(start_y, end_y)
   
   Hide_cursor();
-
-  width = end_x - start_x;
-  height = end_y - start_y;
 
   // Check if the rectangle is not fully outside the picture
   if (start_x > Main_image_width                  // Rectangle at right of picture
