@@ -346,29 +346,90 @@ void Flush_update(void)
       
   // -------------------------------
   // Mouse cursor
-  if (Cursor_shape <= CURSOR_SHAPE_BUCKET)
+  // Icon
+  do
   {
-    byte shape;
-    int x_factor = 1;
-    int y_factor = 1;
-    if ( ( (Mouse_Y<Menu_Y)
-      && ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ) )
-      || (Windows_open) || (Cursor_shape==CURSOR_SHAPE_HOURGLASS) )
-      shape=Cursor_shape;
-    else
-      shape=CURSOR_SHAPE_ARROW;
-    
-    if (shape==CURSOR_SHAPE_ARROW || shape==CURSOR_SHAPE_HOURGLASS || shape==CURSOR_SHAPE_HORIZONTAL)
+    if (Cursor_shape <= CURSOR_SHAPE_BUCKET)
     {
-      x_factor = Menu_factor_X;
-      y_factor = Menu_factor_Y;
-    }
-      r.x = Mouse_X-14*x_factor;
-      r.y = Mouse_Y-15*y_factor;
-      r.w = 29*x_factor;
-      r.h = 31*y_factor;
-    SDL_RenderCopy(Renderer_SDL, Gfx->Mouse_cursor[shape], NULL, &r);
-  }
+      byte shape;
+      int x_factor = 1;
+      int y_factor = 1;
+      
+      // If the cursor is over the menu or over the split separator, cursor becomes an arrow.
+      if ( ( Mouse_Y>=Menu_Y || ( Main_magnifier_mode && Mouse_X>=Main_separator_position && Mouse_X<Main_X_zoom ) )
+        && !Windows_open && Cursor_shape!=CURSOR_SHAPE_HOURGLASS)
+        shape=CURSOR_SHAPE_ARROW;
+      else
+        shape=Cursor_shape;
+      
+      if (shape==CURSOR_SHAPE_ARROW || shape==CURSOR_SHAPE_HOURGLASS || shape==CURSOR_SHAPE_HORIZONTAL)
+      {
+        // These shapes are always scaled to UI factor.
+        x_factor = Menu_factor_X;
+        y_factor = Menu_factor_Y;
+        r.x = Mouse_X-14*x_factor;
+        r.y = Mouse_Y-15*y_factor;
+      }
+      else
+      {
+        // CURSOR_SHAPE_TARGET, CURSOR_SHAPE_COLORPICKER, CURSOR_SHAPE_MULTIDIRECTIONAL,
+        // CURSOR_SHAPE_THIN_TARGET, CURSOR_SHAPE_THIN_COLORPICKER, CURSOR_SHAPE_BUCKET
+        if (Cursor_hidden)
+          break;
+
+        if (Config.Cursor==1 && (shape==CURSOR_SHAPE_TARGET||shape==CURSOR_SHAPE_COLORPICKER))
+        {
+          // "Thin" cursors handled by Display_cursor()
+          break;
+        }
+        if (Config.Cursor==2 && shape==CURSOR_SHAPE_TARGET)
+        {
+          shape=CURSOR_SHAPE_THIN_TARGET;
+        }
+        if (Config.Cursor==2 && shape==CURSOR_SHAPE_COLORPICKER)
+        {
+          shape=CURSOR_SHAPE_THIN_COLORPICKER;
+        }
+        
+        // These shapes are displayed :
+        // - In non-zoomed area : At the size of pixels
+        // - In zoomed area : At the smallest of (zoom_factor*pixel_zize) and UI factor
+        if (Main_magnifier_mode && Mouse_X>=Main_X_zoom)
+        {
+          x_factor = y_factor = Min(
+            Min(Main_magnifier_factor * Pixel_width, Menu_factor_X),
+            Min(Main_magnifier_factor * Pixel_height, Menu_factor_Y));
+          r.x = (Mouse_X-Main_X_zoom)/x_factor*x_factor+Main_X_zoom -14*x_factor;
+          r.y = (Mouse_Y/y_factor-15)*y_factor;
+        }
+        else
+        {
+          x_factor = Pixel_width;
+          y_factor = Pixel_height;
+          r.x = (Mouse_X/x_factor-14)*x_factor;
+          r.y = (Mouse_Y/y_factor-15)*y_factor;
+        }
+      }
+    
+      //  CURSOR_SHAPE_ARROW             Always scaled to Menu_factor_X
+      //  CURSOR_SHAPE_TARGET            Scaled to (Pixel_width) if unzoomed, Min(Main_magnifier_factor*Pixel_width, Menu_factor_X)
+      //  CURSOR_SHAPE_COLORPICKER       Scaled to (Pixel_width) if unzoomed, Min(Main_magnifier_factor*Pixel_width, Menu_factor_X)
+      //  CURSOR_SHAPE_HOURGLASS         Always scaled to Menu_factor_X
+      //  CURSOR_SHAPE_MULTIDIRECTIONAL  Scaled to (Pixel_width) if unzoomed, Min(Main_magnifier_factor*Pixel_width, Menu_factor_X)
+      //  CURSOR_SHAPE_HORIZONTAL        Always scaled to Menu_factor_X
+      //  CURSOR_SHAPE_THIN_TARGET       Scaled to (Pixel_width) if unzoomed, Min(Main_magnifier_factor*Pixel_width, Menu_factor_X)
+      //  CURSOR_SHAPE_THIN_COLORPICKER  Scaled to (Pixel_width) if unzoomed, Min(Main_magnifier_factor*Pixel_width, Menu_factor_X)
+      //  CURSOR_SHAPE_BUCKET            Scaled to (Pixel_width) if unzoomed, Min(Main_magnifier_factor*Pixel_width, Menu_factor_X)
+      //  CURSOR_SHAPE_XOR_TARGET        
+      //  CURSOR_SHAPE_XOR_RECTANGLE     
+      //  CURSOR_SHAPE_XOR_ROTATION      
+      
+        r.w = 29*x_factor;
+        r.h = 31*y_factor;
+      SDL_RenderCopy(Renderer_SDL, Gfx->Mouse_cursor[shape], NULL, &r);
+    } 
+  } while(0);
+  
   // Flip display
   SDL_RenderPresent(Renderer_SDL);  
 

@@ -1852,19 +1852,15 @@ void Display_cursor(void)
   short x_pos;
   short y_pos;
   short counter_x = 0;
-  short counter_y;
-  int   temp;
-  byte  color;
   float cos_a,sin_a;
   short x1,y1,x2,y2,x3,y3,x4,y4;
 
-  // Si le curseur est dans le menu ou sur la barre de split, on affiche toujours une flèche.
-  if ( ( (Mouse_Y<Menu_Y)
-      && ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ) )
-    || (Windows_open) || (Cursor_shape==CURSOR_SHAPE_HOURGLASS) )
-    shape=Cursor_shape;
-  else
+  // If the cursor is over the menu or over the split separator, cursor becomes an arrow.
+  if ( ( Mouse_Y>=Menu_Y || ( Main_magnifier_mode && Mouse_X>=Main_separator_position && Mouse_X<Main_X_zoom ) )
+    && !Windows_open && Cursor_shape!=CURSOR_SHAPE_HOURGLASS)
     shape=CURSOR_SHAPE_ARROW;
+  else
+    shape=Cursor_shape;
 
   switch(shape)
   {
@@ -1892,29 +1888,6 @@ void Display_cursor(void)
             Vertical_XOR_line  (Mouse_X,Mouse_Y+3,4-end_y);
 
           Update_rect(Mouse_X+start_x-6,Mouse_Y+start_y-6,13-end_x,13-end_y);
-        }
-        else
-        {
-          temp=(Config.Cursor)?CURSOR_SHAPE_THIN_TARGET:CURSOR_SHAPE_TARGET;
-          start_x=Mouse_X-Gfx->Cursor_offset_X[temp];
-          start_y=Mouse_Y-Gfx->Cursor_offset_Y[temp];
-
-          for (y_pos=start_y,counter_y=0; counter_y<15 && y_pos < Screen_height;
-            y_pos++,counter_y++)
-          {
-            if( y_pos < 0 ) continue;
-              for (x_pos=start_x,counter_x=0;
-                counter_x<15 && x_pos < Screen_width; x_pos++,counter_x++)
-              {
-                if( x_pos < 0 ) continue;
-                  color=Gfx->Cursor_sprite[temp][counter_y][counter_x];
-                  Cursor_background[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
-                  if (color!=MC_Trans)
-                    Pixel(x_pos,y_pos,color);
-            }
-          }
-
-          Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
         }
       }
       break;
@@ -1961,57 +1934,6 @@ void Display_cursor(void)
         if (Mouse_Y<Menu_Y-6)
           Horizontal_XOR_line(start_x+Mouse_X-1,Mouse_Y+6,3-(start_x+end_x));
       }
-      else
-      {
-        temp=(Config.Cursor)?CURSOR_SHAPE_THIN_COLORPICKER:CURSOR_SHAPE_COLORPICKER;
-        start_x=Mouse_X-Gfx->Cursor_offset_X[temp];
-        start_y=Mouse_Y-Gfx->Cursor_offset_Y[temp];
-
-        for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
-        {
-          if(y_pos<0) continue;
-          if(y_pos>=Screen_height) break;
-          for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
-          {
-            if(x_pos<0) continue;
-            if(x_pos>=Screen_width) break;
-            color=Gfx->Cursor_sprite[temp][counter_y][counter_x];
-            // On sauvegarde dans Cursor_background pour restaurer plus tard
-            Cursor_background[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
-            if (color!=MC_Trans)
-              Pixel(x_pos,y_pos,color);
-          }
-        }
-        Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
-      }
-      break;
-
-    case CURSOR_SHAPE_MULTIDIRECTIONAL :
-    case CURSOR_SHAPE_HORIZONTAL :
-    case CURSOR_SHAPE_BUCKET :
-      if (Cursor_hidden)
-        break;
-
-    case CURSOR_SHAPE_ARROW :
-    case CURSOR_SHAPE_HOURGLASS :
-      start_x=Mouse_X-Gfx->Cursor_offset_X[shape];
-      start_y=Mouse_Y-Gfx->Cursor_offset_Y[shape];
-      for (y_pos=start_y,counter_y=0;counter_y<CURSOR_SPRITE_HEIGHT;y_pos++,counter_y++)
-      {
-        if(y_pos<0) continue;
-        if(y_pos>=Screen_height) break;
-        for (x_pos=start_x,counter_x=0;counter_x<CURSOR_SPRITE_WIDTH;x_pos++,counter_x++)
-        {
-          if(x_pos<0) continue;
-          if(x_pos>=Screen_width) break;
-          color=Gfx->Cursor_sprite[shape][counter_y][counter_x];
-          // On sauvegarde dans Cursor_background pour restaurer plus tard
-          Cursor_background[counter_y][counter_x]=Read_pixel(x_pos,y_pos);
-          if (color!=MC_Trans)
-            Pixel(x_pos,y_pos,color);
-        }
-      }
-      Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
       break;
 
     case CURSOR_SHAPE_XOR_TARGET :
@@ -2082,7 +2004,7 @@ void Display_cursor(void)
       Update_rect(start_x,start_y,end_x+1-start_x,end_y+1-start_y);
 
       break;
-    default: //case CURSOR_SHAPE_XOR_ROTATION :
+    case CURSOR_SHAPE_XOR_ROTATION :
       start_x=1-(Brush_width>>1);
       start_y=1-(Brush_height>>1);
       end_x=start_x+Brush_width-1;
@@ -2157,18 +2079,15 @@ void Hide_cursor(void)
   int x_pos = 0;
   int y_pos;
   short counter_x = 0;
-  short counter_y;
-  int   temp;
   float cos_a,sin_a;
   short x1,y1,x2,y2,x3,y3,x4,y4;
 
-  if ( ( (Mouse_Y<Menu_Y)
-      && ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position)
-                         || (Mouse_X>=Main_X_zoom) ) )
-    || (Windows_open) || (Cursor_shape==CURSOR_SHAPE_HOURGLASS) )
-    shape=Cursor_shape;
-  else
+  // If the cursor is over the menu or over the split separator, cursor becomes an arrow.
+  if ( ( Mouse_Y>=Menu_Y || ( Main_magnifier_mode && Mouse_X>=Main_separator_position && Mouse_X<Main_X_zoom ) )
+    && !Windows_open && Cursor_shape!=CURSOR_SHAPE_HOURGLASS)
     shape=CURSOR_SHAPE_ARROW;
+  else
+    shape=Cursor_shape;
 
   switch(shape)
   {
@@ -2195,26 +2114,6 @@ void Hide_cursor(void)
 
           Update_rect(Mouse_X+start_x-6,Mouse_Y+start_y-6,13-end_x,13-end_y);
         }
-        else
-        {
-          temp=(Config.Cursor)?CURSOR_SHAPE_THIN_TARGET:CURSOR_SHAPE_TARGET;
-          start_x=Mouse_X-Gfx->Cursor_offset_X[temp];
-          start_y=Mouse_Y-Gfx->Cursor_offset_Y[temp];
-
-          for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
-          {
-            if(y_pos < 0) continue;
-            if(y_pos>=Screen_height) break;
-            for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
-            {
-              if(x_pos < 0) continue;
-              else if (x_pos>=Screen_width) break;
-              Pixel(x_pos,y_pos,Cursor_background[counter_y][counter_x]);
-            }
-          }
-
-          Update_rect(Max(start_x,0),Max(start_y,0),x_pos-start_x,y_pos-start_y);
-        }
       }
       if (!Paintbrush_hidden)
       {
@@ -2223,91 +2122,47 @@ void Hide_cursor(void)
       break;
 
     case CURSOR_SHAPE_COLORPICKER:
-        if (Config.Cursor==1)
-        {
-          // Barres formant la croix principale
+      if (Config.Cursor==1)
+      {
+        // Barres formant la croix principale
 
-          start_y=(Mouse_Y<5)?5-Mouse_Y:0;
-          if (start_y<3)
-            Vertical_XOR_line  (Mouse_X,Mouse_Y+start_y-5,3-start_y);
+        start_y=(Mouse_Y<5)?5-Mouse_Y:0;
+        if (start_y<3)
+          Vertical_XOR_line  (Mouse_X,Mouse_Y+start_y-5,3-start_y);
 
-          start_x=(Mouse_X<5)?(short)5-Mouse_X:0;
-          if (start_x<3)
-            Horizontal_XOR_line(Mouse_X+start_x-5,Mouse_Y,3-start_x);
+        start_x=(Mouse_X<5)?(short)5-Mouse_X:0;
+        if (start_x<3)
+          Horizontal_XOR_line(Mouse_X+start_x-5,Mouse_Y,3-start_x);
 
-          end_x=(Mouse_X+6>Screen_width)?Mouse_X+6-Screen_width:0;
-          if (end_x<3)
-            Horizontal_XOR_line(Mouse_X+3,Mouse_Y,3-end_x);
+        end_x=(Mouse_X+6>Screen_width)?Mouse_X+6-Screen_width:0;
+        if (end_x<3)
+          Horizontal_XOR_line(Mouse_X+3,Mouse_Y,3-end_x);
 
-          end_y=(Mouse_Y+6>Screen_height)?Mouse_Y+6-Screen_height:0;
-          if (end_y<3)
-            Vertical_XOR_line  (Mouse_X,Mouse_Y+3,3-end_y);
+        end_y=(Mouse_Y+6>Screen_height)?Mouse_Y+6-Screen_height:0;
+        if (end_y<3)
+          Vertical_XOR_line  (Mouse_X,Mouse_Y+3,3-end_y);
 
-          start_x=(!Mouse_X);
-          start_y=(!Mouse_Y);
-          end_x=(Mouse_X>=Screen_width-1);
-          end_y=(Mouse_Y>=Menu_Y-1);
+        start_x=(!Mouse_X);
+        start_y=(!Mouse_Y);
+        end_x=(Mouse_X>=Screen_width-1);
+        end_y=(Mouse_Y>=Menu_Y-1);
 
-          if (Mouse_Y>5)
-            Horizontal_XOR_line(start_x+Mouse_X-1,Mouse_Y-6,3-(start_x+end_x));
+        if (Mouse_Y>5)
+          Horizontal_XOR_line(start_x+Mouse_X-1,Mouse_Y-6,3-(start_x+end_x));
 
-          if (Mouse_X>5)
-            Vertical_XOR_line  (Mouse_X-6,start_y+Mouse_Y-1,3-(start_y+end_y));
+        if (Mouse_X>5)
+          Vertical_XOR_line  (Mouse_X-6,start_y+Mouse_Y-1,3-(start_y+end_y));
 
-          if (Mouse_X<Screen_width-6)
-            Vertical_XOR_line  (Mouse_X+6,start_y+Mouse_Y-1,3-(start_y+end_y));
+        if (Mouse_X<Screen_width-6)
+          Vertical_XOR_line  (Mouse_X+6,start_y+Mouse_Y-1,3-(start_y+end_y));
 
-          if (Mouse_Y<Menu_Y-6)
-            Horizontal_XOR_line(start_x+Mouse_X-1,Mouse_Y+6,3-(start_x+end_x));
+        if (Mouse_Y<Menu_Y-6)
+          Horizontal_XOR_line(start_x+Mouse_X-1,Mouse_Y+6,3-(start_x+end_x));
 
-          Update_rect(start_x,start_y,end_x-start_x,end_y-start_y);
-        }
-        else
-        {
-          temp=(Config.Cursor)?CURSOR_SHAPE_THIN_COLORPICKER:CURSOR_SHAPE_COLORPICKER;
-          start_x=Mouse_X-Gfx->Cursor_offset_X[temp];
-          start_y=Mouse_Y-Gfx->Cursor_offset_Y[temp];
-
-          for (y_pos=start_y,counter_y=0;counter_y<15;y_pos++,counter_y++)
-          {
-            if(y_pos<0) continue;
-            if(y_pos>=Screen_height) break;
-            for (x_pos=start_x,counter_x=0;counter_x<15;x_pos++,counter_x++)
-            {
-              if(x_pos<0) continue;
-              if(x_pos>=Screen_width) break;
-                  Pixel(x_pos,y_pos,Cursor_background[counter_y][counter_x]);
-            }
-          }
-          Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
-        }
+        Update_rect(start_x,start_y,end_x-start_x,end_y-start_y);
+      }
       if (!Paintbrush_hidden)
         Hide_paintbrush(Paintbrush_X,Paintbrush_Y);
-      break;
-
-    case CURSOR_SHAPE_MULTIDIRECTIONAL :
-    case CURSOR_SHAPE_HORIZONTAL :
-    case CURSOR_SHAPE_BUCKET :
-      if (Cursor_hidden)
-        break;
-
-    case CURSOR_SHAPE_ARROW :
-    case CURSOR_SHAPE_HOURGLASS :
-      start_x=Mouse_X-Gfx->Cursor_offset_X[shape];
-      start_y=Mouse_Y-Gfx->Cursor_offset_Y[shape];
-
-      for (y_pos=start_y,counter_y=0;counter_y<CURSOR_SPRITE_HEIGHT;y_pos++,counter_y++)
-      {
-        if(y_pos<0) continue;
-        if(y_pos>=Screen_height) break;
-        for (x_pos=start_x,counter_x=0;counter_x<CURSOR_SPRITE_WIDTH;x_pos++,counter_x++)
-        {
-          if(x_pos<0) continue;
-          if(x_pos>=Screen_width) break;
-            Pixel(x_pos,y_pos,Cursor_background[counter_y][counter_x]);
-        }
-      }
-      Update_rect(Max(start_x,0),Max(start_y,0),counter_x,counter_y);
       break;
 
     case CURSOR_SHAPE_XOR_TARGET :
@@ -2381,7 +2236,7 @@ void Hide_cursor(void)
       Update_rect(start_x,start_y,end_x+1-start_x,end_y+1-start_y);
 
       break;
-    default: //case CURSOR_SHAPE_XOR_ROTATION :
+    case CURSOR_SHAPE_XOR_ROTATION :
       start_x=1-(Brush_width>>1);
       start_y=1-(Brush_height>>1);
       end_x=start_x+Brush_width-1;
