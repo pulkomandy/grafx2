@@ -367,8 +367,6 @@ void Remap_image_highlevel(byte * conversion_table)
                     (Main_separator_position+(SEPARATOR_WIDTH*Menu_factor_X)),
                     Menu_Y_before_window,conversion_table);
   }
-  // Remappe tous les fonds de fenetre (qui doivent contenir un bout d'écran)
-  Remap_window_backgrounds(conversion_table, 0, Menu_Y_before_window);
 }
 
 
@@ -2721,7 +2719,7 @@ void Button_Palette(void)
         Compute_optimal_menu_colors(working_palette);
 
         // On remappe brutalement
-        Remap_screen_after_menu_colors_change();
+        // supprimé
         // Puis on remet les trucs qui ne devaient pas changer
         Window_draw_palette_bouton(5,79);
         if (show_used_colors)

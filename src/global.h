@@ -189,8 +189,6 @@ void Display_brush_color(word x_pos,word y_pos,word x_offset,word y_offset,word 
 void Display_brush_mono(word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,byte color,word brush_width);
 /// Clear the brush currently displayed on screen, redrawing the image instead.
 void Clear_brush(word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word image_width);
-/// Remap part of the screen after the menu colors have changed.
-void Remap_screen(word x_pos,word y_pos,word width,word height,byte * conversion_table);
 /// Draw a line on screen, without doubling it if using wide pixels. (to be used when the line is already doubled in the input buffer)
 void Display_line_fast(word x_pos,word y_pos,word width,byte * line);
 /// Read a line of pixels from screen.

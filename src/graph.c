@@ -328,8 +328,6 @@ try_again:
   Screen_width = width;
   Screen_height = height;
 
-  Clear_border(MC_Black); // Requires up-to-date Screen_* and Pixel_*
-
   // Set menu size (software zoom)
   if (Screen_width/320 > Screen_height/200)
     factor=Screen_height/200;

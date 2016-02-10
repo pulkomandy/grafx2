@@ -251,28 +251,6 @@ void Display_brush(byte * brush, word x_pos,word y_pos,word x_offset,word y_offs
   }
 }
 
-void Remap_screen(word x_pos,word y_pos,word width,word height,byte * conversion_table)
-{
-  // dest = coords a l'écran
-  byte* dest = Screen_pixels + y_pos * VIDEO_LINE_WIDTH + x_pos;
-  int x,y;
-
-  // Pour chaque ligne
-  for(y=height;y>0;y--)
-  {
-    // Pour chaque pixel
-    for(x=width;x>0;x--)
-    {
-      *dest = conversion_table[*dest];
-      dest ++;
-    }
-
-    dest = dest + VIDEO_LINE_WIDTH - width;
-  }
-
-  Update_rect(x_pos,y_pos,width,height);
-}
-
 void Display_line_fast(word x_pos,word y_pos,word width,byte * line)
 /* On affiche toute une ligne de pixels. Utilisé pour les textes. */
 {

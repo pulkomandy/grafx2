@@ -3499,40 +3499,6 @@ short Window_clicked_button(void)
   return 0;
 }
 
-
-// Fonction qui sert à remapper les parties sauvegardées derriere les
-// fenetres ouvertes. C'est utilisé par exemple par la fenetre de palette
-// Qui remappe des couleurs, afin de propager les changements.
-void Remap_window_backgrounds(byte * conversion_table, int Min_Y, int Max_Y)
-{
-  int window_index; 
-        byte* EDI;
-        int dx,cx;
-
-  for (window_index=0; window_index<Windows_open; window_index++)
-  {
-    EDI = Window_background[window_index];
-  
-        // Pour chaque ligne
-        for(dx=0; dx<Window_stack[window_index].Height*Menu_factor_Y;dx++)
-        {
-          if (dx+Window_stack[window_index].Pos_Y>Max_Y)
-            return;
-          if (dx+Window_stack[window_index].Pos_Y<Min_Y)
-          {
-            EDI += Window_stack[window_index].Width*Menu_factor_X;
-          }
-          else
-                // Pour chaque pixel
-                for(cx=Window_stack[window_index].Width*Menu_factor_X;cx>0;cx--)
-                {
-                        *EDI = conversion_table[*EDI];
-                        EDI ++;
-                }
-        }
-  }
-}
-
 void Delay_with_active_mouse(int speed)
 {
   Uint32 end;

@@ -67,7 +67,6 @@ void Get_SDL_Palette(const SDL_Palette * sdl_palette, T_Palette palette);
 /// Clears the parts of screen that are outside of the editing area.
 /// There is such area only if the screen mode is not a multiple of the pixel
 /// size, eg: 3x3 pixels in 1024x768 leaves 1 column on the right, 0 rows on bottom.
-void Clear_border(byte color);
   
 extern volatile int Allow_colorcycling;
 

@@ -905,7 +905,6 @@ void Load_image(T_IO_Context *context)
     
     // Update palette and screen first
     Compute_optimal_menu_colors(context->Palette);
-    Remap_screen_after_menu_colors_change();
     Set_palette(context->Palette);
     
     // Display palette preview

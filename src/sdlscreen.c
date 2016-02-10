@@ -529,40 +529,6 @@ void Get_SDL_Palette(const SDL_Palette * sdl_palette, T_Palette palette)
 
 }
 
-void Clear_border(byte color)
-{
-  int width;
-  int height;
-  
-  // This function can be called before the graphics mode is set.
-  // Nothing to do then.
-  if (!Screen_SDL)
-    return;
-  
-  width = Screen_SDL->w - Screen_width;
-  height = Screen_SDL->h - Screen_height;
-  if (width)
-  {
-    SDL_Rect r;
-    r.x=Screen_SDL->w - width;
-    r.y=0;
-    r.h=Screen_SDL->h;
-    r.w=width;
-    SDL_FillRect(Screen_SDL,&r,color);
-    Update_rectangle(Screen_SDL, r.x, r.y, r.w, r.h);
-  }
-  if (height)
-  {
-    SDL_Rect r;
-    r.x=0;
-    r.y=Screen_SDL->h - height;
-    r.h=height;
-    r.w=Screen_SDL->w - height;
-    SDL_FillRect(Screen_SDL,&r,color);
-    Update_rectangle(Screen_SDL, r.x, r.y, r.w, r.h);
-  }  
-}
-
 /// Activates or desactivates file drag-dropping in program window.
 void Allow_drag_and_drop(int flag)
 {

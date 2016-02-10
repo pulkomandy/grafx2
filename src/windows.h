@@ -48,7 +48,6 @@
 void Display_cursor(void);
 void Hide_cursor(void);
 
-void Remap_screen_after_menu_colors_change(void);
 void Compute_optimal_menu_colors(T_Components * palette);
 void Remap_menu_sprites();
 

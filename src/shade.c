@@ -98,8 +98,8 @@ void Shade_draw_grad_ranges(void)
   {
     x_size=Menu_factor_X<<6;
     y_size=Menu_factor_Y*48;
-    start_x=Window_pos_X+(Menu_factor_X*224);
-    start_y=Window_pos_Y+(Menu_factor_Y*35);
+    start_x=Menu_factor_X*224;
+    start_y=Menu_factor_Y*35;
     end_x=start_x+x_size;
     end_y=start_y+y_size;
 
@@ -126,8 +126,9 @@ void Shade_draw_grad_ranges(void)
 
       for (x_pos=start_x;x_pos<end_x;x_pos++)
       {
-        Pixel(x_pos,y_pos,Shade_list[Shade_current].List
-              [(((x_pos-start_x)*shade_size)/x_size)+start_shade]);
+        SDL_Color color = Screen_SDL->format->palette->colors[Shade_list[Shade_current].List[(((x_pos-start_x)*shade_size)/x_size)+start_shade]];
+        // This is higher resolution than Pixel_in_window()
+        Rectangle_on_texture(Window_texture, x_pos, y_pos, 1, 1, color.r, color.g, color.b, 255, SDL_BLENDMODE_NONE);
       }
     }
   }
@@ -158,26 +159,26 @@ void Tag_shades(word selection_start,word selection_end)
     for (column=0; column<64; column++)
     {
       position=(line<<6)+column;
-      x_pos=Window_pos_X+(Menu_factor_X*((column<<2)+8));
-      y_pos=Window_pos_Y+(Menu_factor_Y*((line*7)+131));
+      x_pos=(column<<2)+8;
+      y_pos=(line*7)+131;
 
       // On regarde si la case est "disablée"
       if (Shade_list[Shade_current].List[position]&0x8000)
       {
         if ((position>=selection_start) && (position<=selection_end))
         {
-          Block(x_pos,y_pos,Menu_factor_X<<2,Menu_factor_Y,MC_White);
-          Block(x_pos,y_pos+Menu_factor_Y,Menu_factor_X<<2,Menu_factor_Y,MC_Black);
+          Window_rectangle(x_pos, y_pos,   4, 1, MC_White);
+          Window_rectangle(x_pos, y_pos+1, 4, 1, MC_Black);
         }
         else
-          Block(x_pos,y_pos,Menu_factor_X<<2,Menu_factor_Y<<1,MC_White);
+          Window_rectangle(x_pos, y_pos, 4, 2, MC_White);
       }
       else // "enablée"
       {
         if ((position>=selection_start) && (position<=selection_end))
-          Block(x_pos,y_pos,Menu_factor_X<<2,Menu_factor_Y<<1,MC_Black);
+          Window_rectangle(x_pos, y_pos, 4, 2, MC_Black);
         else
-          Block(x_pos,y_pos,Menu_factor_X<<2,Menu_factor_Y<<1,MC_Light);
+          Window_rectangle(x_pos, y_pos, 4, 2, MC_Light);
       }
     }
     Update_window_area(8,131,64<<2,8<<3);

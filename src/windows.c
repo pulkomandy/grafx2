@@ -1317,12 +1317,12 @@ void Display_grad_block_in_window(word x_pos,word y_pos,word block_start,word bl
 {
   word total_lines  =Menu_factor_Y<<6; // <=> à 64 lignes fct(Menu_Facteur)
   word nb_colors   =(block_start<=block_end)?block_end-block_start+1:block_start-block_end+1;
-  word Selected_line_mode=(block_start<=block_end)?0:total_lines-1;
+  word selected_line_mode=(block_start<=block_end)?0:total_lines-1;
 
-  word start_x       =Window_pos_X+(Menu_factor_X*x_pos);
+  word start_x       =Menu_factor_X*x_pos;
   word line_width =Menu_factor_X<<4; // <=> à 16 pixels fct(Menu_Facteur)
 
-  word start_y       =Window_pos_Y+(Menu_factor_Y*y_pos);
+  word start_y       =Menu_factor_Y*y_pos;
   word end_y         =start_y+total_lines;
   word index;
 
@@ -1333,9 +1333,12 @@ void Display_grad_block_in_window(word x_pos,word y_pos,word block_start,word bl
     block_end=index;
   }
 
-  for (index=start_y;index<end_y;index++,Selected_line_mode++)
-    Block(start_x,index,line_width,1,block_start+(nb_colors*Selected_line_mode)/total_lines);
-
+  for (index=start_y;index<end_y;index++,selected_line_mode++)
+  {
+    SDL_Color color = Screen_SDL->format->palette->colors[block_start+(nb_colors*selected_line_mode)/total_lines];
+    // This is higher resolution than Pixel_in_window()
+    Rectangle_on_texture(Window_texture, start_x, index, line_width, 1, color.r, color.g, color.b, 255, SDL_BLENDMODE_NONE);
+  }
   Update_rect(ToWinX(x_pos),ToWinY(y_pos),ToWinL(16),ToWinH(64));
 }
 
@@ -2875,88 +2878,6 @@ byte Best_color_perceptual_except(byte r,byte g,byte b, byte except)
   return best_color;
 }
 
-byte Old_black;
-byte Old_dark;
-byte Old_light;
-byte Old_white;
-byte Old_trans;
-
-void Remap_pixel(byte * pixel)
-{
-  if (*pixel==Old_light)         // On commence par tester le Gris clair
-    *pixel=MC_Light;             // qui est pas mal utilisé.
-  else
-  {
-    if (*pixel==Old_black)        // Puis le Noir...
-      *pixel=MC_Black;
-    else
-    {
-      if (*pixel==Old_dark)     // etc...
-        *pixel=MC_Dark;
-      else
-      {
-        if (*pixel==Old_white)
-          *pixel=MC_White;
-        else
-        {
-          if (*pixel==Old_trans)
-            *pixel=MC_Trans;
-        }
-      }
-    }
-  }
-}
-
-
-
-void Remap_screen_after_menu_colors_change(void)
-{
-  short index;
-  byte  conversion_table[256];
-  short temp/*,temp2*/;
-
-  if ( (MC_Light!=Old_light) || (MC_Dark!=Old_dark) || (MC_White!=Old_white) || (MC_Black !=Old_black )
-    || (MC_Trans!=Old_trans) )
-  {
-    // Création de la table de conversion
-    for (index=0; index<256; index++)
-      conversion_table[index]=index;
-
-    conversion_table[Old_black ]=MC_Black;
-    conversion_table[Old_dark]=MC_Dark;
-    conversion_table[Old_light]=MC_Light;
-    conversion_table[Old_white]=MC_White;
-
-    // Remappage de l'écran
-
-    temp=Window_height*Menu_factor_Y;
-
-    Remap_screen(Window_pos_X, Window_pos_Y,
-                 Window_width*Menu_factor_X,
-                 (Window_pos_Y+temp<Menu_Y_before_window)?temp:Menu_Y_before_window-Window_pos_Y,
-                 conversion_table);
-
-    if (Menu_is_visible_before_window)
-    {
-      Remap_screen(0, Menu_Y_before_window,
-                   Screen_width, Screen_height-Menu_Y_before_window,
-                   conversion_table);
-      // Remappage de la partie du fond de la fenetre qui cacherait le menu...
-      Remap_window_backgrounds(conversion_table, Menu_Y_before_window, Screen_height);
-      /*
-         Il faudrait peut-être remapper les pointillés délimitant l'image.
-         Mais ça va être chiant parce qu'ils peuvent être affichés en mode Loupe.
-         Mais de toutes façons, c'est franchement facultatif...
-      */
-      // On passe la table juste pour ne rafficher que les couleurs modifiées
-      Display_menu_palette_avoiding_window(conversion_table);
-    }
-    Clear_border(MC_Black);
-  }
-
-}
-
-
 static int Diff(int i, int j) {
 	int dr = Main_palette[i].R - Main_palette[j].R;
 	int dg = Main_palette[i].G - Main_palette[j].G;
@@ -3026,269 +2947,15 @@ int Same_color(T_Components * palette, byte c1, byte c2)
 		return 1;
 	return 0;
 }
-
+// TODELETE
 void Compute_optimal_menu_colors(T_Components * palette)
 {
-	int i;
-	byte l[256];
-	byte s[256];
-	byte h;
-	int max_l = -1, min_l = 256;
-	int low_l, hi_l;
-	int delta_low = 999999;
-	int delta_high = 999999;
-	const int tolerence=16;
-	const T_Components cpc_colors[4] = {
-		{  0,  0,  0},
-		{  0,  0,128}, // Dark blue
-		{128,128,128}, // Grey
-		{255,255,255}
-	};
-
-	Old_black =MC_Black;
-	Old_dark = MC_Dark;
-	Old_light = MC_Light;
-	Old_white = MC_White;
-	Old_trans = MC_Trans;
-
-	// First method:
-	// If all close matches for the ideal colors exist, pick them.
-	for (i=255; i>=0; i--)
-	{
-
-		if (Round_palette_component(palette[i].R)/tolerence==Gfx->Default_palette[Gfx->Color[3]].R/tolerence
-				&& Round_palette_component(palette[i].G)/tolerence==Gfx->Default_palette[Gfx->Color[3]].G/tolerence
-				&& Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[3]].B/tolerence)
-		{
-			MC_White=i;
-			for (i=255; i>=0; i--)
-			{
-				if (Round_palette_component(palette[i].R)/tolerence==Gfx->Default_palette[Gfx->Color[2]].R/tolerence
-						&& Round_palette_component(palette[i].G)/tolerence==Gfx->Default_palette[Gfx->Color[2]].G/tolerence
-						&& Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[2]].B/tolerence)
-				{
-					MC_Light=i;
-					for (i=255; i>=0; i--)
-					{
-						if (Round_palette_component(palette[i].R)/tolerence==Gfx->Default_palette[Gfx->Color[1]].R/tolerence
-								&& Round_palette_component(palette[i].G)/tolerence==Gfx->Default_palette[Gfx->Color[1]].G/tolerence
-								&& Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[1]].B/tolerence)
-						{
-							MC_Dark=i;
-							for (i=255; i>=0; i--)
-							{
-								if (Round_palette_component(palette[i].R)/tolerence==Gfx->Default_palette[Gfx->Color[0]].R/tolerence
-										&& Round_palette_component(palette[i].G)/tolerence==Gfx->Default_palette[Gfx->Color[0]].G/tolerence
-										&& Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[0]].B/tolerence)
-								{
-									MC_Black=i;
-									// On cherche une couleur de transparence différente des 4 autres.
-									for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
-												(MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
-									Remap_menu_sprites();
-									return;
-								}
-							}
-            }
-          }
-        }
-      }
-    }
-  }
-  // Second method: For CPC 27-color modes only
-  // Try to find colors that just work
-  if (Get_palette_RGB_scale()==3)
-  for (i=255; i>=0; i--)
-  {
-    
-    if (Round_palette_component(palette[i].R)/tolerence==cpc_colors[3].R/tolerence
-     && Round_palette_component(palette[i].G)/tolerence==cpc_colors[3].G/tolerence
-     && Round_palette_component(palette[i].B)/tolerence==cpc_colors[3].B/tolerence)
-    {
-      MC_White=i;
-      for (i=255; i>=0; i--)
-      {
-        if (Round_palette_component(palette[i].R)/tolerence==cpc_colors[2].R/tolerence
-         && Round_palette_component(palette[i].G)/tolerence==cpc_colors[2].G/tolerence
-         && Round_palette_component(palette[i].B)/tolerence==cpc_colors[2].B/tolerence)
-        {
-          MC_Light=i;
-          for (i=255; i>=0; i--)
-          {
-            if (Round_palette_component(palette[i].R)/tolerence==cpc_colors[1].R/tolerence
-             && Round_palette_component(palette[i].G)/tolerence==cpc_colors[1].G/tolerence
-             && Round_palette_component(palette[i].B)/tolerence==cpc_colors[1].B/tolerence)
-            {
-              MC_Dark=i;
-              for (i=255; i>=0; i--)
-              {
-                if (Round_palette_component(palette[i].R)/tolerence==cpc_colors[0].R/tolerence
-                 && Round_palette_component(palette[i].G)/tolerence==cpc_colors[0].G/tolerence
-                 && Round_palette_component(palette[i].B)/tolerence==cpc_colors[0].B/tolerence)
-                {
-                  MC_Black=i;
-                  // On cherche une couleur de transparence différente des 4 autres.
-                  for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
-                                   (MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
-                  Remap_menu_sprites();
-                  return;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  
-  // Third method:
-
-  // Compute luminance for whole palette
-  // Take the darkest as black, the brightest white
-  for(i = 0; i < 256; i++)
-  {
-    RGB_to_HSL(palette[i].R, palette[i].G, palette[i].B, &h, &s[i], &l[i]);
-    // Another formula for lightness, in 0-255 range
-    //l[i]=Perceptual_lightness(&palette[i])/4062/255;
-    if (l[i] > max_l)
-    {
-      max_l = l[i];
-      MC_White = i;
-    }
-  }
-  for(i = 0; i < 256; i++)
-  {
-    if (l[i] < min_l && i!=MC_White)
-    {
-      min_l = l[i];
-      MC_Black = i;
-    }
-  }
-  // Alter the S values according to the L range - this is for the future
-  // comparisons, so that highly variable saturation doesn't weigh
-  // too heavily when the the lightness is in a narrow range.
-  for(i = 0; i < 256; i++)
-  {
-    s[i]=s[i]*(max_l-min_l)/255;
-  }
-  for(i = 0; i < 256; i++)
-  {
-    // Adjust (reduce) perceived saturation at both ends of L spectrum
-    if (l[i]>192)
-      s[i]=s[i]*(255-l[i])/64;
-    else if (l[i]<64)
-      s[i]=s[i]*l[i]/64;
-  }
-  
-
-  // Find color nearest to min+2(max-min)/3
-  // but at the same time we try to minimize the saturation so that the menu
-  // still looks grey
-  hi_l = min_l + 2*(max_l - min_l)/3;
-
-  for (i = 0; i < 256; i++)
-  {
-    if ( abs(l[i] - hi_l) + s[i]/2 < delta_high && i!=MC_White && i!=MC_Black)
-    {
-      delta_high = abs(l[i] - hi_l) + s[i]/2;
-      MC_Light = i;
-    }
-  }
-  
-  // Target "Dark color" is 2/3 between Light and Black
-  low_l = ((int)l[MC_Light]*2+l[MC_Black])/3;
-  for (i = 0; i < 256; i++)
-  {
-    if ( abs((int)l[i] - low_l) + s[i]/6 < delta_low && i!=MC_White && i!=MC_Black && i!=MC_Light)
-    {
-      delta_low = abs((int)l[i] - low_l)+ s[i]/6;
-      MC_Dark = i;
-    }
-  }
-  
-  
-  //if (l[MC_Light]<l[MC_Dark])
-  //{
-  //  // Not sure if that can happen, but just in case:
-  //  SWAP_BYTES(MC_Light, MC_Dark)
-  //}
-
-  // Si deux des couleurs choisies ont le même index, c'est destructif car 
-  // on fait ensuite un remap de l'image. Donc on évite ce problème (un
-  // peu brutalement)
-  // On commence par déplacer les gris, comme ça on a plus de chances de garder au moins
-  // le blanc et le noir
-  //while (MC_Dark == MC_Light || MC_Dark == MC_White || MC_Black == MC_Dark || Same_color(palette, MC_Dark, MC_White)) MC_Dark--;
-  //while (MC_White == MC_Light || MC_Dark == MC_Light || MC_Black == MC_Light || Same_color(palette, MC_Light, MC_Black)) MC_Light--;
-  //while (MC_White == MC_Light || MC_Dark == MC_White || MC_Black == MC_White) MC_White--;
-
-  // On cherche une couleur de transparence différente des 4 autres.
-  for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
-                   (MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
-  
   Remap_menu_sprites();
 }
 
 /// Remap all menu data when the palette changes or a new skin is loaded
+// TODELETE
 void Remap_menu_sprites()
 {
-  int i, j, k, l;
-
   compute_xor_table();
-  if ( (MC_Light!=Old_light)
-    || (MC_Dark!=Old_dark)
-    || (MC_White!=Old_white)
-    || (MC_Black !=Old_black )
-    || (MC_Trans!=Old_trans) )
-  {
-    // Mouse cursor sprites
-    for (k=0; k<NB_CURSOR_SPRITES; k++)
-      for (j=0; j<CURSOR_SPRITE_HEIGHT; j++)
-        for (i=0; i<CURSOR_SPRITE_WIDTH; i++)
-          Remap_pixel(&Gfx->Cursor_sprite[k][j][i]);
-    // Main menu bar
-    for (k=0; k<3; k++)
-      for (j=0; j<Menu_bars[MENUBAR_TOOLS].Height; j++)
-        for (i=0; i<Menu_bars[MENUBAR_TOOLS].Skin_width; i++)
-          Remap_pixel(&Gfx->Menu_block[k][j][i]);
-    // Menu sprites
-    for (l=0; l<2; l++)
-      for (k=0; k<NB_MENU_SPRITES; k++)
-        for (j=0; j<MENU_SPRITE_HEIGHT; j++)
-          for (i=0; i<MENU_SPRITE_WIDTH; i++)
-            Remap_pixel(&Gfx->Menu_sprite[l][k][j][i]);
-    // Effects sprites
-    for (k=0; k<NB_EFFECTS_SPRITES; k++)
-      for (j=0; j<EFFECT_SPRITE_HEIGHT; j++)
-        for (i=0; i<EFFECT_SPRITE_WIDTH; i++)
-          Remap_pixel(&Gfx->Effect_sprite[k][j][i]);
-    // Layers buttons
-    for (l=0; l<3; l++)
-      for (k=0; k<16; k++)
-        for (j=0; j<LAYER_SPRITE_HEIGHT; j++)
-          for (i=0; i<LAYER_SPRITE_WIDTH; i++)
-            Remap_pixel(&Gfx->Layer_sprite[l][k][j][i]);
-    
-    // Status bar
-    for (k=0; k<3; k++)
-      for (j=0; j<Menu_bars[MENUBAR_STATUS].Height; j++)
-        for (i=0; i<Menu_bars[MENUBAR_STATUS].Skin_width; i++)
-          Remap_pixel(&Gfx->Statusbar_block[k][j][i]);
-    // Layer bar
-    for (k=0; k<3; k++)
-      for (j=0; j<10; j++)
-        for (i=0; i<144; i++)
-          Remap_pixel(&Gfx->Layerbar_block[k][j][i]);
-    // Anim bar
-    for (k=0; k<3; k++)
-      for (j=0; j<14; j++)
-        for (i=0; i<236; i++)
-          Remap_pixel(&Gfx->Animbar_block[k][j][i]);
-
-    // Skin preview
-    for (j = 0; j < 173; j++)
-      for (i = 0; i < 16; i++)
-        Remap_pixel(&Gfx->Preview[i][j]);
-  }
-  Clear_border(MC_Black);
 }
