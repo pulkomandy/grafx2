@@ -229,7 +229,7 @@ void Render_out_rectangle(int x, int y, int w, int h, int alpha)
 void Render_separator(int x, int alpha)
 {
   SDL_Rect rectangle;
-  int height = (Windows_open == 0) ? Menu_Y : Menu_Y_before_window;
+  int height = Menu_Y;
   //SDL_SetRenderDrawBlendMode(Renderer_SDL, SDL_BLENDMODE_BLEND);
   Render_out_rectangle(x+Menu_factor_X, 0, (SEPARATOR_WIDTH-2)*Menu_factor_X, height, alpha);
   
@@ -301,13 +301,20 @@ void Flush_update(void)
     SDL_SetRenderDrawColor(Renderer_SDL, 0, 0, c, 255);
     SDL_RenderClear(Renderer_SDL);
   }
+  {
+    SDL_Rect source_rect = {0, Menu_Y, Screen_SDL->w, Screen_SDL->h-Menu_Y};
 
-  // Copy the fullscreen(old) at the bottom
-  r.x = 0;
-  r.y = Screen_SDL->h;
-  r.w = Screen_SDL->w;
-  r.h = Screen_SDL->h;
-  SDL_RenderCopy(Renderer_SDL, Texture_SDL, NULL, &r);
+    // Copy the fullscreen(old) at the bottom
+    r.x = 0;
+    r.y = Screen_SDL->h;
+    r.w = Screen_SDL->w;
+    r.h = Screen_SDL->h;
+    SDL_RenderCopy(Renderer_SDL, Texture_SDL, NULL, &r);
+    // Copy a second copy of toolbars (temporary)
+    r.y = Menu_Y;
+    r.h = Screen_SDL->h - Menu_Y;
+    SDL_RenderCopy(Renderer_SDL, Texture_SDL, &source_rect, &r);
+  }
   // Version with CreateTextureFromSurface
   //SDL_Texture *temp_tx = SDL_CreateTextureFromSurface(Renderer_SDL, surface);
   //dest_rect.x = 0;

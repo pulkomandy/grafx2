@@ -324,8 +324,8 @@ void Remap_image_highlevel(byte * conversion_table)
     conversion_table[Main_backups->Pages->Transparent_color];
 
   // On calcule les limites à l'écran de l'image
-  if (Main_image_height>=Menu_Y_before_window)
-    end_y=Menu_Y_before_window;
+  if (Main_image_height>=Menu_Y)
+    end_y=Menu_Y;
   else
     end_y=Main_image_height;
 
@@ -349,8 +349,8 @@ void Remap_image_highlevel(byte * conversion_table)
     else
       end_x_mag=(Main_X_zoom+(Main_image_width*Main_magnifier_factor));
 
-    if (Main_image_height*Main_magnifier_factor>=Menu_Y_before_window)
-      end_y_mag=Menu_Y_before_window;
+    if (Main_image_height*Main_magnifier_factor>=Menu_Y)
+      end_y_mag=Menu_Y;
     else
       end_y_mag=Main_image_height*Main_magnifier_factor;
   }
@@ -365,7 +365,7 @@ void Remap_image_highlevel(byte * conversion_table)
     // partie zoomée ne descend pas jusqu'en bas...
     Remap_zone_highlevel(Main_separator_position,end_y_mag,
                     (Main_separator_position+(SEPARATOR_WIDTH*Menu_factor_X)),
-                    Menu_Y_before_window,conversion_table);
+                    Menu_Y,conversion_table);
   }
 }
 
@@ -1812,7 +1812,7 @@ void Button_Palette(void)
           if (clicked_button==8)
           {
             Palette_edit_step(); // Disable Undo
-            Update_rect(0, 0, Screen_width, Menu_Y_before_window);
+            Update_rect(0, 0, Screen_width, Menu_Y);
             End_of_modification();
           }
           Wait_end_of_click();
@@ -2750,7 +2750,7 @@ void Button_Palette(void)
   Compute_optimal_menu_colors(Main_palette);
 
   // La variable employée ici n'a pas vraiment de rapport avec son nom...
-  need_to_remap=(Window_pos_Y+(Window_height*Menu_factor_Y)<Menu_Y_before_window);
+  need_to_remap=(Window_pos_Y+(Window_height*Menu_factor_Y)<Menu_Y);
 
   Close_window();
   Unselect_button(BUTTON_PALETTE);

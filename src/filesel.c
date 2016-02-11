@@ -2112,12 +2112,9 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   Back_color=initial_back_color;
 
   Compute_optimal_menu_colors(Main_palette);
-  temp=(Window_pos_Y+(Window_height*Menu_factor_Y)<Menu_Y_before_window);
 
   Close_window();
-
-  if (temp)
-    Display_menu();
+  Display_menu();
 
   Unselect_button((load)?BUTTON_LOAD:BUTTON_SAVE);
   Display_cursor();

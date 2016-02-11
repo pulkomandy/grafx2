@@ -599,7 +599,6 @@ byte Button_Quit_local_function(void)
 {
   short clicked_button;
   static char  filename[MAX_PATH_CHARACTERS];
-  byte  old_cursor_shape;
 
   if (!Main_image_is_modified)
     return 1;
@@ -635,7 +634,6 @@ byte Button_Quit_local_function(void)
         T_IO_Context save_context;
 
         Hide_cursor();
-        old_cursor_shape=Cursor_shape;
         Cursor_shape=CURSOR_SHAPE_HOURGLASS;
         Display_cursor();
        
@@ -644,7 +642,7 @@ byte Button_Quit_local_function(void)
         Destroy_context(&save_context);
         
         Hide_cursor();
-        Cursor_shape=old_cursor_shape;
+        Cursor_shape=CURSOR_SHAPE_ARROW;
         Display_cursor();
        
         if (!File_error)

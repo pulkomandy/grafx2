@@ -568,11 +568,6 @@ void Layer_preview_on(int * preview_is_visible)
     Menu_Y - previewH * Menu_factor_Y, Buttons_Pool[BUTTON_LAYER_SELECT].Width, previewH);
     *preview_is_visible = 1;
   
-    // Make the system think the menu is visible (Open_popup hides it)
-    // so Button_under_mouse still works
-    Menu_is_visible=Menu_is_visible_before_window;
-    Menu_Y=Menu_Y_before_window;
-
     for(layer = 0; layer < layercount; ++layer)
     {
       int offset;
@@ -1590,14 +1585,8 @@ void Open_window(word width,word height, const char * title)
 
   if (Windows_open == 1)
   {
-    Menu_is_visible_before_window=Menu_is_visible;
-    Menu_is_visible=0;
-    Menu_Y_before_window=Menu_Y;
-    Menu_Y=Screen_height;
-    Cursor_shape_before_window=Cursor_shape;
+    Cursor_shape_before_window = Cursor_shape;
     Cursor_shape=CURSOR_SHAPE_ARROW;
-    Paintbrush_hidden_before_window=Paintbrush_hidden;
-    Paintbrush_hidden=1;
     if (Allow_colorcycling)
     {
       Allow_colorcycling=0;
@@ -1684,13 +1673,9 @@ void Close_window(void)
   {
     Windows_open--;
   
-    Paintbrush_hidden=Paintbrush_hidden_before_window;
-  
     Compute_paintbrush_coordinates();
-  
-    Menu_Y=Menu_Y_before_window;
-    Menu_is_visible=Menu_is_visible_before_window;
     Cursor_shape=Cursor_shape_before_window;
+
     
     Check_menu_mode();
     Display_all_screen();
@@ -2264,18 +2249,6 @@ void Open_popup(word x_pos, word y_pos, word width,word height)
   // Frame noir puis en relief
   Window_display_frame_mono(0,0,width,height,MC_White);
 */
-  if (Windows_open == 1)
-  {
-    Menu_is_visible_before_window=Menu_is_visible;
-    Menu_is_visible=0;
-    Menu_Y_before_window=Menu_Y;
-    Menu_Y=Screen_height;
-    Cursor_shape_before_window=Cursor_shape;
-    Cursor_shape=CURSOR_SHAPE_ARROW;
-    Paintbrush_hidden_before_window=Paintbrush_hidden;
-    Paintbrush_hidden=1;
-  }
-
   // Initialisation des listes de boutons de la fenêtre
   Window_normal_button_list  =NULL;
   Window_palette_button_list =NULL;
@@ -2348,14 +2321,9 @@ void Close_popup(void)
   {
     Windows_open--;
   
-    Paintbrush_hidden=Paintbrush_hidden_before_window;
-  
+    // not sure if needed
     Compute_paintbrush_coordinates();
   
-    Menu_Y=Menu_Y_before_window;
-    Menu_is_visible=Menu_is_visible_before_window;
-    Cursor_shape=Cursor_shape_before_window;
-    
     Display_all_screen();
     Display_menu();
   }
@@ -2400,6 +2368,7 @@ short Wait_click_in_palette(T_Palette_button * button)
   short end_y  =button->Pos_Y+82;
   byte  selected_color;
   byte  old_hide_cursor;
+  byte  old_cursor_shape;
   byte  old_main_magnifier_mode;
 
   Hide_cursor();
@@ -2407,6 +2376,7 @@ short Wait_click_in_palette(T_Palette_button * button)
   old_main_magnifier_mode=Main_magnifier_mode;
   Main_magnifier_mode=0;
   Cursor_hidden=0;
+  old_cursor_shape=Cursor_shape;
   Cursor_shape=CURSOR_SHAPE_TARGET;
   Display_cursor();
 
@@ -2422,7 +2392,7 @@ short Wait_click_in_palette(T_Palette_button * button)
         Hide_cursor();
         selected_color=(((Mouse_X-Window_pos_X)/Menu_factor_X)-(button->Pos_X+2)) / 10 * 16 +
         (((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-(button->Pos_Y+3)) / 5;
-        Cursor_shape=CURSOR_SHAPE_ARROW;
+        Cursor_shape=old_cursor_shape;
         Cursor_hidden=old_hide_cursor;
         Main_magnifier_mode=old_main_magnifier_mode;
         Display_cursor();
@@ -2434,7 +2404,7 @@ short Wait_click_in_palette(T_Palette_button * button)
       {
         Hide_cursor();
         selected_color=Read_pixel(Mouse_X,Mouse_Y);
-        Cursor_shape=CURSOR_SHAPE_ARROW;
+        Cursor_shape=old_cursor_shape;
         Cursor_hidden=old_hide_cursor;
         Main_magnifier_mode=old_main_magnifier_mode;
         Display_cursor();
@@ -2445,7 +2415,7 @@ short Wait_click_in_palette(T_Palette_button * button)
     if ((Mouse_K==RIGHT_SIDE) || (Key==KEY_ESC))
     {
       Hide_cursor();
-      Cursor_shape=CURSOR_SHAPE_ARROW;
+      Cursor_shape=old_cursor_shape;
       Cursor_hidden=old_hide_cursor;
       Main_magnifier_mode=old_main_magnifier_mode;
       Display_cursor();
@@ -2463,31 +2433,23 @@ void Get_color_behind_window(byte * color, byte * click)
   short old_y=-1;
   short index;
   short a,b,c,d; // Variables temporaires et multitâches...
-  byte * buffer = NULL;
   char str[25];
   byte cursor_was_hidden;
+  byte old_cursor_shape;
 
 
   Hide_cursor();
 
   cursor_was_hidden=Cursor_hidden;
   Cursor_hidden=0;
-
-  a=Menu_Y;
-  Menu_Y=Menu_Y_before_window;
-  b=Menu_is_visible;
-  Menu_is_visible=Menu_is_visible_before_window;
-  Display_all_screen();
-  Display_menu();
-  Menu_Y=a;
-  Menu_is_visible=b;
-
+  old_cursor_shape=Cursor_shape;
   Cursor_shape=CURSOR_SHAPE_COLORPICKER;
   b=Paintbrush_hidden;
   Paintbrush_hidden=1;
+  
   c=-1; // color pointée: au début aucune, comme ça on initialise tout
-  if (Menu_is_visible_before_window)
-    Print_in_menu(Buttons_Pool[BUTTON_CHOOSE_COL].Tooltip,0);
+  if (Menu_is_visible)
+  Print_in_menu(Buttons_Pool[BUTTON_CHOOSE_COL].Tooltip,0);
 
   Display_cursor();
 
@@ -2502,7 +2464,7 @@ void Get_color_behind_window(byte * color, byte * click)
       if (a!=c)
       {
         c=a; // Mise à jour de la couleur pointée
-        if (Menu_is_visible_before_window)
+        if (Menu_is_visible)
         {
           sprintf(str,"%d",a);
           d=strlen(str);
@@ -2541,8 +2503,7 @@ void Get_color_behind_window(byte * color, byte * click)
     *click=0;
     Hide_cursor();
   }
-
-  Cursor_shape=CURSOR_SHAPE_ARROW;
+  Cursor_shape=old_cursor_shape;
   Paintbrush_hidden=b;
   Cursor_hidden=cursor_was_hidden;
   Display_cursor();
@@ -2561,10 +2522,10 @@ void Move_window(short dx, short dy)
   short original_y = Window_pos_Y;
   short width=Window_width*Menu_factor_X;
   short height=Window_height*Menu_factor_Y;
-  short a;
-  byte  b;
+  byte old_cursor_shape;
 
   Hide_cursor();
+  old_cursor_shape=Cursor_shape;
   Cursor_shape=CURSOR_SHAPE_MULTIDIRECTIONAL;
   Display_cursor();
 
@@ -2614,24 +2575,20 @@ void Move_window(short dx, short dy)
   if ((original_x!=Window_pos_X)
    || (original_y!=Window_pos_Y))
   {
-    Window_pos_X=original_x;
-    Window_pos_Y=original_y;
+    //Window_pos_X=original_x;
+    //Window_pos_Y=original_y;
   
-    a=Menu_Y;
-    Menu_Y=Menu_Y_before_window;
-    b=Menu_is_visible;
-    Menu_is_visible=Menu_is_visible_before_window;
     //Display_all_screen();
     //Display_menu();
-    Menu_Y=a;
-    Menu_is_visible=b;
+    //Menu_Y=a;
+    //Menu_is_visible=b;
 
     Window_pos_X=new_x;
     Window_pos_Y=new_y;
 
   }
   Hide_cursor();
-  Cursor_shape=CURSOR_SHAPE_ARROW;
+  Cursor_shape=old_cursor_shape;
   Display_cursor();
 
 }

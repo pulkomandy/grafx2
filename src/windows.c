@@ -1171,7 +1171,7 @@ void Verbose_message(const char *caption, const char * message )
   int last_space;
   int nb_char;
   char buffer[36];
-  byte original_cursor_shape = Cursor_shape;
+  byte original_cursor_shape=Cursor_shape;
 
   
   Open_window(300,160,caption);

@@ -446,10 +446,6 @@ GFX2_GLOBAL word  Menu_palette_cell_width;
 
 /// Number of stacked windows currently displayed. 0 when no window is present.
 GFX2_GLOBAL byte Windows_open;
-/// Backup of ::Menu_is_visible, used to store it while a window is open.
-GFX2_GLOBAL byte Menu_is_visible_before_window;
-/// Backup of ::Menu_Y, used to store it while a window is open.
-GFX2_GLOBAL word Menu_Y_before_window;
 /// Backup of ::Paintbrush_hidden, used to store it while a window is open.
 GFX2_GLOBAL byte Paintbrush_hidden_before_window;
 
