@@ -151,8 +151,6 @@ void Colorpicker_1_1(void)
 // Souris effacée: Non
 //
 {
-  char str[4];
-
   if ( (Paintbrush_X>=0) && (Paintbrush_Y>=0)
     && (Paintbrush_X<Main_image_width)
     && (Paintbrush_Y<Main_image_height) )
@@ -172,13 +170,7 @@ void Colorpicker_1_1(void)
       Set_fore_color(Colorpicker_color);
     }
 
-    if (Menu_is_visible)
-    {
-      Print_coordinates();
-      Num2str(Colorpicker_color,str,3);
-      Print_in_menu(str,20);
-      Print_general(170*Menu_factor_X,Menu_status_Y," ",0,Colorpicker_color);
-    }
+    Print_coordinates();
     Display_cursor();
   }
 }
@@ -193,8 +185,6 @@ void Colorpicker_2_1(void)
 // Souris effacée: Non
 //
 {
-  char str[4];
-
   if ( (Paintbrush_X>=0) && (Paintbrush_Y>=0)
     && (Paintbrush_X<Main_image_width)
     && (Paintbrush_Y<Main_image_height) )
@@ -214,13 +204,7 @@ void Colorpicker_2_1(void)
       Set_back_color(Colorpicker_color);
     }
 
-    if (Menu_is_visible)
-    {
-      Print_coordinates();
-      Num2str(Colorpicker_color,str,3);
-      Print_in_menu(str,20);
-      Print_general(170*Menu_factor_X,Menu_status_Y," ",0,Colorpicker_color);
-    }
+    Print_coordinates();
     Display_cursor();
   }
 }
@@ -294,8 +278,6 @@ void Rightclick_colorpick_2_1(void)
 // Souris effacée: Non
 //
 {
-  char str[4];
-
   if ( (Colorpicker_X!=Paintbrush_X)
     || (Colorpicker_Y!=Paintbrush_Y) )
   {
@@ -309,13 +291,7 @@ void Rightclick_colorpick_2_1(void)
     Colorpicker_X=Paintbrush_X;
     Colorpicker_Y=Paintbrush_Y;
 
-    if (Menu_is_visible)
-    {
-      Print_coordinates();
-      Num2str(Colorpicker_color,str,3);
-      Print_in_menu(str,20);
-      Print_general(170*Menu_factor_X,Menu_status_Y," ",0,Colorpicker_color);
-    }
+    Print_coordinates();
   }
 }
 

@@ -633,14 +633,14 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   cursor_y+=8*gfx->Factor;
   
   // Copy unselected bitmaps to current ones
-  memcpy(gfx->Menu_block[2], gfx->Menu_block[0], 
-    Menu_bars[MENUBAR_TOOLS].Skin_width*Menu_bars[MENUBAR_TOOLS].Height);
-  memcpy(gfx->Layerbar_block[2], gfx->Layerbar_block[0],
-    sizeof(gfx->Layerbar_block[0]));
-  memcpy(gfx->Animbar_block[2], gfx->Animbar_block[0],
-    sizeof(gfx->Animbar_block[0]));
-  memcpy(gfx->Statusbar_block[2], gfx->Statusbar_block[0],
-    Menu_bars[MENUBAR_STATUS].Skin_width*Menu_bars[MENUBAR_STATUS].Height);
+  //memcpy(gfx->Menu_block[2], gfx->Menu_block[0], 
+  //  Menu_bars[MENUBAR_TOOLS].Skin_width*Menu_bars[MENUBAR_TOOLS].Height);
+  //memcpy(gfx->Layerbar_block[2], gfx->Layerbar_block[0],
+  //  sizeof(gfx->Layerbar_block[0]));
+  //memcpy(gfx->Animbar_block[2], gfx->Animbar_block[0],
+  //  sizeof(gfx->Animbar_block[0]));
+  //memcpy(gfx->Statusbar_block[2], gfx->Statusbar_block[0],
+  //  Menu_bars[MENUBAR_STATUS].Skin_width*Menu_bars[MENUBAR_STATUS].Height);
   
   
   return 0;
@@ -711,6 +711,8 @@ void Destroy_graphics(T_Gui_skin *skin)
     SDL_DestroyTexture(skin->Help_font_t3[i]);
   for(i=0; i< 64; i++)
     SDL_DestroyTexture(skin->Help_font_t4[i]);
+  for(i=0; i< NB_ICON_SPRITES; i++)
+    SDL_DestroyTexture(skin->Icon_sprite[i]);
   
   free(skin);
 }
@@ -2841,7 +2843,7 @@ void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
   MC_Trans = gfx->Color_trans;
 
   // Set menubars to point to the new data
-  for (i=0; i<3; i++)
+  for (i=0; i<2; i++)
   {
     Menu_bars[MENUBAR_TOOLS ].Skin[i] = (byte*)&(gfx->Menu_block[i]);
     Menu_bars[MENUBAR_LAYERS].Skin[i] = (byte*)&(gfx->Layerbar_block[i]);

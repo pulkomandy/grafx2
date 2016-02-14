@@ -354,6 +354,13 @@ try_again:
       Menu_factor_X=Min(factor,abs(Config.Ratio));
       Menu_factor_Y=Min(factor,abs(Config.Ratio));
   }
+  
+  // Clear previous menu textures
+  for (index=0; index<MENUBAR_COUNT; index++)
+  {
+    SDL_DestroyTexture(Menu_bars[index].Menu_texture);
+    Menu_bars[index].Menu_texture = NULL;
+  }
     
   free(Horizontal_line_buffer);
   Horizontal_line_buffer=(byte *)malloc( 

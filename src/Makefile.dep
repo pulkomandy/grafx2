@@ -78,7 +78,7 @@ $(OBJDIR)/realpath.o: realpath.c
 $(OBJDIR)/saveini.o: saveini.c const.h global.h struct.h readini.h io.h errors.h \
  misc.h saveini.h setup.h windows.h
 $(OBJDIR)/sdlscreen.o: sdlscreen.c global.h struct.h const.h sdlscreen.h errors.h \
- misc.h
+ misc.h windows.h
 $(OBJDIR)/setup.o: setup.c struct.h const.h io.h setup.h
 $(OBJDIR)/shade.o: shade.c global.h struct.h const.h graph.h engine.h errors.h \
  misc.h readline.h help.h sdlscreen.h windows.h input.h shade.h
@@ -94,4 +94,4 @@ $(OBJDIR)/transform.o: transform.c global.h struct.h const.h transform.h engine.
 $(OBJDIR)/version.o: version.c
 $(OBJDIR)/windows.o: windows.c windows.h struct.h const.h engine.h errors.h \
  global.h graph.h input.h misc.h op_c.h colorred.h readline.h sdlscreen.h \
- palette.h
+ palette.h pxsimple.h

@@ -472,10 +472,10 @@ typedef struct
   // Menu and other graphics
   
   /// Bitmap data for the menu, a single rectangle.
-  byte Menu_block[3][35][MENU_WIDTH];
-  byte Layerbar_block[3][10][144];
-  byte Animbar_block[3][14][236];
-  byte Statusbar_block[3][9][20];
+  byte Menu_block[2][35][MENU_WIDTH];
+  byte Layerbar_block[2][10][144];
+  byte Animbar_block[2][14][236];
+  byte Statusbar_block[2][9][20];
   /// Bitmap data for the icons that are displayed over the menu.
   byte Menu_sprite[2][NB_MENU_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
   /// Bitmap data for the different "effects" icons.

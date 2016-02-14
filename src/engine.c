@@ -1390,18 +1390,12 @@ void Main_handler(void)
         // Si le curseur n'est pas sur un bouton
         if (button_index==-1)
         {
-          if (Menu_is_visible)
-          {
-            // On nettoie les coordonnées
-            Hide_cursor();
-            
-            /*if (Gfx->Hover_effect && prev_button_number > -1 && !Buttons_Pool[prev_button_number].Pressed)
-              Draw_menu_button(prev_button_number, BUTTON_RELEASED);
-            */
-            Block(18*Menu_factor_X,Menu_status_Y,192*Menu_factor_X,Menu_factor_Y<<3,MC_Light);
-            Update_rect(18*Menu_factor_X,Menu_status_Y,192*Menu_factor_X,Menu_factor_Y<<3);
-            Display_cursor();
-          }
+          // Clear status line
+          SDL_Color light_color = Screen_SDL->format->palette->colors[MC_Light];
+          Rectangle_on_texture(Menu_bars[MENUBAR_STATUS].Menu_texture,
+            18*Menu_factor_X, Menu_factor_Y,
+            24*8*Menu_factor_X, 8*Menu_factor_Y,
+            light_color.r, light_color.g, light_color.b, 255, SDL_BLENDMODE_NONE);
         }
         else
         {
@@ -1439,10 +1433,12 @@ void Main_handler(void)
               {
                 if ( (Old_MX!=Mouse_X) || (Old_MY!=Mouse_Y) )
                 {
-                  Hide_cursor();
-                  Block(18*Menu_factor_X,Menu_status_Y,192*Menu_factor_X,Menu_factor_Y<<3,MC_Light);
-                  Update_rect(18*Menu_factor_X,Menu_status_Y,192*Menu_factor_X,8*Menu_factor_Y);
-                  Display_cursor();
+                  // Clear status line
+                  SDL_Color light_color = Screen_SDL->format->palette->colors[MC_Light];
+                  Rectangle_on_texture(Menu_bars[MENUBAR_STATUS].Menu_texture,
+                    18*Menu_factor_X, Menu_factor_Y,
+                    24*8*Menu_factor_X, 8*Menu_factor_Y,
+                    light_color.r, light_color.g, light_color.b, 255, SDL_BLENDMODE_NONE);
                 }
               }
             }
@@ -1550,7 +1546,7 @@ void Open_window(word width,word height, const char * title)
   Window_width=width;
   Window_height=height;
   
-  Window_texture=Create_rendering_texture(width, height);
+  Window_texture=Create_rendering_texture(width*Menu_factor_X, height*Menu_factor_Y);
 
   // Positionnement de la fenêtre
   Window_pos_X=(Screen_width-(width*Menu_factor_X))>>1;
@@ -2241,7 +2237,7 @@ void Open_popup(word x_pos, word y_pos, word width,word height)
   Window_pos_Y=y_pos;
   Window_draggable=0;
 
-  Window_texture=Create_rendering_texture(width, height);
+  Window_texture=Create_rendering_texture(width*Menu_factor_X, height*Menu_factor_Y);
 /*
   // Fenêtre grise
   Window_rectangle(1,1,width-2,height-2,MC_Light);
@@ -2432,7 +2428,7 @@ void Get_color_behind_window(byte * color, byte * click)
   short old_x=-1;
   short old_y=-1;
   short index;
-  short a,b,c,d; // Variables temporaires et multitâches...
+  short a,b,c; // Variables temporaires et multitâches...
   char str[25];
   byte cursor_was_hidden;
   byte old_cursor_shape;
@@ -2466,23 +2462,14 @@ void Get_color_behind_window(byte * color, byte * click)
         c=a; // Mise à jour de la couleur pointée
         if (Menu_is_visible)
         {
-          sprintf(str,"%d",a);
-          d=strlen(str);
-          strcat(str,"   (");
-          sprintf(str+strlen(str),"%d",Main_palette[a].R);
-          strcat(str,",");
-          sprintf(str+strlen(str),"%d",Main_palette[a].G);
-          strcat(str,",");
-          sprintf(str+strlen(str),"%d",Main_palette[a].B);
-          strcat(str,")");
-          a=24-d;
-          for (index=strlen(str); index<a; index++)
+          sprintf(str,"%s%3d  (%3d,%3d,%3d)","Color ", a, Main_palette[a].R, Main_palette[a].G, Main_palette[a].B);
+          // append with spaces up to 24
+          for(index=strlen(str); index<24; index++)
             str[index]=' ';
-          str[a]=0;
-          Print_in_menu(str,strlen(Buttons_Pool[BUTTON_CHOOSE_COL].Tooltip));
-
-          Print_general((26+((d+strlen(Buttons_Pool[BUTTON_CHOOSE_COL].Tooltip))<<3))*Menu_factor_X,
-              Menu_status_Y," ",0,c);
+          str[index]='\0';
+          Print_in_menu(str,0);
+          // Single square of picked color
+          Rectangle_on_texture(Menu_bars[MENUBAR_STATUS].Menu_texture, 90*Menu_factor_X, Menu_factor_Y, Menu_factor_X<<3, Menu_factor_Y<<3, Main_palette[c].R, Main_palette[c].G, Main_palette[c].B, 255, SDL_BLENDMODE_NONE);
         }
       }
       Display_cursor();

@@ -44,10 +44,10 @@
 
 T_Toolbar_button Buttons_Pool[NB_BUTTONS];
 T_Menu_Bar Menu_bars[MENUBAR_COUNT] = 
-  {{MENU_WIDTH,  9, 1, 45, {NULL,NULL,NULL},  20, BUTTON_HIDE }, // Status
-  {MENU_WIDTH, 14, 1, 35, {NULL,NULL,NULL}, 236, BUTTON_ANIM_PLAY }, // Animation
-  {MENU_WIDTH, 10, 1, 35, {NULL,NULL,NULL}, 144, BUTTON_LAYER_SELECT }, // Layers
-  {MENU_WIDTH, 35, 1,  0, {NULL,NULL,NULL}, 254, BUTTON_CHOOSE_COL }} // Main
+  {{MENU_WIDTH, 9, 1, 45, {NULL,NULL}, NULL, 20,  BUTTON_HIDE }, // Status
+  {MENU_WIDTH, 14, 1, 35, {NULL,NULL}, NULL, 236, BUTTON_ANIM_PLAY }, // Animation
+  {MENU_WIDTH, 10, 1, 35, {NULL,NULL}, NULL, 144, BUTTON_LAYER_SELECT }, // Layers
+  {MENU_WIDTH, 35, 1,  0, {NULL,NULL}, NULL, 254, NB_BUTTONS }} // Main
   ;
 
 
@@ -71,15 +71,21 @@ word Palette_cells_Y()
 // Affichage d'un pixel dans le menu (si visible)
 void Pixel_in_menu(word bar, word x, word y, byte color)
 {
-  if (Menu_is_visible && Menu_bars[bar].Visible)
-    Block(x*Menu_factor_X,(y+Menu_bars[bar].Top)*Menu_factor_Y+Menu_Y,Menu_factor_X,Menu_factor_Y,color);
+  (void)bar;
+  (void)x;
+  (void)y;
+  (void)color;
+  //if (Menu_is_visible && Menu_bars[bar].Visible)
+  //  Block(x*Menu_factor_X,(y+Menu_bars[bar].Top)*Menu_factor_Y+Menu_Y,Menu_factor_X,Menu_factor_Y,color);
 }
 
 // Affichage d'un pixel dans le menu et met a jour la bitmap de skin
 void Pixel_in_menu_and_skin(word bar, word x, word y, byte color)
 {
   Pixel_in_menu(bar, x, y, color);
-  Menu_bars[bar].Skin[2][y*Menu_bars[bar].Skin_width + x] = color;  
+  //Menu_bars[bar].Skin[2][y*Menu_bars[bar].Skin_width + x] = color;
+  Rectangle_on_texture(Menu_bars[bar].Menu_texture, (x*Menu_factor_X), (y*Menu_factor_Y), Menu_factor_X, Menu_factor_Y, Screen_SDL->format->palette->colors[color].r, Screen_SDL->format->palette->colors[color].g, Screen_SDL->format->palette->colors[color].b, 255, SDL_BLENDMODE_NONE);
+  
 }
 
 // Affichage d'un pixel dans la fenêtre (la fenêtre doit être visible)
@@ -184,13 +190,22 @@ void Window_display_frame(word x_pos,word y_pos,word width,word height)
 
 void Display_foreback(void)
 {
-  if (Menu_is_visible && Menu_bars[MENUBAR_TOOLS].Visible)
-  {
-    Block((MENU_WIDTH-17)*Menu_factor_X,Menu_Y+Menu_factor_Y,Menu_factor_X<<4,Menu_factor_Y*7,Back_color);
-    Block((MENU_WIDTH-13)*Menu_factor_X,Menu_Y+(Menu_factor_Y<<1),Menu_factor_X<<3,Menu_factor_Y*5,Fore_color);
-
-    Update_rect((MENU_WIDTH-17)*Menu_factor_X,Menu_Y+Menu_factor_Y,Menu_factor_X<<4,Menu_factor_Y*7);
-  }
+  //if (Menu_is_visible && Menu_bars[MENUBAR_TOOLS].Visible)
+  //{
+  //  Block((MENU_WIDTH-17)*Menu_factor_X,Menu_Y+Menu_factor_Y,Menu_factor_X<<4,Menu_factor_Y*7,Back_color);
+  //  Block((MENU_WIDTH-13)*Menu_factor_X,Menu_Y+(Menu_factor_Y<<1),Menu_factor_X<<3,Menu_factor_Y*5,Fore_color);
+  //
+  //    Update_rect((MENU_WIDTH-17)*Menu_factor_X,Menu_Y+Menu_factor_Y,Menu_factor_X<<4,Menu_factor_Y*7);
+  //}
+  Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
+    (MENU_WIDTH-17)*Menu_factor_X, Menu_factor_Y,
+    Menu_factor_X<<4,Menu_factor_Y*7,
+    Main_palette[Back_color].R, Main_palette[Back_color].G, Main_palette[Back_color].B, 255, SDL_BLENDMODE_NONE);
+  Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
+    (MENU_WIDTH-13)*Menu_factor_X, 2*Menu_factor_Y,
+    Menu_factor_X<<3,Menu_factor_Y*5,
+    Main_palette[Fore_color].R, Main_palette[Fore_color].G, Main_palette[Fore_color].B, 255, SDL_BLENDMODE_NONE);
+    
 }
 
 /*! Get the top left corner for the palette cell of a color
@@ -599,7 +614,7 @@ void Display_layerbar(void)
     // Block((Menu_bars[MENUBAR_ANIMATION].Skin_width)*Menu_factor_X,(0+Menu_bars[MENUBAR_ANIMATION].Top)*Menu_factor_Y+Menu_Y,8*8*Menu_factor_X,8*Menu_factor_Y,MC_Light);
     // Frame #/#
     snprintf(str, 5, "#%3d", Main_current_layer+1);
-    Print_general((82)*Menu_factor_X,(Menu_bars[MENUBAR_ANIMATION].Top+3)*Menu_factor_Y+Menu_Y,str,MC_Black,MC_Light);
+    Print_in_texture(Menu_bars[MENUBAR_ANIMATION].Menu_texture, str, 82*Menu_factor_X, 3*Menu_factor_Y, MC_Black, MC_Light);
     Update_rect(
       (82)*Menu_factor_X,
       (Menu_bars[MENUBAR_ANIMATION].Top+3)*Menu_factor_Y+Menu_Y,
@@ -615,8 +630,36 @@ void Display_menu(void)
   word x_pos;
   word y_pos;
   int8_t current_menu;
-  char str[4];
+  int button;
 
+  // Reallocate menu textures if necessary
+  for (current_menu=0; current_menu<MENUBAR_COUNT; current_menu++)
+  {
+    // allocate texture if not already there
+    if (!Menu_bars[current_menu].Menu_texture)
+    {
+      Menu_bars[current_menu].Menu_texture = Create_rendering_texture(Screen_width, Menu_bars[current_menu].Height*Menu_factor_Y);
+      // Debug : color the bars
+      Rectangle_on_texture(Menu_bars[current_menu].Menu_texture, 0, 0, Screen_width, Menu_bars[current_menu].Height*Menu_factor_Y, (current_menu+2)*10, (current_menu+2)*30, (current_menu+2)*50, 255, SDL_BLENDMODE_NONE);
+    }
+  }
+  // Redraw entire menus to textures
+  // 
+  // Menu_bars[MENUBAR_TOOLS ].Skin[i] = (byte*)&(gfx->Menu_block[i]);
+  // Menu_bars[MENUBAR_LAYERS].Skin[i] = (byte*)&(gfx->Layerbar_block[i]);
+  // Menu_bars[MENUBAR_ANIMATION].Skin[i] = (byte*)&(gfx->Animbar_block[i]);
+  // Menu_bars[MENUBAR_STATUS].Skin[i] = (byte*)&(gfx->Statusbar_block[i]);
+
+  // Refresh all buttons according to status
+  current_menu = 0;
+  for (button=0; button<NB_BUTTONS; button++)
+  {
+    while (button > Menu_bars[current_menu].Last_button_index)
+      current_menu++;
+      
+      //if (Buttons_Pool[button].Pressed || button==BUTTON_PAINTBRUSHES)
+        Draw_menu_button(button, Buttons_Pool[button].Pressed);
+  }
 
   if (Menu_is_visible)
   {
@@ -628,7 +671,11 @@ void Display_menu(void)
         // Skinned area
         for (y_pos=0;y_pos<Menu_bars[current_menu].Height;y_pos++)
           for (x_pos=0;x_pos<Menu_bars[current_menu].Skin_width;x_pos++)
-            Pixel_in_menu(current_menu, x_pos, y_pos, Menu_bars[current_menu].Skin[2][y_pos * Menu_bars[current_menu].Skin_width + x_pos]);
+          {
+            //byte c = Menu_bars[current_menu].Skin[2][y_pos * Menu_bars[current_menu].Skin_width + x_pos];
+            //Pixel_in_menu(current_menu, x_pos, y_pos, c);
+            //Rectangle_on_texture(Menu_bars[current_menu].Menu_texture, (x_pos*Menu_factor_X), (y_pos*Menu_factor_Y), Menu_factor_X, Menu_factor_Y, Screen_SDL->format->palette->colors[c].r, Screen_SDL->format->palette->colors[c].g, Screen_SDL->format->palette->colors[c].b, 255, SDL_BLENDMODE_NONE);
+          }
 
         if (current_menu == MENUBAR_LAYERS || current_menu == MENUBAR_ANIMATION)
         {
@@ -667,9 +714,6 @@ void Display_menu(void)
         {
           // The colorpicker display the color id between the parentheses
           Print_in_menu("X:       Y:       (    )",0);
-          Num2str(Colorpicker_color,str,3);
-          Print_in_menu(str,20);
-          Print_general(170*Menu_factor_X,Menu_status_Y," ",0,Colorpicker_color);
         }
         Print_coordinates();
       }
@@ -681,36 +725,6 @@ void Display_menu(void)
 }
 
 // -- Affichage de texte -----------------------------------------------------
-
-  // -- Afficher une chaîne n'importe où à l'écran --
-
-void Print_general(short x,short y,const char * str,byte text_color,byte background_color)
-{
-  word  index;
-  int x_pos;
-  int y_pos;
-  byte *font_pixel;
-  short real_x;
-  short real_y;
-  byte repeat_menu_x_factor;
-  byte repeat_menu_y_factor;
-
-  real_y=y;
-  for (y_pos=0;y_pos<8<<3;y_pos+=1<<3)
-  {
-    real_x=0; // Position dans le buffer
-    for (index=0;str[index]!='\0';index++)
-    {
-      // Pointeur sur le premier pixel du caractère
-      font_pixel=Menu_font+(((unsigned char)str[index])<<6);
-      for (x_pos=0;x_pos<8;x_pos+=1)
-        for (repeat_menu_x_factor=0;repeat_menu_x_factor<Menu_factor_X;repeat_menu_x_factor++)
-          Horizontal_line_buffer[real_x++]=*(font_pixel+x_pos+y_pos)?text_color:background_color;
-    }
-    for (repeat_menu_y_factor=0;repeat_menu_y_factor<Menu_factor_Y;repeat_menu_y_factor++)
-      Display_line_fast(x,real_y++,index*Menu_factor_X*8,Horizontal_line_buffer);
-  }
-}
 
 ///Draws a char in a window, checking for bounds
 void Print_in_window_limited(short x,short y,const char * str,byte size,byte text_color,byte background_color)
@@ -742,8 +756,7 @@ void Print_in_window(short x,short y,const char * str,byte text_color,byte backg
 // Draws a string in the menu's status bar
 void Print_in_menu(const char * str, short position)
 {
-  Print_general((18+(position<<3))*Menu_factor_X,Menu_status_Y,str,MC_Black,MC_Light);
-  Update_status_line(position, strlen(str));
+  Print_in_texture(Menu_bars[MENUBAR_STATUS].Menu_texture, str, (18+(position<<3))*Menu_factor_X, Menu_factor_Y, MC_Black, MC_Light);
 }
 
 /// Draws the mouse coordinates on the menu
@@ -769,7 +782,8 @@ void Print_coordinates(void)
 
       Num2str(Colorpicker_color,temp,3);
       Print_in_menu(temp,20);
-      Print_general(170*Menu_factor_X,Menu_status_Y," ",0,Colorpicker_color);
+      // Single square of picked color
+      Rectangle_on_texture(Menu_bars[MENUBAR_STATUS].Menu_texture, 170*Menu_factor_X, Menu_factor_Y, Menu_factor_X<<3, Menu_factor_Y<<3, Main_palette[Colorpicker_color].R, Main_palette[Colorpicker_color].G, Main_palette[Colorpicker_color].B, 255, SDL_BLENDMODE_NONE);
     }
 
     Num2str((dword)Paintbrush_X,temp,4);
@@ -786,6 +800,7 @@ void Print_filename(void)
   word max_size;
   word string_size;
   char display_string[256];
+  SDL_Color light_color = Screen_SDL->format->palette->colors[MC_Light];
 
   // Determine maximum size, in characters
   max_size = 12 + (Screen_width / Menu_factor_X - 320) / 8;
@@ -802,10 +817,13 @@ void Print_filename(void)
     display_string[string_size-1]=ELLIPSIS_CHARACTER;
   }
   // Erase whole area
-  Block(Screen_width-max_size*8*Menu_factor_X,
-    Menu_status_Y,Menu_factor_X*max_size*8,Menu_factor_Y<<3,MC_Light);
+  Rectangle_on_texture(Menu_bars[MENUBAR_STATUS].Menu_texture,
+    Screen_width-max_size*8*Menu_factor_X, Menu_factor_Y,
+    max_size*8*Menu_factor_X, 8*Menu_factor_Y,
+    light_color.r, light_color.g, light_color.b, 255, SDL_BLENDMODE_NONE);
   // Print
-  Print_general(Screen_width-(string_size<<3)*Menu_factor_X,Menu_status_Y,display_string,MC_Black,MC_Light);
+  Print_in_texture(Menu_bars[MENUBAR_STATUS].Menu_texture, display_string, 
+    Screen_width-max_size*8*Menu_factor_X, Menu_factor_Y, MC_Black, MC_Light);
 }
 
 // Fonction d'affichage d'une chaine numérique avec une fonte très fine

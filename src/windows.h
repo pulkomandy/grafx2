@@ -73,7 +73,6 @@ int Pick_color_in_palette(void);
 word Palette_cells_X(void);
 word Palette_cells_Y(void);
 
-void Print_general(short x,short y,const char * str,byte text_color,byte background_color);
 void Print_in_window(short x,short y,const char * str,byte text_color,byte background_color);
 void Print_in_window_limited(short x,short y,const char * str,byte size,byte text_color,byte background_color);
 void Print_in_menu(const char * str, short position);
@@ -157,7 +156,8 @@ typedef struct {
   word Height;
   byte Visible;
   word Top; ///< Relative to the top line of the menu, hidden bars don't count.
-  byte* Skin[3]; ///< [0] has normal buttons, [1] has selected buttons, [2] is current.
+  byte* Skin[2]; ///< [0] has normal buttons, [1] has selected buttons, [2] is current.
+  SDL_Texture *Menu_texture;
   word Skin_width;
   byte Last_button_index;
 } T_Menu_Bar;

@@ -33,6 +33,7 @@
 #include "sdlscreen.h"
 #include "errors.h"
 #include "misc.h"
+#include "windows.h"
 
 // Update method that does a large number of small rectangles, aiming
 // for a minimum number of total pixels updated.
@@ -301,6 +302,23 @@ void Flush_update(void)
     SDL_SetRenderDrawColor(Renderer_SDL, 0, 0, c, 255);
     SDL_RenderClear(Renderer_SDL);
   }
+  // Menus
+  if (Menu_is_visible)
+  {
+    int current_menu;
+    for (current_menu = MENUBAR_COUNT - 1; current_menu >= 0; current_menu --)
+    {
+      if(Menu_bars[current_menu].Visible)
+      {
+        r.x = 0;
+        r.y = Menu_Y + Menu_bars[current_menu].Top*Menu_factor_Y;
+        r.w = Screen_SDL->w;
+        r.h = Menu_bars[current_menu].Height*Menu_factor_Y;
+        SDL_RenderCopy(Renderer_SDL, Menu_bars[current_menu].Menu_texture, NULL, &r);
+      }
+    }
+  }
+  
   {
     SDL_Rect source_rect = {0, Menu_Y, Screen_SDL->w, Screen_SDL->h-Menu_Y};
 
@@ -311,9 +329,9 @@ void Flush_update(void)
     r.h = Screen_SDL->h;
     SDL_RenderCopy(Renderer_SDL, Texture_SDL, NULL, &r);
     // Copy a second copy of toolbars (temporary)
-    r.y = Menu_Y;
-    r.h = Screen_SDL->h - Menu_Y;
-    SDL_RenderCopy(Renderer_SDL, Texture_SDL, &source_rect, &r);
+    //r.y = Menu_Y;
+    //r.h = Screen_SDL->h - Menu_Y;
+    //SDL_RenderCopy(Renderer_SDL, Texture_SDL, &source_rect, &r);
   }
   // Version with CreateTextureFromSurface
   //SDL_Texture *temp_tx = SDL_CreateTextureFromSurface(Renderer_SDL, surface);
@@ -356,19 +374,18 @@ void Flush_update(void)
   // Icon
   do
   {
-    if (Cursor_shape <= CURSOR_SHAPE_BUCKET)
+    byte shape;
+    int x_factor = 1;
+    int y_factor = 1;
+    
+    // If the cursor is over the menu or over the split separator, cursor becomes an arrow.
+    if ( ( Mouse_Y>=Menu_Y || ( Main_magnifier_mode && Mouse_X>=Main_separator_position && Mouse_X<Main_X_zoom ) )
+      && !Windows_open && Cursor_shape!=CURSOR_SHAPE_HOURGLASS)
+      shape=CURSOR_SHAPE_ARROW;
+    else
+      shape=Cursor_shape;
+    if (shape <= CURSOR_SHAPE_BUCKET)
     {
-      byte shape;
-      int x_factor = 1;
-      int y_factor = 1;
-      
-      // If the cursor is over the menu or over the split separator, cursor becomes an arrow.
-      if ( ( Mouse_Y>=Menu_Y || ( Main_magnifier_mode && Mouse_X>=Main_separator_position && Mouse_X<Main_X_zoom ) )
-        && !Windows_open && Cursor_shape!=CURSOR_SHAPE_HOURGLASS)
-        shape=CURSOR_SHAPE_ARROW;
-      else
-        shape=Cursor_shape;
-      
       if (shape==CURSOR_SHAPE_ARROW || shape==CURSOR_SHAPE_HOURGLASS || shape==CURSOR_SHAPE_HORIZONTAL)
       {
         // These shapes are always scaled to UI factor.
@@ -639,7 +656,7 @@ SDL_Texture * Create_texture(SDL_Surface *source, int x, int y, int w, int h)
 
 SDL_Texture * Create_rendering_texture(int width, int height)
 {
-  SDL_Texture * texture = SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_TARGET, width*Menu_factor_X, height*Menu_factor_Y);
+  SDL_Texture * texture = SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_TARGET, width, height);
   SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
   // Fill with transparency : needed for popups
   SDL_SetRenderTarget(Renderer_SDL, texture);
@@ -678,6 +695,25 @@ void Window_print_char(short x_pos,short y_pos,const unsigned char c,byte text_c
   SDL_RenderFillRect(Renderer_SDL, &rectangle);
   SDL_SetTextureColorMod(Gfx->Font[c], Main_palette[text_color].R, Main_palette[text_color].G, Main_palette[text_color].B);
   SDL_RenderCopy(Renderer_SDL, Gfx->Font[c], NULL, &rectangle);
+}
+
+void Print_in_texture(SDL_Texture * texture, const char * str, short x, short y, byte text_color,byte background_color)
+{
+  int i;
+  SDL_Rect rectangle = {x, y, 8*Menu_factor_X*strlen(str), 8*Menu_factor_Y};
+  
+  SDL_SetRenderTarget(Renderer_SDL, texture);
+  SDL_SetRenderDrawBlendMode(Renderer_SDL, SDL_BLENDMODE_NONE);
+  SDL_SetRenderDrawColor(Renderer_SDL, Main_palette[background_color].R, Main_palette[background_color].G, Main_palette[background_color].B, 255);
+  SDL_RenderFillRect(Renderer_SDL, &rectangle);
+  rectangle.w = 8*Menu_factor_X;
+  rectangle.h = 8*Menu_factor_Y;
+  for (i=0; str[i]; i++)
+  {
+    SDL_SetTextureColorMod(Gfx->Font[(byte)str[i]], Main_palette[text_color].R, Main_palette[text_color].G, Main_palette[text_color].B);
+    SDL_RenderCopy(Renderer_SDL, Gfx->Font[(byte)str[i]], NULL, &rectangle);
+    rectangle.x += 8*Menu_factor_X;
+  }
 }
 
 // Display a brush in window, using the image's zoom level
