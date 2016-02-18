@@ -4491,13 +4491,7 @@ void Button_Adjust(void)
 
 void Display_effect_sprite(int sprite_number, short start_x, short start_y)
 {
-  short x,y,x_pos,y_pos;
-
-  for (y=0,y_pos=start_y;y<EFFECT_SPRITE_HEIGHT;y++,y_pos++)
-    for (x=0,x_pos=start_x;x<EFFECT_SPRITE_WIDTH;x++,x_pos++)
-      Pixel_in_window(x_pos,y_pos,Gfx->Effect_sprite[sprite_number][y][x]);
-
-  Update_rect(ToWinX(start_x),ToWinY(start_y),EFFECT_SPRITE_WIDTH*Menu_factor_X,EFFECT_SPRITE_HEIGHT*Menu_factor_Y);
+  Window_draw_texture(Gfx->Effect_sprite[sprite_number], start_x,start_y, EFFECT_SPRITE_WIDTH,EFFECT_SPRITE_HEIGHT);
 }
 
 

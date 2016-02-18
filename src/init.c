@@ -431,11 +431,10 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "effect sprite"))
         return 1;
     }
-    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Effect_sprite[i], EFFECT_SPRITE_WIDTH, EFFECT_SPRITE_HEIGHT, "effect sprite",0))
-      return 1;
-    cursor_x+=EFFECT_SPRITE_WIDTH;
+    gfx->Effect_sprite[i] = Create_texture(gui, cursor_x, cursor_y, EFFECT_SPRITE_WIDTH*gfx->Factor, EFFECT_SPRITE_HEIGHT*gfx->Factor);
+    cursor_x+=EFFECT_SPRITE_WIDTH*gfx->Factor;
   }
-  cursor_y+=EFFECT_SPRITE_HEIGHT;
+  cursor_y+=EFFECT_SPRITE_HEIGHT*gfx->Factor;
   
   // Layer sprite
   for (j=0; j<3; j++)
