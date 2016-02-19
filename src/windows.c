@@ -190,13 +190,6 @@ void Window_display_frame(word x_pos,word y_pos,word width,word height)
 
 void Display_foreback(void)
 {
-  //if (Menu_is_visible && Menu_bars[MENUBAR_TOOLS].Visible)
-  //{
-  //  Block((MENU_WIDTH-17)*Menu_factor_X,Menu_Y+Menu_factor_Y,Menu_factor_X<<4,Menu_factor_Y*7,Back_color);
-  //  Block((MENU_WIDTH-13)*Menu_factor_X,Menu_Y+(Menu_factor_Y<<1),Menu_factor_X<<3,Menu_factor_Y*5,Fore_color);
-  //
-  //    Update_rect((MENU_WIDTH-17)*Menu_factor_X,Menu_Y+Menu_factor_Y,Menu_factor_X<<4,Menu_factor_Y*7);
-  //}
   Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
     (MENU_WIDTH-17)*Menu_factor_X, Menu_factor_Y,
     Menu_factor_X<<4,Menu_factor_Y*7,
@@ -205,7 +198,6 @@ void Display_foreback(void)
     (MENU_WIDTH-13)*Menu_factor_X, 2*Menu_factor_Y,
     Menu_factor_X<<3,Menu_factor_Y*5,
     Main_palette[Fore_color].R, Main_palette[Fore_color].G, Main_palette[Fore_color].B, 255, SDL_BLENDMODE_NONE);
-    
 }
 
 /*! Get the top left corner for the palette cell of a color
@@ -230,11 +222,11 @@ word Palette_cell_Y(byte index)
 {
   if (Config.Palette_vertical)
   {
-    return Menu_Y+((1+(((index-First_color_in_palette)/Menu_cells_X)*(Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y)))*Menu_factor_Y);
+    return ((1+(((index-First_color_in_palette)/Menu_cells_X)*(Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y)))*Menu_factor_Y);
   }
   else
   {
-    return Menu_Y+((1+(((index-First_color_in_palette)%Menu_cells_Y)*(Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y)))*Menu_factor_Y);
+    return ((1+(((index-First_color_in_palette)%Menu_cells_Y)*(Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y)))*Menu_factor_Y);
   }
 }
 
@@ -270,8 +262,8 @@ void Frame_menu_color(byte id)
   word cell_height=Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y;
   byte color;
   
-  if (! Menu_bars[MENUBAR_TOOLS].Visible)
-    return;
+  //if (! Menu_bars[MENUBAR_TOOLS].Visible)
+  //  return;
 
   if (id==Fore_color)
     color = MC_White;
@@ -293,16 +285,21 @@ void Frame_menu_color(byte id)
       // But we have to find which color is above and below (not so easy) and for the horizontal, check we
       // are not at the edge of the palette. This makes a lot of cases to handle.
       // Top
-      Block(start_x,start_y,(Menu_palette_cell_width)*Menu_factor_X+1,1,color);
+      Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
+        start_x,start_y,(Menu_palette_cell_width)*Menu_factor_X+1,1,
+        Main_palette[color].R, Main_palette[color].G, Main_palette[color].B, 255, SDL_BLENDMODE_NONE);
       // Bottom
-      Block(start_x,start_y+cell_height*Menu_factor_Y,(Menu_palette_cell_width)*Menu_factor_X+1,1,color);
-
+      Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
+        start_x,start_y+cell_height*Menu_factor_Y,(Menu_palette_cell_width)*Menu_factor_X+1,1,
+        Main_palette[color].R, Main_palette[color].G, Main_palette[color].B, 255, SDL_BLENDMODE_NONE);
       // Left
-      Block(start_x,start_y+1,1,(cell_height)* Menu_factor_Y,color);
+      Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
+        start_x,start_y+1,1,(cell_height)* Menu_factor_Y,
+        Main_palette[color].R, Main_palette[color].G, Main_palette[color].B, 255, SDL_BLENDMODE_NONE);
       //Right
-      Block(start_x+(Menu_palette_cell_width*Menu_factor_X),start_y+1,1,(cell_height)* Menu_factor_Y,color);
-
-      Update_rect(start_x,start_y,(Menu_palette_cell_width+1)*Menu_factor_X,(cell_height+1)* Menu_factor_Y);
+      Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
+        start_x+(Menu_palette_cell_width*Menu_factor_X),start_y+1,1,(cell_height)* Menu_factor_Y,
+        Main_palette[color].R, Main_palette[color].G, Main_palette[color].B, 255, SDL_BLENDMODE_NONE);
     }
     else
     {
@@ -313,10 +310,9 @@ void Frame_menu_color(byte id)
       if (color==MC_Black)
       {
         // Color is not selected, no dotted lines
-        Block(start_x,start_y,Menu_palette_cell_width*Menu_factor_X,
-              cell_height*Menu_factor_Y,id);
-
-        Update_rect(start_x,start_y,Menu_palette_cell_width*Menu_factor_X,cell_height*Menu_factor_Y);
+        Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
+          start_x,start_y,Menu_palette_cell_width*Menu_factor_X,cell_height*Menu_factor_Y,
+          Main_palette[id].R, Main_palette[id].G, Main_palette[id].B, 255, SDL_BLENDMODE_NONE);
       }
       else
       {
@@ -327,26 +323,28 @@ void Frame_menu_color(byte id)
 
         // Top line
         for (index=0; index<=end_x; index++)
-          Block(start_x+index*Menu_factor_X,start_y,
-                Menu_factor_X,Menu_factor_Y,
-                ((index)&1)?color:MC_Black);
+          Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
+            start_x+index*Menu_factor_X,start_y,
+            Menu_factor_X,Menu_factor_Y,
+            Main_palette[(index&1)?color:MC_Black].R, Main_palette[(index&1)?color:MC_Black].G, Main_palette[(index&1)?color:MC_Black].B, 255, SDL_BLENDMODE_NONE);
         // Left line
         for (index=1; index<end_y; index++)
-          Block(start_x,start_y+index*Menu_factor_Y,
-                Menu_factor_X,Menu_factor_Y,
-                ((index)&1)?color:MC_Black);
+          Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
+            start_x,start_y+index*Menu_factor_Y,
+            Menu_factor_X,Menu_factor_Y,
+            Main_palette[(index&1)?color:MC_Black].R, Main_palette[(index&1)?color:MC_Black].G, Main_palette[(index&1)?color:MC_Black].B, 255, SDL_BLENDMODE_NONE);
         // Right line
         for (index=1; index<end_y; index++)
-          Block(start_x+end_x*Menu_factor_X,start_y+index*Menu_factor_Y,
-                Menu_factor_X,Menu_factor_Y,
-                ((index+end_x)&1)?color:MC_Black);
+          Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
+            start_x+end_x*Menu_factor_X,start_y+index*Menu_factor_Y,
+            Menu_factor_X,Menu_factor_Y,
+            Main_palette[((index+end_x)&1)?color:MC_Black].R, Main_palette[((index+end_x)&1)?color:MC_Black].G, Main_palette[((index+end_x)&1)?color:MC_Black].B, 255, SDL_BLENDMODE_NONE);
         // Bottom line
         for (index=0; index<=end_x; index++)
-          Block(start_x+index*Menu_factor_X,start_y+end_y*Menu_factor_Y,
-                Menu_factor_X,Menu_factor_Y,
-                ((index+end_y)&1)?color:MC_Black);
-
-        Update_rect(start_x*Menu_factor_X,start_y*Menu_factor_Y,Menu_palette_cell_width*Menu_factor_X,Menu_Y+cell_height*Menu_factor_Y);
+          Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
+            start_x+index*Menu_factor_X,start_y+end_y*Menu_factor_Y,
+            Menu_factor_X,Menu_factor_Y,
+            Main_palette[((index+end_y)&1)?color:MC_Black].R, Main_palette[((index+end_y)&1)?color:MC_Black].G, Main_palette[((index+end_y)&1)?color:MC_Black].B, 255, SDL_BLENDMODE_NONE);
       }
     }
   }
@@ -360,18 +358,17 @@ void Display_menu_palette(void)
   byte cell_height=Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y;
   // width: Menu_palette_cell_width
   
-  if (Menu_is_visible && Menu_bars[MENUBAR_TOOLS].Visible)
-  {
+  //if (Menu_is_visible && Menu_bars[MENUBAR_TOOLS].Visible)
 	int transparent = -1;
 	int cw,ch;
 
 	// Fill the whole palette area with black
-    Block(
-      Menu_bars[MENUBAR_TOOLS].Width*Menu_factor_X,
-      Menu_Y,
-      Screen_width-(Menu_bars[MENUBAR_TOOLS].Width*Menu_factor_X),
-      (Menu_bars[MENUBAR_TOOLS].Height)*Menu_factor_Y,
-      MC_Black);
+  Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
+    Menu_bars[MENUBAR_TOOLS].Width*Menu_factor_X,
+    0,
+    Screen_width-(Menu_bars[MENUBAR_TOOLS].Width*Menu_factor_X),
+    (Menu_bars[MENUBAR_TOOLS].Height)*Menu_factor_Y,
+    Main_palette[MC_Black].R, Main_palette[MC_Black].G, Main_palette[MC_Black].B, 255, SDL_BLENDMODE_NONE);
 
 	if (Main_backups->Pages->Image_mode == 0
 		&& Main_backups->Pages->Nb_layers > 1)
@@ -387,25 +384,27 @@ void Display_menu_palette(void)
         ch = (cell_height)*Menu_factor_Y;
 	}
 
-	for (color=First_color_in_palette;color<256&&(color-First_color_in_palette)<Menu_cells_X*Menu_cells_Y;color++) {
+	for (color=First_color_in_palette;color<256&&(color-First_color_in_palette)<Menu_cells_X*Menu_cells_Y;color++)
+	{
 		// Draw the color block
-        Block(Palette_cell_X(color), Palette_cell_Y(color), cw, ch, color);
+    Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
+      Palette_cell_X(color), Palette_cell_Y(color), cw, ch, 
+      Main_palette[color].R, Main_palette[color].G, Main_palette[color].B, 255, SDL_BLENDMODE_NONE);
 
 		// Make the transparent color more visible by adding a MC_Dark/MC_Light pattern to it.
-		if (color == transparent) {
-        	Block(Palette_cell_X(color),
-              Palette_cell_Y(color),
-              cw / 2, ch / 2, MC_Light);
-        	Block(Palette_cell_X(color) + cw / 2,
-              Palette_cell_Y(color) + ch / 2,
-              (cw+1) / 2, (ch+1) / 2, MC_Dark);
+		if (color == transparent)
+		{
+      Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
+        Palette_cell_X(color), Palette_cell_Y(color), cw / 2, ch / 2,
+        Main_palette[MC_Light].R, Main_palette[MC_Light].G, Main_palette[MC_Light].B, 255, SDL_BLENDMODE_NONE);
+      Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
+        Palette_cell_X(color) + cw / 2, Palette_cell_Y(color) + ch / 2, (cw+1) / 2, (ch+1) / 2,
+        Main_palette[MC_Dark].R, Main_palette[MC_Dark].G, Main_palette[MC_Dark].B, 255, SDL_BLENDMODE_NONE);
 		}
-	  }
+	}
 
-    Frame_menu_color(Back_color);
-    Frame_menu_color(Fore_color);
-    Update_rect(MENU_WIDTH*Menu_factor_X,Menu_Y,Screen_width-(MENU_WIDTH*Menu_factor_X),(Menu_height-11)*Menu_factor_Y);
-  }
+  Frame_menu_color(Back_color);
+  Frame_menu_color(Fore_color);
 }
 
   // -- Recalculer l'origine de la palette dans le menu pour rendre la
@@ -514,7 +513,13 @@ void Draw_bar_remainder(word current_menu, word x_off)
 
   for (y_pos=0;y_pos<Menu_bars[current_menu].Height;y_pos++)
     for (x_pos=x_off;x_pos<Screen_width/Menu_factor_X;x_pos++)
-      Pixel_in_menu(current_menu, x_pos, y_pos, Menu_bars[current_menu].Skin[0][y_pos * Menu_bars[current_menu].Skin_width + Menu_bars[current_menu].Skin_width - 2 + (x_pos&1)]);
+    {
+      byte c = Menu_bars[current_menu].Skin[0][y_pos * Menu_bars[current_menu].Skin_width + Menu_bars[current_menu].Skin_width - 2 + (x_pos&1)];
+      Rectangle_on_texture(Menu_bars[current_menu].Menu_texture,
+        x_pos*Menu_factor_X, y_pos*Menu_factor_Y,
+        Menu_factor_X,Menu_factor_Y,
+        Main_palette[c].R, Main_palette[c].G, Main_palette[c].B, 255, SDL_BLENDMODE_NONE);
+    }
 }
 
             
@@ -1778,50 +1783,6 @@ void Copy_view_to_spare(void)
   Spare_separator_proportion=Main_separator_proportion;
 }
 
-  // -- Afficher la barre de séparation entre les parties zoomées ou non en
-  //    mode Loupe --
-
-void Display_separator(void)
-{
-  // Partie grise du milieu
-  Block(Main_separator_position+(Menu_factor_X<<1),Menu_factor_Y,
-        (SEPARATOR_WIDTH-4)*Menu_factor_X,
-        Menu_Y-(Menu_factor_Y<<1),MC_Light);
-
-  // Barre noire de gauche
-  Block(Main_separator_position,0,Menu_factor_X,Menu_Y,MC_Black);
-
-  // Barre noire de droite
-  Block(Main_X_zoom-Menu_factor_X,0,Menu_factor_X,Menu_Y,MC_Black);
-
-  // Bord haut (blanc)
-  Block(Main_separator_position+Menu_factor_X,0,
-        (SEPARATOR_WIDTH-3)*Menu_factor_X,Menu_factor_Y,MC_White);
-
-  // Bord gauche (blanc)
-  Block(Main_separator_position+Menu_factor_X,Menu_factor_Y,
-        Menu_factor_X,(Menu_Y-(Menu_factor_Y<<1)),MC_White);
-
-  // Bord droite (gris foncé)
-  Block(Main_X_zoom-(Menu_factor_X<<1),Menu_factor_Y,
-        Menu_factor_X,(Menu_Y-(Menu_factor_Y<<1)),MC_Dark);
-
-  // Bord bas (gris foncé)
-  Block(Main_separator_position+(Menu_factor_X<<1),Menu_Y-Menu_factor_Y,
-        (SEPARATOR_WIDTH-3)*Menu_factor_X,Menu_factor_Y,MC_Dark);
-
-  // Coin bas gauche
-  Block(Main_separator_position+Menu_factor_X,Menu_Y-Menu_factor_Y,
-        Menu_factor_X,Menu_factor_Y,MC_Light);
-  // Coin haut droite
-  Block(Main_X_zoom-(Menu_factor_X<<1),0,
-        Menu_factor_X,Menu_factor_Y,MC_Light);
-
-  Update_rect(Main_separator_position,0,SEPARATOR_WIDTH*Menu_factor_X,Menu_Y); // On réaffiche toute la partie à gauche du split, ce qui permet d'effacer son ancienne position
-}
-
-
-
 // -- Fonctions de manipulation du curseur -----------------------------------
 
 
@@ -2366,9 +2327,6 @@ void Display_all_screen(void)
   // ---/\/\/\  Partie zoomée: /\/\/\---
   if (Main_magnifier_mode)
   {
-    // Affichage de la barre de split
-    Display_separator();
-
     // Calcul de la largeur visible
     if (Main_image_width<Main_magnifier_width)
       width=Main_image_width;

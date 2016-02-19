@@ -468,7 +468,6 @@ void Select_button(int btn_number,byte click)
 ///Moves the splitbar between zoom and standard views
 void Move_separator(void)
 {
-  short old_main_separator_position=Main_separator_position;
   short old_x_zoom=Main_X_zoom;
   short offset=Main_X_zoom-Mouse_X;
   byte  old_cursor_shape=Cursor_shape;
@@ -476,13 +475,12 @@ void Move_separator(void)
 
   // Afficher la barre en XOR
   Hide_cursor();
-  Windows_open=1;
+  //Windows_open=1;
   Cursor_shape=CURSOR_SHAPE_HORIZONTAL;
-  Vertical_XOR_line(Main_separator_position,0,Menu_Y);
-  Vertical_XOR_line(Main_X_zoom-1,0,Menu_Y);
+  //Vertical_XOR_line(Main_separator_position,0,Menu_Y);
+  //Vertical_XOR_line(Main_X_zoom-1,0,Menu_Y);
   Display_cursor();
-  Update_rect(Main_separator_position,0,abs(Main_separator_position-Main_X_zoom)+1,Menu_Y);
-
+  
   while (Mouse_K)
   {
     if (Mouse_X!=old_mouse_x)
@@ -496,19 +494,14 @@ void Move_separator(void)
         Hide_cursor();
   
         // Effacer la barre en XOR
-        Vertical_XOR_line(old_main_separator_position,0,Menu_Y);
-        Vertical_XOR_line(old_x_zoom-1,0,Menu_Y);
+        //Vertical_XOR_line(old_main_separator_position,0,Menu_Y);
+        //Vertical_XOR_line(old_x_zoom-1,0,Menu_Y);
   
-        Update_rect(old_main_separator_position,0,abs(old_main_separator_position-old_x_zoom)+1,Menu_Y);
-  
-        old_main_separator_position=Main_separator_position;
         old_x_zoom=Main_X_zoom;
   
         // Rafficher la barre en XOR
-        Vertical_XOR_line(Main_separator_position,0,Menu_Y);
-        Vertical_XOR_line(Main_X_zoom-1,0,Menu_Y);
-  
-        Update_rect(Main_separator_position,0,abs(Main_separator_position-Main_X_zoom)+1,Menu_Y);
+        //Vertical_XOR_line(Main_separator_position,0,Menu_Y);
+        //Vertical_XOR_line(Main_X_zoom-1,0,Menu_Y);  
   
         Display_cursor();
       }
@@ -518,9 +511,9 @@ void Move_separator(void)
 
   // Effacer la barre en XOR
   Hide_cursor();
-  Vertical_XOR_line(Main_separator_position,0,Menu_Y);
-  Vertical_XOR_line(Main_X_zoom-1,0,Menu_Y);
-  Windows_open=0;
+  //Vertical_XOR_line(Main_separator_position,0,Menu_Y);
+  //Vertical_XOR_line(Main_X_zoom-1,0,Menu_Y);
+  //Windows_open=0;
   Cursor_shape=old_cursor_shape;
   Compute_magnifier_data();
   Position_screen_according_to_zoom();

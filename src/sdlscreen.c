@@ -320,7 +320,7 @@ void Flush_update(void)
   }
   
   {
-    SDL_Rect source_rect = {0, Menu_Y, Screen_SDL->w, Screen_SDL->h-Menu_Y};
+    //SDL_Rect source_rect = {0, Menu_Y, Screen_SDL->w, Screen_SDL->h-Menu_Y};
 
     // Copy the fullscreen(old) at the bottom
     r.x = 0;
@@ -379,8 +379,9 @@ void Flush_update(void)
     int y_factor = 1;
     
     // If the cursor is over the menu or over the split separator, cursor becomes an arrow.
-    if ( ( Mouse_Y>=Menu_Y || ( Main_magnifier_mode && Mouse_X>=Main_separator_position && Mouse_X<Main_X_zoom ) )
-      && !Windows_open && Cursor_shape!=CURSOR_SHAPE_HOURGLASS)
+    if ( Mouse_Y>=Menu_Y && !Windows_open && Cursor_shape!=CURSOR_SHAPE_HOURGLASS)
+      shape=CURSOR_SHAPE_ARROW;
+    else if (Main_magnifier_mode && !Windows_open && Mouse_X>=Main_separator_position && Mouse_X<Main_X_zoom && Cursor_shape!=CURSOR_SHAPE_HORIZONTAL)
       shape=CURSOR_SHAPE_ARROW;
     else
       shape=Cursor_shape;
