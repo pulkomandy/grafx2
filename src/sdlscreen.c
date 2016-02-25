@@ -302,6 +302,58 @@ void Flush_update(void)
     SDL_SetRenderDrawColor(Renderer_SDL, 0, 0, c, 255);
     SDL_RenderClear(Renderer_SDL);
   }
+  // Main viewport
+  {
+    SDL_Rect source_rect = {0, 0, (Main_magnifier_mode?Main_separator_position:Screen_width)/Pixel_width, Menu_Y/Pixel_height};
+    
+    r.x = source_rect.x;
+    r.y = source_rect.y;
+    r.w = source_rect.w*Pixel_width;
+    r.h = source_rect.h*Pixel_height;
+    // Copy the fullscreen view
+    SDL_RenderCopy(Renderer_SDL, Texture_SDL, &source_rect, &r);
+  }
+  if (Main_magnifier_mode)
+  {
+    // Separator
+    Render_separator(Main_separator_position, SDL_ALPHA_OPAQUE);
+
+    // Zoomed viewport
+    SDL_Rect source_rect = {Main_magnifier_offset_X-Main_offset_X, Main_magnifier_offset_Y-Main_offset_Y, Main_magnifier_width, Main_magnifier_height};
+    r.x = Main_X_zoom;
+    r.y = 0;
+    r.w = Main_magnifier_width*Pixel_width*Main_magnifier_factor;
+    r.h = Main_magnifier_height*Pixel_height*Main_magnifier_factor;
+    SDL_RenderCopy(Renderer_SDL, Texture_SDL, &source_rect, &r);
+
+    // Grid
+    if (Show_grid)
+    {
+      int row, col;
+      int x=Main_X_zoom;
+      int y=0;
+      int w=Min(Screen_width-Main_X_zoom, (Main_image_width-Main_magnifier_offset_X)*Main_magnifier_factor);
+      int h=Min(Menu_Y, (Main_image_height-Main_magnifier_offset_Y)*Main_magnifier_factor);
+      
+      SDL_SetRenderDrawColor(Renderer_SDL, 128, 128, 128, 128); // 50% grey
+      SDL_SetRenderDrawBlendMode(Renderer_SDL,SDL_BLENDMODE_BLEND);
+      // Horizontal lines
+      row=y+((Snap_height*1000-(y-0)/Main_magnifier_factor/Pixel_height-Main_magnifier_offset_Y+Snap_offset_Y-1)%Snap_height)*Main_magnifier_factor*Pixel_height+Main_magnifier_factor*Pixel_height-1;
+      while (row < y+h)
+      {
+        SDL_RenderDrawLine(Renderer_SDL, x, row, x+w, row);
+        row+= Snap_height*Main_magnifier_factor*Pixel_height;
+      }
+      // Vertical lines
+      col=x+((Snap_width*1000-(x-Main_X_zoom)/Main_magnifier_factor/Pixel_width-Main_magnifier_offset_X+Snap_offset_X-1)%Snap_width)*Main_magnifier_factor*Pixel_width+Main_magnifier_factor*Pixel_width-1;
+      while (col < x+w)
+      {
+        SDL_RenderDrawLine(Renderer_SDL, col, y, col, y+h);
+        col+= Snap_width*Main_magnifier_factor*Pixel_width;
+      }
+    }
+  }
+  
   // Menus
   if (Menu_is_visible)
   {
@@ -342,11 +394,6 @@ void Flush_update(void)
   //SDL_RenderCopy(Renderer_SDL, temp_tx, NULL, &dest_rect);
   //SDL_DestroyTexture(temp_tx);
 
-  // Separator
-  if (Main_magnifier_mode)
-  {
-    Render_separator(Main_separator_position, SDL_ALPHA_OPAQUE);
-  }
 
   // While dragging separator - not needed
   //if (Cursor_shape==CURSOR_SHAPE_HORIZONTAL)

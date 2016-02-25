@@ -3769,8 +3769,8 @@ void Button_Magnify(void)
       Pixel_preview=Pixel_preview_magnifier;
 
       // On calcule l'origine de la loupe
-      Main_magnifier_offset_X=Mouse_X-(Main_magnifier_width>>1);
-      Main_magnifier_offset_Y=Mouse_Y-(Main_magnifier_height>>1);
+      Main_magnifier_offset_X=Mouse_X/Pixel_width-(Main_magnifier_width>>1);
+      Main_magnifier_offset_Y=Mouse_Y/Pixel_height-(Main_magnifier_height>>1);
 
      // Calcul des coordonnées absolues de ce coin DANS L'IMAGE
       Main_magnifier_offset_X+=Main_offset_X;

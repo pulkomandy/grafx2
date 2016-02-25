@@ -304,10 +304,10 @@ void Scroll_screen(short delta_x,short delta_y)
   temp_x_offset=Main_offset_X+delta_x;
   temp_y_offset=Main_offset_Y+delta_y;
 
-  if (temp_x_offset+Screen_width>Main_image_width)
-    temp_x_offset=Main_image_width-Screen_width;
-  if (temp_y_offset+Menu_Y>Main_image_height)
-    temp_y_offset=Main_image_height-Menu_Y;
+  if (temp_x_offset+Screen_width/Pixel_width>Main_image_width)
+    temp_x_offset=Main_image_width-Screen_width/Pixel_width;
+  if (temp_y_offset+Menu_Y/Pixel_height>Main_image_height)
+    temp_y_offset=Main_image_height-Menu_Y/Pixel_height;
   if (temp_x_offset<0)
     temp_x_offset=0;
   if (temp_y_offset<0)

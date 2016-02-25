@@ -26,8 +26,3 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "struct.h"
-  
-/// Redraw all magnified part on screen, without overwriting the menu.
-void Display_part_of_screen_scaled(word width,word height,word image_width,byte * buffer);
-void Display_transparent_mono_line_on_screen(word x_pos, word y_pos, word width, byte* line, byte transp_color, byte color);
-void Display_transparent_line_on_screen(word x_pos,word y_pos,word width,byte* line,byte transp_color);

@@ -791,9 +791,9 @@ void Print_coordinates(void)
       Rectangle_on_texture(Menu_bars[MENUBAR_STATUS].Menu_texture, 170*Menu_factor_X, Menu_factor_Y, Menu_factor_X<<3, Menu_factor_Y<<3, Main_palette[Colorpicker_color].R, Main_palette[Colorpicker_color].G, Main_palette[Colorpicker_color].B, 255, SDL_BLENDMODE_NONE);
     }
 
-    Num2str((dword)Paintbrush_X,temp,4);
+    Num2str(Paintbrush_X,temp,4);
     Print_in_menu(temp,2);
-    Num2str((dword)Paintbrush_Y,temp,4);
+    Num2str(Paintbrush_Y,temp,4);
     Print_in_menu(temp,11);
   }
 }
@@ -1370,10 +1370,10 @@ void Compute_limits(void)
   if (Main_magnifier_mode)
   {
     // -- Calcul des limites de la partie non zoomée de l'image --
-    Limit_top  =Main_offset_Y;
+    Limit_top=Main_offset_Y;
     Limit_left=Main_offset_X;
-    Limit_visible_bottom   =Limit_top+Menu_Y-1;
-    Limit_visible_right=Limit_left+Main_separator_position-1;
+    Limit_visible_bottom=Limit_top+(Menu_Y-1)/Pixel_height;
+    Limit_visible_right=Limit_left+(Main_separator_position-1)/Pixel_width;
 
     if (Limit_visible_bottom>=Main_image_height)
       Limit_bottom=Main_image_height-1;
@@ -1386,10 +1386,10 @@ void Compute_limits(void)
       Limit_right=Limit_visible_right;
 
     // -- Calcul des limites de la partie zoomée de l'image --
-    Limit_top_zoom  =Main_magnifier_offset_Y;
+    Limit_top_zoom=Main_magnifier_offset_Y;
     Limit_left_zoom=Main_magnifier_offset_X;
-    Limit_visible_bottom_zoom   =Limit_top_zoom+Main_magnifier_height-1;
-    Limit_visible_right_zoom=Limit_left_zoom+Main_magnifier_width-1;
+    Limit_visible_bottom_zoom=Limit_top_zoom+(Main_magnifier_height-1);
+    Limit_visible_right_zoom=Limit_left_zoom+(Main_magnifier_width-1);
 
     if (Limit_visible_bottom_zoom>=Main_image_height)
       Limit_bottom_zoom=Main_image_height-1;
@@ -1404,10 +1404,10 @@ void Compute_limits(void)
   else
   {
     // -- Calcul des limites de la partie visible de l'image --
-    Limit_top  =Main_offset_Y;
+    Limit_top=Main_offset_Y;
     Limit_left=Main_offset_X;
-    Limit_visible_bottom   =Limit_top+(Menu_is_visible?Menu_Y:Screen_height)-1; // A REVOIR POUR SIMPLIFICATION
-    Limit_visible_right=Limit_left+Screen_width-1;
+    Limit_visible_bottom=Limit_top+((Menu_is_visible?Menu_Y:Screen_height)-1)/Pixel_height; // A REVOIR POUR SIMPLIFICATION
+    Limit_visible_right=Limit_left+(Screen_width-1)/Pixel_width;
 
     if (Limit_visible_bottom>=Main_image_height)
       Limit_bottom=Main_image_height-1;
@@ -1427,13 +1427,13 @@ void Compute_paintbrush_coordinates(void)
 {
   if ((Main_magnifier_mode) && (Mouse_X>=Main_X_zoom))
   {
-    Paintbrush_X=((Mouse_X-Main_X_zoom)/Main_magnifier_factor)+Main_magnifier_offset_X;
-    Paintbrush_Y=(Mouse_Y/Main_magnifier_factor)+Main_magnifier_offset_Y;
+    Paintbrush_X=((Mouse_X-Main_X_zoom)/Pixel_width/Main_magnifier_factor)+Main_magnifier_offset_X;
+    Paintbrush_Y=(Mouse_Y/Pixel_height/Main_magnifier_factor)+Main_magnifier_offset_Y;
   }
   else
   {
-    Paintbrush_X=Mouse_X+Main_offset_X;
-    Paintbrush_Y=Mouse_Y+Main_offset_Y;
+    Paintbrush_X=Mouse_X/Pixel_width+Main_offset_X;
+    Paintbrush_Y=Mouse_Y/Pixel_height+Main_offset_Y;
   }
 
   if (Snap_mode)
@@ -1551,14 +1551,14 @@ void Display_image_limits(void)
 void Position_screen_according_to_zoom(void)
 {
   // Centrage en X
-  if (Main_image_width>Main_separator_position)
+  if (Main_image_width*Pixel_width>Main_separator_position)
   {
-    Main_offset_X=Main_magnifier_offset_X+(Main_magnifier_width>>1)
+    Main_offset_X=Main_magnifier_offset_X+((Main_magnifier_width*Pixel_width)/2)
                          -(Main_separator_position>>1);
     if (Main_offset_X<0)
       Main_offset_X=0;
-    else if (Main_image_width<Main_offset_X+Main_separator_position)
-      Main_offset_X=Main_image_width-Main_separator_position;
+    else if ((Main_image_width-Main_offset_X)*Pixel_width<Main_separator_position)
+      Main_offset_X=Main_image_width*Pixel_width-Main_separator_position;
   }
   else
     Main_offset_X=0;
@@ -1566,12 +1566,12 @@ void Position_screen_according_to_zoom(void)
   // Centrage en Y
   if (Main_image_height>Menu_Y)
   {
-    Main_offset_Y=Main_magnifier_offset_Y+(Main_magnifier_height>>1)
+    Main_offset_Y=Main_magnifier_offset_Y+(Main_magnifier_height*Pixel_height/2)
                          -(Menu_Y>>1);
     if (Main_offset_Y<0)
       Main_offset_Y=0;
-    else if (Main_image_height<Main_offset_Y+Menu_Y)
-      Main_offset_Y=Main_image_height-Menu_Y;
+    else if ((Main_image_height-Main_offset_Y)*Pixel_height<Menu_Y)
+      Main_offset_Y=Main_image_height*Pixel_height-Menu_Y;
   }
   else
     Main_offset_Y=0;
@@ -1583,7 +1583,7 @@ void Position_screen_according_to_position(int target_x, int target_y)
   // Centrage en X
   if (Main_image_width>Main_separator_position)
   {
-    Main_offset_X=target_x-Mouse_X;
+    Main_offset_X=target_x-Mouse_X/Pixel_width;
     // Do not allow the zoomed part to show something that the
     // non-zoomed part doesn't see. All clipping is computed according
     // to the non-zoomed part.
@@ -1604,7 +1604,7 @@ void Position_screen_according_to_position(int target_x, int target_y)
   // Centrage en Y
   if (Main_image_height>Menu_Y)
   {
-    Main_offset_Y=target_y-Mouse_Y;
+    Main_offset_Y=target_y-Mouse_Y/Pixel_height;
     // Do not allow the zoomed part to show something that the
     // non-zoomed part doesn't see. All clipping is computed according
     // to the non-zoomed part.
@@ -1628,21 +1628,21 @@ void Compute_separator_data(void)
   //short temp;
   short theoric_X=Round(Main_separator_proportion*Screen_width);
 
-  Main_X_zoom=Screen_width-(((Screen_width+(Main_magnifier_factor>>1)-theoric_X)/Main_magnifier_factor)*Main_magnifier_factor);
+  Main_X_zoom=Screen_width-(((Screen_width+((Main_magnifier_factor+Pixel_width)>>1)-theoric_X)/Main_magnifier_factor/Pixel_width)*Main_magnifier_factor*Pixel_width);
   Main_separator_position=Main_X_zoom-(Menu_factor_X*SEPARATOR_WIDTH);
 
   // Correction en cas de débordement sur la gauche
   while (Main_separator_position*(Main_magnifier_factor+1)<Screen_width-(Menu_factor_X*SEPARATOR_WIDTH))
   {
-    Main_separator_position+=Main_magnifier_factor;
-    Main_X_zoom+=Main_magnifier_factor;
+    Main_separator_position+=Main_magnifier_factor*Pixel_width;
+    Main_X_zoom+=Main_magnifier_factor*Pixel_width;
   }
   // Correction en cas de débordement sur la droite
-  theoric_X=Screen_width-((NB_ZOOMED_PIXELS_MIN-1)*Main_magnifier_factor);
+  theoric_X=Screen_width-((NB_ZOOMED_PIXELS_MIN-1)*Main_magnifier_factor*Pixel_width);
   while (Main_X_zoom>=theoric_X)
   {
-    Main_separator_position-=Main_magnifier_factor;
-    Main_X_zoom-=Main_magnifier_factor;
+    Main_separator_position-=Main_magnifier_factor*Pixel_width;
+    Main_X_zoom-=Main_magnifier_factor*Pixel_width;
   }
 }
 
@@ -1656,11 +1656,9 @@ void Compute_magnifier_data(void)
 {
   Compute_separator_data();
 
-  Main_magnifier_width=(Screen_width-Main_X_zoom)/Main_magnifier_factor;
-
-  Main_magnifier_height=Menu_Y/Main_magnifier_factor;
-  if (Menu_Y%Main_magnifier_factor)
-    Main_magnifier_height++;
+  Main_magnifier_width=(Screen_width-Main_X_zoom)/Pixel_width/Main_magnifier_factor;
+  // round this division "up", so that there can be incomplete pixels at the bottom, rather than black
+  Main_magnifier_height=(Menu_Y+Pixel_height*Main_magnifier_factor-1)/Pixel_height/Main_magnifier_factor;
 
   Clip_magnifier_offsets(&Main_magnifier_offset_X, &Main_magnifier_offset_Y);
 }
@@ -1679,7 +1677,7 @@ void Clip_magnifier_offsets(short *x_offset, short *y_offset)
     if (*y_offset)
     {
       if (Main_image_height<*y_offset+Main_magnifier_height)
-        *y_offset=Main_image_height-Main_magnifier_height+(Main_magnifier_height*Main_magnifier_factor-Menu_Y>=Main_magnifier_factor/2);
+        *y_offset=Main_image_height-Main_magnifier_height;//+(Main_magnifier_height*Main_magnifier_factor-Menu_Y>=Main_magnifier_factor/2);
       if (*y_offset<0)
         *y_offset=0;
     }
@@ -1696,22 +1694,22 @@ void Change_magnifier_factor(byte factor_index, byte point_at_mouse)
   if (!point_at_mouse || Cursor_in_menu || !Main_magnifier_mode)
   {
     // Locate the pixel in center of the magnified area
-    target_x = Main_magnifier_offset_X + (Main_magnifier_width >> 1);
-    target_y = Main_magnifier_offset_Y + (Main_magnifier_height >> 1);
+    target_x = Main_magnifier_offset_X + (Main_magnifier_width >> 1)/Pixel_width;
+    target_y = Main_magnifier_offset_Y + (Main_magnifier_height >> 1)/Pixel_height;
     point_at_mouse=0;
   }
   else if (Mouse_X>=Main_X_zoom)
   {
     // Locate the pixel under the cursor, in magnified area
-    target_x=((Mouse_X-Main_X_zoom)/Main_magnifier_factor)+Main_magnifier_offset_X;
-    target_y=(Mouse_Y/Main_magnifier_factor)+Main_magnifier_offset_Y;
+    target_x=((Mouse_X-Main_X_zoom)/Pixel_width/Main_magnifier_factor)+Main_magnifier_offset_X;
+    target_y=(Mouse_Y/Pixel_height/Main_magnifier_factor)+Main_magnifier_offset_Y;
     point_at_mouse=1;
   }
   else
   {
     // Locate the pixel under the cursor, in normal area
-    target_x=Mouse_X+Main_offset_X;
-    target_y=Mouse_Y+Main_offset_Y;
+    target_x=Mouse_X/Pixel_width+Main_offset_X;
+    target_y=Mouse_Y/Pixel_height+Main_offset_Y;
     magnified_view_leads=0;
     point_at_mouse=0;
   }
@@ -1725,8 +1723,8 @@ void Change_magnifier_factor(byte factor_index, byte point_at_mouse)
     if (point_at_mouse)
     {
       // Target pixel must be located under the mouse position.
-      Main_magnifier_offset_X = target_x-((Mouse_X-Main_X_zoom)/Main_magnifier_factor);
-      Main_magnifier_offset_Y = target_y-((Mouse_Y)/Main_magnifier_factor);
+      Main_magnifier_offset_X = target_x-((Mouse_X-Main_X_zoom)/Pixel_width/Main_magnifier_factor);
+      Main_magnifier_offset_Y = target_y-((Mouse_Y)/Pixel_height/Main_magnifier_factor);
     }
     else
     {
@@ -1945,10 +1943,10 @@ void Display_cursor(void)
       // !!! Cette forme ne peut pas être utilisée en mode Loupe !!!
 
       // Petite croix au centre
-      start_x=(Mouse_X-3);
-      start_y=(Mouse_Y-3);
-      end_x  =(Mouse_X+4);
-      end_y  =(Mouse_Y+4);
+      start_x=(Mouse_X/Pixel_width-3);
+      start_y=(Mouse_Y/Pixel_height-3);
+      end_x  =(Mouse_X/Pixel_width+4);
+      end_y  =(Mouse_Y/Pixel_height+4);
       if (start_x<0)
         start_x=0;
       if (start_y<0)
@@ -1958,12 +1956,12 @@ void Display_cursor(void)
       if (end_y>Menu_Y)
         end_y=Menu_Y;
 
-      Horizontal_XOR_line(start_x,Mouse_Y,end_x-start_x);
-      Vertical_XOR_line  (Mouse_X,start_y,end_y-start_y);
+      Horizontal_XOR_line(start_x,Mouse_Y/Pixel_height,end_x-start_x);
+      Vertical_XOR_line  (Mouse_X/Pixel_width,start_y,end_y-start_y);
 
       // Grand rectangle autour
-      start_x=Mouse_X-(Main_magnifier_width>>1);
-      start_y=Mouse_Y-(Main_magnifier_height>>1);
+      start_x=Mouse_X/Pixel_width-(Main_magnifier_width>>1);
+      start_y=Mouse_Y/Pixel_height-(Main_magnifier_height>>1);
       if (start_x+Main_magnifier_width>=Limit_right-Main_offset_X)
         start_x=Limit_right-Main_magnifier_width-Main_offset_X+1;
       if (start_y+Main_magnifier_height>=Limit_bottom-Main_offset_Y)
@@ -2176,10 +2174,10 @@ void Hide_cursor(void)
       // !!! Cette forme ne peut pas être utilisée en mode Loupe !!!
 
       // Petite croix au centre
-      start_x=(Mouse_X-3);
-      start_y=(Mouse_Y-3);
-      end_x  =(Mouse_X+4);
-      end_y  =(Mouse_Y+4);
+      start_x=(Mouse_X/Pixel_width-3);
+      start_y=(Mouse_Y/Pixel_height-3);
+      end_x  =(Mouse_X/Pixel_width+4);
+      end_y  =(Mouse_Y/Pixel_height+4);
       if (start_x<0)
         start_x=0;
       if (start_y<0)
@@ -2189,13 +2187,13 @@ void Hide_cursor(void)
       if (end_y>Menu_Y)
         end_y=Menu_Y;
 
-      Horizontal_XOR_line(start_x,Mouse_Y,end_x-start_x);
-      Vertical_XOR_line  (Mouse_X,start_y,end_y-start_y);
+      Horizontal_XOR_line(start_x,Mouse_Y/Pixel_height,end_x-start_x);
+      Vertical_XOR_line  (Mouse_X/Pixel_width,start_y,end_y-start_y);
 
       // Grand rectangle autour
 
-      start_x=Mouse_X-(Main_magnifier_width>>1);
-      start_y=Mouse_Y-(Main_magnifier_height>>1);
+      start_x=Mouse_X/Pixel_width-(Main_magnifier_width>>1);
+      start_y=Mouse_Y/Pixel_height-(Main_magnifier_height>>1);
       if (start_x+Main_magnifier_width>=Limit_right-Main_offset_X)
         start_x=Limit_right-Main_magnifier_width-Main_offset_X+1;
       if (start_y+Main_magnifier_height>=Limit_bottom-Main_offset_Y)
@@ -2323,7 +2321,7 @@ void Display_all_screen(void)
   }
   if (Main_image_height<Menu_Y)
     Block(0,Main_image_height,width,(Menu_Y-height),Main_backups->Pages->Transparent_color);
-
+/*
   // ---/\/\/\  Partie zoomée: /\/\/\---
   if (Main_magnifier_mode)
   {
@@ -2351,7 +2349,7 @@ void Display_all_screen(void)
             Menu_Y,Main_backups->Pages->Transparent_color);
     if (height<Menu_Y)
       Block(Main_X_zoom,height,width*Main_magnifier_factor,(Menu_Y-height),Main_backups->Pages->Transparent_color);
-  }
+  }*/
 
   // ---/\/\/\ Affichage des limites /\/\/\---
   if (Config.Display_image_limits)

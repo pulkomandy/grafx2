@@ -698,24 +698,6 @@ void Scroll_picture(byte * main_src, byte * main_dest, short x_offset,short y_of
   Update_rect(0,0,0,0);
 }
 
-void Zoom_a_line(byte* original_line, byte* zoomed_line,
-    word factor, word width
-    )
-{
-  byte color;
-  word x;
-
-  // Pour chaque pixel
-  for(x=0;x<width;x++){
-    color = *original_line;
-
-    memset(zoomed_line,color,factor);
-    zoomed_line+=factor;
-
-    original_line++;
-  }
-}
-
 /*############################################################################*/
 
 #if defined(__WIN32__)

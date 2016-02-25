@@ -163,7 +163,6 @@ void Update_part_of_screen(short x, short y, short width, short height)
         return;
     }
 
-
  // Très utile pour le debug :)
     /*SDL_Rect r;
     r.x=effective_X;
@@ -171,29 +170,6 @@ void Update_part_of_screen(short x, short y, short width, short height)
     r.h=effective_h;
     r.w=effective_w;
     SDL_FillRect(Screen_SDL,&r,3);*/
-    
-    // When the grid is displayed in Tilemap mode, this tests if
-    // one edge of the grid has been touched :
-    // In this case, the whole magnified area requires a refreshed grid.
-    // This could be optimized further, but at the moment this seemed
-    // fast enough.
-    if (Show_grid && Main_tilemap_mode && (
-        x/Snap_width <(x+width )/Snap_width ||
-        y/Snap_height<(y+height)/Snap_height))
-    {
-      short w,h;
-      
-      w=Min(Screen_width-Main_X_zoom, (Main_image_width-Main_magnifier_offset_X)*Main_magnifier_factor);
-      h=Min(Menu_Y, (Main_image_height-Main_magnifier_offset_Y)*Main_magnifier_factor);
-
-      Redraw_grid(Main_X_zoom,0,w,h);
-      Update_rect(Main_X_zoom,0,w,h);
-    }
-    else
-    {
-      Redraw_grid(effective_X,effective_Y,effective_w,effective_h);
-      Update_rect(effective_X,effective_Y,effective_w,effective_h);
-    }
   }
 }
 
@@ -944,21 +920,6 @@ void Fill_general(byte fill_color)
 
     // Restore original feedback value
     Update_FX_feedback(Config.FX_Feedback);
-
-    //   A la fin, on n'a pas besoin de réafficher le curseur puisque c'est
-    // l'appelant qui s'en charge, et on n'a pas besoin de rafficher l'image
-    // puisque les seuls points qui ont changé dans l'image ont été raffichés
-    // par l'utilisation de "Display_pixel()", et que les autres... eh bein
-    // on n'y a jamais touché à l'écran les autres: ils sont donc corrects.
-    if(Main_magnifier_mode)
-    {
-      short w,h;
-      
-      w=Min(Screen_width-Main_X_zoom, (Main_image_width-Main_magnifier_offset_X)*Main_magnifier_factor);
-      h=Min(Menu_Y, (Main_image_height-Main_magnifier_offset_Y)*Main_magnifier_factor);
-
-      Redraw_grid(Main_X_zoom,0,w,h);
-    }
 
     Update_rect(0,0,0,0);
     End_of_modification();
@@ -2816,44 +2777,6 @@ byte Effect_layer_copy(word x,word y,byte color)
     return *((y)*Main_image_width+(x)+Main_backups->Pages->Image[color].Pixels);
   }
   return Read_pixel_from_feedback_screen(x,y);
-}
-
-void Horizontal_grid_line(word x_pos,word y_pos,word width)
-{
-  int x;
-
-  for (x=!(x_pos&1);x<width;x+=2)
-    Pixel(x_pos+x, y_pos, xor_lut[*((y_pos-1)*VIDEO_LINE_WIDTH+x_pos+Screen_pixels+x)]);
-}
-
-void Vertical_grid_line(word x_pos,word y_pos,word height)
-{
-  int y;
-  
-  for (y=!(y_pos&1);y<height;y+=2)
-    Pixel(x_pos, y_pos+y, xor_lut[*(Screen_pixels+(x_pos-1)+(y_pos+y)*VIDEO_LINE_WIDTH)]);
-}
-
-// Tile Grid
-void Redraw_grid(short x, short y, unsigned short w, unsigned short h)
-{
-  int row, col;
-  if (!Show_grid)
-    return;
-    
-  row=y+((Snap_height*1000-(y-0)/Main_magnifier_factor-Main_magnifier_offset_Y+Snap_offset_Y-1)%Snap_height)*Main_magnifier_factor+Main_magnifier_factor-1;
-  while (row < y+h)
-  {
-    Horizontal_grid_line(x, row, w);
-    row+= Snap_height*Main_magnifier_factor;
-  }
-  
-  col=x+((Snap_width*1000-(x-Main_X_zoom)/Main_magnifier_factor-Main_magnifier_offset_X+Snap_offset_X-1)%Snap_width)*Main_magnifier_factor+Main_magnifier_factor-1;
-  while (col < x+w)
-  {
-    Vertical_grid_line(col, y, h);
-    col+= Snap_width*Main_magnifier_factor;
-  }
 }
 
 byte Read_pixel_from_current_screen  (word x,word y)

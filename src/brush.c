@@ -71,7 +71,7 @@ void Compute_clipped_dimensions(short * x,short * y,short * width,short * height
 
   // -- Calcul de redimensionnement du pinceau pour éviter les débordements
   //    de l'écran zoomé et de l'image --
-
+/*
 void Compute_clipped_dimensions_zoom(short * x,short * y,short * width,short * height)
 {
   if ((*x)<Limit_left_zoom)
@@ -96,7 +96,7 @@ void Compute_clipped_dimensions_zoom(short * x,short * y,short * width,short * h
     (*height)=(Limit_bottom_zoom-(*y))+1;
   }
 }
-
+*/
 
 /// Display the paintbrush (preview : on screen only)
 void Display_paintbrush(short x,short y,byte color)
@@ -175,6 +175,7 @@ void Display_paintbrush(short x,short y,byte color)
 
       Update_part_of_screen(x-Brush_offset_X,y-Brush_offset_Y,Brush_width,Brush_height);
       
+      /*
       if (Main_magnifier_mode != 0)
       {
         Compute_clipped_dimensions_zoom(&start_x,&start_y,&width,&height);
@@ -202,7 +203,7 @@ void Display_paintbrush(short x,short y,byte color)
                                   Brush_width,
                                   Horizontal_line_buffer); 
         }
-      }
+      }*/
 
       break;
       
@@ -224,7 +225,7 @@ void Display_paintbrush(short x,short y,byte color)
                            width,height,
                            0,Fore_color,
                            MAX_PAINTBRUSH_SIZE);
-
+      /*
       if (Main_magnifier_mode != 0)
       {
         Compute_clipped_dimensions_zoom(&start_x,&start_y,&width,&height);
@@ -248,7 +249,7 @@ void Display_paintbrush(short x,short y,byte color)
                                   Horizontal_line_buffer);
 
         }
-      }
+      }*/
       Brush=temp;
   }
 }
@@ -354,7 +355,7 @@ void Draw_paintbrush(short x,short y,byte color)
                     0,0,
                     width,height,0,
                     Main_image_width);
-
+      /*
       if (Main_magnifier_mode != 0)
       {
         Compute_clipped_dimensions_zoom(&min_x,&min_y,&width,&height);
@@ -376,7 +377,7 @@ void Draw_paintbrush(short x,short y,byte color)
                            Main_image_width,
                            Horizontal_line_buffer);
         }
-      }
+      }*/
       // End of graphic feedback
     }
     return;
@@ -741,7 +742,7 @@ void Hide_paintbrush(short x,short y)
                     start_x_counter,start_y_counter,
                     width,height,Back_color,
                     Main_image_width);
-
+      /*
       if (Main_magnifier_mode != 0)
       {
         Compute_clipped_dimensions_zoom(&start_x,&start_y,&width,&height);
@@ -763,7 +764,7 @@ void Hide_paintbrush(short x,short y)
                            Main_image_width,
                            Horizontal_line_buffer);
         }
-      }
+      }*/
       break;
     default: // Pinceau
       start_x=x-Paintbrush_offset_X;
@@ -784,7 +785,7 @@ void Hide_paintbrush(short x,short y)
                     width,height,0,
                     Main_image_width);
       }
-
+      /*
       if (Main_magnifier_mode != 0)
       {
         Compute_clipped_dimensions_zoom(&start_x,&start_y,&width,&height);
@@ -806,7 +807,7 @@ void Hide_paintbrush(short x,short y)
                            Main_image_width,
                            Horizontal_line_buffer);
         }
-      }
+      }*/
 
       Brush=temp;
       break;
