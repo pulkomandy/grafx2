@@ -454,15 +454,9 @@ typedef struct
   int Factor;
 
   // Mouse
-  
-  /// X coordinate of the mouse cursor's "hot spot". It is < ::CURSOR_SPRITE_WIDTH
-  word Cursor_offset_X[NB_CURSOR_SPRITES];
-  /// Y coordinate of the mouse cursor's "hot spot". It is < ::CURSOR_SPRITE_HEIGHT
-  word Cursor_offset_Y[NB_CURSOR_SPRITES];
-  /// Graphic resources for the mouse cursor.
-  byte Cursor_sprite[NB_CURSOR_SPRITES][CURSOR_SPRITE_HEIGHT][CURSOR_SPRITE_WIDTH];
-
   SDL_Texture *Mouse_cursor[NB_CURSOR_SPRITES];
+  int Mouse_cursor_width[NB_CURSOR_SPRITES];
+  int Mouse_cursor_height[NB_CURSOR_SPRITES];
 
   // Sieve patterns
   

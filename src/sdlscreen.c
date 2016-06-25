@@ -436,11 +436,11 @@ void Flush_update(void)
     {
       if (shape==CURSOR_SHAPE_ARROW || shape==CURSOR_SHAPE_HOURGLASS || shape==CURSOR_SHAPE_HORIZONTAL)
       {
-        // These shapes are always scaled to UI factor.
-        x_factor = Menu_factor_X;
-        y_factor = Menu_factor_Y;
-        r.x = Mouse_X-14*x_factor;
-        r.y = Mouse_Y-15*y_factor;
+        // These shapes used to be scaled to UI factor, but no longer.
+        x_factor = 1;//Menu_factor_X;
+        y_factor = 1;//Menu_factor_Y;
+        r.x = Mouse_X-Gfx->Mouse_cursor_width[shape]/2*x_factor;
+        r.y = Mouse_Y-Gfx->Mouse_cursor_height[shape]/2*y_factor;
       }
       else
       {
@@ -471,15 +471,15 @@ void Flush_update(void)
           x_factor = y_factor = Min(
             Min(Main_magnifier_factor * Pixel_width, Menu_factor_X),
             Min(Main_magnifier_factor * Pixel_height, Menu_factor_Y));
-          r.x = (Mouse_X-Main_X_zoom)/x_factor*x_factor+Main_X_zoom -14*x_factor;
-          r.y = (Mouse_Y/y_factor-15)*y_factor;
+          r.x = (Mouse_X-Main_X_zoom)/x_factor*x_factor+Main_X_zoom -Gfx->Mouse_cursor_width[shape]/2*x_factor;
+          r.y = (Mouse_Y/y_factor-Gfx->Mouse_cursor_height[shape]/2)*y_factor;
         }
         else
         {
           x_factor = Pixel_width;
           y_factor = Pixel_height;
-          r.x = (Mouse_X/x_factor-14)*x_factor;
-          r.y = (Mouse_Y/y_factor-15)*y_factor;
+          r.x = (Mouse_X/x_factor-Gfx->Mouse_cursor_width[shape]/2)*x_factor;
+          r.y = (Mouse_Y/y_factor-Gfx->Mouse_cursor_height[shape]/2)*y_factor;
         }
       }
     
@@ -496,8 +496,8 @@ void Flush_update(void)
       //  CURSOR_SHAPE_XOR_RECTANGLE     
       //  CURSOR_SHAPE_XOR_ROTATION      
       
-        r.w = 29*x_factor;
-        r.h = 31*y_factor;
+        r.w = Gfx->Mouse_cursor_width[shape]*x_factor;
+        r.h = Gfx->Mouse_cursor_height[shape]*y_factor;
       SDL_RenderCopy(Renderer_SDL, Gfx->Mouse_cursor[shape], NULL, &r);
     } 
   } while(0);

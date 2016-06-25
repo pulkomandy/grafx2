@@ -208,50 +208,6 @@ byte Read_GUI_pattern(T_Gui_skin *gfx, SDL_Surface *gui, int start_x, int start_
   return 0;
 }
 
-void Center_GUI_cursor(T_Gui_skin *gfx, byte *cursor_buffer, int cursor_number)
-{
-  int x,y;
-  int start_x, start_y;
-  byte found;
-
-  // Locate first non-empty column
-  found=0;
-  for (start_x=0;start_x<14;start_x++)
-  {
-    for (y=0;y<29;y++)
-    {
-      if (cursor_buffer[y*29+start_x]!=gfx->Color_trans)
-      {
-        found=1;
-        break;
-      }
-    }
-    if (found)
-      break;
-  }
-  // Locate first non-empty line
-  found=0;
-  for (start_y=0;start_y<14;start_y++)
-  {
-    for (x=0;x<29;x++)
-    {
-      if (cursor_buffer[start_y*29+x]!=gfx->Color_trans)
-      {
-        found=1;
-        break;
-      }
-    }
-    if (found)
-      break;
-  }
-  gfx->Cursor_offset_X[cursor_number]=14-start_x;
-  gfx->Cursor_offset_Y[cursor_number]=14-start_y;
-
-  for (y=0;y<CURSOR_SPRITE_HEIGHT;y++)
-    for (x=0;x<CURSOR_SPRITE_WIDTH;x++)
-      gfx->Cursor_sprite[cursor_number][y][x]=cursor_buffer[(start_y+y)*29+start_x+x];
-}
-
 byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
 {
   int i,j;
@@ -262,7 +218,6 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   int char_2=0;  // grands titres de l'aide. Chaque indice avance dans 
   int char_3=0;  // l'une des fontes dans l'ordre :  1 2
   int char_4=0;  //                                  3 4
-  byte mouse_cursor_area[31][29];
   SDL_Palette * SDLPal;
   
   // Default palette
@@ -462,6 +417,9 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   // Mouse cursors
   for (i=0; i<NB_CURSOR_SPRITES; i++)
   {
+    int width=0;
+    int height=0;
+    
     if (i==0)
     {
       if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "mouse cursor"))
@@ -472,15 +430,20 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "mouse cursor"))
         return 1;
     }
-    if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, mouse_cursor_area, 29, 31, "mouse cursor",1))
-      return 1;
-    Center_GUI_cursor(gfx, (byte *)mouse_cursor_area,i);
+    do
+      width++;
+    while(cursor_x + width <= gui->w && Get_SDL_pixel_8(gui, cursor_x + width, cursor_y) != neutral_color);
+    do 
+      height++;
+    while(cursor_y + height <= gui->h && Get_SDL_pixel_8(gui, cursor_x, cursor_y + height) != neutral_color);
     
-    gfx->Mouse_cursor[i] = Create_texture(gui, cursor_x, cursor_y, 29, 31);
-    cursor_x+=29;
+    
+    gfx->Mouse_cursor_width[i] = width;
+    gfx->Mouse_cursor_height[i] = height;
+    gfx->Mouse_cursor[i] = Create_texture(gui, cursor_x, cursor_y, width, height);
+    cursor_x+=width;
   }
-  cursor_y+=31;
-
+  cursor_y+=gfx->Mouse_cursor_height[0];
   
 
   // Menu sprites
