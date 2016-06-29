@@ -471,7 +471,7 @@ typedef struct
   byte Animbar_block[2][14][236];
   byte Statusbar_block[2][9][20];
   /// Bitmap data for the icons that are displayed over the menu.
-  byte Menu_sprite[2][NB_MENU_SPRITES][MENU_SPRITE_HEIGHT][MENU_SPRITE_WIDTH];
+  SDL_Texture *Menu_sprite[2][NB_MENU_SPRITES];
   /// Bitmap data for the different "effects" icons.
   SDL_Texture *Effect_sprite[NB_EFFECTS_SPRITES];
   /// Bitmap data for the different Layer icons.

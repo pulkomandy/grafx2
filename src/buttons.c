@@ -2304,7 +2304,7 @@ void Button_Draw_switch_mode(void)
   {
     default:
     case OPERATION_CONTINUOUS_DRAW:
-      icon=-1;
+      icon=MENU_SPRITE_CONTINUOUS_DRAW;
       break;
     case OPERATION_DISCONTINUOUS_DRAW:
       icon=MENU_SPRITE_DISCONTINUOUS_DRAW;
@@ -3598,7 +3598,7 @@ void Button_Lines_switch_mode(void)
   {
     default:
     case OPERATION_LINE:
-      icon=-1;
+      icon=MENU_SPRITE_LINE;
       break;
     case OPERATION_K_LINE:
       icon=MENU_SPRITE_K_LINE;
@@ -4069,7 +4069,7 @@ void Button_Curves_switch_mode(void)
     Selected_curve_mode=OPERATION_4_POINTS_CURVE;
 
   Hide_cursor();
-  Display_sprite_in_menu(BUTTON_CURVES,Selected_curve_mode==OPERATION_4_POINTS_CURVE?MENU_SPRITE_4_POINTS_CURVE:-1);
+  Display_sprite_in_menu(BUTTON_CURVES,Selected_curve_mode==OPERATION_4_POINTS_CURVE?MENU_SPRITE_4_POINTS_CURVE:MENU_SPRITE_3_POINTS_CURVE);
   Draw_menu_button(BUTTON_CURVES,BUTTON_PRESSED);
   Start_operation_stack(Selected_curve_mode);
   Display_cursor();

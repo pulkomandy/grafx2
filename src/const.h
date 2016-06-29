@@ -74,9 +74,9 @@
 #define DEFAULT_ZOOM_FACTOR        4    ///< Initial zoom factor for the magnifier.
 #define MAX_PATH_CHARACTERS PATH_MAX    ///< Number of characters for a file+complete path. Adapt to your OS...
 #define NB_BOOKMARKS               4    ///< Number of bookmark buttons in Save/Load screen.
-// Character to show a right arrow, used when editing long strings. It's present in ::Gfx->System_font 
+// Character to show a right arrow, used when editing long strings. It's present in ::Gfx->System_font
 #define RIGHT_TRIANGLE_CHARACTER  16
-// Character to show a left arrow, used when editing long strings. It's present in ::Gfx->System_font 
+// Character to show a left arrow, used when editing long strings. It's present in ::Gfx->System_font
 #define LEFT_TRIANGLE_CHARACTER   17
 /// Character to display in menus for an ellipsis.
 #define ELLIPSIS_CHARACTER       '…'
@@ -89,7 +89,7 @@
 #define BRUSH_CONTAINER_ROWS             3  ///< Number of rows in the Brush container
 
 ///
-/// We force the dynamic backup page allocation to leave a minimum of 
+/// We force the dynamic backup page allocation to leave a minimum of
 /// 256Kb of free memory, to allow the rest of the program to work safely.
 /// Note: This is a remainder of the DOS version. This system might not work
 /// so well on other OSes, where the "available memory" changes due to external
@@ -323,7 +323,7 @@ enum BUTTON_NUMBERS
   BUTTON_ANIM_REMOVE_FRAME,
   BUTTON_ANIM_UP_FRAME,
   BUTTON_ANIM_DOWN_FRAME,
-  
+
   BUTTON_ANIM_PLAY, // unused at this time
 
   // Layer bar
@@ -378,19 +378,78 @@ enum BUTTON_NUMBERS
 
 enum MENU_SPRITE
 {
-  MENU_SPRITE_COLOR_BRUSH=0,
+  MENU_SPRITE_EMPTY=0,
+  MENU_SPRITE_COLOR_BRUSH,
   MENU_SPRITE_MONO_BRUSH,
+  MENU_SPRITE_CONTINUOUS_DRAW,
   MENU_SPRITE_DISCONTINUOUS_DRAW,
   MENU_SPRITE_POINT_DRAW,
   MENU_SPRITE_CONTOUR_DRAW,
-  MENU_SPRITE_4_POINTS_CURVE,
+  MENU_SPRITE_LINE,
   MENU_SPRITE_K_LINE,
   MENU_SPRITE_CENTERED_LINES,
-  MENU_SPRITE_ELLIPSES,
-  MENU_SPRITE_POLYFORM,
+  MENU_SPRITE_FILL,
   MENU_SPRITE_REPLACE,
+  MENU_SPRITE_RECTANGLE,
+  MENU_SPRITE_FILLED_RECTANGLE,
+  MENU_SPRITE_GRAD_RECTANGLE,
+  MENU_SPRITE_GRAB_BRUSH,
+  MENU_SPRITE_LASSO,
+  MENU_SPRITE_EFFECTS,
+  MENU_SPRITE_MAGNIFIER,
+  MENU_SPRITE_SCREEN,
+  MENU_SPRITE_SAVE,
+  MENU_SPRITE_LOAD,
+  MENU_SPRITE_CLEAR,
+  MENU_SPRITE_UNDO,
+  MENU_SPRITE_KILL,
+  MENU_SPRITE_PALETTE,
+
+  MENU_SPRITE_ADJUST,
+  MENU_SPRITE_3_POINTS_CURVE,
+  MENU_SPRITE_4_POINTS_CURVE,
+  MENU_SPRITE_SPRAY,
+  MENU_SPRITE_POLYGON,
+  MENU_SPRITE_FILLED_POLYGON,
+  MENU_SPRITE_POLYFORM,
+  MENU_SPRITE_FILLED_POLYFORM,
+  MENU_SPRITE_CIRCLE,
+  MENU_SPRITE_FILLED_CIRCLE,
+  MENU_SPRITE_ELLIPSE,
+  MENU_SPRITE_FILLED_ELLIPSE,
+  MENU_SPRITE_GRAD_CIRCLE,
   MENU_SPRITE_GRAD_ELLIPSE,
-  MENU_SPRITE_VERTICAL_PALETTE_SCROLL,
+  MENU_SPRITE_BRUSH_EFFECTS,
+  MENU_SPRITE_TEXT,
+  MENU_SPRITE_COLOR_PICKER,
+  MENU_SPRITE_SPARE,
+  MENU_SPRITE_OPTIONS,
+  MENU_SPRITE_HELP,
+  MENU_SPRITE_QUIT,
+  MENU_SPRITE_PAL_LEFT,
+  MENU_SPRITE_PAL_RIGHT,
+  MENU_SPRITE_PAL_UP,
+  MENU_SPRITE_PAL_DOWN,
+
+  MENU_SPRITE_LAYER_MENU,
+  MENU_SPRITE_LAYER_TRANSPARENT,
+  MENU_SPRITE_LAYER_MERGE,
+  MENU_SPRITE_LAYER_ADD,
+  MENU_SPRITE_LAYER_DROP,
+  MENU_SPRITE_LAYER_LOWER,
+  MENU_SPRITE_LAYER_RAISE,
+
+  MENU_SPRITE_ANIM_LAYERS,
+  MENU_SPRITE_ANIM_TIME,
+  MENU_SPRITE_ANIM_FIRST,
+  MENU_SPRITE_ANIM_PREV,
+  MENU_SPRITE_ANIM_NEXT,
+  MENU_SPRITE_ANIM_LAST,
+  MENU_SPRITE_ANIM_ADD,
+  MENU_SPRITE_ANIM_DROP,
+  MENU_SPRITE_ANIM_MOVE_BACK,
+  MENU_SPRITE_ANIM_MOVE_FORWARD,
+  MENU_SPRITE_HIDE,
   NB_MENU_SPRITES ///< Number of menu sprites.
 };
 
@@ -536,7 +595,7 @@ enum SPECIAL_ACTIONS
   SPECIAL_FORMAT_CHECKER_MENU,
 
   SPECIAL_HOLD_PAN,
-  
+
   NB_SPECIAL_SHORTCUTS            ///< Number of special shortcuts
 };
 

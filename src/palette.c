@@ -2932,7 +2932,8 @@ void Button_Secondary_palette(void)
   {
     Change_palette_cells();
     Display_menu();
-    Display_sprite_in_menu(BUTTON_PAL_LEFT,Config.Palette_vertical?MENU_SPRITE_VERTICAL_PALETTE_SCROLL:-1);
+    Display_sprite_in_menu(BUTTON_PAL_LEFT,Config.Palette_vertical?MENU_SPRITE_PAL_UP:MENU_SPRITE_PAL_LEFT);
+    Display_sprite_in_menu(BUTTON_PAL_RIGHT,Config.Palette_vertical?MENU_SPRITE_PAL_DOWN:MENU_SPRITE_PAL_RIGHT);
     Draw_menu_button(BUTTON_PAL_LEFT,BUTTON_RELEASED);
     Draw_menu_button(BUTTON_PAL_RIGHT,BUTTON_RELEASED);
   }

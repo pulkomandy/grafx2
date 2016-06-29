@@ -43,7 +43,7 @@
 #include "pxsimple.h"
 
 T_Toolbar_button Buttons_Pool[NB_BUTTONS];
-T_Menu_Bar Menu_bars[MENUBAR_COUNT] = 
+T_Menu_Bar Menu_bars[MENUBAR_COUNT] =
   {{MENU_WIDTH, 9, 1, 45, {NULL,NULL}, NULL, 20,  BUTTON_HIDE }, // Status
   {MENU_WIDTH, 14, 1, 35, {NULL,NULL}, NULL, 236, BUTTON_ANIM_PLAY }, // Animation
   {MENU_WIDTH, 10, 1, 35, {NULL,NULL}, NULL, 144, BUTTON_LAYER_SELECT }, // Layers
@@ -85,7 +85,7 @@ void Pixel_in_menu_and_skin(word bar, word x, word y, byte color)
   Pixel_in_menu(bar, x, y, color);
   //Menu_bars[bar].Skin[2][y*Menu_bars[bar].Skin_width + x] = color;
   Rectangle_on_texture(Menu_bars[bar].Menu_texture, (x*Menu_factor_X), (y*Menu_factor_Y), Menu_factor_X, Menu_factor_Y, Screen_SDL->format->palette->colors[color].r, Screen_SDL->format->palette->colors[color].g, Screen_SDL->format->palette->colors[color].b, 255, SDL_BLENDMODE_NONE);
-  
+
 }
 
 // Affichage d'un pixel dans la fenêtre (la fenêtre doit être visible)
@@ -233,7 +233,7 @@ word Palette_cell_Y(byte index)
 void Set_fore_color(byte color)
 {
   byte old_fore_color = Fore_color;
-  
+
   Fore_color=color;
   Reposition_palette();
   Display_foreback();
@@ -244,7 +244,7 @@ void Set_fore_color(byte color)
 void Set_back_color(byte color)
 {
   byte old_back_color = Back_color;
-  
+
   Back_color=color;
   Display_foreback();
   Frame_menu_color(old_back_color);
@@ -261,7 +261,7 @@ void Frame_menu_color(byte id)
   word index;
   word cell_height=Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y;
   byte color;
-  
+
   //if (! Menu_bars[MENUBAR_TOOLS].Visible)
   //  return;
 
@@ -357,7 +357,7 @@ void Display_menu_palette(void)
   int color;
   byte cell_height=Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y;
   // width: Menu_palette_cell_width
-  
+
   //if (Menu_is_visible && Menu_bars[MENUBAR_TOOLS].Visible)
 	int transparent = -1;
 	int cw,ch;
@@ -388,7 +388,7 @@ void Display_menu_palette(void)
 	{
 		// Draw the color block
     Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
-      Palette_cell_X(color), Palette_cell_Y(color), cw, ch, 
+      Palette_cell_X(color), Palette_cell_Y(color), cw, ch,
       Main_palette[color].R, Main_palette[color].G, Main_palette[color].B, 255, SDL_BLENDMODE_NONE);
 
 		// Make the transparent color more visible by adding a MC_Dark/MC_Light pattern to it.
@@ -418,7 +418,7 @@ void Reposition_palette(void)
     cells=Menu_cells_X;
   else
     cells=Menu_cells_Y;
-    
+
 
   if (Fore_color<First_color_in_palette)
   {
@@ -444,7 +444,7 @@ void Change_palette_cells()
     Menu_cells_X=1;
   if (Menu_cells_Y<1)
     Menu_cells_Y=1;
-  
+
   while (1)
   {
     Menu_palette_cell_width = ((Screen_width/Menu_factor_X)-(MENU_WIDTH+2)) / Menu_cells_X;
@@ -454,7 +454,7 @@ void Change_palette_cells()
       break;
     Menu_cells_X--;
   }
-  
+
   // Cale First_color_in_palette sur un multiple du nombre de cellules (arrondi inférieur)
   if (Config.Palette_vertical)
     First_color_in_palette=First_color_in_palette/Menu_cells_X*Menu_cells_X;
@@ -471,7 +471,7 @@ void Change_palette_cells()
     else
       First_color_in_palette=255/Menu_cells_Y*Menu_cells_Y-(Menu_cells_X-1)*Menu_cells_Y;
   }
-  
+
   // Mise à jour de la taille du bouton dans le menu. C'est pour pas que
   // la bordure noire soit active.
   Buttons_Pool[BUTTON_CHOOSE_COL].Width=(Menu_palette_cell_width*Menu_cells_X)-1;
@@ -522,11 +522,11 @@ void Draw_bar_remainder(word current_menu, word x_off)
     }
 }
 
-            
+
 /// Display / update the layer menubar
 void Display_layerbar(void)
 {
-  
+
   if (Menu_bars[MENUBAR_LAYERS].Visible)
   {
     word x_off=0;
@@ -535,52 +535,52 @@ void Display_layerbar(void)
     word horiz_space;
     word current_button;
     word repeats=1;
-    
+
     // Available space in pixels
     horiz_space = Screen_width / Menu_factor_X - Menu_bars[MENUBAR_LAYERS].Skin_width;
-    
+
     // Don't display all buttons if not enough room
     if (horiz_space/button_width < button_number)
       button_number = horiz_space/button_width;
     // Only 16 icons at the moment
     if (button_number > 16) // can be different from MAX_NB_LAYERS
       button_number = 16;
-  
+
     // Enlarge the buttons themselves if there's enough room
     while (button_number*(button_width+2) < horiz_space && repeats < 20)
     {
       repeats+=1;
       button_width+=2;
     }
-    
+
     x_off=Menu_bars[MENUBAR_LAYERS].Skin_width;
     for (current_button=0; current_button<button_number; current_button++)
     {
       word x_pos=0;
       word y_pos;
       word sprite_index;
-      
+
       if (Main_current_layer == current_button)
         sprite_index=1;
       else if (Main_layers_visible & (1 << current_button))
         sprite_index=0;
       else
         sprite_index=2;
-      
-      
+
+
       for (y_pos=0;y_pos<LAYER_SPRITE_HEIGHT;y_pos++)
       {
         word source_x=0;
-        
+
         for (source_x=0;source_x<LAYER_SPRITE_WIDTH;source_x++)
         {
           short i = 1;
-          
-          // This stretches a button, by duplicating the 2nd from right column 
-          // and 3rd column from left.    
+
+          // This stretches a button, by duplicating the 2nd from right column
+          // and 3rd column from left.
           if (source_x == 1 || (source_x == LAYER_SPRITE_WIDTH-3))
             i=repeats;
-          
+
           for (;i>0; i--)
           {
             Pixel_in_menu(MENUBAR_LAYERS, x_pos + x_off, y_pos, Gfx->Layer_sprite[sprite_index][current_button][y_pos][source_x]);
@@ -589,25 +589,25 @@ void Display_layerbar(void)
         }
         // Next line
         x_pos=0;
-      }    
+      }
       // Next button
       x_off+=button_width;
     }
     // Texture any remaining space to the right.
     // This overwrites any junk like deleted buttons.
     Draw_bar_remainder(MENUBAR_LAYERS, x_off);
-    
+
     // Update the active area of the layers pseudo-button
     Buttons_Pool[BUTTON_LAYER_SELECT].Width = button_number * button_width;
-    
+
     // Required to determine which layer button is clicked
     Layer_button_width = button_width;
-    
+
     // A screen refresh required by some callers
     Update_rect(
-      Menu_bars[MENUBAR_LAYERS].Skin_width, 
-      Menu_Y+Menu_bars[MENUBAR_LAYERS].Top*Menu_factor_Y, 
-      horiz_space*Menu_factor_X, 
+      Menu_bars[MENUBAR_LAYERS].Skin_width,
+      Menu_Y+Menu_bars[MENUBAR_LAYERS].Top*Menu_factor_Y,
+      horiz_space*Menu_factor_X,
       Menu_bars[MENUBAR_LAYERS].Height*Menu_factor_Y);
   }
   if (Menu_bars[MENUBAR_ANIMATION].Visible)
@@ -623,7 +623,7 @@ void Display_layerbar(void)
     Update_rect(
       (82)*Menu_factor_X,
       (Menu_bars[MENUBAR_ANIMATION].Top+3)*Menu_factor_Y+Menu_Y,
-      4*8*Menu_factor_X, 
+      4*8*Menu_factor_X,
       8*Menu_factor_Y);
   }
 }
@@ -645,11 +645,17 @@ void Display_menu(void)
     {
       Menu_bars[current_menu].Menu_texture = Create_rendering_texture(Screen_width, Menu_bars[current_menu].Height*Menu_factor_Y);
       // Debug : color the bars
-      Rectangle_on_texture(Menu_bars[current_menu].Menu_texture, 0, 0, Screen_width, Menu_bars[current_menu].Height*Menu_factor_Y, (current_menu+2)*10, (current_menu+2)*30, (current_menu+2)*50, 255, SDL_BLENDMODE_NONE);
+      //byte r = (current_menu+2)*10;
+      //byte g = (current_menu+2)*30;
+      //byte b = (current_menu+2)*50;
+      byte r = Main_palette[MC_Light].R;
+      byte g = Main_palette[MC_Light].G;
+      byte b = Main_palette[MC_Light].B;
+      Rectangle_on_texture(Menu_bars[current_menu].Menu_texture, 0, 0, Screen_width, Menu_bars[current_menu].Height*Menu_factor_Y, r, g, b, 255, SDL_BLENDMODE_NONE);
     }
   }
   // Redraw entire menus to textures
-  // 
+  //
   // Menu_bars[MENUBAR_TOOLS ].Skin[i] = (byte*)&(gfx->Menu_block[i]);
   // Menu_bars[MENUBAR_LAYERS].Skin[i] = (byte*)&(gfx->Layerbar_block[i]);
   // Menu_bars[MENUBAR_ANIMATION].Skin[i] = (byte*)&(gfx->Animbar_block[i]);
@@ -661,7 +667,7 @@ void Display_menu(void)
   {
     while (button > Menu_bars[current_menu].Last_button_index)
       current_menu++;
-      
+
       //if (Buttons_Pool[button].Pressed || button==BUTTON_PAINTBRUSHES)
         Draw_menu_button(button, Buttons_Pool[button].Pressed);
   }
@@ -693,7 +699,7 @@ void Display_menu(void)
           // the last two columns
           Draw_bar_remainder(current_menu, Menu_bars[current_menu].Skin_width);
         }
-        
+
         // Next bar
       }
     }
@@ -809,9 +815,9 @@ void Print_filename(void)
 
   // Determine maximum size, in characters
   max_size = 12 + (Screen_width / Menu_factor_X - 320) / 8;
-  
+
   string_size = strlen(Main_backups->Pages->Filename);
-  
+
   // Partial copy of the name
   strncpy(display_string, Main_backups->Pages->Filename, max_size);
   display_string[max_size]='\0';
@@ -827,7 +833,7 @@ void Print_filename(void)
     max_size*8*Menu_factor_X, 8*Menu_factor_Y,
     light_color.r, light_color.g, light_color.b, 255, SDL_BLENDMODE_NONE);
   // Print
-  Print_in_texture(Menu_bars[MENUBAR_STATUS].Menu_texture, display_string, 
+  Print_in_texture(Menu_bars[MENUBAR_STATUS].Menu_texture, display_string,
     Screen_width-max_size*8*Menu_factor_X, Menu_factor_Y, MC_Black, MC_Light);
 }
 
@@ -1071,7 +1077,7 @@ byte Confirmation_box(char * message)
   {
     char * next_eol;
     char display_string[36+1];
-    
+
     next_eol = strchr(c, '\n');
     if (next_eol==NULL) // last line
       current_length = strlen(c);
@@ -1086,7 +1092,7 @@ byte Confirmation_box(char * message)
     display_string[current_length]='\0';
 
     Print_in_window((window_width>>1)-(current_length<<2), 20+(current_line<<3), display_string, MC_Black, MC_Light);
-    
+
     c += current_length;
     if (*c == '\n')
       c++;
@@ -1196,9 +1202,9 @@ void Verbose_message(const char *caption, const char * message )
   char buffer[36];
   byte original_cursor_shape=Cursor_shape;
 
-  
+
   Open_window(300,160,caption);
-  
+
   // Word-wrap the message
   for (line=0; line < 13 && *message!='\0'; line++)
   {
@@ -1220,10 +1226,10 @@ void Verbose_message(const char *caption, const char * message )
     if (message[nb_char]=='\0' || last_space == -1)
       last_space = nb_char;
     buffer[last_space]='\0';
-    
+
     // Print
     Print_in_window(10,20+line*8,buffer,MC_Black,MC_Light);
-    
+
     // Next line
     message=message+last_space;
     // Strip at most one carriage return and any leading spaces
@@ -1253,12 +1259,6 @@ void Verbose_message(const char *caption, const char * message )
 void Display_sprite_in_menu(int btn_number,char sprite_number)
 {
   Buttons_Pool[btn_number].Icon=sprite_number;
-
-  if (Buttons_Pool[btn_number].Shape == BUTTON_SHAPE_TRIANGLE_TOP_LEFT)
-    Buttons_Pool[btn_number+1].Icon=sprite_number;
-
-  else if (Buttons_Pool[btn_number].Shape == BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT)
-    Buttons_Pool[btn_number-1].Icon=sprite_number;
 }
 
   // -- Redessiner la forme du pinceau dans le menu --
@@ -1274,7 +1274,7 @@ void Display_paintbrush_in_menu(void)
       Display_sprite_in_menu(BUTTON_PAINTBRUSHES, MENU_SPRITE_MONO_BRUSH);
       break;
     default:
-      Display_sprite_in_menu(BUTTON_PAINTBRUSHES, -1);
+      Display_sprite_in_menu(BUTTON_PAINTBRUSHES, MENU_SPRITE_EMPTY);
       break;
   }
   Draw_menu_button(BUTTON_PAINTBRUSHES,BUTTON_RELEASED);
@@ -1301,7 +1301,7 @@ void Display_paintbrush_in_window(word x,word y,int number)
 
   width=Min(Paintbrush[number].Width,PAINTBRUSH_WIDTH);
   height=Min(Paintbrush[number].Height,PAINTBRUSH_WIDTH);
-  
+
   origin_x = (x + 8)*Menu_factor_X - (width/2)*x_size;
   origin_y = (y + 8)*Menu_factor_Y - (height/2)*y_size;
 
@@ -1441,7 +1441,7 @@ void Compute_paintbrush_coordinates(void)
     Paintbrush_X=(((Paintbrush_X+(Snap_width>>1)-Snap_offset_X)/Snap_width)*Snap_width)+Snap_offset_X;
     Paintbrush_Y=(((Paintbrush_Y+(Snap_height>>1)-Snap_offset_Y)/Snap_height)*Snap_height)+Snap_offset_Y;
   }
-  
+
   // Handling the snap axis mode, when shift is pressed.
   switch (Current_operation)
   {
@@ -1458,7 +1458,7 @@ void Compute_paintbrush_coordinates(void)
         Snap_axis=1;
         Snap_axis_origin_X=Paintbrush_X;
         Snap_axis_origin_Y=Paintbrush_Y;
-      } 
+      }
   }
 
   if (Snap_axis==1)
@@ -1557,8 +1557,8 @@ void Position_screen_according_to_zoom(void)
                          -(Main_separator_position>>1);
     if (Main_offset_X<0)
       Main_offset_X=0;
-    else if ((Main_image_width-Main_offset_X)*Pixel_width<Main_separator_position)
-      Main_offset_X=Main_image_width*Pixel_width-Main_separator_position;
+    else if (Main_offset_X>Main_image_width-Main_separator_position/Pixel_width)
+      Main_offset_X=Main_image_width-Main_separator_position/Pixel_width;
   }
   else
     Main_offset_X=0;
@@ -1566,12 +1566,12 @@ void Position_screen_according_to_zoom(void)
   // Centrage en Y
   if (Main_image_height>Menu_Y)
   {
-    Main_offset_Y=Main_magnifier_offset_Y+(Main_magnifier_height*Pixel_height/2)
-                         -(Menu_Y>>1);
+    Main_offset_Y=Main_magnifier_offset_Y+(Main_magnifier_height/2)
+                         -((Menu_Y/Pixel_height)>>1);
     if (Main_offset_Y<0)
       Main_offset_Y=0;
-    else if ((Main_image_height-Main_offset_Y)*Pixel_height<Menu_Y)
-      Main_offset_Y=Main_image_height*Pixel_height-Menu_Y;
+    else if (Main_offset_Y>Main_image_height-Menu_Y/Pixel_height)
+      Main_offset_Y=Main_image_height-Menu_Y/Pixel_height;
   }
   else
     Main_offset_Y=0;
@@ -1581,7 +1581,7 @@ void Position_screen_according_to_zoom(void)
 void Position_screen_according_to_position(int target_x, int target_y)
 {
   // Centrage en X
-  if (Main_image_width>Main_separator_position)
+  if (Main_image_width>Main_separator_position/Pixel_width)
   {
     Main_offset_X=target_x-Mouse_X/Pixel_width;
     // Do not allow the zoomed part to show something that the
@@ -1589,20 +1589,20 @@ void Position_screen_according_to_position(int target_x, int target_y)
     // to the non-zoomed part.
     if (Main_magnifier_offset_X<Main_offset_X)
       Main_offset_X=Main_magnifier_offset_X;
-    else if (Main_magnifier_offset_X+Main_magnifier_width > Main_offset_X+Main_separator_position)
-      Main_offset_X = Main_magnifier_offset_X+Main_magnifier_width-Main_separator_position;
+    else if (Main_magnifier_offset_X+Main_magnifier_width > Main_offset_X+Main_separator_position/Pixel_width)
+      Main_offset_X = Main_magnifier_offset_X+Main_magnifier_width-Main_separator_position/Pixel_width;
     if (Main_offset_X<0)
       Main_offset_X=0;
-    else if (Main_image_width<Main_offset_X+Main_separator_position)
-      Main_offset_X=Main_image_width-Main_separator_position;
-      
-    
+    else if (Main_image_width<Main_offset_X+Main_separator_position/Pixel_width)
+      Main_offset_X=Main_image_width-Main_separator_position/Pixel_width;
+
+
   }
   else
     Main_offset_X=0;
 
   // Centrage en Y
-  if (Main_image_height>Menu_Y)
+  if (Main_image_height>Menu_Y/Pixel_height)
   {
     Main_offset_Y=target_y-Mouse_Y/Pixel_height;
     // Do not allow the zoomed part to show something that the
@@ -1614,8 +1614,8 @@ void Position_screen_according_to_position(int target_x, int target_y)
       Main_offset_Y = Main_magnifier_offset_Y+Main_magnifier_height;
     if (Main_offset_Y<0)
       Main_offset_Y=0;
-    else if (Main_image_height<Main_offset_Y+Menu_Y)
-      Main_offset_Y=Main_image_height-Menu_Y;
+    else if (Main_image_height<Main_offset_Y+Menu_Y/Pixel_height)
+      Main_offset_Y=Main_image_height-Menu_Y/Pixel_height;
   }
   else
     Main_offset_Y=0;
@@ -1628,7 +1628,9 @@ void Compute_separator_data(void)
   //short temp;
   short theoric_X=Round(Main_separator_proportion*Screen_width);
 
-  Main_X_zoom=Screen_width-(((Screen_width+((Main_magnifier_factor+Pixel_width)>>1)-theoric_X)/Main_magnifier_factor/Pixel_width)*Main_magnifier_factor*Pixel_width);
+  // Round so that there the zoomed pixels are "full"
+  //Main_X_zoom=Screen_width-(((Screen_width+((Main_magnifier_factor*Pixel_width)>>1)-theoric_X)/Main_magnifier_factor/Pixel_width)*Main_magnifier_factor*Pixel_width);
+  Main_X_zoom=theoric_X;
   Main_separator_position=Main_X_zoom-(Menu_factor_X*SEPARATOR_WIDTH);
 
   // Correction en cas de débordement sur la gauche
@@ -1729,8 +1731,8 @@ void Change_magnifier_factor(byte factor_index, byte point_at_mouse)
     else
     {
       // Target pixel must be positioned at new center
-      Main_magnifier_offset_X = target_x-(Main_magnifier_width>>1);
-      Main_magnifier_offset_Y = target_y-(Main_magnifier_height>>1);
+      Main_magnifier_offset_X = target_x-(Main_magnifier_width>>1)/Pixel_width;
+      Main_magnifier_offset_Y = target_y-(Main_magnifier_height>>1)/Pixel_height;
     }
     // Fix cases where the image would overflow on edges
     Clip_magnifier_offsets(&Main_magnifier_offset_X, &Main_magnifier_offset_Y);
@@ -1752,11 +1754,11 @@ void Change_magnifier_factor(byte factor_index, byte point_at_mouse)
 
 void Copy_view_to_spare(void)
 {
-  
+
   // Don't do anything if the pictures have different dimensions
   if (Main_image_width!=Spare_image_width || Main_image_height!=Spare_image_height)
     return;
-  
+
   // Copie des décalages de la fenêtre principale (non zoomée) de l'image
   Spare_offset_X=Main_offset_X;
   Spare_offset_Y=Main_offset_Y;
@@ -2339,7 +2341,7 @@ void Display_all_screen(void)
       height=Menu_Y/Main_magnifier_factor*Main_magnifier_factor;
     else
       height=Menu_Y;
-    
+
     Display_part_of_screen_scaled(width,height,Main_image_width,Horizontal_line_buffer);
 
     // Effacement de la partie non-image dans la partie zoomée:
@@ -2395,7 +2397,7 @@ byte Best_color(byte r,byte g,byte b)
 
 byte Best_color_nonexcluded(byte red,byte green,byte blue)
 {
-  int   col;  
+  int   col;
   int   delta_r,delta_g,delta_b;
   int   dist;
   int   best_dist=0x7FFFFFFF;
@@ -2426,8 +2428,8 @@ byte Best_color_nonexcluded(byte red,byte green,byte blue)
 
 byte Best_color_range(byte r, byte g, byte b, byte max)
 {
-  
-  int col;  
+
+  int col;
   float best_diff=255.0*1.56905;
   byte  best_color=0;
   float target_bri;
@@ -2436,7 +2438,7 @@ byte Best_color_range(byte r, byte g, byte b, byte max)
 
   // Similar to Perceptual_lightness();
   target_bri = sqrt(0.26*r*0.26*r + 0.55*g*0.55*g + 0.19*b*0.19*b);
-  
+
   for (col=0; col<max; col++)
   {
     if (Exclude_color[col])
@@ -2461,7 +2463,7 @@ byte Best_color_range(byte r, byte g, byte b, byte max)
     {
       best_diff=diff;
       best_color=col;
-    } 
+    }
   }
 
   return best_color;
@@ -2469,8 +2471,8 @@ byte Best_color_range(byte r, byte g, byte b, byte max)
 
 byte Best_color_perceptual(byte r,byte g,byte b)
 {
-  
-  int col;  
+
+  int col;
   float best_diff=255.0*1.56905;
   byte  best_color=0;
   float target_bri;
@@ -2479,7 +2481,7 @@ byte Best_color_perceptual(byte r,byte g,byte b)
 
   // Similar to Perceptual_lightness();
   target_bri = sqrt(0.26*r*0.26*r + 0.55*g*0.55*g + 0.19*b*0.19*b);
-  
+
   for (col=0; col<256; col++)
   {
     if (Exclude_color[col])
@@ -2504,7 +2506,7 @@ byte Best_color_perceptual(byte r,byte g,byte b)
     {
       best_diff=diff;
       best_color=col;
-    } 
+    }
   }
 
   return best_color;
@@ -2512,8 +2514,8 @@ byte Best_color_perceptual(byte r,byte g,byte b)
 
 byte Best_color_perceptual_weighted(byte r,byte g,byte b,float l_weight)
 {
-  
-  int col;  
+
+  int col;
   float best_diff=255.0*1.56905;
   byte  best_color=0;
   float target_bri;
@@ -2522,7 +2524,7 @@ byte Best_color_perceptual_weighted(byte r,byte g,byte b,float l_weight)
 
   // Similar to Perceptual_lightness();
   target_bri = sqrt(0.26*r*0.26*r + 0.55*g*0.55*g + 0.19*b*0.19*b);
-  
+
   for (col=0; col<256; col++)
   {
     if (Exclude_color[col])
@@ -2547,7 +2549,7 @@ byte Best_color_perceptual_weighted(byte r,byte g,byte b,float l_weight)
     {
       best_diff=diff;
       best_color=col;
-    } 
+    }
   }
 
   return best_color;
@@ -2555,8 +2557,8 @@ byte Best_color_perceptual_weighted(byte r,byte g,byte b,float l_weight)
 
 byte Best_color_perceptual_except(byte r,byte g,byte b, byte except)
 {
-  
-  int col;  
+
+  int col;
   float best_diff=255.0*1.56905;
   byte  best_color=0;
   float target_bri;
@@ -2565,7 +2567,7 @@ byte Best_color_perceptual_except(byte r,byte g,byte b, byte except)
 
   // Similar to Perceptual_lightness();
   target_bri = sqrt(0.26*r*0.26*r + 0.55*g*0.55*g + 0.19*b*0.19*b);
-  
+
   for (col=0; col<256; col++)
   {
     if (col==except || Exclude_color[col])
@@ -2590,7 +2592,7 @@ byte Best_color_perceptual_except(byte r,byte g,byte b, byte except)
     {
       best_diff=diff;
       best_color=col;
-    } 
+    }
   }
 
   return best_color;

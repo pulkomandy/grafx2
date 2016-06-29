@@ -67,7 +67,7 @@ void Get_SDL_Palette(const SDL_Palette * sdl_palette, T_Palette palette);
 /// Clears the parts of screen that are outside of the editing area.
 /// There is such area only if the screen mode is not a multiple of the pixel
 /// size, eg: 3x3 pixels in 1024x768 leaves 1 column on the right, 0 rows on bottom.
-  
+
 extern volatile int Allow_colorcycling;
 
 /// Activates or desactivates file drag-dropping in program window.
@@ -85,4 +85,5 @@ void Window_print_char(short x_pos,short y_pos,const unsigned char c,byte text_c
 // Display a brush in window, using the image's zoom level
 void Brush_in_window(byte * brush, word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,word brush_width);
 void Print_in_texture(SDL_Texture * texture, const char * str, short x, short y, byte text_color,byte background_color);
+void Copy_texture(SDL_Texture * destination, SDL_Texture * source, short x_pos, short y_pos, short width, short height);
 #endif // SDLSCREEN_H_INCLUDED
