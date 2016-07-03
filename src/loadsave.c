@@ -210,26 +210,19 @@ void Set_pixel(T_IO_Context *context, short x_pos, short y_pos, byte color)
 
       if (((x_pos % context->Preview_factor_X)==0) && ((y_pos % context->Preview_factor_Y)==0))
       {
-        // Tag the color as 'used'
-        context->Preview_usage[color]=1;
-
         // Store pixel
-        if (context->Ratio == PIXEL_WIDE &&
-          Pixel_ratio != PIXEL_WIDE &&
-          Pixel_ratio != PIXEL_WIDE2)
+        if (context->Ratio == PIXEL_WIDE)
         {
-          context->Preview_bitmap[x_pos/context->Preview_factor_X*2 + (y_pos/context->Preview_factor_Y)*PREVIEW_WIDTH*Menu_factor_X]=color;
-          context->Preview_bitmap[x_pos/context->Preview_factor_X*2+1 + (y_pos/context->Preview_factor_Y)*PREVIEW_WIDTH*Menu_factor_X]=color;
+          Rectangle_on_texture(Window_texture, context->Preview_pos_X + x_pos/context->Preview_factor_X*2, context->Preview_pos_Y + y_pos/context->Preview_factor_Y, 2, 1, context->Palette[color].R, context->Palette[color].G, context->Palette[color].B, 255, SDL_BLENDMODE_NONE);
         }
-        else if (context->Ratio == PIXEL_TALL &&
-          Pixel_ratio != PIXEL_TALL &&
-          Pixel_ratio != PIXEL_TALL2)
+        else if (context->Ratio == PIXEL_TALL)
         {
-          context->Preview_bitmap[x_pos/context->Preview_factor_X + (y_pos/context->Preview_factor_Y*2)*PREVIEW_WIDTH*Menu_factor_X]=color;
-          context->Preview_bitmap[x_pos/context->Preview_factor_X + (y_pos/context->Preview_factor_Y*2+1)*PREVIEW_WIDTH*Menu_factor_X]=color;
+          Rectangle_on_texture(Window_texture, context->Preview_pos_X + x_pos/context->Preview_factor_X, context->Preview_pos_Y + y_pos/context->Preview_factor_Y*2, 1, 2, context->Palette[color].R, context->Palette[color].G, context->Palette[color].B, 255, SDL_BLENDMODE_NONE);
         }
         else
-          context->Preview_bitmap[x_pos/context->Preview_factor_X + (y_pos/context->Preview_factor_Y)*PREVIEW_WIDTH*Menu_factor_X]=color;
+        {
+          Rectangle_on_texture(Window_texture, context->Preview_pos_X + x_pos/context->Preview_factor_X, context->Preview_pos_Y + y_pos/context->Preview_factor_Y, 1, 1, context->Palette[color].R, context->Palette[color].G, context->Palette[color].B, 255, SDL_BLENDMODE_NONE);
+        }
       }
 
       break;
@@ -251,7 +244,7 @@ void Fill_canvas(T_IO_Context *context, byte color)
     case CONTEXT_PREVIEW:
       if (context->Current_layer!=0)
         return;
-      memset(context->Preview_bitmap, color, PREVIEW_WIDTH*PREVIEW_HEIGHT*Menu_factor_X*Menu_factor_Y);
+      Window_rectangle_RGBA(context->Preview_pos_X, context->Preview_pos_Y, PREVIEW_WIDTH, PREVIEW_HEIGHT, context->Palette[color].R, context->Palette[color].G, context->Palette[color].B, 255);
       break;
     case CONTEXT_MAIN_IMAGE:
       memset(
@@ -267,33 +260,9 @@ void Fill_canvas(T_IO_Context *context, byte color)
   }
 }
 
-void Palette_loaded(T_IO_Context *context)
-{
-  // Update the current screen to the loaded palette
-  switch (context->Type)
-  {
-    case CONTEXT_MAIN_IMAGE:
-    case CONTEXT_PREVIEW:
-    case CONTEXT_BRUSH:
-    case CONTEXT_SURFACE:
-      break;
-  }
-
-  switch (context->Type)
-  {
-    case CONTEXT_PREVIEW:
-    case CONTEXT_MAIN_IMAGE:
-    case CONTEXT_BRUSH:
-    case CONTEXT_SURFACE:
-      break;
-  }
-}
-
 // Chargement des pixels dans le buffer 24b
 void Set_pixel_24b(T_IO_Context *context, short x_pos, short y_pos, byte r, byte g, byte b)
 {
-  byte color;
-
   // Clipping
   if (x_pos<0 || y_pos<0 || x_pos>=context->Width || y_pos>=context->Height)
     return;
@@ -317,14 +286,7 @@ void Set_pixel_24b(T_IO_Context *context, short x_pos, short y_pos, byte r, byte
 
       if (((x_pos % context->Preview_factor_X)==0) && ((y_pos % context->Preview_factor_Y)==0))
       {
-        color=((r >> 5) << 5) |
-                ((g >> 5) << 2) |
-                ((b >> 6));
-
-        // Tag the color as 'used'
-        context->Preview_usage[color]=1;
-
-        context->Preview_bitmap[x_pos/context->Preview_factor_X + (y_pos/context->Preview_factor_Y)*PREVIEW_WIDTH*Menu_factor_X]=color;
+        Rectangle_on_texture(Window_texture, context->Preview_pos_X + x_pos/context->Preview_factor_X, context->Preview_pos_Y + y_pos/context->Preview_factor_Y, 1, 1, r, g, b, 255, SDL_BLENDMODE_NONE);
       }
       break;
   }
@@ -390,10 +352,6 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
     case CONTEXT_PREVIEW:
       // Préparation du chargement d'une preview:
 
-      context->Preview_bitmap=calloc(1, PREVIEW_WIDTH*PREVIEW_HEIGHT*Menu_factor_X*Menu_factor_Y);
-      if (!context->Preview_bitmap)
-        File_error=1;
-
       // Affichage des données "Image size:"
       if ((width<10000) && (height<10000))
       {
@@ -437,13 +395,9 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
       Window_rectangle(45,70,32*8,8,MC_Light);
 
       // Calcul des données nécessaires à l'affichage de la preview:
-      if (ratio == PIXEL_WIDE &&
-          Pixel_ratio != PIXEL_WIDE &&
-          Pixel_ratio != PIXEL_WIDE2)
+      if (ratio == PIXEL_WIDE)
         width*=2;
-      else if (ratio == PIXEL_TALL &&
-          Pixel_ratio != PIXEL_TALL &&
-          Pixel_ratio != PIXEL_TALL2)
+      else if (ratio == PIXEL_TALL)
         height*=2;
 
       context->Preview_factor_X=Round_div_max(width,120*Menu_factor_X);
@@ -457,8 +411,8 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
           context->Preview_factor_X=context->Preview_factor_Y;
       }
 
-      context->Preview_pos_X=Window_pos_X+183*Menu_factor_X;
-      context->Preview_pos_Y=Window_pos_Y+ 95*Menu_factor_Y;
+      context->Preview_pos_X=183*Menu_factor_X;
+      context->Preview_pos_Y=95*Menu_factor_Y;
 
       // On nettoie la zone où va s'afficher la preview:
       Window_rectangle(183,95,PREVIEW_WIDTH,PREVIEW_HEIGHT,MC_Light);
@@ -547,9 +501,7 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
         break;
 
       case CONTEXT_PREVIEW:
-        // Load palette
-        Set_palette_fake_24b(context->Palette);
-        Palette_loaded(context);
+        // Palette is ignored so far
         break;
     }
   }
@@ -672,10 +624,6 @@ void Load_image(T_IO_Context *context)
           Flush_update();
           if (Convert_24b_bitmap_to_256(Main_backups->Pages->Image[0].Pixels,context->Buffer_image_24b,context->Width,context->Height,context->Palette))
             File_error=2;
-          else
-          {
-            Palette_loaded(context);
-          }
           Hide_cursor();
           Cursor_shape=old_cursor_shape;
           Display_cursor();
@@ -876,37 +824,6 @@ void Load_image(T_IO_Context *context)
     /*&& !context->Buffer_image_24b*/
     /*&& !Get_fileformat(context->Format)->Palette_only*/)
   {
-
-    // Try to adapt the palette to accomodate the GUI.
-    int c;
-    int count_unused;
-    byte unused_color[4];
-
-    count_unused=0;
-    // Try find 4 unused colors and insert good colors there
-    for (c=255; c>=0 && count_unused<4; c--)
-    {
-      if (!context->Preview_usage[c])
-      {
-        unused_color[count_unused]=c;
-        count_unused++;
-      }
-    }
-    // Found! replace them with some favorites
-    if (count_unused==4)
-    {
-      int gui_index;
-      for (gui_index=0; gui_index<4; gui_index++)
-      {
-        context->Palette[unused_color[gui_index]]=*Favorite_GUI_color(gui_index);
-      }
-    }
-    // All preview display is here
-
-    // Update palette and screen first
-    Compute_optimal_menu_colors(context->Palette);
-    Set_palette(context->Palette);
-
     // Display palette preview
     if (Get_fileformat(context->Format)->Palette_only)
     {
@@ -914,43 +831,10 @@ void Load_image(T_IO_Context *context)
 
       if (context->Type == CONTEXT_PREVIEW)
         for (index=0; index<256; index++)
-          Window_rectangle(183+(index/16)*7,95+(index&15)*5,5,5,index);
+          Window_rectangle_RGBA(183+(index/16)*7,95+(index&15)*5,5,5,context->Palette[index].R, context->Palette[index].G, context->Palette[index].B, 255);
 
     }
-    // Display normal image
-    else if (context->Preview_bitmap)
-    {
-      int x_pos,y_pos;
-      int width,height;
-      width=context->Width/context->Preview_factor_X;
-      height=context->Height/context->Preview_factor_Y;
-      if (context->Ratio == PIXEL_WIDE &&
-          Pixel_ratio != PIXEL_WIDE &&
-          Pixel_ratio != PIXEL_WIDE2)
-        width*=2;
-      else if (context->Ratio == PIXEL_TALL &&
-          Pixel_ratio != PIXEL_TALL &&
-          Pixel_ratio != PIXEL_TALL2)
-        height*=2;
 
-      /*
-      for (y_pos=0; y_pos<height;y_pos++)
-        for (x_pos=0; x_pos<width;x_pos++)
-        {
-          byte color=context->Preview_bitmap[x_pos+y_pos*PREVIEW_WIDTH*Menu_factor_X];
-
-          // Skip transparent if image has transparent background.
-          if (color == context->Transparent_color && context->Background_transparent)
-            color=MC_Light;
-
-          Pixel(context->Preview_pos_X+x_pos,
-                context->Preview_pos_Y+y_pos,
-                color);
-        }
-        */
-        // context->Preview_pos_X, context->Preview_pos_Y
-        Brush_in_window(context->Preview_bitmap, 10,10, 0, 0, width, height, PREVIEW_WIDTH);
-    }
     // Refresh modified part
     Update_window_area(183,95,PREVIEW_WIDTH,PREVIEW_HEIGHT);
 
@@ -1251,7 +1135,6 @@ void Destroy_context(T_IO_Context *context)
 {
   free(context->Buffer_image_24b);
   free(context->Buffer_image);
-  free(context->Preview_bitmap);
   memset(context, 0, sizeof(T_IO_Context));
 }
 

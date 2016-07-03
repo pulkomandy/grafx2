@@ -50,15 +50,15 @@ typedef struct
 {
   /// Kind of context. Internally used to differentiate the "sub-classes"
   enum CONTEXT_TYPE Type;
-  
+
   // File properties
-  
+
   char * File_name;
   char * File_directory;
   byte Format;
-  
+
   // Image properties
-  
+
   T_Palette Palette;
   short Width;
   short Height;
@@ -68,12 +68,12 @@ typedef struct
   byte Transparent_color;
   /// Pixel ratio of the image
   enum PIXEL_RATIO Ratio;
-  
+
   /// Load/save address of first pixel
   byte *Target_address;
   /// Pitch: Difference of addresses between one pixel and the one just "below" it
   long Pitch;
-  
+
   /// Original file name, stored in GIF file
   char * Original_file_name;
   /// Original file directory, stored in GIF file
@@ -89,18 +89,16 @@ typedef struct
   //byte Is_truecolor;
   /// Internal: Temporary RGB buffer when loading 24bit images
   T_Components *Buffer_image_24b;
-  
+
   /// Internal: Temporary buffer when saving the flattened copy of something
   byte *Buffer_image;
-  
+
   // Internal: working data for preview case
   short Preview_factor_X;
   short Preview_factor_Y;
   short Preview_pos_X;
   short Preview_pos_Y;
-  byte *Preview_bitmap;
-  byte  Preview_usage[256];
-  
+
   // Internal: returned surface for SDL_Surface case
   SDL_Surface * Surface;
 
@@ -128,12 +126,12 @@ void Init_context_backup_image(T_IO_Context * context, char *file_name, char *fi
 void Init_context_flat_image(T_IO_Context * context, char *file_name, char *file_directory);
 // Setup for loading/saving the user's brush
 void Init_context_brush(T_IO_Context * context, char *file_name, char *file_directory);
-// Setup for saving an arbitrary undo/redo step, from either the main or spare page. 
+// Setup for saving an arbitrary undo/redo step, from either the main or spare page.
 void Init_context_history_step(T_IO_Context * context, T_Page *page);
 // Setup for loading an image into a new SDL surface.
 void Init_context_surface(T_IO_Context * context, char *file_name, char *file_directory);
 
-// Cleans up resources (currently: the 24bit buffer) 
+// Cleans up resources (currently: the 24bit buffer)
 void Destroy_context(T_IO_Context *context);
 
 ///
@@ -203,8 +201,6 @@ unsigned int Nb_known_formats(void);
 
 /// Generic allocation and similar stuff, done at beginning of image load, as soon as size is known.
 void Pre_load(T_IO_Context *context, short width, short height, long file_size, int format, enum PIXEL_RATIO ratio, byte truecolor);
-/// Remaps the window. To call after palette (last) changes.
-void Palette_loaded(T_IO_Context *context);
 /// Generic cleanup done on end of loading (ex: color-conversion from the temporary 24b buffer)
 //void Post_load(T_IO_Context *context);
 /// Fill the entire current layer/frame of an image being loaded with a color.

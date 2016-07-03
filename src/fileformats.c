@@ -33,10 +33,10 @@
 #endif
 #if (PNG_LIBPNG_VER_MAJOR <= 1) && (PNG_LIBPNG_VER_MINOR < 4)
   // Compatibility layer to allow us to use libng 1.4 or any older one.
-  
+
   // This function is renamed in 1.4
   #define png_set_expand_gray_1_2_4_to_8(x) png_set_gray_1_2_4_to_8(x)
-  
+
   // Wrappers that are mandatory in 1.4. Older version allowed direct access.
   #define png_get_rowbytes(png_ptr,info_ptr) ((info_ptr)->rowbytes)
   #define png_get_image_width(png_ptr,info_ptr) ((info_ptr)->width)
@@ -130,7 +130,6 @@ void Load_IMG(T_IO_Context * context)
       if (File_error==0)
       {
         memcpy(context->Palette,IMG_header.Palette,sizeof(T_Palette));
-        Palette_loaded(context);
 
         context->Width=IMG_header.Width;
         context->Height=IMG_header.Height;
@@ -177,7 +176,7 @@ void Save_IMG(T_IO_Context * context)
   if ((file=fopen(filename,"wb")))
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
-    
+
     memcpy(IMG_header.Filler1,signature,6);
 
     IMG_header.Width=context->Width;
@@ -266,7 +265,7 @@ void Test_IFF(T_IO_Context * context, const char *sub_type)
         break;
       if (memcmp(section,"FORM",4))
         break;
-      
+
       if (! Read_dword_be(IFF_file, &dummy))
         break;
       //   On aurait pu vérifier que ce long est égal à la taille
@@ -276,7 +275,7 @@ void Test_IFF(T_IO_Context * context, const char *sub_type)
       // garder un peu... Sinon, moi je pleure :'( !!! )
       if (! Read_bytes(IFF_file,format,4))
         break;
-        
+
       if (!memcmp(format,"ANIM",4))
       {
         // An ANIM header: need to check that it encloses an image
@@ -291,12 +290,12 @@ void Test_IFF(T_IO_Context * context, const char *sub_type)
       }
       if ( memcmp(format,sub_type,4))
         break;
-      
+
       // If we reach this part, file is indeed ILBM/PBM or ANIM
       File_error=0;
-      
+
     } while (0);
-    
+
     fclose(IFF_file);
   }
 }
@@ -428,7 +427,7 @@ void Test_LBM(T_IO_Context * context)
 int IFF_Skip_section(void)
 {
   dword size;
-  
+
   if (!Read_dword_be(IFF_file,&size))
     return 0;
   if (size&1)
@@ -603,7 +602,7 @@ void Load_IFF(T_IO_Context * context)
     // FORM + size(4)
     Read_bytes(IFF_file,section,4);
     Read_dword_be(IFF_file,&dummy);
-    
+
     Read_bytes(IFF_file,format,4);
     if (!memcmp(format,"ANIM",4))
     {
@@ -617,7 +616,7 @@ void Load_IFF(T_IO_Context * context)
       iff_format = FORMAT_LBM;
     else
       iff_format = FORMAT_PBM;
-    
+
     if (!IFF_Wait_for((byte *)"BMHD"))
       File_error=1;
     Read_dword_be(IFF_file,&dummy);
@@ -680,7 +679,6 @@ void Load_IFF(T_IO_Context * context)
               Adapt_palette_HAM(context);
               Palette_64_to_256(context->Palette);
             }
-            Palette_loaded(context);
 
             // On lit l'octet de padding du CMAP si la taille est impaire
             if (nb_colors&1)
@@ -701,7 +699,7 @@ void Load_IFF(T_IO_Context * context)
               else if (!memcmp(section,"CRNG",4))
               {
                 // Handle CRNG
-                
+
                 // The content of a CRNG is as follows:
                 word padding;
                 word rate;
@@ -721,12 +719,12 @@ void Load_IFF(T_IO_Context * context)
                     // Valid cycling range
                     if (max_col<min_col)
                     SWAP_BYTES(min_col,max_col)
-                    
+
                     context->Cycle_range[context->Color_cycles].Start=min_col;
                     context->Cycle_range[context->Color_cycles].End=max_col;
                     context->Cycle_range[context->Color_cycles].Inverse=(flags&2)?1:0;
                     context->Cycle_range[context->Color_cycles].Speed=(flags&1) ? rate/78 : 0;
-                                        
+
                     context->Color_cycles++;
                   }
                 }
@@ -745,7 +743,7 @@ void Load_IFF(T_IO_Context * context)
                   break;
                 }
               }
-              
+
             }
 
             if ( !File_error )
@@ -901,9 +899,9 @@ void Load_IFF(T_IO_Context * context)
                 while (!File_error && is_anim)
                 {
                   dword delta_size;
-                  
+
                   // Just loaded the first image successfully : now keep reading
-                  
+
                   // FORM + size(4)
                   if (!Read_bytes(IFF_file,section,4))
                     break;
@@ -1070,14 +1068,14 @@ void Save_IFF(T_IO_Context * context)
   palette_entries = 1<<bit_depth;
 
   File_error=0;
-  
+
   Get_full_filename(filename, context->File_name, context->File_directory);
 
   // Ouverture du fichier
   if ((IFF_file=fopen(filename,"wb")))
   {
     setvbuf(IFF_file, NULL, _IOFBF, 64*1024);
-    
+
     Write_bytes(IFF_file,"FORM",4);
     Write_dword_be(IFF_file,0); // On mettra la taille à jour à la fin
 
@@ -1085,7 +1083,7 @@ void Save_IFF(T_IO_Context * context)
       Write_bytes(IFF_file,"ILBM",4);
     else
       Write_bytes(IFF_file,"PBM ",4);
-      
+
     Write_bytes(IFF_file,"BMHD",4);
     Write_dword_be(IFF_file,20);
 
@@ -1121,13 +1119,13 @@ void Save_IFF(T_IO_Context * context)
     Write_dword_be(IFF_file,palette_entries*3);
 
     Write_bytes(IFF_file,context->Palette,palette_entries*3);
-    
+
     for (i=0; i<context->Color_cycles; i++)
     {
       word flags=0;
       flags|= context->Cycle_range[i].Speed?1:0; // Cycling or not
       flags|= context->Cycle_range[i].Inverse?2:0; // Inverted
-              
+
       Write_bytes(IFF_file,"CRNG",4);
       Write_dword_be(IFF_file,8); // Section size
       Write_word_be(IFF_file,0); // Padding
@@ -1137,7 +1135,7 @@ void Save_IFF(T_IO_Context * context)
       Write_byte(IFF_file,context->Cycle_range[i].End); // Max color
       // No padding, size is multiple of 2
     }
-    
+
     Write_bytes(IFF_file,"BODY",4);
     Write_dword_be(IFF_file,0); // On mettra la taille à jour à la fin
 
@@ -1145,7 +1143,7 @@ void Save_IFF(T_IO_Context * context)
     {
       short line_size; // Size of line in bytes
       short real_line_size; // Size of line in pixels
-      
+
       // Calcul de la taille d'une ligne ILBM (pour les images ayant des dimensions exotiques)
       if (context->Width & 15)
       {
@@ -1158,7 +1156,7 @@ void Save_IFF(T_IO_Context * context)
         line_size=(context->Width>>3)*header.BitPlanes;
       }
       IFF_buffer=(byte *)malloc(line_size);
-      
+
       // Start encoding
       IFF_list_size=0;
       for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
@@ -1167,16 +1165,16 @@ void Save_IFF(T_IO_Context * context)
         memset(IFF_buffer,0,line_size);
         for (x_pos=0; x_pos<context->Width; x_pos++)
           Set_IFF_color(x_pos, Get_pixel(context, x_pos,y_pos), real_line_size, header.BitPlanes);
-          
+
         if (context->Width&1) // odd width fix
           Set_IFF_color(x_pos, 0, real_line_size, header.BitPlanes);
-        
+
         // encode the resulting sequence of bytes
         if (header.Compression)
         {
           int plane_width=line_size/header.BitPlanes;
           int plane;
-          
+
           for (plane=0; plane<header.BitPlanes; plane++)
           {
             for (x_pos=0; x_pos<plane_width && !File_error; x_pos++)
@@ -1197,15 +1195,15 @@ void Save_IFF(T_IO_Context * context)
     else // PBM = chunky 8bpp
     {
       IFF_list_size=0;
-  
+
       for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
       {
         for (x_pos=0; ((x_pos<context->Width) && (!File_error)); x_pos++)
           New_color(Get_pixel(context, x_pos,y_pos));
-  
+
         if (context->Width&1) // odd width fix
           New_color(0);
-          
+
         if (!File_error)
           Transfer_colors();
       }
@@ -1215,7 +1213,7 @@ void Save_IFF(T_IO_Context * context)
     if (!File_error)
     {
       file_size=File_length(filename);
-      
+
       IFF_file=fopen(filename,"rb+");
       fseek(IFF_file,52+palette_entries*3+context->Color_cycles*16,SEEK_SET);
       Write_dword_be(IFF_file,file_size-56-palette_entries*3-context->Color_cycles*16);
@@ -1350,9 +1348,9 @@ byte Bitmap_mask(dword pixel, dword mask)
     {
       if (pixel & 1<<i)
         result |= 1<<bits_found;
-        
+
       bits_found++;
-      
+
       if (bits_found>=8)
         return result;
     }
@@ -1417,7 +1415,7 @@ void Load_BMP(T_IO_Context * context)
         default:
           File_error=1;
       }
-      
+
       if (header.Height < 0)
       {
         negative_height=1;
@@ -1444,8 +1442,6 @@ void Load_BMP(T_IO_Context * context)
               context->Palette[index].G=local_palette[index][1];
               context->Palette[index].B=local_palette[index][0];
             }
-            Palette_loaded(context);
-
             context->Width=header.Width;
             context->Height=header.Height;
 
@@ -1468,7 +1464,7 @@ void Load_BMP(T_IO_Context * context)
                 {
                   short target_y;
                   target_y = negative_height ? y_pos : context->Height-1-y_pos;
-                  
+
                   if (Read_bytes(file,buffer,line_size))
                     for (x_pos=0; x_pos<context->Width; x_pos++)
                       switch (header.Nb_bits)
@@ -1663,13 +1659,13 @@ void Load_BMP(T_IO_Context * context)
               x_pos=(line_size % 4); // x_pos sert de variable temporaire
               if (x_pos>0)
                 line_size+=(4-x_pos);
-    
+
               buffer=(byte *)malloc(line_size);
               for (y_pos=0; (y_pos < context->Height && !File_error); y_pos++)
               {
                 short target_y;
                 target_y = negative_height ? y_pos : context->Height-1-y_pos;
-                
+
                 if (Read_bytes(file,buffer,line_size))
                   for (x_pos=0,index=0; x_pos<context->Width; x_pos++,index+=3)
                     Set_pixel_24b(context, x_pos,target_y,buffer[index+2],buffer[index+1],buffer[index+0]);
@@ -1715,7 +1711,7 @@ void Load_BMP(T_IO_Context * context)
                   File_error=2;
               }
               break;
-            
+
           }
           free(buffer);
           buffer = NULL;
@@ -1754,12 +1750,12 @@ void Save_BMP(T_IO_Context * context)
   if ((file=fopen(filename,"wb")))
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
-    
+
     // Image width must be a multiple of 4 bytes
     line_size = context->Width;
     if (line_size & 3)
       line_size += (4 - (line_size & 3));
-    
+
     header.Signature[0]  = 'B';
     header.Signature[1]  = 'M';
     header.Size_1   =(line_size*context->Height)+1078;
@@ -2058,7 +2054,7 @@ void Load_GIF(T_IO_Context * context)
 
 
   number_LID=0;
-  
+
   Get_full_filename(filename, context->File_name, context->File_directory);
 
   if ((GIF_file=fopen(filename, "rb")))
@@ -2129,7 +2125,7 @@ void Load_GIF(T_IO_Context * context)
             {
               byte function_code;
               // Lecture du code de fonction:
-              Read_byte(GIF_file,&function_code);   
+              Read_byte(GIF_file,&function_code);
               // Lecture de la taille du bloc:
               Read_byte(GIF_file,&size_to_read);
               while (size_to_read!=0 && !File_error)
@@ -2137,12 +2133,12 @@ void Load_GIF(T_IO_Context * context)
                 switch(function_code)
                 {
                   case 0xFE: // Comment Block Extension
-                    // On récupère le premier commentaire non-vide, 
+                    // On récupère le premier commentaire non-vide,
                     // on jette les autres.
                     if (context->Comment[0]=='\0')
                     {
                       int nb_char_to_keep=Min(size_to_read,COMMENT_SIZE);
-                      
+
                       Read_bytes(GIF_file,context->Comment,nb_char_to_keep);
                       context->Comment[nb_char_to_keep+1]='\0';
                       // Si le commentaire etait trop long, on fait avance-rapide
@@ -2229,7 +2225,7 @@ void Load_GIF(T_IO_Context * context)
                         }
                       }
                       else if (!memcmp(aeb,"CRNG\0\0\0\0" "1.0",0x0B))
-                      {            
+                      {
                         // Color animation. Similar to a CRNG chunk in IFF file format.
                         word rate;
                         word flags;
@@ -2249,12 +2245,12 @@ void Load_GIF(T_IO_Context * context)
                               // Valid cycling range
                               if (max_col<min_col)
                               SWAP_BYTES(min_col,max_col)
-                              
+
                               context->Cycle_range[context->Color_cycles].Start=min_col;
                               context->Cycle_range[context->Color_cycles].End=max_col;
                               context->Cycle_range[context->Color_cycles].Inverse=(flags&2)?1:0;
                               context->Cycle_range[context->Color_cycles].Speed=(flags&1)?rate/78:0;
-                                                  
+
                               context->Color_cycles++;
                             }
                           }
@@ -2287,7 +2283,7 @@ void Load_GIF(T_IO_Context * context)
                       Read_byte(GIF_file,&size_to_read);
                     }
                     break;
-                    
+
                   default:
                     // On saute le bloc:
                     fseek(GIF_file,size_to_read,SEEK_CUR);
@@ -2327,7 +2323,7 @@ void Load_GIF(T_IO_Context * context)
               // Duration was set in the previously loaded GCE
               Set_frame_duration(context, last_delay*10);
               number_LID++;
-              
+
               // lecture de 10 derniers octets
               if ( Read_word_le(GIF_file,&(IDB.Pos_X))
                 && Read_word_le(GIF_file,&(IDB.Pos_Y))
@@ -2336,28 +2332,28 @@ void Load_GIF(T_IO_Context * context)
                 && Read_byte(GIF_file,&(IDB.Indicator))
                 && IDB.Image_width && IDB.Image_height)
               {
-    
+
                 // Palette locale dispo = (IDB.Indicator and $80)
                 // Image entrelacée     = (IDB.Indicator and $40)
                 // Ordre de classement  = (IDB.Indicator and $20)
                 // Nombre de bits/pixel = (IDB.Indicator and $07)+1 (si palette locale dispo)
-    
+
                 if (IDB.Indicator & 0x80)
                 {
                   // Palette locale dispo
-    
+
                   if (Config.Clear_palette)
                     memset(context->Palette,0,sizeof(T_Palette));
 
                   nb_colors=(1 << ((IDB.Indicator & 0x07)+1));
                   // Load the palette
                   for(color_index=0;color_index<nb_colors;color_index++)
-                  {   
+                  {
                     Read_byte(GIF_file,&(context->Palette[color_index].R));
                     Read_byte(GIF_file,&(context->Palette[color_index].G));
                     Read_byte(GIF_file,&(context->Palette[color_index].B));
                   }
-                  
+
                 }
                 if (number_LID!=1)
                 {
@@ -2381,13 +2377,11 @@ void Load_GIF(T_IO_Context * context)
                 previous_width=IDB.Image_width;
                 previous_pos_x=IDB.Pos_X;
                 previous_pos_y=IDB.Pos_Y;
-                
-                Palette_loaded(context);
 
                 File_error=0;
                 if (!Read_byte(GIF_file,&(initial_nb_bits)))
                   File_error=1;
-    
+
                 value_clr    =(1<<initial_nb_bits)+0;
                 value_eof    =(1<<initial_nb_bits)+1;
                 alphabet_free=(1<<initial_nb_bits)+2;
@@ -2396,14 +2390,14 @@ void Load_GIF(T_IO_Context * context)
                 alphabet_max      =((1 <<  GIF_nb_bits)-1);
                 GIF_interlaced    =(IDB.Indicator & 0x40);
                 GIF_pass         =0;
-    
+
                 /*Init_lecture();*/
-    
+
 
                 GIF_finished_interlaced_image=0;
-    
+
                 //////////////////////////////////////////// DECOMPRESSION LZW //
-    
+
                 GIF_pos_X=0;
                 GIF_pos_Y=0;
                 alphabet_stack_pos=0;
@@ -2422,23 +2416,23 @@ void Load_GIF(T_IO_Context * context)
                         GIF_current_code=old_code;
                         alphabet_stack[alphabet_stack_pos++]=special_case;
                       }
-    
+
                       while (GIF_current_code>value_clr)
                       {
                         alphabet_stack[alphabet_stack_pos++]=alphabet_suffix[GIF_current_code];
                         GIF_current_code=alphabet_prefix[GIF_current_code];
                       }
-    
+
                       special_case=alphabet_stack[alphabet_stack_pos++]=GIF_current_code;
-    
+
                       do
                         GIF_new_pixel(context, &IDB, is_transparent, alphabet_stack[--alphabet_stack_pos]);
                       while (alphabet_stack_pos!=0);
-    
+
                       alphabet_prefix[alphabet_free  ]=old_code;
                       alphabet_suffix[alphabet_free++]=GIF_current_code;
                       old_code=byte_read;
-    
+
                       if (alphabet_free>alphabet_max)
                       {
                         if (GIF_nb_bits<12)
@@ -2464,14 +2458,14 @@ void Load_GIF(T_IO_Context * context)
                 if (File_error==2 && GIF_pos_X==0 && GIF_pos_Y==IDB.Image_height)
                   File_error=0;
                 /*Close_lecture();*/
-    
+
                 if (File_error>=0)
                 if ( /* (GIF_pos_X!=0) || */
                      ( ( (!GIF_interlaced) && (GIF_pos_Y!=IDB.Image_height) && (GIF_pos_X!=0)) ||
                        (  (GIF_interlaced) && (!GIF_finished_interlaced_image) )
                      ) )
                   File_error=2;
-                
+
                 // No need to read more than one frame in animation preview mode
                 if (context->Type == CONTEXT_PREVIEW && is_looping)
                 {
@@ -2482,7 +2476,7 @@ void Load_GIF(T_IO_Context * context)
                 {
                   goto early_exit;
                 }
-                
+
               } // Le fichier contenait un IDB
               else
                 File_error=2;
@@ -2499,7 +2493,7 @@ void Load_GIF(T_IO_Context * context)
         File_error=1;
 
       early_exit:
-      
+
       // Libération de la mémoire utilisée par les tables & piles de traitement:
       free(alphabet_suffix);
       free(alphabet_prefix);
@@ -2618,15 +2612,15 @@ void Save_GIF(T_IO_Context * context)
   int current_layer;
 
   /////////////////////////////////////////////////// FIN DES DECLARATIONS //
-  
+
   File_error=0;
-  
+
   Get_full_filename(filename, context->File_name, context->File_directory);
 
   if ((GIF_file=fopen(filename,"wb")))
   {
     setvbuf(GIF_file, NULL, _IOFBF, 64*1024);
-    
+
     // On écrit la signature du fichier
     if (Write_bytes(GIF_file,"GIF89a",6))
     {
@@ -2654,7 +2648,7 @@ void Save_GIF(T_IO_Context * context)
       switch(context->Ratio)
       {
         case PIXEL_TALL:
-          LSDB.Aspect = 17; // 1:2 
+          LSDB.Aspect = 17; // 1:2
           break;
         case PIXEL_WIDE:
           LSDB.Aspect = 113; // 2:1
@@ -2696,7 +2690,7 @@ void Save_GIF(T_IO_Context * context)
           if (context->Type == CONTEXT_MAIN_IMAGE && Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
             if (context->Nb_layers>1)
               Write_bytes(GIF_file,"\x21\xFF\x0BNETSCAPE2.0\x03\x01\x00\x00\x00",19);
-            
+
           // Ecriture du commentaire
           if (context->Comment[0])
           {
@@ -2708,7 +2702,7 @@ void Save_GIF(T_IO_Context * context)
           if (context->Color_cycles)
           {
             int i;
-            
+
             Write_bytes(GIF_file,"\x21\xff\x0B" "CRNG\0\0\0\0" "1.0",14);
             Write_byte(GIF_file,context->Color_cycles*6);
             for (i=0; i<context->Color_cycles; i++)
@@ -2716,7 +2710,7 @@ void Save_GIF(T_IO_Context * context)
               word flags=0;
               flags|= context->Cycle_range[i].Speed?1:0; // Cycling or not
               flags|= context->Cycle_range[i].Inverse?2:0; // Inverted
-              
+
               Write_word_be(GIF_file,context->Cycle_range[i].Speed*78); // Rate
               Write_word_be(GIF_file,flags); // Flags
               Write_byte(GIF_file,context->Cycle_range[i].Start); // Min color
@@ -2724,21 +2718,21 @@ void Save_GIF(T_IO_Context * context)
             }
             Write_byte(GIF_file,0);
           }
-          
+
           // Loop on all layers
-          for (current_layer=0; 
+          for (current_layer=0;
             current_layer < context->Nb_layers && !File_error;
             current_layer++)
           {
             // Write a Graphic Control Extension
             T_GIF_GCE GCE;
-            
+
             Set_saving_layer(context, current_layer);
-            
+
             GCE.Block_identifier = 0x21;
             GCE.Function = 0xF9;
             GCE.Block_size=4;
-            
+
             if (context->Type == CONTEXT_MAIN_IMAGE && Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
             {
               // Animation frame
@@ -2760,7 +2754,7 @@ void Save_GIF(T_IO_Context * context)
             }
             GCE.Transparent_color=context->Transparent_color;
             GCE.Block_terminator=0x00;
-            
+
             if (Write_byte(GIF_file,GCE.Block_identifier)
              && Write_byte(GIF_file,GCE.Function)
              && Write_byte(GIF_file,GCE.Block_size)
@@ -2770,7 +2764,7 @@ void Save_GIF(T_IO_Context * context)
              && Write_byte(GIF_file,GCE.Block_terminator)
              )
             {
-            
+
               // On va écrire un block indicateur d'IDB et l'IDB du fichier
               block_identifier=0x2C;
               IDB.Pos_X=0;
@@ -2779,7 +2773,7 @@ void Save_GIF(T_IO_Context * context)
               IDB.Image_height=context->Height;
               IDB.Indicator=0x07;    // Image non entrelacée, pas de palette locale.
               IDB.Nb_bits_pixel=8; // Image 256 couleurs;
-    
+
               if ( Write_byte(GIF_file,block_identifier) &&
                    Write_word_le(GIF_file,IDB.Pos_X) &&
                    Write_word_le(GIF_file,IDB.Pos_Y) &&
@@ -2790,17 +2784,17 @@ void Save_GIF(T_IO_Context * context)
               {
                 //   Le block indicateur d'IDB et l'IDB ont étés correctements
                 // écrits.
-    
+
                 GIF_pos_X=0;
                 GIF_pos_Y=0;
                 GIF_last_byte=0;
                 GIF_remainder_bits=0;
                 GIF_remainder_byte=0;
-    
+
                 index=4096;
                 File_error=0;
                 GIF_stop=0;
-    
+
                 // Réintialisation de la table:
                 alphabet_free=258;
                 GIF_nb_bits  =9;
@@ -2811,19 +2805,19 @@ void Save_GIF(T_IO_Context * context)
                   alphabet_daughter[start]=4096;
                   alphabet_sister[start]=4096;
                 }
-    
+
                 ////////////////////////////////////////////// COMPRESSION LZW //
-    
+
                 start=current_string=GIF_next_pixel(context, &IDB);
                 descend=1;
-    
+
                 do
                 {
                   current_char=GIF_next_pixel(context, &IDB);
-    
+
                   //   On regarde si dans la table on aurait pas une chaîne
                   // équivalente à current_string+Caractere
-    
+
                   while ( (index<alphabet_free) &&
                           ( (current_string!=alphabet_prefix[index]) ||
                             (current_char      !=alphabet_suffix[index]) ) )
@@ -2832,12 +2826,12 @@ void Save_GIF(T_IO_Context * context)
                     start=index;
                     index=alphabet_sister[index];
                   }
-    
+
                   if (index<alphabet_free)
                   {
                     //   On sait ici que la current_string+Caractere se trouve
                     // en position index dans les tables.
-    
+
                     descend=1;
                     start=current_string=index;
                     index=alphabet_daughter[index];
@@ -2849,14 +2843,14 @@ void Save_GIF(T_IO_Context * context)
                       alphabet_daughter[start]=alphabet_free;
                     else
                       alphabet_sister[start]=alphabet_free;
-    
+
                     // On rajoute la chaîne current_string+Caractere à la table
                     alphabet_prefix[alphabet_free  ]=current_string;
                     alphabet_suffix[alphabet_free++]=current_char;
-    
+
                     // On écrit le code dans le fichier
                     GIF_set_code(current_string);
-    
+
                     if (alphabet_free>0xFFF)
                     {
                       // Réintialisation de la table:
@@ -2873,11 +2867,11 @@ void Save_GIF(T_IO_Context * context)
                     else if (alphabet_free>alphabet_max+1)
                     {
                       // On augmente le nb de bits
-    
+
                       GIF_nb_bits++;
                       alphabet_max=(1<<GIF_nb_bits)-1;
                     }
-    
+
                     // On initialise la current_string et le reste pour la suite
                     index=alphabet_daughter[current_char];
                     start=current_string=current_char;
@@ -2885,12 +2879,12 @@ void Save_GIF(T_IO_Context * context)
                   }
                 }
                 while ((!GIF_stop) && (!File_error));
-    
+
                 if (!File_error)
                 {
                   // On écrit le code dans le fichier
                   GIF_set_code(current_string); // Dernière portion d'image
-    
+
                   //   Cette dernière portion ne devrait pas poser de problèmes
                   // du côté GIF_nb_bits puisque pour que GIF_nb_bits change de
                   // valeur, il faudrait que la table de chaîne soit remplie or
@@ -2904,7 +2898,7 @@ void Save_GIF(T_IO_Context * context)
                   //      écrites par copier/coller du temps où la sauvegarde du
                   //      GIF déconnait. Il y a donc fort à parier qu'elles ne
                   //      sont pas correctes.
-    
+
                   /*
                   if (current_string==alphabet_max)
                   {
@@ -2912,7 +2906,7 @@ void Save_GIF(T_IO_Context * context)
                     {
                       // On balargue un Clear Code
                       GIF_set_code(256);
-    
+
                       // On réinitialise les données LZW
                       alphabet_free=258;
                       GIF_nb_bits  =9;
@@ -2925,18 +2919,18 @@ void Save_GIF(T_IO_Context * context)
                     }
                   }
                   */
-    
+
                   GIF_set_code(257);             // Code de End d'image
                   if (GIF_remainder_bits!=0)
                     GIF_set_code(0);             // Code bidon permettant de s'assurer que tous les bits du dernier code aient bien étés inscris dans le buffer GIF
                   GIF_empty_buffer();         // On envoie les dernières données du buffer GIF dans le buffer KM
-    
+
                   // On écrit un \0
                   if (! Write_byte(GIF_file,'\x00'))
                     File_error=1;
-                  
+
                   }
-      
+
                 } // On a pu écrire l'IDB
               else
                 File_error=1;
@@ -2944,7 +2938,7 @@ void Save_GIF(T_IO_Context * context)
             else
               File_error=1;
           }
-          
+
           // After writing all layers
           if (!File_error)
           {
@@ -2972,7 +2966,7 @@ void Save_GIF(T_IO_Context * context)
                   File_error=1;
               }
             }
-          
+
             // On écrit un GIF TERMINATOR, exigé par SVGA et SEA.
             if (! Write_byte(GIF_file,'\x3B'))
               File_error=1;
@@ -3055,7 +3049,7 @@ void Test_PCX(T_IO_Context * context)
         Read_word_le(file,&(PCX_header.Y_max)) &&
         Read_word_le(file,&(PCX_header.X_dpi)) &&
         Read_word_le(file,&(PCX_header.Y_dpi)) &&
-        Read_bytes(file,&(PCX_header.Palette_16c),48) &&        
+        Read_bytes(file,&(PCX_header.Palette_16c),48) &&
         Read_byte(file,&(PCX_header.Reserved)) &&
         Read_byte(file,&(PCX_header.Plane)) &&
         Read_word_le(file,&(PCX_header.Bytes_per_plane_line)) &&
@@ -3064,7 +3058,7 @@ void Test_PCX(T_IO_Context * context)
         Read_word_le(file,&(PCX_header.Screen_Y)) &&
         Read_bytes(file,&(PCX_header.Filler),54) )
     {
-    
+
       //   Vu que ce header a une signature de merde et peu significative, il
       // va falloir que je teste différentes petites valeurs dont je connais
       // l'intervalle. Grrr!
@@ -3107,7 +3101,7 @@ void Load_PCX(T_IO_Context * context)
 {
   char filename[MAX_PATH_CHARACTERS];
   FILE *file;
-  
+
   short line_size;
   short real_line_size; // width de l'image corrigée
   short width_read;
@@ -3130,7 +3124,7 @@ void Load_PCX(T_IO_Context * context)
 
   if ((file=fopen(filename, "rb")))
   {
-    file_size=File_length_file(file);   
+    file_size=File_length_file(file);
     if (Read_byte(file,&(PCX_header.Manufacturer)) &&
         Read_byte(file,&(PCX_header.Version)) &&
         Read_byte(file,&(PCX_header.Compression)) &&
@@ -3141,7 +3135,7 @@ void Load_PCX(T_IO_Context * context)
         Read_word_le(file,&(PCX_header.Y_max)) &&
         Read_word_le(file,&(PCX_header.X_dpi)) &&
         Read_word_le(file,&(PCX_header.Y_dpi)) &&
-        Read_bytes(file,&(PCX_header.Palette_16c),48) &&        
+        Read_bytes(file,&(PCX_header.Palette_16c),48) &&
         Read_byte(file,&(PCX_header.Reserved)) &&
         Read_byte(file,&(PCX_header.Plane)) &&
         Read_word_le(file,&(PCX_header.Bytes_per_plane_line)) &&
@@ -3150,7 +3144,7 @@ void Load_PCX(T_IO_Context * context)
         Read_word_le(file,&(PCX_header.Screen_Y)) &&
         Read_bytes(file,&(PCX_header.Filler),54) )
     {
-      
+
       context->Width=PCX_header.X_max-PCX_header.X_min+1;
       context->Height=PCX_header.Y_max-PCX_header.Y_min+1;
 
@@ -3215,7 +3209,6 @@ void Load_PCX(T_IO_Context * context)
                   }
               }
           }
-          Palette_loaded(context);
 
           //   Maintenant qu'on a lu la palette que ces crétins sont allés foutre
           // à la fin, on retourne juste après le header pour lire l'image.
@@ -3233,7 +3226,7 @@ void Load_PCX(T_IO_Context * context)
             if (PCX_header.Compression)  // Image compressée
             {
               /*Init_lecture();*/
-  
+
               image_size=(long)PCX_header.Bytes_per_plane_line*context->Height;
 
               if (PCX_header.Depth==8) // 256 couleurs (1 plan)
@@ -3445,7 +3438,7 @@ void Save_PCX(T_IO_Context * context)
   if ((file=fopen(filename,"wb")))
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
-    
+
     PCX_header.Manufacturer=10;
     PCX_header.Version=5;
     PCX_header.Compression=1;
@@ -3485,11 +3478,11 @@ void Save_PCX(T_IO_Context * context)
         Write_bytes(file,&(PCX_header.Filler),54) )
     {
       line_size=PCX_header.Bytes_per_plane_line*PCX_header.Plane;
-     
+
       for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
       {
         pixel_read=Get_pixel(context, 0,y_pos);
-     
+
         // Compression et écriture de la ligne
         for (x_pos=0; ((x_pos<line_size) && (!File_error)); )
         {
@@ -3503,18 +3496,18 @@ void Save_PCX(T_IO_Context * context)
             x_pos++;
             pixel_read=Get_pixel(context, x_pos,y_pos);
           }
-      
+
           if ( (counter>1) || (last_pixel>=0xC0) )
             Write_one_byte(file,counter|0xC0);
           Write_one_byte(file,last_pixel);
-      
+
         }
       }
-      
+
       // Ecriture de l'octet (12) indiquant que la palette arrive
       if (!File_error)
         Write_one_byte(file,12);
-      
+
       // Ecriture de la palette
       if (!File_error)
       {
@@ -3524,16 +3517,16 @@ void Save_PCX(T_IO_Context * context)
     }
     else
       File_error=1;
-       
+
     fclose(file);
-       
+
     if (File_error)
       remove(filename);
-       
-  }    
-  else 
+
+  }
+  else
     File_error=1;
-}      
+}
 
 
 //////////////////////////////////// SCx ////////////////////////////////////
@@ -3621,7 +3614,6 @@ void Load_SCx(T_IO_Context * context)
 
           Palette_64_to_256(SCx_Palette);
           memcpy(context->Palette,SCx_Palette,size);
-          Palette_loaded(context);
 
           context->Width=SCx_header.Width;
           context->Height=SCx_header.Height;
@@ -3678,7 +3670,7 @@ void Save_SCx(T_IO_Context * context)
   short x_pos,y_pos;
   T_SCx_Header SCx_header;
   byte last_char;
- 
+
   last_char=strlen(context->File_name)-1;
   if (context->File_name[last_char]=='?')
   {
@@ -3710,11 +3702,11 @@ void Save_SCx(T_IO_Context * context)
   if ((file=fopen(filename,"wb")))
   {
     T_Palette palette_64;
-    
+
     setvbuf(file, NULL, _IOFBF, 64*1024);
     memcpy(palette_64,context->Palette,sizeof(T_Palette));
     Palette_256_to_64(palette_64);
-    
+
     memcpy(SCx_header.Filler1,"RIX3",4);
     SCx_header.Width=context->Width;
     SCx_header.Height=context->Height;
@@ -3802,9 +3794,9 @@ void Test_PNG(T_IO_Context * context)
   FILE *file;             // Fichier du fichier
   char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   byte png_header[8];
-  
+
   Get_full_filename(filename, context->File_name, context->File_directory);
-  
+
   File_error=1;
 
   // Ouverture du fichier
@@ -3830,29 +3822,29 @@ int PNG_read_unknown_chunk(png_structp ptr, png_unknown_chunkp chunk)
   //    png_byte name[5];
   //    png_byte *data;
   //    png_size_t size;
-  
+
   if (!strcmp((const char *)chunk->name, "crNg"))
   {
     // Color animation. Similar to a CRNG chunk in an IFF file.
     unsigned int i;
     byte *chunk_ptr = chunk->data;
-    
+
     // Should be a multiple of 6
     if (chunk->size % 6)
       return (-1);
-    
-    
+
+
     for(i=0;i<chunk->size/6 && i<16; i++)
     {
       word rate;
       word flags;
       byte min_col;
       byte max_col;
-      
+
       // Rate (big-endian word)
       rate = *(chunk_ptr++) << 8;
       rate |= *(chunk_ptr++);
-      
+
       // Flags (big-endian)
       flags = *(chunk_ptr++) << 8;
       flags |= *(chunk_ptr++);
@@ -3868,20 +3860,20 @@ int PNG_read_unknown_chunk(png_structp ptr, png_unknown_chunkp chunk)
         // Valid cycling range
         if (max_col<min_col)
           SWAP_BYTES(min_col,max_col)
-        
+
           PNG_current_context->Cycle_range[i].Start=min_col;
           PNG_current_context->Cycle_range[i].End=max_col;
           PNG_current_context->Cycle_range[i].Inverse=(flags&2)?1:0;
           PNG_current_context->Cycle_range[i].Speed=(flags&1) ? rate/78 : 0;
-                              
+
           PNG_current_context->Color_cycles=i+1;
       }
     }
-  
+
     return (1); // >0 = success
   }
   return (0); /* did not recognize */
-  
+
 }
 
 
@@ -3891,19 +3883,19 @@ void Load_PNG(T_IO_Context * context)
 {
   FILE *file;             // Fichier du fichier
   char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
-  byte png_header[8];  
+  byte png_header[8];
   byte row_pointers_allocated;
   png_bytep trans;
   int num_trans;
   png_color_16p trans_values;
- 
+
   png_structp png_ptr;
   png_infop info_ptr;
 
   Get_full_filename(filename, context->File_name, context->File_directory);
 
   File_error=0;
-  
+
   if ((file=fopen(filename, "rb")))
   {
     // Load header (8 first bytes)
@@ -3923,7 +3915,7 @@ void Load_PNG(T_IO_Context * context)
             png_byte color_type;
             png_byte bit_depth;
             png_voidp user_chunk_ptr;
-            
+
             // Setup a return point. If a pnglib loading error occurs
             // in this if(), the else will be executed.
             if (!setjmp(png_jmpbuf(png_ptr)))
@@ -3931,11 +3923,11 @@ void Load_PNG(T_IO_Context * context)
               png_init_io(png_ptr, file);
               // Inform pnglib we already loaded the header.
               png_set_sig_bytes(png_ptr, 8);
-              
+
               // Hook the handler for unknown chunks
               user_chunk_ptr = png_get_user_chunk_ptr(png_ptr);
               png_set_read_user_chunk_fn(png_ptr, user_chunk_ptr, &PNG_read_unknown_chunk);
-              // This is a horrid way to pass parameters, but we don't get 
+              // This is a horrid way to pass parameters, but we don't get
               // much choice. PNG loader can't be reintrant.
               PNG_current_context=context;
 
@@ -3943,9 +3935,9 @@ void Load_PNG(T_IO_Context * context)
               png_read_info(png_ptr, info_ptr);
               color_type = png_get_color_type(png_ptr,info_ptr);
               bit_depth = png_get_bit_depth(png_ptr,info_ptr);
-              
+
               // If it's any supported file
-              // (Note: As of writing this, this test covers every possible 
+              // (Note: As of writing this, this test covers every possible
               // image format of libpng)
               if (color_type == PNG_COLOR_TYPE_PALETTE
                || color_type == PNG_COLOR_TYPE_GRAY
@@ -3956,7 +3948,7 @@ void Load_PNG(T_IO_Context * context)
               {
                 int num_text;
                 png_text *text_ptr;
-                
+
                 int unit_type;
                 png_uint_32 res_x;
                 png_uint_32 res_y;
@@ -4017,7 +4009,7 @@ void Load_PNG(T_IO_Context * context)
                     // even though the file was less than 8bpp
                     png_set_packing(png_ptr);
                   }
-                    
+
                   // Images with alpha channel
                   if (color_type & PNG_COLOR_MASK_ALPHA)
                   {
@@ -4025,7 +4017,7 @@ void Load_PNG(T_IO_Context * context)
                     png_set_strip_alpha(png_ptr);
                   }
 
-                  // Greyscale images : 
+                  // Greyscale images :
                   if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
                   {
                     // Map low bpp greyscales to full 8bit (0-255 range)
@@ -4039,18 +4031,18 @@ void Load_PNG(T_IO_Context * context)
                         png_set_expand_gray_1_2_4_to_8(png_ptr);
                       #endif
                     }
-                    
+
                     // Create greyscale palette
                     for (x=0;x<256;x++)
                     {
                       context->Palette[x].R=x;
                       context->Palette[x].G=x;
                       context->Palette[x].B=x;
-                    } 
+                    }
                   }
                   else if (color_type == PNG_COLOR_TYPE_PALETTE) // Palette images
                   {
-                    
+
                     if (bit_depth < 8)
                     {
                       // Clear unused colors
@@ -4068,10 +4060,6 @@ void Load_PNG(T_IO_Context * context)
                     }
                     free(palette);
                     palette = NULL;
-                  }
-                  if (color_type != PNG_COLOR_TYPE_RGB && color_type != PNG_COLOR_TYPE_RGB_ALPHA)
-                  {
-                    Palette_loaded(context);
                   }
                   // Transparency (tRNS)
                   if (png_get_tRNS(png_ptr, info_ptr, &trans, &num_trans, &trans_values))
@@ -4092,22 +4080,22 @@ void Load_PNG(T_IO_Context * context)
                     else if ((color_type == PNG_COLOR_TYPE_GRAY
                       || color_type == PNG_COLOR_TYPE_RGB) && trans_values!=NULL)
                     {
-                      // In this case, num_trans is supposed to be "1", 
+                      // In this case, num_trans is supposed to be "1",
                       // and trans_values[0] contains the reference color
                       // (RGB triplet) that counts as transparent.
-                      
+
                       // Ideally, we should reserve this color in the palette,
                       // (so it's not merged and averaged with a neighbor one)
                       // and after creating the optimized palette, find its
                       // index and mark it transparent.
-                      
+
                       // Current implementation: ignore.
                     }
                   }
-                  
+
                   context->Width=png_get_image_width(png_ptr,info_ptr);
                   context->Height=png_get_image_height(png_ptr,info_ptr);
-                  
+
                   png_set_interlace_handling(png_ptr);
                   png_read_update_info(png_ptr, info_ptr);
 
@@ -4124,13 +4112,13 @@ void Load_PNG(T_IO_Context * context)
                     )
                     {
                       // 8bpp
-                      
+
                       for (y=0; y<context->Height; y++)
                         Row_pointers[y] = (png_byte*) malloc(png_get_rowbytes(png_ptr,info_ptr));
                       row_pointers_allocated = 1;
-                      
+
                       png_read_image(png_ptr, Row_pointers);
-                      
+
                       for (y=0; y<context->Height; y++)
                         for (x=0; x<context->Width; x++)
                           Set_pixel(context, x, y, Row_pointers[y][x]);
@@ -4141,15 +4129,15 @@ void Load_PNG(T_IO_Context * context)
                       {
                         case CONTEXT_PREVIEW:
                           // 24bpp
-                        
+
                           // It's a preview
                           // Unfortunately we need to allocate loads of memory
                           for (y=0; y<context->Height; y++)
                             Row_pointers[y] = (png_byte*) malloc(png_get_rowbytes(png_ptr,info_ptr));
                           row_pointers_allocated = 1;
-                          
+
                           png_read_image(png_ptr, Row_pointers);
-                          
+
                           for (y=0; y<context->Height; y++)
                             for (x=0; x<context->Width; x++)
                               Set_pixel_24b(context, x, y, Row_pointers[y][x*3],Row_pointers[y][x*3+1],Row_pointers[y][x*3+2]);
@@ -4164,13 +4152,13 @@ void Load_PNG(T_IO_Context * context)
                             Row_pointers[y] = (png_byte*) (&(context->Buffer_image_24b[y * context->Width]));
                           png_read_image(png_ptr, Row_pointers);
                           break;
-                        
+
                       }
                     }
                   }
                   else
                     File_error=2;
-                    
+
                   /* cleanup heap allocation */
                   if (row_pointers_allocated)
                   {
@@ -4178,7 +4166,7 @@ void Load_PNG(T_IO_Context * context)
                       free(Row_pointers[y]);
                       Row_pointers[y] = NULL;
                     }
-                      
+
                   }
                   free(Row_pointers);
                   Row_pointers = NULL;
@@ -4218,25 +4206,25 @@ void Save_PNG(T_IO_Context * context)
   png_infop info_ptr;
   png_unknown_chunk crng_chunk;
   byte cycle_data[16*6]; // Storage for color-cycling data, referenced by crng_chunk
-  
+
   Get_full_filename(filename, context->File_name, context->File_directory);
   File_error=0;
   Row_pointers = NULL;
-  
+
   // Ouverture du fichier
   if ((file=fopen(filename,"wb")))
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
-    
+
     /* initialisation */
     if ((png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL))
       && (info_ptr = png_create_info_struct(png_ptr)))
     {
-  
+
       if (!setjmp(png_jmpbuf(png_ptr)))
-      {    
+      {
         png_init_io(png_ptr, file);
-      
+
         /* en-tete */
         if (!setjmp(png_jmpbuf(png_ptr)))
         {
@@ -4303,45 +4291,45 @@ void Save_PNG(T_IO_Context * context)
 
             // First, turn our nice structure into byte array
             // (just to avoid padding in structures)
-            
+
             byte *chunk_ptr = cycle_data;
             int i;
-            
+
             for (i=0; i<context->Color_cycles; i++)
             {
               word flags=0;
               flags|= context->Cycle_range[i].Speed?1:0; // Cycling or not
               flags|= context->Cycle_range[i].Inverse?2:0; // Inverted
-              
+
               // Big end of Rate
               *(chunk_ptr++) = (context->Cycle_range[i].Speed*78) >> 8;
               // Low end of Rate
               *(chunk_ptr++) = (context->Cycle_range[i].Speed*78) & 0xFF;
-              
+
               // Big end of Flags
               *(chunk_ptr++) = (flags) >> 8;
               // Low end of Flags
               *(chunk_ptr++) = (flags) & 0xFF;
-              
+
               // Min color
               *(chunk_ptr++) = context->Cycle_range[i].Start;
               // Max color
               *(chunk_ptr++) = context->Cycle_range[i].End;
             }
 
-            // Build one unknown_chuck structure        
+            // Build one unknown_chuck structure
             memcpy(crng_chunk.name, "crNg",5);
             crng_chunk.data=cycle_data;
             crng_chunk.size=context->Color_cycles*6;
             crng_chunk.location=PNG_HAVE_PLTE;
-            
+
             // Give it to libpng
             png_set_unknown_chunks(png_ptr, info_ptr, &crng_chunk, 1);
             // libpng seems to ignore the location I provided earlier.
             png_set_unknown_chunk_location(png_ptr, info_ptr, 0, PNG_HAVE_PLTE);
           }
-          
-          
+
+
           png_write_info(png_ptr, info_ptr);
 
           /* ecriture des pixels de l'image */
@@ -4353,10 +4341,10 @@ void Save_PNG(T_IO_Context * context)
           if (!setjmp(png_jmpbuf(png_ptr)))
           {
             png_write_image(png_ptr, Row_pointers);
-          
+
             /* cloture png */
             if (!setjmp(png_jmpbuf(png_ptr)))
-            {          
+            {
               png_write_end(png_ptr, NULL);
             }
             else
@@ -4384,7 +4372,7 @@ void Save_PNG(T_IO_Context * context)
   // ce fichier pourri trainait... Ca fait pas propre.
   if (File_error)
     remove(filename);
-  
+
   if (Row_pointers)
   {
     free(Row_pointers);

@@ -117,7 +117,6 @@ void Load_PAL(T_IO_Context * context)
       {
         Palette_64_to_256(palette_64);
         memcpy(context->Palette, palette_64, sizeof(T_Palette));
-        Palette_loaded(context);
       }
       else
         File_error = 2;
@@ -127,7 +126,7 @@ void Load_PAL(T_IO_Context * context)
       {
         int i, n, r, g, b;
         fscanf(file, "%d",&n);
-        if(n != 100) 
+        if(n != 100)
         {
           File_error = 2;
           fclose(file);
@@ -142,7 +141,6 @@ void Load_PAL(T_IO_Context * context)
           context->Palette[i].G = g;
           context->Palette[i].B = b;
         }
-        Palette_loaded(context);
       } else if(strncmp(filename, "RIFF", 4) == 0) {
 		// Microsoft RIFF format.
 		fseek(file, 8, SEEK_SET);
@@ -166,9 +164,9 @@ void Load_PAL(T_IO_Context * context)
 		} else File_error = 2;
 	  } else
 	    File_error = 2;
-    
+
     }
-    
+
     // Fermeture du fichier
     fclose(file);
   }
@@ -192,9 +190,9 @@ void Save_PAL(T_IO_Context * context)
   if ((file=fopen(filename,"w")))
   {
     int i;
-    
+
     setvbuf(file, NULL, _IOFBF, 64*1024);
-    
+
     if (fputs("JASC-PAL\n0100\n256\n", file)==EOF)
       File_error=1;
     for (i = 0; i < 256 && File_error==0; i++)
@@ -202,9 +200,9 @@ void Save_PAL(T_IO_Context * context)
       if (fprintf(file,"%d %d %d\n",context->Palette[i].R, context->Palette[i].G, context->Palette[i].B) <= 0)
         File_error=1;
     }
-    
+
     fclose(file);
-    
+
     if (File_error)
       remove(filename);
   }
@@ -241,7 +239,7 @@ void Test_PKM(T_IO_Context * context)
 
 
   Get_full_filename(filename, context->File_name, context->File_directory);
-  
+
   File_error=1;
 
   // Ouverture du fichier
@@ -287,7 +285,7 @@ void Load_PKM(T_IO_Context * context)
   Get_full_filename(filename, context->File_name, context->File_directory);
 
   File_error=0;
-  
+
   if ((file=fopen(filename, "rb")))
   {
     file_size=File_length_file(file);
@@ -397,14 +395,13 @@ void Load_PKM(T_IO_Context * context)
         Pre_load(context, header.Width,header.Height,file_size,FORMAT_PKM,PIXEL_SIMPLE,0);
         if (File_error==0)
         {
-          
+
           context->Width=header.Width;
           context->Height=header.Height;
           image_size=(dword)(context->Width*context->Height);
           // Palette lue en 64
           memcpy(context->Palette,header.Palette,sizeof(T_Palette));
           Palette_64_to_256(context->Palette);
-          Palette_loaded(context);
 
           Compteur_de_donnees_packees=0;
           Compteur_de_pixels=0;
@@ -414,7 +411,7 @@ void Load_PKM(T_IO_Context * context)
           // Boucle de décompression:
           while ( (Compteur_de_pixels<image_size) && (Compteur_de_donnees_packees<Taille_pack) && (!File_error) )
           {
-            if(Read_byte(file, &temp_byte)!=1) 
+            if(Read_byte(file, &temp_byte)!=1)
             {
               File_error=2;
               break;
@@ -559,7 +556,7 @@ void Save_PKM(T_IO_Context * context)
   if ((file=fopen(filename,"wb")))
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
-    
+
     // Ecriture du header
     if (Write_bytes(file,&header.Ident,3) &&
         Write_byte(file,header.Method) &&
@@ -715,7 +712,7 @@ void Test_CEL(T_IO_Context * context)
     File_error = 1; // Si on ne peut pas faire de stat il vaut mieux laisser tomber
     return;
   }
-  
+
   if (! (file=fopen(filename, "rb")))
   {
     File_error = 1;
@@ -726,13 +723,13 @@ void Test_CEL(T_IO_Context * context)
   {
       //   Vu que ce header n'a pas de signature, il va falloir tester la
       // cohérence de la dimension de l'image avec celle du fichier.
-      
+
       size=file_size-4;
       if ( (!size) || ( (((header1.Width+1)>>1)*header1.Height)!=size ) )
       {
         // Tentative de reconnaissance de la signature des nouveaux fichiers
 
-        fseek(file,0,SEEK_SET);        
+        fseek(file,0,SEEK_SET);
         if (Read_bytes(file,&header2.Signature,4) &&
             !memcmp(header2.Signature,"KiSS",4) &&
             Read_byte(file,&header2.Kind) &&
@@ -757,7 +754,7 @@ void Test_CEL(T_IO_Context * context)
   {
     File_error=1;
   }
-  fclose(file);    
+  fclose(file);
 }
 
 
@@ -912,7 +909,7 @@ void Save_CEL(T_IO_Context * context)
   if ((file=fopen(filename,"wb")))
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
-    
+
     // On regarde si des couleurs >16 sont utilisées dans l'image
     for (x_pos=16;((x_pos<256) && (!color_usage[x_pos]));x_pos++);
 
@@ -1133,8 +1130,6 @@ void Load_KCF(T_IO_Context * context)
           context->Palette[index].G=context->Palette[index+16].G;
           context->Palette[index].B=context->Palette[index+16].B;
         }
-
-        Palette_loaded(context);
       }
       else
         File_error=1;
@@ -1192,8 +1187,6 @@ void Load_KCF(T_IO_Context * context)
             context->Palette[index].G=context->Palette[index+16].G;
             context->Palette[index].B=context->Palette[index+16].B;
           }
-
-        Palette_loaded(context);
       }
       else
         File_error=1;
@@ -1370,29 +1363,29 @@ void PI1_decode_palette(byte * src,byte * palette)
   //    Low        High
   // VVVV RRRR | 0000 BBBB
   // 0321 0321 |      0321
-  
+
   ip=0;
   for (i=0;i<16;i++)
   {
-    #if SDL_BYTEORDER == SDL_LIL_ENDIAN 
-   
+    #if SDL_BYTEORDER == SDL_LIL_ENDIAN
+
       w=(((word)src[(i*2)+1]<<8) | (src[(i*2)+0]));
-    
+
       // Traitement des couleurs rouge, verte et bleue:
       palette[ip++]=(((w & 0x0007) <<  1) | ((w & 0x0008) >>  3)) << 4;
       palette[ip++]=(((w & 0x7000) >> 11) | ((w & 0x8000) >> 15)) << 4;
       palette[ip++]=(((w & 0x0700) >>  7) | ((w & 0x0800) >> 11)) << 4;
-   
+
     #else
       w=(((word)src[(i*2+1)])|(((word)src[(i*2)])<<8));
-    
+
       palette[ip++] = (((w & 0x0700)>>7) | ((w & 0x0800) >> 7))<<4 ;
       palette[ip++]=(((w & 0x0070)>>3) | ((w & 0x0080) >> 3))<<4 ;
       palette[ip++] = (((w & 0x0007)<<1) | ((w & 0x0008)))<<4 ;
     #endif
-    
-    
-  } 
+
+
+  }
 }
 
 //// CODAGE de la PALETTE ////
@@ -1408,25 +1401,25 @@ void PI1_code_palette(byte * palette,byte * dest)
   // Low        High
   // VVVV RRRR | 0000 BBBB
   // 0321 0321 |      0321
-    
+
   ip=0;
   for (i=0;i<16;i++)
   {
     #if SDL_BYTEORDER == SDL_LIL_ENDIAN
-   
+
     // Traitement des couleurs rouge, verte et bleue:
     w =(((word)(palette[ip]>>2) & 0x38) >> 3) | (((word)(palette[ip]>>2) & 0x04) <<  1); ip++;
     w|=(((word)(palette[ip]>>2) & 0x38) << 9) | (((word)(palette[ip]>>2) & 0x04) << 13); ip++;
     w|=(((word)(palette[ip]>>2) & 0x38) << 5) | (((word)(palette[ip]>>2) & 0x04) <<  9); ip++;
-    
+
     dest[(i*2)+0]=w & 0x00FF;
     dest[(i*2)+1]=(w>>8);
     #else
-   
+
      w=(((word)(palette[ip]<<3))&0x0700);ip++;
      w|=(((word)(palette[ip]>>1))&0x0070);ip++;
      w|=(((word)(palette[ip]>>5))&0x0007);ip++;
- 
+
     dest[(i*2)+1]=w & 0x00FF;
     dest[(i*2)+0]=(w>>8);
     #endif
@@ -1435,21 +1428,21 @@ void PI1_code_palette(byte * palette,byte * dest)
 
 /// Load color ranges from a PI1 or PC1 image (Degas Elite format)
 void PI1_load_ranges(T_IO_Context * context, const byte * buffer, int size)
-{  
+{
   int range;
-  
+
   if (buffer==NULL || size<32)
     return;
-    
+
   for (range=0; range < 4; range ++)
   {
     word min_col, max_col, direction, delay;
-    
+
     min_col   = (buffer[size - 32 + range*2 +  0] << 8) | buffer[size - 32 + range*2 +  1];
     max_col   = (buffer[size - 32 + range*2 +  8] << 8) | buffer[size - 32 + range*2 +  9];
     direction = (buffer[size - 32 + range*2 + 16] << 8) | buffer[size - 32 + range*2 + 17];
     delay     = (buffer[size - 32 + range*2 + 24] << 8) | buffer[size - 32 + range*2 + 25];
-  
+
     if (max_col < min_col)
       SWAP_WORDS(min_col,max_col)
     // Sanity checks
@@ -1477,7 +1470,7 @@ void PI1_save_ranges(T_IO_Context * context, byte * buffer, int size)
   {
     int i; // index in context->Cycle_range[] : < context->Color_cycles
     int saved_range; // index in resulting buffer : < 4
-    
+
     for (i=0, saved_range=0; i<context->Color_cycles && saved_range<4; i++)
     {
       if (context->Cycle_range[i].Start < 16 && context->Cycle_range[i].End < 16)
@@ -1487,15 +1480,15 @@ void PI1_save_ranges(T_IO_Context * context, byte * buffer, int size)
           speed = 0;
         else if (context->Cycle_range[i].Speed == 1)
           // has to "round" manually to closest valid number for this format
-          speed = 1;          
+          speed = 1;
         else
           speed = 128 - 210 / context->Cycle_range[i].Speed;
-          
+
         buffer[size - 32 + saved_range*2 +  1] = context->Cycle_range[i].Start;
         buffer[size - 32 + saved_range*2 +  9] = context->Cycle_range[i].End;
         buffer[size - 32 + saved_range*2 + 17] = (context->Cycle_range[i].Speed == 0) ? 1 : (context->Cycle_range[i].Inverse ? 0 : 2);
         buffer[size - 32 + saved_range*2 + 25] = speed;
-        
+
         saved_range ++;
       }
     }
@@ -1564,7 +1557,6 @@ void Load_PI1(T_IO_Context * context)
           if (Config.Clear_palette)
             memset(context->Palette,0,sizeof(T_Palette));
           PI1_decode_palette(buffer+2,(byte *)context->Palette);
-          Palette_loaded(context);
 
           context->Width=320;
           context->Height=200;
@@ -1615,7 +1607,7 @@ void Save_PI1(T_IO_Context * context)
   if ((file=fopen(filename,"wb")))
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
-    
+
     // allocation d'un buffer mémoire
     buffer=(byte *)malloc(32034);
     // Codage de la résolution
@@ -1719,7 +1711,7 @@ void PC1_compress_packbits(byte * src,byte * dest,int source_size,int * dest_siz
     {
       // On recherche le 1er endroit où il y a répétition d'au moins 3 valeurs
       // identiques
-  
+
       repet=0;
       for (ir=is;ir<40-2;ir++)
       {
@@ -1729,7 +1721,7 @@ void PC1_compress_packbits(byte * src,byte * dest,int source_size,int * dest_siz
           break;
         }
       }
-  
+
       // On code la partie sans répétitions
       if (!repet || ir!=is)
       {
@@ -1738,7 +1730,7 @@ void PC1_compress_packbits(byte * src,byte * dest,int source_size,int * dest_siz
         for (;n>0;n--)
           dest[id++]=src[is++];
       }
-  
+
       // On code la partie sans répétitions
       if (repet)
       {
@@ -1897,7 +1889,6 @@ void Load_PC1(T_IO_Context * context)
           if (Config.Clear_palette)
             memset(context->Palette,0,sizeof(T_Palette));
           PI1_decode_palette(buffercomp+2,(byte *)context->Palette);
-          Palette_loaded(context);
 
           context->Width=320;
           context->Height=200;
@@ -1961,7 +1952,7 @@ void Save_PC1(T_IO_Context * context)
   if ((file=fopen(filename,"wb")))
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
-    
+
     // Allocation des buffers mémoire
     bufferdecomp=(byte *)malloc(32000);
     buffercomp  =(byte *)malloc(64066);
@@ -1992,7 +1983,7 @@ void Save_PC1(T_IO_Context * context)
     size += 34;
     size += 32;
     PI1_save_ranges(context, buffercomp,size);
-    
+
     if (Write_bytes(file,buffercomp,size))
     {
       fclose(file);
@@ -2088,7 +2079,6 @@ void Load_NEO(T_IO_Context * context)
             memset(context->Palette,0,sizeof(T_Palette));
           // on saute la résolution et le flag, chacun 2 bits
           PI1_decode_palette(buffer+4,(byte *)context->Palette);
-          Palette_loaded(context);
 
           context->Width=320;
           context->Height=200;
@@ -2136,7 +2126,7 @@ void Save_NEO(T_IO_Context * context)
   if ((file=fopen(filename,"wb")))
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
-    
+
     // allocation d'un buffer mémoire
     buffer=(byte *)malloc(32128);
     // Codage de la résolution
@@ -2190,15 +2180,15 @@ void Save_NEO(T_IO_Context * context)
 //////////////////////////////////// C64 ////////////////////////////////////
 
 void Test_C64(T_IO_Context * context)
-{  
+{
     FILE* file;
     char filename[MAX_PATH_CHARACTERS];
     long file_size;
-  
+
     Get_full_filename(filename, context->File_name, context->File_directory);
-  
+
     file = fopen(filename,"rb");
-  
+
     if (file)
     {
         file_size = File_length_file(file);
@@ -2231,7 +2221,7 @@ void Test_C64(T_IO_Context * context)
 void Load_C64_hires(T_IO_Context *context, byte *bitmap, byte *screen_ram)
 {
     int cx,cy,x,y,c[4],pixel,color;
-  
+
     for(cy=0; cy<25; cy++)
     {
         for(cx=0; cx<40; cx++)
@@ -2262,7 +2252,7 @@ void Load_C64_multi(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte 
             c[1]=screen_ram[cy*40+cx]>>4;
             c[2]=screen_ram[cy*40+cx]&15;
             c[3]=color_ram[cy*40+cx]&15;
-                
+
             for(y=0; y<8; y++)
             {
                 pixel=bitmap[cy*320+cx*8+y];
@@ -2301,7 +2291,7 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
   //    Each byte contains 2 colors that *can* be used by the 4x1 pixel group:
   //        Low nybble: Color 1
   //        High nybble: Color 2
-  // 
+  //
   // bitmap     : length: 8000
   //    This is the final structure that refers to all others. It describes
   //    160x200 pixels linearly, from top left to bottom right, starting in
@@ -2317,7 +2307,7 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
   //
 
   int cx,cy,x,y,c[4];
-  
+
   for(y=0; y<200; y++)
   {
     for(x=0; x<160; x++)
@@ -2325,7 +2315,7 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
       Set_pixel(context, x,y,background[y]);
     }
   }
-  
+
   Set_loading_layer(context, 1);
   for(cy=0; cy<25; cy++)
   {
@@ -2351,7 +2341,7 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
       for(y=0; y<8; y++)
       {
         int pixel=bitmap[cy*320+cx*8+y];
-        
+
         c[0]=background[cy*8+y]&15;
         c[1]=screen_ram[y*1024+cy*40+cx]>>4;
         c[2]=screen_ram[y*1024+cy*40+cx]&15;
@@ -2375,7 +2365,7 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
 }
 
 void Load_C64(T_IO_Context * context)
-{    
+{
     FILE* file;
     char filename[MAX_PATH_CHARACTERS];
     long file_size;
@@ -2383,35 +2373,35 @@ void Load_C64(T_IO_Context * context)
     int loadFormat=0;
     enum c64_format {F_hires,F_multi,F_bitmap,F_fli};
     const char *c64_format_names[]={"Hires","Multicolor","Bitmap","FLI"};
-    
-    
+
+
     // Palette from http://www.pepto.de/projects/colorvic/
     byte pal[48]={
-      0x00, 0x00, 0x00, 
-      0xFF, 0xFF, 0xFF, 
-      0x68, 0x37, 0x2B, 
-      0x70, 0xA4, 0xB2, 
-      0x6F, 0x3D, 0x86, 
-      0x58, 0x8D, 0x43, 
-      0x35, 0x28, 0x79, 
-      0xB8, 0xC7, 0x6F, 
-      0x6F, 0x4F, 0x25, 
-      0x43, 0x39, 0x00, 
-      0x9A, 0x67, 0x59, 
-      0x44, 0x44, 0x44, 
-      0x6C, 0x6C, 0x6C, 
-      0x9A, 0xD2, 0x84, 
-      0x6C, 0x5E, 0xB5, 
+      0x00, 0x00, 0x00,
+      0xFF, 0xFF, 0xFF,
+      0x68, 0x37, 0x2B,
+      0x70, 0xA4, 0xB2,
+      0x6F, 0x3D, 0x86,
+      0x58, 0x8D, 0x43,
+      0x35, 0x28, 0x79,
+      0xB8, 0xC7, 0x6F,
+      0x6F, 0x4F, 0x25,
+      0x43, 0x39, 0x00,
+      0x9A, 0x67, 0x59,
+      0x44, 0x44, 0x44,
+      0x6C, 0x6C, 0x6C,
+      0x9A, 0xD2, 0x84,
+      0x6C, 0x5E, 0xB5,
       0x95, 0x95, 0x95};
-  
+
     byte *file_buffer;
     byte *bitmap, *screen_ram, *color_ram=NULL, *background=NULL; // Only pointers to existing data
     word width=320, height=200;
     static byte dummy_screen[1000];
-    
+
     Get_full_filename(filename, context->File_name, context->File_directory);
     file = fopen(filename,"rb");
-  
+
     if (file)
     {
         File_error=0;
@@ -2423,14 +2413,14 @@ void Load_C64(T_IO_Context * context)
             case 8000: // raw bitmap
             case 8002: // raw bitmap with loadaddr
             case 9000: // bitmap + ScreenRAM
-            case 9002: // bitmap + ScreenRAM + loadaddr     
+            case 9002: // bitmap + ScreenRAM + loadaddr
             case 10001: // multicolor
             case 10003: // multicolor + loadaddr
             case 10277: // multicolor CDU-Paint + loadaddr
             case 17472: // FLI (BlackMail)
             case 17474: // FLI (BlackMail) + loadaddr
             break;
-            
+
             default:
                 File_error = 1;
                 fclose(file);
@@ -2452,9 +2442,9 @@ void Load_C64(T_IO_Context * context)
             return;
         }
         fclose(file);
-        
+
         memset(dummy_screen,1,1000);
-        
+
         switch (file_size)
         {
             case 8000: // raw bitmap
@@ -2463,28 +2453,28 @@ void Load_C64(T_IO_Context * context)
                 bitmap=file_buffer+0; // length: 8000
                 screen_ram=dummy_screen;
                 break;
-                
+
             case 8002: // raw bitmap with loadaddr
                 hasLoadAddr=1;
                 loadFormat=F_bitmap;
                 bitmap=file_buffer+2; // length: 8000
                 screen_ram=dummy_screen;
                 break;
-                    
+
             case 9000: // bitmap + ScreenRAM
                 hasLoadAddr=0;
                 loadFormat=F_hires;
                 bitmap=file_buffer+0; // length: 8000
                 screen_ram=file_buffer+8000; // length: 1000
                 break;
-                    
+
             case 9002: // bitmap + ScreenRAM + loadaddr
                 hasLoadAddr=1;
                 loadFormat=F_hires;
                 bitmap=file_buffer+2; // length: 8000
                 screen_ram=file_buffer+8002; // length: 1000
                 break;
-                    
+
             case 10001: // multicolor
                 hasLoadAddr=0;
                 loadFormat=F_multi;
@@ -2494,7 +2484,7 @@ void Load_C64(T_IO_Context * context)
                 color_ram=file_buffer+9000; // length: 1000
                 background=file_buffer+10000; // only 1
                 break;
-                    
+
             case 10003: // multicolor + loadaddr
                 hasLoadAddr=1;
                 loadFormat=F_multi;
@@ -2515,7 +2505,7 @@ void Load_C64(T_IO_Context * context)
                 color_ram=file_buffer+9275; // length: 1000
                 background=file_buffer+10275; // only 1
                 break;
-                
+
             case 17472: // FLI (BlackMail)
                 hasLoadAddr=0;
                 loadFormat=F_fli;
@@ -2525,7 +2515,7 @@ void Load_C64(T_IO_Context * context)
                 screen_ram=file_buffer+1280; // length: 8192
                 bitmap=file_buffer+9472; // length: 8000
                 break;
-                
+
             case 17474: // FLI (BlackMail) + loadaddr
                 hasLoadAddr=1;
                 loadFormat=F_fli;
@@ -2535,16 +2525,16 @@ void Load_C64(T_IO_Context * context)
                 screen_ram=file_buffer+1282; // length: 8192
                 bitmap=file_buffer+9474; // length: 8000
                 break;
-                
+
             default:
                 File_error = 1;
                 free(file_buffer);
                 return;
         }
-        
+
         if (context->Ratio == PIXEL_WIDE)
             width=160;
-        
+
         // Write detailed format in comment
         strcpy(context->Comment, c64_format_names[loadFormat]);
         if (hasLoadAddr)
@@ -2558,7 +2548,7 @@ void Load_C64(T_IO_Context * context)
         {
             sprintf(context->Comment+strlen(context->Comment),", no addr");
         }
-        
+
         Pre_load(context, width, height, file_size, FORMAT_C64, context->Ratio,0); // Do this as soon as you can
 
         memcpy(context->Palette,pal,48); // this set the software palette for grafx2
@@ -2567,13 +2557,11 @@ void Load_C64(T_IO_Context * context)
         context->Palette[16].R=20;
         context->Palette[16].G=20;
         context->Palette[16].B=20;
-        
-        Palette_loaded(context); // Always call it if you change the palette
-                
-        context->Width = width ;                
+
+        context->Width = width ;
         context->Height = height;
         context->Transparent_color=16;
-                
+
         if(loadFormat==F_fli)
         {
             Load_C64_fli(context,bitmap,screen_ram,color_ram,background);
@@ -2587,11 +2575,11 @@ void Load_C64(T_IO_Context * context)
         {
             Load_C64_hires(context,bitmap,screen_ram);
         }
-        
+
         File_error = 0;
-        
+
         free(file_buffer);
-        
+
     }
     else
         File_error = 1;
@@ -2618,24 +2606,24 @@ int Save_C64_window(byte *saveWhat, byte *loadAddr)
         "$C000",
         "$E000"
     };
-       
+
     Open_window(200,120,"c64 settings");
     Window_set_normal_button(110,100,80,15,"Save",1,1,K2K(SDLK_RETURN)); // 1
     Window_set_normal_button(10,100,80,15,"Cancel",1,1,K2K(SDLK_ESCAPE)); // 2
-    
+
     Print_in_window(13,18,"Data:",MC_Dark,MC_Light);
     what=Window_set_dropdown_button(10,28,90,15,70,what_label[*saveWhat],1, 0, 1, LEFT_SIDE,0); // 3
     Window_dropdown_clear_items(what);
     for (i=0; i<sizeof(what_label)/sizeof(what_label[0]); i++)
         Window_dropdown_add_item(what,i,what_label[i]);
-    
+
     Print_in_window(113,18,"Address:",MC_Dark,MC_Light);
     addr=Window_set_dropdown_button(110,28,70,15,70,address_label[*loadAddr/32],1, 0, 1, LEFT_SIDE,0); // 4
     Window_dropdown_clear_items(addr);
     for (i=0; i<sizeof(address_label)/sizeof(address_label[0]); i++)
-        Window_dropdown_add_item(addr,i,address_label[i]); 
-    
-    Update_window_area(0,0,Window_width,Window_height); 
+        Window_dropdown_add_item(addr,i,address_label[i]);
+
+    Update_window_area(0,0,Window_width,Window_height);
     Display_cursor();
 
     do
@@ -2647,16 +2635,16 @@ int Save_C64_window(byte *saveWhat, byte *loadAddr)
                 *saveWhat=Window_attribute2;
                 //printf("what=%d\n",Window_attribute2);
                 break;
-            
+
             case 4: // Load addr
                 *loadAddr=Window_attribute2*32;
                 //printf("addr=$%02x00 (%d)\n",loadAddr,Window_attribute2);
                 break;
-            
+
             case 0: break;
         }
     }while(button!=1 && button!=2);
-    
+
     Close_window();
     Display_cursor();
     return button==1;
@@ -2669,16 +2657,16 @@ int Save_C64_hires(T_IO_Context *context, char *filename, byte saveWhat, byte lo
     dword cusage[256];
     byte screen_ram[1000],bitmap[8000];
     FILE *file;
-    
+
     for(x=0;x<1000;x++)screen_ram[x]=1; // init colormem to black/white
-  
+
     for(cy=0; cy<25; cy++) // Character line, 25 lines
     {
         for(cx=0; cx<40; cx++) // Character column, 40 columns
         {
             for(i=0;i<256;i++)
                 cusage[i]=0;
-            
+
             numcolors=Count_used_colors_area(cusage,cx*8,cy*8,8,8);
             if (numcolors>2)
             {
@@ -2703,18 +2691,18 @@ int Save_C64_hires(T_IO_Context *context, char *filename, byte saveWhat, byte lo
                 {
                   c1=i;
                 }
-            }            
+            }
             screen_ram[cx+cy*40]=(c2<<4)|c1;
-      
+
             for(y=0; y<8; y++)
             {
                 bits=0;
                 for(x=0; x<8; x++)
                 {
                     pixel=Get_pixel(context, x+cx*8,y+cy*8);
-                    if(pixel>15) 
-                    { 
-                        Warning_message("Color above 15 used"); 
+                    if(pixel>15)
+                    {
+                        Warning_message("Color above 15 used");
                         // TODO hilite offending block here too?
                         // or make it smarter with color allocation?
                         // However, the palette is fixed to the 16 first colors
@@ -2728,18 +2716,18 @@ int Save_C64_hires(T_IO_Context *context, char *filename, byte saveWhat, byte lo
             }
         }
     }
-  
+
     file = fopen(filename,"wb");
-  
+
     if(!file)
     {
         Warning_message("File open failed");
         File_error = 1;
         return 1;
     }
-    
+
     setvbuf(file, NULL, _IOFBF, 64*1024);
-    
+
     if (loadAddr)
     {
         Write_byte(file,0);
@@ -2749,14 +2737,14 @@ int Save_C64_hires(T_IO_Context *context, char *filename, byte saveWhat, byte lo
         Write_bytes(file,bitmap,8000);
     if (saveWhat==0 || saveWhat==2)
         Write_bytes(file,screen_ram,1000);
-    
+
     fclose(file);
     return 0;
 }
 
 int Save_C64_multi(T_IO_Context *context, char *filename, byte saveWhat, byte loadAddr)
 {
-    /* 
+    /*
     BITS     COLOR INFORMATION COMES FROM
     00     Background color #0 (screen color)
     01     Upper 4 bits of Screen RAM
@@ -2776,11 +2764,11 @@ int Save_C64_multi(T_IO_Context *context, char *filename, byte saveWhat, byte lo
     dword cusage[256];
     byte i,background=0;
     FILE *file;
-    
+
     numcolors=Count_used_colors(cusage);
-  
+
     count=0;
-  
+
 	// Detect the ackground color the image should be using. It's the one that's
 	// used on all tiles having 4 colors.
 	for(y=0;y<200;y=y+8)
@@ -2821,7 +2809,7 @@ int Save_C64_multi(T_IO_Context *context, char *filename, byte saveWhat, byte lo
 
 					if ((cols & 1 << n) == 0 ) {
 						// This color isn't used at all in this tile:
-						// Can't be the global 
+						// Can't be the global
 						invalids |= 1 << n;
 					}
 
@@ -2846,7 +2834,7 @@ int Save_C64_multi(T_IO_Context *context, char *filename, byte saveWhat, byte lo
 	for (n = 0; n<16; n++)
 	{
 		if (candidates & (1 << n)) {
-			background = n; 
+			background = n;
 			break;
 		}
 	}
@@ -2892,12 +2880,12 @@ int Save_C64_multi(T_IO_Context *context, char *filename, byte saveWhat, byte lo
 			{
 				bits=0;
 				for(x=0;x<4;x++)
-				{                    
+				{
 					pixel=Get_pixel(context, cx*4+x,cy*8+y);
-					if(pixel>15) 
-					{ 
-						Warning_message("Color above 15 used"); 
-						// TODO hilite as in hires, you should stay to 
+					if(pixel>15)
+					{
+						Warning_message("Color above 15 used");
+						// TODO hilite as in hires, you should stay to
 						// the fixed 16 color palette
 						return 1;
 					}
@@ -2910,18 +2898,18 @@ int Save_C64_multi(T_IO_Context *context, char *filename, byte saveWhat, byte lo
 			}
 		}
 	}
-  
+
     file = fopen(filename,"wb");
-    
+
     if(!file)
     {
         Warning_message("File open failed");
         File_error = 2;
         return 2;
     }
-    
+
     setvbuf(file, NULL, _IOFBF, 64*1024);
-    
+
     if (loadAddr)
     {
         Write_byte(file,0);
@@ -2930,16 +2918,16 @@ int Save_C64_multi(T_IO_Context *context, char *filename, byte saveWhat, byte lo
 
     if (saveWhat==0 || saveWhat==1)
         Write_bytes(file,bitmap,8000);
-        
+
     if (saveWhat==0 || saveWhat==2)
         Write_bytes(file,screen_ram,1000);
-        
+
     if (saveWhat==0 || saveWhat==3)
         Write_bytes(file,color_ram,1000);
-        
+
     if (saveWhat==0)
         Write_byte(file,background);
-    
+
     fclose(file);
     //printf("\nbg:%d\n",background);
     return 0;
@@ -2950,26 +2938,26 @@ int Save_C64_fli(char *filename, byte saveWhat, byte loadAddr)
 
     FILE *file;
     byte file_buffer[17474];
-    
+
     memset(file_buffer,0,sizeof(file_buffer));
-    
+
     if (C64_FLI(file_buffer+9474, file_buffer+1282, file_buffer+258, file_buffer+2))
     {
       File_error=1;
       return 1;
     }
-  
+
     file = fopen(filename,"wb");
-    
+
     if(!file)
     {
         Warning_message("File open failed");
         File_error = 1;
         return 1;
     }
-    
+
     setvbuf(file, NULL, _IOFBF, 64*1024);
-    
+
     if (loadAddr)
     {
         file_buffer[0]=0;
@@ -2985,12 +2973,12 @@ int Save_C64_fli(char *filename, byte saveWhat, byte loadAddr)
 
     if (saveWhat==0 || saveWhat==1)
         Write_bytes(file,file_buffer+1282,8192);
-        
+
     if (saveWhat==0 || saveWhat==2)
         Write_bytes(file,file_buffer+9474,8000);
-        
-        
-    
+
+
+
     fclose(file);
     //printf("\nbg:%d\n",background);
     return 0;
@@ -3002,9 +2990,9 @@ void Save_C64(T_IO_Context * context)
     static byte saveWhat=0, loadAddr=0;
     dword numcolors,cusage[256];
     numcolors=Count_used_colors(cusage);
-  
+
     Get_full_filename(filename, context->File_name, context->File_directory);
-  
+
     /*
     if (numcolors>16)
     {
@@ -3018,15 +3006,15 @@ void Save_C64(T_IO_Context * context)
         Warning_message("must be 320x200 or 160x200");
         File_error = 1;
         return;
-    } 
-    
+    }
+
     if(!Save_C64_window(&saveWhat,&loadAddr))
     {
         File_error = 1;
         return;
     }
     //printf("saveWhat=%d, loadAddr=%d\n",saveWhat,loadAddr);
-    
+
 	if (strcasecmp(filename + strlen(filename) - 4, ".fli") == 0)
 	{
 		// FIXME moving FLI to a separate format in the fileselector would be smarter
@@ -3047,7 +3035,7 @@ void Test_SCR(T_IO_Context * context)
     // The palette file can be tested, if it exists and have the right size it's
     // ok. But if it's not there the pixel data may still be valid. And we can't
     // use the filesize as this depends on the screen format.
-    
+
     // An AMSDOS header would be a good indication but in some cases it may not
     // be there
     (void)context; // unused
@@ -3070,10 +3058,10 @@ void Load_SCR(T_IO_Context * context)
     // As if this wasn't enough, Advanced OCP Art Studio, the reference tool on
     // Amstrad, can use RLE packing when saving files, meaning we also have to
     // handle that.
-    
+
     // All this mess enforces us to load (and unpack if needed) the file to a
     // temporary 32k buffer before actually decoding it.
-    
+
     // 1) Seek for a palette
     // 2) If palette found get screenmode from there, else ask user
     // 3) ask user for screen size (or register values)
@@ -3091,7 +3079,7 @@ void Save_SCR(T_IO_Context * context)
     // TODO : Add OCP packing support
     // TODO : Add possibility to include AMSDOS header, with proper loading
     // address guessed from r12/r13 values.
-    
+
     unsigned char* output;
     unsigned long outsize;
     unsigned char r1;
@@ -3158,7 +3146,7 @@ void Test_CM5(T_IO_Context * context)
 void Load_CM5(T_IO_Context* context)
 {
   // Ensure "8bit" constraint mode is switched on
-  // Set palette to the CPC hardware colors 
+  // Set palette to the CPC hardware colors
   // Load the palette data to the 4 colorlayers
   FILE *file;
   char filename[MAX_PATH_CHARACTERS];
@@ -3220,9 +3208,6 @@ void Load_CM5(T_IO_Context* context)
   context->Palette[0x5E].R = 0x6E; context->Palette[0x5E].G = 0x7B; context->Palette[0x5E].B = 1;
   context->Palette[0x5F].R = 0x6E; context->Palette[0x5F].G = 0x7B; context->Palette[0x5F].B = 0xF6;
 
-  Palette_loaded(context);
-
-
   if (Read_byte(file, &value)!=1)
     File_error = 2;
 
@@ -3240,7 +3225,7 @@ void Load_CM5(T_IO_Context* context)
   {
     Set_pixel(context, tx, ty, value);
   }
-  // Fill layer with color we just read 
+  // Fill layer with color we just read
 
   while(Read_byte(file, &value) == 1)
   {
@@ -3296,7 +3281,7 @@ void Load_CM5(T_IO_Context* context)
   	} while(file == NULL);
   }
   Set_loading_layer(context, 4);
-  
+
   for (ty = 0; ty < 256; ty++)
   {
     Read_bytes(file, buffer, 48*6/4);
@@ -3323,19 +3308,19 @@ void Save_CM5(T_IO_Context* context)
 
   Get_full_filename(filename, context->File_name, context->File_directory);
   // TODO: Check picture has 5 layers
-  // TODO: Check the constraints on the layers 
+  // TODO: Check the constraints on the layers
   // Layer 1 : 1 color Only
   // Layer 2 and 3 : 1 color/line
-  // Layer 4 : 1 color / 48x1 block 
+  // Layer 4 : 1 color / 48x1 block
   // TODO: handle filesize
-  
+
   if (!(file = fopen(filename,"wb")))
   {
     File_error = 1;
     return;
   }
   setvbuf(file, NULL, _IOFBF, 64*1024);
-  
+
   // Write layer 0
   Set_saving_layer(context, 0);
   Write_byte(file, Get_pixel(context, 0, 0));
@@ -3363,9 +3348,9 @@ void Save_CM5(T_IO_Context* context)
       return;
   }
   setvbuf(file, NULL, _IOFBF, 64*1024);
-  
+
   Set_saving_layer(context, 4);
-  
+
   for (ty = 0; ty < 256; ty++)
   {
     for (tx = 0; tx < 48*6; tx+=4)
@@ -3387,5 +3372,5 @@ void Save_CM5(T_IO_Context* context)
 
   fclose(file);
   File_error = 0;
-  
+
 }
