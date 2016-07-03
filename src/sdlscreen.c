@@ -152,27 +152,27 @@ void Update_rectangle(SDL_Surface *surface, int x, int y, int width, int height)
   // Usually, recreating the texture using SDL_CreateTextureFromSurface()
   // would be better, but only allows a complete surface (no rectangle)
   // !!! This assumes SDL_PIXELFORMAT_ABGR8888
-  //{
-  //  Uint32 * pixels;
-  //  int pitch;
-  //  int line, col;
-  //  SDL_LockTexture(Texture_SDL, &source_rect, (void **)(&pixels), &pitch );
-  //  for (line = 0; line < source_rect.h; line++)
-  //  {
-  //    for (col = 0; col < source_rect.w; col++)
-  //    {
-  //      byte index = Get_SDL_pixel_8(surface, source_rect.x + col, source_rect.y + line);
-  //      //memcpy(pixels++, surface->format->palette->colors + index, 4);
-  //      //*(pixels++) = *(Uint32 *)(surface->format->palette->colors + index);
-  //      *((byte *)pixels) = surface->format->palette->colors[index].r;
-  //      *(((byte *)pixels) + 1) = surface->format->palette->colors[index].g;
-  //      *(((byte *)pixels) + 2) = surface->format->palette->colors[index].b;
-  //      pixels++;
-  //    }
-  //    pixels += pitch/sizeof(uint32_t) - source_rect.w;
-  //  }
-  //  SDL_UnlockTexture(Texture_SDL);
-  //}
+  /*{
+    Uint32 * pixels;
+    int pitch;
+    int line, col;
+    SDL_LockTexture(Texture_SDL, &source_rect, (void **)(&pixels), &pitch );
+    for (line = 0; line < source_rect.h; line++)
+    {
+      for (col = 0; col < source_rect.w; col++)
+      {
+        byte index = Get_SDL_pixel_8(surface, source_rect.x + col, source_rect.y + line);
+        //memcpy(pixels++, surface->format->palette->colors + index, 4);
+        //*(pixels++) = *(Uint32 *)(surface->format->palette->colors + index);
+        *((byte *)pixels) = surface->format->palette->colors[index].r;
+        *(((byte *)pixels) + 1) = surface->format->palette->colors[index].g;
+        *(((byte *)pixels) + 2) = surface->format->palette->colors[index].b;
+        pixels++;
+      }
+      pixels += pitch/sizeof(uint32_t) - source_rect.w;
+    }
+    SDL_UnlockTexture(Texture_SDL);
+  }*/
 
   // Method 2
   {

@@ -120,12 +120,12 @@ byte Pan_shortcut_pressed;
   /// move by itself, controlled by parasits.
   /// YR 04/11/2010: I just observed a -8700 when joystick is idle.
   #define JOYSTICK_THRESHOLD  (10000)
-  
-  /// A button that is marked as "modifier" will 
+
+  /// A button that is marked as "modifier" will
   short Joybutton_shift=-1; ///< Button number that serves as a "shift" modifier; -1 for none
   short Joybutton_control=-1; ///< Button number that serves as a "ctrl" modifier; -1 for none
   short Joybutton_alt=-1; ///< Button number that serves as a "alt" modifier; -1 for none
-  
+
   short Joybutton_left_click=0; ///< Button number that serves as left click; -1 for none
   short Joybutton_right_click=1; ///< Button number that serves as right-click; -1 for none
 
@@ -135,7 +135,7 @@ int Has_shortcut(word function)
 {
   if (function == 0xFFFF)
     return 0;
-    
+
   if (function & 0x100)
   {
     if (Buttons_Pool[function&0xFF].Left_shortcut[0]!=KEY_NONE)
@@ -156,14 +156,14 @@ int Has_shortcut(word function)
     return 1;
   if(Config_Key[function][1]!=KEY_NONE)
     return 1;
-  return 0; 
+  return 0;
 }
 
 int Is_shortcut(word key, word function)
 {
   if (key == 0 || function == 0xFFFF)
     return 0;
-    
+
   if (function & 0x100)
   {
     if (Buttons_Pool[function&0xFF].Left_shortcut[0]==key)
@@ -184,7 +184,7 @@ int Is_shortcut(word key, word function)
     return 1;
   if(key == Config_Key[function][1])
     return 1;
-  return 0; 
+  return 0;
 }
 
 // Called each time there is a cursor move, either triggered by mouse or keyboard shortcuts
@@ -193,8 +193,8 @@ int Move_cursor_with_constraints()
   int feedback=0;
   int  mouse_blocked=0; ///< Boolean, Set to true if mouse movement was clipped.
 
-  
-  // Clip mouse to the editing area. There can be a border when using big 
+
+  // Clip mouse to the editing area. There can be a border when using big
   // pixels, if the SDL screen dimensions are not factors of the pixel size.
   if (Input_new_mouse_Y>=Screen_height)
   {
@@ -210,7 +210,7 @@ int Move_cursor_with_constraints()
   //menu lorsqu'on est en train de travailler dans l'image
   if (Operation_stack_size != 0)
   {
-        
+
 
         //Si le curseur ne se trouve plus dans l'image
         if(Menu_Y<=Input_new_mouse_Y)
@@ -248,7 +248,7 @@ int Move_cursor_with_constraints()
     if ((Input_new_mouse_K != Mouse_K))
     {
       feedback=1;
-      
+
       if (Input_new_mouse_K == 0)
       {
         Input_sticky_control = 0;
@@ -268,7 +268,7 @@ int Move_cursor_with_constraints()
       Mouse_Y=Input_new_mouse_Y;
     }
     Mouse_K=Input_new_mouse_K;
-    
+
     if (Mouse_moved > Config.Mouse_merge_movement
       && !Operation[Current_operation][Mouse_K_unique]
           [Operation_stack_size].Fast_mouse)
@@ -369,7 +369,7 @@ int Handle_mouse_release(SDL_MouseButtonEvent event)
               Input_new_mouse_K &= ~2;
             break;
     }
-    
+
     return Move_cursor_with_constraints();
 }
 
@@ -404,7 +404,7 @@ int Handle_key_press(SDL_KeyboardEvent event)
 {
     //Appui sur une touche du clavier
     int modifier;
-  
+
     Key = Keysym_to_keycode(event.keysym);
     //Key_ANSI = Keysym_to_ANSI(event.keysym);
     switch(event.keysym.sym)
@@ -497,7 +497,7 @@ int Release_control(int key_code, int modifier)
     {
       Button_inverter=0;
       if (Input_new_mouse_K)
-      {      
+      {
         Input_new_mouse_K ^= 3; // Flip bits 0 and 1
         return Move_cursor_with_constraints();
       }
@@ -549,7 +549,7 @@ int Release_control(int key_code, int modifier)
       Pan_shortcut_pressed=0;
       need_feedback = 1;
     }
-    
+
     // Other keys don't need to be released : they are handled as "events" and procesed only once.
     // These clicks are apart because they need to be continuous (ie move while key pressed)
     // We are relying on "hardware" keyrepeat to achieve that.
@@ -561,7 +561,7 @@ int Handle_key_release(SDL_KeyboardEvent event)
 {
     int modifier;
     int released_key = Keysym_to_keycode(event.keysym) & 0x0FFF;
-  
+
     switch(event.keysym.sym)
     {
       case SDLK_RSHIFT:
@@ -579,7 +579,7 @@ int Handle_key_release(SDL_KeyboardEvent event)
       case SDLK_MODE:
         modifier=MOD_ALT;
         break;
-      
+
       case SDLK_RGUI:
       case SDLK_LGUI:
         modifier=MOD_META;
@@ -681,14 +681,14 @@ int Handle_joystick_press(SDL_JoyButtonEvent event)
         Directional_up_left=1;
         break;
       #endif
-      
+
       default:
         break;
     }
-      
+
     Key = (KEY_JOYBUTTON+event.button)|Key_modifiers(SDL_GetModState());
     // TODO: systeme de répétition
-    
+
     return Move_cursor_with_constraints();
 }
 
@@ -719,7 +719,7 @@ int Handle_joystick_release(SDL_JoyButtonEvent event)
       Input_new_mouse_K &= ~2;
       return Move_cursor_with_constraints();
     }
-  
+
     switch(event.button)
     {
       #ifdef JOY_BUTTON_UP
@@ -762,7 +762,7 @@ int Handle_joystick_release(SDL_JoyButtonEvent event)
         Directional_up_left=1;
         break;
       #endif
-      
+
       default:
         break;
     }
@@ -798,11 +798,11 @@ int Cursor_displace(short delta_x, short delta_y)
 {
   short x=Input_new_mouse_X;
   short y=Input_new_mouse_Y;
-  
+
   if(Main_magnifier_mode && Input_new_mouse_Y < Menu_Y && Input_new_mouse_X > Main_separator_position)
   {
     // Cursor in zoomed area
-    
+
     if (delta_x<0)
       Input_new_mouse_X = Max(Main_separator_position, x-Main_magnifier_factor);
     else if (delta_x>0)
@@ -836,7 +836,7 @@ int Directional_acceleration(int msec)
   // At beginning there is 1 pixel move, then nothing for N milliseconds
   if (msec<initial_delay)
     return 1;
-    
+
   // After that, position over time is generally y = ax²+bx+c
   // a = 1/accel_factor
   // b = 1/linear_factor
@@ -850,10 +850,10 @@ int Get_input(int sleep_time)
 {
     SDL_Event event;
     int user_feedback_required = 0; // Flag qui indique si on doit arrêter de traiter les évènements ou si on peut enchainer
-                
+
     Color_cycling();
     // Commit any pending screen update.
-    // This is done in this function because it's called after reading 
+    // This is done in this function because it's called after reading
     // some user input.
     Flush_update();
     Key_ANSI = 0;
@@ -896,12 +896,12 @@ int Get_input(int sleep_time)
               Handle_mouse_release(event.button);
               user_feedback_required = 1;
               break;
-              
+
           case SDL_MOUSEWHEEL:
               Handle_mouse_wheel(event.wheel);
               user_feedback_required = 1;
               break;
-          
+
           case SDL_KEYDOWN:
               Handle_key_press(event.key);
               user_feedback_required = 1;
@@ -930,7 +930,7 @@ int Get_input(int sleep_time)
 
           #endif
           // End of Joystick handling
-          
+
           case SDL_DROPFILE:
               free(Drop_file_name);
               Drop_file_name=calloc(strlen(event.drop.file)+1,1);
@@ -949,13 +949,13 @@ int Get_input(int sleep_time)
                 SDL_Event event;
                 word character = 0;
                 text = Parse_utf8_string(text, &character);
-                
+
                 event.type = SDL_USEREVENT;
                 event.user.code = Id_event_unicode;
                 event.user.windowID = 0;
                 event.user.data1 = &character;
                 event.user.data2 = NULL;
-                
+
                 SDL_PushEvent(&event);
               }
             }
@@ -987,9 +987,9 @@ int Get_input(int sleep_time)
     {
       long time_now;
       int step=0;
-      
+
       time_now=SDL_GetTicks();
-      
+
       if (Directional_first_move==0)
       {
         Directional_first_move=time_now;
@@ -1003,11 +1003,11 @@ int Get_input(int sleep_time)
         step =
           Directional_acceleration(time_now - Directional_first_move) -
           Directional_acceleration(Directional_last_move - Directional_first_move);
-        
+
         // Clip speed at 3 pixel per visible frame.
         if (step > 3)
           step=3;
-        
+
       }
       Directional_last_move = time_now;
       if (step)
@@ -1023,7 +1023,7 @@ int Get_input(int sleep_time)
            !(Directional_down_left||Directional_left||Directional_emulated_left||Directional_up_left))
         {
           Cursor_displace(step,0);
-        }    
+        }
         // Directional controller DOWN
         if ((Directional_down_right||Directional_down||Directional_emulated_down||Directional_down_left) &&
            !(Directional_up_left||Directional_up||Directional_emulated_up||Directional_up_right))
@@ -1048,7 +1048,7 @@ int Get_input(int sleep_time)
     }
     if (user_feedback_required)
       return 1;
-    
+
     // Nothing significant happened
     if (sleep_time)
       SDL_Delay(sleep_time);
@@ -1067,10 +1067,10 @@ int Color_cycling(void)
   int i, color;
   T_Palette palette;
   int changed; // boolean : true if the palette needs a change in this tick.
-  
+
   long now;
   static long start=0;
-  
+
   if (start==0)
   {
     // First run
@@ -1079,25 +1079,25 @@ int Color_cycling(void)
   }
   if (!Allow_colorcycling || !Cycling_mode)
     return 1;
-    
+
 
   now = SDL_GetTicks();
   changed=0;
-  
+
   // Check all cycles for a change at this tick
   for (i=0; i<16; i++)
   {
     int len;
-    
+
     len=Main_backups->Pages->Gradients->Range[i].End-Main_backups->Pages->Gradients->Range[i].Start+1;
     if (len>1 && Main_backups->Pages->Gradients->Range[i].Speed)
     {
       int new_offset;
-      
+
       new_offset=(now-start)/(int)(1000.0/(Main_backups->Pages->Gradients->Range[i].Speed*0.2856)) % len;
       if (!Main_backups->Pages->Gradients->Range[i].Inverse)
         new_offset=len - new_offset;
-      
+
       if (new_offset!=offset[i])
         changed=1;
       offset[i]=new_offset;
@@ -1115,7 +1115,7 @@ int Color_cycling(void)
     for (i=0; i<16; i++)
     {
       int len;
-    
+
       len=Main_backups->Pages->Gradients->Range[i].End-Main_backups->Pages->Gradients->Range[i].Start+1;
       if (len>1 && Main_backups->Pages->Gradients->Range[i].Speed)
       {

@@ -66,9 +66,9 @@ word Count_used_colors(dword* usage)
     for (i = 0; i < nb_pixels; i++)
     {
       color=*current_pixel; // get color in picture for this pixel
-  
+
       usage[color]++; // add it to the counter
-  
+
       // go to next pixel
       current_pixel++;
     }
@@ -154,13 +154,16 @@ word Count_used_colors_area(dword* usage, word start_x, word start_y,
 
 void Set_palette(T_Palette palette)
 {
-  register int i;
+  // SDL2 requires an explicit call to SDL_SetPaletteColors(). You can read the SDL_Surface->format->palette[], but writing there isn't taken into account.
+  int i;
+  SDL_Color colors[256];
   for(i=0;i<256;i++)
   {
-    Screen_SDL->format->palette->colors[i].r=(palette[i].R=Round_palette_component(palette[i].R));
-    Screen_SDL->format->palette->colors[i].g=(palette[i].G=Round_palette_component(palette[i].G));
-    Screen_SDL->format->palette->colors[i].b=(palette[i].B=Round_palette_component(palette[i].B));
+    colors[i].r = palette[i].R = Round_palette_component(palette[i].R);
+    colors[i].g = palette[i].G = Round_palette_component(palette[i].G);
+    colors[i].b = palette[i].B = Round_palette_component(palette[i].B);
   }
+  SDL_SetPaletteColors(Screen_SDL->format->palette, colors, 0, 256);
 }
 
 void Set_color(byte color, byte red, byte green, byte blue)
@@ -305,7 +308,7 @@ void Rotate_90_deg_lowlevel(byte * source, byte * dest, short width, short heigh
     for(x=0;x<width;x++)
     {
       *(dest+height*(width-1-x)+y)=*source;
-      source++;  
+      source++;
     }
   }
 }
@@ -319,7 +322,7 @@ void Rotate_270_deg_lowlevel(byte * source, byte * dest, short width, short heig
     for(x=0;x<width;x++)
     {
       *(dest+(height-1-y)+x*height)=*source;
-      source++;  
+      source++;
     }
   }
 }
@@ -494,8 +497,8 @@ byte Effect_alpha_colorize    (word x,word y,byte color)
   byte blue_under=Main_palette[color_under].B;
   byte green_under=Main_palette[color_under].G;
   byte red_under=Main_palette[color_under].R;
-  int factor=(Main_palette[color].R*76 + 
-    Main_palette[color].G*151 + 
+  int factor=(Main_palette[color].R*76 +
+    Main_palette[color].G*151 +
     Main_palette[color].B*28)/255;
 
   return Best_color(
