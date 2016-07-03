@@ -319,6 +319,7 @@ void Flush_update(void)
     Render_separator(Main_separator_position, SDL_ALPHA_OPAQUE);
 
     // Zoomed viewport
+
     SDL_Rect source_rect = {Main_magnifier_offset_X-Main_offset_X, Main_magnifier_offset_Y-Main_offset_Y, Main_magnifier_width, Main_magnifier_height};
     r.x = Main_X_zoom;
     r.y = 0;

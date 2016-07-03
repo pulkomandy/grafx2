@@ -68,21 +68,9 @@ word Palette_cells_Y()
   return Menu_cells_Y;
 }
 
-// Affichage d'un pixel dans le menu (si visible)
+// Affichage d'un pixel dans le menu et met a jour la bitmap de skin
 void Pixel_in_menu(word bar, word x, word y, byte color)
 {
-  (void)bar;
-  (void)x;
-  (void)y;
-  (void)color;
-  //if (Menu_is_visible && Menu_bars[bar].Visible)
-  //  Block(x*Menu_factor_X,(y+Menu_bars[bar].Top)*Menu_factor_Y+Menu_Y,Menu_factor_X,Menu_factor_Y,color);
-}
-
-// Affichage d'un pixel dans le menu et met a jour la bitmap de skin
-void Pixel_in_menu_and_skin(word bar, word x, word y, byte color)
-{
-  Pixel_in_menu(bar, x, y, color);
   //Menu_bars[bar].Skin[2][y*Menu_bars[bar].Skin_width + x] = color;
   Rectangle_on_texture(Menu_bars[bar].Menu_texture, (x*Menu_factor_X), (y*Menu_factor_Y), Menu_factor_X, Menu_factor_Y, Screen_SDL->format->palette->colors[color].r, Screen_SDL->format->palette->colors[color].g, Screen_SDL->format->palette->colors[color].b, 255, SDL_BLENDMODE_NONE);
 
@@ -679,15 +667,6 @@ void Display_menu(void)
     {
       if(Menu_bars[current_menu].Visible)
       {
-        // Skinned area
-        for (y_pos=0;y_pos<Menu_bars[current_menu].Height;y_pos++)
-          for (x_pos=0;x_pos<Menu_bars[current_menu].Skin_width;x_pos++)
-          {
-            //byte c = Menu_bars[current_menu].Skin[2][y_pos * Menu_bars[current_menu].Skin_width + x_pos];
-            //Pixel_in_menu(current_menu, x_pos, y_pos, c);
-            //Rectangle_on_texture(Menu_bars[current_menu].Menu_texture, (x_pos*Menu_factor_X), (y_pos*Menu_factor_Y), Menu_factor_X, Menu_factor_Y, Screen_SDL->format->palette->colors[c].r, Screen_SDL->format->palette->colors[c].g, Screen_SDL->format->palette->colors[c].b, 255, SDL_BLENDMODE_NONE);
-          }
-
         if (current_menu == MENUBAR_LAYERS || current_menu == MENUBAR_ANIMATION)
         {
           // The layerbar has its own display, for the whole length.
@@ -699,7 +678,6 @@ void Display_menu(void)
           // the last two columns
           Draw_bar_remainder(current_menu, Menu_bars[current_menu].Skin_width);
         }
-
         // Next bar
       }
     }
@@ -1785,40 +1763,6 @@ void Copy_view_to_spare(void)
 
 // -- Fonctions de manipulation du curseur -----------------------------------
 
-
-  // -- Afficher une barre horizontale XOR zoomée
-
-void Horizontal_XOR_line_zoom(short x_pos, short y_pos, short width)
-{
-  short real_x_pos=Main_X_zoom+(x_pos-Main_magnifier_offset_X)*Main_magnifier_factor;
-  short real_y_pos=(y_pos-Main_magnifier_offset_Y)*Main_magnifier_factor;
-  short real_width=width*Main_magnifier_factor;
-  short end_y_pos=(real_y_pos+Main_magnifier_factor<Menu_Y)?real_y_pos+Main_magnifier_factor:Menu_Y;
-  short index;
-
-  for (index=real_y_pos; index<end_y_pos; index++)
-    Horizontal_XOR_line(real_x_pos,index,real_width);
-
-  Update_rect(real_x_pos,real_y_pos,real_width,end_y_pos-real_y_pos);
-}
-
-
-  // -- Afficher une barre verticale XOR zoomée
-
-void Vertical_XOR_line_zoom(short x_pos, short y_pos, short height)
-{
-  short real_x_pos=Main_X_zoom+(x_pos-Main_magnifier_offset_X)*Main_magnifier_factor;
-  short real_y_pos=(y_pos-Main_magnifier_offset_Y)*Main_magnifier_factor;
-  short end_y_pos=(real_y_pos+height*Main_magnifier_factor<Menu_Y)?real_y_pos+(height*Main_magnifier_factor):Menu_Y;
-  short index;
-
-  for (index=real_y_pos; index<end_y_pos; index++)
-    Horizontal_XOR_line(real_x_pos,index,Main_magnifier_factor);
-
-  Update_rect(real_x_pos,real_y_pos,Main_magnifier_factor,end_y_pos-real_y_pos);
-}
-
-
   // -- Afficher le curseur --
 
 void Display_cursor(void)
@@ -1932,14 +1876,6 @@ void Display_cursor(void)
         Update_rect(Paintbrush_X-Main_offset_X,0,1,Menu_Y);
       }
 
-      if (Main_magnifier_mode)
-      {
-        // UPDATERECT
-        if ((Paintbrush_Y>=Limit_top_zoom) && (Paintbrush_Y<=Limit_visible_bottom_zoom))
-          Horizontal_XOR_line_zoom(Limit_left_zoom,Paintbrush_Y,Main_magnifier_width);
-        if ((Paintbrush_X>=Limit_left_zoom) && (Paintbrush_X<=Limit_visible_right_zoom))
-          Vertical_XOR_line_zoom(Paintbrush_X,Limit_top_zoom,Main_magnifier_height);
-      }
       break;
     case CURSOR_SHAPE_XOR_RECTANGLE :
       // !!! Cette forme ne peut pas être utilisée en mode Loupe !!!
@@ -2160,16 +2096,6 @@ void Hide_cursor(void)
         Vertical_XOR_line(Paintbrush_X-Main_offset_X,0,Menu_Y);
         Update_rect(Paintbrush_X-Main_offset_X,0,1,Menu_Y);
       }
-
-      if (Main_magnifier_mode)
-      {
-        // UPDATERECT
-        if ((Paintbrush_Y>=Limit_top_zoom) && (Paintbrush_Y<=Limit_visible_bottom_zoom))
-          Horizontal_XOR_line_zoom(Limit_left_zoom,Paintbrush_Y,Main_magnifier_width);
-        if ((Paintbrush_X>=Limit_left_zoom) && (Paintbrush_X<=Limit_visible_right_zoom))
-          Vertical_XOR_line_zoom(Paintbrush_X,Limit_top_zoom,Main_magnifier_height);
-      }
-
 
       break;
     case CURSOR_SHAPE_XOR_RECTANGLE :

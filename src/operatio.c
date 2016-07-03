@@ -42,7 +42,7 @@
 
 // PI is NOT part of math.h according to C standards...
 #if defined(__GP2X__) || defined(__VBCC__)
-    #define M_PI 3.14159265358979323846 
+    #define M_PI 3.14159265358979323846
 #endif
 
 /// Time (in SDL ticks) when the next airbrush drawing should be done. Also used
@@ -51,7 +51,7 @@ Uint32 Airbrush_next_time;
 
 void Start_operation_stack(word new_operation)
 {
-  // This part handles things that must be done when exiting an operation. 
+  // This part handles things that must be done when exiting an operation.
   Brush_rotation_center_is_defined=0;
   switch(Current_operation)
   {
@@ -60,7 +60,7 @@ void Start_operation_stack(word new_operation)
     break;
 
     default:
-    break;  
+    break;
   }
 
   // On mémorise l'opération précédente si on démarre une interruption
@@ -248,7 +248,7 @@ void Freehand_mode1_2_0(void)
 {
   if (Rightclick_colorpick(0))
     return;
-  
+
   Init_start_operation();
   Backup();
   Shade_table=Shade_table_right;
@@ -347,7 +347,7 @@ void Freehand_mode2_2_0(void)
 {
   if (Rightclick_colorpick(0))
     return;
-  
+
   Init_start_operation();
   Backup();
   Shade_table=Shade_table_right;
@@ -418,7 +418,7 @@ void Freehand_Mode3_2_0(void)
 {
   if (Rightclick_colorpick(0))
     return;
-  
+
   Init_start_operation();
   Backup();
   Shade_table=Shade_table_right;
@@ -453,7 +453,7 @@ void Line_12_0(void)
 {
   if (Rightclick_colorpick(0))
     return;
-  
+
   Init_start_operation();
   Backup();
   Paintbrush_shape_before_operation=Paintbrush_shape;
@@ -491,14 +491,14 @@ void Line_12_5(void)
 //
 // Souris effacée: Non
 
-// Poursuite du tracé d'une ligne (déplacement de la souris en gardant le 
+// Poursuite du tracé d'une ligne (déplacement de la souris en gardant le
 // curseur appuyé)
 {
   short start_x;
   short start_y;
   short end_x;
   short end_y;
-  
+
   short cursor_x;
   short cursor_y;
 
@@ -601,7 +601,7 @@ void K_line_12_0(void)
 
   if (Rightclick_colorpick(0))
     return;
-  
+
   Init_start_operation();
   Backup();
   Shade_table=(Mouse_K==LEFT_SIDE)?Shade_table_left:Shade_table_right;
@@ -780,7 +780,7 @@ void Rectangle_12_0(void)
 {
   if (Rightclick_colorpick(0))
     return;
-  
+
   Init_start_operation();
 
   if ((Config.Coords_rel) && (Menu_is_visible))
@@ -954,7 +954,7 @@ void Circle_12_0(void)
 {
   if (Rightclick_colorpick(0))
     return;
-  
+
   Init_start_operation();
   Backup();
 
@@ -1070,7 +1070,7 @@ void Empty_circle_0_5(void)
   Draw_empty_circle_permanent(center_x,center_y,radius,color);
 
   End_of_modification();
-  
+
   if ( (Config.Coords_rel) && (Menu_is_visible) )
   {
     Print_in_menu("X:       Y:",0);
@@ -1134,7 +1134,7 @@ void Ellipse_12_0(void)
 {
   if (Rightclick_colorpick(0))
     return;
-  
+
   Init_start_operation();
   Backup();
 
@@ -1184,7 +1184,7 @@ void Ellipse_12_5(void)
   Operation_pop(&center_y);
   Operation_pop(&center_x);
   Operation_pop(&color);
- 
+
 
   if ( (tangent_x!=Paintbrush_X) || (tangent_y!=Paintbrush_Y) )
   {
@@ -1249,7 +1249,7 @@ void Empty_ellipse_0_5(void)
   Draw_empty_ellipse_permanent(center_x,center_y,horizontal_radius,vertical_radius,color);
 
   End_of_modification();
-  
+
   if ( (Config.Coords_rel) && (Menu_is_visible) )
   {
     Print_in_menu("X:       Y:             ",0);
@@ -1338,7 +1338,7 @@ void Fill_2_0(void)
 {
   if (Rightclick_colorpick(1))
     return;
-  
+
   Hide_cursor();
   // Pas besoin d'initialiser le début d'opération car le Smear n'affecte pas
   // le Fill, et on se fout de savoir si on est dans la partie gauche ou
@@ -1387,7 +1387,7 @@ void Replace_2_0(void)
 {
   if (Rightclick_colorpick(1))
     return;
-  
+
   Hide_cursor();
   Init_start_operation();
   Backup();
@@ -1431,7 +1431,7 @@ void Draw_curve_cross(short x_pos, short y_pos)
     end_y=3+(Limit_visible_bottom-y_pos);
 
   if (start_x<=end_x && start_y<=end_y)
-  {    
+  {
     for (i=start_x; i<=end_x; i++)
     {
       temp=x_pos+i-3;
@@ -1488,7 +1488,7 @@ void Curve_34_points_2_0(void)
 {
   if (Rightclick_colorpick(0))
     return;
-  
+
   Init_start_operation();
   Backup();
   Shade_table=Shade_table_right;
@@ -1742,7 +1742,7 @@ void Curve_4_points_2_9(void)
   Operation_pop(&color);
 
   Hide_cursor();
-  
+
   Draw_curve_cross(x2,y2);
   Draw_curve_cross(x3,y3);
 
@@ -1824,14 +1824,14 @@ void Curve_3_points_0_5(void)
   Operation_push(y4);
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
-  
+
   if (Config.Stylus_mode)
   {
     Display_cursor();
     while(!Mouse_K)
       Get_input(20);
     Hide_cursor();
-    
+
     Hide_line_preview(x1,y1,x4,y4);
   }
 }
@@ -1897,7 +1897,7 @@ void Curve_finalize(void)
   Operation_pop(&color);
 
   Paintbrush_hidden=0;
-  
+
   Hide_cursor();
 
   Hide_curve_preview (x1,y1,x2,y2,x3,y3,x4,y4,color);
@@ -2019,7 +2019,7 @@ void Airbrush_12_2(void)
     //Airbrush_next_time+=Airbrush_delay*10;
     // Time is now reset, because the += was death spiral
     // if drawing took more time than the frequency.
-    Airbrush_next_time=now+Airbrush_delay*10;    
+    Airbrush_next_time=now+Airbrush_delay*10;
     Airbrush(Mouse_K_unique);
   }
 
@@ -2055,7 +2055,7 @@ void Polygon_12_0(void)
 
   if (Rightclick_colorpick(0))
     return;
-  
+
   Init_start_operation();
   Backup();
   Shade_table=(Mouse_K==LEFT_SIDE)?Shade_table_left:Shade_table_right;
@@ -2159,7 +2159,7 @@ void Polyfill_12_0(void)
 
   if (Rightclick_colorpick(0))
     return;
-  
+
   Init_start_operation();
   Backup();
   Shade_table=(Mouse_K==LEFT_SIDE)?Shade_table_left:Shade_table_right;
@@ -2175,7 +2175,7 @@ void Polyfill_12_0(void)
   // On place temporairement le début de la ligne qui ne s'afficherait pas sinon
   Pixel_figure_preview_xor(Paintbrush_X,Paintbrush_Y,0);
   Update_part_of_screen(Paintbrush_X,Paintbrush_Y,1,1);
-  
+
   if ((Config.Coords_rel) && (Menu_is_visible))
     Print_in_menu("X:±   0   Y:±   0",0);
 
@@ -2360,7 +2360,7 @@ void Polyform_12_0(void)
 
   if (Rightclick_colorpick(0))
     return;
-  
+
   Init_start_operation();
   Backup();
   Shade_table=(Mouse_K==LEFT_SIDE)?Shade_table_left:Shade_table_right;
@@ -2521,7 +2521,7 @@ void Filled_polyform_12_0(void)
 
   if (Rightclick_colorpick(0))
     return;
-  
+
   Init_start_operation();
 
   // Cette opération étant également utilisée pour le lasso, on ne fait pas de
@@ -2542,7 +2542,7 @@ void Filled_polyform_12_0(void)
   // On place temporairement le début de la ligne qui ne s'afficherait pas sinon
   Pixel_figure_preview_xor(Paintbrush_X,Paintbrush_Y,0);
   Update_part_of_screen(Paintbrush_X,Paintbrush_Y,1,1);
-  
+
   Operation_push(Paintbrush_X); // X Initial
   Operation_push(Paintbrush_Y); // X Initial
   Operation_push(color);   // color de remplissage
@@ -2795,7 +2795,7 @@ void Scroll_12_0(void)
     }
   }
   Update_screen_targets();
-  
+
   Cursor_hidden_before_scroll=Cursor_hidden;
   Cursor_hidden=1;
   if ((Config.Coords_rel) && (Menu_is_visible))
@@ -2826,7 +2826,7 @@ void Scroll_12_5(void)
   Operation_pop(&x_pos);
   Operation_pop(&center_y);
   Operation_pop(&center_x);
-  
+
   if ( (Paintbrush_X!=x_pos) || (Paintbrush_Y!=y_pos) )
   {
     // L'utilisateur a bougé, il faut scroller l'image
@@ -2898,13 +2898,13 @@ void Scroll_0_5(void)
     x_offset=(x_pos-center_x)%Main_image_width;
   else
     x_offset=Main_image_width-((center_x-x_pos)%Main_image_width);
-  
+
   if (y_pos>=center_y)
     y_offset=(y_pos-center_y)%Main_image_height;
   else
     y_offset=Main_image_height-((center_y-y_pos)%Main_image_height);
-    
-  
+
+
     // Do the actual scroll operation on all layers.
     for (i=0; i<Main_backups->Pages->Nb_layers; i++)
       //if ((1<<i) & Main_layers_visible)
@@ -2913,14 +2913,14 @@ void Scroll_0_5(void)
     // It would be faster to scroll it, but we don't have method
     // for in-place scrolling.
     Update_depth_buffer();
-  }  
+  }
   else
   {
     // One layer : everything was done while dragging the mouse
   }
   if (Main_tilemap_mode)
     Tilemap_update();
-  
+
   Cursor_hidden=Cursor_hidden_before_scroll;
 
   End_of_modification();
@@ -2957,7 +2957,7 @@ void Grad_circle_12_0(void)
 
   Pixel_figure_preview(Paintbrush_X,Paintbrush_Y,color);
   Update_part_of_screen(Paintbrush_X,Paintbrush_Y,1,1);
-  
+
   if ((Config.Coords_rel) && (Menu_is_visible))
     Print_in_menu("Radius:   0    ",0);
 
@@ -3127,7 +3127,7 @@ void Grad_circle_12_8(void)
   Operation_pop(&center_x);
   Operation_pop(&color);
   Operation_pop(&old_mouse_k);
-  
+
   Hide_cursor();
   // On efface la croix XOR au centre du cercle
   Draw_curve_cross(center_x,center_y);
@@ -3219,7 +3219,7 @@ void Grad_ellipse_12_0(void)
 
   Pixel_figure_preview(Paintbrush_X,Paintbrush_Y,color);
   Update_part_of_screen(Paintbrush_X,Paintbrush_Y,1,1);
-  
+
   if ((Config.Coords_rel) && (Menu_is_visible))
     Print_in_menu("X:±   0   Y:±   0",0);
 
@@ -3510,7 +3510,7 @@ void Draw_xor_rect(short start_x, short start_y, short end_x, short end_y)
   short offset_top = 0;
   short width = end_x-start_x;
   short height = end_y-start_y;
-  
+
   // Handle clipping
   if (end_x-Main_offset_X > Min(Main_image_width,
     Main_magnifier_mode?Main_separator_position:Screen_width))
@@ -3546,12 +3546,12 @@ void Draw_xor_rect(short start_x, short start_y, short end_x, short end_y)
       Horizontal_XOR_line(start_x - Main_offset_X, end_y
         - Main_offset_Y, width - offset_width + 1);
     }
-  
+
     if (height > offset_height + 2)
     {
       Vertical_XOR_line(start_x-Main_offset_X, start_y
         - Main_offset_Y + 1, height - offset_height - 1);
-  
+
       if (offset_width == 0)
       {
         Vertical_XOR_line(end_x - Main_offset_X, start_y
@@ -3559,62 +3559,10 @@ void Draw_xor_rect(short start_x, short start_y, short end_x, short end_y)
       }
     }
   }
-  
+
   Update_rect(start_x - Main_offset_X, start_y - Main_offset_Y,
     width + 1 - offset_width, height + 1 - offset_height);
 
-  // Dessin dans la zone zoomée
-  if (Main_magnifier_mode && start_x <= Limit_right_zoom
-    && end_x > Limit_left_zoom
-    && start_y <= Limit_bottom_zoom
-    && end_y > Limit_top_zoom )
-  {
-    offset_width = 0;
-    offset_height = 0;
-
-    if (start_x<Limit_left_zoom) // On dépasse du zoom à gauche
-    {
-      offset_width += Limit_left_zoom - start_x;
-      offset_left = Limit_left_zoom;
-    }
-
-    if(end_x>Limit_right_zoom) // On dépasse du zoom à droite
-        offset_width += end_x - Limit_right_zoom;
-
-    if(start_y<Limit_top_zoom) // On dépasse du zoom en haut
-    {
-        offset_height += Limit_top_zoom - start_y;
-        offset_top = Limit_top_zoom;
-    }
-
-    if(end_y>Limit_bottom_zoom) // On dépasse du zoom en bas
-        offset_height += end_y - Limit_bottom_zoom;
-
-    if(width > offset_width)
-    {
-      if(offset_top==0) // La ligne du haut est visible
-        Horizontal_XOR_line_zoom(offset_left>0?offset_left:start_x,start_y,width-offset_width+1);
-
-      if(height!=0 && end_y<=Limit_bottom_zoom) // La  ligne du bas est visible
-        Horizontal_XOR_line_zoom(offset_left>0?offset_left:start_x,end_y,width-offset_width+1);
-    }
-    if (width==0 && height!=0 && height > offset_height && offset_left==0)
-    {
-      // Single vertical line
-      Vertical_XOR_line_zoom(start_x,offset_top!=0?offset_top:start_y,height-offset_height);
-    }
-    else
-    {
-      if(height > offset_height + 2)
-      {
-        if(offset_left==0) // La ligne de gauche est visible
-          Vertical_XOR_line_zoom(start_x,offset_top!=0?offset_top:(start_y+1),height-offset_height-(offset_top==0)+(end_y>Limit_bottom_zoom));
-  
-        if(end_x<=Limit_right_zoom) // La ligne de droite est visible
-          Vertical_XOR_line_zoom(end_x,offset_top!=0?offset_top:(start_y+1),height-offset_height-(offset_top==0)+(end_y>Limit_bottom_zoom));
-      }
-    }
-  }
 }
 void Grad_rectangle_0_5(void)
 // OPERATION_GRAD_RECTANGLE
@@ -3640,17 +3588,17 @@ void Grad_rectangle_0_5(void)
   Operation_pop(&start_y);
   Operation_pop(&start_x);
 
-  // This trick will erase the large crosshair at original position, 
+  // This trick will erase the large crosshair at original position,
   // in normal and zoomed views.
   Paintbrush_X = start_x;
   Paintbrush_Y = start_y;
 
   if (start_x>end_x)
     SWAP_SHORTS(start_x, end_x)
-  
+
   if (start_y>end_y)
     SWAP_SHORTS(start_y, end_y)
-  
+
   Hide_cursor();
 
   // Check if the rectangle is not fully outside the picture
@@ -3758,7 +3706,7 @@ void Grad_rectangle_12_9(void)
     // On corrige les coordonnées de la ligne si la touche shift est appuyée...
     if(SDL_GetModState() & KMOD_SHIFT)
         Clamp_coordinates_regular_angle(start_x,start_y,&cursor_x,&cursor_y);
-        
+
     if ((cursor_x!=end_x) || (cursor_y!=end_y))
     {
         Display_coords_rel_or_abs(start_x,start_y);
@@ -3840,7 +3788,7 @@ void Centered_lines_12_0(void)
 {
     if (Rightclick_colorpick(0))
       return;
-    
+
     Init_start_operation();
     Backup();
     Shade_table=(Mouse_K==LEFT_SIDE)?Shade_table_left:Shade_table_right;
@@ -4063,7 +4011,7 @@ void Pan_view_12_0(void)
 //  First time the user clicks
 {
   Init_start_operation();
-  
+
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
 }
@@ -4079,10 +4027,10 @@ void Pan_view_12_2(void)
 {
   short start_x;
   short start_y;
-  
+
   Operation_pop(&start_y);
   Operation_pop(&start_x);
-  
+
   if (Paintbrush_X!=start_x || Paintbrush_Y!=start_y)
   {
     // User moved
@@ -4114,7 +4062,7 @@ void Pan_view_0_2(void)
 
   Operation_pop(&start_y);
   Operation_pop(&start_x);
-  
+
   if (!Pan_shortcut_pressed)
   {
     // End of operation, return to previous

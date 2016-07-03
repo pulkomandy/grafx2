@@ -174,11 +174,8 @@ void Draw_menu_button(byte btn_number,byte pressed)
 
   if (icon==-1)
   {
-    // Standard button
-    // FIXME
-    Rectangle_on_texture(Menu_bars[current_menu].Menu_texture, (start_x*Menu_factor_X), (start_y*Menu_factor_Y), width*Menu_factor_X, height*Menu_factor_Y, 255, 0, 128, 255, SDL_BLENDMODE_NONE);
-    //bitmap_width = Menu_bars[current_menu].Skin_width;
-    //bitmap=&(Menu_bars[current_menu].Skin[pressed][start_y*Menu_bars[current_menu].Skin_width+start_x]);
+    // Special button
+    // This includes the palette, and the layers button area
   }
   else
   {
@@ -191,36 +188,7 @@ void Draw_menu_button(byte btn_number,byte pressed)
     //if (Buttons_Pool[btn_number].Shape==BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT)
     //  bitmap += MENU_SPRITE_WIDTH+1;
   }
-     /*
-  switch(Buttons_Pool[btn_number].Shape)
-  {
-    case BUTTON_SHAPE_NO_FRAME :
-      break;
-    case BUTTON_SHAPE_RECTANGLE  :
-    for (y_pos=0;y_pos<height;y_pos++)
-      for (x_pos=0;x_pos<width;x_pos++)
-      {
-        color=bitmap[x_pos+y_pos*bitmap_width];
-        Pixel_in_menu_and_skin(current_menu, start_x+x_pos, start_y+y_pos, color);
-      }
-    break;
-    case BUTTON_SHAPE_TRIANGLE_TOP_LEFT:
-    for (y_pos=0;y_pos<15;y_pos++)
-      for (x_pos=0;x_pos<15-y_pos;x_pos++)
-      {
-        color=bitmap[x_pos+y_pos*bitmap_width];
-        Pixel_in_menu_and_skin(current_menu, start_x+x_pos, start_y+y_pos, color);
-      }
-    break;
-    case BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT:
-    for (y_pos=0;y_pos<15;y_pos++)
-      for (x_pos=14-y_pos;x_pos<15;x_pos++)
-      {
-        color=bitmap[(x_pos)+(y_pos)*bitmap_width];
-        Pixel_in_menu_and_skin(current_menu, start_x+x_pos, start_y+y_pos, color);
-      }
-    break;
-  }
+
   // Special: Show specific shape
   if (btn_number==BUTTON_PAINTBRUSHES
     && Paintbrush_shape!=PAINTBRUSH_SHAPE_COLOR_BRUSH
@@ -254,10 +222,10 @@ void Draw_menu_button(byte btn_number,byte pressed)
       for (menu_x_pos=menu_start_x,x_pos=start_x;((x_pos<Paintbrush_width) && (menu_x_pos<15));menu_x_pos++,x_pos++)
       {
         if (Paintbrush_sprite[(y_pos*MAX_PAINTBRUSH_SIZE)+x_pos])
-        Pixel_in_menu_and_skin(MENUBAR_TOOLS, menu_x_pos, menu_y_pos, MC_Black);
+        Pixel_in_menu(MENUBAR_TOOLS, menu_x_pos, menu_y_pos, MC_Black);
       }
   }
-
+/*
   if (Menu_is_visible && Menu_bars[current_menu].Visible)
     Update_rect(Menu_factor_X*(Buttons_Pool[btn_number].X_offset),
       (Buttons_Pool[btn_number].Y_offset+Menu_bars[current_menu].Top)*Menu_factor_Y+Menu_Y,
