@@ -241,9 +241,9 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
 
   file_in_command_line = 0;
   Resolution_in_command_line = 0;
-  
+
   Current_resolution = Config.Default_resolution;
-  
+
   for (index = 1; index<argc; index++)
   {
     char *s = argv[index];
@@ -262,7 +262,7 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
       }
       else
         s++;
-  
+
       for (tmpi = 0; tmpi < ARRAY_SIZE(cmdparams); tmpi++)
       {
         if (!strcmp(s, cmdparams[tmpi].param))
@@ -380,7 +380,7 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
         {
           file_in_command_line ++;
           buffer = Realpath(argv[index], NULL);
-        
+
           if (file_in_command_line == 1)
           {
             // Separate path from filename
@@ -422,7 +422,7 @@ CT_ASSERT(sizeof(T_Palette)==768);
 // ------------------------ Initialiser le programme -------------------------
 // Returns 0 on fail
 int Init_program(int argc,char * argv[])
-{   
+{
   int temp;
   int starting_videomode;
   enum IMAGE_MODES starting_image_mode;
@@ -434,14 +434,14 @@ int Init_program(int argc,char * argv[])
   static char main_directory[MAX_PATH_CHARACTERS];
   static char spare_filename [MAX_PATH_CHARACTERS];
   static char spare_directory[MAX_PATH_CHARACTERS];
- 
-  #if defined(__MINT__)  
+
+  #if defined(__MINT__)
   printf("===============================\n");
   printf(" /|\\ GrafX2 %.19s\n", Program_version);
   printf(" compilation date: %.16s\n", __DATE__);
   printf("===============================\n");
-  #endif 
- 
+  #endif
+
   // On crée dès maintenant les descripteurs des listes de pages pour la page
   // principale et la page de brouillon afin que leurs champs ne soient pas
   // invalide lors des appels aux multiples fonctions manipulées à
@@ -469,26 +469,26 @@ int Init_program(int argc,char * argv[])
 
   // On initialise les données sur le nom de fichier de l'image de brouillon:
   strcpy(Spare_selector.Directory,Main_selector.Directory);
-  
+
   Main_fileformat=DEFAULT_FILEFORMAT;
   Spare_fileformat    =Main_fileformat;
-  
+
   strcpy(Brush_selector.Directory,Main_selector.Directory);
   strcpy(Brush_file_directory,Main_selector.Directory);
   strcpy(Brush_filename       ,"NO_NAME.GIF");
   Brush_fileformat    =Main_fileformat;
 
   // On initialise ce qu'il faut pour que les fileselects ne plantent pas:
-  
+
   Main_selector.Position=0; // Au début, le fileselect est en haut de la liste des fichiers
   Main_selector.Offset=0; // Au début, le fileselect est en haut de la liste des fichiers
   Main_selector.Format_filter=FORMAT_ALL_IMAGES;
-  
+
   Main_current_layer=0;
   Main_layers_visible=0xFFFFFFFF;
   Spare_current_layer=0;
   Spare_layers_visible=0xFFFFFFFF;
-  
+
   Spare_selector.Position=0;
   Spare_selector.Offset=0;
   Spare_selector.Format_filter=FORMAT_ALL_IMAGES;
@@ -520,12 +520,12 @@ int Init_program(int argc,char * argv[])
   Spare_magnifier_offset_X=0;
   Spare_magnifier_offset_Y=0;
   Keyboard_click_allowed = 1;
-  
+
   Main_safety_backup_prefix = SAFETYBACKUP_PREFIX_A[0];
   Spare_safety_backup_prefix = SAFETYBACKUP_PREFIX_B[0];
   Main_time_of_safety_backup = 0;
   Spare_time_of_safety_backup = 0;
-  
+
 
   // SDL
   if(SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO|SDL_INIT_JOYSTICK|SDL_INIT_EVENTS) < 0)
@@ -542,11 +542,9 @@ int Init_program(int argc,char * argv[])
   Joystick = SDL_JoystickOpen(0);
   //SDL_EnableKeyRepeat(250, 32); // TODO
   //SDL_WM_SetCaption("GrafX2","GrafX2"); // TODO
-  Define_icon();
-  
-  
+
   Id_event_unicode = SDL_RegisterEvents(1);
-  
+
   // Texte
   Init_text();
 
@@ -625,13 +623,13 @@ int Init_program(int argc,char * argv[])
   Init_brush_container();
 
   Windows_open=0;
-  
+
   // Paintbrush
   if (!(Paintbrush_sprite=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE))) Error(ERROR_MEMORY);
-  
+
   // Load preset paintbrushes (uses Paintbrush_ variables)
   Init_paintbrushes();
-  
+
   // Set a valid paintbrush afterwards
   *Paintbrush_sprite=1;
   Paintbrush_width=1;
@@ -639,7 +637,7 @@ int Init_program(int argc,char * argv[])
   Paintbrush_offset_X=0;
   Paintbrush_offset_Y=0;
   Paintbrush_shape=PAINTBRUSH_SHAPE_ROUND;
-  
+
   #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
   // Prefer cycling active by default
   Cycling_mode=1;
@@ -664,7 +662,7 @@ int Init_program(int argc,char * argv[])
   temp=Load_INI(&Config);
   if (temp)
     Error(temp);
-  
+
   if(!Config.Allow_multi_shortcuts)
   {
     Remove_duplicate_shortcuts();
@@ -711,7 +709,7 @@ int Init_program(int argc,char * argv[])
   // Open a console for debugging...
   //ActivateConsole();
   #endif
-  
+
   Main_image_width=Screen_width;
   Main_image_height=Screen_height;
   Spare_image_width=Screen_width;
@@ -729,17 +727,17 @@ int Init_program(int argc,char * argv[])
     }
   }
   Set_current_skin(Config.Skin_file, gfx);
-  
+
   // Override colors
   // Gfx->Default_palette[MC_Black]=Config.Fav_menu_colors[0];
   // Gfx->Default_palette[MC_Dark] =Config.Fav_menu_colors[1];
   // Gfx->Default_palette[MC_Light]=Config.Fav_menu_colors[2];
   // Gfx->Default_palette[MC_White]=Config.Fav_menu_colors[3];
-  
+
   // Even when using the skin's palette, if RGB range is small
   // the colors will be unusable.
   Compute_optimal_menu_colors(Gfx->Default_palette);
-    
+
   // Infos sur les trames (Sieve)
   Sieve_mode=0;
   Copy_preset_sieve(0);
@@ -757,15 +755,15 @@ int Init_program(int argc,char * argv[])
 
   Fore_color=Best_color_range(255,255,255,Config.Palette_cells_X*Config.Palette_cells_Y);
   Back_color=Best_color_range(0,0,0,Config.Palette_cells_X*Config.Palette_cells_Y);
-  
-  starting_image_mode = Config.Default_mode_layers ? 
+
+  starting_image_mode = Config.Default_mode_layers ?
     IMAGE_MODE_LAYERED : IMAGE_MODE_ANIMATION;
   // Allocation de mémoire pour les différents écrans virtuels (et brosse)
   if (Init_all_backup_lists(starting_image_mode , Screen_width, Screen_height)==0)
     Error(ERROR_MEMORY);
   // Update toolbars' visibility, now that the current image has a mode
   Check_menu_mode();
-  
+
   // Nettoyage de l'écran virtuel (les autres recevront celui-ci par copie)
   memset(Main_screen,0,Main_image_width*Main_image_height);
 
@@ -822,13 +820,13 @@ int Init_program(int argc,char * argv[])
   {
 	strcpy(Main_selector.Directory, main_directory);
   }
-  
+
   // Test de recuperation de fichiers sauvés
   switch (Check_recovery())
   {
     T_IO_Context context;
 
-    default:    
+    default:
       // Some files were loaded from last crash-exit.
       // Do not load files from command-line, nor show splash screen.
       Compute_optimal_menu_colors(Main_palette);
@@ -847,9 +845,9 @@ int Init_program(int argc,char * argv[])
         "Some backups can be present in\n"
         "the spare page too.\n");
       break;
-  
+
     case -1: // Unable to write lock file
-      Verbose_message("Warning", 
+      Verbose_message("Warning",
         "Safety backups (every minute) are\n"
         "disabled because Grafx2 is running\n"
         "from a read-only device, or other\n"
@@ -857,14 +855,14 @@ int Init_program(int argc,char * argv[])
       break;
 
     case 0:
-    
+
       switch (file_in_command_line)
       {
         case 0:
           if (Config.Opening_message)
             Button_Message_initial();
           break;
-  
+
         case 2:
           // Load this file
           Init_context_layered_image(&context, spare_filename, spare_directory);
@@ -872,7 +870,7 @@ int Init_program(int argc,char * argv[])
           Destroy_context(&context);
           Redraw_layered_image();
           End_of_modification();
-  
+
           Button_Page();
           // no break ! proceed with the other file now
         case 1:
@@ -885,7 +883,7 @@ int Init_program(int argc,char * argv[])
           // If only one image was loaded, assume the spare has same image type
           if (file_in_command_line==1)
             Spare_backups->Pages->Image_mode = Main_backups->Pages->Image_mode;
-          
+
           Hide_cursor();
           Compute_optimal_menu_colors(Main_palette);
           Back_color=Main_backups->Pages->Background_transparent ?
@@ -893,14 +891,14 @@ int Init_program(int argc,char * argv[])
             Best_color_range(0,0,0,Config.Palette_cells_X*Config.Palette_cells_Y);
           Fore_color=Main_palette[Back_color].R+Main_palette[Back_color].G+Main_palette[Back_color].B < 3*127 ?
             Best_color_range(255,255,255,Config.Palette_cells_X*Config.Palette_cells_Y) :
-            Best_color_range(0,0,0,Config.Palette_cells_X*Config.Palette_cells_Y);  
+            Best_color_range(0,0,0,Config.Palette_cells_X*Config.Palette_cells_Y);
           Check_menu_mode();
           Display_all_screen();
           Display_menu();
           Display_cursor();
           Resolution_in_command_line = 0;
           break;
-    
+
         default:
           break;
       }
@@ -921,7 +919,7 @@ void Program_shutdown(void)
   {
     //RECT r;
     //static SDL_SysWMinfo pInfo;
-    
+
     //SDL_GetWMInfo(&pInfo);
     //GetWindowRect(pInfo.window, &r);
 
@@ -971,14 +969,14 @@ void Program_shutdown(void)
   }
   else
     Error(ERROR_MISSING_DIRECTORY);
-    
+
   SDL_Quit();
-  
+
   #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
   chdir("/usr/gp2x");
   execl("/usr/gp2x/gp2xmenu", "/usr/gp2x/gp2xmenu", NULL);
   #endif
-  
+
 }
 
 
@@ -991,7 +989,7 @@ int main(int argc,char * argv[])
     Program_shutdown();
     return 0;
   }
-  
+
   Main_handler();
 
   Program_shutdown();

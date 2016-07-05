@@ -28,7 +28,10 @@
 #include <SDL2/SDL.h>
 #include <SDL_image.h>
 #include <SDL_endian.h>
-
+#include <SDL2/SDL_syswm.h>
+#if defined(__WIN32__)
+    #include <windows.h>
+#endif
 #include "global.h"
 #include "sdlscreen.h"
 #include "errors.h"
@@ -106,6 +109,7 @@ void Set_mode_SDL(int *width, int *height, int fullscreen)
   //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
   SDL_RenderSetLogicalSize(Renderer_SDL, *width, *height * 2);
   Texture_SDL = SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, *width, *height);
+  Define_icon();
 
   if(Screen_SDL != NULL)
   {
@@ -803,4 +807,148 @@ void Brush_in_window(byte * brush, word x_pos,word y_pos,word x_offset,word y_of
     // On passe à la ligne suivante
     src = src + brush_width - width;
   }
+}
+
+/// Set application icon(s)
+void Define_icon(void)
+{
+#ifdef __WIN32__
+  // Specific code for Win32:
+  // Load icon from embedded resource.
+  // This will provide both the 16x16 and 32x32 versions.
+  do
+  {
+    HICON hicon;
+    HRSRC hresource;
+    HINSTANCE hInstance;
+    LPVOID lpResIconDir;
+    LPVOID lpResIcon16;
+    LPVOID lpResIcon32;
+    HGLOBAL hMem;
+    WORD nID;
+    SDL_SysWMinfo info;
+
+    hInstance = (HINSTANCE)GetModuleHandle(NULL);
+    if (hInstance==NULL)
+      break;
+
+    // Icon is resource #1
+    hresource = FindResource(hInstance,
+      MAKEINTRESOURCE(1),
+      RT_GROUP_ICON);
+    if (hresource==NULL)
+      break;
+
+    // Load and lock the icon directory.
+    hMem = LoadResource(hInstance, hresource);
+    if (hMem==NULL)
+      break;
+
+    lpResIconDir = LockResource(hMem);
+    if (lpResIconDir==NULL)
+      break;
+
+    SDL_VERSION(&info.version);
+    if (!SDL_GetWindowWMInfo(Window_SDL, &info))
+        return;
+    if (info.subsystem != SDL_SYSWM_WINDOWS)
+        return;
+
+    //
+    // 16x16
+    //
+
+    // Get the identifier of the 16x16 icon
+    nID = LookupIconIdFromDirectoryEx((PBYTE) lpResIconDir, TRUE,
+        16, 16, LR_DEFAULTCOLOR);
+    if (nID==0)
+      break;
+
+    // Find the bits for the nID icon.
+    hresource = FindResource(hInstance,
+        MAKEINTRESOURCE(nID),
+        MAKEINTRESOURCE((long)RT_ICON));
+    if (hresource==NULL)
+      break;
+
+    // Load and lock the icon.
+    hMem = LoadResource(hInstance, hresource);
+    if (hMem==NULL)
+      break;
+    lpResIcon16 = LockResource(hMem);
+    if (lpResIcon16==NULL)
+      break;
+
+    // Create a handle to the icon.
+    hicon = CreateIconFromResourceEx((PBYTE) lpResIcon16,
+        SizeofResource(hInstance, hresource), TRUE, 0x00030000,
+        16, 16, LR_DEFAULTCOLOR);
+    if (hicon==NULL)
+      break;
+
+    // Set it
+		SetClassLongPtr(info.info.win.window, GCL_HICONSM, (LONG_PTR)hicon);
+    //
+    // 32x32
+    //
+
+    // Get the identifier of the 32x32 icon
+    nID = LookupIconIdFromDirectoryEx((PBYTE) lpResIconDir, TRUE,
+        32, 32, LR_DEFAULTCOLOR);
+    if (nID==0)
+      break;
+
+    // Find the bits for the nID icon.
+    hresource = FindResource(hInstance,
+        MAKEINTRESOURCE(nID),
+        MAKEINTRESOURCE((long)RT_ICON));
+    if (hresource==NULL)
+      break;
+
+    // Load and lock the icon.
+    hMem = LoadResource(hInstance, hresource);
+    if (hMem==NULL)
+      break;
+    lpResIcon32 = LockResource(hMem);
+    if (lpResIcon32==NULL)
+      break;
+
+    // Create a handle to the icon.
+    hicon = CreateIconFromResourceEx((PBYTE) lpResIcon32,
+        SizeofResource(hInstance, hresource), TRUE, 0x00030000,
+        32, 32, LR_DEFAULTCOLOR);
+    if (hicon==NULL)
+      break;
+
+    // Set it
+		SetClassLongPtr(info.info.win.window, GCL_HICON, (LONG_PTR)hicon);
+
+		// Success
+		return;
+  } while (0);
+  // Failure: fall back on normal SDL version:
+
+#else
+  // General version: Load icon from the file gfx2.gif
+  {
+    char icon_path[MAX_PATH_CHARACTERS];
+    SDL_Surface * icon;
+    sprintf(icon_path, "%s%s", Data_directory, "gfx2.gif");
+    icon = IMG_Load(icon_path);
+    // From tests on Windows, files of 128*128 are accepted, 255*255 are refused - YR on SDL2 2.0.3
+    if (icon && icon->w <= 128 && icon->h <= 128)
+    {
+      if (icon->format->BitsPerPixel == 8)
+      {
+        // 8bit image: use color key
+        Uint32 pink;
+        pink = SDL_MapRGB(icon->format, 255, 0, 255);
+
+        SDL_SetColorKey(icon, SDL_TRUE, pink);
+      }
+      SDL_SetWindowIcon(Window_SDL, icon);
+    }
+    SDL_FreeSurface(icon);
+  }
+#endif
 }
