@@ -471,86 +471,6 @@ void Swap(int with_remap,short block_1_start,short block_2_start,short block_siz
   }
 }
 
-
-
-void Set_nice_menu_colors(dword * color_usage,int not_picture)
-{
-  short index,index2;
-  byte color;
-  byte replace_table[256];
-  T_Components rgb[4];
-  short new_colors[4]={255,254,253,252};
-
-  // On initialise la table de remplacement
-  for (index=0; index<256; index++)
-    replace_table[index]=index;
-
-  // On recherche les 4 couleurs les moins utilisées dans l'image pour pouvoir
-  // les remplacer par les nouvelles couleurs.
-  for (index2=0; index2<4; index2++)
-    for (index=255; index>=0; index--)
-    {
-      if ((index!=new_colors[0]) && (index!=new_colors[1])
-       && (index!=new_colors[2]) && (index!=new_colors[3])
-       && (color_usage[index]<color_usage[new_colors[index2]]))
-        new_colors[index2]=index;
-    }
-
-  // On trie maintenant la table dans le sens décroissant.
-  // (Ce n'est pas indispensable, mais ça fera plus joli dans la palette).
-  do
-  {
-    color=0; // Booléen qui dit si le tri n'est pas terminé.
-    for (index=0; index<3; index++)
-    {
-      if (new_colors[index]>new_colors[index+1])
-      {
-        index2            =new_colors[index];
-        new_colors[index]  =new_colors[index+1];
-        new_colors[index+1]=index2;
-        color=1;
-      }
-    }
-  } while (color);
-
-  //   On sauvegarde dans rgb les teintes qu'on va remplacer et on met les
-  // couleurs du menu par défaut
-  for (index=0; index<4; index++)
-  {
-    const T_Components * target_rgb;
-
-    target_rgb=Favorite_GUI_color(index);
-    color=new_colors[index];
-    rgb[index].R=Main_palette[color].R;
-    rgb[index].G=Main_palette[color].G;
-    rgb[index].B=Main_palette[color].B;
-    Main_palette[color].R=Round_palette_component(target_rgb->R);
-    Main_palette[color].G=Round_palette_component(target_rgb->G);
-    Main_palette[color].B=Round_palette_component(target_rgb->B);
-  }
-
-  //   Maintenant qu'on a placé notre nouvelle palette, on va chercher quelles
-  // sont les couleurs qui peuvent remplacer les anciennes
-  Hide_cursor();
-  for (index=0; index<4; index++)
-    replace_table[new_colors[index]]=Best_color_nonexcluded
-                                  (rgb[index].R,rgb[index].G,rgb[index].B);
-
-  if (not_picture)
-  {
-    // Remap caused by preview. Only remap screen
-    Remap_zone_highlevel(0,0,Screen_width,Screen_height,replace_table);
-  }
-  else
-  {
-    // On fait un changement des couleurs visibles à l'écran et dans l'image
-    Remap_image_highlevel(replace_table);
-  }
-  Display_cursor();
-}
-
-
-
 void Reduce_palette(short * used_colors,int nb_colors_asked,T_Palette palette,dword * color_usage)
 {
   char  str[5];                // buffer d'affichage du compteur
@@ -1136,8 +1056,8 @@ void Button_Palette(void)
   Tag_color_range(block_start,block_end);
 
   // Affichage dans le block de visu de la couleur en cours
-  Window_rectangle(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_H,Main_palette[Back_color]);
-  Window_rectangle(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,Main_palette[Fore_color]);
+  Window_rectangle(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_H,working_palette[Back_color]);
+  Window_rectangle(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,working_palette[Fore_color]);
 
   // Affichage des valeurs de la couleur courante (pour 1 couleur)
   Display_sliders(red_slider,green_slider,blue_slider,(block_start!=block_end),working_palette);
@@ -1232,10 +1152,10 @@ void Button_Palette(void)
             {
               Back_color=temp_color;
               // 4 blocks de back_color entourant la fore_color
-              Window_rectangle(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_Y-BGCOLOR_DISPLAY_Y,Main_palette[Back_color]);
-              Window_rectangle(BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y+FGCOLOR_DISPLAY_H,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_Y+BGCOLOR_DISPLAY_H-FGCOLOR_DISPLAY_Y-FGCOLOR_DISPLAY_H,Main_palette[Back_color]);
-              Window_rectangle(BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_X-BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_H,Main_palette[Back_color]);
-              Window_rectangle(FGCOLOR_DISPLAY_X+FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_X+BGCOLOR_DISPLAY_W-FGCOLOR_DISPLAY_X-FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,Main_palette[Back_color]);
+              Window_rectangle(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_Y-BGCOLOR_DISPLAY_Y,working_palette[Back_color]);
+              Window_rectangle(BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y+FGCOLOR_DISPLAY_H,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_Y+BGCOLOR_DISPLAY_H-FGCOLOR_DISPLAY_Y-FGCOLOR_DISPLAY_H,working_palette[Back_color]);
+              Window_rectangle(BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_X-BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_H,working_palette[Back_color]);
+              Window_rectangle(FGCOLOR_DISPLAY_X+FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_X+BGCOLOR_DISPLAY_W-FGCOLOR_DISPLAY_X-FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,working_palette[Back_color]);
               Update_window_area(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_H);
             }
             Display_cursor();
@@ -1293,10 +1213,10 @@ void Button_Palette(void)
 
               Back_color=temp_color;
               // 4 blocks de back_color entourant la fore_color
-              Window_rectangle(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_Y-BGCOLOR_DISPLAY_Y,Main_palette[Back_color]);
-              Window_rectangle(BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y+FGCOLOR_DISPLAY_H,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_Y+BGCOLOR_DISPLAY_H-FGCOLOR_DISPLAY_Y-FGCOLOR_DISPLAY_H,Main_palette[Back_color]);
-              Window_rectangle(BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_X-BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_H,Main_palette[Back_color]);
-              Window_rectangle(FGCOLOR_DISPLAY_X+FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_X+BGCOLOR_DISPLAY_W-FGCOLOR_DISPLAY_X-FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,Main_palette[Back_color]);
+              Window_rectangle(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_Y-BGCOLOR_DISPLAY_Y,working_palette[Back_color]);
+              Window_rectangle(BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y+FGCOLOR_DISPLAY_H,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_Y+BGCOLOR_DISPLAY_H-FGCOLOR_DISPLAY_Y-FGCOLOR_DISPLAY_H,working_palette[Back_color]);
+              Window_rectangle(BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_X-BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_H,working_palette[Back_color]);
+              Window_rectangle(FGCOLOR_DISPLAY_X+FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_X+BGCOLOR_DISPLAY_W-FGCOLOR_DISPLAY_X-FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,working_palette[Back_color]);
               Update_window_area(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_H);
 
               Display_cursor();
@@ -1332,7 +1252,7 @@ void Button_Palette(void)
                 Display_sliders(red_slider,green_slider,blue_slider,0,working_palette);
 
                 // Affichage dans le block de visu de la couleur en cours
-                Window_rectangle(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,Main_palette[Fore_color]);
+                Window_rectangle(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,working_palette[Fore_color]);
                 Update_window_area(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H);
 
                 Palette_edit_select_range();
@@ -1393,7 +1313,7 @@ void Button_Palette(void)
                   Display_sliders(red_slider,green_slider,blue_slider,0,working_palette);
 
                   // Affichage dans le block de visu de la couleur en cours
-                  Window_rectangle(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,Main_palette[Fore_color]);
+                  Window_rectangle(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,working_palette[Fore_color]);
                   Update_window_area(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H);
                 }
 
@@ -1793,7 +1713,7 @@ void Button_Palette(void)
             Num2str(Fore_color,str,3);
             Window_rectangle(COLOR_X,COLOR_Y,56,7,MC_Light);
             // Affichage dans le block de visu de la couleur en cours
-            Window_rectangle(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,Main_palette[Fore_color]);
+            Window_rectangle(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,working_palette[Fore_color]);
           }
           Print_in_window(COLOR_X,COLOR_Y,str,MC_Black,MC_Light);
           // On tag le bloc (ou la couleur)
@@ -1848,7 +1768,7 @@ void Button_Palette(void)
             Num2str(Fore_color,str,3);
             Window_rectangle(COLOR_X,COLOR_Y,56,7,MC_Light);
             // Affichage dans le block de visu de la couleur en cours
-            Window_rectangle(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,Main_palette[Fore_color]);
+            Window_rectangle(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,working_palette[Fore_color]);
           }
           Print_in_window(COLOR_X,COLOR_Y,str,MC_Black,MC_Light);
           // On tag le bloc (ou la couleur)
@@ -1920,16 +1840,6 @@ void Button_Palette(void)
 
             Reduce_palette(&used_colors, reduce_colors_number, working_palette,
                     color_usage);
-
-            if ((Config.Safety_colors) && (used_colors<4))
-            {
-                memcpy(temp_palette, Main_palette, sizeof(T_Palette));
-                memcpy(Main_palette, working_palette, sizeof(T_Palette));
-                Set_nice_menu_colors(color_usage, 0);
-                memcpy(working_palette, Main_palette, sizeof(T_Palette));
-                memcpy(Main_palette, temp_palette, sizeof(T_Palette));
-            }
-
             Set_palette(working_palette); // On définit la nouvelle palette
             Draw_all_palette_sliders(red_slider, green_slider, blue_slider,
                     working_palette, block_start, block_end);
@@ -1967,16 +1877,6 @@ void Button_Palette(void)
             working_palette[i].B=backup_palette[temp_color].B;
           }
         }
-
-        if ((Config.Safety_colors) && (used_colors<4) && (block_end==block_start))
-        {
-          memcpy(temp_palette,Main_palette,sizeof(T_Palette));
-          memcpy(Main_palette,working_palette,sizeof(T_Palette));
-          Set_nice_menu_colors(color_usage,0);
-          memcpy(working_palette,Main_palette,sizeof(T_Palette));
-          memcpy(Main_palette,temp_palette,sizeof(T_Palette));
-        }
-
         Set_palette(working_palette);
         Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
 
@@ -2520,7 +2420,7 @@ void Button_Palette(void)
           Display_sliders(red_slider,green_slider,blue_slider,0,working_palette);
 
           // Affichage dans le block de visu de la couleur en cours
-          Window_rectangle(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,Main_palette[Fore_color]);
+          Window_rectangle(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,working_palette[Fore_color]);
           Update_window_area(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H);
 
           Palette_edit_select_range();
@@ -2554,7 +2454,7 @@ void Button_Palette(void)
             Num2str(Fore_color,str,3);
             Print_in_window(COLOR_X,COLOR_Y,str,MC_Black,MC_Light);
             // Affichage dans le block de visu de la couleur en cours
-            Window_rectangle(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,Main_palette[Fore_color]);
+            Window_rectangle(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,working_palette[Fore_color]);
             Update_window_area(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H);
             Display_cursor();
           }
@@ -2576,7 +2476,7 @@ void Button_Palette(void)
             Num2str(Fore_color,str,3);
             Print_in_window(COLOR_X,COLOR_Y,str,MC_Black,MC_Light);
             // Affichage dans le block de visu de la couleur en cours
-            Window_rectangle(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,Main_palette[Fore_color]);
+            Window_rectangle(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,working_palette[Fore_color]);
             Update_window_area(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H);
             Display_cursor();
           }
@@ -2586,10 +2486,10 @@ void Button_Palette(void)
         {
           Back_color--;
           Hide_cursor();
-          Window_rectangle(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_Y-BGCOLOR_DISPLAY_Y,Main_palette[Back_color]);
-          Window_rectangle(BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y+FGCOLOR_DISPLAY_H,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_Y+BGCOLOR_DISPLAY_H-FGCOLOR_DISPLAY_Y-FGCOLOR_DISPLAY_H,Main_palette[Back_color]);
-          Window_rectangle(BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_X-BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_H,Main_palette[Back_color]);
-          Window_rectangle(FGCOLOR_DISPLAY_X+FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_X+BGCOLOR_DISPLAY_W-FGCOLOR_DISPLAY_X-FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,Main_palette[Back_color]);
+          Window_rectangle(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_Y-BGCOLOR_DISPLAY_Y,working_palette[Back_color]);
+          Window_rectangle(BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y+FGCOLOR_DISPLAY_H,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_Y+BGCOLOR_DISPLAY_H-FGCOLOR_DISPLAY_Y-FGCOLOR_DISPLAY_H,working_palette[Back_color]);
+          Window_rectangle(BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_X-BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_H,working_palette[Back_color]);
+          Window_rectangle(FGCOLOR_DISPLAY_X+FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_X+BGCOLOR_DISPLAY_W-FGCOLOR_DISPLAY_X-FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,working_palette[Back_color]);
           Update_window_area(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_H);
           Display_cursor();
           Key=0;
@@ -2598,39 +2498,12 @@ void Button_Palette(void)
         {
           Back_color++;
           Hide_cursor();
-          Window_rectangle(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_Y-BGCOLOR_DISPLAY_Y,Main_palette[Back_color]);
-          Window_rectangle(BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y+FGCOLOR_DISPLAY_H,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_Y+BGCOLOR_DISPLAY_H-FGCOLOR_DISPLAY_Y-FGCOLOR_DISPLAY_H,Main_palette[Back_color]);
-          Window_rectangle(BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_X-BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_H,Main_palette[Back_color]);
-          Window_rectangle(FGCOLOR_DISPLAY_X+FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_X+BGCOLOR_DISPLAY_W-FGCOLOR_DISPLAY_X-FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,Main_palette[Back_color]);
+          Window_rectangle(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_Y-BGCOLOR_DISPLAY_Y,working_palette[Back_color]);
+          Window_rectangle(BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y+FGCOLOR_DISPLAY_H,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_Y+BGCOLOR_DISPLAY_H-FGCOLOR_DISPLAY_Y-FGCOLOR_DISPLAY_H,working_palette[Back_color]);
+          Window_rectangle(BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_X-BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_H,working_palette[Back_color]);
+          Window_rectangle(FGCOLOR_DISPLAY_X+FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_X+BGCOLOR_DISPLAY_W-FGCOLOR_DISPLAY_X-FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,working_palette[Back_color]);
           Update_window_area(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_H);
           Display_cursor();
-          Key=0;
-        }
-        else if (Key == K2K(SDLK_BACKSPACE))
-        // Remise des couleurs du menu à l'état normal en essayant
-        // de ne pas trop modifier l'image.
-        {
-          if (!image_is_backed_up)
-          {
-            Backup_layers(LAYER_ALL);
-            image_is_backed_up=1;
-          }
-          if (used_colors==-1)
-            Update_color_count(&used_colors, color_usage);
-
-          Palette_edit_step();
-          memcpy(temp_palette,Main_palette,sizeof(T_Palette));
-          memcpy(Main_palette,working_palette,sizeof(T_Palette));
-          Set_nice_menu_colors(color_usage,0);
-          memcpy(working_palette,Main_palette,sizeof(T_Palette));
-          memcpy(Main_palette,temp_palette,sizeof(T_Palette));
-          Set_palette(working_palette);
-          memcpy(temp_palette,working_palette,sizeof(T_Palette));
-          Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
-          Update_color_count(&used_colors,color_usage);
-          // End_of_modification();
-          // Not really needed, the change was in palette entries
-          need_to_remap=1;
           Key=0;
         }
         else if (Is_shortcut(Key,0x100+BUTTON_COLORPICKER))
@@ -2646,10 +2519,10 @@ void Button_Palette(void)
               {
                 Back_color=color;
                 // 4 blocks de back_color entourant la fore_color
-                Window_rectangle(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_Y-BGCOLOR_DISPLAY_Y,Main_palette[Back_color]);
-                Window_rectangle(BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y+FGCOLOR_DISPLAY_H,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_Y+BGCOLOR_DISPLAY_H-FGCOLOR_DISPLAY_Y-FGCOLOR_DISPLAY_H,Main_palette[Back_color]);
-                Window_rectangle(BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_X-BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_H,Main_palette[Back_color]);
-                Window_rectangle(FGCOLOR_DISPLAY_X+FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_X+BGCOLOR_DISPLAY_W-FGCOLOR_DISPLAY_X-FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,Main_palette[Back_color]);
+                Window_rectangle(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_Y-BGCOLOR_DISPLAY_Y,working_palette[Back_color]);
+                Window_rectangle(BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y+FGCOLOR_DISPLAY_H,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_Y+BGCOLOR_DISPLAY_H-FGCOLOR_DISPLAY_Y-FGCOLOR_DISPLAY_H,working_palette[Back_color]);
+                Window_rectangle(BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_X-BGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_H,working_palette[Back_color]);
+                Window_rectangle(FGCOLOR_DISPLAY_X+FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_X+BGCOLOR_DISPLAY_W-FGCOLOR_DISPLAY_X-FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,working_palette[Back_color]);
                 Update_window_area(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_H);
               }
             }
@@ -2668,7 +2541,7 @@ void Button_Palette(void)
               Display_sliders(red_slider,green_slider,blue_slider,0,working_palette);
 
               // Affichage dans le block de visu de la couleur en cours
-              Window_rectangle(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,Main_palette[Fore_color]);
+              Window_rectangle(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,working_palette[Fore_color]);
               Update_window_area(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H);
 
               Palette_edit_select_range();
@@ -2723,7 +2596,7 @@ void Button_Palette(void)
         Window_draw_palette_bouton(5,79);
         if (show_used_colors)
           Tag_used_colors(1, color_usage);
-        Window_rectangle(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_H,Main_palette[Back_color]);
+        Window_rectangle(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_H,working_palette[Back_color]);
         Update_window_area(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_H);
 
         Display_grad_block_in_window(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,block_start,block_end);
@@ -2974,36 +2847,3 @@ int Get_clipboard_colors(T_Palette palette, byte start_color)
   memcpy(palette+start_color, Palette_clipboard, nb_colors*sizeof(T_Components));
   return nb_colors;
 }
-
-/// Get the favorite color to use for GUI's black,dark,light or white.
-const T_Components * Favorite_GUI_color(byte color_index)
-{
-  static const T_Components cpc_colors[4] = {
-    {  0,  0,  0},
-    {  0,  0,128}, // Dark blue
-    {128,128,128}, // Grey
-    {255,255,255}
-  };
-
-  if (RGB_scale==3)
-  {
-    // Check if ALL GUI colors are compatible with /rgb 3
-    int i;
-    for (i=0; i<4; i++)
-    {
-      T_Components col;
-      col=Gfx->Default_palette[Gfx->Color[i]];
-      if ((col.R!=255 && col.R!=128 && col.R!=0)
-        ||(col.G!=255 && col.G!=128 && col.G!=0)
-        ||(col.B!=255 && col.B!=128 && col.B!=0))
-        // Specialized colors for CPC palette
-        return &cpc_colors[color_index];
-    }
-    // Skin has suitable colors
-    return &(Gfx->Default_palette[Gfx->Color[color_index]]);
-  }
-  else
-    // Should be Config.Fav_menu_colors[index] if using user colors
-      return &(Gfx->Default_palette[Gfx->Color[color_index]]);
-}
-

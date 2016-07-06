@@ -953,7 +953,6 @@ void Button_Settings(void)
   {"Draw limits:",1,&(selected_config.Display_image_limits),0,1,0,Lookup_YesNo},
   {"Coordinates:",1,&(selected_config.Coords_rel),0,1,0,Lookup_Coords},
   {"Separate colors:",1,&(selected_config.Separate_colors),0,1,0,Lookup_YesNo},
-  {"Safety colors:",1,&(selected_config.Safety_colors),0,1,0,Lookup_YesNo},
   {"Sync views:",1,&(selected_config.Sync_views),0,1,0,Lookup_YesNo},
   {"",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},

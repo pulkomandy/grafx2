@@ -172,7 +172,7 @@ void Set_color(byte color, byte red, byte green, byte blue)
   comp.r=red;
   comp.g=green;
   comp.b=blue;
-  Screen_SDL->format->palette->colors[color] = comp;
+  SDL_SetPaletteColors(Screen_SDL->format->palette, &comp, color, 1);
 }
 
 void Wait_end_of_click(void)

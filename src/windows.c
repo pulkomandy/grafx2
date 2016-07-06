@@ -1344,7 +1344,7 @@ void Display_grad_block_in_window(word x_pos,word y_pos,word block_start,word bl
     // This is higher resolution than Pixel_in_window()
     Rectangle_on_texture(Window_texture, start_x, index, line_width, 1, rgb, 255, SDL_BLENDMODE_NONE);
   }
-  Update_rect(ToWinX(x_pos),ToWinY(y_pos),ToWinL(16),ToWinH(64));
+  //Update_rect(ToWinX(x_pos),ToWinY(y_pos),ToWinL(16),ToWinH(64));
 }
 
 // -------- Calcul des bornes de la partie d'image visible à l'écran ---------

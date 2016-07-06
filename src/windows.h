@@ -42,7 +42,7 @@
 #define ToWinY(y) (((y)*Menu_factor_Y)+Window_pos_Y)
 #define ToWinL(l) ((l)*Menu_factor_X)
 #define ToWinH(h) ((h)*Menu_factor_Y)
-#define Update_window_area(x,y,w,h) Update_rect(Window_pos_X+(x)*Menu_factor_X,Window_pos_Y+(y)*Menu_factor_Y,(w)*Menu_factor_X,(h)*Menu_factor_Y);
+#define Update_window_area(x,y,w,h)
 #endif
 
 void Display_cursor(void);

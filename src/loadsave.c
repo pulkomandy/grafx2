@@ -662,49 +662,6 @@ void Load_image(T_IO_Context *context)
     free(context->Buffer_image_24b);
     context->Buffer_image_24b = NULL;
   }
-  else if (context->Type == CONTEXT_MAIN_IMAGE)
-  {
-    // Non-24b main image: Add menu colors
-    if (Config.Safety_colors)
-    {
-      dword color_usage[256];
-      memset(color_usage,0,sizeof(color_usage));
-      if (Count_used_colors(color_usage)<252)
-      {
-        int gui_index;
-        // From white to black
-        for (gui_index=3; gui_index>=0; gui_index--)
-        {
-          int c;
-          T_Components gui_color;
-
-          gui_color=*Favorite_GUI_color(gui_index);
-          // Try find a very close match (ignore last 2 bits)
-          for (c=255; c>=0; c--)
-          {
-            if ((context->Palette[c].R|3) == (gui_color.R|3)
-             && (context->Palette[c].G|3) == (gui_color.G|3)
-             && (context->Palette[c].B|3) == (gui_color.B|3) )
-             break;
-          }
-          if (c<0) // Not found
-          {
-            // Find an unused slot at end of palette
-            for (c=255; c>=0; c--)
-            {
-              if (color_usage[c]==0)
-              {
-                context->Palette[c]=gui_color;
-                // Tag as a used color
-                color_usage[c]=1;
-                break;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
 
   if (context->Type == CONTEXT_MAIN_IMAGE)
   {
