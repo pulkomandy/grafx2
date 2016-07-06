@@ -329,13 +329,6 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
     return 1;
   if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_block, Menu_bars[MENUBAR_TOOLS].Skin_width, Menu_bars[MENUBAR_TOOLS].Height,"menu",0))
     return 1;
-
-  // Preview
-  cursor_x += Menu_bars[MENUBAR_TOOLS].Skin_width;
-  if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "preview"))
-    return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Preview, 173, 16, "preview", 0))
-    return 1;
   cursor_y+= Menu_bars[MENUBAR_TOOLS].Height;
 
   // Layerbar

@@ -500,9 +500,6 @@ typedef struct
   /// A default 256-color palette.
   T_Palette Default_palette;
 
-  /// Preview for displaying in the skin dialog
-  byte Preview[16][173];
-
   /// GUI color indices in skin palette: black, dark, light, white.
   byte Color[4];
   /// Transparent GUI color index in skin file
