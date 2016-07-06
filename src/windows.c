@@ -502,7 +502,7 @@ void Draw_bar_remainder(word current_menu, word x_off)
   for (y_pos=0;y_pos<Menu_bars[current_menu].Height;y_pos++)
     for (x_pos=x_off;x_pos<Screen_width/Menu_factor_X;x_pos++)
     {
-      byte c = Menu_bars[current_menu].Skin[0][y_pos * Menu_bars[current_menu].Skin_width + Menu_bars[current_menu].Skin_width - 2 + (x_pos&1)];
+      byte c = Menu_bars[current_menu].Skin[y_pos * Menu_bars[current_menu].Skin_width + Menu_bars[current_menu].Skin_width - 2 + (x_pos&1)];
       Rectangle_on_texture(Menu_bars[current_menu].Menu_texture,
         x_pos*Menu_factor_X, y_pos*Menu_factor_Y,
         Menu_factor_X,Menu_factor_Y,

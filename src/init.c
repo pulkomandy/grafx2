@@ -327,7 +327,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   // Menu
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "menu"))
     return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_block[0], Menu_bars[MENUBAR_TOOLS].Skin_width, Menu_bars[MENUBAR_TOOLS].Height,"menu",0))
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_block, Menu_bars[MENUBAR_TOOLS].Skin_width, Menu_bars[MENUBAR_TOOLS].Height,"menu",0))
     return 1;
 
   // Preview
@@ -341,49 +341,21 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   // Layerbar
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "layer bar"))
     return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layerbar_block[0], 144, 10,"layer bar",0))
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layerbar_block, 144, 10,"layer bar",0))
     return 1;
   cursor_y+= Menu_bars[MENUBAR_LAYERS].Height;
 
   // Animbar
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "anim bar"))
     return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Animbar_block[0], 236, 14,"anim bar",0))
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Animbar_block, 236, 14,"anim bar",0))
     return 1;
   cursor_y+= Menu_bars[MENUBAR_ANIMATION].Height;
 
   // Status bar
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "status bar"))
     return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Statusbar_block[0], Menu_bars[MENUBAR_STATUS].Skin_width, Menu_bars[MENUBAR_STATUS].Height,"status bar",0))
-    return 1;
-  cursor_y+= Menu_bars[MENUBAR_STATUS].Height;
-
-  // Menu (selected)
-  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "selected menu"))
-    return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Menu_block[1], Menu_bars[MENUBAR_TOOLS].Skin_width, Menu_bars[MENUBAR_TOOLS].Height,"selected menu",0))
-    return 1;
-  cursor_y+= Menu_bars[MENUBAR_TOOLS].Height;
-
-  // Layerbar (selected)
-  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "selected layer bar"))
-    return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Layerbar_block[1], 144, 10,"selected layer bar",0))
-    return 1;
-  cursor_y+= Menu_bars[MENUBAR_LAYERS].Height;
-
-  // Animbar (selected)
-  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "selected anim bar"))
-    return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Animbar_block[1], 236, 14,"selected anim bar",0))
-    return 1;
-  cursor_y+= Menu_bars[MENUBAR_ANIMATION].Height;
-
-  // Status bar (selected)
-  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "selected status bar"))
-    return 1;
-  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Statusbar_block[1], Menu_bars[MENUBAR_STATUS].Skin_width, Menu_bars[MENUBAR_STATUS].Height,"selected status bar",0))
+  if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Statusbar_block, Menu_bars[MENUBAR_STATUS].Skin_width, Menu_bars[MENUBAR_STATUS].Height,"status bar",0))
     return 1;
   cursor_y+= Menu_bars[MENUBAR_STATUS].Height;
 
@@ -2857,8 +2829,6 @@ void Init_brush_container(void)
 
 void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
 {
-  int i;
-
   // Free previous one
   Destroy_graphics(Gfx);
 
@@ -2885,13 +2855,11 @@ void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
   MC_Trans = gfx->Color_trans;
 
   // Set menubars to point to the new data
-  for (i=0; i<2; i++)
-  {
-    Menu_bars[MENUBAR_TOOLS ].Skin[i] = (byte*)&(gfx->Menu_block[i]);
-    Menu_bars[MENUBAR_LAYERS].Skin[i] = (byte*)&(gfx->Layerbar_block[i]);
-    Menu_bars[MENUBAR_ANIMATION].Skin[i] = (byte*)&(gfx->Animbar_block[i]);
-    Menu_bars[MENUBAR_STATUS].Skin[i] = (byte*)&(gfx->Statusbar_block[i]);
-  }
+  Menu_bars[MENUBAR_TOOLS ].Skin = (byte*)&(gfx->Menu_block);
+  Menu_bars[MENUBAR_LAYERS].Skin = (byte*)&(gfx->Layerbar_block);
+  Menu_bars[MENUBAR_ANIMATION].Skin = (byte*)&(gfx->Animbar_block);
+  Menu_bars[MENUBAR_STATUS].Skin = (byte*)&(gfx->Statusbar_block);
+
 }
 
 void Init_paintbrush(int index, int width, int height, byte shape, const char * bitmap)

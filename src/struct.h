@@ -170,7 +170,7 @@ typedef struct T_Fileselector_item
 
   struct T_Fileselector_item * Next;    ///< Pointer to next item of the current fileselector.
   struct T_Fileselector_item * Previous;///< Pointer to previous item of the current fileselector.
-  
+
   word  Length_short_name; ///< Number of bytes allocated for :Short_name
   #if __GNUC__ < 3
   char Short_name[0]; ///< Name to display.
@@ -205,7 +205,7 @@ typedef struct T_List_button
 
   T_Special_button  * Entry_button; ///< Pointer to the associated selection control.
   T_Scroller_button * Scroller;     ///< Pointer to the associated scroller
-  
+
   Func_draw_list_item   Draw_list_item; ///< Function to call for each item to draw its line
   byte                  Color_index;    ///< Background color: From 0->MC_Black to 3->MC_White
 
@@ -280,7 +280,7 @@ typedef struct
 {
   byte State; ///< How good is the mode supported. 0:Good (white) 1:OK (light) 2:So-so (dark) 4:User-disabled (black); +128 => System doesn't support it at all.
   word Width; ///< Videomode width in pixels.
-  word Height;///< Videomode height in pixels. 
+  word Height;///< Videomode height in pixels.
 } T_Config_video_mode;
 
 /// Header for gfx2.cfg
@@ -437,7 +437,7 @@ typedef struct
 typedef struct
 {
   byte Paintbrush_shape; ///< Kind of brush
-  byte Thumbnail[BRUSH_CONTAINER_PREVIEW_WIDTH][BRUSH_CONTAINER_PREVIEW_HEIGHT]; 
+  byte Thumbnail[BRUSH_CONTAINER_PREVIEW_WIDTH][BRUSH_CONTAINER_PREVIEW_HEIGHT];
   // Data for color brush
   word Width;
   word Height;
@@ -459,17 +459,17 @@ typedef struct
   int Mouse_cursor_height[NB_CURSOR_SPRITES];
 
   // Sieve patterns
-  
+
   /// Preset sieve patterns, stored as binary (one word per line)
   word  Sieve_pattern[12][16];
-  
+
   // Menu and other graphics
-  
+
   /// Bitmap data for the menu, a single rectangle.
-  byte Menu_block[2][35][MENU_WIDTH];
-  byte Layerbar_block[2][10][144];
-  byte Animbar_block[2][14][236];
-  byte Statusbar_block[2][9][20];
+  byte Menu_block[35][MENU_WIDTH];
+  byte Layerbar_block[10][144];
+  byte Animbar_block[14][236];
+  byte Statusbar_block[9][20];
   /// Bitmap data for the icons that are displayed over the menu.
   SDL_Texture *Menu_sprite[2][NB_MENU_SPRITES];
   /// Bitmap data for the different "effects" icons.
@@ -512,7 +512,7 @@ typedef struct
 
 typedef struct {
   // Preset paintbrushes
-  
+
   /// Graphic resources for the preset paintbrushes.
   byte  Sprite[PAINTBRUSH_HEIGHT][PAINTBRUSH_WIDTH];
   /// Width of the preset paintbrushes.

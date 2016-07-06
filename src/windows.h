@@ -152,7 +152,7 @@ typedef struct {
   word Height;
   byte Visible;
   word Top; ///< Relative to the top line of the menu, hidden bars don't count.
-  byte* Skin[2]; ///< [0] has normal buttons, [1] has selected buttons, [2] is current.
+  byte* Skin;
   SDL_Texture *Menu_texture;
   word Skin_width;
   byte Last_button_index;
