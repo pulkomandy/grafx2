@@ -79,12 +79,12 @@ void Set_surface_palette(const SDL_Surface *surface, const SDL_Color *palette);
 
 SDL_Texture * Create_texture(SDL_Surface *source, int x, int y, int w, int h);
 SDL_Texture * Create_rendering_texture(int width, int height);
-void Rectangle_on_texture(SDL_Texture *texture, int x, int y, int w, int h, int r, int g, int b, int a, SDL_BlendMode blend_mode);
+void Rectangle_on_texture(SDL_Texture *texture, int x, int y, int w, int h, T_Components color, int a, SDL_BlendMode blend_mode);
 void Window_draw_texture(SDL_Texture *texture, int x, int y, int w, int h);
-void Window_print_char(short x_pos,short y_pos,const unsigned char c,byte text_color,byte background_color);
+void Window_print_char(short x_pos,short y_pos,const unsigned char c,T_Components text_color,T_Components background_color);
 // Display a brush in window, using the image's zoom level
 void Brush_in_window(byte * brush, word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,word brush_width);
-void Print_in_texture(SDL_Texture * texture, const char * str, short x, short y, byte text_color,byte background_color);
+void Print_in_texture(SDL_Texture * texture, const char * str, short x, short y, T_Components text_color,T_Components background_color);
 void Copy_texture(SDL_Texture * destination, SDL_Texture * source, short x_pos, short y_pos, short width, short height);
 
 /// Set application icon(s)

@@ -810,8 +810,9 @@ int Init_program(int argc,char * argv[])
   for (temp=0;temp<256;temp++)
     Brush_colormap[temp]=temp;
   Capture_brush(0,0,0,0,0);
-  *Brush=MC_White;
-  *Brush_original_pixels=MC_White;
+  // TODO : see if OK
+  *Brush=1;
+  *Brush_original_pixels=1;
 
   // Make sure the load dialog points to the right place when first shown.
   // Done after loading everything else, but before checking for emergency

@@ -38,10 +38,10 @@ void Layer_activate(int layer, short side)
 
   if (layer >= Main_backups->Pages->Nb_layers)
     return;
-  
+
   // Keep a copy of which layers were visible
   old_layers = Main_layers_visible;
-  
+
   if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
   {
     if (side == RIGHT_SIDE)
@@ -80,7 +80,7 @@ void Layer_activate(int layer, short side)
     {
       Main_current_layer = layer;
       Main_layers_visible = 1<<layer;
-      
+
       Update_screen_targets();
     }
   }
@@ -101,7 +101,7 @@ void Layer_activate(int layer, short side)
 void Button_Layer_add(void)
 {
   int max[] = {MAX_NB_LAYERS, MAX_NB_FRAMES, 5};
-  
+
   Hide_cursor();
 
   if (Main_backups->Pages->Nb_layers < max[Main_backups->Pages->Image_mode])
@@ -128,7 +128,7 @@ void Button_Layer_add(void)
 void Button_Layer_duplicate(void)
 {
   int max[] = {MAX_NB_LAYERS, MAX_NB_FRAMES, 5};
-  
+
   Hide_cursor();
 
   if (Main_backups->Pages->Nb_layers < max[Main_backups->Pages->Image_mode])
@@ -171,7 +171,7 @@ void Button_Layer_remove(void)
     {
       Update_screen_targets();
       Redraw_layered_image();
-      
+
       Display_all_screen();
       Display_layerbar();
       End_of_modification();
@@ -217,7 +217,7 @@ void Button_Layer_toggle(void)
     layer=0;
   else if (layer > Main_backups->Pages->Nb_layers-1)
     layer=Main_backups->Pages->Nb_layers-1;
-  
+
   Layer_activate(layer, RIGHT_SIDE);
   Mouse_K=0;
 }
@@ -227,7 +227,7 @@ static void Draw_transparent_color(byte color)
   char buf[4];
   Num2str(color, buf, 3);
   Print_in_window(63,39,buf,MC_Black,MC_Light);
-  Window_rectangle(90,39,13,7,color);
+  Window_rectangle(90,39,13,7,Main_palette[color]);
 }
 
 static void Draw_transparent_background(byte background)
@@ -252,20 +252,20 @@ void Button_Layer_menu(void)
   Print_in_window(11,38,"Color",MC_Black,MC_Light);
   Window_set_normal_button(54, 36, 56,13,"" , 0,1,KEY_NONE); // 1
   Draw_transparent_color(transparent_color);
-  
+
   Print_in_window(11,57,"Background",MC_Black,MC_Light);
   Window_set_normal_button(95, 54, 15,13,"" , 0,1,KEY_NONE); // 2
   Draw_transparent_background(transparent_background);
-  
+
   Window_set_normal_button( 7, 78, 51,14,"OK" , 0,1,K2K(SDLK_RETURN)); // 3
   Window_set_normal_button(63, 78, 51,14,"Cancel", 0,1,KEY_ESC); // 4
-  
+
   Update_window_area(0,0,Window_width, Window_height);
   Display_cursor();
-  
+
   do
   {
-    
+
     clicked_button=Window_clicked_button();
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       Window_help(BUTTON_LAYER_MENU, NULL);
@@ -282,7 +282,7 @@ void Button_Layer_menu(void)
           Wait_end_of_click();
         }
         break;
-        
+
       case 2: // background
         transparent_background = !transparent_background;
         Hide_cursor();
@@ -323,7 +323,7 @@ void Button_Layer_set_transparent(void)
   {
     Backup_layers(LAYER_ALL);
     Main_backups->Pages->Transparent_color = Back_color;
-    
+
     Redraw_layered_image();
     Display_all_screen();
     End_of_modification();
@@ -354,16 +354,16 @@ void Button_Layer_merge(void)
   {
     // Backup layer below the current
     Backup_layers(Main_current_layer-1);
-  
+
     Merge_layer();
-    
+
     Update_screen_targets();
     Redraw_layered_image();
     Display_all_screen();
     Display_layerbar();
     End_of_modification();
   }
-  
+
   Unselect_button(BUTTON_LAYER_MERGE);
   Display_cursor();
 }
@@ -376,15 +376,15 @@ void Button_Layer_up(void)
   {
     T_Image tmp;
     dword layer_flags;
-    
+
     // Backup with unchanged layers
     Backup_layers(LAYER_NONE);
-    
+
     // swap
     tmp = Main_backups->Pages->Image[Main_current_layer];
     Main_backups->Pages->Image[Main_current_layer] = Main_backups->Pages->Image[Main_current_layer+1];
     Main_backups->Pages->Image[Main_current_layer+1] = tmp;
-    
+
     // Swap visibility indicators
     layer_flags = (Main_layers_visible >> Main_current_layer) & 3;
     // Only needed if they are different.
@@ -395,14 +395,14 @@ void Button_Layer_up(void)
       Main_layers_visible ^= (3 << Main_current_layer);
     }
     Main_current_layer++;
-    
+
     Update_screen_targets();
     Redraw_layered_image();
     Display_all_screen();
     Display_layerbar();
     End_of_modification();
   }
-  
+
   Unselect_button(BUTTON_LAYER_UP);
   Unselect_button(BUTTON_ANIM_UP_FRAME);
   Display_cursor();
@@ -411,20 +411,20 @@ void Button_Layer_up(void)
 void Button_Layer_down(void)
 {
   Hide_cursor();
-  
+
   if (Main_current_layer > 0)
   {
     T_Image tmp;
     dword layer_flags;
-  
+
     // Backup with unchanged layers
     Backup_layers(LAYER_NONE);
-    
+
     // swap
     tmp = Main_backups->Pages->Image[Main_current_layer];
     Main_backups->Pages->Image[Main_current_layer] = Main_backups->Pages->Image[Main_current_layer-1];
     Main_backups->Pages->Image[Main_current_layer-1] = tmp;
-    
+
     // Swap visibility indicators
     layer_flags = (Main_layers_visible >> (Main_current_layer-1)) & 3;
     // Only needed if they are different.
@@ -442,7 +442,7 @@ void Button_Layer_down(void)
     Display_all_screen();
     End_of_modification();
   }
-  
+
   Unselect_button(BUTTON_LAYER_DOWN);
   Unselect_button(BUTTON_ANIM_DOWN_FRAME);
   Display_cursor();
@@ -465,7 +465,7 @@ void Button_Anim_time(void)
   char buffer[6+1];
   T_Special_button * input_duration_button;
   int duration=Main_backups->Pages->Image[Main_current_layer].Duration;
-  
+
   Open_window(166,110,"Animation speed");
 
   Print_in_window(88,20,"ms",MC_Black,MC_Light);
@@ -473,7 +473,7 @@ void Button_Anim_time(void)
 
   Num2str(duration,buffer,6);
   Print_in_window_limited(input_duration_button->Pos_X+2,input_duration_button->Pos_Y+2,buffer,input_duration_button->Width/8,MC_Black,MC_Light);
-  
+
   Print_in_window(24,37,"Set this frame",MC_Black,MC_Light);
   Window_set_normal_button(7, 34, 13,13,"X" , 0,1,KEY_NONE); // 2
 
@@ -485,13 +485,13 @@ void Button_Anim_time(void)
 
   Window_set_normal_button( 7, 92, 51,14,"OK" , 0,1,K2K(SDLK_RETURN)); // 5
   Window_set_normal_button(63, 92, 51,14,"Cancel", 0,1,KEY_ESC); // 6
-  
+
   Update_window_area(0,0,Window_width, Window_height);
   Display_cursor();
-  
+
   do
   {
-    
+
     clicked_button=Window_clicked_button();
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       Window_help(BUTTON_ANIM_TIME, NULL);
@@ -506,7 +506,7 @@ void Button_Anim_time(void)
         else
           sprintf(buffer,"%d", duration);
         Hide_cursor();
-        if (Readline(input_duration_button->Pos_X+2, 
+        if (Readline(input_duration_button->Pos_X+2,
           input_duration_button->Pos_Y+2,
           buffer,
           6,
@@ -620,7 +620,7 @@ void Button_Anim_last_frame(void)
 {
   if (Main_current_layer < (Main_backups->Pages->Nb_layers-1))
     Layer_activate((Main_backups->Pages->Nb_layers-1),LEFT_SIDE);
-    
+
   Hide_cursor();
   Unselect_button(BUTTON_ANIM_LAST_FRAME);
   Display_cursor();
@@ -632,14 +632,14 @@ void Button_Anim_continuous_next(void)
   int time_in_current_frame=0;
 
   time_start = SDL_GetTicks();
-  
+
   do
   {
     int target_frame;
     Uint32 time_now;
-  
+
     Get_input(20);
-    
+
     time_now=SDL_GetTicks();
     time_in_current_frame += time_now-time_start;
     time_start=time_now;
@@ -653,7 +653,7 @@ void Button_Anim_continuous_next(void)
     {
       Layer_activate(target_frame,LEFT_SIDE);
     }
-    
+
   } while (Mouse_K);
 
   Hide_cursor();
@@ -667,14 +667,14 @@ void Button_Anim_continuous_prev(void)
   int time_in_current_frame=0;
 
   time_start = SDL_GetTicks();
-  
+
   do
   {
     int target_frame;
     Uint32 time_now;
-  
+
     Get_input(20);
-    
+
     time_now=SDL_GetTicks();
     time_in_current_frame += time_now-time_start;
     time_start=time_now;
@@ -688,7 +688,7 @@ void Button_Anim_continuous_prev(void)
     {
       Layer_activate(target_frame,LEFT_SIDE);
     }
-    
+
   } while (Mouse_K);
 
   Hide_cursor();

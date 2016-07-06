@@ -58,8 +58,8 @@ void Clip_magnifier_offsets(short *x_offset, short *y_offset);
 void Compute_limits(void);
 void Compute_paintbrush_coordinates(void);
 
-void Pixel_in_menu(word bar, word x, word y, byte color);
-void Pixel_in_window(word x,word y,byte color);
+void Pixel_in_menu(word bar, word x, word y, T_Components color);
+void Pixel_in_window(word x,word y,T_Components color);
 void Set_fore_color(byte color);
 void Set_back_color(byte color);
 void Frame_menu_color(byte id);
@@ -72,12 +72,12 @@ int Pick_color_in_palette(void);
 word Palette_cells_X(void);
 word Palette_cells_Y(void);
 
-void Print_in_window(short x,short y,const char * str,byte text_color,byte background_color);
-void Print_in_window_limited(short x,short y,const char * str,byte size,byte text_color,byte background_color);
+void Print_in_window(short x,short y,const char * str,T_Components text_color,T_Components background_color);
+void Print_in_window_limited(short x,short y,const char * str,byte size,T_Components text_color,T_Components background_color);
 void Print_in_menu(const char * str, short position);
 void Print_coordinates(void);
 void Print_filename(void);
-void Print_counter(short x,short y,const char * str,byte text_color,byte background_color);
+void Print_counter(short x,short y,const char * str,T_Components text_color,T_Components background_color);
 
 byte Confirmation_box(char * message);
 void Warning_message(char * message);
@@ -86,11 +86,11 @@ int Requester_window(char* message, int initial_value);
 
 void Display_image_limits(void);
 void Display_all_screen(void);
-void Window_rectangle(word x_pos,word y_pos,word width,word height,byte color);
-void Window_rectangle_RGBA(word x_pos,word y_pos,word width,word height, byte r, byte g, byte b, byte a);
+void Window_rectangle(word x_pos,word y_pos,word width,word height,T_Components color);
+void Window_rectangle_alpha(word x_pos,word y_pos,word width,word height,T_Components color, byte alpha);
 void Window_display_frame_generic(word x_pos,word y_pos,word width,word height,
-                                    byte color_tl,byte color_br,byte color_s,byte color_tlc,byte color_brc);
-void Window_display_frame_mono(word x_pos,word y_pos,word width,word height,byte color);
+                                    T_Components color_tl,T_Components color_br,T_Components color_s,T_Components color_tlc,T_Components color_brc);
+void Window_display_frame_mono(word x_pos,word y_pos,word width,word height,T_Components color);
 void Window_display_frame_in(word x_pos,word y_pos,word width,word height);
 void Window_display_frame_out(word x_pos,word y_pos,word width,word height);
 void Window_display_frame(word x_pos,word y_pos,word width,word height);
@@ -99,7 +99,7 @@ void Display_sprite_in_menu(int btn_number,char sprite_number);
 void Display_paintbrush_in_menu(void);
 void Display_paintbrush_in_window(word x,word y,int number);
 
-void Draw_thingumajig(word x,word y, byte color, short direction);
+void Draw_thingumajig(word x,word y, T_Components color, short direction);
 void Display_grad_block_in_window(word x_pos,word y_pos,word block_start,word block_end);
 
 byte Best_color(byte red,byte green,byte blue);

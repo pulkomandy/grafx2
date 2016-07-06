@@ -1791,7 +1791,7 @@ void Button_Kill(void)
 
 void Check_mode_button(short x_pos, short y_pos, byte state)
 {
-  byte color;
+  T_Components color;
 
   switch (state & 0x7F)
   {
@@ -1811,7 +1811,7 @@ void Display_modes_list(short list_start, short cursor_position)
 {
   short index,current_mode;
   short y_pos;
-  byte  text_color,background_color;
+  T_Components  text_color,background_color;
   char str[29];
   char *ratio;
 
@@ -2462,6 +2462,11 @@ void Draw_gradient_preview()
   Update_window_area(start_x,start_y,width,height);
 }
 
+void Pixel_in_window_256(word x,word y,byte color)
+{
+  Pixel_in_window(x,y,Main_palette[color]);
+}
+
 void Button_Gradients(void)
 {
   short clicked_button;
@@ -2485,7 +2490,7 @@ void Button_Gradients(void)
   // Enable cycling while this window is open
   Cycling_mode=1;
 
-  Gradient_pixel=Pixel_in_window;
+  Gradient_pixel=Pixel_in_window_256;
   old_current_gradient=Current_gradient;
   changed_gradient_index=0;
   memcpy(&backup_gradients,Main_backups->Pages->Gradients,sizeof(T_Gradient_array));
@@ -5196,11 +5201,12 @@ void Display_stored_brush_in_window(word x_pos,word y_pos,int index)
     {
       for (x=0; x<Brush_container[index].Width && x<BRUSH_CONTAINER_PREVIEW_WIDTH; x++)
       {
-        byte color;
+        T_Components color;
         if (Brush_container[index].Paintbrush_shape <= PAINTBRUSH_SHAPE_MISC)
           color = Brush_container[index].Thumbnail[y][x]?MC_Black:MC_Light;
         else
-          color = Brush_container[index].Colormap[Brush_container[index].Thumbnail[y][x]];
+          //color = Brush_container[index].Colormap[Brush_container[index].Thumbnail[y][x]];
+          color = Brush_container[index].Palette[Brush_container[index].Thumbnail[y][x]];
         Pixel_in_window(x_pos+x+offset_x,y_pos+y+offset_y,color);
       }
     }

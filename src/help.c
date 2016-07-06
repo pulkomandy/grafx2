@@ -88,7 +88,7 @@ const char * Keyboard_shortcut_value(word shortcut_number)
       return Key_name(pointer[0]);
     if (pointer[0] == 0 && pointer[1] != 0)
       return Key_name(pointer[1]);
-      
+
     strcpy(shortcuts_name, Key_name(pointer[0]));
     strcat(shortcuts_name, " or ");
     strcat(shortcuts_name, Key_name(pointer[1]));
@@ -110,7 +110,7 @@ void Redefine_control(word *shortcut, int x_pos, int y_pos)
       *shortcut=Key;
       return;
     }
-  }    
+  }
 }
 
 void Window_set_shortcut(int action_id)
@@ -121,7 +121,7 @@ void Window_set_shortcut(int action_id)
   short redraw_controls=1;
   word * shortcut_ptr=NULL;
   word backup_shortcut[2];
-  
+
   shortcut_ptr=Shortcut(action_id);
 
   backup_shortcut[0]=shortcut_ptr[0];
@@ -151,7 +151,7 @@ void Window_set_shortcut(int action_id)
   }
   */
   config_index=order_index; // Comprends pas... ça devrait pas marcher
-  
+
   Open_window(302,131,"Keyboard shortcut");
   Window_set_normal_button(181,111,55,14,"Cancel",0,1,KEY_ESC); // 1
   Window_set_normal_button(241,111,55,14,"OK",0,1,K2K(SDLK_RETURN)); // 2
@@ -186,13 +186,13 @@ void Window_set_shortcut(int action_id)
       Print_in_window_limited(32,33,Key_name(shortcut_ptr[0]),21,MC_Black,MC_Light);
       Window_rectangle(32,52,21*8,8,MC_Light);
       Print_in_window_limited(32,52,Key_name(shortcut_ptr[1]),21,MC_Black,MC_Light);
-    
+
       Update_window_area(0,0,302,131);
-    
+
       Display_cursor();
       redraw_controls=0;
     }
-    
+
     clicked_button=Window_clicked_button();
 
     switch (clicked_button)
@@ -271,7 +271,7 @@ void Remove_duplicate_shortcuts(void)
   // The idea is that we, coders, append new shortcuts at the end with default
   // values; they take priority as they are new functions.
   for (action_1=NB_SHORTCUTS-1; action_1>0; action_1--)
-  { 
+  {
     int n;
     word *shortcut_1 = Shortcut(Ordering[action_1]);
     for (n=0; n<2; n++)
@@ -328,14 +328,14 @@ void Print_help(short x_pos, short y_pos, const char *line, char line_type, shor
       if (char_index & 1)
         texture = Gfx->Help_font_t4[(unsigned char)(line[char_index/2])-' '];
       else
-        texture = Gfx->Help_font_t3[(unsigned char)(line[char_index/2])-' '];        
+        texture = Gfx->Help_font_t3[(unsigned char)(line[char_index/2])-' '];
     }
     Window_draw_texture(texture, (x_pos+char_index*6), y_pos, 6, 8);
   }
   // Highlight link
   if (line_type=='K')
   {
-    Rectangle_on_texture(Window_texture, (x_pos+link_position*6)*Menu_factor_X, y_pos*Menu_factor_X, 6*link_size*Menu_factor_X, 8*Menu_factor_Y, 255, 255, 255, 64, SDL_BLENDMODE_ADD);
+    Rectangle_on_texture(Window_texture, (x_pos+link_position*6)*Menu_factor_X, y_pos*Menu_factor_X, 6*link_size*Menu_factor_X, 8*Menu_factor_Y, MC_White, 64, SDL_BLENDMODE_ADD);
   }
   return;
 }
@@ -352,17 +352,17 @@ void Display_help(void)
   char   line_type;           // N: Normale, T: Titre, S: Sous-titre
                               // -: Ligne inférieur de sous-titre
   const char * line;
-  char   buffer[45];          // buffer texte utilisé pour formater les noms de 
+  char   buffer[45];          // buffer texte utilisé pour formater les noms de
                               // raccourcis clavier
   short  link_position=0;     // Position du premier caractère "variable"
   short  link_size=0;       // Taille de la partie variable
-  
+
   Window_rectangle(x_pos,
            y_pos,
            (44)*6,
            16*8,
            MC_Black);
-  
+
   for (line_index=0;line_index<16;line_index++)
   {
     // Shortcut au cas ou la section fait moins de 16 lignes
@@ -404,7 +404,7 @@ void Display_help(void)
       }
       line = buffer;
     }
-    
+
     Print_help(x_pos, y_pos+(line_index<<3), line, line_type, link_position, link_size);
   }
   Update_window_area(x_pos,y_pos,44*6,16*8);
@@ -425,7 +425,7 @@ void Scroll_help(T_Scroller_button * scroller)
 void Button_Help(void)
 {
   short btn_number;
-  
+
   // Aide contextuelle
   if (Key!=0)
   {
@@ -637,7 +637,7 @@ void Button_Stats(void)
   unsigned long STRAM=0,TTRAM=0;
   char helpBuf[64]={0};
 #endif
-  
+
   Open_window(310,174,"Statistics");
 
   // Dessin de la fenetre ou va s'afficher le texte
@@ -659,7 +659,7 @@ void Button_Stats(void)
   y+=16;
   Print_in_window(10,y,"Free memory: ",STATS_TITLE_COLOR,MC_Black);
   y+=8;
-  
+
 #if defined (__MINT__)
   // Display free TT/ST RAM
   freeRam=0;
@@ -667,7 +667,7 @@ void Button_Stats(void)
   Atari_Memory_free(&STRAM,&TTRAM);
   freeRam=STRAM+TTRAM;
   buffer[0]='\0';
-  
+
   if(STRAM > (100*1024*1024))
         sprintf(helpBuf,"ST:%u Mb ",(unsigned int)(STRAM/(1024*1024)));
   else if(freeRam > 100*1024)
@@ -676,7 +676,7 @@ void Button_Stats(void)
         sprintf(helpBuf,"ST:%u b ",(unsigned int)STRAM);
 
   strncat(buffer,helpBuf,sizeof(char)*37);
-  
+
   if(TTRAM > (100ULL*1024*1024*1024))
         sprintf(helpBuf,"TT:%u Gb",(unsigned int)(TTRAM/(1024*1024*1024)));
   else if(TTRAM > (100*1024*1024))
@@ -696,15 +696,15 @@ void Button_Stats(void)
         sprintf(helpBuf,"(%u Kb)",(unsigned int)(freeRam/1024));
   else
         sprintf(helpBuf,"(%u b)",(unsigned int)freeRam);
-   
+
    strncat(buffer,helpBuf,sizeof(char)*37);
- 
+
    Print_in_window(18,y,buffer,STATS_DATA_COLOR,MC_Black);
 
 #else
   // Display free RAM (generic)
   freeRam = Memory_free();
-  
+
   if(freeRam > (100ULL*1024*1024*1024))
         sprintf(buffer,"%u Gigabytes",(unsigned int)(freeRam/(1024*1024*1024)));
   else if(freeRam > (100*1024*1024))
@@ -713,11 +713,11 @@ void Button_Stats(void)
         sprintf(buffer,"%u Kilobytes",(unsigned int)(freeRam/1024));
   else
         sprintf(buffer,"%u bytes",(unsigned int)freeRam);
-  
+
   Print_in_window(114,y,buffer,STATS_DATA_COLOR,MC_Black);
 
   #endif
-  
+
   y+=8;
   // Used memory
   Print_in_window(10,y,"Used memory pages: ",STATS_TITLE_COLOR,MC_Black);
@@ -728,7 +728,7 @@ void Button_Stats(void)
   else
         sprintf(buffer,"%ld (%ld Kb)",Stats_pages_number, (long)(Stats_pages_memory/1024));
   Print_in_window(162,y,buffer,STATS_DATA_COLOR,MC_Black);
-  
+
   y+=8;
 #if defined(__WIN32__)
     {
@@ -780,7 +780,7 @@ void Button_Stats(void)
         sprintf(buffer,"%u Megabytes",(unsigned int)(mem_size/(1024*1024)));
     else if(mem_size > (100*1024))
         sprintf(buffer,"%u Kilobytes",(unsigned int)(mem_size/1024));
-    else 
+    else
         sprintf(buffer,"%u bytes",(unsigned int)mem_size);
 #if defined(__AROS__)
     Print_in_window(192,y,buffer,STATS_DATA_COLOR,MC_Black);
@@ -793,30 +793,30 @@ void Button_Stats(void)
 	#endif
 	#undef NODISKSPACESUPPORT
   }
-  
+
   y+=16;
   // Affichage des informations sur l'image
   Print_in_window(10,y,"Picture info.:",STATS_TITLE_COLOR,MC_Black);
   y+=8;
-  
+
   // Affichage des dimensions de l'image
   Print_in_window(18,y,"Dimensions :",STATS_TITLE_COLOR,MC_Black);
   sprintf(buffer,"%dx%d",Main_image_width,Main_image_height);
   Print_in_window(122,y,buffer,STATS_DATA_COLOR,MC_Black);
   y+=8;
-  
+
   // Affichage du nombre de couleur utilisé
   Print_in_window(18,y,"Colors used:",STATS_TITLE_COLOR,MC_Black);
   memset(color_usage,0,sizeof(color_usage));
   sprintf(buffer,"%d",Count_used_colors(color_usage));
   Print_in_window(122,y,buffer,STATS_DATA_COLOR,MC_Black);
   y+=16;
-  
+
   // Affichage des dimensions de l'écran
   Print_in_window(10,y,"Resolution:",STATS_TITLE_COLOR,MC_Black);
   sprintf(buffer,"%dx%d",Screen_width,Screen_height);
   Print_in_window(106,y,buffer,STATS_DATA_COLOR,MC_Black);
-  
+
   Update_window_area(0,0,310,174);
 
   Display_cursor();

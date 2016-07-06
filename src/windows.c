@@ -44,10 +44,10 @@
 
 T_Toolbar_button Buttons_Pool[NB_BUTTONS];
 T_Menu_Bar Menu_bars[MENUBAR_COUNT] =
-  {{MENU_WIDTH, 9, 1, 45, {NULL,NULL}, NULL, 20,  BUTTON_HIDE }, // Status
-  {MENU_WIDTH, 14, 1, 35, {NULL,NULL}, NULL, 236, BUTTON_ANIM_PLAY }, // Animation
-  {MENU_WIDTH, 10, 1, 35, {NULL,NULL}, NULL, 144, BUTTON_LAYER_SELECT }, // Layers
-  {MENU_WIDTH, 35, 1,  0, {NULL,NULL}, NULL, 254, NB_BUTTONS }} // Main
+  {{MENU_WIDTH, 9, 1, 45, NULL, NULL, 20,  BUTTON_HIDE }, // Status
+  {MENU_WIDTH, 14, 1, 35, NULL, NULL, 236, BUTTON_ANIM_PLAY }, // Animation
+  {MENU_WIDTH, 10, 1, 35, NULL, NULL, 144, BUTTON_LAYER_SELECT }, // Layers
+  {MENU_WIDTH, 35, 1,  0, NULL, NULL, 254, NB_BUTTONS }} // Main
   ;
 
 
@@ -69,18 +69,18 @@ word Palette_cells_Y()
 }
 
 // Affichage d'un pixel dans le menu et met a jour la bitmap de skin
-void Pixel_in_menu(word bar, word x, word y, byte color)
+void Pixel_in_menu(word bar, word x, word y, T_Components color)
 {
   //Menu_bars[bar].Skin[2][y*Menu_bars[bar].Skin_width + x] = color;
-  Rectangle_on_texture(Menu_bars[bar].Menu_texture, (x*Menu_factor_X), (y*Menu_factor_Y), Menu_factor_X, Menu_factor_Y, Screen_SDL->format->palette->colors[color].r, Screen_SDL->format->palette->colors[color].g, Screen_SDL->format->palette->colors[color].b, 255, SDL_BLENDMODE_NONE);
+  Rectangle_on_texture(Menu_bars[bar].Menu_texture, (x*Menu_factor_X), (y*Menu_factor_Y), Menu_factor_X, Menu_factor_Y, color, 255, SDL_BLENDMODE_NONE);
 
 }
 
 // Affichage d'un pixel dans la fenêtre (la fenêtre doit être visible)
-void Pixel_in_window(word x,word y,byte color)
+void Pixel_in_window(word x,word y,T_Components color)
 {
 #ifndef MULTI_WINDOW
-  Rectangle_on_texture(Window_texture, (x*Menu_factor_X), (y*Menu_factor_Y), Menu_factor_X, Menu_factor_Y, Screen_SDL->format->palette->colors[color].r, Screen_SDL->format->palette->colors[color].g, Screen_SDL->format->palette->colors[color].b, 255, SDL_BLENDMODE_NONE);
+  Rectangle_on_texture(Window_texture, (x*Menu_factor_X), (y*Menu_factor_Y), Menu_factor_X, Menu_factor_Y, color, 255, SDL_BLENDMODE_NONE);
 #else
   SDL_Surface* surf = SDL_GetWindowSurface(Window_handle);
   SDL_Rect r = {x*Menu_factor_X, y*Menu_factor_Y, 1*Menu_factor_X, 1*Menu_factor_Y};
@@ -90,10 +90,10 @@ void Pixel_in_window(word x,word y,byte color)
 }
 
 // Affichage d'un rectangle dans la fenêtre (la fenêtre doit être visible)
-void Window_rectangle(word x_pos,word y_pos,word width,word height,byte color)
+void Window_rectangle(word x_pos,word y_pos,word width,word height,T_Components color)
 {
 #ifndef MULTI_WINDOW
-  Rectangle_on_texture(Window_texture, (x_pos*Menu_factor_X), (y_pos*Menu_factor_Y), width*Menu_factor_X, height*Menu_factor_Y, Screen_SDL->format->palette->colors[color].r, Screen_SDL->format->palette->colors[color].g, Screen_SDL->format->palette->colors[color].b, 255, SDL_BLENDMODE_NONE);
+  Rectangle_on_texture(Window_texture, (x_pos*Menu_factor_X), (y_pos*Menu_factor_Y), width*Menu_factor_X, height*Menu_factor_Y, color, 255, SDL_BLENDMODE_NONE);
 #else
   SDL_Surface* surf = SDL_GetWindowSurface(Window_handle);
   SDL_Rect r = {x_pos*Menu_factor_X, y_pos*Menu_factor_Y, width*Menu_factor_X, height*Menu_factor_Y};
@@ -103,17 +103,25 @@ void Window_rectangle(word x_pos,word y_pos,word width,word height,byte color)
 }
 
 // Affichage d'un rectangle dans la fenêtre (la fenêtre doit être visible)
-void Window_rectangle_RGBA(word x_pos,word y_pos,word width,word height, byte r, byte g, byte b, byte a)
+void Window_rectangle_alpha(word x_pos,word y_pos,word width,word height,T_Components color, byte alpha)
 {
-  Rectangle_on_texture(Window_texture, (x_pos*Menu_factor_X), (y_pos*Menu_factor_Y), width*Menu_factor_X, height*Menu_factor_Y, r, g, b, a, SDL_BLENDMODE_NONE);
+#ifndef MULTI_WINDOW
+  Rectangle_on_texture(Window_texture, (x_pos*Menu_factor_X), (y_pos*Menu_factor_Y), width*Menu_factor_X, height*Menu_factor_Y, color, alpha, SDL_BLENDMODE_NONE);
+#else
+  SDL_Surface* surf = SDL_GetWindowSurface(Window_handle);
+  SDL_Rect r = {x_pos*Menu_factor_X, y_pos*Menu_factor_Y, width*Menu_factor_X, height*Menu_factor_Y};
+  T_Components c = Main_palette[color];
+  SDL_FillRect(surf, &r, SDL_MapRGB(surf->format, c.R, c.G, c.B));
+#endif
 }
+
 
 // -- Affichages de différents cadres dans une fenêtre -----------------------
 
   // -- Frame général avec couleurs paramètrables --
 
 void Window_display_frame_generic(word x_pos,word y_pos,word width,word height,
-                                    byte color_tl,byte color_br,byte color_s,byte color_tlc,byte color_brc)
+                                    T_Components color_tl,T_Components color_br,T_Components color_s,T_Components color_tlc,T_Components color_brc)
 // Paramètres de couleurs:
 // color_tl =Bords Haut et Gauche
 // color_br =Bords Bas et Droite
@@ -145,7 +153,7 @@ void Window_display_frame_generic(word x_pos,word y_pos,word width,word height,
 
   // -- Frame dont tout le contour est d'une seule couleur --
 
-void Window_display_frame_mono(word x_pos,word y_pos,word width,word height,byte color)
+void Window_display_frame_mono(word x_pos,word y_pos,word width,word height,T_Components color)
 {
   Window_display_frame_generic(x_pos,y_pos,width,height,color,color,color,color,color);
 }
@@ -181,11 +189,11 @@ void Display_foreback(void)
   Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
     (MENU_WIDTH-17)*Menu_factor_X, Menu_factor_Y,
     Menu_factor_X<<4,Menu_factor_Y*7,
-    Main_palette[Back_color].R, Main_palette[Back_color].G, Main_palette[Back_color].B, 255, SDL_BLENDMODE_NONE);
+    Main_palette[Back_color], 255, SDL_BLENDMODE_NONE);
   Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
     (MENU_WIDTH-13)*Menu_factor_X, 2*Menu_factor_Y,
     Menu_factor_X<<3,Menu_factor_Y*5,
-    Main_palette[Fore_color].R, Main_palette[Fore_color].G, Main_palette[Fore_color].B, 255, SDL_BLENDMODE_NONE);
+    Main_palette[Fore_color], 255, SDL_BLENDMODE_NONE);
 }
 
 /*! Get the top left corner for the palette cell of a color
@@ -248,7 +256,7 @@ void Frame_menu_color(byte id)
   word start_x,start_y,end_x,end_y;
   word index;
   word cell_height=Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y;
-  byte color;
+  T_Components color;
 
   //if (! Menu_bars[MENUBAR_TOOLS].Visible)
   //  return;
@@ -275,19 +283,19 @@ void Frame_menu_color(byte id)
       // Top
       Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
         start_x,start_y,(Menu_palette_cell_width)*Menu_factor_X+1,1,
-        Main_palette[color].R, Main_palette[color].G, Main_palette[color].B, 255, SDL_BLENDMODE_NONE);
+        color, 255, SDL_BLENDMODE_NONE);
       // Bottom
       Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
         start_x,start_y+cell_height*Menu_factor_Y,(Menu_palette_cell_width)*Menu_factor_X+1,1,
-        Main_palette[color].R, Main_palette[color].G, Main_palette[color].B, 255, SDL_BLENDMODE_NONE);
+        color, 255, SDL_BLENDMODE_NONE);
       // Left
       Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
         start_x,start_y+1,1,(cell_height)* Menu_factor_Y,
-        Main_palette[color].R, Main_palette[color].G, Main_palette[color].B, 255, SDL_BLENDMODE_NONE);
+        color, 255, SDL_BLENDMODE_NONE);
       //Right
       Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
         start_x+(Menu_palette_cell_width*Menu_factor_X),start_y+1,1,(cell_height)* Menu_factor_Y,
-        Main_palette[color].R, Main_palette[color].G, Main_palette[color].B, 255, SDL_BLENDMODE_NONE);
+        color, 255, SDL_BLENDMODE_NONE);
     }
     else
     {
@@ -295,12 +303,12 @@ void Frame_menu_color(byte id)
       start_x=Palette_cell_X(id);
       start_y=Palette_cell_Y(id);
 
-      if (color==MC_Black)
+      if (id!=Fore_color && id!=Back_color)
       {
         // Color is not selected, no dotted lines
         Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
           start_x,start_y,Menu_palette_cell_width*Menu_factor_X,cell_height*Menu_factor_Y,
-          Main_palette[id].R, Main_palette[id].G, Main_palette[id].B, 255, SDL_BLENDMODE_NONE);
+          Main_palette[id], 255, SDL_BLENDMODE_NONE);
       }
       else
       {
@@ -314,25 +322,25 @@ void Frame_menu_color(byte id)
           Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
             start_x+index*Menu_factor_X,start_y,
             Menu_factor_X,Menu_factor_Y,
-            Main_palette[(index&1)?color:MC_Black].R, Main_palette[(index&1)?color:MC_Black].G, Main_palette[(index&1)?color:MC_Black].B, 255, SDL_BLENDMODE_NONE);
+            (index&1)?color:MC_Black, 255, SDL_BLENDMODE_NONE);
         // Left line
         for (index=1; index<end_y; index++)
           Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
             start_x,start_y+index*Menu_factor_Y,
             Menu_factor_X,Menu_factor_Y,
-            Main_palette[(index&1)?color:MC_Black].R, Main_palette[(index&1)?color:MC_Black].G, Main_palette[(index&1)?color:MC_Black].B, 255, SDL_BLENDMODE_NONE);
+            (index&1)?color:MC_Black, 255, SDL_BLENDMODE_NONE);
         // Right line
         for (index=1; index<end_y; index++)
           Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
             start_x+end_x*Menu_factor_X,start_y+index*Menu_factor_Y,
             Menu_factor_X,Menu_factor_Y,
-            Main_palette[((index+end_x)&1)?color:MC_Black].R, Main_palette[((index+end_x)&1)?color:MC_Black].G, Main_palette[((index+end_x)&1)?color:MC_Black].B, 255, SDL_BLENDMODE_NONE);
+            ((index+end_x)&1)?color:MC_Black, 255, SDL_BLENDMODE_NONE);
         // Bottom line
         for (index=0; index<=end_x; index++)
           Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
             start_x+index*Menu_factor_X,start_y+end_y*Menu_factor_Y,
             Menu_factor_X,Menu_factor_Y,
-            Main_palette[((index+end_y)&1)?color:MC_Black].R, Main_palette[((index+end_y)&1)?color:MC_Black].G, Main_palette[((index+end_y)&1)?color:MC_Black].B, 255, SDL_BLENDMODE_NONE);
+            ((index+end_y)&1)?color:MC_Black, 255, SDL_BLENDMODE_NONE);
       }
     }
   }
@@ -356,7 +364,7 @@ void Display_menu_palette(void)
     0,
     Screen_width-(Menu_bars[MENUBAR_TOOLS].Width*Menu_factor_X),
     (Menu_bars[MENUBAR_TOOLS].Height)*Menu_factor_Y,
-    Main_palette[MC_Black].R, Main_palette[MC_Black].G, Main_palette[MC_Black].B, 255, SDL_BLENDMODE_NONE);
+    MC_Black, 255, SDL_BLENDMODE_NONE);
 
 	if (Main_backups->Pages->Image_mode == 0
 		&& Main_backups->Pages->Nb_layers > 1)
@@ -377,17 +385,17 @@ void Display_menu_palette(void)
 		// Draw the color block
     Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
       Palette_cell_X(color), Palette_cell_Y(color), cw, ch,
-      Main_palette[color].R, Main_palette[color].G, Main_palette[color].B, 255, SDL_BLENDMODE_NONE);
+      Main_palette[color], 255, SDL_BLENDMODE_NONE);
 
 		// Make the transparent color more visible by adding a MC_Dark/MC_Light pattern to it.
 		if (color == transparent)
 		{
       Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
         Palette_cell_X(color), Palette_cell_Y(color), cw / 2, ch / 2,
-        Main_palette[MC_Light].R, Main_palette[MC_Light].G, Main_palette[MC_Light].B, 255, SDL_BLENDMODE_NONE);
+        MC_Light, 255, SDL_BLENDMODE_NONE);
       Rectangle_on_texture(Menu_bars[MENUBAR_TOOLS].Menu_texture,
         Palette_cell_X(color) + cw / 2, Palette_cell_Y(color) + ch / 2, (cw+1) / 2, (ch+1) / 2,
-        Main_palette[MC_Dark].R, Main_palette[MC_Dark].G, Main_palette[MC_Dark].B, 255, SDL_BLENDMODE_NONE);
+        MC_Dark, 255, SDL_BLENDMODE_NONE);
 		}
 	}
 
@@ -506,7 +514,7 @@ void Draw_bar_remainder(word current_menu, word x_off)
       Rectangle_on_texture(Menu_bars[current_menu].Menu_texture,
         x_pos*Menu_factor_X, y_pos*Menu_factor_Y,
         Menu_factor_X,Menu_factor_Y,
-        Main_palette[c].R, Main_palette[c].G, Main_palette[c].B, 255, SDL_BLENDMODE_NONE);
+        Main_palette[c], 255, SDL_BLENDMODE_NONE);
     }
 }
 
@@ -571,7 +579,7 @@ void Display_layerbar(void)
 
           for (;i>0; i--)
           {
-            Pixel_in_menu(MENUBAR_LAYERS, x_pos + x_off, y_pos, Gfx->Layer_sprite[sprite_index][current_button][y_pos][source_x]);
+            Pixel_in_menu(MENUBAR_LAYERS, x_pos + x_off, y_pos, Gfx->Default_palette[Gfx->Layer_sprite[sprite_index][current_button][y_pos][source_x]]);
             x_pos++;
           }
         }
@@ -636,10 +644,7 @@ void Display_menu(void)
       //byte r = (current_menu+2)*10;
       //byte g = (current_menu+2)*30;
       //byte b = (current_menu+2)*50;
-      byte r = Main_palette[MC_Light].R;
-      byte g = Main_palette[MC_Light].G;
-      byte b = Main_palette[MC_Light].B;
-      Rectangle_on_texture(Menu_bars[current_menu].Menu_texture, 0, 0, Screen_width, Menu_bars[current_menu].Height*Menu_factor_Y, r, g, b, 255, SDL_BLENDMODE_NONE);
+      Rectangle_on_texture(Menu_bars[current_menu].Menu_texture, 0, 0, Screen_width, Menu_bars[current_menu].Height*Menu_factor_Y, MC_Light, 255, SDL_BLENDMODE_NONE);
     }
   }
   // Redraw entire menus to textures
@@ -716,7 +721,7 @@ void Display_menu(void)
 // -- Affichage de texte -----------------------------------------------------
 
 ///Draws a char in a window, checking for bounds
-void Print_in_window_limited(short x,short y,const char * str,byte size,byte text_color,byte background_color)
+void Print_in_window_limited(short x,short y,const char * str,byte size,T_Components text_color,T_Components background_color)
 {
   char display_string[256];
   strncpy(display_string, str, size);
@@ -730,7 +735,7 @@ void Print_in_window_limited(short x,short y,const char * str,byte size,byte tex
 }
 
 /// Draws a string in a window
-void Print_in_window(short x,short y,const char * str,byte text_color,byte background_color)
+void Print_in_window(short x,short y,const char * str,T_Components text_color,T_Components background_color)
 {
   int index;
 
@@ -772,7 +777,7 @@ void Print_coordinates(void)
       Num2str(Colorpicker_color,temp,3);
       Print_in_menu(temp,20);
       // Single square of picked color
-      Rectangle_on_texture(Menu_bars[MENUBAR_STATUS].Menu_texture, 170*Menu_factor_X, Menu_factor_Y, Menu_factor_X<<3, Menu_factor_Y<<3, Main_palette[Colorpicker_color].R, Main_palette[Colorpicker_color].G, Main_palette[Colorpicker_color].B, 255, SDL_BLENDMODE_NONE);
+      Rectangle_on_texture(Menu_bars[MENUBAR_STATUS].Menu_texture, 170*Menu_factor_X, Menu_factor_Y, Menu_factor_X<<3, Menu_factor_Y<<3, Main_palette[Colorpicker_color], 255, SDL_BLENDMODE_NONE);
     }
 
     Num2str(Paintbrush_X,temp,4);
@@ -789,7 +794,6 @@ void Print_filename(void)
   word max_size;
   word string_size;
   char display_string[256];
-  SDL_Color light_color = Screen_SDL->format->palette->colors[MC_Light];
 
   // Determine maximum size, in characters
   max_size = 12 + (Screen_width / Menu_factor_X - 320) / 8;
@@ -809,7 +813,7 @@ void Print_filename(void)
   Rectangle_on_texture(Menu_bars[MENUBAR_STATUS].Menu_texture,
     Screen_width-max_size*8*Menu_factor_X, Menu_factor_Y,
     max_size*8*Menu_factor_X, 8*Menu_factor_Y,
-    light_color.r, light_color.g, light_color.b, 255, SDL_BLENDMODE_NONE);
+    MC_Light, 255, SDL_BLENDMODE_NONE);
   // Print
   Print_in_texture(Menu_bars[MENUBAR_STATUS].Menu_texture, display_string,
     Screen_width-max_size*8*Menu_factor_X, Menu_factor_Y, MC_Black, MC_Light);
@@ -817,7 +821,7 @@ void Print_filename(void)
 
 // Fonction d'affichage d'une chaine numérique avec une fonte très fine
 // Spécialisée pour les compteurs RGB
-void Print_counter(short x,short y,const char * str,byte text_color,byte background_color)
+void Print_counter(short x,short y,const char * str,T_Components text_color,T_Components background_color)
 {
   // Macros pour écrire des litteraux binaires.
   // Ex: Ob(11110000) == 0xF0
@@ -1005,7 +1009,7 @@ void Print_counter(short x,short y,const char * str,byte text_color,byte backgro
     {
       for (x_pos=0;x_pos<6;x_pos++)
       {
-        byte color = (thin_font[char_number][y_pos] & (1 << (6-x_pos))) ? text_color:background_color;
+        T_Components color = (thin_font[char_number][y_pos] & (1 << (6-x_pos))) ? text_color:background_color;
         Pixel_in_window(x+(index*6+x_pos),y+y_pos,color);
       }
     }
@@ -1287,7 +1291,7 @@ void Display_paintbrush_in_window(word x,word y,int number)
     for (window_x_pos=0,x_pos=0; x_pos<width; window_x_pos++,x_pos++)
       if (Paintbrush[number].Sprite[y_pos][x_pos])
         {
-          Rectangle_on_texture(Window_texture, origin_x+window_x_pos*x_size, origin_y+window_y_pos*y_size, x_size, y_size, 0, 0, 0, 255, SDL_BLENDMODE_NONE);
+          Rectangle_on_texture(Window_texture, origin_x+window_x_pos*x_size, origin_y+window_y_pos*y_size, x_size, y_size, MC_Black, 255, SDL_BLENDMODE_NONE);
         }
   // On n'utilise pas Pixel_in_window() car on ne dessine pas
   // forcément avec la même taille de pixel.
@@ -1295,7 +1299,7 @@ void Display_paintbrush_in_window(word x,word y,int number)
 
   // -- Dessiner des zigouigouis --
 
-void Draw_thingumajig(word x,word y, byte color, short direction)
+void Draw_thingumajig(word x,word y, T_Components color, short direction)
 {
   word i;
 
@@ -1332,9 +1336,13 @@ void Display_grad_block_in_window(word x_pos,word y_pos,word block_start,word bl
 
   for (index=start_y;index<end_y;index++,selected_line_mode++)
   {
+    T_Components rgb;
     SDL_Color color = Screen_SDL->format->palette->colors[block_start+(nb_colors*selected_line_mode)/total_lines];
+    rgb.R = color.r;
+    rgb.G = color.g;
+    rgb.B = color.b;
     // This is higher resolution than Pixel_in_window()
-    Rectangle_on_texture(Window_texture, start_x, index, line_width, 1, color.r, color.g, color.b, 255, SDL_BLENDMODE_NONE);
+    Rectangle_on_texture(Window_texture, start_x, index, line_width, 1, rgb, 255, SDL_BLENDMODE_NONE);
   }
   Update_rect(ToWinX(x_pos),ToWinY(y_pos),ToWinL(16),ToWinH(64));
 }
@@ -1493,8 +1501,9 @@ void Display_image_limits(void)
     old_zoom_limit=Limit_right_zoom;
     Limit_right_zoom=Limit_visible_right_zoom;
 
-    for (pos=start;pos<=end;pos++)
-      Pixel_preview(Main_image_width,pos,((pos+Main_image_height)&1)?MC_White:MC_Black);
+    // TODO : image limits
+    //for (pos=start;pos<=end;pos++)
+    //  Pixel_preview(Main_image_width,pos,((pos+Main_image_height)&1)?MC_White:MC_Black);
 
     Update_rect(Main_image_width,start,1,end-start + 1);
     // On restaure la bonne valeur des limites
@@ -1512,8 +1521,9 @@ void Display_image_limits(void)
     old_zoom_limit=Limit_bottom_zoom;
     Limit_bottom_zoom=Limit_visible_bottom_zoom;
 
-    for (pos=start;pos<=end;pos++)
-      Pixel_preview(pos,Main_image_height,((pos+Main_image_height)&1)?MC_White:MC_Black);
+    // TODO : image limits
+    //for (pos=start;pos<=end;pos++)
+    //  Pixel_preview(pos,Main_image_height,((pos+Main_image_height)&1)?MC_White:MC_Black);
 
     Update_rect(start,Main_image_height,end-start + 1,1);
 

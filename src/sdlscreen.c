@@ -720,13 +720,13 @@ SDL_Texture * Create_rendering_texture(int width, int height)
   return texture;
 }
 
-void Rectangle_on_texture(SDL_Texture *texture, int x, int y, int w, int h, int r, int g, int b, int a, SDL_BlendMode blend_mode)
+void Rectangle_on_texture(SDL_Texture *texture, int x, int y, int w, int h, T_Components color, int a, SDL_BlendMode blend_mode)
 {
   SDL_Rect rectangle = {x, y, w, h};
 
   SDL_SetRenderTarget(Renderer_SDL, texture);
   SDL_SetRenderDrawBlendMode(Renderer_SDL, blend_mode);
-  SDL_SetRenderDrawColor(Renderer_SDL, r, g, b, a);
+  SDL_SetRenderDrawColor(Renderer_SDL, color.R, color.G, color.B, a);
   SDL_RenderFillRect(Renderer_SDL, &rectangle);
 }
 
@@ -748,31 +748,31 @@ void Copy_texture(SDL_Texture * destination, SDL_Texture * source, short x_pos, 
 
 // TODO merge with Print_in_texture
 /// Draws a char in a window
-void Window_print_char(short x_pos,short y_pos,const unsigned char c,byte text_color,byte background_color)
+void Window_print_char(short x_pos,short y_pos,const unsigned char c,T_Components text_color,T_Components background_color)
 {
   SDL_Rect rectangle = {x_pos*Menu_factor_X, y_pos*Menu_factor_Y, 8*Menu_factor_X, 8*Menu_factor_Y};
   SDL_SetRenderTarget(Renderer_SDL, Window_texture);
   SDL_SetRenderDrawBlendMode(Renderer_SDL, SDL_BLENDMODE_NONE);
-  SDL_SetRenderDrawColor(Renderer_SDL, Main_palette[background_color].R, Main_palette[background_color].G, Main_palette[background_color].B, 255);
+  SDL_SetRenderDrawColor(Renderer_SDL, background_color.R, background_color.G, background_color.B, 255);
   SDL_RenderFillRect(Renderer_SDL, &rectangle);
-  SDL_SetTextureColorMod(Gfx->Font[c], Main_palette[text_color].R, Main_palette[text_color].G, Main_palette[text_color].B);
+  SDL_SetTextureColorMod(Gfx->Font[c], text_color.R, text_color.G, text_color.B);
   SDL_RenderCopy(Renderer_SDL, Gfx->Font[c], NULL, &rectangle);
 }
 
-void Print_in_texture(SDL_Texture * texture, const char * str, short x, short y, byte text_color,byte background_color)
+void Print_in_texture(SDL_Texture * texture, const char * str, short x, short y, T_Components text_color,T_Components background_color)
 {
   int i;
   SDL_Rect rectangle = {x, y, 8*Menu_factor_X*strlen(str), 8*Menu_factor_Y};
 
   SDL_SetRenderTarget(Renderer_SDL, texture);
   SDL_SetRenderDrawBlendMode(Renderer_SDL, SDL_BLENDMODE_NONE);
-  SDL_SetRenderDrawColor(Renderer_SDL, Main_palette[background_color].R, Main_palette[background_color].G, Main_palette[background_color].B, 255);
+  SDL_SetRenderDrawColor(Renderer_SDL, background_color.R, background_color.G, background_color.B, 255);
   SDL_RenderFillRect(Renderer_SDL, &rectangle);
   rectangle.w = 8*Menu_factor_X;
   rectangle.h = 8*Menu_factor_Y;
   for (i=0; str[i]; i++)
   {
-    SDL_SetTextureColorMod(Gfx->Font[(byte)str[i]], Main_palette[text_color].R, Main_palette[text_color].G, Main_palette[text_color].B);
+    SDL_SetTextureColorMod(Gfx->Font[(byte)str[i]], text_color.R, text_color.G, text_color.B);
     SDL_RenderCopy(Renderer_SDL, Gfx->Font[(byte)str[i]], NULL, &rectangle);
     rectangle.x += 8*Menu_factor_X;
   }

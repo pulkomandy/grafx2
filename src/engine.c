@@ -1285,11 +1285,10 @@ void Main_handler(void)
         if (button_index==-1)
         {
           // Clear status line
-          SDL_Color light_color = Screen_SDL->format->palette->colors[MC_Light];
           Rectangle_on_texture(Menu_bars[MENUBAR_STATUS].Menu_texture,
             18*Menu_factor_X, Menu_factor_Y,
             24*8*Menu_factor_X, 8*Menu_factor_Y,
-            light_color.r, light_color.g, light_color.b, 255, SDL_BLENDMODE_NONE);
+            MC_Light, 255, SDL_BLENDMODE_NONE);
         }
         else
         {
@@ -1328,11 +1327,10 @@ void Main_handler(void)
                 if ( (Old_MX!=Mouse_X) || (Old_MY!=Mouse_Y) )
                 {
                   // Clear status line
-                  SDL_Color light_color = Screen_SDL->format->palette->colors[MC_Light];
                   Rectangle_on_texture(Menu_bars[MENUBAR_STATUS].Menu_texture,
                     18*Menu_factor_X, Menu_factor_Y,
                     24*8*Menu_factor_X, 8*Menu_factor_Y,
-                    light_color.r, light_color.g, light_color.b, 255, SDL_BLENDMODE_NONE);
+                    MC_Light, 255, SDL_BLENDMODE_NONE);
                 }
               }
             }
@@ -1588,7 +1586,7 @@ void Close_window(void)
 void Window_draw_normal_bouton(word x_pos,word y_pos,word width,word height,
                                     const char * title,byte undersc_letter,byte clickable)
 {
-  byte title_color;
+  T_Components title_color;
   word text_x_pos,text_y_pos;
 
   if (clickable)
@@ -1635,7 +1633,7 @@ void Window_draw_palette_bouton(word x_pos,word y_pos)
   word color;
 
   for (color=0; color<=255; color++)
-    Window_rectangle( ((color >> 4)*10)+x_pos+6,((color & 15)*5)+y_pos+3,5,5,color);
+    Window_rectangle( ((color >> 4)*10)+x_pos+6,((color & 15)*5)+y_pos+3,5,5,Main_palette[color]);
 
   Window_display_frame(x_pos,y_pos,164,86);
 }
@@ -2097,7 +2095,7 @@ void Window_redraw_list(T_List_button * list)
   i=list->Scroller->Nb_visibles-list->Scroller->Nb_elements;
   if (i>0)
   {
-    byte color;
+    T_Components color;
     color = list->Color_index == 0 ? MC_Black :
            (list->Color_index == 1 ? MC_Dark :
            (list->Color_index == 2 ? MC_Light : MC_White));
@@ -2363,7 +2361,7 @@ void Get_color_behind_window(byte * color, byte * click)
           str[index]='\0';
           Print_in_menu(str,0);
           // Single square of picked color
-          Rectangle_on_texture(Menu_bars[MENUBAR_STATUS].Menu_texture, 90*Menu_factor_X, Menu_factor_Y, Menu_factor_X<<3, Menu_factor_Y<<3, Main_palette[c].R, Main_palette[c].G, Main_palette[c].B, 255, SDL_BLENDMODE_NONE);
+          Rectangle_on_texture(Menu_bars[MENUBAR_STATUS].Menu_texture, 90*Menu_factor_X, Menu_factor_Y, Menu_factor_X<<3, Menu_factor_Y<<3, Main_palette[c], 255, SDL_BLENDMODE_NONE);
         }
       }
       Display_cursor();
@@ -2517,11 +2515,11 @@ T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, sh
   // Ombre portée
   if (SHADOW_BOTTOM)
   {
-    Window_rectangle_RGBA(SHADOW_RIGHT,
+    Window_rectangle_alpha(SHADOW_RIGHT,
         box_height,
         button->Dropdown_width,
         SHADOW_BOTTOM,
-        0, 0, 0, 128);
+        MC_Black, 128);
     Window_rectangle(0,
         box_height,
         button->Dropdown_width,
@@ -2530,11 +2528,11 @@ T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, sh
   }
   if (SHADOW_RIGHT)
   {
-    Window_rectangle_RGBA(button->Dropdown_width,
+    Window_rectangle_alpha(button->Dropdown_width,
         SHADOW_BOTTOM,
         SHADOW_RIGHT,
         box_height-SHADOW_BOTTOM,
-        0, 0, 0, 128);
+        MC_Black, 128);
     Window_rectangle(button->Dropdown_width,
         1,
         1,
@@ -2551,8 +2549,8 @@ T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, sh
     // Affichage des items
     for(item=button->First_item,choice_index=0; item!=NULL; item=item->Next,choice_index++)
     {
-      byte color_1;
-      byte color_2;
+      T_Components color_1;
+      T_Components color_2;
       if (choice_index==selected_index)
       {
         color_1=MC_White;

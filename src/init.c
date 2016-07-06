@@ -2841,11 +2841,10 @@ void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
   //Config.Fav_menu_colors[3] = gfx->Default_palette[gfx->Color[3]];
 
   // Reassign GUI color indices
-  MC_Black = gfx->Color[0];
-  MC_Dark =  gfx->Color[1];
-  MC_Light = gfx->Color[2];
-  MC_White = gfx->Color[3];
-  MC_Trans = gfx->Color_trans;
+  MC_Black = gfx->Default_palette[gfx->Color[0]];
+  MC_Dark =  gfx->Default_palette[gfx->Color[1]];
+  MC_Light = gfx->Default_palette[gfx->Color[2]];
+  MC_White = gfx->Default_palette[gfx->Color[3]];
 
   // Set menubars to point to the new data
   Menu_bars[MENUBAR_TOOLS ].Skin = (byte*)&(gfx->Menu_block);

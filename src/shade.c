@@ -126,9 +126,10 @@ void Shade_draw_grad_ranges(void)
 
       for (x_pos=start_x;x_pos<end_x;x_pos++)
       {
-        SDL_Color color = Screen_SDL->format->palette->colors[Shade_list[Shade_current].List[(((x_pos-start_x)*shade_size)/x_size)+start_shade]];
+        byte color = Shade_list[Shade_current].List[(((x_pos-start_x)*shade_size)/x_size)+start_shade];
         // This is higher resolution than Pixel_in_window()
-        Rectangle_on_texture(Window_texture, x_pos, y_pos, 1, 1, color.r, color.g, color.b, 255, SDL_BLENDMODE_NONE);
+        // TODO use screen palette so that cycling works
+        Rectangle_on_texture(Window_texture, x_pos, y_pos, 1, 1, Main_palette[color], 255, SDL_BLENDMODE_NONE);
       }
     }
   }
@@ -253,7 +254,7 @@ void Display_all_shade(word selection_start1,word selection_end1,
         Window_rectangle((column<<2)+8,
               (line*7)+127,
               4,4,
-              Shade_list[Shade_current].List[position]&0xFF);
+              Main_palette[Shade_list[Shade_current].List[position]&0xFF]);
     }
   Update_window_area(7,126,(64<<2)+2,(8<<2)+2);
   Tag_shades(selection_start2,selection_end2);
@@ -931,16 +932,16 @@ int Menu_shade(void)
         }
         Key=0;
         break;
-        
+
         default:
-        
+
         if (first_color==last_color && Is_shortcut(Key,SPECIAL_PREVIOUS_FORECOLOR))
         {
           first_color--;
           last_color--;
           Hide_cursor();
           Tag_color_range(first_color,first_color);
-          Window_rectangle(172,27,16,64,first_color);
+          Window_rectangle(172,27,16,64,Main_palette[first_color]);
           // On affiche le numéro de la couleur sélectionnée
           Display_selected_color(first_color,last_color);
           Display_cursor();
@@ -952,7 +953,7 @@ int Menu_shade(void)
           last_color++;
           Hide_cursor();
           Tag_color_range(first_color,first_color);
-          Window_rectangle(172,27,16,64,first_color);
+          Window_rectangle(172,27,16,64,Main_palette[first_color]);
           // On affiche le numéro de la couleur sélectionnée
           Display_selected_color(first_color,last_color);
           Display_cursor();
@@ -966,17 +967,17 @@ int Menu_shade(void)
             {
               Hide_cursor();
               temp_color=color;
-    
+
               // On met à jour l'intervalle du Shade
               first_color=last_color=temp_color;
               // On tagge le bloc
               Tag_color_range(first_color,last_color);
               // Tracé du bloc dégradé:
               Display_grad_block_in_window(172,27,first_color,last_color);
-    
+
               // On affiche le numéro de la couleur sélectionnée
               Display_selected_color(first_color,last_color);
-    
+
               Display_cursor();
               Wait_end_of_click();
             }

@@ -68,12 +68,10 @@ GFX2_GLOBAL int  Nb_video_modes;
 
 // -- Menu colors
 
-GFX2_GLOBAL byte MC_Black; ///< Index of color to use as "black" in the GUI menus.
-GFX2_GLOBAL byte MC_Dark;  ///< Index of color to use as "dark grey" in the GUI menus.
-GFX2_GLOBAL byte MC_Light; ///< Index of color to use as "light grey" in the GUI menus.
-GFX2_GLOBAL byte MC_White; ///< Index of color to use as "white" in the GUI menus.
-GFX2_GLOBAL byte MC_Trans; ///< Index of color to use as "transparent" while loading the GUI file.
-
+GFX2_GLOBAL T_Components MC_Black; ///< Index of color to use as "black" in the GUI menus.
+GFX2_GLOBAL T_Components MC_Dark;  ///< Index of color to use as "dark grey" in the GUI menus.
+GFX2_GLOBAL T_Components MC_Light; ///< Index of color to use as "light grey" in the GUI menus.
+GFX2_GLOBAL T_Components MC_White; ///< Index of color to use as "white" in the GUI menus.
 
 // Input state
 GFX2_GLOBAL word Mouse_X; ///< Current mouse cursor position.
@@ -910,7 +908,7 @@ GFX2_GLOBAL SDL_Joystick* Joystick;
     #define JOY_BUTTON_SELECT          (9)
     #define JOY_BUTTON_VOLUP           (16)
     #define JOY_BUTTON_VOLDOWN         (17)
-    
+
     #define KEY_ESC (KEY_JOYBUTTON+JOY_BUTTON_X)
 #elif defined(__WIZ__)
     /// Button definitions for the Wiz

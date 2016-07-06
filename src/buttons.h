@@ -30,7 +30,7 @@
 #include "struct.h"
 
 void Stencil_update_color(byte color);
-void Stencil_tag_color(byte color, byte tag_color);
+void Stencil_tag_color(byte color, T_Components tag_color);
 
 /*!
     Displays an error message when there is no more memory for the requested
@@ -207,7 +207,7 @@ void Button_Text(void);
 
 /*!
     Callback for the gradation button.
-    Opens the "Gradation menu". 
+    Opens the "Gradation menu".
 */
 void Button_Gradients(void);
 

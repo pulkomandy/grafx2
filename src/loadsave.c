@@ -213,15 +213,15 @@ void Set_pixel(T_IO_Context *context, short x_pos, short y_pos, byte color)
         // Store pixel
         if (context->Ratio == PIXEL_WIDE)
         {
-          Rectangle_on_texture(Window_texture, context->Preview_pos_X + x_pos/context->Preview_factor_X*2, context->Preview_pos_Y + y_pos/context->Preview_factor_Y, 2, 1, context->Palette[color].R, context->Palette[color].G, context->Palette[color].B, 255, SDL_BLENDMODE_NONE);
+          Rectangle_on_texture(Window_texture, context->Preview_pos_X + x_pos/context->Preview_factor_X*2, context->Preview_pos_Y + y_pos/context->Preview_factor_Y, 2, 1, context->Palette[color], 255, SDL_BLENDMODE_NONE);
         }
         else if (context->Ratio == PIXEL_TALL)
         {
-          Rectangle_on_texture(Window_texture, context->Preview_pos_X + x_pos/context->Preview_factor_X, context->Preview_pos_Y + y_pos/context->Preview_factor_Y*2, 1, 2, context->Palette[color].R, context->Palette[color].G, context->Palette[color].B, 255, SDL_BLENDMODE_NONE);
+          Rectangle_on_texture(Window_texture, context->Preview_pos_X + x_pos/context->Preview_factor_X, context->Preview_pos_Y + y_pos/context->Preview_factor_Y*2, 1, 2, context->Palette[color], 255, SDL_BLENDMODE_NONE);
         }
         else
         {
-          Rectangle_on_texture(Window_texture, context->Preview_pos_X + x_pos/context->Preview_factor_X, context->Preview_pos_Y + y_pos/context->Preview_factor_Y, 1, 1, context->Palette[color].R, context->Palette[color].G, context->Palette[color].B, 255, SDL_BLENDMODE_NONE);
+          Rectangle_on_texture(Window_texture, context->Preview_pos_X + x_pos/context->Preview_factor_X, context->Preview_pos_Y + y_pos/context->Preview_factor_Y, 1, 1, context->Palette[color], 255, SDL_BLENDMODE_NONE);
         }
       }
 
@@ -244,7 +244,7 @@ void Fill_canvas(T_IO_Context *context, byte color)
     case CONTEXT_PREVIEW:
       if (context->Current_layer!=0)
         return;
-      Window_rectangle_RGBA(context->Preview_pos_X, context->Preview_pos_Y, PREVIEW_WIDTH, PREVIEW_HEIGHT, context->Palette[color].R, context->Palette[color].G, context->Palette[color].B, 255);
+      Window_rectangle(context->Preview_pos_X, context->Preview_pos_Y, PREVIEW_WIDTH, PREVIEW_HEIGHT, context->Palette[color]);
       break;
     case CONTEXT_MAIN_IMAGE:
       memset(
@@ -263,6 +263,8 @@ void Fill_canvas(T_IO_Context *context, byte color)
 // Chargement des pixels dans le buffer 24b
 void Set_pixel_24b(T_IO_Context *context, short x_pos, short y_pos, byte r, byte g, byte b)
 {
+  T_Components rgb;
+
   // Clipping
   if (x_pos<0 || y_pos<0 || x_pos>=context->Width || y_pos>=context->Height)
     return;
@@ -286,7 +288,10 @@ void Set_pixel_24b(T_IO_Context *context, short x_pos, short y_pos, byte r, byte
 
       if (((x_pos % context->Preview_factor_X)==0) && ((y_pos % context->Preview_factor_Y)==0))
       {
-        Rectangle_on_texture(Window_texture, context->Preview_pos_X + x_pos/context->Preview_factor_X, context->Preview_pos_Y + y_pos/context->Preview_factor_Y, 1, 1, r, g, b, 255, SDL_BLENDMODE_NONE);
+        rgb.R = r;
+        rgb.G = g;
+        rgb.B = b;
+        Rectangle_on_texture(Window_texture, context->Preview_pos_X + x_pos/context->Preview_factor_X, context->Preview_pos_Y + y_pos/context->Preview_factor_Y, 1, 1, rgb, 255, SDL_BLENDMODE_NONE);
       }
       break;
   }
@@ -831,8 +836,7 @@ void Load_image(T_IO_Context *context)
 
       if (context->Type == CONTEXT_PREVIEW)
         for (index=0; index<256; index++)
-          Window_rectangle_RGBA(183+(index/16)*7,95+(index&15)*5,5,5,context->Palette[index].R, context->Palette[index].G, context->Palette[index].B, 255);
-
+          Window_rectangle(183+(index/16)*7,95+(index&15)*5,5,5,context->Palette[index]);
     }
 
     // Refresh modified part

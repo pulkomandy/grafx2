@@ -166,7 +166,7 @@ void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_ca
 void Button_Constraint_mode(void)
 {
   int pixel;
-  
+
   if (Main_backups->Pages->Image_mode == IMAGE_MODE_MODE5)
   {
     // Disable
@@ -220,7 +220,7 @@ void Button_Tilemap_menu(void)
 
   Print_in_window(24,21, "Detect mirrored",MC_Dark,MC_Light);
   Window_display_frame(5,17,155,56);
-  
+
   Print_in_window(37,37, "Horizontally",MC_Black,MC_Light);
   Window_set_normal_button(18,34,13,13,flip_x?"X":"",0,1,0);  // 3
 
@@ -257,7 +257,7 @@ void Button_Tilemap_menu(void)
         Hide_cursor();
         Print_in_window(10,81,count?"X":" ", MC_Black, MC_Light);
         Display_cursor();
-        break;      
+        break;
     }
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       Window_help(BUTTON_EFFECTS, "TILEMAP");
@@ -270,11 +270,11 @@ void Button_Tilemap_menu(void)
       Config.Tilemap_allow_flipped_x!=flip_x ||
       Config.Tilemap_allow_flipped_y!=flip_y ||
       !Main_tilemap_mode;
-    
+
     Config.Tilemap_allow_flipped_x=flip_x;
     Config.Tilemap_allow_flipped_y=flip_y;
     Config.Tilemap_show_count=count;
-    
+
     if (changed)
     {
       Main_tilemap_mode=1;
@@ -292,7 +292,7 @@ void Button_Stencil_mode(void)
 }
 
 
-void Stencil_tag_color(byte color, byte tag_color)
+void Stencil_tag_color(byte color, T_Components tag_color)
 {
   Window_rectangle(Window_palette_button_list->Pos_X+4+(color >> 4)*10,
         Window_palette_button_list->Pos_Y+3+(color & 15)* 5,
@@ -493,19 +493,19 @@ void Button_Grid_menu(void)
   if (clicked_button==2) // OK
   {
     byte modified;
-    
+
     modified = Snap_width!=chosen_X
     || Snap_height!=chosen_Y
     || Snap_offset_X!=dx_selected
     || Snap_offset_Y!=dy_selected;
-    
+
     Snap_width=chosen_X;
     Snap_height=chosen_Y;
     Snap_offset_X=dx_selected;
     Snap_offset_Y=dy_selected;
     Snap_mode=snapgrid;
     Show_grid=showgrid;
-    
+
     if (modified)
     {
       Tilemap_update();
@@ -524,7 +524,7 @@ void Button_Show_grid(void)
   Hide_cursor();
   Display_all_screen();
   Display_cursor();
-} 
+}
 
 
 // -- Mode Smooth -----------------------------------------------------------
@@ -1130,12 +1130,8 @@ void Button_Sieve_menu(void)
           {
             Sieve[x_pos][y_pos]=temp;
             Hide_cursor();
-            if (temp)
-              temp=MC_White;
-            else
-              temp=MC_Black;
             // Affichage du pixel dans la fenêtre zoomée
-            Window_rectangle(origin_x+x_pos, origin_y+y_pos, 4, 4, temp);
+            Window_rectangle(origin_x+x_pos, origin_y+y_pos, 4, 4, temp?MC_White:MC_Black);
             // Mise à jour de la preview
             Draw_sieve_scaled(origin_x,origin_y);
             Display_cursor();
@@ -1182,14 +1178,14 @@ void Button_Sieve_menu(void)
         break;
 
       case  7 : // Transfer to brush
-      
+
         if (Realloc_brush(Sieve_width, Sieve_height, NULL, NULL))
           break;
-        
+
         for (y_pos=0; y_pos<Sieve_height; y_pos++)
           for (x_pos=0; x_pos<Sieve_width; x_pos++)
             *(Brush_original_pixels + y_pos * Brush_width + x_pos) = (Sieve[x_pos][y_pos])?Fore_color:Back_color;
-        
+
         // Grab palette
         memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
         // Remap (no change)
@@ -1197,7 +1193,7 @@ void Button_Sieve_menu(void)
 
         Brush_offset_X=(Brush_width>>1);
         Brush_offset_Y=(Brush_height>>1);
-        
+
         Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
         break;
 
