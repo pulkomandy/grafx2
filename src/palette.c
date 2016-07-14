@@ -2584,28 +2584,27 @@ void Button_Palette(void)
           }
         }
       }
+    }
+    if (need_to_remap)
+    {
+      Hide_cursor();
+      Compute_optimal_menu_colors(working_palette);
 
-      if (need_to_remap)
-      {
-        Hide_cursor();
-        Compute_optimal_menu_colors(working_palette);
+      // On remappe brutalement
+      // supprimé
+      // Puis on remet les trucs qui ne devaient pas changer
+      Window_draw_palette_bouton(5, 79);
+      if (show_used_colors)
+        Tag_used_colors(1, color_usage);
+      Window_rectangle(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_H,working_palette[Back_color]);
+      Update_window_area(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_H);
 
-        // On remappe brutalement
-        // supprimé
-        // Puis on remet les trucs qui ne devaient pas changer
-        Window_draw_palette_bouton(5,79);
-        if (show_used_colors)
-          Tag_used_colors(1, color_usage);
-        Window_rectangle(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_H,working_palette[Back_color]);
-        Update_window_area(BGCOLOR_DISPLAY_X,BGCOLOR_DISPLAY_Y,BGCOLOR_DISPLAY_W,BGCOLOR_DISPLAY_H);
+      Display_grad_block_in_window(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,block_start,block_end);
 
-        Display_grad_block_in_window(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,block_start,block_end);
+      Update_window_area(8,82,16*10,5*16);
 
-        Update_window_area(8,82,16*10,5*16);
-
-        Display_cursor();
-        need_to_remap=0;
-      }
+      Display_cursor();
+      need_to_remap=0;
     }
   }
   while ((clicked_button!=13) && (clicked_button!=14));

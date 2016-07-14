@@ -1631,9 +1631,15 @@ void Window_unselect_normal_button(word x_pos,word y_pos,word width,word height)
 void Window_draw_palette_bouton(word x_pos,word y_pos)
 {
   word color;
+  T_Components rgb;
 
   for (color=0; color<=255; color++)
-    Window_rectangle( ((color >> 4)*10)+x_pos+6,((color & 15)*5)+y_pos+3,5,5,Main_palette[color]);
+  {
+    rgb.R = Screen_SDL->format->palette->colors[color].r;
+    rgb.G = Screen_SDL->format->palette->colors[color].g;
+    rgb.B = Screen_SDL->format->palette->colors[color].b;
+    Window_rectangle( ((color >> 4)*10)+x_pos+6,((color & 15)*5)+y_pos+3,5,5,rgb);
+  }
 
   Window_display_frame(x_pos,y_pos,164,86);
 }
