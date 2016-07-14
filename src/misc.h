@@ -45,7 +45,6 @@ void Clear_current_image_with_stencil(byte color, byte * stencil);
 dword Round_div(dword numerator,dword divisor);
 word Count_used_colors(dword * usage);
 word Count_used_colors_area(dword* usage, word start_x, word start_y, word width, word height);
-word Count_used_colors_screen_area(dword* usage, word start_x, word start_y, word width, word height);
 void Pixel_in_brush             (word x,word y,byte color);
 byte Read_pixel_from_spare_screen(word x,word y);
 byte Read_pixel_from_backup_screen   (word x,word y);

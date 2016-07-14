@@ -89,27 +89,43 @@ void Set_mode_SDL(int *width, int *height, int fullscreen)
     SDL_DestroyTexture(Texture_SDL);
     Texture_SDL=NULL;
   }
-  // Renderer and window
-  if (Renderer_SDL!=NULL)
+  // Omit all this part if this is "only" a window resize
+  if (fullscreen || Window_SDL==NULL || (SDL_GetWindowFlags(Window_SDL)&(SDL_WINDOW_FULLSCREEN|SDL_WINDOW_FULLSCREEN_DESKTOP)))
   {
-    SDL_DestroyRenderer(Renderer_SDL);
-    Renderer_SDL=NULL;
-  }
-  if (Window_SDL!=NULL)
-  {
-    SDL_DestroyWindow(Window_SDL);
-    Window_SDL=NULL;
-  }
+    // Renderer and window
+    if (Renderer_SDL!=NULL)
+    {
+      SDL_DestroyRenderer(Renderer_SDL);
+      Renderer_SDL=NULL;
+    }
+    if (Window_SDL!=NULL)
+    {
+      SDL_DestroyWindow(Window_SDL);
+      Window_SDL=NULL;
+    }
+    Window_SDL = SDL_CreateWindow("GrafX2",
+      SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+      *width, *height * 2,
+      (fullscreen?SDL_WINDOW_FULLSCREEN:SDL_WINDOW_RESIZABLE)|SDL_WINDOW_SHOWN);
+    Renderer_SDL = SDL_CreateRenderer(Window_SDL, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+    Define_icon();
+    //SDL_RenderSetLogicalSize(Renderer_SDL, *width, *height * 2);
+    // Trick borrowed to Barrage (http://www.mail-archive.com/debian-bugs-dist@lists.debian.org/msg737265.html) :
+    // Showing the cursor but setting it to fully transparent allows us to get absolute mouse coordinates,
+    // this means we can use tablet in fullscreen mode.
+    SDL_ShowCursor(1); // Hide the SDL mouse cursor, we use our own
 
-  Window_SDL = SDL_CreateWindow("GrafX2",
-    SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-    *width, *height * 2,
-    (fullscreen?SDL_WINDOW_FULLSCREEN:SDL_WINDOW_RESIZABLE)|SDL_WINDOW_SHOWN);
-  Renderer_SDL = SDL_CreateRenderer(Window_SDL, -1, SDL_RENDERER_ACCELERATED|SDL_RENDERER_PRESENTVSYNC);
-  //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
-  SDL_RenderSetLogicalSize(Renderer_SDL, *width, *height * 2);
+    SDL_FreeCursor(cur);
+    cur = SDL_CreateCursor(&cursorData, &cursorData, 1,1,0,0);
+    SDL_SetCursor(cur);
+  }
+  else
+  {
+    //SDL_SetWindowSize(Window_SDL, *width, *height*2);
+    //SDL_RenderSetLogicalSize(Renderer_SDL, *width, *height * 2);
+  }
   Texture_SDL = SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, *width, *height);
-  Define_icon();
 
   if(Screen_SDL != NULL)
   {
@@ -120,16 +136,74 @@ void Set_mode_SDL(int *width, int *height, int fullscreen)
   {
     DEBUG("Error: Unable to change video mode!",0);
   }
+}
 
-  // Trick borrowed to Barrage (http://www.mail-archive.com/debian-bugs-dist@lists.debian.org/msg737265.html) :
-  // Showing the cursor but setting it to fully transparent allows us to get absolute mouse coordinates,
-  // this means we can use tablet in fullscreen mode.
-  SDL_ShowCursor(1); // Hide the SDL mouse cursor, we use our own
+void Resize_window(int width, int height)
+{
+  //Resize_width = width;
+  //Resize_height = height/2;
+  Hide_cursor();
+  Init_mode_video(width, height/2, 0, Pixel_ratio);
+  // Reset the variables that indicate a resize was requested.
+  Resize_width=0;
+  Resize_height=0;
+  Display_menu();
+  Reposition_palette();
+  Display_all_screen();
+  Display_cursor();
+  return;
+  int current_menu, i;
+  //SDL_RenderPresent(Renderer_SDL);
+  //Hide_cursor();
+  // Cleanup
+  for (current_menu=0; current_menu<MENUBAR_COUNT; current_menu++)
+  {
+    // allocate texture if not already there
+    if (!Menu_bars[current_menu].Menu_texture)
+    {
+      SDL_DestroyTexture(Menu_bars[current_menu].Menu_texture);
+      Menu_bars[current_menu].Menu_texture = NULL;
+    }
+  }
+  for (i=0; i<NB_MENU_SPRITES; i++)
+  {
+    SDL_DestroyTexture(Gfx->Menu_sprite[0][i]);
+    Gfx->Menu_sprite[0][i] = NULL;
+    SDL_DestroyTexture(Gfx->Menu_sprite[1][i]);
+    Gfx->Menu_sprite[1][i] = NULL;
+  }
+  for (i=0; i<256; i++)
+  {
+    SDL_DestroyTexture(Gfx->Font[i]);
+    Gfx->Font[i]= NULL;
+  }
 
-  SDL_FreeCursor(cur);
-  cur = SDL_CreateCursor(&cursorData, &cursorData, 1,1,0,0);
-  SDL_SetCursor(cur);
+  Init_mode_video(Resize_width, Resize_height, 0, Pixel_ratio);
 
+  SDL_Renderer *rend = SDL_GetRenderer(Window_SDL);
+  SDL_RendererInfo info;
+  SDL_GetRendererInfo(rend,&info);
+  // Reallocate
+  for (current_menu=0; current_menu<MENUBAR_COUNT; current_menu++)
+  {
+    if (!Menu_bars[current_menu].Menu_texture)
+    {
+      Menu_bars[current_menu].Menu_texture = Create_rendering_texture(Screen_width, Menu_bars[current_menu].Height*Menu_factor_Y);
+    }
+  }
+  for (i=0; i<NB_MENU_SPRITES; i++)
+  {
+    Gfx->Menu_sprite[0][i]=SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, 8, 8);
+    Gfx->Menu_sprite[1][i]=SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, 8, 8);
+  }
+  for (i=0; i<256; i++)
+  {
+    Gfx->Font[i] = SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, 8*Gfx->Factor, 8*Gfx->Factor);
+  }
+  Display_menu();
+  Reposition_palette();
+  Display_all_screen();
+  Display_cursor();
 }
 
 void Update_rectangle(SDL_Surface *surface, int x, int y, int width, int height)

@@ -287,8 +287,9 @@ int Handle_window(SDL_WindowEvent event)
     {
         if (!Video_mode[Current_resolution].Fullscreen)
         {
-          Resize_width = event.data1;
-          Resize_height = event.data2;
+          //Resize_width = event.data1;
+          //Resize_height = event.data2;
+          Resize_window(event.data1, event.data2);
         }
         return 1;
     }

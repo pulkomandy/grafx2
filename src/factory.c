@@ -1673,7 +1673,7 @@ int L_WindowPrint(lua_State* L)
 {
   int x, y, fg=0, bg=2;
   int len;
-  int colors[4] = {MC_Black, MC_Dark, MC_Light, MC_White};
+  T_Components colors[4] = {MC_Black, MC_Dark, MC_Light, MC_White};
   const char *text="";
   int nb_args = lua_gettop(L);
   
@@ -2040,7 +2040,7 @@ void Draw_script_name(word x, word y, word index, byte highlighted)
 
   if (Scripts_selector.Nb_elements)
   {
-    byte fg, bg;
+    T_Components fg, bg;
     
     current_item = Get_item_by_index(&Scripts_selector, index);
 

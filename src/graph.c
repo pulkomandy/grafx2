@@ -108,7 +108,7 @@ void Update_part_of_screen(short x, short y, short width, short height)
 
   if(effective_Y + effective_h > Menu_Y)
     effective_h = Menu_Y - effective_Y;
-    
+
   /*
   SDL_Rect r;
   r.x=effective_X;
@@ -198,7 +198,7 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
   static int Wrong_resize;
 
 try_again:
-  
+
   switch (pix_ratio)
   {
       default:
@@ -243,29 +243,18 @@ try_again:
   // Valeurs raisonnables: minimum 320x200
   if (!fullscreen)
   {
-    if (Wrong_resize>20 && (width < 320 || height < 200))
-    {
-      if(pix_ratio != PIXEL_SIMPLE) {
-        pix_ratio = PIXEL_SIMPLE;
-        Verbose_message("Error!", "Your WM is forcing GrafX2 to resize to something "
-          "smaller than the minimal resolution.\n"
-          "GrafX2 switched to a smaller\npixel scaler to avoid problems                     ");
-        goto try_again;
-      }
-    }
-    
-    if (width > 320 && height > 200)
+    if (width > 320*Menu_factor_X && height > 200*Menu_factor_Y)
       Wrong_resize = 0;
 
-    if (width < 320)
+    if (width < 320*Menu_factor_X)
     {
-        width = 320;
+        width = 320*Menu_factor_X;
         screen_changed=1;
         Wrong_resize++;
     }
-    if (height < 200)
+    if (height < 200*Menu_factor_Y)
     {
-        height = 200;
+        height = 200*Menu_factor_Y;
         screen_changed=1;
         Wrong_resize++;
     }
@@ -275,7 +264,7 @@ try_again:
   }
   else
   {
-    if (width < 320 || height < 200)
+    if (width < 320*Menu_factor_X || height < 200*Menu_factor_Y)
       return 1;
   }
   // La largeur doit être un multiple de 4
@@ -284,17 +273,17 @@ try_again:
       width = (width + 15) & 0xFFFFFFF0;
   #else
       //width = (width + 3 ) & 0xFFFFFFFC;
-  #endif  
+  #endif
 
   pixels_changed = (Pixel_ratio!=pix_ratio);
-  
+
   if (!screen_changed && !pixels_changed)
     return 0;
   if (screen_changed)
   {
     Set_mode_SDL(&width, &height,fullscreen);
   }
-  
+
   if (screen_changed || pixels_changed)
   {
     Pixel_ratio=pix_ratio;
@@ -304,6 +293,7 @@ try_again:
   Screen_width = width;
   Screen_height = height;
 
+  /*
   // Set menu size (software zoom)
   if (Screen_width/320 > Screen_height/200)
     factor=Screen_height/200;
@@ -330,17 +320,14 @@ try_again:
       Menu_factor_X=Min(factor,abs(Config.Ratio));
       Menu_factor_Y=Min(factor,abs(Config.Ratio));
   }
-  
+  */
+
   // Clear previous menu textures
-  for (index=0; index<MENUBAR_COUNT; index++)
-  {
-    SDL_DestroyTexture(Menu_bars[index].Menu_texture);
-    Menu_bars[index].Menu_texture = NULL;
-  }
-    
-  free(Horizontal_line_buffer);
-  Horizontal_line_buffer=(byte *)malloc( 
-    ((Screen_width>Main_image_width)?Screen_width:Main_image_width));
+  //for (index=0; index<MENUBAR_COUNT; index++)
+  //{
+  //  SDL_DestroyTexture(Menu_bars[index].Menu_texture);
+  //  Menu_bars[index].Menu_texture = NULL;
+  //}
 
   Set_palette(Main_palette);
 
@@ -359,7 +346,7 @@ try_again:
   }
 
   Change_palette_cells();
-  
+
   Menu_Y = Screen_height;
   if (Menu_is_visible)
     Menu_Y -= Menu_height * Menu_factor_Y;
@@ -375,7 +362,7 @@ try_again:
     Mouse_Y=Screen_height-1;
   if (fullscreen)
     Set_mouse_position();
-  
+
   Spare_offset_X=0; // |  Il faut penser à éviter les incohérences
   Spare_offset_Y=0; // |- de décalage du brouillon par rapport à
   Spare_magnifier_mode=0; // |  la résolution.
@@ -403,7 +390,7 @@ try_again:
     Position_screen_according_to_zoom();
   Compute_limits();
   Compute_paintbrush_coordinates();
-  
+
   return 0;
 }
 
@@ -486,7 +473,7 @@ void Remap_spare(void)
   // teintes.
   for (layer=0; layer<Spare_backups->Pages->Nb_layers; layer++)
     Remap_general_lowlevel(used,Spare_backups->Pages->Image[layer].Pixels,Spare_backups->Pages->Image[layer].Pixels,Spare_image_width,Spare_image_height,Spare_image_width);
-    
+
   // Change transparent color index
   Spare_backups->Pages->Transparent_color=used[Spare_backups->Pages->Transparent_color];
 }
@@ -503,11 +490,11 @@ void Get_colors_from_brush(void)
   int   image_color;
 
   //if (Confirmation_box("Modify current palette ?"))
-  
+
   // Backup with unchanged layers, only palette is modified
   Backup_layers(LAYER_NONE);
 
-  // Init array of new colors  
+  // Init array of new colors
   for (color=0;color<=255;color++)
     brush_used[color]=0;
 
@@ -518,7 +505,7 @@ void Get_colors_from_brush(void)
 
   // Check used colors in picture (to know which palette entries are free)
   Count_used_colors(usage);
-  
+
   // First pass : omit colors that are already in palette
   for (color=0; color<256; color++)
   {
@@ -533,20 +520,20 @@ void Get_colors_from_brush(void)
          && Brush_original_palette[color].B==Main_palette[image_color].B)
         {
           // Color already in main palette:
-          
+
           // Tag as used, so that no new color will overwrite it
           usage[image_color]=1;
 
           // Tag as non-new, to avoid it in pass 2
           brush_used[color]=0;
-          
+
           break;
         }
       }
     }
   }
-  
-  // Second pass : For each color to add, find an empty slot in 
+
+  // Second pass : For each color to add, find an empty slot in
   // main palette to add it
   image_color=0;
   for (color=0; color<256 && image_color<256; color++)
@@ -562,7 +549,7 @@ void Get_colors_from_brush(void)
           Main_palette[image_color].R=Brush_original_palette[color].R;
           Main_palette[image_color].G=Brush_original_palette[color].G;
           Main_palette[image_color].B=Brush_original_palette[color].B;
-          
+
           image_color++;
           break;
         }
@@ -822,7 +809,7 @@ void Fill_general(byte fill_color)
       if (Paintbrush_Y >= (Main_image_height-Snap_offset_Y)/Snap_height*Snap_height+Snap_offset_Y)
         return;
     }
-    
+
     // On suppose que le curseur est déjà caché.
     // Hide_cursor();
 
@@ -900,7 +887,7 @@ void Fill_general(byte fill_color)
     Limit_left=old_limit_left;
     Limit_top=old_limit_top;
     Limit_bottom=old_limit_bottom;
-  
+
     for (y_pos=top_reached;y_pos<=bottom_reached;y_pos++)
     {
       for (x_pos=left_reached;x_pos<=right_reached;x_pos++)
@@ -909,7 +896,7 @@ void Fill_general(byte fill_color)
 
         // First, restore the color.
         Pixel_in_current_screen(x_pos,y_pos,Read_pixel_from_backup_layer(x_pos,y_pos));
-          
+
         if (filled==2)
         {
           // Update the color according to the fill color and all effects
@@ -948,7 +935,7 @@ void Fill_general(byte fill_color)
   {
     Draw_paintbrush(x_pos,y_pos,color);
     Permanent_draw_count ++;
-    
+
     // Check every 8 pixels
     if (! (Permanent_draw_count&7))
     {
@@ -971,7 +958,7 @@ void Fill_general(byte fill_color)
          (y_pos<=Limit_bottom) )
     Display_pixel(x_pos,y_pos,color);
   }
-  
+
   // Affichage d'un point pour une preview
   void Pixel_figure_preview(word x_pos,word y_pos,byte color)
   {
@@ -995,7 +982,7 @@ void Fill_general(byte fill_color)
   void Pixel_figure_preview_xor(short x_pos,short y_pos,byte color)
   {
     (void)color; // unused
-    
+
     if ( (x_pos>=Limit_left) &&
          (x_pos<=Limit_right) &&
          (y_pos>=Limit_top)   &&
@@ -1003,26 +990,26 @@ void Fill_general(byte fill_color)
       Pixel_preview(x_pos,y_pos,xor_lut[Read_pixel(x_pos-Main_offset_X,
                                            y_pos-Main_offset_Y)]);
   }
-  
+
   // Affichage d'un point pour une preview en xor additif
   // (Il lit la couleur depuis la page backup)
   void Pixel_figure_preview_xorback(word x_pos,word y_pos,byte color)
   {
     (void)color; // unused
-    
+
     if ( (x_pos>=Limit_left) &&
          (x_pos<=Limit_right) &&
          (y_pos>=Limit_top)   &&
          (y_pos<=Limit_bottom) )
       Pixel_preview(x_pos,y_pos,xor_lut[Main_screen[x_pos+y_pos*Main_image_width]]);
   }
-  
+
 
   // Effacement d'un point de preview
   void Pixel_figure_clear_preview(word x_pos,word y_pos,byte color)
   {
     (void)color; // unused
-    
+
     if ( (x_pos>=Limit_left) &&
          (x_pos<=Limit_right) &&
          (y_pos>=Limit_top)   &&
@@ -1175,7 +1162,7 @@ int Circle_squared_diameter(int diameter)
     return result-6;
   if (diameter==14)
     return result-4;
-  
+
   return result;
 }
 
@@ -1335,18 +1322,18 @@ void Clamp_coordinates_regular_angle(short ax, short ay, short* bx, short* by)
   float angle;
 
   dx = *bx-ax;
-  dy = *by-ay; 
+  dy = *by-ay;
 
   // No mouse move: no need to clamp anything
-  if (dx==0 || dy == 0) return; 
+  if (dx==0 || dy == 0) return;
 
   // Determine angle (heading)
   angle = atan2(dx, dy);
-    
+
   // Get absolute values, useful from now on:
   //dx=abs(dx);
   //dy=abs(dy);
-    
+
   // Negative Y
   if (angle < M_PI*(-15.0/16.0) || angle > M_PI*(15.0/16.0))
   {
@@ -1463,7 +1450,7 @@ void Draw_line_general(short start_x,short start_y,short end_x,short end_y, byte
   short incr_x,incr_y;
   short i,cumul;
   short delta_x,delta_y;
-  
+
   x_pos=start_x;
   y_pos=start_y;
 
@@ -1552,13 +1539,13 @@ void Draw_line_preview(short start_x,short start_y,short end_x,short end_y,byte 
 void Draw_line_preview_xor(short start_x,short start_y,short end_x,short end_y,byte color)
 {
   int w, h;
-  
+
   Pixel_figure=(Func_pixel)Pixel_figure_preview_xor;
   // Needed a cast because this function supports signed shorts,
   // (it's usually in image space), while this time it's in screen space
   // and some line endpoints can be out of screen.
   Draw_line_general(start_x,start_y,end_x,end_y,color);
-  
+
   if (start_x<Limit_left)
     start_x=Limit_left;
   if (start_y<Limit_top)
@@ -1567,8 +1554,8 @@ void Draw_line_preview_xor(short start_x,short start_y,short end_x,short end_y,b
     end_x=Limit_left;
   if (end_y<Limit_top)
     end_y=Limit_top;
-  // bottom & right limits are handled by Update_part_of_screen()  
-  
+  // bottom & right limits are handled by Update_part_of_screen()
+
   w = end_x-start_x;
   h = end_y-start_y;
   Update_part_of_screen((start_x<end_x)?start_x:end_x,(start_y<end_y)?start_y:end_y,abs(w)+1,abs(h)+1);
@@ -1620,7 +1607,7 @@ void Draw_empty_rectangle(short start_x,short start_y,short end_x,short end_y,by
 
   // On trace le rectangle:
   Init_permanent_draw();
-  
+
   for (x_pos=start_x;x_pos<=end_x;x_pos++)
   {
     Pixel_figure_permanent(x_pos,start_y,color);
@@ -1632,7 +1619,7 @@ void Draw_empty_rectangle(short start_x,short start_y,short end_x,short end_y,by
     Pixel_figure_permanent(start_x,y_pos,color);
     Pixel_figure_permanent(  end_x,y_pos,color);
   }
-    
+
 #if defined(__macosx__) || defined(__FreeBSD__)
   Update_part_of_screen(start_x,end_x,end_x-start_x,end_y-start_y);
 #endif
@@ -2196,14 +2183,14 @@ void Draw_grad_rectangle(short rax,short ray,short rbx,short rby,short vax,short
       Gradient_total_range = sqrt(pow(vby - vay,2)+pow(vbx - vax,2));
       a = (float)(vby - vay)/(float)(vbx - vax);
       b = vay - a*vax;
-      
+
       for (y_pos=ray;y_pos<=rby;y_pos++)
         for (x_pos = rax;x_pos<=rbx;x_pos++)
         {
           // On calcule ou on en est dans le dégradé
           distance_x = pow((y_pos - vay),2)+pow((x_pos - vax),2);
           distance_y = pow((-a * x_pos + y_pos - b),2)/(a*a+1);
-      
+
           Gradient_function((int)sqrt(distance_x - distance_y),x_pos,y_pos);
         }
     }
@@ -2452,7 +2439,7 @@ void Polyfill(int vertices, short * points, int color)
   // (pixels dessinés plus d'une fois) alors on force le FX Feedback à OFF
   Update_FX_feedback(0);
 
-  Pixel_figure=Pixel_clipped;    
+  Pixel_figure=Pixel_clipped;
   Polyfill_general(vertices,points,color);
 
   // Remarque: pour dessiner la bordure avec la brosse en cours au lieu
@@ -2486,7 +2473,7 @@ void Replace(byte new_color)
     {
       word x;
       word y;
-      
+
       // Update all pixels
       for (y=0; y<Main_image_height; y++)
         for (x=0; x<Main_image_width; x++)
@@ -2602,7 +2589,7 @@ byte No_effect(word x, word y, byte color)
 {
   (void)x; // unused
   (void)y; // unused
-  
+
   return color;
 }
 
@@ -2611,7 +2598,7 @@ byte No_effect(word x, word y, byte color)
 byte Effect_shade(word x,word y,byte color)
 {
   (void)color; // unused
-  
+
   return Shade_table[Read_pixel_from_feedback_screen(x,y)];
 }
 
@@ -2667,7 +2654,7 @@ byte Effect_quick_shade(word x,word y,byte color)
 byte Effect_tiling(word x,word y,byte color)
 {
   (void)color; // unused
-  
+
   return Read_pixel_from_brush((x+Brush_width-Tiling_offset_X)%Brush_width,
                                (y+Brush_height-Tiling_offset_Y)%Brush_height);
 }
@@ -2781,23 +2768,23 @@ byte Effect_layer_copy(word x,word y,byte color)
 
 byte Read_pixel_from_current_screen  (word x,word y)
 {
-  
+
   byte depth;
   byte color;
 
   if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
   {
-    return *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer].Pixels);  
+    return *((y)*Main_image_width+(x)+Main_backups->Pages->Image[Main_current_layer].Pixels);
   }
-  
-  if (Main_backups->Pages->Image_mode == IMAGE_MODE_MODE5)  
+
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_MODE5)
     if (Main_current_layer==4)
       return *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width);
 
   color = *(Main_screen+y*Main_image_width+x);
   if (color != Main_backups->Pages->Transparent_color) // transparent color
     return color;
-  
+
   depth = *(Main_visible_image_depth_buffer.Image+x+y*Main_image_width);
   return *(Main_backups->Pages->Image[depth].Pixels + x+y*Main_image_width);
 }
@@ -2825,7 +2812,7 @@ void Pixel_in_screen_layered(word x,word y,byte color)
     if (color == Main_backups->Pages->Transparent_color) // transparent color
       // fetch pixel color from the topmost visible layer
       color=*(Main_backups->Pages->Image[depth].Pixels + x+y*Main_image_width);
-    
+
     *(x+y*Main_image_width+Main_screen)=color;
   }
 }
@@ -2840,9 +2827,9 @@ void Pixel_in_screen_layered_with_preview(word x,word y,byte color)
     if (color == Main_backups->Pages->Transparent_color) // transparent color
       // fetch pixel color from the topmost visible layer
       color=*(Main_backups->Pages->Image[depth].Pixels + x+y*Main_image_width);
-    
+
     *(x+y*Main_image_width+Main_screen)=color;
-    
+
     Pixel_preview(x,y,color);
   }
 }
@@ -2851,12 +2838,12 @@ void Pixel_in_screen_layered_with_preview(word x,word y,byte color)
 void Pixel_in_screen_underlay(word x,word y,byte color)
 {
   byte depth;
-    
+
   // Paste in layer
   *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width)=color;
   // Search depth
   depth = *(Main_backups->Pages->Image[4].Pixels + x+y*Main_image_width);
-  
+
   if ( depth == Main_current_layer)
   {
     // Draw that color on the visible image buffer
@@ -2868,17 +2855,17 @@ void Pixel_in_screen_underlay(word x,word y,byte color)
 void Pixel_in_screen_underlay_with_preview(word x,word y,byte color)
 {
   byte depth;
-    
+
   // Paste in layer
   *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width)=color;
   // Search depth
   depth = *(Main_backups->Pages->Image[4].Pixels + x+y*Main_image_width);
-  
+
   if ( depth == Main_current_layer)
   {
     // Draw that color on the visible image buffer
     *(x+y*Main_image_width+Main_screen)=color;
-    
+
     Pixel_preview(x,y,color);
   }
 }
@@ -2914,7 +2901,7 @@ void Pixel_in_screen_overlay_with_preview(word x,word y,byte color)
     	color=*(Main_backups->Pages->Image[color].Pixels + x+y*Main_image_width);
     // Draw that color on the visible image buffer
     *(x+y*Main_image_width+Main_screen)=color;
-    
+
     Pixel_preview(x,y,color);
   }
 }

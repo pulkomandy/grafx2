@@ -2827,6 +2827,8 @@ void Set_current_skin(const char *skinfile, T_Gui_skin *gfx)
 
   // Assign main skin pointer
   Gfx = gfx;
+  Menu_factor_X = Gfx->Factor;
+  Menu_factor_Y = Gfx->Factor;
 
   // Change config
   if(Config.Skin_file != skinfile) // Happens when loading the initial skin

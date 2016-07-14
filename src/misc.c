@@ -84,40 +84,6 @@ word Count_used_colors(dword* usage)
   return nb_colors;
 }
 
-/// Same as ::Count_used_colors, but use a block screen memory instead of
-/// picture data. Used to count colors in the loading screen.
-word Count_used_colors_screen_area(dword* usage, word start_x, word start_y,
-  word width, word height)
-{
-  Uint8 color;
-  word x, y;
-  word nb_colors = 0;
-  int i;
-
-  // Init usage table
-  for (i = 0; i < 256; i++) usage[i]=0;
-
-  // For each pixel in screen area
-  for (y = 0; y < height; y++)
-  {
-    for (x = 0; x < width; x++)
-    {
-      // Get color in screen memory
-      color=*(Screen_pixels+((start_x + x)+(start_y + y) * Screen_width
-        * 1) * 1);
-      usage[color]++; //Un point de plus pour cette couleur
-    }
-  }
-  //On va maintenant compter dans la table les couleurs utilisées:
-  for (i = 0; i < 256; i++)
-  {
-    if (usage[i]!=0)
-      nb_colors++;
-  }
-  return nb_colors;
-}
-
-
 /// Same as ::Count_used_colors, but for a given rectangle in the picture only.
 /// Used bu the C64 block constraint checker.
 word Count_used_colors_area(dword* usage, word start_x, word start_y,

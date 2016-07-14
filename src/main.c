@@ -668,8 +668,6 @@ int Init_program(int argc,char * argv[])
     Remove_duplicate_shortcuts();
   }
 
-  Compute_menu_offsets();
-
   file_in_command_line=Analyze_command_line(argc, argv, main_filename, main_directory, spare_filename, spare_directory);
 
   Current_help_section=0;
@@ -681,10 +679,10 @@ int Init_program(int argc,char * argv[])
   if (!(Smear_brush   =(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE))) Error(ERROR_MEMORY);
 
 
-  starting_videomode=Current_resolution;
-  Horizontal_line_buffer=NULL;
-  Screen_width=Screen_height=Current_resolution=0;
 
+  starting_videomode=Current_resolution;
+  Screen_width=Screen_height=Current_resolution=0;
+  Menu_factor_X = Menu_factor_Y = 1;
   Init_mode_video(
     Video_mode[starting_videomode].Width,
     Video_mode[starting_videomode].Height,
@@ -727,6 +725,7 @@ int Init_program(int argc,char * argv[])
     }
   }
   Set_current_skin(Config.Skin_file, gfx);
+  Compute_menu_offsets();
 
   // Override colors
   // Gfx->Default_palette[MC_Black]=Config.Fav_menu_colors[0];
@@ -936,10 +935,6 @@ void Program_shutdown(void)
 
   // Remove the safety backups, this is normal exit
   Delete_safety_backups();
-
-  // On libère le buffer de gestion de lignes
-  free(Horizontal_line_buffer);
-  Horizontal_line_buffer = NULL;
 
   // On libère le pinceau spécial
   free(Paintbrush_sprite);
