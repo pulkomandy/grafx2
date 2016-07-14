@@ -233,6 +233,8 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   int char_4=0;  //                                  3 4
   int largest_height;
   SDL_Palette * SDLPal;
+  SDL_Color light;
+  SDL_Color dark;
 
   // Default palette
   if (!gui->format || gui->format->BitsPerPixel != 8)
@@ -246,9 +248,6 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
     sprintf(Gui_loading_error_message, "Not a 256-color palette");
     return 1;
   }
-
-  // Read the default palette
-  Get_SDL_Palette(SDLPal, gfx->Default_palette);
 
   // Carré "noir"
   gfx->Color[0] = Get_SDL_pixel_8(gui,cursor_x,cursor_y);
@@ -323,6 +322,21 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       return 1;
     }
   }
+
+  // Replace by preferred colors
+  light.r = Config.Fav_menu_colors[2].R;
+  light.g = Config.Fav_menu_colors[2].G;
+  light.b = Config.Fav_menu_colors[2].B;
+  light.a = 255;
+  SDL_SetPaletteColors(SDLPal, &light, gfx->Color[2], 1);
+  dark.r = Config.Fav_menu_colors[1].R;
+  dark.g = Config.Fav_menu_colors[1].G;
+  dark.b = Config.Fav_menu_colors[1].B;
+  dark.a = 255;
+  SDL_SetPaletteColors(SDLPal, &dark, gfx->Color[1], 1);
+
+  // Read the default palette
+  Get_SDL_Palette(SDLPal, gfx->Default_palette);
 
   // Menu
   if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "menu"))

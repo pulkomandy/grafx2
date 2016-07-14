@@ -281,10 +281,10 @@ void Render_out_rectangle(int x, int y, int w, int h, int alpha)
   SDL_Rect rectangle = {x, y, w, h};
   SDL_SetRenderDrawBlendMode(Renderer_SDL, SDL_BLENDMODE_BLEND);
   // Partie grise du milieu
-  SDL_SetRenderDrawColor(Renderer_SDL, 128, 128, 128, alpha);
+  SDL_SetRenderDrawColor(Renderer_SDL, MC_Light.R, MC_Light.G, MC_Light.B, alpha);
   SDL_RenderFillRect(Renderer_SDL, &rectangle);
 
-  SDL_SetRenderDrawColor(Renderer_SDL, 255, 255, 255, alpha);
+  SDL_SetRenderDrawColor(Renderer_SDL, MC_White.R, MC_White.G, MC_White.B, alpha);
   rectangle.w = w - 1*Menu_factor_X;
   rectangle.h = 1*Menu_factor_X;
   SDL_RenderFillRect(Renderer_SDL, &rectangle);
@@ -292,7 +292,7 @@ void Render_out_rectangle(int x, int y, int w, int h, int alpha)
   rectangle.h = h - 1*Menu_factor_Y;
   SDL_RenderFillRect(Renderer_SDL, &rectangle);
 
-  SDL_SetRenderDrawColor(Renderer_SDL, 64, 64, 64, alpha);
+  SDL_SetRenderDrawColor(Renderer_SDL, MC_Dark.R, MC_Dark.G, MC_Dark.B, alpha);
   rectangle.x = x + 1*Menu_factor_X;
   rectangle.y = y + h - 1*Menu_factor_Y;
   rectangle.w = w - 2*Menu_factor_X;
