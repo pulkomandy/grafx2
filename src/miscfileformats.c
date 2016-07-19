@@ -2556,15 +2556,15 @@ void Load_C64(T_IO_Context * context)
       0x9A, 0xD2, 0x84, 
       0x6C, 0x5E, 0xB5, 
       0x95, 0x95, 0x95};
-  
+
     byte *file_buffer;
     byte *bitmap, *screen_ram, *color_ram=NULL, *background=NULL; // Only pointers to existing data
     word width=320, height=200;
     static byte dummy_screen[1000];
-    
+
     Get_full_filename(filename, context->File_name, context->File_directory);
     file = fopen(filename,"rb");
-  
+
     if (file)
     {
         File_error=0;
@@ -2576,14 +2576,14 @@ void Load_C64(T_IO_Context * context)
             case 8000: // raw bitmap
             case 8002: // raw bitmap with loadaddr
             case 9000: // bitmap + ScreenRAM
-            case 9002: // bitmap + ScreenRAM + loadaddr     
+            case 9002: // bitmap + ScreenRAM + loadaddr
             case 10001: // multicolor
             case 10003: // multicolor + loadaddr
             case 10277: // multicolor CDU-Paint + loadaddr
             case 17472: // FLI (BlackMail)
             case 17474: // FLI (BlackMail) + loadaddr
             break;
-            
+
             default:
                 File_error = 1;
                 fclose(file);
@@ -2605,9 +2605,9 @@ void Load_C64(T_IO_Context * context)
             return;
         }
         fclose(file);
-        
+
         memset(dummy_screen,1,1000);
-        
+
         switch (file_size)
         {
             case 8000: // raw bitmap
@@ -2616,28 +2616,28 @@ void Load_C64(T_IO_Context * context)
                 bitmap=file_buffer+0; // length: 8000
                 screen_ram=dummy_screen;
                 break;
-                
+
             case 8002: // raw bitmap with loadaddr
                 hasLoadAddr=1;
                 loadFormat=F_bitmap;
                 bitmap=file_buffer+2; // length: 8000
                 screen_ram=dummy_screen;
                 break;
-                    
+
             case 9000: // bitmap + ScreenRAM
                 hasLoadAddr=0;
                 loadFormat=F_hires;
                 bitmap=file_buffer+0; // length: 8000
                 screen_ram=file_buffer+8000; // length: 1000
                 break;
-                    
+
             case 9002: // bitmap + ScreenRAM + loadaddr
                 hasLoadAddr=1;
                 loadFormat=F_hires;
                 bitmap=file_buffer+2; // length: 8000
                 screen_ram=file_buffer+8002; // length: 1000
                 break;
-                    
+
             case 10001: // multicolor
                 hasLoadAddr=0;
                 loadFormat=F_multi;
@@ -2647,7 +2647,7 @@ void Load_C64(T_IO_Context * context)
                 color_ram=file_buffer+9000; // length: 1000
                 background=file_buffer+10000; // only 1
                 break;
-                    
+
             case 10003: // multicolor + loadaddr
                 hasLoadAddr=1;
                 loadFormat=F_multi;
@@ -2668,7 +2668,7 @@ void Load_C64(T_IO_Context * context)
                 color_ram=file_buffer+9275; // length: 1000
                 background=file_buffer+10275; // only 1
                 break;
-                
+
             case 17472: // FLI (BlackMail)
                 hasLoadAddr=0;
                 loadFormat=F_fli;
@@ -2678,7 +2678,7 @@ void Load_C64(T_IO_Context * context)
                 screen_ram=file_buffer+1280; // length: 8192
                 bitmap=file_buffer+9472; // length: 8000
                 break;
-                
+
             case 17474: // FLI (BlackMail) + loadaddr
                 hasLoadAddr=1;
                 loadFormat=F_fli;
@@ -2688,16 +2688,16 @@ void Load_C64(T_IO_Context * context)
                 screen_ram=file_buffer+1282; // length: 8192
                 bitmap=file_buffer+9474; // length: 8000
                 break;
-                
+
             default:
                 File_error = 1;
                 free(file_buffer);
                 return;
         }
-        
+
         if (context->Ratio == PIXEL_WIDE)
             width=160;
-        
+
         // Write detailed format in comment
         strcpy(context->Comment, c64_format_names[loadFormat]);
         if (hasLoadAddr)
@@ -2711,7 +2711,7 @@ void Load_C64(T_IO_Context * context)
         {
             sprintf(context->Comment+strlen(context->Comment),", no addr");
         }
-        
+
         Pre_load(context, width, height, file_size, FORMAT_C64, context->Ratio,0); // Do this as soon as you can
 
         memcpy(context->Palette,pal,48); // this set the software palette for grafx2
@@ -2720,11 +2720,11 @@ void Load_C64(T_IO_Context * context)
         context->Palette[16].R=20;
         context->Palette[16].G=20;
         context->Palette[16].B=20;
-        
-        context->Width = width ;                
+
+        context->Width = width ;
         context->Height = height;
         context->Transparent_color=16;
-                
+
         if(loadFormat==F_fli)
         {
             Load_C64_fli(context,bitmap,screen_ram,color_ram,background);
@@ -2738,11 +2738,11 @@ void Load_C64(T_IO_Context * context)
         {
             Load_C64_hires(context,bitmap,screen_ram);
         }
-        
+
         File_error = 0;
-        
+
         free(file_buffer);
-        
+
     }
     else
         File_error = 1;
@@ -2769,23 +2769,23 @@ int Save_C64_window(byte *saveWhat, byte *loadAddr)
         "$C000",
         "$E000"
     };
-       
+
     Open_window(200,120,"c64 settings");
     Window_set_normal_button(110,100,80,15,"Save",1,1,SDLK_RETURN); // 1
     Window_set_normal_button(10,100,80,15,"Cancel",1,1,SDLK_ESCAPE); // 2
-    
+
     Print_in_window(13,18,"Data:",MC_Dark,MC_Light);
     what=Window_set_dropdown_button(10,28,90,15,70,what_label[*saveWhat],1, 0, 1, LEFT_SIDE,0); // 3
     Window_dropdown_clear_items(what);
     for (i=0; i<sizeof(what_label)/sizeof(what_label[0]); i++)
         Window_dropdown_add_item(what,i,what_label[i]);
-    
+
     Print_in_window(113,18,"Address:",MC_Dark,MC_Light);
     addr=Window_set_dropdown_button(110,28,70,15,70,address_label[*loadAddr/32],1, 0, 1, LEFT_SIDE,0); // 4
     Window_dropdown_clear_items(addr);
     for (i=0; i<sizeof(address_label)/sizeof(address_label[0]); i++)
         Window_dropdown_add_item(addr,i,address_label[i]); 
-    
+
     Update_window_area(0,0,Window_width,Window_height); 
     Display_cursor();
 
@@ -2798,16 +2798,16 @@ int Save_C64_window(byte *saveWhat, byte *loadAddr)
                 *saveWhat=Window_attribute2;
                 //printf("what=%d\n",Window_attribute2);
                 break;
-            
+
             case 4: // Load addr
                 *loadAddr=Window_attribute2*32;
                 //printf("addr=$%02x00 (%d)\n",loadAddr,Window_attribute2);
                 break;
-            
+
             case 0: break;
         }
     }while(button!=1 && button!=2);
-    
+
     Close_window();
     Display_cursor();
     return button==1;
@@ -2820,16 +2820,16 @@ int Save_C64_hires(T_IO_Context *context, char *filename, byte saveWhat, byte lo
     dword cusage[256];
     byte screen_ram[1000],bitmap[8000];
     FILE *file;
-    
+
     for(x=0;x<1000;x++)screen_ram[x]=1; // init colormem to black/white
-  
+
     for(cy=0; cy<25; cy++) // Character line, 25 lines
     {
         for(cx=0; cx<40; cx++) // Character column, 40 columns
         {
             for(i=0;i<256;i++)
                 cusage[i]=0;
-            
+
             numcolors=Count_used_colors_area(cusage,cx*8,cy*8,8,8);
             if (numcolors>2)
             {
@@ -2854,9 +2854,9 @@ int Save_C64_hires(T_IO_Context *context, char *filename, byte saveWhat, byte lo
                 {
                   c1=i;
                 }
-            }            
+            }
             screen_ram[cx+cy*40]=(c2<<4)|c1;
-      
+
             for(y=0; y<8; y++)
             {
                 bits=0;
@@ -2879,18 +2879,18 @@ int Save_C64_hires(T_IO_Context *context, char *filename, byte saveWhat, byte lo
             }
         }
     }
-  
+
     file = fopen(filename,"wb");
-  
+
     if(!file)
     {
         Warning_message("File open failed");
         File_error = 1;
         return 1;
     }
-    
+
     setvbuf(file, NULL, _IOFBF, 64*1024);
-    
+
     if (loadAddr)
     {
         Write_byte(file,0);
@@ -2900,7 +2900,7 @@ int Save_C64_hires(T_IO_Context *context, char *filename, byte saveWhat, byte lo
         Write_bytes(file,bitmap,8000);
     if (saveWhat==0 || saveWhat==2)
         Write_bytes(file,screen_ram,1000);
-    
+
     fclose(file);
     return 0;
 }
@@ -2916,82 +2916,82 @@ int Save_C64_multi(T_IO_Context *context, char *filename, byte saveWhat, byte lo
     */
 
     int cx,cy,x,y,c[4]={0,0,0,0},color,lut[16],bits,pixel,pos=0;
-	int cand,n,used;
-	word cols, candidates = 0, invalids = 0;
+    int cand,n,used;
+    word cols, candidates = 0, invalids = 0;
 
-	// FIXME allocating this on the stack is not a good idea. On some platforms
-	// the stack has a rather small size...
+    // FIXME allocating this on the stack is not a good idea. On some platforms
+    // the stack has a rather small size...
     byte bitmap[8000],screen_ram[1000],color_ram[1000];
 
     word numcolors,count;
     dword cusage[256];
     byte i,background=0;
     FILE *file;
-    
+
     numcolors=Count_used_colors(cusage);
-  
+
     count=0;
-  
-	// Detect the ackground color the image should be using. It's the one that's
-	// used on all tiles having 4 colors.
-	for(y=0;y<200;y=y+8)
-	{
-		for (x = 0; x<160; x=x+4)
-		{
-			cols = 0;
 
-			// Compute the usage count of each color in the tile
-			for (cy=0;cy<8;cy++)
-			for (cx=0;cx<4;cx++)
-			{
-				pixel=Get_pixel(context, x+cx,y+cy);
-				cols |= (1 << pixel);
-			}
+    // Detect the ackground color the image should be using. It's the one that's
+    // used on all tiles having 4 colors.
+    for(y=0;y<200;y=y+8)
+    {
+        for (x = 0; x<160; x=x+4)
+        {
+            cols = 0;
 
-			cand = 0;
-			used = 0;
-			// Count the number of used colors in the tile
-			for (n = 0; n<16; n++)
-			{
-				if (cols & (1 << pixel))
-					used++;
-			}
+            // Compute the usage count of each color in the tile
+            for (cy=0;cy<8;cy++)
+            for (cx=0;cx<4;cx++)
+            {
+                pixel=Get_pixel(context, x+cx,y+cy);
+                cols |= (1 << pixel);
+            }
 
-			if (used>3)
-			{
-				// This is a tile that uses the background color (and 3 others)
+            cand = 0;
+            used = 0;
+            // Count the number of used colors in the tile
+            for (n = 0; n<16; n++)
+            {
+                if (cols & (1 << pixel))
+                    used++;
+            }
 
-				// Try to guess which color is most likely the background one
-				for (n = 0; n<16; n++)
-				{
-					if ((cols & (1 << n)) && !((candidates | invalids) & (1 << n))) {
-						// This color was not used in any other tile yet,
-						// but it could be the background one.
-						candidates |= 1 << n;
-					}
+            if (used>3)
+            {
+                // This is a tile that uses the background color (and 3 others)
 
-					if ((cols & 1 << n) == 0 ) {
-						// This color isn't used at all in this tile:
-						// Can't be the global 
-						invalids |= 1 << n;
-					}
+                // Try to guess which color is most likely the background one
+                for (n = 0; n<16; n++)
+                {
+                    if ((cols & (1 << n)) && !((candidates | invalids) & (1 << n))) {
+                        // This color was not used in any other tile yet,
+                        // but it could be the background one.
+                        candidates |= 1 << n;
+                    }
 
-					if (candidates & (1 << n)) {
-						// We have a candidate, mark it as such
-						cand++;
-					}
-				}
+                    if ((cols & 1 << n) == 0 ) {
+                        // This color isn't used at all in this tile:
+                        // Can't be the global 
+                        invalids |= 1 << n;
+                    }
 
-				// After checking the constraints for this tile, do we have
-				// candidate background colors left ?
-				if (cand==0)
-				{
-					Warning_message("No possible global background color found");
-					return 1;
-				}
-			}
-		}
-	}
+                    if (candidates & (1 << n)) {
+                        // We have a candidate, mark it as such
+                        cand++;
+                    }
+                }
+
+                // After checking the constraints for this tile, do we have
+                // candidate background colors left ?
+                if (cand==0)
+                {
+                    Warning_message("No possible global background color found");
+                    return 1;
+                }
+            }
+        }
+    }
 
 	// Now just pick the first valid candidate
 	for (n = 0; n<16; n++)
@@ -3198,7 +3198,7 @@ void Test_SCR(T_IO_Context * context)
     // The palette file can be tested, if it exists and have the right size it's
     // ok. But if it's not there the pixel data may still be valid. And we can't
     // use the filesize as this depends on the screen format.
-    
+
     // An AMSDOS header would be a good indication but in some cases it may not
     // be there
     (void)context; // unused
@@ -3221,10 +3221,10 @@ void Load_SCR(T_IO_Context * context)
     // As if this wasn't enough, Advanced OCP Art Studio, the reference tool on
     // Amstrad, can use RLE packing when saving files, meaning we also have to
     // handle that.
-    
+
     // All this mess enforces us to load (and unpack if needed) the file to a
     // temporary 32k buffer before actually decoding it.
-    
+
     // 1) Seek for a palette
     // 2) If palette found get screenmode from there, else ask user
     // 3) ask user for screen size (or register values)
@@ -3242,7 +3242,7 @@ void Save_SCR(T_IO_Context * context)
     // TODO : Add OCP packing support
     // TODO : Add possibility to include AMSDOS header, with proper loading
     // address guessed from r12/r13 values.
-    
+
     unsigned char* output;
     unsigned long outsize;
     unsigned char r1;
@@ -3301,6 +3301,8 @@ void Test_CM5(T_IO_Context * context)
     if (file_size == 2049)
       File_error = 0;
   }
+
+  fclose(file);
 
   // TODO: check existence of a .SCR file with the same name
 }
@@ -3439,8 +3441,6 @@ void Load_CM5(T_IO_Context* context)
 		ext[1] = (idx & 2) ? 'f':'F';
 		ext[2] = (idx & 4) ? 'x':'X';
 
-		printf("trying to load %s...\n", filename);
-
   		file = fopen(filename, "rb");
   	} while(file == NULL);
   }
@@ -3537,4 +3537,365 @@ void Save_CM5(T_IO_Context* context)
   fclose(file);
   File_error = 0;
   
+}
+
+
+/* Amstrad CPC 'PPH' for Perfect Pix.
+// This is a format designed by Rhino.
+// There are 3 modes:
+// - Mode 'R': 1:1 pixels, 16 colors from the CPC 27 color palette.
+//   (this is implemented on CPC as two pictures with wide pixels, the "odd" one
+//   being shifted half a pixel to the right), and flipping)
+// - Mode 'B0': wide pixels, up to 126 out of 378 colors.
+//   (this is implemented as two pictures with wide pixels, sharing the same 16
+//   color palette, and flipping)
+// - Mode 'B1': 1:1 pixels, 1 fixed color, up to 34 palettes of 9 colors
+//   (actually 4 colors + flipping)
+//
+// - The standard CPC formats can also be encapsulated into a PPH file.
+*/
+void Test_PPH(T_IO_Context * context)
+{
+  FILE *file;
+  unsigned char buffer[MAX_PATH_CHARACTERS];
+  long file_size;
+  int w;
+  int expected;
+
+  Get_full_filename(buffer, context->File_name, context->File_directory);
+
+  File_error = 1;
+
+  if ((file = fopen(buffer, "rb")))
+  {
+    // First check file size is large enough to hold the header
+    file_size = File_length_file(file);
+    if (file_size < 11) {
+      File_error = 1;
+      goto abort;
+    }
+
+    // File is large enough for the header, now check if the data makes some sense
+    fread(buffer, 1, 6, file);
+    if (buffer[0] > 5) {
+        // Unknown mode
+        File_error = 2;
+        goto abort;
+    }
+
+    w = buffer[1] | (buffer[2] << 8);
+    if (w < 2 || w > 384) {
+        // Invalid width
+        File_error = 3;
+        goto abort;
+    }
+
+    w = buffer[3] | (buffer[4] << 8);
+    if (w < 1 || w > 272) {
+        // Invalid height
+        File_error = 4;
+        goto abort;
+    }
+
+    if (buffer[5] < 1 || buffer[5] > 28)
+    {
+        // Invalid palettes count
+        File_error = 5;
+        goto abort;
+    }
+    expected = 6; // Size of header
+    switch(buffer[0])
+    {
+        case 0:
+        case 3:
+        case 4:
+            // Palette size should be 16 bytes, only 1 palette.
+            if (buffer[5] != 1) {
+                File_error = 7;
+                goto abort;
+            }
+            expected += 16;
+            break;
+
+        case 1:
+        case 5:
+            expected += buffer[5] * 5 - 1;
+            break;
+
+        case 2:
+            // Palete size should be 2 bytes
+            if (buffer[5] != 1) {
+                File_error = 7;
+                goto abort;
+            }
+            expected += 2;
+            break;
+    }
+
+    if (file_size != expected)
+    {
+        File_error = 6;
+        goto abort;
+    }
+    File_error = 0;
+  } else {
+    File_error = 8;
+  }
+
+abort:
+  fclose(file);
+
+  // TODO: check existence of .ODD/.EVE files with the same name
+}
+
+
+void Load_PPH(T_IO_Context* context)
+{
+  FILE *file;
+  FILE *feven;
+  char filename[MAX_PATH_CHARACTERS];
+
+  // Read in the header
+  uint8_t mode;
+  uint16_t width;
+  uint16_t height;
+  uint8_t npal;
+  int i,j;
+  uint8_t a,b,c,d;
+  int file_size;
+  char* ext;
+  uint8_t pl[16];
+
+  static const T_Components CPCPAL[27] =
+  {
+      { 0x00, 0x02, 0x01 }, { 0x00, 0x02, 0x6B }, { 0x0C, 0x02, 0xF4 },
+      { 0x6C, 0x02, 0x01 }, { 0x69, 0x02, 0x68 }, { 0x6C, 0x02, 0xF2 },
+      { 0xF3, 0x05, 0x06 }, { 0xF0, 0x02, 0x68 }, { 0xF3, 0x02, 0xF4 },
+      { 0x02, 0x78, 0x01 }, { 0x00, 0x78, 0x68 }, { 0x0C, 0x7B, 0xF4 },
+      { 0x6E, 0x7B, 0x01 }, { 0x6E, 0x7D, 0x6B }, { 0x6E, 0x7B, 0xF6 },
+      { 0xF3, 0x7D, 0x0D }, { 0xF3, 0x7D, 0x6B }, { 0xFA, 0x80, 0xF9 },
+      { 0x02, 0xF0, 0x01 }, { 0x00, 0xF3, 0x6B }, { 0x0F, 0xF3, 0xF2 },
+      { 0x71, 0xF5, 0x04 }, { 0x71, 0xF3, 0x6B }, { 0x71, 0xF3, 0xF4 },
+      { 0xF3, 0xF3, 0x0D }, { 0xF3, 0xF3, 0x6D }, { 0xFF, 0xF3, 0xF9 }
+  };
+
+  Get_full_filename(filename, context->File_name, context->File_directory);
+
+  if (!(file = fopen(filename, "rb")))
+  {
+      File_error = 1;
+      return;
+  }
+
+  file_size=File_length_file(file);
+
+  Read_byte(file, &mode);
+  Read_word_le(file, &width);
+  Read_word_le(file, &height);
+  Read_byte(file, &npal);
+
+  if (npal > 16)
+      npal = 16;
+
+  // Switch to the proper aspect ratio
+  switch (mode)
+  {
+      case 0:
+      case 4:
+        context->Ratio = PIXEL_WIDE;
+        width /= 2;
+        break;
+
+      case 2:
+        context->Ratio = PIXEL_TALL;
+        break;
+
+      case 1:
+      case 5:
+      case 3:
+        context->Ratio = PIXEL_SIMPLE;
+        break;
+  }
+
+  Pre_load(context, width, height, file_size, FORMAT_PPH, context->Ratio, 0);
+
+  context->Width = width;
+  context->Height = height;
+
+  // First of all, detect the mode
+  // 0, 1, 2 > Load as with SCR files?
+  // R(3)    > Load as single layer, square pixels, 16 colors
+  // B0(4)   > Load as single layer, wide pixels, expand palette with colorcycling
+  // B1(5)   > Load as ???
+  //           Maybe special mode similar to mode5, with 2 layers + auto-flicker?
+
+  switch (mode)
+  {
+      case 0:
+      case 3: // R
+          // 16-color palette
+          for (i = 0; i < 16; i++)
+          {
+              uint8_t color;
+              Read_byte(file, &color);
+              context->Palette[i] = CPCPAL[color];
+          }
+          break;
+
+      case 1:
+      case 5: // B1
+      {
+          // Single or multiple 4-color palettes
+          uint8_t base[4];
+          for (j = 0; j < npal; j++)
+          {
+            for (i = 0; i < 4; i++)
+            {
+              Read_byte(file,&base[i]);
+            }
+            for (i = 0; i < 16; i++)
+            {
+              context->Palette[i + 16*j].R
+                  = (CPCPAL[base[i & 3]].R + CPCPAL[base[i >> 2]].R) / 2;
+              context->Palette[i + 16*j].G
+                  = (CPCPAL[base[i & 3]].G + CPCPAL[base[i >> 2]].G) / 2;
+              context->Palette[i + 16*j].B
+                  = (CPCPAL[base[i & 3]].B + CPCPAL[base[i >> 2]].B) / 2;
+            }
+            // TODO this byte marks where this palette stops being used and the
+            // next starts. We must handle this!
+            Read_byte(file,&pl[j]);
+          }
+          pl[npal - 1] = 255;
+          break;
+      }
+
+      case 2:
+          // Single 2-color palette
+          break;
+
+      case 4: // B0
+      {
+          // Single 16-color palette + flipping, need to expand palette and
+          // setup colorcycling ranges.
+          uint8_t base[16];
+          for (i = 0; i < 16; i++)
+          {
+              Read_byte(file,&base[i]);
+          }
+
+          for (i = 0; i < 256; i++)
+          {
+              context->Palette[i].R
+                  = (CPCPAL[base[i & 15]].R + CPCPAL[base[i >> 4]].R) / 2;
+              context->Palette[i].G
+                  = (CPCPAL[base[i & 15]].G + CPCPAL[base[i >> 4]].G) / 2;
+              context->Palette[i].B
+                  = (CPCPAL[base[i & 15]].B + CPCPAL[base[i >> 4]].B) / 2;
+          }
+      }
+      break;
+  }
+
+  fclose(file);
+
+  // Load the picture data
+  // There are two pages, each storing bytes in the CPC vram format but lines in
+  // linear order.
+  ext = filename + strlen(filename) - 3;
+  ext[0] = 'O';
+  ext[1] = 'D';
+  ext[2] = 'D';
+
+  file = fopen(filename, "rb");
+
+  ext[0] = 'E';
+  ext[1] = 'V';
+  ext[2] = 'E';
+
+  feven = fopen(filename, "rb");
+
+  c = 0;
+  d = 0;
+
+  for (j = 0; j < height; j++)
+  {
+      for (i = 0; i < width;)
+      {
+          uint8_t even, odd;
+          Read_byte(feven, &even);
+          Read_byte(file, &odd);
+
+          switch (mode)
+          {
+              case 4:
+                a = ((even & 0x02) << 2) | ((even & 0x08) >> 2)
+                  | ((even & 0x20) >> 3) | ((even & 0x80) >> 7);
+                a <<= 4;
+                a |= ((odd & 0x02) << 2) | (( odd & 0x08) >> 2)
+                  | (( odd & 0x20) >> 3) | (( odd & 0x80) >> 7);
+
+                b = ((even & 0x01) << 3) | ((even & 0x04) >> 1)
+                  | ((even & 0x10) >> 2) | ((even & 0x40) >> 6);
+                b <<= 4;
+                b |= ((odd & 0x01) << 3) | (( odd & 0x04) >> 1)
+                  | (( odd & 0x10) >> 2) | (( odd & 0x40) >> 6);
+
+                Set_pixel(context, i++, j, a);
+                Set_pixel(context, i++, j, b);
+                break;
+
+              case 3:
+                a = ((even & 0x02) << 2) | ((even & 0x08) >> 2)
+                  | ((even & 0x20) >> 3) | ((even & 0x80) >> 7);
+                b = (( odd & 0x02) << 2) | (( odd & 0x08) >> 2)
+                  | (( odd & 0x20) >> 3) | (( odd & 0x80) >> 7);
+                c = ((even & 0x01) << 3) | ((even & 0x04) >> 1)
+                  | ((even & 0x10) >> 2) | ((even & 0x40) >> 6);
+                d = (( odd & 0x01) << 3) | (( odd & 0x04) >> 1)
+                  | (( odd & 0x10) >> 2) | (( odd & 0x40) >> 6);
+                Set_pixel(context, i++, j, j & 1 ? b : a);
+                Set_pixel(context, i++, j, j & 1 ? a : b);
+                Set_pixel(context, i++, j, j & 1 ? d : c);
+                Set_pixel(context, i++, j, j & 1 ? c : d);
+                break;
+
+              case 5:
+                if (d > pl[c])
+                {
+                    d = 0;
+                    c++;
+                }
+                a = ((even & 0x80) >> 6) | ((even & 0x08) >> 3);
+                b = (( odd & 0x80) >> 6) | (( odd & 0x08) >> 3);
+                Set_pixel(context, i++, j, a + (b << 2) + c * 16);
+                a = ((even & 0x40) >> 5) | ((even & 0x04) >> 2);
+                b = (( odd & 0x40) >> 5) | (( odd & 0x04) >> 2);
+                Set_pixel(context, i++, j, a + (b << 2) + c * 16);
+                a = ((even & 0x20) >> 4) | ((even & 0x02) >> 1);
+                b = (( odd & 0x20) >> 4) | (( odd & 0x02) >> 1);
+                Set_pixel(context, i++, j, a + (b << 2) + c * 16);
+                a = ((even & 0x10) >> 3) | ((even & 0x01) >> 0);
+                b = (( odd & 0x10) >> 3) | (( odd & 0x01) >> 0);
+                Set_pixel(context, i++, j, a + (b << 2) + c * 16);
+
+                break;
+
+              default:
+                File_error = 2;
+                return;
+          }
+
+      }
+      d++;
+  }
+  fclose(file);
+  fclose(feven);
+
+  File_error = 0;
+}
+
+void Save_PPH(T_IO_Context* context)
+{
+    // TODO
 }

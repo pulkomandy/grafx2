@@ -135,6 +135,7 @@ enum FILE_FORMATS
   FORMAT_GPL,
   FORMAT_SCR,
   FORMAT_CM5,
+  FORMAT_PPH,
   FORMAT_XPM,
   FORMAT_MISC, ///< Must be last of enum: others formats recognized by SDL_image
 };
