@@ -3649,6 +3649,16 @@ abort:
 }
 
 
+static uint8_t pph_blend(uint8_t a, uint8_t b)
+{
+	uint32_t h,l;
+	if (a > b) { h = a; l = b; }
+	else       { h = b; l = a; }
+
+	return (23 * h + 9 * l) / 32;
+}
+
+
 void Load_PPH(T_IO_Context* context)
 {
   FILE *file;
@@ -3755,12 +3765,12 @@ void Load_PPH(T_IO_Context* context)
             }
             for (i = 0; i < 16; i++)
             {
-              context->Palette[i + 16*j].R
-                  = (CPCPAL[base[i & 3]].R + CPCPAL[base[i >> 2]].R) / 2;
-              context->Palette[i + 16*j].G
-                  = (CPCPAL[base[i & 3]].G + CPCPAL[base[i >> 2]].G) / 2;
-              context->Palette[i + 16*j].B
-                  = (CPCPAL[base[i & 3]].B + CPCPAL[base[i >> 2]].B) / 2;
+              context->Palette[i + 16*j].R = pph_blend(
+                  CPCPAL[base[i & 3]].R, CPCPAL[base[i >> 2]].R);
+              context->Palette[i + 16*j].G = pph_blend(
+                  CPCPAL[base[i & 3]].G, CPCPAL[base[i >> 2]].G);
+              context->Palette[i + 16*j].B = pph_blend(
+                  CPCPAL[base[i & 3]].B, CPCPAL[base[i >> 2]].B);
             }
             // TODO this byte marks where this palette stops being used and the
             // next starts. We must handle this!
@@ -3786,12 +3796,12 @@ void Load_PPH(T_IO_Context* context)
 
           for (i = 0; i < 256; i++)
           {
-              context->Palette[i].R
-                  = (CPCPAL[base[i & 15]].R + CPCPAL[base[i >> 4]].R) / 2;
-              context->Palette[i].G
-                  = (CPCPAL[base[i & 15]].G + CPCPAL[base[i >> 4]].G) / 2;
-              context->Palette[i].B
-                  = (CPCPAL[base[i & 15]].B + CPCPAL[base[i >> 4]].B) / 2;
+              context->Palette[i].R = pph_blend(
+                  CPCPAL[base[i & 15]].R, CPCPAL[base[i >> 4]].R);
+              context->Palette[i].G = pph_blend(
+                  CPCPAL[base[i & 15]].G, CPCPAL[base[i >> 4]].G);
+              context->Palette[i].B = pph_blend(
+                  CPCPAL[base[i & 15]].B, CPCPAL[base[i >> 4]].B);
           }
       }
       break;
@@ -3861,7 +3871,7 @@ void Load_PPH(T_IO_Context* context)
                 break;
 
               case 5:
-                if (d > pl[c])
+                if (d >= pl[c])
                 {
                     d = 0;
                     c++;
@@ -3898,4 +3908,15 @@ void Load_PPH(T_IO_Context* context)
 void Save_PPH(T_IO_Context* context)
 {
     // TODO
+
+    // Detect mode
+    // Wide pixels => B0 (4)
+    // Square pixels:
+    // - 16 colors used => R
+    // - more colors used => B1 (if <16 colors per line)
+
+    // Check palette
+    // B0: use diagonal: 0, 17, 34, ... (assume the other are mixes)
+    // R: use 16 used colors (or 16 first?)
+    // B1: find the 16 colors used in a line? Or assume they are in-order already?
 }
