@@ -235,7 +235,8 @@ void Set_pixel(T_IO_Context *context, short x_pos, short y_pos, byte color)
         }
         else if (context->Ratio == PIXEL_TALL && 
           Pixel_ratio != PIXEL_TALL &&
-          Pixel_ratio != PIXEL_TALL2)
+          Pixel_ratio != PIXEL_TALL2 &&
+          Pixel_ratio != PIXEL_TALL3)
         {
           context->Preview_bitmap[x_pos/context->Preview_factor_X + (y_pos/context->Preview_factor_Y*2)*PREVIEW_WIDTH*Menu_factor_X]=color;
           context->Preview_bitmap[x_pos/context->Preview_factor_X + (y_pos/context->Preview_factor_Y*2+1)*PREVIEW_WIDTH*Menu_factor_X]=color;
@@ -437,7 +438,8 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
         width*=2;
       else if (ratio == PIXEL_TALL && 
           Pixel_ratio != PIXEL_TALL &&
-          Pixel_ratio != PIXEL_TALL2)
+          Pixel_ratio != PIXEL_TALL2 &&
+          Pixel_ratio != PIXEL_TALL3)
         height*=2;
       
       context->Preview_factor_X=Round_div_max(width,120*Menu_factor_X);
@@ -920,7 +922,8 @@ void Load_image(T_IO_Context *context)
         width*=2;
       else if (context->Ratio == PIXEL_TALL && 
           Pixel_ratio != PIXEL_TALL &&
-          Pixel_ratio != PIXEL_TALL2)
+          Pixel_ratio != PIXEL_TALL2 &&
+          Pixel_ratio != PIXEL_TALL3)
         height*=2;
       
       for (y_pos=0; y_pos<height;y_pos++)
@@ -1279,7 +1282,7 @@ void Init_context_layered_image(T_IO_Context * context, char *file_name, char *f
   context->Background_transparent=Main_backups->Pages->Background_transparent;
   if (Pixel_ratio == PIXEL_WIDE || Pixel_ratio == PIXEL_WIDE2)
     context->Ratio=PIXEL_WIDE;
-  else if (Pixel_ratio == PIXEL_TALL || Pixel_ratio == PIXEL_TALL2)
+  else if (Pixel_ratio == PIXEL_TALL || Pixel_ratio == PIXEL_TALL2 || Pixel_ratio == PIXEL_TALL3)
     context->Ratio=PIXEL_TALL;
   else
     context->Ratio=PIXEL_SIMPLE;

@@ -4275,6 +4275,7 @@ void Save_PNG(T_IO_Context * context)
               break;
             case PIXEL_TALL:
             case PIXEL_TALL2:
+            case PIXEL_TALL3:
               png_set_pHYs(png_ptr, info_ptr, 6000, 3000, PNG_RESOLUTION_METER);
               break;
             default:

@@ -1957,6 +1957,7 @@ void Button_Resolution(void)
     "Triple    (3x3)",
     "Wide2     (4x2)",
     "Tall2     (2x4)",
+    "Tall3     (3x4)",
     "Quadruple (4x4)"};
 
   Open_window(299,190,"Picture & screen sizes");
@@ -3255,7 +3256,8 @@ void Load_picture(byte image)
           ((context.Ratio == PIXEL_WIDE &&
             Pixel_ratio != PIXEL_WIDE && Pixel_ratio != PIXEL_WIDE2) ||
             (context.Ratio == PIXEL_TALL &&
-            Pixel_ratio != PIXEL_TALL && Pixel_ratio != PIXEL_TALL2)))
+            Pixel_ratio != PIXEL_TALL && Pixel_ratio != PIXEL_TALL2 &&
+            Pixel_ratio != PIXEL_TALL3)))
         {
           Init_mode_video(
             Video_mode[Current_resolution].Width,
@@ -3357,7 +3359,8 @@ void Button_Reload(void)
         ((context.Ratio == PIXEL_WIDE &&
           Pixel_ratio != PIXEL_WIDE && Pixel_ratio != PIXEL_WIDE2) ||
           (context.Ratio == PIXEL_TALL &&
-          Pixel_ratio != PIXEL_TALL && Pixel_ratio != PIXEL_TALL2)))
+          Pixel_ratio != PIXEL_TALL && Pixel_ratio != PIXEL_TALL2 &&
+          Pixel_ratio != PIXEL_TALL3)))
       {
         Init_mode_video(
           Video_mode[Current_resolution].Width,

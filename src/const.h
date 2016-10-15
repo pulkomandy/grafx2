@@ -173,6 +173,7 @@ enum PIXEL_RATIO
     PIXEL_TRIPLE,   ///< Use really big pixels (3x3)
     PIXEL_WIDE2,    ///< Use big wide pixels (4x2)
     PIXEL_TALL2,    ///< Use big tall pixels (2x4)
+    PIXEL_TALL3,    ///< Use big tall pixels (3x4)
     PIXEL_QUAD,     ///< Use really giant pixels (4x4). You need to have a screen resolution at least 1280x800 to use this one
     PIXEL_MAX       ///< Number of elements in enum
 };

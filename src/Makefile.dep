@@ -30,8 +30,8 @@ $(OBJDIR)/filesel.o: filesel.c const.h struct.h global.h misc.h errors.h io.h \
  help.h filesel.h
 $(OBJDIR)/graph.o: graph.c global.h struct.h const.h engine.h buttons.h pages.h \
  errors.h sdlscreen.h graph.h misc.h pxsimple.h pxtall.h pxwide.h \
- pxdouble.h pxtriple.h pxwide2.h pxtall2.h pxquad.h windows.h input.h \
- brush.h tiles.h
+ pxdouble.h pxtriple.h pxwide2.h pxtall2.h pxtall3.h pxquad.h windows.h \
+ input.h brush.h tiles.h
 $(OBJDIR)/help.o: help.c const.h struct.h global.h misc.h engine.h helpfile.h \
  help.h sdlscreen.h text.h keyboard.h windows.h input.h hotkeys.h \
  errors.h pages.h factory.h
@@ -83,6 +83,8 @@ $(OBJDIR)/pxtall.o: pxtall.c global.h struct.h const.h sdlscreen.h misc.h graph.
  pxtall.h pxsimple.h
 $(OBJDIR)/pxtall2.o: pxtall2.c global.h struct.h const.h sdlscreen.h misc.h graph.h \
  pxtall2.h
+$(OBJDIR)/pxtall3.o: pxtall3.c global.h struct.h const.h sdlscreen.h misc.h graph.h \
+ pxtall3.h
 $(OBJDIR)/pxtriple.o: pxtriple.c global.h struct.h const.h sdlscreen.h misc.h \
  graph.h pxtriple.h
 $(OBJDIR)/pxwide.o: pxwide.c global.h struct.h const.h sdlscreen.h misc.h graph.h \

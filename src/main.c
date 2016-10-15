@@ -205,6 +205,7 @@ enum CMD_PARAMS
     CMDPARAM_PIXELRATIO_TRIPLE,
     CMDPARAM_PIXELRATIO_QUAD,
     CMDPARAM_PIXELRATIO_TALL2,
+    CMDPARAM_PIXELRATIO_TALL3,
     CMDPARAM_PIXELRATIO_WIDE2,
     CMDPARAM_RGB,
     CMDPARAM_SKIN
@@ -225,6 +226,7 @@ struct {
     {"triple", CMDPARAM_PIXELRATIO_TRIPLE},
     {"quadruple", CMDPARAM_PIXELRATIO_QUAD},
     {"tall2", CMDPARAM_PIXELRATIO_TALL2},
+    {"tall3", CMDPARAM_PIXELRATIO_TALL3},
     {"wide2", CMDPARAM_PIXELRATIO_WIDE2},
     {"rgb", CMDPARAM_RGB},
     {"skin", CMDPARAM_SKIN}
@@ -327,6 +329,9 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
         break;
       case CMDPARAM_PIXELRATIO_TALL2:
         Pixel_ratio = PIXEL_TALL2;
+        break;
+      case CMDPARAM_PIXELRATIO_TALL3:
+        Pixel_ratio = PIXEL_TALL3;
         break;
       case CMDPARAM_PIXELRATIO_WIDE2:
         Pixel_ratio = PIXEL_WIDE2;

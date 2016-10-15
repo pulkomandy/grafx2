@@ -45,6 +45,7 @@
 #include "pxtriple.h"
 #include "pxwide2.h"
 #include "pxtall2.h"
+#include "pxtall3.h"
 #include "pxquad.h"
 #include "windows.h"
 #include "input.h"
@@ -261,6 +262,10 @@ try_again:
           pix_width=2;
           pix_height=4;
       break;
+      case PIXEL_TALL3:
+          pix_width=3;
+          pix_height=4;
+      break;
       case PIXEL_QUAD:
           pix_width=4;
           pix_height=4;
@@ -377,6 +382,9 @@ try_again:
         break;
         case PIXEL_TALL2:
 			SETPIXEL(tall2)
+        break;
+        case PIXEL_TALL3:
+			SETPIXEL(tall3)
         break;
         case PIXEL_QUAD:
 			SETPIXEL(quad)

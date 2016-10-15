@@ -3261,6 +3261,7 @@ void Save_SCR(T_IO_Context * context)
             break;
         case PIXEL_TALL:
         case PIXEL_TALL2:
+        case PIXEL_TALL3:
             cpc_mode = 2;
             break;
         default:
