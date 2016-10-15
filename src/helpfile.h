@@ -67,7 +67,7 @@ static const T_Help_table helptable_about[] =
 #else
   HELP_TEXT ("")
 #endif
-  HELP_TEXT ("Copyright 2007-2012, the Grafx2 project team")
+  HELP_TEXT ("Copyright 2007-2016, the Grafx2 project team")
   HELP_TEXT ("    Copyright 1996-2001, SUNSET DESIGN")
 };
 static const T_Help_table helptable_licence[] =
@@ -382,6 +382,9 @@ static const T_Help_table helptable_credits[] =
   HELP_TEXT ("  Pasi Kallinen")
   HELP_TEXT ("     Better command-line handling")
   HELP_TEXT ("")
+  HELP_TEXT ("  Nic Soudee (zoner / xylem)")
+  HELP_TEXT ("     3:4 pixel mode")
+  HELP_TEXT ("")
   HELP_TEXT ("  DawnBringer")
   HELP_TEXT ("     Lua scripts, image effects")
   HELP_TEXT ("")
@@ -512,14 +515,19 @@ static const T_Help_table helptable_credits[] =
   HELP_TEXT ("")
   HELP_TEXT ("  BMP : Microsoft")
   HELP_TEXT ("  CEL,KCF : K.O.S. (KISekae Set system)")
+  HELP_TEXT ("  CM5 : SyX")
   HELP_TEXT ("  GIF : Compuserve")
+  HELP_TEXT ("  GPL : The GIMP")
   HELP_TEXT ("  IMG : Bivas (W. Wiedmann?)")
   HELP_TEXT ("  IFF : Electronic Arts")
+  HELP_TEXT ("  KOA : Koala Technologies")
+  HELP_TEXT ("  NEO : Atari Corporation")
   HELP_TEXT ("  PAL : ermmh... nobody (?)")
   HELP_TEXT ("  PCX : Z-Soft")
   HELP_TEXT ("  PI1,PC1 : Degas Elite")
   HELP_TEXT ("  PKM : Sunset Design")
   HELP_TEXT ("  PNG : W3C")
+  HELP_TEXT ("  PPH : Rhino / Batman Group")
   HELP_TEXT ("  SCx : Colorix (?)")
   HELP_TEXT ("")
   HELP_TEXT ("")
