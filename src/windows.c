@@ -586,18 +586,18 @@ void Display_layerbar(void)
   }
   if (Menu_bars[MENUBAR_ANIMATION].Visible)
   {
-    char str[8];
+    char str[9];
     // Rest of horizontal line
     Draw_bar_remainder(MENUBAR_ANIMATION, Menu_bars[MENUBAR_ANIMATION].Skin_width);
     // Frame# background rectangle
     // Block((Menu_bars[MENUBAR_ANIMATION].Skin_width)*Menu_factor_X,(0+Menu_bars[MENUBAR_ANIMATION].Top)*Menu_factor_Y+Menu_Y,8*8*Menu_factor_X,8*Menu_factor_Y,MC_Light);
     // Frame #/#
-    snprintf(str, 5, "#%3d", Main_current_layer+1);
-    Print_general((82)*Menu_factor_X,(Menu_bars[MENUBAR_ANIMATION].Top+3)*Menu_factor_Y+Menu_Y,str,MC_Black,MC_Light);
+    snprintf(str, 8, "%3d/%3d", Main_current_layer+1, Main_backups->Pages->Nb_layers);
+    Print_general((59)*Menu_factor_X,(Menu_bars[MENUBAR_ANIMATION].Top+3)*Menu_factor_Y+Menu_Y,str,MC_Black,MC_Light);
     Update_rect(
-      (82)*Menu_factor_X,
+      (59)*Menu_factor_X,
       (Menu_bars[MENUBAR_ANIMATION].Top+3)*Menu_factor_Y+Menu_Y,
-      4*8*Menu_factor_X, 
+      7*8*Menu_factor_X, 
       8*Menu_factor_Y);
   }
 }
