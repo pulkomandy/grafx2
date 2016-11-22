@@ -231,10 +231,10 @@ typedef struct
   word  X_org;       // Inutile
   word  Y_org;       // Inutile
   byte  BitPlanes;
-  byte  Mask;
-  byte  Compression;
-  byte  Pad1;       // Inutile
-  word  Transp_col;
+  byte  Mask;        // 0=none, 1=mask, 2=transp color, 3=Lasso
+  byte  Compression; // 0=none, 1=packbits, 2=vertical RLE
+  byte  Pad1;        // Inutile
+  word  Transp_col;  // transparent color for masking mode 2
   byte  X_aspect;    // Inutile
   byte  Y_aspect;    // Inutile
   word  X_screen;
@@ -438,7 +438,7 @@ int IFF_Skip_section(void)
 }
 
 // ------------------------- Attendre une section -------------------------
-byte IFF_Wait_for(byte * expected_section)
+byte IFF_Wait_for(const char * expected_section)
 {
   // Valeur retournée: 1=Section trouvée, 0=Section non trouvée (erreur)
   byte section_read[4];
@@ -584,12 +584,14 @@ void Load_IFF(T_IO_Context * context)
   short y_pos;
   short counter;
   short line_size;       // Taille d'une ligne en octets
+  short plane_line_size;  // Size of line in bytes for 1 plane
   short real_line_size; // Taille d'une ligne en pixels
   byte  color;
   long  file_size;
   dword dummy;
   byte  is_anim=0;
   int iff_format;
+  int plane;
 
   Get_full_filename(filename, context->File_name, context->File_directory);
 
@@ -617,7 +619,7 @@ void Load_IFF(T_IO_Context * context)
     else
       iff_format = FORMAT_PBM;
     
-    if (!IFF_Wait_for((byte *)"BMHD"))
+    if (!IFF_Wait_for("BMHD"))
       File_error=1;
     Read_dword_be(IFF_file,&dummy);
 
@@ -637,7 +639,7 @@ void Load_IFF(T_IO_Context * context)
       && (Read_word_be(IFF_file,&header.Y_screen))
       && header.Width && header.Height)
     {
-      if ( (header.BitPlanes) && (IFF_Wait_for((byte *)"CMAP")) )
+      if ( (header.BitPlanes) && (IFF_Wait_for("CMAP")) )
       {
         Read_dword_be(IFF_file,&nb_colors);
         nb_colors/=3;
@@ -662,6 +664,8 @@ void Load_IFF(T_IO_Context * context)
 
         if ( (!File_error) && (nb_colors>=2) && (nb_colors<=256) )
         {
+          byte real_bit_planes = header.BitPlanes;
+
           if (header.Mask==1)
             header.BitPlanes++;
 
@@ -769,73 +773,148 @@ void Load_IFF(T_IO_Context * context)
                 if (!memcmp(format,"ILBM",4))    // "ILBM": InterLeaved BitMap
                 {
                   // Calcul de la taille d'une ligne ILBM (pour les images ayant des dimensions exotiques)
-                  if (context->Width & 15)
+                  real_line_size = (context->Width+15) & ~15;
+                  plane_line_size = real_line_size >> 3;  // 8bits per byte
+                  line_size = plane_line_size * header.BitPlanes;
+
+                  switch(header.Compression)
                   {
-                    real_line_size=( (context->Width+16) >> 4 ) << 4;
-                    line_size=( (context->Width+16) >> 4 )*(header.BitPlanes<<1);
-                  }
-                  else
-                  {
-                    real_line_size=context->Width;
-                    line_size=(context->Width>>3)*header.BitPlanes;
-                  }
-
-                  if (!header.Compression)
-                  {                                           // non compressé
-                    IFF_buffer=(byte *)malloc(line_size);
-                    for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
-                    {
-                      if (Read_bytes(IFF_file,IFF_buffer,line_size))
-                        Draw_IFF_line(context, y_pos,real_line_size, header.BitPlanes);
-                      else
-                        File_error=21;
-                    }
-                    free(IFF_buffer);
-                    IFF_buffer = NULL;
-                  }
-                  else
-                  {                                               // compressé
-                    /*Init_lecture();*/
-
-                    IFF_buffer=(byte *)malloc(line_size);
-
-                    for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
-                    {
-                      for (x_pos=0; ((x_pos<line_size) && (!File_error)); )
+                    case 0:            // non compressé
+                      IFF_buffer=(byte *)malloc(line_size);
+                      for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
                       {
-                        if(Read_byte(IFF_file, &temp_byte)!=1)
+                        if (Read_bytes(IFF_file,IFF_buffer,line_size))
+                          Draw_IFF_line(context, y_pos,real_line_size, header.BitPlanes);
+                        else
+                          File_error=21;
+                      }
+                      free(IFF_buffer);
+                      IFF_buffer = NULL;
+                      break;
+                    case 1:          // compressé packbits (Amiga)
+                      /*Init_lecture();*/
+
+                      IFF_buffer=(byte *)malloc(line_size);
+
+                      for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
+                      {
+                        for (x_pos=0; ((x_pos<line_size) && (!File_error)); )
                         {
-                          File_error=22;
-                          break;
-                        }
-                        // Si temp_byte > 127 alors il faut répéter 256-'temp_byte' fois la couleur de l'octet suivant
-                        // Si temp_byte <= 127 alors il faut afficher directement les 'temp_byte' octets suivants
-                        if (temp_byte>127)
-                        {
-                          if(Read_byte(IFF_file, &color)!=1)
+                          if(Read_byte(IFF_file, &temp_byte)!=1)
                           {
-                            File_error=23;
+                            File_error=22;
                             break;
                           }
-                          b256=(short)(256-temp_byte);
-                          for (counter=0; counter<=b256; counter++)
-                            if (x_pos<line_size)
-                              IFF_buffer[x_pos++]=color;
-                            else
-                              File_error=24;
+                          // Si temp_byte > 127 alors il faut répéter 256-'temp_byte' fois la couleur de l'octet suivant
+                          // Si temp_byte <= 127 alors il faut afficher directement les 'temp_byte' octets suivants
+                          if (temp_byte>127)
+                          {
+                            if(Read_byte(IFF_file, &color)!=1)
+                            {
+                              File_error=23;
+                              break;
+                            }
+                            b256=(short)(256-temp_byte);
+                            for (counter=0; counter<=b256; counter++)
+                              if (x_pos<line_size)
+                                IFF_buffer[x_pos++]=color;
+                              else
+                                File_error=24;
+                          }
+                          else
+                            for (counter=0; counter<=(short)(temp_byte); counter++)
+                              if (x_pos>=line_size || Read_byte(IFF_file, &(IFF_buffer[x_pos++]))!=1)
+                                File_error=25;
                         }
-                        else
-                          for (counter=0; counter<=(short)(temp_byte); counter++)
-                            if (x_pos>=line_size || Read_byte(IFF_file, &(IFF_buffer[x_pos++]))!=1)
-                              File_error=25;
+                        if (!File_error)
+                          Draw_IFF_line(context, y_pos,real_line_size,header.BitPlanes);
+                      }
+
+                      free(IFF_buffer);
+                      IFF_buffer = NULL;
+                      /*Close_lecture();*/
+                      break;
+                    case 2:     // compressé vertical RLE (Atari ST)
+                      IFF_buffer=(byte *)malloc(line_size*context->Height);
+                      plane_line_size = real_line_size >> 3;
+                      for (plane = 0; plane < header.BitPlanes && !File_error; plane++)
+                      {
+                        word cmd_count;
+                        word cmd;
+                        signed char * commands;
+                        word count;
+
+                        y_pos = 0; x_pos = 0;
+                        if (!IFF_Wait_for("VDAT"))
+                        {
+                          File_error = 30;
+                          break;
+                        }
+                        Read_dword_be(IFF_file,&section_size);
+                        Read_word_be(IFF_file,&cmd_count);
+                        cmd_count -= 2;
+                        commands = (signed char *)malloc(cmd_count);
+                        if (!Read_bytes(IFF_file,commands,cmd_count))
+                        {
+                          File_error = 31;
+                          break;
+                        }
+                        for (cmd = 0; cmd < cmd_count && x_pos < plane_line_size; cmd++)
+                        {
+                          if (commands[cmd] <= 0)
+                          { // cmd=0 : load count from data, COPY
+                            // cmd < 0 : count = -cmd, COPY
+                            if (commands[cmd] == 0)
+                              Read_word_be(IFF_file,&count);
+                            else
+                              count = -commands[cmd];
+                            while (count-- > 0 && x_pos < plane_line_size)
+                            {
+                              Read_bytes(IFF_file,IFF_buffer+x_pos+y_pos*line_size+plane*plane_line_size,2);
+                              if(++y_pos >= context->Height)
+                              {
+                                y_pos = 0;
+                                x_pos += 2;
+                              }
+                            }
+                          }
+                          else if (commands[cmd] >= 1)
+                          { // cmd=1 : load count from data, RLE
+                            // cmd >1 : count = cmd, RLE
+                            byte data[2];
+                            if (commands[cmd] == 1)
+                              Read_word_be(IFF_file,&count);
+                            else
+                              count = (word)commands[cmd];
+                            Read_bytes(IFF_file,data,2);
+                            while (count-- > 0 && x_pos < plane_line_size)
+                            {
+                              memcpy(IFF_buffer+x_pos+y_pos*line_size+plane*plane_line_size,data,2);
+                              if (++y_pos >= context->Height)
+                              {
+                                y_pos = 0;
+                                x_pos += 2;
+                              }
+                            }
+                          }
+                        }
+                        free(commands);
                       }
                       if (!File_error)
-                        Draw_IFF_line(context, y_pos,real_line_size,header.BitPlanes);
-                    }
-
-                    free(IFF_buffer);
-                    IFF_buffer = NULL;
-                    /*Close_lecture();*/
+                      {
+                        byte * save_IFF_buffer = IFF_buffer;
+                        for (y_pos = 0; y_pos < context->Height; y_pos++)
+                        {
+                          Draw_IFF_line(context,y_pos,real_line_size,real_bit_planes);
+                          IFF_buffer += line_size;
+                        }
+                        IFF_buffer = save_IFF_buffer;
+                      }
+                      free(IFF_buffer);
+                      IFF_buffer = NULL;
+                      break;
+                    default: // compression non reconnue
+                      File_error = 32;
                   }
                 }
                 else                               // "PBM ": Planar(?) BitMap
@@ -909,7 +988,7 @@ void Load_IFF(T_IO_Context * context)
 
                   // ILBM, hopefully
                   Read_bytes(IFF_file,format,4);
-                  if (!IFF_Wait_for((byte *)"DLTA"))
+                  if (!IFF_Wait_for("DLTA"))
                   {
                     File_error=1;
                     break;
@@ -1142,19 +1221,13 @@ void Save_IFF(T_IO_Context * context)
     if (context->Format == FORMAT_LBM)
     {
       short line_size; // Size of line in bytes
+      short plane_line_size;  // Size of line in bytes for 1 plane
       short real_line_size; // Size of line in pixels
       
       // Calcul de la taille d'une ligne ILBM (pour les images ayant des dimensions exotiques)
-      if (context->Width & 15)
-      {
-        real_line_size=( (context->Width+16) >> 4 ) << 4;
-        line_size=( (context->Width+16) >> 4 )*(header.BitPlanes<<1);
-      }
-      else
-      {
-        real_line_size=context->Width;
-        line_size=(context->Width>>3)*header.BitPlanes;
-      }
+      real_line_size = (context->Width+15) & ~15;
+      plane_line_size = real_line_size >> 3;  // 8bits per byte
+      line_size = plane_line_size * header.BitPlanes;
       IFF_buffer=(byte *)malloc(line_size);
       
       // Start encoding
