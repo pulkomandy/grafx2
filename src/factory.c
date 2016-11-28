@@ -1889,6 +1889,46 @@ int L_StatusMessage(lua_State* L)
 }
 
 
+int L_GetLayerCount(lua_State* L)
+{
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (0, "layercount");
+
+  lua_pushinteger(L, Main_backups->Pages->Nb_layers);
+  return 1;
+}
+
+
+int L_GetSpareLayerCount(lua_State* L)
+{
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (0, "layercount");
+
+  lua_pushinteger(L, Spare_backups->Pages->Nb_layers);
+  return 1;
+}
+
+
+int L_SelectSpareLayer(lua_State* L)
+{
+  int nb_args=lua_gettop(L);
+  
+  LUA_ARG_LIMIT (1, "selectsparelayer");
+  LUA_ARG_NUMBER(1, "selectsparelayer", Spare_current_layer, 0, Spare_backups->Pages->Nb_layers - 1);
+
+  if (Spare_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+  {
+    if (! ((1 << Spare_current_layer) & Spare_layers_visible))
+    {
+      Spare_layers_visible |= (1 << Spare_current_layer);
+    }
+  }
+  return 0;
+}
+
+
 int L_SelectLayer(lua_State* L)
 {
   int nb_args=lua_gettop(L);
@@ -2337,6 +2377,12 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   lua_register(L,"matchcolor",L_MatchColor);
   lua_register(L,"matchcolor2",L_MatchColor2);
 
+  // layers
+  lua_register(L,"selectlayer",L_SelectLayer);
+  lua_register(L,"selectsparelayer",L_SelectSpareLayer);
+  lua_register(L,"getlayercount",L_GetLayerCount);
+  lua_register(L,"getsparelayercount",L_GetSpareLayerCount);
+
   // ui
   lua_register(L,"inputbox",L_InputBox);
   lua_register(L,"messagebox",L_MessageBox);
@@ -2350,7 +2396,6 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   lua_register(L,"updatescreen",L_UpdateScreen);
   lua_register(L,"finalizepicture",L_FinalizePicture);
   lua_register(L,"getfilename",L_GetFileName);
-  lua_register(L,"selectlayer",L_SelectLayer);
   lua_register(L,"run",L_Run);
   
   // dialog
