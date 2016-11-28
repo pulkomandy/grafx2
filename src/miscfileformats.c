@@ -3269,7 +3269,7 @@ void Save_SCR(T_IO_Context * context)
             break;
     }
 
-    output = raw2crtc(context, cpc_mode, 7, &outsize, &r1, 0, 0);
+    output = raw2crtc(context, cpc_mode, 7, &outsize, &r1, 0x0C, 0);
 
     file = fopen(filename,"wb");
     Write_bytes(file, output, outsize);
