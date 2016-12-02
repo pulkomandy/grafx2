@@ -854,6 +854,18 @@ GFX2_GLOBAL signed char File_error;
 /// Current line number when reading/writing gfx2.ini
 GFX2_GLOBAL int Line_number_in_INI_file;
 
+// -- For iconv
+
+#ifdef ENABLE_FILENAMES_ICONV
+
+#include <iconv.h>
+
+#define TOCODE   "CP1252"
+#define FROMCODE "UTF-8"
+GFX2_GLOBAL iconv_t cd;
+GFX2_GLOBAL iconv_t cd_inv;
+#endif /* ENABLE_FILENAMES_ICONV */
+
 // -- Specific to SDL
 
 /// Pointer to the program's screen.

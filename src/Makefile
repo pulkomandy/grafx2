@@ -200,7 +200,8 @@ endif
         LUALOPT = -llua
       endif
     COPT = -W -Wall -c -g $(shell sdl-config --cflags) $(TTFCOPT) -I/boot/common/include $(LUACOPT)
-    LOPT = $(shell sdl-config --libs) -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lfreetype -lbe $(LUALOPT)
+    COPT += -DENABLE_FILENAMES_ICONV
+    LOPT = $(shell sdl-config --libs) -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lfreetype -lbe $(LUALOPT) -liconv
     CC = gcc
 	#Append the gcc kind to the objdir (gcc2 or gcc4) to avoid conflicts when switching from one to other.
 	OBJKIND = $(shell gcc -dumpversion)
@@ -364,6 +365,8 @@ endif
         CC = gcc
         OBJDIR = ../obj/unix
         FCLOPT = -lfontconfig
+        # enable UTF8 filename translation
+        COPT += -DENABLE_FILENAMES_ICONV
       endif
       endif
       endif

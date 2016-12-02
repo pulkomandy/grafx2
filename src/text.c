@@ -335,11 +335,12 @@ void Init_text(void)
        #ifdef USE_FC
        {
 	FcStrList* dirs;
+        FcChar8 * fdir;
 	dirs = FcConfigGetFontDirs(NULL);
-	char* fdir = FcStrListNext(dirs);
+	fdir = FcStrListNext(dirs);
         while(fdir != NULL)
 	{
-            For_each_file(fdir,Add_font);
+            For_each_file((char *)fdir,Add_font);
 	    fdir = FcStrListNext(dirs);
 	}
 

@@ -469,6 +469,13 @@ int Init_program(int argc,char * argv[])
   getcwd(Main_selector.Directory,MAX_PATH_CHARACTERS);
 #endif
 
+#ifdef ENABLE_FILENAMES_ICONV
+  // Initialisation de iconv
+  // utilisé pour convertir les noms de fichiers
+  cd = iconv_open(TOCODE, FROMCODE);  // From UTF8 to ANSI
+  cd_inv = iconv_open(FROMCODE, TOCODE);  // From ANSI to UTF8
+#endif /* ENABLE_FILENAMES_ICONV */
+
   // On en profite pour le mémoriser dans le répertoire principal:
   strcpy(Initial_directory,Main_selector.Directory);
 

@@ -799,10 +799,23 @@ void Print_filename(void)
   // Determine maximum size, in characters
   max_size = 12 + (Screen_width / Menu_factor_X - 320) / 8;
   
-  string_size = strlen(Main_backups->Pages->Filename);
-  
   // Partial copy of the name
-  strncpy(display_string, Main_backups->Pages->Filename, max_size);
+  {
+#ifdef ENABLE_FILENAMES_ICONV
+    char * input = Main_backups->Pages->Filename;
+    size_t inbytesleft = strlen(input);
+    char * output = display_string;
+    size_t outbytesleft = sizeof(display_string)-1;
+    if(cd != (iconv_t)-1 && (ssize_t)iconv(cd, &input, &inbytesleft, &output, &outbytesleft) >= 0)
+      *output = '\0';
+    else
+#endif /* ENABLE_FILENAMES_ICONV */
+    {
+      strncpy(display_string, Main_backups->Pages->Filename, sizeof(display_string)-1);
+      display_string[sizeof(display_string)-1] = '\0';
+    }
+  }
+  string_size = strlen(display_string);
   display_string[max_size]='\0';
 
   if (string_size > max_size)

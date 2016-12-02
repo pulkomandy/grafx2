@@ -230,6 +230,21 @@ char * Format_filename(const char * fname, word max_length, int type)
   int         c;
   int         other_cursor;
   int         pos_last_dot;
+#ifdef ENABLE_FILENAMES_ICONV
+  /* convert file name from UTF8 to ANSI */
+  char        converted_fname[MAX_PATH_CHARACTERS];
+  {
+    char * input = (char *)fname;
+    size_t inbytesleft = strlen(fname);
+    char * output = converted_fname;
+    size_t outbytesleft = sizeof(converted_fname)-1;
+    if(cd != (iconv_t)-1 && (ssize_t)iconv(cd, &input, &inbytesleft, &output, &outbytesleft) >= 0)
+    {
+      *output = '\0';
+      fname = converted_fname;
+    }
+  }
+#endif /* ENABLE_FILENAMES_ICONV */
 
   // safety
   if (max_length>40)
@@ -1064,19 +1079,34 @@ void Print_current_directory(void)
 // Affiche Selector->Directory sur 37 caractères
 //
 {
+  char converted_name[MAX_PATH_CHARACTERS];
   char temp_name[MAX_DISPLAYABLE_PATH+1]; // Nom tronqué
   int  length; // length du répertoire courant
   int  index;   // index de parcours de la chaine complète
 
+  strncpy(converted_name,Selector->Directory,sizeof(converted_name));
+  converted_name[sizeof(converted_name)-1] = '\0';
+#ifdef ENABLE_FILENAMES_ICONV
+  {
+    /* convert file name from UTF8 to ANSI */
+    char * input = Selector->Directory;
+    size_t inbytesleft = strlen(input);
+    char * output = converted_name;
+    size_t outbytesleft = sizeof(converted_name)-1;
+    if(cd != (iconv_t)-1 && (ssize_t)iconv(cd, &input, &inbytesleft, &output, &outbytesleft) >= 0)
+      *output = '\0';
+  }
+#endif /* ENABLE_FILENAMES_ICONV */
+
   Window_rectangle(10,84,37*8,8,MC_Light);
 
-  length=strlen(Selector->Directory);
+  length=strlen(converted_name);
   if (length>MAX_DISPLAYABLE_PATH)
   { // Doh! il va falloir tronquer le répertoire (bouh !)
 
     // On commence par copier bêtement les 3 premiers caractères (e.g. "C:\")
     for (index=0;index<3;index++)
-      temp_name[index]=Selector->Directory[index];
+      temp_name[index]=converted_name[index];
 
     // On y rajoute 3 petits points:
     strcpy(temp_name+3,"...");
@@ -1084,12 +1114,12 @@ void Print_current_directory(void)
     //  Ensuite, on cherche un endroit à partir duquel on pourrait loger tout
     // le reste de la chaine (Ouaaaaaah!!! Vachement fort le mec!!)
     for (index++;index<length;index++)
-      if ( (Selector->Directory[index]==PATH_SEPARATOR[0]) &&
+      if ( (converted_name[index]==PATH_SEPARATOR[0]) &&
            (length-index<=MAX_DISPLAYABLE_PATH-6) )
       {
         // Ouf: on vient de trouver un endroit dans la chaîne à partir duquel
         // on peut faire la copie:
-        strcpy(temp_name+6,Selector->Directory+index);
+        strcpy(temp_name+6,converted_name+index);
         break;
       }
 
@@ -1097,7 +1127,7 @@ void Print_current_directory(void)
     Print_in_window(10,84,temp_name,MC_Black,MC_Light);
   }
   else // Ahhh! La chaîne peut loger tranquillement dans la fenêtre
-    Print_in_window(10,84,Selector->Directory,MC_Black,MC_Light);
+    Print_in_window(10,84,converted_name,MC_Black,MC_Light);
     
   Update_window_area(10,84,37*8,8);
 }
@@ -1107,8 +1137,20 @@ void Print_current_directory(void)
 //
 void Print_filename_in_fileselector(void)
 {
+  char filename[32];
+  strncpy(filename, Selector_filename, sizeof(filename));
+#ifdef ENABLE_FILENAMES_ICONV
+  {
+    char * input = (char *)Selector_filename;
+    size_t inbytesleft = strlen(Selector_filename);
+    char * output = filename;
+    size_t outbytesleft = sizeof(filename)-1;
+    if(cd != (iconv_t)-1 && (ssize_t)iconv(cd, &input, &inbytesleft, &output, &outbytesleft) >= 0)
+      *output = '\0';
+  }
+#endif /* ENABLE_FILENAMES_ICONV */
   Window_rectangle(82,48,27*8,8,MC_Light);
-  Print_in_window_limited(82,48,Selector_filename,27,MC_Black,MC_Light);
+  Print_in_window_limited(82,48,filename,27,MC_Black,MC_Light);
   Update_window_area(82,48,27*8,8);
 }
 
@@ -1721,6 +1763,8 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         }
         break;
       case  8 : // Saisie du nom de fichier
+      {
+        char filename_ansi[256];
 
         // Save the filename
         strcpy(save_filename, Selector_filename);
@@ -1734,8 +1778,31 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
             // current name is a highlighted directory
             Selector_filename[0]='\0';
         }
-        if (Readline(82,48,Selector_filename,27,INPUT_TYPE_FILENAME))
+        strncpy(filename_ansi, Selector_filename, sizeof(filename_ansi));
+#ifdef ENABLE_FILENAMES_ICONV
+        { /* convert from UTF8 to ANSI */
+          char * input = (char *)Selector_filename;
+          size_t inbytesleft = strlen(input);
+          char * output = filename_ansi;
+          size_t outbytesleft = sizeof(filename_ansi)-1;
+          if(cd != (iconv_t)-1 && (ssize_t)iconv(cd, &input, &inbytesleft, &output, &outbytesleft) >= 0)
+            *output = '\0';
+        }
+#endif /* ENABLE_FILENAMES_ICONV */
+        if (Readline(82,48,filename_ansi,27,INPUT_TYPE_FILENAME))
         {
+#ifdef ENABLE_FILENAMES_ICONV
+          /* convert back from ANSI to UTF8 */
+          char * input = (char *)filename_ansi;
+          size_t inbytesleft = strlen(input);
+          char * output = Selector_filename;
+          size_t outbytesleft = sizeof(Selector_filename)-1;
+          if(cd_inv != (iconv_t)-1 && (ssize_t)iconv(cd_inv, &input, &inbytesleft, &output, &outbytesleft) >= 0)
+            *output = '\0';
+          else
+#endif /* ENABLE_FILENAMES_ICONV */
+            strncpy(Selector_filename, filename_ansi, sizeof(Selector_filename));
+
           //   On regarde s'il faut rajouter une extension. C'est-à-dire s'il
           // n'y a pas de '.' dans le nom du fichier.
           for(temp=0,dummy=0; ((Selector_filename[temp]) && (!dummy)); temp++)
@@ -1792,6 +1859,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         }
         Display_cursor();
         break;
+      }
       case  9 : // Volume Select
           Hide_cursor();
           //   Comme on tombe sur un disque qu'on connait pas, on se place en
