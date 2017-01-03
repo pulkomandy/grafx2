@@ -360,8 +360,15 @@ endif
 
         # Compiles a regular linux executable for the native platform
         BIN = ../bin/grafx2
-        COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g $(shell sdl-config --cflags) $(TTFCOPT) $(LUACOPT) $(JOYCOPT) -O$(OPTIM) $(shell pkg-config --cflags libpng) -D_XOPEN_SOURCE=700
-        LOPT = $(shell sdl-config --libs) -lSDL_image $(TTFLOPT) $(shell pkg-config --libs libpng) $(LUALOPT) -lm
+        COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g $(shell sdl-config --cflags) $(TTFCOPT) $(LUACOPT) $(JOYCOPT) -O$(OPTIM)
+        COPT += $(shell pkg-config --cflags libpng)
+        ifneq ($(PLATFORM), FreeBSD)
+          COPT += -D_XOPEN_SOURCE=700
+        endif
+        LOPT = $(shell sdl-config --libs) -lSDL_image $(TTFLOPT)
+        LOPT += $(shell pkg-config --libs libpng)
+        LOPT += $(LUALOPT) -lm
+		LOPT += -liconv
         CC = gcc
         OBJDIR = ../obj/unix
         FCLOPT = -lfontconfig

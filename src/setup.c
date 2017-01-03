@@ -36,7 +36,7 @@
   #import <corefoundation/corefoundation.h>
   #import <sys/param.h>
 #elif defined(__FreeBSD__)
-  #import <sys/param.h>
+  #include <sys/param.h>
 #elif defined(__MINT__)
     #include <mint/osbind.h>
     #include <mint/sysbind.h>

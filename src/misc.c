@@ -727,6 +727,7 @@ void Zoom_a_line(byte* original_line, byte* zoomed_line,
   #if defined(__OpenBSD__)
   #include <sys/param.h>
   #endif
+  #include <sys/types.h>
   #include <sys/sysctl.h>
 #elif defined(__BEOS__) || defined(__HAIKU__)
   #include <kernel/OS.h>

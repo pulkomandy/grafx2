@@ -25,7 +25,7 @@
 // We don't use autoconf and all that in grafx2, so let's do the config here ...
 #if defined(__macosx__) || defined(__FreeBSD__) || defined(__OpenBSD__)                       // MacOS X is POSIX compliant
     #define MOUNTED_GETMNTINFO
-#if defined(__macosx__)
+#if defined(__macosx__) || defined(__FreeBSD__)
     #include <sys/types.h>
 #endif
 #if defined(__OpenBSD__)
@@ -462,7 +462,7 @@ read_file_system_list (bool need_fs_type)
         me = malloc (sizeof *me);
         me->me_devname = strdup (fsp->f_mntfromname);
         me->me_mountdir = strdup (fsp->f_mntonname);
-#if defined(__macosx__) || defined(__OpenBSD__)
+#if defined(__macosx__) || defined(__OpenBSD__) || defined(__FreeBSD__)
         me->me_type = fsp->f_fstypename;
 #else
         me->me_type = fsp->fs_typename;
