@@ -105,21 +105,31 @@ else
     BIN = ../bin/grafx2
     SVN_REVISION = $(shell svnversion | cut -f2 -d ":" - | tr -d "M")
 
+    SDLCONFIG := $(shell which sdl-config)
+ifneq ($(SDLCONFIG), )
     # these are for use with macports
-    #SDLCOPT = $(shell sdl-config --cflags)
-    #SDLLOPT = $(shell sdl-config --libs) $(shell pkg-config --libs SDL_image)
-    #LUACOPT = $(shell pkg-config lua --cflags --silence-errors ||pkg-config lua5.1 --cflags --silence-errors ||pkg-config lua-5.1 --cflags)
-    #LUALOPT = $(shell pkg-config lua --libs --silence-errors ||pkg-config lua5.1 --libs --silence-errors ||pkg-config lua-5.1 --libs)
-
+    SDLCOPT = $(shell sdl-config --cflags)
+    SDLLOPT = $(shell sdl-config --libs) $(shell pkg-config --libs SDL_image)
+else
     # these are for use with Mac OS X native frameworks
     #-framework SDL_ttf 
     SDLLOPT = -isysroot $(MACOSX_SYSROOT) $(MACOSX_ARCH) -L/usr/lib -framework SDL -framework SDL_image -framework Cocoa -framework Carbon -framework OpenGL
     SDLCOPT = $(MACOSX_ARCH) -I$(FWDIR)/SDL.framework/Headers -I$(FWDIR)/SDL_image.framework/Headers -I$(FWDIR)/SDL_ttf.framework/Headers -D_THREAD_SAFE
+endif
+
+    # these are for use with macports
+    LUAPKG := $(shell for p in lua5.1 lua-5.1 lua51 lua ; do pkg-config --exists $$p && echo $$p && break ; done)
+ifneq ($(LUAPKG), )
+    LUACOPT = $(shell pkg-config $(LUAPKG) --cflags)
+    LUALOPT = $(shell pkg-config $(LUAPKG) --libs)
+else
+    # these are for use with Mac OS X native frameworks
     LUACOPT = -I$(FWDIR)/Lua.framework/Headers
 ifdef MACOSX_LION
     LUALOPT = -framework lua
 else
     LUALOPT = -llua 
+endif
 endif
 
     # these are for everyone
@@ -127,7 +137,15 @@ endif
 ifdef MACOSX_LION
     LOPT = $(SDLLOPT) $(LUALOPT) -framework libpng14 -lz
 else
-    LOPT = $(SDLLOPT) $(LUALOPT) -lpng -lz
+    LOPT = $(SDLLOPT) $(LUALOPT)
+    LIBPNGCONFIG := $(shell libpng-config)
+ifneq ($(LIBPNGCONFIG), )
+    COPT += $(shell libpng-config --cflags)
+    LOPT += $(shell libpng-config --ldflags)
+else
+    LOPT += -lpng
+endif
+    LOPT += -lz
 endif
     # Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
     CC = gcc
@@ -288,8 +306,9 @@ endif
         LUACOPT =
         LUALOPT =
       else
-        LUACOPT = $(shell pkg-config lua --cflags --silence-errors ||pkg-config lua5.1 --cflags --silence-errors ||pkg-config lua-5.1 --cflags)
-        LUALOPT = $(shell pkg-config lua --libs --silence-errors ||pkg-config lua5.1 --libs --silence-errors ||pkg-config lua-5.1 --libs)
+        LUAPKG := $(shell for p in lua5.1 lua-5.1 lua51 lua ; do pkg-config --exists $$p && echo $$p && break ; done)
+        LUACOPT = $(shell pkg-config $(LUAPKG) --cflags)
+        LUALOPT = $(shell pkg-config $(LUAPKG) --libs)
       endif
     endif
     
@@ -484,17 +503,19 @@ $(MACAPPEXE) : $(BIN)
 	cp -r ../share/grafx2/scripts/samples_2.4/picture Grafx2.app/Contents/Resources/scripts/samples_2.4
 ifdef MACOSX_LION
 	mkdir -p Grafx2.app/Contents/Frameworks/Lua.framework/Versions
-	mkdir -p Grafx2.app/Contents/Frameworks/libpng14.framework/Versions
-endif
-	mkdir -p Grafx2.app/Contents/Frameworks/SDL.framework/Versions
-	mkdir -p Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions
-#	mkdir -p Grafx2.app/Contents/Frameworks/SDL_ttf.framework/Versions
-ifdef MACOSX_LION
 	cp -Rp $(FWDIR)/Lua.framework/Versions/A Grafx2.app/Contents/Frameworks/Lua.framework/Versions
+	mkdir -p Grafx2.app/Contents/Frameworks/libpng14.framework/Versions
 	cp -Rp $(FWDIR)/libpng14.framework/Versions/1.4.8 Grafx2.app/Contents/Frameworks/libpng14.framework/Versions
 endif
-	cp -Rp $(FWDIR)/SDL.framework/Versions/A Grafx2.app/Contents/Frameworks/SDL.framework/Versions
-	cp -Rp $(FWDIR)/SDL_image.framework/Versions/A Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions
+	if [ -d $(FWDIR)/SDL.framework/Versions ] ; then \
+		mkdir -p Grafx2.app/Contents/Frameworks/SDL.framework/Versions ;\
+		cp -Rp $(FWDIR)/SDL.framework/Versions/A Grafx2.app/Contents/Frameworks/SDL.framework/Versions ;\
+	fi
+	if [ -d $(FWDIR)/SDL_image.framework/Versions ] ; then \
+		mkdir -p Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions ;\
+		cp -Rp $(FWDIR)/SDL_image.framework/Versions/A Grafx2.app/Contents/Frameworks/SDL_image.framework/Versions ;\
+	fi
+#	mkdir -p Grafx2.app/Contents/Frameworks/SDL_ttf.framework/Versions
 #	cp -Rp $(FWDIR)/SDL_ttf.framework/Versions/A Grafx2.app/Contents/Frameworks/SDL_ttf.framework/Versions
     # remove those
 	rm -fr Grafx2.app/Contents/Frameworks/SDL.framework/Versions/A/Headers
