@@ -528,7 +528,7 @@ int Init_program(int argc,char * argv[])
 
 
   // SDL
-  if(SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO|SDL_INIT_JOYSTICK|SDL_INIT_EVENTS) < 0)
+  if(SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO|SDL_INIT_EVENTS) < 0)
   {
     // The program can't continue without that anyway
     printf("Couldn't initialize SDL.\n");
@@ -539,7 +539,10 @@ int Init_program(int argc,char * argv[])
     printf("Couldn't initialize SDL_image.\n");
     return(0);
   }
+  #ifdef USE_JOYSTICK
+  SDL_InitSubSystem(SDL_INIT_JOYSTICK);
   Joystick = SDL_JoystickOpen(0);
+  #endif
   //SDL_EnableKeyRepeat(250, 32); // TODO
   //SDL_WM_SetCaption("GrafX2","GrafX2"); // TODO
 
