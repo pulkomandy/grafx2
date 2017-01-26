@@ -125,7 +125,7 @@ void Set_mode_SDL(int *width, int *height, int fullscreen)
     //SDL_SetWindowSize(Window_SDL, *width, *height*2);
     //SDL_RenderSetLogicalSize(Renderer_SDL, *width, *height * 2);
   }
-  Texture_SDL = SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, *width, *height);
+  Texture_SDL = SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, *width, *height);
 
   if(Screen_SDL != NULL)
   {
@@ -193,12 +193,12 @@ void Resize_window(int width, int height)
   }
   for (i=0; i<NB_MENU_SPRITES; i++)
   {
-    Gfx->Menu_sprite[0][i]=SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, 8, 8);
-    Gfx->Menu_sprite[1][i]=SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, 8, 8);
+    Gfx->Menu_sprite[0][i]=SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 8, 8);
+    Gfx->Menu_sprite[1][i]=SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 8, 8);
   }
   for (i=0; i<256; i++)
   {
-    Gfx->Font[i] = SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, 8*Gfx->Factor, 8*Gfx->Factor);
+    Gfx->Font[i] = SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 8*Gfx->Factor, 8*Gfx->Factor);
   }
   Display_menu();
   Reposition_palette();
@@ -783,7 +783,7 @@ SDL_Texture * Create_texture(SDL_Surface *source, int x, int y, int w, int h)
 
 SDL_Texture * Create_rendering_texture(int width, int height)
 {
-  SDL_Texture * texture = SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_TARGET, width, height);
+  SDL_Texture * texture = SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, width, height);
   SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
   // Fill with transparency : needed for popups
   SDL_SetRenderTarget(Renderer_SDL, texture);

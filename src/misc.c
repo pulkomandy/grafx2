@@ -130,6 +130,7 @@ void Set_palette(T_Palette palette)
     colors[i].b = palette[i].B = Round_palette_component(palette[i].B);
   }
   SDL_SetPaletteColors(Screen_SDL->format->palette, colors, 0, 256);
+  Update_rect(0, 0, 0, 0);
 }
 
 void Set_color(byte color, byte red, byte green, byte blue)
