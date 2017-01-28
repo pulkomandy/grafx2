@@ -93,6 +93,8 @@ void Window_display_frame_generic(word x_pos,word y_pos,word width,word height,
 void Window_display_frame_mono(word x_pos,word y_pos,word width,word height,T_Components color);
 void Window_display_frame_in(word x_pos,word y_pos,word width,word height);
 void Window_display_frame_out(word x_pos,word y_pos,word width,word height);
+void Window_display_frame_clicked(word x_pos,word y_pos,word width,word height);
+void Window_display_frame_black(word x_pos,word y_pos,word width,word height);
 void Window_display_frame(word x_pos,word y_pos,word width,word height);
 void Window_display_ruler(word x_pos,word y_pos,word width);
 

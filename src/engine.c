@@ -136,11 +136,7 @@ void Draw_menu_button(byte btn_number,byte pressed)
   word width;
   word height;
   byte * bitmap;
-  word bitmap_width;
-  word x_pos;
-  word y_pos;
   byte current_menu;
-  byte color;
   signed char icon;
 
   // Find in which menu the button is
@@ -1456,7 +1452,7 @@ void Open_window(word width,word height, const char * title)
   // -- Frame de la fenêtre ----- --- -- -  -
 
   // Frame noir puis en relief
-  Window_display_9_slice(Gfx->Border_black, 2, 0, 0, width, height);
+  Window_display_frame_black(0, 0, width, height);
   Window_display_frame_out(1,1,width-2,height-2);
 
   // Barre sous le titre
@@ -1594,7 +1590,7 @@ void Window_draw_normal_bouton(word x_pos,word y_pos,word width,word height,
   if (clickable)
   {
     Window_display_frame_out(x_pos,y_pos,width,height);
-    Window_display_9_slice(Gfx->Border_black, 2, x_pos-1, y_pos-1, width+2, height+2);
+    Window_display_frame_black(x_pos-1, y_pos-1, width+2, height+2);
     title_color=MC_Black;
   }
   else
@@ -1617,7 +1613,7 @@ void Window_draw_normal_bouton(word x_pos,word y_pos,word width,word height,
 // -- Button normal enfoncé dans la fenêtre --
 void Window_select_normal_button(word x_pos,word y_pos,word width,word height)
 {
-  Window_display_9_slice(Gfx->Border_clicked, 2, x_pos, y_pos, width, height);
+  Window_display_frame_clicked(x_pos, y_pos, width, height);
   Update_window_area(x_pos, y_pos, width, height);
 }
 
@@ -1799,7 +1795,7 @@ void Window_draw_scroller_button(T_Scroller_button * button)
   Window_draw_slider(button);
   if (button->Is_horizontal)
   {
-    Window_display_9_slice(Gfx->Border_black, 2, button->Pos_X-1,button->Pos_Y-1,button->Length+2,13);
+    Window_display_frame_black(button->Pos_X-1,button->Pos_Y-1,button->Length+2,13);
     Window_display_frame_mono(button->Pos_X+11,button->Pos_Y-1,button->Length-22,13,MC_Black);
     Window_display_frame_out(button->Pos_X,button->Pos_Y,11,11);
     Window_display_frame_out(button->Pos_X+button->Length-11,button->Pos_Y,11,11);
@@ -1808,7 +1804,7 @@ void Window_draw_scroller_button(T_Scroller_button * button)
   }
   else
   {
-    Window_display_9_slice(Gfx->Border_black, 2, button->Pos_X-1,button->Pos_Y-1,13,button->Length+2);
+    Window_display_frame_black(button->Pos_X-1,button->Pos_Y-1,13,button->Length+2);
     Window_display_frame_mono(button->Pos_X-1,button->Pos_Y+11,13,button->Length-22,MC_Black);
     Window_display_frame_out(button->Pos_X,button->Pos_Y,11,11);
     Window_display_frame_out(button->Pos_X,button->Pos_Y+button->Length-11,11,11);

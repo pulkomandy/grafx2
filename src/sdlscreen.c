@@ -241,7 +241,7 @@ void Update_rectangle(SDL_Surface *surface, int x, int y, int width, int height)
       {
         byte index = Get_SDL_pixel_8(surface, source_rect.x + col, source_rect.y + line);
         //memcpy(pixels++, surface->format->palette->colors + index, 4);
-        //*(pixels++) = *(Uint32 *)(surface->format->palette->colors + index);
+        // *(pixels++) = *(Uint32 *)(surface->format->palette->colors + index);
         *((byte *)pixels) = surface->format->palette->colors[index].r;
         *(((byte *)pixels) + 1) = surface->format->palette->colors[index].g;
         *(((byte *)pixels) + 2) = surface->format->palette->colors[index].b;

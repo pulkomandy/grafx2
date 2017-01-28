@@ -199,6 +199,17 @@ void Window_display_frame(word x_pos,word y_pos,word width,word height)
   Window_display_frame_out(x_pos+1,y_pos+1,width-2,height-2);
 }
 
+void Window_display_frame_clicked(word x_pos,word y_pos,word width,word height)
+{
+  Window_display_9_slice(Gfx->Border_clicked, 2, x_pos, y_pos, width, height);
+}
+
+void Window_display_frame_black(word x_pos,word y_pos,word width,word height)
+{
+  Window_display_9_slice(Gfx->Border_black, 2, x_pos, y_pos, width, height);
+}
+
+
 //-- Affichages relatifs à la palette dans le menu ---------------------------
 
   // -- Affichage des couleurs courante (fore/back) de pinceau dans le menu --

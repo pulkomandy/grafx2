@@ -957,6 +957,7 @@ void Button_Settings(void)
   {"",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
+  {"",0,NULL,0,0,0,NULL},
 
   {"           --- Input  ---",0,NULL,0,0,0,NULL},
   {"Scrollbar speed",0,NULL,0,0,0,NULL},
