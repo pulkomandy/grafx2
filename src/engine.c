@@ -29,6 +29,7 @@
 #include "graph.h"
 #include "misc.h"
 #include "special.h"
+#include "windows.h"
 #include "buttons.h"
 #include "operatio.h"
 #include "shade.h"
@@ -1455,12 +1456,13 @@ void Open_window(word width,word height, const char * title)
   // -- Frame de la fenêtre ----- --- -- -  -
 
   // Frame noir puis en relief
-  Window_display_frame_mono(0,0,width,height,MC_Black);
+  Window_display_9_slice(Gfx->Border_black, 2, 0, 0, width, height);
   Window_display_frame_out(1,1,width-2,height-2);
 
   // Barre sous le titre
-  Window_rectangle(8,11,width-16,1,MC_Dark);
-  Window_rectangle(8,12,width-16,1,MC_White);
+  //Window_rectangle(8,11,width-16,1,MC_Dark);
+  //Window_rectangle(8,12,width-16,1,MC_White);
+  Window_display_ruler(8,11,width-16);
 
   title_length = strlen(title);
   if (title_length+2 > (size_t)(width/8))
@@ -1592,7 +1594,7 @@ void Window_draw_normal_bouton(word x_pos,word y_pos,word width,word height,
   if (clickable)
   {
     Window_display_frame_out(x_pos,y_pos,width,height);
-    Window_display_frame_generic(x_pos-1,y_pos-1,width+2,height+2,MC_Black,MC_Black,MC_Dark,MC_Dark,MC_Dark);
+    Window_display_9_slice(Gfx->Border_black, 2, x_pos-1, y_pos-1, width+2, height+2);
     title_color=MC_Black;
   }
   else
@@ -1615,7 +1617,7 @@ void Window_draw_normal_bouton(word x_pos,word y_pos,word width,word height,
 // -- Button normal enfoncé dans la fenêtre --
 void Window_select_normal_button(word x_pos,word y_pos,word width,word height)
 {
-  Window_display_frame_generic(x_pos,y_pos,width,height,MC_Dark,MC_Black,MC_Dark,MC_Dark,MC_Black);
+  Window_display_9_slice(Gfx->Border_clicked, 2, x_pos, y_pos, width, height);
   Update_window_area(x_pos, y_pos, width, height);
 }
 
@@ -1794,9 +1796,10 @@ void Window_draw_slider(T_Scroller_button * button)
 
 void Window_draw_scroller_button(T_Scroller_button * button)
 {
+  Window_draw_slider(button);
   if (button->Is_horizontal)
   {
-    Window_display_frame_generic(button->Pos_X-1,button->Pos_Y-1,button->Length+2,13,MC_Black,MC_Black,MC_Dark,MC_Dark,MC_Dark);
+    Window_display_9_slice(Gfx->Border_black, 2, button->Pos_X-1,button->Pos_Y-1,button->Length+2,13);
     Window_display_frame_mono(button->Pos_X+11,button->Pos_Y-1,button->Length-22,13,MC_Black);
     Window_display_frame_out(button->Pos_X,button->Pos_Y,11,11);
     Window_display_frame_out(button->Pos_X+button->Length-11,button->Pos_Y,11,11);
@@ -1805,14 +1808,13 @@ void Window_draw_scroller_button(T_Scroller_button * button)
   }
   else
   {
-    Window_display_frame_generic(button->Pos_X-1,button->Pos_Y-1,13,button->Length+2,MC_Black,MC_Black,MC_Dark,MC_Dark,MC_Dark);
+    Window_display_9_slice(Gfx->Border_black, 2, button->Pos_X-1,button->Pos_Y-1,13,button->Length+2);
     Window_display_frame_mono(button->Pos_X-1,button->Pos_Y+11,13,button->Length-22,MC_Black);
     Window_display_frame_out(button->Pos_X,button->Pos_Y,11,11);
     Window_display_frame_out(button->Pos_X,button->Pos_Y+button->Length-11,11,11);
     Print_in_window(button->Pos_X+2,button->Pos_Y+2,"\030",MC_Black,MC_Light);
     Print_in_window(button->Pos_X+2,button->Pos_Y+button->Length-9,"\031",MC_Black,MC_Light);
   }
-  Window_draw_slider(button);
 }
 
 

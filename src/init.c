@@ -221,6 +221,54 @@ byte Read_GUI_pattern(T_Gui_skin *gfx, SDL_Surface *gui, int start_x, int start_
   return 0;
 }
 
+void Spread_SDL_colors(SDL_Palette *pal, byte start, byte end)
+{
+  short start_red;
+  short start_green;
+  short start_blue;
+  short end_red;
+  short end_green;
+  short end_blue;
+  short index;
+  if (start > end)
+    SWAP_BYTES(start, end)
+  if ( (start!=end) && (start+1!=end) )
+  {
+    start_red=pal->colors[start].r;
+    start_green =pal->colors[start].g;
+    start_blue =pal->colors[start].b;
+
+    end_red  =pal->colors[end  ].r;
+    end_green   =pal->colors[end  ].g;
+    end_blue   =pal->colors[end  ].b;
+
+    for (index=start+1;index<end;index++)
+    {
+      SDL_Color c;
+      c.r = ((end_red-start_red) * (index-start))/(end-start) + start_red;
+      c.g = ((end_green -start_green ) * (index-start))/(end-start) + start_green;
+      c.b = ((end_blue -start_blue ) * (index-start))/(end-start) + start_blue;
+      c.a = 255;
+      SDL_SetPaletteColors(pal, &c, index, 1);
+    }
+  }
+}
+
+void Parse_9_slice(SDL_Texture **texture, SDL_Surface * gui, int cursor_x, int cursor_y, int factor)
+{
+  texture[0] = Create_texture(gui, cursor_x, cursor_y, 2*factor, 2*factor);
+  texture[1] = Create_texture(gui, cursor_x+3*factor, cursor_y, 1, 2*factor);
+  texture[2] = Create_texture(gui, cursor_x+5*factor, cursor_y, 2*factor, 2*factor);
+  
+  texture[3] = Create_texture(gui, cursor_x, cursor_y+3*factor, 2*factor, 1);
+  texture[4] = Create_texture(gui, cursor_x+3*factor, cursor_y+3*factor, 1, 1);
+  texture[5] = Create_texture(gui, cursor_x+5*factor, cursor_y+3*factor, 2*factor, 1);
+  
+  texture[6] = Create_texture(gui, cursor_x, cursor_y+5*factor, 2*factor, 2*factor);
+  texture[7] = Create_texture(gui, cursor_x+3*factor, cursor_y+5*factor, 1, 2*factor);
+  texture[8] = Create_texture(gui, cursor_x+5*factor, cursor_y+5*factor, 2*factor, 2*factor);
+}
+
 byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
 {
   int i,j;
@@ -334,6 +382,9 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   dark.b = Config.Fav_menu_colors[1].B;
   dark.a = 255;
   SDL_SetPaletteColors(SDLPal, &dark, gfx->Color[1], 1);
+  Spread_SDL_colors(SDLPal, gfx->Color[0], gfx->Color[1]);
+  Spread_SDL_colors(SDLPal, gfx->Color[1], gfx->Color[2]);
+  Spread_SDL_colors(SDLPal, gfx->Color[2], gfx->Color[3]);
 
   // Read the default palette
   Get_SDL_Palette(SDLPal, gfx->Default_palette);
@@ -365,6 +416,30 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   if (Read_GUI_block(gfx, gui, cursor_x, cursor_y, gfx->Statusbar_block, Menu_bars[MENUBAR_STATUS].Skin_width, Menu_bars[MENUBAR_STATUS].Height,"status bar",0))
     return 1;
   cursor_y+= Menu_bars[MENUBAR_STATUS].Height;
+
+  // Normal button border
+  if (GUI_seek_down(gui, &cursor_x, &cursor_y, neutral_color, "normal border"))
+    return 1;
+  Parse_9_slice(gfx->Border_out, gui, cursor_x, cursor_y, gfx->Factor);
+  cursor_x+=  7*gfx->Factor;
+
+  // Inverted border
+  if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "inverted border"))
+    return 1;
+  Parse_9_slice(gfx->Border_in, gui, cursor_x, cursor_y, gfx->Factor);
+  cursor_x+=  7*gfx->Factor;
+
+  // Clicked button border
+  if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "clicked button border"))
+    return 1;
+  Parse_9_slice(gfx->Border_clicked, gui, cursor_x, cursor_y, gfx->Factor);
+  cursor_x+=  7*gfx->Factor;
+  
+  // Button outline
+  if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "button outline"))
+    return 1;
+  Parse_9_slice(gfx->Border_black, gui, cursor_x, cursor_y, gfx->Factor);
+  cursor_y+=  7*gfx->Factor;
 
   // Effects
   for (i=0; i<NB_EFFECTS_SPRITES; i++)

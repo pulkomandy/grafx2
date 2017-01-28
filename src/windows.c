@@ -158,18 +158,37 @@ void Window_display_frame_mono(word x_pos,word y_pos,word width,word height,T_Co
   Window_display_frame_generic(x_pos,y_pos,width,height,color,color,color,color,color);
 }
 
+// Draw a horizontal line like a HTML ruler - used in top of windows
+void Window_display_ruler(word x_pos,word y_pos, word width)
+{
+  Copy_texture(Window_texture, Gfx->Border_out[1], (x_pos)*Menu_factor_X, (y_pos+1)*Menu_factor_Y, (width)*Menu_factor_X, 2*Menu_factor_Y);
+  Copy_texture(Window_texture, Gfx->Border_out[7], (x_pos)*Menu_factor_X, (y_pos-1)*Menu_factor_Y, (width)*Menu_factor_X, 2*Menu_factor_Y);
+}
+
+/// Texturize a rectangle using a 9-slice.
+void Window_display_9_slice(SDL_Texture **texture, int border, word x_pos,word y_pos,word width,word height)
+{
+  Copy_texture(Window_texture, texture[0], (x_pos)*Menu_factor_X, (y_pos)*Menu_factor_Y, border*Menu_factor_X, border*Menu_factor_Y);
+  Copy_texture(Window_texture, texture[1], (x_pos+border)*Menu_factor_X, (y_pos)*Menu_factor_Y, (width-border*2)*Menu_factor_X, border*Menu_factor_Y);
+  Copy_texture(Window_texture, texture[2], (x_pos+width-border)*Menu_factor_X, (y_pos)*Menu_factor_Y, (border)*Menu_factor_X, border*Menu_factor_Y);
+  Copy_texture(Window_texture, texture[3], (x_pos)*Menu_factor_X, (y_pos+border)*Menu_factor_Y, border*Menu_factor_X, (height-border*2)*Menu_factor_Y);
+  Copy_texture(Window_texture, texture[5], (x_pos+width-border)*Menu_factor_X, (y_pos+border)*Menu_factor_Y, border*Menu_factor_X, (height-border*2)*Menu_factor_Y);
+  Copy_texture(Window_texture, texture[6], (x_pos)*Menu_factor_X, (y_pos+height-border)*Menu_factor_Y, border*Menu_factor_X, border*Menu_factor_Y);
+  Copy_texture(Window_texture, texture[7], (x_pos+border)*Menu_factor_X, (y_pos+height-border)*Menu_factor_Y, (width-border*2)*Menu_factor_X, border*Menu_factor_Y);
+  Copy_texture(Window_texture, texture[8], (x_pos+width-border)*Menu_factor_X, (y_pos+height-border)*Menu_factor_Y, (border)*Menu_factor_X, border*Menu_factor_Y);
+}
+
   // -- Frame creux: foncé en haut-gauche et clair en bas-droite --
 
 void Window_display_frame_in(word x_pos,word y_pos,word width,word height)
 {
-  Window_display_frame_generic(x_pos,y_pos,width,height,MC_Dark,MC_White,MC_Light,MC_Dark,MC_White);
+  Window_display_9_slice(Gfx->Border_in, 2, x_pos, y_pos, width, height);
 }
 
   // -- Frame bombé: clair en haut-gauche et foncé en bas-droite --
-
 void Window_display_frame_out(word x_pos,word y_pos,word width,word height)
 {
-  Window_display_frame_generic(x_pos,y_pos,width,height,MC_White,MC_Dark,MC_Light,MC_White,MC_Dark);
+  Window_display_9_slice(Gfx->Border_out, 2, x_pos, y_pos, width, height);
 }
 
   // -- Frame de séparation: un cadre bombé dans un cadre creux (3D!!!) --
@@ -628,8 +647,6 @@ void Display_layerbar(void)
 /// Display the whole menu
 void Display_menu(void)
 {
-  word x_pos;
-  word y_pos;
   int8_t current_menu;
   int button;
 

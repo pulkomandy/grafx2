@@ -94,6 +94,7 @@ void Window_display_frame_mono(word x_pos,word y_pos,word width,word height,T_Co
 void Window_display_frame_in(word x_pos,word y_pos,word width,word height);
 void Window_display_frame_out(word x_pos,word y_pos,word width,word height);
 void Window_display_frame(word x_pos,word y_pos,word width,word height);
+void Window_display_ruler(word x_pos,word y_pos,word width);
 
 void Display_sprite_in_menu(int btn_number,char sprite_number);
 void Display_paintbrush_in_menu(void);
