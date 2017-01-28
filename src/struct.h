@@ -467,7 +467,7 @@ typedef struct
   SDL_Texture *Border_out[9];
   SDL_Texture *Border_in[9];
   SDL_Texture *Border_clicked[9];
-  SDL_Texture *Border_black[9];
+  SDL_Texture *Border_outline[9];
 
   /// Bitmap data for the menu, a single rectangle.
   byte Menu_block[35][MENU_WIDTH];

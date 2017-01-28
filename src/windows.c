@@ -151,13 +151,6 @@ void Window_display_frame_generic(word x_pos,word y_pos,word width,word height,
   Pixel_in_window(x_pos,y_pos+height-1,color_s);
 }
 
-  // -- Frame dont tout le contour est d'une seule couleur --
-
-void Window_display_frame_mono(word x_pos,word y_pos,word width,word height,T_Components color)
-{
-  Window_display_frame_generic(x_pos,y_pos,width,height,color,color,color,color,color);
-}
-
 // Draw a horizontal line like a HTML ruler - used in top of windows
 void Window_display_ruler(word x_pos,word y_pos, word width)
 {
@@ -176,6 +169,21 @@ void Window_display_9_slice(SDL_Texture **texture, int border, word x_pos,word y
   Copy_texture(Window_texture, texture[6], (x_pos)*Menu_factor_X, (y_pos+height-border)*Menu_factor_Y, border*Menu_factor_X, border*Menu_factor_Y);
   Copy_texture(Window_texture, texture[7], (x_pos+border)*Menu_factor_X, (y_pos+height-border)*Menu_factor_Y, (width-border*2)*Menu_factor_X, border*Menu_factor_Y);
   Copy_texture(Window_texture, texture[8], (x_pos+width-border)*Menu_factor_X, (y_pos+height-border)*Menu_factor_Y, (border)*Menu_factor_X, border*Menu_factor_Y);
+}
+
+// -- Frame dont tout le contour est d'une seule couleur --
+void Window_display_frame_mono(word x_pos,word y_pos,word width,word height,T_Components color)
+{
+  SDL_SetTextureColorMod(Gfx->Border_outline[0], color.R, color.G, color.B);
+  SDL_SetTextureColorMod(Gfx->Border_outline[1], color.R, color.G, color.B);
+  SDL_SetTextureColorMod(Gfx->Border_outline[2], color.R, color.G, color.B);
+  SDL_SetTextureColorMod(Gfx->Border_outline[3], color.R, color.G, color.B);
+  SDL_SetTextureColorMod(Gfx->Border_outline[4], color.R, color.G, color.B);
+  SDL_SetTextureColorMod(Gfx->Border_outline[5], color.R, color.G, color.B);
+  SDL_SetTextureColorMod(Gfx->Border_outline[6], color.R, color.G, color.B);
+  SDL_SetTextureColorMod(Gfx->Border_outline[7], color.R, color.G, color.B);
+  SDL_SetTextureColorMod(Gfx->Border_outline[8], color.R, color.G, color.B);
+  Window_display_9_slice(Gfx->Border_outline, 2, x_pos, y_pos, width, height);
 }
 
   // -- Frame creux: foncé en haut-gauche et clair en bas-droite --
@@ -203,12 +211,6 @@ void Window_display_frame_clicked(word x_pos,word y_pos,word width,word height)
 {
   Window_display_9_slice(Gfx->Border_clicked, 2, x_pos, y_pos, width, height);
 }
-
-void Window_display_frame_black(word x_pos,word y_pos,word width,word height)
-{
-  Window_display_9_slice(Gfx->Border_black, 2, x_pos, y_pos, width, height);
-}
-
 
 //-- Affichages relatifs à la palette dans le menu ---------------------------
 

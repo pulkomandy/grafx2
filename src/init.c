@@ -438,7 +438,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   // Button outline
   if (GUI_seek_right(gui, &cursor_x, cursor_y, neutral_color, "button outline"))
     return 1;
-  Parse_9_slice(gfx->Border_black, gui, cursor_x, cursor_y, gfx->Factor);
+  Parse_9_slice(gfx->Border_outline, gui, cursor_x, cursor_y, gfx->Factor);
   cursor_y+=  7*gfx->Factor;
 
   // Effects

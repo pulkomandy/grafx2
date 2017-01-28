@@ -1452,7 +1452,7 @@ void Open_window(word width,word height, const char * title)
   // -- Frame de la fenêtre ----- --- -- -  -
 
   // Frame noir puis en relief
-  Window_display_frame_black(0, 0, width, height);
+  Window_display_frame_mono(0, 0, width, height, MC_Black);
   Window_display_frame_out(1,1,width-2,height-2);
 
   // Barre sous le titre
@@ -1590,7 +1590,7 @@ void Window_draw_normal_bouton(word x_pos,word y_pos,word width,word height,
   if (clickable)
   {
     Window_display_frame_out(x_pos,y_pos,width,height);
-    Window_display_frame_black(x_pos-1, y_pos-1, width+2, height+2);
+    Window_display_frame_mono(x_pos-1, y_pos-1, width+2, height+2, MC_Black);
     title_color=MC_Black;
   }
   else
@@ -1795,7 +1795,7 @@ void Window_draw_scroller_button(T_Scroller_button * button)
   Window_draw_slider(button);
   if (button->Is_horizontal)
   {
-    Window_display_frame_black(button->Pos_X-1,button->Pos_Y-1,button->Length+2,13);
+    Window_display_frame_mono(button->Pos_X-1,button->Pos_Y-1,button->Length+2,13, MC_Black);
     Window_display_frame_mono(button->Pos_X+11,button->Pos_Y-1,button->Length-22,13,MC_Black);
     Window_display_frame_out(button->Pos_X,button->Pos_Y,11,11);
     Window_display_frame_out(button->Pos_X+button->Length-11,button->Pos_Y,11,11);
@@ -1804,7 +1804,7 @@ void Window_draw_scroller_button(T_Scroller_button * button)
   }
   else
   {
-    Window_display_frame_black(button->Pos_X-1,button->Pos_Y-1,13,button->Length+2);
+    Window_display_frame_mono(button->Pos_X-1,button->Pos_Y-1,13,button->Length+2, MC_Black);
     Window_display_frame_mono(button->Pos_X-1,button->Pos_Y+11,13,button->Length-22,MC_Black);
     Window_display_frame_out(button->Pos_X,button->Pos_Y,11,11);
     Window_display_frame_out(button->Pos_X,button->Pos_Y+button->Length-11,11,11);

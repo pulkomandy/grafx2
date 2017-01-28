@@ -2547,8 +2547,8 @@ void Button_Brush_Factory(void)
   Open_window(33+8*NAME_WIDTH, 180, "Brush Factory");
   
   Window_set_normal_button(85, 161, 67, 14, "Cancel", 0, 1, KEY_ESC); // 1
-
   Window_display_frame_in(6, FILESEL_Y - 2, NAME_WIDTH*8+4, 84); // File selector
+  Window_rectangle(7,FILESEL_Y - 1, NAME_WIDTH*8+2, 82, MC_Black);
   // Fileselector
   scriptarea=Window_set_special_button(8, FILESEL_Y + 0, NAME_WIDTH*8, 80); // 2
   // Scroller for the fileselector
