@@ -107,7 +107,8 @@ void Display_syntax(void)
   printf("\t-tall2            to emulate a video mode with double tall pixels (2x4)\n");
   printf("\t-triple           to emulate a video mode with triple pixels (3x3)\n");
   printf("\t-quadruple        to emulate a video mode with quadruple pixels (4x4)\n");
-  printf("\t-rgb n            to reduce RGB precision from 256 to n levels\n");
+  printf("\t-rgb n            to reduce RGB precision (2 to 256, 256=max precision)\n");
+  printf("\t-gamma n          to adjust Gamma correction (1 to 30, 10=no correction)\n");
   printf("\t-skin <filename>  to use an alternate file with the menu graphics\n");
   printf("\t-mode <videomode> to set a video mode\n");
   printf("Arguments can be prefixed either by / - or --\n");
@@ -208,6 +209,7 @@ enum CMD_PARAMS
     CMDPARAM_PIXELRATIO_TALL3,
     CMDPARAM_PIXELRATIO_WIDE2,
     CMDPARAM_RGB,
+    CMDPARAM_GAMMA,
     CMDPARAM_SKIN
 };
 
@@ -229,6 +231,7 @@ struct {
     {"tall3", CMDPARAM_PIXELRATIO_TALL3},
     {"wide2", CMDPARAM_PIXELRATIO_WIDE2},
     {"rgb", CMDPARAM_RGB},
+    {"gamma", CMDPARAM_GAMMA},
     {"skin", CMDPARAM_SKIN}
 };
 
@@ -337,7 +340,7 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
         Pixel_ratio = PIXEL_WIDE2;
         break;
       case CMDPARAM_RGB:
-        // echelle des composants RGB
+        /* RGB scale */
         index++;
         if (index<argc)
         {
@@ -350,6 +353,28 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
             exit(0);
           }
           Set_palette_RGB_scale(scale);
+        }
+        else
+        {
+          Error(ERROR_COMMAND_LINE);
+          Display_syntax();
+          exit(0);
+        }
+        break;
+      case CMDPARAM_GAMMA:
+        /* Gamma correction */
+        index++;
+        if (index<argc)
+        {
+          int scale;
+          scale = atoi(argv[index]);
+          if (scale < 1 || scale > 30)
+          {
+            Error(ERROR_COMMAND_LINE);
+            Display_syntax();
+            exit(0);
+          }
+          Set_palette_Gamma(scale);
         }
         else
         {

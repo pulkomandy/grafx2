@@ -33,6 +33,9 @@ void Set_palette_RGB_scale(int);
 
 int Get_palette_RGB_scale(void);
 
+/// Configure Gamma correction
+void Set_palette_Gamma(int);
+
 ///
 /// Scale a component (R, G or B) according to the current RGB graduations.
 /// Returns the resulting value, in the [0-255] range.

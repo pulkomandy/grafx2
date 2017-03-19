@@ -18,9 +18,11 @@
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "const.h"
 #include "struct.h"
 #include "global.h"
@@ -39,11 +41,12 @@
 #include "shade.h"
 
 byte Palette_view_is_RGB = 1; // Indique si on est en HSL ou en RGB
+float Gamma = 1.0;
 
 // Coordinates of the color count (on histogram button)
 static const int COUNT_X = 138;
 static const int COUNT_Y = 64;
-  
+
 
 // Nombre de graduations pour une composante RGB
 int RGB_scale = 256; // 24bit
@@ -72,32 +75,62 @@ int Get_palette_RGB_scale(void)
   return RGB_scale;
 }
 
+
+void Set_palette_Gamma(int gamma)
+{
+  Gamma = gamma / 10.0;
+}
+
 ///
-/// Round a 0-255 RGB component according to the RGB_scale.
+/// Round a 0-255 RGB component according to the RGB_scale and gamm correction.
+//  The result is a color as similar as possible, but that can be encoded in the
+//  picture colorspace.
 /// The result is also in the 0-255 range.
 byte Round_palette_component(byte comp)
 {
-  return (comp*RGB_scale/256+(RGB_scale-(256-1)*RGB_scale/256)/2) * (255/(RGB_scale-1));
+  // Apply Gamma correction
+  float fc = pow(comp/255.0,Gamma)*255;
+
+  // Convert to encodable value
+  comp = ceil(fc);
+  comp = (comp*RGB_scale/256+(RGB_scale-(256-1)*RGB_scale/256)/2) * (255/(RGB_scale-1));
+
+  // Apply reverse Gamma correction
+  fc = pow(comp/255.0,1/Gamma)*255;
+
+  return fc;
 }
 
 ///
-/// Turns a RGB component from 0-255 scale to 0-(RGB_scale-1).
+/// Turns a RGB component from 0-(RGB_scale-1) scale to 0-255 and apply reverse
+//  gamma correction.
 /// The passed value should come from Round_palette_component(),
 /// otherwise the rounding will be "down".
-int Reduce_component(int comp)
+static int Decode_component(int comp)
 {
-  return (comp)*255/Color_max;
+  float res = pow((float)comp/Color_max,1/Gamma)*255;
+  return (int)res;
+}
+
+
+/// Compute the component at a given distance from the current one.
+/// Used by the add/remove and lighten/darken operations.
+static int Add_encoded(int comp, int offset)
+{
+	int new = Decode_component(Encode_component(comp)+offset);
+	if (new < 0)
+		new = 0;
+	if (new > 255)
+		new = 255;
+	return new;
 }
 
 ///
-/// Turns a RGB component from 0-(RGB_scale-1) to 0-255.
-int Expand_component(int comp)
+/// Turns a RGB component from 0-255 to 0-(RGB_scale-1) and apply Gamma correction.
+static int Encode_component(int comp)
 {
-  if (Color_max==255)
-    return comp;
-  return (comp+1)*Color_max/255;
-  // The +1 cancel any rounding down, the above test prevents
-  // the only case where it would be too much.
+  float res = pow(comp/255.0,Gamma)*Color_max;
+  return ceil(res);
 }
 
 // Définir les unités pour les graduations R G B ou H S V
@@ -189,19 +222,19 @@ void Spread_colors(short start,short end,T_Palette palette)
   // pouvoir faire un dégradé:
   if ( (start!=end) && (start+1!=end) )
   {
-    start_red=palette[start].R;
-    start_green =palette[start].G;
-    start_blue =palette[start].B;
+    start_red   = Encode_component(palette[start].R);
+    start_green = Encode_component(palette[start].G);
+    start_blue  = Encode_component(palette[start].B);
 
-    end_red  =palette[end  ].R;
-    end_green   =palette[end  ].G;
-    end_blue   =palette[end  ].B;
+    end_red     = Encode_component(palette[end  ].R);
+    end_green   = Encode_component(palette[end  ].G);
+    end_blue    = Encode_component(palette[end  ].B);
 
     for (index=start+1;index<end;index++)
     {
-      Set_red(index, ((end_red-start_red) * (index-start))/(end-start) + start_red,palette);
-      Set_green (index, ((end_green -start_green ) * (index-start))/(end-start) + start_green ,palette);
-      Set_blue (index, ((end_blue -start_blue ) * (index-start))/(end-start) + start_blue ,palette);
+      Set_red  (index, Decode_component(((end_red  -start_red  ) * (index-start))/(end-start) + start_red),   palette);
+      Set_green(index, Decode_component(((end_green-start_green) * (index-start))/(end-start) + start_green), palette);
+      Set_blue (index, Decode_component(((end_blue -start_blue ) * (index-start))/(end-start) + start_blue),  palette);
     }
     Set_palette(palette);
   }
@@ -797,12 +830,12 @@ void Display_sliders(T_Scroller_button * red_slider,
       RGB_to_HSL(j1,j2,j3,&j1,&j2,&j3);
     }
 
-    Format_component(j1*Color_count/256,str);
-    Set_palette_slider(red_slider,Color_count,Color_max-Expand_component(j1),str,NUMERIC_R_X);
-    Format_component(j2*Color_count/256,str);
-    Set_palette_slider(green_slider,Color_count,Color_max-Expand_component(j2),str,NUMERIC_G_X);
-    Format_component(j3*Color_count/256,str);
-    Set_palette_slider(blue_slider,Color_count,Color_max-Expand_component(j3),str,NUMERIC_B_X);
+    Format_component(Encode_component(j1), str);
+    Set_palette_slider(red_slider,Color_count,Color_max-Encode_component(j1),str,NUMERIC_R_X);
+    Format_component(Encode_component(j2),str);
+    Set_palette_slider(green_slider,Color_count,Color_max-Encode_component(j2),str,NUMERIC_G_X);
+    Format_component(Encode_component(j3),str);
+    Set_palette_slider(blue_slider,Color_count,Color_max-Encode_component(j3),str,NUMERIC_B_X);
   }
 }
 
@@ -841,18 +874,18 @@ void Draw_all_palette_sliders(T_Scroller_button * red_slider,
     {
       RGB_to_HSL(j1,j2,j3,&j1,&j2,&j3);
     }
-    Format_component(j1*Color_count/256,str);
-    red_slider->Position=Color_max-Expand_component(j1);
+    Format_component(Encode_component(j1),str);
+    red_slider->Position=Color_max-Encode_component(j1);
     Window_draw_slider(red_slider);
     Print_counter(NUMERIC_R_X,NUMERIC_Y,str,MC_Black,MC_Light);
 
-    Format_component(j2*Color_count/256,str);
-    green_slider->Position=Color_max-Expand_component(j2);
+    Format_component(Encode_component(j2),str);
+    green_slider->Position=Color_max-Encode_component(j2);
     Window_draw_slider(green_slider);
     Print_counter(NUMERIC_G_X,NUMERIC_Y,str,MC_Black,MC_Light);
 
-    Format_component(j3*Color_count/256,str);
-    blue_slider->Position=Color_max-Expand_component(j3);
+    Format_component(Encode_component(j3),str);
+    blue_slider->Position=Color_max-Encode_component(j3);
     Window_draw_slider(blue_slider);
     Print_counter(NUMERIC_B_X,NUMERIC_Y,str,MC_Black,MC_Light);
   }
@@ -1137,9 +1170,9 @@ void Button_Palette(void)
   Window_rectangle(247,39+96,17,1,MC_Dark);
   Window_rectangle(274,39+96,17,1,MC_Dark);
   // Jauges de couleur
-  red_slider = Window_set_scroller_button(223, 27, 128+24,Color_count,1,Color_max-Reduce_component(working_palette[Fore_color].R));// 2
-  green_slider = Window_set_scroller_button(250, 27, 128+24,Color_count,1,Color_max-Reduce_component(working_palette[Fore_color].G));// 3
-  blue_slider = Window_set_scroller_button(277, 27, 128+24,Color_count,1,Color_max-Reduce_component(working_palette[Fore_color].B));// 4
+  red_slider = Window_set_scroller_button(223, 27, 128+24,Color_count,1,Color_max-Decode_component(working_palette[Fore_color].R));// 2
+  green_slider = Window_set_scroller_button(250, 27, 128+24,Color_count,1,Color_max-Decode_component(working_palette[Fore_color].G));// 3
+  blue_slider = Window_set_scroller_button(277, 27, 128+24,Color_count,1,Color_max-Decode_component(working_palette[Fore_color].B));// 4
 
   if(Palette_view_is_RGB==1) {
       Print_RGB_or_HSL(0);
@@ -1434,8 +1467,8 @@ void Button_Palette(void)
         {
           if(Palette_view_is_RGB)
           {
-            Set_red(Fore_color,Reduce_component(Color_max-red_slider->Position),working_palette);
-            Format_component((working_palette[Fore_color].R)*Color_count/256,str);
+            Set_red(Fore_color,Decode_component(Color_max-red_slider->Position),working_palette);
+            Format_component(Color_max-red_slider->Position,str);
           } 
           else
           {
@@ -1455,7 +1488,7 @@ void Button_Palette(void)
           if(Palette_view_is_RGB)
           {
             for (i=block_start; i<=block_end; i++)
-              Set_red(i,temp_palette[i].R+Reduce_component(Color_max-red_slider->Position),working_palette);
+              Set_red(i,Add_encoded(temp_palette[i].R, Color_max-red_slider->Position),working_palette);
           }
           else
           {
@@ -1467,7 +1500,7 @@ void Button_Palette(void)
                 non_greys=1;
               else
                 greys=1;
-            
+
             for (i=block_start; i<=block_end; i++)
             {
               byte is_grey = temp_palette[i].R==temp_palette[i].G && temp_palette[i].R == temp_palette[i].B;
@@ -1515,8 +1548,8 @@ void Button_Palette(void)
         {
           if(Palette_view_is_RGB)
           {
-            Set_green (Fore_color,Reduce_component(Color_max-green_slider->Position),working_palette);
-            Format_component(working_palette[Fore_color].G*Color_count/256,str);
+            Set_green (Fore_color,Decode_component(Color_max-green_slider->Position),working_palette);
+            Format_component(Color_max-green_slider->Position,str);
           } 
           else
           {
@@ -1536,7 +1569,7 @@ void Button_Palette(void)
           if(Palette_view_is_RGB)
           {
             for (i=block_start; i<=block_end; i++)
-              Set_green (i,temp_palette[i].G+Reduce_component(Color_max-green_slider->Position),working_palette);
+              Set_green (i,Add_encoded(temp_palette[i].G, Color_max-green_slider->Position),working_palette);
           }
           else
           {
@@ -1596,8 +1629,8 @@ void Button_Palette(void)
         {
           if(Palette_view_is_RGB)
           {
-            Set_blue (Fore_color,Reduce_component(Color_max-blue_slider->Position),working_palette);
-            Format_component(working_palette[Fore_color].B*Color_count/256,str);
+            Set_blue (Fore_color,Decode_component(Color_max-blue_slider->Position),working_palette);
+            Format_component(Color_max-blue_slider->Position,str);
           } 
           else
           {
@@ -1617,7 +1650,7 @@ void Button_Palette(void)
           if(Palette_view_is_RGB)
           {
           for (i=block_start; i<=block_end; i++)
-              Set_blue(i,temp_palette[i].B+Reduce_component(Color_max-blue_slider->Position),working_palette);
+              Set_blue(i,Add_encoded(temp_palette[i].B, Color_max-blue_slider->Position),working_palette);
           }
           else
           {
@@ -2013,24 +2046,24 @@ void Button_Palette(void)
           {
             (red_slider->Position)--;
             Window_draw_slider(red_slider);
-            Set_red(Fore_color,Reduce_component(Color_max-red_slider->Position),working_palette);
-            Format_component(working_palette[Fore_color].R*Color_count/256,str);
+            Set_red(Fore_color,Decode_component(Color_max-red_slider->Position),working_palette);
+            Format_component(Color_max-red_slider->Position,str);
             Print_counter(NUMERIC_R_X,NUMERIC_Y,str,MC_Black,MC_Light);
           }
           if (green_slider->Position)
           {
             (green_slider->Position)--;
             Window_draw_slider(green_slider);
-            Set_green (Fore_color,Reduce_component(Color_max-green_slider->Position),working_palette);
-            Format_component(working_palette[Fore_color].G*Color_count/256,str);
+            Set_green (Fore_color,Decode_component(Color_max-green_slider->Position),working_palette);
+            Format_component(Color_max-green_slider->Position,str);
             Print_counter(NUMERIC_G_X,NUMERIC_Y,str,MC_Black,MC_Light);
           }
           if (blue_slider->Position)
           {
             (blue_slider->Position)--;
             Window_draw_slider(blue_slider);
-            Set_blue (Fore_color,Reduce_component(Color_max-blue_slider->Position),working_palette);
-            Format_component(working_palette[Fore_color].B*Color_count/256,str);
+            Set_blue (Fore_color,Decode_component(Color_max-blue_slider->Position),working_palette);
+            Format_component(Color_max-blue_slider->Position,str);
             Print_counter(NUMERIC_B_X,NUMERIC_Y,str,MC_Black,MC_Light);
           }
         }
@@ -2054,9 +2087,9 @@ void Button_Palette(void)
 
           for (i=block_start; i<=block_end; i++)
           {
-            Set_red(i,temp_palette[i].R+Reduce_component(Color_max-red_slider->Position),working_palette);
-            Set_green (i,temp_palette[i].G+Reduce_component(Color_max-green_slider->Position),working_palette);
-            Set_blue (i,temp_palette[i].B+Reduce_component(Color_max-blue_slider->Position),working_palette);
+            Set_red(i,Add_encoded(temp_palette[i].R, Color_max-red_slider->Position),working_palette);
+            Set_green (i,Add_encoded(temp_palette[i].G, Color_max-green_slider->Position),working_palette);
+            Set_blue (i,Add_encoded(temp_palette[i].B, Color_max-blue_slider->Position),working_palette);
           }
 
           // -- red --
@@ -2139,24 +2172,24 @@ void Button_Palette(void)
           {
             (red_slider->Position)++;
             Window_draw_slider(red_slider);
-            Set_red(Fore_color,Reduce_component(Color_max-red_slider->Position),working_palette);
-            Format_component(working_palette[Fore_color].R*Color_count/256,str);
+            Set_red(Fore_color,Decode_component(Color_max-red_slider->Position),working_palette);
+            Format_component(Color_max-red_slider->Position,str);
             Print_counter(NUMERIC_R_X,NUMERIC_Y,str,MC_Black,MC_Light);
           }
           if (green_slider->Position<Color_max)
           {
             (green_slider->Position)++;
             Window_draw_slider(green_slider);
-            Set_green (Fore_color,Reduce_component(Color_max-green_slider->Position),working_palette);
-            Format_component(working_palette[Fore_color].G*Color_count/256,str);
+            Set_green (Fore_color,Decode_component(Color_max-green_slider->Position),working_palette);
+            Format_component(Color_max-green_slider->Position,str);
             Print_counter(NUMERIC_G_X,NUMERIC_Y,str,MC_Black,MC_Light);
           }
           if (blue_slider->Position<Color_max)
           {
             (blue_slider->Position)++;
             Window_draw_slider(blue_slider);
-            Set_blue (Fore_color,Reduce_component(Color_max-blue_slider->Position),working_palette);
-            Format_component(working_palette[Fore_color].B*Color_count/256,str);
+            Set_blue (Fore_color,Decode_component(Color_max-blue_slider->Position),working_palette);
+            Format_component(Color_max-blue_slider->Position,str);
             Print_counter(NUMERIC_B_X,NUMERIC_Y,str,MC_Black,MC_Light);
           }
         }
@@ -2180,9 +2213,9 @@ void Button_Palette(void)
 
           for (i=block_start; i<=block_end; i++)
           {
-            Set_red(i,temp_palette[i].R+Reduce_component(Color_max-red_slider->Position),working_palette);
-            Set_green (i,temp_palette[i].G+Reduce_component(Color_max-green_slider->Position),working_palette);
-            Set_blue (i,temp_palette[i].B+Reduce_component(Color_max-blue_slider->Position),working_palette);
+            Set_red(i,temp_palette[i].R+Decode_component(Color_max-red_slider->Position),working_palette);
+            Set_green (i,temp_palette[i].G+Decode_component(Color_max-green_slider->Position),working_palette);
+            Set_blue (i,temp_palette[i].B+Decode_component(Color_max-blue_slider->Position),working_palette);
           }
 
           // -- red --
@@ -2840,13 +2873,15 @@ void Button_Secondary_palette(void)
   T_Scroller_button * columns_slider;
   T_Scroller_button * lines_slider;
   T_Scroller_button * rgb_scale_slider;
+  T_Scroller_button * gamma_slider;
   char str[4];
   byte palette_vertical = Config.Palette_vertical;
   byte palette_cols, palette_lines;
   word rgb_scale;
+  float gamma;
   byte palette_needs_redraw=0;
   
-  Open_window(200,146,"Palettes");
+  Open_window(230,146,"Palettes");
 
   Window_set_normal_button(10,20,180,14,"Colors for best match",12,1,SDLK_b); // 1
   Window_set_normal_button(10,37,180,14,"User's color series"  ,14,1,SDLK_s); // 2
@@ -2858,6 +2893,7 @@ void Button_Secondary_palette(void)
   Print_in_window(84,77,"Lines",MC_Dark,MC_Light);
   Print_in_window(157,58,"RGB",MC_Dark,MC_Light);
   Print_in_window(152,68,"Scale",MC_Dark,MC_Light);
+  Print_in_window(188,58,"Gamma",MC_Dark,MC_Light);
   
   columns_slider = Window_set_scroller_button(19,72,29,255,1,256-Config.Palette_cells_X);// 5
   Num2str(Config.Palette_cells_X,str,3);
@@ -2877,8 +2913,12 @@ void Button_Secondary_palette(void)
 
   Window_set_normal_button(152,88,18,14,"x2"                  , 1,1,SDLK_x); // 9
   Window_set_normal_button(172,88,18,14,"÷2"                  , 0,1,SDLK_w); // 10
-  
-  Update_window_area(0,0,200,146);
+
+  gamma_slider = Window_set_scroller_button(200,68,40,30, 1,Gamma*10);// 11
+  Num2str(Gamma*10,str,3);
+  Print_in_window(190,112,str,MC_Black,MC_Light);
+
+  Update_window_area(0,0,230,146);
 
   Display_cursor();
 
@@ -2934,6 +2974,15 @@ void Button_Secondary_palette(void)
         Num2str(256-rgb_scale_slider->Position,str,3);
         Print_in_window(157,78,str,MC_Black,MC_Light);
         Window_draw_slider(rgb_scale_slider);
+        break;
+
+      case 11:
+        // Gamma slider
+        Num2str(Window_attribute2,str,3);
+        Hide_cursor();
+        Print_in_window(190,112,str,MC_Black,MC_Light);
+        Display_cursor();
+        break;
     }
   }
   while (clicked_button!=1 && clicked_button!=2 && clicked_button!=3 && clicked_button!=4);
@@ -2942,6 +2991,7 @@ void Button_Secondary_palette(void)
   palette_cols=256-columns_slider->Position;
   palette_lines=16-lines_slider->Position;
   rgb_scale=256-rgb_scale_slider->Position;
+  gamma=gamma_slider->Position/10.f;
 
   Close_window();
   Unselect_button(BUTTON_PALETTE);
@@ -2962,8 +3012,9 @@ void Button_Secondary_palette(void)
     Config.Palette_cells_Y = palette_lines;
     palette_needs_redraw=1;
   }
-  if (rgb_scale!=RGB_scale)
+  if (rgb_scale!=RGB_scale || gamma != Gamma)
   {
+    Gamma = gamma;
     Set_palette_RGB_scale(rgb_scale);
     Set_palette(Main_palette);
     Compute_optimal_menu_colors(Main_palette);
