@@ -210,13 +210,14 @@ endif
     CP = cp
     BIN = ../bin/grafx2
     PLATFORMOBJ = $(OBJDIR)/haiku.o
-      ifeq ($(NOLUA),1)
-        LUACOPT =
-        LUALOPT =
-      else
-        LUACOPT = -D__ENABLE_LUA__
-        LUALOPT = -llua
-      endif
+    ifeq ($(NOLUA),1)
+      LUACOPT =
+      LUALOPT =
+    else
+      LUAPKG=lua
+      LUACOPT = -D__ENABLE_LUA__ $(shell pkg-config $(LUAPKG) --cflags)
+      LUALOPT = $(shell pkg-config $(LUAPKG) --libs)
+    endif
     COPT = -W -Wall -c -g $(shell sdl-config --cflags) $(TTFCOPT) -I/boot/common/include $(LUACOPT)
     COPT += -DENABLE_FILENAMES_ICONV
     LOPT = $(shell sdl-config --libs) -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lfreetype -lbe $(LUALOPT) -liconv
