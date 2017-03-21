@@ -113,6 +113,14 @@ static int Decode_component(int comp)
 }
 
 
+/// Turns a RGB component from 0-255 to 0-(RGB_scale-1) and apply Gamma correction.
+static int Encode_component(int comp)
+{
+  float res = pow(comp/255.0,Gamma)*Color_max;
+  return ceil(res);
+}
+
+
 /// Compute the component at a given distance from the current one.
 /// Used by the add/remove and lighten/darken operations.
 static int Add_encoded(int comp, int offset)
@@ -125,13 +133,6 @@ static int Add_encoded(int comp, int offset)
 	return new;
 }
 
-///
-/// Turns a RGB component from 0-255 to 0-(RGB_scale-1) and apply Gamma correction.
-static int Encode_component(int comp)
-{
-  float res = pow(comp/255.0,Gamma)*Color_max;
-  return ceil(res);
-}
 
 // Définir les unités pour les graduations R G B ou H S V
 void Component_unit(int count)
@@ -2880,43 +2881,51 @@ void Button_Secondary_palette(void)
   word rgb_scale;
   float gamma;
   byte palette_needs_redraw=0;
+
+  static const int RGBScale_X = 161;
+  static const int RGBScale_Y = 85;
+
   
-  Open_window(230,146,"Palettes");
+  Open_window(218,146,"Palettes");
 
   Window_set_normal_button(10,20,180,14,"Colors for best match",12,1,SDLK_b); // 1
   Window_set_normal_button(10,37,180,14,"User's color series"  ,14,1,SDLK_s); // 2
-  Window_set_normal_button(139,126,53,14,"OK"                  , 0,1,SDLK_RETURN); // 3
-  Window_set_normal_button( 80,126,53,14,"Cancel"              , 0,1,KEY_ESC); // 4
+  Window_set_normal_button(155,126,53,14,"OK"                  , 0,1,SDLK_RETURN); // 3
+  Window_set_normal_button( 96,126,53,14,"Cancel"              , 0,1,KEY_ESC); // 4
   Window_display_frame(10,55,122,66);
   Print_in_window(18,59,"Palette layout",MC_Dark,MC_Light);
   Print_in_window(35,77,"Cols",MC_Dark,MC_Light);
   Print_in_window(84,77,"Lines",MC_Dark,MC_Light);
-  Print_in_window(157,58,"RGB",MC_Dark,MC_Light);
-  Print_in_window(152,68,"Scale",MC_Dark,MC_Light);
-  Print_in_window(188,58,"Gamma",MC_Dark,MC_Light);
-  
+
+  Print_in_window(137,57,"RGB Scale",MC_Dark,MC_Light);
+  Print_in_window(137,99,"Gamma",MC_Dark,MC_Light);
+
   columns_slider = Window_set_scroller_button(19,72,29,255,1,256-Config.Palette_cells_X);// 5
   Num2str(Config.Palette_cells_X,str,3);
   Print_in_window(38,89,str,MC_Black,MC_Light);
-  
+
   lines_slider = Window_set_scroller_button(70,72,29,15,1,16-Config.Palette_cells_Y);// 6
   Num2str(Config.Palette_cells_Y,str,3);
   Print_in_window(94,89,str,MC_Black,MC_Light);
-  
-  rgb_scale_slider = Window_set_scroller_button(137,58,60,255,1,256-RGB_scale);// 7
+
+  rgb_scale_slider = Window_set_horizontal_scroller_button(137,68,71,255,1,RGB_scale);// 7
   Num2str(RGB_scale,str,3);
-  Print_in_window(157,78,str,MC_Black,MC_Light);
+  Print_in_window(RGBScale_X,RGBScale_Y,str,MC_Black,MC_Light);
 
   Window_set_normal_button(35,106,13,11,"",-1,1,SDLK_LAST); // 8
   Print_in_window(38,108,(palette_vertical)?"X":" ",MC_Black,MC_Light);
   Print_in_window(51,108,"Vertical",MC_Dark,MC_Light);
 
-  Window_set_normal_button(152,88,18,14,"x2"                  , 1,1,SDLK_x); // 9
-  Window_set_normal_button(172,88,18,14,"÷2"                  , 0,1,SDLK_w); // 10
+  Window_set_normal_button(190,82,18,14,"x2"                  , 1,1,SDLK_x); // 9
+  Window_set_normal_button(137,82,18,14,"÷2"                  , 0,1,SDLK_w); // 10
 
-  gamma_slider = Window_set_scroller_button(200,68,40,30, 1,Gamma*10);// 11
-  Num2str(Gamma*10,str,3);
-  Print_in_window(190,112,str,MC_Black,MC_Light);
+  gamma_slider = Window_set_horizontal_scroller_button(137,110,71,30, 1,Gamma*10);// 11
+  Num2str(Gamma*10,str,2);
+  Print_in_window(178,99,str,MC_Black,MC_Light);
+
+  // I'm too lazy to format the number with a comma...
+  Pixel_in_window(185,107,MC_Black);
+  Pixel_in_window(184,108,MC_Black);
 
   Update_window_area(0,0,230,146);
 
@@ -2947,9 +2956,9 @@ void Button_Secondary_palette(void)
         break;
       case 7:
         // RGB scale slider
-        Num2str(256-Window_attribute2,str,3);
+        Num2str(Window_attribute2,str,3);
         Hide_cursor();
-        Print_in_window(157,78,str,MC_Black,MC_Light);
+        Print_in_window(RGBScale_X,RGBScale_Y,str,MC_Black,MC_Light);
         Display_cursor();
         break;
       case 8:
@@ -2962,25 +2971,29 @@ void Button_Secondary_palette(void)
 
       case 9:
         // x2 RGB scale
-        rgb_scale_slider->Position = rgb_scale_slider->Position>128?rgb_scale_slider->Position*2-256:0;
-        Num2str(256-rgb_scale_slider->Position,str,3);
-        Print_in_window(157,78,str,MC_Black,MC_Light);
+        rgb_scale_slider->Position = (rgb_scale_slider->Position < 128)
+            ? rgb_scale_slider->Position * 2
+            : 256;
+        Num2str(rgb_scale_slider->Position,str,3);
+        Print_in_window(RGBScale_X,RGBScale_Y,str,MC_Black,MC_Light);
         Window_draw_slider(rgb_scale_slider);
         break;
 
       case 10:
         // /2 RGB scale
-        rgb_scale_slider->Position = rgb_scale_slider->Position>253?254:(rgb_scale_slider->Position)/2+128;
-        Num2str(256-rgb_scale_slider->Position,str,3);
-        Print_in_window(157,78,str,MC_Black,MC_Light);
+        rgb_scale_slider->Position = (rgb_scale_slider->Position <= 2)
+            ? 1
+            : (rgb_scale_slider->Position)/2;
+        Num2str(rgb_scale_slider->Position,str,3);
+        Print_in_window(RGBScale_X,RGBScale_Y,str,MC_Black,MC_Light);
         Window_draw_slider(rgb_scale_slider);
         break;
 
       case 11:
         // Gamma slider
-        Num2str(Window_attribute2,str,3);
+        Num2str(Window_attribute2,str,2);
         Hide_cursor();
-        Print_in_window(190,112,str,MC_Black,MC_Light);
+        Print_in_window(178,99,str,MC_Black,MC_Light);
         Display_cursor();
         break;
     }
@@ -2990,7 +3003,7 @@ void Button_Secondary_palette(void)
   // We need to get the sliders positions before closing the window, because they will be freed.
   palette_cols=256-columns_slider->Position;
   palette_lines=16-lines_slider->Position;
-  rgb_scale=256-rgb_scale_slider->Position;
+  rgb_scale=rgb_scale_slider->Position;
   gamma=gamma_slider->Position/10.f;
 
   Close_window();
