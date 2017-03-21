@@ -1,19 +1,13 @@
+*.bak
+.*.sw?
 
 # /
 /gfx2.ini
 /gfx2.cfg
 /message.txt
-/uploadwin.sh
-/uploadsrc.sh
 /stdout.txt
 /stderr.txt
-/*.bak
 /obj
-/googlecode_upload.py
+/bin/grafx2*
 
-# /share/grafx2/scripts/
-/share/grafx2/scripts/*.bak
-
-# /src/
 /src/version.c
-/src/*.bak
