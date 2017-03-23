@@ -32,6 +32,9 @@
 # Compile with OPTIM=0 to disable gcc optimizations, to enable debug.
   STRIP = strip
 
+# Detect GIT revision
+  GIT_REVISION = $(shell git rev-list --count 1af8c74f53110e349d8f0d19b14599281913f71f..)
+
 ### Specific to build MAC OS X universal binaries on Tiger or Lion ###
 ### (may need to be changed or removed depending on the OSX version) ###
 
@@ -103,7 +106,6 @@ else
     # Where the SDL frameworks are located
     FWDIR = /Library/Frameworks
     BIN = ../bin/grafx2
-    SVN_REVISION = $(shell svnversion | cut -f2 -d ":" - | tr -d "M")
 
     SDLCONFIG := $(shell which sdl-config)
 ifneq ($(SDLCONFIG), )
@@ -533,7 +535,7 @@ endif
 	cp $(BIN) $(MACAPPEXE)
 	$(STRIP) -x -X -S $(MACAPPEXE)
 	chmod +x $(MACAPPEXE)
-	tar cvzf grafx2-svn$(SVN_REVISION)-macosx.tgz --exclude '*svn*' --exclude '*DS_Store*' Grafx2.app/*
+	tar cvzf grafx2-git$(GIT_REVISION)-macosx.tgz --exclude '.git' --exclude '*DS_Store*' Grafx2.app/*
 else
 all : $(BIN)
 ifeq ($(ATARICROSS),1)
@@ -566,7 +568,7 @@ release : version $(BIN)
 
 # Create a zip archive ready for upload to the website, including binaries and sourcecode
 ziprelease: version $(BIN) release
-	echo `sed "s/.*=\"\(.*\)\";/\1/" pversion.c`.`svnversion` | tr " :" "_-" | sed -e "s/\(wip\)\\./\1/I" > $(OBJDIR)/versiontag
+	echo `sed "s/.*=\"\(.*\)\";/\1/" pversion.c`.$(GIT_REVISION) | tr " :" "_-" | sed -e "s/\(wip\)\\./\1/I" > $(OBJDIR)/versiontag
 	tar cvzf "../src-`cat $(OBJDIR)/versiontag`.tgz" --strip=1 ../src/*.c ../src/*.cpp ../src/*.h ../src/Makefile ../src/Makefile.dep ../src/gfx2.ico ../src/Grafx2_Prefix.pch ../src/SDLMain.m
 	cd .. && $(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR:../%=%)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" $(BIN:../%=%) share/grafx2/gfx2def.ini $(SCRIPT_FILES:../%=%) $(SKIN_FILES:../%=%) share/grafx2/gfx2.gif share/icons/grafx2.svg doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt doc/PF_fonts.txt $(FONT_FILES:../%=%) doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt doc/README-lua.txt src-`cat $(OBJDIR:../%=%)/versiontag`.tgz $(PLATFORMFILES:../%=%)
 	$(DELCOMMAND) "../src-`cat $(OBJDIR)/versiontag`.tgz"
@@ -582,9 +584,9 @@ ifeq ($(PLATFORM),Haiku)
 	mimeset -f $(BIN)
 endif
 
-# SVN revision number
+# GIT revision number
 version.c :
-	echo "char SVN_revision[]=\"`svnversion .`\";" > version.c
+	echo "char SVN_revision[]=\"$(GIT_REVISION)\";" > version.c
 ifeq ($(LABEL),)
 else
 	echo "char Program_version[]=\"$(LABEL)\";" > pversion.c

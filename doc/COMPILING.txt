@@ -67,8 +67,8 @@ Erases all generated files (intermediate objects, and executable)
   make depend
 Re-compute the dependencies (makefile.dep).
 
-Other compilation targets (make version, make ziprelease) require Subversion
-and are only useful to contributors to the svn repository of Grafx2.
+Other compilation targets (make version, make ziprelease) require git
+and are only useful to contributors to the git repository of Grafx2.
 
 === System specifics ===
 

@@ -23,7 +23,7 @@ eventually like to draw the oldskool way !
 Grafx2 was originally written for the MS-DOS operating system. The authors then 
 released the sourcecode and we've modified it to run on your favorite platform 
 (if we missed it, please tell us !). Check the homepage at
-http://code.google.com/p/grafx2 for latest news and bugfixed versions.
+http://pulkomandy.tk/projects/GrafX2 for latest news and bugfixed versions.
 
 === HELP ===
 
@@ -49,10 +49,10 @@ The font Tuffy.ttf included as a sample in the fonts directory is public domain.
 The source code of Grafx2 should always be distributed along with the
 executable; You can normally find it in a packed archive whose name begins by
 "src". The source code is also available on the web site, either by accessing
-the Subversion repository:
-svn://pulkomandy.tk/GrafX2/
+the git repository:
+https://gitlab.com/GrafX2/grafX2.git
 or you can find the latest versions as packed archives:
-http://code.google.com/p/grafx2/wiki/Downloads
+http://pulkomandy.tk/projects/GrafX2/downloads
 
 === COMPILING ===
 
