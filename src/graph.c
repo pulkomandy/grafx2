@@ -325,7 +325,12 @@ try_again:
   pixels_changed = (Pixel_ratio!=pix_ratio);
   
   if (!screen_changed && !pixels_changed)
+  {
+    Resize_width=0;
+    Resize_height=0;
     return 0;
+  }
+
   if (screen_changed)
   {
     Set_mode_SDL(&width, &height,fullscreen);
