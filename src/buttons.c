@@ -4,7 +4,7 @@
 
     Copyright 2011 Pawel Góralski
     Copyright 2008 Yves Rizoud
-    Copyright 2007-2010 Adrien Destugues (PulkoMandy)
+    Copyright 2007-2017 Adrien Destugues (PulkoMandy)
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
     Grafx2 is free software; you can redistribute it and/or
