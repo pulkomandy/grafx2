@@ -162,12 +162,12 @@ void Button_Message_initial(void)
     for (x=14,x_pos=0; x_pos<231; x_pos++,x++)
       Pixel_in_window(x,y,Gfx->Logo_grafx2[offs_y+x_pos]);
 
-  Print_in_window(130-4*26,88,"Copyright (c) 2007-2012 by",MC_Dark,MC_Light);
-  Print_in_window(130-4*23,96,"the Grafx2 project team",MC_Black,MC_Light);
+  Print_in_window(130-4*26,88,"Copyright (c) 2007-2017 by",MC_Dark,MC_Light);
+  Print_in_window(130-4*23,100,"the Grafx2 project team",MC_Black,MC_Light);
   Print_in_window(130-4*26,112,"Copyright (c) 1996-2001 by",MC_Dark,MC_Light);
-  Print_in_window(130-4*13,120,"Sunset Design",MC_Black,MC_Light);
+  Print_in_window(130-4*13,122,"Sunset Design",MC_Black,MC_Light);
   //Print_in_window( 120-4*13,128,"(placeholder)",MC_Dark,MC_Light);
-  Print_in_window(130-4*17,136,"http://grafx2.org",MC_Dark,MC_Light);
+  Print_in_window(130-4*16,136,"http://grafx2.tk",MC_Dark,MC_Light);
 
   Window_set_normal_button(56, 151, 71, 14, "Anim", 0, (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION), KEY_NONE);
   Window_set_normal_button(133, 151, 71, 14, "Layers", 0, (Main_backups->Pages->Image_mode != IMAGE_MODE_LAYERED), KEY_NONE);
