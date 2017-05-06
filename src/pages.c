@@ -3,7 +3,7 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2008 Franck Charlet
-    Copyright 2007 Adrien Destugues
+    Copyright 2007-2017 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
     Grafx2 is free software; you can redistribute it and/or
@@ -1531,6 +1531,7 @@ void Switch_layer_mode(enum IMAGE_MODES new_mode)
   {
     case IMAGE_MODE_MODE5:
     case IMAGE_MODE_LAYERED:
+    default:
       Update_buffers(Main_image_width, Main_image_height);
       Redraw_layered_image();
       break;

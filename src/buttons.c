@@ -506,9 +506,8 @@ void Button_Toggle_toolbar(void)
 
   Window_dropdown_add_item(&dropdown, 0, menu_name_tools);
   
-  if (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED ||
-      Main_backups->Pages->Image_mode == IMAGE_MODE_MODE5 ||
-    (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION && Main_backups->Pages->Nb_layers==1))
+  if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION ||
+      Main_backups->Pages->Nb_layers==1)
     Window_dropdown_add_item(&dropdown, 1, menu_name_layers);
   
   if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION ||
@@ -544,7 +543,7 @@ void Button_Toggle_toolbar(void)
         }
         Set_bar_visibility(MENUBAR_ANIMATION, !Menu_bars[MENUBAR_ANIMATION].Visible, 0);
 
-        if (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED)
+        if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
           Switch_layer_mode(IMAGE_MODE_ANIMATION);
         
         break;
@@ -4860,10 +4859,10 @@ void Button_Effects(void)
           Display_effect_state(C2,L4, "8 bit" ,Main_backups->Pages->Image_mode > IMAGE_MODE_ANIMATION);
           Display_cursor();
         } else {
-          //Close_window();
-          //Display_cursor();
-          // Contraint checker/enforcer menu
-          //clicked_button = 11;
+          Close_window();
+          Display_cursor();
+          Button_Constraint_menu();
+          clicked_button = 11;
         }
         break;
       case 15: // Tilemap

@@ -4,7 +4,7 @@
 
     Copyright 2014 Sergii Pylypenko
     Copyright 2008 Yves Rizoud
-    Copyright 2007 Adrien Destugues
+    Copyright 2007-2017 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
     Grafx2 is free software; you can redistribute it and/or
@@ -589,6 +589,10 @@ enum IMAGE_MODES
 {
   IMAGE_MODE_LAYERED=0, ///< Layered image
   IMAGE_MODE_ANIMATION, ///< Animation
+  IMAGE_MODE_ZX,        ///< ZX Spectrum (note "SPECTRUM" is kept for later... Spectrum 512 anyone?)
+  IMAGE_MODE_GBC,       ///< Game Boy Color
+  IMAGE_MODE_EGX,       ///< CPC EGX
+  IMAGE_MODE_EGX2,      ///< CPC EGX2
   IMAGE_MODE_MODE5,     ///< CPC mode 5
 };
 

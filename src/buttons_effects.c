@@ -3,7 +3,7 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2008 Yves Rizoud
-    Copyright 2007 Adrien Destugues
+    Copyright 2007-2017 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
     Grafx2 is free software; you can redistribute it and/or
@@ -163,41 +163,84 @@ void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_ca
   Display_cursor();
 }
 
+byte Selected_Constraint_Mode = 0;
 
 // Constaint enforcer/checker ------------------------------------------------
-void Button_Constraint_mode(void)
+void Button_Constraint_mode()
 {
   int pixel;
   
-  if (Main_backups->Pages->Image_mode == IMAGE_MODE_MODE5)
+  if (Main_backups->Pages->Image_mode >= IMAGE_MODE_MODE5)
   {
     // Disable
     Switch_layer_mode(IMAGE_MODE_LAYERED);
     return;
   }
-  if (Main_backups->Pages->Image_mode != IMAGE_MODE_LAYERED ||
-    Main_backups->Pages->Nb_layers!=5 || (Main_image_width%48))
+
+  if (Selected_Constraint_Mode < IMAGE_MODE_MODE5)
+    Selected_Constraint_Mode = IMAGE_MODE_EGX;
+
+  if (Selected_Constraint_Mode == IMAGE_MODE_MODE5)
   {
-    Verbose_message("Error!", "This emulation of Amstrad CPC's Mode5 can only be used on a 5-layer image whose width is a multiple of 48.");
-    return;
-  }
-  for (pixel=0; pixel < Main_image_width*Main_image_height; pixel++)
-  {
-    if (Main_backups->Pages->Image[4].Pixels[pixel]>3)
+    if (Main_backups->Pages->Image_mode != IMAGE_MODE_LAYERED ||
+        Main_backups->Pages->Nb_layers!=5 || (Main_image_width%48))
     {
-      Verbose_message("Error!", "This emulation of Amstrad CPC's Mode5 needs all pixels of layer 5 to use colors 0-3.");
+      Verbose_message("Error!", "This emulation of Amstrad CPC's Mode5 can only be used on a 5-layer image whose width is a multiple of 48.");
       return;
     }
+    for (pixel=0; pixel < Main_image_width*Main_image_height; pixel++)
+    {
+      if (Main_backups->Pages->Image[4].Pixels[pixel]>3)
+      {
+        Verbose_message("Error!", "This emulation of Amstrad CPC's Mode5 needs all pixels of layer 5 to use colors 0-3.");
+        return;
+      }
+    }
+    // TODO set the palette to a CPC one ?
   }
-	// TODO backup
-	Switch_layer_mode(IMAGE_MODE_MODE5);
-	// TODO set the palette to a CPC one ?
+
+  // TODO backup
+  Switch_layer_mode(Selected_Constraint_Mode);
 }
 
 
 void Button_Constraint_menu(void)
 {
+  short clicked_button;
+  T_Dropdown_button* dropdown;
 
+  Open_window(154,79,"8-bit constraints");
+
+  Window_set_normal_button(21,55,51,14,"Cancel",0,1,KEY_ESC);  // 1
+  Window_set_normal_button(82,55,51,14,"OK"    ,0,1,SDLK_RETURN); // 2
+
+  dropdown = Window_set_dropdown_button(17, 21, 120, 14, 120, "Constraints", 1, 0, 1, RIGHT_SIDE|LEFT_SIDE, 0); // 3
+  //Window_dropdown_add_item(dropdown, IMAGE_MODE_ZX, "ZX Spectrum");
+  //Window_dropdown_add_item(dropdown, IMAGE_MODE_GBC, "Game Boy Color");
+  Window_dropdown_add_item(dropdown, IMAGE_MODE_EGX, "EGX (CPC)");
+  //Window_dropdown_add_item(dropdown, IMAGE_MODE_EGX2, "EGX2 (CPC)");
+  Window_dropdown_add_item(dropdown, IMAGE_MODE_MODE5, "Mode 5 (CPC)");
+
+  Update_window_area(0,0,Window_width, Window_height);
+  Display_cursor();
+
+  do
+  {
+    clicked_button=Window_clicked_button();
+
+    if (clicked_button == 3)
+      Selected_Constraint_Mode = Window_attribute2;
+  }
+  while ( (clicked_button!=1) && (clicked_button!=2) );
+
+  Close_window();
+
+  if (clicked_button==2) // OK
+  {
+    Button_Constraint_mode();
+  }
+
+  Display_cursor();
 }
 
 // Tilemap mode

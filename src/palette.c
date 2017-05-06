@@ -2,7 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
-    Copyright 2007 Adrien Destugues
+    Copyright 2007-2017 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
     Grafx2 is free software; you can redistribute it and/or
@@ -344,7 +344,8 @@ void Remap_image_highlevel(byte * conversion_table)
   int layer;
 
   // Remap the flatenned image view
-  if (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED)
+  if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION
+      && Main_backups->Pages->Image_mode != IMAGE_MODE_MODE5)
   {
     Remap_general_lowlevel(conversion_table,Main_visible_image.Image,Main_visible_image.Image,
                          Main_image_width,Main_image_height,Main_image_width);

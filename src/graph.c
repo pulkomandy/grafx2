@@ -3003,6 +3003,28 @@ void Pixel_in_screen_layered_with_preview(word x,word y,byte color)
   }
 }
 
+void Pixel_in_screen_egx(word x,word y,byte color)
+{
+  if (y & 1)
+  {
+    Pixel_in_screen_layered(x & ~1,y,color);
+    Pixel_in_screen_layered(x |  1,y,color);
+  }
+  else
+    Pixel_in_screen_layered(x,y,color & 0xF3);
+}
+
+void Pixel_in_screen_egx_with_preview(word x,word y,byte color)
+{
+  if (y & 1)
+  {
+    Pixel_in_screen_layered_with_preview(x & ~1,y,color);
+    Pixel_in_screen_layered_with_preview(x |  1,y,color);
+  }
+  else
+    Pixel_in_screen_layered_with_preview(x,y,color & 0xF3);
+}
+
 /// Paint a a single pixel in image only : in a layer under one that acts as a layer-selector (mode 5).
 void Pixel_in_screen_underlay(word x,word y,byte color)
 {
@@ -3108,6 +3130,13 @@ void Update_pixel_renderer(void)
     Pixel_in_current_screen = Pixel_in_screen_layered;
     Pixel_in_current_screen_with_preview = Pixel_in_screen_layered_with_preview;
   }
+  else
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_EGX)
+  {
+    // layered
+    Pixel_in_current_screen = Pixel_in_screen_egx;
+    Pixel_in_current_screen_with_preview = Pixel_in_screen_egx_with_preview;
+  }
   // Implicit else : Image_mode must be IMAGE_MODE_MODE5
   else if ( Main_current_layer == 4)
   {
@@ -3123,7 +3152,7 @@ void Update_pixel_renderer(void)
   }
   else
   {
-    // layered (again)
+    // layered (again, for layers > 4 in MODE5)
     Pixel_in_current_screen = Pixel_in_screen_layered;
     Pixel_in_current_screen_with_preview = Pixel_in_screen_layered_with_preview;
   }
