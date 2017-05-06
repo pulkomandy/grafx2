@@ -1,6 +1,9 @@
 /* vim:expandtab:ts=2 sw=2:
 */
+#ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE 500
+#endif
+
 #include <stdlib.h>
 #include <errno.h>
 #include <fcntl.h>

@@ -1723,7 +1723,6 @@ int L_WindowReadline(lua_State* L)
 int L_WindowPrint(lua_State* L)
 {
   int x, y, fg=0, bg=2;
-  int len;
   int colors[4] = {MC_Black, MC_Dark, MC_Light, MC_White};
   const char *text="";
   int nb_args = lua_gettop(L);
@@ -1749,7 +1748,7 @@ int L_WindowPrint(lua_State* L)
     Hide_cursor();
     Cursor_is_visible=0;
   }
-  len=strlen(text);
+
   Print_in_window_limited(x, y, text, (Window_width-x)/8,colors[fg], colors[bg]);
   Window_needs_update=1;
   
@@ -1760,7 +1759,6 @@ int L_WindowSlider(lua_State* L)
 {
   word x, y, height, nb_elements, nb_elements_visible, initial_position;
   int horizontal;
-  T_Scroller_button *button;
   int nb_args = lua_gettop(L);
   
   LUA_ARG_LIMIT (7, "windowslider");
@@ -1790,9 +1788,9 @@ int L_WindowSlider(lua_State* L)
     Cursor_is_visible=0;
   }
   if (horizontal)
-    button = Window_set_horizontal_scroller_button(x, y, height+24, nb_elements, nb_elements_visible, initial_position);
+    Window_set_horizontal_scroller_button(x, y, height+24, nb_elements, nb_elements_visible, initial_position);
   else
-    button = Window_set_scroller_button(x, y, height+24, nb_elements, nb_elements_visible, initial_position);
+    Window_set_scroller_button(x, y, height+24, nb_elements, nb_elements_visible, initial_position);
   
   Window_needs_update=1;
 

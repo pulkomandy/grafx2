@@ -66,7 +66,6 @@ unsigned char *raw2crtc(T_IO_Context *context, unsigned char mode, unsigned char
   unsigned char minAddrIsDefined = 0;
   unsigned short maxAddr = 0;
 
-  unsigned char nbPixPerByte;
   int y,x;
   unsigned char r6;
   unsigned short i;
@@ -85,28 +84,24 @@ unsigned char *raw2crtc(T_IO_Context *context, unsigned char mode, unsigned char
     case 0:
     {
       *r1 = (width+3)/4;
-      nbPixPerByte = 2;
       ptrMode = mode0interlace;
       break;
     }
     case 1:
     {
       *r1 = (width+7)/8;
-      nbPixPerByte = 4;
       ptrMode = mode1interlace;
       break;
     }
     case 2:
     {
       *r1 = (width+15)/16;
-      nbPixPerByte = 8;
       ptrMode = mode2interlace;
       break;
     }
     case 3:
     {
       *r1 = (width+3)/4;
-      nbPixPerByte = 2;
       ptrMode = mode3interlace;
       break;
     }

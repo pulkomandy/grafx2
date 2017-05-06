@@ -115,10 +115,6 @@ void Display_paintbrush(short x,short y,byte color)
         // de laquelle on affiche la brosse/pinceau
   short start_y_counter; // Position Y (dans la brosse/pinceau) à partir
         // de laquelle on affiche la brosse/pinceau
-  short end_counter_x; // Position X ou s'arrête l'affichade de la
-        // brosse/pinceau
-  short end_counter_y; // Position Y ou s'arrête l'affichade de la
-        // brosse/pinceau
   byte * temp;
 
   if (Mouse_K) // pas de curseur si on est en preview et 
@@ -156,8 +152,6 @@ void Display_paintbrush(short x,short y,byte color)
         break;
       start_x_counter=start_x-(x-Brush_offset_X);
       start_y_counter=start_y-(y-Brush_offset_Y);
-      end_counter_x=start_x_counter+width;
-      end_counter_y=start_y_counter+height;
       if (Paintbrush_shape==PAINTBRUSH_SHAPE_COLOR_BRUSH)
         Display_brush_color(
             start_x-Main_offset_X,
@@ -220,8 +214,6 @@ void Display_paintbrush(short x,short y,byte color)
       Compute_clipped_dimensions(&start_x,&start_y,&width,&height);
       start_x_counter=start_x-(x-Paintbrush_offset_X);
       start_y_counter=start_y-(y-Paintbrush_offset_Y);
-      end_counter_x=start_x_counter+width;
-      end_counter_y=start_y_counter+height;
       temp=Brush;
       Brush=Paintbrush_sprite;
 
@@ -430,6 +422,7 @@ void Draw_paintbrush(short x,short y,byte color)
               counter_y < end_counter_y;
               y_pos++, counter_y++
           )
+          {
             for (x_pos = start_x, counter_x = start_x_counter;
               counter_x < end_counter_x;
               x_pos++, counter_x++
@@ -445,8 +438,9 @@ void Draw_paintbrush(short x,short y,byte color)
                       Display_pixel(x_pos,y_pos,Smear_brush[position]);
               Smear_brush[position]=temp_color;
             }
+          }
 
-            Update_part_of_screen(start_x,start_y,width,height);
+          Update_part_of_screen(start_x,start_y,width,height);
         }
 
         Smear_min_X=start_x_counter;
@@ -580,7 +574,7 @@ void Draw_paintbrush(short x,short y,byte color)
                   Display_pixel(x_pos,y_pos,Smear_brush[position]);
               Smear_brush[position]=temp_color;
             }
-            Update_part_of_screen(start_x, start_y, width, height);
+          Update_part_of_screen(start_x, start_y, width, height);
         }
 
 
@@ -711,8 +705,6 @@ void Hide_paintbrush(short x,short y)
   //short counter_x; // Position X (dans la brosse/pinceau) en cours
         //d'affichage
   //short counter_y; // Position Y (dans la brosse/pinceau) en cours d'affichage
-  short end_counter_x; // Position X ou s'arrête l'affichage de la brosse/pinceau
-  short end_counter_y; // Position Y ou s'arrête l'affichage de la brosse/pinceau
   byte * temp;
 
   if (Mouse_K == 0)
@@ -737,8 +729,6 @@ void Hide_paintbrush(short x,short y)
       Compute_clipped_dimensions(&start_x,&start_y,&width,&height);
       start_x_counter=start_x-(x-Brush_offset_X);
       start_y_counter=start_y-(y-Brush_offset_Y);
-      end_counter_x=start_x_counter+width;
-      end_counter_y=start_y_counter+height;
 
       if ( (width>0) && (height>0) )
         Clear_brush(start_x-Main_offset_X,
@@ -778,8 +768,6 @@ void Hide_paintbrush(short x,short y)
       Compute_clipped_dimensions(&start_x,&start_y,&width,&height);
       start_x_counter=start_x-(x-Paintbrush_offset_X);
       start_y_counter=start_y-(y-Paintbrush_offset_Y);
-      end_counter_x=start_x_counter+width;
-      end_counter_y=start_y_counter+height;
 
       temp=Brush;
       Brush=Paintbrush_sprite;
@@ -1318,19 +1306,16 @@ void Stretch_brush(short x1, short y1, short x2, short y2)
   byte * new_brush;
   int    new_brush_width;  // Width de la nouvelle brosse
   int    new_brush_height;  // Height de la nouvelle brosse
-  int    x_flipped, y_flipped;
   
   // Compute new brush dimensions
   if ((new_brush_width=x1-x2)<0)
   {
-    x_flipped=1;
     new_brush_width=-new_brush_width;
   }
   new_brush_width++;
 
   if ((new_brush_height=y1-y2)<0)
   {
-    y_flipped=1;
     new_brush_height=-new_brush_height;
   }
   new_brush_height++;
@@ -2023,15 +2008,13 @@ void Draw_quad_texture_preview(byte *texture, int texture_width,
                                    int x3,int y3,int xt3,int yt3,
                                    int x4,int y4,int xt4,int yt4)
 {
-  int x_min,x_max,y_min,y_max;
+  int y_min,y_max;
   int x,y,xt,yt;
   int y_,y_min_;
   int start_x,end_x,width,height;
   float temp;
   byte color;
 
-  x_min=Min(Min(x1,x2),Min(x3,x4));
-  x_max=Max(Max(x1,x2),Max(x3,x4));
   y_min=Min(Min(y1,y2),Min(y3,y4));
   y_max=Max(Max(y1,y2),Max(y3,y4));
   height=1+y_max-y_min;

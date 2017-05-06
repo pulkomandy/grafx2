@@ -105,7 +105,6 @@ void Load_IMG(T_IO_Context * context)
   byte * buffer;
   FILE *file;
   word x_pos,y_pos;
-  long width_read;
   long file_size;
   T_IMG_Header IMG_header;
 
@@ -133,7 +132,6 @@ void Load_IMG(T_IO_Context * context)
 
         context->Width=IMG_header.Width;
         context->Height=IMG_header.Height;
-        width_read=IMG_header.Width;
 
         for (y_pos=0;(y_pos<context->Height) && (!File_error);y_pos++)
         {
@@ -589,7 +587,6 @@ void Load_IFF(T_IO_Context * context)
   byte  color;
   long  file_size;
   dword dummy;
-  byte  is_anim=0;
   int iff_format;
   int plane;
 
@@ -608,7 +605,6 @@ void Load_IFF(T_IO_Context * context)
     Read_bytes(IFF_file,format,4);
     if (!memcmp(format,"ANIM",4))
     {
-      is_anim=1;
       // Skip a bit, brother
       Read_bytes(IFF_file,section,4);
       Read_dword_be(IFF_file,&dummy);
@@ -4227,6 +4223,9 @@ void Load_PNG(T_IO_Context * context)
                           png_read_image(png_ptr, Row_pointers);
                           break;
                         
+                        case CONTEXT_PALETTE:
+                          // No pixels to draw in a palette!
+                          break;
                       }
                     }
                   }

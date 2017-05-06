@@ -322,6 +322,10 @@ void Set_pixel_24b(T_IO_Context *context, short x_pos, short y_pos, byte r, byte
         context->Preview_bitmap[x_pos/context->Preview_factor_X + (y_pos/context->Preview_factor_Y)*PREVIEW_WIDTH*Menu_factor_X]=color;
       }
       break;
+
+    case CONTEXT_PALETTE:
+      // In a palette, there are no pixels!
+      break;
   }
 }
 
@@ -514,6 +518,10 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
       //context->Pitch = context->Surface->pitch;
       //context->Target_address = context->Surface->pixels;
       break;
+
+    case CONTEXT_PALETTE:
+      // In a palette, there are no pixels!
+      break;
   }
 
   if (File_error)
@@ -545,6 +553,10 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
       case CONTEXT_PREVIEW:
         // Load palette
         Set_palette_fake_24b(context->Palette);
+        break;
+
+      case CONTEXT_PALETTE:
+        // In a palette, there are no pixels!
         break;
     }
   }
@@ -695,6 +707,10 @@ void Load_image(T_IO_Context *context)
           File_error=1;
           break;
 
+
+        case CONTEXT_PALETTE:
+         // In a palette, there are no pixels!
+         break;
       }
     }
     free(context->Buffer_image_24b);
@@ -1030,6 +1046,10 @@ void Save_image(T_IO_Context *context)
       break;
       
     case CONTEXT_SURFACE:
+      break;
+
+    case CONTEXT_PALETTE:
+      // In a palette, there are no pixels!
       break;
   }
 

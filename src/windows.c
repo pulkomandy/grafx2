@@ -1391,8 +1391,6 @@ void Display_menu_palette_avoiding_window(byte * table)
   word height;
   word corner_x=Window_pos_X+Window_width*Menu_factor_X; // |_ Coin bas-droit
   word corner_y=Window_pos_Y+Window_height*Menu_factor_Y; // |  de la fenêtre +1
-  int transparent = -1;
-
 
   if (Config.Separate_colors)
   {
@@ -1404,10 +1402,6 @@ void Display_menu_palette_avoiding_window(byte * table)
     width=Menu_palette_cell_width*Menu_factor_X;
     height=Menu_factor_Y*((Menu_height-11)/Menu_cells_Y);
   }
-
-  if (Main_backups->Pages->Image_mode == 0 && Main_backups->Pages->Nb_layers > 1)
-    transparent = Main_backups->Pages->Transparent_color;
-
 
   for (color=0,real_color=First_color_in_palette;color<Menu_cells_X*Menu_cells_Y;color++,real_color++)
   {

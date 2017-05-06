@@ -143,7 +143,6 @@ void Load_GPL(T_IO_Context * context)
 {
   FILE *file;
   char filename[MAX_PATH_CHARACTERS]; // full filename
-  long file_size;
   long pos;
 
   Get_full_filename(filename, context->File_name, context->File_directory);
@@ -153,7 +152,6 @@ void Load_GPL(T_IO_Context * context)
   if ((file=fopen(filename, "rb")))
   {
     fread(filename, 1, 13, file);
-    file_size = File_length_file(file);
     if (strncmp(filename,"GIMP Palette\n",13) == 0)
     {
       int i, j, r, g, b, columns, chars_read;
@@ -2923,14 +2921,10 @@ int Save_C64_multi(T_IO_Context *context, char *filename, byte saveWhat, byte lo
     // the stack has a rather small size...
     byte bitmap[8000],screen_ram[1000],color_ram[1000];
 
-    word numcolors,count;
+    word numcolors;
     dword cusage[256];
     byte i,background=0;
     FILE *file;
-
-    numcolors=Count_used_colors(cusage);
-
-    count=0;
 
     // Detect the ackground color the image should be using. It's the one that's
     // used on all tiles having 4 colors.
@@ -3151,19 +3145,9 @@ void Save_C64(T_IO_Context * context)
 {
     char filename[MAX_PATH_CHARACTERS];
     static byte saveWhat=0, loadAddr=0;
-    dword numcolors,cusage[256];
-    numcolors=Count_used_colors(cusage);
   
     Get_full_filename(filename, context->File_name, context->File_directory);
   
-    /*
-    if (numcolors>16)
-    {
-        Warning_message("Error: Max 16 colors");
-        File_error = 1;
-        return;
-    }
-    */
     if (((context->Width!=320) && (context->Width!=160)) || context->Height!=200)
     {
         Warning_message("must be 320x200 or 160x200");
@@ -3176,7 +3160,6 @@ void Save_C64(T_IO_Context * context)
         File_error = 1;
         return;
     }
-    //printf("saveWhat=%d, loadAddr=%d\n",saveWhat,loadAddr);
     
 	if (strcasecmp(filename + strlen(filename) - 4, ".fli") == 0)
 	{
@@ -3558,7 +3541,7 @@ void Save_CM5(T_IO_Context* context)
 void Test_PPH(T_IO_Context * context)
 {
   FILE *file;
-  unsigned char buffer[MAX_PATH_CHARACTERS];
+  char buffer[MAX_PATH_CHARACTERS];
   long file_size;
   int w;
   int expected;
@@ -3908,6 +3891,7 @@ void Load_PPH(T_IO_Context* context)
 
 void Save_PPH(T_IO_Context* context)
 {
+  (void)context; // unused
     // TODO
 
     // Detect mode

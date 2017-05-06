@@ -382,7 +382,7 @@ endif
 
         # Compiles a regular linux executable for the native platform
         BIN = ../bin/grafx2
-        COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g $(shell sdl-config --cflags) $(TTFCOPT) $(LUACOPT) $(JOYCOPT) -O$(OPTIM)
+        COPT = -W -Wall -Wdeclaration-after-statement -Werror -std=c99 -c -g $(shell sdl-config --cflags) $(TTFCOPT) $(LUACOPT) $(JOYCOPT) -O$(OPTIM)
         COPT += $(shell pkg-config --cflags libpng)
 
         ifneq ($(PLATFORM), FreeBSD)

@@ -1036,20 +1036,10 @@ void Button_Sieve_menu(void)
   short old_sieve_width=Sieve_width;
   short old_sieve_height=Sieve_height;
   byte  old_sieve[16][16];
-  short preview_x_start; // |  Données précalculées
-  short preview_y_start; // |_ pour la preview
-  short preview_x_end;   // |  => plus grande
-  short preview_y_end;   // |  rapidité.
-
 
   memcpy(old_sieve,Sieve,256);
 
   Open_window(290,179,"Sieve");
-
-  preview_x_start=Window_pos_X+(Menu_factor_X*230);
-  preview_y_start=Window_pos_Y+(Menu_factor_Y*78);
-  preview_x_end=preview_x_start+(Menu_factor_X*51);
-  preview_y_end=preview_y_start+(Menu_factor_Y*71);
 
   Window_display_frame      (  7, 65,130,43);
   Window_display_frame      (  7,110,130,43);

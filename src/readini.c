@@ -21,7 +21,9 @@
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
-#define _XOPEN_SOURCE 500
+#ifndef _XOPEN_SOURCE
+  #define _XOPEN_SOURCE 500
+#endif
 
 #include <stdio.h>
 #include <string.h>

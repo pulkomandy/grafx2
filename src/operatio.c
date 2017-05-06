@@ -2892,19 +2892,18 @@ void Scroll_0_5(void)
   Operation_pop(&center_x);
 
   if (side == RIGHT_SIDE)
-    {
-  // All layers at once
-  if (x_pos>=center_x)
-    x_offset=(x_pos-center_x)%Main_image_width;
-  else
-    x_offset=Main_image_width-((center_x-x_pos)%Main_image_width);
-  
-  if (y_pos>=center_y)
-    y_offset=(y_pos-center_y)%Main_image_height;
-  else
-    y_offset=Main_image_height-((center_y-y_pos)%Main_image_height);
-    
-  
+  {
+    // All layers at once
+    if (x_pos>=center_x)
+      x_offset=(x_pos-center_x)%Main_image_width;
+    else
+      x_offset=Main_image_width-((center_x-x_pos)%Main_image_width);
+
+    if (y_pos>=center_y)
+      y_offset=(y_pos-center_y)%Main_image_height;
+    else
+      y_offset=Main_image_height-((center_y-y_pos)%Main_image_height);
+
     // Do the actual scroll operation on all layers.
     for (i=0; i<Main_backups->Pages->Nb_layers; i++)
       //if ((1<<i) & Main_layers_visible)
@@ -2913,7 +2912,7 @@ void Scroll_0_5(void)
     // It would be faster to scroll it, but we don't have method
     // for in-place scrolling.
     Update_depth_buffer();
-  }  
+  }
   else
   {
     // One layer : everything was done while dragging the mouse
@@ -3632,8 +3631,6 @@ void Grad_rectangle_0_5(void)
   short start_y;
   short end_x;
   short end_y;
-  short width,height;
-
 
   // Tracé propre du rectangle
   Operation_pop(&end_y);
@@ -3653,9 +3650,6 @@ void Grad_rectangle_0_5(void)
     SWAP_SHORTS(start_y, end_y)
   
   Hide_cursor();
-
-  width = end_x - start_x;
-  height = end_y - start_y;
 
   // Check if the rectangle is not fully outside the picture
   if (start_x > Main_image_width                  // Rectangle at right of picture

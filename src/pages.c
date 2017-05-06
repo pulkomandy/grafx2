@@ -1445,11 +1445,8 @@ byte Add_layer(T_List_of_pages *list, int layer)
 /// Delete a layer from the latest page of a list. Returns 0 on success.
 byte Delete_layer(T_List_of_pages *list, int layer)
 {
-  T_Page * page;
   int i;
   
-  page = list->Pages;
-   
   // Keep the position reasonable
   if (layer >= list->Pages->Nb_layers)
     layer = list->Pages->Nb_layers - 1;
