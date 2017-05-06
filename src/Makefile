@@ -224,8 +224,8 @@ endif
     COPT += -DENABLE_FILENAMES_ICONV
     LOPT = $(shell sdl-config --libs) -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lfreetype -lbe $(LUALOPT) -liconv
     CC = gcc
-	#Append the gcc kind to the objdir (gcc2 or gcc4) to avoid conflicts when switching from one to other.
-	OBJKIND = $(shell gcc -dumpversion)
+    #Append the gcc kind to the objdir (gcc2 or gcc4) to avoid conflicts when switching from one to other.
+    OBJKIND = $(shell gcc -dumpversion)
     OBJDIR = ../obj/haiku/$(OBJKIND)
     ZIP = zip
 
@@ -260,27 +260,27 @@ endif
     CC = gcc
   else
   ifeq ($(PLATFORM),FreeMiNT) #10
-  	#Atari FreeMiNT/TOS specific
-        DELCOMMAND = rm -rf
-        MKDIR = mkdir -p
-        RMDIR = rmdir
-        CP = cp
-        ZIP = zip
-        PLATFORMFILES = gfx2.png
-        CC = gcc
-        BIN = ../bin/grafx2.ttp
-	LUALOPT = -llua
-        OBJDIR = ../obj/m68k-atari-mint
-        PLATFORM = m68k-atari-mint
-        STRIP = strip -s 
-	STACK = stack
-	FIX_FLAGS = flags
-	FCLOPT = 
-	COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -DNO_INLINE_MATH -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $(JOYCOPT) $(LUACOPT)
-    	LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) $(LAYERLOPT)
+    #Atari FreeMiNT/TOS specific
+    DELCOMMAND = rm -rf
+    MKDIR = mkdir -p
+    RMDIR = rmdir
+    CP = cp
+    ZIP = zip
+    PLATFORMFILES = gfx2.png
+    CC = gcc
+    BIN = ../bin/grafx2.ttp
+    LUALOPT = -llua
+    OBJDIR = ../obj/m68k-atari-mint
+    PLATFORM = m68k-atari-mint
+    STRIP = strip -s 
+    STACK = stack
+    FIX_FLAGS = flags
+    FCLOPT = 
+    COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -DNO_INLINE_MATH -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $(JOYCOPT) $(LUACOPT)
+    LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) $(LAYERLOPT)
   else
   ifeq ($(PLATFORM),syllable) #11
-	#Syllable
+    #Syllable
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
     RMDIR = rmdir --ignore-fail-on-non-empty
@@ -369,33 +369,40 @@ endif
         #cross compile an exec for atari TOS/MiNT machine
         CC = m68k-atari-mint-gcc
         BIN = ../bin/grafx2.ttp
-	LUALOPT = -llua
+        LUALOPT = -llua
         OBJDIR = ../obj/m68k-atari-mint
         PLATFORM = m68k-atari-mint
         STRIP = m68k-atari-mint-strip -s 
-	STACK = m68k-atari-mint-stack
-	FIX_FLAGS = m68k-atari-mint-flags
-	FCLOPT = 
-	COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -ffast-math -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $(JOYCOPT) $(LUACOPT)
-    	LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) -lm $(LAYERLOPT) -Wl,--stack,8k 
+        STACK = m68k-atari-mint-stack
+        FIX_FLAGS = m68k-atari-mint-flags
+        FCLOPT = 
+        COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -ffast-math -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $(JOYCOPT) $(LUACOPT)
+        LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) -lm $(LAYERLOPT) -Wl,--stack,8k 
       else
 
         # Compiles a regular linux executable for the native platform
         BIN = ../bin/grafx2
         COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g $(shell sdl-config --cflags) $(TTFCOPT) $(LUACOPT) $(JOYCOPT) -O$(OPTIM)
         COPT += $(shell pkg-config --cflags libpng)
+
         ifneq ($(PLATFORM), FreeBSD)
           COPT += -D_XOPEN_SOURCE=700
         endif
+
         LOPT = $(shell sdl-config --libs) -lSDL_image $(TTFLOPT)
         LOPT += $(shell pkg-config --libs libpng)
         LOPT += $(LUALOPT) -lm
-		LOPT += -liconv
         CC = gcc
         OBJDIR = ../obj/unix
         FCLOPT = -lfontconfig
+
         # enable UTF8 filename translation
+        # For Linux (GLibc), iconv is built into the C library so no LOPT needed.
         COPT += -DENABLE_FILENAMES_ICONV
+        ifneq ($(PLATFORM),Linux)
+          LOPT += -liconv
+        endif
+
       endif
       endif
       endif
