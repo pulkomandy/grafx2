@@ -3005,24 +3005,40 @@ void Pixel_in_screen_layered_with_preview(word x,word y,byte color)
 
 void Pixel_in_screen_egx(word x,word y,byte color)
 {
+  uint8_t mask;
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_EGX)
+  {
+    mask = 0xF3;
+  } else {
+    mask = 0xFD;
+  }
+
   if (y & 1)
   {
     Pixel_in_screen_layered(x & ~1,y,color);
     Pixel_in_screen_layered(x |  1,y,color);
   }
   else
-    Pixel_in_screen_layered(x,y,color & 0xF3);
+    Pixel_in_screen_layered(x,y,color & mask);
 }
 
 void Pixel_in_screen_egx_with_preview(word x,word y,byte color)
 {
+  uint8_t mask;
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_EGX)
+  {
+    mask = 0xF3;
+  } else {
+    mask = 0xFD;
+  }
+
   if (y & 1)
   {
     Pixel_in_screen_layered_with_preview(x & ~1,y,color);
     Pixel_in_screen_layered_with_preview(x |  1,y,color);
   }
   else
-    Pixel_in_screen_layered_with_preview(x,y,color & 0xF3);
+    Pixel_in_screen_layered_with_preview(x,y,color & mask);
 }
 
 /// Paint a a single pixel in image only : in a layer under one that acts as a layer-selector (mode 5).
@@ -3131,7 +3147,8 @@ void Update_pixel_renderer(void)
     Pixel_in_current_screen_with_preview = Pixel_in_screen_layered_with_preview;
   }
   else
-  if (Main_backups->Pages->Image_mode == IMAGE_MODE_EGX)
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_EGX
+   || Main_backups->Pages->Image_mode == IMAGE_MODE_EGX2)
   {
     // layered
     Pixel_in_current_screen = Pixel_in_screen_egx;
