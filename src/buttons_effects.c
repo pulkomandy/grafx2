@@ -170,14 +170,14 @@ void Button_Constraint_mode()
 {
   int pixel;
   
-  if (Main_backups->Pages->Image_mode >= IMAGE_MODE_MODE5)
+  if (Main_backups->Pages->Image_mode > IMAGE_MODE_ANIMATION)
   {
     // Disable
     Switch_layer_mode(IMAGE_MODE_LAYERED);
     return;
   }
 
-  if (Selected_Constraint_Mode < IMAGE_MODE_MODE5)
+  if (Selected_Constraint_Mode <= IMAGE_MODE_ANIMATION)
     Selected_Constraint_Mode = IMAGE_MODE_EGX;
 
   if (Selected_Constraint_Mode == IMAGE_MODE_MODE5)
@@ -218,7 +218,7 @@ void Button_Constraint_menu(void)
   //Window_dropdown_add_item(dropdown, IMAGE_MODE_ZX, "ZX Spectrum");
   //Window_dropdown_add_item(dropdown, IMAGE_MODE_GBC, "Game Boy Color");
   Window_dropdown_add_item(dropdown, IMAGE_MODE_EGX, "EGX (CPC)");
-  //Window_dropdown_add_item(dropdown, IMAGE_MODE_EGX2, "EGX2 (CPC)");
+  Window_dropdown_add_item(dropdown, IMAGE_MODE_EGX2, "EGX2 (CPC)");
   Window_dropdown_add_item(dropdown, IMAGE_MODE_MODE5, "Mode 5 (CPC)");
 
   Update_window_area(0,0,Window_width, Window_height);
