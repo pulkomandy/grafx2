@@ -212,9 +212,16 @@ void Set_config_directory(const char * program_dir, char * config_dir)
          printf("GFX2.CFG not found in %s\n",filename);
          strcpy(config_parent_dir, config_dir);
       #else
-        // "~/.grafx2"
-        const char* Config_SubDir = ".grafx2";
-        config_parent_dir = getenv("HOME");
+         // ~/.config/grafx2
+         const char* Config_SubDir;
+         config_parent_dir = getenv("XDG_CONFIG_HOME");
+         if (config_parent_dir)
+           Config_SubDir = "grafx2";
+         else {
+            // "~/.grafx2"
+            const char* Config_SubDir = ".grafx2";
+            config_parent_dir = getenv("HOME");
+         }
       #endif
 
       if (config_parent_dir && config_parent_dir[0]!='\0')
