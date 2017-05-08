@@ -25,7 +25,7 @@
 
 #ifdef __WIN32__
   #include <windows.h>
-  #include <ShellApi.h>
+  #include <shellapi.h>
 #endif
 
 #include "global.h"

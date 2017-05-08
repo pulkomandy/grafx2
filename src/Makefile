@@ -318,10 +318,12 @@ endif
     # These can only be used under linux and maybe freebsd. They allow to compile for the gp2x or to create a windows binary
     ifdef WIN32CROSS
       #cross compile a Win32 executable
-      CC = i586-mingw32msvc-gcc
+      CC = i686-w64-mingw32-gcc
       BIN = ../bin/grafx2.exe
       COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb -Dmain=SDL_main $(shell /usr/local/cross-tools/i386-mingw32/bin/sdl-config --cflags) $(TTFCOPT)
       LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi $(shell /usr/local/cross-tools/i386-mingw32/bin/sdl-config --libs) -lSDL_image $(TTFLOPT)
+      COPT += $(shell PKG_CONFIG_PATH=/usr/local/cross-tools/i386-mingw32/lib/pkgconfig i686-w64-mingw32-pkg-config --cflags libpng)
+      LOPT += $(shell PKG_CONFIG_PATH=/usr/local/cross-tools/i386-mingw32/lib/pkgconfig i686-w64-mingw32-pkg-config --libs libpng)
       OBJDIR = ../obj/win32
       PLATFORM = win32
     else

@@ -43,7 +43,7 @@
 #include "engine.h"
 
 #ifdef __WIN32__
-#include <Windows.h>
+#include <windows.h>
 #include <SDL_syswm.h>
 #elif defined __HAIKU__
 #include "haiku.h"
