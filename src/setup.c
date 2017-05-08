@@ -218,8 +218,7 @@ void Set_config_directory(const char * program_dir, char * config_dir)
          if (config_parent_dir)
            Config_SubDir = "grafx2";
          else {
-            // "~/.grafx2"
-            const char* Config_SubDir = ".grafx2";
+            Config_SubDir = ".config/grafx2";
             config_parent_dir = getenv("HOME");
          }
       #endif
