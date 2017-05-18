@@ -314,16 +314,6 @@ fstype_to_string (short int t)
 }
 # endif
 
-static char *
-fsp_to_string (const struct statfs *fsp)
-{
-# if HAVE_STRUCT_STATFS_F_FSTYPENAME
-  return (char *) (fsp->f_fstypename);
-# else
-  return fstype_to_string (fsp->f_type);
-# endif
-}
-
 #endif /* MOUNTED_GETMNTINFO */
 
 #ifdef MOUNTED_VMOUNT                /* AIX.  */
