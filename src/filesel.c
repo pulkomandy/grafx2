@@ -124,9 +124,13 @@ byte Native_filesel(byte load)
   }
 #else
   (void)load; // unused
+#if 0
+  /* if the native fileselector is used, we should implement it where needed
+   * OS X ? GTK ? etc. */
   #ifndef __linux__ // This makes no sense on X11-oriented platforms. Nothing is really native there.
     #warning "EXPERIMENTAL function for native fileselector not available for this platform!"
   #endif
+#endif
     return 255; // fail !
 #endif
 }  
