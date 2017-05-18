@@ -899,7 +899,7 @@ read_file_system_list (bool need_fs_type)
   *mtail = NULL;
   return mount_list;
 
-
+#if defined(MOUNTED_GETMNTENT1) || defined(MOUNTED_GETMNTENT2) || defined(MOUNTED_GETMNT) || defined(MOUNTED_FREAD) || defined(MOUNTED_FREAD_FSTYP)
  free_then_fail:
   {
     int saved_errno = errno;
@@ -919,6 +919,7 @@ read_file_system_list (bool need_fs_type)
     errno = saved_errno;
     return NULL;
   }
+#endif
 }
 
 #endif
