@@ -300,6 +300,7 @@ void Test_IFF(T_IO_Context * context, const char *sub_type)
     } while (0);
     
     fclose(IFF_file);
+    IFF_file = NULL;
   }
 }
 
@@ -640,42 +641,39 @@ void Load_IFF(T_IO_Context * context)
       && (Read_word_be(IFF_file,&header.Y_screen))
       && header.Width && header.Height)
     {
-      if ( (header.BitPlanes) && (IFF_Wait_for("CMAP")) )
+      byte real_bit_planes = header.BitPlanes;
+      if (header.Mask==1)
+        header.BitPlanes++;
+      Back_color=header.Transp_col;
+      Image_HAM=0;
+      // TODO parse X / Y aspect
+
+      while (File_error == 0
+          && Read_bytes(IFF_file,section,4)
+          && Read_dword_be(IFF_file,&section_size))
       {
-        Read_dword_be(IFF_file,&nb_colors);
-        nb_colors/=3;
-
-        if (((dword)1<<header.BitPlanes)!=nb_colors)
+        if (memcmp(section, "CMAP", 4) == 0)
         {
-          if ((nb_colors==32) && (header.BitPlanes==6))
-          {              // Ce n'est pas une image HAM mais une image 64 coul.
-            Image_HAM=1; // Sauvée en 32 coul. => il faut copier les 32 coul.
-          }              // sur les 32 suivantes et assombrir ces dernières.
-          else
+          nb_colors = section_size/3;
+
+          if (((dword)1<<header.BitPlanes)!=nb_colors)
           {
-            if ((header.BitPlanes==6) || (header.BitPlanes==8))
-              Image_HAM=header.BitPlanes;
+            if ((nb_colors==32) && (header.BitPlanes==6))
+            {              // This is a Extra Half-Brite (EHB) 64 color image.
+              Image_HAM=1; // 32 colors in the palette.
+            }              // The next 32 colors are the same with values divided by 2
             else
-              /* File_error=1;*/  /* C'est censé être incorrect mais j'ai */
-              Image_HAM=0;            /* trouvé un fichier comme ça, alors... */
+            {
+              if ((header.BitPlanes==6) || (header.BitPlanes==8))
+                Image_HAM=header.BitPlanes;
+              else
+                /* File_error=1;*/  /* C'est censé être incorrect mais j'ai */
+                Image_HAM=0;            /* trouvé un fichier comme ça, alors... */
+            }
           }
-        }
-        else
-          Image_HAM=0;
-
-        if ( (!File_error) && (nb_colors>=2) && (nb_colors<=256) )
-        {
-          byte real_bit_planes = header.BitPlanes;
-
-          if (header.Mask==1)
-            header.BitPlanes++;
-
-          // Deluxe paint le fait... alors on le fait...
-          Back_color=header.Transp_col;
 
           if (Config.Clear_palette)
             memset(context->Palette,0,sizeof(T_Palette));
-          //   On peut maintenant charger la nouvelle palette
           if (Read_bytes(IFF_file,context->Palette,3*nb_colors))
           {
             if (Image_HAM)
@@ -685,296 +683,294 @@ void Load_IFF(T_IO_Context * context)
               Palette_64_to_256(context->Palette);
             }
 
-            // On lit l'octet de padding du CMAP si la taille est impaire
-            if (nb_colors&1)
+            section_size -= 3*nb_colors;
+            while(section_size > 0) // Read padding bytes
+            {
               if (Read_byte(IFF_file,&temp_byte))
                 File_error=20;
-
-            // Keep reading sections until we find the body
-            while (1)
-            {
-              if (! Read_bytes(IFF_file,section,4))
-              {
-                File_error=46;
-                break;
-              }
-              // Found body : stop searching
-              if (!memcmp(section,"BODY",4))
-                break;
-              else if (!memcmp(section,"CRNG",4))
-              {
-                // Handle CRNG
-                
-                // The content of a CRNG is as follows:
-                word padding;
-                word rate;
-                word flags;
-                byte min_col;
-                byte max_col;
-                //
-                if ( (Read_dword_be(IFF_file,&section_size))
-                  && (Read_word_be(IFF_file,&padding))
-                  && (Read_word_be(IFF_file,&rate))
-                  && (Read_word_be(IFF_file,&flags))
-                  && (Read_byte(IFF_file,&min_col))
-                  && (Read_byte(IFF_file,&max_col)))
-                {
-                  if (section_size == 8 && min_col != max_col)
-                  {
-                    // Valid cycling range
-                    if (max_col<min_col)
-                    SWAP_BYTES(min_col,max_col)
-                    
-                    context->Cycle_range[context->Color_cycles].Start=min_col;
-                    context->Cycle_range[context->Color_cycles].End=max_col;
-                    context->Cycle_range[context->Color_cycles].Inverse=(flags&2)?1:0;
-                    context->Cycle_range[context->Color_cycles].Speed=(flags&1) ? rate/78 : 0;
-                                        
-                    context->Color_cycles++;
-                  }
-                }
-                else
-                {
-                  File_error=47;
-                  break;
-                }
-              }
-              else
-              {
-                // ignore any number of unknown sections
-                if (!IFF_Skip_section())
-                {
-                  File_error=48;
-                  break;
-                }
-              }
-              
+              section_size--;
             }
-
-            if ( !File_error )
+          }
+          else
+            File_error=1;
+        }
+        else if (memcmp(section,"CRNG",4) == 0)
+        {
+          // The content of a CRNG is as follows:
+          word padding;
+          word rate;
+          word flags;
+          byte min_col;
+          byte max_col;
+          if ( (Read_word_be(IFF_file,&padding))
+            && (Read_word_be(IFF_file,&rate))
+            && (Read_word_be(IFF_file,&flags))
+            && (Read_byte(IFF_file,&min_col))
+            && (Read_byte(IFF_file,&max_col)))
+          {
+            if (section_size == 8 && min_col != max_col)
             {
-              Read_dword_be(IFF_file,&section_size);
-              context->Width = header.Width;
-              context->Height = header.Height;
+              // Valid cycling range
+              if (max_col<min_col)
+                SWAP_BYTES(min_col,max_col)
 
-              Original_screen_X = header.X_screen;
-              Original_screen_Y = header.Y_screen;
+              context->Cycle_range[context->Color_cycles].Start=min_col;
+              context->Cycle_range[context->Color_cycles].End=max_col;
+              context->Cycle_range[context->Color_cycles].Inverse=(flags&2)?1:0;
+              context->Cycle_range[context->Color_cycles].Speed=(flags&1) ? rate/78 : 0;
 
-              Pre_load(context, context->Width,context->Height,file_size,iff_format,PIXEL_SIMPLE,0);
-              context->Background_transparent = header.Mask == 2;
-              context->Transparent_color = context->Background_transparent ? header.Transp_col : 0;
+              context->Color_cycles++;
+            }
+          }
+          else
+            File_error=47;
+        }
+        else if (memcmp(section, "BODY", 4) == 0)
+        {
+          Original_screen_X = header.X_screen;
+          Original_screen_Y = header.Y_screen;
 
-              if (context->Type == CONTEXT_MAIN_IMAGE)
-              {
-                Main.backups->Pages->Image_mode = IMAGE_MODE_ANIMATION;
-                Update_screen_targets();
-              }
-              if (File_error==0)
-              {
-                if (!memcmp(format,"ILBM",4))    // "ILBM": InterLeaved BitMap
+          Pre_load(context, header.Width, header.Height, file_size, iff_format, PIXEL_SIMPLE, 0);
+          context->Background_transparent = header.Mask == 2;
+          context->Transparent_color = context->Background_transparent ? header.Transp_col : 0;
+
+          if (context->Type == CONTEXT_MAIN_IMAGE)
+          {
+            Main.backups->Pages->Image_mode = IMAGE_MODE_ANIMATION;
+            Update_screen_targets();
+          }
+
+          if (!memcmp(format,"ILBM",4))    // "ILBM": InterLeaved BitMap
+          {
+            // compute row size
+            real_line_size = (context->Width+15) & ~15;
+            plane_line_size = real_line_size >> 3;  // 8bits per byte
+            line_size = plane_line_size * header.BitPlanes;
+
+            switch(header.Compression)
+            {
+              case 0:            // uncompressed
+                IFF_buffer=(byte *)malloc(line_size);
+                for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
                 {
-                  // Calcul de la taille d'une ligne ILBM (pour les images ayant des dimensions exotiques)
-                  real_line_size = (context->Width+15) & ~15;
-                  plane_line_size = real_line_size >> 3;  // 8bits per byte
-                  line_size = plane_line_size * header.BitPlanes;
-
-                  switch(header.Compression)
-                  {
-                    case 0:            // non compressé
-                      IFF_buffer=(byte *)malloc(line_size);
-                      for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
-                      {
-                        if (Read_bytes(IFF_file,IFF_buffer,line_size))
-                          Draw_IFF_line(context, y_pos,real_line_size, header.BitPlanes);
-                        else
-                          File_error=21;
-                      }
-                      free(IFF_buffer);
-                      IFF_buffer = NULL;
-                      break;
-                    case 1:          // compressé packbits (Amiga)
-                      /*Init_lecture();*/
-
-                      IFF_buffer=(byte *)malloc(line_size);
-
-                      for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
-                      {
-                        for (x_pos=0; ((x_pos<line_size) && (!File_error)); )
-                        {
-                          if(Read_byte(IFF_file, &temp_byte)!=1)
-                          {
-                            File_error=22;
-                            break;
-                          }
-                          // Si temp_byte > 127 alors il faut répéter 256-'temp_byte' fois la couleur de l'octet suivant
-                          // Si temp_byte <= 127 alors il faut afficher directement les 'temp_byte' octets suivants
-                          if (temp_byte>127)
-                          {
-                            if(Read_byte(IFF_file, &color)!=1)
-                            {
-                              File_error=23;
-                              break;
-                            }
-                            b256=(short)(256-temp_byte);
-                            for (counter=0; counter<=b256; counter++)
-                              if (x_pos<line_size)
-                                IFF_buffer[x_pos++]=color;
-                              else
-                                File_error=24;
-                          }
-                          else
-                            for (counter=0; counter<=(short)(temp_byte); counter++)
-                              if (x_pos>=line_size || Read_byte(IFF_file, &(IFF_buffer[x_pos++]))!=1)
-                                File_error=25;
-                        }
-                        if (!File_error)
-                          Draw_IFF_line(context, y_pos,real_line_size,header.BitPlanes);
-                      }
-
-                      free(IFF_buffer);
-                      IFF_buffer = NULL;
-                      /*Close_lecture();*/
-                      break;
-                    case 2:     // compressé vertical RLE (Atari ST)
-                      IFF_buffer=(byte *)malloc(line_size*context->Height);
-                      plane_line_size = real_line_size >> 3;
-                      for (plane = 0; plane < header.BitPlanes && !File_error; plane++)
-                      {
-                        word cmd_count;
-                        word cmd;
-                        signed char * commands;
-                        word count;
-
-                        y_pos = 0; x_pos = 0;
-                        if (!IFF_Wait_for("VDAT"))
-                        {
-                          File_error = 30;
-                          break;
-                        }
-                        Read_dword_be(IFF_file,&section_size);
-                        Read_word_be(IFF_file,&cmd_count);
-                        cmd_count -= 2;
-                        commands = (signed char *)malloc(cmd_count);
-                        if (!Read_bytes(IFF_file,commands,cmd_count))
-                        {
-                          File_error = 31;
-                          break;
-                        }
-                        for (cmd = 0; cmd < cmd_count && x_pos < plane_line_size; cmd++)
-                        {
-                          if (commands[cmd] <= 0)
-                          { // cmd=0 : load count from data, COPY
-                            // cmd < 0 : count = -cmd, COPY
-                            if (commands[cmd] == 0)
-                              Read_word_be(IFF_file,&count);
-                            else
-                              count = -commands[cmd];
-                            while (count-- > 0 && x_pos < plane_line_size)
-                            {
-                              Read_bytes(IFF_file,IFF_buffer+x_pos+y_pos*line_size+plane*plane_line_size,2);
-                              if(++y_pos >= context->Height)
-                              {
-                                y_pos = 0;
-                                x_pos += 2;
-                              }
-                            }
-                          }
-                          else if (commands[cmd] >= 1)
-                          { // cmd=1 : load count from data, RLE
-                            // cmd >1 : count = cmd, RLE
-                            byte data[2];
-                            if (commands[cmd] == 1)
-                              Read_word_be(IFF_file,&count);
-                            else
-                              count = (word)commands[cmd];
-                            Read_bytes(IFF_file,data,2);
-                            while (count-- > 0 && x_pos < plane_line_size)
-                            {
-                              memcpy(IFF_buffer+x_pos+y_pos*line_size+plane*plane_line_size,data,2);
-                              if (++y_pos >= context->Height)
-                              {
-                                y_pos = 0;
-                                x_pos += 2;
-                              }
-                            }
-                          }
-                        }
-                        free(commands);
-                      }
-                      if (!File_error)
-                      {
-                        byte * save_IFF_buffer = IFF_buffer;
-                        for (y_pos = 0; y_pos < context->Height; y_pos++)
-                        {
-                          Draw_IFF_line(context,y_pos,real_line_size,real_bit_planes);
-                          IFF_buffer += line_size;
-                        }
-                        IFF_buffer = save_IFF_buffer;
-                      }
-                      free(IFF_buffer);
-                      IFF_buffer = NULL;
-                      break;
-                    default: // compression non reconnue
-                      File_error = 32;
-                  }
+                  if (Read_bytes(IFF_file,IFF_buffer,line_size))
+                    Draw_IFF_line(context, y_pos,real_line_size, header.BitPlanes);
+                  else
+                    File_error=21;
                 }
-                else                               // "PBM ": Planar(?) BitMap
+                free(IFF_buffer);
+                IFF_buffer = NULL;
+                break;
+              case 1:          // packbits compression (Amiga)
+                IFF_buffer=(byte *)malloc(line_size);
+                for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
                 {
-                  real_line_size=context->Width+(context->Width&1);
-
-                  if (!header.Compression)
-                  {                                           // non compressé
-                    IFF_buffer=(byte *)malloc(real_line_size);
-                    for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
+                  for (x_pos=0; ((x_pos<line_size) && (!File_error)); )
+                  {
+                    if(Read_byte(IFF_file, &temp_byte)!=1)
                     {
-                      if (Read_bytes(IFF_file,IFF_buffer,real_line_size))
-                        for (x_pos=0; x_pos<context->Width; x_pos++)
-                          Set_pixel(context, x_pos,y_pos,IFF_buffer[x_pos]);
-                      else
-                        File_error=26;
+                      File_error=22;
+                      break;
                     }
-                    free(IFF_buffer);
-                    IFF_buffer = NULL;
+                    // Si temp_byte > 127 alors il faut répéter 256-'temp_byte' fois la couleur de l'octet suivant
+                    // Si temp_byte <= 127 alors il faut afficher directement les 'temp_byte' octets suivants
+                    if (temp_byte>127)
+                    {
+                      if(Read_byte(IFF_file, &color)!=1)
+                      {
+                        File_error=23;
+                        break;
+                      }
+                      b256=(short)(256-temp_byte);
+                      for (counter=0; counter<=b256; counter++)
+                        if (x_pos<line_size)
+                          IFF_buffer[x_pos++]=color;
+                        else
+                          File_error=24;
+                    }
+                    else
+                      for (counter=0; counter<=(short)(temp_byte); counter++)
+                        if (x_pos>=line_size || Read_byte(IFF_file, &(IFF_buffer[x_pos++]))!=1)
+                          File_error=25;
+                  }
+                  if (!File_error)
+                    Draw_IFF_line(context, y_pos,real_line_size,header.BitPlanes);
+                }
+                free(IFF_buffer);
+                IFF_buffer = NULL;
+                break;
+              case 2:     // vertical RLE compression (Atari ST)
+                IFF_buffer=(byte *)calloc(line_size*context->Height, 1);
+                if (IFF_buffer == NULL)
+                {
+                  File_error=1;
+                  Warning("Failed to allocate memory for IFF decoding");
+                }
+                plane_line_size = real_line_size >> 3;
+                for (plane = 0; plane < header.BitPlanes && !File_error; plane++)
+                {
+                  word cmd_count;
+                  word cmd;
+                  signed char * commands;
+                  word count;
+
+                  y_pos = 0; x_pos = 0;
+                  if (!IFF_Wait_for("VDAT"))
+                  {
+                    if (plane == 0) // don't cancel loading if at least 1 bitplane has been loaded
+                      File_error = 30;
+                    break;
+                  }
+                  Read_dword_be(IFF_file,&section_size);
+                  Read_word_be(IFF_file,&cmd_count);
+                  cmd_count -= 2;
+                  commands = (signed char *)malloc(cmd_count);
+                  if (!Read_bytes(IFF_file,commands,cmd_count))
+                  {
+                    File_error = 31;
+                    break;
+                  }
+                  section_size -= (cmd_count + 2);
+                  for (cmd = 0; cmd < cmd_count && x_pos < plane_line_size && section_size > 0; cmd++)
+                  {
+                    if (commands[cmd] <= 0)
+                    { // cmd=0 : load count from data, COPY
+                      // cmd < 0 : count = -cmd, COPY
+                      if (commands[cmd] == 0)
+                      {
+                        Read_word_be(IFF_file,&count);
+                        section_size -= 2;
+                      }
+                      else
+                        count = -commands[cmd];
+                      while (count-- > 0 && x_pos < plane_line_size && section_size > 0)
+                      {
+                        Read_bytes(IFF_file,IFF_buffer+x_pos+y_pos*line_size+plane*plane_line_size,2);
+                        section_size -= 2;
+                        if(++y_pos >= context->Height)
+                        {
+                          y_pos = 0;
+                          x_pos += 2;
+                        }
+                      }
+                    }
+                    else if (commands[cmd] >= 1)
+                    { // cmd=1 : load count from data, RLE
+                      // cmd >1 : count = cmd, RLE
+                      byte data[2];
+                      if (commands[cmd] == 1)
+                      {
+                        Read_word_be(IFF_file,&count);
+                        section_size -= 2;
+                      }
+                      else
+                        count = (word)commands[cmd];
+                      if (section_size == 0)
+                        break;
+                      Read_bytes(IFF_file,data,2);
+                      section_size -= 2;
+                      while (count-- > 0 && x_pos < plane_line_size)
+                      {
+                        memcpy(IFF_buffer+x_pos+y_pos*line_size+plane*plane_line_size,data,2);
+                        if(++y_pos >= context->Height)
+                        {
+                          y_pos = 0;
+                          x_pos += 2;
+                        }
+                      }
+                    }
+                  }
+                  if(cmd < (cmd_count-1) || section_size > 0)
+                    Warning("Early end in VDAT chunk");
+                  if (section_size > 0)
+                    fseek(IFF_file, section_size, SEEK_CUR);  // skip bytes
+                  free(commands);
+                }
+                if (!File_error)
+                {
+                  byte * save_IFF_buffer = IFF_buffer;
+                  for (y_pos = 0; y_pos < context->Height; y_pos++)
+                  {
+                    Draw_IFF_line(context,y_pos,real_line_size,real_bit_planes);
+                    IFF_buffer += line_size;
+                  }
+                  IFF_buffer = save_IFF_buffer;
+                }
+                free(IFF_buffer);
+                IFF_buffer = NULL;
+                break;
+              default:
+                Warning("Unknown IFF compression");
+                File_error = 32;
+            }
+          }
+          else                               // "PBM ": Planar(?) BitMap
+          {
+            real_line_size=context->Width+(context->Width&1);
+
+            if (!header.Compression)
+            {                                           // non compressé
+              IFF_buffer=(byte *)malloc(real_line_size);
+              for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
+              {
+                if (Read_bytes(IFF_file,IFF_buffer,real_line_size))
+                  for (x_pos=0; x_pos<context->Width; x_pos++)
+                    Set_pixel(context, x_pos,y_pos,IFF_buffer[x_pos]);
+                else
+                  File_error=26;
+              }
+              free(IFF_buffer);
+              IFF_buffer = NULL;
+            }
+            else
+            {                                               // compressé
+              /*Init_lecture();*/
+              for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
+              {
+                for (x_pos=0; ((x_pos<real_line_size) && (!File_error)); )
+                {
+                  if(Read_byte(IFF_file, &temp_byte)!=1)
+                  {
+                    File_error=27;
+                    break;
+                  }
+                  if (temp_byte>127)
+                  {
+                    if(Read_byte(IFF_file, &color)!=1)
+                    {
+                      File_error=28;
+                      break;
+                    }
+                    b256=256-temp_byte;
+                    for (counter=0; counter<=b256; counter++)
+                      Set_pixel(context, x_pos++,y_pos,color);
                   }
                   else
-                  {                                               // compressé
-                    /*Init_lecture();*/
-                    for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
+                    for (counter=0; counter<=temp_byte; counter++)
                     {
-                      for (x_pos=0; ((x_pos<real_line_size) && (!File_error)); )
+                      byte byte_read=0;
+                      if(Read_byte(IFF_file, &byte_read)!=1)
                       {
-                        if(Read_byte(IFF_file, &temp_byte)!=1)
-                        {
-                          File_error=27;
-                          break;
-                        }
-                        if (temp_byte>127)
-                        {
-                          if(Read_byte(IFF_file, &color)!=1)
-                          {
-                            File_error=28;
-                            break;
-                          }
-                          b256=256-temp_byte;
-                          for (counter=0; counter<=b256; counter++)
-                            Set_pixel(context, x_pos++,y_pos,color);
-                        }
-                        else
-                          for (counter=0; counter<=temp_byte; counter++)
-                          {
-                            byte byte_read=0;
-                            if(Read_byte(IFF_file, &byte_read)!=1)
-                            {
-                              File_error=29;
-                              break;
-                            }
-                            Set_pixel(context, x_pos++,y_pos,byte_read);
-                          }
+                        File_error=29;
+                        break;
                       }
+                      Set_pixel(context, x_pos++,y_pos,byte_read);
                     }
-                    /*Close_lecture();*/
-                  }
                 }
+              }
+            }
+          }
+        }
+        else
+        {
+          char tmp_msg[60];
+          // skip section
+          snprintf(tmp_msg, sizeof(tmp_msg), "Skip unknown section '%.4s' of %u bytes", section, section_size);
+          Warning(tmp_msg);
+          fseek(IFF_file, section_size, SEEK_CUR);
+        }
+      }
+
                 /*
                 while (!File_error && is_anim)
                 {
@@ -1000,26 +996,12 @@ void Load_IFF(T_IO_Context * context)
                   fseek(IFF_file, delta_size + (delta_size & 1), SEEK_CUR);
                 }
                 */
-              }
-            }
-            else
-              Set_file_error(2);
-          }
-          else
-          {
-            File_error=1;
-          }
-        }
-        else
-          Set_file_error(1);
-      }
-      else
-        File_error=1;
     }
     else
       File_error=1;
 
     fclose(IFF_file);
+    IFF_file = NULL;
   }
   else
     File_error=1;
@@ -1283,6 +1265,7 @@ void Save_IFF(T_IO_Context * context)
       }
     }
     fclose(IFF_file);
+    IFF_file = NULL;
 
     if (!File_error)
     {
@@ -1310,6 +1293,7 @@ void Save_IFF(T_IO_Context * context)
           Write_dword_be(IFF_file,file_size-8);
 
         fclose(IFF_file);
+        IFF_file = NULL;
 
         if (File_error)
           remove(filename);
@@ -1318,6 +1302,7 @@ void Save_IFF(T_IO_Context * context)
       {
         File_error=1;
         fclose(IFF_file);
+        IFF_file = NULL;
         remove(filename);
       }
     }
