@@ -59,8 +59,11 @@
 // Generic pixel-drawing function.
 Func_pixel Pixel_figure;
 
-// Fonction qui met à jour la zone de l'image donnée en paramètre sur l'écran.
-// Tient compte du décalage X et Y et du zoom, et fait tous les controles nécessaires
+/** Update the picture on screen, for the area passed in parameters.
+ *
+ * Takes into account the X/Y scrolling and zoom, and performs all safety checks so no updates will
+ * go outside the display area.
+ */
 void Update_part_of_screen(short x, short y, short width, short height)
 {
   short effective_w, effective_h;
@@ -68,7 +71,7 @@ void Update_part_of_screen(short x, short y, short width, short height)
   short effective_Y;
   short diff;
 
-  // Première étape, si L ou H est négatif, on doit remettre la zone à l'endroit
+  // First make sure the zone is in forward direction (positive width/height)
   if (width < 0)
   {
     x += width;
@@ -81,7 +84,14 @@ void Update_part_of_screen(short x, short y, short width, short height)
     height = - height;
   }
 
-  // D'abord on met à jour dans la zone écran normale
+  // Round up to a multiple of 8 pixels, because some special modes (ZX, Thomson, ...) can change
+  // more pixels than expected (attribute clash)
+  x &= 0xFFF8;
+  y &= 0xFFF8;
+  width = ((width - 1) | 0x7) + 1;
+  height = ((height - 1) | 0x7) + 1;
+
+  // Update "normal" view
   diff = x-Main_offset_X;
   if (diff<0)
   {
@@ -105,10 +115,10 @@ void Update_part_of_screen(short x, short y, short width, short height)
     effective_Y = diff;
   }
 
-  // Normalement il ne faudrait pas updater au delà du split quand on est en mode loupe,
-  // mais personne ne devrait demander d'update en dehors de cette limite, même le fill est contraint
-  // a rester dans la zone visible de l'image
-  // ...Sauf l'affichage de brosse en preview - yr
+  // Clamp to actually visible area. All tools are normally constrained to this, but there are some
+  // exceptions:
+  // - Brush preview requests updates outside the visible screen,
+  // - ZX/Thomson constraints can lead to pixel changes outside the visible area.
   if(Main_magnifier_mode && effective_X + effective_w > Main_separator_position)
     effective_w = Main_separator_position - effective_X;
   else if(effective_X + effective_w > Screen_width)
@@ -116,8 +126,8 @@ void Update_part_of_screen(short x, short y, short width, short height)
 
   if(effective_Y + effective_h > Menu_Y)
     effective_h = Menu_Y - effective_Y;
-    
-  /*
+
+  /* (for debug purposes, highlight the rectangle that is updated)
   SDL_Rect r;
   r.x=effective_X;
   r.y=effective_Y;
@@ -127,15 +137,16 @@ void Update_part_of_screen(short x, short y, short width, short height)
   */
   Update_rect(effective_X,effective_Y,effective_w,effective_h);
 
-  // Et ensuite dans la partie zoomée
+  // Now update the "zoomed" part of the display
   if(Main_magnifier_mode)
   {
-    // Clipping en X
+    // Convert picture to zoomed-screen coordinates
     effective_X = (x-Main_magnifier_offset_X)*Main_magnifier_factor;
     effective_Y = (y-Main_magnifier_offset_Y)*Main_magnifier_factor;
     effective_w = width * Main_magnifier_factor;
     effective_h = height * Main_magnifier_factor;
 
+    // Apply horizontal clipping
     if (effective_X < 0)
     {
       effective_w+=effective_X;
@@ -155,7 +166,7 @@ void Update_part_of_screen(short x, short y, short width, short height)
     }
 
 
-    // Clipping en Y
+    // Vertical clipping
     if (effective_Y < 0)
     {
       effective_h+=effective_Y;
@@ -172,7 +183,7 @@ void Update_part_of_screen(short x, short y, short width, short height)
     }
 
 
- // Très utile pour le debug :)
+ // Again, for debugging purposes, display the touched rectangle
     /*SDL_Rect r;
     r.x=effective_X;
     r.y=effective_Y;
@@ -3041,6 +3052,167 @@ void Pixel_in_screen_egx_with_preview(word x,word y,byte color)
     Pixel_in_screen_layered_with_preview(x,y,color & mask);
 }
 
+void Pixel_in_screen_thomson(word x,word y,byte color)
+{
+  word start = x & 0xFFF8;
+  word x2;
+  uint8_t c1, c2;
+
+  // The color we are going to replace
+  c1 = *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width);
+
+  if (c1 == color)
+    return;
+
+  for (x2 = 0; x2 < 8; x2++)
+  {
+    c2 = *(Main_backups->Pages->Image[Main_current_layer].Pixels + (x2+start)+y*Main_image_width);
+    if (c2 == color)
+      continue;
+    if (c2 != c1)
+      break;
+  }
+
+  if (c2 == c1 || c2 == color)
+  {
+    // There was only one color, so we can add a second one.
+    Pixel_in_screen_layered(x,y,color);
+    return;
+  }
+
+  for (x2 = 0; x2 < 8; x2++)
+  {
+    c2 = *(Main_backups->Pages->Image[Main_current_layer].Pixels + (x2+start)+y*Main_image_width);
+    if (c2 == c1) {
+      Pixel_in_screen_layered(x2+start,y,color);
+    }
+  }
+}
+
+void Pixel_in_screen_thomson_with_preview(word x,word y,byte color)
+{
+  word start = x & 0xFFF8;
+  word x2;
+  uint8_t c1, c2;
+
+  // The color we are going to replace
+  c1 = *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width);
+
+  if (c1 == color)
+    return;
+
+  for (x2 = 0; x2 < 8; x2++)
+  {
+    c2 = *(Main_backups->Pages->Image[Main_current_layer].Pixels + (x2+start)+y*Main_image_width);
+    if (c2 == color)
+      continue;
+    if (c2 != c1)
+      break;
+  }
+
+  if (c2 == c1 || c2 == color)
+  {
+    // There was only one color, so we can add a second one.
+    Pixel_in_screen_layered_with_preview(x,y,color);
+    return;
+  }
+
+  for (x2 = 0; x2 < 8; x2++)
+  {
+    c2 = *(Main_backups->Pages->Image[Main_current_layer].Pixels + (x2+start)+y*Main_image_width);
+    if (c2 == c1) {
+      Pixel_in_screen_layered_with_preview(x2+start,y,color);
+    }
+  }
+}
+
+void Pixel_in_screen_zx(word x,word y,byte color)
+{
+  word start = x & 0xFFF8;
+  word starty = y & 0xFFF8;
+  word x2, y2;
+  uint8_t c1, c2;
+
+  // The color we are going to replace
+  c1 = *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width);
+
+  if (c1 == color)
+    return;
+
+  for (x2 = 0; x2 < 8; x2++)
+  for (y2 = 0; y2 < 8; y2++)
+  {
+    c2 = *(Main_backups->Pages->Image[Main_current_layer].Pixels + (x2+start)+(y2+starty)*Main_image_width);
+    if (c2 == color)
+      continue;
+    if (c2 != c1)
+      goto done;
+  }
+done:
+
+  if (c2 == c1 || c2 == color)
+  {
+    // There was only one color, so we can add a second one.
+    Pixel_in_screen_layered(x,y,color);
+    return;
+  }
+
+  for (x2 = 0; x2 < 8; x2++)
+  for (y2 = 0; y2 < 8; y2++)
+  {
+    c2 = *(Main_backups->Pages->Image[Main_current_layer].Pixels + (x2+start)+(y2+starty)*Main_image_width);
+    if (c2 == c1) {
+      Pixel_in_screen_layered(x2+start,y2+starty,color);
+    }
+  }
+}
+
+void Pixel_in_screen_zx_with_preview(word x,word y,byte color)
+{
+  word start = x & 0xFFF8;
+  word starty = y & 0xFFF8;
+  word x2,y2;
+  uint8_t c1, c2;
+
+  // The color we are going to replace
+  c1 = *(Main_backups->Pages->Image[Main_current_layer].Pixels + x+y*Main_image_width);
+
+  // Pixel is already of the wanted color: nothing to do
+  if (c1 == color)
+    return;
+
+  // Check the whole cell
+  for (x2 = 0; x2 < 8; x2++)
+  for (y2 = 0; y2 < 8; y2++)
+  {
+    c2 = *(Main_backups->Pages->Image[Main_current_layer].Pixels + (x2+start)+(y2+starty)*Main_image_width);
+    // Pixel is already of the color we are going to add, it is no problem
+    if (c2 == color)
+      continue;
+    // We have found another color, which is the one we will keep from the cell
+    if (c2 != c1)
+      goto done;
+  }
+done:
+
+  if (c2 == c1 || c2 == color)
+  {
+    // There was only one color, so we can add a second one.
+    Pixel_in_screen_layered_with_preview(x,y,color);
+    return;
+  }
+
+  // Replace all C1 with C2
+  for (x2 = 0; x2 < 8; x2++)
+  for (y2 = 0; y2 < 8; y2++)
+  {
+    c2 = *(Main_backups->Pages->Image[Main_current_layer].Pixels + (x2+start)+(y2+starty)*Main_image_width);
+    if (c2 == c1) {
+      Pixel_in_screen_layered_with_preview(x2+start,y2+starty,color);
+    }
+  }
+}
+
 /// Paint a a single pixel in image only : in a layer under one that acts as a layer-selector (mode 5).
 void Pixel_in_screen_underlay(word x,word y,byte color)
 {
@@ -3150,9 +3322,21 @@ void Update_pixel_renderer(void)
   if (Main_backups->Pages->Image_mode == IMAGE_MODE_EGX
    || Main_backups->Pages->Image_mode == IMAGE_MODE_EGX2)
   {
-    // layered
+    // special "EGX" mode
     Pixel_in_current_screen = Pixel_in_screen_egx;
     Pixel_in_current_screen_with_preview = Pixel_in_screen_egx_with_preview;
+  }
+  else
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_THOMSON)
+  {
+    Pixel_in_current_screen = Pixel_in_screen_thomson;
+    Pixel_in_current_screen_with_preview = Pixel_in_screen_thomson_with_preview;
+  }
+  else
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_ZX)
+  {
+    Pixel_in_current_screen = Pixel_in_screen_zx;
+    Pixel_in_current_screen_with_preview = Pixel_in_screen_zx_with_preview;
   }
   // Implicit else : Image_mode must be IMAGE_MODE_MODE5
   else if ( Main_current_layer == 4)

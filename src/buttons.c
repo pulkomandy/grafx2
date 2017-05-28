@@ -5610,5 +5610,6 @@ void Button_Brush_container(void)
 
 byte Any_effect_active(void)
 {
-    return Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode||Main_tilemap_mode;
+    return Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode
+      ||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode||Main_tilemap_mode || (Main_backups->Pages->Image_mode > IMAGE_MODE_ANIMATION);
 }

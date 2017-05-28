@@ -215,11 +215,12 @@ void Button_Constraint_menu(void)
   Window_set_normal_button(82,55,51,14,"OK"    ,0,1,SDLK_RETURN); // 2
 
   dropdown = Window_set_dropdown_button(17, 21, 120, 14, 120, "Constraints", 1, 0, 1, RIGHT_SIDE|LEFT_SIDE, 0); // 3
-  //Window_dropdown_add_item(dropdown, IMAGE_MODE_ZX, "ZX Spectrum");
+  Window_dropdown_add_item(dropdown, IMAGE_MODE_ZX, "ZX Spectrum");
   //Window_dropdown_add_item(dropdown, IMAGE_MODE_GBC, "Game Boy Color");
-  Window_dropdown_add_item(dropdown, IMAGE_MODE_EGX, "EGX (CPC)");
-  Window_dropdown_add_item(dropdown, IMAGE_MODE_EGX2, "EGX2 (CPC)");
-  Window_dropdown_add_item(dropdown, IMAGE_MODE_MODE5, "Mode 5 (CPC)");
+  Window_dropdown_add_item(dropdown, IMAGE_MODE_THOMSON, "40col (MO/TO)");
+  Window_dropdown_add_item(dropdown, IMAGE_MODE_EGX,     "EGX (CPC)");
+  Window_dropdown_add_item(dropdown, IMAGE_MODE_EGX2,    "EGX2 (CPC)");
+  Window_dropdown_add_item(dropdown, IMAGE_MODE_MODE5,   "Mode 5 (CPC)");
 
   Update_window_area(0,0,Window_width, Window_height);
   Display_cursor();
@@ -237,6 +238,8 @@ void Button_Constraint_menu(void)
 
   if (clicked_button==2) // OK
   {
+    if ((Selected_Constraint_Mode > IMAGE_MODE_ANIMATION)
+        && (Main_backups->Pages->Image_mode <= IMAGE_MODE_ANIMATION))
     Button_Constraint_mode();
   }
 

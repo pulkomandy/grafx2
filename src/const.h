@@ -591,6 +591,7 @@ enum IMAGE_MODES
   IMAGE_MODE_ANIMATION, ///< Animation
   IMAGE_MODE_ZX,        ///< ZX Spectrum (note "SPECTRUM" is kept for later... Spectrum 512 anyone?)
   IMAGE_MODE_GBC,       ///< Game Boy Color
+  IMAGE_MODE_THOMSON,   ///< "40 columns" mode on Thomson machines
   IMAGE_MODE_EGX,       ///< CPC EGX
   IMAGE_MODE_EGX2,      ///< CPC EGX2
   IMAGE_MODE_MODE5,     ///< CPC mode 5
