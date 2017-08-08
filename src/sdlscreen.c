@@ -183,6 +183,7 @@ void Update_rect(short x, short y, unsigned short width, unsigned short height)
   #endif
 
   #if (UPDATE_METHOD == UPDATE_METHOD_FULL_PAGE)
+  (void)x; (void)y; (void)width; (void)height; // unused
   update_is_required=1;
   #endif
 
