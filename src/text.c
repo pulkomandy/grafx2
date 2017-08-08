@@ -97,15 +97,14 @@ void Add_font(const char *name)
   T_Font * font;
   int size=strlen(name)+1;
   int index;
-  
+
   // Détermination du type:
 
 #if defined(__macosx__)
-
-  if (size < 6) return;
-  
   char strFontName[512];
   CFStringRef CFSFontName;// = CFSTR(name);
+
+  if (size < 6) return;
 
   CFSFontName = CFStringCreateWithBytes(NULL, (UInt8 *) name, size - 1, kCFStringEncodingASCII, false);
   // Fix some funny names
@@ -652,14 +651,14 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
 // et retourne l'adresse du bloc d'octets.
 byte *Render_text(const char *str, int font_number, int size, int antialias, int bold, int italic, int *width, int *height, T_Palette palette)
 {
+  T_Font *font = font_list_start;
+  int index=font_number;
   #ifdef NOTTF
     (void) size; // unused
     (void) antialias; // unused
     (void) bold; // unused
     (void) italic; // unused
   #endif
-  T_Font *font = font_list_start;
-  int index=font_number;
   
   // Verification type de la fonte
   if (font_number<0 ||font_number>=Nb_fonts)

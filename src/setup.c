@@ -71,13 +71,12 @@ int Create_ConfigDirectory(char * config_dir)
 // OUT: Write into program_dir. Trailing / or \ is kept.
 // Note : in fact this is only used to check for the datafiles and fonts in 
 // this same directory.
-void Set_program_directory(const char * argv0,char * program_dir)
+void Set_program_directory(const char * argv0, char * program_dir)
 {
-  (void)argv0; // unused sometimes
-  
   // MacOSX
   #if defined(__macosx__)
     CFURLRef url = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+    (void)argv0; // unused
     CFURLGetFileSystemRepresentation(url,true,(UInt8*)program_dir,MAXPATHLEN);
     CFRelease(url);
     // Append trailing slash
@@ -85,10 +84,12 @@ void Set_program_directory(const char * argv0,char * program_dir)
   
   // AmigaOS and alike: hard-coded volume name.
   #elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+    (void)argv0; // unused
     strcpy(program_dir,"PROGDIR:");
   #elif defined(__MINT__)
   static char path[1024]={0};
   char currentDrive='A';
+  (void)argv0; // unused
   currentDrive=currentDrive+Dgetdrv();
   
   Dgetpath(path,0);
@@ -96,6 +97,7 @@ void Set_program_directory(const char * argv0,char * program_dir)
   // Append trailing slash
   strcat(program_dir,PATH_SEPARATOR);
   #elif defined(__ANDROID__)
+  (void)argv0; // unused
   getcwd(program_dir, MAX_PATH_CHARACTERS);
   strcat(program_dir, "/");
   // Linux: argv[0] unreliable
