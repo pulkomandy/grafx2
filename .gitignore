@@ -11,3 +11,5 @@
 /bin/grafx2*
 
 /src/version.c
+/src/*.tgz
+/src/Grafx2.app
