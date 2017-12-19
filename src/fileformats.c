@@ -3191,6 +3191,7 @@ void Save_GIF(T_IO_Context * context)
           {
             // Write a Graphic Control Extension
             T_GIF_GCE GCE;
+            byte disposal_method;
             
             Set_saving_layer(context, current_layer);
             
@@ -3202,17 +3203,22 @@ void Save_GIF(T_IO_Context * context)
             {
               // Animation frame
               int duration;
-              GCE.Packed_fields=(2<<2)|(context->Background_transparent);
+              if(context->Background_transparent)
+                disposal_method = DISPOSAL_METHOD_RESTORE_BGCOLOR;
+              else
+                disposal_method = DISPOSAL_METHOD_DO_NOT_DISPOSE;
+              GCE.Packed_fields=(disposal_method<<2)|(context->Background_transparent);
               duration=Get_frame_duration(context)/10;
               GCE.Delay_time=duration<0xFFFF?duration:0xFFFF;
             }
             else
             {
               // Layered image
+              disposal_method = DISPOSAL_METHOD_DO_NOT_DISPOSE;
               if (current_layer==0)
-                GCE.Packed_fields=(1<<2)|(context->Background_transparent);
+                GCE.Packed_fields=(disposal_method<<2)|(context->Background_transparent);
               else
-                GCE.Packed_fields=(1<<2)|(1);
+                GCE.Packed_fields=(disposal_method<<2)|(1);
               GCE.Delay_time=5; // Duration 5/100s (minimum viable value for current web browsers)
               if (current_layer == context->Nb_layers -1)
                 GCE.Delay_time=0xFFFF; // Infinity (10 minutes)
@@ -3229,11 +3235,51 @@ void Save_GIF(T_IO_Context * context)
              && Write_byte(GIF_file,GCE.Block_terminator)
              )
             {
-              // first look for the maximum pixel value
-              // to decide how many bit per pixel are needed.
               byte temp, max = 0;
-              for(GIF_pos_Y = 0; GIF_pos_Y < context->Height; GIF_pos_Y++) {
-                for(GIF_pos_X = 0; GIF_pos_X < context->Width; GIF_pos_X++) {
+
+              IDB.Pos_X=0;
+              IDB.Pos_Y=0;
+              IDB.Image_width=context->Width;
+              IDB.Image_height=context->Height;
+              if(current_layer > 0)
+              {
+                word min_X, max_X, min_Y, max_Y;
+                // find bounding box of changes for Animated GIFs
+                min_X = min_Y = 0xffff;
+                max_X = max_Y = 0;
+                temp = LSDB.Backcol;//=context->Transparent_color;
+                for(GIF_pos_Y = 0; GIF_pos_Y < context->Height; GIF_pos_Y++) {
+                  for(GIF_pos_X = 0; GIF_pos_X < context->Width; GIF_pos_X++) {
+                    // compare Pixel from previous layer or from background depending on disposal method
+                    if(disposal_method == DISPOSAL_METHOD_DO_NOT_DISPOSE)
+                      temp = Main.backups->Pages->Image[current_layer - 1].Pixels[GIF_pos_Y * context->Pitch + GIF_pos_X];
+                    if(temp != Get_pixel(context, GIF_pos_X, GIF_pos_Y)) {
+                      if(GIF_pos_X < min_X) min_X = GIF_pos_X;
+                      if(GIF_pos_X > max_X) max_X = GIF_pos_X;
+                      if(GIF_pos_Y < min_Y) min_Y = GIF_pos_Y;
+                      if(GIF_pos_Y > max_Y) max_Y = GIF_pos_Y;
+                    }
+                  }
+                }
+                if((min_X <= max_X) && (min_Y <= max_Y))
+                {
+                  IDB.Pos_X = min_X;
+                  IDB.Pos_Y = min_Y;
+                  IDB.Image_width = max_X + 1 - min_X;
+                  IDB.Image_height = max_Y + 1 - min_Y;
+                }
+                else
+                {
+                  // if no pixel changes, store a 1 pixel image
+                  IDB.Image_width = 1;
+                  IDB.Image_height = 1;
+                }
+              }
+
+              // look for the maximum pixel value
+              // to decide how many bit per pixel are needed.
+              for(GIF_pos_Y = IDB.Pos_Y; GIF_pos_Y < IDB.Image_height + IDB.Pos_Y; GIF_pos_Y++) {
+                for(GIF_pos_X = IDB.Pos_X; GIF_pos_X < IDB.Image_width + IDB.Pos_X; GIF_pos_X++) {
                   temp=Get_pixel(context, GIF_pos_X, GIF_pos_Y);
                   if(temp > max) max = temp;
                 }
@@ -3245,10 +3291,6 @@ void Save_GIF(T_IO_Context * context)
             
               // On va écrire un block indicateur d'IDB et l'IDB du fichier
               block_identifier=0x2C;
-              IDB.Pos_X=0;
-              IDB.Pos_Y=0;
-              IDB.Image_width=context->Width;
-              IDB.Image_height=context->Height;
               IDB.Indicator=0x07;    // Image non entrelacée, pas de palette locale.
               clear = 1 << IDB.Nb_bits_pixel; // Clear Code
               eof = clear + 1;                // End of Picture Code
