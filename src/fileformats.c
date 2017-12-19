@@ -3030,10 +3030,10 @@ void Load_GIF(T_IO_Context * context)
 
     temp=Get_pixel(context, GIF_pos_X,GIF_pos_Y);
 
-    if (++GIF_pos_X>=idb->Image_width)
+    if (++GIF_pos_X >= (idb->Image_width + idb->Pos_X))
     {
-      GIF_pos_X=0;
-      if (++GIF_pos_Y>=idb->Image_height)
+      GIF_pos_X = idb->Pos_X;
+      if (++GIF_pos_Y >= (idb->Image_height + idb->Pos_Y))
         GIF_stop=1;
     }
 
@@ -3264,8 +3264,8 @@ void Save_GIF(T_IO_Context * context)
                 //   Le block indicateur d'IDB et l'IDB ont étés correctements
                 // écrits.
     
-                GIF_pos_X=0;
-                GIF_pos_Y=0;
+                GIF_pos_X=IDB.Pos_X;
+                GIF_pos_Y=IDB.Pos_Y;
                 GIF_last_byte=0;
                 GIF_remainder_bits=0;
                 GIF_remainder_byte=0;
@@ -3402,7 +3402,7 @@ void Save_GIF(T_IO_Context * context)
                   GIF_set_code(eof);  // 257 for 8bpp    // Code de End d'image
                   if (GIF_remainder_bits!=0)
                   {
-                    // WRITE last byte
+                    // Write last byte (this is an incomplete byte)
                     GIF_buffer[++GIF_remainder_byte]=GIF_last_byte;
                     GIF_last_byte=0;
                     GIF_remainder_bits=0;
