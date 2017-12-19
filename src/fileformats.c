@@ -3017,7 +3017,12 @@ void Save_GIF(T_IO_Context * context)
     
                   GIF_set_code(eof);  // 257 for 8bpp    // Code de End d'image
                   if (GIF_remainder_bits!=0)
-                    GIF_set_code(0);             // Code bidon permettant de s'assurer que tous les bits du dernier code aient bien étés inscris dans le buffer GIF
+                  {
+                    // WRITE last byte
+                    GIF_buffer[++GIF_remainder_byte]=GIF_last_byte;
+                    GIF_last_byte=0;
+                    GIF_remainder_bits=0;
+                  }
                   GIF_empty_buffer();         // On envoie les dernières données du buffer GIF dans le buffer KM
     
                   // On écrit un \0
