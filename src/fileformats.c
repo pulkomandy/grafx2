@@ -2681,6 +2681,9 @@ void Save_GIF(T_IO_Context * context)
   word index;            // index de recherche de chaîne
   int current_layer;
 
+  word clear;   // LZW clear code
+  word eof;     // End of image code
+
   /////////////////////////////////////////////////// FIN DES DECLARATIONS //
   
   File_error=0;
@@ -2714,6 +2717,14 @@ void Save_GIF(T_IO_Context * context)
         LSDB.Height=context->Height;
       }
       LSDB.Resol  =0x97;          // Image en 256 couleurs, avec une palette
+      // 0x97 = 1001 0111
+      // <Packed Fields>  =      Global Color Table Flag       1 Bit
+      //                         Color Resolution              3 Bits
+      //                         Sort Flag                     1 Bit
+      //                         Size of Global Color Table    3 Bits
+      // TODO XXX Color resolution should be set to 7 = 8bit per RGB component
+      // it is set to 1 => 2bit per RGB component...
+      // I guess most decoders are ignoring it anyway
       LSDB.Backcol=context->Transparent_color;
       switch(context->Ratio)
       {
@@ -2834,6 +2845,19 @@ void Save_GIF(T_IO_Context * context)
              && Write_byte(GIF_file,GCE.Block_terminator)
              )
             {
+              // first look for the maximum pixel value
+              // to decide how many bit per pixel are needed.
+              byte temp, max = 0;
+              for(GIF_pos_Y = 0; GIF_pos_Y < context->Height; GIF_pos_Y++) {
+                for(GIF_pos_X = 0; GIF_pos_X < context->Width; GIF_pos_X++) {
+                  temp=Get_pixel(context, GIF_pos_X, GIF_pos_Y);
+                  if(temp > max) max = temp;
+                }
+              }
+              IDB.Nb_bits_pixel=2;  // Find the minimum bpp value to fit all pixels
+              while((int)max >= (1 << IDB.Nb_bits_pixel)) {
+                IDB.Nb_bits_pixel++;
+              }
             
               // On va écrire un block indicateur d'IDB et l'IDB du fichier
               block_identifier=0x2C;
@@ -2842,7 +2866,8 @@ void Save_GIF(T_IO_Context * context)
               IDB.Image_width=context->Width;
               IDB.Image_height=context->Height;
               IDB.Indicator=0x07;    // Image non entrelacée, pas de palette locale.
-              IDB.Nb_bits_pixel=8; // Image 256 couleurs;
+              clear = 1 << IDB.Nb_bits_pixel; // Clear Code
+              eof = clear + 1;                // End of Picture Code
     
               if ( Write_byte(GIF_file,block_identifier) &&
                    Write_word_le(GIF_file,IDB.Pos_X) &&
@@ -2866,10 +2891,10 @@ void Save_GIF(T_IO_Context * context)
                 GIF_stop=0;
     
                 // Réintialisation de la table:
-                alphabet_free=258;
-                GIF_nb_bits  =9;
-                alphabet_max =511;
-                GIF_set_code(256);
+                alphabet_free=clear + 2;  // 258 for 8bpp
+                GIF_nb_bits  =IDB.Nb_bits_pixel + 1; // 9 for 8 bpp
+                alphabet_max =clear+clear-1;  // 511 for 8bpp
+                GIF_set_code(clear);  //256 for 8bpp
                 for (start=0;start<4096;start++)
                 {
                   alphabet_daughter[start]=4096;
@@ -2924,10 +2949,10 @@ void Save_GIF(T_IO_Context * context)
                     if (alphabet_free>0xFFF)
                     {
                       // Réintialisation de la table:
-                      GIF_set_code(256);
-                      alphabet_free=258;
-                      GIF_nb_bits  =9;
-                      alphabet_max =511;
+                      GIF_set_code(clear);    // 256 for 8bpp
+                      alphabet_free=clear+2;  // 258 for 8bpp
+                      GIF_nb_bits  =IDB.Nb_bits_pixel + 1;  // 9 for 8bpp
+                      alphabet_max =clear+clear-1;    // 511 for 8bpp
                       for (start=0;start<4096;start++)
                       {
                         alphabet_daughter[start]=4096;
@@ -2990,7 +3015,7 @@ void Save_GIF(T_IO_Context * context)
                   }
                   */
     
-                  GIF_set_code(257);             // Code de End d'image
+                  GIF_set_code(eof);  // 257 for 8bpp    // Code de End d'image
                   if (GIF_remainder_bits!=0)
                     GIF_set_code(0);             // Code bidon permettant de s'assurer que tous les bits du dernier code aient bien étés inscris dans le buffer GIF
                   GIF_empty_buffer();         // On envoie les dernières données du buffer GIF dans le buffer KM
