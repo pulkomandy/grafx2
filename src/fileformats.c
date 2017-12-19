@@ -3290,7 +3290,7 @@ void Save_GIF(T_IO_Context * context)
                 start=current_string=GIF_next_pixel(context, &IDB);
                 descend=1;
     
-                do
+                while ((!GIF_stop) && (!File_error))
                 {
                   current_char=GIF_next_pixel(context, &IDB);
     
@@ -3357,7 +3357,6 @@ void Save_GIF(T_IO_Context * context)
                     descend=1;
                   }
                 }
-                while ((!GIF_stop) && (!File_error));
     
                 if (!File_error)
                 {
