@@ -40,7 +40,7 @@
 
 #if defined(__CAANOO__) || defined(__WIZ__) || defined(__GP2X__)
 // No fontconfig
-#elif defined(__linux__)
+#elif defined(USE_FC) && !defined(NOTTF)
   #include <fontconfig/fontconfig.h>
 #endif
 #endif
@@ -327,11 +327,8 @@ void Init_text(void)
 
   #elif defined(__CAANOO__) || defined(__WIZ__) || defined(__GP2X__)
   // No fontconfig : Only use fonts from Grafx2
-  #elif defined(__linux__)
+  #elif defined(USE_FC)
     #ifndef NOTTF
-       #define USE_FC
-    
-       #ifdef USE_FC
        {
 	FcStrList* dirs;
         FcChar8 * fdir;
@@ -345,7 +342,6 @@ void Init_text(void)
 
         FcStrListDone(dirs);
        }
-       #endif
     #endif
   #elif defined(__amigaos4__) || defined(__amigaos__)
     #ifndef NOTTF

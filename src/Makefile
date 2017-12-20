@@ -257,6 +257,7 @@ endif
     LOPT = $(shell sdl-config --libs) -lSDL_image $(TTFLOPT) -lpng $(LUALOPT) -lm
     OBJDIR = ../obj/unix
     FCLOPT = -lfontconfig
+    COPT += -DUSE_FC
     CC = gcc
   else
   ifeq ($(PLATFORM),FreeMiNT) #10
@@ -397,6 +398,7 @@ endif
         CC = gcc
         OBJDIR = ../obj/unix
         FCLOPT = -lfontconfig
+        COPT += -DUSE_FC
 
         # enable UTF8 filename translation
         # For Linux (GLibc), iconv is built into the C library so no LOPT needed.
