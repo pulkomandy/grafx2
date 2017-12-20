@@ -285,8 +285,10 @@ void Init_text(void)
   font_list_start = NULL;
   Nb_fonts=0;
   // Parcours du répertoire "fonts"
-  strcpy(directory_name, Data_directory);
-  strcat(directory_name, FONTS_SUBDIRECTORY);
+  snprintf(directory_name, sizeof(directory_name), "%s%s", Data_directory,FONTS_SUBDIRECTORY);
+  For_each_file(directory_name, Add_font);
+  // fonts subdirectory in Config_directory
+  snprintf(directory_name, sizeof(directory_name), "%s%s", Config_directory, "/fonts");
   For_each_file(directory_name, Add_font);
   
   #if defined(__WIN32__)
