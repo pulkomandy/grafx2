@@ -2612,7 +2612,13 @@ void Button_Palette(void)
         break;
       }
 
-      case 26: // Load palette (TODO)
+      case 26: // Load palette
+        memcpy(backup_palette, Main_palette, sizeof(T_Palette));
+        Load_picture(CONTEXT_PALETTE);
+        memcpy(working_palette, Main_palette, sizeof(T_Palette));
+        memcpy(temp_palette,working_palette,sizeof(T_Palette));
+        memcpy(Main_palette, backup_palette, sizeof(T_Palette));
+        need_to_remap=1;
         break;
 
       case 27: // Save palette

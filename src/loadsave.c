@@ -855,6 +855,18 @@ void Load_image(T_IO_Context *context)
       Download_infos_page_main(Main.backups->Pages);
     }
   }
+  else if (context->Type == CONTEXT_PALETTE)
+  {
+    if ( File_error!=1)
+    {
+      Set_palette(context->Palette);
+      // Make a backup step
+      Backup_layers(LAYER_NONE);
+      // Copy the loaded palette
+      memcpy(Main_palette, context->Palette, sizeof(T_Palette));
+      //memcpy(Main_backups->Pages->Palette, context->Palette, sizeof(T_Palette));
+    }
+  }
   else if (context->Type == CONTEXT_BRUSH && File_error==0)
   {
     

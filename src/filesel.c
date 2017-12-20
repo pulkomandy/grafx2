@@ -1436,6 +1436,8 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   {
     if (context->Type == CONTEXT_MAIN_IMAGE)
       Open_window(310,200,"Load picture");
+    else if (context->Type == CONTEXT_PALETTE)
+      Open_window(310,200,"Load palette");
     else
       Open_window(310,200,"Load brush");
     Window_set_normal_button(198,180,51,14,"Load",0,1,SDLK_RETURN); // 1
