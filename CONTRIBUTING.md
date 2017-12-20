@@ -1,5 +1,6 @@
-While the sourcecode is currently hosted on gitlab, the bugtracker and developer
-docs are at http://pulkomandy.tk/GrafX2
+While the sourcecode is currently hosted on
+[gitlab](https://gitlab.com/GrafX2/grafX2/), the bugtracker and developer docs
+are hosted on [Trac](http://pulkomandy.tk/projects/GrafX2).
 
 Drive your browser there for a lot of useful information on GrafX2 development,
 internals, and roadmap.
