@@ -1025,7 +1025,7 @@ void Main_handler(void)
                 action++;
                 break;
               case SPECIAL_LOAD_BRUSH :
-                Load_picture(0);
+                Load_picture(CONTEXT_BRUSH);
                 action++;
                 break;
               case SPECIAL_SAVE_BRUSH :

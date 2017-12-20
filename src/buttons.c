@@ -3105,9 +3105,7 @@ int Best_video_mode(void)
   return best_mode;
 }
 
-void Load_picture(byte image)
-  // Image=1 => On charge/sauve une image
-  // Image=0 => On charge/sauve une brosse
+void Load_picture(enum CONTEXT_TYPE type)
 {
   byte  confirm;
   byte  old_cursor_shape;
@@ -3116,23 +3114,33 @@ void Load_picture(byte image)
   static char filename [MAX_PATH_CHARACTERS];
   static char directory[MAX_PATH_CHARACTERS];
   
-  if (image)
+  switch (type)
   {
+  case CONTEXT_MAIN_IMAGE:
     strcpy(filename, Main.backups->Pages->Filename);
     strcpy(directory, Main.backups->Pages->File_directory);
     Init_context_layered_image(&context, filename, directory);
-  }
-  else
-  {
+    break;
+  case CONTEXT_BRUSH:
     strcpy(filename, Brush_filename);
     strcpy(directory, Brush_file_directory);
     Init_context_brush(&context, filename, directory);
+    break;
+  case CONTEXT_PALETTE:
+    strcpy(filename, "");
+    strcpy(directory, Main_backups->Pages->File_directory);
+    Init_context_layered_image(&context, filename, directory);
+    context.Type = CONTEXT_PALETTE;
+    context.Format = FORMAT_PAL;
+    break;
+  default:
+    return; // DO NOTHING
   }
-  confirm=Button_Load_or_Save(image?&Main.selector:&Brush_selector, 1, &context);
+  confirm=Button_Load_or_Save((type==CONTEXT_MAIN_IMAGE)?&Main.selector:&Brush_selector, 1, &context);
 
   if (confirm)
   {
-    if (image)
+    if (type==CONTEXT_MAIN_IMAGE)
     {
       if (Main.image_is_modified)
         confirm=Confirmation_box("Discard unsaved changes?");
@@ -3148,7 +3156,7 @@ void Load_picture(byte image)
     Cursor_shape=CURSOR_SHAPE_HOURGLASS;
     Display_cursor();
 
-    if (image)
+    if (type==CONTEXT_MAIN_IMAGE)
     {
       Original_screen_X=0;
       Original_screen_Y=0;
@@ -3156,7 +3164,7 @@ void Load_picture(byte image)
 
     Load_image(&context);
 
-    if (!image)
+    if (type==CONTEXT_BRUSH)
     {
       strcpy(Brush_filename, context.File_name);
       strcpy(Brush_file_directory, context.File_directory);
@@ -3193,7 +3201,7 @@ void Load_picture(byte image)
     }
     else
     {
-      if (image)
+      if (type==CONTEXT_MAIN_IMAGE)
       {
         if (Main.magnifier_mode)
         {
@@ -3263,7 +3271,7 @@ void Button_Load(void)
   // restituer en cas d'erreur n'affectant pas l'image
   Upload_infos_page(&Main);
 
-  Load_picture(1);
+  Load_picture(CONTEXT_MAIN_IMAGE);
   Tilemap_update();
 }
 
@@ -4016,7 +4024,7 @@ void Button_Brush_FX(void)
       break;
     case 18 : // Load
       Display_cursor();
-      Load_picture(0);
+      Load_picture(CONTEXT_BRUSH);
       Hide_cursor();
       break;
     case 19 : // Save

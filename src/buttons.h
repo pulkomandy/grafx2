@@ -650,7 +650,7 @@ void Button_Toggle_all_toolbars(void);
 /*!
     Load picture from file.
 */
-void Load_picture(byte image);
+void Load_picture(enum CONTEXT_TYPE type);
 
 /*!
     Save picture to file.
