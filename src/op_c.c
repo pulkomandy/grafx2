@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2017 Thomas Bernard
     Copyright 2010 Alexander Filyanov
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
@@ -31,6 +32,11 @@
 #include "op_c.h"
 #include "errors.h"
 #include "colorred.h"
+
+// If GRAFX2_QUANTIZE_CLUSTER_POPULATION_SPLIT is defined,
+// the clusters are splitted in two half of equal (pixel) population.
+// Otherwise, they are splitted in two half of equal volume.
+//#define GRAFX2_QUANTIZE_CLUSTER_POPULATION_SPLIT
 
 int Convert_24b_bitmap_to_256_fast(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette);
 
@@ -473,6 +479,7 @@ ENDCRUSH:
 }
 
 
+#ifndef GRAFX2_QUANTIZE_CLUSTER_POPULATION_SPLIT
 /// Split a cluster on its longest axis.
 /// c = source cluster, c1, c2 = output after split
 /// the two output cluster have half volume (and not half population)
@@ -532,6 +539,7 @@ void Cluster_split_volume(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue
   }
 }
 
+#else // GRAFX2_QUANTIZE_CLUSTER_POPULATION_SPLIT
 /// Split a cluster on its longest axis.
 /// c = source cluster, c1, c2 = output after split
 /// the two output clusters have half population (and not half volume)
@@ -663,6 +671,7 @@ void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
     c2->bmin=b;       c2->bmax=c->bmax;
   }
 }
+#endif // GRAFX2_QUANTIZE_CLUSTER_POPULATION_SPLIT
 
 
 /// Compute the mean R, G, B (for palette generation) and H, L (for palette sorting)
@@ -861,8 +870,11 @@ void CS_Generate(T_Cluster_set * cs, const T_Occurrence_table * const to, CT_Tre
     	free(current);
     	break;
     }
+#ifndef GRAFX2_QUANTIZE_CLUSTER_POPULATION_SPLIT
     Cluster_split_volume(current, &Nouveau1, &Nouveau2, current->data.cut.plus_large);
-    //Cluster_split(current, &Nouveau1, &Nouveau2, current->data.cut.plus_large, to);
+#else
+    Cluster_split(current, &Nouveau1, &Nouveau2, current->data.cut.plus_large, to);
+#endif
     free(current);
 
     // Pack the 2 new clusters (the split may leave some empty space between the
