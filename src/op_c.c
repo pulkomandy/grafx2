@@ -38,6 +38,11 @@
 // Otherwise, they are splitted in two half of equal volume.
 //#define GRAFX2_QUANTIZE_CLUSTER_POPULATION_SPLIT
 
+// If GRAFX2_QUANTIZE_CLUSTER_SORT_BY_VOLUME is defined
+// the clusters are sorted by volume. Otherwise, they
+// are sorted by length of the diagonal
+//#define GRAFX2_QUANTIZE_CLUSTER_SORT_BY_VOLUME
+
 int Convert_24b_bitmap_to_256_fast(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette);
 
 /// Convert RGB to HSL.
@@ -442,11 +447,12 @@ ENDCRUSH:
   c->bmin=bmin;     c->bmax=bmax;
   
   // Find the longest axis to know which way to split the cluster
-  r=(c->rmax-c->rmin) + 1;
-  g=(c->vmax-c->vmin) + 1;
-  b=(c->bmax-c->bmin) + 1;
+  r = c->rmax-c->rmin;
+  g = c->vmax-c->vmin;
+  b = c->bmax-c->bmin;
 
-   c->data.cut.volume = r*g*b;
+  c->data.cut.sqdiag = r*r+g*g+b*b;
+  c->data.cut.volume = (r+1)*(g+1)*(b+1);
 
   if (g>=r)
   {
@@ -801,6 +807,7 @@ void CS_Delete(T_Cluster_set * cs)
 void CS_Get(T_Cluster_set * cs, T_Cluster ** c)
 {  
   // Just remove and return the first cluster, which has the biggest volume.
+  // or the longest diagonal
   *c = cs->clusters;
   
   cs->clusters = (*c)->next;
@@ -815,7 +822,11 @@ void CS_Set(T_Cluster_set * cs,T_Cluster * c)
   T_Cluster* prev = NULL;
 
   // Search the first cluster that is smaller than ours
+#ifdef GRAFX2_QUANTIZE_CLUSTER_SORT_BY_VOLUME
   while (current && current->data.cut.volume > c->data.cut.volume)
+#else
+  while (current && current->data.cut.sqdiag > c->data.cut.sqdiag)
+#endif
   {
     prev = current;
     current = current->next;

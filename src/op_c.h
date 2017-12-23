@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2017 Thomas Bernard
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
@@ -69,6 +70,7 @@ struct S_Cluster_CutData
 {
   // informations used while median-cutting
   int volume; // volume of narrow covering (without margins where there are no pixels)
+  int sqdiag; // square of diagonal length (without margins)
  
   // Widest component : 0 red, 1 green, 2 blue
   byte plus_large;
