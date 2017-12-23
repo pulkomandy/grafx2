@@ -475,6 +475,66 @@ ENDCRUSH:
 
 /// Split a cluster on its longest axis.
 /// c = source cluster, c1, c2 = output after split
+/// the two output cluster have half volume (and not half population)
+void Cluster_split_volume(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue)
+{
+  int r,g,b;
+  if (hue == 0) // split on red
+  {
+    r = (c->rmin + c->rmax) / 2;
+    c1->Rmin=c->Rmin; c1->Rmax=r;
+    c1->rmin=c->rmin; c1->rmax=r;
+    c1->Gmin=c->Gmin; c1->Vmax=c->Vmax;
+    c1->vmin=c->vmin; c1->vmax=c->vmax;
+    c1->Bmin=c->Bmin; c1->Bmax=c->Bmax;
+    c1->bmin=c->bmin; c1->bmax=c->bmax;
+
+    c2->Rmin=r+1;     c2->Rmax=c->Rmax;
+    c2->rmin=r+1;     c2->rmax=c->rmax;
+    c2->Gmin=c->Gmin; c2->Vmax=c->Vmax;
+    c2->vmin=c->vmin; c2->vmax=c->vmax;
+    c2->Bmin=c->Bmin; c2->Bmax=c->Bmax;
+    c2->bmin=c->bmin; c2->bmax=c->bmax;
+  }
+  else if (hue==1) // split on green
+  {
+    g = (c->vmin + c->vmax) / 2;
+    c1->Rmin=c->Rmin; c1->Rmax=c->Rmax;
+    c1->rmin=c->rmin; c1->rmax=c->rmax;
+    c1->Gmin=c->Gmin; c1->Vmax=g;
+    c1->vmin=c->vmin; c1->vmax=g;
+    c1->Bmin=c->Bmin; c1->Bmax=c->Bmax;
+    c1->bmin=c->bmin; c1->bmax=c->bmax;
+
+    c2->Rmin=c->Rmin; c2->Rmax=c->Rmax;
+    c2->rmin=c->rmin; c2->rmax=c->rmax;
+    c2->Gmin=g+1;     c2->Vmax=c->Vmax;
+    c2->vmin=g+1;     c2->vmax=c->vmax;
+    c2->Bmin=c->Bmin; c2->Bmax=c->Bmax;
+    c2->bmin=c->bmin; c2->bmax=c->bmax;
+  }
+  else
+  {
+    b = (c->bmin + c->bmax) / 2;
+    c1->Rmin=c->Rmin; c1->Rmax=c->Rmax;
+    c1->rmin=c->rmin; c1->rmax=c->rmax;
+    c1->Gmin=c->Gmin; c1->Vmax=c->Vmax;
+    c1->vmin=c->vmin; c1->vmax=c->vmax;
+    c1->Bmin=c->Bmin; c1->Bmax=b;
+    c1->bmin=c->bmin; c1->bmax=b;
+
+    c2->Rmin=c->Rmin; c2->Rmax=c->Rmax;
+    c2->rmin=c->rmin; c2->rmax=c->rmax;
+    c2->Gmin=c->Gmin; c2->Vmax=c->Vmax;
+    c2->vmin=c->vmin; c2->vmax=c->vmax;
+    c2->Bmin=b+1;     c2->Bmax=c->Bmax;
+    c2->bmin=b+1;     c2->bmax=c->bmax;
+  }
+}
+
+/// Split a cluster on its longest axis.
+/// c = source cluster, c1, c2 = output after split
+/// the two output clusters have half population (and not half volume)
 void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
   const T_Occurrence_table * const to)
 {
@@ -801,7 +861,8 @@ void CS_Generate(T_Cluster_set * cs, const T_Occurrence_table * const to, CT_Tre
     	free(current);
     	break;
     }
-    Cluster_split(current, &Nouveau1, &Nouveau2, current->data.cut.plus_large, to);
+    Cluster_split_volume(current, &Nouveau1, &Nouveau2, current->data.cut.plus_large);
+    //Cluster_split(current, &Nouveau1, &Nouveau2, current->data.cut.plus_large, to);
     free(current);
 
     // Pack the 2 new clusters (the split may leave some empty space between the
