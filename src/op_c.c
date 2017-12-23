@@ -330,22 +330,19 @@ void Cluster_pack(T_Cluster * c,const T_Occurrence_table * const to)
 
   // Find min. and max. values actually used for each component in this cluster
 
-  // Pre-shift everything to avoid using OT_Get and be faster. This will only
-  // work if the occurence table actually has full precision, that is a
-  // 256^3*sizeof(int) = 64MB table. If your computer has less free ram and
-  // malloc fails, this will not work at all !
+  // Pre-shift everything to avoid using OT_Get and be faster.
   // GIMP use only 6 bits for G and B components in this table.
-  rmin=c->rmax <<16; rmax=c->rmin << 16;
-  vmin=c->vmax << 8; vmax=c->vmin << 8;
-  bmin=c->bmax; bmax=c->bmin;
+  rmin=c->rmax << to->dec_r; rmax=c->rmin << to->dec_r;
+  vmin=c->vmax << to->dec_g; vmax=c->vmin << to->dec_g;
+  bmin=c->bmax << to->dec_b; bmax=c->bmin << to->dec_b;
   c->occurences=0;
 
   // Unoptimized code kept here for documentation purpose because the optimized
   // one is unreadable : run over the whole cluster and find the min and max,
   // and count the occurences at the same time.
   /*
-  for (r=c->rmin<<16;r<=c->rmax<<16;r+=1<<16)
-    for (g=c->vmin<<8;g<=c->vmax<<8;g+=1<<8)
+  for (r=c->rmin<<to->dec_r;r<=c->rmax<<to->dec_r;r+=1<<to->dec_r)
+    for (g=c->vmin<<to->dec_g;g<=c->vmax<<to->dec_g;g+=1<<to->dec_g)
       for (b=c->bmin;b<=c->bmax;b++)
       {
         nbocc=to->table[r + g + b]; // OT_get
@@ -366,8 +363,8 @@ void Cluster_pack(T_Cluster * c,const T_Occurrence_table * const to)
   // area to seek for the next one. Start at the edges of the cluster and go to
   // the center until we find a pixel.
 
-  for(r=c->rmin<<16;r<=c->rmax<<16;r+=1<<16)
-      for(g=c->vmin<<8;g<=c->vmax<<8;g+=1<<8)
+  for(r=c->rmin<<to->dec_r;r<=c->rmax<<to->dec_r;r+=1<<to->dec_r)
+      for(g=c->vmin<<to->dec_g;g<=c->vmax<<to->dec_g;g+=1<<to->dec_g)
           for(b=c->bmin;b<=c->bmax;b++)
           {
             if(to->table[r + g + b]) // OT_get
@@ -377,8 +374,8 @@ void Cluster_pack(T_Cluster * c,const T_Occurrence_table * const to)
             }
           }
 RMAX:
-  for(r=c->rmax<<16;r>=rmin;r-=1<<16)
-      for(g=c->vmin<<8;g<=c->vmax<<8;g+=1<<8)
+  for(r=c->rmax<<to->dec_r;r>=rmin;r-=1<<to->dec_r)
+      for(g=c->vmin<<to->dec_g;g<=c->vmax<<to->dec_g;g+=1<<to->dec_g)
           for(b=c->bmin;b<=c->bmax;b++)
           {
             if(to->table[r + g + b]) // OT_get
@@ -388,8 +385,8 @@ RMAX:
             }
           }
 VMIN:
-  for(g=c->vmin<<8;g<=c->vmax<<8;g+=1<<8)
-      for(r=rmin;r<=rmax;r+=1<<16)
+  for(g=c->vmin<<to->dec_g;g<=c->vmax<<to->dec_g;g+=1<<to->dec_g)
+      for(r=rmin;r<=rmax;r+=1<<to->dec_r)
           for(b=c->bmin;b<=c->bmax;b++)
           {
             if(to->table[r + g + b]) // OT_get
@@ -399,8 +396,8 @@ VMIN:
             }
           }
 VMAX:
-  for(g=c->vmax<<8;g>=vmin;g-=1<<8)
-      for(r=rmin;r<=rmax;r+=1<<16)
+  for(g=c->vmax<<to->dec_g;g>=vmin;g-=1<<to->dec_g)
+      for(r=rmin;r<=rmax;r+=1<<to->dec_r)
           for(b=c->bmin;b<=c->bmax;b++)
           {
             if(to->table[r + g + b]) // OT_get
@@ -411,8 +408,8 @@ VMAX:
           }
 BMIN:
   for(b=c->bmin;b<=c->bmax;b++)
-      for(r=rmin;r<=rmax;r+=1<<16)
-          for(g=vmin;g<=vmax;g+=1<<8)
+      for(r=rmin;r<=rmax;r+=1<<to->dec_r)
+          for(g=vmin;g<=vmax;g+=1<<to->dec_g)
           {
             if(to->table[r + g + b]) // OT_get
             {
@@ -422,8 +419,8 @@ BMIN:
           }
 BMAX:
   for(b=c->bmax;b>=bmin;b--)
-      for(r=rmin;r<=rmax;r+=1<<16)
-          for(g=vmin;g<=vmax;g+=1<<8)
+      for(r=rmin;r<=rmax;r+=1<<to->dec_r)
+          for(g=vmin;g<=vmax;g+=1<<to->dec_g)
           {
             if(to->table[r + g + b]) // OT_get
             {
@@ -434,16 +431,16 @@ BMAX:
 ENDCRUSH:
   // We still need to seek the internal part of the cluster to count pixels
   // inside it
-  for(r=rmin;r<=rmax;r+=1<<16)
-      for(g=vmin;g<=vmax;g+=1<<8)
+  for(r=rmin;r<=rmax;r+=1<<to->dec_r)
+      for(g=vmin;g<=vmax;g+=1<<to->dec_g)
           for(b=bmin;b<=bmax;b++)
           {
             c->occurences+=to->table[r + g + b]; // OT_get
           }
 
   // Unshift the values and put them in the cluster info
-  c->rmin=rmin>>16; c->rmax=rmax>>16;
-  c->vmin=vmin>>8;  c->vmax=vmax>>8;
+  c->rmin=rmin>>to->dec_r; c->rmax=rmax>>to->dec_r;
+  c->vmin=vmin>>to->dec_g; c->vmax=vmax>>to->dec_g;
   c->bmin=bmin;     c->bmax=bmax;
   
   // Find the longest axis to know which way to split the cluster
@@ -562,9 +559,9 @@ void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
   if (hue == 0) // split on red
   {
     // Run over the cluster until we reach the requested number of pixels
-    for (r = c->rmin<<16; r<=c->rmax<<16; r+=1<<16)
+    for (r = c->rmin<<to->dec_r; r<=c->rmax<<to->dec_r; r+=1<<to->dec_r)
     {
-      for (g = c->vmin<<8; g<=c->vmax<<8; g+=1<<8)
+      for (g = c->vmin<<to->dec_g; g<=c->vmax<<to->dec_g; g+=1<<to->dec_g)
       {
         for (b = c->bmin; b<=c->bmax; b++)
         {
@@ -579,8 +576,8 @@ void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
         break;
     }
 
-    r>>=16;
-    g>>=8;
+    r>>=to->dec_r;
+    g>>=to->dec_g;
     
     // More than half of the cluster pixel have r = rmin. Ensure we split somewhere anyway.
     if (r == c->rmin) r++;
@@ -603,9 +600,9 @@ void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
   if (hue==1) // split on green
   {
 
-    for (g=c->vmin<<8;g<=c->vmax<<8;g+=1<<8)
+    for (g=c->vmin<<to->dec_g;g<=c->vmax<<to->dec_g;g+=1<<to->dec_g)
     {
-      for (r=c->rmin<<16;r<=c->rmax<<16;r+=1<<16)
+      for (r=c->rmin<<to->dec_r;r<=c->rmax<<to->dec_r;r+=1<<to->dec_r)
       {
         for (b=c->bmin;b<=c->bmax;b++)
         {
@@ -620,7 +617,7 @@ void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
         break;
     }
 
-    r>>=16; g>>=8;
+    r>>=to->dec_r; g>>=to->dec_g;
     
     if (g == c->vmin) g++;
 
@@ -643,9 +640,9 @@ void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
 
     for (b=c->bmin;b<=c->bmax;b++)
     {
-      for (g=c->vmin<<8;g<=c->vmax<<8;g+=1<<8)
+      for (g=c->vmin<<to->dec_g;g<=c->vmax<<to->dec_g;g+=1<<to->dec_g)
       {
-        for (r=c->rmin<<16;r<=c->rmax<<16;r+=1<<16)
+        for (r=c->rmin<<to->dec_r;r<=c->rmax<<to->dec_r;r+=1<<to->dec_r)
         {
           cumul+=to->table[r + g + b];
           if (cumul>=limit)
@@ -658,7 +655,7 @@ void Cluster_split(T_Cluster * c, T_Cluster * c1, T_Cluster * c2, int hue,
         break;
     }
 
-    r>>=16; g>>=8;
+    r>>=to->dec_r; g>>=to->dec_g;
     
     if (b == c->bmin) b++;
 
@@ -740,6 +737,23 @@ void Cluster_Print(T_Cluster* node)
 		node->Bmin, node->Bmax);
 }
 */
+
+// translate R G B values to 8 8 8
+void CT_set_trad(CT_Tree* colorTree, byte Rmin, byte Gmin, byte Bmin,
+	byte Rmax, byte Gmax, byte Bmax, byte index, const T_Occurrence_table * to)
+{
+  Rmin <<= to->red_r;
+  Rmax <<= to->red_r;
+  Rmax += ((1 << to->red_r) - 1);
+  Gmin <<= to->red_g;
+  Gmax <<= to->red_g;
+  Gmax += ((1 << to->red_g) - 1);
+  Bmin <<= to->red_b;
+  Bmax <<= to->red_b;
+  Bmax += ((1 << to->red_b) - 1);
+  CT_set(colorTree, Rmin, Gmin, Bmin,
+	       Rmax, Gmax, Bmax, index);
+}
 
 /// Setup the first cluster before we start the operations
 /// This one covers the full palette range
@@ -870,8 +884,8 @@ void CS_Generate(T_Cluster_set * cs, const T_Occurrence_table * const to, CT_Tre
     // We are going to split this cluster, so add it to the color tree. It is a split cluster,
     // not a final one. We KNOW its two child will get added later (either because they are split,
     // or because they are part of the final cluster set). So, we add thiscluster with a NULL index.
-    CT_set(colorTree,current->Rmin, current->Gmin, current->Bmin,
-       current->Rmax, current->Vmax, current->Bmax, 0);
+    CT_set_trad(colorTree,current->Rmin, current->Gmin, current->Bmin,
+       current->Rmax, current->Vmax, current->Bmax, 0, to);
 
     // Split it
     if (current->data.cut.volume <= 1)
@@ -988,7 +1002,7 @@ void CS_Sort_by_luminance(T_Cluster_set * cs)
 
 
 /// Generates the palette from the clusters, then the conversion table to map (RGB) to a palette index
-void CS_Generate_color_table_and_palette(T_Cluster_set * cs,CT_Tree* tc,T_Components * palette)
+void CS_Generate_color_table_and_palette(T_Cluster_set * cs,CT_Tree* tc,T_Components * palette, T_Occurrence_table * to)
 {
   int index;
   T_Cluster* current = cs->clusters;
@@ -999,8 +1013,9 @@ void CS_Generate_color_table_and_palette(T_Cluster_set * cs,CT_Tree* tc,T_Compon
     palette[index].G=current->data.pal.g;
     palette[index].B=current->data.pal.b;
 
-    CT_set(tc,current->Rmin, current->Gmin, current->Bmin,
-       current->Rmax, current->Vmax, current->Bmax, index);
+    CT_set_trad(tc,current->Rmin, current->Gmin, current->Bmin,
+       current->Rmax, current->Vmax, current->Bmax,
+       index, to);
     current = current->next;
   }
 }
@@ -1126,7 +1141,7 @@ void GS_Generate(T_Gradient_set * ds,T_Cluster_set * cs)
 /// @param b Resolution for blue
 CT_Tree* Optimize_palette(T_Bitmap24B image, int size,
   T_Components * palette, int r, int g, int b)
-{	
+{
   T_Occurrence_table * to;
   CT_Tree* tc;
   T_Cluster_set * cs;
@@ -1181,7 +1196,7 @@ CT_Tree* Optimize_palette(T_Bitmap24B image, int size,
   //CS_Check(cs);
   
   // And finally generate the conversion table to map RGB > pal. index
-  CS_Generate_color_table_and_palette(cs, tc, palette);
+  CS_Generate_color_table_and_palette(cs, tc, palette, to);
   //CS_Check(cs);
   
   CS_Delete(cs);
@@ -1372,10 +1387,11 @@ int Convert_24b_bitmap_to_256(T_Bitmap256 dest,T_Bitmap24B source,int width,int 
   // meilleure précision possible
   for (ip=0;ip<(10*3);ip+=3)
   {
-	table = Optimize_palette(source,width*height,palette,
-		precision_24b[ip], precision_24b[ip+1], precision_24b[ip+2]);
-	if (table != NULL)
-		break;
+    table = Optimize_palette(source,width*height,palette,
+                             precision_24b[ip], precision_24b[ip+1], precision_24b[ip+2]);
+    if (table != NULL) {
+      break;
+    }
   }
 
   if (table!=NULL)
