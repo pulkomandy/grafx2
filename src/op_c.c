@@ -830,7 +830,8 @@ void CS_Get(T_Cluster_set * cs, T_Cluster ** c)
 
 
 /// Push a copy of a cluster in the list
-void CS_Set(T_Cluster_set * cs,T_Cluster * c)
+/// return -1 in case of error
+int CS_Set(T_Cluster_set * cs,T_Cluster * c)
 {
   T_Cluster* current = cs->clusters;
   T_Cluster* prev = NULL;
@@ -850,12 +851,15 @@ void CS_Set(T_Cluster_set * cs,T_Cluster * c)
   c -> next = current;
 
   current = malloc(sizeof(T_Cluster));
+  if(current == NULL)
+    return -1;
   *current = *c ;
 
   if (prev) prev->next = current;
   else cs->clusters = current;
 
   cs->nb++;
+  return 0;
 }
 
 /// This is the main median cut algorithm and the function actually called to
@@ -868,7 +872,7 @@ void CS_Set(T_Cluster_set * cs,T_Cluster * c)
 // 5) We take the box with the biggest number of pixels inside and we split it again
 // 6) Iterate until there are 256 boxes. Associate each of them to its middle color
 // At the same time, put the split clusters in the color tree for later palette lookup
-void CS_Generate(T_Cluster_set * cs, const T_Occurrence_table * const to, CT_Tree* colorTree)
+int CS_Generate(T_Cluster_set * cs, const T_Occurrence_table * const to, CT_Tree* colorTree)
 {
   T_Cluster* current;
   T_Cluster Nouveau1;
@@ -908,13 +912,17 @@ void CS_Generate(T_Cluster_set * cs, const T_Occurrence_table * const to, CT_Tre
     Cluster_pack(&Nouveau2, to);
 
     // Put them back in the list
-    if (Nouveau1.occurences != 0)
-      CS_Set(cs,&Nouveau1);
+    if (Nouveau1.occurences != 0) {
+      if(CS_Set(cs,&Nouveau1) < 0)
+        return -1;
+    }
       
-    if (Nouveau2.occurences != 0)
-      CS_Set(cs,&Nouveau2);
+    if (Nouveau2.occurences != 0) {
+      if(CS_Set(cs,&Nouveau2) < 0)
+        return -1;
+    }
   }
-
+  return 0;
 }
 
 
@@ -1170,13 +1178,18 @@ CT_Tree* Optimize_palette(T_Bitmap24B image, int size,
   {
     CT_delete(tc);
     OT_delete(to);
-    return 0;
+    return NULL;
   }
   //CS_Check(cs);
   // Ok, everything was allocated
 
   // Generate the cluster set with median cut algorithm
-  CS_Generate(cs, to, tc);
+  if(CS_Generate(cs, to, tc) < 0) {
+    CS_Delete(cs);
+    CT_delete(tc);
+    OT_delete(to);
+    return NULL;
+  }
   //CS_Check(cs);
 
   // Compute the color data for each cluster (palette entry + HL)

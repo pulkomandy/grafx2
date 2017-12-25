@@ -179,8 +179,8 @@ void CS_Init(T_Cluster_set * cs,T_Occurrence_table * to);
 T_Cluster_set * CS_New(int nbmax,T_Occurrence_table * to);
 void CS_Delete(T_Cluster_set * cs);
 void CS_Get(T_Cluster_set * cs,T_Cluster ** c);
-void CS_Set(T_Cluster_set * cs,T_Cluster * c);
-void CS_Generate(T_Cluster_set * cs,const T_Occurrence_table * const to, CT_Tree* colorTree);
+int CS_Set(T_Cluster_set * cs,T_Cluster * c);
+int CS_Generate(T_Cluster_set * cs,const T_Occurrence_table * const to, CT_Tree* colorTree);
 void CS_Compute_colors(T_Cluster_set * cs,T_Occurrence_table * to);
 void CS_Generate_color_table_and_palette(T_Cluster_set * cs,CT_Tree* tc,T_Components * palette, T_Occurrence_table * to);
 
