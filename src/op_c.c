@@ -36,7 +36,7 @@
 // If GRAFX2_QUANTIZE_CLUSTER_POPULATION_SPLIT is defined,
 // the clusters are splitted in two half of equal (pixel) population.
 // Otherwise, they are splitted in two half of equal volume.
-//#define GRAFX2_QUANTIZE_CLUSTER_POPULATION_SPLIT
+#define GRAFX2_QUANTIZE_CLUSTER_POPULATION_SPLIT
 
 // If GRAFX2_QUANTIZE_CLUSTER_SORT_BY_VOLUME is defined
 // the clusters are sorted by volume. Otherwise, they
