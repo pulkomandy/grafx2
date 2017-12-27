@@ -34,7 +34,8 @@
 
 void Layer_activate(int layer, short side)
 {
-  word old_layers;
+  dword old_layers;
+  static dword layers_backup_for_toggle = 0xFFFFFFFF;
 
   if (layer >= Main_backups->Pages->Nb_layers)
     return;
@@ -51,12 +52,14 @@ void Layer_activate(int layer, short side)
       {
         if (Main_layers_visible == (dword)(1<<layer))
         {
-          // Set all layers visible
-          Main_layers_visible = 0xFFFFFFFF;
+          // return to previous state (layers that were on before showing
+          // only this one)
+          Main_layers_visible = layers_backup_for_toggle;
         }
         else
         {
           // Set only this one visible
+          layers_backup_for_toggle = Main_layers_visible;
           Main_layers_visible = 1<<layer;
         }
       }
