@@ -523,8 +523,10 @@ int Init_program(int argc,char * argv[])
   
   Main_current_layer=0;
   Main_layers_visible=0xFFFFFFFF;
+  Main_layers_visible_backup=0xFFFFFFFF;
   Spare_current_layer=0;
   Spare_layers_visible=0xFFFFFFFF;
+  Spare_layers_visible_backup=0xFFFFFFFF;
   
   Spare_selector.Position=0;
   Spare_selector.Offset=0;

@@ -327,6 +327,8 @@ GFX2_GLOBAL short Main_magnifier_offset_Y;
 GFX2_GLOBAL int Main_current_layer;
 /// Bitfield that records which layers are visible. 2^0 for 0, 2^1 for 1, 2^2 for 2, etc.
 GFX2_GLOBAL dword Main_layers_visible;
+/// Backup for Main_layers_visible
+GFX2_GLOBAL dword Main_layers_visible_backup;
 /// Index to use next time, when creating incremental backups, to make unique filename.
 GFX2_GLOBAL long Main_safety_number;
 /// Number of edit actions since the last safety backup
@@ -382,6 +384,8 @@ GFX2_GLOBAL short Spare_magnifier_offset_Y;
 GFX2_GLOBAL int Spare_current_layer;
 /// Bitfield that records which layers are visible. 2^0 for 0, 2^1 for 1, 2^2 for 2, etc.
 GFX2_GLOBAL dword Spare_layers_visible;
+/// Backup for Spare_layers_visible
+GFX2_GLOBAL dword Spare_layers_visible_backup;
 /// Index to use next time, when creating incremental backups, to make unique filename.
 GFX2_GLOBAL long Spare_safety_number;
 /// Number of edit actions since the last safety backup

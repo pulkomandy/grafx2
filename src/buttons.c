@@ -1595,6 +1595,7 @@ void Button_Page(void)
 
   SWAP_BYTES (Main_current_layer,Spare_current_layer)
   SWAP_DWORDS(Main_layers_visible,Spare_layers_visible)
+  SWAP_DWORDS(Main_layers_visible_backup,Spare_layers_visible_backup)
   
   SWAP_DWORDS(Main_safety_number,Spare_safety_number)
   SWAP_DWORDS(Main_edits_since_safety_backup,Spare_edits_since_safety_backup)
