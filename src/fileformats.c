@@ -3312,7 +3312,8 @@ void Save_GIF(T_IO_Context * context)
                 GIF_remainder_bits=0;
                 GIF_remainder_byte=0;
     
-                index=4096;
+#define GIF_INVALID_CODE (65535)
+                index=GIF_INVALID_CODE;
                 File_error=0;
                 GIF_stop=0;
     
@@ -3323,8 +3324,8 @@ void Save_GIF(T_IO_Context * context)
                 GIF_set_code(clear);  //256 for 8bpp
                 for (start=0;start<4096;start++)
                 {
-                  alphabet_daughter[start]=4096;
-                  alphabet_sister[start]=4096;
+                  alphabet_daughter[start] = GIF_INVALID_CODE;
+                  alphabet_sister[start] = GIF_INVALID_CODE;
                 }
     
                 ////////////////////////////////////////////// COMPRESSION LZW //
@@ -3336,10 +3337,8 @@ void Save_GIF(T_IO_Context * context)
                 {
                   current_char=GIF_next_pixel(context, &IDB);
     
-                  //   On regarde si dans la table on aurait pas une chaîne
-                  // équivalente à current_string+Caractere
-    
-                  while ( (index<alphabet_free) &&
+                  // look for (current_string,current_char) in the alphabet
+                  while ( (index != GIF_INVALID_CODE) &&
                           ( (current_string!=alphabet_prefix[index]) ||
                             (current_char      !=alphabet_suffix[index]) ) )
                   {
@@ -3348,10 +3347,11 @@ void Save_GIF(T_IO_Context * context)
                     index=alphabet_sister[index];
                   }
     
-                  if (index<alphabet_free)
+                  if (index != GIF_INVALID_CODE)
                   {
-                    //   On sait ici que la current_string+Caractere se trouve
-                    // en position index dans les tables.
+                    // (current_string,current_char) == (alphabet_prefix,alphabet_suffix)[index]
+                    // We have found (current_string,current_char) in the alphabet
+                    // at the index position. So go on and prepare for then next character
     
                     descend=1;
                     start=current_string=index;
@@ -3359,30 +3359,34 @@ void Save_GIF(T_IO_Context * context)
                   }
                   else
                   {
-                    // On fait la jonction entre la current_string et l'actuelle
-                    if (descend)
-                      alphabet_daughter[start]=alphabet_free;
-                    else
-                      alphabet_sister[start]=alphabet_free;
-    
-                    // On rajoute la chaîne current_string+Caractere à la table
-                    alphabet_prefix[alphabet_free  ]=current_string;
-                    alphabet_suffix[alphabet_free++]=current_char;
-    
-                    // On écrit le code dans le fichier
+                    // (current_string,current_char) was not found in the alphabet
+                    // so write current_string to the Gif stream
                     GIF_set_code(current_string);
+
+                    if(alphabet_free < 4096) {
+                      // link current_string and the new one
+                      if (descend)
+                        alphabet_daughter[start]=alphabet_free;
+                      else
+                        alphabet_sister[start]=alphabet_free;
+
+                      // add (current_string,current_char) to the alphabet
+                      alphabet_prefix[alphabet_free]=current_string;
+                      alphabet_suffix[alphabet_free]=current_char;
+                      alphabet_free++;
+                    }
     
-                    if (alphabet_free>0xFFF)
+                    if (alphabet_free >= 4096)
                     {
-                      // Réintialisation de la table:
+                      // clear alphabet
                       GIF_set_code(clear);    // 256 for 8bpp
                       alphabet_free=clear+2;  // 258 for 8bpp
                       GIF_nb_bits  =IDB.Nb_bits_pixel + 1;  // 9 for 8bpp
                       alphabet_max =clear+clear-1;    // 511 for 8bpp
                       for (start=0;start<4096;start++)
                       {
-                        alphabet_daughter[start]=4096;
-                        alphabet_sister[start]=4096;
+                        alphabet_daughter[start] = GIF_INVALID_CODE;
+                        alphabet_sister[start] = GIF_INVALID_CODE;
                       }
                     }
                     else if (alphabet_free>alphabet_max+1)
@@ -3393,7 +3397,7 @@ void Save_GIF(T_IO_Context * context)
                       alphabet_max=(1<<GIF_nb_bits)-1;
                     }
     
-                    // On initialise la current_string et le reste pour la suite
+                    // initialize current_string as the string "current_char"
                     index=alphabet_daughter[current_char];
                     start=current_string=current_char;
                     descend=1;
