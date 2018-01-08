@@ -52,36 +52,40 @@ int main(int argc, char* argv[])
 
   fread(buffer,1,3,theFile);
 
-  int colors = ((buffer[0]&0b01110000)>>4)+1;
-  colors = pow(2,colors);
-
-  int bpp = (buffer[0]&0xF) +1;
+  int colors = 1 << (((buffer[0]&0b01110000)>>4)+1);
+  int color_table_size = 1 << ((buffer[0]&0x7)+1);
 
   printf("Color palette: %#02.2x\n",buffer[0]&0xFF);
-  if (buffer[0] & 0b10000000)
-    printf("\tGlobal palette\n");
-  printf("\tColor count: %d\n", colors); 
-  printf("\tBits per pixel: %d\n",bpp);
+  if (buffer[0] & 0b10000000) {
+    printf("\tGlobal palette");
+    if(buffer[0] & 0b00001000)
+      printf(" SORTED");
+    printf("\n");
+  }
+  printf("\tColor count: %d\n", colors);
+  printf("\tSize of color table : %d\t", color_table_size);
 
   printf("Index of background color: %d\n",buffer[1]);
-  printf("(reserved byte: %d)\n",buffer[2]);
+  printf("pixel aspect ratio = %d\n",buffer[2]);
+  if(buffer[2] != 0) printf("\t aspect ratio = %d/64\n", 15 + buffer[2]);
 
   printf("Color palette:\n");
-  for (int i = 0; i < pow(2,bpp); i++)
+  for (int i = 0; i < color_table_size; i++)
   {
     fread(buffer,1,3,theFile);
-    printf("\t%d: %u %u %u\t",i,buffer[0], buffer[1], buffer[2]);
-    if ((i+1)%4 ==0)puts("");
+    /*printf("\t%d: %u %u %u\t",i,buffer[0], buffer[1], buffer[2]);*/
+    printf("   %3d: #%02x%02x%02x",i,buffer[0], buffer[1], buffer[2]);
+    if ((i+1)%8 ==0)puts("");
   }
 
   int i = 0;
   do {
     fread(buffer,1,1,theFile);
     i++;
-  } while (i != ',');
+  } while (buffer[0] != ',');
 
-  if (i > 1);
-  printf("Skipped %d meaningless bytes before image descriptor\n",i);
+  if (i > 1)
+    printf("Skipped %d meaningless bytes before image descriptor\n",i);
 
   uint16_t x,y;
 
