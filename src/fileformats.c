@@ -4087,12 +4087,19 @@ void Load_GIF(T_IO_Context * context)
         Original_screen_X=LSDB.Width;
         Original_screen_Y=LSDB.Height;
 
-        if (LSDB.Aspect==17)
-           ratio=PIXEL_TALL;
-        else if (LSDB.Aspect==113)
-           ratio=PIXEL_WIDE;
-        else
-           ratio=PIXEL_SIMPLE;
+        switch(LSDB.Aspect) {
+        case 17:  // (17 + 15) / 64 = 1:2
+          ratio=PIXEL_TALL;
+          break;
+        case 33:  // (33 + 15) / 64 = 3:4
+          ratio=PIXEL_TALL3;
+          break;
+        case 113: // (113 + 15) / 64 = 2:1
+          ratio=PIXEL_WIDE;
+          break;
+        default:
+          ratio=PIXEL_SIMPLE;
+        }
 
         Pre_load(context, LSDB.Width,LSDB.Height,file_size,FORMAT_GIF,ratio,(LSDB.Resol&7)+1);
         context->Width=LSDB.Width;
@@ -4657,10 +4664,15 @@ void Save_GIF(T_IO_Context * context)
       switch(context->Ratio)
       {
         case PIXEL_TALL:
-          LSDB.Aspect = 17; // 1:2 
+        case PIXEL_TALL2:
+          LSDB.Aspect = 17; // 1:2 = 2:4
+          break;
+        case PIXEL_TALL3:
+          LSDB.Aspect = 33; // 3:4
           break;
         case PIXEL_WIDE:
-          LSDB.Aspect = 113; // 2:1
+        case PIXEL_WIDE2:
+          LSDB.Aspect = 113; // 2:1 = 4:2
           break;
         default:
           LSDB.Aspect = 0; // undefined, which is most frequent.

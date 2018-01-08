@@ -3269,8 +3269,9 @@ void Load_picture(enum CONTEXT_TYPE type)
           ((context.Ratio == PIXEL_WIDE &&
             Pixel_ratio != PIXEL_WIDE && Pixel_ratio != PIXEL_WIDE2) ||
             (context.Ratio == PIXEL_TALL &&
-            Pixel_ratio != PIXEL_TALL && Pixel_ratio != PIXEL_TALL2 &&
-            Pixel_ratio != PIXEL_TALL3)))
+            Pixel_ratio != PIXEL_TALL && Pixel_ratio != PIXEL_TALL2) ||
+            (context.Ratio == PIXEL_TALL3 &&
+            Pixel_ratio != PIXEL_TALL3) ))
         {
           Init_mode_video(
             Video_mode[Current_resolution].Width,

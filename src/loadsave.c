@@ -1288,12 +1288,7 @@ void Init_context_layered_image(T_IO_Context * context, char *file_name, char *f
   strcpy(context->Comment, Main.backups->Pages->Comment);
   context->Transparent_color=Main.backups->Pages->Transparent_color;
   context->Background_transparent=Main.backups->Pages->Background_transparent;
-  if (Pixel_ratio == PIXEL_WIDE || Pixel_ratio == PIXEL_WIDE2)
-    context->Ratio=PIXEL_WIDE;
-  else if (Pixel_ratio == PIXEL_TALL || Pixel_ratio == PIXEL_TALL2 || Pixel_ratio == PIXEL_TALL3)
-    context->Ratio=PIXEL_TALL;
-  else
-    context->Ratio=PIXEL_SIMPLE;
+  context->Ratio = Pixel_ratio;
   context->Target_address=Main.backups->Pages->Image[0].Pixels;
   context->Pitch=Main.image_width;
   
