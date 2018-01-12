@@ -1823,6 +1823,22 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   SDLK_SPACE, // Space
 #endif
   0},
+  {209,
+  "Zoom in more",
+  "Increase magnifying factor more.",
+  "",
+  "",
+  true,
+  SDLK_KP_PLUS|MOD_SHIFT, // Shift++
+  KEY_MOUSEWHEELUP|MOD_SHIFT},
+  {210,
+  "Zoom out more",
+  "Increase magnifying factor more.",
+  "",
+  "",
+  true,
+  SDLK_KP_MINUS|MOD_SHIFT, // Shift+-
+  KEY_MOUSEWHEELDOWN|MOD_SHIFT},
 };
 
 word Ordering[NB_SHORTCUTS]=
@@ -2037,4 +2053,6 @@ word Ordering[NB_SHORTCUTS]=
   0x100+BUTTON_ANIM_NEXT_FRAME,
   0x100+BUTTON_ANIM_PLAY, // Unused at this time
   SPECIAL_HOLD_PAN,
+  SPECIAL_ZOOM_IN_MORE,             // Zoom in more
+  SPECIAL_ZOOM_OUT_MORE,            // Zoom out more
 };

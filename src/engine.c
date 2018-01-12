@@ -1036,10 +1036,19 @@ void Main_handler(void)
                 Zoom(+1);
                 action++;
                 break;
+              case SPECIAL_ZOOM_IN_MORE :
+                Zoom(+3);
+                action++;
+                break;
               case SPECIAL_ZOOM_OUT : // Zoom out
                 Zoom(-1);
                 action++;
                 break;
+              case SPECIAL_ZOOM_OUT_MORE :
+                Zoom(-3);
+                action++;
+                break;
+
               case SPECIAL_CENTER_ATTACHMENT : // Center brush attachment
                 Hide_cursor();
                 Brush_offset_X=(Brush_width>>1);
