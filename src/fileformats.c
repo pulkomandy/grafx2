@@ -1379,16 +1379,18 @@ void Test_BMP(T_IO_Context * context)
      {
 
       if ( header.Signature[0]=='B' && header.Signature[1]=='M'
-        && header.Size_2==40
+        && (header.Size_2==40 /* WINDOWS */ || header.Size_2==12 /* OS/2 */)
         && header.Width && header.Height )
+      {
         File_error=0;
+      }
      }
     fclose(file);
   }
 }
 
 // Find the 8 important bits in a dword
-byte Bitmap_mask(dword pixel, dword mask)
+static byte Bitmap_mask(dword pixel, dword mask)
 {
   byte result;
   int i;
@@ -1428,22 +1430,222 @@ byte Bitmap_mask(dword pixel, dword mask)
   return result << (8-bits_found);
 }
 
+void Load_BMP_Palette(T_IO_Context * context, FILE * file, unsigned int nb_colors, int is_rgb24)
+{
+  byte  local_palette[256*4]; // R,G,B,0 or RGB
+  unsigned int i, j;
+
+  if (Read_bytes(file,local_palette,nb_colors*(is_rgb24?3:4)))
+  {
+    if (Config.Clear_palette)
+      memset(context->Palette,0,sizeof(T_Palette));
+
+    // We can now load the new palette
+    for (i=0, j=0; i<nb_colors; i++)
+    {
+      context->Palette[i].B=local_palette[j++];
+      context->Palette[i].G=local_palette[j++];
+      context->Palette[i].R=local_palette[j++];
+      if (!is_rgb24) j++;
+    }
+  }
+  else
+  {
+    File_error=1;
+  }
+}
+
+void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int compression, unsigned int nbbits, int top_down, const dword * mask)
+{
+  unsigned int row_size;
+  unsigned int index;
+  short x_pos;
+  short y_pos;
+  byte * buffer;
+  byte value;
+  byte a,b,c=0;
+
+  printf("Load_BMP_Pixels compression=%d nbbits=%d top_down=%d\n", compression, nbbits, top_down);
+  switch (compression)
+  {
+    case 0 : // Pas de compression
+    case 3 :
+      row_size = ((nbbits*context->Width + 31) >> 3) & ~3;
+      buffer = malloc(row_size);
+      for (y_pos=0; (y_pos < context->Height && !File_error); y_pos++)
+      {
+        short target_y;
+        target_y = top_down ? y_pos : context->Height-1-y_pos;
+
+        if (Read_bytes(file,buffer,row_size))
+        {
+          for (x_pos=0; x_pos<context->Width; x_pos++)
+          {
+            switch (nbbits)
+            {
+              case 8 :
+                value = buffer[x_pos];
+                break;
+              case 4 :
+                value = (x_pos & 1) ? (buffer[x_pos>>1] & 0xF) : (buffer[x_pos>>1] >> 4);
+                break;
+              case 1 :
+                value = ( buffer[x_pos>>3] & (0x80>>(x_pos&7)) ) ? 1 : 0;
+                break;
+              case 24:
+                Set_pixel_24b(context, x_pos,target_y,buffer[x_pos*3+2],buffer[x_pos*3+1],buffer[x_pos*3+0]);
+                break;
+              case 32:
+                {
+                  dword pixel = ((dword *)buffer)[x_pos];
+                  Set_pixel_24b(context, x_pos,target_y,Bitmap_mask(pixel,mask[0]),Bitmap_mask(pixel,mask[1]),Bitmap_mask(pixel,mask[2]));
+                }
+                break;
+              case 16:
+                {
+                  word pixel = ((word *)buffer)[x_pos];
+                  Set_pixel_24b(context, x_pos,target_y,Bitmap_mask(pixel,mask[0]),Bitmap_mask(pixel,mask[1]),Bitmap_mask(pixel,mask[2]));
+                }
+                break;
+              default:
+                value = 0;
+            }
+            if (nbbits <= 8)
+              Set_pixel(context, x_pos, target_y, value);
+          }
+        }
+        else
+        {
+          File_error=2;
+        }
+      }
+      free(buffer);
+      buffer = NULL;
+      break;
+
+    case 1 : // Compression RLE 8 bits
+      x_pos=0;
+
+      y_pos=context->Height-1;
+
+      /*Init_lecture();*/
+      if(Read_byte(file, &a)!=1 || Read_byte(file, &b)!=1)
+        File_error=2;
+      while (!File_error)
+      {
+        if (a) // Encoded mode
+          for (index=1; index<=a; index++)
+            Set_pixel(context, x_pos++,y_pos,b);
+        else   // Absolute mode
+          switch (b)
+          {
+            case 0 : // End of line
+              x_pos=0;
+              y_pos--;
+              break;
+            case 1 : // End of bitmap
+              break;
+            case 2 : // Delta
+              if(Read_byte(file, &a)!=1 || Read_byte(file, &b)!=1)
+                File_error=2;
+              x_pos+=a;
+              y_pos-=b;
+              break;
+            default: // Nouvelle série
+              while (b)
+              {
+                if(Read_byte(file, &a)!=1)
+                  File_error=2;
+                //Read_one_byte(file, &c);
+                Set_pixel(context, x_pos++,y_pos,a);
+                //if (--c)
+                //{
+                //  Set_pixel(context, x_pos++,y_pos,c);
+                //  b--;
+                //}
+                b--;
+              }
+              if (ftell(file) & 1) fseek(file, 1, SEEK_CUR);
+          }
+        if (a==0 && b==1)
+          break;
+        if(Read_byte(file, &a) !=1 || Read_byte(file, &b)!=1)
+        {
+          File_error=2;
+        }
+      }
+      break;
+
+    case 2 : // Compression RLE 4 bits
+      x_pos=0;
+      y_pos=context->Height-1;
+
+      if(Read_byte(file, &a)!=1 ||  Read_byte(file, &b) != 1)
+        File_error =2;
+      while ( (!File_error) && ((a)||(b!=1)) )
+      {
+        if (a) // Encoded mode (A fois les 1/2 pixels de B)
+          for (index=1; index<=a; index++)
+          {
+            if (index & 1)
+              Set_pixel(context, x_pos,y_pos,b>>4);
+            else
+              Set_pixel(context, x_pos,y_pos,b&0xF);
+            x_pos++;
+          }
+        else   // Absolute mode
+          switch (b)
+          {
+            case 0 : //End of line
+              x_pos=0;
+              y_pos--;
+              break;
+            case 1 : // End of bitmap
+              break;
+            case 2 : // Delta
+              if(Read_byte(file, &a)!=1 ||  Read_byte(file, &b)!=1)
+                File_error=2;
+              x_pos+=a;
+              y_pos-=b;
+              break;
+            default: // Nouvelle série (B 1/2 pixels bruts)
+              for (index=1; ((index<=b) && (!File_error)); index++,x_pos++)
+              {
+                if (index&1)
+                {
+                  if(Read_byte(file, &c)!=1) File_error=2;
+                  Set_pixel(context, x_pos,y_pos,c>>4);
+                }
+                else
+                  Set_pixel(context, x_pos,y_pos,c&0xF);
+              }
+              //   On lit l'octet rendant le nombre d'octets pair, si
+              // nécessaire. Encore un truc de crétin "made in MS".
+              if ( ((b&3)==1) || ((b&3)==2) )
+              {
+                byte dummy;
+                if(Read_byte(file, &dummy)!=1) File_error=2;
+              }
+          }
+        if(Read_byte(file, &a)!=1 || Read_byte(file, &b)!=1) File_error=2;
+      }
+      break;
+    default:
+      Warning("Unknown compression type");
+  }
+}
+
 // -- Charger un fichier au format BMP --------------------------------------
 void Load_BMP(T_IO_Context * context)
 {
   char filename[MAX_PATH_CHARACTERS];
   FILE *file;
   T_BMP_Header header;
-  byte * buffer;
-  word  index;
-  byte  local_palette[256][4]; // R,G,B,0
   word  nb_colors =  0;
-  short x_pos;
-  short y_pos;
-  word  line_size;
-  byte  a,b,c=0;
   long  file_size;
-  byte  negative_height;
+  byte  negative_height; // top_down
+  byte  true_color;
+  dword mask[3];  // R G B
 
   Get_full_filename(filename, context->File_name, context->File_directory);
 
@@ -1453,36 +1655,73 @@ void Load_BMP(T_IO_Context * context)
   {
     file_size=File_length_file(file);
 
-    if (Read_bytes(file,header.Signature,2)
+    if (!(Read_bytes(file,header.Signature,2)
      && Read_dword_le(file,&(header.Size_1))
      && Read_word_le(file,&(header.Reserved_1))
      && Read_word_le(file,&(header.Reserved_2))
      && Read_dword_le(file,&(header.Offset))
      && Read_dword_le(file,&(header.Size_2))
-     && Read_dword_le(file,&(header.Width))
-     && Read_dword_le(file,(dword *)&(header.Height))
-     && Read_word_le(file,&(header.Planes))
-     && Read_word_le(file,&(header.Nb_bits))
-     && Read_dword_le(file,&(header.Compression))
-     && Read_dword_le(file,&(header.Size_3))
-     && Read_dword_le(file,&(header.XPM))
-     && Read_dword_le(file,&(header.YPM))
-     && Read_dword_le(file,&(header.Nb_Clr))
-     && Read_dword_le(file,&(header.Clr_Imprt))
-    )
+    ))
+    {
+      File_error = 1;
+    }
+    else
+    {
+      if (header.Size_2 == 40 /* WINDOWS */)
+      {
+        if (!(Read_dword_le(file,&(header.Width))
+         && Read_dword_le(file,(dword *)&(header.Height))
+         && Read_word_le(file,&(header.Planes))
+         && Read_word_le(file,&(header.Nb_bits))
+         && Read_dword_le(file,&(header.Compression))
+         && Read_dword_le(file,&(header.Size_3))
+         && Read_dword_le(file,&(header.XPM))
+         && Read_dword_le(file,&(header.YPM))
+         && Read_dword_le(file,&(header.Nb_Clr))
+         && Read_dword_le(file,&(header.Clr_Imprt))
+        )) File_error = 1;
+      }
+      else if (header.Size_2 == 12 /* OS/2 */)
+      {
+        word tmp_width = 0, tmp_height = 0;
+        if (Read_word_le(file,&tmp_width)
+         && Read_word_le(file,&tmp_height)
+         && Read_word_le(file,&(header.Planes))
+         && Read_word_le(file,&(header.Nb_bits)))
+        {
+          header.Width = tmp_width;
+          header.Height = tmp_height;
+          header.Compression = 0;
+          header.Size_3 = 0;
+          header.XPM = 0;
+          header.YPM = 0;
+          header.Nb_Clr = 0;
+          header.Clr_Imprt = 0;
+        }
+        else
+          File_error = 1;
+      }
+      else
+      {
+        Warning("Unknown BMP type");
+        File_error = 2;
+      }
+    }
+    if (File_error == 0)
     {
       switch (header.Nb_bits)
       {
         case 1 :
         case 4 :
         case 8 :
+          true_color = 0;
           if (header.Nb_Clr)
             nb_colors=header.Nb_Clr;
           else
             nb_colors=1<<header.Nb_bits;
           break;
         default:
-          File_error=1;
+          true_color = 1;
       }
       
       if (header.Height < 0)
@@ -1495,305 +1734,53 @@ void Load_BMP(T_IO_Context * context)
         negative_height=0;
       }
 
-      if (!File_error)
+      // Image 16/24/32 bits
+      if (header.Nb_bits == 16)
       {
-        Pre_load(context, header.Width,header.Height,file_size,FORMAT_BMP,PIXEL_SIMPLE,0);
-        if (File_error==0)
-        {
-          if (Read_bytes(file,local_palette,nb_colors<<2))
-          {
-            if (Config.Clear_palette)
-              memset(context->Palette,0,sizeof(T_Palette));
-            //   On peut maintenant transférer la nouvelle palette
-            for (index=0; index<nb_colors; index++)
-            {
-              context->Palette[index].R=local_palette[index][2];
-              context->Palette[index].G=local_palette[index][1];
-              context->Palette[index].B=local_palette[index][0];
-            }
-
-            context->Width=header.Width;
-            context->Height=header.Height;
-
-            if (fseek(file, header.Offset, SEEK_SET))
-              File_error=2;
-
-            switch (header.Compression)
-            {
-              case 0 : // Pas de compression
-                line_size=context->Width;
-                x_pos=(32/header.Nb_bits); // x_pos sert de variable temporaire
-                // On arrondit line_size au premier multiple de x_pos supérieur
-                if (line_size % x_pos)
-                  line_size=((line_size/x_pos)*x_pos)+x_pos;
-                // On convertit cette taille en octets
-                line_size=(line_size*header.Nb_bits)>>3;
-
-                buffer=(byte *)malloc(line_size);
-                for (y_pos=0; (y_pos < context->Height && !File_error); y_pos++)
-                {
-                  short target_y;
-                  target_y = negative_height ? y_pos : context->Height-1-y_pos;
-                  
-                  if (Read_bytes(file,buffer,line_size))
-                    for (x_pos=0; x_pos<context->Width; x_pos++)
-                      switch (header.Nb_bits)
-                      {
-                        case 8 :
-                          Set_pixel(context, x_pos,target_y,buffer[x_pos]);
-                          break;
-                        case 4 :
-                          if (x_pos & 1)
-                            Set_pixel(context, x_pos,target_y,buffer[x_pos>>1] & 0xF);
-                          else
-                            Set_pixel(context, x_pos,target_y,buffer[x_pos>>1] >> 4 );
-                          break;
-                        case 1 :
-                          if ( buffer[x_pos>>3] & (0x80>>(x_pos&7)) )
-                            Set_pixel(context, x_pos,target_y,1);
-                          else
-                            Set_pixel(context, x_pos,target_y,0);
-                      }
-                  else
-                    File_error=2;
-                }
-                free(buffer);
-                buffer = NULL;
-                break;
-
-              case 1 : // Compression RLE 8 bits
-                x_pos=0;
-                y_pos=context->Height-1;
-
-                /*Init_lecture();*/
-                if(Read_byte(file, &a)!=1 || Read_byte(file, &b)!=1)
-                  File_error=2;
-                while (!File_error)
-                {
-                  if (a) // Encoded mode
-                    for (index=1; index<=a; index++)
-                      Set_pixel(context, x_pos++,y_pos,b);
-                  else   // Absolute mode
-                    switch (b)
-                    {
-                      case 0 : // End of line
-                        x_pos=0;
-                        y_pos--;
-                        break;
-                      case 1 : // End of bitmap
-                        break;
-                      case 2 : // Delta
-                        if(Read_byte(file, &a)!=1 || Read_byte(file, &b)!=1)
-                          File_error=2;
-                        x_pos+=a;
-                        y_pos-=b;
-                        break;
-                      default: // Nouvelle série
-                        while (b)
-                        {
-                          if(Read_byte(file, &a)!=1)
-                            File_error=2;
-                          //Read_one_byte(file, &c);
-                          Set_pixel(context, x_pos++,y_pos,a);
-                          //if (--c)
-                          //{
-                          //  Set_pixel(context, x_pos++,y_pos,c);
-                          //  b--;
-                          //}
-                          b--;
-                        }
-                        if (ftell(file) & 1) fseek(file, 1, SEEK_CUR);
-                    }
-                  if (a==0 && b==1)
-                    break;
-                  if(Read_byte(file, &a) !=1 || Read_byte(file, &b)!=1)
-                  {
-                    File_error=2;
-                  }
-                }
-                /*Close_lecture();*/
-                break;
-
-              case 2 : // Compression RLE 4 bits
-                x_pos=0;
-                y_pos=context->Height-1;
-
-                /*Init_lecture();*/
-                if(Read_byte(file, &a)!=1 ||  Read_byte(file, &b) != 1)
-                  File_error =2;
-                while ( (!File_error) && ((a)||(b!=1)) )
-                {
-                  if (a) // Encoded mode (A fois les 1/2 pixels de B)
-                    for (index=1; index<=a; index++)
-                    {
-                      if (index & 1)
-                        Set_pixel(context, x_pos,y_pos,b>>4);
-                      else
-                        Set_pixel(context, x_pos,y_pos,b&0xF);
-                      x_pos++;
-                    }
-                  else   // Absolute mode
-                    switch (b)
-                    {
-                      case 0 : //End of line
-                        x_pos=0;
-                        y_pos--;
-                        break;
-                      case 1 : // End of bitmap
-                        break;
-                      case 2 : // Delta
-                       if(Read_byte(file, &a)!=1 ||  Read_byte(file, &b)!=1)
-                         File_error=2;
-                        x_pos+=a;
-                        y_pos-=b;
-                        break;
-                      default: // Nouvelle série (B 1/2 pixels bruts)
-                        for (index=1; ((index<=b) && (!File_error)); index++,x_pos++)
-                        {
-                          if (index&1)
-                          {
-                            if(Read_byte(file, &c)!=1) File_error=2;
-                            Set_pixel(context, x_pos,y_pos,c>>4);
-                          }
-                          else
-                            Set_pixel(context, x_pos,y_pos,c&0xF);
-                        }
-                        //   On lit l'octet rendant le nombre d'octets pair, si
-                        // nécessaire. Encore un truc de crétin "made in MS".
-                        if ( ((b&3)==1) || ((b&3)==2) )
-                        {
-                          byte dummy;
-                          if(Read_byte(file, &dummy)!=1) File_error=2;
-                        }
-                    }
-                  if(Read_byte(file, &a)!=1 || Read_byte(file, &b)!=1) File_error=2;
-                }
-                /*Close_lecture();*/
-            }
-            fclose(file);
-          }
-          else
-          {
-            fclose(file);
-            File_error=1;
-          }
-        }
+        mask[0] = 0x00007C00;
+        mask[1] = 0x000003E0;
+        mask[2] = 0x0000001F;
       }
       else
       {
-        // Image 16/24/32 bits
-        dword red_mask;
-        dword green_mask;
-        dword blue_mask;
-        if (header.Nb_bits == 16)
-        {
-          red_mask =   0x00007C00;
-          green_mask = 0x000003E0;
-          blue_mask =  0x0000001F;
-        }
-        else
-        {
-          red_mask = 0x00FF0000;
-          green_mask = 0x0000FF00;
-          blue_mask = 0x000000FF;
-        }
-        File_error=0;
-
-        context->Width=header.Width;
-        context->Height=header.Height;
-        Pre_load(context,header.Width,header.Height,file_size,FORMAT_BMP,PIXEL_SIMPLE,1);
+        mask[0] = 0x00FF0000;
+        mask[1] = 0x0000FF00;
+        mask[2] = 0x000000FF;
+      }
+      {
+        Pre_load(context, header.Width,header.Height,file_size,FORMAT_BMP,PIXEL_SIMPLE,true_color);
         if (File_error==0)
         {
-          switch (header.Compression)
+          if (true_color)
           {
-            case 3: // BI_BITFIELDS
-              if (!Read_dword_le(file,&red_mask) ||
-                  !Read_dword_le(file,&green_mask) ||
-                  !Read_dword_le(file,&blue_mask))
+            if (header.Compression == 3) // BI_BITFIELDS
+            {
+              if (!Read_dword_le(file,&mask[0]) ||
+                  !Read_dword_le(file,&mask[1]) ||
+                  !Read_dword_le(file,&mask[2]))
                 File_error=2;
-              break;
-            default:
-              break;
+            }
           }
-          if (fseek(file, header.Offset, SEEK_SET))
-            File_error=2;
-        }
-        if (File_error==0)
-        {
-          switch (header.Nb_bits)
+          else
           {
-            // 24bit bitmap
-            default:
-            case 24:
-              line_size=context->Width*3;
-              x_pos=(line_size % 4); // x_pos sert de variable temporaire
-              if (x_pos>0)
-                line_size+=(4-x_pos);
-    
-              buffer=(byte *)malloc(line_size);
-              for (y_pos=0; (y_pos < context->Height && !File_error); y_pos++)
-              {
-                short target_y;
-                target_y = negative_height ? y_pos : context->Height-1-y_pos;
-                
-                if (Read_bytes(file,buffer,line_size))
-                  for (x_pos=0,index=0; x_pos<context->Width; x_pos++,index+=3)
-                    Set_pixel_24b(context, x_pos,target_y,buffer[index+2],buffer[index+1],buffer[index+0]);
-                else
-                  File_error=2;
-              }
-              break;
-
-            // 32bit bitmap
-            case 32:
-              line_size=context->Width*4;
-              buffer=(byte *)malloc(line_size);
-              for (y_pos=0; (y_pos < context->Height && !File_error); y_pos++)
-              {
-                short target_y;
-                target_y = negative_height ? y_pos : context->Height-1-y_pos;
-                if (Read_bytes(file,buffer,line_size))
-                  for (x_pos=0; x_pos<context->Width; x_pos++)
-                  {
-                    dword pixel=*(((dword *)buffer)+x_pos);
-                    Set_pixel_24b(context, x_pos,target_y,Bitmap_mask(pixel,red_mask),Bitmap_mask(pixel,green_mask),Bitmap_mask(pixel,blue_mask));
-                  }
-                else
-                  File_error=2;
-              }
-              break;
-
-            // 16bit bitmap
-            case 16:
-              line_size=(context->Width*2) + (context->Width&1)*2;
-              buffer=(byte *)malloc(line_size);
-              for (y_pos=0; (y_pos < context->Height && !File_error); y_pos++)
-              {
-                short target_y;
-                target_y = negative_height ? y_pos : context->Height-1-y_pos;
-                if (Read_bytes(file,buffer,line_size))
-                  for (x_pos=0; x_pos<context->Width; x_pos++)
-                  {
-                    word pixel=*(((word *)buffer)+x_pos);
-                    Set_pixel_24b(context, x_pos,target_y,Bitmap_mask(pixel,red_mask),Bitmap_mask(pixel,green_mask),Bitmap_mask(pixel,blue_mask));
-                  }
-                else
-                  File_error=2;
-              }
-              break;
-            
+            Load_BMP_Palette(context, file, nb_colors, header.Size_2 == 12);
           }
-          free(buffer);
-          buffer = NULL;
-          fclose(file);
+
+          if (File_error==0)
+          {
+            if (fseek(file, header.Offset, SEEK_SET))
+              File_error=2;
+            else
+              Load_BMP_Pixels(context, file, header.Compression, header.Nb_bits, negative_height, mask);
+          }
         }
       }
     }
     else
     {
-      fclose(file);
       File_error=1;
     }
+    fclose(file);
   }
   else
     File_error=1;
