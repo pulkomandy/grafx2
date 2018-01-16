@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2018 Thomas Bernard
     Copyright 2011 Pawel Góralski
     Copyright 2009 Petter Lindquist
     Copyright 2008 Yves Rizoud
@@ -1894,6 +1895,192 @@ void Save_BMP(T_IO_Context * context)
   }
   else
     File_error=1;
+}
+
+
+//////////////////////////////////// ICO ////////////////////////////////////
+typedef struct {
+  byte width;   //Specifies image width in pixels. Value 0 means image width is 256 pixels.
+  byte height;  //Specifies image height in pixels. Value 0 means image height is 256 pixels.
+  byte ncolors; //0 for image without palette
+  byte reserved;
+  word planes;  // (hotspot X for CUR files)
+  word bpp;     // (hotspot Y for CUR files)
+  dword bytecount;
+  dword offset;
+} T_ICO_ImageEntry;
+
+void Test_ICO(T_IO_Context * context)
+{
+  char filename[MAX_PATH_CHARACTERS];
+  FILE *file;
+  struct {
+    word Reserved;
+    word Type;  // Specifies image type: 1 for icon (.ICO) image, 2 for cursor (.CUR) image. Other values are invalid.
+    word Count; // Specifies number of images in the file.
+  } header;
+
+  File_error=1;
+  Get_full_filename(filename, context->File_name, context->File_directory);
+  printf("Test_ICO(%p) %s\n", context, filename);
+
+  if ((file=fopen(filename, "rb")))
+  {
+    if (Read_word_le(file,&(header.Reserved))
+     && Read_word_le(file,&(header.Type))
+     && Read_word_le(file,&(header.Count)))
+    {
+      printf("type=%d count=%d\n", header.Type, header.Count);
+      if (header.Reserved == 0 && header.Type <= 2 && header.Count > 0)
+        File_error=0;
+    }
+    fclose(file);
+  }
+}
+
+void Load_ICO(T_IO_Context * context)
+{
+  char filename[MAX_PATH_CHARACTERS];
+  FILE *file;
+  struct {
+    word Reserved;
+    word Type;  // Specifies image type: 1 for icon (.ICO) image, 2 for cursor (.CUR) image. Other values are invalid.
+    word Count; // Specifies number of images in the file.
+  } header;
+  T_ICO_ImageEntry * images;
+  T_ICO_ImageEntry * entry;
+  unsigned int i;
+  word width, max_width = 0;
+  word max_bpp = 0;
+  word min_bpp = 0xffff;
+  dword mask[3];  // R G B
+
+  File_error=0;
+  Get_full_filename(filename, context->File_name, context->File_directory);
+  printf("Load_ICO(%p)\n", context);
+  if ((file=fopen(filename, "rb")))
+  {
+    if (Read_word_le(file,&(header.Reserved))
+     && Read_word_le(file,&(header.Type))
+     && Read_word_le(file,&(header.Count)))
+    {
+      printf("type=%d count=%d\n", header.Type, header.Count);
+      images = malloc(sizeof(T_ICO_ImageEntry) * header.Count);
+      if (images == NULL)
+      {
+        fclose(file);
+        File_error=1;
+        return;
+      }
+      for (i = 0; i < header.Count; i++) {
+        entry = images + i;
+        if (!Read_byte(file,&entry->width)
+         || !Read_byte(file,&entry->height)
+         || !Read_byte(file,&entry->ncolors)
+         || !Read_byte(file,&entry->reserved)
+         || !Read_word_le(file,&entry->planes)
+         || !Read_word_le(file,&entry->bpp)
+         || !Read_dword_le(file,&entry->bytecount)
+         || !Read_dword_le(file,&entry->offset))
+        {
+          free(images);
+          fclose(file);
+          File_error=1;
+          return;
+        }
+        width = entry->width;
+        if (width == 0) width = 256;
+        if (width > max_width) max_width = width;
+        printf("%2d: %3dx%3d %dcolors planes=%d bpp=%d\n", i, entry->width, entry->height, entry->ncolors, entry->planes, entry->bpp);
+      }
+      // select the picture with the maximum width and 256 colors or less
+      printf("max width = %d\n", max_width);
+      for (i = 0; i < header.Count; i++)
+      {
+        if (images[i].width == (max_width & 0xff))
+        {
+          if (images[i].bpp == 8)
+            break;
+          if (images[i].bpp < 8 && images[i].bpp > max_bpp)
+            max_bpp = images[i].bpp;
+          if (images[i].bpp < min_bpp)
+            min_bpp = images[i].bpp;
+        }
+      }
+      printf("i=%d  max_bpp=%d min_bpp=%d\n", i, max_bpp, min_bpp);
+      if (i >= header.Count)
+      {
+        // 256 color not found, select another one
+        for (i = 0; i < header.Count; i++)
+        {
+          if (images[i].width == (max_width & 0xff))
+          {
+            if ((max_bpp != 0 && images[i].bpp == max_bpp)
+             || (images[i].bpp == min_bpp))
+            {
+              break;
+            }
+          }
+        }
+      }
+      if (i >= header.Count)
+      {
+        File_error=2;
+      }
+      else
+      {
+        T_BMP_Header bmpheader;
+
+        entry = images + i;
+        fseek(file, entry->offset, SEEK_SET);
+        // TODO : detect PNG icons
+        if (Read_dword_le(file,&(bmpheader.Size_2)) // 40
+         && Read_dword_le(file,&(bmpheader.Width))
+         && Read_dword_le(file,(dword *)&(bmpheader.Height))
+         && Read_word_le(file,&(bmpheader.Planes))
+         && Read_word_le(file,&(bmpheader.Nb_bits))
+         && Read_dword_le(file,&(bmpheader.Compression))
+         && Read_dword_le(file,&(bmpheader.Size_3))
+         && Read_dword_le(file,&(bmpheader.XPM))
+         && Read_dword_le(file,&(bmpheader.YPM))
+         && Read_dword_le(file,&(bmpheader.Nb_Clr))
+         && Read_dword_le(file,&(bmpheader.Clr_Imprt)) )
+        {
+          word nb_colors = 0;
+          if (bmpheader.Nb_Clr != 0)
+            nb_colors=bmpheader.Nb_Clr;
+          else
+            nb_colors=1<<bmpheader.Nb_bits;
+          printf("size=%d width=%d height=%d planes=%d nbbits=%d nb_colors=%d\n", bmpheader.Size_2, bmpheader.Width, bmpheader.Height, bmpheader.Planes, bmpheader.Nb_bits, nb_colors);
+          // bmpheader.Width != entry.width...
+          // Image 16/24/32 bits
+          if (bmpheader.Nb_bits == 16)
+          {
+            mask[0] = 0x00007C00;
+            mask[1] = 0x000003E0;
+            mask[2] = 0x0000001F;
+          }
+          else
+          {
+            mask[0] = 0x00FF0000;
+            mask[1] = 0x0000FF00;
+            mask[2] = 0x000000FF;
+          }
+          Pre_load(context, bmpheader.Width,bmpheader.Height/2,0/*file_size*/,FORMAT_ICO,PIXEL_SIMPLE,(entry->bpp > 8));
+          if (entry->bpp <= 8)
+            Load_BMP_Palette(context, file, nb_colors, 0);
+          if (File_error == 0)
+          {
+            Load_BMP_Pixels(context, file, bmpheader.Compression, bmpheader.Nb_bits, (bmpheader.Height < 0) ? 1 : 0, mask);
+          }
+        }
+      }
+      free(images);
+    }
+    fclose(file);
+  } else {
+    File_error=1;
+  }
 }
 
 
