@@ -1368,6 +1368,41 @@ void Convert_24b_bitmap_to_256_nearest_neighbor(T_Bitmap256 dest,
 }
 
 
+// Count colors and convert if 256 colors or less are used
+// return 0 for success
+int Try_Convert_to_256_Without_Loss(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette)
+{
+  int i;
+  int n = 0;  // number of colors
+  long index;
+  T_Bitmap24B ptr;
+
+  for (index = width * height, ptr = source; index > 0; index--, ptr++)
+  {
+    // look for the color in the table
+    for (i = 0; i < n; i++) {
+      if(palette[i].R == ptr->R && palette[i].G == ptr->G && palette[i].B == ptr->B)
+        break;  // found !
+    }
+    if (i >= n) {
+      if (n > 255) {
+        // there are more than 256 colors
+        return 1;
+      }
+      // need to add the color in the palette
+      palette[n].R = ptr->R;
+      palette[n].G = ptr->G;
+      palette[n].B = ptr->B;
+      n++;
+    }
+    *dest = (byte)i;
+    dest++;
+  }
+  // TODO : Sort the palette ?
+  return 0;
+}
+
+
 // These are the allowed precisions for all the tables.
 // For some of them only the first one may work because of ugly optimizations
 static const byte precision_24b[]=
@@ -1389,13 +1424,16 @@ static const byte precision_24b[]=
 // Give this one a 24b source, get back the 256c bitmap and its palette
 int Convert_24b_bitmap_to_256(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette)
 {
+  CT_Tree* table; // table de conversion
+  int                ip;    // index de précision pour la conversion
+
+  if (Try_Convert_to_256_Without_Loss(dest, source, width, height, palette) == 0)
+    return 0;
+
   #if defined(__GP2X__) || defined(__gp2x__) || defined(__WIZ__) || defined(__CAANOO__)
   return Convert_24b_bitmap_to_256_fast(dest, source, width, height, palette);  
 
   #else
-  CT_Tree* table; // table de conversion
-  int                ip;    // index de précision pour la conversion
-
   // On essaye d'obtenir une table de conversion qui loge en mémoire, avec la
   // meilleure précision possible
   for (ip=0;ip<(10*3);ip+=3)
