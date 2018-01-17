@@ -1435,7 +1435,7 @@ static byte Bitmap_mask(dword pixel, dword mask)
   return result << (8-bits_found);
 }
 
-void Load_BMP_Palette(T_IO_Context * context, FILE * file, unsigned int nb_colors, int is_rgb24)
+static void Load_BMP_Palette(T_IO_Context * context, FILE * file, unsigned int nb_colors, int is_rgb24)
 {
   byte  local_palette[256*4]; // R,G,B,0 or RGB
   unsigned int i, j;
@@ -1460,7 +1460,7 @@ void Load_BMP_Palette(T_IO_Context * context, FILE * file, unsigned int nb_color
   }
 }
 
-void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int compression, unsigned int nbbits, int top_down, const dword * mask)
+static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int compression, unsigned int nbbits, int top_down, const dword * mask)
 {
   unsigned int row_size;
   unsigned int index;
@@ -1470,7 +1470,6 @@ void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int compressi
   byte value;
   byte a,b,c=0;
 
-  printf("Load_BMP_Pixels compression=%d nbbits=%d top_down=%d\n", compression, nbbits, top_down);
   switch (compression)
   {
     case 0 : // Pas de compression
@@ -1725,8 +1724,14 @@ void Load_BMP(T_IO_Context * context)
           else
             nb_colors=1<<header.Nb_bits;
           break;
-        default:
+        case 16:
+        case 24:
+        case 32:
           true_color = 1;
+          break;
+        default:
+          Warning("Unsupported bit per pixel");
+          File_error = 1;
       }
       
       if (header.Height < 0)
@@ -1752,6 +1757,7 @@ void Load_BMP(T_IO_Context * context)
         mask[1] = 0x0000FF00;
         mask[2] = 0x000000FF;
       }
+      if (File_error == 0)
       {
         Pre_load(context, header.Width,header.Height,file_size,FORMAT_BMP,PIXEL_SIMPLE,true_color);
         if (File_error==0)
@@ -4492,7 +4498,7 @@ static void Load_PNG_Sub(T_IO_Context * context, FILE * file)
 
 void Load_PNG(T_IO_Context * context)
 {
-  FILE *file;             // Fichier du fichier
+  FILE *file;
   char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   byte png_header[8];
 
@@ -4509,7 +4515,7 @@ void Load_PNG(T_IO_Context * context)
       if ( !png_sig_cmp(png_header, 0, 8))
         Load_PNG_Sub(context, file);
       else
-        File_error=2;
+        File_error=1;
     }
     else // Lecture header impossible: Error ne modifiant pas l'image
       File_error=1;
