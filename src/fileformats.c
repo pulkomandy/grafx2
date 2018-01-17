@@ -1500,6 +1500,10 @@ static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int co
                 value = (x_pos & 1) ? (buffer[x_pos>>1] & 0xF) : (buffer[x_pos>>1] >> 4);
                 Set_pixel(context, x_pos, target_y, value);
                 break;
+              case 2:
+                value = (buffer[x_pos>>2] >> (((x_pos&3)^3)*2)) & 3;
+                Set_pixel(context, x_pos, target_y, value);
+                break;
               case 1 :
                 value = ( buffer[x_pos>>3] & (0x80>>(x_pos&7)) ) ? 1 : 0;
                 if (flags & LOAD_BMP_PIXEL_FLAG_TRANSP_PLANE)
@@ -1728,6 +1732,7 @@ void Load_BMP(T_IO_Context * context)
       switch (header.Nb_bits)
       {
         case 1 :
+        case 2 :
         case 4 :
         case 8 :
           if (header.Nb_Clr)
