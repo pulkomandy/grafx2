@@ -1460,7 +1460,12 @@ static void Load_BMP_Palette(T_IO_Context * context, FILE * file, unsigned int n
   }
 }
 
-static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int compression, unsigned int nbbits, int top_down, const dword * mask)
+// rows are stored from the top to the bottom (standard for BMP is from bottom to the top)
+#define LOAD_BMP_PIXEL_FLAG_TOP_DOWN     0x01
+// We are decoding the AND-mask plane (transparency) of a .ICO file
+#define LOAD_BMP_PIXEL_FLAG_TRANSP_PLANE 0x02
+
+static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int compression, unsigned int nbbits, int flags, const dword * mask)
 {
   unsigned int row_size;
   unsigned int index;
@@ -1479,7 +1484,7 @@ static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int co
       for (y_pos=0; (y_pos < context->Height && !File_error); y_pos++)
       {
         short target_y;
-        target_y = top_down ? y_pos : context->Height-1-y_pos;
+        target_y = (flags & LOAD_BMP_PIXEL_FLAG_TOP_DOWN) ? y_pos : context->Height-1-y_pos;
 
         if (Read_bytes(file,buffer,row_size))
         {
@@ -1489,12 +1494,21 @@ static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int co
             {
               case 8 :
                 value = buffer[x_pos];
+                Set_pixel(context, x_pos, target_y, value);
                 break;
               case 4 :
                 value = (x_pos & 1) ? (buffer[x_pos>>1] & 0xF) : (buffer[x_pos>>1] >> 4);
+                Set_pixel(context, x_pos, target_y, value);
                 break;
               case 1 :
                 value = ( buffer[x_pos>>3] & (0x80>>(x_pos&7)) ) ? 1 : 0;
+                if (flags & LOAD_BMP_PIXEL_FLAG_TRANSP_PLANE)
+                {
+                  if (value) // transparent pixel !
+                    Set_pixel(context, x_pos, target_y, context->Transparent_color);
+                }
+                else
+                  Set_pixel(context, x_pos, target_y, value);
                 break;
               case 24:
                 Set_pixel_24b(context, x_pos,target_y,buffer[x_pos*3+2],buffer[x_pos*3+1],buffer[x_pos*3+0]);
@@ -1514,8 +1528,6 @@ static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int co
               default:
                 value = 0;
             }
-            if (nbbits <= 8)
-              Set_pixel(context, x_pos, target_y, value);
           }
         }
         else
@@ -1781,7 +1793,7 @@ void Load_BMP(T_IO_Context * context)
             if (fseek(file, header.Offset, SEEK_SET))
               File_error=2;
             else
-              Load_BMP_Pixels(context, file, header.Compression, header.Nb_bits, negative_height, mask);
+              Load_BMP_Pixels(context, file, header.Compression, header.Nb_bits, negative_height ? LOAD_BMP_PIXEL_FLAG_TOP_DOWN : 0, mask);
           }
         }
       }
@@ -2083,12 +2095,22 @@ void Load_ICO(T_IO_Context * context)
                 && Read_dword_le(file,&(bmpheader.Nb_Clr))
                 && Read_dword_le(file,&(bmpheader.Clr_Imprt)) )
             {
+              short real_height;
               word nb_colors = 0;
+
               if (bmpheader.Nb_Clr != 0)
                 nb_colors=bmpheader.Nb_Clr;
               else
                 nb_colors=1<<bmpheader.Nb_bits;
-              // bmpheader.Width != entry.width...
+
+              real_height = bmpheader.Height / 2;
+              if (bmpheader.Height < 0) real_height = - real_height;
+              // check that real_height == entry->height
+              if (real_height != entry->height)
+              {
+                Warning("Load_ICO() : real_height != entry->height");
+              }
+
               // Image 16/24/32 bits
               if (bmpheader.Nb_bits == 16)
               {
@@ -2102,7 +2124,7 @@ void Load_ICO(T_IO_Context * context)
                 mask[1] = 0x0000FF00;
                 mask[2] = 0x000000FF;
               }
-              Pre_load(context, bmpheader.Width,bmpheader.Height/2,0/*file_size*/,FORMAT_ICO,PIXEL_SIMPLE,(bmpheader.Nb_bits > 8) || (nb_colors > 256));
+              Pre_load(context, bmpheader.Width,real_height,File_length_file(file),FORMAT_ICO,PIXEL_SIMPLE,(bmpheader.Nb_bits > 8) || (nb_colors > 256));
               if (bmpheader.Nb_bits <= 8)
                 Load_BMP_Palette(context, file, nb_colors, 0);
               else
@@ -2117,7 +2139,15 @@ void Load_ICO(T_IO_Context * context)
               }
               if (File_error == 0)
               {
-                Load_BMP_Pixels(context, file, bmpheader.Compression, bmpheader.Nb_bits, (bmpheader.Height < 0) ? 1 : 0, mask);
+                Load_BMP_Pixels(context, file, bmpheader.Compression, bmpheader.Nb_bits, (bmpheader.Height < 0) ? LOAD_BMP_PIXEL_FLAG_TOP_DOWN : 0, mask);
+                // load transparency
+                // TODO : load transparency for True color images too
+                if (bmpheader.Nb_bits <= 8)
+                {
+                  context->Transparent_color = 0xff;  // TODO : pick an unused color if possible
+                  context->Background_transparent = 1;
+                  Load_BMP_Pixels(context, file, bmpheader.Compression, 1, (bmpheader.Height < 0) ? (LOAD_BMP_PIXEL_FLAG_TOP_DOWN|LOAD_BMP_PIXEL_FLAG_TRANSP_PLANE) : LOAD_BMP_PIXEL_FLAG_TRANSP_PLANE, mask);
+                }
               }
             }
           }
