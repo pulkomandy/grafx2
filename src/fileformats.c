@@ -1648,7 +1648,7 @@ void Load_BMP(T_IO_Context * context)
   word  nb_colors =  0;
   long  file_size;
   byte  negative_height; // top_down
-  byte  true_color;
+  byte  true_color = 0;
   dword mask[3];  // R G B
 
   Get_full_filename(filename, context->File_name, context->File_directory);
@@ -1718,7 +1718,6 @@ void Load_BMP(T_IO_Context * context)
         case 1 :
         case 4 :
         case 8 :
-          true_color = 0;
           if (header.Nb_Clr)
             nb_colors=header.Nb_Clr;
           else
@@ -2001,14 +2000,15 @@ void Load_ICO(T_IO_Context * context)
         width = entry->width;
         if (width == 0) width = 256;
         if (width > max_width) max_width = width;
-        printf("%2d: %3dx%3d %dcolors planes=%d bpp=%d\n", i, entry->width, entry->height, entry->ncolors, entry->planes, entry->bpp);
       }
       // select the picture with the maximum width and 256 colors or less
-      printf("max width = %d\n", max_width);
+      //printf("max width = %d\n", max_width);
       for (i = 0; i < header.Count; i++)
       {
         if (images[i].width == (max_width & 0xff))
         {
+          if (header.Type == 2) // .CUR files have hotspot instead of planes/bpp in header
+            break;
           if (images[i].bpp == 8)
             break;
           if (images[i].bpp < 8 && images[i].bpp > max_bpp)
@@ -2017,8 +2017,7 @@ void Load_ICO(T_IO_Context * context)
             min_bpp = images[i].bpp;
         }
       }
-      printf("i=%d  max_bpp=%d min_bpp=%d\n", i, max_bpp, min_bpp);
-      if (i >= header.Count)
+      if (i >= header.Count && header.Type == 1)
       {
         // 256 color not found, select another one
         for (i = 0; i < header.Count; i++)
@@ -2103,8 +2102,8 @@ void Load_ICO(T_IO_Context * context)
                 mask[1] = 0x0000FF00;
                 mask[2] = 0x000000FF;
               }
-              Pre_load(context, bmpheader.Width,bmpheader.Height/2,0/*file_size*/,FORMAT_ICO,PIXEL_SIMPLE,(entry->bpp > 8));
-              if (entry->bpp <= 8)
+              Pre_load(context, bmpheader.Width,bmpheader.Height/2,0/*file_size*/,FORMAT_ICO,PIXEL_SIMPLE,(bmpheader.Nb_bits > 8) || (nb_colors > 256));
+              if (bmpheader.Nb_bits <= 8)
                 Load_BMP_Palette(context, file, nb_colors, 0);
               else
               {
