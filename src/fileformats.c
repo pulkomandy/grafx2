@@ -2033,49 +2033,88 @@ void Load_ICO(T_IO_Context * context)
       }
       else
       {
-        T_BMP_Header bmpheader;
+        byte png_header[8];
 
         entry = images + i;
         fseek(file, entry->offset, SEEK_SET);
-        // TODO : detect PNG icons
-        if (Read_dword_le(file,&(bmpheader.Size_2)) // 40
-         && Read_dword_le(file,&(bmpheader.Width))
-         && Read_dword_le(file,(dword *)&(bmpheader.Height))
-         && Read_word_le(file,&(bmpheader.Planes))
-         && Read_word_le(file,&(bmpheader.Nb_bits))
-         && Read_dword_le(file,&(bmpheader.Compression))
-         && Read_dword_le(file,&(bmpheader.Size_3))
-         && Read_dword_le(file,&(bmpheader.XPM))
-         && Read_dword_le(file,&(bmpheader.YPM))
-         && Read_dword_le(file,&(bmpheader.Nb_Clr))
-         && Read_dword_le(file,&(bmpheader.Clr_Imprt)) )
+
+        // detect PNG icons
+        // Load header (8 first bytes)
+        if (!Read_bytes(file,png_header,8))
         {
-          word nb_colors = 0;
-          if (bmpheader.Nb_Clr != 0)
-            nb_colors=bmpheader.Nb_Clr;
-          else
-            nb_colors=1<<bmpheader.Nb_bits;
-          printf("size=%d width=%d height=%d planes=%d nbbits=%d nb_colors=%d\n", bmpheader.Size_2, bmpheader.Width, bmpheader.Height, bmpheader.Planes, bmpheader.Nb_bits, nb_colors);
-          // bmpheader.Width != entry.width...
-          // Image 16/24/32 bits
-          if (bmpheader.Nb_bits == 16)
+          File_error = 1;
+        }
+        else
+        {
+          // Do we recognize a png file signature ?
+#ifndef __no_pnglib__
+          if (png_sig_cmp(png_header, 0, 8) == 0)
           {
-            mask[0] = 0x00007C00;
-            mask[1] = 0x000003E0;
-            mask[2] = 0x0000001F;
+            Load_PNG_Sub(context, file);
           }
+#else
+          if (0 = memcmp(png_header, "\x89PNG", 4))
+          {
+            // NO PNG Support
+            Warning("PNG Signature : Compiled without libpng support");
+            File_error = 2;
+          }
+#endif
           else
           {
-            mask[0] = 0x00FF0000;
-            mask[1] = 0x0000FF00;
-            mask[2] = 0x000000FF;
-          }
-          Pre_load(context, bmpheader.Width,bmpheader.Height/2,0/*file_size*/,FORMAT_ICO,PIXEL_SIMPLE,(entry->bpp > 8));
-          if (entry->bpp <= 8)
-            Load_BMP_Palette(context, file, nb_colors, 0);
-          if (File_error == 0)
-          {
-            Load_BMP_Pixels(context, file, bmpheader.Compression, bmpheader.Nb_bits, (bmpheader.Height < 0) ? 1 : 0, mask);
+            T_BMP_Header bmpheader;
+
+            fseek(file, -8, SEEK_CUR);  // back
+            // BMP
+            if (Read_dword_le(file,&(bmpheader.Size_2)) // 40
+                && Read_dword_le(file,&(bmpheader.Width))
+                && Read_dword_le(file,(dword *)&(bmpheader.Height))
+                && Read_word_le(file,&(bmpheader.Planes))
+                && Read_word_le(file,&(bmpheader.Nb_bits))
+                && Read_dword_le(file,&(bmpheader.Compression))
+                && Read_dword_le(file,&(bmpheader.Size_3))
+                && Read_dword_le(file,&(bmpheader.XPM))
+                && Read_dword_le(file,&(bmpheader.YPM))
+                && Read_dword_le(file,&(bmpheader.Nb_Clr))
+                && Read_dword_le(file,&(bmpheader.Clr_Imprt)) )
+            {
+              word nb_colors = 0;
+              if (bmpheader.Nb_Clr != 0)
+                nb_colors=bmpheader.Nb_Clr;
+              else
+                nb_colors=1<<bmpheader.Nb_bits;
+              // bmpheader.Width != entry.width...
+              // Image 16/24/32 bits
+              if (bmpheader.Nb_bits == 16)
+              {
+                mask[0] = 0x00007C00;
+                mask[1] = 0x000003E0;
+                mask[2] = 0x0000001F;
+              }
+              else
+              {
+                mask[0] = 0x00FF0000;
+                mask[1] = 0x0000FF00;
+                mask[2] = 0x000000FF;
+              }
+              Pre_load(context, bmpheader.Width,bmpheader.Height/2,0/*file_size*/,FORMAT_ICO,PIXEL_SIMPLE,(entry->bpp > 8));
+              if (entry->bpp <= 8)
+                Load_BMP_Palette(context, file, nb_colors, 0);
+              else
+              {
+                if (bmpheader.Compression == 3) // BI_BITFIELDS
+                {
+                  if (!Read_dword_le(file,&mask[0]) ||
+                      !Read_dword_le(file,&mask[1]) ||
+                      !Read_dword_le(file,&mask[2]))
+                    File_error=2;
+                }
+              }
+              if (File_error == 0)
+              {
+                Load_BMP_Pixels(context, file, bmpheader.Compression, bmpheader.Nb_bits, (bmpheader.Height < 0) ? 1 : 0, mask);
+              }
+            }
           }
         }
       }
