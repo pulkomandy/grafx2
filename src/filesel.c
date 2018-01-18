@@ -2090,7 +2090,11 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           Highlight_file(Find_file_in_fileselector(&Filelist, previous_directory));
         }
         else
+        {
+          Display_cursor();
           Error(0);
+          Hide_cursor();
+        }
         // Affichage des premiers fichiers visibles:
         Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller);
         Display_cursor();
