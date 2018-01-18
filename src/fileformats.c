@@ -2166,6 +2166,128 @@ void Load_ICO(T_IO_Context * context)
   }
 }
 
+void Save_ICO(T_IO_Context * context)
+{
+  char filename[MAX_PATH_CHARACTERS];
+  FILE *file;
+  short x_pos;
+  short y_pos;
+  long row_size;
+  long row_size_mask;
+
+  if (context->Width > 256 || context->Height > 256)
+  {
+    File_error=1;
+    Warning(".ICO files can handle images up to 256x256");
+    return;
+  }
+
+  File_error=0;
+  Get_full_filename(filename, context->File_name, context->File_directory);
+
+  if ((file=fopen(filename,"wb")) == NULL)
+    File_error=1;
+  else
+  {
+    row_size = (context->Width + 3) & ~3;                   // 8bpp (=1Byte) rounded up to dword
+    row_size_mask = (((context->Width + 7) >> 3) + 3) & ~3; // 1bpp rounded up to dword
+    // ICO Header
+    if (!(Write_word_le(file,0) &&  // 0
+        Write_word_le(file,1) &&  // TYPE 1 = .ICO (2=.CUR)
+        Write_word_le(file,1)))    // Image count
+      File_error=1;
+    if (File_error == 0)
+    {
+      T_ICO_ImageEntry entry;
+      // ICO image entry
+      entry.width = context->Width & 0xff;  //Specifies image width in pixels. Value 0 means image width is 256 pixels.
+      entry.height = context->Height & 0xff;//Specifies image height in pixels. Value 0 means image height is 256 pixels.
+      entry.ncolors = 0;
+      entry.reserved = 0;
+      entry.planes = 1;
+      entry.bpp = 8;
+      entry.bytecount = (row_size + row_size_mask) * context->Height + 40 + 1024;
+      entry.offset = 6 + 16;
+      if  (!(Write_byte(file,entry.width) &&
+           Write_byte(file,entry.height) &&
+           Write_byte(file,entry.ncolors) &&
+           Write_byte(file,entry.reserved) &&
+           Write_word_le(file,entry.planes) &&
+           Write_word_le(file,entry.bpp) &&
+           Write_dword_le(file,entry.bytecount) &&
+           Write_dword_le(file,entry.offset)))
+        File_error=1;
+    }
+    if (File_error == 0)
+    {
+      T_BMP_Header bmpheader;
+      // BMP Header
+      bmpheader.Size_2 = 40;
+      bmpheader.Width = context->Width;
+      bmpheader.Height = context->Height * 2; // *2 because of mask (transparency) data added after the pixel data
+      bmpheader.Planes = 1;
+      bmpheader.Nb_bits = 8;
+      bmpheader.Compression = 0;
+      bmpheader.Size_3 = 0;
+      bmpheader.XPM = 0;
+      bmpheader.YPM = 0;
+      bmpheader.Nb_Clr = 0;
+      bmpheader.Clr_Imprt = 0;
+      if (!(Write_dword_le(file,bmpheader.Size_2) // 40
+          && Write_dword_le(file,bmpheader.Width)
+          && Write_dword_le(file,bmpheader.Height)
+          && Write_word_le(file,bmpheader.Planes)
+          && Write_word_le(file,bmpheader.Nb_bits)
+          && Write_dword_le(file,bmpheader.Compression)
+          && Write_dword_le(file,bmpheader.Size_3)
+          && Write_dword_le(file,bmpheader.XPM)
+          && Write_dword_le(file,bmpheader.YPM)
+          && Write_dword_le(file,bmpheader.Nb_Clr)
+          && Write_dword_le(file,bmpheader.Clr_Imprt)) )
+        File_error=1;
+    }
+    if (File_error == 0)
+    {
+      int i;
+      // palette
+      for (i = 0; i < 256; i++)
+      {
+        if (!Write_dword_le(file, context->Palette[i].R << 16 | context->Palette[i].G << 8 | context->Palette[i].B))
+        {
+          File_error=1;
+          break;
+        }
+      }
+    }
+    if (File_error == 0)
+    {
+      // Image Data
+      for (y_pos=context->Height-1; ((y_pos>=0) && (!File_error)); y_pos--)
+        for (x_pos=0; x_pos<row_size; x_pos++)
+          Write_one_byte(file,Get_pixel(context, x_pos,y_pos));
+    }
+    if (File_error == 0)
+    {
+      byte value = 0;
+      // Mask (Transparency) Data
+      for (y_pos=context->Height-1; ((y_pos>=0) && (!File_error)); y_pos--)
+        for (x_pos=0; x_pos<row_size_mask*8; x_pos++)
+        {
+          value = value << 1;
+          if (context->Background_transparent && Get_pixel(context, x_pos,y_pos) == context->Transparent_color)
+            value |= 1; // 1 = Transparent pixel
+          if ((x_pos & 7) == 7)
+          {
+            Write_one_byte(file,value);
+          }
+        }
+    }
+    fclose(file);
+    if (File_error != 0)
+      remove(filename);
+  }
+}
+
 
 //////////////////////////////////// GIF ////////////////////////////////////
 typedef struct

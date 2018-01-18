@@ -148,6 +148,7 @@ void Save_XPM(T_IO_Context*);
 // -- ICO (Windows ICO)
 void Test_ICO(T_IO_Context *);
 void Load_ICO(T_IO_Context *);
+void Save_ICO(T_IO_Context *);
 
 // -- PNG -------------------------------------------------------------------
 #ifndef __no_pnglib__
@@ -188,7 +189,7 @@ T_Format File_formats[] = {
   {FORMAT_CM5, " cm5", Test_CM5, Load_CM5, Save_CM5, 0, 0, 1, "cm5", "cm5"},
   {FORMAT_PPH, " pph", Test_PPH, Load_PPH, Save_PPH, 0, 0, 1, "pph", "pph"},
   {FORMAT_XPM, " xpm", NULL,     NULL,     Save_XPM, 0, 0, 0, "xpm", "xpm"},
-  {FORMAT_ICO, " ico", Test_ICO, Load_ICO, NULL,     0, 0, 0, "ico", "ico;ic2;cur"},
+  {FORMAT_ICO, " ico", Test_ICO, Load_ICO, Save_ICO, 0, 0, 0, "ico", "ico;ic2;cur"},
   {FORMAT_MISC,"misc.",NULL,     NULL,     NULL,     0, 0, 0, "",    "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff"},
 };
 
