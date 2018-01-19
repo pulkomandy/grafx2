@@ -1519,13 +1519,21 @@ static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int co
                 break;
               case 32:
                 {
+                #if SDL_BYTEORDER != SDL_LIL_ENDIAN
+                  dword pixel = SDL_Swap32(((dword *)buffer)[x_pos]);
+                #else
                   dword pixel = ((dword *)buffer)[x_pos];
+                #endif
                   Set_pixel_24b(context, x_pos,target_y,Bitmap_mask(pixel,mask[0]),Bitmap_mask(pixel,mask[1]),Bitmap_mask(pixel,mask[2]));
                 }
                 break;
               case 16:
                 {
+                #if SDL_BYTEORDER != SDL_LIL_ENDIAN
+                  word pixel = SDL_Swap16(((word *)buffer)[x_pos]);
+                #else
                   word pixel = ((word *)buffer)[x_pos];
+                #endif
                   Set_pixel_24b(context, x_pos,target_y,Bitmap_mask(pixel,mask[0]),Bitmap_mask(pixel,mask[1]),Bitmap_mask(pixel,mask[2]));
                 }
                 break;
@@ -1948,7 +1956,6 @@ void Test_ICO(T_IO_Context * context)
 
   File_error=1;
   Get_full_filename(filename, context->File_name, context->File_directory);
-  printf("Test_ICO(%p) %s\n", context, filename);
 
   if ((file=fopen(filename, "rb")))
   {
@@ -1956,8 +1963,7 @@ void Test_ICO(T_IO_Context * context)
      && Read_word_le(file,&(header.Type))
      && Read_word_le(file,&(header.Count)))
     {
-      printf("type=%d count=%d\n", header.Type, header.Count);
-      if (header.Reserved == 0 && header.Type <= 2 && header.Count > 0)
+      if (header.Reserved == 0 && (header.Type == 1 || header.Type == 2) && header.Count > 0)
         File_error=0;
     }
     fclose(file);
@@ -1983,14 +1989,13 @@ void Load_ICO(T_IO_Context * context)
 
   File_error=0;
   Get_full_filename(filename, context->File_name, context->File_directory);
-  printf("Load_ICO(%p)\n", context);
+
   if ((file=fopen(filename, "rb")))
   {
     if (Read_word_le(file,&(header.Reserved))
      && Read_word_le(file,&(header.Type))
      && Read_word_le(file,&(header.Count)))
     {
-      printf("type=%d count=%d\n", header.Type, header.Count);
       images = malloc(sizeof(T_ICO_ImageEntry) * header.Count);
       if (images == NULL)
       {
