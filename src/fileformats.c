@@ -3566,7 +3566,7 @@ void Test_PCX(T_IO_Context * context)
 // -- Lire un fichier au format PCX -----------------------------------------
 
   // -- Afficher une ligne PCX codée sur 1 seul plan avec moins de 256 c. --
-  void Draw_PCX_line(T_IO_Context *context, short y_pos, byte depth)
+  static void Draw_PCX_line(T_IO_Context *context, short y_pos, byte depth)
   {
     short x_pos;
     byte  color;
@@ -3580,6 +3580,18 @@ void Test_PCX(T_IO_Context * context)
       Set_pixel(context, x_pos,y_pos,color);
     }
   }
+
+// generate CGA RGBI colors.
+static void Set_CGA_Color(int i, T_Components * comp)
+{
+  int intensity = (i & 8) ? 85 : 0;
+  comp->R = ((i & 4) ? 170 : 0) + intensity;
+  if (i == 6)
+    comp->G = 85; // color 6 is brown instead of yellow on IBM CGA display
+  else
+    comp->G = ((i & 2) ? 170 : 0) + intensity;
+  comp->B = ((i & 1) ? 170 : 0) + intensity;
+}
 
 void Load_PCX(T_IO_Context * context)
 {
@@ -3596,7 +3608,6 @@ void Load_PCX(T_IO_Context * context)
   byte  index;
   dword nb_colors;
   long  file_size;
-  byte  palette_CGA[9]={ 84,252,252,  252, 84,252,  252,252,252};
 
   long  position;
   long  image_size;
@@ -3635,7 +3646,7 @@ void Load_PCX(T_IO_Context * context)
       Original_screen_X=PCX_header.Screen_X;
       Original_screen_Y=PCX_header.Screen_Y;
 
-      if (PCX_header.Plane!=3)
+      if (!(PCX_header.Plane==3 && PCX_header.Depth==8))
       {
         Pre_load(context, context->Width,context->Height,file_size,FORMAT_PCX,PIXEL_SIMPLE,0);
         if (File_error==0)
@@ -3645,35 +3656,68 @@ void Load_PCX(T_IO_Context * context)
             memset(context->Palette,0,sizeof(T_Palette));
           nb_colors=(dword)(1<<PCX_header.Plane)<<(PCX_header.Depth-1);
 
-          if (nb_colors>4)
-            memcpy(context->Palette,PCX_header.Palette_16c,48);
-          else
+          memcpy(context->Palette,PCX_header.Palette_16c,48);
+
+          if (nb_colors<=4)
           {
-            context->Palette[1].R=0;
-            context->Palette[1].G=0;
-            context->Palette[1].B=0;
-            byte1=PCX_header.Palette_16c[3]>>5;
-            if (nb_colors==4)
-            { // Pal. CGA "alakon" (du Turc Allahkoum qui signifie "à la con" :))
-              memcpy(context->Palette+1,palette_CGA,9);
-              if (!(byte1&2))
-              {
-                context->Palette[1].B=84;
-                context->Palette[2].B=84;
-                context->Palette[3].B=84;
-              }
-            } // Palette monochrome (on va dire que c'est du N&B)
-            else
+            // CGA !
+            int i;
+
+            if (PCX_header.Version < 5           // Detect if the palette is usable
+                || (nb_colors == 4
+                 && PCX_header.Palette_16c[6] == 0
+                 && PCX_header.Palette_16c[7] == 0
+                 && PCX_header.Palette_16c[8] == 0
+                 && PCX_header.Palette_16c[9] == 0
+                 && PCX_header.Palette_16c[10] == 0
+                 && PCX_header.Palette_16c[11] == 0)
+                || (nb_colors == 2
+                 && PCX_header.Palette_16c[1] == 0
+                 && PCX_header.Palette_16c[2] == 0))
             {
-              context->Palette[1].R=252;
-              context->Palette[1].G=252;
-              context->Palette[1].B=252;
+              // special CGA palette meaning :
+              if (nb_colors == 2)
+              {
+printf("CGA background = #%X\n", PCX_header.Palette_16c[0] >> 4);
+                // Background : BLACK
+                context->Palette[0].R=0;
+                context->Palette[0].G=0;
+                context->Palette[0].B=0;
+                // Foreground : 4 MSB of palette[0] is index of the CGA color to use.
+                i = (PCX_header.Palette_16c[0] >> 4);
+                if (i==0) i = 15;  // Bright White by default
+                Set_CGA_Color(i, &context->Palette[1]);
+              }
+              else
+              {
+                // Color CGA
+                // background color : 4 MSB of palette[0]
+                Set_CGA_Color((PCX_header.Palette_16c[0] >> 4), &context->Palette[0]);
+                // Palette_16c[3] : 8 bits CPIx xxxx
+                // C bit : Color burst enabled  => disable it to set 3rd palette
+                // P bit : palette : 0 = yellow/ 1 = white
+                // I bit : intensity
+                // CGA Palette 0 : 2 green, 4 red, 6 brown
+                // CGA Palette 1 : 3 cyan, 5 magenta, 7 white
+                // CGA 3rd palette : 3 cyan, 4 red, 7 white
+                i = 2;  // 2 - CGA Green
+                if (PCX_header.Palette_16c[3] & 0x40 || !(PCX_header.Palette_16c[3] & 0x80))
+                  i++; // Palette 1 or 3rd palette (cyan)
+                if (PCX_header.Palette_16c[3] & 0x20)
+                  i += 8; // High intensity
+                Set_CGA_Color(i++, &context->Palette[1]);
+                if (PCX_header.Palette_16c[3] & 0x80) i++; // Skip 1 color
+                Set_CGA_Color(i++, &context->Palette[2]);
+                if (!(PCX_header.Palette_16c[3] & 0x80)) i++; // Skip 1 color
+                i++; // Skip 1 color
+                Set_CGA_Color(i, &context->Palette[3]);
+              }
             }
           }
 
           //   On se positionne à la fin du fichier - 769 octets pour voir s'il y
           // a une palette.
-          if ( (PCX_header.Depth==8) && (PCX_header.Version>=5) && (file_size>(256*3)) )
+          if ( (PCX_header.Depth==8) && (PCX_header.Version>=5) && (file_size>(256*3+128)) )
           {
             fseek(file,file_size-((256*3)+1),SEEK_SET);
             // On regarde s'il y a une palette après les données de l'image
