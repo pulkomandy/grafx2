@@ -3665,12 +3665,12 @@ void Load_PCX(T_IO_Context * context)
 
             if (PCX_header.Version < 5           // Detect if the palette is usable
                 || (nb_colors == 4
-                 && PCX_header.Palette_16c[6] == 0
-                 && PCX_header.Palette_16c[7] == 0
-                 && PCX_header.Palette_16c[8] == 0
-                 && PCX_header.Palette_16c[9] == 0
-                 && PCX_header.Palette_16c[10] == 0
-                 && PCX_header.Palette_16c[11] == 0)
+                 && (PCX_header.Palette_16c[6]&15) == 0
+                 && (PCX_header.Palette_16c[7]&15) == 0
+                 && (PCX_header.Palette_16c[8]&15) == 0
+                 && (PCX_header.Palette_16c[9]&15) == 0
+                 && (PCX_header.Palette_16c[10]&15) == 0
+                 && (PCX_header.Palette_16c[11]&15) == 0)
                 || (nb_colors == 2
                  && PCX_header.Palette_16c[1] == 0
                  && PCX_header.Palette_16c[2] == 0))
@@ -3678,7 +3678,6 @@ void Load_PCX(T_IO_Context * context)
               // special CGA palette meaning :
               if (nb_colors == 2)
               {
-printf("CGA background = #%X\n", PCX_header.Palette_16c[0] >> 4);
                 // Background : BLACK
                 context->Palette[0].R=0;
                 context->Palette[0].G=0;
@@ -3700,15 +3699,16 @@ printf("CGA background = #%X\n", PCX_header.Palette_16c[0] >> 4);
                 // CGA Palette 0 : 2 green, 4 red, 6 brown
                 // CGA Palette 1 : 3 cyan, 5 magenta, 7 white
                 // CGA 3rd palette : 3 cyan, 4 red, 7 white
+                // After some tests in PC Paintbrush 3.11, it looks like
+                // the Color burst bit is not taken into acount.
                 i = 2;  // 2 - CGA Green
-                if (PCX_header.Palette_16c[3] & 0x40 || !(PCX_header.Palette_16c[3] & 0x80))
-                  i++; // Palette 1 or 3rd palette (cyan)
+                if (PCX_header.Palette_16c[3] & 0x40)
+                  i++; // Palette 1 (3 = cyan)
                 if (PCX_header.Palette_16c[3] & 0x20)
                   i += 8; // High intensity
                 Set_CGA_Color(i++, &context->Palette[1]);
-                if (PCX_header.Palette_16c[3] & 0x80) i++; // Skip 1 color
+                i++; // Skip 1 color
                 Set_CGA_Color(i++, &context->Palette[2]);
-                if (!(PCX_header.Palette_16c[3] & 0x80)) i++; // Skip 1 color
                 i++; // Skip 1 color
                 Set_CGA_Color(i, &context->Palette[3]);
               }
