@@ -137,6 +137,7 @@ void Warning_function(const char *message, const char *filename, int line_number
 void Error_function(int error_code, const char *filename, int line_number, const char *function_name)
 {
   T_Palette temp_palette;
+  T_Palette backup_palette;
   int       index;
   printf("Error number %d occured in file %s, line %d, function %s.\n", error_code, filename,line_number,function_name);
 
@@ -144,12 +145,13 @@ void Error_function(int error_code, const char *filename, int line_number, const
   {
     // L'erreur 0 n'est pas une vraie erreur, elle fait seulement un flash rouge de l'écran pour dire qu'il y a un problème.
     // Toutes les autres erreurs déclenchent toujours une sortie en catastrophe du programme !
-    memcpy(temp_palette,Main_palette,sizeof(T_Palette));
+    memcpy(backup_palette, Get_current_palette(), sizeof(T_Palette));
+    memcpy(temp_palette, backup_palette, sizeof(T_Palette));
     for (index=0;index<=255;index++)
       temp_palette[index].R=255;
     Set_palette(temp_palette);
     Delay_with_active_mouse(50); // Half a second of red flash
-    Set_palette(Main_palette);
+    Set_palette(backup_palette);
   }
   else
   {

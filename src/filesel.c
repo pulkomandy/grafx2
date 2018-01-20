@@ -2061,47 +2061,49 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         Hide_cursor();
         has_clicked_ok=0;
 
-        // On mémorise le répertoire dans lequel on était
-        if (strcmp(Selector_filename,PARENT_DIR))
-        {
-          strcpy(previous_directory,PARENT_DIR);
-        }
-        else
-        {
-            Extract_filename(previous_directory, Selector->Directory);
-        }
-
-        // On doit rentrer dans le répertoire:
+        // We must enter the directory
         if (!chdir(Selector_filename))
         {
-        #if defined (__MINT__)          
+        #if defined (__MINT__)
           static char path[1024]={0};
           char currentDrive='A';
+        #endif
+
+          // save the previous current directory
+          if (strcmp(Selector_filename,PARENT_DIR) != 0)
+          {
+            strcpy(previous_directory,PARENT_DIR);
+          }
+          else
+          {
+            Extract_filename(previous_directory, Selector->Directory);
+          }
+
+        #if defined (__MINT__)
           currentDrive=currentDrive+Dgetdrv();
           Dgetpath(path,0);
-         sprintf(Selector->Directory,"%c:\%s",currentDrive,path);
+          sprintf(Selector->Directory,"%c:\%s",currentDrive,path);
         #else
           getcwd(Selector->Directory,MAX_PATH_CHARACTERS);
         #endif
-          // On lit le nouveau répertoire
+          // read the new directory
           Read_list_of_files(&Filelist, Selector->Format_filter);
           Sort_list_of_files(&Filelist);
-          // On place la barre de sélection sur le répertoire d'où l'on vient
+          // Set the fileselector bar on the directory we're coming from
           Highlight_file(Find_file_in_fileselector(&Filelist, previous_directory));
+          // display the 1st visible files
+          Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller);
+          Display_cursor();
+          New_preview_is_needed=1;
+
+          // New directory, so we need to reset the quicksearch
+          Reset_quicksearch();
         }
         else
         {
           Display_cursor();
           Error(0);
-          Hide_cursor();
         }
-        // Affichage des premiers fichiers visibles:
-        Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller);
-        Display_cursor();
-        New_preview_is_needed=1;
-
-        // On est dans un nouveau répertoire, donc on remet le quicksearch à 0
-        Reset_quicksearch();
       }
       else  // Sinon on essaye de charger ou sauver le fichier
       {

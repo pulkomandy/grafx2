@@ -151,11 +151,19 @@ word Count_used_colors_area(dword* usage, word start_x, word start_y,
   return nb_colors;
 }
 
+static T_Palette Current_palette = {0};
+
+const T_Components * Get_current_palette(void)
+{
+  return Current_palette;
+}
 
 void Set_palette(T_Palette palette)
 {
   register int i;
   SDL_Color PaletteSDL[256];
+
+  memcpy(Current_palette, palette, sizeof(T_Palette));
   for(i=0;i<256;i++)
   {
     PaletteSDL[i].r=(palette[i].R=Round_palette_component(palette[i].R));
@@ -168,9 +176,10 @@ void Set_palette(T_Palette palette)
 void Set_color(byte color, byte red, byte green, byte blue)
 {
   SDL_Color comp;
-  comp.r=red;
-  comp.g=green;
-  comp.b=blue;
+
+  Current_palette[color].R = comp.r = red;
+  Current_palette[color].G = comp.g = green;
+  Current_palette[color].B = comp.b = blue;
   SDL_SetPalette(Screen_SDL, SDL_PHYSPAL | SDL_LOGPAL, &comp, color, 1);
 }
 

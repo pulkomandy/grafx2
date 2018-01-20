@@ -37,6 +37,7 @@ void Remap_general_lowlevel(byte * conversion_table,byte * in_buffer, byte *out_
 void Scroll_picture(byte * main_src, byte * main_dest, short x_offset,short y_offset);
 void Wait_end_of_click(void);
 void Set_color(byte color, byte red, byte green, byte blue);
+const T_Components * Get_current_palette(void);
 void Set_palette(T_Palette palette);
 void Palette_256_to_64(T_Palette palette);
 void Palette_64_to_256(T_Palette palette);
