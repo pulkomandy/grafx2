@@ -1889,7 +1889,11 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
               case -1: // bouton lui-même: aller au répertoire mémorisé
                 if (Config.Bookmark_directory[clicked_button-10])
                 {
-                  strcpy(Selector_filename,Config.Bookmark_directory[clicked_button-10]);
+                  // backup the currently selected filename
+                  strncpy(save_filename, Selector_filename, sizeof(save_filename));
+                  // simulate a click on the bookmarked directory
+                  strncpy(Selector_filename,Config.Bookmark_directory[clicked_button-10], sizeof(Selector_filename));
+                  Selector_filename[sizeof(Selector_filename)-1] = '\0';
                   Selected_type=1;
                   has_clicked_ok=1;
                   Reset_quicksearch();
@@ -2101,7 +2105,12 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         }
         else
         {
+          char warn_msg[MAX_PATH_CHARACTERS];
           Display_cursor();
+          snprintf(warn_msg, sizeof(warn_msg), "cannot chdir to \"%s\" !", Selector_filename);
+          Warning(warn_msg);
+          // restore Selector_filename
+          strncpy(Selector_filename, save_filename, sizeof(Selector_filename));
           Error(0);
         }
       }
