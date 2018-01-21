@@ -151,6 +151,13 @@ word Count_used_colors_area(dword* usage, word start_x, word start_y,
   return nb_colors;
 }
 
+
+// Backup of the currently displayed palette.
+// It is not always Main_palette ! (for example during a preview)
+// external code must not modify this array but use Set_palette() / Set_color()
+// Get_current_palette() offers a READ-ONLY access.
+// TODO : Color cycling code use directly SDL_SetPalette() we should check
+//        wether it should call Set_palette() instead.
 static T_Palette Current_palette = {0};
 
 const T_Components * Get_current_palette(void)
