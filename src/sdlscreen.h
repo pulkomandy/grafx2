@@ -30,6 +30,7 @@
 
 #include <SDL.h>
 #include "struct.h"
+#include "global.h"
 
 ///
 /// This is the number of bytes in a video line for the current mode.
@@ -39,8 +40,8 @@
 
 void Set_mode_SDL(int *,int *,int);
 
-SDL_Rect ** List_SDL_video_modes;
-byte* Screen_pixels;
+GFX2_GLOBAL SDL_Rect ** List_SDL_video_modes;
+GFX2_GLOBAL byte* Screen_pixels;
 
 void Update_rect(short x, short y, unsigned short width, unsigned short height);
 void Flush_update(void);

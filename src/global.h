@@ -304,7 +304,7 @@ GFX2_GLOBAL short Main_offset_Y;
 /// File format of the image currently edited. It's a value of enum ::FILE_FORMATS
 GFX2_GLOBAL byte  Main_fileformat;
 /// File selector settings
-T_Selector_settings Main_selector;
+GFX2_GLOBAL T_Selector_settings Main_selector;
 /// X position (in screen coordinates) of the separator between normal and magnified views.
 GFX2_GLOBAL short Main_separator_position;
 /// X position (in screen coordinates) of the first pixel of the magnified view.
@@ -361,7 +361,7 @@ GFX2_GLOBAL char  Spare_filename[MAX_PATH_CHARACTERS];
 /// File format of the image currently edited as spare page. It's a value of enum ::FILE_FORMATS
 GFX2_GLOBAL byte  Spare_fileformat;
 /// File selector settings
-T_Selector_settings Spare_selector;
+GFX2_GLOBAL T_Selector_settings Spare_selector;
 /// X position (in screen coordinates) of the separator between normal and magnified views.
 GFX2_GLOBAL short Spare_separator_position;
 /// X position (in screen coordinates) of the first pixel of the magnified view.
@@ -432,7 +432,7 @@ GFX2_GLOBAL char  Brush_filename[MAX_PATH_CHARACTERS];
 /// File format of the brush. It's a value of enum ::FILE_FORMATS
 GFX2_GLOBAL byte  Brush_fileformat;
 /// Fileselector settings
-T_Selector_settings Brush_selector;
+GFX2_GLOBAL T_Selector_settings Brush_selector;
 /// Indicator used for the "Rotate brush" operation.
 GFX2_GLOBAL byte  Brush_rotation_center_is_defined;
 /// Position of the brush's rotation center, in screen coordinates.

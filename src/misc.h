@@ -24,6 +24,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "struct.h"
+#include "global.h"
 
 #define SWAP_BYTES(a,b) { byte c=a; a=b; b=c;}
 #define SWAP_WORDS(a,b) { word c=a; a=b; b=c;}
@@ -138,12 +139,12 @@ void Zoom_a_line(byte * original_line,byte * zoomed_line,word factor,word width)
 void Copy_part_of_image_to_another(byte * source,word source_x,word source_y,word width,word height,word source_width,byte * dest,word dest_x,word dest_y,word destination_width);
 
 // -- Gestion du chrono --
-byte Timer_state; // State du chrono: 0=Attente d'un Xème de seconde
-                  //                 1=Il faut afficher la preview
-                  //                 2=Plus de chrono à gerer pour l'instant
-dword Timer_delay;     // Nombre de 18.2ème de secondes demandés
-dword Timer_start;       // Heure de départ du chrono
-byte New_preview_is_needed; // Booléen "Il faut relancer le chrono de preview"
+GFX2_GLOBAL byte Timer_state; // State du chrono: 0=Attente d'un Xème de seconde
+                              //                 1=Il faut afficher la preview
+                              //                 2=Plus de chrono à gerer pour l'instant
+GFX2_GLOBAL dword Timer_delay;     // Nombre de 18.2ème de secondes demandés
+GFX2_GLOBAL dword Timer_start;       // Heure de départ du chrono
+GFX2_GLOBAL byte New_preview_is_needed; // Booléen "Il faut relancer le chrono de preview"
 
 
 #if defined (__MINT__)
