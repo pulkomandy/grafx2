@@ -685,7 +685,7 @@ void Main_handler(void)
         char* flimit;
         byte old_cursor_shape;
 
-        Upload_infos_page_main(Main.backups->Pages);
+        Upload_infos_page(&Main);
   
         flimit = Find_last_separator(Drop_file_name);
         *(flimit++) = '\0';

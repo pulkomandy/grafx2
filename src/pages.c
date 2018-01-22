@@ -392,21 +392,18 @@ void Redraw_current_layer(void)
   }
 }
 
-// TODO : Upload_infos_page_main/Upload_infos_page_spare => Upload_infos_page()
-void Upload_infos_page_main(T_Page * page)
+void Upload_infos_page(T_Document * doc)
 // Sauve l'écran courant dans la page
 {
-  if (page!=NULL)
+  if (doc->backups->Pages != NULL)
   {
-    //page->Image[Main.current_layer].Pixels=Main_screen;
-    page->Width=Main.image_width;
-    page->Height=Main.image_height;
-    memcpy(page->Palette,Main.palette,sizeof(T_Palette));
-    page->File_format=Main.fileformat;
+    doc->backups->Pages->Width = doc->image_width;
+    doc->backups->Pages->Height = doc->image_height;
+    memcpy(doc->backups->Pages->Palette, doc->palette, sizeof(T_Palette));
+    doc->backups->Pages->File_format = doc->fileformat;
   }
 }
 
-// TODO : Download_infos_page_main/Download_infos_page_spare => Download_infos_page()
 void Download_infos_page_spare(T_Page * page)
 {
   if (page!=NULL)
@@ -415,18 +412,6 @@ void Download_infos_page_spare(T_Page * page)
     Spare.image_height=page->Height;
     memcpy(Spare.palette,page->Palette,sizeof(T_Palette));
     Spare.fileformat=page->File_format;
-  }
-}
-
-void Upload_infos_page_spare(T_Page * page)
-{
-  if (page!=NULL)
-  {
-    //page->Image[Spare.current_layer].Pixels=Spare_screen;
-    page->Width=Spare.image_width;
-    page->Height=Spare.image_height;
-    memcpy(page->Palette,Spare.palette,sizeof(T_Palette));
-    page->File_format=Spare.fileformat;
   }
 }
 
@@ -783,7 +768,7 @@ int Init_all_backup_lists(enum IMAGE_MODES image_mode, int width, int height)
   // celle demandée par l'utilisateur.
 
   // On crée un descripteur de page correspondant à la page principale
-  Upload_infos_page_main(Main.backups->Pages);
+  Upload_infos_page(&Main);
   // On y met les infos sur la dimension de démarrage
   Main.backups->Pages->Width=width;
   Main.backups->Pages->Height=height;
@@ -1105,7 +1090,7 @@ void Backup_layers(int layer)
 
   // On remet à jour l'état des infos de la page courante (pour pouvoir les
   // retrouver plus tard)
-  Upload_infos_page_main(Main.backups->Pages);
+  Upload_infos_page(&Main);
 
   // Create a fresh Page descriptor
   new_page=New_page(Main.backups->Pages->Nb_layers);
@@ -1218,7 +1203,7 @@ void Undo(void)
 
   // On remet à jour l'état des infos de la page courante (pour pouvoir les
   // retrouver plus tard)
-  Upload_infos_page_main(Main.backups->Pages);
+  Upload_infos_page(&Main);
   // On fait faire un undo à la liste des backups de la page principale
   Backward_in_list_of_pages(Main.backups);
 
@@ -1251,7 +1236,7 @@ void Redo(void)
   }
   // On remet à jour l'état des infos de la page courante (pour pouvoir les
   // retrouver plus tard)
-  Upload_infos_page_main(Main.backups->Pages);
+  Upload_infos_page(&Main);
   // On fait faire un redo à la liste des backups de la page principale
   Advance_in_list_of_pages(Main.backups);
 
@@ -1297,8 +1282,8 @@ void Exchange_main_and_spare(void)
   // On commence par mettre à jour dans les descripteurs les infos sur les
   // pages qu'on s'apprête à échanger, pour qu'on se retrouve pas avec de
   // vieilles valeurs qui datent de mathuzalem.
-  Upload_infos_page_main(Main.backups->Pages);
-  Upload_infos_page_spare(Spare.backups->Pages);
+  Upload_infos_page(&Main);
+  Upload_infos_page(&Spare);
 
   // On inverse les listes de pages
 //TODO

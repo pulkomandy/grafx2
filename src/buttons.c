@@ -3301,7 +3301,7 @@ void Button_Load(void)
 {
   // On sauve l'état actuel des paramètres de l'image pour pouvoir les
   // restituer en cas d'erreur n'affectant pas l'image
-  Upload_infos_page_main(Main.backups->Pages);
+  Upload_infos_page(&Main);
 
   Load_picture(1);
   Tilemap_update();
@@ -3315,7 +3315,7 @@ void Button_Reload(void)
 
   // On sauve l'état actuel des paramètres de l'image pour pouvoir les
   // restituer en cas d'erreur n'affectant pas l'image
-  Upload_infos_page_main(Main.backups->Pages);
+  Upload_infos_page(&Main);
 
   if ( (!Main.image_is_modified) || Confirmation_box("Discard unsaved changes ?") )
   {

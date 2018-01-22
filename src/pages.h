@@ -54,7 +54,6 @@ extern T_Bitmap Main_visible_image_depth_buffer;
 ///
 
 void Download_infos_page_main(T_Page * page);
-void Upload_infos_page_main(T_Page * page);
 /// Add a new layer to latest page of a list. Returns 0 on success.
 byte Add_layer(T_List_of_pages *list, int layer);
 /// Delete a layer from the latest page of a list. Returns 0 on success.
@@ -64,10 +63,11 @@ byte Merge_layer();
 /// Backs up a layer, unless it's already different from previous history step.
 int Dup_layer_if_shared(T_Page * page, int layer);
 
+void Upload_infos_page(T_Document * doc);
+
 // private
 T_Page * New_page(int nb_layers);
 void Download_infos_page_spare(T_Page * page);
-void Upload_infos_page_spare(T_Page * page);
 void Clear_page(T_Page * page);
 void Copy_S_page(T_Page * dest,T_Page * source);
 

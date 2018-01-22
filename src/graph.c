@@ -532,7 +532,7 @@ void Resize_image(word chosen_width,word chosen_height)
   // |B| |    C   = Nouvelle image
   // +-+-+
 
-  Upload_infos_page_main(Main.backups->Pages);
+  Upload_infos_page(&Main);
   if (Backup_with_new_dimensions(chosen_width,chosen_height))
   {
     // La nouvelle page a pu être allouée, elle est pour l'instant pleine de

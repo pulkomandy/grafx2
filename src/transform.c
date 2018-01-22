@@ -371,7 +371,7 @@ void Button_Transform_menu(void)
     old_width=Main.image_width;
     old_height=Main.image_height;
     
-    Upload_infos_page_main(Main.backups->Pages);
+    Upload_infos_page(&Main);
     // Allocate a new page
     if (Backup_with_new_dimensions(new_width,new_height))
     {
