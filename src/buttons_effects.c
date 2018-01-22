@@ -170,7 +170,7 @@ void Button_Constraint_mode()
 {
   int pixel;
   
-  if (Main_backups->Pages->Image_mode > IMAGE_MODE_ANIMATION)
+  if (Main.backups->Pages->Image_mode > IMAGE_MODE_ANIMATION)
   {
     // Disable
     Switch_layer_mode(IMAGE_MODE_LAYERED);
@@ -182,15 +182,15 @@ void Button_Constraint_mode()
 
   if (Selected_Constraint_Mode == IMAGE_MODE_MODE5)
   {
-    if (Main_backups->Pages->Image_mode != IMAGE_MODE_LAYERED ||
-        Main_backups->Pages->Nb_layers!=5 || (Main.image_width%48))
+    if (Main.backups->Pages->Image_mode != IMAGE_MODE_LAYERED ||
+        Main.backups->Pages->Nb_layers!=5 || (Main.image_width%48))
     {
       Verbose_message("Error!", "This emulation of Amstrad CPC's Mode5 can only be used on a 5-layer image whose width is a multiple of 48.");
       return;
     }
     for (pixel=0; pixel < Main.image_width*Main.image_height; pixel++)
     {
-      if (Main_backups->Pages->Image[4].Pixels[pixel]>3)
+      if (Main.backups->Pages->Image[4].Pixels[pixel]>3)
       {
         Verbose_message("Error!", "This emulation of Amstrad CPC's Mode5 needs all pixels of layer 5 to use colors 0-3.");
         return;
@@ -239,7 +239,7 @@ void Button_Constraint_menu(void)
   if (clicked_button==2) // OK
   {
     if ((Selected_Constraint_Mode > IMAGE_MODE_ANIMATION)
-        && (Main_backups->Pages->Image_mode <= IMAGE_MODE_ANIMATION))
+        && (Main.backups->Pages->Image_mode <= IMAGE_MODE_ANIMATION))
     Button_Constraint_mode();
   }
 

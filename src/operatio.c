@@ -2785,12 +2785,12 @@ void Scroll_12_0(void)
   else
   {
     Backup_layers(LAYER_ALL); // Main.layers_visible
-    if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+    if (Main.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
     {
       // Ensure the backup visible image is up-to-date
       // (after swapping some layers on/off, it gets outdated)
       memcpy(Main_visible_image_backup.Image,
-             Main_visible_image.Image,
+             Main.visible_image.Image,
              Main.image_width*Main.image_height);
     }
   }
@@ -2851,7 +2851,7 @@ void Scroll_12_5(void)
     else
     {
       // One layer at once
-      Scroll_picture(Main_backups->Pages->Next->Image[Main.current_layer].Pixels, Main_backups->Pages->Image[Main.current_layer].Pixels, x_offset, y_offset);
+      Scroll_picture(Main.backups->Pages->Next->Image[Main.current_layer].Pixels, Main.backups->Pages->Image[Main.current_layer].Pixels, x_offset, y_offset);
       Redraw_current_layer();
     }
 
@@ -2905,9 +2905,9 @@ void Scroll_0_5(void)
       y_offset=Main.image_height-((center_y-y_pos)%Main.image_height);
 
     // Do the actual scroll operation on all layers.
-    for (i=0; i<Main_backups->Pages->Nb_layers; i++)
+    for (i=0; i<Main.backups->Pages->Nb_layers; i++)
       //if ((1<<i) & Main.layers_visible)
-      Scroll_picture(Main_backups->Pages->Next->Image[i].Pixels, Main_backups->Pages->Image[i].Pixels, x_offset, y_offset);
+      Scroll_picture(Main.backups->Pages->Next->Image[i].Pixels, Main.backups->Pages->Image[i].Pixels, x_offset, y_offset);
     // Update the depth buffer too ...
     // It would be faster to scroll it, but we don't have method
     // for in-place scrolling.

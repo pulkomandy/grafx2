@@ -118,8 +118,8 @@ int Tile_is_same(int t1, int t2)
   byte *bmp1,*bmp2;
   int y;
   
-  bmp1 = Main_backups->Pages->Image[Main.current_layer].Pixels+(TILE_Y(t1))*Main.image_width+(TILE_X(t1));
-  bmp2 = Main_backups->Pages->Image[Main.current_layer].Pixels+(TILE_Y(t2))*Main.image_width+(TILE_X(t2));
+  bmp1 = Main.backups->Pages->Image[Main.current_layer].Pixels+(TILE_Y(t1))*Main.image_width+(TILE_X(t1));
+  bmp2 = Main.backups->Pages->Image[Main.current_layer].Pixels+(TILE_Y(t2))*Main.image_width+(TILE_X(t2));
   
   for (y=0; y < Snap_height; y++)
   {
@@ -135,8 +135,8 @@ int Tile_is_same_flipped_x(int t1, int t2)
   byte *bmp1,*bmp2;
   int y, x;
   
-  bmp1 = Main_backups->Pages->Image[Main.current_layer].Pixels+(TILE_Y(t1))*Main.image_width+(TILE_X(t1));
-  bmp2 = Main_backups->Pages->Image[Main.current_layer].Pixels+(TILE_Y(t2))*Main.image_width+(TILE_X(t2)+Snap_width-1);
+  bmp1 = Main.backups->Pages->Image[Main.current_layer].Pixels+(TILE_Y(t1))*Main.image_width+(TILE_X(t1));
+  bmp2 = Main.backups->Pages->Image[Main.current_layer].Pixels+(TILE_Y(t2))*Main.image_width+(TILE_X(t2)+Snap_width-1);
   
   for (y=0; y < Snap_height; y++)
   {
@@ -153,8 +153,8 @@ int Tile_is_same_flipped_y(int t1, int t2)
   byte *bmp1,*bmp2;
   int y;
   
-  bmp1 = Main_backups->Pages->Image[Main.current_layer].Pixels+(TILE_Y(t1))*Main.image_width+(TILE_X(t1));
-  bmp2 = Main_backups->Pages->Image[Main.current_layer].Pixels+(TILE_Y(t2)+Snap_height-1)*Main.image_width+(TILE_X(t2));
+  bmp1 = Main.backups->Pages->Image[Main.current_layer].Pixels+(TILE_Y(t1))*Main.image_width+(TILE_X(t1));
+  bmp2 = Main.backups->Pages->Image[Main.current_layer].Pixels+(TILE_Y(t2)+Snap_height-1)*Main.image_width+(TILE_X(t2));
   
   for (y=0; y < Snap_height; y++)
   {
@@ -171,8 +171,8 @@ int Tile_is_same_flipped_xy(int t1, int t2)
   byte *bmp1,*bmp2;
   int y, x;
   
-  bmp1 = Main_backups->Pages->Image[Main.current_layer].Pixels+(TILE_Y(t1))*Main.image_width+(TILE_X(t1));
-  bmp2 = Main_backups->Pages->Image[Main.current_layer].Pixels+(TILE_Y(t2)+Snap_height-1)*Main.image_width+(TILE_X(t2)+Snap_width-1);
+  bmp1 = Main.backups->Pages->Image[Main.current_layer].Pixels+(TILE_Y(t1))*Main.image_width+(TILE_X(t1));
+  bmp2 = Main.backups->Pages->Image[Main.current_layer].Pixels+(TILE_Y(t2)+Snap_height-1)*Main.image_width+(TILE_X(t2)+Snap_width-1);
   
   for (y=0; y < Snap_height; y++)
   {

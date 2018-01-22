@@ -276,9 +276,9 @@ void Fill_canvas(T_IO_Context *context, byte color)
       break;
     case CONTEXT_MAIN_IMAGE:
       memset(
-        Main_backups->Pages->Image[Main.current_layer].Pixels,
+        Main.backups->Pages->Image[Main.current_layer].Pixels,
         color,
-        Main_backups->Pages->Width*Main_backups->Pages->Height);
+        Main.backups->Pages->Width*Main.backups->Pages->Height);
       break;
     case CONTEXT_BRUSH:
       memset(context->Buffer_image, color, (long)context->Height*context->Pitch);
@@ -356,7 +356,7 @@ void Set_frame_duration(T_IO_Context *context, int duration)
   switch(context->Type)
   {
     case CONTEXT_MAIN_IMAGE:
-      Main_backups->Pages->Image[context->Current_layer].Duration = duration;
+      Main.backups->Pages->Image[context->Current_layer].Duration = duration;
       break;
     default:
       break;
@@ -368,7 +368,7 @@ int Get_frame_duration(T_IO_Context *context)
   switch(context->Type)
   {
     case CONTEXT_MAIN_IMAGE:
-      return Main_backups->Pages->Image[context->Current_layer].Duration;
+      return Main.backups->Pages->Image[context->Current_layer].Duration;
     default:
       return 0;
   }
@@ -683,7 +683,7 @@ void Load_image(T_IO_Context *context)
           Cursor_shape=CURSOR_SHAPE_HOURGLASS;
           Display_cursor();
           Flush_update();
-          if (Convert_24b_bitmap_to_256(Main_backups->Pages->Image[0].Pixels,context->Buffer_image_24b,context->Width,context->Height,context->Palette))
+          if (Convert_24b_bitmap_to_256(Main.backups->Pages->Image[0].Pixels,context->Buffer_image_24b,context->Width,context->Height,context->Palette))
             File_error=2;
           Hide_cursor();
           Cursor_shape=old_cursor_shape;
@@ -778,7 +778,7 @@ void Load_image(T_IO_Context *context)
       }
       // Copy the loaded palette
       memcpy(Main.palette, context->Palette, sizeof(T_Palette));
-      memcpy(Main_backups->Pages->Palette, context->Palette, sizeof(T_Palette));
+      memcpy(Main.backups->Pages->Palette, context->Palette, sizeof(T_Palette));
 
       // For formats that handle more than just the palette:
       // Transfer the data to main image.
@@ -787,13 +787,13 @@ void Load_image(T_IO_Context *context)
         if (context->Original_file_name && context->Original_file_name[0]
           && context->Original_file_directory && context->Original_file_directory[0])
         {
-          strcpy(Main_backups->Pages->Filename,context->Original_file_name);
-          strcpy(Main_backups->Pages->File_directory,context->Original_file_directory);
+          strcpy(Main.backups->Pages->Filename,context->Original_file_name);
+          strcpy(Main.backups->Pages->File_directory,context->Original_file_directory);
         }
         else
         {
-          strcpy(Main_backups->Pages->Filename,context->File_name);
-          strcpy(Main_backups->Pages->File_directory,context->File_directory);
+          strcpy(Main.backups->Pages->Filename,context->File_name);
+          strcpy(Main.backups->Pages->File_directory,context->File_directory);
         }
         
         // On considère que l'image chargée n'est plus modifiée
@@ -805,7 +805,7 @@ void Load_image(T_IO_Context *context)
         //Main_image_width= context->Width;
         //Main_image_height= context->Height;
         
-        if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+        if (Main.backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
         {
           Main.current_layer = 0;
         }
@@ -816,8 +816,8 @@ void Load_image(T_IO_Context *context)
         }
         
         // Load the transparency data
-        Main_backups->Pages->Transparent_color = context->Transparent_color;
-        Main_backups->Pages->Background_transparent = context->Background_transparent;
+        Main.backups->Pages->Transparent_color = context->Transparent_color;
+        Main.backups->Pages->Background_transparent = context->Background_transparent;
   
         // Correction des dimensions
         if (Main.image_width<1)
@@ -827,17 +827,17 @@ void Load_image(T_IO_Context *context)
 
         // Color cyling ranges:
         for (i=0; i<16; i++)
-          Main_backups->Pages->Gradients->Range[i].Speed=0;
+          Main.backups->Pages->Gradients->Range[i].Speed=0;
         for (i=0; i<context->Color_cycles; i++)
         {
-          Main_backups->Pages->Gradients->Range[i].Start=context->Cycle_range[i].Start;
-          Main_backups->Pages->Gradients->Range[i].End=context->Cycle_range[i].End;
-          Main_backups->Pages->Gradients->Range[i].Inverse=context->Cycle_range[i].Inverse;
-          Main_backups->Pages->Gradients->Range[i].Speed=context->Cycle_range[i].Speed;
+          Main.backups->Pages->Gradients->Range[i].Start=context->Cycle_range[i].Start;
+          Main.backups->Pages->Gradients->Range[i].End=context->Cycle_range[i].End;
+          Main.backups->Pages->Gradients->Range[i].Inverse=context->Cycle_range[i].Inverse;
+          Main.backups->Pages->Gradients->Range[i].Speed=context->Cycle_range[i].Speed;
         }
         
         // Comment
-        strcpy(Main_backups->Pages->Comment, context->Comment);
+        strcpy(Main.backups->Pages->Comment, context->Comment);
 
       }
     }
@@ -852,7 +852,7 @@ void Load_image(T_IO_Context *context)
     {
       // Dans ce cas, on sait que l'image n'a pas changé, mais ses
       // paramètres (dimension, palette, ...) si. Donc on les restaures.
-      Download_infos_page_main(Main_backups->Pages);
+      Download_infos_page_main(Main.backups->Pages);
     }
   }
   else if (context->Type == CONTEXT_BRUSH && File_error==0)
@@ -987,10 +987,10 @@ void Save_image(T_IO_Context *context)
   {
     case CONTEXT_MAIN_IMAGE:
       if ((!Get_fileformat(context->Format)->Supports_layers)
-        && (Main_backups->Pages->Nb_layers > 1)
+        && (Main.backups->Pages->Nb_layers > 1)
         && (!Get_fileformat(context->Format)->Palette_only))
       {
-        if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+        if (Main.backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
         {
           if (! Confirmation_box("This format doesn't support\nanimation and will save only\ncurrent frame. Proceed?"))
           {
@@ -999,7 +999,7 @@ void Save_image(T_IO_Context *context)
           }
           // current layer
           context->Nb_layers=1;
-          context->Target_address=Main_backups->Pages->Image[Main.current_layer].Pixels;
+          context->Target_address=Main.backups->Pages->Image[Main.current_layer].Pixels;
         }
         else // all other layer-based formats
         {
@@ -1031,11 +1031,11 @@ void Save_image(T_IO_Context *context)
           {
             case 1: // flatten
               context->Nb_layers=1;
-              context->Target_address=Main_visible_image.Image;
+              context->Target_address=Main.visible_image.Image;
               break;
             case 2: // current layer
               context->Nb_layers=1;
-              context->Target_address=Main_backups->Pages->Image[Main.current_layer].Pixels;
+              context->Target_address=Main.backups->Pages->Image[Main.current_layer].Pixels;
               break;
             default: // Cancel
               // File_error is already set to 1.
@@ -1232,10 +1232,10 @@ void Emergency_backup(const char *fname, byte *source, int width, int height, T_
 
 void Image_emergency_backup()
 {
-  if (Main_backups && Main_backups->Pages && Main_backups->Pages->Nb_layers == 1)
+  if (Main.backups && Main.backups->Pages && Main.backups->Pages->Nb_layers == 1)
     Emergency_backup(SAFETYBACKUP_PREFIX_A "999999" BACKUP_FILE_EXTENSION,Main_screen, Main.image_width, Main.image_height, &Main.palette);
-  if (Spare_backups && Spare_backups->Pages && Spare_backups->Pages->Nb_layers == 1)
-    Emergency_backup(SAFETYBACKUP_PREFIX_B "999999" BACKUP_FILE_EXTENSION,Spare_visible_image.Image, Spare.image_width, Spare.image_height, &Spare.palette);
+  if (Spare.backups && Spare.backups->Pages && Spare.backups->Pages->Nb_layers == 1)
+    Emergency_backup(SAFETYBACKUP_PREFIX_B "999999" BACKUP_FILE_EXTENSION,Spare.visible_image.Image, Spare.image_width, Spare.image_height, &Spare.palette);
 }
 
 T_Format * Get_fileformat(byte format)
@@ -1302,28 +1302,28 @@ void Init_context_layered_image(T_IO_Context * context, char *file_name, char *f
   memcpy(context->Palette, Main.palette, sizeof(T_Palette));
   context->Width = Main.image_width;
   context->Height = Main.image_height;
-  context->Nb_layers = Main_backups->Pages->Nb_layers;
-  strcpy(context->Comment, Main_backups->Pages->Comment);
-  context->Transparent_color=Main_backups->Pages->Transparent_color;
-  context->Background_transparent=Main_backups->Pages->Background_transparent;
+  context->Nb_layers = Main.backups->Pages->Nb_layers;
+  strcpy(context->Comment, Main.backups->Pages->Comment);
+  context->Transparent_color=Main.backups->Pages->Transparent_color;
+  context->Background_transparent=Main.backups->Pages->Background_transparent;
   if (Pixel_ratio == PIXEL_WIDE || Pixel_ratio == PIXEL_WIDE2)
     context->Ratio=PIXEL_WIDE;
   else if (Pixel_ratio == PIXEL_TALL || Pixel_ratio == PIXEL_TALL2 || Pixel_ratio == PIXEL_TALL3)
     context->Ratio=PIXEL_TALL;
   else
     context->Ratio=PIXEL_SIMPLE;
-  context->Target_address=Main_backups->Pages->Image[0].Pixels;
+  context->Target_address=Main.backups->Pages->Image[0].Pixels;
   context->Pitch=Main.image_width;
   
   // Color cyling ranges:
   for (i=0; i<16; i++)
   {
-    if (Main_backups->Pages->Gradients->Range[i].Start!=Main_backups->Pages->Gradients->Range[i].End)
+    if (Main.backups->Pages->Gradients->Range[i].Start!=Main.backups->Pages->Gradients->Range[i].End)
     {
-      context->Cycle_range[context->Color_cycles].Start=Main_backups->Pages->Gradients->Range[i].Start;
-      context->Cycle_range[context->Color_cycles].End=Main_backups->Pages->Gradients->Range[i].End;
-      context->Cycle_range[context->Color_cycles].Inverse=Main_backups->Pages->Gradients->Range[i].Inverse;
-      context->Cycle_range[context->Color_cycles].Speed=Main_backups->Pages->Gradients->Range[i].Speed;
+      context->Cycle_range[context->Color_cycles].Start=Main.backups->Pages->Gradients->Range[i].Start;
+      context->Cycle_range[context->Color_cycles].End=Main.backups->Pages->Gradients->Range[i].End;
+      context->Cycle_range[context->Color_cycles].Inverse=Main.backups->Pages->Gradients->Range[i].Inverse;
+      context->Cycle_range[context->Color_cycles].Speed=Main.backups->Pages->Gradients->Range[i].Speed;
       context->Color_cycles++;
     }
   }
@@ -1385,13 +1385,13 @@ void Set_saving_layer(T_IO_Context *context, int layer)
 
   if (context->Type == CONTEXT_MAIN_IMAGE)
   {
-    if (context->Nb_layers==1 && Main_backups->Pages->Nb_layers!=1)
+    if (context->Nb_layers==1 && Main.backups->Pages->Nb_layers!=1)
     {
       // Context is set to saving a single layer: do nothing
     }
     else
     {
-      context->Target_address=Main_backups->Pages->Image[layer].Pixels;
+      context->Target_address=Main.backups->Pages->Image[layer].Pixels;
     }
   }
 }
@@ -1406,18 +1406,18 @@ void Set_loading_layer(T_IO_Context *context, int layer)
     // This awful thing is the part that happens on load
     while (layer >= context->Nb_layers)
     {
-      if (Add_layer(Main_backups, layer))
+      if (Add_layer(Main.backups, layer))
       {
         // Failure to add a layer on load:
         // Position on last layer
         layer = context->Nb_layers-1;
         break;
       }
-      context->Nb_layers = Main_backups->Pages->Nb_layers;
+      context->Nb_layers = Main.backups->Pages->Nb_layers;
       Main.layers_visible = (2<<layer)-1;
     }
     Main.current_layer = layer;
-    context->Target_address=Main_backups->Pages->Image[layer].Pixels;
+    context->Target_address=Main.backups->Pages->Image[layer].Pixels;
     
     Update_pixel_renderer();
   }
@@ -1667,8 +1667,8 @@ void Rotate_safety_backups(void)
     Init_context_backup_image(&context, file_name, Config_directory);
     context.Format=FORMAT_GIF;
     // Provide original file data, to store as a GIF Application Extension
-    context.Original_file_name = Main_backups->Pages->Filename;
-    context.Original_file_directory = Main_backups->Pages->File_directory;
+    context.Original_file_name = Main.backups->Pages->Filename;
+    context.Original_file_directory = Main.backups->Pages->File_directory;
     
     Save_image(&context);
     Destroy_context(&context);

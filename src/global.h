@@ -407,9 +407,9 @@ GFX2_GLOBAL byte Spare_safety_backup_prefix;
 /// Backup of the current screen, used during drawing when FX feedback is OFF.
 GFX2_GLOBAL byte * Screen_backup;
 /// List of backup pages for the main image.
-GFX2_GLOBAL T_List_of_pages * Main_backups;//TODO
+//GFX2_GLOBAL T_List_of_pages * Main_backups;
 /// List of backup pages for the spare page.
-GFX2_GLOBAL T_List_of_pages * Spare_backups;//TODO
+//GFX2_GLOBAL T_List_of_pages * Spare_backups;
 
 
 // -- Brush data

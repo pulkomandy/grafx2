@@ -1091,13 +1091,13 @@ int Color_cycling(void)
   {
     int len;
     
-    len=Main_backups->Pages->Gradients->Range[i].End-Main_backups->Pages->Gradients->Range[i].Start+1;
-    if (len>1 && Main_backups->Pages->Gradients->Range[i].Speed)
+    len=Main.backups->Pages->Gradients->Range[i].End-Main.backups->Pages->Gradients->Range[i].Start+1;
+    if (len>1 && Main.backups->Pages->Gradients->Range[i].Speed)
     {
       int new_offset;
       
-      new_offset=(now-start)/(int)(1000.0/(Main_backups->Pages->Gradients->Range[i].Speed*0.2856)) % len;
-      if (!Main_backups->Pages->Gradients->Range[i].Inverse)
+      new_offset=(now-start)/(int)(1000.0/(Main.backups->Pages->Gradients->Range[i].Speed*0.2856)) % len;
+      if (!Main.backups->Pages->Gradients->Range[i].Inverse)
         new_offset=len - new_offset;
       
       if (new_offset!=offset[i])
@@ -1118,14 +1118,15 @@ int Color_cycling(void)
     {
       int len;
     
-      len=Main_backups->Pages->Gradients->Range[i].End-Main_backups->Pages->Gradients->Range[i].Start+1;
-      if (len>1 && Main_backups->Pages->Gradients->Range[i].Speed)
+      // TODO improve
+      len=Main.backups->Pages->Gradients->Range[i].End-Main.backups->Pages->Gradients->Range[i].Start+1;
+      if (len>1 && Main.backups->Pages->Gradients->Range[i].Speed)
       {
-        for(color=Main_backups->Pages->Gradients->Range[i].Start;color<=Main_backups->Pages->Gradients->Range[i].End;color++)
+        for(color=Main.backups->Pages->Gradients->Range[i].Start;color<=Main.backups->Pages->Gradients->Range[i].End;color++)
         {
-          PaletteSDL[color].r=Main.palette[Main_backups->Pages->Gradients->Range[i].Start+((color-Main_backups->Pages->Gradients->Range[i].Start+offset[i])%len)].R;
-          PaletteSDL[color].g=Main.palette[Main_backups->Pages->Gradients->Range[i].Start+((color-Main_backups->Pages->Gradients->Range[i].Start+offset[i])%len)].G;
-          PaletteSDL[color].b=Main.palette[Main_backups->Pages->Gradients->Range[i].Start+((color-Main_backups->Pages->Gradients->Range[i].Start+offset[i])%len)].B;
+          PaletteSDL[color].r=Main.palette[Main.backups->Pages->Gradients->Range[i].Start+((color-Main.backups->Pages->Gradients->Range[i].Start+offset[i])%len)].R;
+          PaletteSDL[color].g=Main.palette[Main.backups->Pages->Gradients->Range[i].Start+((color-Main.backups->Pages->Gradients->Range[i].Start+offset[i])%len)].G;
+          PaletteSDL[color].b=Main.palette[Main.backups->Pages->Gradients->Range[i].Start+((color-Main.backups->Pages->Gradients->Range[i].Start+offset[i])%len)].B;
         }
       }
     }

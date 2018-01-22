@@ -371,7 +371,7 @@ void Button_Transform_menu(void)
     old_width=Main.image_width;
     old_height=Main.image_height;
     
-    Upload_infos_page_main(Main_backups->Pages);
+    Upload_infos_page_main(Main.backups->Pages);
     // Allocate a new page
     if (Backup_with_new_dimensions(new_width,new_height))
     {
@@ -385,42 +385,42 @@ void Button_Transform_menu(void)
         int i;
         
         case  2 : // Flip X
-          for (i=0; i<Main_backups->Pages->Nb_layers; i++)
+          for (i=0; i<Main.backups->Pages->Nb_layers; i++)
           {
-            memcpy(Main_backups->Pages->Image[i].Pixels,Main_backups->Pages->Next->Image[i].Pixels,Main.image_width*Main.image_height);
-            Flip_X_lowlevel(Main_backups->Pages->Image[i].Pixels, Main.image_width, Main.image_height);
+            memcpy(Main.backups->Pages->Image[i].Pixels,Main.backups->Pages->Next->Image[i].Pixels,Main.image_width*Main.image_height);
+            Flip_X_lowlevel(Main.backups->Pages->Image[i].Pixels, Main.image_width, Main.image_height);
           }
           break;
         case  3 : // Flip Y      
-          for (i=0; i<Main_backups->Pages->Nb_layers; i++)
+          for (i=0; i<Main.backups->Pages->Nb_layers; i++)
           {
-            memcpy(Main_backups->Pages->Image[i].Pixels,Main_backups->Pages->Next->Image[i].Pixels,Main.image_width*Main.image_height);
-            Flip_Y_lowlevel(Main_backups->Pages->Image[i].Pixels, Main.image_width, Main.image_height);
+            memcpy(Main.backups->Pages->Image[i].Pixels,Main.backups->Pages->Next->Image[i].Pixels,Main.image_width*Main.image_height);
+            Flip_Y_lowlevel(Main.backups->Pages->Image[i].Pixels, Main.image_width, Main.image_height);
           }
           break;
         case  4 : // -90° Rotation
-          for (i=0; i<Main_backups->Pages->Nb_layers; i++)
+          for (i=0; i<Main.backups->Pages->Nb_layers; i++)
           {
-            Rotate_270_deg_lowlevel(Main_backups->Pages->Next->Image[i].Pixels, Main_backups->Pages->Image[i].Pixels, old_width, old_height);
+            Rotate_270_deg_lowlevel(Main.backups->Pages->Next->Image[i].Pixels, Main.backups->Pages->Image[i].Pixels, old_width, old_height);
           }
           break;
         case  5 : // +90° Rotation
-          for (i=0; i<Main_backups->Pages->Nb_layers; i++)
+          for (i=0; i<Main.backups->Pages->Nb_layers; i++)
           {
-            Rotate_90_deg_lowlevel(Main_backups->Pages->Next->Image[i].Pixels, Main_backups->Pages->Image[i].Pixels, old_width, old_height);
+            Rotate_90_deg_lowlevel(Main.backups->Pages->Next->Image[i].Pixels, Main.backups->Pages->Image[i].Pixels, old_width, old_height);
           }
           break;
         case  6 : // 180° Rotation
-          for (i=0; i<Main_backups->Pages->Nb_layers; i++)
+          for (i=0; i<Main.backups->Pages->Nb_layers; i++)
           {
-            memcpy(Main_backups->Pages->Image[i].Pixels,Main_backups->Pages->Next->Image[i].Pixels,Main.image_width*Main.image_height);
-            Rotate_180_deg_lowlevel(Main_backups->Pages->Image[i].Pixels, Main.image_width, Main.image_height);
+            memcpy(Main.backups->Pages->Image[i].Pixels,Main.backups->Pages->Next->Image[i].Pixels,Main.image_width*Main.image_height);
+            Rotate_180_deg_lowlevel(Main.backups->Pages->Image[i].Pixels, Main.image_width, Main.image_height);
           }
           break;       
         case  7 : // Resize
-          for (i=0; i<Main_backups->Pages->Nb_layers; i++)
+          for (i=0; i<Main.backups->Pages->Nb_layers; i++)
           {
-            Rescale(Main_backups->Pages->Next->Image[i].Pixels, old_width, old_height, Main_backups->Pages->Image[i].Pixels, Main.image_width, Main.image_height, 0, 0);
+            Rescale(Main.backups->Pages->Next->Image[i].Pixels, old_width, old_height, Main.backups->Pages->Image[i].Pixels, Main.image_width, Main.image_height, 0, 0);
           }
           break;
       }
@@ -428,9 +428,9 @@ void Button_Transform_menu(void)
       for (i=0; i<NB_LAYERS; i++)
       {
         Copy_part_of_image_to_another(
-          Main_backups->Pages->Next->Image[i].Pixels,0,0,Min(old_width,Main.image_width),
+          Main.backups->Pages->Next->Image[i].Pixels,0,0,Min(old_width,Main.image_width),
           Min(old_height,Main.image_height),old_width,
-          Main_backups->Pages->Image[i].Pixels,0,0,Main.image_width);
+          Main.backups->Pages->Image[i].Pixels,0,0,Main.image_width);
       }
       */
       Redraw_layered_image();

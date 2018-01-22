@@ -344,19 +344,19 @@ void Remap_image_highlevel(byte * conversion_table)
   int layer;
 
   // Remap the flatenned image view
-  if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION
-      && Main_backups->Pages->Image_mode != IMAGE_MODE_MODE5)
+  if (Main.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION
+      && Main.backups->Pages->Image_mode != IMAGE_MODE_MODE5)
   {
-    Remap_general_lowlevel(conversion_table,Main_visible_image.Image,Main_visible_image.Image,
+    Remap_general_lowlevel(conversion_table,Main.visible_image.Image,Main.visible_image.Image,
                          Main.image_width,Main.image_height,Main.image_width);
   }
   // Remap all layers
-  for (layer=0; layer<Main_backups->Pages->Nb_layers; layer++)
-    Remap_general_lowlevel(conversion_table,Main_backups->Pages->Image[layer].Pixels,Main_backups->Pages->Image[layer].Pixels,Main.image_width,Main.image_height,Main.image_width);
+  for (layer=0; layer<Main.backups->Pages->Nb_layers; layer++)
+    Remap_general_lowlevel(conversion_table,Main.backups->Pages->Image[layer].Pixels,Main.backups->Pages->Image[layer].Pixels,Main.image_width,Main.image_height,Main.image_width);
 
   // Remap transparent color
-  Main_backups->Pages->Transparent_color = 
-    conversion_table[Main_backups->Pages->Transparent_color];
+  Main.backups->Pages->Transparent_color =
+    conversion_table[Main.backups->Pages->Transparent_color];
 
   // On calcule les limites à l'écran de l'image
   if (Main.image_height>=Menu_Y_before_window)

@@ -282,8 +282,8 @@ void Frame_menu_color(byte id)
         int cw = (Menu_palette_cell_width)*Menu_factor_X;
         int ch = (cell_height)*Menu_factor_Y;
 
-        if (Main_backups->Pages->Image_mode == 0 && Main_backups->Pages->Nb_layers > 1)
-            transparent = Main_backups->Pages->Transparent_color;
+        if (Main.backups->Pages->Image_mode == 0 && Main.backups->Pages->Nb_layers > 1)
+            transparent = Main.backups->Pages->Transparent_color;
 
         // Color is not selected, no dotted lines
         Block(start_x,start_y,Menu_palette_cell_width*Menu_factor_X,
@@ -352,9 +352,9 @@ void Display_menu_palette(void)
       (Menu_bars[MENUBAR_TOOLS].Height)*Menu_factor_Y,
       MC_Black);
 
-	if (Main_backups->Pages->Image_mode == 0
-		&& Main_backups->Pages->Nb_layers > 1)
-		transparent = Main_backups->Pages->Transparent_color;
+	if (Main.backups->Pages->Image_mode == 0
+		&& Main.backups->Pages->Nb_layers > 1)
+		transparent = Main.backups->Pages->Transparent_color;
 
 	// Compute the size of the color cells (they are smaller by 1px when using
 	// 'separate colors"
@@ -505,7 +505,7 @@ void Display_layerbar(void)
   {
     word x_off=0;
     word button_width = LAYER_SPRITE_WIDTH;
-    word button_number = Main_backups->Pages->Nb_layers;
+    word button_number = Main.backups->Pages->Nb_layers;
     word horiz_space;
     word current_button;
     word repeats=1;
@@ -592,7 +592,7 @@ void Display_layerbar(void)
     // Frame# background rectangle
     // Block((Menu_bars[MENUBAR_ANIMATION].Skin_width)*Menu_factor_X,(0+Menu_bars[MENUBAR_ANIMATION].Top)*Menu_factor_Y+Menu_Y,8*8*Menu_factor_X,8*Menu_factor_Y,MC_Light);
     // Frame #/#
-    snprintf(str, 8, "%3d/%3d", Main.current_layer+1, Main_backups->Pages->Nb_layers);
+    snprintf(str, 8, "%3d/%3d", Main.current_layer+1, Main.backups->Pages->Nb_layers);
     Print_general((59)*Menu_factor_X,(Menu_bars[MENUBAR_ANIMATION].Top+3)*Menu_factor_Y+Menu_Y,str,MC_Black,MC_Light);
     Update_rect(
       (59)*Menu_factor_X,
@@ -802,7 +802,7 @@ void Print_filename(void)
   // Partial copy of the name
   {
 #ifdef ENABLE_FILENAMES_ICONV
-    char * input = Main_backups->Pages->Filename;
+    char * input = Main.backups->Pages->Filename;
     size_t inbytesleft = strlen(input);
     char * output = display_string;
     size_t outbytesleft = sizeof(display_string)-1;
@@ -811,7 +811,7 @@ void Print_filename(void)
     else
 #endif /* ENABLE_FILENAMES_ICONV */
     {
-      strncpy(display_string, Main_backups->Pages->Filename, sizeof(display_string)-1);
+      strncpy(display_string, Main.backups->Pages->Filename, sizeof(display_string)-1);
       display_string[sizeof(display_string)-1] = '\0';
     }
   }
@@ -2628,15 +2628,15 @@ void Display_all_screen(void)
   if (Main.magnifier_mode)
   {
     if (Main.image_width<Main.separator_position && Main.image_width < Screen_width)
-      Block(Main.image_width,0,(Main.separator_position-Main.image_width),Menu_Y,Main_backups->Pages->Transparent_color);
+      Block(Main.image_width,0,(Main.separator_position-Main.image_width),Menu_Y,Main.backups->Pages->Transparent_color);
   }
   else
   {
     if (Main.image_width<Screen_width)
-      Block(Main.image_width,0,(Screen_width-Main.image_width),Menu_Y,Main_backups->Pages->Transparent_color);
+      Block(Main.image_width,0,(Screen_width-Main.image_width),Menu_Y,Main.backups->Pages->Transparent_color);
   }
   if (Main.image_height<Menu_Y)
-    Block(0,Main.image_height,width,(Menu_Y-height),Main_backups->Pages->Transparent_color);
+    Block(0,Main.image_height,width,(Menu_Y-height),Main.backups->Pages->Transparent_color);
 
   // ---/\/\/\  Partie zoomée: /\/\/\---
   if (Main.magnifier_mode)
@@ -2665,9 +2665,9 @@ void Display_all_screen(void)
     if (Main.image_width<Main.magnifier_width)
       Block(Main.X_zoom+(Main.image_width*Main.magnifier_factor),0,
             (Main.magnifier_width-Main.image_width)*Main.magnifier_factor,
-            Menu_Y,Main_backups->Pages->Transparent_color);
+            Menu_Y,Main.backups->Pages->Transparent_color);
     if (height<Menu_Y)
-      Block(Main.X_zoom,height,width*Main.magnifier_factor,(Menu_Y-height),Main_backups->Pages->Transparent_color);
+      Block(Main.X_zoom,height,width*Main.magnifier_factor,(Menu_Y-height),Main.backups->Pages->Transparent_color);
   }
 
   // ---/\/\/\ Affichage des limites /\/\/\---

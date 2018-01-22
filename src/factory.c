@@ -218,7 +218,7 @@ void Backup_if_necessary(lua_State* L, int layer)
     Is_backed_up = 1;
     if (layer == Main.current_layer)
     {
-      Main_backup_page = Main_backups->Pages->Next;
+      Main_backup_page = Main.backups->Pages->Next;
       Main_backup_screen = Screen_backup;
       Register_main_writable(L);
     }
@@ -230,7 +230,7 @@ void Backup_if_necessary(lua_State* L, int layer)
       // Already OK
       return;
     }
-    if (Dup_layer_if_shared(Main_backups->Pages, layer))
+    if (Dup_layer_if_shared(Main.backups->Pages, layer))
     {
       // Depth buffer etc to modify too ?
 
@@ -391,17 +391,17 @@ int L_SetPictureSize(lua_State* L)
     Backup_with_new_dimensions(w, h);
   }
   // part of Resize_image() : the pixel copy part.
-  for (i=0; i<Main_backups->Pages->Nb_layers; i++)
+  for (i=0; i<Main.backups->Pages->Nb_layers; i++)
   {
     Copy_part_of_image_to_another(
-      Main_backups->Pages->Next->Image[i].Pixels,0,0,Min(Main_backups->Pages->Next->Width,Main.image_width),
-      Min(Main_backups->Pages->Next->Height,Main.image_height),Main_backups->Pages->Next->Width,
-      Main_backups->Pages->Image[i].Pixels,0,0,Main.image_width);
+      Main.backups->Pages->Next->Image[i].Pixels,0,0,Min(Main.backups->Pages->Next->Width,Main.image_width),
+      Min(Main.backups->Pages->Next->Height,Main.image_height),Main.backups->Pages->Next->Width,
+      Main.backups->Pages->Image[i].Pixels,0,0,Main.image_width);
   }
   Redraw_layered_image();
 
   Is_backed_up = 1;
-  Main_backup_page = Main_backups->Pages->Next;
+  Main_backup_page = Main.backups->Pages->Next;
   Main_backup_screen = Screen_backup;
   Register_main_writable(L);
   lua_register(L,"setcolor",L_SetColor);
@@ -424,12 +424,12 @@ int L_SetSparePictureSize(lua_State* L)
     
   Backup_and_resize_the_spare(w, h);
   // part of Resize_image() : the pixel copy part.
-  for (i=0; i<Spare_backups->Pages->Nb_layers; i++)
+  for (i=0; i<Spare.backups->Pages->Nb_layers; i++)
   {
     Copy_part_of_image_to_another(
-      Spare_backups->Pages->Next->Image[i].Pixels,0,0,Min(Spare_backups->Pages->Next->Width,Spare.image_width),
-      Min(Spare_backups->Pages->Next->Height,Spare.image_height),Spare_backups->Pages->Next->Width,
-      Spare_backups->Pages->Image[i].Pixels,0,0,Spare.image_width);
+      Spare.backups->Pages->Next->Image[i].Pixels,0,0,Min(Spare.backups->Pages->Next->Width,Spare.image_width),
+      Min(Spare.backups->Pages->Next->Height,Spare.image_height),Spare.backups->Pages->Next->Width,
+      Spare.backups->Pages->Image[i].Pixels,0,0,Spare.image_width);
   }
   Redraw_spare_image();
   
@@ -660,7 +660,7 @@ int L_GetPicturePixel(lua_State* L)
   if (x<0 || y<0 || x>=Main.image_width || y>=Main.image_height)
   {
     // Silently return the image's transparent color
-    lua_pushinteger(L, Main_backups->Pages->Transparent_color);
+    lua_pushinteger(L, Main.backups->Pages->Transparent_color);
     return 1;
   }
   lua_pushinteger(L, Read_pixel_from_current_screen(x,y));
@@ -705,7 +705,7 @@ int L_GetLayerPixel(lua_State* L)
   if (x<0 || y<0 || x>=Main.image_width || y>=Main.image_height)
   {
     // Silently return the image's transparent color
-    lua_pushinteger(L, Main_backups->Pages->Transparent_color);
+    lua_pushinteger(L, Main.backups->Pages->Transparent_color);
     return 1;
   }
   lua_pushinteger(L, Read_pixel_from_current_layer(x,y));
@@ -735,10 +735,10 @@ int L_GetSpareLayerPixel(lua_State* L)
   if (x<0 || y<0 || x>=Spare.image_width || y>=Spare.image_height)
   {
     // Silently return the image's transparent color
-    lua_pushinteger(L, Spare_backups->Pages->Transparent_color);
+    lua_pushinteger(L, Spare.backups->Pages->Transparent_color);
     return 1;
   }
-  lua_pushinteger(L, *(Spare_backups->Pages->Image[Spare.current_layer].Pixels + y*Spare.image_width + x));
+  lua_pushinteger(L, *(Spare.backups->Pages->Image[Spare.current_layer].Pixels + y*Spare.image_width + x));
   return 1;
 }
 
@@ -756,7 +756,7 @@ int L_GetSparePicturePixel(lua_State* L)
   if (x<0 || y<0)
   {
     // Silently return the image's transparent color
-    lua_pushinteger(L, Spare_backups->Pages->Transparent_color);
+    lua_pushinteger(L, Spare.backups->Pages->Transparent_color);
     return 1;
   }
   lua_pushinteger(L, Read_pixel_from_spare_screen(x,y));
@@ -779,7 +779,7 @@ int L_GetSpareColor(lua_State* L)
 
 int L_GetSpareTransColor(lua_State* L)
 {
-  lua_pushinteger(L, Spare_backups->Pages->Transparent_color);
+  lua_pushinteger(L, Spare.backups->Pages->Transparent_color);
   return 1;
 }
 
@@ -949,7 +949,7 @@ int L_GetBackColor(lua_State* L)
 
 int L_GetTransColor(lua_State* L)
 {
-  lua_pushinteger(L, Main_backups->Pages->Transparent_color);
+  lua_pushinteger(L, Main.backups->Pages->Transparent_color);
   return 1;
 }
 
@@ -1893,7 +1893,7 @@ int L_GetLayerCount(lua_State* L)
   
   LUA_ARG_LIMIT (0, "layercount");
 
-  lua_pushinteger(L, Main_backups->Pages->Nb_layers);
+  lua_pushinteger(L, Main.backups->Pages->Nb_layers);
   return 1;
 }
 
@@ -1904,7 +1904,7 @@ int L_GetSpareLayerCount(lua_State* L)
   
   LUA_ARG_LIMIT (0, "layercount");
 
-  lua_pushinteger(L, Spare_backups->Pages->Nb_layers);
+  lua_pushinteger(L, Spare.backups->Pages->Nb_layers);
   return 1;
 }
 
@@ -1914,9 +1914,9 @@ int L_SelectSpareLayer(lua_State* L)
   int nb_args=lua_gettop(L);
   
   LUA_ARG_LIMIT (1, "selectsparelayer");
-  LUA_ARG_NUMBER(1, "selectsparelayer", Spare.current_layer, 0, Spare_backups->Pages->Nb_layers - 1);
+  LUA_ARG_NUMBER(1, "selectsparelayer", Spare.current_layer, 0, Spare.backups->Pages->Nb_layers - 1);
 
-  if (Spare_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+  if (Spare.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
   {
     if (! ((1 << Spare.current_layer) & Spare.layers_visible))
     {
@@ -1932,11 +1932,11 @@ int L_SelectLayer(lua_State* L)
   int nb_args=lua_gettop(L);
   
   LUA_ARG_LIMIT (1, "selectlayer");
-  LUA_ARG_NUMBER(1, "selectlayer", Main.current_layer, 0, Main_backups->Pages->Nb_layers - 1);
+  LUA_ARG_NUMBER(1, "selectlayer", Main.current_layer, 0, Main.backups->Pages->Nb_layers - 1);
 
   Backup_if_necessary(L, Main.current_layer);
   // 
-  if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+  if (Main.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
   {
     if (! ((1 << Main.current_layer) & Main.layers_visible))
     {
@@ -1965,7 +1965,7 @@ int L_FinalizePicture(lua_State* L)
     End_of_modification();
   }
   Is_backed_up = 0;
-  Main_backup_page = Main_backups->Pages;
+  Main_backup_page = Main.backups->Pages;
   Main_backup_screen = Main_screen;
   Register_main_readonly(L);
   lua_register(L,"setcolor",L_SetColor_unsaved);
@@ -1980,8 +1980,8 @@ int L_GetFileName(lua_State* L)
   
   LUA_ARG_LIMIT (0, "getfilename");
   
-  lua_pushstring(L, Main_backups->Pages->Filename);
-  lua_pushstring(L, Main_backups->Pages->File_directory);
+  lua_pushstring(L, Main.backups->Pages->Filename);
+  lua_pushstring(L, Main.backups->Pages->File_directory);
   return 2;
 }
 
@@ -2428,7 +2428,7 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   // like a feedback off effect (convolution matrix comes to mind).
   //Backup();
   Is_backed_up = 0;
-  Main_backup_page = Main_backups->Pages;
+  Main_backup_page = Main.backups->Pages;
   Main_backup_screen = Main_screen;
   Backup_the_spare(LAYER_ALL);
 

@@ -36,13 +36,13 @@ void Layer_activate(int layer, short side)
 {
   dword old_layers;
 
-  if (layer >= Main_backups->Pages->Nb_layers)
+  if (layer >= Main.backups->Pages->Nb_layers)
     return;
   
   // Keep a copy of which layers were visible
   old_layers = Main.layers_visible;
   
-  if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+  if (Main.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
   {
     if (side == RIGHT_SIDE)
     {
@@ -92,7 +92,7 @@ void Layer_activate(int layer, short side)
     Redraw_layered_image();
   else
     Update_depth_buffer(); // Only need the depth buffer
-  //Download_infos_page_main(Main_backups->Pages);
+  //Download_infos_page_main(Main.backups->Pages);
   //Update_FX_feedback(Config.FX_Feedback);
   Update_pixel_renderer();
   Display_all_screen();
@@ -106,11 +106,11 @@ void Button_Layer_add(void)
   
   Hide_cursor();
 
-  if (Main_backups->Pages->Nb_layers < max[Main_backups->Pages->Image_mode])
+  if (Main.backups->Pages->Nb_layers < max[Main.backups->Pages->Image_mode])
   {
     // Backup with unchanged layers
     Backup_layers(LAYER_NONE);
-    if (!Add_layer(Main_backups,Main.current_layer+1))
+    if (!Add_layer(Main.backups,Main.current_layer+1))
     {
       Update_depth_buffer();
       // I just noticed this might be unneeded, since the new layer
@@ -133,19 +133,19 @@ void Button_Layer_duplicate(void)
   
   Hide_cursor();
 
-  if (Main_backups->Pages->Nb_layers < max[Main_backups->Pages->Image_mode])
+  if (Main.backups->Pages->Nb_layers < max[Main.backups->Pages->Image_mode])
   {
     // Backup with unchanged layers
     Backup_layers(LAYER_NONE);
-    if (!Add_layer(Main_backups,Main.current_layer+1))
+    if (!Add_layer(Main.backups,Main.current_layer+1))
     {
       // Make a copy of current image
       memcpy(
-        Main_backups->Pages->Image[Main.current_layer].Pixels,
-        Main_backups->Pages->Image[Main.current_layer-1].Pixels,
-        Main_backups->Pages->Width*Main_backups->Pages->Height);
+        Main.backups->Pages->Image[Main.current_layer].Pixels,
+        Main.backups->Pages->Image[Main.current_layer-1].Pixels,
+        Main.backups->Pages->Width*Main.backups->Pages->Height);
 
-      if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION) {
+      if (Main.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION) {
         Update_depth_buffer();
         // I just noticed this might be unneeded, since the new layer
         // is transparent, it shouldn't have any visible effect.
@@ -165,11 +165,11 @@ void Button_Layer_remove(void)
 {
   Hide_cursor();
 
-  if (Main_backups->Pages->Nb_layers > 1)
+  if (Main.backups->Pages->Nb_layers > 1)
   {
     // Backup with unchanged layers
     Backup_layers(LAYER_NONE);
-    if (!Delete_layer(Main_backups,Main.current_layer))
+    if (!Delete_layer(Main.backups,Main.current_layer))
     {
       Update_screen_targets();
       Redraw_layered_image();
@@ -194,8 +194,8 @@ short Layer_under_mouse(void)
   // Safety required because the mouse cursor can have slided outside button.
   if (layer < 0)
     layer=0;
-  else if (layer > Main_backups->Pages->Nb_layers-1)
-    layer=Main_backups->Pages->Nb_layers-1;
+  else if (layer > Main.backups->Pages->Nb_layers-1)
+    layer=Main.backups->Pages->Nb_layers-1;
 
   return layer;
 }
@@ -217,8 +217,8 @@ void Button_Layer_toggle(void)
   // Safety required because the mouse cursor can have slided outside button.
   if (layer < 0)
     layer=0;
-  else if (layer > Main_backups->Pages->Nb_layers-1)
-    layer=Main_backups->Pages->Nb_layers-1;
+  else if (layer > Main.backups->Pages->Nb_layers-1)
+    layer=Main.backups->Pages->Nb_layers-1;
   
   Layer_activate(layer, RIGHT_SIDE);
   Mouse_K=0;
@@ -240,8 +240,8 @@ static void Draw_transparent_background(byte background)
 
 void Button_Layer_menu(void)
 {
-  byte transparent_color = Main_backups->Pages->Transparent_color;
-  byte transparent_background = Main_backups->Pages->Background_transparent;
+  byte transparent_color = Main.backups->Pages->Transparent_color;
+  byte transparent_background = Main.backups->Pages->Background_transparent;
   short clicked_button;
   byte color;
   byte click;
@@ -301,12 +301,12 @@ void Button_Layer_menu(void)
   if (clicked_button==3)
   {
     // Accept changes
-    if (Main_backups->Pages->Transparent_color != transparent_color ||
-        Main_backups->Pages->Background_transparent != transparent_background)
+    if (Main.backups->Pages->Transparent_color != transparent_color ||
+        Main.backups->Pages->Background_transparent != transparent_background)
     {
       Backup_layers(LAYER_NONE);
-      Main_backups->Pages->Transparent_color = transparent_color;
-      Main_backups->Pages->Background_transparent = transparent_background;
+      Main.backups->Pages->Transparent_color = transparent_color;
+      Main.backups->Pages->Background_transparent = transparent_background;
       Redraw_layered_image();
       Display_all_screen();
       End_of_modification();
@@ -321,10 +321,10 @@ void Button_Layer_set_transparent(void)
 {
   Hide_cursor();
 
-  if (Main_backups->Pages->Transparent_color != Back_color)
+  if (Main.backups->Pages->Transparent_color != Back_color)
   {
     Backup_layers(LAYER_ALL);
-    Main_backups->Pages->Transparent_color = Back_color;
+    Main.backups->Pages->Transparent_color = Back_color;
     
     Redraw_layered_image();
     Display_all_screen();
@@ -339,9 +339,9 @@ void Button_Layer_get_transparent(void)
 {
   Hide_cursor();
 
-  if (Main_backups->Pages->Transparent_color != Back_color)
+  if (Main.backups->Pages->Transparent_color != Back_color)
   {
-    Set_back_color(Main_backups->Pages->Transparent_color);
+    Set_back_color(Main.backups->Pages->Transparent_color);
   }
 
   Unselect_button(BUTTON_LAYER_COLOR);
@@ -374,7 +374,7 @@ void Button_Layer_up(void)
 {
   Hide_cursor();
 
-  if (Main.current_layer < (Main_backups->Pages->Nb_layers-1))
+  if (Main.current_layer < (Main.backups->Pages->Nb_layers-1))
   {
     T_Image tmp;
     dword layer_flags;
@@ -383,9 +383,9 @@ void Button_Layer_up(void)
     Backup_layers(LAYER_NONE);
     
     // swap
-    tmp = Main_backups->Pages->Image[Main.current_layer];
-    Main_backups->Pages->Image[Main.current_layer] = Main_backups->Pages->Image[Main.current_layer+1];
-    Main_backups->Pages->Image[Main.current_layer+1] = tmp;
+    tmp = Main.backups->Pages->Image[Main.current_layer];
+    Main.backups->Pages->Image[Main.current_layer] = Main.backups->Pages->Image[Main.current_layer+1];
+    Main.backups->Pages->Image[Main.current_layer+1] = tmp;
     
     // Swap visibility indicators
     layer_flags = (Main.layers_visible >> Main.current_layer) & 3;
@@ -423,9 +423,9 @@ void Button_Layer_down(void)
     Backup_layers(LAYER_NONE);
     
     // swap
-    tmp = Main_backups->Pages->Image[Main.current_layer];
-    Main_backups->Pages->Image[Main.current_layer] = Main_backups->Pages->Image[Main.current_layer-1];
-    Main_backups->Pages->Image[Main.current_layer-1] = tmp;
+    tmp = Main.backups->Pages->Image[Main.current_layer];
+    Main.backups->Pages->Image[Main.current_layer] = Main.backups->Pages->Image[Main.current_layer-1];
+    Main.backups->Pages->Image[Main.current_layer-1] = tmp;
     
     // Swap visibility indicators
     layer_flags = (Main.layers_visible >> (Main.current_layer-1)) & 3;
@@ -466,7 +466,7 @@ void Button_Anim_time(void)
   int frame;
   char buffer[6+1];
   T_Special_button * input_duration_button;
-  int duration=Main_backups->Pages->Image[Main.current_layer].Duration;
+  int duration=Main.backups->Pages->Image[Main.current_layer].Duration;
   
   Open_window(166,110,"Animation speed");
 
@@ -547,27 +547,27 @@ void Button_Anim_time(void)
           duration=0;
         else if (duration>655350)
           duration=655350;
-        Main_backups->Pages->Image[Main.current_layer].Duration = duration;
+        Main.backups->Pages->Image[Main.current_layer].Duration = duration;
         break;
       case 1:
         if (duration<0)
           duration=0;
         else if (duration>655350)
           duration=655350;
-        for (frame=0; frame<Main_backups->Pages->Nb_layers; frame++)
+        for (frame=0; frame<Main.backups->Pages->Nb_layers; frame++)
         {
-          Main_backups->Pages->Image[frame].Duration = duration;
+          Main.backups->Pages->Image[frame].Duration = duration;
         }
         break;
       case 2:
-        for (frame=0; frame<Main_backups->Pages->Nb_layers; frame++)
+        for (frame=0; frame<Main.backups->Pages->Nb_layers; frame++)
         {
-          int cur_duration = Main_backups->Pages->Image[frame].Duration+duration;
+          int cur_duration = Main.backups->Pages->Image[frame].Duration+duration;
           if (cur_duration<0)
             cur_duration=0;
           else if (cur_duration>655350)
             cur_duration=655350;
-          Main_backups->Pages->Image[frame].Duration = cur_duration;
+          Main.backups->Pages->Image[frame].Duration = cur_duration;
         }
         break;
       break;
@@ -591,10 +591,10 @@ void Button_Anim_first_frame(void)
 
 void Button_Anim_prev_frame(void)
 {
-  if (Main_backups->Pages->Nb_layers>1)
+  if (Main.backups->Pages->Nb_layers>1)
   {
     if (Main.current_layer==0)
-      Layer_activate(Main_backups->Pages->Nb_layers-1,LEFT_SIDE);
+      Layer_activate(Main.backups->Pages->Nb_layers-1,LEFT_SIDE);
     else
       Layer_activate(Main.current_layer-1,LEFT_SIDE);
   }
@@ -605,9 +605,9 @@ void Button_Anim_prev_frame(void)
 
 void Button_Anim_next_frame(void)
 {
-  if (Main_backups->Pages->Nb_layers>1)
+  if (Main.backups->Pages->Nb_layers>1)
   {
-    if (Main.current_layer==Main_backups->Pages->Nb_layers-1)
+    if (Main.current_layer==Main.backups->Pages->Nb_layers-1)
       Layer_activate(0,LEFT_SIDE);
     else
       Layer_activate(Main.current_layer+1,LEFT_SIDE);
@@ -620,8 +620,8 @@ void Button_Anim_next_frame(void)
 
 void Button_Anim_last_frame(void)
 {
-  if (Main.current_layer < (Main_backups->Pages->Nb_layers-1))
-    Layer_activate((Main_backups->Pages->Nb_layers-1),LEFT_SIDE);
+  if (Main.current_layer < (Main.backups->Pages->Nb_layers-1))
+    Layer_activate((Main.backups->Pages->Nb_layers-1),LEFT_SIDE);
     
   Hide_cursor();
   Unselect_button(BUTTON_ANIM_LAST_FRAME);
@@ -646,10 +646,10 @@ void Button_Anim_continuous_next(void)
     time_in_current_frame += time_now-time_start;
     time_start=time_now;
     target_frame = Main.current_layer;
-    while (time_in_current_frame > Main_backups->Pages->Image[target_frame].Duration)
+    while (time_in_current_frame > Main.backups->Pages->Image[target_frame].Duration)
     {
-      time_in_current_frame -= Interpret_delay(Main_backups->Pages->Image[target_frame].Duration);
-      target_frame = (target_frame+1) % Main_backups->Pages->Nb_layers;
+      time_in_current_frame -= Interpret_delay(Main.backups->Pages->Image[target_frame].Duration);
+      target_frame = (target_frame+1) % Main.backups->Pages->Nb_layers;
     }
     if (target_frame != Main.current_layer)
     {
@@ -681,10 +681,10 @@ void Button_Anim_continuous_prev(void)
     time_in_current_frame += time_now-time_start;
     time_start=time_now;
     target_frame = Main.current_layer;
-    while (time_in_current_frame > Main_backups->Pages->Image[target_frame].Duration)
+    while (time_in_current_frame > Main.backups->Pages->Image[target_frame].Duration)
     {
-      time_in_current_frame -= Interpret_delay(Main_backups->Pages->Image[target_frame].Duration);
-      target_frame = (target_frame+Main_backups->Pages->Nb_layers-1) % Main_backups->Pages->Nb_layers;
+      time_in_current_frame -= Interpret_delay(Main.backups->Pages->Image[target_frame].Duration);
+      target_frame = (target_frame+Main.backups->Pages->Nb_layers-1) % Main.backups->Pages->Nb_layers;
     }
     if (target_frame != Main.current_layer)
     {

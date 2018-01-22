@@ -169,8 +169,8 @@ void Button_Message_initial(void)
   //Print_in_window( 120-4*13,128,"(placeholder)",MC_Dark,MC_Light);
   Print_in_window(130-4*16,136,"http://grafx2.tk",MC_Dark,MC_Light);
 
-  Window_set_normal_button(56, 151, 71, 14, "Anim", 0, (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION), KEY_NONE);
-  Window_set_normal_button(133, 151, 71, 14, "Layers", 0, (Main_backups->Pages->Image_mode != IMAGE_MODE_LAYERED), KEY_NONE);
+  Window_set_normal_button(56, 151, 71, 14, "Anim", 0, (Main.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION), KEY_NONE);
+  Window_set_normal_button(133, 151, 71, 14, "Layers", 0, (Main.backups->Pages->Image_mode != IMAGE_MODE_LAYERED), KEY_NONE);
   
   Update_window_area(0,0,Window_width, Window_height);
 
@@ -187,7 +187,7 @@ void Button_Message_initial(void)
   
   if (clicked_button > 0)
   {
-    if (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED)
+    if (Main.backups->Pages->Image_mode == IMAGE_MODE_LAYERED)
     {
       Switch_layer_mode(IMAGE_MODE_ANIMATION);
       Config.Default_mode_layers = 0;
@@ -203,7 +203,7 @@ void Button_Message_initial(void)
       Display_all_screen();
     }
     // Modify the mode for the spare too
-    Spare_backups->Pages->Image_mode = Main_backups->Pages->Image_mode;
+    Spare.backups->Pages->Image_mode = Main.backups->Pages->Image_mode;
     Update_spare_buffers(Spare.image_width,Spare.image_height);
     Redraw_spare_image();
   }
@@ -506,12 +506,12 @@ void Button_Toggle_toolbar(void)
 
   Window_dropdown_add_item(&dropdown, 0, menu_name_tools);
   
-  if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION ||
-      Main_backups->Pages->Nb_layers==1)
+  if (Main.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION ||
+      Main.backups->Pages->Nb_layers==1)
     Window_dropdown_add_item(&dropdown, 1, menu_name_layers);
   
-  if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION ||
-    (Main_backups->Pages->Image_mode == IMAGE_MODE_LAYERED && Main_backups->Pages->Nb_layers==1))
+  if (Main.backups->Pages->Image_mode == IMAGE_MODE_ANIMATION ||
+    (Main.backups->Pages->Image_mode == IMAGE_MODE_LAYERED && Main.backups->Pages->Nb_layers==1))
     Window_dropdown_add_item(&dropdown, 2, menu_name_anim);
 
   item=Dropdown_activate(&dropdown,0,Menu_Y+Menu_bars[MENUBAR_STATUS].Top*Menu_factor_Y);
@@ -531,7 +531,7 @@ void Button_Toggle_toolbar(void)
         }
         Set_bar_visibility(MENUBAR_LAYERS, !Menu_bars[MENUBAR_LAYERS].Visible, 0);
 
-        if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+        if (Main.backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
           Switch_layer_mode(IMAGE_MODE_LAYERED);
           
         break;
@@ -543,7 +543,7 @@ void Button_Toggle_toolbar(void)
         }
         Set_bar_visibility(MENUBAR_ANIMATION, !Menu_bars[MENUBAR_ANIMATION].Visible, 0);
 
-        if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+        if (Main.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
           Switch_layer_mode(IMAGE_MODE_ANIMATION);
         
         break;
@@ -631,7 +631,7 @@ byte Button_Quit_local_function(void)
   {
     case 1 : return 0; // Rester
     case 2 : // Sauver et enregistrer
-      Get_full_filename(filename, Main_backups->Pages->Filename, Main_backups->Pages->File_directory);
+      Get_full_filename(filename, Main.backups->Pages->Filename, Main.backups->Pages->File_directory);
       if ( (!File_exists(filename)) || Confirmation_box("Erase old file ?") )
       {
         T_IO_Context save_context;
@@ -641,7 +641,7 @@ byte Button_Quit_local_function(void)
         Cursor_shape=CURSOR_SHAPE_HOURGLASS;
         Display_cursor();
        
-        Init_context_layered_image(&save_context, Main_backups->Pages->Filename, Main_backups->Pages->File_directory);
+        Init_context_layered_image(&save_context, Main.backups->Pages->Filename, Main.backups->Pages->File_directory);
         Save_image(&save_context);
         Destroy_context(&save_context);
         
@@ -698,9 +698,9 @@ void Button_Clear(void)
   Hide_cursor();
   Backup();
   if (Stencil_mode && Config.Clear_with_stencil)
-    Clear_current_image_with_stencil(Main_backups->Pages->Transparent_color,Stencil);
+    Clear_current_image_with_stencil(Main.backups->Pages->Transparent_color,Stencil);
   else
-    Clear_current_image(Main_backups->Pages->Transparent_color);
+    Clear_current_image(Main.backups->Pages->Transparent_color);
   Redraw_layered_image();
   End_of_modification();
   Display_all_screen();
@@ -1565,9 +1565,9 @@ void Button_Page(void)
   
   // On fait le reste du travail "à la main":
 // TODO
-  SWAP_PBYTES(Main_visible_image.Image,Spare_visible_image.Image)// !
-  SWAP_WORDS (Main_visible_image.Width,Spare_visible_image.Width)// !
-  SWAP_WORDS (Main_visible_image.Height,Spare_visible_image.Height)// !
+  SWAP_PBYTES(Main.visible_image.Image,Spare.visible_image.Image)
+  SWAP_WORDS (Main.visible_image.Width,Spare.visible_image.Width)
+  SWAP_WORDS (Main.visible_image.Height,Spare.visible_image.Height)
   SWAP_SHORTS(Main.offset_X,Spare.offset_X)
   SWAP_SHORTS(Main.offset_Y,Spare.offset_Y)
   SWAP_SHORTS(Main.separator_position,Spare.separator_position)
@@ -1652,20 +1652,20 @@ void Copy_image_only(void)
   {
     byte i;
         
-    for (i=0; i<Spare_backups->Pages->Nb_layers; i++)
+    for (i=0; i<Spare.backups->Pages->Nb_layers; i++)
     {
       if (i == Spare.current_layer)
       {
         // Copy the current layer
-        memcpy(Spare_backups->Pages->Image[i].Pixels,Main_backups->Pages->Image[Main.current_layer].Pixels,Main.image_width*Main.image_height);
+        memcpy(Spare.backups->Pages->Image[i].Pixels,Main.backups->Pages->Image[Main.current_layer].Pixels,Main.image_width*Main.image_height);
       }
       else
       {
         // Resize the original layer
         Copy_part_of_image_to_another(
-        Spare_backups->Pages->Next->Image[i].Pixels,0,0,Min(old_width,Spare.image_width),
+        Spare.backups->Pages->Next->Image[i].Pixels,0,0,Min(old_width,Spare.image_width),
         Min(old_height,Spare.image_height),old_width,
-        Spare_backups->Pages->Image[i].Pixels,0,0,Spare.image_width);
+        Spare.backups->Pages->Image[i].Pixels,0,0,Spare.image_width);
       }
     }
 
@@ -1812,10 +1812,10 @@ void Button_Copy_page(void)
 // -- Suppression d'une page -------------------------------------------------
 void Button_Kill(void)
 {
-  if ( (Main_backups->List_size==1)
+  if ( (Main.backups->List_size==1)
     || (!Confirmation_box("Delete the current page?")) )
   {
-    if (Main_backups->List_size==1)
+    if (Main.backups->List_size==1)
       Warning_message("You can't delete the last page.");
     Hide_cursor();
     Unselect_button(BUTTON_KILL);
@@ -2467,19 +2467,19 @@ void Draw_button_gradient_style(short x_pos,short y_pos,int technique)
 
 void Load_gradient_data(int index)
 {
-  if (Main_backups->Pages->Gradients->Range[index].Start>Main_backups->Pages->Gradients->Range[index].End)
+  if (Main.backups->Pages->Gradients->Range[index].Start>Main.backups->Pages->Gradients->Range[index].End)
     Error(0);
-  Gradient_lower_bound =Main_backups->Pages->Gradients->Range[index].Start;
-  Gradient_upper_bound =Main_backups->Pages->Gradients->Range[index].End;
-  Gradient_is_inverted          =Main_backups->Pages->Gradients->Range[index].Inverse;
-  Gradient_random_factor=Main_backups->Pages->Gradients->Range[index].Mix+1;
+  Gradient_lower_bound =Main.backups->Pages->Gradients->Range[index].Start;
+  Gradient_upper_bound =Main.backups->Pages->Gradients->Range[index].End;
+  Gradient_is_inverted          =Main.backups->Pages->Gradients->Range[index].Inverse;
+  Gradient_random_factor=Main.backups->Pages->Gradients->Range[index].Mix+1;
 
   Gradient_bounds_range=(Gradient_lower_bound<Gradient_upper_bound)?
                             Gradient_upper_bound-Gradient_lower_bound:
                             Gradient_lower_bound-Gradient_upper_bound;
   Gradient_bounds_range++;
 
-  switch(Main_backups->Pages->Gradients->Range[index].Technique)
+  switch(Main.backups->Pages->Gradients->Range[index].Technique)
   {
     case 0 : // Degradé de base
       Gradient_function=Gradient_basic;
@@ -2541,7 +2541,7 @@ void Button_Gradients(void)
   Gradient_pixel=Pixel;
   old_current_gradient=Current_gradient;
   changed_gradient_index=0;
-  memcpy(&backup_gradients,Main_backups->Pages->Gradients,sizeof(T_Gradient_array));
+  memcpy(&backup_gradients,Main.backups->Pages->Gradients,sizeof(T_Gradient_array));
 
   Open_window(235,146,"Gradation menu");
 
@@ -2550,19 +2550,19 @@ void Button_Gradients(void)
   gradient_scroller=Window_set_scroller_button(218,20,75,16,1,Current_gradient);  // 2
   // Slider for mix
   mix_scroller = Window_set_scroller_button(31,20,84,256,1,
-    Main_backups->Pages->Gradients->Range[Current_gradient].Mix);                      // 3
+    Main.backups->Pages->Gradients->Range[Current_gradient].Mix);                      // 3
   // Direction
   Window_set_normal_button(8,20,15,14,
-    (Main_backups->Pages->Gradients->Range[Current_gradient].Inverse)?"\033":"\032",0,1,SDLK_TAB); // 4
+    (Main.backups->Pages->Gradients->Range[Current_gradient].Inverse)?"\033":"\032",0,1,SDLK_TAB); // 4
   // Technique
   Window_set_normal_button(8,90,15,14,"",0,1,SDLK_TAB|MOD_SHIFT); // 5
-  Draw_button_gradient_style(8,90,Main_backups->Pages->Gradients->Range[Current_gradient].Technique);
+  Draw_button_gradient_style(8,90,Main.backups->Pages->Gradients->Range[Current_gradient].Technique);
 
   Window_set_normal_button(178,128,51,14,"OK",0,1,SDLK_RETURN);     // 6
   Window_set_normal_button(123,128,51,14,"Cancel",0,1,KEY_ESC);  // 7
   // Scrolling speed
-  speed_scroller = Window_set_horizontal_scroller_button(99,111,130,106,1,Main_backups->Pages->Gradients->Range[Current_gradient].Speed);  // 8
-  Num2str(Main_backups->Pages->Gradients->Range[Current_gradient].Speed,str,3);
+  speed_scroller = Window_set_horizontal_scroller_button(99,111,130,106,1,Main.backups->Pages->Gradients->Range[Current_gradient].Speed);  // 8
+  Num2str(Main.backups->Pages->Gradients->Range[Current_gradient].Speed,str,3);
   Print_in_window(73,113,str,MC_Black,MC_Light);
       
   Print_in_window(5,58,"MIX",MC_Dark,MC_Light);
@@ -2572,7 +2572,7 @@ void Button_Gradients(void)
   Print_in_window(11,112,"Cycling",cycling_mode?MC_Black:MC_Dark,MC_Light);
   
   // On tagge les couleurs qui vont avec
-  Tag_color_range(Main_backups->Pages->Gradients->Range[Current_gradient].Start,Main_backups->Pages->Gradients->Range[Current_gradient].End);
+  Tag_color_range(Main.backups->Pages->Gradients->Range[Current_gradient].Start,Main.backups->Pages->Gradients->Range[Current_gradient].End);
 
   Num2str(Current_gradient+1,str,2);
   Print_in_window(215,100,str,MC_Black,MC_Light);
@@ -2582,7 +2582,7 @@ void Button_Gradients(void)
   // On affiche la preview
   Draw_gradient_preview(8,128,108,14,Current_gradient);
 
-  first_color=last_color=(Main_backups->Pages->Gradients->Range[Current_gradient].Inverse)?Main_backups->Pages->Gradients->Range[Current_gradient].End:Main_backups->Pages->Gradients->Range[Current_gradient].Start;
+  first_color=last_color=(Main.backups->Pages->Gradients->Range[Current_gradient].Inverse)?Main.backups->Pages->Gradients->Range[Current_gradient].End:Main.backups->Pages->Gradients->Range[Current_gradient].Start;
   Update_window_area(0,0,Window_width, Window_height);
 
   Display_cursor();
@@ -2604,19 +2604,19 @@ void Button_Gradients(void)
       Print_in_window(215,100,str,MC_Black,MC_Light);
 
       // On tagge les couleurs qui vont avec
-      Tag_color_range(Main_backups->Pages->Gradients->Range[Current_gradient].Start,Main_backups->Pages->Gradients->Range[Current_gradient].End);
+      Tag_color_range(Main.backups->Pages->Gradients->Range[Current_gradient].Start,Main.backups->Pages->Gradients->Range[Current_gradient].End);
 
       // On affiche le sens qui va avec
-      Print_in_window(12,23,(Main_backups->Pages->Gradients->Range[Current_gradient].Inverse)?"\033":"\032",MC_Black,MC_Light);
+      Print_in_window(12,23,(Main.backups->Pages->Gradients->Range[Current_gradient].Inverse)?"\033":"\032",MC_Black,MC_Light);
 
       // On raffiche le mélange (jauge) qui va avec
-      mix_scroller->Position=Main_backups->Pages->Gradients->Range[Current_gradient].Mix;
+      mix_scroller->Position=Main.backups->Pages->Gradients->Range[Current_gradient].Mix;
       Window_draw_slider(mix_scroller);
 
       // Update speed
-      speed_scroller->Position=Main_backups->Pages->Gradients->Range[Current_gradient].Speed;
+      speed_scroller->Position=Main.backups->Pages->Gradients->Range[Current_gradient].Speed;
       Window_draw_slider(speed_scroller);
-      Num2str(Main_backups->Pages->Gradients->Range[Current_gradient].Speed,str,3);
+      Num2str(Main.backups->Pages->Gradients->Range[Current_gradient].Speed,str,3);
       Print_in_window(73,113,str,MC_Black,MC_Light);
 
       // Gradient #
@@ -2624,7 +2624,7 @@ void Button_Gradients(void)
       Window_draw_slider(gradient_scroller);
       
       // Technique (flat, dithered, very dithered)
-      Draw_button_gradient_style(8,90,Main_backups->Pages->Gradients->Range[Current_gradient].Technique);
+      Draw_button_gradient_style(8,90,Main.backups->Pages->Gradients->Range[Current_gradient].Technique);
 
       // Rectangular gradient preview
       Draw_gradient_preview(8,128,108,14,Current_gradient);
@@ -2654,9 +2654,9 @@ void Button_Gradients(void)
             // On vient de clicker
 
             // On met à jour l'intervalle du dégradé
-            first_color=last_color=Main_backups->Pages->Gradients->Range[Current_gradient].Start=Main_backups->Pages->Gradients->Range[Current_gradient].End=temp_color;
+            first_color=last_color=Main.backups->Pages->Gradients->Range[Current_gradient].Start=Main.backups->Pages->Gradients->Range[Current_gradient].End=temp_color;
             // On tagge le bloc
-            Tag_color_range(Main_backups->Pages->Gradients->Range[Current_gradient].Start,Main_backups->Pages->Gradients->Range[Current_gradient].End);
+            Tag_color_range(Main.backups->Pages->Gradients->Range[Current_gradient].Start,Main.backups->Pages->Gradients->Range[Current_gradient].End);
             // Tracé de la preview:
             Draw_gradient_preview(8,128,108,14,Current_gradient);
           }
@@ -2668,18 +2668,18 @@ void Button_Gradients(void)
               // On commence par ordonner la 1ère et dernière couleur du bloc
               if (first_color<temp_color)
               {
-                Main_backups->Pages->Gradients->Range[Current_gradient].Start=first_color;
-                Main_backups->Pages->Gradients->Range[Current_gradient].End  =temp_color;
+                Main.backups->Pages->Gradients->Range[Current_gradient].Start=first_color;
+                Main.backups->Pages->Gradients->Range[Current_gradient].End  =temp_color;
               }
               else if (first_color>temp_color)
               {
-                Main_backups->Pages->Gradients->Range[Current_gradient].Start=temp_color;
-                Main_backups->Pages->Gradients->Range[Current_gradient].End  =first_color;
+                Main.backups->Pages->Gradients->Range[Current_gradient].Start=temp_color;
+                Main.backups->Pages->Gradients->Range[Current_gradient].End  =first_color;
               }
               else
-                Main_backups->Pages->Gradients->Range[Current_gradient].Start=Main_backups->Pages->Gradients->Range[Current_gradient].End=first_color;
+                Main.backups->Pages->Gradients->Range[Current_gradient].Start=Main.backups->Pages->Gradients->Range[Current_gradient].End=first_color;
               // On tagge le bloc
-              Tag_color_range(Main_backups->Pages->Gradients->Range[Current_gradient].Start,Main_backups->Pages->Gradients->Range[Current_gradient].End);
+              Tag_color_range(Main.backups->Pages->Gradients->Range[Current_gradient].Start,Main.backups->Pages->Gradients->Range[Current_gradient].End);
               // Tracé de la preview:
               Draw_gradient_preview(8,128,108,14,Current_gradient);
               last_color=temp_color;
@@ -2696,7 +2696,7 @@ void Button_Gradients(void)
       case  3 : // Nouveau mélange de dégradé
         Hide_cursor();
         // Nouvel mélange dans Window_attribute2
-        Main_backups->Pages->Gradients->Range[Current_gradient].Mix=Window_attribute2;
+        Main.backups->Pages->Gradients->Range[Current_gradient].Mix=Window_attribute2;
         // On affiche la nouvelle preview
         Draw_gradient_preview(8,128,108,14,Current_gradient);
         Display_cursor();
@@ -2704,8 +2704,8 @@ void Button_Gradients(void)
       case  4 : // Changement de sens
         Hide_cursor();
         // On inverse le sens (par un XOR de 1)
-        Main_backups->Pages->Gradients->Range[Current_gradient].Inverse^=1;
-        Print_in_window(12,23,(Main_backups->Pages->Gradients->Range[Current_gradient].Inverse)?"\033":"\032",MC_Black,MC_Light);
+        Main.backups->Pages->Gradients->Range[Current_gradient].Inverse^=1;
+        Print_in_window(12,23,(Main.backups->Pages->Gradients->Range[Current_gradient].Inverse)?"\033":"\032",MC_Black,MC_Light);
         // On affiche la nouvelle preview
         Draw_gradient_preview(8,128,108,14,Current_gradient);
         Display_cursor();
@@ -2713,14 +2713,14 @@ void Button_Gradients(void)
       case  5 : // Changement de technique
         Hide_cursor();
         // On change la technique par (+1)%3
-        Main_backups->Pages->Gradients->Range[Current_gradient].Technique=(Main_backups->Pages->Gradients->Range[Current_gradient].Technique+1)%3;
-        Draw_button_gradient_style(8,90,Main_backups->Pages->Gradients->Range[Current_gradient].Technique);
+        Main.backups->Pages->Gradients->Range[Current_gradient].Technique=(Main.backups->Pages->Gradients->Range[Current_gradient].Technique+1)%3;
+        Draw_button_gradient_style(8,90,Main.backups->Pages->Gradients->Range[Current_gradient].Technique);
         // On affiche la nouvelle preview
         Draw_gradient_preview(8,128,108,14,Current_gradient);
         Display_cursor();
       case  8 : // Speed
-        Main_backups->Pages->Gradients->Range[Current_gradient].Speed=Window_attribute2;
-        Num2str(Main_backups->Pages->Gradients->Range[Current_gradient].Speed,str,3);
+        Main.backups->Pages->Gradients->Range[Current_gradient].Speed=Window_attribute2;
+        Num2str(Main.backups->Pages->Gradients->Range[Current_gradient].Speed,str,3);
         Hide_cursor();
         Print_in_window(73,113,str,MC_Black,MC_Light);
         Display_cursor();
@@ -2746,9 +2746,9 @@ void Button_Gradients(void)
           temp_color=color;
 
           // On met à jour l'intervalle du dégradé
-          first_color=last_color=Main_backups->Pages->Gradients->Range[Current_gradient].Start=Main_backups->Pages->Gradients->Range[Current_gradient].End=temp_color;
+          first_color=last_color=Main.backups->Pages->Gradients->Range[Current_gradient].Start=Main.backups->Pages->Gradients->Range[Current_gradient].End=temp_color;
           // On tagge le bloc
-          Tag_color_range(Main_backups->Pages->Gradients->Range[Current_gradient].Start,Main_backups->Pages->Gradients->Range[Current_gradient].End);
+          Tag_color_range(Main.backups->Pages->Gradients->Range[Current_gradient].Start,Main.backups->Pages->Gradients->Range[Current_gradient].End);
           // Tracé de la preview:
           Draw_gradient_preview(8,128,108,14,Current_gradient);
           Display_cursor();
@@ -2804,7 +2804,7 @@ void Button_Gradients(void)
   if (clicked_button==7) // Cancel
   {
     Current_gradient=old_current_gradient;
-    memcpy(Main_backups->Pages->Gradients,&backup_gradients,sizeof(T_Gradient_array));
+    memcpy(Main.backups->Pages->Gradients,&backup_gradients,sizeof(T_Gradient_array));
   }
 }
 
@@ -3158,8 +3158,8 @@ void Load_picture(byte image)
   
   if (image)
   {
-    strcpy(filename, Main_backups->Pages->Filename);
-    strcpy(directory, Main_backups->Pages->File_directory);
+    strcpy(filename, Main.backups->Pages->Filename);
+    strcpy(directory, Main.backups->Pages->File_directory);
     Init_context_layered_image(&context, filename, directory);
   }
   else
@@ -3301,7 +3301,7 @@ void Button_Load(void)
 {
   // On sauve l'état actuel des paramètres de l'image pour pouvoir les
   // restituer en cas d'erreur n'affectant pas l'image
-  Upload_infos_page_main(Main_backups->Pages);
+  Upload_infos_page_main(Main.backups->Pages);
 
   Load_picture(1);
   Tilemap_update();
@@ -3315,7 +3315,7 @@ void Button_Reload(void)
 
   // On sauve l'état actuel des paramètres de l'image pour pouvoir les
   // restituer en cas d'erreur n'affectant pas l'image
-  Upload_infos_page_main(Main_backups->Pages);
+  Upload_infos_page_main(Main.backups->Pages);
 
   if ( (!Main.image_is_modified) || Confirmation_box("Discard unsaved changes ?") )
   {
@@ -3329,7 +3329,7 @@ void Button_Reload(void)
     Original_screen_X=0;
     Original_screen_Y=0;
     
-    Init_context_layered_image(&context, Main_backups->Pages->Filename, Main_backups->Pages->File_directory);
+    Init_context_layered_image(&context, Main.backups->Pages->Filename, Main.backups->Pages->File_directory);
     Load_image(&context);
 
     Hide_cursor();
@@ -3406,7 +3406,7 @@ void Backup_filename(char * fname, char * backup_name)
   short i;
 
   strcpy(backup_name,fname);
-  for (i=strlen(fname)-strlen(Main_backups->Pages->Filename); backup_name[i]!='.'; i++);
+  for (i=strlen(fname)-strlen(Main.backups->Pages->Filename); backup_name[i]!='.'; i++);
   backup_name[i+1]='\0';
   strcat(backup_name,"BAK");
 }
@@ -3417,7 +3417,7 @@ void Backup_existing_file(void)
   char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   char new_filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier backup
 
-  Get_full_filename(filename, Main_backups->Pages->Filename, Main_backups->Pages->File_directory);
+  Get_full_filename(filename, Main.backups->Pages->Filename, Main.backups->Pages->File_directory);
   // Calcul du nom complet du fichier backup
   Backup_filename(filename,new_filename);
 
@@ -3449,8 +3449,8 @@ void Save_picture(enum CONTEXT_TYPE type)
 
   if (type == CONTEXT_MAIN_IMAGE)
   {
-    strcpy(filename, Main_backups->Pages->Filename);
-    strcpy(directory, Main_backups->Pages->File_directory);
+    strcpy(filename, Main.backups->Pages->Filename);
+    strcpy(directory, Main.backups->Pages->File_directory);
     Init_context_layered_image(&save_context, filename, directory);
     save_context.Format = Main.fileformat;
   }
@@ -3464,7 +3464,7 @@ void Save_picture(enum CONTEXT_TYPE type)
   else if (type == CONTEXT_PALETTE)
   {
     char* dotpos;
-    strcpy(filename, Main_backups->Pages->Filename);
+    strcpy(filename, Main.backups->Pages->Filename);
 
     // Replace extension with PAL
     dotpos = strrchr(filename, '.');
@@ -3472,7 +3472,7 @@ void Save_picture(enum CONTEXT_TYPE type)
       dotpos = filename + strlen(filename);
     strcpy(dotpos, ".pal");
 
-    strcpy(directory, Main_backups->Pages->File_directory);
+    strcpy(directory, Main.backups->Pages->File_directory);
     Init_context_layered_image(&save_context, filename, directory);
     save_context.Type = CONTEXT_PALETTE;
 
@@ -3510,12 +3510,12 @@ void Save_picture(enum CONTEXT_TYPE type)
     Save_image(&save_context);
 
     format=Get_fileformat(save_context.Format);
-    if (!File_error && type == CONTEXT_MAIN_IMAGE && !format->Palette_only && (Main_backups->Pages->Nb_layers==1 || format->Supports_layers))
+    if (!File_error && type == CONTEXT_MAIN_IMAGE && !format->Palette_only && (Main.backups->Pages->Nb_layers==1 || format->Supports_layers))
     {
       Main.image_is_modified=0;
       Main.fileformat=save_context.Format;
-      strcpy(Main_backups->Pages->Filename, save_context.File_name);
-      strcpy(Main_backups->Pages->File_directory, save_context.File_directory);
+      strcpy(Main.backups->Pages->Filename, save_context.File_name);
+      strcpy(Main.backups->Pages->File_directory, save_context.File_directory);
     }
     if (type == CONTEXT_BRUSH)
     {
@@ -3547,7 +3547,7 @@ void Button_Autosave(void)
   byte file_already_exists;
 
 
-  Get_full_filename(filename, Main_backups->Pages->Filename, Main_backups->Pages->File_directory);
+  Get_full_filename(filename, Main.backups->Pages->Filename, Main.backups->Pages->File_directory);
   file_already_exists=File_exists(filename);
 
   if ( (!file_already_exists) || Confirmation_box("Erase old file ?") )
@@ -3567,7 +3567,7 @@ void Button_Autosave(void)
       Cursor_shape=CURSOR_SHAPE_HOURGLASS;
       Display_cursor();
 
-      Init_context_layered_image(&save_context, Main_backups->Pages->Filename, Main_backups->Pages->File_directory);
+      Init_context_layered_image(&save_context, Main.backups->Pages->Filename, Main.backups->Pages->File_directory);
       Save_image(&save_context);
       if (!File_error)
       {
@@ -4557,7 +4557,7 @@ void Display_effect_states(void)
   Display_effect_state(C3, L2, "Snap"   ,Snap_mode);
   Display_effect_state(C3, L4, "Tiling" ,Tiling_mode);
 
-  Display_effect_state(C2,L4, "8 bit"  ,Main_backups->Pages->Image_mode > IMAGE_MODE_ANIMATION);
+  Display_effect_state(C2,L4, "8 bit"  ,Main.backups->Pages->Image_mode > IMAGE_MODE_ANIMATION);
   Display_effect_state(C3,L3, "Tilemap",Main.tilemap_mode);
 }
 
@@ -4858,7 +4858,7 @@ void Button_Effects(void)
         {
           Button_Constraint_mode();
           Hide_cursor();
-          Display_effect_state(C2,L4, "8 bit" ,Main_backups->Pages->Image_mode > IMAGE_MODE_ANIMATION);
+          Display_effect_state(C2,L4, "8 bit" ,Main.backups->Pages->Image_mode > IMAGE_MODE_ANIMATION);
           Display_cursor();
         } else {
           Close_window();
@@ -5613,5 +5613,5 @@ void Button_Brush_container(void)
 byte Any_effect_active(void)
 {
     return Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode
-      ||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode||Main.tilemap_mode || (Main_backups->Pages->Image_mode > IMAGE_MODE_ANIMATION);
+      ||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode||Main.tilemap_mode || (Main.backups->Pages->Image_mode > IMAGE_MODE_ANIMATION);
 }

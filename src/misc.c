@@ -59,9 +59,9 @@ word Count_used_colors(dword* usage)
   nb_pixels = Main.image_height * Main.image_width;
 
   // For each layer
-  for (layer = 0; layer < Main_backups->Pages->Nb_layers; layer++)
+  for (layer = 0; layer < Main.backups->Pages->Nb_layers; layer++)
   {
-    current_pixel = Main_backups->Pages->Image[layer].Pixels;
+    current_pixel = Main.backups->Pages->Image[layer].Pixels;
     // For each pixel in picture
     for (i = 0; i < nb_pixels; i++)
     {
@@ -204,7 +204,7 @@ void Clear_current_image_with_stencil(byte color, byte * stencil)
   int nb_pixels=0; //ECX
   //al=color
   //edi=Screen_pixels
-  byte* pixel=Main_backups->Pages->Image[Main.current_layer].Pixels;
+  byte* pixel=Main.backups->Pages->Image[Main.current_layer].Pixels;
   int i;
 
   nb_pixels=Main.image_height*Main.image_width;
@@ -221,7 +221,7 @@ void Clear_current_image(byte color)
   // Effacer l'image courante avec une certaine couleur
 {
   memset(
-    Main_backups->Pages->Image[Main.current_layer].Pixels,
+    Main.backups->Pages->Image[Main.current_layer].Pixels,
     color ,
     Main.image_width * Main.image_height
     );
@@ -303,14 +303,14 @@ byte Read_pixel_from_spare_screen(word x,word y)
   // Clipping is required as this can be called with coordinates from main image
   // (can be a bigger or smaller image)
   if (x>=Spare.image_width || y>=Spare.image_height)
-    return Spare_backups->Pages->Transparent_color;
-  if (Spare_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+    return Spare.backups->Pages->Transparent_color;
+  if (Spare.backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
   {
-    return *(Spare_backups->Pages->Image[Spare.current_layer].Pixels + y*Spare.image_width + x);
+    return *(Spare.backups->Pages->Image[Spare.current_layer].Pixels + y*Spare.image_width + x);
   }
   else
   {
-    return *(Spare_visible_image.Image + y*Spare.image_width + x);
+    return *(Spare.visible_image.Image + y*Spare.image_width + x);
   }
 }
 
@@ -365,7 +365,7 @@ void Remap_general_lowlevel(byte * conversion_table,byte * in_buffer, byte *out_
 
 void Copy_image_to_brush(short start_x,short start_y,short Brush_width,short Brush_height,word image_width)
 {
-  byte* src=start_y*image_width+start_x+Main_backups->Pages->Image[Main.current_layer].Pixels; //Adr départ image (ESI)
+  byte* src=start_y*image_width+start_x+Main.backups->Pages->Image[Main.current_layer].Pixels; //Adr départ image (ESI)
   byte* dest=Brush_original_pixels; //Adr dest brosse (EDI)
   int dx;
 
@@ -410,7 +410,7 @@ void Replace_colors_within_limits(byte * replace_table)
     // Pour chaque pixel sur la ligne :
     for (x = Limit_left;x <= Limit_right;x ++)
     {
-      pixel = Main_backups->Pages->Image[Main.current_layer].Pixels+y*Main.image_width+x;
+      pixel = Main.backups->Pages->Image[Main.current_layer].Pixels+y*Main.image_width+x;
       *pixel = replace_table[*pixel];
     }
   }

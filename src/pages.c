@@ -39,10 +39,10 @@
 // -- Layers data
 
 /// Array of two images, that contains the "flattened" version of the visible layers.
-T_Bitmap Main_visible_image;
+//T_Bitmap Main_visible_image;
 T_Bitmap Main_visible_image_backup;
 T_Bitmap Main_visible_image_depth_buffer;
-T_Bitmap Spare_visible_image;
+//T_Bitmap Spare_visible_image;
 
   ///
   /// GESTION DES PAGES
@@ -198,28 +198,28 @@ void Download_infos_page_main(T_Page * page)
 
 void Redraw_layered_image(void)
 {
-  if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+  if (Main.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
   {
     // Re-construct the image with the visible layers
     byte layer=0;  
     // First layer
-    if (Main_backups->Pages->Image_mode == IMAGE_MODE_MODE5 && Main.layers_visible & (1<<4))
+    if (Main.backups->Pages->Image_mode == IMAGE_MODE_MODE5 && Main.layers_visible & (1<<4))
     {
       // The raster result layer is visible: start there
       // Copy it in Main_visible_image
       int i;
       for (i=0; i< Main.image_width*Main.image_height; i++)
       {
-        layer = *(Main_backups->Pages->Image[4].Pixels+i);
-		if (Main.layers_visible & (1 << layer))
-        	Main_visible_image.Image[i]=*(Main_backups->Pages->Image[layer].Pixels+i);
-		else
-			Main_visible_image.Image[i] = layer;
+        layer = *(Main.backups->Pages->Image[4].Pixels+i);
+        if (Main.layers_visible & (1 << layer))
+          Main.visible_image.Image[i]=*(Main.backups->Pages->Image[layer].Pixels+i);
+        else
+          Main.visible_image.Image[i] = layer;
       }
         
       // Copy it to the depth buffer
       memcpy(Main_visible_image_depth_buffer.Image,
-        Main_backups->Pages->Image[4].Pixels,
+        Main.backups->Pages->Image[4].Pixels,
         Main.image_width*Main.image_height);
         
       // Next
@@ -227,13 +227,13 @@ void Redraw_layered_image(void)
     }
     else
     {
-      for (layer=0; layer<Main_backups->Pages->Nb_layers; layer++)
+      for (layer=0; layer<Main.backups->Pages->Nb_layers; layer++)
       {
         if ((1<<layer) & Main.layers_visible)
         {
            // Copy it in Main_visible_image
-           memcpy(Main_visible_image.Image,
-             Main_backups->Pages->Image[layer].Pixels,
+           memcpy(Main.visible_image.Image,
+             Main.backups->Pages->Image[layer].Pixels,
              Main.image_width*Main.image_height);
            
            // Initialize the depth buffer
@@ -248,17 +248,17 @@ void Redraw_layered_image(void)
       }
     }
     // subsequent layer(s)
-    for (; layer<Main_backups->Pages->Nb_layers; layer++)
+    for (; layer<Main.backups->Pages->Nb_layers; layer++)
     {
       if ((1<<layer) & Main.layers_visible)
       {
         int i;
         for (i=0; i<Main.image_width*Main.image_height; i++)
         {
-          byte color = *(Main_backups->Pages->Image[layer].Pixels+i);
-          if (color != Main_backups->Pages->Transparent_color) // transparent color
+          byte color = *(Main.backups->Pages->Image[layer].Pixels+i);
+          if (color != Main.backups->Pages->Transparent_color) // transparent color
           {
-            *(Main_visible_image.Image+i) = color;
+            *(Main.visible_image.Image+i) = color;
             if (layer != Main.current_layer)
               *(Main_visible_image_depth_buffer.Image+i) = layer;
           }
@@ -275,7 +275,7 @@ void Redraw_layered_image(void)
 
 void Update_depth_buffer(void)
 {
-  if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+  if (Main.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
   {
     // Re-construct the depth buffer with the visible layers.
     // This function doesn't touch the visible buffer, it assumes
@@ -283,7 +283,7 @@ void Update_depth_buffer(void)
   
     int layer;  
     // First layer
-    for (layer=0; layer<Main_backups->Pages->Nb_layers; layer++)
+    for (layer=0; layer<Main.backups->Pages->Nb_layers; layer++)
     {
       if ((1<<layer) & Main.layers_visible)
       {
@@ -298,7 +298,7 @@ void Update_depth_buffer(void)
       }
     }
     // subsequent layer(s)
-    for (; layer<Main_backups->Pages->Nb_layers; layer++)
+    for (; layer<Main.backups->Pages->Nb_layers; layer++)
     {
       // skip the current layer, whenever we reach it
       if (layer == Main.current_layer)
@@ -309,8 +309,8 @@ void Update_depth_buffer(void)
         int i;
         for (i=0; i<Main.image_width*Main.image_height; i++)
         {
-          byte color = *(Main_backups->Pages->Image[layer].Pixels+i);
-          if (color != Main_backups->Pages->Transparent_color) // transparent color
+          byte color = *(Main.backups->Pages->Image[layer].Pixels+i);
+          if (color != Main.backups->Pages->Transparent_color) // transparent color
           {
             *(Main_visible_image_depth_buffer.Image+i) = layer;
           }
@@ -323,18 +323,18 @@ void Update_depth_buffer(void)
 
 void Redraw_spare_image(void)
 {
-  if (Spare_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+  if (Spare.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
   {
     // Re-construct the image with the visible layers
     byte layer;  
     // First layer
-    for (layer=0; layer<Spare_backups->Pages->Nb_layers; layer++)
+    for (layer=0; layer<Spare.backups->Pages->Nb_layers; layer++)
     {
       if ((1<<layer) & Spare.layers_visible)
       {
          // Copy it in Spare_visible_image
-         memcpy(Spare_visible_image.Image,
-           Spare_backups->Pages->Image[layer].Pixels,
+         memcpy(Spare.visible_image.Image,
+           Spare.backups->Pages->Image[layer].Pixels,
            Spare.image_width*Spare.image_height);
          
          // No depth buffer in the spare
@@ -348,17 +348,17 @@ void Redraw_spare_image(void)
       }
     }
     // subsequent layer(s)
-    for (; layer<Spare_backups->Pages->Nb_layers; layer++)
+    for (; layer<Spare.backups->Pages->Nb_layers; layer++)
     {
       if ((1<<layer) & Spare.layers_visible)
       {
         int i;
         for (i=0; i<Spare.image_width*Spare.image_height; i++)
         {
-          byte color = *(Spare_backups->Pages->Image[layer].Pixels+i);
-          if (color != Spare_backups->Pages->Transparent_color) // transparent color
+          byte color = *(Spare.backups->Pages->Image[layer].Pixels+i);
+          if (color != Spare.backups->Pages->Transparent_color) // transparent color
           {
-            *(Spare_visible_image.Image+i) = color;
+            *(Spare.visible_image.Image+i) = color;
             //if (layer != Spare.current_layer)
             //  *(Spare_visible_image_depth_buffer.Image+i) = layer;
           }
@@ -370,7 +370,7 @@ void Redraw_spare_image(void)
 
 void Redraw_current_layer(void)
 {
-  if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+  if (Main.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
   {
     int i;
     for (i=0; i<Main.image_width*Main.image_height; i++)
@@ -378,14 +378,14 @@ void Redraw_current_layer(void)
       byte depth = *(Main_visible_image_depth_buffer.Image+i);
       if (depth<=Main.current_layer)
       {
-        byte color = *(Main_backups->Pages->Image[Main.current_layer].Pixels+i);
-        if (color != Main_backups->Pages->Transparent_color) // transparent color
+        byte color = *(Main.backups->Pages->Image[Main.current_layer].Pixels+i);
+        if (color != Main.backups->Pages->Transparent_color) // transparent color
         {
-          *(Main_visible_image.Image+i) = color;
+          *(Main.visible_image.Image+i) = color;
         }
         else
         {
-          *(Main_visible_image.Image+i) = *(Main_backups->Pages->Image[depth].Pixels+i);
+          *(Main.visible_image.Image+i) = *(Main.backups->Pages->Image[depth].Pixels+i);
         }
       }
     }
@@ -436,9 +436,9 @@ void Update_FX_feedback(byte with_feedback)
 {
 
   if (with_feedback)
-    FX_feedback_screen=Main_backups->Pages->Image[Main.current_layer].Pixels;
+    FX_feedback_screen=Main.backups->Pages->Image[Main.current_layer].Pixels;
   else
-    FX_feedback_screen=Main_backups->Pages->Next->Image[Main.current_layer].Pixels;
+    FX_feedback_screen=Main.backups->Pages->Next->Image[Main.current_layer].Pixels;
 }
 
 void Clear_page(T_Page * page)
@@ -672,7 +672,7 @@ void Free_page_of_a_list(T_List_of_pages * list)
   {
     // On fait faire un undo à la liste, comme ça, la nouvelle page courante
     // est la page précédente
-    Backward_in_list_of_pages(Main_backups);
+    Backward_in_list_of_pages(Main.backups);
 
     // Puis on détruit la dernière page, qui est l'ancienne page courante
     Free_last_page_of_list(list);
@@ -681,25 +681,25 @@ void Free_page_of_a_list(T_List_of_pages * list)
 
 void Update_screen_targets(void)
 {
-  if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+  if (Main.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
   {
-    Main_screen=Main_visible_image.Image;
+    Main_screen=Main.visible_image.Image;
     Screen_backup=Main_visible_image_backup.Image;
   }
   else
   {
-    Main_screen=Main_backups->Pages->Image[Main.current_layer].Pixels;
+    Main_screen=Main.backups->Pages->Image[Main.current_layer].Pixels;
     // Sometimes this function will be called in situations where the
     // current history step and previous one don't have as many layers.
     // I don't like the idea of letting Screen_backup NULL or dangling,
     // so in case Screen_backup was queried, it will point to a valid
     // readable bitmap of correct size : current image.
-    if (Main_backups->Pages->Nb_layers != Main_backups->Pages->Next->Nb_layers
-     || Main_backups->Pages->Width != Main_backups->Pages->Next->Width
-     || Main_backups->Pages->Height != Main_backups->Pages->Next->Height)
+    if (Main.backups->Pages->Nb_layers != Main.backups->Pages->Next->Nb_layers
+     || Main.backups->Pages->Width != Main.backups->Pages->Next->Width
+     || Main.backups->Pages->Height != Main.backups->Pages->Next->Height)
       Screen_backup=Main_screen;
     else
-      Screen_backup=Main_backups->Pages->Next->Image[Main.current_layer].Pixels;
+      Screen_backup=Main.backups->Pages->Next->Image[Main.current_layer].Pixels;
   }
   Update_pixel_renderer();
 }
@@ -707,20 +707,20 @@ void Update_screen_targets(void)
 /// Update all the special image buffers, if necessary.
 int Update_buffers(int width, int height)
 {
-  if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+  if (Main.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
   {
     // At least one dimension is different
-    if (Main_visible_image.Width*Main_visible_image.Height != width*height)
+    if (Main.visible_image.Width*Main.visible_image.Height != width*height)
     {
       // Current image
-      free(Main_visible_image.Image);
-      Main_visible_image.Image = (byte *)malloc(width * height);
-      if (Main_visible_image.Image == NULL)
+      free(Main.visible_image.Image);
+      Main.visible_image.Image = (byte *)malloc(width * height);
+      if (Main.visible_image.Image == NULL)
         return 0;
     }
-    Main_visible_image.Width = width;
-    Main_visible_image.Height = height;
-        
+    Main.visible_image.Width = width;
+    Main.visible_image.Height = height;
+
     if (Main_visible_image_backup.Width*Main_visible_image_backup.Height != width*height)
     {
       // Previous image
@@ -749,19 +749,19 @@ int Update_buffers(int width, int height)
 /// Update all the special image buffers of the spare page, if necessary.
 int Update_spare_buffers(int width, int height)
 {
-  if (Spare_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+  if (Spare.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
   {
     // At least one dimension is different
-    if (Spare_visible_image.Width*Spare_visible_image.Height != width*height)
+    if (Spare.visible_image.Width*Spare.visible_image.Height != width*height)
     {
       // Current image
-      free(Spare_visible_image.Image);
-      Spare_visible_image.Image = (byte *)malloc(width * height);
-      if (Spare_visible_image.Image == NULL)
+      free(Spare.visible_image.Image);
+      Spare.visible_image.Image = (byte *)malloc(width * height);
+      if (Spare.visible_image.Image == NULL)
         return 0;
     }
-    Spare_visible_image.Width = width;
-    Spare_visible_image.Height = height;
+    Spare.visible_image.Width = width;
+    Spare.visible_image.Height = height;
     
   }
   return 1;
@@ -776,38 +776,38 @@ int Init_all_backup_lists(enum IMAGE_MODES image_mode, int width, int height)
   // width et height correspondent à la dimension des images de départ.
   int i;
 
-  if (! Allocate_list_of_pages(Main_backups) ||
-      ! Allocate_list_of_pages(Spare_backups))
+  if (! Allocate_list_of_pages(Main.backups) ||
+      ! Allocate_list_of_pages(Spare.backups))
     return 0;
   // On a réussi à allouer deux listes de pages dont la taille correspond à
   // celle demandée par l'utilisateur.
 
   // On crée un descripteur de page correspondant à la page principale
-  Upload_infos_page_main(Main_backups->Pages);
+  Upload_infos_page_main(Main.backups->Pages);
   // On y met les infos sur la dimension de démarrage
-  Main_backups->Pages->Width=width;
-  Main_backups->Pages->Height=height;
-  strcpy(Main_backups->Pages->File_directory,Main.selector.Directory);
-  strcpy(Main_backups->Pages->Filename,"NO_NAME.GIF");
+  Main.backups->Pages->Width=width;
+  Main.backups->Pages->Height=height;
+  strcpy(Main.backups->Pages->File_directory,Main.selector.Directory);
+  strcpy(Main.backups->Pages->Filename,"NO_NAME.GIF");
 
 
-  for (i=0; i<Main_backups->Pages->Nb_layers; i++)
+  for (i=0; i<Main.backups->Pages->Nb_layers; i++)
   {
-    Main_backups->Pages->Image[i].Pixels=New_layer(width*height);
-    if (! Main_backups->Pages->Image[i].Pixels)
+    Main.backups->Pages->Image[i].Pixels=New_layer(width*height);
+    if (! Main.backups->Pages->Image[i].Pixels)
       return 0;
-    memset(Main_backups->Pages->Image[i].Pixels, 0, width*height);
+    memset(Main.backups->Pages->Image[i].Pixels, 0, width*height);
   }
-  Main_visible_image.Width = 0;
-  Main_visible_image.Height = 0;
-  Main_visible_image.Image = NULL;
+  Main.visible_image.Width = 0;
+  Main.visible_image.Height = 0;
+  Main.visible_image.Image = NULL;
   Main_visible_image_backup.Image = NULL;
   Main_visible_image_depth_buffer.Image = NULL;
-  Main_backups->Pages->Image_mode = image_mode;
-  Spare_visible_image.Width = 0;
-  Spare_visible_image.Height = 0;
-  Spare_visible_image.Image = NULL;
-  Spare_backups->Pages->Image_mode = image_mode;
+  Main.backups->Pages->Image_mode = image_mode;
+  Spare.visible_image.Width = 0;
+  Spare.visible_image.Height = 0;
+  Spare.visible_image.Image = NULL;
+  Spare.backups->Pages->Image_mode = image_mode;
 
   if (!Update_buffers(width, height))
     return 0;
@@ -815,28 +815,28 @@ int Init_all_backup_lists(enum IMAGE_MODES image_mode, int width, int height)
     return 0;
     
   // For speed, instead of Redraw_layered_image() we'll directly set the buffers.
-  if (Main_visible_image.Image != NULL)
+  if (Main.visible_image.Image != NULL)
   {
-    memset(Main_visible_image.Image, 0, width*height);
+    memset(Main.visible_image.Image, 0, width*height);
     memset(Main_visible_image_backup.Image, 0, width*height);
     memset(Main_visible_image_depth_buffer.Image, 0, width*height);
   }
-  if (Spare_visible_image.Image != NULL)
-    memset(Spare_visible_image.Image, 0, width*height);
-      
-  Download_infos_page_main(Main_backups->Pages); 
+  if (Spare.visible_image.Image != NULL)
+    memset(Spare.visible_image.Image, 0, width*height);
+
+  Download_infos_page_main(Main.backups->Pages);
   Update_FX_feedback(Config.FX_Feedback);
 
   // Default values for spare page
-  Spare_backups->Pages->Width = width;
-  Spare_backups->Pages->Height = height;
-  memcpy(Spare_backups->Pages->Palette,Main.palette,sizeof(T_Palette));
-  strcpy(Spare_backups->Pages->Comment,"");
-  strcpy(Spare_backups->Pages->File_directory,Main.selector.Directory);
-  strcpy(Spare_backups->Pages->Filename,"NO_NAME2.GIF");
-  Spare_backups->Pages->File_format=DEFAULT_FILEFORMAT;
+  Spare.backups->Pages->Width = width;
+  Spare.backups->Pages->Height = height;
+  memcpy(Spare.backups->Pages->Palette,Main.palette,sizeof(T_Palette));
+  strcpy(Spare.backups->Pages->Comment,"");
+  strcpy(Spare.backups->Pages->File_directory,Main.selector.Directory);
+  strcpy(Spare.backups->Pages->Filename,"NO_NAME2.GIF");
+  Spare.backups->Pages->File_format=DEFAULT_FILEFORMAT;
   // Copy this informations in the global Spare_ variables
-  Download_infos_page_spare(Spare_backups->Pages);
+  Download_infos_page_spare(Spare.backups->Pages);
     
   // Clear the initial Visible buffer
   //memset(Main_screen,0,Main.image_width*Main.image_height);
@@ -844,10 +844,10 @@ int Init_all_backup_lists(enum IMAGE_MODES image_mode, int width, int height)
   // Spare
   for (i=0; i<NB_LAYERS; i++)
   {
-    Spare_backups->Pages->Image[i].Pixels=New_layer(width*height);
-    if (! Spare_backups->Pages->Image[i].Pixels)
+    Spare.backups->Pages->Image[i].Pixels=New_layer(width*height);
+    if (! Spare.backups->Pages->Image[i].Pixels)
       return 0;
-    memset(Spare_backups->Pages->Image[i].Pixels, 0, width*height);
+    memset(Spare.backups->Pages->Image[i].Pixels, 0, width*height);
 
   }
   //memset(Spare_screen,0,Spare.image_width*Spare.image_height);
@@ -858,8 +858,8 @@ int Init_all_backup_lists(enum IMAGE_MODES image_mode, int width, int height)
 
 void Set_number_of_backups(int nb_backups)
 {
-  Change_page_number_of_list(Main_backups,nb_backups+1);
-  Change_page_number_of_list(Spare_backups,nb_backups+1);
+  Change_page_number_of_list(Main.backups,nb_backups+1);
+  Change_page_number_of_list(Spare.backups,nb_backups+1);
 
   // Le +1 vient du fait que dans chaque liste, en 1ère position on retrouve
   // les infos de la page courante sur le brouillon et la page principale.
@@ -882,7 +882,7 @@ int Backup_new_image(int layers,int width,int height)
   new_page->Height=height;
   new_page->Transparent_color=0;
   new_page->Gradients=Dup_gradient(NULL);
-  if (!Create_new_page(new_page,Main_backups,LAYER_ALL))
+  if (!Create_new_page(new_page,Main.backups,LAYER_ALL))
   {
     Error(0);
     return 0;
@@ -891,7 +891,7 @@ int Backup_new_image(int layers,int width,int height)
   Update_buffers(width, height);
   memset(Main_visible_image_depth_buffer.Image, 0, width*height);
   
-  Download_infos_page_main(Main_backups->Pages);
+  Download_infos_page_main(Main.backups->Pages);
   
   return 1;
 }
@@ -906,7 +906,7 @@ int Backup_with_new_dimensions(int width,int height)
   int i;
 
   // On crée un descripteur pour la nouvelle page courante
-  new_page=New_page(Main_backups->Pages->Nb_layers);
+  new_page=New_page(Main.backups->Pages->Nb_layers);
   if (!new_page)
   {
     Error(0);
@@ -915,39 +915,39 @@ int Backup_with_new_dimensions(int width,int height)
   new_page->Width=width;
   new_page->Height=height;
   new_page->Transparent_color=0;
-  if (!Create_new_page(new_page,Main_backups,LAYER_ALL))
+  if (!Create_new_page(new_page,Main.backups,LAYER_ALL))
   {
     Error(0);
     return 0;
   }
   
   // Copy data from previous history step
-  memcpy(Main_backups->Pages->Palette,Main_backups->Pages->Next->Palette,sizeof(T_Palette));
-  strcpy(Main_backups->Pages->Comment,Main_backups->Pages->Next->Comment);
-  Main_backups->Pages->File_format=Main_backups->Pages->Next->File_format;
-  strcpy(Main_backups->Pages->Filename, Main_backups->Pages->Next->Filename);
-  strcpy(Main_backups->Pages->File_directory, Main_backups->Pages->Next->File_directory);
-  Main_backups->Pages->Gradients=Dup_gradient(Main_backups->Pages->Next);
-  Main_backups->Pages->Background_transparent=Main_backups->Pages->Next->Background_transparent;
-  Main_backups->Pages->Transparent_color=Main_backups->Pages->Next->Transparent_color;
-  Main_backups->Pages->Image_mode=Main_backups->Pages->Next->Image_mode;
+  memcpy(Main.backups->Pages->Palette,Main.backups->Pages->Next->Palette,sizeof(T_Palette));
+  strcpy(Main.backups->Pages->Comment,Main.backups->Pages->Next->Comment);
+  Main.backups->Pages->File_format=Main.backups->Pages->Next->File_format;
+  strcpy(Main.backups->Pages->Filename, Main.backups->Pages->Next->Filename);
+  strcpy(Main.backups->Pages->File_directory, Main.backups->Pages->Next->File_directory);
+  Main.backups->Pages->Gradients=Dup_gradient(Main.backups->Pages->Next);
+  Main.backups->Pages->Background_transparent=Main.backups->Pages->Next->Background_transparent;
+  Main.backups->Pages->Transparent_color=Main.backups->Pages->Next->Transparent_color;
+  Main.backups->Pages->Image_mode=Main.backups->Pages->Next->Image_mode;
   
   // Fill with transparent color
-  for (i=0; i<Main_backups->Pages->Nb_layers;i++)
+  for (i=0; i<Main.backups->Pages->Nb_layers;i++)
   {
-    memset(Main_backups->Pages->Image[i].Pixels, Main_backups->Pages->Transparent_color, width*height);
+    memset(Main.backups->Pages->Image[i].Pixels, Main.backups->Pages->Transparent_color, width*height);
   }
   
   Update_buffers(width, height);
 
-  Download_infos_page_main(Main_backups->Pages);
+  Download_infos_page_main(Main.backups->Pages);
   
   // Same code as in End_of_modification(),
   // Without saving a safety backup:
-  if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+  if (Main.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
   {
     memcpy(Main_visible_image_backup.Image,
-           Main_visible_image.Image,
+           Main.visible_image.Image,
            Main.image_width*Main.image_height);
   }
   else
@@ -974,11 +974,11 @@ int Backup_in_place(int width,int height)
 
   // Perform all allocations first
   
-  new_layer=calloc(Main_backups->Pages->Nb_layers,sizeof(byte *));
+  new_layer=calloc(Main.backups->Pages->Nb_layers,sizeof(byte *));
   if (!new_layer)
     return 0;
   
-  for (i=0; i<Main_backups->Pages->Nb_layers; i++)
+  for (i=0; i<Main.backups->Pages->Nb_layers; i++)
   {
     new_layer[i]=New_layer(height*width);
     if (!new_layer[i])
@@ -993,36 +993,36 @@ int Backup_in_place(int width,int height)
   
   // Now ok to proceed
   
-  for (i=0; i<Main_backups->Pages->Nb_layers; i++)
+  for (i=0; i<Main.backups->Pages->Nb_layers; i++)
   {
     // Replace layers
-    Free_layer(Main_backups->Pages,i);
-    Main_backups->Pages->Image[i].Pixels=new_layer[i];
+    Free_layer(Main.backups->Pages,i);
+    Main.backups->Pages->Image[i].Pixels=new_layer[i];
     
     // Fill with transparency
-    memset(Main_backups->Pages->Image[i].Pixels, Main_backups->Pages->Transparent_color, width*height);
+    memset(Main.backups->Pages->Image[i].Pixels, Main.backups->Pages->Transparent_color, width*height);
   }
   
-  Main_backups->Pages->Width=width;
-  Main_backups->Pages->Height=height;
+  Main.backups->Pages->Width=width;
+  Main.backups->Pages->Height=height;
 
-  Download_infos_page_main(Main_backups->Pages);
+  Download_infos_page_main(Main.backups->Pages);
   
   // The following is part of Update_buffers()
   // (without changing the backup buffer)
-  if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+  if (Main.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
   {
     // At least one dimension is different
-    if (Main_visible_image.Width*Main_visible_image.Height != width*height)
+    if (Main.visible_image.Width*Main.visible_image.Height != width*height)
     {
       // Current image
-      free(Main_visible_image.Image);
-      Main_visible_image.Image = (byte *)malloc(width * height);
-      if (Main_visible_image.Image == NULL)
+      free(Main.visible_image.Image);
+      Main.visible_image.Image = (byte *)malloc(width * height);
+      if (Main.visible_image.Image == NULL)
         return 0;
     }
-    Main_visible_image.Width = width;
-    Main_visible_image.Height = height;
+    Main.visible_image.Width = width;
+    Main.visible_image.Height = height;
   
     if (Main_visible_image_depth_buffer.Width*Main_visible_image_depth_buffer.Height != width*height)
     {      
@@ -1050,7 +1050,7 @@ int Backup_and_resize_the_spare(int width,int height)
   int return_code=0;
   int nb_layers;
 
-  nb_layers=Spare_backups->Pages->Nb_layers;
+  nb_layers=Spare.backups->Pages->Nb_layers;
   // On crée un descripteur pour la nouvelle page de brouillon
   new_page=New_page(nb_layers);
   if (!new_page)
@@ -1060,23 +1060,23 @@ int Backup_and_resize_the_spare(int width,int height)
   }
   
   // Fill it with a copy of the latest history
-  Copy_S_page(new_page,Spare_backups->Pages);
-  new_page->Gradients=Dup_gradient(Spare_backups->Pages);
+  Copy_S_page(new_page,Spare.backups->Pages);
+  new_page->Gradients=Dup_gradient(Spare.backups->Pages);
   
   new_page->Width=width;
   new_page->Height=height;
-  if (Create_new_page(new_page,Spare_backups,LAYER_ALL))
+  if (Create_new_page(new_page,Spare.backups,LAYER_ALL))
   {
     byte i;
     
     for (i=0; i<nb_layers;i++)
     {
-      memset(Spare_backups->Pages->Image[i].Pixels, Spare_backups->Pages->Transparent_color, width*height);
+      memset(Spare.backups->Pages->Image[i].Pixels, Spare.backups->Pages->Transparent_color, width*height);
     }
     
     // Update_buffers(width, height); // Not for spare
     
-    Download_infos_page_spare(Spare_backups->Pages);
+    Download_infos_page_spare(Spare.backups->Pages);
     
     // Light up the 'has unsaved changes' indicator
     Spare.image_is_modified=1;
@@ -1105,10 +1105,10 @@ void Backup_layers(int layer)
 
   // On remet à jour l'état des infos de la page courante (pour pouvoir les
   // retrouver plus tard)
-  Upload_infos_page_main(Main_backups->Pages);
+  Upload_infos_page_main(Main.backups->Pages);
 
   // Create a fresh Page descriptor
-  new_page=New_page(Main_backups->Pages->Nb_layers);
+  new_page=New_page(Main.backups->Pages->Nb_layers);
   if (!new_page)
   {
     Error(0);
@@ -1116,9 +1116,9 @@ void Backup_layers(int layer)
   }
   
   // Fill it with a copy of the latest history
-  Copy_S_page(new_page,Main_backups->Pages);
-  new_page->Gradients=Dup_gradient(Main_backups->Pages);
-  Create_new_page(new_page,Main_backups,layer);
+  Copy_S_page(new_page,Main.backups->Pages);
+  new_page->Gradients=Dup_gradient(Main.backups->Pages);
+  Create_new_page(new_page,Main.backups,layer);
   Download_infos_page_main(new_page);
 
   Update_FX_feedback(Config.FX_Feedback);
@@ -1126,11 +1126,11 @@ void Backup_layers(int layer)
   // Copy the actual pixels from the backup to the latest page
   if (layer != LAYER_NONE)
   {
-    for (i=0; i<Main_backups->Pages->Nb_layers;i++)
+    for (i=0; i<Main.backups->Pages->Nb_layers;i++)
     {
       if (layer == LAYER_ALL || i == layer)
-        memcpy(Main_backups->Pages->Image[i].Pixels,
-               Main_backups->Pages->Next->Image[i].Pixels,
+        memcpy(Main.backups->Pages->Image[i].Pixels,
+               Main.backups->Pages->Next->Image[i].Pixels,
                Main.image_width*Main.image_height);
     }
   }
@@ -1168,7 +1168,7 @@ void Backup_the_spare(int layer)
   T_Page *new_page;
 
   // Create a fresh Page descriptor
-  new_page=New_page(Spare_backups->Pages->Nb_layers);
+  new_page=New_page(Spare.backups->Pages->Nb_layers);
   if (!new_page)
   {
     Error(0);
@@ -1176,18 +1176,18 @@ void Backup_the_spare(int layer)
   }
   
   // Fill it with a copy of the latest history
-  Copy_S_page(new_page,Spare_backups->Pages);
-  new_page->Gradients=Dup_gradient(Spare_backups->Pages);
-  Create_new_page(new_page,Spare_backups,layer);
+  Copy_S_page(new_page,Spare.backups->Pages);
+  new_page->Gradients=Dup_gradient(Spare.backups->Pages);
+  Create_new_page(new_page,Spare.backups,layer);
 
   // Copy the actual pixels from the backup to the latest page
   if (layer != LAYER_NONE)
   {
-    for (i=0; i<Spare_backups->Pages->Nb_layers;i++)
+    for (i=0; i<Spare.backups->Pages->Nb_layers;i++)
     {
       if (layer == LAYER_ALL || i == layer)
-        memcpy(Spare_backups->Pages->Image[i].Pixels,
-               Spare_backups->Pages->Next->Image[i].Pixels,
+        memcpy(Spare.backups->Pages->Image[i].Pixels,
+               Spare.backups->Pages->Next->Image[i].Pixels,
                Spare.image_width*Spare.image_height);
     }
   }
@@ -1198,9 +1198,9 @@ void Backup_the_spare(int layer)
 
 void Check_layers_limits()
 {
-  if (Main.current_layer > Main_backups->Pages->Nb_layers-1)
+  if (Main.current_layer > Main.backups->Pages->Nb_layers-1)
   {
-    Main.current_layer = Main_backups->Pages->Nb_layers-1;
+    Main.current_layer = Main.backups->Pages->Nb_layers-1;
     Main.layers_visible |= 1<<Main.current_layer;
   }
 }
@@ -1212,20 +1212,20 @@ void Undo(void)
 
   if (Last_backed_up_layers)
   {
-    Free_page_of_a_list(Main_backups);
+    Free_page_of_a_list(Main.backups);
     Last_backed_up_layers=0;
   }
 
   // On remet à jour l'état des infos de la page courante (pour pouvoir les
   // retrouver plus tard)
-  Upload_infos_page_main(Main_backups->Pages);
+  Upload_infos_page_main(Main.backups->Pages);
   // On fait faire un undo à la liste des backups de la page principale
-  Backward_in_list_of_pages(Main_backups);
+  Backward_in_list_of_pages(Main.backups);
 
-  Update_buffers(Main_backups->Pages->Width, Main_backups->Pages->Height);
+  Update_buffers(Main.backups->Pages->Width, Main.backups->Pages->Height);
 
   // On extrait ensuite les infos sur la nouvelle page courante
-  Download_infos_page_main(Main_backups->Pages);
+  Download_infos_page_main(Main.backups->Pages);
   // Note: le backup n'a pas obligatoirement les mêmes dimensions ni la même
   //       palette que la page courante. Mais en temps normal, le backup
   //       n'est pas utilisé à la suite d'un Undo. Donc ça ne devrait pas
@@ -1246,19 +1246,19 @@ void Redo(void)
 
   if (Last_backed_up_layers)
   {
-    Free_page_of_a_list(Main_backups);
+    Free_page_of_a_list(Main.backups);
     Last_backed_up_layers=0;
   }
   // On remet à jour l'état des infos de la page courante (pour pouvoir les
   // retrouver plus tard)
-  Upload_infos_page_main(Main_backups->Pages);
+  Upload_infos_page_main(Main.backups->Pages);
   // On fait faire un redo à la liste des backups de la page principale
-  Advance_in_list_of_pages(Main_backups);
+  Advance_in_list_of_pages(Main.backups);
 
-  Update_buffers(Main_backups->Pages->Width, Main_backups->Pages->Height);
+  Update_buffers(Main.backups->Pages->Width, Main.backups->Pages->Height);
 
   // On extrait ensuite les infos sur la nouvelle page courante
-  Download_infos_page_main(Main_backups->Pages);
+  Download_infos_page_main(Main.backups->Pages);
   // Note: le backup n'a pas obligatoirement les mêmes dimensions ni la même
   //       palette que la page courante. Mais en temps normal, le backup
   //       n'est pas utilisé à la suite d'un Redo. Donc ça ne devrait pas
@@ -1275,16 +1275,16 @@ void Redo(void)
 void Free_current_page(void)
 {
   // On détruit la page courante de la liste principale
-  Free_page_of_a_list(Main_backups);
+  Free_page_of_a_list(Main.backups);
   
   // On extrait ensuite les infos sur la nouvelle page courante
-  Download_infos_page_main(Main_backups->Pages);
+  Download_infos_page_main(Main.backups->Pages);
   // Note: le backup n'a pas obligatoirement les mêmes dimensions ni la même
   //       palette que la page courante. Mais en temps normal, le backup
   //       n'est pas utilisé à la suite d'une destruction de page. Donc ça ne
   //       devrait pas poser de problèmes.
    
-  Update_buffers(Main_backups->Pages->Width, Main_backups->Pages->Height);
+  Update_buffers(Main.backups->Pages->Width, Main.backups->Pages->Height);
   Check_layers_limits();
   Redraw_layered_image();
   End_of_modification();
@@ -1297,14 +1297,14 @@ void Exchange_main_and_spare(void)
   // On commence par mettre à jour dans les descripteurs les infos sur les
   // pages qu'on s'apprête à échanger, pour qu'on se retrouve pas avec de
   // vieilles valeurs qui datent de mathuzalem.
-  Upload_infos_page_main(Main_backups->Pages);
-  Upload_infos_page_spare(Spare_backups->Pages);
+  Upload_infos_page_main(Main.backups->Pages);
+  Upload_infos_page_spare(Spare.backups->Pages);
 
   // On inverse les listes de pages
 //TODO
-  temp_list=Main_backups;
-  Main_backups=Spare_backups;
-  Spare_backups=temp_list;
+  temp_list=Main.backups;
+  Main.backups=Spare.backups;
+  Spare.backups=temp_list;
 
   // On extrait ensuite les infos sur les nouvelles pages courante, brouillon
   // et backup.
@@ -1315,11 +1315,11 @@ void Exchange_main_and_spare(void)
   // un changement de dimensions et va bêtement sortir du mode loupe, alors
   // que lors d'un changement de page, on veut bien conserver l'état du mode
   // loupe du brouillon.
-  Main.image_width=Main_backups->Pages->Width;
-  Main.image_height=Main_backups->Pages->Height;
+  Main.image_width=Main.backups->Pages->Width;
+  Main.image_height=Main.backups->Pages->Height;
 
-  Download_infos_page_main(Main_backups->Pages);
-  Download_infos_page_spare(Spare_backups->Pages);
+  Download_infos_page_main(Main.backups->Pages);
+  Download_infos_page_spare(Spare.backups->Pages);
 }
 
 void End_of_modification(void)
@@ -1327,7 +1327,7 @@ void End_of_modification(void)
 
   //Update_buffers(Main.image_width, Main.image_height);
   
-  if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+  if (Main.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
   {
     // Backup buffer can have "wrong" size if a Lua script
     // performs a resize.
@@ -1335,7 +1335,7 @@ void End_of_modification(void)
     //
   
     memcpy(Main_visible_image_backup.Image,
-           Main_visible_image.Image,
+           Main.visible_image.Image,
            Main.image_width*Main.image_height);
   }
   else
@@ -1411,7 +1411,7 @@ byte Add_layer(T_List_of_pages *list, int layer)
     duration=new_page->Image[1].Duration;
   new_page->Image[layer].Duration=duration;
   // Fill with transparency, initially
-  memset(new_image, Main_backups->Pages->Transparent_color, list->Pages->Height*list->Pages->Width); // transparent color
+  memset(new_image, Main.backups->Pages->Transparent_color, list->Pages->Height*list->Pages->Width); // transparent color
   
   // Done. Note that the visible buffer is already ok since we
   // only inserted a transparent "slide" somewhere.
@@ -1424,7 +1424,7 @@ byte Add_layer(T_List_of_pages *list, int layer)
     dword *visible_layers_flag;
     
     // Determine if we're modifying the spare or the main page.
-    if (list == Main_backups)
+    if (list == Main.backups)
     {
       visible_layers_flag = &Main.layers_visible;
       Main.current_layer = layer;
@@ -1483,7 +1483,7 @@ byte Delete_layer(T_List_of_pages *list, int layer)
     byte new_current_layer;
     
     // Determine if we're modifying the spare or the main page.
-    if (list == Main_backups)
+    if (list == Main.backups)
     {
       visible_layers_flag = &Main.layers_visible;
       if (Main.current_layer>=layer && Main.current_layer>0)
@@ -1516,19 +1516,19 @@ byte Merge_layer()
   int i;
   for (i=0; i<Main.image_width*Main.image_height; i++)
   {
-    byte color = *(Main_backups->Pages->Image[Main.current_layer].Pixels+i);
-    if (color != Main_backups->Pages->Transparent_color) // transparent color
-      *(Main_backups->Pages->Image[Main.current_layer-1].Pixels+i) = color;
+    byte color = *(Main.backups->Pages->Image[Main.current_layer].Pixels+i);
+    if (color != Main.backups->Pages->Transparent_color) // transparent color
+      *(Main.backups->Pages->Image[Main.current_layer-1].Pixels+i) = color;
   }
-  return Delete_layer(Main_backups,Main.current_layer);
+  return Delete_layer(Main.backups,Main.current_layer);
 }
 
 void Switch_layer_mode(enum IMAGE_MODES new_mode)
 {
-  if (new_mode == Main_backups->Pages->Image_mode)
+  if (new_mode == Main.backups->Pages->Image_mode)
     return;
 
-  Main_backups->Pages->Image_mode = new_mode;
+  Main.backups->Pages->Image_mode = new_mode;
 
   switch (new_mode)
   {

@@ -606,6 +606,10 @@ typedef struct
   byte safety_backup_prefix;
   /// Tilemap mode
   byte tilemap_mode;
+  /// The pixels of visible layers, flattened copy.
+  T_Bitmap visible_image;
+  /// List of backup pages for the main image.
+  T_List_of_pages * backups;
 } T_Document;
 
 #endif

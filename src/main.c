@@ -478,10 +478,10 @@ int Init_program(int argc,char * argv[])
   // principale et la page de brouillon afin que leurs champs ne soient pas
   // invalide lors des appels aux multiples fonctions manipulées à
   // l'initialisation du programme.
-  Main_backups=(T_List_of_pages *)malloc(sizeof(T_List_of_pages));
-  Spare_backups=(T_List_of_pages *)malloc(sizeof(T_List_of_pages));
-  Init_list_of_pages(Main_backups);
-  Init_list_of_pages(Spare_backups);
+  Main.backups=(T_List_of_pages *)malloc(sizeof(T_List_of_pages));
+  Spare.backups=(T_List_of_pages *)malloc(sizeof(T_List_of_pages));
+  Init_list_of_pages(Main.backups);
+  Init_list_of_pages(Spare.backups);
 
   // Determine the executable directory
   Set_program_directory(argv[0],program_directory);
@@ -802,8 +802,8 @@ int Init_program(int argc,char * argv[])
   memset(Main_screen,0,Main.image_width*Main.image_height);
 
   // Now that the backup system is there, we can store the gradients.
-  memcpy(Main_backups->Pages->Gradients->Range, initial_gradients.Range, sizeof(initial_gradients.Range));
-  memcpy(Spare_backups->Pages->Gradients->Range, initial_gradients.Range, sizeof(initial_gradients.Range));
+  memcpy(Main.backups->Pages->Gradients->Range, initial_gradients.Range, sizeof(initial_gradients.Range));
+  memcpy(Spare.backups->Pages->Gradients->Range, initial_gradients.Range, sizeof(initial_gradients.Range));
 
   Gradient_function=Gradient_basic;
   Gradient_lower_bound=0;
@@ -915,12 +915,12 @@ int Init_program(int argc,char * argv[])
 
           // If only one image was loaded, assume the spare has same image type
           if (file_in_command_line==1)
-            Spare_backups->Pages->Image_mode = Main_backups->Pages->Image_mode;
+            Spare.backups->Pages->Image_mode = Main.backups->Pages->Image_mode;
           
           Hide_cursor();
           Compute_optimal_menu_colors(Main.palette);
-          Back_color=Main_backups->Pages->Background_transparent ?
-            Main_backups->Pages->Transparent_color :
+          Back_color=Main.backups->Pages->Background_transparent ?
+            Main.backups->Pages->Transparent_color :
             Best_color_range(0,0,0,Config.Palette_cells_X*Config.Palette_cells_Y);
           Fore_color=Main.palette[Back_color].R+Main.palette[Back_color].G+Main.palette[Back_color].B < 3*127 ?
             Best_color_range(255,255,255,Config.Palette_cells_X*Config.Palette_cells_Y) :

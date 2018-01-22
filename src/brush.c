@@ -120,7 +120,7 @@ void Display_paintbrush(short x,short y,byte color)
   if (Mouse_K) // pas de curseur si on est en preview et 
     return;                  // en train de cliquer
     
-  if (Main_backups->Pages->Image_mode == IMAGE_MODE_MODE5 && Main.current_layer < 4)
+  if (Main.backups->Pages->Image_mode == IMAGE_MODE_MODE5 && Main.current_layer < 4)
   {
     goto single_pixel;
   }
@@ -284,7 +284,7 @@ void Draw_paintbrush(short x,short y,byte color)
   int position;
   byte old_color;
 
-  if (Main_backups->Pages->Image_mode == IMAGE_MODE_MODE5 && Main.current_layer < 4)
+  if (Main.backups->Pages->Image_mode == IMAGE_MODE_MODE5 && Main.current_layer < 4)
   {
     // Flood-fill the enclosing area
     if (x<Main.image_width && y<Main.image_height && x>= 0 && y >= 0

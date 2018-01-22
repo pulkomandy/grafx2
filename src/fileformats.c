@@ -766,7 +766,7 @@ void Load_IFF(T_IO_Context * context)
 
               if (context->Type == CONTEXT_MAIN_IMAGE)
               {
-                Main_backups->Pages->Image_mode = IMAGE_MODE_ANIMATION;
+                Main.backups->Pages->Image_mode = IMAGE_MODE_ANIMATION;
                 Update_screen_targets();
               }
               if (File_error==0)
@@ -2639,7 +2639,7 @@ void Load_GIF(T_IO_Context * context)
                         // Load as an animation
                         if (context->Type == CONTEXT_MAIN_IMAGE)
                         {
-                          Main_backups->Pages->Image_mode = IMAGE_MODE_ANIMATION;
+                          Main.backups->Pages->Image_mode = IMAGE_MODE_ANIMATION;
                           Update_screen_targets();
                         }
                         // Skip sub-block
@@ -2756,13 +2756,13 @@ void Load_GIF(T_IO_Context * context)
                 // Attempt to add a layer to current image
                 current_layer++;
                 Set_loading_layer(context, current_layer);
-                if (context->Type == CONTEXT_MAIN_IMAGE && Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+                if (context->Type == CONTEXT_MAIN_IMAGE && Main.backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
                 {
                   // Copy the content of previous layer.
                   memcpy(
-                    Main_backups->Pages->Image[Main.current_layer].Pixels,
-                    Main_backups->Pages->Image[Main.current_layer-1].Pixels,
-                    Main_backups->Pages->Width*Main_backups->Pages->Height);
+                    Main.backups->Pages->Image[Main.current_layer].Pixels,
+                    Main.backups->Pages->Image[Main.current_layer-1].Pixels,
+                    Main.backups->Pages->Width*Main.backups->Pages->Height);
                 }
                 else
                 {
@@ -2812,7 +2812,7 @@ void Load_GIF(T_IO_Context * context)
                 if (number_LID!=1)
                 {
                   // This a second layer/frame, or more.
-                  if (context->Type == CONTEXT_MAIN_IMAGE && Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+                  if (context->Type == CONTEXT_MAIN_IMAGE && Main.backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
                   {
                     // Need to clear previous image to back-color.
                     if (previous_disposal_method==DISPOSAL_METHOD_RESTORE_BGCOLOR)
@@ -2820,8 +2820,8 @@ void Load_GIF(T_IO_Context * context)
                       int y;
                       for (y=0; y<previous_height; y++)
                         memset(
-                          Main_backups->Pages->Image[Main.current_layer].Pixels
-                           + (previous_pos_y+y)* Main_backups->Pages->Width+previous_pos_x,
+                          Main.backups->Pages->Image[Main.current_layer].Pixels
+                           + (previous_pos_y+y)* Main.backups->Pages->Width+previous_pos_x,
                           is_transparent ? context->Transparent_color : LSDB.Backcol,
                           previous_width);
                     }
@@ -3152,7 +3152,7 @@ void Save_GIF(T_IO_Context * context)
           //  Write_bytes(GIF_file,"\x21\xFF\x0BNETSCAPE2.0\x03\xLL\xSS\xSS\x00",19);
           // LL : 01 to loop
           // SSSS : number of loops
-          if (context->Type == CONTEXT_MAIN_IMAGE && Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+          if (context->Type == CONTEXT_MAIN_IMAGE && Main.backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
             if (context->Nb_layers>1)
               Write_bytes(GIF_file,"\x21\xFF\x0BNETSCAPE2.0\x03\x01\x00\x00\x00",19);
             
@@ -3198,7 +3198,7 @@ void Save_GIF(T_IO_Context * context)
             GCE.Function = 0xF9;
             GCE.Block_size=4;
             
-            if (context->Type == CONTEXT_MAIN_IMAGE && Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+            if (context->Type == CONTEXT_MAIN_IMAGE && Main.backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
             {
               // Animation frame
               int duration;

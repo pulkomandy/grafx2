@@ -584,7 +584,7 @@ void Layer_preview_on(int * preview_is_visible)
 {
   int x,y;
   short layer;
-  short layercount = Main_backups->Pages->Nb_layers;
+  short layercount = Main.backups->Pages->Nb_layers;
   static int previewW=0, previewH=0;
 
   if (! *preview_is_visible && layercount>1)
@@ -623,7 +623,7 @@ void Layer_preview_on(int * preview_is_visible)
         int imgx = x * Main.image_width / (previewW*Pixel_width*Menu_factor_X-1);
         int imgy = y * Main.image_height / (previewH*Pixel_height*Menu_factor_Y-1);
         // Use Pixel_simple() in order to get highest resolution
-        Pixel_simple(x+((layer*Layer_button_width+offset)*Menu_factor_X+Window_pos_X)*Pixel_width, y+Window_pos_Y*Pixel_height+1, *(Main_backups->Pages->Image[layer].Pixels
+        Pixel_simple(x+((layer*Layer_button_width+offset)*Menu_factor_X+Window_pos_X)*Pixel_width, y+Window_pos_Y*Pixel_height+1, *(Main.backups->Pages->Image[layer].Pixels
           + imgx + imgy * Main.image_width));
       }
     }
@@ -685,7 +685,7 @@ void Main_handler(void)
         char* flimit;
         byte old_cursor_shape;
 
-        Upload_infos_page_main(Main_backups->Pages);
+        Upload_infos_page_main(Main.backups->Pages);
   
         flimit = Find_last_separator(Drop_file_name);
         *(flimit++) = '\0';
@@ -3646,7 +3646,7 @@ void Set_bar_visibility(word bar, int visible, int with_redraw)
 /// Display_menu() and Display_all_screen()
 int Check_menu_mode(void)
 {
-  if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+  if (Main.backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
   {
     if (Menu_bars[MENUBAR_LAYERS].Visible)
     {
