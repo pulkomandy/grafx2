@@ -61,13 +61,13 @@ static const T_Help_table helptable_about[] =
   HELP_TITLE("        GRAFX 2   ")
   HELP_BOLD ("         \"Dragon's Layers\" Edition")
   HELP_BOLD ("  THE ULTIMATE MULTI-RESOLUTION GFX EDITOR")
-  HELP_TEXT ("             http://grafx2.org")
+  HELP_TEXT ("             http://grafx2.tk")
 #if defined(__MINT__)
   HELP_TEXT ("                atari build                ")
 #else
   HELP_TEXT ("")
 #endif
-  HELP_TEXT ("Copyright 2007-2016, the Grafx2 project team")
+  HELP_TEXT ("Copyright 2007-2018, the Grafx2 project team")
   HELP_TEXT ("    Copyright 1996-2001, SUNSET DESIGN")
 };
 static const T_Help_table helptable_licence[] =
