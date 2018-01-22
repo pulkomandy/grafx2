@@ -291,126 +291,17 @@ GFX2_GLOBAL T_Document Main;
 
 /// Pointer to the pixel data of the main image
 GFX2_GLOBAL byte *    Main_screen;
-#if 0
-/// Palette of the main image
-GFX2_GLOBAL T_Palette Main_palette;
-/// Boolean, means the image has been modified since last save.
-GFX2_GLOBAL byte  Main_image_is_modified;
-/// Width in pixels of the main image.
-GFX2_GLOBAL short Main_image_width;
-/// Height in pixels of the main image.
-GFX2_GLOBAL short Main_image_height;
-/// X position (in image space) of the pixel to display in the top left corner of screen.
-GFX2_GLOBAL short Main_offset_X;
-/// Y position (in image space) of the pixel to display in the top left corner of screen.
-GFX2_GLOBAL short Main_offset_Y;
-/// File format of the image currently edited. It's a value of enum ::FILE_FORMATS
-GFX2_GLOBAL byte  Main_fileformat;
-/// File selector settings
-GFX2_GLOBAL T_Selector_settings Main_selector;
-/// X position (in screen coordinates) of the separator between normal and magnified views.
-GFX2_GLOBAL short Main_separator_position;
-/// X position (in screen coordinates) of the first pixel of the magnified view.
-GFX2_GLOBAL short Main_X_zoom;
-/// Proportion of the non-magnified part of the screen.
-GFX2_GLOBAL float Main_separator_proportion;
-/// Boolean, true if the main image has the magnifier active.
-GFX2_GLOBAL byte  Main_magnifier_mode;
-/// Zoom factor used in the magnifier (main image).
-GFX2_GLOBAL word  Main_magnifier_factor;
-/// Height of the magnified view for the main image.
-GFX2_GLOBAL word  Main_magnifier_height;
-/// Width of the magnified view for the main image.
-GFX2_GLOBAL word  Main_magnifier_width;
-/// X position (in image space) of the pixel to display in the top left corner of the magnified view.
-GFX2_GLOBAL short Main_magnifier_offset_X;
-/// Y position (in image space) of the pixel to display in the top left corner of the magnified view.
-GFX2_GLOBAL short Main_magnifier_offset_Y;
-/// Index of layer currently being edited
-GFX2_GLOBAL int Main_current_layer;
-/// Bitfield that records which layers are visible. 2^0 for 0, 2^1 for 1, 2^2 for 2, etc.
-GFX2_GLOBAL dword Main_layers_visible;
-/// Backup for Main_layers_visible
-GFX2_GLOBAL dword Main_layers_visible_backup;
-/// Index to use next time, when creating incremental backups, to make unique filename.
-GFX2_GLOBAL long Main_safety_number;
-/// Number of edit actions since the last safety backup
-GFX2_GLOBAL long Main_edits_since_safety_backup;
-/// SDL Time of the previous safety backup
-GFX2_GLOBAL Uint32 Main_time_of_safety_backup;
-/// Letter prefix for the filenames of safety backups. a or b
-GFX2_GLOBAL byte Main_safety_backup_prefix;
-#endif
 /// Lookup table for XOR effects, pointing each color to the most different one
 GFX2_GLOBAL byte xor_lut[256];
 
 // -- Spare page data
 
 GFX2_GLOBAL T_Document Spare;
-#if 0
-/// Palette of the spare page
-GFX2_GLOBAL T_Palette Spare_palette;
-/// Boolean, means the spare page has been modified since last save.
-GFX2_GLOBAL byte  Spare_image_is_modified;
-/// Width in pixels of the spare image.
-GFX2_GLOBAL short Spare_image_width;
-/// Height in pixels of the spare image.
-GFX2_GLOBAL short Spare_image_height;
-/// X position (in image space) of the pixel to display in the top left corner of screen.
-GFX2_GLOBAL short Spare_offset_X;
-/// Y position (in image space) of the pixel to display in the top left corner of screen.
-GFX2_GLOBAL short Spare_offset_Y;
-/// Name of the directory that holds the image currently edited as spare page.
-GFX2_GLOBAL char  Spare_file_directory[MAX_PATH_CHARACTERS];
-/// Filename (without directory) of the image currently edited as spare page.
-GFX2_GLOBAL char  Spare_filename[MAX_PATH_CHARACTERS];
-/// File format of the image currently edited as spare page. It's a value of enum ::FILE_FORMATS
-GFX2_GLOBAL byte  Spare_fileformat;
-/// File selector settings
-GFX2_GLOBAL T_Selector_settings Spare_selector;
-/// X position (in screen coordinates) of the separator between normal and magnified views.
-GFX2_GLOBAL short Spare_separator_position;
-/// X position (in screen coordinates) of the first pixel of the magnified view.
-GFX2_GLOBAL short Spare_X_zoom;
-/// Proportion of the non-magnified part of the screen.
-GFX2_GLOBAL float Spare_separator_proportion;
-/// Boolean, true if the main image has the magnifier active.
-GFX2_GLOBAL byte  Spare_magnifier_mode;
-/// Zoom factor used in the magnifier (spare page).
-GFX2_GLOBAL word  Spare_magnifier_factor;
-/// Width of the magnified view for the spare page.
-GFX2_GLOBAL word  Spare_magnifier_height;
-/// Height of the magnified view for the spare page.
-GFX2_GLOBAL word  Spare_magnifier_width;
-/// X position (in image space) of the pixel to display in the top left corner of the magnified view.
-GFX2_GLOBAL short Spare_magnifier_offset_X;
-/// Y position (in image space) of the pixel to display in the top left corner of the magnified view.
-GFX2_GLOBAL short Spare_magnifier_offset_Y;
-/// Index of layer currently being edited
-GFX2_GLOBAL int Spare_current_layer;
-/// Bitfield that records which layers are visible. 2^0 for 0, 2^1 for 1, 2^2 for 2, etc.
-GFX2_GLOBAL dword Spare_layers_visible;
-/// Backup for Spare_layers_visible
-GFX2_GLOBAL dword Spare_layers_visible_backup;
-/// Index to use next time, when creating incremental backups, to make unique filename.
-GFX2_GLOBAL long Spare_safety_number;
-/// Number of edit actions since the last safety backup
-GFX2_GLOBAL long Spare_edits_since_safety_backup;
-/// SDL Time of the previous safety backup
-GFX2_GLOBAL Uint32 Spare_time_of_safety_backup;
-/// Letter prefix for the filenames of safety backups. a or b
-GFX2_GLOBAL byte Spare_safety_backup_prefix;
-#endif
 
 // -- Image backups
 
 /// Backup of the current screen, used during drawing when FX feedback is OFF.
 GFX2_GLOBAL byte * Screen_backup;
-/// List of backup pages for the main image.
-//GFX2_GLOBAL T_List_of_pages * Main_backups;
-/// List of backup pages for the spare page.
-//GFX2_GLOBAL T_List_of_pages * Spare_backups;
-
 
 // -- Brush data
 
@@ -658,14 +549,6 @@ GFX2_GLOBAL short Tiling_offset_Y;
 GFX2_GLOBAL byte Mask_mode;
 /// Array of booleans. True if the indexed color is protected by the mask.
 GFX2_GLOBAL byte Mask_table[256];
-
-// -- Tilemap mode
-
-/// Tilemap mode for main page
-//GFX2_GLOBAL byte Main_tilemap_mode;
-
-/// Tilemap mode for spare page
-//GFX2_GLOBAL byte Spare_tilemap_mode;
 
 // -- Magnifier data
 
