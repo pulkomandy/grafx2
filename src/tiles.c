@@ -30,10 +30,10 @@
 #include "tiles.h"
 
 // These helpers are only needed internally at the moment
-#define TILE_FOR_COORDS(x,y) (((y)-Snap_offset_Y)/Snap_height*Main_tilemap_width+((x)-Snap_offset_X)/Snap_width)
-#define TILE_AT(x,y) (y)*Main_tilemap_width+(x)
-#define TILE_X(t) (((t)%Main_tilemap_width)*Snap_width+Snap_offset_X)
-#define TILE_Y(t) (((t)/Main_tilemap_width)*Snap_height+Snap_offset_Y)
+#define TILE_FOR_COORDS(x,y) (((y)-Snap_offset_Y)/Snap_height*Main.tilemap_width+((x)-Snap_offset_X)/Snap_width)
+#define TILE_AT(x,y) (y)*Main.tilemap_width+(x)
+#define TILE_X(t) (((t)%Main.tilemap_width)*Snap_width+Snap_offset_X)
+#define TILE_Y(t) (((t)/Main.tilemap_width)*Snap_height+Snap_offset_Y)
 
 enum TILE_FLIPPED
 {
@@ -45,21 +45,6 @@ enum TILE_FLIPPED
 
 // globals
 
-/// Tilemap for the main screen
-T_Tile * Main_tilemap;
-/// Number of tiles (horizontally) for the main page's tilemap
-short Main_tilemap_width;
-/// Number of tiles (vertically) for the main page's tilemap
-short Main_tilemap_height;
-
-/// Tilemap for the spare
-T_Tile * Spare_tilemap;
-/// Number of tiles (horizontally) for the spare page's tilemap
-short Spare_tilemap_width;
-/// Number of tiles (vertically) for the spare page's tilemap
-short Spare_tilemap_height;
-
-
 ///
 /// Draw a pixel while Tilemap mode is active : This will paint on all
 /// similar tiles of the layer, visible on the screen or not.
@@ -70,8 +55,8 @@ void Tilemap_draw(word x, word y, byte color)
   
   if (x < Snap_offset_X
    || y < Snap_offset_Y
-   || x >= Snap_offset_X + Main_tilemap_width*Snap_width
-   || y >= Snap_offset_Y + Main_tilemap_height*Snap_height)
+   || x >= Snap_offset_X + Main.tilemap_width*Snap_width
+   || y >= Snap_offset_Y + Main.tilemap_height*Snap_height)
     return;
   
   tile = first_tile = TILE_FOR_COORDS(x,y);
@@ -81,24 +66,24 @@ void Tilemap_draw(word x, word y, byte color)
   do
   {
     int xx,yy;
-    switch(Main_tilemap[tile].Flipped ^ Main_tilemap[first_tile].Flipped)
+    switch(Main.tilemap[tile].Flipped ^ Main.tilemap[first_tile].Flipped)
     {
       case 0: // no
       default:
-        xx = (tile % Main_tilemap_width)*Snap_width+Snap_offset_X + rel_x;
-        yy = (tile / Main_tilemap_width)*Snap_height+Snap_offset_Y + rel_y;
+        xx = (tile % Main.tilemap_width)*Snap_width+Snap_offset_X + rel_x;
+        yy = (tile / Main.tilemap_width)*Snap_height+Snap_offset_Y + rel_y;
         break;
       case 1: // horizontal
-        xx = (tile % Main_tilemap_width)*Snap_width+Snap_offset_X + Snap_width-rel_x-1;
-        yy = (tile / Main_tilemap_width)*Snap_height+Snap_offset_Y + rel_y;
+        xx = (tile % Main.tilemap_width)*Snap_width+Snap_offset_X + Snap_width-rel_x-1;
+        yy = (tile / Main.tilemap_width)*Snap_height+Snap_offset_Y + rel_y;
         break;
       case 2: // vertical
-        xx = (tile % Main_tilemap_width)*Snap_width+Snap_offset_X + rel_x;
-        yy = (tile / Main_tilemap_width)*Snap_height+Snap_offset_Y + Snap_height - rel_y - 1;
+        xx = (tile % Main.tilemap_width)*Snap_width+Snap_offset_X + rel_x;
+        yy = (tile / Main.tilemap_width)*Snap_height+Snap_offset_Y + Snap_height - rel_y - 1;
         break;
       case 3: // both
-        xx = (tile % Main_tilemap_width)*Snap_width+Snap_offset_X + Snap_width-rel_x-1;
-        yy = (tile / Main_tilemap_width)*Snap_height+Snap_offset_Y + Snap_height - rel_y - 1;
+        xx = (tile % Main.tilemap_width)*Snap_width+Snap_offset_X + Snap_width-rel_x-1;
+        yy = (tile / Main.tilemap_width)*Snap_height+Snap_offset_Y + Snap_height - rel_y - 1;
         break;
     }
     if (yy>=Limit_top&&yy<=Limit_bottom&&xx>=Limit_left&&xx<=Limit_right)
@@ -106,7 +91,7 @@ void Tilemap_draw(word x, word y, byte color)
     else
       Pixel_in_current_screen(xx,yy,color);
       
-    tile = Main_tilemap[tile].Next;
+    tile = Main.tilemap[tile].Next;
   } while (tile != first_tile);
 
   Update_rect(0,0,0,0);
@@ -209,20 +194,20 @@ void Tilemap_update(void)
     // Or the number of tiles seems unreasonable (one million) : This can
     // happen if you set grid 1x1 for example.
   
-    Disable_main_tilemap();
+    Disable_tilemap(&Main);
     return;
   }
   
-  if (Main_tilemap)
+  if (Main.tilemap)
   {
     // Recycle existing tilemap
-    free(Main_tilemap);
-    Main_tilemap=NULL;
+    free(Main.tilemap);
+    Main.tilemap=NULL;
   }
-  Main_tilemap=tile_ptr;
+  Main.tilemap=tile_ptr;
   
-  Main_tilemap_width=width;
-  Main_tilemap_height=height;
+  Main.tilemap_width=width;
+  Main.tilemap_height=height;
 
   if (width*height > 1000 || Config.Tilemap_show_count)
   {
@@ -239,9 +224,9 @@ void Tilemap_update(void)
   // Initialize array with all tiles unique by default
   for (tile=0; tile<width*height; tile++)
   {
-    Main_tilemap[tile].Previous = tile;
-    Main_tilemap[tile].Next = tile;
-    Main_tilemap[tile].Flipped = 0;
+    Main.tilemap[tile].Previous = tile;
+    Main.tilemap[tile].Next = tile;
+    Main.tilemap[tile].Flipped = 0;
   }
   
   // Now find similar tiles and link them in circular linked list
@@ -254,7 +239,7 @@ void Tilemap_update(void)
     
     for (ref_tile=0; ref_tile<tile; ref_tile++)
     {
-      if (Main_tilemap[ref_tile].Previous<=ref_tile && Tile_is_same(ref_tile, tile))
+      if (Main.tilemap[ref_tile].Previous<=ref_tile && Tile_is_same(ref_tile, tile))
       {
         break; // stop loop on ref_tile
       }
@@ -263,12 +248,12 @@ void Tilemap_update(void)
     {
       // New occurence of a known tile
       // Insert at the end. classic doubly-linked-list.
-      int last_tile=Main_tilemap[ref_tile].Previous;
-      Main_tilemap[tile].Previous=last_tile;
-      Main_tilemap[tile].Next=ref_tile;
-      Main_tilemap[tile].Flipped=Main_tilemap[ref_tile].Flipped;
-      Main_tilemap[ref_tile].Previous=tile;
-      Main_tilemap[last_tile].Next=tile;
+      int last_tile=Main.tilemap[ref_tile].Previous;
+      Main.tilemap[tile].Previous=last_tile;
+      Main.tilemap[tile].Next=ref_tile;
+      Main.tilemap[tile].Flipped=Main.tilemap[ref_tile].Flipped;
+      Main.tilemap[ref_tile].Previous=tile;
+      Main.tilemap[last_tile].Next=tile;
       continue; // next tile
     }
     
@@ -277,7 +262,7 @@ void Tilemap_update(void)
     {
       for (ref_tile=0; ref_tile<tile; ref_tile++)
       {
-        if (Main_tilemap[ref_tile].Previous<=ref_tile && Tile_is_same_flipped_y(ref_tile, tile))
+        if (Main.tilemap[ref_tile].Previous<=ref_tile && Tile_is_same_flipped_y(ref_tile, tile))
         {
           break; // stop loop on ref_tile
         }
@@ -286,12 +271,12 @@ void Tilemap_update(void)
       {
         // New occurence of a known tile
         // Insert at the end. classic doubly-linked-list.
-        int last_tile=Main_tilemap[ref_tile].Previous;
-        Main_tilemap[tile].Previous=last_tile;
-        Main_tilemap[tile].Next=ref_tile;
-        Main_tilemap[tile].Flipped=Main_tilemap[ref_tile].Flipped ^ TILE_FLIPPED_Y;
-        Main_tilemap[ref_tile].Previous=tile;
-        Main_tilemap[last_tile].Next=tile;
+        int last_tile=Main.tilemap[ref_tile].Previous;
+        Main.tilemap[tile].Previous=last_tile;
+        Main.tilemap[tile].Next=ref_tile;
+        Main.tilemap[tile].Flipped=Main.tilemap[ref_tile].Flipped ^ TILE_FLIPPED_Y;
+        Main.tilemap[ref_tile].Previous=tile;
+        Main.tilemap[last_tile].Next=tile;
         continue; // next tile
       }
     }
@@ -301,7 +286,7 @@ void Tilemap_update(void)
     {
       for (ref_tile=0; ref_tile<tile; ref_tile++)
       {
-        if (Main_tilemap[ref_tile].Previous<=ref_tile && Tile_is_same_flipped_x(ref_tile, tile))
+        if (Main.tilemap[ref_tile].Previous<=ref_tile && Tile_is_same_flipped_x(ref_tile, tile))
         {
           break; // stop loop on ref_tile
         }
@@ -310,12 +295,12 @@ void Tilemap_update(void)
       {
         // New occurence of a known tile
         // Insert at the end. classic doubly-linked-list.
-        int last_tile=Main_tilemap[ref_tile].Previous;
-        Main_tilemap[tile].Previous=last_tile;
-        Main_tilemap[tile].Next=ref_tile;
-        Main_tilemap[tile].Flipped=Main_tilemap[ref_tile].Flipped ^ TILE_FLIPPED_X;
-        Main_tilemap[ref_tile].Previous=tile;
-        Main_tilemap[last_tile].Next=tile;
+        int last_tile=Main.tilemap[ref_tile].Previous;
+        Main.tilemap[tile].Previous=last_tile;
+        Main.tilemap[tile].Next=ref_tile;
+        Main.tilemap[tile].Flipped=Main.tilemap[ref_tile].Flipped ^ TILE_FLIPPED_X;
+        Main.tilemap[ref_tile].Previous=tile;
+        Main.tilemap[last_tile].Next=tile;
         continue; // next tile
       }
     }
@@ -325,7 +310,7 @@ void Tilemap_update(void)
     {
       for (ref_tile=0; ref_tile<tile; ref_tile++)
       {
-        if (Main_tilemap[ref_tile].Previous<=ref_tile && Tile_is_same_flipped_xy(ref_tile, tile))
+        if (Main.tilemap[ref_tile].Previous<=ref_tile && Tile_is_same_flipped_xy(ref_tile, tile))
         {
           break; // stop loop on ref_tile
         }
@@ -334,19 +319,19 @@ void Tilemap_update(void)
       {
         // New occurence of a known tile
         // Insert at the end. classic doubly-linked-list.
-        int last_tile=Main_tilemap[ref_tile].Previous;
-        Main_tilemap[tile].Previous=last_tile;
-        Main_tilemap[tile].Next=ref_tile;
-        Main_tilemap[tile].Flipped=Main_tilemap[ref_tile].Flipped ^ TILE_FLIPPED_XY;
-        Main_tilemap[ref_tile].Previous=tile;
-        Main_tilemap[last_tile].Next=tile;
+        int last_tile=Main.tilemap[ref_tile].Previous;
+        Main.tilemap[tile].Previous=last_tile;
+        Main.tilemap[tile].Next=ref_tile;
+        Main.tilemap[tile].Flipped=Main.tilemap[ref_tile].Flipped ^ TILE_FLIPPED_XY;
+        Main.tilemap[ref_tile].Previous=tile;
+        Main.tilemap[last_tile].Next=tile;
         continue; // next tile
       }
     }
     
     // This tile is really unique.
     // Nothing to do at this time: the initialization
-    // has already set the right data for Main_tilemap[tile].
+    // has already set the right data for Main.tilemap[tile].
     count++;
   }
   
@@ -386,42 +371,26 @@ void Swap_tilemap(void)
   SWAP_BYTES(Main.tilemap_mode, Spare.tilemap_mode)
   {
     T_Tile * a;
-    a=Main_tilemap;
-    Main_tilemap=Spare_tilemap;
-    Spare_tilemap=a;
+    a=Main.tilemap;
+    Main.tilemap=Spare.tilemap;
+    Spare.tilemap=a;
   }
-  SWAP_SHORTS(Main_tilemap_width, Spare_tilemap_width)
-  SWAP_SHORTS(Main_tilemap_height, Spare_tilemap_height)
+  SWAP_SHORTS(Main.tilemap_width, Spare.tilemap_width)
+  SWAP_SHORTS(Main.tilemap_height, Spare.tilemap_height)
 }
 
 ///
-/// Clears all tilemap data and settings for the main page.
+/// Clears all tilemap data and settings
 /// Safe to call again.
-void Disable_main_tilemap(void)
+void Disable_tilemap(T_Document * doc)
 {
-  if (Main_tilemap)
+  if (doc->tilemap)
   {
     // Recycle existing tilemap
-    free(Main_tilemap);
-    Main_tilemap=NULL;
+    free(doc->tilemap);
+    doc->tilemap=NULL;
   }
-  Main_tilemap_width=0;
-  Main_tilemap_height=0;
-  Main.tilemap_mode=0;
-}
-
-///
-/// Clears all tilemap data and settings for the spare.
-/// Safe to call again.
-void Disable_spare_tilemap(void)
-{
-    if (Spare_tilemap)
-  {
-    // Recycle existing tilemap
-    free(Spare_tilemap);
-    Spare_tilemap=NULL;
-  }
-  Spare_tilemap_width=0;
-  Spare_tilemap_height=0;
-  Spare.tilemap_mode=0;
+  doc->tilemap_width=0;
+  doc->tilemap_height=0;
+  doc->tilemap_mode=0;
 }

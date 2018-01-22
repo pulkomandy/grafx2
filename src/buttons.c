@@ -1762,7 +1762,7 @@ void Button_Copy_page(void)
       Redraw_spare_image();
       Spare.image_is_modified=1;
       if (Spare.tilemap_mode)
-        Disable_spare_tilemap();
+        Disable_tilemap(&Spare);
       break;
       
     case 2: // Pixels only
@@ -1773,7 +1773,7 @@ void Button_Copy_page(void)
       Redraw_spare_image();
       Spare.image_is_modified=1;
       if (Spare.tilemap_mode)
-        Disable_spare_tilemap();
+        Disable_tilemap(&Spare);
       break;
       
     case 3: // Palette only

@@ -543,7 +543,7 @@ void Button_Grid_menu(void)
     if (modified)
     {
       Tilemap_update();
-      Disable_spare_tilemap();
+      Disable_tilemap(&Spare);
     }
   }
 

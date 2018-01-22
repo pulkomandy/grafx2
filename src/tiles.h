@@ -38,26 +38,7 @@ void Tilemap_draw(word x, word y, byte color);
 void Swap_tilemap(void);
 
 ///
-/// Clears all tilemap data and settings for the main page.
+/// Clears all tilemap data and settings
 /// Safe to call again.
-void Disable_main_tilemap(void);
+void Disable_tilemap(T_Document * doc);
 
-///
-/// Clears all tilemap data and settings for the spare.
-/// Safe to call again.
-void Disable_spare_tilemap(void);
-
-
-/// Tilemap for the main screen
-extern T_Tile * Main_tilemap;
-/// Number of tiles (horizontally) for the main page's tilemap
-extern short Main_tilemap_width;
-/// Number of tiles (vertically) for the main page's tilemap
-extern short Main_tilemap_height;
-
-/// Tilemap for the spare
-extern T_Tile * Spare_tilemap;
-/// Number of tiles (horizontally) for the spare page's tilemap
-extern short Spare_tilemap_width;
-/// Number of tiles (vertically) for the spare page's tilemap
-extern short Spare_tilemap_height;
