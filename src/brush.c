@@ -120,7 +120,7 @@ void Display_paintbrush(short x,short y,byte color)
   if (Mouse_K) // pas de curseur si on est en preview et 
     return;                  // en train de cliquer
     
-  if (Main_backups->Pages->Image_mode == IMAGE_MODE_MODE5 && Main_current_layer < 4)
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_MODE5 && Main.current_layer < 4)
   {
     goto single_pixel;
   }
@@ -154,8 +154,8 @@ void Display_paintbrush(short x,short y,byte color)
       start_y_counter=start_y-(y-Brush_offset_Y);
       if (Paintbrush_shape==PAINTBRUSH_SHAPE_COLOR_BRUSH)
         Display_brush_color(
-            start_x-Main_offset_X,
-            start_y-Main_offset_Y,
+            start_x-Main.offset_X,
+            start_y-Main.offset_Y,
             start_x_counter,
             start_y_counter,
             width,
@@ -163,8 +163,8 @@ void Display_paintbrush(short x,short y,byte color)
             Back_color,
             Brush_width);
       else // mono preview
-        Display_brush_mono(start_x-Main_offset_X,
-                           start_y-Main_offset_Y,
+        Display_brush_mono(start_x-Main.offset_X,
+                           start_y-Main.offset_Y,
                            start_x_counter,
                            start_y_counter,
                            width,
@@ -175,7 +175,7 @@ void Display_paintbrush(short x,short y,byte color)
 
       Update_part_of_screen(x-Brush_offset_X,y-Brush_offset_Y,Brush_width,Brush_height);
       
-      if (Main_magnifier_mode != 0)
+      if (Main.magnifier_mode != 0)
       {
         Compute_clipped_dimensions_zoom(&start_x,&start_y,&width,&height);
         start_x_counter=start_x-(x-Brush_offset_X);
@@ -183,19 +183,19 @@ void Display_paintbrush(short x,short y,byte color)
         if ( (width>0) && (height>0) )
         {
           // Corrections dues au Zoom:
-          start_x=(start_x-Main_magnifier_offset_X)*Main_magnifier_factor;
-          start_y=(start_y-Main_magnifier_offset_Y)*Main_magnifier_factor;
-          height=start_y+(height*Main_magnifier_factor);
+          start_x=(start_x-Main.magnifier_offset_X)*Main.magnifier_factor;
+          start_y=(start_y-Main.magnifier_offset_Y)*Main.magnifier_factor;
+          height=start_y+(height*Main.magnifier_factor);
           if (height>Menu_Y)
             height=Menu_Y;
           if (Paintbrush_shape==PAINTBRUSH_SHAPE_COLOR_BRUSH)
-            Display_brush_color_zoom(Main_X_zoom+start_x,start_y,
+            Display_brush_color_zoom(Main.X_zoom+start_x,start_y,
                                    start_x_counter,start_y_counter,
                                    width,height,Back_color,
                                    Brush_width,
                                    Horizontal_line_buffer);
           else // mono preview
-           Display_brush_mono_zoom(Main_X_zoom+start_x,start_y,
+           Display_brush_mono_zoom(Main.X_zoom+start_x,start_y,
                                   start_x_counter,start_y_counter,
                                   width,height,
                                   Back_color,Fore_color,
@@ -218,14 +218,14 @@ void Display_paintbrush(short x,short y,byte color)
       Brush=Paintbrush_sprite;
 
       if ( (width>0) && (height>0) )
-        Display_brush_mono(start_x-Main_offset_X,
-                           start_y-Main_offset_Y,
+        Display_brush_mono(start_x-Main.offset_X,
+                           start_y-Main.offset_Y,
                            start_x_counter,start_y_counter,
                            width,height,
                            0,Fore_color,
                            MAX_PAINTBRUSH_SIZE);
 
-      if (Main_magnifier_mode != 0)
+      if (Main.magnifier_mode != 0)
       {
         Compute_clipped_dimensions_zoom(&start_x,&start_y,&width,&height);
         start_x_counter=start_x-(x-Paintbrush_offset_X);
@@ -234,13 +234,13 @@ void Display_paintbrush(short x,short y,byte color)
         if ( (width>0) && (height>0) )
         {
           // Corrections dues au Zoom:
-          start_x=(start_x-Main_magnifier_offset_X)*Main_magnifier_factor;
-          start_y=(start_y-Main_magnifier_offset_Y)*Main_magnifier_factor;
-          height=start_y+(height*Main_magnifier_factor);
+          start_x=(start_x-Main.magnifier_offset_X)*Main.magnifier_factor;
+          start_y=(start_y-Main.magnifier_offset_Y)*Main.magnifier_factor;
+          height=start_y+(height*Main.magnifier_factor);
           if (height>Menu_Y)
             height=Menu_Y;
 
-          Display_brush_mono_zoom(Main_X_zoom+start_x,start_y,
+          Display_brush_mono_zoom(Main.X_zoom+start_x,start_y,
                                   start_x_counter,start_y_counter,
                                   width,height,
                                   0,Fore_color,
@@ -284,10 +284,10 @@ void Draw_paintbrush(short x,short y,byte color)
   int position;
   byte old_color;
 
-  if (Main_backups->Pages->Image_mode == IMAGE_MODE_MODE5 && Main_current_layer < 4)
+  if (Main_backups->Pages->Image_mode == IMAGE_MODE_MODE5 && Main.current_layer < 4)
   {
     // Flood-fill the enclosing area
-    if (x<Main_image_width && y<Main_image_height && x>= 0 && y >= 0
+    if (x<Main.image_width && y<Main.image_height && x>= 0 && y >= 0
      && (color=Effect_function(x,y,color)) != (old_color=Read_pixel_from_current_layer(x,y))
      && (!((Stencil_mode) && (Stencil[old_color])))
      && (!((Mask_mode)    && (Mask_table[Read_pixel_from_spare_screen(x,y)])))
@@ -297,22 +297,22 @@ void Draw_paintbrush(short x,short y,byte color)
       short xx,yy;
       
       // determine area
-      switch(Main_current_layer)
+      switch(Main.current_layer)
       {
         case 0:
         default:
           // Full layer
           min_x=0;
           min_y=0;
-          width=Main_image_width;
-          height=Main_image_height;
+          width=Main.image_width;
+          height=Main.image_height;
           break;
         case 1:
         case 2:
           // Line
           min_x=0;
           min_y=y;
-          width=Main_image_width;
+          width=Main.image_width;
           height=1;
           break;
         case 3:
@@ -332,12 +332,12 @@ void Draw_paintbrush(short x,short y,byte color)
       }
       // Clip the bottom edge.
       // (Necessary if image height is not a multiple)
-      if (min_y+height>=Main_image_height)
-        height=Main_image_height-min_y;
+      if (min_y+height>=Main.image_height)
+        height=Main.image_height-min_y;
       // Clip the right edge.
       // (Necessary if image width is not a multiple)
-      if (min_x+width>=Main_image_width)
-        width=Main_image_width-min_x;
+      if (min_x+width>=Main.image_width)
+        width=Main.image_width-min_x;
         
       for (yy=min_y; yy<min_y+height; yy++)
         for (xx=min_x; xx<min_x+width; xx++)
@@ -349,13 +349,13 @@ void Draw_paintbrush(short x,short y,byte color)
       Compute_clipped_dimensions(&min_x,&min_y,&width,&height);
 
       if ( (width>0) && (height>0) )
-        Clear_brush(min_x-Main_offset_X,
-                    min_y-Main_offset_Y,
+        Clear_brush(min_x-Main.offset_X,
+                    min_y-Main.offset_Y,
                     0,0,
                     width,height,0,
-                    Main_image_width);
+                    Main.image_width);
 
-      if (Main_magnifier_mode != 0)
+      if (Main.magnifier_mode != 0)
       {
         Compute_clipped_dimensions_zoom(&min_x,&min_y,&width,&height);
         xx=min_x;
@@ -364,16 +364,16 @@ void Draw_paintbrush(short x,short y,byte color)
         if ( (width>0) && (height>0) )
         {
           // Corrections dues au Zoom:
-          min_x=(min_x-Main_magnifier_offset_X)*Main_magnifier_factor;
-          min_y=(min_y-Main_magnifier_offset_Y)*Main_magnifier_factor;
-          height=min_y+(height*Main_magnifier_factor);
+          min_x=(min_x-Main.magnifier_offset_X)*Main.magnifier_factor;
+          min_y=(min_y-Main.magnifier_offset_Y)*Main.magnifier_factor;
+          height=min_y+(height*Main.magnifier_factor);
           if (height>Menu_Y)
             height=Menu_Y;
 
-          Clear_brush_scaled(Main_X_zoom+min_x,min_y,
+          Clear_brush_scaled(Main.X_zoom+min_x,min_y,
                            xx,yy,
                            width,height,0,
-                           Main_image_width,
+                           Main.image_width,
                            Horizontal_line_buffer);
         }
       }
@@ -407,7 +407,7 @@ void Draw_paintbrush(short x,short y,byte color)
           {
             Copy_part_of_image_to_another(
               Main_screen, start_x, start_y, width, height,
-              Main_image_width, Smear_brush,
+              Main.image_width, Smear_brush,
               start_x_counter, start_y_counter,
               Smear_brush_width
             );
@@ -487,7 +487,7 @@ void Draw_paintbrush(short x,short y,byte color)
             Copy_part_of_image_to_another(Main_screen,
                                                      start_x,start_y,
                                                      width,height,
-                                                     Main_image_width,
+                                                     Main.image_width,
                                                      Smear_brush,
                                                      start_x_counter,
                                                      start_y_counter,
@@ -549,7 +549,7 @@ void Draw_paintbrush(short x,short y,byte color)
             Copy_part_of_image_to_another(Main_screen,
                                                      start_x,start_y,
                                                      width,height,
-                                                     Main_image_width,
+                                                     Main.image_width,
                                                      Smear_brush,
                                                      start_x_counter,
                                                      start_y_counter,
@@ -731,13 +731,13 @@ void Hide_paintbrush(short x,short y)
       start_y_counter=start_y-(y-Brush_offset_Y);
 
       if ( (width>0) && (height>0) )
-        Clear_brush(start_x-Main_offset_X,
-                    start_y-Main_offset_Y,
+        Clear_brush(start_x-Main.offset_X,
+                    start_y-Main.offset_Y,
                     start_x_counter,start_y_counter,
                     width,height,Back_color,
-                    Main_image_width);
+                    Main.image_width);
 
-      if (Main_magnifier_mode != 0)
+      if (Main.magnifier_mode != 0)
       {
         Compute_clipped_dimensions_zoom(&start_x,&start_y,&width,&height);
         start_x_counter=start_x;
@@ -746,16 +746,16 @@ void Hide_paintbrush(short x,short y)
         if ( (width>0) && (height>0) )
         {
           // Corrections dues au Zoom:
-          start_x=(start_x-Main_magnifier_offset_X)*Main_magnifier_factor;
-          start_y=(start_y-Main_magnifier_offset_Y)*Main_magnifier_factor;
-          height=start_y+(height*Main_magnifier_factor);
+          start_x=(start_x-Main.magnifier_offset_X)*Main.magnifier_factor;
+          start_y=(start_y-Main.magnifier_offset_Y)*Main.magnifier_factor;
+          height=start_y+(height*Main.magnifier_factor);
           if (height>Menu_Y)
             height=Menu_Y;
 
-          Clear_brush_scaled(Main_X_zoom+start_x,start_y,
+          Clear_brush_scaled(Main.X_zoom+start_x,start_y,
                            start_x_counter,start_y_counter,
                            width,height,Back_color,
-                           Main_image_width,
+                           Main.image_width,
                            Horizontal_line_buffer);
         }
       }
@@ -774,14 +774,14 @@ void Hide_paintbrush(short x,short y)
 
       if ( (width>0) && (height>0) )
       {
-        Clear_brush(start_x-Main_offset_X,
-                    start_y-Main_offset_Y,
+        Clear_brush(start_x-Main.offset_X,
+                    start_y-Main.offset_Y,
                     start_x_counter,start_y_counter,
                     width,height,0,
-                    Main_image_width);
+                    Main.image_width);
       }
 
-      if (Main_magnifier_mode != 0)
+      if (Main.magnifier_mode != 0)
       {
         Compute_clipped_dimensions_zoom(&start_x,&start_y,&width,&height);
         start_x_counter=start_x;
@@ -790,16 +790,16 @@ void Hide_paintbrush(short x,short y)
         if ( (width>0) && (height>0) )
         {
           // Corrections dues au Zoom:
-          start_x=(start_x-Main_magnifier_offset_X)*Main_magnifier_factor;
-          start_y=(start_y-Main_magnifier_offset_Y)*Main_magnifier_factor;
-          height=start_y+(height*Main_magnifier_factor);
+          start_x=(start_x-Main.magnifier_offset_X)*Main.magnifier_factor;
+          start_y=(start_y-Main.magnifier_offset_Y)*Main.magnifier_factor;
+          height=start_y+(height*Main.magnifier_factor);
           if (height>Menu_Y)
             height=Menu_Y;
 
-          Clear_brush_scaled(Main_X_zoom+start_x,start_y,
+          Clear_brush_scaled(Main.X_zoom+start_x,start_y,
                            start_x_counter,start_y_counter,
                            width,height,0,
-                           Main_image_width,
+                           Main.image_width,
                            Horizontal_line_buffer);
         }
       }
@@ -837,7 +837,7 @@ void Capture_brush(short start_x,short start_y,short end_x,short end_y,short cle
   // On ne capture la nouvelle brosse que si elle est au moins partiellement
   // dans l'image:
 
-  if ((start_x<Main_image_width) && (start_y<Main_image_height))
+  if ((start_x<Main.image_width) && (start_y<Main.image_height))
   {
     // On met les décalages du tiling à 0 pour eviter toute incohérence.
     // Si par hasard on voulait les mettre à
@@ -850,20 +850,20 @@ void Capture_brush(short start_x,short start_y,short end_x,short end_y,short cle
     new_brush_width=(end_x-start_x)+1;
     new_brush_height=(end_y-start_y)+1;
 
-    if (start_x+new_brush_width>Main_image_width)
-      new_brush_width=Main_image_width-start_x;
-    if (start_y+new_brush_height>Main_image_height)
-      new_brush_height=Main_image_height-start_y;
+    if (start_x+new_brush_width>Main.image_width)
+      new_brush_width=Main.image_width-start_x;
+    if (start_y+new_brush_height>Main.image_height)
+      new_brush_height=Main.image_height-start_y;
 
     if (Realloc_brush(new_brush_width, new_brush_height, NULL, NULL))
       return; // Unable to allocate the new brush, keep the old one.
 
-    Copy_image_to_brush(start_x,start_y,Brush_width,Brush_height,Main_image_width);
+    Copy_image_to_brush(start_x,start_y,Brush_width,Brush_height,Main.image_width);
 
     // On regarde s'il faut effacer quelque chose:
     if (clear)
     {
-      if (Main_tilemap_mode)
+      if (Main.tilemap_mode)
       {
         for (y_pos=start_y;y_pos<start_y+Brush_height;y_pos++)
           for (x_pos=start_x;x_pos<start_x+Brush_width;x_pos++)
@@ -882,7 +882,7 @@ void Capture_brush(short start_x,short start_y,short end_x,short end_y,short cle
       }
     }
     // Grab palette
-    memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
+    memcpy(Brush_original_palette, Main.palette,sizeof(T_Palette));
     // Remap (no change)
     Remap_brush();
 
@@ -952,7 +952,7 @@ void Remap_brush(void)
       b=Brush_original_palette[color].B;
       
       // When remapping to same palette, ensure we keep same color index
-      if (r==Main_palette[color].R && g==Main_palette[color].G && b==Main_palette[color].B)
+      if (r==Main.palette[color].R && g==Main.palette[color].G && b==Main.palette[color].B)
         Brush_colormap[color]=color;
       else
         // Usual method: closest by r g b
@@ -1059,7 +1059,7 @@ void Outline_brush(void)
     }
   }
   // Adopt the current palette.
-  memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
+  memcpy(Brush_original_palette, Main.palette,sizeof(T_Palette));
   memcpy(Brush_original_pixels, Brush, (long)Brush_width*Brush_height);
   for (i=0; i<256; i++)
     Brush_colormap[i]=i;
@@ -1167,7 +1167,7 @@ void Nibble_brush(void)
 
     free(old_brush);
     // Adopt the current palette.
-    memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
+    memcpy(Brush_original_palette, Main.palette,sizeof(T_Palette));
     memcpy(Brush_original_pixels, Brush, (long)Brush_width*Brush_height);
     for (i=0; i<256; i++)
       Brush_colormap[i]=i;
@@ -1222,7 +1222,7 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
   // On ne capture la nouvelle brosse que si elle est au moins partiellement
   // dans l'image:
 
-  if ((start_x<Main_image_width) && (start_y<Main_image_height))
+  if ((start_x<Main.image_width) && (start_y<Main.image_height))
   {
     // On met les décalages du tiling à 0 pour eviter toute incohérence.
     // Si par hasard on voulait les mettre à
@@ -1270,7 +1270,7 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
           // On regarde s'il faut effacer quelque chose:
           if (clear)
           {
-            if (Main_tilemap_mode)
+            if (Main.tilemap_mode)
             {
               Tilemap_draw(x_pos,y_pos,Back_color);
             }
@@ -1284,7 +1284,7 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
       Update_part_of_screen(start_x,start_y,end_x-start_x+1,end_y-start_y+1);
 
     // Grab palette
-    memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
+    memcpy(Brush_original_palette, Main.palette,sizeof(T_Palette));
     // Init colormap
     for (temp=0; temp<256; temp++)
       Brush_colormap[temp]=temp;
@@ -2134,9 +2134,9 @@ void Brush_set_palette(T_Palette *palette)
   memcpy(Brush_original_palette,palette,sizeof(T_Palette));
   for (i=0;i<256;i++)
   {
-    if (Brush_original_palette[i].R!=Main_palette[i].R
-     || Brush_original_palette[i].G!=Main_palette[i].G
-     || Brush_original_palette[i].B!=Main_palette[i].B)
+    if (Brush_original_palette[i].R!=Main.palette[i].R
+     || Brush_original_palette[i].G!=Main.palette[i].G
+     || Brush_original_palette[i].B!=Main.palette[i].B)
     {
       need_remap=1;
     }

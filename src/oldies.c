@@ -36,7 +36,7 @@
 
 void Pixel_in_layer(word x,word y, byte layer, byte color)
 {
-  *((y)*Main_image_width+(x)+Main_backups->Pages->Image[layer].Pixels)=color;
+  *((y)*Main.image_width+(x)+Main_backups->Pages->Image[layer].Pixels)=color;
 }
 
 byte C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
@@ -57,7 +57,7 @@ byte C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
   // Prerequisites
   if (Main_backups->Pages->Nb_layers < 3)
     return 1;
-  if (Main_image_width != 160 || Main_image_height != 200)
+  if (Main.image_width != 160 || Main.image_height != 200)
     return 2;
  
   memset(used_colors,0,200*40*sizeof(word));
@@ -76,7 +76,7 @@ byte C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
     {
       for (x=0;x<4;x++)
       {
-        byte c=*((row)*Main_image_width+(col*4+x)+Main_backups->Pages->Image[2].Pixels);
+        byte c=*((row)*Main.image_width+(col*4+x)+Main_backups->Pages->Image[2].Pixels);
         used_colors[row][col] |= 1<<c;
       }
     }
@@ -84,7 +84,7 @@ byte C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
   // Get "mandatory colors" from layer 1
   for (row=0;row<200;row++)
   {
-    byte c=*((row)*Main_image_width+0+Main_backups->Pages->Image[0].Pixels);
+    byte c=*((row)*Main.image_width+0+Main_backups->Pages->Image[0].Pixels);
     if (c<16)
     {
       line_color[row]=c;
@@ -100,7 +100,7 @@ byte C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
   {
     for (col=0;col<40;col++)
     {
-      byte c=*((row)*Main_image_width+(col*4)+Main_backups->Pages->Image[1].Pixels);
+      byte c=*((row)*Main.image_width+(col*4)+Main_backups->Pages->Image[1].Pixels);
       if (c<16)
       {
         block_color[row/8][col]=c;
@@ -312,7 +312,7 @@ byte C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
           for(x=0; x<4; x++)
           {
             byte bits;
-            byte c=*((row*8+y)*Main_image_width+(col*4+x)+Main_backups->Pages->Image[2].Pixels);
+            byte c=*((row*8+y)*Main.image_width+(col*4+x)+Main_backups->Pages->Image[2].Pixels);
            
             if (c==line_color[row*8+y])
               // BG color
@@ -356,9 +356,9 @@ byte C64_FLI_enforcer(void)
   byte c[4];
   
   // Checks
-  if (Main_image_width != 160)
+  if (Main.image_width != 160)
     return 1;
-  if (Main_image_height != 200)
+  if (Main.image_height != 200)
     return 1;
   if (Main_backups->Pages->Nb_layers != 4)
     return 2;
@@ -397,7 +397,7 @@ byte C64_FLI_enforcer(void)
   // Visible feedback:
   
   // If the "check" layer was visible, manually update the whole thing
-  if (Main_layers_visible & (1<<3))
+  if (Main.layers_visible & (1<<3))
   {
     Hide_cursor();
     Redraw_layered_image();

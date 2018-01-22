@@ -204,7 +204,7 @@ void Button_Message_initial(void)
     }
     // Modify the mode for the spare too
     Spare_backups->Pages->Image_mode = Main_backups->Pages->Image_mode;
-    Update_spare_buffers(Spare_image_width,Spare_image_height);
+    Update_spare_buffers(Spare.image_width,Spare.image_height);
     Redraw_spare_image();
   }
   Display_cursor();
@@ -238,13 +238,13 @@ void Button_Undo(void)
 {
   Hide_cursor();
   Undo();
-  Set_palette(Main_palette);
-  Compute_optimal_menu_colors(Main_palette);
+  Set_palette(Main.palette);
+  Compute_optimal_menu_colors(Main.palette);
 
   Check_menu_mode();
   Display_all_screen();
   Unselect_button(BUTTON_UNDO);
-  Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
+  Draw_menu_button(BUTTON_MAGNIFIER,Main.magnifier_mode);
   Display_menu();
   Display_cursor();
 }
@@ -253,13 +253,13 @@ void Button_Redo(void)
 {
   Hide_cursor();
   Redo();
-  Set_palette(Main_palette);
-  Compute_optimal_menu_colors(Main_palette);
+  Set_palette(Main.palette);
+  Compute_optimal_menu_colors(Main.palette);
 
   Check_menu_mode();
   Display_all_screen();
   Unselect_button(BUTTON_UNDO);
-  Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
+  Draw_menu_button(BUTTON_MAGNIFIER,Main.magnifier_mode);
   Display_menu();
   Display_cursor();
 }
@@ -430,31 +430,31 @@ void Button_Hide_menu(void)
     Menu_is_visible=0;
     Menu_Y=Screen_height;
 
-    if (Main_magnifier_mode)
+    if (Main.magnifier_mode)
     {
       Compute_magnifier_data();
     }
 
     //   On repositionne le décalage de l'image pour qu'il n'y ait pas d'in-
     // -cohérences lorsqu'on sortira du mode Loupe.
-    if (Main_offset_Y+Screen_height>Main_image_height)
+    if (Main.offset_Y+Screen_height>Main.image_height)
     {
-      if (Screen_height>Main_image_height)
-        Main_offset_Y=0;
+      if (Screen_height>Main.image_height)
+        Main.offset_Y=0;
       else
-        Main_offset_Y=Main_image_height-Screen_height;
+        Main.offset_Y=Main.image_height-Screen_height;
     }
     // On fait pareil pour le brouillon
-    if (Spare_offset_Y+Screen_height>Spare_image_height)
+    if (Spare.offset_Y+Screen_height>Spare.image_height)
     {
-      if (Screen_height>Spare_image_height)
-        Spare_offset_Y=0;
+      if (Screen_height>Spare.image_height)
+        Spare.offset_Y=0;
       else
-        Spare_offset_Y=Spare_image_height-Screen_height;
+        Spare.offset_Y=Spare.image_height-Screen_height;
     }
 
     Compute_magnifier_data();
-    if (Main_magnifier_mode)
+    if (Main.magnifier_mode)
       Position_screen_according_to_zoom();
     Compute_limits();
     Compute_paintbrush_coordinates();
@@ -470,12 +470,12 @@ void Button_Hide_menu(void)
         Menu_Y -= Menu_bars[current_menu].Height * Menu_factor_Y;
 
     Compute_magnifier_data();
-    if (Main_magnifier_mode)
+    if (Main.magnifier_mode)
       Position_screen_according_to_zoom();
     Compute_limits();
     Compute_paintbrush_coordinates();
     Display_menu();
-    if (Main_magnifier_mode)
+    if (Main.magnifier_mode)
       Display_all_screen();
   }
   Unselect_button(BUTTON_HIDE);
@@ -603,7 +603,7 @@ byte Button_Quit_local_function(void)
   static char  filename[MAX_PATH_CHARACTERS];
   byte  old_cursor_shape;
 
-  if (!Main_image_is_modified)
+  if (!Main.image_is_modified)
     return 1;
 
   // On commence par afficher la fenêtre de QUIT
@@ -671,7 +671,7 @@ void Button_Quit(void)
 
   if (Button_Quit_local_function())
   {
-    if (Spare_image_is_modified)
+    if (Spare.image_is_modified)
     {
       Button_Page(); // On passe sur le brouillon
       // Si l'utilisateur présente les derniers symptomes de l'abandon
@@ -1168,10 +1168,10 @@ void Button_Settings(void)
   {
     // Reset fileselector offsets
     // since different files are shown now
-    Main_selector.Position=0;
-    Main_selector.Offset=0;
-    Spare_selector.Position=0;
-    Spare_selector.Offset=0;
+    Main.selector.Position=0;
+    Main.selector.Offset=0;
+    Spare.selector.Position=0;
+    Spare.selector.Offset=0;
     Brush_selector.Position=0;
     Brush_selector.Offset=0;
   }
@@ -1184,7 +1184,7 @@ void Button_Settings(void)
   Config=selected_config;
 
   if (config_is_reloaded)
-    Compute_optimal_menu_colors(Main_palette);
+    Compute_optimal_menu_colors(Main.palette);
 
   Close_window();
   Unselect_button(BUTTON_SETTINGS);
@@ -1514,12 +1514,12 @@ void Button_Skins(void)
 
     // Now find the best colors for the new skin in the current palette
     // and remap the skin
-    Compute_optimal_menu_colors(Main_palette);
+    Compute_optimal_menu_colors(Main.palette);
 
   }
   
   // We don't want to keep the skin's palette, as this would corrupt the current picture's one.
-  Set_palette(Main_palette);
+  Set_palette(Main.palette);
 
   Close_window();
   Unselect_button(BUTTON_SETTINGS);
@@ -1534,7 +1534,7 @@ void Button_Skins(void)
     switch(button)
     {
       case BUTTON_MAGNIFIER:
-        state|=Main_magnifier_mode;
+        state|=Main.magnifier_mode;
         break;
       case BUTTON_EFFECTS:
         state|=Any_effect_active();
@@ -1564,74 +1564,75 @@ void Button_Page(void)
   Swap_tilemap();
   
   // On fait le reste du travail "à la main":
-  SWAP_PBYTES(Main_visible_image.Image,Spare_visible_image.Image)
-  SWAP_WORDS (Main_visible_image.Width,Spare_visible_image.Width)
-  SWAP_WORDS (Main_visible_image.Height,Spare_visible_image.Height)
-  SWAP_SHORTS(Main_offset_X,Spare_offset_X)
-  SWAP_SHORTS(Main_offset_Y,Spare_offset_Y)
-  SWAP_SHORTS(Main_separator_position,Spare_separator_position)
-  SWAP_SHORTS(Main_X_zoom,Spare_X_zoom)
-  SWAP_FLOATS(Main_separator_proportion,Spare_separator_proportion)
-  SWAP_BYTES (Main_magnifier_mode,Spare_magnifier_mode)
+// TODO
+  SWAP_PBYTES(Main_visible_image.Image,Spare_visible_image.Image)// !
+  SWAP_WORDS (Main_visible_image.Width,Spare_visible_image.Width)// !
+  SWAP_WORDS (Main_visible_image.Height,Spare_visible_image.Height)// !
+  SWAP_SHORTS(Main.offset_X,Spare.offset_X)
+  SWAP_SHORTS(Main.offset_Y,Spare.offset_Y)
+  SWAP_SHORTS(Main.separator_position,Spare.separator_position)
+  SWAP_SHORTS(Main.X_zoom,Spare.X_zoom)
+  SWAP_FLOATS(Main.separator_proportion,Spare.separator_proportion)
+  SWAP_BYTES (Main.magnifier_mode,Spare.magnifier_mode)
 
-  Pixel_preview=(Main_magnifier_mode)?Pixel_preview_magnifier:Pixel_preview_normal;
+  Pixel_preview=(Main.magnifier_mode)?Pixel_preview_magnifier:Pixel_preview_normal;
 
-  SWAP_WORDS (Main_magnifier_factor,Spare_magnifier_factor)
-  SWAP_WORDS (Main_magnifier_height,Spare_magnifier_height)
-  SWAP_WORDS (Main_magnifier_width,Spare_magnifier_width)
-  SWAP_SHORTS(Main_magnifier_offset_X,Spare_magnifier_offset_X)
-  SWAP_SHORTS(Main_magnifier_offset_Y,Spare_magnifier_offset_Y)
+  SWAP_WORDS (Main.magnifier_factor,Spare.magnifier_factor)
+  SWAP_WORDS (Main.magnifier_height,Spare.magnifier_height)
+  SWAP_WORDS (Main.magnifier_width,Spare.magnifier_width)
+  SWAP_SHORTS(Main.magnifier_offset_X,Spare.magnifier_offset_X)
+  SWAP_SHORTS(Main.magnifier_offset_Y,Spare.magnifier_offset_Y)
   // Swap du booléen "Image modifiée"
-  SWAP_BYTES (Main_image_is_modified,Spare_image_is_modified)
+  SWAP_BYTES (Main.image_is_modified,Spare.image_is_modified)
 
   // Swap fileselector data
-  SWAP_BYTES (Main_selector.Format_filter,Spare_selector.Format_filter)
-  SWAP_WORDS (Main_selector.Position,Spare_selector.Position)
-  SWAP_WORDS (Main_selector.Offset,Spare_selector.Offset)
-  strcpy(Temp_buffer            ,Spare_selector.Directory);
-  strcpy(Spare_selector.Directory,Main_selector.Directory);
-  strcpy(Main_selector.Directory,Temp_buffer             );
+  SWAP_BYTES (Main.selector.Format_filter,Spare.selector.Format_filter)
+  SWAP_WORDS (Main.selector.Position,Spare.selector.Position)
+  SWAP_WORDS (Main.selector.Offset,Spare.selector.Offset)
+  strcpy(Temp_buffer            ,Spare.selector.Directory);
+  strcpy(Spare.selector.Directory,Main.selector.Directory);
+  strcpy(Main.selector.Directory,Temp_buffer             );
 
 
-  SWAP_BYTES (Main_current_layer,Spare_current_layer)
-  SWAP_DWORDS(Main_layers_visible,Spare_layers_visible)
-  SWAP_DWORDS(Main_layers_visible_backup,Spare_layers_visible_backup)
+  SWAP_BYTES (Main.current_layer,Spare.current_layer)
+  SWAP_DWORDS(Main.layers_visible,Spare.layers_visible)
+  SWAP_DWORDS(Main.layers_visible_backup,Spare.layers_visible_backup)
   
-  SWAP_DWORDS(Main_safety_number,Spare_safety_number)
-  SWAP_DWORDS(Main_edits_since_safety_backup,Spare_edits_since_safety_backup)
-  SWAP_BYTES(Main_safety_backup_prefix,Spare_safety_backup_prefix)
+  SWAP_DWORDS(Main.safety_number,Spare.safety_number)
+  SWAP_DWORDS(Main.edits_since_safety_backup,Spare.edits_since_safety_backup)
+  SWAP_BYTES(Main.safety_backup_prefix,Spare.safety_backup_prefix)
   {
     Uint32 a;
-    a=Main_time_of_safety_backup;
-    Main_time_of_safety_backup=Spare_time_of_safety_backup;
-    Spare_time_of_safety_backup=a;
+    a=Main.time_of_safety_backup;
+    Main.time_of_safety_backup=Spare.time_of_safety_backup;
+    Spare.time_of_safety_backup=a;
   }
 
   //Redraw_layered_image();
   // replaced by
-  Update_buffers(Main_image_width, Main_image_height);
+  Update_buffers(Main.image_width, Main.image_height);
   Update_depth_buffer();
   Update_screen_targets();
   End_of_modification();
   // --
 
   // A la fin, on affiche l'écran
-  for (factor_index=0; ZOOM_FACTOR[factor_index]!=Main_magnifier_factor; factor_index++);
-  //Change_magnifier_factor(factor_index,0);
+  for (factor_index=0; ZOOM_FACTOR[factor_index]!=Main.magnifier_factor; factor_index++);
+  //Change.magnifier_factor(factor_index,0);
   Compute_magnifier_data();
-  if (Main_magnifier_mode)
+  if (Main.magnifier_mode)
     Pixel_preview=Pixel_preview_magnifier;
   else
     Pixel_preview=Pixel_preview_normal;
   Compute_limits();
   Compute_paintbrush_coordinates();
 
-  Set_palette(Main_palette);
-  Compute_optimal_menu_colors(Main_palette);
+  Set_palette(Main.palette);
+  Compute_optimal_menu_colors(Main.palette);
   Check_menu_mode();
   Display_all_screen();
   Unselect_button(BUTTON_PAGE);
-  Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
+  Draw_menu_button(BUTTON_MAGNIFIER,Main.magnifier_mode);
   // Tilemap mode might be different
   Draw_menu_button(BUTTON_EFFECTS,Any_effect_active());
   Display_menu();
@@ -1644,27 +1645,27 @@ void Button_Page(void)
 
 void Copy_image_only(void)
 {
-  word old_width=Spare_image_width;
-  word old_height=Spare_image_height;
+  word old_width=Spare.image_width;
+  word old_height=Spare.image_height;
   
-  if (Backup_and_resize_the_spare(Main_image_width,Main_image_height))
+  if (Backup_and_resize_the_spare(Main.image_width,Main.image_height))
   {
     byte i;
         
     for (i=0; i<Spare_backups->Pages->Nb_layers; i++)
     {
-      if (i == Spare_current_layer)
+      if (i == Spare.current_layer)
       {
         // Copy the current layer
-        memcpy(Spare_backups->Pages->Image[i].Pixels,Main_backups->Pages->Image[Main_current_layer].Pixels,Main_image_width*Main_image_height);
+        memcpy(Spare_backups->Pages->Image[i].Pixels,Main_backups->Pages->Image[Main.current_layer].Pixels,Main.image_width*Main.image_height);
       }
       else
       {
         // Resize the original layer
         Copy_part_of_image_to_another(
-        Spare_backups->Pages->Next->Image[i].Pixels,0,0,Min(old_width,Spare_image_width),
-        Min(old_height,Spare_image_height),old_width,
-        Spare_backups->Pages->Image[i].Pixels,0,0,Spare_image_width);
+        Spare_backups->Pages->Next->Image[i].Pixels,0,0,Min(old_width,Spare.image_width),
+        Min(old_height,Spare.image_height),old_width,
+        Spare_backups->Pages->Image[i].Pixels,0,0,Spare.image_width);
       }
     }
 
@@ -1674,8 +1675,8 @@ void Copy_image_only(void)
       ces valeurs pour qu'elles soient correctes.
     */
     /*
-    Spare_image_width=Main_image_width;
-    Spare_image_height=Main_image_height;
+    Spare.image_width=Main.image_width;
+    Spare.image_height=Main.image_height;
     */
     
     Copy_view_to_spare();
@@ -1687,7 +1688,7 @@ void Copy_image_only(void)
     // (It's the same reason that the "Page" function gets complex,
     // it needs to rebuild a depth buffer only, trusting the
     // depth buffer that was already available in Spare_.)
-    Update_spare_buffers(Spare_image_width,Spare_image_height);
+    Update_spare_buffers(Spare.image_width,Spare.image_height);
     Redraw_spare_image();
 
   }
@@ -1712,7 +1713,7 @@ void Copy_some_colors(void)
     for (index=0; index<256; index++)
     {
       if (mask_color_to_copy[index])
-        memcpy(Spare_palette+index,Main_palette+index,
+        memcpy(Spare.palette+index,Main.palette+index,
                sizeof(T_Components));
     }
   }
@@ -1755,12 +1756,12 @@ void Button_Copy_page(void)
       // backup is done by the following function
       Copy_image_only();
       // copie de la palette
-      memcpy(Spare_palette,Main_palette,sizeof(T_Palette));
+      memcpy(Spare.palette,Main.palette,sizeof(T_Palette));
       // Equivalent of 'end_of_modifications' for spare.
-      Update_spare_buffers(Spare_image_width,Spare_image_height);
+      Update_spare_buffers(Spare.image_width,Spare.image_height);
       Redraw_spare_image();
-      Spare_image_is_modified=1;
-      if (Spare_tilemap_mode)
+      Spare.image_is_modified=1;
+      if (Spare.tilemap_mode)
         Disable_spare_tilemap();
       break;
       
@@ -1768,21 +1769,21 @@ void Button_Copy_page(void)
       // backup is done by the following function
       Copy_image_only();
       // Equivalent of 'end_of_modifications' for spare.
-      Update_spare_buffers(Spare_image_width,Spare_image_height);
+      Update_spare_buffers(Spare.image_width,Spare.image_height);
       Redraw_spare_image();
-      Spare_image_is_modified=1;
-      if (Spare_tilemap_mode)
+      Spare.image_is_modified=1;
+      if (Spare.tilemap_mode)
         Disable_spare_tilemap();
       break;
       
     case 3: // Palette only
       Backup_the_spare(LAYER_NONE);
       // Copy palette
-      memcpy(Spare_palette,Main_palette,sizeof(T_Palette));
+      memcpy(Spare.palette,Main.palette,sizeof(T_Palette));
       // Equivalent of 'end_of_modifications' for spare.
-      Update_spare_buffers(Spare_image_width,Spare_image_height);
+      Update_spare_buffers(Spare.image_width,Spare.image_height);
       Redraw_spare_image();
-      Spare_image_is_modified=1;
+      Spare.image_is_modified=1;
       break;
       
     case 4: // Some colors
@@ -1794,11 +1795,11 @@ void Button_Copy_page(void)
       Backup_the_spare(LAYER_ALL);
       Remap_spare();
       // Copy palette
-      memcpy(Spare_palette,Main_palette,sizeof(T_Palette));
+      memcpy(Spare.palette,Main.palette,sizeof(T_Palette));
       // Equivalent of 'end_of_modifications' for spare.
-      Update_spare_buffers(Spare_image_width,Spare_image_height);
+      Update_spare_buffers(Spare.image_width,Spare.image_height);
       Redraw_spare_image();
-      Spare_image_is_modified=1;
+      Spare.image_is_modified=1;
       break;  
   }
 
@@ -1825,12 +1826,12 @@ void Button_Kill(void)
     Hide_cursor();
     Free_current_page();
 
-    Set_palette(Main_palette);
-    Compute_optimal_menu_colors(Main_palette);
+    Set_palette(Main.palette);
+    Compute_optimal_menu_colors(Main.palette);
 
     Display_all_screen();
     Unselect_button(BUTTON_KILL);
-    Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
+    Draw_menu_button(BUTTON_MAGNIFIER,Main.magnifier_mode);
     Display_menu();
     Display_cursor();
   }
@@ -2029,11 +2030,11 @@ void Button_Resolution(void)
   Check_mode_button(184,172,3);
  
 
-  chosen_width=Main_image_width;
+  chosen_width=Main.image_width;
   Num2str(chosen_width,str,4);
   Window_input_content(input_width_button,str);
 
-  chosen_height=Main_image_height;
+  chosen_height=Main.image_height;
   Num2str(chosen_height,str,4);
   Window_input_content(input_button_height,str);
 
@@ -2216,11 +2217,11 @@ void Button_Resolution(void)
 
   if (clicked_button==1) // OK
   {
-    if (Main_magnifier_mode)
+    if (Main.magnifier_mode)
       Unselect_button(BUTTON_MAGNIFIER);
 
-    if ( (chosen_width!=Main_image_width)
-      || (chosen_height!=Main_image_height) )
+    if ( (chosen_width!=Main.image_width)
+      || (chosen_height!=Main.image_height) )
     {
       Resize_image(chosen_width,chosen_height);
       End_of_modification();
@@ -2636,7 +2637,7 @@ void Button_Gradients(void)
     {
       Allow_colorcycling=0;
       // Restore palette
-      Set_palette(Main_palette);
+      Set_palette(Main.palette);
     }
 
     switch(clicked_button)
@@ -2849,7 +2850,7 @@ void Button_Fill(void)
     }
     else
       if ( (Mouse_Y<Menu_Y) && (Menu_is_visible) &&
-           ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ) )
+           ( (!Main.magnifier_mode) || (Mouse_X<Main.separator_position) || (Mouse_X>=Main.X_zoom) ) )
         Print_in_menu("X:       Y:             ",0);
     Start_operation_stack(OPERATION_FILL);
     Display_cursor();
@@ -2868,7 +2869,7 @@ void Button_Replace(void)
       Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
     }
     if ( (Mouse_Y<Menu_Y) && (Menu_is_visible) &&
-         ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ) )
+         ( (!Main.magnifier_mode) || (Mouse_X<Main.separator_position) || (Mouse_X>=Main.X_zoom) ) )
       Print_in_menu("X:       Y:       (    )",0);
     Start_operation_stack(OPERATION_REPLACE);
     Display_cursor();
@@ -2882,7 +2883,7 @@ void Button_Unselect_fill(void)
 
   if (Current_operation==OPERATION_REPLACE)
     if ( (Mouse_Y<Menu_Y) && (Menu_is_visible) &&
-         ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ) )
+         ( (!Main.magnifier_mode) || (Mouse_X<Main.separator_position) || (Mouse_X>=Main.X_zoom) ) )
       Print_in_menu("X:       Y:             ",0);
 }
 
@@ -3093,13 +3094,13 @@ int Best_video_mode(void)
     
   // On commence par borner les dimensions, ou du moins les rendre cohérentes
   if ((Original_screen_X<=0) || (Config.Set_resolution_according_to==2))
-    Original_screen_X=Main_image_width;
+    Original_screen_X=Main.image_width;
   else
     if (Original_screen_X<320)
       Original_screen_X=320;
 
   if ((Original_screen_Y<=0) || (Config.Set_resolution_according_to==2))
-    Original_screen_Y=Main_image_height;
+    Original_screen_Y=Main.image_height;
   else
     if (Original_screen_Y<200)
       Original_screen_Y=200;
@@ -3167,13 +3168,13 @@ void Load_picture(byte image)
     strcpy(directory, Brush_file_directory);
     Init_context_brush(&context, filename, directory);
   }
-  confirm=Button_Load_or_Save(image?&Main_selector:&Brush_selector, 1, &context);
+  confirm=Button_Load_or_Save(image?&Main.selector:&Brush_selector, 1, &context);
 
   if (confirm)
   {
     if (image)
     {
-      if (Main_image_is_modified)
+      if (Main.image_is_modified)
         confirm=Confirmation_box("Discard unsaved changes?");
     }
   }
@@ -3225,20 +3226,20 @@ void Load_picture(byte image)
     }
     
     
-    if ( (File_error==1) || (Get_fileformat(Main_fileformat)->Palette_only) )
+    if ( (File_error==1) || (Get_fileformat(Main.fileformat)->Palette_only) )
     {
       if (File_error!=1)
-        Compute_optimal_menu_colors(Main_palette);
+        Compute_optimal_menu_colors(Main.palette);
     }
     else
     {
       if (image)
       {
-        if (Main_magnifier_mode)
+        if (Main.magnifier_mode)
         {
           Pixel_preview=Pixel_preview_normal;
-          Main_magnifier_mode=0;
-          Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
+          Main.magnifier_mode=0;
+          Draw_menu_button(BUTTON_MAGNIFIER,Main.magnifier_mode);
         }
 
         new_mode=Best_video_mode();
@@ -3268,18 +3269,18 @@ void Load_picture(byte image)
         }
         else
         {
-          Main_offset_X=0;
-          Main_offset_Y=0;
+          Main.offset_X=0;
+          Main.offset_Y=0;
           Compute_limits();
           Compute_paintbrush_coordinates();
         }
 
-        Compute_optimal_menu_colors(Main_palette);
+        Compute_optimal_menu_colors(Main.palette);
         Redraw_layered_image();
         End_of_modification();
         Check_menu_mode();
         Display_all_screen();
-        Main_image_is_modified=0;
+        Main.image_is_modified=0;
       }
     }
 
@@ -3292,7 +3293,7 @@ void Load_picture(byte image)
   Hide_cursor();
   Print_filename();
   Display_cursor();
-  Set_palette(Main_palette);
+  Set_palette(Main.palette);
 }
 
 
@@ -3316,7 +3317,7 @@ void Button_Reload(void)
   // restituer en cas d'erreur n'affectant pas l'image
   Upload_infos_page_main(Main_backups->Pages);
 
-  if ( (!Main_image_is_modified) || Confirmation_box("Discard unsaved changes ?") )
+  if ( (!Main.image_is_modified) || Confirmation_box("Discard unsaved changes ?") )
   {
     T_IO_Context context;
     
@@ -3336,11 +3337,11 @@ void Button_Reload(void)
 
     if (File_error!=1)
     {
-      if (Main_magnifier_mode)
+      if (Main.magnifier_mode)
       {
         Pixel_preview=Pixel_preview_normal;
-        Main_magnifier_mode=0;
-        Draw_menu_button(BUTTON_MAGNIFIER,Main_magnifier_mode);
+        Main.magnifier_mode=0;
+        Draw_menu_button(BUTTON_MAGNIFIER,Main.magnifier_mode);
       }
 
       new_mode=Best_video_mode();     
@@ -3371,8 +3372,8 @@ void Button_Reload(void)
       }
       else
       {
-        Main_offset_X=0;
-        Main_offset_Y=0;
+        Main.offset_X=0;
+        Main.offset_Y=0;
         Compute_limits();
         Compute_paintbrush_coordinates();
       }
@@ -3382,14 +3383,14 @@ void Button_Reload(void)
       Check_menu_mode();
       Display_all_screen();
 
-      Main_image_is_modified=0;
+      Main.image_is_modified=0;
     }
     Destroy_context(&context);
   }
   else
     Hide_cursor();
 
-  Compute_optimal_menu_colors(Main_palette);
+  Compute_optimal_menu_colors(Main.palette);
   Display_menu();
   if (Config.Display_image_limits)
     Display_image_limits();
@@ -3451,7 +3452,7 @@ void Save_picture(enum CONTEXT_TYPE type)
     strcpy(filename, Main_backups->Pages->Filename);
     strcpy(directory, Main_backups->Pages->File_directory);
     Init_context_layered_image(&save_context, filename, directory);
-    save_context.Format = Main_fileformat;
+    save_context.Format = Main.fileformat;
   }
   else if (type == CONTEXT_BRUSH)
   {
@@ -3481,7 +3482,7 @@ void Save_picture(enum CONTEXT_TYPE type)
   else
     return;
 
-  confirm=Button_Load_or_Save((type==CONTEXT_MAIN_IMAGE)?&Main_selector:&Brush_selector,0, &save_context);
+  confirm=Button_Load_or_Save((type==CONTEXT_MAIN_IMAGE)?&Main.selector:&Brush_selector,0, &save_context);
 
   if (confirm && File_exists(save_context.File_name))
   {
@@ -3511,8 +3512,8 @@ void Save_picture(enum CONTEXT_TYPE type)
     format=Get_fileformat(save_context.Format);
     if (!File_error && type == CONTEXT_MAIN_IMAGE && !format->Palette_only && (Main_backups->Pages->Nb_layers==1 || format->Supports_layers))
     {
-      Main_image_is_modified=0;
-      Main_fileformat=save_context.Format;
+      Main.image_is_modified=0;
+      Main.fileformat=save_context.Format;
       strcpy(Main_backups->Pages->Filename, save_context.File_name);
       strcpy(Main_backups->Pages->File_directory, save_context.File_directory);
     }
@@ -3529,7 +3530,7 @@ void Save_picture(enum CONTEXT_TYPE type)
   Destroy_context(&save_context);
 
   Print_filename();
-  Set_palette(Main_palette);
+  Set_palette(Main.palette);
 }
 
 
@@ -3570,7 +3571,7 @@ void Button_Autosave(void)
       Save_image(&save_context);
       if (!File_error)
       {
-        Main_image_is_modified=0;
+        Main.image_is_modified=0;
       }
       Destroy_context(&save_context);
 
@@ -3710,7 +3711,7 @@ void Button_Colorpicker(void)
     Paintbrush_shape=PAINTBRUSH_SHAPE_NONE;
     if (Operation_before_interrupt!=OPERATION_REPLACE)
       if ( (Mouse_Y<Menu_Y) && (Menu_is_visible) &&
-           ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ) )
+           ( (!Main.magnifier_mode) || (Mouse_X<Main.separator_position) || (Mouse_X>=Main.X_zoom) ) )
         Print_in_menu("X:       Y:       (    )",0);
   }
   else
@@ -3725,7 +3726,7 @@ void Button_Unselect_colorpicker(void)
   // Erase the color block which shows the picked color
   if (Operation_before_interrupt!=OPERATION_REPLACE)
     if ( (Mouse_Y<Menu_Y) && (Menu_is_visible) &&
-         ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ) )
+         ( (!Main.magnifier_mode) || (Mouse_X<Main.separator_position) || (Mouse_X>=Main.X_zoom) ) )
       Print_in_menu("X:       Y:             ",0);
 
   // On fait de notre mieux pour restaurer l'ancienne opération:
@@ -3763,7 +3764,7 @@ byte Coming_from_zoom_factor_menu=0;
 void Button_Magnify(void)
 {
   Hide_cursor();
-  if ( (Current_operation==OPERATION_MAGNIFY) || (Main_magnifier_mode) )
+  if ( (Current_operation==OPERATION_MAGNIFY) || (Main.magnifier_mode) )
   {
     Unselect_button(BUTTON_MAGNIFIER);
   }
@@ -3780,21 +3781,21 @@ void Button_Magnify(void)
       /* la loupe... Il serait peut-être plus propre de faire une procédure */
       /* qui s'en charge... */
       // On passe en mode loupe
-      Main_magnifier_mode=1;
+      Main.magnifier_mode=1;
 
       // La fonction d'affichage dans la partie image est désormais un affichage
       // spécial loupe.
       Pixel_preview=Pixel_preview_magnifier;
 
       // On calcule l'origine de la loupe
-      Main_magnifier_offset_X=Mouse_X-(Main_magnifier_width>>1);
-      Main_magnifier_offset_Y=Mouse_Y-(Main_magnifier_height>>1);
+      Main.magnifier_offset_X=Mouse_X-(Main.magnifier_width>>1);
+      Main.magnifier_offset_Y=Mouse_Y-(Main.magnifier_height>>1);
 
      // Calcul des coordonnées absolues de ce coin DANS L'IMAGE
-      Main_magnifier_offset_X+=Main_offset_X;
-      Main_magnifier_offset_Y+=Main_offset_Y;
+      Main.magnifier_offset_X+=Main.offset_X;
+      Main.magnifier_offset_Y+=Main.offset_Y;
 
-      Clip_magnifier_offsets(&Main_magnifier_offset_X, &Main_magnifier_offset_Y);
+      Clip_magnifier_offsets(&Main.magnifier_offset_X, &Main.magnifier_offset_Y);
 
       // On calcule les bornes visibles dans l'écran
       Position_screen_according_to_zoom();
@@ -3838,14 +3839,14 @@ void Button_Magnify_menu(void)
     Change_magnifier_factor(item->Number,0);
   }
 
-  if ( (!item) && (!Main_magnifier_mode) && (Current_operation!=OPERATION_MAGNIFY) ) // Cancel
+  if ( (!item) && (!Main.magnifier_mode) && (Current_operation!=OPERATION_MAGNIFY) ) // Cancel
     Unselect_button(BUTTON_MAGNIFIER);
 
   Display_all_screen();
   Display_cursor();
-  Update_rect(Main_separator_position,0,Screen_width-Main_separator_position,Menu_Y);
+  Update_rect(Main.separator_position,0,Screen_width-Main.separator_position,Menu_Y);
 
-  if ( (item) && (!Main_magnifier_mode) && (Current_operation!=OPERATION_MAGNIFY) ) // Passage en mode zoom
+  if ( (item) && (!Main.magnifier_mode) && (Current_operation!=OPERATION_MAGNIFY) ) // Passage en mode zoom
   {
     Coming_from_zoom_factor_menu=1;
     Select_button(BUTTON_MAGNIFIER,LEFT_SIDE);
@@ -3856,27 +3857,27 @@ void Button_Magnify_menu(void)
 
 void Button_Unselect_magnifier(void)
 {
-  if (Main_magnifier_mode)
+  if (Main.magnifier_mode)
   {
     // On sort du mode loupe
-    Main_magnifier_mode=0;
+    Main.magnifier_mode=0;
 
     
     // --> Recalculer le décalage de l'écran lorsqu'on sort de la loupe <--
     // Centrage "brut" de lécran par rapport à la loupe
-    Main_offset_X=Main_magnifier_offset_X-((Screen_width-Main_magnifier_width)>>1);
-    Main_offset_Y=Main_magnifier_offset_Y-((Menu_Y-Main_magnifier_height)>>1);
+    Main.offset_X=Main.magnifier_offset_X-((Screen_width-Main.magnifier_width)>>1);
+    Main.offset_Y=Main.magnifier_offset_Y-((Menu_Y-Main.magnifier_height)>>1);
     
     // Correction en cas de débordement de l'image
-    if (Main_offset_X+Screen_width>Main_image_width)
-      Main_offset_X=Main_image_width-Screen_width;
-    if (Main_offset_X<0)
-      Main_offset_X=0;
+    if (Main.offset_X+Screen_width>Main.image_width)
+      Main.offset_X=Main.image_width-Screen_width;
+    if (Main.offset_X<0)
+      Main.offset_X=0;
 
-    if (Main_offset_Y+Menu_Y>Main_image_height)
-      Main_offset_Y=Main_image_height-Menu_Y;
-    if (Main_offset_Y<0)
-      Main_offset_Y=0;
+    if (Main.offset_Y+Menu_Y>Main.image_height)
+      Main.offset_Y=Main.image_height-Menu_Y;
+    if (Main.offset_Y<0)
+      Main.offset_Y=0;
 
     // La fonction d'affichage dans l'image est désormais un affichage normal.
     Pixel_preview=Pixel_preview_normal;
@@ -4557,7 +4558,7 @@ void Display_effect_states(void)
   Display_effect_state(C3, L4, "Tiling" ,Tiling_mode);
 
   Display_effect_state(C2,L4, "8 bit"  ,Main_backups->Pages->Image_mode > IMAGE_MODE_ANIMATION);
-  Display_effect_state(C3,L3, "Tilemap",Main_tilemap_mode);
+  Display_effect_state(C3,L3, "Tilemap",Main.tilemap_mode);
 }
 
 
@@ -4871,7 +4872,7 @@ void Button_Effects(void)
         {
           Button_Tilemap_mode();
           Hide_cursor();
-          Display_effect_state(C3,L3, "Tilemap" ,Main_tilemap_mode);
+          Display_effect_state(C3,L3, "Tilemap" ,Main.tilemap_mode);
           Display_cursor();
         }
         else
@@ -5056,7 +5057,7 @@ void Button_Text(void)
                 g=text_palette[color].G;
                 b=text_palette[color].B;
                 
-                //if (r==Main_palette[color].R && g==Main_palette[color].G && b==Main_palette[color].B)
+                //if (r==Main.palette[color].R && g==Main.palette[color].G && b==Main.palette[color].B)
                 //  colmap[color]=color;
                 //else
                   colmap[color]=Best_color_perceptual_except(r,g,b,Back_color);
@@ -5330,7 +5331,7 @@ void Store_brush(int index)
     Brush_container[index].Paintbrush_shape=Paintbrush_shape;
     Brush_container[index].Width=Paintbrush_width;
     Brush_container[index].Height=Paintbrush_height;
-    //memcpy(Brush_container[index].Palette,Main_palette,sizeof(T_Palette));
+    //memcpy(Brush_container[index].Palette,Main.palette,sizeof(T_Palette));
     // Preview: pick center for big mono brush
     if (Paintbrush_width>BRUSH_CONTAINER_PREVIEW_WIDTH)
       brush_offset_x = (Paintbrush_width-BRUSH_CONTAINER_PREVIEW_WIDTH)/2;
@@ -5612,5 +5613,5 @@ void Button_Brush_container(void)
 byte Any_effect_active(void)
 {
     return Shade_mode||Quick_shade_mode||Colorize_mode||Smooth_mode||Tiling_mode||Smear_mode
-      ||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode||Main_tilemap_mode || (Main_backups->Pages->Image_mode > IMAGE_MODE_ANIMATION);
+      ||Stencil_mode||Mask_mode||Sieve_mode||Snap_mode||Main.tilemap_mode || (Main_backups->Pages->Image_mode > IMAGE_MODE_ANIMATION);
 }

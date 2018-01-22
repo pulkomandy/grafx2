@@ -110,7 +110,7 @@ void Start_operation_stack(word new_operation)
 
 void Init_start_operation(void)
 {
-  Operation_in_magnifier=(Mouse_X>=Main_X_zoom);
+  Operation_in_magnifier=(Mouse_X>=Main.X_zoom);
   Smear_start=1;
 }
 
@@ -1435,14 +1435,14 @@ void Draw_curve_cross(short x_pos, short y_pos)
     for (i=start_x; i<=end_x; i++)
     {
       temp=x_pos+i-3;
-      Pixel_preview(temp,y_pos,xor_lut[Read_pixel(temp -Main_offset_X,
-                                          y_pos-Main_offset_Y)]);
+      Pixel_preview(temp,y_pos,xor_lut[Read_pixel(temp -Main.offset_X,
+                                          y_pos-Main.offset_Y)]);
     }
     for (i=start_y; i<=end_y; i++)
     {
       temp=y_pos+i-3;
-      Pixel_preview(x_pos,temp,xor_lut[Read_pixel(x_pos-Main_offset_X,
-                                          temp -Main_offset_Y)]);
+      Pixel_preview(x_pos,temp,xor_lut[Read_pixel(x_pos-Main.offset_X,
+                                          temp -Main.offset_Y)]);
     }
     Update_part_of_screen(x_pos+start_x-3,y_pos+start_y-3,end_x-start_x+1,end_y-start_y+1);
   }
@@ -2784,14 +2784,14 @@ void Scroll_12_0(void)
     Backup();
   else
   {
-    Backup_layers(LAYER_ALL); // Main_layers_visible
+    Backup_layers(LAYER_ALL); // Main.layers_visible
     if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
     {
       // Ensure the backup visible image is up-to-date
       // (after swapping some layers on/off, it gets outdated)
       memcpy(Main_visible_image_backup.Image,
              Main_visible_image.Image,
-             Main_image_width*Main_image_height);
+             Main.image_width*Main.image_height);
     }
   }
   Update_screen_targets();
@@ -2832,14 +2832,14 @@ void Scroll_12_5(void)
     // L'utilisateur a bougé, il faut scroller l'image
 
     if (Paintbrush_X>=center_x)
-      x_offset=(Paintbrush_X-center_x)%Main_image_width;
+      x_offset=(Paintbrush_X-center_x)%Main.image_width;
     else
-      x_offset=Main_image_width-((center_x-Paintbrush_X)%Main_image_width);
+      x_offset=Main.image_width-((center_x-Paintbrush_X)%Main.image_width);
 
     if (Paintbrush_Y>=center_y)
-      y_offset=(Paintbrush_Y-center_y)%Main_image_height;
+      y_offset=(Paintbrush_Y-center_y)%Main.image_height;
     else
-      y_offset=Main_image_height-((center_y-Paintbrush_Y)%Main_image_height);
+      y_offset=Main.image_height-((center_y-Paintbrush_Y)%Main.image_height);
 
     Display_coords_rel_or_abs(center_x,center_y);
 
@@ -2851,7 +2851,7 @@ void Scroll_12_5(void)
     else
     {
       // One layer at once
-      Scroll_picture(Main_backups->Pages->Next->Image[Main_current_layer].Pixels, Main_backups->Pages->Image[Main_current_layer].Pixels, x_offset, y_offset);
+      Scroll_picture(Main_backups->Pages->Next->Image[Main.current_layer].Pixels, Main_backups->Pages->Image[Main.current_layer].Pixels, x_offset, y_offset);
       Redraw_current_layer();
     }
 
@@ -2895,18 +2895,18 @@ void Scroll_0_5(void)
   {
     // All layers at once
     if (x_pos>=center_x)
-      x_offset=(x_pos-center_x)%Main_image_width;
+      x_offset=(x_pos-center_x)%Main.image_width;
     else
-      x_offset=Main_image_width-((center_x-x_pos)%Main_image_width);
+      x_offset=Main.image_width-((center_x-x_pos)%Main.image_width);
 
     if (y_pos>=center_y)
-      y_offset=(y_pos-center_y)%Main_image_height;
+      y_offset=(y_pos-center_y)%Main.image_height;
     else
-      y_offset=Main_image_height-((center_y-y_pos)%Main_image_height);
+      y_offset=Main.image_height-((center_y-y_pos)%Main.image_height);
 
     // Do the actual scroll operation on all layers.
     for (i=0; i<Main_backups->Pages->Nb_layers; i++)
-      //if ((1<<i) & Main_layers_visible)
+      //if ((1<<i) & Main.layers_visible)
       Scroll_picture(Main_backups->Pages->Next->Image[i].Pixels, Main_backups->Pages->Image[i].Pixels, x_offset, y_offset);
     // Update the depth buffer too ...
     // It would be faster to scroll it, but we don't have method
@@ -2917,7 +2917,7 @@ void Scroll_0_5(void)
   {
     // One layer : everything was done while dragging the mouse
   }
-  if (Main_tilemap_mode)
+  if (Main.tilemap_mode)
     Tilemap_update();
   
   Cursor_hidden=Cursor_hidden_before_scroll;
@@ -3511,59 +3511,59 @@ void Draw_xor_rect(short start_x, short start_y, short end_x, short end_y)
   short height = end_y-start_y;
   
   // Handle clipping
-  if (end_x-Main_offset_X > Min(Main_image_width,
-    Main_magnifier_mode?Main_separator_position:Screen_width))
+  if (end_x-Main.offset_X > Min(Main.image_width,
+    Main.magnifier_mode?Main.separator_position:Screen_width))
   {
-    offset_width = end_x - Min(Main_image_width,
-      Main_magnifier_mode?Main_separator_position:Screen_width);
+    offset_width = end_x - Min(Main.image_width,
+      Main.magnifier_mode?Main.separator_position:Screen_width);
   }
 
-  if (end_y-Main_offset_Y > Min(Main_image_height, Menu_Y))
-    offset_height = end_y - Min(Main_image_height, Menu_Y);
+  if (end_y-Main.offset_Y > Min(Main.image_height, Menu_Y))
+    offset_height = end_y - Min(Main.image_height, Menu_Y);
 
   if (width == 0)
   {
     // Single line
-    Vertical_XOR_line(start_x-Main_offset_X, start_y
-      - Main_offset_Y, height - offset_height + 1);
+    Vertical_XOR_line(start_x-Main.offset_X, start_y
+      - Main.offset_Y, height - offset_height + 1);
   }
   else if (height == 0)
   {
     // Single line
-    Horizontal_XOR_line(start_x-Main_offset_X,
-      start_y - Main_offset_Y, width - offset_width + 1);
+    Horizontal_XOR_line(start_x-Main.offset_X,
+      start_y - Main.offset_Y, width - offset_width + 1);
   }
   else
   {
     // Dessin dans la zone de dessin normale
-    Horizontal_XOR_line(start_x-Main_offset_X,
-      start_y - Main_offset_Y, width - offset_width + 1);
+    Horizontal_XOR_line(start_x-Main.offset_X,
+      start_y - Main.offset_Y, width - offset_width + 1);
 
     // If not, this line is out of the picture so there is no need to draw it
-    if (offset_height == 0 || end_y - 1 > Menu_Y + Main_offset_Y)
+    if (offset_height == 0 || end_y - 1 > Menu_Y + Main.offset_Y)
     {
-      Horizontal_XOR_line(start_x - Main_offset_X, end_y
-        - Main_offset_Y, width - offset_width + 1);
+      Horizontal_XOR_line(start_x - Main.offset_X, end_y
+        - Main.offset_Y, width - offset_width + 1);
     }
   
     if (height > offset_height + 2)
     {
-      Vertical_XOR_line(start_x-Main_offset_X, start_y
-        - Main_offset_Y + 1, height - offset_height - 1);
+      Vertical_XOR_line(start_x-Main.offset_X, start_y
+        - Main.offset_Y + 1, height - offset_height - 1);
   
       if (offset_width == 0)
       {
-        Vertical_XOR_line(end_x - Main_offset_X, start_y
-          - Main_offset_Y + 1, height - offset_height - 1);
+        Vertical_XOR_line(end_x - Main.offset_X, start_y
+          - Main.offset_Y + 1, height - offset_height - 1);
       }
     }
   }
   
-  Update_rect(start_x - Main_offset_X, start_y - Main_offset_Y,
+  Update_rect(start_x - Main.offset_X, start_y - Main.offset_Y,
     width + 1 - offset_width, height + 1 - offset_height);
 
   // Dessin dans la zone zoomée
-  if (Main_magnifier_mode && start_x <= Limit_right_zoom
+  if (Main.magnifier_mode && start_x <= Limit_right_zoom
     && end_x > Limit_left_zoom
     && start_y <= Limit_bottom_zoom
     && end_y > Limit_top_zoom )
@@ -3652,9 +3652,9 @@ void Grad_rectangle_0_5(void)
   Hide_cursor();
 
   // Check if the rectangle is not fully outside the picture
-  if (start_x > Main_image_width                  // Rectangle at right of picture
-      || start_y > Main_image_height              // Rectangle below picture
-      || start_y - 1 - Main_offset_Y > Menu_Y )   // Rectangle below viewport
+  if (start_x > Main.image_width                  // Rectangle at right of picture
+      || start_y > Main.image_height              // Rectangle below picture
+      || start_y - 1 - Main.offset_Y > Menu_Y )   // Rectangle below viewport
   {
     Operation_pop(&end_y); // reset the stack
     return; // cancel the operation
@@ -4084,7 +4084,7 @@ void Pan_view_12_2(void)
   if (Paintbrush_X!=start_x || Paintbrush_Y!=start_y)
   {
     // User moved
-    if (Main_magnifier_mode)
+    if (Main.magnifier_mode)
       Scroll_magnifier(start_x-Paintbrush_X,start_y-Paintbrush_Y);
     else
       Scroll_screen(start_x-Paintbrush_X,start_y-Paintbrush_Y);

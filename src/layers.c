@@ -40,39 +40,39 @@ void Layer_activate(int layer, short side)
     return;
   
   // Keep a copy of which layers were visible
-  old_layers = Main_layers_visible;
+  old_layers = Main.layers_visible;
   
   if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
   {
     if (side == RIGHT_SIDE)
     {
       // Right-click on current layer
-      if (Main_current_layer == layer)
+      if (Main.current_layer == layer)
       {
-        if (Main_layers_visible == (dword)(1<<layer))
+        if (Main.layers_visible == (dword)(1<<layer))
         {
           // return to previous state (layers that were on before showing
           // only this one)
-          Main_layers_visible = Main_layers_visible_backup;
+          Main.layers_visible = Main.layers_visible_backup;
         }
         else
         {
           // Set only this one visible
-          Main_layers_visible_backup = Main_layers_visible;
-          Main_layers_visible = 1<<layer;
+          Main.layers_visible_backup = Main.layers_visible;
+          Main.layers_visible = 1<<layer;
         }
       }
       else
       {
         // Right-click on an other layer : toggle its visibility
-        Main_layers_visible ^= 1<<layer;
+        Main.layers_visible ^= 1<<layer;
       }
     }
     else
     {
       // Left-click on any layer
-      Main_current_layer = layer;
-      Main_layers_visible |= 1<<layer;
+      Main.current_layer = layer;
+      Main.layers_visible |= 1<<layer;
     }
   }
   else
@@ -80,15 +80,15 @@ void Layer_activate(int layer, short side)
     // Only allow one visible at a time
     if (side == LEFT_SIDE)
     {
-      Main_current_layer = layer;
-      Main_layers_visible = 1<<layer;
+      Main.current_layer = layer;
+      Main.layers_visible = 1<<layer;
       
       Update_screen_targets();
     }
   }
 
   Hide_cursor();
-  if (Main_layers_visible != old_layers)
+  if (Main.layers_visible != old_layers)
     Redraw_layered_image();
   else
     Update_depth_buffer(); // Only need the depth buffer
@@ -110,7 +110,7 @@ void Button_Layer_add(void)
   {
     // Backup with unchanged layers
     Backup_layers(LAYER_NONE);
-    if (!Add_layer(Main_backups,Main_current_layer+1))
+    if (!Add_layer(Main_backups,Main.current_layer+1))
     {
       Update_depth_buffer();
       // I just noticed this might be unneeded, since the new layer
@@ -137,12 +137,12 @@ void Button_Layer_duplicate(void)
   {
     // Backup with unchanged layers
     Backup_layers(LAYER_NONE);
-    if (!Add_layer(Main_backups,Main_current_layer+1))
+    if (!Add_layer(Main_backups,Main.current_layer+1))
     {
       // Make a copy of current image
       memcpy(
-        Main_backups->Pages->Image[Main_current_layer].Pixels,
-        Main_backups->Pages->Image[Main_current_layer-1].Pixels,
+        Main_backups->Pages->Image[Main.current_layer].Pixels,
+        Main_backups->Pages->Image[Main.current_layer-1].Pixels,
         Main_backups->Pages->Width*Main_backups->Pages->Height);
 
       if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION) {
@@ -169,7 +169,7 @@ void Button_Layer_remove(void)
   {
     // Backup with unchanged layers
     Backup_layers(LAYER_NONE);
-    if (!Delete_layer(Main_backups,Main_current_layer))
+    if (!Delete_layer(Main_backups,Main.current_layer))
     {
       Update_screen_targets();
       Redraw_layered_image();
@@ -352,10 +352,10 @@ void Button_Layer_merge(void)
 {
   Hide_cursor();
 
-  if (Main_current_layer>0)
+  if (Main.current_layer>0)
   {
     // Backup layer below the current
-    Backup_layers(Main_current_layer-1);
+    Backup_layers(Main.current_layer-1);
   
     Merge_layer();
     
@@ -374,7 +374,7 @@ void Button_Layer_up(void)
 {
   Hide_cursor();
 
-  if (Main_current_layer < (Main_backups->Pages->Nb_layers-1))
+  if (Main.current_layer < (Main_backups->Pages->Nb_layers-1))
   {
     T_Image tmp;
     dword layer_flags;
@@ -383,20 +383,20 @@ void Button_Layer_up(void)
     Backup_layers(LAYER_NONE);
     
     // swap
-    tmp = Main_backups->Pages->Image[Main_current_layer];
-    Main_backups->Pages->Image[Main_current_layer] = Main_backups->Pages->Image[Main_current_layer+1];
-    Main_backups->Pages->Image[Main_current_layer+1] = tmp;
+    tmp = Main_backups->Pages->Image[Main.current_layer];
+    Main_backups->Pages->Image[Main.current_layer] = Main_backups->Pages->Image[Main.current_layer+1];
+    Main_backups->Pages->Image[Main.current_layer+1] = tmp;
     
     // Swap visibility indicators
-    layer_flags = (Main_layers_visible >> Main_current_layer) & 3;
+    layer_flags = (Main.layers_visible >> Main.current_layer) & 3;
     // Only needed if they are different.
     if (layer_flags == 1 || layer_flags == 2)
     {
       // One is on, the other is off. Negating them will
       // perform the swap.
-      Main_layers_visible ^= (3 << Main_current_layer);
+      Main.layers_visible ^= (3 << Main.current_layer);
     }
-    Main_current_layer++;
+    Main.current_layer++;
     
     Update_screen_targets();
     Redraw_layered_image();
@@ -414,7 +414,7 @@ void Button_Layer_down(void)
 {
   Hide_cursor();
   
-  if (Main_current_layer > 0)
+  if (Main.current_layer > 0)
   {
     T_Image tmp;
     dword layer_flags;
@@ -423,21 +423,21 @@ void Button_Layer_down(void)
     Backup_layers(LAYER_NONE);
     
     // swap
-    tmp = Main_backups->Pages->Image[Main_current_layer];
-    Main_backups->Pages->Image[Main_current_layer] = Main_backups->Pages->Image[Main_current_layer-1];
-    Main_backups->Pages->Image[Main_current_layer-1] = tmp;
+    tmp = Main_backups->Pages->Image[Main.current_layer];
+    Main_backups->Pages->Image[Main.current_layer] = Main_backups->Pages->Image[Main.current_layer-1];
+    Main_backups->Pages->Image[Main.current_layer-1] = tmp;
     
     // Swap visibility indicators
-    layer_flags = (Main_layers_visible >> (Main_current_layer-1)) & 3;
+    layer_flags = (Main.layers_visible >> (Main.current_layer-1)) & 3;
     // Only needed if they are different.
     if (layer_flags == 1 || layer_flags == 2)
     {
       // Only needed if they are different.
       // One is on, the other is off. Negating them will
       // perform the swap.
-      Main_layers_visible ^= (3 << (Main_current_layer-1));
+      Main.layers_visible ^= (3 << (Main.current_layer-1));
     }
-    Main_current_layer--;
+    Main.current_layer--;
     Update_screen_targets();
     Redraw_layered_image();
     Display_layerbar();
@@ -466,7 +466,7 @@ void Button_Anim_time(void)
   int frame;
   char buffer[6+1];
   T_Special_button * input_duration_button;
-  int duration=Main_backups->Pages->Image[Main_current_layer].Duration;
+  int duration=Main_backups->Pages->Image[Main.current_layer].Duration;
   
   Open_window(166,110,"Animation speed");
 
@@ -547,7 +547,7 @@ void Button_Anim_time(void)
           duration=0;
         else if (duration>655350)
           duration=655350;
-        Main_backups->Pages->Image[Main_current_layer].Duration = duration;
+        Main_backups->Pages->Image[Main.current_layer].Duration = duration;
         break;
       case 1:
         if (duration<0)
@@ -581,7 +581,7 @@ void Button_Anim_time(void)
 
 void Button_Anim_first_frame(void)
 {
-  if (Main_current_layer>0)
+  if (Main.current_layer>0)
     Layer_activate(0,LEFT_SIDE);
 
   Hide_cursor();
@@ -593,10 +593,10 @@ void Button_Anim_prev_frame(void)
 {
   if (Main_backups->Pages->Nb_layers>1)
   {
-    if (Main_current_layer==0)
+    if (Main.current_layer==0)
       Layer_activate(Main_backups->Pages->Nb_layers-1,LEFT_SIDE);
     else
-      Layer_activate(Main_current_layer-1,LEFT_SIDE);
+      Layer_activate(Main.current_layer-1,LEFT_SIDE);
   }
   Hide_cursor();
   Unselect_button(BUTTON_ANIM_PREV_FRAME);
@@ -607,10 +607,10 @@ void Button_Anim_next_frame(void)
 {
   if (Main_backups->Pages->Nb_layers>1)
   {
-    if (Main_current_layer==Main_backups->Pages->Nb_layers-1)
+    if (Main.current_layer==Main_backups->Pages->Nb_layers-1)
       Layer_activate(0,LEFT_SIDE);
     else
-      Layer_activate(Main_current_layer+1,LEFT_SIDE);
+      Layer_activate(Main.current_layer+1,LEFT_SIDE);
   }
 
   Hide_cursor();
@@ -620,7 +620,7 @@ void Button_Anim_next_frame(void)
 
 void Button_Anim_last_frame(void)
 {
-  if (Main_current_layer < (Main_backups->Pages->Nb_layers-1))
+  if (Main.current_layer < (Main_backups->Pages->Nb_layers-1))
     Layer_activate((Main_backups->Pages->Nb_layers-1),LEFT_SIDE);
     
   Hide_cursor();
@@ -645,13 +645,13 @@ void Button_Anim_continuous_next(void)
     time_now=SDL_GetTicks();
     time_in_current_frame += time_now-time_start;
     time_start=time_now;
-    target_frame = Main_current_layer;
+    target_frame = Main.current_layer;
     while (time_in_current_frame > Main_backups->Pages->Image[target_frame].Duration)
     {
       time_in_current_frame -= Interpret_delay(Main_backups->Pages->Image[target_frame].Duration);
       target_frame = (target_frame+1) % Main_backups->Pages->Nb_layers;
     }
-    if (target_frame != Main_current_layer)
+    if (target_frame != Main.current_layer)
     {
       Layer_activate(target_frame,LEFT_SIDE);
     }
@@ -680,13 +680,13 @@ void Button_Anim_continuous_prev(void)
     time_now=SDL_GetTicks();
     time_in_current_frame += time_now-time_start;
     time_start=time_now;
-    target_frame = Main_current_layer;
+    target_frame = Main.current_layer;
     while (time_in_current_frame > Main_backups->Pages->Image[target_frame].Duration)
     {
       time_in_current_frame -= Interpret_delay(Main_backups->Pages->Image[target_frame].Duration);
       target_frame = (target_frame+Main_backups->Pages->Nb_layers-1) % Main_backups->Pages->Nb_layers;
     }
-    if (target_frame != Main_current_layer)
+    if (target_frame != Main.current_layer)
     {
       Layer_activate(target_frame,LEFT_SIDE);
     }

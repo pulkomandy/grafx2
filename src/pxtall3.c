@@ -72,7 +72,7 @@ void Display_part_of_screen_tall3 (word width,word height,word image_width)
 /* Afficher une partie de l'image telle quelle sur l'écran */
 {
   byte* dest=Screen_pixels; //On va se mettre en 0,0 dans l'écran (dest)
-  byte* src=Main_offset_Y*image_width+Main_offset_X+Main_screen; //Coords de départ ds la source (src)
+  byte* src=Main.offset_Y*image_width+Main.offset_X+Main_screen; //Coords de départ ds la source (src)
   int y;
   int dy;
 
@@ -106,14 +106,14 @@ void Pixel_preview_normal_tall3 (word x,word y,byte color)
  * Note: si on modifie cette procédure, il faudra penser à faire également 
  * la modif dans la procédure Pixel_Preview_Loupe_SDL. */
 {
-//  if(x-Main_offset_X >= 0 && y - Main_offset_Y >= 0)
-  Pixel_tall3(x-Main_offset_X,y-Main_offset_Y,color);
+//  if(x-Main.offset_X >= 0 && y - Main.offset_Y >= 0)
+  Pixel_tall3(x-Main.offset_X,y-Main.offset_Y,color);
 }
 
 void Pixel_preview_magnifier_tall3  (word x,word y,byte color)
 {
   // Affiche le pixel dans la partie non zoomée
-  Pixel_tall3(x-Main_offset_X,y-Main_offset_Y,color);
+  Pixel_tall3(x-Main.offset_X,y-Main.offset_Y,color);
   
   // Regarde si on doit aussi l'afficher dans la partie zoomée
   if (y >= Limit_top_zoom && y <= Limit_visible_bottom_zoom
@@ -121,18 +121,18 @@ void Pixel_preview_magnifier_tall3  (word x,word y,byte color)
   {
     // On est dedans
     int height;
-    int y_zoom = Main_magnifier_factor * (y-Main_magnifier_offset_Y);
+    int y_zoom = Main.magnifier_factor * (y-Main.magnifier_offset_Y);
 
-    if (Menu_Y - y_zoom < Main_magnifier_factor)
+    if (Menu_Y - y_zoom < Main.magnifier_factor)
       // On ne doit dessiner qu'un morceau du pixel
       // sinon on dépasse sur le menu
       height = Menu_Y - y_zoom;
     else
-      height = Main_magnifier_factor;
+      height = Main.magnifier_factor;
 
     Block_tall3(
-      Main_magnifier_factor * (x-Main_magnifier_offset_X) + Main_X_zoom, 
-      y_zoom, Main_magnifier_factor, height, color
+      Main.magnifier_factor * (x-Main.magnifier_offset_X) + Main.X_zoom,
+      y_zoom, Main.magnifier_factor, height, color
       );
   }
 }
@@ -227,7 +227,7 @@ void Display_brush_mono_tall3(word x_pos, word y_pos,
 void Clear_brush_tall3(word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word image_width)
 {
   byte* dest=Screen_pixels+x_pos*ZOOMX+y_pos*ZOOMY*VIDEO_LINE_WIDTH; //On va se mettre en 0,0 dans l'écran (dest)
-  byte* src = ( y_pos + Main_offset_Y ) * image_width + x_pos + Main_offset_X + Main_screen; //Coords de départ ds la source (src)
+  byte* src = ( y_pos + Main.offset_Y ) * image_width + x_pos + Main.offset_X + Main_screen; //Coords de départ ds la source (src)
   int y;
   int x;
   (void)x_offset; // unused
@@ -362,8 +362,8 @@ void Display_part_of_screen_scaled_tall3(
         word height, // height zoomée
         word image_width,byte * buffer)
 {
-  byte* src = Main_screen + Main_magnifier_offset_Y * image_width 
-                      + Main_magnifier_offset_X;
+  byte* src = Main_screen + Main.magnifier_offset_Y * image_width
+                      + Main.magnifier_offset_X;
   int y = 0; // Ligne en cours de traitement
 
   // Pour chaque ligne à zoomer
@@ -372,24 +372,24 @@ void Display_part_of_screen_scaled_tall3(
     int x;
     
     // On éclate la ligne
-    Zoom_a_line(src,buffer,Main_magnifier_factor*ZOOMX,width);
+    Zoom_a_line(src,buffer,Main.magnifier_factor*ZOOMX,width);
     // On l'affiche Facteur fois, sur des lignes consécutives
-    x = Main_magnifier_factor/**ZOOMY*/;
+    x = Main.magnifier_factor/**ZOOMY*/;
     // Pour chaque ligne
     do{
       // On affiche la ligne zoomée
       Display_line_on_screen_fast_tall3(
-        Main_X_zoom, y, width*Main_magnifier_factor,
+        Main.X_zoom, y, width*Main.magnifier_factor,
         buffer
       );
       // On passe à la suivante
       y++;
       if(y==height/**ZOOMY*/)
       {
-        Redraw_grid(Main_X_zoom,0,
-          width*Main_magnifier_factor,height);
-        Update_rect(Main_X_zoom,0,
-          width*Main_magnifier_factor,height);
+        Redraw_grid(Main.X_zoom,0,
+          width*Main.magnifier_factor,height);
+        Update_rect(Main.X_zoom,0,
+          width*Main.magnifier_factor,height);
         return;
       }
       x--;
@@ -414,15 +414,15 @@ void Display_brush_color_zoom_tall3(word x_pos,word y_pos,
   // Pour chaque ligne
   while(1)
   {
-    Zoom_a_line(src,buffer,Main_magnifier_factor,width);
+    Zoom_a_line(src,buffer,Main.magnifier_factor,width);
     // On affiche facteur fois la ligne zoomée
-    for(bx=Main_magnifier_factor;bx>0;bx--)
+    for(bx=Main.magnifier_factor;bx>0;bx--)
     {
       byte* line_src = buffer;
       byte* dest = Screen_pixels + y*ZOOMY * VIDEO_LINE_WIDTH + x_pos * ZOOMX;
       word x;
       // Pour chaque pixel de la ligne
-      for(x = width*Main_magnifier_factor;x > 0;x--)
+      for(x = width*Main.magnifier_factor;x > 0;x--)
       {
         if(*line_src!=transp_color)
         {
@@ -432,11 +432,11 @@ void Display_brush_color_zoom_tall3(word x_pos,word y_pos,
         dest+=ZOOMX;
       }
       // Double the line
-      memcpy(Screen_pixels + (y*ZOOMY+1)*VIDEO_LINE_WIDTH + x_pos*ZOOMX, Screen_pixels + y*ZOOMY*VIDEO_LINE_WIDTH + x_pos*ZOOMX, width*ZOOMX*Main_magnifier_factor);
+      memcpy(Screen_pixels + (y*ZOOMY+1)*VIDEO_LINE_WIDTH + x_pos*ZOOMX, Screen_pixels + y*ZOOMY*VIDEO_LINE_WIDTH + x_pos*ZOOMX, width*ZOOMX*Main.magnifier_factor);
       // Triple the line
-      memcpy(Screen_pixels + (y*ZOOMY+2)*VIDEO_LINE_WIDTH + x_pos*ZOOMX, Screen_pixels + y*ZOOMY*VIDEO_LINE_WIDTH + x_pos*ZOOMX, width*ZOOMX*Main_magnifier_factor);
+      memcpy(Screen_pixels + (y*ZOOMY+2)*VIDEO_LINE_WIDTH + x_pos*ZOOMX, Screen_pixels + y*ZOOMY*VIDEO_LINE_WIDTH + x_pos*ZOOMX, width*ZOOMX*Main.magnifier_factor);
       // Quadruple it
-      memcpy(Screen_pixels + (y*ZOOMY+3)*VIDEO_LINE_WIDTH + x_pos*ZOOMX, Screen_pixels + y*ZOOMY*VIDEO_LINE_WIDTH + x_pos*ZOOMX, width*ZOOMX*Main_magnifier_factor);
+      memcpy(Screen_pixels + (y*ZOOMY+3)*VIDEO_LINE_WIDTH + x_pos*ZOOMX, Screen_pixels + y*ZOOMY*VIDEO_LINE_WIDTH + x_pos*ZOOMX, width*ZOOMX*Main.magnifier_factor);
       y++;
       if(y==end_y_pos)
       {
@@ -467,18 +467,18 @@ void Display_brush_mono_zoom_tall3(word x_pos, word y_pos,
     int bx;
     // src = Ligne originale
     // On éclate la ligne
-    Zoom_a_line(src,buffer,Main_magnifier_factor,width);
+    Zoom_a_line(src,buffer,Main.magnifier_factor,width);
 
     // On affiche la ligne Facteur fois à l'écran (sur des
     // lignes consécutives)
-    bx = Main_magnifier_factor*ZOOMY;
+    bx = Main.magnifier_factor*ZOOMY;
 
     // Pour chaque ligne écran
     do
     {
       // On affiche la ligne zoomée
       Display_transparent_mono_line_on_screen_tall3(
-        x_pos, y, width * Main_magnifier_factor, 
+        x_pos, y, width * Main.magnifier_factor,
         buffer, transp_color, color
       );
       // On passe à la ligne suivante
@@ -487,9 +487,9 @@ void Display_brush_mono_zoom_tall3(word x_pos, word y_pos,
       if(y == end_y_pos*ZOOMY)
       {
         Redraw_grid( x_pos, y_pos,
-          width * Main_magnifier_factor, end_y_pos - y_pos );
+          width * Main.magnifier_factor, end_y_pos - y_pos );
         Update_rect( x_pos, y_pos,
-          width * Main_magnifier_factor, end_y_pos - y_pos );
+          width * Main.magnifier_factor, end_y_pos - y_pos );
         return;
       }
       bx --;
@@ -512,24 +512,24 @@ void Clear_brush_scaled_tall3(word x_pos,word y_pos,word x_offset,word y_offset,
 
   // Pour chaque ligne à zoomer
   while(1){
-    Zoom_a_line(src,buffer,Main_magnifier_factor*ZOOMX,width);
+    Zoom_a_line(src,buffer,Main.magnifier_factor*ZOOMX,width);
 
-    bx=Main_magnifier_factor;
+    bx=Main.magnifier_factor;
 
     // Pour chaque ligne
     do{
       // TODO a verifier
       Display_line_on_screen_fast_tall3(x_pos,y,
-        width * Main_magnifier_factor,buffer);
+        width * Main.magnifier_factor,buffer);
 
       // Ligne suivante
       y++;
       if(y==end_y_pos)
       {
         Redraw_grid(x_pos,y_pos,
-          width*Main_magnifier_factor,end_y_pos-y_pos);
+          width*Main.magnifier_factor,end_y_pos-y_pos);
         Update_rect(x_pos,y_pos,
-          width*Main_magnifier_factor,end_y_pos-y_pos);
+          width*Main.magnifier_factor,end_y_pos-y_pos);
         return;
       }
       bx--;

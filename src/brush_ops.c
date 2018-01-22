@@ -85,21 +85,21 @@ void Magnifier_12_0(void)
 {
 
   // On passe en mode loupe
-  Main_magnifier_mode=1;
+  Main.magnifier_mode=1;
 
   // La fonction d'affichage dans la partie image est désormais un affichage
   // spécial loupe.
   Pixel_preview=Pixel_preview_magnifier;
 
   // On calcule l'origine de la loupe
-  Main_magnifier_offset_X=Mouse_X-(Main_magnifier_width>>1);
-  Main_magnifier_offset_Y=Mouse_Y-(Main_magnifier_height>>1);
+  Main.magnifier_offset_X=Mouse_X-(Main.magnifier_width>>1);
+  Main.magnifier_offset_Y=Mouse_Y-(Main.magnifier_height>>1);
 
   // Calcul des coordonnées absolues de ce coin DANS L'IMAGE
-  Main_magnifier_offset_X+=Main_offset_X;
-  Main_magnifier_offset_Y+=Main_offset_Y;
+  Main.magnifier_offset_X+=Main.offset_X;
+  Main.magnifier_offset_Y+=Main.offset_Y;
 
-  Clip_magnifier_offsets(&Main_magnifier_offset_X, &Main_magnifier_offset_Y);
+  Clip_magnifier_offsets(&Main.magnifier_offset_X, &Main.magnifier_offset_Y);
 
   // On calcule les bornes visibles dans l'écran
   Position_screen_according_to_zoom();
@@ -154,8 +154,8 @@ void Colorpicker_1_1(void)
   char str[4];
 
   if ( (Paintbrush_X>=0) && (Paintbrush_Y>=0)
-    && (Paintbrush_X<Main_image_width)
-    && (Paintbrush_Y<Main_image_height) )
+    && (Paintbrush_X<Main.image_width)
+    && (Paintbrush_Y<Main.image_height) )
     Colorpicker_color=Read_pixel_from_current_screen(Paintbrush_X,Paintbrush_Y);
   else
     Colorpicker_color=0;
@@ -196,8 +196,8 @@ void Colorpicker_2_1(void)
   char str[4];
 
   if ( (Paintbrush_X>=0) && (Paintbrush_Y>=0)
-    && (Paintbrush_X<Main_image_width)
-    && (Paintbrush_Y<Main_image_height) )
+    && (Paintbrush_X<Main.image_width)
+    && (Paintbrush_Y<Main.image_height) )
     Colorpicker_color=Read_pixel_from_current_screen(Paintbrush_X,Paintbrush_Y);
   else
     Colorpicker_color=0;
@@ -300,8 +300,8 @@ void Rightclick_colorpick_2_1(void)
     || (Colorpicker_Y!=Paintbrush_Y) )
   {
     if ( (Paintbrush_X>=0) && (Paintbrush_Y>=0)
-      && (Paintbrush_X<Main_image_width)
-      && (Paintbrush_Y<Main_image_height) )
+      && (Paintbrush_X<Main.image_width)
+      && (Paintbrush_Y<Main.image_height) )
       Colorpicker_color=Read_pixel_from_current_screen(Paintbrush_X,Paintbrush_Y);
     else
       Colorpicker_color=0;
@@ -343,7 +343,7 @@ void Rightclick_colorpick_0_1(void)
   // Erase the color block which shows the picked color
   if (Operation_before_interrupt!=OPERATION_REPLACE)
     if ( (Mouse_Y<Menu_Y) && (Menu_is_visible) &&
-         ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ) )
+         ( (!Main.magnifier_mode) || (Mouse_X<Main.separator_position) || (Mouse_X>=Main.X_zoom) ) )
       Print_in_menu("X:       Y:             ",0);
 
   Print_coordinates();
@@ -1156,7 +1156,7 @@ void Draw_stretch_spot(short x_pos, short y_pos)
     if (y>=Limit_top && y<=Limit_visible_bottom)
       for (x=x_pos-1;x<x_pos+1;x++)
         if (x>=Limit_left && x<=Limit_visible_right)
-          Pixel_preview(x,y,xor_lut[Read_pixel(x-Main_offset_X,y-Main_offset_Y)]);
+          Pixel_preview(x,y,xor_lut[Read_pixel(x-Main.offset_X,y-Main.offset_Y)]);
   Update_part_of_screen(x_pos-1, y_pos-1, 2, 2);
 }
 

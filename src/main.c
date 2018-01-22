@@ -490,10 +490,10 @@ int Init_program(int argc,char * argv[])
   // Choose directory for settings (read/write)
   Set_config_directory(program_directory,Config_directory);
 #if defined(__MINT__)
-  strcpy(Main_selector.Directory,program_directory);
+  strcpy(Main.selector.Directory,program_directory);
 #else
 // On détermine le répertoire courant:
-  getcwd(Main_selector.Directory,MAX_PATH_CHARACTERS);
+  getcwd(Main.selector.Directory,MAX_PATH_CHARACTERS);
 #endif
 
 #ifdef ENABLE_FILENAMES_ICONV
@@ -504,68 +504,68 @@ int Init_program(int argc,char * argv[])
 #endif /* ENABLE_FILENAMES_ICONV */
 
   // On en profite pour le mémoriser dans le répertoire principal:
-  strcpy(Initial_directory,Main_selector.Directory);
+  strcpy(Initial_directory,Main.selector.Directory);
 
   // On initialise les données sur le nom de fichier de l'image de brouillon:
-  strcpy(Spare_selector.Directory,Main_selector.Directory);
+  strcpy(Spare.selector.Directory,Main.selector.Directory);
   
-  Main_fileformat=DEFAULT_FILEFORMAT;
-  Spare_fileformat    =Main_fileformat;
+  Main.fileformat=DEFAULT_FILEFORMAT;
+  Spare.fileformat    =DEFAULT_FILEFORMAT;
   
-  strcpy(Brush_selector.Directory,Main_selector.Directory);
-  strcpy(Brush_file_directory,Main_selector.Directory);
+  strcpy(Brush_selector.Directory,Main.selector.Directory);
+  strcpy(Brush_file_directory,Main.selector.Directory);
   strcpy(Brush_filename       ,"NO_NAME.GIF");
-  Brush_fileformat    =Main_fileformat;
+  Brush_fileformat    =DEFAULT_FILEFORMAT;
 
   // On initialise ce qu'il faut pour que les fileselects ne plantent pas:
   
-  Main_selector.Position=0; // Au début, le fileselect est en haut de la liste des fichiers
-  Main_selector.Offset=0; // Au début, le fileselect est en haut de la liste des fichiers
-  Main_selector.Format_filter=FORMAT_ALL_IMAGES;
+  Main.selector.Position=0; // Au début, le fileselect est en haut de la liste des fichiers
+  Main.selector.Offset=0; // Au début, le fileselect est en haut de la liste des fichiers
+  Main.selector.Format_filter=FORMAT_ALL_IMAGES;
   
-  Main_current_layer=0;
-  Main_layers_visible=0xFFFFFFFF;
-  Main_layers_visible_backup=0xFFFFFFFF;
-  Spare_current_layer=0;
-  Spare_layers_visible=0xFFFFFFFF;
-  Spare_layers_visible_backup=0xFFFFFFFF;
+  Main.current_layer=0;
+  Main.layers_visible=0xFFFFFFFF;
+  Main.layers_visible_backup=0xFFFFFFFF;
+  Spare.current_layer=0;
+  Spare.layers_visible=0xFFFFFFFF;
+  Spare.layers_visible_backup=0xFFFFFFFF;
   
-  Spare_selector.Position=0;
-  Spare_selector.Offset=0;
-  Spare_selector.Format_filter=FORMAT_ALL_IMAGES;
+  Spare.selector.Position=0;
+  Spare.selector.Offset=0;
+  Spare.selector.Format_filter=FORMAT_ALL_IMAGES;
   Brush_selector.Position=0;
   Brush_selector.Offset=0;
   Brush_selector.Format_filter=FORMAT_ALL_IMAGES;
 
   // On initialise d'ot' trucs
-  Main_offset_X=0;
-  Main_offset_Y=0;
-  Main_separator_position=0;
-  Main_X_zoom=0;
-  Main_separator_proportion=INITIAL_SEPARATOR_PROPORTION;
-  Main_magnifier_mode=0;
-  Main_magnifier_factor=DEFAULT_ZOOM_FACTOR;
-  Main_magnifier_height=0;
-  Main_magnifier_width=0;
-  Main_magnifier_offset_X=0;
-  Main_magnifier_offset_Y=0;
-  Spare_offset_X=0;
-  Spare_offset_Y=0;
-  Spare_separator_position=0;
-  Spare_X_zoom=0;
-  Spare_separator_proportion=INITIAL_SEPARATOR_PROPORTION;
-  Spare_magnifier_mode=0;
-  Spare_magnifier_factor=DEFAULT_ZOOM_FACTOR;
-  Spare_magnifier_height=0;
-  Spare_magnifier_width=0;
-  Spare_magnifier_offset_X=0;
-  Spare_magnifier_offset_Y=0;
+  Main.offset_X=0;
+  Main.offset_Y=0;
+  Main.separator_position=0;
+  Main.X_zoom=0;
+  Main.separator_proportion=INITIAL_SEPARATOR_PROPORTION;
+  Main.magnifier_mode=0;
+  Main.magnifier_factor=DEFAULT_ZOOM_FACTOR;
+  Main.magnifier_height=0;
+  Main.magnifier_width=0;
+  Main.magnifier_offset_X=0;
+  Main.magnifier_offset_Y=0;
+  Spare.offset_X=0;
+  Spare.offset_Y=0;
+  Spare.separator_position=0;
+  Spare.X_zoom=0;
+  Spare.separator_proportion=INITIAL_SEPARATOR_PROPORTION;
+  Spare.magnifier_mode=0;
+  Spare.magnifier_factor=DEFAULT_ZOOM_FACTOR;
+  Spare.magnifier_height=0;
+  Spare.magnifier_width=0;
+  Spare.magnifier_offset_X=0;
+  Spare.magnifier_offset_Y=0;
   Keyboard_click_allowed = 1;
   
-  Main_safety_backup_prefix = SAFETYBACKUP_PREFIX_A[0];
-  Spare_safety_backup_prefix = SAFETYBACKUP_PREFIX_B[0];
-  Main_time_of_safety_backup = 0;
-  Spare_time_of_safety_backup = 0;
+  Main.safety_backup_prefix = SAFETYBACKUP_PREFIX_A[0];
+  Spare.safety_backup_prefix = SAFETYBACKUP_PREFIX_B[0];
+  Main.time_of_safety_backup = 0;
+  Spare.time_of_safety_backup = 0;
   
 
   // SDL
@@ -611,10 +611,10 @@ int Init_program(int argc,char * argv[])
   Selected_curve_mode        =OPERATION_3_POINTS_CURVE;
   Effect_function=No_effect;
     // On initialise les infos de la loupe:
-  Main_magnifier_mode=0;
-  Main_magnifier_factor=DEFAULT_ZOOM_FACTOR;
-  Main_separator_proportion=INITIAL_SEPARATOR_PROPORTION;
-  Spare_separator_proportion=INITIAL_SEPARATOR_PROPORTION;
+  Main.magnifier_mode=0;
+  Main.magnifier_factor=DEFAULT_ZOOM_FACTOR;
+  Main.separator_proportion=INITIAL_SEPARATOR_PROPORTION;
+  Spare.separator_proportion=INITIAL_SEPARATOR_PROPORTION;
     // On initialise les infos du mode smear:
   Smear_mode=0;
   Smear_brush_width=PAINTBRUSH_WIDTH;
@@ -746,7 +746,7 @@ int Init_program(int argc,char * argv[])
         Error(ERROR_GUI_MISSING);
       }
 
-  memcpy(Main_palette, Gfx->Default_palette, sizeof(T_Palette));
+  memcpy(Main.palette, Gfx->Default_palette, sizeof(T_Palette));
 
   Fore_color=Best_color_range(255,255,255,Config.Palette_cells_X*Config.Palette_cells_Y);
   Back_color=Best_color_range(0,0,0,Config.Palette_cells_X*Config.Palette_cells_Y);
@@ -785,10 +785,10 @@ int Init_program(int argc,char * argv[])
   //ActivateConsole();
   #endif
   
-  Main_image_width=Screen_width/Pixel_width;
-  Main_image_height=Screen_height/Pixel_height;
-  Spare_image_width=Screen_width/Pixel_width;
-  Spare_image_height=Screen_height/Pixel_height;
+  Main.image_width=Screen_width/Pixel_width;
+  Main.image_height=Screen_height/Pixel_height;
+  Spare.image_width=Screen_width/Pixel_width;
+  Spare.image_height=Screen_height/Pixel_height;
   
   starting_image_mode = Config.Default_mode_layers ? 
     IMAGE_MODE_LAYERED : IMAGE_MODE_ANIMATION;
@@ -799,7 +799,7 @@ int Init_program(int argc,char * argv[])
   Check_menu_mode();
   
   // Nettoyage de l'écran virtuel (les autres recevront celui-ci par copie)
-  memset(Main_screen,0,Main_image_width*Main_image_height);
+  memset(Main_screen,0,Main.image_width*Main.image_height);
 
   // Now that the backup system is there, we can store the gradients.
   memcpy(Main_backups->Pages->Gradients->Range, initial_gradients.Range, sizeof(initial_gradients.Range));
@@ -828,8 +828,8 @@ int Init_program(int argc,char * argv[])
   // On affiche le curseur pour débuter correctement l'état du programme:
   Display_cursor();
 
-  Spare_image_is_modified=0;
-  Main_image_is_modified=0;
+  Spare.image_is_modified=0;
+  Main.image_is_modified=0;
 
   // Gestionnaire de signaux, quand il ne reste plus aucun espoir
   Init_sighandler();
@@ -851,7 +851,7 @@ int Init_program(int argc,char * argv[])
   // backups
   if (file_in_command_line > 0)
   {
-	strcpy(Main_selector.Directory, main_directory);
+    strcpy(Main.selector.Directory, main_directory);
   }
   
   // Test de recuperation de fichiers sauvés
@@ -862,7 +862,7 @@ int Init_program(int argc,char * argv[])
     default:    
       // Some files were loaded from last crash-exit.
       // Do not load files from command-line, nor show splash screen.
-      Compute_optimal_menu_colors(Main_palette);
+      Compute_optimal_menu_colors(Main.palette);
       Check_menu_mode();
       Display_all_screen();
       Display_menu();
@@ -918,11 +918,11 @@ int Init_program(int argc,char * argv[])
             Spare_backups->Pages->Image_mode = Main_backups->Pages->Image_mode;
           
           Hide_cursor();
-          Compute_optimal_menu_colors(Main_palette);
+          Compute_optimal_menu_colors(Main.palette);
           Back_color=Main_backups->Pages->Background_transparent ?
             Main_backups->Pages->Transparent_color :
             Best_color_range(0,0,0,Config.Palette_cells_X*Config.Palette_cells_Y);
-          Fore_color=Main_palette[Back_color].R+Main_palette[Back_color].G+Main_palette[Back_color].B < 3*127 ?
+          Fore_color=Main.palette[Back_color].R+Main.palette[Back_color].G+Main.palette[Back_color].B < 3*127 ?
             Best_color_range(255,255,255,Config.Palette_cells_X*Config.Palette_cells_Y) :
             Best_color_range(0,0,0,Config.Palette_cells_X*Config.Palette_cells_Y);  
           Check_menu_mode();

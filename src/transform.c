@@ -92,8 +92,8 @@ void Button_Transform_menu(void)
   short old_ratio_height;
   short new_ratio_width;
   short new_ratio_height;
-  short new_width=Main_image_width;
-  short new_height=Main_image_height;
+  short new_width=Main.image_width;
+  short new_height=Main.image_height;
   byte need_display_size = 0;
   
   // Persistent data
@@ -162,9 +162,9 @@ void Button_Transform_menu(void)
         case UNIT_PIXELS:
         default:
           input_value[0]=&new_width;
-          input_value[1]=&Main_image_width; // Don't worry, it's read-only
+          input_value[1]=&Main.image_width; // Don't worry, it's read-only
           input_value[2]=&new_height;
-          input_value[3]=&Main_image_height; // Don't worry, it's read-only
+          input_value[3]=&Main.image_height; // Don't worry, it's read-only
         break;
         case UNIT_PERCENT:
         case UNIT_RATIO:
@@ -220,14 +220,14 @@ void Button_Transform_menu(void)
               old_ratio_width = 100;
               old_ratio_height = 100;
               // Update pixel dimensions, to match percentage exactly
-              new_width=Compute_dimension(Main_image_width, new_ratio_width, old_ratio_width);
-              new_height=Compute_dimension(Main_image_height, new_ratio_height, old_ratio_height);
+              new_width=Compute_dimension(Main.image_width, new_ratio_width, old_ratio_width);
+              new_height=Compute_dimension(Main.image_height, new_ratio_height, old_ratio_height);
             }
             else // unit_index == UNIT_PIXELS
             {
               // Approximate from current pixel size
-              new_ratio_width = new_width*100/Main_image_width;
-              new_ratio_height = new_height*100/Main_image_height;
+              new_ratio_width = new_width*100/Main.image_width;
+              new_ratio_height = new_height*100/Main.image_height;
               old_ratio_width = 100;
               old_ratio_height = 100;
             }
@@ -244,8 +244,8 @@ void Button_Transform_menu(void)
               // Compute simplest ratio from current pixel size
               new_ratio_width = new_width;
               new_ratio_height = new_height;
-              old_ratio_width = Main_image_width;
-              old_ratio_height = Main_image_height;
+              old_ratio_width = Main.image_width;
+              old_ratio_height = Main.image_height;
               Factorize(&new_ratio_width, &old_ratio_width);
               Factorize(&new_ratio_height, &old_ratio_height);
             }
@@ -292,7 +292,7 @@ void Button_Transform_menu(void)
               // Get Y value because X changed
               if (unit_index == UNIT_PIXELS)
               {
-                new_height=Compute_dimension(Main_image_height, new_width, Main_image_width);
+                new_height=Compute_dimension(Main.image_height, new_width, Main.image_width);
               }
               else
               {
@@ -306,7 +306,7 @@ void Button_Transform_menu(void)
               // Get X value because Y changed
               if (unit_index == UNIT_PIXELS)
               {
-                new_width=Compute_dimension(Main_image_width, new_height, Main_image_height);
+                new_width=Compute_dimension(Main.image_width, new_height, Main.image_height);
               }
               else
               {
@@ -320,13 +320,13 @@ void Button_Transform_menu(void)
           // Re-compute ratio from size in pixels
           if (unit_index == UNIT_PIXELS)
           {
-            //new_width=(long)Main_image_width*new_ratio_width/old_ratio_width;
-            //new_height=(long)Main_image_height*new_ratio_height/old_ratio_height;
+            //new_width=(long)Main.image_width*new_ratio_width/old_ratio_width;
+            //new_height=(long)Main.image_height*new_ratio_height/old_ratio_height;
           }
           else // Re-compute size in pixels from ratio
           {
-            new_width=Compute_dimension(Main_image_width,new_ratio_width,old_ratio_width);
-            new_height=Compute_dimension(Main_image_height,new_ratio_height,old_ratio_height);
+            new_width=Compute_dimension(Main.image_width,new_ratio_width,old_ratio_width);
+            new_height=Compute_dimension(Main.image_height,new_ratio_height,old_ratio_height);
           }
           need_display_size=1;
         }
@@ -356,20 +356,20 @@ void Button_Transform_menu(void)
       case  2 : // Flip X
       case  3 : // Flip Y      
       case  6 : // 180° Rotation
-        new_width=Main_image_width;
-        new_height=Main_image_height;
+        new_width=Main.image_width;
+        new_height=Main.image_height;
         break;
       
       case  4 : // -90° Rotation
       case  5 : // +90° Rotation
   
-        new_width=Main_image_height;
-        new_height=Main_image_width;  
+        new_width=Main.image_height;
+        new_height=Main.image_width;
         break;
     }
     // Memorize the current dimensions
-    old_width=Main_image_width;
-    old_height=Main_image_height;
+    old_width=Main.image_width;
+    old_height=Main.image_height;
     
     Upload_infos_page_main(Main_backups->Pages);
     // Allocate a new page
@@ -377,7 +377,7 @@ void Button_Transform_menu(void)
     {
       // The new image is allocated, the new dimensions are already updated.
       
-      Main_image_is_modified=1;
+      Main.image_is_modified=1;
       
       // Process the transformation:
       switch(clicked_button)
@@ -387,15 +387,15 @@ void Button_Transform_menu(void)
         case  2 : // Flip X
           for (i=0; i<Main_backups->Pages->Nb_layers; i++)
           {
-            memcpy(Main_backups->Pages->Image[i].Pixels,Main_backups->Pages->Next->Image[i].Pixels,Main_image_width*Main_image_height);
-            Flip_X_lowlevel(Main_backups->Pages->Image[i].Pixels, Main_image_width, Main_image_height);
+            memcpy(Main_backups->Pages->Image[i].Pixels,Main_backups->Pages->Next->Image[i].Pixels,Main.image_width*Main.image_height);
+            Flip_X_lowlevel(Main_backups->Pages->Image[i].Pixels, Main.image_width, Main.image_height);
           }
           break;
         case  3 : // Flip Y      
           for (i=0; i<Main_backups->Pages->Nb_layers; i++)
           {
-            memcpy(Main_backups->Pages->Image[i].Pixels,Main_backups->Pages->Next->Image[i].Pixels,Main_image_width*Main_image_height);
-            Flip_Y_lowlevel(Main_backups->Pages->Image[i].Pixels, Main_image_width, Main_image_height);
+            memcpy(Main_backups->Pages->Image[i].Pixels,Main_backups->Pages->Next->Image[i].Pixels,Main.image_width*Main.image_height);
+            Flip_Y_lowlevel(Main_backups->Pages->Image[i].Pixels, Main.image_width, Main.image_height);
           }
           break;
         case  4 : // -90° Rotation
@@ -413,14 +413,14 @@ void Button_Transform_menu(void)
         case  6 : // 180° Rotation
           for (i=0; i<Main_backups->Pages->Nb_layers; i++)
           {
-            memcpy(Main_backups->Pages->Image[i].Pixels,Main_backups->Pages->Next->Image[i].Pixels,Main_image_width*Main_image_height);
-            Rotate_180_deg_lowlevel(Main_backups->Pages->Image[i].Pixels, Main_image_width, Main_image_height);
+            memcpy(Main_backups->Pages->Image[i].Pixels,Main_backups->Pages->Next->Image[i].Pixels,Main.image_width*Main.image_height);
+            Rotate_180_deg_lowlevel(Main_backups->Pages->Image[i].Pixels, Main.image_width, Main.image_height);
           }
           break;       
         case  7 : // Resize
           for (i=0; i<Main_backups->Pages->Nb_layers; i++)
           {
-            Rescale(Main_backups->Pages->Next->Image[i].Pixels, old_width, old_height, Main_backups->Pages->Image[i].Pixels, Main_image_width, Main_image_height, 0, 0);
+            Rescale(Main_backups->Pages->Next->Image[i].Pixels, old_width, old_height, Main_backups->Pages->Image[i].Pixels, Main.image_width, Main.image_height, 0, 0);
           }
           break;
       }
@@ -428,9 +428,9 @@ void Button_Transform_menu(void)
       for (i=0; i<NB_LAYERS; i++)
       {
         Copy_part_of_image_to_another(
-          Main_backups->Pages->Next->Image[i].Pixels,0,0,Min(old_width,Main_image_width),
-          Min(old_height,Main_image_height),old_width,
-          Main_backups->Pages->Image[i].Pixels,0,0,Main_image_width);
+          Main_backups->Pages->Next->Image[i].Pixels,0,0,Min(old_width,Main.image_width),
+          Min(old_height,Main.image_height),old_width,
+          Main_backups->Pages->Image[i].Pixels,0,0,Main.image_width);
       }
       */
       Redraw_layered_image();

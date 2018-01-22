@@ -480,9 +480,9 @@ byte *Render_text_TTF(const char *str, int font_number, int size, int antialias,
       
       // Also, make the BG color in brush palette have same RGB values as
       // the current BG color : this will help for remaps.
-      palette[Back_color].R=Main_palette[Back_color].R;
-      palette[Back_color].G=Main_palette[Back_color].G;
-      palette[Back_color].B=Main_palette[Back_color].B;
+      palette[Back_color].R=Main.palette[Back_color].R;
+      palette[Back_color].G=Main.palette[Back_color].G;
+      palette[Back_color].B=Main.palette[Back_color].B;
     }
   }
   else
@@ -495,7 +495,7 @@ byte *Render_text_TTF(const char *str, int font_number, int size, int antialias,
 
     if (Fore_color==Back_color)
     {
-      new_fore=Best_color_perceptual_except(Main_palette[Back_color].R, Main_palette[Back_color].G, Main_palette[Back_color].B, Back_color);
+      new_fore=Best_color_perceptual_except(Main.palette[Back_color].R, Main.palette[Back_color].G, Main.palette[Back_color].B, Back_color);
     }
     
     for (index=0; index < text_surface->w * text_surface->h; index++)
@@ -508,7 +508,7 @@ byte *Render_text_TTF(const char *str, int font_number, int size, int antialias,
     
     // Now copy the current palette to brushe's, for consistency
     // with the indices.
-    memcpy(palette, Main_palette, sizeof(T_Palette));
+    memcpy(palette, Main.palette, sizeof(T_Palette));
     
   }
   *width=text_surface->w;

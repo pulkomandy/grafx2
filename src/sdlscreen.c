@@ -259,9 +259,9 @@ byte * Surface_to_bytefield(SDL_Surface *source, byte * dest)
 SDL_Color Color_to_SDL_color(byte index)
 {
   SDL_Color color;
-  color.r = Main_palette[index].R;
-  color.g = Main_palette[index].G;
-  color.b = Main_palette[index].B;
+  color.r = Main.palette[index].R;
+  color.g = Main.palette[index].G;
+  color.b = Main.palette[index].B;
   color.unused = 255;
   return color;
 }

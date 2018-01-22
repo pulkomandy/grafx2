@@ -549,4 +549,63 @@ typedef struct T_Selector_settings
   char  Directory[MAX_PATH_CHARACTERS]; ///< Directory currently browsed
 } T_Selector_settings;
 
+// structure for Main or Spare page global data
+typedef struct
+{
+  /// Palette
+  T_Palette palette;
+  /// Boolean, means the page has been modified since last save.
+  byte  image_is_modified;
+  /// Width in pixels of the image.
+  short image_width;
+  /// Height in pixels of the image.
+  short image_height;
+  /// X position (in image space) of the pixel to display in the top left corner of screen.
+  short offset_X;
+  /// Y position (in image space) of the pixel to display in the top left corner of screen.
+  short offset_Y;
+  /// Name of the directory that holds the image currently edited as page.
+  char  file_directory[MAX_PATH_CHARACTERS];
+  /// Filename (without directory) of the image currently edited as page.
+  char  filename[MAX_PATH_CHARACTERS];
+  /// File format of the image currently edited as page. It's a value of enum ::FILE_FORMATS
+  byte  fileformat;
+  /// File selector settings
+  T_Selector_settings selector;
+  /// X position (in screen coordinates) of the separator between normal and magnified views.
+  short separator_position;
+  /// X position (in screen coordinates) of the first pixel of the magnified view.
+  short X_zoom;
+  /// Proportion of the non-magnified part of the screen.
+  float separator_proportion;
+  /// Boolean, true if the main image has the magnifier active.
+  byte  magnifier_mode;
+  /// Zoom factor used in the magnifier.
+  word  magnifier_factor;
+  /// Width of the magnified view for the page.
+  word  magnifier_height;
+  /// Height of the magnified view for the page.
+  word  magnifier_width;
+  /// X position (in image space) of the pixel to display in the top left corner of the magnified view.
+  short magnifier_offset_X;
+  /// Y position (in image space) of the pixel to display in the top left corner of the magnified view.
+  short magnifier_offset_Y;
+  /// Index of layer currently being edited
+  int current_layer;
+  /// Bitfield that records which layers are visible. 2^0 for 0, 2^1 for 1, 2^2 for 2, etc.
+  dword layers_visible;
+  /// Backup for layers_visible
+  dword layers_visible_backup;
+  /// Index to use next time, when creating incremental backups, to make unique filename.
+  long safety_number;
+  /// Number of edit actions since the last safety backup
+  long edits_since_safety_backup;
+  /// SDL Time of the previous safety backup
+  dword time_of_safety_backup;
+  /// Letter prefix for the filenames of safety backups. a or b
+  byte safety_backup_prefix;
+  /// Tilemap mode
+  byte tilemap_mode;
+} T_Document;
+
 #endif

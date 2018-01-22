@@ -287,8 +287,11 @@ GFX2_GLOBAL int Pixel_height;
 
 // -- Current image data
 
+GFX2_GLOBAL T_Document Main;
+
 /// Pointer to the pixel data of the main image
 GFX2_GLOBAL byte *    Main_screen;
+#if 0
 /// Palette of the main image
 GFX2_GLOBAL T_Palette Main_palette;
 /// Boolean, means the image has been modified since last save.
@@ -337,11 +340,14 @@ GFX2_GLOBAL long Main_edits_since_safety_backup;
 GFX2_GLOBAL Uint32 Main_time_of_safety_backup;
 /// Letter prefix for the filenames of safety backups. a or b
 GFX2_GLOBAL byte Main_safety_backup_prefix;
+#endif
 /// Lookup table for XOR effects, pointing each color to the most different one
 GFX2_GLOBAL byte xor_lut[256];
 
 // -- Spare page data
 
+GFX2_GLOBAL T_Document Spare;
+#if 0
 /// Palette of the spare page
 GFX2_GLOBAL T_Palette Spare_palette;
 /// Boolean, means the spare page has been modified since last save.
@@ -394,15 +400,16 @@ GFX2_GLOBAL long Spare_edits_since_safety_backup;
 GFX2_GLOBAL Uint32 Spare_time_of_safety_backup;
 /// Letter prefix for the filenames of safety backups. a or b
 GFX2_GLOBAL byte Spare_safety_backup_prefix;
+#endif
 
 // -- Image backups
 
 /// Backup of the current screen, used during drawing when FX feedback is OFF.
 GFX2_GLOBAL byte * Screen_backup;
 /// List of backup pages for the main image.
-GFX2_GLOBAL T_List_of_pages * Main_backups;
+GFX2_GLOBAL T_List_of_pages * Main_backups;//TODO
 /// List of backup pages for the spare page.
-GFX2_GLOBAL T_List_of_pages * Spare_backups;
+GFX2_GLOBAL T_List_of_pages * Spare_backups;//TODO
 
 
 // -- Brush data
@@ -655,10 +662,10 @@ GFX2_GLOBAL byte Mask_table[256];
 // -- Tilemap mode
 
 /// Tilemap mode for main page
-GFX2_GLOBAL byte Main_tilemap_mode;
+//GFX2_GLOBAL byte Main_tilemap_mode;
 
 /// Tilemap mode for spare page
-GFX2_GLOBAL byte Spare_tilemap_mode;
+//GFX2_GLOBAL byte Spare_tilemap_mode;
 
 // -- Magnifier data
 

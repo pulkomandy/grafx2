@@ -276,7 +276,7 @@ void Fill_canvas(T_IO_Context *context, byte color)
       break;
     case CONTEXT_MAIN_IMAGE:
       memset(
-        Main_backups->Pages->Image[Main_current_layer].Pixels,
+        Main_backups->Pages->Image[Main.current_layer].Pixels,
         color,
         Main_backups->Pages->Width*Main_backups->Pages->Height);
       break;
@@ -485,8 +485,8 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
         
         // Load into layer 0, by default.
         context->Nb_layers=1;
-        Main_current_layer=0;
-        Main_layers_visible=1<<0;
+        Main.current_layer=0;
+        Main.layers_visible=1<<0;
         Set_loading_layer(context,0);
         
         // Remove previous comment, unless we load just a palette
@@ -777,7 +777,7 @@ void Load_image(T_IO_Context *context)
         Backup_layers(LAYER_NONE);
       }
       // Copy the loaded palette
-      memcpy(Main_palette, context->Palette, sizeof(T_Palette));
+      memcpy(Main.palette, context->Palette, sizeof(T_Palette));
       memcpy(Main_backups->Pages->Palette, context->Palette, sizeof(T_Palette));
 
       // For formats that handle more than just the palette:
@@ -797,9 +797,9 @@ void Load_image(T_IO_Context *context)
         }
         
         // On considère que l'image chargée n'est plus modifiée
-        Main_image_is_modified=0;
+        Main.image_is_modified=0;
         // Et on documente la variable Main_fileformat avec la valeur:
-        Main_fileformat=format->Identifier;
+        Main.fileformat=format->Identifier;
   
         // already done initially on Backup_with_new_dimensions
         //Main_image_width= context->Width;
@@ -807,12 +807,12 @@ void Load_image(T_IO_Context *context)
         
         if (Main_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
         {
-          Main_current_layer = 0;
+          Main.current_layer = 0;
         }
         else
         {
-          Main_current_layer = context->Nb_layers - 1;
-          Main_layers_visible = (2<<Main_current_layer)-1;
+          Main.current_layer = context->Nb_layers - 1;
+          Main.layers_visible = (2<<Main.current_layer)-1;
         }
         
         // Load the transparency data
@@ -820,10 +820,10 @@ void Load_image(T_IO_Context *context)
         Main_backups->Pages->Background_transparent = context->Background_transparent;
   
         // Correction des dimensions
-        if (Main_image_width<1)
-          Main_image_width=1;
-        if (Main_image_height<1)
-          Main_image_height=1;
+        if (Main.image_width<1)
+          Main.image_width=1;
+        if (Main.image_height<1)
+          Main.image_height=1;
 
         // Color cyling ranges:
         for (i=0; i<16; i++)
@@ -844,9 +844,9 @@ void Load_image(T_IO_Context *context)
     else if (File_error!=1)
     {
       // On considère que l'image chargée est encore modifiée
-      Main_image_is_modified=1;
+      Main.image_is_modified=1;
       // Et on documente la variable Main_fileformat avec la valeur:
-      Main_fileformat=format->Identifier;
+      Main.fileformat=format->Identifier;
     }
     else
     {
@@ -999,7 +999,7 @@ void Save_image(T_IO_Context *context)
           }
           // current layer
           context->Nb_layers=1;
-          context->Target_address=Main_backups->Pages->Image[Main_current_layer].Pixels;
+          context->Target_address=Main_backups->Pages->Image[Main.current_layer].Pixels;
         }
         else // all other layer-based formats
         {
@@ -1035,7 +1035,7 @@ void Save_image(T_IO_Context *context)
               break;
             case 2: // current layer
               context->Nb_layers=1;
-              context->Target_address=Main_backups->Pages->Image[Main_current_layer].Pixels;
+              context->Target_address=Main_backups->Pages->Image[Main.current_layer].Pixels;
               break;
             default: // Cancel
               // File_error is already set to 1.
@@ -1233,9 +1233,9 @@ void Emergency_backup(const char *fname, byte *source, int width, int height, T_
 void Image_emergency_backup()
 {
   if (Main_backups && Main_backups->Pages && Main_backups->Pages->Nb_layers == 1)
-    Emergency_backup(SAFETYBACKUP_PREFIX_A "999999" BACKUP_FILE_EXTENSION,Main_screen, Main_image_width, Main_image_height, &Main_palette);
+    Emergency_backup(SAFETYBACKUP_PREFIX_A "999999" BACKUP_FILE_EXTENSION,Main_screen, Main.image_width, Main.image_height, &Main.palette);
   if (Spare_backups && Spare_backups->Pages && Spare_backups->Pages->Nb_layers == 1)
-    Emergency_backup(SAFETYBACKUP_PREFIX_B "999999" BACKUP_FILE_EXTENSION,Spare_visible_image.Image, Spare_image_width, Spare_image_height, &Spare_palette);
+    Emergency_backup(SAFETYBACKUP_PREFIX_B "999999" BACKUP_FILE_EXTENSION,Spare_visible_image.Image, Spare.image_width, Spare.image_height, &Spare.palette);
 }
 
 T_Format * Get_fileformat(byte format)
@@ -1279,7 +1279,7 @@ void Init_context_preview(T_IO_Context * context, char *file_name, char *file_di
   context->Type = CONTEXT_PREVIEW;
   context->File_name = file_name;
   context->File_directory = file_directory;
-  context->Format = Main_fileformat; // FIXME ?
+  context->Format = Main.fileformat; // FIXME ?
 }
 
 // Setup for loading/saving an intermediate backup
@@ -1298,10 +1298,10 @@ void Init_context_layered_image(T_IO_Context * context, char *file_name, char *f
   context->Type = CONTEXT_MAIN_IMAGE;
   context->File_name = file_name;
   context->File_directory = file_directory;
-  context->Format = Main_fileformat;
-  memcpy(context->Palette, Main_palette, sizeof(T_Palette));
-  context->Width = Main_image_width;
-  context->Height = Main_image_height;
+  context->Format = Main.fileformat;
+  memcpy(context->Palette, Main.palette, sizeof(T_Palette));
+  context->Width = Main.image_width;
+  context->Height = Main.image_height;
   context->Nb_layers = Main_backups->Pages->Nb_layers;
   strcpy(context->Comment, Main_backups->Pages->Comment);
   context->Transparent_color=Main_backups->Pages->Transparent_color;
@@ -1313,7 +1313,7 @@ void Init_context_layered_image(T_IO_Context * context, char *file_name, char *f
   else
     context->Ratio=PIXEL_SIMPLE;
   context->Target_address=Main_backups->Pages->Image[0].Pixels;
-  context->Pitch=Main_image_width;
+  context->Pitch=Main.image_width;
   
   // Color cyling ranges:
   for (i=0; i<16; i++)
@@ -1345,7 +1345,7 @@ void Init_context_brush(T_IO_Context * context, char *file_name, char *file_dire
   context->File_directory = file_directory;
   context->Format = Brush_fileformat;
   // Use main screen's palette
-  memcpy(context->Palette, Main_palette, sizeof(T_Palette));
+  memcpy(context->Palette, Main.palette, sizeof(T_Palette));
   context->Width = Brush_width;
   context->Height = Brush_height;
   context->Nb_layers = 1;
@@ -1414,9 +1414,9 @@ void Set_loading_layer(T_IO_Context *context, int layer)
         break;
       }
       context->Nb_layers = Main_backups->Pages->Nb_layers;
-      Main_layers_visible = (2<<layer)-1;
+      Main.layers_visible = (2<<layer)-1;
     }
-    Main_current_layer = layer;
+    Main.current_layer = layer;
     context->Target_address=Main_backups->Pages->Image[layer].Pixels;
     
     Update_pixel_renderer();
@@ -1465,9 +1465,9 @@ void Add_backup_file(const char *name)
   Extract_filename(file_name, name);
   
   // Check first character
-  if (file_name[0]==Main_safety_backup_prefix)
+  if (file_name[0]==Main.safety_backup_prefix)
     list = &Backups_main;
-  else if (file_name[0]==Spare_safety_backup_prefix)
+  else if (file_name[0]==Spare.safety_backup_prefix)
     list = &Backups_spare;
    else {
     // Not a good file
@@ -1555,7 +1555,7 @@ byte Process_backups(T_String_list **list)
     context.Original_file_name = file_name;
     context.Original_file_directory = file_directory;
     Load_image(&context);
-    Main_image_is_modified=1;
+    Main.image_is_modified=1;
     Destroy_context(&context);
     Redraw_layered_image();
     Display_all_screen();
@@ -1608,8 +1608,8 @@ if (Create_lock_file(Config_directory))
   restored_spare = Process_backups(&Backups_spare);
   if (restored_spare)
   {
-    Main_offset_X=0;
-    Main_offset_Y=0;
+    Main.offset_X=0;
+    Main.offset_Y=0;
     Compute_limits();
     Compute_paintbrush_coordinates();
     if (Backups_main)
@@ -1619,8 +1619,8 @@ if (Create_lock_file(Config_directory))
   
   if (restored_main)
   {
-    Main_offset_X=0;
-    Main_offset_Y=0;
+    Main.offset_X=0;
+    Main.offset_Y=0;
     Compute_limits();
     Compute_paintbrush_coordinates();
   }
@@ -1642,28 +1642,28 @@ void Rotate_safety_backups(void)
   // - Many edits have taken place
   // - A minimum number of edits have taken place AND a minimum time has passed
   // - At least one edit was done, and a maximum time has passed
-  if ((Main_edits_since_safety_backup > Max_edits_for_safety_backup) ||
-      (Main_edits_since_safety_backup > Min_edits_for_safety_backup && 
-      now > Main_time_of_safety_backup + Min_interval_for_safety_backup) ||
-      (Main_edits_since_safety_backup > 1 && 
-      now > Main_time_of_safety_backup + Max_interval_for_safety_backup))
+  if ((Main.edits_since_safety_backup > Max_edits_for_safety_backup) ||
+      (Main.edits_since_safety_backup > Min_edits_for_safety_backup &&
+      now > Main.time_of_safety_backup + Min_interval_for_safety_backup) ||
+      (Main.edits_since_safety_backup > 1 &&
+      now > Main.time_of_safety_backup + Max_interval_for_safety_backup))
   {
     
     // Clear a previous save (rotating saves)
     sprintf(deleted_file, "%s%c%6.6d" BACKUP_FILE_EXTENSION,
       Config_directory,
-      Main_safety_backup_prefix,
-      (Uint32)(Main_safety_number + 1000000l - Rotation_safety_backup) % (Uint32)1000000l);
+      Main.safety_backup_prefix,
+      (Uint32)(Main.safety_number + 1000000l - Rotation_safety_backup) % (Uint32)1000000l);
     remove(deleted_file); // no matter if fail
     
     // Reset counters
-    Main_edits_since_safety_backup=0;
-    Main_time_of_safety_backup=now;
+    Main.edits_since_safety_backup=0;
+    Main.time_of_safety_backup=now;
 
     // Create a new file name and save
     sprintf(file_name, "%c%6.6d" BACKUP_FILE_EXTENSION,
-      Main_safety_backup_prefix,
-      (Uint32)Main_safety_number);
+      Main.safety_backup_prefix,
+      (Uint32)Main.safety_number);
     Init_context_backup_image(&context, file_name, Config_directory);
     context.Format=FORMAT_GIF;
     // Provide original file data, to store as a GIF Application Extension
@@ -1673,7 +1673,7 @@ void Rotate_safety_backups(void)
     Save_image(&context);
     Destroy_context(&context);
     
-    Main_safety_number++;
+    Main.safety_number++;
   }
 }
 

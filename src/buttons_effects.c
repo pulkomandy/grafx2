@@ -183,12 +183,12 @@ void Button_Constraint_mode()
   if (Selected_Constraint_Mode == IMAGE_MODE_MODE5)
   {
     if (Main_backups->Pages->Image_mode != IMAGE_MODE_LAYERED ||
-        Main_backups->Pages->Nb_layers!=5 || (Main_image_width%48))
+        Main_backups->Pages->Nb_layers!=5 || (Main.image_width%48))
     {
       Verbose_message("Error!", "This emulation of Amstrad CPC's Mode5 can only be used on a 5-layer image whose width is a multiple of 48.");
       return;
     }
-    for (pixel=0; pixel < Main_image_width*Main_image_height; pixel++)
+    for (pixel=0; pixel < Main.image_width*Main.image_height; pixel++)
     {
       if (Main_backups->Pages->Image[4].Pixels[pixel]>3)
       {
@@ -249,7 +249,7 @@ void Button_Constraint_menu(void)
 // Tilemap mode
 void Button_Tilemap_mode(void)
 {
-  Main_tilemap_mode=!Main_tilemap_mode;
+  Main.tilemap_mode=!Main.tilemap_mode;
   Tilemap_update();
 }
 
@@ -317,7 +317,7 @@ void Button_Tilemap_menu(void)
     byte changed =
       Config.Tilemap_allow_flipped_x!=flip_x ||
       Config.Tilemap_allow_flipped_y!=flip_y ||
-      !Main_tilemap_mode;
+      !Main.tilemap_mode;
     
     Config.Tilemap_allow_flipped_x=flip_x;
     Config.Tilemap_allow_flipped_y=flip_y;
@@ -325,7 +325,7 @@ void Button_Tilemap_menu(void)
     
     if (changed)
     {
-      Main_tilemap_mode=1;
+      Main.tilemap_mode=1;
       Tilemap_update();
     }
   }
@@ -959,7 +959,7 @@ void Effects_off(void)
   Mask_mode=0;
   Sieve_mode=0;
   Snap_mode=0;
-  Main_tilemap_mode=0;
+  Main.tilemap_mode=0;
 }
 
 
@@ -1240,7 +1240,7 @@ void Button_Sieve_menu(void)
             *(Brush_original_pixels + y_pos * Brush_width + x_pos) = (Sieve[x_pos][y_pos])?Fore_color:Back_color;
         
         // Grab palette
-        memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
+        memcpy(Brush_original_palette, Main.palette,sizeof(T_Palette));
         // Remap (no change)
         Remap_brush();
 

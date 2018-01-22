@@ -231,22 +231,22 @@ int Move_cursor_with_constraints()
             Input_new_mouse_Y=Menu_Y-1; //La ligne !!au-dessus!! du menu
         }
 
-        if(Main_magnifier_mode)
+        if(Main.magnifier_mode)
         {
             if(Operation_in_magnifier==0)
             {
-                if(Input_new_mouse_X>=Main_separator_position)
+                if(Input_new_mouse_X>=Main.separator_position)
                 {
                     mouse_blocked=1;
-                    Input_new_mouse_X=Main_separator_position-1;
+                    Input_new_mouse_X=Main.separator_position-1;
                 }
             }
             else
             {
-                if(Input_new_mouse_X<Main_X_zoom)
+                if(Input_new_mouse_X<Main.X_zoom)
                 {
                     mouse_blocked=1;
-                    Input_new_mouse_X=Main_X_zoom;
+                    Input_new_mouse_X=Main.X_zoom;
                 }
             }
         }
@@ -789,18 +789,18 @@ int Cursor_displace(short delta_x, short delta_y)
   short x=Input_new_mouse_X;
   short y=Input_new_mouse_Y;
   
-  if(Main_magnifier_mode && Input_new_mouse_Y < Menu_Y && Input_new_mouse_X > Main_separator_position)
+  if(Main.magnifier_mode && Input_new_mouse_Y < Menu_Y && Input_new_mouse_X > Main.separator_position)
   {
     // Cursor in zoomed area
     
     if (delta_x<0)
-      Input_new_mouse_X = Max(Main_separator_position, x-Main_magnifier_factor);
+      Input_new_mouse_X = Max(Main.separator_position, x-Main.magnifier_factor);
     else if (delta_x>0)
-      Input_new_mouse_X = Min(Screen_width-1, x+Main_magnifier_factor);
+      Input_new_mouse_X = Min(Screen_width-1, x+Main.magnifier_factor);
     if (delta_y<0)
-      Input_new_mouse_Y = Max(0, y-Main_magnifier_factor);
+      Input_new_mouse_Y = Max(0, y-Main.magnifier_factor);
     else if (delta_y>0)
-      Input_new_mouse_Y = Min(Screen_height-1, y+Main_magnifier_factor);
+      Input_new_mouse_Y = Min(Screen_height-1, y+Main.magnifier_factor);
   }
   else
   {
@@ -1110,9 +1110,9 @@ int Color_cycling(void)
     // Initialize the palette
     for(color=0;color<256;color++)
     {
-      PaletteSDL[color].r=Main_palette[color].R;
-      PaletteSDL[color].g=Main_palette[color].G;
-      PaletteSDL[color].b=Main_palette[color].B;
+      PaletteSDL[color].r=Main.palette[color].R;
+      PaletteSDL[color].g=Main.palette[color].G;
+      PaletteSDL[color].b=Main.palette[color].B;
     }
     for (i=0; i<16; i++)
     {
@@ -1123,9 +1123,9 @@ int Color_cycling(void)
       {
         for(color=Main_backups->Pages->Gradients->Range[i].Start;color<=Main_backups->Pages->Gradients->Range[i].End;color++)
         {
-          PaletteSDL[color].r=Main_palette[Main_backups->Pages->Gradients->Range[i].Start+((color-Main_backups->Pages->Gradients->Range[i].Start+offset[i])%len)].R;
-          PaletteSDL[color].g=Main_palette[Main_backups->Pages->Gradients->Range[i].Start+((color-Main_backups->Pages->Gradients->Range[i].Start+offset[i])%len)].G;
-          PaletteSDL[color].b=Main_palette[Main_backups->Pages->Gradients->Range[i].Start+((color-Main_backups->Pages->Gradients->Range[i].Start+offset[i])%len)].B;
+          PaletteSDL[color].r=Main.palette[Main_backups->Pages->Gradients->Range[i].Start+((color-Main_backups->Pages->Gradients->Range[i].Start+offset[i])%len)].R;
+          PaletteSDL[color].g=Main.palette[Main_backups->Pages->Gradients->Range[i].Start+((color-Main_backups->Pages->Gradients->Range[i].Start+offset[i])%len)].G;
+          PaletteSDL[color].b=Main.palette[Main_backups->Pages->Gradients->Range[i].Start+((color-Main_backups->Pages->Gradients->Range[i].Start+offset[i])%len)].B;
         }
       }
     }

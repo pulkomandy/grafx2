@@ -434,7 +434,7 @@ void Select_button(int btn_number,byte click)
       break;
 
     case FAMILY_INTERRUPTION: // Petit cas spécial dans la famille "Interruption":
-      if ((btn_number!=BUTTON_MAGNIFIER) || (!Main_magnifier_mode))
+      if ((btn_number!=BUTTON_MAGNIFIER) || (!Main.magnifier_mode))
       // Pour chaque bouton:
       for (b=0; b<NB_BUTTONS; b++)
         // S'il est de la même famille
@@ -442,7 +442,7 @@ void Select_button(int btn_number,byte click)
              (b!=btn_number) &&
              (Buttons_Pool[b].Family==FAMILY_INTERRUPTION) &&
              (  (b!=BUTTON_MAGNIFIER) ||
-               ((b==BUTTON_MAGNIFIER) && (!Main_magnifier_mode)) )
+               ((b==BUTTON_MAGNIFIER) && (!Main.magnifier_mode)) )
            )
           // Alors on désenclenche le bouton
           Unselect_button(b);
@@ -456,7 +456,7 @@ void Select_button(int btn_number,byte click)
         if ( (b!=btn_number)
           && (Buttons_Pool[b].Family==FAMILY_INTERRUPTION)
           // Et que ce n'est pas la loupe, ou alors qu'on n'est pas en mode loupe
-          && (!(Main_magnifier_mode && (b==BUTTON_MAGNIFIER))) )
+          && (!(Main.magnifier_mode && (b==BUTTON_MAGNIFIER))) )
           // Alors on désenclenche le bouton
           Unselect_button(b);
       // Right-clicking on Adjust opens a menu, so in this case we skip
@@ -501,9 +501,9 @@ void Select_button(int btn_number,byte click)
 ///Moves the splitbar between zoom and standard views
 void Move_separator(void)
 {
-  short old_main_separator_position=Main_separator_position;
-  short old_x_zoom=Main_X_zoom;
-  short offset=Main_X_zoom-Mouse_X;
+  short old_main_separator_position=Main.separator_position;
+  short old_x_zoom=Main.X_zoom;
+  short offset=Main.X_zoom-Mouse_X;
   byte  old_cursor_shape=Cursor_shape;
   short old_mouse_x=-1;
 
@@ -511,20 +511,20 @@ void Move_separator(void)
   Hide_cursor();
   Windows_open=1;
   Cursor_shape=CURSOR_SHAPE_HORIZONTAL;
-  Vertical_XOR_line(Main_separator_position,0,Menu_Y);
-  Vertical_XOR_line(Main_X_zoom-1,0,Menu_Y);
+  Vertical_XOR_line(Main.separator_position,0,Menu_Y);
+  Vertical_XOR_line(Main.X_zoom-1,0,Menu_Y);
   Display_cursor();
-  Update_rect(Main_separator_position,0,abs(Main_separator_position-Main_X_zoom)+1,Menu_Y);
+  Update_rect(Main.separator_position,0,abs(Main.separator_position-Main.X_zoom)+1,Menu_Y);
 
   while (Mouse_K)
   {
     if (Mouse_X!=old_mouse_x)
     {
       old_mouse_x=Mouse_X;
-      Main_separator_proportion=(float)(Mouse_X+offset)/Screen_width;
+      Main.separator_proportion=(float)(Mouse_X+offset)/Screen_width;
       Compute_separator_data();
   
-      if (Main_X_zoom!=old_x_zoom)
+      if (Main.X_zoom!=old_x_zoom)
       {
         Hide_cursor();
   
@@ -534,14 +534,14 @@ void Move_separator(void)
   
         Update_rect(old_main_separator_position,0,abs(old_main_separator_position-old_x_zoom)+1,Menu_Y);
   
-        old_main_separator_position=Main_separator_position;
-        old_x_zoom=Main_X_zoom;
+        old_main_separator_position=Main.separator_position;
+        old_x_zoom=Main.X_zoom;
   
         // Rafficher la barre en XOR
-        Vertical_XOR_line(Main_separator_position,0,Menu_Y);
-        Vertical_XOR_line(Main_X_zoom-1,0,Menu_Y);
+        Vertical_XOR_line(Main.separator_position,0,Menu_Y);
+        Vertical_XOR_line(Main.X_zoom-1,0,Menu_Y);
   
-        Update_rect(Main_separator_position,0,abs(Main_separator_position-Main_X_zoom)+1,Menu_Y);
+        Update_rect(Main.separator_position,0,abs(Main.separator_position-Main.X_zoom)+1,Menu_Y);
   
         Display_cursor();
       }
@@ -551,8 +551,8 @@ void Move_separator(void)
 
   // Effacer la barre en XOR
   Hide_cursor();
-  Vertical_XOR_line(Main_separator_position,0,Menu_Y);
-  Vertical_XOR_line(Main_X_zoom-1,0,Menu_Y);
+  Vertical_XOR_line(Main.separator_position,0,Menu_Y);
+  Vertical_XOR_line(Main.X_zoom-1,0,Menu_Y);
   Windows_open=0;
   Cursor_shape=old_cursor_shape;
   Compute_magnifier_data();
@@ -571,7 +571,7 @@ void Status_print_palette_color(byte color)
   int i;
   
   strcpy(str,Buttons_Pool[BUTTON_CHOOSE_COL].Tooltip);
-  sprintf(str+strlen(str),"%d (%d,%d,%d)",color,Main_palette[color].R,Main_palette[color].G,Main_palette[color].B);
+  sprintf(str+strlen(str),"%d (%d,%d,%d)",color,Main.palette[color].R,Main.palette[color].G,Main.palette[color].B);
   // Pad spaces
   for (i=strlen(str); i<24; i++)
     str[i]=' ';
@@ -589,12 +589,12 @@ void Layer_preview_on(int * preview_is_visible)
 
   if (! *preview_is_visible && layercount>1)
   {
-    previewW = Min(Main_image_width/Menu_factor_X,Layer_button_width);
-    previewH = previewW * Main_image_height / Main_image_width * Menu_factor_X / Menu_factor_Y;
+    previewW = Min(Main.image_width/Menu_factor_X,Layer_button_width);
+    previewH = previewW * Main.image_height / Main.image_width * Menu_factor_X / Menu_factor_Y;
     if (previewH > Screen_height/4)
     {
       previewH = Screen_height/4;
-      previewW = Main_image_width*previewH/Main_image_height*Menu_factor_Y/Menu_factor_X;
+      previewW = Main.image_width*previewH/Main.image_height*Menu_factor_Y/Menu_factor_X;
     }
   
     Open_popup((Buttons_Pool[BUTTON_LAYER_SELECT].X_offset + 2)*Menu_factor_X,
@@ -620,11 +620,11 @@ void Layer_preview_on(int * preview_is_visible)
       for (y = 0; y < previewH*Pixel_height*Menu_factor_Y-1; y++)
       for (x = 0; x < previewW*Pixel_width*Menu_factor_X-1; x++)
       {
-        int imgx = x * Main_image_width / (previewW*Pixel_width*Menu_factor_X-1);
-        int imgy = y * Main_image_height / (previewH*Pixel_height*Menu_factor_Y-1);
+        int imgx = x * Main.image_width / (previewW*Pixel_width*Menu_factor_X-1);
+        int imgy = y * Main.image_height / (previewH*Pixel_height*Menu_factor_Y-1);
         // Use Pixel_simple() in order to get highest resolution
         Pixel_simple(x+((layer*Layer_button_width+offset)*Menu_factor_X+Window_pos_X)*Pixel_width, y+Window_pos_Y*Pixel_height+1, *(Main_backups->Pages->Image[layer].Pixels
-          + imgx + imgy * Main_image_width));
+          + imgx + imgy * Main.image_width));
       }
     }
     Update_window_area(0,0,Window_width, Window_height);
@@ -675,7 +675,7 @@ void Main_handler(void)
     else if (Drop_file_name)
     {
       // A file was dragged into Grafx2's window
-      if (Main_image_is_modified && !Confirmation_box("Discard unsaved changes ?"))
+      if (Main.image_is_modified && !Confirmation_box("Discard unsaved changes ?"))
       {
         // do nothing
       }
@@ -703,11 +703,11 @@ void Main_handler(void)
           Compute_paintbrush_coordinates();
           Redraw_layered_image();
           End_of_modification();
-          Main_image_is_modified=0;
+          Main.image_is_modified=0;
         }
         Destroy_context(&context);
         
-        Compute_optimal_menu_colors(Main_palette);
+        Compute_optimal_menu_colors(Main.palette);
         Check_menu_mode();
         Display_menu();
         if (Config.Display_image_limits)
@@ -808,84 +808,84 @@ void Main_handler(void)
             switch (key_index)
             {
               case SPECIAL_SCROLL_UP : // Scroll up
-                if (Main_magnifier_mode)
-                  Scroll_magnifier(0,-(Main_magnifier_height>>2));
+                if (Main.magnifier_mode)
+                  Scroll_magnifier(0,-(Main.magnifier_height>>2));
                 else
                   Scroll_screen(0,-(Screen_height>>3));
                 action++;
                 break;
               case SPECIAL_SCROLL_DOWN : // Scroll down
-                if (Main_magnifier_mode)
-                  Scroll_magnifier(0,(Main_magnifier_height>>2));
+                if (Main.magnifier_mode)
+                  Scroll_magnifier(0,(Main.magnifier_height>>2));
                 else
                   Scroll_screen(0,(Screen_height>>3));
                 action++;
                 break;
               case SPECIAL_SCROLL_LEFT : // Scroll left
-                if (Main_magnifier_mode)
-                  Scroll_magnifier(-(Main_magnifier_width>>2),0);
+                if (Main.magnifier_mode)
+                  Scroll_magnifier(-(Main.magnifier_width>>2),0);
                 else
                   Scroll_screen(-(Screen_width>>3),0);
                 action++;
                 break;
               case SPECIAL_SCROLL_RIGHT : // Scroll right
-                if (Main_magnifier_mode)
-                  Scroll_magnifier((Main_magnifier_width>>2),0);
+                if (Main.magnifier_mode)
+                  Scroll_magnifier((Main.magnifier_width>>2),0);
                 else
                   Scroll_screen((Screen_width>>3),0);
                 action++;
                 break;
               case SPECIAL_SCROLL_UP_FAST : // Scroll up faster
-                if (Main_magnifier_mode)
-                  Scroll_magnifier(0,-(Main_magnifier_height>>1));
+                if (Main.magnifier_mode)
+                  Scroll_magnifier(0,-(Main.magnifier_height>>1));
                 else
                   Scroll_screen(0,-(Screen_height>>2));
                 action++;
                 break;
               case SPECIAL_SCROLL_DOWN_FAST : // Scroll down faster
-                if (Main_magnifier_mode)
-                  Scroll_magnifier(0,(Main_magnifier_height>>1));
+                if (Main.magnifier_mode)
+                  Scroll_magnifier(0,(Main.magnifier_height>>1));
                 else
                   Scroll_screen(0,(Screen_height>>2));
                 action++;
                 break;
               case SPECIAL_SCROLL_LEFT_FAST : // Scroll left faster
-                if (Main_magnifier_mode)
-                  Scroll_magnifier(-(Main_magnifier_width>>1),0);
+                if (Main.magnifier_mode)
+                  Scroll_magnifier(-(Main.magnifier_width>>1),0);
                 else
                   Scroll_screen(-(Screen_width>>2),0);
                 action++;
                 break;
               case SPECIAL_SCROLL_RIGHT_FAST : // Scroll right faster
-                if (Main_magnifier_mode)
-                  Scroll_magnifier((Main_magnifier_width>>1),0);
+                if (Main.magnifier_mode)
+                  Scroll_magnifier((Main.magnifier_width>>1),0);
                 else
                   Scroll_screen((Screen_width>>2),0);
                 action++;
                 break;
               case SPECIAL_SCROLL_UP_SLOW : // Scroll up slower
-                if (Main_magnifier_mode)
+                if (Main.magnifier_mode)
                   Scroll_magnifier(0,-1);
                 else
                   Scroll_screen(0,-1);
                 action++;
                 break;
               case SPECIAL_SCROLL_DOWN_SLOW : // Scroll down slower
-                if (Main_magnifier_mode)
+                if (Main.magnifier_mode)
                   Scroll_magnifier(0,1);
                 else
                   Scroll_screen(0,1);
                 action++;
                 break;
               case SPECIAL_SCROLL_LEFT_SLOW : // Scroll left slower
-                if (Main_magnifier_mode)
+                if (Main.magnifier_mode)
                   Scroll_magnifier(-1,0);
                 else
                   Scroll_screen(-1,0);
                 action++;
                 break;
               case SPECIAL_SCROLL_RIGHT_SLOW : // Scroll right slower
-                if (Main_magnifier_mode)
+                if (Main.magnifier_mode)
                   Scroll_magnifier(1,0);
                 else
                   Scroll_screen(1,0);
@@ -1361,7 +1361,7 @@ void Main_handler(void)
                 Cycling_mode= !Cycling_mode;
                 // Restore palette
                 if (!Cycling_mode)
-                  Set_palette(Main_palette);
+                  Set_palette(Main.palette);
                 action++;
                 break;
               case SPECIAL_HOLD_PAN:
@@ -1419,8 +1419,8 @@ void Main_handler(void)
     // Gestion de la souris
 
     Cursor_in_menu=(Mouse_Y>=Menu_Y) ||
-                      ( (Main_magnifier_mode) && (Mouse_X>=Main_separator_position) &&
-                        (Mouse_X<Main_X_zoom) );
+                      ( (Main.magnifier_mode) && (Mouse_X>=Main.separator_position) &&
+                        (Mouse_X<Main.X_zoom) );
 
     if (Cursor_in_menu)
     {
@@ -1512,7 +1512,7 @@ void Main_handler(void)
           }
         }
         else
-          if (Main_magnifier_mode) Move_separator();
+          if (Main.magnifier_mode) Move_separator();
       }
       
       if (button_index == BUTTON_LAYER_SELECT)
@@ -1529,8 +1529,8 @@ void Main_handler(void)
 
     // we need to refresh that one as we may come from a sub window
     Cursor_in_menu=(Mouse_Y>=Menu_Y) ||
-                      ( (Main_magnifier_mode) && (Mouse_X>=Main_separator_position) &&
-                        (Mouse_X<Main_X_zoom) );
+                      ( (Main.magnifier_mode) && (Mouse_X>=Main.separator_position) &&
+                        (Mouse_X<Main.X_zoom) );
 
 
     // Le curseur se trouve dans l'image
@@ -1653,7 +1653,7 @@ void Open_window(word width,word height, const char * title)
     {
       Allow_colorcycling=0;
       // Restore palette
-      Set_palette(Main_palette);
+      Set_palette(Main.palette);
     }
     Allow_drag_and_drop(0);
   }
@@ -2462,8 +2462,8 @@ short Wait_click_in_palette(T_Palette_button * button)
 
   Hide_cursor();
   old_hide_cursor=Cursor_hidden;
-  old_main_magnifier_mode=Main_magnifier_mode;
-  Main_magnifier_mode=0;
+  old_main_magnifier_mode=Main.magnifier_mode;
+  Main.magnifier_mode=0;
   Cursor_hidden=0;
   Cursor_shape=CURSOR_SHAPE_TARGET;
   Display_cursor();
@@ -2482,7 +2482,7 @@ short Wait_click_in_palette(T_Palette_button * button)
         (((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-(button->Pos_Y+3)) / 5;
         Cursor_shape=CURSOR_SHAPE_ARROW;
         Cursor_hidden=old_hide_cursor;
-        Main_magnifier_mode=old_main_magnifier_mode;
+        Main.magnifier_mode=old_main_magnifier_mode;
         Display_cursor();
         return selected_color;
       }
@@ -2494,7 +2494,7 @@ short Wait_click_in_palette(T_Palette_button * button)
         selected_color=Read_pixel(Mouse_X,Mouse_Y);
         Cursor_shape=CURSOR_SHAPE_ARROW;
         Cursor_hidden=old_hide_cursor;
-        Main_magnifier_mode=old_main_magnifier_mode;
+        Main.magnifier_mode=old_main_magnifier_mode;
         Display_cursor();
         return selected_color;
       }
@@ -2505,7 +2505,7 @@ short Wait_click_in_palette(T_Palette_button * button)
       Hide_cursor();
       Cursor_shape=CURSOR_SHAPE_ARROW;
       Cursor_hidden=old_hide_cursor;
-      Main_magnifier_mode=old_main_magnifier_mode;
+      Main.magnifier_mode=old_main_magnifier_mode;
       Display_cursor();
       return -1;
     }
@@ -2566,11 +2566,11 @@ void Get_color_behind_window(byte * color, byte * click)
           sprintf(str,"%d",a);
           d=strlen(str);
           strcat(str,"   (");
-          sprintf(str+strlen(str),"%d",Main_palette[a].R);
+          sprintf(str+strlen(str),"%d",Main.palette[a].R);
           strcat(str,",");
-          sprintf(str+strlen(str),"%d",Main_palette[a].G);
+          sprintf(str+strlen(str),"%d",Main.palette[a].G);
           strcat(str,",");
-          sprintf(str+strlen(str),"%d",Main_palette[a].B);
+          sprintf(str+strlen(str),"%d",Main.palette[a].B);
           strcat(str,")");
           a=24-d;
           for (index=strlen(str); index<a; index++)
@@ -3585,31 +3585,31 @@ void Set_bar_visibility(word bar, int visible, int with_redraw)
 
     Compute_menu_offsets();
 
-    if (Main_magnifier_mode)
+    if (Main.magnifier_mode)
     {
       Compute_magnifier_data();
     }
 
     //   On repositionne le décalage de l'image pour qu'il n'y ait pas d'in-
     // -cohérences lorsqu'on sortira du mode Loupe.
-    if (Main_offset_Y+Screen_height>Main_image_height)
+    if (Main.offset_Y+Screen_height>Main.image_height)
     {
-      if (Screen_height>Main_image_height)
-        Main_offset_Y=0;
+      if (Screen_height>Main.image_height)
+        Main.offset_Y=0;
       else
-        Main_offset_Y=Main_image_height-Screen_height;
+        Main.offset_Y=Main.image_height-Screen_height;
     }
     // On fait pareil pour le brouillon
-    if (Spare_offset_Y+Screen_height>Spare_image_height)
+    if (Spare.offset_Y+Screen_height>Spare.image_height)
     {
-      if (Screen_height>Spare_image_height)
-        Spare_offset_Y=0;
+      if (Screen_height>Spare.image_height)
+        Spare.offset_Y=0;
       else
-        Spare_offset_Y=Spare_image_height-Screen_height;
+        Spare.offset_Y=Spare.image_height-Screen_height;
     }
 
     Compute_magnifier_data();
-    if (Main_magnifier_mode)
+    if (Main.magnifier_mode)
       Position_screen_according_to_zoom();
     Compute_limits();
     Compute_paintbrush_coordinates();
@@ -3626,14 +3626,14 @@ void Set_bar_visibility(word bar, int visible, int with_redraw)
     
     Compute_menu_offsets();
     Compute_magnifier_data();
-    if (Main_magnifier_mode)
+    if (Main.magnifier_mode)
       Position_screen_according_to_zoom();
     Compute_limits();
     Compute_paintbrush_coordinates();
     if (with_redraw)
     {
       Display_menu();
-      if (Main_magnifier_mode)
+      if (Main.magnifier_mode)
         Display_all_screen();
     }
   }

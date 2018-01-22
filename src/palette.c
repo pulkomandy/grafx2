@@ -348,58 +348,58 @@ void Remap_image_highlevel(byte * conversion_table)
       && Main_backups->Pages->Image_mode != IMAGE_MODE_MODE5)
   {
     Remap_general_lowlevel(conversion_table,Main_visible_image.Image,Main_visible_image.Image,
-                         Main_image_width,Main_image_height,Main_image_width);
+                         Main.image_width,Main.image_height,Main.image_width);
   }
   // Remap all layers
   for (layer=0; layer<Main_backups->Pages->Nb_layers; layer++)
-    Remap_general_lowlevel(conversion_table,Main_backups->Pages->Image[layer].Pixels,Main_backups->Pages->Image[layer].Pixels,Main_image_width,Main_image_height,Main_image_width);
+    Remap_general_lowlevel(conversion_table,Main_backups->Pages->Image[layer].Pixels,Main_backups->Pages->Image[layer].Pixels,Main.image_width,Main.image_height,Main.image_width);
 
   // Remap transparent color
   Main_backups->Pages->Transparent_color = 
     conversion_table[Main_backups->Pages->Transparent_color];
 
   // On calcule les limites à l'écran de l'image
-  if (Main_image_height>=Menu_Y_before_window)
+  if (Main.image_height>=Menu_Y_before_window)
     end_y=Menu_Y_before_window;
   else
-    end_y=Main_image_height;
+    end_y=Main.image_height;
 
-  if (!Main_magnifier_mode)
+  if (!Main.magnifier_mode)
   {
-    if (Main_image_width>=Screen_width)
+    if (Main.image_width>=Screen_width)
       end_x=Screen_width;
     else
-      end_x=Main_image_width;
+      end_x=Main.image_width;
 
   }
   else
   {
-    if (Main_image_width>=Main_separator_position)
-      end_x=Main_separator_position;
+    if (Main.image_width>=Main.separator_position)
+      end_x=Main.separator_position;
     else
-      end_x=Main_image_width;
+      end_x=Main.image_width;
 
-    if ((Main_X_zoom+(Main_image_width*Main_magnifier_factor))>=Screen_width)
+    if ((Main.X_zoom+(Main.image_width*Main.magnifier_factor))>=Screen_width)
       end_x_mag=Screen_width;
     else
-      end_x_mag=(Main_X_zoom+(Main_image_width*Main_magnifier_factor));
+      end_x_mag=(Main.X_zoom+(Main.image_width*Main.magnifier_factor));
 
-    if (Main_image_height*Main_magnifier_factor>=Menu_Y_before_window)
+    if (Main.image_height*Main.magnifier_factor>=Menu_Y_before_window)
       end_y_mag=Menu_Y_before_window;
     else
-      end_y_mag=Main_image_height*Main_magnifier_factor;
+      end_y_mag=Main.image_height*Main.magnifier_factor;
   }
 
   // On doit maintenant faire la traduction à l'écran
   Remap_zone_highlevel(0,0,end_x,end_y,conversion_table);
 
-  if (Main_magnifier_mode)
+  if (Main.magnifier_mode)
   {
-    Remap_zone_highlevel(Main_separator_position,0,end_x_mag,end_y_mag,conversion_table);
+    Remap_zone_highlevel(Main.separator_position,0,end_x_mag,end_y_mag,conversion_table);
     // Il peut encore rester le bas de la barre de split à remapper si la
     // partie zoomée ne descend pas jusqu'en bas...
-    Remap_zone_highlevel(Main_separator_position,end_y_mag,
-                    (Main_separator_position+(SEPARATOR_WIDTH*Menu_factor_X)),
+    Remap_zone_highlevel(Main.separator_position,end_y_mag,
+                    (Main.separator_position+(SEPARATOR_WIDTH*Menu_factor_X)),
                     Menu_Y_before_window,conversion_table);
   }
   // Remappe tous les fonds de fenetre (qui doivent contenir un bout d'écran)
@@ -558,12 +558,12 @@ void Set_nice_menu_colors(dword * color_usage,int not_picture)
 
     target_rgb=Favorite_GUI_color(index);
     color=new_colors[index];
-    rgb[index].R=Main_palette[color].R;
-    rgb[index].G=Main_palette[color].G;
-    rgb[index].B=Main_palette[color].B;
-    Main_palette[color].R=Round_palette_component(target_rgb->R);
-    Main_palette[color].G=Round_palette_component(target_rgb->G);
-    Main_palette[color].B=Round_palette_component(target_rgb->B);
+    rgb[index].R=Main.palette[color].R;
+    rgb[index].G=Main.palette[color].G;
+    rgb[index].B=Main.palette[color].B;
+    Main.palette[color].R=Round_palette_component(target_rgb->R);
+    Main.palette[color].G=Round_palette_component(target_rgb->G);
+    Main.palette[color].B=Round_palette_component(target_rgb->B);
   }
 
   //   Maintenant qu'on a placé notre nouvelle palette, on va chercher quelles
@@ -1153,7 +1153,7 @@ void Button_Palette(void)
 
   Open_window(299, 196,"Palette");
 
-  memcpy(working_palette, Main_palette, sizeof(T_Palette));
+  memcpy(working_palette, Main.palette, sizeof(T_Palette));
   Palette_edit_step();
 
   Window_set_palette_button(5, 89); // 1
@@ -1977,11 +1977,11 @@ void Button_Palette(void)
 
             if ((Config.Safety_colors) && (used_colors<4))
             {
-                memcpy(temp_palette, Main_palette, sizeof(T_Palette));
-                memcpy(Main_palette, working_palette, sizeof(T_Palette));
+                memcpy(temp_palette, Main.palette, sizeof(T_Palette));
+                memcpy(Main.palette, working_palette, sizeof(T_Palette));
                 Set_nice_menu_colors(color_usage, 0);
-                memcpy(working_palette, Main_palette, sizeof(T_Palette));
-                memcpy(Main_palette, temp_palette, sizeof(T_Palette));
+                memcpy(working_palette, Main.palette, sizeof(T_Palette));
+                memcpy(Main.palette, temp_palette, sizeof(T_Palette));
             }
 
             Set_palette(working_palette); // On définit la nouvelle palette
@@ -2024,11 +2024,11 @@ void Button_Palette(void)
 
         if ((Config.Safety_colors) && (used_colors<4) && (block_end==block_start))
         {
-          memcpy(temp_palette,Main_palette,sizeof(T_Palette));
-          memcpy(Main_palette,working_palette,sizeof(T_Palette));
+          memcpy(temp_palette,Main.palette,sizeof(T_Palette));
+          memcpy(Main.palette,working_palette,sizeof(T_Palette));
           Set_nice_menu_colors(color_usage,0);
-          memcpy(working_palette,Main_palette,sizeof(T_Palette));
-          memcpy(Main_palette,temp_palette,sizeof(T_Palette));
+          memcpy(working_palette,Main.palette,sizeof(T_Palette));
+          memcpy(Main.palette,temp_palette,sizeof(T_Palette));
         }
 
         Set_palette(working_palette);
@@ -2706,11 +2706,11 @@ void Button_Palette(void)
             Update_color_count(&used_colors, color_usage);
 
           Palette_edit_step();
-          memcpy(temp_palette,Main_palette,sizeof(T_Palette));
-          memcpy(Main_palette,working_palette,sizeof(T_Palette));
+          memcpy(temp_palette,Main.palette,sizeof(T_Palette));
+          memcpy(Main.palette,working_palette,sizeof(T_Palette));
           Set_nice_menu_colors(color_usage,0);
-          memcpy(working_palette,Main_palette,sizeof(T_Palette));
-          memcpy(Main_palette,temp_palette,sizeof(T_Palette));
+          memcpy(working_palette,Main.palette,sizeof(T_Palette));
+          memcpy(Main.palette,temp_palette,sizeof(T_Palette));
           Set_palette(working_palette);
           memcpy(temp_palette,working_palette,sizeof(T_Palette));
           Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
@@ -2827,14 +2827,14 @@ void Button_Palette(void)
   if (clicked_button==14)         // Sortie par OK
   {
     if ( (!image_is_backed_up)
-      && memcmp(Main_palette,working_palette,sizeof(T_Palette)) )
+      && memcmp(Main.palette,working_palette,sizeof(T_Palette)) )
       Backup_layers(LAYER_NONE);
-    memcpy(Main_palette,working_palette,sizeof(T_Palette));
+    memcpy(Main.palette,working_palette,sizeof(T_Palette));
     End_of_modification();
     // Not really needed, the change was in palette entries
   }
 
-  Compute_optimal_menu_colors(Main_palette);
+  Compute_optimal_menu_colors(Main.palette);
 
   // La variable employée ici n'a pas vraiment de rapport avec son nom...
   need_to_remap=(Window_pos_Y+(Window_height*Menu_factor_Y)<Menu_Y_before_window);
@@ -2854,7 +2854,7 @@ void Button_Palette(void)
 
   if (clicked_button==13)                         // Sortie par CANCEL
   {
-    Set_palette(Main_palette);
+    Set_palette(Main.palette);
     if (image_is_backed_up)
       Select_button(BUTTON_UNDO,LEFT_SIDE);
   }
@@ -3030,8 +3030,8 @@ void Button_Secondary_palette(void)
   {
     Gamma = gamma;
     Set_palette_RGB_scale(rgb_scale);
-    Set_palette(Main_palette);
-    Compute_optimal_menu_colors(Main_palette);
+    Set_palette(Main.palette);
+    Compute_optimal_menu_colors(Main.palette);
   }
 
   if (clicked_button==1)

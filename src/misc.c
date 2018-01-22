@@ -56,7 +56,7 @@ word Count_used_colors(dword* usage)
   for (i = 0; i < 256; i++) usage[i]=0;
 
   // Compute total number of pixels in the picture
-  nb_pixels = Main_image_height * Main_image_width;
+  nb_pixels = Main.image_height * Main.image_width;
 
   // For each layer
   for (layer = 0; layer < Main_backups->Pages->Nb_layers; layer++)
@@ -137,7 +137,7 @@ word Count_used_colors_area(dword* usage, word start_x, word start_y,
     for (x = 0; x < width; x++)
     {
       // Get color from picture
-      color=*(Main_screen+((start_x + x)+(start_y + y)*Main_image_width));
+      color=*(Main_screen+((start_x + x)+(start_y + y)*Main.image_width));
       usage[color]++; //Un point de plus pour cette couleur
     }
   }
@@ -204,10 +204,10 @@ void Clear_current_image_with_stencil(byte color, byte * stencil)
   int nb_pixels=0; //ECX
   //al=color
   //edi=Screen_pixels
-  byte* pixel=Main_backups->Pages->Image[Main_current_layer].Pixels;
+  byte* pixel=Main_backups->Pages->Image[Main.current_layer].Pixels;
   int i;
 
-  nb_pixels=Main_image_height*Main_image_width;
+  nb_pixels=Main.image_height*Main.image_width;
 
   for(i=0;i<nb_pixels;i++)
   {
@@ -221,9 +221,9 @@ void Clear_current_image(byte color)
   // Effacer l'image courante avec une certaine couleur
 {
   memset(
-    Main_backups->Pages->Image[Main_current_layer].Pixels,
+    Main_backups->Pages->Image[Main.current_layer].Pixels,
     color ,
-    Main_image_width * Main_image_height
+    Main.image_width * Main.image_height
     );
 }
 
@@ -298,19 +298,19 @@ void Copy_part_of_image_to_another(byte * source,word source_x,word source_y,wor
 
 byte Read_pixel_from_spare_screen(word x,word y)
 {
-//  return *(Spare_screen+y*Spare_image_width+x);
+//  return *(Spare_screen+y*Spare.image_width+x);
 
   // Clipping is required as this can be called with coordinates from main image
   // (can be a bigger or smaller image)
-  if (x>=Spare_image_width || y>=Spare_image_height)
+  if (x>=Spare.image_width || y>=Spare.image_height)
     return Spare_backups->Pages->Transparent_color;
   if (Spare_backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
   {
-    return *(Spare_backups->Pages->Image[Spare_current_layer].Pixels + y*Spare_image_width + x);
+    return *(Spare_backups->Pages->Image[Spare.current_layer].Pixels + y*Spare.image_width + x);
   }
   else
   {
-    return *(Spare_visible_image.Image + y*Spare_image_width + x);
+    return *(Spare_visible_image.Image + y*Spare.image_width + x);
   }
 }
 
@@ -365,7 +365,7 @@ void Remap_general_lowlevel(byte * conversion_table,byte * in_buffer, byte *out_
 
 void Copy_image_to_brush(short start_x,short start_y,short Brush_width,short Brush_height,word image_width)
 {
-  byte* src=start_y*image_width+start_x+Main_backups->Pages->Image[Main_current_layer].Pixels; //Adr départ image (ESI)
+  byte* src=start_y*image_width+start_x+Main_backups->Pages->Image[Main.current_layer].Pixels; //Adr départ image (ESI)
   byte* dest=Brush_original_pixels; //Adr dest brosse (EDI)
   int dx;
 
@@ -385,7 +385,7 @@ void Copy_image_to_brush(short start_x,short start_y,short Brush_width,short Bru
 
 byte Read_pixel_from_feedback_screen (word x,word y)
 {
-  return *(FX_feedback_screen+y*Main_image_width+x);
+  return *(FX_feedback_screen+y*Main.image_width+x);
 }
 
 dword Round_div(dword numerator,dword divisor)
@@ -410,7 +410,7 @@ void Replace_colors_within_limits(byte * replace_table)
     // Pour chaque pixel sur la ligne :
     for (x = Limit_left;x <= Limit_right;x ++)
     {
-      pixel = Main_backups->Pages->Image[Main_current_layer].Pixels+y*Main_image_width+x;
+      pixel = Main_backups->Pages->Image[Main.current_layer].Pixels+y*Main.image_width+x;
       *pixel = replace_table[*pixel];
     }
   }
@@ -418,7 +418,7 @@ void Replace_colors_within_limits(byte * replace_table)
 
 byte Read_pixel_from_backup_screen (word x,word y)
 {
-  return *(Screen_backup + x + Main_image_width * y);
+  return *(Screen_backup + x + Main.image_width * y);
 }
 
 void Palette_256_to_64(T_Palette palette)
@@ -454,12 +454,12 @@ byte Effect_interpolated_colorize  (word x,word y,byte color)
   // On place dans ESI 3*Couleur_dessous ( = position de cette couleur dans la
   // palette des teintes) et dans EDI, 3*color.
   byte color_under = Read_pixel_from_feedback_screen(x,y);
-  byte blue_under=Main_palette[color_under].B;
-  byte blue=Main_palette[color].B;
-  byte green_under=Main_palette[color_under].G;
-  byte green=Main_palette[color].G;
-  byte red_under=Main_palette[color_under].R;
-  byte red=Main_palette[color].R;
+  byte blue_under=Main.palette[color_under].B;
+  byte blue=Main.palette[color].B;
+  byte green_under=Main.palette[color_under].G;
+  byte green=Main.palette[color].G;
+  byte red_under=Main.palette[color_under].R;
+  byte red=Main.palette[color].R;
 
   // On récupère les 3 composantes RVB
 
@@ -477,12 +477,12 @@ byte Effect_interpolated_colorize  (word x,word y,byte color)
 byte Effect_additive_colorize    (word x,word y,byte color)
 {
   byte color_under = Read_pixel_from_feedback_screen(x,y);
-  byte blue_under=Main_palette[color_under].B;
-  byte green_under=Main_palette[color_under].G;
-  byte red_under=Main_palette[color_under].R;
-  byte blue=Main_palette[color].B;
-  byte green=Main_palette[color].G;
-  byte red=Main_palette[color].R;
+  byte blue_under=Main.palette[color_under].B;
+  byte green_under=Main.palette[color_under].G;
+  byte red_under=Main.palette[color_under].R;
+  byte blue=Main.palette[color].B;
+  byte green=Main.palette[color].G;
+  byte red=Main.palette[color].R;
 
   return Best_color(
     red>red_under?red:red_under,
@@ -493,12 +493,12 @@ byte Effect_additive_colorize    (word x,word y,byte color)
 byte Effect_substractive_colorize(word x,word y,byte color)
 {
   byte color_under = Read_pixel_from_feedback_screen(x,y);
-  byte blue_under=Main_palette[color_under].B;
-  byte green_under=Main_palette[color_under].G;
-  byte red_under=Main_palette[color_under].R;
-  byte blue=Main_palette[color].B;
-  byte green=Main_palette[color].G;
-  byte red=Main_palette[color].R;
+  byte blue_under=Main.palette[color_under].B;
+  byte green_under=Main.palette[color_under].G;
+  byte red_under=Main.palette[color_under].R;
+  byte blue=Main.palette[color].B;
+  byte green=Main.palette[color].G;
+  byte red=Main.palette[color].R;
 
   return Best_color(
     red<red_under?red:red_under,
@@ -509,17 +509,17 @@ byte Effect_substractive_colorize(word x,word y,byte color)
 byte Effect_alpha_colorize    (word x,word y,byte color)
 {
   byte color_under = Read_pixel_from_feedback_screen(x,y);
-  byte blue_under=Main_palette[color_under].B;
-  byte green_under=Main_palette[color_under].G;
-  byte red_under=Main_palette[color_under].R;
-  int factor=(Main_palette[color].R*76 + 
-    Main_palette[color].G*151 + 
-    Main_palette[color].B*28)/255;
+  byte blue_under=Main.palette[color_under].B;
+  byte green_under=Main.palette[color_under].G;
+  byte red_under=Main.palette[color_under].R;
+  int factor=(Main.palette[color].R*76 +
+    Main.palette[color].G*151 +
+    Main.palette[color].B*28)/255;
 
   return Best_color(
-    (Main_palette[Fore_color].R*factor + red_under*(255-factor))/255,
-    (Main_palette[Fore_color].G*factor + green_under*(255-factor))/255,
-    (Main_palette[Fore_color].B*factor + blue_under*(255-factor))/255);
+    (Main.palette[Fore_color].R*factor + red_under*(255-factor))/255,
+    (Main.palette[Fore_color].G*factor + green_under*(255-factor))/255,
+    (Main.palette[Fore_color].B*factor + blue_under*(255-factor))/255);
 }
 
 void Check_timer(void)
@@ -687,18 +687,18 @@ void Rescale(byte *src_buffer, short src_width, short src_height, byte *dst_buff
 void Scroll_picture(byte * main_src, byte * main_dest, short x_offset,short y_offset)
 {
   byte* src = main_src; //source de la copie
-  byte* dest = main_dest + y_offset * Main_image_width + x_offset;
-  const word length = Main_image_width - x_offset; // Nombre de pixels à copier à droite
+  byte* dest = main_dest + y_offset * Main.image_width + x_offset;
+  const word length = Main.image_width - x_offset; // Nombre de pixels à copier à droite
   word y;
-  for(y = Main_image_height - y_offset;y>0;y--)
+  for(y = Main.image_height - y_offset;y>0;y--)
   {
     // Pour chaque ligne
     memcpy(dest,src,length);
     memcpy(dest - x_offset,src+length,x_offset);
 
     // On passe à la ligne suivante
-    dest += Main_image_width;
-    src += Main_image_width;
+    dest += Main.image_width;
+    src += Main.image_width;
   }
 
   // On vient de faire le traitement pour otutes les lignes au-dessous de y_offset
@@ -709,8 +709,8 @@ void Scroll_picture(byte * main_src, byte * main_dest, short x_offset,short y_of
     memcpy(dest,src,length);
     memcpy(dest - x_offset,src+length,x_offset);
 
-    dest += Main_image_width;
-    src += Main_image_width;
+    dest += Main.image_width;
+    src += Main.image_width;
   }
 
   Update_rect(0,0,0,0);

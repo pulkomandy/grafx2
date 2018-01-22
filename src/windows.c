@@ -534,9 +534,9 @@ void Display_layerbar(void)
       word y_pos;
       word sprite_index;
       
-      if (Main_current_layer == current_button)
+      if (Main.current_layer == current_button)
         sprite_index=1;
-      else if (Main_layers_visible & (1 << current_button))
+      else if (Main.layers_visible & (1 << current_button))
         sprite_index=0;
       else
         sprite_index=2;
@@ -592,7 +592,7 @@ void Display_layerbar(void)
     // Frame# background rectangle
     // Block((Menu_bars[MENUBAR_ANIMATION].Skin_width)*Menu_factor_X,(0+Menu_bars[MENUBAR_ANIMATION].Top)*Menu_factor_Y+Menu_Y,8*8*Menu_factor_X,8*Menu_factor_Y,MC_Light);
     // Frame #/#
-    snprintf(str, 8, "%3d/%3d", Main_current_layer+1, Main_backups->Pages->Nb_layers);
+    snprintf(str, 8, "%3d/%3d", Main.current_layer+1, Main_backups->Pages->Nb_layers);
     Print_general((59)*Menu_factor_X,(Menu_bars[MENUBAR_ANIMATION].Top+3)*Menu_factor_Y+Menu_Y,str,MC_Black,MC_Light);
     Update_rect(
       (59)*Menu_factor_X,
@@ -650,7 +650,7 @@ void Display_menu(void)
     if (!Windows_open)
     {
       if ((Mouse_Y<Menu_Y) && // Mouse in the picture area
-          ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ))
+          ( (!Main.magnifier_mode) || (Mouse_X<Main.separator_position) || (Mouse_X>=Main.X_zoom) ))
       {
         // Prepare display of XY coordinates even if in some cases they will be
         // erased with some other text
@@ -768,8 +768,8 @@ void Print_coordinates(void)
       || (Current_operation==OPERATION_REPLACE) )
     {
       if ( (Paintbrush_X>=0) && (Paintbrush_Y>=0)
-        && (Paintbrush_X<Main_image_width)
-        && (Paintbrush_Y<Main_image_height) )
+        && (Paintbrush_X<Main.image_width)
+        && (Paintbrush_Y<Main.image_height) )
         Colorpicker_color=Read_pixel_from_current_screen(Paintbrush_X,Paintbrush_Y);
       else
         Colorpicker_color=0;
@@ -1492,55 +1492,55 @@ void Compute_limits(void)
   Avant l'appel à cette fonction, les données de la loupe doivent être à jour.
 */
 {
-  if (Main_magnifier_mode)
+  if (Main.magnifier_mode)
   {
     // -- Calcul des limites de la partie non zoomée de l'image --
-    Limit_top  =Main_offset_Y;
-    Limit_left=Main_offset_X;
+    Limit_top  =Main.offset_Y;
+    Limit_left=Main.offset_X;
     Limit_visible_bottom   =Limit_top+Menu_Y-1;
-    Limit_visible_right=Limit_left+Main_separator_position-1;
+    Limit_visible_right=Limit_left+Main.separator_position-1;
 
-    if (Limit_visible_bottom>=Main_image_height)
-      Limit_bottom=Main_image_height-1;
+    if (Limit_visible_bottom>=Main.image_height)
+      Limit_bottom=Main.image_height-1;
     else
       Limit_bottom=Limit_visible_bottom;
 
-    if (Limit_visible_right>=Main_image_width)
-      Limit_right=Main_image_width-1;
+    if (Limit_visible_right>=Main.image_width)
+      Limit_right=Main.image_width-1;
     else
       Limit_right=Limit_visible_right;
 
     // -- Calcul des limites de la partie zoomée de l'image --
-    Limit_top_zoom  =Main_magnifier_offset_Y;
-    Limit_left_zoom=Main_magnifier_offset_X;
-    Limit_visible_bottom_zoom   =Limit_top_zoom+Main_magnifier_height-1;
-    Limit_visible_right_zoom=Limit_left_zoom+Main_magnifier_width-1;
+    Limit_top_zoom  =Main.magnifier_offset_Y;
+    Limit_left_zoom=Main.magnifier_offset_X;
+    Limit_visible_bottom_zoom   =Limit_top_zoom+Main.magnifier_height-1;
+    Limit_visible_right_zoom=Limit_left_zoom+Main.magnifier_width-1;
 
-    if (Limit_visible_bottom_zoom>=Main_image_height)
-      Limit_bottom_zoom=Main_image_height-1;
+    if (Limit_visible_bottom_zoom>=Main.image_height)
+      Limit_bottom_zoom=Main.image_height-1;
     else
       Limit_bottom_zoom=Limit_visible_bottom_zoom;
 
-    if (Limit_visible_right_zoom>=Main_image_width)
-      Limit_right_zoom=Main_image_width-1;
+    if (Limit_visible_right_zoom>=Main.image_width)
+      Limit_right_zoom=Main.image_width-1;
     else
       Limit_right_zoom=Limit_visible_right_zoom;
   }
   else
   {
     // -- Calcul des limites de la partie visible de l'image --
-    Limit_top  =Main_offset_Y;
-    Limit_left=Main_offset_X;
+    Limit_top  =Main.offset_Y;
+    Limit_left=Main.offset_X;
     Limit_visible_bottom   =Limit_top+(Menu_is_visible?Menu_Y:Screen_height)-1; // A REVOIR POUR SIMPLIFICATION
     Limit_visible_right=Limit_left+Screen_width-1;
 
-    if (Limit_visible_bottom>=Main_image_height)
-      Limit_bottom=Main_image_height-1;
+    if (Limit_visible_bottom>=Main.image_height)
+      Limit_bottom=Main.image_height-1;
     else
       Limit_bottom=Limit_visible_bottom;
 
-    if (Limit_visible_right>=Main_image_width)
-      Limit_right=Main_image_width-1;
+    if (Limit_visible_right>=Main.image_width)
+      Limit_right=Main.image_width-1;
     else
       Limit_right=Limit_visible_right;
   }
@@ -1550,15 +1550,15 @@ void Compute_limits(void)
 // -- Calculer les coordonnées du pinceau en fonction du snap et de la loupe -
 void Compute_paintbrush_coordinates(void)
 {
-  if ((Main_magnifier_mode) && (Mouse_X>=Main_X_zoom))
+  if ((Main.magnifier_mode) && (Mouse_X>=Main.X_zoom))
   {
-    Paintbrush_X=((Mouse_X-Main_X_zoom)/Main_magnifier_factor)+Main_magnifier_offset_X;
-    Paintbrush_Y=(Mouse_Y/Main_magnifier_factor)+Main_magnifier_offset_Y;
+    Paintbrush_X=((Mouse_X-Main.X_zoom)/Main.magnifier_factor)+Main.magnifier_offset_X;
+    Paintbrush_Y=(Mouse_Y/Main.magnifier_factor)+Main.magnifier_offset_Y;
   }
   else
   {
-    Paintbrush_X=Mouse_X+Main_offset_X;
-    Paintbrush_Y=Mouse_Y+Main_offset_Y;
+    Paintbrush_X=Mouse_X+Main.offset_X;
+    Paintbrush_Y=Mouse_Y+Main.offset_Y;
   }
 
   if (Snap_mode)
@@ -1621,16 +1621,16 @@ void Display_image_limits(void)
   byte bottom_is_visible;
   short old_zoom_limit;
 
-  right_is_visible=Main_image_width<((Main_magnifier_mode)?Main_separator_position:Screen_width);
-  bottom_is_visible   =Main_image_height<Menu_Y;
+  right_is_visible=Main.image_width<((Main.magnifier_mode)?Main.separator_position:Screen_width);
+  bottom_is_visible   =Main.image_height<Menu_Y;
 
 
   // On vérifie que la limite à droite est visible:
   if (right_is_visible)
   {
     start=Limit_top;
-    end=(Limit_bottom<Main_image_height)?
-        Limit_bottom:Main_image_height;
+    end=(Limit_bottom<Main.image_height)?
+        Limit_bottom:Main.image_height;
 
     if (bottom_is_visible)
       end++;
@@ -1641,9 +1641,9 @@ void Display_image_limits(void)
     Limit_right_zoom=Limit_visible_right_zoom;
 
     for (pos=start;pos<=end;pos++)
-      Pixel_preview(Main_image_width,pos,((pos+Main_image_height)&1)?MC_White:MC_Black);
+      Pixel_preview(Main.image_width,pos,((pos+Main.image_height)&1)?MC_White:MC_Black);
 
-    Update_rect(Main_image_width,start,1,end-start + 1);
+    Update_rect(Main.image_width,start,1,end-start + 1);
     // On restaure la bonne valeur des limites
     Limit_right_zoom=old_zoom_limit;
   }
@@ -1652,17 +1652,17 @@ void Display_image_limits(void)
   if (bottom_is_visible)
   {
     start=Limit_left;
-    end=(Limit_right<Main_image_width)?
-        Limit_right:Main_image_width;
+    end=(Limit_right<Main.image_width)?
+        Limit_right:Main.image_width;
 
     // On étend également les limites en bas (comme pour la limite droit)
     old_zoom_limit=Limit_bottom_zoom;
     Limit_bottom_zoom=Limit_visible_bottom_zoom;
 
     for (pos=start;pos<=end;pos++)
-      Pixel_preview(pos,Main_image_height,((pos+Main_image_height)&1)?MC_White:MC_Black);
+      Pixel_preview(pos,Main.image_height,((pos+Main.image_height)&1)?MC_White:MC_Black);
 
-    Update_rect(start,Main_image_height,end-start + 1,1);
+    Update_rect(start,Main.image_height,end-start + 1,1);
 
     // On restaure la bonne valeur des limites
     Limit_bottom_zoom=old_zoom_limit;
@@ -1676,74 +1676,74 @@ void Display_image_limits(void)
 void Position_screen_according_to_zoom(void)
 {
   // Centrage en X
-  if (Main_image_width>Main_separator_position)
+  if (Main.image_width>Main.separator_position)
   {
-    Main_offset_X=Main_magnifier_offset_X+(Main_magnifier_width>>1)
-                         -(Main_separator_position>>1);
-    if (Main_offset_X<0)
-      Main_offset_X=0;
-    else if (Main_image_width<Main_offset_X+Main_separator_position)
-      Main_offset_X=Main_image_width-Main_separator_position;
+    Main.offset_X=Main.magnifier_offset_X+(Main.magnifier_width>>1)
+                         -(Main.separator_position>>1);
+    if (Main.offset_X<0)
+      Main.offset_X=0;
+    else if (Main.image_width<Main.offset_X+Main.separator_position)
+      Main.offset_X=Main.image_width-Main.separator_position;
   }
   else
-    Main_offset_X=0;
+    Main.offset_X=0;
 
   // Centrage en Y
-  if (Main_image_height>Menu_Y)
+  if (Main.image_height>Menu_Y)
   {
-    Main_offset_Y=Main_magnifier_offset_Y+(Main_magnifier_height>>1)
+    Main.offset_Y=Main.magnifier_offset_Y+(Main.magnifier_height>>1)
                          -(Menu_Y>>1);
-    if (Main_offset_Y<0)
-      Main_offset_Y=0;
-    else if (Main_image_height<Main_offset_Y+Menu_Y)
-      Main_offset_Y=Main_image_height-Menu_Y;
+    if (Main.offset_Y<0)
+      Main.offset_Y=0;
+    else if (Main.image_height<Main.offset_Y+Menu_Y)
+      Main.offset_Y=Main.image_height-Menu_Y;
   }
   else
-    Main_offset_Y=0;
+    Main.offset_Y=0;
 }
 
 // -- Recenter the non-zoomed part of image around a precise pixel
 void Position_screen_according_to_position(int target_x, int target_y)
 {
   // Centrage en X
-  if (Main_image_width>Main_separator_position)
+  if (Main.image_width>Main.separator_position)
   {
-    Main_offset_X=target_x-Mouse_X;
+    Main.offset_X=target_x-Mouse_X;
     // Do not allow the zoomed part to show something that the
     // non-zoomed part doesn't see. All clipping is computed according
     // to the non-zoomed part.
-    if (Main_magnifier_offset_X<Main_offset_X)
-      Main_offset_X=Main_magnifier_offset_X;
-    else if (Main_magnifier_offset_X+Main_magnifier_width > Main_offset_X+Main_separator_position)
-      Main_offset_X = Main_magnifier_offset_X+Main_magnifier_width-Main_separator_position;
-    if (Main_offset_X<0)
-      Main_offset_X=0;
-    else if (Main_image_width<Main_offset_X+Main_separator_position)
-      Main_offset_X=Main_image_width-Main_separator_position;
+    if (Main.magnifier_offset_X<Main.offset_X)
+      Main.offset_X=Main.magnifier_offset_X;
+    else if (Main.magnifier_offset_X+Main.magnifier_width > Main.offset_X+Main.separator_position)
+      Main.offset_X = Main.magnifier_offset_X+Main.magnifier_width-Main.separator_position;
+    if (Main.offset_X<0)
+      Main.offset_X=0;
+    else if (Main.image_width<Main.offset_X+Main.separator_position)
+      Main.offset_X=Main.image_width-Main.separator_position;
       
     
   }
   else
-    Main_offset_X=0;
+    Main.offset_X=0;
 
   // Centrage en Y
-  if (Main_image_height>Menu_Y)
+  if (Main.image_height>Menu_Y)
   {
-    Main_offset_Y=target_y-Mouse_Y;
+    Main.offset_Y=target_y-Mouse_Y;
     // Do not allow the zoomed part to show something that the
     // non-zoomed part doesn't see. All clipping is computed according
     // to the non-zoomed part.
-    if (Main_magnifier_offset_Y<Main_offset_Y)
-      Main_offset_Y=Main_magnifier_offset_Y;
-    else if (Main_magnifier_offset_Y+Main_magnifier_height > Main_offset_Y)
-      Main_offset_Y = Main_magnifier_offset_Y+Main_magnifier_height;
-    if (Main_offset_Y<0)
-      Main_offset_Y=0;
-    else if (Main_image_height<Main_offset_Y+Menu_Y)
-      Main_offset_Y=Main_image_height-Menu_Y;
+    if (Main.magnifier_offset_Y<Main.offset_Y)
+      Main.offset_Y=Main.magnifier_offset_Y;
+    else if (Main.magnifier_offset_Y+Main.magnifier_height > Main.offset_Y)
+      Main.offset_Y = Main.magnifier_offset_Y+Main.magnifier_height;
+    if (Main.offset_Y<0)
+      Main.offset_Y=0;
+    else if (Main.image_height<Main.offset_Y+Menu_Y)
+      Main.offset_Y=Main.image_height-Menu_Y;
   }
   else
-    Main_offset_Y=0;
+    Main.offset_Y=0;
 }
 
 
@@ -1751,23 +1751,23 @@ void Position_screen_according_to_position(int target_x, int target_y)
 void Compute_separator_data(void)
 {
   //short temp;
-  short theoric_X=Round(Main_separator_proportion*Screen_width);
+  short theoric_X=Round(Main.separator_proportion*Screen_width);
 
-  Main_X_zoom=Screen_width-(((Screen_width+(Main_magnifier_factor>>1)-theoric_X)/Main_magnifier_factor)*Main_magnifier_factor);
-  Main_separator_position=Main_X_zoom-(Menu_factor_X*SEPARATOR_WIDTH);
+  Main.X_zoom=Screen_width-(((Screen_width+(Main.magnifier_factor>>1)-theoric_X)/Main.magnifier_factor)*Main.magnifier_factor);
+  Main.separator_position=Main.X_zoom-(Menu_factor_X*SEPARATOR_WIDTH);
 
   // Correction en cas de débordement sur la gauche
-  while (Main_separator_position*(Main_magnifier_factor+1)<Screen_width-(Menu_factor_X*SEPARATOR_WIDTH))
+  while (Main.separator_position*(Main.magnifier_factor+1)<Screen_width-(Menu_factor_X*SEPARATOR_WIDTH))
   {
-    Main_separator_position+=Main_magnifier_factor;
-    Main_X_zoom+=Main_magnifier_factor;
+    Main.separator_position+=Main.magnifier_factor;
+    Main.X_zoom+=Main.magnifier_factor;
   }
   // Correction en cas de débordement sur la droite
-  theoric_X=Screen_width-((NB_ZOOMED_PIXELS_MIN-1)*Main_magnifier_factor);
-  while (Main_X_zoom>=theoric_X)
+  theoric_X=Screen_width-((NB_ZOOMED_PIXELS_MIN-1)*Main.magnifier_factor);
+  while (Main.X_zoom>=theoric_X)
   {
-    Main_separator_position-=Main_magnifier_factor;
-    Main_X_zoom-=Main_magnifier_factor;
+    Main.separator_position-=Main.magnifier_factor;
+    Main.X_zoom-=Main.magnifier_factor;
   }
 }
 
@@ -1781,30 +1781,30 @@ void Compute_magnifier_data(void)
 {
   Compute_separator_data();
 
-  Main_magnifier_width=(Screen_width-Main_X_zoom)/Main_magnifier_factor;
+  Main.magnifier_width=(Screen_width-Main.X_zoom)/Main.magnifier_factor;
 
-  Main_magnifier_height=Menu_Y/Main_magnifier_factor;
-  if (Menu_Y%Main_magnifier_factor)
-    Main_magnifier_height++;
+  Main.magnifier_height=Menu_Y/Main.magnifier_factor;
+  if (Menu_Y%Main.magnifier_factor)
+    Main.magnifier_height++;
 
-  Clip_magnifier_offsets(&Main_magnifier_offset_X, &Main_magnifier_offset_Y);
+  Clip_magnifier_offsets(&Main.magnifier_offset_X, &Main.magnifier_offset_Y);
 }
 
 void Clip_magnifier_offsets(short *x_offset, short *y_offset)
 {
-  if (Main_magnifier_mode)
+  if (Main.magnifier_mode)
   {
     if (*x_offset)
     {
-      if (Main_image_width<*x_offset+Main_magnifier_width)
-        *x_offset=Main_image_width-Main_magnifier_width;
+      if (Main.image_width<*x_offset+Main.magnifier_width)
+        *x_offset=Main.image_width-Main.magnifier_width;
       if (*x_offset<0)
         *x_offset=0;
     }
     if (*y_offset)
     {
-      if (Main_image_height<*y_offset+Main_magnifier_height)
-        *y_offset=Main_image_height-Main_magnifier_height+(Main_magnifier_height*Main_magnifier_factor-Menu_Y>=Main_magnifier_factor/2);
+      if (Main.image_height<*y_offset+Main.magnifier_height)
+        *y_offset=Main.image_height-Main.magnifier_height+(Main.magnifier_height*Main.magnifier_factor-Menu_Y>=Main.magnifier_factor/2);
       if (*y_offset<0)
         *y_offset=0;
     }
@@ -1818,49 +1818,49 @@ void Change_magnifier_factor(byte factor_index, byte point_at_mouse)
   byte magnified_view_leads=1;
 
   // Values that need to be computed before switching to the new zoom factor
-  if (!point_at_mouse || Cursor_in_menu || !Main_magnifier_mode)
+  if (!point_at_mouse || Cursor_in_menu || !Main.magnifier_mode)
   {
     // Locate the pixel in center of the magnified area
-    target_x = Main_magnifier_offset_X + (Main_magnifier_width >> 1);
-    target_y = Main_magnifier_offset_Y + (Main_magnifier_height >> 1);
+    target_x = Main.magnifier_offset_X + (Main.magnifier_width >> 1);
+    target_y = Main.magnifier_offset_Y + (Main.magnifier_height >> 1);
     point_at_mouse=0;
   }
-  else if (Mouse_X>=Main_X_zoom)
+  else if (Mouse_X>=Main.X_zoom)
   {
     // Locate the pixel under the cursor, in magnified area
-    target_x=((Mouse_X-Main_X_zoom)/Main_magnifier_factor)+Main_magnifier_offset_X;
-    target_y=(Mouse_Y/Main_magnifier_factor)+Main_magnifier_offset_Y;
+    target_x=((Mouse_X-Main.X_zoom)/Main.magnifier_factor)+Main.magnifier_offset_X;
+    target_y=(Mouse_Y/Main.magnifier_factor)+Main.magnifier_offset_Y;
     point_at_mouse=1;
   }
   else
   {
     // Locate the pixel under the cursor, in normal area
-    target_x=Mouse_X+Main_offset_X;
-    target_y=Mouse_Y+Main_offset_Y;
+    target_x=Mouse_X+Main.offset_X;
+    target_y=Mouse_Y+Main.offset_Y;
     magnified_view_leads=0;
     point_at_mouse=0;
   }
 
-  Main_magnifier_factor=ZOOM_FACTOR[factor_index];
+  Main.magnifier_factor=ZOOM_FACTOR[factor_index];
   Compute_magnifier_data();
 
-  if (Main_magnifier_mode)
+  if (Main.magnifier_mode)
   {
     // Recompute the magnifier offset (center its view)
     if (point_at_mouse)
     {
       // Target pixel must be located under the mouse position.
-      Main_magnifier_offset_X = target_x-((Mouse_X-Main_X_zoom)/Main_magnifier_factor);
-      Main_magnifier_offset_Y = target_y-((Mouse_Y)/Main_magnifier_factor);
+      Main.magnifier_offset_X = target_x-((Mouse_X-Main.X_zoom)/Main.magnifier_factor);
+      Main.magnifier_offset_Y = target_y-((Mouse_Y)/Main.magnifier_factor);
     }
     else
     {
       // Target pixel must be positioned at new center
-      Main_magnifier_offset_X = target_x-(Main_magnifier_width>>1);
-      Main_magnifier_offset_Y = target_y-(Main_magnifier_height>>1);
+      Main.magnifier_offset_X = target_x-(Main.magnifier_width>>1);
+      Main.magnifier_offset_Y = target_y-(Main.magnifier_height>>1);
     }
     // Fix cases where the image would overflow on edges
-    Clip_magnifier_offsets(&Main_magnifier_offset_X, &Main_magnifier_offset_Y);
+    Clip_magnifier_offsets(&Main.magnifier_offset_X, &Main.magnifier_offset_Y);
 
     if (magnified_view_leads)
       Position_screen_according_to_zoom();
@@ -1881,31 +1881,31 @@ void Copy_view_to_spare(void)
 {
   
   // Don't do anything if the pictures have different dimensions
-  if (Main_image_width!=Spare_image_width || Main_image_height!=Spare_image_height)
+  if (Main.image_width!=Spare.image_width || Main.image_height!=Spare.image_height)
     return;
   
   // Copie des décalages de la fenêtre principale (non zoomée) de l'image
-  Spare_offset_X=Main_offset_X;
-  Spare_offset_Y=Main_offset_Y;
+  Spare.offset_X=Main.offset_X;
+  Spare.offset_Y=Main.offset_Y;
 
   // Copie du booléen "Mode loupe" de l'image
-  Spare_magnifier_mode=Main_magnifier_mode;
+  Spare.magnifier_mode=Main.magnifier_mode;
 
   // Copie du facteur de zoom du brouillon
-  Spare_magnifier_factor=Main_magnifier_factor;
+  Spare.magnifier_factor=Main.magnifier_factor;
 
   // Copie des dimensions de la fenêtre de zoom
-  Spare_magnifier_width=Main_magnifier_width;
-  Spare_magnifier_height=Main_magnifier_height;
+  Spare.magnifier_width=Main.magnifier_width;
+  Spare.magnifier_height=Main.magnifier_height;
 
   // Copie des décalages de la fenêtre de zoom
-  Spare_magnifier_offset_X=Main_magnifier_offset_X;
-  Spare_magnifier_offset_Y=Main_magnifier_offset_Y;
+  Spare.magnifier_offset_X=Main.magnifier_offset_X;
+  Spare.magnifier_offset_Y=Main.magnifier_offset_Y;
 
   // Copie des données du split du zoom
-  Spare_separator_position=Main_separator_position;
-  Spare_X_zoom=Main_X_zoom;
-  Spare_separator_proportion=Main_separator_proportion;
+  Spare.separator_position=Main.separator_position;
+  Spare.X_zoom=Main.X_zoom;
+  Spare.separator_proportion=Main.separator_proportion;
 }
 
   // -- Afficher la barre de séparation entre les parties zoomées ou non en
@@ -1914,40 +1914,40 @@ void Copy_view_to_spare(void)
 void Display_separator(void)
 {
   // Partie grise du milieu
-  Block(Main_separator_position+(Menu_factor_X<<1),Menu_factor_Y,
+  Block(Main.separator_position+(Menu_factor_X<<1),Menu_factor_Y,
         (SEPARATOR_WIDTH-4)*Menu_factor_X,
         Menu_Y-(Menu_factor_Y<<1),MC_Light);
 
   // Barre noire de gauche
-  Block(Main_separator_position,0,Menu_factor_X,Menu_Y,MC_Black);
+  Block(Main.separator_position,0,Menu_factor_X,Menu_Y,MC_Black);
 
   // Barre noire de droite
-  Block(Main_X_zoom-Menu_factor_X,0,Menu_factor_X,Menu_Y,MC_Black);
+  Block(Main.X_zoom-Menu_factor_X,0,Menu_factor_X,Menu_Y,MC_Black);
 
   // Bord haut (blanc)
-  Block(Main_separator_position+Menu_factor_X,0,
+  Block(Main.separator_position+Menu_factor_X,0,
         (SEPARATOR_WIDTH-3)*Menu_factor_X,Menu_factor_Y,MC_White);
 
   // Bord gauche (blanc)
-  Block(Main_separator_position+Menu_factor_X,Menu_factor_Y,
+  Block(Main.separator_position+Menu_factor_X,Menu_factor_Y,
         Menu_factor_X,(Menu_Y-(Menu_factor_Y<<1)),MC_White);
 
   // Bord droite (gris foncé)
-  Block(Main_X_zoom-(Menu_factor_X<<1),Menu_factor_Y,
+  Block(Main.X_zoom-(Menu_factor_X<<1),Menu_factor_Y,
         Menu_factor_X,(Menu_Y-(Menu_factor_Y<<1)),MC_Dark);
 
   // Bord bas (gris foncé)
-  Block(Main_separator_position+(Menu_factor_X<<1),Menu_Y-Menu_factor_Y,
+  Block(Main.separator_position+(Menu_factor_X<<1),Menu_Y-Menu_factor_Y,
         (SEPARATOR_WIDTH-3)*Menu_factor_X,Menu_factor_Y,MC_Dark);
 
   // Coin bas gauche
-  Block(Main_separator_position+Menu_factor_X,Menu_Y-Menu_factor_Y,
+  Block(Main.separator_position+Menu_factor_X,Menu_Y-Menu_factor_Y,
         Menu_factor_X,Menu_factor_Y,MC_Light);
   // Coin haut droite
-  Block(Main_X_zoom-(Menu_factor_X<<1),0,
+  Block(Main.X_zoom-(Menu_factor_X<<1),0,
         Menu_factor_X,Menu_factor_Y,MC_Light);
 
-  Update_rect(Main_separator_position,0,SEPARATOR_WIDTH*Menu_factor_X,Menu_Y); // On réaffiche toute la partie à gauche du split, ce qui permet d'effacer son ancienne position
+  Update_rect(Main.separator_position,0,SEPARATOR_WIDTH*Menu_factor_X,Menu_Y); // On réaffiche toute la partie à gauche du split, ce qui permet d'effacer son ancienne position
 }
 
 
@@ -1959,10 +1959,10 @@ void Display_separator(void)
 
 void Horizontal_XOR_line_zoom(short x_pos, short y_pos, short width)
 {
-  short real_x_pos=Main_X_zoom+(x_pos-Main_magnifier_offset_X)*Main_magnifier_factor;
-  short real_y_pos=(y_pos-Main_magnifier_offset_Y)*Main_magnifier_factor;
-  short real_width=width*Main_magnifier_factor;
-  short end_y_pos=(real_y_pos+Main_magnifier_factor<Menu_Y)?real_y_pos+Main_magnifier_factor:Menu_Y;
+  short real_x_pos=Main.X_zoom+(x_pos-Main.magnifier_offset_X)*Main.magnifier_factor;
+  short real_y_pos=(y_pos-Main.magnifier_offset_Y)*Main.magnifier_factor;
+  short real_width=width*Main.magnifier_factor;
+  short end_y_pos=(real_y_pos+Main.magnifier_factor<Menu_Y)?real_y_pos+Main.magnifier_factor:Menu_Y;
   short index;
 
   for (index=real_y_pos; index<end_y_pos; index++)
@@ -1976,15 +1976,15 @@ void Horizontal_XOR_line_zoom(short x_pos, short y_pos, short width)
 
 void Vertical_XOR_line_zoom(short x_pos, short y_pos, short height)
 {
-  short real_x_pos=Main_X_zoom+(x_pos-Main_magnifier_offset_X)*Main_magnifier_factor;
-  short real_y_pos=(y_pos-Main_magnifier_offset_Y)*Main_magnifier_factor;
-  short end_y_pos=(real_y_pos+height*Main_magnifier_factor<Menu_Y)?real_y_pos+(height*Main_magnifier_factor):Menu_Y;
+  short real_x_pos=Main.X_zoom+(x_pos-Main.magnifier_offset_X)*Main.magnifier_factor;
+  short real_y_pos=(y_pos-Main.magnifier_offset_Y)*Main.magnifier_factor;
+  short end_y_pos=(real_y_pos+height*Main.magnifier_factor<Menu_Y)?real_y_pos+(height*Main.magnifier_factor):Menu_Y;
   short index;
 
   for (index=real_y_pos; index<end_y_pos; index++)
-    Horizontal_XOR_line(real_x_pos,index,Main_magnifier_factor);
+    Horizontal_XOR_line(real_x_pos,index,Main.magnifier_factor);
 
-  Update_rect(real_x_pos,real_y_pos,Main_magnifier_factor,end_y_pos-real_y_pos);
+  Update_rect(real_x_pos,real_y_pos,Main.magnifier_factor,end_y_pos-real_y_pos);
 }
 
 
@@ -2008,7 +2008,7 @@ void Display_cursor(void)
 
   // Si le curseur est dans le menu ou sur la barre de split, on affiche toujours une flèche.
   if ( ( (Mouse_Y<Menu_Y)
-      && ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position) || (Mouse_X>=Main_X_zoom) ) )
+      && ( (!Main.magnifier_mode) || (Mouse_X<Main.separator_position) || (Mouse_X>=Main.X_zoom) ) )
     || (Windows_open) || (Cursor_shape==CURSOR_SHAPE_HOURGLASS) )
     shape=Cursor_shape;
   else
@@ -2163,29 +2163,29 @@ void Display_cursor(void)
       break;
 
     case CURSOR_SHAPE_XOR_TARGET :
-      x_pos=Paintbrush_X-Main_offset_X;
-      y_pos=Paintbrush_Y-Main_offset_Y;
+      x_pos=Paintbrush_X-Main.offset_X;
+      y_pos=Paintbrush_Y-Main.offset_Y;
 
-      counter_x=(Main_magnifier_mode)?Main_separator_position:Screen_width; // width de la barre XOR
+      counter_x=(Main.magnifier_mode)?Main.separator_position:Screen_width; // width de la barre XOR
       if ((y_pos<Menu_Y) && (Paintbrush_Y>=Limit_top))
       {
-        Horizontal_XOR_line(0,Paintbrush_Y-Main_offset_Y,counter_x);
-        Update_rect(0,Paintbrush_Y-Main_offset_Y,counter_x,1);
+        Horizontal_XOR_line(0,Paintbrush_Y-Main.offset_Y,counter_x);
+        Update_rect(0,Paintbrush_Y-Main.offset_Y,counter_x,1);
       }
 
       if ((x_pos<counter_x) && (Paintbrush_X>=Limit_left))
       {
-        Vertical_XOR_line(Paintbrush_X-Main_offset_X,0,Menu_Y);
-        Update_rect(Paintbrush_X-Main_offset_X,0,1,Menu_Y);
+        Vertical_XOR_line(Paintbrush_X-Main.offset_X,0,Menu_Y);
+        Update_rect(Paintbrush_X-Main.offset_X,0,1,Menu_Y);
       }
 
-      if (Main_magnifier_mode)
+      if (Main.magnifier_mode)
       {
         // UPDATERECT
         if ((Paintbrush_Y>=Limit_top_zoom) && (Paintbrush_Y<=Limit_visible_bottom_zoom))
-          Horizontal_XOR_line_zoom(Limit_left_zoom,Paintbrush_Y,Main_magnifier_width);
+          Horizontal_XOR_line_zoom(Limit_left_zoom,Paintbrush_Y,Main.magnifier_width);
         if ((Paintbrush_X>=Limit_left_zoom) && (Paintbrush_X<=Limit_visible_right_zoom))
-          Vertical_XOR_line_zoom(Paintbrush_X,Limit_top_zoom,Main_magnifier_height);
+          Vertical_XOR_line_zoom(Paintbrush_X,Limit_top_zoom,Main.magnifier_height);
       }
       break;
     case CURSOR_SHAPE_XOR_RECTANGLE :
@@ -2209,23 +2209,23 @@ void Display_cursor(void)
       Vertical_XOR_line  (Mouse_X,start_y,end_y-start_y);
 
       // Grand rectangle autour
-      start_x=Mouse_X-(Main_magnifier_width>>1);
-      start_y=Mouse_Y-(Main_magnifier_height>>1);
-      if (start_x+Main_magnifier_width>=Limit_right-Main_offset_X)
-        start_x=Limit_right-Main_magnifier_width-Main_offset_X+1;
-      if (start_y+Main_magnifier_height>=Limit_bottom-Main_offset_Y)
-        start_y=Limit_bottom-Main_magnifier_height-Main_offset_Y+1;
+      start_x=Mouse_X-(Main.magnifier_width>>1);
+      start_y=Mouse_Y-(Main.magnifier_height>>1);
+      if (start_x+Main.magnifier_width>=Limit_right-Main.offset_X)
+        start_x=Limit_right-Main.magnifier_width-Main.offset_X+1;
+      if (start_y+Main.magnifier_height>=Limit_bottom-Main.offset_Y)
+        start_y=Limit_bottom-Main.magnifier_height-Main.offset_Y+1;
       if (start_x<0)
         start_x=0;
       if (start_y<0)
         start_y=0;
-      end_x=start_x+Main_magnifier_width-1;
-      end_y=start_y+Main_magnifier_height-1;
+      end_x=start_x+Main.magnifier_width-1;
+      end_y=start_y+Main.magnifier_height-1;
 
-      Horizontal_XOR_line(start_x,start_y,Main_magnifier_width);
-      Vertical_XOR_line(start_x,start_y+1,Main_magnifier_height-2);
-      Vertical_XOR_line(  end_x,start_y+1,Main_magnifier_height-2);
-      Horizontal_XOR_line(start_x,  end_y,Main_magnifier_width);
+      Horizontal_XOR_line(start_x,start_y,Main.magnifier_width);
+      Vertical_XOR_line(start_x,start_y+1,Main.magnifier_height-2);
+      Vertical_XOR_line(  end_x,start_y+1,Main.magnifier_height-2);
+      Horizontal_XOR_line(start_x,  end_y,Main.magnifier_width);
 
       Update_rect(start_x,start_y,end_x+1-start_x,end_y+1-start_y);
 
@@ -2311,8 +2311,8 @@ void Hide_cursor(void)
   short x1,y1,x2,y2,x3,y3,x4,y4;
 
   if ( ( (Mouse_Y<Menu_Y)
-      && ( (!Main_magnifier_mode) || (Mouse_X<Main_separator_position)
-                         || (Mouse_X>=Main_X_zoom) ) )
+      && ( (!Main.magnifier_mode) || (Mouse_X<Main.separator_position)
+                         || (Mouse_X>=Main.X_zoom) ) )
     || (Windows_open) || (Cursor_shape==CURSOR_SHAPE_HOURGLASS) )
     shape=Cursor_shape;
   else
@@ -2459,29 +2459,29 @@ void Hide_cursor(void)
       break;
 
     case CURSOR_SHAPE_XOR_TARGET :
-      x_pos=Paintbrush_X-Main_offset_X;
-      y_pos=Paintbrush_Y-Main_offset_Y;
+      x_pos=Paintbrush_X-Main.offset_X;
+      y_pos=Paintbrush_Y-Main.offset_Y;
 
-      counter_x=(Main_magnifier_mode)?Main_separator_position:Screen_width; // width de la barre XOR
+      counter_x=(Main.magnifier_mode)?Main.separator_position:Screen_width; // width de la barre XOR
       if ((y_pos<Menu_Y) && (Paintbrush_Y>=Limit_top))
       {
-        Horizontal_XOR_line(0,Paintbrush_Y-Main_offset_Y,counter_x);
-        Update_rect(0,Paintbrush_Y-Main_offset_Y,counter_x,1);
+        Horizontal_XOR_line(0,Paintbrush_Y-Main.offset_Y,counter_x);
+        Update_rect(0,Paintbrush_Y-Main.offset_Y,counter_x,1);
       }
 
       if ((x_pos<counter_x) && (Paintbrush_X>=Limit_left))
       {
-        Vertical_XOR_line(Paintbrush_X-Main_offset_X,0,Menu_Y);
-        Update_rect(Paintbrush_X-Main_offset_X,0,1,Menu_Y);
+        Vertical_XOR_line(Paintbrush_X-Main.offset_X,0,Menu_Y);
+        Update_rect(Paintbrush_X-Main.offset_X,0,1,Menu_Y);
       }
 
-      if (Main_magnifier_mode)
+      if (Main.magnifier_mode)
       {
         // UPDATERECT
         if ((Paintbrush_Y>=Limit_top_zoom) && (Paintbrush_Y<=Limit_visible_bottom_zoom))
-          Horizontal_XOR_line_zoom(Limit_left_zoom,Paintbrush_Y,Main_magnifier_width);
+          Horizontal_XOR_line_zoom(Limit_left_zoom,Paintbrush_Y,Main.magnifier_width);
         if ((Paintbrush_X>=Limit_left_zoom) && (Paintbrush_X<=Limit_visible_right_zoom))
-          Vertical_XOR_line_zoom(Paintbrush_X,Limit_top_zoom,Main_magnifier_height);
+          Vertical_XOR_line_zoom(Paintbrush_X,Limit_top_zoom,Main.magnifier_height);
       }
 
 
@@ -2508,23 +2508,23 @@ void Hide_cursor(void)
 
       // Grand rectangle autour
 
-      start_x=Mouse_X-(Main_magnifier_width>>1);
-      start_y=Mouse_Y-(Main_magnifier_height>>1);
-      if (start_x+Main_magnifier_width>=Limit_right-Main_offset_X)
-        start_x=Limit_right-Main_magnifier_width-Main_offset_X+1;
-      if (start_y+Main_magnifier_height>=Limit_bottom-Main_offset_Y)
-        start_y=Limit_bottom-Main_magnifier_height-Main_offset_Y+1;
+      start_x=Mouse_X-(Main.magnifier_width>>1);
+      start_y=Mouse_Y-(Main.magnifier_height>>1);
+      if (start_x+Main.magnifier_width>=Limit_right-Main.offset_X)
+        start_x=Limit_right-Main.magnifier_width-Main.offset_X+1;
+      if (start_y+Main.magnifier_height>=Limit_bottom-Main.offset_Y)
+        start_y=Limit_bottom-Main.magnifier_height-Main.offset_Y+1;
       if (start_x<0)
         start_x=0;
       if (start_y<0)
         start_y=0;
-      end_x=start_x+Main_magnifier_width-1;
-      end_y=start_y+Main_magnifier_height-1;
+      end_x=start_x+Main.magnifier_width-1;
+      end_y=start_y+Main.magnifier_height-1;
 
-      Horizontal_XOR_line(start_x,start_y,Main_magnifier_width);
-      Vertical_XOR_line(start_x,start_y+1,Main_magnifier_height-2);
-      Vertical_XOR_line(  end_x,start_y+1,Main_magnifier_height-2);
-      Horizontal_XOR_line(start_x,  end_y,Main_magnifier_width);
+      Horizontal_XOR_line(start_x,start_y,Main.magnifier_width);
+      Vertical_XOR_line(start_x,start_y+1,Main.magnifier_height-2);
+      Vertical_XOR_line(  end_x,start_y+1,Main.magnifier_height-2);
+      Horizontal_XOR_line(start_x,  end_y,Main.magnifier_width);
 
       Update_rect(start_x,start_y,end_x+1-start_x,end_y+1-start_y);
 
@@ -2604,70 +2604,70 @@ void Display_all_screen(void)
   word height;
 
   // ---/\/\/\  Partie non zoomée: /\/\/\---
-  if (Main_magnifier_mode)
+  if (Main.magnifier_mode)
   {
-    if (Main_image_width<Main_separator_position)
-      width=Main_image_width;
+    if (Main.image_width<Main.separator_position)
+      width=Main.image_width;
     else
-      width=Main_separator_position;
+      width=Main.separator_position;
   }
   else
   {
-    if (Main_image_width<Screen_width)
-      width=Main_image_width;
+    if (Main.image_width<Screen_width)
+      width=Main.image_width;
     else
       width=Screen_width;
   }
-  if (Main_image_height<Menu_Y)
-    height=Main_image_height;
+  if (Main.image_height<Menu_Y)
+    height=Main.image_height;
   else
     height=Menu_Y;
-  Display_screen(width,height,Main_image_width);
+  Display_screen(width,height,Main.image_width);
 
   // Effacement de la partie non-image dans la partie non zoomée:
-  if (Main_magnifier_mode)
+  if (Main.magnifier_mode)
   {
-    if (Main_image_width<Main_separator_position && Main_image_width < Screen_width)
-      Block(Main_image_width,0,(Main_separator_position-Main_image_width),Menu_Y,Main_backups->Pages->Transparent_color);
+    if (Main.image_width<Main.separator_position && Main.image_width < Screen_width)
+      Block(Main.image_width,0,(Main.separator_position-Main.image_width),Menu_Y,Main_backups->Pages->Transparent_color);
   }
   else
   {
-    if (Main_image_width<Screen_width)
-      Block(Main_image_width,0,(Screen_width-Main_image_width),Menu_Y,Main_backups->Pages->Transparent_color);
+    if (Main.image_width<Screen_width)
+      Block(Main.image_width,0,(Screen_width-Main.image_width),Menu_Y,Main_backups->Pages->Transparent_color);
   }
-  if (Main_image_height<Menu_Y)
-    Block(0,Main_image_height,width,(Menu_Y-height),Main_backups->Pages->Transparent_color);
+  if (Main.image_height<Menu_Y)
+    Block(0,Main.image_height,width,(Menu_Y-height),Main_backups->Pages->Transparent_color);
 
   // ---/\/\/\  Partie zoomée: /\/\/\---
-  if (Main_magnifier_mode)
+  if (Main.magnifier_mode)
   {
     // Affichage de la barre de split
     Display_separator();
 
     // Calcul de la largeur visible
-    if (Main_image_width<Main_magnifier_width)
-      width=Main_image_width;
+    if (Main.image_width<Main.magnifier_width)
+      width=Main.image_width;
     else
-      width=Main_magnifier_width;
+      width=Main.magnifier_width;
 
     // Calcul du nombre de lignes visibles de l'image zoomée
-    if (Main_image_height<Main_magnifier_height)
-      height=Main_image_height*Main_magnifier_factor;
-    else if (Main_image_height<Main_magnifier_offset_Y+Main_magnifier_height)
+    if (Main.image_height<Main.magnifier_height)
+      height=Main.image_height*Main.magnifier_factor;
+    else if (Main.image_height<Main.magnifier_offset_Y+Main.magnifier_height)
       // Omit "last line" if it's outside picture limits
-      height=Menu_Y/Main_magnifier_factor*Main_magnifier_factor;
+      height=Menu_Y/Main.magnifier_factor*Main.magnifier_factor;
     else
       height=Menu_Y;
     
-    Display_zoomed_screen(width,height,Main_image_width,Horizontal_line_buffer);
+    Display_zoomed_screen(width,height,Main.image_width,Horizontal_line_buffer);
 
     // Effacement de la partie non-image dans la partie zoomée:
-    if (Main_image_width<Main_magnifier_width)
-      Block(Main_X_zoom+(Main_image_width*Main_magnifier_factor),0,
-            (Main_magnifier_width-Main_image_width)*Main_magnifier_factor,
+    if (Main.image_width<Main.magnifier_width)
+      Block(Main.X_zoom+(Main.image_width*Main.magnifier_factor),0,
+            (Main.magnifier_width-Main.image_width)*Main.magnifier_factor,
             Menu_Y,Main_backups->Pages->Transparent_color);
     if (height<Menu_Y)
-      Block(Main_X_zoom,height,width*Main_magnifier_factor,(Menu_Y-height),Main_backups->Pages->Transparent_color);
+      Block(Main.X_zoom,height,width*Main.magnifier_factor,(Menu_Y-height),Main_backups->Pages->Transparent_color);
   }
 
   // ---/\/\/\ Affichage des limites /\/\/\---
@@ -2691,11 +2691,11 @@ byte Best_color(byte r,byte g,byte b)
   {
     if (!Exclude_color[col])
     {
-      delta_r=(int)Main_palette[col].R-r;
-      delta_g=(int)Main_palette[col].G-g;
-      delta_b=(int)Main_palette[col].B-b;
+      delta_r=(int)Main.palette[col].R-r;
+      delta_g=(int)Main.palette[col].G-g;
+      delta_b=(int)Main.palette[col].B-b;
 
-      rmean = ( Main_palette[col].R + r ) / 2;
+      rmean = ( Main.palette[col].R + r ) / 2;
 
       if (!(dist= ( ( (512+rmean) *delta_r*delta_r) >>8) + 4*delta_g*delta_g + (((767-rmean)*delta_b*delta_b)>>8)))
       //if (!(dist=(delta_r*delta_r*30)+(delta_g*delta_g*59)+(delta_b*delta_b*11)))
@@ -2723,13 +2723,13 @@ byte Best_color_nonexcluded(byte red,byte green,byte blue)
 
   for (col=0; col<256; col++)
   {
-    delta_r=(int)Main_palette[col].R-red;
-    delta_g=(int)Main_palette[col].G-green;
-    delta_b=(int)Main_palette[col].B-blue;
+    delta_r=(int)Main.palette[col].R-red;
+    delta_g=(int)Main.palette[col].G-green;
+    delta_b=(int)Main.palette[col].B-blue;
 
     if(delta_r == 0 && delta_g == 0 && delta_b == 0) return col;
 
-    rmean = ( Main_palette[col].R + red ) / 2;
+    rmean = ( Main.palette[col].R + red ) / 2;
 
     dist= ( ( (512+rmean) *delta_r*delta_r) >>8) + 4*delta_g*delta_g + (((767-rmean)*delta_b*delta_b)>>8);
     //dist=(delta_r*delta_r*30)+(delta_g*delta_g*59)+(delta_b*delta_b*11)
@@ -2762,17 +2762,17 @@ byte Best_color_range(byte r, byte g, byte b, byte max)
       continue;
 
     diff_c = sqrt(
-      (0.26*(Main_palette[col].R-r))*
-      (0.26*(Main_palette[col].R-r))+
-      (0.55*(Main_palette[col].G-g))*
-      (0.55*(Main_palette[col].G-g))+
-      (0.19*(Main_palette[col].B-b))*
-      (0.19*(Main_palette[col].B-b)));
+      (0.26*(Main.palette[col].R-r))*
+      (0.26*(Main.palette[col].R-r))+
+      (0.55*(Main.palette[col].G-g))*
+      (0.55*(Main.palette[col].G-g))+
+      (0.19*(Main.palette[col].B-b))*
+      (0.19*(Main.palette[col].B-b)));
     // Exact match
     if (diff_c==0)
       return col;
 
-    bri = sqrt(0.26*Main_palette[col].R*0.26*Main_palette[col].R + 0.55*Main_palette[col].G*0.55*Main_palette[col].G + 0.19*Main_palette[col].B*0.19*Main_palette[col].B);
+    bri = sqrt(0.26*Main.palette[col].R*0.26*Main.palette[col].R + 0.55*Main.palette[col].G*0.55*Main.palette[col].G + 0.19*Main.palette[col].B*0.19*Main.palette[col].B);
     diff_b = abs(target_bri-bri);
 
     diff=0.25*(diff_b-diff_c)+diff_c;
@@ -2805,17 +2805,17 @@ byte Best_color_perceptual(byte r,byte g,byte b)
       continue;
 
     diff_c = sqrt(
-      (0.26*(Main_palette[col].R-r))*
-      (0.26*(Main_palette[col].R-r))+
-      (0.55*(Main_palette[col].G-g))*
-      (0.55*(Main_palette[col].G-g))+
-      (0.19*(Main_palette[col].B-b))*
-      (0.19*(Main_palette[col].B-b)));
+      (0.26*(Main.palette[col].R-r))*
+      (0.26*(Main.palette[col].R-r))+
+      (0.55*(Main.palette[col].G-g))*
+      (0.55*(Main.palette[col].G-g))+
+      (0.19*(Main.palette[col].B-b))*
+      (0.19*(Main.palette[col].B-b)));
     // Exact match
     if (diff_c==0)
       return col;
 
-    bri = sqrt(0.26*Main_palette[col].R*0.26*Main_palette[col].R + 0.55*Main_palette[col].G*0.55*Main_palette[col].G + 0.19*Main_palette[col].B*0.19*Main_palette[col].B);
+    bri = sqrt(0.26*Main.palette[col].R*0.26*Main.palette[col].R + 0.55*Main.palette[col].G*0.55*Main.palette[col].G + 0.19*Main.palette[col].B*0.19*Main.palette[col].B);
     diff_b = abs(target_bri-bri);
 
     diff=0.25*(diff_b-diff_c)+diff_c;
@@ -2848,17 +2848,17 @@ byte Best_color_perceptual_except(byte r,byte g,byte b, byte except)
       continue;
 
     diff_c = sqrt(
-      (0.26*(Main_palette[col].R-r))*
-      (0.26*(Main_palette[col].R-r))+
-      (0.55*(Main_palette[col].G-g))*
-      (0.55*(Main_palette[col].G-g))+
-      (0.19*(Main_palette[col].B-b))*
-      (0.19*(Main_palette[col].B-b)));
+      (0.26*(Main.palette[col].R-r))*
+      (0.26*(Main.palette[col].R-r))+
+      (0.55*(Main.palette[col].G-g))*
+      (0.55*(Main.palette[col].G-g))+
+      (0.19*(Main.palette[col].B-b))*
+      (0.19*(Main.palette[col].B-b)));
     // Exact match
     if (diff_c==0)
       return col;
 
-    bri = sqrt(0.26*Main_palette[col].R*0.26*Main_palette[col].R + 0.55*Main_palette[col].G*0.55*Main_palette[col].G + 0.19*Main_palette[col].B*0.19*Main_palette[col].B);
+    bri = sqrt(0.26*Main.palette[col].R*0.26*Main.palette[col].R + 0.55*Main.palette[col].G*0.55*Main.palette[col].G + 0.19*Main.palette[col].B*0.19*Main.palette[col].B);
     diff_b = abs(target_bri-bri);
 
     diff=0.25*(diff_b-diff_c)+diff_c;
@@ -2955,9 +2955,9 @@ void Remap_screen_after_menu_colors_change(void)
 
 
 static int Diff(int i, int j) {
-	int dr = Main_palette[i].R - Main_palette[j].R;
-	int dg = Main_palette[i].G - Main_palette[j].G;
-	int db = Main_palette[i].B - Main_palette[j].B;
+	int dr = Main.palette[i].R - Main.palette[j].R;
+	int dg = Main.palette[i].G - Main.palette[j].G;
+	int db = Main.palette[i].B - Main.palette[j].B;
 
 	return dr*dr + dg*dg + db*db;
 }

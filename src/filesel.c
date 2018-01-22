@@ -2199,10 +2199,10 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 
   //   On restaure les données de l'image qui ont certainement été modifiées
   // par la preview.
-  Set_palette(Main_palette);
+  Set_palette(Main.palette);
   Back_color=initial_back_color;
 
-  Compute_optimal_menu_colors(Main_palette);
+  Compute_optimal_menu_colors(Main.palette);
   temp=(Window_pos_Y+(Window_height*Menu_factor_Y)<Menu_Y_before_window);
 
   Close_window();

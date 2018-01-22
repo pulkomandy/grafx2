@@ -2760,8 +2760,8 @@ void Load_GIF(T_IO_Context * context)
                 {
                   // Copy the content of previous layer.
                   memcpy(
-                    Main_backups->Pages->Image[Main_current_layer].Pixels,
-                    Main_backups->Pages->Image[Main_current_layer-1].Pixels,
+                    Main_backups->Pages->Image[Main.current_layer].Pixels,
+                    Main_backups->Pages->Image[Main.current_layer-1].Pixels,
                     Main_backups->Pages->Width*Main_backups->Pages->Height);
                 }
                 else
@@ -2820,7 +2820,7 @@ void Load_GIF(T_IO_Context * context)
                       int y;
                       for (y=0; y<previous_height; y++)
                         memset(
-                          Main_backups->Pages->Image[Main_current_layer].Pixels
+                          Main_backups->Pages->Image[Main.current_layer].Pixels
                            + (previous_pos_y+y)* Main_backups->Pages->Width+previous_pos_x,
                           is_transparent ? context->Transparent_color : LSDB.Backcol,
                           previous_width);

@@ -301,24 +301,24 @@ void Scroll_screen(short delta_x,short delta_y)
   short temp_x_offset;
   short temp_y_offset;
 
-  temp_x_offset=Main_offset_X+delta_x;
-  temp_y_offset=Main_offset_Y+delta_y;
+  temp_x_offset=Main.offset_X+delta_x;
+  temp_y_offset=Main.offset_Y+delta_y;
 
-  if (temp_x_offset+Screen_width>Main_image_width)
-    temp_x_offset=Main_image_width-Screen_width;
-  if (temp_y_offset+Menu_Y>Main_image_height)
-    temp_y_offset=Main_image_height-Menu_Y;
+  if (temp_x_offset+Screen_width>Main.image_width)
+    temp_x_offset=Main.image_width-Screen_width;
+  if (temp_y_offset+Menu_Y>Main.image_height)
+    temp_y_offset=Main.image_height-Menu_Y;
   if (temp_x_offset<0)
     temp_x_offset=0;
   if (temp_y_offset<0)
     temp_y_offset=0;
 
-  if ( (Main_offset_X!=temp_x_offset) ||
-       (Main_offset_Y!=temp_y_offset) )
+  if ( (Main.offset_X!=temp_x_offset) ||
+       (Main.offset_Y!=temp_y_offset) )
   {
     Hide_cursor();
-    Main_offset_X=temp_x_offset;
-    Main_offset_Y=temp_y_offset;
+    Main.offset_X=temp_x_offset;
+    Main.offset_Y=temp_y_offset;
 
     Compute_limits();
     Compute_paintbrush_coordinates();
@@ -335,17 +335,17 @@ void Scroll_magnifier(short delta_x,short delta_y)
   short temp_x_offset;
   short temp_y_offset;
 
-  temp_x_offset=Main_magnifier_offset_X+delta_x;
-  temp_y_offset=Main_magnifier_offset_Y+delta_y;
+  temp_x_offset=Main.magnifier_offset_X+delta_x;
+  temp_y_offset=Main.magnifier_offset_Y+delta_y;
 
   Clip_magnifier_offsets(&temp_x_offset, &temp_y_offset);
 
-  if ( (Main_magnifier_offset_X!=temp_x_offset) ||
-       (Main_magnifier_offset_Y!=temp_y_offset) )
+  if ( (Main.magnifier_offset_X!=temp_x_offset) ||
+       (Main.magnifier_offset_Y!=temp_y_offset) )
   {
     Hide_cursor();
-    Main_magnifier_offset_X=temp_x_offset;
-    Main_magnifier_offset_Y=temp_y_offset;
+    Main.magnifier_offset_X=temp_x_offset;
+    Main.magnifier_offset_Y=temp_y_offset;
 
     Position_screen_according_to_zoom();
 
@@ -362,14 +362,14 @@ void Scroll_magnifier(short delta_x,short delta_y)
 void Zoom(short delta)
 {
   short index;
-  for (index=0; ZOOM_FACTOR[index]!=Main_magnifier_factor; index++);
+  for (index=0; ZOOM_FACTOR[index]!=Main.magnifier_factor; index++);
   index+=delta;
 
   if ( (index>=0) && (index<NB_ZOOM_FACTORS) )
   {
     Hide_cursor();
     Change_magnifier_factor(index,1);
-    if (Main_magnifier_mode)
+    if (Main.magnifier_mode)
       Display_all_screen();
     Display_cursor();
   }
@@ -384,13 +384,13 @@ void Zoom_set(int index)
   if (index<0)
   {
     /* Zoom 1:1 */
-    if (Main_magnifier_mode)
+    if (Main.magnifier_mode)
       Unselect_button(BUTTON_MAGNIFIER);
   }
   else
   {
     Change_magnifier_factor(index,1);
-    if (!Main_magnifier_mode)
+    if (!Main.magnifier_mode)
       Select_button(BUTTON_MAGNIFIER,1);
     Display_all_screen();
   }

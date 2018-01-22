@@ -165,7 +165,7 @@ do { \
 #define DECLARE_UNSAVED(BIND) \
 int BIND ## _unsaved(lua_State* L) \
 { \
-  Backup_if_necessary(L, Main_current_layer); \
+  Backup_if_necessary(L, Main.current_layer); \
   Register_main_writable(L); \
   return BIND(L); \
 }
@@ -196,8 +196,8 @@ void Update_colors_during_script(void)
 {
   if (Palette_has_changed)
   {
-    Set_palette(Main_palette);
-    Compute_optimal_menu_colors(Main_palette);
+    Set_palette(Main.palette);
+    Compute_optimal_menu_colors(Main.palette);
     Display_menu();
     Palette_has_changed=0;
   }
@@ -206,7 +206,7 @@ void Update_colors_during_script(void)
 /// Paint a pixel in image without updating the screen
 void Pixel_figure_no_screen(short x_pos,short y_pos,byte color)
 {
-  if (x_pos>0 && y_pos >0 && x_pos<Main_image_width && y_pos<Main_image_height)
+  if (x_pos>0 && y_pos >0 && x_pos<Main.image_width && y_pos<Main.image_height)
     Pixel_in_current_screen(x_pos,y_pos,color);
 }
 
@@ -216,7 +216,7 @@ void Backup_if_necessary(lua_State* L, int layer)
   {
     Backup_layers(layer);
     Is_backed_up = 1;
-    if (layer == Main_current_layer)
+    if (layer == Main.current_layer)
     {
       Main_backup_page = Main_backups->Pages->Next;
       Main_backup_screen = Screen_backup;
@@ -261,7 +261,7 @@ int L_SetBrushSize(lua_State* L)
   memset(Brush_original_pixels,Back_color,(long)Brush_width*Brush_height);
   memset(Brush,Back_color,(long)Brush_width*Brush_height);
   // Adopt the current palette.
-  memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
+  memcpy(Brush_original_palette, Main.palette,sizeof(T_Palette));
   for (i=0; i<256; i++)
     Brush_colormap[i]=i;
   //--
@@ -297,7 +297,7 @@ int L_PutBrushPixel(lua_State* L)
     
     // First time writing in brush:
     // Adopt the current palette.
-    memcpy(Brush_original_palette, Main_palette,sizeof(T_Palette));
+    memcpy(Brush_original_palette, Main.palette,sizeof(T_Palette));
     memcpy(Brush_original_pixels, Brush, Brush_width*Brush_height);
     for (i=0; i<256; i++)
       Brush_colormap[i]=i;
@@ -372,7 +372,7 @@ int L_SetPictureSize(lua_State* L)
   LUA_ARG_NUMBER(1, "setpicturesize", w, 1, 9999);
   LUA_ARG_NUMBER(2, "setpicturesize", h, 1, 9999);
   
-  if (w == Main_image_width && h == Main_image_height)
+  if (w == Main.image_width && h == Main.image_height)
   {
     // nothing to do at all
     return 0;
@@ -394,9 +394,9 @@ int L_SetPictureSize(lua_State* L)
   for (i=0; i<Main_backups->Pages->Nb_layers; i++)
   {
     Copy_part_of_image_to_another(
-      Main_backups->Pages->Next->Image[i].Pixels,0,0,Min(Main_backups->Pages->Next->Width,Main_image_width),
-      Min(Main_backups->Pages->Next->Height,Main_image_height),Main_backups->Pages->Next->Width,
-      Main_backups->Pages->Image[i].Pixels,0,0,Main_image_width);
+      Main_backups->Pages->Next->Image[i].Pixels,0,0,Min(Main_backups->Pages->Next->Width,Main.image_width),
+      Min(Main_backups->Pages->Next->Height,Main.image_height),Main_backups->Pages->Next->Width,
+      Main_backups->Pages->Image[i].Pixels,0,0,Main.image_width);
   }
   Redraw_layered_image();
 
@@ -427,9 +427,9 @@ int L_SetSparePictureSize(lua_State* L)
   for (i=0; i<Spare_backups->Pages->Nb_layers; i++)
   {
     Copy_part_of_image_to_another(
-      Spare_backups->Pages->Next->Image[i].Pixels,0,0,Min(Spare_backups->Pages->Next->Width,Spare_image_width),
-      Min(Spare_backups->Pages->Next->Height,Spare_image_height),Spare_backups->Pages->Next->Width,
-      Spare_backups->Pages->Image[i].Pixels,0,0,Spare_image_width);
+      Spare_backups->Pages->Next->Image[i].Pixels,0,0,Min(Spare_backups->Pages->Next->Width,Spare.image_width),
+      Min(Spare_backups->Pages->Next->Height,Spare.image_height),Spare_backups->Pages->Next->Width,
+      Spare_backups->Pages->Image[i].Pixels,0,0,Spare.image_width);
   }
   Redraw_spare_image();
   
@@ -438,8 +438,8 @@ int L_SetSparePictureSize(lua_State* L)
 
 int L_GetPictureSize(lua_State* L)
 {
-  lua_pushinteger(L, Main_image_width);
-  lua_pushinteger(L, Main_image_height);
+  lua_pushinteger(L, Main.image_width);
+  lua_pushinteger(L, Main.image_height);
   return 2;
 }
 
@@ -473,7 +473,7 @@ int L_PutPicturePixel(lua_State* L)
   LUA_ARG_NUMBER(3, "putpicturepixel", c, INT_MIN, INT_MAX);
   
   // Bound check
-  if (x<0 || y<0 || x>=Main_image_width || y>=Main_image_height)
+  if (x<0 || y<0 || x>=Main.image_width || y>=Main.image_height)
   {
     // Silently ignored
     return 0;
@@ -496,7 +496,7 @@ int L_PutSparePicturePixel(lua_State* L)
   LUA_ARG_NUMBER(3, "putsparepicturepixel", c, INT_MIN, INT_MAX);
   
   // Bound check
-  if (x<0 || y<0 || x>=Spare_image_width || y>=Spare_image_height)
+  if (x<0 || y<0 || x>=Spare.image_width || y>=Spare.image_height)
   {
     // Silently ignored
     return 0;
@@ -563,10 +563,10 @@ int L_DrawFilledRect(lua_State* L)
   }
 
   // Clipping limits
-  if (max_x>Main_image_width)
-    max_x=Main_image_width-1;
-  if (max_y>Main_image_height)
-    max_y=Main_image_height-1;
+  if (max_x>Main.image_width)
+    max_x=Main.image_width-1;
+  if (max_y>Main.image_height)
+    max_y=Main.image_height-1;
   if (min_x<0)
     min_x=0;
   if (min_y<0)
@@ -627,9 +627,9 @@ int L_DrawDisk(lua_State* L)
   
   // Compute clipping limits
   min_x=center_x-r+even<0 ? 0 : center_x-r+even;
-  max_x=center_x+r>=Main_image_width? Main_image_width-1 : center_x+r;
+  max_x=center_x+r>=Main.image_width? Main.image_width-1 : center_x+r;
   min_y=center_y-r+even<0 ? 0 : center_y-r+even;
-  max_y=center_y+r>=Main_image_height? Main_image_height-1 : center_y+r;
+  max_y=center_y+r>=Main.image_height? Main.image_height-1 : center_y+r;
 
   for (y_pos=min_y;y_pos<=max_y;y_pos++)
   {
@@ -657,7 +657,7 @@ int L_GetPicturePixel(lua_State* L)
   LUA_ARG_NUMBER(2, "getpicturepixel", y, INT_MIN, INT_MAX);
   
   // Bound check
-  if (x<0 || y<0 || x>=Main_image_width || y>=Main_image_height)
+  if (x<0 || y<0 || x>=Main.image_width || y>=Main.image_height)
   {
     // Silently return the image's transparent color
     lua_pushinteger(L, Main_backups->Pages->Transparent_color);
@@ -702,7 +702,7 @@ int L_GetLayerPixel(lua_State* L)
   LUA_ARG_NUMBER(2, "getlayerpixel", y, INT_MIN, INT_MAX);
   
   // Bound check
-  if (x<0 || y<0 || x>=Main_image_width || y>=Main_image_height)
+  if (x<0 || y<0 || x>=Main.image_width || y>=Main.image_height)
   {
     // Silently return the image's transparent color
     lua_pushinteger(L, Main_backups->Pages->Transparent_color);
@@ -716,8 +716,8 @@ int L_GetLayerPixel(lua_State* L)
 
 int L_GetSparePictureSize(lua_State* L)
 {
-  lua_pushinteger(L, Spare_image_width);  
-  lua_pushinteger(L, Spare_image_height); 
+  lua_pushinteger(L, Spare.image_width);
+  lua_pushinteger(L, Spare.image_height);
   return 2;
 }
 
@@ -732,13 +732,13 @@ int L_GetSpareLayerPixel(lua_State* L)
   LUA_ARG_NUMBER(2, "getsparelayerpixel", y, INT_MIN, INT_MAX);
   
   // Bound check
-  if (x<0 || y<0 || x>=Spare_image_width || y>=Spare_image_height)
+  if (x<0 || y<0 || x>=Spare.image_width || y>=Spare.image_height)
   {
     // Silently return the image's transparent color
     lua_pushinteger(L, Spare_backups->Pages->Transparent_color);
     return 1;
   }
-  lua_pushinteger(L, *(Spare_backups->Pages->Image[Spare_current_layer].Pixels + y*Spare_image_width + x));
+  lua_pushinteger(L, *(Spare_backups->Pages->Image[Spare.current_layer].Pixels + y*Spare.image_width + x));
   return 1;
 }
 
@@ -771,9 +771,9 @@ int L_GetSpareColor(lua_State* L)
   LUA_ARG_LIMIT (1, "getsparecolor");
   LUA_ARG_NUMBER(1, "getsparecolor", c, INT_MIN, INT_MAX);
 
-  lua_pushinteger(L, Spare_palette[c].R);
-  lua_pushinteger(L, Spare_palette[c].G);
-  lua_pushinteger(L, Spare_palette[c].B);
+  lua_pushinteger(L, Spare.palette[c].R);
+  lua_pushinteger(L, Spare.palette[c].G);
+  lua_pushinteger(L, Spare.palette[c].B);
   return 3;
 }
 
@@ -797,9 +797,9 @@ int L_SetColor(lua_State* L)
   LUA_ARG_NUMBER(4, "setcolor", b, INT_MIN, INT_MAX);
   
     
-  Main_palette[c].R=Round_palette_component(clamp_byte(r));
-  Main_palette[c].G=Round_palette_component(clamp_byte(g));
-  Main_palette[c].B=Round_palette_component(clamp_byte(b));
+  Main.palette[c].R=Round_palette_component(clamp_byte(r));
+  Main.palette[c].G=Round_palette_component(clamp_byte(g));
+  Main.palette[c].B=Round_palette_component(clamp_byte(b));
   // Set_color(c, r, g, b); Not needed. Update screen when script is finished
   Palette_has_changed=1;
   return 0;
@@ -821,9 +821,9 @@ int L_GetColor(lua_State* L)
   LUA_ARG_LIMIT (1, "getcolor");
   LUA_ARG_NUMBER(1, "getcolor", c, INT_MIN, INT_MAX);
 
-  lua_pushinteger(L, Main_palette[c].R);
-  lua_pushinteger(L, Main_palette[c].G);
-  lua_pushinteger(L, Main_palette[c].B);
+  lua_pushinteger(L, Main.palette[c].R);
+  lua_pushinteger(L, Main.palette[c].G);
+  lua_pushinteger(L, Main.palette[c].B);
   return 3;
 }
 
@@ -906,12 +906,12 @@ int L_MatchColor2(lua_State* L)
         continue;
   
       diff_c = sqrt(
-        (0.26*(Main_palette[col].R-r))*
-        (0.26*(Main_palette[col].R-r))+
-        (0.55*(Main_palette[col].G-g))*
-        (0.55*(Main_palette[col].G-g))+
-        (0.19*(Main_palette[col].B-b))*
-        (0.19*(Main_palette[col].B-b)));
+        (0.26*(Main.palette[col].R-r))*
+        (0.26*(Main.palette[col].R-r))+
+        (0.55*(Main.palette[col].G-g))*
+        (0.55*(Main.palette[col].G-g))+
+        (0.19*(Main.palette[col].B-b))*
+        (0.19*(Main.palette[col].B-b)));
       // Exact match
       if (diff_c<1.0)
       {
@@ -919,7 +919,7 @@ int L_MatchColor2(lua_State* L)
           return 1;
       }
   
-      bri = sqrt(0.26*0.26*(Main_palette[col].R*Main_palette[col].R) + 0.55*0.55*(Main_palette[col].G*Main_palette[col].G) + 0.19*0.19*(Main_palette[col].B*Main_palette[col].B));
+      bri = sqrt(0.26*0.26*(Main.palette[col].R*Main.palette[col].R) + 0.55*0.55*(Main.palette[col].G*Main.palette[col].G) + 0.19*0.19*(Main.palette[col].B*Main.palette[col].B));
       diff_b = fabs(target_bri-bri);
   
       diff=l_weight*(diff_b-diff_c)+diff_c;
@@ -1914,13 +1914,13 @@ int L_SelectSpareLayer(lua_State* L)
   int nb_args=lua_gettop(L);
   
   LUA_ARG_LIMIT (1, "selectsparelayer");
-  LUA_ARG_NUMBER(1, "selectsparelayer", Spare_current_layer, 0, Spare_backups->Pages->Nb_layers - 1);
+  LUA_ARG_NUMBER(1, "selectsparelayer", Spare.current_layer, 0, Spare_backups->Pages->Nb_layers - 1);
 
   if (Spare_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
   {
-    if (! ((1 << Spare_current_layer) & Spare_layers_visible))
+    if (! ((1 << Spare.current_layer) & Spare.layers_visible))
     {
-      Spare_layers_visible |= (1 << Spare_current_layer);
+      Spare.layers_visible |= (1 << Spare.current_layer);
     }
   }
   return 0;
@@ -1932,15 +1932,15 @@ int L_SelectLayer(lua_State* L)
   int nb_args=lua_gettop(L);
   
   LUA_ARG_LIMIT (1, "selectlayer");
-  LUA_ARG_NUMBER(1, "selectlayer", Main_current_layer, 0, Main_backups->Pages->Nb_layers - 1);
+  LUA_ARG_NUMBER(1, "selectlayer", Main.current_layer, 0, Main_backups->Pages->Nb_layers - 1);
 
-  Backup_if_necessary(L, Main_current_layer);
+  Backup_if_necessary(L, Main.current_layer);
   // 
   if (Main_backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
   {
-    if (! ((1 << Main_current_layer) & Main_layers_visible))
+    if (! ((1 << Main.current_layer) & Main.layers_visible))
     {
-      Main_layers_visible |= (1 << Main_current_layer);
+      Main.layers_visible |= (1 << Main.current_layer);
       Redraw_layered_image();
     }
     else
@@ -2302,8 +2302,8 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   const char* message;
   byte  old_cursor_shape=Cursor_shape;
   char buf[MAX_PATH_CHARACTERS];
-  int original_image_width=Main_image_width;
-  int original_image_height=Main_image_height;
+  int original_image_width=Main.image_width;
+  int original_image_height=Main.image_height;
 
   // Some scripts are slow
   Cursor_shape=CURSOR_SHAPE_HOURGLASS;
@@ -2499,8 +2499,8 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   Display_all_screen();
   
   // Update tilemap if image size has changed
-  if (original_image_width!=Main_image_width
-   || original_image_height!=Main_image_height)
+  if (original_image_width!=Main.image_width
+   || original_image_height!=Main.image_height)
   {
     Tilemap_update();
   }

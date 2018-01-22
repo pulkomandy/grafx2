@@ -118,12 +118,12 @@ int Tile_is_same(int t1, int t2)
   byte *bmp1,*bmp2;
   int y;
   
-  bmp1 = Main_backups->Pages->Image[Main_current_layer].Pixels+(TILE_Y(t1))*Main_image_width+(TILE_X(t1));
-  bmp2 = Main_backups->Pages->Image[Main_current_layer].Pixels+(TILE_Y(t2))*Main_image_width+(TILE_X(t2));
+  bmp1 = Main_backups->Pages->Image[Main.current_layer].Pixels+(TILE_Y(t1))*Main.image_width+(TILE_X(t1));
+  bmp2 = Main_backups->Pages->Image[Main.current_layer].Pixels+(TILE_Y(t2))*Main.image_width+(TILE_X(t2));
   
   for (y=0; y < Snap_height; y++)
   {
-    if (memcmp(bmp1+y*Main_image_width, bmp2+y*Main_image_width, Snap_width))
+    if (memcmp(bmp1+y*Main.image_width, bmp2+y*Main.image_width, Snap_width))
       return 0;
   }
   return 1;
@@ -135,13 +135,13 @@ int Tile_is_same_flipped_x(int t1, int t2)
   byte *bmp1,*bmp2;
   int y, x;
   
-  bmp1 = Main_backups->Pages->Image[Main_current_layer].Pixels+(TILE_Y(t1))*Main_image_width+(TILE_X(t1));
-  bmp2 = Main_backups->Pages->Image[Main_current_layer].Pixels+(TILE_Y(t2))*Main_image_width+(TILE_X(t2)+Snap_width-1);
+  bmp1 = Main_backups->Pages->Image[Main.current_layer].Pixels+(TILE_Y(t1))*Main.image_width+(TILE_X(t1));
+  bmp2 = Main_backups->Pages->Image[Main.current_layer].Pixels+(TILE_Y(t2))*Main.image_width+(TILE_X(t2)+Snap_width-1);
   
   for (y=0; y < Snap_height; y++)
   {
     for (x=0; x < Snap_width; x++)
-      if (*(bmp1+y*Main_image_width+x) != *(bmp2+y*Main_image_width-x))
+      if (*(bmp1+y*Main.image_width+x) != *(bmp2+y*Main.image_width-x))
         return 0;
   }
   return 1;
@@ -153,12 +153,12 @@ int Tile_is_same_flipped_y(int t1, int t2)
   byte *bmp1,*bmp2;
   int y;
   
-  bmp1 = Main_backups->Pages->Image[Main_current_layer].Pixels+(TILE_Y(t1))*Main_image_width+(TILE_X(t1));
-  bmp2 = Main_backups->Pages->Image[Main_current_layer].Pixels+(TILE_Y(t2)+Snap_height-1)*Main_image_width+(TILE_X(t2));
+  bmp1 = Main_backups->Pages->Image[Main.current_layer].Pixels+(TILE_Y(t1))*Main.image_width+(TILE_X(t1));
+  bmp2 = Main_backups->Pages->Image[Main.current_layer].Pixels+(TILE_Y(t2)+Snap_height-1)*Main.image_width+(TILE_X(t2));
   
   for (y=0; y < Snap_height; y++)
   {
-    if (memcmp(bmp1+y*Main_image_width, bmp2-y*Main_image_width, Snap_width))
+    if (memcmp(bmp1+y*Main.image_width, bmp2-y*Main.image_width, Snap_width))
       return 0;
   }
   return 1;
@@ -171,13 +171,13 @@ int Tile_is_same_flipped_xy(int t1, int t2)
   byte *bmp1,*bmp2;
   int y, x;
   
-  bmp1 = Main_backups->Pages->Image[Main_current_layer].Pixels+(TILE_Y(t1))*Main_image_width+(TILE_X(t1));
-  bmp2 = Main_backups->Pages->Image[Main_current_layer].Pixels+(TILE_Y(t2)+Snap_height-1)*Main_image_width+(TILE_X(t2)+Snap_width-1);
+  bmp1 = Main_backups->Pages->Image[Main.current_layer].Pixels+(TILE_Y(t1))*Main.image_width+(TILE_X(t1));
+  bmp2 = Main_backups->Pages->Image[Main.current_layer].Pixels+(TILE_Y(t2)+Snap_height-1)*Main.image_width+(TILE_X(t2)+Snap_width-1);
   
   for (y=0; y < Snap_height; y++)
   {
     for (x=0; x < Snap_width; x++)
-      if (*(bmp1+y*Main_image_width+x) != *(bmp2-y*Main_image_width-x))
+      if (*(bmp1+y*Main.image_width+x) != *(bmp2-y*Main.image_width-x))
         return 0;
   }
   return 1;
@@ -195,11 +195,11 @@ void Tilemap_update(void)
   int wait_window=0;
   byte old_cursor=0;
 
-  if (!Main_tilemap_mode)
+  if (!Main.tilemap_mode)
     return;
   
-  width=(Main_image_width-Snap_offset_X)/Snap_width;
-  height=(Main_image_height-Snap_offset_Y)/Snap_height;
+  width=(Main.image_width-Snap_offset_X)/Snap_width;
+  height=(Main.image_height-Snap_offset_Y)/Snap_height;
   
   if (width<1 || height<1 || width*height>1000000l
    || (tile_ptr=(T_Tile *)malloc(width*height*sizeof(T_Tile))) == NULL)
@@ -382,7 +382,8 @@ void Tilemap_update(void)
 /// be called when swapping pages.
 void Swap_tilemap(void)
 {
-  SWAP_BYTES(Main_tilemap_mode, Spare_tilemap_mode)
+//TODO
+  SWAP_BYTES(Main.tilemap_mode, Spare.tilemap_mode)
   {
     T_Tile * a;
     a=Main_tilemap;
@@ -406,7 +407,7 @@ void Disable_main_tilemap(void)
   }
   Main_tilemap_width=0;
   Main_tilemap_height=0;
-  Main_tilemap_mode=0;
+  Main.tilemap_mode=0;
 }
 
 ///
@@ -422,5 +423,5 @@ void Disable_spare_tilemap(void)
   }
   Spare_tilemap_width=0;
   Spare_tilemap_height=0;
-  Spare_tilemap_mode=0;
+  Spare.tilemap_mode=0;
 }

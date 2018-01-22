@@ -785,17 +785,17 @@ void Button_Stats(void)
 #if defined(__WIN32__)
     {
       ULARGE_INTEGER tailleU;
-      GetDiskFreeSpaceEx(Main_selector.Directory,&tailleU,NULL,NULL);
+      GetDiskFreeSpaceEx(Main.selector.Directory,&tailleU,NULL,NULL);
       mem_size = tailleU.QuadPart;
     }
 #elif defined(__linux__) || defined(__macosx__) || defined(__FreeBSD__) || defined(__SYLLABLE__) || defined(__AROS__)
     {
       struct statfs disk_info;
-      statfs(Main_selector.Directory,&disk_info);
+      statfs(Main.selector.Directory,&disk_info);
       mem_size=(qword) disk_info.f_bfree * (qword) disk_info.f_bsize;
     }
 #elif defined(__HAIKU__)
-   mem_size = haiku_get_free_space(Main_selector.Directory);
+   mem_size = haiku_get_free_space(Main.selector.Directory);
 #elif defined (__MINT__)
    mem_size=0;
    Dfree(&drvInfo,0);
@@ -813,16 +813,16 @@ void Button_Stats(void)
   if (mem_size != 0)
   {
 #if defined(__AROS__)
-    char *colon = strchr(Main_selector.Directory, ':');
-    int len = strlen(Main_selector.Directory);
+    char *colon = strchr(Main.selector.Directory, ':');
+    int len = strlen(Main.selector.Directory);
     if (colon)
     {
-      len = (long)colon - (long)Main_selector.Directory;
+      len = (long)colon - (long)Main.selector.Directory;
     }
     if (len > 8) len = 8;
-    sprintf(buffer,"Free space on %.*s:",len,Main_selector.Directory);
+    sprintf(buffer,"Free space on %.*s:",len,Main.selector.Directory);
 #else
-    sprintf(buffer,"Free space on %c:",Main_selector.Directory[0]);
+    sprintf(buffer,"Free space on %c:",Main.selector.Directory[0]);
 #endif
     Print_in_window(10,y,buffer,STATS_TITLE_COLOR,MC_Black);
 
@@ -853,7 +853,7 @@ void Button_Stats(void)
   
   // Affichage des dimensions de l'image
   Print_in_window(18,y,"Dimensions :",STATS_TITLE_COLOR,MC_Black);
-  sprintf(buffer,"%dx%d",Main_image_width,Main_image_height);
+  sprintf(buffer,"%dx%d",Main.image_width,Main.image_height);
   Print_in_window(122,y,buffer,STATS_DATA_COLOR,MC_Black);
   y+=8;
   
