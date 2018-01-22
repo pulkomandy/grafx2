@@ -363,23 +363,6 @@ void Tilemap_update(void)
 }
 
 ///
-/// This exchanges the tilemap settings of the main and spare, it should
-/// be called when swapping pages.
-void Swap_tilemap(void)
-{
-//TODO
-  SWAP_BYTES(Main.tilemap_mode, Spare.tilemap_mode)
-  {
-    T_Tile * a;
-    a=Main.tilemap;
-    Main.tilemap=Spare.tilemap;
-    Spare.tilemap=a;
-  }
-  SWAP_SHORTS(Main.tilemap_width, Spare.tilemap_width)
-  SWAP_SHORTS(Main.tilemap_height, Spare.tilemap_height)
-}
-
-///
 /// Clears all tilemap data and settings
 /// Safe to call again.
 void Disable_tilemap(T_Document * doc)

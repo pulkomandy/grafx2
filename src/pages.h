@@ -115,7 +115,6 @@ void Backup_layers(int layer);
 void Undo(void);
 void Redo(void);
 void Free_current_page(void); // 'Kill' button
-void Exchange_main_and_spare(void);
 void End_of_modification(void);
 
 void Update_depth_buffer(void);

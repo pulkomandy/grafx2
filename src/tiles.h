@@ -33,11 +33,6 @@ void Tilemap_update(void);
 void Tilemap_draw(word x, word y, byte color);
 
 ///
-/// This exchanges the tilemap settings of the main and spare, it should
-/// be called when swapping pages.
-void Swap_tilemap(void);
-
-///
 /// Clears all tilemap data and settings
 /// Safe to call again.
 void Disable_tilemap(T_Document * doc);

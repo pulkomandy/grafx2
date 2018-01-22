@@ -1550,63 +1550,23 @@ void Button_Skins(void)
 void Button_Page(void)
 {
   byte   factor_index;
-  char   Temp_buffer[256];
+  T_Document temp_doc;
   
   Hide_cursor();
 
   if (Config.Sync_views)
     Copy_view_to_spare();
 
-  // On dégrossit le travail avec les infos des listes de pages
-  Exchange_main_and_spare();
+  // First update the page descriptors before swapping them
+  Upload_infos_page(&Main);
+  Upload_infos_page(&Spare);
 
-  // Tilemap info
-  Swap_tilemap();
-  
-  // On fait le reste du travail "à la main":
-// TODO
-  SWAP_PBYTES(Main.visible_image.Image,Spare.visible_image.Image)
-  SWAP_WORDS (Main.visible_image.Width,Spare.visible_image.Width)
-  SWAP_WORDS (Main.visible_image.Height,Spare.visible_image.Height)
-  SWAP_SHORTS(Main.offset_X,Spare.offset_X)
-  SWAP_SHORTS(Main.offset_Y,Spare.offset_Y)
-  SWAP_SHORTS(Main.separator_position,Spare.separator_position)
-  SWAP_SHORTS(Main.X_zoom,Spare.X_zoom)
-  SWAP_FLOATS(Main.separator_proportion,Spare.separator_proportion)
-  SWAP_BYTES (Main.magnifier_mode,Spare.magnifier_mode)
+  // SWAP
+  memcpy(&temp_doc, &Main, sizeof(T_Document));
+  memcpy(&Main, &Spare, sizeof(T_Document));
+  memcpy(&Spare, &temp_doc, sizeof(T_Document));
 
   Pixel_preview=(Main.magnifier_mode)?Pixel_preview_magnifier:Pixel_preview_normal;
-
-  SWAP_WORDS (Main.magnifier_factor,Spare.magnifier_factor)
-  SWAP_WORDS (Main.magnifier_height,Spare.magnifier_height)
-  SWAP_WORDS (Main.magnifier_width,Spare.magnifier_width)
-  SWAP_SHORTS(Main.magnifier_offset_X,Spare.magnifier_offset_X)
-  SWAP_SHORTS(Main.magnifier_offset_Y,Spare.magnifier_offset_Y)
-  // Swap du booléen "Image modifiée"
-  SWAP_BYTES (Main.image_is_modified,Spare.image_is_modified)
-
-  // Swap fileselector data
-  SWAP_BYTES (Main.selector.Format_filter,Spare.selector.Format_filter)
-  SWAP_WORDS (Main.selector.Position,Spare.selector.Position)
-  SWAP_WORDS (Main.selector.Offset,Spare.selector.Offset)
-  strcpy(Temp_buffer            ,Spare.selector.Directory);
-  strcpy(Spare.selector.Directory,Main.selector.Directory);
-  strcpy(Main.selector.Directory,Temp_buffer             );
-
-
-  SWAP_BYTES (Main.current_layer,Spare.current_layer)
-  SWAP_DWORDS(Main.layers_visible,Spare.layers_visible)
-  SWAP_DWORDS(Main.layers_visible_backup,Spare.layers_visible_backup)
-  
-  SWAP_DWORDS(Main.safety_number,Spare.safety_number)
-  SWAP_DWORDS(Main.edits_since_safety_backup,Spare.edits_since_safety_backup)
-  SWAP_BYTES(Main.safety_backup_prefix,Spare.safety_backup_prefix)
-  {
-    Uint32 a;
-    a=Main.time_of_safety_backup;
-    Main.time_of_safety_backup=Spare.time_of_safety_backup;
-    Spare.time_of_safety_backup=a;
-  }
 
   //Redraw_layered_image();
   // replaced by

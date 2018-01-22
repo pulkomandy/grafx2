@@ -1275,38 +1275,6 @@ void Free_current_page(void)
   End_of_modification();
 }
 
-void Exchange_main_and_spare(void)
-{
-  T_List_of_pages * temp_list;
-
-  // On commence par mettre à jour dans les descripteurs les infos sur les
-  // pages qu'on s'apprête à échanger, pour qu'on se retrouve pas avec de
-  // vieilles valeurs qui datent de mathuzalem.
-  Upload_infos_page(&Main);
-  Upload_infos_page(&Spare);
-
-  // On inverse les listes de pages
-//TODO
-  temp_list=Main.backups;
-  Main.backups=Spare.backups;
-  Spare.backups=temp_list;
-
-  // On extrait ensuite les infos sur les nouvelles pages courante, brouillon
-  // et backup.
-
-  /* SECTION GROS CACA PROUT PROUT */
-  // Auparavant on ruse en mettant déjà à jour les dimensions de la
-  // nouvelle page courante. Si on ne le fait pas, le "Download" va détecter
-  // un changement de dimensions et va bêtement sortir du mode loupe, alors
-  // que lors d'un changement de page, on veut bien conserver l'état du mode
-  // loupe du brouillon.
-  Main.image_width=Main.backups->Pages->Width;
-  Main.image_height=Main.backups->Pages->Height;
-
-  Download_infos_page_main(Main.backups->Pages);
-  Download_infos_page_spare(Spare.backups->Pages);
-}
-
 void End_of_modification(void)
 {
 
