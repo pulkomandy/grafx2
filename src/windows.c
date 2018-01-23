@@ -2910,7 +2910,8 @@ void Remap_screen_after_menu_colors_change(void)
 {
   short index;
   byte  conversion_table[256];
-  short temp/*,temp2*/;
+  //short temp/*,temp2*/;
+  int window_index, pos_y;
 
   if ( (MC_Light!=Old_light) || (MC_Dark!=Old_dark) || (MC_White!=Old_white) || (MC_Black !=Old_black )
     || (MC_Trans!=Old_trans) )
@@ -2926,20 +2927,36 @@ void Remap_screen_after_menu_colors_change(void)
 
     // Remappage de l'écran
 
-    temp=Window_height*Menu_factor_Y;
+    // remap only screen pixels covered by a window or the menu
+    for (pos_y = 0; pos_y < Screen_height; pos_y++)
+    {
+      int min_x = 0xffff;
+      int max_x = 0;
+      if (Menu_is_visible_before_window && pos_y >= Menu_Y_before_window)
+      {
+        min_x = 0;
+        max_x = Screen_width;
+      }
+      else for (window_index = 0; window_index < Windows_open; window_index++)
+      {
+        if (pos_y < Window_stack[window_index].Pos_Y
+         || pos_y >= (Window_stack[window_index].Pos_Y + Window_stack[window_index].Height*Menu_factor_Y) )
+          continue; // this window doesn't occupy this screen row
+        if (min_x > Window_stack[window_index].Pos_X)
+          min_x = Window_stack[window_index].Pos_X;
+        if (max_x < (Window_stack[window_index].Pos_X + Window_stack[window_index].Width*Menu_factor_X))
+          max_x = Window_stack[window_index].Pos_X + Window_stack[window_index].Width*Menu_factor_X;
+      }
+      if (max_x > min_x)
+        Remap_screen(min_x, pos_y, max_x - min_x, 1, conversion_table);
+    }
 
-    Remap_screen(Window_pos_X, Window_pos_Y,
-                 Window_width*Menu_factor_X,
-                 (Window_pos_Y+temp<Menu_Y_before_window)?temp:Menu_Y_before_window-Window_pos_Y,
-                 conversion_table);
-
+    Remap_window_backgrounds(conversion_table, 0, Screen_height);// TODO check
     if (Menu_is_visible_before_window)
     {
-      Remap_screen(0, Menu_Y_before_window,
-                   Screen_width, Screen_height-Menu_Y_before_window,
-                   conversion_table);
       // Remappage de la partie du fond de la fenetre qui cacherait le menu...
-      Remap_window_backgrounds(conversion_table, Menu_Y_before_window, Screen_height);
+      //Remap_window_backgrounds(conversion_table, Menu_Y_before_window, Screen_height);
+      // TODO remapper les parties de fenetres cachées par la fenetre "on top"
       /*
          Il faudrait peut-être remapper les pointillés délimitant l'image.
          Mais ça va être chiant parce qu'ils peuvent être affichés en mode Loupe.

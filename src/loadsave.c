@@ -864,7 +864,7 @@ void Load_image(T_IO_Context *context)
       Backup_layers(LAYER_NONE);
       // Copy the loaded palette
       memcpy(Main_palette, context->Palette, sizeof(T_Palette));
-      //memcpy(Main_backups->Pages->Palette, context->Palette, sizeof(T_Palette));
+      memcpy(Main_backups->Pages->Palette, context->Palette, sizeof(T_Palette));
     }
   }
   else if (context->Type == CONTEXT_BRUSH && File_error==0)
@@ -934,7 +934,7 @@ void Load_image(T_IO_Context *context)
     Set_palette(context->Palette);
     
     // Display palette preview
-    if (Get_fileformat(context->Format)->Palette_only)
+    if (Get_fileformat(context->Format)->Palette_only)  // TODO : OU nous somme dans le load du menu palette !
     {
       short index;
     

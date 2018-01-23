@@ -2614,8 +2614,10 @@ void Button_Palette(void)
 
       case 26: // Load palette
         memcpy(backup_palette, Main_palette, sizeof(T_Palette));
+        memcpy(Main_palette, working_palette, sizeof(T_Palette));
         Load_picture(CONTEXT_PALETTE);
         memcpy(working_palette, Main_palette, sizeof(T_Palette));
+        Set_palette(working_palette);
         memcpy(temp_palette,working_palette,sizeof(T_Palette));
         memcpy(Main_palette, backup_palette, sizeof(T_Palette));
         need_to_remap=1;

@@ -2201,15 +2201,18 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 
   //   On restaure les données de l'image qui ont certainement été modifiées
   // par la preview.
-  Set_palette(Main.palette);
   Back_color=initial_back_color;
+  if (Windows_open <= 1)
+  {
+    Set_palette(Main.palette);  //TODO vrai backup?
 
-  Compute_optimal_menu_colors(Main.palette);
+    Compute_optimal_menu_colors(Main.palette);//TODO
+  }
   temp=(Window_pos_Y+(Window_height*Menu_factor_Y)<Menu_Y_before_window);
 
   Close_window();
 
-  if (temp)
+  if (temp && Windows_open < 1)
     Display_menu();
 
   Unselect_button((load)?BUTTON_LOAD:BUTTON_SAVE);
