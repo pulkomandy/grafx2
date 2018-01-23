@@ -260,6 +260,7 @@ void Set_pixel(T_IO_Context *context, short x_pos, short y_pos, byte color)
       break;
       
     case CONTEXT_PALETTE:
+    case CONTEXT_PREVIEW_PALETTE:
       break;
   }
 
@@ -286,6 +287,7 @@ void Fill_canvas(T_IO_Context *context, byte color)
     case CONTEXT_SURFACE:
       break;
     case CONTEXT_PALETTE:
+    case CONTEXT_PREVIEW_PALETTE:
       break;
   }
 }
@@ -329,6 +331,7 @@ void Set_pixel_24b(T_IO_Context *context, short x_pos, short y_pos, byte r, byte
       }
       break;
 
+    case CONTEXT_PREVIEW_PALETTE:
     case CONTEXT_PALETTE:
       // In a palette, there are no pixels!
       break;
@@ -526,6 +529,7 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
       break;
 
     case CONTEXT_PALETTE:
+    case CONTEXT_PREVIEW_PALETTE:
       // In a palette, there are no pixels!
       break;
   }
@@ -562,6 +566,7 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
         break;
 
       case CONTEXT_PALETTE:
+    case CONTEXT_PREVIEW_PALETTE:
         // In a palette, there are no pixels!
         break;
     }
@@ -715,6 +720,7 @@ void Load_image(T_IO_Context *context)
 
 
         case CONTEXT_PALETTE:
+        case CONTEXT_PREVIEW_PALETTE:
          // In a palette, there are no pixels!
          break;
       }
@@ -897,7 +903,7 @@ void Load_image(T_IO_Context *context)
       SDL_SetColors(context->Surface, colors, 0, 256);
     }
   }
-  else if (context->Type == CONTEXT_PREVIEW
+  else if (context->Type == CONTEXT_PREVIEW || context->Type == CONTEXT_PREVIEW_PALETTE
     /*&& !context->Buffer_image_24b*/
     /*&& !Get_fileformat(context->Format)->Palette_only*/)
   {
@@ -934,11 +940,12 @@ void Load_image(T_IO_Context *context)
     Set_palette(context->Palette);
     
     // Display palette preview
-    if (Get_fileformat(context->Format)->Palette_only)  // TODO : OU nous somme dans le load du menu palette !
+    if (Get_fileformat(context->Format)->Palette_only
+        || context->Type == CONTEXT_PREVIEW_PALETTE)
     {
       short index;
     
-      if (context->Type == CONTEXT_PREVIEW)
+      if (context->Type == CONTEXT_PREVIEW || context->Type == CONTEXT_PREVIEW_PALETTE)
         for (index=0; index<256; index++)
           Window_rectangle(183+(index/16)*7,95+(index&15)*5,5,5,index);
     
@@ -1061,6 +1068,7 @@ void Save_image(T_IO_Context *context)
       break;
       
     case CONTEXT_PREVIEW:
+    case CONTEXT_PREVIEW_PALETTE:
       break;
       
     case CONTEXT_SURFACE:

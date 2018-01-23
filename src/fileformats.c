@@ -4666,6 +4666,7 @@ static void Load_PNG_Sub(T_IO_Context * context, FILE * file)
                     break;
 
                   case CONTEXT_PALETTE:
+                  case CONTEXT_PREVIEW_PALETTE:
                     // No pixels to draw in a palette!
                     break;
                 }

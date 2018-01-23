@@ -2171,6 +2171,8 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
       
         Init_context_preview(&preview_context, Selector_filename, Selector->Directory);
         Hide_cursor();
+        if (context->Type == CONTEXT_PALETTE)
+          preview_context.Type = CONTEXT_PREVIEW_PALETTE;
 
         Load_image(&preview_context);
         Destroy_context(&preview_context);
