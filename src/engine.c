@@ -65,10 +65,10 @@ byte Tiling_mode_before_cancel;
 Func_effect Effect_function_before_cancel;
 
 ///This table holds pointers to the saved window backgrounds. We can have up to 8 windows open at a time.
-byte* Window_background[8];
+static byte* Window_background[8];
 
 ///Save a screen block (usually before erasing it with a new window or a dropdown menu)
-void Save_background(byte **buffer, int x_pos, int y_pos, int width, int height)
+static void Save_background(byte **buffer, int x_pos, int y_pos, int width, int height)
 {
   int index;
   if(*buffer != NULL) DEBUG("WARNING : buffer already allocated !!!",0);
@@ -79,13 +79,14 @@ void Save_background(byte **buffer, int x_pos, int y_pos, int width, int height)
 }
 
 ///Restores a screen block
-void Restore_background(byte *buffer, int x_pos, int y_pos, int width, int height)
+static void Restore_background(byte **buffer, int x_pos, int y_pos, int width, int height)
 {
   int index;
+  if(*buffer==NULL) return;
   for (index=0; index<height*Menu_factor_Y; index++)
-    Display_line_fast(x_pos,y_pos+index,width*Menu_factor_X,buffer+((int)index*width*Menu_factor_X*Pixel_width));
-  free(buffer);
-  buffer = NULL;
+    Display_line_fast(x_pos,y_pos+index,width*Menu_factor_X,*buffer+((int)index*width*Menu_factor_X*Pixel_width));
+  free(*buffer);
+  *buffer = NULL;
 }
 
 ///Draw a pixel in a saved screen block (when you sort colors in the palette, for example)
@@ -1724,8 +1725,7 @@ void Close_window(void)
   if (Windows_open != 1)
   {
     // Restore de ce que la fenêtre cachait
-    Restore_background(Window_background[Windows_open-1], Window_pos_X, Window_pos_Y, Window_width, Window_height);
-    Window_background[Windows_open-1]=NULL;
+    Restore_background(&Window_background[Windows_open-1], Window_pos_X, Window_pos_Y, Window_width, Window_height);
     Update_window_area(0,0,Window_width,Window_height);
     Windows_open--;
   }
@@ -2395,8 +2395,7 @@ void Close_popup(void)
   if (Windows_open != 1)
   {
     // Restore de ce que la fenêtre cachait
-    Restore_background(Window_background[Windows_open-1], Window_pos_X, Window_pos_Y, Window_width, Window_height);
-    Window_background[Windows_open-1]=NULL;
+    Restore_background(&Window_background[Windows_open-1], Window_pos_X, Window_pos_Y, Window_width, Window_height);
     Update_window_area(0,0,Window_width,Window_height);
     Windows_open--;
   }
@@ -2601,7 +2600,7 @@ void Get_color_behind_window(byte * color, byte * click)
     Hide_cursor();
   }
 
-  Restore_background(buffer,Window_pos_X,Window_pos_Y,Window_width,Window_height);
+  Restore_background(&buffer,Window_pos_X,Window_pos_Y,Window_width,Window_height);
   Update_window_area(0, 0, Window_width, Window_height);
   Cursor_shape=CURSOR_SHAPE_ARROW;
   Paintbrush_hidden=b;
@@ -2712,15 +2711,13 @@ void Move_window(short dx, short dy)
     Save_background(&buffer, Window_pos_X, Window_pos_Y, Window_width, Window_height);
     
     // Restore de ce que la fenêtre cachait
-    Restore_background(Window_background[Windows_open-1], Window_pos_X, Window_pos_Y, Window_width, Window_height);
-    Window_background[Windows_open-1] = NULL;
+    Restore_background(&Window_background[Windows_open-1], Window_pos_X, Window_pos_Y, Window_width, Window_height);
 
     // Sauvegarde de ce que la fenêtre remplace
     Save_background(&(Window_background[Windows_open-1]), new_x, new_y, Window_width, Window_height);
 
     // Raffichage de la fenêtre
-    Restore_background(buffer, new_x, new_y, Window_width, Window_height);
-    buffer = NULL;
+    Restore_background(&buffer, new_x, new_y, Window_width, Window_height);
 
     // Mise à jour du rectangle englobant
     Update_rect(
