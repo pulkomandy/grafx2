@@ -3128,7 +3128,7 @@ void Load_picture(enum CONTEXT_TYPE type)
     break;
   case CONTEXT_PALETTE:
     strcpy(filename, "");
-    strcpy(directory, Main_backups->Pages->File_directory);
+    strcpy(directory, Main.backups->Pages->File_directory);
     Init_context_layered_image(&context, filename, directory);
     context.Type = CONTEXT_PALETTE;
     context.Format = FORMAT_PAL;

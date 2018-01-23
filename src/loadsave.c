@@ -863,8 +863,8 @@ void Load_image(T_IO_Context *context)
       // Make a backup step
       Backup_layers(LAYER_NONE);
       // Copy the loaded palette
-      memcpy(Main_palette, context->Palette, sizeof(T_Palette));
-      memcpy(Main_backups->Pages->Palette, context->Palette, sizeof(T_Palette));
+      memcpy(Main.palette, context->Palette, sizeof(T_Palette));
+      memcpy(Main.backups->Pages->Palette, context->Palette, sizeof(T_Palette));
     }
   }
   else if (context->Type == CONTEXT_BRUSH && File_error==0)
