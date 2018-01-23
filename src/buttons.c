@@ -3113,6 +3113,7 @@ void Load_picture(enum CONTEXT_TYPE type)
   T_IO_Context context;
   static char filename [MAX_PATH_CHARACTERS];
   static char directory[MAX_PATH_CHARACTERS];
+  T_Selector_settings * selector;
   
   switch (type)
   {
@@ -3120,11 +3121,13 @@ void Load_picture(enum CONTEXT_TYPE type)
     strcpy(filename, Main.backups->Pages->Filename);
     strcpy(directory, Main.backups->Pages->File_directory);
     Init_context_layered_image(&context, filename, directory);
+    selector = &Main.selector;
     break;
   case CONTEXT_BRUSH:
     strcpy(filename, Brush_filename);
     strcpy(directory, Brush_file_directory);
     Init_context_brush(&context, filename, directory);
+    selector = &Brush_selector;
     break;
   case CONTEXT_PALETTE:
     strcpy(filename, "");
@@ -3132,11 +3135,12 @@ void Load_picture(enum CONTEXT_TYPE type)
     Init_context_layered_image(&context, filename, directory);
     context.Type = CONTEXT_PALETTE;
     context.Format = FORMAT_PAL;
+    selector = &Main.selector;
     break;
   default:
     return; // DO NOTHING
   }
-  confirm=Button_Load_or_Save((type==CONTEXT_MAIN_IMAGE)?&Main.selector:&Brush_selector, 1, &context);
+  confirm=Button_Load_or_Save(selector, 1, &context);
 
   if (confirm)
   {
