@@ -3502,33 +3502,86 @@ short Window_clicked_button(void)
 // Fonction qui sert à remapper les parties sauvegardées derriere les
 // fenetres ouvertes. C'est utilisé par exemple par la fenetre de palette
 // Qui remappe des couleurs, afin de propager les changements.
-void Remap_window_backgrounds(byte * conversion_table, int Min_Y, int Max_Y)
+void Remap_window_backgrounds(const byte * conversion_table, int Min_Y, int Max_Y)
 {
   int window_index; 
-        byte* EDI;
-        int dx,cx;
+  byte* EDI;
+  int dx,cx;
 
   for (window_index=0; window_index<Windows_open; window_index++)
   {
     EDI = Window_background[window_index];
-  
-        // Pour chaque ligne
-        for(dx=0; dx<Window_stack[window_index].Height*Menu_factor_Y;dx++)
+
+    // Pour chaque ligne
+    for(dx=0; dx<Window_stack[window_index].Height*Menu_factor_Y;dx++)
+    {
+      if (dx+Window_stack[window_index].Pos_Y>Max_Y)
+        return;
+      if (dx+Window_stack[window_index].Pos_Y<Min_Y)
+        EDI += Window_stack[window_index].Width*Menu_factor_X*Pixel_width;
+      else
+      { // Pour chaque pixel
+        for(cx=Window_stack[window_index].Width*Menu_factor_X*Pixel_width;cx>0;cx--)
         {
-          if (dx+Window_stack[window_index].Pos_Y>Max_Y)
-            return;
-          if (dx+Window_stack[window_index].Pos_Y<Min_Y)
-          {
-            EDI += Window_stack[window_index].Width*Menu_factor_X*Pixel_width;
-          }
-          else
-                // Pour chaque pixel
-                for(cx=Window_stack[window_index].Width*Menu_factor_X*Pixel_width;cx>0;cx--)
-                {
-                        *EDI = conversion_table[*EDI];
-                        EDI ++;
-                }
+          *EDI = conversion_table[*EDI];
+          EDI ++;
         }
+      }
+    }
+  }
+}
+
+void Remap_UI_window_backgrounds(const byte * conversion_table)
+{
+  int i, j;
+  int pos_y;
+
+  // all window backgrounds
+  for (i = 0; i < Windows_open; i++)
+  {
+    // remap pixels of background that are either Menu or another window below
+    byte * p = Window_background[i];
+    for (pos_y = Window_stack[i].Pos_Y;
+         pos_y < (Window_stack[i].Pos_Y + Window_stack[i].Height*Menu_factor_Y);
+         pos_y++)
+    {
+      // for each line of the background
+      int min_x = 0xffff;
+      int max_x = 0;
+      if (Menu_is_visible_before_window && pos_y >= Menu_Y_before_window)
+      {
+        min_x = 0;
+        max_x = Screen_width;
+      }
+      else for(j = 0; j < i; j++)
+      {
+        // check all windows below
+        if (pos_y < Window_stack[j].Pos_Y
+         || pos_y >= (Window_stack[j].Pos_Y + Window_stack[j].Height*Menu_factor_Y) )
+          continue; // this window doesn't occupy this screen row
+        if (min_x > Window_stack[j].Pos_X)
+          min_x = Window_stack[j].Pos_X;
+        if (max_x < (Window_stack[j].Pos_X + Window_stack[j].Width*Menu_factor_X))
+          max_x = Window_stack[j].Pos_X + Window_stack[j].Width*Menu_factor_X;
+
+      }
+      if (min_x < Window_stack[i].Pos_X)
+        min_x = Window_stack[i].Pos_X;
+      if (max_x > Window_stack[i].Pos_X + Window_stack[i].Width*Menu_factor_X)
+        max_x = Window_stack[i].Pos_X + Window_stack[i].Width*Menu_factor_X;
+      if (max_x > min_x)
+      {
+        int x;
+        min_x -= Window_stack[i].Pos_X;
+        max_x -= Window_stack[i].Pos_X;
+        // do the conversion
+        for (x = min_x; x < max_x; x++)
+        {
+          p[x] = conversion_table[p[x]];
+        }
+      }
+      p += Window_stack[i].Width*Menu_factor_X*Pixel_width;
+    }
   }
 }
 

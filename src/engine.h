@@ -109,7 +109,8 @@ void Get_color_behind_window(byte * color, byte * click);
 short Window_clicked_button(void);
 int Button_under_mouse(void);
 short Window_get_clicked_button(void);
-void Remap_window_backgrounds(byte * conversion_table, int Min_Y, int Max_Y);
+void Remap_window_backgrounds(const byte * conversion_table, int Min_Y, int Max_Y);
+void Remap_UI_window_backgrounds(const byte * conversion_table);
 void Pixel_background(int x_pos, int y_pos, byte color);
 ///
 /// Updates the status bar line with a color number.

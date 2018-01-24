@@ -2951,12 +2951,10 @@ void Remap_screen_after_menu_colors_change(void)
         Remap_screen(min_x, pos_y, max_x - min_x, 1, conversion_table);
     }
 
-    Remap_window_backgrounds(conversion_table, 0, Screen_height);// TODO check
+    // Remap windows and menu in the backgrounds buffers
+    Remap_UI_window_backgrounds(conversion_table);
     if (Menu_is_visible_before_window)
     {
-      // Remappage de la partie du fond de la fenetre qui cacherait le menu...
-      //Remap_window_backgrounds(conversion_table, Menu_Y_before_window, Screen_height);
-      // TODO remapper les parties de fenetres cachées par la fenetre "on top"
       /*
          Il faudrait peut-être remapper les pointillés délimitant l'image.
          Mais ça va être chiant parce qu'ils peuvent être affichés en mode Loupe.
