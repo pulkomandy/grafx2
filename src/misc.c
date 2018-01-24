@@ -158,7 +158,7 @@ word Count_used_colors_area(dword* usage, word start_x, word start_y,
 // Get_current_palette() offers a READ-ONLY access.
 // TODO : Color cycling code use directly SDL_SetPalette() we should check
 //        wether it should call Set_palette() instead.
-static T_Palette Current_palette = {0};
+static T_Palette Current_palette;
 
 const T_Components * Get_current_palette(void)
 {
