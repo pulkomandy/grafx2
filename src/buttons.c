@@ -1174,6 +1174,8 @@ void Button_Settings(void)
     Spare.selector.Offset=0;
     Brush_selector.Position=0;
     Brush_selector.Offset=0;
+    Palette_selector.Position=0;
+    Palette_selector.Offset=0;
   }
   if(Config.Allow_multi_shortcuts && !selected_config.Allow_multi_shortcuts)
   {
@@ -3135,7 +3137,7 @@ void Load_picture(enum CONTEXT_TYPE type)
     Init_context_layered_image(&context, filename, directory);
     context.Type = CONTEXT_PALETTE;
     context.Format = FORMAT_PAL;
-    selector = &Main.selector;
+    selector = &Palette_selector;
     break;
   default:
     return; // DO NOTHING
@@ -3418,6 +3420,7 @@ void Save_picture(enum CONTEXT_TYPE type)
   T_IO_Context save_context;
   static char filename [MAX_PATH_CHARACTERS];
   static char directory[MAX_PATH_CHARACTERS];
+  T_Selector_settings * selector;
 
   if (type == CONTEXT_MAIN_IMAGE)
   {
@@ -3425,6 +3428,7 @@ void Save_picture(enum CONTEXT_TYPE type)
     strcpy(directory, Main.backups->Pages->File_directory);
     Init_context_layered_image(&save_context, filename, directory);
     save_context.Format = Main.fileformat;
+    selector = &Main.selector;
   }
   else if (type == CONTEXT_BRUSH)
   {
@@ -3432,6 +3436,7 @@ void Save_picture(enum CONTEXT_TYPE type)
     strcpy(directory, Brush_file_directory);
     Init_context_brush(&save_context, filename, directory);
     save_context.Format = Brush_fileformat;
+    selector = &Brush_selector;
   }
   else if (type == CONTEXT_PALETTE)
   {
@@ -3450,11 +3455,12 @@ void Save_picture(enum CONTEXT_TYPE type)
 
     // Set format to PAL
     save_context.Format = FORMAT_PAL;
+    selector = &Palette_selector;
   }
   else
     return;
 
-  confirm=Button_Load_or_Save((type==CONTEXT_MAIN_IMAGE)?&Main.selector:&Brush_selector,0, &save_context);
+  confirm=Button_Load_or_Save(selector, 0, &save_context);
 
   if (confirm && File_exists(save_context.File_name))
   {
@@ -3472,7 +3478,7 @@ void Save_picture(enum CONTEXT_TYPE type)
 
   if (confirm)
   {
-    T_Format * format;
+    const T_Format * format;
      
     old_cursor_shape=Cursor_shape;
     Hide_cursor();

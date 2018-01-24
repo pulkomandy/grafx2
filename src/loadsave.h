@@ -173,7 +173,7 @@ typedef struct {
 } T_Format;
 
 /// Array of the known file formats
-extern T_Format File_formats[];
+extern const T_Format File_formats[];
 
 ///
 /// Function which attempts to save backups of the images (main and spare),
@@ -194,7 +194,7 @@ SDL_Surface * Load_surface(char *full_name, T_Gradient_array *gradients);
 extern enum PIXEL_RATIO Ratio_of_loaded_image;
 */
 
-T_Format * Get_fileformat(byte format);
+const T_Format * Get_fileformat(byte format);
 
 // -- File formats
 

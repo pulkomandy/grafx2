@@ -1495,9 +1495,16 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 
   for (format=0; format < Nb_known_formats(); format++)
   {
-    if (((context->Type == CONTEXT_PALETTE) == File_formats[format].Palette_only) &&
-        ((load && (File_formats[format].Load || File_formats[format].Identifier <= FORMAT_ALL_FILES)) || (!load && File_formats[format].Save)))
-        Window_dropdown_add_item(formats_dropdown,File_formats[format].Identifier,File_formats[format].Label);
+    if (File_formats[format].Identifier > FORMAT_ALL_FILES)
+    {
+      if (load && !File_formats[format].Load) //filter out formats without Load function
+        continue;
+      if (!load && !File_formats[format].Save) // filter out formats without Save function
+        continue;
+    }
+    if (!load && ((context->Type == CONTEXT_PALETTE) != File_formats[format].Palette_only))
+      continue;   // Only Palette only format when SAVING palette and not Palette only when saving image
+    Window_dropdown_add_item(formats_dropdown,File_formats[format].Identifier,File_formats[format].Label);
   }
   Print_in_window(70,18,"Format",MC_Dark,MC_Light);
   

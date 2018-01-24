@@ -517,6 +517,8 @@ int Init_program(int argc,char * argv[])
   strcpy(Brush_filename       ,"NO_NAME.GIF");
   Brush_fileformat    =DEFAULT_FILEFORMAT;
 
+  strcpy(Palette_selector.Directory,Main.selector.Directory);
+
   // On initialise ce qu'il faut pour que les fileselects ne plantent pas:
   
   Main.selector.Position=0; // Au début, le fileselect est en haut de la liste des fichiers
@@ -536,6 +538,10 @@ int Init_program(int argc,char * argv[])
   Brush_selector.Position=0;
   Brush_selector.Offset=0;
   Brush_selector.Format_filter=FORMAT_ALL_IMAGES;
+
+  Palette_selector.Position=0;
+  Palette_selector.Offset=0;
+  Palette_selector.Format_filter=FORMAT_ALL_PALETTES;
 
   // On initialise d'ot' trucs
   Main.offset_X=0;

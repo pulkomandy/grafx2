@@ -303,6 +303,11 @@ GFX2_GLOBAL T_Document Spare;
 /// Backup of the current screen, used during drawing when FX feedback is OFF.
 GFX2_GLOBAL byte * Screen_backup;
 
+// -- Palette load/Save selector
+
+/// Fileselector settings
+GFX2_GLOBAL T_Selector_settings Palette_selector;
+
 // -- Brush data
 
 /// Pixel data of the current brush (remapped).

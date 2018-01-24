@@ -162,9 +162,9 @@ void Save_PNG(T_IO_Context *);
 void Load_SDL_Image(T_IO_Context *);
 
 // ENUM     Name  TestFunc LoadFunc SaveFunc PalOnly Comment Layers Ext Exts  
-T_Format File_formats[] = {
+const T_Format File_formats[] = {
   {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, 0, "", "gif;png;bmp;2bp;pcx;pkm;iff;lbm;ilbm;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;c64;koa;koala;fli;bml;cdu;prg;tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico;ic2;cur;cm5;pph"},
-  {FORMAT_ALL_PALETTES, "(all)", NULL, NULL, NULL, 1, 0, 0, "", "kcf;pal;gpl"},
+  {FORMAT_ALL_PALETTES, "(pal)", NULL, NULL, NULL, 1, 0, 0, "", "kcf;pal;gpl"},
   {FORMAT_ALL_FILES, "(*.*)", NULL, NULL, NULL, 0, 0, 0, "", "*"},
   {FORMAT_GIF, " gif", Test_GIF, Load_GIF, Save_GIF, 0, 1, 1, "gif", "gif"},
 #ifndef __no_pnglib__
@@ -602,7 +602,7 @@ void Set_file_error(int value)
 void Load_image(T_IO_Context *context)
 {
   unsigned int index; // index de balayage des formats
-  T_Format *format = &(File_formats[FORMAT_ALL_FILES+1]); // Format du fichier à charger
+  const T_Format *format = &(File_formats[FORMAT_ALL_FILES+1]); // Format du fichier à charger
   int i;
   byte old_cursor_shape;
   
@@ -996,7 +996,7 @@ void Load_image(T_IO_Context *context)
 // -- Sauver n'importe quel type connu de fichier d'image (ou palette) ------
 void Save_image(T_IO_Context *context)
 {
-  T_Format *format;
+  const T_Format *format;
   
   // On place par défaut File_error à vrai au cas où on ne sache pas
   // sauver le format du fichier: (Est-ce vraiment utile??? Je ne crois pas!)
@@ -1258,10 +1258,10 @@ void Image_emergency_backup()
     Emergency_backup(SAFETYBACKUP_PREFIX_B "999999" BACKUP_FILE_EXTENSION,Spare.visible_image.Image, Spare.image_width, Spare.image_height, &Spare.palette);
 }
 
-T_Format * Get_fileformat(byte format)
+const T_Format * Get_fileformat(byte format)
 {
   unsigned int i;
-  T_Format * safe_default = File_formats;
+  const T_Format * safe_default = File_formats;
   
   for (i=0; i < Nb_known_formats(); i++)
   {
