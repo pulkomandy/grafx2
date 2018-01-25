@@ -107,7 +107,7 @@ else
     OPTIM = 3
     CP = cp
     ZIP = zip
-    PLATFORMFILES = gfx2.png
+    PLATFORMFILES = ../share/grafx2/gfx2.png
     # Where the SDL frameworks are located
     FWDIR = /Library/Frameworks
     BIN = ../bin/grafx2
@@ -256,7 +256,7 @@ endif
     RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     ZIP = zip
-    PLATFORMFILES = gfx2.png
+    PLATFORMFILES = ../share/grafx2/gfx2.png
     BIN = ../bin/grafx2
     COPT = -W -Wall -std=c99 -c -g -gstabs -D__TRU64__ $(shell sdl-config --cflags) $(TTFCOPT) $(LUACOPT)
     LOPT = $(shell sdl-config --libs) -lSDL_image $(TTFLOPT) -lpng $(LUALOPT) -lm
@@ -272,7 +272,7 @@ endif
     RMDIR = rmdir
     CP = cp
     ZIP = zip
-    PLATFORMFILES = gfx2.png
+    PLATFORMFILES = ../share/grafx2/gfx2.png
     CC = gcc
     BIN = ../bin/grafx2.ttp
     LUALOPT = -llua
@@ -292,7 +292,7 @@ endif
     RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     ZIP = zip
-    PLATFORMFILES = gfx2.png
+    PLATFORMFILES = ../share/grafx2/gfx2.png
     LUACOPT = -I/resources/indexes/include
     LUALOPT = -llua
     BIN = ../bin/grafx2
@@ -309,7 +309,7 @@ endif
     RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     ZIP = zip
-    PLATFORMFILES = gfx2.png
+    PLATFORMFILES = ../share/grafx2/gfx2.png
     ifneq ($(ATARICROSS),1)
       ifeq ($(NOLUA),1)
         LUACOPT =
