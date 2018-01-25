@@ -52,6 +52,11 @@ endif
 
 PLATFORMOBJ =
 
+TAR = tar
+TARTRANSFORM = $(shell if $(TAR) --version | grep 'GNU tar' > /dev/null ; then \
+                         echo "--strip=1 --transform 's,^,grafx2/,g'" ; else \
+                         echo "-s '/\.\./grafx2/'" ; fi )
+
 # There is no uname under windows, but we can guess we are there with the COMSPEC env.var
 # Windows specific
 ifdef COMSPEC
@@ -622,10 +627,10 @@ release : version $(BIN)
 # Create a zip archive ready for upload to the website, including binaries and sourcecode
 ziprelease: version $(BIN) release
 	echo `sed "s/.*=\"\(.*\)\";/\1/" pversion.c`.$(GIT_REVISION) | tr " :" "_-" | sed -e "s/\(wip\)\\./\1/I" > $(OBJDIR)/versiontag
-	tar cvzf "../src-`cat $(OBJDIR)/versiontag`.tgz" --strip=1 ../src/*.c ../src/*.cpp ../src/*.h ../src/Makefile ../src/Makefile.dep ../src/gfx2.ico ../src/Grafx2_Prefix.pch ../src/SDLMain.m
+	$(TAR) czf "../src-`cat $(OBJDIR)/versiontag`.tgz" --strip=1 ../src/*.c ../src/*.cpp ../src/*.h ../src/Makefile ../src/Makefile.dep ../src/gfx2.ico ../src/Grafx2_Prefix.pch ../src/SDLMain.m
 	cd .. && $(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR:../%=%)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" $(BIN:../%=%) share/grafx2/gfx2def.ini $(SCRIPT_FILES:../%=%) $(SKIN_FILES:../%=%) share/grafx2/gfx2.gif share/icons/grafx2.svg doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt doc/PF_fonts.txt $(FONT_FILES:../%=%) doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt doc/README-lua.txt src-`cat $(OBJDIR:../%=%)/versiontag`.tgz $(PLATFORMFILES:../%=%)
 	$(DELCOMMAND) "../src-`cat $(OBJDIR)/versiontag`.tgz"
-	tar cvzf "../grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-src.tgz" --strip=1 --transform 's,^,grafx2/,g' ../src/*.c ../src/*.cpp ../src/*.h ../src/Makefile ../src/Makefile.dep ../share/grafx2/gfx2def.ini $(SCRIPT_FILES) $(SKIN_FILES) ../src/gfx2.ico ../share/grafx2/gfx2.gif ../share/icons/grafx2.svg ../doc/README.txt ../doc/COMPILING.txt ../doc/gpl-2.0.txt ../doc/PF_fonts.txt ../misc/unix/grafx2.1 ../misc/unix/grafx2.xpm ../misc/unix/grafx2.desktop ../misc/morphos/grafx2.info $(FONT_FILES) ../src/Grafx2_Prefix.pch ../src/SDLMain.m
+	$(TAR) czf "../grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-src.tgz" $(TARTRANSFORM) ../src/*.c ../src/*.cpp ../src/*.h ../src/Makefile ../src/Makefile.dep ../share/grafx2/gfx2def.ini $(SCRIPT_FILES) $(SKIN_FILES) ../src/gfx2.ico ../share/grafx2/gfx2.gif ../share/icons/grafx2.svg ../doc/README.txt ../doc/COMPILING.txt ../doc/gpl-2.0.txt ../doc/PF_fonts.txt ../misc/unix/grafx2.1 ../misc/unix/grafx2.xpm ../misc/unix/grafx2.desktop ../misc/morphos/grafx2.info $(FONT_FILES) ../src/Grafx2_Prefix.pch ../src/SDLMain.m
 	$(DELCOMMAND) "$(OBJDIR)/versiontag"
 
 $(BIN) : $(OBJ)
