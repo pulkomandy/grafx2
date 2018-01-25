@@ -67,7 +67,7 @@ ifdef COMSPEC
   OBJDIR = ../obj/win32
   # Resources (icon)
   WINDRES = windres.exe
-  PLATFORMOBJ = $(OBJDIR)/winres.o
+  PLATFORMOBJ = winres.o
   PLATFORM = win32
   #some misc files we have to add to the release archive under windows.
   PLATFORMFILES = bin/SDL.dll bin/SDL_image.dll bin/libpng14-14.dll bin/zlib1.dll $(TTFLIBS)
@@ -153,7 +153,7 @@ endif
     CC = gcc
     #CC = nccgen -ncgcc -ncld -ncfabs
     OBJDIR = ../obj/macosx
-    PLATFORMOBJ = $(OBJDIR)/SDLMain.o
+    PLATFORMOBJ = SDLMain.o
     FCLOPT = 
     MACAPPEXE = Grafx2.app/Contents/MacOS/Grafx2
     NOTTF = 1
@@ -211,7 +211,7 @@ endif
     RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     BIN = ../bin/grafx2
-    PLATFORMOBJ = $(OBJDIR)/haiku.o
+    PLATFORMOBJ = haiku.o
     ifeq ($(NOLUA),1)
       LUACOPT =
       LUALOPT =
@@ -479,7 +479,18 @@ endif
 .PHONY : all debug release clean depend zip version force install uninstall
 
 # This is the list of the objects we want to build. Dependancies are built by "make depend" automatically.
-OBJ = $(OBJDIR)/main.o $(OBJDIR)/init.o $(OBJDIR)/graph.o $(OBJDIR)/sdlscreen.o  $(OBJDIR)/misc.o $(OBJDIR)/special.o $(OBJDIR)/buttons.o $(OBJDIR)/palette.o $(OBJDIR)/help.o $(OBJDIR)/operatio.o $(OBJDIR)/pages.o $(OBJDIR)/loadsave.o $(OBJDIR)/readline.o $(OBJDIR)/engine.o $(OBJDIR)/filesel.o $(OBJDIR)/op_c.o $(OBJDIR)/readini.o $(OBJDIR)/saveini.o $(OBJDIR)/shade.o $(OBJDIR)/keyboard.o $(OBJDIR)/io.o $(OBJDIR)/version.o $(OBJDIR)/text.o $(OBJDIR)/SFont.o $(OBJDIR)/setup.o $(OBJDIR)/pxsimple.o $(OBJDIR)/pxtall.o $(OBJDIR)/pxwide.o $(OBJDIR)/pxdouble.o $(OBJDIR)/pxtriple.o $(OBJDIR)/pxtall2.o $(OBJDIR)/pxtall3.o $(OBJDIR)/pxwide2.o $(OBJDIR)/pxquad.o $(OBJDIR)/windows.o $(OBJDIR)/brush.o $(OBJDIR)/realpath.o $(OBJDIR)/mountlist.o $(OBJDIR)/input.o $(OBJDIR)/hotkeys.o $(OBJDIR)/transform.o $(OBJDIR)/pversion.o $(OBJDIR)/factory.o $(PLATFORMOBJ) $(OBJDIR)/fileformats.o $(OBJDIR)/miscfileformats.o $(OBJDIR)/libraw2crtc.o $(OBJDIR)/brush_ops.o $(OBJDIR)/buttons_effects.o $(OBJDIR)/layers.o $(OBJDIR)/oldies.o $(OBJDIR)/tiles.o $(OBJDIR)/colorred.o
+OBJS = main.o init.o graph.o sdlscreen.o misc.o special.o \
+       buttons.o palette.o help.o operatio.o pages.o loadsave.o \
+       readline.o engine.o filesel.o op_c.o readini.o saveini.o \
+       shade.o keyboard.o io.o version.o text.o SFont.o setup.o \
+       pxsimple.o pxtall.o pxwide.o pxdouble.o pxtriple.o \
+       pxtall2.o pxtall3.o pxwide2.o pxquad.o \
+       windows.o brush.o realpath.o mountlist.o input.o hotkeys.o \
+       transform.o pversion.o factory.o $(PLATFORMOBJ) \
+       fileformats.o miscfileformats.o libraw2crtc.o \
+       brush_ops.o buttons_effects.o layers.o \
+       oldies.o tiles.o colorred.o
+OBJ = $(addprefix $(OBJDIR)/, $(OBJS))
 
 SKIN_FILES = ../share/grafx2/skins/skin_classic.png ../share/grafx2/skins/skin_modern.png ../share/grafx2/skins/skin_DPaint.png ../share/grafx2/skins/font_Classic.png ../share/grafx2/skins/font_Fun.png ../share/grafx2/skins/font_Fairlight.png ../share/grafx2/skins/font_Melon.png ../share/grafx2/skins/font_DPaint.png ../share/grafx2/skins/skin_scenish.png ../share/grafx2/skins/font_Seen.png ../share/grafx2/skins/skin_Aurora.png
 
@@ -587,7 +598,7 @@ ziprelease: version $(BIN) release
 	$(DELCOMMAND) "$(OBJDIR)/versiontag"
 
 $(BIN) : $(OBJ)
-	test -d ../bin || $(MKDIR) ../bin
+	@test -d ../bin || $(MKDIR) ../bin
 	$(CC) $(OBJ) -o $(BIN) $(LOPT) $(LFLAGS)
 ifeq ($(PLATFORM),Haiku)
 	rc -o $(OBJDIR)/grafx2.rsrc grafx2.rdef
