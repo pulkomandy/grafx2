@@ -490,15 +490,41 @@ OBJS = main.o init.o graph.o sdlscreen.o misc.o special.o \
        fileformats.o miscfileformats.o libraw2crtc.o \
        brush_ops.o buttons_effects.o layers.o \
        oldies.o tiles.o colorred.o
-OBJ = $(addprefix $(OBJDIR)/, $(OBJS))
+OBJ = $(addprefix $(OBJDIR)/,$(OBJS))
 
-SKIN_FILES = ../share/grafx2/skins/skin_classic.png ../share/grafx2/skins/skin_modern.png ../share/grafx2/skins/skin_DPaint.png ../share/grafx2/skins/font_Classic.png ../share/grafx2/skins/font_Fun.png ../share/grafx2/skins/font_Fairlight.png ../share/grafx2/skins/font_Melon.png ../share/grafx2/skins/font_DPaint.png ../share/grafx2/skins/skin_scenish.png ../share/grafx2/skins/font_Seen.png ../share/grafx2/skins/skin_Aurora.png
+SKINS = skin_classic.png skin_modern.png skin_DPaint.png \
+        font_Classic.png font_Fun.png font_Fairlight.png \
+        font_Melon.png font_DPaint.png \
+        skin_scenish.png font_Seen.png skin_Aurora.png
+SKIN_FILES = $(addprefix ../share/grafx2/skins/,$(SKINS))
 
-SCRIPT_FILES = ../share/grafx2/scripts/samples_2.4/brush/ApplyColor.lua ../share/grafx2/scripts/samples_2.4/brush/Fisheye.lua ../share/grafx2/scripts/samples_2.4/brush/GrayscaleAvg.lua ../share/grafx2/scripts/samples_2.4/brush/GrayscaleDesat.lua ../share/grafx2/scripts/samples_2.4/brush/Halfsmooth.lua ../share/grafx2/scripts/samples_2.4/brush/Waves.lua ../share/grafx2/scripts/samples_2.4/demo/3DPalette.lua ../share/grafx2/scripts/samples_2.4/demo/Ellipse.lua ../share/grafx2/scripts/samples_2.4/demo/FlipPicture.lua \
-../share/grafx2/scripts/samples_2.4/demo/SierpinskyCarpet.lua ../share/grafx2/scripts/samples_2.4/demo/SierpinskyTriangle.lua ../share/grafx2/scripts/samples_2.4/demo/Spritesheet.lua ../share/grafx2/scripts/samples_2.4/demo/brush/Amigaball.lua ../share/grafx2/scripts/samples_2.4/demo/brush/ColorSphere.lua ../share/grafx2/scripts/samples_2.4/demo/brush/FindAA.lua ../share/grafx2/scripts/samples_2.4/demo/brush/Mandelbrot.lua ../share/grafx2/scripts/samples_2.4/libs/dawnbringer_lib.lua ../share/grafx2/scripts/samples_2.4/libs/memory.lua \
-../share/grafx2/scripts/samples_2.4/palette/Desaturate.lua ../share/grafx2/scripts/samples_2.4/palette/ExpandColors.lua ../share/grafx2/scripts/samples_2.4/palette/FillColorCube.lua ../share/grafx2/scripts/samples_2.4/palette/InvertedRGB.lua ../share/grafx2/scripts/samples_2.4/palette/Set3bit.lua ../share/grafx2/scripts/samples_2.4/palette/Set6bit.lua ../share/grafx2/scripts/samples_2.4/palette/SetC64Palette.lua ../share/grafx2/scripts/samples_2.4/palette/ShiftHue.lua ../share/grafx2/scripts/samples_2.4/picture/CellColourReducer.lua \
-../share/grafx2/scripts/samples_2.4/picture/DrawGridIsometric.lua ../share/grafx2/scripts/samples_2.4/picture/DrawgridOrthogonal_Index.lua ../share/grafx2/scripts/samples_2.4/picture/DrawGridOrthogonal_RGB.lua ../share/grafx2/scripts/samples_2.4/picture/GlassGridFilter.lua ../share/grafx2/scripts/samples_2.4/picture/PaletteToPicture.lua ../share/grafx2/scripts/samples_2.4/picture/Pic2isometric.lua ../share/grafx2/scripts/samples_2.4/picture/Rainbow-Dark2Bright.lua ../share/grafx2/scripts/samples_2.4/picture/RemapImage2RGB.lua \
-../share/grafx2/scripts/samples_2.4/picture/RemapImage2RGB_ed.lua ../share/grafx2/scripts/samples_2.4/picture/RemapImageTo3bitPal.lua ../share/grafx2/scripts/samples_2.4/picture/XBitColourXpaceFromPalette.lua ../share/grafx2/scripts/samples_2.4/picture/Tiler.lua
+SCRIPTS_BRUSH = ApplyColor.lua Fisheye.lua GrayscaleAvg.lua \
+                GrayscaleDesat.lua Halfsmooth.lua Waves.lua
+SCRIPTS_DEMO = 3DPalette.lua Ellipse.lua FlipPicture.lua \
+               SierpinskyCarpet.lua SierpinskyTriangle.lua \
+               Spritesheet.lua
+SCRIPTS_DEMO_BRUSH = Amigaball.lua ColorSphere.lua \
+                     FindAA.lua Mandelbrot.lua
+SCRIPTS_LIB = dawnbringer_lib.lua memory.lua
+SCRIPTS_PAL = Desaturate.lua ExpandColors.lua FillColorCube.lua \
+              InvertedRGB.lua Set3bit.lua Set6bit.lua \
+              SetC64Palette.lua ShiftHue.lua
+SCRIPTS_PIC = CellColourReducer.lua DrawGridIsometric.lua \
+              DrawgridOrthogonal_Index.lua DrawGridOrthogonal_RGB.lua \
+              GlassGridFilter.lua PaletteToPicture.lua Pic2isometric.lua \
+              Rainbow-Dark2Bright.lua RemapImage2RGB.lua \
+              RemapImage2RGB_ed.lua RemapImageTo3bitPal.lua \
+              XBitColourXpaceFromPalette.lua Tiler.lua
+# FontConvert.lua
+# picture/others-8bit/
+# picture/thomson/
+SCRIPT_FILES = $(addprefix ../share/grafx2/scripts/samples_2.4/, \
+                 $(addprefix brush/,$(SCRIPTS_BRUSH)) \
+                 $(addprefix demo/,$(SCRIPTS_DEMO)) \
+                 $(addprefix demo/brush/,$(SCRIPTS_DEMO_BRUSH)) \
+                 $(addprefix libs/,$(SCRIPTS_LIB)) \
+                 $(addprefix palette/,$(SCRIPTS_PAL)) \
+                 $(addprefix picture/,$(SCRIPTS_PIC)) )
 
 FONT_FILES = ../share/grafx2/fonts/8pxfont.png ../share/grafx2/fonts/Tuffy.ttf ../share/grafx2/fonts/PF_Arma_5__.png ../share/grafx2/fonts/PF_Easta_7_.png ../share/grafx2/fonts/PF_Easta_7__.png ../share/grafx2/fonts/PF_Ronda_7__.png ../share/grafx2/fonts/PF_Tempesta_5.png ../share/grafx2/fonts/PF_Tempesta_5_.png ../share/grafx2/fonts/PF_Tempesta_5__.png ../share/grafx2/fonts/PF_Tempesta_5___.png ../share/grafx2/fonts/PF_Tempesta_7.png ../share/grafx2/fonts/PF_Tempesta_7_.png ../share/grafx2/fonts/PF_Tempesta_7__.png ../share/grafx2/fonts/PF_Tempesta_7___.png ../share/grafx2/fonts/PF_Westa_7_.png ../share/grafx2/fonts/PF_Westa_7__.png
 
