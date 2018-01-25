@@ -526,7 +526,12 @@ SCRIPT_FILES = $(addprefix ../share/grafx2/scripts/samples_2.4/, \
                  $(addprefix palette/,$(SCRIPTS_PAL)) \
                  $(addprefix picture/,$(SCRIPTS_PIC)) )
 
-FONT_FILES = ../share/grafx2/fonts/8pxfont.png ../share/grafx2/fonts/Tuffy.ttf ../share/grafx2/fonts/PF_Arma_5__.png ../share/grafx2/fonts/PF_Easta_7_.png ../share/grafx2/fonts/PF_Easta_7__.png ../share/grafx2/fonts/PF_Ronda_7__.png ../share/grafx2/fonts/PF_Tempesta_5.png ../share/grafx2/fonts/PF_Tempesta_5_.png ../share/grafx2/fonts/PF_Tempesta_5__.png ../share/grafx2/fonts/PF_Tempesta_5___.png ../share/grafx2/fonts/PF_Tempesta_7.png ../share/grafx2/fonts/PF_Tempesta_7_.png ../share/grafx2/fonts/PF_Tempesta_7__.png ../share/grafx2/fonts/PF_Tempesta_7___.png ../share/grafx2/fonts/PF_Westa_7_.png ../share/grafx2/fonts/PF_Westa_7__.png
+FONTS = 8pxfont.png Tuffy.ttf PF_Arma_5__.png \
+        PF_Easta_7_.png PF_Easta_7__.png PF_Ronda_7__.png \
+        PF_Tempesta_5.png PF_Tempesta_5_.png PF_Tempesta_5__.png PF_Tempesta_5___.png \
+        PF_Tempesta_7.png PF_Tempesta_7_.png PF_Tempesta_7__.png PF_Tempesta_7___.png \
+        PF_Westa_7_.png PF_Westa_7__.png
+FONT_FILES = $(addprefix ../share/grafx2/fonts/,$(FONTS))
 
 
 ifeq ($(PLATFORM),Darwin)
