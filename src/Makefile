@@ -120,7 +120,7 @@ else
 endif
 
     # these are for use with macports
-    LUAPKG := $(shell for p in lua5.1 lua-5.1 lua51 lua ; do pkg-config --exists $$p && echo $$p && break ; done)
+    LUAPKG := $(shell for p in lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua51 lua ; do pkg-config --exists $$p && echo $$p && break ; done)
 ifneq ($(LUAPKG), )
     LUACOPT = $(shell pkg-config $(LUAPKG) --cflags)
     LUALOPT = $(shell pkg-config $(LUAPKG) --libs)
@@ -310,7 +310,7 @@ endif
         LUACOPT =
         LUALOPT =
       else
-        LUAPKG := $(shell for p in lua5.1 lua-5.1 lua51 lua ; do pkg-config --exists $$p && echo $$p && break ; done)
+        LUAPKG := $(shell for p in lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua51 lua ; do pkg-config --exists $$p && echo $$p && break ; done)
         LUACOPT = $(shell pkg-config $(LUAPKG) --cflags)
         LUALOPT = $(shell pkg-config $(LUAPKG) --libs)
       endif
