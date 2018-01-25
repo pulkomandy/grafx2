@@ -2213,9 +2213,12 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   Back_color=initial_back_color;
   if (Windows_open <= 1)
   {
-    Set_palette(Main.palette);  //TODO vrai backup?
+    // Restore Main.palette only when we are not going back to another window
+    // (we let the other window take care of its palette and remapping)
+    // This test was added for Load/Save dialog called from the Palette window
+    Set_palette(Main.palette);
 
-    Compute_optimal_menu_colors(Main.palette);//TODO
+    Compute_optimal_menu_colors(Main.palette);
   }
   temp=(Window_pos_Y+(Window_height*Menu_factor_Y)<Menu_Y_before_window);
 
