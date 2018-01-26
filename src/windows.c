@@ -2952,7 +2952,7 @@ void Remap_screen_after_menu_colors_change(void)
     }
 
     // Remap windows and menu in the backgrounds buffers
-    Remap_UI_window_backgrounds(conversion_table);
+    Remap_UI_in_window_backgrounds(conversion_table);
     if (Menu_is_visible_before_window)
     {
       /*

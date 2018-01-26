@@ -113,7 +113,7 @@ short Window_get_clicked_button(void);
 /// Remaps all the colors from the window background buffers from row Min_Y to row Max_Y
 void Remap_window_backgrounds(const byte * conversion_table, int Min_Y, int Max_Y);
 /// Remaps only UI elements (Windows + Menu) in all window background buffers
-void Remap_UI_window_backgrounds(const byte * conversion_table);
+void Remap_UI_in_window_backgrounds(const byte * conversion_table);
 
 void Pixel_background(int x_pos, int y_pos, byte color);
 ///

@@ -3531,7 +3531,7 @@ void Remap_window_backgrounds(const byte * conversion_table, int Min_Y, int Max_
   }
 }
 
-void Remap_UI_window_backgrounds(const byte * conversion_table)
+void Remap_UI_in_window_backgrounds(const byte * conversion_table)
 {
   int i, j;
   int pos_y;
