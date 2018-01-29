@@ -520,17 +520,25 @@ SCRIPTS_PIC = CellColourReducer.lua DrawGridIsometric.lua \
               GlassGridFilter.lua PaletteToPicture.lua Pic2isometric.lua \
               Rainbow-Dark2Bright.lua RemapImage2RGB.lua \
               RemapImage2RGB_ed.lua RemapImageTo3bitPal.lua \
-              XBitColourXpaceFromPalette.lua Tiler.lua
-# FontConvert.lua
-# picture/others-8bit/
-# picture/thomson/
+              XBitColourXpaceFromPalette.lua Tiler.lua \
+              FontConvert.lua
+SCRIPTS_PIC_8BIT = ostro_oric.lua ostro_zx.lua \
+                   lib/ostro_other.lua
+SCRIPTS_PIC_THOMSON = bayer4_mo5.lua bayer4_to8.lua \
+                      none_mo5.lua none_to8.lua none_to9.lua \
+                      ostro_mo5.lua ostro_to7.lua ostro_to8.lua ostro_to9.lua \
+                      lib/bayer.lua lib/color.lua lib/color_reduction.lua \
+                      lib/convex_hull.lua lib/ostromoukhov.lua \
+                      lib/thomson.lua
 SCRIPT_FILES = $(addprefix ../share/grafx2/scripts/samples_2.4/, \
                  $(addprefix brush/,$(SCRIPTS_BRUSH)) \
                  $(addprefix demo/,$(SCRIPTS_DEMO)) \
                  $(addprefix demo/brush/,$(SCRIPTS_DEMO_BRUSH)) \
                  $(addprefix libs/,$(SCRIPTS_LIB)) \
                  $(addprefix palette/,$(SCRIPTS_PAL)) \
-                 $(addprefix picture/,$(SCRIPTS_PIC)) )
+                 $(addprefix picture/,$(SCRIPTS_PIC)) \
+                 $(addprefix picture/others-8bit/,$(SCRIPTS_PIC_8BIT)) \
+                 $(addprefix picture/thomson/,$(SCRIPTS_PIC_THOMSON)) )
 
 FONTS = 8pxfont.png Tuffy.ttf PF_Arma_5__.png \
         PF_Easta_7_.png PF_Easta_7__.png PF_Ronda_7__.png \
