@@ -87,7 +87,7 @@ else
     RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     BIN = ../bin/grafx2
-    COPT = -Wall -c -gstabs $(shell sdl-config --cflags) $(TTFCOPT)
+    COPT = -Wall -gstabs $(shell sdl-config --cflags) $(TTFCOPT)
     LOPT = $(shell sdl-config --libs) -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lft2
     CC = gcc
     OBJDIR = ../obj/amiga
@@ -138,7 +138,7 @@ endif
 endif
 
     # these are for everyone
-    COPT = -D_DARWIN_C_SOURCE -D__macosx__ -D__linux__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -c -g $(LUACOPT) $(SDLCOPT) $(TTFCOPT) -I/usr/include
+    COPT = -D_DARWIN_C_SOURCE -D__macosx__ -D__linux__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -g $(LUACOPT) $(SDLCOPT) $(TTFCOPT) -I/usr/include
 ifdef MACOSX_LION
     LOPT = $(SDLLOPT) $(LUALOPT) -framework libpng14 -lz
 else
@@ -184,7 +184,7 @@ endif
     RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     BIN = ../bin/grafx2
-    COPT = -Wall -gstabs -c $(shell sdl-config --cflags) $(TTFCOPT)
+    COPT = -Wall -gstabs $(shell sdl-config --cflags) $(TTFCOPT)
     LOPT = -lSDL_image $(shell sdl-config --libs) -lpng -ljpeg -lz $(TTFLOPT)
     CC = gcc
     OBJDIR = ../obj/morphos
@@ -200,7 +200,7 @@ endif
     RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     BIN = ../bin/grafx2
-    COPT = -W -Wall -c -g $(shell sdl-config --cflags) $(TTFCOPT) -I/boot/home/config/include
+    COPT = -W -Wall -g $(shell sdl-config --cflags) $(TTFCOPT) -I/boot/home/config/include
     LOPT = $(shell sdl-config --libs) -lSDL_image -lpng -ljpeg -lz $(TTFLOPT)
     CC = gcc
     OBJDIR = ../obj/beos
@@ -223,7 +223,7 @@ endif
       LUACOPT = -D__ENABLE_LUA__ $(shell pkg-config $(LUAPKG) --cflags)
       LUALOPT = $(shell pkg-config $(LUAPKG) --libs)
     endif
-    COPT = -W -Wall -Werror -c -g $(shell sdl-config --cflags) $(TTFCOPT) -I/boot/common/include $(LUACOPT)
+    COPT = -W -Wall -Werror -g $(shell sdl-config --cflags) $(TTFCOPT) -I/boot/common/include $(LUACOPT)
     COPT += -DENABLE_FILENAMES_ICONV
     LOPT = $(shell sdl-config --libs) -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lfreetype -lbe $(LUALOPT) -liconv
     CC = gcc
@@ -240,7 +240,7 @@ endif
     RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     BIN = ../bin/grafx2
-    COPT = -W -Wall -Wdeclaration-after-statement -c -g $(shell sdl-config --cflags) $(TTFCOPT)
+    COPT = -W -Wall -Wdeclaration-after-statement -g $(shell sdl-config --cflags) $(TTFCOPT)
     LOPT = $(shell sdl-config --libs) -lSDL_image -lpng -ljpeg -lz $(TTFLOPT)
     CC = gcc
     OBJDIR = ../obj/skyos
@@ -256,7 +256,7 @@ endif
     ZIP = zip
     PLATFORMFILES = ../share/grafx2/gfx2.png
     BIN = ../bin/grafx2
-    COPT = -W -Wall -std=c99 -c -g -gstabs -D__TRU64__ $(shell sdl-config --cflags) $(TTFCOPT) $(LUACOPT)
+    COPT = -W -Wall -std=c99 -g -gstabs -D__TRU64__ $(shell sdl-config --cflags) $(TTFCOPT) $(LUACOPT)
     LOPT = $(shell sdl-config --libs) -lSDL_image $(TTFLOPT) -lpng $(LUALOPT) -lm
     OBJDIR = ../obj/unix
     FCLOPT = -lfontconfig
@@ -280,7 +280,7 @@ endif
     STACK = stack
     FIX_FLAGS = flags
     FCLOPT = 
-    COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -DNO_INLINE_MATH -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $(JOYCOPT) $(LUACOPT)
+    COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -DNO_INLINE_MATH -O$(OPTIM) -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $(JOYCOPT) $(LUACOPT)
     LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) $(LAYERLOPT)
   else
   ifeq ($(PLATFORM),syllable) #11
@@ -294,7 +294,7 @@ endif
     LUACOPT = -I/resources/indexes/include
     LUALOPT = -llua
     BIN = ../bin/grafx2
-    COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g `sdl-config --cflags` -I/resources/indexes/include/SDL $(TTFCOPT) $(LUACOPT) $(JOYCOPT) -O$(OPTIM)
+    COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -g `sdl-config --cflags` -I/resources/indexes/include/SDL $(TTFCOPT) $(LUACOPT) $(JOYCOPT) -O$(OPTIM)
     LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng -lz $(LUALOPT) -lm
     CC = gcc
     OBJDIR = ../obj/syllable
@@ -385,13 +385,13 @@ endif
         STACK = m68k-atari-mint-stack
         FIX_FLAGS = m68k-atari-mint-flags
         FCLOPT = 
-        COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -ffast-math -O$(OPTIM) -c -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $(JOYCOPT) $(LUACOPT)
+        COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -ffast-math -O$(OPTIM) -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $(JOYCOPT) $(LUACOPT)
         LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) -lm $(LAYERLOPT) -Wl,--stack,8k 
       else
 
         # Compiles a regular linux executable for the native platform
         BIN = ../bin/grafx2
-        COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -c -g $(shell sdl-config --cflags) $(TTFCOPT) $(LUACOPT) $(JOYCOPT) -O$(OPTIM)
+        COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -g $(shell sdl-config --cflags) $(TTFCOPT) $(LUACOPT) $(JOYCOPT) -O$(OPTIM)
         COPT += $(shell pkg-config --cflags libpng)
 
         ifneq ($(PLATFORM), FreeBSD)
