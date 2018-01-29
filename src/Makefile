@@ -53,9 +53,7 @@ endif
 PLATFORMOBJ =
 
 TAR = tar
-TARTRANSFORM = $(shell if $(TAR) --version | grep 'GNU tar' > /dev/null ; then \
-                         echo "--strip=1 --transform 's,^,grafx2/,g'" ; else \
-                         echo "-s '/\.\./grafx2/'" ; fi )
+TARTRANSFORM = --strip=1 --transform 's,^,grafx2/,g'
 
 # There is no uname under windows, but we can guess we are there with the COMSPEC env.var
 # Windows specific
@@ -309,6 +307,9 @@ endif
     RMDIR = rmdir --ignore-fail-on-non-empty
     CP = cp
     ZIP = zip
+    TARTRANSFORM = $(shell if $(TAR) --version | grep 'GNU tar' > /dev/null ; then \
+                             echo "--strip=1 --transform 's,^,grafx2/,g'" ; else \
+                             echo "-s '/\.\./grafx2/'" ; fi )
     PLATFORMFILES = ../share/grafx2/gfx2.png
     ifneq ($(ATARICROSS),1)
       ifeq ($(NOLUA),1)
