@@ -248,7 +248,7 @@ typedef struct
 /// Data for one line of the "Help" screens.
 typedef struct {
   char Line_type;     ///< Kind of line: 'N' for normal line, 'S' for a bold line, 'K' for a line with keyboard shortcut, 'T' and '-' for upper and lower titles.
-  char * Text;        ///< Displayed string.
+  const char * Text;  ///< Displayed string.
   int Line_parameter; ///< Generic parameter depending on line type. For 'K' lines: a shortcut identifier. For others: unused.
 } T_Help_table;
 

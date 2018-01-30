@@ -4,7 +4,7 @@ OPT = WIN32CROSS=1 \
 endif
 
 .PHONY:	all tools grafx2 ziprelease 3rdparty win32installer \
-        doc doxygen docarchive doxygenarchive
+        doc doxygen docarchive doxygenarchive htmldoc
 
 all:	grafx2 tools
 
@@ -27,8 +27,13 @@ tools:
 win32installer:
 	$(MAKE) -C install/
 
+# generate Doxygen to doc/doxygen
 doxygen:
 	$(MAKE) -C tools/ doxygen
 
 doxygenarchive:
 	$(MAKE) -C tools/ doxygenarchive
+
+# generate HTML doc to doc/html
+htmldoc:
+	$(MAKE) -C src/ htmldoc

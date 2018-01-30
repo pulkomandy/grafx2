@@ -99,6 +99,7 @@ ifdef COMSPEC
   RMDIR = rmdir --ignore-fail-on-non-empty
   CP = cp
   BIN = ../bin/grafx2.exe
+  GENERATEDOCBIN = ../bin/generatedoc.exe
   COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb `sdl-config --cflags` $(TTFCOPT) $(JOYCOPT) $(LUACOPT)
   LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng -lz $(LUALOPT)
   LUALOPT = -llua
@@ -112,6 +113,8 @@ ifdef COMSPEC
   ZIP = zip
 else
 
+# default for GENERATEDOCBIN
+  GENERATEDOCBIN = ../bin/generatedoc
 #For all other platforms, we can rely on uname
   PLATFORM = $(shell uname)
 
@@ -642,7 +645,7 @@ endif
 
 ### And now for the real build rules ###
 
-.PHONY : all debug release clean depend force install uninstall valgrind doc doxygen
+.PHONY : all debug release clean depend force install uninstall valgrind doc doxygen htmldoc
 
 # This is the list of the objects we want to build. Dependancies are built by "make depend" automatically.
 OBJS = main.o init.o graph.o $(APIOBJ) misc.o special.o \
@@ -661,6 +664,8 @@ ifndef NORECOIL
 OBJS += loadrecoil.o recoil.o
 endif
 OBJ = $(addprefix $(OBJDIR)/,$(OBJS))
+
+GENERATEDOCOBJ = $(addprefix $(OBJDIR)/,generatedoc.o hotkeys.o keyboard.o)
 
 SKINS = skin_classic.png skin_modern.png skin_DPaint.png \
         font_Classic.png font_Fun.png font_Fairlight.png \
@@ -840,6 +845,10 @@ ifeq ($(PLATFORM),Haiku)
 	mimeset -f $(BIN)
 endif
 
+$(GENERATEDOCBIN): $(GENERATEDOCOBJ)
+	@test -d ../bin || $(MKDIR) ../bin
+	$(CC) $(GENERATEDOCOBJ) -o $(GENERATEDOCBIN) $(LOPT) $(LFLAGS)
+
 # GIT revision number
 version.c:	$(REVISION_CACHE)
 	echo "const char SVN_revision[]=\"$(GIT_REVISION)\";" > version.c
@@ -971,5 +980,9 @@ doc:	doxygen
 
 doxygen:
 	$(MAKE) -C ../tools doxygen
+
+htmldoc:	$(GENERATEDOCBIN)
+	$(MKDIR) ../doc/html
+	$(GENERATEDOCBIN) ../doc/html
 
 -include Makefile.dep

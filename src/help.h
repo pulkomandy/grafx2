@@ -63,4 +63,3 @@ const char * Keyboard_shortcut_value(word shortcut_number);
 void Remove_duplicate_shortcuts(void);
 
 #endif
-
