@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
   FILE* theFile;
   uint8_t buffer[256];
   uint16_t w,h;
-
+  uint16_t x,y;
 
   if(argc < 2)
   {
@@ -91,15 +91,18 @@ int main(int argc, char* argv[])
   if (i > 1)
     printf("Skipped %d meaningless bytes before image descriptor\n",i);
 
-  uint16_t x,y;
-
-	fread(&x,2,1,theFile);
-	fread(&y,2,1,theFile);
-	fread(&w,2,1,theFile);
-	fread(&h,2,1,theFile);
+  fread(&x,2,1,theFile);
+  fread(&y,2,1,theFile);
+  fread(&w,2,1,theFile);
+  fread(&h,2,1,theFile);
+  fread(buffer,1,1,theFile);
 
   printf("Image descriptor\n");
   printf("\tx=%d y=%d w=%d h=%d\n",x,y,w,h);
+  printf("\t%sLocal Color Table (%d colors) %sSorted, %s\n",
+         (buffer[0]&0x80)?"":"No ", 1 << ((buffer[0]&0x07)+1),
+         (buffer[0]&0x20)?"":"Not ",
+         (buffer[0]&0x40)?"Interlaced":"Progressive");
 
 	fclose(theFile);
 }
