@@ -3100,15 +3100,12 @@ void Save_GIF(T_IO_Context * context)
         LSDB.Width=context->Width;
         LSDB.Height=context->Height;
       }
-      LSDB.Resol  =0x97;          // Image en 256 couleurs, avec une palette
-      // 0x97 = 1001 0111
+      LSDB.Resol  = 0xF7;  // Global palette of 256 entries, 256 color image
+      // 0xF7 = 1111 0111
       // <Packed Fields>  =      Global Color Table Flag       1 Bit
       //                         Color Resolution              3 Bits
       //                         Sort Flag                     1 Bit
       //                         Size of Global Color Table    3 Bits
-      // TODO XXX Color resolution should be set to 7 = 8bit per RGB component
-      // it is set to 1 => 2bit per RGB component...
-      // I guess most decoders are ignoring it anyway
       LSDB.Backcol=context->Transparent_color;
       switch(context->Ratio)
       {
