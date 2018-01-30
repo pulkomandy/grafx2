@@ -26,11 +26,12 @@
 
 static void read_image(FILE * theFile);
 static void read_palette(FILE * theFile, int count);
+static void read_extension(FILE * theFile);
 
 int main(int argc, char* argv[])
 {
   FILE* theFile;
-  uint8_t buffer[256];
+  uint8_t buffer[8];
   uint16_t w,h;
 
   if(argc < 2)
@@ -78,19 +79,27 @@ int main(int argc, char* argv[])
   printf("Color palette:\n");
   read_palette(theFile, color_table_size);
 
-  int i = 0;
-  do {
-    fread(buffer,1,1,theFile);
-    printf("%02X ", buffer[0]);
-    i++;
-  } while (buffer[0] != ',');
-  printf("\n");
+  while (fread(buffer,1,1,theFile) == 1)
+  {
+    if (buffer[0] == ';') // 0x3B
+    {
+      printf("0x3B GIF Trailer Byte\n");
+      break;
+    }
+    else switch (buffer[0])
+    {
+      case '!': // 0x21
+        read_extension(theFile);
+        break;
+      case ',': // 0x2C
+        read_image(theFile);
+        break;
+      default:
+        printf("%02X ", buffer[0]);
+    }
+  }
 
-  if (i > 1)
-    printf("Skipped %d meaningless bytes before image descriptor\n",i);
-
-  read_image(theFile);
-
+  printf("offset : %lu\n", ftell(theFile));
 	fclose(theFile);
 }
 
@@ -119,6 +128,9 @@ static void read_image(FILE * theFile)
   if (buffer[0]&0x80)
     read_palette(theFile, color_table_size);
 
+  fread(buffer,1,1,theFile);
+  printf("\tLZW Minimum Code Size : %d\n", buffer[0]);
+
   while (!feof(theFile))
   {
     fread(buffer,1,1,theFile);
@@ -142,5 +154,52 @@ static void read_palette(FILE * theFile, int count)
     /*printf("\t%d: %u %u %u\t",i,buffer[0], buffer[1], buffer[2]);*/
     printf("   %3d: #%02x%02x%02x",i,buffer[0], buffer[1], buffer[2]);
     if ((i+1)%8 ==0)puts("");
+  }
+}
+
+static void read_extension(FILE * theFile)
+{
+  uint8_t extension_id;
+  uint8_t buffer[256];
+  int block_index = 0;
+  int i;
+
+  fread(&extension_id,1,1,theFile);
+  printf("extension 0x%02X ", extension_id);
+  switch (extension_id)
+  {
+    case 0xF9:
+      printf("Graphic Control Extension :");
+      break;
+    default:
+      break;
+  }
+  putchar('\n');
+  while (fread(buffer,1,1,theFile) == 1)  // Block size
+  {
+    if (buffer[0] == 0)
+      break;
+    fread(buffer+1,1,buffer[0],theFile);
+    switch (extension_id)
+    {
+      case 0xF9:
+        if (block_index == 0)
+        {
+          printf("\tDisposal method=%d, User Input Flag=%d, Transparent Color Flag=%d (Index %d=0x%02X)\n",
+                 (buffer[1] & 0x1C) >> 2, (buffer[1] & 0x02) >> 1, (buffer[1] & 0x01),
+                 buffer[4], buffer[4]);
+          printf("\tDelay Time : %lums\n", (((unsigned long)buffer[3] << 8) | buffer[2]) * 10);
+        }
+        break;
+      default:
+        printf("#%02d %3dbytes ", block_index, buffer[0]);
+        for (i = 1; i <= buffer[0]; i++)
+          printf("%02X ", buffer[i]);
+        printf("| ");
+        for (i = 1; i <= buffer[0]; i++)
+          putchar((buffer[i] >= ' ' && buffer[i] < 128)?buffer[i]:'.');
+        putchar('\n');
+    }
+    block_index++;
   }
 }
