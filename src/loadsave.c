@@ -1369,9 +1369,8 @@ void Init_context_brush(T_IO_Context * context, char *file_name, char *file_dire
   context->Width = Brush_width;
   context->Height = Brush_height;
   context->Nb_layers = 1;
-  // Solid save... could use BG color maybe
-  context->Transparent_color=0;
-  context->Background_transparent=0;
+  context->Transparent_color=Back_color;  // Transparent color for brushes
+  context->Background_transparent=1;
   context->Ratio=PIXEL_SIMPLE;
   context->Target_address=Brush;
   context->Pitch=Brush_width;

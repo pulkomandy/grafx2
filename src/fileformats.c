@@ -3210,7 +3210,7 @@ void Save_GIF(T_IO_Context * context)
             }
             else
             {
-              // Layered image
+              // Layered image or brush
               disposal_method = DISPOSAL_METHOD_DO_NOT_DISPOSE;
               if (current_layer==0)
                 GCE.Packed_fields=(disposal_method<<2)|(context->Background_transparent);
