@@ -26,24 +26,28 @@
 
 int main(int argc, char* argv[])
 {
-	FILE* theFile;
+  FILE* theFile;
+  uint8_t buffer[256];
+  uint16_t w,h;
 
-	if(argc != 2)
-	{
-		printf("%s file.gif\n",argv[0]);
-		exit(-1);
-	}
 
-	theFile = fopen(argv[1], "r");
+  if(argc < 2)
+  {
+    printf("%s file.gif\n",argv[0]);
+    exit(-1);
+  }
 
-	uint8_t buffer[256];
+  theFile = fopen(argv[1], "r");
+  if (theFile == NULL)
+  {
+    fprintf(stderr, "Failed to open file '%s'.\n", argv[1]);
+    exit(1);
+  }
 
 	fread(buffer, 1, 6, theFile);
   buffer[6] = 0;
 
 	printf("Signature: %6s\n", buffer);
-
-	uint16_t w,h;
 
 	fread(&w,2,1,theFile);
 	fread(&h,2,1,theFile);
@@ -52,13 +56,13 @@ int main(int argc, char* argv[])
 
   fread(buffer,1,3,theFile);
 
-  int colors = 1 << (((buffer[0]&0b01110000)>>4)+1);
+  int colors = 1 << (((buffer[0] & 0x70)>>4)+1); // 0x70 == 0b01110000
   int color_table_size = 1 << ((buffer[0]&0x7)+1);
 
-  printf("Color palette: %#02.2x\n",buffer[0]&0xFF);
-  if (buffer[0] & 0b10000000) {
+  printf("Color palette: 0x%02x\n",buffer[0]&0xFF);
+  if (buffer[0] & 0x80) { // 0x80 == 0b10000000
     printf("\tGlobal palette");
-    if(buffer[0] & 0b00001000)
+    if(buffer[0] & 0x08)  // 0x08 == 0b00001000
       printf(" SORTED");
     printf("\n");
   }
