@@ -3,6 +3,7 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
  *  Gif Analyzer tool
 
+    Copyright 2018 Thomas Bernard
     Copyright 2010 Adrien Destugues
 
     Grafx2 is free software; you can redistribute it and/or
@@ -22,14 +23,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <math.h>
+
+static void read_image(FILE * theFile);
+static void read_palette(FILE * theFile, int count);
 
 int main(int argc, char* argv[])
 {
   FILE* theFile;
   uint8_t buffer[256];
   uint16_t w,h;
-  uint16_t x,y;
 
   if(argc < 2)
   {
@@ -74,22 +76,31 @@ int main(int argc, char* argv[])
   if(buffer[2] != 0) printf("\t aspect ratio = %d/64\n", 15 + buffer[2]);
 
   printf("Color palette:\n");
-  for (int i = 0; i < color_table_size; i++)
-  {
-    fread(buffer,1,3,theFile);
-    /*printf("\t%d: %u %u %u\t",i,buffer[0], buffer[1], buffer[2]);*/
-    printf("   %3d: #%02x%02x%02x",i,buffer[0], buffer[1], buffer[2]);
-    if ((i+1)%8 ==0)puts("");
-  }
+  read_palette(theFile, color_table_size);
 
   int i = 0;
   do {
     fread(buffer,1,1,theFile);
+    printf("%02X ", buffer[0]);
     i++;
   } while (buffer[0] != ',');
+  printf("\n");
 
   if (i > 1)
     printf("Skipped %d meaningless bytes before image descriptor\n",i);
+
+  read_image(theFile);
+
+	fclose(theFile);
+}
+
+static void read_image(FILE * theFile)
+{
+  uint8_t buffer[256];
+  uint16_t x,y;
+  uint16_t w,h;
+  unsigned long total_bytes = 0, chunk_count = 0;
+  int color_table_size;
 
   fread(&x,2,1,theFile);
   fread(&y,2,1,theFile);
@@ -97,12 +108,39 @@ int main(int argc, char* argv[])
   fread(&h,2,1,theFile);
   fread(buffer,1,1,theFile);
 
+  color_table_size =  1 << ((buffer[0]&0x07)+1);
   printf("Image descriptor\n");
   printf("\tx=%d y=%d w=%d h=%d\n",x,y,w,h);
   printf("\t%sLocal Color Table (%d colors) %sSorted, %s\n",
-         (buffer[0]&0x80)?"":"No ", 1 << ((buffer[0]&0x07)+1),
+         (buffer[0]&0x80)?"":"No ", color_table_size,
          (buffer[0]&0x20)?"":"Not ",
          (buffer[0]&0x40)?"Interlaced":"Progressive");
 
-	fclose(theFile);
+  if (buffer[0]&0x80)
+    read_palette(theFile, color_table_size);
+
+  while (!feof(theFile))
+  {
+    fread(buffer,1,1,theFile);
+    if (buffer[0] == 0)
+      break;
+    fread(buffer+1,1,buffer[0],theFile);
+    total_bytes += buffer[0];
+    chunk_count++;
+  }
+  printf("  %lu bytes in %lu chunks\n", total_bytes, chunk_count);
+}
+
+static void read_palette(FILE * theFile, int count)
+{
+  uint8_t buffer[3];
+  int i;
+
+  for (i = 0; i < count; i++)
+  {
+    fread(buffer,1,3,theFile);
+    /*printf("\t%d: %u %u %u\t",i,buffer[0], buffer[1], buffer[2]);*/
+    printf("   %3d: #%02x%02x%02x",i,buffer[0], buffer[1], buffer[2]);
+    if ((i+1)%8 ==0)puts("");
+  }
 }
