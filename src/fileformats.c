@@ -595,6 +595,7 @@ void Load_IFF(T_IO_Context * context)
   dword dummy;
   int iff_format;
   int plane;
+  dword AmigaViewModes = 0;
 
   Get_full_filename(filename, context->File_name, context->File_directory);
 
@@ -724,6 +725,11 @@ void Load_IFF(T_IO_Context * context)
           }
           else
             File_error=47;
+        }
+        else if (memcmp(section, "CAMG", 4) == 0) //  	Amiga Viewport Modes
+        {
+          Read_dword_be(IFF_file, &AmigaViewModes); // HIRES=0x8000 LACE=0x4  HAM=0x800  HALFBRITE=0x80
+          section_size -= 4;
         }
         else if (memcmp(section, "BODY", 4) == 0)
         {
