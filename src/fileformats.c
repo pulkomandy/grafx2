@@ -573,6 +573,68 @@ void Set_IFF_color(word x_pos, byte color, word real_line_size, byte bitplanes)
     }
   }
 
+static void PBM_Decode(T_IO_Context * context, byte compression, word width, word height)
+{
+  byte * line_buffer;
+  word x_pos, y_pos;
+  word real_line_size = (width+1)&~1;
+
+  switch (compression)
+  {
+    case 0: // uncompressed
+      line_buffer=(byte *)malloc(real_line_size);
+      for (y_pos=0; ((y_pos<height) && (!File_error)); y_pos++)
+      {
+        if (Read_bytes(IFF_file,line_buffer,real_line_size))
+          for (x_pos=0; x_pos<width; x_pos++)
+            Set_pixel(context, x_pos,y_pos,line_buffer[x_pos]);
+        else
+          File_error=26;
+      }
+      free(line_buffer);
+      break;
+    case 1: // Compressed
+      for (y_pos=0; ((y_pos<height) && (!File_error)); y_pos++)
+      {
+        for (x_pos=0; ((x_pos<real_line_size) && (!File_error)); )
+        {
+          byte temp_byte, color;
+          if(Read_byte(IFF_file, &temp_byte)!=1)
+          {
+            File_error=27;
+            break;
+          }
+          if (temp_byte>127)
+          {
+            if(Read_byte(IFF_file, &color)!=1)
+            {
+              File_error=28;
+              break;
+            }
+            do {
+              Set_pixel(context, x_pos++,y_pos,color);
+            }
+            while(temp_byte++ != 0);
+          }
+          else
+            do
+            {
+              if(Read_byte(IFF_file, &color)!=1)
+              {
+                File_error=29;
+                break;
+              }
+              Set_pixel(context, x_pos++,y_pos,color);
+            }
+            while(temp_byte-- > 0);
+        }
+      }
+      break;
+    default:
+      Warning("PBM only supports compression type 0 and 1");
+      File_error = 50;
+  }
+}
 
 void Load_IFF(T_IO_Context * context)
 {
@@ -593,7 +655,7 @@ void Load_IFF(T_IO_Context * context)
   byte  color;
   long  file_size;
   dword dummy;
-  int iff_format;
+  int iff_format = 0;
   int plane;
   dword AmigaViewModes = 0;
 
@@ -617,17 +679,25 @@ void Load_IFF(T_IO_Context * context)
       Read_dword_be(IFF_file,&dummy);
       Read_bytes(IFF_file,format,4);
     }
-    if (!memcmp(format,"ILBM",4))
+    if (memcmp(format,"ILBM",4) == 0)
       iff_format = FORMAT_LBM;
-    else
+    else if(memcmp(format,"PBM ",4) == 0)
       iff_format = FORMAT_PBM;
+    else
+    {
+      char tmp_msg[60];
+      snprintf(tmp_msg, sizeof(tmp_msg), "Unkown IFF format '%.4s'", format);
+      Warning(tmp_msg);
+      File_error=1;
+    }
     
     if (!IFF_Wait_for("BMHD"))
       File_error=1;
-    Read_dword_be(IFF_file,&dummy);
+    Read_dword_be(IFF_file,&dummy); // SIZE
 
     // Maintenant on lit le header pour pouvoir commencer le chargement de l'image
-    if ( (Read_word_be(IFF_file,&header.Width))
+    if (File_error == 0
+      && (Read_word_be(IFF_file,&header.Width))
       && (Read_word_be(IFF_file,&header.Height))
       && (Read_word_be(IFF_file,&header.X_org))
       && (Read_word_be(IFF_file,&header.Y_org))
@@ -730,6 +800,29 @@ void Load_IFF(T_IO_Context * context)
         {
           Read_dword_be(IFF_file, &AmigaViewModes); // HIRES=0x8000 LACE=0x4  HAM=0x800  HALFBRITE=0x80
           section_size -= 4;
+        }
+        else if (memcmp(section, "DPPV", 4) == 0) // DPaint II ILBM perspective chunk
+        {
+          fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);  // Skip it
+        }
+        else if (memcmp(section, "TINY", 4) == 0)
+        {
+          word tiny_width, tiny_height;
+          Read_word_be(IFF_file,&tiny_width);
+          Read_word_be(IFF_file,&tiny_height);
+          section_size -= 4;
+
+          // Load thumbnail if in preview mode
+          if ((context->Type == CONTEXT_PREVIEW || context->Type == CONTEXT_PREVIEW_PALETTE) && iff_format == FORMAT_PBM)
+          {
+            Pre_load(context, tiny_width, tiny_height,file_size,iff_format,PIXEL_SIMPLE,0);
+            PBM_Decode(context, header.Compression, tiny_width, tiny_height);
+            fclose(IFF_file);
+            IFF_file = NULL;
+            return;
+          }
+          else
+            fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);
         }
         else if (memcmp(section, "BODY", 4) == 0)
         {
@@ -889,7 +982,7 @@ void Load_IFF(T_IO_Context * context)
                   if(cmd < (cmd_count-1) || section_size > 0)
                     Warning("Early end in VDAT chunk");
                   if (section_size > 0)
-                    fseek(IFF_file, section_size, SEEK_CUR);  // skip bytes
+                    fseek(IFF_file, (section_size+1)&~1, SEEK_CUR); // skip bytes
                   free(commands);
                 }
                 if (!File_error)
@@ -912,59 +1005,7 @@ void Load_IFF(T_IO_Context * context)
           }
           else                               // "PBM ": Planar(?) BitMap
           {
-            real_line_size=context->Width+(context->Width&1);
-
-            if (!header.Compression)
-            {                                           // non compressé
-              IFF_buffer=(byte *)malloc(real_line_size);
-              for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
-              {
-                if (Read_bytes(IFF_file,IFF_buffer,real_line_size))
-                  for (x_pos=0; x_pos<context->Width; x_pos++)
-                    Set_pixel(context, x_pos,y_pos,IFF_buffer[x_pos]);
-                else
-                  File_error=26;
-              }
-              free(IFF_buffer);
-              IFF_buffer = NULL;
-            }
-            else
-            {                                               // compressé
-              /*Init_lecture();*/
-              for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
-              {
-                for (x_pos=0; ((x_pos<real_line_size) && (!File_error)); )
-                {
-                  if(Read_byte(IFF_file, &temp_byte)!=1)
-                  {
-                    File_error=27;
-                    break;
-                  }
-                  if (temp_byte>127)
-                  {
-                    if(Read_byte(IFF_file, &color)!=1)
-                    {
-                      File_error=28;
-                      break;
-                    }
-                    b256=256-temp_byte;
-                    for (counter=0; counter<=b256; counter++)
-                      Set_pixel(context, x_pos++,y_pos,color);
-                  }
-                  else
-                    for (counter=0; counter<=temp_byte; counter++)
-                    {
-                      byte byte_read=0;
-                      if(Read_byte(IFF_file, &byte_read)!=1)
-                      {
-                        File_error=29;
-                        break;
-                      }
-                      Set_pixel(context, x_pos++,y_pos,byte_read);
-                    }
-                }
-              }
-            }
+            PBM_Decode(context, header.Compression, context->Width, context->Height);
           }
         }
         else
@@ -973,7 +1014,7 @@ void Load_IFF(T_IO_Context * context)
           // skip section
           snprintf(tmp_msg, sizeof(tmp_msg), "Skip unknown section '%.4s' of %u bytes", section, section_size);
           Warning(tmp_msg);
-          fseek(IFF_file, section_size, SEEK_CUR);
+          fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);
         }
       }
 
