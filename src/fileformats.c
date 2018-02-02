@@ -331,112 +331,6 @@ void Test_LBM(T_IO_Context * context)
 
 // -- Lire un fichier au format IFF -----------------------------------------
 
-  byte Image_HAM;
-
-  // ---------------- Adapter la palette pour les images HAM ----------------
-  void Adapt_palette_HAM(T_IO_Context * context)
-  {
-    short i,j,temp;
-    byte  color;
-
-    if (Image_HAM==6)
-    {
-      for (i=1; i<=14; i++)
-      {
-        // On recopie a palette de base
-        memcpy(context->Palette+(i<<4),context->Palette,48);
-        // On modifie les teintes de cette palette
-        for (j=0; j<16; j++)
-        {
-          color=(i<<4)+j;
-          if (i<=7)
-          {
-            if (i&1)
-            {
-              temp=context->Palette[j].R+16;
-              context->Palette[color].R=(temp<63)?temp:63;
-            }
-            if (i&2)
-            {
-              temp=context->Palette[j].G+16;
-              context->Palette[color].G=(temp<63)?temp:63;
-            }
-            if (i&4)
-            {
-              temp=context->Palette[j].B+16;
-              context->Palette[color].B=(temp<63)?temp:63;
-            }
-          }
-          else
-          {
-            if ((i-7)&1)
-            {
-              temp=context->Palette[j].R-16;
-              context->Palette[color].R=(temp>=0)?temp:0;
-            }
-            if ((i-7)&2)
-            {
-              temp=context->Palette[j].G-16;
-              context->Palette[color].G=(temp>=0)?temp:0;
-            }
-            if ((i-7)&4)
-            {
-              temp=context->Palette[j].B-16;
-              context->Palette[color].B=(temp>=0)?temp:0;
-            }
-          }
-        }
-      }
-      // Ici, il reste les 16 dernières couleurs à modifier
-      for (i=240,j=0; j<16; i++,j++)
-      {
-        temp=context->Palette[j].R+8;
-        context->Palette[i].R=(temp<63)?temp:63;
-        temp=context->Palette[j].G+8;
-        context->Palette[i].G=(temp<63)?temp:63;
-        temp=context->Palette[j].B+8;
-        context->Palette[i].B=(temp<63)?temp:63;
-      }
-    }
-    else if (Image_HAM==8)
-    {
-      for (i=1; i<=3; i++)
-      {
-        // On recopie la palette de base
-        memcpy(context->Palette+(i<<6),context->Palette,192);
-        // On modifie les teintes de cette palette
-        for (j=0; j<64; j++)
-        {
-          color=(i<<6)+j;
-          switch (i)
-          {
-            case 1 :
-              temp=context->Palette[j].R+16;
-              context->Palette[color].R=(temp<63)?temp:63;
-              break;
-            case 2 :
-              temp=context->Palette[j].G+16;
-              context->Palette[color].G=(temp<63)?temp:63;
-              break;
-            default:
-              temp=context->Palette[j].B+16;
-              context->Palette[color].B=(temp<63)?temp:63;
-          }
-        }
-      }
-    }
-    else // Image 64 couleurs sauvée en 32.
-    {
-      for (i=0; i<32; i++)
-      {
-        j=i+32;
-        context->Palette[j].R=context->Palette[i].R>>1;
-        context->Palette[j].G=context->Palette[i].G>>1;
-        context->Palette[j].B=context->Palette[i].B>>1;
-      }
-    }
-  }
-
 // Inspired by Allegro: storing a 4-character identifier as a 32bit litteral
 #define ID4(a,b,c,d) ((((a)&255)<<24) | (((b)&255)<<16) | (((c)&255)<<8) | (((d)&255)))
 
@@ -514,89 +408,92 @@ void Set_IFF_color(byte * buffer, word x_pos, byte color, word real_line_size, b
   }
 }
 
-  // ----------------------- Afficher une ligne ILBM ------------------------
-  void Draw_IFF_line(T_IO_Context *context, const byte * buffer, short y_pos, short real_line_size, byte bitplanes)
-  {
-    byte  color;
-    byte  red,green,blue;
-    byte  temp;
-    short x_pos;
+// ----------------------- Afficher une ligne ILBM ------------------------
+static void Draw_IFF_line(T_IO_Context *context, const byte * buffer, short y_pos, short real_line_size, byte bitplanes)
+{
+  short x_pos;
 
-    if (Image_HAM<=1)                                               // ILBM
+  if (bitplanes > 8)
+  {
+    for (x_pos=0; x_pos<context->Width; x_pos++)
     {
-      if (bitplanes > 8)
-      {
-        for (x_pos=0; x_pos<context->Width; x_pos++)
-        {
-          dword rgb = Get_IFF_color(buffer, x_pos,real_line_size, bitplanes);
-          Set_pixel_24b(context, x_pos,y_pos, rgb >> 16, rgb >> 8, rgb);
-        }
-      }
-      else for (x_pos=0; x_pos<context->Width; x_pos++)
-      {
-        Set_pixel(context, x_pos,y_pos,Get_IFF_color(buffer, x_pos,real_line_size, bitplanes));
-      }
-    }
-    else
-    {
-      color=0;
-      red=context->Palette[0].R;
-      green =context->Palette[0].G;
-      blue =context->Palette[0].B;
-      if (Image_HAM==6)
-      for (x_pos=0; x_pos<context->Width; x_pos++)         // HAM6
-      {
-        temp=Get_IFF_color(buffer, x_pos,real_line_size, bitplanes);
-        switch (temp & 0xF0)
-        {
-          case 0x10: // blue
-            blue=(temp&0x0F)<<2;
-            color=Best_color(red,green,blue);
-            break;
-          case 0x20: // red
-            red=(temp&0x0F)<<2;
-            color=Best_color(red,green,blue);
-            break;
-          case 0x30: // green
-            green=(temp&0x0F)<<2;
-            color=Best_color(red,green,blue);
-            break;
-          default:   // Nouvelle couleur
-            color=temp;
-            red=context->Palette[color].R;
-            green =context->Palette[color].G;
-            blue =context->Palette[color].B;
-        }
-        Set_pixel(context, x_pos,y_pos,color);
-      }
-      else
-      for (x_pos=0; x_pos<context->Width; x_pos++)         // HAM8
-      {
-        temp=Get_IFF_color(buffer,x_pos,real_line_size, bitplanes);
-        switch (temp & 0x03)
-        {
-          case 0x01: // blue
-            blue=temp>>2;
-            color=Best_color(red,green,blue);
-            break;
-          case 0x02: // red
-            red=temp>>2;
-            color=Best_color(red,green,blue);
-            break;
-          case 0x03: // green
-            green=temp>>2;
-            color=Best_color(red,green,blue);
-            break;
-          default:   // Nouvelle couleur
-            color=temp;
-            red=context->Palette[color].R;
-            green =context->Palette[color].G;
-            blue =context->Palette[color].B;
-        }
-        Set_pixel(context, x_pos,y_pos,color);
-      }
+      dword rgb = Get_IFF_color(buffer, x_pos,real_line_size, bitplanes);
+      Set_pixel_24b(context, x_pos,y_pos, rgb >> 16, rgb >> 8, rgb);
     }
   }
+  else for (x_pos=0; x_pos<context->Width; x_pos++)
+  {
+    Set_pixel(context, x_pos,y_pos,Get_IFF_color(buffer, x_pos,real_line_size, bitplanes));
+  }
+}
+
+static void Draw_IFF_line_HAM(T_IO_Context *context, const byte * buffer, short y_pos, short real_line_size, byte bitplanes, const T_Components * SHAM_palettes, int SHAM_palette_count)
+{
+  short x_pos;
+  byte red, green, blue, temp;
+  const T_Components * palette;
+
+  if (SHAM_palettes == NULL)
+    palette = context->Palette;
+  else
+  {
+    if (SHAM_palette_count >= context->Height)
+      palette = SHAM_palettes + 16*y_pos;
+    else
+      palette = SHAM_palettes + 16*(y_pos >> 1);
+  }
+  red = palette[0].R;
+  green = palette[0].G;
+  blue = palette[0].B;
+  if (bitplanes == 6)
+  {
+    for (x_pos=0; x_pos<context->Width; x_pos++)         // HAM6
+    {
+      temp=Get_IFF_color(buffer, x_pos,real_line_size, bitplanes);
+      switch (temp & 0x30)
+      {
+        case 0x10: // blue
+          blue=(temp&0x0F)*0x11;
+          break;
+        case 0x20: // red
+          red=(temp&0x0F)*0x11;
+          break;
+        case 0x30: // green
+          green=(temp&0x0F)*0x11;
+          break;
+        default:   // Nouvelle couleur
+          red=palette[temp].R;
+          green =palette[temp].G;
+          blue =palette[temp].B;
+      }
+      Set_pixel_24b(context, x_pos,y_pos,red,green,blue);
+    }
+  }
+  else
+  {
+    for (x_pos=0; x_pos<context->Width; x_pos++)         // HAM8
+    {
+      temp=Get_IFF_color(buffer,x_pos,real_line_size, bitplanes);
+      switch (temp >> 6)
+      {
+        case 0x01: // blue
+          blue= (temp << 2) | ((temp & 0x30) >> 4);
+          break;
+        case 0x02: // red
+          red= (temp << 2) | ((temp & 0x30) >> 4);
+          break;
+        case 0x03: // green
+          green= (temp << 2) | ((temp & 0x30) >> 4);
+          break;
+        default:   // Nouvelle couleur
+          red=palette[temp].R;
+          green =palette[temp].G;
+          blue =palette[temp].B;
+      }
+      Set_pixel_24b(context, x_pos,y_pos,red,green,blue);
+    }
+  }
+}
 
 static void PBM_Decode(T_IO_Context * context, FILE * file, byte compression, word width, word height)
 {
@@ -689,6 +586,7 @@ void Load_IFF(T_IO_Context * context)
   T_Components * SHAM_palettes = NULL;
   unsigned SHAM_palette_count = 0;
   byte truecolor = 0;
+  byte Image_HAM = 0;
 
   Get_full_filename(filename, context->File_name, context->File_directory);
 
@@ -778,31 +676,26 @@ void Load_IFF(T_IO_Context * context)
         {
           nb_colors = section_size/3;
 
-          if (((dword)1<<header.BitPlanes)!=nb_colors)
+          if ((header.BitPlanes==6 && nb_colors==16) || (header.BitPlanes==8 && nb_colors==64))
           {
-            if ((nb_colors==32) && (header.BitPlanes==6))
-            {              // This is a Extra Half-Brite (EHB) 64 color image.
-              Image_HAM=1; // 32 colors in the palette.
-            }              // The next 32 colors are the same with values divided by 2
-            else
-            {
-              if ((header.BitPlanes==6) || (header.BitPlanes==8))
-                Image_HAM=header.BitPlanes;
-              else
-                /* File_error=1;*/  /* C'est censé être incorrect mais j'ai */
-                Image_HAM=0;            /* trouvé un fichier comme ça, alors... */
-            }
+            Image_HAM=header.BitPlanes;
+            truecolor = 1;
           }
 
           if (Config.Clear_palette)
             memset(context->Palette,0,sizeof(T_Palette));
           if (Read_bytes(IFF_file,context->Palette,3*nb_colors))
           {
-            if (Image_HAM)
-            {
-              Palette_256_to_64(context->Palette);
-              Adapt_palette_HAM(context);
-              Palette_64_to_256(context->Palette);
+            if ((nb_colors==32) && (header.BitPlanes==6))
+            {              // This is a Extra Half-Brite (EHB) 64 color image.
+              int i, j;    // 32 colors in the palette.
+              for (i=0; i<32; i++) // The next 32 colors are the same with values divided by 2
+              {
+                j=i+32;
+                context->Palette[j].R=context->Palette[i].R>>1;
+                context->Palette[j].G=context->Palette[i].G>>1;
+                context->Palette[j].B=context->Palette[i].B>>1;
+              }
             }
 
             section_size -= 3*nb_colors;
@@ -860,6 +753,8 @@ void Load_IFF(T_IO_Context * context)
         {
           word version;
 
+          Image_HAM = header.BitPlanes;
+          truecolor = 1;
           Read_word_be(IFF_file, &version); // always 0
           section_size -= 2;
           SHAM_palette_count = section_size >> 5;  // 32 bytes per palette (16 colors * 2 bytes)
@@ -935,7 +830,12 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
                 for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
                 {
                   if (Read_bytes(IFF_file,buffer,line_size))
-                    Draw_IFF_line(context, buffer, y_pos,real_line_size, header.BitPlanes);
+                  {
+                    if (Image_HAM <= 1)
+                      Draw_IFF_line(context, buffer, y_pos,real_line_size, header.BitPlanes);
+                    else
+                      Draw_IFF_line_HAM(context, buffer, y_pos,real_line_size, header.BitPlanes, SHAM_palettes, SHAM_palette_count);
+                  }
                   else
                     File_error=21;
                 }
@@ -974,7 +874,12 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
                           File_error=25;
                   }
                   if (!File_error)
-                    Draw_IFF_line(context, buffer, y_pos,real_line_size,header.BitPlanes);
+                  {
+                    if (Image_HAM <= 1)
+                      Draw_IFF_line(context, buffer, y_pos,real_line_size,header.BitPlanes);
+                    else
+                      Draw_IFF_line_HAM(context, buffer, y_pos,real_line_size, header.BitPlanes, SHAM_palettes, SHAM_palette_count);
+                  }
                 }
                 free(buffer);
                 break;
@@ -3900,7 +3805,6 @@ void Load_PCX(T_IO_Context * context)
             real_line_size=(short)PCX_header.Bytes_per_plane_line<<3;
             //   On se sert de données ILBM car le dessin de ligne en moins de 256
             // couleurs se fait comme avec la structure ILBM.
-            Image_HAM=0;
             buffer=(byte *)malloc(line_size);
 
             // Chargement de l'image
@@ -4317,7 +4221,6 @@ void Load_SCx(T_IO_Context * context)
             size=((context->Width+7)>>3)*SCx_header.Planes;
             real_size=(size/SCx_header.Planes)<<3;
             buffer=(byte *)malloc(size);
-            Image_HAM=0;
 
             for (y_pos=0;(y_pos<context->Height) && (!File_error);y_pos++)
             {
