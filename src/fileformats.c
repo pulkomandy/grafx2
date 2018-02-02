@@ -678,6 +678,8 @@ void Load_IFF(T_IO_Context * context)
   dword AmigaViewModes = 0;
   enum PIXEL_RATIO ratio = PIXEL_SIMPLE;
   byte * buffer;
+  T_Components * SHAM_palettes = NULL;
+  unsigned SHAM_palette_count = 0;
 
   Get_full_filename(filename, context->File_name, context->File_directory);
 
@@ -842,6 +844,36 @@ void Load_IFF(T_IO_Context * context)
         else if (memcmp(section, "DPPV", 4) == 0) // DPaint II ILBM perspective chunk
         {
           fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);  // Skip it
+        }
+        else if (memcmp(section, "SHAM", 4) == 0) // Sliced HAM
+        {
+          word version;
+
+          Read_word_be(IFF_file, &version); // always 0
+          section_size -= 2;
+          SHAM_palette_count = section_size >> 5;  // 32 bytes per palette (16 colors * 2 bytes)
+          // SHAM_palette_count should be the image height, or height/2 for "interlaced" images
+          SHAM_palettes = malloc(sizeof(T_Components)*16*SHAM_palette_count);
+          if (SHAM_palettes == NULL)
+          {
+            Warning("Memory allocation error");
+            File_error = 1;
+            break;
+          }
+          for (counter = 0; (unsigned)counter < 16*SHAM_palette_count; counter++)
+          {
+            Read_byte(IFF_file, &temp_byte);  // 0R
+            SHAM_palettes[counter].R = (temp_byte & 0x0f) * 0x11; // 4 bits to 8 bits
+            Read_byte(IFF_file, &temp_byte);  // GB
+            SHAM_palettes[counter].G = (temp_byte & 0xf0) | (temp_byte >> 4);
+            SHAM_palettes[counter].B = (temp_byte & 0x0f) * 0x11; // 4 bits to 8 bits
+            section_size -= 2;
+          }
+          if (section_size > 0)
+          {
+            Warning("Extra bytes at the end of SHAM chunk");
+            fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);
+          }
         }
         else if (memcmp(section, "TINY", 4) == 0)
         {
@@ -1085,6 +1117,8 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
   }
   else
     File_error=1;
+  if (SHAM_palettes)
+    free(SHAM_palettes);
 }
 
 
