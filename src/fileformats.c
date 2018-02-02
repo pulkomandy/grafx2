@@ -676,6 +676,7 @@ void Load_IFF(T_IO_Context * context)
   int iff_format = 0;
   int plane;
   dword AmigaViewModes = 0;
+  enum PIXEL_RATIO ratio = PIXEL_SIMPLE;
 
   Get_full_filename(filename, context->File_name, context->File_directory);
 
@@ -743,7 +744,17 @@ void Load_IFF(T_IO_Context * context)
         header.BitPlanes++;
       Back_color=header.Transp_col;
       Image_HAM=0;
-      // TODO parse X / Y aspect
+      if (header.X_aspect != 0 && header.Y_aspect != 0)
+      {
+        if ((10 * header.X_aspect) <= (6 * header.Y_aspect))
+          ratio = PIXEL_TALL;   // ratio <= 0.6
+        else if ((10 * header.X_aspect) <= (8 * header.Y_aspect))
+          ratio = PIXEL_TALL3;  // 0.6 < ratio <= 0.8
+        else if ((10 * header.X_aspect) < (15 * header.Y_aspect))
+          ratio = PIXEL_SIMPLE; // 0.8 < ratio < 1.5
+        else
+          ratio = PIXEL_WIDE; // 1.5 <= ratio
+      }
 
       while (File_error == 0
           && Read_bytes(IFF_file,section,4)
@@ -837,11 +848,12 @@ void Load_IFF(T_IO_Context * context)
           Read_word_be(IFF_file,&tiny_width);
           Read_word_be(IFF_file,&tiny_height);
           section_size -= 4;
+printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, section_size);
 
           // Load thumbnail if in preview mode
           if ((context->Type == CONTEXT_PREVIEW || context->Type == CONTEXT_PREVIEW_PALETTE) && iff_format == FORMAT_PBM)
           {
-            Pre_load(context, tiny_width, tiny_height,file_size,iff_format,PIXEL_SIMPLE,0);
+            Pre_load(context, tiny_width, tiny_height,file_size,iff_format,ratio,0);
             PBM_Decode(context, header.Compression, tiny_width, tiny_height);
             fclose(IFF_file);
             IFF_file = NULL;
@@ -855,7 +867,7 @@ void Load_IFF(T_IO_Context * context)
           Original_screen_X = header.X_screen;
           Original_screen_Y = header.Y_screen;
 
-          Pre_load(context, header.Width, header.Height, file_size, iff_format, PIXEL_SIMPLE, 0);
+          Pre_load(context, header.Width, header.Height, file_size, iff_format, ratio, 0);
           context->Background_transparent = header.Mask == 2;
           context->Transparent_color = context->Background_transparent ? header.Transp_col : 0;
 
