@@ -244,12 +244,11 @@ typedef struct
   word  Y_screen;
 } T_IFF_Header;
 
-FILE *IFF_file;
-
 // -- Tester si un fichier est au format IFF --------------------------------
 
 void Test_IFF(T_IO_Context * context, const char *sub_type)
 {
+  FILE * IFF_file;
   char filename[MAX_PATH_CHARACTERS];
   char  format[4];
   char  section[4];
@@ -317,7 +316,6 @@ void Test_IFF(T_IO_Context * context, const char *sub_type)
     } while (0);
     
     fclose(IFF_file);
-    IFF_file = NULL;
   }
 }
 
@@ -445,32 +443,32 @@ void Test_LBM(T_IO_Context * context)
 /// Skips the current section in an IFF file.
 /// This function should be called while the file pointer is right
 /// after the 4-character code that identifies the section.
-int IFF_Skip_section(void)
+int IFF_Skip_section(FILE * file)
 {
   dword size;
   
-  if (!Read_dword_be(IFF_file,&size))
+  if (!Read_dword_be(file,&size))
     return 0;
   if (size&1)
     size++;
-  if (fseek(IFF_file,size,SEEK_CUR))
+  if (fseek(file,size,SEEK_CUR))
     return 0;
   return 1;
 }
 
 // ------------------------- Attendre une section -------------------------
-byte IFF_Wait_for(const char * expected_section)
+byte IFF_Wait_for(FILE * file, const char * expected_section)
 {
   // Valeur retournée: 1=Section trouvée, 0=Section non trouvée (erreur)
   byte section_read[4];
 
-  if (! Read_bytes(IFF_file,section_read,4))
+  if (! Read_bytes(file,section_read,4))
     return 0;
   while (memcmp(section_read,expected_section,4)) // Sect. pas encore trouvée
   {
-    if (!IFF_Skip_section())
+    if (!IFF_Skip_section(file))
       return 0;
-    if (! Read_bytes(IFF_file,section_read,4))
+    if (! Read_bytes(file,section_read,4))
       return 0;
   }
   return 1;
@@ -592,7 +590,7 @@ void Set_IFF_color(byte * buffer, word x_pos, byte color, word real_line_size, b
     }
   }
 
-static void PBM_Decode(T_IO_Context * context, byte compression, word width, word height)
+static void PBM_Decode(T_IO_Context * context, FILE * file, byte compression, word width, word height)
 {
   byte * line_buffer;
   word x_pos, y_pos;
@@ -604,7 +602,7 @@ static void PBM_Decode(T_IO_Context * context, byte compression, word width, wor
       line_buffer=(byte *)malloc(real_line_size);
       for (y_pos=0; ((y_pos<height) && (!File_error)); y_pos++)
       {
-        if (Read_bytes(IFF_file,line_buffer,real_line_size))
+        if (Read_bytes(file,line_buffer,real_line_size))
           for (x_pos=0; x_pos<width; x_pos++)
             Set_pixel(context, x_pos,y_pos,line_buffer[x_pos]);
         else
@@ -618,14 +616,14 @@ static void PBM_Decode(T_IO_Context * context, byte compression, word width, wor
         for (x_pos=0; ((x_pos<real_line_size) && (!File_error)); )
         {
           byte temp_byte, color;
-          if(Read_byte(IFF_file, &temp_byte)!=1)
+          if(Read_byte(file, &temp_byte)!=1)
           {
             File_error=27;
             break;
           }
           if (temp_byte>127)
           {
-            if(Read_byte(IFF_file, &color)!=1)
+            if(Read_byte(file, &color)!=1)
             {
               File_error=28;
               break;
@@ -638,7 +636,7 @@ static void PBM_Decode(T_IO_Context * context, byte compression, word width, wor
           else
             do
             {
-              if(Read_byte(IFF_file, &color)!=1)
+              if(Read_byte(file, &color)!=1)
               {
                 File_error=29;
                 break;
@@ -657,6 +655,7 @@ static void PBM_Decode(T_IO_Context * context, byte compression, word width, wor
 
 void Load_IFF(T_IO_Context * context)
 {
+  FILE * IFF_file;
   char filename[MAX_PATH_CHARACTERS];
   T_IFF_Header header;
   char  format[4];
@@ -703,7 +702,7 @@ void Load_IFF(T_IO_Context * context)
     else if(memcmp(format,"DPST",4)==0)
     {
       // TODO : read DPAH
-      if (!IFF_Wait_for("FORM"))
+      if (!IFF_Wait_for(IFF_file, "FORM"))
         File_error=1;
       Read_dword_be(IFF_file,&dummy);
       Read_bytes(IFF_file,format,4);
@@ -720,7 +719,7 @@ void Load_IFF(T_IO_Context * context)
       File_error=1;
     }
     
-    if (!IFF_Wait_for("BMHD"))
+    if (!IFF_Wait_for(IFF_file, "BMHD"))
       File_error=1;
     Read_dword_be(IFF_file,&dummy); // SIZE
 
@@ -856,7 +855,7 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
           if ((context->Type == CONTEXT_PREVIEW || context->Type == CONTEXT_PREVIEW_PALETTE) && iff_format == FORMAT_PBM)
           {
             Pre_load(context, tiny_width, tiny_height,file_size,iff_format,ratio,0);
-            PBM_Decode(context, header.Compression, tiny_width, tiny_height);
+            PBM_Decode(context, IFF_file, header.Compression, tiny_width, tiny_height);
             fclose(IFF_file);
             IFF_file = NULL;
             return;
@@ -952,7 +951,7 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
                   word count;
 
                   y_pos = 0; x_pos = 0;
-                  if (!IFF_Wait_for("VDAT"))
+                  if (!IFF_Wait_for(IFF_file, "VDAT"))
                   {
                     if (plane == 0) // don't cancel loading if at least 1 bitplane has been loaded
                       File_error = 30;
@@ -1039,7 +1038,7 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
           }
           else                               // "PBM ": Planar(?) BitMap
           {
-            PBM_Decode(context, header.Compression, context->Width, context->Height);
+            PBM_Decode(context, IFF_file, header.Compression, context->Width, context->Height);
           }
         }
         else
@@ -1066,7 +1065,7 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
 
                   // ILBM, hopefully
                   Read_bytes(IFF_file,format,4);
-                  if (!IFF_Wait_for("DLTA"))
+                  if (!IFF_Wait_for(IFF_file, "DLTA"))
                   {
                     File_error=1;
                     break;
@@ -1096,7 +1095,7 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
   byte IFF_repetition_mode;
 
   // ------------- Ecrire les couleurs que l'on vient de traiter ------------
-  void Transfer_colors(void)
+  void Transfer_colors(FILE * file)
   {
     byte index;
 
@@ -1104,14 +1103,14 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
     {
       if (IFF_repetition_mode)
       {
-        Write_one_byte(IFF_file,257-IFF_list_size);
-        Write_one_byte(IFF_file,IFF_color_list[0]);
+        Write_one_byte(file,257-IFF_list_size);
+        Write_one_byte(file,IFF_color_list[0]);
       }
       else
       {
-        Write_one_byte(IFF_file,IFF_list_size-1);
+        Write_one_byte(file,IFF_list_size-1);
         for (index=0; index<IFF_list_size; index++)
-          Write_one_byte(IFF_file,IFF_color_list[index]);
+          Write_one_byte(file,IFF_color_list[index]);
       }
     }
     IFF_list_size=0;
@@ -1119,7 +1118,7 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
   }
 
   // - Compresion des couleurs encore plus performante que DP2e et que VPIC -
-  void New_color(byte color)
+  void New_color(FILE * file, byte color)
   {
     byte last_color;
     byte second_last_color;
@@ -1147,12 +1146,12 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
             IFF_color_list[IFF_list_size]=color;
             IFF_list_size++;
             if (IFF_list_size==128)
-              Transfer_colors();
+              Transfer_colors(file);
           }
           else // On est en mode <> et on a 3 couleurs qui se suivent
           {
             IFF_list_size-=2;
-            Transfer_colors();
+            Transfer_colors(file);
             IFF_color_list[0]=color;
             IFF_color_list[1]=color;
             IFF_color_list[2]=color;
@@ -1166,11 +1165,11 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
           {
             IFF_color_list[IFF_list_size++]=color;
             if (IFF_list_size==128)
-              Transfer_colors();
+              Transfer_colors(file);
           }
           else                                        // On change de mode...
           {
-            Transfer_colors();
+            Transfer_colors(file);
             IFF_color_list[IFF_list_size]=color;
             IFF_list_size++;
           }
@@ -1181,6 +1180,7 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
 
 void Save_IFF(T_IO_Context * context)
 {
+  FILE * IFF_file;
   char filename[MAX_PATH_CHARACTERS];
   T_IFF_Header header;
   word x_pos;
@@ -1316,10 +1316,10 @@ void Save_IFF(T_IO_Context * context)
           for (plane=0; plane<header.BitPlanes; plane++)
           {
             for (x_pos=0; x_pos<plane_width && !File_error; x_pos++)
-              New_color(buffer[x_pos+plane*plane_width]);
+              New_color(IFF_file, buffer[x_pos+plane*plane_width]);
 
             if (!File_error)
-              Transfer_colors();
+              Transfer_colors(IFF_file);
           }
         }
         else
@@ -1336,13 +1336,13 @@ void Save_IFF(T_IO_Context * context)
       for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
       {
         for (x_pos=0; ((x_pos<context->Width) && (!File_error)); x_pos++)
-          New_color(Get_pixel(context, x_pos,y_pos));
+          New_color(IFF_file, Get_pixel(context, x_pos,y_pos));
   
         if (context->Width&1) // odd width fix
-          New_color(0);
+          New_color(IFF_file, 0);
           
         if (!File_error)
-          Transfer_colors();
+          Transfer_colors(IFF_file);
       }
     }
     fclose(IFF_file);
