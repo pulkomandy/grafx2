@@ -484,11 +484,11 @@ byte IFF_Wait_for(FILE * file, const char * expected_section)
 /// @param x_pos           Position of the pixel in graphic line
 /// @param real_line_size  Width of one bitplane in memory, in bytes
 /// @param bitplanes       Number of bitplanes
-byte Get_IFF_color(const byte * buffer, word x_pos, word real_line_size, byte bitplanes)
+dword Get_IFF_color(const byte * buffer, word x_pos, word real_line_size, byte bitplanes)
 {
   byte shift = 7 - (x_pos & 7);
   int address,masked_bit,plane;
-  byte color=0;
+  dword color=0;
 
   for(plane=bitplanes-1;plane>=0;plane--)
   {
@@ -524,7 +524,15 @@ void Set_IFF_color(byte * buffer, word x_pos, byte color, word real_line_size, b
 
     if (Image_HAM<=1)                                               // ILBM
     {
-      for (x_pos=0; x_pos<context->Width; x_pos++)
+      if (bitplanes > 8)
+      {
+        for (x_pos=0; x_pos<context->Width; x_pos++)
+        {
+          dword rgb = Get_IFF_color(buffer, x_pos,real_line_size, bitplanes);
+          Set_pixel_24b(context, x_pos,y_pos, rgb >> 16, rgb >> 8, rgb);
+        }
+      }
+      else for (x_pos=0; x_pos<context->Width; x_pos++)
       {
         Set_pixel(context, x_pos,y_pos,Get_IFF_color(buffer, x_pos,real_line_size, bitplanes));
       }
@@ -680,6 +688,7 @@ void Load_IFF(T_IO_Context * context)
   byte * buffer;
   T_Components * SHAM_palettes = NULL;
   unsigned SHAM_palette_count = 0;
+  byte truecolor = 0;
 
   Get_full_filename(filename, context->File_name, context->File_directory);
 
@@ -758,6 +767,8 @@ void Load_IFF(T_IO_Context * context)
         else
           ratio = PIXEL_WIDE; // 1.5 <= ratio
       }
+      if (header.BitPlanes > 8)
+        truecolor = 1;
 
       while (File_error == 0
           && Read_bytes(IFF_file,section,4)
@@ -886,7 +897,7 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
           // Load thumbnail if in preview mode
           if ((context->Type == CONTEXT_PREVIEW || context->Type == CONTEXT_PREVIEW_PALETTE) && iff_format == FORMAT_PBM)
           {
-            Pre_load(context, tiny_width, tiny_height,file_size,iff_format,ratio,0);
+            Pre_load(context, tiny_width, tiny_height,file_size,iff_format,ratio,truecolor);
             PBM_Decode(context, IFF_file, header.Compression, tiny_width, tiny_height);
             fclose(IFF_file);
             IFF_file = NULL;
@@ -900,7 +911,7 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
           Original_screen_X = header.X_screen;
           Original_screen_Y = header.Y_screen;
 
-          Pre_load(context, header.Width, header.Height, file_size, iff_format, ratio, 0);
+          Pre_load(context, header.Width, header.Height, file_size, iff_format, ratio, truecolor);
           context->Background_transparent = header.Mask == 2;
           context->Transparent_color = context->Background_transparent ? header.Transp_col : 0;
 
@@ -1068,7 +1079,7 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
                 File_error = 32;
             }
           }
-          else                               // "PBM ": Planar(?) BitMap
+          else                               // "PBM ": Packed BitMap
           {
             PBM_Decode(context, IFF_file, header.Compression, context->Width, context->Height);
           }
