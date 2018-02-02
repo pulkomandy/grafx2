@@ -244,7 +244,6 @@ typedef struct
   word  Y_screen;
 } T_IFF_Header;
 
-byte * IFF_buffer;
 FILE *IFF_file;
 
 // -- Tester si un fichier est au format IFF --------------------------------
@@ -482,10 +481,12 @@ byte IFF_Wait_for(const char * expected_section)
 
 ///
 /// Decodes the color of one pixel from the ILBM line buffer.
+/// Planar to chunky conversion
+/// @param buffer          Planar buffer
 /// @param x_pos           Position of the pixel in graphic line
 /// @param real_line_size  Width of one bitplane in memory, in bytes
 /// @param bitplanes       Number of bitplanes
-byte Get_IFF_color(word x_pos, word real_line_size, byte bitplanes)
+byte Get_IFF_color(const byte * buffer, word x_pos, word real_line_size, byte bitplanes)
 {
   byte shift = 7 - (x_pos & 7);
   int address,masked_bit,plane;
@@ -494,7 +495,7 @@ byte Get_IFF_color(word x_pos, word real_line_size, byte bitplanes)
   for(plane=bitplanes-1;plane>=0;plane--)
   {
     address = (real_line_size * plane + x_pos) >> 3;
-    masked_bit = (IFF_buffer[address] >> shift) & 1;
+    masked_bit = (buffer[address] >> shift) & 1;
 
     color = (color << 1) + masked_bit;
   }
@@ -502,7 +503,7 @@ byte Get_IFF_color(word x_pos, word real_line_size, byte bitplanes)
   return color;
 }
 
-void Set_IFF_color(word x_pos, byte color, word real_line_size, byte bitplanes)
+void Set_IFF_color(byte * buffer, word x_pos, byte color, word real_line_size, byte bitplanes)
 {
   byte shift = 7 - (x_pos & 7);
   int address, plane;
@@ -510,13 +511,13 @@ void Set_IFF_color(word x_pos, byte color, word real_line_size, byte bitplanes)
   for(plane=0;plane<bitplanes;plane++)
   {
     address = (real_line_size * plane + x_pos) >> 3;
-    IFF_buffer[address] |= (color&1) << shift;
+    buffer[address] |= (color&1) << shift;
     color = color >> 1;
   }
 }
 
   // ----------------------- Afficher une ligne ILBM ------------------------
-  void Draw_IFF_line(T_IO_Context *context, short y_pos, short real_line_size, byte bitplanes)
+  void Draw_IFF_line(T_IO_Context *context, const byte * buffer, short y_pos, short real_line_size, byte bitplanes)
   {
     byte  color;
     byte  red,green,blue;
@@ -527,7 +528,7 @@ void Set_IFF_color(word x_pos, byte color, word real_line_size, byte bitplanes)
     {
       for (x_pos=0; x_pos<context->Width; x_pos++)
       {
-        Set_pixel(context, x_pos,y_pos,Get_IFF_color(x_pos,real_line_size, bitplanes));
+        Set_pixel(context, x_pos,y_pos,Get_IFF_color(buffer, x_pos,real_line_size, bitplanes));
       }
     }
     else
@@ -539,7 +540,7 @@ void Set_IFF_color(word x_pos, byte color, word real_line_size, byte bitplanes)
       if (Image_HAM==6)
       for (x_pos=0; x_pos<context->Width; x_pos++)         // HAM6
       {
-        temp=Get_IFF_color(x_pos,real_line_size, bitplanes);
+        temp=Get_IFF_color(buffer, x_pos,real_line_size, bitplanes);
         switch (temp & 0xF0)
         {
           case 0x10: // blue
@@ -565,7 +566,7 @@ void Set_IFF_color(word x_pos, byte color, word real_line_size, byte bitplanes)
       else
       for (x_pos=0; x_pos<context->Width; x_pos++)         // HAM8
       {
-        temp=Get_IFF_color(x_pos,real_line_size, bitplanes);
+        temp=Get_IFF_color(buffer,x_pos,real_line_size, bitplanes);
         switch (temp & 0x03)
         {
           case 0x01: // blue
@@ -677,6 +678,7 @@ void Load_IFF(T_IO_Context * context)
   int plane;
   dword AmigaViewModes = 0;
   enum PIXEL_RATIO ratio = PIXEL_SIMPLE;
+  byte * buffer;
 
   Get_full_filename(filename, context->File_name, context->File_directory);
 
@@ -887,19 +889,18 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
             switch(header.Compression)
             {
               case 0:            // uncompressed
-                IFF_buffer=(byte *)malloc(line_size);
+                buffer=(byte *)malloc(line_size);
                 for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
                 {
-                  if (Read_bytes(IFF_file,IFF_buffer,line_size))
-                    Draw_IFF_line(context, y_pos,real_line_size, header.BitPlanes);
+                  if (Read_bytes(IFF_file,buffer,line_size))
+                    Draw_IFF_line(context, buffer, y_pos,real_line_size, header.BitPlanes);
                   else
                     File_error=21;
                 }
-                free(IFF_buffer);
-                IFF_buffer = NULL;
+                free(buffer);
                 break;
               case 1:          // packbits compression (Amiga)
-                IFF_buffer=(byte *)malloc(line_size);
+                buffer=(byte *)malloc(line_size);
                 for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
                 {
                   for (x_pos=0; ((x_pos<line_size) && (!File_error)); )
@@ -921,24 +922,23 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
                       b256=(short)(256-temp_byte);
                       for (counter=0; counter<=b256; counter++)
                         if (x_pos<line_size)
-                          IFF_buffer[x_pos++]=color;
+                          buffer[x_pos++]=color;
                         else
                           File_error=24;
                     }
                     else
                       for (counter=0; counter<=(short)(temp_byte); counter++)
-                        if (x_pos>=line_size || Read_byte(IFF_file, &(IFF_buffer[x_pos++]))!=1)
+                        if (x_pos>=line_size || Read_byte(IFF_file, &(buffer[x_pos++]))!=1)
                           File_error=25;
                   }
                   if (!File_error)
-                    Draw_IFF_line(context, y_pos,real_line_size,header.BitPlanes);
+                    Draw_IFF_line(context, buffer, y_pos,real_line_size,header.BitPlanes);
                 }
-                free(IFF_buffer);
-                IFF_buffer = NULL;
+                free(buffer);
                 break;
               case 2:     // vertical RLE compression (Atari ST)
-                IFF_buffer=(byte *)calloc(line_size*context->Height, 1);
-                if (IFF_buffer == NULL)
+                buffer=(byte *)calloc(line_size*context->Height, 1);
+                if (buffer == NULL)
                 {
                   File_error=1;
                   Warning("Failed to allocate memory for IFF decoding");
@@ -982,7 +982,7 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
                         count = -commands[cmd];
                       while (count-- > 0 && x_pos < plane_line_size && section_size > 0)
                       {
-                        Read_bytes(IFF_file,IFF_buffer+x_pos+y_pos*line_size+plane*plane_line_size,2);
+                        Read_bytes(IFF_file,buffer+x_pos+y_pos*line_size+plane*plane_line_size,2);
                         section_size -= 2;
                         if(++y_pos >= context->Height)
                         {
@@ -1008,7 +1008,7 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
                       section_size -= 2;
                       while (count-- > 0 && x_pos < plane_line_size)
                       {
-                        memcpy(IFF_buffer+x_pos+y_pos*line_size+plane*plane_line_size,data,2);
+                        memcpy(buffer+x_pos+y_pos*line_size+plane*plane_line_size,data,2);
                         if(++y_pos >= context->Height)
                         {
                           y_pos = 0;
@@ -1025,16 +1025,12 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
                 }
                 if (!File_error)
                 {
-                  byte * save_IFF_buffer = IFF_buffer;
                   for (y_pos = 0; y_pos < context->Height; y_pos++)
                   {
-                    Draw_IFF_line(context,y_pos,real_line_size,real_bit_planes);
-                    IFF_buffer += line_size;
+                    Draw_IFF_line(context,buffer+line_size*y_pos,y_pos,real_line_size,real_bit_planes);
                   }
-                  IFF_buffer = save_IFF_buffer;
                 }
-                free(IFF_buffer);
-                IFF_buffer = NULL;
+                free(buffer);
                 break;
               default:
                 Warning("Unknown IFF compression");
@@ -1288,6 +1284,7 @@ void Save_IFF(T_IO_Context * context)
 
     if (context->Format == FORMAT_LBM)
     {
+      byte * buffer;
       short line_size; // Size of line in bytes
       short plane_line_size;  // Size of line in bytes for 1 plane
       short real_line_size; // Size of line in pixels
@@ -1296,19 +1293,19 @@ void Save_IFF(T_IO_Context * context)
       real_line_size = (context->Width+15) & ~15;
       plane_line_size = real_line_size >> 3;  // 8bits per byte
       line_size = plane_line_size * header.BitPlanes;
-      IFF_buffer=(byte *)malloc(line_size);
+      buffer=(byte *)malloc(line_size);
       
       // Start encoding
       IFF_list_size=0;
       for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
       {
         // Dispatch the pixel into planes
-        memset(IFF_buffer,0,line_size);
+        memset(buffer,0,line_size);
         for (x_pos=0; x_pos<context->Width; x_pos++)
-          Set_IFF_color(x_pos, Get_pixel(context, x_pos,y_pos), real_line_size, header.BitPlanes);
+          Set_IFF_color(buffer, x_pos, Get_pixel(context, x_pos,y_pos), real_line_size, header.BitPlanes);
           
         if (context->Width&1) // odd width fix
-          Set_IFF_color(x_pos, 0, real_line_size, header.BitPlanes);
+          Set_IFF_color(buffer, x_pos, 0, real_line_size, header.BitPlanes);
         
         // encode the resulting sequence of bytes
         if (header.Compression)
@@ -1319,7 +1316,7 @@ void Save_IFF(T_IO_Context * context)
           for (plane=0; plane<header.BitPlanes; plane++)
           {
             for (x_pos=0; x_pos<plane_width && !File_error; x_pos++)
-              New_color(IFF_buffer[x_pos+plane*plane_width]);
+              New_color(buffer[x_pos+plane*plane_width]);
 
             if (!File_error)
               Transfer_colors();
@@ -1327,11 +1324,10 @@ void Save_IFF(T_IO_Context * context)
         }
         else
         {
-          Write_bytes(IFF_file,IFF_buffer,line_size);
+          Write_bytes(IFF_file,buffer,line_size);
         }
       }
-      free(IFF_buffer);
-      IFF_buffer=NULL;
+      free(buffer);
     }
     else // PBM = chunky 8bpp
     {
@@ -3678,7 +3674,7 @@ void Test_PCX(T_IO_Context * context)
 // -- Lire un fichier au format PCX -----------------------------------------
 
   // -- Afficher une ligne PCX codée sur 1 seul plan avec moins de 256 c. --
-  static void Draw_PCX_line(T_IO_Context *context, short y_pos, byte depth)
+  static void Draw_PCX_line(T_IO_Context *context, const byte * buffer, short y_pos, byte depth)
   {
     short x_pos;
     byte  color;
@@ -3688,7 +3684,7 @@ void Test_PCX(T_IO_Context * context)
 
     for (x_pos=0; x_pos<context->Width; x_pos++)
     {
-      color=(IFF_buffer[x_pos/reduction]>>((reduction_minus_one-(x_pos%reduction))*depth)) & byte_mask;
+      color=(buffer[x_pos/reduction]>>((reduction_minus_one-(x_pos%reduction))*depth)) & byte_mask;
       Set_pixel(context, x_pos,y_pos,color);
     }
   }
@@ -3860,7 +3856,7 @@ void Load_PCX(T_IO_Context * context)
             //   On se sert de données ILBM car le dessin de ligne en moins de 256
             // couleurs se fait comme avec la structure ILBM.
             Image_HAM=0;
-            IFF_buffer=(byte *)malloc(line_size);
+            buffer=(byte *)malloc(line_size);
 
             // Chargement de l'image
             if (PCX_header.Compression)  // Image compressée
@@ -3919,7 +3915,7 @@ void Load_PCX(T_IO_Context * context)
                         {
                           for (index=0; index<byte1; index++)
                             if (x_pos<line_size)
-                              IFF_buffer[x_pos++]=byte2;
+                              buffer[x_pos++]=byte2;
                             else
                               File_error=2;
                         }
@@ -3927,14 +3923,14 @@ void Load_PCX(T_IO_Context * context)
                           Set_file_error(2);
                       }
                       else
-                        IFF_buffer[x_pos++]=byte1;
+                        buffer[x_pos++]=byte1;
                     }
                   }
                   // Affichage de la ligne par plan du buffer
                   if (PCX_header.Depth==1)
-                    Draw_IFF_line(context, y_pos,real_line_size,PCX_header.Plane);
+                    Draw_IFF_line(context, buffer, y_pos,real_line_size,PCX_header.Plane);
                   else
-                    Draw_PCX_line(context, y_pos,PCX_header.Depth);
+                    Draw_PCX_line(context, buffer, y_pos,PCX_header.Depth);
                 }
               }
 
@@ -3944,17 +3940,17 @@ void Load_PCX(T_IO_Context * context)
             {
               for (y_pos=0;(y_pos<context->Height) && (!File_error);y_pos++)
               {
-                if ((width_read=Read_bytes(file,IFF_buffer,line_size)))
+                if ((width_read=Read_bytes(file,buffer,line_size)))
                 {
                   if (PCX_header.Plane==1)
                     for (x_pos=0; x_pos<context->Width;x_pos++)
-                      Set_pixel(context, x_pos,y_pos,IFF_buffer[x_pos]);
+                      Set_pixel(context, x_pos,y_pos,buffer[x_pos]);
                   else
                   {
                     if (PCX_header.Depth==1)
-                      Draw_IFF_line(context, y_pos,real_line_size,PCX_header.Plane);
+                      Draw_IFF_line(context, buffer, y_pos,real_line_size,PCX_header.Plane);
                     else
-                      Draw_PCX_line(context, y_pos,PCX_header.Depth);
+                      Draw_PCX_line(context, buffer, y_pos,PCX_header.Depth);
                   }
                 }
                 else
@@ -3962,8 +3958,7 @@ void Load_PCX(T_IO_Context * context)
               }
             }
 
-            free(IFF_buffer);
-            IFF_buffer = NULL;
+            free(buffer);
           }
         }
       }
@@ -4223,6 +4218,7 @@ void Load_SCx(T_IO_Context * context)
   long file_size;
   T_SCx_Header SCx_header;
   T_Palette SCx_Palette;
+  byte * buffer;
 
   Get_full_filename(filename, context->File_name, context->File_directory);
 
@@ -4260,13 +4256,13 @@ void Load_SCx(T_IO_Context * context)
 
           if (!SCx_header.Planes)
           { // 256 couleurs (raw)
-            IFF_buffer=(byte *)malloc(context->Width);
+            buffer=(byte *)malloc(context->Width);
 
             for (y_pos=0;(y_pos<context->Height) && (!File_error);y_pos++)
             {
-              if (Read_bytes(file,IFF_buffer,context->Width))
+              if (Read_bytes(file,buffer,context->Width))
                 for (x_pos=0; x_pos<context->Width;x_pos++)
-                  Set_pixel(context, x_pos,y_pos,IFF_buffer[x_pos]);
+                  Set_pixel(context, x_pos,y_pos,buffer[x_pos]);
               else
                 File_error=2;
             }
@@ -4275,19 +4271,18 @@ void Load_SCx(T_IO_Context * context)
           { // moins de 256 couleurs (planar)
             size=((context->Width+7)>>3)*SCx_header.Planes;
             real_size=(size/SCx_header.Planes)<<3;
-            IFF_buffer=(byte *)malloc(size);
+            buffer=(byte *)malloc(size);
             Image_HAM=0;
 
             for (y_pos=0;(y_pos<context->Height) && (!File_error);y_pos++)
             {
-              if (Read_bytes(file,IFF_buffer,size))
-                Draw_IFF_line(context, y_pos,real_size,SCx_header.Planes);
+              if (Read_bytes(file,buffer,size))
+                Draw_IFF_line(context, buffer, y_pos,real_size,SCx_header.Planes);
               else
                 File_error=2;
             }
           }
-          free(IFF_buffer);
-          IFF_buffer = NULL;
+          free(buffer);
         }
         else
           File_error=1;
