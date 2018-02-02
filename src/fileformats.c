@@ -749,6 +749,21 @@ void Load_IFF(T_IO_Context * context)
         {
           fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);  // Skip it
         }
+        else if (memcmp(section, "CLUT", 4) == 0) // lookup table
+        {
+          dword lut_type; // 0 = A Monochrome, contrast or intensity LUT
+          byte lut[256];  // 1 = RED, 2 = GREEN, 3 = BLUE, 4 = HUE, 5 = SATURATION
+
+          Read_dword_be(IFF_file, &lut_type);
+          Read_dword_be(IFF_file, &dummy);
+          Read_bytes(IFF_file, lut, 256);
+          section_size -= (4+4+256);
+          if (section_size > 0)
+          {
+            Warning("Extra bytes at the end of CLUT chunk");
+            fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);
+          }
+        }
         else if (memcmp(section, "SHAM", 4) == 0) // Sliced HAM
         {
           word version;
