@@ -291,6 +291,24 @@ void Test_IFF(T_IO_Context * context, const char *sub_type)
         if (! Read_bytes(IFF_file,format,4))
           break;
       }
+      else if(memcmp(format,"DPST",4) == 0)
+      {
+        if (! Read_bytes(IFF_file,section,4))
+          break;
+        if (memcmp(section, "DPAH", 4) != 0)
+          break;
+        if (! Read_dword_be(IFF_file, &dummy))
+          break;
+        fseek(IFF_file, dummy, SEEK_CUR);
+        if (! Read_bytes(IFF_file,section,4))
+          break;
+        if (memcmp(section,"FORM",4))
+          break;
+        if (! Read_dword_be(IFF_file, &dummy))
+          break;
+        if (! Read_bytes(IFF_file,format,4))
+          break;
+      }
       if ( memcmp(format,sub_type,4))
         break;
       
@@ -679,6 +697,14 @@ void Load_IFF(T_IO_Context * context)
       Read_dword_be(IFF_file,&dummy);
       Read_bytes(IFF_file,format,4);
     }
+    else if(memcmp(format,"DPST",4)==0)
+    {
+      // TODO : read DPAH
+      if (!IFF_Wait_for("FORM"))
+        File_error=1;
+      Read_dword_be(IFF_file,&dummy);
+      Read_bytes(IFF_file,format,4);
+    }
     if (memcmp(format,"ILBM",4) == 0)
       iff_format = FORMAT_LBM;
     else if(memcmp(format,"PBM ",4) == 0)
@@ -686,7 +712,7 @@ void Load_IFF(T_IO_Context * context)
     else
     {
       char tmp_msg[60];
-      snprintf(tmp_msg, sizeof(tmp_msg), "Unkown IFF format '%.4s'", format);
+      snprintf(tmp_msg, sizeof(tmp_msg), "Unknown IFF format '%.4s'", format);
       Warning(tmp_msg);
       File_error=1;
     }
