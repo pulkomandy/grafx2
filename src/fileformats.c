@@ -867,9 +867,13 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
                       File_error=22;
                       break;
                     }
-                    // Si temp_byte > 127 alors il faut répéter 256-'temp_byte' fois la couleur de l'octet suivant
-                    // Si temp_byte <= 127 alors il faut afficher directement les 'temp_byte' octets suivants
-                    if (temp_byte>127)
+                    // temp_byte > 127  => repeat (256-temp_byte) the next byte
+                    // temp_byte <= 127 => copy (temp_byte' + 1) bytes
+                    if(temp_byte == 128) // 128 = NOP !
+                    {
+                      Warning("NOP in packbits stream");
+                    }
+                    else if (temp_byte>127)
                     {
                       if(Read_byte(IFF_file, &color)!=1)
                       {
@@ -878,15 +882,25 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
                       }
                       b256=(short)(256-temp_byte);
                       for (counter=0; counter<=b256; counter++)
+                      {
                         if (x_pos<line_size)
                           buffer[x_pos++]=color;
                         else
+                        {
                           File_error=24;
+                          break;
+                        }
+                      }
                     }
                     else
                       for (counter=0; counter<=(short)(temp_byte); counter++)
+                      {
                         if (x_pos>=line_size || Read_byte(IFF_file, &(buffer[x_pos++]))!=1)
+                        {
                           File_error=25;
+                          break;
+                        }
+                      }
                   }
                   if (!File_error)
                   {
