@@ -335,6 +335,12 @@ void Test_ACBM(T_IO_Context * context)
 
 // -- Lire un fichier au format IFF -----------------------------------------
 
+typedef struct T_IFF_PCHG_Palette {
+  struct T_IFF_PCHG_Palette * Next;
+  short StartLine;
+  T_Components Palette[1];
+} T_IFF_PCHG_Palette;
+
 // Inspired by Allegro: storing a 4-character identifier as a 32bit litteral
 #define ID4(a,b,c,d) ((((a)&255)<<24) | (((b)&255)<<16) | (((c)&255)<<8) | (((d)&255)))
 
@@ -428,6 +434,25 @@ static void Draw_IFF_line(T_IO_Context *context, const byte * buffer, short y_po
   else for (x_pos=0; x_pos<context->Width; x_pos++)
   {
     Set_pixel(context, x_pos,y_pos,Get_IFF_color(buffer, x_pos,real_line_size, bitplanes));
+  }
+}
+
+static void Draw_IFF_line_PCHG(T_IO_Context *context, const byte * buffer, short y_pos, short real_line_size, byte bitplanes, const T_IFF_PCHG_Palette * PCHG_palettes)
+{
+  const T_IFF_PCHG_Palette * palette;
+  short x_pos;
+
+  palette = PCHG_palettes;  // find the palette to use for the line
+  if (palette == NULL)
+    return;
+  while (palette->Next != NULL && palette->Next->StartLine <= y_pos)
+    palette = palette->Next;
+
+//printf("%d %p %d\n", y_pos, palette, palette->StartLine);
+  for (x_pos=0; x_pos<context->Width; x_pos++)
+  {
+    dword c = Get_IFF_color(buffer, x_pos,real_line_size, bitplanes);
+    Set_pixel_24b(context, x_pos,y_pos, palette->Palette[c].R, palette->Palette[c].G, palette->Palette[c].B);
   }
 }
 
@@ -591,6 +616,7 @@ void Load_IFF(T_IO_Context * context)
   unsigned SHAM_palette_count = 0;
   byte truecolor = 0;
   byte Image_HAM = 0;
+  T_IFF_PCHG_Palette * PCHG_palettes = NULL;
 
   Get_full_filename(filename, context->File_name, context->File_directory);
 
@@ -656,6 +682,7 @@ void Load_IFF(T_IO_Context * context)
       && header.Width && header.Height)
     {
       byte real_bit_planes = header.BitPlanes;
+      nb_colors = 1 << real_bit_planes;
       if (header.Mask==1)
         header.BitPlanes++;
       Back_color=header.Transp_col;
@@ -802,6 +829,161 @@ void Load_IFF(T_IO_Context * context)
             fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);
           }
         }
+        else if (memcmp(section, "PCHG", 4) == 0)
+        {
+          dword * lineBitMask;
+          int i;
+          T_IFF_PCHG_Palette * prev_pal = NULL;
+          T_IFF_PCHG_Palette * curr_pal = NULL;
+          void * PCHGData = NULL;
+
+          // http://wiki.amigaos.net/wiki/ILBM_IFF_Interleaved_Bitmap#ILBM.PCHG
+          // http://vigna.di.unimi.it/software.php
+          // Header
+          word Compression; // 0 = None, 1 = Huffman
+          word Flags;       // 0x1 = SmallLineChanges, 0x2 = BigLineChanges, 0x4 = use alpha
+          short StartLine; // possibly negative
+          word LineCount;
+          word ChangedLines;
+          word MinReg;
+          word MaxReg;
+          word MaxChanges;
+          dword TotalChanges;
+
+          if (!(Read_word_be(IFF_file, &Compression)
+            && Read_word_be(IFF_file, &Flags)
+            && Read_word_be(IFF_file, (word *)&StartLine)
+            && Read_word_be(IFF_file, &LineCount)
+            && Read_word_be(IFF_file, &ChangedLines)
+            && Read_word_be(IFF_file, &MinReg)
+            && Read_word_be(IFF_file, &MaxReg)
+            && Read_word_be(IFF_file, &MaxChanges)
+            && Read_dword_be(IFF_file, &TotalChanges)))
+            File_error = 1;
+          section_size -= 20;
+          if (Compression)
+          {
+            short * TreeCode;
+            const short * TreeP;    //a3
+            int remaining_bits = 0; //d1
+            dword src_dword = 0;    //d2
+            byte * dst_data;        //a1
+
+            dword CompInfoSize;
+            dword OriginalDataSize; //d0
+
+            Read_dword_be(IFF_file, &CompInfoSize);
+            Read_dword_be(IFF_file, &OriginalDataSize);
+            section_size -= 8;
+            // read HuffMan tree
+            TreeCode = malloc(CompInfoSize);
+            for (i = 0; i < (int)(CompInfoSize / 2); i++)
+              Read_word_be(IFF_file, (word *)(TreeCode + i));
+            section_size -= CompInfoSize;
+
+            PCHGData = malloc(OriginalDataSize);
+            dst_data = PCHGData;
+            // HuffMan depacking
+            TreeP = TreeCode+(CompInfoSize/2-1); // pointer to the last element
+            while (OriginalDataSize > 0)
+            {
+              if (--remaining_bits < 0)
+              {
+                Read_dword_be(IFF_file, &src_dword);
+                section_size -= 4;
+                remaining_bits = 31;
+              }
+              if (src_dword & (1 << remaining_bits))
+              {
+                if (*TreeP < 0)
+                {
+                  // OffsetPointer
+                  TreeP += (*TreeP / 2);
+                  continue; // pick another bit
+                }
+              }
+              else
+              {
+                // Case0
+                --TreeP;
+                if ((*TreeP < 0) || !(*TreeP & 0x100))
+                  continue; // pick another bit
+              }
+              // StoreValue
+              *dst_data = (byte)(*TreeP & 0xff);
+              dst_data++;
+              TreeP = TreeCode+(CompInfoSize/2-1); // pointer to the last element
+              OriginalDataSize--;
+            }
+            free(TreeCode);
+          }
+          else
+          {
+            PCHGData = malloc(section_size);
+            Read_bytes(IFF_file, PCHGData, section_size);
+            section_size = 0;
+          }
+          if (PCHGData != NULL)
+          {
+            const byte * data;
+            // initialize first palette from CMAP
+            prev_pal = malloc(sizeof(T_IFF_PCHG_Palette) + nb_colors*sizeof(T_Components));
+            prev_pal->Next = NULL;
+            prev_pal->StartLine = 0;
+            memcpy(prev_pal->Palette, context->Palette, nb_colors*sizeof(T_Components));
+            PCHG_palettes = prev_pal;
+
+            lineBitMask = PCHGData;
+            #if SDL_BYTEORDER != SDL_BIG_ENDIAN
+            for (i = 0 ; i < ((LineCount + 31) >> 5); i++)
+              lineBitMask[i] = SDL_Swap32(lineBitMask[i]);
+            #endif
+            data = PCHGData + ((LineCount + 31) >> 5) * 4;
+            for (y_pos = 0 ; y_pos < LineCount; y_pos++)
+            {
+              if (lineBitMask[y_pos >> 5] & (1 << (31-(y_pos & 31))))
+              {
+                byte ChangeCount16, ChangeCount32;
+                word PaletteChange;
+
+                if ((y_pos + StartLine) < 0)
+                  curr_pal = PCHG_palettes;
+                else
+                {
+                  curr_pal = malloc(sizeof(T_IFF_PCHG_Palette) + nb_colors*sizeof(T_Components));
+                  curr_pal->Next = NULL;
+                  curr_pal->StartLine = StartLine + y_pos;
+                  memcpy(curr_pal->Palette, prev_pal->Palette, nb_colors*sizeof(T_Components));
+                  prev_pal->Next = curr_pal;
+                }
+
+                ChangeCount16 = *data++;
+                ChangeCount32 = *data++;
+                for (i = 0; i < ChangeCount16; i++)
+                {
+                  PaletteChange = data[0] << 8 | data[1]; // Big endian
+                  data += 2;
+                  curr_pal->Palette[(PaletteChange >> 12)].R = ((PaletteChange & 0x0f00) >> 8) * 0x11;
+                  curr_pal->Palette[(PaletteChange >> 12)].G = ((PaletteChange & 0x00f0) >> 4) * 0x11;
+                  curr_pal->Palette[(PaletteChange >> 12)].B = ((PaletteChange & 0x000f) >> 0) * 0x11;
+                }
+                for (i = 0; i < ChangeCount32; i++)
+                {
+                  PaletteChange = data[0] << 8 | data[1]; // Big endian
+                  data += 2;
+                  curr_pal->Palette[16+(PaletteChange >> 12)].R = ((PaletteChange & 0x0f00) >> 8) * 0x11;
+                  curr_pal->Palette[16+(PaletteChange >> 12)].G = ((PaletteChange & 0x00f0) >> 4) * 0x11;
+                  curr_pal->Palette[16+(PaletteChange >> 12)].B = ((PaletteChange & 0x000f) >> 0) * 0x11;
+                }
+                prev_pal = curr_pal;
+              }
+            }
+            free(PCHGData);
+          }
+          fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);
+          if (PCHG_palettes != NULL)
+            truecolor = 1;
+        }
         else if (memcmp(section, "TINY", 4) == 0)
         {
           word tiny_width, tiny_height;
@@ -909,7 +1091,9 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
                 {
                   if (Read_bytes(IFF_file,buffer,line_size))
                   {
-                    if (Image_HAM <= 1)
+                    if (PCHG_palettes)
+                      Draw_IFF_line_PCHG(context, buffer, y_pos,real_line_size, header.BitPlanes, PCHG_palettes);
+                    else if (Image_HAM <= 1)
                       Draw_IFF_line(context, buffer, y_pos,real_line_size, header.BitPlanes);
                     else
                       Draw_IFF_line_HAM(context, buffer, y_pos,real_line_size, header.BitPlanes, SHAM_palettes, SHAM_palette_count);
@@ -967,7 +1151,9 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
                   }
                   if (!File_error)
                   {
-                    if (Image_HAM <= 1)
+                    if (PCHG_palettes)
+                      Draw_IFF_line_PCHG(context, buffer, y_pos,real_line_size, header.BitPlanes, PCHG_palettes);
+                    else if (Image_HAM <= 1)
                       Draw_IFF_line(context, buffer, y_pos,real_line_size,header.BitPlanes);
                     else
                       Draw_IFF_line_HAM(context, buffer, y_pos,real_line_size, header.BitPlanes, SHAM_palettes, SHAM_palette_count);
@@ -1127,6 +1313,12 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
     File_error=1;
   if (SHAM_palettes)
     free(SHAM_palettes);
+  while (PCHG_palettes != NULL)
+  {
+    T_IFF_PCHG_Palette * next = PCHG_palettes->Next;
+    free(PCHG_palettes);
+    PCHG_palettes = next;
+  }
 }
 
 
