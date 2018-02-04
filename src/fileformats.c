@@ -327,6 +327,10 @@ void Test_LBM(T_IO_Context * context)
 {
   Test_IFF(context, "ILBM");
 }
+void Test_ACBM(T_IO_Context * context)
+{
+  Test_IFF(context, "ACBM");
+}
 
 
 // -- Lire un fichier au format IFF -----------------------------------------
@@ -620,6 +624,8 @@ void Load_IFF(T_IO_Context * context)
       iff_format = FORMAT_LBM;
     else if(memcmp(format,"PBM ",4) == 0)
       iff_format = FORMAT_PBM;
+    else if(memcmp(format,"ACBM",4) == 0)
+      iff_format = FORMAT_ACBM;
     else
     {
       char tmp_msg[60];
@@ -827,6 +833,51 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
           context->Comment[length]='\0';
           section_size -= length;
           fseek(IFF_file, section_size, SEEK_CUR);
+        }
+        else if (memcmp(section, "ABIT", 4) == 0)
+        {
+          // ACBM format : ABIT = Amiga BITplanes
+          // The ABIT chunk contains contiguous bitplane data.
+          //  The chunk contains sequential data for bitplane 0 through bitplane n.
+          Pre_load(context, header.Width, header.Height, file_size, iff_format, ratio, truecolor);
+          // compute row size
+          real_line_size = (context->Width+15) & ~15;
+          plane_line_size = real_line_size >> 3;  // 8bits per byte
+          line_size = plane_line_size * header.BitPlanes;
+          buffer = malloc(line_size * context->Height);
+          if ((dword)(line_size * context->Height) == section_size)
+            header.Compression = 0;   // size is of uncompressed data. Forcing.
+          for (plane = 0; plane < header.BitPlanes; plane++)
+          {
+            for (y_pos = 0; y_pos < context->Height; y_pos++)
+            {
+              if (header.Compression == 0)
+              {
+                if (!Read_bytes(IFF_file,buffer+line_size*y_pos+plane_line_size*plane,plane_line_size))
+                {
+                  File_error = 21;
+                  break;
+                }
+              }
+              else
+              {
+                Warning("Unhandled compression for ACBM ABIT chunk");
+                File_error = 32;
+                break;
+              }
+            }
+          }
+          if (File_error == 0)
+          {
+            for (y_pos = 0; y_pos < context->Height; y_pos++)
+            {
+              if (Image_HAM <= 1)
+                Draw_IFF_line(context, buffer+y_pos*line_size, y_pos,real_line_size, header.BitPlanes);
+              else
+                Draw_IFF_line_HAM(context, buffer+y_pos*line_size, y_pos,real_line_size, header.BitPlanes, SHAM_palettes, SHAM_palette_count);
+            }
+          }
+          free(buffer);
         }
         else if (memcmp(section, "BODY", 4) == 0)
         {

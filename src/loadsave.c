@@ -60,6 +60,7 @@ void Save_PKM(T_IO_Context *);
 // -- IFF -------------------------------------------------------------------
 void Test_LBM(T_IO_Context *);
 void Test_PBM(T_IO_Context *);
+void Test_ACBM(T_IO_Context *);
 void Load_IFF(T_IO_Context *);
 void Save_IFF(T_IO_Context *);
 
@@ -163,7 +164,7 @@ void Load_SDL_Image(T_IO_Context *);
 
 // ENUM     Name  TestFunc LoadFunc SaveFunc PalOnly Comment Layers Ext Exts  
 const T_Format File_formats[] = {
-  {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, 0, "", "gif;png;bmp;2bp;pcx;pkm;iff;lbm;ilbm;sham;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;c64;koa;koala;fli;bml;cdu;prg;tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico;ic2;cur;cm5;pph"},
+  {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, 0, "", "gif;png;bmp;2bp;pcx;pkm;iff;lbm;ilbm;sham;acbm;pic;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;c64;koa;koala;fli;bml;cdu;prg;tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico;ic2;cur;cm5;pph"},
   {FORMAT_ALL_PALETTES, "(pal)", NULL, NULL, NULL, 1, 0, 0, "", "kcf;pal;gpl"},
   {FORMAT_ALL_FILES, "(*.*)", NULL, NULL, NULL, 0, 0, 0, "", "*"},
   {FORMAT_GIF, " gif", Test_GIF, Load_GIF, Save_GIF, 0, 1, 1, "gif", "gif"},
@@ -175,6 +176,7 @@ const T_Format File_formats[] = {
   {FORMAT_PKM, " pkm", Test_PKM, Load_PKM, Save_PKM, 0, 1, 0, "pkm", "pkm"},
   {FORMAT_LBM, " lbm", Test_LBM, Load_IFF, Save_IFF, 0, 0, 0, "iff", "iff;lbm;ilbm;sham"},
   {FORMAT_PBM, " pbm", Test_PBM, Load_IFF, Save_IFF, 0, 0, 0, "iff", "iff;pbm;lbm"},
+  {FORMAT_ACBM," acbm",Test_ACBM,Load_IFF, NULL,     0, 0, 0, "iff", "iff;pic;acbm"},
   {FORMAT_IMG, " img", Test_IMG, Load_IMG, Save_IMG, 0, 0, 0, "img", "img"},
   {FORMAT_SCx, " sc?", Test_SCx, Load_SCx, Save_SCx, 0, 0, 0, "sc?", "sci;scq;scf;scn;sco"},
   {FORMAT_PI1, " pi1", Test_PI1, Load_PI1, Save_PI1, 0, 0, 0, "pi1", "pi1"},
