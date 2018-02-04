@@ -816,6 +816,18 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
           else
             fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);
         }
+        else if (memcmp(section, "ANNO", 4) == 0)
+        {
+          dword length;
+          section_size = (section_size + 1) & ~1;
+          length = section_size;
+          if (length > COMMENT_SIZE)
+            length = COMMENT_SIZE;
+          Read_bytes(IFF_file,context->Comment,length);
+          context->Comment[length]='\0';
+          section_size -= length;
+          fseek(IFF_file, section_size, SEEK_CUR);
+        }
         else if (memcmp(section, "BODY", 4) == 0)
         {
           Original_screen_X = header.X_screen;
