@@ -1711,16 +1711,13 @@ void Load_PI1(T_IO_Context * context)
       if (Read_bytes(file,buffer,32034))
       {
         // Initialisation de la preview
-        Pre_load(context, 320,200,File_length_file(file),FORMAT_PI1,PIXEL_SIMPLE,0);
+        Pre_load(context, 320,200,File_length_file(file),FORMAT_PI1,PIXEL_SIMPLE,4);
         if (File_error==0)
         {
           // Initialisation de la palette
           if (Config.Clear_palette)
             memset(context->Palette,0,sizeof(T_Palette));
           PI1_decode_palette(buffer+2,(byte *)context->Palette);
-
-          context->Width=320;
-          context->Height=200;
 
           // Chargement/décompression de l'image
           ptr=buffer+34;
@@ -2043,16 +2040,13 @@ void Load_PC1(T_IO_Context * context)
       if (Read_bytes(file,buffercomp,size))
       {
         // Initialisation de la preview
-        Pre_load(context, 320,200,File_length_file(file),FORMAT_PC1,PIXEL_SIMPLE,0);
+        Pre_load(context, 320,200,File_length_file(file),FORMAT_PC1,PIXEL_SIMPLE,4);
         if (File_error==0)
         {
           // Initialisation de la palette
           if (Config.Clear_palette)
             memset(context->Palette,0,sizeof(T_Palette));
           PI1_decode_palette(buffercomp+2,(byte *)context->Palette);
-
-          context->Width=320;
-          context->Height=200;
 
           // Décompression du buffer
           PC1_uncompress_packbits(buffercomp+34,bufferdecomp);
@@ -2232,7 +2226,7 @@ void Load_NEO(T_IO_Context * context)
       if (Read_bytes(file,buffer,32128))
       {
         // Initialisation de la preview
-        Pre_load(context, 320,200,File_length_file(file),FORMAT_NEO,PIXEL_SIMPLE,0);
+        Pre_load(context, 320,200,File_length_file(file),FORMAT_NEO,PIXEL_SIMPLE,4);
         if (File_error==0)
         {
           // Initialisation de la palette
@@ -2240,9 +2234,6 @@ void Load_NEO(T_IO_Context * context)
             memset(context->Palette,0,sizeof(T_Palette));
           // on saute la résolution et le flag, chacun 2 bits
           PI1_decode_palette(buffer+4,(byte *)context->Palette);
-
-          context->Width=320;
-          context->Height=200;
 
           // Chargement/décompression de l'image
           ptr=buffer+128;

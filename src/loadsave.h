@@ -204,7 +204,7 @@ unsigned int Nb_known_formats(void);
 // Internal use
 
 /// Generic allocation and similar stuff, done at beginning of image load, as soon as size is known.
-void Pre_load(T_IO_Context *context, short width, short height, long file_size, int format, enum PIXEL_RATIO ratio, byte truecolor);
+void Pre_load(T_IO_Context *context, short width, short height, long file_size, int format, enum PIXEL_RATIO ratio, byte bpp);
 /// Fill the entire current layer/frame of an image being loaded with a color.
 void Fill_canvas(T_IO_Context *context, byte color);
 

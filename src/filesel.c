@@ -1517,7 +1517,6 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 
   Print_in_window(9,47,"Filename",MC_Dark,MC_Light);
   Print_in_window(9,59,"Image:",MC_Dark,MC_Light);
-  Print_in_window(101,59,"Size:",MC_Dark,MC_Light);
   Print_in_window(228,59,"(",MC_Dark,MC_Light);
   Print_in_window(292,59,")",MC_Dark,MC_Light);
 
@@ -2144,7 +2143,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         // On nettoie la zone où va s'afficher la preview:
         Window_rectangle(183,95,PREVIEW_WIDTH,PREVIEW_HEIGHT,MC_Light);
         // On efface les dimensions de l'image
-        Window_rectangle(143,59,72,8,MC_Light);
+        Window_rectangle(101,59,120,8,MC_Light);
         // On efface la taille du fichier
         Window_rectangle(236,59,56,8,MC_Light);
         // On efface le format du fichier

@@ -614,7 +614,7 @@ void Load_IFF(T_IO_Context * context)
   byte * buffer;
   T_Components * SHAM_palettes = NULL;
   unsigned SHAM_palette_count = 0;
-  byte truecolor = 0;
+  byte bpp = 0;
   byte Image_HAM = 0;
   T_IFF_PCHG_Palette * PCHG_palettes = NULL;
 
@@ -698,8 +698,7 @@ void Load_IFF(T_IO_Context * context)
         else
           ratio = PIXEL_WIDE; // 1.5 <= ratio
       }
-      if (header.BitPlanes > 8)
-        truecolor = 1;
+      bpp = header.BitPlanes;
 
       while (File_error == 0
           && Read_bytes(IFF_file,section,4)
@@ -712,7 +711,7 @@ void Load_IFF(T_IO_Context * context)
           if ((header.BitPlanes==6 && nb_colors==16) || (header.BitPlanes==8 && nb_colors==64))
           {
             Image_HAM=header.BitPlanes;
-            truecolor = 1;
+            bpp = 3 * (header.BitPlanes - 2); // HAM6 = 12bpp, HAM8 = 18bpp
           }
 
           if (Config.Clear_palette)
@@ -802,7 +801,7 @@ void Load_IFF(T_IO_Context * context)
           word version;
 
           Image_HAM = header.BitPlanes;
-          truecolor = 1;
+          bpp = 3 * (header.BitPlanes - 2);
           Read_word_be(IFF_file, &version); // always 0
           section_size -= 2;
           SHAM_palette_count = section_size >> 5;  // 32 bytes per palette (16 colors * 2 bytes)
@@ -982,7 +981,7 @@ void Load_IFF(T_IO_Context * context)
           }
           fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);
           if (PCHG_palettes != NULL)
-            truecolor = 1;
+            bpp = 12;
         }
         else if (memcmp(section, "TINY", 4) == 0)
         {
@@ -995,7 +994,7 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
           // Load thumbnail if in preview mode
           if ((context->Type == CONTEXT_PREVIEW || context->Type == CONTEXT_PREVIEW_PALETTE) && iff_format == FORMAT_PBM)
           {
-            Pre_load(context, tiny_width, tiny_height,file_size,iff_format,ratio,truecolor);
+            Pre_load(context, tiny_width, tiny_height,file_size,iff_format,ratio,bpp);
             PBM_Decode(context, IFF_file, header.Compression, tiny_width, tiny_height);
             fclose(IFF_file);
             IFF_file = NULL;
@@ -1021,7 +1020,7 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
           // ACBM format : ABIT = Amiga BITplanes
           // The ABIT chunk contains contiguous bitplane data.
           //  The chunk contains sequential data for bitplane 0 through bitplane n.
-          Pre_load(context, header.Width, header.Height, file_size, iff_format, ratio, truecolor);
+          Pre_load(context, header.Width, header.Height, file_size, iff_format, ratio, bpp);
           // compute row size
           real_line_size = (context->Width+15) & ~15;
           plane_line_size = real_line_size >> 3;  // 8bits per byte
@@ -1066,7 +1065,7 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
           Original_screen_X = header.X_screen;
           Original_screen_Y = header.Y_screen;
 
-          Pre_load(context, header.Width, header.Height, file_size, iff_format, ratio, truecolor);
+          Pre_load(context, header.Width, header.Height, file_size, iff_format, ratio, bpp);
           context->Background_transparent = header.Mask == 2;
           context->Transparent_color = context->Background_transparent ? header.Transp_col : 0;
 
@@ -2083,7 +2082,7 @@ void Load_BMP(T_IO_Context * context)
       }
       if (File_error == 0)
       {
-        Pre_load(context, header.Width,header.Height,file_size,FORMAT_BMP,PIXEL_SIMPLE,true_color);
+        Pre_load(context, header.Width,header.Height,file_size,FORMAT_BMP,PIXEL_SIMPLE,header.Nb_bits);
         if (File_error==0)
         {
           if (true_color)
@@ -2434,7 +2433,7 @@ void Load_ICO(T_IO_Context * context)
                 mask[1] = 0x0000FF00;
                 mask[2] = 0x000000FF;
               }
-              Pre_load(context, bmpheader.Width,real_height,File_length_file(file),FORMAT_ICO,PIXEL_SIMPLE,(bmpheader.Nb_bits > 8) || (nb_colors > 256));
+              Pre_load(context, bmpheader.Width,real_height,File_length_file(file),FORMAT_ICO,PIXEL_SIMPLE,bmpheader.Nb_bits);
               if (bmpheader.Nb_bits <= 8)
                 Load_BMP_Palette(context, file, nb_colors, 0);
               else
@@ -2843,7 +2842,7 @@ void Load_GIF(T_IO_Context * context)
         else
            ratio=PIXEL_SIMPLE;
 
-        Pre_load(context, LSDB.Width,LSDB.Height,file_size,FORMAT_GIF,ratio,0);
+        Pre_load(context, LSDB.Width,LSDB.Height,file_size,FORMAT_GIF,ratio,(LSDB.Resol&7)+1);
         context->Width=LSDB.Width;
         context->Height=LSDB.Height;
 
@@ -3988,9 +3987,10 @@ void Load_PCX(T_IO_Context * context)
       Original_screen_X=PCX_header.Screen_X;
       Original_screen_Y=PCX_header.Screen_Y;
 
+      Pre_load(context, context->Width, context->Height, file_size, FORMAT_PCX, PIXEL_SIMPLE, PCX_header.Plane * PCX_header.Depth);
+
       if (!(PCX_header.Plane==3 && PCX_header.Depth==8))
       {
-        Pre_load(context, context->Width,context->Height,file_size,FORMAT_PCX,PIXEL_SIMPLE,0);
         if (File_error==0)
         {
           // On prépare la palette à accueillir les valeurs du fichier PCX
@@ -4198,9 +4198,6 @@ void Load_PCX(T_IO_Context * context)
       else
       {
         // Image 24 bits!!!
-
-        Pre_load(context,context->Width,context->Height,file_size,FORMAT_PCX,PIXEL_SIMPLE,1);
-
         if (File_error==0)
         {
           line_size=PCX_header.Bytes_per_plane_line*3;
@@ -4761,6 +4758,7 @@ static void Load_PNG_Sub(T_IO_Context * context, FILE * file)
       png_byte color_type;
       png_byte bit_depth;
       png_voidp user_chunk_ptr;
+      byte bpp;
 
       // Setup a return point. If a pnglib loading error occurs
       // in this if(), the else will be executed.
@@ -4781,6 +4779,23 @@ static void Load_PNG_Sub(T_IO_Context * context, FILE * file)
         png_read_info(png_ptr, info_ptr);
         color_type = png_get_color_type(png_ptr,info_ptr);
         bit_depth = png_get_bit_depth(png_ptr,info_ptr);
+
+        switch (color_type)
+        {
+          case PNG_COLOR_TYPE_GRAY_ALPHA:
+            bpp = bit_depth * 2;
+            break;
+          case PNG_COLOR_TYPE_RGB:
+            bpp = bit_depth * 3;
+            break;
+          case PNG_COLOR_TYPE_RGB_ALPHA:
+            bpp = bit_depth * 4;
+            break;
+          case PNG_COLOR_TYPE_PALETTE:
+          case PNG_COLOR_TYPE_GRAY:
+          default:
+            bpp = bit_depth;
+        }
 
         // If it's any supported file
         // (Note: As of writing this, this test covers every possible
@@ -4833,9 +4848,9 @@ static void Load_PNG_Sub(T_IO_Context * context, FILE * file)
             }
           }
           if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_RGB_ALPHA)
-            Pre_load(context,png_get_image_width(png_ptr,info_ptr),png_get_image_height(png_ptr,info_ptr),File_length_file(file),FORMAT_PNG,PIXEL_SIMPLE,1);
+            Pre_load(context,png_get_image_width(png_ptr,info_ptr),png_get_image_height(png_ptr,info_ptr),File_length_file(file),FORMAT_PNG,PIXEL_SIMPLE,bpp);
           else
-            Pre_load(context,png_get_image_width(png_ptr,info_ptr),png_get_image_height(png_ptr,info_ptr),File_length_file(file),FORMAT_PNG,context->Ratio,0);
+            Pre_load(context,png_get_image_width(png_ptr,info_ptr),png_get_image_height(png_ptr,info_ptr),File_length_file(file),FORMAT_PNG,context->Ratio,bpp);
 
           if (File_error==0)
           {

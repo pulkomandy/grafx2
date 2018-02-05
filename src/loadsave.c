@@ -382,10 +382,14 @@ int Get_frame_duration(T_IO_Context *context)
 ///
 /// Generic allocation and similar stuff, done at beginning of image load,
 /// as soon as size is known.
-void Pre_load(T_IO_Context *context, short width, short height, long file_size, int format, enum PIXEL_RATIO ratio, byte truecolor)
+void Pre_load(T_IO_Context *context, short width, short height, long file_size, int format, enum PIXEL_RATIO ratio, byte bpp)
 {
   char  str[10];
+  byte truecolor;
 
+  if (bpp == 0)
+    bpp = 8;  // default to 8bits
+  truecolor = (bpp > 8) ? 1 : 0;
   context->Pitch = width; // default
   context->Width = width;
   context->Height = height;
@@ -410,32 +414,33 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
         Num2str(width,str,4);
         Num2str(height,str+5,4);
         str[4]='x';
-        Print_in_window(143,59,str,MC_Black,MC_Light);
       }
       else
       {
-        Print_in_window(143,59,"VERY BIG!",MC_Black,MC_Light);
+        memcpy(str, "VERY BIG!", 10);
       }
+      Print_in_window(101,59,str,MC_Black,MC_Light);
+      snprintf(str, sizeof(str), "%2dbpp", bpp);
+      Print_in_window(181,59,str,MC_Black,MC_Light);
   
       // Affichage de la taille du fichier
       if (file_size<1048576)
       {
         // Le fichier fait moins d'un Mega, on affiche sa taille direct
         Num2str(file_size,str,7);
-        Print_in_window(236,59,str,MC_Black,MC_Light);
       }
-      else if ((file_size/1024)<100000)
+      else if (((file_size+512)/1024)<100000)
       {
         // Le fichier fait plus d'un Mega, on peut afficher sa taille en Ko
-        Num2str(file_size/1024,str,5);
-        strcpy(str+5,"Kb");
-        Print_in_window(236,59,str,MC_Black,MC_Light);
+        Num2str((file_size+512)/1024,str,5);
+        strcpy(str+5,"KB");
       }
       else
       {
         // Le fichier fait plus de 100 Mega octets (cas très rare :))
-        Print_in_window(236,59,"LARGE!!",MC_Black,MC_Light);
+        memcpy(str,"LARGE!!",8);
       }
+      Print_in_window(236,59,str,MC_Black,MC_Light);
   
       // Affichage du vrai format
       if (format!=Selector->Format_filter)
@@ -1123,7 +1128,7 @@ void Load_SDL_Image(T_IO_Context *context)
   {
     // 8bpp image
     
-    Pre_load(context, surface->w, surface->h, file_size ,FORMAT_MISC, PIXEL_SIMPLE, 0);
+    Pre_load(context, surface->w, surface->h, file_size ,FORMAT_MISC, PIXEL_SIMPLE, 8);
 
     // Read palette
     if (surface->format->palette)
@@ -1144,7 +1149,7 @@ void Load_SDL_Image(T_IO_Context *context)
   {
     {
       // Hi/Trucolor
-      Pre_load(context, surface->w, surface->h, file_size ,FORMAT_ALL_IMAGES, PIXEL_SIMPLE, 1);
+      Pre_load(context, surface->w, surface->h, file_size ,FORMAT_ALL_IMAGES, PIXEL_SIMPLE, 8 * surface->format->BytesPerPixel);
     }
     
     for (y_pos=0; y_pos<context->Height; y_pos++)
