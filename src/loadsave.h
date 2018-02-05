@@ -68,6 +68,7 @@ typedef struct
   char Comment[COMMENT_SIZE+1];
   byte Background_transparent;
   byte Transparent_color;
+  byte bpp;
   /// Pixel ratio of the image
   enum PIXEL_RATIO Ratio;
   

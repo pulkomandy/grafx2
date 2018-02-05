@@ -390,6 +390,7 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
   if (bpp == 0)
     bpp = 8;  // default to 8bits
   truecolor = (bpp > 8) ? 1 : 0;
+  context->bpp = bpp;
   context->Pitch = width; // default
   context->Width = width;
   context->Height = height;
@@ -547,8 +548,6 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
   // Extra process for truecolor images
   if (truecolor)
   {
-    //context->Is_truecolor = 1;
-    
     switch(context->Type)
     {
       case CONTEXT_MAIN_IMAGE:
@@ -568,8 +567,9 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
         break;
       
       case CONTEXT_PREVIEW:
-        // Load palette
-        Set_palette_fake_24b(context->Palette);
+        // 3:3:2 "True Color" palette will be loaded lated in context->Palette
+        // There can be an image palette used to decode the true color picture
+        // Such as for HAM ILBM pictures
         break;
 
       case CONTEXT_PALETTE:
@@ -717,7 +717,8 @@ void Load_image(T_IO_Context *context)
           break;
 
         case CONTEXT_PREVIEW:
-          // nothing to do
+          // in this context, context->Buffer_image_24b is not allocated
+          // pixels are drawn to context->Preview_bitmap
           break;
           
         case CONTEXT_SURFACE:
@@ -923,6 +924,9 @@ void Load_image(T_IO_Context *context)
     int count_unused;
     byte unused_color[4];
     
+    if (context->Type == CONTEXT_PREVIEW && context->bpp > 8)
+      Set_palette_fake_24b(context->Palette);
+
     count_unused=0;
     // Try find 4 unused colors and insert good colors there
     for (c=255; c>=0 && count_unused<4; c--)
