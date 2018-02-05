@@ -601,9 +601,9 @@ void Load_IFF(T_IO_Context * context)
   short x_pos;
   short y_pos;
   short counter;
-  short line_size;       // Taille d'une ligne en octets
-  short plane_line_size;  // Size of line in bytes for 1 plane
-  short real_line_size; // Taille d'une ligne en pixels
+  short line_size = 0;        // Taille d'une ligne en octets
+  short plane_line_size = 0;  // Size of line in bytes for 1 plane
+  short real_line_size = 0;   // Taille d'une ligne en pixels
   byte  color;
   long  file_size;
   dword dummy;
@@ -617,6 +617,8 @@ void Load_IFF(T_IO_Context * context)
   byte bpp = 0;
   byte Image_HAM = 0;
   T_IFF_PCHG_Palette * PCHG_palettes = NULL;
+  int current_frame = 0;
+  byte * previous_frame = NULL; // For animations
 
   Get_full_filename(filename, context->File_name, context->File_directory);
 
@@ -668,6 +670,12 @@ void Load_IFF(T_IO_Context * context)
           && Read_bytes(IFF_file,section,4)
           && Read_dword_be(IFF_file,&section_size))
       {
+        if (memcmp(section, "FORM", 4) == 0)
+        {
+          // special
+          Read_bytes(IFF_file, format, 4);
+          continue;
+        }
         if (memcmp(section, "BMHD", 4) == 0)
         {
           if (!((Read_word_be(IFF_file,&header.Width))
@@ -706,6 +714,162 @@ void Load_IFF(T_IO_Context * context)
           }
           bpp = header.BitPlanes;
         }
+        else if (memcmp(section, "ANHD", 4) == 0) // ANimation  HeaDer
+        {
+          // http://www.textfiles.com/programming/FORMATS/anim7.txt
+          byte operation;
+          byte mask;
+          word w,h;
+          word x,y;
+          dword abstime;
+          dword reltime;
+          byte interleave;
+          byte pad0;
+          dword bits;
+
+          Read_byte(IFF_file, &operation);
+          Read_byte(IFF_file, &mask);
+          Read_word_be(IFF_file, &w);
+          Read_word_be(IFF_file, &h);
+          Read_word_be(IFF_file, &x);
+          Read_word_be(IFF_file, &y);
+          Read_dword_be(IFF_file, &abstime);
+          Read_dword_be(IFF_file, &reltime);
+          Read_byte(IFF_file, &interleave);
+          Read_byte(IFF_file, &pad0);
+          Read_dword_be(IFF_file, &bits);
+          section_size -= 24;
+
+          fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);  // Skip remaining bytes
+        }
+        else if (memcmp(section, "DLTA", 4) == 0) // Animation DeLTA
+        {
+          int i, plane;
+          dword offsets[16];
+          dword current_offset = 0;
+
+          if (previous_frame == NULL)
+          {
+            real_line_size = (context->Width+15) & ~15;
+            plane_line_size = real_line_size >> 3;  // 8bits per byte
+            line_size = plane_line_size * real_bit_planes;
+
+            previous_frame = calloc(line_size * context->Height,1);
+            for (y_pos=0; y_pos<context->Height; y_pos++)
+            {
+              const byte * pix_p = Main.backups->Pages->Image[Main.current_layer].Pixels + y_pos * Main.backups->Pages->Width;
+              // Dispatch the pixel into planes
+              for (x_pos=0; x_pos<context->Width; x_pos++)
+              {
+                Set_IFF_color(previous_frame+y_pos*line_size, x_pos, *pix_p++, real_line_size, real_bit_planes);
+              }
+            }
+          }
+
+          Set_loading_layer(context, ++current_frame);
+          for (i = 0; i < 16; i++)
+          {
+            if (!Read_dword_be(IFF_file, offsets+i))
+            {
+              File_error = 2;
+              break;
+            }
+            current_offset += 4;
+          }
+          for (plane = 0; plane < 16; plane++)
+          {
+            byte op_count = 0;
+            if (offsets[plane] == 0)
+              continue;
+            if (plane >= real_bit_planes)
+            {
+              Warning("too much bitplanes in DLTA data");
+              break;
+            }
+            while (current_offset < offsets[plane])
+            {
+              Read_byte(IFF_file, &op_count);
+              current_offset++;
+            }
+            if (current_offset > offsets[plane])
+            {
+              Warning("Loading ERROR in DLTA data");
+              File_error = 2;
+              break;
+            }
+            for (x_pos = 0; x_pos < (context->Width+7) >> 3; x_pos++)
+            {
+              byte * p = previous_frame + x_pos + plane * plane_line_size;
+              y_pos = 0;
+              Read_byte(IFF_file, &op_count);
+              current_offset++;
+              for (i = 0; i < op_count; i++)
+              {
+                byte op;
+
+                if (y_pos >= context->Height)
+                {
+                }
+                Read_byte(IFF_file, &op);
+                current_offset++;
+                if (op == 0)
+                { // Same ops
+                  byte countb, datab;
+                  Read_byte(IFF_file, &countb);
+                  Read_byte(IFF_file, &datab);
+                  current_offset += 2;
+                  while(countb > 0 && y_pos < context->Height)
+                  {
+                    *p = datab;
+                    p += line_size;
+                    y_pos++;
+                    countb--;
+                  }
+                }
+                else if (op & 0x80)
+                { // Uniq Ops
+                  op &= 0x7f;
+                  while (op > 0)
+                  {
+                    byte datab;
+                    Read_byte(IFF_file, &datab);
+                    current_offset++;
+                    if (y_pos < context->Height)
+                    {
+                      *p = datab;
+                      p += line_size;
+                      y_pos++;
+                    }
+                    op--;
+                  }
+                }
+                else
+                { // skip ops
+                    p += op * line_size;
+                    y_pos += op;
+                }
+              }
+              if (y_pos > 0 && y_pos != context->Height)
+              {
+              }
+            }
+          }
+          if (File_error == 0)
+          {
+            for (y_pos=0; y_pos<context->Height; y_pos++)
+            {
+              Draw_IFF_line(context, previous_frame+line_size*y_pos,y_pos,real_line_size,real_bit_planes);
+            }
+          }
+          if (current_offset&1)
+          {
+            byte dummy_byte;
+            Read_byte(IFF_file, &dummy_byte);
+            current_offset++;
+          }
+          section_size -= current_offset;
+          fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);  // Skip it
+        }
         else if (memcmp(section, "CMAP", 4) == 0)
         {
           nb_colors = section_size/3;
@@ -742,6 +906,8 @@ void Load_IFF(T_IO_Context * context)
           }
           else
             File_error=1;
+          if (context->Type == CONTEXT_PALETTE || context->Type == CONTEXT_PREVIEW_PALETTE)
+            break;  // stop once the palette is loaded
         }
         else if (memcmp(section,"CRNG",4) == 0)
         {
@@ -1272,6 +1438,8 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
           {
             PBM_Decode(context, IFF_file, header.Compression, context->Width, context->Height);
           }
+          if (section_size & 1)
+            fseek(IFF_file, 1, SEEK_CUR); // SKIP one byte
         }
         else
         {
@@ -1317,6 +1485,8 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
     File_error=1;
   if (SHAM_palettes)
     free(SHAM_palettes);
+  if (previous_frame)
+    free(previous_frame);
   while (PCHG_palettes != NULL)
   {
     T_IFF_PCHG_Palette * next = PCHG_palettes->Next;
