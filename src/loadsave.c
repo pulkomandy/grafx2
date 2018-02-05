@@ -875,7 +875,10 @@ void Load_image(T_IO_Context *context)
   }
   else if (context->Type == CONTEXT_BRUSH && File_error==0)
   {
-    
+    // For brushes, Back_color is the transparent color.
+    // Set it before remapping, Remap_brush() will take care of it
+    if (context->Background_transparent)
+      Back_color = context->Transparent_color;
     if (Realloc_brush(context->Width, context->Height, context->Buffer_image, NULL))
     {
       File_error=3;
