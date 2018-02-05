@@ -596,7 +596,7 @@ void Load_IFF(T_IO_Context * context)
   char  section[4];
   byte  temp_byte;
   short b256;
-  dword nb_colors;
+  dword nb_colors = 0; // number of colors in the CMAP (color map)
   dword section_size;
   short x_pos;
   short y_pos;
@@ -660,51 +660,53 @@ void Load_IFF(T_IO_Context * context)
       File_error=1;
     }
     
-    if (!IFF_Wait_for(IFF_file, "BMHD"))
-      File_error=1;
-    Read_dword_be(IFF_file,&dummy); // SIZE
 
-    // Maintenant on lit le header pour pouvoir commencer le chargement de l'image
-    if (File_error == 0
-      && (Read_word_be(IFF_file,&header.Width))
-      && (Read_word_be(IFF_file,&header.Height))
-      && (Read_word_be(IFF_file,&header.X_org))
-      && (Read_word_be(IFF_file,&header.Y_org))
-      && (Read_byte(IFF_file,&header.BitPlanes))
-      && (Read_byte(IFF_file,&header.Mask))
-      && (Read_byte(IFF_file,&header.Compression))
-      && (Read_byte(IFF_file,&header.Pad1))
-      && (Read_word_be(IFF_file,&header.Transp_col))
-      && (Read_byte(IFF_file,&header.X_aspect))
-      && (Read_byte(IFF_file,&header.Y_aspect))
-      && (Read_word_be(IFF_file,&header.X_screen))
-      && (Read_word_be(IFF_file,&header.Y_screen))
-      && header.Width && header.Height)
     {
-      byte real_bit_planes = header.BitPlanes;
-      nb_colors = 1 << real_bit_planes;
-      if (header.Mask==1)
-        header.BitPlanes++;
-      Back_color=header.Transp_col;
-      Image_HAM=0;
-      if (header.X_aspect != 0 && header.Y_aspect != 0)
-      {
-        if ((10 * header.X_aspect) <= (6 * header.Y_aspect))
-          ratio = PIXEL_TALL;   // ratio <= 0.6
-        else if ((10 * header.X_aspect) <= (8 * header.Y_aspect))
-          ratio = PIXEL_TALL3;  // 0.6 < ratio <= 0.8
-        else if ((10 * header.X_aspect) < (15 * header.Y_aspect))
-          ratio = PIXEL_SIMPLE; // 0.8 < ratio < 1.5
-        else
-          ratio = PIXEL_WIDE; // 1.5 <= ratio
-      }
-      bpp = header.BitPlanes;
-
+      byte real_bit_planes = 0;
+      byte stored_bit_planes = 0;
       while (File_error == 0
           && Read_bytes(IFF_file,section,4)
           && Read_dword_be(IFF_file,&section_size))
       {
-        if (memcmp(section, "CMAP", 4) == 0)
+        if (memcmp(section, "BMHD", 4) == 0)
+        {
+          if (!((Read_word_be(IFF_file,&header.Width))
+            && (Read_word_be(IFF_file,&header.Height))
+            && (Read_word_be(IFF_file,&header.X_org))
+            && (Read_word_be(IFF_file,&header.Y_org))
+            && (Read_byte(IFF_file,&header.BitPlanes))
+            && (Read_byte(IFF_file,&header.Mask))
+            && (Read_byte(IFF_file,&header.Compression))
+            && (Read_byte(IFF_file,&header.Pad1))
+            && (Read_word_be(IFF_file,&header.Transp_col))
+            && (Read_byte(IFF_file,&header.X_aspect))
+            && (Read_byte(IFF_file,&header.Y_aspect))
+            && (Read_word_be(IFF_file,&header.X_screen))
+            && (Read_word_be(IFF_file,&header.Y_screen))
+            && header.Width && header.Height))
+          {
+            File_error = 1;
+            break;
+          }
+          real_bit_planes = header.BitPlanes;
+          stored_bit_planes = header.BitPlanes;
+          if (header.Mask==1)
+            stored_bit_planes++;
+          Image_HAM=0;
+          if (header.X_aspect != 0 && header.Y_aspect != 0)
+          {
+            if ((10 * header.X_aspect) <= (6 * header.Y_aspect))
+              ratio = PIXEL_TALL;   // ratio <= 0.6
+            else if ((10 * header.X_aspect) <= (8 * header.Y_aspect))
+              ratio = PIXEL_TALL3;  // 0.6 < ratio <= 0.8
+            else if ((10 * header.X_aspect) < (15 * header.Y_aspect))
+              ratio = PIXEL_SIMPLE; // 0.8 < ratio < 1.5
+            else
+              ratio = PIXEL_WIDE; // 1.5 <= ratio
+          }
+          bpp = header.BitPlanes;
+        }
+        else if (memcmp(section, "CMAP", 4) == 0)
         {
           nb_colors = section_size/3;
 
@@ -1024,11 +1026,11 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
           // compute row size
           real_line_size = (context->Width+15) & ~15;
           plane_line_size = real_line_size >> 3;  // 8bits per byte
-          line_size = plane_line_size * header.BitPlanes;
+          line_size = plane_line_size * stored_bit_planes;
           buffer = malloc(line_size * context->Height);
           if ((dword)(line_size * context->Height) == section_size)
             header.Compression = 0;   // size is of uncompressed data. Forcing.
-          for (plane = 0; plane < header.BitPlanes; plane++)
+          for (plane = 0; plane < stored_bit_planes; plane++)
           {
             for (y_pos = 0; y_pos < context->Height; y_pos++)
             {
@@ -1053,9 +1055,9 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
             for (y_pos = 0; y_pos < context->Height; y_pos++)
             {
               if (Image_HAM <= 1)
-                Draw_IFF_line(context, buffer+y_pos*line_size, y_pos,real_line_size, header.BitPlanes);
+                Draw_IFF_line(context, buffer+y_pos*line_size, y_pos,real_line_size, stored_bit_planes);
               else
-                Draw_IFF_line_HAM(context, buffer+y_pos*line_size, y_pos,real_line_size, header.BitPlanes, SHAM_palettes, SHAM_palette_count);
+                Draw_IFF_line_HAM(context, buffer+y_pos*line_size, y_pos,real_line_size, stored_bit_planes, SHAM_palettes, SHAM_palette_count);
             }
           }
           free(buffer);
@@ -1080,7 +1082,7 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
             // compute row size
             real_line_size = (context->Width+15) & ~15;
             plane_line_size = real_line_size >> 3;  // 8bits per byte
-            line_size = plane_line_size * header.BitPlanes;
+            line_size = plane_line_size * stored_bit_planes;
 
             switch(header.Compression)
             {
@@ -1091,11 +1093,11 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
                   if (Read_bytes(IFF_file,buffer,line_size))
                   {
                     if (PCHG_palettes)
-                      Draw_IFF_line_PCHG(context, buffer, y_pos,real_line_size, header.BitPlanes, PCHG_palettes);
+                      Draw_IFF_line_PCHG(context, buffer, y_pos,real_line_size, stored_bit_planes, PCHG_palettes);
                     else if (Image_HAM <= 1)
-                      Draw_IFF_line(context, buffer, y_pos,real_line_size, header.BitPlanes);
+                      Draw_IFF_line(context, buffer, y_pos,real_line_size, stored_bit_planes);
                     else
-                      Draw_IFF_line_HAM(context, buffer, y_pos,real_line_size, header.BitPlanes, SHAM_palettes, SHAM_palette_count);
+                      Draw_IFF_line_HAM(context, buffer, y_pos,real_line_size, stored_bit_planes, SHAM_palettes, SHAM_palette_count);
                   }
                   else
                     File_error=21;
@@ -1114,7 +1116,7 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
                       break;
                     }
                     // temp_byte > 127  => repeat (256-temp_byte) the next byte
-                    // temp_byte <= 127 => copy (temp_byte' + 1) bytes
+                    // temp_byte <= 127 => copy (temp_byte + 1) bytes
                     if(temp_byte == 128) // 128 = NOP !
                     {
                       Warning("NOP in packbits stream");
@@ -1151,11 +1153,11 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
                   if (!File_error)
                   {
                     if (PCHG_palettes)
-                      Draw_IFF_line_PCHG(context, buffer, y_pos,real_line_size, header.BitPlanes, PCHG_palettes);
+                      Draw_IFF_line_PCHG(context, buffer, y_pos,real_line_size, stored_bit_planes, PCHG_palettes);
                     else if (Image_HAM <= 1)
-                      Draw_IFF_line(context, buffer, y_pos,real_line_size,header.BitPlanes);
+                      Draw_IFF_line(context, buffer, y_pos,real_line_size,stored_bit_planes);
                     else
-                      Draw_IFF_line_HAM(context, buffer, y_pos,real_line_size, header.BitPlanes, SHAM_palettes, SHAM_palette_count);
+                      Draw_IFF_line_HAM(context, buffer, y_pos,real_line_size, stored_bit_planes, SHAM_palettes, SHAM_palette_count);
                   }
                 }
                 free(buffer);
@@ -1168,7 +1170,7 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
                   Warning("Failed to allocate memory for IFF decoding");
                 }
                 plane_line_size = real_line_size >> 3;
-                for (plane = 0; plane < header.BitPlanes && !File_error; plane++)
+                for (plane = 0; plane < stored_bit_planes && !File_error; plane++)
                 {
                   word cmd_count;
                   word cmd;
@@ -1302,8 +1304,6 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
                 }
                 */
     }
-    else
-      File_error=1;
 
     fclose(IFF_file);
     IFF_file = NULL;
