@@ -778,6 +778,11 @@ void Load_IFF(T_IO_Context * context)
         {
           Read_dword_be(IFF_file, &AmigaViewModes); // HIRES=0x8000 LACE=0x4  HAM=0x800  HALFBRITE=0x80
           section_size -= 4;
+          if (AmigaViewModes & 0x800)
+          {
+            Image_HAM = header.BitPlanes;
+            bpp = 3 * (header.BitPlanes - 2);
+          }
         }
         else if (memcmp(section, "DPPV", 4) == 0) // DPaint II ILBM perspective chunk
         {
