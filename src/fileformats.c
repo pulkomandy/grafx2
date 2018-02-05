@@ -5978,8 +5978,8 @@ typedef struct
   byte Filler1[4];
   word Width;
   word Height;
-  byte Filler2;
-  byte Planes;
+  byte PaletteType; // M P RGB PIX  0xAF = VGA
+  byte StorageType; // 00 = Linear (1 byte per pixel) 01,02 Planar 03 text 80 Compressed 40 extension block 20 encrypted
 } T_SCx_Header;
 
 // -- Tester si un fichier est au format SCx --------------------------------
@@ -5996,8 +5996,8 @@ void Test_SCx(T_IO_Context * context, FILE * file)
   if (Read_bytes(file,SCx_header.Filler1,4)
       && Read_word_le(file, &(SCx_header.Width))
       && Read_word_le(file, &(SCx_header.Height))
-      && Read_byte(file, &(SCx_header.Filler2))
-      && Read_byte(file, &(SCx_header.Planes))
+      && Read_byte(file, &(SCx_header.PaletteType))
+      && Read_byte(file, &(SCx_header.StorageType))
      )
   {
     if ( (!memcmp(SCx_header.Filler1,"RIX",3))
@@ -6017,6 +6017,7 @@ void Load_SCx(T_IO_Context * context)
   T_SCx_Header SCx_header;
   T_Palette SCx_Palette;
   byte * buffer;
+  byte bpp;
 
   File_error=0;
 
@@ -6027,30 +6028,38 @@ void Load_SCx(T_IO_Context * context)
     if (Read_bytes(file,SCx_header.Filler1,4)
     && Read_word_le(file, &(SCx_header.Width))
     && Read_word_le(file, &(SCx_header.Height))
-    && Read_byte(file, &(SCx_header.Filler2))
-    && Read_byte(file, &(SCx_header.Planes))
+    && Read_byte(file, &(SCx_header.PaletteType))
+    && Read_byte(file, &(SCx_header.StorageType))
     )
     {
-      Pre_load(context, SCx_header.Width,SCx_header.Height,file_size,FORMAT_SCx,PIXEL_SIMPLE,0);
-      if (File_error==0)
-      {
-        if (!SCx_header.Planes)
-          size=sizeof(T_Palette);
-        else
-          size=sizeof(T_Components)*(1<<SCx_header.Planes);
+      bpp = (SCx_header.PaletteType & 7) + 1;
+      // Bit per RGB component in palette = ((SCx_header.PaletteType >> 3) & 7)
+      Pre_load(context, SCx_header.Width,SCx_header.Height,file_size,FORMAT_SCx,PIXEL_SIMPLE,bpp);
+      size=sizeof(T_Components)*(1 << bpp);
 
-        if (Read_bytes(file,SCx_Palette,size))
+      if (SCx_header.PaletteType & 0x80)
+      {
+        if (!Read_bytes(file, SCx_Palette, size))
+          File_error = 2;
+        else
         {
           if (Config.Clear_palette)
             memset(context->Palette,0,sizeof(T_Palette));
 
           Palette_64_to_256(SCx_Palette);
           memcpy(context->Palette,SCx_Palette,size);
-
-          context->Width=SCx_header.Width;
-          context->Height=SCx_header.Height;
-
-          if (!SCx_header.Planes)
+        }
+      }
+      if (File_error == 0)
+      {
+        if (SCx_header.StorageType == 0x80)
+        {
+          Warning("Compressed SCx files are not supported");
+          File_error = 2;
+        }
+        else
+        {
+          if (SCx_header.StorageType == 0)
           { // 256 couleurs (raw)
             buffer=(byte *)malloc(context->Width);
 
@@ -6065,22 +6074,20 @@ void Load_SCx(T_IO_Context * context)
           }
           else
           { // moins de 256 couleurs (planar)
-            size=((context->Width+7)>>3)*SCx_header.Planes;
-            real_size=(size/SCx_header.Planes)<<3;
+            size=((context->Width+7)>>3)*bpp;
+            real_size=(size/bpp)<<3;
             buffer=(byte *)malloc(size);
 
             for (y_pos=0;(y_pos<context->Height) && (!File_error);y_pos++)
             {
               if (Read_bytes(file,buffer,size))
-                Draw_IFF_line(context, buffer, y_pos,real_size,SCx_header.Planes);
+                Draw_IFF_line(context, buffer, y_pos,real_size,bpp);
               else
                 File_error=2;
             }
           }
           free(buffer);
         }
-        else
-          File_error=1;
       }
     }
     else
@@ -6138,14 +6145,14 @@ void Save_SCx(T_IO_Context * context)
     memcpy(SCx_header.Filler1,"RIX3",4);
     SCx_header.Width=context->Width;
     SCx_header.Height=context->Height;
-    SCx_header.Filler2=0xAF;
-    SCx_header.Planes=0x00;
+    SCx_header.PaletteType=0xAF;
+    SCx_header.StorageType=0x00;
 
     if (Write_bytes(file,SCx_header.Filler1,4)
     && Write_word_le(file, SCx_header.Width)
     && Write_word_le(file, SCx_header.Height)
-    && Write_byte(file, SCx_header.Filler2)
-    && Write_byte(file, SCx_header.Planes)
+    && Write_byte(file, SCx_header.PaletteType)
+    && Write_byte(file, SCx_header.StorageType)
     && Write_bytes(file,&palette_64,sizeof(T_Palette))
     )
     {
