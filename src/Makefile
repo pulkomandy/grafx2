@@ -35,6 +35,10 @@
 
 # Detect GIT revision
   GIT_REVISION = $(shell git rev-list --count 1af8c74f53110e349d8f0d19b14599281913f71f..)
+  GIT_BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
+  ifneq (master,$(GIT_BRANCH))
+    GIT_REVISION := "$(GIT_REVISION)-$(GIT_BRANCH)"
+  endif
 
   REVISION_CACHE = .revision.cache
   RES := $(shell if [ ! -f $(REVISION_CACHE) ] || [ "`cat $(REVISION_CACHE)`" != "$(GIT_REVISION)" ] ; then echo "$(GIT_REVISION)" > $(REVISION_CACHE) ; fi )
