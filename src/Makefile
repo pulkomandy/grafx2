@@ -370,6 +370,7 @@ endif
       LOPT += $(shell PKG_CONFIG_PATH=/usr/local/cross-tools/i386-mingw32/lib/pkgconfig i686-w64-mingw32-pkg-config --libs libpng)
       OBJDIR = ../obj/win32
       PLATFORM = win32
+      PLATFORMFILES = bin/SDL.dll bin/SDL_image.dll bin/libpng14-14.dll bin/zlib1.dll $(TTFLIBS)
     else
       ifdef GP2XCROSS
         #cross compile an exec for the gp2x
