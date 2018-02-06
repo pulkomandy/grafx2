@@ -587,6 +587,18 @@ static void PBM_Decode(T_IO_Context * context, FILE * file, byte compression, wo
   }
 }
 
+static void IFF_Set_EHB_Palette(T_IO_Context * context)
+{
+  int i, j;            // 32 colors in the palette.
+  for (i=0; i<32; i++) // The next 32 colors are the same with values divided by 2
+  {
+    j=i+32;
+    context->Palette[j].R=context->Palette[i].R>>1;
+    context->Palette[j].G=context->Palette[i].G>>1;
+    context->Palette[j].B=context->Palette[i].B>>1;
+  }
+}
+
 void Load_IFF(T_IO_Context * context)
 {
   FILE * IFF_file;
@@ -884,17 +896,8 @@ void Load_IFF(T_IO_Context * context)
             memset(context->Palette,0,sizeof(T_Palette));
           if (Read_bytes(IFF_file,context->Palette,3*nb_colors))
           {
-            if ((nb_colors==32) && (header.BitPlanes==6))
-            {              // This is a Extra Half-Brite (EHB) 64 color image.
-              int i, j;    // 32 colors in the palette.
-              for (i=0; i<32; i++) // The next 32 colors are the same with values divided by 2
-              {
-                j=i+32;
-                context->Palette[j].R=context->Palette[i].R>>1;
-                context->Palette[j].G=context->Palette[i].G>>1;
-                context->Palette[j].B=context->Palette[i].B>>1;
-              }
-            }
+            if (((nb_colors==32) || (AmigaViewModes & 0x80)) && (header.BitPlanes==6))
+              IFF_Set_EHB_Palette(context); // This is a Extra Half-Brite (EHB) 64 color image.
 
             section_size -= 3*nb_colors;
             while(section_size > 0) // Read padding bytes
@@ -949,6 +952,8 @@ void Load_IFF(T_IO_Context * context)
             Image_HAM = header.BitPlanes;
             bpp = 3 * (header.BitPlanes - 2);
           }
+          if ((AmigaViewModes & 0x80) && (header.BitPlanes == 6)) // This is a Extra Half-Brite (EHB) 64 color image.
+            IFF_Set_EHB_Palette(context); // Set the palette in case CAMG is after CMAP
         }
         else if (memcmp(section, "DPPV", 4) == 0) // DPaint II ILBM perspective chunk
         {
