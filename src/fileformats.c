@@ -2080,7 +2080,7 @@ void Load_ICO(T_IO_Context * context)
             Load_PNG_Sub(context, file);
           }
 #else
-          if (0 = memcmp(png_header, "\x89PNG", 4))
+          if (0 == memcmp(png_header, "\x89PNG", 4))
           {
             // NO PNG Support
             Warning("PNG Signature : Compiled without libpng support");
