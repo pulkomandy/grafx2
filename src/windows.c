@@ -29,6 +29,11 @@
 #include <stdlib.h> // atoi()
 #include <string.h> // strncpy() strlen()
 
+#ifdef _MSC_VER
+#include <stdio.h>
+#define snprintf _snprintf
+#endif
+
 #include "windows.h"
 
 #include "engine.h"
@@ -1437,6 +1442,7 @@ void Warning_with_format(const char *template, ...) {
 
   va_start(arg_ptr, template);
   vsnprintf(message, sizeof(message), template, arg_ptr);
+  Verbose_message("Warning", message);
   va_end(arg_ptr);
 }
 

@@ -47,6 +47,7 @@
 #ifdef __WIN32__
 #include <windows.h>
 #include <SDL_syswm.h>
+
 #elif defined __HAIKU__
 #include "haiku.h"
 #elif defined(__AROS__)
@@ -55,6 +56,11 @@
 #endif
 #if defined(__ANDROID__)
 #include <SDL_screenkeyboard.h>
+#endif
+
+#ifdef _MSC_VER
+#include <stdio.h>
+#define snprintf _snprintf
 #endif
 
 // Virtual keyboard is ON by default on these platforms:

@@ -26,6 +26,9 @@
 #ifdef __VBCC__
     #define __func__ "stupid compiler !"
 #endif
+#ifdef _MSC_VER
+    #define __func__ __FUNCTION__
+#endif	
 
 /// Prints the source filename, line number, function name, a string and an integer.
 #define DEBUG(y,z) printf("%s %d %s | %s : %d###\n",__FILE__,__LINE__,__func__,y,(unsigned int)z)

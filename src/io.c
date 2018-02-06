@@ -30,14 +30,20 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <fcntl.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     #include <proto/dos.h>
     #include <sys/types.h>
     #include <dirent.h>
 #elif defined(__WIN32__)
+#ifdef _MSC_VER
+    #include <direct.h>
+#else
     #include <dirent.h>
+#endif
     #include <windows.h>
     //#include <commdlg.h>
 #elif defined(__MINT__)
@@ -297,6 +303,9 @@ int Directory_exists(char * directory)
 //   Détermine si un répertoire passé en paramètre existe ou non dans le
 // répertoire courant.
 {
+#ifdef _MSC_VER	// TODO
+  return 1;
+#else
   DIR* entry;    // Structure de lecture des éléments
 
   if (strcmp(directory,PARENT_DIR)==0)
@@ -315,6 +324,7 @@ int Directory_exists(char * directory)
         return 1;
     }
   }
+#endif
 }
 
 /// Check if a file or directory is hidden.
@@ -360,6 +370,8 @@ int File_length_file(FILE * file)
 
 void For_each_file(const char * directory_name, void Callback(const char *, const char *))
 {
+#ifdef _MSC_VER
+#else
   // Pour scan de répertoire
   DIR*  current_directory; //Répertoire courant
   struct dirent* entry; // Structure de lecture des éléments
@@ -389,11 +401,14 @@ void For_each_file(const char * directory_name, void Callback(const char *, cons
     }
   }
   closedir(current_directory);
+#endif
 }
 
 /// Scans a directory, calls Callback for each file or directory in it,
 void For_each_directory_entry(const char * directory_name, void * pdata, T_File_dir_cb Callback)
 {
+#ifdef _MSC_VER // TODO !
+#else
   DIR*  current_directory; // current directory
   struct dirent* entry;    // directory entry struct
   char full_filename[MAX_PATH_CHARACTERS];
@@ -446,6 +461,7 @@ void For_each_directory_entry(const char * directory_name, void * pdata, T_File_
       File_is_hidden(entry->d_name, full_filename));
   }
   closedir(current_directory);
+#endif
 }
 
 
@@ -491,7 +507,7 @@ byte Create_lock_file(const char *file_directory)
   
   #ifdef __WIN32__
   // Windowzy method for creating a lock file
-  Lock_file_handle = CreateFile(
+  Lock_file_handle = CreateFileA(
     lock_filename,
     GENERIC_WRITE,
     0, // No sharing

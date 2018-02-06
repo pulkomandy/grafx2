@@ -8,7 +8,9 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #if defined(__AROS__) || defined(__linux__) || defined(__GLIBC__)|| defined(__MINT__) || defined(__FreeBSD__)
 #include <limits.h>
 #endif
@@ -114,7 +116,7 @@
         return resolved_path;
     }
             
-#elif defined (__WIN32__)
+#elif defined(__WIN32__) || defined(WIN32)
 // Mingw has a working equivalent. It only has reversed arguments.
     char *Realpath(const char *_path, char *resolved_path)
     {

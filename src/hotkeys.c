@@ -23,7 +23,7 @@
 #include "global.h"
 #include "hotkeys.h"
 
-#ifdef __VBCC__
+#if defined(__VBCC__) || defined(_MSC_VER)
   #define false 0
   #define true 1
 #endif

@@ -35,7 +35,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <SDL.h>
 #include <SDL_image.h>
 

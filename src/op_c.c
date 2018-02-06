@@ -21,7 +21,9 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 #include <assert.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

@@ -24,7 +24,7 @@
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     #include <proto/dos.h>
     #include <sys/types.h>
-#elif defined(__WIN32__)
+#elif defined(__WIN32__) || defined(WIN32)
     #include <windows.h>
 #endif
 
@@ -37,9 +37,19 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
+#if !defined(_MSC_VER)
 #include <strings.h>
+#else
+#if (_MSC_VER >= 1400)
+#define strncasecmp _memicmp
+#else
+#define strncasecmp memicmp
+#endif
+#endif
 #include <stdlib.h>
+#if !defined(__VBCC__) && !defined(_MSC_VER)
 #include <unistd.h>
+#endif
 #include <ctype.h>
 #include <sys/stat.h>
 #include <SDL.h>
@@ -81,7 +91,9 @@
     #include <mint/sysbind.h>
     #include <dirent.h>
 #elif defined(__WIN32__)
+#ifndef _MSC_VER
     #include <dirent.h>
+#endif
     #include <windows.h>
 #else
     #include <dirent.h>

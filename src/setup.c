@@ -29,9 +29,12 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#if defined(__WIN32__)
+#if defined(__WIN32__) || defined(WIN32)
   #include <windows.h>
   #include <io.h> // Mingw's _mkdir()
+#ifdef _MSC_VER
+  #include <direct.h>
+#endif
 #elif defined(__macosx__)
   #import <corefoundation/corefoundation.h>
   #import <sys/param.h>
@@ -58,7 +61,7 @@
 
 int Create_ConfigDirectory(char * config_dir)
 {
-  #ifdef __WIN32__
+  #if defined(__WIN32__) || defined(WIN32)
     // Mingw's mkdir has a weird name and only one argument
     return _mkdir(config_dir);
   #else

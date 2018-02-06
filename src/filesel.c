@@ -41,11 +41,15 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <string.h>
+#ifdef _MSC_VER
+#include <stdio.h>
+#define snprintf _snprintf
+#else
 #include <strings.h>
+#include <unistd.h>
+#endif
 #include <ctype.h>
-#include <unistd.h>
 #include <sys/types.h>
-#include <unistd.h>
 
 #include "const.h"
 #include "struct.h"
@@ -97,12 +101,15 @@ byte Native_filesel(byte load)
 
   ofn.lStructSize = sizeof(ofn);
   ofn.hwndOwner = hwnd;
-  ofn.lpstrFilter = "Text Files (*.txt)\0*.txt\0All Files (*.*)\0*.*\0";
+  ofn.lpstrFilter = TEXT("Text Files (*.txt)\0*.txt\0All Files (*.*)\0*.*\0");
+#ifdef UNICODE
+#else
   ofn.lpstrFile = szFileName;
+#endif
   ofn.nMaxFile = MAX_PATH;
   ofn.Flags = OFN_EXPLORER;
   if(load) ofn.Flags |= OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
-  ofn.lpstrDefExt = "txt";
+  ofn.lpstrDefExt = TEXT("txt");
 
   if(load)
   {
@@ -682,7 +689,7 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
         char drive_path[]="A:\\";
         // Cette API Windows est étrange, je dois m'y faire...
         drive_path[0]='A'+bit_index;
-        switch (GetDriveType(drive_path))
+        switch (GetDriveTypeA(drive_path))
         {
           case DRIVE_CDROM:
             icon=ICON_CDROM;
@@ -1572,7 +1579,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
     else if (context->Type == CONTEXT_PALETTE)
       Open_window(310,200,"Save palette");
     else
-      assert(false);
+      assert(0);
     Window_set_normal_button(198,180,51,14,"Save",0,1,SDLK_RETURN); // 1
     if (Selector->Format_filter<=FORMAT_ALL_FILES) // Correction du *.*
     {

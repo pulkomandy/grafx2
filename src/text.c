@@ -50,6 +50,11 @@
   #import <sys/param.h>
 #endif
 
+#ifdef _MSC_VER
+#include <stdio.h>
+#define snprintf _snprintf
+#endif
+
 #include <SDL_image.h>
 #include "SFont.h"
 

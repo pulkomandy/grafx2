@@ -28,8 +28,8 @@
 #ifndef MOUNTLIST_H_
 # define MOUNTLIST_H_
 
-#if !defined(__VBCC__)
-  # include <stdbool.h>
+#if !defined(__VBCC__) && !defined(_MSC_VER)
+    #include <stdbool.h>
 #else
     #define bool char
 #endif

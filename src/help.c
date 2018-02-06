@@ -25,8 +25,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#if defined(__WIN32__)
+#if defined(__WIN32__) || defined(WIN32)
     #include <windows.h>
+#ifdef _MSC_VER
+	#define snprintf _snprintf
+#endif
 #elif defined(__macosx__) || defined(__FreeBSD__)
     #include <sys/param.h>
     #include <sys/mount.h>
@@ -61,6 +64,9 @@
 
 extern char Program_version[]; // generated in pversion.c
 extern char SVN_revision[]; // generated in pversion.c
+#ifdef _MSC_VER//TODO TEMP
+#define SVN_revision "MSC_0000"
+#endif
 
 // Recherche un raccourci clavier:
 word * Shortcut(word shortcut_number)
@@ -785,7 +791,7 @@ void Button_Stats(void)
 #if defined(__WIN32__)
     {
       ULARGE_INTEGER tailleU;
-      GetDiskFreeSpaceEx(Main.selector.Directory,&tailleU,NULL,NULL);
+      GetDiskFreeSpaceExA(Main.selector.Directory,&tailleU,NULL,NULL);
       mem_size = tailleU.QuadPart;
     }
 #elif defined(__linux__) || defined(__macosx__) || defined(__FreeBSD__) || defined(__SYLLABLE__) || defined(__AROS__)

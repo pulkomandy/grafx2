@@ -38,6 +38,12 @@
 #else
   #include <limits.h> // for PATH_MAX
 #endif
+#ifndef PATH_MAX
+#ifdef _MSC_VER
+#include <windows.h>
+#endif
+#define PATH_MAX MAX_PATH
+#endif
 
 #ifndef M_2PI
 #define M_2PI 6.28318530717958647692528676656 ///< Hmm, pie...
