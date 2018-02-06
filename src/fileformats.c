@@ -1653,8 +1653,27 @@ void Save_IFF(T_IO_Context * context)
     header.Compression=1;
     header.Pad1=0;
     header.Transp_col=context->Background_transparent ? context->Transparent_color : 0;
-    header.X_aspect=context->Ratio == PIXEL_WIDE ? 2 : 1;
-    header.Y_aspect=context->Ratio == PIXEL_TALL ? 2 : 1;
+    header.X_aspect=10; // Amiga files are usually 10:11
+    header.Y_aspect=10;
+    switch (context->Ratio)
+    {
+      case PIXEL_SIMPLE:
+      case PIXEL_DOUBLE:
+      case PIXEL_TRIPLE:
+      case PIXEL_QUAD:
+      default:
+        break;
+      case PIXEL_WIDE:
+      case PIXEL_WIDE2:
+        header.X_aspect *= 2; // 2:1
+        break;
+      case PIXEL_TALL3:       // 3:4
+        header.X_aspect = (header.X_aspect * 15) / 10; // *1.5
+      case PIXEL_TALL:
+      case PIXEL_TALL2:
+        header.Y_aspect *= 2; // 1:2
+        break;
+    }
     header.X_screen = context->Width;// Screen_width?;
     header.Y_screen = context->Height;// Screen_height?;
 
