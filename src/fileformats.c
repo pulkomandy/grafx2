@@ -1599,14 +1599,15 @@ void Save_IFF(T_IO_Context * context)
   word x_pos;
   word y_pos;
   byte temp_byte;
-  int file_size;
   int i;
   int palette_entries;
   byte bit_depth;
+  long body_offset = -1;
 
   if (context->Format == FORMAT_LBM)
   {
     // Check how many bits are used by pixel colors
+    temp_byte = 0;
     for (y_pos=0; y_pos<context->Height; y_pos++)
       for (x_pos=0; x_pos<context->Width; x_pos++)
         temp_byte |= Get_pixel(context, x_pos,y_pos);
@@ -1675,6 +1676,18 @@ void Save_IFF(T_IO_Context * context)
     Write_dword_be(IFF_file,palette_entries*3);
 
     Write_bytes(IFF_file,context->Palette,palette_entries*3);
+
+    if (context->Comment[0]) // write ANNO
+    {
+      dword comment_size;
+
+      Write_bytes(IFF_file,"ANNO",4); // Chunk name
+      comment_size = strlen(context->Comment);  // NULL termination is not needed
+      Write_dword_be(IFF_file, comment_size); // Section size
+      Write_bytes(IFF_file, context->Comment, comment_size);
+      if (comment_size&1)
+        Write_byte(IFF_file, 0);  // align to WORD boundaries
+    }
     
     for (i=0; i<context->Color_cycles; i++)
     {
@@ -1691,7 +1704,8 @@ void Save_IFF(T_IO_Context * context)
       Write_byte(IFF_file,context->Cycle_range[i].End); // Max color
       // No padding, size is multiple of 2
     }
-    
+
+    body_offset = ftell(IFF_file);
     Write_bytes(IFF_file,"BODY",4);
     Write_dword_be(IFF_file,0); // On mettra la taille à jour à la fin
 
@@ -1758,49 +1772,27 @@ void Save_IFF(T_IO_Context * context)
           Transfer_colors(IFF_file);
       }
     }
-    fclose(IFF_file);
-    IFF_file = NULL;
-
+    // Now update FORM and BODY size
     if (!File_error)
     {
-      file_size=File_length(filename);
-      
-      IFF_file=fopen(filename,"rb+");
-      fseek(IFF_file,52+palette_entries*3+context->Color_cycles*16,SEEK_SET);
-      Write_dword_be(IFF_file,file_size-56-palette_entries*3-context->Color_cycles*16);
-
-      if (!File_error)
+      long file_size = ftell(IFF_file);
+      if (file_size&1)
       {
-        fseek(IFF_file,4,SEEK_SET);
-
-        //   Si la taille de la section de l'image (taille fichier-8) est
-        // impaire, on rajoute un 0 (Padding) à la fin.
-        if ((file_size) & 1)
-        {
-          Write_dword_be(IFF_file,file_size-7);
-          fseek(IFF_file,0,SEEK_END);
-          temp_byte=0;
-          if (! Write_bytes(IFF_file,&temp_byte,1))
-            File_error=1;
-        }
-        else
-          Write_dword_be(IFF_file,file_size-8);
-
-        fclose(IFF_file);
-        IFF_file = NULL;
-
-        if (File_error)
-          remove(filename);
+        // PAD to even file size
+        if (! Write_byte(IFF_file,0))
+          File_error=1;
       }
-      else
-      {
-        File_error=1;
-        fclose(IFF_file);
-        IFF_file = NULL;
-        remove(filename);
-      }
+      // Write BODY size
+      fseek(IFF_file, body_offset + 4, SEEK_SET);
+      Write_dword_be(IFF_file, file_size-body_offset-8);
+      // Write FORM size
+      file_size = (file_size+1)&~1;
+      fseek(IFF_file,4,SEEK_SET);
+      Write_dword_be(IFF_file,file_size-8);
     }
-    else // Il y a eu une erreur lors du compactage => on efface le fichier
+    fclose(IFF_file);
+    IFF_file = NULL;
+    if (File_error != 0)  // delete file if any error during saving
       remove(filename);
   }
   else
