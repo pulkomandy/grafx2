@@ -96,8 +96,10 @@ This will only work on an UNIXsystem (Linux or FreeBSD).
 == Windows ==
 
 It is also possible to compile from linux, with this command :
-	make WIN32CROSS=1
+ $ make WIN32CROSS=1
 You will need the mingw cross-compiler, and all the librairies listed above.
+Variables CROSS_CC, CROSS_PKGCONFIG and CROSS_SDLCONFIG can be set :
+ $ CROSS_CC=mingw32-gcc CROSS_PKGCONFIG=mingw32-pkg-config CROSS_SDLCONFIG=/path/to/ming32/sdl-config WIN32CROSS=1 NOTTF=1 make
 
 Here is a list of the resources used to build the Windows version:
 

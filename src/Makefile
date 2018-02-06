@@ -362,12 +362,19 @@ endif
     # These can only be used under linux and maybe freebsd. They allow to compile for the gp2x or to create a windows binary
     ifdef WIN32CROSS
       #cross compile a Win32 executable
-      CC = i686-w64-mingw32-gcc
+      CROSS_CC ?= $(shell which i686-w64-mingw32-gcc || which mingw32-gcc)
+      CROSS_PKGCONFIG ?= $(shell i686-w64-mingw32-pkg-config || mingw32-pkg-config)
+      CROSS_SDLCONFIG ?= /usr/local/cross-tools/i386-mingw32/bin/sdl-config
+      CC = $(CROSS_CC)
       BIN = ../bin/grafx2.exe
-      COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb -Dmain=SDL_main $(shell /usr/local/cross-tools/i386-mingw32/bin/sdl-config --cflags) $(TTFCOPT)
-      LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi $(shell /usr/local/cross-tools/i386-mingw32/bin/sdl-config --libs) -lSDL_image $(TTFLOPT)
-      COPT += $(shell PKG_CONFIG_PATH=/usr/local/cross-tools/i386-mingw32/lib/pkgconfig i686-w64-mingw32-pkg-config --cflags libpng)
-      LOPT += $(shell PKG_CONFIG_PATH=/usr/local/cross-tools/i386-mingw32/lib/pkgconfig i686-w64-mingw32-pkg-config --libs libpng)
+      COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb -Dmain=SDL_main $(shell $(CROSS_SDLCONFIG) --cflags) $(TTFCOPT)
+      LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi $(shell $(CROSS_SDLCONFIG) --libs) -lSDL_image $(TTFLOPT)
+      ifeq (,$(CROSS_PKGCONFIG))
+      COPT += -D__no_pnglib__
+      else
+      COPT += $(shell PKG_CONFIG_PATH=/usr/local/cross-tools/i386-mingw32/lib/pkgconfig $(CROSS_PKGCONFIG) --cflags libpng)
+      LOPT += $(shell PKG_CONFIG_PATH=/usr/local/cross-tools/i386-mingw32/lib/pkgconfig $(CROSS_PKGCONGIF) --libs libpng)
+      endif
       OBJDIR = ../obj/win32
       PLATFORM = win32
       PLATFORMFILES = bin/SDL.dll bin/SDL_image.dll bin/libpng14-14.dll bin/zlib1.dll $(TTFLIBS)
