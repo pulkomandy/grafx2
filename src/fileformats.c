@@ -650,6 +650,7 @@ void Load_IFF(T_IO_Context * context)
   T_IFF_PCHG_Palette * PCHG_palettes = NULL;
   int current_frame = 0;
   byte * previous_frame = NULL; // For animations
+  byte * anteprevious_frame = NULL;
 
   memset(&aheader, 0, sizeof(aheader));
 
@@ -784,10 +785,12 @@ void Load_IFF(T_IO_Context * context)
           int i, plane;
           dword offsets[16];
           dword current_offset = 0;
+          byte * frame;
 
           if (Image_HAM > 1)
           {
             Warning("HAM animations are not supported");
+            //Verbose_message("Notice", "HAM animations are not supported, loading only first frame"); // TODO: causes an issue with colors
             break;
           }
           if (previous_frame == NULL)
@@ -806,11 +809,19 @@ void Load_IFF(T_IO_Context * context)
                 Set_IFF_color(previous_frame+y_pos*line_size, x_pos, *pix_p++, real_line_size, real_bit_planes);
               }
             }
+            // many animations are designed for double buffering
+            // and delta is against frame n-2
+            anteprevious_frame = malloc(line_size * context->Height);
+            memcpy(anteprevious_frame, previous_frame, line_size * context->Height);
           }
 
           Set_loading_layer(context, ++current_frame);
-          if(aheader.operation == 5)
+          frame = previous_frame;
+
+          if(aheader.operation == 5)  // Byte Vertical Delta mode
           {
+            if (aheader.interleave != 1)
+              frame = anteprevious_frame;
             for (i = 0; i < 16; i++)
             {
               if (!Read_dword_be(IFF_file, offsets+i))
@@ -843,7 +854,7 @@ void Load_IFF(T_IO_Context * context)
               }
               for (x_pos = 0; x_pos < (context->Width+7) >> 3; x_pos++)
               {
-                byte * p = previous_frame + x_pos + plane * plane_line_size;
+                byte * p = frame + x_pos + plane * plane_line_size;
                 y_pos = 0;
                 Read_byte(IFF_file, &op_count);
                 current_offset++;
@@ -864,7 +875,10 @@ void Load_IFF(T_IO_Context * context)
                     current_offset += 2;
                     while(countb > 0 && y_pos < context->Height)
                     {
-                      *p = datab;
+                      if(aheader.bits & 2)  // XOR
+                        *p ^= datab;
+                      else                  // set
+                        *p = datab;
                       p += line_size;
                       y_pos++;
                       countb--;
@@ -880,7 +894,10 @@ void Load_IFF(T_IO_Context * context)
                       current_offset++;
                       if (y_pos < context->Height)
                       {
-                        *p = datab;
+                        if(aheader.bits & 2)  // XOR
+                          *p ^= datab;
+                        else                  // set
+                          *p = datab;
                         p += line_size;
                         y_pos++;
                       }
@@ -931,7 +948,7 @@ void Load_IFF(T_IO_Context * context)
                   y_start = offset / plane_line_size;
                   for (plane = 0; plane < real_bit_planes; plane++)
                   {
-                    byte * p = previous_frame + plane * plane_line_size;
+                    byte * p = frame + plane * plane_line_size;
                     p += x_start + y_start*line_size;
                     for (y_pos=0; y_pos < y_size; y_pos++)
                     {
@@ -962,7 +979,7 @@ void Load_IFF(T_IO_Context * context)
                   y_start = offset / plane_line_size;
                   for (plane = 0; plane < real_bit_planes; plane++)
                   {
-                    byte * p = previous_frame + plane * plane_line_size;
+                    byte * p = frame + plane * plane_line_size;
                     p += x_start + y_start*line_size;
                     for (y_pos=0; y_pos < y_size; y_pos++)
                     {
@@ -1004,8 +1021,13 @@ void Load_IFF(T_IO_Context * context)
           {
             for (y_pos=0; y_pos<context->Height; y_pos++)
             {
-              Draw_IFF_line(context, previous_frame+line_size*y_pos,y_pos,real_line_size,real_bit_planes);
+              Draw_IFF_line(context, frame+line_size*y_pos,y_pos,real_line_size,real_bit_planes);
             }
+          }
+          if (aheader.operation == 5 && aheader.interleave != 1)
+          {
+            anteprevious_frame = previous_frame;
+            previous_frame = frame;
           }
           if (current_offset&1)
           {
@@ -1020,6 +1042,8 @@ void Load_IFF(T_IO_Context * context)
         {
           nb_colors = section_size/3;
 
+          if (current_frame != 0)
+            Warning("One CMAP per frame is not supported");
           if ((header.BitPlanes==6 && nb_colors==16) || (header.BitPlanes==8 && nb_colors==64))
           {
             Image_HAM=header.BitPlanes;
@@ -1088,7 +1112,7 @@ void Load_IFF(T_IO_Context * context)
         {
           Read_dword_be(IFF_file, &AmigaViewModes); // HIRES=0x8000 LACE=0x4  HAM=0x800  HALFBRITE=0x80
           section_size -= 4;
-          if (AmigaViewModes & 0x800)
+          if (AmigaViewModes & 0x800 && (header.BitPlanes == 6 || header.BitPlanes == 8))
           {
             Image_HAM = header.BitPlanes;
             bpp = 3 * (header.BitPlanes - 2);
@@ -1600,32 +1624,6 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
           fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);
         }
       }
-
-                /*
-                while (!File_error && is_anim)
-                {
-                  dword delta_size;
-                  
-                  // Just loaded the first image successfully : now keep reading
-                  
-                  // FORM + size(4)
-                  if (!Read_bytes(IFF_file,section,4))
-                    break;
-                  Read_dword_be(IFF_file,&dummy);
-
-                  // ILBM, hopefully
-                  Read_bytes(IFF_file,format,4);
-                  if (!IFF_Wait_for(IFF_file, "DLTA"))
-                  {
-                    File_error=1;
-                    break;
-                  }
-                  Set_loading_layer(context, context->Current_layer+1);
-
-                  Read_dword_be(IFF_file,&delta_size);
-                  fseek(IFF_file, delta_size + (delta_size & 1), SEEK_CUR);
-                }
-                */
     }
 
     fclose(IFF_file);
@@ -1637,6 +1635,8 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
     free(SHAM_palettes);
   if (previous_frame)
     free(previous_frame);
+  if (anteprevious_frame)
+    free(anteprevious_frame);
   while (PCHG_palettes != NULL)
   {
     T_IFF_PCHG_Palette * next = PCHG_palettes->Next;
@@ -5610,4 +5610,3 @@ void Save_PNG(T_IO_Context * context)
 }
 #endif  // __no_pnglib__
 
- plane, x_pos, y_pos, context->Height, i, op_count, current_offset)2
