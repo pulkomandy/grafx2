@@ -1238,9 +1238,9 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
             for (y_pos = 0; y_pos < context->Height; y_pos++)
             {
               if (Image_HAM <= 1)
-                Draw_IFF_line(context, buffer+y_pos*line_size, y_pos,real_line_size, stored_bit_planes);
+                Draw_IFF_line(context, buffer+y_pos*line_size, y_pos,real_line_size, real_bit_planes);
               else
-                Draw_IFF_line_HAM(context, buffer+y_pos*line_size, y_pos,real_line_size, stored_bit_planes, SHAM_palettes, SHAM_palette_count);
+                Draw_IFF_line_HAM(context, buffer+y_pos*line_size, y_pos,real_line_size, real_bit_planes, SHAM_palettes, SHAM_palette_count);
             }
           }
           free(buffer);
@@ -1276,11 +1276,11 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
                   if (Read_bytes(IFF_file,buffer,line_size))
                   {
                     if (PCHG_palettes)
-                      Draw_IFF_line_PCHG(context, buffer, y_pos,real_line_size, stored_bit_planes, PCHG_palettes);
+                      Draw_IFF_line_PCHG(context, buffer, y_pos,real_line_size, real_bit_planes, PCHG_palettes);
                     else if (Image_HAM <= 1)
-                      Draw_IFF_line(context, buffer, y_pos,real_line_size, stored_bit_planes);
+                      Draw_IFF_line(context, buffer, y_pos,real_line_size, real_bit_planes);
                     else
-                      Draw_IFF_line_HAM(context, buffer, y_pos,real_line_size, stored_bit_planes, SHAM_palettes, SHAM_palette_count);
+                      Draw_IFF_line_HAM(context, buffer, y_pos,real_line_size, real_bit_planes, SHAM_palettes, SHAM_palette_count);
                   }
                   else
                     File_error=21;
@@ -1336,11 +1336,11 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
                   if (!File_error)
                   {
                     if (PCHG_palettes)
-                      Draw_IFF_line_PCHG(context, buffer, y_pos,real_line_size, stored_bit_planes, PCHG_palettes);
+                      Draw_IFF_line_PCHG(context, buffer, y_pos,real_line_size, real_bit_planes, PCHG_palettes);
                     else if (Image_HAM <= 1)
-                      Draw_IFF_line(context, buffer, y_pos,real_line_size,stored_bit_planes);
+                      Draw_IFF_line(context, buffer, y_pos,real_line_size,real_bit_planes);
                     else
-                      Draw_IFF_line_HAM(context, buffer, y_pos,real_line_size, stored_bit_planes, SHAM_palettes, SHAM_palette_count);
+                      Draw_IFF_line_HAM(context, buffer, y_pos,real_line_size, real_bit_planes, SHAM_palettes, SHAM_palette_count);
                   }
                 }
                 free(buffer);
