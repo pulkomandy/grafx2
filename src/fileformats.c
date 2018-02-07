@@ -427,8 +427,11 @@ static void Draw_IFF_line(T_IO_Context *context, const byte * buffer, short y_po
   {
     for (x_pos=0; x_pos<context->Width; x_pos++)
     {
+      // Default standard deep ILBM bit ordering:
+      // saved first -----------------------------------------------> saved last
+      // R0 R1 R2 R3 R4 R5 R6 R7 G0 G1 G2 G3 G4 G5 G6 G7 B0 B1 B2 B3 B4 B5 B6 B7
       dword rgb = Get_IFF_color(buffer, x_pos,real_line_size, bitplanes);
-      Set_pixel_24b(context, x_pos,y_pos, rgb >> 16, rgb >> 8, rgb);
+      Set_pixel_24b(context, x_pos,y_pos, rgb, rgb >> 8, rgb >> 16);  // R is 8 LSB, etc.
     }
   }
   else for (x_pos=0; x_pos<context->Width; x_pos++)
