@@ -932,12 +932,19 @@ void Load_IFF(T_IO_Context * context)
               if (max_col<min_col)
                 SWAP_BYTES(min_col,max_col)
 
-              context->Cycle_range[context->Color_cycles].Start=min_col;
-              context->Cycle_range[context->Color_cycles].End=max_col;
-              context->Cycle_range[context->Color_cycles].Inverse=(flags&2)?1:0;
-              context->Cycle_range[context->Color_cycles].Speed=(flags&1) ? rate/78 : 0;
+              if (context->Color_cycles >= 16)
+              {
+                Warning("Maximum CRNG number is 16");
+              }
+              else
+              {
+                context->Cycle_range[context->Color_cycles].Start=min_col;
+                context->Cycle_range[context->Color_cycles].End=max_col;
+                context->Cycle_range[context->Color_cycles].Inverse=(flags&2)?1:0;
+                context->Cycle_range[context->Color_cycles].Speed=(flags&1) ? rate/78 : 0;
 
-              context->Color_cycles++;
+                context->Color_cycles++;
+              }
             }
           }
           else
