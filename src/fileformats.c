@@ -764,6 +764,8 @@ void Load_IFF(T_IO_Context * context)
           Read_dword_be(IFF_file, &aheader.bits);
           section_size -= 24;
 
+          if ((aheader.bits & 0xffffffc0) != 0) // invalid ? => clearing
+            aheader.bits = 0;
           fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);  // Skip remaining bytes
         }
         else if (memcmp(section, "DPAN", 4) == 0) // Deluxe Paint ANimation
@@ -1608,7 +1610,7 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
           {
             PBM_Decode(context, IFF_file, header.Compression, context->Width, context->Height);
           }
-          if (section_size & 1)
+          if (ftell(IFF_file) & 1)
             fseek(IFF_file, 1, SEEK_CUR); // SKIP one byte
           if (context->Type == CONTEXT_PREVIEW || context->Type == CONTEXT_PREVIEW_PALETTE)
           {
