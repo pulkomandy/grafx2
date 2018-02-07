@@ -244,6 +244,21 @@ typedef struct
   word  Y_screen;
 } T_IFF_Header;
 
+typedef struct
+{
+  byte operation; // 0=normal body, 1=XOR, 2=Long Delta, 3=Short Delta,
+                  // 4=Generalized Long/Short Delta, 5=Byte Vertical Delta,
+                  // 7=short/long vertical delta, 74=Eric Graham's compression
+  byte mask;  // for XOR mode only
+  word w,h; // for XOR mode only
+  word x,y; // for XOR mode only
+  dword abstime;
+  dword reltime;
+  byte interleave;
+  byte pad0;
+  dword bits;
+} T_IFF_AnimHeader;
+
 // -- Tester si un fichier est au format IFF --------------------------------
 
 void Test_IFF(T_IO_Context * context, const char *sub_type)
@@ -607,6 +622,7 @@ void Load_IFF(T_IO_Context * context)
   FILE * IFF_file;
   char filename[MAX_PATH_CHARACTERS];
   T_IFF_Header header;
+  T_IFF_AnimHeader aheader;
   char  format[4];
   char  section[4];
   byte  temp_byte;
@@ -634,6 +650,8 @@ void Load_IFF(T_IO_Context * context)
   T_IFF_PCHG_Palette * PCHG_palettes = NULL;
   int current_frame = 0;
   byte * previous_frame = NULL; // For animations
+
+  memset(&aheader, 0, sizeof(aheader));
 
   Get_full_filename(filename, context->File_name, context->File_directory);
 
@@ -732,27 +750,17 @@ void Load_IFF(T_IO_Context * context)
         else if (memcmp(section, "ANHD", 4) == 0) // ANimation  HeaDer
         {
           // http://www.textfiles.com/programming/FORMATS/anim7.txt
-          byte operation;
-          byte mask;
-          word w,h;
-          word x,y;
-          dword abstime;
-          dword reltime;
-          byte interleave;
-          byte pad0;
-          dword bits;
-
-          Read_byte(IFF_file, &operation);
-          Read_byte(IFF_file, &mask);
-          Read_word_be(IFF_file, &w);
-          Read_word_be(IFF_file, &h);
-          Read_word_be(IFF_file, &x);
-          Read_word_be(IFF_file, &y);
-          Read_dword_be(IFF_file, &abstime);
-          Read_dword_be(IFF_file, &reltime);
-          Read_byte(IFF_file, &interleave);
-          Read_byte(IFF_file, &pad0);
-          Read_dword_be(IFF_file, &bits);
+          Read_byte(IFF_file, &aheader.operation);
+          Read_byte(IFF_file, &aheader.mask);
+          Read_word_be(IFF_file, &aheader.w);
+          Read_word_be(IFF_file, &aheader.h);
+          Read_word_be(IFF_file, &aheader.x);
+          Read_word_be(IFF_file, &aheader.y);
+          Read_dword_be(IFF_file, &aheader.abstime);
+          Read_dword_be(IFF_file, &aheader.reltime);
+          Read_byte(IFF_file, &aheader.interleave);
+          Read_byte(IFF_file, &aheader.pad0);
+          Read_dword_be(IFF_file, &aheader.bits);
           section_size -= 24;
 
           fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);  // Skip remaining bytes
