@@ -785,6 +785,11 @@ void Load_IFF(T_IO_Context * context)
           dword offsets[16];
           dword current_offset = 0;
 
+          if (Image_HAM > 1)
+          {
+            Warning("HAM animations are not supported");
+            break;
+          }
           if (previous_frame == NULL)
           {
             real_line_size = (context->Width+15) & ~15;
@@ -804,93 +809,197 @@ void Load_IFF(T_IO_Context * context)
           }
 
           Set_loading_layer(context, ++current_frame);
-          for (i = 0; i < 16; i++)
+          if(aheader.operation == 5)
           {
-            if (!Read_dword_be(IFF_file, offsets+i))
+            for (i = 0; i < 16; i++)
             {
-              File_error = 2;
-              break;
-            }
-            current_offset += 4;
-          }
-          for (plane = 0; plane < 16; plane++)
-          {
-            byte op_count = 0;
-            if (offsets[plane] == 0)
-              continue;
-            if (plane >= real_bit_planes)
-            {
-              Warning("too much bitplanes in DLTA data");
-              break;
-            }
-            while (current_offset < offsets[plane])
-            {
-              Read_byte(IFF_file, &op_count);
-              current_offset++;
-            }
-            if (current_offset > offsets[plane])
-            {
-              Warning("Loading ERROR in DLTA data");
-              File_error = 2;
-              break;
-            }
-            for (x_pos = 0; x_pos < (context->Width+7) >> 3; x_pos++)
-            {
-              byte * p = previous_frame + x_pos + plane * plane_line_size;
-              y_pos = 0;
-              Read_byte(IFF_file, &op_count);
-              current_offset++;
-              for (i = 0; i < op_count; i++)
+              if (!Read_dword_be(IFF_file, offsets+i))
               {
-                byte op;
-
-                if (y_pos >= context->Height)
-                {
-                }
-                Read_byte(IFF_file, &op);
+                File_error = 2;
+                break;
+              }
+              current_offset += 4;
+            }
+            for (plane = 0; plane < 16; plane++)
+            {
+              byte op_count = 0;
+              if (offsets[plane] == 0)
+                continue;
+              if (plane >= real_bit_planes)
+              {
+                Warning("too much bitplanes in DLTA data");
+                break;
+              }
+              while (current_offset < offsets[plane])
+              {
+                Read_byte(IFF_file, &op_count);
                 current_offset++;
-                if (op == 0)
-                { // Same ops
-                  byte countb, datab;
-                  Read_byte(IFF_file, &countb);
-                  Read_byte(IFF_file, &datab);
-                  current_offset += 2;
-                  while(countb > 0 && y_pos < context->Height)
+              }
+              if (current_offset > offsets[plane])
+              {
+                Warning("Loading ERROR in DLTA data");
+                File_error = 2;
+                break;
+              }
+              for (x_pos = 0; x_pos < (context->Width+7) >> 3; x_pos++)
+              {
+                byte * p = previous_frame + x_pos + plane * plane_line_size;
+                y_pos = 0;
+                Read_byte(IFF_file, &op_count);
+                current_offset++;
+                for (i = 0; i < op_count; i++)
+                {
+                  byte op;
+
+                  if (y_pos >= context->Height)
                   {
-                    *p = datab;
-                    p += line_size;
-                    y_pos++;
-                    countb--;
                   }
-                }
-                else if (op & 0x80)
-                { // Uniq Ops
-                  op &= 0x7f;
-                  while (op > 0)
-                  {
-                    byte datab;
+                  Read_byte(IFF_file, &op);
+                  current_offset++;
+                  if (op == 0)
+                  { // Same ops
+                    byte countb, datab;
+                    Read_byte(IFF_file, &countb);
                     Read_byte(IFF_file, &datab);
-                    current_offset++;
-                    if (y_pos < context->Height)
+                    current_offset += 2;
+                    while(countb > 0 && y_pos < context->Height)
                     {
                       *p = datab;
                       p += line_size;
                       y_pos++;
+                      countb--;
                     }
-                    op--;
                   }
-                }
-                else
-                { // skip ops
+                  else if (op & 0x80)
+                  { // Uniq Ops
+                    op &= 0x7f;
+                    while (op > 0)
+                    {
+                      byte datab;
+                      Read_byte(IFF_file, &datab);
+                      current_offset++;
+                      if (y_pos < context->Height)
+                      {
+                        *p = datab;
+                        p += line_size;
+                        y_pos++;
+                      }
+                      op--;
+                    }
+                  }
+                  else
+                  { // skip ops
                     p += op * line_size;
                     y_pos += op;
+                  }
                 }
-              }
-              if (y_pos > 0 && y_pos != context->Height)
-              {
+                if (y_pos > context->Height)
+                {
+                }
               }
             }
           }
+          else if(aheader.operation==74)
+          {
+            // from sources found on aminet :
+            // http://aminet.net/package/gfx/conv/unmovie
+            while (current_offset < section_size)
+            {
+              word change_type;
+              word uni_flag;
+              word y_size;
+              word x_size;
+              word num_blocks;
+              word offset;
+              word x_start, y_start;
+
+              Read_word_be(IFF_file, &change_type);
+              current_offset += 2;
+              if (change_type == 0)
+                break;
+              else if (change_type == 1)
+              { // "Wall"
+                Read_word_be(IFF_file, &uni_flag);
+                Read_word_be(IFF_file, &y_size);
+                Read_word_be(IFF_file, &num_blocks);
+                current_offset += 6;
+                while (num_blocks-- > 0)
+                {
+                  Read_word_be(IFF_file, &offset);
+                  current_offset += 2;
+                  x_start = offset % plane_line_size;
+                  y_start = offset / plane_line_size;
+                  for (plane = 0; plane < real_bit_planes; plane++)
+                  {
+                    byte * p = previous_frame + plane * plane_line_size;
+                    p += x_start + y_start*line_size;
+                    for (y_pos=0; y_pos < y_size; y_pos++)
+                    {
+                      byte value;
+                      Read_byte(IFF_file, &value);
+                      current_offset++;
+                      if (uni_flag)
+                        *p ^= value;
+                      else
+                        *p = value;
+                      }
+                      p += line_size;
+                    }
+                }
+              }
+              else if (change_type == 2)
+              { // "Pile"
+                Read_word_be(IFF_file, &uni_flag);
+                Read_word_be(IFF_file, &y_size);
+                Read_word_be(IFF_file, &x_size);
+                Read_word_be(IFF_file, &num_blocks);
+                current_offset += 8;
+                while (num_blocks-- > 0)
+                {
+                  Read_word_be(IFF_file, &offset);
+                  current_offset += 2;
+                  x_start = offset % plane_line_size;
+                  y_start = offset / plane_line_size;
+                  for (plane = 0; plane < real_bit_planes; plane++)
+                  {
+                    byte * p = previous_frame + plane * plane_line_size;
+                    p += x_start + y_start*line_size;
+                    for (y_pos=0; y_pos < y_size; y_pos++)
+                    {
+                      for (x_pos=0; x_pos < x_size; x_pos++)
+                      {
+                        byte value;
+                        Read_byte(IFF_file, &value);
+                        current_offset++;
+                        if (uni_flag)
+                          p[x_pos] ^= value;
+                        else
+                          p[x_pos] = value;
+                      }
+                      p += line_size;
+                    }
+                  }
+                }
+              }
+              else
+              {
+                Warning("Unknown change type in type 74 DLTA");
+                File_error = 2;
+                break;
+              }
+              if (current_offset & 1) // align to WORD boundary
+              {
+                byte junk;
+                Read_byte(IFF_file, &junk);
+                current_offset++;
+              }
+            }
+          }
+          else
+          {
+            Warning("Unsupported compression type in ILBM DLTA chunk");
+          }
+
           if (File_error == 0)
           {
             for (y_pos=0; y_pos<context->Height; y_pos++)
@@ -1477,6 +1586,10 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
           }
           if (section_size & 1)
             fseek(IFF_file, 1, SEEK_CUR); // SKIP one byte
+          if (context->Type == CONTEXT_PREVIEW || context->Type == CONTEXT_PREVIEW_PALETTE)
+          {
+            break; // dont load animations in Preview mode
+          }
         }
         else
         {
@@ -5497,3 +5610,4 @@ void Save_PNG(T_IO_Context * context)
 }
 #endif  // __no_pnglib__
 
+ plane, x_pos, y_pos, context->Height, i, op_count, current_offset)2
