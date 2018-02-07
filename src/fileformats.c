@@ -766,6 +766,8 @@ void Load_IFF(T_IO_Context * context)
 
           if ((aheader.bits & 0xffffffc0) != 0) // invalid ? => clearing
             aheader.bits = 0;
+          if (aheader.operation == 0) // ANHD for 1st frame (BODY)
+            Set_frame_duration(context, (aheader.reltime * 50) / 3);  // convert 1/60th sec in msec
           fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);  // Skip remaining bytes
         }
         else if (memcmp(section, "DPAN", 4) == 0) // Deluxe Paint ANimation
@@ -818,6 +820,7 @@ void Load_IFF(T_IO_Context * context)
           }
 
           Set_loading_layer(context, ++current_frame);
+          Set_frame_duration(context, (aheader.reltime * 50) / 3 ); // convert 1/60th sec in msec
           frame = previous_frame;
 
           if(aheader.operation == 5)  // Byte Vertical Delta mode
