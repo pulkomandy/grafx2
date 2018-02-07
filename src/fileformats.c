@@ -765,6 +765,20 @@ void Load_IFF(T_IO_Context * context)
 
           fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);  // Skip remaining bytes
         }
+        else if (memcmp(section, "DPAN", 4) == 0) // Deluxe Paint ANimation
+        {
+          word version;
+          word frame_count;
+          dword flags;
+          if (section_size >= 8)
+          {
+            Read_word_be(IFF_file, &version);
+            Read_word_be(IFF_file, &frame_count);
+            Read_dword_be(IFF_file, &flags);
+            section_size -= 8;
+          }
+          fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);  // Skip remaining bytes
+        }
         else if (memcmp(section, "DLTA", 4) == 0) // Animation DeLTA
         {
           int i, plane;
