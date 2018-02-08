@@ -651,6 +651,9 @@ void Load_IFF(T_IO_Context * context)
   int current_frame = 0;
   byte * previous_frame = NULL; // For animations
   byte * anteprevious_frame = NULL;
+  word frame_count = 0;
+  word frame_duration = 0;
+  word vdlt_plane = 0; // current plane during Atari ST animation decoding
 
   memset(&aheader, 0, sizeof(aheader));
 
@@ -676,11 +679,28 @@ void Load_IFF(T_IO_Context * context)
     }
     else if(memcmp(format,"DPST",4)==0)
     {
-      // TODO : read DPAH
-      if (!IFF_Wait_for(IFF_file, "FORM"))
-        File_error=1;
-      Read_dword_be(IFF_file,&dummy);
-      Read_bytes(IFF_file,format,4);
+      // read DPAH
+      while (File_error == 0)
+      {
+        if (!(Read_bytes(IFF_file,section,4)
+           && Read_dword_be(IFF_file,&section_size)))
+          File_error = 1;
+        if (memcmp(section, "FORM", 4) == 0)
+        {
+          Read_bytes(IFF_file,format,4);
+          break;
+        }
+        else if (memcmp(section, "DPAH", 4) == 0) // Deluxe Paint Animation Header
+        {
+          word version;
+          Read_word_be(IFF_file, &frame_duration);
+          Read_word_be(IFF_file, &frame_count);
+          Read_word_be(IFF_file, &version);
+          section_size -= 6;
+          Set_frame_duration(context, (frame_duration * 50) / 3);  // convert 1/60th sec to msec
+        }
+        fseek(IFF_file, (section_size+1)&~1, SEEK_CUR); // skip unread bytes
+      }
     }
     if (memcmp(format,"ILBM",4) == 0)
       iff_format = FORMAT_LBM;
@@ -708,9 +728,36 @@ void Load_IFF(T_IO_Context * context)
         {
           // special
           Read_bytes(IFF_file, format, 4);
+          if (memcmp(format, "VDLT", 4) == 0) // Vertical DeLTa
+          { // found in animation produced by DeluxePaint for Atari ST
+            if (frame_count != 0 && current_frame >= (frame_count - 1))
+              break;  // file contains the Delta from the last frame to the 1st one to allow looping, skip it
+
+            real_line_size = (context->Width+15) & ~15;
+            plane_line_size = real_line_size >> 3;  // 8bits per byte
+            line_size = plane_line_size * real_bit_planes;
+
+            if (previous_frame == NULL)
+            {
+              previous_frame = calloc(line_size * context->Height,1);
+              for (y_pos=0; y_pos<context->Height; y_pos++)
+              {
+                const byte * pix_p = Main.backups->Pages->Image[Main.current_layer].Pixels + y_pos * Main.backups->Pages->Width;
+                // Dispatch the pixel into planes
+                for (x_pos=0; x_pos<context->Width; x_pos++)
+                {
+                  Set_IFF_color(previous_frame+y_pos*line_size, x_pos, *pix_p++, real_line_size, real_bit_planes);
+                }
+              }
+            }
+
+            Set_loading_layer(context, ++current_frame);
+            Set_frame_duration(context, (frame_duration * 50) / 3);  // convert 1/60th sec to msec
+            vdlt_plane = 0;
+          }
           continue;
         }
-        if (memcmp(section, "BMHD", 4) == 0)
+        if (memcmp(section, "BMHD", 4) == 0)  // BitMap HeaDer
         {
           if (!((Read_word_be(IFF_file,&header.Width))
             && (Read_word_be(IFF_file,&header.Height))
@@ -767,13 +814,12 @@ void Load_IFF(T_IO_Context * context)
           if ((aheader.bits & 0xffffffc0) != 0) // invalid ? => clearing
             aheader.bits = 0;
           if (aheader.operation == 0) // ANHD for 1st frame (BODY)
-            Set_frame_duration(context, (aheader.reltime * 50) / 3);  // convert 1/60th sec in msec
+            Set_frame_duration(context, (aheader.reltime * 50) / 3);  // convert 1/60th sec to msec
           fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);  // Skip remaining bytes
         }
         else if (memcmp(section, "DPAN", 4) == 0) // Deluxe Paint ANimation
         {
           word version;
-          word frame_count;
           dword flags;
           if (section_size >= 8)
           {
@@ -797,6 +843,8 @@ void Load_IFF(T_IO_Context * context)
             //Verbose_message("Notice", "HAM animations are not supported, loading only first frame"); // TODO: causes an issue with colors
             break;
           }
+          if (frame_count != 0 && current_frame >= (frame_count - 1))
+            break;  // some animations have delta from last to first frame
           if (previous_frame == NULL)
           {
             real_line_size = (context->Width+15) & ~15;
@@ -1043,7 +1091,106 @@ void Load_IFF(T_IO_Context * context)
           section_size -= current_offset;
           fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);  // Skip it
         }
-        else if (memcmp(section, "CMAP", 4) == 0)
+        else if (memcmp(section, "ADAT", 4) == 0)
+        { // Animation made with Deluxe Paint for Atari ST
+          buffer = previous_frame;
+          if (section_size > 0)
+          {
+            byte * p;
+            byte data[2];
+            word cmd_count;
+            word cmd;
+            signed char * commands;
+            word count;
+
+            y_pos = 0; x_pos = 0;
+            Read_word_be(IFF_file,&cmd_count);
+            cmd_count -= 2;
+            commands = (signed char *)malloc(cmd_count);
+            if (!Read_bytes(IFF_file,commands,cmd_count))
+            {
+              File_error = 31;
+              break;
+            }
+            section_size -= (cmd_count + 2);
+            for (cmd = 0; cmd < cmd_count && section_size > 0; cmd++)
+            {
+              if (commands[cmd] == 0)
+              { // move pointer
+                word offset;
+                short x_ofs, y_ofs;
+                Read_word_be(IFF_file,&offset);
+                section_size -= 2;
+                if((short)offset < 0) {
+                  y_ofs = ((short)offset - plane_line_size + 1) / plane_line_size;
+                  x_ofs = (short)offset - y_ofs * plane_line_size;
+                } else {
+                  x_ofs = offset % plane_line_size;
+                  y_ofs = offset / plane_line_size;
+                }
+                y_pos += y_ofs;
+                x_pos += x_ofs;
+              }
+              else if(commands[cmd] < 0)
+              { // XOR with a string of Words
+                if (commands[cmd] == -1 && section_size >= 2)
+                {
+                  Read_word_be(IFF_file,&count);
+                  section_size -= 2;
+                }
+                else
+                  count = -commands[cmd] - 1;
+                while (count-- > 0 && y_pos < context->Height && section_size > 0)
+                {
+                  p = buffer+x_pos+y_pos*line_size+vdlt_plane*plane_line_size;
+                  Read_bytes(IFF_file,data,2);
+                  section_size -= 2;
+                  p[0] ^= data[0];
+                  p[1] ^= data[1];
+                  y_pos++;
+                }
+              }
+              else // commands[cmd] > 0
+              { // XOR a word several times
+                if (commands[cmd] == 1)
+                {
+                  Read_word_be(IFF_file,&count);
+                  section_size -= 2;
+                  if (section_size < 2)
+                    break;
+                }
+                else
+                  count = commands[cmd] - 1;
+                Read_bytes(IFF_file,data,2);
+                section_size -= 2;
+                do
+                {
+                  p = buffer+x_pos+y_pos*line_size+vdlt_plane*plane_line_size;
+                  p[0] ^= data[0];
+                  p[1] ^= data[1];
+                  y_pos++;
+                }
+                while (count-- > 0 && y_pos < context->Height);
+              }
+            }
+            free(commands);
+            if(cmd < (cmd_count-1) || section_size > 0)
+            {
+              Warning("Early end in ADAT chunk");
+            }
+          }
+
+          vdlt_plane++;
+          if (vdlt_plane == real_bit_planes)
+          {
+            for (y_pos=0; y_pos<context->Height; y_pos++)
+            {
+              Draw_IFF_line(context, buffer+line_size*y_pos,y_pos,real_line_size,real_bit_planes);
+            }
+          }
+          fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);  // Skip remaining bytes
+        }
+        else if (memcmp(section, "CMAP", 4) == 0) // Colour MAP
         {
           nb_colors = section_size/3;
 
@@ -1407,6 +1554,7 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
             }
           }
           free(buffer);
+          buffer = NULL;
         }
         else if (memcmp(section, "BODY", 4) == 0)
         {
@@ -1449,6 +1597,7 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
                     File_error=21;
                 }
                 free(buffer);
+                buffer = NULL;
                 break;
               case 1:          // packbits compression (Amiga)
                 buffer=(byte *)malloc(line_size);
@@ -1507,6 +1656,7 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
                   }
                 }
                 free(buffer);
+                buffer = NULL;
                 break;
               case 2:     // vertical RLE compression (Atari ST)
                 buffer=(byte *)calloc(line_size*context->Height, 1);
@@ -1603,6 +1753,7 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
                   }
                 }
                 free(buffer);
+                buffer = NULL;
                 break;
               default:
                 Warning("Unknown IFF compression");
