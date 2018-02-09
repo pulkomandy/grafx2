@@ -170,6 +170,10 @@ void Load_PNG(T_IO_Context *);
 void Save_PNG(T_IO_Context *);
 #endif
 
+// -- INFO (Amiga ICONS) ----------------------------------------------------
+void Test_INFO(T_IO_Context *);
+void Load_INFO(T_IO_Context *);
+
 // -- SDL_Image -------------------------------------------------------------
 // (TGA, BMP, PNM, XPM, XCF, PCX, GIF, JPG, TIF, IFF, PNG, ICO)
 void Load_SDL_Image(T_IO_Context *);
@@ -182,7 +186,7 @@ void Load_Recoil_Image(T_IO_Context *);
 
 // ENUM     Name  TestFunc LoadFunc SaveFunc PalOnly Comment Layers Ext Exts  
 const T_Format File_formats[] = {
-  {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, 0, "", "gif;png;bmp;2bp;pcx;pkm;iff;lbm;ilbm;sham;ham;ham6;ham8;acbm;pic;anim;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;c64;koa;koala;fli;bml;cdu;prg;tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico;ic2;cur;cm5;pph"},
+  {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, 0, "", "gif;png;bmp;2bp;pcx;pkm;iff;lbm;ilbm;sham;ham;ham6;ham8;acbm;pic;anim;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;c64;koa;koala;fli;bml;cdu;prg;tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico;ic2;cur;cm5;pph;info"},
   {FORMAT_ALL_PALETTES, "(pal)", NULL, NULL, NULL, 1, 0, 0, "", "kcf;pal;gpl"},
   {FORMAT_ALL_FILES, "(*.*)", NULL, NULL, NULL, 0, 0, 0, "", "*"},
   {FORMAT_GIF, " gif", Test_GIF, Load_GIF, Save_GIF, 0, 1, 1, "gif", "gif"},
@@ -210,6 +214,7 @@ const T_Format File_formats[] = {
   {FORMAT_PPH, " pph", Test_PPH, Load_PPH, Save_PPH, 0, 0, 1, "pph", "pph"},
   {FORMAT_XPM, " xpm", NULL,     NULL,     Save_XPM, 0, 0, 0, "xpm", "xpm"},
   {FORMAT_ICO, " ico", Test_ICO, Load_ICO, Save_ICO, 0, 0, 0, "ico", "ico;ic2;cur"},
+  {FORMAT_INFO," info",Test_INFO,Load_INFO,NULL,     0, 0, 0, "info", "info"},
   {FORMAT_MISC,"misc.",NULL,     NULL,     NULL,     0, 0, 0, "",    "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff"},
 };
 

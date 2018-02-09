@@ -2341,6 +2341,420 @@ void Save_IFF(T_IO_Context * context)
 
 
 
+/////////////////////////// .info (Amiga Icons) /////////////////////////////
+typedef struct
+{                     // offset
+  word Magic;         // 0
+  word Version;
+  dword NextGadget;
+  word LeftEdge;      // 8
+  word TopEdge;
+  word Width;
+  word Height;
+  word Flags;         // 16
+  word Activation;
+  word GadgetType;    // 20
+  dword GadgetRender; // 22
+  dword SelectRender;
+  dword GadgetText;   // 30
+  dword MutualExclude;
+  dword SpecialInfo;  // 38
+  word GadgetID;
+  dword UserData;     // 44 icon revision : 0 = OS 1.x, 1 = OS 2.x/3.x
+  byte Type;
+  byte padding;
+  dword DefaultTool;
+  dword ToolTypes;
+  dword CurrentX;
+  dword CurrentY;
+  dword DrawerData;
+  dword ToolWindow;
+  dword StackSize;
+} T_INFO_Header;
+
+static int Read_INFO_Header(FILE * file, T_INFO_Header * header)
+{
+  return (Read_word_be(file, &header->Magic)
+       && Read_word_be(file, &header->Version)
+       && Read_dword_be(file, &header->NextGadget)
+       && Read_word_be(file, &header->LeftEdge)
+       && Read_word_be(file, &header->TopEdge)
+       && Read_word_be(file, &header->Width)
+       && Read_word_be(file, &header->Height)
+       && Read_word_be(file, &header->Flags)
+       && Read_word_be(file, &header->Activation)
+       && Read_word_be(file, &header->GadgetType)
+       && Read_dword_be(file, &header->GadgetRender)
+       && Read_dword_be(file, &header->SelectRender)
+       && Read_dword_be(file, &header->GadgetText)
+       && Read_dword_be(file, &header->MutualExclude)
+       && Read_dword_be(file, &header->SpecialInfo)
+       && Read_word_be(file, &header->GadgetID)
+       && Read_dword_be(file, &header->UserData)
+       && Read_byte(file, &header->Type)
+       && Read_byte(file, &header->padding)
+       && Read_dword_be(file, &header->DefaultTool)
+       && Read_dword_be(file, &header->ToolTypes)
+       && Read_dword_be(file, &header->CurrentX)
+       && Read_dword_be(file, &header->CurrentY)
+       && Read_dword_be(file, &header->DrawerData)
+       && Read_dword_be(file, &header->ToolWindow)
+       && Read_dword_be(file, &header->StackSize)
+          );
+}
+
+typedef struct
+{
+  short LeftEdge;
+  short TopEdge;
+  word Width;
+  word Height;
+  word Depth;
+  dword ImageData;
+  byte PlanePick;
+  byte PlaneOnOff;
+  dword NextImage;
+} T_INFO_ImageHeader;
+
+static int Read_INFO_ImageHeader(FILE * file, T_INFO_ImageHeader * header)
+{
+  return (Read_word_be(file, (word *)&header->LeftEdge)
+       && Read_word_be(file, (word *)&header->TopEdge)
+       && Read_word_be(file, &header->Width)
+       && Read_word_be(file, &header->Height)
+       && Read_word_be(file, &header->Depth)
+       && Read_dword_be(file, &header->ImageData)
+       && Read_byte(file, &header->PlanePick)
+       && Read_byte(file, &header->PlaneOnOff)
+       && Read_dword_be(file, &header->NextImage)
+          );
+}
+
+void Test_INFO(T_IO_Context * context)
+{
+  T_INFO_Header header;
+  char filename[MAX_PATH_CHARACTERS];
+  FILE *file;
+
+  File_error=1;
+  Get_full_filename(filename, context->File_name, context->File_directory);
+
+  file=fopen(filename, "rb");
+  if (file == NULL)
+    return;
+  if (Read_INFO_Header(file, &header))
+  {
+    if (header.Magic == 0xe310 && header.Version == 1)
+      File_error = 0;
+  }
+
+  fclose(file);
+}
+
+static char * Read_INFO_String(FILE * file)
+{
+  dword size;
+  char * p;
+  if (!Read_dword_be(file, &size))
+    return NULL;
+  p = malloc(size);
+  if (p == NULL)
+    return NULL;
+  if (!Read_bytes(file, p, size))
+  {
+    free(p);
+    p = NULL;
+  }
+  return p;
+}
+
+static byte * Decode_NewIcons(const byte * p, int bits, int * len)
+{
+  int alloc_size;
+  int i;
+  byte * buffer;
+  dword current_byte = 0;
+  int current_bits = 0;
+
+  alloc_size = 16*1024;
+  buffer = malloc(alloc_size);
+  if (buffer == NULL)
+    return NULL;
+  i = 0;
+  while (*p)
+  {
+    byte value = *p++;
+    if (0xd1 <= value)
+    {
+      value -= 0xd0; // RLE count
+      while (value-- > 0)
+      {
+        current_byte = (current_byte << 7);
+        current_bits += 7;
+        while (current_bits >= bits)
+        {
+          buffer[i++] = (current_byte >> (current_bits - bits)) & ((1 << bits) - 1);
+          current_bits -= bits;
+        }
+      }
+      continue;
+    }
+    if (0x20 <= value && value <= 0x6f)
+      value = value - 0x20;
+    else if (0xa1 <= value && value <= 0xd0)
+      value = value - 0x51;
+    else
+    {
+      Warning("Invalid value");
+      break;
+    }
+    current_byte = (current_byte << 7) | value;
+    current_bits += 7;
+    while (current_bits >= bits)
+    {
+      buffer[i++] = (current_byte >> (current_bits - bits)) & ((1 << bits) - 1);
+      current_bits -= bits;
+    }
+  }
+  //buffer[i++] = (current_byte << (bits - current_bits)) & ((1 << bits) - 1);
+  *len = i;
+  return buffer;
+}
+
+
+void Load_INFO(T_IO_Context * context)
+{
+  static const T_Components amigaOS1x_pal[] = {
+//    {  85, 170, 255 },
+    {   0, 85, 170  },
+    { 255, 255, 255 },
+    {   0,   0,   0 },
+    { 255, 136,   0 },
+  };
+  static const T_Components amigaOS2x_pal[] = {
+    { 149, 149, 149 },
+    {   0,   0,   0 },
+    { 255, 255, 255 },
+    {  59, 103, 162 },
+    { 123, 123, 123 },  // MagicWB extended colors
+    { 175, 175, 175 },
+    { 170, 144, 124 },
+    { 255, 169, 151 },
+  };
+  T_INFO_Header header;
+  T_INFO_ImageHeader imgheaders[2];
+  char filename[MAX_PATH_CHARACTERS];
+  FILE *file;
+  long file_size;
+  word plane_line_size = 0;
+  word line_size = 0;
+  int plane;
+  short x_pos = 0, y_pos = 0;
+  int has_NewIcons = 0;
+  int img_count = 0; // 1 or 2
+  byte * buffers[2];
+
+  File_error = 0;
+  Get_full_filename(filename, context->File_name, context->File_directory);
+
+  file=fopen(filename, "rb");
+  if (file == NULL)
+  {
+    File_error=1;
+    return;
+  }
+  file_size=File_length_file(file);
+  
+  if (Read_INFO_Header(file, &header) && header.Magic == 0xe310)
+  {
+    if (header.GadgetRender == 0)
+      File_error = 1;
+    if (header.DrawerData)    // Skip DrawerData
+      if (fseek(file, 56, SEEK_CUR) != 0)
+        File_error = 1;
+
+    // icons
+    for (img_count = 0; File_error == 0 && img_count < 2; img_count++)
+    {
+      buffers[img_count] = NULL;
+      if (img_count == 0 && header.GadgetRender == 0)
+        continue;
+      if (img_count == 1 && header.SelectRender == 0)
+        break;
+      if (!Read_INFO_ImageHeader(file, &imgheaders[img_count]))
+        File_error = 1;
+      else
+      {
+        plane_line_size = ((imgheaders[img_count].Width + 15) >> 4) * 2;
+        line_size = plane_line_size * imgheaders[img_count].Depth;
+        buffers[img_count] = malloc(line_size * imgheaders[img_count].Height);
+        for (plane = 0; plane < imgheaders[img_count].Depth; plane++)
+        {
+          for (y_pos = 0; y_pos < imgheaders[img_count].Height; y_pos++)
+          {
+            if (!Read_bytes(file, buffers[img_count] + y_pos * line_size + plane * plane_line_size, plane_line_size))
+            {
+              File_error = 2;
+              break;
+            }
+          }
+        }
+      }
+    }
+    if (File_error == 0 && header.DefaultTool)
+    {
+      char * DefaultTool = Read_INFO_String(file);
+      if (DefaultTool == NULL)
+        File_error = 2;
+      else
+      {
+        free(DefaultTool);
+      }
+    }
+    if (File_error == 0 && header.ToolTypes)
+    {
+      int current_img = -1;
+      int width = 0;
+      int height = 0;
+      int color_count;
+      int bpp = 0;
+      
+      dword count;
+      char * ToolType;
+      if (Read_dword_be(file, &count))
+      {
+        while(count > 0)
+        {
+          ToolType = Read_INFO_String(file);
+          if (ToolType == NULL)
+            break;
+          else
+          {
+            // NewIcons
+            if (strlen(ToolType) > 4 && ToolType[0] == 'I' && ToolType[1] == 'M' && ToolType[3] == '=')
+            {
+              byte * p;
+              int img_index = ToolType[2] - '0';
+              p = (byte *)ToolType + 4;
+              if (img_index != current_img)
+              {
+                // image info + palette
+                byte * palette;
+                int palette_len;
+
+                current_img = img_index;
+                if (*p++ == 'B')
+                {
+                  context->Transparent_color = 0;
+                  context->Background_transparent = 1;
+                }
+                else
+                  context->Background_transparent = 0;
+                width = *p++ - 0x21;
+                height = *p++ - 0x21;
+                color_count = *p++ - 0x21;
+                color_count = (color_count << 6) + *p++ - 0x21;
+                for (bpp = 1; color_count > (1 << bpp); bpp++) { }
+                palette = Decode_NewIcons(p, 8, &palette_len);
+                if (palette)
+                {
+                  if (Config.Clear_palette && img_index == 1)
+                    memset(context->Palette,0,sizeof(T_Palette));
+                  memcpy(context->Palette, palette, palette_len);
+                  free(palette);
+                }
+                if (img_index == 1)
+                {
+                  Pre_load(context, width, height,file_size,FORMAT_INFO,PIXEL_SIMPLE, bpp);
+                  if (context->Type == CONTEXT_MAIN_IMAGE)
+                  {
+                    Main.backups->Pages->Image_mode = IMAGE_MODE_ANIMATION;
+                    Update_screen_targets();
+                  }
+                  has_NewIcons = 1;
+                }
+                else
+                  Set_loading_layer(context, img_index - 1);
+                x_pos = 0; y_pos = 0;
+              }
+              else
+              {
+                byte * pixels;
+                int pixel_count;
+
+                pixels = Decode_NewIcons(p, bpp, &pixel_count);
+                if (pixels)
+                {
+                  int i;
+                  for (i = 0; i < pixel_count; i++)
+                  {
+                    Set_pixel(context, x_pos++, y_pos, pixels[i]);
+                    if (x_pos >= width)
+                    {
+                      x_pos = 0;  
+                      y_pos++;
+                    }
+                  }
+                  free(pixels);
+                }
+              }
+            }
+            free(ToolType);
+          }
+          count -= 4;
+        }
+      }
+    }
+    if (File_error == 0 && header.ToolWindow != 0)
+    {
+      char * ToolWindow = Read_INFO_String(file);
+      if (ToolWindow == NULL)
+        File_error = 2;
+      else
+      {
+        free(ToolWindow);
+      }
+    }
+    if (File_error == 0 && header.UserData == 1)
+    {
+      if (fseek(file, 8, SEEK_CUR) != 0)
+        File_error = 1;
+    }
+    // Glow Icon can follow...
+
+    if (!has_NewIcons && img_count > 0)
+    {
+      if (Config.Clear_palette)
+        memset(context->Palette,0,sizeof(T_Palette));
+      if (header.UserData == 0)
+        memcpy(context->Palette, amigaOS1x_pal, sizeof(amigaOS1x_pal));
+      else
+        memcpy(context->Palette, amigaOS2x_pal, sizeof(amigaOS2x_pal));
+
+      Pre_load(context, header.Width, header.Height,file_size,FORMAT_INFO,PIXEL_SIMPLE, imgheaders[0].Depth);
+      if (context->Type == CONTEXT_MAIN_IMAGE)
+      {
+        Main.backups->Pages->Image_mode = IMAGE_MODE_ANIMATION;
+        Update_screen_targets();
+      }
+      for (img_count = 0; img_count < 2 && buffers[img_count] != NULL; img_count++)
+      {
+        if (img_count > 0)
+          Set_loading_layer(context, img_count);
+        for (y_pos = 0; y_pos < imgheaders[img_count].Height; y_pos++)
+          Draw_IFF_line(context, buffers[img_count] + y_pos * line_size, y_pos, plane_line_size << 3, imgheaders[img_count].Depth);
+        free(buffers[img_count]);
+        buffers[img_count] = NULL;
+      }
+    }
+  }
+  else
+    File_error=1;
+  fclose(file);
+}
+
+
+
 //////////////////////////////////// BMP ////////////////////////////////////
 typedef struct
 {
