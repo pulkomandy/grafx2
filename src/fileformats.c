@@ -1323,7 +1323,85 @@ void Load_IFF(T_IO_Context * context)
             fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);
           }
         }
-        else if (memcmp(section, "PCHG", 4) == 0)
+        else if (memcmp(section, "BEAM", 4) == 0)
+        {
+          // One palette per line is stored
+          if (Image_HAM >= 6)
+          {
+            SHAM_palette_count = header.Height;
+            SHAM_palettes = malloc(sizeof(T_Components)*16*SHAM_palette_count);
+            if (SHAM_palettes == NULL)
+            {
+              Warning("Memory allocation error");
+              File_error = 1;
+              break;
+            }
+            for (counter = 0; (unsigned)counter < 16*SHAM_palette_count && section_size > 0; counter++)
+            {
+              Read_byte(IFF_file, &temp_byte);  // 0R
+              SHAM_palettes[counter].R = (temp_byte & 0x0f) * 0x11; // 4 bits to 8 bits
+              Read_byte(IFF_file, &temp_byte);  // GB
+              SHAM_palettes[counter].G = (temp_byte & 0xf0) | (temp_byte >> 4);
+              SHAM_palettes[counter].B = (temp_byte & 0x0f) * 0x11; // 4 bits to 8 bits
+              section_size -= 2;
+            }
+          }
+          else if (section_size >= header.Height * nb_colors * 2)
+          {
+            T_Palette palette;
+            T_IFF_PCHG_Palette * prev_pal = NULL;
+            T_IFF_PCHG_Palette * new_pal = NULL;
+
+            for (y_pos = 0; y_pos < header.Height; y_pos++)
+            {
+              unsigned int i;
+              for (i = 0; i < nb_colors; i++)
+              {
+                word value;
+                Read_word_be(IFF_file, &value);
+                section_size -= 2;
+                palette[i].R = ((value & 0x0f00) >> 8) * 0x11;
+                palette[i].G = ((value & 0x00f0) >> 4) * 0x11;
+                palette[i].B = (value & 0x000f) * 0x11;
+              }
+              if (y_pos == 0)
+              {
+                prev_pal = malloc(sizeof(T_IFF_PCHG_Palette) + nb_colors*sizeof(T_Components));
+                if (prev_pal == NULL)
+                {
+                  Warning("Memory allocation error");
+                  File_error = 1;
+                  break;
+                }
+                prev_pal->Next = NULL;
+                prev_pal->StartLine = 0;
+                memcpy(prev_pal->Palette, palette, nb_colors*sizeof(T_Components));
+                PCHG_palettes = prev_pal;
+              }
+              else if (memcmp(palette, prev_pal->Palette, nb_colors*sizeof(T_Components)) != 0)
+              {
+                new_pal = malloc(sizeof(T_IFF_PCHG_Palette) + nb_colors*sizeof(T_Components));
+                if (new_pal == NULL)
+                {
+                  Warning("Memory allocation error");
+                  File_error = 1;
+                  break;
+                }
+                new_pal->Next = NULL;
+                new_pal->StartLine = y_pos;
+                memcpy(new_pal->Palette, palette, nb_colors*sizeof(T_Components));
+                prev_pal->Next = new_pal;
+                prev_pal = new_pal;
+              }
+            }
+            if (PCHG_palettes != NULL)
+              bpp = 12;
+          }
+          else
+            Warning("inconsistant size of BEAM chunk, ignoring");
+          fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);
+        }
+        else if (memcmp(section, "PCHG", 4) == 0) // Palette CHanGes
         {
           dword * lineBitMask;
           int i;
