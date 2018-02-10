@@ -2751,10 +2751,14 @@ void Load_INFO(T_IO_Context * context)
         }
         for (y_pos = 0; y_pos < imgheaders[img_count].Height; y_pos++)
           Draw_IFF_line(context, buffers[img_count] + y_pos * line_size, y_pos, plane_line_size << 3, imgheaders[img_count].Depth);
+      }
+    }
+    for (img_count = 0; img_count < 2; img_count++)
+      if (buffers[img_count] != NULL)
+      {
         free(buffers[img_count]);
         buffers[img_count] = NULL;
       }
-    }
   }
   else
     File_error=1;
