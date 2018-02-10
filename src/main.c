@@ -951,6 +951,7 @@ int Init_program(int argc,char * argv[])
 // ------------------------- Fermeture du programme --------------------------
 void Program_shutdown(void)
 {
+  int      i;
   int      return_code;
 
   // Windows only: Recover the window position.
@@ -1008,7 +1009,18 @@ void Program_shutdown(void)
   }
   else
     Error(ERROR_MISSING_DIRECTORY);
-    
+
+  // Free Config
+#define FREE_POINTER(p) free(p); p = NULL
+  FREE_POINTER(Config.Skin_file);
+  FREE_POINTER(Config.Font_file);
+  for (i=0;i<NB_BOOKMARKS;i++)
+  {
+    FREE_POINTER(Config.Bookmark_directory[i]);
+  }
+
+  Uninit_text();
+
   SDL_Quit();
   
   #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)

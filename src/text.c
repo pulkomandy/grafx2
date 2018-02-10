@@ -383,6 +383,22 @@ int TrueType_is_supported()
   #endif
 }
 
+void Uninit_text(void)
+{
+#ifndef NOTTF
+  TTF_Quit();
+#if defined(USE_FC)
+  FcFini();
+#endif
+#endif
+  while (font_list_start != NULL)
+  {
+    T_Font * font = font_list_start->Next;
+    free(font_list_start->Name);
+    free(font_list_start);
+    font_list_start = font;
+  }
+}
   
 #ifndef NOTTF
 byte *Render_text_TTF(const char *str, int font_number, int size, int antialias, int bold, int italic, int *width, int *height, T_Palette palette)

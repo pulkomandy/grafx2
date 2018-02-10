@@ -27,6 +27,8 @@
 
 /// Initialization of text settings, needs to be called once on program startup.
 void Init_text(void);
+/// text settings cleanup. called on program shutdown
+void Uninit_text(void);
 /// Returns true if text.c was compiled with TrueType support.
 int TrueType_is_supported(void);
 /// Add a new font to the list to propose to the user.
