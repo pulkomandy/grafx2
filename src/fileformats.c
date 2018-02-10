@@ -4451,7 +4451,7 @@ int PNG_read_unknown_chunk(png_structp ptr, png_unknown_chunkp chunk)
 static void Load_PNG_Sub(T_IO_Context * context, FILE * file)
 {
   png_structp png_ptr;
-  png_infop info_ptr;
+  png_infop info_ptr = NULL;
 
   // Prepare internal PNG loader
   png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -4741,6 +4741,7 @@ static void Load_PNG_Sub(T_IO_Context * context, FILE * file)
     }
     else
       File_error=1;
+    png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
   }
 }
 
