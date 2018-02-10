@@ -2643,6 +2643,8 @@ void Load_INFO(T_IO_Context * context)
                 int palette_len;
 
                 current_img = img_index;
+                if (current_img > 1 && (context->Type == CONTEXT_PREVIEW || context->Type == CONTEXT_PREVIEW_PALETTE))
+                  break;  // don't load 2nd image in preview mode
                 if (*p++ == 'B')
                 {
                   context->Transparent_color = 0;
@@ -2717,10 +2719,12 @@ void Load_INFO(T_IO_Context * context)
     }
     if (File_error == 0 && header.UserData == 1)
     {
+      // Skip extended Drawer Data for OS 2.x
       if (fseek(file, 8, SEEK_CUR) != 0)
         File_error = 1;
     }
-    // Glow Icon can follow...
+    // OS 3.5 (Glow Icon) can follow :
+    // it is IFF data
 
     if (!has_NewIcons && img_count > 0)
     {
@@ -2740,7 +2744,11 @@ void Load_INFO(T_IO_Context * context)
       for (img_count = 0; img_count < 2 && buffers[img_count] != NULL; img_count++)
       {
         if (img_count > 0)
+        {
+          if (context->Type == CONTEXT_PREVIEW || context->Type == CONTEXT_PREVIEW_PALETTE)
+            break;  // don't load 2nd image in preview mode
           Set_loading_layer(context, img_count);
+        }
         for (y_pos = 0; y_pos < imgheaders[img_count].Height; y_pos++)
           Draw_IFF_line(context, buffers[img_count] + y_pos * line_size, y_pos, plane_line_size << 3, imgheaders[img_count].Depth);
         free(buffers[img_count]);
