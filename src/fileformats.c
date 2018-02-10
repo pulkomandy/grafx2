@@ -1026,8 +1026,7 @@ void Load_IFF(T_IO_Context * context)
             && (Read_byte(IFF_file,&header.X_aspect))
             && (Read_byte(IFF_file,&header.Y_aspect))
             && (Read_word_be(IFF_file,&header.X_screen))
-            && (Read_word_be(IFF_file,&header.Y_screen))
-            && header.Width && header.Height))
+            && (Read_word_be(IFF_file,&header.Y_screen))) )
           {
             File_error = 1;
             break;
@@ -1904,6 +1903,8 @@ void Load_IFF(T_IO_Context * context)
           // ACBM format : ABIT = Amiga BITplanes
           // The ABIT chunk contains contiguous bitplane data.
           //  The chunk contains sequential data for bitplane 0 through bitplane n.
+          if (header.Width == 0 || header.Height == 0)
+            break;
           Pre_load(context, header.Width, header.Height, file_size, iff_format, ratio, bpp);
           // compute row size
           real_line_size = (context->Width+15) & ~15;
@@ -1969,6 +1970,8 @@ void Load_IFF(T_IO_Context * context)
             }
             fseek(IFF_file, offset, SEEK_SET);  // rewind
           }
+          if (header.Width == 0 || header.Height == 0)
+            break;
           Original_screen_X = header.X_screen;
           Original_screen_Y = header.Y_screen;
 
