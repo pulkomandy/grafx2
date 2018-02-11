@@ -646,6 +646,9 @@ GFX2_GLOBAL byte Resolution_in_command_line;
 /// Pointer to the font selected for menus.
 GFX2_GLOBAL byte * Menu_font;
 
+/// additional fonts for unicode characters
+GFX2_GLOBAL T_Unicode_Font * Unicode_fonts;
+
 /// Pointer to the current active skin.
 GFX2_GLOBAL T_Gui_skin * Gfx;
 

@@ -701,27 +701,36 @@ T_Gui_skin * Load_graphics(const char * skin_file, T_Gradient_array *gradients)
 
 // ---- font loading -----
 
-byte Parse_font(SDL_Surface * image, byte * font)
+static byte * Parse_font(SDL_Surface * image, int is_main)
 {
+  byte * font;
   int character;
   byte color;
   int x, y;
   int chars_per_line;
+  int character_count;
   
   // Check image size
   if (image->w % 8)
   {
     sprintf(Gui_loading_error_message, "Error in font file: Image width is not a multiple of 8.\n");
-    return 1;
+    return NULL;
   }
-  if (image->w * image->h < 8*8*256)
+  character_count = (image->w * image->h) / (8*8);
+  if (is_main && character_count < 256)
   {
     sprintf(Gui_loading_error_message, "Error in font file: Image is too small to be a 256-character 8x8 font.\n");
-    return 1;
+    return NULL;
+  }
+  font = (byte *)malloc(8*8*character_count);
+  if (font == NULL)
+  {
+    sprintf(Gui_loading_error_message, "Not enough memory to read font file\n");
+    return NULL;
   }
   chars_per_line = image->w/8;
 
-  for (character=0; character < 256; character++)
+  for (character=0; character < character_count; character++)
   {
     for (y=0; y<8; y++)
     {
@@ -732,19 +741,20 @@ byte Parse_font(SDL_Surface * image, byte * font)
         if (color > 1)
         {
           sprintf(Gui_loading_error_message, "Error in font file: Only colors 0 and 1 can be used for the font.\n");
-          return 1;
+          free(font);
+          return NULL;
         }
         // Put it in font. 0 = BG, 1 = FG.
         font[character*64 + y*8 + x]=color;
       }
     }
   }
-  return 0;
+  return font;
 }
 
-byte * Load_font(const char * font_name)
+byte * Load_font(const char * font_name, int is_main)
 {
-  byte * font;
+  byte * font = NULL;
   char filename[MAX_PATH_CHARACTERS];
   SDL_Surface * image;
 
@@ -754,13 +764,6 @@ byte * Load_font(const char * font_name)
     return NULL;
   }
 
-  font = (byte *)malloc(8*8*256);
-  if (font == NULL)
-  {
-    sprintf(Gui_loading_error_message, "Not enough memory to read font file\n");
-    return NULL;
-  }
-  
   // Read the file containing the image
   sprintf(filename,"%s" SKINS_SUBDIRECTORY "%s%s", Data_directory, PATH_SEPARATOR, font_name);
   
@@ -768,19 +771,41 @@ byte * Load_font(const char * font_name)
   if (!image)
   {
     sprintf(Gui_loading_error_message, "Unable to load the skin image (missing? not an image file?)\n");
-    free(font);
     return NULL;
   }
-  if (Parse_font(image, font))
-  {
-    SDL_FreeSurface(image);
-    free(font);
-    return NULL;
-  }
+  font = Parse_font(image, is_main);
   SDL_FreeSurface(image);
   return font;
 }
 
+static void Load_Unicode_font(const char * filename)
+{
+  T_Unicode_Font * ufont;
+  byte * font;
+  unsigned int first, last;
+
+  if (sscanf(filename, "unicode_%04X-%04X.png", &first, &last) == 2)
+  {
+    font = Load_font(filename, 0);
+    if (font)
+    {
+      ufont = malloc(sizeof(T_Unicode_Font));
+      ufont->FirstChar = first;
+      ufont->LastChar = last;
+      ufont->FontData = font;
+      ufont->Next = Unicode_fonts;
+      Unicode_fonts = ufont;
+    }
+  }
+  else
+    Warning("Could not parse filename");
+}
+
+void Load_Unicode_fonts(void)
+{
+  // TODO : for each unicode*.png file in skin directory
+  Load_Unicode_font("unicode_0410-044F.png");
+}
 
 // Initialisation des boutons:
 

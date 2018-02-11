@@ -549,7 +549,7 @@ typedef struct T_Selector_settings
   char  Directory[MAX_PATH_CHARACTERS]; ///< Directory currently browsed
 } T_Selector_settings;
 
-// structure for Main or Spare page global data
+/// structure for Main or Spare page global data
 typedef struct
 {
   /// Palette
@@ -617,5 +617,13 @@ typedef struct
   /// List of backup pages for the main image.
   T_List_of_pages * backups;
 } T_Document;
+
+typedef struct T_Unicode_Font
+{
+  struct T_Unicode_Font * Next;
+  dword FirstChar;
+  dword LastChar;
+  byte * FontData;
+} T_Unicode_Font;
 
 #endif

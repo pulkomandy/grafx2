@@ -47,4 +47,7 @@ extern char Gui_loading_error_message[512];
 /// successful.
 /// If an error is encountered, it frees what needs it, prints an error message
 /// in ::Gui_loading_error_message, and returns NULL.
-byte * Load_font(const char * font_name);
+byte * Load_font(const char * font_name, int is_main);
+
+/// Load fonts for additional Unicode characters
+void Load_Unicode_fonts(void);

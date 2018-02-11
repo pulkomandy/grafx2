@@ -745,12 +745,13 @@ int Init_program(int argc,char * argv[])
   Copy_preset_sieve(0);
 
   // Font
-  if (!(Menu_font=Load_font(Config.Font_file)))
-    if (!(Menu_font=Load_font(DEFAULT_FONT_FILENAME)))
+  if (!(Menu_font=Load_font(Config.Font_file, 1)))
+    if (!(Menu_font=Load_font(DEFAULT_FONT_FILENAME, 1)))
       {
         printf("Unable to open the default font file: %s\n", DEFAULT_FONT_FILENAME);
         Error(ERROR_GUI_MISSING);
       }
+  Load_Unicode_fonts();
 
   memcpy(Main.palette, Gfx->Default_palette, sizeof(T_Palette));
 
@@ -992,6 +993,16 @@ void Program_shutdown(void)
   // Free the skin (Gui graphics) data
   free(Gfx);
   Gfx=NULL;
+
+  free(Menu_font);
+  Menu_font = NULL;
+  while (Unicode_fonts != NULL)
+  {
+    T_Unicode_Font * ufont = Unicode_fonts->Next;
+    free(Unicode_fonts->FontData);
+    free(Unicode_fonts);
+    Unicode_fonts = ufont;
+  }
 
   // On prend bien soin de passer dans le répertoire initial:
   if (chdir(Initial_directory)!=-1)

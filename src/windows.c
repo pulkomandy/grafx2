@@ -708,13 +708,25 @@ void Print_general(short x,short y,const char * str,byte text_color,byte backgro
 }
 
 /// Draws a char in a window
-void Print_char_in_window(short x_pos,short y_pos,const unsigned char c,byte text_color,byte background_color)
+void Print_char_in_window(short x_pos, short y_pos, unsigned int c,byte text_color,byte background_color)
 {
   short x,y;
-  byte *pixel;
+  const byte *pixel;
   // Premier pixel du caractère
-  pixel=Menu_font + (c<<6);
-
+  if (c < 256)
+    pixel=Menu_font + (c<<6);
+  else
+  {
+    T_Unicode_Font * ufont;
+    pixel=Menu_font + (1<<6); // dummy character
+    for (ufont = Unicode_fonts; ufont != NULL; ufont = ufont->Next)
+      if (ufont->FirstChar <= c && c <= ufont->LastChar)
+      {
+        pixel = ufont->FontData + ((c - ufont->FirstChar) << 6);
+        break;
+      }
+  }
+  
   for (y=0;y<8;y++)
     for (x=0;x<8;x++)
       Pixel_in_window(x_pos+x, y_pos+y,
@@ -739,15 +751,30 @@ void Print_in_window_limited(short x,short y,const char * str,byte size,byte tex
 void Print_in_window(short x,short y,const char * str,byte text_color,byte background_color)
 {
   short x_pos = x;
-  int index;
+  const unsigned char * p = (const unsigned char *)str;
 
-  for (index=0;str[index]!='\0';index++)
+  while (*p !='\0')
   {
-    Print_char_in_window(x,y,str[index],text_color,background_color);
+    Print_char_in_window(x,y,*p++,text_color,background_color);
     x+=8;
   }
-  Update_window_area(x_pos,y,8*strlen(str),8);
+  Update_window_area(x_pos,y,x-x_pos,8);
 }
+
+/// Draws a string in a window
+void Print_in_window_utf16(short x,short y,const word * str,byte text_color,byte background_color)
+{
+  short x_pos = x;
+  const word * p = str;
+
+  while (*p != 0)
+  {
+    Print_char_in_window(x,y,*p++,text_color,background_color);
+    x+=8;
+  }
+  Update_window_area(x_pos,y,x-x_pos,8);
+}
+
 
 // Draws a string in the menu's status bar
 void Print_in_menu(const char * str, short position)

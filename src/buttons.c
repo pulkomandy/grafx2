@@ -1459,7 +1459,7 @@ void Button_Skins(void)
         T_Fileselector_item* fontName;
         selected_font = Window_attribute2; // Get the index of the chosen font.
         fontName = Get_item_by_index(&Font_files_list,selected_font);
-        new_font = Load_font(fontName->Full_name);
+        new_font = Load_font(fontName->Full_name, 1);
         if (new_font)
         {
           free(Menu_font);
@@ -1498,7 +1498,7 @@ void Button_Skins(void)
       Set_current_skin(skinsdir, gfx);
     }
     // (Re-)load the selected font
-    new_font = Load_font(Get_item_by_index(&Font_files_list,selected_font)->Full_name);
+    new_font = Load_font(Get_item_by_index(&Font_files_list,selected_font)->Full_name, 1);
     if (new_font)
     {
       const char * fname;
