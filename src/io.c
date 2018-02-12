@@ -390,13 +390,15 @@ void For_each_file(const char * directory_name, void Callback(const char *))
 }
 
 /// Scans a directory, calls Callback for each file or directory in it,
-void For_each_directory_entry(const char * directory_name, void Callback(const char *, byte is_file, byte is_directory, byte is_hidden))
+void For_each_directory_entry(const char * directory_name, void * pdata, T_File_dir_cb Callback)
 {
   // Pour scan de répertoire
   DIR*  current_directory; //Répertoire courant
   struct dirent* entry; // Structure de lecture des éléments
   char full_filename[MAX_PATH_CHARACTERS];
+  word * unicode_filename = NULL;
   int filename_position;
+
   strcpy(full_filename, directory_name);
   current_directory=opendir(full_filename);
   if(current_directory == NULL) return;        // Répertoire invalide ...
@@ -416,7 +418,9 @@ void For_each_directory_entry(const char * directory_name, void Callback(const c
     strcpy(&full_filename[filename_position], entry->d_name);
     stat(full_filename,&Infos_enreg);
     Callback(
-      full_filename, 
+      pdata,
+      entry->d_name,
+      unicode_filename,
       S_ISREG(Infos_enreg.st_mode), 
       S_ISDIR(Infos_enreg.st_mode), 
       File_is_hidden(entry->d_name, full_filename));

@@ -2249,12 +2249,11 @@ void Draw_script_information(T_Fileselector_item * script_item, const char *full
 }
 
 // Add a script to the list
-void Add_script(const char *name, byte is_file, byte is_directory, byte is_hidden)
+static void Add_script(void * pdata, const char *file_name, const word *unicode_name, byte is_file, byte is_directory, byte is_hidden)
 {
-  const char * file_name;
   int len;
-
-  file_name=Find_last_separator(name)+1;
+  (void)pdata;
+  (void)unicode_name;
 
   if (is_file)
   {
@@ -2616,7 +2615,7 @@ void Reload_scripts_list(void)
   {
     Add_element_to_list(&Scripts_selector, PARENT_DIR, Format_filename(PARENT_DIR, NAME_WIDTH+1, 1), 1, ICON_NONE);
     // Add each found file to the list
-    For_each_directory_entry(Config.Scripts_directory, Add_script);
+    For_each_directory_entry(Config.Scripts_directory, NULL, Add_script);
   }
   // Sort it
   Sort_list_of_files(&Scripts_selector); 

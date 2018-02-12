@@ -96,8 +96,10 @@ int File_is_hidden(const char *fname, const char *full_name);
 /// Scans a directory, calls Callback for each file in it,
 void For_each_file(const char * directory_name, void Callback(const char *));
 
+typedef void T_File_dir_cb(void * pdata, const char * filename, const word * unicode_filename, byte is_file, byte is_directory, byte is_hidden);
+
 /// Scans a directory, calls Callback for each file or directory in it,
-void For_each_directory_entry(const char * directory_name, void Callback(const char *, byte is_file, byte is_directory, byte is_hidden));
+void For_each_directory_entry(const char * directory_name, void * pdata, T_File_dir_cb Callback);
 
 ///
 /// Creates a fully qualified name from a directory and filename.
