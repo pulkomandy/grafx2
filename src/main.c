@@ -473,6 +473,17 @@ int Init_program(int argc,char * argv[])
   printf("===============================\n");
   #endif 
  
+#ifdef ENABLE_FILENAMES_ICONV
+  // iconv is used to convert filenames
+  cd = iconv_open(TOCODE, FROMCODE);  // From UTF8 to ANSI
+  cd_inv = iconv_open(FROMCODE, TOCODE);  // From ANSI to UTF8
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+  cd_utf16 = iconv_open("UTF-16BE", FROMCODE); // From UTF8 to UTF16
+#else
+  cd_utf16 = iconv_open("UTF-16LE", FROMCODE); // From UTF8 to UTF16
+#endif
+#endif /* ENABLE_FILENAMES_ICONV */
+
   // On crée dès maintenant les descripteurs des listes de pages pour la page
   // principale et la page de brouillon afin que leurs champs ne soient pas
   // invalide lors des appels aux multiples fonctions manipulées à
@@ -489,15 +500,7 @@ int Init_program(int argc,char * argv[])
   // Choose directory for settings (read/write)
   Set_config_directory(program_directory,Config_directory);
 // On détermine le répertoire courant:
-  Get_current_directory(Main.selector.Directory,MAX_PATH_CHARACTERS);
-
-#ifdef ENABLE_FILENAMES_ICONV
-  // Initialisation de iconv
-  // utilisé pour convertir les noms de fichiers
-  cd = iconv_open(TOCODE, FROMCODE);  // From UTF8 to ANSI
-  cd_inv = iconv_open(FROMCODE, TOCODE);  // From ANSI to UTF8
-  cd_utf16 = iconv_open("UTF-16LE", FROMCODE); // From UTF8 to UTF16
-#endif /* ENABLE_FILENAMES_ICONV */
+  Get_current_directory(Main.selector.Directory,Main.selector.Directory_unicode,MAX_PATH_CHARACTERS);
 
   // On en profite pour le mémoriser dans le répertoire principal:
   strcpy(Initial_directory,Main.selector.Directory);

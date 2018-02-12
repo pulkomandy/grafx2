@@ -130,7 +130,7 @@ void Release_lock_file(const char *file_directory);
 
 ///
 /// Return the current directory, equivalent to getcwd()
-const char * Get_current_directory(char * buf, size_t size);
+const char * Get_current_directory(char * buf, word * buf_unicode, size_t size);
 
 ///
 /// Change current directory. return 0 for success, -1 in case of error

@@ -549,6 +549,7 @@ typedef struct T_Selector_settings
   short Position; ///< Index of the first file/entry to display in list
   short Offset; ///< Position of the "highlight" bar in the file list
   char  Directory[MAX_PATH_CHARACTERS]; ///< Directory currently browsed
+  word  Directory_unicode[MAX_PATH_CHARACTERS]; ///< Directory currently browsed
 } T_Selector_settings;
 
 /// structure for Main or Spare page global data

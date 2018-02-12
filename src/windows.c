@@ -762,7 +762,7 @@ void Print_in_window(short x,short y,const char * str,byte text_color,byte backg
 }
 
 /// Draws a string in a window
-void Print_in_window_utf16(short x,short y,const word * str,byte text_color,byte background_color)
+void Print_in_window_unicode(short x,short y,const word * str,byte text_color,byte background_color)
 {
   short x_pos = x;
   const word * p = str;

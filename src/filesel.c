@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2018 Thomas Bernard
     Copyright 2014 Sergii Pylypenko
     Copyright 2011 Pawel Góralski
     Copyright 2009 Franck Charlet
@@ -134,7 +135,7 @@ byte Native_filesel(byte load)
 
 // -- Fileselector data
 
-T_Fileselector Filelist;
+static T_Fileselector Filelist;
 
 /// Selector settings to use, for all functions called by Load_or_save
 T_Selector_settings * Selector;
@@ -540,7 +541,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   // Après effacement, il ne reste ni fichier ni répertoire dans la liste
 
   // On lit tous les répertoires:
-  current_path = Get_current_directory(curdir, MAX_PATH_CHARACTERS);
+  current_path = Get_current_directory(curdir, NULL, MAX_PATH_CHARACTERS);
 
   For_each_directory_entry(current_path, &callback_data, Read_dir_callback);
   
@@ -965,7 +966,7 @@ void Display_file_list(T_Fileselector *list, short offset_first,short selector_o
       {
         // Name without icon
         if (current_item->Unicode_short_name)
-          Print_in_window_utf16(8,95+index*8,current_item->Unicode_short_name,text_color,background_color);
+          Print_in_window_unicode(8,95+index*8,current_item->Unicode_short_name,text_color,background_color);
         else
           Print_in_window(8,95+index*8,current_item->Short_name,text_color,background_color);
       }
@@ -1166,11 +1167,10 @@ void Display_bookmark(T_Dropdown_button * Button, int bookmark_number)
 
 void Print_current_directory(void)
 //
-// Affiche Selector->Directory sur 37 caractères
+// Shows Selector->Directory on 37 chars
 //
 {
   char converted_name[MAX_PATH_CHARACTERS];
-  char temp_name[MAX_DISPLAYABLE_PATH+1]; // Nom tronqué
   int  length; // length du répertoire courant
   int  index;   // index de parcours de la chaine complète
 
@@ -1190,34 +1190,60 @@ void Print_current_directory(void)
 
   Window_rectangle(10,84,37*8,8,MC_Light);
 
-  length=strlen(converted_name);
-  if (length>MAX_DISPLAYABLE_PATH)
-  { // Doh! il va falloir tronquer le répertoire (bouh !)
+  if (Selector->Directory_unicode[0] != 0)
+  {
+    length=Unicode_strlen(Selector->Directory_unicode);
+    if (length>MAX_DISPLAYABLE_PATH)
+    { // We need to truncate the directory
+      word temp_name[MAX_DISPLAYABLE_PATH+1]; // truncated name
 
-    // On commence par copier bêtement les 3 premiers caractères (e.g. "C:\")
-    for (index=0;index<3;index++)
-      temp_name[index]=converted_name[index];
+      memcpy(temp_name, Selector->Directory_unicode, 3*2);  // first 3 chars "C:\"
+      Unicode_char_strlcpy(temp_name+3, "...", MAX_DISPLAYABLE_PATH+1-3);
 
-    // On y rajoute 3 petits points:
-    strcpy(temp_name+3,"...");
+      // next we look for a place to fit everything ;)
+      for (index=3;index<length;index++)
+        if ( (Selector->Directory_unicode[index]==PATH_SEPARATOR[0]) &&
+            (length-index<=MAX_DISPLAYABLE_PATH-6) )
+        {
+          // we found the place !
+          Unicode_strlcpy(temp_name+6,Selector->Directory_unicode+index, MAX_DISPLAYABLE_PATH+1-6);
+          break;
+        }
 
-    //  Ensuite, on cherche un endroit à partir duquel on pourrait loger tout
-    // le reste de la chaine (Ouaaaaaah!!! Vachement fort le mec!!)
-    for (index++;index<length;index++)
-      if ( (converted_name[index]==PATH_SEPARATOR[0]) &&
-           (length-index<=MAX_DISPLAYABLE_PATH-6) )
-      {
-        // Ouf: on vient de trouver un endroit dans la chaîne à partir duquel
-        // on peut faire la copie:
-        strcpy(temp_name+6,converted_name+index);
-        break;
-      }
-
-    // Enfin, on peut afficher la chaîne tronquée
-    Print_in_window(10,84,temp_name,MC_Black,MC_Light);
+      Print_in_window_unicode(10,84,temp_name,MC_Black,MC_Light);
+    }
+    else // The string is short enough
+      Print_in_window_unicode(10,84,Selector->Directory_unicode,MC_Black,MC_Light);
   }
-  else // Ahhh! La chaîne peut loger tranquillement dans la fenêtre
-    Print_in_window(10,84,converted_name,MC_Black,MC_Light);
+  else
+  {
+    length=strlen(converted_name);
+    if (length>MAX_DISPLAYABLE_PATH)
+    { // We need to truncate the directory
+      char temp_name[MAX_DISPLAYABLE_PATH+1]; // truncated name
+
+      for (index=0;index<3;index++) // copy the first 3 chars "C:\"
+        temp_name[index]=converted_name[index];
+
+      // Add ...
+      strcpy(temp_name+3,"...");
+
+      // next we look for a place to fit everything ;)
+      for (index++;index<length;index++)
+        if ( (converted_name[index]==PATH_SEPARATOR[0]) &&
+            (length-index<=MAX_DISPLAYABLE_PATH-6) )
+        {
+          // we found the place !
+          strcpy(temp_name+6,converted_name+index);
+          break;
+        }
+
+      // display truncated string
+      Print_in_window(10,84,temp_name,MC_Black,MC_Light);
+    }
+    else // The string is short enough
+      Print_in_window(10,84,converted_name,MC_Black,MC_Light);
+  }
     
   Update_window_area(10,84,37*8,8);
 }
@@ -1244,7 +1270,7 @@ void Print_filename_in_fileselector(void)
   {
     word filename_unicode[32];
     Unicode_strlcpy(filename_unicode, Selector_filename_unicode, 28); // 28 including the terminating 0
-    Print_in_window_utf16(82,48,filename_unicode,MC_Black,MC_Light);
+    Print_in_window_unicode(82,48,filename_unicode,MC_Black,MC_Light);
   }
   else
     Print_in_window_limited(82,48,filename,27,MC_Black,MC_Light);
@@ -1628,7 +1654,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   }
   
   Change_directory(context->File_directory);
-  Get_current_directory(Selector->Directory,MAX_PATH_CHARACTERS);
+  Get_current_directory(Selector->Directory, Selector->Directory_unicode, MAX_PATH_CHARACTERS);
   
   // Affichage des premiers fichiers visibles:
   Reload_list_of_files(Selector->Format_filter,file_scroller);
@@ -2176,7 +2202,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
             Extract_filename(previous_directory, Selector->Directory);
           }
 
-          Get_current_directory(Selector->Directory,MAX_PATH_CHARACTERS);
+          Get_current_directory(Selector->Directory, Selector->Directory_unicode, MAX_PATH_CHARACTERS);
           // read the new directory
           Read_list_of_files(&Filelist, Selector->Format_filter);
           Sort_list_of_files(&Filelist);

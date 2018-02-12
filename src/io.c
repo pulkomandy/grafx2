@@ -545,7 +545,7 @@ void Release_lock_file(const char *file_directory)
   remove(lock_filename);
 }
 
-const char * Get_current_directory(char * buf, size_t size)
+const char * Get_current_directory(char * buf, word * buf_unicode, size_t size)
 {
 #if defined(__MINT__)
   buf[0] = 'A'+Dgetdrv();
@@ -554,9 +554,34 @@ const char * Get_current_directory(char * buf, size_t size)
   Dgetpath(buf+3,0);
   strcat(buf,PATH_SEPARATOR);
 
+  if (buf_unicode != NULL)
+    buf_unicode[0] = 0; // no unicode support
+
   return buf;
 #else
-  return getcwd(buf, size);
+  char * ret = getcwd(buf, size);
+#ifdef ENABLE_FILENAMES_ICONV
+  if (ret != NULL && buf_unicode != NULL)
+  {
+    char * input = buf;
+    size_t inbytesleft = strlen(buf);
+    char * output = (char *)buf_unicode;
+    size_t outbytesleft = 2 * (size - 1);
+    if (cd_utf16 != (iconv_t)-1)
+    {
+      size_t r = iconv(cd_utf16, &input, &inbytesleft, &output, &outbytesleft);
+      if (r != (size_t)-1)
+      {
+        output[0] = '\0';
+        output[1] = '\0';
+      }
+    }
+  }
+#else
+  if (buf_unicode != NULL)
+    buf_unicode[0] = 0; // no unicode support
+#endif
+  return ret;
 #endif
 }
 
