@@ -1518,7 +1518,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
     Display_bookmark(bookmark_dropdown[temp],temp);
   }
   
-  chdir(context->File_directory);
+  Change_directory(context->File_directory);
   Get_current_directory(Selector->Directory,MAX_PATH_CHARACTERS);
   
   // Affichage des premiers fichiers visibles:
@@ -2046,7 +2046,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         has_clicked_ok=0;
 
         // We must enter the directory
-        if (!chdir(Selector_filename))
+        if (Change_directory(Selector_filename) == 0)
         {
         #if defined (__MINT__)
           static char path[1024]={0};

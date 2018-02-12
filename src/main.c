@@ -73,7 +73,6 @@
 #if defined(__WIN32__)
     #include <windows.h>
     #include <shlwapi.h>
-    #define chdir(dir) SetCurrentDirectory(dir)
 #elif defined (__MINT__)
     #include <mint/osbind.h>
 #elif defined(__macosx__)
@@ -489,12 +488,8 @@ int Init_program(int argc,char * argv[])
   Set_data_directory(program_directory,Data_directory);
   // Choose directory for settings (read/write)
   Set_config_directory(program_directory,Config_directory);
-#if defined(__MINT__)
-  strcpy(Main.selector.Directory,program_directory);
-#else
 // On détermine le répertoire courant:
-  getcwd(Main.selector.Directory,MAX_PATH_CHARACTERS);
-#endif
+  Get_current_directory(Main.selector.Directory,MAX_PATH_CHARACTERS);
 
 #ifdef ENABLE_FILENAMES_ICONV
   // Initialisation de iconv
@@ -1005,7 +1000,7 @@ void Program_shutdown(void)
   }
 
   // On prend bien soin de passer dans le répertoire initial:
-  if (chdir(Initial_directory)!=-1)
+  if (Change_directory(Initial_directory)==0)
   {
     // On sauvegarde les données dans le .CFG et dans le .INI
     if (Config.Auto_save)

@@ -1723,7 +1723,7 @@ void Delete_safety_backups(void)
   
   For_each_file(Config_directory, Add_backup_file);
   
-  chdir(Config_directory);
+  Change_directory(Config_directory);
   for (element=Backups_main; element!=NULL; element=element->Next)
   {
     if(remove(element->String))

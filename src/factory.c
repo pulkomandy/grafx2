@@ -57,7 +57,6 @@ char * Bound_script[10];
 #include <lauxlib.h>
 #include <lualib.h>
 #include <float.h> // for DBL_MAX
-#include <unistd.h> // chdir()
 #include <limits.h> //for INT_MIN
 #include <string.h> // strncpy()
 
@@ -2059,7 +2058,7 @@ int L_Run(lua_State* L)
   {
     if (!Directory_exists(path_element))
       return luaL_error(L, "run: directory of script doesn't exist");
-    chdir(path_element);
+    Change_directory(path_element);
   }
   Extract_filename(path_element, full_path);
   if (luaL_loadfile(L,path_element) != 0)
@@ -2083,7 +2082,7 @@ int L_Run(lua_State* L)
   }
   nested_calls--;
   // restore directory
-  chdir(saved_directory);
+  Change_directory(saved_directory);
   return 0;
 }
 
@@ -2323,7 +2322,7 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   // This chdir is for the script's sake. Grafx2 itself will (try to)
   // not rely on what is the system's current directory.
   Extract_path(buf,Last_run_script);
-  chdir(buf);
+  Change_directory(buf);
 
   L = luaL_newstate(); // used to be lua_open() on Lua 5.1, deprecated on 5.2
 

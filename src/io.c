@@ -540,3 +540,12 @@ const char * Get_current_directory(char * buf, size_t size)
   return getcwd(buf, size);
 #endif
 }
+
+int Change_directory(const char * path)
+{
+#if defined(__WIN32__) || defined(WIN32)
+  return (SetCurrentDirectoryA(path) ? 0 : -1);
+#else
+  return chdir(path);
+#endif
+}
