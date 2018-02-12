@@ -774,6 +774,7 @@ int Init_all_backup_lists(enum IMAGE_MODES image_mode, int width, int height)
   Main.backups->Pages->Height=height;
   strcpy(Main.backups->Pages->File_directory,Main.selector.Directory);
   strcpy(Main.backups->Pages->Filename,"NO_NAME.GIF");
+  Main.backups->Pages->Filename_unicode[0] = 0;
 
 
   for (i=0; i<Main.backups->Pages->Nb_layers; i++)
@@ -819,6 +820,8 @@ int Init_all_backup_lists(enum IMAGE_MODES image_mode, int width, int height)
   strcpy(Spare.backups->Pages->Comment,"");
   strcpy(Spare.backups->Pages->File_directory,Main.selector.Directory);
   strcpy(Spare.backups->Pages->Filename,"NO_NAME2.GIF");
+  Spare.backups->Pages->Filename_unicode[0] = 0;
+
   Spare.backups->Pages->File_format=DEFAULT_FILEFORMAT;
   // Copy this informations in the global Spare_ variables
   Download_infos_page_spare(Spare.backups->Pages);

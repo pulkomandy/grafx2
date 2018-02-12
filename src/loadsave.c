@@ -51,6 +51,7 @@
 #include "brush.h"
 #include "setup.h"
 #include "filesel.h"
+#include "unicode.h"
 
 // -- PKM -------------------------------------------------------------------
 void Test_PKM(T_IO_Context *);
@@ -803,11 +804,16 @@ void Load_image(T_IO_Context *context)
         {
           strcpy(Main.backups->Pages->Filename,context->Original_file_name);
           strcpy(Main.backups->Pages->File_directory,context->Original_file_directory);
+          Main.backups->Pages->Filename_unicode[0] = 0;
         }
         else
         {
           strcpy(Main.backups->Pages->Filename,context->File_name);
           strcpy(Main.backups->Pages->File_directory,context->File_directory);
+          if (context->File_name_unicode)
+            Unicode_strlcpy(Main.backups->Pages->Filename_unicode, context->File_name_unicode, MAX_PATH_CHARACTERS);
+          else
+            Main.backups->Pages->Filename_unicode[0] = 0;
         }
         
         // On considère que l'image chargée n'est plus modifiée

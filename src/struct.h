@@ -409,6 +409,7 @@ typedef struct T_Page
 
   char      File_directory[MAX_PATH_CHARACTERS];///< Directory that contains the file.
   char      Filename[MAX_PATH_CHARACTERS];      ///< Filename without directory.
+  word      Filename_unicode[MAX_PATH_CHARACTERS]; ///< Filename without directory.
   byte      File_format;                        ///< File format, in enum ::FILE_FORMATS
   struct T_Page *Next; ///< Pointer to the next backup
   struct T_Page *Prev; ///< Pointer to the previous backup
@@ -571,6 +572,8 @@ typedef struct
   char  file_directory[MAX_PATH_CHARACTERS];
   /// Filename (without directory) of the image currently edited as page.
   char  filename[MAX_PATH_CHARACTERS];
+  /// Filename in unicode
+  word  filename_unicode[MAX_PATH_CHARACTERS];
   /// File format of the image currently edited as page. It's a value of enum ::FILE_FORMATS
   byte  fileformat;
   /// File selector settings

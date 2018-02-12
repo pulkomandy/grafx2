@@ -41,6 +41,7 @@
 #include "readline.h"
 #include "sdlscreen.h"
 #include "palette.h"
+#include "unicode.h"
 
 T_Toolbar_button Buttons_Pool[NB_BUTTONS];
 T_Menu_Bar Menu_bars[MENUBAR_COUNT] =
@@ -697,7 +698,49 @@ void Print_general(short x,short y,const char * str,byte text_color,byte backgro
     for (index=0;str[index]!='\0';index++)
     {
       // Pointeur sur le premier pixel du caractère
-      font_pixel=Menu_font+(((unsigned char)str[index])<<6);
+      font_pixel=Menu_font+((unsigned char)str[index]<<6);
+      for (x_pos=0;x_pos<8;x_pos+=1)
+        for (repeat_menu_x_factor=0;repeat_menu_x_factor<Menu_factor_X*Pixel_width;repeat_menu_x_factor++)
+          Horizontal_line_buffer[real_x++]=*(font_pixel+x_pos+y_pos)?text_color:background_color;
+    }
+    for (repeat_menu_y_factor=0;repeat_menu_y_factor<Menu_factor_Y;repeat_menu_y_factor++)
+      Display_line_fast(x,real_y++,index*Menu_factor_X*8,Horizontal_line_buffer);
+  }
+}
+
+void Print_general_unicode(short x,short y,const word * str,byte text_color,byte background_color)
+{
+  word  index;
+  int x_pos;
+  int y_pos;
+  byte *font_pixel;
+  short real_x;
+  short real_y;
+  byte repeat_menu_x_factor;
+  byte repeat_menu_y_factor;
+  unsigned int c;
+
+  real_y=y;
+  for (y_pos=0;y_pos<8<<3;y_pos+=1<<3)
+  {
+    real_x=0; // Position dans le buffer
+    for (index=0;str[index]!=0;index++)
+    {
+      c = str[index];
+      // Pointeur sur le premier pixel du caractère
+      if (c < 256)
+        font_pixel=Menu_font+(c<<6);
+      else
+      {
+        T_Unicode_Font * ufont;
+        font_pixel=Menu_font + (1<<6); // dummy character
+        for (ufont = Unicode_fonts; ufont != NULL; ufont = ufont->Next)
+          if (ufont->FirstChar <= c && c <= ufont->LastChar)
+          {
+            font_pixel = ufont->FontData + ((c - ufont->FirstChar) << 6);
+            break;
+          }
+      }
       for (x_pos=0;x_pos<8;x_pos+=1)
         for (repeat_menu_x_factor=0;repeat_menu_x_factor<Menu_factor_X*Pixel_width;repeat_menu_x_factor++)
           Horizontal_line_buffer[real_x++]=*(font_pixel+x_pos+y_pos)?text_color:background_color;
@@ -822,13 +865,33 @@ void Print_filename(void)
 {
   word max_size;
   word string_size;
-  char display_string[256];
 
   // Determine maximum size, in characters
   max_size = 12 + (Screen_width / Menu_factor_X - 320) / 8;
+  
+  // Erase whole area
+  Block(Screen_width-max_size*8*Menu_factor_X,
+    Menu_status_Y,Menu_factor_X*max_size*8,Menu_factor_Y<<3,MC_Light);
 
   // Partial copy of the name
+  if (Main.backups->Pages->Filename_unicode[0] != 0)
   {
+    word display_string[256];
+    Unicode_strlcpy(display_string, Main.backups->Pages->Filename_unicode, 256);
+    string_size = Unicode_strlen(display_string);
+    display_string[max_size]=0;
+
+    if (string_size > max_size)
+    {
+      string_size = max_size;
+      display_string[string_size-1]=(byte)ELLIPSIS_CHARACTER;
+    }
+    // Print
+    Print_general_unicode(Screen_width-(string_size<<3)*Menu_factor_X,Menu_status_Y,display_string,MC_Black,MC_Light);
+  }
+  else
+  {
+    char display_string[256];
 #ifdef ENABLE_FILENAMES_ICONV
     char * input = Main.backups->Pages->Filename;
     size_t inbytesleft = strlen(input);
@@ -842,20 +905,17 @@ void Print_filename(void)
       strncpy(display_string, Main.backups->Pages->Filename, sizeof(display_string)-1);
       display_string[sizeof(display_string)-1] = '\0';
     }
-  }
-  string_size = strlen(display_string);
-  display_string[max_size]='\0';
+    string_size = strlen(display_string);
+    display_string[max_size]='\0';
 
-  if (string_size > max_size)
-  {
-    string_size = max_size;
-    display_string[string_size-1]=ELLIPSIS_CHARACTER;
+    if (string_size > max_size)
+    {
+      string_size = max_size;
+      display_string[string_size-1]=ELLIPSIS_CHARACTER;
+    }
+    // Print
+    Print_general(Screen_width-(string_size<<3)*Menu_factor_X,Menu_status_Y,display_string,MC_Black,MC_Light);
   }
-  // Erase whole area
-  Block(Screen_width-max_size*8*Menu_factor_X,
-    Menu_status_Y,Menu_factor_X*max_size*8,Menu_factor_Y<<3,MC_Light);
-  // Print
-  Print_general(Screen_width-(string_size<<3)*Menu_factor_X,Menu_status_Y,display_string,MC_Black,MC_Light);
 }
 
 // Fonction d'affichage d'une chaine numérique avec une fonte très fine

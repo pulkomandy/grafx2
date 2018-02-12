@@ -24,12 +24,8 @@
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     #include <proto/dos.h>
     #include <sys/types.h>
-    #include <dirent.h>
 #elif defined(__WIN32__)
-    #include <dirent.h>
     #include <windows.h>
-#else
-    #include <dirent.h>
 #endif
 
 // On Debian, this is already implied in dirent.h
@@ -76,6 +72,7 @@
 #include "special.h"
 #include "tiles.h"
 #include "setup.h"
+#include "unicode.h"
 
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     #include <proto/dos.h>
@@ -3114,6 +3111,7 @@ void Load_picture(enum CONTEXT_TYPE type)
   int   new_mode;
   T_IO_Context context;
   static char filename [MAX_PATH_CHARACTERS];
+  static word filename_unicode[MAX_PATH_CHARACTERS];
   static char directory[MAX_PATH_CHARACTERS];
   T_Selector_settings * selector;
   
@@ -3121,18 +3119,21 @@ void Load_picture(enum CONTEXT_TYPE type)
   {
   case CONTEXT_MAIN_IMAGE:
     strcpy(filename, Main.backups->Pages->Filename);
+    Unicode_strlcpy(filename_unicode, Main.backups->Pages->Filename_unicode, MAX_PATH_CHARACTERS);
     strcpy(directory, Main.backups->Pages->File_directory);
     Init_context_layered_image(&context, filename, directory);
     selector = &Main.selector;
     break;
   case CONTEXT_BRUSH:
     strcpy(filename, Brush_filename);
+    filename_unicode[0] = 0;
     strcpy(directory, Brush_file_directory);
     Init_context_brush(&context, filename, directory);
     selector = &Brush_selector;
     break;
   case CONTEXT_PALETTE:
     strcpy(filename, "");
+    filename_unicode[0] = 0;
     strcpy(directory, Main.backups->Pages->File_directory);
     Init_context_layered_image(&context, filename, directory);
     context.Type = CONTEXT_PALETTE;
@@ -3142,6 +3143,7 @@ void Load_picture(enum CONTEXT_TYPE type)
   default:
     return; // DO NOTHING
   }
+  context.File_name_unicode = filename_unicode;
   confirm=Button_Load_or_Save(selector, 1, &context);
 
   if (confirm)

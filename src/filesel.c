@@ -2302,6 +2302,8 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   if (has_clicked_ok)
   {
     strcpy(context->File_name, Selector_filename);
+    if (context->File_name_unicode)
+      Unicode_strlcpy(context->File_name_unicode, Selector_filename_unicode, MAX_PATH_CHARACTERS);
     strcpy(context->File_directory, Selector->Directory);
     if (!load)
       context->Format = Selector->Format_filter;

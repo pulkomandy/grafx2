@@ -56,6 +56,7 @@ typedef struct
   // File properties
   
   char * File_name;
+  word * File_name_unicode;
   char * File_directory;
   byte Format;
   

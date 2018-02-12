@@ -462,6 +462,7 @@ int Init_program(int argc,char * argv[])
   int file_in_command_line;
   T_Gradient_array initial_gradients;
   static char main_filename [MAX_PATH_CHARACTERS];
+  static word main_filename_unicode[MAX_PATH_CHARACTERS];
   static char main_directory[MAX_PATH_CHARACTERS];
   static char spare_filename [MAX_PATH_CHARACTERS];
   static char spare_directory[MAX_PATH_CHARACTERS];
@@ -914,6 +915,24 @@ int Init_program(int argc,char * argv[])
           // no break ! proceed with the other file now
         case 1:
           Init_context_layered_image(&context, main_filename, main_directory);
+#ifdef ENABLE_FILENAMES_ICONV
+          {
+            char * input = main_filename;
+            size_t inbytesleft = strlen(main_filename);
+            char * output = (char *)main_filename_unicode;
+            size_t outbytesleft = sizeof(main_filename_unicode) - 2;
+            if (cd_utf16 != (iconv_t)-1)
+            {
+              size_t r = iconv(cd_utf16, &input, &inbytesleft, &output, &outbytesleft);
+              if (r != (size_t)-1)
+              {
+                output[0] = '\0';
+                output[1] = '\0';
+                context.File_name_unicode = main_filename_unicode;
+              }
+            }
+          }
+#endif
           Load_image(&context);
           Destroy_context(&context);
           Redraw_layered_image();
