@@ -1198,15 +1198,16 @@ void Print_current_directory(void)
       word temp_name[MAX_DISPLAYABLE_PATH+1]; // truncated name
 
       memcpy(temp_name, Selector->Directory_unicode, 3*2);  // first 3 chars "C:\"
-      Unicode_char_strlcpy(temp_name+3, "...", MAX_DISPLAYABLE_PATH+1-3);
+      temp_name[3] = (byte)ELLIPSIS_CHARACTER;
+      temp_name[4] = 0;
 
       // next we look for a place to fit everything ;)
       for (index=3;index<length;index++)
         if ( (Selector->Directory_unicode[index]==PATH_SEPARATOR[0]) &&
-            (length-index<=MAX_DISPLAYABLE_PATH-6) )
+            (length-index<=MAX_DISPLAYABLE_PATH-4) )
         {
           // we found the place !
-          Unicode_strlcpy(temp_name+6,Selector->Directory_unicode+index, MAX_DISPLAYABLE_PATH+1-6);
+          Unicode_strlcpy(temp_name+4,Selector->Directory_unicode+index, MAX_DISPLAYABLE_PATH+1-4);
           break;
         }
 
@@ -1225,16 +1226,16 @@ void Print_current_directory(void)
       for (index=0;index<3;index++) // copy the first 3 chars "C:\"
         temp_name[index]=converted_name[index];
 
-      // Add ...
-      strcpy(temp_name+3,"...");
+      temp_name[3] = ELLIPSIS_CHARACTER;
+      temp_name[4] = '\0';
 
       // next we look for a place to fit everything ;)
       for (index++;index<length;index++)
         if ( (converted_name[index]==PATH_SEPARATOR[0]) &&
-            (length-index<=MAX_DISPLAYABLE_PATH-6) )
+            (length-index<=MAX_DISPLAYABLE_PATH-4) )
         {
           // we found the place !
-          strcpy(temp_name+6,converted_name+index);
+          strcpy(temp_name+4,converted_name+index);
           break;
         }
 
