@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2018 Thomas Bernard
     Copyright 2011 Pawel Góralski
     Copyright 2008 Yves Rizoud
     Copyright 2007 Adrien Destugues
@@ -523,4 +524,19 @@ void Release_lock_file(const char *file_directory)
   strcpy(lock_filename,file_directory);
   strcat(lock_filename,"gfx2.lck");
   remove(lock_filename);
+}
+
+const char * Get_current_directory(char * buf, size_t size)
+{
+#if defined(__MINT__)
+  buf[0] = 'A'+Dgetdrv();
+  buf[1] = ':';
+  buf[2] = '\\';
+  Dgetpath(buf+3,0);
+  strcat(buf,PATH_SEPARATOR);
+
+  return buf;
+#else
+  return getcwd(buf, size);
+#endif
 }

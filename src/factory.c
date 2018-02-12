@@ -2010,7 +2010,7 @@ int L_Run(lua_State* L)
     return luaL_error(L, "run: too many nested calls (100)");
     
   // store the current directory (on the stack)
-  getcwd(saved_directory,MAX_PATH_CHARACTERS);
+  Get_current_directory(saved_directory,MAX_PATH_CHARACTERS);
 
   #if defined (__AROS__)
   // Convert path written on Linux/Windows norms to AROS norms :

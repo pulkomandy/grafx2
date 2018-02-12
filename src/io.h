@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2018 Thomas Bernard
     Copyright 2011 Pawel Góralski
     Copyright 2008 Yves Rizoud
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
@@ -30,6 +31,7 @@
 /// - fstat()
 /// - opendir()
 /// - readdir()
+/// - getcwd()
 /// - Also, don't assume "/" or "\\", use PATH_SEPARATOR
 /// If you don't, you break another platform.
 //////////////////////////////////////////////////////////////////////////////
@@ -125,3 +127,6 @@ byte Create_lock_file(const char *file_directory);
 /// Release a lock file created by ::Create_lock_file
 void Release_lock_file(const char *file_directory);
 
+///
+/// Return the current directory, equivalent to getcwd()
+const char * Get_current_directory(char * buf, size_t size);

@@ -438,13 +438,8 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   const char * current_path = NULL;
   char curdir[MAX_PATH_CHARACTERS];
 #if defined (__MINT__)
-  char path[1024]={0};
-  char path2[1024]={0};
-  char currentDrive=0;
   T_Fileselector_item *item=0;
   bool bFound=false;
-  path[0]='\0';
-  path2[0]='\0';  
 #endif
 
   callback_data.list = list;
@@ -456,19 +451,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   // Après effacement, il ne reste ni fichier ni répertoire dans la liste
 
   // On lit tous les répertoires:
-
-#if defined (__MINT__)
-  currentDrive='A';
-  currentDrive=currentDrive+Dgetdrv(); 
-  
-  Dgetpath(path,0);
-  sprintf(path2,"%c:\%s",currentDrive,path);
- 
-  strcat(path2,PATH_SEPARATOR);
-  current_path=path2;
-#else  
-  current_path=getcwd(curdir,MAX_PATH_CHARACTERS);
-#endif
+  current_path = Get_current_directory(curdir, MAX_PATH_CHARACTERS);
 
   For_each_directory_entry(current_path, &callback_data, Read_dir_callback);
   
@@ -1535,20 +1518,8 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
     Display_bookmark(bookmark_dropdown[temp],temp);
   }
   
-  #if defined(__MINT__)
-  {
-    static char path[1024]={0};
-    chdir(context->File_directory);
-    Dgetpath(path,0);
-    strcat(path,PATH_SEPARATOR);
-    strcpy(Selector->Directory,path);  
-  }
-  #else
-  {
-    chdir(context->File_directory);
-    getcwd(Selector->Directory,MAX_PATH_CHARACTERS);
-  }
-  #endif
+  chdir(context->File_directory);
+  Get_current_directory(Selector->Directory,MAX_PATH_CHARACTERS);
   
   // Affichage des premiers fichiers visibles:
   Reload_list_of_files(Selector->Format_filter,file_scroller);
@@ -2092,13 +2063,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
             Extract_filename(previous_directory, Selector->Directory);
           }
 
-        #if defined (__MINT__)
-          currentDrive=currentDrive+Dgetdrv();
-          Dgetpath(path,0);
-          sprintf(Selector->Directory,"%c:\%s",currentDrive,path);
-        #else
-          getcwd(Selector->Directory,MAX_PATH_CHARACTERS);
-        #endif
+          Get_current_directory(Selector->Directory,MAX_PATH_CHARACTERS);
           // read the new directory
           Read_list_of_files(&Filelist, Selector->Format_filter);
           Sort_list_of_files(&Filelist);
