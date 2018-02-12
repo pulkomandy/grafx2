@@ -43,7 +43,7 @@
 #include "palette.h"
 
 T_Toolbar_button Buttons_Pool[NB_BUTTONS];
-T_Menu_Bar Menu_bars[MENUBAR_COUNT] = 
+T_Menu_Bar Menu_bars[MENUBAR_COUNT] =
   {{MENU_WIDTH,  9, 1, 45, {NULL,NULL,NULL},  20, BUTTON_HIDE }, // Status
   {MENU_WIDTH, 14, 1, 35, {NULL,NULL,NULL}, 236, BUTTON_ANIM_PLAY }, // Animation
   {MENU_WIDTH, 10, 1, 35, {NULL,NULL,NULL}, 144, BUTTON_LAYER_SELECT }, // Layers
@@ -79,7 +79,7 @@ void Pixel_in_menu(word bar, word x, word y, byte color)
 void Pixel_in_menu_and_skin(word bar, word x, word y, byte color)
 {
   Pixel_in_menu(bar, x, y, color);
-  Menu_bars[bar].Skin[2][y*Menu_bars[bar].Skin_width + x] = color;  
+  Menu_bars[bar].Skin[2][y*Menu_bars[bar].Skin_width + x] = color;
 }
 
 // Affichage d'un pixel dans la fenêtre (la fenêtre doit être visible)
@@ -208,7 +208,7 @@ word Palette_cell_Y(byte index)
 void Set_fore_color(byte color)
 {
   byte old_fore_color = Fore_color;
-  
+
   Fore_color=color;
   Reposition_palette();
   Display_foreback();
@@ -219,7 +219,7 @@ void Set_fore_color(byte color)
 void Set_back_color(byte color)
 {
   byte old_back_color = Back_color;
-  
+
   Back_color=color;
   Display_foreback();
   Frame_menu_color(old_back_color);
@@ -236,7 +236,7 @@ void Frame_menu_color(byte id)
   word index;
   word cell_height=Menu_bars[MENUBAR_TOOLS].Height/Menu_cells_Y;
   byte color;
-  
+
   if (! Menu_bars[MENUBAR_TOOLS].Visible)
     return;
 
@@ -399,7 +399,7 @@ void Reposition_palette(void)
     cells=Menu_cells_X;
   else
     cells=Menu_cells_Y;
-    
+
 
   if (Fore_color<First_color_in_palette)
   {
@@ -425,7 +425,7 @@ void Change_palette_cells()
     Menu_cells_X=1;
   if (Menu_cells_Y<1)
     Menu_cells_Y=1;
-  
+
   while (1)
   {
     Menu_palette_cell_width = ((Screen_width/Menu_factor_X)-(MENU_WIDTH+2)) / Menu_cells_X;
@@ -435,7 +435,7 @@ void Change_palette_cells()
       break;
     Menu_cells_X--;
   }
-  
+
   // Cale First_color_in_palette sur un multiple du nombre de cellules (arrondi inférieur)
   if (Config.Palette_vertical)
     First_color_in_palette=First_color_in_palette/Menu_cells_X*Menu_cells_X;
@@ -452,7 +452,7 @@ void Change_palette_cells()
     else
       First_color_in_palette=255/Menu_cells_Y*Menu_cells_Y-(Menu_cells_X-1)*Menu_cells_Y;
   }
-  
+
   // Mise à jour de la taille du bouton dans le menu. C'est pour pas que
   // la bordure noire soit active.
   Buttons_Pool[BUTTON_CHOOSE_COL].Width=(Menu_palette_cell_width*Menu_cells_X)-1;
@@ -497,11 +497,11 @@ void Draw_bar_remainder(word current_menu, word x_off)
       Pixel_in_menu(current_menu, x_pos, y_pos, Menu_bars[current_menu].Skin[0][y_pos * Menu_bars[current_menu].Skin_width + Menu_bars[current_menu].Skin_width - 2 + (x_pos&1)]);
 }
 
-            
+
 /// Display / update the layer menubar
 void Display_layerbar(void)
 {
-  
+
   if (Menu_bars[MENUBAR_LAYERS].Visible)
   {
     word x_off=0;
@@ -510,52 +510,52 @@ void Display_layerbar(void)
     word horiz_space;
     word current_button;
     word repeats=1;
-    
+
     // Available space in pixels
     horiz_space = Screen_width / Menu_factor_X - Menu_bars[MENUBAR_LAYERS].Skin_width;
-    
+
     // Don't display all buttons if not enough room
     if (horiz_space/button_width < button_number)
       button_number = horiz_space/button_width;
     // Only 16 icons at the moment
     if (button_number > 16) // can be different from MAX_NB_LAYERS
       button_number = 16;
-  
+
     // Enlarge the buttons themselves if there's enough room
     while (button_number*(button_width+2) < horiz_space && repeats < 20)
     {
       repeats+=1;
       button_width+=2;
     }
-    
+
     x_off=Menu_bars[MENUBAR_LAYERS].Skin_width;
     for (current_button=0; current_button<button_number; current_button++)
     {
       word x_pos=0;
       word y_pos;
       word sprite_index;
-      
+
       if (Main.current_layer == current_button)
         sprite_index=1;
       else if (Main.layers_visible & (1 << current_button))
         sprite_index=0;
       else
         sprite_index=2;
-      
-      
+
+
       for (y_pos=0;y_pos<LAYER_SPRITE_HEIGHT;y_pos++)
       {
         word source_x=0;
-        
+
         for (source_x=0;source_x<LAYER_SPRITE_WIDTH;source_x++)
         {
           short i = 1;
-          
-          // This stretches a button, by duplicating the 2nd from right column 
-          // and 3rd column from left.    
+
+          // This stretches a button, by duplicating the 2nd from right column
+          // and 3rd column from left.
           if (source_x == 1 || (source_x == LAYER_SPRITE_WIDTH-3))
             i=repeats;
-          
+
           for (;i>0; i--)
           {
             Pixel_in_menu(MENUBAR_LAYERS, x_pos + x_off, y_pos, Gfx->Layer_sprite[sprite_index][current_button][y_pos][source_x]);
@@ -564,25 +564,25 @@ void Display_layerbar(void)
         }
         // Next line
         x_pos=0;
-      }    
+      }
       // Next button
       x_off+=button_width;
     }
     // Texture any remaining space to the right.
     // This overwrites any junk like deleted buttons.
     Draw_bar_remainder(MENUBAR_LAYERS, x_off);
-    
+
     // Update the active area of the layers pseudo-button
     Buttons_Pool[BUTTON_LAYER_SELECT].Width = button_number * button_width;
-    
+
     // Required to determine which layer button is clicked
     Layer_button_width = button_width;
-    
+
     // A screen refresh required by some callers
     Update_rect(
-      Menu_bars[MENUBAR_LAYERS].Skin_width, 
-      Menu_Y+Menu_bars[MENUBAR_LAYERS].Top*Menu_factor_Y, 
-      horiz_space*Menu_factor_X, 
+      Menu_bars[MENUBAR_LAYERS].Skin_width,
+      Menu_Y+Menu_bars[MENUBAR_LAYERS].Top*Menu_factor_Y,
+      horiz_space*Menu_factor_X,
       Menu_bars[MENUBAR_LAYERS].Height*Menu_factor_Y);
   }
   if (Menu_bars[MENUBAR_ANIMATION].Visible)
@@ -598,7 +598,7 @@ void Display_layerbar(void)
     Update_rect(
       (59)*Menu_factor_X,
       (Menu_bars[MENUBAR_ANIMATION].Top+3)*Menu_factor_Y+Menu_Y,
-      7*8*Menu_factor_X, 
+      7*8*Menu_factor_X,
       8*Menu_factor_Y);
   }
 }
@@ -636,7 +636,7 @@ void Display_menu(void)
           // the last two columns
           Draw_bar_remainder(current_menu, Menu_bars[current_menu].Skin_width);
         }
-        
+
         // Next bar
       }
     }
@@ -714,7 +714,7 @@ void Print_char_in_window(short x_pos,short y_pos,const unsigned char c,byte tex
   byte *pixel;
   // Premier pixel du caractère
   pixel=Menu_font + (c<<6);
-  
+
   for (y=0;y<8;y++)
     for (x=0;x<8;x++)
       Pixel_in_window(x_pos+x, y_pos+y,
@@ -799,7 +799,7 @@ void Print_filename(void)
 
   // Determine maximum size, in characters
   max_size = 12 + (Screen_width / Menu_factor_X - 320) / 8;
-  
+
   // Partial copy of the name
   {
 #ifdef ENABLE_FILENAMES_ICONV
@@ -1071,7 +1071,7 @@ byte Confirmation_box(char * message)
   {
     char * next_eol;
     char display_string[36+1];
-    
+
     next_eol = strchr(c, '\n');
     if (next_eol==NULL) // last line
       current_length = strlen(c);
@@ -1086,7 +1086,7 @@ byte Confirmation_box(char * message)
     display_string[current_length]='\0';
 
     Print_in_window((window_width>>1)-(current_length<<2), 20+(current_line<<3), display_string, MC_Black, MC_Light);
-    
+
     c += current_length;
     if (*c == '\n')
       c++;
@@ -1190,18 +1190,16 @@ void Warning_with_format(const char *template, ...) {
   va_list arg_ptr;
   char *message;
 
-  message = malloc(sizeof(char) * 1024);  // a maximum of 1 KiB of complete message.
-  if (message) {
-    va_start(arg_ptr, template);
-    vsprintf(message, template, arg_ptr);
-    //Warning_message(message);
-    Verbose_message("Warning", message);
-    va_end(arg_ptr);
-    free(message);
-  } else {
+  va_start(arg_ptr, template);
+  if (vasprintf(&message, template, arg_ptr) == -1) {
     //Warning_message(template);
     Verbose_message("Warning", template);
+  } else {
+    //Warning_message(message);
+    Verbose_message("Warning", message);
+    free(message);
   }
+  va_end(arg_ptr);
 }
 
 /// Window that shows a big message (up to 35x13), and waits for a click on OK.
@@ -1216,9 +1214,9 @@ void Verbose_message(const char *caption, const char * message )
   char buffer[36];
   byte original_cursor_shape = Cursor_shape;
 
-  
+
   Open_window(300,160,caption);
-  
+
   // Word-wrap the message
   for (line=0; line < 13 && *message!='\0'; line++)
   {
@@ -1240,10 +1238,10 @@ void Verbose_message(const char *caption, const char * message )
     if (message[nb_char]=='\0' || last_space == -1)
       last_space = nb_char;
     buffer[last_space]='\0';
-    
+
     // Print
     Print_in_window(10,20+line*8,buffer,MC_Black,MC_Light);
-    
+
     // Next line
     message=message+last_space;
     // Strip at most one carriage return and any leading spaces
@@ -1325,7 +1323,7 @@ void Display_paintbrush_in_window(word x,word y,int number)
 
   width=Min(Paintbrush[number].Width,PAINTBRUSH_WIDTH);
   height=Min(Paintbrush[number].Height,PAINTBRUSH_WIDTH);
-  
+
   origin_x = (x + 8)*Menu_factor_X - (width/2)*x_size+Window_pos_X;
   origin_y = (y + 8)*Menu_factor_Y - (height/2)*y_size+Window_pos_Y;
 
@@ -1587,7 +1585,7 @@ void Compute_paintbrush_coordinates(void)
     Paintbrush_X=(((Paintbrush_X+(Snap_width>>1)-Snap_offset_X)/Snap_width)*Snap_width)+Snap_offset_X;
     Paintbrush_Y=(((Paintbrush_Y+(Snap_height>>1)-Snap_offset_Y)/Snap_height)*Snap_height)+Snap_offset_Y;
   }
-  
+
   // Handling the snap axis mode, when shift is pressed.
   switch (Current_operation)
   {
@@ -1604,7 +1602,7 @@ void Compute_paintbrush_coordinates(void)
         Snap_axis=1;
         Snap_axis_origin_X=Paintbrush_X;
         Snap_axis_origin_Y=Paintbrush_Y;
-      } 
+      }
   }
 
   if (Snap_axis==1)
@@ -1741,8 +1739,8 @@ void Position_screen_according_to_position(int target_x, int target_y)
       Main.offset_X=0;
     else if (Main.image_width<Main.offset_X+Main.separator_position)
       Main.offset_X=Main.image_width-Main.separator_position;
-      
-    
+
+
   }
   else
     Main.offset_X=0;
@@ -1900,11 +1898,11 @@ void Change_magnifier_factor(byte factor_index, byte point_at_mouse)
 
 void Copy_view_to_spare(void)
 {
-  
+
   // Don't do anything if the pictures have different dimensions
   if (Main.image_width!=Spare.image_width || Main.image_height!=Spare.image_height)
     return;
-  
+
   // Copie des décalages de la fenêtre principale (non zoomée) de l'image
   Spare.offset_X=Main.offset_X;
   Spare.offset_Y=Main.offset_Y;
@@ -2679,7 +2677,7 @@ void Display_all_screen(void)
       height=Menu_Y/Main.magnifier_factor*Main.magnifier_factor;
     else
       height=Menu_Y;
-    
+
     Display_zoomed_screen(width,height,Main.image_width,Horizontal_line_buffer);
 
     // Effacement de la partie non-image dans la partie zoomée:
@@ -2735,7 +2733,7 @@ byte Best_color(byte r,byte g,byte b)
 
 byte Best_color_nonexcluded(byte red,byte green,byte blue)
 {
-  int   col;  
+  int   col;
   int   delta_r,delta_g,delta_b;
   int   dist;
   int   best_dist=0x7FFFFFFF;
@@ -2766,8 +2764,8 @@ byte Best_color_nonexcluded(byte red,byte green,byte blue)
 
 byte Best_color_range(byte r, byte g, byte b, byte max)
 {
-  
-  int col;  
+
+  int col;
   float best_diff=255.0*1.56905;
   byte  best_color=0;
   float target_bri;
@@ -2776,7 +2774,7 @@ byte Best_color_range(byte r, byte g, byte b, byte max)
 
   // Similar to Perceptual_lightness();
   target_bri = sqrt(0.26*r*0.26*r + 0.55*g*0.55*g + 0.19*b*0.19*b);
-  
+
   for (col=0; col<max; col++)
   {
     if (Exclude_color[col])
@@ -2801,7 +2799,7 @@ byte Best_color_range(byte r, byte g, byte b, byte max)
     {
       best_diff=diff;
       best_color=col;
-    } 
+    }
   }
 
   return best_color;
@@ -2809,8 +2807,8 @@ byte Best_color_range(byte r, byte g, byte b, byte max)
 
 byte Best_color_perceptual(byte r,byte g,byte b)
 {
-  
-  int col;  
+
+  int col;
   float best_diff=255.0*1.56905;
   byte  best_color=0;
   float target_bri;
@@ -2819,7 +2817,7 @@ byte Best_color_perceptual(byte r,byte g,byte b)
 
   // Similar to Perceptual_lightness();
   target_bri = sqrt(0.26*r*0.26*r + 0.55*g*0.55*g + 0.19*b*0.19*b);
-  
+
   for (col=0; col<256; col++)
   {
     if (Exclude_color[col])
@@ -2844,7 +2842,7 @@ byte Best_color_perceptual(byte r,byte g,byte b)
     {
       best_diff=diff;
       best_color=col;
-    } 
+    }
   }
 
   return best_color;
@@ -2852,8 +2850,8 @@ byte Best_color_perceptual(byte r,byte g,byte b)
 
 byte Best_color_perceptual_except(byte r,byte g,byte b, byte except)
 {
-  
-  int col;  
+
+  int col;
   float best_diff=255.0*1.56905;
   byte  best_color=0;
   float target_bri;
@@ -2862,7 +2860,7 @@ byte Best_color_perceptual_except(byte r,byte g,byte b, byte except)
 
   // Similar to Perceptual_lightness();
   target_bri = sqrt(0.26*r*0.26*r + 0.55*g*0.55*g + 0.19*b*0.19*b);
-  
+
   for (col=0; col<256; col++)
   {
     if (col==except || Exclude_color[col])
@@ -2887,7 +2885,7 @@ byte Best_color_perceptual_except(byte r,byte g,byte b, byte except)
     {
       best_diff=diff;
       best_color=col;
-    } 
+    }
   }
 
   return best_color;
@@ -3138,7 +3136,7 @@ void Compute_optimal_menu_colors(T_Components * palette)
   if (Get_palette_RGB_scale()==3)
   for (i=255; i>=0; i--)
   {
-    
+
     if (Round_palette_component(palette[i].R)/tolerence==cpc_colors[3].R/tolerence
      && Round_palette_component(palette[i].G)/tolerence==cpc_colors[3].G/tolerence
      && Round_palette_component(palette[i].B)/tolerence==cpc_colors[3].B/tolerence)
@@ -3183,7 +3181,7 @@ void Compute_optimal_menu_colors(T_Components * palette)
       }
     }
   }
-  
+
   // Third method:
 
   // Compute luminance for whole palette
@@ -3222,7 +3220,7 @@ void Compute_optimal_menu_colors(T_Components * palette)
     else if (l[i]<64)
       s[i]=s[i]*l[i]/64;
   }
-  
+
 
   // Find color nearest to min+2(max-min)/3
   // but at the same time we try to minimize the saturation so that the menu
@@ -3237,7 +3235,7 @@ void Compute_optimal_menu_colors(T_Components * palette)
       MC_Light = i;
     }
   }
-  
+
   // Target "Dark color" is 2/3 between Light and Black
   low_l = ((int)l[MC_Light]*2+l[MC_Black])/3;
   for (i = 0; i < 256; i++)
@@ -3248,15 +3246,15 @@ void Compute_optimal_menu_colors(T_Components * palette)
       MC_Dark = i;
     }
   }
-  
-  
+
+
   //if (l[MC_Light]<l[MC_Dark])
   //{
   //  // Not sure if that can happen, but just in case:
   //  SWAP_BYTES(MC_Light, MC_Dark)
   //}
 
-  // Si deux des couleurs choisies ont le même index, c'est destructif car 
+  // Si deux des couleurs choisies ont le même index, c'est destructif car
   // on fait ensuite un remap de l'image. Donc on évite ce problème (un
   // peu brutalement)
   // On commence par déplacer les gris, comme ça on a plus de chances de garder au moins
@@ -3268,12 +3266,12 @@ void Compute_optimal_menu_colors(T_Components * palette)
   // On cherche une couleur de transparence différente des 4 autres.
   for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
                    (MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
-  
+
   if (Same_color(palette, MC_Black, MC_Dark))
     MC_OnBlack=MC_Light;
   else
     MC_OnBlack=MC_Dark;
-  
+
   if (Same_color(palette, MC_White, MC_Light))
   {
     MC_Window=MC_Dark;
@@ -3285,7 +3283,7 @@ void Compute_optimal_menu_colors(T_Components * palette)
     MC_Darker=MC_Dark;
   }
   MC_Lighter=MC_White;
-  
+
   Remap_menu_sprites();
 }
 
@@ -3328,7 +3326,7 @@ void Remap_menu_sprites()
         for (j=0; j<LAYER_SPRITE_HEIGHT; j++)
           for (i=0; i<LAYER_SPRITE_WIDTH; i++)
             Remap_pixel(&Gfx->Layer_sprite[l][k][j][i]);
-    
+
     // Status bar
     for (k=0; k<3; k++)
       for (j=0; j<Menu_bars[MENUBAR_STATUS].Height; j++)
@@ -3369,7 +3367,7 @@ void Remap_menu_sprites()
       for (j=0; j<8; j++)
         for (i=0; i<6; i++)
           Remap_pixel(&Gfx->Help_font_t4[k][i][j]);
-        
+
     // Drives and other misc. 8x8 icons
     for (k=0; k<NB_ICON_SPRITES; k++)
       for (j=0; j<ICON_SPRITE_HEIGHT; j++)
