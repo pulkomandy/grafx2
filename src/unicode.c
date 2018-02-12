@@ -47,6 +47,23 @@ word * Unicode_strdup(const word * str)
   return new_str;
 }
 
+/// Copy unicode string
+void Unicode_strlcpy(word * dst, const word * src, size_t len)
+{
+  if (len == 0)
+    return;
+  while (len > 1)
+  {
+    *dst = *src;
+    if (*src == '\0')
+      return;
+    dst++;
+    src++;
+    len--;
+  }
+  *dst = 0;
+}
+
 /// Compare an unicode string with a regular Latin1 string
 int Unicode_char_strcmp(const word * s1, const char * s2)
 {

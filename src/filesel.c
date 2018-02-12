@@ -143,6 +143,7 @@ T_Selector_settings * Selector;
 //static char Selector_directory[1024];
 /// Filename (without directory) of the highlighted file
 static char Selector_filename[256];
+static word Selector_filename_unicode[256];
 
 // Conventions:
 //
@@ -981,7 +982,7 @@ void Display_file_list(T_Fileselector *list, short offset_first,short selector_o
 
 
 // -- Récupérer le libellé d'un élément de la liste -------------------------
-void Get_selected_item(T_Fileselector *list, short offset_first,short selector_offset,char * label,int *type)
+static void Get_selected_item(T_Fileselector *list, short offset_first,short selector_offset,char * label,word * unicode_label,int *type)
 //
 // offset_first = Décalage entre le premier fichier visible dans le
 //                   sélecteur et le premier fichier de la liste
@@ -1005,6 +1006,13 @@ void Get_selected_item(T_Fileselector *list, short offset_first,short selector_o
 
     // On recopie la chaîne
     strcpy(label, current_item->Full_name);
+    if (unicode_label != NULL)
+    {
+      if (current_item->Unicode_full_name)
+        Unicode_strlcpy(unicode_label, current_item->Unicode_full_name, 256);
+      else
+        Unicode_char_strlcpy(unicode_label, current_item->Full_name, 256);
+    }
 
     if (type != NULL)
       *type=current_item->Type;
@@ -1232,7 +1240,14 @@ void Print_filename_in_fileselector(void)
   }
 #endif /* ENABLE_FILENAMES_ICONV */
   Window_rectangle(82,48,27*8,8,MC_Light);
-  Print_in_window_limited(82,48,filename,27,MC_Black,MC_Light);
+  if (Selector_filename_unicode[0] != 0)
+  {
+    word filename_unicode[32];
+    Unicode_strlcpy(filename_unicode, Selector_filename_unicode, 28); // 28 including the terminating 0
+    Print_in_window_utf16(82,48,filename_unicode,MC_Black,MC_Light);
+  }
+  else
+    Print_in_window_limited(82,48,filename,27,MC_Black,MC_Light);
   Update_window_area(82,48,27*8,8);
 }
 
@@ -1253,7 +1268,7 @@ void Prepare_and_display_filelist(short Position, short offset, T_Scroller_butto
   Update_window_area(8-1,95-1,144+2,80+2);
 
   // On récupère le nom du schmilblick à "accéder"
-  Get_selected_item(&Filelist, Position,offset,Selector_filename,&Selected_type);
+  Get_selected_item(&Filelist, Position,offset,Selector_filename,Selector_filename_unicode,&Selected_type);
   // On affiche le nouveau nom de fichier
   Print_filename_in_fileselector();
   // On affiche le nom du répertoire courant
@@ -1308,7 +1323,7 @@ void Scroll_fileselector(T_Scroller_button * file_scroller)
     Window_draw_slider(file_scroller);
   }
   // On récupére le nom du schmilblick à "accéder"
-  Get_selected_item(&Filelist, Selector->Position,Selector->Offset,Selector_filename,&Selected_type);
+  Get_selected_item(&Filelist, Selector->Position,Selector->Offset,Selector_filename,Selector_filename_unicode,&Selected_type);
   if (strcmp(old_filename,Selector_filename))
     New_preview_is_needed=1;
 
@@ -1626,6 +1641,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
     // On initialise le nom de fichier à celui en cours et non pas celui sous
     // la barre de sélection
     strcpy(Selector_filename,context->File_name);
+    Selector_filename_unicode[0] = 0; // TODO : retrieve unicode filename
     // On affiche le nouveau nom de fichier
     Print_filename_in_fileselector();
   }
@@ -1737,7 +1753,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
             Selector->Offset=temp;
 
             // On récupére le nom du schmilblick à "accéder"
-            Get_selected_item(&Filelist, Selector->Position,Selector->Offset,Selector_filename,&Selected_type);
+            Get_selected_item(&Filelist, Selector->Position,Selector->Offset,Selector_filename,Selector_filename_unicode,&Selected_type);
             // On affiche le nouveau nom de fichier
             Print_filename_in_fileselector();
             // On affiche à nouveau la liste
@@ -1756,7 +1772,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
             // certains cas, on risque de sauvegarder avec le nom du fichier
             // actuel au lieu de changer de répertoire.
             if (Selector->Position+Selector->Offset<Filelist.Nb_directories)
-              Get_selected_item(&Filelist, Selector->Position,Selector->Offset,Selector_filename,&Selected_type);
+              Get_selected_item(&Filelist, Selector->Position,Selector->Offset,Selector_filename,Selector_filename_unicode,&Selected_type);
 
             has_clicked_ok=1;
             New_preview_is_needed=1;
@@ -1771,7 +1787,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         Hide_cursor();
         Selector->Position=Window_attribute2;
         // On récupére le nom du schmilblick à "accéder"
-        Get_selected_item(&Filelist, Selector->Position,Selector->Offset,Selector_filename,&Selected_type);
+        Get_selected_item(&Filelist, Selector->Position,Selector->Offset,Selector_filename,Selector_filename_unicode,&Selected_type);
         // On affiche le nouveau nom de fichier
         Print_filename_in_fileselector();
         // On affiche à nouveau la liste
@@ -1803,6 +1819,8 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
             {
               strcpy(Selector_filename + pos_last_dot + 1,
                 Get_fileformat(Selector->Format_filter)->Default_extension);
+              Unicode_char_strlcpy(Selector_filename_unicode + pos_last_dot + 1,
+                Get_fileformat(Selector->Format_filter)->Default_extension, 256 - pos_last_dot - 1);
             }
           }
           savename = (char *)strdup(Selector_filename);
@@ -2092,6 +2110,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         {                              
           // On va dans le répertoire parent.
           strcpy(Selector_filename,PARENT_DIR);
+          Selector_filename_unicode[0] = 0;
           Selected_type=1;
           has_clicked_ok=1;
         }
