@@ -541,7 +541,7 @@ OBJS = main.o init.o graph.o sdlscreen.o misc.o special.o \
        transform.o pversion.o factory.o $(PLATFORMOBJ) \
        fileformats.o miscfileformats.o libraw2crtc.o \
        brush_ops.o buttons_effects.o layers.o \
-       oldies.o tiles.o colorred.o
+       oldies.o tiles.o colorred.o unicode.o
 OBJ = $(addprefix $(OBJDIR)/,$(OBJS))
 
 SKINS = skin_classic.png skin_modern.png skin_DPaint.png \

@@ -51,6 +51,7 @@
 #include "struct.h"
 #include "io.h"
 #include "realpath.h"
+#include "global.h"
 
 // Lit un octet
 // Renvoie -1 si OK, 0 en cas d'erreur
@@ -393,17 +394,18 @@ void For_each_file(const char * directory_name, void Callback(const char *))
 /// Scans a directory, calls Callback for each file or directory in it,
 void For_each_directory_entry(const char * directory_name, void * pdata, T_File_dir_cb Callback)
 {
-  // Pour scan de répertoire
-  DIR*  current_directory; //Répertoire courant
-  struct dirent* entry; // Structure de lecture des éléments
+  DIR*  current_directory; // current directory
+  struct dirent* entry;    // directory entry struct
   char full_filename[MAX_PATH_CHARACTERS];
   word * unicode_filename = NULL;
+  word unicode_buffer[MAX_PATH_CHARACTERS];
   int filename_position;
 
-  strcpy(full_filename, directory_name);
-  current_directory=opendir(full_filename);
-  if(current_directory == NULL) return;        // Répertoire invalide ...
-  filename_position = strlen(full_filename);
+  current_directory=opendir(directory_name);
+  if(current_directory == NULL) return;        // Invalid directory
+
+  filename_position = strlen(directory_name);
+  memcpy(full_filename, directory_name, filename_position+1);
 #if defined(__AROS__)
   if (filename_position==0 || (strcmp(full_filename+filename_position-1,PATH_SEPARATOR) && strcmp(full_filename+filename_position-1,":")))
 #else
@@ -416,6 +418,23 @@ void For_each_directory_entry(const char * directory_name, void * pdata, T_File_
   while ((entry=readdir(current_directory)))
   {
     struct stat Infos_enreg;
+#ifdef ENABLE_FILENAMES_ICONV
+    char * input = entry->d_name;
+    size_t inbytesleft = strlen(entry->d_name);
+    char * output = (char *)unicode_buffer;
+    size_t outbytesleft = sizeof(unicode_buffer) - 2;
+    unicode_filename = NULL;
+    if (cd_utf16 != (iconv_t)-1)
+    {
+      size_t r = iconv(cd_utf16, &input, &inbytesleft, &output, &outbytesleft);
+      if (r != (size_t)-1)
+      {
+        output[0] = '\0';
+        output[1] = '\0';
+        unicode_filename = unicode_buffer;
+      }
+    }
+#endif
     strcpy(&full_filename[filename_position], entry->d_name);
     stat(full_filename,&Infos_enreg);
     Callback(

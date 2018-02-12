@@ -496,6 +496,7 @@ int Init_program(int argc,char * argv[])
   // utilisé pour convertir les noms de fichiers
   cd = iconv_open(TOCODE, FROMCODE);  // From UTF8 to ANSI
   cd_inv = iconv_open(FROMCODE, TOCODE);  // From ANSI to UTF8
+  cd_utf16 = iconv_open("UTF-16LE", FROMCODE); // From UTF8 to UTF16
 #endif /* ENABLE_FILENAMES_ICONV */
 
   // On en profite pour le mémoriser dans le répertoire principal:

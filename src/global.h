@@ -770,6 +770,7 @@ GFX2_GLOBAL int Line_number_in_INI_file;
 #endif
 GFX2_GLOBAL iconv_t cd;
 GFX2_GLOBAL iconv_t cd_inv;
+GFX2_GLOBAL iconv_t cd_utf16;
 #endif /* ENABLE_FILENAMES_ICONV */
 
 // -- Specific to SDL

@@ -60,6 +60,7 @@
 #include "readline.h"
 #include "input.h"
 #include "help.h"
+#include "unicode.h"
 #include "filesel.h"
 
 #define NORMAL_FILE_COLOR    MC_Light // color du texte pour une ligne de
@@ -205,23 +206,102 @@ void Free_fileselector_list(T_Fileselector *list)
     // On fait avancer la tête de la liste
     list->First=list->First->Next;
     // Et on efface l'ancien premier élément de la liste
+    free(temp_item->Unicode_full_name);
+    free(temp_item->Unicode_short_name);
     free(temp_item);
     temp_item = NULL;
   }
   Recount_files(list);
 }
 
-int Position_last_dot(const char * fname)
+static int Position_last_dot(const char * fname)
 {
   int pos_last_dot = -1;
   int c = 0;
-  
+
   for (c = 0; fname[c]!='\0'; c++)
     if (fname[c]=='.')
       pos_last_dot = c;
   return pos_last_dot;
 }
-     
+
+static int Position_last_dot_unicode(const word * fname)
+{
+  int pos_last_dot = -1;
+  int c = 0;
+
+  for (c = 0; fname[c]!='\0'; c++)
+    if (fname[c]=='.')
+      pos_last_dot = c;
+  return pos_last_dot;
+}
+
+word * Format_filename_unicode(const word * fname, word max_length, int type)
+{
+  static word result[40];
+  int         c;
+  int         other_cursor;
+  int         pos_last_dot;
+
+ // safety
+  if (max_length>40)
+    max_length=40;
+
+  if (Unicode_char_strcmp(fname,PARENT_DIR)==0)
+  {
+    Unicode_char_strlcpy(result, "\x11 PARENT DIRECTORY", 40);
+    // Append spaces
+    for (c=18; c<max_length-1; c++)
+      result[c]=' ';
+    result[c]='\0';
+  }
+  else if (fname[0]=='.' || type==1 || type==2)
+  {
+    // Files ".something" or drives or directories: Aligned left on (max_length-1) chars max
+    // Initialize as all spaces
+    for (c=0; c<max_length-1; c++)
+      result[c]=' ';
+    result[c]='\0';
+
+    for (c=0;fname[c]!='\0' && c < max_length-1;c++)
+      result[c]=fname[c];
+    // A special character indicates the filename is truncated
+    if (c >= max_length-1)
+      result[max_length-2]=(byte)ELLIPSIS_CHARACTER;
+  }
+  else
+  {
+    // Initialize as all spaces
+    for (c = 0; c<max_length-1; c++)
+      result[c]=' ';
+    result[c]='\0';
+
+    result[max_length-5]='.';
+
+    // Look for the last dot in filename
+    pos_last_dot = Position_last_dot_unicode(fname);
+
+    // Copy the part before the dot
+    for (c=0; c!=pos_last_dot && fname[c]!='\0'; c++)
+    {
+      if (c > max_length-6)
+      {
+        result[max_length-6]=(byte)ELLIPSIS_CHARACTER;
+        break;
+      }
+      result[c]=fname[c];
+    }
+
+    // Ensuite on recopie la partie qui suit le point (si nécessaire):
+    if (pos_last_dot != -1)
+    {
+      for (c = pos_last_dot+1,other_cursor=max_length-4;fname[c]!='\0' && other_cursor < max_length-1;c++,other_cursor++)
+        result[other_cursor]=fname[c];
+    }
+  }
+  return result;
+}
+
 char * Format_filename(const char * fname, word max_length, int type)
 {
   static char result[40];
@@ -305,17 +385,20 @@ char * Format_filename(const char * fname, word max_length, int type)
 
 
 // -- Rajouter a la liste des elements de la liste un element ---------------
-void Add_element_to_list(T_Fileselector *list, const char * full_name, const char *short_name, int type, byte icon)
+T_Fileselector_item * Add_element_to_list(T_Fileselector *list, const char * full_name, const char *short_name, int type, byte icon)
 //  Cette procedure ajoute a la liste chainee un fichier passé en argument.
 {
   // Working element
   T_Fileselector_item * temp_item;
+  size_t short_name_len;
 
+  short_name_len = strlen(short_name) + 1;
   // Allocate enough room for one struct + the visible label
-  temp_item=(T_Fileselector_item *)malloc(sizeof(T_Fileselector_item)+strlen(short_name));
+  temp_item=(T_Fileselector_item *)malloc(sizeof(T_Fileselector_item)+short_name_len);
+  memset(temp_item, 0, sizeof(T_Fileselector_item));
 
   // Initialize element
-  strcpy(temp_item->Short_name,short_name);
+  memcpy(temp_item->Short_name,short_name,short_name_len);
   strcpy(temp_item->Full_name,full_name);
   temp_item->Type = type;
   temp_item->Icon = icon;
@@ -329,6 +412,7 @@ void Add_element_to_list(T_Fileselector *list, const char * full_name, const cha
     
   // Put new element at the beginning
   list->First=temp_item;
+  return temp_item;
 }
 
 ///
@@ -374,8 +458,8 @@ struct Read_dir_pdata
 
 static void Read_dir_callback(void * pdata, const char *file_name, const word *unicode_name, byte is_file, byte is_directory, byte is_hidden)
 {
+  T_Fileselector_item * item;
   struct Read_dir_pdata * p = (struct Read_dir_pdata *)pdata;
-  (void)unicode_name;
 
   if (p == NULL) // error !
     return;
@@ -401,7 +485,9 @@ static void Read_dir_callback(void * pdata, const char *file_name, const word *u
       return;
 
     // Add to list
-    Add_element_to_list(p->list, file_name, Format_filename(file_name, 19, 1), 1, ICON_NONE);
+    item = Add_element_to_list(p->list, file_name, Format_filename(file_name, 19, 1), 1, ICON_NONE);
+    item->Unicode_full_name = Unicode_strdup(unicode_name);
+    item->Unicode_short_name = Unicode_strdup(Format_filename_unicode(unicode_name, 19, 1));
     p->list->Nb_directories++;
   }
   else if (is_file && // It's a file
@@ -413,7 +499,9 @@ static void Read_dir_callback(void * pdata, const char *file_name, const word *u
       if (Check_extension(file_name, ext))
       {
         // Add to list
-        Add_element_to_list(p->list, file_name, Format_filename(file_name, 19, 0), 0, ICON_NONE);
+        item = Add_element_to_list(p->list, file_name, Format_filename(file_name, 19, 0), 0, ICON_NONE);
+        item->Unicode_full_name = Unicode_strdup(unicode_name);
+        item->Unicode_short_name = Unicode_strdup(Format_filename_unicode(unicode_name, 19, 0));
         p->list->Nb_files++;
         // Stop searching
         break;
@@ -871,9 +959,15 @@ void Display_file_list(T_Fileselector *list, short offset_first,short selector_o
         // Name preceded by an icon
         Print_in_window(16,95+index*8,current_item->Short_name,text_color,background_color);
         Window_display_icon_sprite(8,95+index*8,current_item->Icon);
-      } else
+      }
+      else
+      {
         // Name without icon
-        Print_in_window(8,95+index*8,current_item->Short_name,text_color,background_color);
+        if (current_item->Unicode_short_name)
+          Print_in_window_utf16(8,95+index*8,current_item->Unicode_short_name,text_color,background_color);
+        else
+          Print_in_window(8,95+index*8,current_item->Short_name,text_color,background_color);
+      }
 
       // On passe à la ligne suivante
       selector_offset--;

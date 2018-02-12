@@ -180,9 +180,11 @@ typedef struct T_Fileselector_item
 
   struct T_Fileselector_item * Next;    ///< Pointer to next item of the current fileselector.
   struct T_Fileselector_item * Previous;///< Pointer to previous item of the current fileselector.
+
+  word * Unicode_full_name;   ///< Pointer to allocated unicode string. Filesystem name
+  word * Unicode_short_name;  ///< Pointer to allocated unicode string. Name to display
   
-  word  Length_short_name; ///< Number of bytes allocated for :Short_name
-  #if __GNUC__ < 3
+#if __GNUC__ < 3
   char Short_name[0]; ///< Name to display.
 #else
   char Short_name[]; ///< Name to display.

@@ -31,7 +31,7 @@
 
 byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context *context);
 
-void Add_element_to_list(T_Fileselector *list, const char * full_name, const char *short_name, int type, byte icon);
+T_Fileselector_item * Add_element_to_list(T_Fileselector *list, const char * full_name, const char *short_name, int type, byte icon);
 ///
 /// Formats a display name for a file, directory, or similar name (drive, volume).
 /// The returned value is a pointer to a single static buffer of maximum 40 characters
