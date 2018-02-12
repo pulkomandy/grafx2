@@ -29,16 +29,11 @@
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     #include <proto/dos.h>
     #include <sys/types.h>
-    #include <dirent.h>
 #elif defined (__MINT__)
     #include <mint/sysbind.h>
-    #include <dirent.h>
 #elif defined(__WIN32__)
-    #include <dirent.h>
     #include <windows.h>
     #include <commdlg.h>
-#else
-    #include <dirent.h>
 #endif
 
 #include <assert.h>
@@ -49,7 +44,6 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
 #include "const.h"
@@ -372,15 +366,76 @@ int Check_extension(const char *filename, const char * filter)
 
 
 // -- Lecture d'une liste de fichiers ---------------------------------------
+struct Read_dir_pdata
+{
+  T_Fileselector *list;
+  const char * filter;
+};
+
+static void Read_dir_callback(void * pdata, const char *file_name, const word *unicode_name, byte is_file, byte is_directory, byte is_hidden)
+{
+  struct Read_dir_pdata * p = (struct Read_dir_pdata *)pdata;
+  (void)unicode_name;
+
+  if (p == NULL) // error !
+    return;
+
+  // Ignore 'current directory' entry
+  if ( !strcmp(file_name, "."))
+    return;
+
+  // entries tagged "directory" :
+  if (is_directory)
+  {
+    // On Windows, the presence of a "parent directory" entry has proven
+    // unreliable on non-physical drives :
+    // Sometimes it's missing, sometimes it's present even at root...
+    // We skip it here and add a specific check after the loop
+#if defined(__WIN32__)
+    if (!strcmp(file_name, PARENT_DIR))
+      return;
+#endif
+
+    // Don't display hidden file, unless requested by options
+    if (!Config.Show_hidden_directories && is_hidden)
+      return;
+
+    // Add to list
+    Add_element_to_list(p->list, file_name, Format_filename(file_name, 19, 1), 1, ICON_NONE);
+    p->list->Nb_directories++;
+  }
+  else if (is_file && // It's a file
+          (Config.Show_hidden_files || !is_hidden))
+  {
+    const char * ext = p->filter;
+    while (ext!=NULL)
+    {
+      if (Check_extension(file_name, ext))
+      {
+        // Add to list
+        Add_element_to_list(p->list, file_name, Format_filename(file_name, 19, 0), 0, ICON_NONE);
+        p->list->Nb_files++;
+        // Stop searching
+        break;
+      }
+      else
+      {
+        ext = strchr(ext, ';');
+        if (ext)
+          ext++;
+      }
+    }
+  }
+}
+
+
+
 void Read_list_of_files(T_Fileselector *list, byte selected_format)
 //  Cette procédure charge dans la liste chainée les fichiers dont l'extension
 // correspond au format demandé.
 {
-  DIR*  current_directory; //Répertoire courant
-  struct dirent* entry; // Structure de lecture des éléments
-  char * filter = "*"; // Extension demandée
-  struct stat Infos_enreg;
-  char * current_path = NULL;
+  struct Read_dir_pdata callback_data;
+  const char * current_path = NULL;
   char curdir[MAX_PATH_CHARACTERS];
 #if defined (__MINT__)
   char path[1024]={0};
@@ -391,9 +446,10 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   path[0]='\0';
   path2[0]='\0';  
 #endif
-  
+
+  callback_data.list = list;
   // Tout d'abord, on déduit du format demandé un filtre à utiliser:
-  filter = Get_fileformat(selected_format)->Extensions;
+  callback_data.filter = Get_fileformat(selected_format)->Extensions;
 
   // Ensuite, on vide la liste actuelle:
   Free_fileselector_list(list);
@@ -409,66 +465,12 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   sprintf(path2,"%c:\%s",currentDrive,path);
  
   strcat(path2,PATH_SEPARATOR);
-  current_directory=opendir(path2);
+  current_path=path2;
 #else  
   current_path=getcwd(curdir,MAX_PATH_CHARACTERS);
-  current_directory=opendir(current_path);
 #endif
-  while ((entry=readdir(current_directory)))
-  {
-    // Ignore 'current directory' entry
-    if ( !strcmp(entry->d_name, "."))
-    {
-      continue;
-    }
-    stat(entry->d_name,&Infos_enreg);
-    // entries tagged "directory" :
-    if( S_ISDIR(Infos_enreg.st_mode))
-    {
-      // On Windows, the presence of a "parent directory" entry has proven
-      // unreliable on non-physical drives :
-      // Sometimes it's missing, sometimes it's present even at root...
-      // We skip it here and add a specific check after the loop
-      #if defined(__WIN32__)
-      if (!strcmp(entry->d_name, PARENT_DIR))
-        continue;
-      #endif
-      
-      // Don't display hidden file, unless requested by options
-      if (!Config.Show_hidden_directories &&
-          File_is_hidden(entry->d_name, entry->d_name))
-      {
-        continue;
-      }
 
-      // Add to list
-      Add_element_to_list(list, entry->d_name, Format_filename(entry->d_name, 19, 1), 1, ICON_NONE);
-      list->Nb_directories++;
-    }
-    else if (S_ISREG(Infos_enreg.st_mode) && // It's a file
-      (Config.Show_hidden_files || // Not hidden
-      !File_is_hidden(entry->d_name, entry->d_name)))
-    {
-      const char * ext = filter;
-      while (ext!=NULL)
-      {      
-        if (Check_extension(entry->d_name, ext))
-        {
-          // Add to list
-          Add_element_to_list(list, entry->d_name, Format_filename(entry->d_name, 19, 0), 0, ICON_NONE);
-          list->Nb_files++;
-          // Stop searching
-          ext=NULL;
-        }
-        else
-        {
-          ext = strchr(ext, ';');
-          if (ext)
-            ext++;
-        }
-      }
-    }
-  }
+  For_each_directory_entry(current_path, &callback_data, Read_dir_callback);
   
   // Now here's OS-specific code to determine if "parent directory" entry
   // should appear.
@@ -517,7 +519,6 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   
 #endif
 
-  closedir(current_directory);
   current_path = NULL;
 
   if (list->Nb_files==0 && list->Nb_directories==0)
