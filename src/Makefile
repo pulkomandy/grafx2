@@ -155,6 +155,8 @@ else
 endif
     LOPT += -lz
 endif
+    COPT += -DENABLE_FILENAMES_ICONV
+    LOPT += -liconv
     # Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
     CC = gcc
     #CC = nccgen -ncgcc -ncld -ncfabs

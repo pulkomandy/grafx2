@@ -760,7 +760,11 @@ GFX2_GLOBAL int Line_number_in_INI_file;
 #include <iconv.h>
 
 #define TOCODE   "CP1252"
+#ifdef __macosx__
+#define FROMCODE "UTF-8-MAC"
+#else
 #define FROMCODE "UTF-8"
+#endif
 GFX2_GLOBAL iconv_t cd;
 GFX2_GLOBAL iconv_t cd_inv;
 #endif /* ENABLE_FILENAMES_ICONV */
