@@ -778,12 +778,15 @@ byte * Load_font(const char * font_name, int is_main)
   return font;
 }
 
-static void Load_Unicode_font(const char * filename)
+static void Load_Unicode_font(const char * fullname, const char * filename)
 {
   T_Unicode_Font * ufont;
   byte * font;
   unsigned int first, last;
+  (void)fullname;
 
+  if (memcmp(filename, "unicode", 7) != 0)
+    return;
   if (sscanf(filename, "unicode_%04X-%04X.png", &first, &last) == 2)
   {
     font = Load_font(filename, 0);
@@ -803,8 +806,10 @@ static void Load_Unicode_font(const char * filename)
 
 void Load_Unicode_fonts(void)
 {
-  // TODO : for each unicode*.png file in skin directory
-  Load_Unicode_font("unicode_0410-044F.png");
+  char directory[MAX_PATH_CHARACTERS];
+
+  snprintf(directory,sizeof(directory), "%s" SKINS_SUBDIRECTORY, Data_directory);
+  For_each_file(directory, Load_Unicode_font);
 }
 
 // Initialisation des boutons:
