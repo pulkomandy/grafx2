@@ -1,0 +1,35 @@
+language: c
+
+os:
+  - linux
+  - osx
+
+addons:
+  apt:
+    packages:
+    - gcc-mingw-w64-i686
+    - libsdl1.2-dev
+    - libsdl-image1.2-dev
+    - libsdl-ttf2.0-dev
+    - liblua5.2-dev
+
+sudo: false
+
+#env:
+#  - 'WIN32CROSS=1'
+
+compiler:
+  - gcc
+
+before_install:
+  - 'if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update > /dev/null ; fi'
+  - 'if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install sdl sdl_image sdl_ttf lua ; fi'
+
+# to avoid errors with  git rev-list --count 1af8c74f53110e349d8f0d19b14599281913f71f..
+install:
+  - 'git fetch --unshallow'
+
+script:
+  - 'cd $TRAVIS_BUILD_DIR'
+  - 'make -j3'
+  - 'make ziprelease'
