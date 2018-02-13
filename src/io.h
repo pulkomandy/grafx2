@@ -97,7 +97,7 @@ int  Directory_exists(char * directory);
 int File_is_hidden(const char *fname, const char *full_name);
 
 /// Scans a directory, calls Callback for each file in it,
-void For_each_file(const char * directory_name, void Callback(const char *));
+void For_each_file(const char * directory_name, void Callback(const char * full_name, const char * file_name));
 
 typedef void T_File_dir_cb(void * pdata, const char * filename, const word * unicode_filename, byte is_file, byte is_directory, byte is_hidden);
 

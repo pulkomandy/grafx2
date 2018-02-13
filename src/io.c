@@ -358,7 +358,7 @@ int File_length_file(FILE * file)
     return infos_fichier.st_size;
 }
 
-void For_each_file(const char * directory_name, void Callback(const char *))
+void For_each_file(const char * directory_name, void Callback(const char *, const char *))
 {
   // Pour scan de répertoire
   DIR*  current_directory; //Répertoire courant
@@ -385,7 +385,7 @@ void For_each_file(const char * directory_name, void Callback(const char *))
     stat(full_filename,&Infos_enreg);
     if (S_ISREG(Infos_enreg.st_mode))
     {
-      Callback(full_filename);
+      Callback(full_filename, entry->d_name);
     }
   }
   closedir(current_directory);

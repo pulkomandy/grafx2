@@ -1492,16 +1492,14 @@ const int Max_edits_for_safety_backup = 30;
 ///
 /// Adds a file to Backups_main or Backups_spare lists, if it's a backup.
 ///
-void Add_backup_file(const char *name)
+static void Add_backup_file(const char * full_name, const char *file_name)
 {
   T_String_list ** list;
   T_String_list * elem;
   int i;
-  char file_name[MAX_PATH_CHARACTERS];
+  (void)full_name;
   
   // Only files names of the form a0000000.* and b0000000.* are expected
-  
-  Extract_filename(file_name, name);
   
   // Check first character
   if (file_name[0]==Main.safety_backup_prefix)

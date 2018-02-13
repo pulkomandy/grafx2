@@ -91,9 +91,8 @@ int Compare_fonts(T_Font * font_1, T_Font * font_2)
 }
 
 // Ajout d'une fonte à la liste.
-void Add_font(const char *name)
+static void Add_font(const char *name, const char * font_name)
 {
-  char * font_name;
   T_Font * font;
   int size=strlen(name)+1;
   int index;
@@ -162,17 +161,12 @@ void Add_font(const char *name)
       #endif
   }
 
-  font->Name = (char *)malloc(size);
-  strcpy(font->Name, name);
+  font->Name = strdup(name);
   // Label
-  strcpy(font->Label, "                   ");
+  memset(font->Label, ' ', sizeof(font->Label));
+  font->Label[19] = '\0';
   if (font->Is_truetype)
     font->Label[17]=font->Label[18]='T'; // Logo TT
-  font_name=Find_last_separator(font->Name);
-  if (font_name==NULL)
-    font_name=font->Name;
-  else
-    font_name++;
   for (index=0; index < 17 && font_name[index]!='\0' && font_name[index]!='.'; index++)
     font->Label[index]=font_name[index];
 

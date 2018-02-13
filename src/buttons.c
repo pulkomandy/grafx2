@@ -1225,17 +1225,11 @@ char * Format_font_filename(const char * fname)
 }
 
 // Add a skin to the list
-void Add_font_or_skin(const char *name)
+static void Add_font_or_skin(const char * full_name, const char * fname)
 {
-  const char * fname;
-  int namelength;
-  
-  // Cut the long name to keep only filename (no directory)
-  fname = Find_last_separator(name);
-  if (fname)
-    fname++;
-  else
-    fname = name;
+  size_t namelength;
+  (void)full_name;
+
   namelength = strlen(fname);
   if (namelength>=10 && fname[0]!='_' && !strncasecmp(fname, SKIN_PREFIX, strlen(SKIN_PREFIX))
     && (!strcasecmp(fname + namelength - 4,".png")
