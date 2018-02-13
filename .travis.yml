@@ -31,5 +31,5 @@ install:
 
 script:
   - 'cd $TRAVIS_BUILD_DIR'
-  - 'make -j3'
+  - 'if [ "$TRAVIS_OS_NAME" = "osx" ] ; then make ; else make -j3 ; fi'
   - 'make ziprelease'
