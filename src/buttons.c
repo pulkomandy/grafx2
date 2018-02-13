@@ -639,6 +639,7 @@ byte Button_Quit_local_function(void)
         Display_cursor();
        
         Init_context_layered_image(&save_context, Main.backups->Pages->Filename, Main.backups->Pages->File_directory);
+        save_context.File_name_unicode = Main.backups->Pages->Filename_unicode;
         Save_image(&save_context);
         Destroy_context(&save_context);
         
@@ -3415,6 +3416,7 @@ void Save_picture(enum CONTEXT_TYPE type)
   byte  old_cursor_shape;
   T_IO_Context save_context;
   static char filename [MAX_PATH_CHARACTERS];
+  static word filename_unicode[MAX_PATH_CHARACTERS];
   static char directory[MAX_PATH_CHARACTERS];
   T_Selector_settings * selector;
 
@@ -3422,6 +3424,7 @@ void Save_picture(enum CONTEXT_TYPE type)
   {
     strcpy(filename, Main.backups->Pages->Filename);
     strcpy(directory, Main.backups->Pages->File_directory);
+    Unicode_strlcpy(filename_unicode, Main.backups->Pages->Filename_unicode, MAX_PATH_CHARACTERS);
     Init_context_layered_image(&save_context, filename, directory);
     save_context.Format = Main.fileformat;
     selector = &Main.selector;
@@ -3430,6 +3433,7 @@ void Save_picture(enum CONTEXT_TYPE type)
   {
     strcpy(filename, Brush_filename);
     strcpy(directory, Brush_file_directory);
+    filename_unicode[0] = 0;
     Init_context_brush(&save_context, filename, directory);
     save_context.Format = Brush_fileformat;
     selector = &Brush_selector;
@@ -3445,6 +3449,7 @@ void Save_picture(enum CONTEXT_TYPE type)
       dotpos = filename + strlen(filename);
     strcpy(dotpos, ".pal");
 
+    filename_unicode[0] = 0;
     strcpy(directory, Main.backups->Pages->File_directory);
     Init_context_layered_image(&save_context, filename, directory);
     save_context.Type = CONTEXT_PALETTE;
@@ -3456,6 +3461,7 @@ void Save_picture(enum CONTEXT_TYPE type)
   else
     return;
 
+  save_context.File_name_unicode = filename_unicode;
   confirm=Button_Load_or_Save(selector, 0, &save_context);
 
   if (confirm && File_exists(save_context.File_name))

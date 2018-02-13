@@ -1534,6 +1534,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   byte  initial_back_color; // preview destroys it (how nice)
   char  previous_directory[MAX_PATH_CHARACTERS]; // Répertoire d'où l'on vient après un CHDIR
   char  save_filename[MAX_PATH_CHARACTERS];
+  word  save_filename_unicode[MAX_PATH_CHARACTERS];
   char  initial_comment[COMMENT_SIZE+1];
   short window_shortcut;
 
@@ -1668,7 +1669,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
     // On initialise le nom de fichier à celui en cours et non pas celui sous
     // la barre de sélection
     strcpy(Selector_filename,context->File_name);
-    Selector_filename_unicode[0] = 0; // TODO : retrieve unicode filename
+    Unicode_strlcpy(Selector_filename_unicode, context->File_name_unicode, 256);
     // On affiche le nouveau nom de fichier
     Print_filename_in_fileselector();
   }
@@ -1888,9 +1889,11 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
       case  8 : // Saisie du nom de fichier
       {
         char filename_ansi[256];
+        word filename_unicode[256];
 
         // Save the filename
         strcpy(save_filename, Selector_filename);
+        Unicode_strlcpy(save_filename_unicode, Selector_filename_unicode, MAX_PATH_CHARACTERS);
         // Check if the selected entry is a drive/directory :
         // in, this case, clear the filename
         if (Filelist.Nb_elements>0)
@@ -1902,6 +1905,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
             Selector_filename[0]='\0';
         }
         strncpy(filename_ansi, Selector_filename, sizeof(filename_ansi));
+        Unicode_strlcpy(filename_unicode, Selector_filename_unicode, sizeof(filename_unicode)/sizeof(word));
 #ifdef ENABLE_FILENAMES_ICONV
         { /* convert from UTF8 to ANSI */
           char * input = (char *)Selector_filename;
@@ -1978,6 +1982,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         {
           // Restore the old filename
           strcpy(Selector_filename, save_filename);
+          Unicode_strlcpy(Selector_filename_unicode, save_filename_unicode, sizeof(Selector_filename_unicode)/sizeof(word));
           Print_filename_in_fileselector();
         }
         Display_cursor();
