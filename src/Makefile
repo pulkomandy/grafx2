@@ -1,5 +1,6 @@
 #  Grafx2 - The Ultimate 256-color bitmap paint program
 #  
+#  Copyright 2018 Thomas Bernard
 #  Copyright 2012 Franck Charlet
 #  Copyright 2011 Pawel Góralski
 #  Copyright 2009 Per Olofsson
@@ -34,6 +35,16 @@
 
 # Detect GIT revision
   GIT_REVISION = $(shell git rev-list --count 1af8c74f53110e349d8f0d19b14599281913f71f..)
+
+  REVISION_CACHE = .revision.cache
+  RES := $(shell if [ ! -f $(REVISION_CACHE) ] || [ "`cat $(REVISION_CACHE)`" != "$(GIT_REVISION)" ] ; then echo "$(GIT_REVISION)" > $(REVISION_CACHE) ; fi )
+
+ifneq (,$(LABEL))
+  LABEL_CACHE = .label.cache
+  RES := $(shell if [ ! -f $(LABEL_CACHE) ] || [ "`cat $(LABEL_CACHE)`" != "$(LABEL)" ] ; then echo "$(LABEL)" > $(LABEL_CACHE) ; fi )
+endif
+
+  CFLAGS_CACHE = .cflags.cache
 
 ### PLATFORM DETECTION AND CONFIGURATION ###
 
@@ -504,7 +515,7 @@ endif
 
 ### And now for the real build rules ###
 
-.PHONY : all debug release clean depend zip version force install uninstall
+.PHONY : all debug release clean depend zip force install uninstall
 
 # This is the list of the objects we want to build. Dependancies are built by "make depend" automatically.
 OBJS = main.o init.o graph.o sdlscreen.o misc.o special.o \
@@ -652,17 +663,15 @@ endif
 
 
 # Make release will strip the executable to make it smaller but non-debugable
-release : version $(BIN)
+release : $(BIN)
 	$(STRIP) $(BIN)
 
 # Create a zip archive ready for upload to the website, including binaries and sourcecode
-ziprelease: version $(BIN) release
-	echo `sed "s/.*=\"\(.*\)\";/\1/" pversion.c`.$(GIT_REVISION) | tr " :" "_-" | sed -e "s/\([wW][iI][pP]\)\\./\1/" > $(OBJDIR)/versiontag
+ziprelease: release $(OBJDIR)/versiontag
 	cd .. && $(TAR) czf "src-`cat $(OBJDIR:../%=%)/versiontag`.tgz" src/*.c src/*.cpp src/*.h src/Makefile src/Makefile.dep src/gfx2.ico src/Grafx2_Prefix.pch src/SDLMain.m
 	cd .. && $(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR:../%=%)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" $(BIN:../%=%) share/grafx2/gfx2def.ini $(SCRIPT_FILES:../%=%) $(SKIN_FILES:../%=%) share/grafx2/gfx2.gif share/icons/grafx2.svg doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt doc/PF_fonts.txt $(FONT_FILES:../%=%) doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt doc/README-lua.txt src-`cat $(OBJDIR:../%=%)/versiontag`.tgz $(PLATFORMFILES:../%=%)
 	$(DELCOMMAND) "../src-`cat $(OBJDIR)/versiontag`.tgz"
 	$(TAR) czf "../grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-src.tgz" $(TARTRANSFORM) ../src/*.c ../src/*.cpp ../src/*.h ../src/Makefile ../src/Makefile.dep ../share/grafx2/gfx2def.ini $(SCRIPT_FILES) $(SKIN_FILES) ../src/gfx2.ico ../share/grafx2/gfx2.gif ../share/icons/grafx2.svg ../doc/README.txt ../doc/COMPILING.txt ../doc/gpl-2.0.txt ../doc/PF_fonts.txt ../misc/unix/grafx2.1 ../misc/unix/grafx2.xpm ../misc/unix/grafx2.desktop ../misc/morphos/grafx2.info $(FONT_FILES) ../src/Grafx2_Prefix.pch ../src/SDLMain.m
-	$(DELCOMMAND) "$(OBJDIR)/versiontag"
 
 $(BIN) : $(OBJ)
 	@test -d ../bin || $(MKDIR) ../bin
@@ -674,24 +683,20 @@ ifeq ($(PLATFORM),Haiku)
 endif
 
 # GIT revision number
-version.c :
+version.c:	$(REVISION_CACHE)
 	echo "char SVN_revision[]=\"$(GIT_REVISION)\";" > version.c
-ifeq ($(LABEL),)
-else
+
+ifneq ($(LABEL),)
+pversion.c:	$(LABEL_CACHE)
 	echo "char Program_version[]=\"$(LABEL)\";" > pversion.c
 endif
 
-version : delversion delpversion version.c pversion.c $(OBJDIR)/version.o $(OBJDIR)/pversion.o all
+$(OBJDIR)/versiontag: pversion.c $(REVISION_CACHE)
+	echo `sed "s/.*=\"\(.*\)\";/\1/" pversion.c`.$(GIT_REVISION) | tr " :" "_-" | sed -e "s/\([wW][iI][pP]\)\\./\1/" > $(OBJDIR)/versiontag
 
+RES := $(shell if [ ! -f $(CFLAGS_CACHE) ] || [ "`cat $(CFLAGS_CACHE)`" != "$(COPT) $(CFLAGS)" ] ; then echo "$(COPT) $(CFLAGS)" > $(CFLAGS_CACHE) ; fi )
 
-delversion :
-	$(DELCOMMAND) version.c
-	
-delpversion :
-ifeq ($(LABEL),)
-else
-	$(DELCOMMAND) pversion.c
-endif
+$(OBJ):	$(CFLAGS_CACHE)
 
 $(OBJDIR)/%.o : %.c
 	$(if $(wildcard $(OBJDIR)),,$(MKDIR) $(OBJDIR))
@@ -714,6 +719,7 @@ $(OBJDIR)/haiku.o : haiku.cpp
 
 clean :
 	$(DELCOMMAND) $(OBJ)
+	$(DELCOMMAND) $(OBJDOR)/versiontag
 	$(DELCOMMAND) $(BIN)
 
 ifneq ($(PLATFORM),amiga-vbcc)
