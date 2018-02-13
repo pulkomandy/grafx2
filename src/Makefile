@@ -35,19 +35,6 @@
 # Detect GIT revision
   GIT_REVISION = $(shell git rev-list --count 1af8c74f53110e349d8f0d19b14599281913f71f..)
 
-### Specific to build MAC OS X universal binaries on Tiger or Lion ###
-### (may need to be changed or removed depending on the OSX version) ###
-
-#MACOSX_LION = 1
-
-ifdef MACOSX_LION
-MACOSX_SYSROOT = /Developer/SDKs/MacOSX10.6.sdk
-MACOSX_ARCH = -arch x86_64 -arch i386
-else
-MACOSX_SYSROOT = /Developer/SDKs/MacOSX10.4u.sdk
-MACOSX_ARCH = -arch ppc -arch i386
-endif
-
 ### PLATFORM DETECTION AND CONFIGURATION ###
 
 PLATFORMOBJ =
@@ -98,6 +85,36 @@ else
   else
   ifeq ($(PLATFORM),Darwin) # 2
     #Mac OS X specific
+
+    # Darwin / OS X versions :
+    #  6    => 10.2         ppc only
+    #  7    => 10.3         ppc only
+    #  8    => 10.4 Tiger   (ppc/i386)
+    #  9    => 10.5 Leopard (ppc/i386)
+    # 10    => 10.6 Snow Leopard (i386 only)
+    MACHINE = $(shell gcc -dumpmachine)
+    DARWINVER = $(shell gcc -dumpmachine | sed 's/.*darwin\([0-9]*\).*/\1/' )
+    ifeq (greater, $(shell [ $(DARWINVER) -gt 9 ] && echo "greater"))
+    MACOSX_ARCH = -arch x86_64 -arch i386
+    #MACOSX_LION = 1
+    else
+    ifeq (9, $(DARWINVER))
+    MACOSX_ARCH = -arch ppc -arch i386
+    else
+    ifneq ( ,$(findstring(powerpc, $(MACHINE))))
+    MACOSX_ARCH = -arch ppc
+    else
+    MACOSX_ARCH = -arch i386
+    endif
+    endif
+    endif
+
+ifdef MACOSX_LION
+MACOSX_SYSROOT = /Developer/SDKs/MacOSX10.6.sdk
+else
+MACOSX_SYSROOT = /Developer/SDKs/MacOSX10.4u.sdk
+endif
+
     DELCOMMAND = rm -rf
     MKDIR = mkdir -p
     RMDIR = rmdir --ignore-fail-on-non-empty
