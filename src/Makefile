@@ -105,6 +105,9 @@ else
     OPTIM = 3
     CP = cp
     ZIP = zip
+    TARTRANSFORM = $(shell if $(TAR) --version | grep 'GNU tar' > /dev/null ; then \
+                             echo "--strip=1 --transform 's,^,grafx2/,g'" ; else \
+                             echo "-s '/\.\./grafx2/'" ; fi )
     PLATFORMFILES = ../share/grafx2/gfx2.png
     # Where the SDL frameworks are located
     FWDIR = /Library/Frameworks
