@@ -1,0 +1,103 @@
+{
+   SDL_Init_1
+   Memcheck:Cond
+   ...
+   fun:SDL_InitSubSystem
+   fun:SDL_Init
+   fun:Init_program
+   fun:main
+}
+{
+   SDL_Init_2
+   Memcheck:Value8
+   ...
+   fun:SDL_InitSubSystem
+   fun:SDL_Init
+   fun:Init_program
+   fun:main
+}
+{
+   SDL_Init Leaks
+   Memcheck:Leak
+   match-leak-kinds: all
+   ...
+   fun:SDL_InitSubSystem
+   fun:SDL_Init
+   ...
+}
+{
+   SDL_VideoInit Leaks
+   Memcheck:Leak
+   match-leak-kinds: all
+   ...
+   fun:SDL_VideoInit
+   ...
+}
+{
+   SDL_JoystickOpen
+   Memcheck:Cond
+   ...
+   fun:SDL_JoystickOpen
+   fun:Init_program
+   fun:main
+}
+{
+   SDL_JoystickOpen 2
+   Memcheck:Value8
+   ...
+   fun:SDL_JoystickOpen
+   fun:Init_program
+   fun:main
+}
+{
+   SDL_WM_SetCaption
+   Memcheck:Cond
+   ...
+   fun:SDL_WM_SetCaption
+   fun:Init_program
+}
+{
+   SDL_WM_SetCaption_2
+   Memcheck:Param
+   openat(filename)
+   fun:_openat
+   ...
+   fun:SDL_WM_SetCaption
+}
+{
+   SDK_WM_SetCaption Leaks
+   Memcheck:Leak
+   match-leak-kinds: all
+   ...
+   fun:SDL_WM_SetCaption
+   fun:Init_program
+}
+{
+   SDL_SetVideoMode
+   Memcheck:Param
+   writev(vector[...])
+   fun:_writev
+   ...
+   fun:SDL_SetVideoMode
+   fun:Set_mode_SDL
+   fun:Init_mode_video
+}
+{
+   SDL_JoystrickUpdate
+   Memcheck:Param
+   read(count)
+   fun:_read
+   ...
+   fun:SDL_JoystickUpdate
+   ...
+   fun:main
+}
+{
+   SDL_JoystrickUpdate2
+   Memcheck:Cond
+   ...
+   fun:SDL_JoystickUpdate
+   ...
+   fun:main
+}
+

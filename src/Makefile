@@ -528,7 +528,7 @@ endif
 
 ### And now for the real build rules ###
 
-.PHONY : all debug release clean depend zip force install uninstall
+.PHONY : all debug release clean depend zip force install uninstall valgrind
 
 # This is the list of the objects we want to build. Dependancies are built by "make depend" automatically.
 OBJS = main.o init.o graph.o sdlscreen.o misc.o special.o \
@@ -796,6 +796,9 @@ uninstall :
 	@echo Uninstall complete
 
 endif
+
+valgrind: $(BIN)
+	valgrind --suppressions=../valgrind.grafx2.suppr --leak-check=full --show-leak-kinds=all --num-callers=20 $(BIN)
 
 -include Makefile.dep
 
