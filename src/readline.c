@@ -248,6 +248,7 @@ static void Cleanup_string_unicode(word* str, int input_type)
   }
   str[j] = 0;
 }
+
 static void Display_whole_string(word x_pos,word y_pos,const char * str,byte position)
 {
   char cursor[2];
