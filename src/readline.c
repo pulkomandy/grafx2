@@ -219,12 +219,12 @@ static void Display_whole_string(word x_pos,word y_pos,const char * str,byte pos
 
 static void Display_whole_string_unicode(word x_pos,word y_pos, const word * str_unicode,byte position)
 {
-  char cursor[2];
+  word cursor[2];
   Print_general_unicode(x_pos,y_pos,str_unicode,TEXT_COLOR,BACKGROUND_COLOR);
 
   cursor[0]=str_unicode[position] ? str_unicode[position] : ' ';
-  cursor[1]='\0';
-  Print_general(x_pos+(position<<3)*Menu_factor_X,y_pos,cursor,CURSOR_COLOR,CURSOR_BACKGROUND_COLOR);
+  cursor[1]=0;
+  Print_general_unicode(x_pos+(position<<3)*Menu_factor_X,y_pos,cursor,CURSOR_COLOR,CURSOR_BACKGROUND_COLOR);
 }
 
 void Init_virtual_keyboard(word y_pos, word keyboard_width, word keyboard_height)
