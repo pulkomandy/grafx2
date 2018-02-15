@@ -66,6 +66,7 @@ word Palette_cells_X(void);
 word Palette_cells_Y(void);
 
 void Print_general(short x,short y,const char * str,byte text_color,byte background_color);
+void Print_general_unicode(short x,short y,const word * str,byte text_color,byte background_color);
 void Print_in_window(short x,short y,const char * str,byte text_color,byte background_color);
 void Print_in_window_unicode(short x,short y,const word * str,byte text_color,byte background_color);
 void Print_in_window_limited(short x,short y,const char * str,byte size,byte text_color,byte background_color);

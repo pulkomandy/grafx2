@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2018 Thomas Bernard
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
@@ -54,6 +55,8 @@ byte Readline(word x_pos,word y_pos,char * str,byte visible_size,byte input_type
 /// @param decimal_places Number of decimal places (used only with decimal type)
 /// @return             0 if user cancelled (esc), 1 if accepted (return)
 byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_size, byte input_type, byte decimal_places);
+
+byte Readline_ex_unicode(word x_pos,word y_pos,char * str, word * unicode_str, byte visible_size,byte max_size, byte input_type, byte decimal_places);
 
 ///
 /// Converts a double to string.

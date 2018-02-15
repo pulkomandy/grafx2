@@ -96,3 +96,12 @@ void Unicode_char_strlcpy(word * dst, const char * src, size_t len)
   }
   *dst = 0;
 }
+
+/// Append a regular Latin1 string to an unicode string
+void Unicode_char_strlcat(word * dst, const char * src, size_t len)
+{
+  size_t dst_len = Unicode_strlen(dst);
+  if (dst_len >= len)
+    return;
+  Unicode_char_strlcpy(dst + dst_len, src, len - dst_len);
+}

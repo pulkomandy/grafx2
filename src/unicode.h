@@ -39,4 +39,7 @@ int Unicode_char_strcmp(const word * s1, const char * s2);
 /// Copy a regular Latin1 string to an unicode string
 void Unicode_char_strlcpy(word * dst, const char * src, size_t len);
 
+/// Append a regular Latin1 string to an unicode string
+void Unicode_char_strlcat(word * dst, const char * src, size_t len);
+
 #endif

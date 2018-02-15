@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2018 Thomas Bernard
     Copyright 2014 Sergii Pylypenko
     Copyright 2008 Yves Rizoud
     Copyright 2007 Adrien Destugues
@@ -41,6 +42,7 @@
 #include "windows.h"
 #include "input.h"
 #include "engine.h"
+#include "unicode.h"
 
 #ifdef __WIN32__
 #include <windows.h>
@@ -67,17 +69,23 @@
 #define CURSOR_COLOR MC_Black
 #define CURSOR_BACKGROUND_COLOR  MC_Dark
 
-// Suppresion d'un caractère à une certaine POSITION dans une CHAINE.
-void Remove_character(char * str, byte position)
+// remove a character from a string
+static void Remove_character(char * str, int position)
+{
+  for (;str[position]!='\0';position++)
+    str[position]=str[position+1];
+}
+
+// remove a character from a string
+static void Remove_character_unicode(word * str, int position)
 {
   for (;str[position]!='\0';position++)
     str[position]=str[position+1];
 }
 
 
-void Insert_character(char * str, char letter, byte position)
-//  Insertion d'une LETTRE à une certaine POSITION
-//  dans une CHAINE d'une certaine TAILLE.
+static void Insert_character(char * str, char letter, int position)
+//  Insert a character in str at position
 {
   char temp_char;
 
@@ -92,6 +100,18 @@ void Insert_character(char * str, char letter, byte position)
   }
   // On termine la chaine
   str[position]='\0';
+}
+
+static void Insert_character_unicode(word * str, word c, int position)
+{
+  for (;;)
+  {
+    word temp = str[position];
+    str[position++] = c;
+    if (c == 0)
+      return; // we just have written the NULL terminator
+    c = temp;
+  }
 }
 
 int Prepend_string(char* dest, char* src, int max)
@@ -187,12 +207,22 @@ void Cleanup_string(char* str, int input_type)
   str[j] = '\0';
 }
 
-void Display_whole_string(word x_pos,word y_pos,char * str,byte position)
+static void Display_whole_string(word x_pos,word y_pos,const char * str,byte position)
 {
   char cursor[2];
   Print_general(x_pos,y_pos,str,TEXT_COLOR,BACKGROUND_COLOR);
 
   cursor[0]=str[position] ? str[position] : ' ';
+  cursor[1]='\0';
+  Print_general(x_pos+(position<<3)*Menu_factor_X,y_pos,cursor,CURSOR_COLOR,CURSOR_BACKGROUND_COLOR);
+}
+
+static void Display_whole_string_unicode(word x_pos,word y_pos, const word * str_unicode,byte position)
+{
+  char cursor[2];
+  Print_general_unicode(x_pos,y_pos,str_unicode,TEXT_COLOR,BACKGROUND_COLOR);
+
+  cursor[0]=str_unicode[position] ? str_unicode[position] : ' ';
   cursor[1]='\0';
   Print_general(x_pos+(position<<3)*Menu_factor_X,y_pos,cursor,CURSOR_COLOR,CURSOR_BACKGROUND_COLOR);
 }
@@ -343,7 +373,7 @@ byte Readline(word x_pos,word y_pos,char * str,byte visible_size,byte input_type
   byte max_size;
   // Grosse astuce pour les noms de fichiers: La taille affichée est différente
   // de la taille maximum gérée.
-  if (input_type == 2)
+  if (input_type == INPUT_TYPE_FILENAME)
     max_size = 255;
   else
     max_size = visible_size;
@@ -354,6 +384,11 @@ byte Readline(word x_pos,word y_pos,char * str,byte visible_size,byte input_type
 *           Enhanced super scanf deluxe pro plus giga mieux :-)             *
 ****************************************************************************/
 byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_size, byte input_type, byte decimal_places)
+{
+  return Readline_ex_unicode(x_pos, y_pos, str, NULL, visible_size, max_size, input_type, decimal_places);
+}
+
+byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byte visible_size,byte max_size, byte input_type, byte decimal_places)
 // Paramètres:
 //   x_pos, y_pos : Coordonnées de la saisie dans la fenêtre
 //   str       : Chaîne recevant la saisie (et contenant éventuellement une valeur initiale)
@@ -365,6 +400,8 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
 {
   char initial_string[256];
   char display_string[256];
+  word initial_string_unicode[256];
+  word display_string_unicode[256];
   byte position;
   byte size;
   word input_key=0;
@@ -375,7 +412,7 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
   // Virtual keyboard
   byte use_virtual_keyboard=0;
   static byte caps_lock=0;
-  word keymapping[] =
+  static const word keymapping[] =
   {
     SDLK_CLEAR,SDLK_BACKSPACE,SDLK_RETURN,KEY_ESC,
     '0','1','2','3','4','5','6','7','8','9','.',',',
@@ -528,20 +565,38 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
 
   // Mise à jour des variables se rapportant à la chaîne en fonction de la chaîne initiale
   strcpy(initial_string,str);
+  if (str_unicode != NULL)
+  {
+    size = Unicode_strlen(str_unicode);
+    memcpy(initial_string_unicode, str_unicode, 2*(size+1));
+    position=(size<max_size)? size:size-1;
+    if (position-offset>=visible_size)
+      offset=position-visible_size+1;
+    // copy only part of the string if it is too long
+    Unicode_strlcpy(display_string_unicode, str_unicode+offset, visible_size);
+    if (offset>0)
+      display_string_unicode[0] = (byte)LEFT_TRIANGLE_CHARACTER;
+    if (visible_size + offset + 1 < size )
+      display_string_unicode[visible_size-1] = (byte)RIGHT_TRIANGLE_CHARACTER;
 
-  size=strlen(str);
-  position=(size<max_size)? size:size-1;
-  if (position-offset>=visible_size)
-    offset=position-visible_size+1;
-  // Formatage d'une partie de la chaine (si trop longue pour tenir)
-  strncpy(display_string, str + offset, visible_size);
-  display_string[visible_size]='\0';
-  if (offset>0)
-    display_string[0]=LEFT_TRIANGLE_CHARACTER;
-  if (visible_size + offset + 1 < size )
-    display_string[visible_size-1]=RIGHT_TRIANGLE_CHARACTER;
+    Display_whole_string_unicode(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),display_string_unicode,position - offset);
+  }
+  else
+  {
+    size=strlen(str);
+    position=(size<max_size)? size:size-1;
+    if (position-offset>=visible_size)
+      offset=position-visible_size+1;
+    // copy only part of the string if it is too long
+    strncpy(display_string, str + offset, visible_size);
+    display_string[visible_size]='\0';
+    if (offset>0)
+      display_string[0]=LEFT_TRIANGLE_CHARACTER;
+    if (visible_size + offset + 1 < size )
+      display_string[visible_size-1]=RIGHT_TRIANGLE_CHARACTER;
   
-  Display_whole_string(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),display_string,position - offset);
+    Display_whole_string(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),display_string,position - offset);
+  }
   Update_window_area(x_pos,y_pos,visible_size<<3,8);
   Flush_update();
   if (Mouse_K)
@@ -607,15 +662,23 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
             continue; // No clipboard data
           Cleanup_string(data, input_type);
           // Insert it at the cursor position
-          nb_added = Prepend_string(str + position, data, max_size - position);
+          nb_added = Prepend_string(str + position, data, max_size - position);//TODO : unicode
           while (nb_added)
           {
             size++;
             if (size<max_size)
             {
               position++;
-              if (display_string[position-offset]==RIGHT_TRIANGLE_CHARACTER || position-offset>=visible_size)
-                offset++;
+              if (str_unicode != NULL)
+              {
+                if (display_string_unicode[position-offset]==(byte)RIGHT_TRIANGLE_CHARACTER || position-offset>=visible_size)
+                  offset++;
+              }
+              else
+              {
+                if (display_string[position-offset]==RIGHT_TRIANGLE_CHARACTER || position-offset>=visible_size)
+                  offset++;
+              }
             }
             nb_added--;
           }
@@ -633,7 +696,10 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
       case SDLK_DELETE : // Suppr.
             if (position<size)
             {
-              Remove_character(str,position);
+              if (str_unicode != NULL)
+                Remove_character_unicode(str_unicode,position);
+              else
+                Remove_character(str,position);
               size--;
               
               // Effacement de la chaîne
@@ -659,8 +725,16 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
               position++;
               //if (position > visible_size + offset - 2)
               //if (offset + visible_size < max_size && (position == size || (position > visible_size + offset - 2)))
-              if (display_string[position-offset]==RIGHT_TRIANGLE_CHARACTER || position-offset>=visible_size)
-                offset++;
+              if (str_unicode != NULL)
+              {
+                if (display_string_unicode[position-offset]==(byte)RIGHT_TRIANGLE_CHARACTER || position-offset>=visible_size)
+                  offset++;
+              }
+              else
+              {
+                if (display_string[position-offset]==RIGHT_TRIANGLE_CHARACTER || position-offset>=visible_size)
+                  offset++;
+              }
               goto affichage;
             }
       break;
@@ -686,12 +760,15 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
       break;
       case  SDLK_BACKSPACE : // Backspace : combinaison de gauche + suppr
 
-        if (position)
+        if (position > 0)
         {       
           position--;
           if (offset > 0 && (position == 0 || position < (offset + 1)))
             offset--;
-          Remove_character(str,position);
+          if (str_unicode != NULL)
+            Remove_character_unicode(str_unicode,position);
+          else
+            Remove_character(str,position);
           size--;
           // Effacement de la chaîne
           Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
@@ -700,6 +777,8 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
         break;
       case  SDLK_CLEAR : // Clear
         str[0]='\0';
+        if (str_unicode != NULL)
+          str_unicode[0] = 0;
         position=offset=0;
         // Effacement de la chaîne
         Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
@@ -711,6 +790,11 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
         // On restaure la chaine initiale
         strcpy(str,initial_string);
         size=strlen(str);
+        if (str_unicode != NULL)
+        {
+          Unicode_strlcpy(str_unicode, initial_string_unicode, 256);
+          size = Unicode_strlen(str_unicode);
+        }
         break;
       default :
         if (size<max_size)
@@ -720,15 +804,28 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
           if (is_authorized == 1 || (is_authorized == 2 && position == 0 && str[position] != '-'))
           {
             // ... alors on l'insère ...
-            Insert_character(str,input_key,position/*,size*/);
+            if (str_unicode != NULL)
+              Insert_character_unicode(str_unicode,input_key,position/*,size*/);
+            else
+              Insert_character(str,input_key,position/*,size*/);
             // ce qui augmente la taille de la chaine
             size++;
             // et qui risque de déplacer le curseur vers la droite
             if (size<max_size)
             {
               position++;
-              if (display_string[position-offset]==RIGHT_TRIANGLE_CHARACTER || position-offset>=visible_size)
+              if (position-offset>=visible_size)
                 offset++;
+              else if (str_unicode != NULL)
+              {
+                if (display_string_unicode[position-offset]==RIGHT_TRIANGLE_CHARACTER)
+                  offset++;
+              }
+              else
+              {
+                if (display_string[position-offset]==RIGHT_TRIANGLE_CHARACTER)
+                  offset++;
+              }
             }
             // Enfin, on raffiche la chaine
             goto affichage;
@@ -737,16 +834,31 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
         break;
       
 affichage:
-        size=strlen(str);
-        // Formatage d'une partie de la chaine (si trop longue pour tenir)
-        strncpy(display_string, str + offset, visible_size);
-        display_string[visible_size]='\0';
-        if (offset>0)
-          display_string[0]=LEFT_TRIANGLE_CHARACTER;
-        if (visible_size + offset + 0 < size )
-          display_string[visible_size-1]=RIGHT_TRIANGLE_CHARACTER;
-        
-        Display_whole_string(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),display_string,position - offset);
+        if (str_unicode != NULL)
+        {
+          size=Unicode_strlen(str_unicode);
+          // only show part of the string if too long
+          Unicode_strlcpy(display_string_unicode, str_unicode + offset, visible_size);
+          if (offset>0)
+            display_string_unicode[0] = (byte)LEFT_TRIANGLE_CHARACTER;
+          if (visible_size + offset + 0 < size )
+            display_string_unicode[visible_size-1] = (byte)RIGHT_TRIANGLE_CHARACTER;
+
+          Display_whole_string_unicode(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),display_string_unicode,position - offset);
+        }
+        else
+        {
+          size=strlen(str);
+          // only show part of the string if too long
+          strncpy(display_string, str + offset, visible_size);
+          display_string[visible_size]='\0';
+          if (offset>0)
+            display_string[0]=LEFT_TRIANGLE_CHARACTER;
+          if (visible_size + offset + 0 < size )
+            display_string[visible_size-1]=RIGHT_TRIANGLE_CHARACTER;
+
+          Display_whole_string(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),display_string,position - offset);
+        }
         Update_rect(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
         visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
     } // End du "switch(input_key)"

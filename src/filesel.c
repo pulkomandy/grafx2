@@ -1901,11 +1901,17 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           T_Fileselector_item * current_item;
           current_item = Get_item_by_index(&Filelist, Selector->Position + Selector->Offset);
           if (current_item->Type != 0 && !FILENAME_COMPARE(current_item->Full_name,Selector_filename))
+          {
             // current name is a highlighted directory
             Selector_filename[0]='\0';
+            Selector_filename_unicode[0]=0;
+          }
         }
         strncpy(filename_ansi, Selector_filename, sizeof(filename_ansi));
-        Unicode_strlcpy(filename_unicode, Selector_filename_unicode, sizeof(filename_unicode)/sizeof(word));
+        if (Selector_filename_unicode[0] == 0 && strlen(Selector_filename) > 0)
+          Unicode_char_strlcpy(filename_unicode, Selector_filename, sizeof(filename_unicode)/sizeof(word));
+        else
+          Unicode_strlcpy(filename_unicode, Selector_filename_unicode, sizeof(filename_unicode)/sizeof(word));
 #ifdef ENABLE_FILENAMES_ICONV
         { /* convert from UTF8 to ANSI */
           char * input = (char *)Selector_filename;
@@ -1916,19 +1922,21 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
             *output = '\0';
         }
 #endif /* ENABLE_FILENAMES_ICONV */
-        if (Readline(82,48,filename_ansi,27,INPUT_TYPE_FILENAME))
+        if (Readline_ex_unicode(82,48,filename_ansi,filename_unicode,27,sizeof(filename_ansi)-1,INPUT_TYPE_FILENAME,0))
         {
 #ifdef ENABLE_FILENAMES_ICONV
-          /* convert back from ANSI to UTF8 */
-          char * input = (char *)filename_ansi;
-          size_t inbytesleft = strlen(input);
+          /* convert back from UTF16 to UTF8 */
+          char * input = (char *)filename_unicode;
+          size_t inbytesleft = 2 * Unicode_strlen(filename_unicode);
           char * output = Selector_filename;
           size_t outbytesleft = sizeof(Selector_filename)-1;
-          if(cd_inv != (iconv_t)-1 && (ssize_t)iconv(cd_inv, &input, &inbytesleft, &output, &outbytesleft) >= 0)
+          if(cd_utf16_inv != (iconv_t)-1 && (ssize_t)iconv(cd_utf16_inv, &input, &inbytesleft, &output, &outbytesleft) >= 0)
             *output = '\0';
           else
 #endif /* ENABLE_FILENAMES_ICONV */
             strncpy(Selector_filename, filename_ansi, sizeof(Selector_filename));
+
+          Unicode_strlcpy(Selector_filename_unicode, filename_unicode, sizeof(Selector_filename_unicode)/sizeof(word));
 
           //   On regarde s'il faut rajouter une extension. C'est-à-dire s'il
           // n'y a pas de '.' dans le nom du fichier.
@@ -1937,23 +1945,18 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
               dummy=1;
           if (!dummy)
           {
-            if (Get_fileformat(Selector->Format_filter)->Default_extension)
+            if(!Directory_exists(Selector_filename))
             {
-              if(!Directory_exists(Selector_filename))
-              {
-                 strcat(Selector_filename, ".");
-                strcat(Selector_filename, Get_fileformat(Selector->Format_filter)->Default_extension);
-              }
-            }
-            else
-            {
+              const char * ext = Get_fileformat(Selector->Format_filter)->Default_extension;
               // put default extension
               // (but maybe we should browse through all available ones until we find
               //  something suitable ?)
-              if(!Directory_exists(Selector_filename))
-              {
-                 strcat(Selector_filename, ".pkm");
-              }
+              if (ext == NULL)
+                ext = "pkm";
+              strcat(Selector_filename, ".");
+              strcat(Selector_filename, ext);
+              Unicode_char_strlcat(Selector_filename_unicode, ".", sizeof(Selector_filename_unicode)/sizeof(word));
+              Unicode_char_strlcat(Selector_filename_unicode, ext, sizeof(Selector_filename_unicode)/sizeof(word));
             }
           }
           if(load)

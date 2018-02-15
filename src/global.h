@@ -768,9 +768,10 @@ GFX2_GLOBAL int Line_number_in_INI_file;
 #else
 #define FROMCODE "UTF-8"
 #endif
-GFX2_GLOBAL iconv_t cd;
-GFX2_GLOBAL iconv_t cd_inv;
-GFX2_GLOBAL iconv_t cd_utf16;
+GFX2_GLOBAL iconv_t cd;             // FROMCODE => TOCODE
+GFX2_GLOBAL iconv_t cd_inv;         // TOCODE => FROMCODE
+GFX2_GLOBAL iconv_t cd_utf16;       // FROMCODE => UTF16
+GFX2_GLOBAL iconv_t cd_utf16_inv;   // UTF16 => FROMCODE
 #endif /* ENABLE_FILENAMES_ICONV */
 
 // -- Specific to SDL

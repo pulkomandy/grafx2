@@ -480,8 +480,10 @@ int Init_program(int argc,char * argv[])
   cd_inv = iconv_open(FROMCODE, TOCODE);  // From ANSI to UTF8
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
   cd_utf16 = iconv_open("UTF-16BE", FROMCODE); // From UTF8 to UTF16
+  cd_utf16_inv = iconv_open(FROMCODE, "UTF-16BE"); // From UTF16 to UTF8
 #else
   cd_utf16 = iconv_open("UTF-16LE", FROMCODE); // From UTF8 to UTF16
+  cd_utf16_inv = iconv_open(FROMCODE, "UTF-16LE"); // From UTF16 to UTF8
 #endif
 #endif /* ENABLE_FILENAMES_ICONV */
 
