@@ -678,6 +678,191 @@ void Display_menu(void)
 
 // -- Affichage de texte -----------------------------------------------------
 
+
+static const byte * Get_font_character_pixel(unsigned int c)
+{
+  // convert some known Unicode chars we have in the Grafx2 base font
+  switch (c)
+  {
+    case 0x20ac:
+      c = 0x80; // ;Euro Sign
+      break;
+    case 0x201a:
+      c = 0x82; // Single Low-9 Quotation Mark
+      break;
+    case 0x0192:
+      c = 0x83; // Latin Small Letter F With Hook
+      break;
+    case 0x201e:
+      c = 0x84; // Double Low-9 Quotation Mark
+      break;
+    case 0x2026:
+      c = 0x85; // Horizontal Ellipsis
+      break;
+    case 0x2020:
+      c = 0x86; // Dagger
+      break;
+    case 0x2021:
+      c = 0x87; // Double Dagger
+      break;
+    case 0x02c6:
+      c = 0x88; // Modifier Letter Circumflex Accent
+      break;
+    case 0x2030:
+      c = 0x89; // Per Mille Sign
+      break;
+    case 0x0160:
+      c = 0x8a; // Latin Capital Letter S With Caron
+      break;
+    case 0x2039:
+      c = 0x8b; // Single Left-Pointing Angle Quotation Mark
+      break;
+    case 0x0152:
+      c = 0x8c; // Latin Capital Ligature Oe
+      break;
+    case 0x017d:
+      c = 0x8e; // Latin Capital Letter Z With Caron
+      break;
+    case 0x2018:
+      c = 0x91; // Left Single Quotation Mark
+      break;
+    case 0x2019:
+      c = 0x92; // Right Single Quotation Mark
+      break;
+    case 0x201c:
+      c = 0x93; // Left Double Quotation Mark
+      break;
+    case 0x201d:
+      c = 0x94; // Right Double Quotation Mark
+      break;
+    case 0x2022:
+      c = 0x95; // Bullet
+      break;
+    case 0x2013:
+      c = 0x96; // En Dash
+      break;
+    case 0x2014:
+      c = 0x97; // Em Dash
+      break;
+    case 0x02dc:
+      c = 0x98; // Small Tilde
+      break;
+    case 0x2122:
+      c = 0x99; // Trade Mark Sign
+      break;
+    case 0x0161:
+      c = 0x9a; // Latin Small Letter S With Caron
+      break;
+    case 0x203a:
+      c = 0x9b; // Single Right-Pointing Angle Quotation Mark
+      break;
+    case 0x0153:
+      c = 0x9c; // Latin Small Ligature Oe
+      break;
+    case 0x017e:
+      c = 0x9e; // Latin Small Letter Z With Caron
+      break;
+    case 0x0178:
+      c = 0x9f; // Latin Capital Letter Y With Diaeresis
+      break;
+    case 0x2190:
+      c = 0x1b; // left arrow
+      break;
+    case 0x2191:
+      c = 0x18; // up arrow
+      break;
+    case 0x2192:
+      c = 0x1a; // right arrow
+      break;
+    case 0x2193:
+      c = 0x19; // down arrow
+      break;
+    case 0x2194:
+      c = 0x1d; // right/left arrow
+      break;
+    case 0x2195:
+      c = 0x12; // up/down arrow
+      break;
+    case 0x21A8:
+      c = 0x17; // up/down arrow with base
+      break;
+    case 0x221F:
+      c = 0x1c; // right angle
+      break;
+    case 0x2302:
+      c = 0x7f; // House
+      break;
+    case 0x25ac:
+      c = 0x16; // Black rectangle
+      break;
+    case 0x25b2:
+      c = 0x1e; // up triangle
+      break;
+    case 0x25ba:
+      c = 0x10; // right rectangle
+      break;
+    case 0x25bc:
+      c = 0x1f; // down rectangle
+      break;
+    case 0x25c4:
+      c = 0x11; // left rectange
+      break;
+    case 0x25cb:
+      c = 0x09; // circle
+      break;
+    case 0x25d8:
+      c = 0x08; // inverse bullet
+      break;
+    case 0x263a:
+      c = 0x01; // smile
+      break;
+    case 0x263b:
+      c = 0x02; // smile !
+      break;
+    case 0x263c:
+      c = 0x0f; // Sun
+      break;
+    case 0x2640:
+      c = 0x0c; // female
+      break;
+    case 0x2642:
+      c = 0x0b; // male
+      break;
+    case 0x2660:
+      c = 0x06; // spade
+      break;
+    case 0x2663:
+      c = 0x05; // club
+      break;
+    case 0x2665:
+      c = 0x03; // heart
+      break;
+    case 0x2666:
+      c = 0x04; // diamond
+      break;
+    case 0x266a:
+      c = 0x0d; // eighth note
+      break;
+    case 0x266b:
+      c = 0x0e; // beamed eighth notes
+      break;
+  }
+  if (c < 256)
+    return Menu_font+(c<<6);
+  else
+  {
+    T_Unicode_Font * ufont;
+    const byte * font_pixel = Menu_font + (1<<6); // dummy character
+    for (ufont = Unicode_fonts; ufont != NULL; ufont = ufont->Next)
+      if (ufont->FirstChar <= c && c <= ufont->LastChar)
+      {
+        font_pixel = ufont->FontData + ((c - ufont->FirstChar) << 6);
+        break;
+      }
+    return font_pixel;
+  }
+}
+
   // -- Afficher une chaîne n'importe où à l'écran --
 
 void Print_general(short x,short y,const char * str,byte text_color,byte background_color)
@@ -713,12 +898,11 @@ void Print_general_unicode(short x,short y,const word * str,byte text_color,byte
   word  index;
   int x_pos;
   int y_pos;
-  byte *font_pixel;
+  const byte *font_pixel;
   short real_x;
   short real_y;
   byte repeat_menu_x_factor;
   byte repeat_menu_y_factor;
-  unsigned int c;
 
   real_y=y;
   for (y_pos=0;y_pos<8<<3;y_pos+=1<<3)
@@ -726,21 +910,7 @@ void Print_general_unicode(short x,short y,const word * str,byte text_color,byte
     real_x=0; // Position dans le buffer
     for (index=0;str[index]!=0;index++)
     {
-      c = str[index];
-      // Pointeur sur le premier pixel du caractère
-      if (c < 256)
-        font_pixel=Menu_font+(c<<6);
-      else
-      {
-        T_Unicode_Font * ufont;
-        font_pixel=Menu_font + (1<<6); // dummy character
-        for (ufont = Unicode_fonts; ufont != NULL; ufont = ufont->Next)
-          if (ufont->FirstChar <= c && c <= ufont->LastChar)
-          {
-            font_pixel = ufont->FontData + ((c - ufont->FirstChar) << 6);
-            break;
-          }
-      }
+      font_pixel = Get_font_character_pixel(str[index]);
       for (x_pos=0;x_pos<8;x_pos+=1)
         for (repeat_menu_x_factor=0;repeat_menu_x_factor<Menu_factor_X*Pixel_width;repeat_menu_x_factor++)
           Horizontal_line_buffer[real_x++]=*(font_pixel+x_pos+y_pos)?text_color:background_color;
@@ -755,21 +925,9 @@ void Print_char_in_window(short x_pos, short y_pos, unsigned int c,byte text_col
 {
   short x,y;
   const byte *pixel;
-  // Premier pixel du caractère
-  if (c < 256)
-    pixel=Menu_font + (c<<6);
-  else
-  {
-    T_Unicode_Font * ufont;
-    pixel=Menu_font + (1<<6); // dummy character
-    for (ufont = Unicode_fonts; ufont != NULL; ufont = ufont->Next)
-      if (ufont->FirstChar <= c && c <= ufont->LastChar)
-      {
-        pixel = ufont->FontData + ((c - ufont->FirstChar) << 6);
-        break;
-      }
-  }
-  
+  // First pixel of the character
+  pixel = Get_font_character_pixel(c);
+
   for (y=0;y<8;y++)
     for (x=0;x<8;x++)
       Pixel_in_window(x_pos+x, y_pos+y,
