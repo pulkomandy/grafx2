@@ -172,7 +172,7 @@ int Valid_character(word c, int input_type)
 #endif
       int position;
 
-      if (c < ' ' || c > 255)
+      if (c < ' ')
         return 0;
 
       for (position=0; position<(long)sizeof(forbidden_char); position++)
@@ -649,7 +649,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
       do
       {
         Get_input(20);
-        input_key=Key_ANSI;
+        input_key = (str_unicode == NULL) ? Key_ANSI : Key_UNICODE;
         if (Mouse_K)
           input_key=SDLK_RETURN;
 

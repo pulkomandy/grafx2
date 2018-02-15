@@ -633,7 +633,7 @@ word Keysym_to_ANSI(SDL_keysym keysym)
   // This part was removed from the MacOSX port, but I put it back for others
   // as on Linux and Windows, it's what allows editing a text line with the keys
   // SDLK_LEFT, SDLK_RIGHT, SDLK_HOME, SDLK_END etc.
-  #if !(defined(__macosx__) || defined(__FreeBSD__))
+  #if !defined(__macosx__)
   if ( keysym.unicode == 0)
   {
 
@@ -722,6 +722,8 @@ word Keysym_to_ANSI(SDL_keysym keysym)
       return 'º'; // º
     case 0xC600: 
       return 'ã'; // ã
+    case 0x20AC:
+      return '\x80';  // Euro sign is 20AC in unicode, 80 in CP1252
   }
   
   // Key entre 127 et 255

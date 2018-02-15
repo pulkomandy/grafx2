@@ -383,6 +383,9 @@ int Handle_key_press(SDL_KeyboardEvent event)
   
     Key = Keysym_to_keycode(event.keysym);
     Key_ANSI = Keysym_to_ANSI(event.keysym);
+    Key_UNICODE = event.keysym.unicode;
+    if (Key_UNICODE == 0)
+      Key_UNICODE = Key_ANSI;
     switch(event.keysym.sym)
     {
       case SDLK_RSHIFT:
@@ -847,6 +850,7 @@ int Get_input(int sleep_time)
     // some user input.
     Flush_update();
     Key_ANSI = 0;
+    Key_UNICODE = 0;
     Key = 0;
     Mouse_moved=0;
     Input_new_mouse_X = Mouse_X;

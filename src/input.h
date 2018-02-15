@@ -30,8 +30,8 @@
 /// This is the keyboard/mouse/joystick input polling function.
 /// Returns 1 if a significant changed occurred, such as a mouse button pressed
 /// or depressed, or a new keypress was in the keyboard buffer.
-/// The latest input variables are held in ::Key, ::Key_ANSI, ::Mouse_X, ::Mouse_Y, ::Mouse_K.
-/// Note that ::Key and ::Key_ANSI are not persistent, they will be reset to 0
+/// The latest input variables are held in ::Key, ::Key_ANSI, ::Key_UNICODE, ::Mouse_X, ::Mouse_Y, ::Mouse_K.
+/// Note that ::Key, ::Key_ANSI and ::Key_UNICODE are not persistent, they will be reset to 0
 /// on subsequent calls to ::Get_input().
 int  Get_input(int sleep_time);
 

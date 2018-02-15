@@ -97,6 +97,8 @@ GFX2_GLOBAL dword Key;
 /// This is mostly used when the user enters text (filename, etc).
 GFX2_GLOBAL dword Key_ANSI;
 
+GFX2_GLOBAL dword Key_UNICODE;
+
 // Keyboard modifiers
 // (Name conflict with windows.h)
 #ifdef MOD_SHIFT
