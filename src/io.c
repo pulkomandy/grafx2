@@ -524,7 +524,7 @@ void For_each_directory_entry(const char * directory_name, void * pdata, T_File_
 }
 
 
-void Get_full_filename(char * output_name, char * file_name, char * directory_name)
+void Get_full_filename(char * output_name, const char * file_name, const char * directory_name)
 {
   strcpy(output_name,directory_name);
   if (output_name[0] != '\0')

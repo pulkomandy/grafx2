@@ -107,7 +107,7 @@ void For_each_directory_entry(const char * directory_name, void * pdata, T_File_
 ///
 /// Creates a fully qualified name from a directory and filename.
 /// The point is simply to insert a PATH_SEPARATOR when needed.
-void Get_full_filename(char * output_name, char * file_name, char * directory_name);
+void Get_full_filename(char * output_name, const char * file_name, const char * directory_name);
 
 ///
 /// Appends a file or directory name to an existing directory name.
