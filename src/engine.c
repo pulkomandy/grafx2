@@ -2301,6 +2301,11 @@ void Open_popup(word x_pos, word y_pos, word width,word height)
 {
   Windows_open++;
 
+  if (height > Screen_height)
+    height = Screen_height;
+  if (y_pos + height > Screen_height) // fix dropdown that would get bellow the screen
+    y_pos = Screen_height - height;
+
   Window_width=width;
   Window_height=height;
   Window_pos_X=x_pos;
