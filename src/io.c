@@ -57,6 +57,7 @@
 #include "struct.h"
 #include "io.h"
 #include "realpath.h"
+#include "unicode.h"
 #include "global.h"
 
 // Lit un octet
@@ -225,7 +226,7 @@ void Append_path(char *path, const char *filename, char *reverse_path)
     long len;
     char * separator_pos;
 
-    // Remove trailing slash      
+    // Remove trailing slash
     len=strlen(path);
     if (len && (!strcmp(path+len-1,PATH_SEPARATOR) 
     #ifdef __WIN32__
@@ -285,10 +286,13 @@ void Append_path(char *path, const char *filename, char *reverse_path)
   }
 }
 
-int File_exists(char * fname)
+int File_exists(const char * fname)
 //   Détermine si un file passé en paramètre existe ou non dans le
 // répertoire courant.
 {
+#if defined(WIN32)
+  return (INVALID_FILE_ATTRIBUTES == GetFileAttributesA(fname)) ? 0 : 1;
+#else
     struct stat buf;
     int result;
 
@@ -297,14 +301,18 @@ int File_exists(char * fname)
         return(errno!=ENOENT);
     else
         return 1;
-
+#endif
 }
-int Directory_exists(char * directory)
+
+int Directory_exists(const char * directory)
 //   Détermine si un répertoire passé en paramètre existe ou non dans le
 // répertoire courant.
 {
-#ifdef _MSC_VER	// TODO
-  return 1;
+#if defined(WIN32)
+  DWORD attr = GetFileAttributesA(directory);
+  if (attr == INVALID_FILE_ATTRIBUTES)
+    return 0;
+  return (attr & FILE_ATTRIBUTE_DIRECTORY) ? 1 : 0;
 #else
   DIR* entry;    // Structure de lecture des éléments
 
@@ -370,12 +378,30 @@ int File_length_file(FILE * file)
 
 void For_each_file(const char * directory_name, void Callback(const char *, const char *))
 {
-#ifdef _MSC_VER
+  char full_filename[MAX_PATH_CHARACTERS];
+#if defined(WIN32)
+  WIN32_FIND_DATAA fd;
+  char search_string[MAX_PATH_CHARACTERS];
+  HANDLE h;
+
+  _snprintf(search_string, sizeof(search_string), "%s\\*", directory_name);
+  h = FindFirstFileA(search_string, &fd);
+  if (h != INVALID_HANDLE_VALUE)
+  {
+    do
+    {
+      if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+        continue;
+      _snprintf(full_filename, sizeof(full_filename), "%s\\%s", directory_name, fd.cFileName);
+      Callback(full_filename, fd.cFileName);
+    }
+    while (FindNextFileA(h, &fd));
+    FindClose(h);
+  }
 #else
   // Pour scan de répertoire
   DIR*  current_directory; //Répertoire courant
   struct dirent* entry; // Structure de lecture des éléments
-  char full_filename[MAX_PATH_CHARACTERS];
   int filename_position;
   strcpy(full_filename, directory_name);
   current_directory=opendir(directory_name);
@@ -407,7 +433,40 @@ void For_each_file(const char * directory_name, void Callback(const char *, cons
 /// Scans a directory, calls Callback for each file or directory in it,
 void For_each_directory_entry(const char * directory_name, void * pdata, T_File_dir_cb Callback)
 {
-#ifdef _MSC_VER // TODO !
+#if defined(WIN32)
+  WIN32_FIND_DATAW fd;
+  word search_string[MAX_PATH_CHARACTERS];
+  HANDLE h;
+
+  Unicode_char_strlcpy(search_string, directory_name, MAX_PATH_CHARACTERS);
+  Unicode_char_strlcat(search_string, "\\*", MAX_PATH_CHARACTERS);
+  h = FindFirstFileW((WCHAR *)search_string, &fd);
+  if (h != INVALID_HANDLE_VALUE)
+  {
+    do
+    {
+      int i;
+      char short_filename[16];
+      if (fd.cAlternateFileName[0] != 0)
+        for (i = 0; fd.cAlternateFileName[i] != 0 && i < sizeof(short_filename) - 1; i++)
+          short_filename[i] = (char)fd.cAlternateFileName[i];
+      else  // normal name is short !
+        for (i = 0; fd.cFileName[i] != 0 && i < sizeof(short_filename) - 1; i++)
+          short_filename[i] = (char)fd.cFileName[i];
+      short_filename[i] = '\0';
+      Callback(
+        pdata,
+        short_filename,
+        (const word *)fd.cFileName,
+        (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? 0 : 1,
+        (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? 1 : 0,
+        (fd.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) ? 1 : 0
+        );
+    }
+    while (FindNextFileW(h, &fd));
+
+    FindClose(h);
+  }
 #else
   DIR*  current_directory; // current directory
   struct dirent* entry;    // directory entry struct
@@ -573,6 +632,21 @@ const char * Get_current_directory(char * buf, word * buf_unicode, size_t size)
   if (buf_unicode != NULL)
     buf_unicode[0] = 0; // no unicode support
 
+  return buf;
+#elif defined(WIN32)
+  if (GetCurrentDirectoryA(size, buf) == 0)
+    return NULL;
+  if (buf_unicode != NULL)
+  {
+    int i;
+    WCHAR temp[MAX_PATH_CHARACTERS];
+    for (i = 0; i < MAX_PATH_CHARACTERS - 1 && buf[i] != '\0'; i++)
+      temp[i] = buf[i];
+    temp[i] = 0;
+    buf_unicode[0] = 0;
+    GetLongPathNameW(temp, (WCHAR *)buf_unicode, size);
+    //GetCurrentDirectoryW(size, (WCHAR *)buf_unicode);
+  }
   return buf;
 #else
   char * ret = getcwd(buf, size);

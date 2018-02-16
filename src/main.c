@@ -131,6 +131,10 @@ void Display_syntax(void)
 void Warning_function(const char *message, const char *filename, int line_number, const char *function_name)
 {
   printf("Warning in file %s, line %d, function %s : %s\n", filename, line_number, function_name, message);
+#if defined(_MSC_VER) && defined(DEBUG)
+  OutputDebugStringA(message);
+  OutputDebugStringA("\n");
+#endif
 }
 
 
