@@ -48,43 +48,43 @@
 // -- Test wether a file is in PAL format --------------------------------
 void Test_PAL(T_IO_Context * context)
 {
+  char buffer[32];
   FILE *file;
-  char filename[MAX_PATH_CHARACTERS];
   long file_size;
-
-  Get_full_filename(filename, context->File_name, context->File_directory);
 
   File_error = 1;
 
-  if ((file = fopen(filename, "rb")))
+  if ((file = Open_file_read(context)))
   {
     file_size = File_length_file(file);
     // First check for GrafX2 legacy palette format. The simplest one, 768 bytes
-	// of RGB data. It is a raw dump of the T_Palette structure. There is no
-	// header at all, so we check for the file size.
+    // of RGB data. It is a raw dump of the T_Palette structure. There is no
+    // header at all, so we check for the file size.
     if (file_size == sizeof(T_Palette))
       File_error = 0;
-    else {
-	  // Bigger (or smaller ?) files may be in other formats. These have an
-	  // header, so look for it.
-      fread(filename, 1, 8, file);
-      if (strncmp(filename,"JASC-PAL",8) == 0)
+    else
+    {
+      // Bigger (or smaller ?) files may be in other formats. These have an
+      // header, so look for it.
+      fread(buffer, 1, 8, file);
+      if (strncmp(buffer,"JASC-PAL",8) == 0)
       {
-		// JASC file format, used by Paint Shop Pro and GIMP. This is also the
-		// one used for saving, as it brings greater interoperability.
+        // JASC file format, used by Paint Shop Pro and GIMP. This is also the
+        // one used for saving, as it brings greater interoperability.
         File_error = 0;
-      } else if(strncmp(filename,"RIFF", 4) == 0)
-	  {
-		  // Microsoft RIFF file
-		  // This is a data container (similar to IFF). We only check the first
-		  // chunk header, and give up if that's not a palette.
-		  fseek(file, 8, SEEK_SET);
-		  fread(filename, 1, 8, file);
-		  if (strncmp(filename, "PAL data", 8) == 0)
-		  {
-		  	File_error = 0;
-		  }
-	  }
+      }
+      else if(strncmp(buffer,"RIFF", 4) == 0)
+      {
+        // Microsoft RIFF file
+        // This is a data container (similar to IFF). We only check the first
+        // chunk header, and give up if that's not a palette.
+        fseek(file, 8, SEEK_SET);
+        fread(buffer, 1, 8, file);
+        if (strncmp(buffer, "PAL data", 8) == 0)
+        {
+          File_error = 0;
+        }
+      }
     }
     fclose(file);
   }
@@ -92,22 +92,20 @@ void Test_PAL(T_IO_Context * context)
 
 void Test_GPL(T_IO_Context * context)
 {
+  char buffer[16];
   FILE *file;
-  char filename[MAX_PATH_CHARACTERS];
   long file_size;
-
-  Get_full_filename(filename, context->File_name, context->File_directory);
 
   File_error = 1;
 
-  if ((file = fopen(filename, "rb")))
+  if ((file = Open_file_read(context)))
   {
     file_size = File_length_file(file);
     if (file_size > 33) {
        // minimum header length == 33
        // "GIMP Palette" == 12
-       fread(filename, 1, 12, file);
-       if (strncmp(filename,"GIMP Palette",12) == 0)
+       fread(buffer, 1, 12, file);
+       if (strncmp(buffer,"GIMP Palette",12) == 0)
          File_error = 0;
     }
   }
@@ -145,11 +143,10 @@ void Load_GPL(T_IO_Context * context)
   char filename[MAX_PATH_CHARACTERS]; // full filename
   long pos;
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
   File_error=0;
 
   // Open file
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     fread(filename, 1, 13, file);
     if (strncmp(filename,"GIMP Palette\n",13) == 0)
@@ -239,7 +236,7 @@ Save_GPL (T_IO_Context * context)
     fclose(file);
     
     if (File_error)
-      remove(filename);
+      Remove_file(context);
   }
   else
   {
@@ -258,11 +255,10 @@ void Load_PAL(T_IO_Context * context)
   //long  file_size;   // Taille du fichier
 
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
   File_error=0;
 
   // Ouverture du fichier
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     long file_size = File_length_file(file);
     // Le fichier ne peut être au format PAL que si sa taille vaut 768 octets
@@ -363,7 +359,7 @@ void Save_PAL(T_IO_Context * context)
     fclose(file);
     
     if (File_error)
-      remove(filename);
+      Remove_file(context);
   }
   else
   {
@@ -393,16 +389,13 @@ typedef struct
 void Test_PKM(T_IO_Context * context)
 {
   FILE *file;             // Fichier du fichier
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   T_PKM_Header header;
 
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
-  
   File_error=1;
 
   // Ouverture du fichier
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     // Lecture du header du fichier
     if (Read_bytes(file,&header.Ident,3) &&
@@ -429,7 +422,6 @@ void Test_PKM(T_IO_Context * context)
 void Load_PKM(T_IO_Context * context)
 {
   FILE *file;             // Fichier du fichier
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   T_PKM_Header header;
   byte  color;
   byte  temp_byte;
@@ -441,11 +433,9 @@ void Load_PKM(T_IO_Context * context)
   dword Taille_pack;
   long  file_size;
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
-
   File_error=0;
   
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     file_size=File_length_file(file);
 
@@ -679,7 +669,6 @@ void Load_PKM(T_IO_Context * context)
 
 void Save_PKM(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS];
   FILE *file;
   T_PKM_Header header;
   dword Compteur_de_pixels;
@@ -707,12 +696,10 @@ void Save_PKM(T_IO_Context * context)
     header.Jump+=comment_size+2;
 
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
-
   File_error=0;
 
   // Ouverture du fichier
-  if ((file=fopen(filename,"wb")))
+  if ((file=Open_file_write(context)))
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
     
@@ -828,7 +815,7 @@ void Save_PKM(T_IO_Context * context)
   //   S'il y a eu une erreur de sauvegarde, on ne va tout de même pas laisser
   // ce fichier pourri traîner... Ca fait pas propre.
   if (File_error)
-    remove(filename);
+    Remove_file(context);
 }
 
 
@@ -856,7 +843,6 @@ typedef struct
 
 void Test_CEL(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS];
   int  size;
   FILE *file;
   T_CEL_Header1 header1;
@@ -864,19 +850,13 @@ void Test_CEL(T_IO_Context * context)
   int file_size;
 
   File_error=0;
-  Get_full_filename(filename, context->File_name, context->File_directory);
-  file_size=File_length(filename);
-  if (file_size==0)
-  {
-    File_error = 1; // Si on ne peut pas faire de stat il vaut mieux laisser tomber
-    return;
-  }
-  
-  if (! (file=fopen(filename, "rb")))
+
+  if (! (file=Open_file_read(context)))
   {
     File_error = 1;
     return;
   }
+  file_size = File_length_file(file);
   if (Read_word_le(file,&header1.Width) &&
       Read_word_le(file,&header1.Height) )
   {
@@ -921,7 +901,6 @@ void Test_CEL(T_IO_Context * context)
 
 void Load_CEL(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS];
   FILE *file;
   T_CEL_Header1 header1;
   T_CEL_Header2 header2;
@@ -932,8 +911,7 @@ void Load_CEL(T_IO_Context * context)
   const long int header_size = 4;
 
   File_error=0;
-  Get_full_filename(filename, context->File_name, context->File_directory);
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     if (Read_word_le(file,&(header1.Width))
     &&  Read_word_le(file,&(header1.Height)))
@@ -1050,7 +1028,6 @@ void Load_CEL(T_IO_Context * context)
 
 void Save_CEL(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS];
   FILE *file;
   T_CEL_Header1 header1;
   T_CEL_Header2 header2;
@@ -1064,8 +1041,7 @@ void Save_CEL(T_IO_Context * context)
   Count_used_colors(color_usage);
 
   File_error=0;
-  Get_full_filename(filename, context->File_name, context->File_directory);
-  if ((file=fopen(filename,"wb")))
+  if ((file=Open_file_write(context)))
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
     
@@ -1158,7 +1134,7 @@ void Save_CEL(T_IO_Context * context)
     }
 
     if (File_error)
-      remove(filename);
+      Remove_file(context);
   }
   else
     File_error=1;
@@ -1182,7 +1158,6 @@ typedef struct
 
 void Test_KCF(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS];
   FILE *file;
   T_KCF_Header header1;
   T_CEL_Header2 header2;
@@ -1190,8 +1165,7 @@ void Test_KCF(T_IO_Context * context)
   int color_index;
 
   File_error=0;
-  Get_full_filename(filename, context->File_name, context->File_directory);
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     if (File_length_file(file)==320)
     {
@@ -1241,7 +1215,6 @@ void Test_KCF(T_IO_Context * context)
 
 void Load_KCF(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS];
   FILE *file;
   T_KCF_Header header1;
   T_CEL_Header2 header2;
@@ -1253,8 +1226,7 @@ void Load_KCF(T_IO_Context * context)
 
 
   File_error=0;
-  Get_full_filename(filename, context->File_name, context->File_directory);
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     file_size=File_length_file(file);
     if (file_size==320)
@@ -1363,7 +1335,6 @@ void Load_KCF(T_IO_Context * context)
 
 void Save_KCF(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS];
   FILE *file;
   T_KCF_Header header1;
   T_CEL_Header2 header2;
@@ -1377,8 +1348,7 @@ void Save_KCF(T_IO_Context * context)
   Count_used_colors(color_usage);
 
   File_error=0;
-  Get_full_filename(filename, context->File_name, context->File_directory);
-  if ((file=fopen(filename,"wb")))
+  if ((file=Open_file_write(context)))
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
     // Sauvegarde de la palette
@@ -1445,7 +1415,7 @@ void Save_KCF(T_IO_Context * context)
     fclose(file);
 
     if (File_error)
-      remove(filename);
+      Remove_file(context);
   }
   else
     File_error=1;
@@ -1659,17 +1629,14 @@ void PI1_save_ranges(T_IO_Context * context, byte * buffer, int size)
 void Test_PI1(T_IO_Context * context)
 {
   FILE * file;              // Fichier du fichier
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   int  size;              // Taille du fichier
   word resolution;                 // Résolution de l'image
 
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
-
   File_error=1;
 
   // Ouverture du fichier
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     // Vérification de la taille
     size=File_length_file(file);
@@ -1691,17 +1658,14 @@ void Test_PI1(T_IO_Context * context)
 // -- Lire un fichier au format PI1 -----------------------------------------
 void Load_PI1(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   FILE *file;
   word x_pos,y_pos;
   byte * buffer;
   byte * ptr;
   byte pixels[320];
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
-
   File_error=0;
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     // allocation d'un buffer mémoire
     buffer=(byte *)malloc(32034);
@@ -1751,18 +1715,15 @@ void Load_PI1(T_IO_Context * context)
 // -- Sauver un fichier au format PI1 ---------------------------------------
 void Save_PI1(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   FILE *file;
   short x_pos,y_pos;
   byte * buffer;
   byte * ptr;
   byte pixels[320];
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
-
   File_error=0;
   // Ouverture du fichier
-  if ((file=fopen(filename,"wb")))
+  if ((file=Open_file_write(context)))
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
     
@@ -1800,7 +1761,7 @@ void Save_PI1(T_IO_Context * context)
     else // Error d'écriture (disque plein ou protégé)
     {
       fclose(file);
-      remove(filename);
+      Remove_file(context);
       File_error=1;
     }
     // Libération du buffer mémoire
@@ -1810,7 +1771,7 @@ void Save_PI1(T_IO_Context * context)
   else
   {
     fclose(file);
-    remove(filename);
+    Remove_file(context);
     File_error=1;
   }
 }
@@ -1984,17 +1945,14 @@ void PC1_1line_to_4bp(byte * src,byte * dst0,byte * dst1,byte * dst2,byte * dst3
 void Test_PC1(T_IO_Context * context)
 {
   FILE *file;              // Fichier du fichier
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   int  size;              // Taille du fichier
   word resolution;                 // Résolution de l'image
 
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
-
   File_error=1;
 
   // Ouverture du fichier
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     // Vérification de la taille
     size=File_length_file(file);
@@ -2016,7 +1974,6 @@ void Test_PC1(T_IO_Context * context)
 // -- Lire un fichier au format PC1 -----------------------------------------
 void Load_PC1(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   FILE *file;
   int  size;
   word x_pos,y_pos;
@@ -2025,10 +1982,8 @@ void Load_PC1(T_IO_Context * context)
   byte * ptr;
   byte pixels[320];
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
-
   File_error=0;
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     size=File_length_file(file);
     // allocation des buffers mémoire
@@ -2091,7 +2046,6 @@ void Load_PC1(T_IO_Context * context)
 // -- Sauver un fichier au format PC1 ---------------------------------------
 void Save_PC1(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   FILE *file;
   int   size;
   short x_pos,y_pos;
@@ -2100,11 +2054,9 @@ void Save_PC1(T_IO_Context * context)
   byte * ptr;
   byte pixels[320];
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
-
   File_error=0;
   // Ouverture du fichier
-  if ((file=fopen(filename,"wb")))
+  if ((file=Open_file_write(context)))
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
     
@@ -2146,7 +2098,7 @@ void Save_PC1(T_IO_Context * context)
     else // Error d'écriture (disque plein ou protégé)
     {
       fclose(file);
-      remove(filename);
+      Remove_file(context);
       File_error=1;
     }
     // Libération des buffers mémoire
@@ -2157,7 +2109,7 @@ void Save_PC1(T_IO_Context * context)
   else
   {
     fclose(file);
-    remove(filename);
+    Remove_file(context);
     File_error=1;
   }
 }
@@ -2168,17 +2120,14 @@ void Save_PC1(T_IO_Context * context)
 void Test_NEO(T_IO_Context * context)
 {
   FILE *file;              // Fichier du fichier
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   int  size;              // Taille du fichier
   word resolution;                 // Résolution de l'image
 
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
-
   File_error=1;
 
   // Ouverture du fichier
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     // Vérification de la taille
     size=File_length_file(file);
@@ -2206,17 +2155,14 @@ void Test_NEO(T_IO_Context * context)
 
 void Load_NEO(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   FILE *file;
   word x_pos,y_pos;
   byte * buffer;
   byte * ptr;
   byte pixels[320];
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
-
   File_error=0;
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     // allocation d'un buffer mémoire
     buffer=(byte *)malloc(32128);
@@ -2264,18 +2210,15 @@ void Load_NEO(T_IO_Context * context)
 
 void Save_NEO(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   FILE *file;
   short x_pos,y_pos;
   byte * buffer;
   byte * ptr;
   byte pixels[320];
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
-
   File_error=0;
   // Ouverture du fichier
-  if ((file=fopen(filename,"wb")))
+  if ((file=Open_file_write(context)))
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
     
@@ -2314,7 +2257,7 @@ void Save_NEO(T_IO_Context * context)
     else // Error d'écriture (disque plein ou protégé)
     {
       fclose(file);
-      remove(filename);
+      Remove_file(context);
       File_error=1;
     }
     // Libération du buffer mémoire
@@ -2324,7 +2267,7 @@ void Save_NEO(T_IO_Context * context)
   else
   {
     fclose(file);
-    remove(filename);
+    Remove_file(context);
     File_error=1;
   }
 }
@@ -2334,13 +2277,10 @@ void Save_NEO(T_IO_Context * context)
 void Test_C64(T_IO_Context * context)
 {  
     FILE* file;
-    char filename[MAX_PATH_CHARACTERS];
     long file_size;
-  
-    Get_full_filename(filename, context->File_name, context->File_directory);
-  
-    file = fopen(filename,"rb");
-  
+
+    file = Open_file_read(context);
+
     if (file)
     {
         file_size = File_length_file(file);
@@ -2517,33 +2457,32 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
 }
 
 void Load_C64(T_IO_Context * context)
-{    
+{
     FILE* file;
-    char filename[MAX_PATH_CHARACTERS];
     long file_size;
     byte hasLoadAddr=0;
     int loadFormat=0;
     enum c64_format {F_hires,F_multi,F_bitmap,F_fli};
     const char *c64_format_names[]={"Hires","Multicolor","Bitmap","FLI"};
-    
-    
+
+
     // Palette from http://www.pepto.de/projects/colorvic/
-    byte pal[48]={
-      0x00, 0x00, 0x00, 
-      0xFF, 0xFF, 0xFF, 
-      0x68, 0x37, 0x2B, 
-      0x70, 0xA4, 0xB2, 
-      0x6F, 0x3D, 0x86, 
-      0x58, 0x8D, 0x43, 
-      0x35, 0x28, 0x79, 
-      0xB8, 0xC7, 0x6F, 
-      0x6F, 0x4F, 0x25, 
-      0x43, 0x39, 0x00, 
-      0x9A, 0x67, 0x59, 
-      0x44, 0x44, 0x44, 
-      0x6C, 0x6C, 0x6C, 
-      0x9A, 0xD2, 0x84, 
-      0x6C, 0x5E, 0xB5, 
+    static const byte pal[48]={
+      0x00, 0x00, 0x00,
+      0xFF, 0xFF, 0xFF,
+      0x68, 0x37, 0x2B,
+      0x70, 0xA4, 0xB2,
+      0x6F, 0x3D, 0x86,
+      0x58, 0x8D, 0x43,
+      0x35, 0x28, 0x79,
+      0xB8, 0xC7, 0x6F,
+      0x6F, 0x4F, 0x25,
+      0x43, 0x39, 0x00,
+      0x9A, 0x67, 0x59,
+      0x44, 0x44, 0x44,
+      0x6C, 0x6C, 0x6C,
+      0x9A, 0xD2, 0x84,
+      0x6C, 0x5E, 0xB5,
       0x95, 0x95, 0x95};
 
     byte *file_buffer;
@@ -2551,8 +2490,7 @@ void Load_C64(T_IO_Context * context)
     word width=320, height=200;
     static byte dummy_screen[1000];
 
-    Get_full_filename(filename, context->File_name, context->File_directory);
-    file = fopen(filename,"rb");
+    file = Open_file_read(context);
 
     if (file)
     {
@@ -2802,7 +2740,7 @@ int Save_C64_window(byte *saveWhat, byte *loadAddr)
     return button==1;
 }
 
-int Save_C64_hires(T_IO_Context *context, char *filename, byte saveWhat, byte loadAddr)
+int Save_C64_hires(T_IO_Context *context, byte saveWhat, byte loadAddr)
 {
     int cx,cy,x,y,c1,c2=0,i,pixel,bits,pos=0;
     word numcolors;
@@ -2868,7 +2806,7 @@ int Save_C64_hires(T_IO_Context *context, char *filename, byte saveWhat, byte lo
         }
     }
 
-    file = fopen(filename,"wb");
+    file = Open_file_write(context);
 
     if(!file)
     {
@@ -2893,7 +2831,7 @@ int Save_C64_hires(T_IO_Context *context, char *filename, byte saveWhat, byte lo
     return 0;
 }
 
-int Save_C64_multi(T_IO_Context *context, char *filename, byte saveWhat, byte loadAddr)
+int Save_C64_multi(T_IO_Context *context, byte saveWhat, byte loadAddr)
 {
     /* 
     BITS     COLOR INFORMATION COMES FROM
@@ -3046,7 +2984,7 @@ int Save_C64_multi(T_IO_Context *context, char *filename, byte saveWhat, byte lo
 		}
 	}
   
-    file = fopen(filename,"wb");
+    file = Open_file_write(context);
     
     if(!file)
     {
@@ -3080,7 +3018,7 @@ int Save_C64_multi(T_IO_Context *context, char *filename, byte saveWhat, byte lo
     return 0;
 }
 
-int Save_C64_fli(char *filename, byte saveWhat, byte loadAddr)
+int Save_C64_fli(T_IO_Context * context, byte saveWhat, byte loadAddr)
 {
 
     FILE *file;
@@ -3094,7 +3032,7 @@ int Save_C64_fli(char *filename, byte saveWhat, byte loadAddr)
       return 1;
     }
   
-    file = fopen(filename,"wb");
+    file = Open_file_write(context);
     
     if(!file)
     {
@@ -3133,33 +3071,30 @@ int Save_C64_fli(char *filename, byte saveWhat, byte loadAddr)
 
 void Save_C64(T_IO_Context * context)
 {
-    char filename[MAX_PATH_CHARACTERS];
-    static byte saveWhat=0, loadAddr=0;
-  
-    Get_full_filename(filename, context->File_name, context->File_directory);
-  
-    if (((context->Width!=320) && (context->Width!=160)) || context->Height!=200)
-    {
-        Warning_message("must be 320x200 or 160x200");
-        File_error = 1;
-        return;
-    } 
-    
-    if(!Save_C64_window(&saveWhat,&loadAddr))
-    {
-        File_error = 1;
-        return;
-    }
-    
-	if (strcasecmp(filename + strlen(filename) - 4, ".fli") == 0)
-	{
-		// FIXME moving FLI to a separate format in the fileselector would be smarter
-        File_error = Save_C64_fli(filename,saveWhat,loadAddr);
-	} else if (context->Width==320)
-        File_error = Save_C64_hires(context,filename,saveWhat,loadAddr);
-    else {
-        File_error = Save_C64_multi(context, filename,saveWhat,loadAddr);
-	}
+  static byte saveWhat=0, loadAddr=0;
+
+  if (((context->Width!=320) && (context->Width!=160)) || context->Height!=200)
+  {
+    Warning_message("must be 320x200 or 160x200");
+    File_error = 1;
+    return;
+  }
+
+  if(!Save_C64_window(&saveWhat,&loadAddr))
+  {
+    File_error = 1;
+    return;
+  }
+
+  if (strcasecmp(context->File_name + strlen(context->File_name) - 4, ".fli") == 0)
+  {
+    // FIXME moving FLI to a separate format in the fileselector would be smarter
+    File_error = Save_C64_fli(context, saveWhat, loadAddr);
+  } else if (context->Width==320)
+    File_error = Save_C64_hires(context, saveWhat, loadAddr);
+  else {
+    File_error = Save_C64_multi(context, saveWhat, loadAddr);
+  }
 }
 
 
@@ -3221,9 +3156,6 @@ void Save_SCR(T_IO_Context * context)
     unsigned char r1;
     int cpc_mode;
     FILE* file;
-    char filename[MAX_PATH_CHARACTERS];
-
-    Get_full_filename(filename, context->File_name, context->File_directory);
 
 
     switch(Pixel_ratio)
@@ -3244,7 +3176,7 @@ void Save_SCR(T_IO_Context * context)
 
     output = raw2crtc(context, cpc_mode, 7, &outsize, &r1, 0x0C, 0);
 
-    file = fopen(filename,"wb");
+    file = Open_file_write(context);
     Write_bytes(file, output, outsize);
     fclose(file);
 
@@ -3262,14 +3194,11 @@ void Test_CM5(T_IO_Context * context)
 {
   // check cm5 file size == 2049 bytes
   FILE *file;
-  char filename[MAX_PATH_CHARACTERS];
   long file_size;
-
-  Get_full_filename(filename, context->File_name, context->File_directory);
 
   File_error = 1;
 
-  if ((file = fopen(filename, "rb")))
+  if ((file = Open_file_read(context)))
   {
     file_size = File_length_file(file);
     if (file_size == 2049)
@@ -3297,7 +3226,7 @@ void Load_CM5(T_IO_Context* context)
 
   Get_full_filename(filename, context->File_name, context->File_directory);
 
-  if (!(file = fopen(filename, "rb")))
+  if (!(file = Open_file_read(context)))
   {
       File_error = 1;
       return;
@@ -3452,7 +3381,7 @@ void Save_CM5(T_IO_Context* context)
   // Layer 4 : 1 color / 48x1 block 
   // TODO: handle filesize
   
-  if (!(file = fopen(filename,"wb")))
+  if (!(file = Open_file_write(context)))
   {
     File_error = 1;
     return;
@@ -3536,11 +3465,9 @@ void Test_PPH(T_IO_Context * context)
   int w;
   int expected;
 
-  Get_full_filename(buffer, context->File_name, context->File_directory);
-
   File_error = 1;
 
-  if ((file = fopen(buffer, "rb")))
+  if ((file = Open_file_read(context)))
   {
     // First check file size is large enough to hold the header
     file_size = File_length_file(file);
@@ -3665,7 +3592,7 @@ void Load_PPH(T_IO_Context* context)
 
   Get_full_filename(filename, context->File_name, context->File_directory);
 
-  if (!(file = fopen(filename, "rb")))
+  if (!(file = Open_file_read(context)))
   {
       File_error = 1;
       return;
@@ -3786,7 +3713,7 @@ void Load_PPH(T_IO_Context* context)
   // Load the picture data
   // There are two pages, each storing bytes in the CPC vram format but lines in
   // linear order.
-  ext = filename + strlen(filename) - 3;
+  ext = filename + strlen(filename) - 3;  // TODO : make a function to load file with another extension !
   ext[0] = 'O';
   ext[1] = 'D';
   ext[2] = 'D';

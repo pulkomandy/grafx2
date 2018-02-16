@@ -73,17 +73,13 @@ static void Load_PNG_Sub(T_IO_Context * context, FILE * file);
 void Test_IMG(T_IO_Context * context)
 {
   FILE *file;              // Fichier du fichier
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   T_IMG_Header IMG_header;
   byte signature[6]={0x01,0x00,0x47,0x12,0x6D,0xB0};
-
-
-  Get_full_filename(filename, context->File_name, context->File_directory);
 
   File_error=1;
 
   // Ouverture du fichier
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     // Lecture et vérification de la signature
     if (Read_bytes(file,IMG_header.Filler1,6)
@@ -106,17 +102,15 @@ void Test_IMG(T_IO_Context * context)
 // -- Lire un fichier au format IMG -----------------------------------------
 void Load_IMG(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   byte * buffer;
   FILE *file;
   word x_pos,y_pos;
   long file_size;
   T_IMG_Header IMG_header;
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
   File_error=0;
 
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     file_size=File_length_file(file);
 
@@ -165,18 +159,15 @@ void Load_IMG(T_IO_Context * context)
 // -- Sauver un fichier au format IMG ---------------------------------------
 void Save_IMG(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   FILE *file;
   short x_pos,y_pos;
   T_IMG_Header IMG_header;
   byte signature[6]={0x01,0x00,0x47,0x12,0x6D,0xB0};
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
-
   File_error=0;
 
   // Ouverture du fichier
-  if ((file=fopen(filename,"wb")))
+  if ((file=Open_file_write(context)))
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
     
@@ -208,19 +199,19 @@ void Save_IMG(T_IO_Context * context)
       fclose(file);
 
       if (File_error)
-        remove(filename);
+        Remove_file(context);
     }
     else // Error d'écriture (disque plein ou protégé)
     {
       fclose(file);
-      remove(filename);
+      Remove_file(context);
       File_error=1;
     }
   }
   else
   {
     fclose(file);
-    remove(filename);
+    Remove_file(context);
     File_error=1;
   }
 }
@@ -264,16 +255,13 @@ typedef struct
 void Test_IFF(T_IO_Context * context, const char *sub_type)
 {
   FILE * IFF_file;
-  char filename[MAX_PATH_CHARACTERS];
   char  format[4];
   char  section[4];
   dword dummy;
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
-
   File_error=1;
 
-  if ((IFF_file=fopen(filename, "rb")))
+  if ((IFF_file=Open_file_read(context)))
   {
     do // Dummy loop, so that all breaks jump to end.
     {
@@ -620,7 +608,6 @@ static void IFF_Set_EHB_Palette(T_IO_Context * context)
 void Load_IFF(T_IO_Context * context)
 {
   FILE * IFF_file;
-  char filename[MAX_PATH_CHARACTERS];
   T_IFF_Header header;
   T_IFF_AnimHeader aheader;
   char  format[4];
@@ -657,11 +644,9 @@ void Load_IFF(T_IO_Context * context)
 
   memset(&aheader, 0, sizeof(aheader));
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
-
   File_error=0;
 
-  if ((IFF_file=fopen(filename, "rb")))
+  if ((IFF_file=Open_file_read(context)))
   {
     file_size=File_length_file(IFF_file);
 
@@ -1973,7 +1958,6 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
 void Save_IFF(T_IO_Context * context)
 {
   FILE * IFF_file;
-  char filename[MAX_PATH_CHARACTERS];
   T_IFF_Header header;
   word x_pos;
   word y_pos;
@@ -2005,10 +1989,8 @@ void Save_IFF(T_IO_Context * context)
 
   File_error=0;
   
-  Get_full_filename(filename, context->File_name, context->File_directory);
-
   // Ouverture du fichier
-  if ((IFF_file=fopen(filename,"wb")))
+  if ((IFF_file=Open_file_write(context)))
   {
     setvbuf(IFF_file, NULL, _IOFBF, 64*1024);
     
@@ -2188,10 +2170,9 @@ void Save_IFF(T_IO_Context * context)
       fseek(IFF_file,4,SEEK_SET);
       Write_dword_be(IFF_file,file_size-8);
     }
+    else // Il y a eu une erreur lors du compactage => on efface le fichier
+      Remove_file(context);
     fclose(IFF_file);
-    IFF_file = NULL;
-    if (File_error != 0)  // delete file if any error during saving
-      remove(filename);
   }
   else
     File_error=1;
@@ -2224,14 +2205,12 @@ typedef struct
 // -- Tester si un fichier est au format BMP --------------------------------
 void Test_BMP(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS];
   FILE *file;
   T_BMP_Header header;
 
   File_error=1;
-  Get_full_filename(filename, context->File_name, context->File_directory);
 
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     if (Read_bytes(file,&(header.Signature),2) // "BM"
      && Read_dword_le(file,&(header.Size_1))
@@ -2535,7 +2514,6 @@ static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int co
 // -- Charger un fichier au format BMP --------------------------------------
 void Load_BMP(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS];
   FILE *file;
   T_BMP_Header header;
   word  nb_colors =  0;
@@ -2544,11 +2522,9 @@ void Load_BMP(T_IO_Context * context)
   byte  true_color = 0;
   dword mask[3];  // R G B
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
-
   File_error=0;
 
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     file_size=File_length_file(file);
 
@@ -2694,7 +2670,6 @@ void Load_BMP(T_IO_Context * context)
 // -- Sauvegarder un fichier au format BMP ----------------------------------
 void Save_BMP(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS];
   FILE *file;
   T_BMP_Header header;
   short x_pos;
@@ -2705,10 +2680,9 @@ void Save_BMP(T_IO_Context * context)
 
 
   File_error=0;
-  Get_full_filename(filename, context->File_name, context->File_directory);
 
   // Ouverture du fichier
-  if ((file=fopen(filename,"wb")))
+  if ((file=Open_file_write(context)))
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
     
@@ -2779,12 +2753,12 @@ void Save_BMP(T_IO_Context * context)
         fclose(file);
 
         if (File_error)
-          remove(filename);
+          Remove_file(context);
       }
       else
       {
         fclose(file);
-        remove(filename);
+        Remove_file(context);
         File_error=1;
       }
 
@@ -2792,7 +2766,7 @@ void Save_BMP(T_IO_Context * context)
     else
     {
       fclose(file);
-      remove(filename);
+      Remove_file(context);
       File_error=1;
     }
   }
@@ -2815,7 +2789,6 @@ typedef struct {
 
 void Test_ICO(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS];
   FILE *file;
   struct {
     word Reserved;
@@ -2824,9 +2797,8 @@ void Test_ICO(T_IO_Context * context)
   } header;
 
   File_error=1;
-  Get_full_filename(filename, context->File_name, context->File_directory);
 
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     if (Read_word_le(file,&(header.Reserved))
      && Read_word_le(file,&(header.Type))
@@ -2841,7 +2813,6 @@ void Test_ICO(T_IO_Context * context)
 
 void Load_ICO(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS];
   FILE *file;
   struct {
     word Reserved;
@@ -2857,9 +2828,8 @@ void Load_ICO(T_IO_Context * context)
   dword mask[3];  // R G B
 
   File_error=0;
-  Get_full_filename(filename, context->File_name, context->File_directory);
 
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     if (Read_word_le(file,&(header.Reserved))
      && Read_word_le(file,&(header.Type))
@@ -3042,7 +3012,6 @@ void Load_ICO(T_IO_Context * context)
 
 void Save_ICO(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS];
   FILE *file;
   short x_pos;
   short y_pos;
@@ -3057,9 +3026,8 @@ void Save_ICO(T_IO_Context * context)
   }
 
   File_error=0;
-  Get_full_filename(filename, context->File_name, context->File_directory);
 
-  if ((file=fopen(filename,"wb")) == NULL)
+  if ((file=Open_file_write(context)) == NULL)
     File_error=1;
   else
   {
@@ -3158,7 +3126,7 @@ void Save_ICO(T_IO_Context * context)
     }
     fclose(file);
     if (File_error != 0)
-      remove(filename);
+      Remove_file(context);
   }
 }
 
@@ -3209,15 +3177,13 @@ enum DISPOSAL_METHOD
 
 void Test_GIF(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS];
   char signature[6];
   FILE *file;
 
 
   File_error=1;
-  Get_full_filename(filename, context->File_name, context->File_directory);
 
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     if (
         (Read_bytes(file,signature,6)) &&
@@ -3334,7 +3300,6 @@ void GIF_new_pixel(T_IO_Context * context, T_GIF_IDB *idb, int is_transparent, b
 
 void Load_GIF(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS];
   char signature[6];
 
   word * alphabet_stack;     // Pile de décodage d'une chaîne
@@ -3378,9 +3343,7 @@ void Load_GIF(T_IO_Context * context)
 
   number_LID=0;
   
-  Get_full_filename(filename, context->File_name, context->File_directory);
-
-  if ((GIF_file=fopen(filename, "rb")))
+  if ((GIF_file=Open_file_read(context)))
   {
     file_size=File_length_file(GIF_file);
     if ( (Read_bytes(GIF_file,signature,6)) &&
@@ -3913,8 +3876,6 @@ void Load_GIF(T_IO_Context * context)
 
 void Save_GIF(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS];
-
   word * alphabet_prefix;  // Table des préfixes des codes
   word * alphabet_suffix;  // Table des suffixes des codes
   word * alphabet_daughter;    // Table des chaînes filles (plus longues)
@@ -3941,9 +3902,7 @@ void Save_GIF(T_IO_Context * context)
   
   File_error=0;
   
-  Get_full_filename(filename, context->File_name, context->File_directory);
-
-  if ((GIF_file=fopen(filename,"wb")))
+  if ((GIF_file=Open_file_write(context)))
   {
     setvbuf(GIF_file, NULL, _IOFBF, 64*1024);
     
@@ -4387,7 +4346,7 @@ void Save_GIF(T_IO_Context * context)
 
     fclose(GIF_file);
     if (File_error)
-      remove(filename);
+      Remove_file(context);
 
   } // On a pu ouvrir le fichier en écriture
   else
@@ -4426,13 +4385,11 @@ T_PCX_Header PCX_header;
 
 void Test_PCX(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS];
   FILE *file;
 
   File_error=0;
-  Get_full_filename(filename, context->File_name, context->File_directory);
 
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     if (Read_byte(file,&(PCX_header.Manufacturer)) &&
         Read_byte(file,&(PCX_header.Version)) &&
@@ -4506,7 +4463,6 @@ static void Set_CGA_Color(int i, T_Components * comp)
 
 void Load_PCX(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS];
   FILE *file;
   
   short line_size;
@@ -4524,11 +4480,9 @@ void Load_PCX(T_IO_Context * context)
   long  image_size;
   byte * buffer;
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
-
   File_error=0;
 
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     file_size=File_length_file(file);   
     if (Read_byte(file,&(PCX_header.Manufacturer)) &&
@@ -4854,7 +4808,6 @@ void Load_PCX(T_IO_Context * context)
 
 void Save_PCX(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS];
   FILE *file;
 
   short line_size;
@@ -4866,11 +4819,9 @@ void Save_PCX(T_IO_Context * context)
 
 
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
-
   File_error=0;
 
-  if ((file=fopen(filename,"wb")))
+  if ((file=Open_file_write(context)))
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
     
@@ -4956,7 +4907,7 @@ void Save_PCX(T_IO_Context * context)
     fclose(file);
        
     if (File_error)
-      remove(filename);
+      Remove_file(context);
        
   }    
   else 
@@ -4978,17 +4929,13 @@ typedef struct
 void Test_SCx(T_IO_Context * context)
 {
   FILE *file;              // Fichier du fichier
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   //byte Signature[3];
   T_SCx_Header SCx_header;
-
-
-  Get_full_filename(filename, context->File_name, context->File_directory);
 
   File_error=1;
 
   // Ouverture du fichier
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     // Lecture et vérification de la signature
     if (Read_bytes(file,SCx_header.Filler1,4)
@@ -5011,7 +4958,6 @@ void Test_SCx(T_IO_Context * context)
 // -- Lire un fichier au format SCx -----------------------------------------
 void Load_SCx(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   FILE *file;
   word x_pos,y_pos;
   long size,real_size;
@@ -5020,11 +4966,9 @@ void Load_SCx(T_IO_Context * context)
   T_Palette SCx_Palette;
   byte * buffer;
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
-
   File_error=0;
 
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     file_size=File_length_file(file);
 
@@ -5099,7 +5043,6 @@ void Load_SCx(T_IO_Context * context)
 // -- Sauver un fichier au format SCx ---------------------------------------
 void Save_SCx(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   FILE *file;
   short x_pos,y_pos;
   T_SCx_Header SCx_header;
@@ -5128,12 +5071,11 @@ void Save_SCx(T_IO_Context * context)
       }
     }
   }
-  Get_full_filename(filename, context->File_name, context->File_directory);
 
   File_error=0;
 
   // Ouverture du fichier
-  if ((file=fopen(filename,"wb")))
+  if ((file=Open_file_write(context)))
   {
     T_Palette palette_64;
     
@@ -5162,19 +5104,19 @@ void Save_SCx(T_IO_Context * context)
       fclose(file);
 
       if (File_error)
-        remove(filename);
+        Remove_file(context);
     }
     else // Error d'écriture (disque plein ou protégé)
     {
       fclose(file);
-      remove(filename);
+      Remove_file(context);
       File_error=1;
     }
   }
   else
   {
     fclose(file);
-    remove(filename);
+    Remove_file(context);
     File_error=1;
   }
 }
@@ -5226,15 +5168,12 @@ void Save_XPM(T_IO_Context* context)
 void Test_PNG(T_IO_Context * context)
 {
   FILE *file;             // Fichier du fichier
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   byte png_header[8];
-  
-  Get_full_filename(filename, context->File_name, context->File_directory);
   
   File_error=1;
 
   // Ouverture du fichier
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     // Lecture du header du fichier
     if (Read_bytes(file,png_header,8))
@@ -5630,14 +5569,11 @@ static void Load_PNG_Sub(T_IO_Context * context, FILE * file)
 void Load_PNG(T_IO_Context * context)
 {
   FILE *file;
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   byte png_header[8];
-
-  Get_full_filename(filename, context->File_name, context->File_directory);
 
   File_error=0;
 
-  if ((file=fopen(filename, "rb")))
+  if ((file=Open_file_read(context)))
   {
     // Load header (8 first bytes)
     if (Read_bytes(file,png_header,8))
@@ -5659,7 +5595,6 @@ void Load_PNG(T_IO_Context * context)
 
 void Save_PNG(T_IO_Context * context)
 {
-  char filename[MAX_PATH_CHARACTERS];
   FILE *file;
   int y;
   byte * pixel_ptr;
@@ -5669,12 +5604,11 @@ void Save_PNG(T_IO_Context * context)
   byte cycle_data[16*6]; // Storage for color-cycling data, referenced by crng_chunk
   static png_bytep * Row_pointers;
   
-  Get_full_filename(filename, context->File_name, context->File_directory);
   File_error=0;
   Row_pointers = NULL;
   
   // Ouverture du fichier
-  if ((file=fopen(filename,"wb")))
+  if ((file=Open_file_write(context)))
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
     
@@ -5834,7 +5768,7 @@ void Save_PNG(T_IO_Context * context)
   //   S'il y a eu une erreur de sauvegarde, on ne va tout de même pas laisser
   // ce fichier pourri trainait... Ca fait pas propre.
   if (File_error)
-    remove(filename);
+    Remove_file(context);
   
   if (Row_pointers)
   {
