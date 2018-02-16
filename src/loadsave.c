@@ -1754,7 +1754,34 @@ void Delete_safety_backups(void)
 FILE * Open_file_write(T_IO_Context *context)
 {
   char filename[MAX_PATH_CHARACTERS]; // filename with full path
+#if defined(WIN32)
+  WCHAR filename_unicode[MAX_PATH_CHARACTERS];
+  FILE * f;
 
+  if (context->File_name_unicode != NULL)
+  {
+    Unicode_char_strlcpy((word *)filename_unicode, context->File_directory, MAX_PATH_CHARACTERS);
+    Unicode_char_strlcat((word *)filename_unicode, PATH_SEPARATOR, MAX_PATH_CHARACTERS);
+    Unicode_strlcat((word *)filename_unicode, context->File_name_unicode, MAX_PATH_CHARACTERS);
+
+    f = _wfopen(filename_unicode, L"wb");
+    if (f != NULL)
+    {
+      // Now the file has been created, retrieve its short (ASCII) name
+      WCHAR shortpath[MAX_PATH_CHARACTERS];
+      DWORD len = GetShortPathNameW(filename_unicode, shortpath, MAX_PATH_CHARACTERS);
+      if (len > 0 && len < MAX_PATH_CHARACTERS)
+      {
+        DWORD start, index;
+        for (start = len; start > 0 && shortpath[start-1] != '\\'; start--);
+        for (index = 0; index < MAX_PATH_CHARACTERS - 1 && index < len - start; index++)
+          context->File_name[index] = shortpath[start + index];
+        context->File_name[index] = '\0';
+      }
+    }
+    return f;
+  }
+#endif
   Get_full_filename(filename, context->File_name, context->File_directory);
 
   return fopen(filename, "wb");

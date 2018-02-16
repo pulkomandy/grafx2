@@ -33,6 +33,9 @@ word * Unicode_strdup(const word * str);
 /// Copy unicode string
 void Unicode_strlcpy(word * dst, const word * src, size_t len);
 
+/// Append unicode string to another
+void Unicode_strlcat(word * dst, const word * src, size_t len);
+
 /// Compare an unicode string with a regular Latin1 string
 int Unicode_char_strcmp(const word * s1, const char * s2);
 

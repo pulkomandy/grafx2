@@ -1939,7 +1939,13 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           WCHAR temp_str[MAX_PATH_CHARACTERS];
           if (GetShortPathNameW((WCHAR *)filename_unicode, temp_str, MAX_PATH_CHARACTERS) == 0)
           {
-            strcpy(filename_ansi, "*TEMP*");
+            // generate a temporary ansi name
+            int i;
+            for (i = 0; i < MAX_PATH_CHARACTERS - 1 && filename_unicode[i] != 0; i++)
+            {
+              filename_ansi[i] = (filename_unicode[i] < 256) ? (byte)filename_unicode[i] : '_';
+            }
+            filename_ansi[i] = '\0';
           }
           else
           {

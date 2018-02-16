@@ -3507,6 +3507,7 @@ void Save_picture(enum CONTEXT_TYPE type)
       Main.image_is_modified=0;
       Main.fileformat=save_context.Format;
       strcpy(Main.backups->Pages->Filename, save_context.File_name);
+      Unicode_strlcpy(Main.backups->Pages->Filename_unicode, save_context.File_name_unicode, MAX_PATH_CHARACTERS);
       strcpy(Main.backups->Pages->File_directory, save_context.File_directory);
     }
     if (type == CONTEXT_BRUSH)

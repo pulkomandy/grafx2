@@ -64,6 +64,15 @@ void Unicode_strlcpy(word * dst, const word * src, size_t len)
   *dst = 0;
 }
 
+/// concatenate unicode string
+void Unicode_strlcat(word * dst, const word * src, size_t len)
+{
+  size_t dst_len = Unicode_strlen(dst);
+  if (dst_len >= len)
+    return;
+  Unicode_strlcpy(dst + dst_len, src, len - dst_len);
+}
+
 /// Compare an unicode string with a regular Latin1 string
 int Unicode_char_strcmp(const word * s1, const char * s2)
 {
