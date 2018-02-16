@@ -1749,3 +1749,23 @@ void Delete_safety_backups(void)
 #endif
   
 }
+
+/// For use by Save_XXX() functions
+FILE * Open_file_write(T_IO_Context *context)
+{
+  char filename[MAX_PATH_CHARACTERS]; // filename with full path
+
+  Get_full_filename(filename, context->File_name, context->File_directory);
+
+  return fopen(filename, "wb");
+}
+
+/// For use by Load_XXX() and Test_XXX() functions
+FILE * Open_file_read(T_IO_Context *context)
+{
+  char filename[MAX_PATH_CHARACTERS]; // filename with full path
+
+  Get_full_filename(filename, context->File_name, context->File_directory);
+
+  return fopen(filename, "rb");
+}

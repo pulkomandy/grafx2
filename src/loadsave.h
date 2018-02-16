@@ -261,4 +261,10 @@ void Init_preview(short width,short height,long size,int format,enum PIXEL_RATIO
 */
 void Write_one_byte(FILE *file, byte b);
 
+/// For use by Save_XXX() functions
+FILE * Open_file_write(T_IO_Context *context);
+
+/// For use by Load_XXX() and Test_XXX() functions
+FILE * Open_file_read(T_IO_Context *context);
+
 #endif
