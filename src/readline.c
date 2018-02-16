@@ -120,7 +120,7 @@ static void Insert_character_unicode(word * str, word c, int position)
   }
 }
 
-int Prepend_string(char* dest, char* src, int max)
+static int Prepend_string(char* dest, const char* src, int max)
 // Insert a string at the start of another. Up to MAX characters only
 // Returns actual number of chars inserted
 {
@@ -138,7 +138,25 @@ int Prepend_string(char* dest, char* src, int max)
   return sizes;
 }
 
-int Valid_character(word c, int input_type)
+static int Prepend_string_unicode(word* dest, const word* src, int max)
+// Insert a string at the start of another. Up to MAX characters only
+// Returns actual number of chars inserted
+{
+  // Insert src before dest
+  int sized = Unicode_strlen(dest);
+  int sizes = Unicode_strlen(src);
+
+  if (sized + sizes >= max)
+  {
+    sizes = max - sized;
+  }
+
+  memmove(dest+sizes, dest, 2*(sized+1));
+  memcpy(dest, src, sizes*2);
+  return sizes;
+}
+
+static int Valid_character(word c, int input_type)
   // returns 0 = Not allowed
   // returns 1 = Allowed
   // returns 2 = Allowed only once at start of string (for - sign in numbers)
@@ -198,10 +216,10 @@ int Valid_character(word c, int input_type)
   return 0;
 }
 
-void Cleanup_string(char* str, int input_type)
+static void Cleanup_string(char* str, int input_type)
 {
   int i,j=0;
-  
+
   for(i=0; str[i]!='\0'; i++)
   {
     if (Valid_character((unsigned char)(str[i]), input_type))
@@ -213,6 +231,20 @@ void Cleanup_string(char* str, int input_type)
   str[j] = '\0';
 }
 
+static void Cleanup_string_unicode(word* str, int input_type)
+{
+  int i,j=0;
+
+  for(i=0; str[i]!=0; i++)
+  {
+    if (Valid_character(str[i], input_type))
+    {
+      str[j]=str[i];
+      j++;
+    }
+  }
+  str[j] = 0;
+}
 static void Display_whole_string(word x_pos,word y_pos,const char * str,byte position)
 {
   char cursor[2];
@@ -265,30 +297,41 @@ void Init_virtual_keyboard(word y_pos, word keyboard_width, word keyboard_height
 
 // Inspired from http://www.libsdl.org/projects/scrap/
 // TODO X11 and others
-char* getClipboard()
+static char* getClipboard(word * * unicode)
 {
 #ifdef __WIN32__
     char* dst = NULL;
     SDL_SysWMinfo info;
-    HWND SDL_Window;
 
     SDL_VERSION(&info.version);
 
     if ( SDL_GetWMInfo(&info) )
     {
-      SDL_Window = info.window;
-
-      if ( IsClipboardFormatAvailable(CF_TEXT) && OpenClipboard(SDL_Window) )
+      if (OpenClipboard(info.window) )
       {
         HANDLE hMem;
-        char *src;
-
-        hMem = GetClipboardData(CF_TEXT);
-        if ( hMem != NULL )
+        if ( IsClipboardFormatAvailable(CF_TEXT) )
         {
-          src = (char *)GlobalLock(hMem);
-          dst = strdup(src);
-          GlobalUnlock(hMem);
+          char *src;
+
+          hMem = GetClipboardData(CF_TEXT);
+          if ( hMem != NULL )
+          {
+            src = (char *)GlobalLock(hMem);
+            dst = strdup(src);
+            GlobalUnlock(hMem);
+          }
+        }
+        if (unicode != NULL && IsClipboardFormatAvailable(CF_UNICODETEXT) )
+        {
+          word * src;
+          hMem = GetClipboardData(CF_UNICODETEXT);
+          if ( hMem != NULL )
+          {
+            src = (word *)GlobalLock(hMem);
+            *unicode = Unicode_strdup(src);
+            GlobalUnlock(hMem);
+          }
         }
         CloseClipboard();
       }    
@@ -662,14 +705,39 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
         // Handle paste request on CTRL+v
         if (Key == SHORTCUT_PASTE)
         {
-          int nb_added;
-          char* data = getClipboard();
-          if (data == NULL)
-            continue; // No clipboard data
-          Cleanup_string(data, input_type);
-          // Insert it at the cursor position
-          nb_added = Prepend_string(str + position, data, max_size - position);//TODO : unicode
-          while (nb_added)
+          int nb_added = 0;
+          if (str_unicode != NULL)
+          {
+            word * data_unicode = NULL;
+            char * data = getClipboard(&data_unicode);
+            if (data_unicode != NULL)
+            {
+              Cleanup_string_unicode(data_unicode, input_type);
+              nb_added = Prepend_string_unicode(str_unicode + position, data_unicode, max_size - position);
+              free(data_unicode);
+            }
+            else
+            {
+              word tmp_unicode[256];
+              if (data == NULL)
+                continue;
+              Cleanup_string(data, input_type);
+              Unicode_char_strlcpy(tmp_unicode, data, sizeof(tmp_unicode)/sizeof(word));
+              nb_added = Prepend_string_unicode(str_unicode + position, tmp_unicode, max_size - position);
+            }
+            free(data);
+          }
+          else
+          {
+            char* data = getClipboard(NULL);
+            if (data == NULL)
+              continue; // No clipboard data
+            Cleanup_string(data, input_type);
+            // Insert it at the cursor position
+            nb_added = Prepend_string(str + position, data, max_size - position);
+            free(data);
+          }
+          while (nb_added > 0)
           {
             size++;
             if (size<max_size)
@@ -688,7 +756,6 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
             }
             nb_added--;
           }
-          free(data);
           Hide_cursor();
           goto affichage;
         }
