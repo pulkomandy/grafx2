@@ -676,9 +676,7 @@ T_Gui_skin * Load_graphics(const char * skin_file, T_Gradient_array *gradients)
   }
   
   // Read the "skin" file
-  strcpy(filename,Data_directory);
-  strcat(filename,SKINS_SUBDIRECTORY PATH_SEPARATOR);
-  strcat(filename,skin_file);
+  snprintf(filename, sizeof(filename), "%s%s%s%s", Data_directory,SKINS_SUBDIRECTORY, PATH_SEPARATOR, skin_file);
   
   gui=Load_surface(filename, gradients);
   if (!gui)
@@ -765,7 +763,7 @@ byte * Load_font(const char * font_name, int is_main)
   }
 
   // Read the file containing the image
-  sprintf(filename,"%s" SKINS_SUBDIRECTORY "%s%s", Data_directory, PATH_SEPARATOR, font_name);
+  snprintf(filename, sizeof(filename), "%s%s%s%s", Data_directory, SKINS_SUBDIRECTORY, PATH_SEPARATOR, font_name);
   
   image=Load_surface(filename, NULL);
   if (!image)
@@ -808,7 +806,7 @@ void Load_Unicode_fonts(void)
 {
   char directory[MAX_PATH_CHARACTERS];
 
-  snprintf(directory,sizeof(directory), "%s" SKINS_SUBDIRECTORY, Data_directory);
+  snprintf(directory,sizeof(directory), "%s%s", Data_directory, SKINS_SUBDIRECTORY);
   For_each_file(directory, Load_Unicode_font);
 }
 
