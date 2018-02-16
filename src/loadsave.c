@@ -1769,3 +1769,13 @@ FILE * Open_file_read(T_IO_Context *context)
 
   return fopen(filename, "rb");
 }
+
+/// For use by Save_XXX() functions
+void Remove_file(T_IO_Context *context)
+{
+  char filename[MAX_PATH_CHARACTERS]; // filename with full path
+
+  Get_full_filename(filename, context->File_name, context->File_directory);
+
+  remove(filename);
+}
