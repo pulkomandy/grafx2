@@ -783,9 +783,9 @@ static void Load_Unicode_font(const char * fullname, const char * filename)
   unsigned int first, last;
   (void)fullname;
 
-  if (memcmp(filename, "unicode", 7) != 0)
+  if (strncasecmp(filename, "unicode_", 8) != 0)
     return;
-  if (sscanf(filename, "unicode_%04X-%04X.png", &first, &last) == 2)
+  if (sscanf(filename + 8, "%04X-%04X.", &first, &last) == 2)
   {
     font = Load_font(filename, 0);
     if (font)
@@ -799,7 +799,7 @@ static void Load_Unicode_font(const char * fullname, const char * filename)
     }
   }
   else
-    Warning("Could not parse filename");
+    Warning_with_format("Could not parse filename %s", filename);
 }
 
 void Load_Unicode_fonts(void)
