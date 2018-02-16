@@ -1929,9 +1929,26 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
             *output = '\0';
         }
 #endif /* ENABLE_FILENAMES_ICONV */
+#if defined(WIN32) || defined(ENABLE_FILENAMES_ICONV)
         if (Readline_ex_unicode(82,48,filename_ansi,filename_unicode,27,sizeof(filename_ansi)-1,INPUT_TYPE_FILENAME,0))
+#else
+        if (Readline_ex_unicode(82,48,filename_ansi,NULL,27,sizeof(filename_ansi)-1,INPUT_TYPE_FILENAME,0))
+#endif
         {
-#ifdef ENABLE_FILENAMES_ICONV
+#if defined(WIN32)
+          WCHAR temp_str[MAX_PATH_CHARACTERS];
+          if (GetShortPathNameW((WCHAR *)filename_unicode, temp_str, MAX_PATH_CHARACTERS) == 0)
+          {
+            strcpy(filename_ansi, "*TEMP*");
+          }
+          else
+          {
+            int i;
+            for (i = 0; i < MAX_PATH_CHARACTERS - 1 && temp_str[i] != 0; i++)
+              filename_ansi[i] = temp_str[i];
+            filename_ansi[i] = '\0';
+          }
+#elif defined(ENABLE_FILENAMES_ICONV)
           /* convert back from UTF16 to UTF8 */
           char * input = (char *)filename_unicode;
           size_t inbytesleft = 2 * Unicode_strlen(filename_unicode);
@@ -1940,11 +1957,12 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           if(cd_utf16_inv != (iconv_t)-1 && (ssize_t)iconv(cd_utf16_inv, &input, &inbytesleft, &output, &outbytesleft) >= 0)
             *output = '\0';
           else
-#endif /* ENABLE_FILENAMES_ICONV */
+#endif
             strncpy(Selector_filename, filename_ansi, sizeof(Selector_filename));
 
+#if defined(WIN32) || defined(ENABLE_FILENAMES_ICONV)
           Unicode_strlcpy(Selector_filename_unicode, filename_unicode, sizeof(Selector_filename_unicode)/sizeof(word));
-
+#endif
           //   On regarde s'il faut rajouter une extension. C'est-à-dire s'il
           // n'y a pas de '.' dans le nom du fichier.
           for(temp=0,dummy=0; ((Selector_filename[temp]) && (!dummy)); temp++)
