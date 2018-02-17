@@ -31,6 +31,9 @@
 #ifndef _MSC_VER
 #include <unistd.h>
 #endif
+#if defined(WIN32)
+#include <windows.h>
+#endif
 #include <limits.h>
 #include <SDL_image.h>
 #include <SDL_endian.h>

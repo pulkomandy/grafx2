@@ -468,7 +468,9 @@ int Init_program(int argc,char * argv[])
   int file_in_command_line;
   T_Gradient_array initial_gradients;
   static char main_filename [MAX_PATH_CHARACTERS];
+#ifdef ENABLE_FILENAMES_ICONV
   static word main_filename_unicode[MAX_PATH_CHARACTERS];
+#endif
   static char main_directory[MAX_PATH_CHARACTERS];
   static char spare_filename [MAX_PATH_CHARACTERS];
   static char spare_directory[MAX_PATH_CHARACTERS];
