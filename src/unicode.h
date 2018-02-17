@@ -39,6 +39,9 @@ void Unicode_strlcat(word * dst, const word * src, size_t len);
 /// Compare an unicode string with a regular Latin1 string
 int Unicode_char_strcmp(const word * s1, const char * s2);
 
+/// Compare an unicode string with a regular Latin1 string. Ignoring case
+int Unicode_char_strcasecmp(const word * s1, const char * s2);
+
 /// Copy a regular Latin1 string to an unicode string
 void Unicode_char_strlcpy(word * dst, const char * src, size_t len);
 

@@ -267,6 +267,13 @@ FILE * Open_file_write(T_IO_Context *context);
 /// For use by Load_XXX() and Test_XXX() functions
 FILE * Open_file_read(T_IO_Context *context);
 
+/// For use by Load_XXX() and Test_XXX() functions
+FILE * Open_file_read_with_alternate_ext(T_IO_Context *context, const char * ext);
+
 /// For use by Save_XXX() functions
 void Remove_file(T_IO_Context *context);
+
+/// For use by Save_XXX() functions
+FILE * Open_file_write_with_alternate_ext(T_IO_Context *context, const char * ext);
+
 #endif

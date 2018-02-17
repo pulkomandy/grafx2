@@ -1787,6 +1787,38 @@ FILE * Open_file_write(T_IO_Context *context)
   return fopen(filename, "wb");
 }
 
+FILE * Open_file_write_with_alternate_ext(T_IO_Context *context, const char * ext)
+{
+  char *p;
+  char filename[MAX_PATH_CHARACTERS]; // filename with full path
+#if defined(WIN32)
+  WCHAR filename_unicode[MAX_PATH_CHARACTERS];
+  WCHAR * pw;
+
+  if (context->File_name_unicode != NULL)
+  {
+    Unicode_char_strlcpy((word *)filename_unicode, context->File_directory, MAX_PATH_CHARACTERS);
+    Unicode_char_strlcat((word *)filename_unicode, PATH_SEPARATOR, MAX_PATH_CHARACTERS);
+    Unicode_strlcat((word *)filename_unicode, context->File_name_unicode, MAX_PATH_CHARACTERS);
+    pw = wcschr(filename_unicode, (WCHAR)'.');
+    if (pw != NULL)
+      *pw = 0;
+    Unicode_char_strlcat((word *)filename_unicode, ".", MAX_PATH_CHARACTERS);
+    Unicode_char_strlcat((word *)filename_unicode, ext, MAX_PATH_CHARACTERS);
+
+    return _wfopen(filename_unicode, L"wb");
+  }
+#endif
+  Get_full_filename(filename, context->File_name, context->File_directory);
+  p = strrchr(filename, '.');
+  if (p != NULL)
+    *p = '\0';
+  strcat(filename, ".");
+  strcat(filename, ext);
+
+  return fopen(filename, "wb");
+}
+
 /// For use by Load_XXX() and Test_XXX() functions
 FILE * Open_file_read(T_IO_Context *context)
 {
@@ -1795,6 +1827,102 @@ FILE * Open_file_read(T_IO_Context *context)
   Get_full_filename(filename, context->File_name, context->File_directory);
 
   return fopen(filename, "rb");
+}
+
+struct T_Find_alternate_ext_data
+{
+  const char * ext;
+  char basename[MAX_PATH_CHARACTERS];
+  word basename_unicode[MAX_PATH_CHARACTERS];
+  char foundname[MAX_PATH_CHARACTERS];
+  word foundname_unicode[MAX_PATH_CHARACTERS];
+};
+
+static void Look_for_alternate_ext(void * pdata, const char * filename, const word * filename_unicode, byte is_file, byte is_directory, byte is_hidden)
+{
+  size_t base_len;
+  struct T_Find_alternate_ext_data * params = (struct T_Find_alternate_ext_data *)pdata;
+  (void)is_hidden;
+  (void)is_directory;
+
+  if (!is_file)
+    return;
+
+  if (filename_unicode != NULL && params->basename_unicode[0] != 0)
+  {
+    base_len = Unicode_strlen(params->basename_unicode);
+    if (filename_unicode[base_len] != '.')
+      return; // No match.
+#if defined(WIN32)
+    {
+      WCHAR temp_string[MAX_PATH_CHARACTERS];
+      memcpy(temp_string, filename_unicode, base_len * sizeof(word));
+      temp_string[base_len] = 0;
+      if (_wcsicmp((const WCHAR *)params->basename_unicode, temp_string) != 0)
+        return; // No match.
+    }
+#else
+    if (memcmp(params->basename_unicode, filename_unicode, base_len * sizeof(word)) != 0)
+      return; // No match.
+#endif
+    if (Unicode_char_strcasecmp(filename_unicode + base_len + 1, params->ext) != 0)
+      return; // No match.
+    // it is a match !
+    Unicode_strlcpy(params->foundname_unicode, filename_unicode, MAX_PATH_CHARACTERS);
+    strncpy(params->foundname, filename, MAX_PATH_CHARACTERS);
+  }
+  else
+  {
+    base_len = strlen(params->basename);
+    if (filename[base_len] != '.')
+      return; // No match.
+#if defined(WIN32)
+    if (_memicmp(params->basename, filename, base_len) != 0)  // Not case sensitive
+      return; // No match.
+#else
+    if (memcmp(params->basename, filename, base_len) != 0)
+      return; // No match.
+#endif
+    if (strcasecmp(filename + base_len + 1, params->ext) != 0)
+      return; // No match.
+    params->foundname_unicode[0] = 0;
+    strncpy(params->foundname, filename, MAX_PATH_CHARACTERS);
+  }
+}
+
+FILE * Open_file_read_with_alternate_ext(T_IO_Context *context, const char * ext)
+{
+  char * p;
+  struct T_Find_alternate_ext_data params;
+
+  memset(&params, 0, sizeof(params));
+  params.ext = ext;
+  strncpy(params.basename, context->File_name, MAX_PATH_CHARACTERS);
+  p = strrchr(params.basename, '.');
+  if (p != NULL)
+    *p = '\0';
+  if (context->File_name_unicode != NULL)
+  {
+    size_t i = Unicode_strlen(context->File_name_unicode);
+    memcpy(params.basename_unicode, context->File_name_unicode, (i + 1) * sizeof(word));
+    while (i-- > 0)
+      if (params.basename_unicode[i] == (word)'.')
+      {
+        params.basename_unicode[i] = 0;
+        break;
+      }
+  }
+
+  For_each_directory_entry(context->File_directory, &params, Look_for_alternate_ext);
+  if (params.foundname[0] != '\0')
+  {
+    char filename[MAX_PATH_CHARACTERS]; // filename with full path
+
+    Get_full_filename(filename, params.foundname, context->File_directory);
+
+    return fopen(filename, "rb");
+  }
+  return NULL;
 }
 
 /// For use by Save_XXX() functions

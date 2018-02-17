@@ -87,6 +87,28 @@ int Unicode_char_strcmp(const word * s1, const char * s2)
   return (*s1 > *str2) ? 1 : -1;
 }
 
+/// Compare an unicode string with a regular Latin1 string. Ignoring case
+int Unicode_char_strcasecmp(const word * s1, const char * s2)
+{
+  const byte * str2 = (const byte *)s2;
+  unsigned int c1, c2;
+
+  for (;;)
+  {
+    c1 = *s1++;
+    c2 = *str2++;
+    // first convert to lower case
+    if ('a' <= c1 && c1 <= 'z')
+        c1 -= ('a'-'A');
+    if ('a' <= c2 && c2 <= 'z')
+        c2 -= ('a'-'A');
+    if (c1 != c2)
+      return (c1 > c2) ? 1 : -1;
+    if (c1 == 0)
+      return 0;
+  }
+}
+
 /// Copy a regular Latin1 string to an unicode string
 void Unicode_char_strlcpy(word * dst, const char * src, size_t len)
 {

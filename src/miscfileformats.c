@@ -3217,14 +3217,11 @@ void Load_CM5(T_IO_Context* context)
   // Set palette to the CPC hardware colors 
   // Load the palette data to the 4 colorlayers
   FILE *file;
-  char filename[MAX_PATH_CHARACTERS];
   byte value = 0;
   int mod=0;
   short line = 0;
   int tx, ty;
   byte buffer[48*6/4];
-
-  Get_full_filename(filename, context->File_name, context->File_directory);
 
   if (!(file = Open_file_read(context)))
   {
@@ -3330,22 +3327,11 @@ void Load_CM5(T_IO_Context* context)
   fclose(file);
 
   // Load the pixeldata to the 5th layer
+  file = Open_file_read_with_alternate_ext(context, "gfx");
+  if (file == NULL)
   {
-  	char* ext = filename + strlen(filename) - 3;
-	int idx = 8;
- 	do {
-		if (-- idx < 0)
-  		{
-    		File_error = 1;
-    		return;
-  		}
-
-		ext[0] = (idx & 1) ? 'g':'G';
-		ext[1] = (idx & 2) ? 'f':'F';
-		ext[2] = (idx & 4) ? 'x':'X';
-
-  		file = fopen(filename, "rb");
-  	} while(file == NULL);
+    File_error = 1;
+    return;
   }
   Set_loading_layer(context, 4);
   
@@ -3368,12 +3354,9 @@ void Load_CM5(T_IO_Context* context)
 
 void Save_CM5(T_IO_Context* context)
 {
-  char filename[MAX_PATH_CHARACTERS];
   FILE* file;
   int tx, ty;
 
-
-  Get_full_filename(filename, context->File_name, context->File_directory);
   // TODO: Check picture has 5 layers
   // TODO: Check the constraints on the layers 
   // Layer 1 : 1 color Only
@@ -3407,12 +3390,10 @@ void Save_CM5(T_IO_Context* context)
   fclose(file);
 
   // Now the pixeldata
-  filename[strlen(filename) - 3] = 0;
-  strcat(filename,"gfx");
-  if (!(file = fopen(filename, "wb")))
+  if (!(file = Open_file_write_with_alternate_ext(context, "gfx")))
   {
-      File_error = 2;
-      return;
+    File_error = 2;
+    return;
   }
   setvbuf(file, NULL, _IOFBF, 64*1024);
   
@@ -3460,91 +3441,92 @@ void Save_CM5(T_IO_Context* context)
 void Test_PPH(T_IO_Context * context)
 {
   FILE *file;
-  char buffer[MAX_PATH_CHARACTERS];
+  byte buffer[6];
   long file_size;
   int w;
   int expected;
 
   File_error = 1;
 
-  if ((file = Open_file_read(context)))
-  {
-    // First check file size is large enough to hold the header
-    file_size = File_length_file(file);
-    if (file_size < 11) {
-      File_error = 1;
-      goto abort;
-    }
+  file = Open_file_read(context);
+  if (file == NULL)
+    return;
 
-    // File is large enough for the header, now check if the data makes some sense
-    fread(buffer, 1, 6, file);
-    if (buffer[0] > 5) {
-        // Unknown mode
-        File_error = 2;
-        goto abort;
-    }
-
-    w = buffer[1] | (buffer[2] << 8);
-    if (w < 2 || w > 384) {
-        // Invalid width
-        File_error = 3;
-        goto abort;
-    }
-
-    w = buffer[3] | (buffer[4] << 8);
-    if (w < 1 || w > 272) {
-        // Invalid height
-        File_error = 4;
-        goto abort;
-    }
-
-    if (buffer[5] < 1 || buffer[5] > 28)
-    {
-        // Invalid palettes count
-        File_error = 5;
-        goto abort;
-    }
-    expected = 6; // Size of header
-    switch(buffer[0])
-    {
-        case 0:
-        case 3:
-        case 4:
-            // Palette size should be 16 bytes, only 1 palette.
-            if (buffer[5] != 1) {
-                File_error = 7;
-                goto abort;
-            }
-            expected += 16;
-            break;
-
-        case 1:
-        case 5:
-            expected += buffer[5] * 5 - 1;
-            break;
-
-        case 2:
-            // Palete size should be 2 bytes
-            if (buffer[5] != 1) {
-                File_error = 7;
-                goto abort;
-            }
-            expected += 2;
-            break;
-    }
-
-    if (file_size != expected)
-    {
-        File_error = 6;
-        goto abort;
-    }
-    File_error = 0;
-  } else {
-    File_error = 8;
+  // First check file size is large enough to hold the header
+  file_size = File_length_file(file);
+  if (file_size < 11) {
+    File_error = 1;
+    goto abort;
   }
 
+  // File is large enough for the header, now check if the data makes some sense
+  if (!Read_bytes(file, buffer, 6))
+    goto abort;
+  if (buffer[0] > 5) {
+    // Unknown mode
+    File_error = 2;
+    goto abort;
+  }
+
+  w = buffer[1] | (buffer[2] << 8);
+  if (w < 2 || w > 384) {
+    // Invalid width
+    File_error = 3;
+    goto abort;
+  }
+
+  w = buffer[3] | (buffer[4] << 8);
+  if (w < 1 || w > 272) {
+    // Invalid height
+    File_error = 4;
+    goto abort;
+  }
+
+  if (buffer[5] < 1 || buffer[5] > 28)
+  {
+    // Invalid palettes count
+    File_error = 5;
+    goto abort;
+  }
+  expected = 6; // Size of header
+  switch(buffer[0])
+  {
+    case 0:
+    case 3:
+    case 4:
+      // Palette size should be 16 bytes, only 1 palette.
+      if (buffer[5] != 1) {
+        File_error = 7;
+        goto abort;
+      }
+      expected += 16;
+      break;
+
+    case 1:
+    case 5:
+      expected += buffer[5] * 5 - 1;
+      break;
+
+    case 2:
+      // Palette size should be 2 bytes
+      if (buffer[5] != 1) {
+        File_error = 7;
+        goto abort;
+      }
+      expected += 2;
+      break;
+  }
+
+  if (file_size != expected)
+  {
+    File_error = 6;
+    goto abort;
+  }
+  File_error = 0;
+
 abort:
-  fclose(file);
+  if (file != NULL)
+    fclose(file);
 
   // TODO: check existence of .ODD/.EVE files with the same name
 }
@@ -3564,7 +3546,6 @@ void Load_PPH(T_IO_Context* context)
 {
   FILE *file;
   FILE *feven;
-  char filename[MAX_PATH_CHARACTERS];
 
   // Read in the header
   uint8_t mode;
@@ -3574,7 +3555,6 @@ void Load_PPH(T_IO_Context* context)
   int i,j;
   uint8_t a,b,c,d;
   int file_size;
-  char* ext;
   uint8_t pl[16];
 
   static const T_Components CPCPAL[27] =
@@ -3589,8 +3569,6 @@ void Load_PPH(T_IO_Context* context)
       { 0x71, 0xF5, 0x04 }, { 0x71, 0xF3, 0x6B }, { 0x71, 0xF3, 0xF4 },
       { 0xF3, 0xF3, 0x0D }, { 0xF3, 0xF3, 0x6D }, { 0xFF, 0xF3, 0xF9 }
   };
-
-  Get_full_filename(filename, context->File_name, context->File_directory);
 
   if (!(file = Open_file_read(context)))
   {
@@ -3713,18 +3691,19 @@ void Load_PPH(T_IO_Context* context)
   // Load the picture data
   // There are two pages, each storing bytes in the CPC vram format but lines in
   // linear order.
-  ext = filename + strlen(filename) - 3;  // TODO : make a function to load file with another extension !
-  ext[0] = 'O';
-  ext[1] = 'D';
-  ext[2] = 'D';
-
-  file = fopen(filename, "rb");
-
-  ext[0] = 'E';
-  ext[1] = 'V';
-  ext[2] = 'E';
-
-  feven = fopen(filename, "rb");
+  file = Open_file_read_with_alternate_ext(context, "odd");
+  if (file == NULL)
+  {
+    File_error = 3;
+    return;
+  }
+  feven = Open_file_read_with_alternate_ext(context, "eve");
+  if (feven == NULL)
+  {
+    File_error = 4;
+    fclose(file);
+    return;
+  }
 
   c = 0;
   d = 0;
