@@ -3443,7 +3443,7 @@ void Test_PPH(T_IO_Context * context)
   FILE *file;
   byte buffer[6];
   long file_size;
-  int w;
+  unsigned int w, h;
   int expected;
 
   File_error = 1;
@@ -3475,8 +3475,8 @@ void Test_PPH(T_IO_Context * context)
     goto abort;
   }
 
-  w = buffer[3] | (buffer[4] << 8);
-  if (w < 1 || w > 272) {
+  h = buffer[3] | (buffer[4] << 8);
+  if (h < 1 || h > 272) {
     // Invalid height
     File_error = 4;
     goto abort;
@@ -3522,13 +3522,29 @@ void Test_PPH(T_IO_Context * context)
     File_error = 6;
     goto abort;
   }
+  fclose (file);
+
+  // check existence of .ODD/.EVE files with the same name
+  // and the right size
+  expected = w * h / 4;
+  file = Open_file_read_with_alternate_ext(context, "odd");
+  if (file == NULL)
+    goto abort;
+  file_size = File_length_file(file);
+  fclose (file);
+  file = Open_file_read_with_alternate_ext(context, "eve");
+  if (file == NULL)
+    goto abort;
+  if (file_size != File_length_file(file) || file_size != expected)
+  {
+    File_error = 8;
+    goto abort;
+  }
   File_error = 0;
 
 abort:
   if (file != NULL)
     fclose(file);
-
-  // TODO: check existence of .ODD/.EVE files with the same name
 }
 
 
