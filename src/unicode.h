@@ -23,6 +23,16 @@
 
 #include "struct.h"
 
+//////////////////////////////////////////////////////////////////////////////
+///@file unicode.h
+/// Functions supporting Unicode text with 16 bits per characters.
+/// It is just like UCS-2, using the native byte order.
+/// This is not UTF16, as UTF16 encodes some characters using 2 16bit words.
+/// But it matches UTF16 on all the other characters.
+/// Also the "BOM" are not supported
+//////////////////////////////////////////////////////////////////////////////
+
+
 /// equivalent of strlen() for out Unicode strings
 /// return the number of characters (words), so there is twice as much bytes
 size_t Unicode_strlen(const word * str);
