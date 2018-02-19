@@ -14,6 +14,9 @@ JPEGURL = http://www.ijg.org/files/$(JPEGARCH)
 LIBTIFF = tiff-v3.4
 LIBTIFFARCH = $(LIBTIFF)-tar.gz
 LIBTIFFURL = ftp://ftp.sgi.com/graphics/tiff/$(LIBTIFFARCH)
+ZLIB=zlib-1.2.11
+ZLIBARCH=$(ZLIB).tar.gz
+ZLIBURL=https://www.zlib.net/$(ZLIBARCH)
 # https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-0.6.1.tar.gz
 
 PREFIX = $(PWD)/usr
@@ -36,12 +39,12 @@ endif
 HOST = $(shell $(CC) -dumpmachine)
 #HOST = i686-pc-mingw32
 
-.PHONY:	all clean libs libpng libsdl libsdl_image libjpeg libtiff
+.PHONY:	all clean libs libpng libsdl libsdl_image libjpeg libtiff zlib
 
 all:	libs
 
 clean:
-	$(RM) -r archives $(LIBPNG)
+	$(RM) -r archives $(LIBPNG) $(ZLIB) $(SDLIMAGE) $(JPEGDIR) $(LIBTIFF)
 
 libs:	libpng libsdl libsdl_image
 libsdl:	$(PREFIX)/lib/libSDLmain.a
@@ -49,6 +52,7 @@ libsdl_image:	$(PREFIX)/lib/libSDL_image.a
 libjpeg:	$(PREFIX)/lib/libjpeg.a
 libpng:	$(PREFIX)/lib/libpng.a
 libtiff:	$(PREFIX)/lib/libtiff.a
+zlib:	$(PREFIX)/lib/libz.a
 
 $(PREFIX)/lib/libSDLmain.a:	archives/$(SDLDEVEL)
 	$(TAR) xzf $<
@@ -60,7 +64,7 @@ $(PREFIX)/lib/libSDL_image.a:	$(PREFIX)/lib/libtiff.a
 $(PREFIX)/lib/libSDL_image.a:	$(PREFIX)/lib/libpng.a
 
 $(PREFIX)/lib/libSDL_image.a:	$(SDLIMAGE)/.ok
-	cd $(SDLIMAGE) && CC=$(CC) CFLAGS=-I$(PREFIX)/include LDFLAGS=-L$(PREFIX)/lib LIBPNG_CFLAGS= LIBPNG_LIBS=-lpng ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --host=$(HOST) --disable-webp
+	cd $(SDLIMAGE) && CC=$(CC) CPPFLAGS=-I$(PREFIX)/include LDFLAGS=-L$(PREFIX)/lib LIBPNG_CFLAGS= LIBPNG_LIBS=-lpng ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --host=$(HOST) --disable-webp
 	cd $(SDLIMAGE) && $(MAKE)
 	cd $(SDLIMAGE) && $(MAKE) install
 
@@ -93,12 +97,22 @@ $(LIBTIFF)/.ok:	archives/$(LIBTIFFARCH)
 	$(TAR) xzf $<
 	touch $@
 	
+$(PREFIX)/lib/libpng.a:	$(PREFIX)/lib/libz.a
+
 $(PREFIX)/lib/libpng.a:	$(LIBPNG)/.ok
-	cd $(LIBPNG) && CC=$(CC) ./configure --prefix=$(PREFIX) --host=$(HOST)
+	cd $(LIBPNG) && CC=$(CC) CPPFLAGS=-I$(PREFIX)/include LDFLAGS=-L$(PREFIX)/lib ./configure --prefix=$(PREFIX) --host=$(HOST)
 	cd $(LIBPNG) && $(MAKE)
 	cd $(LIBPNG) && $(MAKE) install
 
 $(LIBPNG)/.ok:	archives/$(LIBPNGARCH)
+	$(TAR) xzf $<
+	touch $@
+
+$(PREFIX)/lib/libz.a:	$(ZLIB)/.ok
+	cd $(ZLIB) && $(MAKE) -fwin32/Makefile.gcc PREFIX=$(shell echo $(CC) | sed 's/^\(.*\)gcc/\1/')
+	cd $(ZLIB) && INCLUDE_PATH=$(PREFIX)/include LIBRARY_PATH=$(PREFIX)/lib BINARY_PATH=$(PREFIX)/bin $(MAKE) install -fwin32/Makefile.gcc SHARED_MODE=1
+
+$(ZLIB)/.ok:	archives/$(ZLIBARCH)
 	$(TAR) xzf $<
 	touch $@
 
@@ -121,3 +135,7 @@ archives/$(JPEGARCH):
 archives/$(LIBTIFFARCH):
 	@$(MKDIR) $(@D)
 	cd $(@D) && $(GETURL) $(LIBTIFFURL)
+
+archives/$(ZLIBARCH):
+	@$(MKDIR) $(@D)
+	cd $(@D) && $(GETURL) $(ZLIBURL)
