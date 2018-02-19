@@ -28,6 +28,7 @@ FREETYPEURL=https://download.savannah.gnu.org/releases/freetype/$(FREETYPEARCH)
 PREFIX = $(PWD)/usr
 
 MKDIR = mkdir -p
+CP = cp -v
 TAR = $(shell which tar)
 GETURL = $(shell which wget || echo "curl -O -L")
 
@@ -138,6 +139,7 @@ $(PREFIX)/lib/libpng.a:	$(LIBPNG)/.ok
 	cd $(LIBPNG) && CC=$(CC) CPPFLAGS=-I$(PREFIX)/include LDFLAGS=-L$(PREFIX)/lib ./configure --prefix=$(PREFIX) --host=$(HOST)
 	cd $(LIBPNG) && $(MAKE)
 	cd $(LIBPNG) && $(MAKE) install
+	$(CP) $(PREFIX)/bin/libpng*.dll ../bin
 
 $(LIBPNG)/.ok:	archives/$(LIBPNGARCH)
 	$(TAR) xzf $<
