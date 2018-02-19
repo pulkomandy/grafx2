@@ -363,9 +363,9 @@ endif
     ifdef WIN32CROSS
       #cross compile a Win32 executable
       CROSS_CC ?= $(shell which i686-w64-mingw32-gcc || which mingw32-gcc)
-      CROSS_PKGCONFIG ?= $(shell which i686-w64-mingw32-pkg-config || which mingw32-pkg-config)
+      CROSS_PKGCONFIG ?= $(shell which i686-w64-mingw32-pkg-config || which mingw32-pkg-config || which pkg-config)
       CROSS_SDLCONFIG ?= $(shell which ../3rdparty/usr/bin/sdl-config || which /usr/local/cross-tools/i386-mingw32/bin/sdl-config)
-      CROSS_PKG_CONFIG_PATH ?= $(shell if [ -d ../3rdparty/usr ] ; then echo "../3rdparty/usr/lib/pkgconfig" ; fi )
+      CROSS_PKG_CONFIG_PATH ?= $(shell if [ -d ../3rdparty/usr ] ; then echo "$${PWD}/../3rdparty/usr/lib/pkgconfig" ; fi )
       CC = $(CROSS_CC)
       BIN = ../bin/grafx2.exe
       COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb -Dmain=SDL_main $(shell $(CROSS_SDLCONFIG) --cflags) $(TTFCOPT)
@@ -373,8 +373,8 @@ endif
       ifeq (,$(CROSS_PKGCONFIG))
       COPT += -D__no_pnglib__
       else
-      COPT += $(shell PKG_CONFIG_PATH=/usr/local/cross-tools/i386-mingw32/lib/pkgconfig $(CROSS_PKGCONFIG) --cflags libpng)
-      LOPT += $(shell PKG_CONFIG_PATH=/usr/local/cross-tools/i386-mingw32/lib/pkgconfig $(CROSS_PKGCONGIF) --libs libpng)
+      COPT += $(shell PKG_CONFIG_LIBDIR=$(CROSS_PKG_CONFIG_PATH) $(CROSS_PKGCONFIG) --cflags libpng || echo "-D__no_pnglib__" )
+      LOPT += $(shell PKG_CONFIG_LIBDIR=$(CROSS_PKG_CONFIG_PATH) $(CROSS_PKGCONFIG) --libs libpng)
       endif
       OBJDIR = ../obj/win32
       PLATFORM = win32
