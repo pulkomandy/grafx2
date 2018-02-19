@@ -2,7 +2,9 @@ archives/
 usr/
 SDL-*/
 SDL_image*/
+SDL_ttf-*/
 jpeg-*/
 libpng-*/
 tiff-*/
 zlib-*/
+freetype-*/

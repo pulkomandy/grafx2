@@ -4,6 +4,9 @@ SDLDEVELPATCH = SDL-1.2.15.patch
 SDLIMAGE = SDL_image-1.2.12
 SDLIMAGEARCH = SDL_image-1.2.12.tar.gz
 SDLIMAGEURL = https://www.libsdl.org/projects/SDL_image/release/$(SDLIMAGEARCH)
+SDLTTF=SDL_ttf-2.0.11
+SDLTTFARCH=$(SDLTTF).tar.gz
+SDLTTFURL=https://www.libsdl.org/projects/SDL_ttf/release/$(SDLTTFARCH)
 LIBPNG = libpng-1.6.32
 LIBPNGARCH = $(LIBPNG).tar.gz
 LIBPNGURL = https://download.sourceforge.net/libpng/$(LIBPNGARCH)
@@ -17,6 +20,9 @@ LIBTIFFURL = ftp://ftp.sgi.com/graphics/tiff/$(LIBTIFFARCH)
 ZLIB=zlib-1.2.11
 ZLIBARCH=$(ZLIB).tar.gz
 ZLIBURL=https://www.zlib.net/$(ZLIBARCH)
+FREETYPE=freetype-2.9
+FREETYPEARCH=$(FREETYPE).tar.gz
+FREETYPEURL=https://download.savannah.gnu.org/releases/freetype/$(FREETYPEARCH)
 # https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-0.6.1.tar.gz
 
 PREFIX = $(PWD)/usr
@@ -39,20 +45,22 @@ endif
 HOST = $(shell $(CC) -dumpmachine)
 #HOST = i686-pc-mingw32
 
-.PHONY:	all clean libs libpng libsdl libsdl_image libjpeg libtiff zlib
+.PHONY:	all clean libs libpng libsdl libsdl_image libsdl_ttf libjpeg libtiff zlib freetype
 
 all:	libs
 
 clean:
-	$(RM) -r archives $(LIBPNG) $(ZLIB) $(SDLIMAGE) $(JPEGDIR) $(LIBTIFF)
+	$(RM) -r archives $(LIBPNG) $(ZLIB) $(SDLIMAGE) $(SDLTTF) $(JPEGDIR) $(LIBTIFF) $(FREETYPE)
 
-libs:	libpng libsdl libsdl_image
+libs:	libpng libsdl libsdl_image libsdl_ttf
 libsdl:	$(PREFIX)/lib/libSDLmain.a
 libsdl_image:	$(PREFIX)/lib/libSDL_image.a
+libsdl_ttf:	$(PREFIX)/lib/libSDL_ttf.a
 libjpeg:	$(PREFIX)/lib/libjpeg.a
 libpng:	$(PREFIX)/lib/libpng.a
 libtiff:	$(PREFIX)/lib/libtiff.a
 zlib:	$(PREFIX)/lib/libz.a
+freetype:	$(PREFIX)/lib/libfreetype.a
 
 $(PREFIX)/lib/libSDLmain.a:	archives/$(SDLDEVEL)
 	$(TAR) xzf $<
@@ -69,6 +77,28 @@ $(PREFIX)/lib/libSDL_image.a:	$(SDLIMAGE)/.ok
 	cd $(SDLIMAGE) && $(MAKE) install
 
 $(SDLIMAGE)/.ok:	archives/$(SDLIMAGEARCH)
+	$(TAR) xzf $<
+	touch $@
+
+$(PREFIX)/lib/libSDL_ttf.a:	$(PREFIX)/lib/libfreetype.a
+
+$(PREFIX)/lib/libSDL_ttf.a:	$(SDLTTF)/.ok
+	cd $(SDLTTF) && CC=$(CC) CPPFLAGS=-I$(PREFIX)/include LDFLAGS=-L$(PREFIX)/lib ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --host=$(HOST)
+	cd $(SDLTTF) && $(MAKE)
+	cd $(SDLTTF) && $(MAKE) install
+
+$(SDLTTF)/.ok:	archives/$(SDLTTFARCH)
+	$(TAR) xzf $<
+	touch $@
+
+$(PREFIX)/lib/libfreetype.a:	$(PREFIX)/lib/libpng.a
+
+$(PREFIX)/lib/libfreetype.a:	$(FREETYPE)/.ok
+	cd $(FREETYPE) && ./configure --build=$(shell $(BUILD_CC) -dumpmachine) --host=$(HOST) --prefix=$(PREFIX) PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig
+	cd $(FREETYPE) && $(MAKE)
+	cd $(FREETYPE) && $(MAKE) install
+
+$(FREETYPE)/.ok:	archives/$(FREETYPEARCH)
 	$(TAR) xzf $<
 	touch $@
 
@@ -116,10 +146,6 @@ $(ZLIB)/.ok:	archives/$(ZLIBARCH)
 	$(TAR) xzf $<
 	touch $@
 
-archives/$(LIBPNGARCH):
-	@$(MKDIR) $(@D)
-	cd $(@D) && $(GETURL) $(LIBPNGURL)
-
 archives/$(SDLDEVEL):
 	@$(MKDIR) $(@D)
 	cd $(@D) && $(GETURL) $(SDLDEVELURL)
@@ -127,6 +153,14 @@ archives/$(SDLDEVEL):
 archives/$(SDLIMAGEARCH):
 	@$(MKDIR) $(@D)
 	cd $(@D) && $(GETURL) $(SDLIMAGEURL)
+
+archives/$(SDLTTFARCH):
+	@$(MKDIR) $(@D)
+	cd $(@D) && $(GETURL) $(SDLTTFURL)
+
+archives/$(LIBPNGARCH):
+	@$(MKDIR) $(@D)
+	cd $(@D) && $(GETURL) $(LIBPNGURL)
 
 archives/$(JPEGARCH):
 	@$(MKDIR) $(@D)
@@ -139,3 +173,7 @@ archives/$(LIBTIFFARCH):
 archives/$(ZLIBARCH):
 	@$(MKDIR) $(@D)
 	cd $(@D) && $(GETURL) $(ZLIBURL)
+
+archives/$(FREETYPEARCH):
+	@$(MKDIR) $(@D)
+	cd $(@D) && $(GETURL) $(FREETYPEURL)
