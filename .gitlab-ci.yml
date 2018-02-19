@@ -1,13 +1,23 @@
 before_script:
     - apt-get update -qq && apt-get install -y -qq libsdl1.2-dev libpng-dev libsdl-ttf2.0-dev libsdl-image1.2-dev liblua5.1-0-dev zip
+    - apt-get install -y -qq gcc-mingw-w64-i686 mingw-w64-tools
 
 stages:
     - build
 
-job1:
+job_linux:
     stage: build
     script: "cd src && make && make ziprelease"
     artifacts:
         paths:
             - "*.zip"
 
+job_win32:
+    stage: build
+    script:
+        - "WIN32CROSS=1 make 3rdparty"
+        - "WIN32CROSS=1 make -j3"
+        - "WIN32CROSS=1 make ziprelease"
+    artifacts:
+        paths:
+            - "*.zip"
