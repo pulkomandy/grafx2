@@ -45,12 +45,17 @@ endif
 HOST = $(shell $(CC) -dumpmachine)
 #HOST = i686-pc-mingw32
 
-.PHONY:	all clean libs libpng libsdl libsdl_image libsdl_ttf libjpeg libtiff zlib freetype
+.PHONY:	all clean clean_archives clean_all libs libpng libsdl libsdl_image libsdl_ttf libjpeg libtiff zlib freetype
 
 all:	libs
 
+clean_all:	clean clean_archives
+
 clean:
-	$(RM) -r archives $(LIBPNG) $(ZLIB) $(SDLIMAGE) $(SDLTTF) $(JPEGDIR) $(LIBTIFF) $(FREETYPE)
+	$(RM) -r usr/ $(LIBPNG) $(ZLIB) $(SDLIMAGE) $(SDLTTF) $(JPEGDIR) $(LIBTIFF) $(FREETYPE) SDL-1.2.15
+
+clean_archives:
+	$(RM) -r archives
 
 libs:	libpng libsdl libsdl_image libsdl_ttf
 libsdl:	$(PREFIX)/lib/libSDLmain.a
