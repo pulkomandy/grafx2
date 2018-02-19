@@ -1188,17 +1188,10 @@ void Warning_message(char * message)
 /// This has the added advantage of supporting the printf interface.
 void Warning_with_format(const char *template, ...) {
   va_list arg_ptr;
-  char *message;
+  static char message[400]; // This is enough for 10 lines of text in 320x200
 
   va_start(arg_ptr, template);
-  if (vasprintf(&message, template, arg_ptr) == -1) {
-    //Warning_message(template);
-    Verbose_message("Warning", template);
-  } else {
-    //Warning_message(message);
-    Verbose_message("Warning", message);
-    free(message);
-  }
+  vsnprintf(message, sizeof(message), template, arg_ptr);
   va_end(arg_ptr);
 }
 
