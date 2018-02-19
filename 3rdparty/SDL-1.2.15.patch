@@ -1,0 +1,11 @@
+--- SDL-1.2.15.orig/Makefile	2018-02-18 22:58:20.779552000 +0100
++++ SDL-1.2.15/Makefile	2018-02-18 22:58:27.229780000 +0100
+@@ -1,7 +1,7 @@
+ #
+ # Makefile for installing the Mingw32 version of the SDL library
+ 
+-CROSS_PATH := /usr/local/cross-tools/i686-w64-mingw32
++CROSS_PATH ?= /usr/local/cross-tools/i686-w64-mingw32
+ 
+ all:
+ 	@echo "Type \"make native\" to install to /usr"

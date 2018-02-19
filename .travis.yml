@@ -15,8 +15,14 @@ addons:
 
 sudo: false
 
-#env:
-#  - 'WIN32CROSS=1'
+env:
+  - ''
+  - 'WIN32CROSS=1'
+
+matrix:
+  exclude:
+    - os: osx
+      env: 'WIN32CROSS=1'
 
 compiler:
   - gcc
@@ -31,5 +37,6 @@ install:
 
 script:
   - 'cd $TRAVIS_BUILD_DIR'
+  - 'if [ "$WIN32CROSS" = "1" ] ; then make 3rdparty ; fi'
   - 'if [ "$TRAVIS_OS_NAME" = "osx" ] ; then make ; else make -j3 ; fi'
   - 'make ziprelease'

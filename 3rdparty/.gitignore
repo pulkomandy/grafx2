@@ -1,0 +1,7 @@
+archives/
+usr/
+SDL-*/
+SDL_image*/
+jpeg-*/
+libpng-*/
+tiff-*/
