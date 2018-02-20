@@ -5163,10 +5163,14 @@ void Save_XPM(T_IO_Context* context)
 
   if (color_count > XPM_USABLE_CHARS)
   {
-    // none is for transparent color
     for (i = 0; i < color_count; i++)
-      fprintf(file,"\"%2.2X\tc #%2.2x%2.2x%2.2x\",\n", i, context->Palette[i].R, context->Palette[i].G,
-        context->Palette[i].B);
+    {
+      if (context->Background_transparent && (i == context->Transparent_color))
+        fprintf(file, "\"%2.2X\tc None\",\n", i); // None is for transparent color
+      else
+        fprintf(file,"\"%2.2X\tc #%2.2x%2.2x%2.2x\",\n", i, context->Palette[i].R, context->Palette[i].G,
+          context->Palette[i].B);
+    }
 
     for (j = 0; j < context->Height; j++)
     {
@@ -5183,8 +5187,11 @@ void Save_XPM(T_IO_Context* context)
     {
       c = (i < 2) ? i + 0x20 : i + 0x21;
       if (c >= 0x5c) c++;
-      fprintf(file,"\"%c\tc #%2.2x%2.2x%2.2x\",\n", c, context->Palette[i].R, context->Palette[i].G,
-        context->Palette[i].B);
+      if (context->Background_transparent && (i == context->Transparent_color))
+        fprintf(file, "\"%c\tc None\",\n", c); // None is for transparent color
+      else
+        fprintf(file,"\"%c\tc #%2.2x%2.2x%2.2x\",\n", c, context->Palette[i].R, context->Palette[i].G,
+          context->Palette[i].B);
     }
 
     for (j = 0; j < context->Height; j++)
