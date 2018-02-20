@@ -5124,20 +5124,21 @@ void Save_SCx(T_IO_Context * context)
 //////////////////////////////////// XPM ////////////////////////////////////
 void Save_XPM(T_IO_Context* context)
 {
+  // XPM are unix files, so use LF '\n' line endings
   FILE* file;
-  char filename[MAX_PATH_CHARACTERS];
   int i,j;
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
   File_error = 0;
 
-  file = fopen(filename, "w");
+  file = Open_file_write(context);
   if (file == NULL)
   {
     File_error = 1;
     return;
   }
   setvbuf(file, NULL, _IOFBF, 64*1024);
+  // in case there are less colors than 256, we could
+  // optimize, and use only 1 character per pixel if possible
   fprintf(file, "/* XPM */\nstatic char* pixmap[] = {\n");
   fprintf(file, "\"%d %d 256 2\",\n", context->Width, context->Height);
 

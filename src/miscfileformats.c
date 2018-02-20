@@ -212,15 +212,13 @@ void Load_GPL(T_IO_Context * context)
 void
 Save_GPL (T_IO_Context * context)
 {
+  // Gimp is a unix program, so use Unix file endings (LF aka '\n')
   FILE *file;
-  char filename[MAX_PATH_CHARACTERS]; // full filename
-
-  Get_full_filename(filename, context->File_name, context->File_directory);
 
   File_error=0;
 
   // Open output file
-  if ((file=fopen(filename,"w"))){
+  if ((file=Open_file_write(context)) != NULL ){
     int i;
     fprintf (file, "GIMP Palette\n");
     fprintf (file, "Name: %s\n", context->File_name);
@@ -251,9 +249,6 @@ Save_GPL (T_IO_Context * context)
 void Load_PAL(T_IO_Context * context)
 {
   FILE *file;              // Fichier du fichier
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
-  //long  file_size;   // Taille du fichier
-
 
   File_error=0;
 
@@ -276,8 +271,10 @@ void Load_PAL(T_IO_Context * context)
       else
         File_error = 2;
     } else {
-      fread(filename, 1, 8, file);
-      if (strncmp(filename,"JASC-PAL",8) == 0)
+      char buffer[16];
+      fread(buffer, 1, 8, file);
+      buffer[8] = '\0';
+      if (strncmp(buffer,"JASC-PAL",8) == 0)
       {
         int i, n, r, g, b;
         fscanf(file, "%d",&n);
@@ -296,33 +293,32 @@ void Load_PAL(T_IO_Context * context)
           context->Palette[i].G = g;
           context->Palette[i].B = b;
         }
-      } else if(strncmp(filename, "RIFF", 4) == 0) {
-		// Microsoft RIFF format.
-		fseek(file, 8, SEEK_SET);
-      	fread(filename, 1, 8, file);
-		if (strncmp(filename, "PAL data", 8) == 0)
-		{
-			char buffer[4];
-			word color_count;
-			word i = 0;
+      }
+      else if(strncmp(buffer, "RIFF", 4) == 0)
+      {
+        // Microsoft RIFF format.
+        fseek(file, 8, SEEK_SET);
+        fread(buffer, 1, 8, file);
+        if (strncmp(buffer, "PAL data", 8) == 0)
+        {
+          word color_count;
+          word i = 0;
 
-			fseek(file, 22, SEEK_SET);
-			Read_word_le(file, &color_count);
-			for(i = 0; i < color_count; i++)
-			{
-				Read_bytes(file, buffer, 4);
-          		context->Palette[i].R = buffer[0];
-          		context->Palette[i].G = buffer[1];
-          		context->Palette[i].B = buffer[2];
-			}
+          fseek(file, 22, SEEK_SET);
+          Read_word_le(file, &color_count);
+          for(i = 0; i < color_count; i++)
+          {
+            Read_bytes(file, buffer, 4);
+            context->Palette[i].R = buffer[0];
+            context->Palette[i].G = buffer[1];
+            context->Palette[i].B = buffer[2];
+          }
 
-		} else File_error = 2;
-	  } else
-	    File_error = 2;
-    
+        } else File_error = 2;
+      } else
+        File_error = 2;
     }
     
-    // Fermeture du fichier
     fclose(file);
   }
   else
@@ -334,25 +330,23 @@ void Load_PAL(T_IO_Context * context)
 // -- Sauver un fichier au format PAL ---------------------------------------
 void Save_PAL(T_IO_Context * context)
 {
+  // JASC-PAL is a DOS/Windows format, so use CRLF line endings "\r\n"
   FILE *file;
-  char filename[MAX_PATH_CHARACTERS]; ///< full filename
-
-  Get_full_filename(filename, context->File_name, context->File_directory);
 
   File_error=0;
 
   // Open output file
-  if ((file=fopen(filename,"w")))
+  if ((file=Open_file_write(context)) != NULL)
   {
     int i;
     
     setvbuf(file, NULL, _IOFBF, 64*1024);
     
-    if (fputs("JASC-PAL\n0100\n256\n", file)==EOF)
+    if (fputs("JASC-PAL\r\n0100\r\n256\r\n", file)==EOF)
       File_error=1;
     for (i = 0; i < 256 && File_error==0; i++)
     {
-      if (fprintf(file,"%d %d %d\n",context->Palette[i].R, context->Palette[i].G, context->Palette[i].B) <= 0)
+      if (fprintf(file,"%d %d %d\r\n",context->Palette[i].R, context->Palette[i].G, context->Palette[i].B) <= 0)
         File_error=1;
     }
     
