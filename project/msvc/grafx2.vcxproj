@@ -194,6 +194,7 @@
     <ClCompile Include="..\..\src\tiles.c" />
     <ClCompile Include="..\..\src\transform.c" />
     <ClCompile Include="..\..\src\unicode.c" />
+    <ClCompile Include="..\..\src\version.c" />
     <ClCompile Include="..\..\src\windows.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

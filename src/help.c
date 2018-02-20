@@ -63,10 +63,7 @@
 #include "factory.h"
 
 extern char Program_version[]; // generated in pversion.c
-extern char SVN_revision[]; // generated in pversion.c
-#ifdef _MSC_VER//TODO TEMP
-#define SVN_revision "MSC_0000"
-#endif
+extern char SVN_revision[]; // generated in version.c
 
 // Recherche un raccourci clavier:
 word * Shortcut(word shortcut_number)
