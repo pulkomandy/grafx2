@@ -1490,12 +1490,12 @@ void Load_IFF(T_IO_Context * context)
             memcpy(prev_pal->Palette, context->Palette, nb_colors*sizeof(T_Components));
             PCHG_palettes = prev_pal;
 
-            lineBitMask = PCHGData;
+            lineBitMask = (dword *)PCHGData;
             #if SDL_BYTEORDER != SDL_BIG_ENDIAN
             for (i = 0 ; i < ((LineCount + 31) >> 5); i++)
               lineBitMask[i] = SDL_Swap32(lineBitMask[i]);
             #endif
-            data = PCHGData + ((LineCount + 31) >> 5) * 4;
+            data = (const byte *)PCHGData + ((LineCount + 31) >> 5) * 4;
             for (y_pos = 0 ; y_pos < LineCount; y_pos++)
             {
               if (lineBitMask[y_pos >> 5] & (1 << (31-(y_pos & 31))))
