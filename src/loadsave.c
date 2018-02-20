@@ -1941,5 +1941,5 @@ void Remove_file(T_IO_Context *context)
 
   Get_full_filename(filename, context->File_name, context->File_directory);
 
-  remove(filename);
+  Remove_path(filename);
 }

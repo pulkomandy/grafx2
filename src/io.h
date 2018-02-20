@@ -82,10 +82,10 @@ char * Find_last_separator(const char * str);
 #endif
 
 /// Size of a file, in bytes. Returns 0 in case of error.
-int File_length(const char *fname);
+unsigned long File_length(const char *fname);
 
 /// Size of a file, in bytes. Takes an open file as argument, returns 0 in case of error.
-int File_length_file(FILE * file);
+unsigned long File_length_file(FILE * file);
 
 /// Returns true if a file passed as a parameter exists in the current directory.
 int File_exists(const char * fname);
@@ -135,3 +135,11 @@ const char * Get_current_directory(char * buf, word * buf_unicode, size_t size);
 ///
 /// Change current directory. return 0 for success, -1 in case of error
 int Change_directory(const char * path);
+
+///
+/// Remove the file
+int Remove_path(const char * path);
+
+///
+/// Remove the directory
+int Remove_directory(const char * path);

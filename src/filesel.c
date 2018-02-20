@@ -1743,10 +1743,10 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
             // Si c'est un fichier
             if (Selector->Position+Selector->Offset>=Filelist.Nb_directories)
               // On efface le fichier (si on peut)
-              temp=(!remove(Selector_filename));
+              temp=(!Remove_path(Selector_filename));
             else // Si c'est un repertoire
               // On efface le repertoire (si on peut)
-              temp=(!rmdir(Selector_filename));
+              temp=(!Remove_directory(Selector_filename));
 
             if (temp) // temp indique si l'effacement s'est bien passé
             {

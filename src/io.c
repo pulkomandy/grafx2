@@ -360,20 +360,43 @@ int File_is_hidden(const char *fname, const char *full_name)
   return fname[0]=='.' && strcmp(fname, PARENT_DIR);
 #endif
 }
-// Taille de fichier, en octets
-int File_length(const char * fname)
+
+// File size in bytes
+unsigned long File_length(const char * fname)
 {
-    struct stat infos_fichier;
-    if (stat(fname,&infos_fichier))
-        return 0;
-    return infos_fichier.st_size;
+#if defined(WIN32)
+  WIN32_FILE_ATTRIBUTE_DATA infos;
+  if (GetFileAttributesExA(fname, GetFileExInfoStandard, &infos))
+  {
+    return (unsigned long)(((DWORD64)infos.nFileSizeHigh << 32) + (DWORD64)infos.nFileSizeLow);
+  }
+  else
+    return 0;
+#else
+  struct stat infos_fichier;
+  if (stat(fname,&infos_fichier))
+    return 0;
+  return infos_fichier.st_size;
+#endif
 }
-int File_length_file(FILE * file)
+
+unsigned long File_length_file(FILE * file)
 {
-    struct stat infos_fichier;
-    if (fstat(fileno(file),&infos_fichier))
-        return 0;
-    return infos_fichier.st_size;
+#if defined(WIN32)
+  // revert to old school way of finding file size
+  long offset_backup;
+  long file_length;
+  offset_backup = ftell(file);
+  fseek(file, 0, SEEK_END);
+  file_length = ftell(file);
+  fseek(file, offset_backup, SEEK_SET);
+  return (unsigned long)file_length;
+#else
+  struct stat infos_fichier;
+  if (fstat(fileno(file),&infos_fichier))
+      return 0;
+  return infos_fichier.st_size;
+#endif
 }
 
 void For_each_file(const char * directory_name, void Callback(const char *, const char *))
@@ -681,5 +704,27 @@ int Change_directory(const char * path)
   return (SetCurrentDirectoryA(path) ? 0 : -1);
 #else
   return chdir(path);
+#endif
+}
+
+int Remove_path(const char * path)
+{
+#if defined(WIN32)
+  return (DeleteFileA(path) ? 0 : -1);
+#elif defined(__linux__)
+  return unlink(path);
+#else
+  return remove(path);
+#endif
+}
+
+///
+/// Remove the directory
+int Remove_directory(const char * path)
+{
+#if defined(WIN32)
+  return RemoveDirectoryA(path) ? 0 : -1;
+#else
+  return rmdir(path);
 #endif
 }
