@@ -5133,6 +5133,8 @@ void Save_XPM(T_IO_Context* context)
   // XPM are unix files, so use LF '\n' line endings
   FILE* file;
   int i,j;
+  byte max_color = 0;
+  word color_count;
 
   File_error = 0;
 
@@ -5145,24 +5147,60 @@ void Save_XPM(T_IO_Context* context)
   setvbuf(file, NULL, _IOFBF, 64*1024);
   // in case there are less colors than 256, we could
   // optimize, and use only 1 character per pixel if possible
-  fprintf(file, "/* XPM */\nstatic char* pixmap[] = {\n");
-  fprintf(file, "\"%d %d 256 2\",\n", context->Width, context->Height);
-
-  for (i = 0; i < 256; i++)
-  {
-    fprintf(file,"\"%2.2X c #%2.2x%2.2x%2.2x\",\n", i, context->Palette[i].R, context->Palette[i].G,
-      context->Palette[i].B);
-  }
-
+  // printable characters are from 0x20 to 0x7e, minus " 0x22 and \ 0x5c
+#define XPM_USABLE_CHARS (0x7f - 0x20 - 2)
   for (j = 0; j < context->Height; j++)
-  {
-    fprintf(file, "\"");
     for (i = 0; i < context->Width; i++)
     {
-      fprintf(file, "%2.2X", Get_pixel(context, i, j));
+      byte value = Get_pixel(context, i, j);
+      if (value > max_color)
+        max_color = value;
     }
-    fprintf(file,"\"\n");
+  color_count = (word)max_color + 1;
+
+  fprintf(file, "/* XPM */\nstatic char* pixmap[] = {\n");
+  fprintf(file, "\"%d %d %d %d\",\n", context->Width, context->Height, color_count, color_count > XPM_USABLE_CHARS ? 2 : 1);
+
+  if (color_count > XPM_USABLE_CHARS)
+  {
+    // none is for transparent color
+    for (i = 0; i < color_count; i++)
+      fprintf(file,"\"%2.2X\tc #%2.2x%2.2x%2.2x\",\n", i, context->Palette[i].R, context->Palette[i].G,
+        context->Palette[i].B);
+
+    for (j = 0; j < context->Height; j++)
+    {
+      fprintf(file, "\"");
+      for (i = 0; i < context->Width; i++)
+        fprintf(file, "%2.2X", Get_pixel(context, i, j));
+      fprintf(file,"\"\n");
+    }
   }
+  else
+  {
+    int c;
+    for (i = 0; i < color_count; i++)
+    {
+      c = (i < 2) ? i + 0x20 : i + 0x21;
+      if (c >= 0x5c) c++;
+      fprintf(file,"\"%c\tc #%2.2x%2.2x%2.2x\",\n", c, context->Palette[i].R, context->Palette[i].G,
+        context->Palette[i].B);
+    }
+
+    for (j = 0; j < context->Height; j++)
+    {
+      fprintf(file, "\"");
+      for (i = 0; i < context->Width; i++)
+      {
+        c = Get_pixel(context, i, j);
+        c = (c < 2) ? c + 0x20 : c + 0x21;
+        if (c >= 0x5c) c++;
+        fprintf(file, "%c", c);
+      }
+      fprintf(file,"\"\n");
+    }
+  }
+  fprintf(file, "};\n");
 
   fclose(file);
 }
