@@ -29,6 +29,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#if defined(_MSC_VER)
+#define strdup _strdup
+#endif
 
 #include "const.h"
 #include "errors.h"

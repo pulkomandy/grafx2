@@ -53,6 +53,12 @@
 
 
 #include <stdlib.h>
+#if defined(_MSC_VER)
+#include <stdio.h>
+#if _MSC_VER < 1900
+#define snprintf _snprintf
+#endif
+#endif
 
 #include "errors.h"
 #include "global.h"

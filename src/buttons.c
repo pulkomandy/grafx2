@@ -40,11 +40,8 @@
 #if !defined(_MSC_VER)
 #include <strings.h>
 #else
-#if (_MSC_VER >= 1400)
-#define strncasecmp _memicmp
-#else
-#define strncasecmp memicmp
-#endif
+#define strdup _strdup
+#define strncasecmp _strnicmp
 #endif
 #include <stdlib.h>
 #if !defined(__VBCC__) && !defined(_MSC_VER)

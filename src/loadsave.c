@@ -33,6 +33,12 @@
 #endif
 #if defined(WIN32)
 #include <windows.h>
+#if defined(_MSC_VER)
+#define strdup _strdup
+#if _MSC_VER < 1900
+#define snprintf _snprintf
+#endif
+#endif
 #endif
 #include <limits.h>
 #include <SDL_image.h>

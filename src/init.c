@@ -35,7 +35,6 @@
 #endif
 
 #include <stdio.h>
-//#include <fcntl.h>
 #include <string.h>
 
 #if !defined(__VBCC__) && !defined(_MSC_VER)
@@ -58,9 +57,12 @@
 #ifdef GRAFX2_CATCHES_SIGNALS
   #include <signal.h>
 #endif
-#ifdef _MSC_VER
-#include <stdio.h>
+#if defined(_MSC_VER)
+#define strncasecmp _strnicmp
+#define strdup _strdup
+#if _MSC_VER < 1900
 #define snprintf _snprintf
+#endif
 #endif
 
 #include "buttons.h"

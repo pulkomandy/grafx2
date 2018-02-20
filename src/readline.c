@@ -60,7 +60,10 @@
 
 #ifdef _MSC_VER
 #include <stdio.h>
+#define strdup _strdup
+#if _MSC_VER < 1900
 #define snprintf _snprintf
+#endif
 #endif
 
 // Virtual keyboard is ON by default on these platforms:
