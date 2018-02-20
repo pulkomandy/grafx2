@@ -75,7 +75,7 @@ ifdef COMSPEC
   PLATFORMOBJ = winres.o
   PLATFORM = win32
   #some misc files we have to add to the release archive under windows.
-  PLATFORMFILES = bin/SDL.dll bin/SDL_image.dll $(wildcard ../bin/libpng*.dll) bin/zlib1.dll $(TTFLIBS)
+  PLATFORMFILES = bin/SDL.dll bin/SDL_image.dll $(wildcard ../bin/libpng*.dll) $(wildcard ../bin/libjpeg*.dll) bin/zlib1.dll $(TTFLIBS)
   ZIP = zip
 else
 
@@ -378,7 +378,7 @@ endif
       endif
       OBJDIR = ../obj/win32
       PLATFORM = win32
-      PLATFORMFILES = bin/SDL.dll bin/SDL_image.dll $(wildcard ../bin/libpng*.dll) bin/zlib1.dll $(TTFLIBS)
+      PLATFORMFILES = bin/SDL.dll bin/SDL_image.dll $(wildcard ../bin/libpng*.dll) $(wildcard ../bin/libjpeg*.dll) bin/zlib1.dll $(TTFLIBS)
     else
       ifdef GP2XCROSS
         #cross compile an exec for the gp2x

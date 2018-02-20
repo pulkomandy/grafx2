@@ -38,9 +38,12 @@ ifdef WIN32CROSS
 CROSS_CC ?= $(shell which i686-w64-mingw32-gcc || which mingw32-gcc)
 CROSS_AR ?= $(shell which i686-w64-mingw32-ar || which mingw32-ar)
 CROSS_RANLIB ?= $(shell which i686-w64-mingw32-ranlib || which mingw32-ranlib)
+CROSS_LDFLAGS += -static-libgcc
 CC = $(CROSS_CC)
 AR = $(CROSS_AR)
 RANLIB = $(CROSS_RANLIB)
+CFLAGS = $(CROSS_CFLAGS)
+LDFLAGS = $(CROSS_LDFLAGS)
 endif
 
 HOST = $(shell $(CC) -dumpmachine)
@@ -72,15 +75,21 @@ $(PREFIX)/lib/libSDLmain.a:	archives/$(SDLDEVEL)
 	$(TAR) xzf $<
 	patch -p0 < $(SDLDEVELPATCH)
 	cd SDL-1.2.15 && CROSS_PATH=$(PREFIX) $(MAKE) cross
+ifdef WIN32CROSS
+	$(CP) $(PREFIX)/bin/SDL.dll ../bin
+endif
 
 $(PREFIX)/lib/libSDL_image.a:	$(PREFIX)/lib/libjpeg.a
 $(PREFIX)/lib/libSDL_image.a:	$(PREFIX)/lib/libtiff.a
 $(PREFIX)/lib/libSDL_image.a:	$(PREFIX)/lib/libpng.a
 
 $(PREFIX)/lib/libSDL_image.a:	$(SDLIMAGE)/.ok
-	cd $(SDLIMAGE) && CC=$(CC) CPPFLAGS=-I$(PREFIX)/include LDFLAGS=-L$(PREFIX)/lib LIBPNG_CFLAGS= LIBPNG_LIBS=-lpng ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --host=$(HOST) --disable-webp
+	cd $(SDLIMAGE) && CC="$(CC) $(LDFLAGS)" CPPFLAGS=-I$(PREFIX)/include LDFLAGS="-L$(PREFIX)/lib" LIBPNG_CFLAGS= LIBPNG_LIBS=-lpng ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --host=$(HOST) --disable-webp
 	cd $(SDLIMAGE) && $(MAKE)
 	cd $(SDLIMAGE) && $(MAKE) install
+ifdef WIN32CROSS
+	$(CP) $(PREFIX)/bin/SDL_image.dll ../bin
+endif
 
 $(SDLIMAGE)/.ok:	archives/$(SDLIMAGEARCH)
 	$(TAR) xzf $<
@@ -89,9 +98,12 @@ $(SDLIMAGE)/.ok:	archives/$(SDLIMAGEARCH)
 $(PREFIX)/lib/libSDL_ttf.a:	$(PREFIX)/lib/libfreetype.a
 
 $(PREFIX)/lib/libSDL_ttf.a:	$(SDLTTF)/.ok
-	cd $(SDLTTF) && CC=$(CC) CPPFLAGS=-I$(PREFIX)/include LDFLAGS=-L$(PREFIX)/lib ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --host=$(HOST)
+	cd $(SDLTTF) && CC=$(CC) CPPFLAGS=-I$(PREFIX)/include LDFLAGS="-L$(PREFIX)/lib $(LDFLAGS)" ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --host=$(HOST)
 	cd $(SDLTTF) && $(MAKE)
 	cd $(SDLTTF) && $(MAKE) install
+ifdef WIN32CROSS
+	$(CP) $(PREFIX)/bin/SDL_ttf.dll ../bin
+endif
 
 $(SDLTTF)/.ok:	archives/$(SDLTTFARCH)
 	$(TAR) xzf $<
@@ -100,9 +112,12 @@ $(SDLTTF)/.ok:	archives/$(SDLTTFARCH)
 $(PREFIX)/lib/libfreetype.a:	$(PREFIX)/lib/libpng.a
 
 $(PREFIX)/lib/libfreetype.a:	$(FREETYPE)/.ok
-	cd $(FREETYPE) && ./configure --build=$(shell $(BUILD_CC) -dumpmachine) --host=$(HOST) --prefix=$(PREFIX) PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig
+	cd $(FREETYPE) && ./configure --build=$(shell $(BUILD_CC) -dumpmachine) --host=$(HOST) --prefix=$(PREFIX) PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig LDFLAGS="$(LDFLAGS)"
 	cd $(FREETYPE) && $(MAKE)
 	cd $(FREETYPE) && $(MAKE) install
+ifdef WIN32CROSS
+	$(CP) $(PREFIX)/bin/libfreetype*.dll ../bin
+endif
 
 $(FREETYPE)/.ok:	archives/$(FREETYPEARCH)
 	$(TAR) xzf $<
@@ -112,6 +127,9 @@ $(PREFIX)/lib/libjpeg.a:	$(JPEGDIR)/.ok
 	cd $(JPEGDIR) && CC=$(CC) ./configure --prefix=$(PREFIX) --host=$(HOST)
 	cd $(JPEGDIR) && $(MAKE)
 	cd $(JPEGDIR) && $(MAKE) install
+ifdef WIN32CROSS
+	$(CP) $(PREFIX)/bin/libjpeg*.dll ../bin
+endif
 
 $(JPEGDIR)/.ok:	archives/$(JPEGARCH)
 	$(TAR) xzf $<
@@ -136,18 +154,23 @@ $(LIBTIFF)/.ok:	archives/$(LIBTIFFARCH)
 $(PREFIX)/lib/libpng.a:	$(PREFIX)/lib/libz.a
 
 $(PREFIX)/lib/libpng.a:	$(LIBPNG)/.ok
-	cd $(LIBPNG) && CC=$(CC) CPPFLAGS=-I$(PREFIX)/include LDFLAGS=-L$(PREFIX)/lib ./configure --prefix=$(PREFIX) --host=$(HOST)
+	cd $(LIBPNG) && CC="$(CC) $(LDFLAGS)" CPPFLAGS=-I$(PREFIX)/include LDFLAGS="-L$(PREFIX)/lib" ./configure --prefix=$(PREFIX) --host=$(HOST) --enable-silent-rules
 	cd $(LIBPNG) && $(MAKE)
 	cd $(LIBPNG) && $(MAKE) install
+ifdef WIN32CROSS
 	$(CP) $(PREFIX)/bin/libpng*.dll ../bin
+endif
 
 $(LIBPNG)/.ok:	archives/$(LIBPNGARCH)
 	$(TAR) xzf $<
 	touch $@
 
 $(PREFIX)/lib/libz.a:	$(ZLIB)/.ok
-	cd $(ZLIB) && $(MAKE) -fwin32/Makefile.gcc PREFIX=$(shell echo $(CC) | sed 's/^\(.*\)gcc/\1/')
+	cd $(ZLIB) && $(MAKE) -fwin32/Makefile.gcc PREFIX=$(shell echo $(CC) | sed 's/^\(.*\)gcc/\1/') LOC="$(LDFLAGS) $(CFLAGS)"
 	cd $(ZLIB) && INCLUDE_PATH=$(PREFIX)/include LIBRARY_PATH=$(PREFIX)/lib BINARY_PATH=$(PREFIX)/bin $(MAKE) install -fwin32/Makefile.gcc SHARED_MODE=1
+ifdef WIN32CROSS
+	$(CP) $(PREFIX)/bin/zlib*.dll ../bin
+endif
 
 $(ZLIB)/.ok:	archives/$(ZLIBARCH)
 	$(TAR) xzf $<
