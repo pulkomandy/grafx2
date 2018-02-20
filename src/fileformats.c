@@ -2176,9 +2176,9 @@ void Save_IFF(T_IO_Context * context)
       fseek(IFF_file,4,SEEK_SET);
       Write_dword_be(IFF_file,file_size-8);
     }
-    else // Il y a eu une erreur lors du compactage => on efface le fichier
-      Remove_file(context);
     fclose(IFF_file);
+    if (File_error != 0) // remove the file if there have been an error
+      Remove_file(context);
   }
   else
     File_error=1;
