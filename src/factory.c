@@ -59,6 +59,10 @@ char * Bound_script[10];
 #include <float.h> // for DBL_MAX
 #include <limits.h> //for INT_MIN
 #include <string.h> // strncpy()
+#if defined(_MSC_VER)
+#define strdup _strdup
+#define putenv _putenv
+#endif
 
 ///
 /// Number of characters for name in fileselector.
@@ -84,7 +88,7 @@ static byte Cursor_is_visible;
 static byte Window_needs_update;
 
 /// Helper function to clamp a double to 0-255 range
-static inline byte clamp_byte(double value)
+static byte clamp_byte(double value)
 {
   if (value<0.0)
     return 0;
@@ -981,8 +985,8 @@ int L_SetBackColor(lua_State* L)
 
 int L_InputBox(lua_State* L)
 {
-  const int max_settings = 9;
-  const int args_per_setting = 5;
+#define max_settings (9)
+#define args_per_setting (5)
   double min_value[max_settings];
   double max_value[max_settings];
   double decimal_places[max_settings];
@@ -1258,12 +1262,15 @@ int L_InputBox(lua_State* L)
     lua_pushnumber(L, current_value[setting]);
     
   return 1 + nb_settings;
+#undef max_settings
+#undef args_per_setting
 }
 
 int L_SelectBox(lua_State* L)
 {
-  const int max_settings = 10;
+#define max_settings (10)
   const char * label[max_settings];
+#undef max_settings
 
   const char * window_caption;
   unsigned int caption_length;
