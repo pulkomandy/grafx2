@@ -64,6 +64,8 @@ char * Bound_script[10];
 #define putenv _putenv
 #endif
 
+#include "unicode.h"
+
 ///
 /// Number of characters for name in fileselector.
 /// Window is adjusted according to it.
@@ -2161,7 +2163,10 @@ void Draw_script_name(word x, word y, word index, byte highlighted)
 	  }
     }
     
-    Print_in_window(x, y, current_item->Short_name, fg,bg);
+    if (current_item->Unicode_short_name != NULL)
+      Print_in_window_unicode(x, y, current_item->Unicode_short_name, fg, bg);
+    else
+      Print_in_window(x, y, current_item->Short_name, fg,bg);
 
     Update_window_area(x,y,NAME_WIDTH*8,8);
   }
@@ -2258,8 +2263,8 @@ void Draw_script_information(T_Fileselector_item * script_item, const char *full
 static void Add_script(void * pdata, const char *file_name, const word *unicode_name, byte is_file, byte is_directory, byte is_hidden)
 {
   int len;
+  T_Fileselector_item * item;
   (void)pdata;
-  (void)unicode_name;
 
   if (is_file)
   {
@@ -2271,7 +2276,12 @@ static void Add_script(void * pdata, const char *file_name, const word *unicode_
     if (is_hidden && !Config.Show_hidden_files)
       return;
       
-    Add_element_to_list(&Scripts_selector, file_name, Format_filename(file_name, NAME_WIDTH+1, 0), 0, ICON_NONE);
+    item = Add_element_to_list(&Scripts_selector, file_name, Format_filename(file_name, NAME_WIDTH+1, 0), 0, ICON_NONE);
+    if (item != NULL && unicode_name != NULL)
+    {
+      item->Unicode_full_name = Unicode_strdup(unicode_name);
+      item->Unicode_short_name = Unicode_strdup(Format_filename_unicode(unicode_name, NAME_WIDTH+1, 1));
+    }
   }
   else if (is_directory)
   {
@@ -2285,7 +2295,12 @@ static void Add_script(void * pdata, const char *file_name, const word *unicode_
     if (is_hidden && !Config.Show_hidden_directories)
       return;
     
-    Add_element_to_list(&Scripts_selector, file_name, Format_filename(file_name, NAME_WIDTH+1, 1), 1, ICON_NONE);
+    item = Add_element_to_list(&Scripts_selector, file_name, Format_filename(file_name, NAME_WIDTH+1, 1), 1, ICON_NONE);
+    if (item != NULL && unicode_name != NULL)
+    {
+      item->Unicode_full_name = Unicode_strdup(unicode_name);
+      item->Unicode_short_name = Unicode_strdup(Format_filename_unicode(unicode_name, NAME_WIDTH+1, 1));
+    }
   }
 }
 

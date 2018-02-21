@@ -38,6 +38,8 @@ T_Fileselector_item * Add_element_to_list(T_Fileselector *list, const char * ful
 /// including the '\\0'.
 char * Format_filename(const char * fname, word max_length, int type);
 
+word * Format_filename_unicode(const word * fname, word max_length, int type);
+
 void Free_fileselector_list(T_Fileselector *list);
 
 void Sort_list_of_files(T_Fileselector *list);

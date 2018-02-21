@@ -498,8 +498,11 @@ static void Read_dir_callback(void * pdata, const char *file_name, const word *u
 
     // Add to list
     item = Add_element_to_list(p->list, file_name, Format_filename(file_name, 19, 1), 1, ICON_NONE);
-    item->Unicode_full_name = Unicode_strdup(unicode_name);
-    item->Unicode_short_name = Unicode_strdup(Format_filename_unicode(unicode_name, 19, 1));
+    if (item != NULL && unicode_name != NULL)
+    {
+      item->Unicode_full_name = Unicode_strdup(unicode_name);
+      item->Unicode_short_name = Unicode_strdup(Format_filename_unicode(unicode_name, 19, 1));
+    }
     p->list->Nb_directories++;
   }
   else if (is_file && // It's a file
@@ -512,8 +515,11 @@ static void Read_dir_callback(void * pdata, const char *file_name, const word *u
       {
         // Add to list
         item = Add_element_to_list(p->list, file_name, Format_filename(file_name, 19, 0), 0, ICON_NONE);
-        item->Unicode_full_name = Unicode_strdup(unicode_name);
-        item->Unicode_short_name = Unicode_strdup(Format_filename_unicode(unicode_name, 19, 0));
+        if (item != NULL && unicode_name != NULL)
+        {
+          item->Unicode_full_name = Unicode_strdup(unicode_name);
+          item->Unicode_short_name = Unicode_strdup(Format_filename_unicode(unicode_name, 19, 0));
+        }
         p->list->Nb_files++;
         // Stop searching
         break;
