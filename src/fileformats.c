@@ -1765,6 +1765,8 @@ printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, s
           if ((context->Type == CONTEXT_PREVIEW || context->Type == CONTEXT_PREVIEW_PALETTE)
             && tiny_width > 0 && tiny_height > 0)
           {
+            context->Original_width = header.Width;
+            context->Original_height = header.Height;
             Pre_load(context, tiny_width, tiny_height,file_size,iff_format,ratio,bpp);
             context->Background_transparent = header.Mask == 2;
             context->Transparent_color = context->Background_transparent ? header.Transp_col : 0;

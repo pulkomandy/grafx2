@@ -65,6 +65,8 @@ typedef struct
   T_Palette Palette;
   short Width;
   short Height;
+  short Original_width;   /// Size of the whole image in case of PREVIEW of a thumbnail
+  short Original_height;
   int  Nb_layers;
   char Comment[COMMENT_SIZE+1];
   byte Background_transparent;

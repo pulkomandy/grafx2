@@ -426,17 +426,23 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
       context->Preview_bitmap=calloc(1, PREVIEW_WIDTH*PREVIEW_HEIGHT*Menu_factor_X*Menu_factor_Y);
       if (!context->Preview_bitmap)
         File_error=1;
-            
+
       // Affichage des données "Image size:"
-      if ((width<10000) && (height<10000))
+      memcpy(str, "VERY BIG!", 10); // default string
+      if (context->Original_width != 0)
+      {
+        if (context->Original_width < 10000 && context->Original_height < 10000)
+        {
+          Num2str(context->Original_width,str,4);
+          Num2str(context->Original_height,str+5,4);
+          str[4]='x';
+        }
+      }
+      else if ((width<10000) && (height<10000))
       {
         Num2str(width,str,4);
         Num2str(height,str+5,4);
         str[4]='x';
-      }
-      else
-      {
-        memcpy(str, "VERY BIG!", 10);
       }
       Print_in_window(101,59,str,MC_Black,MC_Light);
       snprintf(str, sizeof(str), "%2dbpp", bpp);
