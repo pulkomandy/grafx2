@@ -57,6 +57,7 @@ endif
 PLATFORMOBJ =
 
 TAR = tar
+# Note : --transform option was added in GNU tar version 1.15.91
 TARTRANSFORM = --strip=1 --transform 's,^,grafx2/,g'
 
 # There is no uname under windows, but we can guess we are there with the COMSPEC env.var
@@ -139,6 +140,7 @@ endif
     OPTIM = 3
     CP = cp
     ZIP = zip
+    TAR = $(shell which bsdtar || which gnutar || which tar)
     TARTRANSFORM = $(shell if $(TAR) --version | grep 'GNU tar' > /dev/null ; then \
                              echo "--strip=1 --transform 's,^,grafx2/,g'" ; else \
                              echo "-s '/\.\./grafx2/'" ; fi )
