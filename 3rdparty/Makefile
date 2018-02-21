@@ -23,6 +23,9 @@ ZLIBURL=https://www.zlib.net/$(ZLIBARCH)
 FREETYPE=freetype-2.9
 FREETYPEARCH=$(FREETYPE).tar.gz
 FREETYPEURL=https://download.savannah.gnu.org/releases/freetype/$(FREETYPEARCH)
+LUA=lua-5.3.4
+LUAARCH=$(LUA).tar.gz
+LUAURL=https://www.lua.org/ftp/$(LUAARCH)
 # https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-0.6.1.tar.gz
 
 PREFIX = $(PWD)/usr
@@ -49,19 +52,20 @@ endif
 HOST = $(shell $(CC) -dumpmachine)
 #HOST = i686-pc-mingw32
 
-.PHONY:	all clean clean_archives clean_all libs libpng libsdl libsdl_image libsdl_ttf libjpeg libtiff zlib freetype
+.PHONY:	all clean clean_archives clean_all libs libpng libsdl libsdl_image libsdl_ttf libjpeg libtiff zlib freetype lua
 
 all:	libs
 
 clean_all:	clean clean_archives
 
 clean:
-	$(RM) -r usr/ $(LIBPNG) $(ZLIB) $(SDLIMAGE) $(SDLTTF) $(JPEGDIR) $(LIBTIFF) $(FREETYPE) SDL-1.2.15
+	$(RM) -r usr/ $(LIBPNG) $(ZLIB) $(SDLIMAGE) $(JPEGDIR) $(LIBTIFF)
+	$(RM) -r $(SDLTTF) $(FREETYPE) SDL-1.2.15 $(LUA)
 
 clean_archives:
 	$(RM) -r archives
 
-libs:	libpng libsdl libsdl_image libsdl_ttf
+libs:	libpng libsdl libsdl_image libsdl_ttf lua
 libsdl:	$(PREFIX)/lib/libSDLmain.a
 libsdl_image:	$(PREFIX)/lib/libSDL_image.a
 libsdl_ttf:	$(PREFIX)/lib/libSDL_ttf.a
@@ -70,6 +74,18 @@ libpng:	$(PREFIX)/lib/libpng.a
 libtiff:	$(PREFIX)/lib/libtiff.a
 zlib:	$(PREFIX)/lib/libz.a
 freetype:	$(PREFIX)/lib/libfreetype.a
+lua:	$(PREFIX)/lib/liblua.a
+
+$(PREFIX)/lib/liblua.a:	$(LUA)/.ok
+ifdef WIN32CROSS
+	cd $(LUA) && $(MAKE) PLAT=mingw CC=$(CC) RANLIB=$(RANLIB)
+	cd $(LUA) && $(MAKE) install PLAT=mingw INSTALL_TOP=$(PREFIX) TO_BIN="lua.exe luac.exe"
+	cp -v $(LUA)/src/lua*.dll ../bin
+endif
+
+$(LUA)/.ok:	archives/$(LUAARCH)
+	$(TAR) xzf $<
+	touch $@
 
 $(PREFIX)/lib/libSDLmain.a:	archives/$(SDLDEVEL)
 	$(TAR) xzf $<
@@ -207,3 +223,7 @@ archives/$(ZLIBARCH):
 archives/$(FREETYPEARCH):
 	@$(MKDIR) $(@D)
 	cd $(@D) && $(GETURL) $(FREETYPEURL)
+
+archives/$(LUAARCH):
+	@$(MKDIR) $(@D)
+	cd $(@D) && $(GETURL) $(LUAURL)
