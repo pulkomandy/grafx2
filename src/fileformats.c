@@ -1759,7 +1759,6 @@ void Load_IFF(T_IO_Context * context)
           Read_word_be(IFF_file,&tiny_width);
           Read_word_be(IFF_file,&tiny_height);
           section_size -= 4;
-printf("%d x %d = %d   %d\n", tiny_width, tiny_height, tiny_width*tiny_height, section_size);
 
           // Load thumbnail if in preview mode
           if ((context->Type == CONTEXT_PREVIEW || context->Type == CONTEXT_PREVIEW_PALETTE)
