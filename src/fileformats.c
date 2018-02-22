@@ -807,6 +807,68 @@ static void LBM_Decode(T_IO_Context * context, FILE * file, byte compression, by
   }
 }
 
+static void RAST_chunk_decode(T_IO_Context * context, FILE * file, dword section_size, T_IFF_PCHG_Palette ** PCHG_palettes)
+{
+  int i;
+  T_Components palette[16];
+  T_IFF_PCHG_Palette * prev_pal = NULL;
+  T_IFF_PCHG_Palette * new_pal = NULL;
+
+  // 17 words per palette : 1 for line, 16 for the colors
+  while (section_size >= 34)
+  {
+    word line, value;
+
+    Read_word_be(file, &line);
+    for (i = 0; i < 16; i++)
+    {
+      Read_word_be(file, &value);  // Decode STE Palette
+      palette[i].R = ((value & 0x0700) >> 7 | (value & 0x0800) >> 11) * 0x11;
+      palette[i].G = ((value & 0x0070) >> 3 | (value & 0x0080) >> 7) * 0x11;
+      palette[i].B = ((value & 0x0007) << 1 | (value & 0x0008) >> 3) * 0x11;
+    }
+    section_size -= 34;
+
+    if (prev_pal == NULL || (line > prev_pal->StartLine && (0 != memcmp(palette, prev_pal->Palette, sizeof(T_Components)*3))))
+    {
+      new_pal = malloc(sizeof(T_IFF_PCHG_Palette) + sizeof(T_Components) * 16);
+      if (new_pal == NULL)
+      {
+        File_error = 2;
+        return;
+      }
+      memcpy(new_pal->Palette, palette, sizeof(T_Components) * 16);
+      new_pal->StartLine = line;
+      new_pal->Next = NULL;
+      if (prev_pal != NULL)
+      {
+        prev_pal->Next = new_pal;
+        prev_pal = new_pal;
+      }
+      else if (line == 0)
+      {
+        prev_pal = new_pal;
+        *PCHG_palettes = prev_pal;
+      }
+      else  // line > 0 && prev_pal == NULL
+      {
+        // create a palette for line 0
+        prev_pal = malloc(sizeof(T_IFF_PCHG_Palette) + sizeof(T_Components) * 16);
+        if (prev_pal == NULL)
+        {
+          File_error = 2;
+          return;
+        }
+        memcpy(prev_pal->Palette, context->Palette, sizeof(T_Components) * 16);
+        prev_pal->StartLine = 0;
+        prev_pal->Next = new_pal;
+        *PCHG_palettes = prev_pal;
+        prev_pal = new_pal;
+      }
+    }
+  }
+}
+
 static void IFF_Set_EHB_Palette(T_IO_Context * context)
 {
   int i, j;            // 32 colors in the palette.
@@ -1759,6 +1821,17 @@ void Load_IFF(T_IO_Context * context)
           if (PCHG_palettes != NULL)
             bpp = 12;
         }
+        else if (memcmp(section, "RAST", 4) == 0) // Atari ST
+        {
+          if (PCHG_palettes == NULL)
+          {
+            RAST_chunk_decode(context, IFF_file, section_size, &PCHG_palettes);
+            if (PCHG_palettes != NULL)
+              bpp = 12;
+          }
+          else
+            fseek(IFF_file, (section_size+1)&~1, SEEK_CUR); // Skip
+        }
         else if (memcmp(section, "TINY", 4) == 0)
         {
           word tiny_width, tiny_height;
@@ -1846,6 +1919,28 @@ void Load_IFF(T_IO_Context * context)
         }
         else if (memcmp(section, "BODY", 4) == 0)
         {
+          long offset = ftell(IFF_file);
+          if (file_size > (offset + section_size + 8))
+          {
+            // Chunk RAST is placed AFTER the BODY, but we need the palette now to decode the image
+            // In addition, some files break the IFF standard by not aligning
+            // the chunk on word boundaries.
+            fseek(IFF_file, section_size, SEEK_CUR);
+            Read_bytes(IFF_file, section, 1);
+            if (section[0] == 'R')                  // we are good
+              Read_bytes(IFF_file, section + 1, 3); // read the remaining 3 bytes
+            else                                    // skip 1 byte
+              Read_bytes(IFF_file, section, 4);     // read 4 bytes
+            if (memcmp(section, "RAST", 4) == 0)
+            {
+              dword rast_size;
+              Read_dword_be(IFF_file, &rast_size);
+              RAST_chunk_decode(context, IFF_file, rast_size, &PCHG_palettes);
+              if (PCHG_palettes != NULL)
+                bpp = 12;
+            }
+            fseek(IFF_file, offset, SEEK_SET);  // rewind
+          }
           Original_screen_X = header.X_screen;
           Original_screen_Y = header.Y_screen;
 
