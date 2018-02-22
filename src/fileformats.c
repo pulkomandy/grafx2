@@ -468,20 +468,20 @@ static void Draw_IFF_line_PCHG(T_IO_Context *context, const byte * buffer, short
   }
 }
 
-static void Draw_IFF_line_HAM(T_IO_Context *context, const byte * buffer, short y_pos, short real_line_size, byte bitplanes, const T_Components * SHAM_palettes, int SHAM_palette_count)
+static void Draw_IFF_line_HAM(T_IO_Context *context, const byte * buffer, short y_pos, short real_line_size, byte bitplanes, const T_IFF_PCHG_Palette * PCHG_palettes)
 {
   short x_pos;
   byte red, green, blue, temp;
   const T_Components * palette;
 
-  if (SHAM_palettes == NULL)
+  if (PCHG_palettes == NULL)
     palette = context->Palette;
   else
   {
-    if (SHAM_palette_count >= context->Height)
-      palette = SHAM_palettes + 16*y_pos;
-    else
-      palette = SHAM_palettes + 16*(y_pos >> 1);
+    // find the palette to use for the line
+    while (PCHG_palettes->Next != NULL && PCHG_palettes->Next->StartLine <= y_pos)
+      PCHG_palettes = PCHG_palettes->Next;
+    palette = PCHG_palettes->Palette;
   }
   red = palette[0].R;
   green = palette[0].G;
@@ -600,8 +600,7 @@ static void PBM_Decode(T_IO_Context * context, FILE * file, byte compression, wo
 }
 
 static void LBM_Decode(T_IO_Context * context, FILE * file, byte compression, byte Image_HAM,
-                       byte stored_bit_planes, byte real_bit_planes, const T_IFF_PCHG_Palette * PCHG_palettes,
-                       const T_Components * SHAM_palettes, int SHAM_palette_count)
+                       byte stored_bit_planes, byte real_bit_planes, const T_IFF_PCHG_Palette * PCHG_palettes)
 {
   int plane;
   byte * buffer;
@@ -625,12 +624,12 @@ static void LBM_Decode(T_IO_Context * context, FILE * file, byte compression, by
       {
         if (Read_bytes(file,buffer,line_size))
         {
-          if (PCHG_palettes)
+          if (Image_HAM > 1)
+            Draw_IFF_line_HAM(context, buffer, y_pos,real_line_size, real_bit_planes, PCHG_palettes);
+          else if (PCHG_palettes)
             Draw_IFF_line_PCHG(context, buffer, y_pos,real_line_size, real_bit_planes, PCHG_palettes);
-          else if (Image_HAM <= 1)
-            Draw_IFF_line(context, buffer, y_pos,real_line_size, real_bit_planes);
           else
-            Draw_IFF_line_HAM(context, buffer, y_pos,real_line_size, real_bit_planes, SHAM_palettes, SHAM_palette_count);
+            Draw_IFF_line(context, buffer, y_pos,real_line_size, real_bit_planes);
         }
         else
           File_error=21;
@@ -694,12 +693,12 @@ static void LBM_Decode(T_IO_Context * context, FILE * file, byte compression, by
         }
         if (!File_error)
         {
-          if (PCHG_palettes)
+          if (Image_HAM > 1)
+            Draw_IFF_line_HAM(context, buffer, y_pos,real_line_size, real_bit_planes, PCHG_palettes);
+          else if (PCHG_palettes)
             Draw_IFF_line_PCHG(context, buffer, y_pos,real_line_size, real_bit_planes, PCHG_palettes);
-          else if (Image_HAM <= 1)
-            Draw_IFF_line(context, buffer, y_pos,real_line_size,real_bit_planes);
           else
-            Draw_IFF_line_HAM(context, buffer, y_pos,real_line_size, real_bit_planes, SHAM_palettes, SHAM_palette_count);
+            Draw_IFF_line(context, buffer, y_pos,real_line_size,real_bit_planes);
         }
       }
       free(buffer);
@@ -869,15 +868,15 @@ static void RAST_chunk_decode(T_IO_Context * context, FILE * file, dword section
   }
 }
 
-static void IFF_Set_EHB_Palette(T_IO_Context * context)
+static void IFF_Set_EHB_Palette(T_Components * palette)
 {
   int i, j;            // 32 colors in the palette.
   for (i=0; i<32; i++) // The next 32 colors are the same with values divided by 2
   {
     j=i+32;
-    context->Palette[j].R=context->Palette[i].R>>1;
-    context->Palette[j].G=context->Palette[i].G>>1;
-    context->Palette[j].B=context->Palette[i].B>>1;
+    palette[j].R = palette[i].R>>1;
+    palette[j].G = palette[i].G>>1;
+    palette[j].B = palette[i].B>>1;
   }
 }
 
@@ -904,8 +903,6 @@ void Load_IFF(T_IO_Context * context)
   dword AmigaViewModes = 0;
   enum PIXEL_RATIO ratio = PIXEL_SIMPLE;
   byte * buffer;
-  T_Components * SHAM_palettes = NULL;
-  unsigned SHAM_palette_count = 0;
   byte bpp = 0;
   byte Image_HAM = 0;
   T_IFF_PCHG_Palette * PCHG_palettes = NULL;
@@ -1465,10 +1462,13 @@ void Load_IFF(T_IO_Context * context)
             memset(context->Palette,0,sizeof(T_Palette));
           if (Read_bytes(IFF_file,context->Palette,3*nb_colors))
           {
-            if (((nb_colors==32) || (AmigaViewModes & 0x80)) && (header.BitPlanes==6))
-              IFF_Set_EHB_Palette(context); // This is a Extra Half-Brite (EHB) 64 color image.
-
             section_size -= 3*nb_colors;
+            if (((nb_colors==32) || (AmigaViewModes & 0x80)) && (header.BitPlanes==6))
+            {
+              IFF_Set_EHB_Palette(context->Palette); // This is a Extra Half-Brite (EHB) 64 color image.
+              nb_colors = 64;
+            }
+
             while(section_size > 0) // Read padding bytes
             {
               if (Read_byte(IFF_file,&temp_byte))
@@ -1529,7 +1529,10 @@ void Load_IFF(T_IO_Context * context)
             bpp = 3 * (header.BitPlanes - 2);
           }
           if ((AmigaViewModes & 0x80) && (header.BitPlanes == 6)) // This is a Extra Half-Brite (EHB) 64 color image.
-            IFF_Set_EHB_Palette(context); // Set the palette in case CAMG is after CMAP
+          {
+            IFF_Set_EHB_Palette(context->Palette); // Set the palette in case CAMG is after CMAP
+            nb_colors = 64;
+          }
         }
         else if (memcmp(section, "DPPV", 4) == 0) // DPaint II ILBM perspective chunk
         {
@@ -1559,6 +1562,9 @@ void Load_IFF(T_IO_Context * context)
         else if (memcmp(section, "SHAM", 4) == 0) // Sliced HAM
         {
           word version;
+          dword SHAM_palette_count;
+          T_IFF_PCHG_Palette * prev_pal = NULL;
+          T_IFF_PCHG_Palette * new_pal = NULL;
 
           Image_HAM = header.BitPlanes;
           bpp = 3 * (header.BitPlanes - 2);
@@ -1566,21 +1572,31 @@ void Load_IFF(T_IO_Context * context)
           section_size -= 2;
           SHAM_palette_count = section_size >> 5;  // 32 bytes per palette (16 colors * 2 bytes)
           // SHAM_palette_count should be the image height, or height/2 for "interlaced" images
-          SHAM_palettes = malloc(sizeof(T_Components)*16*SHAM_palette_count);
-          if (SHAM_palettes == NULL)
+          for (y_pos = 0; y_pos < header.Height && section_size >= 32; y_pos += (SHAM_palette_count < header.Height ? 2 : 1))
           {
-            Warning("Memory allocation error");
-            File_error = 1;
-            break;
-          }
-          for (counter = 0; (unsigned)counter < 16*SHAM_palette_count; counter++)
-          {
-            Read_byte(IFF_file, &temp_byte);  // 0R
-            SHAM_palettes[counter].R = (temp_byte & 0x0f) * 0x11; // 4 bits to 8 bits
-            Read_byte(IFF_file, &temp_byte);  // GB
-            SHAM_palettes[counter].G = (temp_byte & 0xf0) | (temp_byte >> 4);
-            SHAM_palettes[counter].B = (temp_byte & 0x0f) * 0x11; // 4 bits to 8 bits
-            section_size -= 2;
+            new_pal = malloc(sizeof(T_IFF_PCHG_Palette) + nb_colors*sizeof(T_Components));
+            if (new_pal == NULL)
+            {
+              Warning("Memory allocation error");
+              File_error = 1;
+              break;
+            }
+            new_pal->Next = NULL;
+            new_pal->StartLine = y_pos;
+            for (counter = 0; counter < 16; counter++)
+            {
+              Read_byte(IFF_file, &temp_byte);  // 0R
+              new_pal->Palette[counter].R = (temp_byte & 0x0f) * 0x11; // 4 bits to 8 bits
+              Read_byte(IFF_file, &temp_byte);  // GB
+              new_pal->Palette[counter].G = (temp_byte & 0xf0) | (temp_byte >> 4);
+              new_pal->Palette[counter].B = (temp_byte & 0x0f) * 0x11; // 4 bits to 8 bits
+              section_size -= 2;
+            }
+            if (prev_pal != NULL)
+              prev_pal->Next = new_pal;
+            else
+              PCHG_palettes = new_pal;
+            prev_pal = new_pal;
           }
           if (section_size > 0)
           {
@@ -1591,27 +1607,7 @@ void Load_IFF(T_IO_Context * context)
         else if (memcmp(section, "BEAM", 4) == 0 || memcmp(section, "CTBL", 4) == 0)
         {
           // One palette per line is stored
-          if (Image_HAM >= 6)
-          {
-            SHAM_palette_count = header.Height;
-            SHAM_palettes = malloc(sizeof(T_Components)*16*SHAM_palette_count);
-            if (SHAM_palettes == NULL)
-            {
-              Warning("Memory allocation error");
-              File_error = 1;
-              break;
-            }
-            for (counter = 0; (unsigned)counter < 16*SHAM_palette_count && section_size > 0; counter++)
-            {
-              Read_byte(IFF_file, &temp_byte);  // 0R
-              SHAM_palettes[counter].R = (temp_byte & 0x0f) * 0x11; // 4 bits to 8 bits
-              Read_byte(IFF_file, &temp_byte);  // GB
-              SHAM_palettes[counter].G = (temp_byte & 0xf0) | (temp_byte >> 4);
-              SHAM_palettes[counter].B = (temp_byte & 0x0f) * 0x11; // 4 bits to 8 bits
-              section_size -= 2;
-            }
-          }
-          else if (section_size >= header.Height * nb_colors * 2)
+          if (section_size >= header.Height * nb_colors * 2)
           {
             T_Palette palette;
             T_IFF_PCHG_Palette * prev_pal = NULL;
@@ -1812,6 +1808,8 @@ void Load_IFF(T_IO_Context * context)
                   curr_pal->Palette[16+(PaletteChange >> 12)].G = ((PaletteChange & 0x00f0) >> 4) * 0x11;
                   curr_pal->Palette[16+(PaletteChange >> 12)].B = ((PaletteChange & 0x000f) >> 0) * 0x11;
                 }
+                if (nb_colors == 64)  // Extend the 32 colors decoded to 64
+                  IFF_Set_EHB_Palette(curr_pal->Palette);
                 prev_pal = curr_pal;
               }
             }
@@ -1851,7 +1849,7 @@ void Load_IFF(T_IO_Context * context)
             if (iff_format == FORMAT_PBM)
               PBM_Decode(context, IFF_file, header.Compression, tiny_width, tiny_height);
             else
-              LBM_Decode(context, IFF_file, header.Compression, Image_HAM, stored_bit_planes, real_bit_planes, PCHG_palettes, SHAM_palettes, SHAM_palette_count);
+              LBM_Decode(context, IFF_file, header.Compression, Image_HAM, stored_bit_planes, real_bit_planes, PCHG_palettes);
             fclose(IFF_file);
             IFF_file = NULL;
             return;
@@ -1911,7 +1909,7 @@ void Load_IFF(T_IO_Context * context)
               if (Image_HAM <= 1)
                 Draw_IFF_line(context, buffer+y_pos*line_size, y_pos,real_line_size, real_bit_planes);
               else
-                Draw_IFF_line_HAM(context, buffer+y_pos*line_size, y_pos,real_line_size, real_bit_planes, SHAM_palettes, SHAM_palette_count);
+                Draw_IFF_line_HAM(context, buffer+y_pos*line_size, y_pos,real_line_size, real_bit_planes, PCHG_palettes);
             }
           }
           free(buffer);
@@ -1956,7 +1954,7 @@ void Load_IFF(T_IO_Context * context)
 
           if (iff_format == FORMAT_LBM)    // "ILBM": InterLeaved BitMap
           {
-            LBM_Decode(context, IFF_file, header.Compression, Image_HAM, stored_bit_planes, real_bit_planes, PCHG_palettes, SHAM_palettes, SHAM_palette_count);
+            LBM_Decode(context, IFF_file, header.Compression, Image_HAM, stored_bit_planes, real_bit_planes, PCHG_palettes);
           }
           else                               // "PBM ": Packed BitMap
           {
@@ -1985,8 +1983,6 @@ void Load_IFF(T_IO_Context * context)
   }
   else
     File_error=1;
-  if (SHAM_palettes)
-    free(SHAM_palettes);
   if (previous_frame)
     free(previous_frame);
   if (anteprevious_frame)
