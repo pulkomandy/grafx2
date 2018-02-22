@@ -1488,6 +1488,12 @@ void Load_IFF(T_IO_Context * context)
             fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);
           }
         }
+        else if (memcmp(section, "DYCP", 4) == 0) // DYnamic Color Palette
+        {
+          // All files I've seen have 4 words (8bytes) :
+          // { 0, 1, 16, 0}   16 is probably the number of colors in each palette
+          fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);  // Skip it
+        }
         else if (memcmp(section, "SHAM", 4) == 0) // Sliced HAM
         {
           word version;
@@ -1520,7 +1526,7 @@ void Load_IFF(T_IO_Context * context)
             fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);
           }
         }
-        else if (memcmp(section, "BEAM", 4) == 0)
+        else if (memcmp(section, "BEAM", 4) == 0 || memcmp(section, "CTBL", 4) == 0)
         {
           // One palette per line is stored
           if (Image_HAM >= 6)
@@ -1595,7 +1601,7 @@ void Load_IFF(T_IO_Context * context)
               bpp = 12;
           }
           else
-            Warning("inconsistant size of BEAM chunk, ignoring");
+            Warning("inconsistant size of BEAM/CTLB chunk, ignoring");
           fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);
         }
         else if (memcmp(section, "PCHG", 4) == 0) // Palette CHanGes
