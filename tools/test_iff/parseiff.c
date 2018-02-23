@@ -81,11 +81,11 @@ static int parseiff_chunks(FILE * f, uint32_t size, int level)
   char section[4];
   uint32_t section_size;
 
-  if (size&1)
-  {
-    fprintf(stderr, "WARNING: odd size of Container chunk, adjusting\n");
-    size++;
-  }
+  //if (size&1)
+  //{
+  //  fprintf(stderr, "WARNING: odd size of Container chunk, adjusting\n");
+  //  size++;
+  //}
   index = 0;
   while (size >= 8)
   {
@@ -115,7 +115,8 @@ static int parseiff_chunks(FILE * f, uint32_t size, int level)
     else
     {
       printf("%.4s %u\n", section, section_size);
-      section_size = (section_size+1)&~1; // round to WORD boundary
+      if ((size & 1) == 0) // if container has EVEN size
+        section_size = (section_size+1)&~1; // round to WORD boundary
       fseek(f, section_size, SEEK_CUR);
     }
     if (section_size > size)
@@ -170,6 +171,17 @@ int parseiff(FILE * f)
   if (r < 0)
     return r;
   // check we are at end of file
+  offset = ftell(f);
+  fseek(f, 0, SEEK_END);
+  file_size = ftell(f);
+  fseek(f, offset, SEEK_SET);
+  if (file_size > offset + 8)
+  {
+    fprintf(stderr, "Tying to parse the %ld extra bytes.\n", file_size - offset);
+    r = parseiff_chunks(f, file_size - offset, 0);
+    if (r < 0)
+      return r;
+  }
   offset = ftell(f);
   fseek(f, 0, SEEK_END);
   file_size = ftell(f);
