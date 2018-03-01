@@ -892,7 +892,6 @@ void Load_IFF(T_IO_Context * context)
   dword section_size;
   short x_pos;
   short y_pos;
-  short counter;
   short line_size = 0;        // Taille d'une ligne en octets
   short plane_line_size = 0;  // Size of line in bytes for 1 plane
   short real_line_size = 0;   // Taille d'une ligne en pixels
@@ -1561,6 +1560,7 @@ void Load_IFF(T_IO_Context * context)
         }
         else if (memcmp(section, "SHAM", 4) == 0) // Sliced HAM
         {
+          int i;
           word version;
           dword SHAM_palette_count;
           T_IFF_PCHG_Palette * prev_pal = NULL;
@@ -1583,13 +1583,13 @@ void Load_IFF(T_IO_Context * context)
             }
             new_pal->Next = NULL;
             new_pal->StartLine = y_pos;
-            for (counter = 0; counter < 16; counter++)
+            for (i = 0; i < 16; i++)
             {
               Read_byte(IFF_file, &temp_byte);  // 0R
-              new_pal->Palette[counter].R = (temp_byte & 0x0f) * 0x11; // 4 bits to 8 bits
+              new_pal->Palette[i].R = (temp_byte & 0x0f) * 0x11; // 4 bits to 8 bits
               Read_byte(IFF_file, &temp_byte);  // GB
-              new_pal->Palette[counter].G = (temp_byte & 0xf0) | (temp_byte >> 4);
-              new_pal->Palette[counter].B = (temp_byte & 0x0f) * 0x11; // 4 bits to 8 bits
+              new_pal->Palette[i].G = (temp_byte & 0xf0) | (temp_byte >> 4);
+              new_pal->Palette[i].B = (temp_byte & 0x0f) * 0x11; // 4 bits to 8 bits
               section_size -= 2;
             }
             if (prev_pal != NULL)
