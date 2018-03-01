@@ -1060,6 +1060,17 @@ void Program_shutdown(void)
 
   Uninit_text();
 
+#ifdef ENABLE_FILENAMES_ICONV
+  if (cd != (iconv_t)-1)
+    iconv_close(cd);
+  if (cd_inv != (iconv_t)-1)
+    iconv_close(cd_inv);
+  if (cd_utf16 != (iconv_t)-1)
+    iconv_close(cd_utf16);
+  if (cd_utf16_inv != (iconv_t)-1)
+    iconv_close(cd_utf16_inv);
+#endif
+
   SDL_Quit();
   
   #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
