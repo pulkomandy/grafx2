@@ -1462,6 +1462,24 @@ void Load_IFF(T_IO_Context * context)
           if (Read_bytes(IFF_file,context->Palette,3*nb_colors))
           {
             section_size -= 3*nb_colors;
+            if (nb_colors <= 64)
+            {
+              unsigned int i;
+              int is_4bits_colors = 1;  // recoil also checks that header.Pad1 is not 0x80
+              for(i = 0; i < nb_colors && is_4bits_colors; i++)
+              {
+                is_4bits_colors = is_4bits_colors && ((context->Palette[i].R & 0x0f) == 0)
+                                                  && ((context->Palette[i].G & 0x0f) == 0)
+                                                  && ((context->Palette[i].B & 0x0f) == 0);
+              }
+              if (is_4bits_colors)    // extend 4bits per component color palettes to 8bits per component
+                for(i = 0; i < nb_colors; i++)
+                {
+                  context->Palette[i].R |= (context->Palette[i].R >> 4);
+                  context->Palette[i].G |= (context->Palette[i].G >> 4);
+                  context->Palette[i].B |= (context->Palette[i].B >> 4);
+                }
+            }
             if (((nb_colors==32) || (AmigaViewModes & 0x80)) && (header.BitPlanes==6))
             {
               IFF_Set_EHB_Palette(context->Palette); // This is a Extra Half-Brite (EHB) 64 color image.
