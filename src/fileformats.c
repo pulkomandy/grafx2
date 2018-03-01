@@ -5177,7 +5177,10 @@ void Save_XPM(T_IO_Context* context)
       fprintf(file, "\"");
       for (i = 0; i < context->Width; i++)
         fprintf(file, "%2.2X", Get_pixel(context, i, j));
-      fprintf(file,"\"\n");
+      if (j == (context->Height - 1))
+        fprintf(file,"\"\n");
+      else
+        fprintf(file,"\",\n");
     }
   }
   else
@@ -5204,7 +5207,10 @@ void Save_XPM(T_IO_Context* context)
         if (c >= 0x5c) c++;
         fprintf(file, "%c", c);
       }
-      fprintf(file,"\"\n");
+      if (j == (context->Height - 1))
+        fprintf(file,"\"\n");
+      else
+        fprintf(file,"\",\n");
     }
   }
   fprintf(file, "};\n");
