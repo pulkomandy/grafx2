@@ -1860,6 +1860,8 @@ static void Look_for_alternate_ext(void * pdata, const char * filename, const wo
   if (filename_unicode != NULL && params->basename_unicode[0] != 0)
   {
     base_len = Unicode_strlen(params->basename_unicode);
+    if (Unicode_strlen(filename_unicode) <= base_len)
+      return; // No match.
     if (filename_unicode[base_len] != '.')
       return; // No match.
 #if defined(WIN32)
