@@ -1016,7 +1016,7 @@ void Program_shutdown(void)
   // On libère les différents écrans virtuels et brosse:
   free(Brush);
   Brush = NULL;
-  Set_number_of_backups(0);
+  Set_number_of_backups(-1); // even delete the main page
 
   // Free the skin (Gui graphics) data
   free(Gfx);
