@@ -10,6 +10,7 @@ SDLTTFURL=https://www.libsdl.org/projects/SDL_ttf/release/$(SDLTTFARCH)
 LIBPNG = libpng-1.6.34
 LIBPNGARCH = $(LIBPNG).tar.gz
 LIBPNGURL = https://download.sourceforge.net/libpng/$(LIBPNGARCH)
+LIBPNGURLALT = ftp://ftp-osl.osuosl.org/pub/libpng/src/libpng16/$(LIBPNGARCH)
 JPEGVER = 9c
 JPEGDIR = jpeg-$(JPEGVER)
 JPEGARCH = jpegsrc.v$(JPEGVER).tar.gz
@@ -206,7 +207,7 @@ archives/$(SDLTTFARCH):
 
 archives/$(LIBPNGARCH):
 	@$(MKDIR) $(@D)
-	cd $(@D) && $(GETURL) $(LIBPNGURL)
+	cd $(@D) && ( $(GETURL) $(LIBPNGURL) || $(GETURL) $(LIBPNGURLALT) )
 
 archives/$(JPEGARCH):
 	@$(MKDIR) $(@D)
