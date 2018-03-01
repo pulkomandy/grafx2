@@ -1729,6 +1729,7 @@ void Rotate_safety_backups(void)
 void Delete_safety_backups(void)
 {
   T_String_list *element;
+  T_String_list *next;
 
   if (!Safety_backup_active)
     return;
@@ -1739,16 +1740,24 @@ void Delete_safety_backups(void)
   For_each_file(Config_directory, Add_backup_file);
   
   Change_directory(Config_directory);
-  for (element=Backups_main; element!=NULL; element=element->Next)
+  for (element=Backups_main; element!=NULL; element=next)
   {
+    next = element->Next;
     if(remove(element->String))
       printf("Failed to delete %s\n",element->String);
+    free(element->String);
+    free(element);
   }
-  for (element=Backups_spare; element!=NULL; element=element->Next)
+  Backups_main = NULL;
+  for (element=Backups_spare; element!=NULL; element=next)
   {
+    next = element->Next;
     if(remove(element->String))
       printf("Failed to delete %s\n",element->String);
+    free(element->String);
+    free(element);
   }
+  Backups_spare = NULL;
   
   // Release lock file
 #if defined (__MINT__) 
