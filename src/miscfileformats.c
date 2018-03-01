@@ -3436,9 +3436,9 @@ void Test_PPH(T_IO_Context * context)
 {
   FILE *file;
   byte buffer[6];
-  long file_size;
+  unsigned long file_size;
   unsigned int w, h;
-  int expected;
+  unsigned int expected;
 
   File_error = 1;
 

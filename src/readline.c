@@ -405,6 +405,8 @@ bye:
   return haiku_get_clipboard();
   #else
   // Not implemented (no standard) on Linux systems. Maybe someday...
+  if (unicode)
+    *unicode = NULL;
   return NULL;
   #endif
 }
