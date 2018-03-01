@@ -977,7 +977,11 @@ int Init_program(int argc,char * argv[])
   return(1);
 }
 
-// ------------------------- Fermeture du programme --------------------------
+// ------------------------- Program Shutdown --------------------------
+// Free all allocated resources
+
+#define FREE_POINTER(p) free(p); p = NULL
+
 void Program_shutdown(void)
 {
   int      i;
@@ -1013,10 +1017,21 @@ void Program_shutdown(void)
   free(Paintbrush_sprite);
   Paintbrush_sprite = NULL;
 
-  // On libère les différents écrans virtuels et brosse:
-  free(Brush);
-  Brush = NULL;
+  // Free Brushes
+  FREE_POINTER(Brush);
+  FREE_POINTER(Smear_brush);
+  FREE_POINTER(Brush_original_pixels);
+
+  // Free all images
   Set_number_of_backups(-1); // even delete the main page
+
+  FREE_POINTER(Main.visible_image.Image);
+  FREE_POINTER(Spare.visible_image.Image);
+  FREE_POINTER(Main_visible_image_backup.Image);
+  FREE_POINTER(Main_visible_image_depth_buffer.Image);
+
+  FREE_POINTER(Main.backups);
+  FREE_POINTER(Spare.backups);
 
   // Free the skin (Gui graphics) data
   free(Gfx);
@@ -1050,7 +1065,6 @@ void Program_shutdown(void)
     Error(ERROR_MISSING_DIRECTORY);
 
   // Free Config
-#define FREE_POINTER(p) free(p); p = NULL
   FREE_POINTER(Config.Skin_file);
   FREE_POINTER(Config.Font_file);
   for (i=0;i<NB_BOOKMARKS;i++)
