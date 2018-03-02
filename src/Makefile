@@ -723,12 +723,18 @@ $(OBJDIR)/versiontag: pversion.c $(REVISION_CACHE)
 
 RES := $(shell if [ ! -f $(CFLAGS_CACHE) ] || [ "`cat $(CFLAGS_CACHE)`" != "$(COPT) $(CFLAGS)" ] ; then echo "$(COPT) $(CFLAGS)" > $(CFLAGS_CACHE) ; fi )
 
+ifndef NORECOIL
 recoil.c:	../3rdparty/recoil-$(RECOILVER)/recoil.c
 	$(CP) $< $@
 	$(CP) $(subst .c,.h,$< $@)
 
+recoil.h:	recoil.c
+
+$(OBJDIR)/loadrecoil.o:	recoil.c recoil.h
+
 ../3rdparty/recoil-$(RECOILVER)/recoil.c:
 	$(MAKE) -C ../3rdparty recoil
+endif
 
 $(OBJ):	$(CFLAGS_CACHE)
 
@@ -753,8 +759,9 @@ $(OBJDIR)/haiku.o : haiku.cpp
 
 clean :
 	$(DELCOMMAND) $(OBJ)
-	$(DELCOMMAND) $(OBJDOR)/versiontag
+	$(DELCOMMAND) $(OBJDIR)/versiontag
 	$(DELCOMMAND) $(BIN)
+	$(DELCOMMAND) recoil.c recoil.h
 
 ifneq ($(PLATFORM),amiga-vbcc)
 # Linux installation of the program

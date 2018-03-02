@@ -7,7 +7,8 @@ $(OBJDIR)/brush_ops.o: brush_ops.c brush.h struct.h const.h buttons.h loadsave.h
 $(OBJDIR)/buttons.o: buttons.c const.h struct.h global.h misc.h graph.h engine.h \
  readline.h filesel.h loadsave.h init.h buttons.h operatio.h pages.h \
  palette.h errors.h readini.h saveini.h shade.h io.h help.h text.h \
- sdlscreen.h windows.h brush.h input.h special.h tiles.h setup.h
+ sdlscreen.h windows.h brush.h input.h special.h tiles.h setup.h \
+ unicode.h
 $(OBJDIR)/buttons_effects.o: buttons_effects.c brush.h struct.h const.h buttons.h \
  loadsave.h engine.h global.h graph.h help.h input.h misc.h pages.h \
  readline.h sdlscreen.h windows.h tiles.h
@@ -24,7 +25,7 @@ $(OBJDIR)/fileformats.o: fileformats.c errors.h global.h struct.h const.h \
  loadsave.h misc.h io.h pages.h windows.h
 $(OBJDIR)/filesel.o: filesel.c const.h struct.h global.h misc.h errors.h io.h \
  windows.h sdlscreen.h loadsave.h mountlist.h engine.h readline.h input.h \
- help.h filesel.h
+ help.h unicode.h filesel.h
 $(OBJDIR)/graph.o: graph.c global.h struct.h const.h engine.h buttons.h loadsave.h \
  pages.h errors.h sdlscreen.h graph.h misc.h pxsimple.h pxtall.h pxwide.h \
  pxdouble.h pxtriple.h pxwide2.h pxtall2.h pxtall3.h pxquad.h windows.h \
@@ -39,14 +40,16 @@ $(OBJDIR)/init.o: init.c buttons.h struct.h const.h loadsave.h errors.h global.h
  windows.h layers.h special.h
 $(OBJDIR)/input.o: input.c global.h struct.h const.h keyboard.h sdlscreen.h \
  windows.h errors.h misc.h buttons.h loadsave.h input.h
-$(OBJDIR)/io.o: io.c struct.h const.h io.h realpath.h
+$(OBJDIR)/io.o: io.c struct.h const.h io.h realpath.h unicode.h global.h
 $(OBJDIR)/keyboard.o: keyboard.c global.h struct.h const.h keyboard.h
 $(OBJDIR)/layers.o: layers.c const.h struct.h global.h windows.h engine.h pages.h \
  sdlscreen.h input.h help.h misc.h readline.h graph.h
 $(OBJDIR)/libraw2crtc.o: libraw2crtc.c const.h global.h struct.h loadsave.h
+$(OBJDIR)/loadrecoil.o: loadrecoil.c struct.h const.h global.h loadsave.h io.h \
+ errors.h recoil.h
 $(OBJDIR)/loadsave.o: loadsave.c buttons.h struct.h const.h loadsave.h errors.h \
  global.h io.h misc.h graph.h op_c.h colorred.h pages.h palette.h \
- sdlscreen.h windows.h engine.h brush.h setup.h filesel.h
+ sdlscreen.h windows.h engine.h brush.h setup.h filesel.h unicode.h
 $(OBJDIR)/main.o: main.c const.h struct.h global.h graph.h misc.h init.h buttons.h \
  loadsave.h engine.h pages.h sdlscreen.h errors.h readini.h saveini.h \
  io.h text.h setup.h windows.h brush.h palette.h realpath.h input.h \
@@ -92,8 +95,9 @@ $(OBJDIR)/pxwide2.o: pxwide2.c global.h struct.h const.h sdlscreen.h misc.h grap
 $(OBJDIR)/readini.o: readini.c const.h errors.h global.h struct.h misc.h readini.h \
  setup.h realpath.h io.h windows.h
 $(OBJDIR)/readline.o: readline.c const.h struct.h global.h misc.h errors.h \
- sdlscreen.h readline.h windows.h input.h engine.h
+ sdlscreen.h readline.h windows.h input.h engine.h unicode.h
 $(OBJDIR)/realpath.o: realpath.c
+$(OBJDIR)/recoil.o: recoil.c recoil.h
 $(OBJDIR)/saveini.o: saveini.c const.h global.h struct.h readini.h io.h errors.h \
  misc.h saveini.h setup.h windows.h
 $(OBJDIR)/sdlscreen.o: sdlscreen.c global.h struct.h const.h sdlscreen.h errors.h \
@@ -110,7 +114,8 @@ $(OBJDIR)/tiles.o: tiles.c struct.h const.h global.h graph.h sdlscreen.h engine.
 $(OBJDIR)/transform.o: transform.c global.h struct.h const.h transform.h engine.h \
  sdlscreen.h windows.h input.h help.h misc.h readline.h buttons.h \
  loadsave.h pages.h tiles.h
+$(OBJDIR)/unicode.o: unicode.c unicode.h struct.h const.h
 $(OBJDIR)/version.o: version.c
 $(OBJDIR)/windows.o: windows.c windows.h struct.h const.h engine.h errors.h \
  global.h graph.h input.h misc.h op_c.h colorred.h readline.h sdlscreen.h \
- palette.h
+ palette.h unicode.h
