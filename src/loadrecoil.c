@@ -27,8 +27,33 @@
 
 #include "recoil.h"
 
+// RECOIL Vtable with our private data added
+typedef struct {
+	int (*readFile)(RECOIL *, const char *filename, unsigned char *content, int content_length);
+  T_IO_Context *context;
+}
+RECOILVtbl;
+
+static int RECOIL_ReadFile(RECOIL * recoil, const char * filename, unsigned char * content, int content_length)
+{
+  FILE * f;
+  const char * ext;
+
+  ext = strrchr(filename, '.');   // extract back extension from filename
+  if (ext == NULL)
+    return -1;
+  ext++;
+  f = Open_file_read_with_alternate_ext((*((const RECOILVtbl **)recoil))->context, ext);
+  if (f == NULL)
+    return -1;
+  content_length = fread(content, 1, content_length, f);
+  fclose(f);
+  return content_length;
+}
+
 void Load_Recoil_Image(T_IO_Context *context)
 {
+  RECOILVtbl vtbl = { RECOIL_ReadFile, context };
   RECOIL *recoil;
   byte * file_content;
   unsigned long file_length;
@@ -68,6 +93,7 @@ void Load_Recoil_Image(T_IO_Context *context)
   recoil = RECOIL_New();
   if (recoil)
   {
+    *(const RECOILVtbl **)recoil = &vtbl; // set Vtable
     if (RECOIL_Decode(recoil, context->File_name, file_content, file_length))
     {
       int width, height;
