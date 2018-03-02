@@ -50,6 +50,8 @@ endif
 
   CFLAGS_CACHE = .cflags.cache
 
+  RECOILVER = 4.2.0
+
 ### PLATFORM DETECTION AND CONFIGURATION ###
 
 PLATFORMOBJ =
@@ -545,6 +547,7 @@ OBJS = main.o init.o graph.o sdlscreen.o misc.o special.o \
        fileformats.o miscfileformats.o libraw2crtc.o \
        brush_ops.o buttons_effects.o layers.o \
        oldies.o tiles.o colorred.o unicode.o
+OBJS += loadrecoil.o recoil.o
 OBJ = $(addprefix $(OBJDIR)/,$(OBJS))
 
 SKINS = skin_classic.png skin_modern.png skin_DPaint.png \
@@ -712,6 +715,13 @@ $(OBJDIR)/versiontag: pversion.c $(REVISION_CACHE)
 	echo `sed "s/.*=\"\(.*\)\";/\1/" pversion.c`.$(GIT_REVISION) | tr " :" "_-" | sed -e "s/\([wW][iI][pP]\)\\./\1/" > $(OBJDIR)/versiontag
 
 RES := $(shell if [ ! -f $(CFLAGS_CACHE) ] || [ "`cat $(CFLAGS_CACHE)`" != "$(COPT) $(CFLAGS)" ] ; then echo "$(COPT) $(CFLAGS)" > $(CFLAGS_CACHE) ; fi )
+
+recoil.c:	../3rdparty/recoil-$(RECOILVER)/recoil.c
+	$(CP) $< $@
+	$(CP) $(subst .c,.h,$< $@)
+
+../3rdparty/recoil-$(RECOILVER)/recoil.c:
+	$(MAKE) -C ../3rdparty recoil
 
 $(OBJ):	$(CFLAGS_CACHE)
 

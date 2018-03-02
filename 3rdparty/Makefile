@@ -28,6 +28,11 @@ LUA=lua-5.3.4
 LUAARCH=$(LUA).tar.gz
 LUAURL=https://www.lua.org/ftp/$(LUAARCH)
 # https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-0.6.1.tar.gz
+RECOILVER=4.2.0
+RECOIL=recoil-$(RECOILVER)
+RECOILARCH=$(RECOIL).tar.gz
+#RECOILURL=https://downloads.sourceforge.net/project/recoil/recoil/$(RECOILVER)/$(RECOILARCH)
+RECOILURL=https://excellmedia.dl.sourceforge.net/project/recoil/recoil/$(RECOILVER)/$(RECOILARCH)
 
 PREFIX = $(PWD)/usr
 
@@ -53,7 +58,7 @@ endif
 HOST = $(shell $(CC) -dumpmachine)
 #HOST = i686-pc-mingw32
 
-.PHONY:	all clean clean_archives clean_all libs libpng libsdl libsdl_image libsdl_ttf libjpeg libtiff zlib freetype lua
+.PHONY:	all clean clean_archives clean_all libs libpng libsdl libsdl_image libsdl_ttf libjpeg libtiff zlib freetype lua recoil
 
 all:	libs
 
@@ -61,7 +66,7 @@ clean_all:	clean clean_archives
 
 clean:
 	$(RM) -r usr/ $(LIBPNG) $(ZLIB) $(SDLIMAGE) $(JPEGDIR) $(LIBTIFF)
-	$(RM) -r $(SDLTTF) $(FREETYPE) SDL-1.2.15 $(LUA)
+	$(RM) -r $(SDLTTF) $(FREETYPE) SDL-1.2.15 $(LUA) $(RECOIL)
 
 clean_archives:
 	$(RM) -r archives
@@ -193,6 +198,12 @@ $(ZLIB)/.ok:	archives/$(ZLIBARCH)
 	$(TAR) xzf $<
 	touch $@
 
+recoil:	$(RECOIL)/.ok
+
+$(RECOIL)/.ok:	archives/$(RECOILARCH)
+	$(TAR) xzf $<
+	touch $@
+
 archives/$(SDLDEVEL):
 	@$(MKDIR) $(@D)
 	cd $(@D) && $(GETURL) $(SDLDEVELURL)
@@ -228,3 +239,7 @@ archives/$(FREETYPEARCH):
 archives/$(LUAARCH):
 	@$(MKDIR) $(@D)
 	cd $(@D) && $(GETURL) $(LUAURL)
+
+archives/$(RECOILARCH):
+	@$(MKDIR) $(@D)
+	cd $(@D) && $(GETURL) $(RECOILURL)

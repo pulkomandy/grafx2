@@ -174,6 +174,10 @@ void Save_PNG(T_IO_Context *);
 // (TGA, BMP, PNM, XPM, XCF, PCX, GIF, JPG, TIF, IFF, PNG, ICO)
 void Load_SDL_Image(T_IO_Context *);
 
+// -- Recoil ----------------------------------------------------------------
+// 8bits and 16bits computer graphics
+void Load_Recoil_Image(T_IO_Context *);
+
 // ENUM     Name  TestFunc LoadFunc SaveFunc PalOnly Comment Layers Ext Exts  
 const T_Format File_formats[] = {
   {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, 0, "", "gif;png;bmp;2bp;pcx;pkm;iff;lbm;ilbm;sham;ham;ham6;ham8;acbm;pic;anim;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;c64;koa;koala;fli;bml;cdu;prg;tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico;ic2;cur;cm5;pph"},
@@ -661,8 +665,13 @@ void Load_image(T_IO_Context *context)
   if (File_error)
   {
     context->Format = DEFAULT_FILEFORMAT;
-    // Last try: with SDL_image
-    Load_SDL_Image(context);
+    // try with recoil
+    Load_Recoil_Image(context);
+    if (File_error)
+    {
+      // Last try: with SDL_image
+      Load_SDL_Image(context);
+    }
 
     if (File_error)
     { 
@@ -1120,10 +1129,10 @@ void Save_image(T_IO_Context *context)
     return;
   }
 }  
-   
-   
+
+
 void Load_SDL_Image(T_IO_Context *context)
-{  
+{
   char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   word x_pos,y_pos;
   // long file_size;
