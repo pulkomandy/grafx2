@@ -522,6 +522,11 @@ else
     LUALABEL =
 endif
 
+#Recoil is optional
+ifdef NORECOIL
+    COPT += -DNORECOIL
+endif
+
 #To enable Joystick emulation of cursor, make USE_JOYSTICK=1 (for input.o)
 #This can be necessary to test cursor code on a PC, but by default for all
 #non-console platforms the joystick is disabled, to avoid reporting
@@ -547,7 +552,9 @@ OBJS = main.o init.o graph.o sdlscreen.o misc.o special.o \
        fileformats.o miscfileformats.o libraw2crtc.o \
        brush_ops.o buttons_effects.o layers.o \
        oldies.o tiles.o colorred.o unicode.o
+ifndef NORECOIL
 OBJS += loadrecoil.o recoil.o
+endif
 OBJ = $(addprefix $(OBJDIR)/,$(OBJS))
 
 SKINS = skin_classic.png skin_modern.png skin_DPaint.png \

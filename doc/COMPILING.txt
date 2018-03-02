@@ -60,6 +60,9 @@ several layers at a time: You will still be able to edit layered images,
 but you will only see one layer at a time. This option is designed for slow
 platforms, as it makes the program faster.
 
+Compile with NORECOIL=1 to disable support of the RECOIL (REtro COmputer Image
+Library) for loading images. This is advised on memory constrained platforms.
+
 === Other compilation targets ===
   make clean
 Erases all generated files (intermediate objects, and executable)
@@ -199,7 +202,8 @@ Before compilation you have to build all the needed libraries mentioned in requi
 
 To compile a Atari TOS executable, type in
 	make ATARICROSS=1 prefix=/usr/m68k-atari-mint
-You can also add other options like NOTTF,NOLUA,NOLAYERS etc. to enable/disable program features..
+You can also add other options like NOTTF,NOLUA,NOLAYERS,NORECOIL etc. to enable/disable
+program features.
 
 If you don't know how build libraries here's some hints. Please note that prefix path in examples below is valid only under Linux, 
 in case of Cygwin the path will be '/opt/m68k-atari-mint'. There will be no prefix when building on native machine.

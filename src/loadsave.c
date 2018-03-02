@@ -176,7 +176,9 @@ void Load_SDL_Image(T_IO_Context *);
 
 // -- Recoil ----------------------------------------------------------------
 // 8bits and 16bits computer graphics
+#ifndef NORECOIL
 void Load_Recoil_Image(T_IO_Context *);
+#endif
 
 // ENUM     Name  TestFunc LoadFunc SaveFunc PalOnly Comment Layers Ext Exts  
 const T_Format File_formats[] = {
@@ -666,8 +668,10 @@ void Load_image(T_IO_Context *context)
   {
     context->Format = DEFAULT_FILEFORMAT;
     // try with recoil
+#ifndef NORECOIL
     Load_Recoil_Image(context);
     if (File_error)
+#endif
     {
       // Last try: with SDL_image
       Load_SDL_Image(context);
