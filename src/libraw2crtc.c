@@ -114,14 +114,14 @@ unsigned char *raw2crtc(T_IO_Context *context, unsigned char mode, unsigned char
   tmpBuffer = (unsigned char*)malloc(0xFFFF);
   if (tmpBuffer == NULL)
   {
-    printf("Allocation tmpBuffer raté\n");
+    fprintf(stderr, "failed to allocate tmpBuffer\n");
     exit(4);
   }
 
   allocationBuffer = (unsigned char*)malloc(0xFFFF);
   if(allocationBuffer == NULL)
   {
-    printf("Allocation allocationBuffer raté\n");
+    fprintf(stderr, "failed to allocate allocationBuffer\n");
     exit(4);
   }
   memset(allocationBuffer, 0, 0xFFFF);
@@ -149,7 +149,7 @@ unsigned char *raw2crtc(T_IO_Context *context, unsigned char mode, unsigned char
   {
     if(*(allocationBuffer + i) > 1)
     {
-      printf("Attention : Ecriture multiple a l'adresse mémoire %d\n",i);
+      fprintf(stderr, "WARNING : Multiple writte to memory address 0x%04X\n",i);
     }
     if(*(allocationBuffer + i) > 0)
     {
@@ -167,7 +167,7 @@ unsigned char *raw2crtc(T_IO_Context *context, unsigned char mode, unsigned char
   outBuffer = (unsigned char*)malloc((*outSize));
   if (outBuffer == NULL)
   {
-    printf("Allocation outBuffer raté\n");
+    fprintf(stderr, "failed to allocate outBuffer");
     exit(4);
   }
 
