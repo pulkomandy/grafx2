@@ -59,19 +59,24 @@
 // Generic pixel-drawing function.
 Func_pixel Pixel_figure;
 
+typedef struct
+{
+  long  vertical_radius_squared;
+  long  horizontal_radius_squared;
+  qword limit;
+} T_Ellipse_limits;
+
 // Calcule les valeurs suivantes en fonction des deux paramètres:
 //
 // Ellipse_vertical_radius_squared
 // Ellipse_horizontal_radius_squared
 // Ellipse_Limit_High
 // Ellipse_Limit_Low
-static void Ellipse_compute_limites(short horizontal_radius,short vertical_radius)
+static void Ellipse_compute_limites(short horizontal_radius,short vertical_radius, T_Ellipse_limits * Ellipse)
 {
-  Ellipse_horizontal_radius_squared =
-    (long)horizontal_radius * horizontal_radius;
-  Ellipse_vertical_radius_squared =
-    (long)vertical_radius * vertical_radius;
-  Ellipse_limit = (qword)Ellipse_horizontal_radius_squared * Ellipse_vertical_radius_squared;
+  Ellipse->horizontal_radius_squared = (long)horizontal_radius * horizontal_radius;
+  Ellipse->vertical_radius_squared =   (long)vertical_radius * vertical_radius;
+  Ellipse->limit = (qword)Ellipse->horizontal_radius_squared * Ellipse->vertical_radius_squared;
 }
 
 //   Indique si le pixel se trouvant à Ellipse_cursor_X pixels
@@ -79,11 +84,11 @@ static void Ellipse_compute_limites(short horizontal_radius,short vertical_radiu
 // Ellipse_cursor_Y pixels (Ellipse_cursor_Y>0 = en bas,
 // Ellipse_cursor_Y<0 = en haut) du centre se trouve dans l'ellipse en
 // cours.
-static byte Pixel_in_ellipse(long x, long y)
+static byte Pixel_in_ellipse(long x, long y, const T_Ellipse_limits * Ellipse)
 {
-  qword ediesi = (qword)x * x * Ellipse_vertical_radius_squared +
-    (qword)y * y * Ellipse_horizontal_radius_squared;
-  if((ediesi) <= Ellipse_limit) return 255;
+  qword ediesi = (qword)x * x * Ellipse->vertical_radius_squared +
+    (qword)y * y * Ellipse->horizontal_radius_squared;
+  if((ediesi) <= Ellipse->limit) return 255;
 
   return 0;
 }
@@ -1355,17 +1360,18 @@ void Draw_empty_ellipse_general(short center_x,short center_y,short horizontal_r
   short x_pos;
   short y_pos;
   long x, y;
+  T_Ellipse_limits Ellipse;
 
   start_x=center_x-horizontal_radius;
   start_y=center_y-vertical_radius;
 
   // Calcul des limites de l'ellipse
-  Ellipse_compute_limites(horizontal_radius+1,vertical_radius+1);
+  Ellipse_compute_limites(horizontal_radius+1, vertical_radius+1, &Ellipse);
 
   // Affichage des extremitées de l'ellipse sur chaque quart de l'ellipse:
   for (y_pos=start_y,y=-vertical_radius;y_pos<center_y;y_pos++,y++)
     for (x_pos=start_x,x=-horizontal_radius;x_pos<center_x;x_pos++,x++)
-      if (Pixel_in_ellipse(x, y))
+      if (Pixel_in_ellipse(x, y, &Ellipse))
       {
         // On vient de tomber sur le premier point qui sur la ligne
         // horizontale fait partie de l'ellipse.
@@ -1384,7 +1390,7 @@ void Draw_empty_ellipse_general(short center_x,short center_y,short horizontal_r
         // On peut ensuite afficher tous les points qui le suivent dont le
         // pixel voisin du haut n'appartient pas à l'ellipse:
         for (y--,x_pos++,x++;x_pos<center_x;x_pos++,x++)
-          if (!Pixel_in_ellipse(x, y))
+          if (!Pixel_in_ellipse(x, y, &Ellipse))
           {
              // Quart Haut-gauche
             Pixel_figure(x_pos,y_pos,color);
@@ -1408,14 +1414,14 @@ void Draw_empty_ellipse_general(short center_x,short center_y,short horizontal_r
   x_pos=center_x;
   x=-1;
   for (y_pos=center_y+1-vertical_radius,y=-vertical_radius+1;y_pos<center_y+vertical_radius;y_pos++,y++)
-    if (!Pixel_in_ellipse(x, y))
+    if (!Pixel_in_ellipse(x, y, &Ellipse))
       Pixel_figure(x_pos,y_pos,color);
 
   // points horizontaux:
   y_pos=center_y;
   y=-1;
   for (x_pos=center_x+1-horizontal_radius,x=-horizontal_radius+1;x_pos<center_x+horizontal_radius;x_pos++,x++)
-    if (!Pixel_in_ellipse(x, y))
+    if (!Pixel_in_ellipse(x, y, &Ellipse))
       Pixel_figure(x_pos,y_pos,color);
 
   Pixel_figure(center_x,center_y-vertical_radius,color);   // Haut
@@ -1465,6 +1471,7 @@ void Draw_filled_ellipse(short center_x,short center_y,short horizontal_radius,s
   short end_x;
   short end_y;
   long x, y;
+  T_Ellipse_limits Ellipse;
 
   start_x=center_x-horizontal_radius;
   start_y=center_y-vertical_radius;
@@ -1472,7 +1479,7 @@ void Draw_filled_ellipse(short center_x,short center_y,short horizontal_radius,s
   end_y=center_y+vertical_radius;
 
   // Calcul des limites de l'ellipse
-  Ellipse_compute_limites(horizontal_radius+1,vertical_radius+1);
+  Ellipse_compute_limites(horizontal_radius+1, vertical_radius+1, &Ellipse);
 
   // Correction des bornes d'après les limites
   if (start_y<Limit_top)
@@ -1487,7 +1494,7 @@ void Draw_filled_ellipse(short center_x,short center_y,short horizontal_radius,s
   // Affichage de l'ellipse
   for (y_pos=start_y,y=start_y-center_y;y_pos<=end_y;y_pos++,y++)
     for (x_pos=start_x,x=start_x-center_x;x_pos<=end_x;x_pos++,x++)
-      if (Pixel_in_ellipse(x, y))
+      if (Pixel_in_ellipse(x, y, &Ellipse))
         Display_pixel(x_pos,y_pos,color);
   Update_part_of_screen(center_x-horizontal_radius,center_y-vertical_radius,2*horizontal_radius+1,2*vertical_radius+1);
 }
@@ -2264,6 +2271,7 @@ void Draw_grad_ellipse(short center_x,short center_y,short horizontal_radius,sho
   long distance_x; // Distance (au carré) sur les X du point en cours au centre d'éclairage
   long distance_y; // Distance (au carré) sur les Y du point en cours au centre d'éclairage
   long x, y;
+  T_Ellipse_limits Ellipse;
 
   start_x=center_x-horizontal_radius;
   start_y=center_y-vertical_radius;
@@ -2271,7 +2279,7 @@ void Draw_grad_ellipse(short center_x,short center_y,short horizontal_radius,sho
   end_y=center_y+vertical_radius;
 
   // Calcul des limites de l'ellipse
-  Ellipse_compute_limites(horizontal_radius+1,vertical_radius+1);
+  Ellipse_compute_limites(horizontal_radius+1, vertical_radius+1, &Ellipse);
 
   // On calcule la distance maximale:
   Gradient_total_range=(horizontal_radius*horizontal_radius)+
@@ -2305,7 +2313,7 @@ void Draw_grad_ellipse(short center_x,short center_y,short horizontal_radius,sho
     distance_y =(y_pos-spot_y);
     distance_y*=distance_y;
     for (x_pos=start_x,x=start_x-center_x;x_pos<=end_x;x_pos++,x++)
-      if (Pixel_in_ellipse(x, y))
+      if (Pixel_in_ellipse(x, y, &Ellipse))
       {
         distance_x =(x_pos-spot_x);
         distance_x*=distance_x;
