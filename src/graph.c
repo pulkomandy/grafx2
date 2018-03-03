@@ -57,7 +57,13 @@
 #endif
 
 // Generic pixel-drawing function.
-Func_pixel Pixel_figure;
+static Func_pixel Pixel_figure;
+
+void Set_Pixel_figure(Func_pixel func)
+{
+  Pixel_figure = func;
+}
+
 
 typedef struct
 {

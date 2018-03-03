@@ -1244,7 +1244,7 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
     Brush_offset_X=start_x;
     Brush_offset_Y=start_y;
     
-    Pixel_figure=Pixel_figure_in_brush;
+    Set_Pixel_figure(Pixel_figure_in_brush);
 
     memset(Brush,Back_color,(long)Brush_width*Brush_height);
     Polyfill_general(vertices,points,xor_lut[Back_color]);

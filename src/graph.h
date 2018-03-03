@@ -115,7 +115,7 @@ void Remap_spare(void);
 /// - ::Pixel_figure_preview_xor : On screen, XORing the color.
 /// - ::Pixel_figure_permanent : On screen and in the image.
 /// - ::Pixel_figure_clear_preview : On screen, reverting to the image's pixels.
-extern Func_pixel Pixel_figure;
+void Set_Pixel_figure(Func_pixel func);
 
 void Update_part_of_screen(short x, short y, short width, short height);
 

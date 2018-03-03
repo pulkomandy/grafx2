@@ -524,7 +524,7 @@ int L_DrawLine(lua_State* L)
   LUA_ARG_NUMBER(4, "drawline", y2, INT_MIN, INT_MAX);
   LUA_ARG_NUMBER(5, "drawline", c,  INT_MIN, INT_MAX);
 
-  Pixel_figure = (void (*) (word,word,byte))Pixel_figure_no_screen;
+  Set_Pixel_figure((void (*) (word,word,byte))Pixel_figure_no_screen);
   Draw_line_general(x1, y1, x2, y2, c);
 
   return 0;
@@ -598,7 +598,7 @@ int L_DrawCircle(lua_State* L)
   LUA_ARG_NUMBER(3, "drawcircle", r, INT_MIN, INT_MAX);
   LUA_ARG_NUMBER(4, "drawcircle", c, INT_MIN, INT_MAX);
 
-  Pixel_figure = (void (*) (word,word,byte))Pixel_figure_no_screen;
+  Set_Pixel_figure((void (*) (word,word,byte))Pixel_figure_no_screen);
   Circle_limit = r*r;
   Draw_empty_circle_general(x1, y1, r, c);
 
