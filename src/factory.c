@@ -599,8 +599,7 @@ int L_DrawCircle(lua_State* L)
   LUA_ARG_NUMBER(4, "drawcircle", c, INT_MIN, INT_MAX);
 
   Set_Pixel_figure((void (*) (word,word,byte))Pixel_figure_no_screen);
-  Circle_limit = r*r;
-  Draw_empty_circle_general(x1, y1, r, c);
+  Draw_empty_circle_general(x1, y1, r*r, c);
 
   return 0;
 }

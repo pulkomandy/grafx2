@@ -60,13 +60,13 @@ void Pixel_figure_preview_xor(short x_pos,short y_pos,byte color);
 void Pixel_figure_preview_xorback(word x_pos,word y_pos,byte color);
 void Pixel_figure_in_brush(word x_pos,word y_pos,byte color);
 
-void Draw_empty_circle_general(short center_x,short center_y,short radius,byte color);
+void Draw_empty_circle_general(short center_x,short center_y,long sqradius,byte color);
 
-void Draw_empty_circle_permanent(short center_x,short center_y,short radius,byte color);
-void Draw_empty_circle_preview  (short center_x,short center_y,short radius,byte color);
-void Hide_empty_circle_preview (short center_x,short center_y,short radius);
-void Draw_empty_circle_general(short center_x,short center_y,short radius,byte color);
-void Draw_filled_circle         (short center_x,short center_y,short radius,byte color);
+void Draw_empty_circle_permanent(short center_x,short center_y,long sqradius,byte color);
+void Draw_empty_circle_preview  (short center_x,short center_y,long sqradius,byte color);
+void Hide_empty_circle_preview (short center_x,short center_y,long sqradius);
+void Draw_empty_circle_general(short center_x,short center_y,long sqradius,byte color);
+void Draw_filled_circle         (short center_x,short center_y,long sqradius,byte color);
 
 int Circle_squared_diameter(int diameter);
 
@@ -97,7 +97,7 @@ void Gradient_dithered (long index,short x_pos,short y_pos);
 void Gradient_extra_dithered(long index,short x_pos,short y_pos);
 void Degrade_aleatoire         (long index,short x_pos,short y_pos);
 
-void Draw_grad_circle  (short center_x,short center_y,short radius,short spot_x,short spot_y);
+void Draw_grad_circle  (short center_x,short center_y,long sqradius,short spot_x,short spot_y);
 void Draw_grad_ellipse(short center_x,short center_y,short horizontal_radius,short vertical_radius,short spot_x,short spot_y);
 void Draw_grad_rectangle(short rax,short ray,short rbx,short rby,short vax,short vay, short vbx, short vby);
 

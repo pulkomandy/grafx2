@@ -996,7 +996,7 @@ void Circle_12_5(void)
   short center_x;
   short center_y;
   short color;
-  short radius;
+  long limit;
   char  str[5];
 
   Operation_pop(&tangent_y);
@@ -1017,15 +1017,13 @@ void Circle_12_5(void)
     else
       Print_coordinates();
 
-    Circle_limit=((tangent_x-center_x)*(tangent_x-center_x))+
-                  ((tangent_y-center_y)*(tangent_y-center_y));
-    radius=sqrt(Circle_limit);
-    Hide_empty_circle_preview(center_x,center_y,radius);
+    limit=((tangent_x-center_x)*(tangent_x-center_x))+
+           ((tangent_y-center_y)*(tangent_y-center_y));
+    Hide_empty_circle_preview(center_x,center_y,limit);
 
-    Circle_limit=((Paintbrush_X-center_x)*(Paintbrush_X-center_x))+
-                  ((Paintbrush_Y-center_y)*(Paintbrush_Y-center_y));
-    radius=sqrt(Circle_limit);
-    Draw_empty_circle_preview(center_x,center_y,radius,color);
+    limit=((Paintbrush_X-center_x)*(Paintbrush_X-center_x))+
+           ((Paintbrush_Y-center_y)*(Paintbrush_Y-center_y));
+    Draw_empty_circle_preview(center_x,center_y,limit,color);
 
     Display_cursor();
   }
@@ -1052,7 +1050,7 @@ void Empty_circle_0_5(void)
   short center_x;
   short center_y;
   short color;
-  short radius;
+  long limit;
 
   Operation_pop(&tangent_y);
   Operation_pop(&tangent_x);
@@ -1060,14 +1058,13 @@ void Empty_circle_0_5(void)
   Operation_pop(&center_x);
   Operation_pop(&color);
 
-  Circle_limit=((tangent_x-center_x)*(tangent_x-center_x))+
-                ((tangent_y-center_y)*(tangent_y-center_y));
-  radius=sqrt(Circle_limit);
-  Hide_empty_circle_preview(center_x,center_y,radius);
+  limit=((tangent_x-center_x)*(tangent_x-center_x))+
+         ((tangent_y-center_y)*(tangent_y-center_y));
+  Hide_empty_circle_preview(center_x,center_y,limit);
 
   Paintbrush_shape=Paintbrush_shape_before_operation;
 
-  Draw_empty_circle_permanent(center_x,center_y,radius,color);
+  Draw_empty_circle_permanent(center_x,center_y,limit,color);
 
   End_of_modification();
   
@@ -1094,7 +1091,7 @@ void Filled_circle_0_5(void)
   short center_x;
   short center_y;
   short color;
-  short radius;
+  long limit;
 
   Operation_pop(&tangent_y);
   Operation_pop(&tangent_x);
@@ -1102,14 +1099,13 @@ void Filled_circle_0_5(void)
   Operation_pop(&center_x);
   Operation_pop(&color);
 
-  Circle_limit=((tangent_x-center_x)*(tangent_x-center_x))+
-                ((tangent_y-center_y)*(tangent_y-center_y));
-  radius=sqrt(Circle_limit);
-  Hide_empty_circle_preview(center_x,center_y,radius);
+  limit=((tangent_x-center_x)*(tangent_x-center_x))+
+         ((tangent_y-center_y)*(tangent_y-center_y));
+  Hide_empty_circle_preview(center_x,center_y,limit);
 
   Paintbrush_shape=Paintbrush_shape_before_operation;
 
-  Draw_filled_circle(center_x,center_y,radius,color);
+  Draw_filled_circle(center_x,center_y,limit,color);
 
   End_of_modification();
   if ( (Config.Coords_rel) && (Menu_is_visible) )
@@ -2983,7 +2979,7 @@ void Grad_circle_12_6(void)
   short center_x;
   short center_y;
   short color;
-  short radius;
+  long limit;
   char  str[5];
 
   Operation_pop(&tangent_y);
@@ -3005,15 +3001,13 @@ void Grad_circle_12_6(void)
     else
       Print_coordinates();
 
-    Circle_limit=((tangent_x-center_x)*(tangent_x-center_x))+
-                  ((tangent_y-center_y)*(tangent_y-center_y));
-    radius=sqrt(Circle_limit);
-    Hide_empty_circle_preview(center_x,center_y,radius);
+    limit=((tangent_x-center_x)*(tangent_x-center_x))+
+           ((tangent_y-center_y)*(tangent_y-center_y));
+    Hide_empty_circle_preview(center_x,center_y,limit);
 
-    Circle_limit=((Paintbrush_X-center_x)*(Paintbrush_X-center_x))+
+    limit=((Paintbrush_X-center_x)*(Paintbrush_X-center_x))+
                   ((Paintbrush_Y-center_y)*(Paintbrush_Y-center_y));
-    radius=sqrt(Circle_limit);
-    Draw_empty_circle_preview(center_x,center_y,radius,color);
+    Draw_empty_circle_preview(center_x,center_y,limit,color);
 
     Display_cursor();
   }
@@ -3041,7 +3035,6 @@ void Grad_circle_0_6(void)
   short center_y;
   short color;
   short click;
-  short radius;
 
   Operation_pop(&tangent_y);
   Operation_pop(&tangent_x);
@@ -3081,15 +3074,15 @@ void Grad_circle_0_6(void)
   }
   else
   {
-    Circle_limit=((tangent_x-center_x)*(tangent_x-center_x))+
-                  ((tangent_y-center_y)*(tangent_y-center_y));
-    radius=sqrt(Circle_limit);
-    Hide_empty_circle_preview(center_x,center_y,radius);
+    long limit;
+    limit=((tangent_x-center_x)*(tangent_x-center_x))+
+           ((tangent_y-center_y)*(tangent_y-center_y));
+    Hide_empty_circle_preview(center_x,center_y,limit);
 
     Paintbrush_hidden=Paintbrush_hidden_before_scroll;
     Cursor_shape=CURSOR_SHAPE_TARGET;
 
-    Draw_filled_circle(center_x,center_y,radius,Back_color);
+    Draw_filled_circle(center_x,center_y,limit,Back_color);
 
     End_of_modification();
     if ((Config.Coords_rel) && (Menu_is_visible))
@@ -3116,8 +3109,7 @@ void Grad_circle_12_8(void)
   short center_y;
   short color;
   short old_mouse_k;
-
-  short radius;
+  long limit;
 
   Operation_stack_size-=2;   // On fait sauter les 2 derniers élts de la pile
   Operation_pop(&tangent_y);
@@ -3131,16 +3123,15 @@ void Grad_circle_12_8(void)
   // On efface la croix XOR au centre du cercle
   Draw_curve_cross(center_x,center_y);
 
-  Circle_limit=((tangent_x-center_x)*(tangent_x-center_x))+
-                ((tangent_y-center_y)*(tangent_y-center_y));
-  radius=sqrt(Circle_limit);
-  Hide_empty_circle_preview(center_x,center_y,radius);
+  limit=((tangent_x-center_x)*(tangent_x-center_x))+
+         ((tangent_y-center_y)*(tangent_y-center_y));
+  Hide_empty_circle_preview(center_x,center_y,limit);
 
   Paintbrush_hidden=Paintbrush_hidden_before_scroll;
   Cursor_shape=CURSOR_SHAPE_TARGET;
 
   if (Mouse_K==old_mouse_k)
-    Draw_grad_circle(center_x,center_y,radius,Paintbrush_X,Paintbrush_Y);
+    Draw_grad_circle(center_x,center_y,limit,Paintbrush_X,Paintbrush_Y);
   Cursor_shape=CURSOR_SHAPE_XOR_TARGET;
 
   Display_cursor();

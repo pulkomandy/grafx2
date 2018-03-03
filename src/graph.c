@@ -104,9 +104,9 @@ static byte Pixel_in_ellipse(long x, long y, const T_Ellipse_limits * Ellipse)
 // Circle_cursor_Y pixels (Circle_cursor_Y>0 = en bas,
 // Circle_cursor_Y<0 = en haut) du centre se trouve dans le cercle en
 // cours.
-static byte Pixel_in_circle(long x, long y)
+static byte Pixel_in_circle(long x, long y, long limit)
 {
-  if((x * x + y * y) <= Circle_limit)
+  if((x * x + y * y) <= limit)
     return 255;
   return 0;
 }
@@ -1219,13 +1219,16 @@ void Fill_general(byte fill_color)
 
   // -- Tracer général d'un cercle vide -------------------------------------
 
-void Draw_empty_circle_general(short center_x,short center_y,short radius,byte color)
+void Draw_empty_circle_general(short center_x,short center_y, long sqradius,byte color)
 {
   short start_x;
   short start_y;
   short x_pos;
   short y_pos;
   long x, y;
+  short radius;
+
+  radius = sqrt(sqradius);
 
   // Ensuite, on va parcourire le quart haut gauche du cercle
   start_x=center_x-radius;
@@ -1234,7 +1237,7 @@ void Draw_empty_circle_general(short center_x,short center_y,short radius,byte c
   // Affichage des extremitées du cercle sur chaque quart du cercle:
   for (y_pos=start_y,y=-radius;y_pos<center_y;y_pos++,y++)
     for (x_pos=start_x,x=-radius;x_pos<center_x;x_pos++,x++)
-      if (Pixel_in_circle(x, y))
+      if (Pixel_in_circle(x, y, sqradius))
       {
         // On vient de tomber sur le premier point sur la ligne horizontale
         // qui fait partie du cercle.
@@ -1252,7 +1255,7 @@ void Draw_empty_circle_general(short center_x,short center_y,short radius,byte c
         // On peut ensuite afficher tous les points qui le suivent dont le
         // pixel voisin du haut n'appartient pas au cercle:
         for (y--,x_pos++,x++;x_pos<center_x;x_pos++,x++)
-          if (!Pixel_in_circle(x, y))
+          if (!Pixel_in_circle(x, y, sqradius))
           {
              // Quart Haut-gauche
             Pixel_figure(x_pos,y_pos,color);
@@ -1280,35 +1283,38 @@ void Draw_empty_circle_general(short center_x,short center_y,short radius,byte c
 
   // -- Tracé définitif d'un cercle vide --
 
-void Draw_empty_circle_permanent(short center_x,short center_y,short radius,byte color)
+void Draw_empty_circle_permanent(short center_x,short center_y,long sqradius,byte color)
 {
+  short radius = sqrt(sqradius);
   Pixel_figure=Pixel_figure_permanent;
   Init_permanent_draw();
-  Draw_empty_circle_general(center_x,center_y,radius,color);
+  Draw_empty_circle_general(center_x,center_y,sqradius,color);
   Update_part_of_screen(center_x - radius, center_y - radius, 2* radius+1, 2*radius+1);
 }
 
   // -- Tracer la preview d'un cercle vide --
 
-void Draw_empty_circle_preview(short center_x,short center_y,short radius,byte color)
+void Draw_empty_circle_preview(short center_x,short center_y,long sqradius,byte color)
 {
+  short radius = sqrt(sqradius);
   Pixel_figure=Pixel_figure_preview;
-  Draw_empty_circle_general(center_x,center_y,radius,color);
+  Draw_empty_circle_general(center_x,center_y,sqradius,color);
   Update_part_of_screen(center_x - radius, center_y - radius, 2* radius+1, 2*radius+1);
 }
 
   // -- Effacer la preview d'un cercle vide --
 
-void Hide_empty_circle_preview(short center_x,short center_y,short radius)
+void Hide_empty_circle_preview(short center_x,short center_y,long sqradius)
 {
+  short radius = sqrt(sqradius);
   Pixel_figure=Pixel_figure_clear_preview;
-  Draw_empty_circle_general(center_x,center_y,radius,0);
+  Draw_empty_circle_general(center_x,center_y,sqradius,0);
   Update_part_of_screen(center_x - radius, center_y - radius, 2* radius+1, 2*radius+1);
 }
 
   // -- Tracer un cercle plein --
 
-void Draw_filled_circle(short center_x,short center_y,short radius,byte color)
+void Draw_filled_circle(short center_x,short center_y,long sqradius,byte color)
 {
   short start_x;
   short start_y;
@@ -1317,6 +1323,7 @@ void Draw_filled_circle(short center_x,short center_y,short radius,byte color)
   short end_x;
   short end_y;
   long x, y;
+  short radius = sqrt(sqradius);
 
   start_x=center_x-radius;
   start_y=center_y-radius;
@@ -1336,7 +1343,7 @@ void Draw_filled_circle(short center_x,short center_y,short radius,byte color)
   // Affichage du cercle
   for (y_pos=start_y,y=(long)start_y-center_y;y_pos<=end_y;y_pos++,y++)
     for (x_pos=start_x,x=(long)start_x-center_x;x_pos<=end_x;x_pos++,x++)
-      if (Pixel_in_circle(x, y))
+      if (Pixel_in_circle(x, y, sqradius))
         Display_pixel(x_pos,y_pos,color);
 
   Update_part_of_screen(start_x,start_y,end_x+1-start_x,end_y+1-start_y);
@@ -2209,7 +2216,7 @@ void Gradient_extra_dithered(long index,short x_pos,short y_pos)
 
   // -- Tracer un cercle degradé (une sphère) --
 
-void Draw_grad_circle(short center_x,short center_y,short radius,short spot_x,short spot_y)
+void Draw_grad_circle(short center_x,short center_y,long sqradius,short spot_x,short spot_y)
 {
   long start_x;
   long start_y;
@@ -2220,6 +2227,7 @@ void Draw_grad_circle(short center_x,short center_y,short radius,short spot_x,sh
   long distance_x; // Distance (au carré) sur les X du point en cours au centre d'éclairage
   long distance_y; // Distance (au carré) sur les Y du point en cours au centre d'éclairage
   long x, y;
+  short radius = sqrt(sqradius);
 
   start_x=center_x-radius;
   start_y=center_y-radius;
@@ -2236,7 +2244,7 @@ void Draw_grad_circle(short center_x,short center_y,short radius,short spot_x,sh
   if (end_x>Limit_right)
     end_x=Limit_right;
 
-  Gradient_total_range=Circle_limit+
+  Gradient_total_range=sqradius+
                            ((center_x-spot_x)*(center_x-spot_x))+
                            ((center_y-spot_y)*(center_y-spot_y))+
                            (2L*radius*sqrt(
@@ -2252,7 +2260,7 @@ void Draw_grad_circle(short center_x,short center_y,short radius,short spot_x,sh
     distance_y =(y_pos-spot_y);
     distance_y*=distance_y;
     for (x_pos=start_x,x=(long)start_x-center_x;x_pos<=end_x;x_pos++,x++)
-      if (Pixel_in_circle(x, y))
+      if (Pixel_in_circle(x, y, sqradius))
       {
         distance_x =(x_pos-spot_x);
         distance_x*=distance_x;

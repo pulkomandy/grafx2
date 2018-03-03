@@ -566,10 +566,6 @@ GFX2_GLOBAL byte Mask_table[256];
   extern word ZOOM_FACTOR[NB_ZOOM_FACTORS];
 #endif
 
-// -- Data for ellipses and circles
-// FIXME: move this to graph.c
-GFX2_GLOBAL long  Circle_limit;
-
 // -- Data for gradients
 
 /// First color of the gradient.
