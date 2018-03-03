@@ -54,29 +54,6 @@ byte Read_pixel_from_backup_screen   (word x,word y);
 byte Read_pixel_from_feedback_screen (word x,word y);
 byte Read_pixel_from_brush         (word x,word y);
 
-void Ellipse_compute_limites(short horizontal_radius,short vertical_radius);
-// Calcule les valeurs suivantes en fonction des deux paramètres:
-//
-// Ellipse_vertical_radius_squared
-// Ellipse_horizontal_radius_squared
-// Ellipse_Limit_High
-// Ellipse_Limit_Low
-
-
-byte Pixel_in_ellipse(void);
-//   Indique si le pixel se trouvant à Ellipse_cursor_X pixels
-// (Ellipse_cursor_X>0 = à droite, Ellipse_cursor_X<0 = à gauche) et à
-// Ellipse_cursor_Y pixels (Ellipse_cursor_Y>0 = en bas,
-// Ellipse_cursor_Y<0 = en haut) du centre se trouve dans l'ellipse en
-// cours.
-
-byte Pixel_in_circle(void);
-//   Indique si le pixel se trouvant à Circle_cursor_X pixels
-// (Circle_cursor_X>0 = à droite, Circle_cursor_X<0 = à gauche) et à
-// Circle_cursor_Y pixels (Circle_cursor_Y>0 = en bas,
-// Circle_cursor_Y<0 = en haut) du centre se trouve dans le cercle en
-// cours.
-
 // Gestion du chrono dans les fileselects
 void Init_chrono(dword delay);
 void Check_timer(void);

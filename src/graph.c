@@ -59,6 +59,48 @@
 // Generic pixel-drawing function.
 Func_pixel Pixel_figure;
 
+// Calcule les valeurs suivantes en fonction des deux paramètres:
+//
+// Ellipse_vertical_radius_squared
+// Ellipse_horizontal_radius_squared
+// Ellipse_Limit_High
+// Ellipse_Limit_Low
+static void Ellipse_compute_limites(short horizontal_radius,short vertical_radius)
+{
+  Ellipse_horizontal_radius_squared =
+    (long)horizontal_radius * horizontal_radius;
+  Ellipse_vertical_radius_squared =
+    (long)vertical_radius * vertical_radius;
+  Ellipse_limit = (qword)Ellipse_horizontal_radius_squared * Ellipse_vertical_radius_squared;
+}
+
+//   Indique si le pixel se trouvant à Ellipse_cursor_X pixels
+// (Ellipse_cursor_X>0 = à droite, Ellipse_cursor_X<0 = à gauche) et à
+// Ellipse_cursor_Y pixels (Ellipse_cursor_Y>0 = en bas,
+// Ellipse_cursor_Y<0 = en haut) du centre se trouve dans l'ellipse en
+// cours.
+static byte Pixel_in_ellipse(void)
+{
+  qword ediesi = (qword)Ellipse_cursor_X * Ellipse_cursor_X * Ellipse_vertical_radius_squared +
+    (qword)Ellipse_cursor_Y * Ellipse_cursor_Y * Ellipse_horizontal_radius_squared;
+  if((ediesi) <= Ellipse_limit) return 255;
+
+  return 0;
+}
+
+//   Indique si le pixel se trouvant à Circle_cursor_X pixels
+// (Circle_cursor_X>0 = à droite, Circle_cursor_X<0 = à gauche) et à
+// Circle_cursor_Y pixels (Circle_cursor_Y>0 = en bas,
+// Circle_cursor_Y<0 = en haut) du centre se trouve dans le cercle en
+// cours.
+static byte Pixel_in_circle(void)
+{
+  if(Circle_cursor_X * Circle_cursor_X +
+      Circle_cursor_Y * Circle_cursor_Y <= Circle_limit)
+    return 255;
+  return 0;
+}
+
 /** Update the picture on screen, for the area passed in parameters.
  *
  * Takes into account the X/Y scrolling and zoom, and performs all safety checks so no updates will

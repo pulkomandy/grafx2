@@ -247,34 +247,6 @@ byte Read_pixel_from_brush (word x, word y)
   return *(Brush + y * Brush_width + x);
 }
 
-void Ellipse_compute_limites(short horizontal_radius,short vertical_radius)
-{
-  Ellipse_horizontal_radius_squared =
-    (long)horizontal_radius * horizontal_radius;
-  Ellipse_vertical_radius_squared =
-    (long)vertical_radius * vertical_radius;
-  Ellipse_limit = (qword)Ellipse_horizontal_radius_squared * Ellipse_vertical_radius_squared;
-}
-
-// FIXME: move to graph.c, it's the only caller
-byte Pixel_in_ellipse(void)
-{
-  qword ediesi = (qword)Ellipse_cursor_X * Ellipse_cursor_X * Ellipse_vertical_radius_squared +
-    (qword)Ellipse_cursor_Y * Ellipse_cursor_Y * Ellipse_horizontal_radius_squared;
-  if((ediesi) <= Ellipse_limit) return 255;
-
-  return 0;
-}
-
-// FIXME: move to graph.c, it's the only caller
-byte Pixel_in_circle(void)
-{
-  if(Circle_cursor_X * Circle_cursor_X +
-      Circle_cursor_Y * Circle_cursor_Y <= Circle_limit)
-    return 255;
-  return 0;
-}
-
 void Copy_part_of_image_to_another(byte * source,word source_x,word source_y,word width,word height,word source_width,byte * dest,word dest_x,word dest_y,word destination_width)
 {
   // ESI = adresse de la source en (S_Pox_X,source_y)
@@ -294,8 +266,6 @@ void Copy_part_of_image_to_another(byte * source,word source_x,word source_y,wor
     esi+=source_width;
     edi+=destination_width;
   }
-
-
 }
 
 byte Read_pixel_from_spare_screen(word x,word y)
