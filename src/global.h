@@ -568,13 +568,9 @@ GFX2_GLOBAL byte Mask_table[256];
 
 // -- Data for ellipses and circles
 // FIXME: move most of these to graph.c
-GFX2_GLOBAL long  Ellipse_cursor_X;
-GFX2_GLOBAL long  Ellipse_cursor_Y;
 GFX2_GLOBAL long  Ellipse_vertical_radius_squared;
 GFX2_GLOBAL long  Ellipse_horizontal_radius_squared;
 GFX2_GLOBAL qword Ellipse_limit;
-GFX2_GLOBAL long  Circle_cursor_X;
-GFX2_GLOBAL long  Circle_cursor_Y;
 GFX2_GLOBAL long  Circle_limit;
 
 // -- Data for gradients

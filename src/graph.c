@@ -79,10 +79,10 @@ static void Ellipse_compute_limites(short horizontal_radius,short vertical_radiu
 // Ellipse_cursor_Y pixels (Ellipse_cursor_Y>0 = en bas,
 // Ellipse_cursor_Y<0 = en haut) du centre se trouve dans l'ellipse en
 // cours.
-static byte Pixel_in_ellipse(void)
+static byte Pixel_in_ellipse(long x, long y)
 {
-  qword ediesi = (qword)Ellipse_cursor_X * Ellipse_cursor_X * Ellipse_vertical_radius_squared +
-    (qword)Ellipse_cursor_Y * Ellipse_cursor_Y * Ellipse_horizontal_radius_squared;
+  qword ediesi = (qword)x * x * Ellipse_vertical_radius_squared +
+    (qword)y * y * Ellipse_horizontal_radius_squared;
   if((ediesi) <= Ellipse_limit) return 255;
 
   return 0;
@@ -93,10 +93,9 @@ static byte Pixel_in_ellipse(void)
 // Circle_cursor_Y pixels (Circle_cursor_Y>0 = en bas,
 // Circle_cursor_Y<0 = en haut) du centre se trouve dans le cercle en
 // cours.
-static byte Pixel_in_circle(void)
+static byte Pixel_in_circle(long x, long y)
 {
-  if(Circle_cursor_X * Circle_cursor_X +
-      Circle_cursor_Y * Circle_cursor_Y <= Circle_limit)
+  if((x * x + y * y) <= Circle_limit)
     return 255;
   return 0;
 }
@@ -1215,15 +1214,16 @@ void Draw_empty_circle_general(short center_x,short center_y,short radius,byte c
   short start_y;
   short x_pos;
   short y_pos;
+  long x, y;
 
   // Ensuite, on va parcourire le quart haut gauche du cercle
   start_x=center_x-radius;
   start_y=center_y-radius;
 
   // Affichage des extremitées du cercle sur chaque quart du cercle:
-  for (y_pos=start_y,Circle_cursor_Y=-radius;y_pos<center_y;y_pos++,Circle_cursor_Y++)
-    for (x_pos=start_x,Circle_cursor_X=-radius;x_pos<center_x;x_pos++,Circle_cursor_X++)
-      if (Pixel_in_circle())
+  for (y_pos=start_y,y=-radius;y_pos<center_y;y_pos++,y++)
+    for (x_pos=start_x,x=-radius;x_pos<center_x;x_pos++,x++)
+      if (Pixel_in_circle(x, y))
       {
         // On vient de tomber sur le premier point sur la ligne horizontale
         // qui fait partie du cercle.
@@ -1240,8 +1240,8 @@ void Draw_empty_circle_general(short center_x,short center_y,short radius,byte c
 
         // On peut ensuite afficher tous les points qui le suivent dont le
         // pixel voisin du haut n'appartient pas au cercle:
-        for (Circle_cursor_Y--,x_pos++,Circle_cursor_X++;x_pos<center_x;x_pos++,Circle_cursor_X++)
-          if (!Pixel_in_circle())
+        for (y--,x_pos++,x++;x_pos<center_x;x_pos++,x++)
+          if (!Pixel_in_circle(x, y))
           {
              // Quart Haut-gauche
             Pixel_figure(x_pos,y_pos,color);
@@ -1255,7 +1255,7 @@ void Draw_empty_circle_general(short center_x,short center_y,short radius,byte c
           else
             break;
 
-        Circle_cursor_Y++;
+        y++;
         break;
       }
 
@@ -1305,6 +1305,7 @@ void Draw_filled_circle(short center_x,short center_y,short radius,byte color)
   short y_pos;
   short end_x;
   short end_y;
+  long x, y;
 
   start_x=center_x-radius;
   start_y=center_y-radius;
@@ -1322,9 +1323,9 @@ void Draw_filled_circle(short center_x,short center_y,short radius,byte color)
     end_x=Limit_right;
 
   // Affichage du cercle
-  for (y_pos=start_y,Circle_cursor_Y=(long)start_y-center_y;y_pos<=end_y;y_pos++,Circle_cursor_Y++)
-    for (x_pos=start_x,Circle_cursor_X=(long)start_x-center_x;x_pos<=end_x;x_pos++,Circle_cursor_X++)
-      if (Pixel_in_circle())
+  for (y_pos=start_y,y=(long)start_y-center_y;y_pos<=end_y;y_pos++,y++)
+    for (x_pos=start_x,x=(long)start_x-center_x;x_pos<=end_x;x_pos++,x++)
+      if (Pixel_in_circle(x, y))
         Display_pixel(x_pos,y_pos,color);
 
   Update_part_of_screen(start_x,start_y,end_x+1-start_x,end_y+1-start_y);
@@ -1353,6 +1354,7 @@ void Draw_empty_ellipse_general(short center_x,short center_y,short horizontal_r
   short start_y;
   short x_pos;
   short y_pos;
+  long x, y;
 
   start_x=center_x-horizontal_radius;
   start_y=center_y-vertical_radius;
@@ -1361,9 +1363,9 @@ void Draw_empty_ellipse_general(short center_x,short center_y,short horizontal_r
   Ellipse_compute_limites(horizontal_radius+1,vertical_radius+1);
 
   // Affichage des extremitées de l'ellipse sur chaque quart de l'ellipse:
-  for (y_pos=start_y,Ellipse_cursor_Y=-vertical_radius;y_pos<center_y;y_pos++,Ellipse_cursor_Y++)
-    for (x_pos=start_x,Ellipse_cursor_X=-horizontal_radius;x_pos<center_x;x_pos++,Ellipse_cursor_X++)
-      if (Pixel_in_ellipse())
+  for (y_pos=start_y,y=-vertical_radius;y_pos<center_y;y_pos++,y++)
+    for (x_pos=start_x,x=-horizontal_radius;x_pos<center_x;x_pos++,x++)
+      if (Pixel_in_ellipse(x, y))
       {
         // On vient de tomber sur le premier point qui sur la ligne
         // horizontale fait partie de l'ellipse.
@@ -1381,8 +1383,8 @@ void Draw_empty_ellipse_general(short center_x,short center_y,short horizontal_r
 
         // On peut ensuite afficher tous les points qui le suivent dont le
         // pixel voisin du haut n'appartient pas à l'ellipse:
-        for (Ellipse_cursor_Y--,x_pos++,Ellipse_cursor_X++;x_pos<center_x;x_pos++,Ellipse_cursor_X++)
-          if (!Pixel_in_ellipse())
+        for (y--,x_pos++,x++;x_pos<center_x;x_pos++,x++)
+          if (!Pixel_in_ellipse(x, y))
           {
              // Quart Haut-gauche
             Pixel_figure(x_pos,y_pos,color);
@@ -1396,7 +1398,7 @@ void Draw_empty_ellipse_general(short center_x,short center_y,short horizontal_r
           else
             break;
 
-        Ellipse_cursor_Y++;
+        y++;
         break;
       }
 
@@ -1404,16 +1406,16 @@ void Draw_empty_ellipse_general(short center_x,short center_y,short horizontal_r
 
   // points verticaux:
   x_pos=center_x;
-  Ellipse_cursor_X=-1;
-  for (y_pos=center_y+1-vertical_radius,Ellipse_cursor_Y=-vertical_radius+1;y_pos<center_y+vertical_radius;y_pos++,Ellipse_cursor_Y++)
-    if (!Pixel_in_ellipse())
+  x=-1;
+  for (y_pos=center_y+1-vertical_radius,y=-vertical_radius+1;y_pos<center_y+vertical_radius;y_pos++,y++)
+    if (!Pixel_in_ellipse(x, y))
       Pixel_figure(x_pos,y_pos,color);
 
   // points horizontaux:
   y_pos=center_y;
-  Ellipse_cursor_Y=-1;
-  for (x_pos=center_x+1-horizontal_radius,Ellipse_cursor_X=-horizontal_radius+1;x_pos<center_x+horizontal_radius;x_pos++,Ellipse_cursor_X++)
-    if (!Pixel_in_ellipse())
+  y=-1;
+  for (x_pos=center_x+1-horizontal_radius,x=-horizontal_radius+1;x_pos<center_x+horizontal_radius;x_pos++,x++)
+    if (!Pixel_in_ellipse(x, y))
       Pixel_figure(x_pos,y_pos,color);
 
   Pixel_figure(center_x,center_y-vertical_radius,color);   // Haut
@@ -1462,6 +1464,7 @@ void Draw_filled_ellipse(short center_x,short center_y,short horizontal_radius,s
   short y_pos;
   short end_x;
   short end_y;
+  long x, y;
 
   start_x=center_x-horizontal_radius;
   start_y=center_y-vertical_radius;
@@ -1482,9 +1485,9 @@ void Draw_filled_ellipse(short center_x,short center_y,short horizontal_radius,s
     end_x=Limit_right;
 
   // Affichage de l'ellipse
-  for (y_pos=start_y,Ellipse_cursor_Y=start_y-center_y;y_pos<=end_y;y_pos++,Ellipse_cursor_Y++)
-    for (x_pos=start_x,Ellipse_cursor_X=start_x-center_x;x_pos<=end_x;x_pos++,Ellipse_cursor_X++)
-      if (Pixel_in_ellipse())
+  for (y_pos=start_y,y=start_y-center_y;y_pos<=end_y;y_pos++,y++)
+    for (x_pos=start_x,x=start_x-center_x;x_pos<=end_x;x_pos++,x++)
+      if (Pixel_in_ellipse(x, y))
         Display_pixel(x_pos,y_pos,color);
   Update_part_of_screen(center_x-horizontal_radius,center_y-vertical_radius,2*horizontal_radius+1,2*vertical_radius+1);
 }
@@ -2203,6 +2206,7 @@ void Draw_grad_circle(short center_x,short center_y,short radius,short spot_x,sh
   long end_y;
   long distance_x; // Distance (au carré) sur les X du point en cours au centre d'éclairage
   long distance_y; // Distance (au carré) sur les Y du point en cours au centre d'éclairage
+  long x, y;
 
   start_x=center_x-radius;
   start_y=center_y-radius;
@@ -2230,12 +2234,12 @@ void Draw_grad_circle(short center_x,short center_y,short radius,short spot_x,sh
     Gradient_total_range=1;
 
   // Affichage du cercle
-  for (y_pos=start_y,Circle_cursor_Y=(long)start_y-center_y;y_pos<=end_y;y_pos++,Circle_cursor_Y++)
+  for (y_pos=start_y,y=(long)start_y-center_y;y_pos<=end_y;y_pos++,y++)
   {
     distance_y =(y_pos-spot_y);
     distance_y*=distance_y;
-    for (x_pos=start_x,Circle_cursor_X=(long)start_x-center_x;x_pos<=end_x;x_pos++,Circle_cursor_X++)
-      if (Pixel_in_circle())
+    for (x_pos=start_x,x=(long)start_x-center_x;x_pos<=end_x;x_pos++,x++)
+      if (Pixel_in_circle(x, y))
       {
         distance_x =(x_pos-spot_x);
         distance_x*=distance_x;
@@ -2259,7 +2263,7 @@ void Draw_grad_ellipse(short center_x,short center_y,short horizontal_radius,sho
   long end_y;
   long distance_x; // Distance (au carré) sur les X du point en cours au centre d'éclairage
   long distance_y; // Distance (au carré) sur les Y du point en cours au centre d'éclairage
-
+  long x, y;
 
   start_x=center_x-horizontal_radius;
   start_y=center_y-vertical_radius;
@@ -2296,12 +2300,12 @@ void Draw_grad_ellipse(short center_x,short center_y,short horizontal_radius,sho
     end_x=Limit_right;
 
   // Affichage de l'ellipse
-  for (y_pos=start_y,Ellipse_cursor_Y=start_y-center_y;y_pos<=end_y;y_pos++,Ellipse_cursor_Y++)
+  for (y_pos=start_y,y=start_y-center_y;y_pos<=end_y;y_pos++,y++)
   {
     distance_y =(y_pos-spot_y);
     distance_y*=distance_y;
-    for (x_pos=start_x,Ellipse_cursor_X=start_x-center_x;x_pos<=end_x;x_pos++,Ellipse_cursor_X++)
-      if (Pixel_in_ellipse())
+    for (x_pos=start_x,x=start_x-center_x;x_pos<=end_x;x_pos++,x++)
+      if (Pixel_in_ellipse(x, y))
       {
         distance_x =(x_pos-spot_x);
         distance_x*=distance_x;
