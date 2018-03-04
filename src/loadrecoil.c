@@ -158,7 +158,7 @@ void Load_Recoil_Image(T_IO_Context *context)
         free(pixels);
         if (!File_error)
         {
-          snprintf(context->Comment, COMMENT_SIZE + 1, "RECOIL: %s", RECOIL_GetPlatform(recoil));
+          snprintf(context->Comment, COMMENT_SIZE + 1, "RECOIL: %s %d colors", RECOIL_GetPlatform(recoil), RECOIL_GetColors(recoil));
         }
       }
     }
