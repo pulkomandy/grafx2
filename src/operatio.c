@@ -45,6 +45,13 @@
     #define M_PI 3.14159265358979323846 
 #endif
 
+/// when this macro is defined, the ellipses are inscribed in
+/// the rectangle of the mouse button press position and the
+/// release position.
+/// Otherwise, the mouse button press position is the center and
+/// the release postion defines the vertical and horizontal radiuses.
+#define INSCRIBED_ELLIPSE
+
 /// Time (in SDL ticks) when the next airbrush drawing should be done. Also used
 /// for discontinuous freehand drawing.
 Uint32 Airbrush_next_time;
@@ -1172,8 +1179,10 @@ void Ellipse_12_5(void)
   short center_x;
   short center_y;
   short color;
+#ifndef INSCRIBED_ELLIPSE
   short horizontal_radius;
   short vertical_radius;
+#endif
 
   Operation_pop(&tangent_y);
   Operation_pop(&tangent_x);
@@ -1185,9 +1194,12 @@ void Ellipse_12_5(void)
   if ( (tangent_x!=Paintbrush_X) || (tangent_y!=Paintbrush_Y) )
   {
     Hide_cursor();
+#ifndef INSCRIBED_ELLIPSE
     Cursor_shape=CURSOR_SHAPE_TARGET;
+#endif
     Display_coords_rel_or_abs(center_x,center_y);
 
+#ifndef INSCRIBED_ELLIPSE
     horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
                                            :center_x-tangent_x;
     vertical_radius  =(tangent_y>center_y)?tangent_y-center_y
@@ -1199,6 +1211,10 @@ void Ellipse_12_5(void)
     vertical_radius  =(Paintbrush_Y>center_y)?Paintbrush_Y-center_y
                                          :center_y-Paintbrush_Y;
     Draw_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius,color);
+#else
+    Hide_empty_inscribed_ellipse_preview(center_x,center_y,tangent_x,tangent_y);
+    Draw_empty_inscribed_ellipse_preview(center_x,center_y,Paintbrush_X,Paintbrush_Y,color);
+#endif
 
     Display_cursor();
   }
@@ -1225,8 +1241,10 @@ void Empty_ellipse_0_5(void)
   short center_x;
   short center_y;
   short color;
+#ifndef INSCRIBED_ELLIPSE
   short horizontal_radius;
   short vertical_radius;
+#endif
 
   Operation_pop(&tangent_y);
   Operation_pop(&tangent_x);
@@ -1234,15 +1252,23 @@ void Empty_ellipse_0_5(void)
   Operation_pop(&center_x);
   Operation_pop(&color);
 
+#ifndef INSCRIBED_ELLIPSE
   horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
                                          :center_x-tangent_x;
   vertical_radius  =(tangent_y>center_y)?tangent_y-center_y
                                          :center_y-tangent_y;
   Hide_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius);
+#else
+  Hide_empty_inscribed_ellipse_preview(center_x,center_y,tangent_x,tangent_y);
+#endif
 
   Paintbrush_shape=Paintbrush_shape_before_operation;
 
+#ifndef INSCRIBED_ELLIPSE
   Draw_empty_ellipse_permanent(center_x,center_y,horizontal_radius,vertical_radius,color);
+#else
+  Draw_empty_inscribed_ellipse_permanent(center_x,center_y,tangent_x,tangent_y,color);
+#endif
 
   End_of_modification();
   
@@ -1269,8 +1295,10 @@ void Filled_ellipse_0_5(void)
   short center_x;
   short center_y;
   short color;
+#ifndef INSCRIBED_ELLIPSE
   short horizontal_radius;
   short vertical_radius;
+#endif
 
   Operation_pop(&tangent_y);
   Operation_pop(&tangent_x);
@@ -1278,15 +1306,23 @@ void Filled_ellipse_0_5(void)
   Operation_pop(&center_x);
   Operation_pop(&color);
 
+#ifndef INSCRIBED_ELLIPSE
   horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
                                          :center_x-tangent_x;
   vertical_radius  =(tangent_y>center_y)?tangent_y-center_y
                                          :center_y-tangent_y;
   Hide_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius);
+#else
+  Hide_empty_inscribed_ellipse_preview(center_x,center_y,tangent_x,tangent_y);
+#endif
 
   Paintbrush_shape=Paintbrush_shape_before_operation;
 
+#ifndef INSCRIBED_ELLIPSE
   Draw_filled_ellipse(center_x,center_y,horizontal_radius,vertical_radius,color);
+#else
+  Draw_filled_inscribed_ellipse(center_x,center_y,tangent_x,tangent_y,color);
+#endif
 
   End_of_modification();
   if ( (Config.Coords_rel) && (Menu_is_visible) )

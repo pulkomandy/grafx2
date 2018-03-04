@@ -1366,7 +1366,7 @@ int Circle_squared_diameter(int diameter)
 
   // -- Tracer général d'une ellipse vide -----------------------------------
 
-void Draw_empty_ellipse_general(short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color)
+static void Draw_empty_ellipse_general(short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color)
 {
   short start_x;
   short start_y;
@@ -1445,6 +1445,78 @@ void Draw_empty_ellipse_general(short center_x,short center_y,short horizontal_r
   Update_part_of_screen(center_x-horizontal_radius,center_y-vertical_radius,2*horizontal_radius+1,2*vertical_radius+1);
 }
 
+static void Draw_inscribed_ellipse_general(short x1, short y1, short x2, short y2, byte color, byte filled)
+{
+  short left, right, top, bottom;
+  short dbl_center_x; // double of center_x
+  short dbl_center_y; // double of center_y
+  short dbl_x_radius; // double of horizontal radius
+  short dbl_y_radius; // double of vertical radius
+  long sq_dbl_x_radius;
+  long sq_dbl_y_radius;
+  qword sq_dbl_radius_product;
+  short x_pos;
+  short y_pos;
+  short x_max;
+
+  if (x1 > x2)
+  {
+    left = x2;
+    right = x1;
+  }
+  else
+  {
+    left = x1;
+    right = x2;
+  }
+  if (y1 > y2)
+  {
+    top = y2;
+    bottom = y1;
+  }
+  else
+  {
+    top = y1;
+    bottom = y2;
+  }
+  dbl_center_x = left+right;
+  dbl_center_y = top+bottom;
+  dbl_x_radius = right-left+1;
+  dbl_y_radius = bottom-top+1;
+  sq_dbl_x_radius = (long)dbl_x_radius*dbl_x_radius;
+  sq_dbl_y_radius = (long)dbl_y_radius*dbl_y_radius;
+  sq_dbl_radius_product = (qword)sq_dbl_x_radius * sq_dbl_y_radius;
+
+  x_max = right;
+  for (y_pos = top; y_pos <= (dbl_center_y >> 1); y_pos++)
+  {
+    long dbl_y = 2*y_pos - dbl_center_y;
+    long sq_dbl_y = dbl_y*dbl_y;
+    for (x_pos = left; x_pos <= (dbl_center_x >> 1); x_pos++)
+    {
+      long dbl_x = 2*x_pos - dbl_center_x;
+      long sq_dbl_x = dbl_x*dbl_x;
+      if (((qword)sq_dbl_x * sq_dbl_y_radius + (qword)sq_dbl_y * sq_dbl_x_radius) < sq_dbl_radius_product)
+      {
+        short x_pos_backup = x_pos;
+        do
+        {
+          Pixel_figure(x_pos,y_pos,color);
+          Pixel_figure(dbl_center_x - x_pos,y_pos,color);
+          Pixel_figure(x_pos,dbl_center_y - y_pos,color);
+          Pixel_figure(dbl_center_x - x_pos,dbl_center_y - y_pos,color);
+          x_pos++;
+        }
+        while (x_pos <= (dbl_center_x >> 1) && x_pos < x_max);
+        if (!filled && x_pos_backup < x_max)
+          x_max = x_pos_backup;
+        break;
+      }
+    }
+  }
+
+  Update_part_of_screen(left, top, right-left, bottom-top);
+}
   // -- Tracé définitif d'une ellipse vide --
 
 void Draw_empty_ellipse_permanent(short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color)
@@ -1452,7 +1524,14 @@ void Draw_empty_ellipse_permanent(short center_x,short center_y,short horizontal
   Pixel_figure=Pixel_figure_permanent;
   Init_permanent_draw();
   Draw_empty_ellipse_general(center_x,center_y,horizontal_radius,vertical_radius,color);
-  Update_part_of_screen(center_x - horizontal_radius, center_y - vertical_radius, 2* horizontal_radius+1, 2*vertical_radius+1);
+  //Update_part_of_screen(center_x - horizontal_radius, center_y - vertical_radius, 2* horizontal_radius+1, 2*vertical_radius+1);
+}
+
+void Draw_empty_inscribed_ellipse_permanent(short x1,short y1,short x2, short y2,byte color)
+{
+  Pixel_figure=Pixel_figure_permanent;
+  Init_permanent_draw();
+  Draw_inscribed_ellipse_general(x1, y1, x2, y2, color, 0);
 }
 
   // -- Tracer la preview d'une ellipse vide --
@@ -1461,7 +1540,13 @@ void Draw_empty_ellipse_preview(short center_x,short center_y,short horizontal_r
 {
   Pixel_figure=Pixel_figure_preview;
   Draw_empty_ellipse_general(center_x,center_y,horizontal_radius,vertical_radius,color);
-  Update_part_of_screen(center_x - horizontal_radius, center_y - vertical_radius, 2* horizontal_radius+1, 2*vertical_radius +1);
+  //Update_part_of_screen(center_x - horizontal_radius, center_y - vertical_radius, 2* horizontal_radius+1, 2*vertical_radius +1);
+}
+
+void Draw_empty_inscribed_ellipse_preview(short x1,short y1,short x2,short y2,byte color)
+{
+  Pixel_figure=Pixel_figure_preview;
+  Draw_inscribed_ellipse_general(x1, y1, x2, y2, color, 0);
 }
 
   // -- Effacer la preview d'une ellipse vide --
@@ -1470,7 +1555,13 @@ void Hide_empty_ellipse_preview(short center_x,short center_y,short horizontal_r
 {
   Pixel_figure=Pixel_figure_clear_preview;
   Draw_empty_ellipse_general(center_x,center_y,horizontal_radius,vertical_radius,0);
-  Update_part_of_screen(center_x - horizontal_radius, center_y - vertical_radius, 2* horizontal_radius+1, 2*vertical_radius+1);
+  //Update_part_of_screen(center_x - horizontal_radius, center_y - vertical_radius, 2* horizontal_radius+1, 2*vertical_radius+1);
+}
+
+void Hide_empty_inscribed_ellipse_preview(short x1,short y1,short x2,short y2)
+{
+  Pixel_figure=Pixel_figure_clear_preview;
+  Draw_inscribed_ellipse_general(x1,y1,x2,y2,0,0);
 }
 
   // -- Tracer une ellipse pleine --
@@ -1510,6 +1601,12 @@ void Draw_filled_ellipse(short center_x,short center_y,short horizontal_radius,s
       if (Pixel_in_ellipse(x, y, &Ellipse))
         Display_pixel(x_pos,y_pos,color);
   Update_part_of_screen(center_x-horizontal_radius,center_y-vertical_radius,2*horizontal_radius+1,2*vertical_radius+1);
+}
+
+void Draw_filled_inscribed_ellipse(short x1,short y1,short x2,short y2,byte color)
+{
+  Pixel_figure = Pixel_clipped;
+  Draw_inscribed_ellipse_general(x1, y1, x2, y2, color, 1);
 }
 
 /******************

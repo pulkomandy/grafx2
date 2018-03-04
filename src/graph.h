@@ -75,6 +75,11 @@ void Draw_empty_ellipse_preview  (short center_x,short center_y,short horizontal
 void Hide_empty_ellipse_preview (short center_x,short center_y,short horizontal_radius,short vertical_radius);
 void Draw_filled_ellipse        (short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color);
 
+void Draw_empty_inscribed_ellipse_permanent(short x1,short y1,short x2, short y2,byte color);
+void Draw_empty_inscribed_ellipse_preview(short x1,short y1,short x2,short y2,byte color);
+void Hide_empty_inscribed_ellipse_preview(short x1,short y1,short x2,short y2);
+void Draw_filled_inscribed_ellipse(short x1,short y1,short x2,short y2,byte color);
+
 void Clamp_coordinates_regular_angle(short ax, short ay, short* bx, short* by);
 void Draw_line_general(short start_x,short start_y,short end_x,short end_y, byte color);
 void Draw_line_permanent  (short start_x,short start_y,short end_x,short end_y,byte color);
