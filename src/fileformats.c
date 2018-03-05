@@ -6417,16 +6417,21 @@ void Save_PNG(T_IO_Context * context)
             opacity[context->Transparent_color]=0;
             png_set_tRNS(png_ptr, info_ptr, opacity, (int)1 + context->Transparent_color,0);
           }
+          // if using PNG_RESOLUTION_METER, unit is in dot per meter.
+          // 72 DPI = 2835,  600 DPI = 23622
+          // with PNG_RESOLUTION_UNKNOWN, it is arbitrary
           switch(Pixel_ratio)
           {
             case PIXEL_WIDE:
             case PIXEL_WIDE2:
-              png_set_pHYs(png_ptr, info_ptr, 3000, 6000, PNG_RESOLUTION_METER);
+              png_set_pHYs(png_ptr, info_ptr, 1, 2, PNG_RESOLUTION_UNKNOWN);
               break;
             case PIXEL_TALL:
             case PIXEL_TALL2:
+              png_set_pHYs(png_ptr, info_ptr, 2, 1, PNG_RESOLUTION_UNKNOWN);
+              break;
             case PIXEL_TALL3:
-              png_set_pHYs(png_ptr, info_ptr, 6000, 3000, PNG_RESOLUTION_METER);
+              png_set_pHYs(png_ptr, info_ptr, 4, 3, PNG_RESOLUTION_UNKNOWN);
               break;
             default:
               break;
