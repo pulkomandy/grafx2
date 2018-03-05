@@ -6091,10 +6091,17 @@ static void Load_PNG_Sub(T_IO_Context * context, FILE * file)
           {
             while (num_text--)
             {
-              if (!strcmp(text_ptr[num_text].key,"Title"))
+              int size = COMMENT_SIZE;
+              if (text_ptr[num_text].text_length > 0 && text_ptr[num_text].text_length < COMMENT_SIZE)
+                size = text_ptr[num_text].text_length;
+              if (strcmp(text_ptr[num_text].key,"Title") == 0)
               {
-                int size;
-                size = Min(text_ptr[num_text].text_length, COMMENT_SIZE);
+                strncpy(context->Comment, text_ptr[num_text].text, size);
+                context->Comment[size]='\0';
+                break; // Skip all others tEXt chunks
+              }
+              else if(strcmp(text_ptr[num_text].key, "Comment") == 0)
+              {
                 strncpy(context->Comment, text_ptr[num_text].text, size);
                 context->Comment[size]='\0';
                 break; // Skip all others tEXt chunks
