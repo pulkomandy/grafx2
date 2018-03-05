@@ -6081,6 +6081,7 @@ static void Load_PNG_Sub(T_IO_Context * context, FILE * file)
             || color_type == PNG_COLOR_TYPE_RGB_ALPHA
            )
         {
+          enum PIXEL_RATIO ratio = PIXEL_SIMPLE;
           int num_text;
           png_text *text_ptr;
 
@@ -6111,20 +6112,13 @@ static void Load_PNG_Sub(T_IO_Context * context, FILE * file)
             // WIDE or TALL pixels
             if (res_x>0 && res_y>0)
             {
-              if (res_y/res_x>1)
-              {
-                context->Ratio=PIXEL_WIDE;
-              }
-              else if (res_x/res_y>1)
-              {
-                context->Ratio=PIXEL_TALL;
-              }
+              if (res_y * 10 > res_x * 12)  // X/Y < 1/1.2
+                ratio = PIXEL_WIDE;
+              else if (res_x * 10 > res_y * 12) // X/Y > 1.2
+                ratio = PIXEL_TALL;
             }
           }
-          if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_RGB_ALPHA)
-            Pre_load(context,png_get_image_width(png_ptr,info_ptr),png_get_image_height(png_ptr,info_ptr),File_length_file(file),FORMAT_PNG,PIXEL_SIMPLE,bpp);
-          else
-            Pre_load(context,png_get_image_width(png_ptr,info_ptr),png_get_image_height(png_ptr,info_ptr),File_length_file(file),FORMAT_PNG,context->Ratio,bpp);
+          Pre_load(context,png_get_image_width(png_ptr,info_ptr),png_get_image_height(png_ptr,info_ptr),File_length_file(file),FORMAT_PNG,ratio,bpp);
 
           if (File_error==0)
           {
