@@ -3223,6 +3223,11 @@ void Load_CM5(T_IO_Context* context)
   int mod=0;
   short line = 0;
   int tx, ty;
+  // for preview :
+  byte ink0;
+  byte ink1[256];
+  byte ink2[256];
+  byte ink3[256*6];
 
   if (!(file = Open_file_read(context)))
   {
@@ -3276,7 +3281,7 @@ void Load_CM5(T_IO_Context* context)
   context->Palette[0x5F].R = 0x6E; context->Palette[0x5F].G = 0x7B; context->Palette[0x5F].B = 0xF6;
 
 
-  if (!Read_byte(file, &value))
+  if (!Read_byte(file, &ink0))
     File_error = 2;
 
   // This forces the creation of 5 layers total :
@@ -3286,16 +3291,16 @@ void Load_CM5(T_IO_Context* context)
   Set_loading_layer(context, 0);
 
   if (context->Type == CONTEXT_MAIN_IMAGE)
+  {
     Main.backups->Pages->Image_mode = IMAGE_MODE_MODE5;
 
-  for(ty=0; ty<context->Height; ty++)
-  for(tx=0; tx<context->Width; tx++)
-  {
-    Set_pixel(context, tx, ty, value);
+    // Fill layer with color we just read (Layer 1 - INK 0)
+    for(ty=0; ty<context->Height; ty++)
+      for(tx=0; tx<context->Width; tx++)
+        Set_pixel(context, tx, ty, ink0);
   }
-  // Fill layer with color we just read (Layer 1 - INK 0)
 
-  while(Read_byte(file, &value) == 1)
+  while(Read_byte(file, &value))
   {
     switch(mod)
     {
@@ -3304,25 +3309,28 @@ void Load_CM5(T_IO_Context* context)
         Set_loading_layer(context, 1);
         for(tx=0; tx<context->Width; tx++)
           Set_pixel(context, tx, line, value);
+        ink1[line] = value;
         break;
       case 1:
         // This is color for layer 3 - INK 2
         Set_loading_layer(context, 2);
         for(tx=0; tx<context->Width; tx++)
           Set_pixel(context, tx, line, value);
+        ink2[line] = value;
         break;
       default:
         // This is color for a block in layer 4 - INK 3
         Set_loading_layer(context, 3);
         for(tx=(mod-2)*48; tx<(mod-1)*48; tx++)
           Set_pixel(context, tx, line, value);
+        ink3[line*6+(mod-2)] = value;
         break;
     }
-    mod = mod + 1;
+    mod++;
     if (mod > 7)
     {
       mod = 0;
-      line ++;
+      line++;
     }
   }
 
@@ -3336,18 +3344,40 @@ void Load_CM5(T_IO_Context* context)
     return;
   }
   Set_loading_layer(context, 4);
-  
-  for (ty = 0; ty < 256; ty++)
-  {
-    for (tx = 0; tx < 48*6; )
-    {
-      Read_byte(file, &value);
-      Set_pixel(context, tx++, ty, 3 ^ (((value&0x80) >> 7) | ((value&0x8)>>2)));
-      Set_pixel(context, tx++, ty, 3 ^ (((value&0x40) >> 6) | ((value&0x4)>>1)));
-      Set_pixel(context, tx++, ty, 3 ^ (((value&0x20) >> 5) | ((value&0x2)>>0)));
-      Set_pixel(context, tx++, ty, 3 ^ (((value&0x10) >> 4) | ((value&0x1)<<1)));
-    }
-  }
+
+  if (context->Type == CONTEXT_PREVIEW)
+    for (ty = 0; ty < 256; ty++)
+      for (tx = 0; tx < 48*6; )
+      {
+        Read_byte(file, &value);
+        for (mod = 0; mod < 4; mod++, tx++, value <<= 1)
+        {
+          switch(3 ^ (((value&0x80) >> 7) | ((value&0x8)>>2)))  // INK
+          {
+            case 0:
+              Set_pixel(context, tx, ty, ink0);
+              break;
+            case 1:
+              Set_pixel(context, tx, ty, ink1[ty]);
+              break;
+            case 2:
+              Set_pixel(context, tx, ty, ink2[ty]);
+              break;
+            default:
+              Set_pixel(context, tx, ty, ink3[ty*6+(tx/48)]);
+          }
+        }
+      }
+  else
+    for (ty = 0; ty < 256; ty++)
+      for (tx = 0; tx < 48*6; )
+      {
+        Read_byte(file, &value);
+        Set_pixel(context, tx++, ty, 3 ^ (((value&0x80) >> 7) | ((value&0x8)>>2)));
+        Set_pixel(context, tx++, ty, 3 ^ (((value&0x40) >> 6) | ((value&0x4)>>1)));
+        Set_pixel(context, tx++, ty, 3 ^ (((value&0x20) >> 5) | ((value&0x2)>>0)));
+        Set_pixel(context, tx++, ty, 3 ^ (((value&0x10) >> 4) | ((value&0x1)<<1)));
+      }
 
   fclose(file);
 
