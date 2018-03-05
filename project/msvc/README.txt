@@ -1,6 +1,6 @@
 Project files for MS Visual Studio 2010 :
 
-By default the project expect SDL 1.2 SDL Image 1.2 and Lua 5.3 to be installed
+By default the project expects SDL 1.2, SDL Image 1.2 and Lua 5.3 to be installed
 in directories :
   ..\..\..\..\SDL-1.2.15
   ..\..\..\..\SDL_image-1.2.12
@@ -20,3 +20,8 @@ Download precompiled libraries from :
 
   http://luabinaries.sourceforge.net/
     https://sourceforge.net/projects/luabinaries/files/5.3.4/Windows%20Libraries/Static/
+
+
+Download recoil-4.2.0.tar.gz from https://sourceforge.net/projects/recoil/files/recoil/4.2.0/
+and copy recoil.c and recoil.h to src subdirectory.
+You can also disable RECOIL by defining the NORECOIL macro.

@@ -18,6 +18,12 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 
+#ifdef _MSC_VER
+#include <stdio.h>
+#if _MSC_VER < 1900
+#define snprintf _snprintf
+#endif
+#endif
 
 #include "struct.h"
 #include "global.h"
@@ -93,8 +99,25 @@ void Load_Recoil_Image(T_IO_Context *context)
   recoil = RECOIL_New();
   if (recoil)
   {
+#ifdef WIN32
+    char tempfilename[MAX_PATH_CHARACTERS];
+#endif
+    const char * filename = context->File_name;
     *(const RECOILVtbl **)recoil = &vtbl; // set Vtable
-    if (RECOIL_Decode(recoil, context->File_name, file_content, file_length))
+#ifdef WIN32
+    if (context->File_name_unicode != NULL && context->File_name_unicode[0] != 0)
+    {
+      // get the full file extension from the long filename (unicode)
+      // RECOIL doesn't recognize file if the "short" extension is passed,
+      // ie .DEE instead of .deep
+      int i;
+      for (i = 0; context->File_name_unicode[i] != 0 && i < sizeof(tempfilename) - 1; i++)
+        tempfilename[i] = (context->File_name_unicode[i] < 256) ? (char)context->File_name_unicode[i] : '_';
+      tempfilename[i] = '\0';
+      filename = tempfilename;
+    }
+#endif
+    if (RECOIL_Decode(recoil, filename, file_content, file_length))
     {
       int width, height;
       int original_width, original_height;

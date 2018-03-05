@@ -125,6 +125,7 @@
     <ClInclude Include="..\..\src\readini.h" />
     <ClInclude Include="..\..\src\readline.h" />
     <ClInclude Include="..\..\src\realpath.h" />
+    <ClInclude Include="..\..\src\recoil.h" />
     <ClInclude Include="..\..\src\saveini.h" />
     <ClInclude Include="..\..\src\SDLMain.h" />
     <ClInclude Include="..\..\src\sdlscreen.h" />
@@ -161,6 +162,7 @@
     <ClCompile Include="..\..\src\keyboard.c" />
     <ClCompile Include="..\..\src\layers.c" />
     <ClCompile Include="..\..\src\libraw2crtc.c" />
+    <ClCompile Include="..\..\src\loadrecoil.c" />
     <ClCompile Include="..\..\src\loadsave.c" />
     <ClCompile Include="..\..\src\main.c" />
     <ClCompile Include="..\..\src\misc.c" />
@@ -184,6 +186,7 @@
     <ClCompile Include="..\..\src\readini.c" />
     <ClCompile Include="..\..\src\readline.c" />
     <ClCompile Include="..\..\src\realpath.c" />
+    <ClCompile Include="..\..\src\recoil.c" />
     <ClCompile Include="..\..\src\saveini.c" />
     <ClCompile Include="..\..\src\sdlscreen.c" />
     <ClCompile Include="..\..\src\setup.c" />
