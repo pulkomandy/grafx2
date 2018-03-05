@@ -3276,13 +3276,13 @@ void Load_CM5(T_IO_Context* context)
   context->Palette[0x5F].R = 0x6E; context->Palette[0x5F].G = 0x7B; context->Palette[0x5F].B = 0xF6;
 
 
-  if (Read_byte(file, &value)!=1)
+  if (!Read_byte(file, &value))
     File_error = 2;
 
   // This forces the creation of 5 layers total :
   // Needed because the "pixel" functions will seek layer 4
   Set_loading_layer(context, 4);
-  // Now select layer 0 again
+  // Now select layer 1 again
   Set_loading_layer(context, 0);
 
   if (context->Type == CONTEXT_MAIN_IMAGE)
@@ -3293,26 +3293,26 @@ void Load_CM5(T_IO_Context* context)
   {
     Set_pixel(context, tx, ty, value);
   }
-  // Fill layer with color we just read 
+  // Fill layer with color we just read (Layer 1 - INK 0)
 
   while(Read_byte(file, &value) == 1)
   {
     switch(mod)
     {
       case 0:
-        // This is color for layer 1
+        // This is color for layer 2 - INK 1
         Set_loading_layer(context, 1);
         for(tx=0; tx<context->Width; tx++)
           Set_pixel(context, tx, line, value);
         break;
       case 1:
-        // This is color for layer 2
+        // This is color for layer 3 - INK 2
         Set_loading_layer(context, 2);
         for(tx=0; tx<context->Width; tx++)
           Set_pixel(context, tx, line, value);
         break;
       default:
-        // This is color for a block in layer 4
+        // This is color for a block in layer 4 - INK 3
         Set_loading_layer(context, 3);
         for(tx=(mod-2)*48; tx<(mod-1)*48; tx++)
           Set_pixel(context, tx, line, value);
