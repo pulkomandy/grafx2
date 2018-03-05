@@ -3231,8 +3231,9 @@ void Load_CM5(T_IO_Context* context)
   }
 
   Pre_load(context, 48*6, 256, 2049, FORMAT_CM5, PIXEL_SIMPLE, 0);
-  context->Width=48*6;
-  context->Height=256;
+
+  if (Config.Clear_palette)
+    memset(context->Palette,0,sizeof(T_Palette));
 
   // Setup the palette (amstrad hardware palette)
   context->Palette[0x40].R = 0x6E; context->Palette[0x40].G = 0x7D; context->Palette[0x40].B = 0x6B;
