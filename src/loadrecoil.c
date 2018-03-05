@@ -97,13 +97,23 @@ void Load_Recoil_Image(T_IO_Context *context)
     if (RECOIL_Decode(recoil, context->File_name, file_content, file_length))
     {
       int width, height;
+      int original_width, original_height;
       int x, y;
+      int x_ratio, y_ratio;
       byte * pixels;
       const int *palette;
       enum PIXEL_RATIO ratio = PIXEL_SIMPLE;
 
       width = RECOIL_GetWidth(recoil);
       height = RECOIL_GetHeight(recoil);
+      original_width = RECOIL_GetOriginalWidth(recoil);
+      original_height = RECOIL_GetOriginalHeight(recoil);
+      x_ratio = width / original_width;
+      y_ratio = height / original_height;
+      if (x_ratio > 1 && y_ratio == 1)
+        ratio = PIXEL_WIDE;
+      else if(x_ratio == 1 && y_ratio > 1)
+        ratio = PIXEL_TALL;
       pixels = malloc(width * height);
       if (pixels == NULL)
       {
@@ -120,14 +130,17 @@ void Load_Recoil_Image(T_IO_Context *context)
           // 24bits
           const int * tc_pixels;
 
-          Pre_load(context, width, height, file_length, FORMAT_MISC, ratio, 24);
+          Pre_load(context, original_width, original_height, file_length, FORMAT_MISC, ratio, 24);
           tc_pixels = RECOIL_GetPixels(recoil);
-          for (y = 0; y < height; y++)
-            for (x = 0; x < width; x++)
+          for (y = 0; y < original_height; y++)
+          {
+            for (x = 0; x < original_width; x++)
             {
               Set_pixel_24b(context, x, y, *tc_pixels >> 16, *tc_pixels >> 8, *tc_pixels);
-              tc_pixels++;
+              tc_pixels += x_ratio;
             }
+            tc_pixels += width * (y_ratio - 1);
+          }
         }
         else
         {
@@ -148,12 +161,16 @@ void Load_Recoil_Image(T_IO_Context *context)
             context->Palette[i].G = (byte)(palette[i] >> 8);
             context->Palette[i].B = (byte)(palette[i]);
           }
-          Pre_load(context, width, height, file_length, FORMAT_MISC, ratio, bpp);
-          for (y = 0; y < height; y++)
-            for (x = 0; x < width; x++)
+          Pre_load(context, original_width, original_height, file_length, FORMAT_MISC, ratio, bpp);
+          for (y = 0; y < original_height; y++)
+          {
+            for (x = 0; x < original_width; x++)
             {
-              Set_pixel(context, x, y, *p++);
+              Set_pixel(context, x, y, *p);
+              p += x_ratio;
             }
+            p += width * (y_ratio - 1);
+          }
         }
         free(pixels);
         if (!File_error)
