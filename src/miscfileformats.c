@@ -3181,7 +3181,7 @@ void Save_SCR(T_IO_Context * context)
 }
 
 // CM5 - Amstrad CPC "Mode 5" picture
-// This is a format designed by SyX. There is one .SCR file in the usual amstrad format,
+// This is a format designed by SyX. There is one .GFX file in the usual amstrad format,
 // and a .CM5 file with the palette, which varies over time.
 
 void Test_CM5(T_IO_Context * context)
@@ -3192,16 +3192,24 @@ void Test_CM5(T_IO_Context * context)
 
   File_error = 1;
 
-  if ((file = Open_file_read(context)))
-  {
-    file_size = File_length_file(file);
-    if (file_size == 2049)
-      File_error = 0;
-  }
-
+  file = Open_file_read(context);
+  if (file == NULL)
+    return;
+  file_size = File_length_file(file);
   fclose(file);
+  if (file_size != 2049)
+    return;
 
-  // TODO: check existence of a .SCR file with the same name
+  // check existence of a .GFX file with the same name
+  file = Open_file_read_with_alternate_ext(context, "gfx");
+  if (file == NULL)
+    return;
+  file_size = File_length_file(file);
+  fclose(file);
+  if (file_size != 18432)
+    return;
+
+  File_error = 0;
 }
 
 
