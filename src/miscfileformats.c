@@ -3223,7 +3223,6 @@ void Load_CM5(T_IO_Context* context)
   int mod=0;
   short line = 0;
   int tx, ty;
-  byte buffer[48*6/4];
 
   if (!(file = Open_file_read(context)))
   {
@@ -3339,13 +3338,13 @@ void Load_CM5(T_IO_Context* context)
   
   for (ty = 0; ty < 256; ty++)
   {
-    Read_bytes(file, buffer, 48*6/4);
-    for (tx = 0; tx < 48*6; tx+=4)
+    for (tx = 0; tx < 48*6; )
     {
-      Set_pixel(context, tx+0, ty, 3-(((buffer[tx/4]&0x80) >> 7) |((buffer[tx/4]&0x8)>>2)));
-      Set_pixel(context, tx+1, ty, 3-(((buffer[tx/4]&0x40) >> 6) |((buffer[tx/4]&0x4)>>1)));
-      Set_pixel(context, tx+2, ty, 3-(((buffer[tx/4]&0x20) >> 5) |((buffer[tx/4]&0x2)>>0)));
-      Set_pixel(context, tx+3, ty, 3-(((buffer[tx/4]&0x10) >> 4) |((buffer[tx/4]&0x1)<<1)));
+      Read_byte(file, &value);
+      Set_pixel(context, tx++, ty, 3 ^ (((value&0x80) >> 7) | ((value&0x8)>>2)));
+      Set_pixel(context, tx++, ty, 3 ^ (((value&0x40) >> 6) | ((value&0x4)>>1)));
+      Set_pixel(context, tx++, ty, 3 ^ (((value&0x20) >> 5) | ((value&0x2)>>0)));
+      Set_pixel(context, tx++, ty, 3 ^ (((value&0x10) >> 4) | ((value&0x1)<<1)));
     }
   }
 
