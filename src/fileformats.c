@@ -1049,6 +1049,20 @@ void Load_IFF(T_IO_Context * context)
               ratio = PIXEL_WIDE; // 1.5 <= ratio
           }
           bpp = header.BitPlanes;
+          if (bpp <= 8)
+          {
+            unsigned int i;
+            // Set a default grayscale palette : if the
+            // ILBM/PBM file has no palette, it should be assumed to be a
+            // Gray scale picture.
+            if (Config.Clear_palette)
+              memset(context->Palette,0,sizeof(T_Palette));
+            nb_colors = 1 << bpp;
+            for (i = 0; i < nb_colors; i++)
+              context->Palette[i].R =
+              context->Palette[i].G =
+              context->Palette[i].B = (i * 255) / (nb_colors - 1);
+          }
         }
         else if (memcmp(section, "ANHD", 4) == 0) // ANimation  HeaDer
         {
@@ -1457,8 +1471,6 @@ void Load_IFF(T_IO_Context * context)
             bpp = 3 * (header.BitPlanes - 2); // HAM6 = 12bpp, HAM8 = 18bpp
           }
 
-          if (Config.Clear_palette)
-            memset(context->Palette,0,sizeof(T_Palette));
           if (Read_bytes(IFF_file,context->Palette,3*nb_colors))
           {
             section_size -= 3*nb_colors;
