@@ -3272,8 +3272,10 @@ void Grad_ellipse_12_6(void)
   short center_x;
   short center_y;
   short color;
+#ifndef INSCRIBED_ELLIPSE
   short horizontal_radius;
   short vertical_radius;
+#endif
 
   Operation_pop(&tangent_y);
   Operation_pop(&tangent_x);
@@ -3284,9 +3286,12 @@ void Grad_ellipse_12_6(void)
   if ( (tangent_x!=Paintbrush_X) || (tangent_y!=Paintbrush_Y) )
   {
     Hide_cursor();
+#ifndef INSCRIBED_ELLIPSE
     Cursor_shape=CURSOR_SHAPE_TARGET;
+#endif
     Display_coords_rel_or_abs(center_x,center_y);
 
+#ifndef INSCRIBED_ELLIPSE
     horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
                                            :center_x-tangent_x;
     vertical_radius  =(tangent_y>center_y)?tangent_y-center_y
@@ -3298,6 +3303,10 @@ void Grad_ellipse_12_6(void)
     vertical_radius  =(Paintbrush_Y>center_y)?Paintbrush_Y-center_y
                                          :center_y-Paintbrush_Y;
     Draw_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius,color);
+#else
+    Hide_empty_inscribed_ellipse_preview(center_x,center_y,tangent_x,tangent_y);
+    Draw_empty_inscribed_ellipse_preview(center_x,center_y,Paintbrush_X,Paintbrush_Y,color);
+#endif
 
     Display_cursor();
   }
@@ -3326,8 +3335,10 @@ void Grad_ellipse_0_6(void)
   short color;
   short click;
   //short radius;
+#ifndef INSCRIBED_ELLIPSE
   short horizontal_radius;
   short vertical_radius;
+#endif
 
   Operation_pop(&tangent_y);
   Operation_pop(&tangent_x);
@@ -3354,7 +3365,11 @@ void Grad_ellipse_0_6(void)
     Cursor_shape=CURSOR_SHAPE_XOR_TARGET;
 
     // On affiche une croix XOR au centre du cercle
+#ifndef INSCRIBED_ELLIPSE
     Draw_curve_cross(center_x,center_y);
+#else
+    Draw_curve_cross((center_x+tangent_x)/2, (center_y+tangent_y)/2);
+#endif
 
     if (Menu_is_visible)
     {
@@ -3367,16 +3382,24 @@ void Grad_ellipse_0_6(void)
   }
   else
   {
+#ifndef INSCRIBED_ELLIPSE
     horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
                                            :center_x-tangent_x;
     vertical_radius  =(tangent_y>center_y)?tangent_y-center_y
                                            :center_y-tangent_y;
     Hide_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius);
+#else
+    Hide_empty_inscribed_ellipse_preview(center_x,center_y,tangent_x,tangent_y);
+#endif
 
     Paintbrush_hidden=Paintbrush_hidden_before_scroll;
     Cursor_shape=CURSOR_SHAPE_TARGET;
 
+#ifndef INSCRIBED_ELLIPSE
     Draw_filled_ellipse(center_x,center_y,horizontal_radius,vertical_radius,Back_color);
+#else
+    Draw_filled_inscribed_ellipse(center_x,center_y,tangent_x,tangent_y,Back_color);
+#endif
 
     End_of_modification();
     if ((Config.Coords_rel) && (Menu_is_visible))
@@ -3402,8 +3425,10 @@ void Grad_ellipse_12_8(void)
   short center_x;
   short center_y;
   short color;
+#ifndef INSCRIBED_ELLIPSE
   short horizontal_radius;
   short vertical_radius;
+#endif
   short old_mouse_k;
 
   Operation_stack_size-=2;   // On fait sauter les 2 derniers élts de la pile
@@ -3416,19 +3441,31 @@ void Grad_ellipse_12_8(void)
 
   Hide_cursor();
   // On efface la croix XOR au centre de l'ellipse
+#ifndef INSCRIBED_ELLIPSE
   Draw_curve_cross(center_x,center_y);
+#else
+  Draw_curve_cross((center_x+tangent_x)/2, (center_y+tangent_y)/2);
+#endif
 
+#ifndef INSCRIBED_ELLIPSE
   horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
                                          :center_x-tangent_x;
   vertical_radius  =(tangent_y>center_y)?tangent_y-center_y
                                          :center_y-tangent_y;
   Hide_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius);
+#else
+  Hide_empty_inscribed_ellipse_preview(center_x,center_y,tangent_x,tangent_y);
+#endif
 
   Paintbrush_hidden=Paintbrush_hidden_before_scroll;
   Cursor_shape=CURSOR_SHAPE_XOR_TARGET;
 
   if (Mouse_K==old_mouse_k)
+#ifndef INSCRIBED_ELLIPSE
     Draw_grad_ellipse(center_x,center_y,horizontal_radius,vertical_radius,Paintbrush_X,Paintbrush_Y);
+#else
+    Draw_grad_inscribed_ellipse(center_x,center_y,tangent_x,tangent_y,Paintbrush_X,Paintbrush_Y);
+#endif
 
   Display_cursor();
   End_of_modification();

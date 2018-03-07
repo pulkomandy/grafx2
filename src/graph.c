@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2018 Thomas Bernard
     Copyright 2008 Franck Charlet
     Copyright 2007-2017 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
@@ -2435,6 +2436,82 @@ void Draw_grad_ellipse(short center_x,short center_y,short horizontal_radius,sho
   Update_part_of_screen(start_x,start_y,end_x-start_x+1,end_y-start_y+1);
 }
 
+void Draw_grad_inscribed_ellipse(short x1, short y1, short x2, short y2, short spot_x, short spot_y)
+{
+  short left, right, top, bottom;
+  short dbl_center_x; // double of center_x
+  short dbl_center_y; // double of center_y
+  short dbl_x_radius; // double of horizontal radius
+  short dbl_y_radius; // double of vertical radius
+  long sq_dbl_x_radius;
+  long sq_dbl_y_radius;
+  qword sq_dbl_radius_product;
+  short x_pos;
+  short y_pos;
+  long sq_dist_x; // Square horizontal distance with the lightning point
+  long sq_dist_y; // Square vertical distance with the lightning point
+
+  if (x1 > x2)
+  {
+    left = x2;
+    right = x1;
+  }
+  else
+  {
+    left = x1;
+    right = x2;
+  }
+  if (y1 > y2)
+  {
+    top = y2;
+    bottom = y1;
+  }
+  else
+  {
+    top = y1;
+    bottom = y2;
+  }
+  dbl_center_x = left+right;
+  dbl_center_y = top+bottom;
+  dbl_x_radius = right-left+1;
+  dbl_y_radius = bottom-top+1;
+  sq_dbl_x_radius = (long)dbl_x_radius*dbl_x_radius;
+  sq_dbl_y_radius = (long)dbl_y_radius*dbl_y_radius;
+  sq_dbl_radius_product = (qword)sq_dbl_x_radius * sq_dbl_y_radius;
+
+  // calculate grandient range
+  Gradient_total_range= (sq_dbl_x_radius + sq_dbl_y_radius) / 4 +
+                           ((dbl_center_x/2-spot_x)*(dbl_center_x/2-spot_x))+
+                           ((dbl_center_y/2-spot_y)*(dbl_center_y/2-spot_y))+
+                           (sqrt(sq_dbl_x_radius + sq_dbl_y_radius)
+                           *sqrt(
+                           ((dbl_center_x/2-spot_x)*(dbl_center_x/2-spot_x))+
+                           ((dbl_center_y/2-spot_y)*(dbl_center_y/2-spot_y))));
+
+  if (Gradient_total_range==0)
+    Gradient_total_range=1;
+
+  for (y_pos = top; y_pos <= bottom; y_pos++)
+  {
+    long dbl_y = 2*y_pos - dbl_center_y;
+    long sq_dbl_y = dbl_y*dbl_y;
+    sq_dist_y =(y_pos-spot_y);
+    sq_dist_y *= sq_dist_y;
+    for (x_pos = left; x_pos <= right; x_pos++)
+    {
+      long dbl_x = 2*x_pos - dbl_center_x;
+      long sq_dbl_x = dbl_x*dbl_x;
+      if (((qword)sq_dbl_x * sq_dbl_y_radius + (qword)sq_dbl_y * sq_dbl_x_radius) < sq_dbl_radius_product)
+      {
+        sq_dist_x =(x_pos-spot_x);
+        sq_dist_x *= sq_dist_x;
+        Gradient_function(sq_dist_x+sq_dist_y,x_pos,y_pos);
+      }
+    }
+  }
+
+  Update_part_of_screen(left, top, right-left+1, bottom-top+1);
+}
 
 // Tracé d'un rectangle (rax ray - rbx rby) dégradé selon le vecteur (vax vay - vbx - vby)
 void Draw_grad_rectangle(short rax,short ray,short rbx,short rby,short vax,short vay, short vbx, short vby)

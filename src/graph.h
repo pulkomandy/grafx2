@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2018 Thomas Bernard
     Copyright 2007-2008 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
@@ -104,6 +105,7 @@ void Degrade_aleatoire         (long index,short x_pos,short y_pos);
 
 void Draw_grad_circle  (short center_x,short center_y,long sqradius,short spot_x,short spot_y);
 void Draw_grad_ellipse(short center_x,short center_y,short horizontal_radius,short vertical_radius,short spot_x,short spot_y);
+void Draw_grad_inscribed_ellipse(short x1, short y1, short x2, short y2, short spot_x, short spot_y);
 void Draw_grad_rectangle(short rax,short ray,short rbx,short rby,short vax,short vay, short vbx, short vby);
 
 void Polyfill_general(int vertices, short * points, int color);
