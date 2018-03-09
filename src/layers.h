@@ -20,25 +20,25 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 
-void Button_Layer_add(void);
-void Button_Layer_duplicate(void);
-void Button_Layer_remove(void);
-void Button_Layer_menu(void);
-void Button_Layer_set_transparent(void);
-void Button_Layer_get_transparent(void);
-void Button_Layer_merge(void);
-void Button_Layer_up(void);
-void Button_Layer_down(void);
-void Button_Layer_select(void);
-void Button_Layer_toggle(void);
+void Button_Layer_add(int);
+void Button_Layer_duplicate(int);
+void Button_Layer_remove(int);
+void Button_Layer_menu(int);
+void Button_Layer_set_transparent(int);
+void Button_Layer_get_transparent(int);
+void Button_Layer_merge(int);
+void Button_Layer_up(int);
+void Button_Layer_down(int);
+void Button_Layer_select(int);
+void Button_Layer_toggle(int);
 void Layer_activate(int layer, short side);
-void Button_Anim_time(void);
-void Button_Anim_first_frame(void);
-void Button_Anim_prev_frame(void);
-void Button_Anim_next_frame(void);
-void Button_Anim_last_frame(void);
-void Button_Anim_play(void);
-void Button_Anim_continuous_prev(void);
-void Button_Anim_continuous_next(void);
+void Button_Anim_time(int);
+void Button_Anim_first_frame(int);
+void Button_Anim_prev_frame(int);
+void Button_Anim_next_frame(int);
+void Button_Anim_last_frame(int);
+void Button_Anim_play(int);
+void Button_Anim_continuous_prev(int);
+void Button_Anim_continuous_next(int);
 
 short Layer_under_mouse(void);

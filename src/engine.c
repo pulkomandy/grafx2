@@ -730,7 +730,7 @@ void Main_handler(void)
       if (Quit_is_required)
       {
         Quit_is_required=0;
-        Button_Quit();
+        Button_Quit(-1);
       }
       
       if (Pan_shortcut_pressed && Current_operation!=OPERATION_PAN_VIEW)

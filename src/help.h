@@ -32,12 +32,12 @@
     If the mouse is over a button, its contextual help will be displayed.
     Else, the default helpscreen will be shown.
 */
-void Button_Help(void);
+void Button_Help(int);
 
 /*!
     Displays and runs the "Statistics" window
 */
-void Button_Stats(void);
+void Button_Stats(int);
 
 /*!
     Displays and runs the "Help / About..." window

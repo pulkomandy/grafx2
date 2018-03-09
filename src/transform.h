@@ -26,4 +26,4 @@
 //////////////////////////////////////////////////////////////////////////////
 
 /// Opens and handles the Picture transform screen.
-void Button_Transform_menu(void);
+void Button_Transform_menu(int);

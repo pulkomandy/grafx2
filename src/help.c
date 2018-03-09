@@ -477,10 +477,11 @@ void Scroll_help(T_Scroller_button * scroller)
 }
 
 
-void Button_Help(void)
+void Button_Help(int btn)
 {
   short btn_number;
-  
+
+  (void)btn;
   // Aide contextuelle
   if (Key!=0)
   {
@@ -679,7 +680,7 @@ void Window_help(int section, const char *sub_section)
 
 #define STATS_TITLE_COLOR  MC_White
 #define STATS_DATA_COLOR MC_Light
-void Button_Stats(void)
+void Button_Stats(int btn)
 {
   short clicked_button;
   char  buffer[37];
@@ -887,7 +888,7 @@ void Button_Stats(void)
   if(Key==SDLK_RETURN)Key=0;
 
   Close_window();
-  Unselect_button(BUTTON_HELP);
+  Unselect_button(btn);
   Display_cursor();
 }
 

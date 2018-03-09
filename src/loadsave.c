@@ -1680,7 +1680,7 @@ if (Create_lock_file(Config_directory))
     Compute_limits();
     Compute_paintbrush_coordinates();
     if (Backups_main)
-      Button_Page();
+      Button_Page(-1);
   }
   restored_main = Process_backups(&Backups_main);
   

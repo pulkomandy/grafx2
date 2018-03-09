@@ -24,9 +24,9 @@
 //////////////////////////////////////////////////////////////////////////////
 
 /// Open the palette menu and handles everything inside it.
-void Button_Palette(void);
+void Button_Palette(int);
 /// Open the secondary palette menu and handles it.
-void Button_Secondary_palette(void);
+void Button_Secondary_palette(int);
 
 /// Choose the number of graduations for RGB components, from 2 to 256.
 void Set_palette_RGB_scale(int);

@@ -72,7 +72,7 @@ short Compute_dimension(short original_size, short new_ratio, short old_ratio)
     return amount;
 }
 
-void Button_Transform_menu(void)
+void Button_Transform_menu(int btn)
 {
   enum RESIZE_UNIT {
     UNIT_PIXELS  = 1,
@@ -198,7 +198,7 @@ void Button_Transform_menu(void)
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
     {
       Key=0;
-      Window_help(BUTTON_ADJUST, "PICTURE TRANSFORM");
+      Window_help(btn, "PICTURE TRANSFORM");
     }
     else if (Is_shortcut(Key,0x200+BUTTON_ADJUST))
       clicked_button=1;
@@ -340,7 +340,7 @@ void Button_Transform_menu(void)
   
   // The Scroll operation uses the same button as transformation menu.
   if (Current_operation != OPERATION_SCROLL)
-    Unselect_button(BUTTON_ADJUST);
+    Unselect_button(btn);
 
   if (clicked_button != 1) // 1 is Cancel
   {

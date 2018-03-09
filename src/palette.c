@@ -1075,7 +1075,7 @@ void Tag_used_colors(byte color, dword color_usage[])
   Update_window_area(Window_palette_button_list->Pos_X+3,Window_palette_button_list->Pos_Y+3,12*16,5*16);
 }
 
-void Button_Palette(void)
+void Button_Palette(int btn)
 {
   static const int BUTTON_PLUS_X = 182;
   static const int BUTTON_PLUS_Y = 163;
@@ -1145,6 +1145,7 @@ void Button_Palette(void)
   static const int L3 = 46;
   static const int L4 = 61;
 
+  (void)btn;
   backup_palette =(T_Components *)malloc(sizeof(T_Palette));
   temp_palette=(T_Components *)malloc(sizeof(T_Palette));
   working_palette=(T_Components *)malloc(sizeof(T_Palette));
@@ -2876,7 +2877,7 @@ void Button_Palette(void)
 
 //---------------------- Menu de palettes secondaires ------------------------
 
-void Button_Secondary_palette(void)
+void Button_Secondary_palette(int btn)
 {
   short clicked_button;
   byte dummy;
@@ -2894,7 +2895,7 @@ void Button_Secondary_palette(void)
   static const int RGBScale_X = 161;
   static const int RGBScale_Y = 85;
 
-  
+  (void)btn;
   Open_window(218,146,"Palettes");
 
   Window_set_normal_button(10,20,180,14,"Colors for best match",12,1,SDLK_b); // 1

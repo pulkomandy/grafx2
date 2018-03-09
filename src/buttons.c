@@ -240,7 +240,7 @@ void Change_paintbrush_shape(byte shape)
 
 
 //-------------------------------- UNDO/REDO ---------------------------------
-void Button_Undo(void)
+void Button_Undo(int btn)
 {
   Hide_cursor();
   Undo();
@@ -249,13 +249,13 @@ void Button_Undo(void)
 
   Check_menu_mode();
   Display_all_screen();
-  Unselect_button(BUTTON_UNDO);
+  Unselect_button(btn);
   Draw_menu_button(BUTTON_MAGNIFIER,Main.magnifier_mode);
   Display_menu();
   Display_cursor();
 }
 
-void Button_Redo(void)
+void Button_Redo(int btn)
 {
   Hide_cursor();
   Redo();
@@ -264,15 +264,14 @@ void Button_Redo(void)
 
   Check_menu_mode();
   Display_all_screen();
-  Unselect_button(BUTTON_UNDO);
+  Unselect_button(btn);
   Draw_menu_button(BUTTON_MAGNIFIER,Main.magnifier_mode);
   Display_menu();
   Display_cursor();
 }
 
-
 //---------------------------- SCROLL PALETTE LEFT ---------------------------
-void Button_Pal_left(void)
+void Button_Pal_left(int btn)
 {
   short cells;
   cells = (Config.Palette_vertical)?Palette_cells_X():Palette_cells_Y();
@@ -286,11 +285,11 @@ void Button_Pal_left(void)
       First_color_in_palette=0;
     Display_menu_palette();
   }
-  Unselect_button(BUTTON_PAL_LEFT);
+  Unselect_button(btn);
   Display_cursor();
 }
 
-void Button_Pal_left_fast(void)
+void Button_Pal_left_fast(int btn)
 {
   short cells_x = Palette_cells_X();
   short cells_y = Palette_cells_Y();
@@ -304,13 +303,13 @@ void Button_Pal_left_fast(void)
       First_color_in_palette=0;
     Display_menu_palette();
   }
-  Unselect_button(BUTTON_PAL_LEFT);
+  Unselect_button(btn);
   Display_cursor();
 }
 
 
 //--------------------------- SCROLL PALETTE RIGHT ---------------------------
-void Button_Pal_right(void)
+void Button_Pal_right(int btn)
 {
   short cells;
   cells = (Config.Palette_vertical)?Palette_cells_X():Palette_cells_Y();
@@ -322,11 +321,11 @@ void Button_Pal_right(void)
     Display_menu_palette();
   }
   
-  Unselect_button(BUTTON_PAL_RIGHT);
+  Unselect_button(btn);
   Display_cursor();
 }
 
-void Button_Pal_right_fast(void)
+void Button_Pal_right_fast(int btn)
 {
   short cells_x = Palette_cells_X();
   short cells_y = Palette_cells_Y();
@@ -345,12 +344,12 @@ void Button_Pal_right_fast(void)
     }
     Display_menu_palette();
   }
-  Unselect_button(BUTTON_PAL_RIGHT);
+  Unselect_button(btn);
   Display_cursor();
 }
 
 //-------------------- item de la forecolor dans le menu --------------------
-void Button_Select_forecolor(void)
+void Button_Select_forecolor(int btn)
 {
   static long time_click = 0;
   long time_previous;
@@ -367,7 +366,7 @@ void Button_Select_forecolor(void)
     if (time_click - time_previous < Config.Double_click_speed)
     {
       // Open palette window
-      Button_Palette();
+      Button_Palette(btn);
       return;
     }
   }
@@ -384,8 +383,8 @@ void Button_Select_forecolor(void)
     while(Mouse_K)
     {
       Get_input(20);
-      
-      if (Button_under_mouse()==BUTTON_CHOOSE_COL)
+
+      if (Button_under_mouse()==btn)
       {
         color=Pick_color_in_palette();
         if (color != Fore_color && color!=-1)
@@ -401,7 +400,7 @@ void Button_Select_forecolor(void)
 }
 
 //-------------------- item de la backcolor dans le menu --------------------
-void Button_Select_backcolor(void)
+void Button_Select_backcolor(int btn)
 {
   int color;
   
@@ -421,14 +420,14 @@ void Button_Select_backcolor(void)
     {
       Get_input(20);
       
-      if (Button_under_mouse()==BUTTON_CHOOSE_COL)
+      if (Button_under_mouse()==btn)
         break; // This will repeat this button's action
         
     } while(Mouse_K);
   } while(Mouse_K);
 }
 
-void Button_Hide_menu(void)
+void Button_Hide_menu(int btn)
 {
   Hide_cursor();
   if (Menu_is_visible)
@@ -484,11 +483,11 @@ void Button_Hide_menu(void)
     if (Main.magnifier_mode)
       Display_all_screen();
   }
-  Unselect_button(BUTTON_HIDE);
+  Unselect_button(btn);
   Display_cursor();
 }
 
-void Button_Toggle_toolbar(void)
+void Button_Toggle_toolbar(int btn)
 {  
   T_Dropdown_button dropdown;
   T_Dropdown_choice *item;
@@ -562,11 +561,11 @@ void Button_Toggle_toolbar(void)
   // Closing
   Window_dropdown_clear_items(&dropdown);
   
-  Unselect_button(BUTTON_HIDE);
+  Unselect_button(btn);
   Display_cursor();
 }
 
-void Button_Toggle_all_toolbars(void)
+void Button_Toggle_all_toolbars(int btn)
 {
   // This is used to memorize the bars' visibility when temporarily hidden
   static word Last_visibility = 0xFFFF;
@@ -598,7 +597,7 @@ void Button_Toggle_all_toolbars(void)
   Display_menu();
   Display_all_screen();
   
-  Unselect_button(BUTTON_HIDE);
+  Unselect_button(btn);
   Display_cursor();
 }
 
@@ -672,7 +671,7 @@ byte Button_Quit_local_function(void)
 }
 
 
-void Button_Quit(void)
+void Button_Quit(int btn)
 {
   //short clicked_button;
 
@@ -680,7 +679,7 @@ void Button_Quit(void)
   {
     if (Spare.image_is_modified)
     {
-      Button_Page(); // On passe sur le brouillon
+      Button_Page(btn); // On passe sur le brouillon
       // Si l'utilisateur présente les derniers symptomes de l'abandon
       if (Button_Quit_local_function())
         Quitting=1;
@@ -700,7 +699,7 @@ void Button_Quit(void)
 
 
 //---------------------------- Effacer l'écran -------------------------------
-void Button_Clear(void)
+void Button_Clear(int btn)
 {
   Hide_cursor();
   Backup();
@@ -711,11 +710,11 @@ void Button_Clear(void)
   Redraw_layered_image();
   End_of_modification();
   Display_all_screen();
-  Unselect_button(BUTTON_CLEAR);
+  Unselect_button(btn);
   Display_cursor();
 }
 
-void Button_Clear_with_backcolor(void)
+void Button_Clear_with_backcolor(int btn)
 {
   Hide_cursor();
   Backup();
@@ -726,7 +725,7 @@ void Button_Clear_with_backcolor(void)
   Redraw_layered_image();
   End_of_modification();
   Display_all_screen();
-  Unselect_button(BUTTON_CLEAR);
+  Unselect_button(btn);
   Display_cursor();
 }
  
@@ -943,7 +942,7 @@ void Settings_load_config(T_Config * conf)
       Error(0);
 }
 
-void Button_Settings(void)
+void Button_Settings(int btn)
 {
   short clicked_button;
   T_Config selected_config;
@@ -1196,7 +1195,7 @@ void Button_Settings(void)
     Compute_optimal_menu_colors(Main.palette);
 
   Close_window();
-  Unselect_button(BUTTON_SETTINGS);
+  Unselect_button(btn);
   // Raffichage du menu pour que les inscriptions qui y figurent soient
   // retracées avec la nouvelle fonte
   Display_menu();
@@ -1275,7 +1274,7 @@ void Draw_one_skin_name(word x, word y, word index, byte highlighted)
 }
 
 /// Skin selector window
-void Button_Skins(void)
+void Button_Skins(int btn)
 {
   short clicked_button;
   short temp;
@@ -1293,7 +1292,7 @@ void Button_Skins(void)
   
   word x, y, x_pos, offs_y;
   
-  char * cursors[] = { "Solid", "Transparent", "Thin" };
+  const char * cursors[] = { "Solid", "Transparent", "Thin" };
   T_Gui_skin * gfx = NULL;
   byte * new_font;
 
@@ -1525,7 +1524,7 @@ void Button_Skins(void)
   Set_palette(Main.palette);
 
   Close_window();
-  Unselect_button(BUTTON_SETTINGS);
+  Unselect_button(btn);
   
   // Raffichage du menu pour que les inscriptions qui y figurent soient retracées avec la nouvelle fonte
   Display_menu();
@@ -1550,7 +1549,7 @@ void Button_Skins(void)
 
 
 //---------------------------- Changement de page ----------------------------
-void Button_Page(void)
+void Button_Page(int btn)
 {
   byte   factor_index;
   T_Document temp_doc;
@@ -1594,7 +1593,7 @@ void Button_Page(void)
   Compute_optimal_menu_colors(Main.palette);
   Check_menu_mode();
   Display_all_screen();
-  Unselect_button(BUTTON_PAGE);
+  Unselect_button(btn);
   Draw_menu_button(BUTTON_MAGNIFIER,Main.magnifier_mode);
   // Tilemap mode might be different
   Draw_menu_button(BUTTON_EFFECTS,Any_effect_active());
@@ -1683,7 +1682,7 @@ void Copy_some_colors(void)
 }
 
 
-void Button_Copy_page(void)
+void Button_Copy_page(int btn)
 {
   short clicked_button;
 
@@ -1767,13 +1766,13 @@ void Button_Copy_page(void)
   }
 
   Hide_cursor();
-  Unselect_button(BUTTON_PAGE);
+  Unselect_button(btn);
   Display_cursor();
 }
 
 
 // -- Suppression d'une page -------------------------------------------------
-void Button_Kill(void)
+void Button_Kill(int btn)
 {
   if ( (Main.backups->List_size==1)
     || (!Confirmation_box("Delete the current page?")) )
@@ -1781,7 +1780,7 @@ void Button_Kill(void)
     if (Main.backups->List_size==1)
       Warning_message("You can't delete the last page.");
     Hide_cursor();
-    Unselect_button(BUTTON_KILL);
+    Unselect_button(btn);
     Display_cursor();
   }
   else
@@ -1793,7 +1792,7 @@ void Button_Kill(void)
     Compute_optimal_menu_colors(Main.palette);
 
     Display_all_screen();
-    Unselect_button(BUTTON_KILL);
+    Unselect_button(btn);
     Draw_menu_button(BUTTON_MAGNIFIER,Main.magnifier_mode);
     Display_menu();
     Display_cursor();
@@ -1900,7 +1899,7 @@ void Scroll_list_of_modes(short list_start, short cursor_position, int * selecte
   Display_cursor();
 }
 
-void Button_Resolution(void)
+void Button_Resolution(int btn)
 {
   short clicked_button;
   int   selected_mode;
@@ -2215,18 +2214,18 @@ void Button_Resolution(void)
   Paintbrush_Y = Mouse_Y;
 
 
-  Unselect_button(BUTTON_RESOL);
+  Unselect_button(btn);
   Display_cursor();
 }
 
 
-void Button_Safety_resolution(void)
+void Button_Safety_resolution(int btn)
 {
   // In windowed mode, do nothing
   if (Current_resolution==0)
   {
     Hide_cursor();
-    Unselect_button(BUTTON_RESOL);
+    Unselect_button(btn);
     Display_cursor();
     return;
   }
@@ -2245,7 +2244,7 @@ void Button_Safety_resolution(void)
   Reposition_palette();
   Display_all_screen();
 
-  Unselect_button(BUTTON_RESOL);
+  Unselect_button(btn);
   // Le pinceau est affiché à la position du clic et pas 
   Display_cursor();
 }
@@ -2253,15 +2252,16 @@ void Button_Safety_resolution(void)
 
 //------------------ Gestion des boutons de dessin à la main -----------------
 
-void Button_Draw(void)
+void Button_Draw(int btn)
 {
+  (void)btn;
   Hide_cursor();
   Start_operation_stack(Selected_freehand_mode);
   Display_cursor();
 }
 
 
-void Button_Draw_switch_mode(void)
+void Button_Draw_switch_mode(int btn)
 {
   char icon;
   
@@ -2271,9 +2271,9 @@ void Button_Draw_switch_mode(void)
   static const char text[4][14] =
     {"Continuous", "Discontinuous", "Single", "Contour fill"};
 
-  dropdown.Pos_X         =Buttons_Pool[BUTTON_DRAW].X_offset;
-  dropdown.Pos_Y         =Buttons_Pool[BUTTON_DRAW].Y_offset;
-  dropdown.Height        =Buttons_Pool[BUTTON_DRAW].Height;
+  dropdown.Pos_X         =Buttons_Pool[btn].X_offset;
+  dropdown.Pos_Y         =Buttons_Pool[btn].Y_offset;
+  dropdown.Height        =Buttons_Pool[btn].Height;
   dropdown.Dropdown_width=14*8;
   dropdown.First_item    =NULL;
   dropdown.Bottom_up     =1;
@@ -2316,8 +2316,8 @@ void Button_Draw_switch_mode(void)
       icon=MENU_SPRITE_CONTOUR_DRAW;
       break;
   }
-  Display_sprite_in_menu(BUTTON_DRAW,icon);
-  Draw_menu_button(BUTTON_DRAW,BUTTON_PRESSED);
+  Display_sprite_in_menu(btn,icon);
+  Draw_menu_button(btn,BUTTON_PRESSED);
   Start_operation_stack(Selected_freehand_mode);
 
   Display_cursor();
@@ -2327,16 +2327,18 @@ void Button_Draw_switch_mode(void)
 
 // -- Gestion des boutons de rectangle vide et plein ------------------------
 
-void Button_Empty_rectangle(void)
+void Button_Empty_rectangle(int btn)
 {
+  (void)btn;
   Hide_cursor();
   Start_operation_stack(OPERATION_EMPTY_RECTANGLE);
   Display_cursor();
 }
 
 
-void Button_Filled_rectangle(void)
+void Button_Filled_rectangle(int btn)
 {
+  (void)btn;
   Hide_cursor();
   Start_operation_stack(OPERATION_FILLED_RECTANGLE);
   Display_cursor();
@@ -2519,7 +2521,7 @@ void Draw_gradient_preview(short start_x,short start_y,short width,short height,
   Update_rect(start_x,start_y,width*Menu_factor_X,height*Menu_factor_Y);
 }
 
-void Button_Gradients(void)
+void Button_Gradients(int btn)
 {
   short clicked_button;
   char  str[4];
@@ -2539,6 +2541,7 @@ void Button_Gradients(void)
   int  changed_gradient_index;
   byte cycling_mode=Cycling_mode;
 
+  (void)btn;
   // Enable cycling while this window is open
   Cycling_mode=1;
   
@@ -2815,9 +2818,9 @@ void Button_Gradients(void)
 
 // -- Gestion des boutons de cercle / ellipse / rectangle dégradés --------------------
 
-
-void Button_Grad_rectangle(void)
+void Button_Grad_rectangle(int btn)
 {
+  (void)btn;
   Hide_cursor();
   Start_operation_stack(OPERATION_GRAD_RECTANGLE);
   Display_cursor();
@@ -2826,8 +2829,9 @@ void Button_Grad_rectangle(void)
 
 // -- Gestion du bouton de remplissage ---------------------------------------
 
-void Button_Fill(void)
+void Button_Fill(int btn)
 {
+  (void)btn;
   if (Current_operation!=OPERATION_FILL)
   {
     Hide_cursor();
@@ -2847,8 +2851,9 @@ void Button_Fill(void)
 }
 
 
-void Button_Replace(void)
+void Button_Replace(int btn)
 {
+  (void)btn;
   if (Current_operation!=OPERATION_REPLACE)
   {
     Hide_cursor();
@@ -2866,8 +2871,9 @@ void Button_Replace(void)
 }
 
 
-void Button_Unselect_fill(void)
+void Button_Unselect_fill(int btn)
 {
+  (void)btn;
   Paintbrush_shape=Paintbrush_shape_before_fill;
 
   if (Current_operation==OPERATION_REPLACE)
@@ -2899,7 +2905,7 @@ byte Same_paintbrush(byte index)
   return 1;
 }
 
-void Button_Paintbrush_menu(void)
+void Button_Paintbrush_menu(int btn)
 {
   short clicked_button;
   short x_pos,y_pos;
@@ -3051,18 +3057,18 @@ void Button_Paintbrush_menu(void)
   }
   while (1);
 
-  Unselect_button(BUTTON_PAINTBRUSHES);
+  Unselect_button(btn);
   Display_cursor();
 }
 
 
-void Button_Brush_monochrome(void)
+void Button_Brush_monochrome(int btn)
 {
   Hide_cursor();
   // On passe en brosse monochrome:
   Change_paintbrush_shape(PAINTBRUSH_SHAPE_MONO_BRUSH);
 
-  Unselect_button(BUTTON_PAINTBRUSHES);
+  Unselect_button(btn);
 
   Display_cursor();
 }
@@ -3303,8 +3309,9 @@ void Load_picture(enum CONTEXT_TYPE type)
 }
 
 
-void Button_Load(void)
+void Button_Load(int btn)
 {
+  (void)btn;
   // On sauve l'état actuel des paramètres de l'image pour pouvoir les
   // restituer en cas d'erreur n'affectant pas l'image
   Upload_infos_page(&Main);
@@ -3314,11 +3321,12 @@ void Button_Load(void)
 }
 
 
-void Button_Reload(void)
+void Button_Reload(int btn)
 {
   byte old_cursor_shape;
   int  new_mode;
 
+  (void)btn;
   // On sauve l'état actuel des paramètres de l'image pour pouvoir les
   // restituer en cas d'erreur n'affectant pas l'image
   Upload_infos_page(&Main);
@@ -3550,19 +3558,20 @@ void Save_picture(enum CONTEXT_TYPE type)
 }
 
 
-void Button_Save(void)
+void Button_Save(int btn)
 {
+  (void)btn;
   Save_picture(CONTEXT_MAIN_IMAGE);
 }
 
 /// Save main image over existing file (no fileselector)
-void Button_Autosave(void)
+void Button_Autosave(int btn)
 {
   byte old_cursor_shape;
   static char filename[MAX_PATH_CHARACTERS];
   byte file_already_exists;
 
-
+  (void)btn;
   Get_full_filename(filename, Main.backups->Pages->Filename, Main.backups->Pages->File_directory);
   file_already_exists=File_exists(filename);
 
@@ -3608,44 +3617,38 @@ void Button_Autosave(void)
 
 // -- Gestion des boutons de ligne ------------------------------------------
 
-void Button_Lines(void)
+void Button_Lines(int btn)
 {
+  (void)btn;
   Hide_cursor();
   Start_operation_stack(Selected_line_mode);
   Display_cursor();
 }
 
 
-void Button_Lines_switch_mode(void)
+void Button_Lines_switch_mode(int btn)
 {
   char icon;
   
   if (Selected_line_mode==OPERATION_LINE)
+  {
     Selected_line_mode=OPERATION_K_LINE;
+    icon=MENU_SPRITE_K_LINE;
+  }
+  else if (Selected_line_mode==OPERATION_K_LINE)
+  {
+    Selected_line_mode=OPERATION_CENTERED_LINES;
+    icon=MENU_SPRITE_CENTERED_LINES;
+  }
   else
   {
-    if (Selected_line_mode==OPERATION_K_LINE)
-      Selected_line_mode=OPERATION_CENTERED_LINES;
-    else
-      Selected_line_mode=OPERATION_LINE;
-  }
-  switch(Selected_line_mode)
-  {
-    default:
-    case OPERATION_LINE:
-      icon=-1;
-      break;
-    case OPERATION_K_LINE:
-      icon=MENU_SPRITE_K_LINE;
-      break;
-    case OPERATION_CENTERED_LINES:
-      icon=MENU_SPRITE_CENTERED_LINES;
-      break;
+    Selected_line_mode=OPERATION_LINE;
+    icon=-1;
   }
 
   Hide_cursor();
-  Display_sprite_in_menu(BUTTON_LINES,icon);
-  Draw_menu_button(BUTTON_LINES,BUTTON_PRESSED);
+  Display_sprite_in_menu(btn,icon);
+  Draw_menu_button(btn,BUTTON_PRESSED);
   Start_operation_stack(Selected_line_mode);
   Display_cursor();
 }
@@ -3653,34 +3656,34 @@ void Button_Lines_switch_mode(void)
 
 // -- Button de brosse ------------------------------------------------------
 
-void Button_Brush(void)
+void Button_Brush(int btn)
 {
   Hide_cursor();
 
   if (Current_operation!=OPERATION_GRAB_BRUSH)
     Start_operation_stack(OPERATION_GRAB_BRUSH);
   else
-    Unselect_button(BUTTON_BRUSH);
+    Unselect_button(btn);
 
   Display_cursor();
 }
 
 
-void Button_Unselect_brush(void)
+void Button_Unselect_brush(int btn)
 {
+  (void)btn;
   // On fait de notre mieux pour restaurer l'ancienne opération:
   Start_operation_stack(Operation_before_interrupt);
 }
 
 
-void Button_Restore_brush(void)
+void Button_Restore_brush(int btn)
 {
   Hide_cursor();
   // On passe en brosse couleur:
   Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
 
-  Unselect_button(BUTTON_BRUSH);
-  Unselect_button(BUTTON_POLYBRUSH);
+  Unselect_button(btn);
 
   Display_cursor();
 }
@@ -3688,7 +3691,7 @@ void Button_Restore_brush(void)
 
 // -- Button de prise de brosse au lasso ------------------------------------
 
-void Button_Lasso(void)
+void Button_Lasso(int btn)
 {
   Hide_cursor();
 
@@ -3699,14 +3702,15 @@ void Button_Lasso(void)
     Start_operation_stack(OPERATION_POLYBRUSH);
   }
   else
-    Unselect_button(BUTTON_POLYBRUSH);
+    Unselect_button(btn);
 
   Display_cursor();
 }
 
 
-void Button_Unselect_lasso(void)
+void Button_Unselect_lasso(int btn)
 {
+  (void)btn;
   // On fait de notre mieux pour restaurer l'ancienne opération:
   Start_operation_stack(Operation_before_interrupt);
   Paintbrush_shape=Paintbrush_shape_before_lasso;
@@ -3715,7 +3719,7 @@ void Button_Unselect_lasso(void)
 
 // -- Button de pipette -----------------------------------------------------
 
-void Button_Colorpicker(void)
+void Button_Colorpicker(int btn)
 {
   Hide_cursor();
 
@@ -3731,14 +3735,15 @@ void Button_Colorpicker(void)
         Print_in_menu("X:       Y:       (    )",0);
   }
   else
-    Unselect_button(BUTTON_COLORPICKER);
+    Unselect_button(btn);
 
   Display_cursor();
 }
 
 
-void Button_Unselect_colorpicker(void)
+void Button_Unselect_colorpicker(int btn)
 {
+  (void)btn;
   // Erase the color block which shows the picked color
   if (Operation_before_interrupt!=OPERATION_REPLACE)
     if ( (Mouse_Y<Menu_Y) && (Menu_is_visible) &&
@@ -3755,7 +3760,7 @@ void Button_Unselect_colorpicker(void)
 
 
   // -- Inversion de la couleur Fore et de la couleur Back --
-void Button_Invert_foreback(void)
+void Button_Invert_foreback(int btn)
 {
   byte temp_color;
 
@@ -3768,7 +3773,7 @@ void Button_Invert_foreback(void)
   Frame_menu_color(Fore_color);
   Reposition_palette();
   Display_foreback();
-  Unselect_button(BUTTON_COLORPICKER);
+  Unselect_button(btn);
   Display_cursor();  
 }
 
@@ -3777,12 +3782,12 @@ void Button_Invert_foreback(void)
 
 byte Coming_from_zoom_factor_menu=0;
 
-void Button_Magnify(void)
+void Button_Magnify(int btn)
 {
   Hide_cursor();
   if ( (Current_operation==OPERATION_MAGNIFY) || (Main.magnifier_mode) )
   {
-    Unselect_button(BUTTON_MAGNIFIER);
+    Unselect_button(btn);
   }
   else
   {
@@ -3826,15 +3831,16 @@ void Button_Magnify(void)
   Update_rect(0,0,0,0);
 }
 
-void Button_Magnify_menu(void)
+void Button_Magnify_menu(int btn)
 {
   T_Dropdown_button dropdown;
   T_Dropdown_choice *item;
   int i;
-  const char text[NB_ZOOM_FACTORS][4] =
+  static const char * text[NB_ZOOM_FACTORS] =
     {"x2", "x3", "x4", "x5", "x6", "x8", "x10", "x12", "x14", "x16", "x18", "x20",
       "x24", "x28", "x32"};
-  
+
+  (void)btn;
   Hide_cursor();
   
   dropdown.Pos_X         =Buttons_Pool[BUTTON_MAGNIFIER].X_offset;
@@ -3871,8 +3877,9 @@ void Button_Magnify_menu(void)
   Window_dropdown_clear_items(&dropdown);
 }
 
-void Button_Unselect_magnifier(void)
+void Button_Unselect_magnifier(int btn)
 {
+  (void)btn;
   if (Main.magnifier_mode)
   {
     // On sort du mode loupe
@@ -3914,7 +3921,7 @@ void Button_Unselect_magnifier(void)
 
 // ----------------------- Modifications de brosse ---------------------------
 
-void Button_Brush_FX(void)
+void Button_Brush_FX(int btn)
 {
   short clicked_button;
   short index;
@@ -4003,7 +4010,7 @@ void Button_Brush_FX(void)
   while (clicked_button<=0);
 
   Close_window();
-  Unselect_button(BUTTON_BRUSH_EFFECTS);
+  Unselect_button(btn);
 
   // Gestion du bouton clické
   switch (clicked_button)
@@ -4088,15 +4095,16 @@ void Button_Brush_FX(void)
 
 //---------------------------- Courbes de Bézier ----------------------------
 
-void Button_Curves(void)
+void Button_Curves(int btn)
 {
+  (void)btn;
   Hide_cursor();
   Start_operation_stack(Selected_curve_mode);
   Display_cursor();
 }
 
 
-void Button_Curves_switch_mode(void)
+void Button_Curves_switch_mode(int btn)
 {
   if (Selected_curve_mode==OPERATION_4_POINTS_CURVE)
     Selected_curve_mode=OPERATION_3_POINTS_CURVE;
@@ -4104,8 +4112,8 @@ void Button_Curves_switch_mode(void)
     Selected_curve_mode=OPERATION_4_POINTS_CURVE;
 
   Hide_cursor();
-  Display_sprite_in_menu(BUTTON_CURVES,Selected_curve_mode==OPERATION_4_POINTS_CURVE?MENU_SPRITE_4_POINTS_CURVE:-1);
-  Draw_menu_button(BUTTON_CURVES,BUTTON_PRESSED);
+  Display_sprite_in_menu(btn,Selected_curve_mode==OPERATION_4_POINTS_CURVE?MENU_SPRITE_4_POINTS_CURVE:-1);
+  Draw_menu_button(btn,BUTTON_PRESSED);
   Start_operation_stack(Selected_curve_mode);
   Display_cursor();
 }
@@ -4113,8 +4121,9 @@ void Button_Curves_switch_mode(void)
 
 //--------------------------------- Spray -----------------------------------
 
-void Button_Airbrush(void)
+void Button_Airbrush(int btn)
 {
+  (void)btn;
   Hide_cursor();
   Start_operation_stack(OPERATION_AIRBRUSH);
   Display_cursor();
@@ -4139,7 +4148,7 @@ void Refresh_airbrush_settings(byte selected_color, byte update_slider)
 }
 
 
-void Button_Airbrush_menu(void)
+void Button_Airbrush_menu(int btn)
 {
   static byte spray_init=1;
   short  clicked_button;
@@ -4161,7 +4170,7 @@ void Button_Airbrush_menu(void)
   byte color;
   byte click;
 
-
+  (void)btn;
   memcpy(old_airbrush_multi_flow,Airbrush_multi_flow,256);
 
 
@@ -4483,32 +4492,36 @@ void Button_Airbrush_menu(void)
 
 // -- Gestion des boutons de polygone vide et plein -------------------------
 
-void Button_polygon(void)
+void Button_polygon(int btn)
 {
+  (void)btn;
   Hide_cursor();
   Start_operation_stack(OPERATION_POLYGON);
   Display_cursor();
 }
 
 
-void Button_Polyform(void)
+void Button_Polyform(int btn)
 {
+  (void)btn;
   Hide_cursor();
   Start_operation_stack(OPERATION_POLYFORM);
   Display_cursor();
 }
 
 
-void Button_Polyfill(void)
+void Button_Polyfill(int btn)
 {
+  (void)btn;
   Hide_cursor();
   Start_operation_stack(OPERATION_POLYFILL);
   Display_cursor();
 }
 
 
-void Button_Filled_polyform(void)
+void Button_Filled_polyform(int btn)
 {
+  (void)btn;
   Hide_cursor();
   Start_operation_stack(OPERATION_FILLED_POLYFORM);
   Display_cursor();
@@ -4517,8 +4530,9 @@ void Button_Filled_polyform(void)
 
 // -- Boutons d'ajustement de l'image ---------------------------------------
 
-void Button_Adjust(void)
+void Button_Adjust(int btn)
 {
+  (void)btn;
   Hide_cursor();
   Start_operation_stack(OPERATION_SCROLL);
   Display_cursor();
@@ -4584,7 +4598,7 @@ void Display_feedback_state(void)
 }
 
 
-void Button_Effects(void)
+void Button_Effects(int btn)
 {
   short clicked_button;
   byte exit_by_close_button=0;
@@ -4914,7 +4928,7 @@ void Button_Effects(void)
     Hide_cursor();
 
   if (!Any_effect_active())
-    Unselect_button(BUTTON_EFFECTS);
+    Unselect_button(btn);
 
   Display_cursor();
 }
@@ -4927,7 +4941,7 @@ void Draw_one_font_name(word x, word y, word index, byte highlighted)
   Print_in_window(x,y,Font_label(index), MC_Black, (highlighted)?MC_Dark:MC_Light);
 }
 
-void Button_Text(void)
+void Button_Text(int btn)
 {
   static char str[256]="";
   static int font_size=32;
@@ -4954,7 +4968,8 @@ void Button_Text(void)
   
   byte redraw_is_needed=1;
   byte preview_is_needed=1;
-  
+
+  (void)btn;
   Open_window(288,180,"Text");
 
   // Texte saisi
