@@ -2624,16 +2624,22 @@ void Load_INFO(T_IO_Context * context)
     }
     if (File_error == 0 && header.ToolTypes)
     {
+      int i;
       int current_img = -1;
       int width = 0;
       int height = 0;
       int color_count;
+      int palette_color_count = 0;  // used colors in global palette
       int bpp = 0;
+      byte palette_conv[256]; // to translate sub icon specific palette to global palette
       
       dword count;
       char * ToolType;
       if (Read_dword_be(file, &count))
       {
+        for (i = 0; i < 256; i++)
+          palette_conv[i] = (byte)i;
+
         while(count > 0)
         {
           ToolType = Read_INFO_String(file);
@@ -2644,13 +2650,13 @@ void Load_INFO(T_IO_Context * context)
             // NewIcons
             if (strlen(ToolType) > 4 && ToolType[0] == 'I' && ToolType[1] == 'M' && ToolType[3] == '=')
             {
-              byte * p;
+              const byte * p;
               int img_index = ToolType[2] - '0';
               p = (byte *)ToolType + 4;
               if (img_index != current_img)
               {
                 // image info + palette
-                byte * palette;
+                T_Components * palette;
                 int palette_len;
 
                 current_img = img_index;
@@ -2668,12 +2674,40 @@ void Load_INFO(T_IO_Context * context)
                 color_count = *p++ - 0x21;
                 color_count = (color_count << 6) + *p++ - 0x21;
                 for (bpp = 1; color_count > (1 << bpp); bpp++) { }
-                palette = Decode_NewIcons(p, 8, &palette_len);
+                palette = (T_Components *)Decode_NewIcons(p, 8, &palette_len);
                 if (palette)
                 {
-                  if (Config.Clear_palette && img_index == 1)
-                    memset(context->Palette,0,sizeof(T_Palette));
-                  memcpy(context->Palette, palette, palette_len);
+                  if (img_index == 1)
+                  { // Set palette
+                    if (Config.Clear_palette)
+                      memset(context->Palette,0,sizeof(T_Palette));
+                    memcpy(context->Palette, palette, palette_len);
+                    palette_color_count = color_count;
+                  }
+                  else
+                  {
+                    // merge palette with the existing one
+                    for (i = 0; i < color_count; i++)
+                    {
+                      int j;
+                      for (j = 0; j < palette_color_count; j++)
+                      {
+                        if (0 == memcmp(context->Palette + j, palette + i, sizeof(T_Components)))
+                          break;
+                      }
+                      if (j == palette_color_count)
+                      {
+                        if (palette_color_count < 256)
+                        { // Add color to palette
+                          memcpy(context->Palette + palette_color_count, palette + i, sizeof(T_Components));
+                          palette_color_count++;
+                        }
+                        else
+                          Warning("Too much colors in new icons");
+                      }
+                      palette_conv[i] = (byte)j;
+                    }
+                  }
                   free(palette);
                 }
                 if (img_index == 1)
@@ -2698,10 +2732,9 @@ void Load_INFO(T_IO_Context * context)
                 pixels = Decode_NewIcons(p, bpp, &pixel_count);
                 if (pixels)
                 {
-                  int i;
                   for (i = 0; i < pixel_count; i++)
                   {
-                    Set_pixel(context, x_pos++, y_pos, pixels[i]);
+                    Set_pixel(context, x_pos++, y_pos, palette_conv[pixels[i]]);
                     if (x_pos >= width)
                     {
                       x_pos = 0;  
