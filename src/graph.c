@@ -1484,6 +1484,13 @@ static void Draw_inscribed_ellipse_general(short x1, short y1, short x2, short y
   dbl_center_y = top+bottom;
   dbl_x_radius = right-left+1;
   dbl_y_radius = bottom-top+1;
+  if ((Selected_circle_ellipse_mode & MASK_CIRCLE_ELLIPSE) == MODE_CIRCLE)
+  {
+    if (dbl_x_radius > dbl_y_radius)
+      dbl_x_radius = dbl_y_radius;
+    else
+      dbl_y_radius = dbl_x_radius;
+  }
   sq_dbl_x_radius = (long)dbl_x_radius*dbl_x_radius;
   sq_dbl_y_radius = (long)dbl_y_radius*dbl_y_radius;
   sq_dbl_radius_product = (qword)sq_dbl_x_radius * sq_dbl_y_radius;
@@ -2475,6 +2482,13 @@ void Draw_grad_inscribed_ellipse(short x1, short y1, short x2, short y2, short s
   dbl_center_y = top+bottom;
   dbl_x_radius = right-left+1;
   dbl_y_radius = bottom-top+1;
+  if ((Selected_circle_ellipse_mode & MASK_CIRCLE_ELLIPSE) == MODE_CIRCLE)
+  {
+    if (dbl_x_radius > dbl_y_radius)
+      dbl_x_radius = dbl_y_radius;
+    else
+      dbl_y_radius = dbl_x_radius;
+  }
   sq_dbl_x_radius = (long)dbl_x_radius*dbl_x_radius;
   sq_dbl_y_radius = (long)dbl_y_radius*dbl_y_radius;
   sq_dbl_radius_product = (qword)sq_dbl_x_radius * sq_dbl_y_radius;

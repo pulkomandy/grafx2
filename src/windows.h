@@ -130,8 +130,8 @@ typedef struct
   signed char     Icon;             ///< Which icon to display: Either the one from the toolbar (-1) or one of ::MENU_SPRITE
 
   // Triggers on mouse/keyboard
-  Func_action     Left_action;      ///< Action triggered by a left mouseclick on the button
-  Func_action     Right_action;     ///< Action triggered by a right mouseclick on the button
+  Func_btn_action Left_action;      ///< Action triggered by a left mouseclick on the button
+  Func_btn_action Right_action;     ///< Action triggered by a right mouseclick on the button
   word            Left_shortcut[2]; ///< Keyboard shortcut for a left mouseclick
   word            Right_shortcut[2];///< Keyboard shortcut for a right mouseclick
   byte            Left_instant;     ///< Will not wait for mouse release before triggering action
@@ -139,7 +139,7 @@ typedef struct
   const char *    Tooltip;          ///< Text in status bar when button is hovered
 
   // Data used when the button is unselected
-  Func_action     Unselect_action;  ///< Action triggered by unselecting the button
+  Func_btn_action Unselect_action;  ///< Action triggered by unselecting the button
   byte            Family;           ///< enum ::FAMILY_OF_BUTTONS.
 
 } T_Toolbar_button;

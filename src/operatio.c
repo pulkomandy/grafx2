@@ -45,13 +45,6 @@
     #define M_PI 3.14159265358979323846 
 #endif
 
-/// when this macro is defined, the ellipses are inscribed in
-/// the rectangle of the mouse button press position and the
-/// release position.
-/// Otherwise, the mouse button press position is the center and
-/// the release postion defines the vertical and horizontal radiuses.
-#define INSCRIBED_ELLIPSE
-
 /// Time (in SDL ticks) when the next airbrush drawing should be done. Also used
 /// for discontinuous freehand drawing.
 Uint32 Airbrush_next_time;
@@ -1179,10 +1172,8 @@ void Ellipse_12_5(void)
   short center_x;
   short center_y;
   short color;
-#ifndef INSCRIBED_ELLIPSE
   short horizontal_radius;
   short vertical_radius;
-#endif
 
   Operation_pop(&tangent_y);
   Operation_pop(&tangent_x);
@@ -1194,27 +1185,28 @@ void Ellipse_12_5(void)
   if ( (tangent_x!=Paintbrush_X) || (tangent_y!=Paintbrush_Y) )
   {
     Hide_cursor();
-#ifndef INSCRIBED_ELLIPSE
-    Cursor_shape=CURSOR_SHAPE_TARGET;
-#endif
     Display_coords_rel_or_abs(center_x,center_y);
 
-#ifndef INSCRIBED_ELLIPSE
-    horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
-                                           :center_x-tangent_x;
-    vertical_radius  =(tangent_y>center_y)?tangent_y-center_y
-                                           :center_y-tangent_y;
-    Hide_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius);
+    if ((Selected_circle_ellipse_mode & MASK_CENTER_CORNERS) == MODE_CENTER)
+    {
+      Cursor_shape=CURSOR_SHAPE_TARGET;
+      horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
+                                             :center_x-tangent_x;
+      vertical_radius  =(tangent_y>center_y)?tangent_y-center_y
+                                             :center_y-tangent_y;
+      Hide_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius);
 
-    horizontal_radius=(Paintbrush_X>center_x)?Paintbrush_X-center_x
-                                         :center_x-Paintbrush_X;
-    vertical_radius  =(Paintbrush_Y>center_y)?Paintbrush_Y-center_y
-                                         :center_y-Paintbrush_Y;
-    Draw_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius,color);
-#else
-    Hide_empty_inscribed_ellipse_preview(center_x,center_y,tangent_x,tangent_y);
-    Draw_empty_inscribed_ellipse_preview(center_x,center_y,Paintbrush_X,Paintbrush_Y,color);
-#endif
+      horizontal_radius=(Paintbrush_X>center_x)?Paintbrush_X-center_x
+                                           :center_x-Paintbrush_X;
+      vertical_radius  =(Paintbrush_Y>center_y)?Paintbrush_Y-center_y
+                                           :center_y-Paintbrush_Y;
+      Draw_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius,color);
+    }
+    else
+    {
+      Hide_empty_inscribed_ellipse_preview(center_x,center_y,tangent_x,tangent_y);
+      Draw_empty_inscribed_ellipse_preview(center_x,center_y,Paintbrush_X,Paintbrush_Y,color);
+    }
 
     Display_cursor();
   }
@@ -1241,10 +1233,8 @@ void Empty_ellipse_0_5(void)
   short center_x;
   short center_y;
   short color;
-#ifndef INSCRIBED_ELLIPSE
   short horizontal_radius;
   short vertical_radius;
-#endif
 
   Operation_pop(&tangent_y);
   Operation_pop(&tangent_x);
@@ -1252,23 +1242,22 @@ void Empty_ellipse_0_5(void)
   Operation_pop(&center_x);
   Operation_pop(&color);
 
-#ifndef INSCRIBED_ELLIPSE
-  horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
-                                         :center_x-tangent_x;
-  vertical_radius  =(tangent_y>center_y)?tangent_y-center_y
-                                         :center_y-tangent_y;
-  Hide_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius);
-#else
-  Hide_empty_inscribed_ellipse_preview(center_x,center_y,tangent_x,tangent_y);
-#endif
-
-  Paintbrush_shape=Paintbrush_shape_before_operation;
-
-#ifndef INSCRIBED_ELLIPSE
-  Draw_empty_ellipse_permanent(center_x,center_y,horizontal_radius,vertical_radius,color);
-#else
-  Draw_empty_inscribed_ellipse_permanent(center_x,center_y,tangent_x,tangent_y,color);
-#endif
+  if ((Selected_circle_ellipse_mode & MASK_CENTER_CORNERS) == MODE_CENTER)
+  {
+    horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
+                                           :center_x-tangent_x;
+    vertical_radius  =(tangent_y>center_y)?tangent_y-center_y
+                                           :center_y-tangent_y;
+    Hide_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius);
+    Paintbrush_shape=Paintbrush_shape_before_operation;
+    Draw_empty_ellipse_permanent(center_x,center_y,horizontal_radius,vertical_radius,color);
+  }
+  else
+  {
+    Hide_empty_inscribed_ellipse_preview(center_x,center_y,tangent_x,tangent_y);
+    Paintbrush_shape=Paintbrush_shape_before_operation;
+    Draw_empty_inscribed_ellipse_permanent(center_x,center_y,tangent_x,tangent_y,color);
+  }
 
   End_of_modification();
   
@@ -1295,10 +1284,8 @@ void Filled_ellipse_0_5(void)
   short center_x;
   short center_y;
   short color;
-#ifndef INSCRIBED_ELLIPSE
   short horizontal_radius;
   short vertical_radius;
-#endif
 
   Operation_pop(&tangent_y);
   Operation_pop(&tangent_x);
@@ -1306,23 +1293,22 @@ void Filled_ellipse_0_5(void)
   Operation_pop(&center_x);
   Operation_pop(&color);
 
-#ifndef INSCRIBED_ELLIPSE
-  horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
-                                         :center_x-tangent_x;
-  vertical_radius  =(tangent_y>center_y)?tangent_y-center_y
-                                         :center_y-tangent_y;
-  Hide_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius);
-#else
-  Hide_empty_inscribed_ellipse_preview(center_x,center_y,tangent_x,tangent_y);
-#endif
-
-  Paintbrush_shape=Paintbrush_shape_before_operation;
-
-#ifndef INSCRIBED_ELLIPSE
-  Draw_filled_ellipse(center_x,center_y,horizontal_radius,vertical_radius,color);
-#else
-  Draw_filled_inscribed_ellipse(center_x,center_y,tangent_x,tangent_y,color);
-#endif
+  if ((Selected_circle_ellipse_mode & MASK_CENTER_CORNERS) == MODE_CENTER)
+  {
+    horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
+                                           :center_x-tangent_x;
+    vertical_radius  =(tangent_y>center_y)?tangent_y-center_y
+                                           :center_y-tangent_y;
+    Hide_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius);
+    Paintbrush_shape=Paintbrush_shape_before_operation;
+    Draw_filled_ellipse(center_x,center_y,horizontal_radius,vertical_radius,color);
+  }
+  else
+  {
+    Hide_empty_inscribed_ellipse_preview(center_x,center_y,tangent_x,tangent_y);
+    Paintbrush_shape=Paintbrush_shape_before_operation;
+    Draw_filled_inscribed_ellipse(center_x,center_y,tangent_x,tangent_y,color);
+  }
 
   End_of_modification();
   if ( (Config.Coords_rel) && (Menu_is_visible) )
@@ -3272,10 +3258,8 @@ void Grad_ellipse_12_6(void)
   short center_x;
   short center_y;
   short color;
-#ifndef INSCRIBED_ELLIPSE
   short horizontal_radius;
   short vertical_radius;
-#endif
 
   Operation_pop(&tangent_y);
   Operation_pop(&tangent_x);
@@ -3286,27 +3270,28 @@ void Grad_ellipse_12_6(void)
   if ( (tangent_x!=Paintbrush_X) || (tangent_y!=Paintbrush_Y) )
   {
     Hide_cursor();
-#ifndef INSCRIBED_ELLIPSE
-    Cursor_shape=CURSOR_SHAPE_TARGET;
-#endif
     Display_coords_rel_or_abs(center_x,center_y);
 
-#ifndef INSCRIBED_ELLIPSE
-    horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
-                                           :center_x-tangent_x;
-    vertical_radius  =(tangent_y>center_y)?tangent_y-center_y
-                                           :center_y-tangent_y;
-    Hide_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius);
+    if ((Selected_circle_ellipse_mode & MASK_CENTER_CORNERS) == MODE_CENTER)
+    {
+      Cursor_shape=CURSOR_SHAPE_TARGET;
+      horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
+                                             :center_x-tangent_x;
+      vertical_radius  =(tangent_y>center_y)?tangent_y-center_y
+                                             :center_y-tangent_y;
+      Hide_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius);
 
-    horizontal_radius=(Paintbrush_X>center_x)?Paintbrush_X-center_x
-                                         :center_x-Paintbrush_X;
-    vertical_radius  =(Paintbrush_Y>center_y)?Paintbrush_Y-center_y
-                                         :center_y-Paintbrush_Y;
-    Draw_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius,color);
-#else
-    Hide_empty_inscribed_ellipse_preview(center_x,center_y,tangent_x,tangent_y);
-    Draw_empty_inscribed_ellipse_preview(center_x,center_y,Paintbrush_X,Paintbrush_Y,color);
-#endif
+      horizontal_radius=(Paintbrush_X>center_x)?Paintbrush_X-center_x
+                                           :center_x-Paintbrush_X;
+      vertical_radius  =(Paintbrush_Y>center_y)?Paintbrush_Y-center_y
+                                           :center_y-Paintbrush_Y;
+      Draw_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius,color);
+    }
+    else
+    {
+      Hide_empty_inscribed_ellipse_preview(center_x,center_y,tangent_x,tangent_y);
+      Draw_empty_inscribed_ellipse_preview(center_x,center_y,Paintbrush_X,Paintbrush_Y,color);
+    }
 
     Display_cursor();
   }
@@ -3335,10 +3320,8 @@ void Grad_ellipse_0_6(void)
   short color;
   short click;
   //short radius;
-#ifndef INSCRIBED_ELLIPSE
   short horizontal_radius;
   short vertical_radius;
-#endif
 
   Operation_pop(&tangent_y);
   Operation_pop(&tangent_x);
@@ -3365,11 +3348,10 @@ void Grad_ellipse_0_6(void)
     Cursor_shape=CURSOR_SHAPE_XOR_TARGET;
 
     // On affiche une croix XOR au centre du cercle
-#ifndef INSCRIBED_ELLIPSE
-    Draw_curve_cross(center_x,center_y);
-#else
-    Draw_curve_cross((center_x+tangent_x)/2, (center_y+tangent_y)/2);
-#endif
+    if ((Selected_circle_ellipse_mode & MASK_CENTER_CORNERS) == MODE_CENTER)
+      Draw_curve_cross(center_x,center_y);
+    else
+      Draw_curve_cross((center_x+tangent_x)/2, (center_y+tangent_y)/2);
 
     if (Menu_is_visible)
     {
@@ -3382,24 +3364,23 @@ void Grad_ellipse_0_6(void)
   }
   else
   {
-#ifndef INSCRIBED_ELLIPSE
-    horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
-                                           :center_x-tangent_x;
-    vertical_radius  =(tangent_y>center_y)?tangent_y-center_y
-                                           :center_y-tangent_y;
-    Hide_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius);
-#else
-    Hide_empty_inscribed_ellipse_preview(center_x,center_y,tangent_x,tangent_y);
-#endif
-
     Paintbrush_hidden=Paintbrush_hidden_before_scroll;
     Cursor_shape=CURSOR_SHAPE_TARGET;
 
-#ifndef INSCRIBED_ELLIPSE
-    Draw_filled_ellipse(center_x,center_y,horizontal_radius,vertical_radius,Back_color);
-#else
-    Draw_filled_inscribed_ellipse(center_x,center_y,tangent_x,tangent_y,Back_color);
-#endif
+    if ((Selected_circle_ellipse_mode & MASK_CENTER_CORNERS) == MODE_CENTER)
+    {
+      horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
+                                             :center_x-tangent_x;
+      vertical_radius  =(tangent_y>center_y)?tangent_y-center_y
+                                             :center_y-tangent_y;
+      Hide_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius);
+      Draw_filled_ellipse(center_x,center_y,horizontal_radius,vertical_radius,Back_color);
+    }
+    else
+    {
+      Hide_empty_inscribed_ellipse_preview(center_x,center_y,tangent_x,tangent_y);
+      Draw_filled_inscribed_ellipse(center_x,center_y,tangent_x,tangent_y,Back_color);
+    }
 
     End_of_modification();
     if ((Config.Coords_rel) && (Menu_is_visible))
@@ -3425,10 +3406,8 @@ void Grad_ellipse_12_8(void)
   short center_x;
   short center_y;
   short color;
-#ifndef INSCRIBED_ELLIPSE
-  short horizontal_radius;
-  short vertical_radius;
-#endif
+  short horizontal_radius=0;
+  short vertical_radius=0;
   short old_mouse_k;
 
   Operation_stack_size-=2;   // On fait sauter les 2 derniers élts de la pile
@@ -3441,31 +3420,31 @@ void Grad_ellipse_12_8(void)
 
   Hide_cursor();
   // On efface la croix XOR au centre de l'ellipse
-#ifndef INSCRIBED_ELLIPSE
-  Draw_curve_cross(center_x,center_y);
-#else
-  Draw_curve_cross((center_x+tangent_x)/2, (center_y+tangent_y)/2);
-#endif
-
-#ifndef INSCRIBED_ELLIPSE
-  horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
-                                         :center_x-tangent_x;
-  vertical_radius  =(tangent_y>center_y)?tangent_y-center_y
-                                         :center_y-tangent_y;
-  Hide_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius);
-#else
-  Hide_empty_inscribed_ellipse_preview(center_x,center_y,tangent_x,tangent_y);
-#endif
+  if ((Selected_circle_ellipse_mode & MASK_CENTER_CORNERS) == MODE_CENTER)
+  {
+    Draw_curve_cross(center_x,center_y);
+    horizontal_radius=(tangent_x>center_x)?tangent_x-center_x
+                                           :center_x-tangent_x;
+    vertical_radius  =(tangent_y>center_y)?tangent_y-center_y
+                                           :center_y-tangent_y;
+    Hide_empty_ellipse_preview(center_x,center_y,horizontal_radius,vertical_radius);
+  }
+  else
+  {
+    Draw_curve_cross((center_x+tangent_x)/2, (center_y+tangent_y)/2);
+    Hide_empty_inscribed_ellipse_preview(center_x,center_y,tangent_x,tangent_y);
+  }
 
   Paintbrush_hidden=Paintbrush_hidden_before_scroll;
   Cursor_shape=CURSOR_SHAPE_XOR_TARGET;
 
   if (Mouse_K==old_mouse_k)
-#ifndef INSCRIBED_ELLIPSE
-    Draw_grad_ellipse(center_x,center_y,horizontal_radius,vertical_radius,Paintbrush_X,Paintbrush_Y);
-#else
-    Draw_grad_inscribed_ellipse(center_x,center_y,tangent_x,tangent_y,Paintbrush_X,Paintbrush_Y);
-#endif
+  {
+    if ((Selected_circle_ellipse_mode & MASK_CENTER_CORNERS) == MODE_CENTER)
+      Draw_grad_ellipse(center_x,center_y,horizontal_radius,vertical_radius,Paintbrush_X,Paintbrush_Y);
+    else
+      Draw_grad_inscribed_ellipse(center_x,center_y,tangent_x,tangent_y,Paintbrush_X,Paintbrush_Y);
+  }
 
   Display_cursor();
   End_of_modification();

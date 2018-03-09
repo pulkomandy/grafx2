@@ -627,6 +627,8 @@ GFX2_GLOBAL byte Selected_freehand_mode;
 GFX2_GLOBAL byte Selected_curve_mode;
 /// For the Line tool, this determines which variant is selected, either ::OPERATION_LINE, ::OPERATION_K_LINE or ::OPERATION_CENTERED_LINES
 GFX2_GLOBAL byte Selected_line_mode;
+/// Select which kind of Circle/ellipse mode is selected from 0 to 3 : CIRCLE_CTR/CIRCLE_CRN/ELLIPSE_CTR/ELLIPSE_CRN
+GFX2_GLOBAL byte Selected_circle_ellipse_mode;
 /// Determines which color appears in the first cell of the menu palette. Change this value to "scroll" the palette.
 GFX2_GLOBAL byte First_color_in_palette;
 /// Boolean, true if Grafx2 was run with a command-line argument to set a resolution on startup (overrides config)

@@ -820,21 +820,22 @@ void Load_Unicode_fonts(void)
 
   // Action factice:
 
-void Do_nothing(void)
-{}
+static void Do_nothing(int btn)
+{
+  (void)btn;
+}
 
   // Initialiseur d'un bouton:
 
+static
 void Init_button(byte        btn_number,
                  const char* tooltip,
                  word        x_offset, word   y_offset,
                  word        width,    word   height,
                  byte        shape,
-                 Func_action left_action,
-                 Func_action right_action,
-                 byte        left_instant,
-                 byte        right_instant,
-                 Func_action unselect_action,
+                 Func_btn_action left_action, Func_btn_action right_action,
+                 byte        left_instant,    byte        right_instant,
+                 Func_btn_action unselect_action,
                  byte        family)
 {
   Buttons_Pool[btn_number].X_offset        =x_offset;
@@ -990,22 +991,22 @@ void Init_buttons(void)
               FAMILY_TOOL);
 
   Init_button(BUTTON_CIRCLES,
-              "Empty circles / ellipses",
+              "Empty circles / Toggle  ",
               68,18,
               15,15,
               BUTTON_SHAPE_TRIANGLE_TOP_LEFT,
-              Button_Empty_circle,Button_Empty_ellipse,
-              0,0,
+              Button_circle_ellipse,Button_Circle_switch_mode,
+              0,1,
               Do_nothing,
               FAMILY_TOOL);
 
   Init_button(BUTTON_FILLCIRC,
-              "Filled circles / ellips.",
+              "Filled circles / Toggle ",
               69,19,
               15,15,
               BUTTON_SHAPE_TRIANGLE_BOTTOM_RIGHT,
-              Button_Filled_circle,Button_Filled_ellipse,
-              0,0,
+              Button_circle_ellipse,Button_Circle_switch_mode,
+              0,1,
               Do_nothing,
               FAMILY_TOOL);
 
@@ -1020,12 +1021,12 @@ void Init_buttons(void)
               FAMILY_TOOL);
 
   Init_button(BUTTON_SPHERES,
-              "Grad. spheres / ellipses",
+              "Grad. spheres / Toggle. ",
               85,18,
               16,16,
               BUTTON_SHAPE_RECTANGLE,
-              Button_Grad_circle,Button_Grad_ellipse,
-              0,0,
+              Button_circle_ellipse,Button_Circle_switch_mode,
+              0,1,
               Do_nothing,
               FAMILY_TOOL);
 
@@ -1547,48 +1548,92 @@ void Init_operations(void)
   Init_operation(OPERATION_FILLED_RECTANGLE,0,5,
                         Filled_rectangle_0_5,HIDE_CURSOR,FAST_MOUSE);
 
-  Init_operation(OPERATION_EMPTY_CIRCLE,1,0,
+  Init_operation(OPERATION_EMPTY_CIRCLE_CTR,1,0,
                         Circle_12_0,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_EMPTY_CIRCLE,2,0,
+  Init_operation(OPERATION_EMPTY_CIRCLE_CTR,2,0,
                         Circle_12_0,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_EMPTY_CIRCLE,1,5,
+  Init_operation(OPERATION_EMPTY_CIRCLE_CTR,1,5,
                         Circle_12_5,0,FAST_MOUSE);
-  Init_operation(OPERATION_EMPTY_CIRCLE,2,5,
+  Init_operation(OPERATION_EMPTY_CIRCLE_CTR,2,5,
                         Circle_12_5,0,FAST_MOUSE);
-  Init_operation(OPERATION_EMPTY_CIRCLE,0,5,
+  Init_operation(OPERATION_EMPTY_CIRCLE_CTR,0,5,
                         Empty_circle_0_5,HIDE_CURSOR,FAST_MOUSE);
 
-  Init_operation(OPERATION_FILLED_CIRCLE,1,0,
-                        Circle_12_0,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_FILLED_CIRCLE,2,0,
-                        Circle_12_0,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_FILLED_CIRCLE,1,5,
-                        Circle_12_5,0,FAST_MOUSE);
-  Init_operation(OPERATION_FILLED_CIRCLE,2,5,
-                        Circle_12_5,0,FAST_MOUSE);
-  Init_operation(OPERATION_FILLED_CIRCLE,0,5,
-                        Filled_circle_0_5,HIDE_CURSOR,FAST_MOUSE);
-
-  Init_operation(OPERATION_EMPTY_ELLIPSE,1,0,
+  Init_operation(OPERATION_EMPTY_CIRCLE_CRN,1,0,
                         Ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_EMPTY_ELLIPSE,2,0,
+  Init_operation(OPERATION_EMPTY_CIRCLE_CRN,2,0,
                         Ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_EMPTY_ELLIPSE,1,5,
+  Init_operation(OPERATION_EMPTY_CIRCLE_CRN,1,5,
                         Ellipse_12_5,0,FAST_MOUSE);
-  Init_operation(OPERATION_EMPTY_ELLIPSE,2,5,
+  Init_operation(OPERATION_EMPTY_CIRCLE_CRN,2,5,
                         Ellipse_12_5,0,FAST_MOUSE);
-  Init_operation(OPERATION_EMPTY_ELLIPSE,0,5,
+  Init_operation(OPERATION_EMPTY_CIRCLE_CRN,0,5,
                         Empty_ellipse_0_5,HIDE_CURSOR,FAST_MOUSE);
 
-  Init_operation(OPERATION_FILLED_ELLIPSE,1,0,
+  Init_operation(OPERATION_FILLED_CIRCLE_CTR,1,0,
+                        Circle_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_FILLED_CIRCLE_CTR,2,0,
+                        Circle_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_FILLED_CIRCLE_CTR,1,5,
+                        Circle_12_5,0,FAST_MOUSE);
+  Init_operation(OPERATION_FILLED_CIRCLE_CTR,2,5,
+                        Circle_12_5,0,FAST_MOUSE);
+  Init_operation(OPERATION_FILLED_CIRCLE_CTR,0,5,
+                        Filled_circle_0_5,HIDE_CURSOR,FAST_MOUSE);
+
+  Init_operation(OPERATION_FILLED_CIRCLE_CRN,1,0,
                         Ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_FILLED_ELLIPSE,2,0,
+  Init_operation(OPERATION_FILLED_CIRCLE_CRN,2,0,
                         Ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_FILLED_ELLIPSE,1,5,
+  Init_operation(OPERATION_FILLED_CIRCLE_CRN,1,5,
                         Ellipse_12_5,0,FAST_MOUSE);
-  Init_operation(OPERATION_FILLED_ELLIPSE,2,5,
+  Init_operation(OPERATION_FILLED_CIRCLE_CRN,2,5,
                         Ellipse_12_5,0,FAST_MOUSE);
-  Init_operation(OPERATION_FILLED_ELLIPSE,0,5,
+  Init_operation(OPERATION_FILLED_CIRCLE_CRN,0,5,
+                        Filled_ellipse_0_5,HIDE_CURSOR,FAST_MOUSE);
+
+  Init_operation(OPERATION_EMPTY_ELLIPSE_CTR,1,0,
+                        Ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_EMPTY_ELLIPSE_CTR,2,0,
+                        Ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_EMPTY_ELLIPSE_CTR,1,5,
+                        Ellipse_12_5,0,FAST_MOUSE);
+  Init_operation(OPERATION_EMPTY_ELLIPSE_CTR,2,5,
+                        Ellipse_12_5,0,FAST_MOUSE);
+  Init_operation(OPERATION_EMPTY_ELLIPSE_CTR,0,5,
+                        Empty_ellipse_0_5,HIDE_CURSOR,FAST_MOUSE);
+
+  Init_operation(OPERATION_EMPTY_ELLIPSE_CRN,1,0,
+                        Ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_EMPTY_ELLIPSE_CRN,2,0,
+                        Ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_EMPTY_ELLIPSE_CRN,1,5,
+                        Ellipse_12_5,0,FAST_MOUSE);
+  Init_operation(OPERATION_EMPTY_ELLIPSE_CRN,2,5,
+                        Ellipse_12_5,0,FAST_MOUSE);
+  Init_operation(OPERATION_EMPTY_ELLIPSE_CRN,0,5,
+                        Empty_ellipse_0_5,HIDE_CURSOR,FAST_MOUSE);
+
+  Init_operation(OPERATION_FILLED_ELLIPSE_CTR,1,0,
+                        Ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_FILLED_ELLIPSE_CTR,2,0,
+                        Ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_FILLED_ELLIPSE_CTR,1,5,
+                        Ellipse_12_5,0,FAST_MOUSE);
+  Init_operation(OPERATION_FILLED_ELLIPSE_CTR,2,5,
+                        Ellipse_12_5,0,FAST_MOUSE);
+  Init_operation(OPERATION_FILLED_ELLIPSE_CTR,0,5,
+                        Filled_ellipse_0_5,HIDE_CURSOR,FAST_MOUSE);
+
+  Init_operation(OPERATION_FILLED_ELLIPSE_CRN,1,0,
+                        Ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_FILLED_ELLIPSE_CRN,2,0,
+                        Ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_FILLED_ELLIPSE_CRN,1,5,
+                        Ellipse_12_5,0,FAST_MOUSE);
+  Init_operation(OPERATION_FILLED_ELLIPSE_CRN,2,5,
+                        Ellipse_12_5,0,FAST_MOUSE);
+  Init_operation(OPERATION_FILLED_ELLIPSE_CRN,0,5,
                         Filled_ellipse_0_5,HIDE_CURSOR,FAST_MOUSE);
 
   Init_operation(OPERATION_FILL,1,0,
@@ -1799,23 +1844,41 @@ void Init_operations(void)
   Init_operation(OPERATION_SCROLL,0,5,
                         Scroll_0_5,HIDE_CURSOR,FAST_MOUSE);
 
-  Init_operation(OPERATION_GRAD_CIRCLE,1,0,Grad_circle_12_0,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_GRAD_CIRCLE,2,0,Grad_circle_12_0,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_GRAD_CIRCLE,1,6,Grad_circle_12_6,0,FAST_MOUSE);
-  Init_operation(OPERATION_GRAD_CIRCLE,2,6,Grad_circle_12_6,0,FAST_MOUSE);
-  Init_operation(OPERATION_GRAD_CIRCLE,0,6,Grad_circle_0_6,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_GRAD_CIRCLE,1,8,Grad_circle_12_8,0,FAST_MOUSE);
-  Init_operation(OPERATION_GRAD_CIRCLE,2,8,Grad_circle_12_8,0,FAST_MOUSE);
-  Init_operation(OPERATION_GRAD_CIRCLE,0,8,Grad_circle_or_ellipse_0_8,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE_CTR,1,0,Grad_circle_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE_CTR,2,0,Grad_circle_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE_CTR,1,6,Grad_circle_12_6,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE_CTR,2,6,Grad_circle_12_6,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE_CTR,0,6,Grad_circle_0_6,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE_CTR,1,8,Grad_circle_12_8,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE_CTR,2,8,Grad_circle_12_8,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE_CTR,0,8,Grad_circle_or_ellipse_0_8,0,FAST_MOUSE);
 
-  Init_operation(OPERATION_GRAD_ELLIPSE,1,0,Grad_ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_GRAD_ELLIPSE,2,0,Grad_ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_GRAD_ELLIPSE,1,6,Grad_ellipse_12_6,0,FAST_MOUSE);
-  Init_operation(OPERATION_GRAD_ELLIPSE,2,6,Grad_ellipse_12_6,0,FAST_MOUSE);
-  Init_operation(OPERATION_GRAD_ELLIPSE,0,6,Grad_ellipse_0_6,HIDE_CURSOR,FAST_MOUSE);
-  Init_operation(OPERATION_GRAD_ELLIPSE,1,8,Grad_ellipse_12_8,0,FAST_MOUSE);
-  Init_operation(OPERATION_GRAD_ELLIPSE,2,8,Grad_ellipse_12_8,0,FAST_MOUSE);
-  Init_operation(OPERATION_GRAD_ELLIPSE,0,8,Grad_circle_or_ellipse_0_8,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE_CRN,1,0,Grad_ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE_CRN,2,0,Grad_ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE_CRN,1,6,Grad_ellipse_12_6,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE_CRN,2,6,Grad_ellipse_12_6,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE_CRN,0,6,Grad_ellipse_0_6,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE_CRN,1,8,Grad_ellipse_12_8,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE_CRN,2,8,Grad_ellipse_12_8,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_CIRCLE_CRN,0,8,Grad_circle_or_ellipse_0_8,0,FAST_MOUSE);
+
+  Init_operation(OPERATION_GRAD_ELLIPSE_CTR,1,0,Grad_ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE_CTR,2,0,Grad_ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE_CTR,1,6,Grad_ellipse_12_6,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE_CTR,2,6,Grad_ellipse_12_6,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE_CTR,0,6,Grad_ellipse_0_6,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE_CTR,1,8,Grad_ellipse_12_8,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE_CTR,2,8,Grad_ellipse_12_8,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE_CTR,0,8,Grad_circle_or_ellipse_0_8,0,FAST_MOUSE);
+
+  Init_operation(OPERATION_GRAD_ELLIPSE_CRN,1,0,Grad_ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE_CRN,2,0,Grad_ellipse_12_0,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE_CRN,1,6,Grad_ellipse_12_6,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE_CRN,2,6,Grad_ellipse_12_6,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE_CRN,0,6,Grad_ellipse_0_6,HIDE_CURSOR,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE_CRN,1,8,Grad_ellipse_12_8,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE_CRN,2,8,Grad_ellipse_12_8,0,FAST_MOUSE);
+  Init_operation(OPERATION_GRAD_ELLIPSE_CRN,0,8,Grad_circle_or_ellipse_0_8,0,FAST_MOUSE);
 
   Init_operation(OPERATION_GRAD_RECTANGLE,1,0,Grad_rectangle_12_0,0,FAST_MOUSE);
   Init_operation(OPERATION_GRAD_RECTANGLE,1,5,Grad_rectangle_12_5,0,FAST_MOUSE);

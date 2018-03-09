@@ -567,10 +567,14 @@ enum OPERATIONS
   OPERATION_CENTERED_LINES,    ///< Centered lines
   OPERATION_EMPTY_RECTANGLE,   ///< Empty rectangle
   OPERATION_FILLED_RECTANGLE,  ///< Filled rectangle
-  OPERATION_EMPTY_CIRCLE,      ///< Empty circle
-  OPERATION_FILLED_CIRCLE,     ///< Filled circle
-  OPERATION_EMPTY_ELLIPSE,     ///< Empty ellipse
-  OPERATION_FILLED_ELLIPSE,    ///< Filled ellipse
+  OPERATION_EMPTY_CIRCLE_CTR,  ///< Empty circle (center radius)
+  OPERATION_EMPTY_CIRCLE_CRN,  ///< Empty circle (corners)
+  OPERATION_EMPTY_ELLIPSE_CTR, ///< Empty ellipse (center radius)
+  OPERATION_EMPTY_ELLIPSE_CRN, ///< Empty ellipse (corners)
+  OPERATION_FILLED_CIRCLE_CTR, ///< Filled circle (center radius)
+  OPERATION_FILLED_CIRCLE_CRN, ///< Filled circle (corners)
+  OPERATION_FILLED_ELLIPSE_CTR,///< Filled ellipse (center radius)
+  OPERATION_FILLED_ELLIPSE_CRN,///< Filled ellipse (corners)
   OPERATION_FILL,              ///< Fill
   OPERATION_REPLACE,           ///< Color replacer
   OPERATION_GRAB_BRUSH,        ///< Rectangular brush grabbing
@@ -585,8 +589,10 @@ enum OPERATIONS
   OPERATION_POLYFILL,          ///< Filled polygon
   OPERATION_FILLED_POLYFORM,   ///< Filled polyform
   OPERATION_SCROLL,            ///< Scroll (pan)
-  OPERATION_GRAD_CIRCLE,       ///< Gradient-filled circle
-  OPERATION_GRAD_ELLIPSE,      ///< Gradient-filled ellipse
+  OPERATION_GRAD_CIRCLE_CTR,   ///< Gradient-filled circle (center radius)
+  OPERATION_GRAD_CIRCLE_CRN,   ///< Gradient-filled circle (corners)
+  OPERATION_GRAD_ELLIPSE_CTR,  ///< Gradient-filled ellipse (center radius)
+  OPERATION_GRAD_ELLIPSE_CRN,  ///< Gradient-filled ellipse (corners)
   OPERATION_ROTATE_BRUSH,      ///< Rotate brush
   OPERATION_STRETCH_BRUSH,     ///< Stretch brush
   OPERATION_DISTORT_BRUSH,     ///< Distort brush
@@ -607,5 +613,17 @@ enum IMAGE_MODES
   IMAGE_MODE_EGX2,      ///< CPC EGX2
   IMAGE_MODE_MODE5,     ///< CPC mode 5
 };
+
+/// Circle / Ellipse Modes
+#define MASK_CIRCLE_ELLIPSE (2)
+#define MASK_CENTER_CORNERS (1)
+#define MODE_CIRCLE    (0)
+#define MODE_ELLIPSE   (2)
+#define MODE_CENTER    (0)
+#define MODE_CORNERS   (1)
+#define MODE_CIRCLE_CTR  (MODE_CIRCLE|MODE_CENTER)
+#define MODE_CIRCLE_CRN  (MODE_CIRCLE|MODE_CORNERS)
+#define MODE_ELLIPSE_CTR (MODE_ELLIPSE|MODE_CENTER)
+#define MODE_ELLIPSE_CRN (MODE_ELLIPSE|MODE_CORNERS)
 
 #endif

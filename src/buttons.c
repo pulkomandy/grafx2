@@ -2345,37 +2345,78 @@ void Button_Filled_rectangle(void)
 
 // -- Gestion des boutons de cercle (ellipse) vide et plein(e) --------------
 
-void Button_Empty_circle(void)
+void Button_circle_ellipse(int btn)
 {
+  word operation;
+
+  switch (btn)
+  {
+    default:
+    case BUTTON_CIRCLES:
+      operation = OPERATION_EMPTY_CIRCLE_CTR;
+      break;
+    case BUTTON_FILLCIRC:
+      operation = OPERATION_FILLED_CIRCLE_CTR;
+      break;
+    case BUTTON_SPHERES:
+      operation = OPERATION_GRAD_CIRCLE_CTR;
+      break;
+  }
+  operation += Selected_circle_ellipse_mode;  // CIRCLE_CTR/CIRCLE_CRN/ELLIPSE_CTR/ELLIPSE_CRN;
   Hide_cursor();
-  Start_operation_stack(OPERATION_EMPTY_CIRCLE);
+  Start_operation_stack(operation);
   Display_cursor();
 }
 
-
-void Button_Empty_ellipse(void)
+void Button_Circle_switch_mode(int btn)
 {
+  T_Dropdown_button dropdown;
+  T_Dropdown_choice *item = NULL;
+  int i;
+  static const char * text[4] =
+    { "Circle (center/radius)", "Circle (corners)",
+      "Ellipse (center/radiuses)", "Ellipse (corners)" };
+
+  dropdown.Pos_X         =Buttons_Pool[btn].X_offset;
+  dropdown.Pos_Y         =Buttons_Pool[btn].Y_offset;
+  dropdown.Height        =Buttons_Pool[btn].Height;
+  dropdown.Dropdown_width=26*8;
+  dropdown.First_item    =NULL;
+  dropdown.Bottom_up     =1;
+
   Hide_cursor();
-  Start_operation_stack(OPERATION_EMPTY_ELLIPSE);
+
+  // If we get here from a keyboard shortcut, don't show the menu and directly
+  // switch to the next drawing mode.
+  if (Mouse_K != 0) {
+    for(i = 0; i < 4; i++) {
+      Window_dropdown_add_item(&dropdown, i, text[i]);
+    }
+    item=Dropdown_activate(&dropdown,0,Menu_Y);
+  }
+
+  if (item)
+  {
+    Selected_circle_ellipse_mode = item->Number;
+  } else {
+    Selected_circle_ellipse_mode = (Selected_circle_ellipse_mode + 1) & 3;
+  }
+
+  Display_sprite_in_menu(BUTTON_CIRCLES,
+    (Selected_circle_ellipse_mode >= 2) ? MENU_SPRITE_ELLIPSES : -1);
+  Draw_menu_button(BUTTON_CIRCLES,BUTTON_RELEASED);
+  Display_sprite_in_menu(BUTTON_FILLCIRC,
+    (Selected_circle_ellipse_mode >= 2) ? MENU_SPRITE_ELLIPSES : -1);
+  Draw_menu_button(BUTTON_FILLCIRC,BUTTON_RELEASED);
+  Display_sprite_in_menu(BUTTON_SPHERES,
+    (Selected_circle_ellipse_mode >= 2) ? MENU_SPRITE_GRAD_ELLIPSE : -1);
+  Draw_menu_button(BUTTON_SPHERES,BUTTON_RELEASED);
+  Draw_menu_button(btn,BUTTON_PRESSED);
+
   Display_cursor();
+  Button_circle_ellipse(btn);
+  Window_dropdown_clear_items(&dropdown);
 }
-
-
-void Button_Filled_circle(void)
-{
-  Hide_cursor();
-  Start_operation_stack(OPERATION_FILLED_CIRCLE);
-  Display_cursor();
-}
-
-
-void Button_Filled_ellipse(void)
-{
-  Hide_cursor();
-  Start_operation_stack(OPERATION_FILLED_ELLIPSE);
-  Display_cursor();
-}
-
 
 // -- Gestion du menu des dégradés ------------------------------------------
 void Draw_button_gradient_style(short x_pos,short y_pos,int technique)
@@ -2773,21 +2814,6 @@ void Button_Gradients(void)
 
 
 // -- Gestion des boutons de cercle / ellipse / rectangle dégradés --------------------
-
-void Button_Grad_circle(void)
-{
-  Hide_cursor();
-  Start_operation_stack(OPERATION_GRAD_CIRCLE);
-  Display_cursor();
-}
-
-
-void Button_Grad_ellipse(void)
-{
-  Hide_cursor();
-  Start_operation_stack(OPERATION_GRAD_ELLIPSE);
-  Display_cursor();
-}
 
 
 void Button_Grad_rectangle(void)

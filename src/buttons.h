@@ -218,20 +218,6 @@ void Button_Gradients(void);
 */
 void Load_gradient_data(int index);
 
-// Boutons relatifs aux cercles (ellipses) dégradé(e)s
-
-/*!
-    Callback for the gradation circle button left click.
-    Starts drawing a gradation circle.
-*/
-void Button_Grad_circle(void);
-
-/*!
-    Callback for the gradation circle right click.
-    Starts drawing a gradation ellipsis.
-*/
-void Button_Grad_ellipse(void);
-
 /*!
    Callback for the gradation rectangle button.
    Starts the gradation rectangle drawing operation.
@@ -241,28 +227,16 @@ void Button_Grad_rectangle(void);
 // Boutons relatifs aux cercles (ellipses) plein(e)s et vides
 
 /*!
-    Callback for the circle button left click.
-    Starts drawing an empty circle
+    Callback for the circle/ellipse buttons
+    Starts drawing circle/ellipse
 */
-void Button_Empty_circle(void);
+void Button_circle_ellipse(int btn);
 
 /*!
-    Callback for the circle button left click.
-    Starts drawing an empty ellipsis
+    Callback for the cicle button right click.
+    Circle modes
 */
-void Button_Empty_ellipse(void);
-
-/*!
-    Callback for the filled circle button ledt click.
-    Starts drawing a filled circle.
-*/
-void Button_Filled_circle(void);
-
-/*!
-    Callback for the filled circle right click.
-    Starts drawing a filled ellipsis.
-*/
-void Button_Filled_ellipse(void);
+void Button_Circle_switch_mode(int);
 
 // Boutons relatifs aux polygones vides et pleins
 

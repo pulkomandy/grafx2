@@ -59,7 +59,8 @@ typedef uint64_t qword;
 
 // Named function prototypes
 // GrafX2 use a lot of function pointer to do the drawing depending in the "fake hardware zoom" and the magnifier status.
-typedef void (* Func_action)    (void); ///< An action. Used when you click a menu button or trigger a keyboard shortcut.
+typedef void (* Func_action) (void); ///< An action.
+typedef void (* Func_btn_action) (int); ///< An action. Used when you click a menu button or trigger a keyboard shortcut.
 typedef void (* Func_pixel) (word,word,byte); ///< Set pixel at position (x,y) to color c. Used in load screen to write the data to brush, picture, or preview area.
 typedef byte (* Func_read)   (word,word); ///< Read a pixel at position (x,y) on something. Used for example in save to tell if the data is a brush or a picture
 typedef void (* Func_clear)  (byte);

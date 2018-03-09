@@ -379,7 +379,7 @@ void Unselect_button(int btn_number)
     // On affiche le cadre autour du bouton de façon à ce qu'il paraisse relâché
     Draw_menu_button(btn_number,BUTTON_RELEASED);
     // On appelle le désenclenchement particulier au bouton:
-    Buttons_Pool[btn_number].Unselect_action();
+    Buttons_Pool[btn_number].Unselect_action(btn_number);
   }
 }
 
@@ -403,13 +403,6 @@ void Select_button(int btn_number,byte click)
       break;
     case BUTTON_FLOODFILL:
       icon=MENU_SPRITE_REPLACE;
-      break;
-    case BUTTON_CIRCLES:
-    case BUTTON_FILLCIRC:
-      icon=MENU_SPRITE_ELLIPSES;
-      break;
-    case BUTTON_SPHERES:
-      icon=MENU_SPRITE_GRAD_ELLIPSE;
       break;
   }
   if (icon!=-1)
@@ -493,9 +486,9 @@ void Select_button(int btn_number,byte click)
 
   // Puis on se contente d'appeler l'action correspondant au bouton:
   if (click==1)
-    Buttons_Pool[btn_number].Left_action();
+    Buttons_Pool[btn_number].Left_action(btn_number);
   else
-    Buttons_Pool[btn_number].Right_action();
+    Buttons_Pool[btn_number].Right_action(btn_number);
 }
 
 
