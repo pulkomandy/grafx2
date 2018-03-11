@@ -41,6 +41,7 @@
 #include "struct.h"
 #include "windows.h"
 #include "oldies.h"
+#include "fileformats.h"
 
 //////////////////////////////////// PAL ////////////////////////////////////
 //

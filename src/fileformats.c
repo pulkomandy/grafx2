@@ -68,6 +68,7 @@
 #include "io.h"
 #include "pages.h"
 #include "windows.h" // Best_color()
+#include "fileformats.h"
 
 #ifndef __no_pnglib__
 static void Load_PNG_Sub(T_IO_Context * context, FILE * file);

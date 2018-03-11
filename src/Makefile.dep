@@ -22,7 +22,7 @@ $(OBJDIR)/factory.o: factory.c brush.h struct.h const.h buttons.h loadsave.h \
  readline.h sdlscreen.h windows.h palette.h input.h help.h realpath.h \
  setup.h tiles.h
 $(OBJDIR)/fileformats.o: fileformats.c errors.h global.h struct.h const.h \
- loadsave.h misc.h io.h pages.h windows.h
+ loadsave.h misc.h io.h pages.h windows.h fileformats.h
 $(OBJDIR)/filesel.o: filesel.c const.h struct.h global.h misc.h errors.h io.h \
  windows.h sdlscreen.h loadsave.h mountlist.h engine.h readline.h input.h \
  help.h unicode.h filesel.h
@@ -49,7 +49,8 @@ $(OBJDIR)/loadrecoil.o: loadrecoil.c struct.h const.h global.h loadsave.h io.h \
  errors.h recoil.h
 $(OBJDIR)/loadsave.o: loadsave.c buttons.h struct.h const.h loadsave.h errors.h \
  global.h io.h misc.h graph.h op_c.h colorred.h pages.h palette.h \
- sdlscreen.h windows.h engine.h brush.h setup.h filesel.h unicode.h
+ sdlscreen.h windows.h engine.h brush.h setup.h filesel.h unicode.h \
+ fileformats.h
 $(OBJDIR)/main.o: main.c const.h struct.h global.h graph.h misc.h init.h buttons.h \
  loadsave.h engine.h pages.h sdlscreen.h errors.h readini.h saveini.h \
  io.h text.h setup.h windows.h brush.h palette.h realpath.h input.h \
@@ -59,7 +60,7 @@ $(OBJDIR)/misc.o: misc.c struct.h const.h sdlscreen.h global.h errors.h buttons.
  graph.h pages.h
 $(OBJDIR)/miscfileformats.o: miscfileformats.c engine.h struct.h const.h errors.h \
  global.h io.h libraw2crtc.h loadsave.h misc.h sdlscreen.h windows.h \
- oldies.h
+ oldies.h fileformats.h
 $(OBJDIR)/mountlist.o: mountlist.c mountlist.h
 $(OBJDIR)/oldies.o: oldies.c struct.h const.h global.h errors.h misc.h palette.h \
  pages.h windows.h layers.h
