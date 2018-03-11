@@ -532,6 +532,7 @@ void Load_image(T_IO_Context *context)
   const T_Format *format = &(File_formats[FORMAT_ALL_FILES+1]); // Format du fichier à charger
   int i;
   byte old_cursor_shape;
+  FILE * f;
   
   // Not sure it's the best place...
   context->Color_cycles=0;
@@ -540,11 +541,19 @@ void Load_image(T_IO_Context *context)
   // charger le format du fichier:
   File_error=1;
 
+  f = Open_file_read(context);
+  if (f == NULL)
+  {
+    Warning("Cannot open file for reading");
+    Error(0);
+    return;
+  }
+
   if (context->Format>FORMAT_ALL_FILES)
   {
     format = Get_fileformat(context->Format);
     if (format->Test)
-      format->Test(context);
+      format->Test(context, f);
   }
 
   if (File_error)
@@ -558,14 +567,16 @@ void Load_image(T_IO_Context *context)
       if (format->Test == NULL)
         continue;
         
+      fseek(f, 0, SEEK_SET); // rewind
       // On appelle le testeur du format:
-      format->Test(context);
+      format->Test(context, f);
       // On s'arrête si le fichier est au bon format:
       if (File_error==0)
         break;
     }
   }
-  
+  fclose(f);
+
   if (File_error)
   {
     context->Format = DEFAULT_FILEFORMAT;

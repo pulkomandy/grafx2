@@ -116,6 +116,7 @@ typedef struct
 #define PREVIEW_HEIGHT  80
 
 /// Type of a function that can be called for a T_IO_Context. Kind of a method.
+typedef void (* Func_IO_Test) (T_IO_Context *, FILE *);
 typedef void (* Func_IO) (T_IO_Context *);
 
 /*
@@ -165,15 +166,15 @@ void Delete_safety_backups(void);
 /// Data for an image file format.
 typedef struct {
   byte Identifier;         ///< Identifier for this format in enum :FILE_FORMATS
-  char *Label;             ///< Five-letter label
-  Func_IO Test;            ///< Function which tests if the file is of this format
+  const char *Label;       ///< Five-letter label
+  Func_IO_Test Test;       ///< Function which tests if the file is of this format
   Func_IO Load;            ///< Function which loads an image of this format
   Func_IO Save;            ///< Function which saves an image of this format
   byte Palette_only;       ///< Boolean, true if this format saves/loads only the palette.
   byte Comment;            ///< This file format allows a text comment
   byte Supports_layers;    ///< Boolean, true if this format preserves layers on saving
-  char *Default_extension; ///< Default file extension
-  char *Extensions;        ///< List of semicolon-separated file extensions
+  const char *Default_extension; ///< Default file extension
+  const char *Extensions;  ///< List of semicolon-separated file extensions
 } T_Format;
 
 /// Array of the known file formats

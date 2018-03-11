@@ -81,31 +81,24 @@ static void Load_PNG_Sub(T_IO_Context * context, FILE * file);
 //////////////////////////////////// IMG ////////////////////////////////////
 
 // -- Tester si un fichier est au format IMG --------------------------------
-void Test_IMG(T_IO_Context * context)
+void Test_IMG(T_IO_Context * context, FILE * file)
 {
-  FILE *file;              // Fichier du fichier
   T_IMG_Header IMG_header;
   byte signature[6]={0x01,0x00,0x47,0x12,0x6D,0xB0};
 
   File_error=1;
 
-  // Ouverture du fichier
-  if ((file=Open_file_read(context)))
-  {
     // Lecture et vérification de la signature
-    if (Read_bytes(file,IMG_header.Filler1,6)
+  if (Read_bytes(file,IMG_header.Filler1,6)
     && Read_word_le(file,&(IMG_header.Width))
     && Read_word_le(file,&(IMG_header.Height))
     && Read_bytes(file,IMG_header.Filler2,118)
     && Read_bytes(file,IMG_header.Palette,sizeof(T_Palette))
     )
-    {
-      if ( (!memcmp(IMG_header.Filler1,signature,6))
-        && IMG_header.Width && IMG_header.Height)
-        File_error=0;
-    }
-    // Fermeture du fichier
-    fclose(file);
+  {
+    if ( (!memcmp(IMG_header.Filler1,signature,6))
+      && IMG_header.Width && IMG_header.Height)
+      File_error=0;
   }
 }
 
@@ -263,17 +256,14 @@ typedef struct
 
 // -- Tester si un fichier est au format IFF --------------------------------
 
-void Test_IFF(T_IO_Context * context, const char *sub_type)
+void Test_IFF(T_IO_Context * context, FILE * IFF_file, const char *sub_type)
 {
-  FILE * IFF_file;
   char  format[4];
   char  section[4];
   dword dummy;
 
   File_error=1;
 
-  if ((IFF_file=Open_file_read(context)))
-  {
     do // Dummy loop, so that all breaks jump to end.
     {
       if (! Read_bytes(IFF_file,section,4))
@@ -329,21 +319,19 @@ void Test_IFF(T_IO_Context * context, const char *sub_type)
       
     } while (0);
     
-    fclose(IFF_file);
-  }
 }
 
-void Test_PBM(T_IO_Context * context)
+void Test_PBM(T_IO_Context * context, FILE * f)
 {
-  Test_IFF(context, "PBM ");
+  Test_IFF(context, f, "PBM ");
 }
-void Test_LBM(T_IO_Context * context)
+void Test_LBM(T_IO_Context * context, FILE * f)
 {
-  Test_IFF(context, "ILBM");
+  Test_IFF(context, f, "ILBM");
 }
-void Test_ACBM(T_IO_Context * context)
+void Test_ACBM(T_IO_Context * context, FILE * f)
 {
-  Test_IFF(context, "ACBM");
+  Test_IFF(context, f, "ACBM");
 }
 
 
@@ -2438,25 +2426,17 @@ static int Read_INFO_ImageHeader(FILE * file, T_INFO_ImageHeader * header)
           );
 }
 
-void Test_INFO(T_IO_Context * context)
+void Test_INFO(T_IO_Context * context, FILE * file)
 {
   T_INFO_Header header;
-  char filename[MAX_PATH_CHARACTERS];
-  FILE *file;
 
   File_error=1;
-  Get_full_filename(filename, context->File_name, context->File_directory);
 
-  file=fopen(filename, "rb");
-  if (file == NULL)
-    return;
   if (Read_INFO_Header(file, &header))
   {
     if (header.Magic == 0xe310 && header.Version == 1)
       File_error = 0;
   }
-
-  fclose(file);
 }
 
 static char * Read_INFO_String(FILE * file)
@@ -2919,42 +2899,36 @@ typedef struct
 } T_BMP_Header;
 
 // -- Tester si un fichier est au format BMP --------------------------------
-void Test_BMP(T_IO_Context * context)
+void Test_BMP(T_IO_Context * context, FILE * file)
 {
-  FILE *file;
   T_BMP_Header header;
 
   File_error=1;
 
-  if ((file=Open_file_read(context)))
+  if (Read_bytes(file,&(header.Signature),2) // "BM"
+      && Read_dword_le(file,&(header.Size_1))
+      && Read_word_le(file,&(header.Reserved_1))
+      && Read_word_le(file,&(header.Reserved_2))
+      && Read_dword_le(file,&(header.Offset))
+      && Read_dword_le(file,&(header.Size_2))
+      && Read_dword_le(file,&(header.Width))
+      && Read_dword_le(file,(dword *)&(header.Height))
+      && Read_word_le(file,&(header.Planes))
+      && Read_word_le(file,&(header.Nb_bits))
+      && Read_dword_le(file,&(header.Compression))
+      && Read_dword_le(file,&(header.Size_3))
+      && Read_dword_le(file,&(header.XPM))
+      && Read_dword_le(file,&(header.YPM))
+      && Read_dword_le(file,&(header.Nb_Clr))
+      && Read_dword_le(file,&(header.Clr_Imprt))
+     )
   {
-    if (Read_bytes(file,&(header.Signature),2) // "BM"
-     && Read_dword_le(file,&(header.Size_1))
-     && Read_word_le(file,&(header.Reserved_1))
-     && Read_word_le(file,&(header.Reserved_2))
-     && Read_dword_le(file,&(header.Offset))
-     && Read_dword_le(file,&(header.Size_2))
-     && Read_dword_le(file,&(header.Width))
-     && Read_dword_le(file,(dword *)&(header.Height))
-     && Read_word_le(file,&(header.Planes))
-     && Read_word_le(file,&(header.Nb_bits))
-     && Read_dword_le(file,&(header.Compression))
-     && Read_dword_le(file,&(header.Size_3))
-     && Read_dword_le(file,&(header.XPM))
-     && Read_dword_le(file,&(header.YPM))
-     && Read_dword_le(file,&(header.Nb_Clr))
-     && Read_dword_le(file,&(header.Clr_Imprt))
-        )
-     {
-
-      if ( header.Signature[0]=='B' && header.Signature[1]=='M'
+    if ( header.Signature[0]=='B' && header.Signature[1]=='M'
         && (header.Size_2==40 /* WINDOWS */ || header.Size_2==12 /* OS/2 */)
         && header.Width && header.Height )
-      {
-        File_error=0;
-      }
-     }
-    fclose(file);
+    {
+      File_error=0;
+    }
   }
 }
 
@@ -3503,9 +3477,8 @@ typedef struct {
   dword offset;
 } T_ICO_ImageEntry;
 
-void Test_ICO(T_IO_Context * context)
+void Test_ICO(T_IO_Context * context, FILE * file)
 {
-  FILE *file;
   struct {
     word Reserved;
     word Type;  // Specifies image type: 1 for icon (.ICO) image, 2 for cursor (.CUR) image. Other values are invalid.
@@ -3514,16 +3487,12 @@ void Test_ICO(T_IO_Context * context)
 
   File_error=1;
 
-  if ((file=Open_file_read(context)))
+  if (Read_word_le(file,&(header.Reserved))
+      && Read_word_le(file,&(header.Type))
+      && Read_word_le(file,&(header.Count)))
   {
-    if (Read_word_le(file,&(header.Reserved))
-     && Read_word_le(file,&(header.Type))
-     && Read_word_le(file,&(header.Count)))
-    {
-      if (header.Reserved == 0 && (header.Type == 1 || header.Type == 2) && header.Count > 0)
-        File_error=0;
-    }
-    fclose(file);
+    if (header.Reserved == 0 && (header.Type == 1 || header.Type == 2) && header.Count > 0)
+      File_error=0;
   }
 }
 
@@ -3891,28 +3860,20 @@ enum DISPOSAL_METHOD
 
 // -- Tester si un fichier est au format GIF --------------------------------
 
-void Test_GIF(T_IO_Context * context)
+void Test_GIF(T_IO_Context * context, FILE * file)
 {
   char signature[6];
-  FILE *file;
-
 
   File_error=1;
 
-  if ((file=Open_file_read(context)))
+  if (Read_bytes(file,signature,6))
   {
-    if (
-        (Read_bytes(file,signature,6)) &&
-        ((!memcmp(signature,"GIF87a",6))||(!memcmp(signature,"GIF89a",6)))
-       )
+    if ((!memcmp(signature,"GIF87a",6))||(!memcmp(signature,"GIF89a",6)))
       File_error=0;
-
-    fclose(file);
   }
 }
 
 
-// -- Lire un fichier au format GIF -----------------------------------------
 // -- Lire un fichier au format GIF -----------------------------------------
 
 // Définition de quelques variables globales au chargement du GIF87a
@@ -5099,51 +5060,44 @@ T_PCX_Header PCX_header;
 
 // -- Tester si un fichier est au format PCX --------------------------------
 
-void Test_PCX(T_IO_Context * context)
+void Test_PCX(T_IO_Context * context, FILE * file)
 {
-  FILE *file;
-
   File_error=0;
 
-  if ((file=Open_file_read(context)))
+  if (Read_byte(file,&(PCX_header.Manufacturer)) &&
+      Read_byte(file,&(PCX_header.Version)) &&
+      Read_byte(file,&(PCX_header.Compression)) &&
+      Read_byte(file,&(PCX_header.Depth)) &&
+      Read_word_le(file,&(PCX_header.X_min)) &&
+      Read_word_le(file,&(PCX_header.Y_min)) &&
+      Read_word_le(file,&(PCX_header.X_max)) &&
+      Read_word_le(file,&(PCX_header.Y_max)) &&
+      Read_word_le(file,&(PCX_header.X_dpi)) &&
+      Read_word_le(file,&(PCX_header.Y_dpi)) &&
+      Read_bytes(file,&(PCX_header.Palette_16c),48) &&
+      Read_byte(file,&(PCX_header.Reserved)) &&
+      Read_byte(file,&(PCX_header.Plane)) &&
+      Read_word_le(file,&(PCX_header.Bytes_per_plane_line)) &&
+      Read_word_le(file,&(PCX_header.Palette_info)) &&
+      Read_word_le(file,&(PCX_header.Screen_X)) &&
+      Read_word_le(file,&(PCX_header.Screen_Y)) &&
+      Read_bytes(file,&(PCX_header.Filler),54) )
   {
-    if (Read_byte(file,&(PCX_header.Manufacturer)) &&
-        Read_byte(file,&(PCX_header.Version)) &&
-        Read_byte(file,&(PCX_header.Compression)) &&
-        Read_byte(file,&(PCX_header.Depth)) &&
-        Read_word_le(file,&(PCX_header.X_min)) &&
-        Read_word_le(file,&(PCX_header.Y_min)) &&
-        Read_word_le(file,&(PCX_header.X_max)) &&
-        Read_word_le(file,&(PCX_header.Y_max)) &&
-        Read_word_le(file,&(PCX_header.X_dpi)) &&
-        Read_word_le(file,&(PCX_header.Y_dpi)) &&
-        Read_bytes(file,&(PCX_header.Palette_16c),48) &&        
-        Read_byte(file,&(PCX_header.Reserved)) &&
-        Read_byte(file,&(PCX_header.Plane)) &&
-        Read_word_le(file,&(PCX_header.Bytes_per_plane_line)) &&
-        Read_word_le(file,&(PCX_header.Palette_info)) &&
-        Read_word_le(file,&(PCX_header.Screen_X)) &&
-        Read_word_le(file,&(PCX_header.Screen_Y)) &&
-        Read_bytes(file,&(PCX_header.Filler),54) )
-    {
-    
-      //   Vu que ce header a une signature de merde et peu significative, il
-      // va falloir que je teste différentes petites valeurs dont je connais
-      // l'intervalle. Grrr!
-      if ( (PCX_header.Manufacturer!=10)
-        || (PCX_header.Compression>1)
-        || ( (PCX_header.Depth!=1) && (PCX_header.Depth!=2) && (PCX_header.Depth!=4) && (PCX_header.Depth!=8) )
-        || ( (PCX_header.Plane!=1) && (PCX_header.Plane!=2) && (PCX_header.Plane!=4) && (PCX_header.Plane!=8) && (PCX_header.Plane!=3) )
-        || (PCX_header.X_max<PCX_header.X_min)
-        || (PCX_header.Y_max<PCX_header.Y_min)
-        || (PCX_header.Bytes_per_plane_line&1) )
+    //   Vu que ce header a une signature de merde et peu significative, il
+    // va falloir que je teste différentes petites valeurs dont je connais
+    // l'intervalle. Grrr!
+    if ( (PCX_header.Manufacturer!=10)
+      || (PCX_header.Compression>1)
+      || ( (PCX_header.Depth!=1) && (PCX_header.Depth!=2) && (PCX_header.Depth!=4) && (PCX_header.Depth!=8) )
+      || ( (PCX_header.Plane!=1) && (PCX_header.Plane!=2) && (PCX_header.Plane!=4) && (PCX_header.Plane!=8) && (PCX_header.Plane!=3) )
+      || (PCX_header.X_max<PCX_header.X_min)
+      || (PCX_header.Y_max<PCX_header.Y_min)
+      || (PCX_header.Bytes_per_plane_line&1) )
         File_error=1;
-    }
-    else
-      File_error=1;
-
-    fclose(file);
   }
+  else
+    File_error=1;
+
 }
 
 
@@ -5642,31 +5596,25 @@ typedef struct
 } T_SCx_Header;
 
 // -- Tester si un fichier est au format SCx --------------------------------
-void Test_SCx(T_IO_Context * context)
+void Test_SCx(T_IO_Context * context, FILE * file)
 {
-  FILE *file;              // Fichier du fichier
   //byte Signature[3];
   T_SCx_Header SCx_header;
 
   File_error=1;
 
   // Ouverture du fichier
-  if ((file=Open_file_read(context)))
-  {
     // Lecture et vérification de la signature
-    if (Read_bytes(file,SCx_header.Filler1,4)
-    && Read_word_le(file, &(SCx_header.Width))
-    && Read_word_le(file, &(SCx_header.Height))
-    && Read_byte(file, &(SCx_header.Filler2))
-    && Read_byte(file, &(SCx_header.Planes))
-    )
-    {
-      if ( (!memcmp(SCx_header.Filler1,"RIX",3))
+  if (Read_bytes(file,SCx_header.Filler1,4)
+      && Read_word_le(file, &(SCx_header.Width))
+      && Read_word_le(file, &(SCx_header.Height))
+      && Read_byte(file, &(SCx_header.Filler2))
+      && Read_byte(file, &(SCx_header.Planes))
+     )
+  {
+    if ( (!memcmp(SCx_header.Filler1,"RIX",3))
         && SCx_header.Width && SCx_header.Height)
       File_error=0;
-    }
-    // Fermeture du fichier
-    fclose(file);
   }
 }
 
@@ -5933,23 +5881,17 @@ void Save_XPM(T_IO_Context* context)
 #ifndef __no_pnglib__
 
 // -- Tester si un fichier est au format PNG --------------------------------
-void Test_PNG(T_IO_Context * context)
+void Test_PNG(T_IO_Context * context, FILE * file)
 {
-  FILE *file;             // Fichier du fichier
   byte png_header[8];
   
   File_error=1;
 
-  // Ouverture du fichier
-  if ((file=Open_file_read(context)))
+  // Lecture du header du fichier
+  if (Read_bytes(file,png_header,8))
   {
-    // Lecture du header du fichier
-    if (Read_bytes(file,png_header,8))
-    {
-      if ( !png_sig_cmp(png_header, 0, 8))
-        File_error=0;
-    }
-    fclose(file);
+    if ( !png_sig_cmp(png_header, 0, 8))
+      File_error=0;
   }
 }
 

@@ -47,70 +47,60 @@
 //
 
 // -- Test wether a file is in PAL format --------------------------------
-void Test_PAL(T_IO_Context * context)
+void Test_PAL(T_IO_Context * context, FILE * file)
 {
   char buffer[32];
-  FILE *file;
   long file_size;
 
   File_error = 1;
 
-  if ((file = Open_file_read(context)))
+  file_size = File_length_file(file);
+  // First check for GrafX2 legacy palette format. The simplest one, 768 bytes
+  // of RGB data. It is a raw dump of the T_Palette structure. There is no
+  // header at all, so we check for the file size.
+  if (file_size == sizeof(T_Palette))
+    File_error = 0;
+  else
   {
-    file_size = File_length_file(file);
-    // First check for GrafX2 legacy palette format. The simplest one, 768 bytes
-    // of RGB data. It is a raw dump of the T_Palette structure. There is no
-    // header at all, so we check for the file size.
-    if (file_size == sizeof(T_Palette))
-      File_error = 0;
-    else
+    // Bigger (or smaller ?) files may be in other formats. These have an
+    // header, so look for it.
+    fread(buffer, 1, 8, file);
+    if (strncmp(buffer,"JASC-PAL",8) == 0)
     {
-      // Bigger (or smaller ?) files may be in other formats. These have an
-      // header, so look for it.
+      // JASC file format, used by Paint Shop Pro and GIMP. This is also the
+      // one used for saving, as it brings greater interoperability.
+      File_error = 0;
+    }
+    else if(strncmp(buffer,"RIFF", 4) == 0)
+    {
+      // Microsoft RIFF file
+      // This is a data container (similar to IFF). We only check the first
+      // chunk header, and give up if that's not a palette.
+      fseek(file, 8, SEEK_SET);
       fread(buffer, 1, 8, file);
-      if (strncmp(buffer,"JASC-PAL",8) == 0)
+      if (strncmp(buffer, "PAL data", 8) == 0)
       {
-        // JASC file format, used by Paint Shop Pro and GIMP. This is also the
-        // one used for saving, as it brings greater interoperability.
         File_error = 0;
       }
-      else if(strncmp(buffer,"RIFF", 4) == 0)
-      {
-        // Microsoft RIFF file
-        // This is a data container (similar to IFF). We only check the first
-        // chunk header, and give up if that's not a palette.
-        fseek(file, 8, SEEK_SET);
-        fread(buffer, 1, 8, file);
-        if (strncmp(buffer, "PAL data", 8) == 0)
-        {
-          File_error = 0;
-        }
-      }
     }
-    fclose(file);
   }
 }
 
-void Test_GPL(T_IO_Context * context)
+void Test_GPL(T_IO_Context * context, FILE * file)
 {
   char buffer[16];
-  FILE *file;
   long file_size;
 
   File_error = 1;
 
-  if ((file = Open_file_read(context)))
-  {
-    file_size = File_length_file(file);
-    if (file_size > 33) {
-       // minimum header length == 33
-       // "GIMP Palette" == 12
-       fread(buffer, 1, 12, file);
-       if (strncmp(buffer,"GIMP Palette",12) == 0)
-         File_error = 0;
-    }
+  file_size = File_length_file(file);
+  if (file_size > 33) {
+     // minimum header length == 33
+     // "GIMP Palette" == 12
+     fread(buffer, 1, 12, file);
+     if (strncmp(buffer,"GIMP Palette",12) == 0)
+       File_error = 0;
   }
-    fclose(file);
 }
 
 // skip the padding before a space-padded field.
@@ -381,34 +371,27 @@ typedef struct
 } T_PKM_Header;
 
 // -- Tester si un fichier est au format PKM --------------------------------
-void Test_PKM(T_IO_Context * context)
+void Test_PKM(T_IO_Context * context, FILE * file)
 {
-  FILE *file;             // Fichier du fichier
   T_PKM_Header header;
-
 
   File_error=1;
 
-  // Ouverture du fichier
-  if ((file=Open_file_read(context)))
+  // Lecture du header du fichier
+  if (Read_bytes(file,&header.Ident,3) &&
+      Read_byte(file,&header.Method) &&
+      Read_byte(file,&header.Recog1) &&
+      Read_byte(file,&header.Recog2) &&
+      Read_word_le(file,&header.Width) &&
+      Read_word_le(file,&header.Height) &&
+      Read_bytes(file,&header.Palette,sizeof(T_Palette)) &&
+      Read_word_le(file,&header.Jump))
   {
-    // Lecture du header du fichier
-    if (Read_bytes(file,&header.Ident,3) &&
-        Read_byte(file,&header.Method) &&
-        Read_byte(file,&header.Recog1) &&
-        Read_byte(file,&header.Recog2) &&
-        Read_word_le(file,&header.Width) &&
-        Read_word_le(file,&header.Height) &&
-        Read_bytes(file,&header.Palette,sizeof(T_Palette)) &&
-        Read_word_le(file,&header.Jump))
-    {
-      // On regarde s'il y a la signature PKM suivie de la méthode 0.
-      // La constante "PKM" étant un chaîne, elle se termine toujours par 0.
-      // Donc pas la peine de s'emm...er à regarder si la méthode est à 0.
-      if ( (!memcmp(&header,"PKM",4)) && header.Width && header.Height)
-        File_error=0;
-    }
-    fclose(file);
+    // On regarde s'il y a la signature PKM suivie de la méthode 0.
+    // La constante "PKM" étant un chaîne, elle se termine toujours par 0.
+    // Donc pas la peine de s'emm...er à regarder si la méthode est à 0.
+    if ( (!memcmp(&header,"PKM",4)) && header.Width && header.Height)
+      File_error=0;
   }
 }
 
@@ -836,21 +819,15 @@ typedef struct
 
 // -- Tester si un fichier est au format CEL --------------------------------
 
-void Test_CEL(T_IO_Context * context)
+void Test_CEL(T_IO_Context * context, FILE * file)
 {
   int  size;
-  FILE *file;
   T_CEL_Header1 header1;
   T_CEL_Header2 header2;
   int file_size;
 
   File_error=0;
 
-  if (! (file=Open_file_read(context)))
-  {
-    File_error = 1;
-    return;
-  }
   file_size = File_length_file(file);
   if (Read_word_le(file,&header1.Width) &&
       Read_word_le(file,&header1.Height) )
@@ -888,7 +865,6 @@ void Test_CEL(T_IO_Context * context)
   {
     File_error=1;
   }
-  fclose(file);    
 }
 
 
@@ -1151,17 +1127,14 @@ typedef struct
 
 // -- Tester si un fichier est au format KCF --------------------------------
 
-void Test_KCF(T_IO_Context * context)
+void Test_KCF(T_IO_Context * context, FILE * file)
 {
-  FILE *file;
   T_KCF_Header header1;
   T_CEL_Header2 header2;
   int pal_index;
   int color_index;
 
   File_error=0;
-  if ((file=Open_file_read(context)))
-  {
     if (File_length_file(file)==320)
     {
       for (pal_index=0;pal_index<10 && !File_error;pal_index++)
@@ -1199,10 +1172,6 @@ void Test_KCF(T_IO_Context * context)
       else
         File_error=1;
     }
-    fclose(file);
-  }
-  else
-    File_error=1;
 }
 
 
@@ -1621,18 +1590,13 @@ void PI1_save_ranges(T_IO_Context * context, byte * buffer, int size)
   }
 }
 // -- Tester si un fichier est au format PI1 --------------------------------
-void Test_PI1(T_IO_Context * context)
+void Test_PI1(T_IO_Context * context, FILE * file)
 {
-  FILE * file;              // Fichier du fichier
   int  size;              // Taille du fichier
   word resolution;                 // Résolution de l'image
 
-
   File_error=1;
 
-  // Ouverture du fichier
-  if ((file=Open_file_read(context)))
-  {
     // Vérification de la taille
     size=File_length_file(file);
     if ((size==32034) || (size==32066))
@@ -1644,9 +1608,6 @@ void Test_PI1(T_IO_Context * context)
           File_error=0;
       }
     }
-    // Fermeture du fichier
-    fclose(file);
-  }
 }
 
 
@@ -1937,18 +1898,13 @@ void PC1_1line_to_4bp(byte * src,byte * dst0,byte * dst1,byte * dst2,byte * dst3
 
 
 // -- Tester si un fichier est au format PC1 --------------------------------
-void Test_PC1(T_IO_Context * context)
+void Test_PC1(T_IO_Context * context, FILE * file)
 {
-  FILE *file;              // Fichier du fichier
   int  size;              // Taille du fichier
   word resolution;                 // Résolution de l'image
 
-
   File_error=1;
 
-  // Ouverture du fichier
-  if ((file=Open_file_read(context)))
-  {
     // Vérification de la taille
     size=File_length_file(file);
     if ((size<=32066))
@@ -1960,9 +1916,6 @@ void Test_PC1(T_IO_Context * context)
           File_error=0;
       }
     }
-    // Fermeture du fichier
-    fclose(file);
-  }
 }
 
 
@@ -2112,18 +2065,13 @@ void Save_PC1(T_IO_Context * context)
 
 //////////////////////////////////// NEO ////////////////////////////////////
 
-void Test_NEO(T_IO_Context * context)
+void Test_NEO(T_IO_Context * context, FILE * file)
 {
-  FILE *file;              // Fichier du fichier
   int  size;              // Taille du fichier
   word resolution;                 // Résolution de l'image
 
-
   File_error=1;
 
-  // Ouverture du fichier
-  if ((file=Open_file_read(context)))
-  {
     // Vérification de la taille
     size=File_length_file(file);
     if ((size==32128))
@@ -2142,10 +2090,6 @@ void Test_NEO(T_IO_Context * context)
           File_error |= 0;
       }
     }
-    // Fermeture du fichier
-    fclose(file);
-  }
-
 }
 
 void Load_NEO(T_IO_Context * context)
@@ -2269,40 +2213,29 @@ void Save_NEO(T_IO_Context * context)
 
 //////////////////////////////////// C64 ////////////////////////////////////
 
-void Test_C64(T_IO_Context * context)
+void Test_C64(T_IO_Context * context, FILE * file)
 {  
-    FILE* file;
-    long file_size;
+  long file_size;
 
-    file = Open_file_read(context);
-
-    if (file)
-    {
-        file_size = File_length_file(file);
-        switch (file_size)
-        {
-      // case 1000: // screen or color
-      // case 1002: // (screen or color) + loadaddr
-            case 8000: // raw bitmap
-            case 8002: // raw bitmap with loadaddr
-            case 9000: // bitmap + ScreenRAM
-            case 9002: // bitmap + ScreenRAM + loadaddr
-            case 10001: // multicolor
-            case 10003: // multicolor + loadaddr
-            case 17472: // FLI (BlackMail)
-            case 17474: // FLI (BlackMail) + loadaddr
-            case 10277: // multicolor CDU-Paint + loadaddr
-                File_error = 0;
-                break;
-            default: // then we don't know for now.
-            File_error = 1;
-        }
-        fclose (file);
-    }
-    else
-    {
-        File_error = 1;
-    }
+  file_size = File_length_file(file);
+  switch (file_size)
+  {
+    // case 1000: // screen or color
+    // case 1002: // (screen or color) + loadaddr
+    case 8000: // raw bitmap
+    case 8002: // raw bitmap with loadaddr
+    case 9000: // bitmap + ScreenRAM
+    case 9002: // bitmap + ScreenRAM + loadaddr
+    case 10001: // multicolor
+    case 10003: // multicolor + loadaddr
+    case 17472: // FLI (BlackMail)
+    case 17474: // FLI (BlackMail) + loadaddr
+    case 10277: // multicolor CDU-Paint + loadaddr
+      File_error = 0;
+      break;
+    default: // then we don't know for now.
+      File_error = 1;
+  }
 }
 
 void Load_C64_hires(T_IO_Context *context, byte *bitmap, byte *screen_ram)
@@ -3095,7 +3028,7 @@ void Save_C64(T_IO_Context * context)
 
 // SCR (Amstrad CPC)
 
-void Test_SCR(T_IO_Context * context)
+void Test_SCR(T_IO_Context * context, FILE * file)
 {
     // Mmh... not sure what we could test. Any idea ?
     // The palette file can be tested, if it exists and have the right size it's
@@ -3105,6 +3038,7 @@ void Test_SCR(T_IO_Context * context)
     // An AMSDOS header would be a good indication but in some cases it may not
     // be there
     (void)context; // unused
+    (void)file;
 }
 
 void Load_SCR(T_IO_Context * context)
@@ -3185,28 +3119,24 @@ void Save_SCR(T_IO_Context * context)
 // This is a format designed by SyX. There is one .GFX file in the usual amstrad format,
 // and a .CM5 file with the palette, which varies over time.
 
-void Test_CM5(T_IO_Context * context)
+void Test_CM5(T_IO_Context * context, FILE * file)
 {
   // check cm5 file size == 2049 bytes
-  FILE *file;
+  FILE *file_gfx;
   long file_size;
 
   File_error = 1;
 
-  file = Open_file_read(context);
-  if (file == NULL)
-    return;
   file_size = File_length_file(file);
-  fclose(file);
   if (file_size != 2049)
     return;
 
   // check existence of a .GFX file with the same name
-  file = Open_file_read_with_alternate_ext(context, "gfx");
-  if (file == NULL)
+  file_gfx = Open_file_read_with_alternate_ext(context, "gfx");
+  if (file_gfx == NULL)
     return;
-  file_size = File_length_file(file);
-  fclose(file);
+  file_size = File_length_file(file_gfx);
+  fclose(file_gfx);
   if (file_size != 18432)
     return;
 
@@ -3469,9 +3399,9 @@ void Save_CM5(T_IO_Context* context)
 //
 // - The standard CPC formats can also be encapsulated into a PPH file.
 */
-void Test_PPH(T_IO_Context * context)
+void Test_PPH(T_IO_Context * context, FILE * file)
 {
-  FILE *file;
+  FILE *file_oddeve;
   byte buffer[6];
   unsigned long file_size;
   unsigned int w, h;
@@ -3479,45 +3409,41 @@ void Test_PPH(T_IO_Context * context)
 
   File_error = 1;
 
-  file = Open_file_read(context);
-  if (file == NULL)
-    return;
-
   // First check file size is large enough to hold the header
   file_size = File_length_file(file);
   if (file_size < 11) {
     File_error = 1;
-    goto abort;
+    return;
   }
 
   // File is large enough for the header, now check if the data makes some sense
   if (!Read_bytes(file, buffer, 6))
-    goto abort;
+    return;
   if (buffer[0] > 5) {
     // Unknown mode
     File_error = 2;
-    goto abort;
+    return;
   }
 
   w = buffer[1] | (buffer[2] << 8);
   if (w < 2 || w > 384) {
     // Invalid width
     File_error = 3;
-    goto abort;
+    return;
   }
 
   h = buffer[3] | (buffer[4] << 8);
   if (h < 1 || h > 272) {
     // Invalid height
     File_error = 4;
-    goto abort;
+    return;
   }
 
   if (buffer[5] < 1 || buffer[5] > 28)
   {
     // Invalid palettes count
     File_error = 5;
-    goto abort;
+    return;
   }
   expected = 6; // Size of header
   switch(buffer[0])
@@ -3528,7 +3454,7 @@ void Test_PPH(T_IO_Context * context)
       // Palette size should be 16 bytes, only 1 palette.
       if (buffer[5] != 1) {
         File_error = 7;
-        goto abort;
+        return;
       }
       expected += 16;
       break;
@@ -3542,7 +3468,7 @@ void Test_PPH(T_IO_Context * context)
       // Palette size should be 2 bytes
       if (buffer[5] != 1) {
         File_error = 7;
-        goto abort;
+        return;
       }
       expected += 2;
       break;
@@ -3551,31 +3477,33 @@ void Test_PPH(T_IO_Context * context)
   if (file_size != expected)
   {
     File_error = 6;
-    goto abort;
+    return;
   }
-  fclose (file);
 
   // check existence of .ODD/.EVE files with the same name
   // and the right size
   expected = w * h / 4;
-  file = Open_file_read_with_alternate_ext(context, "odd");
-  if (file == NULL)
-    goto abort;
-  file_size = File_length_file(file);
-  fclose (file);
-  file = Open_file_read_with_alternate_ext(context, "eve");
-  if (file == NULL)
-    goto abort;
-  if (file_size != File_length_file(file) || file_size != expected)
+  file_oddeve = Open_file_read_with_alternate_ext(context, "odd");
+  if (file_oddeve == NULL)
+    return;
+  file_size = File_length_file(file_oddeve);
+  fclose (file_oddeve);
+  if (file_size != expected)
   {
     File_error = 8;
-    goto abort;
+    return;
+  }
+  file_oddeve = Open_file_read_with_alternate_ext(context, "eve");
+  if (file_oddeve == NULL)
+    return;
+  file_size = File_length_file(file_oddeve);
+  fclose(file_oddeve);
+  if (file_size != expected)
+  {
+    File_error = 8;
+    return;
   }
   File_error = 0;
-
-abort:
-  if (file != NULL)
-    fclose(file);
 }
 
 
