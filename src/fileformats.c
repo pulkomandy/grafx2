@@ -86,6 +86,7 @@ void Test_IMG(T_IO_Context * context, FILE * file)
   T_IMG_Header IMG_header;
   byte signature[6]={0x01,0x00,0x47,0x12,0x6D,0xB0};
 
+  (void)context;
   File_error=1;
 
     // Lecture et vérification de la signature
@@ -256,7 +257,7 @@ typedef struct
 
 // -- Tester si un fichier est au format IFF --------------------------------
 
-void Test_IFF(T_IO_Context * context, FILE * IFF_file, const char *sub_type)
+void Test_IFF(FILE * IFF_file, const char *sub_type)
 {
   char  format[4];
   char  section[4];
@@ -323,15 +324,18 @@ void Test_IFF(T_IO_Context * context, FILE * IFF_file, const char *sub_type)
 
 void Test_PBM(T_IO_Context * context, FILE * f)
 {
-  Test_IFF(context, f, "PBM ");
+  (void)context;
+  Test_IFF(f, "PBM ");
 }
 void Test_LBM(T_IO_Context * context, FILE * f)
 {
-  Test_IFF(context, f, "ILBM");
+  (void)context;
+  Test_IFF(f, "ILBM");
 }
 void Test_ACBM(T_IO_Context * context, FILE * f)
 {
-  Test_IFF(context, f, "ACBM");
+  (void)context;
+  Test_IFF(f, "ACBM");
 }
 
 
@@ -2430,6 +2434,7 @@ void Test_INFO(T_IO_Context * context, FILE * file)
 {
   T_INFO_Header header;
 
+  (void)context;
   File_error=1;
 
   if (Read_INFO_Header(file, &header))
@@ -2903,6 +2908,7 @@ void Test_BMP(T_IO_Context * context, FILE * file)
 {
   T_BMP_Header header;
 
+  (void)context;
   File_error=1;
 
   if (Read_bytes(file,&(header.Signature),2) // "BM"
@@ -3485,6 +3491,7 @@ void Test_ICO(T_IO_Context * context, FILE * file)
     word Count; // Specifies number of images in the file.
   } header;
 
+  (void)context;
   File_error=1;
 
   if (Read_word_le(file,&(header.Reserved))
@@ -3864,6 +3871,7 @@ void Test_GIF(T_IO_Context * context, FILE * file)
 {
   char signature[6];
 
+  (void)context;
   File_error=1;
 
   if (Read_bytes(file,signature,6))
@@ -5062,6 +5070,7 @@ T_PCX_Header PCX_header;
 
 void Test_PCX(T_IO_Context * context, FILE * file)
 {
+  (void)context;
   File_error=0;
 
   if (Read_byte(file,&(PCX_header.Manufacturer)) &&
@@ -5601,6 +5610,7 @@ void Test_SCx(T_IO_Context * context, FILE * file)
   //byte Signature[3];
   T_SCx_Header SCx_header;
 
+  (void)context;
   File_error=1;
 
   // Ouverture du fichier
@@ -5885,6 +5895,7 @@ void Test_PNG(T_IO_Context * context, FILE * file)
 {
   byte png_header[8];
   
+  (void)context;
   File_error=1;
 
   // Lecture du header du fichier

@@ -52,6 +52,7 @@ void Test_PAL(T_IO_Context * context, FILE * file)
   char buffer[32];
   long file_size;
 
+  (void)context;
   File_error = 1;
 
   file_size = File_length_file(file);
@@ -91,15 +92,16 @@ void Test_GPL(T_IO_Context * context, FILE * file)
   char buffer[16];
   long file_size;
 
+  (void)context;
   File_error = 1;
 
   file_size = File_length_file(file);
   if (file_size > 33) {
-     // minimum header length == 33
-     // "GIMP Palette" == 12
-     fread(buffer, 1, 12, file);
-     if (strncmp(buffer,"GIMP Palette",12) == 0)
-       File_error = 0;
+    // minimum header length == 33
+    // "GIMP Palette" == 12
+    fread(buffer, 1, 12, file);
+    if (strncmp(buffer,"GIMP Palette",12) == 0)
+      File_error = 0;
   }
 }
 
@@ -375,6 +377,7 @@ void Test_PKM(T_IO_Context * context, FILE * file)
 {
   T_PKM_Header header;
 
+  (void)context;
   File_error=1;
 
   // Lecture du header du fichier
@@ -826,6 +829,7 @@ void Test_CEL(T_IO_Context * context, FILE * file)
   T_CEL_Header2 header2;
   int file_size;
 
+  (void)context;
   File_error=0;
 
   file_size = File_length_file(file);
@@ -1134,6 +1138,7 @@ void Test_KCF(T_IO_Context * context, FILE * file)
   int pal_index;
   int color_index;
 
+  (void)context;
   File_error=0;
     if (File_length_file(file)==320)
     {
@@ -1595,6 +1600,7 @@ void Test_PI1(T_IO_Context * context, FILE * file)
   int  size;              // Taille du fichier
   word resolution;                 // Résolution de l'image
 
+  (void)context;
   File_error=1;
 
     // Vérification de la taille
@@ -1903,6 +1909,7 @@ void Test_PC1(T_IO_Context * context, FILE * file)
   int  size;              // Taille du fichier
   word resolution;                 // Résolution de l'image
 
+  (void)context;
   File_error=1;
 
     // Vérification de la taille
@@ -2070,6 +2077,7 @@ void Test_NEO(T_IO_Context * context, FILE * file)
   int  size;              // Taille du fichier
   word resolution;                 // Résolution de l'image
 
+  (void)context;
   File_error=1;
 
     // Vérification de la taille
@@ -2217,6 +2225,7 @@ void Test_C64(T_IO_Context * context, FILE * file)
 {  
   long file_size;
 
+  (void)context;
   file_size = File_length_file(file);
   switch (file_size)
   {
