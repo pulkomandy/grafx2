@@ -73,6 +73,10 @@
 static void Load_PNG_Sub(T_IO_Context * context, FILE * file);
 #endif
 
+#ifndef MIN
+#define MIN(a,b) ((a)<(b)?(a):(b))
+#endif
+
 //////////////////////////////////// IMG ////////////////////////////////////
 
 // -- Tester si un fichier est au format IMG --------------------------------
@@ -2471,10 +2475,10 @@ static char * Read_INFO_String(FILE * file)
   return p;
 }
 
-static byte * Decode_NewIcons(const byte * p, int bits, int * len)
+static byte * Decode_NewIcons(const byte * p, int bits, unsigned int * len)
 {
   int alloc_size;
-  int i;
+  unsigned int i;
   byte * buffer;
   dword current_byte = 0;
   int current_bits = 0;
@@ -2628,8 +2632,9 @@ void Load_INFO(T_IO_Context * context)
       int current_img = -1;
       int width = 0;
       int height = 0;
-      int color_count;
-      int palette_color_count = 0;  // used colors in global palette
+      int palette_continues = 0;
+      unsigned int color_count = 0;
+      unsigned int palette_color_count = 0;  // used colors in global palette
       int bpp = 0;
       byte palette_conv[256]; // to translate sub icon specific palette to global palette
       
@@ -2637,6 +2642,7 @@ void Load_INFO(T_IO_Context * context)
       char * ToolType;
       if (Read_dword_be(file, &count))
       {
+        int look_for_comments = 1;
         for (i = 0; i < 256; i++)
           palette_conv[i] = (byte)i;
 
@@ -2657,7 +2663,7 @@ void Load_INFO(T_IO_Context * context)
               {
                 // image info + palette
                 T_Components * palette;
-                int palette_len;
+                unsigned int palette_len;
 
                 current_img = img_index;
                 if (current_img > 1 && (context->Type == CONTEXT_PREVIEW || context->Type == CONTEXT_PREVIEW_PALETTE))
@@ -2673,7 +2679,7 @@ void Load_INFO(T_IO_Context * context)
                 height = *p++ - 0x21;
                 color_count = *p++ - 0x21;
                 color_count = (color_count << 6) + *p++ - 0x21;
-                for (bpp = 1; color_count > (1 << bpp); bpp++) { }
+                for (bpp = 1; color_count > (unsigned)(1 << bpp); bpp++) { }
                 palette = (T_Components *)Decode_NewIcons(p, 8, &palette_len);
                 if (palette)
                 {
@@ -2681,15 +2687,24 @@ void Load_INFO(T_IO_Context * context)
                   { // Set palette
                     if (Config.Clear_palette)
                       memset(context->Palette,0,sizeof(T_Palette));
-                    memcpy(context->Palette, palette, palette_len);
-                    palette_color_count = color_count;
+                    memcpy(context->Palette, palette, MIN(palette_len,sizeof(T_Palette)));
+                    if (palette_len < color_count * 3)
+                    {
+                      palette_color_count = palette_len / 3;
+                      palette_continues = 1;
+                    }
+                    else
+                    {
+                      palette_color_count = color_count;
+                      palette_continues = 0;
+                    }
                   }
                   else
                   {
                     // merge palette with the existing one
-                    for (i = 0; i < color_count; i++)
+                    for (i = 0; (unsigned)i < MIN(color_count,palette_len/3); i++)
                     {
-                      int j;
+                      unsigned int j;
                       for (j = 0; j < palette_color_count; j++)
                       {
                         if (0 == memcmp(context->Palette + j, palette + i, sizeof(T_Components)))
@@ -2707,6 +2722,10 @@ void Load_INFO(T_IO_Context * context)
                       }
                       palette_conv[i] = (byte)j;
                     }
+                    if (palette_len < color_count * 3)
+                      palette_continues = palette_len / 3;
+                    else
+                      palette_continues = 0; 
                   }
                   free(palette);
                 }
@@ -2724,15 +2743,64 @@ void Load_INFO(T_IO_Context * context)
                   Set_loading_layer(context, img_index - 1);
                 x_pos = 0; y_pos = 0;
               }
+              else if (palette_continues)
+              {
+                T_Components * palette;
+                unsigned int palette_len;
+                palette = (T_Components *)Decode_NewIcons(p, 8, &palette_len);
+                if (palette)
+                {
+                  if (img_index == 1)
+                  {
+                    memcpy(context->Palette + palette_color_count, palette, MIN(palette_len,sizeof(T_Palette) - 3*palette_color_count));
+                    if (palette_color_count * 3 + palette_len < color_count * 3)
+                      palette_color_count += palette_len / 3;
+                    else
+                    {
+                      palette_color_count = color_count;
+                      palette_continues = 0;
+                    }
+                  }
+                  else
+                  {
+                    // merge palette with the existing one
+                    for (i = 0; (unsigned)i < MIN(color_count-palette_continues,palette_len/3); i++)
+                    {
+                      unsigned int j;
+                      for (j = 0; j < palette_color_count; j++)
+                      {
+                        if (0 == memcmp(context->Palette + j, palette + i, sizeof(T_Components)))
+                          break;
+                      }
+                      if (j == palette_color_count)
+                      {
+                        if (palette_color_count < 256)
+                        { // Add color to palette
+                          memcpy(context->Palette + palette_color_count, palette + i, sizeof(T_Components));
+                          palette_color_count++;
+                        }
+                        else
+                          Warning("Too much colors in new icons");
+                      }
+                      palette_conv[i+palette_continues] = (byte)j;
+                    }
+                    if (palette_continues * 3 + palette_len < color_count * 3)
+                      palette_continues += palette_len / 3;
+                    else
+                      palette_continues = 0; 
+                  }
+                  free(palette);
+                }
+              }
               else
               {
                 byte * pixels;
-                int pixel_count;
+                unsigned int pixel_count;
 
                 pixels = Decode_NewIcons(p, bpp, &pixel_count);
                 if (pixels)
                 {
-                  for (i = 0; i < pixel_count; i++)
+                  for (i = 0; (unsigned)i < pixel_count; i++)
                   {
                     Set_pixel(context, x_pos++, y_pos, palette_conv[pixels[i]]);
                     if (x_pos >= width)
@@ -2742,6 +2810,22 @@ void Load_INFO(T_IO_Context * context)
                     }
                   }
                   free(pixels);
+                }
+              }
+            }
+            else if (look_for_comments)
+            {
+              if (strlen(ToolType) > 1)
+              {
+                if (strcmp(ToolType, "*** DON'T EDIT THE FOLLOWING LINES!! ***") == 0)
+                {
+                  // The following lines are NewIcons data!
+                  look_for_comments = 0;
+                }
+                else if (context->Comment[0] == '\0')
+                {
+                  strncpy(context->Comment, ToolType, COMMENT_SIZE);
+                  context->Comment[COMMENT_SIZE] = '\0';
                 }
               }
             }
