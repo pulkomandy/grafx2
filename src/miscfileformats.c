@@ -62,11 +62,12 @@ void Test_PAL(T_IO_Context * context, FILE * file)
   // header at all, so we check for the file size.
   if (file_size == sizeof(T_Palette))
     File_error = 0;
-  else
+  else if (file_size > 8)
   {
     // Bigger (or smaller ?) files may be in other formats. These have an
     // header, so look for it.
-    fread(buffer, 1, 8, file);
+    if (!Read_bytes(file, buffer, 8))
+      return;
     if (strncmp(buffer,"JASC-PAL",8) == 0)
     {
       // JASC file format, used by Paint Shop Pro and GIMP. This is also the
@@ -79,7 +80,8 @@ void Test_PAL(T_IO_Context * context, FILE * file)
       // This is a data container (similar to IFF). We only check the first
       // chunk header, and give up if that's not a palette.
       fseek(file, 8, SEEK_SET);
-      fread(buffer, 1, 8, file);
+      if (!Read_bytes(file, buffer, 8))
+        return;
       if (strncmp(buffer, "PAL data", 8) == 0)
       {
         File_error = 0;
@@ -263,7 +265,12 @@ void Load_PAL(T_IO_Context * context)
         File_error = 2;
     } else {
       char buffer[16];
-      fread(buffer, 1, 8, file);
+      if (!Read_bytes(file, buffer, 8))
+      {
+        File_error = 2;
+        fclose(file);
+        return;
+      }
       buffer[8] = '\0';
       if (strncmp(buffer,"JASC-PAL",8) == 0)
       {
@@ -289,22 +296,25 @@ void Load_PAL(T_IO_Context * context)
       {
         // Microsoft RIFF format.
         fseek(file, 8, SEEK_SET);
-        fread(buffer, 1, 8, file);
+        Read_bytes(file, buffer, 8);
         if (strncmp(buffer, "PAL data", 8) == 0)
         {
           word color_count;
           word i = 0;
 
           fseek(file, 22, SEEK_SET);
-          Read_word_le(file, &color_count);
-          for(i = 0; i < color_count; i++)
-          {
-            Read_bytes(file, buffer, 4);
-            context->Palette[i].R = buffer[0];
-            context->Palette[i].G = buffer[1];
-            context->Palette[i].B = buffer[2];
-          }
-
+          if (!Read_word_le(file, &color_count))
+            File_error = 2;
+          else
+            for(i = 0; i < color_count && File_error == 0; i++)
+            {
+              byte colors[4];
+              if (!Read_bytes(file, colors, 4))
+                File_error = 2;
+              context->Palette[i].R = colors[0];
+              context->Palette[i].G = colors[1];
+              context->Palette[i].B = colors[2];
+            }
         } else File_error = 2;
       } else
         File_error = 2;
