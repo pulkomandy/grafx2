@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2018 Thomas Bernard
     Copyright 2011 Pawel Góralski
     Copyright 2009 Petter Lindquist
     Copyright 2008 Yves Rizoud
@@ -99,7 +100,8 @@ void Test_GPL(T_IO_Context * context, FILE * file)
   if (file_size > 33) {
     // minimum header length == 33
     // "GIMP Palette" == 12
-    fread(buffer, 1, 12, file);
+    if (!Read_bytes(file, buffer, 12))
+      return;
     if (strncmp(buffer,"GIMP Palette",12) == 0)
       File_error = 0;
   }
@@ -109,23 +111,18 @@ void Test_GPL(T_IO_Context * context, FILE * file)
 
 static int skip_padding(FILE *file, int max_chars)
 {
-  char buffer[1];
+  byte b;
   int chars_read = 0;
-  int latest_chars_read = 0;
-  size_t tmp;
-  buffer[0] = ' ';
-  while (buffer[0] == ' '){
-    latest_chars_read = fread(buffer, 1, 1, file);
-    if ((latest_chars_read != 1) || (chars_read == max_chars))
+
+  do {
+    if (chars_read == max_chars)
       return chars_read; // eof
-    chars_read += latest_chars_read;
-  }
+    if (!Read_byte(file, &b))
+      return chars_read;
+    chars_read++;
+  } while (b == ' ');
   
-  if (chars_read > 0){
-    tmp = ftell(file);
-//    printf ("rewinding to %d", tmp - 1);
-    fseek(file, tmp - 1, SEEK_SET);
-  }
+  fseek(file, -1, SEEK_CUR);
   return chars_read;
 }
 
@@ -133,59 +130,60 @@ static int skip_padding(FILE *file, int max_chars)
 void Load_GPL(T_IO_Context * context)
 {
   FILE *file;
-  char filename[MAX_PATH_CHARACTERS]; // full filename
-  long pos;
+  char buffer[256];
 
   File_error=0;
 
   // Open file
   if ((file=Open_file_read(context)))
   {
-    fread(filename, 1, 13, file);
-    if (strncmp(filename,"GIMP Palette\n",13) == 0)
+    if (!Read_byte_line(file, buffer, sizeof(buffer)))
     {
-      int i, j, r, g, b, columns, chars_read;
-      fscanf(file, "Name: %s\n", filename);
-      printf("DBG: Escaped nominal destruction ~%s~\n", filename); // y
-      fscanf(file, "Columns: %d\n", &columns);
+      File_error = 1;
+      return;
+    }
+
+    if (memcmp(buffer,"GIMP Palette",12) == 0)
+    {
+      int i, r, g, b, columns;
+      size_t len;
+      // Name: xxxxx
+      if (!Read_byte_line(file, buffer, sizeof(buffer)))
+      {
+        File_error = 1;
+        return;
+      }
+      // Columns: 16
+      fscanf(file, "Columns: %d", &columns);
+      Read_byte_line(file, buffer, sizeof(buffer));
       // TODO: set grafx2 columns setting to match.
-      printf("DBG: Escaped architectural destruction %d\n", columns); // y
       // #<newline>
-      fread(filename,1, 2, file);
-      filename[2] = 0;
-      printf("DBG: Escaped grammatical destruction ~%s~\n", filename);
+      if (!Read_byte_line(file, buffer, sizeof(buffer)))
+      {
+        File_error = 1;
+        return;
+      }
 
       for (i = 0; i < 256; i++)
       {
-      
-        pos = ftell(file);
         skip_padding(file, 32);
         fscanf(file, "%d", &r);
         skip_padding(file, 32);
         fscanf(file, "%d", &g);
         skip_padding(file, 32);
         fscanf(file, "%d\t", &b);
-        filename[0] = 0;
-        j = 0;
-        do {
-        
-            chars_read = fscanf(file, "%s", filename+j);
-            if (chars_read > 0){
-              j += chars_read;
-              // space or newline follows.
-              fread(filename+j, 1, 1, file);
-            }
-            else{
-              filename[j] = '\n';
-            }
-        } while (filename[j] != '\n');
-        filename[j] = 0;
-        if (ftell(file) == pos)
-          break; // no more colors.
-
+        if (!Read_byte_line(file, buffer, sizeof(buffer)))
+          break;
+        len = strlen(buffer);
+        while (len > 1)
+        {
+          len--;
+          if (buffer[len] == '\r' || buffer[len] == '\n')
+            buffer[len] = '\0';
+        }
         // TODO: analyze color names to build shade table
 
-        printf("DBG: %d: %s\n", i, filename);
+        //printf("DBG: %3d: RGB(%3d,%3d,%3d) %s\n", i, r,g,b, buffer);
         context->Palette[i].R = r;
         context->Palette[i].G = g;
         context->Palette[i].B = b;
