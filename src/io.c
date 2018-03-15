@@ -78,6 +78,12 @@ int Read_bytes(FILE *file, void *dest, size_t size)
 {
   return fread(dest, 1, size, file) == size;
 }
+// Read a line
+// returns -1 if OK, 0 in case of error
+int Read_byte_line(FILE *file, char *line, size_t size)
+{
+  return fgets(line, size, file) != NULL;
+}
 // Ecrit des octets
 // Renvoie -1 si OK, 0 en cas d'erreur
 int Write_bytes(FILE *file, void *src, size_t size)
