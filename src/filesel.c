@@ -431,33 +431,25 @@ T_Fileselector_item * Add_element_to_list(T_Fileselector *list, const char * ful
 /// Checks if a file has the requested file extension.
 /// The extension string can end with a ';' (remainder is ignored)
 /// This function allows wildcard '?', and '*' if it's the only character.
-int Check_extension(const char *filename, const char * filter)
+int Check_extension(const char *filename_ext, const char * filter)
 {
-  int pos_last_dot;
-  int c = 0;
+  int c;
   
   if (filter[0] == '*')
     return 1;
-  // On recherche la position du dernier . dans le nom
-  pos_last_dot = Position_last_dot(filename);
-  
-  // Fichier sans extension (ca arrive)
-  if (pos_last_dot == -1)
+
+  // filename without extension
+  if (filename_ext == NULL || filename_ext[0] == '\0')
     return (filter[0] == '\0' || filter[0] == ';');
 
   // Vérification caractère par caractère, case-insensitive.
-  c = 0;
-  while (1)
+  for (c = 0; !(filter[c] == '\0' || filter[c] == ';'); c++)
   {
-    if (filter[c] == '\0' || filter[c] == ';')
-      return filename[pos_last_dot + 1 + c] == '\0';
-    
     if (filter[c] != '?' &&
-      tolower(filter[c]) != tolower(filename[pos_last_dot + 1 + c]))
+      tolower(filter[c]) != tolower(filename_ext[c]))
       return 0;
-
-     c++;
   }
+  return filename_ext[c] == '\0';
 }
 
 
@@ -509,9 +501,32 @@ static void Read_dir_callback(void * pdata, const char *file_name, const word *u
           (Config.Show_hidden_files || !is_hidden))
   {
     const char * ext = p->filter;
+    const char * file_name_ext = NULL;
+#ifdef WIN32
+	char long_ext[16];
+#endif
+	int pos_last_dot = Position_last_dot(file_name);
+
+	if (pos_last_dot >= 0)
+      file_name_ext = file_name + pos_last_dot + 1;
+#ifdef WIN32
+    if (unicode_name && unicode_name[0] != 0)
+    {
+      pos_last_dot = Position_last_dot_unicode(unicode_name);
+      if (pos_last_dot >= 0)
+      {
+        int i;
+        pos_last_dot++;
+        for (i = 0; i < sizeof(long_ext) - 1; i++)
+          long_ext[i] = (unicode_name[pos_last_dot + i] < 256) ? unicode_name[pos_last_dot + i] : '?';
+        long_ext[i] = '\0';
+        file_name_ext = long_ext;
+      }
+    }
+#endif
     while (ext!=NULL)
     {
-      if (Check_extension(file_name, ext))
+      if (Check_extension(file_name_ext, ext))
       {
         // Add to list
         item = Add_element_to_list(p->list, file_name, Format_filename(file_name, 19, 0), 0, ICON_NONE);
