@@ -402,6 +402,8 @@ bye:
     return dst;
 
   #elif defined __HAIKU__
+  if (unicode)
+    *unicode = NULL;
   return haiku_get_clipboard();
   #else
   // Not implemented (no standard) on Linux systems. Maybe someday...

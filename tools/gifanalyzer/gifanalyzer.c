@@ -33,6 +33,8 @@ int main(int argc, char* argv[])
   FILE* theFile;
   uint8_t buffer[8];
   uint16_t w,h;
+  int colors;
+  int color_table_size;
 
   if(argc < 2)
   {
@@ -59,8 +61,8 @@ int main(int argc, char* argv[])
 
   fread(buffer,1,3,theFile);
 
-  int colors = 1 << (((buffer[0] & 0x70)>>4)+1); // 0x70 == 0b01110000
-  int color_table_size = 1 << ((buffer[0]&0x7)+1);
+  colors = 1 << (((buffer[0] & 0x70)>>4)+1); // 0x70 == 0b01110000
+  color_table_size = 1 << ((buffer[0]&0x7)+1);
 
   printf("Color palette: 0x%02x\n",buffer[0]&0xFF);
   if (buffer[0] & 0x80) { // 0x80 == 0b10000000
@@ -100,7 +102,8 @@ int main(int argc, char* argv[])
   }
 
   printf("offset : %lu\n", ftell(theFile));
-	fclose(theFile);
+  fclose(theFile);
+
   return 0;
 }
 

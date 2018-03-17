@@ -264,7 +264,7 @@ endif
       LUACOPT = -D__ENABLE_LUA__ $(shell pkg-config $(LUAPKG) --cflags)
       LUALOPT = $(shell pkg-config $(LUAPKG) --libs)
     endif
-    COPT = -W -Wall -Werror -g $(shell sdl-config --cflags) $(TTFCOPT) -I/boot/common/include $(LUACOPT)
+    COPT = -W -Wall -g $(shell sdl-config --cflags) $(TTFCOPT) -I/boot/common/include $(LUACOPT)
     COPT += -DENABLE_FILENAMES_ICONV
     LOPT = $(shell sdl-config --libs) -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lfreetype -lbe $(LUALOPT) -liconv
     CC = gcc
