@@ -892,7 +892,7 @@ void Load_IFF(T_IO_Context * context)
   short line_size = 0;        // Taille d'une ligne en octets
   short plane_line_size = 0;  // Size of line in bytes for 1 plane
   short real_line_size = 0;   // Taille d'une ligne en pixels
-  long  file_size;
+  unsigned long file_size;
   dword dummy;
   int iff_format = 0;
   int plane;

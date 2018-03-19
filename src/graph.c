@@ -2002,7 +2002,7 @@ void Draw_curve_general(short x1, short y1,
   old_x=x1;
   old_y=y1;
   Pixel_figure(old_x,old_y,color);
-  delta=0.05; // 1.0/20
+  delta=0.05f; // 1.0/20
   t=0;
   for (i=1; i<=20; i++)
   {

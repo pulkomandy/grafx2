@@ -1020,7 +1020,7 @@ void Rotate_brush_0_5(void)
   short computed_y=0;
   byte  angle_change;
   short prev_state;
-  float angle=0.0;
+  double angle=0.0;
   int dx,dy;
   short cursor_x, cursor_y;
   

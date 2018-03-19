@@ -107,7 +107,7 @@
 #define RIGHT_SIDE                   2     ///< Indicates a right side or right-click
 
 #define SEPARATOR_WIDTH              6     ///< Width of the separator between the normal and the zoomed view
-#define INITIAL_SEPARATOR_PROPORTION 0.3   ///< Proportion of the normal view width, relative to the whole screen width.
+#define INITIAL_SEPARATOR_PROPORTION 0.3f  ///< Proportion of the normal view width, relative to the whole screen width.
 #define NB_ZOOMED_PIXELS_MIN         4     ///< Minimal number of pixel shown (in width) by the zoomed view. (Note: below 4, you can't scroll!)
 
 #if defined(__MORPHOS__) || defined(__amigaos4__) || defined(__amigaos__) || defined(__AROS__)

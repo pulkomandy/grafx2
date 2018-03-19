@@ -3012,7 +3012,7 @@ byte Best_color_range(byte r, byte g, byte b, byte max)
 {
 
   int col;
-  float best_diff=255.0*1.56905;
+  float best_diff=255.0f*1.56905f;
   byte  best_color=0;
   float target_bri;
   float bri;
@@ -3055,7 +3055,7 @@ byte Best_color_perceptual(byte r,byte g,byte b)
 {
 
   int col;
-  float best_diff=255.0*1.56905;
+  float best_diff=255.0f*1.56905f;
   byte  best_color=0;
   float target_bri;
   float bri;
@@ -3098,7 +3098,7 @@ byte Best_color_perceptual_except(byte r,byte g,byte b, byte except)
 {
 
   int col;
-  float best_diff=255.0*1.56905;
+  float best_diff=255.0f*1.56905f;
   byte  best_color=0;
   float target_bri;
   float bri;

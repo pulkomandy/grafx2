@@ -21,6 +21,9 @@
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
+#if defined(WIN32)
+#define _WIN32_WINNT 0x0500
+#endif
 #include <SDL.h>
 #include <string.h>
 #ifndef _MSC_VER
@@ -709,7 +712,6 @@ void Zoom_a_line(byte* original_line, byte* zoomed_line,
 /*############################################################################*/
 
 #if defined(__WIN32__)
-#define _WIN32_WINNT 0x0500
 #include <windows.h>
 #elif defined(__macosx__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
   #if defined(__OpenBSD__)
