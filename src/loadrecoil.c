@@ -111,7 +111,7 @@ void Load_Recoil_Image(T_IO_Context *context)
       // RECOIL doesn't recognize file if the "short" extension is passed,
       // ie .DEE instead of .deep
       int i;
-      for (i = 0; context->File_name_unicode[i] != 0 && i < sizeof(tempfilename) - 1; i++)
+      for (i = 0; context->File_name_unicode[i] != 0 && i < (int)sizeof(tempfilename) - 1; i++)
         tempfilename[i] = (context->File_name_unicode[i] < 256) ? (char)context->File_name_unicode[i] : '_';
       tempfilename[i] = '\0';
       filename = tempfilename;
