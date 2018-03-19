@@ -950,7 +950,7 @@ void Rotate_brush_1_5(void)
   short old_x;
   short old_y;
   short prev_state;
-  float angle;
+  double angle;
   int dx,dy;
   short cursor_x,cursor_y;
 
@@ -973,7 +973,7 @@ void Rotate_brush_1_5(void)
     {
       dx=cursor_x-Brush_rotation_center_X;
       dy=cursor_y-Brush_rotation_center_Y;
-      angle=M_2PI-atan2(dy,dx);
+      angle=M_2PI-atan2((double)dy,(double)dx);
     }
 
     if (Menu_is_visible)
@@ -1045,8 +1045,7 @@ void Rotate_brush_0_5(void)
     {
       dx=cursor_x-Brush_rotation_center_X;
       dy=cursor_y-Brush_rotation_center_Y;
-      angle=acos(((float)dx)/sqrt((dx*dx)+(dy*dy)));
-      if (dy>0) angle=M_2PI-angle;
+      angle=M_2PI-atan2((double)dy, (double)dx);
     }
 
     if (Menu_is_visible)
@@ -1071,13 +1070,13 @@ void Rotate_brush_0_5(void)
     computed_y=Brush_rotation_center_Y;
     switch (Key_ANSI)
     {
-      case '6': angle=     0.0 ; computed_x++;             break;
+      case '6': angle=      0.0; computed_x++;               break;
       case '9': angle=M_PI*0.25; computed_x++; computed_y--; break;
-      case '8': angle=M_PI*0.5 ;             computed_y--; break;
+      case '8': angle=M_PI*0.5 ;               computed_y--; break;
       case '7': angle=M_PI*0.75; computed_x--; computed_y--; break;
-      case '4': angle=M_PI     ; computed_x--;             break;
+      case '4': angle=M_PI     ; computed_x--;               break;
       case '1': angle=M_PI*1.25; computed_x--; computed_y++; break;
-      case '2': angle=M_PI*1.5 ;             computed_y++; break;
+      case '2': angle=M_PI*1.5 ;               computed_y++; break;
       case '3': angle=M_PI*1.75; computed_x++; computed_y++; break;
       default :
         angle_change=0;
