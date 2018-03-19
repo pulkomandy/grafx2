@@ -195,7 +195,7 @@ void Set_config_directory(const char * program_dir, char * config_dir)
     if (!File_exists(filename))
     {
       char *config_parent_dir;
-      #if defined(__WIN32__)
+      #if defined(__WIN32__) || defined(WIN32)
         // "%APPDATA%\GrafX2"
         const char* Config_SubDir = "GrafX2";
         config_parent_dir = getenv("APPDATA");

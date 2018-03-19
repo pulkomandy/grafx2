@@ -778,15 +778,15 @@ void Button_Stats(int btn)
   // Used memory
   Print_in_window(10,y,"Used memory pages: ",STATS_TITLE_COLOR,MC_Black);
   if(Stats_pages_memory > (100LL*1024*1024*1024))
-        sprintf(buffer,"%ld (%lld Gb)",Stats_pages_number, Stats_pages_memory/(1024*1024*1024));
+        sprintf(buffer,"%ld (%ld Gb)",Stats_pages_number, (long)(Stats_pages_memory/(1024*1024*1024)));
   else if(Stats_pages_memory > (100*1024*1024))
-        sprintf(buffer,"%ld (%lld Mb)",Stats_pages_number, Stats_pages_memory/(1024*1024));
+        sprintf(buffer,"%ld (%ld Mb)",Stats_pages_number, (long)(Stats_pages_memory/(1024*1024)));
   else
-        sprintf(buffer,"%ld (%lld Kb)",Stats_pages_number, Stats_pages_memory/1024);
+        sprintf(buffer,"%ld (%ld Kb)",Stats_pages_number, (long)(Stats_pages_memory/1024));
   Print_in_window(162,y,buffer,STATS_DATA_COLOR,MC_Black);
   
   y+=8;
-#if defined(__WIN32__)
+#if defined(__WIN32__) || defined(WIN32)
     {
       ULARGE_INTEGER tailleU;
       GetDiskFreeSpaceExA(Main.selector.Directory,&tailleU,NULL,NULL);

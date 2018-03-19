@@ -477,10 +477,10 @@ void For_each_directory_entry(const char * directory_name, void * pdata, T_File_
       int i;
       char short_filename[16];
       if (fd.cAlternateFileName[0] != 0)
-        for (i = 0; fd.cAlternateFileName[i] != 0 && i < sizeof(short_filename) - 1; i++)
+        for (i = 0; fd.cAlternateFileName[i] != 0 && i < (int)sizeof(short_filename) - 1; i++)
           short_filename[i] = (char)fd.cAlternateFileName[i];
       else  // normal name is short !
-        for (i = 0; fd.cFileName[i] != 0 && i < sizeof(short_filename) - 1; i++)
+        for (i = 0; fd.cFileName[i] != 0 && i < (int)sizeof(short_filename) - 1; i++)
           short_filename[i] = (char)fd.cFileName[i];
       short_filename[i] = '\0';
       Callback(
