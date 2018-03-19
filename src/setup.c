@@ -31,7 +31,6 @@
 #include <sys/stat.h>
 #if defined(__WIN32__) || defined(WIN32)
   #include <windows.h>
-  #include <io.h> // Mingw's _mkdir()
 #ifdef _MSC_VER
   #include <direct.h>
 #endif
@@ -59,11 +58,10 @@
     #define PATH_MAX 32768
 #endif
 
-int Create_ConfigDirectory(char * config_dir)
+int Create_ConfigDirectory(const char * config_dir)
 {
   #if defined(__WIN32__) || defined(WIN32)
-    // Mingw's mkdir has a weird name and only one argument
-    return _mkdir(config_dir);
+    return CreateDirectoryA(config_dir, NULL) ? 0 : -1;
   #else
     return mkdir(config_dir,S_IRUSR|S_IWUSR|S_IXUSR);
   #endif
