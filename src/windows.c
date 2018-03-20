@@ -3137,11 +3137,11 @@ byte Best_color_perceptual_except(byte r,byte g,byte b, byte except)
   return best_color;
 }
 
-byte Old_black;
-byte Old_dark;
-byte Old_light;
-byte Old_white;
-byte Old_trans;
+static byte Old_black;
+static byte Old_dark;
+static byte Old_light;
+static byte Old_white;
+static byte Old_trans;
 
 void Remap_pixel(byte * pixel)
 {
