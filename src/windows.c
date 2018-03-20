@@ -3038,7 +3038,7 @@ byte Best_color_range(byte r, byte g, byte b, byte max)
       return col;
 
     bri = sqrt(0.26*Main.palette[col].R*0.26*Main.palette[col].R + 0.55*Main.palette[col].G*0.55*Main.palette[col].G + 0.19*Main.palette[col].B*0.19*Main.palette[col].B);
-    diff_b = abs(target_bri-bri);
+    diff_b = fabsf(target_bri-bri);
 
     diff=0.25*(diff_b-diff_c)+diff_c;
     if (diff<best_diff)
@@ -3081,7 +3081,7 @@ byte Best_color_perceptual(byte r,byte g,byte b)
       return col;
 
     bri = sqrt(0.26*Main.palette[col].R*0.26*Main.palette[col].R + 0.55*Main.palette[col].G*0.55*Main.palette[col].G + 0.19*Main.palette[col].B*0.19*Main.palette[col].B);
-    diff_b = abs(target_bri-bri);
+    diff_b = fabsf(target_bri-bri);
 
     diff=0.25*(diff_b-diff_c)+diff_c;
     if (diff<best_diff)
@@ -3124,7 +3124,7 @@ byte Best_color_perceptual_except(byte r,byte g,byte b, byte except)
       return col;
 
     bri = sqrt(0.26*Main.palette[col].R*0.26*Main.palette[col].R + 0.55*Main.palette[col].G*0.55*Main.palette[col].G + 0.19*Main.palette[col].B*0.19*Main.palette[col].B);
-    diff_b = abs(target_bri-bri);
+    diff_b = fabsf(target_bri-bri);
 
     diff=0.25*(diff_b-diff_c)+diff_c;
     if (diff<best_diff)
