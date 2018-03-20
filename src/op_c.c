@@ -1092,7 +1092,7 @@ void GS_Generate(T_Gradient_set * ds,T_Cluster_set * cs)
         best_diff=99999999;
         for (id=0;id<ds->nb;id++)
         {
-            diff=abs(current->data.pal.h - ds->gradients[id].hue);
+            diff=abs(current->data.pal.h - (int)ds->gradients[id].hue);
             if ((best_diff>diff) && (diff<16))
             {
                 best_gradient=id;
