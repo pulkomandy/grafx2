@@ -596,7 +596,6 @@ void Reduce_palette(short * used_colors,int nb_colors_asked,T_Palette palette,dw
   int   color_2;                // |  de la palette
   int   best_color_1=0;
   int   best_color_2=0;
-  long   difference;
   long   best_difference;
   dword used;
   dword best_used;
@@ -665,12 +664,13 @@ void Reduce_palette(short * used_colors,int nb_colors_asked,T_Palette palette,dw
       for (color_2=color_1+1;color_2<(*used_colors);color_2++)
         if (color_1!=color_2)
         {
-          difference =26*abs((long)palette[color_1].R-palette[color_2].R)*
-                      26*abs((long)palette[color_1].R-palette[color_2].R)+
-                      55*abs((long)palette[color_1].G-palette[color_2].G)*
-                      55*abs((long)palette[color_1].G-palette[color_2].G)+
-                      19*abs((long)palette[color_1].B-palette[color_2].B)*
-                      19*abs((long)palette[color_1].B-palette[color_2].B);
+          long dr, dg, db;
+          long difference;  // could also be called distance (or distance square)
+
+          dr = (long)palette[color_1].R - (long)palette[color_2].R;
+          dg = (long)palette[color_1].G - (long)palette[color_2].G;
+          db = (long)palette[color_1].B - (long)palette[color_2].B;
+          difference =26*26*dr*dr + 55*55*dg*dg + 19*19*db*db;
 
           if (difference<=best_difference)
           {
