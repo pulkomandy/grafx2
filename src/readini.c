@@ -51,7 +51,7 @@ void Load_INI_clear_string(char * str, byte keep_comments)
 
   for (index=0;str[index]!='\0';)
   {
-    if ((str[index]=='='))
+    if (str[index]=='=')
     {
       equal_found=1;
       index++;
