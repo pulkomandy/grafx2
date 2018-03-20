@@ -106,9 +106,11 @@ void Set_program_directory(const char * argv0, char * program_dir)
   if (argv0[0]!='/')
   {
     char path[PATH_MAX];
-    readlink("/proc/self/exe", path, sizeof(path));
-    Extract_path(program_dir, path);
-    return;
+    if (readlink("/proc/self/exe", path, sizeof(path)) >= 0)
+    {
+      Extract_path(program_dir, path);
+      return;
+    }
   }  
   Extract_path(program_dir, argv0);
   
