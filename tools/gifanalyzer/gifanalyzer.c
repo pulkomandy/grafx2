@@ -101,6 +101,7 @@ int main(int argc, char* argv[])
 
   printf("offset : %lu\n", ftell(theFile));
 	fclose(theFile);
+  return 0;
 }
 
 static void read_image(FILE * theFile)
