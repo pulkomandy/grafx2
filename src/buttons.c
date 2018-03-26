@@ -1466,7 +1466,7 @@ void Button_Skins(int btn)
           Menu_font = new_font;
           Print_in_window( 172, 33,"Font:"            ,MC_Black,MC_Light);
           Print_in_window_limited(font_dropdown->Pos_X+2,font_dropdown->Pos_Y+(font_dropdown->Height-7)/2,
-            fontName->Short_name,strlen(fontName->Short_name) ,MC_Black,MC_Light);
+            fontName->Short_name,(byte)strlen(fontName->Short_name) ,MC_Black,MC_Light);
           Update_window_area(172, 33, 8 * 5, 8);
         }
         break;
@@ -3415,18 +3415,18 @@ void Button_Reload(int btn)
 }
 
 
-void Backup_filename(char * fname, char * backup_name)
+static void Backup_filename(const char * fname, char * backup_name)
 {
-  short i;
+  int i;
 
   strcpy(backup_name,fname);
-  for (i=strlen(fname)-strlen(Main.backups->Pages->Filename); backup_name[i]!='.'; i++);
+  for (i=strlen(fname)-strlen(Main.backups->Pages->Filename); backup_name[i]!='.' && backup_name[i]!='\0'; i++);
   backup_name[i+1]='\0';
   strcat(backup_name,"BAK");
 }
 
 
-void Backup_existing_file(void)
+static void Backup_existing_file(void)
 {
   char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
   char new_filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier backup

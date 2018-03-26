@@ -665,7 +665,7 @@ void Save_PKM(T_IO_Context * context)
   word  repetitions;
   byte  last_color;
   byte  pixel_value;
-  byte  comment_size;
+  size_t comment_size;
 
 
 
@@ -681,8 +681,9 @@ void Save_PKM(T_IO_Context * context)
   // Calcul de la taille du Post-header
   header.Jump=9; // 6 pour les dimensions de l'ecran + 3 pour la back-color
   comment_size=strlen(context->Comment);
+  if (comment_size > 255) comment_size = 255;
   if (comment_size)
-    header.Jump+=comment_size+2;
+    header.Jump+=(word)comment_size+2;
 
 
   File_error=0;
@@ -705,10 +706,10 @@ void Save_PKM(T_IO_Context * context)
 
       // Ecriture du commentaire
       // (Compteur_de_pixels est utilisé ici comme simple index de comptage)
-      if (comment_size)
+      if (comment_size > 0)
       {
         Write_one_byte(file,0);
-        Write_one_byte(file,comment_size);
+        Write_one_byte(file,(byte)comment_size);
         for (Compteur_de_pixels=0; Compteur_de_pixels<comment_size; Compteur_de_pixels++)
           Write_one_byte(file,context->Comment[Compteur_de_pixels]);
       }

@@ -457,7 +457,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
   word initial_string_unicode[256];
   word display_string_unicode[256];
   byte position;
-  byte size;
+  size_t size;
   word input_key=0;
   word window_x=Window_pos_X;
   word window_y=Window_pos_Y;
@@ -622,15 +622,16 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
   if (str_unicode != NULL)
   {
     size = Unicode_strlen(str_unicode);
+    if (size > 255) size = 255;
     memcpy(initial_string_unicode, str_unicode, 2*(size+1));
-    position=(size<max_size)? size:size-1;
+    position  =(byte)((size<max_size) ? size : size-1);
     if (position-offset>=visible_size)
       offset=position-visible_size+1;
     // copy only part of the string if it is too long
     Unicode_strlcpy(display_string_unicode, str_unicode+offset, visible_size);
     if (offset>0)
       display_string_unicode[0] = (byte)LEFT_TRIANGLE_CHARACTER;
-    if (visible_size + offset + 1 < size )
+    if ((size_t)visible_size + offset + 1 < size )
       display_string_unicode[visible_size-1] = (byte)RIGHT_TRIANGLE_CHARACTER;
 
     Display_whole_string_unicode(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),display_string_unicode,position - offset);
@@ -638,7 +639,8 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
   else
   {
     size=strlen(str);
-    position=(size<max_size)? size:size-1;
+    if (size > 255) size = 255;
+    position = (byte)((size<max_size) ? size : size-1);
     if (position-offset>=visible_size)
       offset=position-visible_size+1;
     // copy only part of the string if it is too long
@@ -646,7 +648,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
     display_string[visible_size]='\0';
     if (offset>0)
       display_string[0]=LEFT_TRIANGLE_CHARACTER;
-    if (visible_size + offset + 1 < size )
+    if ((size_t)visible_size + offset + 1 < size )
       display_string[visible_size-1]=RIGHT_TRIANGLE_CHARACTER;
   
     Display_whole_string(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),display_string,position - offset);
@@ -830,7 +832,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
       case SDLK_END : // End
             if ((position<size) && (position<max_size-1))
             {
-              position=(size<max_size)?size:size-1;
+              position = (byte)((size<max_size) ? size : size-1);
               if (position-offset>=visible_size)
                 offset=position-visible_size+1;
               goto affichage;
@@ -868,6 +870,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
         // On restaure la chaine initiale
         strcpy(str,initial_string);
         size=strlen(str);
+        if (size > 255) size = 255;
         if (str_unicode != NULL)
         {
           Unicode_strlcpy(str_unicode, initial_string_unicode, 256);
@@ -915,11 +918,12 @@ affichage:
         if (str_unicode != NULL)
         {
           size=Unicode_strlen(str_unicode);
+          if (size > 255) size = 255;
           // only show part of the string if too long
           Unicode_strlcpy(display_string_unicode, str_unicode + offset, visible_size);
           if (offset>0)
             display_string_unicode[0] = (byte)LEFT_TRIANGLE_CHARACTER;
-          if (visible_size + offset + 0 < size )
+          if ((size_t)visible_size + offset + 0 < size )
             display_string_unicode[visible_size-1] = (byte)RIGHT_TRIANGLE_CHARACTER;
 
           Display_whole_string_unicode(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),display_string_unicode,position - offset);
@@ -927,12 +931,13 @@ affichage:
         else
         {
           size=strlen(str);
+          if (size > 255) size = 255;
           // only show part of the string if too long
           strncpy(display_string, str + offset, visible_size);
           display_string[visible_size]='\0';
           if (offset>0)
             display_string[0]=LEFT_TRIANGLE_CHARACTER;
-          if (visible_size + offset + 0 < size )
+          if ((size_t)visible_size + offset + 0 < size )
             display_string[visible_size-1]=RIGHT_TRIANGLE_CHARACTER;
 
           Display_whole_string(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),display_string,position - offset);
@@ -962,7 +967,7 @@ affichage:
       strcpy(str,"0");
       size=1;
     }
-    Print_in_window(x_pos+((max_size-size)<<3),y_pos,str,TEXT_COLOR,BACKGROUND_COLOR);
+    Print_in_window(x_pos+(((short)max_size-(short)size)<<3),y_pos,str,TEXT_COLOR,BACKGROUND_COLOR);
   }
   else if (input_type==INPUT_TYPE_DECIMAL)
   {
@@ -972,9 +977,10 @@ affichage:
     Sprint_double(str,value,decimal_places,visible_size);
     // Recompute updated size
     size = strlen(str);
+    if (size > 255) size = 255;
     
     if (size<=visible_size)
-      Print_in_window(x_pos+((visible_size-size)<<3),y_pos,str,TEXT_COLOR,BACKGROUND_COLOR);
+      Print_in_window(x_pos+(((short)visible_size-(short)size)<<3),y_pos,str,TEXT_COLOR,BACKGROUND_COLOR);
     else
       Print_in_window_limited(x_pos,y_pos,str,visible_size,TEXT_COLOR,BACKGROUND_COLOR);
   }
