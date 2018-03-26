@@ -226,28 +226,6 @@ void Free_fileselector_list(T_Fileselector *list)
   Recount_files(list);
 }
 
-static int Position_last_dot(const char * fname)
-{
-  int pos_last_dot = -1;
-  int c = 0;
-
-  for (c = 0; fname[c]!='\0'; c++)
-    if (fname[c]=='.')
-      pos_last_dot = c;
-  return pos_last_dot;
-}
-
-static int Position_last_dot_unicode(const word * fname)
-{
-  int pos_last_dot = -1;
-  int c = 0;
-
-  for (c = 0; fname[c]!='\0'; c++)
-    if (fname[c]=='.')
-      pos_last_dot = c;
-  return pos_last_dot;
-}
-
 word * Format_filename_unicode(const word * fname, word max_length, int type)
 {
   static word result[40];

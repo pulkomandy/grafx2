@@ -292,6 +292,28 @@ void Append_path(char *path, const char *filename, char *reverse_path)
   }
 }
 
+int Position_last_dot(const char * fname)
+{
+  int pos_last_dot = -1;
+  int c = 0;
+
+  for (c = 0; fname[c] != '\0'; c++)
+    if (fname[c] == '.')
+      pos_last_dot = c;
+  return pos_last_dot;
+}
+
+int Position_last_dot_unicode(const word * fname)
+{
+  int pos_last_dot = -1;
+  int c = 0;
+
+  for (c = 0; fname[c] != '\0'; c++)
+    if (fname[c] == '.')
+      pos_last_dot = c;
+  return pos_last_dot;
+}
+
 int File_exists(const char * fname)
 //   Détermine si un file passé en paramètre existe ou non dans le
 // répertoire courant.

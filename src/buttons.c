@@ -3415,25 +3415,24 @@ void Button_Reload(int btn)
 }
 
 
-static void Backup_filename(const char * fname, char * backup_name)
+static void Backup_existing_file(const char * filename)
 {
+  char new_filename[MAX_PATH_CHARACTERS]; // full filename of the backup file
+  char * p;
   int i;
 
-  strcpy(backup_name,fname);
-  for (i=strlen(fname)-strlen(Main.backups->Pages->Filename); backup_name[i]!='.' && backup_name[i]!='\0'; i++);
-  backup_name[i+1]='\0';
-  strcat(backup_name,"BAK");
-}
-
-
-static void Backup_existing_file(void)
-{
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
-  char new_filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier backup
-
-  Get_full_filename(filename, Main.backups->Pages->Filename, Main.backups->Pages->File_directory);
-  // Calcul du nom complet du fichier backup
-  Backup_filename(filename,new_filename);
+  strncpy(new_filename, filename, sizeof(new_filename));
+  new_filename[sizeof(new_filename) - 1] = '\0';
+  p = Find_last_separator(new_filename);  // pointer to the filename part (after directory)
+  if (p == NULL)
+    p = new_filename;
+  else
+    p++;
+  i = Position_last_dot(p);
+  if (i >= 0)
+    strcpy(p + i + 1, "BAK");
+  else
+    strcat(p, ".BAK");
 
   File_error=0;
 
@@ -3512,7 +3511,9 @@ void Save_picture(enum CONTEXT_TYPE type)
     confirm=Confirmation_box("Erase old file ?");
     if (confirm && (Config.Backup))
     {
-      Backup_existing_file();
+      char full_filename[MAX_PATH_CHARACTERS];
+      Get_full_filename(full_filename, filename, directory);
+      Backup_existing_file(full_filename);
       if (File_error)
       {
         confirm=0;
@@ -3578,7 +3579,7 @@ void Button_Autosave(int btn)
   if ( (!file_already_exists) || Confirmation_box("Erase old file ?") )
   {
     if ((file_already_exists) && (Config.Backup))
-      Backup_existing_file();
+      Backup_existing_file(filename);
     else
       File_error=0;
 

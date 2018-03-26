@@ -83,6 +83,12 @@ char * Find_last_separator(const char * str);
   #define PATH_SEPARATOR "/"
 #endif
 
+/// finds the rightmost '.' character in fullname. Used to find file extension. returns -1 if not found
+int Position_last_dot(const char * fname);
+
+/// finds the rightmost '.' character in fullname. Used to find file extension. returns -1 if not found
+int Position_last_dot_unicode(const word * fname);
+
 /// Size of a file, in bytes. Returns 0 in case of error.
 unsigned long File_length(const char *fname);
 
