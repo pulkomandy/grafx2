@@ -718,7 +718,7 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
   }
   #elif defined(__MINT__)
     drive_bits = Drvmap(); //get drive map bitfield
-  
+
     for (bit_index=0; bit_index<32; bit_index++)
     {
       if ( (1 << bit_index) & drive_bits )
@@ -729,7 +729,6 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
         drive_index++;
       }
     }
-  
   #else
   {
     //Sous les différents unix, on va mettre
@@ -742,7 +741,7 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
     struct mount_entry* next;
 
     char * home_dir = getenv("HOME");
-    Add_element_to_list(list, "/", Format_filename("/",name_length,2), 2, ICON_NONE);
+    Add_element_to_list(list, "/", Format_filename("/",name_length-1,2), 2, ICON_HDD);
     list->Nb_directories++;
     if(home_dir)
     {
@@ -754,21 +753,23 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
 
     while(mount_points_list != NULL)
     {
-		byte icon = ICON_NONE;
-		if (strcmp(mount_points_list->me_type, "cd9660") == 0)
-				icon = ICON_CDROM;
-		else if (strcmp(mount_points_list->me_type, "nfs") == 0)
-				icon = ICON_NETWORK;
-		else if (strcmp(mount_points_list->me_type, "msdos") == 0)
-				icon = ICON_FLOPPY_3_5; // Only a guess...
-		else if (strcmp(mount_points_list->me_type, "ext2fs") == 0)
-				icon = ICON_HDD; // Only a guess...
+      byte icon = ICON_NONE;
+      if (strcmp(mount_points_list->me_type, "cd9660") == 0)
+        icon = ICON_CDROM;
+      else if (strcmp(mount_points_list->me_type, "nfs") == 0)
+        icon = ICON_NETWORK;
+      else if (strcmp(mount_points_list->me_type, "msdos") == 0)
+        icon = ICON_FLOPPY_3_5; // Only a guess...
+      else if (strcmp(mount_points_list->me_type, "ext2fs") == 0)
+        icon = ICON_HDD; // Only a guess...
+      else if (strcmp(mount_points_list->me_type, "hfs") == 0)
+        icon = ICON_HDD; // Only a guess...
 
-        if(mount_points_list->me_dummy == 0 && strcmp(mount_points_list->me_mountdir,"/") && strcmp(mount_points_list->me_mountdir,"/home"))
+      if(mount_points_list->me_dummy == 0 && strcmp(mount_points_list->me_mountdir,"/") && strcmp(mount_points_list->me_mountdir,"/home"))
         {
-            Add_element_to_list(list, mount_points_list->me_mountdir,
-				Format_filename(mount_points_list->me_mountdir, name_length, 2), 2, icon);
-            list->Nb_directories++;
+          Add_element_to_list(list, mount_points_list->me_mountdir,
+              Format_filename(mount_points_list->me_mountdir, name_length + (icon==ICON_NONE?0:-1), 2), 2, icon);
+          list->Nb_directories++;
         }
         next = mount_points_list -> me_next;
         #if !(defined(__macosx__) || defined(__FreeBSD__))
