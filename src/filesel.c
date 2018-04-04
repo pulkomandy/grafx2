@@ -1170,7 +1170,7 @@ short Compute_click_offset_in_fileselector(void)
   return computed_offset;
 }
 
-void Display_bookmark(T_Dropdown_button * Button, int bookmark_number)
+static void Display_bookmark(T_Dropdown_button * Button, int bookmark_number)
 {
   if (Config.Bookmark_directory[bookmark_number])
   {
@@ -1182,11 +1182,6 @@ void Display_bookmark(T_Dropdown_button * Button, int bookmark_number)
       Window_rectangle(Button->Pos_X+3+10+label_size*8,Button->Pos_Y+2,(8-label_size)*8,8,MC_Light);
     // Menu apparait sur clic droit
     Button->Active_button=RIGHT_SIDE;
-    // item actifs
-    Window_dropdown_clear_items(Button);
-    Window_dropdown_add_item(Button,0,"Set");
-    Window_dropdown_add_item(Button,1,"Rename");
-    Window_dropdown_add_item(Button,2,"Clear");    
   }
   else
   {
@@ -1194,9 +1189,17 @@ void Display_bookmark(T_Dropdown_button * Button, int bookmark_number)
     Print_in_window(Button->Pos_X+3+10,Button->Pos_Y+2,"--------",MC_Dark,MC_Light);
     // Menu apparait sur clic droit ou gauche
     Button->Active_button=RIGHT_SIDE|LEFT_SIDE;
-    // item actifs
-    Window_dropdown_clear_items(Button);
-    Window_dropdown_add_item(Button,0,"Set");
+  }
+  // item actifs
+  Window_dropdown_clear_items(Button);
+  Window_dropdown_add_item(Button,0,"Set");
+#if !(defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__))
+  Window_dropdown_add_item(Button,3,"Set Rel");
+#endif
+  if (Config.Bookmark_directory[bookmark_number])
+  {
+    Window_dropdown_add_item(Button,1,"Rename");
+    Window_dropdown_add_item(Button,2,"Clear");
   }
 }
 
@@ -1728,7 +1731,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   for (temp=0;temp<NB_BOOKMARKS;temp++)
   {
     bookmark_dropdown[temp]=
-      Window_set_dropdown_button(127+(88+1)*(temp%2),18+(temp/2)*12,88,11,56,"",0,0,1,RIGHT_SIDE,0); // 10-13
+      Window_set_dropdown_button(127+(88+1)*(temp%2),18+(temp/2)*12,88,11,64,"",0,0,1,RIGHT_SIDE,0); // 10-13
     Window_display_icon_sprite(bookmark_dropdown[temp]->Pos_X+3,bookmark_dropdown[temp]->Pos_Y+2,ICON_STAR);
     Display_bookmark(bookmark_dropdown[temp],temp);
   }
@@ -2133,6 +2136,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           {
             // Bookmark
             char * directory_name;
+            const char * rel_path;
             
             load_from_clipboard = 0;
             switch(Window_attribute2)
@@ -2193,6 +2197,30 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
                   free(Config.Bookmark_directory[clicked_button-10]);
                   Config.Bookmark_directory[clicked_button-10]=NULL;
                   Config.Bookmark_label[clicked_button-10][0]='\0';
+                  Display_bookmark(bookmark_dropdown[clicked_button-10],clicked_button-10);
+                }
+                break;
+              case 3: // Set Rel
+                rel_path = Calculate_relative_path(Data_directory, Selector->Directory);
+                if (rel_path != NULL)
+                {
+                  // Erase old bookmark
+                  free(Config.Bookmark_directory[clicked_button-10]);
+                  Config.Bookmark_directory[clicked_button-10] = NULL;
+
+                  Config.Bookmark_directory[clicked_button-10] = strdup(rel_path);
+                  directory_name=Find_last_separator(Selector->Directory);
+                  if (directory_name && directory_name[1]!='\0')
+                    directory_name++;
+                  else
+                    directory_name=Selector->Directory;
+                  temp=strlen(directory_name);
+                  strncpy(Config.Bookmark_label[clicked_button-10],directory_name,8);
+                  if (temp>8)
+                  {
+                    Config.Bookmark_label[clicked_button-10][7]=ELLIPSIS_CHARACTER;
+                    Config.Bookmark_label[clicked_button-10][8]='\0';
+                  }
                   Display_bookmark(bookmark_dropdown[clicked_button-10],clicked_button-10);
                 }
                 break;

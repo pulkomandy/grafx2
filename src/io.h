@@ -195,5 +195,9 @@ int Remove_path(const char * path);
 /// Remove the directory
 int Remove_directory(const char * path);
 
+///
+/// Calculate relative path
+const char * Calculate_relative_path(const char * ref_path, const char * path);
+
 /** @}*/
 #endif

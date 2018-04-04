@@ -918,3 +918,56 @@ int Remove_directory(const char * path)
   return rmdir(path);
 #endif
 }
+
+///
+/// Calculate relative path
+const char * Calculate_relative_path(const char * ref_path, const char * path)
+{
+  char real_ref_path[MAX_PATH_CHARACTERS];
+  static char rel_path[MAX_PATH_CHARACTERS];
+  int last_separator = -1;
+  int i;
+  int separator_count = 0;
+
+  if (ref_path == NULL || path == NULL)
+    return NULL;
+  if (Realpath(ref_path, real_ref_path) == NULL)
+  {
+    strncpy(real_ref_path, ref_path, MAX_PATH_CHARACTERS);
+    real_ref_path[MAX_PATH_CHARACTERS-1] = '\0';
+  }
+#if defined(WIN32) || defined(__MINT__)
+  if ((real_ref_path[1] == ':') && (real_ref_path[0] | 32) != (path[0] | 32))
+    return NULL;  // path on different volumes, not possible
+#endif
+  // look for common path parts
+  for (i = 0; real_ref_path[i] == path[i] && path[i] != '\0'; i++)
+  {
+    if (path[i] == PATH_SEPARATOR[0])
+      last_separator = i;
+#if defined(WIN32)
+    else if(path[i] == '/')
+      last_separator = i;
+#endif
+  }
+  if (real_ref_path[i] == '\0' && path[i] == PATH_SEPARATOR[0])
+  {
+    snprintf(rel_path, MAX_PATH_CHARACTERS, ".%s", path + i);  // path is under ref_path
+    return rel_path;
+  }
+  if (real_ref_path[i] == '\0' && path[i] == '\0')
+    return "."; // path are identical
+  if (last_separator <= 0)
+    return path;  // no common part found return absolute path
+  // count the number of path separators in the reference path
+  for (i = last_separator; real_ref_path[i] != '\0'; i++)
+    if (real_ref_path[i] == PATH_SEPARATOR[0])
+      separator_count++;
+  i = 0;
+  // construct the relative path
+  while(separator_count-- > 0)
+    i += snprintf(rel_path + i, MAX_PATH_CHARACTERS - i, "..%s", PATH_SEPARATOR);
+  strncpy(rel_path + i, path + last_separator + 1, MAX_PATH_CHARACTERS - i);
+  rel_path[MAX_PATH_CHARACTERS -1] = '\0';
+  return rel_path;
+}
