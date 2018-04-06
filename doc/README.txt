@@ -6,7 +6,7 @@ _/    _/  _/        _/    _/    _/        _/  _/      _/
 
 GrafX2 - The Ultimate 256-color bitmap paint program
 Copyright (C)1996-2001 Sunset Design (G.Dorme & K.Maritaud)
-Copyright (C)2007-2012 the Grafx2 Project Team (A.Destugues & Y.Rizoud)
+Copyright (C)2007-2018 the Grafx2 Project Team (A.Destugues & Y.Rizoud)
 -------------------------------------
 
 === ABOUT ===
@@ -30,7 +30,7 @@ http://pulkomandy.tk/projects/GrafX2 for latest news and bugfixed versions.
 Remember that right-clicking and left-clicking often have different functions,
 even on menu buttons. If you are in trouble when using the program, press <F1>
 to get contextual help. You can also check the wiki at
-http://code.google.com/p/grafx2/wiki for some more information.
+http://pulkomandy.tk/projects/GrafX2/wiki/WikiStart for some more information.
 
 === LICENSE ===
 
@@ -58,7 +58,7 @@ http://pulkomandy.tk/projects/GrafX2/downloads
 
 See the file COMPILING.txt for compiling instructions.
 There's also a page on the wiki:
-http://code.google.com/p/grafx2/wiki/Compiling
+http://pulkomandy.tk/projects/GrafX2/wiki/Develop/Compiling
 
 === AUTHORS AND SUPPORT ===
 
@@ -92,7 +92,8 @@ Short revision history :
   * 11/1996  2.0b90%   First public release, at the Wired'96.
   * 09/1995            Project starts.
 
-Check http://pulkomandy.tk/projects/GrafX2/log/ for (very) detailed changelog.
+Check https://gitlab.com/GrafX2/grafX2/commits/master for (very) detailed
+changelog.
 Check http://pulkomandy.tk/projects/GrafX2/wiki/History for an overview of the
 new features and bugfixes in each numbered version.
 
@@ -100,7 +101,7 @@ new features and bugfixes in each numbered version.
 
 We enjoy programming GrafX2, we hope you will enjoy drawing with it. If you like
 the program, here is a list of things you can do:
-* Register as an user at www.ohloh.net/p/grafx2 to improve our Karma
+* Register as an user at https://www.ohloh.net/p/grafx2 to improve our Karma
 * Port GrafX2 to your favourite platform
 * Report bugs or ask for features you miss (you'll get credited in the 
 		helpscreen !)
