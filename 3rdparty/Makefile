@@ -39,7 +39,7 @@ PREFIX = $(PWD)/usr
 MKDIR = mkdir -p
 CP = cp -v
 TAR = $(shell which tar)
-GETURL = $(shell which wget || echo "curl -O -L")
+GETURL = $(shell WGET=`which wget` ; if [ "$?" = "0" ] && [ -x "$WGET" ] ; then echo "$WGET" ; else echo "curl -O -L" ; fi )
 
 BUILD_CC := $(CC)
 
