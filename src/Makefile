@@ -695,11 +695,18 @@ endif
 release : $(BIN)
 	$(STRIP) $(BIN)
 
+ifeq ($(PLATFORM),Darwin)
+ziprelease: $(MACAPPEXE)
+endif
+
 # Create a zip archive ready for upload to the website, including binaries and sourcecode
 ziprelease: release $(OBJDIR)/versiontag
 	cd .. && $(TAR) czf "src-`cat $(OBJDIR:../%=%)/versiontag`.tgz" src/*.c src/*.cpp src/*.h src/Makefile src/Makefile.dep src/gfx2.ico src/Grafx2_Prefix.pch src/SDLMain.m
 	cd .. && $(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR:../%=%)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" $(BIN:../%=%) share/grafx2/gfx2def.ini $(SCRIPT_FILES:../%=%) $(SKIN_FILES:../%=%) share/grafx2/gfx2.gif share/icons/grafx2.svg doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt doc/PF_fonts.txt $(FONT_FILES:../%=%) doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt doc/README-lua.txt src-`cat $(OBJDIR:../%=%)/versiontag`.tgz $(PLATFORMFILES:../%=%)
 	$(DELCOMMAND) "../src-`cat $(OBJDIR)/versiontag`.tgz"
+ifeq ($(PLATFORM),Darwin)
+	$(ZIP) $(ZIPOPT) -r ../Grafx2.app-`cat $(OBJDIR)/versiontag`.zip Grafx2.app
+endif
 	$(TAR) czf "../grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-src.tgz" $(TARTRANSFORM) ../src/*.c ../src/*.cpp ../src/*.h ../src/Makefile ../src/Makefile.dep ../share/grafx2/gfx2def.ini $(SCRIPT_FILES) $(SKIN_FILES) ../src/gfx2.ico ../share/grafx2/gfx2.gif ../share/icons/grafx2.svg ../doc/README.txt ../doc/COMPILING.txt ../doc/gpl-2.0.txt ../doc/PF_fonts.txt ../misc/unix/grafx2.1 ../misc/unix/grafx2.xpm ../misc/unix/grafx2.desktop ../misc/morphos/grafx2.info $(FONT_FILES) ../src/Grafx2_Prefix.pch ../src/SDLMain.m
 
 $(BIN) : $(OBJ)
