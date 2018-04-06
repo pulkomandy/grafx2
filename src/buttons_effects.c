@@ -163,10 +163,10 @@ void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_ca
   Display_cursor();
 }
 
-byte Selected_Constraint_Mode = 0;
+static enum IMAGE_MODES Selected_Constraint_Mode = 0;
 
 // Constaint enforcer/checker ------------------------------------------------
-void Button_Constraint_mode()
+void Button_Constraint_mode(void)
 {
   int pixel;
   
@@ -206,21 +206,37 @@ void Button_Constraint_mode()
 
 void Button_Constraint_menu(void)
 {
+  unsigned int i;
   short clicked_button;
   T_Dropdown_button* dropdown;
+  const char * label;
+  static const struct {
+    enum IMAGE_MODES mode;
+    const char * label;
+  } modes[] = {
+    {IMAGE_MODE_ZX,      "ZX Spectrum"},
+    //{IMAGE_MODE_GBC,   "Game Boy Color"},
+    {IMAGE_MODE_THOMSON, "40col (MO/TO)"},
+    {IMAGE_MODE_EGX,     "EGX (CPC)"},
+    {IMAGE_MODE_EGX2,    "EGX2 (CPC)"},
+    {IMAGE_MODE_MODE5,   "Mode 5 (CPC)"},
+  };
 
   Open_window(154,79,"8-bit constraints");
 
   Window_set_normal_button(21,55,51,14,"Cancel",0,1,KEY_ESC);  // 1
   Window_set_normal_button(82,55,51,14,"OK"    ,0,1,SDLK_RETURN); // 2
 
-  dropdown = Window_set_dropdown_button(17, 21, 120, 14, 120, "Constraints", 1, 0, 1, RIGHT_SIDE|LEFT_SIDE, 0); // 3
-  Window_dropdown_add_item(dropdown, IMAGE_MODE_ZX, "ZX Spectrum");
-  //Window_dropdown_add_item(dropdown, IMAGE_MODE_GBC, "Game Boy Color");
-  Window_dropdown_add_item(dropdown, IMAGE_MODE_THOMSON, "40col (MO/TO)");
-  Window_dropdown_add_item(dropdown, IMAGE_MODE_EGX,     "EGX (CPC)");
-  Window_dropdown_add_item(dropdown, IMAGE_MODE_EGX2,    "EGX2 (CPC)");
-  Window_dropdown_add_item(dropdown, IMAGE_MODE_MODE5,   "Mode 5 (CPC)");
+  label = "Constraints";
+  for (i = 0; i < sizeof(modes)/sizeof(modes[0]) ; i++)
+    if (Main.backups->Pages->Image_mode == modes[i].mode)
+    {
+      label = modes[i].label;
+      break;
+    }
+  dropdown = Window_set_dropdown_button(17, 21, 120, 14, 120, label, 1, 0, 1, RIGHT_SIDE|LEFT_SIDE, 0); // 3
+  for (i = 0; i < sizeof(modes)/sizeof(modes[0]) ; i++)
+    Window_dropdown_add_item(dropdown, modes[i].mode, modes[i].label);
 
   Update_window_area(0,0,Window_width, Window_height);
   Display_cursor();
@@ -238,9 +254,12 @@ void Button_Constraint_menu(void)
 
   if (clicked_button==2) // OK
   {
-    if ((Selected_Constraint_Mode > IMAGE_MODE_ANIMATION)
-        && (Main.backups->Pages->Image_mode <= IMAGE_MODE_ANIMATION))
-    Button_Constraint_mode();
+    if (Selected_Constraint_Mode > IMAGE_MODE_ANIMATION)
+    {
+      if (Main.backups->Pages->Image_mode > IMAGE_MODE_ANIMATION)
+        Button_Constraint_mode();  // unactivate current mode
+      Button_Constraint_mode();  // activate selected Mode
+    }
   }
 
   Display_cursor();
