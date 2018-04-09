@@ -32,6 +32,11 @@
 #include <fcntl.h>
 #ifndef _MSC_VER
 #include <unistd.h>
+#else
+#include <stdio.h>
+#if _MSC_VER < 1900
+#define snprintf _snprintf
+#endif
 #endif
 
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
