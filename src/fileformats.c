@@ -5787,8 +5787,6 @@ void Save_SCx(T_IO_Context * context)
   }
   else
   {
-    fclose(file);
-    Remove_file(context);
     File_error=1;
   }
 }
