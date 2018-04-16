@@ -123,31 +123,31 @@ enum FILE_FORMATS
   FORMAT_ALL_IMAGES=0, ///< This is not really a file format, it's reserverd for a compilation of all image file extensions
   FORMAT_ALL_PALETTES=1, ///< This is not really a file format, it's reserverd for a compilation of all palette file extensions
   FORMAT_ALL_FILES=2, ///< This is not really a file format, it's reserverd for the "*.*" filter option.
-  FORMAT_PNG,
-  FORMAT_GIF,
-  FORMAT_BMP,
-  FORMAT_PCX,
-  FORMAT_PKM,
-  FORMAT_LBM,
-  FORMAT_PBM,
-  FORMAT_ACBM,
-  FORMAT_IMG,
-  FORMAT_SCx,
-  FORMAT_PI1,
-  FORMAT_PC1,
-  FORMAT_CEL,
-  FORMAT_NEO,
-  FORMAT_C64,
-  FORMAT_KCF,
-  FORMAT_PAL,
-  FORMAT_GPL,
-  FORMAT_SCR,
-  FORMAT_CM5,
-  FORMAT_PPH,
-  FORMAT_XPM,
-  FORMAT_ICO,
-  FORMAT_INFO,
-  FORMAT_FLI,
+  FORMAT_PNG,  ///< Portable Network Graphics
+  FORMAT_GIF,  ///< Graphics Interchange Format
+  FORMAT_BMP,  ///< Windows or OS/2 bitmap
+  FORMAT_PCX,  ///< Paintbrush
+  FORMAT_PKM,  ///< GrafX2 own format (Karl Maritaud)
+  FORMAT_LBM,  ///< IFF ILBM : InterLeaved BitMap
+  FORMAT_PBM,  ///< IFF PBM : Packet BitMap
+  FORMAT_ACBM, ///< IFF ACBM : Amiga Contiguous BitMap
+  FORMAT_IMG,  ///< from PV (c)W.Wiedmann
+  FORMAT_SCx,  ///< ColoRIX
+  FORMAT_PI1,  ///< Atari ST Degas
+  FORMAT_PC1,  ///< Atari ST Degas Elite
+  FORMAT_CEL,  ///< Atari ST Cyber Paint Cell
+  FORMAT_NEO,  ///< Atari ST NeoChrome
+  FORMAT_C64,  ///< Several C64 formats : Koala, FLI, BML, etc.
+  FORMAT_KCF,  ///< KiSS Color File
+  FORMAT_PAL,  ///< raw 6bit palette or Jasc Paint Shop Pro palette
+  FORMAT_GPL,  ///< Gimp palette
+  FORMAT_SCR,  ///< Amstrad CPC
+  FORMAT_CM5,  ///< Amstrad CPC Mode 5
+  FORMAT_PPH,  ///< Amastad CPC Perfect Pix
+  FORMAT_XPM,  ///< X PixMap
+  FORMAT_ICO,  ///< Windows icons
+  FORMAT_INFO, ///< Amiga OS icons
+  FORMAT_FLI,  ///< Autodesk Animator FLI/FLC
   FORMAT_MISC, ///< Must be last of enum: others formats recognized by SDL_image
 };
 
