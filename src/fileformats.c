@@ -215,8 +215,6 @@ void Save_IMG(T_IO_Context * context)
   }
   else
   {
-    fclose(file);
-    Remove_file(context);
     File_error=1;
   }
 }
@@ -1946,7 +1944,7 @@ void Load_IFF(T_IO_Context * context)
         else if (memcmp(section, "BODY", 4) == 0)
         {
           long offset = ftell(IFF_file);
-          if (file_size > (offset + section_size + 8))
+          if (file_size > (unsigned long)(offset + section_size + 8))
           {
             // Chunk RAST is placed AFTER the BODY, but we need the palette now to decode the image
             // In addition, some files break the IFF standard by not aligning

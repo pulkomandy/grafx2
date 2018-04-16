@@ -42,6 +42,7 @@
 #include "struct.h"
 #include "windows.h"
 #include "oldies.h"
+#include "pages.h"
 #include "fileformats.h"
 
 //////////////////////////////////// PAL ////////////////////////////////////
@@ -3793,4 +3794,417 @@ void Save_PPH(T_IO_Context* context)
     // B0: use diagonal: 0, 17, 34, ... (assume the other are mixes)
     // R: use 16 used colors (or 16 first?)
     // B1: find the 16 colors used in a line? Or assume they are in-order already?
+}
+
+
+/////////////////////////////////// FLI/FLC /////////////////////////////////
+typedef struct {
+  dword size;          /* Size of FLIC including this header */
+  word  type;          /* File type 0xAF11, 0xAF12, 0xAF30, 0xAF44, ... */
+  word  frames;        /* Number of frames in first segment */
+  word  width;         /* FLIC width in pixels */
+  word  height;        /* FLIC height in pixels */
+  word  depth;         /* Bits per pixel (usually 8) */
+  word  flags;         /* Set to zero or to three */
+  dword speed;         /* Delay between frames */
+  word  reserved1;     /* Set to zero */
+  dword created;       /* Date of FLIC creation (FLC only) */
+  dword creator;       /* Serial number or compiler id (FLC only) */
+  dword updated;       /* Date of FLIC update (FLC only) */
+  dword updater;       /* Serial number (FLC only), see creator */
+  word  aspect_dx;     /* Width of square rectangle (FLC only) */
+  word  aspect_dy;     /* Height of square rectangle (FLC only) */
+  word  ext_flags;     /* EGI: flags for specific EGI extensions */
+  word  keyframes;     /* EGI: key-image frequency */
+  word  totalframes;   /* EGI: total number of frames (segments) */
+  dword req_memory;    /* EGI: maximum chunk size (uncompressed) */
+  word  max_regions;   /* EGI: max. number of regions in a CHK_REGION chunk */
+  word  transp_num;    /* EGI: number of transparent levels */
+  byte  reserved2[24]; /* Set to zero */
+  dword oframe1;       /* Offset to frame 1 (FLC only) */
+  dword oframe2;       /* Offset to frame 2 (FLC only) */
+  byte  reserved3[40]; /* Set to zero */
+} T_FLIC_Header;
+
+static void Load_FLI_Header(FILE * file, T_FLIC_Header * header)
+{
+  if (!(Read_dword_le(file,&header->size)
+      && Read_word_le(file,&header->type)
+      && Read_word_le(file,&header->frames)
+      && Read_word_le(file,&header->width)
+      && Read_word_le(file,&header->height)
+      && Read_word_le(file,&header->depth)
+      && Read_word_le(file,&header->flags)
+      && Read_dword_le(file,&header->speed)
+      && Read_word_le(file,&header->reserved1)
+      && Read_dword_le(file,&header->created)
+      && Read_dword_le(file,&header->creator)
+      && Read_dword_le(file,&header->updated)
+      && Read_dword_le(file,&header->updater)
+      && Read_word_le(file,&header->aspect_dx)
+      && Read_word_le(file,&header->aspect_dy)
+      && Read_word_le(file,&header->ext_flags)
+      && Read_word_le(file,&header->keyframes)
+      && Read_word_le(file,&header->totalframes)
+      && Read_dword_le(file,&header->req_memory)
+      && Read_word_le(file,&header->max_regions)
+      && Read_word_le(file,&header->transp_num)
+      && Read_bytes(file,header->reserved2,24)
+      && Read_dword_le(file,&header->oframe1)
+      && Read_dword_le(file,&header->oframe2)
+      && Read_bytes(file,header->reserved2,40) ))
+  {
+    File_error=1;
+  }
+}
+
+void Test_FLI(T_IO_Context * context, FILE * file)
+{
+  T_FLIC_Header header;
+  (void)context;
+
+  File_error=0;
+  Load_FLI_Header(file, &header);
+  if (File_error != 0) return;
+
+  switch (header.type)
+  {
+    case 0xAF11:  // standard FLI
+    case 0xAF12:  // FLC (8bpp)
+#if 0
+    case 0xAF30:  // Huffman or BWT compression
+    case 0xAF31:  // frame shift compression
+    case 0xAF44:  // bpp != 8
+#endif
+      File_error=0;
+      break;
+    default:
+      File_error=1;
+  }
+}
+
+void Load_FLI(T_IO_Context * context)
+{
+  FILE * file;
+  unsigned long file_size;
+  T_FLIC_Header header;
+  dword chunk_size;
+  word chunk_type;
+  word sub_chunk_count, sub_chunk_index;
+  dword sub_chunk_size;
+  word sub_chunk_type;
+  word frame_delay, frame_width, frame_height;
+  int current_frame = 0;
+
+  file = Open_file_read(context);
+  if (file == NULL)
+  {
+    File_error=1;
+    return;
+  }
+  File_error=0;
+  file_size = File_length_file(file);
+  Load_FLI_Header(file, &header);
+  if (File_error != 0)
+  {
+    fclose(file);
+    return;
+  }
+  if (header.size == 12)
+  {
+    // special "magic carpet" format
+    header.depth = 8;
+    header.speed = 66; // about 15fps
+    fseek(file, 12, SEEK_SET);
+  }
+  else if (file_size != header.size)
+    Warning("Load_FLI(): file size mismatch in header");
+
+  if (header.speed == 0)
+  {
+    if (header.type == 0xAF11) // FLI
+      header.speed = 1;   // 1/70th seconds
+    else
+      header.speed = 10;  // 10ms
+  }
+
+  Pre_load(context, header.width,header.height,file_size,FORMAT_FLI,PIXEL_SIMPLE,header.depth);
+  if (context->Type == CONTEXT_MAIN_IMAGE)
+  {
+    Main.backups->Pages->Image_mode = IMAGE_MODE_ANIMATION;
+    Update_screen_targets();
+  }
+
+  while (File_error == 0
+     && Read_dword_le(file,&chunk_size) && Read_word_le(file,&chunk_type))
+  {
+    chunk_size -= 6;
+    switch (chunk_type)
+    {
+      case 0xf1fa:  // FRAME
+        Read_word_le(file, &sub_chunk_count);
+        Read_word_le(file, &frame_delay);
+        fseek(file, 2, SEEK_CUR);
+        Read_word_le(file, &frame_width);
+        Read_word_le(file, &frame_height);
+        if (frame_width == 0)
+          frame_width = header.width;
+        if (frame_height == 0)
+          frame_height = header.height;
+        if (frame_delay == 0)
+          frame_delay = header.speed;
+        chunk_size -= 10;
+        for (sub_chunk_index = 0; sub_chunk_index < sub_chunk_count; sub_chunk_index++)
+        {
+          if (!(Read_dword_le(file,&sub_chunk_size) && Read_word_le(file,&sub_chunk_type)))
+            File_error = 1;
+          else
+          {
+            chunk_size -= sub_chunk_size;
+            sub_chunk_size -= 6;
+            if (sub_chunk_type == 0x04 || sub_chunk_type == 0x0b)   // color map
+            {
+              word packet_count;
+              int i = 0;
+              sub_chunk_size -= 2;
+              if (!Read_word_le(file, &packet_count))
+                File_error = 1;
+              else
+                while (packet_count-- > 0 && File_error == 0)
+                {
+                  byte skip, count;
+                  if (!(Read_byte(file, &skip) && Read_byte(file, &count)))
+                    File_error = 1;
+                  else
+                  {
+                    sub_chunk_size -= 2;
+                    i += skip;  // count 0 means 256
+                    do
+                    {
+                      byte r, g, b;
+                      if (!(Read_byte(file, &r) && Read_byte(file, &g) && Read_byte(file, &b)))
+                      {
+                        File_error = 1;
+                        break;
+                      }
+                      if (sub_chunk_type == 0x0b || header.size == 12) // 6bit per color
+                      {
+                        r = (r << 2) | (r >> 4);
+                        g = (g << 2) | (g >> 4);
+                        b = (b << 2) | (b >> 4);
+                      }
+                      context->Palette[i].R = r;
+                      context->Palette[i].G = g;
+                      context->Palette[i].B = b;
+                      i++;
+                      sub_chunk_size -= 3;
+                    } while (--count != 0);
+                  }
+                }
+            }
+            else if (sub_chunk_type == 0x0f)  // full frame RLE
+            {
+              word x, y;
+              if (header.type == 0xAF11) // FLI
+                Set_frame_duration(context, (frame_delay * 100) / 7); // 1/70th sec
+              else
+                Set_frame_duration(context, frame_delay); // msec
+              for (y = 0; y < frame_height && File_error == 0; y++)
+              {
+                byte count, data;
+                Read_byte(file, &count); // packet count, but dont rely on it
+                sub_chunk_size--;
+                for (x = 0; x < frame_width; )
+                {
+                  if (!Read_byte(file, &count))
+                  {
+                    File_error = 1;
+                    break;
+                  }
+                  sub_chunk_size--;
+                  if ((count & 0x80) == 0)
+                  {
+                    if (!Read_byte(file, &data))  // repeat data count times
+                    {
+                      File_error = 1;
+                      break;
+                    }
+                    sub_chunk_size--;
+                    while (count-- > 0 && x < frame_width)
+                      Set_pixel(context, x++, y, data);
+                  }
+                  else
+                    while (count++ != 0 && x < frame_width)  // copy count bytes
+                    {
+                      if (!Read_byte(file, &data))
+                      {
+                        File_error = 1;
+                        break;
+                      }
+                      Set_pixel(context, x++, y, data);
+                      sub_chunk_size--;
+                    }
+                }
+              }
+              if (context->Type == CONTEXT_PREVIEW || context->Type == CONTEXT_PREVIEW_PALETTE)
+              { // load only 1st frame in preview
+                fclose(file);
+                return;
+              }
+            }
+            else if (sub_chunk_type == 0x0c)  // delta image, RLE
+            {
+              word x, y, line_count;
+
+              Set_loading_layer(context, ++current_frame);
+              if (header.type == 0xAF11) // FLI
+                Set_frame_duration(context, (frame_delay * 100) / 7); // 1/70th sec
+              else
+                Set_frame_duration(context, frame_delay); // msec
+              if (context->Type == CONTEXT_MAIN_IMAGE && Main.backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+              {
+                // Copy the content of previous frame
+                memcpy(
+                  Main.backups->Pages->Image[Main.current_layer].Pixels,
+                  Main.backups->Pages->Image[Main.current_layer-1].Pixels,
+                  Main.backups->Pages->Width*Main.backups->Pages->Height);
+              }
+
+              Read_word_le(file, &y);
+              Read_word_le(file, &line_count);
+              sub_chunk_size -= 4;
+              while (sub_chunk_size > 0 && line_count > 0 && File_error == 0)
+              {
+                byte packet_count;
+
+                x = 0;
+                if (!Read_byte(file, &packet_count))
+                  File_error = 1;
+                else
+                {
+                  sub_chunk_size--;
+                  while (packet_count-- > 0 && File_error == 0)
+                  {
+                    byte skip, count, data;
+                    if (!(Read_byte(file, &skip) && Read_byte(file, &count)))
+                      File_error = 1;
+                    else
+                    {
+                      sub_chunk_size -= 2;
+                      x += skip;
+                      if (count & 0x80)
+                      {
+                        Read_byte(file, &data);
+                        sub_chunk_size--;
+                        while (count++ != 0)
+                          Set_pixel(context, x++, y, data);
+                      }
+                      else
+                        while (count-- > 0)
+                        {
+                          Read_byte(file, &data);
+                          sub_chunk_size--;
+                          Set_pixel(context, x++, y, data);
+                        }
+                    }
+                  }
+                }
+                y++;
+                line_count--;
+              }
+            }
+            else if (sub_chunk_type == 0x07)  // FLC delta image
+            {
+              word opcode, y, line_count;
+
+              Set_loading_layer(context, ++current_frame);
+              if (header.type == 0xAF11) // FLI
+                Set_frame_duration(context, (frame_delay * 100) / 7); // 1/70th sec
+              else
+                Set_frame_duration(context, frame_delay); // msec
+              if (context->Type == CONTEXT_MAIN_IMAGE && Main.backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+              {
+                // Copy the content of previous frame
+                memcpy(
+                  Main.backups->Pages->Image[Main.current_layer].Pixels,
+                  Main.backups->Pages->Image[Main.current_layer-1].Pixels,
+                  Main.backups->Pages->Width*Main.backups->Pages->Height);
+              }
+
+              y = 0;
+              Read_word_le(file, &line_count);
+              sub_chunk_size -= 2;
+              while (line_count > 0)
+              {
+                Read_word_le(file, &opcode);
+                sub_chunk_size -= 2;
+                if ((opcode & 0xc000) == 0x0000) // packet count
+                {
+                  word x = 0;
+                  while (opcode-- > 0)
+                  {
+                    byte skip, count, data1, data2;
+                    if (!(Read_byte(file, &skip) && Read_byte(file, &count)))
+                      File_error = 1;
+                    else
+                    {
+                      sub_chunk_size -= 2;
+                      x += skip;
+                      if (count & 0x80)
+                      {
+                        Read_byte(file, &data1);
+                        Read_byte(file, &data2);
+                        sub_chunk_size -= 2;
+                        while (count++ != 0)
+                        {
+                          Set_pixel(context, x++, y, data1);
+                          Set_pixel(context, x++, y, data2);
+                        }
+                      }
+                      else
+                        while (count-- > 0)
+                        {
+                          Read_byte(file, &data1);
+                          Set_pixel(context, x++, y, data1);
+                          Read_byte(file, &data2);
+                          Set_pixel(context, x++, y, data2);
+                          sub_chunk_size -= 2;
+                        }
+                    }
+                  }
+                  y++;
+                  line_count--;
+                }
+                else if ((opcode & 0xc000) == 0xc000)  // line skip
+                {
+                  y -= opcode;
+                }
+                else if ((opcode & 0xc000) == 0x8000)  // last byte
+                {
+                  Set_pixel(context, frame_width - 1, y, opcode & 0xff);
+                }
+                else
+                {
+                  Warning("Unsupported opcode");
+                  File_error = 2;
+                  break;
+                }
+              }
+            }
+            if (sub_chunk_size > 0)
+            {
+              fseek(file, sub_chunk_size, SEEK_CUR);
+            }
+          }
+        }
+        break;
+      default:  // skip
+        Warning("Load_FLI(): unrecognized chunk");
+    }
+    if (chunk_size > 0 && header.size != 12)
+    {
+      fseek(file, chunk_size, SEEK_CUR);
+    }
+  }
+  fclose(file);
 }

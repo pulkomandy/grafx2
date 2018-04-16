@@ -147,6 +147,7 @@ enum FILE_FORMATS
   FORMAT_XPM,
   FORMAT_ICO,
   FORMAT_INFO,
+  FORMAT_FLI,
   FORMAT_MISC, ///< Must be last of enum: others formats recognized by SDL_image
 };
 

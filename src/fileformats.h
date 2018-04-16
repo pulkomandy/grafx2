@@ -137,4 +137,8 @@ void Save_PNG(T_IO_Context *);
 void Test_INFO(T_IO_Context *, FILE *);
 void Load_INFO(T_IO_Context *);
 
+// -- FLI/FLC (Autodesk animator) -------------------------------------------
+void Test_FLI(T_IO_Context *, FILE *);
+void Load_FLI(T_IO_Context *);
+
 #endif
