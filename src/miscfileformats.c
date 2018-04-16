@@ -3928,13 +3928,6 @@ void Load_FLI(T_IO_Context * context)
       header.speed = 10;  // 10ms
   }
 
-  Pre_load(context, header.width,header.height,file_size,FORMAT_FLI,PIXEL_SIMPLE,header.depth);
-  if (context->Type == CONTEXT_MAIN_IMAGE)
-  {
-    Main.backups->Pages->Image_mode = IMAGE_MODE_ANIMATION;
-    Update_screen_targets();
-  }
-
   while (File_error == 0
      && Read_dword_le(file,&chunk_size) && Read_word_le(file,&chunk_type))
   {
@@ -3954,6 +3947,36 @@ void Load_FLI(T_IO_Context * context)
         if (frame_delay == 0)
           frame_delay = header.speed;
         chunk_size -= 10;
+
+        if (current_frame == 0)
+        {
+          Pre_load(context, header.width,header.height,file_size,FORMAT_FLI,PIXEL_SIMPLE,header.depth);
+          if (context->Type == CONTEXT_MAIN_IMAGE)
+          {
+            Main.backups->Pages->Image_mode = IMAGE_MODE_ANIMATION;
+            Update_screen_targets();
+          }
+          if (Config.Clear_palette)
+            memset(context->Palette,0,sizeof(T_Palette));
+        }
+        else
+        {
+          Set_loading_layer(context, current_frame);
+          if (context->Type == CONTEXT_MAIN_IMAGE && Main.backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+          {
+            // Copy the content of previous frame
+            memcpy(
+                Main.backups->Pages->Image[Main.current_layer].Pixels,
+                Main.backups->Pages->Image[Main.current_layer-1].Pixels,
+                Main.backups->Pages->Width*Main.backups->Pages->Height);
+          }
+        }
+        if (header.type == 0xAF11) // FLI
+          Set_frame_duration(context, (frame_delay * 100) / 7); // 1/70th sec
+        else
+          Set_frame_duration(context, frame_delay); // msec
+        current_frame++;
+
         for (sub_chunk_index = 0; sub_chunk_index < sub_chunk_count; sub_chunk_index++)
         {
           if (!(Read_dword_le(file,&sub_chunk_size) && Read_word_le(file,&sub_chunk_type)))
@@ -4005,10 +4028,6 @@ void Load_FLI(T_IO_Context * context)
             else if (sub_chunk_type == 0x0f)  // full frame RLE
             {
               word x, y;
-              if (header.type == 0xAF11) // FLI
-                Set_frame_duration(context, (frame_delay * 100) / 7); // 1/70th sec
-              else
-                Set_frame_duration(context, frame_delay); // msec
               for (y = 0; y < frame_height && File_error == 0; y++)
               {
                 byte count, data;
@@ -4056,20 +4075,6 @@ void Load_FLI(T_IO_Context * context)
             {
               word x, y, line_count;
 
-              Set_loading_layer(context, ++current_frame);
-              if (header.type == 0xAF11) // FLI
-                Set_frame_duration(context, (frame_delay * 100) / 7); // 1/70th sec
-              else
-                Set_frame_duration(context, frame_delay); // msec
-              if (context->Type == CONTEXT_MAIN_IMAGE && Main.backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
-              {
-                // Copy the content of previous frame
-                memcpy(
-                  Main.backups->Pages->Image[Main.current_layer].Pixels,
-                  Main.backups->Pages->Image[Main.current_layer-1].Pixels,
-                  Main.backups->Pages->Width*Main.backups->Pages->Height);
-              }
-
               Read_word_le(file, &y);
               Read_word_le(file, &line_count);
               sub_chunk_size -= 4;
@@ -4116,20 +4121,6 @@ void Load_FLI(T_IO_Context * context)
             else if (sub_chunk_type == 0x07)  // FLC delta image
             {
               word opcode, y, line_count;
-
-              Set_loading_layer(context, ++current_frame);
-              if (header.type == 0xAF11) // FLI
-                Set_frame_duration(context, (frame_delay * 100) / 7); // 1/70th sec
-              else
-                Set_frame_duration(context, frame_delay); // msec
-              if (context->Type == CONTEXT_MAIN_IMAGE && Main.backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
-              {
-                // Copy the content of previous frame
-                memcpy(
-                  Main.backups->Pages->Image[Main.current_layer].Pixels,
-                  Main.backups->Pages->Image[Main.current_layer-1].Pixels,
-                  Main.backups->Pages->Width*Main.backups->Pages->Height);
-              }
 
               y = 0;
               Read_word_le(file, &line_count);
