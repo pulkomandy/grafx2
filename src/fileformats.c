@@ -1043,7 +1043,7 @@ void Load_IFF(T_IO_Context * context)
               ratio = PIXEL_WIDE; // 1.5 <= ratio
           }
           bpp = header.BitPlanes;
-          if (bpp <= 8)
+          if (bpp <= 8 && bpp > 0)
           {
             unsigned int i;
             // Set a default grayscale palette : if the
