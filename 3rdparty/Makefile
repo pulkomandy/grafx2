@@ -31,15 +31,14 @@ LUAURL=https://www.lua.org/ftp/$(LUAARCH)
 RECOILVER=4.2.0
 RECOIL=recoil-$(RECOILVER)
 RECOILARCH=$(RECOIL).tar.gz
-#RECOILURL=https://downloads.sourceforge.net/project/recoil/recoil/$(RECOILVER)/$(RECOILARCH)
-RECOILURL=https://excellmedia.dl.sourceforge.net/project/recoil/recoil/$(RECOILVER)/$(RECOILARCH)
+RECOILURL=https://sourceforge.net/projects/recoil/files/recoil/$(RECOILVER)/$(RECOILARCH)
 
 PREFIX = $(PWD)/usr
 
 MKDIR = mkdir -p
 CP = cp -v
 TAR = $(shell which tar)
-GETURL = $(shell WGET=`which wget` ; if [ "$?" = "0" ] && [ -x "$WGET" ] ; then echo "$WGET" ; else echo "curl -O -L" ; fi )
+GETURL = $(shell WGET=`which wget` ; if [ "$?" = "0" ] && [ -x "$WGET" ] ; then echo "$WGET" ; else echo "curl -O -L --max-time 120" ; fi )
 
 BUILD_CC := $(CC)
 
