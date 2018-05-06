@@ -789,6 +789,10 @@ install : $(BIN)
 	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/libs || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/libs
 	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/palette || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/palette
 	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture/thomson || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture/thomson
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture/thomson/lib || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture/thomson/lib
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture/others-8bit || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture/others-8bit
+	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture/others-8bit/lib || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture/others-8bit/lib
 	test -d $(DESTDIR)$(datadir)/applications || $(MKDIR) $(DESTDIR)$(datadir)/applications
 	test -d $(DESTDIR)$(pixmapdir) || $(MKDIR) $(DESTDIR)$(pixmapdir)
 	
