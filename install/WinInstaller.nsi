@@ -1,6 +1,8 @@
 ;NSIS Modern User Interface
 ;Based on the Example Script written by Joost Verburg
 
+!define VERSION 2.5
+
 ;--------------------------------
 ;Include Modern UI
 
@@ -11,7 +13,7 @@
 
   ;Name and file
   Name "Grafx2"
-  OutFile "grafx2-2.4.2023.win32.exe"
+  OutFile "grafx2-${VERSION}.win32.exe"
 
   ;Default installation folder
   InstallDir "$PROGRAMFILES\Grafx2"
@@ -23,6 +25,7 @@
   ;Request application privileges for Windows Vista
   RequestExecutionLevel user
 
+  SetCompressor /SOLID LZMA
 ;--------------------------------
 ;Interface Settings
 
@@ -78,7 +81,8 @@ Section "Grafx2" SecProgram
   SectionIn RO
   SetOutPath "$INSTDIR"
   ;ADD YOUR OWN FILES HERE...
-  File ..\src-2.4wip2023.tgz
+  File ..\src\gfx2.ico
+  ;File ..\src-2.4wip2023.tgz
   SetOutPath "$INSTDIR\bin"
   File ..\bin\grafx2.exe
   File ..\bin\SDL_image.dll
@@ -91,72 +95,11 @@ Section "Grafx2" SecProgram
   File ..\share\grafx2\gfx2.gif
   File ..\share\grafx2\gfx2def.ini
   SetOutPath "$INSTDIR\share\grafx2\skins"
-  File ..\share\grafx2\skins\font_Classic.png
-  File ..\share\grafx2\skins\font_DPaint.png
-  File ..\share\grafx2\skins\font_Fairlight.png
-  File ..\share\grafx2\skins\font_Fun.png
-  File ..\share\grafx2\skins\font_Melon.png
-  File ..\share\grafx2\skins\font_Seen.png
-  File ..\share\grafx2\skins\skin_Aurora.png
-  File ..\share\grafx2\skins\skin_classic.png
-  File ..\share\grafx2\skins\skin_DPaint.png
-  File ..\share\grafx2\skins\skin_modern.png
-  File ..\share\grafx2\skins\skin_scenish.png
-  SetOutPath "$INSTDIR\share\grafx2\scripts\samples_2.4\brush"
-  File ..\share\grafx2\scripts\samples_2.4\brush\ApplyColor.lua
-  File ..\share\grafx2\scripts\samples_2.4\brush\Fisheye.lua
-  File ..\share\grafx2\scripts\samples_2.4\brush\GrayscaleAvg.lua
-  File ..\share\grafx2\scripts\samples_2.4\brush\GrayscaleDesat.lua
-  File ..\share\grafx2\scripts\samples_2.4\brush\Halfsmooth.lua
-  File ..\share\grafx2\scripts\samples_2.4\brush\Waves.lua
-  SetOutPath "$INSTDIR\share\grafx2\scripts\samples_2.4\demo"
-  File ..\share\grafx2\scripts\samples_2.4\demo\3DPalette.lua
-  File ..\share\grafx2\scripts\samples_2.4\demo\Ellipse.lua
-  File ..\share\grafx2\scripts\samples_2.4\demo\FlipPicture.lua
-  File ..\share\grafx2\scripts\samples_2.4\demo\SierpinskyCarpet.lua
-  File ..\share\grafx2\scripts\samples_2.4\demo\SierpinskyTriangle.lua
-  File ..\share\grafx2\scripts\samples_2.4\demo\Spritesheet.lua
-  SetOutPath "$INSTDIR\share\grafx2\scripts\samples_2.4\demo\brush"
-  File ..\share\grafx2\scripts\samples_2.4\demo\brush\Amigaball.lua
-  File ..\share\grafx2\scripts\samples_2.4\demo\brush\ColorSphere.lua
-  File ..\share\grafx2\scripts\samples_2.4\demo\brush\FindAA.lua
-  File ..\share\grafx2\scripts\samples_2.4\demo\brush\Mandelbrot.lua
-  SetOutPath "$INSTDIR\share\grafx2\scripts\samples_2.4\libs"
-  File ..\share\grafx2\scripts\samples_2.4\libs\dawnbringer_lib.lua
-  File ..\share\grafx2\scripts\samples_2.4\libs\memory.lua
-  SetOutPath "$INSTDIR\share\grafx2\scripts\samples_2.4\palette"
-  File ..\share\grafx2\scripts\samples_2.4\palette\Desaturate.lua
-  File ..\share\grafx2\scripts\samples_2.4\palette\ExpandColors.lua
-  File ..\share\grafx2\scripts\samples_2.4\palette\FillColorCube.lua
-  File ..\share\grafx2\scripts\samples_2.4\palette\InvertedRGB.lua
-  File ..\share\grafx2\scripts\samples_2.4\palette\Set3bit.lua
-  File ..\share\grafx2\scripts\samples_2.4\palette\Set6bit.lua
-  File ..\share\grafx2\scripts\samples_2.4\palette\SetC64Palette.lua
-  File ..\share\grafx2\scripts\samples_2.4\palette\ShiftHue.lua
-  SetOutPath "$INSTDIR\share\grafx2\scripts\samples_2.4\picture"
-  File ..\share\grafx2\scripts\samples_2.4\picture\CellColourReducer.lua
-  File ..\share\grafx2\scripts\samples_2.4\picture\DrawGridIsometric.lua
-  File ..\share\grafx2\scripts\samples_2.4\picture\DrawgridOrthogonal_Index.lua
-  File ..\share\grafx2\scripts\samples_2.4\picture\DrawGridOrthogonal_RGB.lua
-  File ..\share\grafx2\scripts\samples_2.4\picture\GlassGridFilter.lua
-  File ..\share\grafx2\scripts\samples_2.4\picture\PaletteToPicture.lua
-  File ..\share\grafx2\scripts\samples_2.4\picture\Pic2isometric.lua
-  File ..\share\grafx2\scripts\samples_2.4\picture\Rainbow-Dark2Bright.lua
-  File ..\share\grafx2\scripts\samples_2.4\picture\RemapImage2RGB.lua
-  File ..\share\grafx2\scripts\samples_2.4\picture\RemapImage2RGB_ed.lua
-  File ..\share\grafx2\scripts\samples_2.4\picture\RemapImageTo3bitPal.lua
-  File ..\share\grafx2\scripts\samples_2.4\Tiler.lua
-  File ..\share\grafx2\scripts\samples_2.4\picture\XBitColourXpaceFromPalette.lua
+  File ..\share\grafx2\skins\*.png
+  SetOutPath "$INSTDIR\share\grafx2\scripts\samples_2.4"
+  File /r ..\share\grafx2\scripts\samples_2.4\*.*
   SetOutPath "$INSTDIR\doc"
-  File ..\doc\COMPILING.txt
-  File ..\doc\PF_fonts.txt
-  File ..\doc\README-SDL.txt
-  File ..\doc\README-SDL_image.txt
-  File ..\doc\README-SDL_ttf.txt
-  File ..\doc\README-lua.txt
-  File ..\doc\README-zlib1.txt
-  File ..\doc\README.txt
-  File ..\doc\gpl-2.0.txt
+  File ..\doc\*.txt
   SetOutPath "$INSTDIR\share\grafx2\fonts"
   File ..\share\grafx2\fonts\8pxfont.png
   File ..\share\grafx2\fonts\Tuffy.ttf
@@ -179,6 +122,8 @@ Section "Grafx2" SecProgram
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
                  "DisplayName" "GrafX2 (GNU GPL)"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
+                 "Publisher" "GrafX2 Project Team"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
                  "UninstallString" "$INSTDIR\uninstall.exe"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
                  "InstalledProductName" "GrafX2"
@@ -187,9 +132,9 @@ Section "Grafx2" SecProgram
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
                  "DisplayIcon" "$INSTDIR\gfx2.ico"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
-                 "URLInfoAbout" "http://grafx2.org"
+                 "URLInfoAbout" "http://grafx2.tk"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
-                 "DisplayVersion" "2.4.wip2023"
+                 "DisplayVersion" "${VERSION}"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
                  "NoModify" 1
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
@@ -230,8 +175,9 @@ SectionEnd
 Section "un.SecProgram"
 
   ;ADD YOUR OWN FILES HERE...
+  Delete "$INSTDIR\gfx2.ico"
   Delete "$INSTDIR\bin\grafx2.exe"
-  Delete "$INSTDIR\src-2.4.wip2023.tgz"
+;  Delete "$INSTDIR\src-2.4.wip2023.tgz"
   Delete "$INSTDIR\share\grafx2\gfx2.gif"
   Delete "$INSTDIR\share\grafx2\gfx2def.ini"
   Delete "$INSTDIR\bin\SDL_image.dll"
@@ -243,91 +189,10 @@ Section "un.SecProgram"
   Delete "$INSTDIR\bin\stdout.txt"
   Delete "$INSTDIR\bin\stderr.txt"
   RMDir  "$INSTDIR\bin"
-  Delete "$INSTDIR\doc\COMPILING.txt"
-  Delete "$INSTDIR\doc\PF_fonts.txt"
-  Delete "$INSTDIR\doc\README-SDL.txt"
-  Delete "$INSTDIR\doc\README-SDL_image.txt"
-  Delete "$INSTDIR\doc\README-SDL_ttf.txt"
-  Delete "$INSTDIR\doc\README-lua.txt"
-  Delete "$INSTDIR\doc\README-zlib1.txt"
-  Delete "$INSTDIR\doc\README.txt"
-  Delete "$INSTDIR\doc\gpl-2.0.txt"
-  RMDir  "$INSTDIR\doc"
-  Delete "$INSTDIR\share\grafx2\fonts\8pxfont.png"
-  Delete "$INSTDIR\share\grafx2\fonts\Tuffy.ttf"
-  Delete "$INSTDIR\share\grafx2\fonts\PF_Arma_5__.png"
-  Delete "$INSTDIR\share\grafx2\fonts\PF_Easta_7_.png"
-  Delete "$INSTDIR\share\grafx2\fonts\PF_Easta_7__.png"
-  Delete "$INSTDIR\share\grafx2\fonts\PF_Ronda_7__.png"
-  Delete "$INSTDIR\share\grafx2\fonts\PF_Tempesta_5.png"
-  Delete "$INSTDIR\share\grafx2\fonts\PF_Tempesta_5_.png"
-  Delete "$INSTDIR\share\grafx2\fonts\PF_Tempesta_5__.png"
-  Delete "$INSTDIR\share\grafx2\fonts\PF_Tempesta_5___.png"
-  Delete "$INSTDIR\share\grafx2\fonts\PF_Tempesta_7.png"
-  Delete "$INSTDIR\share\grafx2\fonts\PF_Tempesta_7_.png"
-  Delete "$INSTDIR\share\grafx2\fonts\PF_Tempesta_7__.png"
-  Delete "$INSTDIR\share\grafx2\fonts\PF_Tempesta_7___.png"
-  Delete "$INSTDIR\share\grafx2\fonts\PF_Westa_7_.png"
-  Delete "$INSTDIR\share\grafx2\fonts\PF_Westa_7__.png"
-  RMDir  "$INSTDIR\share\grafx2\fonts"
-  Delete "$INSTDIR\share\grafx2\skins\font_Classic.png"
-  Delete "$INSTDIR\share\grafx2\skins\font_Fun.png"
-  Delete "$INSTDIR\share\grafx2\skins\font_Fairlight.png"
-  Delete "$INSTDIR\share\grafx2\skins\font_Melon.png"
-  Delete "$INSTDIR\share\grafx2\skins\font_DPaint.png"
-  Delete "$INSTDIR\share\grafx2\skins\font_Seen.png"
-  Delete "$INSTDIR\share\grafx2\skins\skin_classic.png"
-  Delete "$INSTDIR\share\grafx2\skins\skin_Aurora.png"
-  Delete "$INSTDIR\share\grafx2\skins\skin_modern.png"
-  Delete "$INSTDIR\share\grafx2\skins\skin_DPaint.png"
-  Delete "$INSTDIR\share\grafx2\skins\skin_scenish.png"
-  RMDir  "$INSTDIR\share\grafx2\skins"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\brush\ApplyColor.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\brush\Fisheye.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\brush\GrayscaleAvg.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\brush\GrayscaleDesat.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\brush\Halfsmooth.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\brush\Waves.lua"
-  RMDir  "$INSTDIR\share\grafx2\scripts\samples_2.4\brush"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\demo\brush\Amigaball.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\demo\brush\ColorSphere.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\demo\brush\FindAA.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\demo\brush\Mandelbrot.lua"
-  RMDir  "$INSTDIR\share\grafx2\scripts\samples_2.4\demo\brush"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\demo\3DPalette.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\demo\Ellipse.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\demo\FlipPicture.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\demo\SierpinskyCarpet.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\demo\SierpinskyTriangle.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\demo\Spritesheet.lua"
-  RMDir  "$INSTDIR\share\grafx2\scripts\samples_2.4\demo"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\libs\dawnbringer_lib.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\libs\memory.lua"
-  RMDir  "$INSTDIR\share\grafx2\scripts\samples_2.4\libs"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\palette\Desaturate.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\palette\ExpandColors.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\palette\FillColorCube.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\palette\InvertedRGB.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\palette\Set3bit.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\palette\Set6bit.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\palette\SetC64Palette.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\palette\ShiftHue.lua"
-  RMDir  "$INSTDIR\share\grafx2\scripts\samples_2.4\palette"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\picture\CellColourReducer.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\picture\DrawGridIsometric.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\picture\DrawgridOrthogonal_Index.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\picture\DrawGridOrthogonal_RGB.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\picture\GlassGridFilter.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\picture\PaletteToPicture.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\picture\Pic2isometric.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\picture\Rainbow-Dark2Bright.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\picture\RemapImage2RGB.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\picture\RemapImage2RGB_ed.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\picture\RemapImageTo3bitPal.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\picture\Tiler.lua"
-  Delete "$INSTDIR\share\grafx2\scripts\samples_2.4\picture\XBitColourXpaceFromPalette.lua"
-  RMDir  "$INSTDIR\share\grafx2\scripts\samples_2.4\picture"
-  RMDir  "$INSTDIR\share\grafx2\scripts\samples_2.4"
+  RMDir /r "$INSTDIR\doc"
+  RMDir /r "$INSTDIR\share\grafx2\fonts"
+  RMDir /r "$INSTDIR\share\grafx2\skins"
+  RMDir /r "$INSTDIR\share\grafx2\scripts"
   RMDir  "$INSTDIR\share\grafx2\scripts"
   RMDir  "$INSTDIR\share\grafx2"
   RMDir  "$INSTDIR\share"
