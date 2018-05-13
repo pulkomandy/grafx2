@@ -3,6 +3,8 @@
 
 !define VERSION 2.5.1946
 
+!define INSTALLSIZE 10072
+
 ;--------------------------------
 ;Include Modern UI
 
@@ -88,9 +90,10 @@ Section "Grafx2" SecProgram
   File ..\bin\SDL_image.dll
   File ..\bin\SDL.dll
   File ..\bin\libfreetype-6.dll
+  File ..\bin\libjpeg-9.dll
   File ..\bin\SDL_ttf.dll
   File ..\bin\zlib1.dll
-  File ..\bin\libpng14-14.dll
+  File ..\bin\libpng16-16.dll
   SetOutPath "$INSTDIR\share\grafx2"
   File ..\share\grafx2\gfx2.gif
   File ..\share\grafx2\gfx2def.ini
@@ -182,10 +185,11 @@ Section "un.SecProgram"
   Delete "$INSTDIR\share\grafx2\gfx2def.ini"
   Delete "$INSTDIR\bin\SDL_image.dll"
   Delete "$INSTDIR\bin\SDL.dll"
+  Delete "$INSTDIR\bin\libjpeg-9.dll"
   Delete "$INSTDIR\bin\libfreetype-6.dll"
   Delete "$INSTDIR\bin\SDL_ttf.dll"
   Delete "$INSTDIR\bin\zlib1.dll"
-  Delete "$INSTDIR\bin\libpng14-14.dll"
+  Delete "$INSTDIR\bin\libpng16-16.dll"
   Delete "$INSTDIR\bin\stdout.txt"
   Delete "$INSTDIR\bin\stderr.txt"
   RMDir  "$INSTDIR\bin"
