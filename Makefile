@@ -3,7 +3,7 @@ OPT = WIN32CROSS=1 \
 
 endif
 
-.PHONY:	all tools grafx2 ziprelease 3rdparty
+.PHONY:	all tools grafx2 ziprelease 3rdparty win32installer
 
 all:	grafx2 tools
 
@@ -18,3 +18,6 @@ tools:
 
 3rdparty:
 	cd 3rdparty/ && $(OPT)$(MAKE)
+
+win32installer:
+	$(MAKE) -C install/
