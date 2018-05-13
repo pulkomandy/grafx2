@@ -21,7 +21,7 @@ LIBTIFFURL = ftp://ftp.sgi.com/graphics/tiff/$(LIBTIFFARCH)
 ZLIB=zlib-1.2.11
 ZLIBARCH=$(ZLIB).tar.gz
 ZLIBURL=https://www.zlib.net/$(ZLIBARCH)
-FREETYPE=freetype-2.9
+FREETYPE=freetype-2.9.1
 FREETYPEARCH=$(FREETYPE).tar.gz
 FREETYPEURL=https://download.savannah.gnu.org/releases/freetype/$(FREETYPEARCH)
 LUA=lua-5.3.4
@@ -135,7 +135,9 @@ $(SDLTTF)/.ok:	archives/$(SDLTTFARCH)
 $(PREFIX)/lib/libfreetype.a:	$(PREFIX)/lib/libpng.a
 
 $(PREFIX)/lib/libfreetype.a:	$(FREETYPE)/.ok
-	cd $(FREETYPE) && ./configure --build=$(shell $(BUILD_CC) -dumpmachine) --host=$(HOST) --prefix=$(PREFIX) PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig LDFLAGS="$(LDFLAGS)"
+	cd $(FREETYPE) && ./configure --build=$(shell $(BUILD_CC) -dumpmachine) --host=$(HOST) \
+	  --prefix=$(PREFIX) --enable-freetype-config \
+	  PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig LDFLAGS="$(LDFLAGS)"
 	cd $(FREETYPE) && $(MAKE)
 	cd $(FREETYPE) && $(MAKE) install
 ifdef WIN32CROSS
