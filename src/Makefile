@@ -384,7 +384,9 @@ endif
       COPT += $(LUACOPT)
       LOPT += $(LUALOPT)
       OBJDIR = ../obj/win32
+      WINDRES ?= $(shell which i686-w64-mingw32-windres || which mingw32-windres)
       PLATFORM = win32
+      PLATFORMOBJ = winres.o
       PLATFORMFILES = bin/SDL.dll bin/SDL_image.dll $(wildcard ../bin/libpng*.dll) $(wildcard ../bin/libjpeg*.dll) bin/zlib1.dll $(TTFLIBS)
     else
       ifdef GP2XCROSS
