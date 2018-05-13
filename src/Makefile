@@ -361,12 +361,16 @@ endif
         LUACOPT =
         LUALOPT =
       else
-        LUAPKG := $(shell for p in lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua51 lua ; do pkg-config --exists $$p && echo $$p && break ; done)
-        LUACOPT = $(shell pkg-config $(LUAPKG) --cflags)
-        LUALOPT = $(shell pkg-config $(LUAPKG) --libs)
+        ifdef WIN32CROSS
+          LUACOPT = -I../3rdparty/usr/include
+        else
+          LUAPKG := $(shell for p in lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua51 lua ; do pkg-config --exists $$p && echo $$p && break ; done)
+          LUACOPT = $(shell pkg-config $(LUAPKG) --cflags)
+          LUALOPT = $(shell pkg-config $(LUAPKG) --libs)
+        endif
       endif
     endif
-    
+
     # These can only be used under linux and maybe freebsd. They allow to compile for the gp2x or to create a windows binary
     ifdef WIN32CROSS
       #cross compile a Win32 executable
