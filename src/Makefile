@@ -35,7 +35,11 @@
 
 # Detect GIT revision
   GIT_REVISION = $(shell git rev-list --count 1af8c74f53110e349d8f0d19b14599281913f71f..)
-  GIT_BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
+  ifneq (,$(CI_COMMIT_REF_NAME))
+    GIT_BRANCH = $(CI_COMMIT_REF_NAME)
+  else
+    GIT_BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
+  endif
   ifneq (master,$(GIT_BRANCH))
     GIT_REVISION := "$(GIT_REVISION)-$(GIT_BRANCH)"
   endif
