@@ -1,18 +1,23 @@
+# (c) 2018 Thomas Bernard
+
+MAKENSIS = makensis
+UNZIP = unzip -o
+SED = sed
+
 VERSIONTAG = ../obj/win32/versiontag
 VERSION := $(shell cat $(VERSIONTAG))
 
 SOURCES = ../src-$(VERSION).tgz
-INSTALLER = ../grafx2-$(VERSION).win32.exe
+INSTALLER = grafx2-$(VERSION).win32.exe
 
 all:	$(INSTALLER)
 
 $(INSTALLER):	WinInstaller.nsi $(SOURCES) $(VERSIONTAG)
-	sed 's/src-.*.tgz/src-$(VERSION).tgz/' $< | \
-	sed 's/VERSION .*/VERSION $(VERSION)/' > new_$<
-	makensis new_$<
+	$(SED) 's/VERSION .*/VERSION $(VERSION)/' $< | $(MAKENSIS) -
 
 $(SOURCES):	../grafx2-$(VERSION)-win32.zip 
-	cd .. && unzip grafx2-$(VERSION)-win32.zip src-$(VERSION).tgz
+	cd .. && $(UNZIP) grafx2-$(VERSION)-win32.zip src-$(VERSION).tgz
+	touch $@
 
-../grafx2-$(VERSION)-win32.zip:
-	cd ../src && WIN32CROSS=1 make ziprelease
+../grafx2-$(VERSION)-win32.zip:	$(VERSIONTAG)
+	cd ../src && WIN32CROSS=1 $(MAKE) ziprelease

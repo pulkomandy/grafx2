@@ -84,7 +84,7 @@ Section "Grafx2" SecProgram
   SetOutPath "$INSTDIR"
   ;ADD YOUR OWN FILES HERE...
   File ..\src\gfx2.ico
-  File "..\src-${VERSION}-HEAD.tgz"
+  File "..\src-${VERSION}.tgz"
   SetOutPath "$INSTDIR\bin"
   File ..\bin\grafx2.exe
   File ..\bin\SDL_image.dll
@@ -180,7 +180,7 @@ Section "un.SecProgram"
   ;ADD YOUR OWN FILES HERE...
   Delete "$INSTDIR\gfx2.ico"
   Delete "$INSTDIR\bin\grafx2.exe"
-  Delete "$INSTDIR\src-${VERSION}-HEAD.tgz"
+  Delete "$INSTDIR\src-${VERSION}.tgz"
   Delete "$INSTDIR\share\grafx2\gfx2.gif"
   Delete "$INSTDIR\share\grafx2\gfx2def.ini"
   Delete "$INSTDIR\bin\SDL_image.dll"
