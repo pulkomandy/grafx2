@@ -32,6 +32,7 @@ RECOILVER=4.2.0
 RECOIL=recoil-$(RECOILVER)
 RECOILARCH=$(RECOIL).tar.gz
 RECOILURL=https://sourceforge.net/projects/recoil/files/recoil/$(RECOILVER)/$(RECOILARCH)
+RECOILURLALT=http://nanard.free.fr/grafx2/$(RECOILARCH)
 
 PREFIX = $(PWD)/usr
 
@@ -245,4 +246,4 @@ archives/$(LUAARCH):
 
 archives/$(RECOILARCH):
 	@$(MKDIR) $(@D)
-	cd $(@D) && $(GETURL) $(RECOILURL)
+	cd $(@D) && ( $(GETURL) $(RECOILURL) || $(GETURL) $(RECOILURLALT) )
