@@ -119,7 +119,9 @@ $(SDLIMAGE)/.ok:	archives/$(SDLIMAGEARCH)
 $(PREFIX)/lib/libSDL_ttf.a:	$(PREFIX)/lib/libfreetype.a
 
 $(PREFIX)/lib/libSDL_ttf.a:	$(SDLTTF)/.ok
-	cd $(SDLTTF) && CC=$(CC) CPPFLAGS=-I$(PREFIX)/include LDFLAGS="-L$(PREFIX)/lib $(LDFLAGS)" ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --host=$(HOST)
+	cd $(SDLTTF) && PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig \
+	  CC=$(CC) CPPFLAGS=-I$(PREFIX)/include LDFLAGS="-L$(PREFIX)/lib $(LDFLAGS)" \
+	  ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --with-freetype-prefix=$(PREFIX) --host=$(HOST)
 	cd $(SDLTTF) && $(MAKE)
 	cd $(SDLTTF) && $(MAKE) install
 ifdef WIN32CROSS
