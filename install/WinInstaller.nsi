@@ -1,7 +1,7 @@
 ;NSIS Modern User Interface
 ;Based on the Example Script written by Joost Verburg
 
-!define VERSION 2.5
+!define VERSION 2.5.1946
 
 ;--------------------------------
 ;Include Modern UI
@@ -82,7 +82,7 @@ Section "Grafx2" SecProgram
   SetOutPath "$INSTDIR"
   ;ADD YOUR OWN FILES HERE...
   File ..\src\gfx2.ico
-  ;File ..\src-2.4wip2023.tgz
+  File "..\src-${VERSION}-HEAD.tgz"
   SetOutPath "$INSTDIR\bin"
   File ..\bin\grafx2.exe
   File ..\bin\SDL_image.dll
@@ -177,7 +177,7 @@ Section "un.SecProgram"
   ;ADD YOUR OWN FILES HERE...
   Delete "$INSTDIR\gfx2.ico"
   Delete "$INSTDIR\bin\grafx2.exe"
-;  Delete "$INSTDIR\src-2.4.wip2023.tgz"
+  Delete "$INSTDIR\src-${VERSION}-HEAD.tgz"
   Delete "$INSTDIR\share\grafx2\gfx2.gif"
   Delete "$INSTDIR\share\grafx2\gfx2def.ini"
   Delete "$INSTDIR\bin\SDL_image.dll"
@@ -192,7 +192,7 @@ Section "un.SecProgram"
   RMDir /r "$INSTDIR\doc"
   RMDir /r "$INSTDIR\share\grafx2\fonts"
   RMDir /r "$INSTDIR\share\grafx2\skins"
-  RMDir /r "$INSTDIR\share\grafx2\scripts"
+  RMDir /r "$INSTDIR\share\grafx2\scripts\samples_2.4"
   RMDir  "$INSTDIR\share\grafx2\scripts"
   RMDir  "$INSTDIR\share\grafx2"
   RMDir  "$INSTDIR\share"
