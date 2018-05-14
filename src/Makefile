@@ -620,7 +620,7 @@ FONT_FILES = $(addprefix ../share/grafx2/fonts/,$(FONTS))
 
 ifeq ($(PLATFORM),Darwin)
 all : $(MACAPPEXE)
-$(MACAPPEXE) : $(BIN)
+$(MACAPPEXE) : $(BIN) $(OBJDIR)/versiontag
 	rm -rf Grafx2.app
 	mkdir -p Grafx2.app Grafx2.app/Contents Grafx2.app/Contents/Frameworks Grafx2.app/Contents/MacOS Grafx2.app/Contents/Resources Grafx2.app/Contents/Resources/scripts
 	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.4
@@ -632,7 +632,8 @@ $(MACAPPEXE) : $(BIN)
 	echo 'APPL????' > Grafx2.app/Contents/PkgInfo
 	cp ../Info.plist Grafx2.app/Contents
 	cp -r Grafx2.icns Grafx2.app/Contents/Resources
-	cp -r English.lproj Grafx2.app/Contents/Resources
+	mkdir -p Grafx2.app/Contents/Resources/English.lproj
+	iconv -f UTF-16BE English.lproj/InfoPlist.strings | sed -e 's/Grafx2 version [.0-9]*/Grafx2 version $(shell cat $(OBJDIR)/versiontag)/' | iconv -t UTF-16BE > Grafx2.app/Contents/Resources/English.lproj/InfoPlist.strings
 	cp -r ../share/grafx2/fonts Grafx2.app/Contents/Resources
 	cp -r ../share/grafx2/skins Grafx2.app/Contents/Resources
 	cp -r ../share/grafx2/gfx2def.ini Grafx2.app/Contents/Resources
