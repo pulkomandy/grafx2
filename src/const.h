@@ -167,6 +167,7 @@ enum ERROR_CODES
   ERROR_MEMORY,            ///< Out of memory
   ERROR_COMMAND_LINE,      ///< Error in command-line arguments (syntax, or couldn't find the file to open)
   ERROR_FORBIDDEN_MODE,    ///< Graphics mode requested is not supported
+  ERROR_FORBIDDEN_SIZE,    ///< Image size requested is not supported
   ERROR_SAVING_CFG,        ///< Error while writing gfx2.cfg
   ERROR_MISSING_DIRECTORY, ///< Unable to return to the original "current directory" on program exit
   ERROR_INI_CORRUPTED,     ///< File gfx2.ini couldn't be parsed

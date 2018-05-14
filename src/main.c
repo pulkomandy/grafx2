@@ -94,24 +94,28 @@
 
 extern char Program_version[]; // generated in pversion.c
 
+static int setsize_width;
+static int setsize_height;
+
 //--- Affichage de la syntaxe, et de la liste des modes vidéos disponibles ---
 void Display_syntax(void)
 {
   int mode_index;
   printf("Syntax: grafx2 [<arguments>] [<picture1>] [<picture2>]\n\n");
   printf("<arguments> can be:]\n");
-  printf("\t-? -h -H -help    for this help screen\n");
-  printf("\t-wide             to emulate a video mode with wide pixels (2x1)\n");
-  printf("\t-tall             to emulate a video mode with tall pixels (1x2)\n");
-  printf("\t-double           to emulate a video mode with double pixels (2x2)\n");
-  printf("\t-wide2            to emulate a video mode with double wide pixels (4x2)\n");
-  printf("\t-tall2            to emulate a video mode with double tall pixels (2x4)\n");
-  printf("\t-triple           to emulate a video mode with triple pixels (3x3)\n");
-  printf("\t-quadruple        to emulate a video mode with quadruple pixels (4x4)\n");
-  printf("\t-rgb n            to reduce RGB precision (2 to 256, 256=max precision)\n");
-  printf("\t-gamma n          to adjust Gamma correction (1 to 30, 10=no correction)\n");
-  printf("\t-skin <filename>  to use an alternate file with the menu graphics\n");
-  printf("\t-mode <videomode> to set a video mode\n");
+  printf("\t-? -h -H -help     for this help screen\n");
+  printf("\t-wide              to emulate a video mode with wide pixels (2x1)\n");
+  printf("\t-tall              to emulate a video mode with tall pixels (1x2)\n");
+  printf("\t-double            to emulate a video mode with double pixels (2x2)\n");
+  printf("\t-wide2             to emulate a video mode with double wide pixels (4x2)\n");
+  printf("\t-tall2             to emulate a video mode with double tall pixels (2x4)\n");
+  printf("\t-triple            to emulate a video mode with triple pixels (3x3)\n");
+  printf("\t-quadruple         to emulate a video mode with quadruple pixels (4x4)\n");
+  printf("\t-rgb n             to reduce RGB precision (2 to 256, 256=max precision)\n");
+  printf("\t-gamma n           to adjust Gamma correction (1 to 30, 10=no correction)\n");
+  printf("\t-skin <filename>   to use an alternate file with the menu graphics\n");
+  printf("\t-mode <videomode>  to set a video mode\n");
+  printf("\t-size <resolution> to set the image size\n");
   printf("Arguments can be prefixed either by / - or --\n");
   printf("They can also be abbreviated.\n\n");
   printf("Available video modes:\n\n");
@@ -179,6 +183,8 @@ void Error_function(int error_code, const char *filename, int line_number, const
                                        printf("enabled mode, then enter the resolution menu and enable the mode you want.\n");
                                        printf("Check also if the 'Default_video_mode' parameter in gfx2.ini is correct.\n");
                                        break;
+      case ERROR_FORBIDDEN_SIZE      : printf("Error: The image dimensions all have to be in the range 1-9999!\n");
+                                       break;
       case ERROR_COMMAND_LINE     : printf("Error: Invalid parameter or file not found.\n\n");
                                        Display_syntax();
                                        break;
@@ -217,7 +223,8 @@ enum CMD_PARAMS
     CMDPARAM_PIXELRATIO_WIDE2,
     CMDPARAM_RGB,
     CMDPARAM_GAMMA,
-    CMDPARAM_SKIN
+    CMDPARAM_SKIN,
+    CMDPARAM_SIZE
 };
 
 struct {
@@ -239,7 +246,8 @@ struct {
     {"wide2", CMDPARAM_PIXELRATIO_WIDE2},
     {"rgb", CMDPARAM_RGB},
     {"gamma", CMDPARAM_GAMMA},
-    {"skin", CMDPARAM_SKIN}
+    {"skin", CMDPARAM_SKIN},
+    {"size", CMDPARAM_SIZE},
 };
 
 #define ARRAY_SIZE(x) (int)(sizeof(x) / sizeof(x[0]))
@@ -261,6 +269,7 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
     char *s = argv[index];
     int is_switch = ((strchr(s,'/') == s) || (strchr(s,'-') == s) || (strstr(s,"--") == s));
     int tmpi;
+    char *tmpcp;
     int paramtype = -1;
     if (is_switch)
     {
@@ -396,6 +405,36 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
         if (index<argc)
         {
           strcpy(Config.Skin_file,argv[index]);
+        }
+        else
+        {
+          Error(ERROR_COMMAND_LINE);
+          Display_syntax();
+          exit(0);
+        }
+        break;
+      case CMDPARAM_SIZE:
+        index++;
+        if (index<argc)
+        {
+          setsize_width = atoi(argv[index]);
+          tmpcp = strchr(argv[index], 'x');
+          if (tmpcp == NULL)
+            tmpcp = strchr(argv[index], 'X');
+          if (tmpcp == NULL)
+          {
+            Error(ERROR_COMMAND_LINE);
+            Display_syntax();
+            exit(0);
+          }
+          setsize_height = atoi(++tmpcp);
+          if (setsize_height < 1 || setsize_height > 9999 ||
+              setsize_width < 1 || setsize_width > 9999)
+          {
+            Error(ERROR_FORBIDDEN_SIZE);
+            Display_syntax();
+            exit(0);
+          }
         }
         else
         {
@@ -817,6 +856,15 @@ int Init_program(int argc,char * argv[])
   
   // Nettoyage de l'écran virtuel (les autres recevront celui-ci par copie)
   memset(Main_screen,0,Main.image_width*Main.image_height);
+
+  // If image size was specified on command line, set that now
+  if (setsize_width != 0 && setsize_height != 0)
+  {
+    Main.image_width=setsize_width;
+    Main.image_height=setsize_height;
+    Spare.image_width=setsize_width;
+    Spare.image_height=setsize_height;
+  }
 
   // Now that the backup system is there, we can store the gradients.
   memcpy(Main.backups->Pages->Gradients->Range, initial_gradients.Range, sizeof(initial_gradients.Range));
