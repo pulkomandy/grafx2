@@ -35,7 +35,7 @@
   #include <direct.h>
 #endif
 #elif defined(__macosx__)
-  #import <corefoundation/corefoundation.h>
+  #import <CoreFoundation/CoreFoundation.h>
   #import <sys/param.h>
 #elif defined(__FreeBSD__)
   #include <sys/param.h>

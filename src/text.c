@@ -46,7 +46,7 @@
 #endif
 
 #if defined(__macosx__)
-  #import <corefoundation/corefoundation.h>
+  #import <CoreFoundation/CoreFoundation.h>
   #import <sys/param.h>
 #endif
 
