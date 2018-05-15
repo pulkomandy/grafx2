@@ -34,6 +34,7 @@
   STRIP = strip
 
 # Detect GIT revision
+ifeq (true,$(shell git rev-parse --is-inside-work-tree))
   GIT_REVISION = $(shell git rev-list --count 1af8c74f53110e349d8f0d19b14599281913f71f..)
   ifneq (,$(CI_COMMIT_REF_NAME))
     GIT_BRANCH = $(CI_COMMIT_REF_NAME)
@@ -43,6 +44,10 @@
   ifneq (master,$(GIT_BRANCH))
     GIT_REVISION := "$(GIT_REVISION)-$(GIT_BRANCH)"
   endif
+else
+  # outside git repository : get version stored in version.c
+  GIT_REVISION := $(shell cat version.c | cut -f 2 -d '"')
+endif
 
   REVISION_CACHE = .revision.cache
   RES := $(shell if [ ! -f $(REVISION_CACHE) ] || [ "`cat $(REVISION_CACHE)`" != "$(GIT_REVISION)" ] ; then echo "$(GIT_REVISION)" > $(REVISION_CACHE) ; fi )
@@ -737,15 +742,15 @@ RES := $(shell if [ ! -f $(CFLAGS_CACHE) ] || [ "`cat $(CFLAGS_CACHE)`" != "$(CO
 
 ifndef NORECOIL
 recoil.c:	../3rdparty/recoil-$(RECOILVER)/recoil.c
-	$(CP) $< $@
-	$(CP) $(subst .c,.h,$< $@)
+	if [ -f $< ] ; then $(CP) $< $@ ; fi
+	if [ -f $(subst .c,.h,$<) ] ; then $(CP) $(subst .c,.h,$< $@) ; fi
 
 recoil.h:	recoil.c
 
 $(OBJDIR)/loadrecoil.o:	recoil.c recoil.h
 
 ../3rdparty/recoil-$(RECOILVER)/recoil.c:
-	$(MAKE) -C ../3rdparty recoil
+	if [ -d ../3rdparty ] ; then $(MAKE) -C ../3rdparty recoil ; fi
 endif
 
 $(OBJ):	$(CFLAGS_CACHE)

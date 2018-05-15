@@ -11,6 +11,7 @@ job_linux:
     artifacts:
         paths:
             - "*.zip"
+            - "*.tgz"
 
 job_win32:
     stage: build
