@@ -378,6 +378,8 @@ endif
       CROSS_SDLCONFIG ?= $(shell which ../3rdparty/usr/bin/sdl-config || which /usr/local/cross-tools/i386-mingw32/bin/sdl-config)
       CROSS_PKG_CONFIG_PATH ?= $(shell if [ -d ../3rdparty/usr ] ; then echo "$${PWD}/../3rdparty/usr/lib/pkgconfig" ; fi )
       CC = $(CROSS_CC)
+      CROSS_STRIP ?= $(shell which i686-w64-mingw32-strip || which mingw32-strip)
+      STRIP = $(CROSS_STRIP)
       BIN = ../bin/grafx2.exe
       COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb -Dmain=SDL_main $(shell $(CROSS_SDLCONFIG) --cflags) $(TTFCOPT)
       LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi $(shell $(CROSS_SDLCONFIG) --libs) -lSDL_image $(TTFLOPT)
