@@ -11,7 +11,7 @@
 #ifndef _MSC_VER
 #include <unistd.h>
 #endif
-#if defined(__AROS__) || defined(__linux__) || defined(__GLIBC__)|| defined(__MINT__) || defined(__FreeBSD__)
+#if !defined(WIN32)
 #include <limits.h>
 #endif
 
