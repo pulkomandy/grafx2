@@ -495,7 +495,7 @@ static void Read_dir_callback(void * pdata, const char *file_name, const word *u
       {
         int i;
         pos_last_dot++;
-        for (i = 0; i < sizeof(long_ext) - 1; i++)
+        for (i = 0; i < (int)sizeof(long_ext) - 1; i++)
           long_ext[i] = (unicode_name[pos_last_dot + i] < 256) ? unicode_name[pos_last_dot + i] : '?';
         long_ext[i] = '\0';
         file_name_ext = long_ext;
