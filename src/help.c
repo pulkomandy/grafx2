@@ -62,8 +62,8 @@
 #include "pages.h"
 #include "factory.h"
 
-extern char Program_version[]; // generated in pversion.c
-extern char SVN_revision[]; // generated in version.c
+extern const char Program_version[]; // generated in pversion.c
+extern const char SVN_revision[]; // generated in version.c
 
 // Recherche un raccourci clavier:
 word * Shortcut(word shortcut_number)

@@ -729,11 +729,11 @@ endif
 
 # GIT revision number
 version.c:	$(REVISION_CACHE)
-	echo "char SVN_revision[]=\"$(GIT_REVISION)\";" > version.c
+	echo "const char SVN_revision[]=\"$(GIT_REVISION)\";" > version.c
 
 ifneq ($(LABEL),)
 pversion.c:	$(LABEL_CACHE)
-	echo "char Program_version[]=\"$(LABEL)\";" > pversion.c
+	echo "const char Program_version[]=\"$(LABEL)\";" > pversion.c
 endif
 
 $(OBJDIR)/versiontag: pversion.c $(REVISION_CACHE)
