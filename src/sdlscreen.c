@@ -64,7 +64,49 @@
   #endif
 #endif
 
+static SDL_Surface * Screen_SDL = NULL;
+
 volatile int Allow_colorcycling=1;
+
+byte Get_Screen_pixel(int x, int y)
+{
+  if (y < 0 || x < 0 || y >= Screen_SDL->h || x >= Screen_SDL->w)
+  {
+    Warning("Get_Screen_pixel() coordinates out of bound");
+    return 0;
+  }
+  return ((byte *)Screen_SDL->pixels)[x + y*(Screen_SDL->pitch)];
+}
+
+void Set_Screen_pixel(int x, int y, byte value)
+{
+  if (y < 0 || x < 0 || y >= Screen_SDL->h || x >= Screen_SDL->w)
+  {
+    Warning("Set_Screen_pixel() coordinates out of bound");
+    return;
+  }
+  ((byte *)Screen_SDL->pixels)[x + y*(Screen_SDL->pitch)] = value;
+}
+
+byte* Get_Screen_pixel_ptr(int x, int y)
+{
+  if (y < 0 || x < 0 || y >= Screen_SDL->h || x >= Screen_SDL->w)
+  {
+    Warning("Get_Screen_pixel_ptr() coordinates out of bound");
+    return NULL;
+  }
+  return (byte *)Screen_SDL->pixels + x + y*(Screen_SDL->pitch);
+}
+
+void Screen_FillRect(int x, int y, int w, int h, byte color)
+{
+  SDL_Rect rectangle;
+  rectangle.x = x;
+  rectangle.y = y;
+  rectangle.w = w;
+  rectangle.h = h;
+  SDL_FillRect(Screen_SDL,&rectangle,color);
+}
 
 /// Sets the new screen/window dimensions.
 void Set_mode_SDL(int *width, int *height, int fullscreen)
@@ -86,7 +128,7 @@ void Set_mode_SDL(int *width, int *height, int fullscreen)
       *width = Screen_SDL->w;
       *height = Screen_SDL->h;
     }
-    Screen_pixels=Screen_SDL->pixels;
+    //Screen_pixels=Screen_SDL->pixels;
   }
   else
   {
@@ -319,6 +361,19 @@ void Get_SDL_Palette(const SDL_Palette * sdl_palette, T_Palette palette)
     palette[i].B=sdl_palette->colors[i].b;
   }
 
+}
+
+int SetPalette(const T_Components * colors, int firstcolor, int ncolors)
+{
+  int i;
+  SDL_Color PaletteSDL[256];
+
+  for (i = 0; i < ncolors; i++) {
+    PaletteSDL[i].r = colors[i].R;
+    PaletteSDL[i].g = colors[i].G;
+    PaletteSDL[i].b = colors[i].B;
+  }
+  return SDL_SetPalette(Screen_SDL, SDL_PHYSPAL | SDL_LOGPAL, PaletteSDL, firstcolor, ncolors);
 }
 
 void Clear_border(byte color)

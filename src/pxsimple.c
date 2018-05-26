@@ -23,7 +23,6 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <SDL.h>
 #include "global.h"
 #include "sdlscreen.h"
 #include "misc.h"
@@ -34,42 +33,47 @@
 void Pixel_simple (word x,word y,byte color)
 /* Affiche un pixel de la color aux coords x;y à l'écran */
 {
-  *(Screen_pixels + x + y * VIDEO_LINE_WIDTH)=color;
+  //*(Screen_pixels + x + y * VIDEO_LINE_WIDTH)=color;
+  Set_Screen_pixel(x, y, color);
 }
 
 byte Read_pixel_simple (word x,word y)
 /* On retourne la couleur du pixel aux coords données */
 {
-  return *( Screen_pixels + y * VIDEO_LINE_WIDTH + x );
+  //return *( Screen_pixels + y * VIDEO_LINE_WIDTH + x );
+  return Get_Screen_pixel(x, y);
 }
 
 void Block_simple (word start_x,word start_y,word width,word height,byte color)
 /* On affiche un rectangle de la couleur donnée */
 {
+#if 0
   SDL_Rect rectangle;
   rectangle.x=start_x;
   rectangle.y=start_y;
   rectangle.w=width;
   rectangle.h=height;
   SDL_FillRect(Screen_SDL,&rectangle,color);
+#endif
+  Screen_FillRect(start_x, start_y, width, height, color);
 }
 
 void Display_part_of_screen_simple (word width,word height,word image_width)
 /* Afficher une partie de l'image telle quelle sur l'écran */
 {
-  byte* dest=Screen_pixels; //On va se mettre en 0,0 dans l'écran (dest)
+  //On va se mettre en 0,0 dans l'écran (dest)
   byte* src=Main.offset_Y*image_width+Main.offset_X+Main_screen; //Coords de départ ds la source (src)
-  int y;
+  word y;
 
-  for(y=height;y!=0;y--)
+  for(y=0;y<height;y++)
   // Pour chaque ligne
   {
+    byte *dest = Get_Screen_pixel_ptr(0, y);
     // On fait une copie de la ligne
     memcpy(dest,src,width);
 
     // On passe à la ligne suivante
     src+=image_width;
-    dest+=VIDEO_LINE_WIDTH;
   }
   //Update_rect(0,0,width,height);
 }
@@ -114,7 +118,8 @@ void Pixel_preview_magnifier_simple  (word x,word y,byte color)
 void Horizontal_XOR_line_simple(word x_pos,word y_pos,word width)
 {
   //On calcule la valeur initiale de dest:
-  byte* dest=y_pos*VIDEO_LINE_WIDTH+x_pos+Screen_pixels;
+  //byte* dest=y_pos*VIDEO_LINE_WIDTH+x_pos+Screen_pixels;
+  byte* dest=Get_Screen_pixel_ptr(x_pos, y_pos);
 
   int x;
 
@@ -128,23 +133,25 @@ void Vertical_XOR_line_simple(word x_pos,word y_pos,word height)
   byte color;
   for (i=y_pos;i<y_pos+height;i++)
   {
-    color=*(Screen_pixels+x_pos+i*VIDEO_LINE_WIDTH);
-    *(Screen_pixels+x_pos+i*VIDEO_LINE_WIDTH)=xor_lut[color];
+    //color=*(Screen_pixels+x_pos+i*VIDEO_LINE_WIDTH);
+    color = Get_Screen_pixel(x_pos, i);
+    //*(Screen_pixels+x_pos+i*VIDEO_LINE_WIDTH)=xor_lut[color];
+    Set_Screen_pixel(x_pos, i, xor_lut[color]);
   }
 }
 
 void Display_brush_color_simple(word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word brush_width)
 {
   // dest = Position à l'écran
-  byte* dest = Screen_pixels + y_pos * VIDEO_LINE_WIDTH + x_pos;
   // src = Position dans la brosse
   byte* src = Brush + y_offset * brush_width + x_offset;
 
   word x,y;
 
   // Pour chaque ligne
-  for(y = height;y > 0; y--)
+  for(y = 0; y < height; y++)
   {
+    byte* dest = Get_Screen_pixel_ptr(x_pos, y_pos + y);
     // Pour chaque pixel
     for(x = width;x > 0; x--)
     {
@@ -159,7 +166,6 @@ void Display_brush_color_simple(word x_pos,word y_pos,word x_offset,word y_offse
     }
 
     // On passe à la ligne suivante
-    dest = dest + VIDEO_LINE_WIDTH - width;
     src = src + brush_width - width;
   }
   Update_rect(x_pos,y_pos,width,height);
@@ -170,15 +176,16 @@ void Display_brush_mono_simple(word x_pos, word y_pos,
         byte transp_color, byte color, word brush_width)
 /* On affiche la brosse en monochrome */
 {
-  byte* dest=y_pos*VIDEO_LINE_WIDTH+x_pos+Screen_pixels; // dest = adr Destination à 
-      // l'écran
+  // dest = adr Destination à l'écran
   byte* src=brush_width*y_offset+x_offset+Brush; // src = adr ds 
       // la brosse
   int x,y;
 
-  for(y=height;y!=0;y--)
+  for(y=0; y<height; y++)
   //Pour chaque ligne
   {
+    byte* dest = Get_Screen_pixel_ptr(x_pos, y_pos + y);
+
     for(x=width;x!=0;x--)
     //Pour chaque pixel
     {
@@ -192,29 +199,30 @@ void Display_brush_mono_simple(word x_pos, word y_pos,
 
     // On passe à la ligne suivante
     src+=brush_width-width;
-    dest+=VIDEO_LINE_WIDTH-width;
+    //dest+=VIDEO_LINE_WIDTH-width;
   }
   Update_rect(x_pos,y_pos,width,height);
 }
 
 void Clear_brush_simple(word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word image_width)
 {
-  byte* dest=Screen_pixels+x_pos+y_pos*VIDEO_LINE_WIDTH; //On va se mettre en 0,0 dans l'écran (dest)
+  //On va se mettre en 0,0 dans l'écran (dest)
   byte* src = ( y_pos + Main.offset_Y ) * image_width + x_pos + Main.offset_X + Main_screen; //Coords de départ ds la source (src)
   int y;
   (void)x_offset; // unused
   (void)y_offset; // unused
   (void)transp_color; // unused
 
-  for(y=height;y!=0;y--)
+  for(y=0; y<height; y++)
   // Pour chaque ligne
   {
+    byte* dest = Get_Screen_pixel_ptr(x_pos, y_pos + y);
     // On fait une copie de la ligne
     memcpy(dest,src,width);
 
     // On passe à la ligne suivante
     src+=image_width;
-    dest+=VIDEO_LINE_WIDTH;
+    //dest+=VIDEO_LINE_WIDTH;
   }
   Update_rect(x_pos,y_pos,width,height);
 }
@@ -223,15 +231,15 @@ void Clear_brush_simple(word x_pos,word y_pos,word x_offset,word y_offset,word w
 void Display_brush_simple(byte * brush, word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word brush_width)
 {
   // dest = Position à l'écran
-  byte* dest = Screen_pixels + y_pos * VIDEO_LINE_WIDTH + x_pos;
   // src = Position dans la brosse
   byte* src = brush + y_offset * brush_width + x_offset;
   
   word x,y;
   
   // Pour chaque ligne
-  for(y = height;y > 0; y--)
+  for(y = 0; y < height; y++)
   {
+    byte* dest = Get_Screen_pixel_ptr(x_pos, y_pos + y);
     // Pour chaque pixel
     for(x = width;x > 0; x--)
     {
@@ -246,7 +254,6 @@ void Display_brush_simple(byte * brush, word x_pos,word y_pos,word x_offset,word
     }
 
     // On passe à la ligne suivante
-    dest = dest + VIDEO_LINE_WIDTH - width;
     src = src + brush_width - width;
   }
 }
@@ -254,12 +261,12 @@ void Display_brush_simple(byte * brush, word x_pos,word y_pos,word x_offset,word
 void Remap_screen_simple(word x_pos,word y_pos,word width,word height,byte * conversion_table)
 {
   // dest = coords a l'écran
-  byte* dest = Screen_pixels + y_pos * VIDEO_LINE_WIDTH + x_pos;
   int x,y;
 
   // Pour chaque ligne
-  for(y=height;y>0;y--)
+  for(y=0; y<height; y++)
   {
+    byte* dest = Get_Screen_pixel_ptr(x_pos, y_pos + y);
     // Pour chaque pixel
     for(x=width;x>0;x--)
     {
@@ -267,7 +274,7 @@ void Remap_screen_simple(word x_pos,word y_pos,word width,word height,byte * con
       dest ++;
     }
 
-    dest = dest + VIDEO_LINE_WIDTH - width;
+    //dest = dest + VIDEO_LINE_WIDTH - width;
   }
 
   Update_rect(x_pos,y_pos,width,height);
@@ -276,7 +283,9 @@ void Remap_screen_simple(word x_pos,word y_pos,word width,word height,byte * con
 void Display_line_on_screen_simple(word x_pos,word y_pos,word width,byte * line)
 /* On affiche toute une ligne de pixels. Utilisé pour les textes. */
 {
-  memcpy(Screen_pixels+x_pos+y_pos*VIDEO_LINE_WIDTH,line,width);
+  byte* dest = Get_Screen_pixel_ptr(x_pos, y_pos);
+  memcpy(dest, line, width);
+  //memcpy(Screen_pixels+x_pos+y_pos*VIDEO_LINE_WIDTH,line,width);
 }
 
 void Display_transparent_mono_line_on_screen_simple(
@@ -285,7 +294,8 @@ void Display_transparent_mono_line_on_screen_simple(
 // Affiche une ligne à l'écran avec une couleur + transparence.
 // Utilisé par les brosses en mode zoom
 {
-  byte* dest = Screen_pixels+ y_pos * VIDEO_LINE_WIDTH + x_pos;
+  //byte* dest = Screen_pixels+ y_pos * VIDEO_LINE_WIDTH + x_pos;
+  byte* dest = Get_Screen_pixel_ptr(x_pos, y_pos);
   int x;
   // Pour chaque pixel
   for(x=0;x<width;x++)
@@ -299,7 +309,8 @@ void Display_transparent_mono_line_on_screen_simple(
 
 void Read_line_screen_simple(word x_pos,word y_pos,word width,byte * line)
 {
-  memcpy(line,VIDEO_LINE_WIDTH * y_pos + x_pos + Screen_pixels,width);
+  //memcpy(line,VIDEO_LINE_WIDTH * y_pos + x_pos + Screen_pixels,width);
+  memcpy(line, Get_Screen_pixel_ptr(x_pos, y_pos), width);
 }
 
 void Display_part_of_screen_scaled_simple(
@@ -347,7 +358,8 @@ void Display_part_of_screen_scaled_simple(
 void Display_transparent_line_on_screen_simple(word x_pos,word y_pos,word width,byte* line,byte transp_color)
 {
   byte* src = line;
-  byte* dest = Screen_pixels + y_pos * VIDEO_LINE_WIDTH + x_pos;
+  //byte* dest = Screen_pixels + y_pos * VIDEO_LINE_WIDTH + x_pos;
+  byte* dest = Get_Screen_pixel_ptr(x_pos, y_pos);
 
   word x;
 

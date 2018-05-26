@@ -49,7 +49,6 @@
 #endif
 #include <ctype.h>
 #include <sys/stat.h>
-#include <SDL.h>
 
 #include "const.h"
 #include "struct.h"

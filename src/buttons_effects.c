@@ -25,7 +25,6 @@
 /// Handles all the effects buttons and setup windows in the effects menu.
 ////////////////////////////////////////////////////////////////////////////
 
-#include <SDL.h>
 #include <stdlib.h>
 #include <string.h>
 

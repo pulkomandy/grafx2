@@ -22,6 +22,7 @@
 */
 #include <string.h>
 #include <ctype.h>
+#include <SDL.h>
 #include "global.h"
 #include "keyboard.h"
 

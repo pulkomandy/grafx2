@@ -24,7 +24,6 @@
 #if defined(WIN32)
 #define _WIN32_WINNT 0x0500
 #endif
-#include <SDL.h>
 #include <string.h>
 #ifndef _MSC_VER
 #include <strings.h>
@@ -108,8 +107,9 @@ word Count_used_colors_screen_area(dword* usage, word start_x, word start_y,
     for (x = 0; x < width; x++)
     {
       // Get color in screen memory
-      color=*(Screen_pixels+((start_x + x)+(start_y + y) * Screen_width
-        * Pixel_height) * Pixel_width);
+      //color=*(Screen_pixels+((start_x + x)+(start_y + y) * Screen_width
+      //  * Pixel_height) * Pixel_width);
+      color = Get_Screen_pixel(start_x + x, start_y + y);
       usage[color]++; //Un point de plus pour cette couleur
     }
   }
@@ -172,27 +172,24 @@ const T_Components * Get_current_palette(void)
 
 void Set_palette(T_Palette palette)
 {
-  register int i;
-  SDL_Color PaletteSDL[256];
+  int i;
 
   memcpy(Current_palette, palette, sizeof(T_Palette));
   for(i=0;i<256;i++)
   {
-    PaletteSDL[i].r=(palette[i].R=Round_palette_component(palette[i].R));
-    PaletteSDL[i].g=(palette[i].G=Round_palette_component(palette[i].G));
-    PaletteSDL[i].b=(palette[i].B=Round_palette_component(palette[i].B));
+    palette[i].R = Round_palette_component(palette[i].R);
+    palette[i].G = Round_palette_component(palette[i].G);
+    palette[i].B = Round_palette_component(palette[i].B);
   }
-  SDL_SetPalette(Screen_SDL, SDL_PHYSPAL | SDL_LOGPAL, PaletteSDL,0,256);
+  SetPalette(palette,0,256);
 }
 
 void Set_color(byte color, byte red, byte green, byte blue)
 {
-  SDL_Color comp;
-
-  Current_palette[color].R = comp.r = red;
-  Current_palette[color].G = comp.g = green;
-  Current_palette[color].B = comp.b = blue;
-  SDL_SetPalette(Screen_SDL, SDL_PHYSPAL | SDL_LOGPAL, &comp, color, 1);
+  Current_palette[color].R = red;
+  Current_palette[color].G = green;
+  Current_palette[color].B = blue;
+  SetPalette(Current_palette + color, color, 1);
 }
 
 void Wait_end_of_click(void)

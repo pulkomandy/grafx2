@@ -1071,7 +1071,6 @@ static int Color_cycling(void)
 {
   static byte offset[16];
   int i, color;
-  static SDL_Color PaletteSDL[256];
   int changed; // boolean : true if the palette needs a change in this tick.
   const T_Gradient_range * range;
   int len;
@@ -1112,13 +1111,9 @@ static int Color_cycling(void)
   }
   if (changed)
   {
+    T_Palette palette;
     // Initialize the palette
-    for(color=0;color<256;color++)
-    {
-      PaletteSDL[color].r=Main.palette[color].R;
-      PaletteSDL[color].g=Main.palette[color].G;
-      PaletteSDL[color].b=Main.palette[color].B;
-    }
+    memcpy(palette, Main.palette, sizeof(T_Palette));
     for (i=0; i<16; i++)
     {
       range = &Main.backups->Pages->Gradients->Range[i];
@@ -1128,13 +1123,11 @@ static int Color_cycling(void)
         for(color=range->Start;color<=range->End;color++)
         {
           int new_color = range->Start+((color-range->Start+offset[i])%len);
-          PaletteSDL[color].r=Main.palette[new_color].R;
-          PaletteSDL[color].g=Main.palette[new_color].G;
-          PaletteSDL[color].b=Main.palette[new_color].B;
+          palette[color] = Main.palette[new_color];
         }
       }
     }
-    SDL_SetPalette(Screen_SDL, SDL_PHYSPAL | SDL_LOGPAL, PaletteSDL,0,256);
+    SetPalette(palette, 0, 256);
   }
   return 0;
 }

@@ -30,7 +30,6 @@
 #ifndef _GLOBAL_H_
 #define _GLOBAL_H_
 
-#include <SDL.h>
 #include "struct.h"
 
 // MAIN declares the variables,
@@ -775,10 +774,8 @@ GFX2_GLOBAL iconv_t cd_utf16_inv;   // UTF16 => FROMCODE
 
 // -- Specific to SDL
 
-/// Pointer to the program's screen.
-GFX2_GLOBAL SDL_Surface * Screen_SDL;
 /// Pointer to the current joystick controller.
-GFX2_GLOBAL SDL_Joystick* Joystick;
+//GFX2_GLOBAL SDL_Joystick* Joystick;
 
 /// Indicates "no keyboard shortcut".
 #define KEY_NONE            0

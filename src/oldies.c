@@ -20,7 +20,6 @@
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
-#include <SDL.h>
 #include <string.h>
 #ifndef _MSC_VER
 #include <strings.h>

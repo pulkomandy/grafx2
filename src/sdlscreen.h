@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2018 Thomas Bernard
     Copyright 2008 Yves Rizoud
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
@@ -32,16 +33,17 @@
 #include "struct.h"
 #include "global.h"
 
-///
-/// This is the number of bytes in a video line for the current mode.
-/// On many platforms it will be the video mode's width (in pixels), rounded up
-/// to be a multiple of 4.
-#define VIDEO_LINE_WIDTH (Screen_SDL->pitch)
-
 void Set_mode_SDL(int *,int *,int);
 
 GFX2_GLOBAL SDL_Rect ** List_SDL_video_modes;
-GFX2_GLOBAL byte* Screen_pixels;
+
+byte Get_Screen_pixel(int x, int y);
+
+void Set_Screen_pixel(int x, int y, byte value);
+
+byte* Get_Screen_pixel_ptr(int x, int y);
+
+void Screen_FillRect(int x, int y, int w, int h, byte color);
 
 void Update_rect(short x, short y, unsigned short width, unsigned short height);
 void Flush_update(void);
@@ -63,6 +65,8 @@ dword Get_SDL_pixel_hicolor(SDL_Surface *bmp, int x, int y);
 void Set_SDL_pixel_8(SDL_Surface *bmp, int x, int y, byte color);
 /// Convert a SDL Palette to a grafx2 palette
 void Get_SDL_Palette(const SDL_Palette * sdl_palette, T_Palette palette);
+
+int SetPalette(const T_Components * colors, int firstcolor, int ncolors);
 
 ///
 /// Clears the parts of screen that are outside of the editing area.
