@@ -4,7 +4,7 @@ MAKENSIS = makensis
 UNZIP = unzip -o
 SED = sed
 
-VERSIONTAG = ../obj/win32/versiontag
+VERSIONTAG = ../obj/win32-sdl/versiontag
 VERSION := $(shell cat $(VERSIONTAG))
 
 SOURCES = ../src-$(VERSION).tgz

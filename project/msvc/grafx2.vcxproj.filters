@@ -177,6 +177,9 @@
     <ClInclude Include="..\..\src\recoil.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\gfx2surface.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\src\gfx2.rc">
@@ -347,6 +350,9 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\recoil.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gfx2surface.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>

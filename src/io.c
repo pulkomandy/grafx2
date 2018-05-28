@@ -38,7 +38,7 @@
     #include <proto/dos.h>
     #include <sys/types.h>
     #include <dirent.h>
-#elif defined(__WIN32__)
+#elif defined(WIN32)
 #ifdef _MSC_VER
     #include <direct.h>
 #else

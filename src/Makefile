@@ -57,9 +57,12 @@ ifneq (,$(LABEL))
   RES := $(shell if [ ! -f $(LABEL_CACHE) ] || [ "`cat $(LABEL_CACHE)`" != "$(LABEL)" ] ; then echo "$(LABEL)" > $(LABEL_CACHE) ; fi )
 endif
 
-  CFLAGS_CACHE = .cflags.cache
+  CFLAGS_CACHE = $(OBJDIR)/.cflags.cache
 
   RECOILVER = 4.3.0
+
+# Video / input API used
+  API ?= sdl
 
 ### PLATFORM DETECTION AND CONFIGURATION ###
 
@@ -539,6 +542,17 @@ ifdef NORECOIL
     COPT += -DNORECOIL
 endif
 
+OBJDIR := $(OBJDIR)-$(API)
+
+ifeq ($(API),sdl)
+  APIOBJ = sdlscreen.o
+  COPT += -DUSE_SDL
+endif
+ifeq ($(API),sdl2)
+  #APIOBJ = sdlscreen.o
+  COPT += -DUSE_SDL2
+endif
+
 #To enable Joystick emulation of cursor, make USE_JOYSTICK=1 (for input.o)
 #This can be necessary to test cursor code on a PC, but by default for all
 #non-console platforms the joystick is disabled, to avoid reporting
@@ -553,7 +567,7 @@ endif
 .PHONY : all debug release clean depend zip force install uninstall valgrind
 
 # This is the list of the objects we want to build. Dependancies are built by "make depend" automatically.
-OBJS = main.o init.o graph.o sdlscreen.o misc.o special.o \
+OBJS = main.o init.o graph.o $(APIOBJ) misc.o special.o \
        buttons.o palette.o help.o operatio.o pages.o loadsave.o \
        readline.o engine.o filesel.o op_c.o readini.o saveini.o \
        shade.o keyboard.o io.o version.o text.o SFont.o setup.o \
@@ -739,9 +753,10 @@ pversion.c:	$(LABEL_CACHE)
 endif
 
 $(OBJDIR)/versiontag: pversion.c $(REVISION_CACHE)
+	$(if $(wildcard $(OBJDIR)),,$(MKDIR) $(OBJDIR))
 	echo `sed "s/.*=\"\(.*\)\";/\1/" pversion.c`.$(GIT_REVISION) | tr " :" "_-" | sed -e "s/\([wW][iI][pP]\)\\./\1/" > $(OBJDIR)/versiontag
 
-RES := $(shell if [ ! -f $(CFLAGS_CACHE) ] || [ "`cat $(CFLAGS_CACHE)`" != "$(COPT) $(CFLAGS)" ] ; then echo "$(COPT) $(CFLAGS)" > $(CFLAGS_CACHE) ; fi )
+RES := $(shell $(MKDIR) $(OBJDIR) ; if [ ! -f $(CFLAGS_CACHE) ] || [ "`cat $(CFLAGS_CACHE)`" != "$(COPT) $(CFLAGS)" ] ; then echo "$(COPT) $(CFLAGS)" > $(CFLAGS_CACHE) ; fi )
 
 ifndef NORECOIL
 recoil.c:	../3rdparty/recoil-$(RECOILVER)/recoil.c

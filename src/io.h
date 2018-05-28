@@ -36,6 +36,10 @@
 /// - Also, don't assume "/" or "\\", use PATH_SEPARATOR
 /// If you don't, you break another platform.
 //////////////////////////////////////////////////////////////////////////////
+#ifndef IO_H__
+#define IO_H__
+
+#include <stdio.h>
 
 /// Reads a single byte from an open file. Returns true if OK, false if a file i/o error occurred.
 int Read_byte(FILE *file, byte *dest);
@@ -151,3 +155,5 @@ int Remove_path(const char * path);
 ///
 /// Remove the directory
 int Remove_directory(const char * path);
+
+#endif
