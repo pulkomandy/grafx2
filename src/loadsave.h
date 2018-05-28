@@ -28,7 +28,10 @@
 #define __LOADSAVE_H__
 
 #include <stdio.h>
+#if defined(USE_SDL) || defined(USE_SDL2)
 #include <SDL_image.h>
+#endif
+#include "gfx2surface.h"
 
 enum CONTEXT_TYPE {
   CONTEXT_MAIN_IMAGE,
@@ -107,8 +110,8 @@ typedef struct
   byte *Preview_bitmap;
   byte  Preview_usage[256];
   
-  // Internal: returned surface for SDL_Surface case
-  SDL_Surface * Surface;
+  // Internal: returned surface for Surface case
+  T_GFX2_Surface * Surface;
 
 } T_IO_Context;
 
@@ -137,7 +140,7 @@ void Init_context_flat_image(T_IO_Context * context, char *file_name, char *file
 void Init_context_brush(T_IO_Context * context, char *file_name, char *file_directory);
 // Setup for saving an arbitrary undo/redo step, from either the main or spare page. 
 void Init_context_history_step(T_IO_Context * context, T_Page *page);
-// Setup for loading an image into a new SDL surface.
+// Setup for loading an image into a new GFX2 surface.
 void Init_context_surface(T_IO_Context * context, char *file_name, char *file_directory);
 
 // Cleans up resources (currently: the 24bit buffer) 
@@ -189,9 +192,9 @@ extern const T_Format File_formats[];
 void Image_emergency_backup(void);
 
 ///
-/// Load an arbitrary SDL_Surface.
+/// Load an arbitrary GFX2_Surface.
 /// @param gradients Pass the address of a target T_Gradient_array if you want the gradients, NULL otherwise
-SDL_Surface * Load_surface(char *full_name, T_Gradient_array *gradients);
+T_GFX2_Surface * Load_surface(char *full_name, T_Gradient_array *gradients);
 
 
 /*

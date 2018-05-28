@@ -41,8 +41,11 @@
 #endif
 #endif
 #include <limits.h>
+#if defined(USE_SDL) || defined(USE_SDL2)
+#include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_endian.h>
+#endif
 
 #include "buttons.h"
 #include "const.h"
@@ -55,7 +58,9 @@
 #include "op_c.h"
 #include "pages.h"
 #include "palette.h"
+#if defined(USE_SDL) || defined(USE_SDL2)
 #include "sdlscreen.h"
+#endif
 #include "struct.h"
 #include "windows.h"
 #include "engine.h"
@@ -65,9 +70,11 @@
 #include "unicode.h"
 #include "fileformats.h"
 
+#if defined(USE_SDL) || defined(USE_SDL2)
 // -- SDL_Image -------------------------------------------------------------
 // (TGA, BMP, PNM, XPM, XCF, PCX, GIF, JPG, TIF, IFF, PNG, ICO)
 void Load_SDL_Image(T_IO_Context *);
+#endif
 
 // -- Recoil ----------------------------------------------------------------
 // 8bits and 16bits computer graphics
@@ -170,10 +177,10 @@ void Set_pixel(T_IO_Context *context, short x_pos, short y_pos, byte color)
 
       break;
       
-    // Load pixels in a SDL_Surface
+    // Load pixels into a Surface
     case CONTEXT_SURFACE:
       if (x_pos>=0 && y_pos>=0 && x_pos<context->Surface->w && y_pos<context->Surface->h)
-        *(((byte *)(context->Surface->pixels)) + context->Surface->pitch * y_pos + x_pos) = color;
+        Set_GFX2_Surface_pixel(context->Surface, x_pos, y_pos, color);
       break;
       
     case CONTEXT_PALETTE:
@@ -447,7 +454,7 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
       break;
       
     case CONTEXT_SURFACE:
-      context->Surface = SDL_CreateRGBSurface(SDL_SWSURFACE|SDL_SRCCOLORKEY, width, height, 8, 0, 0, 0, 0);
+      context->Surface = New_GFX2_Surface(width, height);
       if (! context->Surface)
       {
         File_error=1;
@@ -586,12 +593,14 @@ void Load_image(T_IO_Context *context)
     Load_Recoil_Image(context);
     if (File_error)
 #endif
+#if defined(USE_SDL) || defined(USE_SDL2)
     {
       // Last try: with SDL_image
       Load_SDL_Image(context);
     }
 
     if (File_error)
+#endif
     { 
       // Sinon, l'appelant sera au courant de l'échec grace à File_error;
       // et si on s'apprêtait à faire un chargement définitif de l'image (pas
@@ -846,16 +855,7 @@ void Load_image(T_IO_Context *context)
     if (File_error == 0)
     {
       // Copy the palette
-      SDL_Color colors[256];
-      int i;
-      
-      for (i=0; i<256; i++)
-      {
-        colors[i].r=context->Palette[i].R;
-        colors[i].g=context->Palette[i].G;
-        colors[i].b=context->Palette[i].B;
-      }
-      SDL_SetColors(context->Surface, colors, 0, 256);
+      memcpy(context->Surface->palette, context->Palette, sizeof(T_Palette));
     }
   }
   else if (context->Type == CONTEXT_PREVIEW || context->Type == CONTEXT_PREVIEW_PALETTE
@@ -1049,6 +1049,7 @@ void Save_image(T_IO_Context *context)
 }  
 
 
+#if defined(USE_SDL) || defined(USE_SDL2)
 void Load_SDL_Image(T_IO_Context *context)
 {
   char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
@@ -1120,12 +1121,12 @@ void Load_SDL_Image(T_IO_Context *context)
 }
 
 ///
-/// Load an arbitrary SDL_Surface.
+/// Load an arbitrary Surface.
 /// @param full_name Full (absolute) path of the file to load.
 /// @param gradients Pass the address of a target T_Gradient_array if you want the gradients, NULL otherwise
-SDL_Surface * Load_surface(char *full_name, T_Gradient_array *gradients)
+T_GFX2_Surface * Load_surface(char *full_name, T_Gradient_array *gradients)
 {
-  SDL_Surface * bmp=NULL;
+  T_GFX2_Surface * bmp=NULL;
   T_IO_Context context;
   
   Init_context_surface(&context, full_name, "");
@@ -1153,6 +1154,7 @@ SDL_Surface * Load_surface(char *full_name, T_Gradient_array *gradients)
 
   return bmp;
 }
+#endif
 
 
 /// Saves an image.
@@ -1335,7 +1337,7 @@ void Init_context_brush(T_IO_Context * context, char *file_name, char *file_dire
 
 }
 
-// Setup for loading an image into a new SDL surface.
+// Setup for loading an image into a new GFX2 surface.
 void Init_context_surface(T_IO_Context * context, char *file_name, char *file_directory)
 {
   memset(context, 0, sizeof(T_IO_Context));

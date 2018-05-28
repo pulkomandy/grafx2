@@ -58,9 +58,9 @@ byte * Surface_to_bytefield(SDL_Surface *source, byte * dest);
 /// Gets the RGB 24-bit color currently associated with a palette index.
 SDL_Color Color_to_SDL_color(byte);
 /// Reads a pixel in a 8-bit SDL surface.
-byte Get_SDL_pixel_8(SDL_Surface *bmp, int x, int y);
+byte Get_SDL_pixel_8(const SDL_Surface *bmp, int x, int y);
 /// Reads a pixel in a multi-byte SDL surface.
-dword Get_SDL_pixel_hicolor(SDL_Surface *bmp, int x, int y);
+dword Get_SDL_pixel_hicolor(const SDL_Surface *bmp, int x, int y);
 /// Writes a pixel in a 8-bit SDL surface.
 void Set_SDL_pixel_8(SDL_Surface *bmp, int x, int y, byte color);
 /// Convert a SDL Palette to a grafx2 palette

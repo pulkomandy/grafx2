@@ -43,8 +43,10 @@
 
 #include <stdlib.h>
 #include <errno.h>
+#if defined(USE_SDL) || defined(USE_SDL2)
 #include <SDL_byteorder.h>
 #include <SDL_image.h>
+#endif
 #if defined(__WIN32__)
   #include <windows.h> // GetLogicalDrives(), GetDriveType(), DRIVE_*
 #endif
@@ -81,13 +83,16 @@
 #include "mountlist.h" // read_file_system_list
 #include "operatio.h"
 #include "palette.h"
+#if defined(USE_SDL) || defined(USE_SDL2)
 #include "sdlscreen.h"
+#endif
 #include "setup.h"
 #include "struct.h"
 #include "transform.h"
 #include "windows.h"
 #include "layers.h"
 #include "special.h"
+#include "gfx2surface.h"
 
 char Gui_loading_error_message[512];
 
@@ -98,7 +103,7 @@ void bstrtostr( BSTR in, STRPTR out, TEXT max );
 #endif
 
 // Fonctions de lecture dans la skin de l'interface graphique
-byte GUI_seek_down(SDL_Surface *gui, int *start_x, int *start_y, byte neutral_color,char * section)
+static byte GUI_seek_down(T_GFX2_Surface *gui, int *start_x, int *start_y, byte neutral_color,char * section)
 {
   byte color;
   int y;
@@ -106,7 +111,7 @@ byte GUI_seek_down(SDL_Surface *gui, int *start_x, int *start_y, byte neutral_co
   *start_x=0;
   do
   {
-    color=Get_SDL_pixel_8(gui,*start_x,y);
+    color=Get_GFX2_Surface_pixel(gui,*start_x,y);
     if (color!=neutral_color)
     {
       *start_y=y;
@@ -120,7 +125,7 @@ byte GUI_seek_down(SDL_Surface *gui, int *start_x, int *start_y, byte neutral_co
   return 1;
 }
 
-byte GUI_seek_right(SDL_Surface *gui, int *start_x, int start_y, byte neutral_color, char * section)
+static byte GUI_seek_right(T_GFX2_Surface *gui, int *start_x, int start_y, byte neutral_color, char * section)
 {
   byte color;
   int x;
@@ -128,7 +133,7 @@ byte GUI_seek_right(SDL_Surface *gui, int *start_x, int start_y, byte neutral_co
   
   do
   {
-    color=Get_SDL_pixel_8(gui,x,start_y);
+    color=Get_GFX2_Surface_pixel(gui,x,start_y);
     if (color!=neutral_color)
     {
       *start_x=x;
@@ -142,7 +147,7 @@ byte GUI_seek_right(SDL_Surface *gui, int *start_x, int start_y, byte neutral_co
   return 1;
 }
 
-byte Read_GUI_block(T_Gui_skin *gfx, SDL_Surface *gui, int start_x, int start_y, void *dest, int width, int height, char * section, int type)
+static byte Read_GUI_block(T_Gui_skin *gfx, T_GFX2_Surface *gui, int start_x, int start_y, void *dest, int width, int height, char * section, int type)
 {
   // type: 0 = normal GUI element, only 4 colors allowed
   // type: 1 = mouse cursor, 4 colors allowed + transparent
@@ -165,7 +170,7 @@ byte Read_GUI_block(T_Gui_skin *gfx, SDL_Surface *gui, int start_x, int start_y,
   {
     for (x=start_x; x<start_x+width; x++)
     {
-      color=Get_SDL_pixel_8(gui,x,y);
+      color=Get_GFX2_Surface_pixel(gui,x,y);
       if (type==0 && (color != gfx->Color[0] && color != gfx->Color[1] && color != gfx->Color[2] && color != gfx->Color[3]))
       {
         sprintf(Gui_loading_error_message, "Error in skin file: Was looking at %d,%d for a %d*%d object (%s) but at %d,%d a pixel was found with color %d which isn't one of the GUI colors (which were detected as %d,%d,%d,%d.\n",
@@ -196,7 +201,7 @@ byte Read_GUI_block(T_Gui_skin *gfx, SDL_Surface *gui, int start_x, int start_y,
   return 0;
 }
 
-byte Read_GUI_pattern(T_Gui_skin *gfx, SDL_Surface *gui, int start_x, int start_y, word *dest, char * section)
+static byte Read_GUI_pattern(T_Gui_skin *gfx, T_GFX2_Surface *gui, int start_x, int start_y, word *dest, char * section)
 {
   byte buffer[256];
   int x,y;
@@ -260,7 +265,7 @@ void Center_GUI_cursor(T_Gui_skin *gfx, byte *cursor_buffer, int cursor_number)
       gfx->Cursor_sprite[cursor_number][y][x]=cursor_buffer[(start_y+y)*29+start_x+x];
 }
 
-byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
+static byte Parse_skin(T_GFX2_Surface * gui, T_Gui_skin *gfx)
 {
   int i,j;
   int cursor_x=0,cursor_y=0;
@@ -271,26 +276,12 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   int char_3=0;  // l'une des fontes dans l'ordre :  1 2
   int char_4=0;  //                                  3 4
   byte mouse_cursor_area[31][29];
-  SDL_Palette * SDLPal;
   
   // Default palette
-  if (!gui->format || gui->format->BitsPerPixel != 8)
-  {
-    sprintf(Gui_loading_error_message, "Not a 8-bit image");
-    return 1;
-  }
-  SDLPal=gui->format->palette;
-  if (!SDLPal || SDLPal->ncolors!=256)
-  {
-    sprintf(Gui_loading_error_message, "Not a 256-color palette");
-    return 1;
-  }
-  
-  // Read the default palette
-  Get_SDL_Palette(SDLPal, gfx->Default_palette);
+  memcpy(gfx->Default_palette, gui->palette, sizeof(T_Palette));
 
   // Carré "noir"
-  gfx->Color[0] = Get_SDL_pixel_8(gui,cursor_x,cursor_y);
+  gfx->Color[0] = Get_GFX2_Surface_pixel(gui,cursor_x,cursor_y);
   do
   {
     if (++cursor_x>=gui->w)
@@ -298,7 +289,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       sprintf(Gui_loading_error_message, "Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
       return 1;
     }
-    color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
+    color=Get_GFX2_Surface_pixel(gui,cursor_x,cursor_y);
   } while(color==gfx->Color[0]);
   // Carré "foncé"
   gfx->Color[1] = color;
@@ -309,7 +300,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       sprintf(Gui_loading_error_message, "Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
       return 1;
     }
-    color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
+    color=Get_GFX2_Surface_pixel(gui,cursor_x,cursor_y);
   } while(color==gfx->Color[1]);
   // Carré "clair"
   gfx->Color[2] = color;
@@ -320,7 +311,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       sprintf(Gui_loading_error_message, "Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
       return 1;
     }
-    color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
+    color=Get_GFX2_Surface_pixel(gui,cursor_x,cursor_y);
   } while(color==gfx->Color[2]);
   // Carré "blanc"
   gfx->Color[3] = color;
@@ -331,7 +322,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       sprintf(Gui_loading_error_message, "Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
       return 1;
     }
-    color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
+    color=Get_GFX2_Surface_pixel(gui,cursor_x,cursor_y);
   } while(color==gfx->Color[3]);
   // Carré "transparent"
   gfx->Color_trans=color;
@@ -342,7 +333,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
       sprintf(Gui_loading_error_message, "Error in GUI skin file: should start with 5 consecutive squares for black, dark, light, white, transparent, then a neutral color\n");
       return 1;
     }
-    color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
+    color=Get_GFX2_Surface_pixel(gui,cursor_x,cursor_y);
   } while(color==gfx->Color_trans);
   // Reste : couleur neutre
   neutral_color=color;
@@ -350,7 +341,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   
   cursor_x=0;
   cursor_y=1;
-  while ((color=Get_SDL_pixel_8(gui,cursor_x,cursor_y))==gfx->Color[0])
+  while ((color=Get_GFX2_Surface_pixel(gui,cursor_x,cursor_y))==gfx->Color[0])
   {
     cursor_y++;
     if (cursor_y>=gui->h)
@@ -666,7 +657,7 @@ T_Gui_skin * Load_graphics(const char * skin_file, T_Gradient_array *gradients)
 {
   T_Gui_skin * gfx;
   char filename[MAX_PATH_CHARACTERS];
-  SDL_Surface * gui;
+  T_GFX2_Surface * gui;
 
   if (skin_file[0] == '\0')
   {
@@ -692,20 +683,18 @@ T_Gui_skin * Load_graphics(const char * skin_file, T_Gradient_array *gradients)
     gfx = NULL;
     return NULL;
   }
-  if (Parse_skin(gui, gfx))
+  if (Parse_skin(gui, gfx) != 0)
   {
-    SDL_FreeSurface(gui);
     free(gfx);
     gfx = NULL;
-    return NULL;
   }
-  SDL_FreeSurface(gui);
+  Free_GFX2_Surface(gui);
   return gfx;
 }
 
 // ---- font loading -----
 
-static byte * Parse_font(SDL_Surface * image, int is_main)
+static byte * Parse_font(T_GFX2_Surface * image, int is_main)
 {
   byte * font;
   int character;
@@ -741,7 +730,7 @@ static byte * Parse_font(SDL_Surface * image, int is_main)
       for (x=0;x<8; x++)
       {
         // Pick pixel
-        color = Get_SDL_pixel_8(image, (character % chars_per_line)*8+x, (character / chars_per_line)*8+y);
+        color = Get_GFX2_Surface_pixel(image, (character % chars_per_line)*8+x, (character / chars_per_line)*8+y);
         if (color > 1)
         {
           sprintf(Gui_loading_error_message, "Error in font file: Only colors 0 and 1 can be used for the font.\n");
@@ -760,7 +749,7 @@ byte * Load_font(const char * font_name, int is_main)
 {
   byte * font = NULL;
   char filename[MAX_PATH_CHARACTERS];
-  SDL_Surface * image;
+  T_GFX2_Surface * image;
 
   if (font_name[0] == '\0')
   {
@@ -778,7 +767,7 @@ byte * Load_font(const char * font_name, int is_main)
     return NULL;
   }
   font = Parse_font(image, is_main);
-  SDL_FreeSurface(image);
+  Free_GFX2_Surface(image);
   return font;
 }
 
@@ -3193,6 +3182,7 @@ void Define_icon(void)
   
 #endif
   // General version: Load icon from the file gfx2.gif
+#if defined(USE_SDL) || defined(USE_SDL2)
   {
     char icon_path[MAX_PATH_CHARACTERS];
     SDL_Surface * icon;
@@ -3230,4 +3220,5 @@ void Define_icon(void)
       SDL_FreeSurface(icon);
     }
   }
+#endif
 }

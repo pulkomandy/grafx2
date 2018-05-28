@@ -309,7 +309,7 @@ SDL_Color Color_to_SDL_color(byte index)
 }
 
 /// Reads a pixel in a 8-bit SDL surface.
-byte Get_SDL_pixel_8(SDL_Surface *bmp, int x, int y)
+byte Get_SDL_pixel_8(const SDL_Surface *bmp, int x, int y)
 {
   return ((byte *)(bmp->pixels))[(y*bmp->pitch+x)];
 }
@@ -322,7 +322,7 @@ void Set_SDL_pixel_8(SDL_Surface *bmp, int x, int y, byte color)
 
 
 /// Reads a pixel in a multi-byte SDL surface.
-dword Get_SDL_pixel_hicolor(SDL_Surface *bmp, int x, int y)
+dword Get_SDL_pixel_hicolor(const SDL_Surface *bmp, int x, int y)
 {
   byte * ptr;
   
