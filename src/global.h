@@ -695,10 +695,14 @@ GFX2_GLOBAL T_Brush_template Brush_container[BRUSH_CONTAINER_COLUMNS*BRUSH_CONTA
     CURSOR_SHAPE_TARGET            , // Centered lines
     CURSOR_SHAPE_XOR_TARGET        , // Empty rectangle
     CURSOR_SHAPE_XOR_TARGET        , // Filled rectangle
-    CURSOR_SHAPE_XOR_TARGET        , // Empty circle
-    CURSOR_SHAPE_XOR_TARGET        , // Filled circle
-    CURSOR_SHAPE_XOR_TARGET        , // Empty ellipse
-    CURSOR_SHAPE_XOR_TARGET        , // Filled ellipse
+    CURSOR_SHAPE_XOR_TARGET        , // Empty circle (center radius)
+    CURSOR_SHAPE_XOR_TARGET        , // Empty circle (corners)
+    CURSOR_SHAPE_XOR_TARGET        , // Empty ellipse (center radius)
+    CURSOR_SHAPE_XOR_TARGET        , // Empty ellipse (corners)
+    CURSOR_SHAPE_XOR_TARGET        , // Filled circle (center radius)
+    CURSOR_SHAPE_XOR_TARGET        , // Filled circle (corners)
+    CURSOR_SHAPE_XOR_TARGET        , // Filled ellipse (center radius)
+    CURSOR_SHAPE_XOR_TARGET        , // Filled ellipse (corners)
     CURSOR_SHAPE_BUCKET            , // Fill
     CURSOR_SHAPE_BUCKET            , // Color replacer
     CURSOR_SHAPE_XOR_TARGET        , // Rectangular brush grabbing
@@ -713,8 +717,10 @@ GFX2_GLOBAL T_Brush_template Brush_container[BRUSH_CONTAINER_COLUMNS*BRUSH_CONTA
     CURSOR_SHAPE_TARGET            , // Filled polygon
     CURSOR_SHAPE_TARGET            , // Filled polyform
     CURSOR_SHAPE_MULTIDIRECTIONAL  , // Scroll image
-    CURSOR_SHAPE_XOR_TARGET        , // Gradient-filled circle
-    CURSOR_SHAPE_XOR_TARGET        , // Gradient-filled ellipse
+    CURSOR_SHAPE_XOR_TARGET        , // Gradient-filled circle (center radius)
+    CURSOR_SHAPE_XOR_TARGET        , // Gradient-filled circle (corners)
+    CURSOR_SHAPE_XOR_TARGET        , // Gradient-filled ellipse (center radius)
+    CURSOR_SHAPE_XOR_TARGET        , // Gradient-filled ellipse (corners)
     CURSOR_SHAPE_XOR_ROTATION      , // Rotate brush
     CURSOR_SHAPE_XOR_TARGET        , // Stretch brush
     CURSOR_SHAPE_TARGET            , // Distort brush
