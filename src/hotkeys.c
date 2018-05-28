@@ -452,7 +452,11 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "Around. What gets out from a side",
   "reappears on the other.",
   true,
+#if defined(USE_SDL)
   SDLK_KP5, // Kpad5
+#else
+  SDLK_KP_5, // Kpad5
+#endif
   0},
   {48,
   "Picture effects",
@@ -460,7 +464,11 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
+#if defined(USE_SDL)
   SDLK_KP5|MOD_SHIFT, // Shift + Kpad5
+#else
+  SDLK_KP_5|MOD_SHIFT, // Shift + Kpad5
+#endif
   0},
   {49,
   "Drawing effects",
@@ -1100,7 +1108,11 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "user-defined brush to its center.",
   "",
   true,
+#if defined(USE_SDL)
   SDLK_KP5|MOD_CTRL, // Ctrl + 5 (pavé numérique)
+#else
+  SDLK_KP_5|MOD_CTRL, // Ctrl + 5 (pavé numérique)
+#endif
   0},
   {113,
   "Top-left brush attachment point",

@@ -38,13 +38,14 @@
 #ifndef _MSC_VER
 #include <unistd.h>
 #endif
+#if defined(USE_SDL) || defined(USE_SDL2)
 #include <SDL.h>
 #include <SDL_image.h>
-
 
 // There is no WM on the GP2X...
 #if !defined(__GP2X__) && !defined(__WIZ__) && !defined(__CAANOO__) && !defined(GCWZERO)
     #include <SDL_syswm.h>
+#endif
 #endif
 
 #include "const.h"
@@ -623,6 +624,7 @@ int Init_program(int argc,char * argv[])
   Spare.time_of_safety_backup = 0;
   
 
+#if defined(USE_SDL) || defined(USE_SDL2)
   // SDL
   if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
   {
@@ -630,11 +632,14 @@ int Init_program(int argc,char * argv[])
     printf("Couldn't initialize SDL.\n");
     return(0);
   }
+#endif
   
   //Joystick = SDL_JoystickOpen(0);
+#if defined(USE_SDL)
   SDL_EnableKeyRepeat(250, 32);
   SDL_EnableUNICODE(SDL_ENABLE);
   SDL_WM_SetCaption("GrafX2","GrafX2");
+#endif
   Define_icon();
   
   // Texte

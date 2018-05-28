@@ -457,17 +457,31 @@ endif
       else
 
         # Compiles a regular linux executable for the native platform
-        BIN = ../bin/grafx2
-        COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -g $(shell sdl-config --cflags) $(TTFCOPT) $(LUACOPT) $(JOYCOPT) -O$(OPTIM)
+        BIN = ../bin/grafx2-$(API)
+        COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -g
+        ifeq ($(API),sdl)
+          COPT += $(shell sdl-config --cflags)
+        endif
+        ifeq ($(API),sdl2)
+          COPT += $(shell sdl2-config --cflags)
+        endif
+        COPT += $(TTFCOPT) $(LUACOPT) $(JOYCOPT) -O$(OPTIM)
         COPT += $(shell pkg-config --cflags libpng)
 
         ifneq ($(PLATFORM), FreeBSD)
           COPT += -D_XOPEN_SOURCE=700
         endif
 
-        LOPT = $(shell sdl-config --libs) -lSDL_image $(TTFLOPT)
+        LOPT = -lm
+        ifeq ($(API),sdl)
+          LOPT += $(shell sdl-config --libs) -lSDL_image
+        endif
+        ifeq ($(API),sdl2)
+          LOPT += $(shell sdl2-config --libs) -lSDL2_image
+        endif
+        LOPT += $(TTFLOPT)
         LOPT += $(shell pkg-config --libs libpng)
-        LOPT += $(LUALOPT) -lm
+        LOPT += $(LUALOPT)
         OBJDIR = ../obj/unix
         FCLOPT = -lfontconfig
         COPT += -DUSE_FC
@@ -549,7 +563,7 @@ ifeq ($(API),sdl)
   COPT += -DUSE_SDL
 endif
 ifeq ($(API),sdl2)
-  #APIOBJ = sdlscreen.o
+  APIOBJ = sdlscreen.o
   COPT += -DUSE_SDL2
 endif
 

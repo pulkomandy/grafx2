@@ -47,7 +47,9 @@
 // generic defaults like "Right Amiga+Q = Quit".
 // In case this is annoying for some platforms, disable it.
 
+#if defined(USE_SDL)
 void Handle_window_resize(SDL_ResizeEvent event);
+#endif
 void Handle_window_exit(SDL_QuitEvent event);
 static int Color_cycling(void);
 
@@ -292,11 +294,13 @@ int Move_cursor_with_constraints()
 
 // WM events management
 
+#if defined(USE_SDL)
 void Handle_window_resize(SDL_ResizeEvent event)
 {
     Resize_width = event.w;
     Resize_height = event.h;
 }
+#endif
 
 void Handle_window_exit(SDL_QuitEvent event)
 {
@@ -338,6 +342,9 @@ int Handle_mouse_click(SDL_MouseButtonEvent event)
             // TODO: repeat system maybe?
             return 0;
 
+        // In SDL 2.0 the mousewheel is no longer a button.
+        // Look for SDL_MOUSEWHEEL events.
+#if defined(USE_SDL)
         case SDL_BUTTON_WHEELUP:
             Key = KEY_MOUSEWHEELUP|Key_modifiers(SDL_GetModState());
             return 0;
@@ -345,6 +352,7 @@ int Handle_mouse_click(SDL_MouseButtonEvent event)
         case SDL_BUTTON_WHEELDOWN:
             Key = KEY_MOUSEWHEELDOWN|Key_modifiers(SDL_GetModState());
             return 0;
+#endif
 
         default:
         return 0;
@@ -376,6 +384,7 @@ int Handle_mouse_release(SDL_MouseButtonEvent event)
 
 // Keyboard management
 
+#if defined(USE_SDL)
 int Handle_key_press(SDL_KeyboardEvent event)
 {
     //Appui sur une touche du clavier
@@ -468,6 +477,7 @@ int Handle_key_press(SDL_KeyboardEvent event)
     }
     return 0;
 }
+#endif
 
 int Release_control(int key_code, int modifier)
 {
@@ -543,6 +553,7 @@ int Release_control(int key_code, int modifier)
 }
 
 
+#if defined(USE_SDL)
 int Handle_key_release(SDL_KeyboardEvent event)
 {
     int modifier;
@@ -583,6 +594,7 @@ int Handle_key_release(SDL_KeyboardEvent event)
     }
     return Release_control(released_key, modifier);
 }
+#endif
 
 
 // Joystick management
@@ -610,7 +622,11 @@ int Handle_joystick_press(SDL_JoyButtonEvent event)
     }
     if (event.button == Joybutton_alt)
     {
+#if defined(USE_SDL)
       SDL_SetModState(SDL_GetModState() | (KMOD_ALT|KMOD_META));
+#else
+      SDL_SetModState(SDL_GetModState() | (KMOD_ALT|KMOD_GUI));
+#endif
       if (Config.Swap_buttons == MOD_ALT && Button_inverter==0)
       {
         Button_inverter=1;
@@ -699,7 +715,11 @@ int Handle_joystick_release(SDL_JoyButtonEvent event)
     }
     if (event.button == Joybutton_alt)
     {
+#if defined(USE_SDL)
       SDL_SetModState(SDL_GetModState() & ~(KMOD_ALT|KMOD_META));
+#else
+      SDL_SetModState(SDL_GetModState() & ~(KMOD_ALT|KMOD_GUI));
+#endif
       return Release_control(0,MOD_ALT);
     }
     if (event.button == Joybutton_left_click)
@@ -869,14 +889,20 @@ int Get_input(int sleep_time)
     // Process as much events as possible without redrawing the screen.
     // This mostly allows us to merge mouse events for people with an high
     // resolution mouse
+#if defined(USE_SDL)
     while(!user_feedback_required && SDL_PeepEvents(&event, 1, SDL_GETEVENT, SDL_ALLEVENTS)==1)
+#elif defined(USE_SDL2)
+    while(!user_feedback_required && SDL_PeepEvents(&event, 1, SDL_GETEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT)==1)
+#endif
     {
       switch(event.type)
       {
+#if defined(USE_SDL)
           case SDL_VIDEORESIZE:
               Handle_window_resize(event.resize);
               user_feedback_required = 1;
               break;
+#endif
 
           case SDL_QUIT:
               Handle_window_exit(event.quit);
@@ -897,13 +923,25 @@ int Get_input(int sleep_time)
               user_feedback_required = 1;
               break;
 
+#if defined(USE_SDL2)
+          //case SDL_MOUSEWHEEL:
+          //    break;
+#endif
+
           case SDL_KEYDOWN:
+#if defined(USE_SDL)
               Handle_key_press(event.key);
+#else
+              //TODO SDL2
+#endif
               user_feedback_required = 1;
               break;
 
           case SDL_KEYUP:
+#if defined(USE_SDL)
               Handle_key_release(event.key);
+              //TODO SDL2
+#endif
               break;
 
           // Start of Joystik handling
@@ -1064,7 +1102,11 @@ void Adjust_mouse_sensitivity(word fullscreen)
 
 void Set_mouse_position(void)
 {
+#if defined(USE_SDL)
     SDL_WarpMouse(Mouse_X*Pixel_width, Mouse_Y*Pixel_height);
+#elif defined(USE_SDL2)
+    //SDL_WarpMouseInWindow(Window_SDL, Mouse_X*Pixel_width, Mouse_Y*Pixel_height);
+#endif
 }
 
 static int Color_cycling(void)

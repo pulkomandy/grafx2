@@ -432,7 +432,11 @@ byte *Render_text_TTF(const char *str, int font_number, int size, int antialias,
   fg_color.r=fg_color.g=fg_color.b=255;
   bg_color.r=bg_color.g=bg_color.b=0;
   // The following is alpha, supposedly unused
+#if defined(USE_SDL)
   bg_color.unused=fg_color.unused=255;
+#elif defined(USE_SDL2)
+  bg_color.a=fg_color.a=255;
+#endif
   
   // Text rendering: creates a 8bit surface with its dedicated palette
   #ifdef __ANDROID__
@@ -576,7 +580,11 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
       rgb.r=((color & 0xE0)>>5)<<5;
       rgb.g=((color & 0x1C)>>2)<<5;
       rgb.b=((color & 0x03)>>0)<<6;
+#if defined(USE_SDL)
       SDL_SetColors(reduced_surface, &rgb, color, 1);
+#else
+      //SDL_SetPaletteColors
+#endif
     }
     // Perform reduction
     for (y=0; y<font_surface->h; y++)
@@ -606,7 +614,11 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   // Allocation d'une surface SDL
   text_surface=SDL_CreateRGBSurface(SDL_SWSURFACE, *width, *height, 8, 0, 0, 0, 0);
   // Copy palette
+#if defined(USE_SDL)
   SDL_SetPalette(text_surface, SDL_LOGPAL, font_surface->format->palette->colors, 0, 256);
+#else
+  //SDL_SetPaletteColors(
+#endif
   // Fill with transparent color
   rectangle.x=0;
   rectangle.y=0;

@@ -43,7 +43,9 @@
   This is used to type text and numeric values in input boxes.
   @param keysym SDL symbol to convert
 */
+#if defined(USE_SDL)
 word Keysym_to_ANSI(SDL_keysym keysym);
+#endif
 
 /*!
   Convert an SDL keysym to an internal keycode number.
@@ -52,7 +54,9 @@ word Keysym_to_ANSI(SDL_keysym keysym);
   See the notice at the beginning of keyboard.h for the format of a keycode.
   @param keysym SDL symbol to convert
 */
+#if defined(USE_SDL)
 word Keysym_to_keycode(SDL_keysym keysym);
+#endif
 
 /*!
     Helper function to convert between SDL system and the old coding for PC keycodes.
@@ -73,5 +77,9 @@ const char * Key_name(word key);
   Returns a combination of ::MOD_SHIFT, ::MOD_ALT, ::MOD_CTRL
   @param mod SDL modifiers state
 */
+#if defined(USE_SDL)
 word Key_modifiers(SDLMod mod);
+#elif defined(USE_SDL2)
+word Key_modifiers(SDL_Keymod mod);
+#endif
 

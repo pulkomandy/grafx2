@@ -39,12 +39,13 @@
   #define META_KEY_PREFIX "Super+"
 #endif
 
+#if defined(USE_SDL)
 // Table de correspondance des scancode de clavier IBM PC AT vers
 // les symboles de touches SDL (sym).
 // La correspondance est bonne si le clavier est QWERTY US, ou si
 // l'utilisateur est sous Windows.
 // Dans l'ordre des colonnes: Normal, +Shift, +Control, +Alt
-const word Scancode_to_sym[256][4] =
+static const word Scancode_to_sym[256][4] =
 {
 /* 00  ???   */ { SDLK_UNKNOWN     ,SDLK_UNKNOWN     ,SDLK_UNKNOWN     ,SDLK_UNKNOWN     },
 /* 01  Esc   */ { SDLK_ESCAPE      ,SDLK_ESCAPE      ,SDLK_ESCAPE      ,SDLK_ESCAPE      },
@@ -749,3 +750,18 @@ word Keysym_to_ANSI(SDL_keysym keysym)
  // Sinon c'est une touche spéciale, on retourne son scancode
   return keysym.sym;
 }
+#else
+// SDL2 TODO
+word Key_for_scancode(word scancode)
+{
+  return scancode;
+}
+const char * Key_name(word key)
+{
+  return "Unknown";
+}
+word Key_modifiers(SDL_Keymod mod)
+{
+  return 0;
+}
+#endif

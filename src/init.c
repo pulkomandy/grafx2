@@ -44,8 +44,10 @@
 #include <stdlib.h>
 #include <errno.h>
 #if defined(USE_SDL) || defined(USE_SDL2)
-#include <SDL_byteorder.h>
 #include <SDL_image.h>
+#endif
+#if defined(USE_SDL)
+#include <SDL_byteorder.h>
 #endif
 #if defined(__WIN32__)
   #include <windows.h> // GetLogicalDrives(), GetDriveType(), DRIVE_*
@@ -1918,10 +1920,10 @@ void Init_operations(void)
 
   // Définition d'un mode:
 
-void Set_video_mode(short  width,
-                        short  height,
-                        byte   mode,
-                        word   fullscreen)
+static void Set_video_mode(short  width,
+                           short  height,
+                           byte   mode,
+                           word   fullscreen)
 {
   byte supported = 0;
 
@@ -1932,19 +1934,21 @@ void Set_video_mode(short  width,
   }
   if (!fullscreen)
     supported = 128; // Prefere, non modifiable
+#if defined(USE_SDL)
   else if (SDL_VideoModeOK(width, height, 8, SDL_FULLSCREEN))
     supported = 1; // supported
+#endif
   else
   {
     // Non supporte : on ne le prend pas
     return;
   }
 
-  Video_mode[Nb_video_modes].Width          = width;
-  Video_mode[Nb_video_modes].Height          = height;
-  Video_mode[Nb_video_modes].Mode             = mode;
-  Video_mode[Nb_video_modes].Fullscreen       = fullscreen;
-  Video_mode[Nb_video_modes].State                   = supported;
+  Video_mode[Nb_video_modes].Width      = width;
+  Video_mode[Nb_video_modes].Height     = height;
+  Video_mode[Nb_video_modes].Mode       = mode;
+  Video_mode[Nb_video_modes].Fullscreen = fullscreen;
+  Video_mode[Nb_video_modes].State      = supported;
   Nb_video_modes ++;
 }
 
@@ -1966,7 +1970,9 @@ int Compare_video_modes(const void *p1, const void *p2)
 // Initializes the list of available video modes
 void Set_all_video_modes(void)
 {
+#if defined(USE_SDL)
   SDL_Rect** Modes;
+#endif
   Nb_video_modes=0;
   
   // The first mode will have index number 0.
@@ -2044,6 +2050,7 @@ void Set_all_video_modes(void)
   Set_video_mode( 800,600,0, 1);
   Set_video_mode(1024,768,0, 1);
 
+#if defined(USE_SDL)
   Modes = SDL_ListModes(NULL, SDL_FULLSCREEN);
   if ((Modes != (SDL_Rect**)0) && (Modes!=(SDL_Rect**)-1))
   {
@@ -2074,6 +2081,17 @@ void Set_all_video_modes(void)
     // Note that we voluntarily omit the first entry: the default mode.
     qsort(&Video_mode[1], Nb_video_modes - 1, sizeof(T_Video_mode), Compare_video_modes);
   }
+#endif
+#if defined(USE_SDL2)
+  {
+    SDL_DisplayMode dm;
+    if (SDL_GetDesktopDisplayMode(0, &dm) == 0)
+    {
+      // Set the native desktop video mode
+      Set_video_mode(dm.w, dm.h, 0, 1);
+    }
+  }
+#endif
 }
 
 //---------------------------------------------------------------------------
@@ -3196,9 +3214,13 @@ void Define_icon(void)
       if (icon->format->BitsPerPixel == 8)
       {
         // 8bit image: use color key
-        
+#if defined(USE_SDL)
         SDL_SetColorKey(icon, SDL_SRCCOLORKEY, pink);
         SDL_WM_SetIcon(icon,NULL);
+#else
+        SDL_SetColorKey(icon, SDL_TRUE, pink);
+        //SDL_SetWindowIcon(SDL_Window*  window, icon);
+#endif
       }
       else
       {
@@ -3213,7 +3235,11 @@ void Define_icon(void)
           for (x=0;x<32;x++)
             if (Get_SDL_pixel_hicolor(icon, x, y) != pink)
               icon_mask[(y*32+x)/8] |=0x80>>(x&7);
+#if defined(USE_SDL)
         SDL_WM_SetIcon(icon,icon_mask);
+#else
+        //SDL_SetWindowIcon(SDL_Window*  window, icon);
+#endif
         free(icon_mask);
         icon_mask = NULL;
       }

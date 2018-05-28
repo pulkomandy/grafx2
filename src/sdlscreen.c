@@ -65,6 +65,11 @@
 #endif
 
 static SDL_Surface * Screen_SDL = NULL;
+#if defined(USE_SDL2)
+static SDL_Window * Window_SDL = NULL;
+static SDL_Renderer * Renderer_SDL = NULL;
+static SDL_Texture * Texture_SDL = NULL;
+#endif
 
 volatile int Allow_colorcycling=1;
 
@@ -114,6 +119,7 @@ void Set_mode_SDL(int *width, int *height, int fullscreen)
   static SDL_Cursor* cur = NULL;
   static byte cursorData = 0;
 
+#if defined(USE_SDL)
 #ifdef GCWZERO
   Screen_SDL=SDL_SetVideoMode(*width,*height,8,SDL_HWSURFACE|SDL_TRIPLEBUF|(fullscreen?SDL_FULLSCREEN:0)|SDL_RESIZABLE);
 #else
@@ -134,6 +140,14 @@ void Set_mode_SDL(int *width, int *height, int fullscreen)
   {
     DEBUG("Error: Unable to change video mode!",0);
   }
+#else
+  // SDL2
+  Window_SDL = SDL_CreateWindow("GrafX2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                                *width, *height, (fullscreen?SDL_WINDOW_FULLSCREEN:SDL_WINDOW_RESIZABLE));
+  Renderer_SDL = SDL_CreateRenderer(Window_SDL, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+  Texture_SDL = SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, *width, *height);
+  Screen_SDL = SDL_CreateRGBSurface(0, *width, *height, 8, 0, 0, 0, 0);
+#endif
 
   // Trick borrowed to Barrage (http://www.mail-archive.com/debian-bugs-dist@lists.debian.org/msg737265.html) :
   // Showing the cursor but setting it to fully transparent allows us to get absolute mouse coordinates,
@@ -152,6 +166,40 @@ void Set_mode_SDL(int *width, int *height, int fullscreen)
     SDL_ShowCursor(SDL_DISABLE); // Hide the SDL mouse cursor, we use our own internal one
   }
 }
+
+#if defined(USE_SDL2)
+static void GFX2_UpdateRect(int x, int y, int width, int height)
+{
+  byte * pixels;
+  int pitch;
+  int line;
+  static SDL_Surface *RGBcopy = NULL;
+  SDL_Rect source_rect;
+
+  source_rect.x = x;
+  source_rect.y = y;
+  source_rect.w = width;
+  source_rect.h = height;
+
+  if  (RGBcopy == NULL)
+  {
+    RGBcopy = SDL_CreateRGBSurface(0,
+    Screen_SDL->w, Screen_SDL->h,
+    32, 0, 0, 0, 0);
+  }
+  // conversion ARGB
+  SDL_BlitSurface(Screen_SDL, &source_rect, RGBcopy, &source_rect);
+  // upload texture
+  SDL_LockTexture(Texture_SDL, &source_rect, (void **)(&pixels), &pitch );
+  for (line = 0; line < source_rect.h; line++)
+  {
+     memcpy(pixels + line * pitch, RGBcopy->pixels + source_rect.x * 4 + (source_rect.y+line)* RGBcopy->pitch, source_rect.w * 4 );
+  }
+  SDL_UnlockTexture(Texture_SDL);
+  SDL_RenderCopy(Renderer_SDL, Texture_SDL, &source_rect, &source_rect);
+  SDL_RenderPresent(Renderer_SDL);
+}
+#endif
 
 #if (UPDATE_METHOD == UPDATE_METHOD_CUMULATED)
 short Min_X=0;
@@ -174,8 +222,10 @@ void Flush_update(void)
   {
 #ifdef GCWZERO
     SDL_Flip(Screen_SDL);
-#else
+#elif defined(USE_SDL)
     SDL_UpdateRect(Screen_SDL, 0, 0, 0, 0);
+#else
+    GFX2_UpdateRect(0, 0, 0, 0);
 #endif
     update_is_required=0;
   }
@@ -191,14 +241,22 @@ void Flush_update(void)
       Min_X=0;
     if (Min_Y<0)
       Min_Y=0;
+#if defined(USE_SDL)
     SDL_UpdateRect(Screen_SDL, Min_X*Pixel_width, Min_Y*Pixel_height, Min(Screen_width-Min_X, Max_X-Min_X)*Pixel_width, Min(Screen_height-Min_Y, Max_Y-Min_Y)*Pixel_height);
+#else
+    GFX2_UpdateRect(Min_X*Pixel_width, Min_Y*Pixel_height, Min(Screen_width-Min_X, Max_X-Min_X)*Pixel_width, Min(Screen_height-Min_Y, Max_Y-Min_Y)*Pixel_height);
+#endif
 
     Min_X=Min_Y=10000;
     Max_X=Max_Y=0;
   }
   if (Status_line_dirty_end)
   {
+#if defined(USE_SDL)
     SDL_UpdateRect(Screen_SDL, (18+(Status_line_dirty_begin*8))*Menu_factor_X*Pixel_width,Menu_status_Y*Pixel_height,(Status_line_dirty_end-Status_line_dirty_begin)*8*Menu_factor_X*Pixel_width,8*Menu_factor_Y*Pixel_height);
+#else
+    GFX2_UpdateRect((18+(Status_line_dirty_begin*8))*Menu_factor_X*Pixel_width,Menu_status_Y*Pixel_height,(Status_line_dirty_end-Status_line_dirty_begin)*8*Menu_factor_X*Pixel_width,8*Menu_factor_Y*Pixel_height);
+#endif
   }
   Status_line_dirty_begin=25;
   Status_line_dirty_end=0;
@@ -210,7 +268,11 @@ void Flush_update(void)
 void Update_rect(short x, short y, unsigned short width, unsigned short height)
 {
   #if (UPDATE_METHOD == UPDATE_METHOD_MULTI_RECTANGLE)
+    #if defined(USE_SDL)
     SDL_UpdateRect(Screen_SDL, x*Pixel_width, y*Pixel_height, width*Pixel_width, height*Pixel_height);
+    #else
+    GFX2_UpdateRect(x*Pixel_width, y*Pixel_height, width*Pixel_width, height*Pixel_height);
+    #endif
   #endif
 
   #if (UPDATE_METHOD == UPDATE_METHOD_CUMULATED)
@@ -242,7 +304,11 @@ void Update_rect(short x, short y, unsigned short width, unsigned short height)
 void Update_status_line(short char_pos, short width)
 {
   #if (UPDATE_METHOD == UPDATE_METHOD_MULTI_RECTANGLE)
+  #if defined(USE_SDL)
   SDL_UpdateRect(Screen_SDL, (18+char_pos*8)*Menu_factor_X*Pixel_width,Menu_status_Y*Pixel_height,width*8*Menu_factor_X*Pixel_width,8*Menu_factor_Y*Pixel_height);
+  #else
+  GFX2_UpdateRect((18+char_pos*8)*Menu_factor_X*Pixel_width,Menu_status_Y*Pixel_height,width*8*Menu_factor_X*Pixel_width,8*Menu_factor_Y*Pixel_height);
+  #endif
   #endif
 
   #if (UPDATE_METHOD == UPDATE_METHOD_CUMULATED)
@@ -304,7 +370,11 @@ SDL_Color Color_to_SDL_color(byte index)
   color.r = Main.palette[index].R;
   color.g = Main.palette[index].G;
   color.b = Main.palette[index].B;
+#if defined(USE_SDL)
   color.unused = 255;
+#else
+  color.a = 255;
+#endif
   return color;
 }
 
@@ -373,7 +443,11 @@ int SetPalette(const T_Components * colors, int firstcolor, int ncolors)
     PaletteSDL[i].g = colors[i].G;
     PaletteSDL[i].b = colors[i].B;
   }
+#if defined(USE_SDL)
   return SDL_SetPalette(Screen_SDL, SDL_PHYSPAL | SDL_LOGPAL, PaletteSDL, firstcolor, ncolors);
+#else
+  return SDL_SetPaletteColors(Screen_SDL->format->palette, PaletteSDL, firstcolor, ncolors);
+#endif
 }
 
 void Clear_border(byte color)
@@ -396,7 +470,11 @@ void Clear_border(byte color)
     r.h=Screen_SDL->h;
     r.w=width;
     SDL_FillRect(Screen_SDL,&r,color);
+#if defined(USE_SDL)
     SDL_UpdateRect(Screen_SDL, r.x, r.y, r.w, r.h);
+#else
+    //SDL_RenderPresent(
+#endif
   }
   if (height)
   {
@@ -406,7 +484,11 @@ void Clear_border(byte color)
     r.h=height;
     r.w=Screen_SDL->w - height;
     SDL_FillRect(Screen_SDL,&r,color);
+#if defined(USE_SDL)
     SDL_UpdateRect(Screen_SDL, r.x, r.y, r.w, r.h);
+#else
+// TODO
+#endif
   }  
 }
 
