@@ -1606,7 +1606,7 @@ if (Create_lock_file(Config_directory))
 
 void Rotate_safety_backups(void)
 {
-  Uint32 now;
+  dword now;
   T_IO_Context context;
   char file_name[12+1];
   char deleted_file[MAX_PATH_CHARACTERS];
@@ -1614,7 +1614,7 @@ void Rotate_safety_backups(void)
   if (!Safety_backup_active)
     return;
     
-  now = SDL_GetTicks();
+  now = GFX2_GetTicks();
   // It's time to save if either:
   // - Many edits have taken place
   // - A minimum number of edits have taken place AND a minimum time has passed
@@ -1630,7 +1630,7 @@ void Rotate_safety_backups(void)
     sprintf(deleted_file, "%s%c%6.6d" BACKUP_FILE_EXTENSION,
       Config_directory,
       Main.safety_backup_prefix,
-      (Uint32)(Main.safety_number + 1000000l - Rotation_safety_backup) % (Uint32)1000000l);
+      (dword)(Main.safety_number + 1000000l - Rotation_safety_backup) % (dword)1000000l);
     remove(deleted_file); // no matter if fail
     
     // Reset counters
@@ -1640,7 +1640,7 @@ void Rotate_safety_backups(void)
     // Create a new file name and save
     sprintf(file_name, "%c%6.6d" BACKUP_FILE_EXTENSION,
       Main.safety_backup_prefix,
-      (Uint32)Main.safety_number);
+      (int)Main.safety_number);
     Init_context_backup_image(&context, file_name, Config_directory);
     context.Format=FORMAT_GIF;
     // Provide original file data, to store as a GIF Application Extension

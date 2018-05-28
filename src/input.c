@@ -989,7 +989,7 @@ int Get_input(int sleep_time)
       long time_now;
       int step=0;
       
-      time_now=SDL_GetTicks();
+      time_now=GFX2_GetTicks();
       
       if (Directional_first_move==0)
       {
@@ -1081,14 +1081,14 @@ static int Color_cycling(void)
   if (start==0)
   {
     // First run
-    start = SDL_GetTicks();
+    start = GFX2_GetTicks();
     return 1;
   }
   if (!Allow_colorcycling || !Cycling_mode)
     return 1;
     
 
-  now = SDL_GetTicks();
+  now = GFX2_GetTicks();
   changed=0;
   
   // Check all cycles for a change at this tick

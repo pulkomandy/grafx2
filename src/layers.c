@@ -630,10 +630,10 @@ void Button_Anim_last_frame(void)
 
 void Button_Anim_continuous_next(void)
 {
-  Uint32 time_start;
+  dword time_start;
   int time_in_current_frame=0;
 
-  time_start = SDL_GetTicks();
+  time_start = GFX2_GetTicks();
   
   do
   {
@@ -642,7 +642,7 @@ void Button_Anim_continuous_next(void)
   
     Get_input(20);
     
-    time_now=SDL_GetTicks();
+    time_now=GFX2_GetTicks();
     time_in_current_frame += time_now-time_start;
     time_start=time_now;
     target_frame = Main.current_layer;
@@ -665,10 +665,10 @@ void Button_Anim_continuous_next(void)
 
 void Button_Anim_continuous_prev(void)
 {
-  Uint32 time_start;
+  dword time_start;
   int time_in_current_frame=0;
 
-  time_start = SDL_GetTicks();
+  time_start = GFX2_GetTicks();
   
   do
   {
@@ -677,7 +677,7 @@ void Button_Anim_continuous_prev(void)
   
     Get_input(20);
     
-    time_now=SDL_GetTicks();
+    time_now=GFX2_GetTicks();
     time_in_current_frame += time_now-time_start;
     time_start=time_now;
     target_frame = Main.current_layer;

@@ -47,7 +47,7 @@
 
 /// Time (in SDL ticks) when the next airbrush drawing should be done. Also used
 /// for discontinuous freehand drawing.
-Uint32 Airbrush_next_time;
+dword Airbrush_next_time;
 
 // Panning needs its own operation storage because it may interrupt another
 // interrupting operation
@@ -311,7 +311,7 @@ void Freehand_mode2_1_0(void)
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
   Print_coordinates();
-  Airbrush_next_time = SDL_GetTicks() + Airbrush_delay*10;
+  Airbrush_next_time = GFX2_GetTicks() + Airbrush_delay*10;
 }
 
 
@@ -331,7 +331,7 @@ void Freehand_mode2_1_2(void)
   if ( (start_x!=Paintbrush_X) || (start_y!=Paintbrush_Y) )
   {
     Print_coordinates();
-    if (SDL_GetTicks()>Airbrush_next_time)
+    if (GFX2_GetTicks()>Airbrush_next_time)
     {
       Airbrush_next_time+=Airbrush_delay*10;
       Hide_cursor();
@@ -363,7 +363,7 @@ void Freehand_mode2_2_0(void)
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
   Print_coordinates();
-  Airbrush_next_time = SDL_GetTicks() + Airbrush_delay*10;
+  Airbrush_next_time = GFX2_GetTicks() + Airbrush_delay*10;
   // On affiche définitivement le pinceau
   Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color);
 }
@@ -385,7 +385,7 @@ void Freehand_mode2_2_2(void)
   if ( (start_x!=Paintbrush_X) || (start_y!=Paintbrush_Y) )
   {
     Print_coordinates();
-    if (SDL_GetTicks()>Airbrush_next_time)
+    if (GFX2_GetTicks()>Airbrush_next_time)
     {
       Airbrush_next_time+=Airbrush_delay*10;
       Hide_cursor();
@@ -1983,10 +1983,10 @@ void Airbrush_1_0(void)
   Backup();
   Shade_table=Shade_table_left;
 
-  if (SDL_GetTicks()>Airbrush_next_time)
+  if (GFX2_GetTicks()>Airbrush_next_time)
   {
     Airbrush(LEFT_SIDE);
-    Airbrush_next_time = SDL_GetTicks()+Airbrush_delay*10;
+    Airbrush_next_time = GFX2_GetTicks()+Airbrush_delay*10;
   }
 
   Operation_push(Paintbrush_X);
@@ -2008,10 +2008,10 @@ void Airbrush_2_0(void)
   Init_start_operation();
   Backup();
   Shade_table=Shade_table_right;
-  if (SDL_GetTicks()>Airbrush_next_time)
+  if (GFX2_GetTicks()>Airbrush_next_time)
   {
     Airbrush(RIGHT_SIDE);
-    Airbrush_next_time = SDL_GetTicks()+Airbrush_delay*10;
+    Airbrush_next_time = GFX2_GetTicks()+Airbrush_delay*10;
   }
 
   Operation_push(Paintbrush_X);
@@ -2028,7 +2028,7 @@ void Airbrush_12_2(void)
 //
 {
   short old_x,old_y;
-  Uint32 now;
+  dword now;
 
   Operation_pop(&old_y);
   Operation_pop(&old_x);
@@ -2040,7 +2040,7 @@ void Airbrush_12_2(void)
     Display_cursor();
   }
 
-  now=SDL_GetTicks();
+  now=GFX2_GetTicks();
   if (now>Airbrush_next_time)
   {
     //Airbrush_next_time+=Airbrush_delay*10;

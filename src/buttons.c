@@ -355,7 +355,7 @@ void Button_Select_forecolor(int btn)
   int color;
 
   time_previous = time_click;
-  time_click = SDL_GetTicks();
+  time_click = GFX2_GetTicks();
 
   color=Pick_color_in_palette();
 

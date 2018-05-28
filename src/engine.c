@@ -3246,9 +3246,9 @@ short Window_clicked_button(void)
     {
       short clicked_button;
       T_List_button * list;
-      static Uint32 time_last_click = 0;
+      static dword time_last_click = 0;
       static int last_list_number = -1;
-      Uint32 time_now;
+      dword time_now;
       
       // Check which controls was clicked (by rectangular area)
       clicked_button = Window_get_clicked_button();
@@ -3263,7 +3263,7 @@ short Window_clicked_button(void)
           clicked_line = (((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-list->Entry_button->Pos_Y)>>3;
           if (clicked_line >= list->Scroller->Nb_elements) // Below last line
             return 0;
-          time_now = SDL_GetTicks();
+          time_now = GFX2_GetTicks();
           if (clicked_line == list->Cursor_position)
           {
             // Double click check
@@ -3603,15 +3603,15 @@ void Remap_UI_in_window_backgrounds(const byte * conversion_table)
 
 void Delay_with_active_mouse(int speed)
 {
-  Uint32 end;
+  dword end;
   byte original_mouse_k = Mouse_K;
   
-  end = SDL_GetTicks()+speed*10;
+  end = GFX2_GetTicks()+speed*10;
   
   do
   {
     Get_input(20);
-  } while (Mouse_K == original_mouse_k && SDL_GetTicks()<end);
+  } while (Mouse_K == original_mouse_k && GFX2_GetTicks()<end);
 }
 
 ///

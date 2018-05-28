@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2018 Thomas Bernard
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
@@ -22,6 +23,9 @@
 ///@file misc.h
 /// Miscellanous unsorted functions.
 //////////////////////////////////////////////////////////////////////////////
+
+#ifndef MISC_H__
+#define MISC_H__
 
 #include "struct.h"
 #include "global.h"
@@ -149,3 +153,8 @@ int Convert_videomode_arg(const char *argument);
 
 int Popcount_word(word x);
 int Popcount_dword(dword x);
+
+/// Return a number of milliseconds
+dword GFX2_GetTicks(void);
+
+#endif

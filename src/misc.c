@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2018 Thomas Bernard
     Copyright 2011 Pawel Góralski
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
@@ -30,6 +31,13 @@
 #endif
 #include <stdlib.h>
 #include <math.h>
+#if !defined(USE_SDL) && !defined(USE_SDL2)
+#if defined(WIN32)
+#include <windows.h>
+#else
+#include <sys/time.h>
+#endif
+#endif
 #include "struct.h"
 #include "sdlscreen.h"
 #include "global.h"
@@ -233,7 +241,7 @@ void Init_chrono(dword delay)
   // Démarrer le chrono
 {
   Timer_delay = delay;
-  Timer_start = SDL_GetTicks()/55;
+  Timer_start = GFX2_GetTicks()/55;
   return;
 }
 
@@ -496,7 +504,7 @@ byte Effect_alpha_colorize    (word x,word y,byte color)
 
 void Check_timer(void)
 {
-  if((SDL_GetTicks()/55)-Timer_delay>Timer_start) Timer_state=1;
+  if((GFX2_GetTicks()/55)-Timer_delay>Timer_start) Timer_state=1;
 }
 
 void Flip_Y_lowlevel(byte *src, short width, short height)
@@ -880,5 +888,19 @@ int Convert_videomode_arg(const char *argument)
       return mode_index;
 
   return -1;
+}
+
+dword GFX2_GetTicks(void)
+{
+#if defined(USE_SDL) || defined(USE_SDL2)
+  return SDL_GetTicks();
+#elif defined(WIN32)
+  return GetTickCount();
+#else
+  struct timeval tv;
+  if (gettimeofday(&tv, NULL) < 0)
+    return 0;
+  return tv.tv_sec * 1000 + tv.tv_usec / 1000;
+#endif
 }
 

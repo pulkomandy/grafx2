@@ -1111,13 +1111,13 @@ void Fill_general(byte fill_color)
 //////////////////////////////////////////////////////////////////////////////
 
   // Data used by ::Init_permanent_draw() and ::Pixel_figure_permanent()
-  static Uint32 Permanent_draw_next_refresh=0;
+  static dword Permanent_draw_next_refresh=0;
   static int Permanent_draw_count=0;
 
   void Init_permanent_draw(void)
   {
     Permanent_draw_count = 0;
-    Permanent_draw_next_refresh = SDL_GetTicks() + 100;
+    Permanent_draw_next_refresh = GFX2_GetTicks() + 100;
   }
 
   // Affichage d'un point de façon définitive (utilisation du pinceau)
@@ -1129,7 +1129,7 @@ void Fill_general(byte fill_color)
     // Check every 8 pixels
     if (! (Permanent_draw_count&7))
     {
-      Uint32 now = SDL_GetTicks();
+      dword now = GFX2_GetTicks();
       SDL_PumpEvents();
       if (now>= Permanent_draw_next_refresh)
       {

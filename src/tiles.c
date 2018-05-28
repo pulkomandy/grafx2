@@ -338,7 +338,7 @@ void Tilemap_update(void)
   if (wait_window)
   {
     char   str[8];
-    Uint32 end;
+    dword end;
     
     if (Config.Tilemap_show_count)
     {
@@ -349,11 +349,11 @@ void Tilemap_update(void)
       Display_cursor();
       
       // Wait a moment to display count
-      end = SDL_GetTicks()+750;
+      end = GFX2_GetTicks()+750;
       do
       {
         Get_input(20);
-      } while (SDL_GetTicks()<end);
+      } while (GFX2_GetTicks()<end);
     }
 
     Close_window();

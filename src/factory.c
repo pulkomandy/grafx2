@@ -1385,7 +1385,7 @@ int L_MessageBox(lua_State* L)
 int L_Wait(lua_State* L)
 {
   float delay;
-  Uint32 end;
+  dword end;
   int nb_args=lua_gettop(L);
   
   LUA_ARG_LIMIT (1, "wait");
@@ -1403,19 +1403,19 @@ int L_Wait(lua_State* L)
     return 0;
   }
   // Wait specified time
-  end = SDL_GetTicks()+(int)(delay*1000.0);
+  end = GFX2_GetTicks()+(int)(delay*1000.0);
   
   do
   {
     Get_input(20);
-  } while (SDL_GetTicks()<end);
+  } while (GFX2_GetTicks()<end);
   return 0;
 }
 
 int L_WaitBreak(lua_State* L)
 {
   float delay;
-  Uint32 end;
+  dword end;
   int nb_args=lua_gettop(L);
   
   LUA_ARG_LIMIT (1, "waitbreak");
@@ -1434,7 +1434,7 @@ int L_WaitBreak(lua_State* L)
     return 1;
   }
   // Wait specified time
-  end = SDL_GetTicks()+(int)(delay*1000.0);
+  end = GFX2_GetTicks()+(int)(delay*1000.0);
   
   do
   {
@@ -1444,7 +1444,7 @@ int L_WaitBreak(lua_State* L)
       lua_pushinteger(L, 1);
       return 1;
     }
-  } while (SDL_GetTicks()<end);
+  } while (GFX2_GetTicks()<end);
 
   lua_pushinteger(L, 0);
   return 1;
@@ -1453,7 +1453,7 @@ int L_WaitBreak(lua_State* L)
 int L_WaitInput(lua_State* L)
 {
   float delay;
-  Uint32 end;
+  dword end;
   int nb_args=lua_gettop(L);
   int moved;
   
@@ -1478,13 +1478,13 @@ int L_WaitInput(lua_State* L)
   else
   {
     // Wait specified time
-    end = SDL_GetTicks()+(int)(delay*1000.0);
+    end = GFX2_GetTicks()+(int)(delay*1000.0);
   
     moved=0;
     do
     {
       moved=Get_input(20);
-    } while (!moved && SDL_GetTicks()<end);
+    } while (!moved && GFX2_GetTicks()<end);
   }
   
   lua_pushboolean(L, moved ? 1 : 0);

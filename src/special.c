@@ -429,7 +429,7 @@ void Transparency_set(byte amount)
   }
 
   time_previous = time_click;
-  time_click = SDL_GetTicks();
+  time_click = GFX2_GetTicks();
 
   // Check if it's a quick re-press
   if (time_click - time_previous < doubleclick_delay)
