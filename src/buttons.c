@@ -1355,12 +1355,12 @@ void Button_Skins(int btn)
     Window_dropdown_add_item(cursor_dropdown, temp, cursors[temp]);
 
   Window_set_normal_button(172, 87, 14, 14,
-    (Config.Display_image_limits)?"X":" ", -1, 1, SDLK_LAST); // 8
+    (Config.Display_image_limits)?"X":" ", -1, 1, KEY_NONE); // 8
   Print_in_window( 190, 85,"Draw picture", MC_Dark, MC_Light);
   Print_in_window( 190, 94,"limits", MC_Dark, MC_Light);
 
   Window_set_normal_button(172, 111, 14, 14,
-    (Config.Separate_colors)?"X":" ", -1, 1, SDLK_LAST); // 9
+    (Config.Separate_colors)?"X":" ", -1, 1, KEY_NONE); // 9
   Print_in_window( 190, 109,"Separate", MC_Dark, MC_Light);
   Print_in_window( 190, 118,"colors", MC_Dark, MC_Light);
 
@@ -1978,7 +1978,7 @@ void Button_Resolution(int btn)
 
   // 10 little buttons for the state of each visible mode
   for (temp=0; temp<MODELIST_LINES && temp < Nb_video_modes; temp++)
-    Window_set_normal_button(17,86+(temp<<3),13,7,"",0,1,SDLK_LAST);// 8..17
+    Window_set_normal_button(17,86+(temp<<3),13,7,"",0,1,KEY_NONE);// 8..17
 
   // Dummy buttons as explainations of colors
   Window_draw_normal_bouton( 16,170,13,7,"",0,0);
@@ -2934,7 +2934,7 @@ void Button_Paintbrush_menu(int btn)
   {
     x_pos=13+(index%12)*24;
     y_pos=27+(index/12)*25;
-    //Window_set_normal_button(x_pos  ,y_pos  ,20,20,"",0,1,SDLK_LAST);
+    //Window_set_normal_button(x_pos  ,y_pos  ,20,20,"",0,1,KEY_NONE);
     Window_set_dropdown_button(x_pos  ,y_pos  ,20,20,28,NULL, 0,0,0,RIGHT_SIDE,0);
     Window_dropdown_add_item(Window_dropdown_button_list, 1, "Set");
     // Highlight selected brush
@@ -4997,8 +4997,8 @@ void Button_Text(int btn)
 
   // Taille texte
   input_size_button = Window_set_input_button_s(220,43,3,SDLK_s); // 7
-  Window_set_repeatable_button(202,43,13,11,"-",0,1,SDLK_LAST); // 8
-  Window_set_repeatable_button(251,43,13,11,"+",0,1,SDLK_LAST); // 9
+  Window_set_repeatable_button(202,43,13,11,"-",0,1,KEY_NONE); // 8
+  Window_set_repeatable_button(251,43,13,11,"+",0,1,KEY_NONE); // 9
 
   // Preview
   preview_button = Window_set_special_button(8,106,273,50,0); // 10
@@ -5593,7 +5593,8 @@ void Button_Brush_container(void)
       y_pos,
       BRUSH_CONTAINER_PREVIEW_WIDTH+2,
       BRUSH_CONTAINER_PREVIEW_HEIGHT+2,
-      "",0,1,SDLK_LAST);
+      "",0,1,KEY_NONE
+      );
     Display_stored_brush_in_window(x_pos+1, y_pos+1, index);
   }
   Update_window_area(0,0,Window_width, Window_height);

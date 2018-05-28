@@ -1652,7 +1652,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   Print_in_window(292,59,")",MC_Dark,MC_Light);
 
   // Selecteur de Lecteur / Volume
-  Window_set_normal_button(7,18,53,23,"",0,1,SDLK_LAST); // 9
+  Window_set_normal_button(7,18,53,23,"",0,1,KEY_NONE); // 9
   Print_in_window(10,22,"Select",MC_Black,MC_Light);
   Print_in_window(14,30,"drive",MC_Black,MC_Light);
  

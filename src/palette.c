@@ -2923,7 +2923,7 @@ void Button_Secondary_palette(int btn)
   Num2str(RGB_scale,str,3);
   Print_in_window(RGBScale_X,RGBScale_Y,str,MC_Black,MC_Light);
 
-  Window_set_normal_button(35,106,13,11,"",-1,1,SDLK_LAST); // 8
+  Window_set_normal_button(35,106,13,11,"",-1,1,KEY_NONE); // 8
   Print_in_window(38,108,(palette_vertical)?"X":" ",MC_Black,MC_Light);
   Print_in_window(51,108,"Vertical",MC_Dark,MC_Light);
 

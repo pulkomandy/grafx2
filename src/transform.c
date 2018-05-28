@@ -123,9 +123,9 @@ void Button_Transform_menu(int btn)
   Window_set_normal_button( 17,140, 27,14,"Y\022" ,1,1,SDLK_y);  // 3
 
   Print_in_window( 84,114,"Rotate",MC_Dark,MC_Light);
-  Window_set_normal_button( 69,125, 37,14,"-90\xb0"  ,0,1,SDLK_LAST); // 4
-  Window_set_normal_button(107,125, 37,14,"+90\xb0"  ,0,1,SDLK_LAST); // 5
-  Window_set_normal_button( 69,140, 75,14,"180\xb0"  ,0,1,SDLK_LAST); // 6
+  Window_set_normal_button( 69,125, 37,14,"-90\xb0"  ,0,1,KEY_NONE); // 4
+  Window_set_normal_button(107,125, 37,14,"+90\xb0"  ,0,1,KEY_NONE); // 5
+  Window_set_normal_button( 69,140, 75,14,"180\xb0"  ,0,1,KEY_NONE); // 6
 
   Print_in_window( 87, 19,"Resize",MC_Dark,MC_Light);
   Window_set_normal_button( 80, 86, 60,14,"RESIZE",1,1,SDLK_r);    // 7

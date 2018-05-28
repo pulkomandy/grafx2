@@ -779,6 +779,8 @@ GFX2_GLOBAL iconv_t cd_utf16_inv;   // UTF16 => FROMCODE
 
 /// Indicates "no keyboard shortcut".
 #define KEY_NONE            0
+
+#if defined(USE_SDL)
 ///
 /// This is the "key identifier" for the mouse 3rd button.
 /// It was chosen to not conflict with any SDL key number.
@@ -797,6 +799,18 @@ GFX2_GLOBAL iconv_t cd_utf16_inv;   // UTF16 => FROMCODE
 /// (since their is an unknown number of them, and for example 18 on GP2X)
 /// It was chosen to not conflict with any SDL key number.
 #define KEY_JOYBUTTON       (SDLK_LAST+4)
+
+#else
+// Not SDL 1.2
+#define KEY_MOUSEMIDDLE     0x0210
+#define KEY_MOUSEX1         0x0211
+#define KEY_MOUSEX2         0x0212
+#define KEY_MOUSEWHEELUP    0x0200
+#define KEY_MOUSEWHEELDOWN  0x0201
+#define KEY_MOUSEWHEELLEFT  0x0202
+#define KEY_MOUSEWHEELRIGHT 0x0203
+#define KEY_JOYBUTTON       0x0100
+#endif
 
 /// The joystick axis are {X,Y} - on all platforms so far.
 /// If there is ever a platform where they are reversed, put
@@ -870,12 +884,14 @@ GFX2_GLOBAL iconv_t cd_utf16_inv;   // UTF16 => FROMCODE
     #define JOY_BUTTON_JOY           (10)
 
     #define KEY_ESC (KEY_JOYBUTTON+JOY_BUTTON_HOME)
-#else
+#elif defined(USE_SDL) || defined(USE_SDL2)
   ///
   /// This is the key identifier for ESC. When hard-coding keyboard shortcuts
   /// for buttons, etc. we use this instead of SDLK_ESCAPE,
   /// so the console ports can get a joybutton equivalent of it.
   #define KEY_ESC SDLK_ESCAPE
+#else
+  #define KEY_ESC 1
 #endif
 
 #endif

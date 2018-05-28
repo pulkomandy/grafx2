@@ -19,6 +19,9 @@
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
+#if defined(USE_SDL) || defined(USE_SDL2)
+#include <SDL.h>
+#endif
 #include "struct.h"
 #include "global.h"
 #include "hotkeys.h"
