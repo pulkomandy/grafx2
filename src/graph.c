@@ -139,10 +139,10 @@ void Update_part_of_screen(short x, short y, short width, short height)
 
   // Round up to a multiple of 8 pixels, because some special modes (ZX, Thomson, ...) can change
   // more pixels than expected (attribute clash)
+  width = ((width + (x & 7)) | 7) + 1;
+  height = ((height + (y & 7)) | 7) + 1;
   x &= 0xFFF8;
   y &= 0xFFF8;
-  width = ((width - 1) | 0x7) + 1;
-  height = ((height - 1) | 0x7) + 1;
 
   // Update "normal" view
   diff = x-Main.offset_X;
