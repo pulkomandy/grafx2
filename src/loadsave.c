@@ -1120,6 +1120,7 @@ void Load_SDL_Image(T_IO_Context *context)
 
   SDL_FreeSurface(surface);
 }
+#endif
 
 ///
 /// Load an arbitrary Surface.
@@ -1155,7 +1156,6 @@ T_GFX2_Surface * Load_surface(char *full_name, T_Gradient_array *gradients)
 
   return bmp;
 }
-#endif
 
 
 /// Saves an image.

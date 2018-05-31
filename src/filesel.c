@@ -1573,7 +1573,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
       Open_window(310,200,"Load palette");
     else
       Open_window(310,200,"Load brush");
-    Window_set_normal_button(198,180,51,14,"Load",0,1,SDLK_RETURN); // 1
+    Window_set_normal_button(198,180,51,14,"Load",0,1,KEY_RETURN); // 1
   }
   else
   {
@@ -1585,7 +1585,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
       Open_window(310,200,"Save palette");
     else
       assert(0);
-    Window_set_normal_button(198,180,51,14,"Save",0,1,SDLK_RETURN); // 1
+    Window_set_normal_button(198,180,51,14,"Save",0,1,KEY_RETURN); // 1
     if (Selector->Format_filter<=FORMAT_ALL_FILES) // Correction du *.*
     {
       Selector->Format_filter=context->Format;
@@ -1605,7 +1605,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   }
 
   Window_set_normal_button(253,180,51,14,"Cancel",0,1,KEY_ESC); // 2
-  Window_set_normal_button(7,180,51,14,"Delete",0,1,SDLK_DELETE); // 3
+  Window_set_normal_button(7,180,51,14,"Delete",0,1,KEY_DELETE); // 3
 
   // Frame autour des infos sur le fichier de dessin
   Window_display_frame_in(6, 44,299, 37);
@@ -2117,43 +2117,43 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 
     switch (Key)
     {
-      case SDLK_UNKNOWN : break;
-      case SDLK_DOWN : // Bas
+      case KEY_UNKNOWN : break;
+      case KEY_DOWN : // Bas
         Reset_quicksearch();
         Hide_cursor();
         Selector_scroll_down(&Selector->Position,&Selector->Offset);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
-      case SDLK_UP : // Haut
+      case KEY_UP : // Haut
         Reset_quicksearch();
         Hide_cursor();
         Selector_scroll_up(&Selector->Position,&Selector->Offset);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
-      case SDLK_PAGEDOWN : // PageDown
+      case KEY_PAGEDOWN : // PageDown
         Reset_quicksearch();
         Hide_cursor();
         Selector_page_down(&Selector->Position,&Selector->Offset,9);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
-      case SDLK_PAGEUP : // PageUp
+      case KEY_PAGEUP : // PageUp
         Reset_quicksearch();
         Hide_cursor();
         Selector_page_up(&Selector->Position,&Selector->Offset,9);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
-      case SDLK_END : // End
+      case KEY_END : // End
         Reset_quicksearch();
         Hide_cursor();
         Selector_end(&Selector->Position,&Selector->Offset);
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
-      case SDLK_HOME : // Home
+      case KEY_HOME : // Home
         Reset_quicksearch();
         Hide_cursor();
         Selector_home(&Selector->Position,&Selector->Offset);
@@ -2174,7 +2174,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         Scroll_fileselector(file_scroller);
         Key=0;
         break;
-      case SDLK_BACKSPACE : // Backspace
+      case KEY_BACKSPACE : // Backspace
         Reset_quicksearch();
         // Si le choix ".." est bien en tête des propositions...
         if (Filelist.Nb_elements && !strcmp(Filelist.First->Full_name,PARENT_DIR))

@@ -25,6 +25,7 @@
     GERMANY
     karlb@gmx.net                                                      
 */                                                                            
+#if defined(USE_SDL) || defined(USE_SDL2)
 #include <SDL.h>
 #include <SDL_video.h>
 
@@ -222,3 +223,4 @@ void SFont_WriteCenter(SDL_Surface *Surface, const SFont_Font *Font,
                 y, text);
 }
 */
+#endif

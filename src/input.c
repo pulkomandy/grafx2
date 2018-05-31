@@ -20,8 +20,11 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 
+#include <string.h>
+#if defined(USE_SDL) || defined(USE_SDL2)
 #include <SDL.h>
 #include <SDL_syswm.h>
+#endif
 
 #ifdef __WIN32__
   #include <windows.h>
@@ -50,7 +53,9 @@
 #if defined(USE_SDL)
 void Handle_window_resize(SDL_ResizeEvent event);
 #endif
+#if defined(USE_SDL) || defined(USE_SDL2)
 void Handle_window_exit(SDL_QuitEvent event);
+#endif
 static int Color_cycling(void);
 
 // public Globals (available as extern)
@@ -302,6 +307,7 @@ void Handle_window_resize(SDL_ResizeEvent event)
 }
 #endif
 
+#if defined(USE_SDL) || defined(USE_SDL2)
 void Handle_window_exit(SDL_QuitEvent event)
 {
     (void)event, // unused
@@ -381,6 +387,7 @@ int Handle_mouse_release(SDL_MouseButtonEvent event)
     
     return Move_cursor_with_constraints();
 }
+#endif
 
 // Keyboard management
 
@@ -599,6 +606,7 @@ int Handle_key_release(SDL_KeyboardEvent event)
 
 // Joystick management
 
+#if defined(USE_SDL) || defined(USE_SDL2)
 int Handle_joystick_press(SDL_JoyButtonEvent event)
 {
     if (event.button == Joybutton_shift)
@@ -805,6 +813,7 @@ void Handle_joystick_movement(SDL_JoyAxisEvent event)
         Directional_down=1;
     }
 }
+#endif
 
 // Attempts to move the mouse cursor by the given deltas (may be more than 1 pixel at a time)
 int Cursor_displace(short delta_x, short delta_y)
@@ -861,6 +870,7 @@ int Directional_acceleration(int msec)
 
 int Get_input(int sleep_time)
 {
+#if defined(USE_SDL) || defined(USE_SDL2)
     SDL_Event event;
     int user_feedback_required = 0; // Flag qui indique si on doit arrêter de traiter les évènements ou si on peut enchainer
                 
@@ -1091,6 +1101,7 @@ int Get_input(int sleep_time)
     // Nothing significant happened
     if (sleep_time)
       SDL_Delay(sleep_time);
+#endif
     return 0;
 }
 

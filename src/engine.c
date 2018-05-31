@@ -3341,7 +3341,7 @@ short Window_clicked_button(void)
       // FIXME: Make only one list have the keyboard focus.
       if (1)
       {
-        if (Key==SDLK_UP && (list->Cursor_position+list->List_start)>0)
+        if (Key==KEY_UP && (list->Cursor_position+list->List_start)>0)
         {
           Key=0;
           Hide_cursor();
@@ -3361,7 +3361,7 @@ short Window_clicked_button(void)
           // Return the control ID of the list.
           return list->Number;
         }
-        if (Key==SDLK_DOWN && (list->Cursor_position+list->List_start)<(list->Scroller->Nb_elements-1))
+        if (Key==KEY_DOWN && (list->Cursor_position+list->List_start)<(list->Scroller->Nb_elements-1))
         {
           Key=0;
           Hide_cursor();
@@ -3381,7 +3381,7 @@ short Window_clicked_button(void)
           // Return the control ID of the list.
           return list->Number;
         }
-        if (Key==SDLK_HOME && (list->Cursor_position!=0 || list->List_start!=0))
+        if (Key==KEY_HOME && (list->Cursor_position!=0 || list->List_start!=0))
         {
           Key=0;
           Hide_cursor();
@@ -3397,7 +3397,7 @@ short Window_clicked_button(void)
           // Return the control ID of the list.
           return list->Number;
         }
-        if (Key==SDLK_END && (list->Cursor_position+list->List_start)<(list->Scroller->Nb_elements-1))
+        if (Key==KEY_END && (list->Cursor_position+list->List_start)<(list->Scroller->Nb_elements-1))
         {
           Key=0;
           Hide_cursor();
@@ -3417,7 +3417,7 @@ short Window_clicked_button(void)
           // Return the control ID of the list.
           return list->Number;
         }
-        if (Key==SDLK_PAGEDOWN && (list->Cursor_position+list->List_start)<(list->Scroller->Nb_elements-1))
+        if (Key==KEY_PAGEDOWN && (list->Cursor_position+list->List_start)<(list->Scroller->Nb_elements-1))
         {
           Key=0;
           Hide_cursor();
@@ -3447,7 +3447,7 @@ short Window_clicked_button(void)
           // Return the control ID of the list.
           return list->Number;
         }
-        if (Key==SDLK_PAGEUP && (list->Cursor_position+list->List_start)>0)
+        if (Key==KEY_PAGEUP && (list->Cursor_position+list->List_start)>0)
         {
           Key=0;
           Hide_cursor();

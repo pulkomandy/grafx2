@@ -64,6 +64,11 @@ endif
 # Video / input API used
   API ?= sdl
 
+# At the moment support for TTF requires SDL or SDL2
+  ifneq (sdl,$(findstring sdl,$(API)))
+    NOTTF = 1
+  endif
+
 ### PLATFORM DETECTION AND CONFIGURATION ###
 
 PLATFORMOBJ =

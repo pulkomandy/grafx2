@@ -158,7 +158,7 @@ void Window_set_shortcut(int action_id)
   
   Open_window(302,131,"Keyboard shortcut");
   Window_set_normal_button(181,111,55,14,"Cancel",0,1,KEY_ESC); // 1
-  Window_set_normal_button(241,111,55,14,"OK",0,1,SDLK_RETURN); // 2
+  Window_set_normal_button(241,111,55,14,"OK",0,1,KEY_RETURN); // 2
 
   Window_set_normal_button(6,111,111,14,"Reset default",0,1,KEY_NONE); // 3
 
@@ -259,7 +259,7 @@ void Window_set_shortcut(int action_id)
         break;
     }
   }
-  while ((clicked_button!=1) && (clicked_button!=2) && (Key!=SDLK_RETURN));
+  while ((clicked_button!=1) && (clicked_button!=2) && (Key!=KEY_RETURN));
   Key=0;
   Close_window();
   Display_cursor();
@@ -532,11 +532,11 @@ void Window_help(int section, const char *sub_section)
   scroller=Window_set_scroller_button(290,18,130,nb_lines,
                                   16,Help_position);   // 2
 
-  Window_set_normal_button(  9,154, 6*8,14,"About"  ,1,1,SDLK_a); // 3
+  Window_set_normal_button(  9,154, 6*8,14,"About"  ,1,1,KEY_a); // 3
 
-  Window_set_normal_button( 9+6*8+4,154, 8*8,14,"License",1,1,SDLK_l); // 4
-  Window_set_normal_button( 9+6*8+4+8*8+4,154, 5*8,14,"Help",1,1,SDLK_h); // 5
-  Window_set_normal_button(9+6*8+4+8*8+4+5*8+4,154, 8*8,14,"Credits",1,1,SDLK_c); // 6
+  Window_set_normal_button( 9+6*8+4,154, 8*8,14,"License",1,1,KEY_l); // 4
+  Window_set_normal_button( 9+6*8+4+8*8+4,154, 5*8,14,"Help",1,1,KEY_h); // 5
+  Window_set_normal_button(9+6*8+4+8*8+4+5*8+4,154, 8*8,14,"Credits",1,1,KEY_c); // 6
 
   Window_set_special_button(9,18,272,130,0); // 7
 
@@ -603,19 +603,19 @@ void Window_help(int section, const char *sub_section)
     // Gestion des touches de déplacement dans la liste
     switch (Key)
     {
-      case SDLK_UP : // Haut
+      case KEY_UP : // Haut
         if (Help_position>0)
           Help_position--;
         Scroll_help(scroller);
         Key=0;
         break;
-      case SDLK_DOWN : // Bas
+      case KEY_DOWN : // Bas
         if (Help_position<nb_lines-16)
           Help_position++;
         Scroll_help(scroller);
         Key=0;
         break;
-      case SDLK_PAGEUP : // PageUp
+      case KEY_PAGEUP : // PageUp
         if (Help_position>15)
           Help_position-=15;
         else
@@ -631,7 +631,7 @@ void Window_help(int section, const char *sub_section)
         Scroll_help(scroller);
         Key=0;
         break;
-      case SDLK_PAGEDOWN : // PageDown
+      case KEY_PAGEDOWN : // PageDown
         if (nb_lines>16)
         {
           if (Help_position<nb_lines-16-15)
@@ -653,12 +653,12 @@ void Window_help(int section, const char *sub_section)
           Key=0;
         }
         break;
-      case SDLK_HOME : // Home
+      case KEY_HOME : // Home
         Help_position=0;
         Scroll_help(scroller);
         Key=0;
         break;
-      case SDLK_END : // End
+      case KEY_END : // End
       if (nb_lines>16)
       {
         Help_position=nb_lines-16;
@@ -670,7 +670,7 @@ void Window_help(int section, const char *sub_section)
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       clicked_button=1;
   }
-  while ((clicked_button!=1) && (Key!=SDLK_RETURN));
+  while ((clicked_button!=1) && (Key!=KEY_RETURN));
 
   Key=0;
   Close_window();
@@ -884,9 +884,9 @@ void Button_Stats(int btn)
     if (Is_shortcut(Key,0x200+BUTTON_HELP))
       clicked_button=1;
   }
-  while ( (clicked_button!=1) && (Key!=SDLK_RETURN) );
+  while ( (clicked_button!=1) && (Key!=KEY_RETURN) );
 
-  if(Key==SDLK_RETURN)Key=0;
+  if(Key==KEY_RETURN)Key=0;
 
   Close_window();
   Unselect_button(btn);

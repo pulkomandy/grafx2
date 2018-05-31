@@ -18,6 +18,8 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 
+#include <stdlib.h>
+#include <string.h>
 #ifdef _MSC_VER
 #include <stdio.h>
 #if _MSC_VER < 1900

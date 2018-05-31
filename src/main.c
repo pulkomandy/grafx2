@@ -205,7 +205,9 @@ void Error_function(int error_code, const char *filename, int line_number, const
                                        break;
     }
 
+#if defined(USE_SDL) || defined(USE_SDL2)
     SDL_Quit();
+#endif
     exit(error_code);
   }
 }
@@ -1138,7 +1140,9 @@ void Program_shutdown(void)
     iconv_close(cd_utf16_inv);
 #endif
 
+#if defined(USE_SDL) || defined(USE_SDL2)
   SDL_Quit();
+#endif
   
   #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
   chdir("/usr/gp2x");

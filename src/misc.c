@@ -58,8 +58,8 @@
 word Count_used_colors(dword* usage)
 {
   int nb_pixels = 0;
-  Uint8* current_pixel;
-  Uint8 color;
+  byte* current_pixel;
+  byte color;
   word nb_colors = 0;
   int i;
   int layer;
@@ -100,7 +100,7 @@ word Count_used_colors(dword* usage)
 word Count_used_colors_screen_area(dword* usage, word start_x, word start_y,
   word width, word height)
 {
-  Uint8 color;
+  byte color;
   word x, y;
   word nb_colors = 0;
   int i;
@@ -135,7 +135,7 @@ word Count_used_colors_screen_area(dword* usage, word start_x, word start_y,
 word Count_used_colors_area(dword* usage, word start_x, word start_y,
   word width, word height)
 {
-  Uint8 color;
+  byte color;
   word x, y;
   word nb_colors = 0;
   int i;

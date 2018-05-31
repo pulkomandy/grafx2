@@ -520,8 +520,10 @@ void Line_12_5(void)
   cursor_y = Paintbrush_Y;
 
   // On corrige les coordonnées de la ligne si la touche shift est appuyée...
+#if defined(USE_SDL) || defined(USE_SDL2)
   if(SDL_GetModState() & KMOD_SHIFT)
     Clamp_coordinates_regular_angle(start_x,start_y,&cursor_x,&cursor_y);
+#endif
 
   // On vient de bouger
   if ((cursor_x!=end_x) || (cursor_y!=end_y))
@@ -3806,8 +3808,10 @@ void Grad_rectangle_12_9(void)
     cursor_x = Paintbrush_X;
     cursor_y = Paintbrush_Y;
     // On corrige les coordonnées de la ligne si la touche shift est appuyée...
+#if defined(USE_SDL) || defined(USE_SDL2)
     if(SDL_GetModState() & KMOD_SHIFT)
         Clamp_coordinates_regular_angle(start_x,start_y,&cursor_x,&cursor_y);
+#endif
 
     if ((cursor_x!=end_x) || (cursor_y!=end_y))
     {

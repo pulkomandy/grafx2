@@ -43,6 +43,7 @@
 #include "windows.h"
 #include "oldies.h"
 #include "pages.h"
+#include "keycodes.h"
 #include "fileformats.h"
 
 //////////////////////////////////// PAL ////////////////////////////////////
@@ -2645,8 +2646,8 @@ int Save_C64_window(byte *saveWhat, byte *loadAddr)
     };
 
     Open_window(200,120,"c64 settings");
-    Window_set_normal_button(110,100,80,15,"Save",1,1,SDLK_RETURN); // 1
-    Window_set_normal_button(10,100,80,15,"Cancel",1,1,SDLK_ESCAPE); // 2
+    Window_set_normal_button(110,100,80,15,"Save",1,1,KEY_RETURN); // 1
+    Window_set_normal_button(10,100,80,15,"Cancel",1,1,KEY_ESCAPE); // 2
 
     Print_in_window(13,18,"Data:",MC_Dark,MC_Light);
     what=Window_set_dropdown_button(10,28,90,15,70,what_label[*saveWhat],1, 0, 1, LEFT_SIDE,0); // 3

@@ -27,6 +27,7 @@
 ///@file fileformats.c
 /// Saving and loading different picture formats.
 
+#include <string.h>
 #ifndef __no_pnglib__
 #include <png.h>
 #if !defined(PNG_HAVE_PLTE)

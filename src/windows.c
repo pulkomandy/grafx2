@@ -1355,8 +1355,8 @@ byte Confirmation_box(char * message)
       c++;
   }
 
-  Window_set_normal_button((window_width/3)-20     ,29+(nb_lines<<3),40,14,"Yes",1,1,SDLK_y); // 1
-  Window_set_normal_button(((window_width<<1)/3)-20,29+(nb_lines<<3),40,14,"No" ,1,1,SDLK_n); // 2
+  Window_set_normal_button((window_width/3)-20     ,29+(nb_lines<<3),40,14,"Yes",1,1,KEY_y); // 1
+  Window_set_normal_button(((window_width<<1)/3)-20,29+(nb_lines<<3),40,14,"No" ,1,1,KEY_n); // 2
 
   Update_window_area(0, 0, Window_width, Window_height);
 
@@ -1365,7 +1365,7 @@ byte Confirmation_box(char * message)
   do
   {
     clicked_button=Window_clicked_button();
-    if (Key==SDLK_RETURN) clicked_button=1;
+    if (Key==KEY_RETURN) clicked_button=1;
     if (Key==KEY_ESC) clicked_button=2;
   }
   while (clicked_button<=0);
@@ -1397,8 +1397,8 @@ int Requester_window(char* message, int initial_value)
   sprintf(str, "%d", initial_value);
   Window_set_input_button(10, 37, 4); // 1
   Print_in_window(11, 39, str, MC_Black, MC_Light);
-  Window_set_normal_button(60 ,37,40,14,"OK",1,1,SDLK_y); // 2
-  Window_set_normal_button(130,37,60,14,"Cancel" ,1,1,SDLK_n); // 3
+  Window_set_normal_button(60 ,37,40,14,"OK",1,1,KEY_y); // 2
+  Window_set_normal_button(130,37,60,14,"Cancel" ,1,1,KEY_n); // 3
 
   Update_window_area(0, 0, window_width, 60);
   Display_cursor();
@@ -1408,7 +1408,7 @@ int Requester_window(char* message, int initial_value)
     clicked_button = Window_clicked_button();
     if (clicked_button == 1)
       Readline(11, 39, str, 4, INPUT_TYPE_INTEGER);
-    if (Key == SDLK_ESCAPE) clicked_button = 2;
+    if (Key == KEY_ESCAPE) clicked_button = 2;
   }
   while (clicked_button <= 0);
 
@@ -1434,13 +1434,13 @@ void Warning_message(char * message)
   Open_window(window_width,60,"Warning!");
 
   Print_in_window((window_width>>1)-(strlen(message)<<2),20,message,MC_Black,MC_Light);
-  Window_set_normal_button((window_width>>1)-20     ,37,40,14,"OK",1,1,SDLK_RETURN); // 1
+  Window_set_normal_button((window_width>>1)-20     ,37,40,14,"OK",1,1,KEY_RETURN); // 1
   Update_window_area(0,0,window_width,60);
   Display_cursor();
 
   do
     clicked_button=Window_clicked_button();
-  while ((clicked_button<=0) && (Key!=KEY_ESC) && (Key!=SDLK_o));
+  while ((clicked_button<=0) && (Key!=KEY_ESC) && (Key!=KEY_o));
   Key=0;
 
   Close_window();
@@ -1508,14 +1508,14 @@ void Verbose_message(const char *caption, const char * message )
       message++;
   }
 
-  Window_set_normal_button(300/2-20,160-23,40,14,"OK",1,1,SDLK_RETURN); // 1
+  Window_set_normal_button(300/2-20,160-23,40,14,"OK",1,1,KEY_RETURN); // 1
   Update_window_area(0,0,Window_width,Window_height);
   Cursor_shape=CURSOR_SHAPE_ARROW;
   Display_cursor();
 
   do
     clicked_button=Window_clicked_button();
-  while ((clicked_button<=0) && (Key!=KEY_ESC) && (Key!=SDLK_o));
+  while ((clicked_button<=0) && (Key!=KEY_ESC) && (Key!=KEY_o));
   Key=0;
 
   Close_window();
@@ -1852,6 +1852,7 @@ void Compute_paintbrush_coordinates(void)
       Snap_axis=0;
       break;
     // Operations that implement it
+#if defined(USE_SDL) || defined(USE_SDL2)
     default:
       if (Snap_axis==0 && (SDL_GetModState() & KMOD_SHIFT))
       {
@@ -1860,6 +1861,7 @@ void Compute_paintbrush_coordinates(void)
         Snap_axis_origin_X=Paintbrush_X;
         Snap_axis_origin_Y=Paintbrush_Y;
       }
+#endif
   }
 
   if (Snap_axis==1)

@@ -20,11 +20,15 @@
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
+#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#if defined(USE_SDL)
 #include <SDL.h>
+#endif
 #include "global.h"
 #include "keyboard.h"
+#include "keycodes.h"
 
 #if defined(__macosx__)
   // Apple's "command" character is not present in the ANSI table, so we
@@ -373,6 +377,7 @@ word Keysym_to_keycode(SDL_keysym keysym)
   key_code |= mod;
   return key_code;
 }
+#endif
 
 const char * Key_name(word key)
 {
@@ -391,59 +396,61 @@ const char * Key_name(word key)
     { SDLK_PAUSE       , "Power-Down" },
     { SDLK_ESCAPE      , "SELECT" },
 #else
-    { SDLK_BACKSPACE   , "Backspace" },
-    { SDLK_TAB         , "Tab" },
-    { SDLK_CLEAR       , "Clear" },
-    { SDLK_RETURN      , "Return" },
-    { SDLK_PAUSE       , "Pause" },
-    { SDLK_ESCAPE      , "Esc" },
+    { KEY_BACKSPACE   , "Backspace" },
+    { KEY_TAB         , "Tab" },
+    { KEY_CLEAR       , "Clear" },
+    { KEY_RETURN      , "Return" },
+    { KEY_PAUSE       , "Pause" },
+    { KEY_ESCAPE      , "Esc" },
 #endif
-    { SDLK_DELETE      , "Del" },
-    { SDLK_KP0         , "KP 0" },
-    { SDLK_KP1         , "KP 1" },
-    { SDLK_KP2         , "KP 2" },
-    { SDLK_KP3         , "KP 3" },
-    { SDLK_KP4         , "KP 4" },
-    { SDLK_KP5         , "KP 5" },
-    { SDLK_KP6         , "KP 6" },
-    { SDLK_KP7         , "KP 7" },
-    { SDLK_KP8         , "KP 8" },
-    { SDLK_KP9         , "KP 9" },
-    { SDLK_KP_PERIOD   , "KP ." },
-    { SDLK_KP_DIVIDE   , "KP /" },
-    { SDLK_KP_MULTIPLY,  "KP *" },
-    { SDLK_KP_MINUS    , "KP -" },
-    { SDLK_KP_PLUS     , "KP +" },
-    { SDLK_KP_ENTER    , "KP Enter" },
-    { SDLK_KP_EQUALS   , "KP =" },
-    { SDLK_UP          , "Up" },
-    { SDLK_DOWN        , "Down" },
-    { SDLK_RIGHT       , "Right" },
-    { SDLK_LEFT        , "Left" },
-    { SDLK_INSERT      , "Ins" },
-    { SDLK_HOME        , "Home" },
-    { SDLK_END         , "End" },
-    { SDLK_PAGEUP      , "PgUp" },
-    { SDLK_PAGEDOWN    , "PgDn" },
-    { SDLK_F1          , "F1" },
-    { SDLK_F2          , "F2" },
-    { SDLK_F3          , "F3" },
-    { SDLK_F4          , "F4" },
-    { SDLK_F5          , "F5" },
-    { SDLK_F6          , "F6" },
-    { SDLK_F7          , "F7" },
-    { SDLK_F8          , "F8" },
-    { SDLK_F9          , "F9" },
-    { SDLK_F10         , "F10" },
-    { SDLK_F11         , "F11" },
-    { SDLK_F12         , "F12" },
+    { KEY_DELETE      , "Del" },
+    { KEY_KP0         , "KP 0" },
+    { KEY_KP1         , "KP 1" },
+    { KEY_KP2         , "KP 2" },
+    { KEY_KP3         , "KP 3" },
+    { KEY_KP4         , "KP 4" },
+    { KEY_KP5         , "KP 5" },
+    { KEY_KP6         , "KP 6" },
+    { KEY_KP7         , "KP 7" },
+    { KEY_KP8         , "KP 8" },
+    { KEY_KP9         , "KP 9" },
+    { KEY_KP_PERIOD   , "KP ." },
+    { KEY_KP_DIVIDE   , "KP /" },
+    { KEY_KP_MULTIPLY,  "KP *" },
+    { KEY_KP_MINUS    , "KP -" },
+    { KEY_KP_PLUS     , "KP +" },
+    { KEY_KP_ENTER    , "KP Enter" },
+    { KEY_KP_EQUALS   , "KP =" },
+    { KEY_UP          , "Up" },
+    { KEY_DOWN        , "Down" },
+    { KEY_RIGHT       , "Right" },
+    { KEY_LEFT        , "Left" },
+    { KEY_INSERT      , "Ins" },
+    { KEY_HOME        , "Home" },
+    { KEY_END         , "End" },
+    { KEY_PAGEUP      , "PgUp" },
+    { KEY_PAGEDOWN    , "PgDn" },
+    { KEY_F1          , "F1" },
+    { KEY_F2          , "F2" },
+    { KEY_F3          , "F3" },
+    { KEY_F4          , "F4" },
+    { KEY_F5          , "F5" },
+    { KEY_F6          , "F6" },
+    { KEY_F7          , "F7" },
+    { KEY_F8          , "F8" },
+    { KEY_F9          , "F9" },
+    { KEY_F10         , "F10" },
+    { KEY_F11         , "F11" },
+    { KEY_F12         , "F12" },
+#if defined(USE_SDL)
     { SDLK_F13         , "F13" },
     { SDLK_F14         , "F14" },
     { SDLK_F15         , "F15" },
-    { SDLK_NUMLOCK     , "NumLock" },
-    { SDLK_CAPSLOCK    , "CapsLck" },
-    { SDLK_SCROLLOCK   , "ScrlLock" },
-    { SDLK_RSHIFT      , "RShift" },
+#endif
+    { KEY_NUMLOCK     , "NumLock" },
+    { KEY_CAPSLOCK    , "CapsLck" },
+    { KEY_SCROLLOCK   , "ScrlLock" },
+    { KEY_RSHIFT      , "RShift" },
 #ifdef GCWZERO
     { SDLK_LSHIFT      , "X" },
     { SDLK_RCTRL       , "RCtrl" },
@@ -451,12 +458,13 @@ const char * Key_name(word key)
     { SDLK_RALT        , "RAlt" },
     { SDLK_LALT        , "B" },
 #else
-    { SDLK_LSHIFT      , "LShift" },
-    { SDLK_RCTRL       , "RCtrl" },
-    { SDLK_LCTRL       , "LCtrl" },
-    { SDLK_RALT        , "RAlt" },
-    { SDLK_LALT        , "LAlt" },
+    { KEY_LSHIFT      , "LShift" },
+    { KEY_RCTRL       , "RCtrl" },
+    { KEY_LCTRL       , "LCtrl" },
+    { KEY_RALT        , "RAlt" },
+    { KEY_LALT        , "LAlt" },
 #endif
+#if defined(USE_SDL)
     { SDLK_RMETA       , "RMeta" },
     { SDLK_LMETA       , "LMeta" },
     { SDLK_LSUPER      , "LWin" },
@@ -471,6 +479,7 @@ const char * Key_name(word key)
     { SDLK_POWER       , "Power" },
     { SDLK_EURO        , "Euro" },
     { SDLK_UNDO        , "Undo" },
+#endif
     { KEY_MOUSEMIDDLE, "Mouse3" },
     { KEY_MOUSEWHEELUP, "WheelUp" },
     { KEY_MOUSEWHEELDOWN, "WheelDown" }
@@ -480,7 +489,7 @@ const char * Key_name(word key)
   static char buffer[41];
   buffer[0] = '\0';
 
-  if (key == SDLK_UNKNOWN)
+  if (key == KEY_UNKNOWN)
     return "None";
 
 #ifdef GCWZERO
@@ -605,12 +614,14 @@ const char * Key_name(word key)
     sprintf(buffer+strlen(buffer), "'%c'", toupper(key));
     return buffer;
   }
+#if defined(USE_SDL) || defined(USE_SDL2)
   // Touches 'World'
   if (key>=SDLK_WORLD_0 && key <= SDLK_WORLD_95)
   {
     sprintf(buffer+strlen(buffer), "w%d", key - SDLK_WORLD_0);
     return buffer;
   }
+#endif
 
   // Touches au libellé connu
   for (index=0; index < (long)sizeof(key_labels)/(long)sizeof(T_key_label);index++)
@@ -627,6 +638,7 @@ const char * Key_name(word key)
 
 }
 
+#if defined(USE_SDL)
 // Obtient le caractère ANSI tapé, à partir d'un keysym.
 // (Valeur 32 à 255)
 // Renvoie 0 s'il n'y a pas de caractère associé (shift, backspace, etc)
@@ -750,18 +762,19 @@ word Keysym_to_ANSI(SDL_keysym keysym)
  // Sinon c'est une touche spéciale, on retourne son scancode
   return keysym.sym;
 }
-#else
+#elif defined(USE_SDL2)
 // SDL2 TODO
 word Key_for_scancode(word scancode)
 {
   return scancode;
 }
-const char * Key_name(word key)
-{
-  return "Unknown";
-}
 word Key_modifiers(SDL_Keymod mod)
 {
   return 0;
+}
+#else
+word Key_for_scancode(word scancode)
+{
+  return scancode;
 }
 #endif

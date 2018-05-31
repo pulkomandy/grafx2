@@ -39,7 +39,10 @@
 //////////////////////////////////////////////////////////////////////////////
 #if defined(USE_SDL)
 #include <SDL.h>
+#elif defined(USE_SDL2)
+#include <SDL_keyboard.h>
 #endif
+
 
 /*!
   Convert an SDL keysym to an ANSI/ASCII character.

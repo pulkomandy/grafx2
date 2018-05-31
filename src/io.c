@@ -53,7 +53,9 @@
 #else
     #include <dirent.h>
 #endif
+#if defined(USE_SDL) || defined(USE_SDL2)
 #include <SDL_endian.h>
+#endif
 
 #include "struct.h"
 #include "io.h"

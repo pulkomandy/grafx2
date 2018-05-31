@@ -52,7 +52,7 @@
 #if defined(__WIN32__)
   #include <windows.h> // GetLogicalDrives(), GetDriveType(), DRIVE_*
 #endif
-#ifndef __GP2X__
+#if !defined(__GP2X__) && defined(USE_SDL)
     #include <SDL_syswm.h>
 #endif
 #if defined (__MINT__)

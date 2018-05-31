@@ -119,8 +119,8 @@ void Button_Transform_menu(int btn)
   Window_set_normal_button(154,140, 54,14,"Cancel",0,1,KEY_ESC); // 1
 
   Print_in_window(  9,114,"Mirror",MC_Dark,MC_Light);
-  Window_set_normal_button( 17,125, 27,14,"X\035" ,1,1,SDLK_x);  // 2
-  Window_set_normal_button( 17,140, 27,14,"Y\022" ,1,1,SDLK_y);  // 3
+  Window_set_normal_button( 17,125, 27,14,"X\035" ,1,1,KEY_x);  // 2
+  Window_set_normal_button( 17,140, 27,14,"Y\022" ,1,1,KEY_y);  // 3
 
   Print_in_window( 84,114,"Rotate",MC_Dark,MC_Light);
   Window_set_normal_button( 69,125, 37,14,"-90\xb0"  ,0,1,KEY_NONE); // 4
@@ -128,7 +128,7 @@ void Button_Transform_menu(int btn)
   Window_set_normal_button( 69,140, 75,14,"180\xb0"  ,0,1,KEY_NONE); // 6
 
   Print_in_window( 87, 19,"Resize",MC_Dark,MC_Light);
-  Window_set_normal_button( 80, 86, 60,14,"RESIZE",1,1,SDLK_r);    // 7
+  Window_set_normal_button( 80, 86, 60,14,"RESIZE",1,1,KEY_r);    // 7
   Print_in_window( 51, 34,"New",MC_Dark,MC_Light);
   Print_in_window( 96, 34,"Old",MC_Dark,MC_Light);
   Print_in_window_underscore( 30, 44,"W:",MC_Dark,MC_Light,1);
@@ -137,15 +137,15 @@ void Button_Transform_menu(int btn)
   Print_in_window( 80, 59,":",MC_Dark,MC_Light);
   Print_in_window_underscore( 44, 75,"Lock proportions",MC_Dark,MC_Light,1);
 
-  Window_set_normal_button( 28, 72, 13,13,ratio_is_locked?"X":" ",0,1,SDLK_l);// 8
+  Window_set_normal_button( 28, 72, 13,13,ratio_is_locked?"X":" ",0,1,KEY_l);// 8
   unit_button = Window_set_dropdown_button(128,50,69,11,69,unit_label[unit_index],1,0,1,LEFT_SIDE|RIGHT_SIDE,0);// 9
   Window_dropdown_add_item(unit_button,UNIT_PIXELS,unit_label[UNIT_PIXELS]);
   Window_dropdown_add_item(unit_button,UNIT_PERCENT,unit_label[UNIT_PERCENT]);
   Window_dropdown_add_item(unit_button,UNIT_RATIO,unit_label[UNIT_RATIO]);
 
-  input_button[0] = Window_set_input_button_s(45,43,4,SDLK_w); // 10
+  input_button[0] = Window_set_input_button_s(45,43,4,KEY_w); // 10
   input_button[1] = Window_set_input_button(89,43,4); // 11
-  input_button[2] = Window_set_input_button_s(45,58,4,SDLK_h); // 12
+  input_button[2] = Window_set_input_button_s(45,58,4,KEY_h); // 12
   input_button[3] = Window_set_input_button(89,58,4); // 13
 
   Update_window_area(0,0,Window_width, Window_height);

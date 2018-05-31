@@ -1087,7 +1087,7 @@ int L_InputBox(lua_State* L)
   control[0]=0;
   
   // OK
-  Window_set_normal_button( 7, 25 + 17 * nb_settings, 51,14,"OK" , 0,1,SDLK_RETURN);
+  Window_set_normal_button( 7, 25 + 17 * nb_settings, 51,14,"OK" , 0,1,KEY_RETURN);
   control[Window_nb_buttons] = CONTROL_OK;
 
   // Cancel
@@ -1488,7 +1488,7 @@ int L_WaitInput(lua_State* L)
   }
   
   lua_pushboolean(L, moved ? 1 : 0);
-  lua_pushinteger(L, (Key == KEY_ESC) ? SDLK_ESCAPE : Key);
+  lua_pushinteger(L, (Key == KEY_ESC) ? KEY_ESCAPE : Key);
   lua_pushinteger(L, Mouse_X);
   lua_pushinteger(L, Mouse_Y);
   lua_pushinteger(L, Mouse_K);
@@ -2669,7 +2669,7 @@ void Button_Brush_Factory(void)
       Scripts_selector.Nb_elements,10, 0); // 3
   scriptlist = Window_set_list_button(scriptarea,scriptscroll,Draw_script_name, 0); // 4
 
-  Window_set_normal_button(10, 161, 67, 14, "Run", 0, 1, SDLK_RETURN); // 5
+  Window_set_normal_button(10, 161, 67, 14, "Run", 0, 1, KEY_RETURN); // 5
 
   Window_display_frame_in(6, FILESEL_Y + 88, DESC_WIDTH*6+4, 4*8+2); // Descr.
   Window_set_special_button(7, FILESEL_Y + 89+24,DESC_WIDTH*6,8,0); // 6
@@ -2719,7 +2719,7 @@ void Button_Brush_Factory(void)
     do
     {
       clicked_button = Window_clicked_button();
-      if (Key==SDLK_BACKSPACE && Config.Scripts_directory[0]!='\0')
+      if (Key==KEY_BACKSPACE && Config.Scripts_directory[0]!='\0')
       {
         // Make it select first entry (parent directory)
         scriptlist->List_start=0;

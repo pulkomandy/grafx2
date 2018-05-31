@@ -933,7 +933,7 @@ int Window_Histogram(unsigned char block_start, unsigned char block_end, dword* 
   }
 
   Open_window(263, 150, "Histogram");
-  Window_set_normal_button(120, 130, 42, 14, "Close",-1,1,SDLK_RETURN);
+  Window_set_normal_button(120, 130, 42, 14, "Close",-1,1,KEY_RETURN);
 
   Print_in_window(6, 17, "Color:", MC_Dark, MC_Light);
   Print_in_window(110+12*8, 17, "Pixels", MC_Dark, MC_Light);
@@ -1200,12 +1200,12 @@ void Button_Palette(int btn)
   Num2str(Fore_color, str, 3);
   Print_in_window(COLOR_X, COLOR_Y, str, MC_Black, MC_Light);
 
-  Window_set_normal_button(C4_X,L3,C4_W,14,"Merge" ,1,1,SDLK_m);    // 5
-  Window_set_normal_button(C2_X,L3,C2_W,14,"Gray"   ,1,1,SDLK_g);   // 6
-  Window_set_normal_button(C1_X,L1,C1_W,14,"Swap"   ,2,1,SDLK_w); // 7
-  Window_set_normal_button(C2_X,L1,C2_W,14,"X-Swap" ,1,1,SDLK_x);   // 8
-  Window_set_normal_button(C3_X,L1,C3_W,14,"Copy"   ,1,1,SDLK_c);   // 9
-  Window_set_normal_button(C3_X,L3,C3_W,14,"Spread" ,4,1,SDLK_e);   // 10
+  Window_set_normal_button(C4_X,L3,C4_W,14,"Merge"  ,1,1,KEY_m);   // 5
+  Window_set_normal_button(C2_X,L3,C2_W,14,"Gray"   ,1,1,KEY_g);   // 6
+  Window_set_normal_button(C1_X,L1,C1_W,14,"Swap"   ,2,1,KEY_w);   // 7
+  Window_set_normal_button(C2_X,L1,C2_W,14,"X-Swap" ,1,1,KEY_x);   // 8
+  Window_set_normal_button(C3_X,L1,C3_W,14,"Copy"   ,1,1,KEY_c);   // 9
+  Window_set_normal_button(C3_X,L3,C3_W,14,"Spread" ,4,1,KEY_e);   // 10
 
   reduce_dropdown = Window_set_dropdown_button(89, L4, 83, 14, 84, "Reduce", 0,
     0, 1, RIGHT_SIDE|LEFT_SIDE, 0); // 11
@@ -1219,22 +1219,22 @@ void Button_Palette(int btn)
   Window_dropdown_add_item(reduce_dropdown,   2, "to 2");
   Window_dropdown_add_item(reduce_dropdown,   0, "Other");
 
-  Window_set_normal_button(  5,178,35,14,"Undo"  ,1,1,SDLK_u);  // 12
+  Window_set_normal_button(  5,178,35,14,"Undo"  ,1,1,KEY_u);  // 12
   Window_set_normal_button(122,178,51,14,"Cancel",0,1,KEY_ESC);  // 13
-  Window_set_normal_button(177,178,35,14,"OK"    ,0,1,SDLK_RETURN);  // 14
+  Window_set_normal_button(177,178,35,14,"OK"    ,0,1,KEY_RETURN);  // 14
 
-  Window_set_normal_button(C4_X,L2,C4_W,14,"Used",4,1,SDLK_d); // 15
-  Window_set_normal_button(C1_X,L4,83,14,"Zap unused",0,1,SDLK_DELETE);//16
+  Window_set_normal_button(C4_X,L2,C4_W,14,"Used",4,1,KEY_d); // 15
+  Window_set_normal_button(C1_X,L4,83,14,"Zap unused",0,1,KEY_DELETE);//16
 
-  Window_set_repeatable_button(BUTTON_PLUS_X, BUTTON_PLUS_Y,12,11,"+",0,1,SDLK_KP_PLUS);       // 17
-  Window_set_repeatable_button(BUTTON_MINUS_X,BUTTON_MINUS_Y,12,11,"-",0,1,SDLK_KP_MINUS);       // 18
+  Window_set_repeatable_button(BUTTON_PLUS_X, BUTTON_PLUS_Y,12,11,"+",0,1,KEY_KP_PLUS);       // 17
+  Window_set_repeatable_button(BUTTON_MINUS_X,BUTTON_MINUS_Y,12,11,"-",0,1,KEY_KP_MINUS);       // 18
 
-  Window_set_normal_button(C1_X,L3,C1_W,14,"Neg"    ,1,1,SDLK_n);   // 19
-  Window_set_normal_button(C1_X,L2,C1_W,14,"Flip"   ,1,1,SDLK_f);   // 20
-  Window_set_normal_button(C2_X,L2,C2_W,14,"X-Flip" ,5,1,SDLK_i);   // 21
+  Window_set_normal_button(C1_X,L3,C1_W,14,"Neg"    ,1,1,KEY_n);   // 19
+  Window_set_normal_button(C1_X,L2,C1_W,14,"Flip"   ,1,1,KEY_f);   // 20
+  Window_set_normal_button(C2_X,L2,C2_W,14,"X-Flip" ,5,1,KEY_i);   // 21
 
   // Button without outline (RGB/HSL switch)
-  Window_set_normal_button(NUMERIC_BOX_X,14,81,11,""    ,0,1,SDLK_h);   // 22
+  Window_set_normal_button(NUMERIC_BOX_X,14,81,11,""    ,0,1,KEY_h);   // 22
   Window_display_frame_mono(NUMERIC_BOX_X-1,14-1,81+2,11+2,MC_Light);
 
   sort_dropdown = Window_set_dropdown_button(C3_X, L2, C3_W, 14, 80, " Sort", 0,
@@ -1247,10 +1247,10 @@ void Button_Palette(int btn)
   // Button without outline
   Window_display_frame_mono(NUMERIC_BOX_X-1,NUMERIC_BOX_Y-1,NUMERIC_BOX_W+2,NUMERIC_BOX_H+2,MC_Light);
 
-  Window_set_normal_button(C4_X,L1,C4_W,14,"Histo",4,1,SDLK_t);// 25
+  Window_set_normal_button(C4_X,L1,C4_W,14,"Histo",4,1,KEY_t);// 25
 
-  Window_set_normal_button( 44,178,35,14,"Load"  ,1,1,SDLK_l);  // 26
-  Window_set_normal_button( 83,178,35,14,"Save"  ,1,1,SDLK_s);  // 27
+  Window_set_normal_button( 44,178,35,14,"Load"  ,1,1,KEY_l);  // 26
+  Window_set_normal_button( 83,178,35,14,"Save"  ,1,1,KEY_s);  // 27
 
   // Dessin des petits effets spéciaux pour les boutons [+] et [-]
   Draw_thingumajig(BUTTON_PLUS_X-5, BUTTON_PLUS_Y,MC_White,-1);
@@ -2703,7 +2703,7 @@ void Button_Palette(int btn)
           Display_cursor();
           Key=0;
         }
-        else if (Key == SDLK_BACKSPACE)
+        else if (Key == KEY_BACKSPACE)
         // Remise des couleurs du menu à l'état normal en essayant
         // de ne pas trop modifier l'image.
         {
@@ -2899,9 +2899,9 @@ void Button_Secondary_palette(int btn)
   (void)btn;
   Open_window(218,146,"Palettes");
 
-  Window_set_normal_button(10,20,180,14,"Colors for best match",12,1,SDLK_b); // 1
-  Window_set_normal_button(10,37,180,14,"User's color series"  ,14,1,SDLK_s); // 2
-  Window_set_normal_button(155,126,53,14,"OK"                  , 0,1,SDLK_RETURN); // 3
+  Window_set_normal_button(10,20,180,14,"Colors for best match",12,1,KEY_b); // 1
+  Window_set_normal_button(10,37,180,14,"User's color series"  ,14,1,KEY_s); // 2
+  Window_set_normal_button(155,126,53,14,"OK"                  , 0,1,KEY_RETURN); // 3
   Window_set_normal_button( 96,126,53,14,"Cancel"              , 0,1,KEY_ESC); // 4
   Window_display_frame(10,55,122,66);
   Print_in_window(18,59,"Palette layout",MC_Dark,MC_Light);
@@ -2927,8 +2927,8 @@ void Button_Secondary_palette(int btn)
   Print_in_window(38,108,(palette_vertical)?"X":" ",MC_Black,MC_Light);
   Print_in_window(51,108,"Vertical",MC_Dark,MC_Light);
 
-  Window_set_normal_button(190,82,18,14,"x2"                  , 1,1,SDLK_x); // 9
-  Window_set_normal_button(137,82,18,14,"\xf7""2"                  , 0,1,SDLK_w); // 10
+  Window_set_normal_button(190,82,18,14,"x2"                  , 1,1,KEY_x); // 9
+  Window_set_normal_button(137,82,18,14,"\xf7""2"             , 0,1,KEY_w); // 10
 
   gamma_slider = Window_set_horizontal_scroller_button(137,110,71,30, 1,Gamma*10);// 11
   Num2str(Gamma*10,str,2);

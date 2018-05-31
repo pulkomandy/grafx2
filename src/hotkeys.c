@@ -19,12 +19,10 @@
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
-#if defined(USE_SDL) || defined(USE_SDL2)
-#include <SDL.h>
-#endif
 #include "struct.h"
 #include "global.h"
 #include "hotkeys.h"
+#include "keycodes.h"
 
 #if defined(__VBCC__) || defined(_MSC_VER)
   #define false 0
@@ -38,7 +36,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "magnify and normal mode.",
   "",
   false,
-  SDLK_UP, // HAUT
+  KEY_UP, // HAUT
   0},
   {1,
   "Scroll down",
@@ -46,7 +44,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "magnify and normal mode.",
   "",
   false,
-  SDLK_DOWN, // BAS
+  KEY_DOWN, // BAS
   0},
   {2,
   "Scroll left",
@@ -54,7 +52,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "both in magnify and normal mode.",
   "",
   false,
-  SDLK_LEFT, // GAUCHE
+  KEY_LEFT, // GAUCHE
   0},
   {3,
   "Scroll right",
@@ -62,7 +60,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "both in magnify and normal mode.",
   "",
   false,
-  SDLK_RIGHT, // DROITE
+  KEY_RIGHT, // DROITE
   0},
 #ifdef GCWZERO
 #define FAST_MOD MOD_CTRL
@@ -75,7 +73,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "picture fast, either in magnify and",
   "normal mode.",
   true,
-  SDLK_UP|FAST_MOD, // Shift + Up
+  KEY_UP|FAST_MOD, // Shift + Up
   0},
   {5,
   "Faster scroll down",
@@ -83,7 +81,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "picture fast, either in magnify and",
   "normal mode.",
   true,
-  SDLK_DOWN|FAST_MOD, // Shift + Down
+  KEY_DOWN|FAST_MOD, // Shift + Down
   0},
   {6,
   "Faster scroll left",
@@ -91,7 +89,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "picture fast, either in magnify and",
   "normal mode.",
   true,
-  SDLK_LEFT|FAST_MOD, // Shift + Left
+  KEY_LEFT|FAST_MOD, // Shift + Left
   0},
   {7,
   "Faster scroll right",
@@ -99,7 +97,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "picture fast, either in magnify and",
   "normal mode.",
   true,
-  SDLK_RIGHT|FAST_MOD, // Shift + Right
+  KEY_RIGHT|FAST_MOD, // Shift + Right
   0},
 #undef FAST_MOD
   {8,
@@ -108,7 +106,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "picture pixel by pixel, either in",
   "magnify and normal mode.",
   true,
-  SDLK_UP|MOD_ALT, // Alt + Haut
+  KEY_UP|MOD_ALT, // Alt + Haut
   0},
   {9,
   "Slower scroll down",
@@ -116,7 +114,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "picture pixel by pixel, either in",
   "magnify and normal mode.",
   true,
-  SDLK_DOWN|MOD_ALT, // Alt + Bas
+  KEY_DOWN|MOD_ALT, // Alt + Bas
   0},
   {10,
   "Slower scroll left",
@@ -124,7 +122,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "picture pixel by pixel, either in",
   "magnify and normal mode.",
   true,
-  SDLK_LEFT|MOD_ALT, // Alt + Gauche
+  KEY_LEFT|MOD_ALT, // Alt + Gauche
   0},
   {11,
   "Slower scroll right",
@@ -132,7 +130,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "picture pixel by pixel, either in",
   "magnify and normal mode.",
   true,
-  SDLK_RIGHT|MOD_ALT, // Alt + Droite
+  KEY_RIGHT|MOD_ALT, // Alt + Droite
   0},
   {12,
   "Move mouse cursor 1 pixel up",
@@ -141,9 +139,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "when you want ultra-high precision.",
   true,
 #ifdef GCWZERO
-  SDLK_UNKNOWN,
+  KEY_UNKNOWN,
 #else
-  SDLK_UP|MOD_CTRL, // Ctrl + Haut
+  KEY_UP|MOD_CTRL, // Ctrl + Haut
 #endif
   0},
   {13,
@@ -153,9 +151,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "when you want ultra-high precision.",
   true,
 #ifdef GCWZERO
-  SDLK_UNKNOWN,
+  KEY_UNKNOWN,
 #else
-  SDLK_DOWN|MOD_CTRL, // Ctrl + Bas
+  KEY_DOWN|MOD_CTRL, // Ctrl + Bas
 #endif
   0},
   {14,
@@ -165,9 +163,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "when you want ultra-high precision.",
   true,
 #ifdef GCWZERO
-  SDLK_UNKNOWN,
+  KEY_UNKNOWN,
 #else
-  SDLK_LEFT|MOD_CTRL, // Ctrl + Gauche
+  KEY_LEFT|MOD_CTRL, // Ctrl + Gauche
 #endif
   0},
   {15,
@@ -177,9 +175,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "when you want ultra-high precision.",
   true,
 #ifdef GCWZERO
-  SDLK_UNKNOWN,
+  KEY_UNKNOWN,
 #else
-  SDLK_RIGHT|MOD_CTRL, // Ctrl + Droite
+  KEY_RIGHT|MOD_CTRL, // Ctrl + Droite
 #endif
   0},
   {16,
@@ -189,9 +187,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "when you want ultra-high precision.",
   true,
 #ifdef GCWZERO
-  SDLK_SPACE, // Space
+  KEY_SPACE, // Space
 #else
-  SDLK_SPACE|MOD_CTRL, // Ctrl + Space
+  KEY_SPACE|MOD_CTRL, // Ctrl + Space
 #endif
   0},
   {17,
@@ -201,9 +199,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "when you want ultra-high precision.",
   true,
 #ifdef GCWZERO
-  SDLK_BACKSPACE, // R-shoulderpad
+  KEY_BACKSPACE, // R-shoulderpad
 #else
-  SDLK_SPACE|MOD_SHIFT, // Shift + Space
+  KEY_SPACE|MOD_SHIFT, // Shift + Space
 #endif
   0},
   {18,
@@ -212,7 +210,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "them back.",
   "",
   false,
-  SDLK_F10, // F10
+  KEY_F10, // F10
   0},
   {19,
   "Show/hide cursor",
@@ -220,7 +218,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "This only works on the \"small cross\"",
   "and \"hand\" cursors.",
   true,
-  SDLK_F9, // F9
+  KEY_F9, // F9
   0},
   {20,
   "Set paintbrush to 1 pixel",
@@ -228,7 +226,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "\"single-pixel-brush\".",
   "",
   true,
-  SDLK_DELETE, // Del
+  KEY_DELETE, // Del
   0},
   {21,
   "Paintbrush choice",
@@ -236,7 +234,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "paintbrush out of 24 predefined",
   "ones.",
   true,
-  SDLK_F4, // F4
+  KEY_F4, // F4
   0},
   {22,
   "Monochrome brush",
@@ -244,7 +242,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "into a single colored one. All non-",
   "transparent colors are set to FG.",
   true,
-  SDLK_F4|MOD_SHIFT, // Shift + F4
+  KEY_F4|MOD_SHIFT, // Shift + F4
   0},
   {23,
   "Freehand drawing",
@@ -252,7 +250,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "classical freehand one.",
   "",
   true,
-  SDLK_d, // D
+  KEY_d, // D
   0},
   {24,
   "Switch freehand drawing mode",
@@ -260,7 +258,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "discontinuous, point by point,",
   "and contour fill",
   true,
-  SDLK_d|MOD_SHIFT, // Shift + D
+  KEY_d|MOD_SHIFT, // Shift + D
   0},
   {25,
   "Continuous freehand drawing",
@@ -268,7 +266,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "freehand drawing mode.",
   "",
   true,
-  SDLK_d|MOD_CTRL, // Ctrl + D
+  KEY_d|MOD_CTRL, // Ctrl + D
   0},
   {26,
   "Line",
@@ -276,7 +274,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  SDLK_l, // L
+  KEY_l, // L
   0},
   {27,
   "Knotted lines",
@@ -284,7 +282,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "This mode can also be called",
   "\"Polyline\".",
   true,
-  SDLK_l|MOD_SHIFT, // Shift + L
+  KEY_l|MOD_SHIFT, // Shift + L
   0},
   {28,
   "Spray",
@@ -292,7 +290,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "randomly in the picture.",
   "",
   true,
-  SDLK_a, // A (Q en AZERTY)
+  KEY_a, // A (Q en AZERTY)
   0},
   {29,
   "Spray menu",
@@ -300,7 +298,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "configure the spray flow and size.",
   "",
   true,
-  SDLK_a|MOD_SHIFT, // Shift + A
+  KEY_a|MOD_SHIFT, // Shift + A
   0},
   {30,
   "Flood-fill",
@@ -308,7 +306,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "picture made of pixels of the same",
   "color.",
   true,
-  SDLK_f, // F
+  KEY_f, // F
   0},
   {124,
   "Replace color",
@@ -316,7 +314,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the clicked color to the fore-color",
   "or the back-color.",
   true,
-  SDLK_f|MOD_SHIFT, // Shift + F
+  KEY_f|MOD_SHIFT, // Shift + F
   0},
   {31,
   "Bezier's curves",
@@ -324,7 +322,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  SDLK_i, // I
+  KEY_i, // I
   0},
   {32,
   "Bezier's curve with 3 or 4 points",
@@ -332,7 +330,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "want to draw Bezier's curves with",
   "3 or 4 points.",
   true,
-  SDLK_i|MOD_SHIFT, // Shift + I
+  KEY_i|MOD_SHIFT, // Shift + I
   0},
   {33,
   "Empty rectangle",
@@ -340,7 +338,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the brush.",
   "",
   true,
-  SDLK_r, // R
+  KEY_r, // R
   0},
   {34,
   "Filled rectangle",
@@ -348,7 +346,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "rectangle.",
   "",
   true,
-  SDLK_r|MOD_SHIFT, // Shift + R
+  KEY_r|MOD_SHIFT, // Shift + R
   0},
   {35,
   "Empty circle",
@@ -356,7 +354,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the brush.",
   "",
   true,
-  SDLK_c, // C
+  KEY_c, // C
   0},
   {36,
   "Empty ellipse",
@@ -364,7 +362,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the brush.",
   "",
   true,
-  SDLK_c|MOD_CTRL, // Ctrl + C
+  KEY_c|MOD_CTRL, // Ctrl + C
   0},
   {37,
   "Filled circle",
@@ -372,7 +370,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  SDLK_c|MOD_SHIFT, // Shift + C
+  KEY_c|MOD_SHIFT, // Shift + C
   0},
   {38,
   "Filled ellipse",
@@ -380,7 +378,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  SDLK_c|MOD_SHIFT|MOD_CTRL, // Shift + Ctrl + C
+  KEY_c|MOD_SHIFT|MOD_CTRL, // Shift + Ctrl + C
   0},
   {39,
   "Empty polygon",
@@ -388,7 +386,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the brush.",
   "",
   true,
-  SDLK_n, // N
+  KEY_n, // N
   0},
   {40,
   "Empty \"polyform\"",
@@ -396,7 +394,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "polygon using the brush.",
   "",
   true,
-  SDLK_n|MOD_CTRL, // Ctrl + N
+  KEY_n|MOD_CTRL, // Ctrl + N
   0},
   {41,
   "Filled polygon",
@@ -404,7 +402,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  SDLK_n|MOD_SHIFT, // Shift + N
+  KEY_n|MOD_SHIFT, // Shift + N
   0},
   {42,
   "Filled \"polyform\"",
@@ -412,7 +410,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "polygon.",
   "",
   true,
-  SDLK_n|MOD_SHIFT|MOD_CTRL, // Shift + Ctrl + N
+  KEY_n|MOD_SHIFT|MOD_CTRL, // Shift + Ctrl + N
   0},
   {43,
   "Rectangle with gradation",
@@ -420,7 +418,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "a color gradation.",
   "",
   true,
-  SDLK_r|MOD_ALT, // Alt + R
+  KEY_r|MOD_ALT, // Alt + R
   0},
   {44,
   "Gradation menu",
@@ -428,7 +426,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "color gradations are calculated.",
   "",
   true,
-  SDLK_g|MOD_ALT, // Alt + G
+  KEY_g|MOD_ALT, // Alt + G
   0},
   {45,
   "Sphere with gradation",
@@ -436,7 +434,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "a color gradation.",
   "",
   true,
-  SDLK_c|MOD_ALT, // Alt + C
+  KEY_c|MOD_ALT, // Alt + C
   0},
   {46,
   "Ellipse with gradation",
@@ -444,7 +442,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "with a color gradation.",
   "",
   true,
-  SDLK_c|MOD_SHIFT|MOD_ALT, // Shift + Alt + C
+  KEY_c|MOD_SHIFT|MOD_ALT, // Shift + Alt + C
   0},
   {47,
   "Adjust picture",
@@ -452,11 +450,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "Around. What gets out from a side",
   "reappears on the other.",
   true,
-#if defined(USE_SDL)
-  SDLK_KP5, // Kpad5
-#else
-  SDLK_KP_5, // Kpad5
-#endif
+  KEY_KP5, // Kpad5
   0},
   {48,
   "Picture effects",
@@ -464,11 +458,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-#if defined(USE_SDL)
-  SDLK_KP5|MOD_SHIFT, // Shift + Kpad5
-#else
-  SDLK_KP_5|MOD_SHIFT, // Shift + Kpad5
-#endif
+  KEY_KP5|MOD_SHIFT, // Shift + Kpad5
   0},
   {49,
   "Drawing effects",
@@ -476,7 +466,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "disable and configure the drawing",
   "effects.",
   true,
-  SDLK_e, // E
+  KEY_e, // E
   0},
   {50,
   "Shade mode",
@@ -484,7 +474,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  SDLK_F5, // F5
+  KEY_F5, // F5
   0},
   {51,
   "Shade menu",
@@ -492,7 +482,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  SDLK_F5|MOD_SHIFT, // Shift + F5
+  KEY_F5|MOD_SHIFT, // Shift + F5
   0},
   {131,
   "Quick-shade mode",
@@ -500,7 +490,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "mode.",
   "",
   true,
-  SDLK_F5|MOD_CTRL, // Ctrl + F5
+  KEY_F5|MOD_CTRL, // Ctrl + F5
   0},
   {132,
   "Quick-shade menu",
@@ -508,7 +498,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "settings.",
   "",
   true,
-  SDLK_F5|MOD_SHIFT|MOD_CTRL, // Shift + Ctrl + F5
+  KEY_F5|MOD_SHIFT|MOD_CTRL, // Shift + Ctrl + F5
   0},
   {52,
   "Stencil mode",
@@ -516,7 +506,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  SDLK_F6, // F6
+  KEY_F6, // F6
   0},
   {53,
   "Stencil menu",
@@ -524,7 +514,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "settings.",
   "",
   true,
-  SDLK_F6|MOD_SHIFT, // Shift + F6
+  KEY_F6|MOD_SHIFT, // Shift + F6
   0},
   {54,
   "Mask mode",
@@ -532,7 +522,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  SDLK_F6|MOD_ALT, // Alt + F6
+  KEY_F6|MOD_ALT, // Alt + F6
   0},
   {55,
   "Mask menu",
@@ -540,7 +530,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  SDLK_F6|MOD_SHIFT|MOD_ALT, // Shift + Alt + F6
+  KEY_F6|MOD_SHIFT|MOD_ALT, // Shift + Alt + F6
   0},
   {56,
   "Grid mode",
@@ -548,7 +538,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  SDLK_g, // G
+  KEY_g, // G
   0},
   {57,
   "Grid menu",
@@ -556,7 +546,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the grid used by Grid mode.",
   "",
   true,
-  SDLK_g|MOD_SHIFT, // Shift + G
+  KEY_g|MOD_SHIFT, // Shift + G
   0},
   {58,
   "Sieve mode",
@@ -564,7 +554,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  SDLK_g|MOD_CTRL, // Ctrl + G
+  KEY_g|MOD_CTRL, // Ctrl + G
   0},
   {59,
   "Sieve menu",
@@ -572,7 +562,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the sieve.",
   "",
   true,
-  SDLK_g|MOD_SHIFT|MOD_CTRL, // Shift + Ctrl + G
+  KEY_g|MOD_SHIFT|MOD_CTRL, // Shift + Ctrl + G
   0},
   {60,
   "Invert sieve",
@@ -580,7 +570,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "Sieve menu.",
   "",
   true,
-  SDLK_g|MOD_CTRL|MOD_ALT, // Ctrl + Alt + G
+  KEY_g|MOD_CTRL|MOD_ALT, // Ctrl + Alt + G
   0},
   {61,
   "Colorize mode",
@@ -588,7 +578,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "mode.",
   "",
   true,
-  SDLK_F7, // F7
+  KEY_F7, // F7
   0},
   {62,
   "Colorize menu",
@@ -596,7 +586,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "opacity percentage for Colorize",
   "mode.",
   true,
-  SDLK_F7|MOD_SHIFT, // Shift + F7
+  KEY_F7|MOD_SHIFT, // Shift + F7
   0},
   {63,
   "Smooth mode",
@@ -604,7 +594,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "mode.",
   "",
   true,
-  SDLK_F8, // F8
+  KEY_F8, // F8
   0},
   {123,
   "Smooth menu",
@@ -612,7 +602,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the Smooth matrix.",
   "",
   true,
-  SDLK_F8|MOD_SHIFT, // Shift + F8
+  KEY_F8|MOD_SHIFT, // Shift + F8
   0},
   {64,
   "Smear mode",
@@ -620,7 +610,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  SDLK_F8|MOD_ALT, // Alt + F8
+  KEY_F8|MOD_ALT, // Alt + F8
   0},
   {65,
   "Tiling mode",
@@ -628,7 +618,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "mode.",
   "",
   true,
-  SDLK_b|MOD_ALT, // Alt + B
+  KEY_b|MOD_ALT, // Alt + B
   0},
   {66,
   "Tiling menu",
@@ -636,7 +626,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the origin of the tiling.",
   "",
   true,
-  SDLK_b|MOD_SHIFT|MOD_ALT, // Shift + Alt + B
+  KEY_b|MOD_SHIFT|MOD_ALT, // Shift + Alt + B
   0},
   {206,
   "Tilemap mode",
@@ -660,9 +650,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "within a rectangle.",
   "",
   true,
-  SDLK_b, // B
+  KEY_b, // B
   #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
-  SDLK_C|MOD_META // Right-Amiga + C
+  KEY_C|MOD_META // Right-Amiga + C
   #else
   0
   #endif
@@ -673,7 +663,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "within a freehand polygon.",
   "",
   true,
-  SDLK_b|MOD_CTRL, // Ctrl + B
+  KEY_b|MOD_CTRL, // Ctrl + B
   0},
   {69,
   "Get previous brush back",
@@ -681,7 +671,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  SDLK_b|MOD_SHIFT, // Shift + B
+  KEY_b|MOD_SHIFT, // Shift + B
   0},
   {70,
   "Horizontal brush flipping",
@@ -689,7 +679,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  SDLK_x, // X
+  KEY_x, // X
   0},
   {71,
   "Vertical brush flipping",
@@ -697,7 +687,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  SDLK_y, // Y
+  KEY_y, // Y
   0},
   {72,
   "90\xb0 brush rotation",
@@ -705,7 +695,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "(counter-clockwise).",
   "",
   true,
-  SDLK_z, // Z (W en AZERTY)
+  KEY_z, // Z (W en AZERTY)
   0},
   {73,
   "180\xb0 brush rotation",
@@ -713,7 +703,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "180\xb0.",
   "",
   true,
-  SDLK_z|MOD_SHIFT, // Shift + Z
+  KEY_z|MOD_SHIFT, // Shift + Z
   0},
   {74,
   "Strech brush",
@@ -721,7 +711,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "user-defined brush.",
   "",
   true,
-  SDLK_s, // S
+  KEY_s, // S
   0},
   {75,
   "Distort brush",
@@ -729,7 +719,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "user-defined brush.",
   "",
   true,
-  SDLK_s|MOD_SHIFT, // Shift + S
+  KEY_s|MOD_SHIFT, // Shift + S
   0},
   {76,
   "Outline brush",
@@ -737,7 +727,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "with the fore color.",
   "",
   true,
-  SDLK_o, // O
+  KEY_o, // O
   0},
   {77,
   "Nibble brush",
@@ -745,7 +735,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "user-defined brush.This does the",
   "opposite of the Outline option.",
   true,
-  SDLK_o|MOD_SHIFT, // Shift + O
+  KEY_o|MOD_SHIFT, // Shift + O
   0},
   {78,
   "Get colors from brush",
@@ -753,7 +743,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "are used in the brush.",
   "",
   true,
-  SDLK_F11, // F11
+  KEY_F11, // F11
   0},
   {79,
   "Recolorize brush",
@@ -761,7 +751,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "order to get a brush which looks as",
   "if it was grabbed in the spare page.",
   true,
-  SDLK_F12, // F12
+  KEY_F12, // F12
   0},
   {80,
   "Rotate by any angle",
@@ -769,7 +759,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "you can define.",
   "",
   true,
-  SDLK_w, // W (Z en AZERTY)
+  KEY_w, // W (Z en AZERTY)
   0},
   {81,
   "Pipette",
@@ -777,7 +767,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "pixel in the picture into the",
   "foreground or background color.",
   true,
-  SDLK_BACKQUOTE, // `~ (Key sous le Esc - ² en AZERTY)
+  KEY_BACKQUOTE, // `~ (Key sous le Esc - ² en AZERTY)
   0},
   {82,
   "Swap foreground/background colors",
@@ -785,7 +775,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "colors.",
   "",
   true,
-  SDLK_BACKQUOTE|MOD_SHIFT, // Shift + `~
+  KEY_BACKQUOTE|MOD_SHIFT, // Shift + `~
   0},
   {83,
   "Magnifier mode",
@@ -793,7 +783,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  SDLK_m, // M (, ? sur AZERTY)
+  KEY_m, // M (, ? sur AZERTY)
   KEY_MOUSEMIDDLE},
   {84,
   "Zoom factor menu",
@@ -801,7 +791,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "magnifying factor.",
   "",
   true,
-  SDLK_m|MOD_SHIFT, // Shift + M
+  KEY_m|MOD_SHIFT, // Shift + M
   0},
   {85,
   "Zoom in",
@@ -809,7 +799,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  SDLK_KP_PLUS, // Grey +
+  KEY_KP_PLUS, // Grey +
   KEY_MOUSEWHEELUP},
   {86,
   "Zoom out",
@@ -817,7 +807,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  SDLK_KP_MINUS, // Grey -
+  KEY_KP_MINUS, // Grey -
   KEY_MOUSEWHEELDOWN},
   {87,
   "Brush effects menu",
@@ -825,7 +815,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "different effects on the",
   "user-defined brush.",
   true,
-  SDLK_b|MOD_CTRL|MOD_ALT, // Ctrl + Alt + B
+  KEY_b|MOD_CTRL|MOD_ALT, // Ctrl + Alt + B
   0},
   {88,
   "Text",
@@ -833,7 +823,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "type in a character string and",
   "render it as a brush.",
   true,
-  SDLK_t, // T
+  KEY_t, // T
   0},
   {89,
   "Screen resolution menu",
@@ -841,7 +831,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the screen resolution and image",
   "dimensions.",
   true,
-  SDLK_RETURN, // Enter
+  KEY_RETURN, // Enter
   0},
   {90,
   "\"Safety\" resolution",
@@ -849,7 +839,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "mode that should work everywhere:",
   "usually a 640x400 window.",
   false,
-  SDLK_RETURN|MOD_SHIFT, // Shift + Enter
+  KEY_RETURN|MOD_SHIFT, // Shift + Enter
   0},
   {91,
   "Help and credits",
@@ -858,9 +848,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "or contextual help.",
   true,
 #ifdef GCWZERO
-  SDLK_TAB, // L-Shoulderpad
+  KEY_TAB, // L-Shoulderpad
 #else
-  SDLK_F1, // F1
+  KEY_F1, // F1
 #endif
   0},
   {92,
@@ -869,7 +859,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "useful information.",
   "",
   true,
-  SDLK_F1|MOD_SHIFT, // Shift + F1
+  KEY_F1|MOD_SHIFT, // Shift + F1
   0},
   {93,
   "Jump to spare page",
@@ -878,9 +868,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   true,
 #ifdef GCWZERO
-  SDLK_UNKNOWN,
+  KEY_UNKNOWN,
 #else
-  SDLK_TAB, // Tab
+  KEY_TAB, // Tab
 #endif
   0},
   {94,
@@ -889,7 +879,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  SDLK_TAB|MOD_SHIFT, // Shift + Tab
+  KEY_TAB|MOD_SHIFT, // Shift + Tab
   0},
   {95,
   "Save picture as...",
@@ -897,9 +887,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "you to save your picture with a new",
   "path-name.",
   true,
-  SDLK_F2, // F2
+  KEY_F2, // F2
   #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
-  SDLK_A|MOD_META // Right-Amiga + A
+  KEY_A|MOD_META // Right-Amiga + A
   #else
   0
   #endif
@@ -910,9 +900,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "name you gave it.",
   "",
   true,
-  SDLK_F2|MOD_SHIFT, // Shift + F2
+  KEY_F2|MOD_SHIFT, // Shift + F2
   #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
-  SDLK_S|MOD_META // Right-Amiga + S
+  KEY_S|MOD_META // Right-Amiga + S
   #else
   0
   #endif
@@ -923,9 +913,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "you to load a new picture.",
   "",
   true,
-  SDLK_F3, // F3
+  KEY_F3, // F3
   #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
-  SDLK_O|MOD_META // Right-Amiga + O
+  KEY_O|MOD_META // Right-Amiga + O
   #else
   0
   #endif
@@ -936,7 +926,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "allows you to cancel modifications",
   "made since last saving.",
   true,
-  SDLK_F3|MOD_SHIFT, // Shift + F3
+  KEY_F3|MOD_SHIFT, // Shift + F3
   0},
   {99,
   "Save brush",
@@ -944,7 +934,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "you to save your current",
   "user-defined brush.",
   true,
-  SDLK_F2|MOD_CTRL, // Ctrl + F2
+  KEY_F2|MOD_CTRL, // Ctrl + F2
   0},
   {100,
   "Load brush",
@@ -952,7 +942,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "you to load a brush.",
   "",
   true,
-  SDLK_F3|MOD_CTRL, // Ctrl + F3
+  KEY_F3|MOD_CTRL, // Ctrl + F3
   0},
   {101,
   "Settings",
@@ -960,7 +950,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "modify some parameters of the",
   "program.",
   true,
-  SDLK_F10|MOD_SHIFT, // Shift + F10
+  KEY_F10|MOD_SHIFT, // Shift + F10
   0},
   {102,
   "Undo (Oops!)",
@@ -968,14 +958,14 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "modified the picture.",
   "",
   true,
-  SDLK_u, // U
+  KEY_u, // U
   // Secondary shortcut is button I on the Caanoo, L on the Wiz, unset on others
   #if defined (__CAANOO__)
     (KEY_JOYBUTTON+JOY_BUTTON_I)
   #elif defined (__WIZ__)
     (KEY_JOYBUTTON+JOY_BUTTON_L)
   #elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
-  SDLK_Z|MOD_META // Right-Amiga + Z
+  KEY_Z|MOD_META // Right-Amiga + Z
   #else
   0
   #endif
@@ -987,7 +977,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  SDLK_u|MOD_SHIFT, // Shift + U
+  KEY_u|MOD_SHIFT, // Shift + U
   // Secondary shortcut is button II on the Caanoo, R on the Wiz, unset on others
   #if defined (__CAANOO__)
     (KEY_JOYBUTTON+JOY_BUTTON_II)
@@ -1004,7 +994,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "removes the current page from the",
   "list of \"Undo\" pages.",
   true,
-  SDLK_DELETE|MOD_SHIFT, // Shift + Suppr
+  KEY_DELETE|MOD_SHIFT, // Shift + Suppr
   0},
   {104,
   "Clear page",
@@ -1013,9 +1003,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "a layered image.",
   true,
 #ifdef GCWZERO
-  SDLK_UNKNOWN, // BackSpace
+  KEY_UNKNOWN, // BackSpace
 #else
-  SDLK_BACKSPACE, // BackSpace
+  KEY_BACKSPACE, // BackSpace
 #endif
   0},
   {105,
@@ -1024,7 +1014,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "current backcolor.",
   "",
   true,
-  SDLK_BACKSPACE|MOD_SHIFT, // Shift + BackSpace
+  KEY_BACKSPACE|MOD_SHIFT, // Shift + BackSpace
   0},
   {106,
   "Quit program",
@@ -1032,14 +1022,14 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "If modifications were not saved,",
   "confirmation is asked.",
   false,
-  SDLK_q, // Q (A en AZERTY)
+  KEY_q, // Q (A en AZERTY)
   // Secondary shortcut is button Home on the Caanoo, Menu on the Wiz, unset on others
   #if defined (__CAANOO__)
     (KEY_JOYBUTTON+JOY_BUTTON_HOME)
   #elif defined (__WIZ__)
     (KEY_JOYBUTTON+JOY_BUTTON_MENU)
   #eif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
-  SDLK_Q|MOD_META // Right-Amiga + Q
+  KEY_Q|MOD_META // Right-Amiga + Q
   #else
   0
   #endif
@@ -1052,7 +1042,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "modify the current palette.",
   "",
   true,
-  SDLK_p, // P
+  KEY_p, // P
   0},
   {125,
   "Secondary palette menu",
@@ -1060,7 +1050,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "define color series and some tagged",
   "colors.",
   true,
-  SDLK_p|MOD_SHIFT, // Shift + P
+  KEY_p|MOD_SHIFT, // Shift + P
   0},
   {130,
   "Exclude colors menu",
@@ -1068,7 +1058,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "define the colors you don't want to",
   "use in Smooth and Transparency",
   true,
-  SDLK_p|MOD_CTRL, // Ctrl + P
+  KEY_p|MOD_CTRL, // Ctrl + P
   0},
   {108,
   "Scroll palette to the left",
@@ -1076,7 +1066,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the left, column by column.",
   "",
   true,
-  SDLK_PAGEUP, // PgUp
+  KEY_PAGEUP, // PgUp
   0},
   {109,
   "Scroll palette to the right",
@@ -1084,7 +1074,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the right, column by column.",
   "",
   true,
-  SDLK_PAGEDOWN, // PgDn
+  KEY_PAGEDOWN, // PgDn
   0},
   {110,
   "Scroll palette to the left faster",
@@ -1092,7 +1082,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the left, 8 columns by 8 columns.",
   "",
   true,
-  SDLK_PAGEUP|MOD_SHIFT, // Shift + PgUp
+  KEY_PAGEUP|MOD_SHIFT, // Shift + PgUp
   0},
   {111,
   "Scroll palette to the right faster",
@@ -1100,7 +1090,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the right, 8 columns by 8 columns.",
   "",
   true,
-  SDLK_PAGEDOWN|MOD_SHIFT, // Shift + PgDn
+  KEY_PAGEDOWN|MOD_SHIFT, // Shift + PgDn
   0},
   {112,
   "Center brush attachment point",
@@ -1108,11 +1098,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "user-defined brush to its center.",
   "",
   true,
-#if defined(USE_SDL)
-  SDLK_KP5|MOD_CTRL, // Ctrl + 5 (pavé numérique)
-#else
-  SDLK_KP_5|MOD_CTRL, // Ctrl + 5 (pavé numérique)
-#endif
+  KEY_KP5|MOD_CTRL, // Ctrl + 5 (pavé numérique)
   0},
   {113,
   "Top-left brush attachment point",
@@ -1120,7 +1106,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "user-defined brush to its top-left",
   "corner.",
   true,
-  SDLK_HOME|MOD_CTRL, // Ctrl + 7
+  KEY_HOME|MOD_CTRL, // Ctrl + 7
   0},
   {114,
   "Top-right brush attachment point",
@@ -1128,7 +1114,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "user-defined brush to its top-right",
   "corner.",
   true,
-  SDLK_PAGEUP|MOD_CTRL, // Ctrl + 9
+  KEY_PAGEUP|MOD_CTRL, // Ctrl + 9
   0},
   {115,
   "Bottom-left brush attachment point",
@@ -1136,7 +1122,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "user-defined brush to its",
   "bottom-left corner.",
   true,
-  SDLK_END|MOD_CTRL, // Ctrl + 1
+  KEY_END|MOD_CTRL, // Ctrl + 1
   0},
   {116,
   "Bottom-right brush attachment point",
@@ -1144,7 +1130,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "user-defined brush to its",
   "bottom-right corner.",
   true,
-  SDLK_PAGEDOWN|MOD_CTRL, // Ctrl + 3
+  KEY_PAGEDOWN|MOD_CTRL, // Ctrl + 3
   0},
   {117,
   "Next foreground color",
@@ -1153,9 +1139,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   true,
 #ifdef GCWZERO
-  SDLK_RIGHT|MOD_SHIFT,
+  KEY_RIGHT|MOD_SHIFT,
 #else
-  SDLK_RIGHTBRACKET, // ] (0x en AZERTY)
+  KEY_RIGHTBRACKET, // ] (0x en AZERTY)
 #endif
   0},
   {118,
@@ -1165,9 +1151,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   true,
 #ifdef GCWZERO
-  SDLK_LEFT|MOD_SHIFT,
+  KEY_LEFT|MOD_SHIFT,
 #else
-  SDLK_LEFTBRACKET, // [ (^ en AZERTY)
+  KEY_LEFTBRACKET, // [ (^ en AZERTY)
 #endif
   0},
   {119,
@@ -1177,9 +1163,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   true,
 #ifdef GCWZERO
-  SDLK_DOWN|MOD_SHIFT,
+  KEY_DOWN|MOD_SHIFT,
 #else
-  SDLK_RIGHTBRACKET|MOD_SHIFT, // Shift + ]
+  KEY_RIGHTBRACKET|MOD_SHIFT, // Shift + ]
 #endif
   0},
   {120,
@@ -1189,9 +1175,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   true,
 #ifdef GCWZERO
-  SDLK_UP|MOD_SHIFT,
+  KEY_UP|MOD_SHIFT,
 #else
-  SDLK_LEFTBRACKET|MOD_SHIFT, // Shift + [
+  KEY_LEFTBRACKET|MOD_SHIFT, // Shift + [
 #endif
   0},
   {126,
@@ -1200,7 +1186,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "in the user-defined color series.",
   "",
   true,
-  SDLK_EQUALS, // "=+"
+  KEY_EQUALS, // "=+"
   0},
   {127,
   "Previous user-defined forecolor",
@@ -1208,7 +1194,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "previous in the user-defined color",
   "series.",
   true,
-  SDLK_MINUS, // "-_" (")°" en AZERTY
+  KEY_MINUS, // "-_" (")°" en AZERTY
   0},
   {128,
   "Next user-defined backcolor",
@@ -1216,7 +1202,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "in the user-defined color series.",
   "",
   true,
-  SDLK_EQUALS|MOD_SHIFT, // Shift + "=+"
+  KEY_EQUALS|MOD_SHIFT, // Shift + "=+"
   0},
   {129,
   "Previous user-defined backcolor",
@@ -1224,7 +1210,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "previous in the user-defined color",
   "series.",
   true,
-  SDLK_MINUS|MOD_SHIFT, // Shift + "-_" (")°" en AZERTY
+  KEY_MINUS|MOD_SHIFT, // Shift + "-_" (")°" en AZERTY
   0},
   {121,
   "Shrink paintbrush",
@@ -1232,7 +1218,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "if it is special circle or square.",
   "",
   true,
-  SDLK_COMMA, // , < (;. en AZERTY)
+  KEY_COMMA, // , < (;. en AZERTY)
   0},
   {122,
   "Enlarge paintbrush",
@@ -1240,7 +1226,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "if it is special circle or square.",
   "",
   true,
-  SDLK_PERIOD, // .> (:/ en AZERTY)
+  KEY_PERIOD, // .> (:/ en AZERTY)
   0},
   {134,
   "Effects off",
@@ -1248,7 +1234,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "is the same as the 'All off' button",
   "in the Effects screen",
   true,
-  SDLK_e|MOD_SHIFT, // Shift-E
+  KEY_e|MOD_SHIFT, // Shift-E
   0},
   {135,
   "Transparency 10%",
@@ -1256,7 +1242,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "opacity at 10%.",
   "",
   true,
-  SDLK_1, // 1
+  KEY_1, // 1
   0},
   {136,
   "Transparency 20%",
@@ -1264,7 +1250,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "opacity at 20%.",
   "",
   true,
-  SDLK_2, // 2
+  KEY_2, // 2
   0},
   {137,
   "Transparency 30%",
@@ -1272,7 +1258,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "opacity at 30%.",
   "",
   true,
-  SDLK_3, // 3
+  KEY_3, // 3
   0},
   {138,
   "Transparency 40%",
@@ -1280,7 +1266,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "opacity at 40%.",
   "",
   true,
-  SDLK_4, // 4
+  KEY_4, // 4
   0},
   {139,
   "Transparency 50%",
@@ -1288,7 +1274,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "opacity at 50%.",
   "",
   true,
-  SDLK_5, // 5
+  KEY_5, // 5
   0},
   {140,
   "Transparency 60%",
@@ -1296,7 +1282,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "opacity at 60%.",
   "",
   true,
-  SDLK_6, // 6
+  KEY_6, // 6
   0},
   {141,
   "Transparency 70%",
@@ -1304,7 +1290,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "opacity at 70%.",
   "",
   true,
-  SDLK_7, // 7
+  KEY_7, // 7
   0},
   {142,
   "Transparency 80%",
@@ -1312,7 +1298,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "opacity at 80%.",
   "",
   true,
-  SDLK_8, // 8
+  KEY_8, // 8
   0},
   {143,
   "Transparency 90%",
@@ -1320,7 +1306,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "opacity at 90%.",
   "",
   true,
-  SDLK_9, // 9
+  KEY_9, // 9
   0},
   {144,
   "Transparency 0%",
@@ -1328,7 +1314,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "opacity at 0%.",
   "",
   true,
-  SDLK_0, // 0
+  KEY_0, // 0
   0},
   {145,
   "Zoom 1:1",
@@ -1336,7 +1322,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  SDLK_1|MOD_CTRL, /* Ctrl + 1 */
+  KEY_1|MOD_CTRL, /* Ctrl + 1 */
   0},
   {146,
   "Zoom 2:1",
@@ -1344,7 +1330,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "factor to 2:1",
   "",
   true,
-  SDLK_2|MOD_CTRL, /* Ctrl + 2 */
+  KEY_2|MOD_CTRL, /* Ctrl + 2 */
   0},
   {147,
   "Zoom 3:1",
@@ -1352,7 +1338,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "factor to 3:1",
   "",
   true,
-  SDLK_3|MOD_CTRL, /* Ctrl + 3 */
+  KEY_3|MOD_CTRL, /* Ctrl + 3 */
   0},
   {148,
   "Zoom 4:1",
@@ -1360,7 +1346,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "factor to 4:1",
   "",
   true,
-  SDLK_4|MOD_CTRL, /* Ctrl + 4 */
+  KEY_4|MOD_CTRL, /* Ctrl + 4 */
   0},
   {149,
   "Zoom 5:1",
@@ -1368,7 +1354,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "factor to 5:1",
   "",
   true,
-  SDLK_5|MOD_CTRL, /* Ctrl + 5 */
+  KEY_5|MOD_CTRL, /* Ctrl + 5 */
   0},
   {150,
   "Zoom 6:1",
@@ -1376,7 +1362,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "factor to 6:1",
   "",
   true,
-  SDLK_6|MOD_CTRL, /* Ctrl + 6 */
+  KEY_6|MOD_CTRL, /* Ctrl + 6 */
   0},
   {151,
   "Zoom 8:1",
@@ -1384,7 +1370,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "factor to 8:1",
   "",
   true,
-  SDLK_7|MOD_CTRL, /* Ctrl + 7 */
+  KEY_7|MOD_CTRL, /* Ctrl + 7 */
   0},
   {152,
   "Zoom 10:1",
@@ -1392,7 +1378,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "factor to 10:1",
   "",
   true,
-  SDLK_8|MOD_CTRL, /* Ctrl + 8 */
+  KEY_8|MOD_CTRL, /* Ctrl + 8 */
   0},
   {153,
   "Zoom 12:1",
@@ -1440,7 +1426,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the magnified view. Grid cells match",
   "the size ",
   true,
-  SDLK_g|MOD_SHIFT|MOD_ALT, // Shift + Alt + G,
+  KEY_g|MOD_SHIFT|MOD_ALT, // Shift + Alt + G,
   0},
   {159,
   "Select layer 1",
@@ -1576,7 +1562,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "active one. The new layer is filled",
   "with transparent color.",
   true,
-  SDLK_INSERT|MOD_ALT, // Alt + Insert
+  KEY_INSERT|MOD_ALT, // Alt + Insert
   0},
   {209,
   "Duplicate layer",
@@ -1592,7 +1578,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "You can't delete the last",
   "layer.",
   true,
-  SDLK_DELETE|MOD_ALT, // Alt + Delete
+  KEY_DELETE|MOD_ALT, // Alt + Delete
   0},
   {177,
   "Merge a layer",
@@ -1600,7 +1586,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the one directly below it.",
   "",
   true,
-  SDLK_END|MOD_ALT, // Alt + End
+  KEY_END|MOD_ALT, // Alt + End
   0},
   {178,
   "Swap layer (up)",
@@ -1608,7 +1594,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "up the stack. No effect if already",
   "on top.",
   true,
-  SDLK_PAGEUP|MOD_ALT, // Alt + PageUp
+  KEY_PAGEUP|MOD_ALT, // Alt + PageUp
   0},
   {179,
   "Swap layer (down)",
@@ -1616,7 +1602,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "down the stack. No effect if already",
   "on bottom.",
   true,
-  SDLK_PAGEDOWN|MOD_ALT, // Alt + PageDown
+  KEY_PAGEDOWN|MOD_ALT, // Alt + PageDown
   0},
   {180,
   "Layers menu",
@@ -1624,7 +1610,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "to layers and image transparency.",
   "",
   true,
-  SDLK_HOME|MOD_ALT, // Alt + Home
+  KEY_HOME|MOD_ALT, // Alt + Home
   0},
   {181,
   "Brush factory",
@@ -1648,7 +1634,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "by doubling width and height.",
   "",
   true,
-  SDLK_h|MOD_SHIFT, // Shift+H
+  KEY_h|MOD_SHIFT, // Shift+H
   0},
   {184,
   "Double brush width",
@@ -1656,7 +1642,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "by doubling its width.",
   "",
   true,
-  SDLK_x|MOD_SHIFT, // Shift+X
+  KEY_x|MOD_SHIFT, // Shift+X
   0},
   {185,
   "Double brush height",
@@ -1664,7 +1650,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "by doubling its height.",
   "",
   true,
-  SDLK_y|MOD_SHIFT, // Shift+Y
+  KEY_y|MOD_SHIFT, // Shift+Y
   0},
   {186,
   "Halve brush size",
@@ -1672,7 +1658,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "by halving its width and height",
   "",
   true,
-  SDLK_h, // H
+  KEY_h, // H
   0},
   {187,
   "Run script #1",
@@ -1760,7 +1746,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "cycling, if the current image has",
   "cycling colors. (See gradient menu)",
   true,
-  SDLK_BACKQUOTE|MOD_CTRL, // Ctrl + `~
+  KEY_BACKQUOTE|MOD_CTRL, // Ctrl + `~
   0},
   {198,
   "Format checker",
@@ -1833,9 +1819,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "pan the view.",
   true,
 #ifdef GCWZERO
-  SDLK_F1, // Space
+  KEY_F1, // Space
 #else
-  SDLK_SPACE, // Space
+  KEY_SPACE, // Space
 #endif
   0},
   {209,
@@ -1844,7 +1830,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  SDLK_KP_PLUS|MOD_SHIFT, // Shift++
+  KEY_KP_PLUS|MOD_SHIFT, // Shift++
   KEY_MOUSEWHEELUP|MOD_SHIFT},
   {210,
   "Zoom out more",
@@ -1852,7 +1838,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  SDLK_KP_MINUS|MOD_SHIFT, // Shift+-
+  KEY_KP_MINUS|MOD_SHIFT, // Shift+-
   KEY_MOUSEWHEELDOWN|MOD_SHIFT},
 };
 

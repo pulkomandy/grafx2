@@ -473,11 +473,11 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
   static byte caps_lock=0;
   static const word keymapping[] =
   {
-    SDLK_CLEAR,SDLK_BACKSPACE,SDLK_RETURN,KEY_ESC,
+    KEY_CLEAR,KEY_BACKSPACE,KEY_RETURN,KEY_ESC,
     '0','1','2','3','4','5','6','7','8','9','.',',',
     'Q','W','E','R','T','Y','U','I','O','P',
     'A','S','D','F','G','H','J','K','L',
-    SDLK_CAPSLOCK,'Z','X','C','V','B','N','M',' ',
+    KEY_CAPSLOCK,'Z','X','C','V','B','N','M',' ',
     '-','+','*','/','|','\\',
     '(',')','{','}','[',']',
     '_','=','<','>','%','@',
@@ -502,7 +502,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
   
 #if defined(__ANDROID__)
 	SDL_ANDROID_GetScreenKeyboardTextInput(str, max_size);
-	input_key = SDLK_RETURN;
+	input_key = KEY_RETURN;
 #else
   // Virtual keyboards
   if (Config.Use_virtual_keyboard==1 ||
@@ -667,7 +667,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
     Hide_cursor();
   }
 
-  while ((input_key!=SDLK_RETURN) && (input_key!=KEY_ESC))
+  while ((input_key!=KEY_RETURN) && (input_key!=KEY_ESC))
   {
     Display_cursor();
     if (use_virtual_keyboard)
@@ -678,11 +678,11 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
       input_key=Key_ANSI;
 
       if (clicked_button==-1)
-        input_key=SDLK_RETURN;
+        input_key=KEY_RETURN;
       else if (clicked_button>0)
       {
         input_key=keymapping[clicked_button-1];
-        if (input_key==SDLK_CAPSLOCK)
+        if (input_key==KEY_CAPSLOCK)
         {
           // toggle uppercase
           caps_lock=!caps_lock;
@@ -690,14 +690,14 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
           Print_in_window(8, 49,caps_lock?"\036":"\037", MC_Black,MC_Light);
           Display_cursor();
         }
-        else if (input_key==SDLK_BACKSPACE)
+        else if (input_key==KEY_BACKSPACE)
         {
           // A little hack: the button for backspace will:
           // - backspace if the cursor is at end of string
           // - delete otherwise
           // It's needed for those input boxes that are completely full.
           if (position<size)
-            input_key = SDLK_DELETE;
+            input_key = KEY_DELETE;
         }
         else if (input_key>='A' && input_key<='Z' && !caps_lock)
         {
@@ -712,7 +712,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
         Get_input(20);
         input_key = (str_unicode == NULL) ? Key_ANSI : Key_UNICODE;
         if (Mouse_K)
-          input_key=SDLK_RETURN;
+          input_key=KEY_RETURN;
 
         // Handle paste request on CTRL+v
         if (Key == SHORTCUT_PASTE)
@@ -778,7 +778,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
 
     switch (input_key)
     {
-      case SDLK_DELETE : // Suppr.
+      case KEY_DELETE : // Suppr.
             if (position<size)
             {
               if (str_unicode != NULL)
@@ -792,7 +792,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
               goto affichage;
             }
       break;
-      case SDLK_LEFT : // Gauche
+      case KEY_LEFT : // Gauche
             if (position>0)
             {
               // Effacement de la chaîne
@@ -804,7 +804,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
               goto affichage;
             }
       break;
-      case SDLK_RIGHT : // Droite
+      case KEY_RIGHT : // Droite
             if ((position<size) && (position<max_size-1))
             {
               position++;
@@ -823,7 +823,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
               goto affichage;
             }
       break;
-      case SDLK_HOME : // Home
+      case KEY_HOME : // Home
             if (position)
             {
               // Effacement de la chaîne
@@ -834,7 +834,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
               goto affichage;
             }
       break;
-      case SDLK_END : // End
+      case KEY_END : // End
             if ((position<size) && (position<max_size-1))
             {
               position = (byte)((size<max_size) ? size : size-1);
@@ -843,7 +843,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
               goto affichage;
             }
       break;
-      case  SDLK_BACKSPACE : // Backspace : combinaison de gauche + suppr
+      case  KEY_BACKSPACE : // Backspace : combinaison de gauche + suppr
 
         if (position > 0)
         {       
@@ -860,7 +860,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
           goto affichage;
         }
         break;
-      case  SDLK_CLEAR : // Clear
+      case  KEY_CLEAR : // Clear
         str[0]='\0';
         if (str_unicode != NULL)
           str_unicode[0] = 0;
@@ -868,7 +868,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
         // Effacement de la chaîne
         Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
         goto affichage;
-      case SDLK_RETURN :
+      case KEY_RETURN :
         break;
         
       case KEY_ESC :
@@ -995,7 +995,7 @@ affichage:
   }
   Update_window_area(x_pos,y_pos,visible_size<<3,8);
   
-  return (input_key==SDLK_RETURN);
+  return (input_key==KEY_RETURN);
 }
 
 void Sprint_double(char *str, double value, byte decimal_places, byte min_positions)
