@@ -733,7 +733,7 @@ void Main_handler(void)
         Button_Quit(BUTTON_QUIT);
       }
       
-      if (Pan_shortcut_pressed && Current_operation!=OPERATION_PAN_VIEW)
+      if (Pan_shortcut_pressed && Current_operation!=OPERATION_PAN_VIEW && Operation_stack_size==0)
       {
         Hide_cursor();
         Start_operation_stack(OPERATION_PAN_VIEW);
