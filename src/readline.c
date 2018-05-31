@@ -193,7 +193,7 @@ static int Valid_character(word c, int input_type)
       // d'autres poseront des problèmes au shell, alors on évite.
       // Sous Windows : c'est moins grave car le fopen() échouerait de toutes façons.
       // AmigaOS4: Pas de ':' car utilisé pour les volumes.
-#if defined(__WIN32__)
+#if defined(WIN32)
       char forbidden_char[] = {'/', '|', '?', '*', '<', '>', ':', '\\'};
 #elif defined (__amigaos4__) || defined(__AROS__)
       char forbidden_char[] = {'/', '|', '?', '*', '<', '>', ':'};
@@ -305,8 +305,9 @@ void Init_virtual_keyboard(word y_pos, word keyboard_width, word keyboard_height
 // TODO X11 and others
 static char* getClipboard(word * * unicode)
 {
-#ifdef __WIN32__
+#ifdef WIN32
     char* dst = NULL;
+#if defined(USE_SDL) || defined(USE_SDL2)
     SDL_SysWMinfo info;
 
     SDL_VERSION(&info.version);
@@ -314,6 +315,10 @@ static char* getClipboard(word * * unicode)
     if ( SDL_GetWMInfo(&info) )
     {
       if (OpenClipboard(info.window) )
+#else
+    {
+      if (OpenClipboard(GetActiveWindow()))
+#endif
       {
         HANDLE hMem;
         if ( IsClipboardFormatAvailable(CF_TEXT) )

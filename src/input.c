@@ -26,7 +26,7 @@
 #include <SDL_syswm.h>
 #endif
 
-#ifdef __WIN32__
+#ifdef WIN32
   #include <windows.h>
   #include <shellapi.h>
 #endif

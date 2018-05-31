@@ -25,7 +25,7 @@
 
 // Signal handler: I activate it for the two platforms who certainly
 // support them. Feel free to check with others.
-#if defined(__WIN32__) || defined(__linux__)
+#if defined(WIN32) || defined(__linux__)
   #define GRAFX2_CATCHES_SIGNALS
 #endif
 
@@ -49,7 +49,7 @@
 #if defined(USE_SDL)
 #include <SDL_byteorder.h>
 #endif
-#if defined(__WIN32__)
+#if defined(WIN32)
   #include <windows.h> // GetLogicalDrives(), GetDriveType(), DRIVE_*
 #endif
 #if !defined(__GP2X__) && defined(USE_SDL)
@@ -2872,7 +2872,10 @@ void Set_config_defaults(void)
 
 #ifdef GRAFX2_CATCHES_SIGNALS
 
-#if defined(__WIN32__)
+#if defined(WIN32)
+#if defined(_MSC_VER)
+typedef void (*__p_sig_fn_t)(int);
+#endif
   #define SIGHANDLER_T __p_sig_fn_t
 #elif defined(__macosx__)
   typedef void (*sig_t) (int);
@@ -3096,7 +3099,9 @@ void Define_icon(void)
     LPVOID lpResIcon32;
     HGLOBAL hMem;
     WORD nID;
+#if defined(USE_SDL) || defined(USE_SDL2)
     SDL_SysWMinfo info;
+#endif
     
     hInstance = (HINSTANCE)GetModuleHandle(NULL);
     if (hInstance==NULL)
@@ -3118,9 +3123,11 @@ void Define_icon(void)
     if (lpResIconDir==NULL)
       break;
       
+#if defined(USE_SDL) || defined(USE_SDL2)
     SDL_VERSION(&info.version);
     SDL_GetWMInfo(&info);
-      
+#endif
+
     //
     // 16x16
     //
@@ -3152,9 +3159,13 @@ void Define_icon(void)
         16, 16, LR_DEFAULTCOLOR); 
     if (hicon==NULL)
       break;
-      
+
     // Set it
+#if defined(USE_SDL) || defined(USE_SDL2)
 		SetClassLongPtr(info.window, GCL_HICONSM, (LONG_PTR)hicon);
+#else
+    // TODO
+#endif
 
     
     //
@@ -3190,7 +3201,11 @@ void Define_icon(void)
       break;
 
     // Set it
+#if defined(USE_SDL) || defined(USE_SDL2)
 		SetClassLongPtr(info.window, GCL_HICON, (LONG_PTR)hicon);
+#else
+    // TODO
+#endif
 		
 		
 		// Success

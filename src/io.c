@@ -598,7 +598,7 @@ void Get_full_filename(char * output_name, const char * file_name, const char * 
 }
 
 /// Lock file used to prevent several instances of grafx2 from harming each others' backups
-#ifdef __WIN32__
+#ifdef WIN32
 HANDLE Lock_file_handle = INVALID_HANDLE_VALUE;
 #else
 int Lock_file_handle = -1;
@@ -618,7 +618,7 @@ byte Create_lock_file(const char *file_directory)
 #endif
   strcat(lock_filename,"gfx2.lck");
   
-  #ifdef __WIN32__
+  #ifdef WIN32
   // Windowzy method for creating a lock file
   Lock_file_handle = CreateFileA(
     lock_filename,
@@ -655,7 +655,7 @@ void Release_lock_file(const char *file_directory)
 {
   char lock_filename[MAX_PATH_CHARACTERS];
     
-  #ifdef __WIN32__
+  #ifdef WIN32
   if (Lock_file_handle != INVALID_HANDLE_VALUE)
   {
     CloseHandle(Lock_file_handle);

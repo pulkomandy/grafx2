@@ -295,7 +295,7 @@ void Init_text(void)
   snprintf(directory_name, sizeof(directory_name), "%s%s", Config_directory, "/fonts");
   For_each_file(directory_name, Add_font);
   
-  #if defined(__WIN32__)
+  #if defined(WIN32)
     // Parcours du répertoire systeme windows "fonts"
     #ifndef NOTTF
     {
@@ -709,6 +709,8 @@ byte *Render_text(const char *str, int font_number, int size, int antialias, int
   {
 #if defined(USE_SDL) || defined(USE_SDL2)
     return Render_text_SFont(str, font_number, width, height, palette);
+#else
+    return NULL;
 #endif
   }
 }

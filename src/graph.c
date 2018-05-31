@@ -1135,7 +1135,9 @@ void Fill_general(byte fill_color)
     if (! (Permanent_draw_count&7))
     {
       dword now = GFX2_GetTicks();
+#if defined(USE_SDL) || defined(USE_SDL2)
       SDL_PumpEvents();
+#endif
       if (now>= Permanent_draw_next_refresh)
       {
         Permanent_draw_next_refresh = now+100;

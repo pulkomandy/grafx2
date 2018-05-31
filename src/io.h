@@ -79,7 +79,7 @@ void Extract_path(char *dest, const char *source);
 /// Finds the rightmost path separator in a full filename. Used to separate directory from file.
 char * Find_last_separator(const char * str);
 
-#if defined(__WIN32__)
+#if defined(WIN32)
   #define PATH_SEPARATOR "\\"
 #elif defined(__MINT__)
   #define PATH_SEPARATOR "\\"

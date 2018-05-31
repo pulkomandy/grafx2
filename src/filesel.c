@@ -34,7 +34,7 @@
     #include <sys/types.h>
 #elif defined (__MINT__)
     #include <mint/sysbind.h>
-#elif defined(__WIN32__)
+#elif defined(WIN32)
     #include <windows.h>
     #include <commdlg.h>
 #endif
@@ -92,15 +92,19 @@
 byte Native_filesel(byte load)
 {
   //load = load;
-#ifdef __WIN32__
+#if WIN32
   OPENFILENAME ofn;
   char szFileName[MAX_PATH] = "";
-  SDL_SysWMinfo wminfo;
   HWND hwnd;
+#if defined(USE_SDL) || defined(USE_SDL2)
+  SDL_SysWMinfo wminfo;
   
   SDL_VERSION(&wminfo.version);
   SDL_GetWMInfo(&wminfo);
   hwnd = wminfo.window;
+#else
+  hwnd = GetActiveWindow();
+#endif
 
   ZeroMemory(&ofn, sizeof(ofn));
 
@@ -459,7 +463,7 @@ static void Read_dir_callback(void * pdata, const char *file_name, const word *u
     // unreliable on non-physical drives :
     // Sometimes it's missing, sometimes it's present even at root...
     // We skip it here and add a specific check after the loop
-#if defined(__WIN32__)
+#if defined(WIN32)
     if (!strcmp(file_name, PARENT_DIR))
       return;
 #endif
@@ -564,7 +568,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   Add_element_to_list(list, PARENT_DIR, Format_filename(PARENT_DIR,19,1), 1, ICON_NONE);
   list->Nb_directories ++;
   
-#elif defined (__WIN32__)
+#elif defined (WIN32)
   // Windows :
   if (((current_path[0]>='a'&&current_path[0]<='z')||(current_path[0]>='A'&&current_path[0]<='Z')) &&
     current_path[1]==':' &&
@@ -674,7 +678,7 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
       UnLockDosList( LDF_VOLUMES | LDF_ASSIGNS | LDF_READ );
     }
   }
-  #elif defined (__WIN32__)
+  #elif defined (WIN32)
   {
     char drive_name[]="A:\\";
     int drive_bits = GetLogicalDrives();

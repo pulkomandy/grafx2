@@ -715,7 +715,7 @@ void Zoom_a_line(byte* original_line, byte* zoomed_line,
 
 /*############################################################################*/
 
-#if defined(__WIN32__)
+#if defined(WIN32)
 #include <windows.h>
 #elif defined(__macosx__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
   #if defined(__OpenBSD__)
@@ -755,7 +755,7 @@ unsigned long Memory_free(void)
   // If Grafx2 thinks the memory is full, weird things may happen. And if memory
   // ever becomes full and you're still saying there are 10MB free here, the
   // program will crash without saving any picture backup ! You've been warned...
-#if defined(__WIN32__)
+#if defined(WIN32)
   MEMORYSTATUS mstt;
   mstt.dwLength = sizeof(MEMORYSTATUS);
   GlobalMemoryStatus(&mstt);

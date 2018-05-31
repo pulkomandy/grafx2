@@ -1406,8 +1406,10 @@ void Main_handler(void)
     }
     else
     {
+#if defined(USE_SDL) || defined(USE_SDL2)
       // Removed all SDL_Delay() timing here: relying on Get_input()
       SDL_Delay(10);
+#endif
     }
 
     // Gestion de la souris
