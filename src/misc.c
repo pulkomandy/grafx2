@@ -39,14 +39,13 @@
 #endif
 #endif
 #include "struct.h"
-#include "sdlscreen.h"
 #include "global.h"
 #include "errors.h"
 #include "buttons.h"
 #include "engine.h"
 #include "misc.h"
 #include "keyboard.h"
-#include "sdlscreen.h"
+#include "screen.h"
 #include "windows.h"
 #include "palette.h"
 #include "input.h"

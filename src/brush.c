@@ -33,7 +33,7 @@
 #include "misc.h"
 #include "errors.h"
 #include "windows.h"
-#include "sdlscreen.h"
+#include "screen.h"
 #include "brush.h"
 #include "tiles.h"
 

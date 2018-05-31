@@ -26,7 +26,7 @@
 #include "struct.h"
 #include "transform.h"
 #include "engine.h"
-#include "sdlscreen.h"
+#include "screen.h"
 #include "windows.h"
 #include "input.h"
 #include "help.h"

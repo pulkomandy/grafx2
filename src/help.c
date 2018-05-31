@@ -52,7 +52,7 @@
 #include "engine.h"
 #include "helpfile.h"
 #include "help.h"
-#include "sdlscreen.h"
+#include "screen.h"
 #include "text.h"
 #include "keyboard.h"
 #include "windows.h"
@@ -61,6 +61,7 @@
 #include "errors.h"
 #include "pages.h"
 #include "factory.h"
+#include "keycodes.h"
 
 extern const char Program_version[]; // generated in pversion.c
 extern const char SVN_revision[]; // generated in version.c

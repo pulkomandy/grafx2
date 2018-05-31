@@ -37,6 +37,9 @@
 /// Add 0x4000 for the Alt modifier ::MOD_ALT
 /// Add 0x8000 for the "Meta" modifier ::MOD_META (On MacOS X it's the CMD key)
 //////////////////////////////////////////////////////////////////////////////
+#if defined(USE_SDL)
+#include <SDL.h>
+#endif
 
 /*!
   Convert an SDL keysym to an ANSI/ASCII character.

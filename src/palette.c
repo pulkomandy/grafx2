@@ -32,7 +32,7 @@
 #include "buttons.h"
 #include "pages.h"
 #include "help.h"
-#include "sdlscreen.h"
+#include "screen.h"
 #include "errors.h"
 #include "op_c.h"
 #include "windows.h"

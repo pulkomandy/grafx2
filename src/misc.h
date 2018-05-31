@@ -27,6 +27,9 @@
 #ifndef MISC_H__
 #define MISC_H__
 
+/* For sprintf() used in Num2str() and Dec2str(a,b,c) */
+#include <stdio.h>
+
 #include "struct.h"
 #include "global.h"
 

@@ -19,10 +19,13 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 
+#include <stdlib.h>
+#include <string.h>
+
 #include "struct.h"
 #include "global.h"
 #include "graph.h"
-#include "sdlscreen.h"
+#include "screen.h"
 #include "engine.h"
 #include "windows.h"
 #include "input.h"

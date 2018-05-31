@@ -37,7 +37,7 @@
 #include "misc.h"
 #include "pages.h"  // Backup()
 #include "readline.h"
-#include "sdlscreen.h"
+#include "screen.h"
 #include "windows.h"
 #include "palette.h"
 #include "input.h" // Is_shortcut()

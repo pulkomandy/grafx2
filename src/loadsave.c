@@ -61,6 +61,7 @@
 #if defined(USE_SDL) || defined(USE_SDL2)
 #include "sdlscreen.h"
 #endif
+#include "screen.h"
 #include "struct.h"
 #include "windows.h"
 #include "engine.h"

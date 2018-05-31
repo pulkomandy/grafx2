@@ -36,7 +36,7 @@
 #include "buttons.h"
 #include "pages.h"
 #include "errors.h"
-#include "sdlscreen.h"
+#include "screen.h"
 #include "graph.h"
 #include "misc.h"
 #include "pxsimple.h"
@@ -52,6 +52,9 @@
 #include "input.h"
 #include "brush.h"
 #include "tiles.h"
+#if defined(USE_SDL) || defined(USE_SDL2)
+#include "sdlscreen.h"
+#endif
 
 #if defined(__VBCC__) || defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
     #define M_PI 3.141592653589793238462643
@@ -397,7 +400,9 @@ try_again:
 
   if (screen_changed)
   {
+#if defined(USE_SDL) || defined(USE_SDL2)
     Set_mode_SDL(&width, &height,fullscreen);
+#endif
   }
 
   if (screen_changed || pixels_changed)

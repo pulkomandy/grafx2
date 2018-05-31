@@ -33,7 +33,7 @@
 #include "buttons.h"
 #include "pages.h"
 #include "errors.h"
-#include "sdlscreen.h"
+#include "screen.h"
 #include "brush.h"
 #include "windows.h"
 #include "input.h"

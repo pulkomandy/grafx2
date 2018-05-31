@@ -25,7 +25,9 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 
+#if defined(USE_SDL) || defined(USE_SDL2)
 #include <SDL_syswm.h>
+#endif
 
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     #include <proto/dos.h>
@@ -61,7 +63,7 @@
 #include "errors.h"
 #include "io.h"
 #include "windows.h"
-#include "sdlscreen.h"
+#include "screen.h"
 #include "loadsave.h"
 #include "mountlist.h"
 #include "engine.h"

@@ -58,12 +58,14 @@
 #endif
 #endif
 
+#if defined(USE_SDL) || defined(USE_SDL2)
 #include <SDL_image.h>
 #include "SFont.h"
+#include "sdlscreen.h"
+#endif
 
 #include "struct.h"
 #include "global.h"
-#include "sdlscreen.h"
 #include "io.h"
 #include "errors.h"
 #include "windows.h"
@@ -541,7 +543,7 @@ byte *Render_text_TTF(const char *str, int font_number, int size, int antialias,
 }
 #endif
 
-
+#if defined(USE_SDL) || defined(USE_SDL2)
 byte *Render_text_SFont(const char *str, int font_number, int *width, int *height, T_Palette palette)
 {
   SFont_Font *font;
@@ -673,6 +675,7 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
 
   return new_brush;
 }
+#endif
 
 // Crée une brosse à partir des paramètres de texte demandés.
 // Si cela réussit, la fonction place les dimensions dans width et height, 
@@ -704,8 +707,9 @@ byte *Render_text(const char *str, int font_number, int size, int antialias, int
   }
   else
   {
+#if defined(USE_SDL) || defined(USE_SDL2)
     return Render_text_SFont(str, font_number, width, height, palette);
+#endif
   }
 }
-
 

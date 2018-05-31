@@ -33,7 +33,7 @@
 #include "operatio.h"
 #include "shade.h"
 #include "errors.h"
-#include "sdlscreen.h"
+#include "screen.h"
 #include "windows.h"
 #include "brush.h"
 #include "input.h"

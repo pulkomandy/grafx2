@@ -19,18 +19,22 @@
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
+#include <stdlib.h>
+#include <string.h>
+
 #include "const.h"
 #include "struct.h"
 #include "global.h"
 #include "windows.h"
 #include "engine.h"
 #include "pages.h"
-#include "sdlscreen.h"
+#include "screen.h"
 #include "input.h"
 #include "help.h"
 #include "misc.h"
 #include "readline.h"
 #include "graph.h"
+#include "keycodes.h"
 
 void Layer_activate(int layer, short side)
 {
@@ -638,7 +642,7 @@ void Button_Anim_continuous_next(void)
   do
   {
     int target_frame;
-    Uint32 time_now;
+    dword time_now;
   
     Get_input(20);
     
@@ -673,7 +677,7 @@ void Button_Anim_continuous_prev(void)
   do
   {
     int target_frame;
-    Uint32 time_now;
+    dword time_now;
   
     Get_input(20);
     

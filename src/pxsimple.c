@@ -24,7 +24,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "global.h"
-#include "sdlscreen.h"
+#include "screen.h"
 #include "misc.h"
 #include "graph.h"
 #include "pxsimple.h"

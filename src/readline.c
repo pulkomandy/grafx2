@@ -37,16 +37,19 @@
 #include "misc.h"
 #include "errors.h"
 #include "const.h"
-#include "sdlscreen.h"
+#include "screen.h"
 #include "readline.h"
 #include "windows.h"
 #include "input.h"
 #include "engine.h"
 #include "unicode.h"
+#include "keycodes.h"
 
-#ifdef __WIN32__
+#ifdef WIN32
 #include <windows.h>
+#if defined(USE_SDL)
 #include <SDL_syswm.h>
+#endif
 
 #elif defined __HAIKU__
 #include "haiku.h"

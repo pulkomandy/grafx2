@@ -38,7 +38,7 @@
 #include "libraw2crtc.h"
 #include "loadsave.h"
 #include "misc.h"
-#include "sdlscreen.h"
+#include "screen.h"
 #include "struct.h"
 #include "windows.h"
 #include "oldies.h"

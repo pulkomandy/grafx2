@@ -37,18 +37,6 @@ void Set_mode_SDL(int *,int *,int);
 
 GFX2_GLOBAL SDL_Rect ** List_SDL_video_modes;
 
-byte Get_Screen_pixel(int x, int y);
-
-void Set_Screen_pixel(int x, int y, byte value);
-
-byte* Get_Screen_pixel_ptr(int x, int y);
-
-void Screen_FillRect(int x, int y, int w, int h, byte color);
-
-void Update_rect(short x, short y, unsigned short width, unsigned short height);
-void Flush_update(void);
-void Update_status_line(short char_pos, short width);
-
 ///
 /// Converts a SDL_Surface (indexed colors or RGB) into an array of bytes
 /// (indexed colors).
@@ -65,18 +53,5 @@ dword Get_SDL_pixel_hicolor(const SDL_Surface *bmp, int x, int y);
 void Set_SDL_pixel_8(SDL_Surface *bmp, int x, int y, byte color);
 /// Convert a SDL Palette to a grafx2 palette
 void Get_SDL_Palette(const SDL_Palette * sdl_palette, T_Palette palette);
-
-int SetPalette(const T_Components * colors, int firstcolor, int ncolors);
-
-///
-/// Clears the parts of screen that are outside of the editing area.
-/// There is such area only if the screen mode is not a multiple of the pixel
-/// size, eg: 3x3 pixels in 1024x768 leaves 1 column on the right, 0 rows on bottom.
-void Clear_border(byte color);
-  
-extern volatile int Allow_colorcycling;
-
-/// Activates or desactivates file drag-dropping in program window.
-void Allow_drag_and_drop(int flag);
 
 #endif // SDLSCREEN_H_INCLUDED

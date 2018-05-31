@@ -71,7 +71,7 @@
 #include "io.h"
 #include "help.h"
 #include "text.h"
-#include "sdlscreen.h"
+#include "screen.h"
 #include "windows.h"
 #include "brush.h"
 #include "input.h"
@@ -86,7 +86,7 @@
 #elif defined(__MINT__)
     #include <mint/sysbind.h>
     #include <dirent.h>
-#elif defined(__WIN32__)
+#elif defined(WIN32)
 #ifndef _MSC_VER
     #include <dirent.h>
 #endif

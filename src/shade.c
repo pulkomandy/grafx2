@@ -28,10 +28,11 @@
 #include "misc.h"
 #include "readline.h"
 #include "help.h"
-#include "sdlscreen.h"
+#include "screen.h"
 #include "windows.h"
 #include "input.h"
 #include "shade.h"
+#include "keycodes.h"
 
 void Button_Shade_mode(void)
 {

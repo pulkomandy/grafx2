@@ -38,7 +38,7 @@
 #include "misc.h"
 #include "pages.h"
 #include "readline.h"
-#include "sdlscreen.h"
+#include "screen.h"
 #include "struct.h"
 #include "windows.h"
 #include "tiles.h"

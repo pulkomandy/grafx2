@@ -46,9 +46,10 @@
 #include "misc.h"
 #include "op_c.h"
 #include "readline.h"
-#include "sdlscreen.h"
+#include "screen.h"
 #include "palette.h"
 #include "unicode.h"
+#include "keycodes.h"
 
 T_Toolbar_button Buttons_Pool[NB_BUTTONS];
 T_Menu_Bar Menu_bars[MENUBAR_COUNT] =

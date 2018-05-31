@@ -30,7 +30,7 @@
 
 #include "global.h"
 #include "keyboard.h"
-#include "sdlscreen.h"
+#include "screen.h"
 #include "windows.h"
 #include "errors.h"
 #include "misc.h"
