@@ -49,6 +49,10 @@
 /// for discontinuous freehand drawing.
 Uint32 Airbrush_next_time;
 
+// Panning needs its own operation storage because it may interrupt another
+// interrupting operation
+static enum OPERATIONS Operation_before_pan;
+
 void Start_operation_stack(word new_operation)
 {
   // This part handles things that must be done when exiting an operation. 
@@ -72,8 +76,13 @@ void Start_operation_stack(word new_operation)
     case OPERATION_GRAB_BRUSH:
     case OPERATION_POLYBRUSH:
     case OPERATION_STRETCH_BRUSH:
-    case OPERATION_PAN_VIEW:
       Operation_before_interrupt=Current_operation;
+      // On passe à l'operation demandée
+      Current_operation=new_operation;
+      break;
+    case OPERATION_PAN_VIEW:
+      // Use separate operation-before storage for panning
+      Operation_before_pan=Current_operation;
       // On passe à l'operation demandée
       Current_operation=new_operation;
       break;
@@ -4089,7 +4098,7 @@ void Pan_view_0_0(void)
   {
     // End of operation, return to previous
     Hide_cursor();
-    Start_operation_stack(Operation_before_interrupt);
+    Start_operation_stack(Operation_before_pan);
     Display_cursor();
   }
 }
@@ -4160,7 +4169,7 @@ void Pan_view_0_2(void)
   {
     // End of operation, return to previous
     Hide_cursor();
-    Start_operation_stack(Operation_before_interrupt);
+    Start_operation_stack(Operation_before_pan);
     Display_cursor();
   }
 }
