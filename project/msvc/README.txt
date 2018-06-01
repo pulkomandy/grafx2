@@ -5,6 +5,7 @@ in directories :
   ..\..\..\..\SDL-1.2.15
   ..\..\..\..\SDL_image-1.2.12
   ..\..\..\..\lua
+Edit the file libraries.props to set the correct paths for your configuration.
 
 That is, if grafX2 sources are in C:\stuff\code\grafX2
 Visual studio project files are in C:\stuff\code\grafX2\project\msvc
