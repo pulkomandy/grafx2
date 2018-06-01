@@ -17,7 +17,8 @@ JPEGARCH = jpegsrc.v$(JPEGVER).tar.gz
 JPEGURL = http://www.ijg.org/files/$(JPEGARCH)
 LIBTIFF = tiff-v3.4
 LIBTIFFARCH = $(LIBTIFF)-tar.gz
-LIBTIFFURL = ftp://ftp.sgi.com/graphics/tiff/$(LIBTIFFARCH)
+LIBTIFFURL = https://download.osgeo.org/libtiff/old/$(LIBTIFFARCH)
+LIBTIFFURLALT = ftp://ftp.sgi.com/graphics/tiff/$(LIBTIFFARCH)
 ZLIB=zlib-1.2.11
 ZLIBARCH=$(ZLIB).tar.gz
 ZLIBURL=https://www.zlib.net/$(ZLIBARCH)
@@ -230,7 +231,7 @@ archives/$(JPEGARCH):
 
 archives/$(LIBTIFFARCH):
 	@$(MKDIR) $(@D)
-	cd $(@D) && $(GETURL) $(LIBTIFFURL)
+	cd $(@D) && ( $(GETURL) $(LIBTIFFURL) || $(GETURL) $(LIBTIFFURLALT) )
 
 archives/$(ZLIBARCH):
 	@$(MKDIR) $(@D)
