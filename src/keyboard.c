@@ -446,8 +446,8 @@ const char * Key_name(word key)
     { SDLK_F13         , "F13" },
     { SDLK_F14         , "F14" },
     { SDLK_F15         , "F15" },
+    { SDLK_NUMLOCK     , "NumLock" },
 #endif
-    { KEY_NUMLOCK     , "NumLock" },
     { KEY_CAPSLOCK    , "CapsLck" },
     { KEY_SCROLLOCK   , "ScrlLock" },
     { KEY_RSHIFT      , "RShift" },
@@ -614,7 +614,7 @@ const char * Key_name(word key)
     sprintf(buffer+strlen(buffer), "'%c'", toupper(key));
     return buffer;
   }
-#if defined(USE_SDL) || defined(USE_SDL2)
+#if defined(USE_SDL)
   // Touches 'World'
   if (key>=SDLK_WORLD_0 && key <= SDLK_WORLD_95)
   {

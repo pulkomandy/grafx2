@@ -12,8 +12,11 @@ keys = ['UNKNOWN',
         'INSERT', 'DELETE', 'COMMA', 'BACKQUOTE',
         'PAGEUP', 'PAGEDOWN', 'HOME', 'END',
         'KP_PLUS', 'KP_MINUS', 'KP_MULTIPLY', 'KP_ENTER',
+        'KP_DIVIDE', 'KP_PERIOD', 'KP_EQUALS',
         'EQUALS', 'MINUS', 'PERIOD',
-        'CAPSLOCK', 'CLEAR', 'SPACE']
+        'CAPSLOCK', 'CLEAR', 'SPACE', 'PAUSE',
+        'LSHIFT', 'RSHIFT', 'LCTRL', 'RCTRL',
+        'LALT', 'RALT']
 
 def keycode_def(section, key, index, sdl_key=None):
 	if section == 'SDL and SDL2':
@@ -41,12 +44,15 @@ def add_keycodes_defs(section, lines):
 		key = "KP%d" % (j)
 		lines.append(keycode_def(section, key, i))
 		i = i + 1
+	lines.append(keycode_def(section, 'SCROLLOCK', i))
+	i = i + 1
 	if section == 'SDL and SDL2':
 		lines.append('#else\n')
 		for j in range(10):
 			key = "KP%d" % (j)
 			sdl_key = 'KP_%d' % (j)
 			lines.append(keycode_def(section, key, 0, sdl_key))
+		lines.append(keycode_def(section, 'SCROLLOCK', i, 'SCROLLLOCK'))
 		lines.append('#endif\n')
 	for j in range(1,13):
 		key = "F%d" % (j)
