@@ -15,10 +15,12 @@ JPEGVER = 9c
 JPEGDIR = jpeg-$(JPEGVER)
 JPEGARCH = jpegsrc.v$(JPEGVER).tar.gz
 JPEGURL = http://www.ijg.org/files/$(JPEGARCH)
-LIBTIFF = tiff-v3.4
-LIBTIFFARCH = $(LIBTIFF)-tar.gz
-LIBTIFFURL = https://download.osgeo.org/libtiff/old/$(LIBTIFFARCH)
-LIBTIFFURLALT = ftp://ftp.sgi.com/graphics/tiff/$(LIBTIFFARCH)
+# http://www.simplesystems.org/libtiff/
+# https://gitlab.com/libtiff/libtiff
+LIBTIFF = tiff-4.0.9
+LIBTIFFARCH = $(LIBTIFF).tar.gz
+LIBTIFFURL = https://download.osgeo.org/libtiff/$(LIBTIFFARCH)
+LIBTIFFURLALT = https://fossies.org/linux/misc/$(LIBTIFFARCH)
 ZLIB=zlib-1.2.11
 ZLIBARCH=$(ZLIB).tar.gz
 ZLIBURL=https://www.zlib.net/$(ZLIBARCH)
@@ -165,12 +167,7 @@ $(JPEGDIR)/.ok:	archives/$(JPEGARCH)
 $(PREFIX)/lib/libtiff.a:	$(PREFIX)/lib/libjpeg.a
 
 $(PREFIX)/lib/libtiff.a:	$(LIBTIFF)/.ok
-	cd $(LIBTIFF)/libtiff && mv Makefile.in Makefile.in.orig
-	cd $(LIBTIFF)/libtiff && sed 's/[^	]*[ ]\(-o mk[^ ]*\)/$(subst /,\/,$(BUILD_CC)) \1/' Makefile.in.orig > Makefile.in
-	cd $(LIBTIFF) && mv configure configure.orig
-	cd $(LIBTIFF) && sed 's/^\(DIR.*=\).usr.local\(.*\)/\1$(subst /,\/,$(PREFIX))\2/' configure.orig | sed 's/^\(NONINTERACTIVE=\)no/\1yes/' | sed 's/^\(DIR_JPEGLIB=\)[^#]*/\1$(subst /,\/,$(PREFIX))\/lib/' > configure
-	cd $(LIBTIFF) && chmod +x configure
-	cd $(LIBTIFF) && CC=$(CC) AR=$(AR) RANLIB=$(RANLIB) GCOPT=-g ./configure --target=$(HOST)
+	cd $(LIBTIFF) && ./configure --prefix=$(PREFIX) --host=$(HOST)
 	cd $(LIBTIFF) && $(MAKE)
 	cd $(LIBTIFF) && $(MAKE) install
 
