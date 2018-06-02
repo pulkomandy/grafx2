@@ -1,6 +1,6 @@
 before_script:
     - apt-get update -qq && apt-get install -y -qq libsdl1.2-dev libpng-dev libsdl-ttf2.0-dev libsdl-image1.2-dev liblua5.1-0-dev zip
-    - apt-get install -y -qq gcc-mingw-w64-i686 mingw-w64-tools nsis
+    - apt-get install -y -qq gcc-mingw-w64-i686 g++-mingw-w64-i686 mingw-w64-tools nsis
 
 stages:
     - build
