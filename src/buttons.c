@@ -679,7 +679,7 @@ void Button_Quit(int btn)
   {
     if (Spare.image_is_modified)
     {
-      Button_Page(btn); // On passe sur le brouillon
+      Button_Page(BUTTON_PAGE); // On passe sur le brouillon
       // Si l'utilisateur présente les derniers symptomes de l'abandon
       if (Button_Quit_local_function())
         Quitting=1;
@@ -691,7 +691,7 @@ void Button_Quit(int btn)
   if ( (Menu_is_visible) && (Mouse_Y+8>Menu_Y) )
     Hide_cursor();
 
-  Unselect_button(BUTTON_QUIT);
+  Unselect_button(btn);
 
   if ( (Menu_is_visible) && (Mouse_Y+8>Menu_Y) )
     Display_cursor();

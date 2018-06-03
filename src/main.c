@@ -969,7 +969,7 @@ int Init_program(int argc,char * argv[])
           Redraw_layered_image();
           End_of_modification();
   
-          Button_Page(-1);
+          Button_Page(BUTTON_PAGE);
           // no break ! proceed with the other file now
         case 1:
           Init_context_layered_image(&context, main_filename, main_directory);
