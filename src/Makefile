@@ -59,7 +59,7 @@ endif
 
   CFLAGS_CACHE = .cflags.cache
 
-  RECOILVER = 4.2.0
+  RECOILVER = 4.3.0
 
 ### PLATFORM DETECTION AND CONFIGURATION ###
 
