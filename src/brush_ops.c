@@ -37,6 +37,7 @@
 #include "pages.h"
 #include "screen.h"
 #include "windows.h"
+#include "keyboard.h"
 
 #if defined(__VBCC__) || defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
     #define M_PI 3.141592653589793238462643
@@ -961,11 +962,8 @@ void Rotate_brush_1_5(void)
   // On corrige les coordonnées de la ligne si la touche shift est appuyée...
   cursor_x = Paintbrush_X;
   cursor_y = Paintbrush_Y;
-#if defined(USE_SDL) || defined(USE_SDL2)
-  if(SDL_GetModState() & KMOD_SHIFT)
+  if(Get_Key_modifiers() & MOD_SHIFT)
     Clamp_coordinates_regular_angle(Brush_rotation_center_X,Brush_rotation_center_Y,&cursor_x,&cursor_y);
-  // TODO : portable
-#endif
 
   if ( (cursor_x!=old_x) || (cursor_y!=old_y) || (prev_state!=2) )
   {
@@ -1035,11 +1033,8 @@ void Rotate_brush_0_5(void)
   // On corrige les coordonnées de la ligne si la touche shift est appuyée...
   cursor_x = Paintbrush_X;
   cursor_y = Paintbrush_Y;
-#if defined(USE_SDL) || defined(USE_SDL2)
-  if(SDL_GetModState() & KMOD_SHIFT)
+  if(Get_Key_modifiers() & MOD_SHIFT)
     Clamp_coordinates_regular_angle(Brush_rotation_center_X,Brush_rotation_center_Y,&cursor_x,&cursor_y);
-  // TODO
-#endif
 
   if ((cursor_x!=old_x) || (cursor_y!=old_y) || (prev_state!=3))
   {

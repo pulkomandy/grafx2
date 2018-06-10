@@ -50,6 +50,7 @@
 #include "palette.h"
 #include "unicode.h"
 #include "keycodes.h"
+#include "keyboard.h"
 
 T_Toolbar_button Buttons_Pool[NB_BUTTONS];
 T_Menu_Bar Menu_bars[MENUBAR_COUNT] =
@@ -1854,7 +1855,7 @@ void Compute_paintbrush_coordinates(void)
     // Operations that implement it
 #if defined(USE_SDL) || defined(USE_SDL2)
     default:
-      if (Snap_axis==0 && (SDL_GetModState() & KMOD_SHIFT))
+      if (Snap_axis==0 && (Get_Key_modifiers() & MOD_SHIFT))
       {
         // Start "Snap axis" mode
         Snap_axis=1;

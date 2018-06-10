@@ -79,13 +79,7 @@ word Key_for_scancode(word scancode);
 const char * Key_name(word key);
 
 /*!
-  Gets the modifiers in our format from the SDL_Mod information.
+  Gets the Key modifiers in our format
   Returns a combination of ::MOD_SHIFT, ::MOD_ALT, ::MOD_CTRL
-  @param mod SDL modifiers state
 */
-#if defined(USE_SDL)
-word Key_modifiers(SDLMod mod);
-#elif defined(USE_SDL2)
-word Key_modifiers(SDL_Keymod mod);
-#endif
-
+word Get_Key_modifiers(void);

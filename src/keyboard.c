@@ -330,9 +330,10 @@ word Key_for_scancode(word scancode)
 }
 
 // Convertit des modificateurs de touches SDL en modificateurs GrafX2
-word Key_modifiers(SDLMod mod)
+word Get_Key_modifiers(void)
 {
   word modifiers=0;
+  SDLMod mod = SDL_GetModState();
 
     if (mod & KMOD_CTRL )
       modifiers|=MOD_CTRL;
@@ -371,7 +372,7 @@ word Keysym_to_keycode(SDL_keysym keysym)
   // Normally I should test keysym.mod here, but on windows the implementation
   // is buggy: if you release a modifier key, the following keys (when they repeat)
   // still name the original modifiers.
-  mod=Key_modifiers(SDL_GetModState());
+  mod = Get_Key_modifiers();
 
   // SDL_GetModState() seems to get the right up-to-date info.
   key_code |= mod;
@@ -768,7 +769,7 @@ word Key_for_scancode(word scancode)
 {
   return scancode;
 }
-word Key_modifiers(SDL_Keymod mod)
+word Get_Key_modifiers(void)
 {
   return 0;
 }

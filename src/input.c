@@ -344,7 +344,7 @@ int Handle_mouse_click(SDL_MouseButtonEvent event)
             break;
 
         case SDL_BUTTON_MIDDLE:
-            Key = KEY_MOUSEMIDDLE|Key_modifiers(SDL_GetModState());
+            Key = KEY_MOUSEMIDDLE|Get_Key_modifiers();
             // TODO: repeat system maybe?
             return 0;
 
@@ -352,11 +352,11 @@ int Handle_mouse_click(SDL_MouseButtonEvent event)
         // Look for SDL_MOUSEWHEEL events.
 #if defined(USE_SDL)
         case SDL_BUTTON_WHEELUP:
-            Key = KEY_MOUSEWHEELUP|Key_modifiers(SDL_GetModState());
+            Key = KEY_MOUSEWHEELUP|Get_Key_modifiers();
             return 0;
 
         case SDL_BUTTON_WHEELDOWN:
-            Key = KEY_MOUSEWHEELDOWN|Key_modifiers(SDL_GetModState());
+            Key = KEY_MOUSEWHEELDOWN|Get_Key_modifiers();
             return 0;
 #endif
 
@@ -703,7 +703,7 @@ int Handle_joystick_press(SDL_JoyButtonEvent event)
         break;
     }
       
-    Key = (KEY_JOYBUTTON+event.button)|Key_modifiers(SDL_GetModState());
+    Key = (KEY_JOYBUTTON+event.button)|Get_Key_modifiers();
     // TODO: systeme de répétition
     
     return Move_cursor_with_constraints();
