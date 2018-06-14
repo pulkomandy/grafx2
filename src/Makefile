@@ -485,8 +485,9 @@ endif
         STACK = m68k-atari-mint-stack
         FIX_FLAGS = m68k-atari-mint-flags
         FCLOPT = 
-        COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -ffast-math -O$(OPTIM) -I$(PREFIX)/include `$(PREFIX)/bin/libpng12-config --cflags` `$(PREFIX)/bin/sdl-config --cflags` $(JOYCOPT) $(LUACOPT)
-        LOPT = -static -m68020-60 -lSDL_image `$(PREFIX)/bin/sdl-config --libs` -L$(PREFIX)/lib -ltiff -ljpeg `$(PREFIX)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) -lm $(LAYERLOPT) -Wl,--stack,8k 
+        LIBPNG_CONFIG = $(wildcard $(PREFIX)/bin/libpng12-config $(PREFIX)/bin/libpng14-config $(PREFIX)/bin/libpng16-config)
+        COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -ffast-math -O$(OPTIM) -I$(PREFIX)/include `$(LIBPNG_CONFIG) --cflags` `$(PREFIX)/bin/sdl-config --cflags` $(JOYCOPT) $(LUACOPT)
+        LOPT = -static -m68020-60 -lSDL_image `$(PREFIX)/bin/sdl-config --libs` -L$(PREFIX)/lib -ltiff -ljpeg `$(LIBPNG_CONFIG) --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) -lm $(LAYERLOPT) -Wl,--stack,8k 
       else
 
         # Compiles a regular linux executable for the native platform
