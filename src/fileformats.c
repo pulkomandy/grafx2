@@ -27,6 +27,9 @@
 ///@file fileformats.c
 /// Saving and loading different picture formats.
 
+#ifdef __MINT__
+#undef _GNU_SOURCE
+#endif
 #include <string.h>
 #ifndef __no_pnglib__
 #include <png.h>
