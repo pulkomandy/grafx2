@@ -42,7 +42,9 @@
 #include "loadsave.h"
 
 
+#if defined(USE_SDL)
 #define RSUPER_EMULATES_META_MOD
+#endif
 // Keyboards with a Super key never seem to have a Meta key at the same time.
 // This setting allows the right 'Super' key (the one with a 'Windows' or
 // 'Amiga' label to be used as a modifier instead of a normal key.
@@ -181,7 +183,7 @@ int Is_shortcut(word key, word function)
 {
   if (key == 0 || function == 0xFFFF)
     return 0;
-    
+
   if (function & 0x100)
   {
     if (Buttons_Pool[function&0xFF].Left_shortcut[0]==key)
@@ -391,7 +393,6 @@ int Handle_mouse_release(SDL_MouseButtonEvent event)
 
 // Keyboard management
 
-#if defined(USE_SDL)
 int Handle_key_press(SDL_KeyboardEvent event)
 {
     //Appui sur une touche du clavier
@@ -399,8 +400,10 @@ int Handle_key_press(SDL_KeyboardEvent event)
   
     Key = Keysym_to_keycode(event.keysym);
     Key_ANSI = Keysym_to_ANSI(event.keysym);
+#if defined(USE_SDL)
     Key_UNICODE = event.keysym.unicode;
     if (Key_UNICODE == 0)
+#endif
       Key_UNICODE = Key_ANSI;
     switch(event.keysym.sym)
     {
@@ -420,8 +423,13 @@ int Handle_key_press(SDL_KeyboardEvent event)
         modifier=MOD_ALT;
         break;
 
+#if defined(USE_SDL2)
+      case SDLK_RGUI:
+      case SDLK_LGUI:
+#else
       case SDLK_RMETA:
       case SDLK_LMETA:
+#endif
         modifier=MOD_META;
         break;
 
@@ -484,7 +492,6 @@ int Handle_key_press(SDL_KeyboardEvent event)
     }
     return 0;
 }
-#endif
 
 int Release_control(int key_code, int modifier)
 {
@@ -560,7 +567,6 @@ int Release_control(int key_code, int modifier)
 }
 
 
-#if defined(USE_SDL)
 int Handle_key_release(SDL_KeyboardEvent event)
 {
     int modifier;
@@ -591,8 +597,13 @@ int Handle_key_release(SDL_KeyboardEvent event)
         break;
       #endif
       
+#if defined(USE_SDL2)
+      case SDLK_RGUI:
+      case SDLK_LGUI:
+#else
       case SDLK_RMETA:
       case SDLK_LMETA:
+#endif
         modifier=MOD_META;
         break;
 
@@ -601,7 +612,6 @@ int Handle_key_release(SDL_KeyboardEvent event)
     }
     return Release_control(released_key, modifier);
 }
-#endif
 
 
 // Joystick management
@@ -939,19 +949,12 @@ int Get_input(int sleep_time)
 #endif
 
           case SDL_KEYDOWN:
-#if defined(USE_SDL)
               Handle_key_press(event.key);
-#else
-              //TODO SDL2
-#endif
               user_feedback_required = 1;
               break;
 
           case SDL_KEYUP:
-#if defined(USE_SDL)
               Handle_key_release(event.key);
-              //TODO SDL2
-#endif
               break;
 
           // Start of Joystik handling

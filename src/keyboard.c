@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#if defined(USE_SDL)
+#if defined(USE_SDL) || defined(USE_SDL2)
 #include <SDL.h>
 #endif
 #include "global.h"
@@ -346,8 +346,15 @@ word Get_Key_modifiers(void)
 
   return modifiers;
 }
+#endif
 
+#if defined(USE_SDL) || defined(USE_SDL2)
+
+#if defined(USE_SDL)
 word Keysym_to_keycode(SDL_keysym keysym)
+#elif defined(USE_SDL2)
+word Keysym_to_keycode(SDL_Keysym keysym)
+#endif
 {
   word key_code = 0;
   word mod;
@@ -356,23 +363,39 @@ word Keysym_to_keycode(SDL_keysym keysym)
   if (keysym.sym == SDLK_RSHIFT || keysym.sym == SDLK_LSHIFT ||
       keysym.sym == SDLK_RCTRL  || keysym.sym == SDLK_LCTRL ||
       keysym.sym == SDLK_RALT   || keysym.sym == SDLK_LALT ||
+#if defined(USE_SDL2)
+      keysym.sym == SDLK_RGUI  || keysym.sym == SDLK_LGUI ||
+#else
       keysym.sym == SDLK_RMETA  || keysym.sym == SDLK_LMETA ||
+#endif
       keysym.sym == SDLK_MODE) // AltGr
   return 0;
 
   // Les touches qui n'ont qu'une valeur unicode (très rares)
   // seront codées sur 11 bits, le 12e bit est mis à 1 (0x0800)
   if (keysym.sym != 0)
-    key_code = keysym.sym;
+    key_code = K2K(keysym.sym);
   else if (keysym.scancode != 0)
   {
     key_code = (keysym.scancode & 0x07FF) | 0x0800;
   }
 
+#if defined(USE_SDL)
   // Normally I should test keysym.mod here, but on windows the implementation
   // is buggy: if you release a modifier key, the following keys (when they repeat)
   // still name the original modifiers.
   mod = Get_Key_modifiers();
+#else
+  mod = 0;
+  if (keysym.mod & KMOD_CTRL)
+    mod |= MOD_CTRL;
+  if (keysym.mod & KMOD_SHIFT )
+    mod |= MOD_SHIFT;
+  if (keysym.mod & (KMOD_ALT|KMOD_MODE))
+    mod |= MOD_ALT;
+  if (keysym.mod & (KMOD_GUI))
+    mod |= MOD_META;
+#endif
 
   // SDL_GetModState() seems to get the right up-to-date info.
   key_code |= mod;
@@ -764,7 +787,13 @@ word Keysym_to_ANSI(SDL_keysym keysym)
   return keysym.sym;
 }
 #elif defined(USE_SDL2)
-// SDL2 TODO
+word Keysym_to_ANSI(SDL_Keysym keysym)
+{
+  if (keysym.sym < 128)
+    return (word)keysym.sym;
+  return K2K(keysym.sym);
+}
+
 word Key_for_scancode(word scancode)
 {
   return scancode;

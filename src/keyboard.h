@@ -51,6 +51,8 @@
 */
 #if defined(USE_SDL)
 word Keysym_to_ANSI(SDL_keysym keysym);
+#elif defined(USE_SDL2)
+word Keysym_to_ANSI(SDL_Keysym keysym);
 #endif
 
 /*!
@@ -62,6 +64,8 @@ word Keysym_to_ANSI(SDL_keysym keysym);
 */
 #if defined(USE_SDL)
 word Keysym_to_keycode(SDL_keysym keysym);
+#elif defined(USE_SDL2)
+word Keysym_to_keycode(SDL_Keysym keysym);
 #endif
 
 /*!
