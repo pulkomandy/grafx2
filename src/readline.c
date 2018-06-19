@@ -777,10 +777,77 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
           goto affichage;
         }
         
-      } while(input_key==0);
+      } while(input_key==0
+#if defined(USE_SDL2)
+              && Key_Text[0] == '\0'
+#endif
+              );
     }
     Hide_cursor();
 
+#if defined(USE_SDL2)
+    if (Key_Text[0] != 0)
+    {
+      word unicode_text[32];
+      int i;
+#if defined(ENABLE_FILENAMES_ICONV)
+      char * input = Key_Text;
+      size_t inbytesleft = strlen(Key_Text);
+      char * output = (char *)unicode_text;
+      size_t outbytesleft = sizeof(unicode_text) - 2;
+      size_t r = iconv(cd_utf16, &input, &inbytesleft, &output, &outbytesleft);
+      if (r != (size_t)-1)
+      {
+        output[1] = output[0] = '\0';
+      }
+      else
+      {
+        Warning("Unicode conversion of input text failed");
+        unicode_text[0] = 0;
+      }
+#else
+      int j;
+      for (i = 0, j = 0; i < sizeof(Key_Text) && Key_Text[i] != '\0'; i++)
+        if (Key_Text[i] < 128) unicode_text[j++] = Key_Text[i];
+      unicode_text[j++] = 0;
+#endif
+      for (i = 0; unicode_text[i] != 0 && size < max_size; i++)
+      {
+        // Si la touche était autorisée...
+        byte is_authorized = Valid_character(unicode_text[i], input_type);
+        if (is_authorized == 1 || (is_authorized == 2 && position == 0 && str[position] != '-'))
+        {
+          // ... alors on l'insère ...
+          if (str_unicode != NULL)
+            Insert_character_unicode(str_unicode,unicode_text[i],position/*,size*/);
+          else
+            Insert_character(str,unicode_text[i],position/*,size*/);
+          // ce qui augmente la taille de la chaine
+          size++;
+          // et qui risque de déplacer le curseur vers la droite
+          if (size<max_size)
+          {
+            position++;
+            if (position-offset>=visible_size)
+              offset++;
+            else if (str_unicode != NULL)
+            {
+              if (display_string_unicode[position-offset]==RIGHT_TRIANGLE_CHARACTER)
+                offset++;
+            }
+            else
+            {
+              if (display_string[position-offset]==RIGHT_TRIANGLE_CHARACTER)
+                offset++;
+            }
+          }
+        }
+      }
+      // Enfin, on raffiche la chaine
+      goto affichage;
+    }
+    else
+#endif
     switch (input_key)
     {
       case KEY_DELETE : // Suppr.
@@ -888,6 +955,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
         }
         break;
       default :
+#if !defined(USE_SDL2)
         if (size<max_size)
         {
           // Si la touche était autorisée...
@@ -922,6 +990,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
             goto affichage;
           } // End du test d'autorisation de touche
         } // End du test de place libre
+#endif
         break;
       
 affichage:

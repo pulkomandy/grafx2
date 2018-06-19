@@ -892,6 +892,9 @@ int Get_input(int sleep_time)
     Key_ANSI = 0;
     Key_UNICODE = 0;
     Key = 0;
+#if defined(USE_SDL2)
+    memset(Key_Text, 0, sizeof(Key_Text));
+#endif
     Mouse_moved=0;
     Input_new_mouse_X = Mouse_X;
     Input_new_mouse_Y = Mouse_Y;
@@ -944,8 +947,13 @@ int Get_input(int sleep_time)
               break;
 
 #if defined(USE_SDL2)
-          //case SDL_MOUSEWHEEL:
-          //    break;
+          case SDL_MOUSEWHEEL:
+              if (event.wheel.y > 0)
+                Key = KEY_MOUSEWHEELUP|Get_Key_modifiers();
+              else if (event.wheel.y < 0)
+                Key = KEY_MOUSEWHEELDOWN|Get_Key_modifiers();
+              user_feedback_required = 1;
+              break;
 #endif
 
           case SDL_KEYDOWN:
@@ -956,6 +964,13 @@ int Get_input(int sleep_time)
           case SDL_KEYUP:
               Handle_key_release(event.key);
               break;
+
+#if defined(USE_SDL2)
+          case SDL_TEXTINPUT:
+              memcpy(Key_Text, event.text.text, sizeof(Key_Text));
+              user_feedback_required = 1;
+              break;
+#endif
 
           // Start of Joystik handling
           #ifdef USE_JOYSTICK

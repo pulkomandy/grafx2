@@ -98,6 +98,11 @@ GFX2_GLOBAL dword Key_ANSI;
 
 GFX2_GLOBAL dword Key_UNICODE;
 
+/// from SDL_TextInputEvent
+#if defined(USE_SDL2)
+GFX2_GLOBAL char Key_Text[32];
+#endif
+
 // Keyboard modifiers
 // (Name conflict with windows.h)
 #ifdef MOD_SHIFT
