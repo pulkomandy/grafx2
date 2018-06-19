@@ -1093,11 +1093,17 @@ int Get_input(int sleep_time)
     {
       Compute_paintbrush_coordinates();
       Display_cursor();
+#if defined(USE_SDL2)
+      //GFX2_UpdateScreen();
+#endif
       return 1;
     }
     if (user_feedback_required)
       return 1;
-    
+
+#if defined(USE_SDL2)
+    GFX2_UpdateScreen();
+#endif
     // Nothing significant happened
     if (sleep_time)
       SDL_Delay(sleep_time);

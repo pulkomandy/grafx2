@@ -178,8 +178,13 @@ static void GFX2_UpdateRect(int x, int y, int width, int height)
 
   source_rect.x = x;
   source_rect.y = y;
-  source_rect.w = width;
-  source_rect.h = height;
+  if (width == 0 && height == 0) {
+    source_rect.w = Screen_SDL->w;
+    source_rect.h = Screen_SDL->h;
+  } else {
+    source_rect.w = width;
+    source_rect.h = height;
+  }
 
   if  (RGBcopy == NULL)
   {
@@ -196,7 +201,12 @@ static void GFX2_UpdateRect(int x, int y, int width, int height)
      memcpy(pixels + line * pitch, RGBcopy->pixels + source_rect.x * 4 + (source_rect.y+line)* RGBcopy->pitch, source_rect.w * 4 );
   }
   SDL_UnlockTexture(Texture_SDL);
-  SDL_RenderCopy(Renderer_SDL, Texture_SDL, &source_rect, &source_rect);
+  //SDL_RenderCopy(Renderer_SDL, Texture_SDL, &source_rect, &source_rect);
+}
+
+void GFX2_UpdateScreen(void)
+{
+  SDL_RenderCopy(Renderer_SDL, Texture_SDL, NULL, NULL);
   SDL_RenderPresent(Renderer_SDL);
 }
 #endif

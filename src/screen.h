@@ -57,4 +57,8 @@ extern volatile int Allow_colorcycling;
 /// Activates or desactivates file drag-dropping in program window.
 void Allow_drag_and_drop(int flag);
 
+#if defined(USE_SDL2)
+void GFX2_UpdateScreen(void);
+#endif
+
 #endif // SCREEN_H_INCLUDED
