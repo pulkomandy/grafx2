@@ -14,6 +14,7 @@
     <ProjectGuid>{2C23F950-9403-4871-848E-7E98BE9BD565}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>grafx2</RootNamespace>
+    <ProjectName>grafx2-sdl</ProjectName>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\libraries.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -107,6 +108,7 @@
     <ClInclude Include="..\..\src\input.h" />
     <ClInclude Include="..\..\src\io.h" />
     <ClInclude Include="..\..\src\keyboard.h" />
+    <ClInclude Include="..\..\src\keycodes.h" />
     <ClInclude Include="..\..\src\layers.h" />
     <ClInclude Include="..\..\src\libraw2crtc.h" />
     <ClInclude Include="..\..\src\loadsave.h" />

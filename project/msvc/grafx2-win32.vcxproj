@@ -45,7 +45,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IntDir>$(Configuration)-win32\</IntDir>
     <OutDir>$(SolutionDir)..\..\bin\</OutDir>
-    <TargetName>$(ProjectName)$(Configuration)</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -157,6 +157,7 @@
     <ClInclude Include="..\..\src\input.h" />
     <ClInclude Include="..\..\src\io.h" />
     <ClInclude Include="..\..\src\keyboard.h" />
+    <ClInclude Include="..\..\src\keycodes.h" />
     <ClInclude Include="..\..\src\layers.h" />
     <ClInclude Include="..\..\src\libraw2crtc.h" />
     <ClInclude Include="..\..\src\loadsave.h" />
