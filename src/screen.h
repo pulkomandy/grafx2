@@ -32,6 +32,12 @@
 #include "struct.h"
 #include "global.h"
 
+#if defined(WIN32) && !defined(USE_SDL) && !defined(USE_SDL2)
+int Init_Win32(HINSTANCE hInstance, HINSTANCE hPrevInstance);
+#endif
+
+void GFX2_Set_mode(int *width, int *height, int fullscreen);
+
 byte Get_Screen_pixel(int x, int y);
 
 void Set_Screen_pixel(int x, int y, byte value);

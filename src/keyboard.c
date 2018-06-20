@@ -807,4 +807,8 @@ word Key_for_scancode(word scancode)
 {
   return scancode;
 }
+word Get_Key_modifiers(void)
+{
+  return 0;
+}
 #endif

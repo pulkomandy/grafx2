@@ -393,6 +393,7 @@ int Handle_mouse_release(SDL_MouseButtonEvent event)
 
 // Keyboard management
 
+#if defined(USE_SDL) || defined(USE_SDL2)
 int Handle_key_press(SDL_KeyboardEvent event)
 {
     //Appui sur une touche du clavier
@@ -612,6 +613,7 @@ int Handle_key_release(SDL_KeyboardEvent event)
     }
     return Release_control(released_key, modifier);
 }
+#endif
 
 
 // Joystick management
@@ -876,6 +878,10 @@ int Directional_acceleration(int msec)
   return 1+(msec-initial_delay+linear_factor)/linear_factor+(msec-initial_delay)*(msec-initial_delay)/accel_factor;
 }
 
+#if defined(WIN32) && !defined(USE_SDL) && !defined(USE_SDL2)
+int user_feedback_required = 0; // Flag qui indique si on doit arrêter de traiter les évènements ou si on peut enchainer
+#endif
+
 // Main input handling function
 
 int Get_input(int sleep_time)
@@ -1125,6 +1131,39 @@ int Get_input(int sleep_time)
     // Nothing significant happened
     if (sleep_time)
       SDL_Delay(sleep_time);
+#elif defined(WIN32)
+    MSG msg;
+
+    user_feedback_required = 0;
+    Key_ANSI = 0;
+    Key_UNICODE = 0;
+    Key = 0;
+    Mouse_moved=0;
+    Input_new_mouse_X = Mouse_X;
+    Input_new_mouse_Y = Mouse_Y;
+    Input_new_mouse_K = Mouse_K;
+
+    Color_cycling();
+    // Commit any pending screen update.
+    // This is done in this function because it's called after reading
+    // some user input.
+    Flush_update();
+
+	  while (!user_feedback_required && PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+		  TranslateMessage(&msg);
+		  DispatchMessage(&msg);
+	  }
+
+    // If the cursor was moved since last update,
+    // it was erased, so we need to redraw it (with the preview brush)
+    if (Mouse_moved)
+    {
+      Compute_paintbrush_coordinates();
+      Display_cursor();
+      return 1;
+    }
+    if (user_feedback_required)
+      return 1;
 #endif
     return 0;
 }

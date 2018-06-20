@@ -1153,9 +1153,30 @@ void Program_shutdown(void)
 
 
 // -------------------------- Procédure principale ---------------------------
+#if defined(WIN32) && !defined(USE_SDL) && !defined(USE_SDL2)
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
+#else
 int main(int argc,char * argv[])
+#endif
 {
+#if defined(WIN32) && !defined(USE_SDL) && !defined(USE_SDL2)
+  TCHAR ModuleFileName[MAX_PATH];
+  TCHAR ModuleShortFileName[MAX_PATH];
+  int i;
+  int argc = 0;
+  char arg_buffer[4096];
+  char * argv[16] = {NULL};
 
+  Init_Win32(hInstance, hPrevInstance);
+  GetModuleFileName(NULL, ModuleFileName, MAX_PATH);
+  GetShortPathName(ModuleFileName, ModuleShortFileName, MAX_PATH);
+  argv[argc++] = arg_buffer;
+  for (i = 0; i < sizeof(arg_buffer); i++) {
+    arg_buffer[i] = (char)ModuleShortFileName[i];
+    if (arg_buffer[i] == 0) break;
+  }
+  // TODO : parse command line
+#endif
   if(!Init_program(argc,argv))
   {
     Program_shutdown();

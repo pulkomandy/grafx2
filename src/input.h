@@ -51,6 +51,8 @@ void Adjust_mouse_sensitivity(word fullscreen);
 
 void Set_mouse_position(void);
 
+int Move_cursor_with_constraints(void);
+
 ///
 /// This holds the ID of the GUI control that the mouse
 /// is manipulating. The input system will reset it to zero 

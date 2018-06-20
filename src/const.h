@@ -171,6 +171,7 @@ enum ERROR_CODES
   ERROR_MISSING_DIRECTORY, ///< Unable to return to the original "current directory" on program exit
   ERROR_INI_CORRUPTED,     ///< File gfx2.ini couldn't be parsed
   ERROR_SAVING_INI,        ///< Error while writing gfx2.ini
+  ERROR_INIT,              ///< Program initialization error
   ERROR_SORRY_SORRY_SORRY  ///< (Page allocation error that shouldn't ever happen, now)
 };
 
