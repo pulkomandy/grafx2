@@ -1163,7 +1163,14 @@ int Get_input(int sleep_time)
       return 1;
     }
     if (user_feedback_required)
+    {
+      // Process the WM_CHAR event that follow WM_KEYDOWN
+      if(PeekMessage(&msg, NULL, WM_CHAR, WM_CHAR, PM_REMOVE)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+	    }
       return 1;
+    }
 #endif
     return 0;
 }

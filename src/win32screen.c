@@ -122,6 +122,15 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
     Key = KEY_MOUSEMIDDLE|Get_Key_modifiers();
     return 0;
 // WM_MBUTTONDBLCLK
+  case WM_KEYDOWN:  // lParam & 0xffff => repeat count.   (lParam >> 16) & 0x1ff => scancode
+    Key = wParam;
+    user_feedback_required = 1;
+    return 0;
+  case WM_KEYUP:
+    return 0;
+  case WM_CHAR:
+    Key_ANSI = Key_UNICODE = wParam;
+    return 0;
   default:
     {
       char msg[256];
