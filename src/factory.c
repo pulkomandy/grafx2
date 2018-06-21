@@ -59,6 +59,7 @@ char * Bound_script[10];
 #include <float.h> // for DBL_MAX
 #include <limits.h> //for INT_MIN
 #include <string.h> // strncpy()
+#include <stdlib.h> // for atof()
 #if defined(_MSC_VER)
 #define strdup _strdup
 #define putenv _putenv
