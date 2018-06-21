@@ -57,6 +57,10 @@
 #define snprintf _snprintf
 #endif
 #endif
+#if defined(WIN32)
+#include <windows.h>
+#include <malloc.h>
+#endif
 
 #if defined(USE_SDL) || defined(USE_SDL2)
 #include <SDL_image.h>

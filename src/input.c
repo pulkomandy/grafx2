@@ -1171,6 +1171,14 @@ int Get_input(int sleep_time)
 	    }
       return 1;
     }
+    if (sleep_time == 0)
+      sleep_time = 20;  // default of 20 ms
+    // TODO : we should check where Get_input(0) is called
+    {
+      UINT_PTR timerId = SetTimer(NULL, 0, sleep_time, NULL);
+      WaitMessage();
+      KillTimer(NULL, timerId);
+    }
 #endif
     return 0;
 }
