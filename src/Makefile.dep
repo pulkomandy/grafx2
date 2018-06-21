@@ -56,7 +56,7 @@ $(OBJDIR)/loadsave.o: loadsave.c buttons.h struct.h const.h loadsave.h \
 $(OBJDIR)/main.o: main.c const.h struct.h global.h graph.h misc.h init.h buttons.h \
  loadsave.h gfx2surface.h engine.h pages.h screen.h errors.h readini.h \
  saveini.h io.h text.h setup.h windows.h brush.h palette.h realpath.h \
- input.h keycodes.h help.h filesel.h
+ input.h keycodes.h help.h filesel.h win32screen.h
 $(OBJDIR)/misc.o: misc.c struct.h const.h global.h errors.h buttons.h loadsave.h \
  gfx2surface.h engine.h misc.h keyboard.h screen.h windows.h palette.h \
  input.h keycodes.h graph.h pages.h
@@ -119,7 +119,8 @@ $(OBJDIR)/transform.o: transform.c global.h struct.h const.h transform.h engine.
  loadsave.h gfx2surface.h pages.h tiles.h
 $(OBJDIR)/unicode.o: unicode.c unicode.h struct.h const.h
 $(OBJDIR)/version.o: version.c
-$(OBJDIR)/win32screen.o: win32screen.c screen.h struct.h const.h global.h
+$(OBJDIR)/win32screen.o: win32screen.c screen.h struct.h const.h global.h errors.h \
+ windows.h input.h keycodes.h keyboard.h
 $(OBJDIR)/windows.o: windows.c windows.h struct.h const.h engine.h errors.h \
  global.h graph.h input.h keycodes.h misc.h op_c.h colorred.h readline.h \
  screen.h palette.h unicode.h keyboard.h

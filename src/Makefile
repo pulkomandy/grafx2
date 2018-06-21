@@ -388,9 +388,13 @@ endif
       CC = $(CROSS_CC)
       CROSS_STRIP ?= $(shell which i686-w64-mingw32-strip || which mingw32-strip)
       STRIP = $(CROSS_STRIP)
-      BIN = ../bin/grafx2.exe
-      COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb -Dmain=SDL_main $(shell $(CROSS_SDLCONFIG) --cflags) $(TTFCOPT)
-      LOPT = -mwindows -lmingw32 -lSDLmain -lSDL -lshlwapi $(shell $(CROSS_SDLCONFIG) --libs) -lSDL_image $(TTFLOPT)
+      BIN = ../bin/grafx2-$(API).exe
+      COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb $(TTFCOPT)
+      LOPT = -mwindows -lmingw32 -lshlwapi $(TTFLOPT)
+      ifeq ($(API),sdl)
+      COPT += -Dmain=SDL_main $(shell $(CROSS_SDLCONFIG) --cflags)
+      LOPT += -lSDLmain -lSDL $(shell $(CROSS_SDLCONFIG) --libs) -lSDL_image
+      endif
       ifeq (,$(CROSS_PKGCONFIG))
       COPT += -D__no_pnglib__
       else
@@ -404,7 +408,10 @@ endif
       WINDRES ?= $(shell which i686-w64-mingw32-windres || which mingw32-windres)
       PLATFORM = win32
       PLATFORMOBJ = winres.o
-      PLATFORMFILES = bin/SDL.dll bin/SDL_image.dll $(wildcard ../bin/libpng*.dll) $(wildcard ../bin/libjpeg*.dll) bin/zlib1.dll $(TTFLIBS)
+      PLATFORMFILES = $(wildcard ../bin/libpng*.dll) $(wildcard ../bin/libjpeg*.dll) bin/zlib1.dll $(TTFLIBS)
+      ifeq ($(API),sdl)
+      PLATFORMFILES += bin/SDL.dll bin/SDL_image.dll
+      endif
     else
       ifdef GP2XCROSS
         #cross compile an exec for the gp2x
@@ -570,6 +577,9 @@ endif
 ifeq ($(API),sdl2)
   APIOBJ = sdlscreen.o
   COPT += -DUSE_SDL2
+endif
+ifeq ($(API),win32)
+  APIOBJ = win32screen.o
 endif
 
 #To enable Joystick emulation of cursor, make USE_JOYSTICK=1 (for input.o)

@@ -20,7 +20,7 @@
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
-#include <Windows.h>
+#include <windows.h>
 #include <malloc.h>
 #include <stdio.h>
 #if defined(_MSC_VER) && _MSC_VER < 1900
@@ -30,6 +30,7 @@
 #include "errors.h"
 #include "windows.h"
 #include "input.h"
+#include "keyboard.h"
 
 extern int user_feedback_required;
 extern word Input_new_mouse_X;

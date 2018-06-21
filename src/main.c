@@ -72,8 +72,11 @@
 #include "input.h"
 #include "help.h"
 #include "filesel.h"
+#if defined(WIN32) && !(defined(USE_SDL) || defined(USE_SDL2))
+#include "win32screen.h"
+#endif
 
-#if defined(__WIN32__)
+#if defined(WIN32)
     #include <windows.h>
     #include <shlwapi.h>
 #elif defined (__MINT__)
@@ -86,7 +89,7 @@
 #endif
 
 
-#if defined (__WIN32__)
+#if defined (WIN32) && (defined(USE_SDL) || defined(USE_SDL2))
   // On Windows, SDL_putenv is not present in any compilable header.
   // It can be linked anyway, this declaration only avoids
   // a compilation warning.
@@ -830,17 +833,19 @@ int Init_program(int argc,char * argv[])
     Pixel_ratio);
 
   // Windows only: move back the window to its original position.
-  #if defined(__WIN32__)
+  #if defined(WIN32)
   if (!Video_mode[starting_videomode].Fullscreen)
   {
     if (Config.Window_pos_x != 9999 && Config.Window_pos_y != 9999)
     {
       //RECT r;
+      #if defined(USE_SDL) || defined(USE_SDL2)
       static SDL_SysWMinfo pInfo;
       SDL_VERSION(&pInfo.version);
       SDL_GetWMInfo(&pInfo);
       //GetWindowRect(pInfo.window, &r);
       SetWindowPos(pInfo.window, 0, Config.Window_pos_x, Config.Window_pos_y, 0, 0, SWP_NOSIZE);
+      #endif
     }
   }
 
@@ -1043,7 +1048,7 @@ void Program_shutdown(void)
   int      return_code;
 
   // Windows only: Recover the window position.
-  #if defined(__WIN32__)
+  #if defined(WIN32) && (defined(USE_SDL) || defined(USE_SDL2))
   {
     RECT r;
     static SDL_SysWMinfo pInfo;
@@ -1171,7 +1176,7 @@ int main(int argc,char * argv[])
   GetModuleFileName(NULL, ModuleFileName, MAX_PATH);
   GetShortPathName(ModuleFileName, ModuleShortFileName, MAX_PATH);
   argv[argc++] = arg_buffer;
-  for (i = 0; i < sizeof(arg_buffer); i++) {
+  for (i = 0; i < (int)sizeof(arg_buffer); i++) {
     arg_buffer[i] = (char)ModuleShortFileName[i];
     if (arg_buffer[i] == 0) break;
   }
@@ -1188,3 +1193,30 @@ int main(int argc,char * argv[])
   Program_shutdown();
   return 0;
 }
+
+#if defined(WIN32) && !defined(USE_SDL) && !defined(USE_SDL2) && !defined(_MSC_VER)
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR _lpCmdLine, int nCmdShow)
+{
+  WCHAR *lpCmdLine = GetCommandLineW();
+  if (__argc == 1)
+  { // avoids GetCommandLineW bug that does not always quote the program name if no arguments
+    do { ++lpCmdLine; } while (*lpCmdLine);
+  }
+  else
+  {
+    BOOL quoted = lpCmdLine[0] == L'"';
+    ++lpCmdLine; // skips the " or the first letter (all paths are at least 1 letter)
+    while (*lpCmdLine)
+    {
+      if (quoted && lpCmdLine[0] == L'"') quoted = FALSE; // found end quote
+      else if (!quoted && lpCmdLine[0] == L' ')
+      { // found an unquoted space, now skip all spaces
+        do { ++lpCmdLine; } while (lpCmdLine[0] == L' ');
+        break;
+      }
+      ++lpCmdLine;
+    }
+  }
+  return wWinMain(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+}
+#endif
