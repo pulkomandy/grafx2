@@ -44,4 +44,6 @@ script:
   - 'if [ "$TRAVIS_OS_NAME" = "osx" ] ; then make ; else make -j3 ; fi'
   - 'make ziprelease'
   - 'if [ "$WIN32CROSS" = "1" ] ; then make win32installer ; fi'
-  - 'if [ "$WIN32CROSS" = "1" ] ; then API=win32 make ; fi'
+  - 'if [ "$WIN32CROSS" = "1" ] ; then API=win32 make -j3 ; fi'
+  - 'if [ "$WIN32CROSS" = "1" ] ; then API=win32 make ziprelease ; fi'
+  - 'if [ "$WIN32CROSS" = "1" ] ; then API=win32 make win32installer ; fi'
