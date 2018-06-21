@@ -69,6 +69,10 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
   {
   case WM_CREATE:
     break;
+  case WM_SIZE:
+    Resize_width = LOWORD(lParam);
+    Resize_height = HIWORD(lParam);
+    break;
   case WM_CLOSE:
     Quit_is_required = 1;
     break;
@@ -170,6 +174,7 @@ int Init_Win32(HINSTANCE hInstance, HINSTANCE hPrevInstance)
 static int Video_AllocateDib(int width, int height)
 {
 	BITMAPINFO *bi;
+  BITMAP bm;
 	HDC dc;
 
 	if (Windows_DIB != NULL) {
@@ -193,23 +198,40 @@ static int Video_AllocateDib(int width, int height)
 		return -1;
 	}
 	ReleaseDC(NULL, dc);
-  Windows_DIB_width = width;
-  Windows_DIB_height = height;
+  if (GetObject(Windows_DIB, sizeof(bm), &bm) > 0)
+  {
+    Windows_DIB_width = bm.bmWidthBytes;
+    Windows_DIB_height = bm.bmHeight;
+  }
+  else
+  {
+    Windows_DIB_width = width;
+    Windows_DIB_height = height;
+  }
 	return 0;
 }
 
 static void Win32_CreateWindow(int width, int height, int fullscreen)
 {
   DWORD style;
+  RECT r;
 
 	style = WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU;
 	/* allow window to be resized */
 	style |= WS_THICKFRAME;
+  style |= WS_MAXIMIZEBOX;
+
+  r.left = 0;
+  r.top = 0;
+  r.right = width;
+  r.bottom = height;
+  AdjustWindowRect(&r, style, FALSE);
 
 	Win32_hwnd = CreateWindow(TEXT("grafx2"), TEXT("grafx2"), style, CW_USEDEFAULT, CW_USEDEFAULT,
-                            width, height, NULL, NULL,
+                            r.right - r.left, r.bottom - r.top, NULL, NULL,
                             GetModuleHandle(NULL), NULL);
-	if (Win32_hwnd == NULL) {
+	if (Win32_hwnd == NULL)
+  {
 		Error(ERROR_INIT);
 		return;
 	}
@@ -219,7 +241,8 @@ static void Win32_CreateWindow(int width, int height, int fullscreen)
 void GFX2_Set_mode(int *width, int *height, int fullscreen)
 {
   Video_AllocateDib(*width, *height);
-  Win32_CreateWindow(*width, *height, fullscreen);
+  if (Win32_hwnd == NULL)
+    Win32_CreateWindow(*width, *height, fullscreen);
 }
 
 byte Get_Screen_pixel(int x, int y)
