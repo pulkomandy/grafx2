@@ -16,7 +16,7 @@
   ;Default installation folder
   InstallDir "$PROGRAMFILES\Grafx2"
   !define MULTIUSER_INSTALLMODE_INSTDIR "Grafx2"
-  
+
   ;Get installation folder from registry if available
   InstallDirRegKey HKCU "Software\Grafx2" ""
 
@@ -45,13 +45,13 @@
   !insertmacro MUI_PAGE_COMPONENTS
   !insertmacro MUI_PAGE_DIRECTORY
   !insertmacro MUI_PAGE_INSTFILES
-  
+
   !insertmacro MUI_UNPAGE_CONFIRM
   !insertmacro MUI_UNPAGE_INSTFILES
-  
+
 ;--------------------------------
 ;Languages
- 
+
   !insertmacro MUI_LANGUAGE "English"
 
 ;--------------------------------
@@ -197,7 +197,7 @@ Section "Grafx2" SecProgram
 
   ;Store installation folder
   WriteRegStr HKLM "Software\Grafx2" "" $INSTDIR
-  
+
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 
@@ -332,7 +332,7 @@ Section "un.SecProgram"
   RMDir  "$INSTDIR\share\grafx2"
   RMDir  "$INSTDIR\share"
   Delete "$INSTDIR\Uninstall.exe"
-  
+
   MessageBox MB_YESNO|MB_DEFBUTTON2|MB_ICONQUESTION "Do you wish to keep your configuration settings ?" IDYES keepconfig IDNO deleteconfig
   deleteconfig:
   Delete "$INSTDIR\gfx2.cfg"
@@ -341,7 +341,7 @@ Section "un.SecProgram"
   Delete "$APPDATA\Grafx2\gfx2.ini"
   RMDir  "$APPDATA\Grafx2"
   keepconfig:
-  
+
   RMDir "$INSTDIR"
 
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL"
@@ -353,4 +353,3 @@ SectionEnd
 Section "un.SecShortcut"
   Delete "$DESKTOP\Grafx2.lnk"
 SectionEnd
-  
