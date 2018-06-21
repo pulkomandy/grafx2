@@ -18,11 +18,44 @@ keys = ['UNKNOWN',
         'LSHIFT', 'RSHIFT', 'LCTRL', 'RCTRL',
         'LALT', 'RALT']
 
-def keycode_def(section, key, index, sdl_key=None):
+win32vk = {
+'BACKSPACE': 'BACK',
+'PAGEUP': 'PRIOR',
+'PAGEDOWN': 'NEXT',
+'CAPSLOCK': 'CAPITAL',
+'EQUALS': 'OEM_PLUS',  # =+ key on US keyboards
+'COMMA': 'OEM_COMMA',
+'MINUS': 'OEM_MINUS',
+'PERIOD': 'OEM_PERIOD',
+'BACKQUOTE': 'OEM_3',
+'LEFTBRACKET': 'OEM_4',
+'RIGHTBRACKET': 'OEM_6',
+'KP_PLUS': 'ADD',
+'KP_MULTIPLY': 'MULTIPLY',
+'KP_MINUS': 'SUBTRACT',
+'KP_DIVIDE': 'DIVIDE',
+'KP_PERIOD': 'DECIMAL',
+'KP_ENTER': 'RETURN',
+'LCTRL': 'LCONTROL',
+'RCTRL': 'RCONTROL',
+'LALT': 'LMENU',
+'RALT': 'RMENU',
+}
+
+def keycode_def(section, key, index, native_key=None):
+	if native_key is None:
+		native_key = key
 	if section == 'SDL and SDL2':
-		if sdl_key is None:
-			sdl_key = key
-		return '#define KEY_%-12s K2K(SDLK_%s)\n' % (key, sdl_key)
+		return '#define KEY_%-12s K2K(SDLK_%s)\n' % (key, native_key)
+	elif section == 'win32':
+		if len(key) == 1 and key >= '0' and key <= '9':
+			return '#define KEY_%-12s 0x%02x\n' % (key, ord(key))
+		elif len(key) == 1 and key >= 'a' and key <= 'z':
+			return '#define KEY_%-12s 0x%02x\n' % (key, ord(key)-32)
+		elif key == 'UNKNOWN' or key == 'KP_EQUALS':
+			return '#define KEY_%-12s 0\n' % (key)
+		else:
+			return '#define KEY_%-12s VK_%s\n' % (key, native_key)
 	else:
 		return '#define KEY_%-12s %d\n' % (key, index)
 
@@ -30,7 +63,10 @@ def add_keycodes_defs(section, lines):
 	global keys
 	i = 0
 	for key in keys:
-		lines.append(keycode_def(section, key, i))
+		if section == 'win32' and key in win32vk:
+			lines.append(keycode_def(section, key, i, win32vk[key]))
+		else:
+			lines.append(keycode_def(section, key, i))
 		i = i + 1
 	for j in range(10):
 		lines.append(keycode_def(section, chr(ord('0') + j), i))
@@ -42,9 +78,15 @@ def add_keycodes_defs(section, lines):
 		lines.append('#if defined(USE_SDL)\n')
 	for j in range(10):
 		key = "KP%d" % (j)
-		lines.append(keycode_def(section, key, i))
+		if section == 'win32':
+			lines.append(keycode_def(section, key, i, "NUMPAD%d" % (j)))
+		else:
+			lines.append(keycode_def(section, key, i))
 		i = i + 1
-	lines.append(keycode_def(section, 'SCROLLOCK', i))
+	if section == 'win32':
+		lines.append(keycode_def(section, 'SCROLLOCK', i, 'SCROLL'))
+	else:
+		lines.append(keycode_def(section, 'SCROLLOCK', i))
 	i = i + 1
 	if section == 'SDL and SDL2':
 		lines.append('#else\n')
