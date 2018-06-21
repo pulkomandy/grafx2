@@ -20,7 +20,7 @@ if not OstroDither then
 
 OstroDither = {}
 
-local function default_levels() 
+local function default_levels()
 	return {r={0,Color.ONE},g={0,Color.ONE},b={0,Color.ONE}}
 end
 
@@ -46,17 +46,17 @@ function OstroDither:setLevelsFromPalette()
 		rLevels[1+r] = true
 		gLevels[1+g] = true
 		bLevels[1+b] = true
-		if pal~=thomson.default_palette[i] then 
+		if pal~=thomson.default_palette[i] then
 			default_palette = false
 		end
 	end
 	local levels = {r={},g={},b={}}
 	for i,v in ipairs(thomson.levels.linear) do
 		if false then
-			if rLevels[i] and gLevels[i] and bLevels[i] then 
-				table.insert(levels.r, v) 
-				table.insert(levels.g, v) 
-				table.insert(levels.b, v) 
+			if rLevels[i] and gLevels[i] and bLevels[i] then
+				table.insert(levels.r, v)
+				table.insert(levels.g, v)
+				table.insert(levels.b, v)
 			end
 		else
 			if rLevels[i] then table.insert(levels.r, v) end
@@ -65,7 +65,7 @@ function OstroDither:setLevelsFromPalette()
 		end
 	end
 	self.levels = levels
-	if default_palette then 
+	if default_palette then
 		self.attenuation = .98
 		self.levels = default_levels()
 	else
@@ -77,7 +77,7 @@ end
 function OstroDither:_coefs(linearLevel,rgb)
 	if self._ostro==nil then
 		-- original coefs, about to be adapted to the levels
-		local t={ 
+		local t={
 			13,     0,     5,
 			13,     0,     5,
 			21,     0,    10,
@@ -392,13 +392,13 @@ end
 function OstroDither:_diffuse(linearColor,err, err0,err1,err2)
 	local c=self:getColorIndex(err:add(linearColor))
 	local M = Color.ONE
-	
+
 	err:sub(self:_linearPalette(c))
 	local function d(rgb)
 		local e = err[rgb]
 		function f(a,c)
 			a=a+c*e
-			return a<-M and -M or 
+			return a<-M and -M or
 			       a> M and  M or a
 		end
 		local c0,c1,c2=self:_coefs(linearColor,rgb)
@@ -407,18 +407,18 @@ function OstroDither:_diffuse(linearColor,err, err0,err1,err2)
 		if err2 and c2>0 then err2[rgb] = f(err2[rgb],c2) end
 	end
 	d("r"); d("g"); d("b")
-	
+
 	return c
 end
 
 function OstroDither:dither(screen_w,screen_h,getLinearPixel,pset,serpentine,info)
 	if not info then info = function(y) thomson.info() end end
 	if not serpentine then serpentine = true end
-	
+
 	local err1,err2 = {},{}
-	for x=-1,screen_w do 
-		err1[x] = Color:new(0,0,0) 
-		err2[x] = Color:new(0,0,0) 
+	for x=-1,screen_w do
+		err1[x] = Color:new(0,0,0)
+		err2[x] = Color:new(0,0,0)
 	end
 
 	for y=0,screen_h-1 do
@@ -426,10 +426,10 @@ function OstroDither:dither(screen_w,screen_h,getLinearPixel,pset,serpentine,inf
 		err1,err2 = err2,err1
 		-- clear current-row's buffer
 		for i=-1,screen_w do err2[i]:mul(0) end
-		
+
 		local x0,x1,xs=0,screen_w-1,1
 		if serpentine and y%2==1 then x0,x1,xs=x1,x0,-xs end
-		
+
 		for x=x0,x1,xs do
 			local p = getLinearPixel(x,y,xs,err1)
 			local c = self:_diffuse(p,err1[x],err1[x+xs],
@@ -445,15 +445,15 @@ function OstroDither:ccAcceptCouple(c1,c2)
 end
 
 function OstroDither:ccDither(screen_w,screen_h,getLinearPixel,pset,serpentine,info) -- dither with color clash
-	local c1,c2	
+	local c1,c2
 	self.getColorIndex = function(self,p)
 		return p:dist2(self:_linearPalette(c1))<p:dist2(self:_linearPalette(c2)) and c1 or c2
 	end
-	
+
 	local function _pset(x,y,c)
 		pset(x,y,c==c1-1 and c or -c2)
 	end
-	
+
 	local findC1C2 = function(x,y,xs,err1)
 		-- collect the data we are working on
 		local gpl = {
@@ -466,8 +466,8 @@ function OstroDither:ccDither(screen_w,screen_h,getLinearPixel,pset,serpentine,i
 				return r
 			end,
 			fill = function(self,dither)
-				for i=x,x+(dither.clash_size-1)*xs,xs do 
-					table.insert(self, 
+				for i=x,x+(dither.clash_size-1)*xs,xs do
+					table.insert(self,
 					            {pix=getLinearPixel(i,y),
 								 err=err1[i]})
 				end
@@ -476,7 +476,7 @@ function OstroDither:ccDither(screen_w,screen_h,getLinearPixel,pset,serpentine,i
 			end
 		}
 		gpl:fill(self)
-		
+
 		local histo = {
 			fill = function(self,dither)
 				local t=gpl:clone()
@@ -489,7 +489,7 @@ function OstroDither:ccDither(screen_w,screen_h,getLinearPixel,pset,serpentine,i
 					self[c].n = self[c].n+1
 				end
 				dither.getColorIndex = back
-				table.sort(self, function(a,b) 
+				table.sort(self, function(a,b)
 				           return a.n>b.n or a.n==b.n and a.c<b.c end)
 		 	end,
 			get = function(self,i,...)
@@ -509,7 +509,7 @@ function OstroDither:ccDither(screen_w,screen_h,getLinearPixel,pset,serpentine,i
 		histo:fill(self)
 
 		c1,c2=histo:get(1,2)
-		
+
 		if not self:ccAcceptCouple(c1,c2) or histo:sum(1,2)<=self.clash_size-2 then
 			info(y)
 			local dm=1e30
@@ -528,7 +528,7 @@ function OstroDither:ccDither(screen_w,screen_h,getLinearPixel,pset,serpentine,i
 				end
 			end
 			dm=eval()
-		
+
 			if histo:num(1)>=self.clash_size/2+1 then
 				local z=c2
 				for i=1,#self.palette do c2=i
@@ -548,7 +548,7 @@ function OstroDither:ccDither(screen_w,screen_h,getLinearPixel,pset,serpentine,i
 			end
 		end
 	end
-	
+
 	local function _getLinearPixel(x,y,xs,err1)
 		if x%self.clash_size==(xs>0 and 0 or self.clash_size-1) then
 			findC1C2(x,y,xs,err1)
@@ -559,7 +559,7 @@ function OstroDither:ccDither(screen_w,screen_h,getLinearPixel,pset,serpentine,i
 	self:dither(screen_w,screen_h,_getLinearPixel,_pset,serpentine,info)
 end
 
-function OstroDither:dither40cols(getpalette,serpentine) 
+function OstroDither:dither40cols(getpalette,serpentine)
 	-- get screen size
 	local screen_w, screen_h = getpicturesize()
 
@@ -577,7 +577,7 @@ function OstroDither:dither40cols(getpalette,serpentine)
 	end
 
 	-- return the Color @(x,y) in linear space (0-255)
-	-- corresonding to the thomson screen (x in 0-319, 
+	-- corresonding to the thomson screen (x in 0-319,
 	-- y in 0-199)
 	local function getLinearPixel(x,y)
 		local with_cache = true
@@ -597,26 +597,26 @@ function OstroDither:dither40cols(getpalette,serpentine)
 				end
 			end
 			p:div((y2-y1)*(x2-x1)) --:floor()
-						
+
 			if with_cache then self._getLinearPixel[k]=p end
 		end
-		
+
 		return with_cache and p:clone() or p
 	end
-		
+
 	-- MO5 mode
 	thomson.setMO5()
 	self.palette = getpalette(thomson.w,thomson.h,getLinearPixel)
-	
+
 	-- compute levels from palette
 	self:setLevelsFromPalette()
-	
+
 	-- convert picture
-	self:ccDither(thomson.w,thomson.h, 
-				  getLinearPixel, thomson.pset, 
-				  serpentine or true, function(y) 
+	self:ccDither(thomson.w,thomson.h,
+				  getLinearPixel, thomson.pset,
+				  serpentine or true, function(y)
 					thomson.info("Converting...",
-						math.floor(y*100/thomson.h),"%") 
+						math.floor(y*100/thomson.h),"%")
 				  end,true)
 
 	-- refresh screen

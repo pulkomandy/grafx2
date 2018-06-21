@@ -4,8 +4,8 @@
 --
 --   The data will be stored in file called
 --     <calling_function_name>.dat
---   in the lua directory 
--- 
+--   in the lua directory
+--
 -- Example 1:
 --
 --  -- Load initial values or set defaults
@@ -37,7 +37,7 @@
 --    memory.save({x=picX,y=picY,scale=scale})
 --  end
 
-  
+
 memory =
 {
   serialize = function(o)
@@ -57,7 +57,7 @@ memory =
       error("cannot serialize a " .. type(o))
     end
   end;
-  
+
   -- Return a string identifying the calling function.
   -- Pass 1 for parent, 2 for grandparent etc.
   callername = function(level)
@@ -70,7 +70,7 @@ memory =
       return caller
     end
     -- Otherwise, get file name, without extension
-   
+
     -- Get part after directory name
     last_slash=0
     while true do
@@ -83,16 +83,16 @@ memory =
       if (pos==nil) then break end
       last_slash=pos
     end
-    
+
     caller=string.sub(info.source, last_slash+1)
-    
+
     -- Remove file extension
     if (string.sub(caller,-4, -1)==".lua") then
       caller=string.sub(caller, 1, -5)
     end
     return caller
   end;
-  
+
   -- Memorize some parameters.
   save = function(o)
     local caller=memory.callername(2)
@@ -110,10 +110,10 @@ memory =
       end
       f:write("}\n")
       f:close()
-    end  
+    end
   end;
-  
-  
+
+
   -- Recover some saved parameters.
   load = function(o)
     local caller=memory.callername(2)

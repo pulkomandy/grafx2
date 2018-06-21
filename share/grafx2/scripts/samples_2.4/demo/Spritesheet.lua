@@ -43,4 +43,3 @@ memory.save({XS=XS,YS=YS,SPACE=SPACE,FRAMES=FRAMES,XOFF=XOFF,YOFF=YOFF,FPS=FPS})
  end -- plays
 
 end --OK
-

@@ -24,8 +24,8 @@ local function mul(k,u)
 end
 
 local function cross(u,v)
-	return {u[2]*v[3] - u[3]*v[2], 
-	        u[3]*v[1] - u[1]*v[3], 
+	return {u[2]*v[3] - u[3]*v[2],
+	        u[3]*v[1] - u[1]*v[3],
 			u[1]*v[2] - u[2]*v[1]}
 end
 
@@ -40,7 +40,7 @@ end
 
 ConvexHull = {}
 
-function ConvexHull:new(coordFct) 
+function ConvexHull:new(coordFct)
 	local o = {
 		points={},
 		coord=coordFct
@@ -85,7 +85,7 @@ function ConvexHull:bdry(faces)
 	function code.encode(pt,...)
 		if pt then
 			local k = code[pt]
-			if not k then 
+			if not k then
 				k = code.n+1
 				code[k]  = pt
 				code[pt] = k
@@ -133,11 +133,11 @@ end
 
 function ConvexHull:addPoint(p)
 	-- first 3 points
-	if self.points then 
+	if self.points then
 		if p==self.points[1] or p==self.points[2] then return end
 		table.insert(self.points,p)
-		
-		if #self.points==3 then 
+
+		if #self.points==3 then
 			self.hull={
 				{self.points[1],self.points[2],self.points[3]},
 				{self.points[1],self.points[3],self.points[2]}
@@ -150,7 +150,7 @@ function ConvexHull:addPoint(p)
 			if F[1]==p or F[2]==p or F[3]==p then return end
 			if self:seen(F,p) then seenF[F]=true;n=n+1 end
 		end
-		
+
 		if n==#self.hull then
 			-- if can see all faces, unsee ones looking "down"
 			local N
@@ -162,11 +162,11 @@ function ConvexHull:addPoint(p)
 				end
 			end
 		end
-		
+
 		-- remove (old) seen faces
 		local z=#self.hull
 		for i=#self.hull,1,-1 do
-			if seenF[self.hull[i]] then 
+			if seenF[self.hull[i]] then
 				table.remove(self.hull,i)
 			end
 		end
@@ -208,7 +208,7 @@ function ConvexHull:distToHull(pt)
 	for _,F in ipairs(self.hull) do
 		local t = self:distToFace(F,pt)
 		d = d==nil and t or
-			(0<=t and t<d or 
+			(0<=t and t<d or
 			 0>=t and t>d) and t or
 			d
 		if d==0 then break end

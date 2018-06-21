@@ -22,7 +22,7 @@ if not bayer then
 			for i=1,n*2 do t[i]=0; end
 			r[j] = t;
 		end
-		
+
 		-- 0 3
 		-- 2 1
 		for j=1,m do
@@ -34,11 +34,11 @@ if not bayer then
 				r[m*0+j][n*1+i] = v-0
 			end
 		end
-		
+
 		return r;
 	end
 
-	-- returns a version of the matrix normalized into  
+	-- returns a version of the matrix normalized into
 	-- the 0-1 range
 	function bayer.norm(matrix)
 		local m,n=#matrix,#matrix[1]

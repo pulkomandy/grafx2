@@ -46,12 +46,12 @@ dialog = function(args)
     title = args.title,
     w = args.w,
     h = args.h,
-    -- 
+    --
     widgets = {},
     -- an indexed array, starting at 1. Used for calling the relevant
-    -- callback when a numbered control is clicked.  
+    -- callback when a numbered control is clicked.
     callbacks = {},
-    
+
     --
     -- dialog.run() --
     --
@@ -61,10 +61,10 @@ dialog = function(args)
       for _,widget in ipairs(self.widgets) do
         widget:create()
       end
-      
+
       repeat
        local button, button2, key = windowdodialog();
-      
+
         if button > 0 then
           local c = self.callbacks[button]
           if c ~= nil then
@@ -151,7 +151,7 @@ textbox = function(args)
     x = args.x,
     y = args.y,
     nbchar = args.nbchar, -- visible size in characters
-    --format = args.format, -- numeric, decimal, path 
+    --format = args.format, -- numeric, decimal, path
     decimal = args.decimal or 0,
     min = args.min,
     max = args.max,
@@ -167,7 +167,7 @@ textbox = function(args)
     render = function(self)
       local val = tostring(self._value)
       if string.len(val) < self.nbchar then
-        val = string.rep(" ",self.nbchar - string.len(val)) .. val; 
+        val = string.rep(" ",self.nbchar - string.len(val)) .. val;
       elseif string.len(val) > self.nbchar then
         val = string.sub(val, 1, self.nbchar-1) .. gui.char.ellipsis
       end
@@ -183,7 +183,7 @@ textbox = function(args)
         inputtype = 0 -- entry as string
       end
       local accept, val = windowreadline(self.x, self.y, self._value, self.nbchar, self.maxchar, self.decimal, inputtype);
-      
+
       if accept then
         if (inputtype == 1 or inputtype == 3) then
           val = tonumber(val)
@@ -196,7 +196,7 @@ textbox = function(args)
         if (self.max ~= nil and val > self.max) then
           val = self.max
         end
-        
+
         self._value = val
       end
       self:render()

@@ -1,5 +1,5 @@
--- ostro_zx.lua : converts a color image into a 
--- Oric image (8+8 fixed colors with color clash) 
+-- ostro_zx.lua : converts a color image into a
+-- Oric image (8+8 fixed colors with color clash)
 -- using Ostromoukhov's error diffusion algorithm.
 --
 -- Version: 03/21/2017

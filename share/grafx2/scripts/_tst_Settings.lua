@@ -21,7 +21,7 @@ ok, w, h = inputbox("Modify brush",
   "X Flip", 0, 0, 1,  0,
   "Y Flip", 0, 0, 1,  0,
   "Degrees",1, 0, 1,  -2,
-  "Radians",0, 0, 1,  -2  
+  "Radians",0, 0, 1,  -2
 );
 if ok == true then
   messagebox(
@@ -29,5 +29,3 @@ if ok == true then
     "h: " .. h .. "\n"
   )
 end
-
-

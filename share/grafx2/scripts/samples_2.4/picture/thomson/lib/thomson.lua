@@ -32,7 +32,7 @@ end
 thomson.levels = {
 	-- in pc-space (0-255):
 	pc = {0,100,127,142,163,179,191,203,215,223,231,239,
-		  243,247,251,255}, 
+		  243,247,251,255},
 	-- in linear space (0-255):
 	linear = {},
 	-- maps pc-levels (0-255) to thomson levels (1-16)
@@ -46,10 +46,10 @@ local function toLinear(val)
 	-- use the version from Color library
 	if not Color then
 		val = val/255
-		if val<=0.081 then 
-			val = val/4.5; 
-		else 
-			val = ((val+0.099)/1.099)^2.2; 
+		if val<=0.081 then
+			val = val/4.5;
+		else
+			val = ((val+0.099)/1.099)^2.2;
 		end
 		val = val*255
 		return val;
@@ -57,11 +57,11 @@ local function toLinear(val)
 		return Color:new(val,0,0):toLinear().r
 	end
 end
-		
-for i=1,16 do 
+
+for i=1,16 do
 	thomson.levels.linear[i] = toLinear(thomson.levels.pc[i])
 end
-for i=0,255 do 
+for i=0,255 do
 	local r,cm,dm;
 	r,cm,dm = toLinear(i),0,1e30
 	for c,v in ipairs(thomson.levels.linear) do
@@ -78,7 +78,7 @@ for i=0,255 do
 end
 
 -- palette stuff
-function thomson.palette(i, pal) 
+function thomson.palette(i, pal)
 	-- returns palette #i if pal is missing (nil)
 	-- if pal is a number, sets palette #i
 	-- if pal is an array, sets the palette #i, #i+1, ...
@@ -177,7 +177,7 @@ end
 -- saves the thomson screen into a MAP file
 function thomson.savep(name)
 	if not name then return save_current_file()	end
-	
+
 	wait(0) -- allow for key handling
 	local data = thomson._get_map_data()
 	local tmp = {0, math.floor(#data/256), #data%256,0,0}
@@ -208,8 +208,8 @@ waitbreak(0.01)
 function thomson.info(...)
 	local txt = ""
 	for _,t in ipairs({...}) do txt = txt .. t end
-	statusmessage(txt); 
-	if waitbreak(0)==1 then 
+	statusmessage(txt);
+	if waitbreak(0)==1 then
 		local ok=false
 		selectbox("Abort ?", "Yes", function() ok = true end, "No", function() ok = false end)
 		if ok then error('Operation aborted') end
@@ -237,16 +237,16 @@ function thomson.updatescreen()
 		local r=v % 16
 		local g=math.floor(v/16)  % 16
 		local b=math.floor(v/256) % 16
-		setcolor(i+thomson._palette.offset-1, 
-				 thomson.levels.pc[r+1], 
-				 thomson.levels.pc[g+1], 
+		setcolor(i+thomson._palette.offset-1,
+				 thomson.levels.pc[r+1],
+				 thomson.levels.pc[g+1],
 				 thomson.levels.pc[b+1])
 	end
 	updatescreen()
 end
 
 -- bitmap 16 mode
-function thomson.setBM16() 
+function thomson.setBM16()
 	-- put a pixel onto real screen
 	function thomson._putpixel(x,y,c)
 		putpicturepixel(x*2+0,y,c)
@@ -288,7 +288,7 @@ function thomson.setBM16()
 			wait(0) -- allow for key handling
 		end
 		local pal = {}
-		for i=1,16 do 
+		for i=1,16 do
 			pal[2*i-1] = math.floor(thomson._palette[i]/256)
 			pal[2*i+0] =            thomson._palette[i]%256
 		end
@@ -311,7 +311,7 @@ function thomson.setBM16()
 		thomson._append(data,{0xa5,0x5a})
 		return data
 	end
-	
+
 	thomson.w = 160
 	thomson.h = 200
 	thomson.palette(0,thomson.default_palette)
@@ -319,20 +319,20 @@ function thomson.setBM16()
 	thomson.clear()
 end
 
--- mode MO5 
-function thomson.setMO5() 
+-- mode MO5
+function thomson.setMO5()
 	-- put a pixel onto real screen
 	thomson._putpixel = putpicturepixel
 	-- helpers
-	local function bittst(val,mask) 
-		-- return bit32.btest(val,mask) 
+	local function bittst(val,mask)
+		-- return bit32.btest(val,mask)
 		return (val % (2*mask))>=mask;
 	end
-	local function bitset(val,mask) 
+	local function bitset(val,mask)
 		-- return bit32.bor(val, mask)
 		return bittst(val,mask) and val or (val+mask)
 	end
-	local function bitclr(val,mask) 
+	local function bitclr(val,mask)
 		-- return bit32.band(val,255-mask)
 		return bittst(val,mask) and (val-mask) or val
 	end
@@ -362,7 +362,7 @@ function thomson.setMO5()
 	-- convert color from MO5 to TO7 (MAP requires TO7 encoding)
 	local function mo5to7(val)
 		-- MO5: DCBA 4321
-		--      __    
+		--      __
 		-- TO7: 4DCB A321
 		local t=((val%16)>=8) and 0 or 128
 		val = math.floor(val/16)*8 + (val%8)
@@ -385,7 +385,7 @@ function thomson.setMO5()
 			for i=2,8000 do
 				local c1,c2 = math.floor(tmpB[i-0]/16),tmpB[i-0]%16
 				local d1,d2 = math.floor(tmpB[i-1]/16),tmpB[i-1]%16
-				
+
 				if tmpA[i-1]==255-tmpA[i] or c1==d2 and c2==c1 then
 					tmpA[i] = 255-tmpA[i]
 					tmpB[i] = c2*16+c1
@@ -396,7 +396,7 @@ function thomson.setMO5()
 		else
 			for i=1,8000 do
 				local c1,c2 = math.floor(tmpB[i]/16),tmpB[i]%16
-				
+
 				if tmpA[i]==255 or c1<c2 then
 					tmpA[i] = 255-tmpA[i]
 					tmpB[i] = c2*16+c1
@@ -420,10 +420,10 @@ function thomson.setMO5()
 		thomson._append(data,{0,0})
 		-- padd to word (for compatibility with basic)
 		if #data%2==1 then table.insert(data,0); end
-		
+
 		-- tosnap
 		local orig_palette = true
-		for i=0,15 do 
+		for i=0,15 do
 			if thomson.default_palette[i+1]~=thomson.palette(i) then
 				orig_palette = false
 				break
@@ -431,7 +431,7 @@ function thomson.setMO5()
 		end
 		if not orig_palette then
 			local pal = {}
-			for i=0,15 do 
+			for i=0,15 do
 				local v = thomson.palette(i)
 				pal[2*i+1] = math.floor(v/256)
 				pal[2*i+2] =            v%256
@@ -440,10 +440,10 @@ function thomson.setMO5()
 			thomson._append(data, pal)
 			thomson._append(data,{0xa5,0x5a})
 		end
-		
+
 		return data
 	end
-	
+
 	thomson.w = 320
 	thomson.h = 200
 	thomson.palette(0,thomson.default_palette)

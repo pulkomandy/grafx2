@@ -1,5 +1,5 @@
--- ostro_mo5.lua : converts a color image into a 
--- MO5 image (16 fixed colors with color clash) 
+-- ostro_mo5.lua : converts a color image into a
+-- MO5 image (16 fixed colors with color clash)
 -- using Ostromoukhov's error diffusion algorithm.
 --
 -- Version: 02-jan-2017

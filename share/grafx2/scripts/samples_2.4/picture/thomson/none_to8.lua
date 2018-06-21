@@ -16,7 +16,7 @@ run('lib/thomson.lua')
 run('lib/ostromoukhov.lua')
 run('lib/color_reduction.lua')
 -- run('lib/zzz.lua')
-	
+
 -- get screen size
 local screen_w, screen_h = getpicturesize()
 
@@ -48,7 +48,7 @@ local function getLinearPixel(x,y)
 		end
 	end
 	p:div((y2-y1)*(x2-x1)) --:floor()
-	
+
 	return p
 end
 
@@ -57,7 +57,7 @@ local red = ColorReducer:new():analyzeWithDither(160,200,
     function(y)
 		thomson.info("Collecting stats...",math.floor(y/2),"%")
 	end)
-	
+
 -- BM16 mode
 thomson.setBM16()
 
@@ -69,7 +69,7 @@ thomson.palette(0, palette)
 OstroDither:new(palette, 0)
            :dither(thomson.h,thomson.w,
              function(y,x) return getLinearPixel(x,y) end,
-			 function(y,x,c) thomson.pset(x,y,c) end, 
+			 function(y,x,c) thomson.pset(x,y,c) end,
 			 true,
 			 function(x) thomson.info("Converting...",math.floor(x*100/160),"%") end)
 

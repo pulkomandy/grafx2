@@ -25,14 +25,14 @@ run('convex_hull.lua')
 if not ColorReducer then
 
 -- clamp a value in the 0-255 range
-local function clamp(v) 
+local function clamp(v)
 	v=math.floor(v+.5)
 	return v<0 and 0 or v>255 and 255 or v
 end
 
 local Voxel = {}
 
-function Voxel:new() 
+function Voxel:new()
 	local o = {m2 = 0, wt=0, mr=0, mg=0, mb=0}
 	setmetatable(o, self)
 	self.__index = self
@@ -94,7 +94,7 @@ end
 
 ColorReducer = {}
 
-function ColorReducer:new() 
+function ColorReducer:new()
 	local o = {}
 	setmetatable(o, self)
 	self.__index = self
@@ -109,7 +109,7 @@ end
 
 function ColorReducer:add(linearColor)
 	local r,g,b=linearColor:toRGB()
-	
+
 	r,g,b=thomson.levels.linear2to[clamp(r)],
 	      thomson.levels.linear2to[clamp(g)],
 	      thomson.levels.linear2to[clamp(b)]
@@ -219,7 +219,7 @@ function ColorReducer:Maximize(cube,dir,first,last,cut,whole)
 	local base = self:Bottom(cube,dir)
 	local max = 0
 	cut[dir] = -1
-	for i=first,last-1 do 
+	for i=first,last-1 do
 		local half = Voxel:new():add(base):add(self:Top(cube,dir,i))
 		-- now half is sum over lower half of box, if split at i
 		if half.wt>0 then -- subbox could be empty of pixels!
@@ -247,7 +247,7 @@ function ColorReducer:Cut(set1,set2)
 	elseif maxg>=maxr and maxg>=maxb then
 		dir = "GREEN"
 	end
-	
+
 	set2.r1=set1.r1
 	set2.g1=set1.g1
 	set2.b1=set1.b1
@@ -279,33 +279,33 @@ end
 function ColorReducer:boostBorderColors()
 	-- Idea: consider the convex hull of all the colors.
 	-- These color can be mixed to produce any other used
-	-- color, so they are kind of really important. 
+	-- color, so they are kind of really important.
 	-- Unfortunately most color-reduction algorithm do not
 	-- retain these color ue to averaging property. The idea
 	-- here is not artifically increase their count so that
-	-- the averaging goes into these colors. 
+	-- the averaging goes into these colors.
 
 	-- do return self end -- for testing
-	
+
 	local hull=ConvexHull:new(function(v)
 		return {v:rgb()}
 	end)
-	
+
 	-- collect set of points
 	local pts,tot={},0
 	for i=0,17*17*17-1 do
 		local v = self[i]
-		if v then 
+		if v then
 			pts[v] = true
 			tot=tot+v.wt
 		end
 	end
-	
+
 	-- build convex hull of colors.
 	for v in pairs(pts) do
-		hull:addPoint(v) 
+		hull:addPoint(v)
 	end
-	
+
 	-- collect points near the hull
 	local bdr, hsz, hnb, max = {},0,0,0
 	for v in pairs(pts) do
@@ -316,8 +316,8 @@ function ColorReducer:boostBorderColors()
 			max = math.max(max,v.wt)
 		end
 	end
-	
-	if tot>hsz then	
+
+	if tot>hsz then
 		-- heuristic formula to boost colors of the hull
 		-- not too little, not to much. It might be tuned
 		-- over time, but this version gives satisfying
@@ -326,13 +326,13 @@ function ColorReducer:boostBorderColors()
 			v:mul(math.min(max,tot-hsz,v.wt*(1+.51*max*hnb/hsz))/v.wt)
 		end
 	end
-	
+
 	return self
 end
 
 function ColorReducer:buildPalette(max, forceBlack)
 	if self.palette then return self.palette end
-	
+
 	forceBlack=forceBlack or true
 
 	self:M3d()
@@ -375,9 +375,9 @@ function ColorReducer:buildPalette(max, forceBlack)
 		table.insert(pal, {r=r+1,g=g+1,b=b+1})
 	end
 	-- messagebox(#pal)
-	
+
 	-- sort the palette in a nice color distribution
-	local function cmp(a,b) 
+	local function cmp(a,b)
 		local t=thomson.levels.pc
 		a = Color:new(t[a.r],t[a.g],t[a.b])
 		b = Color:new(t[b.r],t[b.g],t[b.b])
@@ -402,10 +402,10 @@ function ColorReducer:buildPalette(max, forceBlack)
 		return ah<bh or (ah==bh and (as<bs or (as==bs and av<bv)))
 	end
 	table.sort(pal, cmp)
-	
+
 	-- add black if color count is not reached
 	while #pal<max do table.insert(pal,{r=1,g=1,b=1}) end
-	
+
 	-- linear palette
 	local linear = {}
 	for i=1,#pal do
@@ -414,7 +414,7 @@ function ColorReducer:buildPalette(max, forceBlack)
 							  thomson.levels.linear[pal[i].b])
 	end
 	self.linear = linear
-	
+
 	-- thomson palette
 	local palette = {}
 	for i=1,#pal do
@@ -432,8 +432,8 @@ end
 function ColorReducer:getColor(linearColor)
 	local M=64
 	local m=(M-1)/255
-	local function f(x) 
-		return math.floor(.5+(x<0 and 0 or x>255 and 255 or x)*m) 
+	local function f(x)
+		return math.floor(.5+(x<0 and 0 or x>255 and 255 or x)*m)
 	end
 	local k=f(linearPixel.r)+M*(f(linearPixel.g)+M*f(linearPixel.b))
 	local c=self[k]
@@ -481,7 +481,7 @@ function ColorReducer:analyzeWithDither(w,h,getLinearPixel,info)
 		return p
 	end
 	return self:analyze(w,h, function(x,y)
-		return 
+		return
 			   dith(x,y)
 		       -- :mul(4):add(getLinearPixel(x,y)):div(5)
 			   -- :add(getLinearPixel(x-1,y))
@@ -493,11 +493,11 @@ end
 --[[
 function ColorReducer:analyzeBuildWithDither(w,h,max,getLinearPixel,info)
 	if not info then info=function(y) wait(0) end end
-	
+
 	local dith = ColorReducer:new()
 	dith:analyze(w,h,getLinearPixel,function(y) info(y/2) end)
-	
-	
+
+
 	local ostro = OstroDither:new(dith:buildPalette(max),
 	                              thomson.levels.linear, .9)
 	ostro:dither(w,h,
@@ -506,7 +506,7 @@ function ColorReducer:analyzeBuildWithDither(w,h,max,getLinearPixel,info)
 			self:add(err[x]:clone():add(p))
 			self:add(p)
 			return p
-		end, 
+		end,
 		function(x,y,c)
 			-- self:add(ostro:_linearPalette(c+1))
 		end,true,
@@ -516,5 +516,5 @@ function ColorReducer:analyzeBuildWithDither(w,h,max,getLinearPixel,info)
 	return self:buildPalette(max)
 end
 --]]
-	
+
 end -- ColorReduction

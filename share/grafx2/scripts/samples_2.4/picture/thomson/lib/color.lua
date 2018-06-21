@@ -25,15 +25,15 @@ if not Color then
 		return o
 	end
 	Color.black = Color:new(0,0,0)
-	
+
 	function Color.clamp(v,...)
-		if v then 
-			return v<0         and 0 or 
+		if v then
+			return v<0         and 0 or
 				   v>Color.ONE and Color.ONE or
 				   v,Color.clamp(...)
 		end
 	end
-	
+
 	function Color:clone()
 		return Color:new(self.r, self.g, self.b)
 	end
@@ -41,21 +41,21 @@ if not Color then
 	function Color:tostring()
 		return "(r=" .. self.r .. " g=" .. self.g .. " b=" .. self.b .. ")"
 	end
-	
+
 	function Color:HSV()
 		local max=math.floor(.5+math.max(self.r,self.g,self.b))
 		local min=math.floor(.5+math.min(self.r,self.g,self.b))
-		
+
 		local H=(max<=min and 0 or
 			     max<=self.r and (self.g-self.b)/(max-min)+6 or
 			     max<=self.g and (self.b-self.r)/(max-min)+2 or
 			 	 max<=self.b and (self.r-self.g)/(max-min)+4)/6 % 1.0
 		local S=(max==0 or max<=min) and 0 or 1-min/max
 		local V=max/Color.ONE
-		
+
 		return H,S,V
 	end
-	
+
 	function Color:intensity()
 		return .3*self.r + .59*self.g + .11*self.b
 	end
@@ -77,39 +77,39 @@ if not Color then
 		self.b = self.b + other.b;
 		return self;
 	end
-	
+
 	function Color:sub(other)
 		self.r = self.r - other.r;
 		self.g = self.g - other.g;
 		self.b = self.b - other.b;
 		return self;
 	end
-	
+
 	function Color:dist2(other)
 		return self:euclid_dist2(other)
 		-- return Color.dE2000(self,other)^2
 		-- return Color.dE2fast(self,other)
 	end
-	
+
 	function Color:euclid_dist2(other)
-		return (self.r - other.r)^2 + 
-		       (self.g - other.g)^2 + 
+		return (self.r - other.r)^2 +
+		       (self.g - other.g)^2 +
 			   (self.b - other.b)^2
 	end
-	
-	function Color:floor() 
+
+	function Color:floor()
 		self.r = math.min(math.floor(self.r),Color.ONE);
 		self.g = math.min(math.floor(self.g),Color.ONE);
 		self.b = math.min(math.floor(self.b),Color.ONE);
 		return self;
 	end
 
-	function Color:toPC() 
-		local function f(val) 
+	function Color:toPC()
+		local function f(val)
 			val = val/Color.ONE
 			-- if val<=0.018 then val = 4.5*val; else val = 1.099*(val ^ (1/2.2))-0.099; end
-			
-			-- works much metter: https://fr.wikipedia.org/wiki/SRGB 
+
+			-- works much metter: https://fr.wikipedia.org/wiki/SRGB
 			if val<=0.0031308 then val=12.92*val else val = 1.055*(val ^ (1/2.4))-0.055 end
 			return val*Color.ONE
 		end;
@@ -119,11 +119,11 @@ if not Color then
 		return self;
 	end
 
-	function Color:toLinear() 
-		local function f(val) 
+	function Color:toLinear()
+		local function f(val)
 			val = val/Color.ONE
 			-- if val<=0.081 then val = val/4.5; else val = ((val+0.099)/1.099)^2.2; end
-			
+
 			-- works much metter: https://fr.wikipedia.org/wiki/SRGB#Transformation_inverse
 			if val<=0.04045 then val = val/12.92 else val = ((val+0.055)/1.055)^2.4 end
 			return val*Color.ONE
@@ -140,7 +140,7 @@ if not Color then
 
 	-- return the Color @(x,y) on the original screen in linear space
 	local screen_w, screen_h, _getLinearPictureColor = getpicturesize()
-	function getLinearPictureColor(x,y) 
+	function getLinearPictureColor(x,y)
 		if _getLinearPictureColor==nil then
 			_getLinearPictureColor = {}
 			for i=0,255 do _getLinearPictureColor[i] = Color:new(getbackupcolor(i)):toLinear(); end
@@ -171,20 +171,20 @@ if not Color then
 		end
 		return (x<0 or y<0 or x>=screen_w or y>=screen_h) and Color.black or _getLinearPictureColor[getbackuppixel(x,y)]
 	end
-	
+
 	-- http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
 	function Color.RGBtoXYZ(R,G,B)
 		return 0.4887180*R +0.3106803*G +0.2006017*B,
 			   0.1762044*R +0.8129847*G +0.0108109*B,
                             0.0102048*G +0.9897952*B
 	end
-	
+
 	function Color.XYZtoRGB(X,Y,Z)
 		return   2.3706743*X -0.9000405*Y -0.4706338*Z,
                 -0.5138850*X +1.4253036*Y +0.0885814*Z,
                  0.0052982*X -0.0146949*Y +1.0093968*Z
 	end
-	
+
 	-- https://fr.wikipedia.org/wiki/CIE_L*a*b*
 	function Color.XYZtoCIELab(X,Y,Z)
 		local function f(t)
@@ -209,7 +209,7 @@ if not Color then
 	function Color:toLab()
 		return Color.XYZtoCIELab(Color.RGBtoXYZ(self:toRGB()))
 	end
-	
+
 	-- http://www.brucelindbloom.com/Eqn_DeltaE_CIE2000.html
 	function Color.dE1976(col1,col2)
 		local L1,a1,b1 = col1:toLab()
@@ -219,29 +219,29 @@ if not Color then
 	function Color.dE1994(col1,col2)
 		local L1,a1,b1 = col1:toLab()
 		local L2,a2,b2 = col2:toLab()
-		
+
 		local k1,k2 = 0.045,0.015
 		local kL,kC,kH = 1,1,1
-		
+
 		local c1 = (a1^2 + b1^2)^.5
 		local c2 = (a2^2 + b2^2)^.5
-		
+
 		local dA = a1 - a2
 		local dB = b1 - b2
 		local dC = c1 - c2
-		
+
 		local dH2 = dA^2 + dB^2 - dC^2
 		local dH = dH2>0 and dH2^.5 or 0
 		local dL = L1 - L2
-		
+
 		local sL = 1
 		local sC = 1 + k1*c1
 		local sH = 1 + k2*c1
-		
+
 		local vL = dL/(kL*sL)
 		local vC = dC/(kC*sC)
 		local vH = dH/(kH*sH)
-		
+
 		return (vL^2 + vC^2 + vH^2)^.5
 	end
 	-- http://www.color.org/events/colorimetry/Melgosa_CIEDE2000_Workshop-July4.pdf
@@ -249,11 +249,11 @@ if not Color then
 	function Color.dE2000(col1,col2)
 		local L1,a1,b1 = col1:toLab()
 		local L2,a2,b2 = col2:toLab()
-		
+
 		local kL,kC,kH = 1,1,1
 
 		local l_p = (L1 + L2)/2
-		
+
 		function sqrt(x)
 			return x^.5
 		end
@@ -277,22 +277,22 @@ if not Color then
 		local c1  = norm(a1,b1)
 		local c2  = norm(a2,b2)
 		local c_  = mean(c1,c2)
-		
+
 		local G   = 0.5*(1-sqrt(c_^7/(c_^7+25^7)))
 		local a1p = a1*(1+G)
 		local a2p = a2*(1+G)
-		
+
 		local c1p = norm(a1p,b1)
 		local c2p = norm(a2p,b2)
 		local c_p = mean(c1p,c2p)
-		
+
 		local h1p = atan2(b1,a1p)
 		local h2p = atan2(b2,a2p)
-		
-		local h_p = mean(h1p,h2p) + 
+
+		local h_p = mean(h1p,h2p) +
 		            (math.abs(h1p - h2p)<=180 and 0 or
 					  h1p+h2p<360 and 180 or -180)
-		
+
 		local T   = 1 -
 				    0.17 * cos(    h_p - 30) +
 			        0.24 * cos(2 * h_p     ) +
@@ -300,45 +300,45 @@ if not Color then
 			        0.20 * cos(4 * h_p - 63)
 
 		local dhp = h2p - h1p + (math.abs(h1p - h2p)<=180 and 0 or
-		                                         h2p<=h1p and 360 or 
+		                                         h2p<=h1p and 360 or
 												             -360)
 		local dLp = L2 - L1
 		local dCp = c2p - c1p
 		local dHp = 2*sqrt(c1p*c2p)*sin(dhp/2)
-		
-	
+
+
 		local sL = 1 + 0.015*(l_p - 50)^2/sqrt(20+(l_p-50)^2)
 		local sC = 1 + 0.045*c_p
 		local sH = 1 + 0.015*c_p*T
-		
+
 		local d0 = 30*math.exp(-((h_p-275)/25)^2)
-		
+
 		local rC = 2*sqrt(c_p^7/(c_p^7+25^7))
 		local rT = -rC * sin(2*d0)
-		
-		return sqrt( (dLp / (kL*sL))^2 + 
+
+		return sqrt( (dLp / (kL*sL))^2 +
 		             (dCp / (kC*sC))^2 +
 			         (dHp / (kH*sH))^2 +
 			         (dCp / (kC*sC))*(dHp / (kH*sH))*rT )
 	end
-	
+
 	function Color.dE2fast(col1,col2)
 		-- http://www.compuphase.com/cmetric.htm#GAMMA
 		local r1,g1,b1 = Color.clamp(col1:toRGB())
 		local r2,g2,b2 = Color.clamp(col2:toRGB())
-		
+
 		local rM = (r1+r2)/(Color.ONE*2)
-		
+
 		return ((r1-r2)^2)*(2+rM) +
 		       ((g1-g2)^2)*(4+1) +
 			   ((b1-b2)^2)*(3-rM)
 	end
-	
+
 	function Color:hash(M)
 		M=M or 256
 		local m=(M-1)/Color.ONE
-		local function f(x) 
-			return math.floor(.5+(x<0 and 0 or x>Color.ONE and Color.ONE or x)*m) 
+		local function f(x)
+			return math.floor(.5+(x<0 and 0 or x>Color.ONE and Color.ONE or x)*m)
 		end
 		return f(self.r)+M*(f(self.g)+M*f(self.b))
 	end

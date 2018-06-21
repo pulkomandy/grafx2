@@ -48,13 +48,13 @@ local function getLinearPixel(x,y)
 		end
 	end
 	p:div((y2-y1)*(x2-x1)*Color.ONE)
-	
+
 	return p
 end
 
 local dither = bayer.norm(bayer.double(bayer.double({{1,2},{3,4}})))
 local dx,dy=#dither,#dither[1]
- 
+
 -- get thomson palette pixel (linear, 0-1 range)
 local linearPalette = {}
 function linearPalette.get(i)
@@ -111,11 +111,11 @@ function best_couple.get(h)
 				if d<=dm then table.insert(best_found, {c1=i,c2=j}) end
 			end
 		end
-	
-		if best_couple.n>10000 then 
+
+		if best_couple.n>10000 then
 			-- keep memory usage low
-			best_couple = {n=0, get=best_couple.get} 
-		end 
+			best_couple = {n=0, get=best_couple.get}
+		end
 		best_couple[k] = best_found
 		best_couple.n  = best_couple.n+1
 	end
@@ -128,27 +128,27 @@ thomson.setMO5()
 -- convert picture
 local err1,err2 = {},{}
 local coefs = {0,0.6,0}
-for x=-1,320 do 
-	err1[x] = Color:new(0,0,0) 
-	err2[x] = Color:new(0,0,0) 
+for x=-1,320 do
+	err1[x] = Color:new(0,0,0)
+	err2[x] = Color:new(0,0,0)
 end
 for y = 0,199 do
 	err1,err2 = err2,err1
 	for x=-1,320 do err2[x]:mul(0) end
-	
+
 	for x = 0,319,8 do
 		local h,q = {},{} -- histo, expected color
 		for z=x,x+7 do
 			local d=dither[1+(y%dx)][1+(z%dx)]
 			local p=getLinearPixel(z,y):add(err1[z])
-			local c=((p.r>d) and 1 or 0) + 
-			        ((p.g>d) and 2 or 0) + 
+			local c=((p.r>d) and 1 or 0) +
+			        ((p.g>d) and 2 or 0) +
 					((p.b>d) and 4 or 0) + 1 -- theorical color
 
-			table.insert(q,c)			
+			table.insert(q,c)
 			h[c] = (h[c] or 0)+1
 		end
-		
+
 		local c1,c2
 		for c,_ in pairs(h) do
 			if c1==nil then c1=c
@@ -180,10 +180,10 @@ for y = 0,199 do
 				end
 			end
 		end
-		
+
 		-- thomson.pset(x,y,c1-1)
 		-- thomson.pset(x,y,-c2)
-		
+
 		for k=0,7 do
 			local z=x+k
 			local q=q[k+1]
@@ -217,4 +217,3 @@ do
 	end
 	if ok then thomson.savep(fullname) end
 end
-

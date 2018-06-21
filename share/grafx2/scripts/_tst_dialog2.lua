@@ -10,7 +10,7 @@ local form = gui.dialog{
     h=150,
     counter,
     gui.button{ label="+",
-      x=6, y=38, w=14, h=14, repeatable=true, click=function() 
+      x=6, y=38, w=14, h=14, repeatable=true, click=function()
       counter.value=counter.value+1;
     end},
     gui.button{ label="-",
@@ -45,4 +45,3 @@ local form = gui.dialog{
 }
 
 form:run()
-

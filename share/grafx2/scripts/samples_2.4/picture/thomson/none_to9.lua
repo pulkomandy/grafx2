@@ -1,5 +1,5 @@
--- ostro_mo5.lua : converts a color image into a 
--- TO9 image (320x200x16 with color clashes) 
+-- ostro_mo5.lua : converts a color image into a
+-- TO9 image (320x200x16 with color clashes)
 -- using Ostromoukhov's error diffusion algorithm.
 --
 -- Version: 02-jan-2017
@@ -31,7 +31,7 @@ dith:dither40cols(function(w,h,getLinearPixel)
 			if getbackuppixel(x,y)>15 then c16 = false end
 		end
 	end
-	
+
 	local pal
 	if c16 then
 		pal = {}

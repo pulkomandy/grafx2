@@ -1,5 +1,5 @@
--- ostro_zx.lua : converts a color image into a 
--- ZX-like image (8+8 fixed colors with color clash) 
+-- ostro_zx.lua : converts a color image into a
+-- ZX-like image (8+8 fixed colors with color clash)
 -- using Ostromoukhov's error diffusion algorithm.
 --
 -- Version: 03/21/2017
@@ -50,12 +50,12 @@ function OtherDither:new(a)
 				local r=v % 16
 				local g=math.floor(v/16)  % 16
 				local b=math.floor(v/256) % 16
-				setcolor(i+thomson._palette.offset-1, 
-						 thomson.levels.pc[r+1], 
-						 thomson.levels.pc[g+1], 
+				setcolor(i+thomson._palette.offset-1,
+						 thomson.levels.pc[r+1],
+						 thomson.levels.pc[g+1],
 						 thomson.levels.pc[b+1])
 			end
-			updatescreen()		
+			updatescreen()
 		end,
 		-- palette with thomson ordering (to use thomson's
 		-- lib support)
@@ -101,12 +101,12 @@ function OtherDither:getLinearPixel(x,y)
 			end
 		end
 		p:div((y2-y1)*(x2-x1)) --:floor()
-					
-		if self._getLinearPixel then 
-			self._getLinearPixel[k]=p 
+
+		if self._getLinearPixel then
+			self._getLinearPixel[k]=p
 		end
 	end
-	
+
 	return self._getLinearPixel and p:clone() or p
 end
 
@@ -118,20 +118,20 @@ end
 function OtherDither:dither()
 	local NORMALIZE=Color.NORMALIZE
 	Color.NORMALIZE=self.normalize
-	
+
 	local dither=OstroDither:new(self.pal)
 	dither.ccAcceptCouple = function(dither,c1,c2) return self:ccAcceptCouple(c1,c2) end
 	dither.clash_size = self.clash_size
 	dither.attenuation = .9
-	
+
 	self:setGfx()
-	dither:ccDither(self.width,self.height, 
-				  function(x,y) return self:getLinearPixel(x,y) end, 
-				  function(x,y,c) self:pset(x,y,c) end, 
-				  true, 
-				  function(y) 
+	dither:ccDither(self.width,self.height,
+				  function(x,y) return self:getLinearPixel(x,y) end,
+				  function(x,y,c) self:pset(x,y,c) end,
+				  true,
+				  function(y)
 					thomson.info("Converting...",
-							math.floor(y*100/self.height),"%") 
+							math.floor(y*100/self.height),"%")
 				  end,true)
 	-- refresh screen
 	setpicturesize(self.width,self.height)

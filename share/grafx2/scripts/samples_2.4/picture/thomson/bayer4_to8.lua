@@ -15,7 +15,7 @@
 -- This is my first code in lua, so excuse any bad
 -- coding practice.
 
--- use a zig zag. If false (recommended value), this gives 
+-- use a zig zag. If false (recommended value), this gives
 -- a raster look and feel
 local with_zig_zag = with_zig_zag or false
 
@@ -77,7 +77,7 @@ function bayer(matrix)
 		for i=1,n*2 do t[i]=0; end
 		r[j] = t;
 	end
-	
+
 	-- 0 3
 	-- 2 1
 	for j=1,m do
@@ -89,7 +89,7 @@ function bayer(matrix)
 			r[m*0+j][n*1+i] = v-0
 		end
 	end
-	
+
 	return r;
 end
 --]]
@@ -113,13 +113,13 @@ end
 
 -- get color statistics
 local stat = {};
-function stat:clear() 
+function stat:clear()
 	self.r = {}
 	self.g = {}
 	self.b = {}
 	for i=1,16 do self.r[i] = 0; self.g[i] = 0; self.b[i] = 0; end
 end
-function stat:update(px) 
+function stat:update(px)
 	local pc2to = thomson.levels.pc2to
 	local r,g,b=pc2to[px.r], pc2to[px.g], pc2to[px.b];
 	self.r[r] = self.r[r] + 1;
@@ -131,8 +131,8 @@ function stat:coversThr(perc)
 		local t=-stat[1]
 		for i,n in ipairs(stat) do t=t+n end
 		local thr = t*perc; t=-stat[1]
-		for i,n in ipairs(stat) do 
-			t=t+n 
+		for i,n in ipairs(stat) do
+			t=t+n
 			if t>=thr then return i end
 		end
 		return 0
@@ -175,7 +175,7 @@ function levels.compute(name, stat, num)
 	for _,t in ipairs(stat) do
 		max = math.max(t,max)
 		tot = tot + t
-	end	
+	end
 	local acc,full=-stat[1],0
 	for i,t in ipairs(stat) do
 		acc = acc + t
@@ -183,14 +183,14 @@ function levels.compute(name, stat, num)
 			full=thomson.levels.linear[i]
 			break
 		end
-	end	
+	end
 	-- sanity
 	if fixed_levels or full==0 then full=255 end
 	local res = {1}; num = num-1
 	for i=1,num do
 		local p = math.floor(full*i/num)
 		local q = thomson.levels.linear2to[p]
-		if q==res[i] and q<16 then q=q+1 end			
+		if q==res[i] and q<16 then q=q+1 end
 		if not fixed_levels and i<num then
 			if q>res[i]+1 and stat[q-1]>stat[q] then q=q-1 end
 			if q>res[i]+1 and stat[q-1]>stat[q] then q=q-1 end
@@ -199,7 +199,7 @@ function levels.compute(name, stat, num)
 		end
 		res[1+i] = q
 	end
-	
+
 	-- debug
 	if debug then
 		local txt = ""
@@ -211,7 +211,7 @@ function levels.compute(name, stat, num)
 		end
 		messagebox(txt)
 	end
-	
+
 	return res
 end
 function levels.computeAll(stat)
@@ -227,9 +227,9 @@ local function pset(x,y,px)
 	local function dither(val,thr,lvls)
 		local i=#lvls
 		local a,b = thomson.levels.linear[lvls[i]],1e30
-		while i>1 and val<a do 
+		while i>1 and val<a do
 			i=i-1;
-			a,b=thomson.levels.linear[lvls[i]],a; 
+			a,b=thomson.levels.linear[lvls[i]],a;
 		end
 		return i + ((val-a)>=thr*(b-a) and 0 or -1)
 	end
@@ -237,10 +237,10 @@ local function pset(x,y,px)
 	local r = dither(px.r, thr, levels.red);
 	local g = dither(px.g, thr, levels.grn);
 	local b = dither(px.b, thr, levels.blu);
-	
+
 	local i = r + b*4
 	local j = g==0 and 0 or (11 + g)
-	
+
 	if with_zig_zag and x%2==1 then
 		thomson.pset(x,y*2+0,j)
 		thomson.pset(x,y*2+1,i)
