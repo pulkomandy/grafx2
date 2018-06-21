@@ -23,6 +23,9 @@ job_win32:
         - "WIN32CROSS=1 make -j3"
         - "WIN32CROSS=1 make ziprelease"
         - "WIN32CROSS=1 make win32installer"
+        - "WIN32CROSS=1 API=win32 make -j3"
+        - "WIN32CROSS=1 API=win32 make ziprelease"
+        - "WIN32CROSS=1 API=win32 make win32installer"
     artifacts:
         paths:
             - "*.zip"
