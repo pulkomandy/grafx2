@@ -216,10 +216,17 @@ static void Win32_CreateWindow(int width, int height, int fullscreen)
   DWORD style;
   RECT r;
 
-	style = WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU;
-	/* allow window to be resized */
-	style |= WS_THICKFRAME;
-  style |= WS_MAXIMIZEBOX;
+  if (fullscreen)
+  {
+    style = WS_POPUP;
+  }
+  else
+  {
+    style = WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU;
+    /* allow window to be resized */
+    style |= WS_THICKFRAME;
+    style |= WS_MAXIMIZEBOX;
+  }
 
   r.left = 0;
   r.top = 0;
@@ -240,9 +247,40 @@ static void Win32_CreateWindow(int width, int height, int fullscreen)
 
 void GFX2_Set_mode(int *width, int *height, int fullscreen)
 {
+  static RECT backup_pos = { 0 }; // Last window position used when not in fullscreen
+
   Video_AllocateDib(*width, *height);
   if (Win32_hwnd == NULL)
     Win32_CreateWindow(*width, *height, fullscreen);
+  else
+  {
+    DWORD style = GetWindowLong(Win32_hwnd, GWL_STYLE);
+    if (fullscreen)
+    {
+      style &= ~WS_OVERLAPPEDWINDOW;
+      style |= WS_POPUP;
+      SetWindowLong(Win32_hwnd, GWL_STYLE, style);
+      SetWindowPos(Win32_hwnd, HWND_TOPMOST, 0, 0, *width, *height, SWP_FRAMECHANGED | SWP_NOCOPYBITS);
+    }
+    else if ((style & WS_POPUP) != 0)
+    {
+      style &= ~WS_POPUP;
+      style |= WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_THICKFRAME | WS_MAXIMIZEBOX;
+      SetWindowLong(Win32_hwnd, GWL_STYLE, style);
+      if (backup_pos.bottom == 0 || backup_pos.left == 0)
+      { // could happen if we started in fullscreen mode
+        backup_pos.left = backup_pos.right + *width;
+        backup_pos.bottom = backup_pos.top + *height;
+        AdjustWindowRect(&backup_pos, style, FALSE);
+      }
+      SetWindowPos(Win32_hwnd, HWND_TOPMOST,
+        backup_pos.left, backup_pos.top,
+        backup_pos.right - backup_pos.left, backup_pos.bottom - backup_pos.top,
+        SWP_FRAMECHANGED | SWP_NOCOPYBITS);
+    }
+  }
+  if (!fullscreen)
+    GetWindowRect(Win32_hwnd, &backup_pos);
 }
 
 byte Get_Screen_pixel(int x, int y)

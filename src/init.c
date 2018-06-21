@@ -2081,14 +2081,27 @@ void Set_all_video_modes(void)
     // Note that we voluntarily omit the first entry: the default mode.
     qsort(&Video_mode[1], Nb_video_modes - 1, sizeof(T_Video_mode), Compare_video_modes);
   }
-#endif
-#if defined(USE_SDL2)
+#elif defined(USE_SDL2)
   {
     SDL_DisplayMode dm;
     if (SDL_GetDesktopDisplayMode(0, &dm) == 0)
     {
       // Set the native desktop video mode
       Set_video_mode(dm.w, dm.h, 0, 1);
+    }
+  }
+#elif defined(WIN32)
+  {
+    int width = GetSystemMetrics(SM_CXSCREEN);
+    int height = GetSystemMetrics(SM_CYSCREEN);
+    if (width > 0 && height > 0)
+    {
+      Video_mode[Nb_video_modes].Width      = width;
+      Video_mode[Nb_video_modes].Height     = height;
+      Video_mode[Nb_video_modes].Mode       = 0;
+      Video_mode[Nb_video_modes].Fullscreen = 1;
+      Video_mode[Nb_video_modes].State      = 1;
+      Nb_video_modes ++;
     }
   }
 #endif
