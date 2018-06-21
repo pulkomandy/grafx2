@@ -9,5 +9,3 @@ perl -ne 'if ($_ =~ /^\s*#define ([^_]\w+)/) { print "$1\n"; }' *.h *.c | sort -
 
 Translate some source files
 ./translate.pl *.c *.h
-
-
