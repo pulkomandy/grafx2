@@ -2,6 +2,7 @@
 ;Based on the Example Script written by Joost Verburg
 
 !define VERSION 2.5.1946
+!define API sdl
 
 !define INSTALLSIZE 10072
 
@@ -15,7 +16,7 @@
 
   ;Name and file
   Name "Grafx2"
-  OutFile "grafx2-${VERSION}.win32.exe"
+  OutFile "grafx2-${API}-${VERSION}.win32.exe"
 
   ;Default installation folder
   InstallDir "$PROGRAMFILES\Grafx2"
@@ -86,12 +87,14 @@ Section "Grafx2" SecProgram
   File ..\src\gfx2.ico
   File "..\src-${VERSION}.tgz"
   SetOutPath "$INSTDIR\bin"
-  File ..\bin\grafx2.exe
-  File ..\bin\SDL_image.dll
-  File ..\bin\SDL.dll
+  File ..\bin\grafx2-${API}.exe
+  StrCmp ${API} "sdl" 0 nosdl
+    File ..\bin\SDL_image.dll
+    File ..\bin\SDL.dll
+    File ..\bin\SDL_ttf.dll
+  nosdl:
   File ..\bin\libfreetype-6.dll
   File ..\bin\libjpeg-9.dll
-  File ..\bin\SDL_ttf.dll
   File ..\bin\zlib1.dll
   File ..\bin\libpng16-16.dll
   SetOutPath "$INSTDIR\share\grafx2"

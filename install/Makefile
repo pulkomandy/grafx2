@@ -4,16 +4,18 @@ MAKENSIS = makensis
 UNZIP = unzip -o
 SED = sed
 
-VERSIONTAG = ../obj/win32-sdl/versiontag
+API ?= sdl
+
+VERSIONTAG = ../obj/win32-$(API)/versiontag
 VERSION := $(shell cat $(VERSIONTAG))
 
 SOURCES = ../src-$(VERSION).tgz
-INSTALLER = grafx2-$(VERSION).win32.exe
+INSTALLER = grafx2-$(API)-$(VERSION).win32.exe
 
 all:	$(INSTALLER)
 
 $(INSTALLER):	WinInstaller.nsi $(SOURCES) $(VERSIONTAG)
-	$(SED) 's/VERSION .*/VERSION $(VERSION)/' $< | $(MAKENSIS) -
+	$(SED) -e 's/VERSION .*/VERSION $(VERSION)/' -e 's/API .*/API $(API)/' $< | $(MAKENSIS) -
 
 $(SOURCES):	../grafx2-$(VERSION)-win32.zip 
 	cd .. && $(UNZIP) grafx2-$(VERSION)-win32.zip src-$(VERSION).tgz
