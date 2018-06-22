@@ -42,6 +42,7 @@ static void *Windows_Screen = NULL;
 static int Windows_DIB_width = 0;
 static int Windows_DIB_height = 0;
 static HWND Win32_hwnd = NULL;
+static int Win32_Is_Fullscreen = 0;
 
 static void Win32_Repaint(HWND hwnd)
 {
@@ -67,6 +68,13 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
 {
   switch(uMsg)
   {
+  case WM_MOVE:
+    if (!Win32_Is_Fullscreen)
+    {
+      Config.Window_pos_x = LOWORD(lParam);
+      Config.Window_pos_y = HIWORD(lParam);
+    }
+    return 0;
   case WM_NCHITTEST:
     // send to test in which part of the windows the coordinates are
     break;
@@ -232,6 +240,7 @@ static void Win32_CreateWindow(int width, int height, int fullscreen)
 {
   DWORD style;
   RECT r;
+  int x, y;
 
   if (fullscreen)
   {
@@ -251,7 +260,16 @@ static void Win32_CreateWindow(int width, int height, int fullscreen)
   r.bottom = height;
   AdjustWindowRect(&r, style, FALSE);
 
-	Win32_hwnd = CreateWindow(TEXT("grafx2"), TEXT("grafx2"), style, CW_USEDEFAULT, CW_USEDEFAULT,
+  if (Config.Window_pos_x != 9999 && Config.Window_pos_y != 9999)
+  {
+    x = Config.Window_pos_x;
+    y = Config.Window_pos_y;
+  }
+  else
+  {
+    x = y = CW_USEDEFAULT;
+  }
+  Win32_hwnd = CreateWindow(TEXT("grafx2"), TEXT("grafx2"), style, x, y,
                             r.right - r.left, r.bottom - r.top, NULL, NULL,
                             GetModuleHandle(NULL), NULL);
 	if (Win32_hwnd == NULL)
@@ -264,8 +282,7 @@ static void Win32_CreateWindow(int width, int height, int fullscreen)
 
 void GFX2_Set_mode(int *width, int *height, int fullscreen)
 {
-  static RECT backup_pos = { 0 }; // Last window position used when not in fullscreen
-
+  Win32_Is_Fullscreen = fullscreen;
   Video_AllocateDib(*width, *height);
   if (Win32_hwnd == NULL)
     Win32_CreateWindow(*width, *height, fullscreen);
@@ -281,23 +298,29 @@ void GFX2_Set_mode(int *width, int *height, int fullscreen)
     }
     else if ((style & WS_POPUP) != 0)
     {
+      RECT r;
       style &= ~WS_POPUP;
       style |= WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_THICKFRAME | WS_MAXIMIZEBOX;
       SetWindowLong(Win32_hwnd, GWL_STYLE, style);
-      if (backup_pos.bottom == 0 || backup_pos.left == 0)
-      { // could happen if we started in fullscreen mode
-        backup_pos.left = backup_pos.right + *width;
-        backup_pos.bottom = backup_pos.top + *height;
-        AdjustWindowRect(&backup_pos, style, FALSE);
+      if (Config.Window_pos_x != 9999 && Config.Window_pos_y != 9999)
+      {
+        r.left = Config.Window_pos_x;
+        r.top = Config.Window_pos_y;
       }
+      else
+      {
+        r.left = 0;
+        r.top = 0;
+      }
+      r.right = r.left + *width;
+      r.bottom = r.top + *height;
+      AdjustWindowRect(&r, style, FALSE);
       SetWindowPos(Win32_hwnd, HWND_TOPMOST,
-        backup_pos.left, backup_pos.top,
-        backup_pos.right - backup_pos.left, backup_pos.bottom - backup_pos.top,
+        r.left, r.top,
+        r.right - r.left, r.bottom - r.top,
         SWP_FRAMECHANGED | SWP_NOCOPYBITS);
     }
   }
-  if (!fullscreen)
-    GetWindowRect(Win32_hwnd, &backup_pos);
 }
 
 byte Get_Screen_pixel(int x, int y)

@@ -1048,7 +1048,8 @@ void Program_shutdown(void)
   int      return_code;
 
   // Windows only: Recover the window position.
-  #if defined(WIN32) && (defined(USE_SDL) || defined(USE_SDL2))
+  #if defined(WIN32)
+  #if defined(USE_SDL) || defined(USE_SDL2)
   {
     RECT r;
     static SDL_SysWMinfo pInfo;
@@ -1059,6 +1060,8 @@ void Program_shutdown(void)
     Config.Window_pos_x = r.left;
     Config.Window_pos_y = r.top;
   }
+  #endif
+  // Config.Window_pos_x / Config.Window_pos_y are set in win32screen.c
   #else
   // All other targets: irrelevant dimensions.
   // Do not attempt to force them back on next program run.
