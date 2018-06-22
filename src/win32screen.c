@@ -131,10 +131,21 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
   case WM_MBUTTONDOWN:
   //case WM_MBUTTONUP:
     Key = KEY_MOUSEMIDDLE|Get_Key_modifiers();
+    user_feedback_required = 1;
+    return 0;
+  case WM_MOUSEWHEEL:
+    {
+      short delta = HIWORD(wParam);
+      if (delta > 0)
+        Key = KEY_MOUSEWHEELUP|Get_Key_modifiers();
+      else
+        Key = KEY_MOUSEWHEELDOWN|Get_Key_modifiers();
+    }
+    user_feedback_required = 1;
     return 0;
 // WM_MBUTTONDBLCLK
   case WM_KEYDOWN:  // lParam & 0xffff => repeat count.   (lParam >> 16) & 0x1ff => scancode
-    Key = wParam;
+    Key = wParam|Get_Key_modifiers();
     user_feedback_required = 1;
     return 0;
   case WM_KEYUP:
