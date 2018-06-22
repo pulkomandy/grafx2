@@ -95,13 +95,63 @@ int Nb_fonts;
 #define EXTID(a,b,c) ((((a)&255)<<16) | (((b)&255)<<8) | (((c)&255)))
 #define EXTID4(a,b,c,d) ((((a)&255)<<24) | (((b)&255)<<16) | (((c)&255)<<8) | (((d)&255)))
 
-int Compare_fonts(T_Font * font_1, T_Font * font_2)
+static int Compare_fonts(T_Font * font_1, T_Font * font_2)
 {
   if (font_1->Is_bitmap && !font_2->Is_bitmap)
     return -1;
   if (font_2->Is_bitmap && !font_1->Is_bitmap)
     return 1;
   return strcmp(font_1->Label, font_2->Label);
+}
+
+static void Insert_font(T_Font * font)
+{
+  // Gestion Liste
+  font->Next = NULL;
+  font->Previous = NULL;
+  if (font_list_start==NULL)
+  {
+    // Premiere (liste vide)
+    font_list_start = font;
+    Nb_fonts++;
+  }
+  else
+  {
+    int compare;
+    compare = Compare_fonts(font, font_list_start);
+    if (compare<=0)
+    {
+      if (compare==0 && !strcmp(font->Name, font_list_start->Name))
+      {
+        // Doublon
+        free(font->Name);
+        free(font);
+        return;
+      }
+      // Avant la premiere
+      font->Next=font_list_start;
+      font_list_start=font;
+      Nb_fonts++;
+    }
+    else
+    {
+      T_Font *searched_font;
+      searched_font=font_list_start;
+      while (searched_font->Next && (compare=Compare_fonts(font, searched_font->Next))>0)
+        searched_font=searched_font->Next;
+      // Après searched_font
+      if (compare==0 && strcmp(font->Name, searched_font->Next->Name)==0)
+      {
+        // Doublon
+        free(font->Name);
+        free(font);
+        return;
+      }
+      font->Next=searched_font->Next;
+      searched_font->Next=font;
+      Nb_fonts++;
+    }
+  }
 }
 
 // Ajout d'une fonte à la liste.
@@ -190,52 +240,7 @@ static void Add_font(const char *name, const char * font_name)
   for (index=0; index < 17 && font_name[index]!='\0' && font_name[index]!='.'; index++)
     font->Label[index]=font_name[index];
 
-  // Gestion Liste
-  font->Next = NULL;
-  font->Previous = NULL;
-  if (font_list_start==NULL)
-  {
-    // Premiere (liste vide)
-    font_list_start = font;
-    Nb_fonts++;
-  }
-  else
-  {
-    int compare;
-    compare = Compare_fonts(font, font_list_start);
-    if (compare<=0)
-    {
-      if (compare==0 && !strcmp(font->Name, font_list_start->Name))
-      {
-        // Doublon
-        free(font->Name);
-        free(font);
-        return;
-      }
-      // Avant la premiere
-      font->Next=font_list_start;
-      font_list_start=font;
-      Nb_fonts++;
-    }
-    else
-    {
-      T_Font *searched_font;
-      searched_font=font_list_start;
-      while (searched_font->Next && (compare=Compare_fonts(font, searched_font->Next))>0)
-        searched_font=searched_font->Next;
-      // Après searched_font
-      if (compare==0 && strcmp(font->Name, searched_font->Next->Name)==0)
-      {
-        // Doublon
-        free(font->Name);
-        free(font);
-        return;
-      }
-      font->Next=searched_font->Next;
-      searched_font->Next=font;
-      Nb_fonts++;
-    }
-  }
+  Insert_font(font);
 }
 
 
@@ -295,23 +300,8 @@ static int CALLBACK EnumFontFamCallback(CONST LOGFONTA *lpelf, CONST TEXTMETRICA
     font->Is_truetype = 1;
     snprintf(font->Label, sizeof(font->Label), "%-17.17sTT", lpelf->lfFaceName);
     font->Name = strdup(lpelf->lfFaceName);
-    // Gestion Liste
-    font->Next = NULL;
-    font->Previous = NULL;
-    // TODO insert at the right place
-    if (font_list_start==NULL)
-    {
-      // Premiere (liste vide)
-      font_list_start = font;
-      Nb_fonts++;
-    }
-    else
-    {
-      //font_list_start->Previous = font;
-      font->Next = font_list_start;
-      font_list_start = font;
-      Nb_fonts++;
-    }
+
+    Insert_font(font);
   }
   return 1; // non-zero : continue enumeration
 }
@@ -836,7 +826,7 @@ byte *Render_text(const char *str, int font_number, int size, int antialias, int
 {
   T_Font *font = font_list_start;
   int index=font_number;
-  #ifdef NOTTF
+  #if defined(NOTTF) && !defined(WIN32)
     (void) size; // unused
     (void) antialias; // unused
     (void) bold; // unused
@@ -851,10 +841,10 @@ byte *Render_text(const char *str, int font_number, int size, int antialias, int
     font = font->Next;
   if (font->Is_truetype)
   {
-  #if defined(WIN32)
-    return Render_text_Win32(str, font_number, size, antialias, bold, italic, width, height, palette);
-  #elif !defined(NOTTF)
+  #if !defined(NOTTF)
     return Render_text_TTF(str, font_number, size, antialias, bold, italic, width, height, palette);
+  #elif defined(WIN32)
+    return Render_text_Win32(str, font_number, size, antialias, bold, italic, width, height, palette);
   #else
     return NULL;
   #endif
