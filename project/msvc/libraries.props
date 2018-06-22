@@ -9,6 +9,7 @@
     <LuaIncDir>..\..\..\..\lua\include</LuaIncDir>
     <LuaLibDir>..\..\..\..\lua</LuaLibDir>
     <PNGIncDir>..\..\..\..\lpng1634</PNGIncDir>
-    <PNGLibDir>..\..\..\..\lpng1634\projects\vstudio\Debug</PNGLibDir>
+    <PNGLibDirDebug>..\..\..\..\lpng1634\projects\vstudio\Debug Library</PNGLibDirDebug>
+    <PNGLibDirRelease>..\..\..\..\lpng1634\projects\vstudio\Release Library</PNGLibDirRelease>
   </PropertyGroup>
 </Project>
