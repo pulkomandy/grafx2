@@ -78,7 +78,7 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
     break;
   case WM_CLOSE:
     Quit_is_required = 1;
-    break;
+    return 0;
   case WM_ERASEBKGND:
     // the background should be erased
     break;
