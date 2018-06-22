@@ -67,6 +67,9 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
 {
   switch(uMsg)
   {
+  case WM_NCHITTEST:
+    // send to test in which part of the windows the coordinates are
+    break;
   case WM_CREATE:
     break;
   case WM_SIZE:
@@ -75,6 +78,9 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
     break;
   case WM_CLOSE:
     Quit_is_required = 1;
+    break;
+  case WM_ERASEBKGND:
+    // the background should be erased
     break;
   case WM_PAINT:
     Win32_Repaint(hwnd);
