@@ -777,7 +777,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
           goto affichage;
         }
         
-      } while(input_key==0
+      } while(input_key==0 && Key == 0
 #if defined(USE_SDL2)
               && Key_Text[0] == '\0'
 #endif
@@ -848,7 +848,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
     }
     else
 #endif
-    switch (input_key)
+    switch (Key)
     {
       case KEY_DELETE : // Suppr.
             if (position<size)
@@ -956,7 +956,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
         break;
       default :
 #if !defined(USE_SDL2)
-        if (size<max_size)
+        if (size<max_size && input_key != 0)
         {
           // Si la touche était autorisée...
           byte is_authorized = Valid_character(input_key, input_type);

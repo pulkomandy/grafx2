@@ -164,7 +164,7 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
   default:
     {
       char msg[256];
-      snprintf(msg, sizeof(msg), "unknown Message : 0x%x", uMsg);
+      snprintf(msg, sizeof(msg), "unknown Message : 0x%04x wParam=%08x lParam=%08x", uMsg, wParam, lParam);
       Warning(msg);
     }
   }
