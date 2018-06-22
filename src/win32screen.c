@@ -346,6 +346,24 @@ void Screen_FillRect(int x, int y, int w, int h, byte color)
   int i;
   byte * ptr;
 
+  if (x < 0)
+  {
+    w += x;
+    x = 0;
+  }
+  if (y < 0)
+  {
+    h += y;
+    y = 0;
+  }
+  if (x > Windows_DIB_width || y > Windows_DIB_height)
+    return;
+  if ((x + w) > Windows_DIB_width)
+    w = Windows_DIB_width - x;
+  if ((y + h) > Windows_DIB_height)
+    h = Windows_DIB_height - y;
+  if (w <= 0 || h <= 0)
+    return;
   for (i = 0; i < h; i++) {
     ptr = Get_Screen_pixel_ptr(x, y + i);
     memset(ptr, color, w);
