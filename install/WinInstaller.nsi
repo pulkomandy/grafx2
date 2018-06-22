@@ -6,6 +6,10 @@
 
 !define INSTALLSIZE 10072
 
+!define FREETYPEDLL libfreetype-6.dll
+!define JPEGDLL     libjpeg-9.dll
+!define PNGDLL      libpng16-16.dll
+
 ;--------------------------------
 ;Include Modern UI
 
@@ -73,7 +77,7 @@ FunctionEnd
 
 Function .onInstSuccess
   MessageBox MB_YESNO "Run GrafX2 now ?" IDNO norun
-    Exec $INSTDIR\bin\grafx2.exe
+    Exec $INSTDIR\bin\grafx2-${API}.exe
   norun:
 FunctionEnd
 
@@ -93,10 +97,10 @@ Section "Grafx2" SecProgram
     File ..\bin\SDL.dll
     File ..\bin\SDL_ttf.dll
   nosdl:
-  File ..\bin\libfreetype-6.dll
-  File ..\bin\libjpeg-9.dll
+  File ..\bin\${FREETYPEDLL}
+  File ..\bin\${JPEGDLL}
   File ..\bin\zlib1.dll
-  File ..\bin\libpng16-16.dll
+  File ..\bin\${PNGDLL}
   SetOutPath "$INSTDIR\share\grafx2"
   File ..\share\grafx2\gfx2.gif
   File ..\share\grafx2\gfx2def.ini
@@ -157,7 +161,7 @@ SectionEnd
 Section "Desktop shortcut" SecShortcut
 
   SetOutPath "$INSTDIR"
-  CreateShortCut "$DESKTOP\Grafx2.lnk" "$INSTDIR\bin\grafx2.exe" "" "" "" SW_SHOWNORMAL
+  CreateShortCut "$DESKTOP\Grafx2.lnk" "$INSTDIR\bin\grafx2-${API}.exe" "" "" "" SW_SHOWNORMAL
 
 SectionEnd
 
@@ -182,17 +186,17 @@ Section "un.SecProgram"
 
   ;ADD YOUR OWN FILES HERE...
   Delete "$INSTDIR\gfx2.ico"
-  Delete "$INSTDIR\bin\grafx2.exe"
+  Delete "$INSTDIR\bin\grafx2-${API}.exe"
   Delete "$INSTDIR\src-${VERSION}.tgz"
   Delete "$INSTDIR\share\grafx2\gfx2.gif"
   Delete "$INSTDIR\share\grafx2\gfx2def.ini"
   Delete "$INSTDIR\bin\SDL_image.dll"
   Delete "$INSTDIR\bin\SDL.dll"
-  Delete "$INSTDIR\bin\libjpeg-9.dll"
-  Delete "$INSTDIR\bin\libfreetype-6.dll"
   Delete "$INSTDIR\bin\SDL_ttf.dll"
+  Delete "$INSTDIR\bin\${JPEGDLL}"
+  Delete "$INSTDIR\bin\${FREETYPEDLL}"
   Delete "$INSTDIR\bin\zlib1.dll"
-  Delete "$INSTDIR\bin\libpng16-16.dll"
+  Delete "$INSTDIR\bin\${PNGDLL}"
   Delete "$INSTDIR\bin\stdout.txt"
   Delete "$INSTDIR\bin\stderr.txt"
   RMDir  "$INSTDIR\bin"
