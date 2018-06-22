@@ -438,7 +438,10 @@ void For_each_file(const char * directory_name, void Callback(const char *, cons
   char search_string[MAX_PATH_CHARACTERS];
   HANDLE h;
 
-  _snprintf(search_string, sizeof(search_string), "%s\\*", directory_name);
+  if (Realpath(directory_name, full_filename))
+    _snprintf(search_string, sizeof(search_string), "%s\\*", full_filename);
+  else
+    _snprintf(search_string, sizeof(search_string), "%s\\*", directory_name);
   h = FindFirstFileA(search_string, &fd);
   if (h != INVALID_HANDLE_VALUE)
   {

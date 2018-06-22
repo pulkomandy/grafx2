@@ -132,6 +132,12 @@ static void Add_font(const char *name, const char * font_name)
     return;
 #endif
 
+#if defined(WIN32) && defined(NOTTF)
+  // Register font in windows so they will be visible with EnumFontFamiliesEx()
+  if (AddFontResourceExA(name, FR_PRIVATE, 0) > 0)
+    return;
+#endif
+
   font = (T_Font *)malloc(sizeof(T_Font));
 
   switch (EXTID(tolower(name[size-4]), tolower(name[size-3]), tolower(name[size-2])))
@@ -278,6 +284,38 @@ int TrueType_font(int index)
   return font->Is_truetype;
 }
 
+#if defined(WIN32) && defined(NOTTF)
+static int CALLBACK EnumFontFamCallback(CONST LOGFONTA *lpelf, CONST TEXTMETRICA *lpntm, DWORD FontType, LPARAM lParam)
+{
+  T_Font * font;
+  if (FontType & TRUETYPE_FONTTYPE)
+  {
+    font = malloc(sizeof(T_Font));
+    font->Is_bitmap = 0;
+    font->Is_truetype = 1;
+    snprintf(font->Label, sizeof(font->Label), "%-17.17sTT", lpelf->lfFaceName);
+    font->Name = strdup(lpelf->lfFaceName);
+    // Gestion Liste
+    font->Next = NULL;
+    font->Previous = NULL;
+    // TODO insert at the right place
+    if (font_list_start==NULL)
+    {
+      // Premiere (liste vide)
+      font_list_start = font;
+      Nb_fonts++;
+    }
+    else
+    {
+      //font_list_start->Previous = font;
+      font->Next = font_list_start;
+      font_list_start = font;
+      Nb_fonts++;
+    }
+  }
+  return 1; // non-zero : continue enumeration
+}
+#endif
 
 
 // Initialisation à faire une fois au début du programme
@@ -309,6 +347,18 @@ void Init_text(void)
         sprintf(directory_name, "%s\\FONTS", WindowsPath);
         For_each_file(directory_name, Add_font);
       }
+    }
+    #else
+    {
+      LOGFONTA lf;
+      HDC dc = GetDC(NULL);
+      memset(&lf, 0, sizeof(lf));
+      lf.lfCharSet = ANSI_CHARSET /* DEFAULT_CHARSET*/;
+      lf.lfPitchAndFamily = 0;
+      //EnumFontsA(dc, NULL, EnumFontCallback, NULL);
+      //EnumFontFamiliesA(dc, NULL, EnumFontFamCallback, 0);
+      EnumFontFamiliesExA(dc, &lf, EnumFontFamCallback, 0, 0);
+      ReleaseDC(NULL, dc);
     }
     #endif
   #elif defined(__macosx__)
@@ -547,6 +597,104 @@ byte *Render_text_TTF(const char *str, int font_number, int size, int antialias,
 }
 #endif
 
+#if defined(WIN32)
+byte *Render_text_Win32(const char *str, int font_number, int size, int antialias, int bold, int italic, int *width, int *height, T_Palette palette)
+{
+  int str_len;
+  HGDIOBJ oldobj;
+  HGDIOBJ oldfont;
+  RECT rect;
+  BITMAPINFO *bi;
+  HDC dc;
+  HBITMAP bm;
+  SIZE s;
+  byte * pixels = NULL;
+  byte * new_brush = NULL;
+  int i;
+  HFONT font;
+  const char * font_name;
+
+  font_name = Font_name(font_number);
+
+  font = CreateFontA(size, 0, 0, 0 /* nOrientation */,
+                     bold ? FW_BOLD : FW_REGULAR, italic, 0 /* underline */, 0 /*strikeout */,
+                     ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                     antialias ? ANTIALIASED_QUALITY : NONANTIALIASED_QUALITY /* DEFAULT_QUALITY*/,
+                     DEFAULT_PITCH | FF_DONTCARE, font_name);
+  if (font == NULL)
+    return NULL;
+
+  dc = CreateCompatibleDC(NULL);
+  oldfont = SelectObject(dc, font);
+  str_len = (int)strlen(str);
+  if (!GetTextExtentPoint32A(dc, str, str_len, &s))
+  {
+    s.cx = 320;
+    s.cy = 32;
+  }
+
+  bi = (BITMAPINFO*)_alloca(sizeof(BITMAPINFOHEADER) + sizeof(RGBQUAD) * 256);
+  memset(bi, 0, sizeof(BITMAPINFOHEADER) + sizeof(RGBQUAD) * 256);
+  bi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+	bi->bmiHeader.biWidth = (s.cx + 3) & ~3;
+	bi->bmiHeader.biHeight = -s.cy;
+	bi->bmiHeader.biPlanes = 1;
+	bi->bmiHeader.biBitCount = 8;
+	bi->bmiHeader.biCompression = BI_RGB;
+
+  for (i = 0; i < 255; i++) {
+    bi->bmiColors[i].rgbBlue = i;
+    bi->bmiColors[i].rgbBlue = i;
+    bi->bmiColors[i].rgbBlue = i;
+  }
+  bm = CreateDIBSection(dc, bi, DIB_RGB_COLORS, &pixels, NULL, 0);
+  oldobj = SelectObject(dc, bm);
+
+  SetTextColor(dc, RGB(255,255,255));
+  SetBkColor(dc, RGB(0,0,0));
+  //SetBkMode(dc,TRANSPARENT);
+  rect.left=0;
+  rect.top=0;
+  rect.right = s.cx;
+  rect.bottom = s.cy;
+  DrawTextA(dc, str, str_len, &rect, DT_LEFT | DT_SINGLELINE | DT_NOCLIP | DT_NOPREFIX ) ;
+  GdiFlush();
+  SelectObject(dc, oldobj);
+  SelectObject(dc, oldfont);
+
+  new_brush = malloc(s.cx*s.cy);
+  if (antialias)
+  {
+    int y;
+    // TODO complete the antialiasing processing
+    for (y = 0; y < s.cy; y++)
+    {
+      memcpy(new_brush + y * s.cx, pixels + y * bi->bmiHeader.biWidth, s.cx);
+    }
+  }
+  else
+  {
+    int x, y;
+    for (y = 0; y < s.cy; y++)
+    {
+      for (x = 0; x < s.cx; x++)
+      {
+        byte v = pixels[y*bi->bmiHeader.biWidth+x];
+        new_brush[y*s.cx+x] = (v != 0) ? Fore_color : Back_color;
+      }
+    }
+    memcpy(palette, Main.palette, sizeof(T_Palette));
+  }
+  *width = s.cx;
+  *height = s.cy;
+
+  DeleteObject(bm);
+  ReleaseDC(NULL, dc);
+  DeleteObject(font);
+  return new_brush;
+}
+#endif
+
 #if defined(USE_SDL) || defined(USE_SDL2)
 byte *Render_text_SFont(const char *str, int font_number, int *width, int *height, T_Palette palette)
 {
@@ -703,7 +851,9 @@ byte *Render_text(const char *str, int font_number, int size, int antialias, int
     font = font->Next;
   if (font->Is_truetype)
   {
-  #ifndef NOTTF 
+  #if defined(WIN32)
+    return Render_text_Win32(str, font_number, size, antialias, bold, italic, width, height, palette);
+  #elif !defined(NOTTF)
     return Render_text_TTF(str, font_number, size, antialias, bold, italic, width, height, palette);
   #else
     return NULL;
