@@ -37,6 +37,10 @@
 #include <signal.h>
 #ifndef _MSC_VER
 #include <unistd.h>
+#else
+#if _MSC_VER < 1900
+#define snprintf _snprintf
+#endif
 #endif
 #if defined(USE_SDL) || defined(USE_SDL2)
 #include <SDL.h>
@@ -104,35 +108,45 @@ static int setsize_height;
 //--- Affichage de la syntaxe, et de la liste des modes vidéos disponibles ---
 void Display_syntax(void)
 {
-  int mode_index;
-  printf("Syntax: grafx2 [<arguments>] [<picture1>] [<picture2>]\n\n");
-  printf("<arguments> can be:]\n");
-  printf("\t-? -h -H -help     for this help screen\n");
-  printf("\t-wide              to emulate a video mode with wide pixels (2x1)\n");
-  printf("\t-tall              to emulate a video mode with tall pixels (1x2)\n");
-  printf("\t-double            to emulate a video mode with double pixels (2x2)\n");
-  printf("\t-wide2             to emulate a video mode with double wide pixels (4x2)\n");
-  printf("\t-tall2             to emulate a video mode with double tall pixels (2x4)\n");
-  printf("\t-triple            to emulate a video mode with triple pixels (3x3)\n");
-  printf("\t-quadruple         to emulate a video mode with quadruple pixels (4x4)\n");
-  printf("\t-rgb n             to reduce RGB precision (2 to 256, 256=max precision)\n");
-  printf("\t-gamma n           to adjust Gamma correction (1 to 30, 10=no correction)\n");
-  printf("\t-skin <filename>   to use an alternate file with the menu graphics\n");
-  printf("\t-mode <videomode>  to set a video mode\n");
-  printf("\t-size <resolution> to set the image size\n");
-  printf("Arguments can be prefixed either by / - or --\n");
-  printf("They can also be abbreviated.\n\n");
-  printf("Available video modes:\n\n");
+  int mode_index, i;
+  char modes[1024*2];
+  const char * syntax =
+    "Syntax: grafx2 [<arguments>] [<picture1>] [<picture2>]\n\n"
+    "<arguments> can be:\n"
+    "\t-? -h -H -help     for this help screen\n"
+    "\t-wide              to emulate a video mode with wide pixels (2x1)\n"
+    "\t-tall              to emulate a video mode with tall pixels (1x2)\n"
+    "\t-double            to emulate a video mode with double pixels (2x2)\n"
+    "\t-wide2             to emulate a video mode with double wide pixels (4x2)\n"
+    "\t-tall2             to emulate a video mode with double tall pixels (2x4)\n"
+    "\t-triple            to emulate a video mode with triple pixels (3x3)\n"
+    "\t-quadruple         to emulate a video mode with quadruple pixels (4x4)\n"
+    "\t-rgb n             to reduce RGB precision (2 to 256, 256=max precision)\n"
+    "\t-gamma n           to adjust Gamma correction (1 to 30, 10=no correction)\n"
+    "\t-skin <filename>   to use an alternate file with the menu graphics\n"
+    "\t-mode <videomode>  to set a video mode\n"
+    "\t-size <resolution> to set the image size\n"
+    "Arguments can be prefixed either by / - or --\n"
+    "They can also be abbreviated.\n\n";
+  fputs(syntax, stdout);
+
+  i = snprintf(modes, sizeof(modes), "Available video modes:\n\n");
   for (mode_index = 0; mode_index < Nb_video_modes; mode_index += 12)
   {
     int k;
     for (k = 0; k < 6; k++)
     {
       if (mode_index + k >= Nb_video_modes) break;
-      printf("%12s",Mode_label(mode_index + k));
+      i += snprintf(modes + i, sizeof(modes) - i, "%12s", Mode_label(mode_index + k));
     }
-    puts("");
+    i += snprintf(modes + i, sizeof(modes) - i, "\n");
   }
+  fputs(modes, stdout);
+
+#if defined(WIN32)
+  MessageBoxA(NULL, syntax, "GrafX2", MB_OK);
+  MessageBoxA(NULL, modes, "GrafX2", MB_OK);
+#endif
 }
 
 // ---------------------------- Sortie impromptue ----------------------------
@@ -267,9 +281,9 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
 
   file_in_command_line = 0;
   Resolution_in_command_line = 0;
-  
+
   Current_resolution = Config.Default_resolution;
-  
+
   for (index = 1; index<argc; index++)
   {
     char *s = argv[index];
@@ -289,7 +303,7 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
       }
       else
         s++;
-  
+
       for (tmpi = 0; tmpi < ARRAY_SIZE(cmdparams); tmpi++)
       {
         if (!strcmp(s, cmdparams[tmpi].param))
@@ -462,7 +476,7 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
         {
           file_in_command_line ++;
           buffer = Realpath(argv[index], NULL);
-        
+
           if (file_in_command_line == 1)
           {
             // Separate path from filename
@@ -504,7 +518,7 @@ CT_ASSERT(sizeof(T_Palette)==768);
 // ------------------------ Initialiser le programme -------------------------
 // Returns 0 on fail
 int Init_program(int argc,char * argv[])
-{   
+{
   int temp;
   int starting_videomode;
   enum IMAGE_MODES starting_image_mode;
@@ -519,14 +533,14 @@ int Init_program(int argc,char * argv[])
   static char main_directory[MAX_PATH_CHARACTERS];
   static char spare_filename [MAX_PATH_CHARACTERS];
   static char spare_directory[MAX_PATH_CHARACTERS];
- 
-  #if defined(__MINT__)  
+
+  #if defined(__MINT__)
   printf("===============================\n");
   printf(" /|\\ GrafX2 %.19s\n", Program_version);
   printf(" compilation date: %.16s\n", __DATE__);
   printf("===============================\n");
-  #endif 
- 
+  #endif
+
 #ifdef ENABLE_FILENAMES_ICONV
   // iconv is used to convert filenames
   cd = iconv_open(TOCODE, FROMCODE);  // From UTF8 to ANSI
@@ -563,10 +577,10 @@ int Init_program(int argc,char * argv[])
 
   // On initialise les données sur le nom de fichier de l'image de brouillon:
   strcpy(Spare.selector.Directory,Main.selector.Directory);
-  
+
   Main.fileformat=DEFAULT_FILEFORMAT;
   Spare.fileformat    =DEFAULT_FILEFORMAT;
-  
+
   strcpy(Brush_selector.Directory,Main.selector.Directory);
   strcpy(Brush_file_directory,Main.selector.Directory);
   strcpy(Brush_filename       ,"NO_NAME.GIF");
@@ -575,18 +589,18 @@ int Init_program(int argc,char * argv[])
   strcpy(Palette_selector.Directory,Main.selector.Directory);
 
   // On initialise ce qu'il faut pour que les fileselects ne plantent pas:
-  
+
   Main.selector.Position=0; // Au début, le fileselect est en haut de la liste des fichiers
   Main.selector.Offset=0; // Au début, le fileselect est en haut de la liste des fichiers
   Main.selector.Format_filter=FORMAT_ALL_IMAGES;
-  
+
   Main.current_layer=0;
   Main.layers_visible=0xFFFFFFFF;
   Main.layers_visible_backup=0xFFFFFFFF;
   Spare.current_layer=0;
   Spare.layers_visible=0xFFFFFFFF;
   Spare.layers_visible_backup=0xFFFFFFFF;
-  
+
   Spare.selector.Position=0;
   Spare.selector.Offset=0;
   Spare.selector.Format_filter=FORMAT_ALL_IMAGES;
@@ -622,12 +636,12 @@ int Init_program(int argc,char * argv[])
   Spare.magnifier_offset_X=0;
   Spare.magnifier_offset_Y=0;
   Keyboard_click_allowed = 1;
-  
+
   Main.safety_backup_prefix = SAFETYBACKUP_PREFIX_A[0];
   Spare.safety_backup_prefix = SAFETYBACKUP_PREFIX_B[0];
   Main.time_of_safety_backup = 0;
   Spare.time_of_safety_backup = 0;
-  
+
 
 #if defined(USE_SDL) || defined(USE_SDL2)
   // SDL
@@ -638,7 +652,7 @@ int Init_program(int argc,char * argv[])
     return(0);
   }
 #endif
-  
+
   //Joystick = SDL_JoystickOpen(0);
 #if defined(USE_SDL)
   SDL_EnableKeyRepeat(250, 32);
@@ -646,7 +660,7 @@ int Init_program(int argc,char * argv[])
   SDL_WM_SetCaption("GrafX2","GrafX2");
 #endif
   Define_icon();
-  
+
   // Texte
   Init_text();
 
@@ -725,13 +739,13 @@ int Init_program(int argc,char * argv[])
   Init_brush_container();
 
   Windows_open=0;
-  
+
   // Paintbrush
   if (!(Paintbrush_sprite=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE))) Error(ERROR_MEMORY);
-  
+
   // Load preset paintbrushes (uses Paintbrush_ variables)
   Init_paintbrushes();
-  
+
   // Set a valid paintbrush afterwards
   *Paintbrush_sprite=1;
   Paintbrush_width=1;
@@ -739,7 +753,7 @@ int Init_program(int argc,char * argv[])
   Paintbrush_offset_X=0;
   Paintbrush_offset_Y=0;
   Paintbrush_shape=PAINTBRUSH_SHAPE_ROUND;
-  
+
   #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
   // Prefer cycling active by default
   Cycling_mode=1;
@@ -764,7 +778,7 @@ int Init_program(int argc,char * argv[])
   temp=Load_INI(&Config);
   if (temp)
     Error(temp);
-  
+
   if(!Config.Allow_multi_shortcuts)
   {
     Remove_duplicate_shortcuts();
@@ -794,11 +808,11 @@ int Init_program(int argc,char * argv[])
   // Gfx->Default_palette[MC_Dark] =Config.Fav_menu_colors[1];
   // Gfx->Default_palette[MC_Light]=Config.Fav_menu_colors[2];
   // Gfx->Default_palette[MC_White]=Config.Fav_menu_colors[3];
-  
+
   // Even when using the skin's palette, if RGB range is small
   // the colors will be unusable.
   Compute_optimal_menu_colors(Gfx->Default_palette);
-    
+
   // Infos sur les trames (Sieve)
   Sieve_mode=0;
   Copy_preset_sieve(0);
@@ -852,20 +866,20 @@ int Init_program(int argc,char * argv[])
   // Open a console for debugging...
   //ActivateConsole();
   #endif
-  
+
   Main.image_width=Screen_width/Pixel_width;
   Main.image_height=Screen_height/Pixel_height;
   Spare.image_width=Screen_width/Pixel_width;
   Spare.image_height=Screen_height/Pixel_height;
-  
-  starting_image_mode = Config.Default_mode_layers ? 
+
+  starting_image_mode = Config.Default_mode_layers ?
     IMAGE_MODE_LAYERED : IMAGE_MODE_ANIMATION;
   // Allocation de mémoire pour les différents écrans virtuels (et brosse)
   if (Init_all_backup_lists(starting_image_mode , Screen_width, Screen_height)==0)
     Error(ERROR_MEMORY);
   // Update toolbars' visibility, now that the current image has a mode
   Check_menu_mode();
-  
+
   // Nettoyage de l'écran virtuel (les autres recevront celui-ci par copie)
   memset(Main_screen,0,Main.image_width*Main.image_height);
 
@@ -930,13 +944,13 @@ int Init_program(int argc,char * argv[])
   {
     strcpy(Main.selector.Directory, main_directory);
   }
-  
+
   // Test de recuperation de fichiers sauvés
   switch (Check_recovery())
   {
     T_IO_Context context;
 
-    default:    
+    default:
       // Some files were loaded from last crash-exit.
       // Do not load files from command-line, nor show splash screen.
       Compute_optimal_menu_colors(Main.palette);
@@ -955,9 +969,9 @@ int Init_program(int argc,char * argv[])
         "Some backups can be present in\n"
         "the spare page too.\n");
       break;
-  
+
     case -1: // Unable to write lock file
-      Verbose_message("Warning", 
+      Verbose_message("Warning",
         "Safety backups (every minute) are\n"
         "disabled because Grafx2 is running\n"
         "from a read-only device, or other\n"
@@ -965,14 +979,14 @@ int Init_program(int argc,char * argv[])
       break;
 
     case 0:
-    
+
       switch (file_in_command_line)
       {
         case 0:
           if (Config.Opening_message)
             Button_Message_initial();
           break;
-  
+
         case 2:
           // Load this file
           Init_context_layered_image(&context, spare_filename, spare_directory);
@@ -980,7 +994,7 @@ int Init_program(int argc,char * argv[])
           Destroy_context(&context);
           Redraw_layered_image();
           End_of_modification();
-  
+
           Button_Page(BUTTON_PAGE);
           // no break ! proceed with the other file now
         case 1:
@@ -1011,7 +1025,7 @@ int Init_program(int argc,char * argv[])
           // If only one image was loaded, assume the spare has same image type
           if (file_in_command_line==1)
             Spare.backups->Pages->Image_mode = Main.backups->Pages->Image_mode;
-          
+
           Hide_cursor();
           Compute_optimal_menu_colors(Main.palette);
           Back_color=Main.backups->Pages->Background_transparent ?
@@ -1019,14 +1033,14 @@ int Init_program(int argc,char * argv[])
             Best_color_range(0,0,0,Config.Palette_cells_X*Config.Palette_cells_Y);
           Fore_color=Main.palette[Back_color].R+Main.palette[Back_color].G+Main.palette[Back_color].B < 3*127 ?
             Best_color_range(255,255,255,Config.Palette_cells_X*Config.Palette_cells_Y) :
-            Best_color_range(0,0,0,Config.Palette_cells_X*Config.Palette_cells_Y);  
+            Best_color_range(0,0,0,Config.Palette_cells_X*Config.Palette_cells_Y);
           Check_menu_mode();
           Display_all_screen();
           Display_menu();
           Display_cursor();
           Resolution_in_command_line = 0;
           break;
-    
+
         default:
           break;
       }
@@ -1053,7 +1067,7 @@ void Program_shutdown(void)
   {
     RECT r;
     static SDL_SysWMinfo pInfo;
-    
+
     SDL_GetWMInfo(&pInfo);
     GetWindowRect(pInfo.window, &r);
 
@@ -1151,12 +1165,12 @@ void Program_shutdown(void)
 #if defined(USE_SDL) || defined(USE_SDL2)
   SDL_Quit();
 #endif
-  
+
   #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
   chdir("/usr/gp2x");
   execl("/usr/gp2x/gp2xmenu", "/usr/gp2x/gp2xmenu", NULL);
   #endif
-  
+
 }
 
 
@@ -1169,28 +1183,91 @@ int main(int argc,char * argv[])
 {
 #if defined(WIN32) && !defined(USE_SDL) && !defined(USE_SDL2)
   TCHAR ModuleFileName[MAX_PATH];
-  TCHAR ModuleShortFileName[MAX_PATH];
-  int i;
+  TCHAR TmpArg[MAX_PATH];
+  TCHAR ShortFileName[MAX_PATH];
+  int i, j, k;
+  int inquote = 0;
   int argc = 0;
   char arg_buffer[4096];
-  char * argv[16] = {NULL};
+  char * argv[64] = {NULL};
 
   Init_Win32(hInstance, hPrevInstance);
-  GetModuleFileName(NULL, ModuleFileName, MAX_PATH);
-  GetShortPathName(ModuleFileName, ModuleShortFileName, MAX_PATH);
-  argv[argc++] = arg_buffer;
-  for (i = 0; i < (int)sizeof(arg_buffer); i++) {
-    arg_buffer[i] = (char)ModuleShortFileName[i];
-    if (arg_buffer[i] == 0) break;
+  if (GetModuleFileName(NULL, ModuleFileName, MAX_PATH) == 0)
+  {
+    MessageBoxA(NULL, "Error initializing program", NULL, MB_OK | MB_ICONERROR);
+    return 1;
   }
-  // TODO : parse command line
+  GetShortPathName(ModuleFileName, ShortFileName, MAX_PATH);
+  argv[argc++] = arg_buffer;
+  for (i = 0; i < (int)sizeof(arg_buffer); )
+  {
+    arg_buffer[i] = (char)ShortFileName[i];
+    if (arg_buffer[i++] == 0) break;
+  }
+  k = 0;
+  for (j = 0; pCmdLine[j] != 0 && k < MAX_PATH - 1; j++)
+  {
+    if (inquote)
+    {
+      if (pCmdLine[j] == '"')
+      {
+        inquote = 0;
+        continue;
+      }
+    }
+    else
+    {
+      if (pCmdLine[j] == '"')
+      {
+        inquote = 1;
+        continue;
+      }
+      if (pCmdLine[j] == ' ' || pCmdLine[j] == '\t')
+      { // next argument
+        TmpArg[k++] = '\0';
+        argv[argc++] = arg_buffer + i;
+        if (GetShortPathName(TmpArg, ShortFileName, MAX_PATH) > 0)
+        {
+          for (k = 0; ShortFileName[k] != 0; k++)
+            arg_buffer[i++] = ShortFileName[k];
+        }
+        else
+        {
+          for (k = 0; TmpArg[k] != 0; k++)
+            arg_buffer[i++] = TmpArg[k];
+        }
+        arg_buffer[i++] = 0;
+        k = 0;
+        continue;
+      }
+    }
+    TmpArg[k++] = pCmdLine[j];
+  }
+  TmpArg[k] = '\0';
+  if (k > 0)
+  {
+    argv[argc++] = arg_buffer + i;
+    if (GetShortPathName(TmpArg, ShortFileName, MAX_PATH) > 0)
+    {
+      for (k = 0; ShortFileName[k] != 0; k++)
+        arg_buffer[i++] = ShortFileName[k];
+    }
+    else
+    {
+      for (k = 0; TmpArg[k] != 0; k++)
+        arg_buffer[i++] = TmpArg[k];
+    }
+    arg_buffer[i++] = 0;
+  }
+
+  // TODO : nCmdShow indicates if the window must be maximized, etc.
 #endif
   if(!Init_program(argc,argv))
   {
     Program_shutdown();
     return 0;
   }
-  
+
   Main_handler();
 
   Program_shutdown();
