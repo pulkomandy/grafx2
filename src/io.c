@@ -98,82 +98,154 @@ int Write_bytes(FILE *file, void *src, size_t size)
 // Renvoie -1 si OK, 0 en cas d'erreur
 int Read_word_le(FILE *file, word *dest)
 {
+#if defined(USE_SDL) || defined(USE_SDL2)
   if (fread(dest, 1, sizeof(word), file) != sizeof(word))
     return 0;
   #if SDL_BYTEORDER != SDL_LIL_ENDIAN
     *dest = SDL_Swap16(*dest);
   #endif
   return -1;
+#else
+  byte buffer[2];
+  if (fread(buffer, 1, 2, file) != 2)
+    return 0;
+  *dest = (word)buffer[0] | (word)buffer[1] << 8;
+  return -1;
+#endif
 }
 // Ecrit un word (little-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
 int Write_word_le(FILE *file, word w)
 {
+#if defined(USE_SDL) || defined(USE_SDL2)
   #if SDL_BYTEORDER != SDL_LIL_ENDIAN
     w = SDL_Swap16(w);
   #endif
   return fwrite(&w, 1, sizeof(word), file) == sizeof(word);
+#else
+  if (fputc((w >> 0) & 0xff, file) == EOF)
+    return 0;
+  if (fputc((w >> 8) & 0xff, file) == EOF)
+    return 0;
+  return -1;
+#endif
 }
 // Lit un word (big-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
 int Read_word_be(FILE *file, word *dest)
 {
+#if defined(USE_SDL) || defined(USE_SDL2)
   if (fread(dest, 1, sizeof(word), file) != sizeof(word))
     return 0;
   #if SDL_BYTEORDER != SDL_BIG_ENDIAN
     *dest = SDL_Swap16(*dest);
   #endif
   return -1;
+#else
+  byte buffer[2];
+  if (fread(buffer, 1, 2, file) != 2)
+    return 0;
+  *dest = (word)buffer[0] << 8 | (word)buffer[1];
+  return -1;
+#endif
 }
 // Ecrit un word (big-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
 int Write_word_be(FILE *file, word w)
 {
+#if defined(USE_SDL) || defined(USE_SDL2)
   #if SDL_BYTEORDER != SDL_BIG_ENDIAN
     w = SDL_Swap16(w);
   #endif
   return fwrite(&w, 1, sizeof(word), file) == sizeof(word);
+#else
+  if (fputc((w >> 8) & 0xff, file) == EOF)
+    return 0;
+  if (fputc((w >> 0) & 0xff, file) == EOF)
+    return 0;
+  return -1;
+#endif
 }
 // Lit un dword (little-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
 int Read_dword_le(FILE *file, dword *dest)
 {
+#if defined(USE_SDL) || defined(USE_SDL2)
   if (fread(dest, 1, sizeof(dword), file) != sizeof(dword))
     return 0;
   #if SDL_BYTEORDER != SDL_LIL_ENDIAN
     *dest = SDL_Swap32(*dest);
   #endif
   return -1;
+#else
+  byte buffer[4];
+  if (fread(buffer, 1, 4, file) != 4)
+    return 0;
+  *dest = (dword)buffer[0] | (dword)buffer[1] << 8 | (dword)buffer[2] << 16 | (dword)buffer[3] << 24;
+  return -1;
+#endif
 }
 // Ecrit un dword (little-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
 int Write_dword_le(FILE *file, dword dw)
 {
+#if defined(USE_SDL) || defined(USE_SDL2)
   #if SDL_BYTEORDER != SDL_LIL_ENDIAN
     dw = SDL_Swap32(dw);
   #endif
   return fwrite(&dw, 1, sizeof(dword), file) == sizeof(dword);
+#else
+  if (fputc((dw >> 0) & 0xff, file) == EOF)
+    return 0;
+  if (fputc((dw >> 8) & 0xff, file) == EOF)
+    return 0;
+  if (fputc((dw >> 16) & 0xff, file) == EOF)
+    return 0;
+  if (fputc((dw >> 24) & 0xff, file) == EOF)
+    return 0;
+  return -1;
+#endif
 }
 
 // Lit un dword (big-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
 int Read_dword_be(FILE *file, dword *dest)
 {
+#if defined(USE_SDL) || defined(USE_SDL2)
   if (fread(dest, 1, sizeof(dword), file) != sizeof(dword))
     return 0;
   #if SDL_BYTEORDER != SDL_BIG_ENDIAN
     *dest = SDL_Swap32(*dest);
   #endif
   return -1;
+#else
+  byte buffer[4];
+  if (fread(buffer, 1, 4, file) != 4)
+    return 0;
+  *dest = (dword)buffer[0] << 24 | (dword)buffer[1] << 16 | (dword)buffer[2] << 8 | (dword)buffer[3];
+  return -1;
+#endif
 }
 // Ecrit un dword (big-endian)
 // Renvoie -1 si OK, 0 en cas d'erreur
 int Write_dword_be(FILE *file, dword dw)
 {
+#if defined(USE_SDL) || defined(USE_SDL2)
   #if SDL_BYTEORDER != SDL_BIG_ENDIAN
     dw = SDL_Swap32(dw);
   #endif
   return fwrite(&dw, 1, sizeof(dword), file) == sizeof(dword);
+#else
+  if (fputc((dw >> 24) & 0xff, file) == EOF)
+    return 0;
+  if (fputc((dw >> 16) & 0xff, file) == EOF)
+    return 0;
+  if (fputc((dw >> 8) & 0xff, file) == EOF)
+    return 0;
+  if (fputc((dw >> 0) & 0xff, file) == EOF)
+    return 0;
+  return -1;
+#endif
 }
 
 // Détermine la position du dernier '/' ou '\\' dans une chaine,

@@ -1458,6 +1458,12 @@ void Load_IFF(T_IO_Context * context)
         {
           nb_colors = section_size/3;
 
+          if (nb_colors > 256)
+          {
+            File_error = 1;
+            break;
+          }
+
           if (current_frame != 0)
             Warning("One CMAP per frame is not supported");
           if ((header.BitPlanes==6 && nb_colors==16) || (header.BitPlanes==8 && nb_colors==64))
