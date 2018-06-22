@@ -292,17 +292,22 @@ int TrueType_font(int index)
 #if defined(WIN32) && defined(NOTTF)
 static int CALLBACK EnumFontFamCallback(CONST LOGFONTA *lpelf, CONST TEXTMETRICA *lpntm, DWORD FontType, LPARAM lParam)
 {
+  char type[3] = { ' ', ' ', '\0' };
   T_Font * font;
-  if (FontType & TRUETYPE_FONTTYPE)
-  {
-    font = malloc(sizeof(T_Font));
-    font->Is_bitmap = 0;
-    font->Is_truetype = 1;
-    snprintf(font->Label, sizeof(font->Label), "%-17.17sTT", lpelf->lfFaceName);
-    font->Name = strdup(lpelf->lfFaceName);
 
-    Insert_font(font);
-  }
+  if (FontType & TRUETYPE_FONTTYPE)
+    type[0] = type[1] = 'T';
+  else if (FontType & RASTER_FONTTYPE)
+    type[0] = 'R';  // Raster font.
+  if (((CONST NEWTEXTMETRICA *)lpntm)->ntmFlags & NTM_TT_OPENTYPE)
+    type[0] = 'O';  // OpenType font
+  font = (T_Font *)malloc(sizeof(T_Font));
+  font->Is_bitmap = 0;
+  font->Is_truetype = 1;
+  snprintf(font->Label, sizeof(font->Label), "%-17.17s%s", lpelf->lfFaceName, type);
+  font->Name = strdup(lpelf->lfFaceName);
+
+  Insert_font(font);
   return 1; // non-zero : continue enumeration
 }
 #endif
@@ -632,17 +637,20 @@ byte *Render_text_Win32(const char *str, int font_number, int size, int antialia
 	bi->bmiHeader.biBitCount = 8;
 	bi->bmiHeader.biCompression = BI_RGB;
 
-  for (i = 0; i < 255; i++) {
+  for (i = 0; i < 256; i++) {
+    bi->bmiColors[i].rgbRed = i;
+    bi->bmiColors[i].rgbGreen = i;
     bi->bmiColors[i].rgbBlue = i;
-    bi->bmiColors[i].rgbBlue = i;
-    bi->bmiColors[i].rgbBlue = i;
+    palette[i].R = i;
+    palette[i].G = i;
+    palette[i].B = i;
   }
-  bm = CreateDIBSection(dc, bi, DIB_RGB_COLORS, &pixels, NULL, 0);
+  bm = CreateDIBSection(dc, bi, DIB_RGB_COLORS, (void **)&pixels, NULL, 0);
   oldobj = SelectObject(dc, bm);
 
   SetTextColor(dc, RGB(255,255,255));
   SetBkColor(dc, RGB(0,0,0));
-  //SetBkMode(dc,TRANSPARENT);
+  SetBkMode(dc, OPAQUE);
   rect.left=0;
   rect.top=0;
   rect.right = s.cx;
@@ -652,7 +660,7 @@ byte *Render_text_Win32(const char *str, int font_number, int size, int antialia
   SelectObject(dc, oldobj);
   SelectObject(dc, oldfont);
 
-  new_brush = malloc(s.cx*s.cy);
+  new_brush = (byte *)malloc(s.cx*s.cy);
   if (antialias)
   {
     int y;
