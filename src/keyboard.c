@@ -809,6 +809,13 @@ word Key_for_scancode(word scancode)
 }
 word Get_Key_modifiers(void)
 {
-  return 0;
+  word mod = 0;
+  if (GetKeyState(VK_SHIFT) & 0x8000)
+    mod |= MOD_SHIFT;
+  if (GetKeyState(VK_CONTROL) & 0x8000)
+    mod |= MOD_CTRL;
+  if (GetKeyState(VK_MENU) & 0x8000)
+    mod |= MOD_ALT;
+  return mod;
 }
 #endif
