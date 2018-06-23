@@ -3,30 +3,33 @@
 /*  SFont: a simple font-library that uses special bitmaps as fonts
     Copyright (C) 2003 Karl Bartel
 
+    GrafX2 Modification
+    Copyright (c) 2018 Thomas Bernard
+
     License: GPL or LGPL (at your choice)
     WWW: http://www.linux-games.com/sfont/
 
-    This program is free software; you can redistribute it and/or modify        
-    it under the terms of the GNU General Public License as published by        
-    the Free Software Foundation; either version 2 of the License, or           
-    (at your option) any later version.                                         
-                                                                                
-    This program is distributed in the hope that it will be useful,       
-    but WITHOUT ANY WARRANTY; without even the implied warranty of              
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               
-    GNU General Public License for more details.                
-                                                                               
-    You should have received a copy of the GNU General Public License           
-    along with this program; if not, see <http://www.gnu.org/licenses/>. 
-                                                                                
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, see <http://www.gnu.org/licenses/>.
+
     Karl Bartel
-    Cecilienstr. 14                                                    
+    Cecilienstr. 14
     12307 Berlin
     GERMANY
-    karlb@gmx.net                                                      
-*/                                                                            
+    karlb@gmx.net
+*/
 
-/************************************************************************ 
+/************************************************************************
 *    SFONT - SDL Font Library by Karl Bartel <karlb@gmx.net>            *
 *                                                                       *
 *  All functions are explained below. For further information, take a   *
@@ -44,9 +47,9 @@
 #ifndef _SFONT_H_
 #define _SFONT_H_
 
-#include <SDL.h>
+#include "gfx2surface.h"
 
-#ifdef __cplusplus 
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -55,7 +58,7 @@ extern "C" {
 /// To load the fonts, load the font image into YourFont->Surface
 /// and call InitFont( YourFont );
 typedef struct {
-        SDL_Surface *Surface;   
+        T_GFX2_Surface *Surface;
         int CharBegin[256];
         int CharWidth[256];
         int Space;
@@ -66,7 +69,7 @@ typedef struct {
 /// Initializes the font.
 /// @param Font this contains the suface with the font.
 ///        The Surface must be loaded before calling this function
-SFont_Font* SFont_InitFont (SDL_Surface *Font);
+SFont_Font* SFont_InitFont (T_GFX2_Surface *Font);
 
 ///
 /// Frees the font.
@@ -81,7 +84,7 @@ void SFont_FreeFont(SFont_Font* Font);
 /// @param text    A string containing the text you want to blit.
 /// @param x       Coordinates to start drawing.
 /// @param y       Coordinates to start drawing.
-void SFont_Write(SDL_Surface *Surface, const SFont_Font *Font, int x, int y,
+void SFont_Write(T_GFX2_Surface *Surface, const SFont_Font *Font, int x, int y,
                                  const char *text);
 
 /// Returns the width of "text" in pixels
@@ -90,8 +93,8 @@ int SFont_TextWidth(const SFont_Font* Font, const char *text);
 int SFont_TextHeight(const SFont_Font* Font, const char *text);
 
 /// Blits a string to Surface with centered x position
-void SFont_WriteCenter(SDL_Surface *Surface, const SFont_Font* Font, int y,
-                                           const char *text);
+//void SFont_WriteCenter(SDL_Surface *Surface, const SFont_Font* Font, int y,
+//                                           const char *text);
 
 #ifdef __cplusplus
 }

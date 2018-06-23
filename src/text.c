@@ -64,7 +64,6 @@
 
 #if defined(USE_SDL) || defined(USE_SDL2)
 #include <SDL_image.h>
-#include "SFont.h"
 #include "sdlscreen.h"
 #endif
 
@@ -75,6 +74,8 @@
 #include "windows.h"
 #include "misc.h"
 #include "setup.h"
+#include "loadsave.h"
+#include "SFont.h"
 
 typedef struct T_Font
 {
@@ -693,109 +694,43 @@ byte *Render_text_Win32(const char *str, int font_number, int size, int antialia
 }
 #endif
 
-#if defined(USE_SDL) || defined(USE_SDL2)
 byte *Render_text_SFont(const char *str, int font_number, int *width, int *height, T_Palette palette)
 {
   SFont_Font *font;
-  SDL_Surface * text_surface;
-  SDL_Surface *font_surface;
-  byte * new_brush;
-  SDL_Rect rectangle;
+  T_GFX2_Surface * text_surface;
+  T_GFX2_Surface *font_surface;
+  byte * new_brush = NULL;
 
   // Chargement de la fonte
-  font_surface=IMG_Load(Font_name(font_number));
+  font_surface = Load_surface(Font_name(font_number), NULL);
   if (!font_surface)
   {
-	char buffer[256];
-	strcpy(buffer, "Error loading font.\n");
-	strcat(buffer,IMG_GetError());
-    Verbose_message("Warning",buffer);
-	// TODO this leaves a non-erased cursor when the window closes.
+    Verbose_message("Warning", "Error loading font");
+    // TODO this leaves a non-erased cursor when the window closes.
     return NULL;
-  }
-  // Font is 24bit: Perform a color reduction
-  if (font_surface->format->BitsPerPixel>8)
-  {
-    SDL_Surface * reduced_surface;
-    int x,y,color;
-    SDL_Color rgb;
-    
-    reduced_surface=SDL_CreateRGBSurface(SDL_SWSURFACE, font_surface->w, font_surface->h, 8, 0, 0, 0, 0);
-    if (!reduced_surface)
-    {
-      SDL_FreeSurface(font_surface);
-      return NULL;
-    }
-    // Set the quick palette
-    for (color=0;color<256;color++)
-    {
-      rgb.r=((color & 0xE0)>>5)<<5;
-      rgb.g=((color & 0x1C)>>2)<<5;
-      rgb.b=((color & 0x03)>>0)<<6;
-#if defined(USE_SDL)
-      SDL_SetColors(reduced_surface, &rgb, color, 1);
-#else
-      //SDL_SetPaletteColors
-#endif
-    }
-    // Perform reduction
-    for (y=0; y<font_surface->h; y++)
-      for (x=0; x<font_surface->w; x++)
-      {
-        SDL_GetRGB(Get_SDL_pixel_hicolor(font_surface, x, y), font_surface->format, &rgb.r, &rgb.g, &rgb.b);
-        color=((rgb.r >> 5) << 5) |
-                ((rgb.g >> 5) << 2) |
-                ((rgb.b >> 6));
-        Set_SDL_pixel_8(reduced_surface, x, y, color);
-      }
-    
-    SDL_FreeSurface(font_surface);
-    font_surface=reduced_surface;
   }
   font=SFont_InitFont(font_surface);
   if (!font)
   {
     DEBUG("Font init failed",1);
-    SDL_FreeSurface(font_surface);
-    return NULL;
-  }
-  
-  // Calcul des dimensions
-  *height=SFont_TextHeight(font, str);
-  *width=SFont_TextWidth(font, str);
-  // Allocation d'une surface SDL
-  text_surface=SDL_CreateRGBSurface(SDL_SWSURFACE, *width, *height, 8, 0, 0, 0, 0);
-  // Copy palette
-#if defined(USE_SDL)
-  SDL_SetPalette(text_surface, SDL_LOGPAL, font_surface->format->palette->colors, 0, 256);
-#else
-  //SDL_SetPaletteColors(
-#endif
-  // Fill with transparent color
-  rectangle.x=0;
-  rectangle.y=0;
-  rectangle.w=*width;
-  rectangle.h=*height;
-  SDL_FillRect(text_surface, &rectangle, font->Transparent);
-  // Rendu du texte
-  SFont_Write(text_surface, font, 0, 0, str);
-  if (!text_surface)
-  {
-    DEBUG("Rendering failed",2);
-    SFont_FreeFont(font);
-    return NULL;
-  }
-    
-  new_brush=Surface_to_bytefield(text_surface, NULL);
-  if (!new_brush)
-  {
-    DEBUG("Converting failed",3);
-    SDL_FreeSurface(text_surface);
-    SFont_FreeFont(font);
+    Free_GFX2_Surface(font_surface);
     return NULL;
   }
 
-  Get_SDL_Palette(font_surface->format->palette, palette);
+  // Calcul des dimensions
+  *height = SFont_TextHeight(font, str);
+  *width = SFont_TextWidth(font, str);
+
+  text_surface = New_GFX2_Surface(*width, *height);
+  // Fill with transparent color
+  memset(text_surface->pixels, font->Transparent, *width * *height);
+  // Rendu du texte
+  SFont_Write(text_surface, font, 0, 0, str);
+
+  // Copy palette
+  memcpy(palette, font_surface->palette, sizeof(T_Palette));
+
+  new_brush = text_surface->pixels; // "Steal" pixels from surface
 
   // Swap current BG color with font's transparent color
   if (font->Transparent != Back_color)
@@ -816,16 +751,15 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
     colmap[font->Transparent]=Back_color;
     colmap[Back_color]=font->Transparent;
     
-    Remap_general_lowlevel(colmap, new_brush, new_brush, text_surface->w,text_surface->h, text_surface->w);
+    Remap_general_lowlevel(colmap, new_brush, new_brush, text_surface->w, text_surface->h, text_surface->w);
     
   }
 
-  SDL_FreeSurface(text_surface);
   SFont_FreeFont(font);
+  free(text_surface); // Do not call Free_GFX2_Surface() because pixels was stolen
 
   return new_brush;
 }
-#endif
 
 // Crée une brosse à partir des paramètres de texte demandés.
 // Si cela réussit, la fonction place les dimensions dans width et height, 
@@ -859,11 +793,7 @@ byte *Render_text(const char *str, int font_number, int size, int antialias, int
   }
   else
   {
-#if defined(USE_SDL) || defined(USE_SDL2)
     return Render_text_SFont(str, font_number, width, height, palette);
-#else
-    return NULL;
-#endif
   }
 }
 

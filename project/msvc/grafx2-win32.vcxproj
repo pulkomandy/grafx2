@@ -128,6 +128,7 @@
     <ClCompile Include="..\..\src\recoil.c" />
     <ClCompile Include="..\..\src\saveini.c" />
     <ClCompile Include="..\..\src\setup.c" />
+    <ClCompile Include="..\..\src\SFont.c" />
     <ClCompile Include="..\..\src\shade.c" />
     <ClCompile Include="..\..\src\special.c" />
     <ClCompile Include="..\..\src\text.c" />
