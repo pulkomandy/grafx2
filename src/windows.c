@@ -955,8 +955,9 @@ void Print_in_window_limited(short x,short y,const char * str,byte size,byte tex
   Print_in_window(x, y, display_string, text_color, background_color);
 }
 
-/// Draws a string in a window
-void Print_in_window(short x,short y,const char * str,byte text_color,byte background_color)
+/// Draws a string in a window with underscore
+/// undersc_letter is 0 for no underscore, 1-indexed array index otherwise
+void Print_in_window_underscore(short x,short y,const char * str,byte text_color,byte background_color, byte undersc_letter)
 {
   short x_pos = x;
   const unsigned char * p = (const unsigned char *)str;
@@ -966,7 +967,16 @@ void Print_in_window(short x,short y,const char * str,byte text_color,byte backg
     Print_char_in_window(x,y,*p++,text_color,background_color);
     x+=8;
   }
+  if (undersc_letter) {
+    Window_rectangle(x_pos+((undersc_letter-1)<<3),y+8,8,1,text_color);
+  }
   Update_window_area(x_pos,y,x-x_pos,8);
+}
+
+/// Draws a string in a window
+void Print_in_window(short x,short y,const char * str,byte text_color,byte background_color)
+{
+  Print_in_window_underscore(x,y,str,text_color,background_color,0);
 }
 
 /// Draws a string in a window

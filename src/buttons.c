@@ -1044,7 +1044,7 @@ void Button_Settings(int btn)
     // Button Close
   Window_set_normal_button(250,163, 51,14,"Close"        ,0,1,KEY_ESC); // 4
 
-  panel=Window_set_special_button(10, 21, 272,SETTING_PER_PAGE*SETTING_HEIGHT); // 5
+  panel=Window_set_special_button(10, 21, 272,SETTING_PER_PAGE*SETTING_HEIGHT,0); // 5
   Window_set_scroller_button(285,21,SETTING_PER_PAGE*SETTING_HEIGHT,SETTING_PAGES,1,current_page); // 6
   
   Update_window_area(0,0,Window_width, Window_height);
@@ -1333,7 +1333,7 @@ void Button_Skins(int btn)
   // List of skins
   skin_list = Window_set_list_button(
   // Fileselector
-  Window_set_special_button(8, FILESEL_Y + 1, 144, 80), // 2
+  Window_set_special_button(8, FILESEL_Y + 1, 144, 80,0), // 2
     // Scroller for the fileselector
     (file_scroller = Window_set_scroller_button(155, FILESEL_Y - 1, 82,
     Skin_files_list.Nb_elements, 10, 0)), // 3
@@ -1931,9 +1931,9 @@ void Button_Resolution(int btn)
   Window_set_normal_button(223, 18,67,14,"OK"      ,0,1,SDLK_RETURN); // 1
   Window_set_normal_button(223, 35,67,14,"Cancel"  ,0,1,KEY_ESC);  // 2
 
-  Print_in_window( 12, 37,"Width:"          ,MC_Dark,MC_Light);
-  input_width_button=Window_set_input_button( 60, 35,4);            // 3
-  
+  Print_in_window_underscore( 12, 37,"Width:",MC_Dark,MC_Light,1);
+  input_width_button=Window_set_input_button_s( 60, 35,4,SDLK_w);     // 3
+
   Print_in_window(108, 37,"Height:"         ,MC_Dark,MC_Light);
   input_button_height=Window_set_input_button(164, 35,4);           // 4
 
@@ -1948,7 +1948,7 @@ void Button_Resolution(int btn)
   Print_in_window( 62,170,"OK"              ,MC_Dark,MC_Light);
   Print_in_window(102,170,"Imperfect"       ,MC_Dark,MC_Light);
   Print_in_window(196,170,"Unsupported"     ,MC_Dark,MC_Light);
-  Window_set_special_button(38,86,225,80);                       // 5
+  Window_set_special_button(38,86,225,80,0);                       // 5
 
   selected_mode=Current_resolution;
   if (selected_mode>=MODELIST_LINES/2 && Nb_video_modes > MODELIST_LINES)
@@ -4993,7 +4993,7 @@ void Button_Text(int btn)
   // Scroller des fontes
   font_scroller = Window_set_scroller_button(165,35,NB_FONTS*8,Nb_fonts,NB_FONTS,list_start); // 5
   // Liste des fontes disponibles
-  font_list_button = Window_set_special_button(8,35,152,NB_FONTS*8); // 6
+  font_list_button = Window_set_special_button(8,35,152,NB_FONTS*8,0); // 6
   Window_display_frame_in(7, 33, 154, NB_FONTS*8+4);
   
   // Taille texte
@@ -5002,7 +5002,7 @@ void Button_Text(int btn)
   Window_set_repeatable_button(251,43,13,11,"+",0,1,SDLK_LAST); // 9
   
   // Preview
-  preview_button = Window_set_special_button(8,106,273,50); // 10
+  preview_button = Window_set_special_button(8,106,273,50,0); // 10
   Window_display_frame_in(7, 105, 275, 52);
   
   Window_set_normal_button(8,160,40,14,"OK",0,1,SDLK_RETURN); // 11

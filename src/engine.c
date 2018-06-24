@@ -1753,7 +1753,7 @@ void Close_window(void)
 
 
 //---------------- Dessiner un bouton normal dans une fenêtre ----------------
-
+// undersc_letter is 0 for no underscore, 1-indexed array index otherwise
 void Window_draw_normal_bouton(word x_pos,word y_pos,word width,word height,
                                     const char * title,byte undersc_letter,byte clickable)
 {
@@ -2006,7 +2006,7 @@ void Window_clear_input_button(T_Special_button * button)
 
 
 //------ Rajout d'un bouton à la liste de ceux présents dans la fenêtre ------
-
+// undersc_letter is 0 for no underscore, 1-indexed array index otherwise
 T_Normal_button * Window_set_normal_button(word x_pos, word y_pos,
                                    word width, word height,
                                    const char * title, byte undersc_letter,
@@ -2036,7 +2036,7 @@ T_Normal_button * Window_set_normal_button(word x_pos, word y_pos,
   return temp;
 }
 //------ Rajout d'un bouton à la liste de ceux présents dans la fenêtre ------
-
+// undersc_letter is 0 for no underscore, 1-indexed array index otherwise
 T_Normal_button * Window_set_repeatable_button(word x_pos, word y_pos,
                                    word width, word height,
                                    const char * title, byte undersc_letter,
@@ -2134,7 +2134,7 @@ T_Scroller_button * Window_set_horizontal_scroller_button(word x_pos, word y_pos
   return temp;
 }
 
-T_Special_button * Window_set_special_button(word x_pos,word y_pos,word width,word height)
+T_Special_button * Window_set_special_button(word x_pos,word y_pos,word width,word height, word shortcut)
 {
   T_Special_button * temp;
 
@@ -2142,8 +2142,9 @@ T_Special_button * Window_set_special_button(word x_pos,word y_pos,word width,wo
   temp->Number   =++Window_nb_buttons;
   temp->Pos_X    =x_pos;
   temp->Pos_Y    =y_pos;
-  temp->Width  =width;
-  temp->Height  =height;
+  temp->Width    =width;
+  temp->Height   =height;
+  temp->Shortcut =shortcut;
 
   temp->Next=Window_special_button_list;
   Window_special_button_list=temp;
@@ -2151,12 +2152,17 @@ T_Special_button * Window_set_special_button(word x_pos,word y_pos,word width,wo
 }
 
 
-T_Special_button * Window_set_input_button(word x_pos,word y_pos,word width_in_characters)
+T_Special_button * Window_set_input_button_s(word x_pos,word y_pos,word width_in_characters, word shortcut)
 {
   T_Special_button *temp;
-  temp=Window_set_special_button(x_pos,y_pos,(width_in_characters<<3)+3,11);
+  temp=Window_set_special_button(x_pos,y_pos,(width_in_characters<<3)+3,11,shortcut);
   Window_draw_input_bouton(x_pos,y_pos,width_in_characters);
   return temp;
+}
+
+T_Special_button * Window_set_input_button(word x_pos,word y_pos,word width_in_characters)
+{
+  return Window_set_input_button_s(x_pos, y_pos, width_in_characters, 0);
 }
 
 T_Dropdown_button * Window_set_dropdown_button(word x_pos,word y_pos,word width,word height,word dropdown_width,const char *label,byte display_choice,byte display_centered,byte display_arrow,byte active_button, byte bottom_up)
@@ -3133,6 +3139,7 @@ short Window_get_clicked_button(void)
 short Window_get_button_shortcut(void)
 {
   T_Normal_button * temp;
+  T_Special_button * temp2;
 
   if (Key & MOD_SHIFT)
     Window_attribute1=RIGHT_SIDE;
@@ -3158,6 +3165,17 @@ short Window_get_button_shortcut(void)
       return temp->Number;
     }
     temp=temp->Next;
+  }
+
+  // Scan for shortcut in special button list
+  temp2=Window_special_button_list;
+  while (temp2!=NULL)
+  {
+    if (temp2->Shortcut==Key)
+    {
+      return temp2->Number;
+    }
+    temp2=temp2->Next;
   }
 
   // Si la recherche n'a pas été fructueuse ET que l'utilisateur appuyait sur

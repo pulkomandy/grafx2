@@ -1613,7 +1613,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   Window_display_frame_in(6,93,148,84);
 
   // Fileselector
-  Window_set_special_button(9,95,144,80); // 4
+  Window_set_special_button(9,95,144,80,0); // 4
 
   // Scroller du fileselector
   file_scroller = Window_set_scroller_button(160,94,82,1,10,0);               // 5

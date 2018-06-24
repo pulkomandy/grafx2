@@ -147,6 +147,7 @@ typedef struct T_Special_button
   word Pos_Y;                    ///< Coordinate for left of button, relative to the window, before scaling.
   word Width;                    ///< Width before scaling
   word Height;                   ///< Height before scaling
+  word Shortcut;                 ///< Keyboard shortcut that will emulate a click on this button.
   struct T_Special_button * Next;///< Pointer to the next special button of current window.
 } T_Special_button;
 

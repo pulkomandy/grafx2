@@ -73,8 +73,11 @@ T_Scroller_button * Window_set_horizontal_scroller_button(word x_pos, word y_pos
   word height, word nb_elements, word nb_elements_visible,
   word initial_position);
 
-T_Special_button * Window_set_special_button(word x_pos, word y_pos, word width,
-  word height);
+T_Special_button * Window_set_special_button(word x_pos, word y_pos,
+  word width, word height, word shortcut);
+
+T_Special_button * Window_set_input_button_s(word x_pos,word y_pos,
+  word width_in_characters, word shortcut);
 
 T_Special_button * Window_set_input_button(word x_pos, word y_pos,
   word width_in_characters);

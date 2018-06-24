@@ -2663,7 +2663,7 @@ void Button_Brush_Factory(void)
 
   Window_display_frame_in(6, FILESEL_Y - 2, NAME_WIDTH*8+4, 84); // File selector
   // Fileselector
-  scriptarea=Window_set_special_button(8, FILESEL_Y + 0, NAME_WIDTH*8, 80); // 2
+  scriptarea=Window_set_special_button(8, FILESEL_Y + 0, NAME_WIDTH*8, 80,0); // 2
   // Scroller for the fileselector
   scriptscroll = Window_set_scroller_button(NAME_WIDTH*8+14, FILESEL_Y - 1, 82,
       Scripts_selector.Nb_elements,10, 0); // 3
@@ -2672,7 +2672,7 @@ void Button_Brush_Factory(void)
   Window_set_normal_button(10, 161, 67, 14, "Run", 0, 1, SDLK_RETURN); // 5
 
   Window_display_frame_in(6, FILESEL_Y + 88, DESC_WIDTH*6+4, 4*8+2); // Descr.
-  Window_set_special_button(7, FILESEL_Y + 89+24,DESC_WIDTH*6,8); // 6
+  Window_set_special_button(7, FILESEL_Y + 89+24,DESC_WIDTH*6,8,0); // 6
   
   // Box around path (slightly expands up left)
   Window_rectangle(8, FILESEL_Y - 13, DESC_WIDTH*6+2, 9, MC_Black);

@@ -1116,7 +1116,7 @@ void Button_Sieve_menu(void)
   Print_in_window( 23,120,"Width:" ,MC_Dark,MC_Light);
   Print_in_window( 15,136,"Height:",MC_Dark,MC_Light);
 
-  Window_set_special_button(143,69,80,80);                     // 1
+  Window_set_special_button(143,69,80,80,0);                     // 1
 
   Window_set_normal_button(175,157,51,14,"Cancel",0,1,KEY_ESC); // 2
   Window_set_normal_button(230,157,51,14,"OK"    ,0,1,SDLK_RETURN); // 3

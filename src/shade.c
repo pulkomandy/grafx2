@@ -468,7 +468,7 @@ int Menu_shade(void)
   Window_set_scroller_button(192,17,84,8,1,Shade_current);      // 2
 
   // Déclaration & tracé de la zone de définition des dégradés
-  Window_set_special_button(8,127,256,53);                     // 3
+  Window_set_special_button(8,127,256,53,0);                     // 3
 
   // Déclaration & tracé des boutons de sortie
   Window_set_normal_button(207,17,51,14,"Cancel",0,1,KEY_ESC);   // 4

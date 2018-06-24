@@ -988,7 +988,7 @@ int Window_Histogram(unsigned char block_start, unsigned char block_end, dword* 
       1,
       old_height+1,MC_Black);
 
-  histo = Window_set_special_button(3, 27, j*bar_width, 100); // 2
+  histo = Window_set_special_button(3, 27, j*bar_width, 100,0); // 2
 
   Update_window_area(0,0,263,150);
   Display_cursor();

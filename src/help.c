@@ -537,7 +537,7 @@ void Window_help(int section, const char *sub_section)
   Window_set_normal_button( 9+6*8+4+8*8+4,154, 5*8,14,"Help",1,1,SDLK_h); // 5
   Window_set_normal_button(9+6*8+4+8*8+4+5*8+4,154, 8*8,14,"Credits",1,1,SDLK_c); // 6
 
-  Window_set_special_button(9,18,272,130); // 7
+  Window_set_special_button(9,18,272,130,0); // 7
 
   Display_help();
 
