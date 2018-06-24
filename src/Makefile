@@ -527,27 +527,28 @@ endif
 ### the "overridable defaults", and environment variables set before launching make
 
 #TrueType is optional: make NOTTF=1 to disable support and dependencies.
-ifndef ($(ATARICROSS,1))
- ifeq ($(NOTTF),1)
-   TTFCOPT = -DNOTTF=1
-   TTFLOPT =
-   TTFLIBS =
-   TTFLABEL = -nottf
- else
+ifeq ($(NOTTF),1)
+  TTFCOPT = -DNOTTF=1
+  TTFLOPT =
+  TTFLIBS =
+  TTFLABEL = -nottf
+else
+ ifneq ($(ATARICROSS),1)
    TTFCOPT = 
+   ifeq ($(API),sdl)
    TTFLOPT = -L$(PREFIX)/lib -lSDL_ttf $(FCLOPT)
+   else
+   TTFLOPT = -L$(PREFIX)/lib -lSDL2_ttf $(FCLOPT)
+   endif
    TTFLIBS = bin/libfreetype-6.dll bin/SDL_ttf.dll
    TTFLABEL = 
- endif
-else
- ifeq ($(NOTTF),1)
-   TTFCOPT = -DNOTTF=1
-   TTFLOPT =
-   TTFLIBS =
-   TTFLABEL = -nottf
  else
    TTFCOPT = 
+   ifeq ($(API),sdl)
    TTFLOPT = -L$(PREFIX)/lib -lSDL_ttf $(FCLOPT)
+   else
+   TTFLOPT = -L$(PREFIX)/lib -lSDL2_ttf $(FCLOPT)
+   endif
    TTFLIBS =  
    TTFLABEL = 
  endif
