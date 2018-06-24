@@ -131,11 +131,11 @@ void Button_Transform_menu(int btn)
   Window_set_normal_button( 80, 86, 60,14,"RESIZE",1,1,SDLK_r);    // 7
   Print_in_window( 51, 34,"New",MC_Dark,MC_Light);
   Print_in_window( 96, 34,"Old",MC_Dark,MC_Light);
-  Print_in_window( 30, 44,"X:",MC_Dark,MC_Light);
-  Print_in_window( 30, 59,"Y:",MC_Dark,MC_Light);
+  Print_in_window_underscore( 30, 44,"W:",MC_Dark,MC_Light,1);
+  Print_in_window_underscore( 30, 59,"H:",MC_Dark,MC_Light,1);
   Print_in_window( 80, 44,":",MC_Dark,MC_Light);
   Print_in_window( 80, 59,":",MC_Dark,MC_Light);
-  Print_in_window( 44, 75,"Lock proportions",MC_Dark,MC_Light);
+  Print_in_window_underscore( 44, 75,"Lock proportions",MC_Dark,MC_Light,1);
 
   Window_set_normal_button( 28, 72, 13,13,ratio_is_locked?"X":" ",0,1,SDLK_l);// 8
   unit_button = Window_set_dropdown_button(128,50,69,11,69,unit_label[unit_index],1,0,1,LEFT_SIDE|RIGHT_SIDE,0);// 9
@@ -143,9 +143,9 @@ void Button_Transform_menu(int btn)
   Window_dropdown_add_item(unit_button,UNIT_PERCENT,unit_label[UNIT_PERCENT]);
   Window_dropdown_add_item(unit_button,UNIT_RATIO,unit_label[UNIT_RATIO]);
   
-  input_button[0] = Window_set_input_button(45,43,4); // 10
+  input_button[0] = Window_set_input_button_s(45,43,4,SDLK_w); // 10
   input_button[1] = Window_set_input_button(89,43,4); // 11
-  input_button[2] = Window_set_input_button(45,58,4); // 12
+  input_button[2] = Window_set_input_button_s(45,58,4,SDLK_h); // 12
   input_button[3] = Window_set_input_button(89,58,4); // 13
   
   Update_window_area(0,0,Window_width, Window_height);

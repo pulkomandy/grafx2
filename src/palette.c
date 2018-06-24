@@ -1199,9 +1199,9 @@ void Button_Palette(int btn)
   Num2str(Fore_color, str, 3);
   Print_in_window(COLOR_X, COLOR_Y, str, MC_Black, MC_Light);
 
-  Window_set_normal_button(C4_X,L3,C4_W,14,"Merge" ,0,1,SDLK_m);    // 5
+  Window_set_normal_button(C4_X,L3,C4_W,14,"Merge" ,1,1,SDLK_m);    // 5
   Window_set_normal_button(C2_X,L3,C2_W,14,"Gray"   ,1,1,SDLK_g);   // 6
-  Window_set_normal_button(C1_X,L1,C1_W,14,"Swap"   ,0,1,KEY_NONE); // 7
+  Window_set_normal_button(C1_X,L1,C1_W,14,"Swap"   ,2,1,SDLK_w); // 7
   Window_set_normal_button(C2_X,L1,C2_W,14,"X-Swap" ,1,1,SDLK_x);   // 8
   Window_set_normal_button(C3_X,L1,C3_W,14,"Copy"   ,1,1,SDLK_c);   // 9
   Window_set_normal_button(C3_X,L3,C3_W,14,"Spread" ,4,1,SDLK_e);   // 10
@@ -1222,15 +1222,15 @@ void Button_Palette(int btn)
   Window_set_normal_button(122,178,51,14,"Cancel",0,1,KEY_ESC);  // 13
   Window_set_normal_button(177,178,35,14,"OK"    ,0,1,SDLK_RETURN);  // 14
 
-  Window_set_normal_button(C4_X,L2,C4_W,14,"Used",0,1,SDLK_d); // 15
+  Window_set_normal_button(C4_X,L2,C4_W,14,"Used",4,1,SDLK_d); // 15
   Window_set_normal_button(C1_X,L4,83,14,"Zap unused",0,1,SDLK_DELETE);//16
   
   Window_set_repeatable_button(BUTTON_PLUS_X, BUTTON_PLUS_Y,12,11,"+",0,1,SDLK_KP_PLUS);       // 17
   Window_set_repeatable_button(BUTTON_MINUS_X,BUTTON_MINUS_Y,12,11,"-",0,1,SDLK_KP_MINUS);       // 18
 
   Window_set_normal_button(C1_X,L3,C1_W,14,"Neg"    ,1,1,SDLK_n);   // 19
-  Window_set_normal_button(C1_X,L2,C1_W,14,"Flip"    ,1,1,SDLK_i);   // 20
-  Window_set_normal_button(C2_X,L2,C2_W,14,"X-Flip" ,5,1,SDLK_v);   // 21
+  Window_set_normal_button(C1_X,L2,C1_W,14,"Flip"    ,3,1,SDLK_i);   // 20
+  Window_set_normal_button(C2_X,L2,C2_W,14,"X-Flip" ,0,1,SDLK_v);   // 21
 
   // Button without outline (RGB/HSL switch)
   Window_set_normal_button(NUMERIC_BOX_X,14,81,11,""    ,0,1,SDLK_h);   // 22
@@ -1246,7 +1246,7 @@ void Button_Palette(int btn)
   // Button without outline
   Window_display_frame_mono(NUMERIC_BOX_X-1,NUMERIC_BOX_Y-1,NUMERIC_BOX_W+2,NUMERIC_BOX_H+2,MC_Light);
 
-  Window_set_normal_button(C4_X,L1,C4_W,14,"Histo",0,1,KEY_NONE);// 25
+  Window_set_normal_button(C4_X,L1,C4_W,14,"Histo",4,1,SDLK_t);// 25
 
   Window_set_normal_button( 44,178,35,14,"Load"  ,1,1,SDLK_l);  // 26
   Window_set_normal_button( 83,178,35,14,"Save"  ,1,1,SDLK_s);  // 27

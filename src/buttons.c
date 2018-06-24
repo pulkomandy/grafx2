@@ -1036,11 +1036,11 @@ void Button_Settings(int btn)
   Open_window(307,182,"Settings");
 
     // Button Reload
-  Window_set_normal_button(  6,163, 51,14,"Reload"       ,0,1,SDLK_LAST); // 1
+  Window_set_normal_button(  6,163, 51,14,"Reload"       ,1,1,SDLK_r); // 1
     // Button Auto-save
-  Window_set_normal_button( 73,163,107,14,"Auto-save:   ",0,1,SDLK_LAST); // 2
+  Window_set_normal_button( 73,163,107,14,"Auto-save:   ",1,1,SDLK_a); // 2
     // Button Save
-  Window_set_normal_button(183,163, 51,14,"Save"         ,0,1,SDLK_LAST); // 3
+  Window_set_normal_button(183,163, 51,14,"Save"         ,1,1,SDLK_s); // 3
     // Button Close
   Window_set_normal_button(250,163, 51,14,"Close"        ,0,1,KEY_ESC); // 4
 
@@ -1934,8 +1934,8 @@ void Button_Resolution(int btn)
   Print_in_window_underscore( 12, 37,"Width:",MC_Dark,MC_Light,1);
   input_width_button=Window_set_input_button_s( 60, 35,4,SDLK_w);     // 3
 
-  Print_in_window(108, 37,"Height:"         ,MC_Dark,MC_Light);
-  input_button_height=Window_set_input_button(164, 35,4);           // 4
+  Print_in_window_underscore(108, 37,"Height:",MC_Dark,MC_Light,1);
+  input_button_height=Window_set_input_button_s(164, 35,4,SDLK_h); // 4
 
   Window_display_frame      ( 8,72,283,110);
   Window_display_frame_in   (37,84,228,84);
@@ -4197,23 +4197,23 @@ void Button_Airbrush_menu(int btn)
 
   Window_set_normal_button(  8, 37,43,14,"Clear"     ,1,1,SDLK_c); // 10
 
-  Print_in_window(142,25,"Size:"     ,MC_Dark,MC_Light);
-  input_size_button = Window_set_input_button(186,23,3);                // 11
+  Print_in_window_underscore(142,25,"Size:"     ,MC_Dark,MC_Light,1);
+  input_size_button = Window_set_input_button_s(186,23,3,SDLK_s); // 11
   Num2str(Airbrush_size,str,3);
   Window_input_content(input_size_button,str);
 
-  Print_in_window(142,39,"Delay:"    ,MC_Dark,MC_Light);
-  input_delay_button = Window_set_input_button(194,37,2);               // 12
+  Print_in_window_underscore(142,39,"Delay:"    ,MC_Dark,MC_Light,1);
+  input_delay_button = Window_set_input_button_s(194,37,2,SDLK_d); // 12
   Num2str(Airbrush_delay,str,2);
   Window_input_content(input_delay_button,str);
 
-  Print_in_window( 27,24,"Mono-Flow:",MC_Dark,MC_Light);
-  input_flow_button = Window_set_input_button(111,22,2);           // 13
+  Print_in_window_underscore( 27,24,"Mono-Flow:",MC_Dark,MC_Light,1);
+  input_flow_button = Window_set_input_button_s(111,22,2,SDLK_m); // 13
   Num2str(Airbrush_mono_flow,str,2);
   Window_input_content(input_flow_button,str);
 
-  Print_in_window( 67,40,"Init:",MC_Dark,MC_Light);
-  input_init_button = Window_set_input_button(111,38,2);                // 14
+  Print_in_window_underscore( 67,40,"Init:",MC_Dark,MC_Light,1);
+  input_init_button = Window_set_input_button_s(111,38,2,SDLK_i); // 14
   Num2str(spray_init,str,2);
   Window_input_content(input_init_button,str);
 
@@ -4974,21 +4974,21 @@ void Button_Text(int btn)
   Open_window(288,180,"Text");
 
   // Texte saisi
-  Print_in_window(6,20,"Text:",MC_Dark,MC_Light);
-  input_text_button = Window_set_input_button(48,18,29); // 1
+  Print_in_window_underscore(6,20,"Text:",MC_Dark,MC_Light,1);
+  input_text_button = Window_set_input_button_s(48,18,29,SDLK_t); // 1
   
   // TrueType options
   Window_display_frame_in(182,34,100,68);
   Print_in_window(199,31,"TrueType", MC_Dark, MC_Light);
   // AA
   Window_set_normal_button(188,58,13,11,antialias?"X":" ",0,1,SDLK_a); // 2
-  Print_in_window(206,60,"AntiAlias", MC_Dark, MC_Light);
+  Print_in_window_underscore(206,60,"AntiAlias", MC_Dark, MC_Light,5);
   // Bold
   Window_set_normal_button(188,72,13,11,is_bold?"X":" ",0,1,SDLK_b); // 3
-  Print_in_window(206,75,"Bold", MC_Dark, MC_Light);
+  Print_in_window_underscore(206,75,"Bold", MC_Dark, MC_Light,1);
   // Italic
   Window_set_normal_button(188,86,13,11,is_italic?"X":" ",0,1,SDLK_i); // 4
-  Print_in_window(206,89,"Italic", MC_Dark, MC_Light);
+  Print_in_window_underscore(206,89,"Italic", MC_Dark, MC_Light,1);
   
   // Scroller des fontes
   font_scroller = Window_set_scroller_button(165,35,NB_FONTS*8,Nb_fonts,NB_FONTS,list_start); // 5
@@ -4997,7 +4997,7 @@ void Button_Text(int btn)
   Window_display_frame_in(7, 33, 154, NB_FONTS*8+4);
   
   // Taille texte
-  input_size_button = Window_set_input_button(220,43,3); // 7
+  input_size_button = Window_set_input_button_s(220,43,3,SDLK_s); // 7
   Window_set_repeatable_button(202,43,13,11,"-",0,1,SDLK_LAST); // 8
   Window_set_repeatable_button(251,43,13,11,"+",0,1,SDLK_LAST); // 9
   
