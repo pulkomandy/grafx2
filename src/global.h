@@ -777,11 +777,6 @@ GFX2_GLOBAL iconv_t cd_utf16;       // FROMCODE => UTF16
 GFX2_GLOBAL iconv_t cd_utf16_inv;   // UTF16 => FROMCODE
 #endif /* ENABLE_FILENAMES_ICONV */
 
-// -- Specific to SDL
-
-/// Pointer to the current joystick controller.
-//GFX2_GLOBAL SDL_Joystick* Joystick;
-
 /// Indicates "no keyboard shortcut".
 #define KEY_NONE            0
 

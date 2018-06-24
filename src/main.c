@@ -105,6 +105,11 @@ extern char Program_version[]; // generated in pversion.c
 static int setsize_width;
 static int setsize_height;
 
+#if defined(USE_SDL) || defined(USE_SDL2)
+/// Pointer to the current joystick controller.
+static SDL_Joystick* Joystick;
+#endif
+
 //--- Affichage de la syntaxe, et de la liste des modes vidéos disponibles ---
 void Display_syntax(void)
 {
@@ -651,9 +656,9 @@ int Init_program(int argc,char * argv[])
     printf("Couldn't initialize SDL.\n");
     return(0);
   }
-#endif
 
-  //Joystick = SDL_JoystickOpen(0);
+  Joystick = SDL_JoystickOpen(0);
+#endif
 #if defined(USE_SDL)
   SDL_EnableKeyRepeat(250, 32);
   SDL_EnableUNICODE(SDL_ENABLE);

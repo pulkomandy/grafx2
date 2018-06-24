@@ -618,8 +618,8 @@ int Handle_key_release(SDL_KeyboardEvent event)
 
 // Joystick management
 
-#if defined(USE_SDL) || defined(USE_SDL2)
-int Handle_joystick_press(SDL_JoyButtonEvent event)
+#if defined(USE_JOYSTICK) && (defined(USE_SDL) || defined(USE_SDL2))
+static int Handle_joystick_press(SDL_JoyButtonEvent event)
 {
     if (event.button == Joybutton_shift)
     {
@@ -721,7 +721,7 @@ int Handle_joystick_press(SDL_JoyButtonEvent event)
     return Move_cursor_with_constraints();
 }
 
-int Handle_joystick_release(SDL_JoyButtonEvent event)
+static int Handle_joystick_release(SDL_JoyButtonEvent event)
 {
     if (event.button == Joybutton_shift)
     {
@@ -802,7 +802,7 @@ int Handle_joystick_release(SDL_JoyButtonEvent event)
   return Move_cursor_with_constraints();
 }
 
-void Handle_joystick_movement(SDL_JoyAxisEvent event)
+static void Handle_joystick_movement(SDL_JoyAxisEvent event)
 {
     if (event.axis==JOYSTICK_AXIS_X)
     {
