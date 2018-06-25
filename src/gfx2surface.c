@@ -28,22 +28,18 @@ T_GFX2_Surface * New_GFX2_Surface(word width, word height)
   T_GFX2_Surface * surface;
   size_t size;
 
+  size = width * height;
+  if (size == 0)  // surfaces with no pixels not allowed
+    return NULL;
+
   surface = malloc(sizeof(T_GFX2_Surface));
   if (surface == NULL)
     return NULL;
-  size = width * height;
-  if (size > 0)
+  surface->pixels = malloc(size);
+  if(surface->pixels == NULL)
   {
-    surface->pixels = malloc(size);
-    if(surface->pixels == NULL)
-    {
-      free(surface);
-      return NULL;
-    }
-  }
-  else
-  {
-    surface->pixels = NULL;
+    free(surface);
+    return NULL;
   }
   memset(surface->palette, 0, sizeof(surface->palette));
   surface->w = width;

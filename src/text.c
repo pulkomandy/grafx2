@@ -722,6 +722,13 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   *width = SFont_TextWidth(font, str);
 
   text_surface = New_GFX2_Surface(*width, *height);
+  if (text_surface == NULL)
+  {
+    Warning("Failed to allocate text surface");
+    SFont_FreeFont(font);
+    Free_GFX2_Surface(font_surface);
+    return NULL;
+  }
   // Fill with transparent color
   memset(text_surface->pixels, font->Transparent, *width * *height);
   // Rendu du texte
