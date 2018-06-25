@@ -166,6 +166,32 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
   case WM_CHAR:
     Key_ANSI = Key_UNICODE = wParam;
     return 0;
+  case WM_DROPFILES:
+    {
+      int file_count;
+      HDROP hDrop = (HDROP)wParam;
+
+      file_count = DragQueryFile(hDrop, (UINT)-1, NULL , 0);
+      if (file_count > 0)
+      {
+        TCHAR LongDropFileName[MAX_PATH];
+        TCHAR ShortDropFileName[MAX_PATH];
+        if (DragQueryFile(hDrop, 0 , LongDropFileName ,(UINT) MAX_PATH)
+           && GetShortPathName(LongDropFileName, ShortDropFileName, MAX_PATH))
+        {
+          Drop_file_name = (char *)malloc(lstrlen(ShortDropFileName) + 1);
+          if (Drop_file_name != NULL)
+          {
+            int i;
+
+            for (i = 0; ShortDropFileName[i] != 0; i++)
+              Drop_file_name[i] = (char)ShortDropFileName[i];
+            Drop_file_name[i] = 0;
+          }
+        }
+      }
+    }
+    return 0;
   default:
     {
       char msg[256];

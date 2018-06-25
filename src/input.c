@@ -1014,10 +1014,23 @@ int Get_input(int sleep_time)
                     Drop_file_name=calloc(len+1,1);
                     if (Drop_file_name)
                     {
+#ifdef UNICODE
+                      TCHAR LongDropFileName[MAX_PATH];
+                      TCHAR ShortDropFileName[MAX_PATH];
+                      if (DragQueryFile(hdrop, 0 , LongDropFileName ,(UINT) MAX_PATH)
+                        && GetShortPathName(LongDropFileName, ShortDropFileName, MAX_PATH))
+                      {
+                        int i;
+                        for (i = 0; ShortDropFileName[i] != 0; i++)
+                          Drop_file_name[i] = (char)ShortDropFileName[i];
+                        Drop_file_name[i] = 0;
+                      }
+#else
                       if (DragQueryFile(hdrop,0 ,(LPTSTR) Drop_file_name ,(UINT) MAX_PATH))
                       {
                         // Success
                       }
+#endif
                       else
                       {
                         free(Drop_file_name);
