@@ -535,10 +535,14 @@ ifeq ($(NOTTF),1)
 else
  ifneq ($(ATARICROSS),1)
    TTFCOPT = 
+   TTFLOPT =
+   ifneq ($(WIN32CROSS),1)
+     TTFLOPT += -L$(PREFIX)/lib
+   endif
    ifeq ($(API),sdl)
-   TTFLOPT = -L$(PREFIX)/lib -lSDL_ttf $(FCLOPT)
+     TTFLOPT += -lSDL_ttf $(FCLOPT)
    else
-   TTFLOPT = -L$(PREFIX)/lib -lSDL2_ttf $(FCLOPT)
+     TTFLOPT += -lSDL2_ttf $(FCLOPT)
    endif
    TTFLIBS = bin/libfreetype-6.dll bin/SDL_ttf.dll
    TTFLABEL = 
