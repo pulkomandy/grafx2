@@ -36,20 +36,6 @@
 void Pixel_tall3 (word x,word y,byte color)
 /* Affiche un pixel de la color aux coords x;y à l'écran */
 {
-#if 0
-  *(Screen_pixels + x * ZOOMX + y*ZOOMY * VIDEO_LINE_WIDTH)=color;
-  *(Screen_pixels + x * ZOOMX + y*ZOOMY * VIDEO_LINE_WIDTH + 1)=color;
-  *(Screen_pixels + x * ZOOMX + y*ZOOMY * VIDEO_LINE_WIDTH + 2)=color;
-  *(Screen_pixels + x * ZOOMX + (y*ZOOMY+1) * VIDEO_LINE_WIDTH)=color;
-  *(Screen_pixels + x * ZOOMX + (y*ZOOMY+1) * VIDEO_LINE_WIDTH + 1)=color;
-  *(Screen_pixels + x * ZOOMX + (y*ZOOMY+1) * VIDEO_LINE_WIDTH + 2)=color;
-  *(Screen_pixels + x * ZOOMX + (y*ZOOMY+2) * VIDEO_LINE_WIDTH)=color;
-  *(Screen_pixels + x * ZOOMX + (y*ZOOMY+2) * VIDEO_LINE_WIDTH + 1)=color;
-  *(Screen_pixels + x * ZOOMX + (y*ZOOMY+2) * VIDEO_LINE_WIDTH + 2)=color;
-  *(Screen_pixels + x * ZOOMX + (y*ZOOMY+3) * VIDEO_LINE_WIDTH)=color;
-  *(Screen_pixels + x * ZOOMX + (y*ZOOMY+3) * VIDEO_LINE_WIDTH + 1)=color;
-  *(Screen_pixels + x * ZOOMX + (y*ZOOMY+3) * VIDEO_LINE_WIDTH + 2)=color;
-#endif
   Set_Screen_pixel(x * ZOOMX,     y * ZOOMY,     color);
   Set_Screen_pixel(x * ZOOMX + 1, y * ZOOMY,     color);
   Set_Screen_pixel(x * ZOOMX + 2, y * ZOOMY,     color);
@@ -67,28 +53,18 @@ void Pixel_tall3 (word x,word y,byte color)
 byte Read_pixel_tall3 (word x,word y)
 /* On retourne la couleur du pixel aux coords données */
 {
-  //return *( Screen_pixels + y * ZOOMY * VIDEO_LINE_WIDTH + x * ZOOMX);
   return Get_Screen_pixel(x * ZOOMX, y * ZOOMY);
 }
 
 void Block_tall3 (word start_x,word start_y,word width,word height,byte color)
 /* On affiche un rectangle de la couleur donnée */
 {
-#if 0
-  SDL_Rect rectangle;
-  rectangle.x=start_x*ZOOMX;
-  rectangle.y=start_y*ZOOMY;
-  rectangle.w=width*ZOOMX;
-  rectangle.h=height*ZOOMY;
-  SDL_FillRect(Screen_SDL,&rectangle,color);
-#endif
   Screen_FillRect(start_x * ZOOMX, start_y * ZOOMY, width * ZOOMX, height * ZOOMY, color);
 }
 
 void Display_part_of_screen_tall3 (word width,word height,word image_width)
 /* Afficher une partie de l'image telle quelle sur l'écran */
 {
-  //On va se mettre en 0,0 dans l'écran (dest)
   byte* src=Main.offset_Y*image_width+Main.offset_X+Main_screen; //Coords de départ ds la source (src)
   int y;
   int dy;
@@ -105,18 +81,14 @@ void Display_part_of_screen_tall3 (word width,word height,word image_width)
       dest+=ZOOMX;
     }
     // On double la ligne qu'on vient de copier
-    //memcpy(dest-width*ZOOMX+VIDEO_LINE_WIDTH,dest-width*ZOOMX,width*ZOOMX);
     memcpy(Get_Screen_pixel_ptr(0, y * ZOOMY + 1), Get_Screen_pixel_ptr(0, y * ZOOMY), width * ZOOMX);
     // On la triple
-    //memcpy(dest-width*ZOOMX+2*VIDEO_LINE_WIDTH,dest-width*ZOOMX,width*ZOOMX);
     memcpy(Get_Screen_pixel_ptr(0, y * ZOOMY + 2), Get_Screen_pixel_ptr(0, y * ZOOMY), width * ZOOMX);
     // On la quadruple
-    //memcpy(dest-width*ZOOMX+3*VIDEO_LINE_WIDTH,dest-width*ZOOMX,width*ZOOMX);
     memcpy(Get_Screen_pixel_ptr(0, y * ZOOMY + 3), Get_Screen_pixel_ptr(0, y * ZOOMY), width * ZOOMX);
 
     // On passe à la ligne suivante
     src+=image_width-width;
-    //dest+=VIDEO_LINE_WIDTH*ZOOMY - width*ZOOMX;
   }
   //Update_rect(0,0,width,height);
 }
@@ -167,8 +139,7 @@ void Horizontal_XOR_line_tall3(word x_pos,word y_pos,word width)
 
   for (x=0;x<width*ZOOMX;x+=ZOOMX)
   {
-    //*(dest+x+3*VIDEO_LINE_WIDTH+2)=*(dest+x+3*VIDEO_LINE_WIDTH+1)=*(dest+x+3*VIDEO_LINE_WIDTH)=*(dest+x+2*VIDEO_LINE_WIDTH+2)=*(dest+x+2*VIDEO_LINE_WIDTH+1)=*(dest+x+2*VIDEO_LINE_WIDTH)=*(dest+x+VIDEO_LINE_WIDTH+2)=*(dest+x+VIDEO_LINE_WIDTH+1)=*(dest+x+VIDEO_LINE_WIDTH)=*(dest+x+1)=*(dest+x)=xor_lut[*(dest+x)];
-      byte color = xor_lut[Get_Screen_pixel(x_pos * ZOOMX + x, y_pos * ZOOMY)];
+    byte color = xor_lut[Get_Screen_pixel(x_pos * ZOOMX + x, y_pos * ZOOMY)];
     Set_Screen_pixel(x_pos * ZOOMX + x,     y_pos * ZOOMY, color);
     Set_Screen_pixel(x_pos * ZOOMX + x + 1, y_pos * ZOOMY, color);
     Set_Screen_pixel(x_pos * ZOOMX + x + 2, y_pos * ZOOMY, color);
@@ -187,11 +158,8 @@ void Horizontal_XOR_line_tall3(word x_pos,word y_pos,word width)
 void Vertical_XOR_line_tall3(word x_pos,word y_pos,word height)
 {
   int i;
-  //byte *dest=Screen_pixels+x_pos*ZOOMX+y_pos*VIDEO_LINE_WIDTH*ZOOMY;
   for (i=0; i<height; i++)
   {
-    //*(dest+3*VIDEO_LINE_WIDTH+2)=*(dest+3*VIDEO_LINE_WIDTH+1)=*(dest+3*VIDEO_LINE_WIDTH)=*(dest+2*VIDEO_LINE_WIDTH+2)=*(dest+2*VIDEO_LINE_WIDTH+1)=*(dest+2*VIDEO_LINE_WIDTH)=*(dest+VIDEO_LINE_WIDTH+2)=*(dest+VIDEO_LINE_WIDTH+1)=*(dest+VIDEO_LINE_WIDTH)=*(dest+2)=*(dest+1)=*(dest)=xor_lut[*(dest)];
-    //dest+=VIDEO_LINE_WIDTH*ZOOMY;
     byte color = xor_lut[Get_Screen_pixel(x_pos * ZOOMX, (y_pos + i) * ZOOMY)];
     Set_Screen_pixel(x_pos * ZOOMX,     (y_pos + i) * ZOOMY, color);
     Set_Screen_pixel(x_pos * ZOOMX + 1, (y_pos + i) * ZOOMY, color);
@@ -226,7 +194,6 @@ void Display_brush_color_tall3(word x_pos,word y_pos,word x_offset,word y_offset
       // On vérifie que ce n'est pas la transparence
       if(*src != transp_color)
       {
-        //*(dest+3*VIDEO_LINE_WIDTH+2) =*(dest+3*VIDEO_LINE_WIDTH+1) = *(dest+3*VIDEO_LINE_WIDTH) = *(dest+2*VIDEO_LINE_WIDTH+2) =*(dest+2*VIDEO_LINE_WIDTH+1) = *(dest+2*VIDEO_LINE_WIDTH) = *(dest+VIDEO_LINE_WIDTH+2) =*(dest+VIDEO_LINE_WIDTH+1) = *(dest+VIDEO_LINE_WIDTH) = *(dest+2) =*(dest+1) = *dest = *src;
         *(dest3+2) =*(dest3+1) = *(dest3) = *(dest2+2) =*(dest2+1) = *(dest2) = *(dest1+2) =*(dest1+1) = *(dest1) = *(dest+2) =*(dest+1) = *dest = *src;
       }
 
@@ -265,7 +232,6 @@ void Display_brush_mono_tall3(word x_pos, word y_pos,
     //Pour chaque pixel
     {
       if (*src!=transp_color)
-        //*(dest+3*VIDEO_LINE_WIDTH+2)=*(dest+3*VIDEO_LINE_WIDTH+1)=*(dest+3*VIDEO_LINE_WIDTH)=*(dest+2*VIDEO_LINE_WIDTH+2)=*(dest+2*VIDEO_LINE_WIDTH+1)=*(dest+2*VIDEO_LINE_WIDTH)=*(dest+VIDEO_LINE_WIDTH+2)=*(dest+VIDEO_LINE_WIDTH+1)=*(dest+VIDEO_LINE_WIDTH)=*(dest+2)=*(dest+1)=*(dest)=color;
         *(dest3+2) =*(dest3+1) = *(dest3) = *(dest2+2) =*(dest2+1) = *(dest2) = *(dest1+2) =*(dest1+1) = *(dest1) = *(dest+2) =*(dest+1) = *dest = color;
 
       // On passe au pixel suivant
@@ -278,14 +244,12 @@ void Display_brush_mono_tall3(word x_pos, word y_pos,
 
     // On passe à la ligne suivante
     src+=brush_width-width;
-    //dest+=VIDEO_LINE_WIDTH*ZOOMY-width*ZOOMX;
   }
   Update_rect(x_pos,y_pos,width,height);
 }
 
 void Clear_brush_tall3(word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word image_width)
 {
-  //On va se mettre en 0,0 dans l'écran (dest)
   byte* src = ( y_pos + Main.offset_Y ) * image_width + x_pos + Main.offset_X + Main_screen; //Coords de départ ds la source (src)
   int y;
   int x;
@@ -303,7 +267,6 @@ void Clear_brush_tall3(word x_pos,word y_pos,word x_offset,word y_offset,word wi
     for(x=width;x!=0;x--)
     //Pour chaque pixel
     {
-      //*(dest+3*VIDEO_LINE_WIDTH+2)=*(dest+3*VIDEO_LINE_WIDTH+1)=*(dest+3*VIDEO_LINE_WIDTH)=*(dest+2*VIDEO_LINE_WIDTH+2)=*(dest+2*VIDEO_LINE_WIDTH+1)=*(dest+2*VIDEO_LINE_WIDTH)=*(dest+VIDEO_LINE_WIDTH+2)=*(dest+VIDEO_LINE_WIDTH+1)=*(dest+VIDEO_LINE_WIDTH)=*(dest+2)=*(dest+1)=*(dest)=*src;
       *(dest3+2) =*(dest3+1) = *(dest3) = *(dest2+2) =*(dest2+1) = *(dest2) = *(dest1+2) =*(dest1+1) = *(dest1) = *(dest+2) =*(dest+1) = *dest = *src;
 
       // On passe au pixel suivant
@@ -316,7 +279,6 @@ void Clear_brush_tall3(word x_pos,word y_pos,word x_offset,word y_offset,word wi
 
     // On passe à la ligne suivante
     src+=image_width-width;
-    //dest+=VIDEO_LINE_WIDTH*ZOOMY-width*ZOOMX;
   }
   Update_rect(x_pos,y_pos,width,height);
 }
@@ -343,7 +305,6 @@ void Display_brush_tall3(byte * brush, word x_pos,word y_pos,word x_offset,word 
       // On vérifie que ce n'est pas la transparence
       if(*src != transp_color)
       {
-        //*(dest+3*VIDEO_LINE_WIDTH+2)=*(dest+3*VIDEO_LINE_WIDTH+1)=*(dest+3*VIDEO_LINE_WIDTH)=*(dest+2*VIDEO_LINE_WIDTH+2)=*(dest+2*VIDEO_LINE_WIDTH+1)=*(dest+2*VIDEO_LINE_WIDTH)=*(dest+VIDEO_LINE_WIDTH+2)=*(dest+VIDEO_LINE_WIDTH+1)=*(dest+VIDEO_LINE_WIDTH)=*(dest+2)=*(dest+1)=*(dest)=*src;
         *(dest3+2) =*(dest3+1) = *(dest3) = *(dest2+2) =*(dest2+1) = *(dest2) = *(dest1+2) =*(dest1+1) = *(dest1) = *(dest+2) =*(dest+1) = *dest = *src;
       }
 
@@ -374,16 +335,13 @@ void Remap_screen_tall3(word x_pos,word y_pos,word width,word height,byte * conv
     // Pour chaque pixel
     for(x=width;x>0;x--)
     {
-        //*(dest+3*VIDEO_LINE_WIDTH+2)=*(dest+3*VIDEO_LINE_WIDTH+1)=*(dest+3*VIDEO_LINE_WIDTH)=*(dest+2*VIDEO_LINE_WIDTH+2)=*(dest+2*VIDEO_LINE_WIDTH+1)=*(dest+2*VIDEO_LINE_WIDTH)=*(dest+VIDEO_LINE_WIDTH+2)=*(dest+VIDEO_LINE_WIDTH+1)=*(dest+VIDEO_LINE_WIDTH)=*(dest+2)=*(dest+1)=*(dest)=
-        *(dest3+2) =*(dest3+1) = *(dest3) = *(dest2+2) =*(dest2+1) = *(dest2) = *(dest1+2) =*(dest1+1) = *(dest1) = *(dest+2) =*(dest+1) = *dest =
+      *(dest3+2) =*(dest3+1) = *(dest3) = *(dest2+2) =*(dest2+1) = *(dest2) = *(dest1+2) =*(dest1+1) = *(dest1) = *(dest+2) =*(dest+1) = *dest =
         conversion_table[*dest];
       dest +=ZOOMX;
       dest1+=ZOOMX;
       dest2+=ZOOMX;
       dest3+=ZOOMX;
     }
-
-    //dest = dest + VIDEO_LINE_WIDTH*ZOOMY - width*ZOOMX;
   }
 
   Update_rect(x_pos,y_pos,width,height);
@@ -393,10 +351,6 @@ void Display_line_on_screen_fast_tall3(word x_pos,word y_pos,word width,byte * l
 /* On affiche toute une ligne de pixels telle quelle. */
 /* Utilisée si le buffer contient déja des pixel doublés. */
 {
-  //memcpy(Screen_pixels+x_pos*ZOOMX+y_pos*ZOOMY*VIDEO_LINE_WIDTH,line,width*ZOOMX);
-  //memcpy(Screen_pixels+x_pos*ZOOMX+(y_pos*ZOOMY+1)*VIDEO_LINE_WIDTH,line,width*ZOOMX);
-  //memcpy(Screen_pixels+x_pos*ZOOMX+(y_pos*ZOOMY+2)*VIDEO_LINE_WIDTH,line,width*ZOOMX);
-  //memcpy(Screen_pixels+x_pos*ZOOMX+(y_pos*ZOOMY+3)*VIDEO_LINE_WIDTH,line,width*ZOOMX);
   memcpy(Get_Screen_pixel_ptr(+x_pos*ZOOMX, y_pos*ZOOMY), line, width*ZOOMX);
   memcpy(Get_Screen_pixel_ptr(+x_pos*ZOOMX, y_pos*ZOOMY+1), line, width*ZOOMX);
   memcpy(Get_Screen_pixel_ptr(+x_pos*ZOOMX, y_pos*ZOOMY+2), line, width*ZOOMX);
@@ -407,15 +361,12 @@ void Display_line_on_screen_tall3(word x_pos,word y_pos,word width,byte * line)
 /* On affiche une ligne de pixels en les doublant. */
 {
   int x;
-  //byte *dest;
-  //dest=Screen_pixels+x_pos*ZOOMX+y_pos*ZOOMY*VIDEO_LINE_WIDTH;
   byte* dest = Get_Screen_pixel_ptr(x_pos * ZOOMX, y_pos * ZOOMY);
   byte* dest1 = Get_Screen_pixel_ptr(x_pos * ZOOMX, y_pos * ZOOMY + 1);
   byte* dest2 = Get_Screen_pixel_ptr(x_pos * ZOOMX, y_pos * ZOOMY + 2);
   byte* dest3 = Get_Screen_pixel_ptr(x_pos * ZOOMX, y_pos * ZOOMY + 3);
   for(x=width;x>0;x--)
   {
-    //*(dest+3*VIDEO_LINE_WIDTH+2)=*(dest+3*VIDEO_LINE_WIDTH+1)=*(dest+3*VIDEO_LINE_WIDTH)=*(dest+2*VIDEO_LINE_WIDTH+2)=*(dest+2*VIDEO_LINE_WIDTH+1)=*(dest+2*VIDEO_LINE_WIDTH)=*(dest+VIDEO_LINE_WIDTH+2)=*(dest+VIDEO_LINE_WIDTH+1)=*(dest+VIDEO_LINE_WIDTH)=*(dest+2)=*(dest+1)=*(dest)=*line;
     *(dest3+2) =*(dest3+1) = *(dest3) = *(dest2+2) =*(dest2+1) = *(dest2) = *(dest1+2) =*(dest1+1) = *(dest1) = *(dest+2) =*(dest+1) = *dest = *line;
     dest+=ZOOMX;
     line++;
@@ -427,7 +378,6 @@ void Display_transparent_mono_line_on_screen_tall3(
 // Affiche une ligne à l'écran avec une couleur + transparence.
 // Utilisé par les brosses en mode zoom
 {
-  //byte* dest = Screen_pixels+ y_pos*VIDEO_LINE_WIDTH + x_pos*ZOOMX;
   byte* dest = Get_Screen_pixel_ptr(x_pos * ZOOMX, y_pos);
   int x;
   // Pour chaque pixel
@@ -444,7 +394,6 @@ void Display_transparent_mono_line_on_screen_tall3(
 
 void Read_line_screen_tall3(word x_pos,word y_pos,word width,byte * line)
 {
-  //memcpy(line,VIDEO_LINE_WIDTH*ZOOMY * y_pos + x_pos * ZOOMX + Screen_pixels,width*ZOOMX);
   memcpy(line, Get_Screen_pixel_ptr(x_pos * ZOOMX, y_pos * ZOOMY), width*ZOOMX);
 }
 
@@ -524,13 +473,10 @@ void Display_brush_color_zoom_tall3(word x_pos,word y_pos,
         dest+=ZOOMX;
       }
       // Double the line
-      //memcpy(Screen_pixels + (y*ZOOMY+1)*VIDEO_LINE_WIDTH + x_pos*ZOOMX, Screen_pixels + y*ZOOMY*VIDEO_LINE_WIDTH + x_pos*ZOOMX, width*ZOOMX*Main.magnifier_factor);
       memcpy(Get_Screen_pixel_ptr(x_pos * ZOOMX, y * ZOOMY + 1), Get_Screen_pixel_ptr(x_pos * ZOOMX, y * ZOOMY), width*ZOOMX*Main.magnifier_factor);
       // Triple the line
-      //memcpy(Screen_pixels + (y*ZOOMY+2)*VIDEO_LINE_WIDTH + x_pos*ZOOMX, Screen_pixels + y*ZOOMY*VIDEO_LINE_WIDTH + x_pos*ZOOMX, width*ZOOMX*Main.magnifier_factor);
       memcpy(Get_Screen_pixel_ptr(x_pos * ZOOMX, y * ZOOMY + 2), Get_Screen_pixel_ptr(x_pos * ZOOMX, y * ZOOMY), width*ZOOMX*Main.magnifier_factor);
       // Quadruple it
-      //memcpy(Screen_pixels + (y*ZOOMY+3)*VIDEO_LINE_WIDTH + x_pos*ZOOMX, Screen_pixels + y*ZOOMY*VIDEO_LINE_WIDTH + x_pos*ZOOMX, width*ZOOMX*Main.magnifier_factor);
       memcpy(Get_Screen_pixel_ptr(x_pos * ZOOMX, y * ZOOMY + 3), Get_Screen_pixel_ptr(x_pos * ZOOMX, y * ZOOMY), width*ZOOMX*Main.magnifier_factor);
       y++;
       if(y==end_y_pos)
@@ -633,5 +579,3 @@ void Clear_brush_scaled_tall3(word x_pos,word y_pos,word x_offset,word y_offset,
     src+= image_width;
   }
 }
-
-

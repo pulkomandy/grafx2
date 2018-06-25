@@ -3175,7 +3175,6 @@ void Horizontal_grid_line(word x_pos,word y_pos,word width)
 
   for (x=!(x_pos&1);x<width;x+=2)
     Pixel(x_pos+x, y_pos, xor_lut[Get_Screen_pixel((x_pos+x)*Pixel_width, (y_pos-1)*Pixel_height)]);
-    //Pixel(x_pos+x, y_pos, xor_lut[*((y_pos-1)*Pixel_height*VIDEO_LINE_WIDTH+x_pos*Pixel_width+Screen_pixels+x*Pixel_width)]);
 }
 
 void Vertical_grid_line(word x_pos,word y_pos,word height)
@@ -3184,7 +3183,6 @@ void Vertical_grid_line(word x_pos,word y_pos,word height)
 
   for (y=!(y_pos&1);y<height;y+=2)
     Pixel(x_pos, y_pos+y, xor_lut[Get_Screen_pixel(x_pos*Pixel_width-1, (y_pos+y)*Pixel_height)]);
-    //Pixel(x_pos, y_pos+y, xor_lut[*(Screen_pixels+(x_pos*Pixel_width-1)+(y_pos*Pixel_height+y*Pixel_height)*VIDEO_LINE_WIDTH)]);
 }
 
 // Tile Grid
