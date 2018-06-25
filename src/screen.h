@@ -29,6 +29,9 @@
 #ifndef SCREEN_H_INCLUDED
 #define SCREEN_H_INCLUDED
 
+#ifdef WIN32
+#include <windows.h>  // for HWND
+#endif
 #include "struct.h"
 #include "global.h"
 
@@ -61,6 +64,10 @@ void Allow_drag_and_drop(int flag);
 
 #if defined(USE_SDL2)
 void GFX2_UpdateScreen(void);
+#endif
+
+#if defined(WIN32)
+HWND GFX2_Get_Window_Handle(void);
 #endif
 
 #endif // SCREEN_H_INCLUDED

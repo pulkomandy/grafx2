@@ -45,11 +45,18 @@
 #if defined(USE_SDL) || defined(USE_SDL2)
 #include <SDL.h>
 #include <SDL_image.h>
-
-// There is no WM on the GP2X...
-#if !defined(__GP2X__) && !defined(__WIZ__) && !defined(__CAANOO__) && !defined(GCWZERO)
-    #include <SDL_syswm.h>
 #endif
+
+#if defined(WIN32)
+    #include <windows.h>
+    #include <shlwapi.h>
+#elif defined (__MINT__)
+    #include <mint/osbind.h>
+#elif defined(__macosx__)
+    #import <CoreFoundation/CoreFoundation.h>
+    #import <sys/param.h>
+#elif defined(__FreeBSD__)
+    #include <sys/param.h>
 #endif
 
 #include "const.h"
@@ -78,18 +85,6 @@
 #include "filesel.h"
 #if defined(WIN32) && !(defined(USE_SDL) || defined(USE_SDL2))
 #include "win32screen.h"
-#endif
-
-#if defined(WIN32)
-    #include <windows.h>
-    #include <shlwapi.h>
-#elif defined (__MINT__)
-    #include <mint/osbind.h>
-#elif defined(__macosx__)
-    #import <CoreFoundation/CoreFoundation.h>
-    #import <sys/param.h>
-#elif defined(__FreeBSD__)
-    #include <sys/param.h>
 #endif
 
 
@@ -859,11 +854,8 @@ int Init_program(int argc,char * argv[])
     {
       //RECT r;
       #if defined(USE_SDL) || defined(USE_SDL2)
-      static SDL_SysWMinfo pInfo;
-      SDL_VERSION(&pInfo.version);
-      SDL_GetWMInfo(&pInfo);
-      //GetWindowRect(pInfo.window, &r);
-      SetWindowPos(pInfo.window, 0, Config.Window_pos_x, Config.Window_pos_y, 0, 0, SWP_NOSIZE);
+      //GetWindowRect(window, &r);
+      SetWindowPos(GFX2_Get_Window_Handle(), 0, Config.Window_pos_x, Config.Window_pos_y, 0, 0, SWP_NOSIZE);
       #endif
     }
   }
@@ -1071,10 +1063,7 @@ void Program_shutdown(void)
   #if defined(USE_SDL) || defined(USE_SDL2)
   {
     RECT r;
-    static SDL_SysWMinfo pInfo;
-
-    SDL_GetWMInfo(&pInfo);
-    GetWindowRect(pInfo.window, &r);
+    GetWindowRect(GFX2_Get_Window_Handle(), &r);
 
     Config.Window_pos_x = r.left;
     Config.Window_pos_y = r.top;

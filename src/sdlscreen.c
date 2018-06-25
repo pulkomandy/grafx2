@@ -502,18 +502,23 @@ void Clear_border(byte color)
   }  
 }
 
+#ifdef WIN32
+HWND GFX2_Get_Window_Handle(void)
+{
+  SDL_SysWMinfo wminfo;
+
+  SDL_VERSION(&wminfo.version);
+  SDL_GetWMInfo(&wminfo);
+  return wminfo.window;
+}
+#endif
+
 /// Activates or desactivates file drag-dropping in program window.
 void Allow_drag_and_drop(int flag)
 {
   // Inform Windows that we accept drag-n-drop events or not
   #ifdef __WIN32__
-  SDL_SysWMinfo wminfo;
-  HWND hwnd;
-  
-  SDL_VERSION(&wminfo.version);
-  SDL_GetWMInfo(&wminfo);
-  hwnd = wminfo.window;
-  DragAcceptFiles(hwnd,flag?TRUE:FALSE);
+  DragAcceptFiles(GFX2_Get_Window_Handle(), flag?TRUE:FALSE);
   SDL_EventState (SDL_SYSWMEVENT,flag?SDL_ENABLE:SDL_DISABLE );
   #else
   (void)flag; // unused

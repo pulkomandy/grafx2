@@ -44,6 +44,11 @@ static int Windows_DIB_height = 0;
 static HWND Win32_hwnd = NULL;
 static int Win32_Is_Fullscreen = 0;
 
+HWND GFX2_Get_Window_Handle()
+{
+  return Win32_hwnd;
+}
+
 static void Win32_Repaint(HWND hwnd)
 {
   PAINTSTRUCT ps;
@@ -421,4 +426,5 @@ volatile int Allow_colorcycling = 0;
 /// Activates or desactivates file drag-dropping in program window.
 void Allow_drag_and_drop(int flag)
 {
+  DragAcceptFiles(GFX2_Get_Window_Handle(), flag?TRUE:FALSE);
 }

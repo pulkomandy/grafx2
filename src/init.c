@@ -52,9 +52,6 @@
 #if defined(WIN32)
   #include <windows.h> // GetLogicalDrives(), GetDriveType(), DRIVE_*
 #endif
-#if !defined(__GP2X__) && defined(USE_SDL)
-    #include <SDL_syswm.h>
-#endif
 #if defined (__MINT__)
   #include <mint/osbind.h>
 #endif
@@ -85,6 +82,7 @@
 #include "mountlist.h" // read_file_system_list
 #include "operatio.h"
 #include "palette.h"
+#include "screen.h"
 #if defined(USE_SDL) || defined(USE_SDL2)
 #include "sdlscreen.h"
 #endif
@@ -3112,9 +3110,6 @@ void Define_icon(void)
     LPVOID lpResIcon32;
     HGLOBAL hMem;
     WORD nID;
-#if defined(USE_SDL) || defined(USE_SDL2)
-    SDL_SysWMinfo info;
-#endif
     
     hInstance = (HINSTANCE)GetModuleHandle(NULL);
     if (hInstance==NULL)
@@ -3136,11 +3131,6 @@ void Define_icon(void)
     if (lpResIconDir==NULL)
       break;
       
-#if defined(USE_SDL) || defined(USE_SDL2)
-    SDL_VERSION(&info.version);
-    SDL_GetWMInfo(&info);
-#endif
-
     //
     // 16x16
     //
@@ -3175,7 +3165,7 @@ void Define_icon(void)
 
     // Set it
 #if defined(USE_SDL) || defined(USE_SDL2)
-		SetClassLongPtr(info.window, GCL_HICONSM, (LONG_PTR)hicon);
+		SetClassLongPtr(GFX2_Get_Window_Handle(), GCL_HICONSM, (LONG_PTR)hicon);
 #else
     // TODO
 #endif
@@ -3215,7 +3205,7 @@ void Define_icon(void)
 
     // Set it
 #if defined(USE_SDL) || defined(USE_SDL2)
-		SetClassLongPtr(info.window, GCL_HICON, (LONG_PTR)hicon);
+		SetClassLongPtr(GFX2_Get_Window_Handle(), GCL_HICON, (LONG_PTR)hicon);
 #else
     // TODO
 #endif

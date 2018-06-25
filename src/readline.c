@@ -47,9 +47,6 @@
 
 #ifdef WIN32
 #include <windows.h>
-#if defined(USE_SDL)
-#include <SDL_syswm.h>
-#endif
 
 #elif defined __HAIKU__
 #include "haiku.h"
@@ -307,18 +304,7 @@ static char* getClipboard(word * * unicode)
 {
 #ifdef WIN32
     char* dst = NULL;
-#if defined(USE_SDL) || defined(USE_SDL2)
-    SDL_SysWMinfo info;
-
-    SDL_VERSION(&info.version);
-
-    if ( SDL_GetWMInfo(&info) )
-    {
-      if (OpenClipboard(info.window) )
-#else
-    {
-      if (OpenClipboard(GetActiveWindow()))
-#endif
+    if (OpenClipboard(GFX2_Get_Window_Handle()))
       {
         HANDLE hMem;
         if ( IsClipboardFormatAvailable(CF_TEXT) )
@@ -346,7 +332,6 @@ static char* getClipboard(word * * unicode)
         }
         CloseClipboard();
       }    
-    }
     return dst;
   #elif defined(__AROS__)
 

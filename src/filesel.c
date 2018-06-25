@@ -25,10 +25,6 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 
-#if defined(USE_SDL) || defined(USE_SDL2)
-#include <SDL_syswm.h>
-#endif
-
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     #include <proto/dos.h>
     #include <sys/types.h>
@@ -95,21 +91,11 @@ byte Native_filesel(byte load)
 #if WIN32
   OPENFILENAME ofn;
   char szFileName[MAX_PATH] = "";
-  HWND hwnd;
-#if defined(USE_SDL) || defined(USE_SDL2)
-  SDL_SysWMinfo wminfo;
-  
-  SDL_VERSION(&wminfo.version);
-  SDL_GetWMInfo(&wminfo);
-  hwnd = wminfo.window;
-#else
-  hwnd = GetActiveWindow();
-#endif
 
   ZeroMemory(&ofn, sizeof(ofn));
 
   ofn.lStructSize = sizeof(ofn);
-  ofn.hwndOwner = hwnd;
+  ofn.hwndOwner = GFX2_Get_Window_Handle();
   ofn.lpstrFilter = TEXT("Text Files (*.txt)\0*.txt\0All Files (*.*)\0*.*\0");
 #ifdef UNICODE
 #else
