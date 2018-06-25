@@ -400,11 +400,7 @@ try_again:
 
   if (screen_changed)
   {
-#if defined(USE_SDL) || defined(USE_SDL2)
-    Set_mode_SDL(&width, &height,fullscreen);
-#else
     GFX2_Set_mode(&width, &height, fullscreen);
-#endif
   }
 
   if (screen_changed || pixels_changed)

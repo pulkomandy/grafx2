@@ -114,7 +114,7 @@ void Screen_FillRect(int x, int y, int w, int h, byte color)
 }
 
 /// Sets the new screen/window dimensions.
-void Set_mode_SDL(int *width, int *height, int fullscreen)
+void GFX2_Set_mode(int *width, int *height, int fullscreen)
 {
   static SDL_Cursor* cur = NULL;
   static byte cursorData = 0;

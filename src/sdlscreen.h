@@ -33,8 +33,6 @@
 #include "struct.h"
 #include "global.h"
 
-void Set_mode_SDL(int *,int *,int);
-
 GFX2_GLOBAL SDL_Rect ** List_SDL_video_modes;
 
 ///
