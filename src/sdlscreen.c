@@ -142,10 +142,20 @@ void GFX2_Set_mode(int *width, int *height, int fullscreen)
   }
 #else
   // SDL2
-  Window_SDL = SDL_CreateWindow("GrafX2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                                *width, *height, (fullscreen?SDL_WINDOW_FULLSCREEN:SDL_WINDOW_RESIZABLE));
-  Renderer_SDL = SDL_CreateRenderer(Window_SDL, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+  if (Window_SDL == NULL)
+  {
+    Window_SDL = SDL_CreateWindow("GrafX2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                                  *width, *height, (fullscreen?SDL_WINDOW_FULLSCREEN:SDL_WINDOW_RESIZABLE));
+    Renderer_SDL = SDL_CreateRenderer(Window_SDL, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+  }
+  //else
+  //  SDL_SetWindowSize(Window_SDL, *width, *height);
+  //SDL_GetWindowSize(Window_SDL, width, height);
+  if (Texture_SDL != NULL)
+    SDL_DestroyTexture(Texture_SDL);
   Texture_SDL = SDL_CreateTexture(Renderer_SDL, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, *width, *height);
+  if (Screen_SDL != NULL)
+    SDL_FreeSurface(Screen_SDL);
   Screen_SDL = SDL_CreateRGBSurface(0, *width, *height, 8, 0, 0, 0, 0);
 #endif
 

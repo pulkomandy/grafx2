@@ -933,6 +933,29 @@ int Get_input(int sleep_time)
               break;
 #endif
 
+#if defined(USE_SDL2)
+          case SDL_WINDOWEVENT:
+              switch(event.window.event)
+              {
+                  case SDL_WINDOWEVENT_RESIZED: // change by external event (user or window manager)
+                      Resize_width = event.window.data1;
+                      Resize_height = event.window.data2;
+                      // forbid window size < 320x200
+                      if (Resize_width < 320)
+                        Resize_width = 320;
+                      if (Resize_height < 200)
+                        Resize_height = 200;
+                      if (Resize_width != event.window.data1 || Resize_height != event.window.data2)
+                        SDL_SetWindowSize(SDL_GetWindowFromID(event.window.windowID), Resize_width, Resize_height);
+                      break;
+                  case SDL_WINDOWEVENT_CLOSE:
+                      Quit_is_required = 1;
+                      user_feedback_required = 1;
+                      break;
+              }
+              break;
+#endif
+
           case SDL_QUIT:
               Handle_window_exit(event.quit);
               user_feedback_required = 1;
