@@ -1229,8 +1229,8 @@ void Button_Palette(int btn)
   Window_set_repeatable_button(BUTTON_MINUS_X,BUTTON_MINUS_Y,12,11,"-",0,1,SDLK_KP_MINUS);       // 18
 
   Window_set_normal_button(C1_X,L3,C1_W,14,"Neg"    ,1,1,SDLK_n);   // 19
-  Window_set_normal_button(C1_X,L2,C1_W,14,"Flip"    ,3,1,SDLK_i);   // 20
-  Window_set_normal_button(C2_X,L2,C2_W,14,"X-Flip" ,0,1,SDLK_v);   // 21
+  Window_set_normal_button(C1_X,L2,C1_W,14,"Flip"   ,1,1,SDLK_f);   // 20
+  Window_set_normal_button(C2_X,L2,C2_W,14,"X-Flip" ,5,1,SDLK_i);   // 21
 
   // Button without outline (RGB/HSL switch)
   Window_set_normal_button(NUMERIC_BOX_X,14,81,11,""    ,0,1,SDLK_h);   // 22
