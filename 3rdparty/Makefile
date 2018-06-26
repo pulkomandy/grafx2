@@ -34,7 +34,8 @@ LUAURL=https://www.lua.org/ftp/$(LUAARCH)
 RECOILVER=4.3.0
 RECOIL=recoil-$(RECOILVER)
 RECOILARCH=$(RECOIL).tar.gz
-RECOILURL=https://sourceforge.net/projects/recoil/files/recoil/$(RECOILVER)/$(RECOILARCH)
+# https://downloads.sourceforge.net/project/recoil/recoil/4.3.0/recoil-4.3.0.tar.gz
+RECOILURL=https://downloads.sourceforge.net/project/recoil/recoil/$(RECOILVER)/$(RECOILARCH)
 RECOILURLALT=http://nanard.free.fr/grafx2/$(RECOILARCH)
 
 PREFIX = $(PWD)/usr
