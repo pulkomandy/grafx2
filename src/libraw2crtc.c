@@ -15,16 +15,23 @@
 #include "struct.h"
 #include "loadsave.h"
 
-unsigned short addrCalc(unsigned char vcc, unsigned char rcc, unsigned char hcc, unsigned char cclk, unsigned char r1, unsigned char r12, unsigned char r13)
+/* 6845 registers :
+ * R1 : Horizontal Displayed : number of character displayed per line (4, 8 or 16 pixels depending on mode)
+ * R6 : Vertical Displayed : Height of displayed screen in characters
+ * R9 : Maximum Raster Address : number of line per character-1
+ * R12 : Display Start Address (High)
+ * R13 : Display Start Address (Low)
+ */
+static unsigned short addrCalc(unsigned char vcc, unsigned char rcc, unsigned char hcc, unsigned char cclk, unsigned char r1, unsigned char r12, unsigned char r13)
 {
   unsigned short MA;
   unsigned short addr;
 
   //MA = vcc*r1 + hcc + (0x0C)*256;
   MA = vcc*r1 + hcc + r12*256 + r13;
-  addr = cclk | ((MA & 0x03FF) << 1);
-  addr = addr | ((rcc & 0x07) << 11);
-  addr = addr | ((MA & 0x3000) << 2);
+  addr = cclk | ((MA & 0x03FF) << 1); // MA9-MA0 CCLK
+  addr = addr | ((rcc & 0x07) << 11); // RA2-RA0 (row address)
+  addr = addr | ((MA & 0x3000) << 2); // MA13-MA12
 
   return addr;
 }
@@ -68,9 +75,9 @@ unsigned char *raw2crtc(T_IO_Context *context, unsigned char mode, unsigned char
 
   int i, y,x;
   unsigned char r6;
-  unsigned char vcc;
-  unsigned char rcc;
-  unsigned char hcc;
+  unsigned char vcc;  // vertical character count
+  unsigned char rcc;  // raster count (line within character)
+  unsigned char hcc;  // horizontal character count
   unsigned char cclk;
 
   int width = context->Width;
@@ -116,6 +123,7 @@ unsigned char *raw2crtc(T_IO_Context *context, unsigned char mode, unsigned char
     fprintf(stderr, "failed to allocate tmpBuffer\n");
     exit(4);
   }
+  memset(tmpBuffer, 0, 0x10000);
 
   allocationBuffer = (unsigned char*)malloc(0x10000);
   if(allocationBuffer == NULL)
@@ -123,13 +131,13 @@ unsigned char *raw2crtc(T_IO_Context *context, unsigned char mode, unsigned char
     fprintf(stderr, "failed to allocate allocationBuffer\n");
     exit(4);
   }
-  memset(allocationBuffer, 0, 0xFFFF);
+  memset(allocationBuffer, 0, 0x10000);
 
   r6 = height/(r9+1);
 
   for(vcc = 0; vcc < r6; vcc++)
   {
-    for(rcc = 0; rcc < (r9+1); rcc++)
+    for(rcc = 0; rcc <= r9; rcc++)
     {
       for(hcc = 0; hcc < *r1; hcc++)
       {
