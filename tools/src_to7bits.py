@@ -12,11 +12,12 @@ import sys
 import os
 import re
 
-conv_format = '\\%03o'  # octal
-#conv_format = '\\x%02x' # hex
+#conv_format = '\\%03o'  # octal
+conv_format = '\\x%02x' # hex
 
 # for C++ style comments //
-commentre = re.compile('(.*)(\/\/.*)', re.MULTILINE | re.DOTALL)
+#commentre = re.compile('(.*)(\/\/.*)', re.MULTILINE | re.DOTALL)
+commentre = re.compile('^(.*?)(\/\/.*)$')
 
 def escape_8bit_chars(char):
   if ord(char) >= 0x7f:
@@ -28,9 +29,13 @@ def escape_8bit_chars(char):
 # and a filename+'.out' file was written
 def to_7bit(filename):
   with open(filename, "r") as f:
+    has_changed = False
     output = ''
     in_comment = False  # C style comments /*  */
+    lineindex = 0
     for line in f.readlines():
+      line = line.rstrip()
+      lineindex = lineindex + 1
       comment_start = 0
       comment_end = -1
       if not in_comment:
@@ -53,14 +58,22 @@ def to_7bit(filename):
           (line, comment) = m.group(1,2)
         else:
           comment = ''
-      conv = ''.join(map(escape_8bit_chars, list(line)))
-      output = output + conv + comment
-    if f.tell() < len(output):
+      convlist = map(escape_8bit_chars, list(line))
+      # check for problematic hex strings
+      for i in range(len(convlist)-1):
+        if convlist[i][0:2] == '\\x':
+          c = convlist[i+1]
+          if (c >= '0' and c <= '9') or (c >= 'a' and c <= 'f') or (c >= 'A' and c <= 'F'):
+            print "WARNING %15s:%-4d %s followed by %s : Inserting \"\"" % (filename, lineindex, convlist[i], c)
+            convlist[i] = convlist[i] + '""'
+      conv = ''.join(convlist)
+      if conv != line:
+        has_changed = True
+      output = output + conv + comment + '\n'
+    if has_changed:
       with open(filename + '.out', "w") as fout:
         fout.write(output)
-      return True
-    else:
-      return False
+    return has_changed
 
 # program entry point
 if len(sys.argv) <= 1:
