@@ -586,6 +586,11 @@ endif
 ifeq ($(API),win32)
   APIOBJ = win32screen.o
 endif
+ifeq ($(API),x11)
+  APIOBJ = x11screen.o
+  COPT += -DUSE_X11
+  LOPT += -lX11
+endif
 
 #To enable Joystick emulation of cursor, make USE_JOYSTICK=1 (for input.o)
 #This can be necessary to test cursor code on a PC, but by default for all

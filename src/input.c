@@ -31,6 +31,13 @@
   #include <shellapi.h>
 #endif
 
+#ifdef USE_X11
+#include <unistd.h>
+#include <X11/Xlib.h>
+#include <X11/XKBlib.h>
+#include <X11/Xutil.h>
+#endif
+
 #include "global.h"
 #include "keyboard.h"
 #include "screen.h"
@@ -41,6 +48,9 @@
 #include "input.h"
 #include "loadsave.h"
 
+#ifdef USE_X11
+extern Display * X11_display;
+#endif
 
 #if defined(USE_SDL)
 #define RSUPER_EMULATES_META_MOD
@@ -1215,6 +1225,146 @@ int Get_input(int sleep_time)
       WaitMessage();
       KillTimer(NULL, timerId);
     }
+#elif defined(USE_X11)
+    int user_feedback_required = 0; // Flag qui indique si on doit arrêter de traiter les évènements ou si on peut enchainer
+
+    Color_cycling();
+    // Commit any pending screen update.
+    // This is done in this function because it's called after reading 
+    // some user input.
+    Flush_update();
+
+    Key_ANSI = 0;
+    Key_UNICODE = 0;
+    Key = 0;
+    Mouse_moved=0;
+    Input_new_mouse_X = Mouse_X;
+    Input_new_mouse_Y = Mouse_Y;
+    Input_new_mouse_K = Mouse_K;
+
+    XFlush(X11_display);
+    while(!user_feedback_required && XPending(X11_display) > 0)
+    {
+      word mod = 0;
+      XEvent event;
+      XNextEvent(X11_display, &event);
+      switch(event.type)
+      {
+        case KeyPress:
+          {
+            KeySym sym;
+            //printf("key code = %d state=0x%08x\n", event.xkey.keycode, event.xkey.state);
+            // right/left window 40 Mod4Mask
+            // left alt = 8         Mod1Mask
+            // right alt = 80       Mod5Mask
+            // NumLock = 10         Mod2Mask
+            if (event.xkey.state & ShiftMask)
+              mod |= MOD_SHIFT;
+            if (event.xkey.state & ControlMask)
+              mod |= MOD_CTRL;
+            if (event.xkey.state & (Mod1Mask | Mod5Mask))
+              mod |= MOD_ALT;
+            if (event.xkey.state & Mod3Mask)
+              mod |= MOD_META;
+            //sym = XKeycodeToKeysym(X11_display, event.xkey.keycode, 0);
+            sym = XkbKeycodeToKeysym(X11_display, event.xkey.keycode, 0, 0);
+            //printf("sym = %04lx %s\t\tmod=%04x\n", sym, XKeysymToString(sym), mod);
+            Key = mod | (sym & 0x0fff);
+            //sym = XkbKeycodeToKeysym(X11_display, event.xkey.keycode, 0, event.xkey.state);
+            if ((sym & 0xf000) != 0xf000) // test for standard key
+            {
+              int count;
+              char buffer[16];
+              static XComposeStatus status;
+              count = XLookupString(&event.xkey, buffer, sizeof(buffer),
+                                    &sym, &status);
+              //printf(" sym = %04lx %s  %d %s\n", sym, XKeysymToString(sym), count, buffer);
+              Key_UNICODE = sym;
+              if (sym < 0x100)
+                Key_ANSI = sym;
+            }
+            user_feedback_required = 1;
+          }
+          break;
+        case ButtonPress: // left = 1, middle = 2, right = 3, wheelup = 4, wheeldown = 5
+          //printf("Press button = %d state = 0x%08x\n", event.xbutton.button, event.xbutton.state);
+          if (event.xkey.state & ShiftMask)
+            mod |= MOD_SHIFT;
+          if (event.xkey.state & ControlMask)
+            mod |= MOD_CTRL;
+          if (event.xkey.state & (Mod1Mask | Mod5Mask))
+            mod |= MOD_ALT;
+          if (event.xkey.state & Mod3Mask)
+            mod |= MOD_META;
+          switch(event.xbutton.button)
+          {
+            case 1:
+            case 3:
+              {
+                byte mask = 1;
+                if(event.xbutton.button == 3)
+                  mask ^= 3;
+                if (Button_inverter)
+                  mask ^= 3;
+                Input_new_mouse_K |= mask;
+                user_feedback_required = Move_cursor_with_constraints();
+              }
+              break;
+            case 2:
+              Key = KEY_MOUSEMIDDLE | mod;
+              user_feedback_required = 1;
+              break;
+            case 4:
+              Key = KEY_MOUSEWHEELUP | mod;
+              user_feedback_required = 1;
+              break;
+            case 5:
+              Key = KEY_MOUSEWHEELDOWN | mod;
+              user_feedback_required = 1;
+              break;
+          }
+          break;
+        case ButtonRelease:
+          //printf("Release button = %d\n", event.xbutton.button);
+          if(event.xbutton.button == 1 || event.xbutton.button == 3)
+          {
+            byte mask = 1;
+            if(event.xbutton.button == 3)
+              mask ^= 3;
+            if (Button_inverter)
+              mask ^= 3;
+            Input_new_mouse_K &= ~mask;
+            user_feedback_required = Move_cursor_with_constraints();
+          }
+          break;
+        case MotionNotify:
+          //printf("mouse %dx%d\n", event.xmotion.x, event.xmotion.y);
+          Input_new_mouse_X = (event.xmotion.x < 0) ? 0 : event.xmotion.x/Pixel_width;
+          Input_new_mouse_Y = (event.xmotion.y < 0) ? 0 : event.xmotion.y/Pixel_height;
+          user_feedback_required = Move_cursor_with_constraints();
+          break;
+        case Expose:
+          printf("Expose (%d,%d) (%d,%d)\n", event.xexpose.x, event.xexpose.y, event.xexpose.width, event.xexpose.height);
+          Update_rect(event.xexpose.x, event.xexpose.y,
+                      event.xexpose.width, event.xexpose.height);
+          break;
+        default:
+          printf("event.type = %d\n", event.type);
+      }
+    }
+    // If the cursor was moved since last update,
+    // it was erased, so we need to redraw it (with the preview brush)
+    if (Mouse_moved)
+    {
+      Compute_paintbrush_coordinates();
+      Display_cursor();
+      return 1;
+    }
+    if (user_feedback_required)
+      return 1;
+    // Nothing significant happened
+    if (sleep_time)
+      usleep(1000 * sleep_time);
 #endif
     return 0;
 }

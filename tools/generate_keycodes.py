@@ -42,6 +42,31 @@ win32vk = {
 'RALT': 'RMENU',
 }
 
+x11xk = {
+'BACKSPACE': 'BackSpace',
+'CAPSLOCK': 'Caps_Lock',
+'PAGEUP': 'Page_Up',
+'PAGEDOWN': 'Page_Down',
+'BACKQUOTE': 'grave',
+'KP_PLUS': 'KP_Add',
+'KP_MINUS': 'KP_Subtract',
+'KP_EQUALS': 'KP_Equal',
+'KP_PERIOD': 'KP_Decimal',
+'COMMA': 'comma',
+'SPACE': 'space',
+'EQUALS': 'equal',
+'MINUS': 'minus',
+'PERIOD': 'period',
+'LEFTBRACKET': 'bracketleft',
+'RIGHTBRACKET': 'bracketright',
+'LCTRL': 'Control_L',
+'RCTRL': 'Control_R',
+'LALT': 'Alt_L',
+'RALT': 'Alt_R',
+'LSHIFT': 'Shift_L',
+'RSHIFT': 'Shift_R',
+}
+
 def keycode_def(section, key, index, native_key=None):
 	if native_key is None:
 		native_key = key
@@ -56,6 +81,13 @@ def keycode_def(section, key, index, native_key=None):
 			return '#define KEY_%-12s 0\n' % (key)
 		else:
 			return '#define KEY_%-12s VK_%s\n' % (key, native_key)
+	elif section == 'x11':
+		if native_key[0:3] == 'Kp_':
+			native_key = 'KP_' + native_key[3:]
+		if key == 'UNKNOWN':
+			return '#define KEY_%-12s 0\n' % (key)
+		else:
+			return '#define KEY_%-12s K2K(XK_%s)\n' % (key, native_key)
 	else:
 		return '#define KEY_%-12s %d\n' % (key, index)
 
@@ -65,6 +97,11 @@ def add_keycodes_defs(section, lines):
 	for key in keys:
 		if section == 'win32' and key in win32vk:
 			lines.append(keycode_def(section, key, i, win32vk[key]))
+		elif section == 'x11':
+			if key in x11xk:
+				lines.append(keycode_def(section, key, i, x11xk[key]))
+			else:
+				lines.append(keycode_def(section, key, i, key.title()))
 		else:
 			lines.append(keycode_def(section, key, i))
 		i = i + 1
@@ -80,11 +117,15 @@ def add_keycodes_defs(section, lines):
 		key = "KP%d" % (j)
 		if section == 'win32':
 			lines.append(keycode_def(section, key, i, "NUMPAD%d" % (j)))
+		elif section == 'x11':
+			lines.append(keycode_def(section, key, i, "KP_%d" % (j)))
 		else:
 			lines.append(keycode_def(section, key, i))
 		i = i + 1
 	if section == 'win32':
 		lines.append(keycode_def(section, 'SCROLLOCK', i, 'SCROLL'))
+	elif section == 'x11':
+		lines.append(keycode_def(section, 'SCROLLOCK', i, 'Scroll_Lock'))
 	else:
 		lines.append(keycode_def(section, 'SCROLLOCK', i))
 	i = i + 1
