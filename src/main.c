@@ -144,8 +144,8 @@ void Display_syntax(void)
   fputs(modes, stdout);
 
 #if defined(WIN32)
-  MessageBoxA(NULL, syntax, "GrafX2", MB_OK);
-  MessageBoxA(NULL, modes, "GrafX2", MB_OK);
+  MessageBoxA(GFX2_Get_Window_Handle(), syntax, "GrafX2", MB_OK);
+  MessageBoxA(GFX2_Get_Window_Handle(), modes, "GrafX2", MB_OK);
 #endif
 }
 
@@ -166,7 +166,13 @@ void Error_function(int error_code, const char *filename, int line_number, const
   T_Palette temp_palette;
   T_Palette backup_palette;
   int       index;
-  printf("Error number %d occured in file %s, line %d, function %s.\n", error_code, filename,line_number,function_name);
+  char msg_buffer[512];
+
+  snprintf(msg_buffer, sizeof(msg_buffer), "Error number %d occured in file %s, line %d, function %s.\n", error_code, filename,line_number,function_name);
+  fputs(msg_buffer, stderr);
+#if defined(_MSC_VER) && defined(DEBUG)
+  OutputDebugStringA(msg_buffer);
+#endif
 
   if (error_code==0)
   {
@@ -182,45 +188,63 @@ void Error_function(int error_code, const char *filename, int line_number, const
   }
   else
   {
+    const char * msg = NULL;
     switch (error_code)
     {
-      case ERROR_GUI_MISSING         : printf("Error: File containing the GUI graphics is missing!\n");
-                                       printf("This program cannot run without this file.\n");
+      case ERROR_GUI_MISSING         : snprintf(msg_buffer, sizeof(msg_buffer), "Error: File containing the GUI graphics is missing!\n"
+                                             "This program cannot run without this file.\n"
+                                              "\n%s", Gui_loading_error_message);
+                                       msg = msg_buffer;
                                        break;
-      case ERROR_GUI_CORRUPTED       : printf("Error: File containing the GUI graphics couldn't be parsed!\n");
-                                       printf("This program cannot run without a correct version of this file.\n");
+      case ERROR_GUI_CORRUPTED       : msg = "Error: File containing the GUI graphics couldn't be parsed!\n"
+                                             "This program cannot run without a correct version of this file.\n";
                                        break;
-      case ERROR_INI_MISSING         : printf("Error: File gfx2def.ini is missing!\n");
-                                       printf("This program cannot run without this file.\n");
+      case ERROR_INI_MISSING         : msg = "Error: File gfx2def.ini is missing!\n"
+                                             "This program cannot run without this file.\n";
                                        break;
-      case ERROR_MEMORY              : printf("Error: Not enough memory!\n\n");
-                                       printf("You should try exiting other programs to free some bytes for Grafx2.\n\n");
+      case ERROR_MEMORY              : msg = "Error: Not enough memory!\n\n"
+                                             "You should try exiting other programs to free some bytes for Grafx2.\n\n";
                                        break;
-      case ERROR_FORBIDDEN_MODE      : printf("Error: The requested video mode has been disabled from the resolution menu!\n");
-                                       printf("If you want to run the program in this mode, you'll have to start it with an\n");
-                                       printf("enabled mode, then enter the resolution menu and enable the mode you want.\n");
-                                       printf("Check also if the 'Default_video_mode' parameter in gfx2.ini is correct.\n");
+      case ERROR_FORBIDDEN_MODE      : msg = "Error: The requested video mode has been disabled from the resolution menu!\n"
+                                             "If you want to run the program in this mode, you'll have to start it with an\n"
+                                             "enabled mode, then enter the resolution menu and enable the mode you want.\n"
+                                             "Check also if the 'Default_video_mode' parameter in gfx2.ini is correct.\n";
                                        break;
-      case ERROR_FORBIDDEN_SIZE      : printf("Error: The image dimensions all have to be in the range 1-9999!\n");
+      case ERROR_FORBIDDEN_SIZE      : msg = "Error: The image dimensions all have to be in the range 1-9999!\n";
                                        break;
-      case ERROR_COMMAND_LINE     : printf("Error: Invalid parameter or file not found.\n\n");
-                                       Display_syntax();
+      case ERROR_COMMAND_LINE     : msg = "Error: Invalid parameter or file not found.\n\n";
                                        break;
-      case ERROR_SAVING_CFG     : printf("Error: Write error while saving settings!\n");
-                                       printf("Settings have not been saved correctly, and the gfx2.cfg file may have been\n");
-                                       printf("corrupt. If so, please delete it and Grafx2 will restore default settings.\n");
+      case ERROR_SAVING_CFG     : msg = "Error: Write error while saving settings!\n"
+                                        "Settings have not been saved correctly, and the gfx2.cfg file may have been\n"
+                                        "corrupt. If so, please delete it and Grafx2 will restore default settings.\n";
                                        break;
-      case ERROR_MISSING_DIRECTORY : printf("Error: Directory you ran the program from not found!\n");
+      case ERROR_MISSING_DIRECTORY : msg = "Error: Directory you ran the program from not found!\n";
                                        break;
-      case ERROR_INI_CORRUPTED       : printf("Error: File gfx2.ini is corrupt!\n");
-                                       printf("It contains bad values at line %d.\n",Line_number_in_INI_file);
-                                       printf("You can re-generate it by deleting the file and running GrafX2 again.\n");
+      case ERROR_INI_CORRUPTED       : snprintf(msg_buffer, sizeof(msg_buffer), "Error: File gfx2.ini is corrupt!\n"
+                                                "It contains bad values at line %d.\n"
+                                                "You can re-generate it by deleting the file and running GrafX2 again.\n",
+                                                Line_number_in_INI_file);
+                                       msg = msg_buffer;
                                        break;
-      case ERROR_SAVING_INI     : printf("Error: Cannot rewrite file gfx2.ini!\n");
+      case ERROR_SAVING_INI     : msg = "Error: Cannot rewrite file gfx2.ini!\n";
                                        break;
-      case ERROR_SORRY_SORRY_SORRY  : printf("Error: Sorry! Sorry! Sorry! Please forgive me!\n");
+      case ERROR_SORRY_SORRY_SORRY  : msg = "Error: Sorry! Sorry! Sorry! Please forgive me!\n";
                                        break;
     }
+
+    if(msg != NULL)
+    {
+      fputs(msg, stderr);
+#if defined(WIN32)
+#if defined(DEBUG)
+      OutputDebugStringA(msg);
+#endif
+      MessageBoxA(GFX2_Get_Window_Handle(), msg, "GrafX2 error", MB_OK | MB_ICONERROR);
+#endif
+    }
+
+    if (error_code == ERROR_COMMAND_LINE)
+      Display_syntax();
 
 #if defined(USE_SDL) || defined(USE_SDL2)
     SDL_Quit();
@@ -335,7 +359,6 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
           if (Current_resolution == -1)
           {
             Error(ERROR_COMMAND_LINE);
-            Display_syntax();
             exit(0);
           }
           if ((Video_mode[Current_resolution].State & 0x7F) == 3)
@@ -347,7 +370,6 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
         else
         {
           Error(ERROR_COMMAND_LINE);
-          Display_syntax();
           exit(0);
         }
         break;
@@ -385,7 +407,6 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
           if (scale < 2 || scale > 256)
           {
             Error(ERROR_COMMAND_LINE);
-            Display_syntax();
             exit(0);
           }
           Set_palette_RGB_scale(scale);
@@ -393,7 +414,6 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
         else
         {
           Error(ERROR_COMMAND_LINE);
-          Display_syntax();
           exit(0);
         }
         break;
@@ -407,7 +427,6 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
           if (scale < 1 || scale > 30)
           {
             Error(ERROR_COMMAND_LINE);
-            Display_syntax();
             exit(0);
           }
           Set_palette_Gamma(scale);
@@ -415,7 +434,6 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
         else
         {
           Error(ERROR_COMMAND_LINE);
-          Display_syntax();
           exit(0);
         }
         break;
@@ -429,7 +447,6 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
         else
         {
           Error(ERROR_COMMAND_LINE);
-          Display_syntax();
           exit(0);
         }
         break;
@@ -444,7 +461,6 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
           if (tmpcp == NULL)
           {
             Error(ERROR_COMMAND_LINE);
-            Display_syntax();
             exit(0);
           }
           setsize_height = atoi(++tmpcp);
@@ -452,14 +468,12 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
               setsize_width < 1 || setsize_width > 9999)
           {
             Error(ERROR_FORBIDDEN_SIZE);
-            Display_syntax();
             exit(0);
           }
         }
         else
         {
           Error(ERROR_COMMAND_LINE);
-          Display_syntax();
           exit(0);
         }
         break;
@@ -469,7 +483,6 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
         {
           // Il y a déjà 2 noms de fichiers et on vient d'en trouver un 3ème
           Error(ERROR_COMMAND_LINE);
-          Display_syntax();
           exit(0);
         }
         else if (File_exists(argv[index]))
@@ -495,7 +508,6 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
         else
         {
           Error(ERROR_COMMAND_LINE);
-          Display_syntax();
           exit(0);
         }
         break;
@@ -798,7 +810,6 @@ int Init_program(int argc,char * argv[])
     gfx = Load_graphics(DEFAULT_SKIN_FILENAME, &initial_gradients);
     if (gfx == NULL)
     {
-      printf("%s", Gui_loading_error_message);
       Error(ERROR_GUI_MISSING);
     }
   }
@@ -821,7 +832,8 @@ int Init_program(int argc,char * argv[])
   if (!(Menu_font=Load_font(Config.Font_file, 1)))
     if (!(Menu_font=Load_font(DEFAULT_FONT_FILENAME, 1)))
       {
-        printf("Unable to open the default font file: %s\n", DEFAULT_FONT_FILENAME);
+        snprintf(Gui_loading_error_message, sizeof(Gui_loading_error_message),
+                 "Unable to open the default font file: %s\n", DEFAULT_FONT_FILENAME);
         Error(ERROR_GUI_MISSING);
       }
   Load_Unicode_fonts();
