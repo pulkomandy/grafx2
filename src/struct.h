@@ -3,7 +3,7 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2014 Sergii Pylypenko
-    Copyright 2011 Pawel Góralski
+    Copyright 2011 Pawel GÃ³ralski
     Copyright 2008 Yves Rizoud
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
@@ -386,11 +386,11 @@ typedef struct
 
 } T_Config;
 
-// Structures utilisées pour les descriptions de pages et de liste de pages.
-// Lorsqu'on gèrera les animations, il faudra aussi des listes de listes de
+// Structures utilisÃ©es pour les descriptions de pages et de liste de pages.
+// Lorsqu'on gÃ¨rera les animations, il faudra aussi des listes de listes de
 // pages.
 
-// Ces structures sont manipulées à travers des fonctions de gestion du
+// Ces structures sont manipulÃ©es Ã  travers des fonctions de gestion du
 // backup dans "graph.c".
 
 typedef struct T_Image

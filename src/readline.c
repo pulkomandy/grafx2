@@ -23,7 +23,7 @@
 */
 /************************************************************************
 *                                                                       *
-* READLINE (procédure permettant de saisir une chaîne de caractères) *
+* READLINE (procÃ©dure permettant de saisir une chaÃ®ne de caractÃ¨res) *
 *                                                                       *
 ************************************************************************/
 
@@ -100,11 +100,11 @@ static void Insert_character(char * str, char letter, int position)
 
   for (;letter!='\0';position++)
   {
-    // On mémorise le caractère qui se trouve en "position"
+    // On mÃ©morise le caractÃ¨re qui se trouve en "position"
     temp_char=str[position];
-    // On splotch la lettre à insérer
+    // On splotch la lettre Ã  insÃ©rer
     str[position]=letter;
-    // On place le caractère mémorisé dans "letter" comme nouvelle lettre à insérer
+    // On place le caractÃ¨re mÃ©morisÃ© dans "letter" comme nouvelle lettre Ã  insÃ©rer
     letter=temp_char;
   }
   // On termine la chaine
@@ -185,11 +185,11 @@ static int Valid_character(word c, int input_type)
       break;
     case INPUT_TYPE_FILENAME:
     {
-      // On regarde si la touche est autorisée
+      // On regarde si la touche est autorisÃ©e
       // Sous Linux: Seul le / est strictement interdit, mais beaucoup
-      // d'autres poseront des problèmes au shell, alors on évite.
-      // Sous Windows : c'est moins grave car le fopen() échouerait de toutes façons.
-      // AmigaOS4: Pas de ':' car utilisé pour les volumes.
+      // d'autres poseront des problÃ¨mes au shell, alors on Ã©vite.
+      // Sous Windows : c'est moins grave car le fopen() Ã©chouerait de toutes faÃ§ons.
+      // AmigaOS4: Pas de ':' car utilisÃ© pour les volumes.
 #if defined(__WIN32__)
       char forbidden_char[] = {'/', '|', '?', '*', '<', '>', ':', '\\'};
 #elif defined (__amigaos4__) || defined(__AROS__)
@@ -418,17 +418,17 @@ bye:
  *           Enhanced super scanf deluxe pro plus giga mieux :-)             *
  ****************************************************************************/
 byte Readline(word x_pos,word y_pos,char * str,byte visible_size,byte input_type)
-// Paramètres:
-//   x_pos, y_pos : Coordonnées de la saisie dans la fenêtre
-//   str       : Chaîne recevant la saisie (et contenant éventuellement une valeur initiale)
-//   max_size  : Nombre de caractères logeant dans la zone de saisie
-//   input_type  : 0=Chaîne, 1=Nombre, 2=Nom de fichier
+// ParamÃ¨tres:
+//   x_pos, y_pos : CoordonnÃ©es de la saisie dans la fenÃªtre
+//   str       : ChaÃ®ne recevant la saisie (et contenant Ã©ventuellement une valeur initiale)
+//   max_size  : Nombre de caractÃ¨res logeant dans la zone de saisie
+//   input_type  : 0=ChaÃ®ne, 1=Nombre, 2=Nom de fichier
 // Sortie:
 //   0: Sortie par annulation (Esc.) / 1: sortie par acceptation (Return)
 {
   byte max_size;
-  // Grosse astuce pour les noms de fichiers: La taille affichée est différente
-  // de la taille maximum gérée.
+  // Grosse astuce pour les noms de fichiers: La taille affichÃ©e est diffÃ©rente
+  // de la taille maximum gÃ©rÃ©e.
   if (input_type == INPUT_TYPE_FILENAME)
     max_size = 255;
   else
@@ -445,10 +445,10 @@ byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_siz
 }
 
 byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byte visible_size,byte max_size, byte input_type, byte decimal_places)
-// Paramètres:
-//   x_pos, y_pos : Coordonnées de la saisie dans la fenêtre
-//   str       : Chaîne recevant la saisie (et contenant éventuellement une valeur initiale)
-//   max_size  : Nombre de caractères logeant dans la zone de saisie
+// ParamÃ¨tres:
+//   x_pos, y_pos : CoordonnÃ©es de la saisie dans la fenÃªtre
+//   str       : ChaÃ®ne recevant la saisie (et contenant Ã©ventuellement une valeur initiale)
+//   max_size  : Nombre de caractÃ¨res logeant dans la zone de saisie
 //   input_type  : 0=String, 1=Unsigned int, 2=Filename 3=Signed Double
 //   decimal_places: Number of decimal places for a double
 // Sortie:
@@ -463,7 +463,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
   word input_key=0;
   word window_x=Window_pos_X;
   word window_y=Window_pos_Y;
-  byte offset=0; // index du premier caractère affiché
+  byte offset=0; // index du premier caractÃ¨re affichÃ©
   
   // Virtual keyboard
   byte use_virtual_keyboard=0;
@@ -482,11 +482,11 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
     '!','?','^','&','#','$'
   };
 
-  // Si on a commencé à editer par un clic-droit, on vide la chaine.
+  // Si on a commencÃ© Ã  editer par un clic-droit, on vide la chaine.
   if (Mouse_K==RIGHT_SIDE)
     str[0]='\0';
   else if (input_type==INPUT_TYPE_INTEGER && str[0]!='\0')
-    snprintf(str,10,"%d",atoi(str)); // On tasse la chaine à gauche
+    snprintf(str,10,"%d",atoi(str)); // On tasse la chaine Ã  gauche
   else if (input_type==INPUT_TYPE_DECIMAL)
   {
     //  Nothing. The caller should have used Sprint_double, with min_positions
@@ -615,11 +615,11 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
 #endif
   Hide_cursor();
 
-  // Effacement de la chaîne
+  // Effacement de la chaÃ®ne
   Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
   Update_window_area(x_pos,y_pos,visible_size<<3,8);
 
-  // Mise à jour des variables se rapportant à la chaîne en fonction de la chaîne initiale
+  // Mise Ã  jour des variables se rapportant Ã  la chaÃ®ne en fonction de la chaÃ®ne initiale
   strcpy(initial_string,str);
   if (str_unicode != NULL)
   {
@@ -784,7 +784,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
                 Remove_character(str,position);
               size--;
               
-              // Effacement de la chaîne
+              // Effacement de la chaÃ®ne
               Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
               goto affichage;
             }
@@ -792,7 +792,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
       case SDLK_LEFT : // Gauche
             if (position>0)
             {
-              // Effacement de la chaîne
+              // Effacement de la chaÃ®ne
               if (position==size)
                 Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
               position--;
@@ -823,7 +823,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
       case SDLK_HOME : // Home
             if (position)
             {
-              // Effacement de la chaîne
+              // Effacement de la chaÃ®ne
               if (position==size)
                 Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
               position = 0;
@@ -852,7 +852,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
           else
             Remove_character(str,position);
           size--;
-          // Effacement de la chaîne
+          // Effacement de la chaÃ®ne
           Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
           goto affichage;
         }
@@ -862,7 +862,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
         if (str_unicode != NULL)
           str_unicode[0] = 0;
         position=offset=0;
-        // Effacement de la chaîne
+        // Effacement de la chaÃ®ne
         Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
         goto affichage;
       case SDLK_RETURN :
@@ -882,18 +882,18 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
       default :
         if (size<max_size)
         {
-          // Si la touche était autorisée...
+          // Si la touche Ã©tait autorisÃ©e...
           byte is_authorized = Valid_character(input_key, input_type);
           if (is_authorized == 1 || (is_authorized == 2 && position == 0 && str[position] != '-'))
           {
-            // ... alors on l'insère ...
+            // ... alors on l'insÃ¨re ...
             if (str_unicode != NULL)
               Insert_character_unicode(str_unicode,input_key,position/*,size*/);
             else
               Insert_character(str,input_key,position/*,size*/);
             // ce qui augmente la taille de la chaine
             size++;
-            // et qui risque de déplacer le curseur vers la droite
+            // et qui risque de dÃ©placer le curseur vers la droite
             if (size<max_size)
             {
               position++;
@@ -959,7 +959,7 @@ affichage:
     Input_sticky_control=0;
   }
 #endif // defined(__ANDROID__)  
-  // Effacement de la chaîne
+  // Effacement de la chaÃ®ne
   Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
   // On raffiche la chaine correctement
   if (input_type==INPUT_TYPE_INTEGER)

@@ -3,7 +3,7 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2018 Thomas Bernard
-    Copyright 2011 Pawel Góralski
+    Copyright 2011 Pawel GÃ³ralski
     Copyright 2009 Petter Lindquist
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
@@ -89,7 +89,7 @@ void Test_IMG(T_IO_Context * context, FILE * file)
   (void)context;
   File_error=1;
 
-    // Lecture et vérification de la signature
+    // Lecture et vÃ©rification de la signature
   if (Read_bytes(file,IMG_header.Filler1,6)
     && Read_word_le(file,&(IMG_header.Width))
     && Read_word_le(file,&(IMG_header.Height))
@@ -206,7 +206,7 @@ void Save_IMG(T_IO_Context * context)
       if (File_error)
         Remove_file(context);
     }
-    else // Error d'écriture (disque plein ou protégé)
+    else // Error d'Ã©criture (disque plein ou protÃ©gÃ©)
     {
       fclose(file);
       Remove_file(context);
@@ -272,10 +272,10 @@ void Test_IFF(FILE * IFF_file, const char *sub_type)
       
       if (! Read_dword_be(IFF_file, &dummy))
         break;
-      //   On aurait pu vérifier que ce long est égal à la taille
-      // du fichier - 8, mais ça aurait interdit de charger des
-      // fichiers tronqués (et déjà que c'est chiant de perdre
-      // une partie du fichier il faut quand même pouvoir en
+      //   On aurait pu vÃ©rifier que ce long est Ã©gal Ã  la taille
+      // du fichier - 8, mais Ã§a aurait interdit de charger des
+      // fichiers tronquÃ©s (et dÃ©jÃ  que c'est chiant de perdre
+      // une partie du fichier il faut quand mÃªme pouvoir en
       // garder un peu... Sinon, moi je pleure :'( !!! )
       if (! Read_bytes(IFF_file,format,4))
         break;
@@ -367,12 +367,12 @@ int IFF_Skip_section(FILE * file)
 // ------------------------- Attendre une section -------------------------
 byte IFF_Wait_for(FILE * file, const char * expected_section)
 {
-  // Valeur retournée: 1=Section trouvée, 0=Section non trouvée (erreur)
+  // Valeur retournÃ©e: 1=Section trouvÃ©e, 0=Section non trouvÃ©e (erreur)
   byte section_read[4];
 
   if (! Read_bytes(file,section_read,4))
     return 0;
-  while (memcmp(section_read,expected_section,4)) // Sect. pas encore trouvée
+  while (memcmp(section_read,expected_section,4)) // Sect. pas encore trouvÃ©e
   {
     if (!IFF_Skip_section(file))
       return 0;
@@ -382,7 +382,7 @@ byte IFF_Wait_for(FILE * file, const char * expected_section)
   return 1;
 }
 
-// Les images ILBM sont stockés en bitplanes donc on doit trifouiller les bits pour
+// Les images ILBM sont stockÃ©s en bitplanes donc on doit trifouiller les bits pour
 // en faire du chunky
 
 ///
@@ -2061,11 +2061,11 @@ void Load_IFF(T_IO_Context * context)
 
     switch (IFF_list_size)
     {
-      case 0 : // Première couleur
+      case 0 : // PremiÃ¨re couleur
         IFF_color_list[0]=color;
         IFF_list_size=1;
         break;
-      case 1 : // Deuxième couleur
+      case 1 : // DeuxiÃ¨me couleur
         last_color=IFF_color_list[0];
         IFF_repetition_mode=(last_color==color);
         IFF_color_list[1]=color;
@@ -2074,7 +2074,7 @@ void Load_IFF(T_IO_Context * context)
       default: // Couleurs suivantes
         last_color      =IFF_color_list[IFF_list_size-1];
         second_last_color=IFF_color_list[IFF_list_size-2];
-        if (last_color==color)  // On a une répétition de couleur
+        if (last_color==color)  // On a une rÃ©pÃ©tition de couleur
         {
           if ( (IFF_repetition_mode) || (second_last_color!=color) )
           // On conserve le mode...
@@ -2095,7 +2095,7 @@ void Load_IFF(T_IO_Context * context)
             IFF_repetition_mode=1;
           }
         }
-        else // La couleur n'est pas la même que la précédente
+        else // La couleur n'est pas la mÃªme que la prÃ©cÃ©dente
         {
           if (!IFF_repetition_mode)                 // On conserve le mode...
           {
@@ -2154,7 +2154,7 @@ void Save_IFF(T_IO_Context * context)
     setvbuf(IFF_file, NULL, _IOFBF, 64*1024);
     
     Write_bytes(IFF_file,"FORM",4);
-    Write_dword_be(IFF_file,0); // On mettra la taille à jour à la fin
+    Write_dword_be(IFF_file,0); // On mettra la taille Ã  jour Ã  la fin
 
     if (context->Format == FORMAT_LBM)
       Write_bytes(IFF_file,"ILBM",4);
@@ -2246,7 +2246,7 @@ void Save_IFF(T_IO_Context * context)
 
     body_offset = ftell(IFF_file);
     Write_bytes(IFF_file,"BODY",4);
-    Write_dword_be(IFF_file,0); // On mettra la taille à jour à la fin
+    Write_dword_be(IFF_file,0); // On mettra la taille Ã  jour Ã  la fin
 
     if (context->Format == FORMAT_LBM)
     {
@@ -3121,7 +3121,7 @@ static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int co
               x_pos+=a;
               y_pos-=b;
               break;
-            default: // Nouvelle série
+            default: // Nouvelle sÃ©rie
               while (b)
               {
                 if(Read_byte(file, &a)!=1)
@@ -3178,7 +3178,7 @@ static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int co
               x_pos+=a;
               y_pos-=b;
               break;
-            default: // Nouvelle série (B 1/2 pixels bruts)
+            default: // Nouvelle sÃ©rie (B 1/2 pixels bruts)
               for (index=1; ((index<=b) && (!File_error)); index++,x_pos++)
               {
                 if (index&1)
@@ -3190,7 +3190,7 @@ static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int co
                   Set_pixel(context, x_pos,y_pos,c&0xF);
               }
               //   On lit l'octet rendant le nombre d'octets pair, si
-              // nécessaire. Encore un truc de crétin "made in MS".
+              // nÃ©cessaire. Encore un truc de crÃ©tin "made in MS".
               if ( ((b&3)==1) || ((b&3)==2) )
               {
                 byte dummy;
@@ -3421,11 +3421,11 @@ void Save_BMP(T_IO_Context * context)
      && Write_dword_le(file,header.Clr_Imprt))
     {
       //   Chez Bill, ils ont dit: "On va mettre les couleur dans l'ordre
-      // inverse, et pour faire chier, on va les mettre sur une échelle de
-      // 0 à 255 parce que le standard VGA c'est de 0 à 63 (logique!). Et
-      // puis comme c'est pas assez débile, on va aussi y rajouter un octet
-      // toujours à 0 pour forcer les gens à s'acheter des gros disques
-      // durs... Comme ça, ça fera passer la pillule lorsqu'on sortira
+      // inverse, et pour faire chier, on va les mettre sur une Ã©chelle de
+      // 0 Ã  255 parce que le standard VGA c'est de 0 Ã  63 (logique!). Et
+      // puis comme c'est pas assez dÃ©bile, on va aussi y rajouter un octet
+      // toujours Ã  0 pour forcer les gens Ã  s'acheter des gros disques
+      // durs... Comme Ã§a, Ã§a fera passer la pillule lorsqu'on sortira
       // Windows 95." ...
       for (index=0; index<256; index++)
       {
@@ -3438,7 +3438,7 @@ void Save_BMP(T_IO_Context * context)
       if (Write_bytes(file,local_palette,1024))
       {
         // ... Et Bill, il a dit: "OK les gars! Mais seulement si vous rangez
-        // les pixels dans l'ordre inverse, mais que sur les Y quand-même
+        // les pixels dans l'ordre inverse, mais que sur les Y quand-mÃªme
         // parce que faut pas pousser."
         for (y_pos=context->Height-1; ((y_pos>=0) && (!File_error)); y_pos--)
           for (x_pos=0; x_pos<line_size; x_pos++)
@@ -3882,20 +3882,20 @@ void Test_GIF(T_IO_Context * context, FILE * file)
 
 // -- Lire un fichier au format GIF -----------------------------------------
 
-// Définition de quelques variables globales au chargement du GIF87a
+// DÃ©finition de quelques variables globales au chargement du GIF87a
 word GIF_nb_bits;        // Nb de bits composants un code complet
 word GIF_remainder_bits;      // Nb de bits encore dispos dans GIF_last_byte
 byte GIF_remainder_byte;      // Nb d'octets avant le prochain bloc de Raster Data
-word GIF_current_code;    // Code traité (qui vient d'être lu en général)
+word GIF_current_code;    // Code traitÃ© (qui vient d'Ãªtre lu en gÃ©nÃ©ral)
 byte GIF_last_byte;      // Octet de lecture des bits
-word GIF_pos_X;          // Coordonnées d'affichage de l'image
+word GIF_pos_X;          // CoordonnÃ©es d'affichage de l'image
 word GIF_pos_Y;
-word GIF_interlaced;     // L'image est entrelacée
-word GIF_finished_interlaced_image; // L'image entrelacée est finie de charger
-word GIF_pass;          // index de passe de l'image entrelacée
+word GIF_interlaced;     // L'image est entrelacÃ©e
+word GIF_finished_interlaced_image; // L'image entrelacÃ©e est finie de charger
+word GIF_pass;          // index de passe de l'image entrelacÃ©e
 FILE *GIF_file;        // L'handle du fichier
 
-// -- Lit le code à GIF_nb_bits suivant --
+// -- Lit le code Ã  GIF_nb_bits suivant --
 
 word GIF_get_next_code(void)
 {
@@ -3985,12 +3985,12 @@ void Load_GIF(T_IO_Context * context)
 {
   char signature[6];
 
-  word * alphabet_stack;     // Pile de décodage d'une chaîne
-  word * alphabet_prefix;  // Table des préfixes des codes
+  word * alphabet_stack;     // Pile de dÃ©codage d'une chaÃ®ne
+  word * alphabet_prefix;  // Table des prÃ©fixes des codes
   word * alphabet_suffix;  // Table des suffixes des codes
   word   alphabet_free;     // Position libre dans l'alphabet
-  word   alphabet_max;      // Nombre d'entrées possibles dans l'alphabet
-  word   alphabet_stack_pos; // Position dans la pile de décodage d'un chaîne
+  word   alphabet_max;      // Nombre d'entrÃ©es possibles dans l'alphabet
+  word   alphabet_stack_pos; // Position dans la pile de dÃ©codage d'un chaÃ®ne
 
   T_GIF_LSDB LSDB;
   T_GIF_IDB IDB;
@@ -3998,16 +3998,16 @@ void Load_GIF(T_IO_Context * context)
 
   word nb_colors;       // Nombre de couleurs dans l'image
   word color_index; // index de traitement d'une couleur
-  byte size_to_read; // Nombre de données à lire      (divers)
+  byte size_to_read; // Nombre de donnÃ©es Ã  lire      (divers)
   byte block_identifier;  // Code indicateur du type de bloc en cours
-  byte initial_nb_bits;   // Nb de bits au début du traitement LZW
-  word special_case=0;       // Mémoire pour le cas spécial
-  word old_code=0;       // Code précédent
+  byte initial_nb_bits;   // Nb de bits au dÃ©but du traitement LZW
+  word special_case=0;       // MÃ©moire pour le cas spÃ©cial
+  word old_code=0;       // Code prÃ©cÃ©dent
   word byte_read;         // Sauvegarde du code en cours de lecture
   word value_clr;        // Valeur <=> Clear tables
   word value_eof;        // Valeur <=> End d'image
   long file_size;
-  int number_LID; // Nombre d'images trouvées dans le fichier
+  int number_LID; // Nombre d'images trouvÃ©es dans le fichier
   int current_layer = 0;
   int last_delay = 0;
   byte is_transparent = 0;
@@ -4034,7 +4034,7 @@ void Load_GIF(T_IO_Context * context)
            (memcmp(signature,"GIF89a",6)==0) ) )
     {
 
-      // Allocation de mémoire pour les tables & piles de traitement:
+      // Allocation de mÃ©moire pour les tables & piles de traitement:
       alphabet_stack   =(word *)malloc(4096*sizeof(word));
       alphabet_prefix=(word *)malloc(4096*sizeof(word));
       alphabet_suffix=(word *)malloc(4096*sizeof(word));
@@ -4046,7 +4046,7 @@ void Load_GIF(T_IO_Context * context)
       && Read_byte(GIF_file,&(LSDB.Aspect))
         )
       {
-        // Lecture du Logical Screen Descriptor Block réussie:
+        // Lecture du Logical Screen Descriptor Block rÃ©ussie:
 
         Original_screen_X=LSDB.Width;
         Original_screen_Y=LSDB.Height;
@@ -4102,7 +4102,7 @@ void Load_GIF(T_IO_Context * context)
                 switch(function_code)
                 {
                   case 0xFE: // Comment Block Extension
-                    // On récupère le premier commentaire non-vide, 
+                    // On rÃ©cupÃ¨re le premier commentaire non-vide, 
                     // on jette les autres.
                     if (context->Comment[0]=='\0')
                     {
@@ -4119,7 +4119,7 @@ void Load_GIF(T_IO_Context * context)
                     Read_byte(GIF_file,&size_to_read);
                     break;
                   case 0xF9: // Graphics Control Extension
-                    // Prévu pour la transparence
+                    // PrÃ©vu pour la transparence
                     if ( Read_byte(GIF_file,&(GCE.Packed_fields))
                       && Read_word_le(GIF_file,&(GCE.Delay_time))
                       && Read_byte(GIF_file,&(GCE.Transparent_color)))
@@ -4303,7 +4303,7 @@ void Load_GIF(T_IO_Context * context)
               {
     
                 // Palette locale dispo = (IDB.Indicator and $80)
-                // Image entrelacée     = (IDB.Indicator and $40)
+                // Image entrelacÃ©e     = (IDB.Indicator and $40)
                 // Ordre de classement  = (IDB.Indicator and $20)
                 // Nombre de bits/pixel = (IDB.Indicator and $07)+1 (si palette locale dispo)
     
@@ -4408,7 +4408,7 @@ void Load_GIF(T_IO_Context * context)
                           alphabet_max      =((1 << (++GIF_nb_bits))-1);
                       }
                     }
-                    else // Code Clear rencontré
+                    else // Code Clear rencontrÃ©
                     {
                       GIF_nb_bits       =initial_nb_bits + 1;
                       alphabet_max      =((1 <<  GIF_nb_bits)-1);
@@ -4423,7 +4423,7 @@ void Load_GIF(T_IO_Context * context)
                     File_error=2;
                     break;
                   }
-                } // Code End-Of-Information ou erreur de fichier rencontré
+                } // Code End-Of-Information ou erreur de fichier rencontrÃ©
                 if (File_error==2 && GIF_pos_X==0 && GIF_pos_Y==IDB.Image_height)
                   File_error=0;
                 /*Close_lecture();*/
@@ -4463,7 +4463,7 @@ void Load_GIF(T_IO_Context * context)
 
       early_exit:
       
-      // Libération de la mémoire utilisée par les tables & piles de traitement:
+      // LibÃ©ration de la mÃ©moire utilisÃ©e par les tables & piles de traitement:
       free(alphabet_suffix);
       free(alphabet_prefix);
       free(alphabet_stack);
@@ -4474,7 +4474,7 @@ void Load_GIF(T_IO_Context * context)
 
     fclose(GIF_file);
 
-  } // Le fichier était ouvrable
+  } // Le fichier Ã©tait ouvrable
   else
     File_error=1;
 }
@@ -4482,8 +4482,8 @@ void Load_GIF(T_IO_Context * context)
 
 // -- Sauver un fichier au format GIF ---------------------------------------
 
-  int  GIF_stop;         // "On peut arrêter la sauvegarde du fichier"
-  byte GIF_buffer[256];   // buffer d'écriture de bloc de données compilées
+  int  GIF_stop;         // "On peut arrÃªter la sauvegarde du fichier"
+  byte GIF_buffer[256];   // buffer d'Ã©criture de bloc de donnÃ©es compilÃ©es
 
   // -- Vider le buffer GIF dans le buffer KM --
 
@@ -4502,7 +4502,7 @@ void Load_GIF(T_IO_Context * context)
     }
   }
 
-  // -- Ecrit un code à GIF_nb_bits --
+  // -- Ecrit un code Ã  GIF_nb_bits --
 
   void GIF_set_code(word Code)
   {
@@ -4520,9 +4520,9 @@ void Load_GIF(T_IO_Context * context)
       nb_bits_processed  +=current_nb_bits;
       nb_bits_to_process-=current_nb_bits;
 
-      if (GIF_remainder_bits==8) // Il ne reste plus de bits à coder sur l'octet courant
+      if (GIF_remainder_bits==8) // Il ne reste plus de bits Ã  coder sur l'octet courant
       {
-        // Ecrire l'octet à balancer:
+        // Ecrire l'octet Ã  balancer:
         GIF_buffer[++GIF_remainder_byte]=GIF_last_byte;
 
         // Si on a atteint la fin du bloc de Raster Data
@@ -4559,23 +4559,23 @@ void Load_GIF(T_IO_Context * context)
 
 void Save_GIF(T_IO_Context * context)
 {
-  word * alphabet_prefix;  // Table des préfixes des codes
+  word * alphabet_prefix;  // Table des prÃ©fixes des codes
   word * alphabet_suffix;  // Table des suffixes des codes
-  word * alphabet_daughter;    // Table des chaînes filles (plus longues)
-  word * alphabet_sister;    // Table des chaînes soeurs (même longueur)
+  word * alphabet_daughter;    // Table des chaÃ®nes filles (plus longues)
+  word * alphabet_sister;    // Table des chaÃ®nes soeurs (mÃªme longueur)
   word   alphabet_free;     // Position libre dans l'alphabet
-  word   alphabet_max;      // Nombre d'entrées possibles dans l'alphabet
-  word   start;            // Code précédent (sert au linkage des chaînes)
-  int    descend;          // Booléen "On vient de descendre"
+  word   alphabet_max;      // Nombre d'entrÃ©es possibles dans l'alphabet
+  word   start;            // Code prÃ©cÃ©dent (sert au linkage des chaÃ®nes)
+  int    descend;          // BoolÃ©en "On vient de descendre"
 
   T_GIF_LSDB LSDB;
   T_GIF_IDB IDB;
 
 
   byte block_identifier;  // Code indicateur du type de bloc en cours
-  word current_string;   // Code de la chaîne en cours de traitement
-  byte current_char;         // Caractère à coder
-  word index;            // index de recherche de chaîne
+  word current_string;   // Code de la chaÃ®ne en cours de traitement
+  byte current_char;         // CaractÃ¨re Ã  coder
+  word index;            // index de recherche de chaÃ®ne
   int current_layer;
 
   word clear;   // LZW clear code
@@ -4589,12 +4589,12 @@ void Save_GIF(T_IO_Context * context)
   {
     setvbuf(GIF_file, NULL, _IOFBF, 64*1024);
     
-    // On écrit la signature du fichier
+    // On Ã©crit la signature du fichier
     if (Write_bytes(GIF_file,"GIF89a",6))
     {
-      // La signature du fichier a été correctement écrite.
+      // La signature du fichier a Ã©tÃ© correctement Ã©crite.
 
-      // Allocation de mémoire pour les tables
+      // Allocation de mÃ©moire pour les tables
       alphabet_prefix=(word *)malloc(4096*sizeof(word));
       alphabet_suffix=(word *)malloc(4096*sizeof(word));
       alphabet_daughter  =(word *)malloc(4096*sizeof(word));
@@ -4639,7 +4639,7 @@ void Save_GIF(T_IO_Context * context)
           Write_byte(GIF_file,LSDB.Backcol) &&
           Write_byte(GIF_file,LSDB.Aspect) )
       {
-        // Le LSDB a été correctement écrit.
+        // Le LSDB a Ã©tÃ© correctement Ã©crit.
         int i;
         // On sauve la palette
         for(i=0;i<256 && !File_error;i++)
@@ -4651,7 +4651,7 @@ void Save_GIF(T_IO_Context * context)
         }
         if (!File_error)
         {
-          // La palette a été correctement écrite.
+          // La palette a Ã©tÃ© correctement Ã©crite.
 
           // Ecriture de la transparence
           //Write_bytes(GIF_file,"\x21\xF9\x04\x01\x00\x00\xNN\x00",8);
@@ -4797,9 +4797,9 @@ void Save_GIF(T_IO_Context * context)
                 IDB.Nb_bits_pixel++;
               }
             
-              // On va écrire un block indicateur d'IDB et l'IDB du fichier
+              // On va Ã©crire un block indicateur d'IDB et l'IDB du fichier
               block_identifier=0x2C;
-              IDB.Indicator=0x07;    // Image non entrelacée, pas de palette locale.
+              IDB.Indicator=0x07;    // Image non entrelacÃ©e, pas de palette locale.
               clear = 1 << IDB.Nb_bits_pixel; // Clear Code
               eof = clear + 1;                // End of Picture Code
     
@@ -4811,8 +4811,8 @@ void Save_GIF(T_IO_Context * context)
                    Write_byte(GIF_file,IDB.Indicator) &&
                    Write_byte(GIF_file,IDB.Nb_bits_pixel))
               {
-                //   Le block indicateur d'IDB et l'IDB ont étés correctements
-                // écrits.
+                //   Le block indicateur d'IDB et l'IDB ont Ã©tÃ©s correctements
+                // Ã©crits.
     
                 GIF_pos_X=IDB.Pos_X;
                 GIF_pos_Y=IDB.Pos_Y;
@@ -4825,7 +4825,7 @@ void Save_GIF(T_IO_Context * context)
                 File_error=0;
                 GIF_stop=0;
     
-                // Réintialisation de la table:
+                // RÃ©intialisation de la table:
                 alphabet_free=clear + 2;  // 258 for 8bpp
                 GIF_nb_bits  =IDB.Nb_bits_pixel + 1; // 9 for 8 bpp
                 alphabet_max =clear+clear-1;  // 511 for 8bpp
@@ -4914,21 +4914,21 @@ void Save_GIF(T_IO_Context * context)
     
                 if (!File_error)
                 {
-                  // On écrit le code dans le fichier
-                  GIF_set_code(current_string); // Dernière portion d'image
+                  // On Ã©crit le code dans le fichier
+                  GIF_set_code(current_string); // DerniÃ¨re portion d'image
     
-                  //   Cette dernière portion ne devrait pas poser de problèmes
-                  // du côté GIF_nb_bits puisque pour que GIF_nb_bits change de
-                  // valeur, il faudrait que la table de chaîne soit remplie or
-                  // c'est impossible puisqu'on traite une chaîne qui se trouve
-                  // déjà dans la table, et qu'elle n'a rien d'inédit. Donc on
-                  // ne devrait pas avoir à changer de taille, mais je laisse
-                  // quand même en remarque tout ça, au cas où il subsisterait
-                  // des problèmes dans certains cas exceptionnels.
+                  //   Cette derniÃ¨re portion ne devrait pas poser de problÃ¨mes
+                  // du cÃ´tÃ© GIF_nb_bits puisque pour que GIF_nb_bits change de
+                  // valeur, il faudrait que la table de chaÃ®ne soit remplie or
+                  // c'est impossible puisqu'on traite une chaÃ®ne qui se trouve
+                  // dÃ©jÃ  dans la table, et qu'elle n'a rien d'inÃ©dit. Donc on
+                  // ne devrait pas avoir Ã  changer de taille, mais je laisse
+                  // quand mÃªme en remarque tout Ã§a, au cas oÃ¹ il subsisterait
+                  // des problÃ¨mes dans certains cas exceptionnels.
                   //
-                  // Note: de toutes façons, ces lignes en commentaires ont étés
-                  //      écrites par copier/coller du temps où la sauvegarde du
-                  //      GIF déconnait. Il y a donc fort à parier qu'elles ne
+                  // Note: de toutes faÃ§ons, ces lignes en commentaires ont Ã©tÃ©s
+                  //      Ã©crites par copier/coller du temps oÃ¹ la sauvegarde du
+                  //      GIF dÃ©connait. Il y a donc fort Ã  parier qu'elles ne
                   //      sont pas correctes.
     
                   /*
@@ -4939,7 +4939,7 @@ void Save_GIF(T_IO_Context * context)
                       // On balargue un Clear Code
                       GIF_set_code(256);
     
-                      // On réinitialise les données LZW
+                      // On rÃ©initialise les donnÃ©es LZW
                       alphabet_free=258;
                       GIF_nb_bits  =9;
                       alphabet_max =511;
@@ -4960,15 +4960,15 @@ void Save_GIF(T_IO_Context * context)
                     GIF_last_byte=0;
                     GIF_remainder_bits=0;
                   }
-                  GIF_empty_buffer();         // On envoie les dernières données du buffer GIF dans le buffer KM
+                  GIF_empty_buffer();         // On envoie les derniÃ¨res donnÃ©es du buffer GIF dans le buffer KM
     
-                  // On écrit un \0
+                  // On Ã©crit un \0
                   if (! Write_byte(GIF_file,'\x00'))
                     File_error=1;
                   
                   }
       
-                } // On a pu écrire l'IDB
+                } // On a pu Ã©crire l'IDB
               else
                 File_error=1;
             }
@@ -5004,26 +5004,26 @@ void Save_GIF(T_IO_Context * context)
               }
             }
           
-            // On écrit un GIF TERMINATOR, exigé par SVGA et SEA.
+            // On Ã©crit un GIF TERMINATOR, exigÃ© par SVGA et SEA.
             if (! Write_byte(GIF_file,'\x3B'))
               File_error=1;
           }
 
-        } // On a pu écrire la palette
+        } // On a pu Ã©crire la palette
         else
           File_error=1;
 
-      } // On a pu écrire le LSDB
+      } // On a pu Ã©crire le LSDB
       else
         File_error=1;
 
-      // Libération de la mémoire utilisée par les tables
+      // LibÃ©ration de la mÃ©moire utilisÃ©e par les tables
       free(alphabet_sister);
       free(alphabet_daughter);
       free(alphabet_suffix);
       free(alphabet_prefix);
 
-    } // On a pu écrire la signature du fichier
+    } // On a pu Ã©crire la signature du fichier
     else
       File_error=1;
 
@@ -5031,7 +5031,7 @@ void Save_GIF(T_IO_Context * context)
     if (File_error)
       Remove_file(context);
 
-  } // On a pu ouvrir le fichier en écriture
+  } // On a pu ouvrir le fichier en Ã©criture
   else
     File_error=1;
 
@@ -5044,21 +5044,21 @@ typedef struct
   {
     byte Manufacturer;       // |_ Il font chier ces cons! Ils auraient pu
     byte Version;            // |  mettre une vraie signature!
-    byte Compression;        // L'image est-elle compressée?
+    byte Compression;        // L'image est-elle compressÃ©e?
     byte Depth;              // Nombre de bits pour coder un pixel (inutile puisqu'on se sert de Plane)
     word X_min;              // |_ Coin haut-gauche   |
-    word Y_min;              // |  de l'image         |_ (Crétin!)
+    word Y_min;              // |  de l'image         |_ (CrÃ©tin!)
     word X_max;              // |_ Coin bas-droit     |
     word Y_max;              // |  de l'image         |
-    word X_dpi;              // |_ Densité de |_ (Presque inutile parce que
+    word X_dpi;              // |_ DensitÃ© de |_ (Presque inutile parce que
     word Y_dpi;              // |  l'image    |  aucun moniteur n'est pareil!)
-    byte Palette_16c[48];    // Palette 16 coul (inutile pour 256c) (débile!)
-    byte Reserved;           // Ca me plait ça aussi!
+    byte Palette_16c[48];    // Palette 16 coul (inutile pour 256c) (dÃ©bile!)
+    byte Reserved;           // Ca me plait Ã§a aussi!
     byte Plane;              // 4 => 16c , 1 => 256c , ...
-    word Bytes_per_plane_line;// Doit toujours être pair
-    word Palette_info;       // 1 => color , 2 => Gris (ignoré à partir de la version 4)
+    word Bytes_per_plane_line;// Doit toujours Ãªtre pair
+    word Palette_info;       // 1 => color , 2 => Gris (ignorÃ© Ã  partir de la version 4)
     word Screen_X;           // |_ Dimensions de
-    word Screen_Y;           // |  l'écran d'origine
+    word Screen_Y;           // |  l'Ã©cran d'origine
     byte Filler[54];         // Ca... J'adore!
   } T_PCX_Header;
 
@@ -5091,7 +5091,7 @@ void Test_PCX(T_IO_Context * context, FILE * file)
       Read_bytes(file,&(PCX_header.Filler),54) )
   {
     //   Vu que ce header a une signature de merde et peu significative, il
-    // va falloir que je teste différentes petites valeurs dont je connais
+    // va falloir que je teste diffÃ©rentes petites valeurs dont je connais
     // l'intervalle. Grrr!
     if ( (PCX_header.Manufacturer!=10)
       || (PCX_header.Compression>1)
@@ -5110,7 +5110,7 @@ void Test_PCX(T_IO_Context * context, FILE * file)
 
 // -- Lire un fichier au format PCX -----------------------------------------
 
-  // -- Afficher une ligne PCX codée sur 1 seul plan avec moins de 256 c. --
+  // -- Afficher une ligne PCX codÃ©e sur 1 seul plan avec moins de 256 c. --
   static void Draw_PCX_line(T_IO_Context *context, const byte * buffer, short y_pos, byte depth)
   {
     short x_pos;
@@ -5143,7 +5143,7 @@ void Load_PCX(T_IO_Context * context)
   FILE *file;
   
   short line_size;
-  short real_line_size; // width de l'image corrigée
+  short real_line_size; // width de l'image corrigÃ©e
   short width_read;
   short x_pos;
   short y_pos;
@@ -5194,7 +5194,7 @@ void Load_PCX(T_IO_Context * context)
       {
         if (File_error==0)
         {
-          // On prépare la palette à accueillir les valeurs du fichier PCX
+          // On prÃ©pare la palette Ã  accueillir les valeurs du fichier PCX
           if (Config.Clear_palette)
             memset(context->Palette,0,sizeof(T_Palette));
           nb_colors=(dword)(1<<PCX_header.Plane)<<(PCX_header.Depth-1);
@@ -5258,17 +5258,17 @@ void Load_PCX(T_IO_Context * context)
             }
           }
 
-          //   On se positionne à la fin du fichier - 769 octets pour voir s'il y
+          //   On se positionne Ã  la fin du fichier - 769 octets pour voir s'il y
           // a une palette.
           if ( (PCX_header.Depth==8) && (PCX_header.Version>=5) && (file_size>(256*3+128)) )
           {
             fseek(file,file_size-((256*3)+1),SEEK_SET);
-            // On regarde s'il y a une palette après les données de l'image
+            // On regarde s'il y a une palette aprÃ¨s les donnÃ©es de l'image
             if (Read_byte(file,&byte1))
               if (byte1==12) // Lire la palette si c'est une image en 256 couleurs
               {
                 int index;
-                // On lit la palette 256c que ces crétins ont foutue à la fin du fichier
+                // On lit la palette 256c que ces crÃ©tins ont foutue Ã  la fin du fichier
                 for(index=0;index<256;index++)
                   if ( ! Read_byte(file,&(context->Palette[index].R))
                    || ! Read_byte(file,&(context->Palette[index].G))
@@ -5281,19 +5281,19 @@ void Load_PCX(T_IO_Context * context)
               }
           }
 
-          //   Maintenant qu'on a lu la palette que ces crétins sont allés foutre
-          // à la fin, on retourne juste après le header pour lire l'image.
+          //   Maintenant qu'on a lu la palette que ces crÃ©tins sont allÃ©s foutre
+          // Ã  la fin, on retourne juste aprÃ¨s le header pour lire l'image.
           fseek(file,128,SEEK_SET);
           if (!File_error)
           {
             line_size=PCX_header.Bytes_per_plane_line*PCX_header.Plane;
             real_line_size=(short)PCX_header.Bytes_per_plane_line<<3;
-            //   On se sert de données ILBM car le dessin de ligne en moins de 256
+            //   On se sert de donnÃ©es ILBM car le dessin de ligne en moins de 256
             // couleurs se fait comme avec la structure ILBM.
             buffer=(byte *)malloc(line_size);
 
             // Chargement de l'image
-            if (PCX_header.Compression)  // Image compressée
+            if (PCX_header.Compression)  // Image compressÃ©e
             {
               /*Init_lecture();*/
   
@@ -5303,14 +5303,14 @@ void Load_PCX(T_IO_Context * context)
               {
                 for (position=0; ((position<image_size) && (!File_error));)
                 {
-                  // Lecture et décompression de la ligne
+                  // Lecture et dÃ©compression de la ligne
                   if(Read_byte(file,&byte1) !=1) File_error=2;
                   if (!File_error)
                   {
                     if ((byte1&0xC0)==0xC0)
                     {
-                      byte1-=0xC0;               // facteur de répétition
-                      if(Read_byte(file,&byte2)!=1) File_error = 2; // octet à répéter
+                      byte1-=0xC0;               // facteur de rÃ©pÃ©tition
+                      if(Read_byte(file,&byte2)!=1) File_error = 2; // octet Ã  rÃ©pÃ©ter
                       if (!File_error)
                       {
                         for (index=0; index<byte1; index++,position++)
@@ -5332,7 +5332,7 @@ void Load_PCX(T_IO_Context * context)
                   }
                 }
               }
-              else                 // couleurs rangées par plans
+              else                 // couleurs rangÃ©es par plans
               {
                 for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
                 {
@@ -5343,8 +5343,8 @@ void Load_PCX(T_IO_Context * context)
                     {
                       if ((byte1&0xC0)==0xC0)
                       {
-                        byte1-=0xC0;               // facteur de répétition
-                        if(Read_byte(file,&byte2)!=1) File_error=2; // octet à répéter
+                        byte1-=0xC0;               // facteur de rÃ©pÃ©tition
+                        if(Read_byte(file,&byte2)!=1) File_error=2; // octet Ã  rÃ©pÃ©ter
                         if (!File_error)
                         {
                           for (index=0; index<byte1; index++)
@@ -5370,7 +5370,7 @@ void Load_PCX(T_IO_Context * context)
 
               /*Close_lecture();*/
             }
-            else                     // Image non compressée
+            else                     // Image non compressÃ©e
             {
               for (y_pos=0;(y_pos<context->Height) && (!File_error);y_pos++)
               {
@@ -5423,14 +5423,14 @@ void Load_PCX(T_IO_Context * context)
 
             for (y_pos=0,position=0;(y_pos<context->Height) && (!File_error);)
             {
-              // Lecture et décompression de la ligne
+              // Lecture et dÃ©compression de la ligne
               if(Read_byte(file,&byte1)!=1) File_error=2;
               if (!File_error)
               {
                 if ((byte1 & 0xC0)==0xC0)
                 {
-                  byte1-=0xC0;               // facteur de répétition
-                  if(Read_byte(file,&byte2)!=1) File_error=2; // octet à répéter
+                  byte1-=0xC0;               // facteur de rÃ©pÃ©tition
+                  if(Read_byte(file,&byte2)!=1) File_error=2; // octet Ã  rÃ©pÃ©ter
                   if (!File_error)
                   {
                     for (index=0; (index<byte1) && (!File_error); index++)
@@ -5546,7 +5546,7 @@ void Save_PCX(T_IO_Context * context)
       {
         pixel_read=Get_pixel(context, 0,y_pos);
      
-        // Compression et écriture de la ligne
+        // Compression et Ã©criture de la ligne
         for (x_pos=0; ((x_pos<line_size) && (!File_error)); )
         {
           x_pos++;
@@ -5612,7 +5612,7 @@ void Test_SCx(T_IO_Context * context, FILE * file)
   File_error=1;
 
   // Ouverture du fichier
-    // Lecture et vérification de la signature
+    // Lecture et vÃ©rification de la signature
   if (Read_bytes(file,SCx_header.Filler1,4)
       && Read_word_le(file, &(SCx_header.Width))
       && Read_word_le(file, &(SCx_header.Height))
@@ -5778,7 +5778,7 @@ void Save_SCx(T_IO_Context * context)
       if (File_error)
         Remove_file(context);
     }
-    else // Error d'écriture (disque plein ou protégé)
+    else // Error d'Ã©criture (disque plein ou protÃ©gÃ©)
     {
       fclose(file);
       Remove_file(context);
@@ -6482,7 +6482,7 @@ void Save_PNG(T_IO_Context * context)
     fclose(file);
   }
 
-  //   S'il y a eu une erreur de sauvegarde, on ne va tout de même pas laisser
+  //   S'il y a eu une erreur de sauvegarde, on ne va tout de mÃªme pas laisser
   // ce fichier pourri trainait... Ca fait pas propre.
   if (File_error)
     Remove_file(context);

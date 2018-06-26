@@ -2,7 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
-    Copyright 2011 Pawel Góralski
+    Copyright 2011 Pawel GÃ³ralski
     Copyright 2008 Yves Rizoud
     Copyright 2007-2017 Adrien Destugues (PulkoMandy)
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
@@ -234,7 +234,7 @@ void Change_paintbrush_shape(byte shape)
       Paintbrush_shape=PAINTBRUSH_SHAPE_NONE;
       break;
     // Note: Il existe un Paintbrush_shape_before_lasso, mais comme le lasso aura
-    // été automatiquement désactivé avant d'arriver ici, y'a pas de problème.
+    // Ã©tÃ© automatiquement dÃ©sactivÃ© avant d'arriver ici, y'a pas de problÃ¨me.
   }
 }
 
@@ -440,8 +440,8 @@ void Button_Hide_menu(int btn)
       Compute_magnifier_data();
     }
 
-    //   On repositionne le décalage de l'image pour qu'il n'y ait pas d'in-
-    // -cohérences lorsqu'on sortira du mode Loupe.
+    //   On repositionne le dÃ©calage de l'image pour qu'il n'y ait pas d'in-
+    // -cohÃ©rences lorsqu'on sortira du mode Loupe.
     if (Main.offset_Y+Screen_height>Main.image_height)
     {
       if (Screen_height>Main.image_height)
@@ -611,7 +611,7 @@ byte Button_Quit_local_function(void)
   if (!Main.image_is_modified)
     return 1;
 
-  // On commence par afficher la fenêtre de QUIT
+  // On commence par afficher la fenÃªtre de QUIT
   Open_window(160,84,"Quit ?");
   Window_set_normal_button(20,20,120,14,"Stay",0,1,KEY_ESC);          // 1
   Window_set_normal_button(20,40,120,14,"Save & quit",1,1,SDLK_s);   // 2
@@ -656,14 +656,14 @@ byte Button_Quit_local_function(void)
         Display_cursor();
 
         if (!File_error)
-          // L'ayant sauvée avec succès,
+          // L'ayant sauvÃ©e avec succÃ¨s,
           return 1; // On peut quitter
         else
           // Il y a eu une erreur lors de la sauvegarde,
           return 0; // On ne peut donc pas quitter
       }
       else
-        // L'utilisateur ne veut pas écraser l'ancien fichier,
+        // L'utilisateur ne veut pas Ã©craser l'ancien fichier,
         return 0; // On doit donc rester
     case 3 : return 1; // Quitter
   }
@@ -680,7 +680,7 @@ void Button_Quit(int btn)
     if (Spare.image_is_modified)
     {
       Button_Page(BUTTON_PAGE); // On passe sur le brouillon
-      // Si l'utilisateur présente les derniers symptomes de l'abandon
+      // Si l'utilisateur prÃ©sente les derniers symptomes de l'abandon
       if (Button_Quit_local_function())
         Quitting=1;
     }
@@ -698,7 +698,7 @@ void Button_Quit(int btn)
 }
 
 
-//---------------------------- Effacer l'écran -------------------------------
+//---------------------------- Effacer l'Ã©cran -------------------------------
 void Button_Clear(int btn)
 {
   Hide_cursor();
@@ -730,7 +730,7 @@ void Button_Clear_with_backcolor(int btn)
 }
 
 
-//------------------------------- Paramètres ---------------------------------
+//------------------------------- ParamÃ¨tres ---------------------------------
 
 #define SETTING_PER_PAGE 11
 #define SETTING_PAGES     5
@@ -1197,11 +1197,11 @@ void Button_Settings(int btn)
   Close_window();
   Unselect_button(btn);
   // Raffichage du menu pour que les inscriptions qui y figurent soient
-  // retracées avec la nouvelle fonte
+  // retracÃ©es avec la nouvelle fonte
   Display_menu();
   Display_cursor();
 
-  // On vérifie qu'on peut bien allouer le nombre de pages Undo.
+  // On vÃ©rifie qu'on peut bien allouer le nombre de pages Undo.
   Set_number_of_backups(Config.Max_undo_pages);
 }
 
@@ -1526,7 +1526,7 @@ void Button_Skins(int btn)
   Close_window();
   Unselect_button(btn);
 
-  // Raffichage du menu pour que les inscriptions qui y figurent soient retracées avec la nouvelle fonte
+  // Raffichage du menu pour que les inscriptions qui y figurent soient retracÃ©es avec la nouvelle fonte
   Display_menu();
   // Redraw all buttons, to ensure all specific sprites are in place.
   // This is necessary for multi-state buttons, for example Freehand.
@@ -1578,7 +1578,7 @@ void Button_Page(int btn)
   End_of_modification();
   // --
 
-  // A la fin, on affiche l'écran
+  // A la fin, on affiche l'Ã©cran
   for (factor_index=0; ZOOM_FACTOR[factor_index]!=Main.magnifier_factor; factor_index++);
   //Change.magnifier_factor(factor_index,0);
   Compute_magnifier_data();
@@ -1633,7 +1633,7 @@ void Copy_image_only(void)
 
     // Copie des dimensions de l'image
     /*
-      C'est inutile, le "Backuper et redimensionner brouillon" a déjà modifié
+      C'est inutile, le "Backuper et redimensionner brouillon" a dÃ©jÃ  modifiÃ©
       ces valeurs pour qu'elles soient correctes.
     */
     /*
@@ -2056,7 +2056,7 @@ void Button_Resolution(int btn)
           // Si l'utilisateur s'est servi du bouton droit de la souris:
           if (Mouse_K==2)
           {
-            // On affecte également les dimensions de l'image:
+            // On affecte Ã©galement les dimensions de l'image:
             chosen_width=Video_mode[selected_mode].Width/Pixel_width;
             Num2str(chosen_width,str,4);
             Window_input_content(input_width_button,str);
@@ -2080,10 +2080,10 @@ void Button_Resolution(int btn)
         chosen_pixel=Window_attribute2;
         break;
 
-      default: // Boutons de tag des états des modes
+      default: // Boutons de tag des Ã©tats des modes
         temp=list_start+clicked_button-8;
-        if (Video_mode[temp].Fullscreen==1 && // On n'a pas le droit de cocher le mode fenêtré
-            !(Video_mode[temp].State & 128)) // Ni ceux non détectés par SDL
+        if (Video_mode[temp].Fullscreen==1 && // On n'a pas le droit de cocher le mode fenÃªtrÃ©
+            !(Video_mode[temp].State & 128)) // Ni ceux non dÃ©tectÃ©s par SDL
         {
           if (Window_attribute1==LEFT_SIDE)
             Video_mode[temp].State=((Video_mode[temp].State&0x7F)+1)&3;
@@ -2097,7 +2097,7 @@ void Button_Resolution(int btn)
         }
     }
 
-    // Gestion des touches de déplacement dans la liste
+    // Gestion des touches de dÃ©placement dans la liste
     switch (Key)
     {
       case SDLK_UP : // Haut
@@ -2197,7 +2197,7 @@ void Button_Resolution(int btn)
         Video_mode[selected_mode].Fullscreen,
         chosen_pixel))
     {
-      Error(0); // On signale à l'utilisateur que c'est un mode invalide
+      Error(0); // On signale Ã  l'utilisateur que c'est un mode invalide
       Pixel_ratio=PIXEL_SIMPLE;
       Init_mode_video(
         Video_mode[Current_resolution].Width,
@@ -2245,12 +2245,12 @@ void Button_Safety_resolution(int btn)
   Display_all_screen();
 
   Unselect_button(btn);
-  // Le pinceau est affiché à la position du clic et pas
+  // Le pinceau est affichÃ© Ã  la position du clic et pas
   Display_cursor();
 }
 
 
-//------------------ Gestion des boutons de dessin à la main -----------------
+//------------------ Gestion des boutons de dessin Ã  la main -----------------
 
 void Button_Draw(int btn)
 {
@@ -2420,21 +2420,21 @@ void Button_Circle_switch_mode(int btn)
   Window_dropdown_clear_items(&dropdown);
 }
 
-// -- Gestion du menu des dégradés ------------------------------------------
+// -- Gestion du menu des dÃ©gradÃ©s ------------------------------------------
 void Draw_button_gradient_style(short x_pos,short y_pos,int technique)
 {
   short line;
 
-  // On commence par afficher les 2 côtés qui constituent le dégradé de base:
-    // Côté gauche (noir)
+  // On commence par afficher les 2 cÃ´tÃ©s qui constituent le dÃ©gradÃ© de base:
+    // CÃ´tÃ© gauche (noir)
   Window_rectangle(x_pos+2, y_pos+2, 6, 10, MC_Black);
-    // Côté droit (blanc)
+    // CÃ´tÃ© droit (blanc)
   Window_rectangle(x_pos+8, y_pos+2, 5, 10, MC_White);
 
   switch(technique)
   {
-    case 1 : // Dégradé de trames simples
-      // Au centre, on place 10 lignes tramées simplement
+    case 1 : // DÃ©gradÃ© de trames simples
+      // Au centre, on place 10 lignes tramÃ©es simplement
       for (line=2;line<2+10;line++)
         if (line&1)
         {
@@ -2450,8 +2450,8 @@ void Draw_button_gradient_style(short x_pos,short y_pos,int technique)
           Pixel_in_window(x_pos+ 9,y_pos+line,MC_Black);
         }
       break;
-    case 2 : // Dégradé de trames étendues
-      // Au centre, on place 10 lignes tramées de façon compliquée
+    case 2 : // DÃ©gradÃ© de trames Ã©tendues
+      // Au centre, on place 10 lignes tramÃ©es de faÃ§on compliquÃ©e
       for (line=2;line<2+10;line++)
         if (line&1)
         {
@@ -2487,20 +2487,20 @@ void Load_gradient_data(int index)
 
   switch(Main.backups->Pages->Gradients->Range[index].Technique)
   {
-    case 0 : // Degradé de base
+    case 0 : // DegradÃ© de base
       Gradient_function=Gradient_basic;
       break;
-    case 1 : // Dégradé de trames simples
+    case 1 : // DÃ©gradÃ© de trames simples
       Gradient_function=Gradient_dithered;
       break;
-    case 2 : // Dégradé de trames étendues
+    case 2 : // DÃ©gradÃ© de trames Ã©tendues
       Gradient_function=Gradient_extra_dithered;
   }
 }
 
 void Draw_gradient_preview(short start_x,short start_y,short width,short height,int index)
 {
-  short x_pos; // Variables de balayage du block en bas de l'écran.
+  short x_pos; // Variables de balayage du block en bas de l'Ã©cran.
   short y_pos;
   short end_x;
   short end_y;
@@ -2584,7 +2584,7 @@ void Button_Gradients(int btn)
   Num2str(Current_gradient+1,str,2);
   Print_in_window(215,100,str,MC_Black,MC_Light);
 
-  // On affiche le cadre autour de la préview
+  // On affiche le cadre autour de la prÃ©view
   Window_display_frame_in(7,127,110,16);
   // On affiche la preview
   Draw_gradient_preview(8,128,108,14,Current_gradient);
@@ -2616,7 +2616,7 @@ void Button_Gradients(int btn)
       // On affiche le sens qui va avec
       Print_in_window(12,23,(Main.backups->Pages->Gradients->Range[Current_gradient].Inverse)?"\033":"\032",MC_Black,MC_Light);
 
-      // On raffiche le mélange (jauge) qui va avec
+      // On raffiche le mÃ©lange (jauge) qui va avec
       mix_scroller->Position=Main.backups->Pages->Gradients->Range[Current_gradient].Mix;
       Window_draw_slider(mix_scroller);
 
@@ -2660,11 +2660,11 @@ void Button_Gradients(int btn)
           {
             // On vient de clicker
 
-            // On met à jour l'intervalle du dégradé
+            // On met Ã  jour l'intervalle du dÃ©gradÃ©
             first_color=last_color=Main.backups->Pages->Gradients->Range[Current_gradient].Start=Main.backups->Pages->Gradients->Range[Current_gradient].End=temp_color;
             // On tagge le bloc
             Tag_color_range(Main.backups->Pages->Gradients->Range[Current_gradient].Start,Main.backups->Pages->Gradients->Range[Current_gradient].End);
-            // Tracé de la preview:
+            // TracÃ© de la preview:
             Draw_gradient_preview(8,128,108,14,Current_gradient);
           }
           else
@@ -2672,7 +2672,7 @@ void Button_Gradients(int btn)
             // On maintient le click, on va donc tester si le curseur bouge
             if (temp_color!=last_color)
             {
-              // On commence par ordonner la 1ère et dernière couleur du bloc
+              // On commence par ordonner la 1Ã¨re et derniÃ¨re couleur du bloc
               if (first_color<temp_color)
               {
                 Main.backups->Pages->Gradients->Range[Current_gradient].Start=first_color;
@@ -2687,7 +2687,7 @@ void Button_Gradients(int btn)
                 Main.backups->Pages->Gradients->Range[Current_gradient].Start=Main.backups->Pages->Gradients->Range[Current_gradient].End=first_color;
               // On tagge le bloc
               Tag_color_range(Main.backups->Pages->Gradients->Range[Current_gradient].Start,Main.backups->Pages->Gradients->Range[Current_gradient].End);
-              // Tracé de la preview:
+              // TracÃ© de la preview:
               Draw_gradient_preview(8,128,108,14,Current_gradient);
               last_color=temp_color;
             }
@@ -2695,14 +2695,14 @@ void Button_Gradients(int btn)
           Display_cursor();
         }
         break;
-      case  2 : // Nouvel indice de dégradé
+      case  2 : // Nouvel indice de dÃ©gradÃ©
         // Nouvel indice dans Window_attribute2
         Current_gradient=Window_attribute2;
         changed_gradient_index=1;
         break;
-      case  3 : // Nouveau mélange de dégradé
+      case  3 : // Nouveau mÃ©lange de dÃ©gradÃ©
         Hide_cursor();
-        // Nouvel mélange dans Window_attribute2
+        // Nouvel mÃ©lange dans Window_attribute2
         Main.backups->Pages->Gradients->Range[Current_gradient].Mix=Window_attribute2;
         // On affiche la nouvelle preview
         Draw_gradient_preview(8,128,108,14,Current_gradient);
@@ -2744,7 +2744,7 @@ void Button_Gradients(int btn)
     if (!Mouse_K)
     switch (Key)
     {
-      case SDLK_BACKQUOTE : // Récupération d'une couleur derrière le menu
+      case SDLK_BACKQUOTE : // RÃ©cupÃ©ration d'une couleur derriÃ¨re le menu
       case SDLK_COMMA :
         Get_color_behind_window(&color,&click);
         if (click)
@@ -2752,11 +2752,11 @@ void Button_Gradients(int btn)
           Hide_cursor();
           temp_color=color;
 
-          // On met à jour l'intervalle du dégradé
+          // On met Ã  jour l'intervalle du dÃ©gradÃ©
           first_color=last_color=Main.backups->Pages->Gradients->Range[Current_gradient].Start=Main.backups->Pages->Gradients->Range[Current_gradient].End=temp_color;
           // On tagge le bloc
           Tag_color_range(Main.backups->Pages->Gradients->Range[Current_gradient].Start,Main.backups->Pages->Gradients->Range[Current_gradient].End);
-          // Tracé de la preview:
+          // TracÃ© de la preview:
           Draw_gradient_preview(8,128,108,14,Current_gradient);
           Display_cursor();
           Wait_end_of_click();
@@ -2816,7 +2816,7 @@ void Button_Gradients(int btn)
 }
 
 
-// -- Gestion des boutons de cercle / ellipse / rectangle dégradés --------------------
+// -- Gestion des boutons de cercle / ellipse / rectangle dÃ©gradÃ©s --------------------
 
 void Button_Grad_rectangle(int btn)
 {
@@ -3073,7 +3073,7 @@ void Button_Brush_monochrome(int btn)
   Display_cursor();
 }
 
-// -- Fonction renvoyant le mode vidéo le plus adapté à l'image chargée -----
+// -- Fonction renvoyant le mode vidÃ©o le plus adaptÃ© Ã  l'image chargÃ©e -----
 #define TOLERANCE_X 8
 #define TOLERANCE_Y 4
 int Best_video_mode(void)
@@ -3083,11 +3083,11 @@ int Best_video_mode(void)
   short temp_x,temp_y;
   int mode;
 
-  // Si mode fenêtre, on reste dans ce mode.
+  // Si mode fenÃªtre, on reste dans ce mode.
   if (Current_resolution == 0)
     return 0;
 
-  // On commence par borner les dimensions, ou du moins les rendre cohérentes
+  // On commence par borner les dimensions, ou du moins les rendre cohÃ©rentes
   if ((Original_screen_X<=0) || (Config.Set_resolution_according_to==2))
     Original_screen_X=Main.image_width;
   else
@@ -3223,7 +3223,7 @@ void Load_picture(enum CONTEXT_TYPE type)
       Select_button(BUTTON_DRAW,LEFT_SIDE);
       if (Config.Auto_discontinuous)
       {
-        // On se place en mode Dessin discontinu à la main
+        // On se place en mode Dessin discontinu Ã  la main
         while (Current_operation!=OPERATION_DISCONTINUOUS_DRAW)
           Select_button(BUTTON_DRAW,RIGHT_SIDE);
       }
@@ -3312,7 +3312,7 @@ void Load_picture(enum CONTEXT_TYPE type)
 void Button_Load(int btn)
 {
   (void)btn;
-  // On sauve l'état actuel des paramètres de l'image pour pouvoir les
+  // On sauve l'Ã©tat actuel des paramÃ¨tres de l'image pour pouvoir les
   // restituer en cas d'erreur n'affectant pas l'image
   Upload_infos_page(&Main);
 
@@ -3327,7 +3327,7 @@ void Button_Reload(int btn)
   int  new_mode;
 
   (void)btn;
-  // On sauve l'état actuel des paramètres de l'image pour pouvoir les
+  // On sauve l'Ã©tat actuel des paramÃ¨tres de l'image pour pouvoir les
   // restituer en cas d'erreur n'affectant pas l'image
   Upload_infos_page(&Main);
 
@@ -3437,10 +3437,10 @@ static void Backup_existing_file(const char * filename)
   File_error=0;
 
   // On fait un backup si le nom du fichier n'est pas celui qu'on a choisi
-  // pour nommer les backups (c'est évident!).
+  // pour nommer les backups (c'est Ã©vident!).
   if (strcmp(new_filename,filename))
   {
-    // S'il y avait déjà un fichier Backup, on l'efface
+    // S'il y avait dÃ©jÃ  un fichier Backup, on l'efface
     if ((File_exists(new_filename))
      && (remove(new_filename)!=0))
       File_error=1;
@@ -3673,7 +3673,7 @@ void Button_Brush(int btn)
 void Button_Unselect_brush(int btn)
 {
   (void)btn;
-  // On fait de notre mieux pour restaurer l'ancienne opération:
+  // On fait de notre mieux pour restaurer l'ancienne opÃ©ration:
   Start_operation_stack(Operation_before_interrupt);
 }
 
@@ -3712,7 +3712,7 @@ void Button_Lasso(int btn)
 void Button_Unselect_lasso(int btn)
 {
   (void)btn;
-  // On fait de notre mieux pour restaurer l'ancienne opération:
+  // On fait de notre mieux pour restaurer l'ancienne opÃ©ration:
   Start_operation_stack(Operation_before_interrupt);
   Paintbrush_shape=Paintbrush_shape_before_lasso;
 }
@@ -3751,7 +3751,7 @@ void Button_Unselect_colorpicker(int btn)
          ( (!Main.magnifier_mode) || (Mouse_X<Main.separator_position) || (Mouse_X>=Main.X_zoom) ) )
       Print_in_menu("X:       Y:             ",0);
 
-  // On fait de notre mieux pour restaurer l'ancienne opération:
+  // On fait de notre mieux pour restaurer l'ancienne opÃ©ration:
   if (Current_operation==OPERATION_COLORPICK)
   {
     Start_operation_stack(Operation_before_interrupt);
@@ -3799,32 +3799,32 @@ void Button_Magnify(int btn)
       Start_operation_stack(OPERATION_MAGNIFY);
     }
     else
-    { /* Ceci est de la duplication de code de presque toute l'opération de */
-      /* la loupe... Il serait peut-être plus propre de faire une procédure */
+    { /* Ceci est de la duplication de code de presque toute l'opÃ©ration de */
+      /* la loupe... Il serait peut-Ãªtre plus propre de faire une procÃ©dure */
       /* qui s'en charge... */
       // On passe en mode loupe
       Main.magnifier_mode=1;
 
-      // La fonction d'affichage dans la partie image est désormais un affichage
-      // spécial loupe.
+      // La fonction d'affichage dans la partie image est dÃ©sormais un affichage
+      // spÃ©cial loupe.
       Pixel_preview=Pixel_preview_magnifier;
 
       // On calcule l'origine de la loupe
       Main.magnifier_offset_X=Mouse_X-(Main.magnifier_width>>1);
       Main.magnifier_offset_Y=Mouse_Y-(Main.magnifier_height>>1);
 
-     // Calcul des coordonnées absolues de ce coin DANS L'IMAGE
+     // Calcul des coordonnÃ©es absolues de ce coin DANS L'IMAGE
       Main.magnifier_offset_X+=Main.offset_X;
       Main.magnifier_offset_Y+=Main.offset_Y;
 
       Clip_magnifier_offsets(&Main.magnifier_offset_X, &Main.magnifier_offset_Y);
 
-      // On calcule les bornes visibles dans l'écran
+      // On calcule les bornes visibles dans l'Ã©cran
       Position_screen_according_to_zoom();
       Compute_limits();
       Display_all_screen();
 
-      // Repositionner le curseur en fonction des coordonnées visibles
+      // Repositionner le curseur en fonction des coordonnÃ©es visibles
       Compute_paintbrush_coordinates();
     }
   }
@@ -3887,12 +3887,12 @@ void Button_Unselect_magnifier(int btn)
     Main.magnifier_mode=0;
 
 
-    // --> Recalculer le décalage de l'écran lorsqu'on sort de la loupe <--
-    // Centrage "brut" de lécran par rapport à la loupe
+    // --> Recalculer le dÃ©calage de l'Ã©cran lorsqu'on sort de la loupe <--
+    // Centrage "brut" de lÃ©cran par rapport Ã  la loupe
     Main.offset_X=Main.magnifier_offset_X-((Screen_width-Main.magnifier_width)>>1);
     Main.offset_Y=Main.magnifier_offset_Y-((Menu_Y-Main.magnifier_height)>>1);
 
-    // Correction en cas de débordement de l'image
+    // Correction en cas de dÃ©bordement de l'image
     if (Main.offset_X+Screen_width>Main.image_width)
       Main.offset_X=Main.image_width-Screen_width;
     if (Main.offset_X<0)
@@ -3903,19 +3903,19 @@ void Button_Unselect_magnifier(int btn)
     if (Main.offset_Y<0)
       Main.offset_Y=0;
 
-    // La fonction d'affichage dans l'image est désormais un affichage normal.
+    // La fonction d'affichage dans l'image est dÃ©sormais un affichage normal.
     Pixel_preview=Pixel_preview_normal;
 
-    // Calculer les bornes visibles dans l'écran
+    // Calculer les bornes visibles dans l'Ã©cran
     Compute_limits();
     Display_all_screen();  // <=> Display_screen();
-    // Repositionner le curseur en fonction des coordonnées visibles
+    // Repositionner le curseur en fonction des coordonnÃ©es visibles
     Compute_paintbrush_coordinates();
 
     Old_MX = -1;
     Old_MY = -1;
   }
-  else // On fait de notre mieux pour restaurer l'ancienne opération:
+  else // On fait de notre mieux pour restaurer l'ancienne opÃ©ration:
     Start_operation_stack(Operation_before_interrupt);
 }
 
@@ -3944,7 +3944,7 @@ void Button_Brush_FX(int btn)
   Window_set_normal_button(155, 99,131,14,"Recolorize"      ,0,1,Config_Key[SPECIAL_RECOLORIZE_BRUSH][0]); // 9
   Window_set_normal_button(155,117,131,14,"Get brush colors",0,1,Config_Key[SPECIAL_GET_BRUSH_COLORS][0]); // 10
 
-  // Boutons représentant les coins du brush handle: (HG,HD,C,BG,BD)
+  // Boutons reprÃ©sentant les coins du brush handle: (HG,HD,C,BG,BD)
   Window_set_normal_button( 75, 90,11,11,"",0,1,Config_Key[SPECIAL_TOP_LEFT_ATTACHMENT][0]); // 11
   Window_set_normal_button(103, 90,11,11,"",0,1,Config_Key[SPECIAL_TOP_RIGHT_ATTACHMENT][0]); // 12
   Window_set_normal_button( 89,104,11,11,"",0,1,Config_Key[SPECIAL_CENTER_ATTACHMENT][0]); // 13
@@ -3966,7 +3966,7 @@ void Button_Brush_FX(int btn)
   Print_in_window( 20,102,"Brush",MC_Dark,MC_Light);
   Print_in_window( 16,110,"handle",MC_Dark,MC_Light);
 
-  // Dessin des pointillés pour le "brush handle"
+  // Dessin des pointillÃ©s pour le "brush handle"
   for (index=0; index<13; index+=2)
   {
     Pixel_in_window( 88+index, 92,MC_Dark);
@@ -4013,7 +4013,7 @@ void Button_Brush_FX(int btn)
   Close_window();
   Unselect_button(btn);
 
-  // Gestion du bouton clické
+  // Gestion du bouton clickÃ©
   switch (clicked_button)
   {
     case  2 : // Flip X
@@ -4026,10 +4026,10 @@ void Button_Brush_FX(int btn)
       // Remap according to the last used remap table
       Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
       break;
-    case  4 : // 90° Rotation
+    case  4 : // 90Â° Rotation
       Rotate_90_deg();
       break;
-    case  5 : // 180° Rotation
+    case  5 : // 180Â° Rotation
       Rotate_180_deg_lowlevel(Brush_original_pixels, Brush_width, Brush_height);
       Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
       Brush_offset_X=(Brush_width>>1);
@@ -4094,7 +4094,7 @@ void Button_Brush_FX(int btn)
 }
 
 
-//---------------------------- Courbes de Bézier ----------------------------
+//---------------------------- Courbes de BÃ©zier ----------------------------
 
 void Button_Curves(int btn)
 {
@@ -4220,11 +4220,11 @@ void Button_Airbrush_menu(int btn)
   Window_display_frame(173,56,45,86);
   Window_display_frame(137,19,81,33);
 
-  // On tagge toutes les couleurs utilisées
+  // On tagge toutes les couleurs utilisÃ©es
   for (index=0; index<256; index++)
     if (Airbrush_multi_flow[index])
       Stencil_tag_color(index,MC_Black);
-  // Et enfin, on tagge la couleur sélectionnée
+  // Et enfin, on tagge la couleur sÃ©lectionnÃ©e
   Stencil_tag_color(selected_color,MC_White);
   Refresh_airbrush_settings(selected_color,0);
 
@@ -4269,7 +4269,7 @@ void Button_Airbrush_menu(int btn)
           Hide_cursor();
           Stencil_tag_color(selected_color,(Airbrush_multi_flow[selected_color])?MC_Black:MC_Light);
           Stencil_update_color(selected_color);
-          // Mettre la couleur sélectionnée à jour suivant le click
+          // Mettre la couleur sÃ©lectionnÃ©e Ã  jour suivant le click
           selected_color=(clicked_button==4) ? Window_attribute2 : Read_pixel(Mouse_X,Mouse_Y);
           if (Mouse_K==2)
             Airbrush_multi_flow[selected_color]=0;
@@ -4277,7 +4277,7 @@ void Button_Airbrush_menu(int btn)
             if (Airbrush_multi_flow[selected_color]==0)
               Airbrush_multi_flow[selected_color]=spray_init;
 
-          // Tagger la couleur sélectionnée en blanc
+          // Tagger la couleur sÃ©lectionnÃ©e en blanc
           Stencil_tag_color(selected_color,MC_White);
           Refresh_airbrush_settings(selected_color,1);
           Display_cursor();
@@ -4333,7 +4333,7 @@ void Button_Airbrush_menu(int btn)
         Display_cursor();
         break;
 
-      case  9 : // ÷2
+      case  9 : // Ã·2
         for (index=0; index<256; index++)
         {
           if (Airbrush_multi_flow[index]>1)
@@ -4346,11 +4346,11 @@ void Button_Airbrush_menu(int btn)
 
       case 10 : // Clear
         memset(Airbrush_multi_flow,0,256);
-        // On raffiche les infos de la couleur sélectionnée
+        // On raffiche les infos de la couleur sÃ©lectionnÃ©e
         Refresh_airbrush_settings(selected_color,1);
         // On efface les anciens TAGs
         Window_clear_tags();
-        // Tagger la couleur sélectionnée en blanc
+        // Tagger la couleur sÃ©lectionnÃ©e en blanc
         Stencil_tag_color(selected_color,MC_White);
         Stencil_update_color(selected_color);
         break;
@@ -4427,7 +4427,7 @@ void Button_Airbrush_menu(int btn)
     if (!Mouse_K)
     switch (Key)
     {
-      case SDLK_BACKQUOTE : // Récupération d'une couleur derrière le menu
+      case SDLK_BACKQUOTE : // RÃ©cupÃ©ration d'une couleur derriÃ¨re le menu
       case SDLK_COMMA :
         Get_color_behind_window(&color,&click);
         if (click)
@@ -4435,7 +4435,7 @@ void Button_Airbrush_menu(int btn)
           Hide_cursor();
           Stencil_tag_color(selected_color,(Airbrush_multi_flow[selected_color])?MC_Black:MC_Light);
           Stencil_update_color(selected_color);
-          // Mettre la couleur sélectionnée à jour suivant le click
+          // Mettre la couleur sÃ©lectionnÃ©e Ã  jour suivant le click
           selected_color=color;
           if (click==2)
             Airbrush_multi_flow[selected_color]=0;
@@ -4443,7 +4443,7 @@ void Button_Airbrush_menu(int btn)
             if (Airbrush_multi_flow[selected_color]==0)
               Airbrush_multi_flow[selected_color]=spray_init;
 
-          // Tagger la couleur sélectionnée en blanc
+          // Tagger la couleur sÃ©lectionnÃ©e en blanc
           Stencil_tag_color(selected_color,MC_White);
           Refresh_airbrush_settings(selected_color,1);
           Display_cursor();
@@ -4471,9 +4471,9 @@ void Button_Airbrush_menu(int btn)
   Close_window();
 
 /*
-  //   Tant que l'on aura pas résolu le problème du désenclenchement du mode
-  // de dessin précedent, il faudra laisser ça en remarque et donc passer en
-  // spray même si on a clické sur Cancel (idem pour OK (un peu plus bas)).
+  //   Tant que l'on aura pas rÃ©solu le problÃ¨me du dÃ©senclenchement du mode
+  // de dessin prÃ©cedent, il faudra laisser Ã§a en remarque et donc passer en
+  // spray mÃªme si on a clickÃ© sur Cancel (idem pour OK (un peu plus bas)).
   if (clicked_button==1) // Cancel
   {
     if (Current_operation!=OPERATION_AIRBRUSH)
@@ -5284,7 +5284,7 @@ void Button_Text(int btn)
       Select_button(BUTTON_DRAW,LEFT_SIDE);
       if (Config.Auto_discontinuous)
       {
-        // On se place en mode Dessin discontinu à la main
+        // On se place en mode Dessin discontinu Ã  la main
         while (Current_operation!=OPERATION_DISCONTINUOUS_DRAW)
           Select_button(BUTTON_DRAW,RIGHT_SIDE);
       }

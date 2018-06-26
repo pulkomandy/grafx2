@@ -3,7 +3,7 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2018 Thomas Bernard
-    Copyright 2011 Pawel Góralski
+    Copyright 2011 Pawel GÃ³ralski
     Copyright 2009 Petter Lindquist
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
@@ -198,7 +198,7 @@ void Load_GPL(T_IO_Context * context)
     fclose(file);
   }
   else
-    // Si on n'a pas réussi à ouvrir le fichier, alors il y a eu une erreur
+    // Si on n'a pas rÃ©ussi Ã  ouvrir le fichier, alors il y a eu une erreur
     File_error=1;
 }
 
@@ -250,7 +250,7 @@ void Load_PAL(T_IO_Context * context)
   if ((file=Open_file_read(context)))
   {
     long file_size = File_length_file(file);
-    // Le fichier ne peut être au format PAL que si sa taille vaut 768 octets
+    // Le fichier ne peut Ãªtre au format PAL que si sa taille vaut 768 octets
     if (file_size == sizeof(T_Palette))
     {
       T_Palette palette_64;
@@ -324,7 +324,7 @@ void Load_PAL(T_IO_Context * context)
     fclose(file);
   }
   else
-    // Si on n'a pas réussi à ouvrir le fichier, alors il y a eu une erreur
+    // Si on n'a pas rÃ©ussi Ã  ouvrir le fichier, alors il y a eu une erreur
     File_error=1;
 }
 
@@ -399,9 +399,9 @@ void Test_PKM(T_IO_Context * context, FILE * file)
       Read_bytes(file,&header.Palette,sizeof(T_Palette)) &&
       Read_word_le(file,&header.Jump))
   {
-    // On regarde s'il y a la signature PKM suivie de la méthode 0.
-    // La constante "PKM" étant un chaîne, elle se termine toujours par 0.
-    // Donc pas la peine de s'emm...er à regarder si la méthode est à 0.
+    // On regarde s'il y a la signature PKM suivie de la mÃ©thode 0.
+    // La constante "PKM" Ã©tant un chaÃ®ne, elle se termine toujours par 0.
+    // Donc pas la peine de s'emm...er Ã  regarder si la mÃ©thode est Ã  0.
     if ( (!memcmp(&header,"PKM",4)) && header.Width && header.Height)
       File_error=0;
   }
@@ -476,7 +476,7 @@ void Load_PKM(T_IO_Context * context)
                   File_error=2;
                 break;
 
-              case 1 : // Dimensions de l'écran d'origine
+              case 1 : // Dimensions de l'Ã©cran d'origine
                 if (Read_byte(file,&temp_byte))
                 {
                   if (temp_byte==4)
@@ -547,7 +547,7 @@ void Load_PKM(T_IO_Context * context)
           // Header size is 780
           Taille_pack=(file_size)-780-header.Jump;
 
-          // Boucle de décompression:
+          // Boucle de dÃ©compression:
           while ( (Compteur_de_pixels<image_size) && (Compteur_de_donnees_packees<Taille_pack) && (!File_error) )
           {
             if(Read_byte(file, &temp_byte)!=1) 
@@ -565,7 +565,7 @@ void Load_PKM(T_IO_Context * context)
               Compteur_de_donnees_packees++;
               Compteur_de_pixels++;
             }
-            else // Sinon, On regarde si on va décompacter un...
+            else // Sinon, On regarde si on va dÃ©compacter un...
             { // ... nombre de pixels tenant sur un byte
                 if (temp_byte==header.Recog1)
                 {
@@ -631,10 +631,10 @@ void Load_PKM(T_IO_Context * context)
     // On commence par compter l'utilisation de chaque couleurs
     Count_used_colors(Find_recon);
 
-    // Ensuite recog1 devient celle la moins utilisée de celles-ci
+    // Ensuite recog1 devient celle la moins utilisÃ©e de celles-ci
     *recog1=0;
     best=1;
-    NBest=INT_MAX; // Une même couleur ne pourra jamais être utilisée 1M de fois.
+    NBest=INT_MAX; // Une mÃªme couleur ne pourra jamais Ãªtre utilisÃ©e 1M de fois.
     for (index=1;index<=255;index++)
       if (Find_recon[index]<NBest)
       {
@@ -643,7 +643,7 @@ void Load_PKM(T_IO_Context * context)
       }
     *recog1=best;
 
-    // Enfin recog2 devient la 2ème moins utilisée
+    // Enfin recog2 devient la 2Ã¨me moins utilisÃ©e
     *recog2=0;
     best=0;
     NBest=INT_MAX;
@@ -706,7 +706,7 @@ void Save_PKM(T_IO_Context * context)
     {
 
       // Ecriture du commentaire
-      // (Compteur_de_pixels est utilisé ici comme simple index de comptage)
+      // (Compteur_de_pixels est utilisÃ© ici comme simple index de comptage)
       if (comment_size > 0)
       {
         Write_one_byte(file,0);
@@ -714,7 +714,7 @@ void Save_PKM(T_IO_Context * context)
         for (Compteur_de_pixels=0; Compteur_de_pixels<comment_size; Compteur_de_pixels++)
           Write_one_byte(file,context->Comment[Compteur_de_pixels]);
       }
-      // Ecriture des dimensions de l'écran
+      // Ecriture des dimensions de l'Ã©cran
       Write_one_byte(file,1);
       Write_one_byte(file,4);
       Write_one_byte(file,Screen_width&0xFF);
@@ -803,8 +803,8 @@ void Save_PKM(T_IO_Context * context)
     File_error=1;
     fclose(file);
   }
-  //   S'il y a eu une erreur de sauvegarde, on ne va tout de même pas laisser
-  // ce fichier pourri traîner... Ca fait pas propre.
+  //   S'il y a eu une erreur de sauvegarde, on ne va tout de mÃªme pas laisser
+  // ce fichier pourri traÃ®ner... Ca fait pas propre.
   if (File_error)
     Remove_file(context);
 }
@@ -847,7 +847,7 @@ void Test_CEL(T_IO_Context * context, FILE * file)
       Read_word_le(file,&header1.Height) )
   {
       //   Vu que ce header n'a pas de signature, il va falloir tester la
-      // cohérence de la dimension de l'image avec celle du fichier.
+      // cohÃ©rence de la dimension de l'image avec celle du fichier.
       
       size=file_size-4;
       if ( (!size) || ( (((header1.Width+1)>>1)*header1.Height)!=size ) )
@@ -929,7 +929,7 @@ void Load_CEL(T_IO_Context * context)
       }
       else
       {
-        // On réessaye avec le nouveau format
+        // On rÃ©essaye avec le nouveau format
 
         fseek(file,0,SEEK_SET);
         if (Read_bytes(file,header2.Signature,4)
@@ -957,7 +957,7 @@ void Load_CEL(T_IO_Context * context)
 
             if (!File_error)
             {
-              // Effacement du décalage
+              // Effacement du dÃ©calage
               for (y_pos=0;y_pos<header2.Y_offset;y_pos++)
                 for (x_pos=0;x_pos<context->Width;x_pos++)
                   Set_pixel(context, x_pos,y_pos,0);
@@ -1030,12 +1030,12 @@ void Save_CEL(T_IO_Context * context)
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
     
-    // On regarde si des couleurs >16 sont utilisées dans l'image
+    // On regarde si des couleurs >16 sont utilisÃ©es dans l'image
     for (x_pos=16;((x_pos<256) && (!color_usage[x_pos]));x_pos++);
 
     if (x_pos==256)
     {
-      // Cas d'une image 16 couleurs (écriture à l'ancien format)
+      // Cas d'une image 16 couleurs (Ã©criture Ã  l'ancien format)
 
       header1.Width =context->Width;
       header1.Height=context->Height;
@@ -1066,9 +1066,9 @@ void Save_CEL(T_IO_Context * context)
     }
     else
     {
-      // Cas d'une image 256 couleurs (écriture au nouveau format)
+      // Cas d'une image 256 couleurs (Ã©criture au nouveau format)
 
-      // Recherche du décalage
+      // Recherche du dÃ©calage
       for (y_pos=0;y_pos<context->Height;y_pos++)
       {
         for (x_pos=0;x_pos<context->Width;x_pos++)
@@ -1157,7 +1157,7 @@ void Test_KCF(T_IO_Context * context, FILE * file)
           if (!Read_byte(file,&header1.Palette[pal_index].color[color_index].Byte1) ||
               !Read_byte(file,&header1.Palette[pal_index].color[color_index].Byte2))
             File_error=1;
-      // On vérifie une propriété de la structure de palette:
+      // On vÃ©rifie une propriÃ©tÃ© de la structure de palette:
       for (pal_index=0;pal_index<10;pal_index++)
         for (color_index=0;color_index<16;color_index++)
           if ((header1.Palette[pal_index].color[color_index].Byte2>>4)!=0)
@@ -1210,7 +1210,7 @@ void Load_KCF(T_IO_Context * context)
     file_size=File_length_file(file);
     if (file_size==320)
     {
-      // Fichier KCF à l'ancien format
+      // Fichier KCF Ã  l'ancien format
       for (pal_index=0;pal_index<10 && !File_error;pal_index++)
         for (color_index=0;color_index<16 && !File_error;color_index++)
           if (!Read_byte(file,&header1.Palette[pal_index].color[color_index].Byte1) ||
@@ -1332,12 +1332,12 @@ void Save_KCF(T_IO_Context * context)
     setvbuf(file, NULL, _IOFBF, 64*1024);
     // Sauvegarde de la palette
 
-    // On regarde si des couleurs >16 sont utilisées dans l'image
+    // On regarde si des couleurs >16 sont utilisÃ©es dans l'image
     for (index=16;((index<256) && (!color_usage[index]));index++);
 
     if (index==256)
     {
-      // Cas d'une image 16 couleurs (écriture à l'ancien format)
+      // Cas d'une image 16 couleurs (Ã©criture Ã  l'ancien format)
 
       for (pal_index=0;pal_index<10;pal_index++)
         for (color_index=0;color_index<16;color_index++)
@@ -1356,7 +1356,7 @@ void Save_KCF(T_IO_Context * context)
     }
     else
     {
-      // Cas d'une image 256 couleurs (écriture au nouveau format)
+      // Cas d'une image 256 couleurs (Ã©criture au nouveau format)
 
       memcpy(header2.Signature,"KiSS",4); // Initialisation de la signature
       header2.Kind=0x10;              // Initialisation du type (PALette)
@@ -1364,8 +1364,8 @@ void Save_KCF(T_IO_Context * context)
       header2.Filler1=0;              // Initialisation du filler 1 (?)
       header2.Width=256;            // Initialisation du nombre de couleurs
       header2.Height=1;              // Initialisation du nombre de palettes
-      header2.X_offset=0;           // Initialisation du décalage X
-      header2.Y_offset=0;           // Initialisation du décalage Y
+      header2.X_offset=0;           // Initialisation du dÃ©calage X
+      header2.Y_offset=0;           // Initialisation du dÃ©calage Y
       for (index=0;index<16;index++) // Initialisation du filler 2 (?)
         header2.Filler2[index]=0;
 
@@ -1407,9 +1407,9 @@ void Save_KCF(T_IO_Context * context)
 
 void PI1_8b_to_16p(byte * src,byte * dest)
 {
-  int  i;           // index du pixel à calculer
+  int  i;           // index du pixel Ã  calculer
   word byte_mask;      // Masque de decodage
-  word w0,w1,w2,w3; // Les 4 words bien ordonnés de la source
+  word w0,w1,w2,w3; // Les 4 words bien ordonnÃ©s de la source
 
   byte_mask=0x8000;
   w0=(((word)src[0])<<8) | src[1];
@@ -1418,8 +1418,8 @@ void PI1_8b_to_16p(byte * src,byte * dest)
   w3=(((word)src[6])<<8) | src[7];
   for (i=0;i<16;i++)
   {
-    // Pour décoder le pixel n°i, il faut traiter les 4 words sur leur bit
-    // correspondant à celui du masque
+    // Pour dÃ©coder le pixel nÂ°i, il faut traiter les 4 words sur leur bit
+    // correspondant Ã  celui du masque
 
     dest[i]=((w0 & byte_mask)?0x01:0x00) |
            ((w1 & byte_mask)?0x02:0x00) |
@@ -1433,16 +1433,16 @@ void PI1_8b_to_16p(byte * src,byte * dest)
 
 void PI1_16p_to_8b(byte * src,byte * dest)
 {
-  int  i;           // index du pixel à calculer
+  int  i;           // index du pixel Ã  calculer
   word byte_mask;      // Masque de codage
-  word w0,w1,w2,w3; // Les 4 words bien ordonnés de la destination
+  word w0,w1,w2,w3; // Les 4 words bien ordonnÃ©s de la destination
 
   byte_mask=0x8000;
   w0=w1=w2=w3=0;
   for (i=0;i<16;i++)
   {
-    // Pour coder le pixel n°i, il faut modifier les 4 words sur leur bit
-    // correspondant à celui du masque
+    // Pour coder le pixel nÂ°i, il faut modifier les 4 words sur leur bit
+    // correspondant Ã  celui du masque
 
     w0|=(src[i] & 0x01)?byte_mask:0x00;
     w1|=(src[i] & 0x02)?byte_mask:0x00;
@@ -1464,11 +1464,11 @@ void PI1_16p_to_8b(byte * src,byte * dest)
 
 void PI1_decode_palette(byte * src,byte * palette)
 {
-  int i;  // Numéro de la couleur traitée
+  int i;  // NumÃ©ro de la couleur traitÃ©e
   int ip; // index dans la palette
   word w; // Word contenant le code
 
-  // Schéma d'un word =
+  // SchÃ©ma d'un word =
   //
   //    Low        High
   // VVVV RRRR | 0000 BBBB
@@ -1502,11 +1502,11 @@ void PI1_decode_palette(byte * src,byte * palette)
 
 void PI1_code_palette(byte * palette,byte * dest)
 {
-  int i;  // Numéro de la couleur traitée
+  int i;  // NumÃ©ro de la couleur traitÃ©e
   int ip; // index dans la palette
   word w; // Word contenant le code
 
-  // Schéma d'un word =
+  // SchÃ©ma d'un word =
   //
   // Low        High
   // VVVV RRRR | 0000 BBBB
@@ -1608,16 +1608,16 @@ void PI1_save_ranges(T_IO_Context * context, byte * buffer, int size)
 void Test_PI1(T_IO_Context * context, FILE * file)
 {
   int  size;              // Taille du fichier
-  word resolution;                 // Résolution de l'image
+  word resolution;                 // RÃ©solution de l'image
 
   (void)context;
   File_error=1;
 
-    // Vérification de la taille
+    // VÃ©rification de la taille
     size=File_length_file(file);
     if ((size==32034) || (size==32066))
     {
-      // Lecture et vérification de la résolution
+      // Lecture et vÃ©rification de la rÃ©solution
       if (Read_word_le(file,&resolution))
       {
         if (resolution==0x0000)
@@ -1639,7 +1639,7 @@ void Load_PI1(T_IO_Context * context)
   File_error=0;
   if ((file=Open_file_read(context)))
   {
-    // allocation d'un buffer mémoire
+    // allocation d'un buffer mÃ©moire
     buffer=(byte *)malloc(32034);
     if (buffer!=NULL)
     {
@@ -1655,7 +1655,7 @@ void Load_PI1(T_IO_Context * context)
             memset(context->Palette,0,sizeof(T_Palette));
           PI1_decode_palette(buffer+2,(byte *)context->Palette);
 
-          // Chargement/décompression de l'image
+          // Chargement/dÃ©compression de l'image
           ptr=buffer+34;
           for (y_pos=0;y_pos<200;y_pos++)
           {
@@ -1699,9 +1699,9 @@ void Save_PI1(T_IO_Context * context)
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
     
-    // allocation d'un buffer mémoire
+    // allocation d'un buffer mÃ©moire
     buffer=(byte *)malloc(32034);
-    // Codage de la résolution
+    // Codage de la rÃ©solution
     buffer[0]=0x00;
     buffer[1]=0x00;
     // Codage de la palette
@@ -1730,13 +1730,13 @@ void Save_PI1(T_IO_Context * context)
     {
       fclose(file);
     }
-    else // Error d'écriture (disque plein ou protégé)
+    else // Error d'Ã©criture (disque plein ou protÃ©gÃ©)
     {
       fclose(file);
       Remove_file(context);
       File_error=1;
     }
-    // Libération du buffer mémoire
+    // LibÃ©ration du buffer mÃ©moire
     free(buffer);
     buffer = NULL;
   }
@@ -1751,12 +1751,12 @@ void Save_PI1(T_IO_Context * context)
 
 //////////////////////////////////// PC1 ////////////////////////////////////
 
-//// DECOMPRESSION d'un buffer selon la méthode PACKBITS ////
+//// DECOMPRESSION d'un buffer selon la mÃ©thode PACKBITS ////
 
 void PC1_uncompress_packbits(byte * src,byte * dest)
 {
   int is,id; // Les indices de parcour des buffers
-  int n;     // Octet de contrôle
+  int n;     // Octet de contrÃ´le
 
   for (is=id=0;id<32000;)
   {
@@ -1772,19 +1772,19 @@ void PC1_uncompress_packbits(byte * src,byte * dest)
     }
     else
     {
-      // Recopier n+1 octets littéralement
+      // Recopier n+1 octets littÃ©ralement
       n=n+1;
       for (;(n>0) && (id<32000);n--)
         dest[id++]=src[is++];
     }
 
-    // Contrôle des erreurs
+    // ContrÃ´le des erreurs
     if (n>0)
       File_error=1;
   }
 }
 
-//// COMPRESSION d'un buffer selon la méthode PACKBITS ////
+//// COMPRESSION d'un buffer selon la mÃ©thode PACKBITS ////
 
 void PC1_compress_packbits(byte * src,byte * dest,int source_size,int * dest_size)
 {
@@ -1794,13 +1794,13 @@ void PC1_compress_packbits(byte * src,byte * dest,int source_size,int * dest_siz
   {
     int is = 0; // index dans la source
     int id = 0; // index dans la destination
-    int ir; // index de   la répétition
-    int n;  // Taille des séquences
-    int repet; // "Il y a répétition"
+    int ir; // index de   la rÃ©pÃ©tition
+    int n;  // Taille des sÃ©quences
+    int repet; // "Il y a rÃ©pÃ©tition"
 
     while(is<40)
     {
-      // On recherche le 1er endroit où il y a répétition d'au moins 3 valeurs
+      // On recherche le 1er endroit oÃ¹ il y a rÃ©pÃ©tition d'au moins 3 valeurs
       // identiques
   
       repet=0;
@@ -1813,7 +1813,7 @@ void PC1_compress_packbits(byte * src,byte * dest,int source_size,int * dest_siz
         }
       }
   
-      // On code la partie sans répétitions
+      // On code la partie sans rÃ©pÃ©titions
       if (!repet || ir!=is)
       {
         n=(ir-is)+1;
@@ -1822,10 +1822,10 @@ void PC1_compress_packbits(byte * src,byte * dest,int source_size,int * dest_siz
           dest[id++]=src[is++];
       }
   
-      // On code la partie sans répétitions
+      // On code la partie sans rÃ©pÃ©titions
       if (repet)
       {
-        // On compte la quantité de fois qu'il faut répéter la valeur
+        // On compte la quantitÃ© de fois qu'il faut rÃ©pÃ©ter la valeur
         for (ir+=3;ir<40;ir++)
         {
           if (src[ir]!=src[is])
@@ -1837,7 +1837,7 @@ void PC1_compress_packbits(byte * src,byte * dest,int source_size,int * dest_siz
         is=ir;
       }
     }
-    // On renseigne la taille du buffer compressé
+    // On renseigne la taille du buffer compressÃ©
     *dest_size+=id;
     // Move for next 40-byte block
     src += 40;
@@ -1853,7 +1853,7 @@ void PC1_compress_packbits(byte * src,byte * dest,int source_size,int * dest_siz
 void PC1_4bp_to_1line(byte * src0,byte * src1,byte * src2,byte * src3,byte * dest)
 {
   int  i,j;         // Compteurs
-  int  ip;          // index du pixel à calculer
+  int  ip;          // index du pixel Ã  calculer
   byte byte_mask;      // Masque de decodage
   byte b0,b1,b2,b3; // Les 4 octets des plans bits sources
 
@@ -1885,7 +1885,7 @@ void PC1_4bp_to_1line(byte * src0,byte * src1,byte * src2,byte * src3,byte * des
 void PC1_1line_to_4bp(byte * src,byte * dst0,byte * dst1,byte * dst2,byte * dst3)
 {
   int  i,j;         // Compteurs
-  int  ip;          // index du pixel à calculer
+  int  ip;          // index du pixel Ã  calculer
   byte byte_mask;      // Masque de decodage
   byte b0,b1,b2,b3; // Les 4 octets des plans bits sources
 
@@ -1917,16 +1917,16 @@ void PC1_1line_to_4bp(byte * src,byte * dst0,byte * dst1,byte * dst2,byte * dst3
 void Test_PC1(T_IO_Context * context, FILE * file)
 {
   int  size;              // Taille du fichier
-  word resolution;                 // Résolution de l'image
+  word resolution;                 // RÃ©solution de l'image
 
   (void)context;
   File_error=1;
 
-    // Vérification de la taille
+    // VÃ©rification de la taille
     size=File_length_file(file);
     if ((size<=32066))
     {
-      // Lecture et vérification de la résolution
+      // Lecture et vÃ©rification de la rÃ©solution
       if (Read_word_le(file,&resolution))
       {
         if (resolution==0x0080)
@@ -1951,7 +1951,7 @@ void Load_PC1(T_IO_Context * context)
   if ((file=Open_file_read(context)))
   {
     size=File_length_file(file);
-    // allocation des buffers mémoire
+    // allocation des buffers mÃ©moire
     buffercomp=(byte *)malloc(size);
     bufferdecomp=(byte *)malloc(32000);
     if ( (buffercomp!=NULL) && (bufferdecomp!=NULL) )
@@ -1968,14 +1968,14 @@ void Load_PC1(T_IO_Context * context)
             memset(context->Palette,0,sizeof(T_Palette));
           PI1_decode_palette(buffercomp+2,(byte *)context->Palette);
 
-          // Décompression du buffer
+          // DÃ©compression du buffer
           PC1_uncompress_packbits(buffercomp+34,bufferdecomp);
 
-          // Décodage de l'image
+          // DÃ©codage de l'image
           ptr=bufferdecomp;
           for (y_pos=0;y_pos<200;y_pos++)
           {
-            // Décodage de la scanline
+            // DÃ©codage de la scanline
             PC1_4bp_to_1line(ptr,ptr+40,ptr+80,ptr+120,pixels);
             ptr+=160;
             // Chargement de la ligne
@@ -2025,10 +2025,10 @@ void Save_PC1(T_IO_Context * context)
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
     
-    // Allocation des buffers mémoire
+    // Allocation des buffers mÃ©moire
     bufferdecomp=(byte *)malloc(32000);
     buffercomp  =(byte *)malloc(64066);
-    // Codage de la résolution
+    // Codage de la rÃ©solution
     buffercomp[0]=0x80;
     buffercomp[1]=0x00;
     // Codage de la palette
@@ -2060,13 +2060,13 @@ void Save_PC1(T_IO_Context * context)
     {
       fclose(file);
     }
-    else // Error d'écriture (disque plein ou protégé)
+    else // Error d'Ã©criture (disque plein ou protÃ©gÃ©)
     {
       fclose(file);
       Remove_file(context);
       File_error=1;
     }
-    // Libération des buffers mémoire
+    // LibÃ©ration des buffers mÃ©moire
     free(bufferdecomp);
     free(buffercomp);
     buffercomp = bufferdecomp = NULL;
@@ -2085,12 +2085,12 @@ void Save_PC1(T_IO_Context * context)
 void Test_NEO(T_IO_Context * context, FILE * file)
 {
   int  size;              // Taille du fichier
-  word resolution;                 // Résolution de l'image
+  word resolution;                 // RÃ©solution de l'image
 
   (void)context;
   File_error=1;
 
-    // Vérification de la taille
+    // VÃ©rification de la taille
     size=File_length_file(file);
     if ((size==32128))
     {
@@ -2101,7 +2101,7 @@ void Test_NEO(T_IO_Context * context, FILE * file)
           File_error = 0;
       }
 
-      // Lecture et vérification de la résolution
+      // Lecture et vÃ©rification de la rÃ©solution
       if (Read_word_le(file,&resolution))
       {
         if (resolution==0 || resolution==1 || resolution==2)
@@ -2121,7 +2121,7 @@ void Load_NEO(T_IO_Context * context)
   File_error=0;
   if ((file=Open_file_read(context)))
   {
-    // allocation d'un buffer mémoire
+    // allocation d'un buffer mÃ©moire
     buffer=(byte *)malloc(32128);
     if (buffer!=NULL)
     {
@@ -2135,10 +2135,10 @@ void Load_NEO(T_IO_Context * context)
           // Initialisation de la palette
           if (Config.Clear_palette)
             memset(context->Palette,0,sizeof(T_Palette));
-          // on saute la résolution et le flag, chacun 2 bits
+          // on saute la rÃ©solution et le flag, chacun 2 bits
           PI1_decode_palette(buffer+4,(byte *)context->Palette);
 
-          // Chargement/décompression de l'image
+          // Chargement/dÃ©compression de l'image
           ptr=buffer+128;
           for (y_pos=0;y_pos<200;y_pos++)
           {
@@ -2179,9 +2179,9 @@ void Save_NEO(T_IO_Context * context)
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
     
-    // allocation d'un buffer mémoire
+    // allocation d'un buffer mÃ©moire
     buffer=(byte *)malloc(32128);
-    // Codage de la résolution
+    // Codage de la rÃ©solution
     buffer[0]=0x00;
     buffer[1]=0x00;
     buffer[2]=0x00;
@@ -2211,13 +2211,13 @@ void Save_NEO(T_IO_Context * context)
     {
       fclose(file);
     }
-    else // Error d'écriture (disque plein ou protégé)
+    else // Error d'Ã©criture (disque plein ou protÃ©gÃ©)
     {
       fclose(file);
       Remove_file(context);
       File_error=1;
     }
-    // Libération du buffer mémoire
+    // LibÃ©ration du buffer mÃ©moire
     free(buffer);
     buffer = NULL;
   }

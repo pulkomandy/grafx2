@@ -67,7 +67,7 @@ void Start_operation_stack(word new_operation)
     break;
   }
 
-  // On mémorise l'opération précédente si on démarre une interruption
+  // On mÃ©morise l'opÃ©ration prÃ©cÃ©dente si on dÃ©marre une interruption
   switch(new_operation)
   {
     case OPERATION_MAGNIFY:
@@ -77,28 +77,28 @@ void Start_operation_stack(word new_operation)
     case OPERATION_POLYBRUSH:
     case OPERATION_STRETCH_BRUSH:
       Operation_before_interrupt=Current_operation;
-      // On passe à l'operation demandée
+      // On passe Ã  l'operation demandÃ©e
       Current_operation=new_operation;
       break;
     case OPERATION_PAN_VIEW:
       // Use separate operation-before storage for panning
       Operation_before_pan=Current_operation;
-      // On passe à l'operation demandée
+      // On passe Ã  l'operation demandÃ©e
       Current_operation=new_operation;
       break;
     case OPERATION_ROTATE_BRUSH:
       Begin_brush_rotation();
       Operation_before_interrupt=Current_operation;
-      // On passe à l'operation demandée
+      // On passe Ã  l'operation demandÃ©e
       Current_operation=new_operation;
       break;
     default :
-      // On passe à l'operation demandée
+      // On passe Ã  l'operation demandÃ©e
       Current_operation=new_operation;
       Operation_before_interrupt=Current_operation;
   }
 
-  // On spécifie si l'opération autorise le changement de couleur au clavier
+  // On spÃ©cifie si l'opÃ©ration autorise le changement de couleur au clavier
   switch(new_operation)
   {
     case OPERATION_CONTINUOUS_DRAW:
@@ -194,16 +194,16 @@ void Display_coords_rel_or_abs(short start_x, short start_y)
 //////////////////////////////////////////////////// OPERATION_CONTINUOUS_DRAW
 
 void Freehand_mode1_1_0(void)
-//  Opération   : OPERATION_CONTINUOUS_DRAW
+//  OpÃ©ration   : OPERATION_CONTINUOUS_DRAW
 //  Click Souris: 1
 //  Taille_Pile : 0
 //
-//  Souris effacée: Oui
+//  Souris effacÃ©e: Oui
 {
   Init_start_operation();
   Backup();
   Shade_table=Shade_table_left;
-  // On affiche définitivement le pinceau
+  // On affiche dÃ©finitivement le pinceau
   Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color);
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
@@ -211,11 +211,11 @@ void Freehand_mode1_1_0(void)
 
 
 void Freehand_mode1_1_2(void)
-//  Opération   : OPERATION_CONTINUOUS_DRAW
+//  OpÃ©ration   : OPERATION_CONTINUOUS_DRAW
 //  Click Souris: 1
 //  Taille_Pile : 2
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 {
   short start_x;
   short start_y;
@@ -237,11 +237,11 @@ void Freehand_mode1_1_2(void)
 
 
 void Freehand_mode12_0_2(void)
-//  Opération   : OPERATION_DESSIN_[DIS]CONTINU
+//  OpÃ©ration   : OPERATION_DESSIN_[DIS]CONTINU
 //  Click Souris: 0
 //  Taille_Pile : 2
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 {
   Operation_stack_size=0;
   End_of_modification();
@@ -249,11 +249,11 @@ void Freehand_mode12_0_2(void)
 
 
 void Freehand_mode1_2_0(void)
-//  Opération   : OPERATION_CONTINUOUS_DRAW
+//  OpÃ©ration   : OPERATION_CONTINUOUS_DRAW
 //  Click Souris: 2
 //  Taille_Pile : 0
 //
-//  Souris effacée: Oui
+//  Souris effacÃ©e: Oui
 {
   if (Rightclick_colorpick(0))
     return;
@@ -261,7 +261,7 @@ void Freehand_mode1_2_0(void)
   Init_start_operation();
   Backup();
   Shade_table=Shade_table_right;
-  // On affiche définitivement le pinceau
+  // On affiche dÃ©finitivement le pinceau
   Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color);
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
@@ -269,11 +269,11 @@ void Freehand_mode1_2_0(void)
 
 
 void Freehand_mode1_2_2(void)
-//  Opération   : OPERATION_CONTINUOUS_DRAW
+//  OpÃ©ration   : OPERATION_CONTINUOUS_DRAW
 //  Click Souris: 2
 //  Taille_Pile : 2
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 {
   short start_x;
   short start_y;
@@ -297,16 +297,16 @@ void Freehand_mode1_2_2(void)
 ///////////////////////////////////////////////// OPERATION_DISCONTINUOUS_DRAW
 
 void Freehand_mode2_1_0(void)
-//  Opération   : OPERATION_DISCONTINUOUS_DRAW
+//  OpÃ©ration   : OPERATION_DISCONTINUOUS_DRAW
 //  Click Souris: 1
 //  Taille_Pile : 0
 //
-//  Souris effacée: Oui
+//  Souris effacÃ©e: Oui
 {
   Init_start_operation();
   Backup();
   Shade_table=Shade_table_left;
-  // On affiche définitivement le pinceau
+  // On affiche dÃ©finitivement le pinceau
   Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color);
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
@@ -316,11 +316,11 @@ void Freehand_mode2_1_0(void)
 
 
 void Freehand_mode2_1_2(void)
-//  Opération   : OPERATION_DISCONTINUOUS_DRAW
+//  OpÃ©ration   : OPERATION_DISCONTINUOUS_DRAW
 //  Click Souris: 1
 //  Taille_Pile : 2
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 {
   short start_x;
   short start_y;
@@ -335,7 +335,7 @@ void Freehand_mode2_1_2(void)
     {
       Airbrush_next_time+=Airbrush_delay*10;
       Hide_cursor();
-      // On affiche définitivement le pinceau
+      // On affiche dÃ©finitivement le pinceau
       Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color);
       Display_cursor();
     }
@@ -348,11 +348,11 @@ void Freehand_mode2_1_2(void)
 // ----------
 
 void Freehand_mode2_2_0(void)
-//  Opération   : OPERATION_DISCONTINUOUS_DRAW
+//  OpÃ©ration   : OPERATION_DISCONTINUOUS_DRAW
 //  Click Souris: 2
 //  Taille_Pile : 0
 //
-//  Souris effacée: Oui
+//  Souris effacÃ©e: Oui
 {
   if (Rightclick_colorpick(0))
     return;
@@ -364,17 +364,17 @@ void Freehand_mode2_2_0(void)
   Operation_push(Paintbrush_Y);
   Print_coordinates();
   Airbrush_next_time = SDL_GetTicks() + Airbrush_delay*10;
-  // On affiche définitivement le pinceau
+  // On affiche dÃ©finitivement le pinceau
   Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color);
 }
 
 
 void Freehand_mode2_2_2(void)
-//  Opération   : OPERATION_DISCONTINUOUS_DRAW
+//  OpÃ©ration   : OPERATION_DISCONTINUOUS_DRAW
 //  Click Souris: 2
 //  Taille_Pile : 2
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 {
   short start_x;
   short start_y;
@@ -389,7 +389,7 @@ void Freehand_mode2_2_2(void)
     {
       Airbrush_next_time+=Airbrush_delay*10;
       Hide_cursor();
-      // On affiche définitivement le pinceau
+      // On affiche dÃ©finitivement le pinceau
       Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color);
       Display_cursor();
     }
@@ -403,27 +403,27 @@ void Freehand_mode2_2_2(void)
 ////////////////////////////////////////////////////// OPERATION_POINT_DRAW
 
 void Freehand_mode3_1_0(void)
-//  Opération   : OPERATION_POINT_DRAW
+//  OpÃ©ration   : OPERATION_POINT_DRAW
 //  Click Souris: 1
 //  Taille_Pile : 0
 //
-//  Souris effacée: Oui
+//  Souris effacÃ©e: Oui
 {
   Init_start_operation();
   Backup();
   Shade_table=Shade_table_left;
-  // On affiche définitivement le pinceau
+  // On affiche dÃ©finitivement le pinceau
   Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Fore_color);
-  Operation_push(0);  // On change simplement l'état de la pile...
+  Operation_push(0);  // On change simplement l'Ã©tat de la pile...
 }
 
 
 void Freehand_Mode3_2_0(void)
-//  Opération   : OPERATION_POINT_DRAW
+//  OpÃ©ration   : OPERATION_POINT_DRAW
 //  Click Souris: 2
 //  Taille_Pile : 0
 //
-//  Souris effacée: Oui
+//  Souris effacÃ©e: Oui
 {
   if (Rightclick_colorpick(0))
     return;
@@ -431,18 +431,18 @@ void Freehand_Mode3_2_0(void)
   Init_start_operation();
   Backup();
   Shade_table=Shade_table_right;
-  // On affiche définitivement le pinceau
+  // On affiche dÃ©finitivement le pinceau
   Draw_paintbrush(Paintbrush_X,Paintbrush_Y,Back_color);
-  Operation_push(0);  // On change simplement l'état de la pile...
+  Operation_push(0);  // On change simplement l'Ã©tat de la pile...
 }
 
 
 void Freehand_mode3_0_1(void)
-//  Opération   : OPERATION_POINT_DRAW
+//  OpÃ©ration   : OPERATION_POINT_DRAW
 //  Click Souris: 0
 //  Taille_Pile : 1
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 {
   End_of_modification();
   Operation_stack_size--;
@@ -452,13 +452,13 @@ void Freehand_mode3_0_1(void)
 ///////////////////////////////////////////////////////////// OPERATION_LINE
 
 void Line_12_0(void)
-// Opération   : OPERATION_LINE
+// OpÃ©ration   : OPERATION_LINE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-//  Souris effacée: Oui
+//  Souris effacÃ©e: Oui
 
-//  Début du tracé d'une ligne (premier clic)
+//  DÃ©but du tracÃ© d'une ligne (premier clic)
 {
   if (Rightclick_colorpick(0))
     return;
@@ -494,14 +494,14 @@ void Line_12_0(void)
 
 
 void Line_12_5(void)
-// Opération   : OPERATION_LINE
+// OpÃ©ration   : OPERATION_LINE
 // Click Souris: 1
 // Taille_Pile : 5
 //
-// Souris effacée: Non
+// Souris effacÃ©e: Non
 
-// Poursuite du tracé d'une ligne (déplacement de la souris en gardant le
-// curseur appuyé)
+// Poursuite du tracÃ© d'une ligne (dÃ©placement de la souris en gardant le
+// curseur appuyÃ©)
 {
   short start_x;
   short start_y;
@@ -519,7 +519,7 @@ void Line_12_5(void)
   cursor_x = Paintbrush_X;
   cursor_y = Paintbrush_Y;
 
-  // On corrige les coordonnées de la ligne si la touche shift est appuyée...
+  // On corrige les coordonnÃ©es de la ligne si la touche shift est appuyÃ©e...
   if(SDL_GetModState() & KMOD_SHIFT)
     Clamp_coordinates_regular_angle(start_x,start_y,&cursor_x,&cursor_y);
 
@@ -560,13 +560,13 @@ void Line_12_5(void)
 
 
 void Line_0_5(void)
-// Opération   : OPERATION_LINE
+// OpÃ©ration   : OPERATION_LINE
 // Click Souris: 0
 // Taille_Pile : 5
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 
-// End du tracé d'une ligne (relachage du bouton)
+// End du tracÃ© d'une ligne (relachage du bouton)
 {
   short start_x;
   short start_y;
@@ -600,11 +600,11 @@ void Line_0_5(void)
 
 
 void K_line_12_0(void)
-// Opération   : OPERATION_K_LINE
+// OpÃ©ration   : OPERATION_K_LINE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-//  Souris effacée: Oui
+//  Souris effacÃ©e: Oui
 {
   byte color;
 
@@ -619,7 +619,7 @@ void K_line_12_0(void)
 
   color=(Mouse_K==LEFT_SIDE)?Fore_color:Back_color;
 
-  // On place temporairement le début de la ligne qui ne s'afficherait pas sinon
+  // On place temporairement le dÃ©but de la ligne qui ne s'afficherait pas sinon
   Pixel_figure_preview(Paintbrush_X,Paintbrush_Y,color);
 
   if ((Config.Coords_rel) && (Menu_is_visible))
@@ -636,11 +636,11 @@ void K_line_12_0(void)
 
 
 void K_line_12_6(void)
-// Opération   : OPERATION_K_LINE
+// OpÃ©ration   : OPERATION_K_LINE
 // Click Souris: 1 ou 2 | 0
 // Taille_Pile : 6      | 7
 //
-// Souris effacée: Non
+// Souris effacÃ©e: Non
 {
   short start_x;
   short start_y;
@@ -676,11 +676,11 @@ void K_line_12_6(void)
 
 
 void K_line_0_6(void)
-// Opération   : OPERATION_K_LINE
+// OpÃ©ration   : OPERATION_K_LINE
 // Click Souris: 0
 // Taille_Pile : 6
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 {
   short start_x;
   short start_y;
@@ -715,7 +715,7 @@ void K_line_0_6(void)
   Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
 
   Operation_push(direction);
-  Operation_push(direction); // Valeur bidon servant de nouvel état de pile
+  Operation_push(direction); // Valeur bidon servant de nouvel Ã©tat de pile
   Operation_push(color);
   Operation_push(Paintbrush_X);
   Operation_push(Paintbrush_Y);
@@ -726,11 +726,11 @@ void K_line_0_6(void)
 
 
 void K_line_12_7(void)
-// Opération   : OPERATION_K_LINE
+// OpÃ©ration   : OPERATION_K_LINE
 // Click Souris: 1 ou 2
 // Taille_Pile : 7
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 {
   short start_x;
   short start_y;
@@ -759,7 +759,7 @@ void K_line_12_7(void)
   }
   else
   {
-    // La série de ligne est terminée, il faut donc effacer la dernière
+    // La sÃ©rie de ligne est terminÃ©e, il faut donc effacer la derniÃ¨re
     // preview de ligne
     Pixel_figure_preview_auto  (start_x,start_y);
     Hide_line_preview (start_x,start_y,end_x,end_y);
@@ -781,11 +781,11 @@ void K_line_12_7(void)
 /////////////////////////////////////////////////// OPERATION_RECTANGLE_?????
 
 void Rectangle_12_0(void)
-// Opération   : OPERATION_EMPTY_RECTANGLE / OPERATION_FILLED_RECTANGLE
+// OpÃ©ration   : OPERATION_EMPTY_RECTANGLE / OPERATION_FILLED_RECTANGLE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 {
   if (Rightclick_colorpick(0))
     return;
@@ -794,7 +794,7 @@ void Rectangle_12_0(void)
 
   if ((Config.Coords_rel) && (Menu_is_visible))
     Print_in_menu("\035:   1   \022:   1",0);
-  // On laisse une trace du curseur à l'écran
+  // On laisse une trace du curseur Ã  l'Ã©cran
   Display_cursor();
 
   if (Mouse_K==LEFT_SIDE)
@@ -816,11 +816,11 @@ void Rectangle_12_0(void)
 
 
 void Rectangle_12_5(void)
-// Opération   : OPERATION_EMPTY_RECTANGLE / OPERATION_FILLED_RECTANGLE
+// OpÃ©ration   : OPERATION_EMPTY_RECTANGLE / OPERATION_FILLED_RECTANGLE
 // Click Souris: 1 ou 2
 // Taille_Pile : 5
 //
-// Souris effacée: Non
+// Souris effacÃ©e: Non
 {
   short start_x;
   short start_y;
@@ -856,17 +856,17 @@ void Rectangle_12_5(void)
 
 
 void Empty_rectangle_0_5(void)
-// Opération   : OPERATION_EMPTY_RECTANGLE
+// OpÃ©ration   : OPERATION_EMPTY_RECTANGLE
 // Click Souris: 0
 // Taille_Pile : 5
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 {
   short old_paintbrush_x;
   short old_paintbrush_y;
   short color;
 
-  // On mémorise la position courante du pinceau:
+  // On mÃ©morise la position courante du pinceau:
 
   old_paintbrush_x=Paintbrush_X;
   old_paintbrush_y=Paintbrush_Y;
@@ -878,7 +878,7 @@ void Empty_rectangle_0_5(void)
   Operation_pop(&Paintbrush_Y);
   Operation_pop(&Paintbrush_X);
 
-  // On va devoir effacer l'ancien curseur qu'on a laissé trainer:
+  // On va devoir effacer l'ancien curseur qu'on a laissÃ© trainer:
   Hide_cursor();
 
   // On lit la couleur du rectangle:
@@ -890,7 +890,7 @@ void Empty_rectangle_0_5(void)
   // Et on trace le rectangle:
   Draw_empty_rectangle(Paintbrush_X,Paintbrush_Y,old_paintbrush_x,old_paintbrush_y,color);
 
-  // Enfin, on rétablit la position du pinceau:
+  // Enfin, on rÃ©tablit la position du pinceau:
   Paintbrush_X=old_paintbrush_x;
   Paintbrush_Y=old_paintbrush_y;
 
@@ -903,17 +903,17 @@ void Empty_rectangle_0_5(void)
 
 
 void Filled_rectangle_0_5(void)
-// Opération   : OPERATION_FILLED_RECTANGLE
+// OpÃ©ration   : OPERATION_FILLED_RECTANGLE
 // Click Souris: 0
 // Taille_Pile : 5
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 {
   short old_paintbrush_x;
   short old_paintbrush_y;
   short color;
 
-  // On mémorise la position courante du pinceau:
+  // On mÃ©morise la position courante du pinceau:
 
   old_paintbrush_x=Paintbrush_X;
   old_paintbrush_y=Paintbrush_Y;
@@ -925,7 +925,7 @@ void Filled_rectangle_0_5(void)
   Operation_pop(&Paintbrush_Y);
   Operation_pop(&Paintbrush_X);
 
-  // On va devoir effacer l'ancien curseur qu'on a laissé trainer:
+  // On va devoir effacer l'ancien curseur qu'on a laissÃ© trainer:
   Hide_cursor();
 
   // On lit la couleur du rectangle:
@@ -937,7 +937,7 @@ void Filled_rectangle_0_5(void)
   // Et on trace le rectangle:
   Draw_filled_rectangle(Paintbrush_X,Paintbrush_Y,old_paintbrush_x,old_paintbrush_y,color);
 
-  // Enfin, on rétablit la position du pinceau:
+  // Enfin, on rÃ©tablit la position du pinceau:
   Paintbrush_X=old_paintbrush_x;
   Paintbrush_Y=old_paintbrush_y;
 
@@ -955,11 +955,11 @@ void Filled_rectangle_0_5(void)
 
 void Circle_12_0(void)
 //
-// Opération   : OPERATION_EMPTY_CIRCLE / OPERATION_FILLED_CIRCLE
+// OpÃ©ration   : OPERATION_EMPTY_CIRCLE / OPERATION_FILLED_CIRCLE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 {
   if (Rightclick_colorpick(0))
     return;
@@ -993,11 +993,11 @@ void Circle_12_0(void)
 
 void Circle_12_5(void)
 //
-// Opération   : OPERATION_EMPTY_CIRCLE / OPERATION_FILLED_CIRCLE
+// OpÃ©ration   : OPERATION_EMPTY_CIRCLE / OPERATION_FILLED_CIRCLE
 // Click Souris: 1 ou 2
 // Taille_Pile : 5 (color, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
-// Souris effacée: Non
+// Souris effacÃ©e: Non
 //
 {
   short tangent_x;
@@ -1047,11 +1047,11 @@ void Circle_12_5(void)
 
 void Empty_circle_0_5(void)
 //
-// Opération   : OPERATION_EMPTY_CIRCLE
+// OpÃ©ration   : OPERATION_EMPTY_CIRCLE
 // Click Souris: 0
 // Taille_Pile : 5 (color, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 //
 {
   short tangent_x;
@@ -1088,11 +1088,11 @@ void Empty_circle_0_5(void)
 
 void Filled_circle_0_5(void)
 //
-// Opération   : OPERATION_FILLED_CIRCLE
+// OpÃ©ration   : OPERATION_FILLED_CIRCLE
 // Click Souris: 0
 // Taille_Pile : 5 (color, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 //
 {
   short tangent_x;
@@ -1131,11 +1131,11 @@ void Filled_circle_0_5(void)
 
 void Ellipse_12_0(void)
 //
-// Opération   : OPERATION_EMPTY_ELLIPSE / OPERATION_FILLED_ELLIPSE
+// OpÃ©ration   : OPERATION_EMPTY_ELLIPSE / OPERATION_FILLED_ELLIPSE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 {
   if (Rightclick_colorpick(0))
     return;
@@ -1169,11 +1169,11 @@ void Ellipse_12_0(void)
 
 void Ellipse_12_5(void)
 //
-// Opération   : OPERATION_EMPTY_ELLIPSE / OPERATION_FILLED_ELLIPSE
+// OpÃ©ration   : OPERATION_EMPTY_ELLIPSE / OPERATION_FILLED_ELLIPSE
 // Click Souris: 1 ou 2
 // Taille_Pile : 5 (color, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
-// Souris effacée: Non
+// Souris effacÃ©e: Non
 //
 {
   short tangent_x;
@@ -1230,11 +1230,11 @@ void Ellipse_12_5(void)
 
 void Empty_ellipse_0_5(void)
 //
-// Opération   : OPERATION_EMPTY_ELLIPSE
+// OpÃ©ration   : OPERATION_EMPTY_ELLIPSE
 // Click Souris: 0
 // Taille_Pile : 5 (color, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 //
 {
   short tangent_x;
@@ -1281,11 +1281,11 @@ void Empty_ellipse_0_5(void)
 
 void Filled_ellipse_0_5(void)
 //
-// Opération   : OPERATION_FILLED_ELLIPSE
+// OpÃ©ration   : OPERATION_FILLED_ELLIPSE
 // Click Souris: 0
 // Taille_Pile : 5 (color, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 //
 {
   short tangent_x;
@@ -1334,15 +1334,15 @@ void Filled_ellipse_0_5(void)
 
 void Fill_1_0(void)
 //
-// Opération   : OPERATION_FILL
+// OpÃ©ration   : OPERATION_FILL
 // Click Souris: 1
 // Taille_Pile : 0
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 //
 {
   Hide_cursor();
-  // Pas besoin d'initialiser le début d'opération car le Smear n'affecte pas
+  // Pas besoin d'initialiser le dÃ©but d'opÃ©ration car le Smear n'affecte pas
   // le Fill, et on se fout de savoir si on est dans la partie gauche ou
   // droite de la loupe.
   // On ne s'occupe pas de faire un Backup: c'est "Fill_general" qui s'en charge.
@@ -1356,18 +1356,18 @@ void Fill_1_0(void)
 
 void Fill_2_0(void)
 //
-// Opération   : OPERATION_FILL
+// OpÃ©ration   : OPERATION_FILL
 // Click Souris: 2
 // Taille_Pile : 0
 //
-// Souris effacée: Non
+// Souris effacÃ©e: Non
 //
 {
   if (Rightclick_colorpick(1))
     return;
 
   Hide_cursor();
-  // Pas besoin d'initialiser le début d'opération car le Smear n'affecte pas
+  // Pas besoin d'initialiser le dÃ©but d'opÃ©ration car le Smear n'affecte pas
   // le Fill, et on se fout de savoir si on est dans la partie gauche ou
   // droite de la loupe.
   // On ne s'occupe pas de faire un Backup: c'est "Fill_general" qui s'en charge.
@@ -1384,11 +1384,11 @@ void Fill_2_0(void)
 
 void Replace_1_0(void)
 //
-// Opération   : OPERATION_REPLACE
+// OpÃ©ration   : OPERATION_REPLACE
 // Click Souris: 1
 // Taille_Pile : 0
 //
-// Souris effacée: Non
+// Souris effacÃ©e: Non
 //
 {
   Hide_cursor();
@@ -1405,11 +1405,11 @@ void Replace_1_0(void)
 
 void Replace_2_0(void)
 //
-// Opération   : OPERATION_REPLACE
+// OpÃ©ration   : OPERATION_REPLACE
 // Click Souris: 2
 // Taille_Pile : 0
 //
-// Souris effacée: Non
+// Souris effacÃ©e: Non
 //
 {
   if (Rightclick_colorpick(1))
@@ -1478,11 +1478,11 @@ void Draw_curve_cross(short x_pos, short y_pos)
 
 void Curve_34_points_1_0(void)
 //
-//  Opération   : OPERATION_COURBE_?_POINTS
+//  OpÃ©ration   : OPERATION_COURBE_?_POINTS
 //  Click Souris: 1
 //  Taille_Pile : 0
 //
-//  Souris effacée: Oui
+//  Souris effacÃ©e: Oui
 //
 {
   Init_start_operation();
@@ -1506,11 +1506,11 @@ void Curve_34_points_1_0(void)
 
 void Curve_34_points_2_0(void)
 //
-//  Opération   : OPERATION_COURBE_?_POINTS
+//  OpÃ©ration   : OPERATION_COURBE_?_POINTS
 //  Click Souris: 2
 //  Taille_Pile : 0
 //
-//  Souris effacée: Oui
+//  Souris effacÃ©e: Oui
 //
 {
   if (Rightclick_colorpick(0))
@@ -1538,11 +1538,11 @@ void Curve_34_points_2_0(void)
 
 void Curve_34_points_1_5(void)
 //
-//  Opération   : OPERATION_COURBE_?_POINTS
+//  OpÃ©ration   : OPERATION_COURBE_?_POINTS
 //  Click Souris: 1
 //  Taille_Pile : 5
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 //
 {
   short x1,x2,y1,y2;
@@ -1572,11 +1572,11 @@ void Curve_34_points_1_5(void)
 
 void Curve_34_points_2_5(void)
 //
-//  Opération   : OPERATION_COURBE_?_POINTS
+//  OpÃ©ration   : OPERATION_COURBE_?_POINTS
 //  Click Souris: 2
 //  Taille_Pile : 5
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 //
 {
   short x1,x2,y1,y2;
@@ -1609,11 +1609,11 @@ byte Cursor_hidden_before_curve;
 
 void Curve_4_points_0_5(void)
 //
-//  Opération   : OPERATION_4_POINTS_CURVE
+//  OpÃ©ration   : OPERATION_4_POINTS_CURVE
 //  Click Souris: 0
 //  Taille_Pile : 5
 //
-//  Souris effacée: Oui
+//  Souris effacÃ©e: Oui
 //
 {
   short x1,y1,x2,y2,x3,y3,x4,y4;
@@ -1654,7 +1654,7 @@ void Curve_4_points_0_5(void)
   Hide_line_preview(x1,y1,x4,y4);
   Draw_curve_preview(x1,y1,x2,y2,x3,y3,x4,y4,color);
 
-  // On trace les petites croix montrant les 2 points intermédiares
+  // On trace les petites croix montrant les 2 points intermÃ©diares
   Draw_curve_cross(x2,y2);
   Draw_curve_cross(x3,y3);
 
@@ -1681,11 +1681,11 @@ void Curve_4_points_0_5(void)
 
 void Curve_4_points_1_9(void)
 //
-//  Opération   : OPERATION_4_POINTS_CURVE
+//  OpÃ©ration   : OPERATION_4_POINTS_CURVE
 //  Click Souris: 1
 //  Taille_Pile : 9
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 //
 {
   short x1,y1,x2,y2,x3,y3,x4,y4;
@@ -1748,11 +1748,11 @@ void Curve_4_points_1_9(void)
 
 void Curve_4_points_2_9(void)
 //
-//  Opération   : OPERATION_4_POINTS_CURVE
+//  OpÃ©ration   : OPERATION_4_POINTS_CURVE
 //  Click Souris: 2
 //  Taille_Pile : 9
 //
-//  Souris effacée: Oui
+//  Souris effacÃ©e: Oui
 //
 {
   short x1,y1,x2,y2,x3,y3,x4,y4;
@@ -1795,26 +1795,26 @@ void Compute_3_point_curve(short x1, short y1, short x4, short y4,
   float bx,by; // Intersect. des dtes ((x1,y1),(x2,y2)) et ((x3,y3),(x4,y4))
 
   cx=(float)(x1+x4)/2.0;              // P1*--_               Legend:
-  cy=(float)(y1+y4)/2.0;              //   ·   \·· P2         -_\|/ : curve
-                                      //   ·    \ ·*·         * : important point
-  bx=cx+((8.0/3.0)*(Paintbrush_X-cx));//   ·     |   ··       · : dotted line
-  by=cy+((8.0/3.0)*(Paintbrush_Y-cy));//   ·     |P    ··  B
-                                      // C *·····*·········*  P=Pencil position
-  *x2=Round((bx+x1)/2.0);             //   ·     |     ··     C=middle of [P1,P4]
-  *y2=Round((by+y1)/2.0);             //   ·     |   ··       B=point computed as
-                                      //   ·    / ·*·         C->B=(8/3) * C->P
-  *x3=Round((bx+x4)/2.0);             //   ·  _/·· P3         P2=middle of [P1,B]
+  cy=(float)(y1+y4)/2.0;              //   Â·   \Â·Â· P2         -_\|/ : curve
+                                      //   Â·    \ Â·*Â·         * : important point
+  bx=cx+((8.0/3.0)*(Paintbrush_X-cx));//   Â·     |   Â·Â·       Â· : dotted line
+  by=cy+((8.0/3.0)*(Paintbrush_Y-cy));//   Â·     |P    Â·Â·  B
+                                      // C *Â·Â·Â·Â·Â·*Â·Â·Â·Â·Â·Â·Â·Â·Â·*  P=Pencil position
+  *x2=Round((bx+x1)/2.0);             //   Â·     |     Â·Â·     C=middle of [P1,P4]
+  *y2=Round((by+y1)/2.0);             //   Â·     |   Â·Â·       B=point computed as
+                                      //   Â·    / Â·*Â·         C->B=(8/3) * C->P
+  *x3=Round((bx+x4)/2.0);             //   Â·  _/Â·Â· P3         P2=middle of [P1,B]
   *y3=Round((by+y4)/2.0);             // P4*--                P3=middle of [P4,B]
 }
 
 
 void Curve_3_points_0_5(void)
 //
-//  Opération   : OPERATION_3_POINTS_CURVE
+//  OpÃ©ration   : OPERATION_3_POINTS_CURVE
 //  Click Souris: 0
 //  Taille_Pile : 5
 //
-//  Souris effacée: Oui
+//  Souris effacÃ©e: Oui
 //
 {
   short x1,y1,x2,y2,x3,y3,x4,y4;
@@ -1938,11 +1938,11 @@ void Curve_finalize(void)
 
 void Curve_3_points_0_11(void)
 //
-//  Opération   : OPERATION_3_POINTS_CURVE
+//  OpÃ©ration   : OPERATION_3_POINTS_CURVE
 //  Click Souris: 0
 //  Taille_Pile : 11
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 //
 {
   if (!Config.Stylus_mode)
@@ -1954,11 +1954,11 @@ void Curve_3_points_0_11(void)
 
 void Curve_3_points_12_11(void)
 //
-//  Opération   : OPERATION_3_POINTS_CURVE
+//  OpÃ©ration   : OPERATION_3_POINTS_CURVE
 //  Click Souris: 1 ou 2
 //  Taille_Pile : 11
 //
-//  Souris effacée: Oui
+//  Souris effacÃ©e: Oui
 //
 {
   if (!Config.Stylus_mode)
@@ -1972,11 +1972,11 @@ void Curve_3_points_12_11(void)
 
 void Airbrush_1_0(void)
 //
-//  Opération   : OPERATION_AIRBRUSH
+//  OpÃ©ration   : OPERATION_AIRBRUSH
 //  Click Souris: 1
 //  Taille_Pile : 0
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 //
 {
   Init_start_operation();
@@ -1995,11 +1995,11 @@ void Airbrush_1_0(void)
 
 void Airbrush_2_0(void)
 //
-//  Opération   : OPERATION_AIRBRUSH
+//  OpÃ©ration   : OPERATION_AIRBRUSH
 //  Click Souris: 2
 //  Taille_Pile : 0
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 //
 {
   if (Rightclick_colorpick(1))
@@ -2020,11 +2020,11 @@ void Airbrush_2_0(void)
 
 void Airbrush_12_2(void)
 //
-//  Opération   : OPERATION_AIRBRUSH
+//  OpÃ©ration   : OPERATION_AIRBRUSH
 //  Click Souris: 1 ou 2
 //  Taille_Pile : 2
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 //
 {
   short old_x,old_y;
@@ -2056,11 +2056,11 @@ void Airbrush_12_2(void)
 
 void Airbrush_0_2(void)
 //
-//  Opération   : OPERATION_AIRBRUSH
+//  OpÃ©ration   : OPERATION_AIRBRUSH
 //  Click Souris: 0
 //  Taille_Pile : 2
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 //
 {
   Operation_stack_size-=2;
@@ -2072,11 +2072,11 @@ void Airbrush_0_2(void)
 
 
 void Polygon_12_0(void)
-// Opération   : OPERATION_POLYGON
+// OpÃ©ration   : OPERATION_POLYGON
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 {
   byte color;
 
@@ -2091,7 +2091,7 @@ void Polygon_12_0(void)
 
   color=(Mouse_K==LEFT_SIDE)?Fore_color:Back_color;
 
-  // On place temporairement le début de la ligne qui ne s'afficherait pas sinon
+  // On place temporairement le dÃ©but de la ligne qui ne s'afficherait pas sinon
   Pixel_figure_preview(Paintbrush_X,Paintbrush_Y,color);
   Update_part_of_screen(Paintbrush_X,Paintbrush_Y,1,1);
 
@@ -2112,11 +2112,11 @@ void Polygon_12_0(void)
 
 
 void Polygon_12_9(void)
-// Opération   : OPERATION_POLYGON
+// OpÃ©ration   : OPERATION_POLYGON
 // Click Souris: 1 ou 2
 // Taille_Pile : 9
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 {
   short start_x;
   short start_y;
@@ -2145,14 +2145,14 @@ void Polygon_12_9(void)
   }
   else
   {
-    //   La série de ligne est terminée, il faut donc effacer la dernière
+    //   La sÃ©rie de ligne est terminÃ©e, il faut donc effacer la derniÃ¨re
     // preview de ligne et relier le dernier point avec le premier
     Pixel_figure_preview_auto  (start_x,start_y);
     Hide_line_preview (start_x,start_y,end_x,end_y);
     Operation_pop(&end_y);
     Operation_pop(&end_x);
     Paintbrush_shape=Paintbrush_shape_before_operation;
-    // Le pied aurait été de ne pas repasser sur le 1er point de la 1ère ligne
+    // Le pied aurait Ã©tÃ© de ne pas repasser sur le 1er point de la 1Ã¨re ligne
     // mais c'est pas possible :(
     Draw_line_permanent(start_x,start_y,end_x,end_y,color);
     Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
@@ -2176,11 +2176,11 @@ void Polygon_12_9(void)
 ////////////////////////////////////////////////////////// OPERATION_POLYFILL
 
 void Polyfill_12_0(void)
-// Opération   : OPERATION_POLYFILL
+// OpÃ©ration   : OPERATION_POLYFILL
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 {
   byte color;
 
@@ -2199,7 +2199,7 @@ void Polyfill_12_0(void)
   Polyfill_table_of_points[1]=Paintbrush_Y;
   Polyfill_number_of_points=1;
 
-  // On place temporairement le début de la ligne qui ne s'afficherait pas sinon
+  // On place temporairement le dÃ©but de la ligne qui ne s'afficherait pas sinon
   Pixel_figure_preview_xor(Paintbrush_X,Paintbrush_Y,0);
   Update_part_of_screen(Paintbrush_X,Paintbrush_Y,1,1);
 
@@ -2219,11 +2219,11 @@ void Polyfill_12_0(void)
 
 
 void Polyfill_0_8(void)
-// Opération   : OPERATION_POLYFILL
+// OpÃ©ration   : OPERATION_POLYFILL
 // Click Souris: 0
 // Taille_Pile : 8
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 {
   short start_x;
   short start_y;
@@ -2247,7 +2247,7 @@ void Polyfill_0_8(void)
   if (direction & 0x80)
     direction=(direction & 0x7F);
 
-  Operation_push(direction); // Valeur bidon servant de nouvel état de pile
+  Operation_push(direction); // Valeur bidon servant de nouvel Ã©tat de pile
   Operation_push(direction);
   Operation_push(color);
 
@@ -2276,11 +2276,11 @@ void Polyfill_0_8(void)
 
 
 void Polyfill_12_8(void)
-// Opération   : OPERATION_POLYFILL
+// OpÃ©ration   : OPERATION_POLYFILL
 // Click Souris: 1 ou 2 | 0
 // Taille_Pile : 8      | 9
 //
-// Souris effacée: Non
+// Souris effacÃ©e: Non
 {
   short start_x;
   short start_y;
@@ -2312,11 +2312,11 @@ void Polyfill_12_8(void)
 
 
 void Polyfill_12_9(void)
-// Opération   : OPERATION_POLYFILL
+// OpÃ©ration   : OPERATION_POLYFILL
 // Click Souris: 1 ou 2
 // Taille_Pile : 9
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 {
   short start_x;
   short start_y;
@@ -2345,7 +2345,7 @@ void Polyfill_12_9(void)
   }
   else
   {
-    //   La série de lignes est terminée, il faut donc effacer la dernière
+    //   La sÃ©rie de lignes est terminÃ©e, il faut donc effacer la derniÃ¨re
     // preview de ligne et relier le dernier point avec le premier
     Hide_cursor();
     Draw_line_preview_xor(start_x,start_y,end_x,end_y,0);
@@ -2377,11 +2377,11 @@ void Polyfill_12_9(void)
 
 
 void Polyform_12_0(void)
-//  Opération   : OPERATION_POLYFORM
+//  OpÃ©ration   : OPERATION_POLYFORM
 //  Click Souris: 1 ou 2
 //  Taille_Pile : 0
 //
-//  Souris effacée: Oui
+//  Souris effacÃ©e: Oui
 {
   short color;
 
@@ -2411,11 +2411,11 @@ void Polyform_12_0(void)
 
 
 void Polyform_12_8(void)
-//  Opération   : OPERATION_POLYFORM
+//  OpÃ©ration   : OPERATION_POLYFORM
 //  Click Souris: 1 ou 2
 //  Taille_Pile : 8
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 {
   short click;
   short end_y;
@@ -2438,18 +2438,18 @@ void Polyform_12_8(void)
 
     if ((start_x!=Paintbrush_X) || (start_y!=Paintbrush_Y))
     {
-      // Il existe un segment définit par (start_x,start_y)-(Paintbrush_X,Paintbrush_Y)
+      // Il existe un segment dÃ©finit par (start_x,start_y)-(Paintbrush_X,Paintbrush_Y)
 
       Hide_cursor();
       Print_coordinates();
 
       Operation_pop(&color);
 
-      // On efface la preview du segment validé:
+      // On efface la preview du segment validÃ©:
       Pixel_figure_preview_auto  (start_x,start_y);
       Hide_line_preview(start_x,start_y,end_x,end_y);
 
-      // On l'affiche de façon définitive:
+      // On l'affiche de faÃ§on dÃ©finitive:
       Draw_line_permanent(start_x,start_y,Paintbrush_X,Paintbrush_Y,color);
 
       // Et on affiche un pixel de preview en (Paintbrush_X,Paintbrush_Y):
@@ -2468,7 +2468,7 @@ void Polyform_12_8(void)
   }
   else
   {
-    // L'utilisateur souhaite arrêter l'opération et refermer le polygone
+    // L'utilisateur souhaite arrÃªter l'opÃ©ration et refermer le polygone
 
     Operation_pop(&color);
     Operation_pop(&initial_y);
@@ -2477,10 +2477,10 @@ void Polyform_12_8(void)
     Hide_cursor();
     Print_coordinates();
 
-    // On efface la preview du segment annulé:
+    // On efface la preview du segment annulÃ©:
     Hide_line_preview(start_x,start_y,end_x,end_y);
 
-    // On affiche de façon définitive le bouclage du polygone:
+    // On affiche de faÃ§on dÃ©finitive le bouclage du polygone:
     Draw_line_permanent(start_x,start_y,initial_x,initial_y,color);
 
     Display_cursor();
@@ -2491,11 +2491,11 @@ void Polyform_12_8(void)
 
 
 void Polyform_0_8(void)
-//  Opération   : OPERATION_POLYFORM
+//  OpÃ©ration   : OPERATION_POLYFORM
 //  Click Souris: 0
 //  Taille_Pile : 8
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 {
   short click;
   short end_y;
@@ -2517,7 +2517,7 @@ void Polyform_0_8(void)
     Operation_pop(&start_x);
     Operation_pop(&color);
 
-    // On met à jour l'affichage de la preview du prochain segment:
+    // On met Ã  jour l'affichage de la preview du prochain segment:
     Hide_line_preview(start_x,start_y,end_x,end_y);
     Draw_line_preview (start_x,start_y,Paintbrush_X,Paintbrush_Y,color);
 
@@ -2538,11 +2538,11 @@ void Polyform_0_8(void)
 
 
 void Filled_polyform_12_0(void)
-//  Opération   : OPERATION_FILLED_POLYFORM
+//  OpÃ©ration   : OPERATION_FILLED_POLYFORM
 //  Click Souris: 1 ou 2
 //  Taille_Pile : 0
 //
-//  Souris effacée: Oui
+//  Souris effacÃ©e: Oui
 {
   short color;
 
@@ -2551,7 +2551,7 @@ void Filled_polyform_12_0(void)
 
   Init_start_operation();
 
-  // Cette opération étant également utilisée pour le lasso, on ne fait pas de
+  // Cette opÃ©ration Ã©tant Ã©galement utilisÃ©e pour le lasso, on ne fait pas de
   // backup si on prend une brosse au lasso avec le bouton gauche.
   if ((Current_operation==OPERATION_FILLED_POLYFORM) || (Current_operation==OPERATION_FILLED_CONTOUR) || (Mouse_K==RIGHT_SIDE))
     Backup();
@@ -2566,7 +2566,7 @@ void Filled_polyform_12_0(void)
   Polyfill_table_of_points[1]=Paintbrush_Y;
   Polyfill_number_of_points=1;
 
-  // On place temporairement le début de la ligne qui ne s'afficherait pas sinon
+  // On place temporairement le dÃ©but de la ligne qui ne s'afficherait pas sinon
   Pixel_figure_preview_xor(Paintbrush_X,Paintbrush_Y,0);
   Update_part_of_screen(Paintbrush_X,Paintbrush_Y,1,1);
 
@@ -2582,11 +2582,11 @@ void Filled_polyform_12_0(void)
 
 
 void Filled_polyform_12_8(void)
-//  Opération   : OPERATION_FILLED_POLYFORM
+//  OpÃ©ration   : OPERATION_FILLED_POLYFORM
 //  Click Souris: 1 ou 2
 //  Taille_Pile : 8
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 {
   short click;
   short end_y;
@@ -2610,13 +2610,13 @@ void Filled_polyform_12_8(void)
     if (((start_x!=Paintbrush_X) || (start_y!=Paintbrush_Y)) &&
         (Polyfill_number_of_points<Config.Nb_max_vertices_per_polygon))
     {
-      // Il existe un nouveau segment défini par
+      // Il existe un nouveau segment dÃ©fini par
       // (start_x,start_y)-(Paintbrush_X,Paintbrush_Y)
 
       Hide_cursor();
       Print_coordinates();
 
-      // On le place à l'écran
+      // On le place Ã  l'Ã©cran
       if (Current_operation==OPERATION_FILLED_CONTOUR)
       {
         Draw_line_preview_xorback(start_x,start_y,end_x,end_y,0);
@@ -2653,13 +2653,13 @@ void Filled_polyform_12_8(void)
           Hide_cursor();
           Print_coordinates();
 
-          // On le place à l'écran
+          // On le place Ã  l'Ã©cran
           Draw_line_preview_xor(start_x,start_y,end_x,end_y,0);
           Draw_line_preview_xor(start_x,start_y,Paintbrush_X,Paintbrush_Y,0);
           Display_cursor();
         }
 
-        // On remet les mêmes valeurs (comme si on n'avait pas cliqué):
+        // On remet les mÃªmes valeurs (comme si on n'avait pas cliquÃ©):
         Operation_push(start_x);
         Operation_push(start_y);
         Operation_push(Paintbrush_X);
@@ -2678,7 +2678,7 @@ void Filled_polyform_12_8(void)
   }
   else
   {
-    // L'utilisateur souhaite arrêter l'opération et refermer le polygone
+    // L'utilisateur souhaite arrÃªter l'opÃ©ration et refermer le polygone
 
     Operation_pop(&color);
     Operation_pop(&initial_y);
@@ -2705,11 +2705,11 @@ void Filled_polyform_12_8(void)
 
 
 void Filled_polyform_0_8(void)
-//  Opération   : OPERATION_FILLED_POLYFORM
+//  OpÃ©ration   : OPERATION_FILLED_POLYFORM
 //  Click Souris: 0
 //  Taille_Pile : 8
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 {
   short click;
   short end_y;
@@ -2729,7 +2729,7 @@ void Filled_polyform_0_8(void)
     Operation_pop(&start_y);
     Operation_pop(&start_x);
 
-    // On met à jour l'affichage de la preview du prochain segment:
+    // On met Ã  jour l'affichage de la preview du prochain segment:
     Draw_line_preview_xor(start_x,start_y,end_x,end_y,0);
     Draw_line_preview_xor(start_x,start_y,Paintbrush_X,Paintbrush_Y,0);
 
@@ -2745,11 +2745,11 @@ void Filled_polyform_0_8(void)
 }
 
 void Filled_contour_0_8(void)
-//  Opération   : OPERATION_FILLED_CONTOUR
+//  OpÃ©ration   : OPERATION_FILLED_CONTOUR
 //  Click Souris: 0
 //  Taille_Pile : 8
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 {
   short click;
   short end_y;
@@ -2794,11 +2794,11 @@ byte Cursor_hidden_before_scroll;
 
 void Scroll_12_0(void)
 //
-//  Opération   : OPERATION_SCROLL
+//  OpÃ©ration   : OPERATION_SCROLL
 //  Click Souris: 1 ou 2
 //  Taille_Pile : 0
 //
-//  Souris effacée: Oui
+//  Souris effacÃ©e: Oui
 //
 {
   Init_start_operation();
@@ -2832,11 +2832,11 @@ void Scroll_12_0(void)
 
 void Scroll_12_5(void)
 //
-//  Opération   : OPERATION_SCROLL
+//  OpÃ©ration   : OPERATION_SCROLL
 //  Click Souris: 1 ou 2
 //  Taille_Pile : 5
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 //
 {
   short center_x;
@@ -2856,7 +2856,7 @@ void Scroll_12_5(void)
 
   if ( (Paintbrush_X!=x_pos) || (Paintbrush_Y!=y_pos) )
   {
-    // L'utilisateur a bougé, il faut scroller l'image
+    // L'utilisateur a bougÃ©, il faut scroller l'image
 
     if (Paintbrush_X>=center_x)
       x_offset=(Paintbrush_X-center_x)%Main.image_width;
@@ -2894,11 +2894,11 @@ void Scroll_12_5(void)
 
 void Scroll_0_5(void)
 //
-//  Opération   : OPERATION_SCROLL
+//  OpÃ©ration   : OPERATION_SCROLL
 //  Click Souris: 0
 //  Taille_Pile : 5
 //
-//  Souris effacée: Oui
+//  Souris effacÃ©e: Oui
 //
 {
   // All layers at once
@@ -2963,11 +2963,11 @@ void Scroll_0_5(void)
 
 void Grad_circle_12_0(void)
 //
-// Opération   : OPERATION_GRAD_CIRCLE
+// OpÃ©ration   : OPERATION_GRAD_CIRCLE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 {
   byte color;
 
@@ -2998,11 +2998,11 @@ void Grad_circle_12_0(void)
 
 void Grad_circle_12_6(void)
 //
-// Opération   : OPERATION_GRAD_CIRCLE
+// OpÃ©ration   : OPERATION_GRAD_CIRCLE
 // Click Souris: 1 ou 2
 // Taille_Pile : 6 (Mouse_K, color, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
-// Souris effacée: Non
+// Souris effacÃ©e: Non
 //
 {
   short tangent_x;
@@ -3053,11 +3053,11 @@ void Grad_circle_12_6(void)
 
 void Grad_circle_0_6(void)
 //
-// Opération   : OPERATION_GRAD_CIRCLE
+// OpÃ©ration   : OPERATION_GRAD_CIRCLE
 // Click Souris: 0
 // Taille_Pile : 6 (Mouse_K, color, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 //
 {
   short tangent_x;
@@ -3127,11 +3127,11 @@ void Grad_circle_0_6(void)
 
 void Grad_circle_12_8(void)
 //
-// Opération   : OPERATION_GRAD_CIRCLE
+// OpÃ©ration   : OPERATION_GRAD_CIRCLE
 // Click Souris: 0
 // Taille_Pile : 8 (Mouse_K, color, X_Centre, Y_Centre, X_Tangente, Y_Tangente, old_x, old_y)
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 //
 {
   short tangent_x;
@@ -3142,7 +3142,7 @@ void Grad_circle_12_8(void)
   short old_mouse_k;
   long limit;
 
-  Operation_stack_size-=2;   // On fait sauter les 2 derniers élts de la pile
+  Operation_stack_size-=2;   // On fait sauter les 2 derniers Ã©lts de la pile
   Operation_pop(&tangent_y);
   Operation_pop(&tangent_x);
   Operation_pop(&center_y);
@@ -3179,11 +3179,11 @@ void Grad_circle_12_8(void)
 
 void Grad_circle_or_ellipse_0_8(void)
 //
-// Opération   : OPERATION_{CERCLE|ELLIPSE}_DEGRADE
+// OpÃ©ration   : OPERATION_{CERCLE|ELLIPSE}_DEGRADE
 // Click Souris: 0
 // Taille_Pile : 8
 //
-// Souris effacée: Non
+// Souris effacÃ©e: Non
 //
 {
   short start_x;
@@ -3219,11 +3219,11 @@ void Grad_circle_or_ellipse_0_8(void)
 
 void Grad_ellipse_12_0(void)
 //
-// Opération   : OPERATION_GRAD_ELLIPSE
+// OpÃ©ration   : OPERATION_GRAD_ELLIPSE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 {
   byte color;
 
@@ -3255,11 +3255,11 @@ void Grad_ellipse_12_0(void)
 
 void Grad_ellipse_12_6(void)
 //
-// Opération   : OPERATION_GRAD_ELLIPSE
+// OpÃ©ration   : OPERATION_GRAD_ELLIPSE
 // Click Souris: 1 ou 2
 // Taille_Pile : 6 (Mouse_K, color, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
-// Souris effacée: Non
+// Souris effacÃ©e: Non
 //
 {
   short tangent_x;
@@ -3315,11 +3315,11 @@ void Grad_ellipse_12_6(void)
 
 void Grad_ellipse_0_6(void)
 //
-// Opération   : OPERATION_GRAD_ELLIPSE
+// OpÃ©ration   : OPERATION_GRAD_ELLIPSE
 // Click Souris: 0
 // Taille_Pile : 6 (Mouse_K, color, X_Centre, Y_Centre, X_Tangente, Y_Tangente)
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 //
 {
   short tangent_x;
@@ -3403,11 +3403,11 @@ void Grad_ellipse_0_6(void)
 
 void Grad_ellipse_12_8(void)
 //
-// Opération   : OPERATION_GRAD_ELLIPSE
+// OpÃ©ration   : OPERATION_GRAD_ELLIPSE
 // Click Souris: 0
 // Taille_Pile : 8 (Mouse_K, color, X_Centre, Y_Centre, X_Tangente, Y_Tangente, old_x, old_y)
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 //
 {
   short tangent_x;
@@ -3419,7 +3419,7 @@ void Grad_ellipse_12_8(void)
   short vertical_radius=0;
   short old_mouse_k;
 
-  Operation_stack_size-=2;   // On fait sauter les 2 derniers élts de la pile
+  Operation_stack_size-=2;   // On fait sauter les 2 derniers Ã©lts de la pile
   Operation_pop(&tangent_y);
   Operation_pop(&tangent_x);
   Operation_pop(&center_y);
@@ -3470,19 +3470,19 @@ void Grad_ellipse_12_8(void)
 * Operation_Rectangle_Degrade *
 ******************************/
 
-// 1) tracé d'un rectangle classique avec les lignes XOR
-// 2) tracé d'une ligne vecteur de dégradé, comme une ligne normale
-// 3) dessin du dégradé
+// 1) tracÃ© d'un rectangle classique avec les lignes XOR
+// 2) tracÃ© d'une ligne vecteur de dÃ©gradÃ©, comme une ligne normale
+// 3) dessin du dÃ©gradÃ©
 
 
 void Grad_rectangle_12_0(void)
-// Opération   : OPERATION_GRAD_RECTANGLE
+// OpÃ©ration   : OPERATION_GRAD_RECTANGLE
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 
-// Initialisation de l'étape 1, on commence à dessiner le rectangle
+// Initialisation de l'Ã©tape 1, on commence Ã  dessiner le rectangle
 {
   Init_start_operation();
   Backup();
@@ -3490,7 +3490,7 @@ void Grad_rectangle_12_0(void)
 
   if ((Config.Coords_rel) && (Menu_is_visible))
     Print_in_menu("\035:   1   \022:   1",0);
-  // On laisse une trace du curseur à l'écran
+  // On laisse une trace du curseur Ã  l'Ã©cran
   Display_cursor();
 
   if (Mouse_K==LEFT_SIDE)
@@ -3512,11 +3512,11 @@ void Grad_rectangle_12_0(void)
 
 
 void Grad_rectangle_12_5(void)
-// Opération   : OPERATION_GRAD_RECTANGLE
+// OpÃ©ration   : OPERATION_GRAD_RECTANGLE
 // Click Souris: 1 ou 2
 // Taille_Pile : 5
 //
-// Souris effacée: Non
+// Souris effacÃ©e: Non
 
 // Modification de la taille du rectangle
 {
@@ -3614,7 +3614,7 @@ void Draw_xor_rect(short start_x, short start_y, short end_x, short end_y)
   Update_rect(start_x - Main.offset_X, start_y - Main.offset_Y,
     width + 1 - offset_width, height + 1 - offset_height);
 
-  // Dessin dans la zone zoomée
+  // Dessin dans la zone zoomÃ©e
   if (Main.magnifier_mode && start_x <= Limit_right_zoom
     && end_x > Limit_left_zoom
     && start_y <= Limit_bottom_zoom
@@ -3623,22 +3623,22 @@ void Draw_xor_rect(short start_x, short start_y, short end_x, short end_y)
     offset_width = 0;
     offset_height = 0;
 
-    if (start_x<Limit_left_zoom) // On dépasse du zoom à gauche
+    if (start_x<Limit_left_zoom) // On dÃ©passe du zoom Ã  gauche
     {
       offset_width += Limit_left_zoom - start_x;
       offset_left = Limit_left_zoom;
     }
 
-    if(end_x>Limit_right_zoom) // On dépasse du zoom à droite
+    if(end_x>Limit_right_zoom) // On dÃ©passe du zoom Ã  droite
         offset_width += end_x - Limit_right_zoom;
 
-    if(start_y<Limit_top_zoom) // On dépasse du zoom en haut
+    if(start_y<Limit_top_zoom) // On dÃ©passe du zoom en haut
     {
         offset_height += Limit_top_zoom - start_y;
         offset_top = Limit_top_zoom;
     }
 
-    if(end_y>Limit_bottom_zoom) // On dépasse du zoom en bas
+    if(end_y>Limit_bottom_zoom) // On dÃ©passe du zoom en bas
         offset_height += end_y - Limit_bottom_zoom;
 
     if(width > offset_width)
@@ -3672,19 +3672,19 @@ void Grad_rectangle_0_5(void)
 // click souris 0
 // Taile pile : 5
 //
-// Souris effacée : non
+// Souris effacÃ©e : non
 
-// Le rectangle est en place, maintenant il faut tracer le vecteur de dégradé,
+// Le rectangle est en place, maintenant il faut tracer le vecteur de dÃ©gradÃ©,
 // on doit donc attendre que l'utilisateur clique quelque part
-// On stocke tout de suite les coordonnées du pinceau comme ça on change d'état et on passe à la suite
+// On stocke tout de suite les coordonnÃ©es du pinceau comme Ã§a on change d'Ã©tat et on passe Ã  la suite
 {
-  // !!! Cette fonction remet start_x start_y end_x end_y dans la pile à la fin donc il ne faut pas les modifier ! (sauf éventuellement un tri)
+  // !!! Cette fonction remet start_x start_y end_x end_y dans la pile Ã  la fin donc il ne faut pas les modifier ! (sauf Ã©ventuellement un tri)
   short start_x;
   short start_y;
   short end_x;
   short end_y;
 
-  // Tracé propre du rectangle
+  // TracÃ© propre du rectangle
   Operation_pop(&end_y);
   Operation_pop(&end_x);
   Operation_pop(&start_y);
@@ -3718,7 +3718,7 @@ void Grad_rectangle_0_5(void)
   Operation_push(end_x);
   Operation_push(end_y);
 
-  // On ajoute des trucs dans la pile pour forcer le passage à l'étape suivante
+  // On ajoute des trucs dans la pile pour forcer le passage Ã  l'Ã©tape suivante
   Operation_push(end_x);
   Operation_push(end_y);
 }
@@ -3728,9 +3728,9 @@ void Grad_rectangle_0_7(void)
 // click souris 0
 // Taile pile : 5
 //
-// Souris effacée : non
+// Souris effacÃ©e : non
 
-// On continue à attendre que l'utilisateur clique en gardant les coords à jour
+// On continue Ã  attendre que l'utilisateur clique en gardant les coords Ã  jour
 {
     Operation_stack_size -= 2;
     Print_coordinates();
@@ -3739,16 +3739,16 @@ void Grad_rectangle_0_7(void)
 }
 
 void Grad_rectangle_12_7(void)
-// Opération   : OPERATION_GRAD_RECTANGLE
+// OpÃ©ration   : OPERATION_GRAD_RECTANGLE
 // Click Souris: 1 ou 2
 // Taille_Pile : 7
 //
-//  Souris effacée: Oui
+//  Souris effacÃ©e: Oui
 
-//  Début du tracé du vecteur (premier clic)
-// On garde les anciennes coordonnées dans la pile, et on ajoute les nouvelles par dessus
+//  DÃ©but du tracÃ© du vecteur (premier clic)
+// On garde les anciennes coordonnÃ©es dans la pile, et on ajoute les nouvelles par dessus
 
-// Si l'utilisateur utilise le mauvais bouton, on annule le tracé. Mais ça nous oblige à vider toute la pile pour vérifier :(
+// Si l'utilisateur utilise le mauvais bouton, on annule le tracÃ©. Mais Ã§a nous oblige Ã  vider toute la pile pour vÃ©rifier :(
 {
   short start_x,end_x,start_y,end_y,vax,vay,click;
 
@@ -3776,20 +3776,20 @@ void Grad_rectangle_12_7(void)
   }
   else
   {
-      // Mauvais bouton > anulation de l'opération.
-      // On a déjà vidé la pile, il reste à effacer le rectangle XOR
+      // Mauvais bouton > anulation de l'opÃ©ration.
+      // On a dÃ©jÃ  vidÃ© la pile, il reste Ã  effacer le rectangle XOR
       Draw_xor_rect(start_x, start_y, end_x, end_y);
   }
 }
 
 void Grad_rectangle_12_9(void)
-    // Opération   : OPERATION_GRAD_RECTANGLE
+    // OpÃ©ration   : OPERATION_GRAD_RECTANGLE
     // Click Souris: 1
     // Taille_Pile : 9
     //
-    // Souris effacée: Oui
+    // Souris effacÃ©e: Oui
 
-    // Poursuite du tracé du vecteur (déplacement de la souris en gardant le curseur appuyé)
+    // Poursuite du tracÃ© du vecteur (dÃ©placement de la souris en gardant le curseur appuyÃ©)
 {
     short start_x;
     short start_y;
@@ -3805,7 +3805,7 @@ void Grad_rectangle_12_9(void)
 
     cursor_x = Paintbrush_X;
     cursor_y = Paintbrush_Y;
-    // On corrige les coordonnées de la ligne si la touche shift est appuyée...
+    // On corrige les coordonnÃ©es de la ligne si la touche shift est appuyÃ©e...
     if(SDL_GetModState() & KMOD_SHIFT)
         Clamp_coordinates_regular_angle(start_x,start_y,&cursor_x,&cursor_y);
 
@@ -3826,13 +3826,13 @@ void Grad_rectangle_12_9(void)
 }
 
 void Grad_rectangle_0_9(void)
-    // Opération   : OPERATION_GRAD_RECTANGLE
+    // OpÃ©ration   : OPERATION_GRAD_RECTANGLE
     // Click Souris: 0
     // Taille_Pile : 9
     //
-    //  Souris effacée: Oui
+    //  Souris effacÃ©e: Oui
 
-    // Ouf, fini ! on dessine enfin le rectangle avec son dégradé
+    // Ouf, fini ! on dessine enfin le rectangle avec son dÃ©gradÃ©
 {
     short rect_start_x;
     short rect_start_y;
@@ -3859,10 +3859,10 @@ void Grad_rectangle_0_9(void)
     Draw_xor_rect(rect_start_x, rect_start_y, rect_end_x, rect_end_y);
     Hide_line_preview(vector_start_x,vector_start_y,vector_end_x,vector_end_y);
 
-    // Et enfin on trace le rectangle avec le dégradé dedans !
+    // Et enfin on trace le rectangle avec le dÃ©gradÃ© dedans !
     if (vector_end_x==vector_start_x && vector_end_y==vector_start_y)
     {
-        // Vecteur nul > pas de rectangle tracé
+        // Vecteur nul > pas de rectangle tracÃ©
     }
     else
     {
@@ -3882,11 +3882,11 @@ void Grad_rectangle_0_9(void)
 
 
 void Centered_lines_12_0(void)
-    // Opération   : OPERATION_CENTERED_LINES
+    // OpÃ©ration   : OPERATION_CENTERED_LINES
     // Click Souris: 1 ou 2
     // Taille_Pile : 0
     //
-    //  Souris effacée: Oui
+    //  Souris effacÃ©e: Oui
 {
     if (Rightclick_colorpick(0))
       return;
@@ -3905,11 +3905,11 @@ void Centered_lines_12_0(void)
 
 
 void Centered_lines_12_3(void)
-    // Opération   : OPERATION_CENTERED_LINES
+    // OpÃ©ration   : OPERATION_CENTERED_LINES
     // Click Souris: 1 ou 2
     // Taille_Pile : 3
     //
-    // Souris effacée: Non
+    // Souris effacÃ©e: Non
 {
     short start_x;
     short start_y;
@@ -3922,11 +3922,11 @@ void Centered_lines_12_3(void)
 
 
 void Centered_lines_0_3(void)
-    // Opération   : OPERATION_CENTERED_LINES
+    // OpÃ©ration   : OPERATION_CENTERED_LINES
     // Click Souris: 0
     // Taille_Pile : 3
     //
-    // Souris effacée: Oui
+    // Souris effacÃ©e: Oui
 {
     short start_x;
     short start_y;
@@ -3944,21 +3944,21 @@ void Centered_lines_0_3(void)
     Paintbrush_shape=PAINTBRUSH_SHAPE_POINT;
 
     Operation_push(Button);
-    Operation_push(Paintbrush_X); // Nouveau début X
-    Operation_push(Paintbrush_Y); // Nouveau début Y
-    Operation_push(Paintbrush_X); // Nouvelle dernière fin X
-    Operation_push(Paintbrush_Y); // Nouvelle dernière fin Y
-    Operation_push(Paintbrush_X); // Nouvelle dernière position X
-    Operation_push(Paintbrush_Y); // Nouvelle dernière position Y
+    Operation_push(Paintbrush_X); // Nouveau dÃ©but X
+    Operation_push(Paintbrush_Y); // Nouveau dÃ©but Y
+    Operation_push(Paintbrush_X); // Nouvelle derniÃ¨re fin X
+    Operation_push(Paintbrush_Y); // Nouvelle derniÃ¨re fin Y
+    Operation_push(Paintbrush_X); // Nouvelle derniÃ¨re position X
+    Operation_push(Paintbrush_Y); // Nouvelle derniÃ¨re position Y
 }
 
 
 void Centered_lines_12_7(void)
-    // Opération   : OPERATION_CENTERED_LINES
+    // OpÃ©ration   : OPERATION_CENTERED_LINES
     // Click Souris: 1 ou 2
     // Taille_Pile : 7
     //
-    // Souris effacée: Non
+    // Souris effacÃ©e: Non
 {
     short Button;
     short start_x;
@@ -4033,11 +4033,11 @@ void Centered_lines_12_7(void)
 
 
 void Centered_lines_0_7(void)
-    // Opération   : OPERATION_CENTERED_LINES
+    // OpÃ©ration   : OPERATION_CENTERED_LINES
     // Click Souris: 0
     // Taille_Pile : 7
     //
-    // Souris effacée: Non
+    // Souris effacÃ©e: Non
 {
     short Button;
     short start_x;
@@ -4084,11 +4084,11 @@ void Centered_lines_0_7(void)
 ///////////////////////////////////////////////////////////// OPERATION_PAN_VIEW
 
 void Pan_view_0_0(void)
-// Opération   : OPERATION_PAN_VIEW
+// OpÃ©ration   : OPERATION_PAN_VIEW
 // Click Souris: 0
 // Taille_Pile : 0
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 {
   if (Pan_shortcut_pressed)
   {
@@ -4104,11 +4104,11 @@ void Pan_view_0_0(void)
 }
 
 void Pan_view_12_0(void)
-// Opération   : OPERATION_PAN_VIEW
+// OpÃ©ration   : OPERATION_PAN_VIEW
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 
 //  First time the user clicks
 {
@@ -4119,11 +4119,11 @@ void Pan_view_12_0(void)
 }
 
 void Pan_view_12_2(void)
-// Opération   : OPERATION_PAN_VIEW
+// OpÃ©ration   : OPERATION_PAN_VIEW
 // Click Souris: 1 ou 2
 // Taille_Pile : 2
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 
 //  While dragging view
 {
@@ -4151,11 +4151,11 @@ void Pan_view_12_2(void)
 }
 
 void Pan_view_0_2(void)
-// Opération   : OPERATION_PAN_VIEW
+// OpÃ©ration   : OPERATION_PAN_VIEW
 // Click Souris: 0
 // Taille_Pile : 2
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 
 //  When releasing after dragging
 {

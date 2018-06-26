@@ -217,7 +217,7 @@ int Move_cursor_with_constraints()
       Input_new_mouse_X=Screen_width-1;
       mouse_blocked=1;
   }
-  //Gestion "avancée" du curseur: interdire la descente du curseur dans le
+  //Gestion "avancÃ©e" du curseur: interdire la descente du curseur dans le
   //menu lorsqu'on est en train de travailler dans l'image
   if (Operation_stack_size != 0)
   {
@@ -680,7 +680,7 @@ int Handle_joystick_press(SDL_JoyButtonEvent event)
     }
       
     Key = (KEY_JOYBUTTON+event.button)|Key_modifiers(SDL_GetModState());
-    // TODO: systeme de répétition
+    // TODO: systeme de rÃ©pÃ©tition
     
     return Move_cursor_with_constraints();
 }
@@ -830,7 +830,7 @@ int Directional_acceleration(int msec)
   if (msec<initial_delay)
     return 1;
     
-  // After that, position over time is generally y = ax²+bx+c
+  // After that, position over time is generally y = axÂ²+bx+c
   // a = 1/accel_factor
   // b = 1/linear_factor
   // c = 1
@@ -842,7 +842,7 @@ int Directional_acceleration(int msec)
 int Get_input(int sleep_time)
 {
     SDL_Event event;
-    int user_feedback_required = 0; // Flag qui indique si on doit arrêter de traiter les évènements ou si on peut enchainer
+    int user_feedback_required = 0; // Flag qui indique si on doit arrÃªter de traiter les Ã©vÃ¨nements ou si on peut enchainer
                 
     Color_cycling();
     // Commit any pending screen update.

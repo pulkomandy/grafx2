@@ -53,7 +53,7 @@ void Window_set_shortcut(int action_id);
 /// Print a line with the 'help' (6x8) font.
 short Print_help(short x_pos, short y_pos, const char *line, char line_type, short link_position, short link_size);
 
-// Nom de la touche actuallement assignée à un raccourci d'après son numéro
+// Nom de la touche actuallement assignÃ©e Ã  un raccourci d'aprÃ¨s son numÃ©ro
 // de type 0x100+BOUTON_* ou SPECIAL_*
 const char * Keyboard_shortcut_value(word shortcut_number);
 

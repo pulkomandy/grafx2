@@ -165,7 +165,7 @@ T_Gradient_array *Dup_gradient(T_Page * page)
 }
 
 void Download_infos_page_main(T_Page * page)
-// Affiche la page à l'écran
+// Affiche la page Ã  l'Ã©cran
 {
   //int factor_index;
   int size_is_modified;
@@ -393,7 +393,7 @@ void Redraw_current_layer(void)
 }
 
 void Upload_infos_page(T_Document * doc)
-// Sauve l'écran courant dans la page
+// Sauve l'Ã©cran courant dans la page
 {
   if (doc->backups->Pages != NULL)
   {
@@ -428,7 +428,7 @@ void Update_FX_feedback(byte with_feedback)
 
 void Clear_page(T_Page * page)
 {
-  // On peut appeler cette fonction sur une page non allouée.
+  // On peut appeler cette fonction sur une page non allouÃ©e.
   int i;
   for (i=0; i<page->Nb_layers; i++)
   {
@@ -448,7 +448,7 @@ void Clear_page(T_Page * page)
 
   page->Width=0;
   page->Height=0;
-  // On ne se préoccupe pas de ce que deviens le reste des infos de l'image.
+  // On ne se prÃ©occupe pas de ce que deviens le reste des infos de l'image.
 }
 
 void Copy_S_page(T_Page * dest,T_Page * source)
@@ -473,8 +473,8 @@ void Init_list_of_pages(T_List_of_pages * list)
 
 int Allocate_list_of_pages(T_List_of_pages * list)
 {
-  // Important: la T_List_of_pages ne doit pas déjà désigner une liste de
-  //            pages allouée auquel cas celle-ci serait perdue.
+  // Important: la T_List_of_pages ne doit pas dÃ©jÃ  dÃ©signer une liste de
+  //            pages allouÃ©e auquel cas celle-ci serait perdue.
   T_Page * page;
 
   // On initialise chacune des nouvelles pages
@@ -493,26 +493,26 @@ int Allocate_list_of_pages(T_List_of_pages * list)
   if (!page->Gradients)
     return 0;
   
-  return 1; // Succès
+  return 1; // SuccÃ¨s
 }
 
 
 void Backward_in_list_of_pages(T_List_of_pages * list)
 {
-  // Cette fonction fait l'équivalent d'un "Undo" dans la liste de pages.
+  // Cette fonction fait l'Ã©quivalent d'un "Undo" dans la liste de pages.
   // Elle effectue une sorte de ROL (Rotation Left) sur la liste:
   // +---+-+-+-+-+-+-+-+-+-+  |
-  // ¦0¦1¦2¦3¦4¦5¦6¦7¦8¦9¦A¦  |
+  // Â¦0Â¦1Â¦2Â¦3Â¦4Â¦5Â¦6Â¦7Â¦8Â¦9Â¦AÂ¦  |
   // +---+-+-+-+-+-+-+-+-+-+  |  0=page courante
-  //  ¦ ¦ ¦ ¦ ¦ ¦ ¦ ¦ ¦ ¦ ¦   |_ A=page la plus ancienne
-  //  v v v v v v v v v v v   |  1=DerniÞre page (1er backup)
+  //  Â¦ Â¦ Â¦ Â¦ Â¦ Â¦ Â¦ Â¦ Â¦ Â¦ Â¦   |_ A=page la plus ancienne
+  //  v v v v v v v v v v v   |  1=DerniÃžre page (1er backup)
   // +---+-+-+-+-+-+-+-+-+-+  |
-  // ¦1¦2¦3¦4¦5¦6¦7¦8¦9¦A¦0¦  |
+  // Â¦1Â¦2Â¦3Â¦4Â¦5Â¦6Â¦7Â¦8Â¦9Â¦AÂ¦0Â¦  |
   // +---+-+-+-+-+-+-+-+-+-+  |
 
-  // Pour simuler un véritable Undo, l'appelant doit mettre la structure
-  // de page courante à jour avant l'appel, puis en réextraire les infos en
-  // sortie, ainsi que celles relatives à la plus récente page d'undo (1ère
+  // Pour simuler un vÃ©ritable Undo, l'appelant doit mettre la structure
+  // de page courante Ã  jour avant l'appel, puis en rÃ©extraire les infos en
+  // sortie, ainsi que celles relatives Ã  la plus rÃ©cente page d'undo (1Ã¨re
   // page de la liste).
 
   if (Last_backed_up_layers)
@@ -539,20 +539,20 @@ void Backward_in_list_of_pages(T_List_of_pages * list)
 
 void Advance_in_list_of_pages(T_List_of_pages * list)
 {
-  // Cette fonction fait l'équivalent d'un "Redo" dans la liste de pages.
+  // Cette fonction fait l'Ã©quivalent d'un "Redo" dans la liste de pages.
   // Elle effectue une sorte de ROR (Rotation Right) sur la liste:
   // +-+-+-+-+-+-+-+-+-+-+-+  |
   // |0|1|2|3|4|5|6|7|8|9|A|  |
   // +-+-+-+-+-+-+-+-+-+-+-+  |  0=page courante
   //  | | | | | | | | | | |   |_ A=page la plus ancienne
-  //  v v v v v v v v v v v   |  1=Dernière page (1er backup)
+  //  v v v v v v v v v v v   |  1=DerniÃ¨re page (1er backup)
   // +-+-+-+-+-+-+-+-+-+-+-+  |
   // |A|0|1|2|3|4|5|6|7|8|9|  |
   // +-+-+-+-+-+-+-+-+-+-+-+  |
 
-  // Pour simuler un véritable Redo, l'appelant doit mettre la structure
-  // de page courante à jour avant l'appel, puis en réextraire les infos en
-  // sortie, ainsi que celles relatives à la plus récente page d'undo (1ère
+  // Pour simuler un vÃ©ritable Redo, l'appelant doit mettre la structure
+  // de page courante Ã  jour avant l'appel, puis en rÃ©extraire les infos en
+  // sortie, ainsi que celles relatives Ã  la plus rÃ©cente page d'undo (1Ã¨re
   // page de la liste).
   if (Last_backed_up_layers)
   {
@@ -651,15 +651,15 @@ void Change_page_number_of_list(T_List_of_pages * list,int number)
 
 void Free_page_of_a_list(T_List_of_pages * list)
 {
-  // On ne peut pas détruire la page courante de la liste si après
+  // On ne peut pas dÃ©truire la page courante de la liste si aprÃ¨s
   // destruction il ne reste pas encore au moins une page.
   if (list->List_size>1)
   {
-    // On fait faire un undo à la liste, comme ça, la nouvelle page courante
-    // est la page précédente
+    // On fait faire un undo Ã  la liste, comme Ã§a, la nouvelle page courante
+    // est la page prÃ©cÃ©dente
     Backward_in_list_of_pages(Main.backups);
 
-    // Puis on détruit la dernière page, qui est l'ancienne page courante
+    // Puis on dÃ©truit la derniÃ¨re page, qui est l'ancienne page courante
     Free_last_page_of_list(list);
   }
 }
@@ -758,18 +758,18 @@ int Update_spare_buffers(int width, int height)
 
 int Init_all_backup_lists(enum IMAGE_MODES image_mode, int width, int height)
 {
-  // width et height correspondent à la dimension des images de départ.
+  // width et height correspondent Ã  la dimension des images de dÃ©part.
   int i;
 
   if (! Allocate_list_of_pages(Main.backups) ||
       ! Allocate_list_of_pages(Spare.backups))
     return 0;
-  // On a réussi à allouer deux listes de pages dont la taille correspond à
-  // celle demandée par l'utilisateur.
+  // On a rÃ©ussi Ã  allouer deux listes de pages dont la taille correspond Ã 
+  // celle demandÃ©e par l'utilisateur.
 
-  // On crée un descripteur de page correspondant à la page principale
+  // On crÃ©e un descripteur de page correspondant Ã  la page principale
   Upload_infos_page(&Main);
-  // On y met les infos sur la dimension de démarrage
+  // On y met les infos sur la dimension de dÃ©marrage
   Main.backups->Pages->Width=width;
   Main.backups->Pages->Height=height;
   strcpy(Main.backups->Pages->File_directory,Main.selector.Directory);
@@ -849,7 +849,7 @@ void Set_number_of_backups(int nb_backups)
   Change_page_number_of_list(Main.backups,nb_backups+1);
   Change_page_number_of_list(Spare.backups,nb_backups+1);
 
-  // Le +1 vient du fait que dans chaque liste, en 1ère position on retrouve
+  // Le +1 vient du fait que dans chaque liste, en 1Ã¨re position on retrouve
   // les infos de la page courante sur le brouillon et la page principale.
   // (nb_backups = Nombre de backups, sans compter les pages courantes)
 }
@@ -859,7 +859,7 @@ int Backup_new_image(int layers,int width,int height)
   // Retourne 1 si une nouvelle page est disponible et 0 sinon
   T_Page * new_page;  
 
-  // On crée un descripteur pour la nouvelle page courante
+  // On crÃ©e un descripteur pour la nouvelle page courante
   new_page=New_page(layers);
   if (!new_page)
   {
@@ -893,7 +893,7 @@ int Backup_with_new_dimensions(int width,int height)
   T_Page * new_page;  
   int i;
 
-  // On crée un descripteur pour la nouvelle page courante
+  // On crÃ©e un descripteur pour la nouvelle page courante
   new_page=New_page(Main.backups->Pages->Nb_layers);
   if (!new_page)
   {
@@ -1039,7 +1039,7 @@ int Backup_and_resize_the_spare(int width,int height)
   int nb_layers;
 
   nb_layers=Spare.backups->Pages->Nb_layers;
-  // On crée un descripteur pour la nouvelle page de brouillon
+  // On crÃ©e un descripteur pour la nouvelle page de brouillon
   new_page=New_page(nb_layers);
   if (!new_page)
   {
@@ -1075,8 +1075,8 @@ int Backup_and_resize_the_spare(int width,int height)
 }
 
 void Backup(void)
-// Sauve la page courante comme première page de backup et crée une nouvelle page
-// pur continuer à dessiner. Utilisé par exemple pour le fill
+// Sauve la page courante comme premiÃ¨re page de backup et crÃ©e une nouvelle page
+// pur continuer Ã  dessiner. UtilisÃ© par exemple pour le fill
 {
   Backup_layers(Main.current_layer);
 }
@@ -1091,7 +1091,7 @@ void Backup_layers(int layer)
     return; // Already done.
   */
 
-  // On remet à jour l'état des infos de la page courante (pour pouvoir les
+  // On remet Ã  jour l'Ã©tat des infos de la page courante (pour pouvoir les
   // retrouver plus tard)
   Upload_infos_page(&Main);
 
@@ -1204,20 +1204,20 @@ void Undo(void)
     Last_backed_up_layers=0;
   }
 
-  // On remet à jour l'état des infos de la page courante (pour pouvoir les
+  // On remet Ã  jour l'Ã©tat des infos de la page courante (pour pouvoir les
   // retrouver plus tard)
   Upload_infos_page(&Main);
-  // On fait faire un undo à la liste des backups de la page principale
+  // On fait faire un undo Ã  la liste des backups de la page principale
   Backward_in_list_of_pages(Main.backups);
 
   Update_buffers(Main.backups->Pages->Width, Main.backups->Pages->Height);
 
   // On extrait ensuite les infos sur la nouvelle page courante
   Download_infos_page_main(Main.backups->Pages);
-  // Note: le backup n'a pas obligatoirement les mêmes dimensions ni la même
+  // Note: le backup n'a pas obligatoirement les mÃªmes dimensions ni la mÃªme
   //       palette que la page courante. Mais en temps normal, le backup
-  //       n'est pas utilisé à la suite d'un Undo. Donc ça ne devrait pas
-  //       poser de problèmes.
+  //       n'est pas utilisÃ© Ã  la suite d'un Undo. Donc Ã§a ne devrait pas
+  //       poser de problÃ¨mes.
   
   Check_layers_limits();
   Redraw_layered_image();
@@ -1237,20 +1237,20 @@ void Redo(void)
     Free_page_of_a_list(Main.backups);
     Last_backed_up_layers=0;
   }
-  // On remet à jour l'état des infos de la page courante (pour pouvoir les
+  // On remet Ã  jour l'Ã©tat des infos de la page courante (pour pouvoir les
   // retrouver plus tard)
   Upload_infos_page(&Main);
-  // On fait faire un redo à la liste des backups de la page principale
+  // On fait faire un redo Ã  la liste des backups de la page principale
   Advance_in_list_of_pages(Main.backups);
 
   Update_buffers(Main.backups->Pages->Width, Main.backups->Pages->Height);
 
   // On extrait ensuite les infos sur la nouvelle page courante
   Download_infos_page_main(Main.backups->Pages);
-  // Note: le backup n'a pas obligatoirement les mêmes dimensions ni la même
+  // Note: le backup n'a pas obligatoirement les mÃªmes dimensions ni la mÃªme
   //       palette que la page courante. Mais en temps normal, le backup
-  //       n'est pas utilisé à la suite d'un Redo. Donc ça ne devrait pas
-  //       poser de problèmes.
+  //       n'est pas utilisÃ© Ã  la suite d'un Redo. Donc Ã§a ne devrait pas
+  //       poser de problÃ¨mes.
   
   Check_layers_limits();
   Redraw_layered_image();
@@ -1262,15 +1262,15 @@ void Redo(void)
 
 void Free_current_page(void)
 {
-  // On détruit la page courante de la liste principale
+  // On dÃ©truit la page courante de la liste principale
   Free_page_of_a_list(Main.backups);
   
   // On extrait ensuite les infos sur la nouvelle page courante
   Download_infos_page_main(Main.backups->Pages);
-  // Note: le backup n'a pas obligatoirement les mêmes dimensions ni la même
+  // Note: le backup n'a pas obligatoirement les mÃªmes dimensions ni la mÃªme
   //       palette que la page courante. Mais en temps normal, le backup
-  //       n'est pas utilisé à la suite d'une destruction de page. Donc ça ne
-  //       devrait pas poser de problèmes.
+  //       n'est pas utilisÃ© Ã  la suite d'une destruction de page. Donc Ã§a ne
+  //       devrait pas poser de problÃ¨mes.
    
   Update_buffers(Main.backups->Pages->Width, Main.backups->Pages->Height);
   Check_layers_limits();

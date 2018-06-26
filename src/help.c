@@ -2,7 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
-    Copyright 2011 Pawel Góralski
+    Copyright 2011 Pawel GÃ³ralski
     Copyright 2008 Peter Gordon
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
@@ -75,7 +75,7 @@ word * Shortcut(word shortcut_number)
   return &(Config_Key[shortcut_number & 0xFF][0]);
 }
 
-// Nom de la touche actuallement assignée à un raccourci d'après son numéro
+// Nom de la touche actuallement assignÃ©e Ã  un raccourci d'aprÃ¨s son numÃ©ro
 // de type 0x100+BOUTON_* ou SPECIAL_*
 const char * Keyboard_shortcut_value(word shortcut_number)
 {
@@ -153,7 +153,7 @@ void Window_set_shortcut(int action_id)
     }
   }
   */
-  config_index=order_index; // Comprends pas... ça devrait pas marcher
+  config_index=order_index; // Comprends pas... Ã§a devrait pas marcher
   
   Open_window(302,131,"Keyboard shortcut");
   Window_set_normal_button(181,111,55,14,"Cancel",0,1,KEY_ESC); // 1
@@ -304,10 +304,10 @@ void Remove_duplicate_shortcuts(void)
 short Print_help(short x_pos, short y_pos, const char *line, char line_type, short link_position, short link_size)
 {
   short  width;             // Largeur physique d'une ligne de texte
-  short  x;                   // Indices d'affichage d'un caractère
+  short  x;                   // Indices d'affichage d'un caractÃ¨re
   short  y;
   short  x_position;          // Parcours de remplissage du buffer de ligne
-  short  char_index; // Parcours des caractères d'une ligne
+  short  char_index; // Parcours des caractÃ¨res d'une ligne
   byte * char_pixel;
   short  repeat_menu_x_factor;
   short  repeat_menu_y_factor;
@@ -323,20 +323,20 @@ short Print_help(short x_pos, short y_pos, const char *line, char line_type, sho
   if (line_type == 'T' || line_type == '-')
     width = width*2;
 
-  // Pour chaque ligne dans la fenêtre:
+  // Pour chaque ligne dans la fenÃªtre:
   for (y=0;y<8;y++)
   {
     x_position=0;
-    // On crée une nouvelle ligne à splotcher
+    // On crÃ©e une nouvelle ligne Ã  splotcher
     for (char_index=0;char_index<width;char_index++)
     {
-      // Recherche du caractère dans les fontes de l'aide.
-      // Ligne titre : Si l'indice est impair on dessine le quart de caractère
+      // Recherche du caractÃ¨re dans les fontes de l'aide.
+      // Ligne titre : Si l'indice est impair on dessine le quart de caractÃ¨re
       // qui va a gauche, sinon celui qui va a droite.
       if (line_type=='T')
       {
         if (line[char_index/2]>'_' || line[char_index/2]<' ')
-          char_pixel=&(Gfx->Help_font_norm['!'][0][0]); // Caractère pas géré
+          char_pixel=&(Gfx->Help_font_norm['!'][0][0]); // CaractÃ¨re pas gÃ©rÃ©
         else if (char_index & 1)
           char_pixel=&(Gfx->Help_font_t2[(unsigned char)(line[char_index/2])-' '][0][0]);
         else
@@ -345,7 +345,7 @@ short Print_help(short x_pos, short y_pos, const char *line, char line_type, sho
       else if (line_type=='-')
       {
         if (line[char_index/2]>'_' || line[char_index/2]<' ')
-          char_pixel=&(Gfx->Help_font_norm['!'][0][0]); // Caractère pas géré
+          char_pixel=&(Gfx->Help_font_norm['!'][0][0]); // CaractÃ¨re pas gÃ©rÃ©
         else if (char_index & 1)
           char_pixel=&(Gfx->Help_font_t4[(unsigned char)(line[char_index/2])-' '][0][0]);
         else
@@ -396,11 +396,11 @@ void Display_help(void)
   const short  x_pos=13;
   const short  y_pos=19;
   char   line_type;           // N: Normale, T: Titre, S: Sous-titre
-                              // -: Ligne inférieur de sous-titre
+                              // -: Ligne infÃ©rieur de sous-titre
   const char * line;
-  char   buffer[45];          // buffer texte utilisé pour formater les noms de 
+  char   buffer[45];          // buffer texte utilisÃ© pour formater les noms de 
                               // raccourcis clavier
-  short  link_position=0;     // Position du premier caractère "variable"
+  short  link_position=0;     // Position du premier caractÃ¨re "variable"
   short  link_size=0;       // Taille de la partie variable
   short width;
   
@@ -412,8 +412,8 @@ void Display_help(void)
       Window_rectangle (x_pos,
            y_pos + line_index*8,
            44*6,
-           // 44 = Nb max de char (+1 pour éviter les plantages en mode X
-           // causés par une largeur = 0)
+           // 44 = Nb max de char (+1 pour Ã©viter les plantages en mode X
+           // causÃ©s par une largeur = 0)
            (16 - line_index)*8,
            MC_Black);
       break;
@@ -421,7 +421,7 @@ void Display_help(void)
     // On affiche la ligne
     line = Help_section[Current_help_section].Help_table[start_line + line_index].Text;
     line_type = Help_section[Current_help_section].Help_table[start_line + line_index].Line_type;
-    // Si c'est une sous-ligne de titre, on utilise le texte de la ligne précédente
+    // Si c'est une sous-ligne de titre, on utilise le texte de la ligne prÃ©cÃ©dente
     if (line_type == '-' && (start_line + line_index > 0))
       line = Help_section[Current_help_section].Help_table[start_line + line_index - 1].Text;
     else if (line_type == 'K')
@@ -494,8 +494,8 @@ void Button_Help(int btn)
   }
   Window_help(-1, NULL);
 }
-// Ouvre l'ecran d'aide. Passer -1 pour la section par défaut (ou derniere,)
-// Ou un nombre de l'enumération BUTTON_NUMBERS pour l'aide contextuelle.
+// Ouvre l'ecran d'aide. Passer -1 pour la section par dÃ©faut (ou derniere,)
+// Ou un nombre de l'enumÃ©ration BUTTON_NUMBERS pour l'aide contextuelle.
 void Window_help(int section, const char *sub_section)
 {
   short clicked_button;
@@ -523,7 +523,7 @@ void Window_help(int section, const char *sub_section)
 
   Open_window(310,175,"Help / About...");
 
-  // dessiner de la fenêtre où va défiler le texte
+  // dessiner de la fenÃªtre oÃ¹ va dÃ©filer le texte
   Window_display_frame_in(8,17,274,132);
   Window_rectangle(9, 18, 272, 130, MC_Black);
 
@@ -568,7 +568,7 @@ void Window_help(int section, const char *sub_section)
                 case 'K':
                   Window_set_shortcut(Help_section[Current_help_section].Help_table[Help_position+line].Line_parameter);
                 break;
-                // Ici on peut gérer un cas 'lien hypertexte'
+                // Ici on peut gÃ©rer un cas 'lien hypertexte'
                 default:
                 break;
               }
@@ -599,7 +599,7 @@ void Window_help(int section, const char *sub_section)
     }
 
 
-    // Gestion des touches de déplacement dans la liste
+    // Gestion des touches de dÃ©placement dans la liste
     switch (Key)
     {
       case SDLK_UP : // Haut
@@ -861,14 +861,14 @@ void Button_Stats(int btn)
   Print_in_window(122,y,buffer,STATS_DATA_COLOR,MC_Black);
   y+=8;
   
-  // Affichage du nombre de couleur utilisé
+  // Affichage du nombre de couleur utilisÃ©
   Print_in_window(18,y,"Colors used:",STATS_TITLE_COLOR,MC_Black);
   memset(color_usage,0,sizeof(color_usage));
   sprintf(buffer,"%d",Count_used_colors(color_usage));
   Print_in_window(122,y,buffer,STATS_DATA_COLOR,MC_Black);
   y+=16;
   
-  // Affichage des dimensions de l'écran
+  // Affichage des dimensions de l'Ã©cran
   Print_in_window(10,y,"Resolution:",STATS_TITLE_COLOR,MC_Black);
   sprintf(buffer,"%dx%d",Screen_width,Screen_height);
   Print_in_window(106,y,buffer,STATS_DATA_COLOR,MC_Black);

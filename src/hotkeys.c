@@ -766,7 +766,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "pixel in the picture into the",
   "foreground or background color.",
   true,
-  SDLK_BACKQUOTE, // `~ (Key sous le Esc - ² en AZERTY)
+  SDLK_BACKQUOTE, // `~ (Key sous le Esc - Â² en AZERTY)
   0},
   {82,
   "Swap foreground/background colors",
@@ -1097,7 +1097,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "user-defined brush to its center.",
   "",
   true,
-  SDLK_KP5|MOD_CTRL, // Ctrl + 5 (pavé numérique)
+  SDLK_KP5|MOD_CTRL, // Ctrl + 5 (pavÃ© numÃ©rique)
   0},
   {113,
   "Top-left brush attachment point",
@@ -1193,7 +1193,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "previous in the user-defined color",
   "series.",
   true,
-  SDLK_MINUS, // "-_" (")°" en AZERTY
+  SDLK_MINUS, // "-_" (")Â°" en AZERTY
   0},
   {128,
   "Next user-defined backcolor",
@@ -1209,7 +1209,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "previous in the user-defined color",
   "series.",
   true,
-  SDLK_MINUS|MOD_SHIFT, // Shift + "-_" (")°" en AZERTY
+  SDLK_MINUS|MOD_SHIFT, // Shift + "-_" (")Â°" en AZERTY
   0},
   {121,
   "Shrink paintbrush",
@@ -1875,8 +1875,8 @@ word Ordering[NB_SHORTCUTS]=
   0x200+BUTTON_AIRBRUSH,            // Spray menu
   0x100+BUTTON_FLOODFILL,           // Floodfill
   0x200+BUTTON_FLOODFILL,           // Replace color
-  0x100+BUTTON_CURVES,              // Bézier's curves
-  0x200+BUTTON_CURVES,              // Bézier's curve with 3 or 4 points
+  0x100+BUTTON_CURVES,              // BÃ©zier's curves
+  0x200+BUTTON_CURVES,              // BÃ©zier's curve with 3 or 4 points
   0x100+BUTTON_RECTANGLES,          // Empty rectangle
   0x100+BUTTON_FILLRECT,            // Filled rectangle
   0x100+BUTTON_CIRCLES,             // Empty circle
@@ -1921,8 +1921,8 @@ word Ordering[NB_SHORTCUTS]=
   0x200+BUTTON_BRUSH,               // Restore brush
   SPECIAL_FLIP_X,                   // Flip X
   SPECIAL_FLIP_Y,                   // Flip Y
-  SPECIAL_ROTATE_90,                // 90° brush rotation
-  SPECIAL_ROTATE_180,               // 180° brush rotation
+  SPECIAL_ROTATE_90,                // 90Â° brush rotation
+  SPECIAL_ROTATE_180,               // 180Â° brush rotation
   SPECIAL_STRETCH,                  // Stretch brush
   SPECIAL_DISTORT,                  // Distort brush
   SPECIAL_OUTLINE,                  // Outline brush

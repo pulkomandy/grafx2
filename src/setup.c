@@ -3,7 +3,7 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2014 Sergii Pylypenko
-    Copyright 2011 Pawel Góralski
+    Copyright 2011 Pawel GÃ³ralski
     Copyright 2008 Peter Gordon
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
@@ -239,15 +239,15 @@ void Set_config_directory(const char * program_dir, char * config_dir)
         strcat(config_dir,Config_SubDir);
         if (Directory_exists(config_dir))
         {
-          // Répertoire trouvé, ok
+          // RÃ©pertoire trouvÃ©, ok
           strcat(config_dir,PATH_SEPARATOR);
         }
         else
         {
-          // Tentative de création
+          // Tentative de crÃ©ation
           if (!Create_ConfigDirectory(config_dir)) 
           {
-            // Réussi
+            // RÃ©ussi
             strcat(config_dir,PATH_SEPARATOR);
           }
           else

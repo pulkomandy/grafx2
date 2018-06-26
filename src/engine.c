@@ -53,7 +53,7 @@ short Old_MY = -1;
 
 //---------- Annuler les effets des modes de dessin (sauf la grille) ---------
 
-// Variables mÈmorisants les anciens effets
+// Variables m√©morisants les anciens effets
 
 byte Shade_mode_before_cancel;
 byte Quick_shade_mode_before_cancel;
@@ -374,11 +374,11 @@ void Unselect_button(int btn_number)
 {
   if (Buttons_Pool[btn_number].Pressed)
   {
-    // On considËre que le bouton est rel‚chÈ
+    // On consid√®re que le bouton est rel√¢ch√©
     Buttons_Pool[btn_number].Pressed=BUTTON_RELEASED;
-    // On affiche le cadre autour du bouton de faÁon ‡ ce qu'il paraisse rel‚chÈ
+    // On affiche le cadre autour du bouton de fa√ßon √† ce qu'il paraisse rel√¢ch√©
     Draw_menu_button(btn_number,BUTTON_RELEASED);
-    // On appelle le dÈsenclenchement particulier au bouton:
+    // On appelle le d√©senclenchement particulier au bouton:
     Buttons_Pool[btn_number].Unselect_action(btn_number);
   }
 }
@@ -419,31 +419,31 @@ void Select_button(int btn_number,byte click)
       Draw_menu_button(btn_number-1, BUTTON_RELEASED);
   }
 
-  // On note dÈj‡ la famille du bouton (La "Famiglia" c'est sacrÈ)
+  // On note d√©j√† la famille du bouton (La "Famiglia" c'est sacr√©)
   family=Buttons_Pool[btn_number].Family;
 
   switch (family)
   {
-    case FAMILY_TOOLBAR: // On ne fait rien (on prÈserve les interruptions)
+    case FAMILY_TOOLBAR: // On ne fait rien (on pr√©serve les interruptions)
       break;
 
-    case FAMILY_INTERRUPTION: // Petit cas spÈcial dans la famille "Interruption":
+    case FAMILY_INTERRUPTION: // Petit cas sp√©cial dans la famille "Interruption":
       if ((btn_number!=BUTTON_MAGNIFIER) || (!Main.magnifier_mode))
       // Pour chaque bouton:
       for (b=0; b<NB_BUTTONS; b++)
-        // S'il est de la mÍme famille
+        // S'il est de la m√™me famille
         if (
              (b!=btn_number) &&
              (Buttons_Pool[b].Family==FAMILY_INTERRUPTION) &&
              (  (b!=BUTTON_MAGNIFIER) ||
                ((b==BUTTON_MAGNIFIER) && (!Main.magnifier_mode)) )
            )
-          // Alors on dÈsenclenche le bouton
+          // Alors on d√©senclenche le bouton
           Unselect_button(b);
       break;
 
     default:
-      // On dÈsenclenche D'ABORD les interruptions
+      // On d√©senclenche D'ABORD les interruptions
       // Pour chaque bouton:
       for (b=0; b<NB_BUTTONS; b++)
         // S'il est de la famille interruption
@@ -451,7 +451,7 @@ void Select_button(int btn_number,byte click)
           && (Buttons_Pool[b].Family==FAMILY_INTERRUPTION)
           // Et que ce n'est pas la loupe, ou alors qu'on n'est pas en mode loupe
           && (!(Main.magnifier_mode && (b==BUTTON_MAGNIFIER))) )
-          // Alors on dÈsenclenche le bouton
+          // Alors on d√©senclenche le bouton
           Unselect_button(b);
       // Right-clicking on Adjust opens a menu, so in this case we skip
       // the unselection of all "Tool" buttons.
@@ -462,17 +462,17 @@ void Select_button(int btn_number,byte click)
         break;
       // Pour chaque bouton:
       for (b=0; b<NB_BUTTONS; b++)
-        // S'il est de la mÍme famille
+        // S'il est de la m√™me famille
         if ( (b!=btn_number)
           && (Buttons_Pool[b].Family==family) )
-          // Alors on dÈsenclenche le bouton
+          // Alors on d√©senclenche le bouton
           Unselect_button(b);
   }
 
-  // On considËre que le bouton est enfoncÈ
+  // On consid√®re que le bouton est enfonc√©
   Buttons_Pool[btn_number].Pressed=BUTTON_PRESSED;
 
-  // On affiche le cadre autour du bouton de faÁon ‡ ce qu'il paraisse enfoncÈ
+  // On affiche le cadre autour du bouton de fa√ßon √† ce qu'il paraisse enfonc√©
   Draw_menu_button(btn_number, BUTTON_PRESSED);
 
   Display_cursor();
@@ -480,7 +480,7 @@ void Select_button(int btn_number,byte click)
   if ((click==1 && !Buttons_Pool[btn_number].Left_instant)
     ||(click!=1 && !Buttons_Pool[btn_number].Right_instant))
   {
-    // On attend ensuite que l'utilisateur l‚che son bouton:
+    // On attend ensuite que l'utilisateur l√¢che son bouton:
     Wait_end_of_click();
   }
 
@@ -641,10 +641,10 @@ void Layer_preview_off(int * preview_is_visible)
 void Main_handler(void)
 {
   static byte temp_color;
-  int  button_index;           // NumÈro de bouton de menu en cours
-  int  prev_button_number=0; // NumÈro de bouton de menu sur lequel on Ètait prÈcÈdemment
-  byte blink;                   // L'opÈration demande un effacement du curseur
-  int  key_index;           // index du tableau de touches spÈciales correspondant ‡ la touche enfoncÈe
+  int  button_index;           // Num√©ro de bouton de menu en cours
+  int  prev_button_number=0; // Num√©ro de bouton de menu sur lequel on √©tait pr√©c√©demment
+  byte blink;                   // L'op√©ration demande un effacement du curseur
+  int  key_index;           // index du tableau de touches sp√©ciales correspondant √† la touche enfonc√©e
   byte temp;
   byte effect_modified;
   byte action;
@@ -769,7 +769,7 @@ void Main_handler(void)
                 Special_previous_backcolor();
                 action++;
                 break;
-              case SPECIAL_SMALLER_PAINTBRUSH: // RÈtrÈcir le pinceau
+              case SPECIAL_SMALLER_PAINTBRUSH: // R√©tr√©cir le pinceau
                 Smaller_paintbrush();
                 action++;
                 break;
@@ -922,13 +922,13 @@ void Main_handler(void)
                 Display_cursor();
                 action++;
                 break;
-              case SPECIAL_ROTATE_90 : // 90∞ brush rotation
+              case SPECIAL_ROTATE_90 : // 90¬∞ brush rotation
                 Hide_cursor();
                 Rotate_90_deg();
                 Display_cursor();
                 action++;
                 break;
-              case SPECIAL_ROTATE_180 : // 180∞ brush rotation
+              case SPECIAL_ROTATE_180 : // 180¬∞ brush rotation
                 Hide_cursor();
                 Rotate_180_deg_lowlevel(Brush_original_pixels, Brush_width, Brush_height);
                 // Remap according to the last used remap table
@@ -1392,8 +1392,8 @@ void Main_handler(void)
           }
         }
   
-        // Si on a modifiÈ un effet, il faut rafficher le bouton des effets en
-        // consÈquence.
+        // Si on a modifi√© un effet, il faut rafficher le bouton des effets en
+        // cons√©quence.
         if (effect_modified)
         {
           Hide_cursor();
@@ -1433,7 +1433,7 @@ void Main_handler(void)
         {
           if (Menu_is_visible)
           {
-            // On nettoie les coordonnÈes
+            // On nettoie les coordonn√©es
             Hide_cursor();
             
             /*if (Gfx->Hover_effect && prev_button_number > -1 && !Buttons_Pool[prev_button_number].Pressed)
@@ -1528,7 +1528,7 @@ void Main_handler(void)
 
 
     // Le curseur se trouve dans l'image
-    if ( (!Cursor_in_menu) && (Menu_is_visible) && (Old_MY != Mouse_Y || Old_MX != Mouse_X || Key || Mouse_K)) // On ne met les coordonnÈes ‡ jour que si l'utilisateur a fait un truc
+    if ( (!Cursor_in_menu) && (Menu_is_visible) && (Old_MY != Mouse_Y || Old_MX != Mouse_X || Key || Mouse_K)) // On ne met les coordonn√©es √† jour que si l'utilisateur a fait un truc
     {
       if(Cursor_in_menu_previous)
       {
@@ -1576,14 +1576,14 @@ void Main_handler(void)
 
 
 //////////////////////////////////////////////////////////////////////////////
-//      diffÈrentes fonctions d'affichage utilisÈes dans les fenÍtres       //
+//      diff√©rentes fonctions d'affichage utilis√©es dans les fen√™tres       //
 //////////////////////////////////////////////////////////////////////////////
 
-//----------------------- Tracer une fenÍtre d'options -----------------------
+//----------------------- Tracer une fen√™tre d'options -----------------------
 
 void Open_window(word width,word height, const char * title)
-// Lors de l'appel ‡ cette procÈdure, la souris doit Ítre affichÈe.
-// En sortie de cette procedure, la souris est effacÈe.
+// Lors de l'appel √† cette proc√©dure, la souris doit √™tre affich√©e.
+// En sortie de cette procedure, la souris est effac√©e.
 {
   //word i,j;
   size_t title_length;
@@ -1605,20 +1605,20 @@ void Open_window(word width,word height, const char * title)
   Window_width=width;
   Window_height=height;
 
-  // Positionnement de la fenÍtre
+  // Positionnement de la fen√™tre
   Window_pos_X=(Screen_width-(width*Menu_factor_X))>>1;
 
   Window_pos_Y=(Screen_height-(height*Menu_factor_Y))>>1;
   
   Window_draggable=1;
 
-  // Sauvegarde de ce que la fenÍtre remplace
+  // Sauvegarde de ce que la fen√™tre remplace
   Save_background(&(Window_background[Windows_open-1]), Window_pos_X, Window_pos_Y, width, height);
 
-  // FenÍtre grise
+  // Fen√™tre grise
   Window_rectangle(2,2,width-4,height-4,MC_Window);
 
-  // -- Frame de la fenÍtre ----- --- -- -  -
+  // -- Frame de la fen√™tre ----- --- -- -  -
 
   // Frame noir puis en relief
   Window_display_frame_mono(0,0,width,height,MC_Black);
@@ -1652,7 +1652,7 @@ void Open_window(word width,word height, const char * title)
     Allow_drag_and_drop(0);
   }
 
-  // Initialisation des listes de boutons de la fenÍtre
+  // Initialisation des listes de boutons de la fen√™tre
   Window_normal_button_list  =NULL;
   Window_palette_button_list =NULL;
   Window_scroller_button_list=NULL;
@@ -1662,11 +1662,11 @@ void Open_window(word width,word height, const char * title)
 
 }
 
-//----------------------- Fermer une fenÍtre d'options -----------------------
+//----------------------- Fermer une fen√™tre d'options -----------------------
 
 void Close_window(void)
-// Lors de l'appel ‡ cette procedure, la souris doit Ítre affichÈe.
-// En sortie de cette procedure, la souris est effacÈe.
+// Lors de l'appel √† cette procedure, la souris doit √™tre affich√©e.
+// En sortie de cette procedure, la souris est effac√©e.
 {
   T_Normal_button   * temp1;
   T_Palette_button  * temp2;
@@ -1717,7 +1717,7 @@ void Close_window(void)
 
   if (Windows_open != 1)
   {
-    // Restore de ce que la fenÍtre cachait
+    // Restore de ce que la fen√™tre cachait
     Restore_background(&Window_background[Windows_open-1], Window_pos_X, Window_pos_Y, Window_width, Window_height);
     Update_window_area(0,0,Window_width,Window_height);
     Windows_open--;
@@ -1752,7 +1752,7 @@ void Close_window(void)
 }
 
 
-//---------------- Dessiner un bouton normal dans une fenÍtre ----------------
+//---------------- Dessiner un bouton normal dans une fen√™tre ----------------
 // undersc_letter is 0 for no underscore, 1-indexed array index otherwise
 void Window_draw_normal_bouton(word x_pos,word y_pos,word width,word height,
                                     const char * title,byte undersc_letter,byte clickable)
@@ -1783,14 +1783,14 @@ void Window_draw_normal_bouton(word x_pos,word y_pos,word width,word height,
 }
 
 
-// -- Button normal enfoncÈ dans la fenÍtre --
+// -- Button normal enfonc√© dans la fen√™tre --
 void Window_select_normal_button(word x_pos,word y_pos,word width,word height)
 {
   Window_display_frame_generic(x_pos,y_pos,width,height,MC_Dark,MC_Black,MC_Dark,MC_Dark,MC_Black);
   Update_window_area(x_pos, y_pos, width, height);
 }
 
-// -- Button normal dÈsenfoncÈ dans la fenÍtre --
+// -- Button normal d√©senfonc√© dans la fen√™tre --
 void Window_unselect_normal_button(word x_pos,word y_pos,word width,word height)
 {
   Window_display_frame_out(x_pos,y_pos,width,height);
@@ -1798,7 +1798,7 @@ void Window_unselect_normal_button(word x_pos,word y_pos,word width,word height)
 }
 
 
-//--------------- Dessiner un bouton palette dans une fenÍtre ----------------
+//--------------- Dessiner un bouton palette dans une fen√™tre ----------------
 void Window_draw_palette_bouton(word x_pos,word y_pos)
 {
   word color;
@@ -1811,7 +1811,7 @@ void Window_draw_palette_bouton(word x_pos,word y_pos)
 
 
 // -------------------- Effacer les TAGs sur les palette ---------------------
-// Cette fonct∞ ne sert plus que lorsqu'on efface les tags dans le menu Spray.
+// Cette fonct¬∞ ne sert plus que lorsqu'on efface les tags dans le menu Spray.
 void Window_clear_tags(void)
 {
   word origin_x;
@@ -1861,10 +1861,10 @@ void Tag_color_range(byte start,byte end)
 
   if (start!=end)
   {
-    // On complËte le 1er TAG
+    // On compl√®te le 1er TAG
     Pixel_in_window(origin_x+1,origin_y+4,MC_Black);
 
-    // On affiche le 2Ëme TAG
+    // On affiche le 2√®me TAG
     origin_x=(Window_palette_button_list->Pos_X+3)+(end>>4)*10;
     origin_y=(Window_palette_button_list->Pos_Y+3)+(end&15)* 5;
     for (y_pos=0,window_y_pos=origin_y; y_pos<5; y_pos++,window_y_pos++)
@@ -1873,13 +1873,13 @@ void Tag_color_range(byte start,byte end)
       Pixel_in_window(origin_x+1,window_y_pos,MC_Black);
     Pixel_in_window(origin_x+2,origin_y+2,MC_Black);
 
-    // On TAG toutes les couleurs intermÈdiaires
+    // On TAG toutes les couleurs interm√©diaires
     for (index=start+1;index<end;index++)
     {
       Window_rectangle(Window_palette_button_list->Pos_X+3+((index>>4)*10),
             Window_palette_button_list->Pos_Y+3+((index&15)* 5),
             2,5,MC_Black);
-      // On efface l'Èventuelle pointe d'une ancienne extrÈmitÈ de l'intervalle
+      // On efface l'√©ventuelle pointe d'une ancienne extr√©mit√© de l'intervalle
       Pixel_in_window(Window_palette_button_list->Pos_X+5+((index>>4)*10),
                          Window_palette_button_list->Pos_Y+5+((index&15)* 5),
                          MC_Light);
@@ -1893,7 +1893,7 @@ void Tag_color_range(byte start,byte end)
 }
 
 
-//------------------ Dessiner un scroller dans une fenÍtre -------------------
+//------------------ Dessiner un scroller dans une fen√™tre -------------------
 
 void Compute_slider_cursor_length(T_Scroller_button * button)
 {
@@ -1981,7 +1981,7 @@ void Window_draw_scroller_button(T_Scroller_button * button)
 }
 
 
-//--------------- Dessiner une zone de saisie dans une fenÍtre ---------------
+//--------------- Dessiner une zone de saisie dans une fen√™tre ---------------
 
 void Window_draw_input_bouton(word x_pos,word y_pos,word width_in_characters)
 {
@@ -2005,7 +2005,7 @@ void Window_clear_input_button(T_Special_button * button)
 }
 
 
-//------ Rajout d'un bouton ‡ la liste de ceux prÈsents dans la fenÍtre ------
+//------ Rajout d'un bouton √† la liste de ceux pr√©sents dans la fen√™tre ------
 // undersc_letter is 0 for no underscore, 1-indexed array index otherwise
 T_Normal_button * Window_set_normal_button(word x_pos, word y_pos,
                                    word width, word height,
@@ -2035,7 +2035,7 @@ T_Normal_button * Window_set_normal_button(word x_pos, word y_pos,
   Window_draw_normal_bouton(x_pos,y_pos,width,height,title,undersc_letter,clickable);
   return temp;
 }
-//------ Rajout d'un bouton ‡ la liste de ceux prÈsents dans la fenÍtre ------
+//------ Rajout d'un bouton √† la liste de ceux pr√©sents dans la fen√™tre ------
 // undersc_letter is 0 for no underscore, 1-indexed array index otherwise
 T_Normal_button * Window_set_repeatable_button(word x_pos, word y_pos,
                                    word width, word height,
@@ -2194,9 +2194,9 @@ T_Dropdown_button * Window_set_dropdown_button(word x_pos,word y_pos,word width,
   return temp;
 }
 
-// Ajoute un choix ‡ une dropdown. Le libellÈ est seulement rÈfÈrencÈ,
-// il doit pointer sur une zone qui doit Ítre encore valide ‡ la fermeture 
-// de la fenÍtre (comprise).
+// Ajoute un choix √† une dropdown. Le libell√© est seulement r√©f√©renc√©,
+// il doit pointer sur une zone qui doit √™tre encore valide √† la fermeture 
+// de la fen√™tre (comprise).
 void Window_dropdown_add_item(T_Dropdown_button * dropdown, word btn_number, const char *label)
 {
   T_Dropdown_choice *temp;
@@ -2210,7 +2210,7 @@ void Window_dropdown_add_item(T_Dropdown_button * dropdown, word btn_number, con
   last=dropdown->First_item;
   if (last)
   {
-    // On cherche le dernier ÈlÈment
+    // On cherche le dernier √©l√©ment
     for (;last->Next;last=last->Next)
       ;
     last->Next=temp;
@@ -2289,12 +2289,12 @@ void Window_redraw_list(T_List_button * list)
 //----------------------- Ouverture d'un pop-up -----------------------
 
 void Open_popup(word x_pos, word y_pos, word width,word height)
-// Lors de l'appel ‡ cette procÈdure, la souris doit Ítre affichÈe.
-// En sortie de cette procedure, la souris est effacÈe.
+// Lors de l'appel √† cette proc√©dure, la souris doit √™tre affich√©e.
+// En sortie de cette procedure, la souris est effac√©e.
 
-// Note : les pop-ups sont gÈrÈs comme s'ils Ètaient des sous-fenÍtres, ils ont donc leur propre boucle d'ÈvËnements et tout, on peut ajouter des widgets dedans, ...
-// Les diffÈrences sont surtout graphiques :
-    // -PossibilitÈ de prÈciser la position XY
+// Note : les pop-ups sont g√©r√©s comme s'ils √©taient des sous-fen√™tres, ils ont donc leur propre boucle d'√©v√®nements et tout, on peut ajouter des widgets dedans, ...
+// Les diff√©rences sont surtout graphiques :
+    // -Possibilit√© de pr√©ciser la position XY
     // -Pas de titre
     // -Pas de cadre en relief mais seulement un plat, et il est blanc au lieu de noir.
 {
@@ -2311,11 +2311,11 @@ void Open_popup(word x_pos, word y_pos, word width,word height)
   Window_pos_Y=y_pos;
   Window_draggable=0;
 
-  // Sauvegarde de ce que la fenÍtre remplace
+  // Sauvegarde de ce que la fen√™tre remplace
   Save_background(&(Window_background[Windows_open-1]), Window_pos_X, Window_pos_Y, width, height);
 
 /*
-  // FenÍtre grise
+  // Fen√™tre grise
   Window_rectangle(1,1,width-2,height-2,MC_Light);
 
   // Frame noir puis en relief
@@ -2333,7 +2333,7 @@ void Open_popup(word x_pos, word y_pos, word width,word height)
     Paintbrush_hidden=1;
   }
 
-  // Initialisation des listes de boutons de la fenÍtre
+  // Initialisation des listes de boutons de la fen√™tre
   Window_normal_button_list  =NULL;
   Window_palette_button_list =NULL;
   Window_scroller_button_list=NULL;
@@ -2343,11 +2343,11 @@ void Open_popup(word x_pos, word y_pos, word width,word height)
 
 }
 
-//----------------------- Fermer une fenÍtre d'options -----------------------
+//----------------------- Fermer une fen√™tre d'options -----------------------
 
 void Close_popup(void)
-// Lors de l'appel ‡ cette procedure, la souris doit Ítre affichÈe.
-// En sortie de cette procedure, la souris est effacÈe.
+// Lors de l'appel √† cette procedure, la souris doit √™tre affich√©e.
+// En sortie de cette procedure, la souris est effac√©e.
 {
   T_Normal_button   * temp1;
   T_Palette_button  * temp2;
@@ -2398,7 +2398,7 @@ void Close_popup(void)
   
   if (Windows_open != 1)
   {
-    // Restore de ce que la fenÍtre cachait
+    // Restore de ce que la fen√™tre cachait
     Restore_background(&Window_background[Windows_open-1], Window_pos_X, Window_pos_Y, Window_width, Window_height);
     Update_window_area(0,0,Window_width,Window_height);
     Windows_open--;
@@ -2431,12 +2431,12 @@ void Close_popup(void)
 }
 //////////////////////////////////////////////////////////////////////////////
 //                                                                          //
-//       Mini-MOTEUR utilisÈ dans les fenÍtres (menus des boutons...)       //
+//       Mini-MOTEUR utilis√© dans les fen√™tres (menus des boutons...)       //
 //                                                                          //
 //////////////////////////////////////////////////////////////////////////////
 
 
-// -- Indique si on a cliquÈ dans une zone dÈfinie par deux points extremes --
+// -- Indique si on a cliqu√© dans une zone d√©finie par deux points extremes --
 byte Window_click_in_rectangle(short start_x,short start_y,short end_x,short end_y)
 {
   short x_pos,y_pos;
@@ -2452,7 +2452,7 @@ byte Window_click_in_rectangle(short start_x,short start_y,short end_x,short end
 
 
 // --- Attend que l'on clique dans la palette pour renvoyer la couleur choisie
-// ou bien renvoie -1 si on a annulÈ l'action pas click-droit ou Escape ------
+// ou bien renvoie -1 si on a annul√© l'action pas click-droit ou Escape ------
 short Wait_click_in_palette(T_Palette_button * button)
 {
   short start_x=button->Pos_X+5;
@@ -2517,13 +2517,13 @@ short Wait_click_in_palette(T_Palette_button * button)
 
 
 
-// -------------- RÈcupÈration d'une couleur derriËre un menu ----------------
+// -------------- R√©cup√©ration d'une couleur derri√®re un menu ----------------
 void Get_color_behind_window(byte * color, byte * click)
 {
   short old_x=-1;
   short old_y=-1;
   short index;
-  short a,b,c,d; // Variables temporaires et multit‚ches...
+  short a,b,c,d; // Variables temporaires et multit√¢ches...
   byte * buffer = NULL;
   char str[25];
   byte cursor_was_hidden;
@@ -2547,7 +2547,7 @@ void Get_color_behind_window(byte * color, byte * click)
   Cursor_shape=CURSOR_SHAPE_COLORPICKER;
   b=Paintbrush_hidden;
   Paintbrush_hidden=1;
-  c=-1; // color pointÈe: au dÈbut aucune, comme Áa on initialise tout
+  c=-1; // color point√©e: au d√©but aucune, comme √ßa on initialise tout
   if (Menu_is_visible_before_window)
     Print_in_menu(Buttons_Pool[BUTTON_CHOOSE_COL].Tooltip,0);
 
@@ -2563,7 +2563,7 @@ void Get_color_behind_window(byte * color, byte * click)
       a=Read_pixel(Mouse_X,Mouse_Y);
       if (a!=c)
       {
-        c=a; // Mise ‡ jour de la couleur pointÈe
+        c=a; // Mise √† jour de la couleur point√©e
         if (Menu_is_visible_before_window)
         {
           sprintf(str,"%d",a);
@@ -2614,7 +2614,7 @@ void Get_color_behind_window(byte * color, byte * click)
 
 
 
-// ------------ OpÈration de dÈplacement de la fenÍtre ‡ l'Ècran -------------
+// ------------ Op√©ration de d√©placement de la fen√™tre √† l'√©cran -------------
 void Move_window(short dx, short dy)
 {
   short new_x=Mouse_X-dx;
@@ -2711,19 +2711,19 @@ void Move_window(short dx, short dy)
     Menu_Y=a;
     Menu_is_visible=b;
 
-    // Sauvegarde du contenu actuel de la fenÍtre
+    // Sauvegarde du contenu actuel de la fen√™tre
     Save_background(&buffer, Window_pos_X, Window_pos_Y, Window_width, Window_height);
     
-    // Restore de ce que la fenÍtre cachait
+    // Restore de ce que la fen√™tre cachait
     Restore_background(&Window_background[Windows_open-1], Window_pos_X, Window_pos_Y, Window_width, Window_height);
 
-    // Sauvegarde de ce que la fenÍtre remplace
+    // Sauvegarde de ce que la fen√™tre remplace
     Save_background(&(Window_background[Windows_open-1]), new_x, new_y, Window_width, Window_height);
 
-    // Raffichage de la fenÍtre
+    // Raffichage de la fen√™tre
     Restore_background(&buffer, new_x, new_y, Window_width, Window_height);
 
-    // Mise ‡ jour du rectangle englobant
+    // Mise √† jour du rectangle englobant
     Update_rect(
       (new_x>Window_pos_X)?Window_pos_X:new_x,
       (new_y>Window_pos_Y)?Window_pos_Y:new_y,
@@ -2757,7 +2757,7 @@ T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, sh
   short box_height;
   T_Dropdown_choice *item;
   
-  // Taille de l'ombre portÈe (en plus des dimensions normales)
+  // Taille de l'ombre port√©e (en plus des dimensions normales)
   #define SHADOW_RIGHT 3
   #define SHADOW_BOTTOM 4
 
@@ -2783,7 +2783,7 @@ T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, sh
   Window_rectangle(0,0,1,box_height,MC_Black);
   // Frame fonce et blanc
   Window_display_frame_out(1,0,button->Dropdown_width-1,box_height);
-  // Ombre portÈe
+  // Ombre port√©e
   if (SHADOW_BOTTOM)
   {
     Window_rectangle(SHADOW_RIGHT,
@@ -2815,7 +2815,7 @@ T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, sh
   while (1)
   {
     old_selected_index = selected_index;
-    // FenÍtre grise
+    // Fen√™tre grise
     Window_rectangle(2,1,button->Dropdown_width-3,box_height-2,MC_Light);
     // Affichage des items
     for(item=button->First_item,choice_index=0; item!=NULL; item=item->Next,choice_index++)
@@ -2843,7 +2843,7 @@ T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, sh
     {
       // Attente
       Get_input(20);
-      // Mise ‡ jour du survol
+      // Mise √† jour du survol
       selected_index=Window_click_in_rectangle(2,2,button->Dropdown_width-2,box_height-1)?
         (((Mouse_Y-Window_pos_Y)/Menu_factor_Y-2)>>3) : -1;
 
@@ -2901,9 +2901,9 @@ short Window_dropdown_on_click(T_Dropdown_button *button)
   
 }
 
-// --- Fonction de clic sur un bouton a peu prËs ordinaire:
+// --- Fonction de clic sur un bouton a peu pr√®s ordinaire:
 // Attend que l'on relache le bouton, et renvoie le numero du bouton si on
-// est restÈ dessus, 0 si on a annulÈ en sortant du bouton.
+// est rest√© dessus, 0 si on a annul√© en sortant du bouton.
 short Window_normal_button_onclick(word x_pos, word y_pos, word width, word height, short btn_number)
 {
   while(1)
@@ -3146,7 +3146,7 @@ short Window_get_button_shortcut(void)
   else
     Window_attribute1=LEFT_SIDE;
 
-  // On fait une premiËre recherche
+  // On fait une premi√®re recherche
   temp=Window_normal_button_list;
   while (temp!=NULL)
   {
@@ -3178,9 +3178,9 @@ short Window_get_button_shortcut(void)
     temp2=temp2->Next;
   }
 
-  // Si la recherche n'a pas ÈtÈ fructueuse ET que l'utilisateur appuyait sur
-  // <Shift>, on regarde si un bouton ne pourrait pas rÈagir comme si <Shift>
-  // n'Ètait pas appuyÈ.
+  // Si la recherche n'a pas √©t√© fructueuse ET que l'utilisateur appuyait sur
+  // <Shift>, on regarde si un bouton ne pourrait pas r√©agir comme si <Shift>
+  // n'√©tait pas appuy√©.
   if (Window_attribute1==RIGHT_SIDE)
   {
     temp=Window_normal_button_list;
@@ -3350,7 +3350,7 @@ short Window_clicked_button(void)
           {
             list->List_start=list->List_start+list->Cursor_position;
             list->Cursor_position=0;
-            // Mise ‡ jour du scroller
+            // Mise √† jour du scroller
             list->Scroller->Position=list->List_start;
             Window_draw_slider(list->Scroller);
           }
@@ -3370,7 +3370,7 @@ short Window_clicked_button(void)
           {
             list->List_start=list->List_start+list->Cursor_position-(list->Scroller->Nb_visibles-1);
             list->Cursor_position=(list->Scroller->Nb_visibles-1);
-            // Mise ‡ jour du scroller
+            // Mise √† jour du scroller
             list->Scroller->Position=list->List_start;
             Window_draw_slider(list->Scroller);
           }
@@ -3387,7 +3387,7 @@ short Window_clicked_button(void)
           Hide_cursor();
           list->Cursor_position=0;
           list->List_start=0;
-          // Mise ‡ jour du scroller
+          // Mise √† jour du scroller
           list->Scroller->Position=list->List_start;
           Window_draw_slider(list->Scroller);
           Window_redraw_list(list);
@@ -3406,7 +3406,7 @@ short Window_clicked_button(void)
           {
             list->List_start=list->List_start+list->Cursor_position-(list->Scroller->Nb_visibles-1);
             list->Cursor_position=(list->Scroller->Nb_visibles-1);
-            // Mise ‡ jour du scroller
+            // Mise √† jour du scroller
             list->Scroller->Position=list->List_start;
             Window_draw_slider(list->Scroller);
           }
@@ -3436,7 +3436,7 @@ short Window_clicked_button(void)
             {
               list->List_start=list->Scroller->Nb_elements-list->Scroller->Nb_visibles;
             }
-            // Mise ‡ jour du scroller
+            // Mise √† jour du scroller
             list->Scroller->Position=list->List_start;
             Window_draw_slider(list->Scroller);
           }
@@ -3462,7 +3462,7 @@ short Window_clicked_button(void)
             {
               list->List_start=0;
             }
-            // Mise ‡ jour du scroller
+            // Mise √† jour du scroller
             list->Scroller->Position=list->List_start;
             Window_draw_slider(list->Scroller);
           }
@@ -3481,10 +3481,10 @@ short Window_clicked_button(void)
           else
             list->List_start=0;
           list->Cursor_position-=list->List_start;
-          // On affiche ‡ nouveau la liste
+          // On affiche √† nouveau la liste
           Hide_cursor();
           Window_redraw_list(list);
-          // Mise ‡ jour du scroller
+          // Mise √† jour du scroller
           list->Scroller->Position=list->List_start;
           Window_draw_slider(list->Scroller);
           Display_cursor();
@@ -3498,10 +3498,10 @@ short Window_clicked_button(void)
             list->List_start=list->Scroller->Nb_elements-list->Scroller->Nb_visibles;
           }          
           list->Cursor_position-=list->List_start;
-          // On affiche ‡ nouveau la liste
+          // On affiche √† nouveau la liste
           Hide_cursor();
           Window_redraw_list(list);
-          // Mise ‡ jour du scroller
+          // Mise √† jour du scroller
           list->Scroller->Position=list->List_start;
           Window_draw_slider(list->Scroller);
           Display_cursor();
@@ -3515,8 +3515,8 @@ short Window_clicked_button(void)
 }
 
 
-// Fonction qui sert ‡ remapper les parties sauvegardÈes derriere les
-// fenetres ouvertes. C'est utilisÈ par exemple par la fenetre de palette
+// Fonction qui sert √† remapper les parties sauvegard√©es derriere les
+// fenetres ouvertes. C'est utilis√© par exemple par la fenetre de palette
 // Qui remappe des couleurs, afin de propager les changements.
 void Remap_window_backgrounds(const byte * conversion_table, int Min_Y, int Max_Y)
 {
@@ -3656,8 +3656,8 @@ void Set_bar_visibility(word bar, int visible, int with_redraw)
       Compute_magnifier_data();
     }
 
-    //   On repositionne le dÈcalage de l'image pour qu'il n'y ait pas d'in-
-    // -cohÈrences lorsqu'on sortira du mode Loupe.
+    //   On repositionne le d√©calage de l'image pour qu'il n'y ait pas d'in-
+    // -coh√©rences lorsqu'on sortira du mode Loupe.
     if (Main.offset_Y+Screen_height>Main.image_height)
     {
       if (Screen_height>Main.image_height)

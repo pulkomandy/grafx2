@@ -73,7 +73,7 @@ typedef struct
   qword limit;
 } T_Ellipse_limits;
 
-// Calcule les valeurs suivantes en fonction des deux paramètres:
+// Calcule les valeurs suivantes en fonction des deux paramÃ¨tres:
 //
 // Ellipse_vertical_radius_squared
 // Ellipse_horizontal_radius_squared
@@ -86,8 +86,8 @@ static void Ellipse_compute_limites(short horizontal_radius,short vertical_radiu
   Ellipse->limit = (qword)Ellipse->horizontal_radius_squared * Ellipse->vertical_radius_squared;
 }
 
-//   Indique si le pixel se trouvant à Ellipse_cursor_X pixels
-// (Ellipse_cursor_X>0 = à droite, Ellipse_cursor_X<0 = à gauche) et à
+//   Indique si le pixel se trouvant Ã  Ellipse_cursor_X pixels
+// (Ellipse_cursor_X>0 = Ã  droite, Ellipse_cursor_X<0 = Ã  gauche) et Ã 
 // Ellipse_cursor_Y pixels (Ellipse_cursor_Y>0 = en bas,
 // Ellipse_cursor_Y<0 = en haut) du centre se trouve dans l'ellipse en
 // cours.
@@ -100,8 +100,8 @@ static byte Pixel_in_ellipse(long x, long y, const T_Ellipse_limits * Ellipse)
   return 0;
 }
 
-//   Indique si le pixel se trouvant à Circle_cursor_X pixels
-// (Circle_cursor_X>0 = à droite, Circle_cursor_X<0 = à gauche) et à
+//   Indique si le pixel se trouvant Ã  Circle_cursor_X pixels
+// (Circle_cursor_X>0 = Ã  droite, Circle_cursor_X<0 = Ã  gauche) et Ã 
 // Circle_cursor_Y pixels (Circle_cursor_Y>0 = en bas,
 // Circle_cursor_Y<0 = en haut) du centre se trouve dans le cercle en
 // cours.
@@ -279,7 +279,7 @@ void Transform_point(short x, short y, float cos_a, float sin_a,
 }
 
 
-//--------------------- Initialisation d'un mode vidéo -----------------------
+//--------------------- Initialisation d'un mode vidÃ©o -----------------------
 
 int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
 {
@@ -378,7 +378,7 @@ try_again:
     if (width < 320*pix_width || height < 200*pix_height)
       return 1;
   }
-  // La largeur doit être un multiple de 4
+  // La largeur doit Ãªtre un multiple de 4
   #ifdef __amigaos4__
       // On AmigaOS the systems adds some more constraints on that ...
       width = (width + 15) & 0xFFFFFFF0;
@@ -536,9 +536,9 @@ try_again:
   if (fullscreen)
     Set_mouse_position();
 
-  Spare.offset_X=0; // |  Il faut penser à éviter les incohérences
-  Spare.offset_Y=0; // |- de décalage du brouillon par rapport à
-  Spare.magnifier_mode=0; // |  la résolution.
+  Spare.offset_X=0; // |  Il faut penser Ã  Ã©viter les incohÃ©rences
+  Spare.offset_Y=0; // |- de dÃ©calage du brouillon par rapport Ã 
+  Spare.magnifier_mode=0; // |  la rÃ©solution.
 
   if (Main.magnifier_mode)
   {
@@ -571,7 +571,7 @@ try_again:
 
 
 
-  // -- Redimentionner l'image (nettoie l'écran virtuel) --
+  // -- Redimentionner l'image (nettoie l'Ã©cran virtuel) --
 
 void Resize_image(word chosen_width,word chosen_height)
 {
@@ -588,7 +588,7 @@ void Resize_image(word chosen_width,word chosen_height)
   Upload_infos_page(&Main);
   if (Backup_with_new_dimensions(chosen_width,chosen_height))
   {
-    // La nouvelle page a pu être allouée, elle est pour l'instant pleine de
+    // La nouvelle page a pu Ãªtre allouÃ©e, elle est pour l'instant pleine de
     // 0s. Elle fait Main.image_width de large.
 
     Main.image_is_modified=1;
@@ -618,11 +618,11 @@ void Remap_spare(void)
 {
   short x_pos; // Variable de balayage de la brosse
   short y_pos; // Variable de balayage de la brosse
-  byte  used[256]; // Tableau de booléens "La couleur est utilisée"
+  byte  used[256]; // Tableau de boolÃ©ens "La couleur est utilisÃ©e"
   int   color;
   int   layer;
 
-  // On commence par initialiser le tableau de booléens à faux
+  // On commence par initialiser le tableau de boolÃ©ens Ã  faux
   for (color=0;color<=255;color++)
     used[color]=0;
 
@@ -635,16 +635,16 @@ void Remap_spare(void)
   //   On va maintenant se servir de la table "used" comme table de
   // conversion: pour chaque indice, la table donne une couleur de
   // remplacement.
-  // Note : Seules les couleurs utilisées on besoin d'êtres recalculées: les
-  //       autres ne seront jamais consultées dans la nouvelle table de
+  // Note : Seules les couleurs utilisÃ©es on besoin d'Ãªtres recalculÃ©es: les
+  //       autres ne seront jamais consultÃ©es dans la nouvelle table de
   //       conversion puisque elles n'existent pas dans l'image, donc elles
-  //       ne seront pas utilisées par Remap_general_lowlevel.
+  //       ne seront pas utilisÃ©es par Remap_general_lowlevel.
   for (color=0;color<=255;color++)
     if (used[color])
       used[color]=Best_color_perceptual(Spare.palette[color].R,Spare.palette[color].G,Spare.palette[color].B);
 
   //   Maintenant qu'on a une super table de conversion qui n'a que le nom
-  // qui craint un peu, on peut faire l'échange dans la brosse de toutes les
+  // qui craint un peu, on peut faire l'Ã©change dans la brosse de toutes les
   // teintes.
   for (layer=0; layer<Spare.backups->Pages->Nb_layers; layer++)
     Remap_general_lowlevel(used,Spare.backups->Pages->Image[layer].Pixels,Spare.backups->Pages->Image[layer].Pixels,Spare.image_width,Spare.image_height,Spare.image_width);
@@ -659,7 +659,7 @@ void Get_colors_from_brush(void)
 {
   short x_pos; // Variable de balayage de la brosse
   short y_pos; // Variable de balayage de la brosse
-  byte  brush_used[256]; // Tableau de booléens "La couleur est utilisée"
+  byte  brush_used[256]; // Tableau de boolÃ©ens "La couleur est utilisÃ©e"
   dword usage[256];
   int   color;
   int   image_color;
@@ -754,25 +754,25 @@ void Get_colors_from_brush(void)
 void Fill(short * top_reached  , short * bottom_reached,
           short * left_reached, short * right_reached)
 //
-//   Cette fonction fait un remplissage classique d'une zone délimitée de
-// l'image. Les limites employées sont Limit_top, Limit_bottom, Limit_left
-// et Limit_right. Le point de départ du remplissage est Paintbrush_X,Paintbrush_Y
-// et s'effectue en théorie sur la couleur 1 et emploie la couleur 2 pour le
-// remplissage. Ces restrictions sont dûes à l'utilisation qu'on en fait dans
+//   Cette fonction fait un remplissage classique d'une zone dÃ©limitÃ©e de
+// l'image. Les limites employÃ©es sont Limit_top, Limit_bottom, Limit_left
+// et Limit_right. Le point de dÃ©part du remplissage est Paintbrush_X,Paintbrush_Y
+// et s'effectue en thÃ©orie sur la couleur 1 et emploie la couleur 2 pour le
+// remplissage. Ces restrictions sont dÃ»es Ã  l'utilisation qu'on en fait dans
 // la fonction principale "Fill_general", qui se charge de faire une gestion de
 // tous les effets.
-//   Cette fonction ne doit pas être directement appelée.
+//   Cette fonction ne doit pas Ãªtre directement appelÃ©e.
 //
 {
-  short x_pos;   // Abscisse de balayage du segment, utilisée lors de l'"affichage"
-  short line;   // Ordonnée de la ligne en cours de traitement
-  short start_x; // Abscisse de départ du segment traité
-  short end_x;   // Abscisse de fin du segment traité
-  int   changes_made;    // Booléen "On a fait une modif dans le dernier passage"
-  int   can_propagate; // Booléen "On peut propager la couleur dans le segment"
+  short x_pos;   // Abscisse de balayage du segment, utilisÃ©e lors de l'"affichage"
+  short line;   // OrdonnÃ©e de la ligne en cours de traitement
+  short start_x; // Abscisse de dÃ©part du segment traitÃ©
+  short end_x;   // Abscisse de fin du segment traitÃ©
+  int   changes_made;    // BoolÃ©en "On a fait une modif dans le dernier passage"
+  int   can_propagate; // BoolÃ©en "On peut propager la couleur dans le segment"
   short current_limit_bottom;  // Intervalle vertical restreint
   short current_limit_top;
-  int   line_is_modified;       // Booléen "On a fait une modif dans la ligne"
+  int   line_is_modified;       // BoolÃ©en "On a fait une modif dans la ligne"
 
   changes_made=1;
   current_limit_top=Paintbrush_Y;
@@ -788,22 +788,22 @@ void Fill(short * top_reached  , short * bottom_reached,
     for (line=current_limit_top;line<=current_limit_bottom;line++)
     {
       line_is_modified=0;
-      // On va traiter le cas de la ligne n° line.
+      // On va traiter le cas de la ligne nÂ° line.
 
-      // On commence le traitement à la gauche de l'écran
+      // On commence le traitement Ã  la gauche de l'Ã©cran
       start_x=Limit_left;
 
       // Pour chaque segment de couleur 1 que peut contenir la ligne
       while (start_x<=Limit_right)
       {
-        // On cherche son début
+        // On cherche son dÃ©but
         while((start_x<=Limit_right) &&
                 (Read_pixel_from_current_layer(start_x,line)!=1))
              start_x++;
 
         if (start_x<=Limit_right)
         {
-          // Un segment de couleur 1 existe et commence à la position start_x.
+          // Un segment de couleur 1 existe et commence Ã  la position start_x.
           // On va donc en chercher la fin.
           for (end_x=start_x+1;(end_x<=Limit_right) &&
                (Read_pixel_from_current_layer(end_x,line)==1);end_x++);
@@ -811,19 +811,19 @@ void Fill(short * top_reached  , short * bottom_reached,
           //   On sait qu'il existe un segment de couleur 1 qui commence en
           // start_x et qui se termine en end_x-1.
 
-          //   On va maintenant regarder si une couleur sur la périphérie
+          //   On va maintenant regarder si une couleur sur la pÃ©riphÃ©rie
           // permet de colorier ce segment avec la couleur 2.
 
           can_propagate=(
-            // Test de la présence d'un point à gauche du segment
+            // Test de la prÃ©sence d'un point Ã  gauche du segment
             ((start_x>Limit_left) &&
              (Read_pixel_from_current_layer(start_x-1,line)==2)) ||
-            // Test de la présence d'un point à droite du segment
+            // Test de la prÃ©sence d'un point Ã  droite du segment
             ((end_x-1<Limit_right) &&
              (Read_pixel_from_current_layer(end_x    ,line)==2))
                                );
 
-          // Test de la présence d'un point en haut du segment
+          // Test de la prÃ©sence d'un point en haut du segment
           if (!can_propagate && (line>Limit_top))
             for (x_pos=start_x;x_pos<end_x;x_pos++)
               if (Read_pixel_from_current_layer(x_pos,line-1)==2)
@@ -838,7 +838,7 @@ void Fill(short * top_reached  , short * bottom_reached,
               *left_reached=start_x;
             if (end_x>*right_reached)
               *right_reached=end_x;
-            // On remplit le segment de start_x à end_x-1.
+            // On remplit le segment de start_x Ã  end_x-1.
             for (x_pos=start_x;x_pos<end_x;x_pos++)
               Pixel_in_current_layer(x_pos,line,2);
             // On vient d'effectuer des modifications.
@@ -859,8 +859,8 @@ void Fill(short * top_reached  , short * bottom_reached,
 
     // Pour le prochain balayage vers le haut, on va se permettre d'aller
     // voir une ligne plus haut.
-    // Si on ne le fait pas, et que la première ligne (current_limit_top)
-    // n'était pas modifiée, alors cette limite ne serait pas remontée, donc
+    // Si on ne le fait pas, et que la premiÃ¨re ligne (current_limit_top)
+    // n'Ã©tait pas modifiÃ©e, alors cette limite ne serait pas remontÃ©e, donc
     // le filler ne progresserait pas vers le haut.
     if (current_limit_top>Limit_top)
       current_limit_top--;
@@ -868,21 +868,21 @@ void Fill(short * top_reached  , short * bottom_reached,
     for (line=current_limit_bottom;line>=current_limit_top;line--)
     {
       line_is_modified=0;
-      // On va traiter le cas de la ligne n° line.
+      // On va traiter le cas de la ligne nÂ° line.
 
-      // On commence le traitement à la gauche de l'écran
+      // On commence le traitement Ã  la gauche de l'Ã©cran
       start_x=Limit_left;
 
       // Pour chaque segment de couleur 1 que peut contenir la ligne
       while (start_x<=Limit_right)
       {
-        // On cherche son début
+        // On cherche son dÃ©but
         for (;(start_x<=Limit_right) &&
              (Read_pixel_from_current_layer(start_x,line)!=1);start_x++);
 
         if (start_x<=Limit_right)
         {
-          // Un segment de couleur 1 existe et commence à la position start_x.
+          // Un segment de couleur 1 existe et commence Ã  la position start_x.
           // On va donc en chercher la fin.
           for (end_x=start_x+1;(end_x<=Limit_right) &&
                (Read_pixel_from_current_layer(end_x,line)==1);end_x++);
@@ -890,19 +890,19 @@ void Fill(short * top_reached  , short * bottom_reached,
           //   On sait qu'il existe un segment de couleur 1 qui commence en
           // start_x et qui se termine en end_x-1.
 
-          //   On va maintenant regarder si une couleur sur la périphérie
+          //   On va maintenant regarder si une couleur sur la pÃ©riphÃ©rie
           // permet de colorier ce segment avec la couleur 2.
 
           can_propagate=(
-            // Test de la présence d'un point à gauche du segment
+            // Test de la prÃ©sence d'un point Ã  gauche du segment
             ((start_x>Limit_left) &&
              (Read_pixel_from_current_layer(start_x-1,line)==2)) ||
-            // Test de la présence d'un point à droite du segment
+            // Test de la prÃ©sence d'un point Ã  droite du segment
             ((end_x-1<Limit_right) &&
              (Read_pixel_from_current_layer(end_x    ,line)==2))
                                );
 
-          // Test de la présence d'un point en bas du segment
+          // Test de la prÃ©sence d'un point en bas du segment
           if (!can_propagate && (line<Limit_bottom))
             for (x_pos=start_x;x_pos<end_x;x_pos++)
               if (Read_pixel_from_current_layer(x_pos,line+1)==2)
@@ -917,7 +917,7 @@ void Fill(short * top_reached  , short * bottom_reached,
               *left_reached=start_x;
             if (end_x>*right_reached)
               *right_reached=end_x;
-            // On remplit le segment de start_x à end_x-1.
+            // On remplit le segment de start_x Ã  end_x-1.
             for (x_pos=start_x;x_pos<end_x;x_pos++)
               Pixel_in_current_layer(x_pos,line,2);
             // On vient d'effectuer des modifications.
@@ -949,8 +949,8 @@ byte Read_pixel_from_backup_layer(word x,word y)
 
 void Fill_general(byte fill_color)
 //
-//  Cette fonction fait un remplissage qui gère tous les effets. Elle fait
-// appel à "Fill()".
+//  Cette fonction fait un remplissage qui gÃ¨re tous les effets. Elle fait
+// appel Ã  "Fill()".
 //
 {
   byte   cursor_shape_before_fill;
@@ -964,7 +964,7 @@ void Fill_general(byte fill_color)
   int old_limit_bottom=Limit_bottom;
 
 
-  // Avant toute chose, on vérifie que l'on n'est pas en train de remplir
+  // Avant toute chose, on vÃ©rifie que l'on n'est pas en train de remplir
   // en dehors de l'image:
 
   if ( (Paintbrush_X>=Limit_left) &&
@@ -985,7 +985,7 @@ void Fill_general(byte fill_color)
         return;
     }
 
-    // On suppose que le curseur est déjà caché.
+    // On suppose que le curseur est dÃ©jÃ  cachÃ©.
     // Hide_cursor();
 
     //   On va faire patienter l'utilisateur en lui affichant un joli petit
@@ -1009,7 +1009,7 @@ void Fill_general(byte fill_color)
       Limit_top = Max(Limit_top, (Paintbrush_Y-Snap_offset_Y)/Snap_height*Snap_height+Snap_offset_Y);
     }
 
-    // On va maintenant "épurer" la zone visible de l'image:
+    // On va maintenant "Ã©purer" la zone visible de l'image:
     memset(replace_table,0,256);
     replace_table[Read_pixel_from_backup_layer(Paintbrush_X,Paintbrush_Y)]=1;
     Replace_colors_within_limits(replace_table);
@@ -1018,13 +1018,13 @@ void Fill_general(byte fill_color)
     Fill(&top_reached  ,&bottom_reached,
          &left_reached,&right_reached);
 
-    //  On s'apprête à faire des opérations qui nécessitent un affichage. Il
-    // faut donc retirer de l'écran le curseur:
+    //  On s'apprÃªte Ã  faire des opÃ©rations qui nÃ©cessitent un affichage. Il
+    // faut donc retirer de l'Ã©cran le curseur:
     Hide_cursor();
     Cursor_shape=cursor_shape_before_fill;
 
     //  Il va maintenant falloir qu'on "turn" ce gros caca "into" un truc qui
-    // ressemble un peu plus à ce à quoi l'utilisateur peut s'attendre.
+    // ressemble un peu plus Ã  ce Ã  quoi l'utilisateur peut s'attendre.
     if (top_reached>Limit_top)
       Copy_part_of_image_to_another(Main.backups->Pages->Next->Image[Main.current_layer].Pixels, // source
                                                Limit_left,Limit_top,       // Pos X et Y dans source
@@ -1083,11 +1083,11 @@ void Fill_general(byte fill_color)
     // Restore original feedback value
     Update_FX_feedback(Config.FX_Feedback);
 
-    //   A la fin, on n'a pas besoin de réafficher le curseur puisque c'est
+    //   A la fin, on n'a pas besoin de rÃ©afficher le curseur puisque c'est
     // l'appelant qui s'en charge, et on n'a pas besoin de rafficher l'image
-    // puisque les seuls points qui ont changé dans l'image ont été raffichés
+    // puisque les seuls points qui ont changÃ© dans l'image ont Ã©tÃ© raffichÃ©s
     // par l'utilisation de "Display_pixel()", et que les autres... eh bein
-    // on n'y a jamais touché à l'écran les autres: ils sont donc corrects.
+    // on n'y a jamais touchÃ© Ã  l'Ã©cran les autres: ils sont donc corrects.
     if(Main.magnifier_mode)
     {
       short w,h;
@@ -1106,7 +1106,7 @@ void Fill_general(byte fill_color)
 
 
 //////////////////////////////////////////////////////////////////////////////
-////////////////// TRACéS DE FIGURES GéOMéTRIQUES STANDARDS //////////////////
+////////////////// TRACÃ©S DE FIGURES GÃ©OMÃ©TRIQUES STANDARDS //////////////////
 ////////////////////////// avec gestion de previews //////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
@@ -1120,7 +1120,7 @@ void Fill_general(byte fill_color)
     Permanent_draw_next_refresh = SDL_GetTicks() + 100;
   }
 
-  // Affichage d'un point de façon définitive (utilisation du pinceau)
+  // Affichage d'un point de faÃ§on dÃ©finitive (utilisation du pinceau)
   void Pixel_figure_permanent(word x_pos,word y_pos,byte color)
   {
     Draw_paintbrush(x_pos,y_pos,color);
@@ -1139,7 +1139,7 @@ void Fill_general(byte fill_color)
     }
   }
 
-  // Affichage d'un point de façon définitive
+  // Affichage d'un point de faÃ§on dÃ©finitive
   void Pixel_clipped(word x_pos,word y_pos,byte color)
   {
     if ( (x_pos>=Limit_left) &&
@@ -1218,7 +1218,7 @@ void Fill_general(byte fill_color)
   }
 
 
-  // -- Tracer général d'un cercle vide -------------------------------------
+  // -- Tracer gÃ©nÃ©ral d'un cercle vide -------------------------------------
 
 void Draw_empty_circle_general(short center_x,short center_y, long sqradius,byte color)
 {
@@ -1235,14 +1235,14 @@ void Draw_empty_circle_general(short center_x,short center_y, long sqradius,byte
   start_x=center_x-radius;
   start_y=center_y-radius;
 
-  // Affichage des extremitées du cercle sur chaque quart du cercle:
+  // Affichage des extremitÃ©es du cercle sur chaque quart du cercle:
   for (y_pos=start_y,y=-radius;y_pos<center_y;y_pos++,y++)
     for (x_pos=start_x,x=-radius;x_pos<center_x;x_pos++,x++)
       if (Pixel_in_circle(x, y, sqradius))
       {
         // On vient de tomber sur le premier point sur la ligne horizontale
         // qui fait partie du cercle.
-        // Donc on peut l'afficher (lui et ses copains symétriques)
+        // Donc on peut l'afficher (lui et ses copains symÃ©triques)
 
          // Quart Haut-gauche
         Pixel_figure(x_pos,y_pos,color);
@@ -1274,7 +1274,7 @@ void Draw_empty_circle_general(short center_x,short center_y, long sqradius,byte
         break;
       }
 
-  // On affiche à la fin les points cardinaux:
+  // On affiche Ã  la fin les points cardinaux:
   Pixel_figure(center_x,center_y-radius,color); // Haut
   Pixel_figure(center_x-radius,center_y,color); // Gauche
   Pixel_figure(center_x+radius,center_y,color); // Droite
@@ -1282,7 +1282,7 @@ void Draw_empty_circle_general(short center_x,short center_y, long sqradius,byte
 
 }
 
-  // -- Tracé définitif d'un cercle vide --
+  // -- TracÃ© dÃ©finitif d'un cercle vide --
 
 void Draw_empty_circle_permanent(short center_x,short center_y,long sqradius,byte color)
 {
@@ -1331,7 +1331,7 @@ void Draw_filled_circle(short center_x,short center_y,long sqradius,byte color)
   end_x=center_x+radius;
   end_y=center_y+radius;
 
-  // Correction des bornes d'après les limites
+  // Correction des bornes d'aprÃ¨s les limites
   if (start_y<Limit_top)
     start_y=Limit_top;
   if (end_y>Limit_bottom)
@@ -1365,7 +1365,7 @@ int Circle_squared_diameter(int diameter)
   return result;
 }
 
-  // -- Tracer général d'une ellipse vide -----------------------------------
+  // -- Tracer gÃ©nÃ©ral d'une ellipse vide -----------------------------------
 
 static void Draw_empty_ellipse_general(short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color)
 {
@@ -1382,7 +1382,7 @@ static void Draw_empty_ellipse_general(short center_x,short center_y,short horiz
   // Calcul des limites de l'ellipse
   Ellipse_compute_limites(horizontal_radius+1, vertical_radius+1, &Ellipse);
 
-  // Affichage des extremitées de l'ellipse sur chaque quart de l'ellipse:
+  // Affichage des extremitÃ©es de l'ellipse sur chaque quart de l'ellipse:
   for (y_pos=start_y,y=-vertical_radius;y_pos<center_y;y_pos++,y++)
     for (x_pos=start_x,x=-horizontal_radius;x_pos<center_x;x_pos++,x++)
       if (Pixel_in_ellipse(x, y, &Ellipse))
@@ -1390,7 +1390,7 @@ static void Draw_empty_ellipse_general(short center_x,short center_y,short horiz
         // On vient de tomber sur le premier point qui sur la ligne
         // horizontale fait partie de l'ellipse.
 
-        // Donc on peut l'afficher (lui et ses copains symétriques)
+        // Donc on peut l'afficher (lui et ses copains symÃ©triques)
 
          // Quart Haut-gauche
         Pixel_figure(x_pos,y_pos,color);
@@ -1402,7 +1402,7 @@ static void Draw_empty_ellipse_general(short center_x,short center_y,short horiz
         Pixel_figure((center_x<<1)-x_pos,(center_y<<1)-y_pos,color);
 
         // On peut ensuite afficher tous les points qui le suivent dont le
-        // pixel voisin du haut n'appartient pas à l'ellipse:
+        // pixel voisin du haut n'appartient pas Ã  l'ellipse:
         for (y--,x_pos++,x++;x_pos<center_x;x_pos++,x++)
           if (!Pixel_in_ellipse(x, y, &Ellipse))
           {
@@ -1422,7 +1422,7 @@ static void Draw_empty_ellipse_general(short center_x,short center_y,short horiz
         break;
       }
 
-  // On affiche à la fin les points cardinaux:
+  // On affiche Ã  la fin les points cardinaux:
 
   // points verticaux:
   x_pos=center_x;
@@ -1525,7 +1525,7 @@ static void Draw_inscribed_ellipse_general(short x1, short y1, short x2, short y
 
   Update_part_of_screen(left, top, right-left, bottom-top);
 }
-  // -- Tracé définitif d'une ellipse vide --
+  // -- TracÃ© dÃ©finitif d'une ellipse vide --
 
 void Draw_empty_ellipse_permanent(short center_x,short center_y,short horizontal_radius,short vertical_radius,byte color)
 {
@@ -1593,7 +1593,7 @@ void Draw_filled_ellipse(short center_x,short center_y,short horizontal_radius,s
   // Calcul des limites de l'ellipse
   Ellipse_compute_limites(horizontal_radius+1, vertical_radius+1, &Ellipse);
 
-  // Correction des bornes d'après les limites
+  // Correction des bornes d'aprÃ¨s les limites
   if (start_y<Limit_top)
     start_y=Limit_top;
   if (end_y>Limit_bottom)
@@ -1618,7 +1618,7 @@ void Draw_filled_inscribed_ellipse(short x1,short y1,short x2,short y2,byte colo
 }
 
 /******************
-* TRACÉ DE LIGNES *
+* TRACÃ‰ DE LIGNES *
 ******************/
 
 /// Alters bx and by so the (AX,AY)-(BX,BY) segment becomes either horizontal,
@@ -1749,7 +1749,7 @@ void Clamp_coordinates_regular_angle(short ax, short ay, short* bx, short* by)
   return;
 }
 
-  // -- Tracer général d'une ligne ------------------------------------------
+  // -- Tracer gÃ©nÃ©ral d'une ligne ------------------------------------------
 
 void Draw_line_general(short start_x,short start_y,short end_x,short end_y, byte color)
 {
@@ -1819,7 +1819,7 @@ void Draw_line_general(short start_x,short start_y,short end_x,short end_y, byte
 
 }
 
-  // -- Tracer définitif d'une ligne --
+  // -- Tracer dÃ©finitif d'une ligne --
 
 void Draw_line_permanent(short start_x,short start_y,short end_x,short end_y, byte color)
 {
@@ -1898,7 +1898,7 @@ void Draw_empty_rectangle(short start_x,short start_y,short end_x,short end_y,by
   short y_pos;
 
 
-  // On vérifie que les bornes soient dans le bon sens:
+  // On vÃ©rifie que les bornes soient dans le bon sens:
   if (start_x>end_x)
   {
     temp=start_x;
@@ -1941,7 +1941,7 @@ void Draw_filled_rectangle(short start_x,short start_y,short end_x,short end_y,b
   short y_pos;
 
 
-  // On vérifie que les bornes sont dans le bon sens:
+  // On vÃ©rifie que les bornes sont dans le bon sens:
   if (start_x>end_x)
   {
     temp=start_x;
@@ -1955,7 +1955,7 @@ void Draw_filled_rectangle(short start_x,short start_y,short end_x,short end_y,b
     end_y=temp;
   }
 
-  // Correction en cas de dépassement des limites de l'image
+  // Correction en cas de dÃ©passement des limites de l'image
   if (end_x>Limit_right)
     end_x=Limit_right;
   if (end_y>Limit_bottom)
@@ -1965,7 +1965,7 @@ void Draw_filled_rectangle(short start_x,short start_y,short end_x,short end_y,b
   for (y_pos=start_y;y_pos<=end_y;y_pos++)
     for (x_pos=start_x;x_pos<=end_x;x_pos++)
       // Display_pixel traite chaque pixel avec tous les effets ! (smear, ...)
-      // Donc on ne peut pas otimiser en traçant ligne par ligne avec memset :(
+      // Donc on ne peut pas otimiser en traÃ§ant ligne par ligne avec memset :(
       Display_pixel(x_pos,y_pos,color);
   Update_part_of_screen(start_x,start_y,end_x-start_x,end_y-start_y);
 
@@ -1974,7 +1974,7 @@ void Draw_filled_rectangle(short start_x,short start_y,short end_x,short end_y,b
 
 
 
-  // -- Tracer une courbe de Bézier --
+  // -- Tracer une courbe de BÃ©zier --
 
 void Draw_curve_general(short x1, short y1,
                            short x2, short y2,
@@ -1998,7 +1998,7 @@ void Draw_curve_general(short x1, short y1,
   cy[2]= - 3*y1 + 3*y2;
   cy[3]= +   y1;
 
-  // Traçage de la courbe
+  // TraÃ§age de la courbe
   old_x=x1;
   old_y=y1;
   Pixel_figure(old_x,old_y,color);
@@ -2021,7 +2021,7 @@ void Draw_curve_general(short x1, short y1,
   Update_part_of_screen(x,y,old_x+1,old_y+1);
 }
 
-  // -- Tracer une courbe de Bézier définitivement --
+  // -- Tracer une courbe de BÃ©zier dÃ©finitivement --
 
 void Draw_curve_permanent(short x1, short y1,
                              short x2, short y2,
@@ -2034,7 +2034,7 @@ void Draw_curve_permanent(short x1, short y1,
   Draw_curve_general(x1,y1,x2,y2,x3,y3,x4,y4,color);
 }
 
-  // -- Tracer la preview d'une courbe de Bézier --
+  // -- Tracer la preview d'une courbe de BÃ©zier --
 
 void Draw_curve_preview(short x1, short y1,
                            short x2, short y2,
@@ -2046,7 +2046,7 @@ void Draw_curve_preview(short x1, short y1,
   Draw_curve_general(x1,y1,x2,y2,x3,y3,x4,y4,color);
 }
 
-  // -- Effacer la preview d'une courbe de Bézier --
+  // -- Effacer la preview d'une courbe de BÃ©zier --
 
 void Hide_curve_preview(short x1, short y1,
                             short x2, short y2,
@@ -2094,9 +2094,9 @@ void Airbrush(short clicked_button)
   }
   else
   {
-    //   On essaye de se balader dans la table des flux de façon à ce que ce
-    // ne soit pas toujours la dernière couleur qui soit affichée en dernier
-    // Pour ça, on part d'une couleur au pif dans une direction aléatoire.
+    //   On essaye de se balader dans la table des flux de faÃ§on Ã  ce que ce
+    // ne soit pas toujours la derniÃ¨re couleur qui soit affichÃ©e en dernier
+    // Pour Ã§a, on part d'une couleur au pif dans une direction alÃ©atoire.
     direction=rand()&1;
     for (index=0,color_index=rand()/*%256*/; index<256; index++)
     {
@@ -2131,7 +2131,7 @@ void Airbrush(short clicked_button)
   //////////////////////////////////////////////////////////////////////////
 
 
-  // -- Gestion d'un dégradé de base (le plus moche) --
+  // -- Gestion d'un dÃ©gradÃ© de base (le plus moche) --
 
 void Gradient_basic(long index,short x_pos,short y_pos)
 {
@@ -2140,21 +2140,21 @@ void Gradient_basic(long index,short x_pos,short y_pos)
   // On fait un premier calcul partiel
   position=(index*Gradient_bounds_range);
 
-  // On gère un déplacement au hasard
+  // On gÃ¨re un dÃ©placement au hasard
   position+=(Gradient_total_range*(rand()%Gradient_random_factor)) >>6;
   position-=(Gradient_total_range*Gradient_random_factor) >>7;
 
   position/=Gradient_total_range;
 
-  //   On va vérifier que nos petites idioties n'ont pas éjecté la valeur hors
-  // des valeurs autorisées par le dégradé défini par l'utilisateur.
+  //   On va vÃ©rifier que nos petites idioties n'ont pas Ã©jectÃ© la valeur hors
+  // des valeurs autorisÃ©es par le dÃ©gradÃ© dÃ©fini par l'utilisateur.
 
   if (position<0)
     position=0;
   else if (position>=Gradient_bounds_range)
     position=Gradient_bounds_range-1;
 
-  // On ramène ensuite la position dans le dégradé vers un numéro de couleur
+  // On ramÃ¨ne ensuite la position dans le dÃ©gradÃ© vers un numÃ©ro de couleur
   if (Gradient_is_inverted)
     Gradient_pixel(x_pos,y_pos,Gradient_upper_bound-position);
   else
@@ -2162,7 +2162,7 @@ void Gradient_basic(long index,short x_pos,short y_pos)
 }
 
 
-  // -- Gestion d'un dégradé par trames simples --
+  // -- Gestion d'un dÃ©gradÃ© par trames simples --
 
 void Gradient_dithered(long index,short x_pos,short y_pos)
 {
@@ -2170,22 +2170,22 @@ void Gradient_dithered(long index,short x_pos,short y_pos)
   long position_in_segment;
 
   //
-  //   But de l'opération: en plus de calculer la position de base (désignée
-  // dans cette procédure par "position_in_gradient", on calcule la position
-  // de l'indice dans le schéma suivant:
+  //   But de l'opÃ©ration: en plus de calculer la position de base (dÃ©signÃ©e
+  // dans cette procÃ©dure par "position_in_gradient", on calcule la position
+  // de l'indice dans le schÃ©ma suivant:
   //
-  //         | Les indices qui traînent de ce côté du segment se voient subir
-  //         | une incrémentation conditionnelle à leur position dans l'écran.
+  //         | Les indices qui traÃ®nent de ce cÃ´tÃ© du segment se voient subir
+  //         | une incrÃ©mentation conditionnelle Ã  leur position dans l'Ã©cran.
   //         v
   //  |---|---|---|---- - - -
   //   ^
-  //   |_ Les indices qui traînent de ce côté du segment se voient subir une
-  //      décrémentation conditionnelle à leur position dans l'écran.
+  //   |_ Les indices qui traÃ®nent de ce cÃ´tÃ© du segment se voient subir une
+  //      dÃ©crÃ©mentation conditionnelle Ã  leur position dans l'Ã©cran.
 
   // On fait d'abord un premier calcul partiel
   position_in_gradient=(index*Gradient_bounds_range);
 
-  // On gère un déplacement au hasard...
+  // On gÃ¨re un dÃ©placement au hasard...
   position_in_gradient+=(Gradient_total_range*(rand()%Gradient_random_factor)) >>6;
   position_in_gradient-=(Gradient_total_range*Gradient_random_factor) >>7;
 
@@ -2195,11 +2195,11 @@ void Gradient_dithered(long index,short x_pos,short y_pos)
   // ... qui nous permet de calculer la position dans le segment
   position_in_segment=((position_in_gradient<<2)/Gradient_total_range)&3;
 
-  // On peut ensuite terminer le calcul de l'indice dans le dégradé
+  // On peut ensuite terminer le calcul de l'indice dans le dÃ©gradÃ©
   position_in_gradient/=Gradient_total_range;
 
   // On va pouvoir discuter de la valeur de position_in_gradient en fonction
-  // de la position dans l'écran et de la position_in_segment.
+  // de la position dans l'Ã©cran et de la position_in_segment.
 
   switch (position_in_segment)
   {
@@ -2208,23 +2208,23 @@ void Gradient_dithered(long index,short x_pos,short y_pos)
         position_in_gradient--;
       break;
 
-      // On n'a pas à traiter les cas 1 et 2 car ils représentent des valeurs
-      // suffisament au centre du segment pour ne pas avoir à subir la trame
+      // On n'a pas Ã  traiter les cas 1 et 2 car ils reprÃ©sentent des valeurs
+      // suffisament au centre du segment pour ne pas avoir Ã  subir la trame
 
     case 3 : // On est sur la droite du segment
-      if (((x_pos+y_pos)&1)!=0) // Note: on doit faire le test inverse au cas gauche pour synchroniser les 2 côtés de la trame.
+      if (((x_pos+y_pos)&1)!=0) // Note: on doit faire le test inverse au cas gauche pour synchroniser les 2 cÃ´tÃ©s de la trame.
         position_in_gradient++;
   }
 
-  //   On va vérifier que nos petites idioties n'ont pas éjecté la valeur hors
-  // des valeurs autorisées par le dégradé défini par l'utilisateur.
+  //   On va vÃ©rifier que nos petites idioties n'ont pas Ã©jectÃ© la valeur hors
+  // des valeurs autorisÃ©es par le dÃ©gradÃ© dÃ©fini par l'utilisateur.
 
   if (position_in_gradient<0)
     position_in_gradient=0;
   else if (position_in_gradient>=Gradient_bounds_range)
     position_in_gradient=Gradient_bounds_range-1;
 
-  // On ramène ensuite la position dans le dégradé vers un numéro de couleur
+  // On ramÃ¨ne ensuite la position dans le dÃ©gradÃ© vers un numÃ©ro de couleur
   if (Gradient_is_inverted)
     position_in_gradient=Gradient_upper_bound-position_in_gradient;
   else
@@ -2234,7 +2234,7 @@ void Gradient_dithered(long index,short x_pos,short y_pos)
 }
 
 
-  // -- Gestion d'un dégradé par trames étendues --
+  // -- Gestion d'un dÃ©gradÃ© par trames Ã©tendues --
 
 void Gradient_extra_dithered(long index,short x_pos,short y_pos)
 {
@@ -2242,22 +2242,22 @@ void Gradient_extra_dithered(long index,short x_pos,short y_pos)
   long position_in_segment;
 
 //
-  //   But de l'opération: en plus de calculer la position de base (désignée
-  // dans cette procédure par "position_in_gradient", on calcule la position
-  // de l'indice dans le schéma suivant:
+  //   But de l'opÃ©ration: en plus de calculer la position de base (dÃ©signÃ©e
+  // dans cette procÃ©dure par "position_in_gradient", on calcule la position
+  // de l'indice dans le schÃ©ma suivant:
   //
-  //         | Les indices qui traînent de ce côté du segment se voient subir
-  //         | une incrémentation conditionnelle à leur position dans l'écran.
+  //         | Les indices qui traÃ®nent de ce cÃ´tÃ© du segment se voient subir
+  //         | une incrÃ©mentation conditionnelle Ã  leur position dans l'Ã©cran.
   //         v
   //  |---|---|---|---- - - -
   //   ^
-  //   |_ Les indices qui traînent de ce côté du segment se voient subir une
-  //      décrémentation conditionnelle à leur position dans l'écran.
+  //   |_ Les indices qui traÃ®nent de ce cÃ´tÃ© du segment se voient subir une
+  //      dÃ©crÃ©mentation conditionnelle Ã  leur position dans l'Ã©cran.
 
   // On fait d'abord un premier calcul partiel
   position_in_gradient=(index*Gradient_bounds_range);
 
-  // On gère un déplacement au hasard
+  // On gÃ¨re un dÃ©placement au hasard
   position_in_gradient+=(Gradient_total_range*(rand()%Gradient_random_factor)) >>6;
   position_in_gradient-=(Gradient_total_range*Gradient_random_factor) >>7;
 
@@ -2267,15 +2267,15 @@ void Gradient_extra_dithered(long index,short x_pos,short y_pos)
   // Qui nous permet de calculer la position dans le segment
   position_in_segment=((position_in_gradient<<3)/Gradient_total_range)&7;
 
-  // On peut ensuite terminer le calcul de l'indice dans le dégradé
+  // On peut ensuite terminer le calcul de l'indice dans le dÃ©gradÃ©
   position_in_gradient/=Gradient_total_range;
 
   // On va pouvoir discuter de la valeur de position_in_gradient en fonction
-  // de la position dans l'écran et de la position_in_segment.
+  // de la position dans l'Ã©cran et de la position_in_segment.
 
   switch (position_in_segment)
   {
-    case 0 : // On est sur l'extrême gauche du segment
+    case 0 : // On est sur l'extrÃªme gauche du segment
       if (((x_pos+y_pos)&1)==0)
         position_in_gradient--;
       break;
@@ -2286,8 +2286,8 @@ void Gradient_extra_dithered(long index,short x_pos,short y_pos)
         position_in_gradient--;
       break;
 
-      // On n'a pas à traiter les cas 3 et 4 car ils représentent des valeurs
-      // suffisament au centre du segment pour ne pas avoir à subir la trame
+      // On n'a pas Ã  traiter les cas 3 et 4 car ils reprÃ©sentent des valeurs
+      // suffisament au centre du segment pour ne pas avoir Ã  subir la trame
 
     case 5 : // On est sur la droite du segment
     case 6 : // On est sur la droite du segment
@@ -2296,19 +2296,19 @@ void Gradient_extra_dithered(long index,short x_pos,short y_pos)
       break;
 
     case 7 : // On est sur l'extreme droite du segment
-      if (((x_pos+y_pos)&1)!=0) // Note: on doit faire le test inverse au cas gauche pour synchroniser les 2 côtés de la trame.
+      if (((x_pos+y_pos)&1)!=0) // Note: on doit faire le test inverse au cas gauche pour synchroniser les 2 cÃ´tÃ©s de la trame.
         position_in_gradient++;
   }
 
-  //   On va vérifier que nos petites idioties n'ont pas éjecté la valeur hors
-  // des valeurs autorisées par le dégradé défini par l'utilisateur.
+  //   On va vÃ©rifier que nos petites idioties n'ont pas Ã©jectÃ© la valeur hors
+  // des valeurs autorisÃ©es par le dÃ©gradÃ© dÃ©fini par l'utilisateur.
 
   if (position_in_gradient<0)
     position_in_gradient=0;
   else if (position_in_gradient>=Gradient_bounds_range)
     position_in_gradient=Gradient_bounds_range-1;
 
-  // On ramène ensuite la position dans le dégradé vers un numéro de couleur
+  // On ramÃ¨ne ensuite la position dans le dÃ©gradÃ© vers un numÃ©ro de couleur
   if (Gradient_is_inverted)
     position_in_gradient=Gradient_upper_bound-position_in_gradient;
   else
@@ -2319,7 +2319,7 @@ void Gradient_extra_dithered(long index,short x_pos,short y_pos)
 
 
 
-  // -- Tracer un cercle degradé (une sphère) --
+  // -- Tracer un cercle degradÃ© (une sphÃ¨re) --
 
 void Draw_grad_circle(short center_x,short center_y,long sqradius,short spot_x,short spot_y)
 {
@@ -2329,8 +2329,8 @@ void Draw_grad_circle(short center_x,short center_y,long sqradius,short spot_x,s
   long y_pos;
   long end_x;
   long end_y;
-  long distance_x; // Distance (au carré) sur les X du point en cours au centre d'éclairage
-  long distance_y; // Distance (au carré) sur les Y du point en cours au centre d'éclairage
+  long distance_x; // Distance (au carrÃ©) sur les X du point en cours au centre d'Ã©clairage
+  long distance_y; // Distance (au carrÃ©) sur les Y du point en cours au centre d'Ã©clairage
   long x, y;
   short radius = sqrt(sqradius);
 
@@ -2339,7 +2339,7 @@ void Draw_grad_circle(short center_x,short center_y,long sqradius,short spot_x,s
   end_x=center_x+radius;
   end_y=center_y+radius;
 
-  // Correction des bornes d'après les limites
+  // Correction des bornes d'aprÃ¨s les limites
   if (start_y<Limit_top)
     start_y=Limit_top;
   if (end_y>Limit_bottom)
@@ -2377,7 +2377,7 @@ void Draw_grad_circle(short center_x,short center_y,long sqradius,short spot_x,s
 }
 
 
-  // -- Tracer une ellipse degradée --
+  // -- Tracer une ellipse degradÃ©e --
 
 void Draw_grad_ellipse(short center_x,short center_y,short horizontal_radius,short vertical_radius,short spot_x,short spot_y)
 {
@@ -2387,8 +2387,8 @@ void Draw_grad_ellipse(short center_x,short center_y,short horizontal_radius,sho
   long y_pos;
   long end_x;
   long end_y;
-  long distance_x; // Distance (au carré) sur les X du point en cours au centre d'éclairage
-  long distance_y; // Distance (au carré) sur les Y du point en cours au centre d'éclairage
+  long distance_x; // Distance (au carrÃ©) sur les X du point en cours au centre d'Ã©clairage
+  long distance_y; // Distance (au carrÃ©) sur les Y du point en cours au centre d'Ã©clairage
   long x, y;
   T_Ellipse_limits Ellipse;
 
@@ -2416,7 +2416,7 @@ void Draw_grad_ellipse(short center_x,short center_y,short horizontal_radius,sho
   if (Gradient_total_range==0)
     Gradient_total_range=1;
 
-  // Correction des bornes d'après les limites
+  // Correction des bornes d'aprÃ¨s les limites
   if (start_y<Limit_top)
     start_y=Limit_top;
   if (end_y>Limit_bottom)
@@ -2527,12 +2527,12 @@ void Draw_grad_inscribed_ellipse(short x1, short y1, short x2, short y2, short s
   Update_part_of_screen(left, top, right-left+1, bottom-top+1);
 }
 
-// Tracé d'un rectangle (rax ray - rbx rby) dégradé selon le vecteur (vax vay - vbx - vby)
+// TracÃ© d'un rectangle (rax ray - rbx rby) dÃ©gradÃ© selon le vecteur (vax vay - vbx - vby)
 void Draw_grad_rectangle(short rax,short ray,short rbx,short rby,short vax,short vay, short vbx, short vby)
 {
     short y_pos, x_pos;
 
-    // On commence par s'assurer que le rectangle est à l'endroit
+    // On commence par s'assurer que le rectangle est Ã  l'endroit
     if(rbx < rax)
     {
       x_pos = rbx;
@@ -2547,7 +2547,7 @@ void Draw_grad_rectangle(short rax,short ray,short rbx,short rby,short vax,short
       ray = y_pos;
     }
 
-    // Correction des bornes d'après les limites
+    // Correction des bornes d'aprÃ¨s les limites
     if (ray<Limit_top)
       ray=Limit_top;
     if (rby>Limit_bottom)
@@ -2559,7 +2559,7 @@ void Draw_grad_rectangle(short rax,short ray,short rbx,short rby,short vax,short
 
     if(vbx == vax)
     {
-      // Le vecteur est vertical, donc on évite la partie en dessous qui foirerait avec une division par 0...
+      // Le vecteur est vertical, donc on Ã©vite la partie en dessous qui foirerait avec une division par 0...
       if (vby == vay) return;  // L'utilisateur fait n'importe quoi
       Gradient_total_range = abs(vby - vay);
       for(y_pos=ray;y_pos<=rby;y_pos++)
@@ -2580,7 +2580,7 @@ void Draw_grad_rectangle(short rax,short ray,short rbx,short rby,short vax,short
       for (y_pos=ray;y_pos<=rby;y_pos++)
         for (x_pos = rax;x_pos<=rbx;x_pos++)
         {
-          // On calcule ou on en est dans le dégradé
+          // On calcule ou on en est dans le dÃ©gradÃ©
           distance_x = pow((y_pos - vay),2)+pow((x_pos - vax),2);
           distance_y = pow((-a * x_pos + y_pos - b),2)/(a*a+1);
 
@@ -2593,7 +2593,7 @@ void Draw_grad_rectangle(short rax,short ray,short rbx,short rby,short vax,short
 
 
 
-// -- Tracer un polygône plein --
+// -- Tracer un polygÃ´ne plein --
 
 typedef struct T_Polygon_edge      /* an active edge */
 {
@@ -2817,7 +2817,7 @@ void Polyfill_general(int vertices, short * points, int color)
   free(initial_edge);
   initial_edge = NULL;
 
-  // On ne connait pas simplement les xmin et xmax ici, mais de toutes façon ce n'est pas utilisé en preview
+  // On ne connait pas simplement les xmin et xmax ici, mais de toutes faÃ§on ce n'est pas utilisÃ© en preview
   Update_part_of_screen(0,top,Main.image_width,bottom-top+1);
 }
 
@@ -2834,7 +2834,7 @@ void Polyfill(int vertices, short * points, int color)
   }
 
   // Comme pour le Fill, cette operation fait un peu d'"overdraw"
-  // (pixels dessinés plus d'une fois) alors on force le FX Feedback à OFF
+  // (pixels dessinÃ©s plus d'une fois) alors on force le FX Feedback Ã  OFF
   Update_FX_feedback(0);
 
   Pixel_figure=Pixel_clipped;
@@ -2856,7 +2856,7 @@ void Polyfill(int vertices, short * points, int color)
 
 
 
-//------------ Remplacement de la couleur pointée par une autre --------------
+//------------ Remplacement de la couleur pointÃ©e par une autre --------------
 
 void Replace(byte new_color)
 {
@@ -2896,32 +2896,32 @@ void Shade_list_to_lookup_tables(word * list,short step,byte mode,byte * table_i
   int temp;
 
 
-  // On initialise les deux tables de conversion en Identité
+  // On initialise les deux tables de conversion en IdentitÃ©
   for (index=0;index<256;index++)
   {
     table_inc[index]=index;
     table_dec[index]=index;
   }
 
-  // On s'apprête à examiner l'ensemble de la liste
+  // On s'apprÃªte Ã  examiner l'ensemble de la liste
   for (index=0;index<512;index++)
   {
-    // On recherche la première case de la liste non vide (et non inhibée)
+    // On recherche la premiÃ¨re case de la liste non vide (et non inhibÃ©e)
     while ((index<512) && (list[index]>255))
       index++;
 
-    // On note la position de la première case de la séquence
+    // On note la position de la premiÃ¨re case de la sÃ©quence
     first=index;
 
-    // On recherche la position de la dernière case de la séquence
+    // On recherche la position de la derniÃ¨re case de la sÃ©quence
     for (last=first;list[last+1]<256;last++);
 
-    // Pour toutes les cases non vides (et non inhibées) qui suivent
+    // Pour toutes les cases non vides (et non inhibÃ©es) qui suivent
     switch (mode)
     {
       case SHADE_MODE_NORMAL :
         for (;(index<512) && (list[index]<256);index++)
-        { // On met à jour les tables de conversion
+        { // On met Ã  jour les tables de conversion
           color=list[index];
           table_inc[color]=list[(index+step<=last)?index+step:last];
           table_dec[color]=list[(index-step>=first)?index-step:first];
@@ -2930,7 +2930,7 @@ void Shade_list_to_lookup_tables(word * list,short step,byte mode,byte * table_i
       case SHADE_MODE_LOOP :
         temp=1+last-first;
         for (;(index<512) && (list[index]<256);index++)
-        { // On met à jour les tables de conversion
+        { // On met Ã  jour les tables de conversion
           color=list[index];
           table_inc[color]=list[first+((step+index-first)%temp)];
           table_dec[color]=list[first+(((temp-step)+index-first)%temp)];
@@ -2938,7 +2938,7 @@ void Shade_list_to_lookup_tables(word * list,short step,byte mode,byte * table_i
         break;
       default : // SHADE_MODE_NOSAT
         for (;(index<512) && (list[index]<256);index++)
-        { // On met à jour les tables de conversion
+        { // On met Ã  jour les tables de conversion
           color=list[index];
           if (index+step<=last)
             table_inc[color]=list[index+step];
@@ -2951,17 +2951,17 @@ void Shade_list_to_lookup_tables(word * list,short step,byte mode,byte * table_i
 
 
 
-// -- Interface avec l'image, affectée par le facteur de grossissement -------
+// -- Interface avec l'image, affectÃ©e par le facteur de grossissement -------
 
-  // fonction d'affichage "Pixel" utilisée pour les opérations définitivement
-  // Ne doit à aucune condition être appelée en dehors de la partie visible
-  // de l'image dans l'écran (ça pourrait être grave)
+  // fonction d'affichage "Pixel" utilisÃ©e pour les opÃ©rations dÃ©finitivement
+  // Ne doit Ã  aucune condition Ãªtre appelÃ©e en dehors de la partie visible
+  // de l'image dans l'Ã©cran (Ã§a pourrait Ãªtre grave)
 void Display_pixel(word x,word y,byte color)
   // x & y    sont la position d'un point dans l'IMAGE
   // color  est la couleur du point
-  // Le Stencil est géré.
-  // Les effets sont gérés par appel à Effect_function().
-  // La Loupe est gérée par appel à Pixel_preview().
+  // Le Stencil est gÃ©rÃ©.
+  // Les effets sont gÃ©rÃ©s par appel Ã  Effect_function().
+  // La Loupe est gÃ©rÃ©e par appel Ã  Pixel_preview().
 {
   if ( ( (!Sieve_mode)   || (Effect_sieve(x,y)) )
     && (!((Stencil_mode) && (Stencil[Read_pixel_from_current_layer(x,y)])))
@@ -2979,7 +2979,7 @@ void Display_pixel(word x,word y,byte color)
 
 
 
-// -- Calcul des différents effets -------------------------------------------
+// -- Calcul des diffÃ©rents effets -------------------------------------------
 
   // -- Aucun effet en cours --
 
@@ -3147,13 +3147,13 @@ byte Effect_smooth(word x,word y,byte color)
     b+=weight*Main.palette[c].B;
   }
 
-  return (total_weight)? // On regarde s'il faut éviter le 0/0.
+  return (total_weight)? // On regarde s'il faut Ã©viter le 0/0.
     Best_color(Round_div(r,total_weight),
                       Round_div(g,total_weight),
                       Round_div(b,total_weight)):
-    Read_pixel_from_current_screen(x,y); // C'est bien l'écran courant et pas
-                                       // l'écran feedback car il s'agit de ne
-}                                      // pas modifier l'écran courant.
+    Read_pixel_from_current_screen(x,y); // C'est bien l'Ã©cran courant et pas
+                                       // l'Ã©cran feedback car il s'agit de ne
+}                                      // pas modifier l'Ã©cran courant.
 
 byte Effect_layer_copy(word x,word y,byte color)
 {

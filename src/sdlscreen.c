@@ -3,7 +3,7 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2014 Sergii Pylypenko
-    Copyright 2011 Pawel Góralski
+    Copyright 2011 Pawel GÃ³ralski
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
     Copyright 2007 Adrien Destugues

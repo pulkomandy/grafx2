@@ -67,13 +67,13 @@ void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_ca
   {
     Window_set_normal_button(91,129,78,14,"OK"    ,0,1,SDLK_RETURN); // 4
     Window_set_normal_button( 7,129,78,14,"Cancel",0,1,KEY_ESC);  // 5
-    // On enregistre la table dans un backup au cas où on ferait Cancel
+    // On enregistre la table dans un backup au cas oÃ¹ on ferait Cancel
     memcpy(backup_table,table,256);
   }
   else
     Window_set_normal_button(49,129,78,14,"OK"    ,0,1,SDLK_RETURN); // 4
 
-  // On affiche l'état actuel de la table
+  // On affiche l'Ã©tat actuel de la table
   for (index=0; index<=255; index++)
     Stencil_tag_color(index, (table[index])?MC_Black:MC_Light);
 
@@ -123,7 +123,7 @@ void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_ca
     if (!Mouse_K)
     switch (Key)
     {
-      case SDLK_BACKQUOTE : // Récupération d'une couleur derrière le menu
+      case SDLK_BACKQUOTE : // RÃ©cupÃ©ration d'une couleur derriÃ¨re le menu
       case SDLK_COMMA :
         Get_color_behind_window(&color,&click);
         if (click)
@@ -682,7 +682,7 @@ void Button_Smooth_menu(void)
   if (clicked_button==2) // OK
   {
     memcpy(Smooth_matrix,chosen_matrix,sizeof(Smooth_matrix));
-    Smooth_mode=0; // On le met à 0 car la fonct° suivante va le passer à 1
+    Smooth_mode=0; // On le met Ã  0 car la fonctÂ° suivante va le passer Ã  1
     Button_Smooth_mode();
   }
 
@@ -754,9 +754,9 @@ void Button_Colorize_mode(void)
 
 void Button_Colorize_display_selection(int mode)
 {
-  short y_pos=0; // Ligne où afficher les flèches de sélection
+  short y_pos=0; // Ligne oÃ¹ afficher les flÃ¨ches de sÃ©lection
 
-  // On commence par effacer les anciennes sélections:
+  // On commence par effacer les anciennes sÃ©lections:
     // Partie gauche
   Print_in_window(4,37," ",MC_Black,MC_Light);
   Print_in_window(4,57," ",MC_Black,MC_Light);
@@ -768,19 +768,19 @@ void Button_Colorize_display_selection(int mode)
   Print_in_window(129,74," ",MC_Black,MC_Light);
   Print_in_window(129,91," ",MC_Black,MC_Light);
 
-  // Ensuite, on affiche la flèche là où il le faut:
+  // Ensuite, on affiche la flÃ¨che lÃ  oÃ¹ il le faut:
   switch(mode)
   {
-    case 0 : // Méthode interpolée
+    case 0 : // MÃ©thode interpolÃ©e
       y_pos=37;
       break;
-    case 1 : // Méthode additive
+    case 1 : // MÃ©thode additive
       y_pos=57;
       break;
-    case 2 : // Méthode soustractive
+    case 2 : // MÃ©thode soustractive
       y_pos=74;
       break;
-    case 3 : // Méthode alpha
+    case 3 : // MÃ©thode alpha
       y_pos=91;
   }
   Print_in_window(4,y_pos,"\020",MC_Black,MC_Light);
@@ -825,7 +825,7 @@ void Button_Colorize_menu(void)
 
     switch(clicked_button)
     {
-      case 1: // Zone de saisie de l'opacité
+      case 1: // Zone de saisie de l'opacitÃ©
         Num2str(chosen_opacity,str,3);
         Readline(89,23,str,3,INPUT_TYPE_INTEGER);
         chosen_opacity=atoi(str);
@@ -861,7 +861,7 @@ void Button_Colorize_menu(void)
     Colorize_opacity      =chosen_opacity;
     Colorize_current_mode=selected_mode;
     Compute_colorize_table();
-    Colorize_mode=0; // On le met à 0 car la fonct° suivante va le passer à 1
+    Colorize_mode=0; // On le met Ã  0 car la fonctÂ° suivante va le passer Ã  1
     Button_Colorize_mode();
   }
 
@@ -917,12 +917,12 @@ void Button_Tiling_menu(void)
   {
     clicked_button=Window_clicked_button();
 
-    if (clicked_button==3)  // Zone de saisie du décalage X
+    if (clicked_button==3)  // Zone de saisie du dÃ©calage X
     {
       Num2str(chosen_offset_x,str,4);
       Readline(93,23,str,4,INPUT_TYPE_INTEGER);
       chosen_offset_x=atoi(str);
-      // On corrige le décalage en X
+      // On corrige le dÃ©calage en X
       if (chosen_offset_x>=Brush_width)
       {
         chosen_offset_x=Brush_width-1;
@@ -932,12 +932,12 @@ void Button_Tiling_menu(void)
       Display_cursor();
     }
     else
-    if (clicked_button==4)  // Zone de saisie du décalage Y
+    if (clicked_button==4)  // Zone de saisie du dÃ©calage Y
     {
       Num2str(chosen_offset_y,str,4);
       Readline(93,37,str,4,INPUT_TYPE_INTEGER);
       chosen_offset_y=atoi(str);
-      // On corrige le décalage en Y
+      // On corrige le dÃ©calage en Y
       if (chosen_offset_y>=Brush_height)
       {
         chosen_offset_y=Brush_height-1;
@@ -1000,9 +1000,9 @@ void Draw_sieve_scaled(short origin_x, short origin_y)
   short start_y=Window_pos_Y+(Menu_factor_Y*78);
 
   x_size=Menu_factor_X*5; // |_ Taille d'une case
-  y_size=Menu_factor_Y*5; // |  de la trame zoomée
+  y_size=Menu_factor_Y*5; // |  de la trame zoomÃ©e
 
-  // On efface de contenu précédent
+  // On efface de contenu prÃ©cÃ©dent
   Block(origin_x,origin_y,
         Menu_factor_X*Window_special_button_list->Width,
         Menu_factor_Y*Window_special_button_list->Height,MC_Light);
@@ -1024,7 +1024,7 @@ void Draw_sieve_scaled(short origin_x, short origin_y)
     }
 
   // Dessiner la preview de la trame
-  x_size=Menu_factor_X*51; // |_ Taille de la fenêtre
+  x_size=Menu_factor_X*51; // |_ Taille de la fenÃªtre
   y_size=Menu_factor_Y*71; // |  de la preview
   for (y_pos=0; y_pos<y_size; y_pos++)
     for (x_pos=0; x_pos<x_size; x_pos++)
@@ -1077,7 +1077,7 @@ void Invert_trame(void)
       Sieve[x_pos][y_pos]=!(Sieve[x_pos][y_pos]);
 }
 
-// Rafraichit toute la zone correspondant à la trame zoomee.
+// Rafraichit toute la zone correspondant Ã  la trame zoomee.
 void Update_sieve_area(short x, short y)
 {
   Update_rect(x,y,80*Menu_factor_X,80*Menu_factor_Y);
@@ -1097,7 +1097,7 @@ void Button_Sieve_menu(void)
   static byte default_bg_color=0;
   T_Normal_button * button_bg_color;
   char  str[3];
-  byte  temp; // Octet temporaire servant à n'importe quoi
+  byte  temp; // Octet temporaire servant Ã  n'importe quoi
   short old_sieve_width=Sieve_width;
   short old_sieve_height=Sieve_height;
   byte  old_sieve[16][16];
@@ -1201,10 +1201,10 @@ void Button_Sieve_menu(void)
               temp=MC_White;
             else
               temp=MC_Black;
-            // Affichage du pixel dans la fenêtre zoomée
+            // Affichage du pixel dans la fenÃªtre zoomÃ©e
             Block(origin_x+(old_x_pos*x_pos), origin_y+(old_y_pos*y_pos),
                   x_pos-Menu_factor_X, y_pos-Menu_factor_Y, temp);
-            // Mise à jour de la preview
+            // Mise Ã  jour de la preview
             Draw_sieve_scaled(origin_x,origin_y);
             Display_cursor();
             // Maj de la case seule
@@ -1269,7 +1269,7 @@ void Button_Sieve_menu(void)
         Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
         break;
 
-      case  8 : // Réduire hauteur
+      case  8 : // RÃ©duire hauteur
         if (Sieve_height>1)
         {
           Hide_cursor();
@@ -1297,7 +1297,7 @@ void Button_Sieve_menu(void)
         }
         break;
 
-      case 10 : // Réduire largeur
+      case 10 : // RÃ©duire largeur
         if (Sieve_width>1)
         {
           Hide_cursor();
@@ -1325,7 +1325,7 @@ void Button_Sieve_menu(void)
         }
         break;
 
-      case 12 : // Toggle octets insérés
+      case 12 : // Toggle octets insÃ©rÃ©s
         Hide_cursor();
         default_bg_color=!default_bg_color;
         Window_rectangle(button_bg_color->Pos_X+2,
@@ -1396,7 +1396,7 @@ void Button_Sieve_menu(void)
         Update_sieve_area(origin_x, origin_y);
         break;
 
-      default : // Boutons de trames prédéfinies
+      default : // Boutons de trames prÃ©dÃ©finies
         Hide_cursor();
         Copy_preset_sieve(clicked_button-17);
         Draw_sieve_scaled(origin_x,origin_y);

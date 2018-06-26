@@ -4,7 +4,7 @@
 
     Copyright 2018 Thomas Bernard
     Copyright 2014 Sergii Pylypenko
-    Copyright 2011 Pawel Góralski
+    Copyright 2011 Pawel GÃ³ralski
     Copyright 2009 Franck Charlet
     Copyright 2008 Peter Gordon
     Copyright 2008 Yves Rizoud
@@ -72,17 +72,17 @@
 #include "filesel.h"
 
 #define NORMAL_FILE_COLOR    MC_Light // color du texte pour une ligne de
-  // fichier non sélectionné
+  // fichier non sÃ©lectionnÃ©
 #define NORMAL_DIRECTORY_COLOR MC_Dark // color du texte pour une ligne de
-  // répertoire non sélectionné
+  // rÃ©pertoire non sÃ©lectionnÃ©
 #define NORMAL_BACKGROUND_COLOR       MC_Black  // color du fond  pour une ligne
-  // non sélectionnée
+  // non sÃ©lectionnÃ©e
 #define SELECTED_FILE_COLOR    MC_White // color du texte pour une ligne de
-  // fichier sélectionnée
+  // fichier sÃ©lectionnÃ©e
 #define SELECTED_DIRECTORY_COLOR MC_Light // color du texte pour une ligne de
-  // repértoire sélectionnée
+  // repÃ©rtoire sÃ©lectionnÃ©e
 #define SELECTED_BACKGROUND_COLOR       MC_Dark // color du fond  pour une ligne
-  // sélectionnée
+  // sÃ©lectionnÃ©e
 
 // -- Native fileselector for WIN32
 
@@ -158,8 +158,8 @@ static word Selector_filename_unicode[256];
 
 // Conventions:
 //
-// * Le fileselect modifie le répertoire courant. Ceci permet de n'avoir
-//   qu'un findfirst dans le répertoire courant à faire:
+// * Le fileselect modifie le rÃ©pertoire courant. Ceci permet de n'avoir
+//   qu'un findfirst dans le rÃ©pertoire courant Ã  faire:
 
 void Recount_files(T_Fileselector *list)
 {
@@ -202,9 +202,9 @@ void Recount_files(T_Fileselector *list)
   }
 }
 
-// -- Destruction de la liste chaînée ---------------------------------------
+// -- Destruction de la liste chaÃ®nÃ©e ---------------------------------------
 void Free_fileselector_list(T_Fileselector *list)
-//  Cette procédure détruit la chaine des fichiers. Elle doit être appelée
+//  Cette procÃ©dure dÃ©truit la chaine des fichiers. Elle doit Ãªtre appelÃ©e
 // avant de rappeler la fonction Read_list_of_files, ainsi qu'en fin de
 // programme.
 {
@@ -213,11 +213,11 @@ void Free_fileselector_list(T_Fileselector *list)
 
   while (list->First!=NULL)
   {
-    // On mémorise l'adresse du premier élément de la liste
+    // On mÃ©morise l'adresse du premier Ã©lÃ©ment de la liste
     temp_item =list->First;
-    // On fait avancer la tête de la liste
+    // On fait avancer la tÃªte de la liste
     list->First=list->First->Next;
-    // Et on efface l'ancien premier élément de la liste
+    // Et on efface l'ancien premier Ã©lÃ©ment de la liste
     free(temp_item->Unicode_full_name);
     free(temp_item->Unicode_short_name);
     free(temp_item);
@@ -282,7 +282,7 @@ word * Format_filename_unicode(const word * fname, word max_length, int type)
       result[c]=fname[c];
     }
 
-    // Ensuite on recopie la partie qui suit le point (si nécessaire):
+    // Ensuite on recopie la partie qui suit le point (si nÃ©cessaire):
     if (pos_last_dot != -1)
     {
       for (c = pos_last_dot+1,other_cursor=max_length-4;fname[c]!='\0' && other_cursor < max_length-1;c++,other_cursor++)
@@ -363,7 +363,7 @@ char * Format_filename(const char * fname, word max_length, int type)
       result[c]=fname[c];
     }
 
-    // Ensuite on recopie la partie qui suit le point (si nécessaire):
+    // Ensuite on recopie la partie qui suit le point (si nÃ©cessaire):
     if (pos_last_dot != -1)
     {
       for (c = pos_last_dot+1,other_cursor=max_length-4;fname[c]!='\0' && other_cursor < max_length-1;c++,other_cursor++)
@@ -376,7 +376,7 @@ char * Format_filename(const char * fname, word max_length, int type)
 
 // -- Rajouter a la liste des elements de la liste un element ---------------
 T_Fileselector_item * Add_element_to_list(T_Fileselector *list, const char * full_name, const char *short_name, int type, byte icon)
-//  Cette procedure ajoute a la liste chainee un fichier passé en argument.
+//  Cette procedure ajoute a la liste chainee un fichier passÃ© en argument.
 {
   // Working element
   T_Fileselector_item * temp_item;
@@ -420,7 +420,7 @@ int Check_extension(const char *filename_ext, const char * filter)
   if (filename_ext == NULL || filename_ext[0] == '\0')
     return (filter[0] == '\0' || filter[0] == ';');
 
-  // Vérification caractère par caractère, case-insensitive.
+  // VÃ©rification caractÃ¨re par caractÃ¨re, case-insensitive.
   for (c = 0; !(filter[c] == '\0' || filter[c] == ';'); c++)
   {
     if (filter[c] != '?' &&
@@ -530,8 +530,8 @@ static void Read_dir_callback(void * pdata, const char *file_name, const word *u
 
 
 void Read_list_of_files(T_Fileselector *list, byte selected_format)
-//  Cette procédure charge dans la liste chainée les fichiers dont l'extension
-// correspond au format demandé.
+//  Cette procÃ©dure charge dans la liste chainÃ©e les fichiers dont l'extension
+// correspond au format demandÃ©.
 {
   struct Read_dir_pdata callback_data;
   const char * current_path = NULL;
@@ -542,14 +542,14 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
 #endif
 
   callback_data.list = list;
-  // Tout d'abord, on déduit du format demandé un filtre à utiliser:
+  // Tout d'abord, on dÃ©duit du format demandÃ© un filtre Ã  utiliser:
   callback_data.filter = Get_fileformat(selected_format)->Extensions;
 
   // Ensuite, on vide la liste actuelle:
   Free_fileselector_list(list);
-  // Après effacement, il ne reste ni fichier ni répertoire dans la liste
+  // AprÃ¨s effacement, il ne reste ni fichier ni rÃ©pertoire dans la liste
 
-  // On lit tous les répertoires:
+  // On lit tous les rÃ©pertoires:
   current_path = Get_current_directory(curdir, NULL, MAX_PATH_CHARACTERS);
 
   For_each_directory_entry(current_path, &callback_data, Read_dir_callback);
@@ -686,10 +686,10 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
     {
       if ( (1 << bit_index) & drive_bits )
       {
-        // On a ce lecteur, il faut maintenant déterminer son type "physique".
+        // On a ce lecteur, il faut maintenant dÃ©terminer son type "physique".
         // pour profiter des jolies icones de X-man.
         char drive_path[]="A:\\";
-        // Cette API Windows est étrange, je dois m'y faire...
+        // Cette API Windows est Ã©trange, je dois m'y faire...
         drive_path[0]='A'+bit_index;
         switch (GetDriveTypeA(drive_path))
         {
@@ -731,11 +731,11 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
     }
   #else
   {
-    //Sous les différents unix, on va mettre
+    //Sous les diffÃ©rents unix, on va mettre
     // un disque dur qui pointera vers la racine,
     // et un autre vers le home directory de l'utilisateur.
 
-    // Ensuite on utilise read_file_system_list pour compléter
+    // Ensuite on utilise read_file_system_list pour complÃ©ter
 
     struct mount_entry* mount_points_list;
     struct mount_entry* next;
@@ -797,15 +797,15 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
 #endif
 
 
-// -- Tri de la liste des fichiers et répertoires ---------------------------
+// -- Tri de la liste des fichiers et rÃ©pertoires ---------------------------
 void Sort_list_of_files(T_Fileselector *list)
-// Tri la liste chainée existante dans l'ordre suivant:
+// Tri la liste chainÃ©e existante dans l'ordre suivant:
 //
-// * Les répertoires d'abord, dans l'ordre alphabétique de leur nom
-// * Les fichiers ensuite, dans l'ordre alphabétique de leur nom
+// * Les rÃ©pertoires d'abord, dans l'ordre alphabÃ©tique de leur nom
+// * Les fichiers ensuite, dans l'ordre alphabÃ©tique de leur nom
 {
-  byte   list_is_sorted; // Booléen "La liste est triée"
-  byte   need_swap;          // Booléen "Il faut inverser les éléments"
+  byte   list_is_sorted; // BoolÃ©en "La liste est triÃ©e"
+  byte   need_swap;          // BoolÃ©en "Il faut inverser les Ã©lÃ©ments"
   T_Fileselector_item * prev_item;
   T_Fileselector_item * current_item;
   T_Fileselector_item * next_item;
@@ -816,7 +816,7 @@ void Sort_list_of_files(T_Fileselector *list)
   {
     do
     {
-      // Par défaut, on considère que la liste est triée
+      // Par dÃ©faut, on considÃ¨re que la liste est triÃ©e
       list_is_sorted=1;
 
       current_item=list->First;
@@ -827,7 +827,7 @@ void Sort_list_of_files(T_Fileselector *list)
         // On commence par supposer qu'il n'y pas pas besoin d'inversion
         need_swap=0;
 
-        // Ensuite, on vérifie si les deux éléments sont bien dans l'ordre ou
+        // Ensuite, on vÃ©rifie si les deux Ã©lÃ©ments sont bien dans l'ordre ou
         // non:
 
           // Drives go at the top of the list, and files go after them
@@ -846,39 +846,39 @@ void Sort_list_of_files(T_Fileselector *list)
 
         if (need_swap)
         {
-          // Si les deux éléments nécessitent d'être inversé:
+          // Si les deux Ã©lÃ©ments nÃ©cessitent d'Ãªtre inversÃ©:
 
           // On les inverses:
 
-          // On note avant tout les éléments qui encapsulent nos deux amis
+          // On note avant tout les Ã©lÃ©ments qui encapsulent nos deux amis
           prev_item         =current_item->Previous;
           next_to_next_item=next_item->Next;
 
-          // On permute le chaînage des deux éléments entree eux
+          // On permute le chaÃ®nage des deux Ã©lÃ©ments entree eux
           current_item->Next  =next_to_next_item;
           current_item->Previous=next_item;
           next_item->Next  =current_item;
           next_item->Previous=prev_item;
 
-          // On tente un chaînage des éléments encapsulant les compères:
+          // On tente un chaÃ®nage des Ã©lÃ©ments encapsulant les compÃ¨res:
           if (prev_item!=NULL)
             prev_item->Next=next_item;
           if (next_to_next_item!=NULL)
             next_to_next_item->Previous=current_item;
 
-          // On fait bien attention à modifier la tête de liste en cas de besoin
+          // On fait bien attention Ã  modifier la tÃªte de liste en cas de besoin
           if (current_item==list->First)
             list->First=next_item;
 
-          // Ensuite, on se prépare à étudier les éléments précédents:
+          // Ensuite, on se prÃ©pare Ã  Ã©tudier les Ã©lÃ©ments prÃ©cÃ©dents:
           current_item=prev_item;
 
-          // Et on constate que la liste n'était pas encore génialement triée
+          // Et on constate que la liste n'Ã©tait pas encore gÃ©nialement triÃ©e
           list_is_sorted=0;
         }
         else
         {
-          // Si les deux éléments sont dans l'ordre:
+          // Si les deux Ã©lÃ©ments sont dans l'ordre:
 
           // On passe aux suivants
           current_item=current_item->Next;
@@ -918,14 +918,14 @@ T_Fileselector_item * Get_item_by_index(T_Fileselector *list, short index)
 }
 
 
-// -- Affichage des éléments de la liste de fichier / répertoire ------------
+// -- Affichage des Ã©lÃ©ments de la liste de fichier / rÃ©pertoire ------------
 void Display_file_list(T_Fileselector *list, short offset_first,short selector_offset)
 //
-// offset_first = Décalage entre le premier fichier visible dans le
-//                   sélecteur et le premier fichier de la liste
+// offset_first = DÃ©calage entre le premier fichier visible dans le
+//                   sÃ©lecteur et le premier fichier de la liste
 //
-// selector_offset  = Décalage entre le premier fichier visible dans le
-//                   sélecteur et le fichier sélectionné dans la liste
+// selector_offset  = DÃ©calage entre le premier fichier visible dans le
+//                   sÃ©lecteur et le fichier sÃ©lectionnÃ© dans la liste
 //
 {
   T_Fileselector_item * current_item;
@@ -934,16 +934,16 @@ void Display_file_list(T_Fileselector *list, short offset_first,short selector_o
   byte   background_color;
 
 
-  // On vérifie s'il y a au moins 1 fichier dans la liste:
+  // On vÃ©rifie s'il y a au moins 1 fichier dans la liste:
   if (list->Nb_elements>0)
   {
-    // On commence par chercher à pointer sur le premier fichier visible:
+    // On commence par chercher Ã  pointer sur le premier fichier visible:
     current_item = Get_item_by_index(list, offset_first);
 
-    // Pour chacun des 10 éléments inscriptibles à l'écran
+    // Pour chacun des 10 Ã©lÃ©ments inscriptibles Ã  l'Ã©cran
     for (index=0;index<10;index++)
     {
-      // S'il est sélectionné:
+      // S'il est sÃ©lectionnÃ©:
       if (!selector_offset)
       {
         // Si c'est un fichier
@@ -965,7 +965,7 @@ void Display_file_list(T_Fileselector *list, short offset_first,short selector_o
         background_color=NORMAL_BACKGROUND_COLOR;
       }
 
-      // On affiche l'élément
+      // On affiche l'Ã©lÃ©ment
       if (current_item->Icon != ICON_NONE)
       {
         // Name preceded by an icon
@@ -981,7 +981,7 @@ void Display_file_list(T_Fileselector *list, short offset_first,short selector_o
           Print_in_window(8,95+index*8,current_item->Short_name,text_color,background_color);
       }
 
-      // On passe à la ligne suivante
+      // On passe Ã  la ligne suivante
       selector_offset--;
       current_item=current_item->Next;
       if (!current_item)
@@ -992,30 +992,30 @@ void Display_file_list(T_Fileselector *list, short offset_first,short selector_o
 }
 
 
-// -- Récupérer le libellé d'un élément de la liste -------------------------
+// -- RÃ©cupÃ©rer le libellÃ© d'un Ã©lÃ©ment de la liste -------------------------
 static void Get_selected_item(T_Fileselector *list, short offset_first,short selector_offset,char * label,word * unicode_label,int *type)
 //
-// offset_first = Décalage entre le premier fichier visible dans le
-//                   sélecteur et le premier fichier de la liste
+// offset_first = DÃ©calage entre le premier fichier visible dans le
+//                   sÃ©lecteur et le premier fichier de la liste
 //
-// selector_offset  = Décalage entre le premier fichier visible dans le
-//                   sélecteur et le fichier à récupérer
+// selector_offset  = DÃ©calage entre le premier fichier visible dans le
+//                   sÃ©lecteur et le fichier Ã  rÃ©cupÃ©rer
 //
-// label          = str de réception du libellé de l'élément
+// label          = str de rÃ©ception du libellÃ© de l'Ã©lÃ©ment
 //
-// type             = Récupération du type: 0 fichier, 1 repertoire, 2 lecteur.
-//                    Passer NULL si pas interessé.
+// type             = RÃ©cupÃ©ration du type: 0 fichier, 1 repertoire, 2 lecteur.
+//                    Passer NULL si pas interessÃ©.
 {
   T_Fileselector_item * current_item;
 
-  // On vérifie s'il y a au moins 1 fichier dans la liste:
+  // On vÃ©rifie s'il y a au moins 1 fichier dans la liste:
   if (list->Nb_elements>0)
   {
-    // On commence par chercher à pointer sur le premier fichier visible:
-    // Ensuite, on saute autant d'éléments que le décalage demandé:
+    // On commence par chercher Ã  pointer sur le premier fichier visible:
+    // Ensuite, on saute autant d'Ã©lÃ©ments que le dÃ©calage demandÃ©:
     current_item = Get_item_by_index(list, offset_first + selector_offset);
 
-    // On recopie la chaîne
+    // On recopie la chaÃ®ne
     strcpy(label, current_item->Full_name);
     if (unicode_label != NULL)
     {
@@ -1031,28 +1031,28 @@ static void Get_selected_item(T_Fileselector *list, short offset_first,short sel
 }
 
 
-// ----------------- Déplacements dans la liste de fichiers -----------------
+// ----------------- DÃ©placements dans la liste de fichiers -----------------
 
 void Selector_scroll_down(short * offset_first,short * selector_offset)
-// Fait scroller vers le bas le sélecteur de fichier... (si possible)
+// Fait scroller vers le bas le sÃ©lecteur de fichier... (si possible)
 {
   if ( ((*selector_offset)<9)
     && ( (*selector_offset)+1 < Filelist.Nb_elements ) )
-    // Si la sélection peut descendre
+    // Si la sÃ©lection peut descendre
     Display_file_list(&Filelist, *offset_first,++(*selector_offset));
-  else // Sinon, descendre la fenêtre (si possible)
+  else // Sinon, descendre la fenÃªtre (si possible)
   if ((*offset_first)+10<Filelist.Nb_elements)
     Display_file_list(&Filelist, ++(*offset_first),*selector_offset);
 }
 
 
 void Selector_scroll_up(short * offset_first,short * selector_offset)
-// Fait scroller vers le haut le sélecteur de fichier... (si possible)
+// Fait scroller vers le haut le sÃ©lecteur de fichier... (si possible)
 {
   if ((*selector_offset)>0)
-    // Si la sélection peut monter
+    // Si la sÃ©lection peut monter
     Display_file_list(&Filelist, *offset_first,--(*selector_offset));
-  else // Sinon, monter la fenêtre (si possible)
+  else // Sinon, monter la fenÃªtre (si possible)
   if ((*offset_first)>0)
     Display_file_list(&Filelist, --(*offset_first),*selector_offset);
 }
@@ -1129,9 +1129,9 @@ void Selector_home(short * offset_first,short * selector_offset)
 
 short Compute_click_offset_in_fileselector(void)
 /*
-  Renvoie le décalage dans le sélecteur de fichier sur lequel on a clické.
-  Renvoie le décalage du dernier fichier si on a clické au delà.
-  Renvoie -1 si le sélecteur est vide.
+  Renvoie le dÃ©calage dans le sÃ©lecteur de fichier sur lequel on a clickÃ©.
+  Renvoie le dÃ©calage du dernier fichier si on a clickÃ© au delÃ .
+  Renvoie -1 si le sÃ©lecteur est vide.
 */
 {
   short computed_offset;
@@ -1148,7 +1148,7 @@ void Display_bookmark(T_Dropdown_button * Button, int bookmark_number)
   if (Config.Bookmark_directory[bookmark_number])
   {
     int label_size;
-    // Libellé
+    // LibellÃ©
     Print_in_window_limited(Button->Pos_X+3+10,Button->Pos_Y+2,Config.Bookmark_label[bookmark_number],8,MC_Black,MC_Light);
     label_size=strlen(Config.Bookmark_label[bookmark_number]);
     if (label_size<8)
@@ -1163,7 +1163,7 @@ void Display_bookmark(T_Dropdown_button * Button, int bookmark_number)
   }
   else
   {
-    // Libellé
+    // LibellÃ©
     Print_in_window(Button->Pos_X+3+10,Button->Pos_Y+2,"--------",MC_Dark,MC_Light);
     // Menu apparait sur clic droit ou gauche
     Button->Active_button=RIGHT_SIDE|LEFT_SIDE;
@@ -1181,8 +1181,8 @@ void Print_current_directory(void)
 //
 {
   char converted_name[MAX_PATH_CHARACTERS];
-  int  length; // length du répertoire courant
-  int  index;   // index de parcours de la chaine complète
+  int  length; // length du rÃ©pertoire courant
+  int  index;   // index de parcours de la chaine complÃ¨te
 
   strncpy(converted_name,Selector->Directory,sizeof(converted_name));
   converted_name[sizeof(converted_name)-1] = '\0';
@@ -1288,7 +1288,7 @@ void Print_filename_in_fileselector(void)
   Update_window_area(82,48,27*8,8);
 }
 
-int   Selected_type; // Utilisé pour mémoriser le type d'entrée choisi
+int   Selected_type; // UtilisÃ© pour mÃ©moriser le type d'entrÃ©e choisi
                         // dans le selecteur de fichier.
 
 void Prepare_and_display_filelist(short Position, short offset, T_Scroller_button * button)
@@ -1304,11 +1304,11 @@ void Prepare_and_display_filelist(short Position, short offset, T_Scroller_butto
 
   Update_window_area(8-1,95-1,144+2,80+2);
 
-  // On récupère le nom du schmilblick à "accéder"
+  // On rÃ©cupÃ¨re le nom du schmilblick Ã  "accÃ©der"
   Get_selected_item(&Filelist, Position,offset,Selector_filename,Selector_filename_unicode,&Selected_type);
   // On affiche le nouveau nom de fichier
   Print_filename_in_fileselector();
-  // On affiche le nom du répertoire courant
+  // On affiche le nom du rÃ©pertoire courant
   Print_current_directory();
 }
 
@@ -1352,14 +1352,14 @@ void Scroll_fileselector(T_Scroller_button * file_scroller)
 
   strcpy(old_filename,Selector_filename);
 
-  // On regarde si la liste a bougé
+  // On regarde si la liste a bougÃ©
   if (file_scroller->Position!=Selector->Position)
   {
-    // Si c'est le cas, il faut mettre à jour la jauge
+    // Si c'est le cas, il faut mettre Ã  jour la jauge
     file_scroller->Position=Selector->Position;
     Window_draw_slider(file_scroller);
   }
-  // On récupére le nom du schmilblick à "accéder"
+  // On rÃ©cupÃ©re le nom du schmilblick Ã  "accÃ©der"
   Get_selected_item(&Filelist, Selector->Position,Selector->Offset,Selector_filename,Selector_filename_unicode,&Selected_type);
   if (strcmp(old_filename,Selector_filename))
     New_preview_is_needed=1;
@@ -1513,7 +1513,7 @@ int Quicksearch_list(T_List_button * list, T_Fileselector * selector)
     Locate_list_item(list, selected_item);
     
     Hide_cursor();
-    // Mise à jour du scroller
+    // Mise Ã  jour du scroller
     list->Scroller->Position=list->List_start;
     Window_draw_slider(list->Scroller);
     
@@ -1537,12 +1537,12 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   T_Dropdown_button * bookmark_dropdown[4];
   short temp;
   unsigned int format;
-  int dummy=0;       // Sert à appeler SDL_GetKeyState
+  int dummy=0;       // Sert Ã  appeler SDL_GetKeyState
   byte  save_or_load_image=0;
-  byte  has_clicked_ok=0;// Indique si on a clické sur Load ou Save ou sur
-                             //un bouton enclenchant Load ou Save juste après.
+  byte  has_clicked_ok=0;// Indique si on a clickÃ© sur Load ou Save ou sur
+                             //un bouton enclenchant Load ou Save juste aprÃ¨s.
   byte  initial_back_color; // preview destroys it (how nice)
-  char  previous_directory[MAX_PATH_CHARACTERS]; // Répertoire d'où l'on vient après un CHDIR
+  char  previous_directory[MAX_PATH_CHARACTERS]; // RÃ©pertoire d'oÃ¹ l'on vient aprÃ¨s un CHDIR
   char  save_filename[MAX_PATH_CHARACTERS];
   word  save_filename_unicode[MAX_PATH_CHARACTERS];
   char  initial_comment[COMMENT_SIZE+1];
@@ -1676,8 +1676,8 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
     Highlight_file(Find_file_in_fileselector(&Filelist, context->File_name));
     Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller);
 
-    // On initialise le nom de fichier à celui en cours et non pas celui sous
-    // la barre de sélection
+    // On initialise le nom de fichier Ã  celui en cours et non pas celui sous
+    // la barre de sÃ©lection
     strcpy(Selector_filename,context->File_name);
     Unicode_strlcpy(Selector_filename_unicode, context->File_name_unicode, 256);
     // On affiche le nouveau nom de fichier
@@ -1748,9 +1748,9 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
               // On efface le repertoire (si on peut)
               temp=(!Remove_directory(Selector_filename));
 
-            if (temp) // temp indique si l'effacement s'est bien passé
+            if (temp) // temp indique si l'effacement s'est bien passÃ©
             {
-              // On remonte si c'était le dernier élément de la liste
+              // On remonte si c'Ã©tait le dernier Ã©lÃ©ment de la liste
               if (Selector->Position+Selector->Offset==Filelist.Nb_elements-1)
               {
                 if (Selector->Position)
@@ -1759,7 +1759,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
                   if (Selector->Offset)
                     Selector->Offset--;
               }
-              else // Si ce n'était pas le dernier, il faut faire gaffe à ce
+              else // Si ce n'Ã©tait pas le dernier, il faut faire gaffe Ã  ce
               {    // que ses copains d'en dessous ne remontent pas trop.
                 if ( (Selector->Position)
                   && (Selector->Position+10==Filelist.Nb_elements) )
@@ -1787,14 +1787,14 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         {
           if (temp!=Selector->Offset)
           {
-            // On met à jour le décalage
+            // On met Ã  jour le dÃ©calage
             Selector->Offset=temp;
 
-            // On récupére le nom du schmilblick à "accéder"
+            // On rÃ©cupÃ©re le nom du schmilblick Ã  "accÃ©der"
             Get_selected_item(&Filelist, Selector->Position,Selector->Offset,Selector_filename,Selector_filename_unicode,&Selected_type);
             // On affiche le nouveau nom de fichier
             Print_filename_in_fileselector();
-            // On affiche à nouveau la liste
+            // On affiche Ã  nouveau la liste
             Display_file_list(&Filelist, Selector->Position,Selector->Offset);
 
             // On vient de changer de nom de fichier, donc on doit s'appreter
@@ -1805,10 +1805,10 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           }
           else
           {
-            //   En sauvegarde, si on a double-clické sur un répertoire, il
-            // faut mettre le nom de fichier au nom du répertoire. Sinon, dans
+            //   En sauvegarde, si on a double-clickÃ© sur un rÃ©pertoire, il
+            // faut mettre le nom de fichier au nom du rÃ©pertoire. Sinon, dans
             // certains cas, on risque de sauvegarder avec le nom du fichier
-            // actuel au lieu de changer de répertoire.
+            // actuel au lieu de changer de rÃ©pertoire.
             if (Selector->Position+Selector->Offset<Filelist.Nb_directories)
               Get_selected_item(&Filelist, Selector->Position,Selector->Offset,Selector_filename,Selector_filename_unicode,&Selected_type);
 
@@ -1824,11 +1824,11 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
       case  5 : // Scroller de fichiers
         Hide_cursor();
         Selector->Position=Window_attribute2;
-        // On récupére le nom du schmilblick à "accéder"
+        // On rÃ©cupÃ©re le nom du schmilblick Ã  "accÃ©der"
         Get_selected_item(&Filelist, Selector->Position,Selector->Offset,Selector_filename,Selector_filename_unicode,&Selected_type);
         // On affiche le nouveau nom de fichier
         Print_filename_in_fileselector();
-        // On affiche à nouveau la liste
+        // On affiche Ã  nouveau la liste
         Display_file_list(&Filelist, Selector->Position,Selector->Offset);
         Display_cursor();
         New_preview_is_needed=1;
@@ -1972,7 +1972,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 #if defined(WIN32) || defined(ENABLE_FILENAMES_ICONV)
           Unicode_strlcpy(Selector_filename_unicode, filename_unicode, sizeof(Selector_filename_unicode)/sizeof(word));
 #endif
-          //   On regarde s'il faut rajouter une extension. C'est-à-dire s'il
+          //   On regarde s'il faut rajouter une extension. C'est-Ã -dire s'il
           // n'y a pas de '.' dans le nom du fichier.
           for(temp=0,dummy=0; ((Selector_filename[temp]) && (!dummy)); temp++)
             if (Selector_filename[temp]=='.')
@@ -2028,7 +2028,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
       case  9 : // Volume Select
           Hide_cursor();
           //   Comme on tombe sur un disque qu'on connait pas, on se place en
-          // début de liste:
+          // dÃ©but de liste:
           Selector->Position=0;
           Selector->Offset=0;
           // Affichage des premiers fichiers visibles:
@@ -2047,7 +2047,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
             
             switch(Window_attribute2)
             {
-              case -1: // bouton lui-même: aller au répertoire mémorisé
+              case -1: // bouton lui-mÃªme: aller au rÃ©pertoire mÃ©morisÃ©
                 if (Config.Bookmark_directory[clicked_button-10])
                 {
                   // backup the currently selected filename
@@ -2087,7 +2087,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
               case 1: // Rename
                 if (Config.Bookmark_directory[clicked_button-10])
                 {
-                  // On enlève les "..." avant l'édition
+                  // On enlÃ¨ve les "..." avant l'Ã©dition
                   char bookmark_label[8+1];
                   strcpy(bookmark_label, Config.Bookmark_label[clicked_button-10]);
                   if (bookmark_label[7]==ELLIPSIS_CHARACTER)
@@ -2174,10 +2174,10 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         break;
       case SDLK_BACKSPACE : // Backspace
         Reset_quicksearch();
-        // Si le choix ".." est bien en tête des propositions...
+        // Si le choix ".." est bien en tÃªte des propositions...
         if (Filelist.Nb_elements && !strcmp(Filelist.First->Full_name,PARENT_DIR))
         {                              
-          // On va dans le répertoire parent.
+          // On va dans le rÃ©pertoire parent.
           strcpy(Selector_filename,PARENT_DIR);
           Selector_filename_unicode[0] = 0;
           Selected_type=1;
@@ -2220,7 +2220,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 
     if (has_clicked_ok)
     {
-      //   Si c'est un répertoire, on annule "has_clicked_ok" et on passe
+      //   Si c'est un rÃ©pertoire, on annule "has_clicked_ok" et on passe
       // dedans.
       if (Selected_type!=0)
       {
@@ -2281,14 +2281,14 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
     // Gestion du chrono et des previews
     if (New_preview_is_needed)
     {
-      // On efface les infos de la preview précédente s'il y en a une
-      // d'affichée
+      // On efface les infos de la preview prÃ©cÃ©dente s'il y en a une
+      // d'affichÃ©e
       if (Timer_state==2)
       {
         Hide_cursor();
-        // On efface le commentaire précédent
+        // On efface le commentaire prÃ©cÃ©dent
         Window_rectangle(45,70,32*8,8,MC_Light);
-        // On nettoie la zone où va s'afficher la preview:
+        // On nettoie la zone oÃ¹ va s'afficher la preview:
         Window_rectangle(183,95,PREVIEW_WIDTH,PREVIEW_HEIGHT,MC_Light);
         // On efface les dimensions de l'image
         Window_rectangle(101,59,120,8,MC_Light);
@@ -2302,15 +2302,15 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           Print_in_window(45,70,context->Comment,MC_Black,MC_Light);
         }
         Display_cursor();
-        // Un update pour couvrir les 4 zones: 3 libellés plus le commentaire
+        // Un update pour couvrir les 4 zones: 3 libellÃ©s plus le commentaire
         Update_window_area(45,48,256,30);
         // Zone de preview
         Update_window_area(183,95,PREVIEW_WIDTH,PREVIEW_HEIGHT);
       }
 
       New_preview_is_needed=0;
-      Timer_state=0;         // State du chrono = Attente d'un Xème de seconde
-      // On lit le temps de départ du chrono
+      Timer_state=0;         // State du chrono = Attente d'un XÃ¨me de seconde
+      // On lit le temps de dÃ©part du chrono
       Init_chrono(Config.Timer_delay);
     }
 
@@ -2337,7 +2337,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 
       }
 
-      Timer_state=2; // On arrête le chrono
+      Timer_state=2; // On arrÃªte le chrono
     }
   }
   while ( (!has_clicked_ok) && (clicked_button!=2) );
@@ -2358,7 +2358,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   }
   
 
-  //   On restaure les données de l'image qui ont certainement été modifiées
+  //   On restaure les donnÃ©es de l'image qui ont certainement Ã©tÃ© modifiÃ©es
   // par la preview.
   Back_color=initial_back_color;
   if (Windows_open <= 1)

@@ -47,20 +47,20 @@ void Return_to_draw_mode(void)
 {
 
   // Comme l'enclenchement du bouton efface le curseur, il faut l'afficher au
-  // préalable:
+  // prÃ©alable:
   Display_cursor();
   if (Mouse_K)
     Wait_end_of_click();
   // !!! Efface la croix puis affiche le viseur !!!
-  Select_button(BUTTON_DRAW,LEFT_SIDE); // Désenclenche au passage le bouton brosse
+  Select_button(BUTTON_DRAW,LEFT_SIDE); // DÃ©senclenche au passage le bouton brosse
   if (Config.Auto_discontinuous)
   {
-    // On se place en mode Dessin discontinu à la main
+    // On se place en mode Dessin discontinu Ã  la main
     while (Current_operation!=OPERATION_DISCONTINUOUS_DRAW)
       Select_button(BUTTON_DRAW,RIGHT_SIDE);
   }
-  // Maintenant, il faut réeffacer le curseur parce qu'il sera raffiché en fin
-  // d'appel à cette action:
+  // Maintenant, il faut rÃ©effacer le curseur parce qu'il sera raffichÃ© en fin
+  // d'appel Ã  cette action:
   Hide_cursor();
 
   // On passe en brosse couleur:
@@ -76,40 +76,40 @@ void Return_to_draw_mode(void)
 
 void Magnifier_12_0(void)
 
-// Opération   : 4      (item d'une Loupe)
+// OpÃ©ration   : 4      (item d'une Loupe)
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 
 {
 
   // On passe en mode loupe
   Main.magnifier_mode=1;
 
-  // La fonction d'affichage dans la partie image est désormais un affichage
-  // spécial loupe.
+  // La fonction d'affichage dans la partie image est dÃ©sormais un affichage
+  // spÃ©cial loupe.
   Pixel_preview=Pixel_preview_magnifier;
 
   // On calcule l'origine de la loupe
   Main.magnifier_offset_X=Mouse_X-(Main.magnifier_width>>1);
   Main.magnifier_offset_Y=Mouse_Y-(Main.magnifier_height>>1);
 
-  // Calcul des coordonnées absolues de ce coin DANS L'IMAGE
+  // Calcul des coordonnÃ©es absolues de ce coin DANS L'IMAGE
   Main.magnifier_offset_X+=Main.offset_X;
   Main.magnifier_offset_Y+=Main.offset_Y;
 
   Clip_magnifier_offsets(&Main.magnifier_offset_X, &Main.magnifier_offset_Y);
 
-  // On calcule les bornes visibles dans l'écran
+  // On calcule les bornes visibles dans l'Ã©cran
   Position_screen_according_to_zoom();
   Compute_limits();
   Display_all_screen();
 
-  // Repositionner le curseur en fonction des coordonnées visibles
+  // Repositionner le curseur en fonction des coordonnÃ©es visibles
   Compute_paintbrush_coordinates();
 
-  // On fait de notre mieux pour restaurer l'ancienne opération:
+  // On fait de notre mieux pour restaurer l'ancienne opÃ©ration:
   Start_operation_stack(Operation_before_interrupt);
   Display_cursor();
   Wait_end_of_click();
@@ -121,11 +121,11 @@ void Magnifier_12_0(void)
 
 void Colorpicker_12_0(void)
 //
-// Opération   : OPERATION_COLORPICK
+// OpÃ©ration   : OPERATION_COLORPICK
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 //
 {
   Init_start_operation();
@@ -144,11 +144,11 @@ void Colorpicker_12_0(void)
 
 void Colorpicker_1_1(void)
 //
-// Opération   : OPERATION_COLORPICK
+// OpÃ©ration   : OPERATION_COLORPICK
 // Click Souris: 1
 // Taille_Pile : 1
 //
-// Souris effacée: Non
+// Souris effacÃ©e: Non
 //
 {
   char str[4];
@@ -186,11 +186,11 @@ void Colorpicker_1_1(void)
 
 void Colorpicker_2_1(void)
 //
-// Opération   : OPERATION_COLORPICK
+// OpÃ©ration   : OPERATION_COLORPICK
 // Click Souris: 2
 // Taille_Pile : 1
 //
-// Souris effacée: Non
+// Souris effacÃ©e: Non
 //
 {
   char str[4];
@@ -229,11 +229,11 @@ void Colorpicker_2_1(void)
 
 void Colorpicker_0_1(void)
 //
-// Opération   : OPERATION_COLORPICK
+// OpÃ©ration   : OPERATION_COLORPICK
 // Click Souris: 0
 // Taille_Pile : 1
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 //
 {
   short click;
@@ -287,11 +287,11 @@ byte Rightclick_colorpick(byte cursor_visible)
 
 void Rightclick_colorpick_2_1(void)
 //
-// Opération   : OPERATION_RMB_COLORPICK
+// OpÃ©ration   : OPERATION_RMB_COLORPICK
 // Click Souris: 2
 // Taille_Pile : 1
 //
-// Souris effacée: Non
+// Souris effacÃ©e: Non
 //
 {
   char str[4];
@@ -323,11 +323,11 @@ void Rightclick_colorpick_2_1(void)
 
 void Rightclick_colorpick_0_1(void)
 //
-// Opération   : OPERATION_RMB_COLORPICK
+// OpÃ©ration   : OPERATION_RMB_COLORPICK
 // Click Souris: 0
 // Taille_Pile : 1
 //
-// Souris effacée: Non
+// Souris effacÃ©e: Non
 //
 {
   short dummy;
@@ -356,31 +356,31 @@ void Rightclick_colorpick_0_1(void)
 
 void Brush_12_0(void)
 //
-// Opération   : OPERATION_GRAB_BRUSH
+// OpÃ©ration   : OPERATION_GRAB_BRUSH
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 //
 {
   Init_start_operation();
-  if (Mouse_K==RIGHT_SIDE) // Besoin d'effacer la brosse après ?
+  if (Mouse_K==RIGHT_SIDE) // Besoin d'effacer la brosse aprÃ¨s ?
   {
     Operation_push(1);
-    // Puisque la zone où on prend la brosse sera effacée, on fait un backup
+    // Puisque la zone oÃ¹ on prend la brosse sera effacÃ©e, on fait un backup
     Backup();
   }
   else
     Operation_push(0);
 
   // On laisse une trace du curseur pour que l'utilisateur puisse visualiser
-  // où demarre sa brosse:
+  // oÃ¹ demarre sa brosse:
   Display_cursor();
 
-  Operation_push(Paintbrush_X); // Début X
-  Operation_push(Paintbrush_Y); // Début Y
-  Operation_push(Paintbrush_X); // Dernière position X
-  Operation_push(Paintbrush_Y); // Dernière position Y
+  Operation_push(Paintbrush_X); // DÃ©but X
+  Operation_push(Paintbrush_Y); // DÃ©but Y
+  Operation_push(Paintbrush_X); // DerniÃ¨re position X
+  Operation_push(Paintbrush_Y); // DerniÃ¨re position Y
 
   if ((Config.Coords_rel) && (Menu_is_visible))
     Print_in_menu("\035:   1   \022:   1",0);
@@ -389,11 +389,11 @@ void Brush_12_0(void)
 
 void Brush_12_5(void)
 //
-// Opération   : OPERATION_GRAB_BRUSH
+// OpÃ©ration   : OPERATION_GRAB_BRUSH
 // Click Souris: 1 ou 2
 // Taille_Pile : 5
 //
-// Souris effacée: Non
+// Souris effacÃ©e: Non
 //
 {
   char  str[5];
@@ -435,11 +435,11 @@ void Brush_12_5(void)
 
 void Brush_0_5(void)
 //
-// Opération   : OPERATION_GRAB_BRUSH
+// OpÃ©ration   : OPERATION_GRAB_BRUSH
 // Click Souris: 0
 // Taille_Pile : 5
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 //
 {
   short start_x;
@@ -448,7 +448,7 @@ void Brush_0_5(void)
   short old_paintbrush_y;
   short clear;
 
-  // Comme on a demandé l'effacement du curseur, il n'y a plus de croix en
+  // Comme on a demandÃ© l'effacement du curseur, il n'y a plus de croix en
   // (Paintbrush_X,Paintbrush_Y). C'est une bonne chose.
 
   Operation_stack_size-=2;
@@ -461,7 +461,7 @@ void Brush_0_5(void)
   old_paintbrush_y=Paintbrush_Y;
   Paintbrush_X=start_x;
   Paintbrush_Y=start_y;
-  Hide_cursor(); // Maintenant, il n'y a plus de croix à l'écran.
+  Hide_cursor(); // Maintenant, il n'y a plus de croix Ã  l'Ã©cran.
 
   Paintbrush_X=old_paintbrush_x;
   Paintbrush_Y=old_paintbrush_y;
@@ -500,11 +500,11 @@ void Brush_0_5(void)
 
 
 void Polybrush_12_8(void)
-//  Opération   : OPERATION_POLYBRUSH
+//  OpÃ©ration   : OPERATION_POLYBRUSH
 //  Click Souris: 1 ou 2
 //  Taille_Pile : 8
 //
-//  Souris effacée: Non
+//  Souris effacÃ©e: Non
 {
   short click;
   short end_y;
@@ -528,13 +528,13 @@ void Polybrush_12_8(void)
     if (((start_x!=Paintbrush_X) || (start_y!=Paintbrush_Y)) &&
         (Polyfill_number_of_points<Config.Nb_max_vertices_per_polygon))
     {
-      // Il existe un nouveau segment défini par
+      // Il existe un nouveau segment dÃ©fini par
       // (start_x,start_y)-(Paintbrush_X,Paintbrush_Y)
 
       Hide_cursor();
       Print_coordinates();
 
-      // On le place à l'écran
+      // On le place Ã  l'Ã©cran
       Draw_line_preview_xor(start_x,start_y,end_x,end_y,0);
       Draw_line_preview_xor(start_x,start_y,Paintbrush_X,Paintbrush_Y,0);
 
@@ -563,13 +563,13 @@ void Polybrush_12_8(void)
           Hide_cursor();
           Print_coordinates();
 
-          // On le place à l'écran
+          // On le place Ã  l'Ã©cran
           Draw_line_preview_xor(start_x,start_y,end_x,end_y,0);
           Draw_line_preview_xor(start_x,start_y,Paintbrush_X,Paintbrush_Y,0);
           Display_cursor();
         }
 
-        // On remet les mêmes valeurs (comme si on n'avait pas cliqué):
+        // On remet les mÃªmes valeurs (comme si on n'avait pas cliquÃ©):
         Operation_push(start_x);
         Operation_push(start_y);
         Operation_push(Paintbrush_X);
@@ -588,7 +588,7 @@ void Polybrush_12_8(void)
   }
   else
   {
-    // L'utilisateur souhaite arrêter l'opération et refermer le polygone
+    // L'utilisateur souhaite arrÃªter l'opÃ©ration et refermer le polygone
 
     Operation_pop(&color);
     Operation_pop(&initial_y);
@@ -607,8 +607,8 @@ void Polybrush_12_8(void)
     if (click==RIGHT_SIDE)
       End_of_modification();
 
-    // On raffiche l'écran pour effacer les traits en xor et pour raffraichir
-    // l'écran si on a découpé une partie de l'image en prenant la brosse.
+    // On raffiche l'Ã©cran pour effacer les traits en xor et pour raffraichir
+    // l'Ã©cran si on a dÃ©coupÃ© une partie de l'image en prenant la brosse.
     Display_all_screen();
 
     Paintbrush_hidden=0;
@@ -630,27 +630,27 @@ void Polybrush_12_8(void)
 
 void Stretch_brush_12_0(void)
 //
-// Opération   : OPERATION_STRETCH_BRUSH
+// OpÃ©ration   : OPERATION_STRETCH_BRUSH
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 //
 {
   Init_start_operation();
   if (Mouse_K==LEFT_SIDE)
   {
     // On laisse une trace du curseur pour que l'utilisateur puisse visualiser
-    // où demarre sa brosse:
+    // oÃ¹ demarre sa brosse:
     Display_cursor();
 
     Operation_push(Paintbrush_X); // Dernier calcul X
     Operation_push(Paintbrush_Y); // Dernier calcul Y
-    Operation_push(Paintbrush_X); // Début X
-    Operation_push(Paintbrush_Y); // Début Y
-    Operation_push(Paintbrush_X); // Dernière position X
-    Operation_push(Paintbrush_Y); // Dernière position Y
-    Operation_push(1); // State précédent
+    Operation_push(Paintbrush_X); // DÃ©but X
+    Operation_push(Paintbrush_Y); // DÃ©but Y
+    Operation_push(Paintbrush_X); // DerniÃ¨re position X
+    Operation_push(Paintbrush_Y); // DerniÃ¨re position Y
+    Operation_push(1); // State prÃ©cÃ©dent
 
     if ((Config.Coords_rel) && (Menu_is_visible))
       Print_in_menu("\035:   1   \022:   1",0);
@@ -666,11 +666,11 @@ void Stretch_brush_12_0(void)
 
 void Stretch_brush_1_7(void)
 //
-// Opération   : OPERATION_STRETCH_BRUSH
+// OpÃ©ration   : OPERATION_STRETCH_BRUSH
 // Click Souris: 1
 // Taille_Pile : 7
 //
-// Souris effacée: Non
+// Souris effacÃ©e: Non
 //
 {
   char  str[5];
@@ -756,11 +756,11 @@ void Stretch_brush_1_7(void)
 
 void Stretch_brush_0_7(void)
 //
-// Opération   : OPERATION_STRETCH_BRUSH
+// OpÃ©ration   : OPERATION_STRETCH_BRUSH
 // Click Souris: 0
 // Taille_Pile : 7
 //
-// Souris effacée: Non
+// Souris effacÃ©e: Non
 //
 {
   char  str[5];
@@ -799,7 +799,7 @@ void Stretch_brush_0_7(void)
   }
 
   // Utilise Key_ANSI au lieu de Key, car Get_input() met ce dernier
-  // à zero si une operation est en cours (Operation_stack_size!=0)
+  // Ã  zero si une operation est en cours (Operation_stack_size!=0)
   if (Key_ANSI)
   {
     size_change=1;
@@ -817,15 +817,15 @@ void Stretch_brush_0_7(void)
         width=start_x+Brush_width-1;
         height=start_y+(Brush_height<<1)-1;
         break;
-      case 'h': // Moitié
+      case 'h': // MoitiÃ©
         width=(Brush_width>1)?start_x+(Brush_width>>1)-1:1;
         height=(Brush_height>1)?start_y+(Brush_height>>1)-1:1;
         break;
-      case 'X': // Moitié X
+      case 'X': // MoitiÃ© X
         width=(Brush_width>1)?start_x+(Brush_width>>1)-1:1;
         height=start_y+Brush_height-1;
         break;
-      case 'Y': // Moitié Y
+      case 'Y': // MoitiÃ© Y
         width=start_x+Brush_width-1;
         height=(Brush_height>1)?start_y+(Brush_height>>1)-1:1;
         break;
@@ -872,11 +872,11 @@ void Stretch_brush_0_7(void)
 
 void Stretch_brush_2_7(void)
 //
-// Opération   : OPERATION_STRETCH_BRUSH
+// OpÃ©ration   : OPERATION_STRETCH_BRUSH
 // Click Souris: 2
 // Taille_Pile : 7
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 //
 {
   short computed_x;
@@ -894,7 +894,7 @@ void Stretch_brush_2_7(void)
   // On efface la preview de la brosse (et la croix)
   Display_all_screen();
 
-  // Et enfin on stocke pour de bon la nouvelle brosse étirée
+  // Et enfin on stocke pour de bon la nouvelle brosse Ã©tirÃ©e
   Stretch_brush(start_x,start_y,computed_x,computed_y);
 
   Return_to_draw_mode();
@@ -906,11 +906,11 @@ void Stretch_brush_2_7(void)
 
 void Rotate_brush_12_0(void)
 //
-// Opération   : OPERATION_ROTATE_BRUSH
+// OpÃ©ration   : OPERATION_ROTATE_BRUSH
 // Click Souris: 1 ou 2
 // Taille_Pile : 0
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 //
 {
   Init_start_operation();
@@ -919,11 +919,11 @@ void Rotate_brush_12_0(void)
     Brush_rotation_center_X=Paintbrush_X+(Brush_width>>1)-Brush_width;
     Brush_rotation_center_Y=Paintbrush_Y;
     Brush_rotation_center_is_defined=1;
-    Operation_push(Paintbrush_X); // Dernière position calculée X
-    Operation_push(Paintbrush_Y); // Dernière position calculée Y
-    Operation_push(Paintbrush_X); // Dernière position X
-    Operation_push(Paintbrush_Y); // Dernière position Y
-    Operation_push(1); // State précédent
+    Operation_push(Paintbrush_X); // DerniÃ¨re position calculÃ©e X
+    Operation_push(Paintbrush_Y); // DerniÃ¨re position calculÃ©e Y
+    Operation_push(Paintbrush_X); // DerniÃ¨re position X
+    Operation_push(Paintbrush_Y); // DerniÃ¨re position Y
+    Operation_push(1); // State prÃ©cÃ©dent
 
     if ((Config.Coords_rel) && (Menu_is_visible))
       Print_in_menu("Angle:   0\xb0    ",0);
@@ -931,7 +931,7 @@ void Rotate_brush_12_0(void)
   else
   {
     Start_operation_stack(Operation_before_interrupt);
-    Wait_end_of_click(); // FIXME: celui-la il donne un résultat pas très chouette en visuel
+    Wait_end_of_click(); // FIXME: celui-la il donne un rÃ©sultat pas trÃ¨s chouette en visuel
   }
 }
 
@@ -939,11 +939,11 @@ void Rotate_brush_12_0(void)
 
 void Rotate_brush_1_5(void)
 //
-// Opération   : OPERATION_ROTATE_BRUSH
+// OpÃ©ration   : OPERATION_ROTATE_BRUSH
 // Click Souris: 1
 // Taille_Pile : 5
 //
-// Souris effacée: Non
+// Souris effacÃ©e: Non
 //
 {
   char  str[4];
@@ -958,7 +958,7 @@ void Rotate_brush_1_5(void)
   Operation_pop(&old_y);
   Operation_pop(&old_x);
 
-  // On corrige les coordonnées de la ligne si la touche shift est appuyée...
+  // On corrige les coordonnÃ©es de la ligne si la touche shift est appuyÃ©e...
   cursor_x = Paintbrush_X;
   cursor_y = Paintbrush_Y;
   if(SDL_GetModState() & KMOD_SHIFT)
@@ -1006,11 +1006,11 @@ void Rotate_brush_1_5(void)
 
 void Rotate_brush_0_5(void)
 //
-// Opération   : OPERATION_ROTATE_BRUSH
+// OpÃ©ration   : OPERATION_ROTATE_BRUSH
 // Click Souris: 0
 // Taille_Pile : 5
 //
-// Souris effacée: Non
+// Souris effacÃ©e: Non
 //
 {
   char  str[4];
@@ -1029,7 +1029,7 @@ void Rotate_brush_0_5(void)
   Operation_pop(&old_y);
   Operation_pop(&old_x);
 
-  // On corrige les coordonnées de la ligne si la touche shift est appuyée...
+  // On corrige les coordonnÃ©es de la ligne si la touche shift est appuyÃ©e...
   cursor_x = Paintbrush_X;
   cursor_y = Paintbrush_Y;
   if(SDL_GetModState() & KMOD_SHIFT)
@@ -1062,7 +1062,7 @@ void Rotate_brush_0_5(void)
   }
 
   // Utilise Key_ANSI au lieu de Key, car Get_input() met ce dernier
-  // à zero si une operation est en cours (Operation_stack_size!=0)
+  // Ã  zero si une operation est en cours (Operation_stack_size!=0)
   if (Key_ANSI)
   {
     angle_change=1;
@@ -1106,11 +1106,11 @@ void Rotate_brush_0_5(void)
 
 void Rotate_brush_2_5(void)
 //
-// Opération   : OPERATION_ROTATE_BRUSH
+// OpÃ©ration   : OPERATION_ROTATE_BRUSH
 // Click Souris: 2
 // Taille_Pile : 5
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 //
 {
   short computed_x;
@@ -1126,7 +1126,7 @@ void Rotate_brush_2_5(void)
   Operation_pop(&computed_y);
   Operation_pop(&computed_x);
 
-  // Calcul de l'angle par rapport à la dernière position calculée
+  // Calcul de l'angle par rapport Ã  la derniÃ¨re position calculÃ©e
   if ( (Brush_rotation_center_X==computed_x)
     && (Brush_rotation_center_Y==computed_y) )
     angle=0.0;
@@ -1138,7 +1138,7 @@ void Rotate_brush_2_5(void)
     if (dy>0) angle=M_2PI-angle;
   }
 
-  // Et enfin on stocke pour de bon la nouvelle brosse étirée
+  // Et enfin on stocke pour de bon la nouvelle brosse Ã©tirÃ©e
   Rotate_brush(angle);
 
   Return_to_draw_mode();
@@ -1161,11 +1161,11 @@ void Draw_stretch_spot(short x_pos, short y_pos)
 
 void Distort_brush_0_0(void)
 //
-// Opération   : OPERATION_DISTORT_BRUSH
+// OpÃ©ration   : OPERATION_DISTORT_BRUSH
 // Click Souris: 0
 // Taille_Pile : 0
 //
-// Souris effacée: Non
+// Souris effacÃ©e: Non
 //
 {
   if ( Menu_is_visible )
@@ -1176,11 +1176,11 @@ void Distort_brush_0_0(void)
 
 void Distort_brush_1_0(void)
 //
-// Opération   : OPERATION_DISTORT_BRUSH
+// OpÃ©ration   : OPERATION_DISTORT_BRUSH
 // Click Souris: 1
 // Taille_Pile : 0
 //
-// Souris effacée: Non
+// Souris effacÃ©e: Non
 //
 {
   short x_pos, y_pos;
@@ -1235,11 +1235,11 @@ void Distort_brush_1_0(void)
 
 void Distort_brush_1_8(void)
 //
-//  Opération   : OPERATION_DISTORT_BRUSH
+//  OpÃ©ration   : OPERATION_DISTORT_BRUSH
 //  Click Souris: 1
 //  Taille_Pile : 8
 //
-//  Souris effacée: No
+//  Souris effacÃ©e: No
 //
 {
   // How far (in pixels) you can catch a handle
@@ -1282,11 +1282,11 @@ void Distort_brush_1_8(void)
 
 void Distort_brush_1_9(void)
 //
-//  Opération   : OPERATION_DISTORT_BRUSH
+//  OpÃ©ration   : OPERATION_DISTORT_BRUSH
 //  Click Souris: 1
 //  Taille_Pile : 9
 //
-//  Souris effacée: No
+//  Souris effacÃ©e: No
 //
 {
   short i;
@@ -1339,11 +1339,11 @@ void Distort_brush_1_9(void)
 }
 void Distort_brush_0_9(void)
 //
-//  Opération   : OPERATION_DISTORT_BRUSH
+//  OpÃ©ration   : OPERATION_DISTORT_BRUSH
 //  Click Souris: 0
 //  Taille_Pile : 9
 //
-//  Souris effacée: No
+//  Souris effacÃ©e: No
 //
 {
   short selected_corner;
@@ -1353,11 +1353,11 @@ void Distort_brush_0_9(void)
 
 void Distort_brush_2_0(void)
 //
-// Opération   : OPERATION_DISTORT_BRUSH
+// OpÃ©ration   : OPERATION_DISTORT_BRUSH
 // Click Souris: 2
 // Taille_Pile : 0
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 //
 {
   Paintbrush_hidden=0;
@@ -1372,11 +1372,11 @@ void Distort_brush_2_0(void)
 
 void Distort_brush_2_8(void)
 //
-// Opération   : OPERATION_DISTORT_BRUSH
+// OpÃ©ration   : OPERATION_DISTORT_BRUSH
 // Click Souris: 2
 // Taille_Pile : 8
 //
-// Souris effacée: Oui
+// Souris effacÃ©e: Oui
 //
 {
   short i;

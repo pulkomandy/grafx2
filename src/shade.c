@@ -110,7 +110,7 @@ void Shade_draw_grad_ranges(void)
     {
       // On regarde quel shade on va afficher en preview
       shade_processed=((y_pos-start_y)*nb_shades)/y_size;
-      // Si ce n'est pas le shade précédemment traité on calcule ses infos
+      // Si ce n'est pas le shade prÃ©cÃ©demment traitÃ© on calcule ses infos
       if (shade_processed>shade_processed_old)
       {
         // On commence par sauter tous les vides jusqu'au prochain shade
@@ -161,7 +161,7 @@ void Tag_shades(word selection_start,word selection_end)
       x_pos=Window_pos_X+(Menu_factor_X*((column<<2)+8));
       y_pos=Window_pos_Y+(Menu_factor_Y*((line*7)+131));
 
-      // On regarde si la case est "disablée"
+      // On regarde si la case est "disablÃ©e"
       if (Shade_list[Shade_current].List[position]&0x8000)
       {
         if ((position>=selection_start) && (position<=selection_end))
@@ -172,7 +172,7 @@ void Tag_shades(word selection_start,word selection_end)
         else
           Block(x_pos,y_pos,Menu_factor_X<<2,Menu_factor_Y<<1,MC_White);
       }
-      else // "enablée"
+      else // "enablÃ©e"
       {
         if ((position>=selection_start) && (position<=selection_end))
           Block(x_pos,y_pos,Menu_factor_X<<2,Menu_factor_Y<<1,MC_Black);
@@ -294,8 +294,8 @@ void Insert_shade(byte first_color, byte last_color, word selection_start)
     first_color=temp;
   }
 
-  // Avant d'insérer quoi que ce soit, on efface les éventuelles couleurs que
-  // l'on va réinsérer:
+  // Avant d'insÃ©rer quoi que ce soit, on efface les Ã©ventuelles couleurs que
+  // l'on va rÃ©insÃ©rer:
   limit=512-selection_start;
   for (cursor=0; cursor<512; cursor++)
   {
@@ -305,7 +305,7 @@ void Insert_shade(byte first_color, byte last_color, word selection_start)
           && ((Shade_list[Shade_current].List[cursor]&0xFF)==temp) )
           Shade_list[Shade_current].List[cursor]=(Shade_list[Shade_current].List[cursor]&0x8000)|0x0100;
   }
-  // Voilà... Maintenant on peut y aller peinard.
+  // VoilÃ ... Maintenant on peut y aller peinard.
 
   temp=1+last_color-first_color;
   limit=selection_start+temp;
@@ -383,7 +383,7 @@ void Swap_shade(short block_1_start,short block_2_start,short block_size)
   temp_shade=(word *)malloc(512*sizeof(word));
   memcpy(temp_shade,Shade_list[Shade_current].List,512*sizeof(word));
 
-  // On calcul les dernières couleurs de chaque bloc.
+  // On calcul les derniÃ¨res couleurs de chaque bloc.
   end_1=block_1_start+block_size-1;
   end_2=block_2_start+block_size-1;
 
@@ -394,7 +394,7 @@ void Swap_shade(short block_1_start,short block_2_start,short block_size)
     {
       // Il faut transformer la case pos_1 en pos_2:
       Shade_list[Shade_current].List[pos_1]=temp_shade[pos_2];
-      // On gère la mise à jour de pos_2
+      // On gÃ¨re la mise Ã  jour de pos_2
       if (pos_2==end_2)
         pos_2=block_1_start;
       else
@@ -404,12 +404,12 @@ void Swap_shade(short block_1_start,short block_2_start,short block_size)
   else
   if ((block_2_start<block_1_start) && (end_2>=block_1_start))
   {
-    // Le bloc destination déborde dans le bloc source.
+    // Le bloc destination dÃ©borde dans le bloc source.
     for (pos_1=block_2_start,pos_2=block_1_start;pos_1<=end_1;pos_1++)
     {
       // Il faut transformer la couleur pos_1 en pos_2:
       Shade_list[Shade_current].List[pos_1]=temp_shade[pos_2];
-      // On gère la mise à jour de pos_2
+      // On gÃ¨re la mise Ã  jour de pos_2
       if (pos_2==end_1)
         pos_2=block_2_start;
       else
@@ -421,7 +421,7 @@ void Swap_shade(short block_1_start,short block_2_start,short block_size)
     // Le bloc source et le bloc destination sont distincts.
     for (pos_1=block_1_start,pos_2=block_2_start;pos_1<=end_1;pos_1++,pos_2++)
     {
-      // On échange les cases
+      // On Ã©change les cases
       temp                                  =Shade_list[Shade_current].List[pos_1];
       Shade_list[Shade_current].List[pos_1]=Shade_list[Shade_current].List[pos_2];
       Shade_list[Shade_current].List[pos_2]=temp;
@@ -434,9 +434,9 @@ void Swap_shade(short block_1_start,short block_2_start,short block_size)
 
 int Menu_shade(void)
 {
-  short clicked_button; // Numéro du bouton sur lequel l'utilisateur a clické
-  char str[4]; // str d'affichage du n° de shade actif et du Pas
-  word old_mouse_x, old_mouse_x2; // Mémo. de l'ancienne pos. du curseur
+  short clicked_button; // NumÃ©ro du bouton sur lequel l'utilisateur a clickÃ©
+  char str[4]; // str d'affichage du nÂ° de shade actif et du Pas
+  word old_mouse_x, old_mouse_x2; // MÃ©mo. de l'ancienne pos. du curseur
   word old_mouse_y, old_mouse_y2;
   byte old_mouse_k, old_mouse_k2;
   byte temp_color; // Variables de gestion des clicks dans la palette
@@ -458,52 +458,52 @@ int Menu_shade(void)
   undo_buffer  =(word *)malloc(512*sizeof(word));
   temp_ptr=(word *)malloc(512*sizeof(word));
 
-  // Ouverture de la fenêtre du menu
+  // Ouverture de la fenÃªtre du menu
   Open_window(310,190,"Shade");
 
-  // Déclaration & tracé du bouton de palette
+  // DÃ©claration & tracÃ© du bouton de palette
   Window_set_palette_button(5,16);                             // 1
 
-  // Déclaration & tracé du scroller de sélection du n° de dégradé
+  // DÃ©claration & tracÃ© du scroller de sÃ©lection du nÂ° de dÃ©gradÃ©
   Window_set_scroller_button(192,17,84,8,1,Shade_current);      // 2
 
-  // Déclaration & tracé de la zone de définition des dégradés
+  // DÃ©claration & tracÃ© de la zone de dÃ©finition des dÃ©gradÃ©s
   Window_set_special_button(8,127,256,53,0);                     // 3
 
-  // Déclaration & tracé des boutons de sortie
+  // DÃ©claration & tracÃ© des boutons de sortie
   Window_set_normal_button(207,17,51,14,"Cancel",0,1,KEY_ESC);   // 4
   Window_set_normal_button(261,17,43,14,"OK"    ,0,1,SDLK_RETURN);  // 5
 
-  // Déclaration & tracé des boutons de copie de shade
+  // DÃ©claration & tracÃ© des boutons de copie de shade
   Window_set_normal_button(206,87,27,14,"Cpy"   ,1,1,SDLK_c);  // 6
   Window_set_normal_button(234,87,43,14,"Paste" ,1,1,SDLK_p);  // 7
 
   // On tagge le bloc
   Tag_color_range(Fore_color,Fore_color);
 
-  // Tracé d'un cadre creux autour du bloc dégradé
+  // TracÃ© d'un cadre creux autour du bloc dÃ©gradÃ©
   Window_display_frame_in(171,26,18,66);
   Window_rectangle(172,27,16,64,MC_Black);
-  // Tracé d'un cadre creux autour de tous les dégradés
+  // TracÃ© d'un cadre creux autour de tous les dÃ©gradÃ©s
   Window_display_frame_in(223,34,66,50);
   Shade_draw_grad_ranges();
-  // Tracé d'un cadre autour de la zone de définition de dégradés
+  // TracÃ© d'un cadre autour de la zone de dÃ©finition de dÃ©gradÃ©s
   Window_display_frame(5,124,262,61);
   Display_all_shade(first_color,last_color,selection_start,selection_end);
 
-  // Déclaration & tracé des boutons d'édition de shade
+  // DÃ©claration & tracÃ© des boutons d'Ã©dition de shade
   Window_set_normal_button(  6,107,27,14,"Ins"  ,0,1,SDLK_INSERT);  // 8
   Window_set_normal_button( 38,107,27,14,"Del"  ,0,1,SDLK_DELETE);  // 9
   Window_set_normal_button( 66,107,43,14,"Blank",1,1,SDLK_b);  // 10
   Window_set_normal_button(110,107,27,14,"Inv"  ,1,1,SDLK_i);  // 11
   Window_set_normal_button(138,107,27,14,"Swp"  ,1,1,SDLK_s);  // 12
 
-  // Déclaration & tracé des boutons de taggage
+  // DÃ©claration & tracÃ© des boutons de taggage
   Print_in_window(268,123,"Disbl"/*"Dsabl"*/,MC_Dark,MC_Light);
   Window_set_normal_button(274,133,27,14,"Set"   ,0,1,SDLK_F1); // 13
   Window_set_normal_button(274,148,27,14,"Clr"   ,0,1,SDLK_F2); // 14
 
-  // Déclaration & tracé de la zone de saisie du pas
+  // DÃ©claration & tracÃ© de la zone de saisie du pas
   Print_in_window(272,165,"Step",MC_Dark,MC_Light);
   input_button = Window_set_input_button(274,174,3);          // 15
   Num2str(Shade_list[Shade_current].Step,str,3);
@@ -517,7 +517,7 @@ int Menu_shade(void)
   // Button Mode
   Window_set_normal_button(244,107,60,14,"",0,1,SDLK_TAB);       // 18
 
-  // Affichage du n° de shade actif
+  // Affichage du nÂ° de shade actif
   Num2str(Shade_current+1,str,1);
   Print_in_window(210,55,str,MC_Black,MC_Light);
 
@@ -550,11 +550,11 @@ int Menu_shade(void)
           if (!old_mouse_k)
           { // On vient de clicker
 
-            // On met à jour l'intervalle du Shade
+            // On met Ã  jour l'intervalle du Shade
             first_color=last_color=temp_color;
             // On tagge le bloc
             Tag_color_range(first_color,last_color);
-            // Tracé du bloc dégradé:
+            // TracÃ© du bloc dÃ©gradÃ©:
             Display_grad_block_in_window(172,27,16,64,first_color,last_color);
           }
           else
@@ -577,7 +577,7 @@ int Menu_shade(void)
             }
           }
 
-          // On affiche le numéro de la couleur sélectionnée
+          // On affiche le numÃ©ro de la couleur sÃ©lectionnÃ©e
           Display_selected_color(first_color,last_color);
 
           Display_cursor();
@@ -587,20 +587,20 @@ int Menu_shade(void)
       case  2 : // Gestion du changement de Shade (scroller)
         Hide_cursor();
         Shade_current=Window_attribute2;
-        // Affichade du n° de shade actif
+        // Affichade du nÂ° de shade actif
         Num2str(Shade_current+1,str,1);
         Print_in_window(210,55,str,MC_Black,MC_Light);
         // Affichade du Pas
         Num2str(Shade_list[Shade_current].Step,str,3);
         Print_in_window(276,176,str,MC_Black,MC_Light);
-        // Tracé du bloc dégradé:
+        // TracÃ© du bloc dÃ©gradÃ©:
         Display_all_shade(first_color,last_color,selection_start,selection_end);
         Display_cursor();
         // On place le nouveau shade dans le buffer du Undo
         memcpy(undo_buffer,Shade_list[Shade_current].List,512*sizeof(word));
         break;
 
-      case  3 : // Gestion de la zone de définition de shades
+      case  3 : // Gestion de la zone de dÃ©finition de shades
         if (((((Mouse_Y-Window_pos_Y)/Menu_factor_Y)-127)%7)<4)
         if ( (Mouse_X!=old_mouse_x2) || (Mouse_Y!=old_mouse_y2) || (Mouse_K!=old_mouse_k2) )
         {
@@ -645,12 +645,12 @@ int Menu_shade(void)
         else
           temp=first_color-last_color;
 
-        if (selection_start==selection_end) // Une couleur sélectionnée
+        if (selection_start==selection_end) // Une couleur sÃ©lectionnÃ©e
         {
           if (Window_attribute1==2)
             Remove_shade(selection_start,selection_start+temp);
         }
-        else                          // Un bloc sélectionné
+        else                          // Un bloc sÃ©lectionnÃ©
         {
           Remove_shade(selection_start,selection_end);
 
@@ -677,7 +677,7 @@ int Menu_shade(void)
         }
         Insert_shade(first_color,last_color,selection_start);
 
-        // On sélectionne la position juste après ce qu'on vient d'insérer
+        // On sÃ©lectionne la position juste aprÃ¨s ce qu'on vient d'insÃ©rer
         selection_start+=temp+1;
         if (selection_start>=512)
           selection_start=511;
@@ -782,7 +782,7 @@ int Menu_shade(void)
           // On place le shade dans le buffer du Undo
           memcpy(undo_buffer,Shade_list[Shade_current].List,512*sizeof(word));
           // Et on le modifie
-          // On échange le bloc avec sa destination
+          // On Ã©change le bloc avec sa destination
           if (selection_start<=selection_end)
           {
             temp=(temp_cell+selection_end-selection_start<512)?selection_end+1-selection_start:512-temp_cell;
@@ -793,7 +793,7 @@ int Menu_shade(void)
             temp=(temp_cell+selection_start-selection_end<512)?selection_start+1-selection_end:512-temp_cell;
             Swap_shade(selection_end,temp_cell,temp);
           }
-          // On place la sélection sur la nouvelle position du bloc
+          // On place la sÃ©lection sur la nouvelle position du bloc
           selection_start=temp_cell;
           selection_end=selection_start+temp-1;
           // Et on raffiche tout
@@ -883,8 +883,8 @@ int Menu_shade(void)
     if (!Mouse_K)
     switch (Key)
     {
-      case SDLK_LEFTBRACKET : // Décaler couleur dans palette vers la gauche
-      case SDLK_RIGHTBRACKET : // Décaler couleur dans palette vers la droite
+      case SDLK_LEFTBRACKET : // DÃ©caler couleur dans palette vers la gauche
+      case SDLK_RIGHTBRACKET : // DÃ©caler couleur dans palette vers la droite
         if (first_color==last_color)
         {
           if (Key==SDLK_LEFTBRACKET)
@@ -902,7 +902,7 @@ int Menu_shade(void)
           Block(Window_pos_X+(Menu_factor_X*172),
                 Window_pos_Y+(Menu_factor_Y*27),
                 Menu_factor_X<<4,Menu_factor_Y*64,first_color);
-          // On affiche le numéro de la couleur sélectionnée
+          // On affiche le numÃ©ro de la couleur sÃ©lectionnÃ©e
           Display_selected_color(first_color,last_color);
           Display_cursor();
         }
@@ -957,7 +957,7 @@ int Menu_shade(void)
         Key=0;
         break;
 
-      case SDLK_BACKQUOTE : // Récupération d'une couleur derrière le menu
+      case SDLK_BACKQUOTE : // RÃ©cupÃ©ration d'une couleur derriÃ¨re le menu
       case SDLK_COMMA :
         Get_color_behind_window(&color,&click);
         if (click)
@@ -965,14 +965,14 @@ int Menu_shade(void)
           Hide_cursor();
           temp_color=color;
 
-          // On met à jour l'intervalle du Shade
+          // On met Ã  jour l'intervalle du Shade
           first_color=last_color=temp_color;
           // On tagge le bloc
           Tag_color_range(first_color,last_color);
-          // Tracé du bloc dégradé:
+          // TracÃ© du bloc dÃ©gradÃ©:
           Display_grad_block_in_window(172,27,16,64,first_color,last_color);
 
-          // On affiche le numéro de la couleur sélectionnée
+          // On affiche le numÃ©ro de la couleur sÃ©lectionnÃ©e
           Display_selected_color(first_color,last_color);
 
           Display_cursor();
@@ -1004,11 +1004,11 @@ int Menu_shade(void)
 /// @return true if user clicked ok, false if he cancelled
 int Shade_settings_menu(void)
 {
-  T_Shade * initial_shade_list; // Anciennes données des shades
-  byte old_shade; // old n° de shade actif
+  T_Shade * initial_shade_list; // Anciennes donnÃ©es des shades
+  byte old_shade; // old nÂ° de shade actif
   int return_code;
 
-  // Backup des anciennes données
+  // Backup des anciennes donnÃ©es
   initial_shade_list=(T_Shade *)malloc(sizeof(Shade_list));
   memcpy(initial_shade_list,Shade_list,sizeof(Shade_list));
   old_shade=Shade_current;
@@ -1052,7 +1052,7 @@ void Button_Quick_shade_menu(void)
   int temp;
   char str[4];
   byte step_backup=Quick_shade_step; // Backup des
-  byte loop_backup=Quick_shade_loop; // anciennes données
+  byte loop_backup=Quick_shade_loop; // anciennes donnÃ©es
   T_Special_button * step_button;
 
   Open_window(142,56,"Quick-shade");
@@ -1062,7 +1062,7 @@ void Button_Quick_shade_menu(void)
   Window_set_normal_button(76,18,60,14,"",0,1,SDLK_TAB);          // 3
   Display_shade_mode(83,21,Quick_shade_loop);
 
-  // Déclaration & tracé de la zone de saisie du pas
+  // DÃ©claration & tracÃ© de la zone de saisie du pas
   Print_in_window(5,21,"Step",MC_Dark,MC_Light);
   step_button = Window_set_input_button(40,19,3);                  // 4
   Num2str(Quick_shade_step,str,3);
@@ -1121,7 +1121,7 @@ void Button_Quick_shade_menu(void)
   }
   else // OK
   {
-    // Si avant de rentrer dans le menu on n'était pas en mode Quick-Shade
+    // Si avant de rentrer dans le menu on n'Ã©tait pas en mode Quick-Shade
     if (!Quick_shade_mode)
       Button_Quick_shade_mode(); // => On y passe (cool!)
   }

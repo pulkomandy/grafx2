@@ -3,7 +3,7 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2014 Sergii Pylypenko
-    Copyright 2011 Pawel Góralski
+    Copyright 2011 Pawel GÃ³ralski
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
     Copyright 2008 Adrien Destugues
@@ -23,7 +23,7 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 
-// Pour désactiver le support TrueType, définir NOTTF
+// Pour dÃ©sactiver le support TrueType, dÃ©finir NOTTF
 // To disable TrueType support, define NOTTF
 
 #include <string.h>
@@ -77,15 +77,15 @@ typedef struct T_Font
   int    Is_bitmap;
   char   Label[22];
   
-  // Liste chainée simple
+  // Liste chainÃ©e simple
   struct T_Font * Next;
   struct T_Font * Previous;
 } T_Font;
-// Liste chainée des polices de texte
+// Liste chainÃ©e des polices de texte
 T_Font * font_list_start;
 int Nb_fonts;
 
-// Inspiré par Allegro
+// InspirÃ© par Allegro
 #define EXTID(a,b,c) ((((a)&255)<<16) | (((b)&255)<<8) | (((c)&255)))
 #define EXTID4(a,b,c,d) ((((a)&255)<<24) | (((b)&255)<<16) | (((c)&255)<<8) | (((d)&255)))
 
@@ -98,14 +98,14 @@ int Compare_fonts(T_Font * font_1, T_Font * font_2)
   return strcmp(font_1->Label, font_2->Label);
 }
 
-// Ajout d'une fonte à la liste.
+// Ajout d'une fonte Ã  la liste.
 static void Add_font(const char *name, const char * font_name)
 {
   T_Font * font;
   int size=strlen(name)+1;
   int index;
 
-  // Détermination du type:
+  // DÃ©termination du type:
 
 #if defined(__macosx__)
   char strFontName[512];
@@ -211,7 +211,7 @@ static void Add_font(const char *name, const char * font_name)
       searched_font=font_list_start;
       while (searched_font->Next && (compare=Compare_fonts(font, searched_font->Next))>0)
         searched_font=searched_font->Next;
-      // Après searched_font
+      // AprÃ¨s searched_font
       if (compare==0 && strcmp(font->Name, searched_font->Next->Name)==0)
       {
         // Doublon
@@ -227,7 +227,7 @@ static void Add_font(const char *name, const char * font_name)
 }
 
 
-// Trouve le nom d'une fonte par son numéro
+// Trouve le nom d'une fonte par son numÃ©ro
 char * Font_name(int index)
 {
   T_Font *font = font_list_start;
@@ -239,7 +239,7 @@ char * Font_name(int index)
 }
 
 
-// Trouve le libellé d'affichage d'une fonte par son numéro
+// Trouve le libellÃ© d'affichage d'une fonte par son numÃ©ro
 // Renvoie un pointeur sur un buffer statique de 20 caracteres.
 char * Font_label(int index)
 {
@@ -255,13 +255,13 @@ char * Font_label(int index)
   while (index--)
     font = font->Next;
   
-  // Libellé
+  // LibellÃ©
   strcpy(label, font->Label);
   return label;
 }
 
 
-// Vérifie si une fonte donnée est TrueType
+// VÃ©rifie si une fonte donnÃ©e est TrueType
 int TrueType_font(int index)
 {
   T_Font *font = font_list_start;
@@ -274,7 +274,7 @@ int TrueType_font(int index)
 
 
 
-// Initialisation à faire une fois au début du programme
+// Initialisation Ã  faire une fois au dÃ©but du programme
 void Init_text(void)
 {
   char directory_name[MAX_PATH_CHARACTERS];
@@ -286,7 +286,7 @@ void Init_text(void)
   // Initialisation des fontes
   font_list_start = NULL;
   Nb_fonts=0;
-  // Parcours du répertoire "fonts"
+  // Parcours du rÃ©pertoire "fonts"
   snprintf(directory_name, sizeof(directory_name), "%s%s", Data_directory,FONTS_SUBDIRECTORY);
   For_each_file(directory_name, Add_font);
   // fonts subdirectory in Config_directory
@@ -294,7 +294,7 @@ void Init_text(void)
   For_each_file(directory_name, Add_font);
   
   #if defined(__WIN32__)
-    // Parcours du répertoire systeme windows "fonts"
+    // Parcours du rÃ©pertoire systeme windows "fonts"
     #ifndef NOTTF
     {
       char * WindowsPath=getenv("windir");
@@ -306,7 +306,7 @@ void Init_text(void)
     }
     #endif
   #elif defined(__macosx__)
-    // Récupération de la liste des fonts avec fontconfig
+    // RÃ©cupÃ©ration de la liste des fonts avec fontconfig
     #ifndef NOTTF
 
 
@@ -375,7 +375,7 @@ void Init_text(void)
   #endif
 }
 
-// Informe si texte.c a été compilé avec l'option de support TrueType ou pas.
+// Informe si texte.c a Ã©tÃ© compilÃ© avec l'option de support TrueType ou pas.
 int TrueType_is_supported()
 {
   #ifdef NOTTF
@@ -662,8 +662,8 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   return new_brush;
 }
 
-// Crée une brosse à partir des paramètres de texte demandés.
-// Si cela réussit, la fonction place les dimensions dans width et height, 
+// CrÃ©e une brosse Ã  partir des paramÃ¨tres de texte demandÃ©s.
+// Si cela rÃ©ussit, la fonction place les dimensions dans width et height, 
 // et retourne l'adresse du bloc d'octets.
 byte *Render_text(const char *str, int font_number, int size, int antialias, int bold, int italic, int *width, int *height, T_Palette palette)
 {

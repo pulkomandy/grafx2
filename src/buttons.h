@@ -105,7 +105,7 @@ void Button_Brush_monochrome(int);
 */
 void Button_Paintbrush_menu(int);
 
-// Boutons relatifs au mode de dessin à main levée
+// Boutons relatifs au mode de dessin Ã  main levÃ©e
 
 /*!
     Callback for the freehand draw button left click.
@@ -168,7 +168,7 @@ void Button_Airbrush(int);
 */
 void Button_Airbrush_menu(int);
 
-// Courbes de Bézier
+// Courbes de BÃ©zier
 
 /*!
     Callback for the curves button left click.
@@ -204,7 +204,7 @@ void Button_Filled_rectangle(int);
 */
 void Button_Text(int);
 
-// Boutons relatifs aux dégradés
+// Boutons relatifs aux dÃ©gradÃ©s
 
 /*!
     Callback for the gradation button.
@@ -463,7 +463,7 @@ void Button_Lasso(int);
 */
 void Button_Unselect_lasso(int);
 
-// Button relatifs à la pipette
+// Button relatifs Ã  la pipette
 
 /*!
     Starts the color picking operation.
@@ -497,14 +497,14 @@ void Button_Magnify_menu(int);
 */
 void Button_Unselect_magnifier(int);
 
-// Les différents effets sur la brosse
+// Les diffÃ©rents effets sur la brosse
 
 /*!
     Display the Brush effects window.
 */
 void Button_Brush_FX(int);
 
-// Boutons relatifs aux différentes pages
+// Boutons relatifs aux diffÃ©rentes pages
 
 /*!
     Swap main and spare drawing pages.
@@ -526,7 +526,7 @@ void Copy_image_only(void);
 */
 void Button_Kill(int);
 
-// Boutons relatifs aux changements de résolution et de taille d'image
+// Boutons relatifs aux changements de rÃ©solution et de taille d'image
 
 /*!
     Display the screenmode menu.
@@ -560,7 +560,7 @@ void Button_Save(int);
 */
 void Button_Autosave(int);
 
-// Réglage des paramètres de l'utilisateur
+// RÃ©glage des paramÃ¨tres de l'utilisateur
 
 /*!
     Display the setting menu.
@@ -572,7 +572,7 @@ void Button_Settings(int);
 */
 void Button_Skins(int);
 
-// Annulation de la dernière modification
+// Annulation de la derniÃ¨re modification
 
 /*!
     Undo the last modification to the picture.

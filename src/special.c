@@ -35,7 +35,7 @@
 
 
 
-//---------------------- Modifier le pinceau spécial -------------------------
+//---------------------- Modifier le pinceau spÃ©cial -------------------------
 
 void Set_paintbrush_size(int width, int height)
 {
@@ -295,7 +295,7 @@ void Special_previous_user_backcolor(void)
   Display_cursor();
 }
 
-// ------------------- Scroller l'écran (pas en mode loupe) ------------------
+// ------------------- Scroller l'Ã©cran (pas en mode loupe) ------------------
 void Scroll_screen(short delta_x,short delta_y)
 {
   short temp_x_offset;
@@ -329,7 +329,7 @@ void Scroll_screen(short delta_x,short delta_y)
 }
 
 
-// ---------------------- Scroller la fenêtre de la loupe --------------------
+// ---------------------- Scroller la fenÃªtre de la loupe --------------------
 void Scroll_magnifier(short delta_x,short delta_y)
 {
   short temp_x_offset;
@@ -358,7 +358,7 @@ void Scroll_magnifier(short delta_x,short delta_y)
 }
 
 
-// -------------- Changer le Zoom (grâce aux touches [+] et [-]) -------------
+// -------------- Changer le Zoom (grÃ¢ce aux touches [+] et [-]) -------------
 void Zoom(short delta)
 {
   short index;

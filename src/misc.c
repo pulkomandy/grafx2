@@ -2,7 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
-    Copyright 2011 Pawel GÛralski
+    Copyright 2011 Pawel G√≥ralski
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
     Copyright 2007 Adrien Destugues
@@ -113,7 +113,7 @@ word Count_used_colors_screen_area(dword* usage, word start_x, word start_y,
       usage[color]++; //Un point de plus pour cette couleur
     }
   }
-  //On va maintenant compter dans la table les couleurs utilisÈes:
+  //On va maintenant compter dans la table les couleurs utilis√©es:
   for (i = 0; i < 256; i++)
   {
     if (usage[i]!=0)
@@ -136,7 +136,7 @@ word Count_used_colors_area(dword* usage, word start_x, word start_y,
   // Init usage table
   for (i = 0; i < 256; i++) usage[i]=0;
 
-  // On parcourt l'Ècran courant pour compter les utilisations des couleurs
+  // On parcourt l'√©cran courant pour compter les utilisations des couleurs
   for (y = 0; y < height; y++)
   {
     for (x = 0; x < width; x++)
@@ -147,7 +147,7 @@ word Count_used_colors_area(dword* usage, word start_x, word start_y,
     }
   }
 
-  //On va maintenant compter dans la table les couleurs utilisÈes:
+  //On va maintenant compter dans la table les couleurs utilis√©es:
   for (i = 0; i < 256; i++)
   {
     if (usage[i]!=0)
@@ -197,7 +197,7 @@ void Set_color(byte color, byte red, byte green, byte blue)
 
 void Wait_end_of_click(void)
 {
-  // On dÈsactive tous les raccourcis clavier
+  // On d√©sactive tous les raccourcis clavier
 
   while(Mouse_K)
     Get_input(20);
@@ -233,7 +233,7 @@ void Clear_current_image(byte color)
 }
 
 void Init_chrono(dword delay)
-  // DÈmarrer le chrono
+  // D√©marrer le chrono
 {
   Timer_delay = delay;
   Timer_start = SDL_GetTicks()/55;
@@ -265,7 +265,7 @@ void Copy_part_of_image_to_another(byte * source,word source_x,word source_y,wor
   {
     memcpy(edi,esi,width);
 
-    // Passe ‡ la ligne suivante
+    // Passe √† la ligne suivante
     esi+=source_width;
     edi+=destination_width;
   }
@@ -340,7 +340,7 @@ void Remap_general_lowlevel(byte * conversion_table,byte * in_buffer, byte *out_
 
 void Copy_image_to_brush(short start_x,short start_y,short Brush_width,short Brush_height,word image_width)
 {
-  byte* src=start_y*image_width+start_x+Main.backups->Pages->Image[Main.current_layer].Pixels; //Adr dÈpart image (ESI)
+  byte* src=start_y*image_width+start_x+Main.backups->Pages->Image[Main.current_layer].Pixels; //Adr d√©part image (ESI)
   byte* dest=Brush_original_pixels; //Adr dest brosse (EDI)
   int dx;
 
@@ -351,7 +351,7 @@ void Copy_image_to_brush(short start_x,short start_y,short Brush_width,short Bru
     // On fait une copie de la ligne
     memcpy(dest,src,Brush_width);
 
-    // On passe ‡ la ligne suivante
+    // On passe √† la ligne suivante
     src+=image_width;
     dest+=Brush_width;
   }
@@ -436,7 +436,7 @@ byte Effect_interpolated_colorize  (word x,word y,byte color)
   byte red_under=Main.palette[color_under].R;
   byte red=Main.palette[color].R;
 
-  // On rÈcupËre les 3 composantes RVB
+  // On r√©cup√®re les 3 composantes RVB
 
   // blue
   blue = (Factors_inv_table[blue]
@@ -513,7 +513,7 @@ void Flip_Y_lowlevel(byte *src, short width, short height)
 
   while(ESI < EDI)
   {
-    // Il faut inverser les lignes pointÈes par ESI et
+    // Il faut inverser les lignes point√©es par ESI et
     // EDI ("Brush_width" octets en tout)
 
     for(cx = width;cx>0;cx--)
@@ -526,9 +526,9 @@ void Flip_Y_lowlevel(byte *src, short width, short height)
     }
 
     // On change de ligne :
-    // ESI pointe dÈj‡ sur le dÈbut de la ligne suivante
+    // ESI pointe d√©j√† sur le d√©but de la ligne suivante
     // EDI pointe sur la fin de la ligne en cours, il
-    // doit pointer sur le dÈbut de la prÈcÈdente...
+    // doit pointer sur le d√©but de la pr√©c√©dente...
     EDI -= 2 * width; // On recule de 2 lignes
   }
 }
@@ -550,7 +550,7 @@ void Flip_X_lowlevel(byte *src, short width, short height)
     line_start = ESI;
     line_end = EDI;
 
-    // On Èchange par colonnes
+    // On √©change par colonnes
     for(cx=height;cx>0;cx--)
     {
       tmp=*ESI;
@@ -562,16 +562,16 @@ void Flip_X_lowlevel(byte *src, short width, short height)
 
     // On change de colonne
     // ESI > colonne suivante
-    // EDI > colonne prÈcÈdente
+    // EDI > colonne pr√©c√©dente
     ESI = line_start + 1;
     EDI = line_end - 1;
   }
 }
 
-// Rotate a pixel buffer 180∫ on itself.
+// Rotate a pixel buffer 180¬∫ on itself.
 void Rotate_180_deg_lowlevel(byte *src, short width, short height)
 {
-  // ESI pointe sur la partie supÈrieure de la brosse
+  // ESI pointe sur la partie sup√©rieure de la brosse
   // EDI pointe sur la partie basse
   byte* ESI = src;
   byte* EDI = src + height*width - 1;
@@ -591,9 +591,9 @@ void Rotate_180_deg_lowlevel(byte *src, short width, short height)
 
   while(ESI < EDI)
   {
-    // On Èchange les deux lignes pointÈes par EDI et
+    // On √©change les deux lignes point√©es par EDI et
     // ESI (Brush_width octets)
-    // En mÍme temps, on Èchange les pixels, donc EDI
+    // En m√™me temps, on √©change les pixels, donc EDI
     // pointe sur la FIN de sa ligne
 
     for(cx=width;cx>0;cx--)
@@ -614,8 +614,8 @@ void Rescale(byte *src_buffer, short src_width, short src_height, byte *dst_buff
 
   int    x_pos_in_brush;   // Position courante dans l'ancienne brosse
   int    y_pos_in_brush;
-  int    initial_x_pos;       // Position X de dÈbut de parcours de ligne
-  int    initial_y_pos;       // Position Y de dÈbut de parcours de ligne
+  int    initial_x_pos;       // Position X de d√©but de parcours de ligne
+  int    initial_y_pos;       // Position Y de d√©but de parcours de ligne
 
   int	delta_x, delta_y;
 
@@ -642,13 +642,13 @@ void Rescale(byte *src_buffer, short src_width, short src_height, byte *dst_buff
   // Pour chaque ligne
   for (line=0;line<dst_height;line++)
   {
-    // On passe ‡ la ligne de brosse suivante:
+    // On passe √† la ligne de brosse suivante:
     y_pos_in_brush = initial_y_pos + line * delta_y / dst_height;
 
     // Pour chaque colonne:
     for (column=0;column<dst_width;column++)
     {
-      // On passe ‡ la colonne de brosse suivante:
+      // On passe √† la colonne de brosse suivante:
       x_pos_in_brush = initial_x_pos + column * delta_x / dst_width;
       // On copie le pixel:
       dst_buffer[offset]=*(src_buffer + x_pos_in_brush + y_pos_in_brush * src_width);
@@ -663,7 +663,7 @@ void Scroll_picture(byte * main_src, byte * main_dest, short x_offset,short y_of
 {
   byte* src = main_src; //source de la copie
   byte* dest = main_dest + y_offset * Main.image_width + x_offset;
-  const word length = Main.image_width - x_offset; // Nombre de pixels ‡ copier ‡ droite
+  const word length = Main.image_width - x_offset; // Nombre de pixels √† copier √† droite
   word y;
   for(y = Main.image_height - y_offset;y>0;y--)
   {
@@ -671,7 +671,7 @@ void Scroll_picture(byte * main_src, byte * main_dest, short x_offset,short y_of
     memcpy(dest,src,length);
     memcpy(dest - x_offset,src+length,x_offset);
 
-    // On passe ‡ la ligne suivante
+    // On passe √† la ligne suivante
     dest += Main.image_width;
     src += Main.image_width;
   }
@@ -740,7 +740,7 @@ void Atari_Memory_free(unsigned long *stRam,unsigned long *ttRam){
   *ttRam = Mxalloc(-1L,1);
 }
 #else
-// Indique quelle est la mÈmoire disponible
+// Indique quelle est la m√©moire disponible
 unsigned long Memory_free(void)
 {
   // Memory is no longer relevant. If there is ANY problem or doubt here,
@@ -789,7 +789,7 @@ unsigned long Memory_free(void)
 
 
 
-// Arrondir un nombre rÈel ‡ la valeur entiËre la plus proche
+// Arrondir un nombre r√©el √† la valeur enti√®re la plus proche
 // TODO : this should probably be replaced with round() from C99...
 short Round(float value)
 {
@@ -804,7 +804,7 @@ short Round(float value)
 }
 
 
-// Arrondir le rÈsultat d'une division ‡ la valeur entiËre supÈrieure
+// Arrondir le r√©sultat d'une division √† la valeur enti√®re sup√©rieure
 short Round_div_max(short numerator,short divisor)
 {
   if (!(numerator % divisor))
@@ -858,7 +858,7 @@ int Popcount_dword(dword x)
 }
 
 
-// Fonction retournant le libellÈ d'une mode (ex: " 320x200")
+// Fonction retournant le libell√© d'une mode (ex: " 320x200")
 char * Mode_label(int mode)
 {
   static char str[24];
@@ -870,12 +870,12 @@ char * Mode_label(int mode)
 }
 
 
-// Trouve un mode video ‡ partir d'une chaine: soit "window",
+// Trouve un mode video √† partir d'une chaine: soit "window",
 // soit de la forme "320x200"
 // Renvoie -1 si la chaine n'est pas convertible
 int Convert_videomode_arg(const char *argument)
 {
-  // Je suis paresseux alors je vais juste tester les libellÈs
+  // Je suis paresseux alors je vais juste tester les libell√©s
   int mode_index;
   for (mode_index=0; mode_index<Nb_video_modes; mode_index++)
     // Attention les vieilles fonctions de lecture .ini mettent tout en MAJUSCULE.

@@ -2,7 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
-    Copyright 2011 Pawel Góralski
+    Copyright 2011 Pawel GÃ³ralski
     Copyright 2008 Peter Gordon
     Copyright 2008 Yves Rizoud
     Copyright 2007 Adrien Destugues
@@ -40,11 +40,11 @@ int Save_INI_reach_group(FILE * old_file,FILE * new_file,char * buffer,char * gr
   char * group_upper;
   char * upper_buffer;
 
-  // On alloue les zones de mémoire:
+  // On alloue les zones de mÃ©moire:
   group_upper =(char *)malloc(1024);
   upper_buffer=(char *)malloc(1024);
 
-  // On commence par se faire une version majuscule du groupe à rechercher:
+  // On commence par se faire une version majuscule du groupe Ã  rechercher:
   strcpy(group_upper,group);
   Load_INI_clear_string(group_upper, 0);
 
@@ -63,7 +63,7 @@ int Save_INI_reach_group(FILE * old_file,FILE * new_file,char * buffer,char * gr
     strcpy(upper_buffer,buffer);
     Load_INI_clear_string(upper_buffer, 0);
 
-    // On compare la chaîne avec le groupe recherché:
+    // On compare la chaÃ®ne avec le groupe recherchÃ©:
     stop_seek=Load_INI_seek_pattern(upper_buffer,group_upper);
     if (fprintf(new_file,"%s",buffer)<0)
     {
@@ -126,16 +126,16 @@ void Save_INI_set_value(char * dest,char * source,int nb_values_to_set,int * val
   for (;source[source_index]==' ';source_index++)
     dest[source_index]=source[source_index];
 
-  // Pour l'instant, la source et la destination en sont au même point:
+  // Pour l'instant, la source et la destination en sont au mÃªme point:
   dest_index=source_index;
 
-  // Puis pour chaque valeur à recopier:
+  // Puis pour chaque valeur Ã  recopier:
   for (value_index=0;value_index<nb_values_to_set;value_index++)
   {
-    // Dans la destination, on écrit la valeur:
+    // Dans la destination, on Ã©crit la valeur:
     if (litteral)
     {
-      // La valeur doit être écrite sous la forme Yes/No
+      // La valeur doit Ãªtre Ã©crite sous la forme Yes/No
 
       if (values[value_index])
       {
@@ -154,22 +154,22 @@ void Save_INI_set_value(char * dest,char * source,int nb_values_to_set,int * val
     }
     else
     {
-      // La valeur doit être écrite sous forme numérique
+      // La valeur doit Ãªtre Ã©crite sous forme numÃ©rique
 
       if (source[source_index]=='$')
       {
-        // On va écrire la valeur sous forme hexadécimale:
+        // On va Ã©crire la valeur sous forme hexadÃ©cimale:
 
         // On commence par inscrire le symbole '$':
         dest[dest_index]='$';
 
-        // Puis on y concatène la valeur:
+        // Puis on y concatÃ¨ne la valeur:
         sprintf(dest+dest_index+1,"%x",values[value_index]);
         dest_index+=strlen(dest+dest_index);
       }
       else
       {
-        // On va écrire la valeur sous forme décimale:
+        // On va Ã©crire la valeur sous forme dÃ©cimale:
 
         sprintf(dest+dest_index,"%d",values[value_index]);
         dest_index+=strlen(dest+dest_index);
@@ -181,16 +181,16 @@ void Save_INI_set_value(char * dest,char * source,int nb_values_to_set,int * val
 
     if (value_index!=(nb_values_to_set-1))
     {
-      // Il reste d'autres valeurs à écrire
+      // Il reste d'autres valeurs Ã  Ã©crire
 
-      // On recopie tous les caractères de la source jusqu'au suivant qui
-      // désigne une valeur:
+      // On recopie tous les caractÃ¨res de la source jusqu'au suivant qui
+      // dÃ©signe une valeur:
       for (;(!Save_INI_char_in_value_alphabet(source[source_index])) && (source[source_index]!='\0');source_index++,dest_index++)
         dest[dest_index]=source[source_index];
     }
     else
     {
-      // C'est la dernière valeur à initialiser
+      // C'est la derniÃ¨re valeur Ã  initialiser
 
       // On recopie toute la fin de la ligne:
       for (;source[source_index]!='\0';source_index++,dest_index++)
@@ -219,10 +219,10 @@ void Save_INI_set_string(char * dest,char * source,char * value)
   for (;source[source_index]==' ';source_index++)
     dest[source_index]=source[source_index];
 
-  // Pour l'instant, la source et la destination en sont au même point:
+  // Pour l'instant, la source et la destination en sont au mÃªme point:
   dest_index=source_index;
 
-  // Dans la destination, on écrit la valeur:
+  // Dans la destination, on Ã©crit la valeur:
   strcpy(dest+dest_index,value);
   dest_index+=strlen(value);
 
@@ -245,7 +245,7 @@ int Save_INI_set_strings(FILE * old_file,FILE * new_file,char * buffer,char * op
   char * result_buffer;
   //int    buffer_index;
 
-  // On alloue les zones de mémoire:
+  // On alloue les zones de mÃ©moire:
   option_upper=(char *)malloc(1024);
   upper_buffer=(char *)malloc(1024);
   result_buffer=(char *)malloc(1024);
@@ -254,7 +254,7 @@ int Save_INI_set_strings(FILE * old_file,FILE * new_file,char * buffer,char * op
   if (value == NULL)
     value="";
 
-  // On commence par se faire une version majuscule de l'option à rechercher:
+  // On commence par se faire une version majuscule de l'option Ã  rechercher:
   strcpy(option_upper,option_name);
   Load_INI_clear_string(option_upper, 0);
 
@@ -274,12 +274,12 @@ int Save_INI_set_strings(FILE * old_file,FILE * new_file,char * buffer,char * op
     strcpy(upper_buffer,buffer);
     Load_INI_clear_string(upper_buffer, 0);
 
-    // On compare la chaîne avec l'option recherchée:
+    // On compare la chaÃ®ne avec l'option recherchÃ©e:
     stop_seek=Load_INI_seek_pattern(upper_buffer,option_upper);
 
     if (stop_seek)
     {
-      // On l'a trouvée:
+      // On l'a trouvÃ©e:
 
       Save_INI_set_string(result_buffer,buffer,value);
       if (fprintf(new_file,"%s",result_buffer)<0)
@@ -292,7 +292,7 @@ int Save_INI_set_strings(FILE * old_file,FILE * new_file,char * buffer,char * op
     }
     else
     {
-      // On l'a pas trouvée:
+      // On l'a pas trouvÃ©e:
 
       if (fprintf(new_file,"%s",buffer)<0)
       {
@@ -320,12 +320,12 @@ int Save_INI_set_values(FILE * old_file,FILE * new_file,char * buffer,char * opt
   char * result_buffer;
   //int    buffer_index;
 
-  // On alloue les zones de mémoire:
+  // On alloue les zones de mÃ©moire:
   option_upper=(char *)malloc(1024);
   upper_buffer=(char *)malloc(1024);
   result_buffer=(char *)malloc(1024);
 
-  // On commence par se faire une version majuscule de l'option à rechercher:
+  // On commence par se faire une version majuscule de l'option Ã  rechercher:
   strcpy(option_upper,option_name);
   Load_INI_clear_string(option_upper, 0);
 
@@ -346,12 +346,12 @@ int Save_INI_set_values(FILE * old_file,FILE * new_file,char * buffer,char * opt
     strcpy(upper_buffer,buffer);
     Load_INI_clear_string(upper_buffer, 0);
 
-    // On compare la chaîne avec l'option recherchée:
+    // On compare la chaÃ®ne avec l'option recherchÃ©e:
     stop_seek=Load_INI_seek_pattern(upper_buffer,option_upper);
 
     if (stop_seek)
     {
-      // On l'a trouvée:
+      // On l'a trouvÃ©e:
 
       Save_INI_set_value(result_buffer,buffer,nb_values_to_set,values,litteral);
       if (fprintf(new_file,"%s",result_buffer)<0)
@@ -364,7 +364,7 @@ int Save_INI_set_values(FILE * old_file,FILE * new_file,char * buffer,char * opt
     }
     else
     {
-      // On l'a pas trouvée:
+      // On l'a pas trouvÃ©e:
 
       if (fprintf(new_file,"%s",buffer)<0)
       {
@@ -407,14 +407,14 @@ int Save_INI(T_Config * conf)
   int    ini_file_exists;
   int index;
 
-  // On alloue les zones de mémoire:
+  // On alloue les zones de mÃ©moire:
   buffer=(char *)malloc(1024);
   
   // On calcule les noms des fichiers qu'on manipule:
   strcpy(filename,Config_directory);
   strcat(filename,INI_FILENAME);
 
-  // On vérifie si le fichier INI existe
+  // On vÃ©rifie si le fichier INI existe
   if ((ini_file_exists = File_exists(filename)))
   {
     strcpy(temp_filename,Config_directory);
@@ -428,7 +428,7 @@ int Save_INI(T_Config * conf)
       goto Erreur_ERREUR_SAUVEGARDE_INI;
     }
   }
-  // On récupère un fichier INI "propre" à partir de gfx2def.ini
+  // On rÃ©cupÃ¨re un fichier INI "propre" Ã  partir de gfx2def.ini
   strcpy(ref_ini_file,Data_directory);
   strcat(ref_ini_file,INIDEF_FILENAME);
   old_file=fopen(ref_ini_file,"rb");

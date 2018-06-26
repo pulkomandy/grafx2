@@ -3,7 +3,7 @@
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
     Copyright 2018 Thomas Bernard
-    Copyright 2011 Pawel Góralski
+    Copyright 2011 Pawel GÃ³ralski
     Copyright 2008 Yves Rizoud
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
@@ -22,7 +22,7 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 
-// Fonctions de lecture/ecriture file, gèrent les systèmes big-endian et
+// Fonctions de lecture/ecriture file, gÃ¨rent les systÃ¨mes big-endian et
 // little-endian.
 
 #include <SDL_endian.h>
@@ -173,10 +173,10 @@ int Write_dword_be(FILE *file, dword dw)
   return fwrite(&dw, 1, sizeof(dword), file) == sizeof(dword);
 }
 
-// Détermine la position du dernier '/' ou '\\' dans une chaine,
-// typiquement pour séparer le nom de file d'un chemin.
+// DÃ©termine la position du dernier '/' ou '\\' dans une chaine,
+// typiquement pour sÃ©parer le nom de file d'un chemin.
 // Attention, sous Windows, il faut s'attendre aux deux car 
-// par exemple un programme lancé sous GDB aura comme argv[0]:
+// par exemple un programme lancÃ© sous GDB aura comme argv[0]:
 // d:\Data\C\GFX2\grafx2/grafx2.exe
 char * Find_last_separator(const char * str)
 {
@@ -192,7 +192,7 @@ char * Find_last_separator(const char * str)
       position = str;
   return (char *)position;
 }
-// Récupère la partie "nom de file seul" d'un chemin
+// RÃ©cupÃ¨re la partie "nom de file seul" d'un chemin
 void Extract_filename(char *dest, const char *source)
 {
   const char * position = Find_last_separator(source);
@@ -202,7 +202,7 @@ void Extract_filename(char *dest, const char *source)
   else
     strcpy(dest,source);
 }
-// Récupère la partie "répertoire+/" d'un chemin.
+// RÃ©cupÃ¨re la partie "rÃ©pertoire+/" d'un chemin.
 void Extract_path(char *dest, const char *source)
 {
   char * position=NULL;
@@ -315,8 +315,8 @@ int Position_last_dot_unicode(const word * fname)
 }
 
 int File_exists(const char * fname)
-//   Détermine si un file passé en paramètre existe ou non dans le
-// répertoire courant.
+//   DÃ©termine si un file passÃ© en paramÃ¨tre existe ou non dans le
+// rÃ©pertoire courant.
 {
 #if defined(WIN32)
   return (INVALID_FILE_ATTRIBUTES == GetFileAttributesA(fname)) ? 0 : 1;
@@ -333,8 +333,8 @@ int File_exists(const char * fname)
 }
 
 int Directory_exists(const char * directory)
-//   Détermine si un répertoire passé en paramètre existe ou non dans le
-// répertoire courant.
+//   DÃ©termine si un rÃ©pertoire passÃ© en paramÃ¨tre existe ou non dans le
+// rÃ©pertoire courant.
 {
 #if defined(WIN32)
   DWORD attr = GetFileAttributesA(directory);
@@ -342,14 +342,14 @@ int Directory_exists(const char * directory)
     return 0;
   return (attr & FILE_ATTRIBUTE_DIRECTORY) ? 1 : 0;
 #else
-  DIR* entry;    // Structure de lecture des éléments
+  DIR* entry;    // Structure de lecture des Ã©lÃ©ments
 
   if (strcmp(directory,PARENT_DIR)==0)
     return 1;
   else
   {
-    //  On va chercher si le répertoire existe à l'aide d'un Opendir. S'il
-    //  renvoie NULL c'est que le répertoire n'est pas accessible...
+    //  On va chercher si le rÃ©pertoire existe Ã  l'aide d'un Opendir. S'il
+    //  renvoie NULL c'est que le rÃ©pertoire n'est pas accessible...
 
     entry=opendir(directory);
     if (entry==NULL)
@@ -450,13 +450,13 @@ void For_each_file(const char * directory_name, void Callback(const char *, cons
     FindClose(h);
   }
 #else
-  // Pour scan de répertoire
-  DIR*  current_directory; //Répertoire courant
-  struct dirent* entry; // Structure de lecture des éléments
+  // Pour scan de rÃ©pertoire
+  DIR*  current_directory; //RÃ©pertoire courant
+  struct dirent* entry; // Structure de lecture des Ã©lÃ©ments
   int filename_position;
   strcpy(full_filename, directory_name);
   current_directory=opendir(directory_name);
-  if(current_directory == NULL) return;        // Répertoire invalide ...
+  if(current_directory == NULL) return;        // RÃ©pertoire invalide ...
   filename_position = strlen(full_filename);
 #if defined(__AROS__)
   if (filename_position==0 || (strcmp(full_filename+filename_position-1,PATH_SEPARATOR) && strcmp(full_filename+filename_position-1,":")))

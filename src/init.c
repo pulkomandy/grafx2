@@ -2,7 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
-    Copyright 2011 Pawel Góralski
+    Copyright 2011 Pawel GÃ³ralski
     Copyright 2008 Peter Gordon
     Copyright 2008 Yves Rizoud
     Copyright 2009 Franck Charlet
@@ -265,8 +265,8 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   int i,j;
   int cursor_x=0,cursor_y=0;
   byte color;
-  byte neutral_color; // color neutre utilisée pour délimiter les éléments GUI
-  int char_1=0;  // Indices utilisés pour les 4 "fontes" qui composent les
+  byte neutral_color; // color neutre utilisÃ©e pour dÃ©limiter les Ã©lÃ©ments GUI
+  int char_1=0;  // Indices utilisÃ©s pour les 4 "fontes" qui composent les
   int char_2=0;  // grands titres de l'aide. Chaque indice avance dans 
   int char_3=0;  // l'une des fontes dans l'ordre :  1 2
   int char_4=0;  //                                  3 4
@@ -289,7 +289,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
   // Read the default palette
   Get_SDL_Palette(SDLPal, gfx->Default_palette);
 
-  // Carré "noir"
+  // CarrÃ© "noir"
   gfx->Color[0] = Get_SDL_pixel_8(gui,cursor_x,cursor_y);
   do
   {
@@ -300,7 +300,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
   } while(color==gfx->Color[0]);
-  // Carré "foncé"
+  // CarrÃ© "foncÃ©"
   gfx->Color[1] = color;
   do
   {
@@ -311,7 +311,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
   } while(color==gfx->Color[1]);
-  // Carré "clair"
+  // CarrÃ© "clair"
   gfx->Color[2] = color;
   do
   {
@@ -322,7 +322,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
   } while(color==gfx->Color[2]);
-  // Carré "blanc"
+  // CarrÃ© "blanc"
   gfx->Color[3] = color;
   do
   {
@@ -333,7 +333,7 @@ byte Parse_skin(SDL_Surface * gui, T_Gui_skin *gfx)
     }
     color=Get_SDL_pixel_8(gui,cursor_x,cursor_y);
   } while(color==gfx->Color[3]);
-  // Carré "transparent"
+  // CarrÃ© "transparent"
   gfx->Color_trans=color;
   do
   {
@@ -878,7 +878,7 @@ void Init_buttons(void)
                 0);
   }
 
-  // Ici viennent les déclarations des boutons que l'on sait gérer
+  // Ici viennent les dÃ©clarations des boutons que l'on sait gÃ©rer
 
   Init_button(BUTTON_PAINTBRUSHES,
               "Paintbrush choice       ",
@@ -1241,7 +1241,7 @@ void Init_buttons(void)
   Init_button(BUTTON_CHOOSE_COL,
               "Color #"                 ,
               MENU_WIDTH+1,1,
-              1,32, // La largeur est mise à jour à chq chngmnt de mode
+              1,32, // La largeur est mise Ã  jour Ã  chq chngmnt de mode
               BUTTON_SHAPE_NO_FRAME,
               Button_Select_forecolor,Button_Select_backcolor,
               1,1,
@@ -1430,9 +1430,9 @@ void Init_buttons(void)
 
 
 
-// Initialisation des opérations:
+// Initialisation des opÃ©rations:
 
-  // Initialiseur d'une opération:
+  // Initialiseur d'une opÃ©ration:
 
 void Init_operation(byte operation_number,
                            byte mouse_button,
@@ -1450,17 +1450,17 @@ void Init_operation(byte operation_number,
 }
 
 
-  // Initiliseur de toutes les opérations:
+  // Initiliseur de toutes les opÃ©rations:
 
 void Init_operations(void)
 {
-  byte number; // Numéro de l'option en cours d'auto-initialisation
+  byte number; // NumÃ©ro de l'option en cours d'auto-initialisation
   byte Button; // Button souris en cours d'auto-initialisation
   byte stack_index; // Taille de la pile en cours d'auto-initialisation
   #define HIDE_CURSOR 1
   #define FAST_MOUSE 1
 
-  // Auto-initialisation des opérations (vers des actions inoffensives)
+  // Auto-initialisation des opÃ©rations (vers des actions inoffensives)
 
   for (number=0;number<NB_OPERATIONS;number++)
     for (Button=0;Button<3;Button++)
@@ -1468,7 +1468,7 @@ void Init_operations(void)
         Init_operation(number,Button,stack_index,Print_coordinates,0,FAST_MOUSE);
 
 
-  // Ici viennent les déclarations détaillées des opérations
+  // Ici viennent les dÃ©clarations dÃ©taillÃ©es des opÃ©rations
   Init_operation(OPERATION_CONTINUOUS_DRAW,1,0,
                         Freehand_mode1_1_0,HIDE_CURSOR,0);
   Init_operation(OPERATION_CONTINUOUS_DRAW,1,2,
@@ -1925,9 +1925,9 @@ void Init_operations(void)
 
 
 
-//-- Définition des modes vidéo: --------------------------------------------
+//-- DÃ©finition des modes vidÃ©o: --------------------------------------------
 
-  // Définition d'un mode:
+  // DÃ©finition d'un mode:
 
 void Set_video_mode(short  width,
                         short  height,
@@ -1959,7 +1959,7 @@ void Set_video_mode(short  width,
   Nb_video_modes ++;
 }
 
-// Utilisé pour trier les modes retournés par SDL
+// UtilisÃ© pour trier les modes retournÃ©s par SDL
 int Compare_video_modes(const void *p1, const void *p2)
 {
   const T_Video_mode *mode1 = (const T_Video_mode *)p1;
@@ -2123,7 +2123,7 @@ int Load_CFG(int reload_all)
     && (cfg_header.Version2== 0)
     && (cfg_header.Beta1== 96))
   {
-    // Les touches (scancodes) sont à convertir)
+    // Les touches (scancodes) sont Ã  convertir)
     key_conversion = 1;
   }
   // Version SDL jusqu'a 98%
@@ -2202,7 +2202,7 @@ int Load_CFG(int reload_all)
             goto Erreur_lecture_config;
         }
         break;
-      case CHUNK_VIDEO_MODES: // Modes vidéo
+      case CHUNK_VIDEO_MODES: // Modes vidÃ©o
         for (index=0; index<(long)(Chunk.Size/5); index++)
         {
           if (!Read_byte(Handle, &cfg_video_mode.State) ||
@@ -2220,9 +2220,9 @@ int Load_CFG(int reload_all)
             if (Video_mode[index2].Width==cfg_video_mode.Width &&
                 Video_mode[index2].Height==cfg_video_mode.Height)
             {
-              // On ne prend le paramètre utilisateur que si la résolution
-              // est effectivement supportée par SDL
-              // Seules les deux petits bits sont récupérés, car les anciens fichiers
+              // On ne prend le paramÃ¨tre utilisateur que si la rÃ©solution
+              // est effectivement supportÃ©e par SDL
+              // Seules les deux petits bits sont rÃ©cupÃ©rÃ©s, car les anciens fichiers
               // de configuration (DOS 96.5%) utilisaient d'autres bits.
               if (! (Video_mode[index2].State & 128))
                 Video_mode[index2].State=cfg_video_mode.State&3;
@@ -2283,7 +2283,7 @@ int Load_CFG(int reload_all)
             goto Erreur_lecture_config;
         }
         break;
-      case CHUNK_GRADIENTS: // Infos sur les dégradés
+      case CHUNK_GRADIENTS: // Infos sur les dÃ©gradÃ©s
         // The gradients chunk is deprecated since the data
         // is now loaded/saved in GIF and IFF formats.
         // The chunk will be completely ignored.
@@ -2537,7 +2537,7 @@ int Save_CFG(void)
       goto Erreur_sauvegarde_config;
   }
 
-  // D'abord compter les modes pour lesquels l'utilisateur a mis une préférence
+  // D'abord compter les modes pour lesquels l'utilisateur a mis une prÃ©fÃ©rence
   modes_to_save=0;
 #if defined(__GP2X__) || defined (__WIZ__) || defined (__CAANOO__)
   index = 0;
@@ -2548,7 +2548,7 @@ int Save_CFG(void)
     if (Video_mode[index].State==0 || Video_mode[index].State==2 || Video_mode[index].State==3)
       modes_to_save++;
 
-  // Sauvegarde de l'état de chaque mode vidéo
+  // Sauvegarde de l'Ã©tat de chaque mode vidÃ©o
   Chunk.Number=CHUNK_VIDEO_MODES;
   Chunk.Size=modes_to_save * 5;
 
@@ -2573,7 +2573,7 @@ int Save_CFG(void)
         goto Erreur_sauvegarde_config;
     }
 
-  // Ecriture des données du Shade (précédées du shade en cours)
+  // Ecriture des donnÃ©es du Shade (prÃ©cÃ©dÃ©es du shade en cours)
   Chunk.Number=CHUNK_SHADE;
   Chunk.Size=8209;
   if (!Write_byte(Handle, Chunk.Number) ||
@@ -2611,7 +2611,7 @@ int Save_CFG(void)
   if (!Write_bytes(Handle, Stencil,256))
     goto Erreur_sauvegarde_config;
 
-  // Sauvegarde des informations des dégradés
+  // Sauvegarde des informations des dÃ©gradÃ©s
   // The gradients chunk is deprecated since the data
   // is now loaded/saved in GIF and IFF formats.
   /*
@@ -2644,7 +2644,7 @@ int Save_CFG(void)
       if (!Write_byte(Handle, Smooth_matrix[index][index2]))
         goto Erreur_sauvegarde_config;
 
-  // Sauvegarde des couleurs à exclure
+  // Sauvegarde des couleurs Ã  exclure
   Chunk.Number=CHUNK_EXCLUDE_COLORS;
   Chunk.Size=256;
   if (!Write_byte(Handle, Chunk.Number) ||
@@ -2787,7 +2787,7 @@ Erreur_sauvegarde_config:
   return ERROR_SAVING_CFG;
 }
 
-// (Ré)assigne toutes les valeurs de configuration par défaut
+// (RÃ©)assigne toutes les valeurs de configuration par dÃ©faut
 void Set_config_defaults(void)
 {
   int index, index2;
@@ -2820,7 +2820,7 @@ void Set_config_defaults(void)
     for (index2=0; index2<512; index2++)
       Shade_list[index].List[index2]=256;
   }
-  // Shade par défaut pour la palette standard
+  // Shade par dÃ©faut pour la palette standard
   for (index=0; index<7; index++)
     for (index2=0; index2<16; index2++)
       Shade_list[0].List[index*17+index2]=index*16+index2+16;

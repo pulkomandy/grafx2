@@ -2,7 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
-    Copyright 2011 Pawel Góralski
+    Copyright 2011 Pawel GÃ³ralski
     Copyright 2008 Peter Gordon
     Copyright 2008 Yves Rizoud
     Copyright 2007 Adrien Destugues
@@ -55,7 +55,7 @@ void Load_INI_clear_string(char * str, byte keep_comments)
     {
       equal_found=1;
       index++;
-      // On enleve les espaces après le '='
+      // On enleve les espaces aprÃ¨s le '='
       while (str[index]==' ' || str[index]=='\t')
         memmove(str+index,str+index+1,strlen(str+index));
     }
@@ -78,7 +78,7 @@ void Load_INI_clear_string(char * str, byte keep_comments)
     {
       if (!equal_found)
       {
-        // Passage en majuscule d'un caractère:
+        // Passage en majuscule d'un caractÃ¨re:
 #ifndef GCWZERO  //this causes gcw to crash
         str[index]=toupper((int)str[index]);
 #endif
@@ -86,7 +86,7 @@ void Load_INI_clear_string(char * str, byte keep_comments)
       index++;
     }
   }
-  // On enlève les espaces avant la fin de chaine
+  // On enlÃ¨ve les espaces avant la fin de chaine
   while (index>0 && (str[index-1]==' ' || str[index-1]=='\t'))
   {
     index--;
@@ -101,22 +101,22 @@ int Load_INI_seek_pattern(char * buffer,char * pattern)
   int buffer_index;
   int pattern_index;
 
-  // A partir de chaque lettre de la chaîne buffer
+  // A partir de chaque lettre de la chaÃ®ne buffer
   for (buffer_index=0;buffer[buffer_index]!='\0';buffer_index++)
   {
-    // On regarde si la chaîne pattern est équivalente à la position courante
-    // de la chaîne buffer:
+    // On regarde si la chaÃ®ne pattern est Ã©quivalente Ã  la position courante
+    // de la chaÃ®ne buffer:
     for (pattern_index=0;(pattern[pattern_index]!='\0') && (buffer[buffer_index+pattern_index]==pattern[pattern_index]);pattern_index++);
 
-    // Si on a trouvé la chaîne pattern dans la chaîne buffer, on renvoie la
-    // position à laquelle on l'a trouvée (+1 pour que si on la trouve au
-    // début ça ne renvoie pas la même chose que si on ne l'avait pas
-    // trouvée):
+    // Si on a trouvÃ© la chaÃ®ne pattern dans la chaÃ®ne buffer, on renvoie la
+    // position Ã  laquelle on l'a trouvÃ©e (+1 pour que si on la trouve au
+    // dÃ©but Ã§a ne renvoie pas la mÃªme chose que si on ne l'avait pas
+    // trouvÃ©e):
     if (pattern[pattern_index]=='\0')
       return (buffer_index+1);
   }
 
-  // Si on ne l'a pas trouvée, on renvoie 0:
+  // Si on ne l'a pas trouvÃ©e, on renvoie 0:
   return 0;
 }
 
@@ -128,11 +128,11 @@ int Load_INI_reach_group(FILE * file,char * buffer,char * group)
   char * group_upper;
   char * upper_buffer;
 
-  // On alloue les zones de mémoire:
+  // On alloue les zones de mÃ©moire:
   group_upper=(char *)malloc(1024);
   upper_buffer=(char *)malloc(1024);
 
-  // On commence par se faire une version majuscule du groupe à rechercher:
+  // On commence par se faire une version majuscule du groupe Ã  rechercher:
   strcpy(group_upper,group);
   Load_INI_clear_string(group_upper, 0);
 
@@ -153,7 +153,7 @@ int Load_INI_reach_group(FILE * file,char * buffer,char * group)
     strcpy(upper_buffer,buffer);
     Load_INI_clear_string(upper_buffer, 0);
 
-    // On compare la chaîne avec le groupe recherché:
+    // On compare la chaÃ®ne avec le groupe recherchÃ©:
     stop_seek=Load_INI_seek_pattern(upper_buffer,group_upper);
   }
   while (!stop_seek);
@@ -178,11 +178,11 @@ int Load_INI_get_string(FILE * file,char * buffer,char * option_name,char * retu
   char * upper_buffer;
   int    buffer_index;
 
-  // On alloue les zones de mémoire:
+  // On alloue les zones de mÃ©moire:
   option_upper=(char *)malloc(1024);
   upper_buffer=(char *)malloc(1024);
 
-  // On commence par se faire une version majuscule de l'option à rechercher:
+  // On commence par se faire une version majuscule de l'option Ã  rechercher:
   strcpy(option_upper,option_name);
   Load_INI_clear_string(option_upper, 0);
 
@@ -203,13 +203,13 @@ int Load_INI_get_string(FILE * file,char * buffer,char * option_name,char * retu
     strcpy(upper_buffer,buffer);
     Load_INI_clear_string(upper_buffer, raw_text);
 
-    // On compare la chaîne avec l'option recherchée:
+    // On compare la chaÃ®ne avec l'option recherchÃ©e:
     stop_seek=Load_INI_seek_pattern(upper_buffer,option_upper);
 
-    // Si on l'a trouvée:
+    // Si on l'a trouvÃ©e:
     if (stop_seek)
     {
-      // On se positionne juste après la chaîne "="
+      // On se positionne juste aprÃ¨s la chaÃ®ne "="
       buffer_index=Load_INI_seek_pattern(upper_buffer,"=");
 
       strcpy(return_code, upper_buffer + buffer_index);
@@ -358,11 +358,11 @@ int Load_INI_get_values(FILE * file,char * buffer,char * option_name,int nb_expe
   int    buffer_index;
   int    nb_values;
 
-  // On alloue les zones de mémoire:
+  // On alloue les zones de mÃ©moire:
   option_upper=(char *)malloc(1024);
   upper_buffer=(char *)malloc(1024);
 
-  // On commence par se faire une version majuscule de l'option à rechercher:
+  // On commence par se faire une version majuscule de l'option Ã  rechercher:
   strcpy(option_upper,option_name);
   Load_INI_clear_string(option_upper, 0);
 
@@ -383,15 +383,15 @@ int Load_INI_get_values(FILE * file,char * buffer,char * option_name,int nb_expe
     strcpy(upper_buffer,buffer);
     Load_INI_clear_string(upper_buffer, 0);
 
-    // On compare la chaîne avec l'option recherchée:
+    // On compare la chaÃ®ne avec l'option recherchÃ©e:
     stop_seek=Load_INI_seek_pattern(upper_buffer,option_upper);
 
-    // Si on l'a trouvée:
+    // Si on l'a trouvÃ©e:
     if (stop_seek)
     {
       nb_values=0;
 
-      // On se positionne juste après la chaîne "="
+      // On se positionne juste aprÃ¨s la chaÃ®ne "="
       buffer_index=Load_INI_seek_pattern(upper_buffer,"=");
 
       // Tant qu'on a pas atteint la fin de la ligne
@@ -451,7 +451,7 @@ int Load_INI(T_Config * conf)
 #endif
 
 
-  // On alloue les zones de mémoire:
+  // On alloue les zones de mÃ©moire:
   buffer=(char *)malloc(1024);
   filename=(char *)malloc(256);
 
@@ -722,7 +722,7 @@ int Load_INI(T_Config * conf)
     goto Erreur_ERREUR_INI_CORROMPU;
   conf->Auto_nb_used=values[0];
 
-  // Optionnel, le mode video par défaut (à partir de beta 97.0%)
+  // Optionnel, le mode video par dÃ©faut (Ã  partir de beta 97.0%)
   conf->Default_resolution=0;
   if (!Load_INI_get_string (file,buffer,"Default_video_mode",value_label, 0))
   {
@@ -731,7 +731,7 @@ int Load_INI(T_Config * conf)
       conf->Default_resolution=mode;
   }
   
-  // Optionnel, les dimensions de la fenêtre (à partir de beta 97.0%)
+  // Optionnel, les dimensions de la fenÃªtre (Ã  partir de beta 97.0%)
   // Do that only if the first mode is actually windowed (not the case on gp2x for example)
   if(Video_mode[0].Fullscreen==0)
   {
@@ -747,7 +747,7 @@ int Load_INI(T_Config * conf)
   }
 
   conf->Mouse_merge_movement=100;
-  // Optionnel, paramètre pour grouper les mouvements souris (>98.0%)
+  // Optionnel, paramÃ¨tre pour grouper les mouvements souris (>98.0%)
   if (!Load_INI_get_values (file,buffer,"Merge_movement",1,values))
   {
     if ((values[0]<0) || (values[0]>1000))

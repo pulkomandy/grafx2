@@ -2,7 +2,7 @@
 */
 /* GFX2CRTC - libraw2crtc.h
  * CloudStrife - 20080921
- * Diffusé sous licence libre CeCILL v2
+ * DiffusÃ© sous licence libre CeCILL v2
  * Voire LICENCE
  */
 

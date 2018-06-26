@@ -57,9 +57,9 @@ int RGB_scale = 256; // 24bit
 
 // Nombre de graduations pour une composante dans le mode actuel
 int Color_count=256;
-// Les composantes vont de 0 à (Color_count-1)
+// Les composantes vont de 0 Ã  (Color_count-1)
 int Color_max=255;
-// Le demi-pas est une quantité que l'on ajoute à une composante
+// Le demi-pas est une quantitÃ© que l'on ajoute Ã  une composante
 // avant de faire un arrondi par division.
 int Color_halfstep=0;
 
@@ -134,7 +134,7 @@ static int Add_encoded(int comp, int offset)
 }
 
 
-// Définir les unités pour les graduations R G B ou H S V
+// DÃ©finir les unitÃ©s pour les graduations R G B ou H S V
 void Component_unit(int count)
 {
   Color_count = count;
@@ -200,7 +200,7 @@ void Set_blue(byte color, short new_color, T_Palette palette)
 }
 
 void Format_component(byte value, char *str)
-// Formate une chaine de 4 caractères+\0 : "nnn "
+// Formate une chaine de 4 caractÃ¨res+\0 : "nnn "
 {
   Num2str(value,str,3);
   str[3]=' ';
@@ -208,8 +208,8 @@ void Format_component(byte value, char *str)
 }
 
 void Spread_colors(short start,short end,T_Palette palette)
-// Modifie la palette pour obtenir un dégradé de couleur entre les deux bornes
-// passées en paramètre
+// Modifie la palette pour obtenir un dÃ©gradÃ© de couleur entre les deux bornes
+// passÃ©es en paramÃ¨tre
 {
   short start_red;
   short start_green;
@@ -219,8 +219,8 @@ void Spread_colors(short start,short end,T_Palette palette)
   short end_blue;
   short index;
 
-  // On vérifie qu'il y ait assez de couleurs entre le début et la fin pour
-  // pouvoir faire un dégradé:
+  // On vÃ©rifie qu'il y ait assez de couleurs entre le dÃ©but et la fin pour
+  // pouvoir faire un dÃ©gradÃ©:
   if ( (start!=end) && (start+1!=end) )
   {
     start_red   = Encode_component(palette[start].R);
@@ -358,7 +358,7 @@ void Remap_image_highlevel(byte * conversion_table)
   Main.backups->Pages->Transparent_color =
     conversion_table[Main.backups->Pages->Transparent_color];
 
-  // On calcule les limites à l'écran de l'image
+  // On calcule les limites Ã  l'Ã©cran de l'image
   if (Main.image_height>=Menu_Y_before_window)
     end_y=Menu_Y_before_window;
   else
@@ -390,19 +390,19 @@ void Remap_image_highlevel(byte * conversion_table)
       end_y_mag=Main.image_height*Main.magnifier_factor;
   }
 
-  // On doit maintenant faire la traduction à l'écran
+  // On doit maintenant faire la traduction Ã  l'Ã©cran
   Remap_zone_highlevel(0,0,end_x,end_y,conversion_table);
 
   if (Main.magnifier_mode)
   {
     Remap_zone_highlevel(Main.separator_position,0,end_x_mag,end_y_mag,conversion_table);
-    // Il peut encore rester le bas de la barre de split à remapper si la
-    // partie zoomée ne descend pas jusqu'en bas...
+    // Il peut encore rester le bas de la barre de split Ã  remapper si la
+    // partie zoomÃ©e ne descend pas jusqu'en bas...
     Remap_zone_highlevel(Main.separator_position,end_y_mag,
                     (Main.separator_position+(SEPARATOR_WIDTH*Menu_factor_X)),
                     Menu_Y_before_window,conversion_table);
   }
-  // Remappe tous les fonds de fenetre (qui doivent contenir un bout d'écran)
+  // Remappe tous les fonds de fenetre (qui doivent contenir un bout d'Ã©cran)
   Remap_window_backgrounds(conversion_table, 0, Menu_Y_before_window);
 }
 
@@ -424,12 +424,12 @@ void Swap(int with_remap,short block_1_start,short block_2_start,short block_siz
   // On fait une copie de la table d'used des couleurs
   memcpy(temp_usage, color_usage, sizeof(dword) * 256);
 
-  // On commence à initialiser la table de conversion à un état où elle ne
+  // On commence Ã  initialiser la table de conversion Ã  un Ã©tat oÃ¹ elle ne
   // fera aucune conversion.
   for (pos_1=0;pos_1<=255;pos_1++)
     conversion_table[pos_1]=pos_1;
 
-  // On calcul les dernières couleurs de chaque bloc.
+  // On calcul les derniÃ¨res couleurs de chaque bloc.
   end_1=block_1_start+block_size-1;
   end_2=block_2_start+block_size-1;
 
@@ -447,7 +447,7 @@ void Swap(int with_remap,short block_1_start,short block_2_start,short block_siz
       palette[pos_1].G=temp_palette[pos_2].G;
       palette[pos_1].B=temp_palette[pos_2].B;
 
-      // On gère la mise à jour de pos_2
+      // On gÃ¨re la mise Ã  jour de pos_2
       if (pos_2==end_2)
         pos_2=block_1_start;
       else
@@ -457,7 +457,7 @@ void Swap(int with_remap,short block_1_start,short block_2_start,short block_siz
   else
   if ((block_2_start<block_1_start) && (end_2>=block_1_start))
   {
-    // Le bloc destination déborde dans le bloc source.
+    // Le bloc destination dÃ©borde dans le bloc source.
 
     for (pos_1=block_2_start,pos_2=block_1_start;pos_1<=end_1;pos_1++)
     {
@@ -469,7 +469,7 @@ void Swap(int with_remap,short block_1_start,short block_2_start,short block_siz
       palette[pos_1].G=temp_palette[pos_2].G;
       palette[pos_1].B=temp_palette[pos_2].B;
 
-      // On gère la mise à jour de pos_2
+      // On gÃ¨re la mise Ã  jour de pos_2
       if (pos_2==end_1)
         pos_2=block_2_start;
       else
@@ -487,7 +487,7 @@ void Swap(int with_remap,short block_1_start,short block_2_start,short block_siz
       conversion_table[pos_2]=pos_1;
 
       //   On intervertit le nombre d'used des couleurs pour garder une
-      // cohérence lors d'un éventuel "Zap unused".
+      // cohÃ©rence lors d'un Ã©ventuel "Zap unused".
       SWAP_DWORDS(color_usage[pos_1], color_usage[pos_2])
 
       // On fait un changement de teinte:
@@ -522,7 +522,7 @@ void Set_nice_menu_colors(dword * color_usage,int not_picture)
   for (index=0; index<256; index++)
     replace_table[index]=index;
 
-  // On recherche les 4 couleurs les moins utilisées dans l'image pour pouvoir
+  // On recherche les 4 couleurs les moins utilisÃ©es dans l'image pour pouvoir
   // les remplacer par les nouvelles couleurs.
   for (index2=0; index2<4; index2++)
     for (index=255; index>=0; index--)
@@ -533,11 +533,11 @@ void Set_nice_menu_colors(dword * color_usage,int not_picture)
         new_colors[index2]=index;
     }
 
-  // On trie maintenant la table dans le sens décroissant.
-  // (Ce n'est pas indispensable, mais ça fera plus joli dans la palette).
+  // On trie maintenant la table dans le sens dÃ©croissant.
+  // (Ce n'est pas indispensable, mais Ã§a fera plus joli dans la palette).
   do
   {
-    color=0; // Booléen qui dit si le tri n'est pas terminé.
+    color=0; // BoolÃ©en qui dit si le tri n'est pas terminÃ©.
     for (index=0; index<3; index++)
     {
       if (new_colors[index]>new_colors[index+1])
@@ -551,7 +551,7 @@ void Set_nice_menu_colors(dword * color_usage,int not_picture)
   } while (color);
 
   //   On sauvegarde dans rgb les teintes qu'on va remplacer et on met les
-  // couleurs du menu par défaut
+  // couleurs du menu par dÃ©faut
   for (index=0; index<4; index++)
   {
     const T_Components * target_rgb;
@@ -566,7 +566,7 @@ void Set_nice_menu_colors(dword * color_usage,int not_picture)
     Main.palette[color].B=Round_palette_component(target_rgb->B);
   }
 
-  //   Maintenant qu'on a placé notre nouvelle palette, on va chercher quelles
+  //   Maintenant qu'on a placÃ© notre nouvelle palette, on va chercher quelles
   // sont les couleurs qui peuvent remplacer les anciennes
   Hide_cursor();
   for (index=0; index<4; index++)
@@ -580,7 +580,7 @@ void Set_nice_menu_colors(dword * color_usage,int not_picture)
   }
   else
   {
-    // On fait un changement des couleurs visibles à l'écran et dans l'image
+    // On fait un changement des couleurs visibles Ã  l'Ã©cran et dans l'image
     Remap_image_highlevel(replace_table);
   }
   Display_cursor();
@@ -600,20 +600,20 @@ void Reduce_palette(short * used_colors,int nb_colors_asked,T_Palette palette,dw
   dword used;
   dword best_used;
 
-  //   On commence par initialiser la table de conversion dans un état où
-  // aucune conversion ne sera effectuée.
+  //   On commence par initialiser la table de conversion dans un Ã©tat oÃ¹
+  // aucune conversion ne sera effectuÃ©e.
   for (color_1=0; color_1<=255; color_1++)
     conversion_table[color_1]=color_1;
 
-  //   Si on ne connait pas encore le nombre de couleurs utilisées, on le
-  // calcule! (!!! La fonction appelée Efface puis Affiche le curseur !!!)
+  //   Si on ne connait pas encore le nombre de couleurs utilisÃ©es, on le
+  // calcule! (!!! La fonction appelÃ©e Efface puis Affiche le curseur !!!)
   if ((*used_colors)<0)
     Update_color_count(used_colors,color_usage);
 
   Hide_cursor();
 
-  //   On tasse la palette vers le début parce qu'elle doit ressembler à
-  // du Gruyère (et comme Papouille il aime pas le fromage...)
+  //   On tasse la palette vers le dÃ©but parce qu'elle doit ressembler Ã 
+  // du GruyÃ¨re (et comme Papouille il aime pas le fromage...)
 
   // Pour cela, on va scruter la couleur color_1 et se servir de l'indice
   // color_2 comme position de destination.
@@ -626,19 +626,19 @@ void Reduce_palette(short * used_colors,int nb_colors_asked,T_Palette palette,dw
       palette[color_2].G=palette[color_1].G;
       palette[color_2].B=palette[color_1].B;
 
-      // Ensuite, on met à jour le tableau d'occupation des couleurs.
+      // Ensuite, on met Ã  jour le tableau d'occupation des couleurs.
       color_usage[color_2]=color_usage[color_1];
 
       // On va maintenant s'occuper de la table de conversion:
       conversion_table[color_1]=color_2;
 
-      // Maintenant, la place désignée par color_2 est occupée, alors on
-      // doit passer à un indice de destination suivant.
+      // Maintenant, la place dÃ©signÃ©e par color_2 est occupÃ©e, alors on
+      // doit passer Ã  un indice de destination suivant.
       color_2++;
     }
   }
 
-  // On met toutes les couleurs inutilisées en noir
+  // On met toutes les couleurs inutilisÃ©es en noir
   for (;color_2<256;color_2++)
   {
     palette[color_2].R=0;
@@ -647,14 +647,14 @@ void Reduce_palette(short * used_colors,int nb_colors_asked,T_Palette palette,dw
     color_usage[color_2]=0;
   }
 
-  //   Maintenant qu'on a une palette clean, on va boucler en réduisant
-  // le nombre de couleurs jusqu'à ce qu'on atteigne le nombre désiré.
+  //   Maintenant qu'on a une palette clean, on va boucler en rÃ©duisant
+  // le nombre de couleurs jusqu'Ã  ce qu'on atteigne le nombre dÃ©sirÃ©.
   // (The stop condition is further down)
   while (1)
   {
     //   Il s'agit de trouver les 2 couleurs qui se ressemblent le plus
-    // parmis celles qui sont utilisées (bien sûr) et de les remplacer par
-    // une seule couleur qui est la moyenne pondérée de ces 2 couleurs
+    // parmis celles qui sont utilisÃ©es (bien sÃ»r) et de les remplacer par
+    // une seule couleur qui est la moyenne pondÃ©rÃ©e de ces 2 couleurs
     // en fonction de leur utilisation dans l'image.
 
     best_difference =26*255*26*255+55*255*255+19*255*19*255;
@@ -690,14 +690,14 @@ void Reduce_palette(short * used_colors,int nb_colors_asked,T_Palette palette,dw
     if (best_difference!=0 && (*used_colors)<=nb_colors_asked)
       break;
 
-    //   Maintenant qu'on les a trouvées, on va pouvoir mettre à jour nos
-    // données pour que le remplacement se fasse sans encombres.
+    //   Maintenant qu'on les a trouvÃ©es, on va pouvoir mettre Ã  jour nos
+    // donnÃ©es pour que le remplacement se fasse sans encombres.
 
     // En somme, on va remplacer best_color_2 par best_color_1,
     // mais attention, on ne remplace pas best_color_1 par
     // best_color_2 !
 
-    // On met à jour la palette.
+    // On met Ã  jour la palette.
     palette[best_color_1].R=Round_div((color_usage[best_color_1]*palette[best_color_1].R)+
                                              (color_usage[best_color_2]*palette[best_color_2].R),
                                              best_used);
@@ -708,78 +708,78 @@ void Reduce_palette(short * used_colors,int nb_colors_asked,T_Palette palette,dw
                                              (color_usage[best_color_2]*palette[best_color_2].B),
                                              best_used);
 
-    // On met à jour la table d'utilisation.
+    // On met Ã  jour la table d'utilisation.
     color_usage[best_color_1]+=color_usage[best_color_2];
     color_usage[best_color_2]=0;
 
-    // On met à jour la table de conversion.
+    // On met Ã  jour la table de conversion.
     for (color_1=0;color_1<=255;color_1++)
     {
       if (conversion_table[color_1]==best_color_2)
       {
-        //   La color_1 avait déjà prévue de se faire remplacer par la
-        // couleur que l'on veut maintenant éliminer. On va maintenant
-        // demander à ce que la color_1 se fasse remplacer par la
+        //   La color_1 avait dÃ©jÃ  prÃ©vue de se faire remplacer par la
+        // couleur que l'on veut maintenant Ã©liminer. On va maintenant
+        // demander Ã  ce que la color_1 se fasse remplacer par la
         // best_color_1.
         conversion_table[color_1]=best_color_1;
       }
     }
 
     //   Bon, maintenant que l'on a fait bouger nos petites choses concernants
-    // la couleur à éliminer, on va s'occuper de faire bouger les couleurs
-    // situées après la couleur à éliminer pour qu'elles se déplaçent d'une
-    // couleur en arrière.
+    // la couleur Ã  Ã©liminer, on va s'occuper de faire bouger les couleurs
+    // situÃ©es aprÃ¨s la couleur Ã  Ã©liminer pour qu'elles se dÃ©plaÃ§ent d'une
+    // couleur en arriÃ¨re.
     for (color_1=0;color_1<=255;color_1++)
     {
-      //   Commençons par nous occuper des tables d'utilisation et de la
+      //   CommenÃ§ons par nous occuper des tables d'utilisation et de la
       // palette.
 
       if (color_1>best_color_2)
       {
-        // La color_1 va scroller en arrière.
+        // La color_1 va scroller en arriÃ¨re.
 
-        //   Donc on transfère son utilisation dans l'utilisation de la
-        // couleur qui la précède.
+        //   Donc on transfÃ¨re son utilisation dans l'utilisation de la
+        // couleur qui la prÃ©cÃ¨de.
         color_usage[color_1-1]=color_usage[color_1];
 
-        //   Et on transfère ses teintes dans les teintes de la couleur qui
-        // la précède.
+        //   Et on transfÃ¨re ses teintes dans les teintes de la couleur qui
+        // la prÃ©cÃ¨de.
         palette[color_1-1].R=palette[color_1].R;
         palette[color_1-1].G=palette[color_1].G;
         palette[color_1-1].B=palette[color_1].B;
       }
 
-      //   Une fois la palette et la table d'utilisation gérées, on peut
+      //   Une fois la palette et la table d'utilisation gÃ©rÃ©es, on peut
       // s'occuper de notre table de conversion.
       if (conversion_table[color_1]>best_color_2)
         //   La color_1 avait l'intention de se faire remplacer par une
-        // couleur que l'on va (ou que l'on a déjà) bouger en arrière.
+        // couleur que l'on va (ou que l'on a dÃ©jÃ ) bouger en arriÃ¨re.
         conversion_table[color_1]--;
     }
 
-    //   On vient d'éjecter une couleur, donc on peut mettre à jour le nombre
-    // de couleurs utilisées.
+    //   On vient d'Ã©jecter une couleur, donc on peut mettre Ã  jour le nombre
+    // de couleurs utilisÃ©es.
     (*used_colors)--;
 
     // A la fin, on doit passer (dans la palette) les teintes du dernier
-    // élément de notre ensemble en noir.
+    // Ã©lÃ©ment de notre ensemble en noir.
     palette[*used_colors].R=0;
     palette[*used_colors].G=0;
     palette[*used_colors].B=0;
 
-    // Au passage, on va s'assurer que l'on a pas oublié de la mettre à une
+    // Au passage, on va s'assurer que l'on a pas oubliÃ© de la mettre Ã  une
     // utilisation nulle.
     color_usage[*used_colors]=0;
 
-    // Après avoir éjecté une couleur, on le fait savoir à l'utilisateur par
-    // l'intermédiaire du compteur de nombre utilisées.
+    // AprÃ¨s avoir Ã©jectÃ© une couleur, on le fait savoir Ã  l'utilisateur par
+    // l'intermÃ©diaire du compteur de nombre utilisÃ©es.
     Num2str(*used_colors,str,3);
     Print_in_window(COUNT_X,COUNT_Y,str,MC_Black,MC_Light);
   }
 
-  //   Maintenant, tous ces calculs doivent êtres pris en compte dans la
-  // palette, l'image et à l'écran.
-  Remap_image_highlevel(conversion_table); // Et voila pour l'image et l'écran
+  //   Maintenant, tous ces calculs doivent Ãªtres pris en compte dans la
+  // palette, l'image et Ã  l'Ã©cran.
+  Remap_image_highlevel(conversion_table); // Et voila pour l'image et l'Ã©cran
   Display_cursor();
 }
 
@@ -849,10 +849,10 @@ void Draw_all_palette_sliders(T_Scroller_button * red_slider,
   char str[5];
 
   Hide_cursor();
-  // Réaffichage des jauges:
+  // RÃ©affichage des jauges:
   if (start!=end)
   {
-    // Dans le cas d'un bloc, tout à 0.
+    // Dans le cas d'un bloc, tout Ã  0.
     red_slider->Position   =Color_max;
     Window_draw_slider(red_slider);
     Print_counter(NUMERIC_R_X,NUMERIC_Y,"\xb1  0",MC_Black,MC_Light);
@@ -1100,9 +1100,9 @@ void Button_Palette(int btn)
 
 
   static short reduce_colors_number = 256;
-  short temp_color; // Variable pouvant reservir pour différents calculs intermédiaires
+  short temp_color; // Variable pouvant reservir pour diffÃ©rents calculs intermÃ©diaires
   dword temp;
-  byte  color,click; // Variables pouvant reservir pour différents calculs intermédiaires
+  byte  color,click; // Variables pouvant reservir pour diffÃ©rents calculs intermÃ©diaires
   short clicked_button;
   word  old_mouse_x;
   word  old_mouse_y;
@@ -1251,7 +1251,7 @@ void Button_Palette(int btn)
   Window_set_normal_button( 44,178,35,14,"Load"  ,1,1,SDLK_l);  // 26
   Window_set_normal_button( 83,178,35,14,"Save"  ,1,1,SDLK_s);  // 27
 
-  // Dessin des petits effets spéciaux pour les boutons [+] et [-]
+  // Dessin des petits effets spÃ©ciaux pour les boutons [+] et [-]
   Draw_thingumajig(BUTTON_PLUS_X-5, BUTTON_PLUS_Y,MC_White,-1);
   Draw_thingumajig(BUTTON_MINUS_X+16,BUTTON_MINUS_Y,MC_Dark,+1);
 
@@ -1274,7 +1274,7 @@ void Button_Palette(int btn)
     {
       case  0 : // Nulle part
         break;
-      case -1 : // Hors de la fenêtre
+      case -1 : // Hors de la fenÃªtre
       case  1 : // palette
         if ( (Mouse_X!=old_mouse_x) || (Mouse_Y!=old_mouse_y) || (Mouse_K!=old_mouse_k) )
         {
@@ -1370,13 +1370,13 @@ void Button_Palette(int btn)
               if ( (Fore_color!=temp_color) || (block_start!=block_end) )
               {
                 // La couleur en question est nouvelle ou elle annule un
-                // ancien bloc. Il faut donc sélectionner cette couleur comme
+                // ancien bloc. Il faut donc sÃ©lectionner cette couleur comme
                 // unique couleur choisie.
 
                 Fore_color=first_color=last_color=block_start=block_end=temp_color;
                 Tag_color_range(block_start,block_end);
 
-                // Affichage du n° de la couleur sélectionnée
+                // Affichage du nÂ° de la couleur sÃ©lectionnÃ©e
                 Window_rectangle(COLOR_X,COLOR_Y,56,7,MC_Light);
                 Num2str(Fore_color,str,3);
                 Print_in_window(COLOR_X,COLOR_Y,str,MC_Black,MC_Light);
@@ -1398,22 +1398,22 @@ void Button_Palette(int btn)
               // On maintient le click, on va donc tester si le curseur bouge
               if (temp_color!=last_color)
               {
-                // On commence par ordonner la 1ère et dernière couleur du bloc
+                // On commence par ordonner la 1Ã¨re et derniÃ¨re couleur du bloc
                 if (first_color<temp_color)
                 {
                   block_start=first_color;
                   block_end=temp_color;
 
-                  // Affichage du n° de la couleur sélectionnée
+                  // Affichage du nÂ° de la couleur sÃ©lectionnÃ©e
                   Num2str(block_start,str  ,3);
                   Num2str(block_end  ,str+4,3);
-                  str[3]=26; // Flèche vers la droite
+                  str[3]=26; // FlÃ¨che vers la droite
                   Print_in_window(COLOR_X,COLOR_Y,str,MC_Black,MC_Light);
 
                   // Affichage des jauges
                   Display_sliders(red_slider,green_slider,blue_slider,1,NULL);
 
-                  // Affichage dans le block de visu du bloc (dégradé) en cours
+                  // Affichage dans le block de visu du bloc (dÃ©gradÃ©) en cours
                   Display_grad_block_in_window(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,block_start,block_end);
                 }
                 else if (first_color>temp_color)
@@ -1421,16 +1421,16 @@ void Button_Palette(int btn)
                   block_start=temp_color;
                   block_end=first_color;
 
-                  // Affichage du n° de la couleur sélectionnée
+                  // Affichage du nÂ° de la couleur sÃ©lectionnÃ©e
                   Num2str(block_start,str  ,3);
                   Num2str(block_end  ,str+4,3);
-                  str[3]=26; // Flèche vers la droite
+                  str[3]=26; // FlÃ¨che vers la droite
                   Print_in_window(COLOR_X,COLOR_Y,str,MC_Black,MC_Light);
 
                   // Affichage des jauges
                   Display_sliders(red_slider,green_slider,blue_slider,1,NULL);
 
-                  // Affichage dans le block de visu du bloc (dégradé) en cours
+                  // Affichage dans le block de visu du bloc (dÃ©gradÃ©) en cours
                   Display_grad_block_in_window(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,block_start,block_end);
                 }
                 else
@@ -1438,7 +1438,7 @@ void Button_Palette(int btn)
                   block_start=block_end=first_color;
                   Window_rectangle(NUMERIC_R_X,NUMERIC_Y,72,7,MC_Light);
 
-                  // Affichage du n° de la couleur sélectionnée
+                  // Affichage du nÂ° de la couleur sÃ©lectionnÃ©e
                   Window_rectangle(COLOR_X+24,COLOR_Y,32,7,MC_Light);
                   Update_window_area(COLOR_X+24,COLOR_Y,32,7);
                   Num2str(Fore_color,str,3);
@@ -1520,7 +1520,7 @@ void Button_Palette(int btn)
 
           if (red_slider->Position>Color_max)
           {
-            // Jauge dans les négatifs:
+            // Jauge dans les nÃ©gatifs:
             Num2str(-(Color_max-red_slider->Position),str,4);
             str[0]='-';
           }
@@ -1601,7 +1601,7 @@ void Button_Palette(int btn)
 
           if (green_slider->Position>Color_max)
           {
-            // Jauge dans les négatifs:
+            // Jauge dans les nÃ©gatifs:
             Num2str(-(Color_max-green_slider->Position),str,4);
             str[0]='-';
           }
@@ -1682,7 +1682,7 @@ void Button_Palette(int btn)
 
           if (blue_slider->Position>Color_max)
           {
-            // Jauge dans les négatifs:
+            // Jauge dans les nÃ©gatifs:
             Num2str(-(Color_max-blue_slider->Position),str,4);
             str[0]='-';
           }
@@ -1778,7 +1778,7 @@ void Button_Palette(int btn)
           }
         }
         Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
-        // On prépare la "modifiabilité" des nouvelles couleurs
+        // On prÃ©pare la "modifiabilitÃ©" des nouvelles couleurs
         Set_palette(working_palette);
         memcpy(temp_palette,working_palette,sizeof(T_Palette));
         need_to_remap=1;
@@ -1797,7 +1797,7 @@ void Button_Palette(int btn)
           Set_blue (i,temp_color,working_palette);
         }
         Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
-        // On prépare la "modifiabilité" des nouvelles couleurs
+        // On prÃ©pare la "modifiabilitÃ©" des nouvelles couleurs
         Set_palette(working_palette);
         memcpy(temp_palette,working_palette,sizeof(T_Palette));
 
@@ -1814,7 +1814,7 @@ void Button_Palette(int btn)
           Palette_edit_step();
 
           // On calcule le nombre de couleurs a swapper sans risquer de sortir
-          // de la palette (La var. first_color est utilisée pour économiser 1 var; c'est tout)
+          // de la palette (La var. first_color est utilisÃ©e pour Ã©conomiser 1 var; c'est tout)
           first_color=(temp_color+block_end-block_start<=255)?block_end+1-block_start:256-temp_color;
 
           if (clicked_button==8) // On ne fait de backup de l'image que si on
@@ -1829,17 +1829,17 @@ void Button_Palette(int btn)
 
           memcpy(temp_palette,working_palette,sizeof(T_Palette));
 
-          // On déplace le bloc vers les modifs:
+          // On dÃ©place le bloc vers les modifs:
           last_color=block_end=temp_color+first_color-1;
           Fore_color=first_color=block_start=temp_color;
-          // On raffiche le n° des bornes du bloc:
+          // On raffiche le nÂ° des bornes du bloc:
           if (block_start!=block_end)
           {
             // Cas d'un bloc multi-couleur
             Num2str(block_start,str  ,3);
             Num2str(block_end  ,str+4,3);
-            str[3]=26; // Flèche vers la droite
-            // Affichage dans le block de visu du bloc (dégradé) en cours
+            str[3]=26; // FlÃ¨che vers la droite
+            // Affichage dans le block de visu du bloc (dÃ©gradÃ©) en cours
             Display_grad_block_in_window(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,block_start,block_end);
           }
           else
@@ -1884,17 +1884,17 @@ void Button_Palette(int btn)
                  ((temp_color+block_end-block_start<=255)?block_end+1-block_start:256-temp_color)*3);
           memcpy(temp_palette,working_palette,sizeof(T_Palette));
           Set_palette(working_palette);
-          // On déplace le bloc vers les modifs:
+          // On dÃ©place le bloc vers les modifs:
           last_color=block_end=((temp_color+block_end-block_start<=255)?(temp_color+block_end-block_start):255);
           Fore_color=first_color=block_start=temp_color;
-          // On raffiche le n° des bornes du bloc:
+          // On raffiche le nÂ° des bornes du bloc:
           if (block_start!=block_end)
           {
             // Cas d'un bloc multi-couleur
             Num2str(block_start,str  ,3);
             Num2str(block_end  ,str+4,3);
-            str[3]=26; // Flèche vers la droite
-            // Affichage dans le block de visu du bloc (dégradé) en cours
+            str[3]=26; // FlÃ¨che vers la droite
+            // Affichage dans le block de visu du bloc (dÃ©gradÃ©) en cours
             Display_grad_block_in_window(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,block_start,block_end);
           }
           else
@@ -1938,7 +1938,7 @@ void Button_Palette(int btn)
         }
 
         Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
-        // On prépare la "modifiabilité" des nouvelles couleurs
+        // On prÃ©pare la "modifiabilitÃ©" des nouvelles couleurs
 
         Set_palette(working_palette);
 
@@ -1985,7 +1985,7 @@ void Button_Palette(int btn)
                 memcpy(Main.palette, temp_palette, sizeof(T_Palette));
             }
 
-            Set_palette(working_palette); // On définit la nouvelle palette
+            Set_palette(working_palette); // On dÃ©finit la nouvelle palette
             Draw_all_palette_sliders(red_slider, green_slider, blue_slider,
                     working_palette, block_start, block_end);
             memcpy(temp_palette, working_palette, sizeof(T_Palette));
@@ -2098,7 +2098,7 @@ void Button_Palette(int btn)
           // -- red --
           if (red_slider->Position>Color_max)
           {
-            // Jauge dans les négatifs:
+            // Jauge dans les nÃ©gatifs:
             Num2str(-(Color_max-red_slider->Position),str,4);
             str[0]='-';
           }
@@ -2119,7 +2119,7 @@ void Button_Palette(int btn)
           // -- green --
           if (green_slider->Position>Color_max)
           {
-            // Jauge dans les négatifs:
+            // Jauge dans les nÃ©gatifs:
             Num2str(-(Color_max-green_slider->Position),str,4);
             str[0]='-';
           }
@@ -2140,7 +2140,7 @@ void Button_Palette(int btn)
           // -- blue --
           if (blue_slider->Position>Color_max)
           {
-            // Jauge dans les négatifs:
+            // Jauge dans les nÃ©gatifs:
             Num2str(-(Color_max-blue_slider->Position),str,4);
             str[0]='-';
           }
@@ -2224,7 +2224,7 @@ void Button_Palette(int btn)
           // -- red --
           if (red_slider->Position>Color_max)
           {
-            // Jauge dans les négatifs:
+            // Jauge dans les nÃ©gatifs:
             Num2str(-(Color_max-red_slider->Position),str,4);
             str[0]='-';
           }
@@ -2245,7 +2245,7 @@ void Button_Palette(int btn)
           // -- green --
           if (green_slider->Position>Color_max)
           {
-            // Jauge dans les négatifs:
+            // Jauge dans les nÃ©gatifs:
             Num2str(-(Color_max-green_slider->Position),str,4);
             str[0]='-';
           }
@@ -2266,7 +2266,7 @@ void Button_Palette(int btn)
           // -- blue --
           if (blue_slider->Position>Color_max)
           {
-            // Jauge dans les négatifs:
+            // Jauge dans les nÃ©gatifs:
             Num2str(-(Color_max-blue_slider->Position),str,4);
             str[0]='-';
           }
@@ -2302,7 +2302,7 @@ void Button_Palette(int btn)
         }
         Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
         Set_palette(working_palette);
-        // On prépare la "modifiabilité" des nouvelles couleurs
+        // On prÃ©pare la "modifiabilitÃ©" des nouvelles couleurs
         memcpy(temp_palette,working_palette,sizeof(T_Palette));
 
         need_to_remap=1;
@@ -2352,7 +2352,7 @@ void Button_Palette(int btn)
           End_of_modification();
           Palette_edit_step(); // Disable Undo
         }
-        // On prépare la "modifiabilité" des nouvelles couleurs
+        // On prÃ©pare la "modifiabilitÃ©" des nouvelles couleurs
         Set_palette(working_palette);
         memcpy(temp_palette,working_palette,sizeof(T_Palette));
 
@@ -2398,7 +2398,7 @@ void Button_Palette(int btn)
       case 23 : // Sort palette
       {
         byte h = 0, l = 0, s=0;
-        byte oh=0,ol=0,os=0; // Valeur pour la couleur précédente
+        byte oh=0,ol=0,os=0; // Valeur pour la couleur prÃ©cÃ©dente
         int swap=1;
         byte remap_table[256];
         byte inverted_table[256];
@@ -2515,8 +2515,8 @@ void Button_Palette(int btn)
         for (i=0;i<256;i++)
           inverted_table[remap_table[i]]=i;
         Remap_image_highlevel(inverted_table);
-        // Maintenant, tous ces calculs doivent êtres pris en compte dans la
-        // palette, l'image et à l'écran.
+        // Maintenant, tous ces calculs doivent Ãªtres pris en compte dans la
+        // palette, l'image et Ã  l'Ã©cran.
         Set_palette(working_palette);
         Palette_edit_step(); // Disable Undo
 
@@ -2565,7 +2565,7 @@ void Button_Palette(int btn)
               Set_green (i,new_green,working_palette);
               Set_blue (i,new_blue,working_palette);
             }
-            // On prépare la "modifiabilité" des nouvelles couleurs
+            // On prÃ©pare la "modifiabilitÃ©" des nouvelles couleurs
             Set_palette(working_palette);
             memcpy(temp_palette,working_palette,sizeof(T_Palette));
             need_to_remap=1;
@@ -2590,7 +2590,7 @@ void Button_Palette(int btn)
           Fore_color=first_color=last_color=block_start=block_end=selected_col;
           Tag_color_range(block_start,block_end);
 
-          // Affichage du n° de la couleur sélectionnée
+          // Affichage du nÂ° de la couleur sÃ©lectionnÃ©e
           Window_rectangle(COLOR_X,COLOR_Y,56,7,MC_Light);
           Num2str(Fore_color,str,3);
           Print_in_window(COLOR_X,COLOR_Y,str,MC_Black,MC_Light);
@@ -2634,7 +2634,7 @@ void Button_Palette(int btn)
     {
       if (Key)
       {
-        if (Is_shortcut(Key,SPECIAL_PREVIOUS_FORECOLOR)) // Décaler Forecolor vers la gauche
+        if (Is_shortcut(Key,SPECIAL_PREVIOUS_FORECOLOR)) // DÃ©caler Forecolor vers la gauche
         {
           if (block_start==block_end)
           {
@@ -2646,7 +2646,7 @@ void Button_Palette(int btn)
             Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
             Hide_cursor();
             Tag_color_range(block_start,block_end);
-            // Affichage du n° de la couleur sélectionnée
+            // Affichage du nÂ° de la couleur sÃ©lectionnÃ©e
             Num2str(Fore_color,str,3);
             Print_in_window(COLOR_X,COLOR_Y,str,MC_Black,MC_Light);
             // Affichage dans le block de visu de la couleur en cours
@@ -2656,7 +2656,7 @@ void Button_Palette(int btn)
           }
           Key=0;
         }
-        else if (Is_shortcut(Key,SPECIAL_NEXT_FORECOLOR)) // Décaler Forecolor vers la droite
+        else if (Is_shortcut(Key,SPECIAL_NEXT_FORECOLOR)) // DÃ©caler Forecolor vers la droite
         {
           if (block_start==block_end)
           {
@@ -2668,7 +2668,7 @@ void Button_Palette(int btn)
             Draw_all_palette_sliders(red_slider,green_slider,blue_slider,working_palette,block_start,block_end);
             Hide_cursor();
             Tag_color_range(block_start,block_end);
-            // Affichage du n° de la couleur sélectionnée
+            // Affichage du nÂ° de la couleur sÃ©lectionnÃ©e
             Num2str(Fore_color,str,3);
             Print_in_window(COLOR_X,COLOR_Y,str,MC_Black,MC_Light);
             // Affichage dans le block de visu de la couleur en cours
@@ -2703,7 +2703,7 @@ void Button_Palette(int btn)
           Key=0;
         }
         else if (Key == SDLK_BACKSPACE)
-        // Remise des couleurs du menu à l'état normal en essayant
+        // Remise des couleurs du menu Ã  l'Ã©tat normal en essayant
         // de ne pas trop modifier l'image.
         {
           if (!image_is_backed_up)
@@ -2731,7 +2731,7 @@ void Button_Palette(int btn)
         }
         else if (Is_shortcut(Key,0x100+BUTTON_COLORPICKER))
         {
-          // Récupération d'une couleur derrière le menu
+          // RÃ©cupÃ©ration d'une couleur derriÃ¨re le menu
           Get_color_behind_window(&color,&click);
           if (click)
           {
@@ -2754,7 +2754,7 @@ void Button_Palette(int btn)
               Fore_color=first_color=last_color=block_start=block_end=color;
               Tag_color_range(block_start,block_end);
 
-              // Affichage du n° de la couleur sélectionnée
+              // Affichage du nÂ° de la couleur sÃ©lectionnÃ©e
               Window_rectangle(COLOR_X+24,COLOR_Y,32,7,MC_Light);
               Update_window_area(COLOR_X+24,COLOR_Y,32,7);
               Num2str(Fore_color,str,3);
@@ -2845,7 +2845,7 @@ void Button_Palette(int btn)
 
   Compute_optimal_menu_colors(Main.palette);
 
-  // La variable employée ici n'a pas vraiment de rapport avec son nom...
+  // La variable employÃ©e ici n'a pas vraiment de rapport avec son nom...
   need_to_remap=(Window_pos_Y+(Window_height*Menu_factor_Y)<Menu_Y_before_window);
 
   Close_window();
@@ -2853,9 +2853,9 @@ void Button_Palette(int btn)
 
   Reposition_palette();
 
-  //   On affiche les "ForeBack" car le menu n'est raffiché que si la fenêtre
-  // empiétait sur le menu. Mais si les couleurs on été modifiées, il faut
-  // rafficher tout le menu remappé.
+  //   On affiche les "ForeBack" car le menu n'est raffichÃ© que si la fenÃªtre
+  // empiÃ©tait sur le menu. Mais si les couleurs on Ã©tÃ© modifiÃ©es, il faut
+  // rafficher tout le menu remappÃ©.
   if (need_to_remap)
     Display_menu();
 

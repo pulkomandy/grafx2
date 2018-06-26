@@ -62,9 +62,9 @@ T_Menu_Bar Menu_bars[MENUBAR_COUNT] =
 /// Width of one layer button, in pixels before scaling
 word Layer_button_width = 1;
 
-// L'encapsulation tente une percée...ou un dernier combat.
+// L'encapsulation tente une percÃ©e...ou un dernier combat.
 
-// Nombre de cellules réel dans la palette du menu
+// Nombre de cellules rÃ©el dans la palette du menu
 word Menu_cells_X;
 word Palette_cells_X()
 {
@@ -90,42 +90,42 @@ void Pixel_in_menu_and_skin(word bar, word x, word y, byte color)
   Menu_bars[bar].Skin[2][y*Menu_bars[bar].Skin_width + x] = color;
 }
 
-// Affichage d'un pixel dans la fenêtre (la fenêtre doit être visible)
+// Affichage d'un pixel dans la fenÃªtre (la fenÃªtre doit Ãªtre visible)
 void Pixel_in_window(word x,word y,byte color)
 {
     Block((x*Menu_factor_X)+Window_pos_X,(y*Menu_factor_Y)+Window_pos_Y,Menu_factor_X,Menu_factor_Y,color);
 }
 
-// Affichage d'un rectangle dans la fenêtre (la fenêtre doit être visible)
+// Affichage d'un rectangle dans la fenÃªtre (la fenÃªtre doit Ãªtre visible)
 void Window_rectangle(word x_pos,word y_pos,word width,word height,byte color)
 {
   Block((x_pos*Menu_factor_X)+Window_pos_X,(y_pos*Menu_factor_Y)+Window_pos_Y,width*Menu_factor_X,height*Menu_factor_Y,color);
 }
 
 
-// -- Affichages de différents cadres dans une fenêtre -----------------------
+// -- Affichages de diffÃ©rents cadres dans une fenÃªtre -----------------------
 
-  // -- Frame général avec couleurs paramètrables --
+  // -- Frame gÃ©nÃ©ral avec couleurs paramÃ¨trables --
 
 void Window_display_frame_generic(word x_pos,word y_pos,word width,word height,
                                     byte color_tl,byte color_br,byte color_s,byte color_tlc,byte color_brc)
-// Paramètres de couleurs:
+// ParamÃ¨tres de couleurs:
 // color_tl =Bords Haut et Gauche
 // color_br =Bords Bas et Droite
 // color_s  =Coins Haut-Droite et Bas-Gauche
 // color_tlc=Coin Haut-Gauche
 // color_brc=Coin Bas-Droite
 {
-  // Bord haut (sans les extrémités)
+  // Bord haut (sans les extrÃ©mitÃ©s)
   Window_rectangle(x_pos+1,y_pos,width-2,1,color_tl);
 
-  // Bord bas (sans les extrémités)
+  // Bord bas (sans les extrÃ©mitÃ©s)
   Window_rectangle(x_pos+1,y_pos+height-1,width-2,1,color_br);
 
-  // Bord gauche (sans les extrémités)
+  // Bord gauche (sans les extrÃ©mitÃ©s)
   Window_rectangle(x_pos, y_pos+1,1,height-2,color_tl);
 
-  // Bord droite (sans les extrémités)
+  // Bord droite (sans les extrÃ©mitÃ©s)
   Window_rectangle(x_pos+width-1,y_pos+1,1,height-2,color_br);
 
   // Coin haut gauche
@@ -145,21 +145,21 @@ void Window_display_frame_mono(word x_pos,word y_pos,word width,word height,byte
   Window_display_frame_generic(x_pos,y_pos,width,height,color,color,color,color,color);
 }
 
-  // -- Frame creux: foncé en haut-gauche et clair en bas-droite --
+  // -- Frame creux: foncÃ© en haut-gauche et clair en bas-droite --
 
 void Window_display_frame_in(word x_pos,word y_pos,word width,word height)
 {
   Window_display_frame_generic(x_pos,y_pos,width,height,MC_Dark,MC_White,MC_Light,MC_Dark,MC_White);
 }
 
-  // -- Frame bombé: clair en haut-gauche et foncé en bas-droite --
+  // -- Frame bombÃ©: clair en haut-gauche et foncÃ© en bas-droite --
 
 void Window_display_frame_out(word x_pos,word y_pos,word width,word height)
 {
   Window_display_frame_generic(x_pos,y_pos,width,height,MC_White,MC_Dark,MC_Light,MC_White,MC_Dark);
 }
 
-  // -- Frame de séparation: un cadre bombé dans un cadre creux (3D!!!) --
+  // -- Frame de sÃ©paration: un cadre bombÃ© dans un cadre creux (3D!!!) --
 
 void Window_display_frame(word x_pos,word y_pos,word width,word height)
 {
@@ -168,7 +168,7 @@ void Window_display_frame(word x_pos,word y_pos,word width,word height)
 }
 
 
-//-- Affichages relatifs à la palette dans le menu ---------------------------
+//-- Affichages relatifs Ã  la palette dans le menu ---------------------------
 
   // -- Affichage des couleurs courante (fore/back) de pinceau dans le menu --
 
@@ -438,19 +438,19 @@ void Change_palette_cells()
   {
     Menu_palette_cell_width = ((Screen_width/Menu_factor_X)-(MENU_WIDTH+2)) / Menu_cells_X;
 
-    // Si ça tient, c'est bon. Sinon, on retente avec une colonne de moins
+    // Si Ã§a tient, c'est bon. Sinon, on retente avec une colonne de moins
     if (Menu_palette_cell_width>2)
       break;
     Menu_cells_X--;
   }
 
-  // Cale First_color_in_palette sur un multiple du nombre de cellules (arrondi inférieur)
+  // Cale First_color_in_palette sur un multiple du nombre de cellules (arrondi infÃ©rieur)
   if (Config.Palette_vertical)
     First_color_in_palette=First_color_in_palette/Menu_cells_X*Menu_cells_X;
   else
     First_color_in_palette=First_color_in_palette/Menu_cells_Y*Menu_cells_Y;
 
-  // Si le nombre de cellules a beaucoup augmenté et qu'on était près de
+  // Si le nombre de cellules a beaucoup augmentÃ© et qu'on Ã©tait prÃ¨s de
   // la fin, il faut reculer First_color_in_palette pour montrer plein
   // de couleurs.
   if ((int)First_color_in_palette+(Menu_cells_Y)*Menu_cells_X*2>=256)
@@ -461,17 +461,17 @@ void Change_palette_cells()
       First_color_in_palette=255/Menu_cells_Y*Menu_cells_Y-(Menu_cells_X-1)*Menu_cells_Y;
   }
 
-  // Mise à jour de la taille du bouton dans le menu. C'est pour pas que
+  // Mise Ã  jour de la taille du bouton dans le menu. C'est pour pas que
   // la bordure noire soit active.
   Buttons_Pool[BUTTON_CHOOSE_COL].Width=(Menu_palette_cell_width*Menu_cells_X)-1;
   Buttons_Pool[BUTTON_CHOOSE_COL].Height=(MENU_HEIGHT-9)/Menu_cells_Y*Menu_cells_Y-1;
 }
 
 // Retrouve la couleur sur laquelle pointe le curseur souris.
-// Cette fonction suppose qu'on a déja vérifié que le curseur est dans
+// Cette fonction suppose qu'on a dÃ©ja vÃ©rifiÃ© que le curseur est dans
 // la zone rectangulaire du BUTTON_CHOOSE_COL
-// La fonction renvoie -1 si on est "trop à gauche" (pas possible)
-// ou après la couleur 255 (Ce qui peut arriver si la palette est affichée
+// La fonction renvoie -1 si on est "trop Ã  gauche" (pas possible)
+// ou aprÃ¨s la couleur 255 (Ce qui peut arriver si la palette est affichÃ©e
 // avec un nombre de lignes qui n'est pas une puissance de deux.)
 int Pick_color_in_palette()
 {
@@ -870,7 +870,7 @@ static const byte * Get_font_character_pixel(unsigned int c)
   }
 }
 
-  // -- Afficher une chaîne n'importe où à l'écran --
+  // -- Afficher une chaÃ®ne n'importe oÃ¹ Ã  l'Ã©cran --
 
 void Print_general(short x,short y,const char * str,byte text_color,byte background_color)
 {
@@ -889,7 +889,7 @@ void Print_general(short x,short y,const char * str,byte text_color,byte backgro
     real_x=0; // Position dans le buffer
     for (index=0;str[index]!='\0';index++)
     {
-      // Pointeur sur le premier pixel du caractère
+      // Pointeur sur le premier pixel du caractÃ¨re
       font_pixel=Menu_font+((unsigned char)str[index]<<6);
       for (x_pos=0;x_pos<8;x_pos+=1)
         for (repeat_menu_x_factor=0;repeat_menu_x_factor<Menu_factor_X*Pixel_width;repeat_menu_x_factor++)
@@ -1093,11 +1093,11 @@ void Print_filename(void)
   }
 }
 
-// Fonction d'affichage d'une chaine numérique avec une fonte très fine
-// Spécialisée pour les compteurs RGB
+// Fonction d'affichage d'une chaine numÃ©rique avec une fonte trÃ¨s fine
+// SpÃ©cialisÃ©e pour les compteurs RGB
 void Print_counter(short x,short y,const char * str,byte text_color,byte background_color)
 {
-  // Macros pour écrire des litteraux binaires.
+  // Macros pour Ã©crire des litteraux binaires.
   // Ex: Ob(11110000) == 0xF0
   #define Ob(x)  ((unsigned)Ob_(0 ## x ## uL))
   #define Ob_(x) ((x & 1) | (x >> 2 & 2) | (x >> 4 & 4) | (x >> 6 & 8) |                \
@@ -1554,10 +1554,10 @@ void Display_paintbrush_in_menu(void)
   Draw_menu_button(BUTTON_PAINTBRUSHES,BUTTON_RELEASED);
 }
 
-  // -- Dessiner un pinceau prédéfini dans la fenêtre --
+  // -- Dessiner un pinceau prÃ©dÃ©fini dans la fenÃªtre --
 
 void Display_paintbrush_in_window(word x,word y,int number)
-  // Pinceau = 0..NB_PAINTBRUSH_SPRITES-1 : Pinceau prédéfini
+  // Pinceau = 0..NB_PAINTBRUSH_SPRITES-1 : Pinceau prÃ©dÃ©fini
 {
   word x_pos;
   word y_pos;
@@ -1588,7 +1588,7 @@ void Display_paintbrush_in_window(word x,word y,int number)
       if (Paintbrush[number].Sprite[y_pos][x_pos])
         Block(origin_x+window_x_pos*x_size,origin_y+window_y_pos*y_size,x_size,y_size,MC_Black);
   // On n'utilise pas Pixel_in_window() car on ne dessine pas
-  // forcément avec la même taille de pixel.
+  // forcÃ©ment avec la mÃªme taille de pixel.
 
   Update_rect( ToWinX(origin_x), ToWinY(origin_y),
         ToWinL(Paintbrush[number].Width),
@@ -1611,7 +1611,7 @@ void Draw_thingumajig(word x,word y, byte color, short direction)
   Pixel_in_window(x,y+5,color);
 }
 
-  // -- Dessiner un bloc de couleurs dégradé verticalement
+  // -- Dessiner un bloc de couleurs dÃ©gradÃ© verticalement
 
 void Display_grad_block_in_window(word x_pos,word y_pos,word width,word height,word block_start,word block_end)
 {
@@ -1641,7 +1641,7 @@ void Display_grad_block_in_window(word x_pos,word y_pos,word width,word height,w
 
 
 
-  // -- Dessiner un petit sprite représentant le type d'un drive --
+  // -- Dessiner un petit sprite reprÃ©sentant le type d'un drive --
 
 void Window_display_icon_sprite(word x_pos,word y_pos,byte type)
 {
@@ -1657,15 +1657,15 @@ void Window_display_icon_sprite(word x_pos,word y_pos,byte type)
 
 void Display_menu_palette_avoiding_window(byte * table)
 {
-  // On part du principe qu'il n'y a que le bas d'une fenêtre qui puisse
-  // empiéter sur la palette... Et c'est déjà pas mal!
+  // On part du principe qu'il n'y a que le bas d'une fenÃªtre qui puisse
+  // empiÃ©ter sur la palette... Et c'est dÃ©jÃ  pas mal!
   word color,real_color;
   word start_x,start_y;
   word end_x,end_y;
   word width;
   word height;
   word corner_x=Window_pos_X+Window_width*Menu_factor_X; // |_ Coin bas-droit
-  word corner_y=Window_pos_Y+Window_height*Menu_factor_Y; // |  de la fenêtre +1
+  word corner_y=Window_pos_Y+Window_height*Menu_factor_Y; // |  de la fenÃªtre +1
 
   if (Config.Separate_colors)
   {
@@ -1687,8 +1687,8 @@ void Display_menu_palette_avoiding_window(byte * table)
       end_x=start_x+width;
       end_y=start_y+height;
 
-      //   On affiche le bloc en entier si on peut, sinon on le découpe autour
-      // de la fenêtre.
+      //   On affiche le bloc en entier si on peut, sinon on le dÃ©coupe autour
+      // de la fenÃªtre.
       if ( (start_y>=corner_y) || (end_x<=Window_pos_X) || (start_x>=corner_x) )
         Block(start_x,start_y,width,height,real_color);
       else
@@ -1742,12 +1742,12 @@ void Display_menu_palette_avoiding_window(byte * table)
       }
       {
         // Affichage du bloc directement dans le "buffer de fond" de la fenetre.
-        // Cela permet au bloc de couleur d'apparaitre si on déplace la fenetre.
+        // Cela permet au bloc de couleur d'apparaitre si on dÃ©place la fenetre.
         short x_pos;
         short y_pos;
-        short relative_x; // besoin d'une variable signée
-        short relative_y; // besoin d'une variable signée
-        // Attention aux unités
+        short relative_x; // besoin d'une variable signÃ©e
+        short relative_y; // besoin d'une variable signÃ©e
+        // Attention aux unitÃ©s
         relative_x = ((short)start_x - (short)Window_pos_X);
         relative_y = ((short)start_y - (short)Window_pos_Y);
 
@@ -1761,15 +1761,15 @@ void Display_menu_palette_avoiding_window(byte * table)
   Update_rect(MENU_WIDTH*Menu_factor_X,Menu_Y_before_window,Screen_width-(MENU_WIDTH*Menu_factor_X),(Menu_height-11)*Menu_factor_Y);
 }
 
-// -------- Calcul des bornes de la partie d'image visible à l'écran ---------
+// -------- Calcul des bornes de la partie d'image visible Ã  l'Ã©cran ---------
 void Compute_limits(void)
 /*
-  Avant l'appel à cette fonction, les données de la loupe doivent être à jour.
+  Avant l'appel Ã  cette fonction, les donnÃ©es de la loupe doivent Ãªtre Ã  jour.
 */
 {
   if (Main.magnifier_mode)
   {
-    // -- Calcul des limites de la partie non zoomée de l'image --
+    // -- Calcul des limites de la partie non zoomÃ©e de l'image --
     Limit_top  =Main.offset_Y;
     Limit_left=Main.offset_X;
     Limit_visible_bottom   =Limit_top+Menu_Y-1;
@@ -1785,7 +1785,7 @@ void Compute_limits(void)
     else
       Limit_right=Limit_visible_right;
 
-    // -- Calcul des limites de la partie zoomée de l'image --
+    // -- Calcul des limites de la partie zoomÃ©e de l'image --
     Limit_top_zoom  =Main.magnifier_offset_Y;
     Limit_left_zoom=Main.magnifier_offset_X;
     Limit_visible_bottom_zoom   =Limit_top_zoom+Main.magnifier_height-1;
@@ -1822,7 +1822,7 @@ void Compute_limits(void)
 }
 
 
-// -- Calculer les coordonnées du pinceau en fonction du snap et de la loupe -
+// -- Calculer les coordonnÃ©es du pinceau en fonction du snap et de la loupe -
 void Compute_paintbrush_coordinates(void)
 {
   if ((Main.magnifier_mode) && (Mouse_X>=Main.X_zoom))
@@ -1900,7 +1900,7 @@ void Display_image_limits(void)
   bottom_is_visible   =Main.image_height<Menu_Y;
 
 
-  // On vérifie que la limite à droite est visible:
+  // On vÃ©rifie que la limite Ã  droite est visible:
   if (right_is_visible)
   {
     start=Limit_top;
@@ -1910,7 +1910,7 @@ void Display_image_limits(void)
     if (bottom_is_visible)
       end++;
 
-    // Juste le temps d'afficher les limites, on étend les limites de la loupe
+    // Juste le temps d'afficher les limites, on Ã©tend les limites de la loupe
     // aux limites visibles, car sinon Pixel_preview ne voudra pas afficher.
     old_zoom_limit=Limit_right_zoom;
     Limit_right_zoom=Limit_visible_right_zoom;
@@ -1923,14 +1923,14 @@ void Display_image_limits(void)
     Limit_right_zoom=old_zoom_limit;
   }
 
-  // On vérifie que la limite en bas est visible:
+  // On vÃ©rifie que la limite en bas est visible:
   if (bottom_is_visible)
   {
     start=Limit_left;
     end=(Limit_right<Main.image_width)?
         Limit_right:Main.image_width;
 
-    // On étend également les limites en bas (comme pour la limite droit)
+    // On Ã©tend Ã©galement les limites en bas (comme pour la limite droit)
     old_zoom_limit=Limit_bottom_zoom;
     Limit_bottom_zoom=Limit_visible_bottom_zoom;
 
@@ -1946,7 +1946,7 @@ void Display_image_limits(void)
 
 
 
-// -- Recadrer la partie non-zoomée de l'image par rapport à la partie zoomée
+// -- Recadrer la partie non-zoomÃ©e de l'image par rapport Ã  la partie zoomÃ©e
 //    lorsqu'on scrolle en mode Loupe --
 void Position_screen_according_to_zoom(void)
 {
@@ -2022,7 +2022,7 @@ void Position_screen_according_to_position(int target_x, int target_y)
 }
 
 
-// - Calcul des données du split en fonction de la proportion de chaque zone -
+// - Calcul des donnÃ©es du split en fonction de la proportion de chaque zone -
 void Compute_separator_data(void)
 {
   //short temp;
@@ -2031,13 +2031,13 @@ void Compute_separator_data(void)
   Main.X_zoom=Screen_width-(((Screen_width+(Main.magnifier_factor>>1)-theoric_X)/Main.magnifier_factor)*Main.magnifier_factor);
   Main.separator_position=Main.X_zoom-(Menu_factor_X*SEPARATOR_WIDTH);
 
-  // Correction en cas de débordement sur la gauche
+  // Correction en cas de dÃ©bordement sur la gauche
   while (Main.separator_position*(Main.magnifier_factor+1)<Screen_width-(Menu_factor_X*SEPARATOR_WIDTH))
   {
     Main.separator_position+=Main.magnifier_factor;
     Main.X_zoom+=Main.magnifier_factor;
   }
-  // Correction en cas de débordement sur la droite
+  // Correction en cas de dÃ©bordement sur la droite
   theoric_X=Screen_width-((NB_ZOOMED_PIXELS_MIN-1)*Main.magnifier_factor);
   while (Main.X_zoom>=theoric_X)
   {
@@ -2051,7 +2051,7 @@ void Compute_separator_data(void)
 // -------------------- Calcul des information de la loupe -------------------
 void Compute_magnifier_data(void)
 /*
-  Après modification des données de la loupe, il faut recalculer les limites.
+  AprÃ¨s modification des donnÃ©es de la loupe, il faut recalculer les limites.
 */
 {
   Compute_separator_data();
@@ -2159,31 +2159,31 @@ void Copy_view_to_spare(void)
   if (Main.image_width!=Spare.image_width || Main.image_height!=Spare.image_height)
     return;
 
-  // Copie des décalages de la fenêtre principale (non zoomée) de l'image
+  // Copie des dÃ©calages de la fenÃªtre principale (non zoomÃ©e) de l'image
   Spare.offset_X=Main.offset_X;
   Spare.offset_Y=Main.offset_Y;
 
-  // Copie du booléen "Mode loupe" de l'image
+  // Copie du boolÃ©en "Mode loupe" de l'image
   Spare.magnifier_mode=Main.magnifier_mode;
 
   // Copie du facteur de zoom du brouillon
   Spare.magnifier_factor=Main.magnifier_factor;
 
-  // Copie des dimensions de la fenêtre de zoom
+  // Copie des dimensions de la fenÃªtre de zoom
   Spare.magnifier_width=Main.magnifier_width;
   Spare.magnifier_height=Main.magnifier_height;
 
-  // Copie des décalages de la fenêtre de zoom
+  // Copie des dÃ©calages de la fenÃªtre de zoom
   Spare.magnifier_offset_X=Main.magnifier_offset_X;
   Spare.magnifier_offset_Y=Main.magnifier_offset_Y;
 
-  // Copie des données du split du zoom
+  // Copie des donnÃ©es du split du zoom
   Spare.separator_position=Main.separator_position;
   Spare.X_zoom=Main.X_zoom;
   Spare.separator_proportion=Main.separator_proportion;
 }
 
-  // -- Afficher la barre de séparation entre les parties zoomées ou non en
+  // -- Afficher la barre de sÃ©paration entre les parties zoomÃ©es ou non en
   //    mode Loupe --
 
 void Display_separator(void)
@@ -2207,11 +2207,11 @@ void Display_separator(void)
   Block(Main.separator_position+Menu_factor_X,Menu_factor_Y,
         Menu_factor_X,(Menu_Y-(Menu_factor_Y<<1)),MC_White);
 
-  // Bord droite (gris foncé)
+  // Bord droite (gris foncÃ©)
   Block(Main.X_zoom-(Menu_factor_X<<1),Menu_factor_Y,
         Menu_factor_X,(Menu_Y-(Menu_factor_Y<<1)),MC_Dark);
 
-  // Bord bas (gris foncé)
+  // Bord bas (gris foncÃ©)
   Block(Main.separator_position+(Menu_factor_X<<1),Menu_Y-Menu_factor_Y,
         (SEPARATOR_WIDTH-3)*Menu_factor_X,Menu_factor_Y,MC_Dark);
 
@@ -2222,7 +2222,7 @@ void Display_separator(void)
   Block(Main.X_zoom-(Menu_factor_X<<1),0,
         Menu_factor_X,Menu_factor_Y,MC_Light);
 
-  Update_rect(Main.separator_position,0,SEPARATOR_WIDTH*Menu_factor_X,Menu_Y); // On réaffiche toute la partie à gauche du split, ce qui permet d'effacer son ancienne position
+  Update_rect(Main.separator_position,0,SEPARATOR_WIDTH*Menu_factor_X,Menu_Y); // On rÃ©affiche toute la partie Ã  gauche du split, ce qui permet d'effacer son ancienne position
 }
 
 
@@ -2230,7 +2230,7 @@ void Display_separator(void)
 // -- Fonctions de manipulation du curseur -----------------------------------
 
 
-  // -- Afficher une barre horizontale XOR zoomée
+  // -- Afficher une barre horizontale XOR zoomÃ©e
 
 void Horizontal_XOR_line_zoom(short x_pos, short y_pos, short width)
 {
@@ -2247,7 +2247,7 @@ void Horizontal_XOR_line_zoom(short x_pos, short y_pos, short width)
 }
 
 
-  // -- Afficher une barre verticale XOR zoomée
+  // -- Afficher une barre verticale XOR zoomÃ©e
 
 void Vertical_XOR_line_zoom(short x_pos, short y_pos, short height)
 {
@@ -2281,7 +2281,7 @@ void Display_cursor(void)
   float cos_a,sin_a;
   short x1,y1,x2,y2,x3,y3,x4,y4;
 
-  // Si le curseur est dans le menu ou sur la barre de split, on affiche toujours une flèche.
+  // Si le curseur est dans le menu ou sur la barre de split, on affiche toujours une flÃ¨che.
   if ( ( (Mouse_Y<Menu_Y)
       && ( (!Main.magnifier_mode) || (Mouse_X<Main.separator_position) || (Mouse_X>=Main.X_zoom) ) )
     || (Windows_open) || (Cursor_shape==CURSOR_SHAPE_HOURGLASS) )
@@ -2365,7 +2365,7 @@ void Display_cursor(void)
         if (end_y<3)
           Vertical_XOR_line  (Mouse_X,Mouse_Y+3,3-end_y);
 
-        // Petites barres aux extrémités
+        // Petites barres aux extrÃ©mitÃ©s
 
         start_x=(!Mouse_X);
         start_y=(!Mouse_Y);
@@ -2464,7 +2464,7 @@ void Display_cursor(void)
       }
       break;
     case CURSOR_SHAPE_XOR_RECTANGLE :
-      // !!! Cette forme ne peut pas être utilisée en mode Loupe !!!
+      // !!! Cette forme ne peut pas Ãªtre utilisÃ©e en mode Loupe !!!
 
       // Petite croix au centre
       start_x=(Mouse_X-3);
@@ -2573,7 +2573,7 @@ void Display_cursor(void)
 void Hide_cursor(void)
 {
   byte  shape;
-  int start_x; // int car sont parfois négatifs ! (quand on dessine sur un bord)
+  int start_x; // int car sont parfois nÃ©gatifs ! (quand on dessine sur un bord)
   int start_y;
   short end_x;
   short end_y;
@@ -2762,7 +2762,7 @@ void Hide_cursor(void)
 
       break;
     case CURSOR_SHAPE_XOR_RECTANGLE :
-      // !!! Cette forme ne peut pas être utilisée en mode Loupe !!!
+      // !!! Cette forme ne peut pas Ãªtre utilisÃ©e en mode Loupe !!!
 
       // Petite croix au centre
       start_x=(Mouse_X-3);
@@ -2878,7 +2878,7 @@ void Display_all_screen(void)
   word width;
   word height;
 
-  // ---/\/\/\  Partie non zoomée: /\/\/\---
+  // ---/\/\/\  Partie non zoomÃ©e: /\/\/\---
   if (Main.magnifier_mode)
   {
     if (Main.image_width<Main.separator_position)
@@ -2899,7 +2899,7 @@ void Display_all_screen(void)
     height=Menu_Y;
   Display_screen(width,height,Main.image_width);
 
-  // Effacement de la partie non-image dans la partie non zoomée:
+  // Effacement de la partie non-image dans la partie non zoomÃ©e:
   if (Main.magnifier_mode)
   {
     if (Main.image_width<Main.separator_position && Main.image_width < Screen_width)
@@ -2913,7 +2913,7 @@ void Display_all_screen(void)
   if (Main.image_height<Menu_Y)
     Block(0,Main.image_height,width,(Menu_Y-height),Main.backups->Pages->Transparent_color);
 
-  // ---/\/\/\  Partie zoomée: /\/\/\---
+  // ---/\/\/\  Partie zoomÃ©e: /\/\/\---
   if (Main.magnifier_mode)
   {
     // Affichage de la barre de split
@@ -2925,7 +2925,7 @@ void Display_all_screen(void)
     else
       width=Main.magnifier_width;
 
-    // Calcul du nombre de lignes visibles de l'image zoomée
+    // Calcul du nombre de lignes visibles de l'image zoomÃ©e
     if (Main.image_height<Main.magnifier_height)
       height=Main.image_height*Main.magnifier_factor;
     else if (Main.image_height<Main.magnifier_offset_Y+Main.magnifier_height)
@@ -2936,7 +2936,7 @@ void Display_all_screen(void)
 
     Display_zoomed_screen(width,height,Main.image_width,Horizontal_line_buffer);
 
-    // Effacement de la partie non-image dans la partie zoomée:
+    // Effacement de la partie non-image dans la partie zoomÃ©e:
     if (Main.image_width<Main.magnifier_width)
       Block(Main.X_zoom+(Main.image_width*Main.magnifier_factor),0,
             (Main.magnifier_width-Main.image_width)*Main.magnifier_factor,
@@ -2948,7 +2948,7 @@ void Display_all_screen(void)
   // ---/\/\/\ Affichage des limites /\/\/\---
   if (Config.Display_image_limits)
     Display_image_limits();
-  Update_rect(0,0,Screen_width,Menu_Y); // TODO On peut faire plus fin, en évitant de mettre à jour la partie à droite du split quand on est en mode loupe. Mais c'est pas vraiment intéressant ?
+  Update_rect(0,0,Screen_width,Menu_Y); // TODO On peut faire plus fin, en Ã©vitant de mettre Ã  jour la partie Ã  droite du split quand on est en mode loupe. Mais c'est pas vraiment intÃ©ressant ?
 }
 
 
@@ -3156,7 +3156,7 @@ static byte Old_trans;
 void Remap_pixel(byte * pixel)
 {
   if (*pixel==Old_light)         // On commence par tester le Gris clair
-    *pixel=MC_Light;             // qui est pas mal utilisé.
+    *pixel=MC_Light;             // qui est pas mal utilisÃ©.
   else
   {
     if (*pixel==Old_black)        // Puis le Noir...
@@ -3191,7 +3191,7 @@ void Remap_screen_after_menu_colors_change(void)
   if ( (MC_Light!=Old_light) || (MC_Dark!=Old_dark) || (MC_White!=Old_white) || (MC_Black !=Old_black )
     || (MC_Trans!=Old_trans) )
   {
-    // Création de la table de conversion
+    // CrÃ©ation de la table de conversion
     for (index=0; index<256; index++)
       conversion_table[index]=index;
 
@@ -3200,7 +3200,7 @@ void Remap_screen_after_menu_colors_change(void)
     conversion_table[Old_light]=MC_Light;
     conversion_table[Old_white]=MC_White;
 
-    // Remappage de l'écran
+    // Remappage de l'Ã©cran
 
     // remap only screen pixels covered by a window or the menu
     for (pos_y = 0; pos_y < Screen_height; pos_y++)
@@ -3231,11 +3231,11 @@ void Remap_screen_after_menu_colors_change(void)
     if (Menu_is_visible_before_window)
     {
       /*
-         Il faudrait peut-être remapper les pointillés délimitant l'image.
-         Mais ça va être chiant parce qu'ils peuvent être affichés en mode Loupe.
-         Mais de toutes façons, c'est franchement facultatif...
+         Il faudrait peut-Ãªtre remapper les pointillÃ©s dÃ©limitant l'image.
+         Mais Ã§a va Ãªtre chiant parce qu'ils peuvent Ãªtre affichÃ©s en mode Loupe.
+         Mais de toutes faÃ§ons, c'est franchement facultatif...
       */
-      // On passe la table juste pour ne rafficher que les couleurs modifiées
+      // On passe la table juste pour ne rafficher que les couleurs modifiÃ©es
       Display_menu_palette_avoiding_window(conversion_table);
     }
     Clear_border(MC_Black);
@@ -3369,7 +3369,7 @@ void Compute_optimal_menu_colors(T_Components * palette)
 										&& Round_palette_component(palette[i].B)/tolerence==Gfx->Default_palette[Gfx->Color[0]].B/tolerence)
 								{
 									MC_Black=i;
-									// On cherche une couleur de transparence différente des 4 autres.
+									// On cherche une couleur de transparence diffÃ©rente des 4 autres.
 									for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
 												(MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
 									// Easy case
@@ -3419,7 +3419,7 @@ void Compute_optimal_menu_colors(T_Components * palette)
                  && Round_palette_component(palette[i].B)/tolerence==cpc_colors[0].B/tolerence)
                 {
                   MC_Black=i;
-                  // On cherche une couleur de transparence différente des 4 autres.
+                  // On cherche une couleur de transparence diffÃ©rente des 4 autres.
                   for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
                                    (MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
                   // Easy case
@@ -3510,16 +3510,16 @@ void Compute_optimal_menu_colors(T_Components * palette)
   //  SWAP_BYTES(MC_Light, MC_Dark)
   //}
 
-  // Si deux des couleurs choisies ont le même index, c'est destructif car
-  // on fait ensuite un remap de l'image. Donc on évite ce problème (un
+  // Si deux des couleurs choisies ont le mÃªme index, c'est destructif car
+  // on fait ensuite un remap de l'image. Donc on Ã©vite ce problÃ¨me (un
   // peu brutalement)
-  // On commence par déplacer les gris, comme ça on a plus de chances de garder au moins
+  // On commence par dÃ©placer les gris, comme Ã§a on a plus de chances de garder au moins
   // le blanc et le noir
   //while (MC_Dark == MC_Light || MC_Dark == MC_White || MC_Black == MC_Dark || Same_color(palette, MC_Dark, MC_White)) MC_Dark--;
   //while (MC_White == MC_Light || MC_Dark == MC_Light || MC_Black == MC_Light || Same_color(palette, MC_Light, MC_Black)) MC_Light--;
   //while (MC_White == MC_Light || MC_Dark == MC_White || MC_Black == MC_White) MC_White--;
 
-  // On cherche une couleur de transparence différente des 4 autres.
+  // On cherche une couleur de transparence diffÃ©rente des 4 autres.
   for (MC_Trans=0; ((MC_Trans==MC_Black) || (MC_Trans==MC_Dark) ||
                    (MC_Trans==MC_Light) || (MC_Trans==MC_White)); MC_Trans++);
 

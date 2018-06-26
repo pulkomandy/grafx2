@@ -35,7 +35,7 @@
 
 
 void Pixel_triple (word x,word y,byte color)
-/* Affiche un pixel de la color aux coords x;y à l'écran */
+/* Affiche un pixel de la color aux coords x;y Ã  l'Ã©cran */
 {
   *(Screen_pixels + x * ZOOMX + y*ZOOMY * VIDEO_LINE_WIDTH)=color;
   *(Screen_pixels + x * ZOOMX + y*ZOOMY * VIDEO_LINE_WIDTH + 1)=color;
@@ -49,13 +49,13 @@ void Pixel_triple (word x,word y,byte color)
 }
 
 byte Read_pixel_triple (word x,word y)
-/* On retourne la couleur du pixel aux coords données */
+/* On retourne la couleur du pixel aux coords donnÃ©es */
 {
   return *( Screen_pixels + y * ZOOMY * VIDEO_LINE_WIDTH + x * ZOOMX);
 }
 
 void Block_triple (word start_x,word start_y,word width,word height,byte color)
-/* On affiche un rectangle de la couleur donnée */
+/* On affiche un rectangle de la couleur donnÃ©e */
 {
   SDL_Rect rectangle;
   rectangle.x=start_x*ZOOMX;
@@ -66,10 +66,10 @@ void Block_triple (word start_x,word start_y,word width,word height,byte color)
 }
 
 void Display_part_of_screen_triple (word width,word height,word image_width)
-/* Afficher une partie de l'image telle quelle sur l'écran */
+/* Afficher une partie de l'image telle quelle sur l'Ã©cran */
 {
-  byte* dest=Screen_pixels; //On va se mettre en 0,0 dans l'écran (dest)
-  byte* src=Main.offset_Y*image_width+Main.offset_X+Main_screen; //Coords de départ ds la source (src)
+  byte* dest=Screen_pixels; //On va se mettre en 0,0 dans l'Ã©cran (dest)
+  byte* src=Main.offset_Y*image_width+Main.offset_X+Main_screen; //Coords de dÃ©part ds la source (src)
   int y;
   int dy;
 
@@ -88,7 +88,7 @@ void Display_part_of_screen_triple (word width,word height,word image_width)
     // On la triple
     memcpy(dest-width*ZOOMX+2*VIDEO_LINE_WIDTH,dest-width*ZOOMX,width*ZOOMX);
     
-    // On passe à la ligne suivante
+    // On passe Ã  la ligne suivante
     src+=image_width-width;
     dest+=VIDEO_LINE_WIDTH*ZOOMY - width*ZOOMX;
   }
@@ -96,10 +96,10 @@ void Display_part_of_screen_triple (word width,word height,word image_width)
 }
 
 void Pixel_preview_normal_triple (word x,word y,byte color)
-/* Affichage d'un pixel dans l'écran, par rapport au décalage de l'image 
- * dans l'écran, en mode normal (pas en mode loupe)
- * Note: si on modifie cette procédure, il faudra penser à faire également 
- * la modif dans la procédure Pixel_Preview_Loupe_SDL. */
+/* Affichage d'un pixel dans l'Ã©cran, par rapport au dÃ©calage de l'image 
+ * dans l'Ã©cran, en mode normal (pas en mode loupe)
+ * Note: si on modifie cette procÃ©dure, il faudra penser Ã  faire Ã©galement 
+ * la modif dans la procÃ©dure Pixel_Preview_Loupe_SDL. */
 {
 //  if(x-Main.offset_X >= 0 && y - Main.offset_Y >= 0)
   Pixel_triple(x-Main.offset_X,y-Main.offset_Y,color);
@@ -107,10 +107,10 @@ void Pixel_preview_normal_triple (word x,word y,byte color)
 
 void Pixel_preview_magnifier_triple  (word x,word y,byte color)
 {
-  // Affiche le pixel dans la partie non zoomée
+  // Affiche le pixel dans la partie non zoomÃ©e
   Pixel_triple(x-Main.offset_X,y-Main.offset_Y,color);
   
-  // Regarde si on doit aussi l'afficher dans la partie zoomée
+  // Regarde si on doit aussi l'afficher dans la partie zoomÃ©e
   if (y >= Limit_top_zoom && y <= Limit_visible_bottom_zoom
           && x >= Limit_left_zoom && x <= Limit_visible_right_zoom)
   {
@@ -120,7 +120,7 @@ void Pixel_preview_magnifier_triple  (word x,word y,byte color)
 
     if (Menu_Y - y_zoom < Main.magnifier_factor)
       // On ne doit dessiner qu'un morceau du pixel
-      // sinon on dépasse sur le menu
+      // sinon on dÃ©passe sur le menu
       height = Menu_Y - y_zoom;
     else
       height = Main.magnifier_factor;
@@ -156,7 +156,7 @@ void Vertical_XOR_line_triple(word x_pos,word y_pos,word height)
 
 void Display_brush_color_triple(word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word brush_width)
 {
-  // dest = Position à l'écran
+  // dest = Position Ã  l'Ã©cran
   byte* dest = Screen_pixels + y_pos * ZOOMY * VIDEO_LINE_WIDTH + x_pos * ZOOMX;
   // src = Position dans la brosse
   byte* src = Brush + y_offset * brush_width + x_offset;
@@ -169,7 +169,7 @@ void Display_brush_color_triple(word x_pos,word y_pos,word x_offset,word y_offse
     // Pour chaque pixel
     for(x = width;x > 0; x--)
     {
-      // On vérifie que ce n'est pas la transparence
+      // On vÃ©rifie que ce n'est pas la transparence
       if(*src != transp_color)
       {
         *(dest+2*VIDEO_LINE_WIDTH+2) = *(dest+2*VIDEO_LINE_WIDTH+1) = *(dest+2*VIDEO_LINE_WIDTH) = *(dest+VIDEO_LINE_WIDTH+2) = *(dest+VIDEO_LINE_WIDTH+1) = *(dest+VIDEO_LINE_WIDTH) = *(dest+2) = *(dest+1) = *dest = *src;
@@ -180,7 +180,7 @@ void Display_brush_color_triple(word x_pos,word y_pos,word x_offset,word y_offse
       dest+=ZOOMX;
     }
 
-    // On passe à la ligne suivante
+    // On passe Ã  la ligne suivante
     dest = dest + VIDEO_LINE_WIDTH*ZOOMY - width*ZOOMX;
     src = src + brush_width - width;
   }
@@ -192,8 +192,8 @@ void Display_brush_mono_triple(word x_pos, word y_pos,
         byte transp_color, byte color, word brush_width)
 /* On affiche la brosse en monochrome */
 {
-  byte* dest=y_pos*ZOOMY*VIDEO_LINE_WIDTH+x_pos*ZOOMX+Screen_pixels; // dest = adr destination à 
-      // l'écran
+  byte* dest=y_pos*ZOOMY*VIDEO_LINE_WIDTH+x_pos*ZOOMX+Screen_pixels; // dest = adr destination Ã  
+      // l'Ã©cran
   byte* src=brush_width*y_offset+x_offset+Brush; // src = adr ds 
       // la brosse
   int x,y;
@@ -212,7 +212,7 @@ void Display_brush_mono_triple(word x_pos, word y_pos,
       dest+=ZOOMX;
     }
 
-    // On passe à la ligne suivante
+    // On passe Ã  la ligne suivante
     src+=brush_width-width;
     dest+=VIDEO_LINE_WIDTH*ZOOMY-width*ZOOMX;
   }
@@ -221,8 +221,8 @@ void Display_brush_mono_triple(word x_pos, word y_pos,
 
 void Clear_brush_triple(word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word image_width)
 {
-  byte* dest=Screen_pixels+x_pos*ZOOMX+y_pos*ZOOMY*VIDEO_LINE_WIDTH; //On va se mettre en 0,0 dans l'écran (dest)
-  byte* src = ( y_pos + Main.offset_Y ) * image_width + x_pos + Main.offset_X + Main_screen; //Coords de départ ds la source (src)
+  byte* dest=Screen_pixels+x_pos*ZOOMX+y_pos*ZOOMY*VIDEO_LINE_WIDTH; //On va se mettre en 0,0 dans l'Ã©cran (dest)
+  byte* src = ( y_pos + Main.offset_Y ) * image_width + x_pos + Main.offset_X + Main_screen; //Coords de dÃ©part ds la source (src)
   int y;
   int x;
   (void)x_offset; // unused
@@ -242,17 +242,17 @@ void Clear_brush_triple(word x_pos,word y_pos,word x_offset,word y_offset,word w
       dest+=ZOOMX;
     }
 
-    // On passe à la ligne suivante
+    // On passe Ã  la ligne suivante
     src+=image_width-width;
     dest+=VIDEO_LINE_WIDTH*ZOOMY-width*ZOOMX;
   }
   Update_rect(x_pos,y_pos,width,height);
 }
 
-// Affiche une brosse (arbitraire) à l'écran
+// Affiche une brosse (arbitraire) Ã  l'Ã©cran
 void Display_brush_triple(byte * brush, word x_pos,word y_pos,word x_offset,word y_offset,word width,word height,byte transp_color,word brush_width)
 {
-  // dest = Position à l'écran
+  // dest = Position Ã  l'Ã©cran
   byte* dest = Screen_pixels + y_pos * ZOOMY * VIDEO_LINE_WIDTH + x_pos * ZOOMX;
   // src = Position dans la brosse
   byte* src = brush + y_offset * brush_width + x_offset;
@@ -265,7 +265,7 @@ void Display_brush_triple(byte * brush, word x_pos,word y_pos,word x_offset,word
     // Pour chaque pixel
     for(x = width;x > 0; x--)
     {
-      // On vérifie que ce n'est pas la transparence
+      // On vÃ©rifie que ce n'est pas la transparence
       if(*src != transp_color)
       {
         *(dest+2*VIDEO_LINE_WIDTH+2)=*(dest+2*VIDEO_LINE_WIDTH+1)=*(dest+2*VIDEO_LINE_WIDTH)=*(dest+VIDEO_LINE_WIDTH+2)=*(dest+VIDEO_LINE_WIDTH+1)=*(dest+VIDEO_LINE_WIDTH)=*(dest+2)=*(dest+1)=*dest=*src;
@@ -275,7 +275,7 @@ void Display_brush_triple(byte * brush, word x_pos,word y_pos,word x_offset,word
       src++; dest+=ZOOMX;
     }
 
-    // On passe à la ligne suivante
+    // On passe Ã  la ligne suivante
     dest = dest + VIDEO_LINE_WIDTH*ZOOMY - width*ZOOMX;
     src = src + brush_width - width;
   }
@@ -283,7 +283,7 @@ void Display_brush_triple(byte * brush, word x_pos,word y_pos,word x_offset,word
 
 void Remap_screen_triple(word x_pos,word y_pos,word width,word height,byte * conversion_table)
 {
-  // dest = coords a l'écran
+  // dest = coords a l'Ã©cran
   byte* dest = Screen_pixels + y_pos * ZOOMY * VIDEO_LINE_WIDTH + x_pos * ZOOMX;
   int x,y;
 
@@ -306,7 +306,7 @@ void Remap_screen_triple(word x_pos,word y_pos,word width,word height,byte * con
 
 void Display_line_on_screen_fast_triple(word x_pos,word y_pos,word width,byte * line)
 /* On affiche toute une ligne de pixels telle quelle. */
-/* Utilisée si le buffer contient déja des pixel doublés. */
+/* UtilisÃ©e si le buffer contient dÃ©ja des pixel doublÃ©s. */
 {
   memcpy(Screen_pixels+x_pos*ZOOMX+y_pos*ZOOMY*VIDEO_LINE_WIDTH,line,width*ZOOMX);
   memcpy(Screen_pixels+x_pos*ZOOMX+(y_pos*ZOOMY+1)*VIDEO_LINE_WIDTH,line,width*ZOOMX);
@@ -329,8 +329,8 @@ void Display_line_on_screen_triple(word x_pos,word y_pos,word width,byte * line)
 void Display_transparent_mono_line_on_screen_triple(
         word x_pos, word y_pos, word width, byte* line, 
         byte transp_color, byte color)
-// Affiche une ligne à l'écran avec une couleur + transparence.
-// Utilisé par les brosses en mode zoom
+// Affiche une ligne Ã  l'Ã©cran avec une couleur + transparence.
+// UtilisÃ© par les brosses en mode zoom
 {
   byte* dest = Screen_pixels+ y_pos*VIDEO_LINE_WIDTH + x_pos*ZOOMX;
   int x;
@@ -352,31 +352,31 @@ void Read_line_screen_triple(word x_pos,word y_pos,word width,byte * line)
 }
 
 void Display_part_of_screen_scaled_triple(
-        word width, // width non zoomée
-        word height, // height zoomée
+        word width, // width non zoomÃ©e
+        word height, // height zoomÃ©e
         word image_width,byte * buffer)
 {
   byte* src = Main_screen + Main.magnifier_offset_Y * image_width
                       + Main.magnifier_offset_X;
   int y = 0; // Ligne en cours de traitement
 
-  // Pour chaque ligne à zoomer
+  // Pour chaque ligne Ã  zoomer
   while(1)
   {
     int x;
     
-    // On éclate la ligne
+    // On Ã©clate la ligne
     Zoom_a_line(src,buffer,Main.magnifier_factor*ZOOMX,width);
-    // On l'affiche Facteur fois, sur des lignes consécutives
+    // On l'affiche Facteur fois, sur des lignes consÃ©cutives
     x = Main.magnifier_factor/**ZOOMY*/;
     // Pour chaque ligne
     do{
-      // On affiche la ligne zoomée
+      // On affiche la ligne zoomÃ©e
       Display_line_on_screen_fast_triple(
         Main.X_zoom, y, width*Main.magnifier_factor,
         buffer
       );
-      // On passe à la suivante
+      // On passe Ã  la suivante
       y++;
       if(y==height/**ZOOMY*/)
       {
@@ -393,12 +393,12 @@ void Display_part_of_screen_scaled_triple(
 // ATTENTION on n'arrive jamais ici !
 }
 
-// Affiche une partie de la brosse couleur zoomée
+// Affiche une partie de la brosse couleur zoomÃ©e
 void Display_brush_color_zoom_triple(word x_pos,word y_pos,
         word x_offset,word y_offset,
-        word width, // width non zoomée
+        word width, // width non zoomÃ©e
         word end_y_pos,byte transp_color,
-        word brush_width, // width réelle de la brosse
+        word brush_width, // width rÃ©elle de la brosse
         byte * buffer)
 {
   byte* src = Brush+y_offset*brush_width + x_offset;
@@ -409,7 +409,7 @@ void Display_brush_color_zoom_triple(word x_pos,word y_pos,
   while(1)
   {
     Zoom_a_line(src,buffer,Main.magnifier_factor,width);
-    // On affiche facteur fois la ligne zoomée
+    // On affiche facteur fois la ligne zoomÃ©e
     for(bx=Main.magnifier_factor;bx>0;bx--)
     {
       byte* line_src = buffer;
@@ -442,10 +442,10 @@ void Display_brush_color_zoom_triple(word x_pos,word y_pos,
 
 void Display_brush_mono_zoom_triple(word x_pos, word y_pos,
         word x_offset, word y_offset, 
-        word width, // width non zoomée 
+        word width, // width non zoomÃ©e 
         word end_y_pos,
         byte transp_color, byte color, 
-        word brush_width, // width réelle de la brosse
+        word brush_width, // width rÃ©elle de la brosse
         byte * buffer
 )
 
@@ -453,29 +453,29 @@ void Display_brush_mono_zoom_triple(word x_pos, word y_pos,
   byte* src = Brush + y_offset * brush_width + x_offset;
   int y=y_pos*ZOOMY;
 
-  //Pour chaque ligne à zoomer :
+  //Pour chaque ligne Ã  zoomer :
   while(1)
   {
     int bx;
     // src = Ligne originale
-    // On éclate la ligne
+    // On Ã©clate la ligne
     Zoom_a_line(src,buffer,Main.magnifier_factor,width);
 
-    // On affiche la ligne Facteur fois à l'écran (sur des
-    // lignes consécutives)
+    // On affiche la ligne Facteur fois Ã  l'Ã©cran (sur des
+    // lignes consÃ©cutives)
     bx = Main.magnifier_factor*ZOOMY;
 
-    // Pour chaque ligne écran
+    // Pour chaque ligne Ã©cran
     do
     {
-      // On affiche la ligne zoomée
+      // On affiche la ligne zoomÃ©e
       Display_transparent_mono_line_on_screen_triple(
         x_pos, y, width * Main.magnifier_factor,
         buffer, transp_color, color
       );
-      // On passe à la ligne suivante
+      // On passe Ã  la ligne suivante
       y++;
-      // On vérifie qu'on est pas à la ligne finale
+      // On vÃ©rifie qu'on est pas Ã  la ligne finale
       if(y == end_y_pos*ZOOMY)
       {
         Redraw_grid( x_pos, y_pos,
@@ -488,7 +488,7 @@ void Display_brush_mono_zoom_triple(word x_pos, word y_pos,
     }
     while (bx > 0);
     
-    // Passage à la ligne suivante dans la brosse aussi
+    // Passage Ã  la ligne suivante dans la brosse aussi
     src+=brush_width;
   }
 }
@@ -496,13 +496,13 @@ void Display_brush_mono_zoom_triple(word x_pos, word y_pos,
 void Clear_brush_scaled_triple(word x_pos,word y_pos,word x_offset,word y_offset,word width,word end_y_pos,byte transp_color,word image_width,byte * buffer)
 {
 
-  // En fait on va recopier l'image non zoomée dans la partie zoomée !
+  // En fait on va recopier l'image non zoomÃ©e dans la partie zoomÃ©e !
   byte* src = Main_screen + y_offset * image_width + x_offset;
   int y = y_pos;
   int bx;
   (void)transp_color; // unused
 
-  // Pour chaque ligne à zoomer
+  // Pour chaque ligne Ã  zoomer
   while(1){
     Zoom_a_line(src,buffer,Main.magnifier_factor*ZOOMX,width);
 

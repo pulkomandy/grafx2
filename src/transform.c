@@ -355,13 +355,13 @@ void Button_Transform_menu(int btn)
         break;
       case  2 : // Flip X
       case  3 : // Flip Y
-      case  6 : // 180° Rotation
+      case  6 : // 180Â° Rotation
         new_width=Main.image_width;
         new_height=Main.image_height;
         break;
 
-      case  4 : // -90° Rotation
-      case  5 : // +90° Rotation
+      case  4 : // -90Â° Rotation
+      case  5 : // +90Â° Rotation
 
         new_width=Main.image_height;
         new_height=Main.image_width;
@@ -398,19 +398,19 @@ void Button_Transform_menu(int btn)
             Flip_Y_lowlevel(Main.backups->Pages->Image[i].Pixels, Main.image_width, Main.image_height);
           }
           break;
-        case  4 : // -90° Rotation
+        case  4 : // -90Â° Rotation
           for (i=0; i<Main.backups->Pages->Nb_layers; i++)
           {
             Rotate_270_deg_lowlevel(Main.backups->Pages->Next->Image[i].Pixels, Main.backups->Pages->Image[i].Pixels, old_width, old_height);
           }
           break;
-        case  5 : // +90° Rotation
+        case  5 : // +90Â° Rotation
           for (i=0; i<Main.backups->Pages->Nb_layers; i++)
           {
             Rotate_90_deg_lowlevel(Main.backups->Pages->Next->Image[i].Pixels, Main.backups->Pages->Image[i].Pixels, old_width, old_height);
           }
           break;
-        case  6 : // 180° Rotation
+        case  6 : // 180Â° Rotation
           for (i=0; i<Main.backups->Pages->Nb_layers; i++)
           {
             memcpy(Main.backups->Pages->Image[i].Pixels,Main.backups->Pages->Next->Image[i].Pixels,Main.image_width*Main.image_height);

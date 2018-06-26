@@ -1031,7 +1031,7 @@ void CS_Generate_color_table_and_palette(T_Cluster_set * cs,CT_Tree* tc,T_Compon
 }
 
 /////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////// Méthodes de gestion des dégradés //
+///////////////////////////////////////// MÃ©thodes de gestion des dÃ©gradÃ©s //
 /////////////////////////////////////////////////////////////////////////////
 
 void GS_Init(T_Gradient_set * ds,T_Cluster_set * cs)
@@ -1040,7 +1040,7 @@ void GS_Init(T_Gradient_set * ds,T_Cluster_set * cs)
     ds->gradients[0].min=cs->clusters->data.pal.h;
     ds->gradients[0].max=cs->clusters->data.pal.h;
     ds->gradients[0].hue=cs->clusters->data.pal.h;
-    // Et hop : le 1er ensemble de d‚grad‚s est initialis‚
+    // Et hop : le 1er ensemble de dÃ©gradÃ©s est initialisÃ©
     ds->nb=1;
 }
 
@@ -1051,7 +1051,7 @@ T_Gradient_set * GS_New(T_Cluster_set * cs)
     n=(T_Gradient_set *)malloc(sizeof(T_Gradient_set));
     if (n!=NULL)
     {
-        // On recopie les paramètres demandés
+        // On recopie les paramÃ¨tres demandÃ©s
         n->nb_max=cs->nb_max;
 
         // On tente d'allouer la table
@@ -1061,7 +1061,7 @@ T_Gradient_set * GS_New(T_Cluster_set * cs)
             GS_Init(n,cs);
         else
         {
-            // Table impossible à allouer
+            // Table impossible Ã  allouer
             free(n);
             n=NULL;
         }
@@ -1079,15 +1079,15 @@ void GS_Delete(T_Gradient_set * ds)
 void GS_Generate(T_Gradient_set * ds,T_Cluster_set * cs)
 {
     int id; // Les indexs de parcours des ensembles
-    int best_gradient; // Meilleur d‚grad‚
-    int best_diff; // Meilleure diff‚rence de chrominance
+    int best_gradient; // Meilleur dÃ©gradÃ©
+    int best_diff; // Meilleure diffÃ©rence de chrominance
     int diff;  // difference de chrominance courante
     T_Cluster * current = cs->clusters;
 
-    // Pour chacun des clusters … traiter
+    // Pour chacun des clusters â€¦ traiter
     do
     {
-        // On recherche le d‚grad‚ le plus proche de la chrominance du cluster
+        // On recherche le dÃ©gradÃ© le plus proche de la chrominance du cluster
         best_gradient=-1;
         best_diff=99999999;
         for (id=0;id<ds->nb;id++)
@@ -1100,10 +1100,10 @@ void GS_Generate(T_Gradient_set * ds,T_Cluster_set * cs)
             }
         }
 
-        // Si on a trouv‚ un d‚grad‚ dans lequel inclure le cluster
+        // Si on a trouvÃ© un dÃ©gradÃ© dans lequel inclure le cluster
         if (best_gradient!=-1)
         {
-            // On met … jour le d‚grad‚
+            // On met Ã  jour le dÃ©gradÃ©
             if (current->data.pal.h < ds->gradients[best_gradient].min)
                 ds->gradients[best_gradient].min=current->data.pal.h;
             if (current->data.pal.h > ds->gradients[best_gradient].max)
@@ -1116,7 +1116,7 @@ void GS_Generate(T_Gradient_set * ds,T_Cluster_set * cs)
         }
         else
         {
-            // On cr‚e un nouveau d‚grad‚
+            // On crÃ©e un nouveau dÃ©gradÃ©
             best_gradient=ds->nb;
             ds->gradients[best_gradient].nb_colors=1;
             ds->gradients[best_gradient].min=current->data.pal.h;
@@ -1254,9 +1254,9 @@ void Convert_24b_bitmap_to_256_Floyd_Steinberg(T_Bitmap256 dest,T_Bitmap24B sour
   // On initialise les variables de parcours:
   current =source;      // Le pixel dont on s'occupe
   next =current+width; // Le pixel en dessous
-  c_plus1 =current+1;   // Le pixel à droite
-  u_minus1=next-1;   // Le pixel en bas à gauche
-  u_plus1 =next+1;   // Le pixel en bas à droite
+  c_plus1 =current+1;   // Le pixel Ã  droite
+  u_minus1=next-1;   // Le pixel en bas Ã  gauche
+  u_plus1 =next+1;   // Le pixel en bas Ã  droite
   d       =dest;
 
   // On parcours chaque pixel:
@@ -1272,7 +1272,7 @@ void Convert_24b_bitmap_to_256_Floyd_Steinberg(T_Bitmap256 dest,T_Bitmap24B sour
       // Cherche la couleur correspondant dans la palette et la range dans l'image de destination
       *d=CT_get(tc,red,green,blue);
 
-      // Puis on calcule pour chaque composante l'erreur dûe à l'approximation
+      // Puis on calcule pour chaque composante l'erreur dÃ»e Ã  l'approximation
       red-=palette[*d].R;
       green -=palette[*d].G;
       blue -=palette[*d].B;
@@ -1289,7 +1289,7 @@ void Convert_24b_bitmap_to_256_Floyd_Steinberg(T_Bitmap256 dest,T_Bitmap24B sour
           c_plus1->G=Modified_value(c_plus1->G,e_green );
           c_plus1->B=Modified_value(c_plus1->B,e_blue );
         }
-      // En bas à gauche:
+      // En bas Ã  gauche:
       if (y_pos+1<height)
       {
         e_red=(red*3)/16.0;
@@ -1308,7 +1308,7 @@ void Convert_24b_bitmap_to_256_Floyd_Steinberg(T_Bitmap256 dest,T_Bitmap24B sour
         next->R=Modified_value(next->R,e_red);
         next->G=Modified_value(next->G,e_green );
         next->B=Modified_value(next->B,e_blue );
-      // En bas à droite:
+      // En bas Ã  droite:
         if (x_pos+1<width)
         {
         e_red=(red/16.0);
@@ -1427,7 +1427,7 @@ static const byte precision_24b[]=
 int Convert_24b_bitmap_to_256(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette)
 {
   CT_Tree* table; // table de conversion
-  int                ip;    // index de précision pour la conversion
+  int                ip;    // index de prÃ©cision pour la conversion
 
   if (Try_Convert_to_256_Without_Loss(dest, source, width, height, palette) == 0)
     return 0;
@@ -1436,8 +1436,8 @@ int Convert_24b_bitmap_to_256(T_Bitmap256 dest,T_Bitmap24B source,int width,int 
   return Convert_24b_bitmap_to_256_fast(dest, source, width, height, palette);  
 
   #else
-  // On essaye d'obtenir une table de conversion qui loge en mémoire, avec la
-  // meilleure précision possible
+  // On essaye d'obtenir une table de conversion qui loge en mÃ©moire, avec la
+  // meilleure prÃ©cision possible
   for (ip=0;ip<(10*3);ip+=3)
   {
     table = Optimize_palette(source,width*height,palette,

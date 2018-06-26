@@ -85,7 +85,7 @@
 // Character to show a left arrow, used when editing long strings. It's present in ::Gfx->System_font 
 #define LEFT_TRIANGLE_CHARACTER   17
 /// Character to display in menus for an ellipsis.
-//#define ELLIPSIS_CHARACTER       '…'
+//#define ELLIPSIS_CHARACTER       'â€¦'
 #define ELLIPSIS_CHARACTER       '\x85'
 #define NB_LAYERS                  1    ///< Initial number of layers for a new image
 #define MAX_NB_FRAMES            999    ///< Maximum number of frames that can be used in a grafx2 animation.

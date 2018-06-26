@@ -2,7 +2,7 @@
 #  
 #  Copyright 2018 Thomas Bernard
 #  Copyright 2012 Franck Charlet
-#  Copyright 2011 Pawel Góralski
+#  Copyright 2011 Pawel GÃ³ralski
 #  Copyright 2009 Per Olofsson
 #  Copyright 2008 Peter Gordon
 #  Copyright 2008-2010 Yves Rizoud

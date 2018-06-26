@@ -33,38 +33,38 @@
 #include "struct.h"
 #include "colorred.h"
 
-//////////////////////////////////////////////// Définition des types de base
+//////////////////////////////////////////////// DÃ©finition des types de base
 
 typedef T_Components * T_Bitmap24B;
 typedef byte * T_Bitmap256;
 
 
-///////////////////////////////////////// Définition d'une table d'occurences
+///////////////////////////////////////// DÃ©finition d'une table d'occurences
 
 typedef struct
 {
-  int nbb_r; // Nb de bits de précision sur les rouges
-  int nbb_g; // Nb de bits de précision sur les verts
-  int nbb_b; // Nb de bits de précision sur les bleu
+  int nbb_r; // Nb de bits de prÃ©cision sur les rouges
+  int nbb_g; // Nb de bits de prÃ©cision sur les verts
+  int nbb_b; // Nb de bits de prÃ©cision sur les bleu
 
   int rng_r; // Nb de valeurs sur les rouges (= 1<<nbb_r)
   int rng_g; // Nb de valeurs sur les verts  (= 1<<nbb_g)
   int rng_b; // Nb de valeurs sur les bleus  (= 1<<nbb_b)
 
-  int dec_r; // Coefficient multiplicateur d'accès dans la table (= nbb_g+nbb_b)
-  int dec_g; // Coefficient multiplicateur d'accès dans la table (= nbb_b)
-  int dec_b; // Coefficient multiplicateur d'accès dans la table (= 0)
+  int dec_r; // Coefficient multiplicateur d'accÃ¨s dans la table (= nbb_g+nbb_b)
+  int dec_g; // Coefficient multiplicateur d'accÃ¨s dans la table (= nbb_b)
+  int dec_b; // Coefficient multiplicateur d'accÃ¨s dans la table (= 0)
 
-  int red_r; // Coefficient réducteur de traduction d'une couleur rouge (= 8-nbb_r)
-  int red_g; // Coefficient réducteur de traduction d'une couleur verte (= 8-nbb_g)
-  int red_b; // Coefficient réducteur de traduction d'une couleur bleue (= 8-nbb_b)
+  int red_r; // Coefficient rÃ©ducteur de traduction d'une couleur rouge (= 8-nbb_r)
+  int red_g; // Coefficient rÃ©ducteur de traduction d'une couleur verte (= 8-nbb_g)
+  int red_b; // Coefficient rÃ©ducteur de traduction d'une couleur bleue (= 8-nbb_b)
 
   int * table;
 } T_Occurrence_table;
 
 
 
-///////////////////////////////////////// Définition d'un ensemble de couleur
+///////////////////////////////////////// DÃ©finition d'un ensemble de couleur
 
 struct S_Cluster_CutData
 {
@@ -80,9 +80,9 @@ struct S_Cluster_CutData
 struct S_Cluster_PalData
 {
   //  information used while color reducing	
-  byte r,g,b;      // color synthétisant l'ensemble
+  byte r,g,b;      // color synthÃ©tisant l'ensemble
   byte h;          // Chrominance
-  byte l;          // Luminosité
+  byte l;          // LuminositÃ©
 };
 
 union U_Cluster_Data
@@ -111,7 +111,7 @@ typedef struct S_Cluster
 
 
 
-//////////////////////////////////////// Définition d'un ensemble de clusters
+//////////////////////////////////////// DÃ©finition d'un ensemble de clusters
 
 typedef struct
 {
@@ -122,25 +122,25 @@ typedef struct
 
 
 
-///////////////////////////////////////////////////// Définition d'un dégradé
+///////////////////////////////////////////////////// DÃ©finition d'un dÃ©gradÃ©
 
 typedef struct
 {
-  int   nb_colors; // Nombre de couleurs dans le dégradé
-  float min;        // Chrominance minimale du dégradé
-  float max;        // Chrominance maximale du dégradé
-  float hue;        // Chrominance moyenne du dégradé
+  int   nb_colors; // Nombre de couleurs dans le dÃ©gradÃ©
+  float min;        // Chrominance minimale du dÃ©gradÃ©
+  float max;        // Chrominance maximale du dÃ©gradÃ©
+  float hue;        // Chrominance moyenne du dÃ©gradÃ©
 } T_Gradient;
 
 
 
-///////////////////////////////////////// Définition d'un ensemble de dégradé
+///////////////////////////////////////// DÃ©finition d'un ensemble de dÃ©gradÃ©
 
 typedef struct
 {
-  int nb;             // Nombre de dégradés dans l'ensemble
-  int nb_max;          // Nombre maximum de dégradés
-  T_Gradient * gradients; // Les dégradés
+  int nb;             // Nombre de dÃ©gradÃ©s dans l'ensemble
+  int nb_max;          // Nombre maximum de dÃ©gradÃ©s
+  T_Gradient * gradients; // Les dÃ©gradÃ©s
 } T_Gradient_set;
 
 void RGB_to_HSL(int r, int g,int b, byte* h, byte*s, byte* l);
@@ -149,7 +149,7 @@ void HSL_to_RGB(byte h, byte s, byte l, byte* r, byte* g, byte* b);
 long Perceptual_lightness(T_Components *color);
 
 /////////////////////////////////////////////////////////////////////////////
-/////////////////////////////// Méthodes de gestion des tables d'occurence //
+/////////////////////////////// MÃ©thodes de gestion des tables d'occurence //
 /////////////////////////////////////////////////////////////////////////////
 
 void OT_init(T_Occurrence_table * t);
@@ -162,7 +162,7 @@ void OT_count_occurrences(T_Occurrence_table * t,T_Bitmap24B image,int size);
 
 
 /////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////// Méthodes de gestion des clusters //
+///////////////////////////////////////// MÃ©thodes de gestion des clusters //
 /////////////////////////////////////////////////////////////////////////////
 
 void Cluster_pack(T_Cluster * c,const T_Occurrence_table * const to);
@@ -172,7 +172,7 @@ void Cluster_compute_hue(T_Cluster * c,T_Occurrence_table * to);
 
 
 /////////////////////////////////////////////////////////////////////////////
-//////////////////////////// Méthodes de gestion des ensembles de clusters //
+//////////////////////////// MÃ©thodes de gestion des ensembles de clusters //
 /////////////////////////////////////////////////////////////////////////////
 
 void CS_Init(T_Cluster_set * cs,T_Occurrence_table * to);
@@ -185,7 +185,7 @@ void CS_Compute_colors(T_Cluster_set * cs,T_Occurrence_table * to);
 void CS_Generate_color_table_and_palette(T_Cluster_set * cs,CT_Tree* tc,T_Components * palette, T_Occurrence_table * to);
 
 /////////////////////////////////////////////////////////////////////////////
-//////////////////////////// Méthodes de gestion des ensembles de dégradés //
+//////////////////////////// MÃ©thodes de gestion des ensembles de dÃ©gradÃ©s //
 /////////////////////////////////////////////////////////////////////////////
 
 void GS_Init(T_Gradient_set * ds,T_Cluster_set * cs);
@@ -195,7 +195,7 @@ void GS_Generate(T_Gradient_set * ds,T_Cluster_set * cs);
 
 
 
-// Convertie avec le plus de précision possible une image 24b en 256c
+// Convertie avec le plus de prÃ©cision possible une image 24b en 256c
 // Renvoie s'il y a eu une erreur ou pas..
 int Convert_24b_bitmap_to_256(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette);
 

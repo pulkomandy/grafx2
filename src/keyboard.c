@@ -345,7 +345,7 @@ word Keysym_to_keycode(SDL_keysym keysym)
   word key_code = 0;
   word mod;
 
-  // On ignore shift, alt et control isolés.
+  // On ignore shift, alt et control isolÃ©s.
   if (keysym.sym == SDLK_RSHIFT || keysym.sym == SDLK_LSHIFT ||
       keysym.sym == SDLK_RCTRL  || keysym.sym == SDLK_LCTRL ||
       keysym.sym == SDLK_RALT   || keysym.sym == SDLK_LALT ||
@@ -353,8 +353,8 @@ word Keysym_to_keycode(SDL_keysym keysym)
       keysym.sym == SDLK_MODE) // AltGr
   return 0;
 
-  // Les touches qui n'ont qu'une valeur unicode (très rares)
-  // seront codées sur 11 bits, le 12e bit est mis à 1 (0x0800)
+  // Les touches qui n'ont qu'une valeur unicode (trÃ¨s rares)
+  // seront codÃ©es sur 11 bits, le 12e bit est mis Ã  1 (0x0800)
   if (keysym.sym != 0)
     key_code = keysym.sym;
   else if (keysym.scancode != 0)
@@ -610,7 +610,7 @@ const char * Key_name(word key)
     return buffer;
   }
 
-  // Touches au libellé connu
+  // Touches au libellÃ© connu
   for (index=0; index < (long)sizeof(key_labels)/(long)sizeof(T_key_label);index++)
   {
     if (key == key_labels[index].keysym)
@@ -625,9 +625,9 @@ const char * Key_name(word key)
 
 }
 
-// Obtient le caractère ANSI tapé, à partir d'un keysym.
-// (Valeur 32 à 255)
-// Renvoie 0 s'il n'y a pas de caractère associé (shift, backspace, etc)
+// Obtient le caractÃ¨re ANSI tapÃ©, Ã  partir d'un keysym.
+// (Valeur 32 Ã  255)
+// Renvoie 0 s'il n'y a pas de caractÃ¨re associÃ© (shift, backspace, etc)
 word Keysym_to_ANSI(SDL_keysym keysym)
 {
   // This part was removed from the MacOSX port, but I put it back for others
@@ -667,61 +667,61 @@ word Keysym_to_ANSI(SDL_keysym keysym)
   switch(keysym.unicode)
   {
     case 0x8100:
-      return '\xfc'; // ü
+      return '\xfc'; // Ã¼
     case 0x1A20:
-      return '\xe9'; // é
+      return '\xe9'; // Ã©
     case 0x201A:
-      return '\xe8'; // è
+      return '\xe8'; // Ã¨
     case 0x9201:
-      return '\xe2'; // â
+      return '\xe2'; // Ã¢
     case 0x1E20:
-      return '\xe4'; // ä
+      return '\xe4'; // Ã¤
     case 0x2620:
-      return '\xe0'; // à
+      return '\xe0'; // Ã 
     case 0x2020:
-      return '\xe5'; // å
+      return '\xe5'; // Ã¥
     case 0x2120:
-      return '\xe7'; // ç
+      return '\xe7'; // Ã§
     case 0xC602:
-      return '\xea'; // ê
+      return '\xea'; // Ãª
     case 0x3020:
-      return '\xeb'; // ë
+      return '\xeb'; // Ã«
     case 0x6001:
-      return '\xe8'; // è
+      return '\xe8'; // Ã¨
     case 0x3920:
-      return '\xef'; // ï
+      return '\xef'; // Ã¯
     case 0x5201:
-      return '\xee'; // î
+      return '\xee'; // Ã®
     case 0x8D00:
-      return '\xec'; // ì
+      return '\xec'; // Ã¬
     case 0x1C20:
-      return '\xf4'; // ô
+      return '\xf4'; // Ã´
     case 0x1D20:
-      return '\xf6'; // ö
+      return '\xf6'; // Ã¶
     case 0x2220:
-      return '\xf2'; // ò
+      return '\xf2'; // Ã²
     case 0x1320:
-      return '\xfb'; // û
+      return '\xfb'; // Ã»
     case 0x1420:
-      return '\xf9'; // ù
+      return '\xf9'; // Ã¹
     case 0xDC02:
-      return '\xff'; // ÿ
+      return '\xff'; // Ã¿
     case 0x5301:
-      return '\xa3'; // £
+      return '\xa3'; // Â£
     case 0xA000:
-      return '\xe1'; // á
+      return '\xe1'; // Ã¡
     case 0xA100:
-      return '\xed'; // í
+      return '\xed'; // Ã­
     case 0xA200:
-      return '\xf3'; // ó
+      return '\xf3'; // Ã³
     case 0xA300:
-      return '\xfa'; // ú
+      return '\xfa'; // Ãº
     case 0xA400:
-      return '\xf1'; // ñ
+      return '\xf1'; // Ã±
     case 0xA700:
-      return '\xba'; // º
+      return '\xba'; // Âº
     case 0xC600:
-      return '\xe3'; // ã
+      return '\xe3'; // Ã£
     case 0x20AC:
       return '\x80';  // Euro sign is 20AC in unicode, 80 in CP1252
   }
@@ -745,6 +745,6 @@ word Keysym_to_ANSI(SDL_keysym keysym)
     return keysym.unicode;
   }
 
- // Sinon c'est une touche spéciale, on retourne son scancode
+ // Sinon c'est une touche spÃ©ciale, on retourne son scancode
   return keysym.sym;
 }

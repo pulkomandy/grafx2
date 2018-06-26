@@ -2,7 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
-    Copyright 2011 Pawel GÛralski
+    Copyright 2011 Pawel G√≥ralski
     Copyright 2009 Pasi Kallinen
     Copyright 2008 Peter Gordon
     Copyright 2008 Franck Charlet
@@ -97,7 +97,7 @@ extern char Program_version[]; // generated in pversion.c
 static int setsize_width;
 static int setsize_height;
 
-//--- Affichage de la syntaxe, et de la liste des modes vidÈos disponibles ---
+//--- Affichage de la syntaxe, et de la liste des modes vid√©os disponibles ---
 void Display_syntax(void)
 {
   int mode_index;
@@ -152,8 +152,8 @@ void Error_function(int error_code, const char *filename, int line_number, const
 
   if (error_code==0)
   {
-    // L'erreur 0 n'est pas une vraie erreur, elle fait seulement un flash rouge de l'Ècran pour dire qu'il y a un problËme.
-    // Toutes les autres erreurs dÈclenchent toujours une sortie en catastrophe du programme !
+    // L'erreur 0 n'est pas une vraie erreur, elle fait seulement un flash rouge de l'√©cran pour dire qu'il y a un probl√®me.
+    // Toutes les autres erreurs d√©clenchent toujours une sortie en catastrophe du programme !
     memcpy(backup_palette, Get_current_palette(), sizeof(T_Palette));
     memcpy(temp_palette, backup_palette, sizeof(T_Palette));
     for (index=0;index<=255;index++)
@@ -444,10 +444,10 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
         }
         break;
       default:
-        // Si ce n'est pas un paramËtre, c'est le nom du fichier ‡ ouvrir
+        // Si ce n'est pas un param√®tre, c'est le nom du fichier √† ouvrir
         if (file_in_command_line > 1)
         {
-          // Il y a dÈj‡ 2 noms de fichiers et on vient d'en trouver un 3Ëme
+          // Il y a d√©j√† 2 noms de fichiers et on vient d'en trouver un 3√®me
           Error(ERROR_COMMAND_LINE);
           Display_syntax();
           exit(0);
@@ -534,9 +534,9 @@ int Init_program(int argc,char * argv[])
 #endif
 #endif /* ENABLE_FILENAMES_ICONV */
 
-  // On crÈe dËs maintenant les descripteurs des listes de pages pour la page
+  // On cr√©e d√®s maintenant les descripteurs des listes de pages pour la page
   // principale et la page de brouillon afin que leurs champs ne soient pas
-  // invalide lors des appels aux multiples fonctions manipulÈes ‡
+  // invalide lors des appels aux multiples fonctions manipul√©es √†
   // l'initialisation du programme.
   Main.backups=(T_List_of_pages *)malloc(sizeof(T_List_of_pages));
   Spare.backups=(T_List_of_pages *)malloc(sizeof(T_List_of_pages));
@@ -549,13 +549,13 @@ int Init_program(int argc,char * argv[])
   Set_data_directory(program_directory,Data_directory);
   // Choose directory for settings (read/write)
   Set_config_directory(program_directory,Config_directory);
-// On dÈtermine le rÈpertoire courant:
+// On d√©termine le r√©pertoire courant:
   Get_current_directory(Main.selector.Directory,Main.selector.Directory_unicode,MAX_PATH_CHARACTERS);
 
-  // On en profite pour le mÈmoriser dans le rÈpertoire principal:
+  // On en profite pour le m√©moriser dans le r√©pertoire principal:
   strcpy(Initial_directory,Main.selector.Directory);
 
-  // On initialise les donnÈes sur le nom de fichier de l'image de brouillon:
+  // On initialise les donn√©es sur le nom de fichier de l'image de brouillon:
   strcpy(Spare.selector.Directory,Main.selector.Directory);
   
   Main.fileformat=DEFAULT_FILEFORMAT;
@@ -570,8 +570,8 @@ int Init_program(int argc,char * argv[])
 
   // On initialise ce qu'il faut pour que les fileselects ne plantent pas:
   
-  Main.selector.Position=0; // Au dÈbut, le fileselect est en haut de la liste des fichiers
-  Main.selector.Offset=0; // Au dÈbut, le fileselect est en haut de la liste des fichiers
+  Main.selector.Position=0; // Au d√©but, le fileselect est en haut de la liste des fichiers
+  Main.selector.Offset=0; // Au d√©but, le fileselect est en haut de la liste des fichiers
   Main.selector.Format_filter=FORMAT_ALL_IMAGES;
   
   Main.current_layer=0;
@@ -640,26 +640,26 @@ int Init_program(int argc,char * argv[])
   // Texte
   Init_text();
 
-  // On initialise tous les modes vidÈo
+  // On initialise tous les modes vid√©o
   Set_all_video_modes();
   Pixel_ratio=PIXEL_SIMPLE;
-  // On initialise les donnÈes sur l'Ètat du programme:
-  // DonnÈe sur la sortie du programme:
+  // On initialise les donn√©es sur l'√©tat du programme:
+  // Donn√©e sur la sortie du programme:
   Quit_is_required=0;
   Quitting=0;
-  // DonnÈes sur l'Ètat du menu:
+  // Donn√©es sur l'√©tat du menu:
   Menu_is_visible=1;
-  // DonnÈes sur les couleurs et la palette:
+  // Donn√©es sur les couleurs et la palette:
   First_color_in_palette=0;
-  // DonnÈes sur le curseur:
+  // Donn√©es sur le curseur:
   Cursor_shape=CURSOR_SHAPE_TARGET;
   Cursor_hidden=0;
-  // DonnÈes sur le pinceau:
+  // Donn√©es sur le pinceau:
   Paintbrush_X=0;
   Paintbrush_Y=0;
   Paintbrush_hidden=0;
 
-  // On initialise tout ce qui concerne les opÈrations et les effets
+  // On initialise tout ce qui concerne les op√©rations et les effets
   Operation_stack_size=0;
   Selected_freehand_mode=OPERATION_CONTINUOUS_DRAW;
   Selected_line_mode         =OPERATION_LINE;
@@ -677,10 +677,10 @@ int Init_program(int argc,char * argv[])
     // On initialise les infos du mode smooth:
   Smooth_mode=0;
     // On initialise les infos du mode shade:
-  Shade_mode=0;     // Les autres infos du Shade sont chargÈes avec la config
+  Shade_mode=0;     // Les autres infos du Shade sont charg√©es avec la config
   Quick_shade_mode=0; // idem
-    // On initialise les infos sur les dÈgradÈs:
-  Gradient_pixel =Display_pixel; // Les autres infos sont chargÈes avec la config
+    // On initialise les infos sur les d√©grad√©s:
+  Gradient_pixel =Display_pixel; // Les autres infos sont charg√©es avec la config
     // On initialise les infos de la grille:
   Snap_mode=0;
   Snap_width=8;
@@ -688,13 +688,13 @@ int Init_program(int argc,char * argv[])
   Snap_offset_X=0;
   Snap_offset_Y=0;
     // On initialise les infos du mode Colorize:
-  Colorize_mode=0;          // Mode colorize inactif par dÈfaut
-  Colorize_opacity=50;      // Une interpolation de 50% par dÈfaut
-  Colorize_current_mode=0; // Par dÈfaut, la mÈthode par interpolation
+  Colorize_mode=0;          // Mode colorize inactif par d√©faut
+  Colorize_opacity=50;      // Une interpolation de 50% par d√©faut
+  Colorize_current_mode=0; // Par d√©faut, la m√©thode par interpolation
   Compute_colorize_table();
     // On initialise les infos du mode Tiling:
-  Tiling_mode=0;  //   Pas besoin d'initialiser les dÈcalages car Áa se fait
-                  // en prenant une brosse (toujours mis ‡ 0).
+  Tiling_mode=0;  //   Pas besoin d'initialiser les d√©calages car √ßa se fait
+                  // en prenant une brosse (toujours mis √† 0).
     // On initialise les infos du mode Mask:
   Mask_mode=0;
 
@@ -704,11 +704,11 @@ int Init_program(int argc,char * argv[])
   Airbrush_delay=1;
   Airbrush_mono_flow=10;
   memset(Airbrush_multi_flow,0,256);
-  srand(time(NULL)); // On randomize un peu tout Áa...
+  srand(time(NULL)); // On randomize un peu tout √ßa...
 
   // Initialisation des boutons
   Init_buttons();
-  // Initialisation des opÈrations
+  // Initialisation des op√©rations
   Init_operations();
 
   // Initialize the brush container
@@ -741,7 +741,7 @@ int Init_program(int argc,char * argv[])
   switch(Load_CFG(1))
   {
     case ERROR_CFG_MISSING:
-      // Pas un problËme, on a les valeurs par dÈfaut.
+      // Pas un probl√®me, on a les valeurs par d√©faut.
       break;
     case ERROR_CFG_CORRUPTED:
       DEBUG("Corrupted CFG file.",0);
@@ -807,7 +807,7 @@ int Init_program(int argc,char * argv[])
   Fore_color=Best_color_range(255,255,255,Config.Palette_cells_X*Config.Palette_cells_Y);
   Back_color=Best_color_range(0,0,0,Config.Palette_cells_X*Config.Palette_cells_Y);
 
-  // Allocation de mÈmoire pour la brosse
+  // Allocation de m√©moire pour la brosse
   if (!(Brush         =(byte *)malloc(   1*   1))) Error(ERROR_MEMORY);
   if (!(Smear_brush   =(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE))) Error(ERROR_MEMORY);
 
@@ -848,13 +848,13 @@ int Init_program(int argc,char * argv[])
   
   starting_image_mode = Config.Default_mode_layers ? 
     IMAGE_MODE_LAYERED : IMAGE_MODE_ANIMATION;
-  // Allocation de mÈmoire pour les diffÈrents Ècrans virtuels (et brosse)
+  // Allocation de m√©moire pour les diff√©rents √©crans virtuels (et brosse)
   if (Init_all_backup_lists(starting_image_mode , Screen_width, Screen_height)==0)
     Error(ERROR_MEMORY);
   // Update toolbars' visibility, now that the current image has a mode
   Check_menu_mode();
   
-  // Nettoyage de l'Ècran virtuel (les autres recevront celui-ci par copie)
+  // Nettoyage de l'√©cran virtuel (les autres recevront celui-ci par copie)
   memset(Main_screen,0,Main.image_width*Main.image_height);
 
   // If image size was specified on command line, set that now
@@ -890,7 +890,7 @@ int Init_program(int argc,char * argv[])
   Draw_menu_button(BUTTON_PAL_LEFT,BUTTON_RELEASED);
   Draw_menu_button(BUTTON_PAL_RIGHT,BUTTON_RELEASED);
 
-  // On affiche le curseur pour dÈbuter correctement l'Ètat du programme:
+  // On affiche le curseur pour d√©buter correctement l'√©tat du programme:
   Display_cursor();
 
   Spare.image_is_modified=0;
@@ -899,10 +899,10 @@ int Init_program(int argc,char * argv[])
   // Gestionnaire de signaux, quand il ne reste plus aucun espoir
   Init_sighandler();
 
-  // Le programme dÈbute en mode de dessin ‡ la main
+  // Le programme d√©bute en mode de dessin √† la main
   Select_button(BUTTON_DRAW,LEFT_SIDE);
 
-  // On initialise la brosse initiale ‡ 1 pixel blanc:
+  // On initialise la brosse initiale √† 1 pixel blanc:
   Brush_width=1;
   Brush_height=1;
   for (temp=0;temp<256;temp++)
@@ -919,7 +919,7 @@ int Init_program(int argc,char * argv[])
     strcpy(Main.selector.Directory, main_directory);
   }
   
-  // Test de recuperation de fichiers sauvÈs
+  // Test de recuperation de fichiers sauv√©s
   switch (Check_recovery())
   {
     T_IO_Context context;
@@ -1057,11 +1057,11 @@ void Program_shutdown(void)
   // Remove the safety backups, this is normal exit
   Delete_safety_backups();
 
-  // On libËre le buffer de gestion de lignes
+  // On lib√®re le buffer de gestion de lignes
   free(Horizontal_line_buffer);
   Horizontal_line_buffer = NULL;
 
-  // On libËre le pinceau spÈcial
+  // On lib√®re le pinceau sp√©cial
   free(Paintbrush_sprite);
   Paintbrush_sprite = NULL;
 
@@ -1095,10 +1095,10 @@ void Program_shutdown(void)
     Unicode_fonts = ufont;
   }
 
-  // On prend bien soin de passer dans le rÈpertoire initial:
+  // On prend bien soin de passer dans le r√©pertoire initial:
   if (Change_directory(Initial_directory)==0)
   {
-    // On sauvegarde les donnÈes dans le .CFG et dans le .INI
+    // On sauvegarde les donn√©es dans le .CFG et dans le .INI
     if (Config.Auto_save)
     {
       return_code=Save_CFG();
@@ -1143,7 +1143,7 @@ void Program_shutdown(void)
 }
 
 
-// -------------------------- ProcÈdure principale ---------------------------
+// -------------------------- Proc√©dure principale ---------------------------
 int main(int argc,char * argv[])
 {
 

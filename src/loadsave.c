@@ -2,7 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
-    Copyright 2011 Pawel Góralski
+    Copyright 2011 Pawel GÃ³ralski
     Copyright 2010 Alexander Filyanov
     Copyright 2009 Petter Lindquist
     Copyright 2008 Yves Rizoud
@@ -125,7 +125,7 @@ void Set_pixel(T_IO_Context *context, short x_pos, short y_pos, byte color)
     
   switch (context->Type)
   {
-    // Chargement des pixels dans l'écran principal
+    // Chargement des pixels dans l'Ã©cran principal
     case CONTEXT_MAIN_IMAGE:
       Pixel_in_current_screen(x_pos,y_pos,color);
       break;
@@ -257,12 +257,12 @@ void Set_pixel_24b(T_IO_Context *context, short x_pos, short y_pos, byte r, byte
 
 
 
-// Création d'une palette fake
+// CrÃ©ation d'une palette fake
 void Set_palette_fake_24b(T_Palette palette)
 {
   int color;
 
-  // Génération de la palette
+  // GÃ©nÃ©ration de la palette
   for (color=0;color<256;color++)
   {
     palette[color].R=((color & 0xE0)>>5)<<5;
@@ -318,13 +318,13 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
   {
     // Preview
     case CONTEXT_PREVIEW:
-      // Préparation du chargement d'une preview:
+      // PrÃ©paration du chargement d'une preview:
       
       context->Preview_bitmap=calloc(1, PREVIEW_WIDTH*PREVIEW_HEIGHT*Menu_factor_X*Menu_factor_Y);
       if (!context->Preview_bitmap)
         File_error=1;
 
-      // Affichage des données "Image size:"
+      // Affichage des donnÃ©es "Image size:"
       memcpy(str, "VERY BIG!", 10); // default string
       if (context->Original_width != 0)
       {
@@ -359,7 +359,7 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
       }
       else
       {
-        // Le fichier fait plus de 100 Mega octets (cas très rare :))
+        // Le fichier fait plus de 100 Mega octets (cas trÃ¨s rare :))
         memcpy(str,"LARGE!!",8);
       }
       Print_in_window(236,59,str,MC_Black,MC_Light);
@@ -370,10 +370,10 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
         Print_in_window( 59,59,Get_fileformat(format)->Label,MC_Black,MC_Light);
       }
 
-      // On efface le commentaire précédent
+      // On efface le commentaire prÃ©cÃ©dent
       Window_rectangle(45,70,32*8,8,MC_Light);
   
-      // Calcul des données nécessaires à l'affichage de la preview:
+      // Calcul des donnÃ©es nÃ©cessaires Ã  l'affichage de la preview:
       if (ratio == PIXEL_WIDE && 
           Pixel_ratio != PIXEL_WIDE &&
           Pixel_ratio != PIXEL_WIDE2)
@@ -398,10 +398,10 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
       context->Preview_pos_X=Window_pos_X+183*Menu_factor_X;
       context->Preview_pos_Y=Window_pos_Y+ 95*Menu_factor_Y;
   
-      // On nettoie la zone où va s'afficher la preview:
+      // On nettoie la zone oÃ¹ va s'afficher la preview:
       Window_rectangle(183,95,PREVIEW_WIDTH,PREVIEW_HEIGHT,MC_Light);
       
-      // Un update pour couvrir les 4 zones: 3 libellés plus le commentaire
+      // Un update pour couvrir les 4 zones: 3 libellÃ©s plus le commentaire
       Update_window_area(45,48,256,30);
       // Zone de preview
       Update_window_area(183,95,PREVIEW_WIDTH,PREVIEW_HEIGHT);
@@ -411,9 +411,9 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
     case CONTEXT_MAIN_IMAGE:
       if (Backup_new_image(1,width,height))
       {
-        // La nouvelle page a pu être allouée, elle est pour l'instant pleine
+        // La nouvelle page a pu Ãªtre allouÃ©e, elle est pour l'instant pleine
         // de 0s. Elle fait Main_image_width de large.
-        // Normalement tout va bien, tout est sous contrôle...
+        // Normalement tout va bien, tout est sous contrÃ´le...
         
         // Load into layer 0, by default.
         context->Nb_layers=1;
@@ -428,7 +428,7 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
       else
       {
         // Afficher un message d'erreur
-        // Pour être sûr que ce soit lisible.
+        // Pour Ãªtre sÃ»r que ce soit lisible.
         Compute_optimal_menu_colors(context->Palette);
         Message_out_of_memory();
         File_error=1; // 1 => On n'a pas perdu l'image courante
@@ -502,7 +502,7 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
 }
 
 /////////////////////////////////////////////////////////////////////////////
-//                    Gestion des lectures et écritures                    //
+//                    Gestion des lectures et Ã©critures                    //
 /////////////////////////////////////////////////////////////////////////////
 
 void Write_one_byte(FILE *file, byte b)
@@ -513,12 +513,12 @@ void Write_one_byte(FILE *file, byte b)
 
 /////////////////////////////////////////////////////////////////////////////
 
-// -------- Modifier la valeur du code d'erreur d'accès à un fichier --------
-//   On n'est pas obligé d'utiliser cette fonction à chaque fois mais il est
+// -------- Modifier la valeur du code d'erreur d'accÃ¨s Ã  un fichier --------
+//   On n'est pas obligÃ© d'utiliser cette fonction Ã  chaque fois mais il est
 // important de l'utiliser dans les cas du type:
 //   if (!File_error) *** else File_error=***;
-// En fait, dans le cas où l'on modifie File_error alors qu'elle contient
-// dèjà un code d'erreur.
+// En fait, dans le cas oÃ¹ l'on modifie File_error alors qu'elle contient
+// dÃ¨jÃ  un code d'erreur.
 void Set_file_error(int value)
 {
   if (File_error>=0)
@@ -530,7 +530,7 @@ void Set_file_error(int value)
 void Load_image(T_IO_Context *context)
 {
   unsigned int index; // index de balayage des formats
-  const T_Format *format = &(File_formats[FORMAT_ALL_FILES+1]); // Format du fichier à charger
+  const T_Format *format = &(File_formats[FORMAT_ALL_FILES+1]); // Format du fichier Ã  charger
   int i;
   byte old_cursor_shape;
   FILE * f;
@@ -538,7 +538,7 @@ void Load_image(T_IO_Context *context)
   // Not sure it's the best place...
   context->Color_cycles=0;
 
-  // On place par défaut File_error à vrai au cas où on ne sache pas
+  // On place par dÃ©faut File_error Ã  vrai au cas oÃ¹ on ne sache pas
   // charger le format du fichier:
   File_error=1;
 
@@ -559,8 +559,8 @@ void Load_image(T_IO_Context *context)
 
   if (File_error)
   {
-    //  Sinon, on va devoir scanner les différents formats qu'on connait pour
-    // savoir à quel format est le fichier:
+    //  Sinon, on va devoir scanner les diffÃ©rents formats qu'on connait pour
+    // savoir Ã  quel format est le fichier:
     for (index=0; index < Nb_known_formats(); index++)
     {
       format = Get_fileformat(index);
@@ -571,7 +571,7 @@ void Load_image(T_IO_Context *context)
       fseek(f, 0, SEEK_SET); // rewind
       // On appelle le testeur du format:
       format->Test(context, f);
-      // On s'arrête si le fichier est au bon format:
+      // On s'arrÃªte si le fichier est au bon format:
       if (File_error==0)
         break;
     }
@@ -593,8 +593,8 @@ void Load_image(T_IO_Context *context)
 
     if (File_error)
     { 
-      // Sinon, l'appelant sera au courant de l'échec grace à File_error;
-      // et si on s'apprêtait à faire un chargement définitif de l'image (pas
+      // Sinon, l'appelant sera au courant de l'Ã©chec grace Ã  File_error;
+      // et si on s'apprÃªtait Ã  faire un chargement dÃ©finitif de l'image (pas
       // une preview), alors on flash l'utilisateur.
       //if (Pixel_load_function!=Pixel_load_in_preview)
       //  Error(0);
@@ -602,12 +602,12 @@ void Load_image(T_IO_Context *context)
     }
   }
   else
-  // Si on a su déterminer avec succès le format du fichier:
+  // Si on a su dÃ©terminer avec succÃ¨s le format du fichier:
   {
     context->Format = format->Identifier;
     // On peut charger le fichier:
     // Dans certains cas il est possible que le chargement plante
-    // après avoir modifié la palette. TODO
+    // aprÃ¨s avoir modifiÃ© la palette. TODO
     format->Load(context);
   }
 
@@ -754,7 +754,7 @@ void Load_image(T_IO_Context *context)
             Main.backups->Pages->Filename_unicode[0] = 0;
         }
         
-        // On considère que l'image chargée n'est plus modifiée
+        // On considÃ¨re que l'image chargÃ©e n'est plus modifiÃ©e
         Main.image_is_modified=0;
         // Et on documente la variable Main_fileformat avec la valeur:
         Main.fileformat=format->Identifier;
@@ -801,15 +801,15 @@ void Load_image(T_IO_Context *context)
     }
     else if (File_error!=1)
     {
-      // On considère que l'image chargée est encore modifiée
+      // On considÃ¨re que l'image chargÃ©e est encore modifiÃ©e
       Main.image_is_modified=1;
       // Et on documente la variable Main_fileformat avec la valeur:
       Main.fileformat=format->Identifier;
     }
     else
     {
-      // Dans ce cas, on sait que l'image n'a pas changé, mais ses
-      // paramètres (dimension, palette, ...) si. Donc on les restaures.
+      // Dans ce cas, on sait que l'image n'a pas changÃ©, mais ses
+      // paramÃ¨tres (dimension, palette, ...) si. Donc on les restaures.
       Download_infos_page_main(Main.backups->Pages);
     }
   }
@@ -956,7 +956,7 @@ void Save_image(T_IO_Context *context)
 {
   const T_Format *format;
   
-  // On place par défaut File_error à vrai au cas où on ne sache pas
+  // On place par dÃ©faut File_error Ã  vrai au cas oÃ¹ on ne sache pas
   // sauver le format du fichier: (Est-ce vraiment utile??? Je ne crois pas!)
   File_error=1;
 
@@ -1204,7 +1204,7 @@ void Emergency_backup(const char *fname, byte *source, int width, int height, T_
         return;
       }
 
-  // Ouf, sauvé
+  // Ouf, sauvÃ©
   fclose(file);
 }
 

@@ -42,8 +42,8 @@ static byte * Brush_rotate_buffer;
 static int Brush_rotate_width;
 static int Brush_rotate_height;
 
-// Calcul de redimensionnement du pinceau pour éviter les débordements de
-// l'écran et de l'image
+// Calcul de redimensionnement du pinceau pour Ã©viter les dÃ©bordements de
+// l'Ã©cran et de l'image
 void Compute_clipped_dimensions(short * x,short * y,short * width,short * height)
 {
   if ((*x)<Limit_left)
@@ -69,8 +69,8 @@ void Compute_clipped_dimensions(short * x,short * y,short * width,short * height
   }
 }
 
-  // -- Calcul de redimensionnement du pinceau pour éviter les débordements
-  //    de l'écran zoomé et de l'image --
+  // -- Calcul de redimensionnement du pinceau pour Ã©viter les dÃ©bordements
+  //    de l'Ã©cran zoomÃ© et de l'image --
 
 void Compute_clipped_dimensions_zoom(short * x,short * y,short * width,short * height)
 {
@@ -101,19 +101,19 @@ void Compute_clipped_dimensions_zoom(short * x,short * y,short * width,short * h
 /// Display the paintbrush (preview : on screen only)
 void Display_paintbrush(short x,short y,byte color)
   // x,y: position du centre du pinceau
-  // color: couleur à appliquer au pinceau
+  // color: couleur Ã  appliquer au pinceau
 {
-  short start_x; // Position X (dans l'image) à partir de laquelle on
+  short start_x; // Position X (dans l'image) Ã  partir de laquelle on
         // affiche la brosse/pinceau
-  short start_y; // Position Y (dans l'image) à partir de laquelle on
+  short start_y; // Position Y (dans l'image) Ã  partir de laquelle on
         // affiche la brosse/pinceau
-  short width; // width dans l'écran selon laquelle on affiche la
+  short width; // width dans l'Ã©cran selon laquelle on affiche la
         // brosse/pinceau
-  short height; // height dans l'écran selon laquelle on affiche la
+  short height; // height dans l'Ã©cran selon laquelle on affiche la
         // brosse/pinceau
-  short start_x_counter; // Position X (dans la brosse/pinceau) à partir
+  short start_x_counter; // Position X (dans la brosse/pinceau) Ã  partir
         // de laquelle on affiche la brosse/pinceau
-  short start_y_counter; // Position Y (dans la brosse/pinceau) à partir
+  short start_y_counter; // Position Y (dans la brosse/pinceau) Ã  partir
         // de laquelle on affiche la brosse/pinceau
   byte * temp;
 
@@ -256,19 +256,19 @@ void Display_paintbrush(short x,short y,byte color)
 /// Draw the paintbrush in the image buffer
 void Draw_paintbrush(short x,short y,byte color)
   // x,y: position du centre du pinceau
-  // color: couleur à appliquer au pinceau
+  // color: couleur Ã  appliquer au pinceau
 {
-  short start_x; // Position X (dans l'image) à partir de laquelle on
+  short start_x; // Position X (dans l'image) Ã  partir de laquelle on
         // affiche la brosse/pinceau
-  short start_y; // Position Y (dans l'image) à partir de laquelle on
+  short start_y; // Position Y (dans l'image) Ã  partir de laquelle on
         // affiche la brosse/pinceau
-  short width; // width dans l'écran selon laquelle on affiche la
+  short width; // width dans l'Ã©cran selon laquelle on affiche la
         // brosse/pinceau
-  short height; // height dans l'écran selon laquelle on affiche la
+  short height; // height dans l'Ã©cran selon laquelle on affiche la
         // brosse/pinceau
-  short start_x_counter; // Position X (dans la brosse/pinceau) à partir
+  short start_x_counter; // Position X (dans la brosse/pinceau) Ã  partir
         // de laquelle on affiche la brosse/pinceau
-  short start_y_counter; // Position Y (dans la brosse/pinceau) à partir
+  short start_y_counter; // Position Y (dans la brosse/pinceau) Ã  partir
         // de laquelle on affiche la brosse/pinceau
   short x_pos; // Position X (dans l'image) en cours d'affichage
   short y_pos; // Position Y (dans l'image) en cours d'affichage
@@ -276,9 +276,9 @@ void Draw_paintbrush(short x,short y,byte color)
         // d'affichage
   short counter_y; // Position Y (dans la brosse/pinceau) en cours
         // d'affichage
-  short end_counter_x; // Position X ou s'arrête l'affichade de la
+  short end_counter_x; // Position X ou s'arrÃªte l'affichade de la
         // brosse/pinceau
-  short end_counter_y; // Position Y ou s'arrête l'affichade de la
+  short end_counter_y; // Position Y ou s'arrÃªte l'affichade de la
         // brosse/pinceau
   byte  temp_color; // color de la brosse en cours d'affichage
   int position;
@@ -688,17 +688,17 @@ byte Realloc_brush(word new_brush_width, word new_brush_height, byte *new_brush,
 void Hide_paintbrush(short x,short y)
   // x,y: position du centre du pinceau
 {
-  short start_x; // Position X (dans l'image) à partir de laquelle on
+  short start_x; // Position X (dans l'image) Ã  partir de laquelle on
         // affiche la brosse/pinceau
-  short start_y; // Position Y (dans l'image) à partir de laquelle on
+  short start_y; // Position Y (dans l'image) Ã  partir de laquelle on
         // affiche la brosse/pinceau
-  short width; // width dans l'écran selon laquelle on affiche la
+  short width; // width dans l'Ã©cran selon laquelle on affiche la
         // brosse/pinceau
-  short height; // height dans l'écran selon laquelle on affiche la
+  short height; // height dans l'Ã©cran selon laquelle on affiche la
         // brosse/pinceau
-  short start_x_counter; // Position X (dans la brosse/pinceau) à partir
+  short start_x_counter; // Position X (dans la brosse/pinceau) Ã  partir
         // de laquelle on affiche la brosse/pinceau
-  short start_y_counter; // Position Y (dans la brosse/pinceau) à partir
+  short start_y_counter; // Position Y (dans la brosse/pinceau) Ã  partir
         // de laquelle on affiche la brosse/pinceau
   //short x_pos; // Position X (dans l'image) en cours d'affichage
   //short y_pos; // Position Y (dans l'image) en cours d'affichage
@@ -839,10 +839,10 @@ void Capture_brush(short start_x,short start_y,short end_x,short end_y,short cle
 
   if ((start_x<Main.image_width) && (start_y<Main.image_height))
   {
-    // On met les décalages du tiling à 0 pour eviter toute incohérence.
-    // Si par hasard on voulait les mettre à
+    // On met les dÃ©calages du tiling Ã  0 pour eviter toute incohÃ©rence.
+    // Si par hasard on voulait les mettre Ã 
     //    min(Tiling_Decalage_?,Brosse_?a??eur-1)
-    // il faudrait penser à les initialiser à 0 dans "MAIN.C".
+    // il faudrait penser Ã  les initialiser Ã  0 dans "MAIN.C".
     Tiling_offset_X=0;
     Tiling_offset_Y=0;
 
@@ -922,7 +922,7 @@ void Remap_brush(void)
   int   color;
 
 
-  // On commence par initialiser le tableau de booléens à faux
+  // On commence par initialiser le tableau de boolÃ©ens Ã  faux
   for (color=0;color<=255;color++)
     Brush_colormap[color]=0;
 
@@ -931,18 +931,18 @@ void Remap_brush(void)
     for (x_pos=0;x_pos<Brush_width;x_pos++)
       Brush_colormap[*(Brush_original_pixels + y_pos * Brush_width + x_pos)]=1;
 
-  //  On n'est pas censé remapper la couleur de transparence, sinon la brosse
-  // changera de forme, donc on dit pour l'instant qu'elle n'est pas utilisée
-  // ainsi on ne s'embêtera pas à la recalculer
+  //  On n'est pas censÃ© remapper la couleur de transparence, sinon la brosse
+  // changera de forme, donc on dit pour l'instant qu'elle n'est pas utilisÃ©e
+  // ainsi on ne s'embÃªtera pas Ã  la recalculer
   Brush_colormap[Back_color]=0;
 
   //   On va maintenant se servir de la table comme table de
   // conversion: pour chaque indice, la table donne une couleur de
   // remplacement.
-  // Note : Seules les couleurs utilisées on besoin d'êtres recalculées: les
-  //       autres ne seront jamais consultées dans la nouvelle table de
+  // Note : Seules les couleurs utilisÃ©es on besoin d'Ãªtres recalculÃ©es: les
+  //       autres ne seront jamais consultÃ©es dans la nouvelle table de
   //       conversion puisque elles n'existent pas dans la brosse, donc elles
-  //       ne seront pas utilisées par Remap_general_lowlevel.
+  //       ne seront pas utilisÃ©es par Remap_general_lowlevel.
   for (color=0;color<=255;color++)
     if (Brush_colormap[color] != 0)
     {
@@ -959,16 +959,16 @@ void Remap_brush(void)
         Brush_colormap[color]=Best_color_perceptual_except(r,g,b,Back_color);
     }
 
-  //   Il reste une couleur non calculée dans la table qu'il faut mettre à
-  // jour: c'est la couleur de fond. On l'avait inhibée pour éviter son
-  // calcul inutile, mais comme il est possible qu'elle soit quand même dans
-  // la brosse, on va mettre dans la table une relation d'équivalence entre
-  // les deux palettes: comme on ne veut pas que la couleur soit remplacée,
-  // on va dire qu'on veut qu'elle soit remplacée par la couleur en question.
+  //   Il reste une couleur non calculÃ©e dans la table qu'il faut mettre Ã 
+  // jour: c'est la couleur de fond. On l'avait inhibÃ©e pour Ã©viter son
+  // calcul inutile, mais comme il est possible qu'elle soit quand mÃªme dans
+  // la brosse, on va mettre dans la table une relation d'Ã©quivalence entre
+  // les deux palettes: comme on ne veut pas que la couleur soit remplacÃ©e,
+  // on va dire qu'on veut qu'elle soit remplacÃ©e par la couleur en question.
   Brush_colormap[Back_color]=Back_color;
 
   //   Maintenant qu'on a une super table de conversion qui n'a que le nom
-  // qui craint un peu, on peut faire l'échange dans la brosse de toutes les
+  // qui craint un peu, on peut faire l'Ã©change dans la brosse de toutes les
   // teintes.
   Remap_general_lowlevel(Brush_colormap,Brush_original_pixels,Brush,Brush_width,Brush_height,Brush_width);
   
@@ -996,7 +996,7 @@ void Outline_brush(void)
     return;
   }
 
-  // On remplit la bordure ajoutée par la Backcolor
+  // On remplit la bordure ajoutÃ©e par la Backcolor
   memset(Brush,Back_color,((long)Brush_width)*Brush_height);
 
   // On copie la brosse courante dans la nouvelle
@@ -1005,7 +1005,7 @@ void Outline_brush(void)
       Brush, // Destination
       1, 1, Brush_width);
 
-  // Si on "outline" avec une couleur différente de la Back_color on y va!
+  // Si on "outline" avec une couleur diffÃ©rente de la Back_color on y va!
   if (Fore_color!=Back_color)
   {
     // 1er balayage (horizontal)
@@ -1028,12 +1028,12 @@ void Outline_brush(void)
           state=1;
         }
       }
-      // Cas du dernier pixel à droite de la ligne
+      // Cas du dernier pixel Ã  droite de la ligne
       if (state != 0)
         Pixel_in_brush(x_pos,y_pos,Fore_color);
     }
 
-    // 2ème balayage (vertical)
+    // 2Ã¨me balayage (vertical)
     for (x_pos=1; x_pos<Brush_width-1; x_pos++)
     {
       state=0;
@@ -1069,7 +1069,7 @@ void Outline_brush(void)
   Brush_offset_X=(Brush_width>>1);
   Brush_offset_Y=(Brush_height>>1);
 
-  free(old_brush); // Libération de l'ancienne brosse
+  free(old_brush); // LibÃ©ration de l'ancienne brosse
 
 }
 
@@ -1131,12 +1131,12 @@ void Nibble_brush(void)
           }
         }
       }
-      // Cas du dernier pixel à droite de la ligne
+      // Cas du dernier pixel Ã  droite de la ligne
       if (old_brush[((y_pos+1)*old_width)+x_pos+1]==Back_color)
         Pixel_in_brush(x_pos-1,y_pos,Back_color);
     }
 
-    // 2ème balayage (vertical)
+    // 2Ã¨me balayage (vertical)
     for (x_pos=0; x_pos<Brush_width; x_pos++)
     {
       state=(old_brush[old_width+x_pos+1]!=Back_color);;
@@ -1209,7 +1209,7 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
       end_y=y_pos;
   }
 
-  // On clippe ces bornes à l'écran:
+  // On clippe ces bornes Ã  l'Ã©cran:
   if (start_x<Limit_left)
     start_x=Limit_left;
   if (end_x>Limit_right)
@@ -1224,10 +1224,10 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
 
   if ((start_x<Main.image_width) && (start_y<Main.image_height))
   {
-    // On met les décalages du tiling à 0 pour eviter toute incohérence.
-    // Si par hasard on voulait les mettre à
+    // On met les dÃ©calages du tiling Ã  0 pour eviter toute incohÃ©rence.
+    // Si par hasard on voulait les mettre Ã 
     //    min(Tiling_Decalage_?,Brosse_?a??eur-1)
-    // il faudrait penser à les initialiser à 0 dans "MAIN.C".
+    // il faudrait penser Ã  les initialiser Ã  0 dans "MAIN.C".
     Tiling_offset_X=0;
     Tiling_offset_Y=0;
 
@@ -1260,7 +1260,7 @@ void Capture_brush_with_lasso(int vertices, short * points,short clear)
                          points[0],points[1],
                          xor_lut[Back_color]);
 
-    // On scanne la brosse pour remplacer tous les pixels affectés par le
+    // On scanne la brosse pour remplacer tous les pixels affectÃ©s par le
     // polyfill par ceux de l'image:
     for (y_pos=start_y;y_pos<=end_y;y_pos++)
       for (x_pos=start_x;x_pos<=end_x;x_pos++)
@@ -1367,7 +1367,7 @@ void Stretch_brush_preview(short x1, short y1, short x2, short y2)
   dest_width=final_dest_x_pos-initial_dest_x_pos+1;
   dest_height=final_dest_y_pos-initial_dest_y_pos+1;
 
-  // Calcul des vecteurs d'incrémentation :
+  // Calcul des vecteurs d'incrÃ©mentation :
   delta_x=(Brush_width<<16)/dest_width;
   delta_y=(Brush_height<<16)/dest_height;
 
@@ -1691,7 +1691,7 @@ void Interpolate_texture(int start_x,int start_y,int xt1,int yt1,
       {
         xt=(((float)((x_pos-start_x)*delta_xt))/(float)delta_x2) + (float)xt1;
         yt=(((float)((x_pos-start_x)*delta_yt))/(float)delta_x2) + (float)yt1;
-        if (isnan(ScanY_X[0][y_pos])) // Gauche non défini
+        if (isnan(ScanY_X[0][y_pos])) // Gauche non dÃ©fini
         {
           ScanY_X[0][y_pos]=(float)x_pos;
           ScanY_Xt[0][y_pos]=xt;
@@ -1701,7 +1701,7 @@ void Interpolate_texture(int start_x,int start_y,int xt1,int yt1,
         {
           if ((float)x_pos>=ScanY_X[0][y_pos])
           {
-            if (isnan(ScanY_X[1][y_pos]) // Droit non défini
+            if (isnan(ScanY_X[1][y_pos]) // Droit non dÃ©fini
              || (x_pos>ScanY_X[1][y_pos]))
             {
               ScanY_X[1][y_pos]=(float)x_pos;
@@ -1711,7 +1711,7 @@ void Interpolate_texture(int start_x,int start_y,int xt1,int yt1,
           }
           else
           {
-            if (isnan(ScanY_X[1][y_pos])) // Droit non défini
+            if (isnan(ScanY_X[1][y_pos])) // Droit non dÃ©fini
             {
               ScanY_X[1][y_pos]=ScanY_X[0][y_pos];
               ScanY_Xt[1][y_pos]=ScanY_Xt[0][y_pos];
@@ -1748,7 +1748,7 @@ void Interpolate_texture(int start_x,int start_y,int xt1,int yt1,
       {
         xt=(((float)((y_pos-start_y)*delta_xt))/(float)delta_y2) + (float)xt1;
         yt=(((float)((y_pos-start_y)*delta_yt))/(float)delta_y2) + (float)yt1;
-        if (isnan(ScanY_X[0][y_pos])) // Gauche non défini
+        if (isnan(ScanY_X[0][y_pos])) // Gauche non dÃ©fini
         {
           ScanY_X[0][y_pos]=(float)x_pos;
           ScanY_Xt[0][y_pos]=xt;
@@ -1758,7 +1758,7 @@ void Interpolate_texture(int start_x,int start_y,int xt1,int yt1,
         {
           if ((float)x_pos>=ScanY_X[0][y_pos])
           {
-            if (isnan(ScanY_X[1][y_pos]) // Droit non défini
+            if (isnan(ScanY_X[1][y_pos]) // Droit non dÃ©fini
              || (x_pos>ScanY_X[1][y_pos]))
             {
               ScanY_X[1][y_pos]=(float)x_pos;
@@ -1768,7 +1768,7 @@ void Interpolate_texture(int start_x,int start_y,int xt1,int yt1,
           }
           else
           {
-            if (isnan(ScanY_X[1][y_pos])) // Droit non défini
+            if (isnan(ScanY_X[1][y_pos])) // Droit non dÃ©fini
             {
               ScanY_X[1][y_pos]=ScanY_X[0][y_pos];
               ScanY_Xt[1][y_pos]=ScanY_Xt[0][y_pos];
@@ -1817,7 +1817,7 @@ void Compute_quad_texture( byte *texture, int texture_width,
   ScanY_X[0] =(float *)malloc(height*sizeof(float));
   ScanY_X[1] =(float *)malloc(height*sizeof(float));
 
-  // Fill_general avec des valeurs égales à NAN.
+  // Fill_general avec des valeurs Ã©gales Ã  NAN.
   for (y=0; y<height; y++)
   {
     ScanY_X[0][y]=NAN ;
@@ -1947,7 +1947,7 @@ void Rotate_brush(float angle)
   float cos_a=cos(angle);
   float sin_a=sin(angle);
 
-  // Calcul des coordonnées des 4 coins:
+  // Calcul des coordonnÃ©es des 4 coins:
   // 1 2
   // 3 4
 
@@ -1978,7 +1978,7 @@ void Rotate_brush(float angle)
     Error(0);
     return;
   }
-  // Et maintenant on calcule la nouvelle brosse tournée.
+  // Et maintenant on calcule la nouvelle brosse tournÃ©e.
   Compute_quad_texture( Brush_rotate_buffer, Brush_rotate_width,
                         x1,y1,               offset,               offset,
                         x2,y2,Brush_rotate_width-offset-1,               offset,
@@ -2026,7 +2026,7 @@ void Draw_quad_texture_preview(byte *texture, int texture_width,
   ScanY_X[0] =(float *)malloc(height*sizeof(float));
   ScanY_X[1] =(float *)malloc(height*sizeof(float));
 
-  // Fill_general avec des valeurs égales à NAN.
+  // Fill_general avec des valeurs Ã©gales Ã  NAN.
   for (y=0; y<height; y++)
   {
     ScanY_X[0][y]=NAN;
@@ -2086,7 +2086,7 @@ void Rotate_brush_preview(float angle)
   float sin_a=sin(angle);
   int offset=0;
 
-  // Calcul des coordonnées des 4 coins:
+  // Calcul des coordonnÃ©es des 4 coins:
   // 1 2
   // 3 4
 
@@ -2110,7 +2110,7 @@ void Rotate_brush_preview(float angle)
   x4+=Brush_rotation_center_X;
   y4+=Brush_rotation_center_Y;
 
-  // Et maintenant on dessine la brosse tournée.
+  // Et maintenant on dessine la brosse tournÃ©e.
   Draw_quad_texture_preview(Brush_rotate_buffer, Brush_rotate_width,
                             x1, y1, offset, offset,
                             x2, y2, Brush_rotate_width-offset-1, offset,
