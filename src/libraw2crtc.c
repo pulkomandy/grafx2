@@ -149,7 +149,7 @@ unsigned char *raw2crtc(T_IO_Context *context, unsigned char mode, unsigned char
   {
     if(*(allocationBuffer + i) > 1)
     {
-      fprintf(stderr, "WARNING : Multiple writte to memory address 0x%04X\n",i);
+      fprintf(stderr, "WARNING : Multiple writes to memory address 0x%04X\n",i);
     }
     if(*(allocationBuffer + i) > 0)
     {
