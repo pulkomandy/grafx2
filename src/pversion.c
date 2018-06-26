@@ -1,2 +1,1 @@
-const char Program_version[]="2.5";
-
+const char Program_version[]="2.6wip";
