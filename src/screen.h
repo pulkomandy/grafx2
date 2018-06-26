@@ -70,4 +70,7 @@ void GFX2_UpdateScreen(void);
 HWND GFX2_Get_Window_Handle(void);
 #endif
 
+/// Set application icon(s)
+void Define_icon(void);
+
 #endif // SCREEN_H_INCLUDED

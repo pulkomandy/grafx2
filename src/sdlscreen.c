@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <SDL.h>
 #include <SDL_endian.h>
+#include <SDL_image.h>
 #if defined(__WIN32__)
     #include <windows.h>
 #endif
@@ -69,6 +70,7 @@ static SDL_Surface * Screen_SDL = NULL;
 static SDL_Window * Window_SDL = NULL;
 static SDL_Renderer * Renderer_SDL = NULL;
 static SDL_Texture * Texture_SDL = NULL;
+static SDL_Surface * icon = NULL;
 #endif
 
 volatile int Allow_colorcycling=1;
@@ -146,6 +148,7 @@ void GFX2_Set_mode(int *width, int *height, int fullscreen)
   {
     Window_SDL = SDL_CreateWindow("GrafX2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                                   *width, *height, (fullscreen?SDL_WINDOW_FULLSCREEN:SDL_WINDOW_RESIZABLE));
+    SDL_SetWindowIcon(Window_SDL, icon);
     Renderer_SDL = SDL_CreateRenderer(Window_SDL, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
   }
   //else
@@ -280,7 +283,7 @@ void Flush_update(void)
   }
   Status_line_dirty_begin=25;
   Status_line_dirty_end=0;
-  
+
     #endif
 
 }
@@ -415,7 +418,7 @@ void Set_SDL_pixel_8(SDL_Surface *bmp, int x, int y, byte color)
 dword Get_SDL_pixel_hicolor(const SDL_Surface *bmp, int x, int y)
 {
   byte * ptr;
-  
+
   switch(bmp->format->BytesPerPixel)
   {
     case 4:
@@ -443,7 +446,7 @@ dword Get_SDL_pixel_hicolor(const SDL_Surface *bmp, int x, int y)
 void Get_SDL_Palette(const SDL_Palette * sdl_palette, T_Palette palette)
 {
   int i;
-  
+
   for (i=0; i<256; i++)
   {
     palette[i].R=sdl_palette->colors[i].r;
@@ -474,12 +477,12 @@ void Clear_border(byte color)
 {
   int width;
   int height;
-  
+
   // This function can be called before the graphics mode is set.
   // Nothing to do then.
   if (!Screen_SDL)
     return;
-  
+
   width = Screen_SDL->w - Screen_width*Pixel_width;
   height = Screen_SDL->h - Screen_height*Pixel_height;
   if (width)
@@ -509,7 +512,7 @@ void Clear_border(byte color)
 #else
 // TODO
 #endif
-  }  
+  }
 }
 
 #ifdef WIN32
@@ -533,4 +536,173 @@ void Allow_drag_and_drop(int flag)
   #else
   (void)flag; // unused
   #endif
+}
+
+/// Set application icon(s)
+void Define_icon(void)
+{
+#ifdef WIN32
+  // Specific code for Win32:
+  // Load icon from embedded resource.
+  // This will provide both the 16x16 and 32x32 versions.
+  do
+  {
+    HICON hicon;
+    HRSRC hresource;
+    HINSTANCE hInstance;
+    LPVOID lpResIconDir;
+    LPVOID lpResIcon16;
+    LPVOID lpResIcon32;
+    HGLOBAL hMem;
+    WORD nID;
+
+    hInstance = (HINSTANCE)GetModuleHandle(NULL);
+    if (hInstance==NULL)
+      break;
+
+    // Icon is resource #1
+    hresource = FindResource(hInstance,
+      MAKEINTRESOURCE(1),
+      RT_GROUP_ICON);
+    if (hresource==NULL)
+      break;
+
+    // Load and lock the icon directory.
+    hMem = LoadResource(hInstance, hresource);
+    if (hMem==NULL)
+      break;
+
+    lpResIconDir = LockResource(hMem);
+    if (lpResIconDir==NULL)
+      break;
+
+    //
+    // 16x16
+    //
+
+    // Get the identifier of the 16x16 icon
+    nID = LookupIconIdFromDirectoryEx((PBYTE) lpResIconDir, TRUE,
+        16, 16, LR_DEFAULTCOLOR);
+    if (nID==0)
+      break;
+
+    // Find the bits for the nID icon.
+    hresource = FindResource(hInstance,
+        MAKEINTRESOURCE(nID),
+        MAKEINTRESOURCE((long)RT_ICON));
+    if (hresource==NULL)
+      break;
+
+    // Load and lock the icon.
+    hMem = LoadResource(hInstance, hresource);
+    if (hMem==NULL)
+      break;
+    lpResIcon16 = LockResource(hMem);
+    if (lpResIcon16==NULL)
+      break;
+
+    // Create a handle to the icon.
+    hicon = CreateIconFromResourceEx((PBYTE) lpResIcon16,
+        SizeofResource(hInstance, hresource), TRUE, 0x00030000,
+        16, 16, LR_DEFAULTCOLOR);
+    if (hicon==NULL)
+      break;
+
+    // Set it
+		SetClassLongPtr(GFX2_Get_Window_Handle(), GCL_HICONSM, (LONG_PTR)hicon);
+
+
+    //
+    // 32x32
+    //
+
+    // Get the identifier of the 32x32 icon
+    nID = LookupIconIdFromDirectoryEx((PBYTE) lpResIconDir, TRUE,
+        32, 32, LR_DEFAULTCOLOR);
+    if (nID==0)
+      break;
+
+    // Find the bits for the nID icon.
+    hresource = FindResource(hInstance,
+        MAKEINTRESOURCE(nID),
+        MAKEINTRESOURCE((long)RT_ICON));
+    if (hresource==NULL)
+      break;
+
+    // Load and lock the icon.
+    hMem = LoadResource(hInstance, hresource);
+    if (hMem==NULL)
+      break;
+    lpResIcon32 = LockResource(hMem);
+    if (lpResIcon32==NULL)
+      break;
+
+    // Create a handle to the icon.
+    hicon = CreateIconFromResourceEx((PBYTE) lpResIcon32,
+        SizeofResource(hInstance, hresource), TRUE, 0x00030000,
+        32, 32, LR_DEFAULTCOLOR);
+    if (hicon==NULL)
+      break;
+
+    // Set it
+		SetClassLongPtr(GFX2_Get_Window_Handle(), GCL_HICON, (LONG_PTR)hicon);
+
+
+		// Success
+		return;
+  } while (0);
+  // Failure: fall back on normal SDL version:
+
+#endif
+
+  // General version: Load icon from file
+  {
+    char icon_path[MAX_PATH_CHARACTERS];
+#if defined(USE_SDL)
+    SDL_Surface * icon;
+#endif
+    //sprintf(icon_path, "%s%s", Data_directory, "gfx2.gif"); // 32x32
+    sprintf(icon_path, "%s%s", Data_directory, "gfx2.png"); // 48x48
+    icon = IMG_Load(icon_path);
+    if (icon != NULL)
+    {
+      Uint32 pink;
+      pink = SDL_MapRGB(icon->format, 255, 0, 255);
+
+      if (icon->format->BitsPerPixel == 8)
+      {
+        // NOTE : disable use of color key because of SDL/SDL2
+        // get the transparency information from the .gif and .png
+        // files by itself.
+        // 8bit image: use color key
+#if defined(USE_SDL)
+        //SDL_SetColorKey(icon, SDL_SRCCOLORKEY, pink);
+        SDL_WM_SetIcon(icon, NULL);
+#else
+        //SDL_SetColorKey(icon, SDL_TRUE, pink);
+#endif
+      }
+      else
+      {
+        // 24bit image: need to build a mask on magic pink
+        byte *icon_mask;
+        int x,y;
+
+        icon_mask = malloc(icon->w * icon->h / 8);
+        memset(icon_mask, 0, icon->w * icon->h / 8);
+        for (y=0; y<icon->h; y++)
+          for (x=0; x<icon->w; x++)
+            if (Get_SDL_pixel_hicolor(icon, x, y) != pink)
+              icon_mask[(y*icon->w+x)/8] |= 0x80 >> (x&7);
+#if defined(USE_SDL)
+        SDL_WM_SetIcon(icon, icon_mask);
+#endif
+        free(icon_mask);
+        icon_mask = NULL;
+      }
+#if defined(USE_SDL)
+      SDL_FreeSurface(icon);
+#endif
+    }
+  }
 }

@@ -195,7 +195,7 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
   default:
     {
       char msg[256];
-      snprintf(msg, sizeof(msg), "unknown Message : 0x%04x wParam=%08x lParam=%08x", uMsg, wParam, lParam);
+      snprintf(msg, sizeof(msg), "unknown Message : 0x%04x wParam=%08x lParam=%08lx", uMsg, wParam, lParam);
       Warning(msg);
     }
   }
@@ -453,4 +453,10 @@ volatile int Allow_colorcycling = 0;
 void Allow_drag_and_drop(int flag)
 {
   DragAcceptFiles(GFX2_Get_Window_Handle(), flag?TRUE:FALSE);
+}
+
+void Define_icon(void)
+{
+  // Do nothing because the icon is set in the window class
+  // see Init_Win32()
 }
