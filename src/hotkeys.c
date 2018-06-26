@@ -689,17 +689,17 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   SDLK_y, // Y
   0},
   {72,
-  "90° brush rotation",
-  "Rotate the user-defined brush by 90°",
+  "90\xb0 brush rotation",
+  "Rotate the user-defined brush by 90\xb0",
   "(counter-clockwise).",
   "",
   true,
   SDLK_z, // Z (W en AZERTY)
   0},
   {73,
-  "180° brush rotation",
+  "180\xb0 brush rotation",
   "Rotate the user-defined brush by",
-  "180°.",
+  "180\xb0.",
   "",
   true,
   SDLK_z|MOD_SHIFT, // Shift + Z
@@ -1981,7 +1981,7 @@ word Ordering[NB_SHORTCUTS]=
   SPECIAL_BIGGER_PAINTBRUSH,        // Sets paintbrush size: bigger
   SPECIAL_EFFECTS_OFF,              // Turns off all effects
   SPECIAL_TRANSPARENCY_1,           // Sets transparency level 10%
-  SPECIAL_TRANSPARENCY_2,           // Sets transparency level 20% 
+  SPECIAL_TRANSPARENCY_2,           // Sets transparency level 20%
   SPECIAL_TRANSPARENCY_3,           // Sets transparency level 30%
   SPECIAL_TRANSPARENCY_4,           // Sets transparency level 40%
   SPECIAL_TRANSPARENCY_5,           // Sets transparency level 50%

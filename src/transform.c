@@ -42,7 +42,7 @@ void Factorize(short *a, short *b)
 {
   // Method: brute-force.
   short factor;
-    
+
   factor=2;
   while (factor<=*a && factor<=*b)
   {
@@ -79,7 +79,7 @@ void Button_Transform_menu(int btn)
     UNIT_PERCENT = 2,
     UNIT_RATIO   = 3
   };
-    
+
   char buffer[5];
   short clicked_button;
   const char * unit_label[] = {
@@ -95,11 +95,11 @@ void Button_Transform_menu(int btn)
   short new_width=Main.image_width;
   short new_height=Main.image_height;
   byte need_display_size = 0;
-  
+
   // Persistent data
   static short unit_index = 1; // 1= Pixels, 2= Percent, 3=Ratio
   static short ratio_is_locked = 1; // True if X and Y resize should go together
-  
+
   T_Dropdown_button * unit_button;
   T_Special_button * input_button[4];
   short *input_value[4];
@@ -109,7 +109,7 @@ void Button_Transform_menu(int btn)
     new_ratio_width=old_ratio_width=new_ratio_height=old_ratio_height=100;
   else
     new_ratio_width=old_ratio_width=new_ratio_height=old_ratio_height=1;
-  
+
   Open_window(215,165,"Picture transform");
 
   Window_display_frame( 5, 15,205,91);
@@ -123,9 +123,9 @@ void Button_Transform_menu(int btn)
   Window_set_normal_button( 17,140, 27,14,"Y\022" ,1,1,SDLK_y);  // 3
 
   Print_in_window( 84,114,"Rotate",MC_Dark,MC_Light);
-  Window_set_normal_button( 69,125, 37,14,"-90°"  ,0,1,SDLK_LAST); // 4
-  Window_set_normal_button(107,125, 37,14,"+90°"  ,0,1,SDLK_LAST); // 5
-  Window_set_normal_button( 69,140, 75,14,"180°"  ,0,1,SDLK_LAST); // 6
+  Window_set_normal_button( 69,125, 37,14,"-90\xb0"  ,0,1,SDLK_LAST); // 4
+  Window_set_normal_button(107,125, 37,14,"+90\xb0"  ,0,1,SDLK_LAST); // 5
+  Window_set_normal_button( 69,140, 75,14,"180\xb0"  ,0,1,SDLK_LAST); // 6
 
   Print_in_window( 87, 19,"Resize",MC_Dark,MC_Light);
   Window_set_normal_button( 80, 86, 60,14,"RESIZE",1,1,SDLK_r);    // 7
@@ -142,14 +142,14 @@ void Button_Transform_menu(int btn)
   Window_dropdown_add_item(unit_button,UNIT_PIXELS,unit_label[UNIT_PIXELS]);
   Window_dropdown_add_item(unit_button,UNIT_PERCENT,unit_label[UNIT_PERCENT]);
   Window_dropdown_add_item(unit_button,UNIT_RATIO,unit_label[UNIT_RATIO]);
-  
+
   input_button[0] = Window_set_input_button_s(45,43,4,SDLK_w); // 10
   input_button[1] = Window_set_input_button(89,43,4); // 11
   input_button[2] = Window_set_input_button_s(45,58,4,SDLK_h); // 12
   input_button[3] = Window_set_input_button(89,58,4); // 13
-  
+
   Update_window_area(0,0,Window_width, Window_height);
-  
+
   Display_cursor();
 
   do
@@ -191,9 +191,9 @@ void Button_Transform_menu(int btn)
       Display_cursor();
       need_display_size=0;
     }
-  
+
     clicked_button=Window_clicked_button();
-    
+
     // Contextual help
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
     {
@@ -202,7 +202,7 @@ void Button_Transform_menu(int btn)
     }
     else if (Is_shortcut(Key,0x200+BUTTON_ADJUST))
       clicked_button=1;
-      
+
     else switch(clicked_button)
     {
       case 9: // Unit
@@ -249,12 +249,12 @@ void Button_Transform_menu(int btn)
               Factorize(&new_ratio_width, &old_ratio_width);
               Factorize(&new_ratio_height, &old_ratio_height);
             }
-          break;        
+          break;
         }
-        
+
         unit_index = Window_attribute2;
         break;
-    
+
       case 8: // Lock proportions
         ratio_is_locked = ! ratio_is_locked;
         Hide_cursor();
@@ -271,7 +271,7 @@ void Button_Transform_menu(int btn)
       case 12: // input new height
         Num2str(*( input_value[clicked_button-10]),buffer,4);
         Hide_cursor();
-        if (Readline(input_button[clicked_button-10]->Pos_X+2, 
+        if (Readline(input_button[clicked_button-10]->Pos_X+2,
           input_button[clicked_button-10]->Pos_Y+2,
           buffer,
           4,
@@ -299,7 +299,7 @@ void Button_Transform_menu(int btn)
                 // Copy the whole ratio
                 new_ratio_height=new_ratio_width;
                 old_ratio_height=old_ratio_width;
-              }                
+              }
             }
             else //  (clicked_button == 12 || clicked_button == 13)
             {
@@ -313,10 +313,10 @@ void Button_Transform_menu(int btn)
                 // Copy the whole ratio
                 new_ratio_width=new_ratio_height;
                 old_ratio_width=old_ratio_height;
-              }                
+              }
             }
-          }    
-            
+          }
+
           // Re-compute ratio from size in pixels
           if (unit_index == UNIT_PIXELS)
           {
@@ -337,7 +337,7 @@ void Button_Transform_menu(int btn)
   while (clicked_button<=0 || clicked_button>=8);
 
   Close_window();
-  
+
   // The Scroll operation uses the same button as transformation menu.
   if (Current_operation != OPERATION_SCROLL)
     Unselect_button(btn);
@@ -346,7 +346,7 @@ void Button_Transform_menu(int btn)
   {
     short old_width;
     short old_height;
-    
+
     // Determine new image dimensions
     switch (clicked_button)
     {
@@ -354,15 +354,15 @@ void Button_Transform_menu(int btn)
         // Keep new_width and new_height as entered.
         break;
       case  2 : // Flip X
-      case  3 : // Flip Y      
+      case  3 : // Flip Y
       case  6 : // 180° Rotation
         new_width=Main.image_width;
         new_height=Main.image_height;
         break;
-      
+
       case  4 : // -90° Rotation
       case  5 : // +90° Rotation
-  
+
         new_width=Main.image_height;
         new_height=Main.image_width;
         break;
@@ -370,20 +370,20 @@ void Button_Transform_menu(int btn)
     // Memorize the current dimensions
     old_width=Main.image_width;
     old_height=Main.image_height;
-    
+
     Upload_infos_page(&Main);
     // Allocate a new page
     if (Backup_with_new_dimensions(new_width,new_height))
     {
       // The new image is allocated, the new dimensions are already updated.
-      
+
       Main.image_is_modified=1;
-      
+
       // Process the transformation:
       switch(clicked_button)
       {
         int i;
-        
+
         case  2 : // Flip X
           for (i=0; i<Main.backups->Pages->Nb_layers; i++)
           {
@@ -391,7 +391,7 @@ void Button_Transform_menu(int btn)
             Flip_X_lowlevel(Main.backups->Pages->Image[i].Pixels, Main.image_width, Main.image_height);
           }
           break;
-        case  3 : // Flip Y      
+        case  3 : // Flip Y
           for (i=0; i<Main.backups->Pages->Nb_layers; i++)
           {
             memcpy(Main.backups->Pages->Image[i].Pixels,Main.backups->Pages->Next->Image[i].Pixels,Main.image_width*Main.image_height);
@@ -416,7 +416,7 @@ void Button_Transform_menu(int btn)
             memcpy(Main.backups->Pages->Image[i].Pixels,Main.backups->Pages->Next->Image[i].Pixels,Main.image_width*Main.image_height);
             Rotate_180_deg_lowlevel(Main.backups->Pages->Image[i].Pixels, Main.image_width, Main.image_height);
           }
-          break;       
+          break;
         case  7 : // Resize
           for (i=0; i<Main.backups->Pages->Nb_layers; i++)
           {

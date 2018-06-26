@@ -203,8 +203,8 @@ static const T_Help_table helptable_help[] =
   HELP_LINK ("Restore brush:       %s",   0x200+BUTTON_BRUSH)
   HELP_LINK ("Flip brush X:        %s",   SPECIAL_FLIP_X)
   HELP_LINK ("Flip brush Y:        %s",   SPECIAL_FLIP_Y)
-  HELP_LINK ("90° brush rotation:  %s",   SPECIAL_ROTATE_90)
-  HELP_LINK ("180° brush rotation: %s",   SPECIAL_ROTATE_180)
+  HELP_LINK ("90\xb0 brush rotation:  %s",   SPECIAL_ROTATE_90)
+  HELP_LINK ("180\xb0 brush rotation: %s",   SPECIAL_ROTATE_180)
   HELP_LINK ("Stretch brush:       %s",   SPECIAL_STRETCH)
   HELP_LINK ("Distort brush:       %s",   SPECIAL_DISTORT)
   HELP_LINK ("Outline brush:       %s",   SPECIAL_OUTLINE)
@@ -456,7 +456,7 @@ static const T_Help_table helptable_credits[] =
   HELP_TEXT ("")
   HELP_BOLD ("                FREEBSD PORT")
   HELP_TEXT ("")
-  HELP_TEXT ("  Jean-Baptiste Berlioz (Tobé)")
+  HELP_TEXT ("  Jean-Baptiste Berlioz (Tob\xe9)")
   HELP_TEXT ("")
   HELP_BOLD ("                OPENBSD PORT")
   HELP_TEXT ("")
@@ -470,7 +470,7 @@ static const T_Help_table helptable_credits[] =
   HELP_BOLD ("               LINUX BINARIES")
   HELP_TEXT ("")
   HELP_TEXT ("  Gentoo : Matteo 'Peach' Pescarin")
-  HELP_TEXT ("  Debian : Gürkan Sengün")
+  HELP_TEXT ("  Debian : G\xfcrkan Seng\xfcn")
   HELP_TEXT ("  Android : pelya")
   HELP_TEXT ("")
   HELP_BOLD ("              WIZ & CAANOO PORT")
@@ -495,7 +495,7 @@ static const T_Help_table helptable_credits[] =
   HELP_TEXT ("  DarkDefende   DawnBringer    El Topo      ")
   HELP_TEXT ("  falenblood    fanickbux      fano         ")
   HELP_TEXT ("  finticemo     fogbot121      freehand     ")
-  HELP_TEXT ("  Frost         Grimmy         Gürkan Sengün")
+  HELP_TEXT ("  Frost         Grimmy         G\xfcrkan Seng\xfcn")
   HELP_TEXT ("  Hatch         HoraK-FDF      iLKke        ")
   HELP_TEXT ("  Iw2evk        jackfrost128   Jamon        ")
   HELP_TEXT ("  keito         kusma          lmemsm       ")
@@ -506,7 +506,7 @@ static const T_Help_table helptable_credits[] =
   HELP_TEXT ("  Ravey1138     richienyhus    rixard       ")
   HELP_TEXT ("  sm4tik        spratek        Surt         ")
   HELP_TEXT ("  tape.yrm      TeeEmCee       tempest      ")
-  HELP_TEXT ("  Timo Kurrpa   titus^Rab      Tobé         ")
+  HELP_TEXT ("  Timo Kurrpa   titus^Rab      Tob\xe9         ")
   HELP_TEXT ("  yakumo2975    00ai99")
   HELP_TEXT ("  ... posted the annoying bug reports.")
   HELP_TEXT ("")
@@ -564,7 +564,7 @@ static const T_Help_table helptable_credits[] =
   HELP_TEXT ("  Acryl         Fred          Prowler")
   HELP_TEXT ("  Alexel        FreddyV       Puznik")
   HELP_TEXT ("  Alias         Frost         Quick")
-  HELP_TEXT ("  Amiral        Gaël(GDC)     Ra")
+  HELP_TEXT ("  Amiral        Ga\xebl(GDC)     Ra")
   HELP_TEXT ("  Arrakis       GainX         Raster")
   HELP_TEXT ("  Avocado       Gandalf       Ravian")
   HELP_TEXT ("  Baloo         Goblin        RedBug")
@@ -575,10 +575,10 @@ static const T_Help_table helptable_credits[] =
   HELP_TEXT ("  BlackAxe      Haplo         Sam")
   HELP_TEXT ("  Bonnie        Hof           SandMan")
   HELP_TEXT ("  Boo           Hornet        Scape")
-  HELP_TEXT ("  Boz           Hulud         Sébastien")
+  HELP_TEXT ("  Boz           Hulud         S\xe9""bastien")
   HELP_TEXT ("  Carine        Java          Shodan")
   HELP_TEXT ("  Chandra       JBT           Skal")
-  HELP_TEXT ("  Cheetah       Jérôme        Skyfire")
+  HELP_TEXT ("  Cheetah       J\xe9r\xf4me        Skyfire")
   HELP_TEXT ("  Chill         Julien(JCA)   Sphair")
   HELP_TEXT ("  Cougar        KalMinDo      Sprocket")
   HELP_TEXT ("  Cremax        KaneWood      Stef")
@@ -793,7 +793,7 @@ static const T_Help_table helptable_adjust[] =
   HELP_TEXT ("")
   HELP_TEXT ("In 'Ratio' mode, you can set 2 numbers for")
   HELP_TEXT ("each dimension, and the resizing factor will")
-  HELP_TEXT ("be of 'new'÷'old'. For example you can use")
+  HELP_TEXT ("be of 'new'\xf7'old'. For example you can use")
   HELP_TEXT ("1:3 to divide the image by three, 2:1 to")
   HELP_TEXT ("double it, and any fraction like 15:16.")
   HELP_TEXT ("")
@@ -810,12 +810,12 @@ static const T_Help_table helptable_adjust[] =
   HELP_TEXT ("")
   HELP_BOLD ("ROTATE")
   HELP_TEXT ("")
-  HELP_TEXT ("-90°: Rotates the image by 90°")
+  HELP_TEXT ("-90\xb0: Rotates the image by 90\xb0")
   HELP_TEXT ("      clockwise.")
   HELP_TEXT ("")
-  HELP_TEXT ("+90°: Rotates the image by 90°")
+  HELP_TEXT ("+90\xb0: Rotates the image by 90\xb0")
   HELP_TEXT ("      counter-clockwise.")
-  HELP_TEXT ("180°: Rotates the image by 180°")
+  HELP_TEXT ("180\xb0: Rotates the image by 180\xb0")
   HELP_TEXT ("")
   HELP_TEXT ("")
 };
@@ -1301,10 +1301,10 @@ static const T_Help_table helptable_brush_fx[] =
   HELP_LINK ("- Y: (Key:%s)",SPECIAL_FLIP_Y)
   HELP_TEXT ("Flip vertically.")
   HELP_TEXT ("")
-  HELP_LINK ("- Rotate by 90°: (Key:%s)",SPECIAL_ROTATE_90)
+  HELP_LINK ("- Rotate by 90\xb0: (Key:%s)",SPECIAL_ROTATE_90)
   HELP_TEXT ("Rotates the brush by an angle of 90 degrees.")
   HELP_TEXT ("")
-  HELP_LINK ("- Rotate by 180°: (Key:%s)",SPECIAL_ROTATE_180)
+  HELP_LINK ("- Rotate by 180\xb0: (Key:%s)",SPECIAL_ROTATE_180)
   HELP_TEXT ("Rotates the brush by an angle of 180")
   HELP_TEXT ("degrees.")
   HELP_TEXT ("")
@@ -2515,14 +2515,14 @@ static const T_Help_table helptable_settings_details[] =
   HELP_TEXT ("window. (Set it to 'no' if you have a slow")
   HELP_TEXT ("computer or if you edit huge pictures)")
   HELP_TEXT ("")
-  HELP_BOLD ("  Right click colorpick")  
+  HELP_BOLD ("  Right click colorpick")
   HELP_TEXT ("This enables a mode where the right mouse")
   HELP_TEXT ("buttons acts as a color picker until")
-  HELP_TEXT ("it's released, and selects Foreground color.")  
-  HELP_TEXT ("This mode prevents you from painting with")  
+  HELP_TEXT ("it's released, and selects Foreground color.")
+  HELP_TEXT ("This mode prevents you from painting with")
   HELP_TEXT ("Background color.")
   HELP_TEXT ("This option is ignored when the Shade,")
-  HELP_TEXT ("Quick-shade, or Tiling mode is used.")    
+  HELP_TEXT ("Quick-shade, or Tiling mode is used.")
   HELP_TEXT ("")
   HELP_TEXT ("  Multi shortcuts")
   HELP_TEXT ("When this setting is disabled, and you")
@@ -2909,7 +2909,7 @@ static const T_Help_table helptable_layertrans[] =
   HELP_TEXT ("")
   HELP_TEXT ("The current Background color becomes the")
   HELP_TEXT ("color considered transparent for the layers.")
-  
+
 };
 static const T_Help_table helptable_layermerge[] =
 {
@@ -3138,7 +3138,7 @@ T_Help_section Help_section[] =
   HELP_TABLE_DECLARATION(helptable_pal_scroll)
   HELP_TABLE_DECLARATION(helptable_color_select)
   // End of buttons list
-  
+
   // NB_BUTTONS+0
   HELP_TABLE_DECLARATION(helptable_settings_details)
   // NB_BUTTONS+1
@@ -3146,5 +3146,5 @@ T_Help_section Help_section[] =
   // NB_BUTTONS+2
   // HELP_TABLE_DECLARATION()
   // ...
-  
+
 };

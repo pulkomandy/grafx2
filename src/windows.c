@@ -1043,7 +1043,7 @@ void Print_filename(void)
 
   // Determine maximum size, in characters
   max_size = 12 + (Screen_width / Menu_factor_X - 320) / 8;
-  
+
   // Erase whole area
   Block(Screen_width-max_size*8*Menu_factor_X,
     Menu_status_Y,Menu_factor_X*max_size*8,Menu_factor_Y<<3,MC_Light);
@@ -1275,7 +1275,7 @@ void Print_counter(short x,short y,const char * str,byte text_color,byte backgro
       case '-':
         char_number=12;
         break;
-      case '±':
+      case '\xb1':
         char_number=13;
         break;
     }

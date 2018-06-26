@@ -259,7 +259,7 @@ byte Rightclick_colorpick(byte cursor_visible)
   if (!Config.Right_click_colorpick)
     return 0;
   if (Mouse_K!=RIGHT_SIDE)
-    return 0;    
+    return 0;
   // In these modes, the Foreground color is ignored,
   // so the RMB should act as normal.
   if (Shade_mode||Quick_shade_mode||Tiling_mode)
@@ -268,20 +268,20 @@ byte Rightclick_colorpick(byte cursor_visible)
   Colorpicker_color=-1;
   Colorpicker_X=-1;
   Colorpicker_Y=-1;
-  
+
   if (cursor_visible)
     Hide_cursor();
   Start_operation_stack(OPERATION_RMB_COLORPICK);
-  
+
   Init_start_operation();
-  
+
   // Just an indicator to go to next step
   Operation_push(1);
   Rightclick_colorpick_2_1();
-  
+
   if (cursor_visible)
     Display_cursor();
-    
+
   return 1;
 }
 
@@ -333,13 +333,13 @@ void Rightclick_colorpick_0_1(void)
   short dummy;
 
   Hide_cursor();
-  
+
   Operation_pop(&dummy);
   Set_fore_color(Colorpicker_color);
-  
+
   // Restore previous operation
   Start_operation_stack(Operation_before_interrupt);
-  
+
   // Erase the color block which shows the picked color
   if (Operation_before_interrupt!=OPERATION_REPLACE)
     if ( (Mouse_Y<Menu_Y) && (Menu_is_visible) &&
@@ -347,7 +347,7 @@ void Rightclick_colorpick_0_1(void)
       Print_in_menu("X:       Y:             ",0);
 
   Print_coordinates();
-  
+
   Display_cursor();
 }
 
@@ -490,7 +490,7 @@ void Brush_0_5(void)
     Brush_offset_X=(Brush_offset_X/Snap_width)*Snap_width;
     Brush_offset_Y=(Brush_offset_Y/Snap_height)*Snap_height;
   }
-  
+
   End_of_modification();
   Return_to_draw_mode();
 }
@@ -618,7 +618,7 @@ void Polybrush_12_8(void)
       Brush_offset_X=(Brush_offset_X/Snap_width)*Snap_width;
       Brush_offset_Y=(Brush_offset_Y/Snap_height)*Snap_height;
     }
-    
+
     Return_to_draw_mode();
     Display_cursor();
   }
@@ -926,7 +926,7 @@ void Rotate_brush_12_0(void)
     Operation_push(1); // State précédent
 
     if ((Config.Coords_rel) && (Menu_is_visible))
-      Print_in_menu("Angle:   0°    ",0);
+      Print_in_menu("Angle:   0\xb0    ",0);
   }
   else
   {
@@ -995,7 +995,7 @@ void Rotate_brush_1_5(void)
     Operation_push(cursor_x);
     Operation_push(cursor_y);
   }
-  
+
 
   Operation_push(cursor_x);
   Operation_push(cursor_y);
@@ -1023,7 +1023,7 @@ void Rotate_brush_0_5(void)
   double angle=0.0;
   int dx,dy;
   short cursor_x, cursor_y;
-  
+
 
   Operation_pop(&prev_state);
   Operation_pop(&old_y);
@@ -1188,32 +1188,32 @@ void Distort_brush_1_0(void)
   Init_start_operation();
   Paintbrush_hidden=1;
   Hide_cursor();
-  
+
   // Top left angle
   x_pos=Paintbrush_X-Brush_offset_X;
   y_pos=Paintbrush_Y-Brush_offset_Y;
   Draw_stretch_spot(x_pos,y_pos);
   Operation_push(x_pos);
   Operation_push(y_pos);
-  
+
   // Top right angle
   x_pos+=Brush_width;
   Draw_stretch_spot(x_pos,y_pos);
   Operation_push(x_pos);
   Operation_push(y_pos);
-  
+
   // Bottom right angle
   y_pos+=Brush_height;
   Draw_stretch_spot(x_pos,y_pos);
   Operation_push(x_pos);
   Operation_push(y_pos);
-  
+
   // Bottom left angle
   x_pos-=Brush_width;
   Draw_stretch_spot(x_pos,y_pos);
   Operation_push(x_pos);
   Operation_push(y_pos);
-  
+
   Distort_brush_preview(
     Operation_stack[1],
     Operation_stack[2],
@@ -1262,13 +1262,13 @@ void Distort_brush_1_8(void)
       best_distance=distance;
     }
   }
-  
+
   for (i=0;i<4;i++)
   {
     Operation_push(x[i]);
     Operation_push(y[i]);
   }
-  
+
   if (best_spot>-1)
   {
     Operation_push(best_spot);
@@ -1301,11 +1301,11 @@ void Distort_brush_1_9(void)
     Operation_pop(&y[i]);
     Operation_pop(&x[i]);
   }
-  
+
   if (Paintbrush_X!=x[selected_corner] || Paintbrush_Y!=y[selected_corner])
-  {  
+  {
     Hide_cursor();
-    
+
     // Easiest refresh mode: make no assumptions on how the brush was
     // displayed before.
     Display_all_screen();
@@ -1319,7 +1319,7 @@ void Distort_brush_1_9(void)
     Distort_brush_preview(x[0],y[0],x[1],y[1],x[2],y[2],x[3],y[3]);
 
     Display_cursor();
-    
+
     if ( (Config.Coords_rel) && (Menu_is_visible) )
     {
         Print_in_menu("X:       Y:             ",0);
@@ -1327,7 +1327,7 @@ void Distort_brush_1_9(void)
     }
     Update_rect(0,0,Screen_width,Menu_Y);
   }
-  
+
   // Push back all arguments
   for (i=0;i<4;i++)
   {
@@ -1348,7 +1348,7 @@ void Distort_brush_0_9(void)
 {
   short selected_corner;
   Operation_pop(&selected_corner);
-  
+
 }
 
 void Distort_brush_2_0(void)
@@ -1390,10 +1390,10 @@ void Distort_brush_2_8(void)
     Operation_pop(&x[i]);
   }
   Distort_brush(x[0],y[0],x[1],y[1],x[2],y[2],x[3],y[3]);
-  
+
   Paintbrush_hidden=0;
   Display_all_screen();
-  
+
   Return_to_draw_mode();
 }
 
