@@ -1924,6 +1924,9 @@ static void Set_video_mode(short  width,
                            word   fullscreen)
 {
   byte supported = 0;
+#if defined(USE_SDL2)
+  SDL_DisplayMode dm;
+#endif
 
   if (Nb_video_modes >= MAX_VIDEO_MODES-1)
   {
@@ -1935,12 +1938,15 @@ static void Set_video_mode(short  width,
 #if defined(USE_SDL)
   else if (SDL_VideoModeOK(width, height, 8, SDL_FULLSCREEN))
     supported = 1; // supported
-#endif
-  else
-  {
-    // Non supporte : on ne le prend pas
-    return;
+#elif defined(USE_SDL2)
+  else if (SDL_GetDisplayMode(0, mode, &dm) == 0) {
+    if (width == dm.w && height == dm.h)
+      supported = 1;
   }
+#endif
+
+  if (!supported) // Not supported : skip this mode
+    return;
 
   Video_mode[Nb_video_modes].Width      = width;
   Video_mode[Nb_video_modes].Height     = height;
@@ -2082,10 +2088,21 @@ void Set_all_video_modes(void)
 #elif defined(USE_SDL2)
   {
     SDL_DisplayMode dm;
-    if (SDL_GetDesktopDisplayMode(0, &dm) == 0)
+    int num_modes, mode;
+    int display = 0;
+
+
+    num_modes = SDL_GetNumDisplayModes(display);
+    for (mode = num_modes; mode >= 0; mode--) // reverse order. from small resolution to big resolution
+    {
+      if (SDL_GetDisplayMode(display, mode, &dm) == 0)
+        Set_video_mode(dm.w, dm.h, mode, 1);
+    }
+
+    if (SDL_GetDesktopDisplayMode(display, &dm) == 0)
     {
       // Set the native desktop video mode
-      Set_video_mode(dm.w, dm.h, 0, 1);
+      Set_video_mode(dm.w, dm.h, num_modes + 1, 1);
     }
   }
 #elif defined(WIN32)

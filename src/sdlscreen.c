@@ -151,8 +151,11 @@ void GFX2_Set_mode(int *width, int *height, int fullscreen)
     SDL_SetWindowIcon(Window_SDL, icon);
     Renderer_SDL = SDL_CreateRenderer(Window_SDL, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
   }
-  //else
-  //  SDL_SetWindowSize(Window_SDL, *width, *height);
+  else
+  {
+    SDL_SetWindowSize(Window_SDL, *width, *height);
+    SDL_SetWindowFullscreen(Window_SDL, fullscreen?SDL_WINDOW_FULLSCREEN:0);
+  }
   //SDL_GetWindowSize(Window_SDL, width, height);
   if (Texture_SDL != NULL)
     SDL_DestroyTexture(Texture_SDL);
@@ -199,7 +202,13 @@ static void GFX2_UpdateRect(int x, int y, int width, int height)
     source_rect.h = height;
   }
 
-  if  (RGBcopy == NULL)
+  if (RGBcopy != NULL && (Screen_SDL->w > RGBcopy->w || Screen_SDL->h > RGBcopy->h))
+  {
+    SDL_FreeSurface(RGBcopy);
+    RGBcopy = NULL;
+  }
+
+  if (RGBcopy == NULL)
   {
     RGBcopy = SDL_CreateRGBSurface(0,
     Screen_SDL->w, Screen_SDL->h,
