@@ -1,8 +1,12 @@
+#ifdef _MSC_VER
 #include <VerRsrc.h>
+#else
+#define VS_FF_DEBUG 0x00000001L
+#endif
 
 1 VERSIONINFO
-FILEVERSION     2,5,0,1943
-PRODUCTVERSION  2,5,0,1943
+FILEVERSION     2,5,0,2047
+PRODUCTVERSION  2,5,0,2047
 FILEFLAGSMASK   VS_FF_DEBUG
 #ifdef DEBUG
 FILEFLAGS       VS_FF_DEBUG
@@ -16,12 +20,12 @@ BEGIN
     BEGIN
       VALUE "CompanyName", "The GrafX2 Team"
       VALUE "FileDescription", "The ultimate 256-color painting programm"
-      VALUE "FileVersion", "2.5.1943"
+      VALUE "FileVersion", "2.5.2047"
       VALUE "InternalName", "grafx2"
       VALUE "LegalCopyright", "(c) 2007-2018 The GrafX2 Team, (c) 1996-2001 Sunset Design"
       VALUE "OriginalFilename", "grafx2.exe"
       VALUE "ProductName", "GrafX2"
-      VALUE "ProductVersion", "2.5.1943"
+      VALUE "ProductVersion", "2.5.2047"
     END
   END
   BLOCK "VarFileInfo"

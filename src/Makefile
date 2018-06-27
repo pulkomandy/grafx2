@@ -42,7 +42,7 @@ ifeq (true,$(shell git rev-parse --is-inside-work-tree))
     GIT_BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
   endif
   ifneq (master,$(GIT_BRANCH))
-    GIT_REVISION := "$(GIT_REVISION)-$(GIT_BRANCH)"
+    GIT_REVISION := $(GIT_REVISION)-$(GIT_BRANCH)
   endif
 else
   # outside git repository : get version stored in version.c
@@ -824,8 +824,11 @@ depend :
 	$(CC) -MM *.c | sed 's:^[^ ]:$$(OBJDIR)/&:' > Makefile.dep
 
 # Link the icons to the program under windows
-$(OBJDIR)/winres.o : gfx2.ico
-	echo "1 ICON \"gfx2.ico\"" | $(WINDRES) -o $(OBJDIR)/winres.o
+$(OBJDIR)/winres.o : gfx2.rc gfx2.ico $(REVISION_CACHE)
+	sed -e 's/\(VERSION [ ]*\([0-9]*,\)\{3\}\)\(.*\)/\1$(firstword $(subst -, ,$(GIT_REVISION)))/' \
+	    -e 's/\(Version", "\([0-9]*\.\)\{2\}\)\(.*\)"/\1$(GIT_REVISION)"/' $< > $<.tmp
+	if ! diff -q -i $< $<.tmp ; then mv $<.tmp $< ; else rm $<.tmp ; fi
+	$(WINDRES) -i $< -o $(OBJDIR)/winres.o
 
 # Compile the C++ file needed in Haiku to use the API
 $(OBJDIR)/haiku.o : haiku.cpp
