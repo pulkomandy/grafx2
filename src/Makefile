@@ -23,12 +23,12 @@
 #  along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 
 # Overridable defaults
-  prefix = /usr/local
-  exec_prefix = $(prefix)
+  PREFIX ?= /usr/local
+  exec_prefix = $(PREFIX)
   bindir = $(exec_prefix)/bin
-  datarootdir = $(prefix)/share
+  datarootdir = $(PREFIX)/share
   datadir = $(datarootdir)
-  pixmapdir = $(datarootdir)/icons
+  pixmapdir = $(datarootdir)/icons/hicolor/scalable/apps
 
 # Compile with OPTIM=0 to disable gcc optimizations, to enable debug.
   STRIP = strip
@@ -325,8 +325,8 @@ endif
     STACK = stack
     FIX_FLAGS = flags
     FCLOPT = 
-    COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -DNO_INLINE_MATH -O$(OPTIM) -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $(JOYCOPT) $(LUACOPT)
-    LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) $(LAYERLOPT)
+    COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -DNO_INLINE_MATH -O$(OPTIM) -I$(PREFIX)/include `$(PREFIX)/bin/libpng12-config --cflags` `$(PREFIX)/bin/sdl-config --cflags` $(JOYCOPT) $(LUACOPT)
+    LOPT = -static -m68020-60 -lSDL_image `$(PREFIX)/bin/sdl-config --libs` -L$(PREFIX)/lib -ltiff -ljpeg `$(PREFIX)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) $(LAYERLOPT)
   else
   ifeq ($(PLATFORM),syllable) #11
     #Syllable
@@ -449,8 +449,8 @@ endif
         STACK = m68k-atari-mint-stack
         FIX_FLAGS = m68k-atari-mint-flags
         FCLOPT = 
-        COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -ffast-math -O$(OPTIM) -I$(prefix)/include `$(prefix)/bin/libpng12-config --cflags` `$(prefix)/bin/sdl-config --cflags` $(JOYCOPT) $(LUACOPT)
-        LOPT = -static -m68020-60 -lSDL_image `$(prefix)/bin/sdl-config --libs` -L$(prefix)/lib -ltiff -ljpeg `$(prefix)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) -lm $(LAYERLOPT) -Wl,--stack,8k 
+        COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -ffast-math -O$(OPTIM) -I$(PREFIX)/include `$(PREFIX)/bin/libpng12-config --cflags` `$(PREFIX)/bin/sdl-config --cflags` $(JOYCOPT) $(LUACOPT)
+        LOPT = -static -m68020-60 -lSDL_image `$(PREFIX)/bin/sdl-config --libs` -L$(PREFIX)/lib -ltiff -ljpeg `$(PREFIX)/bin/libpng12-config --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) -lm $(LAYERLOPT) -Wl,--stack,8k 
       else
 
         # Compiles a regular linux executable for the native platform
@@ -506,7 +506,7 @@ ifndef ($(ATARICROSS,1))
    TTFLABEL = -nottf
  else
    TTFCOPT = 
-   TTFLOPT = -L$(prefix)/lib -lSDL_ttf $(FCLOPT)
+   TTFLOPT = -L$(PREFIX)/lib -lSDL_ttf $(FCLOPT)
    TTFLIBS = bin/libfreetype-6.dll bin/SDL_ttf.dll
    TTFLABEL = 
  endif
@@ -518,7 +518,7 @@ else
    TTFLABEL = -nottf
  else
    TTFCOPT = 
-   TTFLOPT = -L$(prefix)/lib -lSDL_ttf $(FCLOPT)
+   TTFLOPT = -L$(PREFIX)/lib -lSDL_ttf $(FCLOPT)
    TTFLIBS =  
    TTFLABEL = 
  endif
@@ -805,6 +805,7 @@ install : $(BIN)
 	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture/others-8bit || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture/others-8bit
 	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture/others-8bit/lib || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture/others-8bit/lib
 	test -d $(DESTDIR)$(datadir)/applications || $(MKDIR) $(DESTDIR)$(datadir)/applications
+	test -d $(DESTDIR)$(datadir)/metainfo || $(MKDIR) $(DESTDIR)$(datadir)/metainfo
 	test -d $(DESTDIR)$(pixmapdir) || $(MKDIR) $(DESTDIR)$(pixmapdir)
 	
 	# Copy files
@@ -816,6 +817,7 @@ install : $(BIN)
 	for f in $(SCRIPT_FILES:../share/%=%); do cp "../share/$$f" "$(DESTDIR)$(datadir)/$$f" ; done
 	# Icon and desktop file for debian
 	$(CP) ../misc/unix/grafx2.desktop $(DESTDIR)$(datadir)/applications/
+	$(CP) ../misc/unix/grafx2.appdata.xml $(DESTDIR)$(datadir)/metainfo/
 	$(CP) ../misc/unix/grafx2.xpm $(DESTDIR)$(pixmapdir)
 	$(CP) ../share/icons/grafx2.svg $(DESTDIR)$(pixmapdir)
 	@echo Install complete
@@ -842,6 +844,7 @@ uninstall :
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2),$(RMDIR) $(DESTDIR)$(datadir)/grafx2,)
 	# Icon and desktop file for debian
 	$(DELCOMMAND) $(DESTDIR)$(datadir)/applications/grafx2.desktop
+	$(DELCOMMAND) $(DESTDIR)$(datadir)/metainfo/grafx2.appdata.xml
 	$(DELCOMMAND) $(DESTDIR)$(pixmapdir)/grafx2.xpm
 	$(DELCOMMAND) $(DESTDIR)$(pixmapdir)/grafx2.svg
 	@echo Uninstall complete
@@ -852,4 +855,3 @@ valgrind: $(BIN)
 	valgrind --suppressions=../valgrind.grafx2.suppr --leak-check=full --show-leak-kinds=all --num-callers=20 $(BIN)
 
 -include Makefile.dep
-
