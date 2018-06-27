@@ -1,4 +1,4 @@
-$(OBJDIR)/SFont.o: SFont.c
+$(OBJDIR)/SFont.o: SFont.c SFont.h gfx2surface.h struct.h const.h
 $(OBJDIR)/brush.o: brush.c global.h struct.h const.h graph.h misc.h errors.h \
  windows.h screen.h brush.h tiles.h
 $(OBJDIR)/brush_ops.o: brush_ops.c brush.h struct.h const.h buttons.h loadsave.h \
@@ -37,8 +37,8 @@ $(OBJDIR)/help.o: help.c const.h struct.h global.h misc.h engine.h helpfile.h \
 $(OBJDIR)/hotkeys.o: hotkeys.c struct.h const.h global.h hotkeys.h keycodes.h
 $(OBJDIR)/init.o: init.c buttons.h struct.h const.h loadsave.h gfx2surface.h \
  errors.h global.h graph.h init.h io.h factory.h help.h hotkeys.h \
- keyboard.h misc.h mountlist.h operatio.h palette.h setup.h transform.h \
- windows.h layers.h special.h
+ keyboard.h misc.h mountlist.h operatio.h palette.h screen.h setup.h \
+ transform.h windows.h layers.h special.h
 $(OBJDIR)/input.o: input.c global.h struct.h const.h keyboard.h screen.h windows.h \
  errors.h misc.h buttons.h loadsave.h gfx2surface.h input.h keycodes.h
 $(OBJDIR)/io.o: io.c struct.h const.h io.h realpath.h unicode.h global.h
@@ -56,7 +56,7 @@ $(OBJDIR)/loadsave.o: loadsave.c buttons.h struct.h const.h loadsave.h \
 $(OBJDIR)/main.o: main.c const.h struct.h global.h graph.h misc.h init.h buttons.h \
  loadsave.h gfx2surface.h engine.h pages.h screen.h errors.h readini.h \
  saveini.h io.h text.h setup.h windows.h brush.h palette.h realpath.h \
- input.h keycodes.h help.h filesel.h win32screen.h
+ input.h keycodes.h help.h filesel.h
 $(OBJDIR)/misc.o: misc.c struct.h const.h global.h errors.h buttons.h loadsave.h \
  gfx2surface.h engine.h misc.h keyboard.h screen.h windows.h palette.h \
  input.h keycodes.h graph.h pages.h
@@ -111,7 +111,7 @@ $(OBJDIR)/shade.o: shade.c global.h struct.h const.h graph.h engine.h errors.h \
 $(OBJDIR)/special.o: special.c const.h struct.h global.h graph.h engine.h windows.h \
  special.h pages.h misc.h buttons.h loadsave.h gfx2surface.h
 $(OBJDIR)/text.o: text.c struct.h const.h global.h io.h errors.h windows.h misc.h \
- setup.h
+ setup.h loadsave.h gfx2surface.h SFont.h
 $(OBJDIR)/tiles.o: tiles.c struct.h const.h global.h graph.h screen.h engine.h \
  windows.h input.h keycodes.h misc.h tiles.h
 $(OBJDIR)/transform.o: transform.c global.h struct.h const.h transform.h engine.h \
@@ -119,8 +119,7 @@ $(OBJDIR)/transform.o: transform.c global.h struct.h const.h transform.h engine.
  loadsave.h gfx2surface.h pages.h tiles.h
 $(OBJDIR)/unicode.o: unicode.c unicode.h struct.h const.h
 $(OBJDIR)/version.o: version.c
-$(OBJDIR)/win32screen.o: win32screen.c screen.h struct.h const.h global.h errors.h \
- windows.h input.h keycodes.h keyboard.h
 $(OBJDIR)/windows.o: windows.c windows.h struct.h const.h engine.h errors.h \
  global.h graph.h input.h keycodes.h misc.h op_c.h colorred.h readline.h \
  screen.h palette.h unicode.h keyboard.h
+$(OBJDIR)/x11screen.o: x11screen.c screen.h struct.h const.h global.h gfx2surface.h
