@@ -5,8 +5,8 @@
 #endif
 
 1 VERSIONINFO
-FILEVERSION     2,5,0,2047
-PRODUCTVERSION  2,5,0,2047
+FILEVERSION     2,6,0,2058
+PRODUCTVERSION  2,6,0,2058
 FILEFLAGSMASK   VS_FF_DEBUG
 #ifdef DEBUG
 FILEFLAGS       VS_FF_DEBUG
@@ -20,12 +20,12 @@ BEGIN
     BEGIN
       VALUE "CompanyName", "The GrafX2 Team"
       VALUE "FileDescription", "The ultimate 256-color painting programm"
-      VALUE "FileVersion", "2.5.2047"
+      VALUE "FileVersion", "2.6wip2058-rc"
       VALUE "InternalName", "grafx2"
       VALUE "LegalCopyright", "(c) 2007-2018 The GrafX2 Team, (c) 1996-2001 Sunset Design"
       VALUE "OriginalFilename", "grafx2.exe"
       VALUE "ProductName", "GrafX2"
-      VALUE "ProductVersion", "2.5.2047"
+      VALUE "ProductVersion", "2.6wip2058-rc"
     END
   END
   BLOCK "VarFileInfo"

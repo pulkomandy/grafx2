@@ -55,6 +55,9 @@ endif
 ifneq (,$(LABEL))
   LABEL_CACHE = .label.cache
   RES := $(shell if [ ! -f $(LABEL_CACHE) ] || [ "`cat $(LABEL_CACHE)`" != "$(LABEL)" ] ; then echo "$(LABEL)" > $(LABEL_CACHE) ; fi )
+else
+  # get label stored in pversion.c
+  LABEL := $(shell cat pversion.c | cut -f 2 -d '"')
 endif
 
   CFLAGS_CACHE = $(OBJDIR)/.cflags.cache
@@ -786,14 +789,12 @@ endif
 version.c:	$(REVISION_CACHE)
 	echo "const char SVN_revision[]=\"$(GIT_REVISION)\";" > version.c
 
-ifneq ($(LABEL),)
 pversion.c:	$(LABEL_CACHE)
 	echo "const char Program_version[]=\"$(LABEL)\";" > pversion.c
-endif
 
 $(OBJDIR)/versiontag: pversion.c $(REVISION_CACHE)
 	$(if $(wildcard $(OBJDIR)),,$(MKDIR) $(OBJDIR))
-	echo `sed "s/.*=\"\(.*\)\";/\1/" pversion.c`.$(GIT_REVISION) | tr " :" "_-" | sed -e "s/\([wW][iI][pP]\)\\./\1/" > $(OBJDIR)/versiontag
+	echo "$(subst wip.,wip,$(LABEL).$(GIT_REVISION))" > $@
 
 RES := $(shell $(MKDIR) $(OBJDIR) ; if [ ! -f $(CFLAGS_CACHE) ] || [ "`cat $(CFLAGS_CACHE)`" != "$(COPT) $(CFLAGS)" ] ; then echo "$(COPT) $(CFLAGS)" > $(CFLAGS_CACHE) ; fi )
 
@@ -823,10 +824,12 @@ $(OBJDIR)/%.o : %.m
 depend :
 	$(CC) -MM *.c | sed 's:^[^ ]:$$(OBJDIR)/&:' > Makefile.dep
 
+comma := ,
+
 # Link the icons to the program under windows
-$(OBJDIR)/winres.o : gfx2.rc gfx2.ico $(REVISION_CACHE)
-	sed -e 's/\(VERSION [ ]*\([0-9]*,\)\{3\}\)\(.*\)/\1$(firstword $(subst -, ,$(GIT_REVISION)))/' \
-	    -e 's/\(Version", "\([0-9]*\.\)\{2\}\)\(.*\)"/\1$(GIT_REVISION)"/' $< > $<.tmp
+$(OBJDIR)/winres.o : gfx2.rc gfx2.ico $(REVISION_CACHE) $(LABEL_CACHE)
+	sed -e 's/\(VERSION [ ]*\)\(.*\)/\1$(subst .,$(comma),$(subst wip,,$(LABEL))),0,$(firstword $(subst -, ,$(GIT_REVISION)))/' \
+	    -e 's/\(Version", "\)\(.*\)"/\1$(subst wip.,wip,$(LABEL).$(GIT_REVISION))"/' $< > $<.tmp
 	if ! diff -q -i $< $<.tmp ; then mv $<.tmp $< ; else rm $<.tmp ; fi
 	$(WINDRES) -i $< -o $(OBJDIR)/winres.o
 
