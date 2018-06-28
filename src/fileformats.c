@@ -61,6 +61,16 @@
 #endif
 #endif
 
+#if !defined(WIN32) && !defined(USE_SDL) && !defined(USE_SDL2)
+#if defined(__macosx__)
+#include <machine/endian.h>
+#elif defined(__FreeBSD__)
+#include <sys/endian.h>
+#else
+#include <endian.h>
+#endif
+#endif
+
 #include "errors.h"
 #include "global.h"
 #include "loadsave.h"
@@ -1798,10 +1808,17 @@ void Load_IFF(T_IO_Context * context)
             PCHG_palettes = prev_pal;
 
             lineBitMask = (dword *)PCHGData;
-            #if SDL_BYTEORDER != SDL_BIG_ENDIAN
+#if defined(SDL_BYTEORDER) && (SDL_BYTEORDER != SDL_BIG_ENDIAN)
             for (i = 0 ; i < ((LineCount + 31) >> 5); i++)
               lineBitMask[i] = SDL_Swap32(lineBitMask[i]);
-            #endif
+#elif defined(BYTE_ORDER) && (BYTE_ORDER != BIG_ENDIAN)
+            for (i = 0 ; i < ((LineCount + 31) >> 5); i++)
+              lineBitMask[i] = be32toh(lineBitMask[i]);
+#elif defined(WIN32)
+            // assume WIN32 is little endian
+            for (i = 0 ; i < ((LineCount + 31) >> 5); i++)
+              lineBitMask[i] = __builtin_bswap32(lineBitMask[i]);
+#endif
             data = (const byte *)PCHGData + ((LineCount + 31) >> 5) * 4;
             for (y_pos = 0 ; y_pos < LineCount; y_pos++)
             {
@@ -3068,21 +3085,25 @@ static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int co
                 break;
               case 32:
                 {
-                #if SDL_BYTEORDER != SDL_LIL_ENDIAN
+#if defined(SDL_BYTEORDER) && (SDL_BYTEORDER != SDL_LIL_ENDIAN)
                   dword pixel = SDL_Swap32(((dword *)buffer)[x_pos]);
-                #else
+#elif defined(BYTEORDER)
+                  dword pixel = le32toh(((dword *)buffer)[x_pos]);
+#else // default to little endian
                   dword pixel = ((dword *)buffer)[x_pos];
-                #endif
+#endif
                   Set_pixel_24b(context, x_pos,target_y,Bitmap_mask(pixel,mask[0]),Bitmap_mask(pixel,mask[1]),Bitmap_mask(pixel,mask[2]));
                 }
                 break;
               case 16:
                 {
-                #if SDL_BYTEORDER != SDL_LIL_ENDIAN
+#if defined(SDL_BYTEORDER) && (SDL_BYTEORDER != SDL_LIL_ENDIAN)
                   word pixel = SDL_Swap16(((word *)buffer)[x_pos]);
-                #else
+#elif defined(BYTEORDER)
+                  word pixel = le16toh(((word *)buffer)[x_pos]);
+#else // default to little endian
                   word pixel = ((word *)buffer)[x_pos];
-                #endif
+#endif
                   Set_pixel_24b(context, x_pos,target_y,Bitmap_mask(pixel,mask[0]),Bitmap_mask(pixel,mask[1]),Bitmap_mask(pixel,mask[2]));
                 }
                 break;

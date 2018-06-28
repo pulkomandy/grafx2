@@ -125,7 +125,7 @@ static int skip_padding(FILE *file, int max_chars)
       return chars_read;
     chars_read++;
   } while (b == ' ');
-  
+
   fseek(file, -1, SEEK_CUR);
   return chars_read;
 }
@@ -218,7 +218,7 @@ Save_GPL (T_IO_Context * context)
     fprintf (file, "GIMP Palette\n");
     fprintf (file, "Name: %s\n", context->File_name);
     // TODO: use actual columns value
-    fprintf (file, "Columns: %d\n#\n", 16); 
+    fprintf (file, "Columns: %d\n#\n", 16);
 
     for (i = 0; i < 256 && File_error==0; i++)
     {
@@ -227,7 +227,7 @@ Save_GPL (T_IO_Context * context)
         File_error=1;
     }
     fclose(file);
-    
+
     if (File_error)
       Remove_file(context);
   }
@@ -278,7 +278,7 @@ void Load_PAL(T_IO_Context * context)
       {
         int i, n, r, g, b;
         fscanf(file, "%d",&n);
-        if(n != 100) 
+        if(n != 100)
         {
           File_error = 2;
           fclose(file);
@@ -321,7 +321,7 @@ void Load_PAL(T_IO_Context * context)
       } else
         File_error = 2;
     }
-    
+
     fclose(file);
   }
   else
@@ -342,9 +342,9 @@ void Save_PAL(T_IO_Context * context)
   if ((file=Open_file_write(context)) != NULL)
   {
     int i;
-    
+
     setvbuf(file, NULL, _IOFBF, 64*1024);
-    
+
     if (fputs("JASC-PAL\r\n0100\r\n256\r\n", file)==EOF)
       File_error=1;
     for (i = 0; i < 256 && File_error==0; i++)
@@ -352,9 +352,9 @@ void Save_PAL(T_IO_Context * context)
       if (fprintf(file,"%d %d %d\r\n",context->Palette[i].R, context->Palette[i].G, context->Palette[i].B) <= 0)
         File_error=1;
     }
-    
+
     fclose(file);
-    
+
     if (File_error)
       Remove_file(context);
   }
@@ -425,7 +425,7 @@ void Load_PKM(T_IO_Context * context)
   long  file_size;
 
   File_error=0;
-  
+
   if ((file=Open_file_read(context)))
   {
     file_size=File_length_file(file);
@@ -535,7 +535,7 @@ void Load_PKM(T_IO_Context * context)
         Pre_load(context, header.Width,header.Height,file_size,FORMAT_PKM,PIXEL_SIMPLE,0);
         if (File_error==0)
         {
-          
+
           context->Width=header.Width;
           context->Height=header.Height;
           image_size=(dword)(context->Width*context->Height);
@@ -551,7 +551,7 @@ void Load_PKM(T_IO_Context * context)
           // Boucle de décompression:
           while ( (Compteur_de_pixels<image_size) && (Compteur_de_donnees_packees<Taille_pack) && (!File_error) )
           {
-            if(Read_byte(file, &temp_byte)!=1) 
+            if(Read_byte(file, &temp_byte)!=1)
             {
               File_error=2;
               break;
@@ -694,7 +694,7 @@ void Save_PKM(T_IO_Context * context)
   if ((file=Open_file_write(context)))
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
-    
+
     // Ecriture du header
     if (Write_bytes(file,&header.Ident,3) &&
         Write_byte(file,header.Method) &&
@@ -849,13 +849,13 @@ void Test_CEL(T_IO_Context * context, FILE * file)
   {
       //   Vu que ce header n'a pas de signature, il va falloir tester la
       // cohérence de la dimension de l'image avec celle du fichier.
-      
+
       size=file_size-4;
       if ( (!size) || ( (((header1.Width+1)>>1)*header1.Height)!=size ) )
       {
         // Tentative de reconnaissance de la signature des nouveaux fichiers
 
-        fseek(file,0,SEEK_SET);        
+        fseek(file,0,SEEK_SET);
         if (Read_bytes(file,&header2.Signature,4) &&
             !memcmp(header2.Signature,"KiSS",4) &&
             Read_byte(file,&header2.Kind) &&
@@ -1030,7 +1030,7 @@ void Save_CEL(T_IO_Context * context)
   if ((file=Open_file_write(context)))
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
-    
+
     // On regarde si des couleurs >16 sont utilisées dans l'image
     for (x_pos=16;((x_pos<256) && (!color_usage[x_pos]));x_pos++);
 
@@ -1463,10 +1463,9 @@ void PI1_16p_to_8b(byte * src,byte * dest)
 
 //// DECODAGE de la PALETTE ////
 
-void PI1_decode_palette(byte * src,byte * palette)
+static void PI1_decode_palette(const byte * src, T_Components * palette)
 {
   int i;  // Numéro de la couleur traitée
-  int ip; // index dans la palette
   word w; // Word contenant le code
 
   // Schéma d'un word =
@@ -1474,37 +1473,23 @@ void PI1_decode_palette(byte * src,byte * palette)
   //    Low        High
   // VVVV RRRR | 0000 BBBB
   // 0321 0321 |      0321
-  
-  ip=0;
+
   for (i=0;i<16;i++)
   {
-    #if SDL_BYTEORDER == SDL_LIL_ENDIAN 
-   
-      w=(((word)src[(i*2)+1]<<8) | (src[(i*2)+0]));
-    
-      // Traitement des couleurs rouge, verte et bleue:
-      palette[ip++]=(((w & 0x0007) <<  1) | ((w & 0x0008) >>  3)) << 4;
-      palette[ip++]=(((w & 0x7000) >> 11) | ((w & 0x8000) >> 15)) << 4;
-      palette[ip++]=(((w & 0x0700) >>  7) | ((w & 0x0800) >> 11)) << 4;
-   
-    #else
-      w=(((word)src[(i*2+1)])|(((word)src[(i*2)])<<8));
-    
-      palette[ip++] = (((w & 0x0700)>>7) | ((w & 0x0800) >> 7))<<4 ;
-      palette[ip++]=(((w & 0x0070)>>3) | ((w & 0x0080) >> 3))<<4 ;
-      palette[ip++] = (((w & 0x0007)<<1) | ((w & 0x0008)))<<4 ;
-    #endif
-    
-    
-  } 
+    w = (word)src[0] << 8 | (word)src[1];
+    src += 2;
+
+    palette[i].R = (((w & 0x0700)>>7) | ((w & 0x0800) >> 11)) * 0x11 ;
+    palette[i].G = (((w & 0x0070)>>3) | ((w & 0x0080) >> 7)) * 0x11 ;
+    palette[i].B = (((w & 0x0007)<<1) | ((w & 0x0008) >> 3)) * 0x11 ;
+  }
 }
 
 //// CODAGE de la PALETTE ////
 
-void PI1_code_palette(byte * palette,byte * dest)
+void PI1_code_palette(const T_Components * palette, byte * dest)
 {
   int i;  // Numéro de la couleur traitée
-  int ip; // index dans la palette
   word w; // Word contenant le code
 
   // Schéma d'un word =
@@ -1512,48 +1497,35 @@ void PI1_code_palette(byte * palette,byte * dest)
   // Low        High
   // VVVV RRRR | 0000 BBBB
   // 0321 0321 |      0321
-    
-  ip=0;
+
   for (i=0;i<16;i++)
   {
-    #if SDL_BYTEORDER == SDL_LIL_ENDIAN
-   
-    // Traitement des couleurs rouge, verte et bleue:
-    w =(((word)(palette[ip]>>2) & 0x38) >> 3) | (((word)(palette[ip]>>2) & 0x04) <<  1); ip++;
-    w|=(((word)(palette[ip]>>2) & 0x38) << 9) | (((word)(palette[ip]>>2) & 0x04) << 13); ip++;
-    w|=(((word)(palette[ip]>>2) & 0x38) << 5) | (((word)(palette[ip]>>2) & 0x04) <<  9); ip++;
-    
-    dest[(i*2)+0]=w & 0x00FF;
-    dest[(i*2)+1]=(w>>8);
-    #else
-   
-     w=(((word)(palette[ip]<<3))&0x0700);ip++;
-     w|=(((word)(palette[ip]>>1))&0x0070);ip++;
-     w|=(((word)(palette[ip]>>5))&0x0007);ip++;
- 
-    dest[(i*2)+1]=w & 0x00FF;
-    dest[(i*2)+0]=(w>>8);
-    #endif
+    w  = ((word)(palette[i].R & 0xe0) << 3) | ((word)(palette[i].R & 0x10) << 7);
+    w |= ((word)(palette[i].G & 0xe0) >> 1) | ((word)(palette[i].G & 0x10) << 3);
+    w |= ((word)(palette[i].B & 0xe0) >> 5) | ((word)(palette[i].B & 0x10) >> 1);
+
+    *dest++ = (w >> 8);
+    *dest++ = (w & 0xff);
   }
 }
 
 /// Load color ranges from a PI1 or PC1 image (Degas Elite format)
 void PI1_load_ranges(T_IO_Context * context, const byte * buffer, int size)
-{  
+{
   int range;
-  
+
   if (buffer==NULL || size<32)
     return;
-    
+
   for (range=0; range < 4; range ++)
   {
     word min_col, max_col, direction, delay;
-    
+
     min_col   = (buffer[size - 32 + range*2 +  0] << 8) | buffer[size - 32 + range*2 +  1];
     max_col   = (buffer[size - 32 + range*2 +  8] << 8) | buffer[size - 32 + range*2 +  9];
     direction = (buffer[size - 32 + range*2 + 16] << 8) | buffer[size - 32 + range*2 + 17];
     delay     = (buffer[size - 32 + range*2 + 24] << 8) | buffer[size - 32 + range*2 + 25];
-  
+
     if (max_col < min_col)
       SWAP_WORDS(min_col,max_col)
     // Sanity checks
@@ -1581,7 +1553,7 @@ void PI1_save_ranges(T_IO_Context * context, byte * buffer, int size)
   {
     int i; // index in context->Cycle_range[] : < context->Color_cycles
     int saved_range; // index in resulting buffer : < 4
-    
+
     for (i=0, saved_range=0; i<context->Color_cycles && saved_range<4; i++)
     {
       if (context->Cycle_range[i].Start < 16 && context->Cycle_range[i].End < 16)
@@ -1591,15 +1563,15 @@ void PI1_save_ranges(T_IO_Context * context, byte * buffer, int size)
           speed = 0;
         else if (context->Cycle_range[i].Speed == 1)
           // has to "round" manually to closest valid number for this format
-          speed = 1;          
+          speed = 1;
         else
           speed = 128 - 210 / context->Cycle_range[i].Speed;
-          
+
         buffer[size - 32 + saved_range*2 +  1] = context->Cycle_range[i].Start;
         buffer[size - 32 + saved_range*2 +  9] = context->Cycle_range[i].End;
         buffer[size - 32 + saved_range*2 + 17] = (context->Cycle_range[i].Speed == 0) ? 1 : (context->Cycle_range[i].Inverse ? 0 : 2);
         buffer[size - 32 + saved_range*2 + 25] = speed;
-        
+
         saved_range ++;
       }
     }
@@ -1654,7 +1626,7 @@ void Load_PI1(T_IO_Context * context)
           // Initialisation de la palette
           if (Config.Clear_palette)
             memset(context->Palette,0,sizeof(T_Palette));
-          PI1_decode_palette(buffer+2,(byte *)context->Palette);
+          PI1_decode_palette(buffer+2, context->Palette);
 
           // Chargement/décompression de l'image
           ptr=buffer+34;
@@ -1699,14 +1671,14 @@ void Save_PI1(T_IO_Context * context)
   if ((file=Open_file_write(context)))
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
-    
+
     // allocation d'un buffer mémoire
     buffer=(byte *)malloc(32034);
     // Codage de la résolution
     buffer[0]=0x00;
     buffer[1]=0x00;
     // Codage de la palette
-    PI1_code_palette((byte *)context->Palette,buffer+2);
+    PI1_code_palette(context->Palette, buffer+2);
     // Codage de l'image
     ptr=buffer+34;
     for (y_pos=0;y_pos<200;y_pos++)
@@ -1803,7 +1775,7 @@ void PC1_compress_packbits(byte * src,byte * dest,int source_size,int * dest_siz
     {
       // On recherche le 1er endroit où il y a répétition d'au moins 3 valeurs
       // identiques
-  
+
       repet=0;
       for (ir=is;ir<40-2;ir++)
       {
@@ -1813,7 +1785,7 @@ void PC1_compress_packbits(byte * src,byte * dest,int source_size,int * dest_siz
           break;
         }
       }
-  
+
       // On code la partie sans répétitions
       if (!repet || ir!=is)
       {
@@ -1822,7 +1794,7 @@ void PC1_compress_packbits(byte * src,byte * dest,int source_size,int * dest_siz
         for (;n>0;n--)
           dest[id++]=src[is++];
       }
-  
+
       // On code la partie sans répétitions
       if (repet)
       {
@@ -1967,7 +1939,7 @@ void Load_PC1(T_IO_Context * context)
           // Initialisation de la palette
           if (Config.Clear_palette)
             memset(context->Palette,0,sizeof(T_Palette));
-          PI1_decode_palette(buffercomp+2,(byte *)context->Palette);
+          PI1_decode_palette(buffercomp+2, context->Palette);
 
           // Décompression du buffer
           PC1_uncompress_packbits(buffercomp+34,bufferdecomp);
@@ -2025,7 +1997,7 @@ void Save_PC1(T_IO_Context * context)
   if ((file=Open_file_write(context)))
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
-    
+
     // Allocation des buffers mémoire
     bufferdecomp=(byte *)malloc(32000);
     buffercomp  =(byte *)malloc(64066);
@@ -2033,7 +2005,7 @@ void Save_PC1(T_IO_Context * context)
     buffercomp[0]=0x80;
     buffercomp[1]=0x00;
     // Codage de la palette
-    PI1_code_palette((byte *)context->Palette,buffercomp+2);
+    PI1_code_palette(context->Palette, buffercomp+2);
     // Codage de l'image
     ptr=bufferdecomp;
     for (y_pos=0;y_pos<200;y_pos++)
@@ -2056,7 +2028,7 @@ void Save_PC1(T_IO_Context * context)
     size += 34;
     size += 32;
     PI1_save_ranges(context, buffercomp,size);
-    
+
     if (Write_bytes(file,buffercomp,size))
     {
       fclose(file);
@@ -2137,7 +2109,7 @@ void Load_NEO(T_IO_Context * context)
           if (Config.Clear_palette)
             memset(context->Palette,0,sizeof(T_Palette));
           // on saute la résolution et le flag, chacun 2 bits
-          PI1_decode_palette(buffer+4,(byte *)context->Palette);
+          PI1_decode_palette(buffer+4, context->Palette);
 
           // Chargement/décompression de l'image
           ptr=buffer+128;
@@ -2179,7 +2151,7 @@ void Save_NEO(T_IO_Context * context)
   if ((file=Open_file_write(context)))
   {
     setvbuf(file, NULL, _IOFBF, 64*1024);
-    
+
     // allocation d'un buffer mémoire
     buffer=(byte *)malloc(32128);
     // Codage de la résolution
@@ -2188,7 +2160,7 @@ void Save_NEO(T_IO_Context * context)
     buffer[2]=0x00;
     buffer[3]=0x00;
     // Codage de la palette
-    PI1_code_palette((byte *)context->Palette,buffer+4);
+    PI1_code_palette(context->Palette, buffer+4);
     // Codage de l'image
     ptr=buffer+128;
     for (y_pos=0;y_pos<200;y_pos++)
@@ -2233,7 +2205,7 @@ void Save_NEO(T_IO_Context * context)
 //////////////////////////////////// C64 ////////////////////////////////////
 
 void Test_C64(T_IO_Context * context, FILE * file)
-{  
+{
   long file_size;
 
   (void)context;
@@ -2261,7 +2233,7 @@ void Test_C64(T_IO_Context * context, FILE * file)
 void Load_C64_hires(T_IO_Context *context, byte *bitmap, byte *screen_ram)
 {
     int cx,cy,x,y,c[4],pixel,color;
-  
+
     for(cy=0; cy<25; cy++)
     {
         for(cx=0; cx<40; cx++)
@@ -2292,7 +2264,7 @@ void Load_C64_multi(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte 
             c[1]=screen_ram[cy*40+cx]>>4;
             c[2]=screen_ram[cy*40+cx]&15;
             c[3]=color_ram[cy*40+cx]&15;
-                
+
             for(y=0; y<8; y++)
             {
                 pixel=bitmap[cy*320+cx*8+y];
@@ -2331,7 +2303,7 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
   //    Each byte contains 2 colors that *can* be used by the 4x1 pixel group:
   //        Low nybble: Color 1
   //        High nybble: Color 2
-  // 
+  //
   // bitmap     : length: 8000
   //    This is the final structure that refers to all others. It describes
   //    160x200 pixels linearly, from top left to bottom right, starting in
@@ -2347,7 +2319,7 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
   //
 
   int cx,cy,x,y,c[4];
-  
+
   for(y=0; y<200; y++)
   {
     for(x=0; x<160; x++)
@@ -2355,7 +2327,7 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
       Set_pixel(context, x,y,background[y]);
     }
   }
-  
+
   Set_loading_layer(context, 1);
   for(cy=0; cy<25; cy++)
   {
@@ -2381,7 +2353,7 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
       for(y=0; y<8; y++)
       {
         int pixel=bitmap[cy*320+cx*8+y];
-        
+
         c[0]=background[cy*8+y]&15;
         c[1]=screen_ram[y*1024+cy*40+cx]>>4;
         c[2]=screen_ram[y*1024+cy*40+cx]&15;
@@ -2659,9 +2631,9 @@ int Save_C64_window(byte *saveWhat, byte *loadAddr)
     addr=Window_set_dropdown_button(110,28,70,15,70,address_label[*loadAddr/32],1, 0, 1, LEFT_SIDE,0); // 4
     Window_dropdown_clear_items(addr);
     for (i=0; i<sizeof(address_label)/sizeof(address_label[0]); i++)
-        Window_dropdown_add_item(addr,i,address_label[i]); 
+        Window_dropdown_add_item(addr,i,address_label[i]);
 
-    Update_window_area(0,0,Window_width,Window_height); 
+    Update_window_area(0,0,Window_width,Window_height);
     Display_cursor();
 
     do
@@ -2737,9 +2709,9 @@ int Save_C64_hires(T_IO_Context *context, byte saveWhat, byte loadAddr)
                 for(x=0; x<8; x++)
                 {
                     pixel=Get_pixel(context, x+cx*8,y+cy*8);
-                    if(pixel>15) 
-                    { 
-                        Warning_message("Color above 15 used"); 
+                    if(pixel>15)
+                    {
+                        Warning_message("Color above 15 used");
                         // TODO hilite offending block here too?
                         // or make it smarter with color allocation?
                         // However, the palette is fixed to the 16 first colors
@@ -2781,7 +2753,7 @@ int Save_C64_hires(T_IO_Context *context, byte saveWhat, byte loadAddr)
 
 int Save_C64_multi(T_IO_Context *context, byte saveWhat, byte loadAddr)
 {
-    /* 
+    /*
     BITS     COLOR INFORMATION COMES FROM
     00     Background color #0 (screen color)
     01     Upper 4 bits of Screen RAM
@@ -2842,7 +2814,7 @@ int Save_C64_multi(T_IO_Context *context, byte saveWhat, byte loadAddr)
 
                     if ((cols & 1 << n) == 0 ) {
                         // This color isn't used at all in this tile:
-                        // Can't be the global 
+                        // Can't be the global
                         invalids |= 1 << n;
                     }
 
@@ -2867,7 +2839,7 @@ int Save_C64_multi(T_IO_Context *context, byte saveWhat, byte loadAddr)
 	for (n = 0; n<16; n++)
 	{
 		if (candidates & (1 << n)) {
-			background = n; 
+			background = n;
 			break;
 		}
 	}
@@ -2913,12 +2885,12 @@ int Save_C64_multi(T_IO_Context *context, byte saveWhat, byte loadAddr)
 			{
 				bits=0;
 				for(x=0;x<4;x++)
-				{                    
+				{
 					pixel=Get_pixel(context, cx*4+x,cy*8+y);
-					if(pixel>15) 
-					{ 
-						Warning_message("Color above 15 used"); 
-						// TODO hilite as in hires, you should stay to 
+					if(pixel>15)
+					{
+						Warning_message("Color above 15 used");
+						// TODO hilite as in hires, you should stay to
 						// the fixed 16 color palette
 						return 1;
 					}
@@ -2931,18 +2903,18 @@ int Save_C64_multi(T_IO_Context *context, byte saveWhat, byte loadAddr)
 			}
 		}
 	}
-  
+
     file = Open_file_write(context);
-    
+
     if(!file)
     {
         Warning_message("File open failed");
         File_error = 2;
         return 2;
     }
-    
+
     setvbuf(file, NULL, _IOFBF, 64*1024);
-    
+
     if (loadAddr)
     {
         Write_byte(file,0);
@@ -2951,16 +2923,16 @@ int Save_C64_multi(T_IO_Context *context, byte saveWhat, byte loadAddr)
 
     if (saveWhat==0 || saveWhat==1)
         Write_bytes(file,bitmap,8000);
-        
+
     if (saveWhat==0 || saveWhat==2)
         Write_bytes(file,screen_ram,1000);
-        
+
     if (saveWhat==0 || saveWhat==3)
         Write_bytes(file,color_ram,1000);
-        
+
     if (saveWhat==0)
         Write_byte(file,background);
-    
+
     fclose(file);
     //printf("\nbg:%d\n",background);
     return 0;
@@ -2971,26 +2943,26 @@ int Save_C64_fli(T_IO_Context * context, byte saveWhat, byte loadAddr)
 
     FILE *file;
     byte file_buffer[17474];
-    
+
     memset(file_buffer,0,sizeof(file_buffer));
-    
+
     if (C64_FLI(file_buffer+9474, file_buffer+1282, file_buffer+258, file_buffer+2))
     {
       File_error=1;
       return 1;
     }
-  
+
     file = Open_file_write(context);
-    
+
     if(!file)
     {
         Warning_message("File open failed");
         File_error = 1;
         return 1;
     }
-    
+
     setvbuf(file, NULL, _IOFBF, 64*1024);
-    
+
     if (loadAddr)
     {
         file_buffer[0]=0;
@@ -3006,12 +2978,12 @@ int Save_C64_fli(T_IO_Context * context, byte saveWhat, byte loadAddr)
 
     if (saveWhat==0 || saveWhat==1)
         Write_bytes(file,file_buffer+1282,8192);
-        
+
     if (saveWhat==0 || saveWhat==2)
         Write_bytes(file,file_buffer+9474,8000);
-        
-        
-    
+
+
+
     fclose(file);
     //printf("\nbg:%d\n",background);
     return 0;
@@ -3167,7 +3139,7 @@ void Test_CM5(T_IO_Context * context, FILE * file)
 void Load_CM5(T_IO_Context* context)
 {
   // Ensure "8bit" constraint mode is switched on
-  // Set palette to the CPC hardware colors 
+  // Set palette to the CPC hardware colors
   // Load the palette data to the 4 colorlayers
   FILE *file;
   byte value = 0;
@@ -3339,19 +3311,19 @@ void Save_CM5(T_IO_Context* context)
   int tx, ty;
 
   // TODO: Check picture has 5 layers
-  // TODO: Check the constraints on the layers 
+  // TODO: Check the constraints on the layers
   // Layer 1 : 1 color Only
   // Layer 2 and 3 : 1 color/line
-  // Layer 4 : 1 color / 48x1 block 
+  // Layer 4 : 1 color / 48x1 block
   // TODO: handle filesize
-  
+
   if (!(file = Open_file_write(context)))
   {
     File_error = 1;
     return;
   }
   setvbuf(file, NULL, _IOFBF, 64*1024);
-  
+
   // Write layer 0
   Set_saving_layer(context, 0);
   Write_byte(file, Get_pixel(context, 0, 0));
@@ -3377,9 +3349,9 @@ void Save_CM5(T_IO_Context* context)
     return;
   }
   setvbuf(file, NULL, _IOFBF, 64*1024);
-  
+
   Set_saving_layer(context, 4);
-  
+
   for (ty = 0; ty < 256; ty++)
   {
     for (tx = 0; tx < 48*6; tx+=4)
@@ -3401,7 +3373,7 @@ void Save_CM5(T_IO_Context* context)
 
   fclose(file);
   File_error = 0;
-  
+
 }
 
 

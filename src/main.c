@@ -59,6 +59,16 @@
     #include <sys/param.h>
 #endif
 
+#if !defined(WIN32)
+#if defined(__macosx__)
+#include <machine/endian.h>
+#elif defined(__FreeBSD__)
+#include <sys/endian.h>
+#else
+#include <endian.h>
+#endif
+#endif
+
 #include "const.h"
 #include "struct.h"
 #include "global.h"
@@ -557,7 +567,7 @@ int Init_program(int argc,char * argv[])
   // iconv is used to convert filenames
   cd = iconv_open(TOCODE, FROMCODE);  // From UTF8 to ANSI
   cd_inv = iconv_open(FROMCODE, TOCODE);  // From ANSI to UTF8
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+#if (defined(SDL_BYTEORDER) && (SDL_BYTEORDER == SDL_BIG_ENDIAN)) || (defined(BYTE_ORDER) && (BYTE_ORDER == BIG_ENDIAN))
   cd_utf16 = iconv_open("UTF-16BE", FROMCODE); // From UTF8 to UTF16
   cd_utf16_inv = iconv_open(FROMCODE, "UTF-16BE"); // From UTF16 to UTF8
 #else
