@@ -172,6 +172,7 @@ endif
     FWDIR = /Library/Frameworks
     BIN = ../bin/grafx2
 
+ifeq ($(API),sdl)
     SDLCONFIG := $(shell which sdl-config)
 ifneq ($(SDLCONFIG), )
     # these are for use with macports
@@ -182,6 +183,7 @@ else
     #-framework SDL_ttf 
     SDLLOPT = -isysroot $(MACOSX_SYSROOT) $(MACOSX_ARCH) -L/usr/lib -framework SDL -framework SDL_image -framework Cocoa -framework Carbon -framework OpenGL
     SDLCOPT = $(MACOSX_ARCH) -I$(FWDIR)/SDL.framework/Headers -I$(FWDIR)/SDL_image.framework/Headers -I$(FWDIR)/SDL_ttf.framework/Headers -D_THREAD_SAFE
+endif
 endif
 
     # these are for use with macports
@@ -216,10 +218,15 @@ endif
 endif
     COPT += -DENABLE_FILENAMES_ICONV
     LOPT += -liconv
+ifeq ($(API),x11)
+    LOPT += -Wl,-framework,CoreFoundation
+endif
     # Use gcc for compiling. Use ncc to build a callgraph and analyze the code.
     #CC = nccgen -ncgcc -ncld -ncfabs
     OBJDIR = ../obj/macosx
+ifeq ($(API),sdl)
     PLATFORMOBJ = SDLMain.o
+endif
     FCLOPT = 
     MACAPPEXE = Grafx2.app/Contents/MacOS/Grafx2
     NOTTF = 1
