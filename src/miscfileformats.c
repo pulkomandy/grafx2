@@ -1697,10 +1697,14 @@ void Save_PI1(T_IO_Context * context)
         ptr+=8;
       }
     }
-    PI1_save_ranges(context, buffer, 32034);
 
     if (Write_bytes(file,buffer,32034))
     {
+      if (context->Color_cycles)
+      {
+        PI1_save_ranges(context, buffer, 32);
+        Write_bytes(file,buffer,32);
+      }
       fclose(file);
     }
     else // Error d'écriture (disque plein ou protégé)
