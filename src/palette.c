@@ -345,7 +345,8 @@ void Remap_image_highlevel(byte * conversion_table)
 
   // Remap the flatenned image view
   if (Main.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION
-      && Main.backups->Pages->Image_mode != IMAGE_MODE_MODE5)
+      && Main.backups->Pages->Image_mode != IMAGE_MODE_MODE5
+      && Main.backups->Pages->Image_mode != IMAGE_MODE_RASTER)
   {
     Remap_general_lowlevel(conversion_table,Main.visible_image.Image,Main.visible_image.Image,
                          Main.image_width,Main.image_height,Main.image_width);

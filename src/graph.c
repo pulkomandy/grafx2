@@ -3213,7 +3213,8 @@ byte Read_pixel_from_current_screen  (word x,word y)
     return *((y)*Main.image_width+(x)+Main.backups->Pages->Image[Main.current_layer].Pixels);
   }
 
-  if (Main.backups->Pages->Image_mode == IMAGE_MODE_MODE5)
+  if (Main.backups->Pages->Image_mode == IMAGE_MODE_MODE5
+  	|| Main.backups->Pages->Image_mode == IMAGE_MODE_RASTER)
     if (Main.current_layer==4)
       return *(Main.backups->Pages->Image[Main.current_layer].Pixels + x+y*Main.image_width);
 
@@ -3632,7 +3633,7 @@ void Update_pixel_renderer(void)
     Pixel_in_current_screen = Pixel_in_screen_zx;
     Pixel_in_current_screen_with_preview = Pixel_in_screen_zx_with_preview;
   }
-  // Implicit else : Image_mode must be IMAGE_MODE_MODE5
+  // Implicit else : Image_mode must be IMAGE_MODE_MODE5 or IMAGE_MODE_RASTER
   else if ( Main.current_layer == 4)
   {
     // overlay
@@ -3647,7 +3648,7 @@ void Update_pixel_renderer(void)
   }
   else
   {
-    // layered (again, for layers > 4 in MODE5)
+    // layered (again, for layers > 4 in MODE5 and RASTER)
     Pixel_in_current_screen = Pixel_in_screen_layered;
     Pixel_in_current_screen_with_preview = Pixel_in_screen_layered_with_preview;
   }

@@ -203,7 +203,8 @@ void Redraw_layered_image(void)
     // Re-construct the image with the visible layers
     byte layer=0;  
     // First layer
-    if (Main.backups->Pages->Image_mode == IMAGE_MODE_MODE5 && Main.layers_visible & (1<<4))
+    if ((Main.backups->Pages->Image_mode == IMAGE_MODE_MODE5
+		|| Main.backups->Pages->Image_mode == IMAGE_MODE_RASTER) && Main.layers_visible & (1<<4))
     {
       // The raster result layer is visible: start there
       // Copy it in Main_visible_image
@@ -1453,7 +1454,7 @@ byte Delete_layer(T_List_of_pages *list, int layer)
         Spare.current_layer--;
       new_current_layer = Spare.current_layer;
     }
-    
+
     // Fun with binary!
     layers_before = ((1<<layer)-1) & *visible_layers_flag;
     layers_after = (*visible_layers_flag & (~layers_before))>>1;
@@ -1461,10 +1462,11 @@ byte Delete_layer(T_List_of_pages *list, int layer)
     // Ensure the current layer is part what is shown.
     *visible_layers_flag |= 1<<new_current_layer;
   }
-  
+
   // All ok
   return 0;
 }
+
 
 /// Merges the current layer onto the one below it.
 byte Merge_layer()
@@ -1479,6 +1481,7 @@ byte Merge_layer()
   return Delete_layer(Main.backups,Main.current_layer);
 }
 
+
 void Switch_layer_mode(enum IMAGE_MODES new_mode)
 {
   if (new_mode == Main.backups->Pages->Image_mode)
@@ -1486,18 +1489,12 @@ void Switch_layer_mode(enum IMAGE_MODES new_mode)
 
   Main.backups->Pages->Image_mode = new_mode;
 
-  switch (new_mode)
+  if (new_mode != IMAGE_MODE_ANIMATION)
   {
-    case IMAGE_MODE_MODE5:
-    case IMAGE_MODE_LAYERED:
-    default:
       Update_buffers(Main.image_width, Main.image_height);
       Redraw_layered_image();
-      break;
-    case IMAGE_MODE_ANIMATION:
-      // nothing to do.
-      // Eventually, we may clear the buffers to save a bit of memory...
-      break;
   }
-  Update_pixel_renderer();      
+  // TODO Eventually, in animation mode we may clear the buffers to save a bit of memory...
+
+  Update_pixel_renderer();
 }

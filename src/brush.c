@@ -120,7 +120,8 @@ void Display_paintbrush(short x,short y,byte color)
   if (Mouse_K) // pas de curseur si on est en preview et 
     return;                  // en train de cliquer
     
-  if (Main.backups->Pages->Image_mode == IMAGE_MODE_MODE5 && Main.current_layer < 4)
+  if ((Main.backups->Pages->Image_mode == IMAGE_MODE_MODE5
+  	|| Main.backups->Pages->Image_mode == IMAGE_MODE_RASTER) && Main.current_layer < 4)
   {
     goto single_pixel;
   }
@@ -284,7 +285,8 @@ void Draw_paintbrush(short x,short y,byte color)
   int position;
   byte old_color;
 
-  if (Main.backups->Pages->Image_mode == IMAGE_MODE_MODE5 && Main.current_layer < 4)
+  if ((Main.backups->Pages->Image_mode == IMAGE_MODE_MODE5
+  	|| Main.backups->Pages->Image_mode == IMAGE_MODE_RASTER) && Main.current_layer < 4)
   {
     // Flood-fill the enclosing area
     if (x<Main.image_width && y<Main.image_height && x>= 0 && y >= 0
@@ -295,41 +297,110 @@ void Draw_paintbrush(short x,short y,byte color)
     {
       short min_x,width,min_y,height;
       short xx,yy;
-      
-      // determine area
-      switch(Main.current_layer)
-      {
-        case 0:
-        default:
-          // Full layer
-          min_x=0;
-          min_y=0;
-          width=Main.image_width;
-          height=Main.image_height;
-          break;
-        case 1:
-        case 2:
-          // Line
-          min_x=0;
-          min_y=y;
-          width=Main.image_width;
-          height=1;
-          break;
-        case 3:
-          // Segment
-          min_x=x / 48 * 48;
-          min_y=y;
-          width=48;
-          height=1;
-          break;
-        //case 4:
-        //  // 8x8
-        //  min_x=x / 8 * 8;
-        //  min_y=y / 8 * 8;
-        //  width=8;
-        //  height=8;
-        //  break;
-      }
+
+  	  if (Main.backups->Pages->Image_mode == IMAGE_MODE_MODE5)
+	  {
+		  // determine area
+		  switch(Main.current_layer)
+		  {
+			  case 0:
+			  default:
+				  // Full layer
+				  min_x=0;
+				  min_y=0;
+				  width=Main.image_width;
+				  height=Main.image_height;
+				  break;
+			  case 1:
+			  case 2:
+				  // Line
+				  min_x=0;
+				  min_y=y;
+				  width=Main.image_width;
+				  height=1;
+				  break;
+			  case 3:
+				  // Segment
+				  min_x=x / 48 * 48;
+				  min_y=y;
+				  width=48;
+				  height=1;
+				  break;
+		  }
+	  } else {
+		int prev_x;
+		// Raster mode
+		// No matter what, you can always edit only 1 line at a time here, and you will always
+		// draw on "nops" boundaries (8 pixels in mode 1)
+		height=1;
+		min_y=y;
+		min_x=x / 8 * 8;
+		width = 8;
+
+		// ????????
+		//     ^
+		//     A
+
+		// First look for the previous span to see if it is the same color
+		prev_x = min_x - 8;
+
+		old_color = Read_pixel_from_current_screen(prev_x, y);
+
+		if (old_color == color) {
+			// aaaA????
+			//     ^
+			//     A
+			// We are just making the previous span larger
+			width = 8;
+			while ((min_x >= 0) && (width < 32)
+				&& (Read_pixel_from_current_screen(min_x, y) == color))
+			{
+				min_x -= 8;
+				width += 8;
+			}
+		} else {
+			// ???B????
+			//     ^
+			//     A
+			// We are creating a new span. We need to check if the previous span is still large
+			// enough to be allowed. If it is less than 32 pixels, there is no way to render it
+			// on the real hardware (this is the time the OUT instruction to change the palette
+			// needs)
+			while ((min_x - prev_x < 48)
+				&& (prev_x <= 0 || old_color == Read_pixel_from_current_screen(prev_x, y)))
+			{
+				prev_x -= 8;
+			}
+			prev_x += 8;
+
+			// CBBB????
+			//  p  ^
+			//     A
+			// The previous span is too small, so eat it
+			if (min_x - prev_x < 32) {
+				width += min_x - prev_x;
+				min_x = prev_x;
+			}
+
+			if (width < 32)
+				width = 32;
+		}
+		// Now, we also need to check if the next span is still large enough, as we are going to
+		// remove 8 pixels from it. If it is not, we just replace it with the current color and
+		// let the user figure out how to reinsert it without breaking everything.
+		prev_x = min_x + width;
+		old_color = Read_pixel_from_current_screen(prev_x, y);
+		if (old_color != color) {
+			while ((prev_x - (min_x + width) < 40)
+				&& (prev_x > Main.image_width || old_color == Read_pixel_from_current_screen(prev_x, y)))
+			{
+				prev_x += 8;
+			}
+
+			if (prev_x - (min_x + width) < 32)
+				width = prev_x - min_x;
+		}
+	  }
       // Clip the bottom edge.
       // (Necessary if image height is not a multiple)
       if (min_y+height>=Main.image_height)
@@ -338,7 +409,7 @@ void Draw_paintbrush(short x,short y,byte color)
       // (Necessary if image width is not a multiple)
       if (min_x+width>=Main.image_width)
         width=Main.image_width-min_x;
-        
+
       for (yy=min_y; yy<min_y+height; yy++)
         for (xx=min_x; xx<min_x+width; xx++)
         {

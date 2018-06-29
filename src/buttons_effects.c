@@ -180,19 +180,26 @@ void Button_Constraint_mode(void)
   if (Selected_Constraint_Mode <= IMAGE_MODE_ANIMATION)
     Selected_Constraint_Mode = IMAGE_MODE_EGX;
 
-  if (Selected_Constraint_Mode == IMAGE_MODE_MODE5)
+  if (Selected_Constraint_Mode == IMAGE_MODE_MODE5 && (Main.image_width%48))
   {
+	  Verbose_message("Error!", "Emulation of Amstrad CPC's Mode5 can only be used on an image whose width is a multiple of 48.");
+      return;
+  }
+
+  if (Selected_Constraint_Mode == IMAGE_MODE_MODE5 || Selected_Constraint_Mode == IMAGE_MODE_RASTER)
+  {
+	/* TODO it would be great to auto-create extra layers */
     if (Main.backups->Pages->Image_mode != IMAGE_MODE_LAYERED ||
-        Main.backups->Pages->Nb_layers!=5 || (Main.image_width%48))
+        Main.backups->Pages->Nb_layers!=5)
     {
-      Verbose_message("Error!", "This emulation of Amstrad CPC's Mode5 can only be used on a 5-layer image whose width is a multiple of 48.");
+      Verbose_message("Error!", "Emulation of Amstrad CPC's rasters requires a 5-layer image.");
       return;
     }
     for (pixel=0; pixel < Main.image_width*Main.image_height; pixel++)
     {
       if (Main.backups->Pages->Image[4].Pixels[pixel]>3)
       {
-        Verbose_message("Error!", "This emulation of Amstrad CPC's Mode5 needs all pixels of layer 5 to use colors 0-3.");
+        Verbose_message("Error!", "Emulation of Amstrad CPC's rasters needs all pixels of layer 5 to use colors 0-3.");
         return;
       }
     }
@@ -220,6 +227,7 @@ void Button_Constraint_menu(void)
     {IMAGE_MODE_EGX,     "EGX (CPC)"},
     {IMAGE_MODE_EGX2,    "EGX2 (CPC)"},
     {IMAGE_MODE_MODE5,   "Mode 5 (CPC)"},
+    {IMAGE_MODE_RASTER,  "Rasters (CPC)"},
   };
 
   Open_window(154,79,"8-bit constraints");

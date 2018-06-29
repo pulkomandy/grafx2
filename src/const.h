@@ -614,6 +614,7 @@ enum IMAGE_MODES
   IMAGE_MODE_EGX,       ///< CPC EGX
   IMAGE_MODE_EGX2,      ///< CPC EGX2
   IMAGE_MODE_MODE5,     ///< CPC mode 5
+  IMAGE_MODE_RASTER,    ///< CPC generic rasters
 };
 
 /// Circle / Ellipse Modes
