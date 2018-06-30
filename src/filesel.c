@@ -2012,8 +2012,8 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           // Restore the old filename
           strcpy(Selector_filename, save_filename);
           Unicode_strlcpy(Selector_filename_unicode, save_filename_unicode, sizeof(Selector_filename_unicode)/sizeof(word));
-          Print_filename_in_fileselector();
         }
+        Print_filename_in_fileselector();
         Display_cursor();
         break;
       }
