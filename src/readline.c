@@ -453,6 +453,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
   word display_string_unicode[256];
   byte position;
   size_t size;
+  word input_char=0;
   word input_key=0;
   word window_x=Window_pos_X;
   word window_y=Window_pos_Y;
@@ -665,7 +666,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
       int clicked_button;
 
       clicked_button=Window_clicked_button();
-      input_key=Key_ANSI;
+      input_char=0;
 
       if (clicked_button==-1)
         input_key=KEY_RETURN;
@@ -691,7 +692,11 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
         }
         else if (input_key>='A' && input_key<='Z' && !caps_lock)
         {
-          input_key+='a'-'A';
+          input_char = input_key + 'a' - 'A';
+        }
+        else if (input_key >= ' ')  // this is a printable char
+        {
+          input_char = input_key;
         }
       }
     }
@@ -700,12 +705,13 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
       do
       {
         Get_input(20);
-        input_key = (str_unicode == NULL) ? Key_ANSI : Key_UNICODE;
+        input_char = (str_unicode == NULL) ? Key_ANSI : Key_UNICODE;
+        input_key = Key;
         if (Mouse_K)
           input_key=KEY_RETURN;
 
         // Handle paste request on CTRL+v
-        if (Key == SHORTCUT_PASTE)
+        if (input_key == SHORTCUT_PASTE)
         {
           int nb_added = 0;
           if (str_unicode != NULL)
@@ -762,7 +768,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
           goto affichage;
         }
         
-      } while(input_key==0 && Key == 0
+      } while(input_char==0 && input_key == 0
 #if defined(USE_SDL2)
               && Key_Text[0] == '\0'
 #endif
@@ -833,7 +839,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
     }
     else
 #endif
-    switch (Key)
+    switch (input_key)
     {
       case KEY_DELETE : // Suppr.
             if (position<size)
@@ -941,17 +947,17 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
         break;
       default :
 #if !defined(USE_SDL2)
-        if (size<max_size && input_key != 0)
+        if (size<max_size && input_char != 0)
         {
           // Si la touche était autorisée...
-          byte is_authorized = Valid_character(input_key, input_type);
+          byte is_authorized = Valid_character(input_char, input_type);
           if (is_authorized == 1 || (is_authorized == 2 && position == 0 && str[position] != '-'))
           {
             // ... alors on l'insère ...
             if (str_unicode != NULL)
-              Insert_character_unicode(str_unicode,input_key,position/*,size*/);
+              Insert_character_unicode(str_unicode,input_char,position/*,size*/);
             else
-              Insert_character(str,input_key,position/*,size*/);
+              Insert_character(str,input_char,position/*,size*/);
             // ce qui augmente la taille de la chaine
             size++;
             // et qui risque de déplacer le curseur vers la droite
