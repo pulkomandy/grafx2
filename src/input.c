@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2018 Thomas Bernard
     Copyright 2009 Franck Charlet
     Copyright 2007 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
@@ -1271,17 +1272,26 @@ int Get_input(int sleep_time)
             //printf("sym = %04lx %s\t\tmod=%04x\n", sym, XKeysymToString(sym), mod);
             Key = mod | (sym & 0x0fff);
             //sym = XkbKeycodeToKeysym(X11_display, event.xkey.keycode, 0, event.xkey.state);
-            if ((sym & 0xf000) != 0xf000) // test for standard key
+            if (((sym & 0xf000) != 0xf000) || IsKeypadKey(sym)) // test for standard key or KeyPad
             {
               int count;
               char buffer[16];
               static XComposeStatus status;
               count = XLookupString(&event.xkey, buffer, sizeof(buffer),
                                     &sym, &status);
-              //printf(" sym = %04lx %s  %d %s\n", sym, XKeysymToString(sym), count, buffer);
-              Key_UNICODE = sym;
-              if (sym < 0x100)
-                Key_ANSI = sym;
+              if (count == 1) {
+                Key_ANSI = Key_UNICODE = (word)buffer[0] & 0x00ff;
+              }
+              else if((sym & 0xf000) != 0xf000)
+              {
+                Key_UNICODE = sym;
+                if (sym < 0x100)
+                  Key_ANSI = sym;
+              }
+            }
+            else
+            {
+              Key_UNICODE = Key_ANSI = 0;
             }
             user_feedback_required = 1;
           }
