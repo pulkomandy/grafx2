@@ -51,6 +51,7 @@
 #include "const.h"
 #include "errors.h"
 #include "global.h"
+#include "keycodes.h"
 #include "io.h"
 #include "loadsave.h"
 #include "misc.h"
