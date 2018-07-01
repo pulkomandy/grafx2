@@ -43,13 +43,9 @@ void GFX2_Set_mode(int *width, int *height, int fullscreen)
   unsigned long white, black;
   char * winName[] = { "GrafX2" };
   Visual * visual;
-  const char blank_data[1] = { 0 };
-  Pixmap blank;
-  Cursor cursor;
-  XColor dummy;
 
   if (X11_display == NULL)
-    X11_display = XOpenDisplay(NULL);//getenv("DISPLAY")
+    X11_display = XOpenDisplay(NULL);// NULL is equivalent to getenv("DISPLAY")
   if (X11_display == NULL)
   {
     fprintf(stderr, "X11: cannot open display\n");
@@ -75,53 +71,73 @@ void GFX2_Set_mode(int *width, int *height, int fullscreen)
   }
   depth = DisplayPlanes(X11_display, s);
 
-  X11_window = XCreateSimpleWindow(X11_display, RootWindow(X11_display, s),
-                                   0, 0, *width, *height, 0, white, black);
-
-  // create blank 1x1 pixmap to make a 1x1 transparent cursor
-  blank = XCreateBitmapFromData(X11_display, X11_window, blank_data, 1, 1);
-  cursor = XCreatePixmapCursor(X11_display, blank, blank, &dummy, &dummy, 0, 0);
-  //cursor = XCreateFontCursor(X11_display, 130 /*XC_tcross*/);
-  XDefineCursor(X11_display, X11_window, cursor);
-  XFreePixmap(X11_display, blank);
-  XFreeCursor(X11_display, cursor);
-
-  X11_gc = XCreateGC(X11_display, X11_window, 0, NULL);
-  XSetFunction(X11_display, X11_gc, GXcopy);
-
-  XStringListToTextProperty(winName, 1, &windowName);
-  XSetWMName(X11_display, X11_window, &windowName);
-  // TODO : set icon
-
-  screen = New_GFX2_Surface(*width, *height);
-  memset(screen->pixels, 0, *width * *height);
-
-  image_pixels = malloc(*height * *width * 4);
-  memset(image_pixels, 64, *height * *width * 4);
-#if 0
-{
-int i;
-for (i= 3*8; i < (*height * *width * 4); i += *width * 4)
-{
-image_pixels[i+0] = 0;  // B
-image_pixels[i+1] = 0;  // G
-image_pixels[i+2] = 0;  // R
-}
-}
-#endif
-  X11_image = XCreateImage(X11_display, visual, depth,
-                           ZPixmap, 0, image_pixels, *width, *height,
-                           32, 0/**width * 4*/);
-  if(X11_image == NULL)
+  if (X11_window == NULL)
   {
-    fprintf(stderr, "XCreateImage failed\n");
-    exit(1);
+    static const char blank_data[1] = { 0 };
+    Pixmap blank;
+    Cursor cursor;
+    XColor dummy;
+    Atom wmDelete;
+
+    X11_window = XCreateSimpleWindow(X11_display, RootWindow(X11_display, s),
+                                     0, 0, *width, *height, 0, white, black);
+
+    // create blank 1x1 pixmap to make a 1x1 transparent cursor
+    blank = XCreateBitmapFromData(X11_display, X11_window, blank_data, 1, 1);
+    cursor = XCreatePixmapCursor(X11_display, blank, blank, &dummy, &dummy, 0, 0);
+    //cursor = XCreateFontCursor(X11_display, 130 /*XC_tcross*/);
+    XDefineCursor(X11_display, X11_window, cursor);
+    XFreePixmap(X11_display, blank);
+    XFreeCursor(X11_display, cursor);
+
+    X11_gc = XCreateGC(X11_display, X11_window, 0, NULL);
+    //XSetFunction(X11_display, X11_gc, GXcopy);
+
+    XStringListToTextProperty(winName, 1, &windowName);
+    XSetWMName(X11_display, X11_window, &windowName);
+    // TODO : set icon
+
+    XSelectInput(X11_display, X11_window,
+                 PointerMotionMask | ButtonPressMask | ButtonReleaseMask | KeyPressMask | ExposureMask | StructureNotifyMask);
+
+    wmDelete = XInternAtom(X11_display, "WM_DELETE_WINDOW", True);
+    XSetWMProtocols(X11_display, X11_window, &wmDelete, 1);
+
+    XMapWindow(X11_display, X11_window);
   }
 
-  XSelectInput(X11_display, X11_window,
-               PointerMotionMask | ButtonPressMask | ButtonReleaseMask | KeyPressMask | ExposureMask | StructureNotifyMask);
+  if (screen == NULL)
+  {
+    screen = New_GFX2_Surface(*width, *height);
+    memset(screen->pixels, 0, *width * *height);
+  }
+  else if (*width > screen->w || *height > screen->h)
+  {
+    screen->pixels = realloc(screen->pixels, *width * *height);
+    screen->w = *width;
+    screen->h = *height;
+    XDestroyImage(X11_image);
+    X11_image = NULL;
+    image_pixels = NULL;
+  }
 
-  XMapWindow(X11_display, X11_window);
+  if (image_pixels == NULL)
+  {
+    image_pixels = malloc(*height * *width * 4);
+    memset(image_pixels, 64, *height * *width * 4);
+  }
+  if (X11_image == NULL)
+  {
+    X11_image = XCreateImage(X11_display, visual, depth,
+                             ZPixmap, 0, image_pixels, *width, *height,
+                             32, 0/**width * 4*/);
+    if(X11_image == NULL)
+    {
+      fprintf(stderr, "XCreateImage failed\n");
+      exit(1);
+    }
+  }
+
   XFlush(X11_display);
 }
 

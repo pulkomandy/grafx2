@@ -1358,6 +1358,20 @@ int Get_input(int sleep_time)
           Update_rect(event.xexpose.x, event.xexpose.y,
                       event.xexpose.width, event.xexpose.height);
           break;
+        case ConfigureNotify:
+          if (event.xconfigure.above == 0)
+          {
+            Resize_width = event.xconfigure.width;
+            Resize_height = event.xconfigure.height;
+          }
+          break;
+        case ClientMessage:
+          if (event.xclient.data.l[0] == XInternAtom(X11_display, "WM_DELETE_WINDOW", False))
+          {
+            Quit_is_required = 1;
+            user_feedback_required = 1;
+          }
+          break;
         default:
           printf("event.type = %d\n", event.type);
       }
