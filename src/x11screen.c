@@ -27,6 +27,7 @@
 #include <X11/Xutil.h>
 #include "screen.h"
 #include "gfx2surface.h"
+#include "loadsave.h"
 
 Display * X11_display = NULL;
 static Window X11_window = 0;
@@ -35,6 +36,7 @@ static char * image_pixels = NULL;
 static XTextProperty windowName;
 static GC X11_gc = 0;
 static T_GFX2_Surface * screen = NULL;
+static T_GFX2_Surface * icon = NULL;
 
 void GFX2_Set_mode(int *width, int *height, int fullscreen)
 {
@@ -71,13 +73,14 @@ void GFX2_Set_mode(int *width, int *height, int fullscreen)
   }
   depth = DisplayPlanes(X11_display, s);
 
-  if (X11_window == NULL)
+  if (X11_window == 0)
   {
     static const char blank_data[1] = { 0 };
     Pixmap blank;
     Cursor cursor;
     XColor dummy;
     Atom wmDelete;
+    XWMHints* hints;
 
     X11_window = XCreateSimpleWindow(X11_display, RootWindow(X11_display, s),
                                      0, 0, *width, *height, 0, white, black);
@@ -95,7 +98,51 @@ void GFX2_Set_mode(int *width, int *height, int fullscreen)
 
     XStringListToTextProperty(winName, 1, &windowName);
     XSetWMName(X11_display, X11_window, &windowName);
-    // TODO : set icon
+
+    // set icon
+    if (icon != NULL)
+    {
+      XImage * icon_image = XCreateImage(X11_display, visual, depth,
+                             ZPixmap, 0, malloc(icon->w * icon->h * 4),
+                             icon->w, icon->h, 32, 0/**width * 4*/);
+      if (icon_image != NULL)
+      {
+        char * transp_data;
+        int x, y;
+        Pixmap icon_mask;
+        Pixmap icon_pixmap = XCreatePixmap(X11_display, X11_window, icon->w, icon->h, 24);
+
+        transp_data = calloc(1, ((icon->w + 7) >> 3) * icon->h);
+        for (y = 0; y < icon->h; y++)
+        {
+          for (x = 0; x < icon->w; x++)
+          {
+            byte v = icon->pixels[x + y * icon->w];
+            if (v != 0) // assume 0 is transparent
+              transp_data[(x >> 3) + ((icon->w + 7) >> 3) * y] |= (1 << (x & 7));
+            XPutPixel(icon_image, x, y,
+                      (unsigned)icon->palette[v].R << 16 | (unsigned)icon->palette[v].G << 8 | (unsigned)icon->palette[v].B);
+          }
+        }
+        // Transfer icon_image to the icon_pixmap
+        XPutImage(X11_display, icon_pixmap, X11_gc, icon_image,
+                  0, 0, 0, 0, icon->w, icon->h);
+        icon_mask = XCreateBitmapFromData(X11_display, X11_window, transp_data,
+                                          icon->w, icon->h);
+
+        hints = XAllocWMHints();
+        if (hints != NULL)
+        {
+          hints->flags = IconPixmapHint | IconMaskHint;
+          hints->icon_pixmap = icon_pixmap;
+          hints->icon_mask = icon_mask;
+          XSetWMHints(X11_display, X11_window, hints);
+          XFree(hints);
+        }
+        free(transp_data);
+      }
+      XDestroyImage(icon_image);
+    }
 
     XSelectInput(X11_display, X11_window,
                  PointerMotionMask | ButtonPressMask | ButtonReleaseMask | KeyPressMask | ExposureMask | StructureNotifyMask);
@@ -258,7 +305,7 @@ void Clear_border(byte color)
 {
 (void)color;//TODO
 }
-  
+
 volatile int Allow_colorcycling = 0;
 
 /// Activates or desactivates file drag-dropping in program window.
@@ -269,4 +316,7 @@ void Allow_drag_and_drop(int flag)
 
 void Define_icon(void)
 {
+  char icon_path[MAX_PATH_CHARACTERS];
+  snprintf(icon_path, sizeof(icon_path), "%s%s", Data_directory, "gfx2.png"); // 48x48
+  icon = Load_surface(icon_path, NULL);
 }
