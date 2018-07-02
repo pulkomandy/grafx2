@@ -34,6 +34,7 @@
 
 #ifdef USE_X11
 #include <unistd.h>
+#include <stdlib.h>
 #include <X11/Xlib.h>
 #include <X11/XKBlib.h>
 #include <X11/Xutil.h>
@@ -51,6 +52,7 @@
 
 #ifdef USE_X11
 extern Display * X11_display;
+extern Window X11_window;
 #endif
 
 #if defined(USE_SDL)
@@ -1228,6 +1230,7 @@ int Get_input(int sleep_time)
     }
 #elif defined(USE_X11)
     int user_feedback_required = 0; // Flag qui indique si on doit arrêter de traiter les évènements ou si on peut enchainer
+    static int xdnd_version = 5;
 
     Color_cycling();
     // Commit any pending screen update.
@@ -1366,10 +1369,108 @@ int Get_input(int sleep_time)
           }
           break;
         case ClientMessage:
-          if (event.xclient.data.l[0] == XInternAtom(X11_display, "WM_DELETE_WINDOW", False))
+          if (event.xclient.message_type == XInternAtom(X11_display,"WM_PROTOCOLS", False))
           {
-            Quit_is_required = 1;
-            user_feedback_required = 1;
+            if (event.xclient.data.l[0] == XInternAtom(X11_display, "WM_DELETE_WINDOW", False))
+            {
+              Quit_is_required = 1;
+              user_feedback_required = 1;
+            }
+            else
+            {
+              // unrecognized WM event.
+            }
+          }
+          else if (event.xclient.message_type == XInternAtom(X11_display, "XdndEnter", False))
+          {
+            //int list = event.xclient.data.l[1] & 1;
+            xdnd_version = event.xclient.data.l[1] >> 24;
+          }
+          else if (event.xclient.message_type == XInternAtom(X11_display, "XdndLeave", False))
+          {
+            printf("XdndLeave\n");
+          }
+          else if (event.xclient.message_type == XInternAtom(X11_display, "XdndPosition", False))
+          {
+            XEvent reply;
+            int x_pos, y_pos;
+            x_pos = (event.xclient.data.l[2] >> 16) & 0xffff;
+            y_pos = event.xclient.data.l[2] & 0xffff;
+            // reply with XdndStatus
+            // see https://github.com/glfw/glfw/blob/a9a5a0b016215b4e40a19acb69577d91cf21a563/src/x11_window.c
+
+            memset(&reply, 0, sizeof(reply));
+
+            reply.type = ClientMessage;
+            reply.xclient.window = event.xclient.data.l[0];
+            reply.xclient.message_type = XInternAtom(X11_display, "XdndStatus", False);
+            reply.xclient.format = 32;
+            reply.xclient.data.l[0] = event.xclient.window;
+            reply.xclient.data.l[2] = 0; // Specify an empty rectangle
+            reply.xclient.data.l[3] = 0;
+
+            // Reply that we are ready to copy the dragged data
+            reply.xclient.data.l[1] = 1; // Accept with no rectangle
+            if (xdnd_version >= 2)
+            {
+              reply.xclient.data.l[4] = XInternAtom(X11_display, "XdndActionCopy", False);
+            }
+            XSendEvent(X11_display, event.xclient.data.l[0], False, NoEventMask, &reply);
+          }
+          else if (event.xclient.message_type == XInternAtom(X11_display, "XdndDrop", False))
+          {
+            XConvertSelection(X11_display,
+                              XInternAtom(X11_display, "XdndSelection", False),
+                              XInternAtom(X11_display, "text/uri-list", False),
+                              XInternAtom(X11_display, "XdndSelection", False),
+                              event.xclient.window,
+                              event.xclient.data.l[2]);
+          }
+          break;
+        case SelectionNotify:
+          if (event.xselection.property == XInternAtom(X11_display, "XdndSelection", False))
+          {
+            Atom type = 0;
+            int format = 0;
+            int r;
+            unsigned long count = 0, bytesAfter = 0;
+            unsigned char * value = NULL;
+
+            r = XGetWindowProperty(X11_display, event.xselection.requestor, event.xselection.property, 0, LONG_MAX,
+                                   False, event.xselection.target /* type */, &type, &format,
+                                   &count, &bytesAfter, &value);
+            if (r == Success && value != NULL)
+            {
+              if (format == 8)
+              {
+                int i, j;
+                Drop_file_name = malloc(count + 1);
+                i = 0; j = 0;
+                if (count > 7 && 0 == memcmp(value, "file://", 7))
+                  i = 7;
+                while (i < (int)count && value[i] != 0 && value[i] != '\n' && value[i] != '\r')
+                {
+                  Drop_file_name[j++] = (char)value[i++]; // TODO : URI decode
+                }
+                Drop_file_name[j++] = '\0';
+              }
+              XFree(value);
+            }
+            if (xdnd_version >= 2)
+            {
+              XEvent reply;
+              memset(&reply, 0, sizeof(reply));
+
+              reply.type = ClientMessage;
+              reply.xclient.window = event.xselection.requestor;
+              reply.xclient.message_type = XInternAtom(X11_display, "XdndFinished", False);
+              reply.xclient.format = 32;
+              reply.xclient.data.l[0] = X11_window;
+              reply.xclient.data.l[1] = 1;  // success
+              reply.xclient.data.l[2] = XInternAtom(X11_display, "XdndActionCopy", False);
+
+              XSendEvent(X11_display, event.xselection.requestor, False, NoEventMask, &reply);
+            }
           }
           break;
         default:

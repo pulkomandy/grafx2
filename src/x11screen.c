@@ -25,12 +25,13 @@
 #include <stdlib.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <X11/Xatom.h>
 #include "screen.h"
 #include "gfx2surface.h"
 #include "loadsave.h"
 
 Display * X11_display = NULL;
-static Window X11_window = 0;
+Window X11_window = 0;
 static XImage * X11_image = NULL;
 static char * image_pixels = NULL;
 static XTextProperty windowName;
@@ -311,7 +312,9 @@ volatile int Allow_colorcycling = 0;
 /// Activates or desactivates file drag-dropping in program window.
 void Allow_drag_and_drop(int flag)
 {
-(void)flag;
+  Atom version = flag ? 5 : 0;
+
+  XChangeProperty(X11_display, X11_window, XInternAtom(X11_display, "XdndAware", False), XA_ATOM, 32, PropModeReplace, (unsigned char *)&version, 1);
 }
 
 void Define_icon(void)
