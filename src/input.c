@@ -82,6 +82,10 @@ int Snap_axis_origin_Y;
 
 char * Drop_file_name = NULL;
 
+#if defined(USE_X11)
+char * X11_clipboard = NULL;
+#endif
+
 // --
 
 // Digital joystick state
@@ -1471,6 +1475,25 @@ int Get_input(int sleep_time)
 
               XSendEvent(X11_display, event.xselection.requestor, False, NoEventMask, &reply);
             }
+          }
+          else if (event.xselection.selection == XInternAtom(X11_display, "CLIPBOARD", False)
+                || event.xselection.selection == XInternAtom(X11_display, "PRIMARY", False))
+          {
+            Atom type = 0;
+            int format = 0;
+            int r;
+            unsigned long count = 0, bytesAfter = 0;
+            unsigned char * value = NULL;
+
+            r = XGetWindowProperty(X11_display, X11_window, event.xselection.property, 0, LONG_MAX,
+                                   False, event.xselection.target /* type */, &type, &format,
+                                   &count, &bytesAfter, &value);
+            if (r == Success && value != NULL)
+            {
+              X11_clipboard = strdup((char *)value);
+              XFree(value);
+            }
+            user_feedback_required = 1;
           }
           break;
         default:

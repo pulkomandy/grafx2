@@ -66,6 +66,13 @@
 #endif
 #endif
 
+#if defined(USE_X11)
+#include <X11/Xlib.h>
+extern Display * X11_display;
+extern Window X11_window;
+extern char * X11_clipboard;
+#endif
+
 // Virtual keyboard is ON by default on these platforms:
 #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__) || defined(GCWZERO)
   #define VIRT_KEY_DEFAULT_ON 1
@@ -300,7 +307,6 @@ void Init_virtual_keyboard(word y_pos, word keyboard_width, word keyboard_height
 
 
 // Inspired from http://www.libsdl.org/projects/scrap/
-// TODO X11 and others
 static char* getClipboard(word * * unicode)
 {
 #ifdef WIN32
@@ -399,6 +405,36 @@ bye:
   if (unicode)
     *unicode = NULL;
   return haiku_get_clipboard();
+  #elif defined(USE_X11)
+  Atom selection = XInternAtom(X11_display, "CLIPBOARD", False);
+  Window selection_owner = XGetSelectionOwner(X11_display, selection);
+
+  if (selection_owner == None)
+  {
+    selection = XInternAtom(X11_display, "PRIMARY", False);
+    selection_owner = XGetSelectionOwner(X11_display, selection);
+  }
+  if (unicode)
+    *unicode = NULL;
+  if (selection_owner != None)
+  {
+    int i;
+    XConvertSelection(X11_display, selection, XInternAtom(X11_display, "UTF8_STRING", False),
+                      XInternAtom(X11_display, "GFX2_CLIP", False), /* Property */
+                      X11_window, CurrentTime);
+    for(i = 0; X11_clipboard == NULL && i < 10; i++)
+    {
+      Get_input(20);
+    }
+    if (X11_clipboard != NULL)
+    {
+      char * tmp = X11_clipboard;
+      X11_clipboard = NULL;
+      // TODO : UTF8 -> UTF16 conversion
+      return tmp;
+    }
+  }
+  return NULL;
   #else
   // Not implemented (no standard) on Linux systems. Maybe someday...
   if (unicode)
