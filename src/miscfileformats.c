@@ -1703,7 +1703,8 @@ void Save_PI1(T_IO_Context * context)
       if (context->Color_cycles)
       {
         PI1_save_ranges(context, buffer, 32);
-        Write_bytes(file,buffer,32);
+        if (!Write_bytes(file,buffer,32))
+          File_error=1;
       }
       fclose(file);
     }
