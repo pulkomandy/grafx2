@@ -428,10 +428,63 @@ bye:
     }
     if (X11_clipboard != NULL)
     {
-      char * tmp = X11_clipboard;
+      char * utf8_str = X11_clipboard;
       X11_clipboard = NULL;
-      // TODO : UTF8 -> UTF16 conversion
-      return tmp;
+      // UTF8 -> UTF16 and UTF8 -> ANSI conversions
+#if defined(ENABLE_FILENAMES_ICONV)
+      if (unicode != NULL)
+      {
+        char * input = utf8_str;
+        size_t inbytesleft = strlen(utf8_str);
+        char * output;
+        size_t outbytesleft;
+        size_t r;
+        *unicode = (word *)malloc(2 * inbytesleft + 2);
+        if (*unicode != NULL)
+        {
+          output = (char *)*unicode;
+          outbytesleft = 2 * inbytesleft;
+          r = iconv(cd_utf16, &input, &inbytesleft, &output, &outbytesleft);
+          if (r != (size_t)-1)
+          {
+            output[1] = output[0] = '\0';
+          }
+          else
+          {
+            Warning("Unicode conversion of clipboard text failed");
+            free(*unicode);
+            *unicode = NULL;
+          }
+        }
+      }
+      {
+        char * ansi_str;
+        char * input = utf8_str;
+        size_t inbytesleft = strlen(utf8_str);
+        char * output;
+        size_t outbytesleft;
+        size_t r;
+        ansi_str = (char *)malloc(inbytesleft + 1);
+        if (ansi_str != NULL)
+        {
+          output = ansi_str;
+          outbytesleft = inbytesleft;
+          r = iconv(cd, &input, &inbytesleft, &output, &outbytesleft);
+          if (r != (size_t)-1)
+          {
+            *output = '\0';
+            free(utf8_str);
+            return ansi_str;
+          }
+          else
+          {
+            Warning("ANSI conversion of clipboard text failed");
+            free(ansi_str);
+          }
+        }
+      }
+#endif
+      return utf8_str;
     }
   }
   return NULL;
