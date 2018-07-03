@@ -1392,7 +1392,7 @@ int Get_input(int sleep_time)
           }
           else if (event.xclient.message_type == XInternAtom(X11_display, "XdndLeave", False))
           {
-            printf("XdndLeave\n");
+            //printf("XdndLeave\n");
           }
           else if (event.xclient.message_type == XInternAtom(X11_display, "XdndPosition", False))
           {
