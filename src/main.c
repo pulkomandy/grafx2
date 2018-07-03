@@ -1092,7 +1092,7 @@ void Program_shutdown(void)
   }
   #endif
   // Config.Window_pos_x / Config.Window_pos_y are set in win32screen.c
-  #else
+  #elif !defined(USE_X11)
   // All other targets: irrelevant dimensions.
   // Do not attempt to force them back on next program run.
     Config.Window_pos_x = 9999;

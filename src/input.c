@@ -1368,8 +1368,17 @@ int Get_input(int sleep_time)
         case ConfigureNotify:
           if (event.xconfigure.above == 0)
           {
+            int x_pos, y_pos;
+            unsigned int width, height, border_width, depth;
+            Window root_window;
+
             Resize_width = event.xconfigure.width;
             Resize_height = event.xconfigure.height;
+            if (XGetGeometry(X11_display, X11_window, &root_window, &x_pos, &y_pos, &width, &height, &border_width, &depth))
+            {
+              Config.Window_pos_x = event.xconfigure.x - x_pos;
+              Config.Window_pos_y = event.xconfigure.y - y_pos;
+            }
           }
           break;
         case ClientMessage:

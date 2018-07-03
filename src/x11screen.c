@@ -46,6 +46,7 @@ void GFX2_Set_mode(int *width, int *height, int fullscreen)
   unsigned long white, black;
   char * winName[] = { "GrafX2" };
   Visual * visual;
+  (void)fullscreen;
 
   if (X11_display == NULL)
     X11_display = XOpenDisplay(NULL);// NULL is equivalent to getenv("DISPLAY")
@@ -152,6 +153,8 @@ void GFX2_Set_mode(int *width, int *height, int fullscreen)
     XSetWMProtocols(X11_display, X11_window, &wmDelete, 1);
 
     XMapWindow(X11_display, X11_window);
+    if (Config.Window_pos_x != 9999 && Config.Window_pos_y != 9999)
+      XMoveWindow(X11_display, X11_window, Config.Window_pos_x, Config.Window_pos_y);
   }
 
   if (screen == NULL)
