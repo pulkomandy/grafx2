@@ -1235,6 +1235,7 @@ int Get_input(int sleep_time)
 #elif defined(USE_X11)
     int user_feedback_required = 0; // Flag qui indique si on doit arrêter de traiter les évènements ou si on peut enchainer
     static int xdnd_version = 5;
+    static Window xdnd_source = None;
 
     Color_cycling();
     // Commit any pending screen update.
@@ -1398,6 +1399,7 @@ int Get_input(int sleep_time)
           {
             //int list = event.xclient.data.l[1] & 1;
             xdnd_version = event.xclient.data.l[1] >> 24;
+            xdnd_source = event.xclient.data.l[0];
           }
           else if (event.xclient.message_type == XInternAtom(X11_display, "XdndLeave", False))
           {
@@ -1406,21 +1408,30 @@ int Get_input(int sleep_time)
           else if (event.xclient.message_type == XInternAtom(X11_display, "XdndPosition", False))
           {
             XEvent reply;
+            int x_abs, y_abs;
             int x_pos, y_pos;
-            x_pos = (event.xclient.data.l[2] >> 16) & 0xffff;
-            y_pos = event.xclient.data.l[2] & 0xffff;
+            Window root_window, child;
+            unsigned int width, height;
+            unsigned int border_width, depth;
+
+            x_abs = (event.xclient.data.l[2] >> 16) & 0xffff;
+            y_abs = event.xclient.data.l[2] & 0xffff;
             // reply with XdndStatus
             // see https://github.com/glfw/glfw/blob/a9a5a0b016215b4e40a19acb69577d91cf21a563/src/x11_window.c
 
             memset(&reply, 0, sizeof(reply));
 
             reply.type = ClientMessage;
-            reply.xclient.window = event.xclient.data.l[0];
+            reply.xclient.window = event.xclient.data.l[0]; // drag & drop source window
             reply.xclient.message_type = XInternAtom(X11_display, "XdndStatus", False);
             reply.xclient.format = 32;
             reply.xclient.data.l[0] = event.xclient.window;
-            reply.xclient.data.l[2] = 0; // Specify an empty rectangle
-            reply.xclient.data.l[3] = 0;
+            if (XGetGeometry(X11_display, X11_window, &root_window, &x_pos, &y_pos, &width, &height, &border_width, &depth)
+              && XTranslateCoordinates(X11_display, X11_window, root_window, 0, 0, &x_abs, &y_abs, &child))
+            {
+              reply.xclient.data.l[2] = (x_abs & 0xffff) << 16 | (y_abs & 0xffff);
+              reply.xclient.data.l[3] = (width & 0xffff) << 16 | (height & 0xffff);
+            }
 
             // Reply that we are ready to copy the dragged data
             reply.xclient.data.l[1] = 1; // Accept with no rectangle
@@ -1432,12 +1443,15 @@ int Get_input(int sleep_time)
           }
           else if (event.xclient.message_type == XInternAtom(X11_display, "XdndDrop", False))
           {
+            Time time = CurrentTime;
+            if (xdnd_version >= 1)
+              time = event.xclient.data.l[2];
             XConvertSelection(X11_display,
                               XInternAtom(X11_display, "XdndSelection", False),
                               XInternAtom(X11_display, "text/uri-list", False),
                               XInternAtom(X11_display, "XdndSelection", False),
                               event.xclient.window,
-                              event.xclient.data.l[2]);
+                              time);
           }
           break;
         case SelectionNotify:
@@ -1475,14 +1489,14 @@ int Get_input(int sleep_time)
               memset(&reply, 0, sizeof(reply));
 
               reply.type = ClientMessage;
-              reply.xclient.window = event.xselection.requestor;
+              reply.xclient.window = xdnd_source;
               reply.xclient.message_type = XInternAtom(X11_display, "XdndFinished", False);
               reply.xclient.format = 32;
               reply.xclient.data.l[0] = X11_window;
               reply.xclient.data.l[1] = 1;  // success
               reply.xclient.data.l[2] = XInternAtom(X11_display, "XdndActionCopy", False);
 
-              XSendEvent(X11_display, event.xselection.requestor, False, NoEventMask, &reply);
+              XSendEvent(X11_display, xdnd_source, False, NoEventMask, &reply);
             }
           }
           else if (event.xselection.selection == XInternAtom(X11_display, "CLIPBOARD", False)
