@@ -1477,7 +1477,19 @@ int Get_input(int sleep_time)
                   i = 7;
                 while (i < (int)count && value[i] != 0 && value[i] != '\n' && value[i] != '\r')
                 {
-                  Drop_file_name[j++] = (char)value[i++]; // TODO : URI decode
+                  if (i < ((int)count + 2) && value[i] == '%')
+                  {
+                    // URI-Decode : "%NN" to char of value 0xNN
+                    i++;
+                    Drop_file_name[j] = (value[i] - ((value[i] >= 'A') ? 'A' - 10 : '0')) << 4;
+                    i++;
+                    Drop_file_name[j++] |= (value[i] - ((value[i] >= 'A') ? 'A' - 10 : '0'));
+                    i++;
+                  }
+                  else
+                  {
+                    Drop_file_name[j++] = (char)value[i++];
+                  }
                 }
                 Drop_file_name[j++] = '\0';
               }
