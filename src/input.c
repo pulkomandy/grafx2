@@ -1251,6 +1251,8 @@ int Get_input(int sleep_time)
     Input_new_mouse_Y = Mouse_Y;
     Input_new_mouse_K = Mouse_K;
 
+    if (X11_display == NULL)
+      return 0;
     XFlush(X11_display);
     while(!user_feedback_required && XPending(X11_display) > 0)
     {
