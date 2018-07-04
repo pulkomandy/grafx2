@@ -3,6 +3,8 @@
 Set WshShell = CreateObject("WScript.Shell")
 Set FSO = CreateObject("Scripting.FileSystemObject")
 versionfile = "..\..\src\version.c"
+pversionfile = "..\..\src\pversion.c"
+ressourcefile = "..\..\src\gfx2.rc"
 
 On Error Resume Next
 
@@ -57,8 +59,51 @@ If Err.Number = 0 Then
 	f.Close
 End If
 
+Err.Clear
+Set f = FSO.OpenTextFile(pversionfile, 1, False) ' 1 = Read
+If Err.Number = 0 Then
+	line = f.ReadLine
+	i = InStr(line, Chr(34)) + 1
+	j = InStr(i, line, Chr(34))
+	label = Mid(line, i, j - i)
+	f.Close
+End If
+
 If NeedWrite Then
 	Set f = FSO.OpenTextFile(versionfile, 2, True) ' 2 = Write
 	f.WriteLine "char SVN_revision[]=" & Chr(34) & revision & Chr(34) & ";"
 	f.Close
+	' rewrite ressourcefile
+	Dim lines()
+	i = 0
+	Err.Clear
+	Set f = FSO.OpenTextFile(ressourcefile, 1, False)
+	If Err.Number = 0 Then
+		While Not f.AtEndOfStream
+			line = f.ReadLine
+			k = InStr(line, "VERSION ")
+			l = InStr(line, "Version" & Chr(34))
+			If k <> 0 Then
+				'Wscript.Echo "* i=" & i & " k=" & k & " l=" & l & " : " & line
+				k = InStrRev(line, ",")
+				line = Mid(line, 1, k) & GIT_REVISION
+			End If
+			If l <> 0 Then
+				'Wscript.Echo "_ i=" & i & " k=" & k & " l=" & l & " : " & line
+				k = InStr(InStr(line, ","), line, Chr(34))
+				line = Mid(line, 1, k) & label & revision & Chr(34)
+			End If
+			Redim preserve lines(i)
+			lines(i) = line
+			i = i + 1
+		Wend
+		f.Close
+		' Write lines back to the file
+		Set f = FSO.OpenTextFile(ressourcefile, 2, True) ' 2 = Write
+		For i = 0 To UBound(lines)
+			'Wscript.Echo lines(i)
+			f.WriteLine lines(i)
+		Next
+		f.Close
+	End If
 End If
