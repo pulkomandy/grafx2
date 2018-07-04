@@ -10,6 +10,9 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="generateversion.vbs" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{056D84A3-08C5-4A2A-A24B-D2E6D00D9552}</ProjectGuid>
     <Keyword>MakeFileProj</Keyword>
