@@ -57,10 +57,15 @@
 
 
 #include <stdlib.h>
+#if defined(WIN32)
 #if defined(_MSC_VER)
 #include <stdio.h>
 #if _MSC_VER < 1900
 #define snprintf _snprintf
+#endif
+#define WIN32_BSWAP32 _byteswap_ulong
+#else
+#define WIN32_BSWAP32 __builtin_bswap32
 #endif
 #endif
 
@@ -1820,7 +1825,7 @@ void Load_IFF(T_IO_Context * context)
 #elif defined(WIN32)
             // assume WIN32 is little endian
             for (i = 0 ; i < ((LineCount + 31) >> 5); i++)
-              lineBitMask[i] = __builtin_bswap32(lineBitMask[i]);
+              lineBitMask[i] = WIN32_BSWAP32(lineBitMask[i]);
 #endif
             data = (const byte *)PCHGData + ((LineCount + 31) >> 5) * 4;
             for (y_pos = 0 ; y_pos < LineCount; y_pos++)
