@@ -78,7 +78,7 @@ extern char * Drop_file_name;
 
 #if defined __HAIKU__
 	#define SHORTCUT_COPY (KEY_c|MOD_ALT)
-#elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+#elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__) || defined(__macosx__)
 	#define SHORTCUT_COPY (KEY_c|MOD_META)
 #else
 	#define SHORTCUT_COPY (KEY_c|MOD_CTRL)
@@ -86,7 +86,7 @@ extern char * Drop_file_name;
 
 #if defined __HAIKU__
 	#define SHORTCUT_PASTE (KEY_v|MOD_ALT)
-#elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+#elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__) || defined(__macosx__)
 	#define SHORTCUT_PASTE (KEY_v|MOD_META)
 #else
 	#define SHORTCUT_PASTE (KEY_v|MOD_CTRL)

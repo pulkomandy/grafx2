@@ -71,6 +71,8 @@
 extern Display * X11_display;
 extern Window X11_window;
 extern char * X11_clipboard;
+#elif defined(__macosx__)
+const char * get_paste_board(void);
 #endif
 
 // Virtual keyboard is ON by default on these platforms:
@@ -405,7 +407,8 @@ bye:
   if (unicode)
     *unicode = NULL;
   return haiku_get_clipboard();
-  #elif defined(USE_X11)
+  #elif defined(USE_X11) || defined(__macosx__)
+    #if defined(USE_X11)
   Atom selection = XInternAtom(X11_display, "CLIPBOARD", False);
   Window selection_owner = XGetSelectionOwner(X11_display, selection);
 
@@ -430,11 +433,18 @@ bye:
     {
       char * utf8_str = X11_clipboard;
       X11_clipboard = NULL;
+  #else
+  {
+    // mac OS without X11
+    const char * utf8_str = get_paste_board();
+    if (utf8_str != NULL)
+    {
+  #endif
       // UTF8 -> UTF16 and UTF8 -> ANSI conversions
 #if defined(ENABLE_FILENAMES_ICONV)
       if (unicode != NULL)
       {
-        char * input = utf8_str;
+        char * input = (char *)utf8_str;
         size_t inbytesleft = strlen(utf8_str);
         char * output;
         size_t outbytesleft;
@@ -459,7 +469,7 @@ bye:
       }
       {
         char * ansi_str;
-        char * input = utf8_str;
+        char * input = (char *)utf8_str;
         size_t inbytesleft = strlen(utf8_str);
         char * output;
         size_t outbytesleft;
@@ -473,7 +483,9 @@ bye:
           if (r != (size_t)-1)
           {
             *output = '\0';
+#if defined(USE_X11)
             free(utf8_str);
+#endif
             return ansi_str;
           }
           else
@@ -484,7 +496,13 @@ bye:
         }
       }
 #endif
+      // we can get there if the charset conversions failed
+      // return the uf8_string, that's better than nothing
+#if defined(USE_X11)
       return utf8_str;
+#else
+      return strdup(utf8_str);
+#endif
     }
   }
   return NULL;

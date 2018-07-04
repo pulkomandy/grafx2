@@ -397,3 +397,23 @@ int main (int argc, char **argv)
 #endif
     return 0;
 }
+
+const char * get_paste_board(void)
+{
+  NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+  // only available with 10.6+
+  //NSArray *classArray = [NSArray arrayWithObject:[NSString class]];
+  //NSDictionary *options = [NSDictionary dictionary];
+
+  //BOOL ok = [pasteboard canReadObjectForClasses:classArray options:options];
+  //if (ok) {
+  //  NSArray *objectsToPaste = [pasteboard readObjectsForClasses:classArray options:options];
+  //  NSString * string = [objectsToPaste objectAtIndex:0];
+  //  NSLog(@"%@", string);
+  //}
+
+  //NSLog(@"types : %@", [pasteboard types]);
+  NSString * string = [pasteboard stringForType:NSStringPboardType];
+  NSLog(@"pasteboard content : %@", string);
+  return [string UTF8String];
+}
