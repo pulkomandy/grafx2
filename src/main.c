@@ -338,6 +338,12 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
       else
         s++;
 
+#ifdef __macosx__
+      // ignore -psn argument
+      if (memcmp(s, "psn_", 4) ==0)
+        continue;
+#endif
+
       for (tmpi = 0; tmpi < ARRAY_SIZE(cmdparams); tmpi++)
       {
         if (!strcmp(s, cmdparams[tmpi].param))
