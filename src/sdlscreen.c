@@ -571,7 +571,7 @@ void Define_icon(void)
 
     // Icon is resource #1
     hresource = FindResource(hInstance,
-      MAKEINTRESOURCE(1),
+      MAKEINTRESOURCE(100),
       RT_GROUP_ICON);
     if (hresource==NULL)
       break;
@@ -697,7 +697,7 @@ void Define_icon(void)
         byte *icon_mask;
         int x,y;
 
-        icon_mask = malloc(icon->w * icon->h / 8);
+        icon_mask = (byte *)malloc(icon->w * icon->h / 8);
         memset(icon_mask, 0, icon->w * icon->h / 8);
         for (y=0; y<icon->h; y++)
           for (x=0; x<icon->w; x++)
