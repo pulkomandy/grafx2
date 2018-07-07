@@ -13,6 +13,9 @@ addons:
     - libsdl1.2-dev
     - libsdl-image1.2-dev
     - libsdl-ttf2.0-dev
+    - libsdl2-dev
+    - libsdl2-image-dev
+    - libsdl2-ttf-dev
     - liblua5.2-dev
     - nsis
 
@@ -32,7 +35,7 @@ compiler:
 
 before_install:
   - 'if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update > /dev/null ; fi'
-  - 'if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install sdl sdl_image sdl_ttf lua ; fi'
+  - 'if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install sdl sdl_image sdl_ttf sdl2 sdl2_image sdl2_ttf lua ; fi'
 
 # to avoid errors with  git rev-list --count 1af8c74f53110e349d8f0d19b14599281913f71f..
 install:
@@ -41,9 +44,10 @@ install:
 script:
   - 'cd $TRAVIS_BUILD_DIR'
   - 'if [ "$WIN32CROSS" = "1" ] ; then make 3rdparty ; fi'
-  - 'if [ "$TRAVIS_OS_NAME" = "osx" ] ; then make ; else make -j3 ; fi'
+  - 'make -j3'
   - 'make ziprelease'
   - 'if [ "$WIN32CROSS" = "1" ] ; then make win32installer ; fi'
-  - 'if [ "$WIN32CROSS" = "1" ] ; then API=win32 make -j3 ; fi'
-  - 'if [ "$WIN32CROSS" = "1" ] ; then API=win32 make ziprelease ; fi'
+  - 'if [ "$WIN32CROSS" = "1" ] ; then API=win32 make -j3 ; else API=sdl2 make -j3 ; fi'
+  - 'if [ "$WIN32CROSS" = "1" ] ; then API=win32 make ziprelease ; else API=sdl2 make ziprelease ; fi'
   - 'if [ "$WIN32CROSS" = "1" ] ; then API=win32 make win32installer ; fi'
+  - 'if [ "$WIN32CROSS" = "" ] && [ "$TRAVIS_OS_NAME" = "linux" ] ; then API=x11 make -j3 ; API=x11 make ziprelease ; fi'
