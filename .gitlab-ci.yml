@@ -10,11 +10,11 @@ job_linux:
     stage: build
     script:
         - "cd src && make && make ziprelease"
-        - "API=sdl2 make"
+        - "API=sdl2 make && API=sdl2 make ziprelease"
     artifacts:
         paths:
             - "*.zip"
-            - "*.tgz"
+            - "grafx2*.tgz"
 
 job_win32:
     stage: build
