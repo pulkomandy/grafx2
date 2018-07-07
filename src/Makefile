@@ -191,6 +191,11 @@ else
     SDLCOPT = $(MACOSX_ARCH) -I$(FWDIR)/SDL.framework/Headers -I$(FWDIR)/SDL_image.framework/Headers -I$(FWDIR)/SDL_ttf.framework/Headers -D_THREAD_SAFE
 endif
 endif
+ifeq ($(API),sdl2)
+    SDLCOPT = $(shell sdl2-config --cflags)
+    SDLLOPT = $(shell sdl2-config --libs) $(shell pkg-config --libs SDL2_image)
+    SDLLOPT += -Wl,-framework,Cocoa
+endif
 
     # these are for use with macports
     LUAPKG := $(shell for p in lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua51 lua ; do pkg-config --exists $$p && echo $$p && break ; done)
