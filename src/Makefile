@@ -869,7 +869,7 @@ clean :
 	$(DELCOMMAND) $(OBJ)
 	$(DELCOMMAND) $(OBJDIR)/versiontag
 	$(DELCOMMAND) $(BIN)
-	$(DELCOMMAND) recoil.c recoil.h
+	if [ -d ../3rdparty ] ; then $(DELCOMMAND) recoil.c recoil.h ; fi
 
 ifneq ($(PLATFORM),amiga-vbcc)
 # Linux installation of the program
