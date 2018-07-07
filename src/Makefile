@@ -777,8 +777,9 @@ ziprelease: $(MACAPPEXE)
 endif
 
 # Create a zip archive ready for upload to the website, including binaries and sourcecode
-ziprelease: release $(OBJDIR)/versiontag
-	cd .. && $(TAR) czf "src-`cat $(OBJDIR:../%=%)/versiontag`.tgz" src/*.c src/*.cpp src/*.h src/Makefile src/Makefile.dep src/gfx2.ico src/Grafx2_Prefix.pch src/SDLMain.m
+ziprelease: release $(OBJDIR)/versiontag gfx2.rc
+	cd .. && $(TAR) czf "src-`cat $(OBJDIR:../%=%)/versiontag`.tgz" src/*.c src/*.cpp src/*.h src/Makefile src/Makefile.dep \
+	  src/gfx2.ico src/Grafx2_Prefix.pch src/SDLMain.m src/gfx2.rc
 	cd .. && $(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR:../%=%)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" $(BIN:../%=%) share/grafx2/gfx2def.ini $(SCRIPT_FILES:../%=%) $(SKIN_FILES:../%=%) share/grafx2/gfx2.gif share/icons/grafx2.svg doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt doc/PF_fonts.txt $(FONT_FILES:../%=%) doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt doc/README-lua.txt src-`cat $(OBJDIR:../%=%)/versiontag`.tgz $(PLATFORMFILES:../%=%)
 	$(DELCOMMAND) "../src-`cat $(OBJDIR)/versiontag`.tgz"
 ifeq ($(PLATFORM),Darwin)
@@ -834,13 +835,16 @@ $(OBJDIR)/%.o : %.m
 depend :
 	$(CC) -MM *.c | sed 's:^[^ ]:$$(OBJDIR)/&:' > Makefile.dep
 
+# update the gfx2.rc Windows ressource file
 comma := ,
 
-# Link the icons to the program under windows
-$(OBJDIR)/winres.o : gfx2.rc gfx2.ico $(REVISION_CACHE) $(LABEL_CACHE)
+gfx2.rc: gfx2.ico $(REVISION_CACHE) $(LABEL_CACHE)
 	sed -e 's/\(VERSION [ ]*\)\(.*\)/\1$(subst .,$(comma),$(subst wip,,$(LABEL))),0,$(firstword $(subst -, ,$(GIT_REVISION)))/' \
-	    -e 's/\(Version", "\)\(.*\)"/\1$(subst wip.,wip,$(LABEL).$(GIT_REVISION))"/' $< > $<.tmp
-	if ! diff -q -i $< $<.tmp ; then mv $<.tmp $< ; else rm $<.tmp ; fi
+	    -e 's/\(Version", "\)\(.*\)"/\1$(subst wip.,wip,$(LABEL).$(GIT_REVISION))"/' $@ > $@.tmp
+	if ! diff -q -i $@ $@.tmp ; then mv $@.tmp $@ ; else rm $@.tmp ; fi
+
+# Link the icons to the program under windows
+$(OBJDIR)/winres.o : gfx2.rc gfx2.ico
 	$(WINDRES) -i $< -o $(OBJDIR)/winres.o
 
 # Compile the C++ file needed in Haiku to use the API
