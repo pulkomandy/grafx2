@@ -613,7 +613,7 @@ endif
 
 ### And now for the real build rules ###
 
-.PHONY : all debug release clean depend zip force install uninstall valgrind
+.PHONY : all debug release clean depend force install uninstall valgrind
 
 # This is the list of the objects we want to build. Dependancies are built by "make depend" automatically.
 OBJS = main.o init.o graph.o $(APIOBJ) misc.o special.o \
@@ -681,6 +681,8 @@ FONTS = 8pxfont.png Tuffy.ttf PF_Arma_5__.png \
         PF_Tempesta_7.png PF_Tempesta_7_.png PF_Tempesta_7__.png PF_Tempesta_7___.png \
         PF_Westa_7_.png PF_Westa_7__.png
 FONT_FILES = $(addprefix ../share/grafx2/fonts/,$(FONTS))
+
+DOC_FILES = $(wildcard ../doc/*.txt)
 
 
 ifeq ($(PLATFORM),Darwin)
@@ -772,20 +774,32 @@ endif
 release : $(BIN)
 	$(STRIP) $(BIN)
 
+# .tgz archive with source only files
+SRCARCH = ../src-$(shell cat $(OBJDIR)/versiontag).tgz
+
+$(SRCARCH):	$(wildcard *.c) $(wildcard *.cpp) $(wildcard *.h) Makefile Makefile.dep gfx2.ico Grafx2_Prefix.pch SDLMain.m gfx2.rc
+	cd .. && $(TAR) czf $(SRCARCH:../%=%) $(addprefix src/,$^)
+
 ifeq ($(PLATFORM),Darwin)
 ziprelease: $(MACAPPEXE)
 endif
 
 # Create a zip archive ready for upload to the website, including binaries and sourcecode
-ziprelease: release $(OBJDIR)/versiontag gfx2.rc
-	cd .. && $(TAR) czf "src-`cat $(OBJDIR:../%=%)/versiontag`.tgz" src/*.c src/*.cpp src/*.h src/Makefile src/Makefile.dep \
-	  src/gfx2.ico src/Grafx2_Prefix.pch src/SDLMain.m src/gfx2.rc
-	cd .. && $(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR:../%=%)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" $(BIN:../%=%) share/grafx2/gfx2def.ini $(SCRIPT_FILES:../%=%) $(SKIN_FILES:../%=%) share/grafx2/gfx2.gif share/icons/grafx2.svg doc/README.txt doc/COMPILING.txt doc/gpl-2.0.txt doc/PF_fonts.txt $(FONT_FILES:../%=%) doc/README-zlib1.txt doc/README-SDL.txt doc/README-SDL_image.txt doc/README-SDL_ttf.txt doc/README-lua.txt src-`cat $(OBJDIR:../%=%)/versiontag`.tgz $(PLATFORMFILES:../%=%)
-	$(DELCOMMAND) "../src-`cat $(OBJDIR)/versiontag`.tgz"
+ziprelease: release $(OBJDIR)/versiontag $(SRCARCH)
+	cd .. && $(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR:../%=%)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
+	  $(BIN:../%=%) share/grafx2/gfx2def.ini $(SCRIPT_FILES:../%=%) $(SKIN_FILES:../%=%) \
+	  share/grafx2/gfx2.gif share/icons/grafx2.svg \
+	  $(DOC_FILES:../%=%) $(FONT_FILES:../%=%) $(SRCARCH:../%=%) $(PLATFORMFILES:../%=%)
 ifeq ($(PLATFORM),Darwin)
 	$(ZIP) $(ZIPOPT) -r ../Grafx2.app-`cat $(OBJDIR)/versiontag`.zip Grafx2.app
 endif
-	$(TAR) czf "../grafx2-`cat $(OBJDIR)/versiontag`$(TTFLABEL)-src.tgz" $(TARTRANSFORM) ../src/*.c ../src/*.cpp ../src/*.h ../src/Makefile ../src/Makefile.dep ../share/grafx2/gfx2def.ini $(SCRIPT_FILES) $(SKIN_FILES) ../src/gfx2.ico ../share/grafx2/gfx2.gif ../share/icons/grafx2.svg ../doc/README.txt ../doc/COMPILING.txt ../doc/gpl-2.0.txt ../doc/PF_fonts.txt ../misc/unix/grafx2.1 ../misc/unix/grafx2.xpm ../misc/unix/grafx2.desktop ../misc/morphos/grafx2.info $(FONT_FILES) ../src/Grafx2_Prefix.pch ../src/SDLMain.m
+	$(TAR) czf "../grafx2-`cat $(OBJDIR)/versiontag`-src.tgz" $(TARTRANSFORM) \
+	  ../src/*.c ../src/*.cpp ../src/*.h ../src/Makefile ../src/Makefile.dep \
+	  ../src/Grafx2_Prefix.pch ../src/SDLMain.m ../src/gfx2.rc ../src/gfx2.ico \
+	  ../src/Grafx2.icns ../src/English.lproj/* \
+	  ../share/grafx2/gfx2def.ini $(SCRIPT_FILES) $(SKIN_FILES) \
+	  ../share/grafx2/gfx2.gif ../share/grafx2/gfx2.png ../share/icons/grafx2.svg \
+	  $(DOC_FILES) $(wildcard ../misc/*/*) $(FONT_FILES)
 
 $(BIN) : $(OBJ)
 	@test -d ../bin || $(MKDIR) ../bin
