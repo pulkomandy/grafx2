@@ -697,8 +697,8 @@ $(MACAPPEXE) : $(BIN) $(OBJDIR)/versiontag
 	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.4/palette
 	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.4/picture
 	echo 'APPL????' > Grafx2.app/Contents/PkgInfo
-	cp ../Info.plist Grafx2.app/Contents
-	cp -r Grafx2.icns Grafx2.app/Contents/Resources
+	cp Info.plist Grafx2.app/Contents
+	cp Grafx2.icns Grafx2.app/Contents/Resources
 ifeq ($(API),x11)
 	cp ../share/grafx2/gfx2.png Grafx2.app/Contents/Resources
 endif
@@ -796,7 +796,7 @@ endif
 	$(TAR) czf "../grafx2-`cat $(OBJDIR)/versiontag`-src.tgz" $(TARTRANSFORM) \
 	  ../src/*.c ../src/*.cpp ../src/*.h ../src/Makefile ../src/Makefile.dep \
 	  ../src/Grafx2_Prefix.pch ../src/SDLMain.m ../src/gfx2.rc ../src/gfx2.ico \
-	  ../src/Grafx2.icns ../src/English.lproj/* \
+	  ../src/Grafx2.icns ../src/English.lproj/* ../src/Info.plist \
 	  ../share/grafx2/gfx2def.ini $(SCRIPT_FILES) $(SKIN_FILES) \
 	  ../share/grafx2/gfx2.gif ../share/grafx2/gfx2.png ../share/icons/grafx2.svg \
 	  $(DOC_FILES) $(wildcard ../misc/*/*) $(FONT_FILES)
