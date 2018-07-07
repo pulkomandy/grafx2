@@ -39,7 +39,11 @@ ifeq (true,$(shell git rev-parse --is-inside-work-tree))
   ifneq (,$(CI_COMMIT_REF_NAME))
     GIT_BRANCH = $(CI_COMMIT_REF_NAME)
   else
+  ifneq (,$(TRAVIS_BRANCH))
+    GIT_BRANCH = $(TRAVIS_BRANCH)
+  else
     GIT_BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
+  endif
   endif
   ifneq (master,$(GIT_BRANCH))
     GIT_REVISION := $(GIT_REVISION)-$(GIT_BRANCH)
