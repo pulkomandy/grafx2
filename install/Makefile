@@ -6,8 +6,9 @@ SED = sed
 
 API ?= sdl
 
-VERSIONTAG = ../obj/win32-$(API)/versiontag
-VERSION := $(shell cat $(VERSIONTAG))
+GIT_REVISION := $(shell cat ../src/version.c | cut -f 2 -d '"')
+LABEL := $(shell cat ../src/pversion.c | cut -f 2 -d '"')
+VERSION := $(subst wip.,wip,$(LABEL).$(GIT_REVISION))
 
 SOURCES = ../src-$(VERSION).tgz
 INSTALLER = grafx2-$(API)-$(VERSION).win32.exe
@@ -17,9 +18,5 @@ all:	$(INSTALLER)
 $(INSTALLER):	WinInstaller.nsi $(SOURCES) $(VERSIONTAG)
 	$(SED) -e 's/VERSION .*/VERSION $(VERSION)/' -e 's/API .*/API $(API)/' $< | $(MAKENSIS) -
 
-$(SOURCES):	../grafx2-$(VERSION)-win32.zip 
-	cd .. && $(UNZIP) grafx2-$(VERSION)-win32.zip src-$(VERSION).tgz
-	touch $@
-
-../grafx2-$(VERSION)-win32.zip:	$(VERSIONTAG)
-	cd ../src && WIN32CROSS=1 $(MAKE) ziprelease
+$(SOURCES): $(wildcard ../src/*.c) $(wildcard ../src/*.h)
+	cd ../src && WIN32CROSS=1 $(MAKE) $(SOURCES)

@@ -60,6 +60,8 @@ else
   LABEL := $(shell cat pversion.c | cut -f 2 -d '"')
 endif
 
+  VERSIONTAG = $(subst wip.,wip,$(LABEL).$(GIT_REVISION))
+
   CFLAGS_CACHE = $(OBJDIR)/.cflags.cache
 
   RECOILVER = 4.3.0
@@ -687,7 +689,7 @@ DOC_FILES = $(wildcard ../doc/*.txt)
 
 ifeq ($(PLATFORM),Darwin)
 all : $(MACAPPEXE)
-$(MACAPPEXE) : $(BIN) $(OBJDIR)/versiontag
+$(MACAPPEXE) : $(BIN)
 	rm -rf Grafx2.app
 	mkdir -p Grafx2.app Grafx2.app/Contents Grafx2.app/Contents/Frameworks Grafx2.app/Contents/MacOS Grafx2.app/Contents/Resources Grafx2.app/Contents/Resources/scripts
 	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.4
@@ -703,7 +705,7 @@ ifeq ($(API),x11)
 	cp ../share/grafx2/gfx2.png Grafx2.app/Contents/Resources
 endif
 	mkdir -p Grafx2.app/Contents/Resources/English.lproj
-	iconv -f UTF-16BE English.lproj/InfoPlist.strings | sed -e 's/Grafx2 version [.0-9]*/Grafx2 version $(shell cat $(OBJDIR)/versiontag)/' | iconv -t UTF-16BE > Grafx2.app/Contents/Resources/English.lproj/InfoPlist.strings
+	iconv -f UTF-16BE English.lproj/InfoPlist.strings | sed -e 's/Grafx2 version [.0-9]*/Grafx2 version $(VERSIONTAG)/' | iconv -t UTF-16BE > Grafx2.app/Contents/Resources/English.lproj/InfoPlist.strings
 	cp -r ../share/grafx2/fonts Grafx2.app/Contents/Resources
 	cp -r ../share/grafx2/skins Grafx2.app/Contents/Resources
 	cp -r ../share/grafx2/gfx2def.ini Grafx2.app/Contents/Resources
@@ -775,7 +777,7 @@ release : $(BIN)
 	$(STRIP) $(BIN)
 
 # .tgz archive with source only files
-SRCARCH = ../src-$(shell cat $(OBJDIR)/versiontag).tgz
+SRCARCH = ../src-$(VERSIONTAG).tgz
 
 $(SRCARCH):	$(wildcard *.c) $(wildcard *.cpp) $(wildcard *.h) Makefile Makefile.dep gfx2.ico Grafx2_Prefix.pch SDLMain.m gfx2.rc
 	cd .. && $(TAR) czf $(SRCARCH:../%=%) $(addprefix src/,$^)
@@ -785,15 +787,15 @@ ziprelease: $(MACAPPEXE)
 endif
 
 # Create a zip archive ready for upload to the website, including binaries and sourcecode
-ziprelease: release $(OBJDIR)/versiontag $(SRCARCH)
-	cd .. && $(ZIP) $(ZIPOPT) "grafx2-`cat $(OBJDIR:../%=%)/versiontag`$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
+ziprelease: release $(SRCARCH)
+	cd .. && $(ZIP) $(ZIPOPT) "grafx2-$(VERSIONTAG)$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
 	  $(BIN:../%=%) share/grafx2/gfx2def.ini $(SCRIPT_FILES:../%=%) $(SKIN_FILES:../%=%) \
 	  share/grafx2/gfx2.gif share/icons/grafx2.svg \
 	  $(DOC_FILES:../%=%) $(FONT_FILES:../%=%) $(SRCARCH:../%=%) $(PLATFORMFILES:../%=%)
 ifeq ($(PLATFORM),Darwin)
-	$(ZIP) $(ZIPOPT) -r ../Grafx2.app-`cat $(OBJDIR)/versiontag`.zip Grafx2.app
+	$(ZIP) $(ZIPOPT) -r ../Grafx2.app-$(VERSIONTAG).zip Grafx2.app
 endif
-	$(TAR) czf "../grafx2-`cat $(OBJDIR)/versiontag`-src.tgz" $(TARTRANSFORM) \
+	$(TAR) czf "../grafx2-$(VERSIONTAG)-src.tgz" $(TARTRANSFORM) \
 	  ../src/*.c ../src/*.cpp ../src/*.h ../src/Makefile ../src/Makefile.dep \
 	  ../src/Grafx2_Prefix.pch ../src/SDLMain.m ../src/gfx2.rc ../src/gfx2.ico \
 	  ../src/Grafx2.icns ../src/English.lproj/* ../src/Info.plist \
@@ -816,10 +818,6 @@ version.c:	$(REVISION_CACHE)
 
 pversion.c:	$(LABEL_CACHE)
 	echo "const char Program_version[]=\"$(LABEL)\";" > pversion.c
-
-$(OBJDIR)/versiontag: pversion.c $(REVISION_CACHE)
-	$(if $(wildcard $(OBJDIR)),,$(MKDIR) $(OBJDIR))
-	echo "$(subst wip.,wip,$(LABEL).$(GIT_REVISION))" > $@
 
 RES := $(shell $(MKDIR) $(OBJDIR) ; if [ ! -f $(CFLAGS_CACHE) ] || [ "`cat $(CFLAGS_CACHE)`" != "$(COPT) $(CFLAGS)" ] ; then echo "$(COPT) $(CFLAGS)" > $(CFLAGS_CACHE) ; fi )
 
@@ -867,7 +865,6 @@ $(OBJDIR)/haiku.o : haiku.cpp
 
 clean :
 	$(DELCOMMAND) $(OBJ)
-	$(DELCOMMAND) $(OBJDIR)/versiontag
 	$(DELCOMMAND) $(BIN)
 	if [ -d ../3rdparty ] ; then $(DELCOMMAND) recoil.c recoil.h ; fi
 
