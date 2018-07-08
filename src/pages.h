@@ -42,7 +42,10 @@ extern byte * FX_feedback_screen;
 
 /// The pixels of visible layers, flattened copy, used for no-feedback effects.
 extern T_Bitmap Main_visible_image_backup;
-/// The index of visible pixels from ::Main.visible_image. Points to the right layer.
+/** The index of visible pixels Main page ::T_Document.visible_image.
+ *
+ * Points to the right layer.
+ */
 extern T_Bitmap Main_visible_image_depth_buffer;
 
 ///

@@ -1258,6 +1258,7 @@ void Print_filename_in_fileselector(void)
 {
   char filename[32];
   strncpy(filename, Selector_filename, sizeof(filename));
+  printf("%d %s %ls\n", __LINE__, Selector_filename, Selector_filename_unicode);
 #ifdef ENABLE_FILENAMES_ICONV
   {
     char * input = (char *)Selector_filename;
@@ -2003,6 +2004,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
             if(Directory_exists(Selector_filename)) Selected_type = 1;
             else Selected_type = 0;
           }
+  		  printf("%d %s %ls\n", __LINE__, Selector_filename, Selector_filename_unicode);
 
           // Now load immediately, but only if the user exited readline by pressing ENTER
           if (Mouse_K == 0) has_clicked_ok = 1;

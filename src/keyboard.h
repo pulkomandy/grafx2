@@ -44,41 +44,46 @@
 #endif
 
 
-/*!
-  Convert an SDL keysym to an ANSI/ASCII character.
-  This is used to type text and numeric values in input boxes.
-  @param keysym SDL symbol to convert
-*/
 #if defined(USE_SDL)
+/*! Convert an SDL keysym to an ANSI/ASCII character.
+
+  This is used to type text and numeric values in input boxes.
+
+  @param[in] keysym SDL symbol to convert
+*/
 word Keysym_to_ANSI(SDL_keysym keysym);
 #elif defined(USE_SDL2)
 word Keysym_to_ANSI(SDL_Keysym keysym);
 #endif
 
-/*!
-  Convert an SDL keysym to an internal keycode number.
-  This is needed because SDL tends to split the information across the unicode sym, the regular sym, and the raw keycode.
-  We also need to differenciate 1 (keypad) and 1 (regular keyboard), and some other things.
-  See the notice at the beginning of keyboard.h for the format of a keycode.
-  @param keysym SDL symbol to convert
-*/
 #if defined(USE_SDL)
+/*! Convert an SDL keysym to an internal keycode number.
+
+  This is needed because SDL tends to split the information across the unicode
+  sym, the regular sym, and the raw keycode. We also need to differenciate
+  1 (keypad) and 1 (regular keyboard), and some other things. See the notice
+  at the beginning of keyboard.h for the format of a keycode.
+
+  @param[in] keysym SDL symbol to convert
+  @return internal keycode value
+*/
 word Keysym_to_keycode(SDL_keysym keysym);
 #elif defined(USE_SDL2)
 word Keysym_to_keycode(SDL_Keysym keysym);
 #endif
 
-/*!
-    Helper function to convert between SDL system and the old coding for PC keycodes.
-    This is only used to convert configuration files from the DOS version of 
+/*! Helper function to convert between SDL system and the old coding for PC keycodes.
+    This is only used to convert configuration files from the DOS version of
     Grafx2, where keyboard codes are in in the IBM PC AT form.
   @param scancode Scancode to convert
 */
 word Key_for_scancode(word scancode);
 
-/*!
-    Returns key name in a string. Used to display them in the helpscreens and in the keymapper window.
-  @param key keycode of the key to translate, including modifiers
+/*! Returns key name in a string.
+	
+	Used to display them in the helpscreens and in the keymapper window.
+
+    @param[in] key keycode of the key to translate, including modifiers
 */
 const char * Key_name(word key);
 
