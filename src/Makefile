@@ -476,18 +476,20 @@ endif
       else
       ifdef ATARICROSS
         #cross compile an exec for atari TOS/MiNT machine
-        CC = m68k-atari-mint-gcc
+        ARCH ?= m68k
+        MCPU ?= -m68020-60
+        CC = $(ARCH)-atari-mint-gcc
         BIN = ../bin/grafx2.ttp
         LUALOPT = -llua
-        OBJDIR = ../obj/m68k-atari-mint
-        PLATFORM = m68k-atari-mint
-        STRIP = m68k-atari-mint-strip -s 
-        STACK = m68k-atari-mint-stack
-        FIX_FLAGS = m68k-atari-mint-flags
+        OBJDIR = ../obj/$(ARCH)-atari-mint
+        PLATFORM = $(ARCH)-atari-mint
+        STRIP = $(ARCH)-atari-mint-strip -s 
+        STACK = $(ARCH)-atari-mint-stack
+        FIX_FLAGS = $(ARCH)-atari-mint-flags
         FCLOPT = 
         LIBPNG_CONFIG = $(wildcard $(PREFIX)/bin/libpng12-config $(PREFIX)/bin/libpng14-config $(PREFIX)/bin/libpng16-config)
-        COPT = -W -Wall -m68020-60 -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -ffast-math -O$(OPTIM) -I$(PREFIX)/include `$(LIBPNG_CONFIG) --cflags` `$(PREFIX)/bin/sdl-config --cflags` $(JOYCOPT) $(LUACOPT)
-        LOPT = -static -m68020-60 -lSDL_image `$(PREFIX)/bin/sdl-config --libs` -L$(PREFIX)/lib -ltiff -ljpeg `$(LIBPNG_CONFIG) --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) -lm $(LAYERLOPT) -Wl,--stack,8k 
+        COPT = -W -Wall $(MCPU) -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -ffast-math -O$(OPTIM) -I$(PREFIX)/include `$(LIBPNG_CONFIG) --cflags` `$(PREFIX)/bin/sdl-config --cflags` $(JOYCOPT) $(LUACOPT)
+        LOPT = -static $(MCPU) -lSDL_image `$(PREFIX)/bin/sdl-config --libs` -L$(PREFIX)/lib -ltiff -ljpeg `$(LIBPNG_CONFIG) --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) -lm $(LAYERLOPT) -Wl,--stack,8k 
       else
 
         # Compiles a regular linux executable for the native platform
