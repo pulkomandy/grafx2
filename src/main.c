@@ -69,6 +69,7 @@
 #endif
 #endif
 
+#include "gfx2log.h"
 #include "const.h"
 #include "struct.h"
 #include "global.h"
@@ -124,6 +125,7 @@ void Display_syntax(void)
     "Syntax: grafx2 [<arguments>] [<picture1>] [<picture2>]\n\n"
     "<arguments> can be:\n"
     "\t-? -h -H -help     for this help screen\n"
+    "\t-verbose           to increase log verbosity\n"
     "\t-wide              to emulate a video mode with wide pixels (2x1)\n"
     "\t-tall              to emulate a video mode with tall pixels (1x2)\n"
     "\t-double            to emulate a video mode with double pixels (2x2)\n"
@@ -278,7 +280,8 @@ enum CMD_PARAMS
     CMDPARAM_RGB,
     CMDPARAM_GAMMA,
     CMDPARAM_SKIN,
-    CMDPARAM_SIZE
+    CMDPARAM_SIZE,
+    CMDPARAM_VERBOSE,
 };
 
 struct {
@@ -302,6 +305,7 @@ struct {
     {"gamma", CMDPARAM_GAMMA},
     {"skin", CMDPARAM_SKIN},
     {"size", CMDPARAM_SIZE},
+    {"verbose", CMDPARAM_VERBOSE},
 };
 
 #define ARRAY_SIZE(x) (int)(sizeof(x) / sizeof(x[0]))
@@ -492,6 +496,9 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
           Error(ERROR_COMMAND_LINE);
           exit(0);
         }
+        break;
+      case CMDPARAM_VERBOSE:
+        GFX2_verbosity_level++;
         break;
       default:
         // Si ce n'est pas un paramètre, c'est le nom du fichier à ouvrir

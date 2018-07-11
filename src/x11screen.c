@@ -29,6 +29,7 @@
 #include "screen.h"
 #include "gfx2surface.h"
 #include "loadsave.h"
+#include "gfx2log.h"
 
 Display * X11_display = NULL;
 Window X11_window = 0;
@@ -52,7 +53,7 @@ void GFX2_Set_mode(int *width, int *height, int fullscreen)
     X11_display = XOpenDisplay(NULL);// NULL is equivalent to getenv("DISPLAY")
   if (X11_display == NULL)
   {
-    fprintf(stderr, "X11: cannot open display\n");
+    GFX2_Log(GFX2_ERROR, "X11: cannot open display\n");
     exit(1);
   }
   s = DefaultScreen(X11_display);
@@ -64,12 +65,12 @@ void GFX2_Set_mode(int *width, int *height, int fullscreen)
     int i;
     int count = 0;
     int * depths = XListDepths(X11_display, s, &count);
-    printf("DefaultDepth = %d, DisplayPlanes = %d\n", DefaultDepth(X11_display, s), DisplayPlanes(X11_display, s));
+    GFX2_Log(GFX2_DEBUG, "DefaultDepth = %d, DisplayPlanes = %d\n", DefaultDepth(X11_display, s), DisplayPlanes(X11_display, s));
     if (depths != NULL)
     {
       for (i = 0; i < count; i++)
-        printf(" %d", depths[i]);
-      printf("\n");
+        GFX2_Log(GFX2_DEBUG, " %d", depths[i]);
+      GFX2_Log(GFX2_DEBUG, "\n");
       XFree(depths);
     }
   }
@@ -184,7 +185,7 @@ void GFX2_Set_mode(int *width, int *height, int fullscreen)
                              32, 0/**width * 4*/);
     if(X11_image == NULL)
     {
-      fprintf(stderr, "XCreateImage failed\n");
+      GFX2_Log(GFX2_ERROR, "XCreateImage failed\n");
       exit(1);
     }
   }

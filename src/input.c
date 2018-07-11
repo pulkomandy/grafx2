@@ -40,6 +40,7 @@
 #include <X11/Xutil.h>
 #endif
 
+#include "gfx2log.h"
 #include "global.h"
 #include "keyboard.h"
 #include "screen.h"
@@ -1264,7 +1265,6 @@ int Get_input(int sleep_time)
         case KeyPress:
           {
             KeySym sym;
-            //printf("key code = %d state=0x%08x\n", event.xkey.keycode, event.xkey.state);
             // right/left window 40 Mod4Mask
             // left alt = 8         Mod1Mask
             // right alt = 80       Mod5Mask
@@ -1279,7 +1279,8 @@ int Get_input(int sleep_time)
               mod |= MOD_META;
             //sym = XKeycodeToKeysym(X11_display, event.xkey.keycode, 0);
             sym = XkbKeycodeToKeysym(X11_display, event.xkey.keycode, 0, 0);
-            //printf("sym = %04lx %s\t\tmod=%04x\n", sym, XKeysymToString(sym), mod);
+            GFX2_Log(GFX2_DEBUG, "key code = %3d state=0x%08x sym = 0x%04lx %s\tmod=%04x\n",
+                     event.xkey.keycode, event.xkey.state, sym, XKeysymToString(sym), mod);
             Key = mod | (sym & 0x0fff);
             //sym = XkbKeycodeToKeysym(X11_display, event.xkey.keycode, 0, event.xkey.state);
             if (((sym & 0xf000) != 0xf000) || IsKeypadKey(sym)) // test for standard key or KeyPad
@@ -1364,7 +1365,7 @@ int Get_input(int sleep_time)
           user_feedback_required = Move_cursor_with_constraints();
           break;
         case Expose:
-          printf("Expose (%d,%d) (%d,%d)\n", event.xexpose.x, event.xexpose.y, event.xexpose.width, event.xexpose.height);
+          GFX2_Log(GFX2_DEBUG, "Expose (%d,%d) (%d,%d)\n", event.xexpose.x, event.xexpose.y, event.xexpose.width, event.xexpose.height);
           Update_rect(event.xexpose.x, event.xexpose.y,
                       event.xexpose.width, event.xexpose.height);
           break;
@@ -1387,7 +1388,7 @@ int Get_input(int sleep_time)
         case ClientMessage:
           if (event.xclient.message_type == XInternAtom(X11_display,"WM_PROTOCOLS", False))
           {
-            if (event.xclient.data.l[0] == XInternAtom(X11_display, "WM_DELETE_WINDOW", False))
+            if ((Atom)event.xclient.data.l[0] == XInternAtom(X11_display, "WM_DELETE_WINDOW", False))
             {
               Quit_is_required = 1;
               user_feedback_required = 1;
@@ -1402,10 +1403,11 @@ int Get_input(int sleep_time)
             //int list = event.xclient.data.l[1] & 1;
             xdnd_version = event.xclient.data.l[1] >> 24;
             xdnd_source = event.xclient.data.l[0];
+            GFX2_Log(GFX2_DEBUG, "XdndEnter version=%d source=%lu\n", xdnd_version, xdnd_source);
           }
           else if (event.xclient.message_type == XInternAtom(X11_display, "XdndLeave", False))
           {
-            //printf("XdndLeave\n");
+            GFX2_Log(GFX2_DEBUG, "XdndLeave\n");
           }
           else if (event.xclient.message_type == XInternAtom(X11_display, "XdndPosition", False))
           {
@@ -1534,7 +1536,7 @@ int Get_input(int sleep_time)
           }
           break;
         default:
-          printf("event.type = %d\n", event.type);
+          GFX2_Log(GFX2_INFO, "X11 event.type = %d not handled\n", event.type);
       }
     }
     // If the cursor was moved since last update,

@@ -47,6 +47,7 @@
 #include <SDL_endian.h>
 #endif
 
+#include "gfx2log.h"
 #include "buttons.h"
 #include "const.h"
 #include "errors.h"
@@ -624,7 +625,7 @@ void Load_image(T_IO_Context *context)
 
   if (File_error>0)
   {
-    fprintf(stderr,"Unable to load file %s (error %d)!\n",context->File_name, File_error);
+    GFX2_Log(GFX2_WARNING, "Unable to load file %s (error %d)! format:%s\n", context->File_name, File_error, format->Label);
     if (context->Type!=CONTEXT_SURFACE)
       Error(0);
   }
