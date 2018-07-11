@@ -407,10 +407,10 @@ const char * Key_name(word key)
 {
   typedef struct
   {
-  word keysym;
-  char *Key_name;
+    word keysym;
+    const char *Key_name;
   } T_key_label;
-  T_key_label key_labels[] =
+  static const T_key_label key_labels[] =
   {
 #ifdef GCWZERO
     { SDLK_BACKSPACE   , "Right-SP" },
@@ -555,7 +555,7 @@ const char * Key_name(word key)
   if (key>=KEY_JOYBUTTON && key<=KEY_JOYBUTTON+99)
   {
 
-    char *button_name;
+    const char *button_name;
     switch(key-KEY_JOYBUTTON)
     {
       #ifdef JOY_BUTTON_UP
@@ -641,28 +641,16 @@ const char * Key_name(word key)
     return buffer;
   }
 
+#if defined(USE_SDL) || defined(USE_SDL2)
   if (key & 0x800)
   {
     sprintf(buffer+strlen(buffer), "[%d]", key & 0x7FF);
     return buffer;
   }
   key = key & 0x7FF;
-  // Touches ASCII
-  if (key>=' ' && key < 127)
-  {
-    sprintf(buffer+strlen(buffer), "'%c'", toupper(key));
-    return buffer;
-  }
-#if defined(USE_SDL)
-  // Touches 'World'
-  if (key>=SDLK_WORLD_0 && key <= SDLK_WORLD_95)
-  {
-    sprintf(buffer+strlen(buffer), "w%d", key - SDLK_WORLD_0);
-    return buffer;
-  }
 #endif
 
-  // Touches au libellé connu
+  // Keys with a known label
   for (index=0; index < (long)sizeof(key_labels)/(long)sizeof(T_key_label);index++)
   {
     if (key == key_labels[index].keysym)
@@ -671,10 +659,26 @@ const char * Key_name(word key)
       return buffer;
     }
   }
-  // Autres touches inconnues
-  sprintf(buffer+strlen(buffer), "0x%X", key & 0x7FF);
-  return buffer;
 
+  // ASCII characters keys
+  if (key>=' ' && key < 127)
+  {
+    sprintf(buffer+strlen(buffer), "'%c'", toupper(key));
+    return buffer;
+  }
+
+#if defined(USE_SDL)
+  // 'World' keys
+  if (key>=SDLK_WORLD_0 && key <= SDLK_WORLD_95)
+  {
+    sprintf(buffer+strlen(buffer), "w%d", key - SDLK_WORLD_0);
+    return buffer;
+  }
+#endif
+
+  // Unknown keys
+  sprintf(buffer+strlen(buffer), "0x%X", key);
+  return buffer;
 }
 
 #if defined(USE_SDL)
