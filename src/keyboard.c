@@ -506,7 +506,22 @@ const char * Key_name(word key)
 #endif
     { KEY_MOUSEMIDDLE, "Mouse3" },
     { KEY_MOUSEWHEELUP, "WheelUp" },
-    { KEY_MOUSEWHEELDOWN, "WheelDown" }
+    { KEY_MOUSEWHEELDOWN, "WheelDown" },
+#if !defined(USE_SDL) && !defined(USE_SDL2) && defined(WIN32)
+    /* windows VK_* codes which translate to ASCII characters are
+     * not using the ASCII code, except for digit and letters */
+    { KEY_COMMA,       "','" },
+    { KEY_PERIOD,      "'.'" },
+    { KEY_EQUALS,      "'='" },
+    { KEY_MINUS,       "'-'" },
+    { VK_OEM_1,        "';'" },
+    { VK_OEM_2,        "'/'" },
+    { KEY_BACKQUOTE,   "'`'" }, // VK_OEM_3
+    { KEY_LEFTBRACKET, "'['" }, // VK_OEM_4
+    { VK_OEM_5,        "'\\'"},
+    { KEY_RIGHTBRACKET,"']'" }, // VK_OEM_6
+    { VK_OEM_7,        "'''" },
+#endif
   };
 
   int index;
