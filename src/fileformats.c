@@ -104,7 +104,7 @@ static void Load_PNG_Sub(T_IO_Context * context, FILE * file);
 void Test_IMG(T_IO_Context * context, FILE * file)
 {
   T_IMG_Header IMG_header;
-  byte signature[6]={0x01,0x00,0x47,0x12,0x6D,0xB0};
+  static const byte signature[6]={0x01,0x00,0x47,0x12,0x6D,0xB0};
 
   (void)context;
   File_error=1;
@@ -4099,8 +4099,6 @@ void Load_GIF(T_IO_Context * context)
         }
 
         Pre_load(context, LSDB.Width,LSDB.Height,file_size,FORMAT_GIF,ratio,(LSDB.Resol&7)+1);
-        context->Width=LSDB.Width;
-        context->Height=LSDB.Height;
 
         // Palette globale dispo = (LSDB.Resol  and $80)
         // Profondeur de couleur =((LSDB.Resol  and $70) shr 4)+1
