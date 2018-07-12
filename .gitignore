@@ -14,3 +14,9 @@
 /src/*.tgz
 /src/Grafx2.app
 /src/.*.cache
+
+/doc/html
+/doc/doxygen
+
+*.tgz
+*.zip
