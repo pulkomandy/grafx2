@@ -3,9 +3,11 @@ OPT = WIN32CROSS=1 \
 
 endif
 
-.PHONY:	all tools grafx2 ziprelease 3rdparty win32installer
+.PHONY:	all tools grafx2 ziprelease 3rdparty win32installer doc doxygen
 
 all:	grafx2 tools
+
+doc:	doxygen
 
 grafx2:
 	$(OPT)$(MAKE) -C src/
@@ -21,3 +23,6 @@ tools:
 
 win32installer:
 	$(MAKE) -C install/
+
+doxygen:
+	$(MAKE) -C tools/ doxygen

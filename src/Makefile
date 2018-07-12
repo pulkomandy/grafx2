@@ -642,7 +642,7 @@ endif
 
 ### And now for the real build rules ###
 
-.PHONY : all debug release clean depend force install uninstall valgrind
+.PHONY : all debug release clean depend force install uninstall valgrind doc doxygen
 
 # This is the list of the objects we want to build. Dependancies are built by "make depend" automatically.
 OBJS = main.o init.o graph.o $(APIOBJ) misc.o special.o \
@@ -966,5 +966,10 @@ endif
 
 valgrind: $(BIN)
 	valgrind --suppressions=../valgrind.grafx2.suppr --leak-check=full --show-leak-kinds=all --num-callers=20 $(BIN)
+
+doc:	doxygen
+
+doxygen:
+	$(MAKE) -C ../tools doxygen
 
 -include Makefile.dep
