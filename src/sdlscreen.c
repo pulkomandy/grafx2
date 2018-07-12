@@ -530,8 +530,42 @@ HWND GFX2_Get_Window_Handle(void)
   SDL_SysWMinfo wminfo;
 
   SDL_VERSION(&wminfo.version);
-  SDL_GetWMInfo(&wminfo);
+#if defined(USE_SDL)
+  if (SDL_GetWMInfo(&wminfo) <= 0)
+    return NULL;
   return wminfo.window;
+#else
+  if (Window_SDL == NULL)
+    return NULL;
+  if (!SDL_GetWindowWMInfo(Window_SDL, &wminfo))
+    return NULL;
+  return wminfo.info.win.window;
+#endif
+}
+#endif
+
+#ifdef SDL_VIDEO_DRIVER_X11
+int GFX2_Get_X11_Display_Window(Display * * display, Window * window)
+{
+  SDL_SysWMinfo wminfo;
+
+  SDL_VERSION(&wminfo.version);
+#if defined(USE_SDL)
+  // SDL 1.x
+  if (SDL_GetWMInfo(&wminfo) <= 0)
+    return 0;
+  *display = wminfo.info.x11.display;
+  *window = wminfo.info.x11.wmwindow;
+#else
+  // SDL 2.x
+  if (Window_SDL == NULL)
+    return 0;
+  if (!SDL_GetWindowWMInfo(Window_SDL, &wminfo))
+    return 0;
+  *display = wminfo.info.x11.display;
+  *window = wminfo.info.x11.window;
+#endif
+  return 1;
 }
 #endif
 
@@ -546,8 +580,20 @@ void Allow_drag_and_drop(int flag)
   // Inform Windows that we accept drag-n-drop events or not
 #ifdef __WIN32__
   DragAcceptFiles(GFX2_Get_Window_Handle(), flag?TRUE:FALSE);
-  SDL_EventState (SDL_SYSWMEVENT,flag?SDL_ENABLE:SDL_DISABLE );
-  #else
+  SDL_EventState (SDL_SYSWMEVENT, flag?SDL_ENABLE:SDL_DISABLE);
+#elif defined(SDL_VIDEO_DRIVER_X11)
+  Atom version = flag ? 5 : 0;
+  Display * display;
+  Window window;
+
+  if (GFX2_Get_X11_Display_Window(&display, &window))
+  {
+    XChangeProperty(display, window,
+                    XInternAtom(display, "XdndAware", False),
+                    XA_ATOM, 32, PropModeReplace, (unsigned char *)&version, 1);
+    SDL_EventState (SDL_SYSWMEVENT, flag?SDL_ENABLE:SDL_DISABLE);
+  }
+#else
   (void)flag; // unused
 #endif
 #endif

@@ -70,9 +70,11 @@
 #include <X11/Xlib.h>
 extern Display * X11_display;
 extern Window X11_window;
-extern char * X11_clipboard;
 #elif defined(__macosx__)
 const char * get_paste_board(void);
+#endif
+#if defined(USE_X11) || defined(SDL_VIDEO_DRIVER_X11)
+extern char * X11_clipboard;
 #endif
 
 // Virtual keyboard is ON by default on these platforms:
@@ -407,7 +409,7 @@ bye:
   if (unicode)
     *unicode = NULL;
   return haiku_get_clipboard();
-  #elif defined(USE_X11) || defined(__macosx__) || defined(USE_SDL2)
+  #elif defined(USE_X11) || defined(__macosx__) || defined(USE_SDL2) || (defined(USE_SDL) && defined(SDL_VIDEO_DRIVER_X11))
   if (unicode)
     *unicode = NULL;
     #if defined(USE_SDL2)
@@ -420,11 +422,24 @@ bye:
     char * utf8_str = SDL_GetClipboardText();
     if (utf8_str != NULL)
     {
-    #elif defined(USE_X11)
+    #elif defined(USE_X11) || (defined(USE_SDL) && defined(SDL_VIDEO_DRIVER_X11))
   {
     int i;
-    Atom selection = XInternAtom(X11_display, "CLIPBOARD", False);
-    Window selection_owner = XGetSelectionOwner(X11_display, selection);
+    Atom selection;
+    Window selection_owner;
+#if defined(SDL_VIDEO_DRIVER_X11)
+    Display * X11_display;
+    Window X11_window;
+    int old_wmevent_state;
+
+    if (!GFX2_Get_X11_Display_Window(&X11_display, &X11_window))
+    {
+      GFX2_Log(GFX2_ERROR, "Failed to get X11 display and window\n");
+      return NULL;
+    }
+#endif
+    selection = XInternAtom(X11_display, "CLIPBOARD", False);
+    selection_owner = XGetSelectionOwner(X11_display, selection);
 
     if (selection_owner == None)
     {
@@ -433,6 +448,10 @@ bye:
     }
     if (selection_owner == None)
       return NULL;
+#if defined(USE_SDL)
+    old_wmevent_state = SDL_EventState(SDL_SYSWMEVENT, SDL_QUERY);
+    SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);
+#endif
 
     XConvertSelection(X11_display, selection, XInternAtom(X11_display, "UTF8_STRING", False),
                       XInternAtom(X11_display, "GFX2_CLIP", False), /* Property */
@@ -442,6 +461,9 @@ bye:
     {
       Get_input(20);
     }
+#if defined(USE_SDL)
+    SDL_EventState(SDL_SYSWMEVENT, old_wmevent_state);
+#endif
     if (X11_clipboard != NULL)
     {
       char * utf8_str = X11_clipboard;

@@ -32,6 +32,12 @@
 #ifdef WIN32
 #include <windows.h>  // for HWND
 #endif
+#if defined(USE_SDL) || defined(USE_SDL2)
+#include <SDL_syswm.h> // for Display, Window
+#endif
+#if defined(USE_X11)
+#include <X11/Xlib.h> // for Display, Window
+#endif
 #include "struct.h"
 #include "global.h"
 
@@ -68,6 +74,10 @@ void GFX2_UpdateScreen(void);
 
 #if defined(WIN32)
 HWND GFX2_Get_Window_Handle(void);
+#endif
+
+#if defined(USE_X11) || defined(SDL_VIDEO_DRIVER_X11)
+int GFX2_Get_X11_Display_Window(Display * * display, Window * window);
 #endif
 
 /// Set application icon(s)

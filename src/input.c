@@ -83,7 +83,7 @@ int Snap_axis_origin_Y;
 
 char * Drop_file_name = NULL;
 
-#if defined(USE_X11)
+#if defined(USE_X11) || defined(SDL_VIDEO_DRIVER_X11)
 char * X11_clipboard = NULL;
 #endif
 
@@ -318,6 +318,182 @@ int Move_cursor_with_constraints()
 }
 
 // WM events management
+
+#if defined(USE_X11) || defined(SDL_VIDEO_DRIVER_X11)
+static int xdnd_version = 5;
+static Window xdnd_source = None;
+
+static void Handle_ClientMessage(const XClientMessageEvent * xclient)
+{
+#if defined(SDL_VIDEO_DRIVER_X11)
+  Display * X11_display;
+  Window X11_window;
+
+  if (!GFX2_Get_X11_Display_Window(&X11_display, &X11_window))
+  {
+    GFX2_Log(GFX2_ERROR, "Failed to get X11 display and window\n");
+    return;
+  }
+#endif
+
+  if (xclient->message_type == XInternAtom(X11_display, "XdndEnter", False))
+  {
+    //int list = xclient->data.l[1] & 1;
+    xdnd_version = xclient->data.l[1] >> 24;
+    xdnd_source = xclient->data.l[0];
+    GFX2_Log(GFX2_DEBUG, "XdndEnter version=%d source=%lu\n", xdnd_version, xdnd_source);
+  }
+  else if (xclient->message_type == XInternAtom(X11_display, "XdndLeave", False))
+  {
+    GFX2_Log(GFX2_DEBUG, "XdndLeave\n");
+  }
+  else if (xclient->message_type == XInternAtom(X11_display, "XdndPosition", False))
+  {
+    XEvent reply;
+    int x_abs, y_abs;
+    int x_pos, y_pos;
+    Window root_window, child;
+    unsigned int width, height;
+    unsigned int border_width, depth;
+
+    x_abs = (xclient->data.l[2] >> 16) & 0xffff;
+    y_abs = xclient->data.l[2] & 0xffff;
+    // reply with XdndStatus
+    // see https://github.com/glfw/glfw/blob/a9a5a0b016215b4e40a19acb69577d91cf21a563/src/x11_window.c
+
+    memset(&reply, 0, sizeof(reply));
+
+    reply.type = ClientMessage;
+    reply.xclient.window = xclient->data.l[0]; // drag & drop source window
+    reply.xclient.message_type = XInternAtom(X11_display, "XdndStatus", False);
+    reply.xclient.format = 32;
+    reply.xclient.data.l[0] = xclient->window;
+    if (XGetGeometry(X11_display, X11_window, &root_window, &x_pos, &y_pos, &width, &height, &border_width, &depth)
+        && XTranslateCoordinates(X11_display, X11_window, root_window, 0, 0, &x_abs, &y_abs, &child))
+    {
+      reply.xclient.data.l[2] = (x_abs & 0xffff) << 16 | (y_abs & 0xffff);
+      reply.xclient.data.l[3] = (width & 0xffff) << 16 | (height & 0xffff);
+    }
+
+    // Reply that we are ready to copy the dragged data
+    reply.xclient.data.l[1] = 1; // Accept with no rectangle
+    if (xdnd_version >= 2)
+      reply.xclient.data.l[4] = XInternAtom(X11_display, "XdndActionCopy", False);
+    XSendEvent(X11_display, xclient->data.l[0], False, NoEventMask, &reply);
+  }
+  else if (xclient->message_type == XInternAtom(X11_display, "XdndDrop", False))
+  {
+    Atom selection = XInternAtom(X11_display, "XdndSelection", False);
+    Time time = CurrentTime;
+    if (xdnd_version >= 1)
+      time = xclient->data.l[2];
+    XConvertSelection(X11_display,
+        selection,
+        XInternAtom(X11_display, "text/uri-list", False),
+        selection,
+        xclient->window,
+        time);
+  }
+  else
+  {
+    GFX2_Log(GFX2_INFO, "Unhandled ClientMessage message_type=\"%s\"\n", XGetAtomName(X11_display, xclient->message_type));
+  }
+}
+
+static int Handle_SelectionNotify(const XSelectionEvent* xselection)
+{
+  int user_feedback_required = 0;
+  Atom type = 0;
+  int format = 0;
+#if defined(SDL_VIDEO_DRIVER_X11)
+  Display * X11_display;
+  Window X11_window;
+
+  if (!GFX2_Get_X11_Display_Window(&X11_display, &X11_window))
+  {
+    GFX2_Log(GFX2_ERROR, "Failed to get X11 display and window\n");
+    return 0;
+  }
+#endif
+
+  if (xselection->property == XInternAtom(X11_display, "XdndSelection", False))
+  {
+    int r;
+    unsigned long count = 0, bytesAfter = 0;
+    unsigned char * value = NULL;
+
+    r = XGetWindowProperty(X11_display, xselection->requestor, xselection->property, 0, LONG_MAX,
+                           False, xselection->target /* type */, &type, &format,
+                           &count, &bytesAfter, &value);
+    if (r == Success && value != NULL)
+    {
+      if (format == 8)
+      {
+        int i, j;
+        Drop_file_name = malloc(count + 1);
+        i = 0; j = 0;
+        if (count > 7 && 0 == memcmp(value, "file://", 7))
+          i = 7;
+        while (i < (int)count && value[i] != 0 && value[i] != '\n' && value[i] != '\r')
+        {
+          if (i < ((int)count + 2) && value[i] == '%')
+          {
+            // URI-Decode : "%NN" to char of value 0xNN
+            i++;
+            Drop_file_name[j] = (value[i] - ((value[i] >= 'A') ? 'A' - 10 : '0')) << 4;
+            i++;
+            Drop_file_name[j++] |= (value[i] - ((value[i] >= 'A') ? 'A' - 10 : '0'));
+            i++;
+          }
+          else
+          {
+            Drop_file_name[j++] = (char)value[i++];
+          }
+        }
+        Drop_file_name[j++] = '\0';
+      }
+      XFree(value);
+    }
+    if (xdnd_version >= 2)
+    {
+      XEvent reply;
+      memset(&reply, 0, sizeof(reply));
+
+      reply.type = ClientMessage;
+      reply.xclient.window = xdnd_source;
+      reply.xclient.message_type = XInternAtom(X11_display, "XdndFinished", False);
+      reply.xclient.format = 32;
+      reply.xclient.data.l[0] = X11_window;
+      reply.xclient.data.l[1] = 1;  // success
+      reply.xclient.data.l[2] = XInternAtom(X11_display, "XdndActionCopy", False);
+
+      XSendEvent(X11_display, xdnd_source, False, NoEventMask, &reply);
+    }
+  }
+  else if (xselection->selection == XInternAtom(X11_display, "CLIPBOARD", False)
+      || xselection->selection == XInternAtom(X11_display, "PRIMARY", False))
+  {
+    int r;
+    unsigned long count = 0, bytesAfter = 0;
+    unsigned char * value = NULL;
+
+    r = XGetWindowProperty(X11_display, X11_window, xselection->property, 0, LONG_MAX,
+        False, xselection->target /* type */, &type, &format,
+        &count, &bytesAfter, &value);
+    if (r == Success && value != NULL)
+    {
+      X11_clipboard = strdup((char *)value);
+      XFree(value);
+    }
+    user_feedback_required = 1;
+  }
+  else
+  {
+    GFX2_Log(GFX2_INFO, "Unhandled SelectNotify selection=%s\n", XGetAtomName(X11_display, xselection->selection));
+  }
+  return user_feedback_required;
+}
+#endif
 
 #if defined(USE_SDL)
 void Handle_window_resize(SDL_ResizeEvent event)
@@ -945,6 +1121,10 @@ int Get_input(int sleep_time)
       switch(event.type)
       {
 #if defined(USE_SDL)
+          case SDL_ACTIVEEVENT:
+              GFX2_Log(GFX2_DEBUG, "SDL_ACTIVEEVENT gain=%d state=%d\n", event.active.gain, event.active.state);
+              break;
+
           case SDL_VIDEORESIZE:
               Handle_window_resize(event.resize);
               user_feedback_required = 1;
@@ -1111,8 +1291,38 @@ int Get_input(int sleep_time)
                   // Drop of zero files. Thanks for the information, Bill.
                 }
               }
+#elif defined(SDL_VIDEO_DRIVER_X11)
+#if defined(USE_SDL)
+#define xevent event.syswm.msg->event.xevent
 #else
-              GFX2_Log(GFX2_DEBUG, "Unhandled SDL_SYSWMEVENT\n");
+#define xevent event.syswm.msg->msg.x11.event
+#endif
+              switch (xevent.type)
+              {
+                case ClientMessage:
+                  Handle_ClientMessage(&(xevent.xclient));
+                  break;
+                case SelectionNotify:
+                  if (Handle_SelectionNotify(&(xevent.xselection)))
+                    user_feedback_required = 1;
+                  break;
+                case ButtonPress:
+                case ButtonRelease:
+                case MotionNotify:
+                  // ignore
+                  break;
+                case GenericEvent:
+                  GFX2_Log(GFX2_DEBUG, "SDL_SYSWMEVENT x11 GenericEvent extension=%d evtype=%d\n",
+                           xevent.xgeneric.extension,
+                           xevent.xgeneric.evtype);
+                  break;
+                case PropertyNotify:
+                  GFX2_Log(GFX2_DEBUG, "SDL_SYSWMEVENT x11 PropertyNotify\n");
+                  break;
+                default:
+                  GFX2_Log(GFX2_DEBUG, "Unhandled SDL_SYSWMEVENT x11 event type=%d\n", xevent.type);
+              }
+#undef xevent
 #endif
               break;
           
@@ -1255,8 +1465,6 @@ int Get_input(int sleep_time)
     }
 #elif defined(USE_X11)
     int user_feedback_required = 0; // Flag qui indique si on doit arrêter de traiter les évènements ou si on peut enchainer
-    static int xdnd_version = 5;
-    static Window xdnd_source = None;
 
     Color_cycling();
     // Commit any pending screen update.
@@ -1415,145 +1623,15 @@ int Get_input(int sleep_time)
             }
             else
             {
-              // unrecognized WM event.
+              GFX2_Log(GFX2_INFO, "unrecognized WM event : %s\n", XGetAtomName(X11_display, (Atom)event.xclient.data.l[0]));
             }
           }
-          else if (event.xclient.message_type == XInternAtom(X11_display, "XdndEnter", False))
-          {
-            //int list = event.xclient.data.l[1] & 1;
-            xdnd_version = event.xclient.data.l[1] >> 24;
-            xdnd_source = event.xclient.data.l[0];
-            GFX2_Log(GFX2_DEBUG, "XdndEnter version=%d source=%lu\n", xdnd_version, xdnd_source);
-          }
-          else if (event.xclient.message_type == XInternAtom(X11_display, "XdndLeave", False))
-          {
-            GFX2_Log(GFX2_DEBUG, "XdndLeave\n");
-          }
-          else if (event.xclient.message_type == XInternAtom(X11_display, "XdndPosition", False))
-          {
-            XEvent reply;
-            int x_abs, y_abs;
-            int x_pos, y_pos;
-            Window root_window, child;
-            unsigned int width, height;
-            unsigned int border_width, depth;
-
-            x_abs = (event.xclient.data.l[2] >> 16) & 0xffff;
-            y_abs = event.xclient.data.l[2] & 0xffff;
-            // reply with XdndStatus
-            // see https://github.com/glfw/glfw/blob/a9a5a0b016215b4e40a19acb69577d91cf21a563/src/x11_window.c
-
-            memset(&reply, 0, sizeof(reply));
-
-            reply.type = ClientMessage;
-            reply.xclient.window = event.xclient.data.l[0]; // drag & drop source window
-            reply.xclient.message_type = XInternAtom(X11_display, "XdndStatus", False);
-            reply.xclient.format = 32;
-            reply.xclient.data.l[0] = event.xclient.window;
-            if (XGetGeometry(X11_display, X11_window, &root_window, &x_pos, &y_pos, &width, &height, &border_width, &depth)
-              && XTranslateCoordinates(X11_display, X11_window, root_window, 0, 0, &x_abs, &y_abs, &child))
-            {
-              reply.xclient.data.l[2] = (x_abs & 0xffff) << 16 | (y_abs & 0xffff);
-              reply.xclient.data.l[3] = (width & 0xffff) << 16 | (height & 0xffff);
-            }
-
-            // Reply that we are ready to copy the dragged data
-            reply.xclient.data.l[1] = 1; // Accept with no rectangle
-            if (xdnd_version >= 2)
-            {
-              reply.xclient.data.l[4] = XInternAtom(X11_display, "XdndActionCopy", False);
-            }
-            XSendEvent(X11_display, event.xclient.data.l[0], False, NoEventMask, &reply);
-          }
-          else if (event.xclient.message_type == XInternAtom(X11_display, "XdndDrop", False))
-          {
-            Time time = CurrentTime;
-            if (xdnd_version >= 1)
-              time = event.xclient.data.l[2];
-            XConvertSelection(X11_display,
-                              XInternAtom(X11_display, "XdndSelection", False),
-                              XInternAtom(X11_display, "text/uri-list", False),
-                              XInternAtom(X11_display, "XdndSelection", False),
-                              event.xclient.window,
-                              time);
-          }
+          else
+            Handle_ClientMessage(&event.xclient);
           break;
         case SelectionNotify:
-          if (event.xselection.property == XInternAtom(X11_display, "XdndSelection", False))
-          {
-            Atom type = 0;
-            int format = 0;
-            int r;
-            unsigned long count = 0, bytesAfter = 0;
-            unsigned char * value = NULL;
-
-            r = XGetWindowProperty(X11_display, event.xselection.requestor, event.xselection.property, 0, LONG_MAX,
-                                   False, event.xselection.target /* type */, &type, &format,
-                                   &count, &bytesAfter, &value);
-            if (r == Success && value != NULL)
-            {
-              if (format == 8)
-              {
-                int i, j;
-                Drop_file_name = malloc(count + 1);
-                i = 0; j = 0;
-                if (count > 7 && 0 == memcmp(value, "file://", 7))
-                  i = 7;
-                while (i < (int)count && value[i] != 0 && value[i] != '\n' && value[i] != '\r')
-                {
-                  if (i < ((int)count + 2) && value[i] == '%')
-                  {
-                    // URI-Decode : "%NN" to char of value 0xNN
-                    i++;
-                    Drop_file_name[j] = (value[i] - ((value[i] >= 'A') ? 'A' - 10 : '0')) << 4;
-                    i++;
-                    Drop_file_name[j++] |= (value[i] - ((value[i] >= 'A') ? 'A' - 10 : '0'));
-                    i++;
-                  }
-                  else
-                  {
-                    Drop_file_name[j++] = (char)value[i++];
-                  }
-                }
-                Drop_file_name[j++] = '\0';
-              }
-              XFree(value);
-            }
-            if (xdnd_version >= 2)
-            {
-              XEvent reply;
-              memset(&reply, 0, sizeof(reply));
-
-              reply.type = ClientMessage;
-              reply.xclient.window = xdnd_source;
-              reply.xclient.message_type = XInternAtom(X11_display, "XdndFinished", False);
-              reply.xclient.format = 32;
-              reply.xclient.data.l[0] = X11_window;
-              reply.xclient.data.l[1] = 1;  // success
-              reply.xclient.data.l[2] = XInternAtom(X11_display, "XdndActionCopy", False);
-
-              XSendEvent(X11_display, xdnd_source, False, NoEventMask, &reply);
-            }
-          }
-          else if (event.xselection.selection == XInternAtom(X11_display, "CLIPBOARD", False)
-                || event.xselection.selection == XInternAtom(X11_display, "PRIMARY", False))
-          {
-            Atom type = 0;
-            int format = 0;
-            int r;
-            unsigned long count = 0, bytesAfter = 0;
-            unsigned char * value = NULL;
-
-            r = XGetWindowProperty(X11_display, X11_window, event.xselection.property, 0, LONG_MAX,
-                                   False, event.xselection.target /* type */, &type, &format,
-                                   &count, &bytesAfter, &value);
-            if (r == Success && value != NULL)
-            {
-              X11_clipboard = strdup((char *)value);
-              XFree(value);
-            }
+          if (Handle_SelectionNotify(&event.xselection))
             user_feedback_required = 1;
-          }
           break;
         default:
           GFX2_Log(GFX2_INFO, "X11 event.type = %d not handled\n", event.type);
