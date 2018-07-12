@@ -338,7 +338,7 @@ int Save_INI_set_values(FILE * old_file,FILE * new_file,char * buffer,char * opt
       free(result_buffer);
       free(upper_buffer);
       free(option_upper);
-      DEBUG("END OF FILE",0);
+      GFX2_Log(GFX2_WARNING, "%s(): END OF FILE\n", __func__);
       return ERROR_INI_CORRUPTED;
     }
 

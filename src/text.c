@@ -712,7 +712,7 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   font=SFont_InitFont(font_surface);
   if (!font)
   {
-    DEBUG("Font init failed",1);
+    GFX2_Log(GFX2_ERROR, "Font init failed : %s\n", Font_name(font_number));
     Free_GFX2_Surface(font_surface);
     return NULL;
   }

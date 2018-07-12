@@ -23,6 +23,8 @@
 /// Functions and macros for tracing and error reporting.
 //////////////////////////////////////////////////////////////////////////////
 
+#include "gfx2log.h"
+
 #ifdef __VBCC__
     #define __func__ "stupid compiler !"
 #endif
@@ -31,10 +33,10 @@
 #endif	
 
 /// Prints the source filename, line number, function name, a string and an integer.
-#define DEBUG(y,z) printf("%s %d %s | %s : %d###\n",__FILE__,__LINE__,__func__,y,(unsigned int)z)
+#define DEBUG(y,z) GFX2_Log(GFX2_DEBUG, "%s %d %s | %s : %d###\n",__FILE__,__LINE__,__func__,y,(unsigned int)z)
 
 /// Same as ::DEBUG but in hexadecimal
-#define DEBUGX(y,z) printf("%s %d %s | %s : %X###\n",__FILE__,__LINE__,__func__,y,(unsigned int)z)
+#define DEBUGX(y,z) GFX2_Log(GFX2_DEBUG, "%s %d %s | %s : %X###\n",__FILE__,__LINE__,__func__,y,(unsigned int)z)
 
 /// Helper function used by the macro ::Error
 void Error_function(int error_code, const char *filename, int line_number, const char *function_name);

@@ -71,9 +71,17 @@ static byte* Window_background[8];
 static void Save_background(byte **buffer, int x_pos, int y_pos, int width, int height)
 {
   int index;
-  if(*buffer != NULL) DEBUG("WARNING : buffer already allocated !!!",0);
+  if(*buffer != NULL)
+  {
+    GFX2_Log(GFX2_WARNING, "%s() WARNING : buffer already allocated !!!\n", __func__);
+    free(*buffer);
+  }
   *buffer=(byte *) malloc(width*Menu_factor_X*height*Menu_factor_Y*Pixel_width);
-  if(*buffer==NULL) Error(0);
+  if(*buffer==NULL)
+  {
+    Error(0);
+    return;
+  }
   for (index=0; index<(height*Menu_factor_Y); index++)
     Read_line(x_pos,y_pos+index,width*Menu_factor_X,(*buffer)+((int)index*width*Menu_factor_X*Pixel_width));
 }

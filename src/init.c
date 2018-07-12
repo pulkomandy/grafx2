@@ -1930,7 +1930,7 @@ static void Set_video_mode(short  width,
 
   if (Nb_video_modes >= MAX_VIDEO_MODES-1)
   {
-    DEBUG("Error! Attempt to create too many videomodes. Maximum is:", MAX_VIDEO_MODES);
+    GFX2_Log(GFX2_ERROR, "Attempt to create too many videomodes. Maximum is: %d\n", MAX_VIDEO_MODES);
     return;
   }
   if (!fullscreen)

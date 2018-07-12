@@ -5318,7 +5318,7 @@ void Load_PCX(T_IO_Context * context)
                    || ! Read_byte(file,&(context->Palette[index].B)) )
                   {
                     File_error=2;
-                    DEBUG("ERROR READING PCX PALETTE !",index);
+                    GFX2_Log(GFX2_ERROR, "ERROR READING PCX PALETTE ! index=%d\n", index);
                     break;
                   }
               }

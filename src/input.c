@@ -1093,11 +1093,13 @@ int Get_input(int sleep_time)
                   // Drop of zero files. Thanks for the information, Bill.
                 }
               }
+#else
+              GFX2_Log(GFX2_DEBUG, "Unhandled SDL_SYSWMEVENT\n");
 #endif
               break;
           
           default:
-              //DEBUG("Unhandled SDL event number : ",event.type);
+              GFX2_Log(GFX2_DEBUG, "Unhandled SDL event number : %d\n",event.type);
               break;
       }
     }

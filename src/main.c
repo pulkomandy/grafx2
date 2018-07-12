@@ -164,11 +164,7 @@ void Display_syntax(void)
 // ---------------------------- Sortie impromptue ----------------------------
 void Warning_function(const char *message, const char *filename, int line_number, const char *function_name)
 {
-  printf("Warning in file %s, line %d, function %s : %s\n", filename, line_number, function_name, message);
-#if defined(_MSC_VER) && defined(DEBUG)
-  OutputDebugStringA(message);
-  OutputDebugStringA("\n");
-#endif
+  GFX2_Log(GFX2_WARNING, "Warning in file %s, line %d, function %s : %s\n", filename, line_number, function_name, message);
 }
 
 
@@ -678,6 +674,9 @@ int Init_program(int argc,char * argv[])
   Spare.time_of_safety_backup = 0;
 
 
+  // analyse commande line as soon as possible
+  file_in_command_line=Analyze_command_line(argc, argv, main_filename, main_directory, spare_filename, spare_directory);
+
 #if defined(USE_SDL) || defined(USE_SDL2)
   // SDL
   if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
@@ -687,6 +686,9 @@ int Init_program(int argc,char * argv[])
     return(0);
   }
 
+#if defined(USE_SDL2)
+  SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_VERBOSE);
+#endif
   Joystick = SDL_JoystickOpen(0);
 #endif
 #if defined(USE_SDL)
@@ -803,10 +805,10 @@ int Init_program(int argc,char * argv[])
       // Pas un problème, on a les valeurs par défaut.
       break;
     case ERROR_CFG_CORRUPTED:
-      DEBUG("Corrupted CFG file.",0);
+      GFX2_Log(GFX2_ERROR, "Corrupted CFG file.\n");
       break;
     case ERROR_CFG_OLD:
-      DEBUG("Unknown CFG file version, not loaded.",0);
+      GFX2_Log(GFX2_WARNING, "Unknown CFG file version, not loaded.\n");
       break;
   }
   // Charger la configuration du .INI
@@ -820,8 +822,6 @@ int Init_program(int argc,char * argv[])
   }
 
   Compute_menu_offsets();
-
-  file_in_command_line=Analyze_command_line(argc, argv, main_filename, main_directory, spare_filename, spare_directory);
 
   Current_help_section=0;
   Help_position=0;

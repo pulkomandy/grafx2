@@ -132,7 +132,7 @@ void GFX2_Set_mode(int *width, int *height, int fullscreen)
     // Check the mode we got, in case it was different from the one we requested.
     if (Screen_SDL->w != *width || Screen_SDL->h != *height)
     {
-      DEBUG("Error: Got a different video mode than the requested one!",0);
+      GFX2_Log(GFX2_WARNING, "Got a different video mode than the requested one! %dx%d => %dx%d\n", *width, *height, Screen_SDL->w, Screen_SDL->h);
       *width = Screen_SDL->w;
       *height = Screen_SDL->h;
     }
@@ -140,7 +140,7 @@ void GFX2_Set_mode(int *width, int *height, int fullscreen)
   }
   else
   {
-    DEBUG("Error: Unable to change video mode!",0);
+    GFX2_Log(GFX2_ERROR, "Unable to change video mode!\n");
   }
 #else
   // SDL2
