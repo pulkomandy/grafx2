@@ -21,11 +21,10 @@
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
-/************************************************************************
-*                                                                       *
-* READLINE (procédure permettant de saisir une chaîne de caractères) *
-*                                                                       *
-************************************************************************/
+/**
+ * @file readline.c
+ * Text input GUI widget
+ */
 
 #include <stdlib.h>
 #include <string.h>
@@ -89,14 +88,14 @@ extern char * X11_clipboard;
 #define CURSOR_COLOR MC_Black
 #define CURSOR_BACKGROUND_COLOR  MC_Dark
 
-// remove a character from a string
+//! remove a character from a string
 static void Remove_character(char * str, int position)
 {
   for (;str[position]!='\0';position++)
     str[position]=str[position+1];
 }
 
-// remove a character from a string
+//! remove a character from a unicode string
 static void Remove_character_unicode(word * str, int position)
 {
   for (;str[position]!='\0';position++)
@@ -104,8 +103,8 @@ static void Remove_character_unicode(word * str, int position)
 }
 
 
+//! Insert a character in string at position
 static void Insert_character(char * str, char letter, int position)
-//  Insert a character in str at position
 {
   char temp_char;
 
@@ -122,6 +121,7 @@ static void Insert_character(char * str, char letter, int position)
   str[position]='\0';
 }
 
+//! Insert a character in unicode string at position
 static void Insert_character_unicode(word * str, word c, int position)
 {
   for (;;)
@@ -134,9 +134,9 @@ static void Insert_character_unicode(word * str, word c, int position)
   }
 }
 
+//! Insert a string at the start of another. Up to MAX characters only.
+//! @return actual number of chars inserted
 static int Prepend_string(char* dest, const char* src, int max)
-// Insert a string at the start of another. Up to MAX characters only
-// Returns actual number of chars inserted
 {
   // Insert src before dest
   int sized = strlen(dest);
@@ -152,9 +152,9 @@ static int Prepend_string(char* dest, const char* src, int max)
   return sizes;
 }
 
+//! Insert a unicode string at the start of another. Up to MAX characters only.
+//! @return actual number of chars inserted
 static int Prepend_string_unicode(word* dest, const word* src, int max)
-// Insert a string at the start of another. Up to MAX characters only
-// Returns actual number of chars inserted
 {
   // Insert src before dest
   int sized = Unicode_strlen(dest);
@@ -170,10 +170,11 @@ static int Prepend_string_unicode(word* dest, const word* src, int max)
   return sizes;
 }
 
-static int Valid_character(word c, int input_type)
-  // returns 0 = Not allowed
-  // returns 1 = Allowed
-  // returns 2 = Allowed only once at start of string (for - sign in numbers)
+//! Check validy of character depending on input_type
+//! @returns 0 = Not allowed
+//! @returns 1 = Allowed
+//! @returns 2 = Allowed only once at start of string (for - sign in numbers)
+static int Valid_character(word c, enum INPUT_TYPE input_type)
 {
   // On va regarder si l'utilisateur le droit de se servir de cette touche
   switch(input_type)
@@ -230,6 +231,7 @@ static int Valid_character(word c, int input_type)
   return 0;
 }
 
+//! remove invalid characters
 static void Cleanup_string(char* str, int input_type)
 {
   int i,j=0;
@@ -245,6 +247,7 @@ static void Cleanup_string(char* str, int input_type)
   str[j] = '\0';
 }
 
+//! remove invalid characters
 static void Cleanup_string_unicode(word* str, int input_type)
 {
   int i,j=0;
@@ -260,6 +263,10 @@ static void Cleanup_string_unicode(word* str, int input_type)
   str[j] = 0;
 }
 
+//! Prints the string and the cursor on screen
+//! @param x_pos, y_pos position on screen
+//! @param str the string to display
+//! @param position the cursor position
 static void Display_whole_string(word x_pos,word y_pos,const char * str,byte position)
 {
   char cursor[2];
@@ -270,6 +277,10 @@ static void Display_whole_string(word x_pos,word y_pos,const char * str,byte pos
   Print_general(x_pos+(position<<3)*Menu_factor_X,y_pos,cursor,CURSOR_COLOR,CURSOR_BACKGROUND_COLOR);
 }
 
+//! Prints the unicode string and the cursor on screen
+//! @param x_pos, y_pos position on screen
+//! @param str_unicode the string to display
+//! @param position the cursor position
 static void Display_whole_string_unicode(word x_pos,word y_pos, const word * str_unicode,byte position)
 {
   word cursor[2];
@@ -280,6 +291,7 @@ static void Display_whole_string_unicode(word x_pos,word y_pos, const word * str
   Print_general_unicode(x_pos+(position<<3)*Menu_factor_X,y_pos,cursor,CURSOR_COLOR,CURSOR_BACKGROUND_COLOR);
 }
 
+//! Initializes and displays the visual keyboard
 void Init_virtual_keyboard(word y_pos, word keyboard_width, word keyboard_height)
 {
   int h_pos;
@@ -310,7 +322,11 @@ void Init_virtual_keyboard(word y_pos, word keyboard_width, word keyboard_height
 }
 
 
-// Inspired from http://www.libsdl.org/projects/scrap/
+//! Get clipboard text content.
+//! Inspired from http://www.libsdl.org/projects/scrap/
+//! @param unicode NULL for pure ANSI working, or a pointer to get Unicode text data
+//! that should be free()'d by the caller
+//! @return a ANSI C string that should be free()'d by the caller
 static char* getClipboard(word * * unicode)
 {
 #ifdef WIN32
@@ -550,6 +566,7 @@ bye:
         return return_str;
       }
 #else
+      // mac OS without X11
       return strdup(utf8_str);
 #endif
     }
@@ -567,7 +584,7 @@ bye:
 /****************************************************************************
  *           Enhanced super scanf deluxe pro plus giga mieux :-)             *
  ****************************************************************************/
-byte Readline(word x_pos,word y_pos,char * str,byte visible_size,byte input_type)
+byte Readline(word x_pos, word y_pos, char * str, byte visible_size, enum INPUT_TYPE input_type)
 // Paramètres:
 //   x_pos, y_pos : Coordonnées de la saisie dans la fenêtre
 //   str       : Chaîne recevant la saisie (et contenant éventuellement une valeur initiale)
@@ -589,12 +606,15 @@ byte Readline(word x_pos,word y_pos,char * str,byte visible_size,byte input_type
 /****************************************************************************
 *           Enhanced super scanf deluxe pro plus giga mieux :-)             *
 ****************************************************************************/
-byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_size, byte input_type, byte decimal_places)
+byte Readline_ex(word x_pos,word y_pos,char * str,byte visible_size,byte max_size,
+                 enum INPUT_TYPE input_type, byte decimal_places)
 {
   return Readline_ex_unicode(x_pos, y_pos, str, NULL, visible_size, max_size, input_type, decimal_places);
 }
 
-byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byte visible_size,byte max_size, byte input_type, byte decimal_places)
+byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
+                         byte visible_size, byte max_size,
+                         enum INPUT_TYPE input_type, byte decimal_places)
 // Paramètres:
 //   x_pos, y_pos : Coordonnées de la saisie dans la fenêtre
 //   str       : Chaîne recevant la saisie (et contenant éventuellement une valeur initiale)
@@ -877,6 +897,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
             char * data = getClipboard(&data_unicode);
             if (data_unicode != NULL)
             {
+              // ignore ANSI data, use Unicode
               Cleanup_string_unicode(data_unicode, input_type);
               nb_added = Prepend_string_unicode(str_unicode + position, data_unicode, max_size - position);
               free(data_unicode);
@@ -887,7 +908,7 @@ byte Readline_ex_unicode(word x_pos,word y_pos,char * str,word * str_unicode,byt
               if (data == NULL)
                 continue;
               Cleanup_string(data, input_type);
-              Unicode_char_strlcpy(tmp_unicode, data, sizeof(tmp_unicode)/sizeof(word));
+              Unicode_char_strlcpy(tmp_unicode, data, sizeof(tmp_unicode)/sizeof(word)); // convert ANSI to unicode
               nb_added = Prepend_string_unicode(str_unicode + position, tmp_unicode, max_size - position);
             }
             free(data);
