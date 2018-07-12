@@ -1,6 +1,6 @@
-ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-³°±²Û Technical documentation for GrafX 2.00 - Version 1.08 (10/05/1997) Û²±°³
-ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚â–‘â–’â–“â–ˆ Technical documentation for GrafX 2.00 - Version 1.08 (10/05/1997) â–ˆâ–“â–’â–‘â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
 This file deals with:
 
@@ -10,9 +10,9 @@ This file deals with:
 
 
 
-ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-³            °±²Û The PKM picture format - by Karl Maritaud Û²±°             ³
-ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚            â–‘â–’â–“â–ˆ The PKM picture format - by Karl Maritaud â–ˆâ–“â–’â–‘             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
 
     First of all, I'd like to say that I made this file format some years ago
@@ -35,54 +35,54 @@ This file deals with:
 
 
 The HEADER:
-ÍÍÍÍÍÍÍÍÍÍÍ
+â•â•â•â•â•â•â•â•â•â•â•
 
   The header is the following 780-byte-structure. (Don't worry about the size.
   That's just because the palette is considered as a part of the header).
 
 
-  ÚÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-  ³ Pos ³ Field     ³ Type ³ Size ³ Description                              ³
-  ÆÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍØÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍµ
-  ³   0 ³ Signature ³ char ³   3  ³ Constant string "PKM" (with NO size      ³
-  ³     ³           ³      ³      ³ delimitation '\0' or so...)              ³
-  ÃÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
-  ³   3 ³ Version   ³ byte ³   1  ³ For the moment, it can take only the     ³
-  ³     ³           ³      ³      ³ value 0.                                 ³
-  ³     ³           ³      ³      ³ Other packing methods may change this    ³
-  ³     ³           ³      ³      ³ field but there is only one for now...   ³
-  ÃÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
-  ³   4 ³ Pack_byte ³ byte ³   1  ³ Value of the recognition byte for color  ³
-  ³     ³           ³      ³      ³ repetitions that are coded on 1 byte.    ³
-  ³     ³           ³      ³      ³ (See the picture packing section for a   ³
-  ³     ³           ³      ³      ³ better explanation)                      ³
-  ÃÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
-  ³   5 ³ Pack_word ³ byte ³   1  ³ Value of the recognition byte for color  ³
-  ³     ³           ³      ³      ³ repetitions that are coded on 2 bytes.   ³
-  ³     ³           ³      ³      ³ (See the picture packing section...)     ³
-  ÃÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
-  ³   6 ³ Width     ³ word ³   2  ³ Picture width  (in pixels)               ³
-  ÃÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
-  ³   8 ³ Height    ³ word ³   2  ³ Picture height (in pixels)               ³
-  ÃÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
-  ³  10 ³ Palette   ³ byte ³ 768  ³ RGB palette (RGB RGB ... 256 times) with ³
-  ³     ³           ³      ³      ³ values from 0 to 63. I know the standard ³
-  ³     ³           ³      ³      ³ in picture files is 0 to 255 but I find  ³
-  ³     ³           ³      ³      ³ it stupid! It is really easier to send   ³
-  ³     ³           ³      ³      ³ the whole palette in port 3C9h with a    ³
-  ³     ³           ³      ³      ³ REP OUTSB without palette convertion.    ³
-  ÃÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
-  ³ 778 ³ PH_size   ³ word ³   2  ³ Post-header size. This is the number of  ³
-  ³     ³           ³      ³      ³ bytes between the header and the picture ³
-  ³     ³           ³      ³      ³ data. This value can be equal to 0.      ³
-  ÀÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+  â”Œâ”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+  â”‚ Pos â”‚ Field     â”‚ Type â”‚ Size â”‚ Description                              â”‚
+  â•žâ•â•â•â•â•â•ªâ•â•â•â•â•â•â•â•â•â•â•â•ªâ•â•â•â•â•â•â•ªâ•â•â•â•â•â•â•ªâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•¡
+  â”‚   0 â”‚ Signature â”‚ char â”‚   3  â”‚ Constant string "PKM" (with NO size      â”‚
+  â”‚     â”‚           â”‚      â”‚      â”‚ delimitation '\0' or so...)              â”‚
+  â”œâ”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+  â”‚   3 â”‚ Version   â”‚ byte â”‚   1  â”‚ For the moment, it can take only the     â”‚
+  â”‚     â”‚           â”‚      â”‚      â”‚ value 0.                                 â”‚
+  â”‚     â”‚           â”‚      â”‚      â”‚ Other packing methods may change this    â”‚
+  â”‚     â”‚           â”‚      â”‚      â”‚ field but there is only one for now...   â”‚
+  â”œâ”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+  â”‚   4 â”‚ Pack_byte â”‚ byte â”‚   1  â”‚ Value of the recognition byte for color  â”‚
+  â”‚     â”‚           â”‚      â”‚      â”‚ repetitions that are coded on 1 byte.    â”‚
+  â”‚     â”‚           â”‚      â”‚      â”‚ (See the picture packing section for a   â”‚
+  â”‚     â”‚           â”‚      â”‚      â”‚ better explanation)                      â”‚
+  â”œâ”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+  â”‚   5 â”‚ Pack_word â”‚ byte â”‚   1  â”‚ Value of the recognition byte for color  â”‚
+  â”‚     â”‚           â”‚      â”‚      â”‚ repetitions that are coded on 2 bytes.   â”‚
+  â”‚     â”‚           â”‚      â”‚      â”‚ (See the picture packing section...)     â”‚
+  â”œâ”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+  â”‚   6 â”‚ Width     â”‚ word â”‚   2  â”‚ Picture width  (in pixels)               â”‚
+  â”œâ”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+  â”‚   8 â”‚ Height    â”‚ word â”‚   2  â”‚ Picture height (in pixels)               â”‚
+  â”œâ”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+  â”‚  10 â”‚ Palette   â”‚ byte â”‚ 768  â”‚ RGB palette (RGB RGB ... 256 times) with â”‚
+  â”‚     â”‚           â”‚      â”‚      â”‚ values from 0 to 63. I know the standard â”‚
+  â”‚     â”‚           â”‚      â”‚      â”‚ in picture files is 0 to 255 but I find  â”‚
+  â”‚     â”‚           â”‚      â”‚      â”‚ it stupid! It is really easier to send   â”‚
+  â”‚     â”‚           â”‚      â”‚      â”‚ the whole palette in port 3C9h with a    â”‚
+  â”‚     â”‚           â”‚      â”‚      â”‚ REP OUTSB without palette convertion.    â”‚
+  â”œâ”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+  â”‚ 778 â”‚ PH_size   â”‚ word â”‚   2  â”‚ Post-header size. This is the number of  â”‚
+  â”‚     â”‚           â”‚      â”‚      â”‚ bytes between the header and the picture â”‚
+  â”‚     â”‚           â”‚      â”‚      â”‚ data. This value can be equal to 0.      â”‚
+  â””â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
   Data of type "word" are stored with Intel conventions: lower byte first.
 
 
 
 The POST-HEADER:
-ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
   The post-header has a variable size. It was designed to support new features
 for this file format without changing the whole format.
@@ -92,7 +92,7 @@ for this file format without changing the whole format.
 
 
   These field identifiers are:  (this list may be updated...)
-  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     0 : Comment on the picture
     1 : Original screen dimensions
@@ -104,7 +104,7 @@ for this file format without changing the whole format.
 
 
   The fields:
-  ÄÄÄÄÄÄÄÄÄÄÄ
+  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     * Comment:
 
@@ -151,7 +151,7 @@ for this file format without changing the whole format.
 
 
 The PICTURE PACKING METHOD:
-ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
   The PKM compression method is some sort of Run-Length-Compression which is
 very efficient on pictures with long horizontal color repetitions.
@@ -251,7 +251,7 @@ ming in incomprehensible explanations.
 
 
   Packing advices:
-  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   * As you can see, there could be a problem when you'd want to pack a raw
   pixel with a color equal to Pack_byte or Pack_word. These pixels should
@@ -281,9 +281,9 @@ ming in incomprehensible explanations.
 
 
 
-ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-³                  °±²Û Setting GrafX 2.00 video modes Û²±°                  ³
-ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                  â–‘â–’â–“â–ˆ Setting GrafX 2.00 video modes â–ˆâ–“â–’â–‘                  â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 
 
     All set-mode procs are in 386 ASM. Anyway, if you can't understand any
@@ -297,7 +297,7 @@ ming in incomprehensible explanations.
 
 
 MCGA: (Standard VGA mode)
-ÍÍÍÍÍ
+â•â•â•â•â•
 
     Is there anybody in this world who still don't now how to set the MCGA
   320x200 256 colors mode ??!?
@@ -310,7 +310,7 @@ MCGA: (Standard VGA mode)
 
 
 X-Modes: (Extended VGA modes)
-ÍÍÍÍÍÍÍÍ
+â•â•â•â•â•â•â•â•
 
     Well... I think the original Mode X was 320x240 but now, many people call
   "X-Modes" (or Modes X, or Tweaked modes) all the VGA modes that use more
@@ -359,10 +359,10 @@ X-Modes: (Extended VGA modes)
                      ;                    or ELSE => Send AL to MISCELLANEOUS
 
     or   al,al       ; Shall we modify the basic video mode?
-    jz   NoThankYou  ; No?Ä¿ Actually the answer is always "Yes".
-    mov  dx,3C2h     ;     ³ Except for a few modes such as
-    out  dx,al       ;     ³ 320x200 in Mode X
-    NoThankYou:      ; <ÄÄÄÙ (but our 320x200 is MCGA...)
+    jz   NoThankYou  ; No?â”€â” Actually the answer is always "Yes".
+    mov  dx,3C2h     ;     â”‚ Except for a few modes such as
+    out  dx,al       ;     â”‚ 320x200 in Mode X
+    NoThankYou:      ; <â”€â”€â”€â”˜ (but our 320x200 is MCGA...)
 
     mov  dx,3C4h     ; Manipulations with MISCELLANEOUS register are over, we
     mov  ax,0300h    ; can now disengage the synchronous register of the TS.
@@ -570,20 +570,20 @@ X-Modes: (Extended VGA modes)
 
   The structure: (example)
 
-       ÚÄÄÄÄThis is the number of values to send to the CRTC registers. This
-       ³    is actually the number of words in the tables minus 1 (because the
-       ³    1st word of the table is not sent to the CRTC but contains a value
-       ³    to send to the MISCELLANEOUS register and the number of values to
-       ³    send to the CRTC registers ;) ).
-       ³
-       ³ ÚÄÄThis is the value to send to the MISCEALLANEOUS register (or ZERO
-       ³ ³  if no value must be sent to it).
-       ³ ³
-       ³ ³     ÚÄÄÄThis is a value to send to a register of the CRTC.
-       ³ ³     ³
-       ³ ³     ³ ÚÄThis is the index of the CRTC register that will receive
-       ³ ³     ³ ³ the value.
-       Ã¿Ã¿    Ã¿Ã¿
+       â”Œâ”€â”€â”€â”€This is the number of values to send to the CRTC registers. This
+       â”‚    is actually the number of words in the tables minus 1 (because the
+       â”‚    1st word of the table is not sent to the CRTC but contains a value
+       â”‚    to send to the MISCELLANEOUS register and the number of values to
+       â”‚    send to the CRTC registers ;) ).
+       â”‚
+       â”‚ â”Œâ”€â”€This is the value to send to the MISCEALLANEOUS register (or ZERO
+       â”‚ â”‚  if no value must be sent to it).
+       â”‚ â”‚
+       â”‚ â”‚     â”Œâ”€â”€â”€This is a value to send to a register of the CRTC.
+       â”‚ â”‚     â”‚
+       â”‚ â”‚     â”‚ â”Œâ”€This is the index of the CRTC register that will receive
+       â”‚ â”‚     â”‚ â”‚ the value.
+       â”œâ”â”œâ”    â”œâ”â”œâ”
    { 0x0AE3, 0x0D06, 0x3E07, 0x4109, 0xEA10, 0xAC11, 0xDF12, 0x0014, 0xE715,
      0x0616, 0xE317 };
 
@@ -613,7 +613,7 @@ X-Modes: (Extended VGA modes)
 
 
 VESA: (A "pseudo-standard" for Super-VGA modes)
-ÍÍÍÍÍ
+â•â•â•â•â•
 
     We use VESA for modes that require a width of 640, 800 or 1024 pixels.
   But there is a way to combine X-Modes height with VESA so it's possible to
@@ -696,17 +696,17 @@ VESA: (A "pseudo-standard" for Super-VGA modes)
 
 
   Modifying CRTC registers: (inspired by X-Modes init... See above for more
-  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ  details or comments)
+  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€  details or comments)
 
   mov  esi,XVESA_Ptr
   cld
 
   lodsb
   or   al,al       ; Shall we modify the basic video mode?
-  jz   NoThankYou  ; No?Ä¿ The answer can be "No" because initialisations
-  mov  dx,3C2h     ;     ³ of certain VESA modes directly set the right
-  out  dx,al       ;     ³ value for the Miscellaneous register.
-  NoThankYou:      ; <ÄÄÄÙ
+  jz   NoThankYou  ; No?â”€â” The answer can be "No" because initialisations
+  mov  dx,3C2h     ;     â”‚ of certain VESA modes directly set the right
+  out  dx,al       ;     â”‚ value for the Miscellaneous register.
+  NoThankYou:      ; <â”€â”€â”€â”˜
 
   mov  dx,3D4h
   mov  al,11h

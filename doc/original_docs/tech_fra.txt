@@ -1,0 +1,769 @@
+┌────────────────────────────────────────────────────────────────────────────┐
+│░▒▓█   Doc. technique pour GrafX 2.00 - Version 1.08 (5 octobre 1997)   █▓▒░│
+└────────────────────────────────────────────────────────────────────────────┘
+
+Ce fichier traite:
+
+  - du format d'image PKM
+  - des valeurs à envoyer au CRTC pour avoir accès à tous les modes vidéos
+    incroyables disponibles dans GrafX 2.00
+
+
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│            ░▒▓█ Le format d'image PKM - par Karl Maritaud █▓▒░             │
+└────────────────────────────────────────────────────────────────────────────┘
+
+
+    Tout d'abord, je tiens a dire que j'ai créé ce format il y a déjà quelques
+  années, à l'époque où je ne savais pas comment charger les meilleurs formats
+  (GIF par exemple) et que je voulais également avoir mon propre format.
+    Le format PKM a été conçu pour être très simple, facile à encoder et à
+  décoder. De plus, son header est très simple (court) et evolutif.
+    Le seul vrai défaut que je puisse y trouver est que l'on ne peut sauver
+  des images qu'en 256 couleurs.
+    Je sais que vous allez vous dire:
+      "Oh non! Encore un nouveau format à la con! J'm'en servirai jamais! En
+      plus le taux de compression est naze! Je prefère le GIF!".
+    Et je répondrai:
+      "Ouais! T'as raison. Mais si tu ne sais pas comment charger du GIF et
+      que tu veux un format simple avec une compression correcte (du moins sur
+      les images simples), il peut être utile."
+
+  Donc, voici la documentation de ce format...
+
+
+
+Le HEADER:
+══════════
+
+  Le header est la structure de 780 octets suivante. (Ne vous inquiétez pas à
+  propos de la taille. C'est tout simplement parce que la palette fait partie
+  du header).
+
+
+  ┌─────┬───────────┬──────┬──────┬──────────────────────────────────────────┐
+  │ Pos │ Champ     │ Type │Taille│ Description                              │
+  ╞═════╪═══════════╪══════╪══════╪══════════════════════════════════════════╡
+  │   0 │ Signature │ char │   3  │ Chaîne constante "PKM" (SANS délimitation│
+  │     │           │      │      │ de taille '\0' ou autres...)             │
+  ├─────┼───────────┼──────┼──────┼──────────────────────────────────────────┤
+  │   3 │ Version   │ byte │   1  │ Pour le moment, ce champ ne peut prendre │
+  │     │           │      │      │ que la valeur 0.                         │
+  │     │           │      │      │ D'autres méthodes de compression pourront│
+  │     │           │      │      │ la modifier mais pour l'instant il n'y en│
+  │     │           │      │      │ a qu'une seule.                          │
+  ├─────┼───────────┼──────┼──────┼──────────────────────────────────────────┤
+  │   4 │ Pack_byte │ byte │   1  │ Valeur de l'octet de reconnaissance pour │
+  │     │           │      │      │ les répétitions de couleurs codées sur 1 │
+  │     │           │      │      │ Octet. (Voir la section sur la méthode de│
+  │     │           │      │      │ compression pour plus d'informations)    │
+  ├─────┼───────────┼──────┼──────┼──────────────────────────────────────────┤
+  │   5 │ Pack_word │ byte │   1  │ Valeur de l'octet de reconnaissance pour │
+  │     │           │      │      │ les répétitions de couleurs codées sur 2 │
+  │     │           │      │      │ Octets. (Voir la section sur la méthode  │
+  │     │           │      │      │ de compression pour plus d'informations) │
+  ├─────┼───────────┼──────┼──────┼──────────────────────────────────────────┤
+  │   6 │ Largeur   │ word │   2  │ Largeur de l'image (en pixels)           │
+  ├─────┼───────────┼──────┼──────┼──────────────────────────────────────────┤
+  │   8 │ Hauteur   │ word │   2  │ Hauteur de l'image (en pixels)           │
+  ├─────┼───────────┼──────┼──────┼──────────────────────────────────────────┤
+  │  10 │ Palette   │ byte │ 768  │ Palette RGB (RGB RGB ... 256 fois) avec  │
+  │     │           │      │      │ des valeurs de 0 à 63. Je sais que le    │
+  │     │           │      │      │ standard dans les fichiers d'images est  │
+  │     │           │      │      │ de 0 à 255 mais je trouve ça crétin!     │
+  │     │           │      │      │ C'est tellement plus simple d'envoyer la │
+  │     │           │      │      │ palette toute entière dans le port 3C9h  │
+  │     │           │      │      │ avec un REP OUTSB sans avoir à convertir │
+  │     │           │      │      │ la palette.                              │
+  ├─────┼───────────┼──────┼──────┼──────────────────────────────────────────┤
+  │ 778 │ Taille_PH │ word │   2  │ Taille du Post-header. C'est le nombre   │
+  │     │           │      │      │ d'octets entre le header et les données  │
+  │     │           │      │      │ de l'image. Cette valeur peut valoir 0.  │
+  └─────┴───────────┴──────┴──────┴──────────────────────────────────────────┘
+
+  Les données du type "word" sont stockées selon les conventions d'Intel:
+  c'est-à-dire l'octet de poids le plus faible en premier.
+
+
+
+Le POST-HEADER:
+═══════════════
+
+  Le post-header a une taille variable. Il a été conçu pour supporter les
+nouvelles fonctions de ce format sans avoir a changer complètement le format.
+
+  Il est constitué d'identificateurs de champ suivis par leur taille et leur
+contenu.
+  Un identificateur de champ est codé sur 1 octet ainsi que sa taille.
+
+
+  Ces identificateurs de champ sont:  (cette liste peut être rallongée...)
+  ──────────────────────────────────
+
+    0 : Commentaire sur l'image
+    1 : Dimensions de l'écran d'origine
+    2 : Couleur de fond (couleur de transparence)
+
+  Si vous rencontrez un champ inconnu par votre routine de chargment, sautez
+  simplement au delà. Mais, par contre, si un champ vous dit de sauter à une
+  position qui tombe après le début théorique des données de l'image, alors
+  c'est qu'il y a une erreur dans le fichier.
+
+
+  Les champs:
+  ───────────
+
+    * Commentaire:
+
+      Grâce à ce champ, les artistes vont pouvoir commenter leurs dessins.
+      Notez que GrafX 2 a une taille limite de commentaire de 32 caractères.
+      Mais vous pourrez avoir des commentaires allant jusqu'à 255 caractères
+      si vous créez votre propre viewer puisque GrafX 2 ignorera simplement
+      les caractères en trop.
+
+      Exemple: [0],[15],[Dessin de X-Man]
+      Cette séquence signifie:
+        - le champ est un commentaire
+        - le commentaire a une taille de 15 caractères (il n'y a pas de
+          caractère de fin de chaîne puisque vous connaissez sa taille)
+        - le commentaire est "Dessin de X-Man"
+
+    * Dimensions de l'écran d'origine:
+
+      Puisque GrafX 2 propose un énorme choix de résolutions, il a semblé
+      pratique d'ajouter un champ indicant quelles étaient les dimensions de
+      l'écran d'origine.
+
+      Exemple: [1],[4],[320],[256]
+      Cette séquence signifie:
+        - Le champ décrit les dimensions de l'écran d'origine
+        - Les dimensions sont 2 words (donc cette valeur doit être égale à 4)
+        - La largeur de l'écran d'origine était de 320 pixels
+        - La hauteur de l'écran d'origine était de 256 pixels
+
+      Notez que les words stockés dans les champs sont écrits à la manière
+      Intel. La BETA-version 90% ne respectait pas cette norme (désolé).
+      Ce n'est pas bien grâve mais les images sauvées avec la version 90% et
+      rechargées avec une version postérieure (91% et plus) ne passeront pas
+      dans la bonne résolution.
+
+    * Couleur de fond:
+
+      Enregistrer la couleur de fond (couleur de transparence) se révèle
+      particulièrement utile lorsque vous voulez sauvegarder une brosse.
+      La taille de ce champ est 1 octet (indice de la couleur entre 0 et 255).
+
+      Exemple: [2],[1],[255]
+      Cette séquence signifie:
+        - le champ décrit la couleur de fond
+        - la valeur prend 1 octet
+        - La couleur de transparence est 255
+
+
+La METHODE DE COMPACTAGE DE L'IMAGE:
+════════════════════════════════════
+
+  La méthode de compression PKM est une sorte de "Run-Length-Compression" qui
+est très efficace sur les images comportant de longues répétitions d'une même
+couleur horizontalement.
+  En fait la compression commence à être efficace s'il y a souvent plus de 3
+fois la même couleur consécutivement.
+
+  Je pense qu'il est préférable de vous donner directement l'algorithme plutôt
+que de nager dans des explications incomprehensibles.
+
+
+  DEBUT
+    /*
+      fonctions:
+        Lire_octet(Fichier)            Lit et retourne 1 octet à partir de
+                                     Fichier
+        Dessiner_pixel(X,Y,Couleur)    Dessine un pixel d'une certaine Couleur
+                                     à la position (X,Y)
+        Taille_fichier(Fichier)        Retourne la taille totale d'un Fichier
+                                     en octets
+
+      variables:
+        le type de Taille_image        est dword
+        le type de Taille_donnees      est dword
+        le type de Compteur_donnees    est dword
+        le type de Compteur_pixels     est dword
+        le type de Couleur             est byte
+        le type de Octet_lu            est byte
+        le type de Word_lu             est word
+        le type de Compteur            est word
+        le type de Fichier             est <fichier binaire>
+    */
+
+    /* A cet endroit, le header et le post-header ont déjà été lus. */
+
+    Taille_image        <- Header.Largeur * Header.Hauteur
+    Taille_donnees      <- Taille_fichier(Fichier) - (780+Header.Taille_PH)
+
+    Compteur_donnees    <- 0
+    Compteur_pixels     <- 0
+
+    /* Boucle de décompression: */
+    TANT QUE ((Compteur_pixels<Taille_image)
+           ET (Compteur_donnees<Taille_donnees)) FAIRE
+    {
+      Octet_lu <- Lire_octet(Fichier)
+
+      /* Si pas un octet de reconnaissance de paquet, c'est un pixel brut */
+      SI ((Octet_lu<>Header.Pack_byte) ET (Octet_lu<>Header.Pack_word))
+      ALORS
+      {
+        Dessiner_pixel(Compteur_pixels MOD Header.Largeur,
+                       Compteur_pixels DIV Header.Largeur,
+                       Octet_lu)
+
+        Compteur_pixels  <- Compteur_pixels + 1
+        Compteur_donnees <- Compteur_donnees + 1
+      }
+      SINON   /* Est-ce que le nombre de pixels à répéter est codé... */
+      {       /* ... sur 1 octet ? */
+        SI (Octet_lu = Header.Pack_byte) ALORS
+        {
+          Couleur  <- Lire_octet(Fichier)
+          Octet_lu <- Lire_octet(Fichier)
+
+          POUR Compteur ALLANT DE 0 A (Octet_lu-1) PAR PAS DE +1
+            Dessiner_pixel((Compteur_pixels+Compteur) MOD Header.Largeur,
+                           (Compteur_pixels+Compteur) DIV Header.Largeur,
+                           Couleur)
+
+          Compteur_pixels  <- Compteur_pixels + Octet_lu
+          Compteur_donnees <- Compteur_donnees + 3
+        }
+        SINON /* ... sur 2 octets ? */
+        {
+          Couleur <- Lire_octet(Fichier)
+          Word_lu <- (word) (Lire_octet(Fichier) SHL 8)+Lire_octet(Fichier)
+
+          POUR Compteur ALLANT DE 0 A (Word_lu-1) PAR PAS DE +1
+            Dessiner_pixel((Compteur_pixels+Compteur) MOD Header.Largeur,
+                           (Compteur_pixels+Compteur) DIV Header.Largeur,
+                           Couleur)
+
+          Compteur_pixels  <- Compteur_pixels + Word_lu
+          Compteur_donnees <- Compteur_donnees + 4
+        }
+      }
+    }
+  FIN
+
+
+  Par exemple, la séquence suivante:
+    (on suppose que Pack_byte=01 et Pack_word=02)
+    04 03 01 05 06 03 02 00 01 2C
+  sera décodée comme:
+    04 03 05 05 05 05 05 05 03 00 00 00 ... (repéter 0 300 fois (012Ch=300))
+
+  Les répétitions qui tiennent sur un word doivent être écrites avec leur
+  octet de poids le plus fort en premier. Je sais que ça va à l'encontre du
+  standard Intel mais puisque je lis les octets du fichier au travers d'un
+  buffer (franchement plus rapide), Je me fous complètement de l'ordre
+  (Désolé :)). Mais les words du header et du post-header doivent être écrits
+  et lus à la manière Intel!
+
+
+  Conseils de compactage:
+  ───────────────────────
+
+  * Comme vous pouvez le constater, il pourrait y avoir un problème lorsque
+  vous devriez compacter un pixel brut de couleur égale à Pack_byte ou à
+  Pack_word. Ces pixels doivent toujours être codés comme des paquets même
+  s'il n'y a qu'un seul pixel.
+
+    Exemple: (supposons que Pack_byte=9)
+      9   sera encodé 9,9,1     (Le 1er 9 dans la séquence...
+      9,9 sera encodé 9,9,2     ... encodée est Pack_byte)
+      etc...
+
+  * Il semble évident de trouver des valeurs pour Pack_byte et Pack_word qui
+  ne sont jamais (ou presque) utilisées. Donc, une petite routine qui trouve
+  les 2 couleurs les moins utilisées dans l'image devrait être appelée avant
+  de commencer la compression. Ceci peut être réalisé presque instantanément
+  en Assembleur.
+
+  * Quand vous voulez écrire une séquence de 2 couleurs identiques, écrivez
+  simplement ces 2 couleurs l'une après l'autre (Couleur,Couleur) puisque ça
+  ne prend que 2 octets au lieu de 3 si vous aviez écrit un paquet (Pack_byte,
+  Couleur,2).
+
+  * Si vous compressez une image extrêmement simple qui comporte une séquence
+  de plus de 65535 fois la même couleur consécutivement, vous devez "casser"
+  la séquence et continuer avec un nouveau paquet.
+
+    Exemple: vous devez compacter les 65635 mêmes octets consécutifs (de
+             couleur 0 par exemple)
+      (On suppose que Pack_byte=01 et Pack_word=02)
+      Vous devrez alors écrire: 02 00 FF FF 01 00 64    (FFFFh=65535, 64h=100)
+
+
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│            ░▒▓█ Passer dans les modes vidéos de GrafX 2.00 █▓▒░            │
+└────────────────────────────────────────────────────────────────────────────┘
+
+
+    Toutes les procédures d'initialisation de mode sont écrites en ASM 386. De
+  toutes façons, si vous ne comprenez pas une ligne d'ASM, je ne vois vraiment
+  pas à quoi pourront vous servir ces procédures.
+
+    Elles ont été conçues pour être utilisées dans le modèle de mémoire FLAT.
+  Mais cela ne devrait pas vous prendre trop de temps de les adapter au modèle
+  que vous souhaitez utiliser puisqu'il n'y a que les manipulations de mémoire
+  que cela affectera (utilisez donc DS:SI au lieu de ESI, ES:DI à la place de
+  EDI et faîtes attention à l'adresse 0A0000h qui se transforme en l'adresse
+  0A000h:0000h).
+
+
+MCGA: (Mode VGA standard)
+═════
+
+    Y-a-t'il quelqu'un sur cette planète qui ne sache toujours pas comment
+  on passe en mode MCGA 320x200 en 256 couleurs ??!?
+    Bon... Je suppose que vous êtes un novice si vous lisez les 2 lignes
+  suivantes :)
+
+
+    mov  ax,0013h
+    int  10h
+
+
+
+Modes X: (Modes VGA étendus)
+════════
+
+    Bon... Il me semble que le Mode X original était en 320x240, mais
+  maintenant tout le monde appelle "Modes X" (ou X-Modes, ou Tweaked modes)
+  tous les modes VGA qui utilise plus de 64Ko de mémoire vidéo et la structure
+  "Unchained".
+    Afficher un pixel dans n'importe quel Mode X peut être effectué par la
+  même et unique fonction (mais je ne vous expliquerai pas comment faire, il
+  vous suffit d'indiquer à la fonction la taille des plans (Largeur/4)).
+    Si vous ne comprenez rien à ce que je dis, (Unchained, plans...) il vous
+  suffit de lire n'importe quelle bonne documentation sur le Mode X.
+
+
+    Nous tenons à remercier les auteurs de XLIB2 pour nous avoir économisé du
+  temps en ayant écrit cette fonction. Nous l'avons légèrement optimisée en
+  fonction de nos besoins, mais l'essentiel en a été conservé.
+
+
+    mov  ax,13h      ; Oui! Encore le mode MCGA! Tous les Modes X doivent
+    int  10h         ; commencer à partir du mode VGA standard, mais bien des
+                     ; choses changent par la suite.
+
+    mov  dx,3C6h     ; Pour la durée de l'initialisation, on va éteindre la
+    xor  al,al       ; palette de façon à ce que l'utilisateur ne subisse pas
+    out  dx,al       ; nos triturations.
+
+    mov  dx,3C4h     ; Nous allons demander au registre TIMING SEQUENCER de
+    mov  ax,0604h    ; passer dans le mode "Unchained" (mode X), sans gérer de
+    out  dx,ax       ; parité, et un accès aux 256Ko de la carte vidéo.
+    mov  ax,0100h    ; On va ensuite enclencher le reset synchrone du registre
+    out  dx,ax       ; TS car on s'apprête à jouer avec les registres.
+
+    mov  al,01h      ; De la même façon que pour la palette, on demande à la
+    out  dx,al       ; carte vidéo de ne plus scruter la mémoire pour
+    inc  dx          ; afficher son contenu. Ainsi, c'est une façon de plus
+    in   al,dx       ; d'éviter l'affichage parasite qui arrive le temps que
+    mov  ah,al       ; le mode soit totalement initialisé et stabilisé.
+    mov  al,01h      ; De plus, on peut espérer qu'en demandant un arrêt de
+    push ax          ; la lecture de la mémoire, le système s'en voit un peu
+    mov  al,ah       ; accéléré, et ainsi accélérer l'initialisation du mode
+    or   al,20h      ; graphique (l'espoir fait vivre :))
+    out  dx,al       ;
+
+    mov  esi,X_ptr   ; Pointeur sur la liste des constantes à envoyer au CRTC.
+    cld
+
+    lodsb            ; Ceci charge dans AL une valeur qui nous dira quoi faire
+                     ; avec le registre MISCELLANEOUS, et incrémente ESI.
+                     ; La valeur est égale à ZERO => Rien à faire
+                     ;                      sinon => Envoyer AL au reg. MISC.
+
+    or   al,al       ; Devons nous modifier le mode vidéo de base ?
+    jz   NonMerci    ; Non?─┐ En fait, la réponse est toujours "Oui".
+    mov  dx,3C2h     ;      │ Sauf pour quelques modes tels que le
+    out  dx,al       ;      │ 320x200 en Mode X
+    NonMerci:        ; <────┘ (mais notre mode 320x200 est en MCGA...)
+
+    mov  dx,3C4h     ; On en a terminé avec les manipulations du registre
+    mov  ax,0300h    ; MISCELLANEOUS, on peut maintenant désenclencher le
+    out  dx,ax       ; reset synchrone du registre TIMING SEQUENCER.
+
+    ; Et maintenant, si on jouait avec le CRTC?
+
+    mov  dx,3D4h     ; Dans le 18ème registre du CRTC, on va désenclencher le
+    mov  al,11h      ; bit de protection. Sans cela, les valeurs que nous
+    out  dx,al       ; aurions envoyées aux registres du CRTC auraient été
+    inc  dx          ; ignorées.
+    in   al,dx
+    and  al,7Fh
+    out  dx,al
+
+    dec  dx          ; DX pointe à nouveau sur "l'entrée" du registre CRTC.
+    lodsb            ; Ceci met dans AL le nombre de registres CRTC à changer
+    xor  ecx,ecx     ; On doit nettoyer ECX avant de commencer à répéter...
+    mov  cl,al       ; ...CL (AL) fois OUTSW
+    rep  outsw       ; On peut envoyer la sauce aux registres du CRTC!
+
+    ; Juste au cas où le 20ème registre CRTC aurait été oublié dans la table
+    ; d'initialisation, on peut le calculer nous-mêmes (Ouaip, on est des
+    ; braves gars).
+
+    mov  ax,Screen_width ; Vous devez indiquer à la routine quelle est la
+    shr  ax,3            ; largeur de l'écran
+    mov  ah,al
+    mov  al,13h
+    out  dx,ax
+
+    mov  dx,3C4h     ; Maintenant vous avez la bonne résolution mais il peut
+    mov  ax,0F02h    ; y avoir des pixels pourris à l'écran à cause de zones
+    out  dx,ax       ; non nettoyées de la mémoire vidéo.
+    mov  edi,0A0000h ; Donc on va nettoyer la mémoire à partir de 0A0000h
+    xor  eax,eax     ; avec la valeur 0 (qui est le noir standard) et sur une
+    mov  ecx,4000h   ; longueur de 4000h dwords (256Ko).
+    rep  stosd       ; Allez, liquidez-moi tout ça!
+
+    mov  dx,3C4h     ; On peut redemander à la carte VGA de relire la mémoire
+    pop  ax          ; pour afficher l'écran...
+    out  dx,ax       ;
+    mov  dx,3C6h     ; ... et rétablir la palette pour que l'image soit
+    mov  al,0FFh     ; visible à l'utilisateur.
+    out  dx,al       ;
+
+
+
+  La table de constantes que vous devez employer est l'une des suivantes:
+  (Ces tables sont au format C, mais elles peuvent facilement êtres employées
+   dans d'autres langages)
+
+  word X320Y224[] =
+    { 0x0BA3, 0x6F06, 0xBA07, 0x0008, 0x4109, 0x0810, 0x8A11, 0xBF12, 0x0014,
+      0xC715, 0x0416, 0xE317 };
+  word X320Y240[] =
+    { 0x0AE3, 0x0D06, 0x3E07, 0x4109, 0xEA10, 0xAC11, 0xDF12, 0x0014, 0xE715,
+      0x0616, 0xE317 };
+  word X320Y256[] =
+    { 0x0CE3, 0x2306, 0xB207, 0x0008, 0x6109, 0x0A10, 0xAC11, 0xFF12, 0x2013,
+      0x0014, 0x0715, 0x1A16, 0xE317 };
+  word X320Y270[] =
+    { 0x0BE7, 0x3006, 0xF007, 0x0008, 0x6109, 0x2010, 0xA911, 0x1B12, 0x0014,
+      0x1F15, 0x2F16, 0xE317 };
+  word X320Y282[] =
+    { 0x0CE3, 0x6206, 0xF007, 0x6109, 0x310F, 0x3710, 0x8911, 0x3312, 0x2F13,
+      0x0014, 0x3C15, 0x5C16, 0xE317 };
+  word X320Y300[] =
+    { 0x0DE3, 0x4606, 0x1F07, 0x0008, 0x4009, 0x3110, 0x8011, 0x2B12, 0x2013,
+      0x0014, 0x2F15, 0x4416, 0xE317 };
+  word X320Y360[] =
+    { 0x09E3, 0x4009, 0x8810, 0x8511, 0x6712, 0x2013, 0x0014, 0x6D15, 0xBA16,
+      0xE317 };
+  word X320Y400[] =
+    { 0x03E3, 0x4009, 0x0014, 0xE317 };
+  word X320Y448[] =
+    { 0x0BA3, 0x6F06, 0xBA07, 0x0008, 0x4009, 0x0810, 0x8A11, 0xBF12, 0x0014,
+      0xC715, 0x0416, 0xE317 };
+  word X320Y480[] =
+    { 0x0AE3, 0x0D06, 0x3E07, 0x4009, 0xEA10, 0xAC11, 0xDF12, 0x0014, 0xE715,
+      0x0616 , 0xE317};
+  word X320Y512[] =
+    { 0x0CE3, 0x2306, 0xB207, 0x0008, 0x6009, 0x0A10, 0xAC11, 0xFF12, 0x2013,
+      0x0014, 0x0715, 0x1A16, 0xE317 };
+  word X320Y540[] =
+    { 0x0BE7, 0x3006, 0xF007, 0x0008, 0x6009, 0x2010, 0xA911, 0x1B12, 0x0014,
+      0x1F15, 0x2F16, 0xE317 };
+  word X320Y564[] =
+    { 0x0CE7, 0x6206, 0xF007, 0x0008, 0x6009, 0x3E10, 0x8911, 0x3312, 0x2013,
+      0x0014, 0x3C15, 0x5C16, 0xE317 };
+  word X320Y600[] =
+    { 0x0BE7, 0xBE06, 0xF007, 0x0008, 0x6009, 0x7C10, 0x8C11, 0x5712, 0x0014,
+      0x5815, 0x7016, 0xE317 };
+  word X360Y200[] =
+    { 0x09E7, 0x6B00, 0x5901, 0x5A02, 0x8E03, 0x5E04, 0x8A05, 0x2D13, 0x0014,
+      0xE317 };
+  word X360Y224[] =
+    { 0x12A7, 0x6B00, 0x5901, 0x5A02, 0x8E03, 0x5E04, 0x8A05, 0x6F06, 0xBA07,
+      0x0008, 0x4109, 0x0810, 0x8A11, 0xBF12, 0x2D13, 0x0014, 0xC715, 0x0416,
+      0xE317 };
+  word X360Y240[] =
+    { 0x11E7, 0x6B00, 0x5901, 0x5A02, 0x8E03, 0x5E04, 0x8A05, 0x0D06, 0x3E07,
+      0x4109, 0xEA10, 0xAC11, 0xDF12, 0x2D13, 0x0014, 0xE715, 0x0616, 0xE317 };
+  word X360Y256[] =
+    { 0x12E7, 0x6B00, 0x5901, 0x5A02, 0x8E03, 0x5E04, 0x8A05, 0x2B06, 0xB207,
+      0x0008, 0x6109, 0x0E10, 0xAC11, 0xFF12, 0x2D13, 0x0014, 0x0715, 0x1A16,
+      0xE317 };
+  word X360Y270[] =
+    { 0x12E7, 0x6B00, 0x5901, 0x5A02, 0x8E03, 0x5E04, 0x8A05, 0x3006, 0xF007,
+      0x0008, 0x6109, 0x2010, 0xA911, 0x1B12, 0x2D13, 0x0014, 0x1F15, 0x2F16,
+      0xE317 };
+  word X360Y282[] =
+    { 0x12E7, 0x6B00, 0x5901, 0x5A02, 0x8E03, 0x5E04, 0x8A05, 0x6206, 0xF007,
+      0x6109, 0x310F, 0x3710, 0x8911, 0x3312, 0x2D13, 0x0014, 0x3C15, 0x5C16,
+      0xE317 };
+  word X360Y300[] =
+    { 0x12E7, 0x6B00, 0x5901, 0x5A02, 0x8E03, 0x5E04, 0x8A05, 0x4606, 0x1F07,
+      0x0008, 0x4009, 0x3110, 0x8011, 0x2B12, 0x2D13, 0x0014, 0x2F15, 0x4416,
+      0xE317 };
+  word X360Y360[] =
+    { 0x0FE7, 0x6B00, 0x5901, 0x5A02, 0x8E03, 0x5E04, 0x8A05, 0x4009, 0x8810,
+      0x8511, 0x6712, 0x2D13, 0x0014, 0x6D15, 0xBA16, 0xE317 };
+  word X360Y400[] =
+    { 0x0AE7, 0x6B00, 0x5901, 0x5A02, 0x8E03, 0x5E04, 0x8A05, 0x4009, 0x2D13,
+      0x0014, 0xE317 };
+  word X360Y448[] =
+    { 0x12A7, 0x6B00, 0x5901, 0x5A02, 0x8E03, 0x5E04, 0x8A05, 0x6F06, 0xBA07,
+      0x0008, 0x4009, 0x0810, 0x8A11, 0xBF12, 0x2D13, 0x0014, 0xC715, 0x0416,
+      0xE317 };
+  word X360Y480[] =
+    { 0x11E7, 0x6B00, 0x5901, 0x5A02, 0x8E03, 0x5E04, 0x8A05, 0x0D06, 0x3E07,
+      0x4009, 0xEA10, 0xAC11, 0xDF12, 0x2D13, 0x0014, 0xE715, 0x0616, 0xE317 };
+  word X360Y512[] =
+    { 0x12E7, 0x6B00, 0x5901, 0x5A02, 0x8E03, 0x5E04, 0x8A05, 0x2B06, 0xB207,
+      0x0008, 0x6009, 0x0E10, 0xAC11, 0xff12, 0x2D13, 0x0014, 0x0715, 0x1A16,
+      0xE317 };
+  word X360Y540[] =
+    { 0x12E7, 0x6B00, 0x5901, 0x5A02, 0x8E03, 0x5E04, 0x8A05, 0x3006, 0xF007,
+      0x0008, 0x6009, 0x2010, 0xA911, 0x1B12, 0x2D13, 0x0014, 0x1F15, 0x2F16,
+      0xE317 };
+  word X360Y564[] =
+    { 0x12EB, 0x6B00, 0x5901, 0x5A02, 0x8E03, 0x5E04, 0x8A05, 0x6206, 0xF007,
+      0x0008, 0x6009, 0x3E10, 0x8911, 0x3312, 0x2D13, 0x0014, 0x3C15, 0x5C16,
+      0xE317 };
+  word X360Y600[] =
+    { 0x12E7, 0x6B00, 0x5901, 0x5A02, 0x8E03, 0x5E04, 0x8A05, 0xBE06, 0xF007,
+      0x0008, 0x6009, 0x7C10, 0x8C11, 0x5712, 0x2D13, 0x0014, 0x5815, 0x7016,
+      0xE317 };
+  word X400Y200[] =
+    { 0x09E7, 0x7100, 0x6301, 0x6402, 0x9203, 0x6604, 0x8205, 0x3213, 0x0014,
+      0xE317 };
+  word X400Y224[] =
+    { 0x12A7, 0x7100, 0x6301, 0x6402, 0x9203, 0x6604, 0x8205, 0x6F06, 0xBA07,
+      0x0008, 0x4109, 0x0810, 0x8A11, 0xBF12, 0x3213, 0x0014, 0xC715, 0x0416,
+      0xE317 };
+  word X400Y240[] =
+    { 0x12E7, 0x7100, 0x6301, 0x6402, 0x9203, 0x6604, 0x8205, 0x0D06, 0x3E07,
+      0x0008, 0x4109, 0xEA10, 0xAC11, 0xDF12, 0x3213, 0x0014, 0xE715, 0x0616,
+      0xE317 };
+  word X400Y256[] =
+    { 0x12E7, 0x7100, 0x6301, 0x6402, 0x9203, 0x6604, 0x8205, 0x2B06, 0xB207,
+      0x0008, 0x6109, 0x1310, 0xAC11, 0xFF12, 0x3213, 0x0014, 0x0715, 0x1A16,
+      0xE317 };
+  word X400Y270[] =
+    { 0x12E7, 0x7100, 0x6301, 0x6402, 0x9203, 0x6604, 0x8205, 0x3006, 0xF007,
+      0x0008, 0x6109, 0x2010, 0xA911, 0x1B12, 0x3213, 0x0014, 0x1F15, 0x2F16,
+      0xE317 };
+  word X400Y282[] =
+    { 0x12E7, 0x7100, 0x6301, 0x6402, 0x9203, 0x6604, 0x8205, 0x6206, 0xF007,
+      0x6109, 0x310F, 0x3710, 0x8911, 0x3312, 0x3213, 0x0014, 0x3C15, 0x5C16,
+      0xE317 };
+  word X400Y300[] =
+    { 0x12E7, 0x7100, 0x6301, 0x6402, 0x9203, 0x6604, 0x8205, 0x4606, 0x1F07,
+      0x0008, 0x4009, 0x3110, 0x8011, 0x2B12, 0x3213, 0x0014, 0x2F15, 0x4416,
+      0xE317 };
+  word X400Y360[] =
+    { 0x0FE7, 0x7100, 0x6301, 0x6402, 0x9203, 0x6604, 0x8205, 0x4009, 0x8810,
+      0x8511, 0x6712, 0x3213, 0x0014, 0x6D15, 0xBA16, 0xE317 };
+  word X400Y400[] =
+    { 0x0AE7, 0x7100, 0x6301, 0x6402, 0x9203, 0x6604, 0x8205, 0x4009, 0x3213,
+      0x0014, 0xE317 };
+  word X400Y448[] =
+    { 0x12A7, 0x7100, 0x6301, 0x6402, 0x9203, 0x6604, 0x8205, 0x6F06, 0xBA07,
+      0x0008, 0x4009, 0x0810, 0x8A11, 0xBF12, 0x3213, 0x0014, 0xC715, 0x0416,
+      0xE317 };
+  word X400Y480[] =
+    { 0x11E7, 0x7100, 0x6301, 0x6402, 0x9203, 0x6604, 0x8205, 0x0D06, 0x3E07,
+      0x4009, 0xEA10, 0xAC11, 0xDF12, 0x3213, 0x0014, 0xE715, 0x0616, 0xE317 };
+  word X400Y512[] =
+    { 0x12E7, 0x7100, 0x6301, 0x6402, 0x9203, 0x6604, 0x8205, 0x2B06, 0xB207,
+      0x0008, 0x6009, 0x1310, 0xAC11, 0xFF12, 0x3213, 0x0014, 0x0715, 0x1A16,
+      0xE317 };
+  word X400Y540[] =
+    { 0x12E7, 0x7100, 0x6301, 0x6402, 0x9203, 0x6604, 0x8205, 0x3006, 0xF007,
+      0x0008, 0x6009, 0x2010, 0xA911, 0x1B12, 0x3213, 0x0014, 0x1F15, 0x2F16,
+      0xE317 };
+  word X400Y564[] =
+    { 0x12EB, 0x7100, 0x6301, 0x6402, 0x9203, 0x6604, 0x8205, 0x6206, 0xF007,
+      0x0008, 0x6009, 0x3E10, 0x8911, 0x3312, 0x3213, 0x0014, 0x3C15, 0x5C16,
+      0xE317 };
+  word X400Y600[] =
+    { 0x12E7, 0x7100, 0x6301, 0x6402, 0x9203, 0x6604, 0x8205, 0xBE06, 0xF007,
+      0x0008, 0x6009, 0x7C10, 0x8C11, 0x5712, 0x3213, 0x0014, 0x5815, 0x7016,
+      0xE317 };
+
+
+  La structure: (exemple)
+
+       ┌────Ceci est le nombre de valeurs à envoyer aux registres CRTC. C'est
+       │    en fait le nombre de words dans la table moins 1 (à cause du 1er
+       │    word de la table qui n'est pas envoyé au CRTC mais qui contient
+       │    une valeur à envoyer au registre MISCELLANEOUS et le nombre de
+       │    valeurs à envoyer aux registres CRTC ;) ).
+       │
+       │ ┌──Ceci est la valeur à envoyer au registre MISCELLANEOUS (ou 0 si
+       │ │  aucune valeur ne doit y être envoyée).
+       │ │
+       │ │     ┌───Ceci est une valeur à envoyer dans un registre du CRTC.
+       │ │     │
+       │ │     │ ┌─Ceci est le numéro du registre du CRTC qui recevra la
+       │ │     │ │ valeur citée précédemment.
+       ├┐├┐    ├┐├┐
+   { 0x0AE3, 0x0D06, 0x3E07, 0x4109, 0xEA10, 0xAC11, 0xDF12, 0x0014, 0xE715,
+     0x0616, 0xE317 };
+
+    Vous pouvez remarquer que les registres 0 à 5 (et le 13h) du CRTC
+  définissent la largeur de l'écran, alors que les registres 6 à 17h (à
+  l'exception du 13h) definissent la hauteur de l'écran.
+
+
+    Nous avons plus de modes en poche que les quelques-uns :) que nous avons
+  inclus dans GrafX 2.00, mais ils ne sont ni vraiment utiles ni vraiment
+  stables. Nous pourrons toutefois décider de les inclure dans une prochaine
+  version.
+    S'il manque certains de vos modes préféres, envoyez nous simplement la
+  liste des constantes que l'on doit balancer au CRTC à la manière de la
+  structure utilisée ci-dessus.
+
+  IMPORTANT! Les valeurs des constantes citées plus haut ne sont pas
+             supportées par tous les moniteurs ou les cartes vidéos.
+             Nous avons testé GrafX2 avec différentes configurations et avons
+             constatés que certains modes ne marchent pas du tout avec
+             certaines cartes vidéos, alors que d'autres débordent de l'écran,
+             sont décentrés, assombris, trop clairs, ou tassés.
+             Toutefois, ils marchent tous correctement avec notre pauvre
+             petite Tseng Labs ET4000...
+
+  Si vous avez déjà une bonne connaissance à propos du CRTC, et avez des
+  valeurs différentes des notres pour certains modes, merci de nous en
+  informer. Nous nous en servirons s'ils marchent mieux sur une majorité
+  d'ordinateurs.
+
+
+
+VESA: (Un "pseudo-standard" pour les modes Super-VGA)
+═════
+
+    Nous nous servons du VESA pour des modes qui nécessitent une largeur de
+  640, 800 ou 1024 pixels. Mais il existe un moyen de combiner la hauteur des
+  Modes X avec les modes VESA, il est ainsi possible d'avoir des modes aussi
+  timbrés qu'en Mode X.
+
+
+  mov  ax,4F02h
+  mov  bx,Video_mode
+  int  10h
+
+
+  Les modes VESA 256 couleur VESA sont:
+    100h :  640x400
+    101h :  640x480
+    103h :  800x600
+    105h : 1024x768
+    107h : 1280x1024 (non disponible dans GrafX2 parce qu'uniquement supporté
+                     par des cartes vidéo avec 2 Megaoctets ou plus de mémoire
+                     vidéo)
+
+
+  Comme avec les Modes X, vous pouvez modifier les registres CRTC pour accéder
+  aux modes "VESA-X"! (Notez que certaines cartes vidéo ne supportent pas les
+  modifications des registres du CRTC VGA dans les modes VESA.)
+
+
+  Pour passer dans ces modes étendus, passez dans un mode VESA standard ayant
+  la bonne largeur, puis appelez Modif_registres_CRTC avec la bonne table de
+  hauteur.
+
+  Exemple (640x512) :
+    VESA_Set_mode(101h)         // On passe dans un mode qui a la même largeur
+    Modif_registres_CRTC(Y512)  // On modifie la hauteur
+
+
+  * Tables des hauteurs:
+
+  word Y224[] =
+    { 0x09A3, 0x6F06, 0xBA07, 0x0008, 0x4109, 0x0810, 0x8A11, 0xBF12, 0xC715,
+      0x0416 };
+  word Y240[] =
+    { 0x09E3, 0x0D06, 0x3E07, 0x0008, 0x4109, 0xEA10, 0xAC11, 0xDF12, 0xE715,
+      0x0616 };
+  word Y256[] =
+    { 0x0900, 0x2B06, 0xB207, 0x0008, 0x6109, 0x0A10, 0xAC11, 0xFF12, 0x0715,
+      0x1A16 };
+  word Y270[] =
+    { 0x09E7, 0x3006, 0xF007, 0x0008, 0x6109, 0x2010, 0xA911, 0x1B12, 0x1F15,
+      0x2F16 };
+  word Y282[] =
+    { 0x0AE3, 0x6206, 0xF007, 0x0008, 0x6109, 0x310F, 0x3710, 0x8911, 0x3312,
+      0x3C15, 0x5C16 };
+  word Y300[] =
+    { 0x09E3, 0x4606, 0x1F07, 0x0008, 0x4009, 0x3110, 0x8011, 0x2B12, 0x2F15,
+      0x4416 };
+  word Y350[] =
+    { 0x09A3, 0xBF06, 0x1F07, 0x0008, 0x4009, 0x8310, 0x8511, 0x5D12, 0x6315,
+      0xBA16 };
+  word Y360[] =
+    { 0x07E3, 0x0008, 0x4009, 0x8810, 0x8511, 0x6712, 0x6D15, 0xBA16 };
+  word Y400[] =
+    { 0x01E3, 0x4009 };
+  word Y448[] =
+    { 0x09A3, 0x6F06, 0xBA07, 0x0008, 0x4009, 0x0810, 0x8A11, 0xBF12, 0xC715,
+      0x0416 };
+  word Y480[] =
+    { 0x09E3, 0x0D06, 0x3E07, 0x0008, 0x4009, 0xEA10, 0xAC11, 0xDF12, 0xE715,
+      0x0616 };
+  word Y512[] =
+    { 0x0900, 0x2B06, 0xB207, 0x0008, 0x6009, 0x0A10, 0xAC11, 0xFF12, 0x0715,
+      0x1A16 };
+  word Y540[] =
+    { 0x09E7, 0x3006, 0xF007, 0x0008, 0x6009, 0x2010, 0xA911, 0x1B12, 0x1F15,
+      0x2F16 };
+  word Y564[] =
+    { 0x09E7, 0x6206, 0xF007, 0x0008, 0x6009, 0x3E10, 0x8911, 0x3312, 0x3C15,
+      0x5C16 };
+  word Y600[] =
+    { 0x09E7, 0xBE06, 0xF007, 0x0008, 0x6009, 0x7C10, 0x8C11, 0x5712, 0x5815,
+      0x7016 };
+
+
+
+  Modifier les registres CRTC: (inspiré de l'init. des Modes X... voir plus
+  ────────────────────────────  haut pour de plus amples détails)
+
+  mov  esi,XVESA_Ptr
+  cld
+
+  lodsb
+  or   al,al       ; Devons nous modifier le mode vidéo de base ?
+  jz   NonMerci    ; Non?─┐ La réponse peut être "Non" car les initialisations
+  mov  dx,3C2h     ;      │ de certains modes VESA mettent directement la
+  out  dx,al       ;      │ bonne valeur pour le registre MISCELLANEOUS.
+  NonMerci:        ; <────┘
+
+  mov  dx,3D4h
+  mov  al,11h
+  out  dx,al
+  inc  dx
+  in   al,dx
+  and  al,7Fh
+  out  dx,al
+
+  dec  dx
+  lodsb
+  xor  ecx,ecx
+  mov  cl,al
+  rep  outsw
+
+
+
+    Si vous êtes suffisament astucieux, vous pourrez combiner les constantes
+  utilisées dans les Modes X pour obtenir plus de modes "VESA-X" tels que le
+  640x200, 800x480, etc... (mais je ne pense pas que ça marche convenablement
+  avec les largeurs de 1024 pixels puisque ce mode est généralement
+  entrelacé... Mais qui sait?...)
+    Je pense que le plus difficile est de trouver la bonne valeur du registre
+  MISCELLANEOUS.
