@@ -245,6 +245,8 @@ int SetPalette(const T_Components * colors, int firstcolor, int ncolors)
 {
   if (screen == NULL) return 0;
   memcpy(screen->palette + firstcolor, colors, ncolors * sizeof(T_Components));
+  // update full screen
+  Update_rect(0, 0, screen->w, screen->h);
   return 1;
 }
 
