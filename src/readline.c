@@ -407,24 +407,37 @@ bye:
   if (unicode)
     *unicode = NULL;
   return haiku_get_clipboard();
-  #elif defined(USE_X11) || defined(__macosx__)
-    #if defined(USE_X11)
-  Atom selection = XInternAtom(X11_display, "CLIPBOARD", False);
-  Window selection_owner = XGetSelectionOwner(X11_display, selection);
-
-  if (selection_owner == None)
-  {
-    selection = XInternAtom(X11_display, "PRIMARY", False);
-    selection_owner = XGetSelectionOwner(X11_display, selection);
-  }
+  #elif defined(USE_X11) || defined(__macosx__) || defined(USE_SDL2)
   if (unicode)
     *unicode = NULL;
-  if (selection_owner != None)
+    #if defined(USE_SDL2)
+  if (!SDL_HasClipboardText())
+  {
+    return NULL;
+  }
+  else
+  {
+    char * utf8_str = SDL_GetClipboardText();
+    if (utf8_str != NULL)
+    {
+    #elif defined(USE_X11)
   {
     int i;
+    Atom selection = XInternAtom(X11_display, "CLIPBOARD", False);
+    Window selection_owner = XGetSelectionOwner(X11_display, selection);
+
+    if (selection_owner == None)
+    {
+      selection = XInternAtom(X11_display, "PRIMARY", False);
+      selection_owner = XGetSelectionOwner(X11_display, selection);
+    }
+    if (selection_owner == None)
+      return NULL;
+
     XConvertSelection(X11_display, selection, XInternAtom(X11_display, "UTF8_STRING", False),
                       XInternAtom(X11_display, "GFX2_CLIP", False), /* Property */
                       X11_window, CurrentTime);
+    // wait for the event to be received
     for(i = 0; X11_clipboard == NULL && i < 10; i++)
     {
       Get_input(20);
@@ -485,6 +498,8 @@ bye:
             *output = '\0';
 #if defined(USE_X11)
             free(utf8_str);
+#elif defined(USE_SDL2)
+            SDL_free(utf8_str);
 #endif
             return ansi_str;
           }
@@ -500,6 +515,12 @@ bye:
       // return the uf8_string, that's better than nothing
 #if defined(USE_X11)
       return utf8_str;
+#elif defined(USE_SDL2)
+      {
+        char * return_str = strdup(utf8_str);
+        SDL_free(utf8_str);
+        return return_str;
+      }
 #else
       return strdup(utf8_str);
 #endif
