@@ -538,13 +538,19 @@ HWND GFX2_Get_Window_Handle(void)
 /// Activates or desactivates file drag-dropping in program window.
 void Allow_drag_and_drop(int flag)
 {
+#if defined(USE_SDL2)
+  // SDL 2.x
+  SDL_EventState(SDL_DROPFILE, flag ? SDL_ENABLE : SDL_DISABLE);
+#else
+  // SDL 1.x
   // Inform Windows that we accept drag-n-drop events or not
-  #ifdef __WIN32__
+#ifdef __WIN32__
   DragAcceptFiles(GFX2_Get_Window_Handle(), flag?TRUE:FALSE);
   SDL_EventState (SDL_SYSWMEVENT,flag?SDL_ENABLE:SDL_DISABLE );
   #else
   (void)flag; // unused
-  #endif
+#endif
+#endif
 }
 
 /// Set application icon(s)

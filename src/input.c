@@ -1039,6 +1039,24 @@ int Get_input(int sleep_time)
           #endif
           // End of Joystick handling
           
+#if defined(USE_SDL2)
+          case SDL_DROPFILE:
+              GFX2_Log(GFX2_DEBUG, "SDL_DROPFILE: %s\n", event.drop.file);
+              Drop_file_name = strdup(event.drop.file);
+              SDL_free(event.drop.file);
+              break;
+          case SDL_DROPTEXT:
+              GFX2_Log(GFX2_DEBUG, "SDL_DROPTEXT: \"%s\"\n", event.drop.file);
+              SDL_free(event.drop.file);
+              break;
+          case SDL_DROPBEGIN:
+              GFX2_Log(GFX2_DEBUG, "SDL_DROPBEGIN\n");
+              break;
+          case SDL_DROPCOMPLETE:
+              GFX2_Log(GFX2_DEBUG, "SDL_DROPCOMPLETE\n");
+              break;
+#endif
+
           case SDL_SYSWMEVENT:
 #ifdef __WIN32__
               if(event.syswm.msg->msg  == WM_DROPFILES)
