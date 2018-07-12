@@ -1,9 +1,13 @@
 DOXYGEN = doxygen
+TAR = tar
+
 GIT_REVISION = $(shell cat ../src/version.c | cut -f 2 -d '"')
 LABEL = $(shell cat ../src/pversion.c | cut -f 2 -d '"')
 VERSION = $(subst wip.,wip,$(LABEL).$(GIT_REVISION))
 
 SOURCES = $(wildcard ../src/*.c) $(wildcard ../src/*.h)
+
+DOCARCHIVE = ../grafx2-$(VERSION)-doxygen.tgz
 
 .PHONY:	all gifanalyzer sdl_image_test test_iff doxygen
 
@@ -17,6 +21,11 @@ sdl_image_test:
 
 test_iff:
 	$(MAKE) -C $@
+
+doxygenarchive:	$(DOCARCHIVE)
+
+$(DOCARCHIVE):	../doc/doxygen/html/index.html
+	cd ../doc && $(TAR) czf $@ doxygen/
 
 doxygen:	../doc/doxygen/html/index.html
 
