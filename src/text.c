@@ -607,6 +607,7 @@ byte *Render_text_Win32(const char *str, int font_number, int size, int antialia
   byte * pixels = NULL;
   byte * new_brush = NULL;
   int i;
+  int x, y;
   HFONT font;
   const char * font_name;
 
@@ -635,7 +636,7 @@ byte *Render_text_Win32(const char *str, int font_number, int size, int antialia
 	bi->bmiHeader.biWidth = (s.cx + 3) & ~3;
 	bi->bmiHeader.biHeight = -s.cy;
 	bi->bmiHeader.biPlanes = 1;
-	bi->bmiHeader.biBitCount = 8;
+	bi->bmiHeader.biBitCount = antialias ? 32 : 8; // the GDI does Antialiasing only on TrueColor DIB
 	bi->bmiHeader.biCompression = BI_RGB;
 
   for (i = 0; i < 256; i++) {
@@ -664,16 +665,15 @@ byte *Render_text_Win32(const char *str, int font_number, int size, int antialia
   new_brush = (byte *)malloc(s.cx*s.cy);
   if (antialias)
   {
-    int y;
-    // TODO complete the antialiasing processing
     for (y = 0; y < s.cy; y++)
     {
-      memcpy(new_brush + y * s.cx, pixels + y * bi->bmiHeader.biWidth, s.cx);
+      // get the value from the 1st color component.
+      for (x = 0; x < s.cx; x++)
+        new_brush[x + y * s.cx] = pixels[(x + y * bi->bmiHeader.biWidth) * 4];
     }
   }
   else
   {
-    int x, y;
     for (y = 0; y < s.cy; y++)
     {
       for (x = 0; x < s.cx; x++)
