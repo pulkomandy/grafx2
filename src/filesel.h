@@ -29,24 +29,46 @@
 #include "struct.h"
 #include "loadsave.h"
 
+///
+/// Launch the Load/Save dialog (file selector)
+/// @param settings the settings associated with this file selector
+/// @param load 1 for a load dialog, 0 for a save
+/// @param context the IO context
+/// @return 0 if the user cancelled the load/save
+/// @return 1 if the user want to load/save a file
 byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context *context);
 
-T_Fileselector_item * Add_element_to_list(T_Fileselector *list, const char * full_name, const char *short_name, int type, byte icon);
+T_Fileselector_item * Add_element_to_list(T_Fileselector *list, const char * full_name, const char *short_name, int type, enum ICON_TYPES icon);
+
 ///
 /// Formats a display name for a file, directory, or similar name (drive, volume).
-/// The returned value is a pointer to a single static buffer of maximum 40 characters
-/// including the '\\0'.
+/// @param fname full file name from the file system
+/// @param max_length numbers of characters to display
+/// @param type 0 for file, 1 for directory, 2 for drive
+/// @return a pointer to a single static buffer of maximum 40 characters
+///         including the '\\0'.
 char * Format_filename(const char * fname, word max_length, int type);
 
+///
+/// Formats a display name for a file, directory, or similar name (drive, volume).
+/// @param fname full file name from the file system
+/// @param max_length numbers of characters to display
+/// @param type 0 for file, 1 for directory, 2 for drive
+/// @return a pointer to a single static buffer of maximum 40 wide characters
+///         including the '\\0'.
 word * Format_filename_unicode(const word * fname, word max_length, int type);
 
 void Free_fileselector_list(T_Fileselector *list);
 
 void Sort_list_of_files(T_Fileselector *list);
 
-void Recount_files(T_Fileselector *list);
-
-T_Fileselector_item * Get_item_by_index(T_Fileselector *list, short index);
+///
+/// Fast access to a list item.
+/// @param list the linked list
+/// @param index the item index to access
+/// @return the item at the index position in the list
+/// @return NULL in case of error
+T_Fileselector_item * Get_item_by_index(T_Fileselector *list, unsigned short index);
 
 void Read_list_of_drives(T_Fileselector *list, byte name_length);
 
@@ -57,7 +79,5 @@ void Locate_list_item(T_List_button * list, short selected_item);
 int Quicksearch_list(T_List_button * list, T_Fileselector * selector);
 
 void Reset_quicksearch(void);
-
-extern T_Selector_settings * Selector;
 
 #endif

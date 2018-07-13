@@ -140,7 +140,7 @@ byte Native_filesel(byte load)
 static T_Fileselector Filelist;
 
 /// Selector settings to use, for all functions called by Load_or_save
-T_Selector_settings * Selector;
+static T_Selector_settings * Selector;
 
 /// Name of the current directory
 //static char Selector_directory[1024];
@@ -153,7 +153,13 @@ static word Selector_filename_unicode[256];
 // * Le fileselect modifie le répertoire courant. Ceci permet de n'avoir
 //   qu'un findfirst dans le répertoire courant à faire:
 
-void Recount_files(T_Fileselector *list)
+/**
+ * Update T_Fileselector::Nb_files T_Fileselector::Nb_directories T_Fileselector::Nb_elements
+ * counts.
+ * Also update the list index T_Fileselector::Index
+ * @param list the linked list to update
+ */
+static void Recount_files(T_Fileselector *list)
 {
   T_Fileselector_item *item;
 
@@ -180,7 +186,7 @@ void Recount_files(T_Fileselector *list)
   {
     int i;
     
-    list->Index = (T_Fileselector_item **) malloc(list->Nb_elements * sizeof(T_Fileselector_item **));
+    list->Index = (T_Fileselector_item **) malloc(list->Nb_elements * sizeof(T_Fileselector_item *));
     if (list->Index)
     {
       // Fill the index
@@ -194,11 +200,11 @@ void Recount_files(T_Fileselector *list)
   }
 }
 
-// -- Destruction de la liste chaînée ---------------------------------------
+/**
+ * This function free all item in the list, but not the list itself.
+ * @param list the linked list
+ */
 void Free_fileselector_list(T_Fileselector *list)
-//  Cette procédure détruit la chaine des fichiers. Elle doit être appelée
-// avant de rappeler la fonction Read_list_of_files, ainsi qu'en fin de
-// programme.
 {
   // Pointeur temporaire de destruction
   T_Fileselector_item * temp_item;
@@ -366,22 +372,35 @@ char * Format_filename(const char * fname, word max_length, int type)
 }
 
 
-// -- Rajouter a la liste des elements de la liste un element ---------------
-T_Fileselector_item * Add_element_to_list(T_Fileselector *list, const char * full_name, const char *short_name, int type, byte icon)
-//  Cette procedure ajoute a la liste chainee un fichier passé en argument.
+/**
+ * Add an item to the file selector linked list
+ * @param list the linked list
+ * @param full_name the file name
+ * @param short_name the file name truncated to display in the file selector
+ * @param type the type of the item : 0 = File, 1 = Directory, 2 = Drive
+ * @param icon the icon for the item
+ * @return a pointer to the newly added item
+ * @return NULL in case of error
+ */
+T_Fileselector_item * Add_element_to_list(T_Fileselector *list, const char * full_name, const char *short_name, int type, enum ICON_TYPES icon)
 {
   // Working element
   T_Fileselector_item * temp_item;
-  size_t short_name_len;
+  size_t full_name_len, short_name_len;
 
+  full_name_len = strlen(full_name) + 1;
   short_name_len = strlen(short_name) + 1;
   // Allocate enough room for one struct + the visible label
-  temp_item=(T_Fileselector_item *)malloc(sizeof(T_Fileselector_item)+short_name_len);
+  temp_item=(T_Fileselector_item *)malloc(sizeof(T_Fileselector_item)+full_name_len);
+  if (temp_item == NULL)  // memory allocation error
+    return NULL;
   memset(temp_item, 0, sizeof(T_Fileselector_item));
 
+  if (short_name_len > sizeof(temp_item->Short_name))
+    short_name_len = sizeof(temp_item->Short_name) - 1; // without terminating 0
   // Initialize element
   memcpy(temp_item->Short_name,short_name,short_name_len);
-  strcpy(temp_item->Full_name,full_name);
+  memcpy(temp_item->Full_name,full_name,full_name_len);
   temp_item->Type = type;
   temp_item->Icon = icon;
 
@@ -399,7 +418,7 @@ T_Fileselector_item * Add_element_to_list(T_Fileselector *list, const char * ful
 
 ///
 /// Checks if a file has the requested file extension.
-/// The extension string can end with a ';' (remainder is ignored)
+/// The extension string can end with a ';' (remainder is ignored).
 /// This function allows wildcard '?', and '*' if it's the only character.
 int Check_extension(const char *filename_ext, const char * filter)
 {
@@ -789,12 +808,16 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
 #endif
 
 
-// -- Tri de la liste des fichiers et répertoires ---------------------------
+/**
+ * Sort a file/directory list.
+ * The sord is done in that order :
+ * Directories first, in alphabetical order,
+ * then Files, in alphabetical order.
+ *
+ * List counts and index are updated.
+ * @param list the linked list
+ */
 void Sort_list_of_files(T_Fileselector *list)
-// Tri la liste chainée existante dans l'ordre suivant:
-//
-// * Les répertoires d'abord, dans l'ordre alphabétique de leur nom
-// * Les fichiers ensuite, dans l'ordre alphabétique de leur nom
 {
   byte   list_is_sorted; // Booléen "La liste est triée"
   byte   need_swap;          // Booléen "Il faut inverser les éléments"
@@ -884,9 +907,11 @@ void Sort_list_of_files(T_Fileselector *list)
   Recount_files(list);
 }
 
-T_Fileselector_item * Get_item_by_index(T_Fileselector *list, short index)
+T_Fileselector_item * Get_item_by_index(T_Fileselector *list, unsigned short index)
 {
   // Safety
+  if (list->Nb_elements == 0)
+    return NULL;
   if (index >= list->Nb_elements)
     index=list->Nb_elements-1;
 
@@ -901,7 +926,7 @@ T_Fileselector_item * Get_item_by_index(T_Fileselector *list, short index)
     // Fall back anyway on iterative search
  
     T_Fileselector_item * item = list->First;
-    for (;index>0;index--)
+    for (; index > 0 && item != NULL; index--)
       item = item->Next;
     
     return item;
@@ -910,15 +935,12 @@ T_Fileselector_item * Get_item_by_index(T_Fileselector *list, short index)
 }
 
 
-// -- Affichage des éléments de la liste de fichier / répertoire ------------
+/**
+ * Display of the file/directory list items.
+ * @param offset_first offset between the 1st visible file and the first file in list.
+ * @param selector_offset offset between the 1st visible file and the selected file.
+ */
 void Display_file_list(T_Fileselector *list, short offset_first,short selector_offset)
-//
-// offset_first = Décalage entre le premier fichier visible dans le
-//                   sélecteur et le premier fichier de la liste
-//
-// selector_offset  = Décalage entre le premier fichier visible dans le
-//                   sélecteur et le fichier sélectionné dans la liste
-//
 {
   T_Fileselector_item * current_item;
   byte   index;  // index du fichier qu'on affiche (0 -> 9)
@@ -984,19 +1006,15 @@ void Display_file_list(T_Fileselector *list, short offset_first,short selector_o
 }
 
 
-// -- Récupérer le libellé d'un élément de la liste -------------------------
+/**
+ * Get the label of a list item.
+ * @param offset_first offset between the 1st visible file and the 1st file in list.
+ * @param selector_offset offset between the 1st visible file and the wanted label.
+ * @param label pointer to a buffer to receive the label (ANSI)
+ * @param unicode_label pointer to a buffer to receive the label (Unicode)
+ * @param type NULL or a pointer to receive the type : 0 = file, 1 = directory, 2 = drive.
+ */
 static void Get_selected_item(T_Fileselector *list, short offset_first,short selector_offset,char * label,word * unicode_label,int *type)
-//
-// offset_first = Décalage entre le premier fichier visible dans le
-//                   sélecteur et le premier fichier de la liste
-//
-// selector_offset  = Décalage entre le premier fichier visible dans le
-//                   sélecteur et le fichier à récupérer
-//
-// label          = str de réception du libellé de l'élément
-//
-// type             = Récupération du type: 0 fichier, 1 repertoire, 2 lecteur.
-//                    Passer NULL si pas interessé.
 {
   T_Fileselector_item * current_item;
 

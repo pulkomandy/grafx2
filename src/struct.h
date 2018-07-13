@@ -180,7 +180,6 @@ typedef struct T_Dropdown_button
 /// Data for one item (file, directory) in a fileselector.
 typedef struct T_Fileselector_item
 {
-  char Full_name[MAX_PATH_CHARACTERS]; ///< Filesystem value.
   byte Type;           ///< Type of item: 0 = File, 1 = Directory, 2 = Drive
   byte Icon;           ///< One of ::ICON_TYPES, ICON_NONE for none.
 
@@ -190,23 +189,20 @@ typedef struct T_Fileselector_item
   word * Unicode_full_name;   ///< Pointer to allocated unicode string. Filesystem name
   word * Unicode_short_name;  ///< Pointer to allocated unicode string. Name to display
   
-#if __GNUC__ < 3
-  char Short_name[0]; ///< Name to display.
-#else
-  char Short_name[]; ///< Name to display.
-#endif
-  // No field after Short_name[] ! Dynamic allocation according to name length.
+  char Short_name[36];  ///< Name to display. limited to 35 characters (used in factory.c)
+  char Full_name[1];    ///< Filesystem value.
+  // No field after Full_name[] ! Dynamic allocation according to name length.
 } T_Fileselector_item;
 
 /// Data for a fileselector
 typedef struct T_Fileselector
 {
   /// Number of elements in the current fileselector's ::Filelist
-  short Nb_elements;
+  unsigned short Nb_elements;
   /// Number of files in the current fileselector's ::Filelist
-  short Nb_files;
+  unsigned short Nb_files;
   /// Number of directories in the current fileselector's ::Filelist
-  short Nb_directories;
+  unsigned short Nb_directories;
   /// Head of the linked list for the fileselector.
   T_Fileselector_item * First;
   /// Index for direct access to element number N

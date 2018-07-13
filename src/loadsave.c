@@ -375,10 +375,7 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
       Print_in_window(236,59,str,MC_Black,MC_Light);
   
       // Affichage du vrai format
-      if (format!=Selector->Format_filter)
-      {
-        Print_in_window( 59,59,Get_fileformat(format)->Label,MC_Black,MC_Light);
-      }
+      Print_in_window( 59,59,Get_fileformat(format)->Label,MC_Black,MC_Light);
 
       // On efface le commentaire précédent
       Window_rectangle(45,70,32*8,8,MC_Light);
