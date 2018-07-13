@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2018 Thomas Bernard
     Copyright 2011 Pawel Góralski
     Copyright 2009 Pasi Kallinen
     Copyright 2008 Peter Gordon
@@ -22,6 +23,33 @@
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
+/**
+ * @file main.c
+ * Program entry point, global variables and global functions.
+ *
+ * @mainpage
+ * GrafX2 is a bitmap paint program inspired by the Amiga programs
+ * Deluxe Paint and Brilliance. Specialized in 256-color drawing,
+ * it includes a very large number of tools and effects that make
+ * it particularly suitable for pixel art, game graphics,
+ * and generally any detailed graphics painted with a mouse.
+ *
+ * The program is mostly developed on Haiku, Linux, FreeBSD
+ * and Windows, but is also portable on many other platforms :
+ * It can be built using SDL 1.x or SDL 2.x libraries (see https://www.libsdl.org/)
+ * or Xlib or Win32 API.
+ *
+ * Web for the project users is http://grafx2.tk/.
+ *
+ * Developpers are welcome to contribute :
+ * the code is hosted on gitlab https://gitlab.com/GrafX2/grafX2
+ * and a bug tracker, wiki, etc. is available on
+ * https://pulkomandy.tk/projects/GrafX2.
+ *
+ * This Doxygen documentation is browsable on
+ * https://pulkomandy.tk/projects/GrafX2/doxygen/ (updated nightly).
+ */
+/// declare global variables in main.c
 #define GLOBAL_VARIABLES
 
 // time.h defines timeval which conflicts with the one in amiga SDK
@@ -116,7 +144,12 @@ static int setsize_height;
 static SDL_Joystick* Joystick;
 #endif
 
-//--- Affichage de la syntaxe, et de la liste des modes vidéos disponibles ---
+/**
+ * Show the command line syntax and available video modes.
+ *
+ * Output to standard outout (stdout) and show a message box under MS Windows,
+ * where standard output is not available
+ */
 void Display_syntax(void)
 {
   int mode_index, i;
@@ -306,7 +339,17 @@ struct {
 
 #define ARRAY_SIZE(x) (int)(sizeof(x) / sizeof(x[0]))
 
-// --------------------- Analyse de la ligne de commande ---------------------
+/**
+ * Parse the command line.
+ *
+ * @param argc argument count
+ * @param argv argument values
+ * @param main_filename pointer to receive 1st file name
+ * @param main_directory pointer to receive 1st file directory
+ * @param spare_filename pointer to receive 2nd file name
+ * @param spare_directory pointer to receive 2nd file directory
+ * @return the number of file to open (0, 1 or 2)
+ */
 int Analyze_command_line(int argc, char * argv[], char *main_filename, char *main_directory, char *spare_filename, char *spare_directory)
 {
   char *buffer ;
@@ -609,8 +652,14 @@ static int Get_Unicode_Filename(word * filename_unicode, const char * filename, 
 #endif
 }
 
-// ------------------------ Initialiser le programme -------------------------
-// Returns 0 on fail
+/**
+ * Initialize the  program.
+ *
+ * @param argc command line argument count
+ * @param argv command line argument values
+ * @return 0 on fail
+ * @return 1 on success
+ */
 int Init_program(int argc,char * argv[])
 {
   int temp;
@@ -1132,11 +1181,13 @@ int Init_program(int argc,char * argv[])
   return(1);
 }
 
-// ------------------------- Program Shutdown --------------------------
-// Free all allocated resources
+#define FREE_POINTER(p) free(p); p = NULL //!< Make free the memory and make sure the pointer is set to NULL
 
-#define FREE_POINTER(p) free(p); p = NULL
-
+/**
+ * Program Shutdown.
+ *
+ * Free all allocated resources.
+ */
 void Program_shutdown(void)
 {
   int      i;
@@ -1252,7 +1303,9 @@ void Program_shutdown(void)
 }
 
 
-// -------------------------- Procédure principale ---------------------------
+/**
+ * Program entry point
+ */
 #if defined(WIN32) && !defined(USE_SDL) && !defined(USE_SDL2)
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 #else
@@ -1353,6 +1406,11 @@ int main(int argc,char * argv[])
 }
 
 #if defined(WIN32) && !defined(USE_SDL) && !defined(USE_SDL2) && !defined(_MSC_VER)
+/**
+ * MS Window entry point.
+ *
+ * This function is used when building with MinGW
+ */
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR _lpCmdLine, int nCmdShow)
 {
   WCHAR *lpCmdLine = GetCommandLineW();

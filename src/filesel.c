@@ -937,6 +937,7 @@ T_Fileselector_item * Get_item_by_index(T_Fileselector *list, unsigned short ind
 
 /**
  * Display of the file/directory list items.
+ * @param list the file list
  * @param offset_first offset between the 1st visible file and the first file in list.
  * @param selector_offset offset between the 1st visible file and the selected file.
  */
@@ -1008,6 +1009,7 @@ void Display_file_list(T_Fileselector *list, short offset_first,short selector_o
 
 /**
  * Get the label of a list item.
+ * @param list the file list
  * @param offset_first offset between the 1st visible file and the 1st file in list.
  * @param selector_offset offset between the 1st visible file and the wanted label.
  * @param label pointer to a buffer to receive the label (ANSI)
