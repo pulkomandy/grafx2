@@ -1225,6 +1225,9 @@ int Get_input(int sleep_time)
               Drop_file_name = strdup(event.drop.file);
               SDL_free(event.drop.file);
               break;
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+          // SDL_DROPTEXT, SDL_DROPBEGIN, and SDL_DROPCOMPLETE
+          // are available since SDL 2.0.5.
           case SDL_DROPTEXT:
               GFX2_Log(GFX2_DEBUG, "SDL_DROPTEXT: \"%s\"\n", event.drop.file);
               SDL_free(event.drop.file);
@@ -1235,6 +1238,7 @@ int Get_input(int sleep_time)
           case SDL_DROPCOMPLETE:
               GFX2_Log(GFX2_DEBUG, "SDL_DROPCOMPLETE\n");
               break;
+#endif
 #endif
 
           case SDL_SYSWMEVENT:
