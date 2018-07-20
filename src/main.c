@@ -584,7 +584,7 @@ static int Get_Unicode_Filename(word * filename_unicode, const char * filename, 
   filename_unicode[i++] = 0;
   return 1;
 #elif defined(ENABLE_FILENAMES_ICONV)
-  char * input = filename;
+  char * input = (char *)filename;
   size_t inbytesleft = strlen(filename);
   char * output = (char *)filename_unicode;
   size_t outbytesleft = (MAX_PATH_CHARACTERS - 1) * 2;
