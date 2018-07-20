@@ -73,7 +73,7 @@ extern Window X11_window;
 #elif defined(__macosx__)
 const char * get_paste_board(void);
 #endif
-#if defined(USE_X11) || defined(SDL_VIDEO_DRIVER_X11)
+#if defined(USE_X11) || (defined(SDL_VIDEO_DRIVER_X11) && !defined(NO_X11))
 extern char * X11_clipboard;
 #endif
 
@@ -409,7 +409,7 @@ bye:
   if (unicode)
     *unicode = NULL;
   return haiku_get_clipboard();
-  #elif defined(USE_X11) || defined(__macosx__) || defined(USE_SDL2) || (defined(USE_SDL) && defined(SDL_VIDEO_DRIVER_X11))
+  #elif defined(USE_X11) || defined(__macosx__) || defined(USE_SDL2) || (defined(USE_SDL) && defined(SDL_VIDEO_DRIVER_X11) && !defined(NO_X11))
   if (unicode)
     *unicode = NULL;
     #if defined(USE_SDL2)

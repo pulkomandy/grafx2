@@ -511,11 +511,18 @@ endif
         LOPT = -lm
         ifeq ($(API),sdl)
           LOPT += $(shell sdl-config --libs) -lSDL_image
-          LOPT += -lX11
+          ifneq ($(NO_X11),1)
+            LOPT += -lX11
+          endif
         endif
         ifeq ($(API),sdl2)
           LOPT += $(shell sdl2-config --libs) -lSDL2_image
-          LOPT += -lX11
+          ifneq ($(NO_X11),1)
+            LOPT += -lX11
+          endif
+        endif
+        ifeq ($(NO_X11),1)
+          COPT += -DNO_X11
         endif
         LOPT += $(TTFLOPT)
         LOPT += $(shell pkg-config --libs libpng)

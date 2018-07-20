@@ -83,7 +83,7 @@ int Snap_axis_origin_Y;
 
 char * Drop_file_name = NULL;
 
-#if defined(USE_X11) || defined(SDL_VIDEO_DRIVER_X11)
+#if defined(USE_X11) || (defined(SDL_VIDEO_DRIVER_X11) && !defined(NO_X11))
 char * X11_clipboard = NULL;
 #endif
 
@@ -319,7 +319,7 @@ int Move_cursor_with_constraints()
 
 // WM events management
 
-#if defined(USE_X11) || defined(SDL_VIDEO_DRIVER_X11)
+#if defined(USE_X11) || (defined(SDL_VIDEO_DRIVER_X11) && !defined(NO_X11))
 static int xdnd_version = 5;
 static Window xdnd_source = None;
 
@@ -1295,7 +1295,7 @@ int Get_input(int sleep_time)
                   // Drop of zero files. Thanks for the information, Bill.
                 }
               }
-#elif defined(SDL_VIDEO_DRIVER_X11)
+#elif defined(SDL_VIDEO_DRIVER_X11) && !defined(NO_X11)
 #if defined(USE_SDL)
 #define xevent event.syswm.msg->event.xevent
 #else

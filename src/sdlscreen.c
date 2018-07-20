@@ -581,7 +581,7 @@ void Allow_drag_and_drop(int flag)
 #ifdef __WIN32__
   DragAcceptFiles(GFX2_Get_Window_Handle(), flag?TRUE:FALSE);
   SDL_EventState (SDL_SYSWMEVENT, flag?SDL_ENABLE:SDL_DISABLE);
-#elif defined(SDL_VIDEO_DRIVER_X11)
+#elif defined(SDL_VIDEO_DRIVER_X11) && !defined(NO_X11)
   Atom version = flag ? 5 : 0;
   Display * display;
   Window window;
