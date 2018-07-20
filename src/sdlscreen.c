@@ -588,6 +588,12 @@ void Allow_drag_and_drop(int flag)
 
   if (GFX2_Get_X11_Display_Window(&display, &window))
   {
+    if (display == NULL)
+    {
+      if (flag)
+        GFX2_Log(GFX2_WARNING, "Drag&Drop with SDL needs the x11 video driver\n");
+      return;
+    }
     XChangeProperty(display, window,
                     XInternAtom(display, "XdndAware", False),
                     XA_ATOM, 32, PropModeReplace, (unsigned char *)&version, 1);

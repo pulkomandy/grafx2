@@ -437,6 +437,12 @@ bye:
       GFX2_Log(GFX2_ERROR, "Failed to get X11 display and window\n");
       return NULL;
     }
+    if (X11_display == NULL)
+    {
+      char video_driver_name[32];
+      GFX2_Log(GFX2_WARNING, "X11 display is NULL. X11 is needed for Copy/Paste. SDL video driver is currently %s\n", SDL_VideoDriverName(video_driver_name, sizeof(video_driver_name)));
+      return NULL;
+    }
 #endif
     selection = XInternAtom(X11_display, "CLIPBOARD", False);
     selection_owner = XGetSelectionOwner(X11_display, selection);
