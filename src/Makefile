@@ -508,17 +508,23 @@ endif
           COPT += -D_XOPEN_SOURCE=700
         endif
 
+        ifeq ($(PLATFORM), NetBSD)
+          COPT += -D_NETBSD_SOURCE
+        endif
+
         LOPT = -lm
         ifeq ($(API),sdl)
           LOPT += $(shell sdl-config --libs) -lSDL_image
           ifneq ($(NO_X11),1)
-            LOPT += -lX11
+            LOPT += $(shell pkg-config --libs x11)
+            COPT += $(shell pkg-config --cflags x11)
           endif
         endif
         ifeq ($(API),sdl2)
           LOPT += $(shell sdl2-config --libs) -lSDL2_image
           ifneq ($(NO_X11),1)
-            LOPT += -lX11
+            LOPT += $(shell pkg-config --libs x11)
+            COPT += $(shell pkg-config --cflags x11)
           endif
         endif
         ifeq ($(NO_X11),1)
@@ -534,7 +540,7 @@ endif
         # enable UTF8 filename translation
         # For Linux (GLibc), iconv is built into the C library so no LOPT needed.
         COPT += -DENABLE_FILENAMES_ICONV
-        ifneq ($(PLATFORM),Linux)
+        ifeq ($(filter-out NetBSD Linux, $(PLATFORM))),)
           LOPT += -liconv
         endif
 
