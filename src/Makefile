@@ -540,7 +540,7 @@ endif
         # enable UTF8 filename translation
         # For Linux (GLibc), iconv is built into the C library so no LOPT needed.
         COPT += -DENABLE_FILENAMES_ICONV
-        ifeq ($(filter-out NetBSD Linux, $(PLATFORM))),)
+        ifneq ($(filter-out NetBSD Linux,$(PLATFORM)),)
           LOPT += -liconv
         endif
 
