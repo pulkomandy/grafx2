@@ -176,7 +176,7 @@ void Display_syntax(void)
   fputs(syntax, stdout);
 
   i = snprintf(modes, sizeof(modes), "Available video modes:\n\n");
-  for (mode_index = 0; mode_index < Nb_video_modes; mode_index += 12)
+  for (mode_index = 0; mode_index < Nb_video_modes; mode_index += 6)
   {
     int k;
     for (k = 0; k < 6; k++)
