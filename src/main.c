@@ -786,9 +786,6 @@ int Init_program(int argc,char * argv[])
   Spare.time_of_safety_backup = 0;
 
 
-  // analyse commande line as soon as possible
-  file_in_command_line=Analyze_command_line(argc, argv, main_filename, main_directory, spare_filename, spare_directory);
-
 #if defined(USE_SDL) || defined(USE_SDL2)
   // SDL
   if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
@@ -813,8 +810,14 @@ int Init_program(int argc,char * argv[])
   // Texte
   Init_text();
 
-  // On initialise tous les modes vidéo
+  // Initialize all video modes
   Set_all_video_modes();
+
+  // Analyse command-line as soon as possible.
+  // This must come after video mode initialization because
+  // a video mode may be requested as a command-line parameter
+  file_in_command_line=Analyze_command_line(argc, argv, main_filename, main_directory, spare_filename, spare_directory);
+
   Pixel_ratio=PIXEL_SIMPLE;
   // On initialise les données sur l'état du programme:
   // Donnée sur la sortie du programme:
