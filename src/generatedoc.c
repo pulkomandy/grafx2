@@ -223,7 +223,7 @@ static const char * Export_help_table(FILE * f, unsigned int page)
     else if (table[index].Line_type == 'T')
     {
       if (index < length-2 && table[index+2].Line_type == 'T')
-        fprintf(f, " ");
+        fprintf(f, "\n");
       else
       {
         fprintf(f, "</h%d>", hlevel);
