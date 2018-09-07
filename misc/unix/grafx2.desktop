@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=GrafX2
 Comment=Deluxe Paint Clone
-Exec=grafx2 %F
+Exec=grafx2 %f
 Terminal=false
 Type=Application
 Icon=grafx2
