@@ -24,18 +24,20 @@ $(OBJDIR)/factory.o: factory.c brush.h struct.h const.h buttons.h loadsave.h \
 $(OBJDIR)/fileformats.o: fileformats.c gfx2log.h errors.h global.h struct.h const.h \
  loadsave.h gfx2surface.h misc.h io.h pages.h windows.h fileformats.h
 $(OBJDIR)/filesel.o: filesel.c const.h struct.h global.h misc.h errors.h gfx2log.h \
- io.h windows.h screen.h loadsave.h gfx2surface.h mountlist.h engine.h \
- readline.h input.h keycodes.h help.h unicode.h filesel.h
+  io.h windows.h screen.h loadsave.h gfx2surface.h mountlist.h engine.h \
+  readline.h input.h keycodes.h help.h unicode.h filesel.h
+$(OBJDIR)/generatedoc.o: generatedoc.c global.h struct.h const.h hotkeys.h \
+  helpfile.h keyboard.h
 $(OBJDIR)/gfx2log.o: gfx2log.c gfx2log.h
 $(OBJDIR)/gfx2surface.o: gfx2surface.c gfx2surface.h struct.h const.h errors.h \
  gfx2log.h
 $(OBJDIR)/graph.o: graph.c global.h struct.h const.h engine.h buttons.h loadsave.h \
- gfx2surface.h pages.h errors.h gfx2log.h screen.h graph.h misc.h \
- pxsimple.h pxtall.h pxwide.h pxdouble.h pxtriple.h pxwide2.h pxtall2.h \
- pxtall3.h pxquad.h windows.h input.h keycodes.h brush.h tiles.h
-$(OBJDIR)/help.o: help.c const.h struct.h global.h misc.h engine.h helpfile.h \
- help.h screen.h text.h keyboard.h windows.h input.h keycodes.h hotkeys.h \
- errors.h gfx2log.h pages.h factory.h
+  gfx2surface.h pages.h errors.h gfx2log.h screen.h graph.h misc.h \
+  pxsimple.h pxtall.h pxwide.h pxdouble.h pxtriple.h pxwide2.h pxtall2.h \
+  pxtall3.h pxquad.h windows.h input.h keycodes.h brush.h tiles.h
+$(OBJDIR)/help.o: help.c recoil.h const.h struct.h global.h misc.h engine.h \
+  helpfile.h help.h screen.h text.h keyboard.h windows.h input.h \
+  keycodes.h hotkeys.h errors.h gfx2log.h pages.h factory.h
 $(OBJDIR)/hotkeys.o: hotkeys.c struct.h const.h global.h hotkeys.h keycodes.h
 $(OBJDIR)/init.o: init.c buttons.h struct.h const.h loadsave.h gfx2surface.h \
  errors.h gfx2log.h global.h graph.h init.h io.h factory.h help.h \
@@ -126,6 +128,8 @@ $(OBJDIR)/transform.o: transform.c global.h struct.h const.h transform.h engine.
  loadsave.h gfx2surface.h pages.h tiles.h
 $(OBJDIR)/unicode.o: unicode.c unicode.h struct.h const.h
 $(OBJDIR)/version.o: version.c
+$(OBJDIR)/win32screen.o: win32screen.c screen.h struct.h const.h global.h errors.h \
+  gfx2log.h windows.h input.h keycodes.h keyboard.h
 $(OBJDIR)/windows.o: windows.c windows.h struct.h const.h engine.h errors.h \
  gfx2log.h global.h graph.h input.h keycodes.h misc.h op_c.h colorred.h \
  readline.h screen.h palette.h unicode.h keyboard.h

@@ -45,6 +45,13 @@
     #include <sys/mount.h>
 #endif
 
+#ifndef __no_pnglib__
+#include <png.h>
+#endif
+#ifndef NORECOIL
+#include "recoil.h"
+#endif
+
 #include "const.h"
 #include "struct.h"
 #include "global.h"
@@ -705,14 +712,26 @@ void Button_Stats(int btn)
 
   y=19; // row for first line
   Print_in_window(10,y,"Program version:",STATS_TITLE_COLOR,MC_Black);
-  sprintf(buffer,"%s.%s",Program_version, SVN_revision);
+  snprintf(buffer,20,"%s.%s",Program_version, SVN_revision);
   Print_in_window(146,y,buffer,STATS_DATA_COLOR,MC_Black);
-  y+=16;
+  y+=8;
   Print_in_window(10,y,"Build options:",STATS_TITLE_COLOR,MC_Black);
   Print_in_window(146,y,TrueType_is_supported()?"TTF fonts":"no TTF fonts",STATS_DATA_COLOR,MC_Black);
   y+=8;
   Print_in_window(10,y,"Lua version:",STATS_TITLE_COLOR,MC_Black);
   Print_in_window_limited(146,y,Lua_version(),10,STATS_DATA_COLOR,MC_Black);
+  y+=8;
+  Print_in_window(10,y,"libpng version:",STATS_TITLE_COLOR,MC_Black);
+#ifdef __no_pnglib__
+  Print_in_window(146,y,"not linked",STATS_DATA_COLOR,MC_Black);
+#else
+  Print_in_window(146,y,png_libpng_ver,STATS_DATA_COLOR,MC_Black);
+#endif
+#ifndef NORECOIL
+  y+=8;
+  Print_in_window(10,y,"recoil version:",STATS_TITLE_COLOR,MC_Black);
+  Print_in_window(146,y,RECOIL_VERSION " (" RECOIL_YEARS ")",STATS_DATA_COLOR,MC_Black);
+#endif
   y+=16;
   Print_in_window(10,y,"Free memory: ",STATS_TITLE_COLOR,MC_Black);
   y+=8;
@@ -892,4 +911,3 @@ void Button_Stats(int btn)
   Unselect_button(btn);
   Display_cursor();
 }
-
