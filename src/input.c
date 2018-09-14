@@ -1315,11 +1315,13 @@ int Get_input(int sleep_time)
                 case MotionNotify:
                   // ignore
                   break;
+#ifdef GenericEvent
                 case GenericEvent:
                   GFX2_Log(GFX2_DEBUG, "SDL_SYSWMEVENT x11 GenericEvent extension=%d evtype=%d\n",
                            xevent.xgeneric.extension,
                            xevent.xgeneric.evtype);
                   break;
+#endif
                 case PropertyNotify:
                   GFX2_Log(GFX2_DEBUG, "SDL_SYSWMEVENT x11 PropertyNotify\n");
                   break;
