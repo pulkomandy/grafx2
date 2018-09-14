@@ -1853,18 +1853,17 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         {
           int pos_last_dot;
           char* savename = NULL;
-    
+          word Selector_filename_unicode_save[256];
+
+          GFX2_Log(GFX2_DEBUG, "fileselector format changed from %d to %d\n", (int)Selector->Format_filter, (int)Window_attribute2);
           Selector->Format_filter = Window_attribute2;
-          if (Filelist.Nb_elements>0)
+          if (!load)
           {
-            T_Fileselector_item * current_item;
-            current_item = Get_item_by_index(&Filelist, Selector->Position + Selector->Offset);
             // In "save" box, if current name is a (possible) filename
             // with extension, set it to new format's extension
-            if (!load &&
-              current_item->Type == 0 &&
-              Get_fileformat(Selector->Format_filter)->Default_extension[0] != '\0' &&
-              (pos_last_dot=Position_last_dot(Selector_filename))!=-1 &&
+            pos_last_dot = Position_last_dot(Selector_filename);
+            if (Get_fileformat(Selector->Format_filter)->Default_extension[0] != '\0' &&
+              pos_last_dot!=-1 &&
               Selector_filename[pos_last_dot+1]!='\0')
             {
               strcpy(Selector_filename + pos_last_dot + 1,
@@ -1874,6 +1873,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
             }
           }
           savename = (char *)strdup(Selector_filename);
+          memcpy(Selector_filename_unicode_save, Selector_filename_unicode, sizeof(Selector_filename_unicode_save));
           // By default, position list at the beginning
           Selector->Position = 0;
           Selector->Offset = 0;
@@ -1894,7 +1894,10 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
             // If the file is (still present) or it's a name with new
             // extension, set it as the proposed file name.
             if (pos!=0 || !load)
+            {
               strcpy(Selector_filename, savename);
+              memcpy(Selector_filename_unicode, Selector_filename_unicode_save, sizeof(Selector_filename_unicode_save));
+            }
             free(savename);
           }
           Print_filename_in_fileselector();
