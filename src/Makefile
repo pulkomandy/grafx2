@@ -217,6 +217,9 @@ endif
 
     # these are for everyone
     COPT = -D_DARWIN_C_SOURCE -D__macosx__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -g $(LUACOPT) $(SDLCOPT) $(TTFCOPT) -I/usr/include
+ifeq ($(NO_X11),1)
+    COPT += -DNO_X11
+endif
 ifdef MACOSX_LION
     LOPT = $(SDLLOPT) $(LUALOPT) -framework libpng14 -lz
 else
