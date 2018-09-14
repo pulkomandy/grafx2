@@ -438,7 +438,7 @@ bye:
     char * utf8_str = SDL_GetClipboardText();
     if (utf8_str != NULL)
     {
-    #elif defined(USE_X11) || (defined(USE_SDL) && defined(SDL_VIDEO_DRIVER_X11))
+    #elif defined(USE_X11) || (defined(USE_SDL) && defined(SDL_VIDEO_DRIVER_X11) && !defined(NO_X11))
   {
     int i;
     Atom selection;
