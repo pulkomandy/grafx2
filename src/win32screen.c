@@ -157,10 +157,23 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
     user_feedback_required = 1;
     return 0;
 // WM_MBUTTONDBLCLK
+  case WM_SYSKEYDOWN: // Sent when ALT is pressed
   case WM_KEYDOWN:  // lParam & 0xffff => repeat count.   (lParam >> 16) & 0x1ff => scancode
-    Key = wParam|Get_Key_modifiers();
-    user_feedback_required = 1;
+    switch (wParam)
+    {
+      // Ignore isolated shift, alt,  control and window keys
+    case VK_SHIFT:
+    case VK_CONTROL:
+    case VK_MENU:
+    case VK_LWIN:
+    case VK_RWIN:
+      break;
+    default:
+      Key = wParam|Get_Key_modifiers();
+      user_feedback_required = 1;
+    }
     return 0;
+  case WM_SYSKEYUP:
   case WM_KEYUP:
     return 0;
   case WM_CHAR:
@@ -193,11 +206,7 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
     }
     return 0;
   default:
-    {
-      char msg[256];
-      snprintf(msg, sizeof(msg), "unknown Message : 0x%04x wParam=%08x lParam=%08lx", uMsg, wParam, lParam);
-      Warning(msg);
-    }
+    GFX2_Log(GFX2_INFO, "Win32_WindowProc() unknown Message : 0x%04x wParam=%08x lParam=%08lx\n", uMsg, wParam, lParam);
   }
   return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
