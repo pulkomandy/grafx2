@@ -38,6 +38,9 @@
 #elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
   // 'Amiga' key: an outlined uppercase A. Drawn on 2 unused characters.
   #define META_KEY_PREFIX "\215\216"
+#elif defined(WIN32)
+  // Windows Key
+  #define META_KEY_PREFIX "Win+"
 #else
   // All other platforms
   #define META_KEY_PREFIX "Super+"
@@ -549,7 +552,7 @@ const char * Key_name(word key)
   if (key & MOD_META)
     strcat(buffer, META_KEY_PREFIX);
 
-  key=key & ~(MOD_CTRL|MOD_ALT|MOD_SHIFT);
+  key=key & ~(MOD_CTRL|MOD_ALT|MOD_SHIFT|MOD_META);
 
   // 99 is only a sanity check
   if (key>=KEY_JOYBUTTON && key<=KEY_JOYBUTTON+99)
@@ -836,6 +839,8 @@ word Get_Key_modifiers(void)
     mod |= MOD_CTRL;
   if (GetKeyState(VK_MENU) & 0x8000)
     mod |= MOD_ALT;
+  if ((GetKeyState(VK_LWIN) | GetKeyState(VK_RWIN)) & 0x8000)
+    mod |= MOD_META;
 #endif
   return mod;
 }
