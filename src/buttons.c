@@ -1314,7 +1314,8 @@ void Button_Skins(int btn)
   Sort_list_of_files(&Font_files_list);
 
   selected_font = Find_file_in_fileselector(&Font_files_list, Config.Font_file);
-
+  if (selected_font < 0)
+    selected_font = 0;
 
   // --------------------------------------------------------------
 
@@ -1340,6 +1341,8 @@ void Button_Skins(int btn)
     Draw_one_skin_name, 2); // 4
 
   skin_list->Cursor_position = Find_file_in_fileselector(&Skin_files_list, Config.Skin_file);
+  if (skin_list->Cursor_position < 0)
+    skin_list->Cursor_position = 0;
 
   // Buttons to choose a font
   font_dropdown = Window_set_dropdown_button(172, 43, 104, 11, 0, Get_item_by_index(&Font_files_list,selected_font)->Short_name,1,0,1,RIGHT_SIDE|LEFT_SIDE,0); // 5

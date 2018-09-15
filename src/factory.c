@@ -2309,6 +2309,8 @@ void Highlight_script(T_Fileselector *selector, T_List_button *list, const char 
   short index;
 
   index=Find_file_in_fileselector(selector, selected_file);
+  if (index < 0)
+    index = 0;  // 1st item if selected_file is not found
   Locate_list_item(list, index);
 }
 

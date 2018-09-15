@@ -1386,13 +1386,13 @@ short Find_file_in_fileselector(T_Fileselector *list, const char * fname)
 {
   T_Fileselector_item * item;
   short  index;
-  short  close_match=0;
+  short  close_match = -1;
 
   index=0;
   for (item=list->First; item!=NULL; item=item->Next)
   {
     if (strcmp(item->Full_name,fname)==0)
-      return index;
+      return index; // exact match
     if (strcasecmp(item->Full_name,fname)==0)
       close_match=index;
       
@@ -1402,7 +1402,10 @@ short Find_file_in_fileselector(T_Fileselector *list, const char * fname)
   return close_match;
 }
 
-void Highlight_file(short index)
+/// Set the position and index of the file list according
+/// to the selected index
+/// @param index index of selected file
+static void Highlight_file(short index)
 {
 
   if ((Filelist.Nb_elements<=10) || (index<5))
@@ -1685,7 +1688,8 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 
   if (!load)
   {
-    Highlight_file(Find_file_in_fileselector(&Filelist, context->File_name));
+    short pos = Find_file_in_fileselector(&Filelist, context->File_name);
+    Highlight_file((pos >= 0) ? pos : 0);
     Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller);
 
     // On initialise le nom de fichier à celui en cours et non pas celui sous
@@ -1885,15 +1889,15 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           if (savename != NULL)
           {
             // attempt to find the file name in new list
-            int pos=Find_file_in_fileselector(&Filelist, savename);
-            if (pos!=0)
+            short pos=Find_file_in_fileselector(&Filelist, savename);
+            if (pos >= 0)
             {
               Highlight_file(pos);
               Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller);
             }
             // If the file is (still present) or it's a name with new
             // extension, set it as the proposed file name.
-            if (pos!=0 || !load)
+            if (pos >= 0 || !load)
             {
               strcpy(Selector_filename, savename);
               memcpy(Selector_filename_unicode, Selector_filename_unicode_save, sizeof(Selector_filename_unicode_save));
@@ -2265,7 +2269,8 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           Read_list_of_files(&Filelist, Selector->Format_filter);
           Sort_list_of_files(&Filelist);
           // Set the fileselector bar on the directory we're coming from
-          Highlight_file(Find_file_in_fileselector(&Filelist, previous_directory));
+          pos = Find_file_in_fileselector(&Filelist, previous_directory);
+          Highlight_file((pos >= 0) ? pos : 0);
           // display the 1st visible files
           Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller);
           Display_cursor();

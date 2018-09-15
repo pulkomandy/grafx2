@@ -72,6 +72,11 @@ T_Fileselector_item * Get_item_by_index(T_Fileselector *list, unsigned short ind
 
 void Read_list_of_drives(T_Fileselector *list, byte name_length);
 
+/// Look for a file name in a file selector list
+/// @param list  The file selector list
+/// @param fname The file name to search for
+/// @return the index of the file
+/// @return -1 if the file name was not found
 short Find_file_in_fileselector(T_Fileselector *list, const char * fname);
 
 void Locate_list_item(T_List_button * list, short selected_item);
