@@ -19,6 +19,9 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 
+#if defined(_MSC_VER)
+#include <windows.h>
+#endif
 #if defined(USE_SDL2)
 #include <SDL.h>
 #endif
@@ -34,7 +37,7 @@ extern void GFX2_Log(GFX2_Log_priority_T priority, const char * fmt, ...)
   va_start(ap, fmt);
   GFX2_LogV(priority, fmt, ap);
   va_end(ap);
-#if defined(_MSC_VER) && defined(DEBUG)
+#if defined(_MSC_VER) && defined(_DEBUG)
   {
     char message[1024];
     va_start(ap, fmt);
@@ -47,7 +50,7 @@ extern void GFX2_Log(GFX2_Log_priority_T priority, const char * fmt, ...)
 
 extern void GFX2_LogV(GFX2_Log_priority_T priority, const char * fmt, va_list ap)
 {
-#if !defined(DEBUG)
+#if !defined(_DEBUG)
   if ((unsigned)GFX2_verbosity_level < (unsigned)priority)
     return;
 #endif
