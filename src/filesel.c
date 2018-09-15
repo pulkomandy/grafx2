@@ -1566,11 +1566,11 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   byte  has_clicked_ok=0;// Indique si on a clické sur Load ou Save ou sur
                              //un bouton enclenchant Load ou Save juste après.
   byte  initial_back_color; // preview destroys it (how nice)
-  char  previous_directory[MAX_PATH_CHARACTERS]; // Répertoire d'où l'on vient après un CHDIR
   char  save_filename[MAX_PATH_CHARACTERS];
   word  save_filename_unicode[MAX_PATH_CHARACTERS];
   char  initial_comment[COMMENT_SIZE+1];
   short window_shortcut;
+  const char * directory_to_change_to = NULL;
 
   Selector=settings;
 
@@ -1879,6 +1879,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
               pos_last_dot!=-1 &&
               Selector_filename[pos_last_dot+1]!='\0')
             {
+              GFX2_Log(GFX2_DEBUG, "extension %s => %s\n", Selector_filename + pos_last_dot + 1, Get_fileformat(Selector->Format_filter)->Default_extension);
               strcpy(Selector_filename + pos_last_dot + 1,
                 Get_fileformat(Selector->Format_filter)->Default_extension);
               Unicode_char_strlcpy(Selector_filename_unicode + pos_last_dot + 1,
@@ -2078,13 +2079,11 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
               case -1: // bouton lui-même: aller au répertoire mémorisé
                 if (Config.Bookmark_directory[clicked_button-10])
                 {
+                  GFX2_Log(GFX2_DEBUG,"Go to bookmark %s\n", Config.Bookmark_directory[clicked_button-10]);
                   // backup the currently selected filename
                   strncpy(save_filename, Selector_filename, sizeof(save_filename));
                   // simulate a click on the bookmarked directory
-                  strncpy(Selector_filename,Config.Bookmark_directory[clicked_button-10], sizeof(Selector_filename));
-                  Selector_filename[sizeof(Selector_filename)-1] = '\0';
-                  Selected_type=1;
-                  has_clicked_ok=1;
+                  directory_to_change_to = Config.Bookmark_directory[clicked_button-10];
                   Reset_quicksearch();
                 }
                 break;
@@ -2246,25 +2245,30 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           Reset_quicksearch();
     }
 
-    if (has_clicked_ok)
+    if (has_clicked_ok || (directory_to_change_to != NULL))
     {
       //   Si c'est un répertoire, on annule "has_clicked_ok" et on passe
       // dedans.
-      if (Selected_type!=0)
+      if (Selected_type!=0 || (directory_to_change_to != NULL))
       {
         Hide_cursor();
         has_clicked_ok=0;
 
+        if (directory_to_change_to == NULL)
+          directory_to_change_to = Selector_filename;
+
         // We must enter the directory
-        if (Change_directory(Selector_filename) == 0)
+        if (Change_directory(directory_to_change_to) == 0)
         {
+          short pos;
+          char  previous_directory[MAX_PATH_CHARACTERS]; // Répertoire d'où l'on vient après un CHDIR
         #if defined (__MINT__)
           static char path[1024]={0};
           char currentDrive='A';
         #endif
 
           // save the previous current directory
-          if (strcmp(Selector_filename,PARENT_DIR) != 0)
+          if (strcmp(directory_to_change_to,PARENT_DIR) != 0)
           {
             strcpy(previous_directory,PARENT_DIR);
           }
@@ -2292,12 +2296,13 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         {
           char warn_msg[MAX_PATH_CHARACTERS];
           Display_cursor();
-          snprintf(warn_msg, sizeof(warn_msg), "cannot chdir to \"%s\" !", Selector_filename);
+          snprintf(warn_msg, sizeof(warn_msg), "cannot chdir to \"%s\" !", directory_to_change_to);
           Warning(warn_msg);
           // restore Selector_filename
           strncpy(Selector_filename, save_filename, sizeof(Selector_filename));
           Error(0);
         }
+        directory_to_change_to = NULL;
       }
       else  // Sinon on essaye de charger ou sauver le fichier
       {
