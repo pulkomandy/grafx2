@@ -1300,10 +1300,16 @@ void Print_filename_in_fileselector(void)
   Update_window_area(82,48,27*8,8);
 }
 
-int   Selected_type; // Utilisé pour mémoriser le type d'entrée choisi
+static int Selected_type; // Utilisé pour mémoriser le type d'entrée choisi
                         // dans le selecteur de fichier.
 
-void Prepare_and_display_filelist(short Position, short offset, T_Scroller_button * button)
+/// Displays the file list with sliders, etc.
+/// also optionally updates the current file name (Selector_filename)
+/// @param Position the current position in the file list
+/// @param offset   the offset of the selected item in the file list
+/// @param button   the scrollbar/slider GUI control
+/// @param setfilename option to update Selector_filename
+static void Prepare_and_display_filelist(short Position, short offset, T_Scroller_button * button, int setfilename)
 {
   button->Nb_elements=Filelist.Nb_elements;
   button->Position=Position;
@@ -1316,8 +1322,11 @@ void Prepare_and_display_filelist(short Position, short offset, T_Scroller_butto
 
   Update_window_area(8-1,95-1,144+2,80+2);
 
-  // On récupère le nom du schmilblick à "accéder"
-  Get_selected_item(&Filelist, Position,offset,Selector_filename,Selector_filename_unicode,&Selected_type);
+  if (setfilename)
+  {
+    // On récupère le nom du schmilblick à "accéder"
+    Get_selected_item(&Filelist, Position,offset,Selector_filename,Selector_filename_unicode,&Selected_type);
+  }
   // On affiche le nouveau nom de fichier
   Print_filename_in_fileselector();
   // On affiche le nom du répertoire courant
@@ -1325,7 +1334,7 @@ void Prepare_and_display_filelist(short Position, short offset, T_Scroller_butto
 }
 
 
-void Reload_list_of_files(byte filter, T_Scroller_button * button)
+static void Reload_list_of_files(byte filter, T_Scroller_button * button)
 {
   Read_list_of_files(&Filelist, filter);
   Sort_list_of_files(&Filelist);
@@ -1355,7 +1364,7 @@ void Reload_list_of_files(byte filter, T_Scroller_button * button)
   // Restore the offset as relative to the position.
   Selector->Offset -= Selector->Position;
 
-  Prepare_and_display_filelist(Selector->Position,Selector->Offset,button);
+  Prepare_and_display_filelist(Selector->Position,Selector->Offset,button,1);
 }
 
 void Scroll_fileselector(T_Scroller_button * file_scroller)
@@ -1690,7 +1699,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   {
     short pos = Find_file_in_fileselector(&Filelist, context->File_name);
     Highlight_file((pos >= 0) ? pos : 0);
-    Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller);
+    Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller,0);
 
     // On initialise le nom de fichier à celui en cours et non pas celui sous
     // la barre de sélection
@@ -1893,7 +1902,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
             if (pos >= 0)
             {
               Highlight_file(pos);
-              Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller);
+              Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller,load);
             }
             // If the file is (still present) or it's a name with new
             // extension, set it as the proposed file name.
@@ -2053,7 +2062,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           // Affichage des premiers fichiers visibles:
           Read_list_of_drives(&Filelist,19);
           Sort_list_of_files(&Filelist);
-          Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller);
+          Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller,0);
           Display_cursor();
           New_preview_is_needed=1;
           Reset_quicksearch();
@@ -2226,7 +2235,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
               temp=Selector->Position+Selector->Offset;
               Hide_cursor();
               Highlight_file(selected_item);
-              Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller);
+              Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller,1);
               Display_cursor();
               if (temp!=Selector->Position+Selector->Offset)
                 New_preview_is_needed=1;
@@ -2272,7 +2281,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           pos = Find_file_in_fileselector(&Filelist, previous_directory);
           Highlight_file((pos >= 0) ? pos : 0);
           // display the 1st visible files
-          Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller);
+          Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller,0);
           Display_cursor();
           New_preview_is_needed=1;
 
