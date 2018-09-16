@@ -491,6 +491,7 @@ const char * Key_name(word key)
     { KEY_RALT        , "RAlt" },
     { KEY_LALT        , "LAlt" },
 #endif
+    { KEY_MENU        , "Menu" },
 #if defined(USE_SDL)
     { SDLK_RMETA       , "RMeta" },
     { SDLK_LMETA       , "LMeta" },
@@ -502,7 +503,6 @@ const char * Key_name(word key)
     { SDLK_PRINT       , "Print" },
     { SDLK_SYSREQ      , "SysReq" },
     { SDLK_BREAK       , "Break" },
-    { SDLK_MENU        , "Menu" },
     { SDLK_POWER       , "Power" },
     { SDLK_EURO        , "Euro" },
     { SDLK_UNDO        , "Undo" },

@@ -16,7 +16,7 @@ keys = ['UNKNOWN',
         'EQUALS', 'MINUS', 'PERIOD',
         'CAPSLOCK', 'CLEAR', 'SPACE', 'PAUSE',
         'LSHIFT', 'RSHIFT', 'LCTRL', 'RCTRL',
-        'LALT', 'RALT']
+        'LALT', 'RALT', 'MENU']
 
 win32vk = {
 'BACKSPACE': 'BACK',
@@ -40,6 +40,7 @@ win32vk = {
 'RCTRL': 'RCONTROL',
 'LALT': 'LMENU',
 'RALT': 'RMENU',
+'MENU': 'APPS',
 }
 
 x11xk = {
