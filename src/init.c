@@ -2136,8 +2136,9 @@ int Load_CFG(int reload_all)
   T_Config_video_mode   cfg_video_mode;
   int key_conversion = 0;
 
-  strcpy(filename,Config_directory);
-  strcat(filename,"gfx2.cfg");
+  snprintf(filename, sizeof(filename), "%s%s", Config_directory, CONFIG_FILENAME);
+
+  GFX2_Log(GFX2_DEBUG, "Load_CFG() trying to load %s\n", filename);
 
   file_size=File_length(filename);
 

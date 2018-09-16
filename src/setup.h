@@ -89,6 +89,14 @@ void Set_config_directory(const char * program_dir, char * config_dir);
 /// Name of the binary file containing some configuration settings.
 #if defined (__MINT__)
   #define CONFIG_FILENAME "GFX2.CFG"
+#elif defined(USE_SDL)
+  #define CONFIG_FILENAME "gfx2.cfg"
+#elif defined(USE_SDL2)
+  #define CONFIG_FILENAME "gfx2-sdl2.cfg"
+#elif defined(USE_X11)
+  #define CONFIG_FILENAME "gfx2-x11.cfg"
+#elif defined(WIN32)
+  #define CONFIG_FILENAME "gfx2-win32.cfg"
 #else
   #define CONFIG_FILENAME "gfx2.cfg"
 #endif
