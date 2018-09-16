@@ -644,15 +644,6 @@ const char * Key_name(word key)
     return buffer;
   }
 
-#if defined(USE_SDL) || defined(USE_SDL2)
-  if (key & 0x800)
-  {
-    sprintf(buffer+strlen(buffer), "[%d]", key & 0x7FF);
-    return buffer;
-  }
-  key = key & 0x7FF;
-#endif
-
   // Keys with a known label
   for (index=0; index < (long)sizeof(key_labels)/(long)sizeof(T_key_label);index++)
   {
@@ -675,6 +666,15 @@ const char * Key_name(word key)
   if (key>=SDLK_WORLD_0 && key <= SDLK_WORLD_95)
   {
     sprintf(buffer+strlen(buffer), "w%d", key - SDLK_WORLD_0);
+    return buffer;
+  }
+#endif
+
+#if defined(USE_SDL) || defined(USE_SDL2)
+  if (key & 0x800)
+  {
+    // print Scancode
+    sprintf(buffer+strlen(buffer), "[%d]", key & 0x7FF);
     return buffer;
   }
 #endif
