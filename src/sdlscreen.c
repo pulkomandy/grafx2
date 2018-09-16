@@ -478,7 +478,12 @@ int SetPalette(const T_Components * colors, int firstcolor, int ncolors)
 #if defined(USE_SDL)
   return SDL_SetPalette(Screen_SDL, SDL_PHYSPAL | SDL_LOGPAL, PaletteSDL, firstcolor, ncolors);
 #else
-  return SDL_SetPaletteColors(Screen_SDL->format->palette, PaletteSDL, firstcolor, ncolors);
+  // When using SDL2, we need to force screen update so the
+  // 8bit => True color conversion will be performed
+  i = SDL_SetPaletteColors(Screen_SDL->format->palette, PaletteSDL, firstcolor, ncolors);
+  if (i == 0)
+    Update_rect(0, 0, Screen_SDL->w, Screen_SDL->h);
+  return i;
 #endif
 }
 
