@@ -1503,18 +1503,24 @@ int Get_input(int sleep_time)
             // left alt = 8         Mod1Mask
             // right alt = 80       Mod5Mask
             // NumLock = 10         Mod2Mask
+            // see "modmap"
             if (event.xkey.state & ShiftMask)
               mod |= MOD_SHIFT;
             if (event.xkey.state & ControlMask)
               mod |= MOD_CTRL;
             if (event.xkey.state & (Mod1Mask | Mod5Mask))
               mod |= MOD_ALT;
-            if (event.xkey.state & Mod3Mask)
+            if (event.xkey.state & Mod4Mask)
               mod |= MOD_META;
             //sym = XKeycodeToKeysym(X11_display, event.xkey.keycode, 0);
             sym = XkbKeycodeToKeysym(X11_display, event.xkey.keycode, 0, 0);
             GFX2_Log(GFX2_DEBUG, "key code = %3d state=0x%08x sym = 0x%04lx %s\tmod=%04x\n",
                      event.xkey.keycode, event.xkey.state, sym, XKeysymToString(sym), mod);
+            if (sym == XK_Shift_L || sym == XK_Shift_R ||
+                sym == XK_Control_L || sym == XK_Control_R ||
+                sym == XK_Alt_L || sym == XK_Alt_R || sym == XK_ISO_Level3_Shift || // ALT GR
+                sym == XK_Super_L || sym == XK_Super_R)
+              break;    // ignore shift/ctrl/alt/windows alone
             Key = mod | (sym & 0x0fff);
             //sym = XkbKeycodeToKeysym(X11_display, event.xkey.keycode, 0, event.xkey.state);
             if (((sym & 0xf000) != 0xf000) || IsKeypadKey(sym)) // test for standard key or KeyPad
