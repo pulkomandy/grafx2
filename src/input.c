@@ -1122,7 +1122,19 @@ int Get_input(int sleep_time)
       {
 #if defined(USE_SDL)
           case SDL_ACTIVEEVENT:
-              GFX2_Log(GFX2_DEBUG, "SDL_ACTIVEEVENT gain=%d state=%d\n", event.active.gain, event.active.state);
+              GFX2_Log(GFX2_DEBUG, "SDL_ACTIVEEVENT gain=%d state=%d (%s%s%s)\n",
+                       event.active.gain, event.active.state,
+                       (event.active.state & SDL_APPMOUSEFOCUS)?"Mouse ":"",
+                       (event.active.state & SDL_APPINPUTFOCUS)?"Keyboard ":"",
+                       (event.active.state & SDL_APPACTIVE)?"Iconification":"");
+#ifdef WIN32
+              // Work around a bug in SDL1.2 with win32
+              // when doing ALT-TAB to loose focus, and then gaining focus back
+              // by clicking on the GrafX2 window, the "ALT" key appears as still pressed
+              // So "depress" ALT
+              if (event.active.gain && (event.active.state & SDL_APPINPUTFOCUS) != 0)
+                SDL_SetModState(SDL_GetModState() & ~KMOD_ALT);
+#endif
               break;
 
           case SDL_VIDEORESIZE:
