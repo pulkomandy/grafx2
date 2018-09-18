@@ -526,6 +526,34 @@ const char * Key_name(word key)
     { VK_OEM_7,        "'''" },
     { VK_OEM_8,        "'!'" },
     { VK_OEM_102,      "<>" },
+    /* special keys, such as browser navigation keys,
+     * play/pause, sound volume, etc. */
+#if defined(VK_BROWSER_BACK)
+    { VK_BROWSER_BACK,    "Browser Back" },
+    { VK_BROWSER_FORWARD, "Browser Forward" },
+    { VK_BROWSER_REFRESH, "Browser Refresh" },
+    { VK_BROWSER_STOP,    "Browser Stop" },
+    { VK_BROWSER_SEARCH,  "Browser Search" },
+    { VK_BROWSER_FAVORITES, "Browser Favorites" },
+    { VK_BROWSER_HOME,    "Browser Home" },
+#endif
+#if defined(VK_VOLUME_MUTE)
+    { VK_VOLUME_MUTE,      "Volume Mute" },
+    { VK_VOLUME_DOWN,      "Volume Down" },
+    { VK_VOLUME_UP,        "Volume Up" },
+#endif
+#if defined(VK_MEDIA_NEXT_TRACK)
+    { VK_MEDIA_NEXT_TRACK, "Next Track" },
+    { VK_MEDIA_PREV_TRACK, "Previous Track" },
+    { VK_MEDIA_STOP,       "Stop" },
+    { VK_MEDIA_PLAY_PAUSE, "Play/Pause" },
+#endif
+#if defined(VK_LAUNCH_MAIL)
+    { VK_LAUNCH_MAIL,      "Email" },
+    { VK_LAUNCH_MEDIA_SELECT, "Select Media" },
+    { VK_LAUNCH_APP1,      "Start App1" },
+    { VK_LAUNCH_APP2,      "Start App2" },
+#endif
 #endif
   };
 
