@@ -837,10 +837,20 @@ word Get_Key_modifiers(void)
 #if defined(WIN32)
   if (GetKeyState(VK_SHIFT) & 0x8000)
     mod |= MOD_SHIFT;
-  if (GetKeyState(VK_CONTROL) & 0x8000)
-    mod |= MOD_CTRL;
-  if (GetKeyState(VK_MENU) & 0x8000)
-    mod |= MOD_ALT;
+  // Pressing AltGr is reported by windows as the right Alt together with the Left control keys
+  if ((GetKeyState(VK_RMENU) & 0x8000) && (GetKeyState(VK_LCONTROL) & 0x8000))
+  {
+    mod |= MOD_ALT; // ALT GR
+    if (GetKeyState(VK_RCONTROL) & 0x8000)
+      mod |= MOD_CTRL;
+  }
+  else
+  {
+    if (GetKeyState(VK_CONTROL) & 0x8000)
+      mod |= MOD_CTRL;
+    if (GetKeyState(VK_MENU) & 0x8000)
+      mod |= MOD_ALT;
+  }
   if ((GetKeyState(VK_LWIN) | GetKeyState(VK_RWIN)) & 0x8000)
     mod |= MOD_META;
 #endif

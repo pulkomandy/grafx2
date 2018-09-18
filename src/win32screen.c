@@ -159,14 +159,20 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
 // WM_MBUTTONDBLCLK
   case WM_SYSKEYDOWN: // Sent when ALT is pressed
   case WM_KEYDOWN:  // lParam & 0xffff => repeat count.   (lParam >> 16) & 0x1ff => scancode
+    // lParam & 0x20000000 : context : 0 for WM_KEYDOWN; 1 for WM_SYSKEYDOWN if ALT is pressed
+    // lParam & 0x40000000 : previous key state (1 down, 0 up)
+    // lParam & 0x80000000 : transition state. 0 for WM_KEYDOWN and WM_SYSKEYDOWN
+    GFX2_Log(GFX2_DEBUG, "KEYDOWN wParam=%04x lParam=%08x\n", wParam, lParam);
     switch (wParam)
     {
       // Ignore isolated shift, alt,  control and window keys
+      // and numlock
     case VK_SHIFT:
     case VK_CONTROL:
-    case VK_MENU:
+    case VK_MENU: // ALT
     case VK_LWIN:
     case VK_RWIN:
+    case VK_NUMLOCK:
       break;
     default:
       Key = wParam|Get_Key_modifiers();
