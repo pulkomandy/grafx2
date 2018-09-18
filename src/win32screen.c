@@ -173,6 +173,8 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
     case VK_LWIN:
     case VK_RWIN:
     case VK_NUMLOCK:
+    case 0xff:  // ignore 0xff which is invalid but returned with some specific keys
+                // such as laptop Fn+something combinaisons
       break;
     default:
       Key = wParam|Get_Key_modifiers();
