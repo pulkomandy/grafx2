@@ -524,6 +524,8 @@ const char * Key_name(word key)
     { VK_OEM_5,        "'\\'"},
     { KEY_RIGHTBRACKET,"']'" }, // VK_OEM_6
     { VK_OEM_7,        "'''" },
+    { VK_OEM_8,        "'!'" },
+    { VK_OEM_102,      "<>" },
 #endif
   };
 
