@@ -23,7 +23,12 @@
 #include <SDL.h>
 #include <SDL_image.h>
 
+#if defined(USE_SDL)
 SDL_Surface * screen = NULL;
+#elif defined(USE_SDL2)
+SDL_Window * window = NULL;
+SDL_Renderer * renderer = NULL;
+#endif
 
 int Show_IMG(const char * filename)
 {
@@ -35,19 +40,38 @@ int Show_IMG(const char * filename)
     fprintf(stderr, "Cannot load image \"%s\"\n", filename);
     return -1;
   }
+#if defined(USE_SDL)
   if(screen == NULL) {
     screen = SDL_SetVideoMode(image->w, image->h, image->format->BitsPerPixel, 0);
   }
+#elif defined(USE_SDL2)
+  if(window == NULL) {
+    window = SDL_CreateWindow(filename, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                              image->w, image->h, 0);
+    renderer = SDL_CreateRenderer(window, -1, 0);
+  }
+#endif
   dest.x = 0;
   dest.y = 0;
   dest.w = image->w;
   dest.h = image->h;
+#if defined(USE_SDL)
   if(screen != NULL) {
     SDL_BlitSurface(image, NULL, screen, &dest);
     SDL_UpdateRects(screen, 1, &dest);
   } else {
     fprintf(stderr, "no SDL screen open\n");
   }
+#elif defined(USE_SDL2)
+  if(renderer != NULL) {
+    SDL_Texture * texture = SDL_CreateTextureFromSurface(renderer, image);
+    SDL_RenderCopy(renderer, texture, NULL, NULL);
+    SDL_RenderPresent(renderer);
+    SDL_DestroyTexture(texture);
+  } else {
+    fprintf(stderr, "no SDL2 renderer\n");
+  }
+#endif
   SDL_FreeSurface(image);
   return 0;
 }
@@ -87,10 +111,18 @@ int main(int argc, char * * argv)
   }
   atexit(SDL_Quit);
 
+#ifdef USE_SDL
   SDL_WM_SetCaption(filename, filename); /* window caption, icon caption */
+#endif
 
   if(Show_IMG(filename) < 0)
     return 1;
   Manage_Events();
+#if defined(USE_SDL2)
+  if(renderer != NULL)
+    SDL_DestroyRenderer(renderer);
+  if(window != NULL)
+    SDL_DestroyWindow(window);
+#endif
   return 0;
 }

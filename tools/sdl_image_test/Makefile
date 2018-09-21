@@ -1,18 +1,35 @@
 CFLAGS = -Wall -O -g
 
-CFLAGS += $(shell sdl-config --cflags)
+ifeq ($(API),sdl2)
+# SDL 2.x
+SDLCONFIG = sdl2-config
+SDLIMAGE = SDL2_image
+BIN = showimage-sdl2
+CFLAGS += -DUSE_SDL2
+else
+# SDL 1.2.x
+SDLCONFIG = sdl-config
+SDLIMAGE = SDL_image
+BIN = showimage
+CFLAGS += -DUSE_SDL
+endif
 
-LDLIBS = $(shell sdl-config --libs)
-LDLIBS += $(shell pkg-config SDL_image --libs-only-l)
+CFLAGS += $(shell $(SDLCONFIG) --cflags)
 
-LDFLAGS = $(shell pkg-config SDL_image --libs-only-L)
+LDLIBS = $(shell $(SDLCONFIG) --libs)
+LDLIBS += $(shell pkg-config $(SDLIMAGE) --libs-only-l)
+
+LDFLAGS = $(shell pkg-config $(SDLIMAGE) --libs-only-L)
 
 .PHONY:	all clean
 
-all:	showimage
+all:	$(BIN)
 
 clean:
-	$(RM) showimage *.o
+	$(RM) $(BIN) *.o
 
-showimage:	showimage.o
+$(BIN):	$(BIN).o
+
+$(BIN).o:	showimage.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
