@@ -765,7 +765,9 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
     while(mount_points_list != NULL)
     {
       byte icon = ICON_NONE;
-      if (strcmp(mount_points_list->me_type, "cd9660") == 0)
+      if (mount_points_list->me_remote)
+        icon = ICON_NETWORK;
+      else if (strcmp(mount_points_list->me_type, "cd9660") == 0)
         icon = ICON_CDROM;
       else if (strcmp(mount_points_list->me_type, "nfs") == 0)
         icon = ICON_NETWORK;
@@ -775,6 +777,12 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
         icon = ICON_HDD; // Only a guess...
       else if (strcmp(mount_points_list->me_type, "hfs") == 0)
         icon = ICON_HDD; // Only a guess...
+      else if (strcmp(mount_points_list->me_type, "ufs") == 0)
+        icon = ICON_HDD; // Only a guess...
+      else if (strcmp(mount_points_list->me_type, "zfs") == 0)
+        icon = ICON_HDD; // Only a guess...
+
+      GFX2_Log(GFX2_DEBUG, "dummy=%u type=%s path=%s icon=%d\n", mount_points_list->me_dummy, mount_points_list->me_type, mount_points_list->me_mountdir, (int)icon);
 
       if(mount_points_list->me_dummy == 0 && strcmp(mount_points_list->me_mountdir,"/") && strcmp(mount_points_list->me_mountdir,"/home"))
         {
