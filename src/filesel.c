@@ -791,9 +791,10 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
           list->Nb_directories++;
         }
         next = mount_points_list -> me_next;
-        #if !(defined(__macosx__) || defined(__FreeBSD__))
+        if (mount_points_list->me_type_malloced)
+        {
           free(mount_points_list -> me_type);
-        #endif
+        }
         free(mount_points_list -> me_devname);
         free(mount_points_list -> me_mountdir);
         free(mount_points_list);
