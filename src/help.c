@@ -812,7 +812,7 @@ void Button_Stats(int btn)
       GetDiskFreeSpaceExA(Main.selector.Directory,&tailleU,NULL,NULL);
       mem_size = tailleU.QuadPart;
     }
-#elif defined(__linux__) || defined(__macosx__) || defined(__FreeBSD__) || defined(__SYLLABLE__) || defined(__AROS__)
+#elif defined(__linux__) || defined(__macosx__) || defined(__FreeBSD__) || defined(__SYLLABLE__) || defined(__AROS__) || defined(__OpenBSD__) || defined(__NetBSD__)
     {
       struct statfs disk_info;
       statfs(Main.selector.Directory,&disk_info);
