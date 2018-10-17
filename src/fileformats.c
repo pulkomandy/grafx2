@@ -2222,6 +2222,9 @@ void Save_IFF(T_IO_Context * context)
         break;
       case PIXEL_TALL3:       // 3:4
         header.X_aspect = (header.X_aspect * 15) / 10; // *1.5
+#if defined(__GNUC__) && (__GNUC__ >= 7)
+        __attribute__ ((fallthrough));
+#endif
       case PIXEL_TALL:
       case PIXEL_TALL2:
         header.Y_aspect *= 2; // 1:2

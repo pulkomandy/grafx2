@@ -2418,6 +2418,9 @@ void Display_cursor(void)
     case CURSOR_SHAPE_BUCKET :
       if (Cursor_hidden)
         break;
+#if defined(__GNUC__) && (__GNUC__ >= 7)
+          __attribute__ ((fallthrough));
+#endif
 
     case CURSOR_SHAPE_ARROW :
     case CURSOR_SHAPE_HOURGLASS :
@@ -2717,6 +2720,9 @@ void Hide_cursor(void)
     case CURSOR_SHAPE_BUCKET :
       if (Cursor_hidden)
         break;
+#if defined(__GNUC__) && (__GNUC__ >= 7)
+          __attribute__ ((fallthrough));
+#endif
 
     case CURSOR_SHAPE_ARROW :
     case CURSOR_SHAPE_HOURGLASS :

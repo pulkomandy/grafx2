@@ -538,7 +538,7 @@ void Button_Grid_menu(void)
         Window_input_content(input_dy_button,str);
 
         Display_cursor();
-
+        break;
       case 7:
         snapgrid = !snapgrid;
         Hide_cursor();

@@ -1146,6 +1146,9 @@ int Init_program(int argc,char * argv[])
 
           Button_Page(BUTTON_PAGE);
           // no break ! proceed with the other file now
+#if defined(__GNUC__) && (__GNUC__ >= 7)
+          __attribute__ ((fallthrough));
+#endif
         case 1:
           Init_context_layered_image(&context, main_filename, main_directory);
           if (Get_Unicode_Filename(filename_unicode, main_filename, main_directory))

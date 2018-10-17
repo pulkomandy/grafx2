@@ -267,6 +267,9 @@ void Button_Transform_menu(int btn)
         // "Old" values are not editable, unless the unit is "ratio"
         if (unit_index!=UNIT_RATIO)
           break;
+#if defined(__GNUC__) && (__GNUC__ >= 7)
+          __attribute__ ((fallthrough));
+#endif
       case 10: // input new width
       case 12: // input new height
         Num2str(*( input_value[clicked_button-10]),buffer,4);

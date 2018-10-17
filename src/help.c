@@ -235,6 +235,7 @@ void Window_set_shortcut(int action_id)
       case  1: // Cancel
         shortcut_ptr[0]=backup_shortcut[0];
         shortcut_ptr[1]=backup_shortcut[1];
+        break;
       case 2: // OK
         // Replace twice by single
         if (shortcut_ptr[0]==shortcut_ptr[1])
