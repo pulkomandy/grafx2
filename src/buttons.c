@@ -3719,9 +3719,14 @@ void Button_Lasso(int btn)
 void Button_Unselect_lasso(int btn)
 {
   (void)btn;
+
+  // If we aren't in OPERATION_POLYBRUSH, then we didn't save a brush shape,
+  // and we shouldn't try to restore it.
+  if (Current_operation==OPERATION_POLYBRUSH)
+    Paintbrush_shape=Paintbrush_shape_before_lasso;
+
   // On fait de notre mieux pour restaurer l'ancienne opération:
   Start_operation_stack(Operation_before_interrupt);
-  Paintbrush_shape=Paintbrush_shape_before_lasso;
 }
 
 
