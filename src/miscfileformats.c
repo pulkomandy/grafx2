@@ -2568,17 +2568,16 @@ void Load_C64(T_IO_Context * context)
             width=160;
 
         // Write detailed format in comment
-        strcpy(context->Comment, c64_format_names[loadFormat]);
         if (hasLoadAddr)
         {
             // get load address
             word load_addr;
             load_addr = file_buffer[0] | (file_buffer[1] << 8);
-            sprintf(context->Comment+strlen(context->Comment),", load at $%4.4X",load_addr);
+            snprintf(context->Comment,COMMENT_SIZE+1,"%s, load at $%4.4X",c64_format_names[loadFormat],load_addr);
         }
         else
         {
-            sprintf(context->Comment+strlen(context->Comment),", no addr");
+            snprintf(context->Comment,COMMENT_SIZE+1,"%s, no addr",c64_format_names[loadFormat]);
         }
 
         Pre_load(context, width, height, file_size, FORMAT_C64, context->Ratio,4); // Do this as soon as you can
@@ -2590,16 +2589,13 @@ void Load_C64(T_IO_Context * context)
         context->Palette[16].G=20;
         context->Palette[16].B=20;
 
-        context->Width = width ;
-        context->Height = height;
         context->Transparent_color=16;
 
         if(loadFormat==F_fli)
         {
             Load_C64_fli(context,bitmap,screen_ram,color_ram,background);
         }
-        else
-        if(loadFormat==F_multi)
+        else if(loadFormat==F_multi)
         {
             Load_C64_multi(context,bitmap,screen_ram,color_ram,*background);
         }
