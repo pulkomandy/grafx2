@@ -2800,7 +2800,7 @@ int Save_C64_multi(T_IO_Context *context, byte saveWhat, byte loadAddr)
             // Count the number of used colors in the tile
             for (n = 0; n<16; n++)
             {
-                if (cols & (1 << pixel))
+                if (cols & (1 << n))
                     used++;
             }
 
