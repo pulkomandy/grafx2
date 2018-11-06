@@ -2284,6 +2284,19 @@ void Load_C64_multi(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte 
     }
 }
 
+/**
+ * Loads a C64 FLI (Flexible Line Interpretation) picture.
+ * Sets 4 layers :
+ *  - Layer 0 : filled with background colors (1 per line)
+ *  - Layer 1 : "Color RAM" 4x8 blocks
+ *  - Layer 2 : pixels (From Screen RAMs + Bitmap)
+ *  - Layer 3 : Transparency layer filled with color 16
+ *
+ * @param bitmap 8000 bytes buffer
+ * @param screen_ram 8 x 1024 bytes buffers
+ * @param color_ram 1000 byte buffer
+ * @param background 200 byte buffer
+ */
 void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
 {
   // Thanks to MagerValp for complement of specifications.
@@ -2325,6 +2338,7 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
 
   int cx,cy,x,y,c[4];
 
+  // Fill layer 0 with background colors
   for(y=0; y<200; y++)
   {
     for(x=0; x<160; x++)
@@ -2333,6 +2347,7 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
     }
   }
 
+  // Fill layer 1 with color ram (1 color per 4x8 block)
   Set_loading_layer(context, 1);
   for(cy=0; cy<25; cy++)
   {
@@ -2349,6 +2364,7 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
     }
   }
 
+  // Layer 2 are actual pixels
   Set_loading_layer(context, 2);
   for(cy=0; cy<25; cy++)
   {
@@ -2371,6 +2387,7 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
       }
     }
   }
+  // Fill layer 3 with color 16
   Set_loading_layer(context, 3);
   for(y=0; y<200; y++)
   {
