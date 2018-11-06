@@ -2728,6 +2728,7 @@ void Button_Gradients(int btn)
         // On affiche la nouvelle preview
         Draw_gradient_preview(8,128,108,14,Current_gradient);
         Display_cursor();
+        break;
       case  8 : // Speed
         Main.backups->Pages->Gradients->Range[Current_gradient].Speed=Window_attribute2;
         Num2str(Main.backups->Pages->Gradients->Range[Current_gradient].Speed,str,3);
