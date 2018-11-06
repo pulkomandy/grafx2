@@ -40,8 +40,8 @@
 #include "palette.h"
 #include "shade.h"
 
-byte Palette_view_is_RGB = 1; // Indique si on est en HSL ou en RGB
-float Gamma = 1.0;
+static byte Palette_view_is_RGB = 1; // Indique si on est en HSL ou en RGB
+static float Gamma = 1.0;
 
 // Coordinates of the color count (on histogram button)
 static const int COUNT_X = 138;
