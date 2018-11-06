@@ -2942,10 +2942,21 @@ int Save_C64_fli(T_IO_Context * context, byte saveWhat, byte loadAddr)
 
   memset(file_buffer,0,sizeof(file_buffer));
 
-  if (C64_FLI(file_buffer+9474, file_buffer+1282, file_buffer+258, file_buffer+2))
+  switch(C64_FLI(file_buffer+9474, file_buffer+1282, file_buffer+258, file_buffer+2))
   {
-    File_error=1;
-    return 1;
+    case 0: // OK
+      break;
+    case 1:
+      Warning_message("Less than 3 layers");
+      File_error=1;
+      return 1;
+    case 2:
+      Warning_message("Picture must be 160x200");
+      File_error=1;
+      return 1;
+    default:
+      File_error=1;
+      return 1;
   }
 
   file = Open_file_write(context);
