@@ -2726,7 +2726,6 @@ int Save_C64_hires(T_IO_Context *context, byte saveWhat, byte loadAddr)
                     if (pixel==c2) bits|=1;
                 }
                 bitmap[pos++]=bits;
-                //Write_byte(file,bits&255);
             }
         }
     }
@@ -2862,137 +2861,123 @@ int Save_C64_multi(T_IO_Context *context, byte saveWhat, byte loadAddr)
            (int)background, (int)background, (unsigned)candidates, (unsigned)invalids);
 
 
-	// Now that we know which color is the background, we can encode the cells
-	for(cy=0; cy<25; cy++)
-	{
-		for(cx=0; cx<40; cx++)
-		{
-			numcolors=Count_used_colors_area(cusage,cx*4,cy*8,4,8);
-			if(numcolors>4)
-			{
-				Warning_with_format("More than 4 colors\nin 4x8 pixel cell: (%d, %d)\nRect: (%d, %d, %d, %d)", cx, cy, cx * 4, cy * 8, cx * 4 + 3, cy * 8 + 7);
-				// TODO hilite offending block
-				return 1;
-			}
-			color=1;
-			c[0]=background;
-			for(i=0; i<16; i++)
-			{
-				lut[i]=0;
-				if(cusage[i])
-				{
-					if(i!=background)
-					{
-						lut[i]=color;
-						c[color]=i;
-						color++;
-					}
-					else
-					{
-						lut[i]=0;
-					}
-				}
-			}
-			// add to screen_ram and color_ram
-			screen_ram[cx+cy*40]=c[1]<<4|c[2];
-			color_ram[cx+cy*40]=c[3];
-			//printf("%x%x%x ",c[1],c[2],c[3]);
-			for(y=0;y<8;y++)
-			{
-				bits=0;
-				for(x=0;x<4;x++)
-				{
-					pixel = Get_pixel(context, cx*4+x,cy*8+y);
-					bits = (bits << 2) | lut[pixel];
-
-				}
-				bitmap[pos++]=bits;
-			}
-		}
-	}
-
-    file = Open_file_write(context);
-
-    if(!file)
+  // Now that we know which color is the background, we can encode the cells
+  for(cy=0; cy<25; cy++)
+  {
+    for(cx=0; cx<40; cx++)
     {
-        Warning_message("File open failed");
-        File_error = 2;
-        return 2;
+      numcolors=Count_used_colors_area(cusage,cx*4,cy*8,4,8);
+      if(numcolors>4)
+      {
+        Warning_with_format("More than 4 colors\nin 4x8 pixel cell: (%d, %d)\nRect: (%d, %d, %d, %d)", cx, cy, cx * 4, cy * 8, cx * 4 + 3, cy * 8 + 7);
+        // TODO hilite offending block
+        return 1;
+      }
+      color=1;
+      c[0]=background;
+      for(i=0; i<16; i++)
+      {
+        lut[i]=0;
+        if(cusage[i] && (i!=background))
+        {
+          lut[i]=color;
+          c[color]=i;
+          color++;
+        }
+      }
+      // add to screen_ram and color_ram
+      screen_ram[cx+cy*40]=c[1]<<4|c[2];
+      color_ram[cx+cy*40]=c[3];
+
+      for(y=0;y<8;y++)
+      {
+        bits=0;
+        for(x=0;x<4;x++)
+        {
+          pixel = Get_pixel(context, cx*4+x,cy*8+y);
+          bits = (bits << 2) | lut[pixel];
+        }
+        bitmap[pos++]=bits;
+      }
     }
+  }
 
-    setvbuf(file, NULL, _IOFBF, 64*1024);
+  file = Open_file_write(context);
 
-    if (loadAddr)
-    {
-        Write_byte(file,0);
-        Write_byte(file,loadAddr);
-    }
+  if(!file)
+  {
+    Warning_message("File open failed");
+    File_error = 2;
+    return 2;
+  }
 
-    if (saveWhat==0 || saveWhat==1)
-        Write_bytes(file,bitmap,8000);
+  setvbuf(file, NULL, _IOFBF, 64*1024);
 
-    if (saveWhat==0 || saveWhat==2)
-        Write_bytes(file,screen_ram,1000);
+  if (loadAddr)
+  {
+    Write_byte(file,0);
+    Write_byte(file,loadAddr);
+  }
 
-    if (saveWhat==0 || saveWhat==3)
-        Write_bytes(file,color_ram,1000);
+  if (saveWhat==0 || saveWhat==1)
+    Write_bytes(file,bitmap,8000);
 
-    if (saveWhat==0)
-        Write_byte(file,background);
+  if (saveWhat==0 || saveWhat==2)
+    Write_bytes(file,screen_ram,1000);
 
-    fclose(file);
-    return 0;
+  if (saveWhat==0 || saveWhat==3)
+    Write_bytes(file,color_ram,1000);
+
+  if (saveWhat==0)
+    Write_byte(file,background);
+
+  fclose(file);
+  return 0;
 }
 
 int Save_C64_fli(T_IO_Context * context, byte saveWhat, byte loadAddr)
 {
+  FILE *file;
+  byte file_buffer[17474];
 
-    FILE *file;
-    byte file_buffer[17474];
+  memset(file_buffer,0,sizeof(file_buffer));
 
-    memset(file_buffer,0,sizeof(file_buffer));
+  if (C64_FLI(file_buffer+9474, file_buffer+1282, file_buffer+258, file_buffer+2))
+  {
+    File_error=1;
+    return 1;
+  }
 
-    if (C64_FLI(file_buffer+9474, file_buffer+1282, file_buffer+258, file_buffer+2))
-    {
-      File_error=1;
-      return 1;
-    }
+  file = Open_file_write(context);
 
-    file = Open_file_write(context);
+  if(!file)
+  {
+    Warning_message("File open failed");
+    File_error = 1;
+    return 1;
+  }
 
-    if(!file)
-    {
-        Warning_message("File open failed");
-        File_error = 1;
-        return 1;
-    }
+  if (loadAddr)
+  {
+    file_buffer[0]=0;
+    file_buffer[1]=loadAddr;
+    Write_bytes(file,file_buffer,2);
+  }
 
-    setvbuf(file, NULL, _IOFBF, 64*1024);
+  if (saveWhat==0)
+    Write_bytes(file,file_buffer+2,256);    // Background colors for lines 0-199 (+ 56bytes padding)
 
-    if (loadAddr)
-    {
-        file_buffer[0]=0;
-        file_buffer[1]=loadAddr;
-        Write_bytes(file,file_buffer,2);
-    }
+  if (saveWhat==0 || saveWhat==3)
+    Write_bytes(file,file_buffer+258,1024); // Color RAM (1000 bytes + padding 24)
 
-    if (saveWhat==0)
-        Write_bytes(file,file_buffer+2,256);
+  if (saveWhat==0 || saveWhat==1)
+    Write_bytes(file,file_buffer+1282,8192);  // Screen RAMs 8 x (1000 bytes + padding 24)
 
-    if (saveWhat==0 || saveWhat==3)
-        Write_bytes(file,file_buffer+258,1024);
+  if (saveWhat==0 || saveWhat==2)
+    Write_bytes(file,file_buffer+9474,8000);  // BitMap
 
-    if (saveWhat==0 || saveWhat==1)
-        Write_bytes(file,file_buffer+1282,8192);
-
-    if (saveWhat==0 || saveWhat==2)
-        Write_bytes(file,file_buffer+9474,8000);
-
-
-
-    fclose(file);
-    //printf("\nbg:%d\n",background);
-    return 0;
+  fclose(file);
+  return 0;
 }
 
 void Save_C64(T_IO_Context * context)
