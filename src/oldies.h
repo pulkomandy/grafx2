@@ -18,7 +18,19 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 
-byte C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background);
+///@file oldies.h
+/// C64 FLI functions
 
-byte C64_FLI_enforcer(void);
+/**
+ * Save a 3 layer picture to C64 FLI format
+ *
+ * @param bitmap a 8000 byte buffer to store bitmap data
+ * @param screen_ram a 8192 byte buffer to store the 8 screen RAMs
+ * @param color_ram a 1000 byte buffer to store the color RAM
+ * @param background a 200 byte buffer to store the background colors
+ * @return 0 for success, 1 if the picture is less than 3 layers, 2 if the picture dimensions are not 160x200
+ */
+int C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background);
+
+int C64_FLI_enforcer(void);
 

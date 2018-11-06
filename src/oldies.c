@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "struct.h"
+#include "oldies.h"
 #include "global.h"
 #include "errors.h"
 #include "misc.h"
@@ -35,12 +36,12 @@
 #include "windows.h"
 #include "layers.h"
 
-void Pixel_in_layer(word x,word y, byte layer, byte color)
+static void Set_Pixel_in_layer(word x,word y, byte layer, byte color)
 {
   *((y)*Main.image_width+(x)+Main.backups->Pages->Image[layer].Pixels)=color;
 }
 
-byte C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
+int C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
 {
   word used_colors[200][40];
   word block_used_colors[25][40];
@@ -346,7 +347,7 @@ byte C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
 
 }
 
-byte C64_FLI_enforcer(void)
+int C64_FLI_enforcer(void)
 {
   byte background[200];
   byte bitmap[8000];
@@ -357,12 +358,15 @@ byte C64_FLI_enforcer(void)
   byte c[4];
   
   // Checks
-  if (Main.image_width != 160)
+  if (Main.image_width != 160 || Main.image_height != 200)
+  {
+    GFX2_Log(GFX2_WARNING, "C64_FLI_enforcer() requires 160x200 image resolution\n");
     return 1;
-  if (Main.image_height != 200)
-    return 1;
-  if (Main.backups->Pages->Nb_layers != 4)
+  }
+  if (Main.backups->Pages->Nb_layers != 4) {
+    GFX2_Log(GFX2_WARNING, "C64_FLI_enforcer() requires 4 layers\n");
     return 2;
+  }
   
   Backup_layers(3);
   
@@ -388,7 +392,7 @@ byte C64_FLI_enforcer(void)
         {
           int color=c[(pixel&3)];
           pixel>>=2;
-          Pixel_in_layer(col*4+(3-x),row*8+y,3,color);
+          Set_Pixel_in_layer(col*4+(3-x),row*8+y,3,color);
         }
       }
     }
