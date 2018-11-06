@@ -30,7 +30,7 @@
 #if defined(_MSC_VER) && _MSC_VER < 1900
 	#define snprintf _snprintf
 #endif
-#elif defined(__macosx__) || defined(__FreeBSD__)
+#elif defined(__macosx__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
     #include <sys/param.h>
     #include <sys/mount.h>
 #elif defined (__linux__) || defined(__SYLLABLE__)
