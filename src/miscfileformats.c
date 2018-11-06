@@ -2564,7 +2564,7 @@ void Load_C64(T_IO_Context * context)
             sprintf(context->Comment+strlen(context->Comment),", no addr");
         }
 
-        Pre_load(context, width, height, file_size, FORMAT_C64, context->Ratio,0); // Do this as soon as you can
+        Pre_load(context, width, height, file_size, FORMAT_C64, context->Ratio,4); // Do this as soon as you can
 
         memcpy(context->Palette,pal,48); // this set the software palette for grafx2
         // Transparent color "16" is a dark grey that is distinguishable
