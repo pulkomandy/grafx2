@@ -2605,13 +2605,13 @@ int Save_C64_window(byte *saveWhat, byte *loadAddr)
     int button;
     unsigned int i;
     T_Dropdown_button *what, *addr;
-    char * what_label[] = {
+    static const char * what_label[] = {
         "All",
         "Bitmap",
         "Screen",
         "Color"
     };
-    char * address_label[] = {
+    static const char * address_label[] = {
         "None",
         "$2000",
         "$4000",
@@ -2653,7 +2653,7 @@ int Save_C64_window(byte *saveWhat, byte *loadAddr)
 
             case 4: // Load addr
                 *loadAddr=Window_attribute2*32;
-                //printf("addr=$%02x00 (%d)\n",loadAddr,Window_attribute2);
+                GFX2_Log(GFX2_DEBUG, "Save_C64_Window() : addr=$%02x00 (%d)\n",*loadAddr,Window_attribute2);
                 break;
 
             case 0: break;
@@ -2779,7 +2779,7 @@ int Save_C64_multi(T_IO_Context *context, byte saveWhat, byte loadAddr)
     byte i,background=0;
     FILE *file;
 
-    // Detect the ackground color the image should be using. It's the one that's
+    // Detect the background color the image should be using. It's the one that's
     // used on all tiles having 4 colors.
     for(y=0;y<200;y=y+8)
     {
@@ -2791,8 +2791,15 @@ int Save_C64_multi(T_IO_Context *context, byte saveWhat, byte loadAddr)
             for (cy=0;cy<8;cy++)
             for (cx=0;cx<4;cx++)
             {
-                pixel=Get_pixel(context, x+cx,y+cy);
-                cols |= (1 << pixel);
+              pixel=Get_pixel(context, x+cx,y+cy);
+              if(pixel>15)
+              {
+                Warning_message("Color above 15 used");
+                // TODO hilite as in hires, you should stay to
+                // the fixed 16 color palette
+                return 1;
+              }
+              cols |= (1 << pixel);
             }
 
             cand = 0;
@@ -2806,21 +2813,24 @@ int Save_C64_multi(T_IO_Context *context, byte saveWhat, byte loadAddr)
 
             if (used>3)
             {
+                GFX2_Log(GFX2_DEBUG, "(%3d,%3d) used=%d cols=%04x\n", x, y, used,(unsigned)cols);
                 // This is a tile that uses the background color (and 3 others)
 
                 // Try to guess which color is most likely the background one
                 for (n = 0; n<16; n++)
                 {
                     if ((cols & (1 << n)) && !((candidates | invalids) & (1 << n))) {
-                        // This color was not used in any other tile yet,
-                        // but it could be the background one.
+                        // This color is used in this tile but
+                        // was not used in any other tile yet,
+                        // so it could be the background one.
                         candidates |= 1 << n;
                     }
 
-                    if ((cols & 1 << n) == 0 ) {
+                    if ((cols & (1 << n)) == 0 ) {
                         // This color isn't used at all in this tile:
-                        // Can't be the global
+                        // Can't be the global background
                         invalids |= 1 << n;
+                        candidates &= ~(1 << n);
                     }
 
                     if (candidates & (1 << n)) {
@@ -2848,12 +2858,13 @@ int Save_C64_multi(T_IO_Context *context, byte saveWhat, byte loadAddr)
 			break;
 		}
 	}
+  GFX2_Log(GFX2_DEBUG, "Save_C64_multi() background=%d ($%x) candidates=%x invalid=%x\n",
+           (int)background, (int)background, (unsigned)candidates, (unsigned)invalids);
 
 
 	// Now that we know which color is the background, we can encode the cells
 	for(cy=0; cy<25; cy++)
 	{
-		//printf("\ny:%2d ",cy);
 		for(cx=0; cx<40; cx++)
 		{
 			numcolors=Count_used_colors_area(cusage,cx*4,cy*8,4,8);
@@ -2891,19 +2902,10 @@ int Save_C64_multi(T_IO_Context *context, byte saveWhat, byte loadAddr)
 				bits=0;
 				for(x=0;x<4;x++)
 				{
-					pixel=Get_pixel(context, cx*4+x,cy*8+y);
-					if(pixel>15)
-					{
-						Warning_message("Color above 15 used");
-						// TODO hilite as in hires, you should stay to
-						// the fixed 16 color palette
-						return 1;
-					}
-					bits=bits<<2;
-					bits|=lut[pixel];
+					pixel = Get_pixel(context, cx*4+x,cy*8+y);
+					bits = (bits << 2) | lut[pixel];
 
 				}
-				//Write_byte(file,bits&255);
 				bitmap[pos++]=bits;
 			}
 		}
@@ -2939,7 +2941,6 @@ int Save_C64_multi(T_IO_Context *context, byte saveWhat, byte loadAddr)
         Write_byte(file,background);
 
     fclose(file);
-    //printf("\nbg:%d\n",background);
     return 0;
 }
 
