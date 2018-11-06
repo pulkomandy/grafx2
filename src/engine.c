@@ -572,11 +572,12 @@ void Status_print_palette_color(byte color)
   char str[25];
   int i;
   
-  strcpy(str,Buttons_Pool[BUTTON_CHOOSE_COL].Tooltip);
-  sprintf(str+strlen(str),"%d (%d,%d,%d)",color,Main.palette[color].R,Main.palette[color].G,Main.palette[color].B);
+  i = snprintf(str, sizeof(str), "%s%d (%d,%d,%d)",
+           Buttons_Pool[BUTTON_CHOOSE_COL].Tooltip, color,
+           Main.palette[color].R,Main.palette[color].G,Main.palette[color].B);
   // Pad spaces
-  for (i=strlen(str); i<24; i++)
-    str[i]=' ';
+  while(i<24)
+    str[i++]=' ';
   str[24]='\0';
   
   Print_in_menu(str,0);
@@ -2576,18 +2577,13 @@ void Get_color_behind_window(byte * color, byte * click)
         c=a; // Mise à jour de la couleur pointée
         if (Menu_is_visible_before_window)
         {
-          sprintf(str,"%d",a);
-          d=strlen(str);
-          strcat(str,"   (");
-          sprintf(str+strlen(str),"%d",Main.palette[a].R);
-          strcat(str,",");
-          sprintf(str+strlen(str),"%d",Main.palette[a].G);
-          strcat(str,",");
-          sprintf(str+strlen(str),"%d",Main.palette[a].B);
-          strcat(str,")");
+          d = snprintf(str, sizeof(str), "%d", a);  // position of the space to color
+          index = snprintf(str+d, sizeof(str)-d, "   (%d,%d,%d)",
+                   Main.palette[a].R, Main.palette[a].G, Main.palette[a].B);
+          index += d;
           a=24-d;
-          for (index=strlen(str); index<a; index++)
-            str[index]=' ';
+          while (index<a)
+            str[index++]=' ';
           str[a]=0;
           Print_in_menu(str,strlen(Buttons_Pool[BUTTON_CHOOSE_COL].Tooltip));
 
