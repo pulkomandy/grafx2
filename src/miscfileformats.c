@@ -2261,7 +2261,10 @@ void Test_C64(T_IO_Context * context, FILE * file)
     case 9218:
       // $5C00 => Doodle
     case 10003: // multicolor + loadaddr
+      // $4000 => InterPaint multicolor
       // $6000 => Koala Painter
+    case 10018:
+      // $2000 => Advanced Art Studio
     case 10050:
       // $1800 => Picasso64
       File_error = 0;
@@ -2539,6 +2542,7 @@ void Load_C64(T_IO_Context * context)
             case 9218:  // Doodle
             case 10001: // multicolor
             case 10003: // multicolor + loadaddr
+            case 10018: // Advanced Art Studio + loadaddr
             case 10050: // Picasso64 + loadaddr
             case 10242: // Artist64 or blazing paddle + Loadaddr
             case 10277: // multicolor CDU-Paint + loadaddr
@@ -2643,6 +2647,17 @@ void Load_C64(T_IO_Context * context)
                 screen_ram=file_buffer+8002; // length: 1000
                 color_ram=file_buffer+9002; // length: 1000
                 background=file_buffer+10002; // only 1
+                break;
+
+            case 10018: // Advanced Art Studio (.ocp) + loadaddr
+                hasLoadAddr=1;
+                loadFormat=F_multi;
+                context->Ratio = PIXEL_WIDE;
+                bitmap=file_buffer+2; // length: 8000
+                screen_ram=file_buffer+8000+2; // length: 1000
+                color_ram=file_buffer+9016+2; // length: 1000
+                // filebuffer+9000+2 is border
+                background=file_buffer+9001+2; // only 1
                 break;
 
             case 10050: // Picasso64 multicolor + loadaddr
