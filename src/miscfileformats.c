@@ -2258,9 +2258,19 @@ void Test_C64(T_IO_Context * context, FILE * file)
       // $6000 => Koala Painter
     case 10050:
       // $1800 => Picasso64
+      File_error = 0;
+      break;
     case 10242:
-      // $4000 => Artist 64
-      // ? $A000 => Blazing paddles ?
+      // $4000 => Artist 64 (.a64)
+      // $A000 => Blazing paddles (.pi)
+      // $5C00 => Rainbow Painter (.rp)
+      if (load_addr != 0x4000 && load_addr != 0xa000 && load_addr != 0x5c00)
+      {
+        File_error = 1;
+        return;
+      }
+      File_error = 0;
+      break;
     case 17409:
       // $3c00 => FLI-designer v1.1
       // ? $3ff0 => FLI designer 2 ?
@@ -2475,6 +2485,7 @@ void Load_C64(T_IO_Context * context)
     FILE* file;
     long file_size;
     byte hasLoadAddr=0;
+    word load_addr;
     int loadFormat=0;
     enum c64_format {F_hires,F_multi,F_bitmap,F_fli};
     static const char *c64_format_names[]={"Hires","Multicolor","Bitmap","FLI"};
@@ -2549,6 +2560,9 @@ void Load_C64(T_IO_Context * context)
         }
         fclose(file);
 
+        // get load address (valid only if hasLoadAddr = 1)
+        load_addr = file_buffer[0] | (file_buffer[1] << 8);
+
         memset(dummy_screen,1,1000);
 
         switch (file_size)
@@ -2611,14 +2625,32 @@ void Load_C64(T_IO_Context * context)
                 background=file_buffer+1024*2+2-1; // only 1
                 break;
 
-            case 10242: // Artist 64 multicolor + loadaddr
+            case 10242: // Artist 64/Blazing Paddles/Rainbow Painter multicolor + loadaddr
                 hasLoadAddr=1;
                 loadFormat=F_multi;
                 context->Ratio = PIXEL_WIDE;
-                bitmap=file_buffer+2; // length: 8000 (+padding 192)
-                screen_ram=file_buffer+8192+2; // length: 1000 + (padding 24)
-                color_ram=file_buffer+1024+8192+2; // length: 1000 + (padding 24)
-                background=file_buffer+1024*2+8192+2-1; // only 1
+                switch(load_addr)
+                {
+                  default:
+                  case 0x4000:  // Artist 64
+                    bitmap=file_buffer+2; // length: 8000 (+padding 192)
+                    screen_ram=file_buffer+8192+2; // length: 1000 + (padding 24)
+                    color_ram=file_buffer+1024+8192+2; // length: 1000 + (padding 24)
+                    background=file_buffer+1024*2+8192+2-1; // only 1
+                    break;
+                  case 0xa000:  // Blazing Paddles
+                    bitmap=file_buffer+2; // length: 8000 (+padding 192)
+                    screen_ram=file_buffer+8192+2; // length: 1000 + (padding 24)
+                    color_ram=file_buffer+1024+8192+2; // length: 1000 + (padding 24)
+                    background=file_buffer+8064+2; // only 1
+                    break;
+                  case 0x5c00:  // Rainbow Painter
+                    screen_ram=file_buffer+2; // length: 1000 + (padding 24)
+                    bitmap=file_buffer+1024+2; // length: 8000 (+padding 192)
+                    color_ram=file_buffer+1024+8192+2; // length: 1000 + (padding 24)
+                    background=file_buffer; // only 1
+                    break;
+                }
                 break;
 
             case 10277: // multicolor CDU-Paint + loadaddr
@@ -2674,9 +2706,6 @@ void Load_C64(T_IO_Context * context)
         // Write detailed format in comment
         if (hasLoadAddr)
         {
-            // get load address
-            word load_addr;
-            load_addr = file_buffer[0] | (file_buffer[1] << 8);
             snprintf(context->Comment,COMMENT_SIZE+1,"%s, load at $%4.4X",c64_format_names[loadFormat],load_addr);
         }
         else
