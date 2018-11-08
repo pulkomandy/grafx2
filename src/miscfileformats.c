@@ -2503,8 +2503,7 @@ void Load_C64(T_IO_Context * context)
     long file_size;
     byte hasLoadAddr=0;
     word load_addr;
-    int loadFormat=0;
-    enum c64_format {F_hires,F_multi,F_bitmap,F_fli};
+    enum c64_format {F_invalid=-1, F_hires=0,F_multi=1,F_bitmap=2,F_fli=3} loadFormat = F_invalid;
     static const char *c64_format_names[]={"Hires","Multicolor","Bitmap","FLI"};
 
     /// Set C64 Palette from http://www.pepto.de/projects/colorvic/
@@ -2528,7 +2527,7 @@ void Load_C64(T_IO_Context * context)
 
     byte *file_buffer;
     byte *bitmap, *screen_ram, *color_ram=NULL, *background=NULL; // Only pointers to existing data
-    word width=320, height=200;
+    word width, height=200;
 
     file = Open_file_read(context);
 
@@ -2588,7 +2587,6 @@ void Load_C64(T_IO_Context * context)
             case 8000: // raw bitmap
                 hasLoadAddr=0;
                 loadFormat=F_bitmap;
-                context->Ratio = PIXEL_SIMPLE;
                 bitmap=file_buffer+0; // length: 8000
                 screen_ram=NULL;
                 break;
@@ -2596,7 +2594,6 @@ void Load_C64(T_IO_Context * context)
             case 8002: // raw bitmap with loadaddr
                 hasLoadAddr=1;
                 loadFormat=F_bitmap;
-                context->Ratio = PIXEL_SIMPLE;
                 bitmap=file_buffer+2; // length: 8000
                 screen_ram=NULL;
                 break;
@@ -2604,7 +2601,6 @@ void Load_C64(T_IO_Context * context)
             case 9000: // bitmap + ScreenRAM
                 hasLoadAddr=0;
                 loadFormat=F_hires;
-                context->Ratio = PIXEL_SIMPLE;
                 bitmap=file_buffer+0; // length: 8000
                 screen_ram=file_buffer+8000; // length: 1000
                 break;
@@ -2613,7 +2609,6 @@ void Load_C64(T_IO_Context * context)
             case 9002: // bitmap + ScreenRAM + loadaddr
                 hasLoadAddr=1;
                 loadFormat=F_hires;
-                context->Ratio = PIXEL_SIMPLE;
                 bitmap=file_buffer+2; // length: 8000
                 screen_ram=file_buffer+8002; // length: 1000
                 break;
@@ -2621,7 +2616,6 @@ void Load_C64(T_IO_Context * context)
             case 9009: // Art Studio (.aas)
                 hasLoadAddr=1;
                 loadFormat=F_hires;
-                context->Ratio = PIXEL_SIMPLE;
                 bitmap=file_buffer+2; // length: 8000
                 screen_ram=file_buffer+8002; // length: 1000
                 break;
@@ -2629,7 +2623,6 @@ void Load_C64(T_IO_Context * context)
             case 9218: // Doodle (.dd)
                 hasLoadAddr=1;
                 loadFormat=F_hires;
-                context->Ratio = PIXEL_SIMPLE;
                 screen_ram=file_buffer+2; // length: 1000 (+24 padding)
                 bitmap=file_buffer+1024+2; // length: 8000
                 break;
@@ -2637,7 +2630,6 @@ void Load_C64(T_IO_Context * context)
             case 10001: // multicolor
                 hasLoadAddr=0;
                 loadFormat=F_multi;
-                context->Ratio = PIXEL_WIDE;
                 bitmap=file_buffer+0; // length: 8000
                 screen_ram=file_buffer+8000; // length: 1000
                 color_ram=file_buffer+9000; // length: 1000
@@ -2647,7 +2639,6 @@ void Load_C64(T_IO_Context * context)
             case 10003: // multicolor + loadaddr
                 hasLoadAddr=1;
                 loadFormat=F_multi;
-                context->Ratio = PIXEL_WIDE;
                 bitmap=file_buffer+2; // length: 8000
                 screen_ram=file_buffer+8002; // length: 1000
                 color_ram=file_buffer+9002; // length: 1000
@@ -2657,7 +2648,6 @@ void Load_C64(T_IO_Context * context)
             case 10018: // Advanced Art Studio (.ocp) + loadaddr
                 hasLoadAddr=1;
                 loadFormat=F_multi;
-                context->Ratio = PIXEL_WIDE;
                 bitmap=file_buffer+2; // length: 8000
                 screen_ram=file_buffer+8000+2; // length: 1000
                 color_ram=file_buffer+9016+2; // length: 1000
@@ -2668,7 +2658,6 @@ void Load_C64(T_IO_Context * context)
             case 10050: // Picasso64 multicolor + loadaddr
                 hasLoadAddr=1;
                 loadFormat=F_multi;
-                context->Ratio = PIXEL_WIDE;
                 color_ram=file_buffer+2; // length: 1000 + (padding 24)
                 screen_ram=file_buffer+1024+2; // length: 1000 + (padding 24)
                 bitmap=file_buffer+1024*2+2; // length: 8000
@@ -2678,7 +2667,6 @@ void Load_C64(T_IO_Context * context)
             case 10242: // Artist 64/Blazing Paddles/Rainbow Painter multicolor + loadaddr
                 hasLoadAddr=1;
                 loadFormat=F_multi;
-                context->Ratio = PIXEL_WIDE;
                 switch(load_addr)
                 {
                   default:
@@ -2706,7 +2694,6 @@ void Load_C64(T_IO_Context * context)
             case 10277: // multicolor CDU-Paint + loadaddr
                 hasLoadAddr=1;
                 loadFormat=F_multi;
-                context->Ratio = PIXEL_WIDE;
                 // 273 bytes of display routine
                 bitmap=file_buffer+275; // length: 8000
                 screen_ram=file_buffer+8275; // length: 1000
@@ -2717,7 +2704,6 @@ void Load_C64(T_IO_Context * context)
             case 17472: // FLI (BlackMail)
                 hasLoadAddr=0;
                 loadFormat=F_fli;
-                context->Ratio = PIXEL_WIDE;
                 background=file_buffer+0; // length: 200 (+ padding 56)
                 color_ram=file_buffer+256; // length: 1000 (+ padding 24)
                 screen_ram=file_buffer+1280; // length: 8192
@@ -2727,7 +2713,6 @@ void Load_C64(T_IO_Context * context)
             case 17474: // FLI (BlackMail) + loadaddr
                 hasLoadAddr=1;
                 loadFormat=F_fli;
-                context->Ratio = PIXEL_WIDE;
                 background=file_buffer+2; // length: 200 (+ padding 56)
                 color_ram=file_buffer+258; // length: 1000 (+ padding 24)
                 screen_ram=file_buffer+1282; // length: 8192
@@ -2737,7 +2722,6 @@ void Load_C64(T_IO_Context * context)
             case 17409: // FLI-Designer v1.1 (+loadaddr)
               hasLoadAddr=1;
               loadFormat=F_fli;
-              context->Ratio = PIXEL_WIDE;
               background=NULL;
               color_ram=file_buffer+2; // length: 1000 (+ padding 24)
               screen_ram=file_buffer+1024+2; // length: 8192
@@ -2750,20 +2734,31 @@ void Load_C64(T_IO_Context * context)
                 return;
         }
 
-        if (context->Ratio == PIXEL_WIDE)
-            width=160;
-
-        // Write detailed format in comment
-        if (hasLoadAddr)
+        if (loadFormat == F_invalid)
         {
-            snprintf(context->Comment,COMMENT_SIZE+1,"%s, load at $%4.4X",c64_format_names[loadFormat],load_addr);
+          File_error = 1;
+          free(file_buffer);
+          return;
+        }
+
+        if (loadFormat == F_fli || loadFormat == F_multi)
+        {
+          context->Ratio = PIXEL_WIDE;
+          width = 160;
         }
         else
         {
-            snprintf(context->Comment,COMMENT_SIZE+1,"%s, no addr",c64_format_names[loadFormat]);
+          context->Ratio = PIXEL_SIMPLE;
+          width = 320;
         }
 
-        Pre_load(context, width, height, file_size, FORMAT_C64, context->Ratio,4); // Do this as soon as you can
+        // Write detailed format in comment
+        if (hasLoadAddr)
+          snprintf(context->Comment,COMMENT_SIZE+1,"%s, load at $%4.4X",c64_format_names[loadFormat],load_addr);
+        else
+          snprintf(context->Comment,COMMENT_SIZE+1,"%s, no addr",c64_format_names[loadFormat]);
+
+        Pre_load(context, width, height, file_size, FORMAT_C64, context->Ratio, 4); // Do this as soon as you can
 
         memcpy(context->Palette,pal,48); // this set the software palette for grafx2
         // Transparent color "16" is a dark grey that is distinguishable
@@ -2774,16 +2769,15 @@ void Load_C64(T_IO_Context * context)
 
         context->Transparent_color=16;
 
-        if(loadFormat==F_fli)
+        switch(loadFormat)
         {
+          case F_fli:
             Load_C64_fli(context,bitmap,screen_ram,color_ram,background);
-        }
-        else if(loadFormat==F_multi)
-        {
+            break;
+          case F_multi:
             Load_C64_multi(context,bitmap,screen_ram,color_ram,*background);
-        }
-        else
-        {
+            break;
+          default:
             Load_C64_hires(context,bitmap,screen_ram);
         }
 
