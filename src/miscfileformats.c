@@ -2216,25 +2216,53 @@ void Save_NEO(T_IO_Context * context)
 
 //////////////////////////////////// C64 ////////////////////////////////////
 
+/**
+ * Test for a C64 picture file
+ *
+ * Checks the file size and the load address
+ *
+ * http://unusedino.de/ec64/technical/formats/bitmap.html
+ * http://codebase64.org/doku.php?id=base:c64_grafix_files_specs_list_v0.03
+ */
 void Test_C64(T_IO_Context * context, FILE * file)
 {
   long file_size;
+  word load_addr;
 
   (void)context;
   file_size = File_length_file(file);
+  // First test for formats without load address
   switch (file_size)
   {
     // case 1000: // screen or color
-    // case 1002: // (screen or color) + loadaddr
     case 8000: // raw bitmap
-    case 8002: // raw bitmap with loadaddr
     case 9000: // bitmap + ScreenRAM
-    case 9002: // bitmap + ScreenRAM + loadaddr
     case 10001: // multicolor
-    case 10003: // multicolor + loadaddr
     case 17472: // FLI (BlackMail)
+      File_error = 0;
+      return;
+    default: // then we don't know for now.
+      if (!Read_word_le(file, &load_addr))
+      {
+        File_error = 1;
+        return;
+      }
+  }
+  GFX2_Log(GFX2_DEBUG, "Test_C64() file_size=%ld LoadAddr=$%04X\n", file_size, load_addr);
+  switch (file_size)
+  {
+    // case 1002: // (screen or color) + loadaddr
+    case 8002: // raw bitmap with loadaddr
+    case 9002: // bitmap + ScreenRAM + loadaddr
+    case 10003: // multicolor + loadaddr
+      // $6000 => Koala Painter
+    case 17409:
+      // $3c00 => FLI-designer v1.1
+      // ? $3ff0 => FLI designer 2 ?
     case 17474: // FLI (BlackMail) + loadaddr
+      // $3b00 => FLI Graph 2
     case 10277: // multicolor CDU-Paint + loadaddr
+      // $7EEF
       File_error = 0;
       break;
     default: // then we don't know for now.
