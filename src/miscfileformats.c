@@ -2303,25 +2303,33 @@ void Test_C64(T_IO_Context * context, FILE * file)
  */
 static void Load_C64_hires(T_IO_Context *context, byte *bitmap, byte *screen_ram)
 {
-    int cx,cy,x,y,c[4],pixel,color;
+  int cx,cy,x,y,c[4],pixel,color;
 
-    for(cy=0; cy<25; cy++)
+  for(cy=0; cy<25; cy++)
+  {
+    for(cx=0; cx<40; cx++)
     {
-        for(cx=0; cx<40; cx++)
+      if(screen_ram != NULL)
+      {
+        c[0]=screen_ram[cy*40+cx]&15;
+        c[1]=screen_ram[cy*40+cx]>>4;
+      }
+      else
+      { /// If screen_ram is NULL, uses default C64 basic colors
+        c[0] = 6;
+        c[1] = 14;
+      }
+      for(y=0; y<8; y++)
+      {
+        pixel=bitmap[cy*320+cx*8+y];
+        for(x=0; x<8; x++)
         {
-            c[0]=screen_ram[cy*40+cx]&15;
-            c[1]=screen_ram[cy*40+cx]>>4;
-            for(y=0; y<8; y++)
-            {
-                pixel=bitmap[cy*320+cx*8+y];
-                for(x=0; x<8; x++)
-                {
-                    color=c[pixel&(1<<(7-x))?1:0];
-                    Set_pixel(context, cx*8+x,cy*8+y,color);
-                }
-            }
+          color=c[pixel&(1<<(7-x))?1:0];
+          Set_pixel(context, cx*8+x,cy*8+y,color);
         }
+      }
     }
+  }
 }
 
 /**
@@ -2521,7 +2529,6 @@ void Load_C64(T_IO_Context * context)
     byte *file_buffer;
     byte *bitmap, *screen_ram, *color_ram=NULL, *background=NULL; // Only pointers to existing data
     word width=320, height=200;
-    byte dummy_screen[1000];
 
     file = Open_file_read(context);
 
@@ -2576,8 +2583,6 @@ void Load_C64(T_IO_Context * context)
         // get load address (valid only if hasLoadAddr = 1)
         load_addr = file_buffer[0] | (file_buffer[1] << 8);
 
-        memset(dummy_screen,1,1000);
-
         switch (file_size)
         {
             case 8000: // raw bitmap
@@ -2585,7 +2590,7 @@ void Load_C64(T_IO_Context * context)
                 loadFormat=F_bitmap;
                 context->Ratio = PIXEL_SIMPLE;
                 bitmap=file_buffer+0; // length: 8000
-                screen_ram=dummy_screen;
+                screen_ram=NULL;
                 break;
 
             case 8002: // raw bitmap with loadaddr
@@ -2593,7 +2598,7 @@ void Load_C64(T_IO_Context * context)
                 loadFormat=F_bitmap;
                 context->Ratio = PIXEL_SIMPLE;
                 bitmap=file_buffer+2; // length: 8000
-                screen_ram=dummy_screen;
+                screen_ram=NULL;
                 break;
 
             case 9000: // bitmap + ScreenRAM
