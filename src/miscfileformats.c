@@ -2242,7 +2242,14 @@ void Test_C64(T_IO_Context * context, FILE * file)
   }
 }
 
-void Load_C64_hires(T_IO_Context *context, byte *bitmap, byte *screen_ram)
+/**
+ * Load C64 hires (320x200)
+ *
+ * @param context	the IO context
+ * @param bitmap the bitmap RAM (8000 bytes)
+ * @param screen_ram the screen RAM (1000 bytes)
+ */
+static void Load_C64_hires(T_IO_Context *context, byte *bitmap, byte *screen_ram)
 {
     int cx,cy,x,y,c[4],pixel,color;
 
@@ -2265,7 +2272,16 @@ void Load_C64_hires(T_IO_Context *context, byte *bitmap, byte *screen_ram)
     }
 }
 
-void Load_C64_multi(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *color_ram, byte background)
+/**
+ * Load C64 multicolor (160x200)
+ *
+ * @param context	the IO context
+ * @param bitmap the bitmap RAM (8000 bytes)
+ * @param screen_ram the screen RAM (1000 bytes)
+ * @param color_ram the color RAM (1000 bytes)
+ * @param background the background color
+ */
+static void Load_C64_multi(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *color_ram, byte background)
 {
     int cx,cy,x,y,c[4],pixel,color;
     c[0]=background&15;
@@ -2299,6 +2315,7 @@ void Load_C64_multi(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte 
  *  - Layer 2 : pixels (From Screen RAMs + Bitmap)
  *  - Layer 3 : Transparency layer filled with color 16
  *
+ * @param context the IO context
  * @param bitmap 8000 bytes buffer
  * @param screen_ram 8 x 1024 bytes buffers
  * @param color_ram 1000 byte buffer
@@ -2405,6 +2422,18 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
   }
 }
 
+/**
+ * Load C64 pictures formats.
+ *
+ * Supports:
+ * - Hires (with or without ScreenRAM)
+ * - Multicolor (Koala or CDU-paint format)
+ * - FLI
+ *
+ * see http://unusedino.de/ec64/technical/formats/bitmap.html
+ *
+ * @param context the IO context
+ */
 void Load_C64(T_IO_Context * context)
 {
     FILE* file;
@@ -2412,10 +2441,9 @@ void Load_C64(T_IO_Context * context)
     byte hasLoadAddr=0;
     int loadFormat=0;
     enum c64_format {F_hires,F_multi,F_bitmap,F_fli};
-    const char *c64_format_names[]={"Hires","Multicolor","Bitmap","FLI"};
+    static const char *c64_format_names[]={"Hires","Multicolor","Bitmap","FLI"};
 
-
-    // Palette from http://www.pepto.de/projects/colorvic/
+    /// Set C64 Palette from http://www.pepto.de/projects/colorvic/
     static const byte pal[48]={
       0x00, 0x00, 0x00,
       0xFF, 0xFF, 0xFF,
@@ -2437,7 +2465,7 @@ void Load_C64(T_IO_Context * context)
     byte *file_buffer;
     byte *bitmap, *screen_ram, *color_ram=NULL, *background=NULL; // Only pointers to existing data
     word width=320, height=200;
-    static byte dummy_screen[1000];
+    byte dummy_screen[1000];
 
     file = Open_file_read(context);
 
@@ -2611,10 +2639,7 @@ void Load_C64(T_IO_Context * context)
             Load_C64_hires(context,bitmap,screen_ram);
         }
 
-        File_error = 0;
-
         free(file_buffer);
-
     }
     else
         File_error = 1;
@@ -2955,6 +2980,18 @@ int Save_C64_multi(T_IO_Context *context, byte saveWhat, byte loadAddr)
   return 0;
 }
 
+/**
+ * Save a C64 FLI (Flexible Line Interpretation) picture.
+ *
+ * This function need a 3 layer image :
+ * - layer 0 is background colors
+ * - layer 1 is color RAM values (4x8 blocks)
+ * - layer 2 is the actual picture
+ *
+ * @param context the IO context
+ * @param saveWhat what part of the data to save
+ * @param loadAddr The load address
+ */
 int Save_C64_fli(T_IO_Context * context, byte saveWhat, byte loadAddr)
 {
   FILE *file;
@@ -3011,6 +3048,16 @@ int Save_C64_fli(T_IO_Context * context, byte saveWhat, byte loadAddr)
   return 0;
 }
 
+/**
+ * Save C64 picture.
+ *
+ * Supports :
+ * - HiRes (320x200)
+ * - Multicolor
+ * - FLI
+ *
+ * @param context the IO context
+ */
 void Save_C64(T_IO_Context * context)
 {
   static byte saveWhat=0, loadAddr=0;
