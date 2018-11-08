@@ -2254,6 +2254,12 @@ void Test_C64(T_IO_Context * context, FILE * file)
     // case 1002: // (screen or color) + loadaddr
     case 8002: // raw bitmap with loadaddr
     case 9002: // bitmap + ScreenRAM + loadaddr
+      // $4000 => InterPaint Hi-Res (.iph)
+    case 9003: // bitmap + ScreenRAM + loadaddr (+ border ?)
+    case 9009: // bitmap + ScreenRAM + loadaddr
+      // $2000 => Art Studio
+    case 9218:
+      // $5C00 => Doodle
     case 10003: // multicolor + loadaddr
       // $6000 => Koala Painter
     case 10050:
@@ -2528,6 +2534,9 @@ void Load_C64(T_IO_Context * context)
             case 8002: // raw bitmap with loadaddr
             case 9000: // bitmap + ScreenRAM
             case 9002: // bitmap + ScreenRAM + loadaddr
+            case 9003: // bitmap + ScreenRAM + loadaddr (+border ?)
+            case 9009: // bitmap + ScreenRAM + loadaddr
+            case 9218:  // Doodle
             case 10001: // multicolor
             case 10003: // multicolor + loadaddr
             case 10050: // Picasso64 + loadaddr
@@ -2570,6 +2579,7 @@ void Load_C64(T_IO_Context * context)
             case 8000: // raw bitmap
                 hasLoadAddr=0;
                 loadFormat=F_bitmap;
+                context->Ratio = PIXEL_SIMPLE;
                 bitmap=file_buffer+0; // length: 8000
                 screen_ram=dummy_screen;
                 break;
@@ -2577,6 +2587,7 @@ void Load_C64(T_IO_Context * context)
             case 8002: // raw bitmap with loadaddr
                 hasLoadAddr=1;
                 loadFormat=F_bitmap;
+                context->Ratio = PIXEL_SIMPLE;
                 bitmap=file_buffer+2; // length: 8000
                 screen_ram=dummy_screen;
                 break;
@@ -2584,15 +2595,34 @@ void Load_C64(T_IO_Context * context)
             case 9000: // bitmap + ScreenRAM
                 hasLoadAddr=0;
                 loadFormat=F_hires;
+                context->Ratio = PIXEL_SIMPLE;
                 bitmap=file_buffer+0; // length: 8000
                 screen_ram=file_buffer+8000; // length: 1000
                 break;
 
+            case 9003: // bitmap + ScreenRAM + loadaddr (+ border ?)
             case 9002: // bitmap + ScreenRAM + loadaddr
                 hasLoadAddr=1;
                 loadFormat=F_hires;
+                context->Ratio = PIXEL_SIMPLE;
                 bitmap=file_buffer+2; // length: 8000
                 screen_ram=file_buffer+8002; // length: 1000
+                break;
+
+            case 9009: // Art Studio (.aas)
+                hasLoadAddr=1;
+                loadFormat=F_hires;
+                context->Ratio = PIXEL_SIMPLE;
+                bitmap=file_buffer+2; // length: 8000
+                screen_ram=file_buffer+8002; // length: 1000
+                break;
+
+            case 9218: // Doodle (.dd)
+                hasLoadAddr=1;
+                loadFormat=F_hires;
+                context->Ratio = PIXEL_SIMPLE;
+                screen_ram=file_buffer+2; // length: 1000 (+24 padding)
+                bitmap=file_buffer+1024+2; // length: 8000
                 break;
 
             case 10001: // multicolor
