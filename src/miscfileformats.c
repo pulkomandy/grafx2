@@ -2256,6 +2256,8 @@ void Test_C64(T_IO_Context * context, FILE * file)
     case 9002: // bitmap + ScreenRAM + loadaddr
     case 10003: // multicolor + loadaddr
       // $6000 => Koala Painter
+    case 10050:
+      // $1800 => Picasso64
     case 17409:
       // $3c00 => FLI-designer v1.1
       // ? $3ff0 => FLI designer 2 ?
@@ -2514,6 +2516,7 @@ void Load_C64(T_IO_Context * context)
             case 9002: // bitmap + ScreenRAM + loadaddr
             case 10001: // multicolor
             case 10003: // multicolor + loadaddr
+            case 10050: // Picasso64 + loadaddr
             case 10277: // multicolor CDU-Paint + loadaddr
             case 17409: // FLI-designer v1.1
             case 17472: // FLI (BlackMail)
@@ -2592,6 +2595,16 @@ void Load_C64(T_IO_Context * context)
                 screen_ram=file_buffer+8002; // length: 1000
                 color_ram=file_buffer+9002; // length: 1000
                 background=file_buffer+10002; // only 1
+                break;
+
+            case 10050: // Picasso64 multicolor + loadaddr
+                hasLoadAddr=1;
+                loadFormat=F_multi;
+                context->Ratio = PIXEL_WIDE;
+                color_ram=file_buffer+2; // length: 1000 + (padding 24)
+                screen_ram=file_buffer+1024+2; // length: 1000 + (padding 24)
+                bitmap=file_buffer+1024*2+2; // length: 8000
+                background=file_buffer+1024*2+2-1; // only 1
                 break;
 
             case 10277: // multicolor CDU-Paint + loadaddr
