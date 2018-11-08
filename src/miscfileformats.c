@@ -2393,10 +2393,11 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
   // Fill layer 0 with background colors
   for(y=0; y<200; y++)
   {
+    byte bg_color = 0;
+    if (background != NULL)
+      bg_color = background[y];
     for(x=0; x<160; x++)
-    {
-      Set_pixel(context, x,y,background[y]);
-    }
+      Set_pixel(context, x,y, bg_color);
   }
 
   // Fill layer 1 with color ram (1 color per 4x8 block)
@@ -2427,7 +2428,9 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
       {
         int pixel=bitmap[cy*320+cx*8+y];
 
-        c[0]=background[cy*8+y]&15;
+        c[0] = 0;
+        if(background != NULL)
+          c[0] = background[cy*8+y]&15;
         c[1]=screen_ram[y*1024+cy*40+cx]>>4;
         c[2]=screen_ram[y*1024+cy*40+cx]&15;
         for(x=0; x<4; x++)
@@ -2512,6 +2515,7 @@ void Load_C64(T_IO_Context * context)
             case 10001: // multicolor
             case 10003: // multicolor + loadaddr
             case 10277: // multicolor CDU-Paint + loadaddr
+            case 17409: // FLI-designer v1.1
             case 17472: // FLI (BlackMail)
             case 17474: // FLI (BlackMail) + loadaddr
             break;
@@ -2620,6 +2624,16 @@ void Load_C64(T_IO_Context * context)
                 screen_ram=file_buffer+1282; // length: 8192
                 bitmap=file_buffer+9474; // length: 8000
                 break;
+
+            case 17409: // FLI-Designer v1.1 (+loadaddr)
+              hasLoadAddr=1;
+              loadFormat=F_fli;
+              context->Ratio = PIXEL_WIDE;
+              background=NULL;
+              color_ram=file_buffer+2; // length: 1000 (+ padding 24)
+              screen_ram=file_buffer+1024+2; // length: 8192
+              bitmap=file_buffer+8192+1024+2; // length: 8000
+              break;
 
             default:
                 File_error = 1;
