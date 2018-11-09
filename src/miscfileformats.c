@@ -2216,6 +2216,26 @@ void Save_NEO(T_IO_Context * context)
 
 //////////////////////////////////// C64 ////////////////////////////////////
 
+/** C64 file formats
+ */
+enum c64_format
+{
+  F_invalid = -1,
+  F_hires = 0,    ///< 320x200
+  F_multi = 1,    ///< 160x200
+  F_bitmap = 2,   ///< 320x200 monochrome
+  F_fli = 3       ///< FLI (Flexible Line Interpretation)
+};
+
+/** C64 file formats names
+ */
+static const char *c64_format_names[] = {
+  "Hires",
+  "Multicolor",
+  "Bitmap",
+  "FLI"
+};
+
 /**
  * Test for a C64 picture file
  *
@@ -2503,8 +2523,7 @@ void Load_C64(T_IO_Context * context)
     long file_size;
     byte hasLoadAddr=0;
     word load_addr;
-    enum c64_format {F_invalid=-1, F_hires=0,F_multi=1,F_bitmap=2,F_fli=3} loadFormat = F_invalid;
-    static const char *c64_format_names[]={"Hires","Multicolor","Bitmap","FLI"};
+    enum c64_format loadFormat = F_invalid;
 
     /// Set C64 Palette from http://www.pepto.de/projects/colorvic/
     static const byte pal[48]={
@@ -2787,69 +2806,94 @@ void Load_C64(T_IO_Context * context)
         File_error = 1;
 }
 
-int Save_C64_window(byte *saveWhat, byte *loadAddr)
+/**
+ * Display the dialog for C64 save parameters
+ *
+ * @param save
+ * @return true to proceed, false to abort
+ */
+static int Save_C64_window(enum c64_format *saveFormat, byte *saveWhat, byte *loadAddr)
 {
-    int button;
-    unsigned int i;
-    T_Dropdown_button *what, *addr;
-    static const char * what_label[] = {
-        "All",
-        "Bitmap",
-        "Screen",
-        "Color"
-    };
-    static const char * address_label[] = {
-        "None",
-        "$2000",
-        "$4000",
-        "$6000",
-        "$8000",
-        "$A000",
-        "$C000",
-        "$E000"
-    };
+  int button;
+  unsigned int i;
+  T_Dropdown_button *what, *addr;
+  T_Dropdown_button *format;
+  static const char * what_label[] = {
+    "All",
+    "Bitmap",
+    "Screen",
+    "Color"
+  };
+  static const char * address_label[] = {
+    "None",
+    "$2000",
+    "$4000",
+    "$6000",
+    "$8000",
+    "$A000",
+    "$C000",
+    "$E000"
+  };
 
-    Open_window(200,120,"c64 settings");
-    Window_set_normal_button(110,100,80,15,"Save",1,1,KEY_RETURN); // 1
-    Window_set_normal_button(10,100,80,15,"Cancel",1,1,KEY_ESCAPE); // 2
+  Open_window(200,120,"C64 saving settings");
+  Window_set_normal_button(110,100,80,15,"Save",1,1,KEY_RETURN); // 1
+  Window_set_normal_button(10,100,80,15,"Cancel",1,1,KEY_ESCAPE); // 2
 
-    Print_in_window(13,18,"Data:",MC_Dark,MC_Light);
-    what=Window_set_dropdown_button(10,28,90,15,70,what_label[*saveWhat],1, 0, 1, LEFT_SIDE,0); // 3
-    Window_dropdown_clear_items(what);
-    for (i=0; i<sizeof(what_label)/sizeof(what_label[0]); i++)
-        Window_dropdown_add_item(what,i,what_label[i]);
+  Print_in_window(13,18,"Data:",MC_Dark,MC_Light);
+  what = Window_set_dropdown_button(10,28,90,15,70,what_label[*saveWhat],1, 0, 1, LEFT_SIDE,0); // 3
+  Window_dropdown_clear_items(what);
+  for (i=0; i<sizeof(what_label)/sizeof(what_label[0]); i++)
+    Window_dropdown_add_item(what,i,what_label[i]);
 
-    Print_in_window(113,18,"Address:",MC_Dark,MC_Light);
-    addr=Window_set_dropdown_button(110,28,70,15,70,address_label[*loadAddr/32],1, 0, 1, LEFT_SIDE,0); // 4
-    Window_dropdown_clear_items(addr);
-    for (i=0; i<sizeof(address_label)/sizeof(address_label[0]); i++)
-        Window_dropdown_add_item(addr,i,address_label[i]);
+  Print_in_window(113,18,"Address:",MC_Dark,MC_Light);
+  addr = Window_set_dropdown_button(110,28,70,15,70,address_label[*loadAddr/32],1, 0, 1, LEFT_SIDE,0); // 4
+  Window_dropdown_clear_items(addr);
+  for (i=0; i<sizeof(address_label)/sizeof(address_label[0]); i++)
+    Window_dropdown_add_item(addr,i,address_label[i]);
 
-    Update_window_area(0,0,Window_width,Window_height);
-    Display_cursor();
+  Print_in_window(13,46,"Format:",MC_Dark,MC_Light);
+  format = Window_set_dropdown_button(10,56,90,15,88,c64_format_names[*saveFormat],1, 0, 1, LEFT_SIDE,0); // 5
+  if (*saveFormat == F_hires || *saveFormat == F_bitmap)
+  {
+    Window_dropdown_add_item(format, F_hires, c64_format_names[F_hires]);
+    Window_dropdown_add_item(format, F_bitmap, c64_format_names[F_bitmap]);
+  }
+  else
+  {
+    Window_dropdown_add_item(format, F_multi, c64_format_names[F_multi]);
+    Window_dropdown_add_item(format, F_fli, c64_format_names[F_fli]);
+  }
 
-    do
+  Update_window_area(0,0,Window_width,Window_height);
+  Display_cursor();
+
+  do
+  {
+    button = Window_clicked_button();
+    switch(button)
     {
-        button = Window_clicked_button();
-        switch(button)
-        {
-            case 3: // Save what
-                *saveWhat=Window_attribute2;
-                //printf("what=%d\n",Window_attribute2);
-                break;
+      case 3: // Save what
+        *saveWhat = Window_attribute2;
+        //printf("what=%d\n",Window_attribute2);
+        break;
 
-            case 4: // Load addr
-                *loadAddr=Window_attribute2*32;
-                GFX2_Log(GFX2_DEBUG, "Save_C64_Window() : addr=$%02x00 (%d)\n",*loadAddr,Window_attribute2);
-                break;
+      case 4: // Load addr
+        *loadAddr = Window_attribute2*32;
+        GFX2_Log(GFX2_DEBUG, "Save_C64_Window() : addr=$%02x00 (%d)\n",*loadAddr,Window_attribute2);
+        break;
 
-            case 0: break;
-        }
-    }while(button!=1 && button!=2);
+      case 5:
+        *saveFormat = Window_attribute2;
+        GFX2_Log(GFX2_DEBUG, "Save_C64_Window() : format=%d\n", Window_attribute2);
+        break;
 
-    Close_window();
-    Display_cursor();
-    return button==1;
+      case 0: break;
+    }
+  } while(button!=1 && button!=2);
+
+  Close_window();
+  Display_cursor();
+  return button==1;
 }
 
 int Save_C64_hires(T_IO_Context *context, byte saveWhat, byte loadAddr)
@@ -3263,7 +3307,7 @@ int Save_C64_multi(T_IO_Context *context, byte saveWhat, byte loadAddr)
                 // candidate background colors left ?
                 if (cand==0)
                 {
-                    Warning_message("No possible global background color found");
+                    Warning_message("No possible global background color");
                     return 1;
                 }
             }
@@ -3436,6 +3480,7 @@ int Save_C64_fli(T_IO_Context * context, byte saveWhat, byte loadAddr)
  */
 void Save_C64(T_IO_Context * context)
 {
+  enum c64_format saveFormat = F_invalid;
   static byte saveWhat=0, loadAddr=0;
 
   if (((context->Width!=320) && (context->Width!=160)) || context->Height!=200)
@@ -3445,24 +3490,37 @@ void Save_C64(T_IO_Context * context)
     return;
   }
 
-  if(!Save_C64_window(&saveWhat,&loadAddr))
+  saveFormat = (context->Width == 320) ? F_hires : F_multi;
+    
+  GFX2_Log(GFX2_DEBUG, "Save_C64() extension : %s\n", context->File_name + strlen(context->File_name) - 4);
+  if (strcasecmp(context->File_name + strlen(context->File_name) - 4, ".fli") == 0)
+    saveFormat = F_fli;
+
+  if(!Save_C64_window(&saveFormat, &saveWhat,&loadAddr))
   {
     File_error = 1;
     return;
   }
 
-  GFX2_Log(GFX2_DEBUG, "Save_C64() extension : %s\n", context->File_name + strlen(context->File_name) - 4);
-  if (strcasecmp(context->File_name + strlen(context->File_name) - 4, ".fli") == 0)
+  switch (saveFormat)
   {
-    // FIXME moving FLI to a separate format in the fileselector would be smarter
-    if (Main.backups->Pages->Nb_layers < 3)
-      File_error = Save_C64_fli_monolayer(context, saveWhat, loadAddr);
-    else
-      File_error = Save_C64_fli(context, saveWhat, loadAddr);
-  } else if (context->Width==320) {
-    File_error = Save_C64_hires(context, saveWhat, loadAddr);
-  } else {
-    File_error = Save_C64_multi(context, saveWhat, loadAddr);
+    case F_fli:
+      if (Main.backups->Pages->Nb_layers < 3)
+        File_error = Save_C64_fli_monolayer(context, saveWhat, loadAddr);
+      else
+        File_error = Save_C64_fli(context, saveWhat, loadAddr);
+      break;
+    case F_multi:
+      File_error = Save_C64_multi(context, saveWhat, loadAddr);
+      break;
+    case F_bitmap:
+      saveWhat = 1; // force save bitmap
+#if defined(__GNUC__) && (__GNUC__ >= 7)
+      __attribute__ ((fallthrough));
+#endif
+    case F_hires:
+    default:
+      File_error = Save_C64_hires(context, saveWhat, loadAddr);
   }
 }
 
