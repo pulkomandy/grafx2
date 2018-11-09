@@ -97,6 +97,10 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
     break;
   case WM_CREATE:
     break;
+  case WM_ACTIVATE:
+    break;
+  case WM_SETFOCUS:
+    break;
   case WM_SIZE:
     Resize_width = LOWORD(lParam);
     Resize_height = HIWORD(lParam);
@@ -123,6 +127,8 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
   //case WM_MOUSEENTER:
     //ShowCursor(FALSE);
     //return 0;
+  case WM_NCMOUSEMOVE:  // Mouse move in the non client area of the window
+    break;
   case WM_MOUSEMOVE:
     //Hide_cursor();
     Input_new_mouse_X = (LOWORD(lParam))/Pixel_width;
@@ -225,6 +231,16 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
       }
     }
     return 0;
+  case WM_STYLECHANGING:  // app can change the styles
+  case WM_STYLECHANGED:   // app can not change the styles
+    // wParam : GWL_EXSTYLE (extended style) / GWL_STYLE
+    // lParam : pointer to STYLESTRUC
+    // An application should return zero if it processes this message.
+    break;
+#if(WINVER >= 0x0400)
+  case WM_MOVING:
+    break;
+#endif
   default:
     GFX2_Log(GFX2_INFO, "Win32_WindowProc() unknown Message : 0x%04x wParam=%08x lParam=%08lx\n", uMsg, wParam, lParam);
   }
