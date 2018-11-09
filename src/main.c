@@ -727,6 +727,7 @@ int Init_program(int argc,char * argv[])
   strcpy(Brush_selector.Directory,Main.selector.Directory);
   strcpy(Brush_file_directory,Main.selector.Directory);
   strcpy(Brush_filename       ,"NO_NAME.GIF");
+  Brush_filename_unicode[0] = 0;
   Brush_fileformat    =DEFAULT_FILEFORMAT;
 
   strcpy(Palette_selector.Directory,Main.selector.Directory);

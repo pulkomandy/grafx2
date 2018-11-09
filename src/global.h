@@ -338,6 +338,8 @@ GFX2_GLOBAL word Brush_height;
 GFX2_GLOBAL char  Brush_file_directory[MAX_PATH_CHARACTERS];
 /// Filename (without directory) of the brush (after loading or saving it).
 GFX2_GLOBAL char  Brush_filename[MAX_PATH_CHARACTERS];
+/// Filename (without directory) of the brush (after loading or saving it) unicode.
+GFX2_GLOBAL word  Brush_filename_unicode[MAX_PATH_CHARACTERS];
 /// File format of the brush. It's a value of enum ::FILE_FORMATS
 GFX2_GLOBAL byte  Brush_fileformat;
 /// Fileselector settings
