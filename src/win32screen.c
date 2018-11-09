@@ -425,7 +425,7 @@ void Update_rect(short x, short y, unsigned short width, unsigned short height)
   rect.top = y * Pixel_height;
   rect.right = (x + width) * Pixel_width;
   rect.bottom = (y + height) * Pixel_height;
-  InvalidateRect(Win32_hwnd, &rect, TRUE);
+  InvalidateRect(Win32_hwnd, &rect, FALSE/*TRUE*/);
 }
 
 void Flush_update(void)
@@ -459,6 +459,7 @@ int SetPalette(const T_Components * colors, int firstcolor, int ncolors)
 	SelectObject(dc2, old_bmp);
 	DeleteDC(dc2);
 	ReleaseDC(Win32_hwnd, dc);
+  InvalidateRect(Win32_hwnd, NULL, FALSE);  // Refresh the whole window
   return 1;
 }
 
