@@ -7,7 +7,7 @@ SDLIMAGEURL = https://www.libsdl.org/projects/SDL_image/release/$(SDLIMAGEARCH)
 SDLTTF=SDL_ttf-2.0.11
 SDLTTFARCH=$(SDLTTF).tar.gz
 SDLTTFURL=https://www.libsdl.org/projects/SDL_ttf/release/$(SDLTTFARCH)
-LIBPNG = libpng-1.6.34
+LIBPNG = libpng-1.6.35
 LIBPNGARCH = $(LIBPNG).tar.gz
 LIBPNGURL = https://download.sourceforge.net/libpng/$(LIBPNGARCH)
 LIBPNGURLALT = ftp://ftp-osl.osuosl.org/pub/libpng/src/libpng16/$(LIBPNGARCH)
@@ -27,7 +27,7 @@ ZLIBURL=https://www.zlib.net/$(ZLIBARCH)
 FREETYPE=freetype-2.9.1
 FREETYPEARCH=$(FREETYPE).tar.gz
 FREETYPEURL=https://download.savannah.gnu.org/releases/freetype/$(FREETYPEARCH)
-LUA=lua-5.3.4
+LUA=lua-5.3.5
 LUAARCH=$(LUA).tar.gz
 LUAURL=https://www.lua.org/ftp/$(LUAARCH)
 # https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-0.6.1.tar.gz
