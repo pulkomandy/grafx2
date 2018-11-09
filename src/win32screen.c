@@ -74,10 +74,22 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
   switch(uMsg)
   {
   case WM_MOVE:
+    GFX2_Log(GFX2_DEBUG, "WM_MOVE : (%d,%d)\n", LOWORD(lParam), HIWORD(lParam));
     if (!Win32_Is_Fullscreen)
     {
       Config.Window_pos_x = LOWORD(lParam);
       Config.Window_pos_y = HIWORD(lParam);
+    }
+    return 0;
+  case WM_WINDOWPOSCHANGED:
+    {
+      LPWINDOWPOS pos = (LPWINDOWPOS)lParam;
+      GFX2_Log(GFX2_DEBUG, "WM_WINDOWPOSCHANGED : (%d,%d) %dx%d\n", pos->x, pos->y, pos->cx, pos->cy);
+      if (!Win32_Is_Fullscreen)
+      {
+        Config.Window_pos_x = pos->x;
+        Config.Window_pos_y = pos->y;
+      }
     }
     return 0;
   case WM_NCHITTEST:
