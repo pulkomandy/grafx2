@@ -23,6 +23,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifdef _MSC_VER
+#include <stdio.h>
+#if _MSC_VER < 1900
+#define snprintf _snprintf
+#endif
+#endif
+
 #include "const.h"
 #include "struct.h"
 #include "global.h"
