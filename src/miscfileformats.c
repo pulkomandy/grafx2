@@ -3089,7 +3089,7 @@ int Save_C64_fli_monolayer(T_IO_Context *context, byte saveWhat, byte loadAddr)
       if (n_possible_backgrounds == 0)
       {
         //ERROR
-        GFX2_Log(GFX2_WARNING, "Save_C64_fli_monolayer() no possible background color for line %d\n", by*8+cy);
+        Warning_with_format("No possible background color for line %d.\n4x1 pixel blocks using 4 different colors must share at least one color.", by*8+cy);
         return 1;
       }
       else
@@ -3129,8 +3129,7 @@ int Save_C64_fli_monolayer(T_IO_Context *context, byte saveWhat, byte loadAddr)
       int n_possibles_color11 = count_set_bits(color_ram_possible[bx]);
       if (n_possibles_color11 == 0)
       {
-        GFX2_Log(GFX2_WARNING, "Save_C64_fli_monolayer() no possible color RAM value for block (%d,%d) coordinates (%d,%d)\n",
-                 bx, by, bx*4, by*8);
+        Warning_with_format("No possible color RAM value for 4x8 block (%d,%d) coordinates (%d,%d)\nThe 8 4x1 blocks must share a color.", bx, by, bx*4, by*8);
         return 1;
       }
       else
