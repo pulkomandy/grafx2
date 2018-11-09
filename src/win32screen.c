@@ -110,17 +110,42 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
         Config.Window_pos_y = pos->y;
       }
     }
-    return 0;
-  case WM_NCHITTEST:
-    // send to test in which part of the windows the coordinates are
+    break;  // call DefWindowProc() in order to receive the WM_SIZE msg
+  case WM_NCCREATE:   // Sent before WM_CREATE
+    {
+      LPCREATESTRUCTA create = (LPCREATESTRUCTA)lParam;
+      GFX2_Log(GFX2_DEBUG, "WM_NCCREATE : (%d,%d) %dx%d\n", create->x, create->y, create->cx, create->cy);
+    }
+    break;
+  case WM_NCCALCSIZE: // Sent when the size and position of a window's client area must be calculated
+    if(wParam)
+    {
+      //LPNCCALCSIZE_PARAMS p = (LPNCCALCSIZE_PARAMS)lParam;
+      GFX2_Log(GFX2_DEBUG, "WM_NCCALCSIZE(request)\n");
+    }
+    else
+    {
+      LPRECT rect = (LPRECT)lParam;
+      GFX2_Log(GFX2_DEBUG, "WM_NCCALCSIZE(info): (%d,%d)-(%d,%d)\n", rect->left, rect->top, rect->right, rect->bottom);
+      //return 0;
+    }
+    break;
+  case WM_NCHITTEST: // send to test in which part of the windows the coordinates are
+    break;
+  case WM_NCPAINT:  // The WM_NCPAINT message is sent to a window when its frame must be painted.
+    break;
+  case WM_NCACTIVATE: // nonclient area needs to be changed to indicate an active or inactive state.
     break;
   case WM_CREATE:
     break;
   case WM_ACTIVATE:
     break;
-  case WM_SETFOCUS:
+  case WM_SETFOCUS:   // We gained keyboard focus
+    break;
+  case WM_KILLFOCUS:  // We lost keyboard focus
     break;
   case WM_SIZE:
+    GFX2_Log(GFX2_DEBUG, "WM_SIZE : %dx%d\n", LOWORD(lParam), HIWORD(lParam));
     Resize_width = LOWORD(lParam);
     Resize_height = HIWORD(lParam);
     break;
@@ -256,10 +281,44 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
     // lParam : pointer to STYLESTRUC
     // An application should return zero if it processes this message.
     break;
+  case WM_GETICON:  // request icon
+    GFX2_Log(GFX2_DEBUG, "WM_GETICON : type=%d dpi=%d\n", (int)wParam, (int)lParam);
+    // wParam : ICON_BIG / ICON_SMALL / ICON_SMALL2
+    // we can return a custom HICON
+    break;
+  case WM_SYSCOMMAND: // Window menu command (formerly known as the system or control menu)
+    // or maximize button, minimize button, restore button, or close button.
+    break;
+  case WM_ENTERSIZEMOVE:  // enters the moving or sizing modal loop.
+    break;
+  case WM_EXITSIZEMOVE:   // the moving or sizing modal loop has exited.
+    break;
 #if(WINVER >= 0x0400)
-  case WM_MOVING:
+  case WM_CAPTURECHANGED: // we lost the mouse capture to (HWND)lParam
+    break;
+  case WM_SIZING: // user is resizing the window
+    {
+      LPRECT rect = (LPRECT)lParam;
+      GFX2_Log(GFX2_DEBUG, "WM_SIZING : (%d,%d)-(%d,%d)\n", rect->left, rect->top, rect->right, rect->bottom);
+    }
+    break;
+  case WM_MOVING: // user is moving the window
+    {
+      LPRECT rect = (LPRECT)lParam;
+      GFX2_Log(GFX2_DEBUG, "WM_MOVING : (%d,%d)-(%d,%d)\n", rect->left, rect->top, rect->right, rect->bottom);
+    }
+    break;
+  case WM_IME_SETCONTEXT: // window is activated
+    break;
+  case WM_IME_NOTIFY: // change of IME function
     break;
 #endif
+#if(WINVER >= 0x0500)
+  case WM_NCMOUSEHOVER: // the cursor hovers over the nonclient area of the window
+    break;
+  case WM_NCMOUSELEAVE: // the cursor leaves the nonclient area of the window
+    break;
+#endif /* WINVER >= 0x0500 */
   default:
     GFX2_Log(GFX2_INFO, "Win32_WindowProc() unknown Message : 0x%04x wParam=%08x lParam=%08lx\n", uMsg, wParam, lParam);
   }
