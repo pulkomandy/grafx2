@@ -1472,6 +1472,7 @@ void Verbose_message(const char *caption, const char * message )
   char buffer[36];
   byte original_cursor_shape = Cursor_shape;
 
+  GFX2_Log(GFX2_INFO, "* USER MSG * %s : %s\n", caption, message);
 
   Open_window(300,160,caption);
 
