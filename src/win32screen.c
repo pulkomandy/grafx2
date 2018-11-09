@@ -73,18 +73,37 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
 {
   switch(uMsg)
   {
-  case WM_MOVE:
+  case WM_MOVE:   // Gives the client area coordinates
     GFX2_Log(GFX2_DEBUG, "WM_MOVE : (%d,%d)\n", LOWORD(lParam), HIWORD(lParam));
-    if (!Win32_Is_Fullscreen)
+    break;
+  case WM_GETMINMAXINFO: // size or position is about to change
     {
-      Config.Window_pos_x = LOWORD(lParam);
-      Config.Window_pos_y = HIWORD(lParam);
+      RECT rect;
+      LPMINMAXINFO minmaxinfo = (LPMINMAXINFO)lParam;
+      GFX2_Log(GFX2_DEBUG, "WM_GETMINMAXINFO : input ptMinTrackSize : %dx%d\n", minmaxinfo->ptMinTrackSize.x, minmaxinfo->ptMinTrackSize.y);
+      rect.left = 0;
+      rect.top = 0;
+      rect.right = 320;
+      rect.bottom = 200;
+      // add the non client area overhead
+      if(AdjustWindowRect(&rect, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_THICKFRAME | WS_MAXIMIZEBOX, FALSE))
+      {
+        minmaxinfo->ptMinTrackSize.x = rect.right - rect.left;
+        minmaxinfo->ptMinTrackSize.y = rect.bottom - rect.top;
+        GFX2_Log(GFX2_DEBUG, "WM_GETMINMAXINFO : return ptMinTrackSize : %dx%d\n", minmaxinfo->ptMinTrackSize.x, minmaxinfo->ptMinTrackSize.y);
+      }
     }
     return 0;
+  case WM_WINDOWPOSCHANGING: // window size, position, or place in the Z order is about to change
+    {
+      LPWINDOWPOS pos = (LPWINDOWPOS)lParam;
+      GFX2_Log(GFX2_DEBUG, "WM_WINDOWPOSCHANGING : (%d,%d) %dx%d flags=%04x after=%x\n", pos->x, pos->y, pos->cx, pos->cy, pos->flags, pos->hwndInsertAfter);
+    }
+    break;
   case WM_WINDOWPOSCHANGED:
     {
       LPWINDOWPOS pos = (LPWINDOWPOS)lParam;
-      GFX2_Log(GFX2_DEBUG, "WM_WINDOWPOSCHANGED : (%d,%d) %dx%d\n", pos->x, pos->y, pos->cx, pos->cy);
+      GFX2_Log(GFX2_DEBUG, "WM_WINDOWPOSCHANGED : (%d,%d) %dx%d flags=%04x after=%x\n", pos->x, pos->y, pos->cx, pos->cy, pos->flags, pos->hwndInsertAfter);
       if (!Win32_Is_Fullscreen)
       {
         Config.Window_pos_x = pos->x;
