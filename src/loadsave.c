@@ -1700,7 +1700,7 @@ FILE * Open_file_write(T_IO_Context *context)
   WCHAR filename_unicode[MAX_PATH_CHARACTERS];
   FILE * f;
 
-  if (context->File_name_unicode != NULL)
+  if (context->File_name_unicode != NULL && context->File_name_unicode[0] != 0)
   {
     Unicode_char_strlcpy((word *)filename_unicode, context->File_directory, MAX_PATH_CHARACTERS);
     Unicode_char_strlcat((word *)filename_unicode, PATH_SEPARATOR, MAX_PATH_CHARACTERS);
@@ -1737,7 +1737,7 @@ FILE * Open_file_write_with_alternate_ext(T_IO_Context *context, const char * ex
   WCHAR filename_unicode[MAX_PATH_CHARACTERS];
   WCHAR * pw;
 
-  if (context->File_name_unicode != NULL)
+  if (context->File_name_unicode != NULL && context->File_name_unicode[0] != 0)
   {
     Unicode_char_strlcpy((word *)filename_unicode, context->File_directory, MAX_PATH_CHARACTERS);
     Unicode_char_strlcat((word *)filename_unicode, PATH_SEPARATOR, MAX_PATH_CHARACTERS);
