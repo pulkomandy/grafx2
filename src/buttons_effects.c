@@ -216,34 +216,39 @@ void Button_Constraint_menu(void)
   short clicked_button;
   T_Dropdown_button* dropdown;
   const char * label;
+  const char * summary;
   static const struct {
     enum IMAGE_MODES mode;
     const char * label;
+    const char * summary;
   } modes[] = {
-    {IMAGE_MODE_ZX,      "ZX Spectrum"},
+    {IMAGE_MODE_ZX,      "ZX Spectrum",   "2 colors per 8x8 block"},
     //{IMAGE_MODE_GBC,   "Game Boy Color"},
-    {IMAGE_MODE_THOMSON, "40col (MO/TO)"},
-    {IMAGE_MODE_EGX,     "EGX (CPC)"},
-    {IMAGE_MODE_EGX2,    "EGX2 (CPC)"},
-    {IMAGE_MODE_MODE5,   "Mode 5 (CPC)"},
-    {IMAGE_MODE_RASTER,  "Rasters (CPC)"},
+    {IMAGE_MODE_THOMSON, "40col (MO/TO)", "2 colors per 8x1 block"},
+    {IMAGE_MODE_EGX,     "EGX (CPC)",     "Alternate Mode0/Mode1 "},
+    {IMAGE_MODE_EGX2,    "EGX2 (CPC)",    "Alternate Mode1/Mode2 "},
+    {IMAGE_MODE_MODE5,   "Mode 5 (CPC)",  "Mode5                 "},
+    {IMAGE_MODE_RASTER,  "Rasters (CPC)", "CPC Rasters           "},
   };
 
-  Open_window(154,79,"8-bit constraints");
+  Open_window(194,79,"8-bit constraints");
 
-  Window_set_normal_button(21,55,51,14,"Cancel",0,1,KEY_ESC);  // 1
-  Window_set_normal_button(82,55,51,14,"OK"    ,0,1,KEY_RETURN); // 2
+  Window_set_normal_button(31,55,51,14,"Cancel",0,1,KEY_ESC);  // 1
+  Window_set_normal_button(112,55,51,14,"OK"    ,0,1,KEY_RETURN); // 2
 
   label = "Constraints";
+  summary = "";
   for (i = 0; i < sizeof(modes)/sizeof(modes[0]) ; i++)
     if (Main.backups->Pages->Image_mode == modes[i].mode)
     {
       label = modes[i].label;
+      summary = modes[i].summary;
       break;
     }
-  dropdown = Window_set_dropdown_button(17, 21, 120, 14, 120, label, 1, 0, 1, RIGHT_SIDE|LEFT_SIDE, 0); // 3
+  dropdown = Window_set_dropdown_button(37, 21, 120, 14, 120, label, 1, 0, 1, RIGHT_SIDE|LEFT_SIDE, 0); // 3
   for (i = 0; i < sizeof(modes)/sizeof(modes[0]) ; i++)
     Window_dropdown_add_item(dropdown, modes[i].mode, modes[i].label);
+  Print_in_window(10, 21+18, summary, MC_Dark, MC_Light);
 
   Update_window_area(0,0,Window_width, Window_height);
   Display_cursor();
@@ -253,7 +258,17 @@ void Button_Constraint_menu(void)
     clicked_button=Window_clicked_button();
 
     if (clicked_button == 3)
+    {
       Selected_Constraint_Mode = Window_attribute2;
+      for (i = 0; i < sizeof(modes)/sizeof(modes[0]) ; i++)
+        if (Selected_Constraint_Mode == modes[i].mode)
+        {
+          Hide_cursor();
+          Print_in_window(10, 21+18, modes[i].summary, MC_Dark, MC_Light);
+          Display_cursor();
+          break;
+        }
+    }
   }
   while ( (clicked_button!=1) && (clicked_button!=2) );
 
