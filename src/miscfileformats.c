@@ -2243,6 +2243,7 @@ static const char *c64_format_names[] = {
  *
  * http://unusedino.de/ec64/technical/formats/bitmap.html
  * http://codebase64.org/doku.php?id=base:c64_grafix_files_specs_list_v0.03
+ * https://sourceforge.net/p/view64/code/HEAD/tree/trunk/libview64.c#l3737
  */
 void Test_C64(T_IO_Context * context, FILE * file)
 {
@@ -2777,7 +2778,7 @@ void Load_C64(T_IO_Context * context)
         else
           snprintf(context->Comment,COMMENT_SIZE+1,"%s, no addr",c64_format_names[loadFormat]);
 
-        Pre_load(context, width, height, file_size, FORMAT_C64, context->Ratio, 4); // Do this as soon as you can
+        Pre_load(context, width, height, file_size, FORMAT_C64, context->Ratio, (loadFormat == F_bitmap) ? 1 : 4); // Do this as soon as you can
 
         memcpy(context->Palette,pal,48); // this set the software palette for grafx2
         // Transparent color "16" is a dark grey that is distinguishable
@@ -2874,7 +2875,7 @@ static int Save_C64_window(enum c64_format *saveFormat, byte *saveWhat, byte *lo
     {
       case 3: // Save what
         *saveWhat = Window_attribute2;
-        //printf("what=%d\n",Window_attribute2);
+        GFX2_Log(GFX2_DEBUG, "Save_C64_Window() : what=%d (%s)\n", *saveWhat, what_label[*saveWhat]);
         break;
 
       case 4: // Load addr
