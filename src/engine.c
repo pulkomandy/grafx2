@@ -1602,8 +1602,8 @@ void Main_handler(void)
 /**
  * Open a GUI window
  *
- * @param width window width
- * @param height window height
+ * @param width window width (max 320)
+ * @param height window height (max 200)
  * @param title window title
  *
  * The mouse must be shown before calling this function. The mouse is hidden
@@ -1629,11 +1629,13 @@ void Open_window(word width, word height, const char * title)
     
   Windows_open++;
 
-  // Limit the window size to the screen size
-  if (width > Screen_width)
-    width = Screen_width;
-  if (height > Screen_height)
-    height = Screen_height;
+  // Limit the window size to 320x200
+  if (width > 320 || height > 200)
+    GFX2_Log(GFX2_WARNING, "Open_window(%d, %d, \"%s\") maximum size for windows is 320x200 !\n", width, height, title);
+  if (width > 320)
+    width = 320;
+  if (height > 200)
+    height = 200;
 
   Window_width=width;
   Window_height=height;
@@ -1642,8 +1644,6 @@ void Open_window(word width, word height, const char * title)
   Window_pos_X=(Screen_width-(width*Menu_factor_X))>>1;
 
   Window_pos_Y=(Screen_height-(height*Menu_factor_Y))>>1;
-
-  GFX2_Log(GFX2_DEBUG, "Open_window(%d, %d, \"%s\") pos (%d,%d)\n", width, height, title, Window_pos_X, Window_pos_Y);
   
   Window_draggable=1;
 
