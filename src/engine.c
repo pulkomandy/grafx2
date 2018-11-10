@@ -2327,22 +2327,32 @@ void Window_redraw_list(T_List_button * list)
 
 //----------------------- Ouverture d'un pop-up -----------------------
 
+/**
+ * Open a popup window
+ *
+ * @param x_pos left position
+ * @param y_pos top position
+ * @param width width of the popup (max 320)
+ * @param height height of the popup (max 200)
+ *
+ * The mouse cursor must be shown when calling this function. When the
+ * function returns it is hidden.
+ *
+ * Popup windows are managed as sub-windows. They have their own
+ * event loop, widget can be added inside, etc.
+ * The differences with plain windows are almost only graphical :
+ * - Possibility of fixing position (x_pos, y_pos)
+ * - No title
+ * - No 3D border, but a flat white border.
+ */
 void Open_popup(word x_pos, word y_pos, word width,word height)
-// Lors de l'appel à cette procédure, la souris doit être affichée.
-// En sortie de cette procedure, la souris est effacée.
-
-// Note : les pop-ups sont gérés comme s'ils étaient des sous-fenêtres, ils ont donc leur propre boucle d'évènements et tout, on peut ajouter des widgets dedans, ...
-// Les différences sont surtout graphiques :
-    // -Possibilité de préciser la position XY
-    // -Pas de titre
-    // -Pas de cadre en relief mais seulement un plat, et il est blanc au lieu de noir.
 {
   Windows_open++;
 
-  if (height > Screen_height)
-    height = Screen_height;
-  if (y_pos + height > Screen_height) // fix dropdown that would get bellow the screen
-    y_pos = Screen_height - height;
+  if (height*Menu_factor_Y > Screen_height)
+    height = Screen_height/Menu_factor_Y;
+  if ((y_pos + height)*Menu_factor_Y > Screen_height) // fix dropdown that would get bellow the screen
+    y_pos = Screen_height/Menu_factor_Y - height;
 
   Window_width=width;
   Window_height=height;
