@@ -2280,6 +2280,16 @@ void Test_C64(T_IO_Context * context, FILE * file)
     File_error = 0;
     return;
   }
+  // check last 2 bytes
+  if (fseek(file, -2, SEEK_END) < 0)
+    return;
+  if (!Read_bytes(file, header, 2))
+    return;
+  if (load_addr == 0x4000 && header[0] == 0xC2 && header[1] == 0x00) // Amica Paint EOF mark
+  {
+    File_error = 0;
+    return;
+  }
   switch (file_size)
   {
     // case 1002: // (screen or color) + loadaddr
@@ -2521,10 +2531,71 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
 }
 
 /**
+ * Unpack the Amica Paint RLE packing
+ *
+ * @param[in,out] file_buffer will contain the unpacked buffer on return
+ * @param[in] file_size packed buffer size
+ * @return the unpacked data size or -1 in case of error
+ *
+ * Ref:
+ * - http://codebase64.org/doku.php?id=base:c64_grafix_files_specs_list_v0.03
+ */
+static long C64_unpack_amica(byte ** file_buffer, long file_size)
+{
+  long unpacked_size = 0;
+  byte * unpacked_buffer;
+  byte * current, * end;
+  byte * unpacked;
+  const byte RLE_code = 0xC2;
+
+  if (file_size <= 16 || file_buffer == NULL || *file_buffer == NULL)
+    return -1;
+  // First pass to know unpacked size
+  end = *file_buffer + file_size;
+  for (current = *file_buffer + 2; current < end; current++)
+  {
+    if (*current == RLE_code)
+    {
+      current++;
+      if (*current == 0)
+        break;
+      unpacked_size += *current++;
+    }
+    else
+      unpacked_size++;
+  }
+  GFX2_Log(GFX2_DEBUG, "C64_unpack_amica() unpacked_size=%ld\n", unpacked_size);
+   // 2nd pass to unpack
+  unpacked_buffer = malloc(unpacked_size);
+  if (unpacked_buffer == NULL)
+    return -1;
+  unpacked = unpacked_buffer;
+
+  for (current = *file_buffer + 2; current < end; current++)
+  {
+    if (*current == RLE_code)
+    {
+      byte count;
+      current++;
+      count = *current++;
+      if (count == 0)
+        break;
+      while (count-- > 0)
+        *unpacked++ = *current;
+    }
+    else
+      *unpacked++ = *current;
+  }
+  free(*file_buffer);
+  *file_buffer = unpacked_buffer;
+  return unpacked_size;
+}
+
+/**
  * Unpack the DRAZPAINT RLE packing
  *
  * @param[in,out] file_buffer will contain the unpacked buffer on return
- * @param[in] packed buffer size
+ * @param[in] file_size packed buffer size
  * @return the unpacked data size or -1 in case of error
  *
  * Ref:
@@ -2654,6 +2725,8 @@ void Load_C64(T_IO_Context * context)
         // Unpack if needed
         if (memcmp(file_buffer + 2, "DRAZPAINT", 9) == 0)
           file_size = C64_unpack_draz(&file_buffer, file_size);
+        else if(load_addr == 0x4000 && file_buffer[file_size-2] == 0xC2 && file_buffer[file_size-1] == 0)
+          file_size = C64_unpack_amica(&file_buffer, file_size);
 
         switch (file_size)
         {
@@ -2781,6 +2854,17 @@ void Load_C64(T_IO_Context * context)
                     background=file_buffer; // only 1
                     break;
                 }
+                break;
+
+            case 10257: // unpacked Amica Paint (.ami)
+                hasLoadAddr=1;
+                loadFormat=F_multi;
+                bitmap=file_buffer; // length 8000
+                screen_ram=file_buffer+8000;  // length: 1000
+                color_ram=file_buffer+1000+8000;// length:1000
+                background=file_buffer+2*1000+8000;//1
+                // remaining bytes (offset 10001, length 256) are a "Color Rotation Table"
+                // we should decode if we learn its format...
                 break;
 
             case 10277: // multicolor CDU-Paint + loadaddr
