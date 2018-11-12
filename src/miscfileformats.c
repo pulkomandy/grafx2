@@ -2241,17 +2241,22 @@ static const char *c64_format_names[] = {
  *
  * Checks the file size and the load address
  *
- * http://unusedino.de/ec64/technical/formats/bitmap.html
- * http://codebase64.org/doku.php?id=base:c64_grafix_files_specs_list_v0.03
- * https://sourceforge.net/p/view64/code/HEAD/tree/trunk/libview64.c#l3737
+ * References :
+ * - http://unusedino.de/ec64/technical/formats/bitmap.html
+ * - http://codebase64.org/doku.php?id=base:c64_grafix_files_specs_list_v0.03
+ * - https://sourceforge.net/p/view64/code/HEAD/tree/trunk/libview64.c#l3737
  */
 void Test_C64(T_IO_Context * context, FILE * file)
 {
   long file_size;
   word load_addr;
+  byte header[14];
 
   (void)context;
+  File_error = 1;
   file_size = File_length_file(file);
+  if (file_size < 16 || file_size > 48*1024)
+    return; // File too short or too long, exit now
   // First test for formats without load address
   switch (file_size)
   {
@@ -2264,12 +2269,17 @@ void Test_C64(T_IO_Context * context, FILE * file)
       return;
     default: // then we don't know for now.
       if (!Read_word_le(file, &load_addr))
-      {
-        File_error = 1;
         return;
-      }
   }
   GFX2_Log(GFX2_DEBUG, "Test_C64() file_size=%ld LoadAddr=$%04X\n", file_size, load_addr);
+  if (!Read_bytes(file, header, sizeof(header)))
+    return;
+  if (memcmp(header, "DRAZPAINT", 9) == 0)
+  {
+    GFX2_Log(GFX2_DEBUG, "Test_C64() header=%.13s RLE code = $%02X\n", header, header[13]);
+    File_error = 0;
+    return;
+  }
   switch (file_size)
   {
     // case 1002: // (screen or color) + loadaddr
@@ -2284,10 +2294,14 @@ void Test_C64(T_IO_Context * context, FILE * file)
     case 10003: // multicolor + loadaddr
       // $4000 => InterPaint multicolor
       // $6000 => Koala Painter
+    case 10004:
+      // $4000 => Face Paint (.fpt)
     case 10018:
       // $2000 => Advanced Art Studio
     case 10050:
       // $1800 => Picasso64
+    case 10218:
+      // $3C00 => Image System (.ism)
       File_error = 0;
       break;
     case 10242:
@@ -2507,6 +2521,67 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
 }
 
 /**
+ * Unpack the DRAZPAINT RLE packing
+ *
+ * @param[in,out] file_buffer will contain the unpacked buffer on return
+ * @param[in] packed buffer size
+ * @return the unpacked data size or -1 in case of error
+ *
+ * Ref:
+ * - https://www.godot64.de/german/l_draz.htm
+ * - https://sourceforge.net/p/view64/code/HEAD/tree/trunk/libview64.c#l2805
+ */
+static long C64_unpack_draz(byte ** file_buffer, long file_size)
+{
+  long unpacked_size = 0;
+  byte * unpacked_buffer;
+  byte * current, * end;
+  byte * unpacked;
+  byte RLE_code;
+
+  if (file_size <= 16 || file_buffer == NULL || *file_buffer == NULL)
+    return -1;
+  RLE_code = (*file_buffer)[15];
+  GFX2_Log(GFX2_DEBUG, "C64_unpack_draz() \"%.13s\" RLE code=$%02X RLE data length=%ld\n",
+           *file_buffer + 2, RLE_code, file_size - 16);
+  // First pass to know unpacked size
+  end = *file_buffer + file_size;
+  for (current = *file_buffer + 16; current < end; current++)
+  {
+    if (*current == RLE_code)
+    {
+      current++;
+      unpacked_size += *current++;
+    }
+    else
+      unpacked_size++;
+  }
+  GFX2_Log(GFX2_DEBUG, "C64_unpack_draz() unpacked_size=%ld\n", unpacked_size);
+   // 2nd pass to unpack
+  unpacked_buffer = malloc(unpacked_size);
+  if (unpacked_buffer == NULL)
+    return -1;
+  unpacked = unpacked_buffer;
+
+  for (current = *file_buffer + 16; current < end; current++)
+  {
+    if (*current == RLE_code)
+    {
+      byte count;
+      current++;
+      count = *current++;
+      while (count-- > 0)
+        *unpacked++ = *current;
+    }
+    else
+      *unpacked++ = *current;
+  }
+  free(*file_buffer);
+  *file_buffer = unpacked_buffer;
+  return unpacked_size;
+}
+
+/**
  * Load C64 pictures formats.
  *
  * Supports:
@@ -2556,32 +2631,6 @@ void Load_C64(T_IO_Context * context)
         File_error=0;
         file_size = File_length_file(file);
 
-        // Check for known file sizes
-        switch (file_size)
-        {
-            case 8000: // raw bitmap
-            case 8002: // raw bitmap with loadaddr
-            case 9000: // bitmap + ScreenRAM
-            case 9002: // bitmap + ScreenRAM + loadaddr
-            case 9003: // bitmap + ScreenRAM + loadaddr (+border ?)
-            case 9009: // bitmap + ScreenRAM + loadaddr
-            case 9218:  // Doodle
-            case 10001: // multicolor
-            case 10003: // multicolor + loadaddr
-            case 10018: // Advanced Art Studio + loadaddr
-            case 10050: // Picasso64 + loadaddr
-            case 10242: // Artist64 or blazing paddle + Loadaddr
-            case 10277: // multicolor CDU-Paint + loadaddr
-            case 17409: // FLI-designer v1.1
-            case 17472: // FLI (BlackMail)
-            case 17474: // FLI (BlackMail) + loadaddr
-            break;
-
-            default:
-                File_error = 1;
-                fclose(file);
-                return;
-        }
         // Load entire file in memory
         file_buffer=(byte *)malloc(file_size);
         if (!file_buffer)
@@ -2601,6 +2650,10 @@ void Load_C64(T_IO_Context * context)
 
         // get load address (valid only if hasLoadAddr = 1)
         load_addr = file_buffer[0] | (file_buffer[1] << 8);
+
+        // Unpack if needed
+        if (memcmp(file_buffer + 2, "DRAZPAINT", 9) == 0)
+          file_size = C64_unpack_draz(&file_buffer, file_size);
 
         switch (file_size)
         {
@@ -2657,6 +2710,7 @@ void Load_C64(T_IO_Context * context)
                 break;
 
             case 10003: // multicolor + loadaddr
+            case 10004: // extra byte is border color
                 hasLoadAddr=1;
                 loadFormat=F_multi;
                 bitmap=file_buffer+2; // length: 8000
@@ -2675,6 +2729,15 @@ void Load_C64(T_IO_Context * context)
                 background=file_buffer+9001+2; // only 1
                 break;
 
+            case 10049: // unpacked DrazPaint
+                hasLoadAddr=1;
+                loadFormat=F_multi;
+                color_ram=file_buffer; // length: 1000 + (padding 24)
+                screen_ram=file_buffer+1024; // length: 1000 + (padding 24)
+                bitmap=file_buffer+1024*2; // length: 8000
+                background=file_buffer+8000+1024*2;
+                break;
+
             case 10050: // Picasso64 multicolor + loadaddr
                 hasLoadAddr=1;
                 loadFormat=F_multi;
@@ -2682,6 +2745,15 @@ void Load_C64(T_IO_Context * context)
                 screen_ram=file_buffer+1024+2; // length: 1000 + (padding 24)
                 bitmap=file_buffer+1024*2+2; // length: 8000
                 background=file_buffer+1024*2+2-1; // only 1
+                break;
+
+            case 10218: // Image System
+                hasLoadAddr=1;
+                loadFormat=F_multi;
+                color_ram=file_buffer+2; // Length: 1000 (+ padding 24)
+                bitmap=file_buffer+1024+2; // Length: 8000 (+padding 192)
+                screen_ram=file_buffer+8192+1024+2;  // Length: 1000 (no padding)
+                background=file_buffer+8192+1024+2-1; // only 1
                 break;
 
             case 10242: // Artist 64/Blazing Paddles/Rainbow Painter multicolor + loadaddr
