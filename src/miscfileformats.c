@@ -4867,20 +4867,43 @@ void Load_FLI(T_IO_Context * context)
 void Test_MOTO(T_IO_Context * context, FILE * file)
 {
   long file_size;
+  byte code;
+  word size, address;
 
   (void)context;
   file_size = File_length_file(file);
 
+  File_error = 1;
+  if (file_size <= 10)
+    return;
   switch (file_size)
   {
+    // Files in RAW formats (from TGA2teo)
     case 8004:  // 2 colors palette
     case 8008:  // 4 colors palette
     case 8032:  // 16 colors palette
       File_error = 0;
-      break;
+      return;
     default:
-      File_error = 1;
+      break;
   }
+  // Check for Thomson binary format
+  // last 5 bytes must be
+  // FF 00 00 xx xx (xx xx = start address when using LOADM,R)
+  if (fseek(file, -5, SEEK_END) < 0)
+    return;
+  if(!Read_byte(file, &code))
+    return;
+  if(code != 0xff)
+    return;
+  if(!Read_word_be(file, &size))
+    return;
+  if(size != 0)
+    return;
+  if(!Read_word_be(file, &address))
+    return;
+
+  File_error = 0;
 }
 
 /**
@@ -4909,18 +4932,17 @@ void Test_MOTO(T_IO_Context * context, FILE * file)
 void Load_MOTO(T_IO_Context * context)
 {
   // FORME / COULEUR
-  FILE * file_forme;
-  FILE * file_couleur = NULL;
+  FILE * file;
+  byte * vram_forme;
+  byte * vram_couleur;
   long file_size;
-  int n_colors;
-  int bx, x, y;
-  char filename[MAX_PATH_CHARACTERS];
-  char path[MAX_PATH_CHARACTERS];
+  int bx, x, y, i;
   byte bpp;
-  char * ext;
+  byte code;
+  word length, address;
   enum MOTO_mode { F_40col, F_80col, F_bm4, F_bm16 } mode = F_40col;
   enum PIXEL_RATIO ratio = PIXEL_SIMPLE;
-  int width = 320;
+  int width = 320, height = 200, columns = 40;
   static const int gamma[16] = {  // Gamma values for MO6/TO8 palette
     0  , 100, 127, 147,
     163, 179, 191, 203,
@@ -4930,73 +4952,302 @@ void Load_MOTO(T_IO_Context * context)
 
 
   File_error = 1;
-  file_forme = Open_file_read(context);
-  if (file_forme == NULL)
+  file = Open_file_read(context);
+  if (file == NULL)
     return;
-  file_size = File_length_file(file_forme);
-  n_colors = (file_size - 8000) / 2;
-  switch(n_colors)
-  {
-    case 16:
-      bpp = 4;
-      // 16 colors : either 40col or bm16 mode !
-      // select later
-      break;
-    case 4:
-      bpp = 2;
-      mode = F_bm4;
-      break;
-    default:
-      bpp = 1;
-      mode = F_80col;
-      width = 640;
-      ratio = PIXEL_TALL;
-  }
-  strncpy(filename, context->File_name, sizeof(filename));
-  filename[sizeof(filename)-1] = '\0';
-  ext = strrchr(filename, '.');
-  if (ext == NULL || ext == context->File_name)
-  {
-    fclose(file_forme);
+  file_size = File_length_file(file);
+  // check for Thomson binary format
+  // last 5 bytes must be
+  // FF 00 00 xx xx (xx xx = start address when using LOADM,R)
+  if (fseek(file, -5, SEEK_END) < 0)
     return;
-  }
-  if ((ext[-1] | 32) == 'c')
+  if (!(Read_byte(file,&code) && Read_word_be(file,&length) && Read_word_be(file,&address)))
+    return;
+  if (fseek(file, 0, SEEK_SET) < 0)
+    return;
+  if (code == 0xff && length == 0)
   {
-    file_couleur = file_forme;
-    ext[-1] = (ext[-1] & 32) | 'P';
-    Get_full_filename(path, filename, context->File_directory);
-    file_forme = fopen(path, "rb");
-  }
-  else if ((ext[-1] | 32) == 'p')
-  {
-    ext[-1] = (ext[-1] & 32) | 'C';
-    Get_full_filename(path, filename, context->File_directory);
-    file_couleur = fopen(path, "rb");
-    if (n_colors == 16)
+    // http://collection.thomson.free.fr/code/articles/prehisto_bulletin/page.php?XI=0&XJ=13
+    byte map_mode, col_count, line_count;
+    byte * vram_current;
+    int end_marks;
+
+    GFX2_Log(GFX2_DEBUG, "Thomson binary file detected. run address=&H%04X\n", address);
+    if (!(Read_byte(file,&code) && Read_word_be(file,&length) && Read_word_be(file,&address)))
     {
-      mode = F_bm16;
-      width = 160;
-      ratio = PIXEL_WIDE;
+      fclose(file);
+      return;
+    }
+    GFX2_Log(GFX2_DEBUG, "block &H%02X length=&H%04X address=&H%04X\n", code, length, address);
+    if (length < 5 || !(Read_byte(file,&map_mode) && Read_byte(file,&col_count) && Read_byte(file,&line_count)))
+    {
+      fclose(file);
+      return;
+    }
+    length -= 3;
+    columns = col_count + 1;
+    height = 8 * (line_count + 1);
+    switch(map_mode)
+    {
+      default:
+      case 0: // bitmap4 or 40col
+        width = 8 * columns;
+        mode = F_40col; // default to 40col
+        bpp = 4;
+        break;
+      case 0x40:  // bitmap16
+        width = 4 * columns;
+        mode = F_bm16;
+        bpp = 4;
+        ratio = PIXEL_WIDE;
+        break;
+      case 0x80:  // 80col
+        width = 16 * columns;
+        mode = F_80col;
+        bpp = 1;
+        ratio = PIXEL_TALL;
+        break;
+    }
+    GFX2_Log(GFX2_DEBUG, "Map mode &H%02X row=%u line=%u (%dx%d)\n", map_mode, col_count, line_count, width, height);
+    vram_forme = malloc(columns * height);
+    vram_couleur = malloc(columns * height);
+    // Check extension (TO-SNAP / PPM / ???)
+    if (length > 36)
+    {
+      long pos_backup;
+      word data;
+
+      pos_backup = ftell(file);
+      fseek(file, length-2, SEEK_CUR);  // go to last word of chunk
+      Read_word_be(file, &data);
+      GFX2_Log(GFX2_DEBUG, "%04X\n", data);
+      switch (data)
+      {
+      case 0xA55A:  // TO-SNAP
+        fseek(file, -40, SEEK_CUR); // go to begin of extension
+        Read_word_be(file, &data);  // SCRMOD. 0=>40col, 1=>bm4, $40=>bm16, $80=>80col
+        GFX2_Log(GFX2_DEBUG, "SCRMOD=&H%04X ", data);
+        Read_word_be(file, &data);  // Border color
+        GFX2_Log(GFX2_DEBUG, "BORDER=%u ", data);
+        Read_word_be(file, &data);  // Mode BASIC (CONSOLE,,,,X) 0=40col, 1=80col, 2=bm4, 3=bm16, etc.
+        GFX2_Log(GFX2_DEBUG, "CONSOLE,,,,%u\n", data);
+        if(data == 2)
+        {
+          mode = F_bm4;
+          bpp = 2;
+        }
+        for (i = 0; i < 16; i++)
+        {
+          Read_word_be(file, &data);  // Palette entry
+          if (data & 0x8000) data = ~data;
+          context->Palette[i].B = gamma[(data >> 8) & 0x0F];
+          context->Palette[i].G = gamma[(data >> 4) & 0x0F];
+          context->Palette[i].R = gamma[data & 0x0F];
+        }
+        break;
+      case 0x484C:  // 'HL' PPM
+        fseek(file, -36, SEEK_CUR); // go to begin of extension
+        for (i = 0; i < 16; i++)
+        {
+          Read_word_be(file, &data);  // Palette entry
+          if (data & 0x8000) data = ~data;
+          context->Palette[i].B = gamma[(data >> 8) & 0x0F];
+          context->Palette[i].G = gamma[(data >> 4) & 0x0F];
+          context->Palette[i].R = gamma[data & 0x0F];
+        }
+        Read_word_be(file, &data);  // Mode BASIC (CONSOLE,,,,X) 0=40col, 1=80col, 2=bm4, 3=bm16, etc.
+        GFX2_Log(GFX2_DEBUG, "CONSOLE,,,,%u\n", data);
+        if(data == 2)
+        {
+          mode = F_bm4;
+          bpp = 2;
+        }
+        break;
+      }
+      fseek(file, pos_backup, SEEK_SET);  // RESET Position
+    }
+    i = 0;
+    vram_current = vram_forme;
+    end_marks = 0;
+    while (length > 1)
+    {
+      byte byte1, byte2;
+      Read_byte(file,&byte1);
+      Read_byte(file,&byte2);
+      length-=2;
+      if(byte1 == 0)
+      {
+        if (byte2 == 0)
+        {
+          // end of vram stream
+          GFX2_Log(GFX2_DEBUG, "0000 i=%d length=%ld\n", i, length);
+          if (end_marks == 1)
+            break;
+          i = 0;
+          vram_current = vram_couleur;
+          end_marks++;
+        }
+        else while(byte2-- > 0 && length > 0) // copy
+        {
+          Read_byte(file,vram_current + i);
+          length--;
+          i += columns; // to the next line
+          if (i >= columns * height)
+          {
+            if (mode == F_bm4 || mode == F_40col)
+              i -= (columns * height - 1);  // to the 1st line of the next column
+            else
+            {
+              i -= columns * height;  // back to the 1st line of the current column
+              if (vram_current == vram_forme)   // other VRAM
+                vram_current = vram_couleur;
+              else
+              {
+                vram_current = vram_forme;
+                i++;  // next column
+              }
+            }
+          }
+        }
+      }
+      else while(byte1-- > 0) // run length
+      {
+        vram_current[i] = byte2;
+        i += columns; // to the next line
+        if (i >= columns * height)
+        {
+          if (mode == F_bm4 || mode == F_40col)
+            i -= (columns * height - 1);  // to the 1st line of the next column
+          else
+          {
+            i -= columns * height;  // back to the 1st line of the current column
+            if (vram_current == vram_forme)   // other VRAM
+              vram_current = vram_couleur;
+            else
+            {
+              vram_current = vram_forme;
+              i++;  // next column
+            }
+          }
+        }
+      }
     }
   }
-  if (file_couleur == NULL)
+  else
   {
-    fclose(file_forme);
-    return;
+    char filename[MAX_PATH_CHARACTERS];
+    char path[MAX_PATH_CHARACTERS];
+    char * ext;
+    int n_colors;
+
+    vram_forme = malloc(file_size);
+    if (vram_forme == NULL)
+    {
+      fclose(file);
+      return;
+    }
+    if (!Read_bytes(file, vram_forme, file_size))
+    {
+      free(vram_forme);
+      fclose(file);
+      return;
+    }
+    n_colors = (file_size - 8000) / 2;
+    switch(n_colors)
+    {
+      case 16:
+        bpp = 4;
+        // 16 colors : either 40col or bm16 mode !
+        // select later
+        break;
+      case 4:
+        bpp = 2;
+        mode = F_bm4;
+        break;
+      default:
+        bpp = 1;
+        mode = F_80col;
+        width = 640;
+        ratio = PIXEL_TALL;
+    }
+    strncpy(filename, context->File_name, sizeof(filename));
+    filename[sizeof(filename)-1] = '\0';
+    ext = strrchr(filename, '.');
+    if (ext == NULL || ext == context->File_name)
+    {
+      free(vram_forme);
+      return;
+    }
+    if ((ext[-1] | 32) == 'c')
+    {
+      vram_couleur = vram_forme;
+      vram_forme = NULL;
+      ext[-1] = (ext[-1] & 32) | 'P';
+    }
+    else if ((ext[-1] | 32) == 'p')
+    {
+      ext[-1] = (ext[-1] & 32) | 'C';
+      if (n_colors == 16)
+      {
+        mode = F_bm16;
+        width = 160;
+        ratio = PIXEL_WIDE;
+      }
+    }
+    else
+    {
+      free(vram_forme);
+      return;
+    }
+    Get_full_filename(path, filename, context->File_directory);
+    file = fopen(path, "rb");
+    if (vram_forme == NULL)
+    {
+      vram_forme = malloc(file_size);
+      if (vram_forme == NULL)
+      {
+        free(vram_couleur);
+        fclose(file);
+        return;
+      }
+      Read_bytes(file,vram_forme,file_size);
+    }
+    else
+    {
+      vram_couleur = malloc(file_size);
+      if (vram_couleur == NULL)
+      {
+        free(vram_forme);
+        fclose(file);
+        return;
+      }
+      Read_bytes(file,vram_couleur,file_size);
+    }
+    fclose(file);
+    GFX2_Log(GFX2_DEBUG, "MO/TO: %s,%s file_size=%ld n_colors=%d\n", context->File_name, filename, file_size, n_colors);
+    for (x = 0; x < n_colors; x++)
+    {
+      // 1 byte Blue (4 lower bits)
+      // 1 byte Green (4 upper bits) / Red (4 lower bits)
+      context->Palette[x].B = gamma[vram_couleur[8000+x*2] & 0x0F];
+      context->Palette[x].G = gamma[vram_couleur[8000+x*2+1] >> 4];
+      context->Palette[x].R = gamma[vram_couleur[8000+x*2+1] & 0x0F];
+    }
   }
-  GFX2_Log(GFX2_DEBUG, "MO/TO: %s,%s file_size=%ld n_colors=%d\n", context->File_name, filename, file_size, n_colors);
-  Pre_load(context, width, 200, file_size, FORMAT_MOTO, ratio, bpp);
+  Pre_load(context, width, height, file_size, FORMAT_MOTO, ratio, bpp);
   File_error = 0;
-  for (y = 0; y < 200; y++)
+  i = 0;
+  for (y = 0; y < height; y++)
   {
-    for (bx = 0; bx < 40; bx++)
+    for (bx = 0; bx < columns; bx++)
     {
       byte couleur_forme;
       byte couleur_fond;
       byte forme, couleurs;
 
-      if (!(Read_byte(file_forme,&forme) && Read_byte(file_couleur,&couleurs)))
-        File_error = 1;
+      forme = vram_forme[i];
+      couleurs = vram_couleur[i];
+      i++;
       switch(mode)
       {
         case F_bm4:
@@ -5040,19 +5291,4 @@ void Load_MOTO(T_IO_Context * context)
       }
     }
   }
-  for (x = 0; x < n_colors; x++)
-  {
-    byte value;
-    // 1 byte Blue (4 lower bits)
-    // 1 byte Green (4 upper bits) / Red (4 lower bits)
-    if (!Read_byte(file_forme,&value))
-      File_error = 1;
-    context->Palette[x].B = gamma[value & 0x0F];
-    if (!Read_byte(file_forme,&value))
-      File_error = 1;
-    context->Palette[x].G = gamma[value >> 4];
-    context->Palette[x].R = gamma[value & 0x0F];
-  }
-  fclose(file_forme);
-  fclose(file_couleur);
 }
