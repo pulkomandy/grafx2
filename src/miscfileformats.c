@@ -4949,6 +4949,7 @@ void Load_MOTO(T_IO_Context * context)
     215, 223, 231, 239,
     243, 247, 251, 255
   };
+  // 0, 71, 97, 117, 132, 145, 183, 193, 204, 212, 219, 227, 235, 242, 250, 255
 
 
   File_error = 1;
@@ -4996,19 +4997,21 @@ void Load_MOTO(T_IO_Context * context)
         bpp = 4;
         break;
       case 0x40:  // bitmap16
+        columns >>= 1;
         width = 4 * columns;
         mode = F_bm16;
         bpp = 4;
         ratio = PIXEL_WIDE;
         break;
       case 0x80:  // 80col
+        columns >>= 1;
         width = 16 * columns;
         mode = F_80col;
         bpp = 1;
         ratio = PIXEL_TALL;
         break;
     }
-    GFX2_Log(GFX2_DEBUG, "Map mode &H%02X row=%u line=%u (%dx%d)\n", map_mode, col_count, line_count, width, height);
+    GFX2_Log(GFX2_DEBUG, "Map mode &H%02X row=%u line=%u (%dx%d) %d\n", map_mode, col_count, line_count, width, height, columns * height);
     vram_forme = malloc(columns * height);
     vram_couleur = malloc(columns * height);
     // Check extension (TO-SNAP / PPM / ???)
@@ -5044,6 +5047,7 @@ void Load_MOTO(T_IO_Context * context)
           context->Palette[i].G = gamma[(data >> 4) & 0x0F];
           context->Palette[i].R = gamma[data & 0x0F];
         }
+        snprintf(context->Comment, sizeof(context->Comment), "TO-SNAP .MAP file");
         break;
       case 0x484C:  // 'HL' PPM
         fseek(file, -36, SEEK_CUR); // go to begin of extension
@@ -5062,7 +5066,10 @@ void Load_MOTO(T_IO_Context * context)
           mode = F_bm4;
           bpp = 2;
         }
+        snprintf(context->Comment, sizeof(context->Comment), "PPM .MAP file");
         break;
+      default:
+        snprintf(context->Comment, sizeof(context->Comment), "standard .MAP file");
       }
       fseek(file, pos_backup, SEEK_SET);  // RESET Position
     }
@@ -5132,6 +5139,7 @@ void Load_MOTO(T_IO_Context * context)
         }
       }
     }
+    fclose(file);
   }
   else
   {
@@ -5275,6 +5283,15 @@ void Load_MOTO(T_IO_Context * context)
           Set_pixel(context, bx*4+1, y, forme & 0x0F);
           Set_pixel(context, bx*4+2, y, couleurs >> 4);
           Set_pixel(context, bx*4+3, y, couleurs & 0x0F);
+          break;
+        case F_80col:
+          for (x = bx*16; x < bx*16+8; x++)
+          {
+            Set_pixel(context, x, y, (forme & 0x80) >> 7);
+            Set_pixel(context, x+8, y, (couleurs & 0x80) >> 7);
+            forme <<= 1;
+            couleurs <<= 1;
+          }
           break;
         case F_40col:
         default:
