@@ -2312,6 +2312,8 @@ void Test_C64(T_IO_Context * context, FILE * file)
       // $1800 => Picasso64
     case 10218:
       // $3C00 => Image System (.ism)
+    case 10219:
+      // $7800 => Saracen Paint (.sar)
       File_error = 0;
       break;
     case 10242:
@@ -2827,6 +2829,15 @@ void Load_C64(T_IO_Context * context)
                 bitmap=file_buffer+1024+2; // Length: 8000 (+padding 192)
                 screen_ram=file_buffer+8192+1024+2;  // Length: 1000 (no padding)
                 background=file_buffer+8192+1024+2-1; // only 1
+                break;
+
+            case 10219: // Saracen Paint (.sar)
+                hasLoadAddr=1;
+                loadFormat=F_multi;
+                screen_ram=file_buffer+2;  // Length: 1000 (+ padding24)
+                background=file_buffer+1008+2; // offset 0x3F0 (only 1 byte)
+                bitmap=file_buffer+1024+2; // Length: 8000 (+padding 192)
+                color_ram=file_buffer+8192+1024+2; // Length: 1000 (+ padding 24)
                 break;
 
             case 10242: // Artist 64/Blazing Paddles/Rainbow Painter multicolor + loadaddr
