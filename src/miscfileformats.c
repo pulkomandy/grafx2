@@ -2810,7 +2810,9 @@ void Load_C64(T_IO_Context * context)
 /**
  * Display the dialog for C64 save parameters
  *
- * @param save
+ * @param[in,out] saveFormat one of the C64 mode from @ref c64_format
+ * @param[in,out] saveWhat 0=All, 1=Only bitmap, 2=Only Screen RAM, 3=Only color RAM
+ * @param[in,out] loadAddr actual load address/0x2000 or 0 for "None"
  * @return true to proceed, false to abort
  */
 static int Save_C64_window(enum c64_format *saveFormat, byte *saveWhat, byte *loadAddr)
