@@ -147,6 +147,7 @@ enum FILE_FORMATS
   FORMAT_ICO,  ///< Windows icons
   FORMAT_INFO, ///< Amiga OS icons
   FORMAT_FLI,  ///< Autodesk Animator FLI/FLC
+  FORMAT_MOTO, ///< Thomson MO/TO computers pictures
   FORMAT_MISC, ///< Must be last of enum: others formats recognized by SDL_image
 };
 

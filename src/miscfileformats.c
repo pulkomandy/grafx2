@@ -4858,3 +4858,201 @@ void Load_FLI(T_IO_Context * context)
   }
   fclose(file);
 }
+
+/////////////////////////////// Thomson Files ///////////////////////////////
+
+/**
+ * Test for Thomson file
+ */
+void Test_MOTO(T_IO_Context * context, FILE * file)
+{
+  long file_size;
+
+  (void)context;
+  file_size = File_length_file(file);
+
+  switch (file_size)
+  {
+    case 8004:  // 2 colors palette
+    case 8008:  // 4 colors palette
+    case 8032:  // 16 colors palette
+      File_error = 0;
+      break;
+    default:
+      File_error = 1;
+  }
+}
+
+/**
+ * Load a picture for Thomson TO8/TO8D/TO9/TO9+/MO6
+ *
+ * The format used is the one produced by TGA2Teo :
+ * - Picture data is splitted into 2 files, one for each VRAM bank :
+ *   - The first VRAM bank is called "forme" (shape).
+ *     In 40col mode it stores pixels.
+ *   - The second VRAM bank is called "couleur" (color).
+ *     In 40col mode it store color indexes for foreground and background.
+ * - File extension is .BIN, character before extension is "P" for the first
+ *   file, and "C" for the second.
+ * - The color palette is stored in both files after the data.
+ *
+ * The mode is detected thanks to the number of color in the palette :
+ * - 2 colors is 80col (640x200)
+ * - 4 colors is bitmap4 (320x200 4 colors)
+ * - 16 colors is either bitmap16 (160x200 16colors)
+ *   or 40col (320x200 16 colors with 2 unique colors in each 8x1 pixels
+ *   block).
+ *
+ * As it is not possible to disriminate bitmap16 and 40col, opening the "P"
+ * file sets bitmap16, opening the "C" file sets 40col.
+ */
+void Load_MOTO(T_IO_Context * context)
+{
+  // FORME / COULEUR
+  FILE * file_forme;
+  FILE * file_couleur = NULL;
+  long file_size;
+  int n_colors;
+  int bx, x, y;
+  char filename[MAX_PATH_CHARACTERS];
+  char path[MAX_PATH_CHARACTERS];
+  byte bpp;
+  char * ext;
+  enum MOTO_mode { F_40col, F_80col, F_bm4, F_bm16 } mode = F_40col;
+  enum PIXEL_RATIO ratio = PIXEL_SIMPLE;
+  int width = 320;
+  static const int gamma[16] = {  // Gamma values for MO6/TO8 palette
+    0  , 100, 127, 147,
+    163, 179, 191, 203,
+    215, 223, 231, 239,
+    243, 247, 251, 255
+  };
+
+
+  File_error = 1;
+  file_forme = Open_file_read(context);
+  if (file_forme == NULL)
+    return;
+  file_size = File_length_file(file_forme);
+  n_colors = (file_size - 8000) / 2;
+  switch(n_colors)
+  {
+    case 16:
+      bpp = 4;
+      // 16 colors : either 40col or bm16 mode !
+      // select later
+      break;
+    case 4:
+      bpp = 2;
+      mode = F_bm4;
+      break;
+    default:
+      bpp = 1;
+      mode = F_80col;
+      width = 640;
+      ratio = PIXEL_TALL;
+  }
+  strncpy(filename, context->File_name, sizeof(filename));
+  filename[sizeof(filename)-1] = '\0';
+  ext = strrchr(filename, '.');
+  if (ext == NULL || ext == context->File_name)
+  {
+    fclose(file_forme);
+    return;
+  }
+  if ((ext[-1] | 32) == 'c')
+  {
+    file_couleur = file_forme;
+    ext[-1] = (ext[-1] & 32) | 'P';
+    Get_full_filename(path, filename, context->File_directory);
+    file_forme = fopen(path, "rb");
+  }
+  else if ((ext[-1] | 32) == 'p')
+  {
+    ext[-1] = (ext[-1] & 32) | 'C';
+    Get_full_filename(path, filename, context->File_directory);
+    file_couleur = fopen(path, "rb");
+    if (n_colors == 16)
+    {
+      mode = F_bm16;
+      width = 160;
+      ratio = PIXEL_WIDE;
+    }
+  }
+  if (file_couleur == NULL)
+  {
+    fclose(file_forme);
+    return;
+  }
+  GFX2_Log(GFX2_DEBUG, "MO/TO: %s,%s file_size=%ld n_colors=%d\n", context->File_name, filename, file_size, n_colors);
+  Pre_load(context, width, 200, file_size, FORMAT_MOTO, ratio, bpp);
+  File_error = 0;
+  for (y = 0; y < 200; y++)
+  {
+    for (bx = 0; bx < 40; bx++)
+    {
+      byte couleur_forme;
+      byte couleur_fond;
+      byte forme, couleurs;
+
+      if (!(Read_byte(file_forme,&forme) && Read_byte(file_couleur,&couleurs)))
+        File_error = 1;
+      switch(mode)
+      {
+        case F_bm4:
+          for (x = bx*8; x < bx*8+8; x++)
+          {
+            Set_pixel(context, x, y, ((forme & 0x80) >> 6) | ((couleurs & 0x80) >> 7));
+            forme <<= 1;
+            couleurs <<= 1;
+          }
+#if 0
+          for (x = bx*8; x < bx*8+4; x++)
+          {
+            Set_pixel(context, x, y, couleurs >> 6);
+            couleurs <<= 2;
+          }
+          for (x = bx*8 + 4; x < bx*8+8; x++)
+          {
+            Set_pixel(context, x, y, forme >> 6);
+            forme <<= 2;
+          }
+#endif
+          break;
+        case F_bm16:
+          Set_pixel(context, bx*4, y, forme >> 4);
+          Set_pixel(context, bx*4+1, y, forme & 0x0F);
+          Set_pixel(context, bx*4+2, y, couleurs >> 4);
+          Set_pixel(context, bx*4+3, y, couleurs & 0x0F);
+          break;
+        case F_40col:
+        default:
+          // the color plane byte is bfFFFBBB
+          // with the upper bits of both foreground (forme) and
+          // background (fond) inverted.
+          couleur_forme = ((couleurs & 0x78) >> 3) ^ 0x08;
+          couleur_fond = ((couleurs & 7) | ((couleurs & 0x80) >> 4)) ^ 0x08;
+          for (x = bx*8; x < bx*8+8; x++)
+          {
+            Set_pixel(context, x, y, (forme & 0x80)?couleur_forme:couleur_fond);
+            forme <<= 1;
+          }
+      }
+    }
+  }
+  for (x = 0; x < n_colors; x++)
+  {
+    byte value;
+    // 1 byte Blue (4 lower bits)
+    // 1 byte Green (4 upper bits) / Red (4 lower bits)
+    if (!Read_byte(file_forme,&value))
+      File_error = 1;
+    context->Palette[x].B = gamma[value & 0x0F];
+    if (!Read_byte(file_forme,&value))
+      File_error = 1;
+    context->Palette[x].G = gamma[value >> 4];
+    context->Palette[x].R = gamma[value & 0x0F];
+  }
+  fclose(file_forme);
+  fclose(file_couleur);
+}
