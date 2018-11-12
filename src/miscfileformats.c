@@ -4950,13 +4950,22 @@ void Load_MOTO(T_IO_Context * context)
     243, 247, 251, 255
   };
   // 0, 71, 97, 117, 132, 145, 183, 193, 204, 212, 219, 227, 235, 242, 250, 255
-
+  static const unsigned char mo5palette[48] = {
+    // Taken from https://16couleurs.wordpress.com/2013/03/31/archeologie-infographique-le-pixel-art-pour-thomson/
+    0, 0, 0, 255, 85, 85, 0, 255, 0, 255, 255, 0,
+    85, 85, 255, 255, 0, 255, 0, 255, 255, 255, 255, 255,
+    170, 170, 170, 255, 170, 255, 170, 255, 170, 255, 255, 170,
+    85, 170, 255, 255, 170, 170, 170, 255, 255, 255, 170, 85
+  };
 
   File_error = 1;
   file = Open_file_read(context);
   if (file == NULL)
     return;
   file_size = File_length_file(file);
+  // Load default palette
+  memcpy(context->Palette, mo5palette, sizeof(mo5palette));
+
   // check for Thomson binary format
   // last 5 bytes must be
   // FF 00 00 xx xx (xx xx = start address when using LOADM,R)
