@@ -11,6 +11,7 @@
 /bin/stderr.txt
 /obj
 /bin/grafx2*
+/bin/generatedoc*
 
 /src/version.c
 /src/*.tgz
