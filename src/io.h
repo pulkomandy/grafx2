@@ -51,7 +51,7 @@ int Read_bytes(FILE *file, void *dest, size_t size);
 // Read a line from an open file. Returns true if OK, false in case of error
 int Read_byte_line(FILE *file, char *line, size_t size);
 /// Writes several bytes to an open file. Returns true if OK, false if a file i/o error occurred.
-int Write_bytes(FILE *file, void *dest, size_t size);
+int Write_bytes(FILE *file, const void *dest, size_t size);
 
 /// Reads a 16-bit Low-Endian word from an open file. Returns true if OK, false if a file i/o error occurred.
 int Read_word_le(FILE *file, word *dest);

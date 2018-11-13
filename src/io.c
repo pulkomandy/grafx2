@@ -89,7 +89,7 @@ int Read_byte_line(FILE *file, char *line, size_t size)
 }
 // Ecrit des octets
 // Renvoie -1 si OK, 0 en cas d'erreur
-int Write_bytes(FILE *file, void *src, size_t size)
+int Write_bytes(FILE *file, const void *src, size_t size)
 {
   return fwrite(src, 1, size, file) == size;
 }
