@@ -120,7 +120,7 @@ const T_Format File_formats[] = {
   {FORMAT_ICO, " ico", Test_ICO, Load_ICO, Save_ICO, 0, 0, 0, "ico", "ico;ic2;cur"},
   {FORMAT_INFO," info",Test_INFO,Load_INFO,NULL,     0, 0, 0, "info", "info"},
   {FORMAT_FLI, " flc", Test_FLI, Load_FLI, NULL,     0, 0, 0, "flc", "flc;fli;dat"},
-  {FORMAT_MOTO," moto",Test_MOTO,Load_MOTO,NULL,     0, 0, 0, "bin", "bin;map"},
+  {FORMAT_MOTO," moto",Test_MOTO,Load_MOTO,Save_MOTO,0, 1, 0, "bin", "bin;map"},
   {FORMAT_MISC,"misc.",NULL,     NULL,     NULL,     0, 0, 0, "",    "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff"},
 };
 

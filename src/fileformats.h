@@ -144,5 +144,6 @@ void Load_FLI(T_IO_Context *);
 // -- Thomson MO/TO computer series pictures --------------------------------
 void Test_MOTO(T_IO_Context *, FILE *);
 void Load_MOTO(T_IO_Context *);
+void Save_MOTO(T_IO_Context *);
 
 #endif

@@ -53,6 +53,9 @@
 #include "keycodes.h"
 #include "fileformats.h"
 
+extern char Program_version[]; // generated in pversion.c
+extern const char SVN_revision[]; // generated in version.c
+
 //////////////////////////////////// PAL ////////////////////////////////////
 //
 
@@ -4867,8 +4870,6 @@ void Load_FLI(T_IO_Context * context)
 void Test_MOTO(T_IO_Context * context, FILE * file)
 {
   long file_size;
-  byte code;
-  word size, address;
 
   (void)context;
   file_size = File_length_file(file);
@@ -4876,34 +4877,27 @@ void Test_MOTO(T_IO_Context * context, FILE * file)
   File_error = 1;
   if (file_size <= 10)
     return;
-  switch (file_size)
+  switch (MOTO_Check_binary_file(file))
   {
-    // Files in RAW formats (from TGA2teo)
-    case 8004:  // 2 colors palette
-    case 8008:  // 4 colors palette
-    case 8032:  // 16 colors palette
+    case 0: // Not Thomson binary format
+      switch (file_size)
+      {
+        // Files in RAW formats (from TGA2teo)
+        case 8004:  // 2 colors palette
+        case 8008:  // 4 colors palette
+        case 8032:  // 16 colors palette
+          File_error = 0;
+          return;
+        default:
+          break;
+      }
+      break;
+    case 2: // MAP file (SAVEP/LOADP)
+    case 3: // TO autoloading picture
+    case 4: // MO autoloading picture
       File_error = 0;
       return;
-    default:
-      break;
   }
-  // Check for Thomson binary format
-  // last 5 bytes must be
-  // FF 00 00 xx xx (xx xx = start address when using LOADM,R)
-  if (fseek(file, -5, SEEK_END) < 0)
-    return;
-  if(!Read_byte(file, &code))
-    return;
-  if(code != 0xff)
-    return;
-  if(!Read_word_be(file, &size))
-    return;
-  if(size != 0)
-    return;
-  if(!Read_word_be(file, &address))
-    return;
-
-  File_error = 0;
 }
 
 /**
@@ -4933,11 +4927,12 @@ void Load_MOTO(T_IO_Context * context)
 {
   // FORME / COULEUR
   FILE * file;
-  byte * vram_forme;
-  byte * vram_couleur;
+  byte * vram_forme = NULL;
+  byte * vram_couleur = NULL;
   long file_size;
+  int file_type;
   int bx, x, y, i;
-  byte bpp;
+  byte bpp = 4;
   byte code;
   word length, address;
   enum MOTO_mode { F_40col, F_80col, F_bm4, F_bm16 } mode = F_40col;
@@ -4966,29 +4961,26 @@ void Load_MOTO(T_IO_Context * context)
   // Load default palette
   memcpy(context->Palette, mo5palette, sizeof(mo5palette));
 
-  // check for Thomson binary format
-  // last 5 bytes must be
-  // FF 00 00 xx xx (xx xx = start address when using LOADM,R)
-  if (fseek(file, -5, SEEK_END) < 0)
-    return;
-  if (!(Read_byte(file,&code) && Read_word_be(file,&length) && Read_word_be(file,&address)))
-    return;
+  file_type = MOTO_Check_binary_file(file);
   if (fseek(file, 0, SEEK_SET) < 0)
+  {
+    fclose(file);
     return;
-  if (code == 0xff && length == 0)
+  }
+
+
+  if (file_type == 2) // MAP file
   {
     // http://collection.thomson.free.fr/code/articles/prehisto_bulletin/page.php?XI=0&XJ=13
     byte map_mode, col_count, line_count;
     byte * vram_current;
     int end_marks;
 
-    GFX2_Log(GFX2_DEBUG, "Thomson binary file detected. run address=&H%04X\n", address);
     if (!(Read_byte(file,&code) && Read_word_be(file,&length) && Read_word_be(file,&address)))
     {
       fclose(file);
       return;
     }
-    GFX2_Log(GFX2_DEBUG, "block &H%02X length=&H%04X address=&H%04X\n", code, length, address);
     if (length < 5 || !(Read_byte(file,&map_mode) && Read_byte(file,&col_count) && Read_byte(file,&line_count)))
     {
       fclose(file);
@@ -5150,6 +5142,53 @@ void Load_MOTO(T_IO_Context * context)
     }
     fclose(file);
   }
+  else if(file_type == 3 || file_type == 4)
+  {
+    do
+    {
+      if (!(Read_byte(file,&code) && Read_word_be(file,&length) && Read_word_be(file,&address)))
+      {
+        if (vram_forme)
+          break;
+        fclose(file);
+        return;
+      }
+      // MO5 VRAM address is &H0000
+      // TO7/TO8/TO9 VRAM addres is &H4000
+      if (length >= 8000 && length <= 8192 && address == 0x4000)  // TO7/TO8/TO9 VRAM address
+      {
+        if (vram_forme == NULL)
+        {
+          vram_forme = calloc(8192, 1);
+          Read_bytes(file, vram_forme, length);
+          length = 0;
+        }
+        else if (vram_couleur == NULL)
+        {
+          vram_couleur = calloc(8192, 1);
+          Read_bytes(file, vram_couleur, length);
+          if (length >= 8032)
+          {
+            for (x = 0; x < 16; x++)
+            {
+              // 1 byte Blue (4 lower bits)
+              // 1 byte Green (4 upper bits) / Red (4 lower bits)
+              context->Palette[x].B = gamma[vram_couleur[8000+x*2] & 0x0F];
+              context->Palette[x].G = gamma[vram_couleur[8000+x*2+1] >> 4];
+              context->Palette[x].R = gamma[vram_couleur[8000+x*2+1] & 0x0F];
+            }
+            if (length >= 8064)
+              memcpy(context->Comment, vram_couleur + 8032, 32);
+            context->Comment[COMMENT_SIZE] = '\0';
+          }
+          length = 0;
+        }
+      }
+      if (length > 0)
+        fseek(file, length, SEEK_CUR);
+    } while(code == 0);
+    fclose(file);
+  }
   else
   {
     char filename[MAX_PATH_CHARACTERS];
@@ -5263,7 +5302,10 @@ void Load_MOTO(T_IO_Context * context)
       byte forme, couleurs;
 
       forme = vram_forme[i];
-      couleurs = vram_couleur[i];
+      if (vram_couleur)
+        couleurs = vram_couleur[i];
+      else
+        couleurs = (mode == F_40col) ? 0x01 : 0x00;
       i++;
       switch(mode)
       {
@@ -5317,4 +5359,193 @@ void Load_MOTO(T_IO_Context * context)
       }
     }
   }
+}
+
+void Save_MOTO(T_IO_Context * context)
+{
+  FILE * file;
+  byte * vram_forme;
+  byte * vram_couleur;
+  int i, x, y, bx;
+  word reg_prc = 0xE7C3; // TO8 : PRC
+  byte prc_value = 0x65;// Value to write to PRC to select VRAM bank
+
+  file = Open_file_write(context);
+  if (file == NULL )
+  {
+    File_error = 1;
+    return;
+  }
+  vram_forme = malloc(8192);
+  vram_couleur = malloc(8192);
+  {
+    // 40col
+    {
+      /**
+       * The 40col encoding algorithm is optimized for further vertical
+       * RLE packing. The "attibute" byte is kept as constant as possible
+       * between adjacent blocks.
+       */
+      unsigned color_freq[16];
+      unsigned max_freq = 0;
+      byte previous_fond = 0, previous_forme = 0;
+      byte most_used_color = 0;
+
+      // search for most used color to prefer it as background color
+      for (i = 0; i < 16; i++)
+        color_freq[i] = 0;
+      for (y = 0; y < context->Height; y++)
+      {
+        for (x = 0; x < context->Width; x++)
+        {
+          byte col = Get_pixel(context, x, y);
+          if (col > 15)
+          {
+            GFX2_Log(GFX2_WARNING, "Save_MOTO() color %u > 15 at pixel (%d,%d)\n", col, x, y);
+            goto error;
+          }
+          color_freq[col]++;
+        }
+      }
+      for (i = 0; i < 16; i++)
+      {
+        if (color_freq[i] > max_freq)
+        {
+          max_freq = color_freq[i];
+          most_used_color = (byte)i;  // most used color
+        }
+      }
+      previous_fond = most_used_color;
+      max_freq = 0;
+      for (i = 0; i < 16; i++)
+      {
+        if (i != most_used_color && color_freq[i] > max_freq)
+        {
+          max_freq = color_freq[i];
+          previous_forme = (byte)i;  // second most used color
+        }
+      }
+      GFX2_Log(GFX2_DEBUG, "Save_MOTO() most used color index %u, 2nd %u\n", previous_fond, previous_forme);
+      // encoding of each 8x1 block
+      for (bx = 0; bx < 40; bx++)
+      {
+        for (y = 0; y < context->Height; y++)
+        {
+          byte forme_byte = 1;
+          byte col;
+          byte c1, c1_count = 1;
+          byte c2 = 0xff, c2_count = 0;
+          byte fond, forme;
+          x = bx * 8;
+          c1 = Get_pixel(context, x, y);
+          while (++x < bx * 8 + 8)
+          {
+            forme_byte <<= 1;
+            col = Get_pixel(context, x, y);
+            if (col == c1)
+            {
+              forme_byte |= 1;
+              c1_count++;
+            }
+            else
+            {
+              c2_count++;
+              if (c2 == 0xff)
+                c2 = col;
+              else if (col != c2)
+              {
+                GFX2_Log(GFX2_WARNING, "Save_MOTO() constraint error (%d,%d)\n", x, y);
+                goto error;
+              }
+            }
+          }
+          if (c2 == 0xff)
+          {
+            // Only one color in the 8x1 block
+            if (c1 == previous_fond)
+              c2 = previous_forme;
+            else
+              c2 = previous_fond;
+          }
+          // select background color (fond)
+          // and foreground color (forme)
+          if (c1 == previous_fond)
+          {
+            fond = c1;
+            forme = c2;
+            forme_byte = ~forme_byte;
+          }
+          else if (c2 == previous_fond)
+          {
+            fond = c2;
+            forme = c1;
+          }
+          else if (c1 == most_used_color)
+          {
+            fond = c1;
+            forme = c2;
+            forme_byte = ~forme_byte;
+          }
+          else if (c2 == most_used_color)
+          {
+            fond = c2;
+            forme = c1;
+          }
+          else if (c1_count >= c2_count)
+          {
+            fond = c1;
+            forme = c2;
+            forme_byte = ~forme_byte;
+          }
+          else
+          {
+            fond = c2;
+            forme = c1;
+          }
+          // write to VRAM
+          vram_forme[bx+y*40] = forme_byte;
+          vram_couleur[bx+y*40] = ((fond & 7) | ((fond & 8) << 4) | (forme << 3)) ^ 0xC0;
+          previous_fond = fond;
+          previous_forme = forme;
+        }
+        previous_fond = (vram_couleur[bx-1] & 7) | (~vram_couleur[bx-1] & 0x80) >> 4;
+        previous_forme = ((vram_couleur[bx-1] & 0x78) >> 3) ^ 8;
+      }
+    }
+  }
+  // palette
+  for (i = 0; i < 16; i++)
+  {
+    word to8color = MOTO_gamma_correct_RGB_to_MOTO(context->Palette + i);
+    vram_forme[8000+i*2] = to8color >> 8;
+    vram_forme[8000+i*2+1] = to8color & 0xFF;
+  }
+  // Commentaire
+  if (context->Comment[0] != '\0')
+    strncpy((char *)vram_forme + 8032, context->Comment, 32);
+  else
+    snprintf((char *)vram_forme + 8032, 32, "GrafX2 %s.%s", Program_version, SVN_revision);
+  memcpy(vram_couleur + 8000, vram_forme + 8000, 64);
+  // Format BIN
+  if (!MOTO_BIN_Add_Chunk(file, 1, reg_prc, &prc_value))
+    goto error;
+  if (!MOTO_BIN_Add_Chunk(file, 8000+64, 0x4000, vram_forme))
+    goto error;
+  prc_value &= 0xFE; // select color data
+  if (!MOTO_BIN_Add_Chunk(file, 1, reg_prc, &prc_value))
+    goto error;
+  if (!MOTO_BIN_Add_Chunk(file, 8000+64, 0x4000, vram_couleur))
+    goto error;
+  if (!MOTO_BIN_Add_End(file, 0x0000))
+    goto error;
+  // TODO : format MAP
+  fclose(file);
+  File_error = 0;
+  return;
+
+error:
+  free(vram_forme);
+  free(vram_couleur);
+  fclose(file);
+  File_error = 1;
 }
