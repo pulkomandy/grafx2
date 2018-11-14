@@ -4507,6 +4507,11 @@ static void Load_FLI_Header(FILE * file, T_FLIC_Header * header)
   }
 }
 
+/**
+ * Test for the Autodesk Animator FLI/FLC format.
+ *
+ * Not to be confused with Commodore 64 FLI.
+ */
 void Test_FLI(T_IO_Context * context, FILE * file)
 {
   T_FLIC_Header header;
@@ -4532,6 +4537,11 @@ void Test_FLI(T_IO_Context * context, FILE * file)
   }
 }
 
+/**
+ * Load file in the Autodesk Animator FLI/FLC format.
+ *
+ * Not to be confused with Commodore 64 FLI.
+ */
 void Load_FLI(T_IO_Context * context)
 {
   FILE * file;
