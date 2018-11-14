@@ -25,11 +25,13 @@
 #include <strings.h>
 #endif
 #include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
 #include "struct.h"
 #include "oldies.h"
 #include "global.h"
 #include "errors.h"
+#include "io.h"
 #include "misc.h"
 #include "palette.h"
 #include "pages.h"
@@ -416,4 +418,91 @@ int C64_FLI_enforcer(void)
     
     
   return 0;
+}
+
+int MOTO_Check_binary_file(FILE * f)
+{
+  int type = 1; // BIN
+  byte code;
+  word length, address;
+
+  // Check end of file
+  if (fseek(f, -5, SEEK_END) < 0)
+    return 0;
+  if (!(Read_byte(f, &code) && Read_word_be(f, &length) && Read_word_be(f, &address)))
+    return 0;
+  if (code != 0xff || length != 0)
+    return 0;
+  if (fseek(f, 0, SEEK_SET) < 0)
+    return 0;
+  // Read Binary structure
+  do
+  {
+    if (!(Read_byte(f, &code) && Read_word_be(f, &length) && Read_word_be(f, &address)))
+      return 0;
+    GFX2_Log(GFX2_DEBUG, "Thomson BIN &H%02X &H%04X &H%04X\n", code, length, address);
+
+    // VRAM is &H4000 on TO7/TO8/TO9/TO9+
+    if (length >= 8000 && length <= 8192 && address == 0x4000)
+      type = 3; // TO autoloading picture
+    else if (length > 16 && address == 0)  // address is 0 for MAP files
+    {
+      byte map_header[3];
+      if (!Read_bytes(f, map_header, 3))
+        return 0;
+      length -= 3;
+      if ((map_header[0] & 0x3F) == 0 && (map_header[0] & 0xC0) != 0xC0)
+      {
+        GFX2_Log(GFX2_DEBUG, "Thomson MAP &H%02X %u %u\n", map_header[0], map_header[1], map_header[2]);
+        if (((map_header[1] < 80 && map_header[0] != 0) // <= 80col in 80col and bm16
+             || map_header[1] < 40) // <= 40col in 40col
+            && map_header[2] < 25)  // <= 200 pixels high
+          type = 2; // MAP file (SAVEP/LOADP format)
+      }
+    }
+    else if (length == 1 && address == 0xE7C3)  // TO8/TO9 6846 PRC
+      type = 3; // TO autoloading picture
+    // TODO : check autoloading MO5...
+
+    if (fseek(f, length, SEEK_CUR) < 0)
+      return 0;
+  }
+  while(code == 0);
+  if (code != 0xff)
+    return 0;
+  return type;
+}
+
+int MOTO_BIN_Add_Chunk(FILE * f, word size, word address, const byte * data)
+{
+  return Write_byte(f, 0)
+      && Write_word_be(f, size)
+      && Write_word_be(f, address)
+      && Write_bytes(f, data, size);
+}
+
+int MOTO_BIN_Add_End(FILE * f, word address)
+{
+  return Write_byte(f, 0xff)
+      && Write_word_be(f, 0)
+      && Write_word_be(f, address);
+}
+
+word MOTO_gamma_correct_RGB_to_MOTO(T_Components * color)
+{
+  static const word gamma[] = { 0, 71, 97, 117, 132, 145, 183, 193, 204, 212, 219, 227, 235, 242, 250, 255};
+  word r, g, b;
+  for (r = 0; color->R > gamma[r]; r++)
+  {
+  }
+  for (g = 0; color->G > gamma[g]; g++)
+  {
+  }
+  for (b = 0; color->B > gamma[b]; b++)
+  {
+  }
+  GFX2_Log(GFX2_DEBUG, "#%02x%02x%02x => &H%04X\n",
+           color->R, color->G, color->B,
+           b << 8 | g << 4 | r);
+  return b << 8 | g << 4 | r;
 }
