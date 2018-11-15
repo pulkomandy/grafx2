@@ -754,6 +754,10 @@ int Save_INI(const T_Config * conf)
   if ((return_code=Save_INI_set_values (old_file,new_file,buffer,"Default_mode_layers",1,values,1)))
     goto Erreur_Retour;
 
+  values[0]=conf->MOTO_gamma;
+  if ((return_code=Save_INI_set_values (old_file,new_file,buffer,"MOTO_gamma",1,values,0)))
+    goto Erreur_Retour;
+
   // Insert new values here
   
   Save_INI_flush(old_file,new_file,buffer);

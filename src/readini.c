@@ -1048,6 +1048,13 @@ int Load_INI(T_Config * conf)
   {
     conf->Default_mode_layers=(values[0]!=0);
   }
+
+  conf->MOTO_gamma=28;
+  // Optional, gamma value used for palette of load/save Thomson MO/TO pictures (>=2.6)
+  if (!Load_INI_get_values (file,buffer,"MOTO_gamma",1,values))
+  {
+    conf->MOTO_gamma=(byte)values[0];
+  }
   
   // Insert new values here
 

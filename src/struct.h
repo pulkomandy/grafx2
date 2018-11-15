@@ -379,6 +379,7 @@ typedef struct
   byte Tilemap_show_count;               ///< Boolean, true if the Tilemap tool should display tile count after analysis.
   byte Use_virtual_keyboard;             ///< 0: Auto, 1: On, 2: Off
   byte Default_mode_layers;              ///< Indicates if default new image has layers (alternative is animation)
+  byte MOTO_gamma;                       ///< Number, 10 x the Gamma used for converting MO6/TO8/TO9 palette
 
 } T_Config;
 

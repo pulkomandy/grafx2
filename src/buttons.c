@@ -1011,7 +1011,7 @@ void Button_Settings(int btn)
   {"      --- Format options  ---",0,NULL,0,0,0,NULL},
   {"Screen size in GIF:",1,&(selected_config.Screen_size_in_GIF),0,1,0,Lookup_YesNo},
   {"Clear palette:",1,&(selected_config.Clear_palette),0,1,0,Lookup_YesNo},
-  {"",0,NULL,0,0,0,NULL},
+  {"MO6/TO8 palette gamma",1,&(selected_config.MOTO_gamma),10,30,2,NULL},
   {"",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
   {"",0,NULL,0,0,0,NULL},
