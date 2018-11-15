@@ -34,7 +34,10 @@
 #include "setup.h"
 #include "windows.h"
 
-int Save_INI_reach_group(FILE * old_file,FILE * new_file,char * buffer,char * group)
+/**
+ * go forward in gfx2.ini until the group is found
+ */
+static int Save_INI_reach_group(FILE * old_file,FILE * new_file,char * buffer,const char * group)
 {
   int    stop_seek;
   char * group_upper;
@@ -81,8 +84,14 @@ int Save_INI_reach_group(FILE * old_file,FILE * new_file,char * buffer,char * gr
 }
 
 
-
-int Save_INI_char_in_value_alphabet(char c)
+/**
+ * Check if a character is [-$.0-9A-Z]
+ * which are the allowed characters for values
+ *
+ * @return 1 for a matching character
+ * @return 0 for any other character
+ */
+static int Save_INI_char_in_value_alphabet(char c)
 {
   if (
        (                    // Digit
@@ -107,8 +116,16 @@ int Save_INI_char_in_value_alphabet(char c)
 }
 
 
-
-void Save_INI_set_value(char * dest,char * source,int nb_values_to_set,int * values,int litteral)
+/**
+ * build a gfx2.ini line
+ *
+ * @param[out] dest the destination buffer
+ * @param source the original gfx2.ini line
+ * @param nb_values_to_set the number of values to set
+ * @param values the array of values
+ * @param litteral if true, the value name is written, else the digital value
+ */
+static void Save_INI_set_value(char * dest,const char * source,int nb_values_to_set,const int * values,int litteral)
 {
   int dest_index;
   int source_index;
@@ -202,7 +219,14 @@ void Save_INI_set_value(char * dest,char * source,int nb_values_to_set,int * val
   }
 }
 
-void Save_INI_set_string(char * dest,char * source,char * value)
+/**
+ * build a gfx2.ini line
+ *
+ * @param[out] dest receiving buffer for the line
+ * @param source original gfx2.ini line
+ * @param value value to write
+ */
+static void Save_INI_set_string(char * dest,const char * source,const char * value)
 {
   int dest_index;
   int source_index;
@@ -237,7 +261,10 @@ void Save_INI_set_string(char * dest,char * source,char * value)
   dest[dest_index]='\0';
 }
 
-int Save_INI_set_strings(FILE * old_file,FILE * new_file,char * buffer,char * option_name,char * value)
+/**
+ * Set an option value in gfx2.ini
+ */
+static int Save_INI_set_strings(FILE * old_file,FILE * new_file,char * buffer,const char * option_name,const char * value)
 {
   int    stop_seek;
   char * option_upper;
@@ -312,7 +339,10 @@ int Save_INI_set_strings(FILE * old_file,FILE * new_file,char * buffer,char * op
   return 0;
 }
 
-int Save_INI_set_values(FILE * old_file,FILE * new_file,char * buffer,char * option_name,int nb_values_to_set,int * values,int litteral)
+/**
+ * set option values in the gfx2.ini file
+ */
+static int Save_INI_set_values(FILE * old_file,FILE * new_file,char * buffer,const char * option_name,int nb_values_to_set,const int * values,int litteral)
 {
   int    stop_seek;
   char * option_upper;
@@ -384,17 +414,20 @@ int Save_INI_set_values(FILE * old_file,FILE * new_file,char * buffer,char * opt
   return 0;
 }
 
-
-
-void Save_INI_flush(FILE * old_file,FILE * new_file,char * buffer)
+/**
+ * copy all remaining lines
+ */
+static void Save_INI_flush(FILE * old_file,FILE * new_file,char * buffer)
 {
   while (fgets(buffer,1024,old_file)!=0)
     fprintf(new_file,"%s",buffer);
 }
 
 
-
-int Save_INI(T_Config * conf)
+/**
+ * Save the config to the gfx2.ini file
+ */
+int Save_INI(const T_Config * conf)
 {
   FILE * old_file;
   FILE * new_file;

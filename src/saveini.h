@@ -24,4 +24,4 @@
 /// Saving settings in gfx2.ini
 //////////////////////////////////////////////////////////////////////////////
 
-int Save_INI(T_Config * conf);
+int Save_INI(const T_Config * conf);

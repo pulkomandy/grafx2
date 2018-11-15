@@ -43,7 +43,18 @@
 #include "io.h"
 #include "windows.h"
 
-
+/**
+ * Clean a line of the ini file.
+ *
+ * - Suppress all leading and trailing spaces
+ * - convert the key to uppercase
+ *
+ * Comments start with ";". The result will be in the following format :
+ * <tt>KEY=value</tt>
+ *
+ * @param[in,out] str
+ * @param[in] keep_comments if set, the comments are kept
+ */
 void Load_INI_clear_string(char * str, byte keep_comments)
 {
   int index;
@@ -94,9 +105,15 @@ void Load_INI_clear_string(char * str, byte keep_comments)
   }
 }
 
-
-
-int Load_INI_seek_pattern(char * buffer,char * pattern)
+/**
+ * Search for a substring in a string
+ *
+ * @param buffer the string to search into
+ * @param pattern the string to search for
+ * @return 0 if the pattern was not found
+ * @return >0 the position (+1) where the pattern was found
+ */
+int Load_INI_seek_pattern(const char * buffer,const char * pattern)
 {
   int buffer_index;
   int pattern_index;
@@ -120,9 +137,13 @@ int Load_INI_seek_pattern(char * buffer,char * pattern)
   return 0;
 }
 
-
-
-int Load_INI_reach_group(FILE * file,char * buffer,char * group)
+/**
+ * Read lines until a group is found
+ *
+ * @return 0 when the group is reached
+ * @return @ref ERROR_INI_CORRUPTED if the group is not found
+ */
+static int Load_INI_reach_group(FILE * file,char * buffer,const char * group)
 {
   int    stop_seek;
   char * group_upper;
@@ -171,7 +192,9 @@ int Load_INI_reach_group(FILE * file,char * buffer,char * group)
 /// @param option_name string to search
 /// @param return_code the found value will be copied there. (must be allocaed)
 /// @param raw_text Boolean: true to return the raw value (up to end-of-line), false to strip comments.
-int Load_INI_get_string(FILE * file,char * buffer,char * option_name,char * return_code, byte raw_text)
+/// @return 0 when OK
+/// @return @ref ERROR_INI_CORRUPTED if the option is not found
+static int Load_INI_get_string(FILE * file,char * buffer,const char * option_name,char * return_code, byte raw_text)
 {
   int    stop_seek;
   char * option_upper;
@@ -223,7 +246,19 @@ int Load_INI_get_string(FILE * file,char * buffer,char * option_name,char * retu
   return 0;
 }
 
-int Load_INI_get_value(char * str,int * index,int * value)
+/**
+ * Read a value from the string
+ *
+ * @ref index is updated according to the number of characters read
+ * from the source string.
+ *
+ * @param str the source string (option "values")
+ * @param index a pointer to the current index in the source string
+ * @param value the read value will be put there
+ * @return 0
+ * @return @ref ERROR_INI_CORRUPTED
+ */
+static int Load_INI_get_value(const char * str,int * index,int * value)
 {
   int negative = 0;
   
@@ -349,8 +384,20 @@ int Load_INI_get_value(char * str,int * index,int * value)
 }
 
 
-
-int Load_INI_get_values(FILE * file,char * buffer,char * option_name,int nb_expected_values,int * values)
+/**
+ * Read all values from a string
+ *
+ * The values are comma separated
+ *
+ * @param file handle to gfx2.ini
+ * @param buffer Current text buffer, preserved from one call to the next
+ * @param option_name name of the option to read
+ * @param nb_expected_values number of values to read from the line
+ * @param[out] values the values will be put there
+ * @return 0 when OK
+ * @return @ref ERROR_INI_CORRUPTED if no value was found, or not enough
+ */
+static int Load_INI_get_values(FILE * file,char * buffer,const char * option_name,int nb_expected_values,int * values)
 {
   int    stop_seek;
   char * option_upper;
@@ -432,6 +479,13 @@ int Load_INI_get_values(FILE * file,char * buffer,char * option_name,int nb_expe
 }
 
 
+/**
+ * Load config from the gfx2.ini file
+ *
+ * @param[out] conf the configuration to read to
+ * @return 0 when OK
+ * @return @ref ERROR_INI_CORRUPTED for any error
+ */
 int Load_INI(T_Config * conf)
 {
   FILE * file;
