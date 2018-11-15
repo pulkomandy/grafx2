@@ -70,4 +70,9 @@ int MOTO_Check_binary_file(FILE * f);
 /**
  * Convert a RGB value to Thomson BGR value with gamma correction.
  */
-word MOTO_gamma_correct_RGB_to_MOTO(T_Components * color);
+word MOTO_gamma_correct_RGB_to_MOTO(const T_Components * color);
+
+/**
+ * Convert a Thomson BGR value to RGB values with gamma correction.
+ */
+void MOTO_gamma_correct_MOTO_to_RGB(T_Components * color, word bgr);

@@ -4938,13 +4938,6 @@ void Load_MOTO(T_IO_Context * context)
   enum MOTO_mode { F_40col, F_80col, F_bm4, F_bm16 } mode = F_40col;
   enum PIXEL_RATIO ratio = PIXEL_SIMPLE;
   int width = 320, height = 200, columns = 40;
-  static const int gamma[16] = {  // Gamma values for MO6/TO8 palette
-    0  , 100, 127, 147,
-    163, 179, 191, 203,
-    215, 223, 231, 239,
-    243, 247, 251, 255
-  };
-  // 0, 71, 97, 117, 132, 145, 183, 193, 204, 212, 219, 227, 235, 242, 250, 255
   static const unsigned char mo5palette[48] = {
     // Taken from https://16couleurs.wordpress.com/2013/03/31/archeologie-infographique-le-pixel-art-pour-thomson/
     0, 0, 0, 255, 85, 85, 0, 255, 0, 255, 255, 0,
@@ -5044,9 +5037,7 @@ void Load_MOTO(T_IO_Context * context)
         {
           Read_word_be(file, &data);  // Palette entry
           if (data & 0x8000) data = ~data;
-          context->Palette[i].B = gamma[(data >> 8) & 0x0F];
-          context->Palette[i].G = gamma[(data >> 4) & 0x0F];
-          context->Palette[i].R = gamma[data & 0x0F];
+          MOTO_gamma_correct_MOTO_to_RGB(&context->Palette[i], data);
         }
         snprintf(context->Comment, sizeof(context->Comment), "TO-SNAP .MAP file");
         break;
@@ -5056,9 +5047,7 @@ void Load_MOTO(T_IO_Context * context)
         {
           Read_word_be(file, &data);  // Palette entry
           if (data & 0x8000) data = ~data;
-          context->Palette[i].B = gamma[(data >> 8) & 0x0F];
-          context->Palette[i].G = gamma[(data >> 4) & 0x0F];
-          context->Palette[i].R = gamma[data & 0x0F];
+          MOTO_gamma_correct_MOTO_to_RGB(&context->Palette[i], data);
         }
         Read_word_be(file, &data);  // Mode BASIC (CONSOLE,,,,X) 0=40col, 1=80col, 2=bm4, 3=bm16, etc.
         GFX2_Log(GFX2_DEBUG, "CONSOLE,,,,%u\n", data);
@@ -5173,9 +5162,8 @@ void Load_MOTO(T_IO_Context * context)
             {
               // 1 byte Blue (4 lower bits)
               // 1 byte Green (4 upper bits) / Red (4 lower bits)
-              context->Palette[x].B = gamma[vram_couleur[8000+x*2] & 0x0F];
-              context->Palette[x].G = gamma[vram_couleur[8000+x*2+1] >> 4];
-              context->Palette[x].R = gamma[vram_couleur[8000+x*2+1] & 0x0F];
+              MOTO_gamma_correct_MOTO_to_RGB(&context->Palette[x],
+                                             vram_couleur[8000+x*2]<<8 | vram_couleur[8000+x*2+1]);
             }
             if (length >= 8064)
               memcpy(context->Comment, vram_couleur + 8032, 32);
@@ -5285,9 +5273,8 @@ void Load_MOTO(T_IO_Context * context)
     {
       // 1 byte Blue (4 lower bits)
       // 1 byte Green (4 upper bits) / Red (4 lower bits)
-      context->Palette[x].B = gamma[vram_couleur[8000+x*2] & 0x0F];
-      context->Palette[x].G = gamma[vram_couleur[8000+x*2+1] >> 4];
-      context->Palette[x].R = gamma[vram_couleur[8000+x*2+1] & 0x0F];
+      MOTO_gamma_correct_MOTO_to_RGB(&context->Palette[x],
+                                     vram_couleur[8000+x*2]<<8 | vram_couleur[8000+x*2+1]);
     }
   }
   Pre_load(context, width, height, file_size, FORMAT_MOTO, ratio, bpp);

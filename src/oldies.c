@@ -488,21 +488,23 @@ int MOTO_BIN_Add_End(FILE * f, word address)
       && Write_word_be(f, address);
 }
 
-word MOTO_gamma_correct_RGB_to_MOTO(T_Components * color)
+word MOTO_gamma_correct_RGB_to_MOTO(const T_Components * color)
 {
-  static const word gamma[] = { 0, 71, 97, 117, 132, 145, 183, 193, 204, 212, 219, 227, 235, 242, 250, 255};
   word r, g, b;
-  for (r = 0; color->R > gamma[r]; r++)
-  {
-  }
-  for (g = 0; color->G > gamma[g]; g++)
-  {
-  }
-  for (b = 0; color->B > gamma[b]; b++)
-  {
-  }
+  double gamma = Config.MOTO_gamma / 10.0;
+  r = (word)round(pow(color->R / 255.0, gamma) * 15.0);
+  g = (word)round(pow(color->G / 255.0, gamma) * 15.0);
+  b = (word)round(pow(color->B / 255.0, gamma) * 15.0);
   GFX2_Log(GFX2_DEBUG, "#%02x%02x%02x => &H%04X\n",
            color->R, color->G, color->B,
            b << 8 | g << 4 | r);
   return b << 8 | g << 4 | r;
+}
+
+void MOTO_gamma_correct_MOTO_to_RGB(T_Components * color, word bgr)
+{
+  double inv_gamma = 10.0 / Config.MOTO_gamma;
+  color->B = (byte)round(pow(((bgr >> 8)& 0x0F)/15.0, inv_gamma) * 255.0);
+  color->G = (byte)round(pow(((bgr >> 4)& 0x0F)/15.0, inv_gamma) * 255.0);
+  color->R = (byte)round(pow((bgr & 0x0F)/15.0, inv_gamma) * 255.0);
 }
