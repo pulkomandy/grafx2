@@ -809,7 +809,7 @@ typedef struct {
   const T_Lookup * Lookup;
 } T_Setting;
 
-long int Get_setting_value(T_Setting *item)
+long int Get_setting_value(const T_Setting *item)
 {
   switch(item->Type)
   {
@@ -826,7 +826,7 @@ long int Get_setting_value(T_Setting *item)
   }
 }
 
-void Set_setting_value(T_Setting *item, long int value)
+void Set_setting_value(const T_Setting *item, long int value)
 {
   switch(item->Type)
   {
@@ -888,7 +888,7 @@ int Lookup_previous(int code, const T_Lookup *lookup)
   return lookup[(current + count - 1) % count].Code;
 }
 
-void Settings_display_config(T_Setting *setting, T_Config * conf, T_Special_button *panel)
+void Settings_display_config(const T_Setting *setting, T_Config * conf, T_Special_button *panel)
 {
   int i;
 
@@ -955,7 +955,7 @@ void Button_Settings(int btn)
   //  Label,Type (0 = label, 1+ = setting size in bytes),
   //  Value, min, max, digits, Lookup)
 
-  T_Setting setting[SETTING_PER_PAGE*SETTING_PAGES] = {
+  const T_Setting setting[SETTING_PER_PAGE*SETTING_PAGES] = {
 
   {"           --- GUI  ---",0,NULL,0,0,0,NULL},
   {"Opening message:",1,&(selected_config.Opening_message),0,1,0,Lookup_YesNo},
@@ -1089,29 +1089,28 @@ void Button_Settings(int btn)
 
       case 5: // Panel area
         {
-          T_Setting item;
 
           int num=(((short)Mouse_Y-Window_pos_Y)/Menu_factor_Y - panel->Pos_Y)/SETTING_HEIGHT;
           if (num >= 0 && num < SETTING_PER_PAGE)
           {
-            item=setting[current_page*SETTING_PER_PAGE+num];
-            if (item.Type!=0)
+            const T_Setting * item = &setting[current_page*SETTING_PER_PAGE+num];
+            if (item->Type!=0)
             {
               // Remember which button is clicked
               byte old_mouse_k = Mouse_K;
 
               if (Window_normal_button_onclick(panel->Pos_X, panel->Pos_Y+num*SETTING_HEIGHT, panel->Width, SETTING_HEIGHT+1, 5))
               {
-                int value = Get_setting_value(&item);
+                int value = Get_setting_value(item);
 
-                if (item.Lookup)
+                if (item->Lookup)
                 {
                   // Enum: toggle it
                   if (old_mouse_k & LEFT_SIDE)
-                    value = Lookup_next(value, item.Lookup);
+                    value = Lookup_next(value, item->Lookup);
                   else
-                    value = Lookup_previous(value, item.Lookup);
-                  Set_setting_value(&item, value);
+                    value = Lookup_previous(value, item->Lookup);
+                  Set_setting_value(item, value);
                 }
                 else
                 {
@@ -1119,16 +1118,16 @@ void Button_Settings(int btn)
                   char str[10];
                   str[0]='\0';
                   if (! (old_mouse_k & RIGHT_SIDE))
-                    Num2str(value,str,item.Digits+1);
-                  if (Readline(panel->Pos_X+3+176, panel->Pos_Y+num*SETTING_HEIGHT+(SETTING_HEIGHT-6)/2,str,item.Digits+1,INPUT_TYPE_INTEGER))
+                    Num2str(value,str,item->Digits+1);
+                  if (Readline(panel->Pos_X+3+176, panel->Pos_Y+num*SETTING_HEIGHT+(SETTING_HEIGHT-6)/2,str,item->Digits+1,INPUT_TYPE_INTEGER))
                   {
                     value=atoi(str);
-                    if (value<item.Min_value)
-                      value = item.Min_value;
-                    else if (value>item.Max_value)
-                      value = item.Max_value;
+                    if (value<item->Min_value)
+                      value = item->Min_value;
+                    else if (value>item->Max_value)
+                      value = item->Max_value;
 
-                    Set_setting_value(&item, value);
+                    Set_setting_value(item, value);
                   }
                   Key=0; // Need to discard keys used during editing
                 }
