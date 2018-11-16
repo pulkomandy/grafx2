@@ -35,7 +35,7 @@ int C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background);
 int C64_FLI_enforcer(void);
 
 /**
- * Add a chunk to a Thomson MO/TO binary file
+ * Add a chunk to a DECB binary file
  *
  * @param f open file
  * @param size size of the memory chunk
@@ -43,17 +43,19 @@ int C64_FLI_enforcer(void);
  * @param data data to add in memory chunk
  * @return true for success
  */
-int MOTO_BIN_Add_Chunk(FILE * f, word size, word address, const byte * data);
+int DECB_BIN_Add_Chunk(FILE * f, word size, word address, const byte * data);
 
 /**
- * Add a chunk to a Thomson MO/TO binary file
+ * Add a chunk to a DECB binary file
  *
  * @param f open file
  * @param address run address of the binary file (LOADM,,R)
  * @return true for success
  */
-int MOTO_BIN_Add_End(FILE * f, word address);
+int DECB_BIN_Add_End(FILE * f, word address);
 
+
+int DECB_Check_binary_file(FILE * f);
 /**
  * Checks if the file is a Thomson binary file (SAVEM/LOADM format)
  *

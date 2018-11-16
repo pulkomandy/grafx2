@@ -473,7 +473,7 @@ int MOTO_Check_binary_file(FILE * f)
   return type;
 }
 
-int MOTO_BIN_Add_Chunk(FILE * f, word size, word address, const byte * data)
+int DECB_BIN_Add_Chunk(FILE * f, word size, word address, const byte * data)
 {
   return Write_byte(f, 0)
       && Write_word_be(f, size)
@@ -481,7 +481,7 @@ int MOTO_BIN_Add_Chunk(FILE * f, word size, word address, const byte * data)
       && Write_bytes(f, data, size);
 }
 
-int MOTO_BIN_Add_End(FILE * f, word address)
+int DECB_BIN_Add_End(FILE * f, word address)
 {
   return Write_byte(f, 0xff)
       && Write_word_be(f, 0)

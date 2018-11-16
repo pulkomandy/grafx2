@@ -5514,16 +5514,17 @@ void Save_MOTO(T_IO_Context * context)
     snprintf((char *)vram_forme + 8032, 32, "GrafX2 %s.%s", Program_version, SVN_revision);
   memcpy(vram_couleur + 8000, vram_forme + 8000, 64);
   // Format BIN
-  if (!MOTO_BIN_Add_Chunk(file, 1, reg_prc, &prc_value))
+  // TO8/TO9 : set LGAMOD 0xE7DC  40col=0 bm4=0x21 80col=0x2a bm16=0x7b
+  if (!DECB_BIN_Add_Chunk(file, 1, reg_prc, &prc_value))
     goto error;
-  if (!MOTO_BIN_Add_Chunk(file, 8000+64, 0x4000, vram_forme))
+  if (!DECB_BIN_Add_Chunk(file, 8000+64, 0x4000, vram_forme))
     goto error;
   prc_value &= 0xFE; // select color data
-  if (!MOTO_BIN_Add_Chunk(file, 1, reg_prc, &prc_value))
+  if (!DECB_BIN_Add_Chunk(file, 1, reg_prc, &prc_value))
     goto error;
-  if (!MOTO_BIN_Add_Chunk(file, 8000+64, 0x4000, vram_couleur))
+  if (!DECB_BIN_Add_Chunk(file, 8000+64, 0x4000, vram_couleur))
     goto error;
-  if (!MOTO_BIN_Add_End(file, 0x0000))
+  if (!DECB_BIN_Add_End(file, 0x0000))
     goto error;
   // TODO : format MAP
   fclose(file);
