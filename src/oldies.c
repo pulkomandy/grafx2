@@ -420,6 +420,7 @@ int C64_FLI_enforcer(void)
   return 0;
 }
 
+/// @ingroup moto
 int MOTO_Check_binary_file(FILE * f)
 {
   int type = 1; // BIN
@@ -488,6 +489,8 @@ int DECB_BIN_Add_End(FILE * f, word address)
       && Write_word_be(f, address);
 }
 
+/** @ingroup moto
+ * @{ */
 word MOTO_gamma_correct_RGB_to_MOTO(const T_Components * color)
 {
   word r, g, b;
@@ -508,3 +511,4 @@ void MOTO_gamma_correct_MOTO_to_RGB(T_Components * color, word bgr)
   color->G = (byte)round(pow(((bgr >> 4)& 0x0F)/15.0, inv_gamma) * 255.0);
   color->R = (byte)round(pow((bgr & 0x0F)/15.0, inv_gamma) * 255.0);
 }
+/** @} */

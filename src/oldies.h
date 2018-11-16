@@ -21,6 +21,10 @@
 ///@file oldies.h
 /// functions relative to old computers (Commodore 64, Thomsons MO/TO, Amstrad CPC, ZX Spectrum, etc.)
 
+/** @defgroup c64 Commodore 64
+ * Some C64 video mode related functions
+ * @{
+ */
 /**
  * Save a 3 layer picture to C64 FLI format
  *
@@ -34,6 +38,17 @@ int C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background);
 
 int C64_FLI_enforcer(void);
 
+/** @}*/
+
+/** @defgroup decb DECB binary format
+ *
+ * The DECB binary format was used on 6809 based machines :
+ * Tandy CoCo, Dragon 32/64 and Thomson MO/TO.
+ *
+ * DECB stand for Disk Extended Color Basic and was a version
+ * of the Microsoft BASIC-69 (their basic for Motorola 6809)
+ * @{
+ */
 /**
  * Add a chunk to a DECB binary file
  *
@@ -56,6 +71,24 @@ int DECB_BIN_Add_End(FILE * f, word address);
 
 
 int DECB_Check_binary_file(FILE * f);
+/** @}*/
+
+/** @defgroup moto Thomson MO/TO
+ * The Thomson MO/TO computer range was based on a Motorola 6809 CPU
+ * and equiped with Microsoft Basic called Basic 1.0 for the first
+ * versions and then Basic 128 or Basic 512 which included a DOS
+ * and more features.
+ *
+ * The range includes :
+ * - TO7
+ * - MO5/MO5E
+ * - TO7/70
+ * - TO9
+ * - MO6/MO5NR
+ * - TO8/TO8D
+ * - TO9
+ * - Olivetti Prodest PC128 (a Thomson MO6 clone)
+ */
 /**
  * Checks if the file is a Thomson binary file (SAVEM/LOADM format)
  *
@@ -78,3 +111,4 @@ word MOTO_gamma_correct_RGB_to_MOTO(const T_Components * color);
  * Convert a Thomson BGR value to RGB values with gamma correction.
  */
 void MOTO_gamma_correct_MOTO_to_RGB(T_Components * color, word bgr);
+/** @}*/
