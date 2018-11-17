@@ -6001,7 +6001,7 @@ void Save_MOTO(T_IO_Context * context)
   {
     word chunk_length;
 
-    if (target_machine == MACHINE_TO7 || target_machine == MACHINE_MO5)
+    if (target_machine == MACHINE_TO7 || target_machine == MACHINE_TO770 || target_machine == MACHINE_MO5)
       chunk_length = 8000;  // Do not save palette
     else
     {
@@ -6106,7 +6106,7 @@ void Save_MOTO(T_IO_Context * context)
     }
     if (i&1)  // align
       packed_data[i++] = 0;
-    if (machine != MACHINE_TO7 && machine != MACHINE_TO770 && machine != MACHINE_MO5)
+    if (target_machine != MACHINE_TO7 && target_machine != MACHINE_TO770 && target_machine != MACHINE_MO5)
     {
       // add TO-SNAP extension
       // see http://collection.thomson.free.fr/code/articles/prehisto_bulletin/page.php?XI=0&XJ=13
