@@ -6104,57 +6104,60 @@ void Save_MOTO(T_IO_Context * context)
         packed_data[i++] = 0;
         break;
     }
-    // add TO-SNAP extension
-    // see http://collection.thomson.free.fr/code/articles/prehisto_bulletin/page.php?XI=0&XJ=13
     if (i&1)  // align
       packed_data[i++] = 0;
-    // bytes 0-1 : Hardware video mode (value of SCRMOD 0x605F)
-    packed_data[i++] = 0;
-    switch (mode)
+    if (machine != MACHINE_TO7 && machine != MACHINE_TO770 && machine != MACHINE_MO5)
     {
-      case MOTO_MODE_40col:
-        packed_data[i++] = 0;
-        break;
-      case MOTO_MODE_bm4:
-        packed_data[i++] = 0x01;
-        break;
-      case MOTO_MODE_80col:
-        packed_data[i++] = 0x40;
-        break;
-      case MOTO_MODE_bm16:
-        packed_data[i++] = 0x80;
-        break;
+      // add TO-SNAP extension
+      // see http://collection.thomson.free.fr/code/articles/prehisto_bulletin/page.php?XI=0&XJ=13
+      // bytes 0-1 : Hardware video mode (value of SCRMOD 0x605F)
+      packed_data[i++] = 0;
+      switch (mode)
+      {
+        case MOTO_MODE_40col:
+          packed_data[i++] = 0;
+          break;
+        case MOTO_MODE_bm4:
+          packed_data[i++] = 0x01;
+          break;
+        case MOTO_MODE_80col:
+          packed_data[i++] = 0x40;
+          break;
+        case MOTO_MODE_bm16:
+          packed_data[i++] = 0x80;
+          break;
+      }
+      // bytes 2-3 : Border color
+      packed_data[i++] = 0;
+      packed_data[i++] = 0;
+      // bytes 4-5 : BASIC video mode (CONSOLE,,,,X)
+      packed_data[i++] = 0;
+      switch (mode)
+      {
+        case MOTO_MODE_40col:
+          packed_data[i++] = 0;
+          break;
+        case MOTO_MODE_bm4:
+          packed_data[i++] = 2;
+          break;
+        case MOTO_MODE_80col:
+          packed_data[i++] = 1;
+          break;
+        case MOTO_MODE_bm16:
+          packed_data[i++] = 3;
+          break;
+      }
+      // bytes 6-37 : BGR palette
+      for (x = 0; x < 16; x++)
+      {
+        word bgr = MOTO_gamma_correct_RGB_to_MOTO(context->Palette + x);
+        packed_data[i++] = bgr >> 8;
+        packed_data[i++] = bgr & 0xff;
+      }
+      // bytes 38-39 : TO-SNAP signature
+      packed_data[i++] = 0xA5;
+      packed_data[i++] = 0x5A;
     }
-    // bytes 2-3 : Border color
-    packed_data[i++] = 0;
-    packed_data[i++] = 0;
-    // bytes 4-5 : BASIC video mode (CONSOLE,,,,X)
-    packed_data[i++] = 0;
-    switch (mode)
-    {
-      case MOTO_MODE_40col:
-        packed_data[i++] = 0;
-        break;
-      case MOTO_MODE_bm4:
-        packed_data[i++] = 2;
-        break;
-      case MOTO_MODE_80col:
-        packed_data[i++] = 1;
-        break;
-      case MOTO_MODE_bm16:
-        packed_data[i++] = 3;
-        break;
-    }
-    // bytes 6-37 : BGR palette
-    for (x = 0; x < 16; x++)
-    {
-      word bgr = MOTO_gamma_correct_RGB_to_MOTO(context->Palette + x);
-      packed_data[i++] = bgr >> 8;
-      packed_data[i++] = bgr & 0xff;
-    }
-    // bytes 38-39 : TO-SNAP signature
-    packed_data[i++] = 0xA5;
-    packed_data[i++] = 0x5A;
 
     free(unpacked_data);
 
