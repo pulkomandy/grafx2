@@ -5361,16 +5361,24 @@ void Load_MOTO(T_IO_Context * context)
 }
 
 /**
+ * Pack a stream of byte in the format used by Thomson MO/TO MAP files.
+ *
+ * - 00 cc xx yy .. : encodes a "copy run" (cc = bytes to copy)
+ * - cc xx          : encodes a "repeat run" (cc > 0 : count)
  */
-#define MOTO_MAP_NOPACKING
+//#define MOTO_MAP_NOPACKING
 static unsigned int MOTO_MAP_pack(byte * packed, const byte * unpacked, unsigned int unpacked_len)
 {
   unsigned int src;
   unsigned int dst = 0;
-  unsigned int repeat;
   unsigned int count;
+#ifndef MOTO_MAP_NOPACKING
+  unsigned int repeat;
   unsigned int i;
+  word * counts;
+#endif
 
+  GFX2_Log(GFX2_DEBUG, "MOTO_MAP_pack(%p, %p, %u)\n", packed, unpacked, unpacked_len);
   if (unpacked_len == 0)
     return 0;
   if (unpacked_len == 1)
@@ -5398,9 +5406,12 @@ static unsigned int MOTO_MAP_pack(byte * packed, const byte * unpacked, unsigned
   src += count;
   return dst;
 #else
+  counts = malloc(sizeof(word) * (unpacked_len + 1));
+  i = 0;
   repeat = (unpacked[0] == unpacked[1]);
   count = 2;
   src = 2;
+  // 1st step : count lenght of the Copy runs and Repeat runs
   while (src < unpacked_len)
   {
     if (repeat)
@@ -5409,9 +5420,8 @@ static unsigned int MOTO_MAP_pack(byte * packed, const byte * unpacked, unsigned
         count++;
       else
       {
-        // flush run
-        packed[dst++] = count;
-        packed[dst++] = unpacked[src-1];
+        // flush the repeat run
+        counts[i++] = count | 0x8000; // 0x8000 is the marker for repeat runs
         count = 1;
         repeat = 0;
       }
@@ -5427,20 +5437,157 @@ static unsigned int MOTO_MAP_pack(byte * packed, const byte * unpacked, unsigned
       }
       else
       {
-// verifier le nombre de repetitions > 3
-        if (unpacked[src] != unpacked[src+1] || unpacked[src] != unpacked[src+2])
-        {
-          src += 2;
-          count += 3;
-        }
+        // flush the copy run
+        counts[i++] = (count-1) | (count == 2 ? 0x8000 : 0); // mark copy run of 1 as repeat of 1
+        count = 2;
+        repeat = 1;
       }
     }
     src++;
   }
-  // commit
+  // flush the last run
+  counts[i++] = ((repeat || count == 1) ? 0x8000 : 0) | count;
+  counts[i++] = 0;  // end marker
+  // check consistency of counts
+  count = 0;
+  for (i = 0; counts[i] != 0; i++)
+    count += (counts[i] & ~0x8000);
+  if (count != unpacked_len)
+    GFX2_Log(GFX2_ERROR, "*** encoding error in MOTO_MAP_pack() *** count=%u unpacked_len=%u\n",
+             count, unpacked_len);
+  // output optimized packed stream
+  // repeat run are encoded cc xx
+  // copy run are encoded   00 cc xx xx xx xx
+  i = 0;
+  src = 0;
+  while (counts[i] != 0)
+  {
+    while (counts[i] & 0x8000)  // repeat run
+    {
+      count = counts[i] & ~0x8000;
+      GFX2_Log(GFX2_DEBUG, "MOTO_MAP_pack() %4u %4u repeat %u times %02x\n", src, i, count, unpacked[src]);
+      while(count > 255)
+      {
+        packed[dst++] = 255;
+        packed[dst++] = unpacked[src];
+        count -= 255;
+        src += 255;
+      }
+      packed[dst++] = count;
+      packed[dst++] = unpacked[src];
+      src += count;
+      i++;
+    }
+    while (counts[i] != 0 && !(counts[i] & 0x8000))  // copy run
+    {
+      // calculate the "savings" of repeat runs between 2 copy run
+      int savings = 0;
+      unsigned int j;
+      GFX2_Log(GFX2_DEBUG, "MOTO_MAP_pack() %4u %4u copy %u bytes\n", src, i, counts[i]);
+      for (j = i + 1; counts[j] & 0x8000; j++) // check repeat runs until the next copy run
+      {
+        count = counts[j] & ~0x8000;
+        if (savings < 0 && (savings + (int)count - 2) > 0)
+          break;
+        savings += count - 2; // a repeat run outputs 2 bytes for count bytes of input
+      }
+      count = counts[i];
+GFX2_Log(GFX2_DEBUG, " savings=%d i=%u j=%u (counts[j]=0x%04x)\n", savings, i, j, counts[j]);
+      if (savings < 2 && (j > i + 1))
+      {
+        unsigned int k;
+        if (counts[j] == 0) // go to the end of stream
+        {
+          for (k = i + 1; k < j; k++)
+            count += (counts[k] & ~0x8000);
+          GFX2_Log(GFX2_DEBUG, "MOTO_MAP_pack() src=%u extend copy from %u to %u\n", src, counts[i], count);
+          i = j - 1;
+        }
+        else
+        {
+          for (k = i + 1; k < j; k++)
+            count += (counts[k] & ~0x8000);
+          if (!(counts[j] & 0x8000))
+          { // merge with the next copy run (and the repeat runs between)
+            GFX2_Log(GFX2_DEBUG, "MOTO_MAP_pack() src=%u merge savings=%d\n", src, savings);
+            i = j;
+            counts[i] += count;
+            continue;
+          }
+          else
+          { // merge with the next few repeat runs
+            GFX2_Log(GFX2_DEBUG, "MOTO_MAP_pack() src=%u extends savings=%d\n", src, savings);
+            i = j - 1;
+          }
+        }
+      }
+      while (count > 255)
+      {
+        packed[dst++] = 0;
+        packed[dst++] = 255;
+        memcpy(packed+dst, unpacked+src, 255);
+        dst += 255;
+        src += 255;
+        count -= 255;
+      }
+      packed[dst++] = 0;
+      packed[dst++] = count;
+      memcpy(packed+dst, unpacked+src, count);
+      dst += count;
+      src += count;
+      i++;
+    }
+  }
+  free(counts);
   return dst;
 #endif
 }
+
+#if 0
+void Test_MOTO_MAP_pack(void)
+{
+  unsigned int i, j;
+  byte buffer[1024];
+  byte buffer2[1024];
+  unsigned int packed_len, unpacked_len, original_len;
+  static const char * tests[] = {
+    //"12345AAAAAAA@",    // best : 00 05 "12345" 07 'A' 01 '@' : 11
+    "123AABAA123@@@@@", // best : 00 0B "123AABAA123" 05 '@' : 15
+    "123AAAAA123AABAA", // best : 00 03 "123" 05 'A' 00 06 "123AAB" 02 'A' : 17
+    "123AAAAA123AAB", // best : 00 03 "123" 05 'A' 00 06 "123AAB" : 15
+    "abcAABAAdddddddd", // best : 00 08 "abcAABAA" 08 'd' : 12
+    NULL
+  };
+
+  GFX2_Log(GFX2_DEBUG, "Test_MOTO_MAP_pack\n");
+  for (i = 0; tests[i]; i++)
+  {
+    original_len = strlen(tests[i]);
+    packed_len = MOTO_MAP_pack(buffer, (const byte *)tests[i], original_len);
+    GFX2_Log(GFX2_DEBUG, "    %s (%u) packed to %u\n", tests[i], original_len, packed_len);
+    unpacked_len = 0;
+    j = 0;
+    // unpack to test
+    while (j < packed_len)
+    {
+      if (buffer[j] == 0)
+      { // copy
+        memcpy(buffer2 + unpacked_len, buffer + j + 2, buffer[j+1]);
+        unpacked_len += buffer[j+1];
+        j += 2 + buffer[j+1];
+      }
+      else
+      { // repeat
+        memset(buffer2 + unpacked_len, buffer[j+1], buffer[j]);
+        unpacked_len += buffer[j];
+        j += 2;
+      }
+    }
+    if (unpacked_len != original_len || 0 != memcmp(tests[i], buffer2, original_len))
+      GFX2_Log(GFX2_ERROR, "*** %u %s != %u %s ***\n", original_len, tests[i], unpacked_len, buffer2);
+  }
+}
+#endif
 
 /**
  * GUI window to choose Thomson MO/TO saving parameters
