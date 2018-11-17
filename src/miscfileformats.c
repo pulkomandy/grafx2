@@ -4938,7 +4938,7 @@ void Load_MOTO(T_IO_Context * context)
   byte code;
   word length, address;
   int transpose = 1;
-  enum MOTO_mode { F_40col, F_80col, F_bm4, F_bm16 } mode = F_40col;
+  enum MOTO_Graphic_Mode mode = MOTO_MODE_40col;
   enum PIXEL_RATIO ratio = PIXEL_SIMPLE;
   int width = 320, height = 200, columns = 40;
 
@@ -4984,20 +4984,20 @@ void Load_MOTO(T_IO_Context * context)
       default:
       case 0: // bitmap4 or 40col
         width = 8 * columns;
-        mode = F_40col; // default to 40col
+        mode = MOTO_MODE_40col; // default to 40col
         bpp = 4;
         break;
       case 0x40:  // bitmap16
         columns >>= 1;
         width = 4 * columns;
-        mode = F_bm16;
+        mode = MOTO_MODE_bm16;
         bpp = 4;
         ratio = PIXEL_WIDE;
         break;
       case 0x80:  // 80col
         columns >>= 1;
         width = 16 * columns;
-        mode = F_80col;
+        mode = MOTO_MODE_80col;
         bpp = 1;
         ratio = PIXEL_TALL;
         break;
@@ -5027,7 +5027,7 @@ void Load_MOTO(T_IO_Context * context)
         GFX2_Log(GFX2_DEBUG, "CONSOLE,,,,%u\n", data);
         if(data == 2)
         {
-          mode = F_bm4;
+          mode = MOTO_MODE_bm4;
           bpp = 2;
         }
         for (i = 0; i < 16; i++)
@@ -5050,7 +5050,7 @@ void Load_MOTO(T_IO_Context * context)
         GFX2_Log(GFX2_DEBUG, "CONSOLE,,,,%u\n", data);
         if(data == 2)
         {
-          mode = F_bm4;
+          mode = MOTO_MODE_bm4;
           bpp = 2;
         }
         snprintf(context->Comment, sizeof(context->Comment), "PPM .MAP file");
@@ -5088,7 +5088,7 @@ void Load_MOTO(T_IO_Context * context)
           i += columns; // to the next line
           if (i >= columns * height)
           {
-            if (mode == F_bm4 || mode == F_40col)
+            if (mode == MOTO_MODE_bm4 || mode == MOTO_MODE_40col)
               i -= (columns * height - 1);  // to the 1st line of the next column
             else
             {
@@ -5110,7 +5110,7 @@ void Load_MOTO(T_IO_Context * context)
         i += columns; // to the next line
         if (i >= columns * height)
         {
-          if (mode == F_bm4 || mode == F_40col)
+          if (mode == MOTO_MODE_bm4 || mode == MOTO_MODE_40col)
             i -= (columns * height - 1);  // to the 1st line of the next column
           else
           {
@@ -5169,7 +5169,11 @@ void Load_MOTO(T_IO_Context * context)
                                              vram_couleur[8000+x*2]<<8 | vram_couleur[8000+x*2+1]);
             }
             if (length >= 8064)
+            {
               memcpy(context->Comment, vram_couleur + 8032, 32);
+              if (vram_couleur[8063] >= '0' && vram_couleur[8063] <= '3')
+                mode = vram_couleur[8063] - '0';
+            }
             context->Comment[COMMENT_SIZE] = '\0';
           }
           length = 0;
@@ -5179,6 +5183,23 @@ void Load_MOTO(T_IO_Context * context)
         fseek(file, length, SEEK_CUR);
     } while(code == 0);
     fclose(file);
+    switch (mode)
+    {
+      case MOTO_MODE_40col: // default
+        break;
+      case MOTO_MODE_bm4:
+        bpp = 2;
+        break;
+      case MOTO_MODE_80col:
+        bpp = 1;
+        width = 640;
+        ratio = PIXEL_TALL;
+        break;
+      case MOTO_MODE_bm16:
+        width = 160;
+        ratio = PIXEL_WIDE;
+        break;
+    }
   }
   else
   {
@@ -5209,11 +5230,11 @@ void Load_MOTO(T_IO_Context * context)
         break;
       case 4:
         bpp = 2;
-        mode = F_bm4;
+        mode = MOTO_MODE_bm4;
         break;
       default:
         bpp = 1;
-        mode = F_80col;
+        mode = MOTO_MODE_80col;
         width = 640;
         ratio = PIXEL_TALL;
     }
@@ -5236,7 +5257,7 @@ void Load_MOTO(T_IO_Context * context)
       ext[-1] = (ext[-1] & 32) | 'C';
       if (n_colors == 16)
       {
-        mode = F_bm16;
+        mode = MOTO_MODE_bm16;
         width = 160;
         ratio = PIXEL_WIDE;
       }
@@ -5295,11 +5316,11 @@ void Load_MOTO(T_IO_Context * context)
       if (vram_couleur)
         couleurs = vram_couleur[i];
       else
-        couleurs = (mode == F_40col) ? 0x01 : 0x00;
+        couleurs = (mode == MOTO_MODE_40col) ? 0x01 : 0x00;
       i++;
       switch(mode)
       {
-        case F_bm4:
+        case MOTO_MODE_bm4:
           for (x = bx*8; x < bx*8+8; x++)
           {
             Set_pixel(context, x, y, ((forme & 0x80) >> 6) | ((couleurs & 0x80) >> 7));
@@ -5319,13 +5340,13 @@ void Load_MOTO(T_IO_Context * context)
           }
 #endif
           break;
-        case F_bm16:
+        case MOTO_MODE_bm16:
           Set_pixel(context, bx*4, y, forme >> 4);
           Set_pixel(context, bx*4+1, y, forme & 0x0F);
           Set_pixel(context, bx*4+2, y, couleurs >> 4);
           Set_pixel(context, bx*4+3, y, couleurs & 0x0F);
           break;
-        case F_80col:
+        case MOTO_MODE_80col:
           for (x = bx*16; x < bx*16+8; x++)
           {
             Set_pixel(context, x, y, (forme & 0x80) >> 7);
@@ -5334,7 +5355,7 @@ void Load_MOTO(T_IO_Context * context)
             couleurs <<= 1;
           }
           break;
-        case F_40col:
+        case MOTO_MODE_40col:
         default:
           if (transpose)
           {
@@ -5990,6 +6011,9 @@ void Save_MOTO(T_IO_Context * context)
         strncpy((char *)vram_forme + 8032, context->Comment, 32);
       else
         snprintf((char *)vram_forme + 8032, 32, "GrafX2 %s.%s", Program_version, SVN_revision);
+      // also saves the video mode
+      //*((char *)vram_forme + 8063) = '0' + mode;
+      vram_forme[8063] = '0' + mode;
       memcpy(vram_couleur + 8000, vram_forme + 8000, 64);
     }
     
