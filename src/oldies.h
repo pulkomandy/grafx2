@@ -141,4 +141,20 @@ word MOTO_gamma_correct_RGB_to_MOTO(const T_Components * color);
  * Convert a Thomson BGR value to RGB values with gamma correction.
  */
 void MOTO_gamma_correct_MOTO_to_RGB(T_Components * color, word bgr);
+
+/**
+ * Set MO5 Palette
+ *
+ * http://pulkomandy.tk/wiki/doku.php?id=documentations:devices:gate.arrays#video_generation
+ * https://16couleurs.wordpress.com/2013/03/31/archeologie-infographique-le-pixel-art-pour-thomson/
+ */
+void MOTO_set_MO5_palette(T_Components * palette);
+
+/**
+ * Set TO7/70 Palette.
+ *
+ * The 8 first colors are the TO7 palette
+ */
+void MOTO_set_TO7_palette(T_Components * palette);
+
 /** @}*/

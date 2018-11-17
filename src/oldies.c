@@ -545,3 +545,30 @@ void MOTO_gamma_correct_MOTO_to_RGB(T_Components * color, word bgr)
   color->G = (byte)round(pow(((bgr >> 4)& 0x0F)/15.0, inv_gamma) * 255.0);
   color->R = (byte)round(pow((bgr & 0x0F)/15.0, inv_gamma) * 255.0);
 }
+
+void MOTO_set_MO5_palette(T_Components * palette)
+{
+  static const unsigned char mo5palette[48] = {
+    // Taken from https://16couleurs.wordpress.com/2013/03/31/archeologie-infographique-le-pixel-art-pour-thomson/
+    // http://pulkomandy.tk/wiki/doku.php?id=documentations:devices:gate.arrays#video_generation
+    0, 0, 0, 255, 85, 85, 0, 255, 0, 255, 255, 0,
+    85, 85, 255, 255, 0, 255, 0, 255, 255, 255, 255, 255,
+    170, 170, 170, 255, 170, 255, 170, 255, 170, 255, 255, 170,
+    85, 170, 255, 255, 170, 170, 170, 255, 255, 255, 170, 85
+  };
+  memcpy(palette, mo5palette, 48);
+}
+
+void MOTO_set_TO7_palette(T_Components * palette)
+{
+  int i;
+  static const word to8default_pal[16] = {
+    // BGR values Dumped from a TO8D with a BASIC 512 program :
+    // FOR I=0TO15:PRINT PALETTE(I):NEXT I
+    0x000, 0x00F, 0x0F0, 0x0FF, 0xF00, 0xF0F, 0xFF0, 0xFFF,
+    0x777, 0x33A, 0x3A3, 0x3AA, 0xA33, 0xA3A, 0xEE7, 0x07B
+  };
+
+  for (i = 0; i < 16; i++)
+    MOTO_gamma_correct_MOTO_to_RGB(palette + i, to8default_pal[i]);
+}

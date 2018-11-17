@@ -4941,14 +4941,6 @@ void Load_MOTO(T_IO_Context * context)
   enum MOTO_mode { F_40col, F_80col, F_bm4, F_bm16 } mode = F_40col;
   enum PIXEL_RATIO ratio = PIXEL_SIMPLE;
   int width = 320, height = 200, columns = 40;
-  static const unsigned char mo5palette[48] = {
-    // Taken from https://16couleurs.wordpress.com/2013/03/31/archeologie-infographique-le-pixel-art-pour-thomson/
-    // http://pulkomandy.tk/wiki/doku.php?id=documentations:devices:gate.arrays#video_generation
-    0, 0, 0, 255, 85, 85, 0, 255, 0, 255, 255, 0,
-    85, 85, 255, 255, 0, 255, 0, 255, 255, 255, 255, 255,
-    170, 170, 170, 255, 170, 255, 170, 255, 170, 255, 255, 170,
-    85, 170, 255, 255, 170, 170, 170, 255, 255, 255, 170, 85
-  };
 
   File_error = 1;
   file = Open_file_read(context);
@@ -4958,7 +4950,7 @@ void Load_MOTO(T_IO_Context * context)
   // Load default palette
   if (Config.Clear_palette)
     memset(context->Palette,0,sizeof(T_Palette));
-  memcpy(context->Palette, mo5palette, sizeof(mo5palette));
+  MOTO_set_TO7_palette(context->Palette);
 
   file_type = MOTO_Check_binary_file(file);
   if (fseek(file, 0, SEEK_SET) < 0)
@@ -5139,7 +5131,10 @@ void Load_MOTO(T_IO_Context * context)
   else if(file_type == 3 || file_type == 4)
   {
     if (file_type == 4) // MO file
+    {
       transpose = 0;
+      MOTO_set_MO5_palette(context->Palette);
+    }
 
     do
     {
