@@ -420,12 +420,11 @@ int C64_FLI_enforcer(void)
   return 0;
 }
 
-/// @ingroup moto
-int MOTO_Check_binary_file(FILE * f)
+int DECB_Check_binary_file(FILE * f)
 {
-  int type = 1; // BIN
   byte code;
   word length, address;
+  long end;
 
   // Check end of file
   if (fseek(f, -5, SEEK_END) < 0)
@@ -433,6 +432,36 @@ int MOTO_Check_binary_file(FILE * f)
   if (!(Read_byte(f, &code) && Read_word_be(f, &length) && Read_word_be(f, &address)))
     return 0;
   if (code != 0xff || length != 0)
+    return 0;
+  end = ftell(f);
+  if (end < 0)
+    return 0;
+  if (fseek(f, 0, SEEK_SET) < 0)
+    return 0;
+  // Read Binary structure
+  do
+  {
+    if (!(Read_byte(f, &code) && Read_word_be(f, &length) && Read_word_be(f, &address)))
+      return 0;
+    // skip chunk content
+    if (fseek(f, length, SEEK_CUR) < 0)
+      return 0;
+  }
+  while(code == 0);
+  if (code != 0xff)
+    return 0;
+  if (ftell(f) != end)
+    return 0;
+  return 1;
+}
+
+int MOTO_Check_binary_file(FILE * f)
+{
+  int type = 1; // BIN
+  byte code;
+  word length, address;
+
+  if (!DECB_Check_binary_file(f))
     return 0;
   if (fseek(f, 0, SEEK_SET) < 0)
     return 0;
@@ -452,7 +481,7 @@ int MOTO_Check_binary_file(FILE * f)
       if (!Read_bytes(f, map_header, 3))
         return 0;
       length -= 3;
-      if ((map_header[0] & 0x3F) == 0 && (map_header[0] & 0xC0) != 0xC0)
+      if ((map_header[0] & 0x3F) == 0 && (map_header[0] & 0xC0) != 0xC0)  // 00, 40 or 80
       {
         GFX2_Log(GFX2_DEBUG, "Thomson MAP &H%02X %u %u\n", map_header[0], map_header[1], map_header[2]);
         if (((map_header[1] < 80 && map_header[0] != 0) // <= 80col in 80col and bm16
@@ -460,17 +489,24 @@ int MOTO_Check_binary_file(FILE * f)
             && map_header[2] < 25)  // <= 200 pixels high
           type = 2; // MAP file (SAVEP/LOADP format)
       }
+      if (type == 1)
+      {
+        if (length == 8000 || length == 8032 || length == 8064)
+          type = 4; // MO autoloading picture
+      }
     }
-    else if (length == 1 && address == 0xE7C3)  // TO8/TO9 6846 PRC
-      type = 3; // TO autoloading picture
-    // TODO : check autoloading MO5...
+    else if (length == 1)
+    {
+      if(address == 0xE7C3)  // TO7/TO8/TO9 6846 PRC
+        type = 3; // TO autoloading picture
+      else if(address == 0xA7C0)  // MO5/MO6 PRC
+        type = 4; // MO autoloading picture
+    }
 
     if (fseek(f, length, SEEK_CUR) < 0)
       return 0;
   }
   while(code == 0);
-  if (code != 0xff)
-    return 0;
   return type;
 }
 
@@ -489,8 +525,6 @@ int DECB_BIN_Add_End(FILE * f, word address)
       && Write_word_be(f, address);
 }
 
-/** @ingroup moto
- * @{ */
 word MOTO_gamma_correct_RGB_to_MOTO(const T_Components * color)
 {
   word r, g, b;
@@ -511,4 +545,3 @@ void MOTO_gamma_correct_MOTO_to_RGB(T_Components * color, word bgr)
   color->G = (byte)round(pow(((bgr >> 4)& 0x0F)/15.0, inv_gamma) * 255.0);
   color->R = (byte)round(pow((bgr & 0x0F)/15.0, inv_gamma) * 255.0);
 }
-/** @} */

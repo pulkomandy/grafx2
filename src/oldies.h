@@ -70,6 +70,12 @@ int DECB_BIN_Add_Chunk(FILE * f, word size, word address, const byte * data);
 int DECB_BIN_Add_End(FILE * f, word address);
 
 
+/**
+ * Check if the file is in the DECB Binary format
+ *
+ * @param f open file
+ * @return 1 if the file is in DECB Binary format, or else 0
+ */
 int DECB_Check_binary_file(FILE * f);
 /** @}*/
 
@@ -88,7 +94,31 @@ int DECB_Check_binary_file(FILE * f);
  * - TO8/TO8D
  * - TO9
  * - Olivetti Prodest PC128 (a Thomson MO6 clone)
+ * @{
  */
+
+/**
+ * to define a specific machine in the Thomson MO/TO range of machines
+ */
+enum MOTO_Machine_Type {
+  MACHINE_TO7,    ///< original TO7 with 8 colors
+  MACHINE_TO770,  ///< the TO7-70 had 16 colors
+  MACHINE_MO5,
+  MACHINE_MO6,    ///<
+  MACHINE_TO9,
+  MACHINE_TO8     ///< TO8, TO8D and TO9+ are equivalent
+};
+
+/**
+ * Graphic modes available in BASIC 128/512 with CONSOLE,,,,X instruction
+ */
+enum MOTO_Graphic_Mode {
+  MOTO_MODE_40col = 0,  ///< 320x200 16 colors with constraints
+  MOTO_MODE_80col = 1,  ///< 640x200 2 colors
+  MOTO_MODE_bm4 = 2,    ///< 320x200 4 colors without constraint
+  MOTO_MODE_bm16 = 3,   ///< 160x200 16 colors without constraint
+};
+
 /**
  * Checks if the file is a Thomson binary file (SAVEM/LOADM format)
  *
