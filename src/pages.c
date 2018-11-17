@@ -77,6 +77,7 @@ T_Page * New_page(int nb_layers)
     page->Comment[0]='\0';
     page->File_directory[0]='\0';
     page->Filename[0]='\0';
+    page->Filename_unicode[0]=0;
     page->File_format=DEFAULT_FILEFORMAT;
     page->Nb_layers=nb_layers;
     page->Gradients=NULL;
