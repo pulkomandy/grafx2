@@ -5361,6 +5361,88 @@ void Load_MOTO(T_IO_Context * context)
 }
 
 /**
+ */
+#define MOTO_MAP_NOPACKING
+static unsigned int MOTO_MAP_pack(byte * packed, const byte * unpacked, unsigned int unpacked_len)
+{
+  unsigned int src;
+  unsigned int dst = 0;
+  unsigned int repeat;
+  unsigned int count;
+  unsigned int i;
+
+  if (unpacked_len == 0)
+    return 0;
+  if (unpacked_len == 1)
+  {
+    packed[0] = 1;
+    packed[1] = unpacked[0];
+    return 2;
+  }
+#ifdef MOTO_MAP_NOPACKING
+  // compression disabled
+  src = 0;
+  while ((unpacked_len - src) > 255)
+  {
+    packed[dst++] = 0;
+    packed[dst++] = 255;
+    memcpy(packed+dst, unpacked+src, 255);
+    dst += 255;
+    src += 255;
+  }
+  count = unpacked_len - src;
+  packed[dst++] = 0;
+  packed[dst++] = count;
+  memcpy(packed+dst, unpacked+src, count);
+  dst += count;
+  src += count;
+  return dst;
+#else
+  repeat = (unpacked[0] == unpacked[1]);
+  count = 2;
+  src = 2;
+  while (src < unpacked_len)
+  {
+    if (repeat)
+    {
+      if (unpacked[src-1] == unpacked[src])
+        count++;
+      else
+      {
+        // flush run
+        packed[dst++] = count;
+        packed[dst++] = unpacked[src-1];
+        count = 1;
+        repeat = 0;
+      }
+    }
+    else
+    {
+      if (unpacked[src-1] != unpacked[src])
+        count++;
+      else if (count == 1)
+      {
+        count++;
+        repeat = 1;
+      }
+      else
+      {
+// verifier le nombre de repetitions > 3
+        if (unpacked[src] != unpacked[src+1] || unpacked[src] != unpacked[src+2])
+        {
+          src += 2;
+          count += 3;
+        }
+      }
+    }
+    src++;
+  }
+  // commit
+  return dst;
+#endif
+}
+
+/**
  * GUI window to choose Thomson MO/TO saving parameters
  *
  * @param[out] machine target machine
@@ -5713,7 +5795,8 @@ void Save_MOTO(T_IO_Context * context)
     vram_forme[8000+i*2] = to8color >> 8;
     vram_forme[8000+i*2+1] = to8color & 0xFF;
   }
-  if (1)
+
+  if (format == 0)  // BIN
   {
     word chunk_length;
 
@@ -5746,7 +5829,138 @@ void Save_MOTO(T_IO_Context * context)
   }
   else
   {
-    // TODO : format MAP
+    // format MAP with TO-SNAP extensions
+    byte * unpacked_data;
+    byte * packed_data;
+
+    unpacked_data = malloc(16*1024);
+    packed_data = malloc(16*1024);
+    if (packed_data == NULL || unpacked_data == NULL)
+    {
+      GFX2_Log(GFX2_ERROR, "Failed to allocate 2x16kB of memory\n");
+      free(packed_data);
+      free(unpacked_data);
+      goto error;
+    }
+    switch (mode)
+    {
+      case MOTO_MODE_40col:
+      case MOTO_MODE_bm4:
+        packed_data[0] = 0;  // mode
+        packed_data[1] = (context->Width / 8) - 1;
+        break;
+      case MOTO_MODE_80col:
+        packed_data[0] = 0x80; // mode
+        packed_data[1] = (context->Width / 8) - 1;
+        break;
+      case MOTO_MODE_bm16:
+        packed_data[0] = 0x40; // mode
+        packed_data[1] = (context->Width / 2) - 1;
+        break;
+    }
+    packed_data[2] = (context->Height / 8) - 1;
+    // 1st step : put data to pack in a linear buffer
+    // 2nd step : pack data
+    i = 0;
+    switch (mode)
+    {
+      case MOTO_MODE_40col:
+      case MOTO_MODE_bm4:
+        for (bx = 0; bx <= packed_data[1]; bx++)
+        {
+          for (y = 0; y < context->Height; y++)
+          {
+            unpacked_data[i] = vram_forme[bx + y*(packed_data[1]+1)];
+            unpacked_data[i+8192] = vram_couleur[bx + y*(packed_data[1]+1)];
+            i++;
+          }
+        }
+        i = 3;
+        i += MOTO_MAP_pack(packed_data+3, unpacked_data, context->Height * (packed_data[1]+1));
+        packed_data[i++] = 0; // ending of VRAM forme packing
+        packed_data[i++] = 0;
+        i += MOTO_MAP_pack(packed_data+i, unpacked_data + 8192, context->Height * (packed_data[1]+1));
+        packed_data[i++] = 0; // ending of VRAM couleur packing
+        packed_data[i++] = 0;
+        break;
+      case MOTO_MODE_80col:
+      case MOTO_MODE_bm16:
+        for (bx = 0; bx < (packed_data[1] + 1) / 2; bx++)
+        {
+          for (y = 0; y < context->Height; y++)
+            unpacked_data[i++] = vram_forme[bx + y*(packed_data[1]+1)/2];
+          for (y = 0; y < context->Height; y++)
+            unpacked_data[i++] = vram_couleur[bx + y*(packed_data[1]+1)/2];
+        }
+        i = 3;
+        i += MOTO_MAP_pack(packed_data+3, unpacked_data, context->Height * (packed_data[1]+1));
+        packed_data[i++] = 0; // ending of VRAM forme packing
+        packed_data[i++] = 0;
+        packed_data[i++] = 0; // ending of VRAM couleur packing
+        packed_data[i++] = 0;
+        break;
+    }
+    // add TO-SNAP extension
+    // see http://collection.thomson.free.fr/code/articles/prehisto_bulletin/page.php?XI=0&XJ=13
+    if (i&1)  // align
+      packed_data[i++] = 0;
+    // bytes 0-1 : Hardware video mode (value of SCRMOD 0x605F)
+    packed_data[i++] = 0;
+    switch (mode)
+    {
+      case MOTO_MODE_40col:
+        packed_data[i++] = 0;
+        break;
+      case MOTO_MODE_bm4:
+        packed_data[i++] = 0x01;
+        break;
+      case MOTO_MODE_80col:
+        packed_data[i++] = 0x40;
+        break;
+      case MOTO_MODE_bm16:
+        packed_data[i++] = 0x80;
+        break;
+    }
+    // bytes 2-3 : Border color
+    packed_data[i++] = 0;
+    packed_data[i++] = 0;
+    // bytes 4-5 : BASIC video mode (CONSOLE,,,,X)
+    packed_data[i++] = 0;
+    switch (mode)
+    {
+      case MOTO_MODE_40col:
+        packed_data[i++] = 0;
+        break;
+      case MOTO_MODE_bm4:
+        packed_data[i++] = 2;
+        break;
+      case MOTO_MODE_80col:
+        packed_data[i++] = 1;
+        break;
+      case MOTO_MODE_bm16:
+        packed_data[i++] = 3;
+        break;
+    }
+    // bytes 6-37 : BGR palette
+    for (x = 0; x < 16; x++)
+    {
+      word bgr = MOTO_gamma_correct_RGB_to_MOTO(context->Palette + x);
+      packed_data[i++] = bgr >> 8;
+      packed_data[i++] = bgr & 0xff;
+    }
+    // bytes 38-39 : TO-SNAP signature
+    packed_data[i++] = 0xA5;
+    packed_data[i++] = 0x5A;
+
+    free(unpacked_data);
+
+    if (!DECB_BIN_Add_Chunk(file, i, 0, packed_data) ||
+        !DECB_BIN_Add_End(file, 0x0000))
+    {
+      free(packed_data);
+      goto error;
+    }
+    free(packed_data);
   }
   fclose(file);
   File_error = 0;
