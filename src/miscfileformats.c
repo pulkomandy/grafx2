@@ -5926,13 +5926,46 @@ void Save_MOTO(T_IO_Context * context)
     }
     break;
   case MOTO_MODE_80col:
-    GFX2_Log(GFX2_WARNING, "80col not implemented!\n");
+    for (bx = 0; bx < context->Width / 16; bx++)
+    {
+      for (y = 0; y < context->Height; y++)
+      {
+        byte val = 0;
+        for (x = bx * 16; x < bx*16 + 8; x++)
+          val = (val << 1) | Get_pixel(context, x, y);
+        vram_forme[y*(context->Width/16)+bx] = val;
+        for (; x < bx*16 + 16; x++)
+          val = (val << 1) | Get_pixel(context, x, y);
+        vram_couleur[y*(context->Width/16)+bx] = val;
+      }
+    }
     break;
   case MOTO_MODE_bm4:
-    GFX2_Log(GFX2_WARNING, "bm4 not implemented!\n");
+    for (y = 0; y < context->Height; y++)
+    {
+      for (bx = 0; bx < context->Width / 8; bx++)
+      {
+        byte val1 = 0, val2 = 0, pixel;
+        for (x = bx * 8; x < bx*8 + 8; x++)
+        {
+          pixel = Get_pixel(context, x, y); // TODO check pixel < 4
+          val1 = (val1 << 1) | (pixel >> 1);
+          val2 = (val2 << 1) | (pixel & 1);
+        }
+        vram_forme[y*(context->Width/8)+bx] = val1;
+        vram_couleur[y*(context->Width/8)+bx] = val2;
+      }
+    }
     break;
   case MOTO_MODE_bm16:
-    GFX2_Log(GFX2_WARNING, "bm16 not implemented!\n");
+    for (bx = 0; bx < context->Width / 4; bx++)
+    {
+      for (y = 0; y < context->Height; y++)
+      {
+         vram_forme[y*(context->Width/4)+bx] = (Get_pixel(context, bx*4, y) << 4) | Get_pixel(context, bx*4+1, y);
+         vram_couleur[y*(context->Width/4)+bx] = (Get_pixel(context, bx*4+2, y) << 4) | Get_pixel(context, bx*4+3, y);
+      }
+    }
     break;
   }
   // palette
