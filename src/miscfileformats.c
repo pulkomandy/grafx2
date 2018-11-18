@@ -3045,7 +3045,12 @@ static int Save_C64_window(enum c64_format *saveFormat, byte *saveWhat, byte *lo
   do
   {
     button = Window_clicked_button();
-    switch(button)
+    if (Is_shortcut(Key, 0x100+BUTTON_HELP))
+    {
+      Key = 0;
+      Window_help(BUTTON_SAVE, "COMMODORE 64 FORMATS");
+    }
+    else switch(button)
     {
       case 3: // Save what
         *saveWhat = Window_attribute2;

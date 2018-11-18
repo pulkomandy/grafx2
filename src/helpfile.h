@@ -2216,6 +2216,18 @@ static const T_Help_table helptable_save[] =
   HELP_TEXT ("The TO7, TO7/70 and MO5 only support the")
   HELP_TEXT ("40col mode with 8 (TO7) or 16 (TO7/70 and")
   HELP_TEXT ("MO5) colors.")
+  HELP_TEXT ("")
+  HELP_TEXT ("")
+  HELP_TITLE("COMMODORE 64 FORMATS")
+  HELP_TEXT ("GrafX2 supports saving of :")
+  HELP_TEXT ("- hi-res (320x200) 2 colors in each 8x8block")
+  HELP_TEXT ("- multicolor (160x200) 4 colors in each 4x8")
+  HELP_TEXT ("  block, with a common background color")
+  HELP_TEXT ("- FLI (Flexible Line Interpretation) based")
+  HELP_TEXT ("  on multicolor with in each 4x1 block :")
+  HELP_TEXT ("  1 background color common to the line,")
+  HELP_TEXT ("  1 color common for the 4x8 block and")
+  HELP_TEXT ("  2 specific colors.")
 };
 static const T_Help_table helptable_load[] =
 {
