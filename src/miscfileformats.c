@@ -6143,10 +6143,10 @@ void Save_MOTO(T_IO_Context * context)
           packed_data[i++] = 0x01;
           break;
         case MOTO_MODE_80col:
-          packed_data[i++] = 0x40;
+          packed_data[i++] = 0x80;
           break;
         case MOTO_MODE_bm16:
-          packed_data[i++] = 0x80;
+          packed_data[i++] = 0x40;
           break;
       }
       // bytes 2-3 : Border color
