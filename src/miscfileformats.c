@@ -5664,7 +5664,7 @@ static int Save_MOTO_window(enum MOTO_Machine_Type * machine, int * format, enum
     if (Is_shortcut(Key, 0x100+BUTTON_HELP))
     {
       Key = 0;
-      Window_help(BUTTON_SAVE, NULL);
+      Window_help(BUTTON_SAVE, "THOMSON MO/TO FORMAT");
     }
     else switch (button)
     {
