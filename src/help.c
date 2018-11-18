@@ -416,7 +416,7 @@ void Display_help(void)
   for (line_index=0;line_index<16;line_index++)
   {
     // Shortcut au cas ou la section fait moins de 16 lignes
-    if (line_index >= Help_section[Current_help_section].Length)
+    if ((line_index + start_line) >= Help_section[Current_help_section].Length)
     {
       Window_rectangle (x_pos,
            y_pos + line_index*8,
