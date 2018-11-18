@@ -5629,6 +5629,7 @@ static int Save_MOTO_window(enum MOTO_Machine_Type * machine, int * format, enum
   T_Dropdown_button * format_dd;
   T_Dropdown_button * mode_dd;
   static const char * mode_list[] = { "40col", "80col", "bm4", "bm16" };
+  char text_info[24];
 
   Open_window(200, 125, "Thomson MO/TO Saving");
   Window_set_normal_button(110,100,80,15,"Save",1,1,KEY_RETURN); // 1
@@ -5683,6 +5684,22 @@ static int Save_MOTO_window(enum MOTO_Machine_Type * machine, int * format, enum
         *mode = (enum MOTO_Graphic_Mode)Window_attribute2;
         break;
     }
+    Hide_cursor();
+    //"ABCDEFGHIJKLMNOPQRSTUVW"
+    memset(text_info, ' ', 23);
+    text_info[23] = '\0';
+    if (*machine == MACHINE_TO7 || *machine == MACHINE_TO770 || *machine == MACHINE_MO5)
+    {
+      if (*mode != MOTO_MODE_40col)
+        snprintf(text_info, sizeof(text_info), "%s only supports 40col",
+                 (*machine == MACHINE_MO5) ? "MO5" : "TO7");
+      else if (*format == 1)
+        strncpy(text_info, "No TO-SNAP extension.  ", sizeof(text_info));
+      else
+        strncpy(text_info, "No palette to save.    ", sizeof(text_info));
+    }
+    Print_in_window(9, 80, text_info, MC_Dark, MC_Light);
+    Display_cursor();
   } while(button!=1 && button!=2);
 
   Close_window();
