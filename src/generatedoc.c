@@ -173,8 +173,12 @@ static const char * Export_help_table(FILE * f, unsigned int page)
       char * link = strstr(table[index].Text, "http://");
       if (link == NULL)
       {
-        link = strstr(table[index].Text, "www.");
-        prefix = "http://";
+        link = strstr(table[index].Text, "https://");
+        if (link == NULL)
+        {
+          link = strstr(table[index].Text, "www.");
+          prefix = "http://";
+        }
       }
       if (link != NULL)
       {
