@@ -4910,7 +4910,7 @@ void Test_MOTO(T_IO_Context * context, FILE * file)
 /**
  * Load a picture for Thomson TO8/TO8D/TO9/TO9+/MO6
  *
- * The format used is the one produced by TGA2Teo :
+ * One of the supported format is the one produced by TGA2Teo :
  * - Picture data is splitted into 2 files, one for each VRAM bank :
  *   - The first VRAM bank is called "forme" (shape).
  *     In 40col mode it stores pixels.
@@ -4929,6 +4929,11 @@ void Test_MOTO(T_IO_Context * context, FILE * file)
  *
  * As it is not possible to disriminate bitmap16 and 40col, opening the "P"
  * file sets bitmap16, opening the "C" file sets 40col.
+ *
+ * This function also supports .MAP files (with optional TO-SNAP extension)
+ * and our own "autoloading" BIN files.
+ * See http://pulkomandy.tk/projects/GrafX2/wiki/Develop/FileFormats/MOTO for
+ * a detailled description.
  */
 void Load_MOTO(T_IO_Context * context)
 {
@@ -4942,7 +4947,8 @@ void Load_MOTO(T_IO_Context * context)
   byte bpp = 4;
   byte code;
   word length, address;
-  int transpose = 1;
+  int transpose = 1;  // transpose the upper bits of the color plane bytes
+                      // FFFFBBBB becomes bfFFFBBB (for TO7 compatibility)
   enum MOTO_Graphic_Mode mode = MOTO_MODE_40col;
   enum PIXEL_RATIO ratio = PIXEL_SIMPLE;
   int width = 320, height = 200, columns = 40;
@@ -5332,7 +5338,7 @@ void Load_MOTO(T_IO_Context * context)
             forme <<= 1;
             couleurs <<= 1;
           }
-#if 0
+#if 0     // the following would be for the alternate bm4 mode
           for (x = bx*8; x < bx*8+4; x++)
           {
             Set_pixel(context, x, y, couleurs >> 6);
@@ -5732,7 +5738,8 @@ void Save_MOTO(T_IO_Context * context)
 
   /**
    * In the future we could support other resolution for .MAP
-   * format. */
+   * format.
+   * And even in .BIN format, we could store less lines. */
   if (context->Height != 200)
   {
     Warning_message("must be 640x200, 320x200 or 160x200");
