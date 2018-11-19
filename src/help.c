@@ -45,6 +45,16 @@
     #include <sys/mount.h>
 #endif
 
+#if defined(__macosx__)
+#import <CoreFoundation/CoreFoundation.h>
+/* defining __QD__ is a cheat to avoid :
+screen.h:58: error: conflicting types for 'SetPalette'
+/System/Library/Frameworks/ApplicationServices.framework/Frameworks/QD.framework/Headers/Palettes.h:150: error: previous declaration of 'SetPalette' was here
+*/
+#define __QD__
+#import <ApplicationServices/ApplicationServices.h>
+#endif
+
 #ifndef __no_pnglib__
 #include <png.h>
 #endif
@@ -337,12 +347,13 @@ static void Window_help_follow_link(const char * line)
   while (i < (sizeof(buffer) - 1) && *link != '\0'
          && *link != ')' && *link != ' ')
     buffer[i++] = *link++;
-  buffer[i++] = '\0';
+  buffer[i] = '\0';
   GFX2_Log(GFX2_DEBUG, "WWW link found : \"%s\"\n", buffer);
 #if defined(WIN32)
   /*HINSTANCE hInst = */ShellExecute(NULL, "open", buffer, NULL, NULL, SW_SHOWNORMAL);
 #elif defined(__macosx__)
-  /*{
+  {
+    OSStatus ret;
     CFURLRef url = CFURLCreateWithBytes (
         NULL,                   // allocator
         (UInt8*)buffer,         // URLBytes
@@ -350,9 +361,11 @@ static void Window_help_follow_link(const char * line)
         kCFStringEncodingASCII, // encoding
         NULL                    // baseURL
       );
-    LSOpenCFURLRef(url,0);
+    ret = LSOpenCFURLRef(url,0);
+    if (ret != noErr)
+      GFX2_Log(GFX2_ERROR, "LSOpenCFURLRef() returned %d\n", ret);
     CFRelease(url);
-  }*/
+  }
 #elif defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
   {
     char command[80]; // use the xdg-open command to open the url in the default browser
