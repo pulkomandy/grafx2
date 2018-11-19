@@ -5707,13 +5707,19 @@ static int Save_MOTO_window(enum MOTO_Machine_Type * machine, int * format, enum
   return button==1;
 }
 
+/**
+ * Save a picture in MAP or BIN Thomson MO/TO file format.
+ *
+ * File format details :
+ * http://pulkomandy.tk/projects/GrafX2/wiki/Develop/FileFormats/MOTO
+ */
 void Save_MOTO(T_IO_Context * context)
 {
   int transpose = 1;  // transpose upper bits in "couleur" vram
   enum MOTO_Machine_Type target_machine = MACHINE_TO7;
   int format = 0; // 0 = BIN, 1 = MAP
   enum MOTO_Graphic_Mode mode;
-  FILE * file;
+  FILE * file = NULL;
   byte * vram_forme;
   byte * vram_couleur;
   int i, x, y, bx;
@@ -5724,6 +5730,9 @@ void Save_MOTO(T_IO_Context * context)
 
   File_error = 1;
 
+  /**
+   * In the future we could support other resolution for .MAP
+   * format. */
   if (context->Height != 200)
   {
     Warning_message("must be 640x200, 320x200 or 160x200");
@@ -5734,9 +5743,11 @@ void Save_MOTO(T_IO_Context * context)
   {
     case 160:
       mode = MOTO_MODE_bm16;
+      target_machine = MACHINE_TO8;
       break;
     case 640:
       mode = MOTO_MODE_80col;
+      target_machine = MACHINE_TO8;
       break;
     case 320:
       mode = MOTO_MODE_40col; // or bm4
@@ -5757,9 +5768,6 @@ void Save_MOTO(T_IO_Context * context)
     transpose = 0;
   }
 
-  file = Open_file_write(context);
-  if (file == NULL )
-    return;
   vram_forme = malloc(8192);
   vram_couleur = malloc(8192);
   switch (mode)
@@ -5786,7 +5794,7 @@ void Save_MOTO(T_IO_Context * context)
           byte col = Get_pixel(context, x, y);
           if (col > 15)
           {
-            GFX2_Log(GFX2_WARNING, "Save_MOTO() color %u > 15 at pixel (%d,%d)\n", col, x, y);
+            Warning_with_format("color %u > 15 at pixel (%d,%d)", col, x, y);
             goto error;
           }
           color_freq[col]++;
@@ -5851,7 +5859,7 @@ void Save_MOTO(T_IO_Context * context)
                   fond = col;
                 else
                 {
-                  GFX2_Log(GFX2_WARNING, "Save_MOTO() constraint error (%d,%d)\n", x, y);
+                  Warning_with_format("Constraint error at pixel (%d,%d)", x, y);
                   goto error;
                 }
               }
@@ -5884,6 +5892,11 @@ void Save_MOTO(T_IO_Context * context)
             {
               forme_byte <<= 1;
               col = Get_pixel(context, x, y);
+              if (col > 15)
+              {
+                Warning_with_format("color %d > 15 at pixel (%d,%d)", col, x, y);
+                goto error;
+              }
               if (col == c1)
               {
                 forme_byte |= 1;
@@ -5896,7 +5909,7 @@ void Save_MOTO(T_IO_Context * context)
                   c2 = col;
                 else if (col != c2)
                 {
-                  GFX2_Log(GFX2_WARNING, "Save_MOTO() constraint error (%d,%d)\n", x, y);
+                  Warning_with_format("constraint error at pixel (%d,%d)", x, y);
                   goto error;
                 }
               }
@@ -5991,7 +6004,12 @@ void Save_MOTO(T_IO_Context * context)
         byte val1 = 0, val2 = 0, pixel;
         for (x = bx * 8; x < bx*8 + 8; x++)
         {
-          pixel = Get_pixel(context, x, y); // TODO check pixel < 4
+          pixel = Get_pixel(context, x, y);
+          if (pixel > 3)
+          {
+            Warning_with_format("color %d > 3 at pixel (%d,%d)", pixel, x, y);
+            goto error;
+          }
           val1 = (val1 << 1) | (pixel >> 1);
           val2 = (val2 << 1) | (pixel & 1);
         }
@@ -6019,6 +6037,10 @@ void Save_MOTO(T_IO_Context * context)
     vram_forme[8000+i*2+1] = to8color & 0xFF;
   }
 
+  file = Open_file_write(context);
+  if (file == NULL)
+    goto error;
+
   if (format == 0)  // BIN
   {
     word chunk_length;
@@ -6034,7 +6056,6 @@ void Save_MOTO(T_IO_Context * context)
       else
         snprintf((char *)vram_forme + 8032, 32, "GrafX2 %s.%s", Program_version, SVN_revision);
       // also saves the video mode
-      //*((char *)vram_forme + 8063) = '0' + mode;
       vram_forme[8063] = '0' + mode;
       memcpy(vram_couleur + 8000, vram_forme + 8000, 64);
     }
@@ -6198,6 +6219,7 @@ void Save_MOTO(T_IO_Context * context)
 error:
   free(vram_forme);
   free(vram_couleur);
-  fclose(file);
+  if (file)
+    fclose(file);
   File_error = 1;
 }
