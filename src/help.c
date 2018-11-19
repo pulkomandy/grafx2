@@ -309,6 +309,63 @@ void Remove_duplicate_shortcuts(void)
 }
 
 ///
+/// Follow the WWW link included in the line
+///
+/// recognize URLs starting with %http:// %https:// or www.
+static void Window_help_follow_link(const char * line)
+{
+  unsigned int i;
+  char buffer[48];
+  char * link;
+
+  link = strstr(line, "http://");
+  if (link == NULL)
+  {
+    link = strstr(line, "https://");
+    if (link == NULL)
+      link = strstr(line, "www.");
+  }
+  if (link == NULL)
+    return; // nothing found !
+  if (link[0] == 'w')
+  {
+    memcpy(buffer, "http://", 7);
+    i = 7;
+  }
+  else
+    i = 0;
+  while (i < (sizeof(buffer) - 1) && *link != '\0'
+         && *link != ')' && *link != ' ')
+    buffer[i++] = *link++;
+  buffer[i++] = '\0';
+  GFX2_Log(GFX2_DEBUG, "WWW link found : \"%s\"\n", buffer);
+#if defined(WIN32)
+  /*HINSTANCE hInst = */ShellExecute(NULL, "open", buffer, NULL, NULL, SW_SHOWNORMAL);
+#elif defined(__macosx__)
+  /*{
+    CFURLRef url = CFURLCreateWithBytes (
+        NULL,                   // allocator
+        (UInt8*)buffer,         // URLBytes
+        i,                      // length
+        kCFStringEncodingASCII, // encoding
+        NULL                    // baseURL
+      );
+    LSOpenCFURLRef(url,0);
+    CFRelease(url);
+  }*/
+#elif defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
+  {
+    char command[80]; // use the xdg-open command to open the url in the default browser
+    snprintf(command, sizeof(command), "xdg-open \"%s\"", buffer);
+    system(command);
+  }
+#else
+  // TODO : HAIKU, MINT, etc.
+  GFX2_Log(GFX2_WARNING, "URL open not supported yet on this system.\n");
+#endif
+}
+
+///
 /// Print a line with the 'help' (6x8) font.
 short Print_help(short x_pos, short y_pos, const char *line, char line_type, short link_position, short link_size)
 {
@@ -579,6 +636,8 @@ void Window_help(int section, const char *sub_section)
                 break;
                 // Ici on peut gérer un cas 'lien hypertexte'
                 default:
+                  GFX2_Log(GFX2_DEBUG, "click on line \"%s\"\n", Help_section[Current_help_section].Help_table[Help_position+line].Text);
+                  Window_help_follow_link(Help_section[Current_help_section].Help_table[Help_position+line].Text);
                 break;
               }
               Hide_cursor();
