@@ -5575,51 +5575,6 @@ GFX2_Log(GFX2_DEBUG, " savings=%d i=%u j=%u (counts[j]=0x%04x)\n", savings, i, j
 #endif
 }
 
-#if 0
-void Test_MOTO_MAP_pack(void)
-{
-  unsigned int i, j;
-  byte buffer[1024];
-  byte buffer2[1024];
-  unsigned int packed_len, unpacked_len, original_len;
-  static const char * tests[] = {
-    //"12345AAAAAAA@",    // best : 00 05 "12345" 07 'A' 01 '@' : 11
-    "123AABAA123@@@@@", // best : 00 0B "123AABAA123" 05 '@' : 15
-    "123AAAAA123AABAA", // best : 00 03 "123" 05 'A' 00 06 "123AAB" 02 'A' : 17
-    "123AAAAA123AAB", // best : 00 03 "123" 05 'A' 00 06 "123AAB" : 15
-    "abcAABAAdddddddd", // best : 00 08 "abcAABAA" 08 'd' : 12
-    NULL
-  };
-
-  GFX2_Log(GFX2_DEBUG, "Test_MOTO_MAP_pack\n");
-  for (i = 0; tests[i]; i++)
-  {
-    original_len = strlen(tests[i]);
-    packed_len = MOTO_MAP_pack(buffer, (const byte *)tests[i], original_len);
-    GFX2_Log(GFX2_DEBUG, "    %s (%u) packed to %u\n", tests[i], original_len, packed_len);
-    unpacked_len = 0;
-    j = 0;
-    // unpack to test
-    while (j < packed_len)
-    {
-      if (buffer[j] == 0)
-      { // copy
-        memcpy(buffer2 + unpacked_len, buffer + j + 2, buffer[j+1]);
-        unpacked_len += buffer[j+1];
-        j += 2 + buffer[j+1];
-      }
-      else
-      { // repeat
-        memset(buffer2 + unpacked_len, buffer[j+1], buffer[j]);
-        unpacked_len += buffer[j];
-        j += 2;
-      }
-    }
-    if (unpacked_len != original_len || 0 != memcmp(tests[i], buffer2, original_len))
-      GFX2_Log(GFX2_ERROR, "*** %u %s != %u %s ***\n", original_len, tests[i], unpacked_len, buffer2);
-  }
-}
-#endif
 
 /**
  * GUI window to choose Thomson MO/TO saving parameters
