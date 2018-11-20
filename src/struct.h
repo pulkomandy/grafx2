@@ -62,6 +62,7 @@ typedef uint64_t qword;
 typedef void (* Func_action) (void); ///< An action.
 typedef void (* Func_btn_action) (int); ///< An action. Used when you click a menu button or trigger a keyboard shortcut.
 typedef void (* Func_pixel) (word,word,byte); ///< Set pixel at position (x,y) to color c. Used in load screen to write the data to brush, picture, or preview area.
+typedef void (* Func_pixel_opt_preview) (word,word,byte,int); ///< Set pixel at position (x,y) to color c. With optional preview.
 typedef byte (* Func_read)   (word,word); ///< Read a pixel at position (x,y) on something. Used for example in save to tell if the data is a brush or a picture
 typedef void (* Func_clear)  (byte);
 typedef void (* Func_display)   (word,word,word);

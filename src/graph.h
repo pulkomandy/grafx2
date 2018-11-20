@@ -134,11 +134,16 @@ byte Read_pixel_from_current_screen  (word x,word y);
 byte Read_pixel_from_current_layer(word x,word y);
 
 /// Paint a single pixel in image only.
-extern Func_pixel Pixel_in_current_screen;
+#define Pixel_in_current_screen(x,y,c) Pixel_in_current_screen_with_opt_preview(x,y,c,0)
 
 /// Paint a single pixel in image AND on screen.
-extern Func_pixel Pixel_in_current_screen_with_preview;
+#define Pixel_in_current_screen_with_preview(x,y,c) Pixel_in_current_screen_with_opt_preview(x,y,c,1)
 
+/// Paint a single pixel in image AND optionnaly on screen.
+extern Func_pixel_opt_preview Pixel_in_current_screen_with_opt_preview;
+
+/// Update the pixel functions according to the current Image_mode.
 /// Sets ::Pixel_in_current_screen and ::Pixel_in_current_screen_with_preview
+/// through ::Pixel_in_current_screen_with_opt_preview
 void Update_pixel_renderer(void);
 

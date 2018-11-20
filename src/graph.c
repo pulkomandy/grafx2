@@ -3231,90 +3231,58 @@ byte Read_pixel_from_current_screen  (word x,word y)
   return *(Main.backups->Pages->Image[depth].Pixels + x+y*Main.image_width);
 }
 
-/// Paint a a single pixel in image only : as-is.
-void Pixel_in_screen_direct(word x,word y,byte color)
+/// Paint a a single pixel in image and optionnaly on screen: as-is.
+static void Pixel_in_screen_direct_with_opt_preview(word x, word y, byte color, int preview)
 {
   *((y)*Main.image_width+(x)+Main.backups->Pages->Image[Main.current_layer].Pixels)=color;
-}
-
-/// Paint a a single pixel in image and on screen: as-is.
-void Pixel_in_screen_direct_with_preview(word x,word y,byte color)
-{
-  *((y)*Main.image_width+(x)+Main.backups->Pages->Image[Main.current_layer].Pixels)=color;
-  Pixel_preview(x,y,color);
-}
-
-/// Paint a a single pixel in image only : using layered display.
-void Pixel_in_screen_layered(word x,word y,byte color)
-{
-  byte depth = *(Main_visible_image_depth_buffer.Image+x+y*Main.image_width);
-  *(Main.backups->Pages->Image[Main.current_layer].Pixels + x+y*Main.image_width)=color;
-  if ( depth <= Main.current_layer)
-  {
-    if (color == Main.backups->Pages->Transparent_color) // transparent color
-      // fetch pixel color from the topmost visible layer
-      color=*(Main.backups->Pages->Image[depth].Pixels + x+y*Main.image_width);
-
-    *(x+y*Main.image_width+Main_screen)=color;
-  }
-}
-
-/// Paint a a single pixel in image and on screen : using layered display.
-void Pixel_in_screen_layered_with_preview(word x,word y,byte color)
-{
-  byte depth = *(Main_visible_image_depth_buffer.Image+x+y*Main.image_width);
-  *(Main.backups->Pages->Image[Main.current_layer].Pixels + x+y*Main.image_width)=color;
-  if ( depth <= Main.current_layer)
-  {
-    if (color == Main.backups->Pages->Transparent_color) // transparent color
-      // fetch pixel color from the topmost visible layer
-      color=*(Main.backups->Pages->Image[depth].Pixels + x+y*Main.image_width);
-
-    *(x+y*Main.image_width+Main_screen)=color;
-
+  if (preview)
     Pixel_preview(x,y,color);
+}
+
+/// Paint a a single pixel in image and on optionnaly on screen : using layered display.
+static void Pixel_in_screen_layered_with_opt_preview(word x,word y,byte color, int preview)
+{
+  byte depth = *(Main_visible_image_depth_buffer.Image+x+y*Main.image_width);
+  *(Main.backups->Pages->Image[Main.current_layer].Pixels + x+y*Main.image_width)=color;
+  if ( depth <= Main.current_layer)
+  {
+    if (color == Main.backups->Pages->Transparent_color) // transparent color
+      // fetch pixel color from the topmost visible layer
+      color=*(Main.backups->Pages->Image[depth].Pixels + x+y*Main.image_width);
+
+    *(x+y*Main.image_width+Main_screen)=color;
+
+    if (preview)
+      Pixel_preview(x,y,color);
   }
 }
 
-void Pixel_in_screen_egx(word x,word y,byte color)
+/// Paint a pixel in CPC EGX mode
+///
+/// even lines have 2x more pixel than odd lines, but less colors
+static void Pixel_in_screen_egx_with_opt_preview(word x,word y,byte color,int preview)
 {
   uint8_t mask;
   if (Main.backups->Pages->Image_mode == IMAGE_MODE_EGX)
   {
-    mask = 0xF3;
+    mask = 0xF3;  // 11110011
   } else {
-    mask = 0xFD;
+    mask = 0xFD;  // 11111101
   }
 
   if (y & 1)
   {
-    Pixel_in_screen_layered(x & ~1,y,color);
-    Pixel_in_screen_layered(x |  1,y,color);
+    Pixel_in_screen_layered_with_opt_preview(x & ~1,y,color,preview);
+    Pixel_in_screen_layered_with_opt_preview(x |  1,y,color,preview);
   }
   else
-    Pixel_in_screen_layered(x,y,color & mask);
+    Pixel_in_screen_layered_with_opt_preview(x,y,color & mask,preview);
 }
 
-void Pixel_in_screen_egx_with_preview(word x,word y,byte color)
-{
-  uint8_t mask;
-  if (Main.backups->Pages->Image_mode == IMAGE_MODE_EGX)
-  {
-    mask = 0xF3;
-  } else {
-    mask = 0xFD;
-  }
-
-  if (y & 1)
-  {
-    Pixel_in_screen_layered_with_preview(x & ~1,y,color);
-    Pixel_in_screen_layered_with_preview(x |  1,y,color);
-  }
-  else
-    Pixel_in_screen_layered_with_preview(x,y,color & mask);
-}
-
-void Pixel_in_screen_thomson(word x,word y,byte color)
+/// Paint a pixel in 40col Thomson MO/TO mode
+///
+/// Only 2 colors in a 8x1 pixel block
+static void Pixel_in_screen_thomson_with_opt_preview(word x,word y,byte color,int preview)
 {
   word start = x & 0xFFF8;
   word x2;
@@ -3338,7 +3306,7 @@ void Pixel_in_screen_thomson(word x,word y,byte color)
   if (c2 == c1 || c2 == color)
   {
     // There was only one color, so we can add a second one.
-    Pixel_in_screen_layered(x,y,color);
+    Pixel_in_screen_layered_with_opt_preview(x,y,color,preview);
     return;
   }
 
@@ -3346,115 +3314,19 @@ void Pixel_in_screen_thomson(word x,word y,byte color)
   {
     c2 = *(Main.backups->Pages->Image[Main.current_layer].Pixels + (x2+start)+y*Main.image_width);
     if (c2 == c1) {
-      Pixel_in_screen_layered(x2+start,y,color);
+      Pixel_in_screen_layered_with_opt_preview(x2+start,y,color,preview);
     }
   }
 }
 
-void Pixel_in_screen_thomson_with_preview(word x,word y,byte color)
-{
-  word start = x & 0xFFF8;
-  word x2;
-  uint8_t c1, c2;
-
-  // The color we are going to replace
-  c1 = *(Main.backups->Pages->Image[Main.current_layer].Pixels + x+y*Main.image_width);
-
-  if (c1 == color)
-    return;
-
-  for (x2 = 0; x2 < 8; x2++)
-  {
-    c2 = *(Main.backups->Pages->Image[Main.current_layer].Pixels + (x2+start)+y*Main.image_width);
-    if (c2 == color)
-      continue;
-    if (c2 != c1)
-      break;
-  }
-
-  if (c2 == c1 || c2 == color)
-  {
-    // There was only one color, so we can add a second one.
-    Pixel_in_screen_layered_with_preview(x,y,color);
-    return;
-  }
-
-  for (x2 = 0; x2 < 8; x2++)
-  {
-    c2 = *(Main.backups->Pages->Image[Main.current_layer].Pixels + (x2+start)+y*Main.image_width);
-    if (c2 == c1) {
-      Pixel_in_screen_layered_with_preview(x2+start,y,color);
-    }
-  }
-}
-
-void Pixel_in_screen_zx(word x,word y,byte color)
+/// Paint a pixel with 8x8 block constraints
+///
+/// only 2 colors in a 8x8 block, and for the ZX Spectrum both must be either bight or not.
+static void Pixel_in_screen_zx_with_opt_preview(word x,word y,byte color,int preview)
 {
   word start = x & 0xFFF8;
   word starty = y & 0xFFF8;
   word x2, y2;
-  uint8_t c1, c2;
-
-  // The color we are going to replace
-  c1 = *(Main.backups->Pages->Image[Main.current_layer].Pixels
-     + x + y * Main.image_width);
-
-  if (c1 == color)
-    return;
-
-  // find if there is another color in the cell
-  for (x2 = 0; x2 < 8; x2++)
-  for (y2 = 0; y2 < 8; y2++)
-  {
-    c2 = *(Main.backups->Pages->Image[Main.current_layer].Pixels
-       + (x2 + start) + (y2 + starty) * Main.image_width);
-    // Pixel is already of the color we are going to add, it is no problem
-    if (c2 == color)
-      continue;
-    // We have found another color, which is the one we will keep from the cell
-    if (c2 != c1)
-      goto done;
-  }
-done:
-
-  if ((c2 == c1 || c2 == color))
-  {
-    // There was only one color, so we can add a second one
-
-    // First make sure we have a single brightness
-    if ((c2 & 8) != (color & 8))
-    {
-      for (x2 = 0; x2 < 8; x2++)
-      for (y2 = 0; y2 < 8; y2++)
-      {
-        Pixel_in_screen_layered(x2+start,y2+starty,c2 ^ 8);
-      }
-    }
-
-    Pixel_in_screen_layered(x,y,color);
-    return;
-  }
-
-  // Now replace all pixels which are of color c1, with color c2
-  for (x2 = 0; x2 < 8; x2++)
-  for (y2 = 0; y2 < 8; y2++)
-  {
-    c2 = *(Main.backups->Pages->Image[Main.current_layer].Pixels
-       + (x2 + start) + (y2 + starty) * Main.image_width);
-    if (c2 == c1) {
-      Pixel_in_screen_layered(x2+start,y2+starty,color);
-    } else {
-      // Force the brightness bit
-      Pixel_in_screen_layered(x2+start,y2+starty,(c2 & ~8) | (color & 8));
-    }
-  }
-}
-
-void Pixel_in_screen_zx_with_preview(word x,word y,byte color)
-{
-  word start = x & 0xFFF8;
-  word starty = y & 0xFFF8;
-  word x2,y2;
   uint8_t c1, c2;
 
   // The color we are going to replace
@@ -3490,11 +3362,11 @@ done:
       for (x2 = 0; x2 < 8; x2++)
       for (y2 = 0; y2 < 8; y2++)
       {
-        Pixel_in_screen_layered_with_preview(x2+start,y2+starty,c2 ^ 8);
+        Pixel_in_screen_layered_with_opt_preview(x2+start,y2+starty,c2 ^ 8,preview);
       }
     }
 
-    Pixel_in_screen_layered_with_preview(x,y,color);
+    Pixel_in_screen_layered_with_opt_preview(x,y,color,preview);
     return;
   }
 
@@ -3505,33 +3377,16 @@ done:
     c2 = *(Main.backups->Pages->Image[Main.current_layer].Pixels
        + (x2 + start) + (y2 + starty) * Main.image_width);
     if (c2 == c1) {
-      Pixel_in_screen_layered_with_preview(x2+start,y2+starty,color);
+      Pixel_in_screen_layered_with_opt_preview(x2+start,y2+starty,color,preview);
     } else {
       // Force the brightness bit
-      Pixel_in_screen_layered_with_preview(x2+start,y2+starty,(c2 & ~8) | (color & 8));
+      Pixel_in_screen_layered_with_opt_preview(x2+start,y2+starty,(c2 & ~8) | (color & 8),preview);
     }
   }
 }
 
-/// Paint a a single pixel in image only : in a layer under one that acts as a layer-selector (mode 5).
-void Pixel_in_screen_underlay(word x,word y,byte color)
-{
-  byte depth;
-
-  // Paste in layer
-  *(Main.backups->Pages->Image[Main.current_layer].Pixels + x+y*Main.image_width)=color;
-  // Search depth
-  depth = *(Main.backups->Pages->Image[4].Pixels + x+y*Main.image_width);
-
-  if ( depth == Main.current_layer)
-  {
-    // Draw that color on the visible image buffer
-    *(x+y*Main.image_width+Main_screen)=color;
-  }
-}
-
-/// Paint a a single pixel in image and on screen : in a layer under one that acts as a layer-selector (mode 5).
-void Pixel_in_screen_underlay_with_preview(word x,word y,byte color)
+/// Paint a a single pixel in image and optionnaly on screen : in a layer under one that acts as a layer-selector (mode 5).
+static void Pixel_in_screen_underlay_with_opt_preview(word x,word y,byte color,int preview)
 {
   byte depth;
 
@@ -3545,29 +3400,13 @@ void Pixel_in_screen_underlay_with_preview(word x,word y,byte color)
     // Draw that color on the visible image buffer
     *(x+y*Main.image_width+Main_screen)=color;
 
-    Pixel_preview(x,y,color);
-  }
-}
-
-/// Paint a a single pixel in image only : in a layer that acts as a layer-selector (mode 5).
-void Pixel_in_screen_overlay(word x,word y,byte color)
-{
-  if (color<4)
-  {
-    // Paste in layer
-    *(Main.backups->Pages->Image[Main.current_layer].Pixels + x+y*Main.image_width)=color;
-    // Paste in depth buffer
-    *(Main_visible_image_depth_buffer.Image+x+y*Main.image_width)=color;
-    // Fetch pixel color from the target raster layer
-    if (Main.layers_visible & (1 << color))
-        color=*(Main.backups->Pages->Image[color].Pixels + x+y*Main.image_width);
-    // Draw that color on the visible image buffer
-    *(x+y*Main.image_width+Main_screen)=color;
+    if (preview)
+      Pixel_preview(x,y,color);
   }
 }
 
 /// Paint a a single pixel in image and on screen : in a layer that acts as a layer-selector (mode 5).
-void Pixel_in_screen_overlay_with_preview(word x,word y,byte color)
+static void Pixel_in_screen_overlay_with_opt_preview(word x,word y,byte color,int preview)
 {
   if (color<4)
   {
@@ -3581,12 +3420,12 @@ void Pixel_in_screen_overlay_with_preview(word x,word y,byte color)
     // Draw that color on the visible image buffer
     *(x+y*Main.image_width+Main_screen)=color;
 
-    Pixel_preview(x,y,color);
+    if (preview)
+      Pixel_preview(x,y,color);
   }
 }
 
-Func_pixel Pixel_in_current_screen=Pixel_in_screen_direct;
-Func_pixel Pixel_in_current_screen_with_preview=Pixel_in_screen_direct_with_preview;
+Func_pixel_opt_preview Pixel_in_current_screen_with_opt_preview=Pixel_in_screen_direct_with_opt_preview;
 
 void Pixel_in_spare(word x,word y, byte color)
 {
@@ -3603,11 +3442,6 @@ byte Read_pixel_from_current_layer(word x,word y)
   return *((y)*Main.image_width+(x)+Main.backups->Pages->Image[Main.current_layer].Pixels);
 }
 
-/**
- * Update the pixel functions according to the current Image_mode.
- *
- * Pixel_in_current_screen and Pixel_in_current_screen_with_preview are updated.
- */
 void Update_pixel_renderer(void)
 {
   switch (Main.backups->Pages->Image_mode)
@@ -3617,49 +3451,32 @@ void Update_pixel_renderer(void)
   case IMAGE_MODE_GBC:  // TODO
   case IMAGE_MODE_ANIMATION:
     // direct
-    Pixel_in_current_screen = Pixel_in_screen_direct;
-    Pixel_in_current_screen_with_preview = Pixel_in_screen_direct_with_preview;
+    Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_direct_with_opt_preview;
     break;
   case IMAGE_MODE_LAYERED:
     // layered
-    Pixel_in_current_screen = Pixel_in_screen_layered;
-    Pixel_in_current_screen_with_preview = Pixel_in_screen_layered_with_preview;
+    Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_layered_with_opt_preview;
     break;
   case IMAGE_MODE_EGX:
   case IMAGE_MODE_EGX2:
     // special "EGX" mode
-    Pixel_in_current_screen = Pixel_in_screen_egx;
-    Pixel_in_current_screen_with_preview = Pixel_in_screen_egx_with_preview;
+    Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_egx_with_opt_preview;
     break;
   case IMAGE_MODE_THOMSON:
-    Pixel_in_current_screen = Pixel_in_screen_thomson;
-    Pixel_in_current_screen_with_preview = Pixel_in_screen_thomson_with_preview;
+    Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_thomson_with_opt_preview;
     break;
   case IMAGE_MODE_C64HIRES:
   case IMAGE_MODE_ZX:
-    Pixel_in_current_screen = Pixel_in_screen_zx;
-    Pixel_in_current_screen_with_preview = Pixel_in_screen_zx_with_preview;
+    Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_zx_with_opt_preview;
     break;
   case IMAGE_MODE_MODE5:
   case IMAGE_MODE_RASTER:
-    if ( Main.current_layer == 4)
-    {
-      // overlay
-      Pixel_in_current_screen = Pixel_in_screen_overlay;
-      Pixel_in_current_screen_with_preview = Pixel_in_screen_overlay_with_preview;
-    }
-    else if (Main.current_layer<4 && (Main.layers_visible & (1<<4)))
-    {
-      // underlay
-      Pixel_in_current_screen = Pixel_in_screen_underlay;
-      Pixel_in_current_screen_with_preview = Pixel_in_screen_underlay_with_preview;
-    }
-    else
-    {
-      // layered (again, for layers > 4 in MODE5 and RASTER)
-      Pixel_in_current_screen = Pixel_in_screen_layered;
-      Pixel_in_current_screen_with_preview = Pixel_in_screen_layered_with_preview;
-    }
+    if ( Main.current_layer == 4)                                     // overlay
+      Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_overlay_with_opt_preview;
+    else if (Main.current_layer<4 && (Main.layers_visible & (1<<4)))  // underlay
+      Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_underlay_with_opt_preview;
+    else                              // layered (again, for layers > 4 in MODE5 and RASTER)
+      Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_layered_with_opt_preview;
     break;
   }
 }
