@@ -17,8 +17,12 @@
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
-#include "struct.h"
-
+/** @file haiku.cpp
+ * Definition of Haiku specific functions.
+ *
+ * Haiku API is C++, so this is C++ code exporting as C symbols
+ * to be called by GrafX2 C code.
+ */
 #ifdef __HAIKU__
 #include <Clipboard.h>
 #include <Entry.h>
@@ -26,8 +30,7 @@
 
 #include <string.h>
 
-extern "C" qword haiku_get_free_space(char* path);
-extern "C" char* haiku_get_clipboard();
+#include "haiku.h"
 
 qword haiku_get_free_space(char* path)
 {
@@ -38,6 +41,9 @@ qword haiku_get_free_space(char* path)
 	return (qword) disk.Capacity();	
 }
 
+/**
+ * @return NULL or a string that should be free()'d by the caller
+ */
 char* haiku_get_clipboard()
 {
 	if (be_clipboard->Lock())
