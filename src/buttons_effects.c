@@ -256,8 +256,12 @@ void Button_Constraint_menu(void)
   do
   {
     clicked_button=Window_clicked_button();
-
-    if (clicked_button == 3)
+    if (Is_shortcut(Key, 0x100+BUTTON_HELP))
+    {
+      Key = 0;
+      Window_help(BUTTON_EFFECTS, "8 BIT");
+    }
+    else if (clicked_button == 3)
     {
       Selected_Constraint_Mode = Window_attribute2;
       for (i = 0; i < sizeof(modes)/sizeof(modes[0]) ; i++)

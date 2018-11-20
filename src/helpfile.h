@@ -1919,6 +1919,18 @@ static const T_Help_table helptable_effects[] =
   HELP_TEXT ("* Show count : Briefly displays the number")
   HELP_TEXT ("of unique tiles after each analysis.")
   HELP_TEXT ("")
+  HELP_TEXT ("")
+  HELP_TITLE("8 BIT")
+  HELP_TEXT (" This mode enable constraints of the vintage")
+  HELP_TEXT ("8bits computers video modes, such as the ZX")
+  HELP_TEXT ("Spectrum, Commodore 64, etc.")
+  HELP_BOLD ("LEFT CLICK")
+  HELP_TEXT ("Enable/disable the contraints")
+  HELP_TEXT ("")
+  HELP_BOLD ("RIGHT CLICK")
+  HELP_TEXT ("Opens the menu to choose the type of")
+  HELP_TEXT ("constraints")
+  HELP_TEXT ("")
 };
 static const T_Help_table helptable_text[] =
 {
