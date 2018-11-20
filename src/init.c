@@ -2140,10 +2140,10 @@ int Load_CFG(int reload_all)
 
   GFX2_Log(GFX2_DEBUG, "Load_CFG() trying to load %s\n", filename);
 
-  file_size=File_length(filename);
-
   if ((Handle=fopen(filename,"rb"))==NULL)
     return ERROR_CFG_MISSING;
+
+  file_size=File_length_file(Handle);
 
   if ( (file_size<7)
     || (!Read_bytes(Handle, &cfg_header.Signature, 3))
