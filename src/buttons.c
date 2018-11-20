@@ -42,6 +42,9 @@
 #else
 #define strdup _strdup
 #define strncasecmp _strnicmp
+#if _MSC_VER < 1900
+#define snprintf _snprintf
+#endif
 #endif
 #include <stdlib.h>
 #if !defined(__VBCC__) && !defined(_MSC_VER)
@@ -158,8 +161,7 @@ void Button_Message_initial(void)
   int   x_pos,offs_y,x,y;
   int clicked_button=0;
 
-  strcpy(str,"GrafX2 version ");
-  strcat(str,Program_version);
+  snprintf(str,sizeof(str),"GrafX2 version %s",Program_version);
   Open_window(260,172,str);
 
   Window_display_frame_in(10,20,239,62);
@@ -175,8 +177,8 @@ void Button_Message_initial(void)
   //Print_in_window( 120-4*13,128,"(placeholder)",MC_Dark,MC_Light);
   Print_in_window(130-4*16,136,"http://grafx2.tk",MC_Dark,MC_Light);
 
-  Window_set_normal_button(56, 151, 71, 14, "Anim", 0, (Main.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION), KEY_NONE);
-  Window_set_normal_button(133, 151, 71, 14, "Layers", 0, (Main.backups->Pages->Image_mode != IMAGE_MODE_LAYERED), KEY_NONE);
+  Window_set_normal_button(56, 151, 71, 14, "Anim", 1, (Main.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION), KEY_a);
+  Window_set_normal_button(133, 151, 71, 14, "Layers", 1, (Main.backups->Pages->Image_mode != IMAGE_MODE_LAYERED), KEY_l);
 
   Update_window_area(0,0,Window_width, Window_height);
 
@@ -189,6 +191,9 @@ void Button_Message_initial(void)
     clicked_button = Window_get_clicked_button();
     Wait_end_of_click();
   }
+  else
+    clicked_button = Window_get_button_shortcut();
+  GFX2_Log(GFX2_DEBUG, "Button_Message_initial() clicked_button=%d\n", clicked_button);
   Close_window();
 
   if (clicked_button > 0)

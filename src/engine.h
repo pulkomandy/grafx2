@@ -111,6 +111,7 @@ void Get_color_behind_window(byte * color, byte * click);
 
 short Window_clicked_button(void);
 int Button_under_mouse(void);
+short Window_get_button_shortcut(void);
 short Window_get_clicked_button(void);
 
 /// Remaps all the colors from the window background buffers from row Min_Y to row Max_Y
