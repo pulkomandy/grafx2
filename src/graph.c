@@ -3603,58 +3603,63 @@ byte Read_pixel_from_current_layer(word x,word y)
   return *((y)*Main.image_width+(x)+Main.backups->Pages->Image[Main.current_layer].Pixels);
 }
 
+/**
+ * Update the pixel functions according to the current Image_mode.
+ *
+ * Pixel_in_current_screen and Pixel_in_current_screen_with_preview are updated.
+ */
 void Update_pixel_renderer(void)
 {
-  if (Main.backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+  switch (Main.backups->Pages->Image_mode)
   {
+  case IMAGE_MODE_C64MULTI: //TODO
+  case IMAGE_MODE_C64FLI: //TODO
+  case IMAGE_MODE_GBC:  // TODO
+  case IMAGE_MODE_ANIMATION:
     // direct
     Pixel_in_current_screen = Pixel_in_screen_direct;
     Pixel_in_current_screen_with_preview = Pixel_in_screen_direct_with_preview;
-  }
-  else
-  if (Main.backups->Pages->Image_mode == IMAGE_MODE_LAYERED)
-  {
+    break;
+  case IMAGE_MODE_LAYERED:
     // layered
     Pixel_in_current_screen = Pixel_in_screen_layered;
     Pixel_in_current_screen_with_preview = Pixel_in_screen_layered_with_preview;
-  }
-  else
-  if (Main.backups->Pages->Image_mode == IMAGE_MODE_EGX
-   || Main.backups->Pages->Image_mode == IMAGE_MODE_EGX2)
-  {
+    break;
+  case IMAGE_MODE_EGX:
+  case IMAGE_MODE_EGX2:
     // special "EGX" mode
     Pixel_in_current_screen = Pixel_in_screen_egx;
     Pixel_in_current_screen_with_preview = Pixel_in_screen_egx_with_preview;
-  }
-  else
-  if (Main.backups->Pages->Image_mode == IMAGE_MODE_THOMSON)
-  {
+    break;
+  case IMAGE_MODE_THOMSON:
     Pixel_in_current_screen = Pixel_in_screen_thomson;
     Pixel_in_current_screen_with_preview = Pixel_in_screen_thomson_with_preview;
-  }
-  else
-  if (Main.backups->Pages->Image_mode == IMAGE_MODE_ZX)
-  {
+    break;
+  case IMAGE_MODE_C64HIRES:
+  case IMAGE_MODE_ZX:
     Pixel_in_current_screen = Pixel_in_screen_zx;
     Pixel_in_current_screen_with_preview = Pixel_in_screen_zx_with_preview;
-  }
-  // Implicit else : Image_mode must be IMAGE_MODE_MODE5 or IMAGE_MODE_RASTER
-  else if ( Main.current_layer == 4)
-  {
-    // overlay
-    Pixel_in_current_screen = Pixel_in_screen_overlay;
-    Pixel_in_current_screen_with_preview = Pixel_in_screen_overlay_with_preview;
-  }
-  else if (Main.current_layer<4 && (Main.layers_visible & (1<<4)))
-  {
-    // underlay
-    Pixel_in_current_screen = Pixel_in_screen_underlay;
-    Pixel_in_current_screen_with_preview = Pixel_in_screen_underlay_with_preview;
-  }
-  else
-  {
-    // layered (again, for layers > 4 in MODE5 and RASTER)
-    Pixel_in_current_screen = Pixel_in_screen_layered;
-    Pixel_in_current_screen_with_preview = Pixel_in_screen_layered_with_preview;
+    break;
+  case IMAGE_MODE_MODE5:
+  case IMAGE_MODE_RASTER:
+    if ( Main.current_layer == 4)
+    {
+      // overlay
+      Pixel_in_current_screen = Pixel_in_screen_overlay;
+      Pixel_in_current_screen_with_preview = Pixel_in_screen_overlay_with_preview;
+    }
+    else if (Main.current_layer<4 && (Main.layers_visible & (1<<4)))
+    {
+      // underlay
+      Pixel_in_current_screen = Pixel_in_screen_underlay;
+      Pixel_in_current_screen_with_preview = Pixel_in_screen_underlay_with_preview;
+    }
+    else
+    {
+      // layered (again, for layers > 4 in MODE5 and RASTER)
+      Pixel_in_current_screen = Pixel_in_screen_layered;
+      Pixel_in_current_screen_with_preview = Pixel_in_screen_layered_with_preview;
+    }
+    break;
   }
 }
