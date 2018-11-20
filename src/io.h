@@ -41,6 +41,13 @@
 
 #include <stdio.h>
 
+
+/** @defgroup io File input/output
+ * Functions used to read and write from/to files.
+ * Except for bytes ones, each function is available in Big-Endian and
+ * Little-Endian flavour.
+ * @{ */
+
 /// Reads a single byte from an open file. Returns true if OK, false if a file i/o error occurred.
 int Read_byte(FILE *file, byte *dest);
 /// Writes a single byte to an open file. Returns true if OK, false if a file i/o error occurred.
@@ -71,6 +78,18 @@ int Read_dword_be(FILE *file, dword *dest);
 /// Writes a 32-bit Big-Endian dword to an open file. Returns true if OK, false if a file i/o error occurred.
 int Write_dword_be(FILE *file, dword dw);
 
+/// Size of an open file, in bytes.
+/// @param file an open file
+/// @return the size in bytes
+/// @return 0 in case of error
+unsigned long File_length_file(FILE * file);
+/** @}*/
+
+
+/** @defgroup filename File path and name
+ * Functions used to manipulate files path and names
+ * @{ */
+
 /// Extracts the filename part from a full file name.
 void Extract_filename(char *dest, const char *source);
 /// Extracts the directory from a full file name.
@@ -79,9 +98,8 @@ void Extract_path(char *dest, const char *source);
 /// Finds the rightmost path separator in a full filename. Used to separate directory from file.
 char * Find_last_separator(const char * str);
 
-#if defined(WIN32)
-  #define PATH_SEPARATOR "\\"
-#elif defined(__MINT__)
+/// default path separator character
+#if defined(WIN32) || defined(__MINT__)
   #define PATH_SEPARATOR "\\"
 #else
   #define PATH_SEPARATOR "/"
@@ -93,11 +111,19 @@ int Position_last_dot(const char * fname);
 /// finds the rightmost '.' character in fullname. Used to find file extension. returns -1 if not found
 int Position_last_dot_unicode(const word * fname);
 
+/** @}*/
+
+
+/** @defgroup filesystem File system
+ * filesystem operations
+ * - checking file/directory existence and properties
+ * - directory listing
+ * - current diretory request/change
+ * - Lock files
+ * - File delete
+ * @{ */
 /// Size of a file, in bytes. Returns 0 in case of error.
 unsigned long File_length(const char *fname);
-
-/// Size of a file, in bytes. Takes an open file as argument, returns 0 in case of error.
-unsigned long File_length_file(FILE * file);
 
 /// Returns true if a file passed as a parameter exists in the current directory.
 int File_exists(const char * fname);
@@ -115,7 +141,11 @@ typedef void T_File_dir_cb(void * pdata, const char * filename, const word * uni
 
 /// Scans a directory, calls Callback for each file or directory in it,
 void For_each_directory_entry(const char * directory_name, void * pdata, T_File_dir_cb Callback);
+/** @}*/
 
+
+/** @ingroup filename
+ * @{ */
 ///
 /// Creates a fully qualified name from a directory and filename.
 /// The point is simply to insert a PATH_SEPARATOR when needed.
@@ -131,6 +161,10 @@ void Get_full_filename(char * output_name, const char * file_name, const char * 
 /// - else: ".."
 void Append_path(char *path, const char *filename, char *reverse_path);
 
+/** @}*/
+
+/** @ingroup filesystem
+ * @{ */
 ///
 /// Creates a lock file, to check if an other instance of Grafx2 is running.
 /// @return 0 on success (first instance), -1 on failure (others are running)
@@ -156,4 +190,5 @@ int Remove_path(const char * path);
 /// Remove the directory
 int Remove_directory(const char * path);
 
+/** @}*/
 #endif
