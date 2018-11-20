@@ -490,8 +490,13 @@ unsigned long File_length_file(FILE * file)
   long offset_backup;
   long file_length;
   offset_backup = ftell(file);
-  fseek(file, 0, SEEK_END);
+  if (offset_backup < 0)
+    return 0;
+  if (fseek(file, 0, SEEK_END) < 0
+    return 0;
   file_length = ftell(file);
+  if (file_length < 0)
+    file_length = 0;
   fseek(file, offset_backup, SEEK_SET);
   return (unsigned long)file_length;
 #else
