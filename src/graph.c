@@ -3321,7 +3321,8 @@ static void Pixel_in_screen_thomson_with_opt_preview(word x,word y,byte color,in
 
 /// Paint a pixel with 8x8 block constraints
 ///
-/// only 2 colors in a 8x8 block, and for the ZX Spectrum both must be either bight or not.
+/// Used for ZX Spectrum and C64 HiRes modes.
+/// Only 2 colors in a 8x8 block, and for the ZX Spectrum both must be either bight or not.
 static void Pixel_in_screen_zx_with_opt_preview(word x,word y,byte color,int preview)
 {
   word start = x & 0xFFF8;
@@ -3330,8 +3331,7 @@ static void Pixel_in_screen_zx_with_opt_preview(word x,word y,byte color,int pre
   uint8_t c1, c2;
 
   // The color we are going to replace
-  c1 = *(Main.backups->Pages->Image[Main.current_layer].Pixels
-     + x + y * Main.image_width);
+  c1 = Read_pixel_from_current_layer(x, y);
 
   // Pixel is already of the wanted color: nothing to do
   if (c1 == color)
@@ -3341,8 +3341,7 @@ static void Pixel_in_screen_zx_with_opt_preview(word x,word y,byte color,int pre
   for (x2 = 0; x2 < 8; x2++)
   for (y2 = 0; y2 < 8; y2++)
   {
-    c2 = *(Main.backups->Pages->Image[Main.current_layer].Pixels
-       + (x2 + start) + (y2 + starty) * Main.image_width);
+    c2 = Read_pixel_from_current_layer(x2 + start, y2 + starty);
     // Pixel is already of the color we are going to add, it is no problem
     if (c2 == color)
       continue;
@@ -3357,7 +3356,8 @@ done:
     // There was only one color, so we can add a second one
 
     // First make sure we have a single brightness
-    if ((c2 & 8) != (color & 8))
+    if (Main.backups->Pages->Image_mode == IMAGE_MODE_ZX
+       && (c2 & 8) != (color & 8))
     {
       for (x2 = 0; x2 < 8; x2++)
       for (y2 = 0; y2 < 8; y2++)
@@ -3374,14 +3374,11 @@ done:
   for (x2 = 0; x2 < 8; x2++)
   for (y2 = 0; y2 < 8; y2++)
   {
-    c2 = *(Main.backups->Pages->Image[Main.current_layer].Pixels
-       + (x2 + start) + (y2 + starty) * Main.image_width);
-    if (c2 == c1) {
+    c2 = Read_pixel_from_current_layer(x2 + start, y2 + starty);
+    if (c2 == c1)
       Pixel_in_screen_layered_with_opt_preview(x2+start,y2+starty,color,preview);
-    } else {
-      // Force the brightness bit
+    else if (Main.backups->Pages->Image_mode == IMAGE_MODE_ZX)  // Force the brightness bit
       Pixel_in_screen_layered_with_opt_preview(x2+start,y2+starty,(c2 & ~8) | (color & 8),preview);
-    }
   }
 }
 
