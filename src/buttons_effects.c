@@ -256,7 +256,7 @@ void Button_Constraint_menu(void)
   Print_in_window(10, 21+18, summary, MC_Dark, MC_Light);
 
   Window_set_normal_button(10, 51, 14, 14, set_palette?"X":" ", 0, 1, KEY_p);  // 4
-  Print_in_window(10+18, 51+3, "Set Palette", MC_Dark, MC_Light);
+  Print_in_window_underscore(10+18, 51+3, "Set Palette", MC_Dark, MC_Light, 5);
 
   Update_window_area(0,0,Window_width, Window_height);
   Display_cursor();
