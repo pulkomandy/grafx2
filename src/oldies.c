@@ -420,6 +420,48 @@ int C64_FLI_enforcer(void)
   return 0;
 }
 
+void C64_set_palette(T_Components * palette)
+{
+  /// Set C64 Palette from http://www.pepto.de/projects/colorvic/
+  static const byte pal[48]={
+    0x00, 0x00, 0x00,
+    0xFF, 0xFF, 0xFF,
+    0x68, 0x37, 0x2B,
+    0x70, 0xA4, 0xB2,
+    0x6F, 0x3D, 0x86,
+    0x58, 0x8D, 0x43,
+    0x35, 0x28, 0x79,
+    0xB8, 0xC7, 0x6F,
+    0x6F, 0x4F, 0x25,
+    0x43, 0x39, 0x00,
+    0x9A, 0x67, 0x59,
+    0x44, 0x44, 0x44,
+    0x6C, 0x6C, 0x6C,
+    0x9A, 0xD2, 0x84,
+    0x6C, 0x5E, 0xB5,
+    0x95, 0x95, 0x95};
+
+  memcpy(palette, pal, 48);
+  /// Also set transparent color "16" as a dark grey that is distinguishable
+  /// from black, but darker than normal colors.
+  palette[16].R=20;
+  palette[16].G=20;
+  palette[16].B=20;
+}
+
+void ZX_Spectrum_set_palette(T_Components * palette)
+{
+  int i, intensity;
+
+  for (i = 0; i < 16; i++)
+  {
+    intensity = (i & 8) ? 255 : 205;
+    palette[i].G = ((i & 4) >> 2) * intensity;
+    palette[i].R = ((i & 2) >> 1) * intensity;
+    palette[i].B = (i & 1) * intensity;
+  }
+}
+
 int DECB_Check_binary_file(FILE * f)
 {
   byte code;

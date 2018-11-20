@@ -2679,25 +2679,6 @@ void Load_C64(T_IO_Context * context)
     word load_addr;
     enum c64_format loadFormat = F_invalid;
 
-    /// Set C64 Palette from http://www.pepto.de/projects/colorvic/
-    static const byte pal[48]={
-      0x00, 0x00, 0x00,
-      0xFF, 0xFF, 0xFF,
-      0x68, 0x37, 0x2B,
-      0x70, 0xA4, 0xB2,
-      0x6F, 0x3D, 0x86,
-      0x58, 0x8D, 0x43,
-      0x35, 0x28, 0x79,
-      0xB8, 0xC7, 0x6F,
-      0x6F, 0x4F, 0x25,
-      0x43, 0x39, 0x00,
-      0x9A, 0x67, 0x59,
-      0x44, 0x44, 0x44,
-      0x6C, 0x6C, 0x6C,
-      0x9A, 0xD2, 0x84,
-      0x6C, 0x5E, 0xB5,
-      0x95, 0x95, 0x95};
-
     byte *file_buffer;
     byte *bitmap, *screen_ram, *color_ram=NULL, *background=NULL; // Only pointers to existing data
     word width, height=200;
@@ -2952,13 +2933,9 @@ void Load_C64(T_IO_Context * context)
 
         Pre_load(context, width, height, file_size, FORMAT_C64, context->Ratio, (loadFormat == F_bitmap) ? 1 : 4); // Do this as soon as you can
 
-        memcpy(context->Palette,pal,48); // this set the software palette for grafx2
-        // Transparent color "16" is a dark grey that is distinguishable
-        // from black, but darker than normal colors.
-        context->Palette[16].R=20;
-        context->Palette[16].G=20;
-        context->Palette[16].B=20;
-
+        if (Config.Clear_palette)
+          memset(context->Palette,0, sizeof(T_Palette));
+        C64_set_palette(context->Palette);
         context->Transparent_color=16;
 
         switch(loadFormat)

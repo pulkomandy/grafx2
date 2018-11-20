@@ -38,6 +38,26 @@ int C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background);
 
 int C64_FLI_enforcer(void);
 
+/**
+ * Set the 16 colors Commodore 64 palette
+ */
+void C64_set_palette(T_Components * palette);
+
+/** @}*/
+
+/** @defgroup zx_spectrum Sinclair ZX Spectrum
+ *
+ * @{
+ */
+
+/**
+ * Set the 16 colors ZX Spectrum palette.
+ *
+ * The ZX Spectrum palette is a 16 color RGBI palette.
+ * The color components are in IGRB order.
+ */
+void ZX_Spectrum_set_palette(T_Components * palette);
+
 /** @}*/
 
 /** @defgroup decb DECB binary format

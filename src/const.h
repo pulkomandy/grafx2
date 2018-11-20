@@ -606,6 +606,7 @@ enum OPERATIONS
   NB_OPERATIONS                ///< Number of operations handled by the engine
 };
 
+/// Image drawing modes.
 enum IMAGE_MODES
 {
   IMAGE_MODE_LAYERED=0, ///< Layered image
@@ -617,6 +618,9 @@ enum IMAGE_MODES
   IMAGE_MODE_EGX2,      ///< CPC EGX2
   IMAGE_MODE_MODE5,     ///< CPC mode 5
   IMAGE_MODE_RASTER,    ///< CPC generic rasters
+  IMAGE_MODE_C64HIRES,  ///< C64 HiRes
+  IMAGE_MODE_C64MULTI,  ///< C64 Multicolor
+  IMAGE_MODE_C64FLI,    ///< C64 Flexible Line Interpretation
 };
 
 /// Circle / Ellipse Modes

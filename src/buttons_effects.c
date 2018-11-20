@@ -42,6 +42,7 @@
 #include "struct.h"
 #include "windows.h"
 #include "tiles.h"
+#include "oldies.h"
 
 //---------- Menu dans lequel on tagge des couleurs (genre Stencil) ----------
 void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_cancel, const char *help_section, word close_shortcut)
@@ -213,6 +214,7 @@ void Button_Constraint_mode(void)
 void Button_Constraint_menu(void)
 {
   unsigned int i;
+  int set_palette = 1;
   short clicked_button;
   T_Dropdown_button* dropdown;
   const char * label;
@@ -229,12 +231,15 @@ void Button_Constraint_menu(void)
     {IMAGE_MODE_EGX2,    "EGX2 (CPC)",    "Alternate Mode1/Mode2 "},
     {IMAGE_MODE_MODE5,   "Mode 5 (CPC)",  "Mode5                 "},
     {IMAGE_MODE_RASTER,  "Rasters (CPC)", "CPC Rasters           "},
+    {IMAGE_MODE_C64HIRES,"C64 HiRes",     "2 colors per 8x8 block"},
+    {IMAGE_MODE_C64MULTI,"C64 Multicolor","4 colors per 4x1 block"},
+    {IMAGE_MODE_C64FLI,  "C64 FLI",       "improved multicolor   "},
   };
 
-  Open_window(194,79,"8-bit constraints");
+  Open_window(194,95,"8-bit constraints");
 
-  Window_set_normal_button(31,55,51,14,"Cancel",0,1,KEY_ESC);  // 1
-  Window_set_normal_button(112,55,51,14,"OK"    ,0,1,KEY_RETURN); // 2
+  Window_set_normal_button(31,71,51,14,"Cancel",0,1,KEY_ESC);  // 1
+  Window_set_normal_button(112,71,51,14,"OK"    ,0,1,KEY_RETURN); // 2
 
   label = "Constraints";
   summary = "";
@@ -249,6 +254,9 @@ void Button_Constraint_menu(void)
   for (i = 0; i < sizeof(modes)/sizeof(modes[0]) ; i++)
     Window_dropdown_add_item(dropdown, modes[i].mode, modes[i].label);
   Print_in_window(10, 21+18, summary, MC_Dark, MC_Light);
+
+  Window_set_normal_button(10, 51, 14, 14, set_palette?"X":" ", 0, 1, KEY_p);  // 4
+  Print_in_window(10+18, 51+3, "Set Palette", MC_Dark, MC_Light);
 
   Update_window_area(0,0,Window_width, Window_height);
   Display_cursor();
@@ -273,6 +281,14 @@ void Button_Constraint_menu(void)
           break;
         }
     }
+    else if (clicked_button == 4)
+    {
+      // palette
+      set_palette = !set_palette;
+      Hide_cursor();
+      Print_in_window(10+3, 51+3, set_palette?"X":" ", MC_Black, MC_Light);
+      Display_cursor();
+    }
   }
   while ( (clicked_button!=1) && (clicked_button!=2) );
 
@@ -285,6 +301,33 @@ void Button_Constraint_menu(void)
       if (Main.backups->Pages->Image_mode > IMAGE_MODE_ANIMATION)
         Button_Constraint_mode();  // unactivate current mode
       Button_Constraint_mode();  // activate selected Mode
+      if (set_palette)
+      {
+        switch (Selected_Constraint_Mode)
+        {
+          case IMAGE_MODE_ZX:
+            ZX_Spectrum_set_palette(Main.palette);
+            break;
+          //case IMAGE_MODE_THOMSON:
+            // ask TO7/70, MO5 or MO6 / TO8/TO9
+          case IMAGE_MODE_EGX:
+          case IMAGE_MODE_EGX2:
+          case IMAGE_MODE_MODE5:
+          case IMAGE_MODE_RASTER:
+          // TODO : CPC
+            break;
+          case IMAGE_MODE_C64HIRES:
+          case IMAGE_MODE_C64MULTI:
+          case IMAGE_MODE_C64FLI:
+            C64_set_palette(Main.palette);
+            break;
+          default:
+            break;
+        }
+        // Refresh palette
+        Set_palette(Main.palette);
+        //Compute_optimal_menu_colors(Main.palette);  // I'm not sure this is needed
+      }
     }
   }
 
@@ -624,7 +667,7 @@ void Button_Smooth_mode(void)
 }
 
 
-byte Smooth_default_matrices[4][3][3]=
+static const byte Smooth_default_matrices[4][3][3]=
 {
  { {1,2,1}, {2,4,2}, {1,2,1} },
  { {1,3,1}, {3,9,3}, {1,3,1} },
