@@ -4886,7 +4886,6 @@ void Test_MOTO(T_IO_Context * context, FILE * file)
 {
   long file_size;
 
-  (void)context;
   file_size = File_length_file(file);
 
   File_error = 1;
@@ -4901,7 +4900,27 @@ void Test_MOTO(T_IO_Context * context, FILE * file)
         case 8004:  // 2 colors palette
         case 8008:  // 4 colors palette
         case 8032:  // 16 colors palette
-          File_error = 0;
+          {
+            char filename[MAX_PATH_CHARACTERS];
+            char path[MAX_PATH_CHARACTERS];
+            char * ext;
+
+            // Check there are both FORME and COULEUR files
+            strncpy(filename, context->File_name, sizeof(filename));
+            filename[sizeof(filename)-1] = '\0';
+            ext = strrchr(filename, '.');
+            if (ext == NULL || ext == filename)
+              return;
+            if ((ext[-1] | 32) == 'c')
+              ext[-1] = (ext[-1] & 32) | 'P';
+            else if ((ext[-1] | 32) == 'p')
+              ext[-1] = (ext[-1] & 32) | 'C';
+            else
+              return;
+            Get_full_filename(path, filename, context->File_directory);
+            if (File_exists(path))
+              File_error = 0;
+          }
           return;
         default:
           break;
@@ -5260,7 +5279,7 @@ void Load_MOTO(T_IO_Context * context)
     strncpy(filename, context->File_name, sizeof(filename));
     filename[sizeof(filename)-1] = '\0';
     ext = strrchr(filename, '.');
-    if (ext == NULL || ext == context->File_name)
+    if (ext == NULL || ext == filename)
     {
       free(vram_forme);
       return;
