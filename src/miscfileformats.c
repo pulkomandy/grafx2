@@ -1543,7 +1543,9 @@ void PI1_load_ranges(T_IO_Context * context, const byte * buffer, int size)
     // Sanity checks
     if (min_col < 256 && max_col < 256 && direction < 3 && (direction == 1 || delay < 128))
     {
-      int speed = 210/(128-delay);
+      int speed = 105;
+      if (delay < 128)
+        speed = 210/(128-delay);
       // Grafx2's slider has a limit of 105
       if (speed>105)
         speed = 105;
