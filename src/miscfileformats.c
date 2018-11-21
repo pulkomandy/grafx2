@@ -3681,21 +3681,28 @@ void Save_C64(T_IO_Context * context)
 }
 
 
-// SCR (Amstrad CPC)
-
+/**
+ * Test for SCR file (Amstrad CPC)
+ *
+ * TODO
+ */
 void Test_SCR(T_IO_Context * context, FILE * file)
 {
-    // Mmh... not sure what we could test. Any idea ?
-    // The palette file can be tested, if it exists and have the right size it's
-    // ok. But if it's not there the pixel data may still be valid. And we can't
-    // use the filesize as this depends on the screen format.
+    /**
+     * Mmh... not sure what we could test. Any idea ?
+     * The palette file can be tested, if it exists and have the right size it's
+     * ok. But if it's not there the pixel data may still be valid. And we can't
+     * use the filesize as this depends on the screen format.
 
-    // An AMSDOS header would be a good indication but in some cases it may not
-    // be there
+     * An AMSDOS header would be a good indication but in some cases it may not
+     * be there */
     (void)context; // unused
     (void)file;
 }
 
+/**
+ * TODO
+ */
 void Load_SCR(T_IO_Context * context)
 {
     // The Amstrad CPC screen memory is mapped in a weird mode, somewhere
@@ -3728,6 +3735,9 @@ void Load_SCR(T_IO_Context * context)
     (void)context; // unused
 }
 
+/**
+ * Save Amstrad SCR file
+ */
 void Save_SCR(T_IO_Context * context)
 {
     // TODO : Add possibility to set R9, R12, R13 values
@@ -3770,10 +3780,15 @@ void Save_SCR(T_IO_Context * context)
     File_error = 0;
 }
 
-// CM5 - Amstrad CPC "Mode 5" picture
-// This is a format designed by SyX. There is one .GFX file in the usual amstrad format,
-// and a .CM5 file with the palette, which varies over time.
-
+/**
+ * Test for CM5 - Amstrad CPC "Mode 5" picture
+ *
+ * This is a format designed by SyX.
+ * There is one .GFX file in the usual amstrad format
+ * and a .CM5 file with the palette, which varies over time.
+ *
+ * CM5 file is 2049 bytes, GFX is 18432 bytes.
+ */
 void Test_CM5(T_IO_Context * context, FILE * file)
 {
   // check cm5 file size == 2049 bytes
@@ -3799,6 +3814,9 @@ void Test_CM5(T_IO_Context * context, FILE * file)
 }
 
 
+/**
+ * Load Amstrad CPC "Mode 5" picture
+ */
 void Load_CM5(T_IO_Context* context)
 {
   // Ensure "8bit" constraint mode is switched on

@@ -27,6 +27,13 @@
 
 #include "loadsave.h"
 
+/// @defgroup loadsaveformats Test, Load and Save functions
+///
+/// The Test, Load and Save function for each supported
+/// file formats are referenced in @ref File_formats
+///
+/// @{
+
 // -- PKM -------------------------------------------------------------------
 void Test_PKM(T_IO_Context *, FILE *);
 void Load_PKM(T_IO_Context *);
@@ -146,4 +153,5 @@ void Test_MOTO(T_IO_Context *, FILE *);
 void Load_MOTO(T_IO_Context *);
 void Save_MOTO(T_IO_Context *);
 
+/// @}
 #endif
