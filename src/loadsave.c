@@ -89,8 +89,8 @@ void Load_Recoil_Image(T_IO_Context *);
 const T_Format File_formats[] = {
   {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, 0, "",
     "gif;png;bmp;2bp;pcx;pkm;iff;lbm;ilbm;sham;ham;ham6;ham8;acbm;pic;anim;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;"
-    "c64;p64;a64;pi;rp;aas;art;dd;iph;ipt;hpc;ocp;koa;koala;fli;"
-    "bml;cdu;prg;tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico;ic2;cur;cm5;pph;info;flc;bin;map"},
+    "c64;p64;a64;pi;rp;aas;art;dd;iph;ipt;hpc;ocp;koa;koala;fli;bml;cdu;prg;pmg;"
+    "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico;ic2;cur;cm5;pph;info;flc;bin;map"},
   {FORMAT_ALL_PALETTES, "(pal)", NULL, NULL, NULL, 1, 0, 0, "", "kcf;pal;gpl"},
   {FORMAT_ALL_FILES, "(*.*)", NULL, NULL, NULL, 0, 0, 0, "", "*"},
   {FORMAT_GIF, " gif", Test_GIF, Load_GIF, Save_GIF, 0, 1, 1, "gif", "gif"},
@@ -112,7 +112,8 @@ const T_Format File_formats[] = {
   {FORMAT_KCF, " kcf", Test_KCF, Load_KCF, Save_KCF, 1, 0, 0, "kcf", "kcf"},
   {FORMAT_PAL, " pal", Test_PAL, Load_PAL, Save_PAL, 1, 0, 0, "pal", "pal"},
   {FORMAT_GPL, " gpl", Test_GPL, Load_GPL, Save_GPL, 1, 0, 0, "gpl", "gpl"},
-  {FORMAT_C64, " c64", Test_C64, Load_C64, Save_C64, 0, 1, 0, "c64", "c64;p64;a64;pi;rp;aas;art;dd;iph;ipt;hpc;ocp;koa;koala;fli;bml;cdu;prg"},
+  {FORMAT_C64, " c64", Test_C64, Load_C64, Save_C64, 0, 1, 0, "c64",
+    "c64;p64;a64;pi;rp;aas;art;dd;iph;ipt;hpc;ocp;koa;koala;fli;bml;cdu;prg;pmg"},
   {FORMAT_SCR, " cpc", NULL,     NULL,     Save_SCR, 0, 0, 0, "cpc", "cpc;scr"},
   {FORMAT_CM5, " cm5", Test_CM5, Load_CM5, Save_CM5, 0, 0, 1, "cm5", "cm5"},
   {FORMAT_PPH, " pph", Test_PPH, Load_PPH, Save_PPH, 0, 0, 1, "pph", "pph"},

@@ -2308,6 +2308,8 @@ void Test_C64(T_IO_Context * context, FILE * file)
       // $2000 => Art Studio
     case 9218:
       // $5C00 => Doodle
+    case 9332:
+      // $3F8E => Paint Magic (.pmg) 'JEDI' at offset $0010 and $2010
     case 10003: // multicolor + loadaddr
       // $4000 => InterPaint multicolor
       // $6000 => Koala Painter
@@ -2687,6 +2689,7 @@ void Load_C64(T_IO_Context * context)
 
     byte *file_buffer;
     byte *bitmap, *screen_ram, *color_ram=NULL, *background=NULL; // Only pointers to existing data
+    byte *temp_buffer = NULL;
     word width, height=200;
 
     file = Open_file_read(context);
@@ -2765,6 +2768,20 @@ void Load_C64(T_IO_Context * context)
                 loadFormat=F_hires;
                 screen_ram=file_buffer+2; // length: 1000 (+24 padding)
                 bitmap=file_buffer+1024+2; // length: 8000
+                break;
+
+            case 9332:  // Paint Magic .pmg
+                hasLoadAddr=1;
+                loadFormat=F_multi;
+                // Display routine between offset $0002 and $0073 (114 bytes)
+                // duplicated between offset      $2002 and $2073
+                bitmap=file_buffer+114+2;         // $0074
+                background=file_buffer+8000+114+2;// $1FB4
+                temp_buffer=malloc(1000);
+                memset(temp_buffer, file_buffer[3+8000+114+2], 1000); // color RAM Byte
+                color_ram=temp_buffer;
+                //border  byte = file_buffer[4+8000+114+2];
+                screen_ram=file_buffer+8192+114+2;  // $2074
                 break;
 
             case 10001: // multicolor
@@ -2967,6 +2984,8 @@ void Load_C64(T_IO_Context * context)
         }
 
         free(file_buffer);
+        if (temp_buffer)
+          free(temp_buffer);
     }
     else
         File_error = 1;
