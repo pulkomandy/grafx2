@@ -2315,8 +2315,12 @@ void Test_C64(T_IO_Context * context, FILE * file)
       // $6000 => Koala Painter
     case 10004:
       // $4000 => Face Paint (.fpt)
+    case 10006:
+      // $6000 => Run Paint (.rpm)
     case 10018:
       // $2000 => Advanced Art Studio
+    case 10022:
+      // $18DC => Micro Illustrator (uncompressed)
     case 10050:
       // $1800 => Picasso64
     case 10218:
@@ -2795,6 +2799,7 @@ void Load_C64(T_IO_Context * context)
 
             case 10003: // multicolor + loadaddr
             case 10004: // extra byte is border color
+            case 10006: // Run Paint
                 hasLoadAddr=1;
                 loadFormat=F_multi;
                 bitmap=file_buffer+2; // length: 8000
@@ -2811,6 +2816,14 @@ void Load_C64(T_IO_Context * context)
                 color_ram=file_buffer+9016+2; // length: 1000
                 // filebuffer+9000+2 is border
                 background=file_buffer+9001+2; // only 1
+                break;
+
+            case 10022: // Micro Illustrator (.mil)
+                hasLoadAddr=1;
+                loadFormat=F_multi;
+                screen_ram=file_buffer+20+2;
+                color_ram=file_buffer+1000+20+2;
+                bitmap=file_buffer+2*1000+20+2;
                 break;
 
             case 10049: // unpacked DrazPaint
@@ -2977,7 +2990,8 @@ void Load_C64(T_IO_Context * context)
             Load_C64_fli(context,bitmap,screen_ram,color_ram,background);
             break;
           case F_multi:
-            Load_C64_multi(context,bitmap,screen_ram,color_ram,*background);
+            Load_C64_multi(context,bitmap,screen_ram,color_ram,
+                           (background==NULL) ? 0 : *background);
             break;
           default:
             Load_C64_hires(context,bitmap,screen_ram);
