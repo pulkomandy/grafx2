@@ -60,6 +60,21 @@ void ZX_Spectrum_set_palette(T_Components * palette);
 
 /** @}*/
 
+/** @defgroup cpc Amstrad CPC
+ *
+ * @{
+ */
+
+/**
+ * Set 32 color HW Amstrad CPC palette
+ *
+ * The palette is in fact 27 colors, with some duplicates.
+ * http://www.cpcwiki.eu/index.php/CPC_Palette
+ */
+void CPC_set_HW_palette(T_Components * palette);
+
+/** @}*/
+
 /** @defgroup decb DECB binary format
  *
  * The DECB binary format was used on 6809 based machines :
