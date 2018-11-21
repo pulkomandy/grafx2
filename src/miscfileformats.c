@@ -2337,8 +2337,12 @@ void Test_C64(T_IO_Context * context, FILE * file)
     case 17409:
       // $3c00 => FLI-designer v1.1
       // ? $3ff0 => FLI designer 2 ?
+    case 17410:
+     // $3c00 => FLI MATIC
     case 17474: // FLI (BlackMail) + loadaddr
       // $3b00 => FLI Graph 2
+    case 17665:
+      // $3b00 => FLI editor
     case 10277: // multicolor CDU-Paint + loadaddr
       // $7EEF
       File_error = 0;
@@ -2895,12 +2899,22 @@ void Load_C64(T_IO_Context * context)
                 break;
 
             case 17409: // FLI-Designer v1.1 (+loadaddr)
+            case 17410: // => FLI MATIC (background at 2+1024+8192+8000+65 ?)
               hasLoadAddr=1;
               loadFormat=F_fli;
               background=NULL;
               color_ram=file_buffer+2; // length: 1000 (+ padding 24)
               screen_ram=file_buffer+1024+2; // length: 8192
               bitmap=file_buffer+8192+1024+2; // length: 8000
+              break;
+
+            case 17665: // FLI Editor
+              hasLoadAddr=1;
+              loadFormat=F_fli;
+              background=file_buffer+8;
+              color_ram=file_buffer+256+2; // length: 1000 (+ padding 24)
+              screen_ram=file_buffer+1024+256+2; // length: 8192
+              bitmap=file_buffer+8192+1024+256+2; // length: 8000
               break;
 
             default:
