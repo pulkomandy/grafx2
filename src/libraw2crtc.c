@@ -64,6 +64,7 @@ unsigned char mode3interlace(T_IO_Context * context, unsigned char x, unsigned c
   return mode3pixel[Get_pixel(context, x,y) & 3] << 3 | mode3pixel[Get_pixel(context,x+1,y) & 3] << 2;
 }
 
+///@ingroup cpc
 unsigned char *raw2crtc(T_IO_Context *context, unsigned char mode, unsigned char r9, unsigned long *outSize, unsigned char *r1, unsigned char r12, unsigned char r13)
 {
   unsigned char *outBuffer;

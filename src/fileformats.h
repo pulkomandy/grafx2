@@ -112,6 +112,8 @@ void Load_C64(T_IO_Context *);
 void Save_C64(T_IO_Context *);
 
 // -- SCR (Amstrad CPC)
+void Test_SCR(T_IO_Context *, FILE *);
+void Load_SCR(T_IO_Context *);
 void Save_SCR(T_IO_Context *);
 
 // -- CM5 (Amstrad CPC)

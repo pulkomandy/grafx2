@@ -504,6 +504,41 @@ void CPC_set_HW_palette(T_Components * palette)
   memcpy(palette, CPC_Hw_Palette, sizeof(CPC_Hw_Palette));
 }
 
+int CPC_check_AMSDOS(FILE * file, word * loading_address, unsigned long * file_length)
+{
+  int i;
+  byte data[128];
+  word checksum = 0;
+
+  fseek(file, 0, SEEK_SET);
+  if (!Read_bytes(file, data, 128))
+    return 0;
+  for (i = 1; i <= 11; i++) // check filename and extension
+  {
+    if (data[i] < ' ' || data[i] >= 0x7F)
+      return 0;
+  }
+  for (i = 0; i < 67; i++)
+    checksum += (word)data[i];
+  if (checksum != (data[67] | (data[68] << 8)))
+  {
+    GFX2_Log(GFX2_INFO, "AMSDOS header checksum mismatch %04X != %04X\n",
+             checksum, data[67] | (data[68] << 8));
+    return 0;
+  }
+  GFX2_Log(GFX2_DEBUG, "AMSDOS : user=%02X %.8s.%.3s %d %u(%u) bytes, load at $%04X checksum $%04X\n",
+           data[0],
+           (char *)(data + 1), (char *)(data + 9), data[18],
+           data[24] | (data[25] << 8), data[64] | (data[65] << 8) | (data[66] << 16),
+           data[26] | (data[27] << 8), checksum);
+  if (loading_address)
+    *loading_address = data[26] | (data[27] << 8);
+  if (file_length)
+    *file_length = data[64] | (data[65] << 8) | (data[66] << 16); // 24bit size
+  //  *file_length = data[24] | (data[25] << 8);  // 16bit size
+  return 1;
+}
+
 int DECB_Check_binary_file(FILE * f)
 {
   byte code;

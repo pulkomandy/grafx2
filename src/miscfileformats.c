@@ -3733,24 +3733,65 @@ void Save_C64(T_IO_Context * context)
 /**
  * Test for SCR file (Amstrad CPC)
  *
- * TODO
+ * SCR file format is from "Advanced OCP Art Studio" :
+ * http://www.cpcwiki.eu/index.php/Format:Advanced_OCP_Art_Studio_File_Formats
+ *
+ * For now we check the presence of a valid PAL file.
+ * If the PAL file is not there the pixel data may still be valid.
+ * The file size depends on the screen resolution.
+ * An AMSDOS header would be a good indication but in some cases it may not
+ * be there.
  */
 void Test_SCR(T_IO_Context * context, FILE * file)
 {
-    /**
-     * Mmh... not sure what we could test. Any idea ?
-     * The palette file can be tested, if it exists and have the right size it's
-     * ok. But if it's not there the pixel data may still be valid. And we can't
-     * use the filesize as this depends on the screen format.
+  FILE * pal_file;
+  unsigned long pal_size;
+  byte mode, color_anim_flag;
 
-     * An AMSDOS header would be a good indication but in some cases it may not
-     * be there */
-    (void)context; // unused
-    (void)file;
+  (void)file;
+
+  File_error = 1;
+  // requires the PAL file
+  pal_file = Open_file_read_with_alternate_ext(context, "pal");
+  if (pal_file == NULL)
+    return;
+
+  pal_size = File_length_file(pal_file);
+  if (pal_size == 239+128)
+  {
+    if (!CPC_check_AMSDOS(pal_file, NULL, NULL))
+    {
+      fclose(pal_file);
+      return;
+    }
+    fseek(pal_file, 128, SEEK_SET); // right after AMSDOS header
+  }
+  else if (pal_size != 239)
+  {
+    fclose(pal_file);
+    return;
+  }
+
+  if (!Read_byte(pal_file, &mode) || !Read_byte(pal_file, &color_anim_flag))
+  {
+    fclose(pal_file);
+    return;
+  }
+  GFX2_Log(GFX2_DEBUG, "Test_SCR() mode=%d color animation flag %02X\n", mode, color_anim_flag);
+  if (mode <= 2 && (color_anim_flag == 0 || color_anim_flag == 0xff))
+    File_error = 0;
+  fclose(pal_file);
 }
 
 /**
- * TODO
+ * Load Advanced OCP Art Studio files (Amstrad CPC)
+ *
+ * Only standard resolution files (Mode 0 160x200, mode 1 320x200 and
+ * mode 2 640x200) are supported. The .PAL file presence is required.
+ * "MJH" RLE packing is supported.
+ *
+ * @todo Ask user for screen size (or register values) in order to support
+ * non standard resolutions.
  */
 void Load_SCR(T_IO_Context * context)
 {
@@ -3772,61 +3813,283 @@ void Load_SCR(T_IO_Context * context)
 
     // All this mess enforces us to load (and unpack if needed) the file to a
     // temporary 32k buffer before actually decoding it.
+  FILE * pal_file, * file;
+  unsigned long file_size, amsdos_file_size = 0;
+  byte mode, color_anim_flag, color_anim_delay;
+  byte pal_data[236]; // 12 palettes of 16+1 colors + 16 excluded inks + 16 protected inks
+  word width, height = 200;
+  byte bpp;
+  enum PIXEL_RATIO ratio;
+  byte * pixel_data;
+  word x, y;
+  int i;
 
-    // 1) Seek for a palette
-    // 2) If palette found get screenmode from there, else ask user
-    // 3) ask user for screen size (or register values)
-    // 4) Load color data from palette (if found)
-    // 5) Close palette
-    // 6) Open the file
-    // 7) Run around the screen to untangle the pixeldata
-    // 8) Close the file
-    (void)context; // unused
+  File_error = 1;
+  // requires the PAL file
+  pal_file = Open_file_read_with_alternate_ext(context, "pal");
+  if (pal_file == NULL)
+    return;
+  file_size = File_length_file(pal_file);
+  if (file_size == 239+128)
+  {
+    if (!CPC_check_AMSDOS(pal_file, NULL, NULL))
+    {
+      fclose(pal_file);
+      return;
+    }
+    fseek(pal_file, 128, SEEK_SET); // right after AMSDOS header
+  }
+  if (!Read_byte(pal_file, &mode) || !Read_byte(pal_file, &color_anim_flag)
+      || !Read_byte(pal_file, &color_anim_delay) || !Read_bytes(pal_file, pal_data, 236))
+  {
+    GFX2_Log(GFX2_WARNING, "Load_SCR() failed to load .PAL file\n");
+    fclose(pal_file);
+    return;
+  }
+  fclose(pal_file);
+  GFX2_Log(GFX2_DEBUG, "Load_SCR() mode=%d color animation flag=%02X delay=%u\n",
+           mode, color_anim_flag, color_anim_delay);
+  switch (mode)
+  {
+    case 0:
+      width = 160;
+      bpp = 4;
+      ratio = PIXEL_WIDE;
+      break;
+    case 1:
+      width = 320;
+      bpp = 2;
+      ratio = PIXEL_SIMPLE;
+      break;
+    case 2:
+      width = 640;
+      bpp = 1;
+      ratio = PIXEL_TALL;
+      break;
+    default:
+      return; // unsupported
+  }
+
+  if (Config.Clear_palette)
+    memset(context->Palette,0,sizeof(T_Palette));
+  // Setup the palette (amstrad hardware palette)
+  CPC_set_HW_palette(context->Palette + 0x40);
+
+  // Set the palette for this picture
+  for (i = 0; i < 16; i++)
+    context->Palette[i] = context->Palette[pal_data[12*i]];
+
+  file = Open_file_read(context);
+  if (file == NULL)
+    return;
+  file_size = File_length_file(file);
+  if (CPC_check_AMSDOS(file, NULL, &amsdos_file_size))
+  {
+    if (file_size < (amsdos_file_size + 128))
+    {
+      GFX2_Log(GFX2_ERROR, "Load_SCR() mismatch in file size. AMSDOS file size %lu, should be %lu\n", amsdos_file_size, file_size - 128);
+      fclose(file);
+      return;
+    }
+    else if (file_size > (amsdos_file_size + 128))
+      GFX2_Log(GFX2_INFO, "Load_SCR() %lu extra bytes at end of file\n", file_size - 128 - amsdos_file_size);
+    fseek(file, 128, SEEK_SET); // right after AMSDOS header
+  }
+  else
+    fseek(file, 0, SEEK_SET);
+  Pre_load(context, width, height, file_size, FORMAT_SCR, ratio, bpp);
+  if(amsdos_file_size != 0)
+    file_size = amsdos_file_size;
+
+  pixel_data = malloc(16384);
+
+  if (file_size >= 16336 && file_size <= 16384)
+    Read_bytes(file, pixel_data, file_size);
+  else
+  {
+    byte sig[3];
+    word block_length;
+    // MJH packed format
+    i = 0;
+    do
+    {
+      if (!Read_bytes(file, sig, 3) || !Read_word_le(file, &block_length))
+        break;
+      if (0 != memcmp(sig, "MJH", 3))
+        break;
+      GFX2_Log(GFX2_DEBUG, "  %.3s %u\n", sig, block_length);
+      file_size -= 5;
+      while (block_length > 0)
+      {
+        byte code;
+        if (!Read_byte(file, &code))
+          break;
+        file_size--;
+        if (code == 1)
+        {
+          byte repeat, value;
+          if (!Read_byte(file, &repeat) || !Read_byte(file, &value))
+            break;
+          file_size -= 2;
+          do
+          {
+            pixel_data[i++] = value;
+            block_length--;
+          }
+          while(--repeat != 0);
+        }
+        else
+        {
+          pixel_data[i++] = code;
+          block_length--;
+        }
+      }
+    }
+    while(file_size > 0 && i < 16384);
+  }
+  fclose(file);
+
+  for (y = 0; y < height; y++)
+  {
+    const byte * line;
+
+    line = pixel_data + ((y & 7) << 11) + ((y >> 3) * 80);
+    x = 0;
+    for (i = 0; i < 80; i++)
+    {
+      byte pixels = line[i];
+      switch (mode)
+      {
+        case 0:
+          Set_pixel(context, x++, y, (pixels & 0x80) >> 7 | (pixels & 0x08) >> 2 | (pixels & 0x20) >> 3 | (pixels & 0x02) << 2);
+          Set_pixel(context, x++, y, (pixels & 0x40) >> 6 | (pixels & 0x04) >> 1 | (pixels & 0x10) >> 2 | (pixels & 0x01) << 3);
+          break;
+        case 1:
+          do {
+            // upper nibble is 4 lower color bits, lower nibble is 4 upper color bits
+            Set_pixel(context, x++, y, (pixels & 0x80) >> 7 | (pixels & 0x08) >> 2);
+            pixels <<= 1;
+          }
+          while ((x & 3) != 0);
+          break;
+        case 2:
+          do {
+            Set_pixel(context, x++, y, (pixels & 0x80) >> 7);
+            pixels <<= 1;
+          }
+          while ((x & 7) != 0);
+      }
+    }
+  }
+
+  free(pixel_data);
+
+  File_error = 0;
 }
 
 /**
  * Save Amstrad SCR file
+ *
+ * guess mode from aspect ratio :
+ * - normal pixels are mode 1
+ * - wide pixels are mode 0
+ * - tall pixels are mode 2
+ *
+ * Mode and palette are stored in a .PAL file.
+ *
+ * The picture color index should be 0-15,
+ * The CPC Hardware palette is expected to be set (indexes 64 to 95)
+ *
+ * @todo Add possibility to set R9, R12, R13 values
+ * @todo Add OCP packing support
+ * @todo Add possibility to include AMSDOS header, with proper loading
+ *       address guessed from r12/r13 values.
  */
 void Save_SCR(T_IO_Context * context)
 {
-    // TODO : Add possibility to set R9, R12, R13 values
-    // TODO : Add OCP packing support
-    // TODO : Add possibility to include AMSDOS header, with proper loading
-    // address guessed from r12/r13 values.
-
-    unsigned char* output;
-    unsigned long outsize;
-    unsigned char r1;
-    int cpc_mode;
-    FILE* file;
+  int i, j;
+  unsigned char* output;
+  unsigned long outsize = 0;
+  unsigned char r1 = 0;
+  int cpc_mode;
+  FILE* file;
 
 
-    switch(Pixel_ratio)
-    {
-        case PIXEL_WIDE:
-        case PIXEL_WIDE2:
-            cpc_mode = 0;
-            break;
-        case PIXEL_TALL:
-        case PIXEL_TALL2:
-        case PIXEL_TALL3:
-            cpc_mode = 2;
-            break;
-        default:
-            cpc_mode = 1;
-            break;
-    }
+  switch(Pixel_ratio)
+  {
+    case PIXEL_WIDE:
+    case PIXEL_WIDE2:
+      cpc_mode = 0;
+      break;
+    case PIXEL_TALL:
+    case PIXEL_TALL2:
+    case PIXEL_TALL3:
+      cpc_mode = 2;
+      break;
+    default:
+      cpc_mode = 1;
+      break;
+  }
 
-    output = raw2crtc(context, cpc_mode, 7, &outsize, &r1, 0x0C, 0);
-
-    file = Open_file_write(context);
-    Write_bytes(file, output, outsize);
+  file = Open_file_write_with_alternate_ext(context, "pal");
+  if (file == NULL)
+    return;
+  if (!Write_byte(file, cpc_mode) || !Write_byte(file, 0) || !Write_byte(file, 0))
+  {
     fclose(file);
+    return;
+  }
+  for (i = 0; i < 16; i++)
+  {
+    // search for the color in the HW palette (0x40-0x5F)
+    byte index = 0x40;
+    while ((index < 0x60) &&
+        (0 != memcmp(context->Palette + i, context->Palette + index, sizeof(T_Components))))
+      index++;
+    if (index >= 0x60)
+    {
+      GFX2_Log(GFX2_WARNING, "Save_SCR() color #%i not found in CPC HW palette.\n", i);
+      index = 0x54 - i; // default
+    }
+    for (j = 0; j < 12; j++)  // write the same color for the 12 frames
+    {
+      Write_byte(file, index);
+    }
+  }
+  // border
+  for (j = 0; j < 12; j++)
+  {
+    Write_byte(file, 0x54); // black
+  }
+  // excluded inks
+  for (i = 0; i < 16; i++)
+  {
+    Write_byte(file, 0);
+  }
+  // protected inks
+  for (i = 0; i < 16; i++)
+  {
+    Write_byte(file, 0);
+  }
+  fclose(file);
 
-    free (output);
-    output = NULL;
+  output = raw2crtc(context, cpc_mode, 7, &outsize, &r1, 0x0C, 0);
+  GFX2_Log(GFX2_DEBUG, "Save_SCR() output=%p outsize=%lu r1=$%02X\n", output, outsize, r1);
 
+  if (output == NULL)
+    return;
+
+  file = Open_file_write(context);
+  if (file == NULL)
+    File_error = 1;
+  else
+  {
     File_error = 0;
+    if (!Write_bytes(file, output, outsize))
+      File_error = 1;
+    fclose(file);
+  }
+  free (output);
 }
 
 /**

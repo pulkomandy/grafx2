@@ -73,6 +73,19 @@ void ZX_Spectrum_set_palette(T_Components * palette);
  */
 void CPC_set_HW_palette(T_Components * palette);
 
+/**
+ * Check AMSDOS header
+ *
+ * see http://www.cpcwiki.eu/index.php/AMSDOS_Header
+ *
+ * @param[in] file an open file
+ * @param[out] loading_address the loading address from the header
+ * @param[out] file_length the file length written in the header
+ * @return 0 if the file does not contain a valid AMSDOS header
+ * @return 1 if it does.
+ */
+int CPC_check_AMSDOS(FILE * file, word * loading_address, unsigned long * file_length);
+
 /** @}*/
 
 /** @defgroup decb DECB binary format
