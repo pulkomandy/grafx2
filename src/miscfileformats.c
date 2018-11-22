@@ -3736,6 +3736,8 @@ void Save_C64(T_IO_Context * context)
  * SCR file format is from "Advanced OCP Art Studio" :
  * http://www.cpcwiki.eu/index.php/Format:Advanced_OCP_Art_Studio_File_Formats
  *
+ * .WIN "window" format is also supported.
+ *
  * For now we check the presence of a valid PAL file.
  * If the PAL file is not there the pixel data may still be valid.
  * The file size depends on the screen resolution.
@@ -3745,12 +3747,17 @@ void Save_C64(T_IO_Context * context)
 void Test_SCR(T_IO_Context * context, FILE * file)
 {
   FILE * pal_file;
-  unsigned long pal_size;
+  unsigned long pal_size, file_size;
   byte mode, color_anim_flag;
 
   (void)file;
 
   File_error = 1;
+
+  file_size = File_length_file(file);
+  if (file_size > 16384+128)
+    return;
+
   // requires the PAL file
   pal_file = Open_file_read_with_alternate_ext(context, "pal");
   if (pal_file == NULL)
@@ -3790,6 +3797,8 @@ void Test_SCR(T_IO_Context * context, FILE * file)
  * mode 2 640x200) are supported. The .PAL file presence is required.
  * "MJH" RLE packing is supported.
  *
+ * .WIN "window" format is also supported.
+ *
  * @todo Ask user for screen size (or register values) in order to support
  * non standard resolutions.
  */
@@ -3814,7 +3823,7 @@ void Load_SCR(T_IO_Context * context)
     // All this mess enforces us to load (and unpack if needed) the file to a
     // temporary 32k buffer before actually decoding it.
   FILE * pal_file, * file;
-  unsigned long file_size, amsdos_file_size = 0;
+  unsigned long real_file_size, file_size, amsdos_file_size = 0;
   byte mode, color_anim_flag, color_anim_delay;
   byte pal_data[236]; // 12 palettes of 16+1 colors + 16 excluded inks + 16 protected inks
   word width, height = 200;
@@ -3823,6 +3832,11 @@ void Load_SCR(T_IO_Context * context)
   byte * pixel_data;
   word x, y;
   int i;
+  byte sig[3];
+  word block_length;
+  word win_width, win_height;
+  int is_win = 0;
+  int columns = 80;
 
   File_error = 1;
   // requires the PAL file
@@ -3883,6 +3897,7 @@ void Load_SCR(T_IO_Context * context)
   if (file == NULL)
     return;
   file_size = File_length_file(file);
+  real_file_size = file_size;
   if (CPC_check_AMSDOS(file, NULL, &amsdos_file_size))
   {
     if (file_size < (amsdos_file_size + 128))
@@ -3894,21 +3909,35 @@ void Load_SCR(T_IO_Context * context)
     else if (file_size > (amsdos_file_size + 128))
       GFX2_Log(GFX2_INFO, "Load_SCR() %lu extra bytes at end of file\n", file_size - 128 - amsdos_file_size);
     fseek(file, 128, SEEK_SET); // right after AMSDOS header
+    file_size = amsdos_file_size;
   }
   else
     fseek(file, 0, SEEK_SET);
-  Pre_load(context, width, height, file_size, FORMAT_SCR, ratio, bpp);
-  if(amsdos_file_size != 0)
-    file_size = amsdos_file_size;
+
+  if (file_size > 16384)  // we don't support bigger files yet
+  {
+    fclose(file);
+    return;
+  }
+
+  if (!Read_bytes(file, sig, 3) || !Read_word_le(file, &block_length))
+  {
+    fclose(file);
+    return;
+  }
+  fseek(file, -5, SEEK_CUR);
 
   pixel_data = malloc(16384);
+  memset(pixel_data, 0, 16384);
 
-  if (file_size >= 16336 && file_size <= 16384)
+  if (0 != memcmp(sig, "MJH", 3) || block_length > 16384)
+  {
+    // raw data
     Read_bytes(file, pixel_data, file_size);
+    i = file_size;
+  }
   else
   {
-    byte sig[3];
-    word block_length;
     // MJH packed format
     i = 0;
     do
@@ -3917,7 +3946,7 @@ void Load_SCR(T_IO_Context * context)
         break;
       if (0 != memcmp(sig, "MJH", 3))
         break;
-      GFX2_Log(GFX2_DEBUG, "  %.3s %u\n", sig, block_length);
+      GFX2_Log(GFX2_DEBUG, "  %.3s block %u\n", sig, block_length);
       file_size -= 5;
       while (block_length > 0)
       {
@@ -3944,18 +3973,48 @@ void Load_SCR(T_IO_Context * context)
           block_length--;
         }
       }
+      GFX2_Log(GFX2_DEBUG, "  unpacked %d bytes. remaining bytes in file=%lu\n",
+               i, file_size);
     }
     while(file_size > 0 && i < 16384);
   }
   fclose(file);
 
+  if (i > 5)
+  {
+    win_width = pixel_data[i-4] + (pixel_data[i-3] << 8);  // in bits
+    win_height = pixel_data[i-2];
+    if (((win_width + 7) >> 3) * win_height + 5 == i) // that's a WIN file !
+    {
+      width = win_width >> (2 - mode);
+      height = win_height;
+      is_win = 1;
+      columns = (win_width + 7) >> 3;
+      GFX2_Log(GFX2_DEBUG, ".WIN file detected len=%d (%d,%d) %dcols %02X %02X %02X %02X %02X\n",
+          i, width, height, columns,
+          pixel_data[i-5], pixel_data[i-4], pixel_data[i-3],
+          pixel_data[i-2], pixel_data[i-1]);
+    }
+    else
+    {
+      ///@todo guess the picture size, or ask the user
+      GFX2_Log(GFX2_DEBUG, ".SCR file. Data length %d\n", i);
+      // i <= 16384 && i >= 16336 => Standard resolution
+    }
+  }
+
+  Pre_load(context, width, height, real_file_size, FORMAT_SCR, ratio, bpp);
+
   for (y = 0; y < height; y++)
   {
     const byte * line;
 
-    line = pixel_data + ((y & 7) << 11) + ((y >> 3) * 80);
+    if (is_win)
+      line = pixel_data + y * columns;
+    else
+      line = pixel_data + ((y & 7) << 11) + ((y >> 3) * columns);
     x = 0;
-    for (i = 0; i < 80; i++)
+    for (i = 0; i < columns; i++)
     {
       byte pixels = line[i];
       switch (mode)
@@ -4100,6 +4159,8 @@ void Save_SCR(T_IO_Context * context)
  * and a .CM5 file with the palette, which varies over time.
  *
  * CM5 file is 2049 bytes, GFX is 18432 bytes.
+ *
+ * @todo check CM5 contains only valid values [0x40-0x5f]
  */
 void Test_CM5(T_IO_Context * context, FILE * file)
 {
