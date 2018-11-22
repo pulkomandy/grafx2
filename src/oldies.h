@@ -74,6 +74,13 @@ void ZX_Spectrum_set_palette(T_Components * palette);
 void CPC_set_HW_palette(T_Components * palette);
 
 /**
+ * Set 16 color default Amstrad CPC BASIC palette
+ *
+ * @note INK 14 and 15 are blinking on the real hardware.
+ */
+void CPC_set_default_BASIC_palette(T_Components * palette);
+
+/**
  * Check AMSDOS header
  *
  * see http://www.cpcwiki.eu/index.php/AMSDOS_Header

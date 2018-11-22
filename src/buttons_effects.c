@@ -309,12 +309,14 @@ void Button_Constraint_menu(void)
             ZX_Spectrum_set_palette(Main.palette);
             break;
           //case IMAGE_MODE_THOMSON:
-            // ask TO7/70, MO5 or MO6 / TO8/TO9
+          /// @todo set palette for Thomson.
+          /// ask TO7/70, MO5 or MO6 / TO8/TO9
           case IMAGE_MODE_EGX:
           case IMAGE_MODE_EGX2:
           case IMAGE_MODE_MODE5:
           case IMAGE_MODE_RASTER:
-          // TODO : CPC
+            CPC_set_HW_palette(Main.palette + 0x40);
+            CPC_set_default_BASIC_palette(Main.palette);
             break;
           case IMAGE_MODE_C64HIRES:
           case IMAGE_MODE_C64MULTI:
