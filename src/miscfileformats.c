@@ -4215,7 +4215,13 @@ void Load_CM5(T_IO_Context* context)
   Pre_load(context, 48*6, 256, 2049, FORMAT_CM5, PIXEL_SIMPLE, 0);
 
   if (Config.Clear_palette)
+  {
     memset(context->Palette,0,sizeof(T_Palette));
+    // setup colors 0,1,2,3 to see something in the thumbnail preview of layer 5
+    context->Palette[1].R = 60;
+    context->Palette[2].B = 60;
+    context->Palette[3].G = 60;
+  }
 
   // Setup the palette (amstrad hardware palette)
   CPC_set_HW_palette(context->Palette + 0x40);
