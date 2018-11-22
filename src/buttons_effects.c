@@ -165,7 +165,9 @@ void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_ca
 
 static enum IMAGE_MODES Selected_Constraint_Mode = 0;
 
-// Constaint enforcer/checker ------------------------------------------------
+/// Constaint enforcer/checker
+///
+/// A call toggles between constraint mode and Layered mode.
 void Button_Constraint_mode(void)
 {
   int pixel;
@@ -178,17 +180,17 @@ void Button_Constraint_mode(void)
   }
 
   if (Selected_Constraint_Mode <= IMAGE_MODE_ANIMATION)
-    Selected_Constraint_Mode = IMAGE_MODE_EGX;
+    Selected_Constraint_Mode = IMAGE_MODE_EGX;  ///@todo load prefered/last used contrained mode from config ?
 
   if (Selected_Constraint_Mode == IMAGE_MODE_MODE5 && (Main.image_width%48))
   {
-	  Verbose_message("Error!", "Emulation of Amstrad CPC's Mode5 can only be used on an image whose width is a multiple of 48.");
-      return;
+    Verbose_message("Error!", "Emulation of Amstrad CPC's Mode5 can only be used on an image whose width is a multiple of 48.");
+    return;
   }
 
   if (Selected_Constraint_Mode == IMAGE_MODE_MODE5 || Selected_Constraint_Mode == IMAGE_MODE_RASTER)
   {
-	/* TODO it would be great to auto-create extra layers */
+    /** @todo it would be great to auto-create extra layers */
     if (Main.backups->Pages->Image_mode != IMAGE_MODE_LAYERED ||
         Main.backups->Pages->Nb_layers!=5)
     {
@@ -203,10 +205,10 @@ void Button_Constraint_mode(void)
         return;
       }
     }
-    // TODO set the palette to a CPC one ?
   }
+  /// Setting the palette is done in @ref Button_Constraint_menu (8-bit constraint window)
 
-  // TODO backup
+  /// @todo backup
   Switch_layer_mode(Selected_Constraint_Mode);
 }
 
@@ -233,7 +235,7 @@ void Button_Constraint_menu(void)
     {IMAGE_MODE_EGX,     "EGX (CPC)",     "Alternate Mode0/Mode1 ", 0}, // 320x200
     {IMAGE_MODE_EGX2,    "EGX2 (CPC)",    "Alternate Mode1/Mode2 ", 0}, // 640x200
     {IMAGE_MODE_MODE5,   "Mode 5 (CPC)",  "Mode5                 ", 0}, // 288x256
-    {IMAGE_MODE_RASTER,  "Rasters (CPC)", "CPC Rasters           ", 0},
+    {IMAGE_MODE_RASTER,  "Rasters (CPC)", "CPC Rasters           ", 1},
     {IMAGE_MODE_C64HIRES,"C64 HiRes",     "2 colors per 8x8 block", 1}, // 320x200
     {IMAGE_MODE_C64MULTI,"C64 Multicolor","4 colors per 4x1 block", 1}, // 160x200
     //{IMAGE_MODE_C64FLI,  "C64 FLI",       "improved multicolor   ", 1}, // 160x200
@@ -251,6 +253,7 @@ void Button_Constraint_menu(void)
     {
       label = modes[i].label;
       summary = modes[i].summary;
+      set_grid = modes[i].grid;
       break;
     }
   dropdown = Window_set_dropdown_button(37, 21, 120, 14, 120, label, 1, 0, 1, RIGHT_SIDE|LEFT_SIDE, 0); // 3
@@ -374,9 +377,10 @@ void Button_Constraint_menu(void)
             Snap_width = 4;
             Snap_height = 8;
             break;
+          case IMAGE_MODE_RASTER:
           case IMAGE_MODE_THOMSON:
             Snap_width = 8;
-            Snap_height = 200;
+            Snap_height = 400;
             break;
           default:
             set_grid = 0;
