@@ -1028,6 +1028,24 @@ void Print_coordinates(void)
       Print_in_menu(temp,20);
       Print_general(170*Menu_factor_X,Menu_status_Y," ",0,Colorpicker_color);
     }
+    else if (Main.backups->Pages->Image_mode == IMAGE_MODE_MODE5
+            || Main.backups->Pages->Image_mode == IMAGE_MODE_RASTER)
+    {
+      int ink;
+      temp[1] = '\0';
+      if ( (Paintbrush_X>=0) && (Paintbrush_Y>=0)
+        && (Paintbrush_X<Main.image_width)
+        && (Paintbrush_Y<Main.image_height) )
+      {
+        for (ink = 0; ink < 4; ink++)
+        {
+          byte color = Main.backups->Pages->Image[ink].Pixels[Paintbrush_X+Paintbrush_Y*Main.image_width];
+          temp[0] = '0' + ink;
+          Print_general((170+ink*8)*Menu_factor_X, Menu_status_Y,temp,MC_Dark,color);
+        }
+        Update_status_line(19, 4);
+      }
+    }
 
     Num2str((dword)Paintbrush_X,temp,4);
     Print_in_menu(temp,2);
