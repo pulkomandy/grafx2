@@ -3209,19 +3209,18 @@ void Redraw_grid(short x, short y, unsigned short w, unsigned short h)
 
 byte Read_pixel_from_current_screen  (word x,word y)
 {
-
   byte depth;
   byte color;
 
   if (Main.backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
   {
-    return *((y)*Main.image_width+(x)+Main.backups->Pages->Image[Main.current_layer].Pixels);
+    return Read_pixel_from_current_layer(x, y);
   }
 
   if (Main.backups->Pages->Image_mode == IMAGE_MODE_MODE5
   	|| Main.backups->Pages->Image_mode == IMAGE_MODE_RASTER)
     if (Main.current_layer==4)
-      return *(Main.backups->Pages->Image[Main.current_layer].Pixels + x+y*Main.image_width);
+      return Read_pixel_from_current_layer(x, y);
 
   color = *(Main_screen+y*Main.image_width+x);
   if (color != Main.backups->Pages->Transparent_color) // transparent color
@@ -3234,7 +3233,7 @@ byte Read_pixel_from_current_screen  (word x,word y)
 /// Paint a a single pixel in image and optionnaly on screen: as-is.
 static void Pixel_in_screen_direct_with_opt_preview(word x, word y, byte color, int preview)
 {
-  *((y)*Main.image_width+(x)+Main.backups->Pages->Image[Main.current_layer].Pixels)=color;
+  Pixel_in_current_layer(x, y, color);
   if (preview)
     Pixel_preview(x,y,color);
 }
@@ -3243,7 +3242,7 @@ static void Pixel_in_screen_direct_with_opt_preview(word x, word y, byte color, 
 static void Pixel_in_screen_layered_with_opt_preview(word x,word y,byte color, int preview)
 {
   byte depth = *(Main_visible_image_depth_buffer.Image+x+y*Main.image_width);
-  *(Main.backups->Pages->Image[Main.current_layer].Pixels + x+y*Main.image_width)=color;
+  Pixel_in_current_layer(x, y, color);
   if ( depth <= Main.current_layer)
   {
     if (color == Main.backups->Pages->Transparent_color) // transparent color
@@ -3294,14 +3293,14 @@ static void Pixel_in_screen_thomson_with_opt_preview(word x,word y,byte color,in
   uint8_t c1, c2;
 
   // The color we are going to replace
-  c1 = *(Main.backups->Pages->Image[Main.current_layer].Pixels + x+y*Main.image_width);
+  c1 = Read_pixel_from_current_layer(x, y);
 
   if (c1 == color)
     return;
 
   for (x2 = 0; x2 < 8; x2++)
   {
-    c2 = *(Main.backups->Pages->Image[Main.current_layer].Pixels + (x2+start)+y*Main.image_width);
+    c2 = Read_pixel_from_current_layer(start+x2, y);
     if (c2 == color)
       continue;
     if (c2 != c1)
@@ -3317,7 +3316,7 @@ static void Pixel_in_screen_thomson_with_opt_preview(word x,word y,byte color,in
 
   for (x2 = 0; x2 < 8; x2++)
   {
-    c2 = *(Main.backups->Pages->Image[Main.current_layer].Pixels + (x2+start)+y*Main.image_width);
+    c2 = Read_pixel_from_current_layer(start+x2, y);
     if (c2 == c1) {
       Pixel_in_screen_layered_with_opt_preview(x2+start,y,color,preview);
     }
@@ -3464,7 +3463,7 @@ static void Pixel_in_screen_underlay_with_opt_preview(word x,word y,byte color,i
   byte depth;
 
   // Paste in layer
-  *(Main.backups->Pages->Image[Main.current_layer].Pixels + x+y*Main.image_width)=color;
+  Pixel_in_current_layer(x, y, color);
   // Search depth
   depth = *(Main.backups->Pages->Image[4].Pixels + x+y*Main.image_width);
 
@@ -3484,7 +3483,7 @@ static void Pixel_in_screen_overlay_with_opt_preview(word x,word y,byte color,in
   if (color<4)
   {
     // Paste in layer
-    *(Main.backups->Pages->Image[Main.current_layer].Pixels + x+y*Main.image_width)=color;
+    Pixel_in_current_layer(x, y, color);
     // Paste in depth buffer
     *(Main_visible_image_depth_buffer.Image+x+y*Main.image_width)=color;
     // Fetch pixel color from the target raster layer
