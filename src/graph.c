@@ -3477,24 +3477,46 @@ static void Pixel_in_screen_underlay_with_opt_preview(word x,word y,byte color,i
   }
 }
 
-/// Paint a a single pixel in image and on screen : in a layer that acts as a layer-selector (mode 5).
+/// Paint a single pixel in the layer 5 of mode 5
+///
+/// used when @ref IMAGE_MODE_MODE5 or @ref IMAGE_MODE_RASTER is active.
+///
+/// The layer 5 acts as a layer-selector.
+/// it contains INK 0 to 3 which select one of the layer from 1 to 4, the
+/// display color is retrieved from this one.
 static void Pixel_in_screen_overlay_with_opt_preview(word x,word y,byte color,int preview)
 {
-  if (color<4)
-  {
-    // Paste in layer
-    Pixel_in_current_layer(x, y, color);
-    // Paste in depth buffer
-    *(Main_visible_image_depth_buffer.Image+x+y*Main.image_width)=color;
-    // Fetch pixel color from the target raster layer
-    if (Main.layers_visible & (1 << color))
-        color=*(Main.backups->Pages->Image[color].Pixels + x+y*Main.image_width);
-    // Draw that color on the visible image buffer
-    *(x+y*Main.image_width+Main_screen)=color;
+  byte ink; // 0 to 3
 
-    if (preview)
-      Pixel_preview(x,y,color);
+  if (color < 4)
+    ink = color;  // the argument was the ink!
+  else
+  {
+    // search for this color in the 4 defined inks
+    for (ink = 0; ink < 4; ink++)
+    {
+      if (color == Main.backups->Pages->Image[ink].Pixels[x+y*Main.image_width])
+        break;
+    }
+    if (ink >= 4)
+      return; // not found ? do nothing
   }
+
+  // Paste ink in layer 5
+  Pixel_in_current_layer(x, y, ink);
+  // Paste in depth buffer
+  *(Main_visible_image_depth_buffer.Image+x+y*Main.image_width) = ink;
+  // Fetch pixel color from the target raster layer
+  if (Main.layers_visible & (1 << ink))
+    color=*(Main.backups->Pages->Image[ink].Pixels + x+y*Main.image_width);
+  else
+    color = ink;
+
+  // Draw that color on the visible image buffer
+  *(x+y*Main.image_width+Main_screen)=color;
+
+  if (preview)
+    Pixel_preview(x,y,color);
 }
 
 // end of constraints group
