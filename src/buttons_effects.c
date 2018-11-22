@@ -224,16 +224,16 @@ void Button_Constraint_menu(void)
     const char * label;
     const char * summary;
   } modes[] = {
-    {IMAGE_MODE_ZX,      "ZX Spectrum",   "2 colors per 8x8 block"},
+    {IMAGE_MODE_ZX,      "ZX Spectrum",   "2 colors per 8x8 block"}, // 256x192
     //{IMAGE_MODE_GBC,   "Game Boy Color"},
-    {IMAGE_MODE_THOMSON, "40col (MO/TO)", "2 colors per 8x1 block"},
-    {IMAGE_MODE_EGX,     "EGX (CPC)",     "Alternate Mode0/Mode1 "},
-    {IMAGE_MODE_EGX2,    "EGX2 (CPC)",    "Alternate Mode1/Mode2 "},
-    {IMAGE_MODE_MODE5,   "Mode 5 (CPC)",  "Mode5                 "},
+    {IMAGE_MODE_THOMSON, "40col (MO/TO)", "2 colors per 8x1 block"}, // 320x200
+    {IMAGE_MODE_EGX,     "EGX (CPC)",     "Alternate Mode0/Mode1 "}, // 320x200
+    {IMAGE_MODE_EGX2,    "EGX2 (CPC)",    "Alternate Mode1/Mode2 "}, // 640x200
+    {IMAGE_MODE_MODE5,   "Mode 5 (CPC)",  "Mode5                 "}, // 288x256
     {IMAGE_MODE_RASTER,  "Rasters (CPC)", "CPC Rasters           "},
-    {IMAGE_MODE_C64HIRES,"C64 HiRes",     "2 colors per 8x8 block"},
-    {IMAGE_MODE_C64MULTI,"C64 Multicolor","4 colors per 4x1 block"},
-    {IMAGE_MODE_C64FLI,  "C64 FLI",       "improved multicolor   "},
+    {IMAGE_MODE_C64HIRES,"C64 HiRes",     "2 colors per 8x8 block"}, // 320x200
+    {IMAGE_MODE_C64MULTI,"C64 Multicolor","4 colors per 4x1 block"}, // 160x200
+    //{IMAGE_MODE_C64FLI,  "C64 FLI",       "improved multicolor   "}, // 160x200
   };
 
   Open_window(194,95,"8-bit constraints");

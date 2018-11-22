@@ -3257,6 +3257,11 @@ static void Pixel_in_screen_layered_with_opt_preview(word x,word y,byte color, i
   }
 }
 
+
+/// @defgroup constraints Special constaints drawing modes
+/// For 8bits machines modes (ZX Spectrum, C64, etc.)
+/// @{
+
 /// Paint a pixel in CPC EGX mode
 ///
 /// even lines have 2x more pixel than odd lines, but less colors
@@ -3382,6 +3387,77 @@ done:
   }
 }
 
+/// Paint a pixel with C64 MultiColor constraints
+///
+/// Only 4 colors in a 4x8 block, including the background color
+/// which is common for all blocks.
+///
+/// @todo support for any background color (fixed to 0 now)
+static void Pixel_in_screen_c64multi_with_opt_preview(word x,word y,byte color,int preview)
+{
+  word startx = x & ~3;
+  word starty = y & ~7;
+  word x2, y2;
+  byte col, old_color;
+  byte c[4] = { 0, 0, 0, 0 };  // palette of 4 colors for the block
+  int i, n;
+
+  old_color = Read_pixel_from_current_layer(x, y);
+  if (old_color == color)
+    return; // nothing to do if the color doesn't change !
+
+  c[0] = 0; // assume background is 0
+  n = 1;  // counted colors
+  for (y2 = 0; y2 < 8; y2++)
+  {
+    for (x2 = 0; x2 < 4; x2++)
+    {
+      col = Read_pixel_from_current_layer(startx+x2, starty+y2);
+      // search color in our mini 4 colors palette
+      for (i = 0; i < n; i++)
+      {
+        if (col == c[i])
+          break;  // found
+      }
+      if (i == n) // not found
+      {
+        if (n < 4)
+          c[n++] = col; // set color in palette
+        else  // already more than 3 colors (+ background) in the block. Fix it
+          Pixel_in_screen_layered_with_opt_preview(startx+x2,starty+y2,color,preview);
+      }
+    }
+  }
+  if (n < 4)
+  {
+    // there is less than 4 colors in the block : nothing special to do
+    Pixel_in_screen_layered_with_opt_preview(x,y,color,preview);
+    return;
+  }
+  for (i = 0; i < n; i++)
+    if (color == c[i])
+    {
+      // The new color is already in the palette, nothing special to do
+      Pixel_in_screen_layered_with_opt_preview(x,y,color,preview);
+      return;
+    }
+  // The execution reaches this point only if plotting the new color
+  // would violate the constraints.
+  // replace old_color with color, except if old_color is the background.
+  // replace the last color of the palette instead.
+  if (old_color == c[0])  // background
+    old_color = c[3];
+  for (y2 = 0; y2 < 8; y2++)
+  {
+    for (x2 = 0; x2 < 4; x2++)
+    {
+      col = Read_pixel_from_current_layer(startx+x2, starty+y2);
+      if (col == old_color)
+        Pixel_in_screen_layered_with_opt_preview(startx+x2,starty+y2,color,preview);
+    }
+  }
+}
+
 /// Paint a a single pixel in image and optionnaly on screen : in a layer under one that acts as a layer-selector (mode 5).
 static void Pixel_in_screen_underlay_with_opt_preview(word x,word y,byte color,int preview)
 {
@@ -3422,6 +3498,9 @@ static void Pixel_in_screen_overlay_with_opt_preview(word x,word y,byte color,in
   }
 }
 
+// end of constraints group
+/// @}
+
 Func_pixel_opt_preview Pixel_in_current_screen_with_opt_preview=Pixel_in_screen_direct_with_opt_preview;
 
 void Pixel_in_spare(word x,word y, byte color)
@@ -3443,7 +3522,6 @@ void Update_pixel_renderer(void)
 {
   switch (Main.backups->Pages->Image_mode)
   {
-  case IMAGE_MODE_C64MULTI: //TODO
   case IMAGE_MODE_C64FLI: //TODO
   case IMAGE_MODE_GBC:  // TODO
   case IMAGE_MODE_ANIMATION:
@@ -3465,6 +3543,9 @@ void Update_pixel_renderer(void)
   case IMAGE_MODE_C64HIRES:
   case IMAGE_MODE_ZX:
     Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_zx_with_opt_preview;
+    break;
+  case IMAGE_MODE_C64MULTI:
+    Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_c64multi_with_opt_preview;
     break;
   case IMAGE_MODE_MODE5:
   case IMAGE_MODE_RASTER:
