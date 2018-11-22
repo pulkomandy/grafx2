@@ -2255,7 +2255,7 @@ static const char *c64_format_names[] = {
  */
 void Test_C64(T_IO_Context * context, FILE * file)
 {
-  long file_size;
+  unsigned long file_size;
   word load_addr;
   byte header[14];
 
@@ -3696,7 +3696,7 @@ void Save_C64(T_IO_Context * context)
   }
 
   saveFormat = (context->Width == 320) ? F_hires : F_multi;
-    
+
   GFX2_Log(GFX2_DEBUG, "Save_C64() extension : %s\n", context->File_name + strlen(context->File_name) - 4);
   if (strcasecmp(context->File_name + strlen(context->File_name) - 4, ".fli") == 0)
     saveFormat = F_fli;
@@ -5885,7 +5885,7 @@ static int Save_MOTO_window(enum MOTO_Machine_Type * machine, int * format, enum
   Open_window(200, 125, "Thomson MO/TO Saving");
   Window_set_normal_button(110,100,80,15,"Save",1,1,KEY_RETURN); // 1
   Window_set_normal_button(10,100,80,15,"Cancel",1,1,KEY_ESCAPE); // 2
-  
+
   Print_in_window(13,18,"Target Machine:",MC_Dark,MC_Light);
   machine_dd = Window_set_dropdown_button(10,28,110,15,100,
                                           (*mode == MOTO_MODE_40col) ? "TO7/TO7-70" : "TO9/TO8/TO9+",
@@ -6311,7 +6311,7 @@ void Save_MOTO(T_IO_Context * context)
       vram_forme[8063] = '0' + mode;
       memcpy(vram_couleur + 8000, vram_forme + 8000, 64);
     }
-    
+
     // Format BIN
     // TO8/TO9 : set LGAMOD 0xE7DC  40col=0 bm4=0x21 80col=0x2a bm16=0x7b
     if (!DECB_BIN_Add_Chunk(file, 1, reg_prc, &prc_value))
