@@ -14,6 +14,7 @@
 #include "global.h"
 #include "struct.h"
 #include "loadsave.h"
+#include "gfx2log.h"
 
 /* 6845 registers :
  * R1 : Horizontal Displayed : number of character displayed per line (4, 8 or 16 pixels depending on mode)
@@ -41,20 +42,24 @@ unsigned char mode0interlace(T_IO_Context * context, unsigned char x, unsigned c
   // bit7 bit6 bit5 bit4 bit3 bit2 bit1 bit0
   // p0b0 p1b0 p0b2 p1b2 p0b1 p1b1 p0b3 p1b3
   unsigned char mode0pixel[] = {0, 64, 4, 68, 16, 80, 20, 84, 1, 65, 5, 69, 17, 81, 21, 85};
-  return mode0pixel[Get_pixel(context,x,y) & 0xf] << 1 | mode0pixel[Get_pixel(context,x+1,y) & 0xf];
+  return mode0pixel[Get_pixel(context,x*2,y) & 0xf] << 1
+       | mode0pixel[Get_pixel(context,x*2+1,y) & 0xf];
 }
 
 unsigned char mode1interlace(T_IO_Context * context, unsigned char x, unsigned char y)
 {
   unsigned char mode1pixel[] = {0, 16, 1, 17};
-  return mode1pixel[Get_pixel(context,x,y) & 3] << 3 | mode1pixel[Get_pixel(context,x+1,y) & 3] << 2 | mode1pixel[Get_pixel(context,x+2,y) & 3] << 1 | mode1pixel[Get_pixel(context,x+3,y) & 3];
+  return mode1pixel[Get_pixel(context,x*4,y) & 3] << 3
+       | mode1pixel[Get_pixel(context,x*4+1,y) & 3] << 2
+       | mode1pixel[Get_pixel(context,x*4+2,y) & 3] << 1
+       | mode1pixel[Get_pixel(context,x*4+3,y) & 3];
 }
 
 unsigned char mode2interlace(T_IO_Context * context, unsigned char x, unsigned char y)
 {
   unsigned char out = 0;
   int i;
-  for(i = 0; i < 8; i++) out += ((Get_pixel(context,x+7-i,y)&1) << i);
+  for(i = 0; i < 8; i++) out += ((Get_pixel(context,x*8+7-i,y)&1) << i);
   return out;
 }
 
@@ -135,6 +140,8 @@ unsigned char *raw2crtc(T_IO_Context *context, unsigned char mode, unsigned char
   memset(allocationBuffer, 0, 0x10000);
 
   r6 = height/(r9+1);
+
+  GFX2_Log(GFX2_DEBUG, "raw2crtc() r1=%u r6=%u\n", *r1, r6);
 
   for(vcc = 0; vcc < r6; vcc++)
   {
