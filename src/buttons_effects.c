@@ -215,6 +215,8 @@ void Button_Constraint_menu(void)
 {
   unsigned int i;
   int set_palette = 1;
+  int set_pic_size = 0;
+  int set_grid = 1;
   short clicked_button;
   T_Dropdown_button* dropdown;
   const char * label;
@@ -223,23 +225,24 @@ void Button_Constraint_menu(void)
     enum IMAGE_MODES mode;
     const char * label;
     const char * summary;
+    int grid;
   } modes[] = {
-    {IMAGE_MODE_ZX,      "ZX Spectrum",   "2 colors per 8x8 block"}, // 256x192
+    {IMAGE_MODE_ZX,      "ZX Spectrum",   "2 colors per 8x8 block", 1}, // 256x192
     //{IMAGE_MODE_GBC,   "Game Boy Color"},
-    {IMAGE_MODE_THOMSON, "40col (MO/TO)", "2 colors per 8x1 block"}, // 320x200
-    {IMAGE_MODE_EGX,     "EGX (CPC)",     "Alternate Mode0/Mode1 "}, // 320x200
-    {IMAGE_MODE_EGX2,    "EGX2 (CPC)",    "Alternate Mode1/Mode2 "}, // 640x200
-    {IMAGE_MODE_MODE5,   "Mode 5 (CPC)",  "Mode5                 "}, // 288x256
-    {IMAGE_MODE_RASTER,  "Rasters (CPC)", "CPC Rasters           "},
-    {IMAGE_MODE_C64HIRES,"C64 HiRes",     "2 colors per 8x8 block"}, // 320x200
-    {IMAGE_MODE_C64MULTI,"C64 Multicolor","4 colors per 4x1 block"}, // 160x200
-    //{IMAGE_MODE_C64FLI,  "C64 FLI",       "improved multicolor   "}, // 160x200
+    {IMAGE_MODE_THOMSON, "40col (MO/TO)", "2 colors per 8x1 block", 1}, // 320x200
+    {IMAGE_MODE_EGX,     "EGX (CPC)",     "Alternate Mode0/Mode1 ", 0}, // 320x200
+    {IMAGE_MODE_EGX2,    "EGX2 (CPC)",    "Alternate Mode1/Mode2 ", 0}, // 640x200
+    {IMAGE_MODE_MODE5,   "Mode 5 (CPC)",  "Mode5                 ", 0}, // 288x256
+    {IMAGE_MODE_RASTER,  "Rasters (CPC)", "CPC Rasters           ", 0},
+    {IMAGE_MODE_C64HIRES,"C64 HiRes",     "2 colors per 8x8 block", 1}, // 320x200
+    {IMAGE_MODE_C64MULTI,"C64 Multicolor","4 colors per 4x1 block", 1}, // 160x200
+    //{IMAGE_MODE_C64FLI,  "C64 FLI",       "improved multicolor   ", 1}, // 160x200
   };
 
-  Open_window(194,95,"8-bit constraints");
+  Open_window(194,95+36,"8-bit constraints");
 
-  Window_set_normal_button(31,71,51,14,"Cancel",0,1,KEY_ESC);  // 1
-  Window_set_normal_button(112,71,51,14,"OK"    ,0,1,KEY_RETURN); // 2
+  Window_set_normal_button(31,71+36,51,14,"Cancel",0,1,KEY_ESC);  // 1
+  Window_set_normal_button(112,71+36,51,14,"OK"    ,0,1,KEY_RETURN); // 2
 
   label = "Constraints";
   summary = "";
@@ -256,7 +259,13 @@ void Button_Constraint_menu(void)
   Print_in_window(10, 21+18, summary, MC_Dark, MC_Light);
 
   Window_set_normal_button(10, 51, 14, 14, set_palette?"X":" ", 0, 1, KEY_p);  // 4
-  Print_in_window_underscore(10+18, 51+3, "Set Palette", MC_Dark, MC_Light, 5);
+  Print_in_window_underscore(10+18, 51+3, "Set palette", MC_Dark, MC_Light, 5);
+
+  Window_set_normal_button(10, 69, 14, 14, set_pic_size?"X":" ", 0, 1, KEY_s);  // 5
+  Print_in_window_underscore(10+18, 69+3, "Set picture size", MC_Dark, MC_Light, 13);
+
+  Window_set_normal_button(10, 87, 14, 14, set_grid?"X":" ", 0, 1, KEY_g);  // 6
+  Print_in_window_underscore(10+18, 87+3, "Enable grid", MC_Dark, MC_Light, 8);
 
   Update_window_area(0,0,Window_width, Window_height);
   Display_cursor();
@@ -275,8 +284,10 @@ void Button_Constraint_menu(void)
       for (i = 0; i < sizeof(modes)/sizeof(modes[0]) ; i++)
         if (Selected_Constraint_Mode == modes[i].mode)
         {
+          set_grid = modes[i].grid;
           Hide_cursor();
           Print_in_window(10, 21+18, modes[i].summary, MC_Dark, MC_Light);
+          Print_in_window(10+3, 87+3, set_grid?"X":" ", MC_Black, MC_Light);
           Display_cursor();
           break;
         }
@@ -287,6 +298,22 @@ void Button_Constraint_menu(void)
       set_palette = !set_palette;
       Hide_cursor();
       Print_in_window(10+3, 51+3, set_palette?"X":" ", MC_Black, MC_Light);
+      Display_cursor();
+    }
+    else if (clicked_button == 5)
+    {
+      // picture size
+      set_pic_size = !set_pic_size;
+      Hide_cursor();
+      Print_in_window(10+3, 69+3, set_pic_size?"X":" ", MC_Black, MC_Light);
+      Display_cursor();
+    }
+    else if (clicked_button == 6)
+    {
+      // enable grid
+      set_grid = !set_grid;
+      Hide_cursor();
+      Print_in_window(10+3, 87+3, set_grid?"X":" ", MC_Black, MC_Light);
       Display_cursor();
     }
   }
@@ -301,6 +328,69 @@ void Button_Constraint_menu(void)
       if (Main.backups->Pages->Image_mode > IMAGE_MODE_ANIMATION)
         Button_Constraint_mode();  // unactivate current mode
       Button_Constraint_mode();  // activate selected Mode
+      if (set_pic_size)
+      {
+        switch (Selected_Constraint_Mode)
+        {
+          case IMAGE_MODE_ZX:
+            Resize_image(256, 192);
+            End_of_modification();
+            break;
+          case IMAGE_MODE_MODE5:
+            Resize_image(288, 256);
+            End_of_modification();
+            break;
+          case IMAGE_MODE_EGX:
+          case IMAGE_MODE_THOMSON:
+          case IMAGE_MODE_C64HIRES:
+            Resize_image(320, 200);
+            End_of_modification();
+            break;
+          case IMAGE_MODE_EGX2:
+            Resize_image(640, 200);
+            End_of_modification();
+            break;
+          case IMAGE_MODE_C64MULTI:
+          case IMAGE_MODE_C64FLI:
+            Resize_image(160, 200);
+            End_of_modification();
+            /// @todo enable WIDE pixels when switching to 160x200
+            break;
+          default:
+            break;
+        }
+      }
+      if (set_grid)
+      {
+        switch (Selected_Constraint_Mode)
+        {
+          case IMAGE_MODE_ZX:
+          case IMAGE_MODE_C64HIRES:
+            Snap_width = 8;
+            Snap_height = 8;
+            break;
+          case IMAGE_MODE_C64MULTI:
+          case IMAGE_MODE_C64FLI:
+            Snap_width = 4;
+            Snap_height = 8;
+            break;
+          case IMAGE_MODE_THOMSON:
+            Snap_width = 8;
+            Snap_height = 200;
+            break;
+          default:
+            set_grid = 0;
+        }
+        if (set_grid)
+        {
+          Show_grid = 1;
+          Snap_offset_X = 0;
+          Snap_offset_Y = 0;
+          Snap_mode = 0;
+          //Tilemap_update();
+          Display_all_screen();
+        }
+      }
       if (set_palette)
       {
         switch (Selected_Constraint_Mode)
