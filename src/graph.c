@@ -3502,18 +3502,32 @@ static void Pixel_in_screen_overlay_with_opt_preview(word x,word y,byte color,in
 
 Func_pixel_opt_preview Pixel_in_current_screen_with_opt_preview=Pixel_in_screen_direct_with_opt_preview;
 
+/**
+ * Put a pixel in the current layer of a "Document"
+ *
+ * @param doc pointer to either @ref Main or @ref Spare
+ * @param x x coordinate of the pixel to put
+ * @param y y coordinate of the pixel to put
+ * @param color the new color for the pixel
+ */
+void Pixel_in_document_current_layer(T_Document * doc, word x, word y, byte color)
+{
+  doc->backups->Pages->Image[doc->current_layer].Pixels[x + y*doc->image_width] = color;
+}
+
 void Pixel_in_spare(word x,word y, byte color)
 {
-  *((y)*Spare.image_width+(x)+Spare.backups->Pages->Image[Spare.current_layer].Pixels)=color;
+  Pixel_in_document_current_layer(&Spare, x, y, color);
 }
 
 void Pixel_in_current_layer(word x,word y, byte color)
 {
-  *((y)*Main.image_width+(x)+Main.backups->Pages->Image[Main.current_layer].Pixels)=color;
+  Pixel_in_document_current_layer(&Main, x, y, color);
 }
 
 byte Read_pixel_from_current_layer(word x,word y)
 {
+  // return Main.backups->Pages->Image[Main.current_layer].Pixels[x + y*Main.image_width];
   return *((y)*Main.image_width+(x)+Main.backups->Pages->Image[Main.current_layer].Pixels);
 }
 

@@ -291,8 +291,7 @@ GFX2_GLOBAL int Pixel_width;
 GFX2_GLOBAL int Pixel_height;
 
 
-// -- Current image data
-
+/// Current image data
 GFX2_GLOBAL T_Document Main;
 
 /// Pointer to the pixel data of the main image
@@ -300,8 +299,7 @@ GFX2_GLOBAL byte *    Main_screen;
 /// Lookup table for XOR effects, pointing each color to the most different one
 GFX2_GLOBAL byte xor_lut[256];
 
-// -- Spare page data
-
+/// Spare page data
 GFX2_GLOBAL T_Document Spare;
 
 // -- Image backups
