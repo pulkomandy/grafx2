@@ -492,7 +492,7 @@ unsigned long File_length_file(FILE * file)
   offset_backup = ftell(file);
   if (offset_backup < 0)
     return 0;
-  if (fseek(file, 0, SEEK_END) < 0
+  if (fseek(file, 0, SEEK_END) < 0)
     return 0;
   file_length = ftell(file);
   if (file_length < 0)
