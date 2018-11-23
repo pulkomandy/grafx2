@@ -1,6 +1,10 @@
 DOXYGEN = doxygen
 TAR = tar
 
+ifneq ($(shell test -f ../src/version.c && echo exists),exists)
+$(error please build grafx2 first. missing version.c file.)
+endif
+
 GIT_REVISION = $(shell cat ../src/version.c | cut -f 2 -d '"')
 LABEL = $(shell cat ../src/pversion.c | cut -f 2 -d '"')
 VERSION = $(subst wip.,wip,$(LABEL).$(GIT_REVISION))
