@@ -576,7 +576,9 @@ ifeq ($(NOTTF),1)
   TTFCOPT = -DNOTTF=1
   TTFLOPT =
   TTFLIBS =
-  TTFLABEL = -nottf
+  ifneq ($(API),win32)
+    TTFLABEL = -nottf
+  endif
 else
  ifneq ($(ATARICROSS),1)
    TTFCOPT = 
@@ -824,12 +826,12 @@ endif
 
 # Create a zip archive ready for upload to the website, including binaries and sourcecode
 ziprelease: release $(SRCARCH)
-	cd .. && $(ZIP) $(ZIPOPT) "grafx2-$(VERSIONTAG)$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
+	cd .. && $(ZIP) $(ZIPOPT) "grafx2-$(API)-$(VERSIONTAG)$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
 	  $(BIN:../%=%) share/grafx2/gfx2def.ini $(SCRIPT_FILES:../%=%) $(SKIN_FILES:../%=%) \
 	  share/grafx2/gfx2.gif share/icons/grafx2.svg \
 	  $(DOC_FILES:../%=%) $(FONT_FILES:../%=%) $(SRCARCH:../%=%) $(PLATFORMFILES:../%=%)
 ifeq ($(PLATFORM),Darwin)
-	$(ZIP) $(ZIPOPT) -r ../Grafx2.app-$(VERSIONTAG).zip Grafx2.app
+	$(ZIP) $(ZIPOPT) -r ../Grafx2.app-$(API)-$(VERSIONTAG).zip Grafx2.app
 endif
 	$(TAR) czf "../grafx2-$(VERSIONTAG)-src.tgz" $(TARTRANSFORM) \
 	  ../src/*.c ../src/*.cpp ../src/*.h ../src/Makefile ../src/Makefile.dep \
