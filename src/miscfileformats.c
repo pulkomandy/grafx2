@@ -2243,6 +2243,8 @@ static const char *c64_format_names[] = {
   "FLI"
 };
 
+static long C64_unpack_doodle(byte ** file_buffer, long file_size);
+
 /**
  * Test for a C64 picture file
  *
@@ -2340,6 +2342,7 @@ void Test_C64(T_IO_Context * context, FILE * file)
       }
       File_error = 0;
       break;
+    case 17218:
     case 17409:
       // $3c00 => FLI-designer v1.1
       // ? $3ff0 => FLI designer 2 ?
@@ -2349,12 +2352,33 @@ void Test_C64(T_IO_Context * context, FILE * file)
       // $3b00 => FLI Graph 2
     case 17665:
       // $3b00 => FLI editor
+    case 17666:
+      // $3b00 => FLI Graph
     case 10277: // multicolor CDU-Paint + loadaddr
       // $7EEF
       File_error = 0;
       break;
     default: // then we don't know for now.
-      File_error = 1;
+      if (load_addr == 0x6000 || load_addr == 0x5c00)
+      {
+        long unpacked_size;
+        byte * buffer = malloc(file_size);
+        if (buffer == NULL)
+          return;
+        fseek(file, SEEK_SET, 0);
+        if (!Read_bytes(file, buffer, file_size))
+          return;
+        unpacked_size = C64_unpack_doodle(&buffer, file_size);
+        free(buffer);
+        switch (unpacked_size)
+        {
+          case 9024:  // Doodle hi color
+          case 9216:
+          case 10001: // Koala painter 2
+          case 10070:
+            File_error = 0;
+        }
+      }
   }
 }
 
@@ -2550,6 +2574,93 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
 }
 
 /**
+ * Count the length of the unpacked data
+ *
+ * RLE encoding is either ESCAPE CODE, COUNT, VALUE
+ * or ESCAPE CODE, VALUE, COUNT
+ *
+ * @param buffer the packed data
+ * @param input_size the packed data byte count
+ * @param RLE_code the escape code
+ * @param order 0 for ESCAPE, COUNT, VALUE, 1 for ESCAPE, VALUE, COUNT
+ * @return the unpacked data byte count
+ */
+static long C64_unpack_get_length(const byte * buffer, long input_size, byte RLE_code, int order)
+{
+  const byte * end;
+  long unpacked_size = 0;
+
+  end = buffer + input_size;
+  while(buffer < end)
+  {
+    if (*buffer == RLE_code)
+    {
+      if (order)
+      { // ESCAPE, VALUE, COUNT
+        buffer += 2;  // skip value
+        unpacked_size += *buffer;
+      }
+      else
+      { // ESCAPE, COUNT, VALUE
+        buffer++;
+        if (*buffer == 0)
+          break;
+        unpacked_size += *buffer++;
+      }
+    }
+    else
+      unpacked_size++;
+    buffer++;
+  }
+  return unpacked_size;
+}
+
+/**
+ * unpack RLE packed data
+ *
+ * RLE encoding is either ESCAPE CODE, COUNT, VALUE
+ * or ESCAPE CODE, VALUE, COUNT
+ *
+ * @param unpacked buffer to received unpacked data
+ * @param buffer the packed data
+ * @param input_size the packed data byte count
+ * @param RLE_code the escape code
+ * @param order 0 for ESCAPE, COUNT, VALUE, 1 for ESCAPE, VALUE, COUNT
+ */
+static void C64_unpack(byte * unpacked, const byte * buffer, long input_size, byte RLE_code, int order)
+{
+  const byte * end;
+
+  end = buffer + input_size;
+  while(buffer < end)
+  {
+    if (*buffer == RLE_code)
+    {
+      byte count;
+      byte value;
+      buffer++;
+      if (order)
+      { // ESCAPE, VALUE, COUNT
+        value = *buffer++;
+        count = *buffer;
+      }
+      else
+      { // ESCAPE, COUNT, VALUE
+        count = *buffer++;
+        value = *buffer;
+      }
+      if (count == 0)
+        break;
+      while (count-- > 0)
+        *unpacked++ = value;
+    }
+    else
+      *unpacked++ = *buffer;
+    buffer++;
+  }
+}
+
+/**
  * Unpack the Amica Paint RLE packing
  *
  * @param[in,out] file_buffer will contain the unpacked buffer on return
@@ -2561,50 +2672,20 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
  */
 static long C64_unpack_amica(byte ** file_buffer, long file_size)
 {
-  long unpacked_size = 0;
+  long unpacked_size;
   byte * unpacked_buffer;
-  byte * current, * end;
-  byte * unpacked;
   const byte RLE_code = 0xC2;
 
   if (file_size <= 16 || file_buffer == NULL || *file_buffer == NULL)
     return -1;
-  // First pass to know unpacked size
-  end = *file_buffer + file_size;
-  for (current = *file_buffer + 2; current < end; current++)
-  {
-    if (*current == RLE_code)
-    {
-      current++;
-      if (*current == 0)
-        break;
-      unpacked_size += *current++;
-    }
-    else
-      unpacked_size++;
-  }
+  unpacked_size = C64_unpack_get_length(*file_buffer + 2, file_size - 2, RLE_code, 0);
   GFX2_Log(GFX2_DEBUG, "C64_unpack_amica() unpacked_size=%ld\n", unpacked_size);
    // 2nd pass to unpack
   unpacked_buffer = malloc(unpacked_size);
   if (unpacked_buffer == NULL)
     return -1;
-  unpacked = unpacked_buffer;
+  C64_unpack(unpacked_buffer, *file_buffer + 2, file_size - 2, RLE_code, 0);
 
-  for (current = *file_buffer + 2; current < end; current++)
-  {
-    if (*current == RLE_code)
-    {
-      byte count;
-      current++;
-      count = *current++;
-      if (count == 0)
-        break;
-      while (count-- > 0)
-        *unpacked++ = *current;
-    }
-    else
-      *unpacked++ = *current;
-  }
   free(*file_buffer);
   *file_buffer = unpacked_buffer;
   return unpacked_size;
@@ -2623,49 +2704,48 @@ static long C64_unpack_amica(byte ** file_buffer, long file_size)
  */
 static long C64_unpack_draz(byte ** file_buffer, long file_size)
 {
-  long unpacked_size = 0;
+  long unpacked_size;
   byte * unpacked_buffer;
-  byte * current, * end;
-  byte * unpacked;
   byte RLE_code;
 
   if (file_size <= 16 || file_buffer == NULL || *file_buffer == NULL)
     return -1;
   RLE_code = (*file_buffer)[15];
-  GFX2_Log(GFX2_DEBUG, "C64_unpack_draz() \"%.13s\" RLE code=$%02X RLE data length=%ld\n",
-           *file_buffer + 2, RLE_code, file_size - 16);
   // First pass to know unpacked size
-  end = *file_buffer + file_size;
-  for (current = *file_buffer + 16; current < end; current++)
-  {
-    if (*current == RLE_code)
-    {
-      current++;
-      unpacked_size += *current++;
-    }
-    else
-      unpacked_size++;
-  }
-  GFX2_Log(GFX2_DEBUG, "C64_unpack_draz() unpacked_size=%ld\n", unpacked_size);
+  unpacked_size = C64_unpack_get_length(*file_buffer + 16, file_size - 16, RLE_code, 0);
+  GFX2_Log(GFX2_DEBUG, "C64_unpack_draz() \"%.13s\" RLE code=$%02X RLE data length=%ld unpacked_size=%ld\n",
+           *file_buffer + 2, RLE_code, file_size - 16, unpacked_size);
    // 2nd pass to unpack
   unpacked_buffer = malloc(unpacked_size);
   if (unpacked_buffer == NULL)
     return -1;
-  unpacked = unpacked_buffer;
+  C64_unpack(unpacked_buffer, *file_buffer + 16, file_size - 16, RLE_code, 0);
+  free(*file_buffer);
+  *file_buffer = unpacked_buffer;
+  return unpacked_size;
+}
 
-  for (current = *file_buffer + 16; current < end; current++)
-  {
-    if (*current == RLE_code)
-    {
-      byte count;
-      current++;
-      count = *current++;
-      while (count-- > 0)
-        *unpacked++ = *current;
-    }
-    else
-      *unpacked++ = *current;
-  }
+/**
+ * Unpack doodle/koala painter 2 data
+ *
+ * @return the unpacked data size or -1 in case of error
+ */
+static long C64_unpack_doodle(byte ** file_buffer, long file_size)
+{
+  long unpacked_size;
+  byte * unpacked_buffer;
+  const byte RLE_code = 0xFE;
+
+  if (file_size <= 16 || file_buffer == NULL || *file_buffer == NULL)
+    return -1;
+  // First pass to know unpacked size
+  unpacked_size = C64_unpack_get_length(*file_buffer + 2, file_size - 2, RLE_code, 1);
+  GFX2_Log(GFX2_DEBUG, "C64_unpack_doodle() unpacked_size=%ld\n", unpacked_size);
+   // 2nd pass to unpack
+  unpacked_buffer = malloc(unpacked_size);
+  if (unpacked_buffer == NULL)
+    return -1;
+  C64_unpack(unpacked_buffer, *file_buffer + 2, file_size - 2, RLE_code, 1);
   free(*file_buffer);
   *file_buffer = unpacked_buffer;
   return unpacked_size;
@@ -2728,6 +2808,8 @@ void Load_C64(T_IO_Context * context)
           file_size = C64_unpack_draz(&file_buffer, file_size);
         else if(load_addr == 0x4000 && file_buffer[file_size-2] == 0xC2 && file_buffer[file_size-1] == 0)
           file_size = C64_unpack_amica(&file_buffer, file_size);
+        else if (file_size < 8000 && (load_addr == 0x6000 || load_addr == 0x5c00))
+          file_size = C64_unpack_doodle(&file_buffer, file_size);
 
         switch (file_size)
         {
@@ -2767,6 +2849,14 @@ void Load_C64(T_IO_Context * context)
                 screen_ram=file_buffer+8002; // length: 1000
                 break;
 
+            case 9024:  // Doodle (unpacked from .jj)
+            case 9216:
+                hasLoadAddr=0;
+                loadFormat=F_hires;
+                screen_ram=file_buffer; // length: 1000 (+24 padding)
+                bitmap=file_buffer+1024; // length: 8000
+                break;
+
             case 9218: // Doodle (.dd)
                 hasLoadAddr=1;
                 loadFormat=F_hires;
@@ -2789,6 +2879,7 @@ void Load_C64(T_IO_Context * context)
                 break;
 
             case 10001: // multicolor
+            case 10070: // unpacked file.
                 hasLoadAddr=0;
                 loadFormat=F_multi;
                 bitmap=file_buffer+0; // length: 8000
@@ -2928,6 +3019,7 @@ void Load_C64(T_IO_Context * context)
                 bitmap=file_buffer+9474; // length: 8000
                 break;
 
+            case 17218:
             case 17409: // FLI-Designer v1.1 (+loadaddr)
             case 17410: // => FLI MATIC (background at 2+1024+8192+8000+65 ?)
               hasLoadAddr=1;
@@ -2936,6 +3028,15 @@ void Load_C64(T_IO_Context * context)
               color_ram=file_buffer+2; // length: 1000 (+ padding 24)
               screen_ram=file_buffer+1024+2; // length: 8192
               bitmap=file_buffer+8192+1024+2; // length: 8000
+              break;
+
+            case 17666: // FLI Graph
+              hasLoadAddr=1;
+              loadFormat=F_fli;
+              background=file_buffer+2;
+              color_ram=file_buffer+256+2; // length: 1000 (+ padding 24)
+              screen_ram=file_buffer+1024+256+2; // length: 8192
+              bitmap=file_buffer+8192+1024+256+2; // length: 8000
               break;
 
             case 17665: // FLI Editor
