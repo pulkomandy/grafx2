@@ -17,7 +17,7 @@ JPEGARCH = jpegsrc.v$(JPEGVER).tar.gz
 JPEGURL = http://www.ijg.org/files/$(JPEGARCH)
 # http://www.simplesystems.org/libtiff/
 # https://gitlab.com/libtiff/libtiff
-LIBTIFF = tiff-4.0.9
+LIBTIFF = tiff-4.0.10
 LIBTIFFARCH = $(LIBTIFF).tar.gz
 LIBTIFFURL = https://download.osgeo.org/libtiff/$(LIBTIFFARCH)
 LIBTIFFURLALT = https://fossies.org/linux/misc/$(LIBTIFFARCH)
