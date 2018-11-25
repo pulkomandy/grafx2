@@ -80,3 +80,22 @@ extern void GFX2_LogV(GFX2_Log_priority_T priority, const char * fmt, va_list ap
   vfprintf((unsigned)priority >= GFX2_INFO ? stdout : stderr, fmt, ap);
 #endif
 }
+
+extern void GFX2_LogHexDump(GFX2_Log_priority_T priority, const char * header, const byte * data, long offset, long count)
+{
+  long i;
+  while (count > 0)
+  {
+    GFX2_Log(priority, "%s%06X:", header, offset);
+    for (i = 0; i < count && i < 16; i++)
+      GFX2_Log(priority, " %02x", data[offset+i]);
+    while(i++ < 16)
+      GFX2_Log(priority, "   ");
+    GFX2_Log(priority, " | ");
+    for (i = 0; i < count && i < 16; i++)
+      GFX2_Log(priority, " %c", data[offset+i]>=32 && data[offset+i]<127 ? data[offset+i] : '.');
+    GFX2_Log(priority, "\n");
+    count -= i;
+    offset += i;
+  }
+}

@@ -22,6 +22,12 @@
 #define GFX2LOG_H_DEFINED
 
 #include <stdarg.h>
+#include "struct.h"
+
+/**
+ * @defgroup log error and debugging logs
+ * @{
+ */
 
 typedef enum {
   GFX2_ERROR = 0,
@@ -32,8 +38,14 @@ typedef enum {
 
 extern GFX2_Log_priority_T GFX2_verbosity_level;
 
+/**
+ * Log error or debugging info
+ */
 extern void GFX2_Log(GFX2_Log_priority_T priority, const char * fmt, ...);
 
 extern void GFX2_LogV(GFX2_Log_priority_T priority, const char * fmt, va_list ap);
 
+extern void GFX2_LogHexDump(GFX2_Log_priority_T priority, const char * header, const byte * data, long offset, long count);
+
+/** @} */
 #endif
