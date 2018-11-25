@@ -401,6 +401,7 @@ void Button_Constraint_menu(void)
         {
           case IMAGE_MODE_ZX:
             ZX_Spectrum_set_palette(Main.palette);
+            First_color_in_palette = 0;
             break;
           //case IMAGE_MODE_THOMSON:
           /// @todo set palette for Thomson.
@@ -411,11 +412,13 @@ void Button_Constraint_menu(void)
           case IMAGE_MODE_RASTER:
             CPC_set_HW_palette(Main.palette + 0x40);
             CPC_set_default_BASIC_palette(Main.palette);
+            First_color_in_palette = (Selected_Constraint_Mode >= IMAGE_MODE_MODE5) ? 64 : 0;
             break;
           case IMAGE_MODE_C64HIRES:
           case IMAGE_MODE_C64MULTI:
           case IMAGE_MODE_C64FLI:
             C64_set_palette(Main.palette);
+            First_color_in_palette = 0;
             break;
           default:
             break;
@@ -423,6 +426,7 @@ void Button_Constraint_menu(void)
         // Refresh palette
         Set_palette(Main.palette);
         //Compute_optimal_menu_colors(Main.palette);  // I'm not sure this is needed
+        Display_menu_palette();
       }
     }
   }

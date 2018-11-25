@@ -4336,6 +4336,8 @@ void Load_CM5(T_IO_Context* context)
   // Setup the palette (amstrad hardware palette)
   CPC_set_HW_palette(context->Palette + 0x40);
 
+  First_color_in_palette = 64;
+
   if (!Read_byte(file, &ink0))
     File_error = 2;
 
