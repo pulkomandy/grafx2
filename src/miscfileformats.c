@@ -4101,6 +4101,15 @@ void Load_SCR(T_IO_Context * context)
       ///@todo guess the picture size, or ask the user
       GFX2_Log(GFX2_DEBUG, ".SCR file. Data length %d\n", i);
       // i <= 16384 && i >= 16336 => Standard resolution
+      if (i <= 16384 && i >= 16336)
+      {
+        int j;
+        // Standard resolution files have the 200 lines stored in block
+        // of 25 lines of 80 bytes = 2000 bytes every 2048 bytes.
+        // so there are 48 bytes unused every 2048 bytes...
+        for (j = 0; j < i; j += 2048)
+          GFX2_LogHexDump(GFX2_DEBUG, "SCR ", pixel_data, j+2000, 48);
+      }
     }
   }
 
