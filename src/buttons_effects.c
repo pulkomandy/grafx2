@@ -380,7 +380,7 @@ void Button_Constraint_menu(void)
           case IMAGE_MODE_RASTER:
           case IMAGE_MODE_THOMSON:
             Snap_width = 8;
-            Snap_height = 400;
+            Snap_height = 999;  // maximum value (3 digits)
             break;
           default:
             set_grid = 0;

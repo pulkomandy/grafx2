@@ -3477,7 +3477,7 @@ static void Pixel_in_screen_underlay_with_opt_preview(word x,word y,byte color,i
   }
 }
 
-/// Paint a single pixel in the layer 5 of mode 5
+/// Paint a single pixel in the layer 5 of CPC rasterized modes
 ///
 /// used when @ref IMAGE_MODE_MODE5 or @ref IMAGE_MODE_RASTER is active.
 ///
