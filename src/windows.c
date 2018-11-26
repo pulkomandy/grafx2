@@ -1319,7 +1319,7 @@ void Print_counter(short x,short y,const char * str,byte text_color,byte backgro
 /// center the lines, but the carriage returns have to be explicit.
 /// The function will clip the message in case of problem.
 /// @return 1 if user pressed OK, 0 if CANCEL
-byte Confirmation_box(char * message)
+byte Confirmation_box(const char * message)
 {
   short clicked_button;
   word  window_width = 120;
@@ -1398,7 +1398,7 @@ byte Confirmation_box(char * message)
 
 
 /// Window that allows you to enter a single value
-int Requester_window(char* message, int initial_value)
+int Requester_window(const char* message, int initial_value)
 {
   short clicked_button = 0;
   word window_width;
@@ -1441,7 +1441,7 @@ int Requester_window(char* message, int initial_value)
 
 
 /// Window that show a warning message and wait for a click on the OK button
-void Warning_message(char * message)
+void Warning_message(const char * message)
 {
   short clicked_button;
   word  window_width;

@@ -77,11 +77,11 @@ void Print_coordinates(void);
 void Print_filename(void);
 void Print_counter(short x,short y,const char * str,byte text_color,byte background_color);
 
-byte Confirmation_box(char * message);
-void Warning_message(char * message);
+byte Confirmation_box(const char * message);
+void Warning_message(const char * message);
 void Warning_with_format(const char * message, ...);
 void Verbose_message(const char * caption, const char * message);
-int Requester_window(char* message, int initial_value);
+int Requester_window(const char* message, int initial_value);
 
 void Display_image_limits(void);
 void Display_all_screen(void);
