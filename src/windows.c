@@ -52,6 +52,10 @@
 #include "keycodes.h"
 #include "keyboard.h"
 
+#ifndef MIN
+#define MIN(a,b) ((a)<(b)?(a):(b))
+#endif
+
 T_Toolbar_button Buttons_Pool[NB_BUTTONS];
 T_Menu_Bar Menu_bars[MENUBAR_COUNT] =
   {{MENU_WIDTH,  9, 1, 45, {NULL,NULL,NULL},  20, BUTTON_HIDE }, // Status
@@ -1439,8 +1443,95 @@ int Requester_window(const char* message, int initial_value)
   return clicked_button==2?-1:atoi(str);
 }
 
+/// Ask the user to choose between multiple choices
+int Dialog_multiple_choice(const char * title, const T_MultipleChoice * choices, int default_choice)
+{
+  int i;
+  int choice;
+  word window_width = 130, window_height = 70;
+  unsigned int max_len_label = 0;
+  unsigned int max_len_hint = 0;
+  short clicked_button;
+  T_Dropdown_button* dropdown;
+  char hint[38];
+  const char * default_hint = NULL;
+  const char * default_label = "please choose";
 
-/// Window that show a warning message and wait for a click on the OK button
+  choice = default_choice;
+  for (i = 0; choices[i].label != NULL; i++)
+  {
+    if (strlen(choices[i].label) > max_len_label)
+      max_len_label = strlen(choices[i].label);
+    if (choices[i].hint != NULL && strlen(choices[i].hint) > max_len_hint)
+      max_len_hint = strlen(choices[i].hint);
+    if (default_choice == choices[i].value)
+    {
+      default_label = choices[i].label;
+      default_hint = choices[i].hint;
+    }
+  }
+  GFX2_Log(GFX2_DEBUG, "max_len_label=%u max_len_hint=%u\n", max_len_label, max_len_hint);
+  if (max_len_hint > 37)  // maximum window width is 320 pixels, so that's 37 characters
+    max_len_hint = 37;
+
+  if (max_len_label*8 + 6 + 20 > window_width)
+    window_width = max_len_label*8 + 6 + 20;
+  if (max_len_hint > 0)
+  {
+    window_height += 10;
+    if(max_len_hint*8 + 20 > window_width)
+      window_width = max_len_hint * 8 + 20;
+  }
+  if (window_width > 320)
+    window_width = 320;
+
+  Open_window(window_width, window_height, title);
+  Window_set_normal_button(10, window_height-23, 40,14, "OK", 1,1,KEY_o); // 1
+  Window_set_normal_button(window_width-70, window_height-23, 60,14, "Cancel", 1,1,KEY_c); // 2
+  dropdown = Window_set_dropdown_button(10, 21, window_width-20, 14, window_width-20,
+                                        default_label, 1, 0, 1, RIGHT_SIDE|LEFT_SIDE, 0); // 3
+  for (i = 0; choices[i].label != NULL; i++)
+    Window_dropdown_add_item(dropdown, choices[i].value, choices[i].label);
+
+  if (default_hint != NULL)
+    Print_in_window(10, 21+18, default_hint, MC_Dark, MC_Light);
+
+  Update_window_area(0, 0, window_width, window_height);
+  Display_cursor();
+
+  do
+  {
+    clicked_button = Window_clicked_button();
+    if (clicked_button == 3)
+    {
+      choice = Window_attribute2;
+      for (i = 0; choices[i].label != NULL; i++)
+        if (choice == choices[i].value)
+        {
+          memset(hint, ' ', sizeof(hint));
+          hint[max_len_hint] = '\0';
+          if (choices[i].hint != NULL)
+            memcpy(hint, choices[i].hint, MIN(37, strlen(choices[i].hint)));
+          Hide_cursor();
+          Print_in_window(10, 21+18, hint, MC_Dark, MC_Light);
+          Display_cursor();
+          break;
+        }
+    }
+    else if (Key==KEY_ESCAPE)
+      clicked_button = 2; // Cancel
+    else if (Key==KEY_RETURN)
+      clicked_button = 1; // OK
+  }
+  while (clicked_button <= 0 || clicked_button > 2);
+
+  Close_window();
+  Display_cursor();
+  return (clicked_button == 2) ? -1 : choice;
+}
+
+
+/// Window that shows a warning message and wait for a click on the OK button
 void Warning_message(const char * message)
 {
   short clicked_button;
@@ -1467,6 +1558,7 @@ void Warning_message(const char * message)
 }
 
 /// Window that shows a warning message and waits for a click on the OK button
+///
 /// This has the added advantage of supporting the printf interface.
 void Warning_with_format(const char *template, ...) {
   va_list arg_ptr;
@@ -1479,8 +1571,8 @@ void Warning_with_format(const char *template, ...) {
 }
 
 /// Window that shows a big message (up to 35x13), and waits for a click on OK.
-/// On call: Cursor must be displayed
-/// On exit: Cursor is displayed
+/// - On call: Cursor must be displayed
+/// - On exit: Cursor is displayed
 void Verbose_message(const char *caption, const char * message )
 {
   short clicked_button;

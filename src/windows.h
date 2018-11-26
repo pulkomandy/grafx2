@@ -77,11 +77,20 @@ void Print_coordinates(void);
 void Print_filename(void);
 void Print_counter(short x,short y,const char * str,byte text_color,byte background_color);
 
+/** @defgroup dialog Dialog windows
+ * @{ */
 byte Confirmation_box(const char * message);
 void Warning_message(const char * message);
 void Warning_with_format(const char * message, ...);
 void Verbose_message(const char * caption, const char * message);
 int Requester_window(const char* message, int initial_value);
+typedef struct {
+  int value;          ///< integer value
+  const char * label; ///< label for dropdown
+  const char * hint;  ///< optional help text
+} T_MultipleChoice;
+int Dialog_multiple_choice(const char * title, const T_MultipleChoice * choices, int initial_choice);
+/** @} */
 
 void Display_image_limits(void);
 void Display_all_screen(void);
