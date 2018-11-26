@@ -561,6 +561,12 @@ GFX2_GLOBAL byte Mask_mode;
 /// Array of booleans. True if the indexed color is protected by the mask.
 GFX2_GLOBAL byte Mask_table[256];
 
+// -- 8 bit constraints mode
+
+/// Selected constraint mode
+GFX2_GLOBAL enum IMAGE_MODES Selected_Constraint_Mode;
+
+
 // -- Magnifier data
 
 #ifdef GLOBAL_VARIABLES

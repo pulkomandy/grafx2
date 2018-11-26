@@ -4901,7 +4901,7 @@ void Button_Effects(int btn)
 
 
       case 14: // Constraint checker/enforcer
-        if (Window_attribute1==LEFT_SIDE)
+        if (Window_attribute1==LEFT_SIDE && Selected_Constraint_Mode > IMAGE_MODE_ANIMATION)
         {
           Button_Constraint_mode();
           Hide_cursor();

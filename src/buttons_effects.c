@@ -163,7 +163,6 @@ void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_ca
   Display_cursor();
 }
 
-static enum IMAGE_MODES Selected_Constraint_Mode = 0;
 
 /// Constaint enforcer/checker
 ///
