@@ -43,6 +43,7 @@
 #include "windows.h"
 #include "tiles.h"
 #include "oldies.h"
+#include "palette.h"
 
 //---------- Menu dans lequel on tagge des couleurs (genre Stencil) ----------
 void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_cancel, const char *help_section, word close_shortcut)
@@ -399,33 +400,98 @@ void Button_Constraint_menu(void)
         switch (Selected_Constraint_Mode)
         {
           case IMAGE_MODE_ZX:
+            memset(Main.palette, 0, sizeof(T_Palette));
             ZX_Spectrum_set_palette(Main.palette);
             First_color_in_palette = 0;
+            Fore_color = 7;
+            Back_color = 0;
             break;
-          //case IMAGE_MODE_THOMSON:
-          /// @todo set palette for Thomson.
-          /// ask TO7/70, MO5 or MO6 / TO8/TO9
+          case IMAGE_MODE_THOMSON:
+            {
+              static const T_MultipleChoice moto_choices[] = {
+                { MACHINE_TO7, "TO7 / TO7/70", "16 colors" },
+                { MACHINE_MO5, "MO5", "16 colors" },
+                { MACHINE_TO8, "TO9/TO8/TO9+", "4096 colors" },
+                { MACHINE_MO6, "MO6", "4096 colors" },
+                { -1, NULL, NULL }
+              };
+              int machine = Dialog_multiple_choice("Select machine", moto_choices, -1);
+              if (machine >= 0)
+              {
+                memset(Main.palette, 0, sizeof(T_Palette));
+                if (machine == MACHINE_MO5 || machine == MACHINE_MO6)
+                  MOTO_set_MO5_palette(Main.palette);
+                else
+                  MOTO_set_TO7_palette(Main.palette);
+                if (machine == MACHINE_MO6 || machine == MACHINE_TO8)
+                {
+                  Set_palette_Gamma(Config.MOTO_gamma);
+                  Set_palette_RGB_scale(16);
+                }
+                First_color_in_palette = 0;
+                Fore_color = 7;
+                Back_color = 0;
+              }
+            }
+            break;
           case IMAGE_MODE_EGX:
           case IMAGE_MODE_EGX2:
+            {
+              static const T_MultipleChoice cpc_choices[] = {
+                { 1, "CPC", "27 colors" },
+                { 2, "CPC+", "4096 colors" },
+                { -1, NULL, NULL }
+              };
+              int machine = Dialog_multiple_choice("Select machine", cpc_choices, -1);
+              if (machine >= 0)
+              {
+                memset(Main.palette, 0, sizeof(T_Palette));
+                CPC_set_default_BASIC_palette(Main.palette);
+                First_color_in_palette = 0;
+                Fore_color = 1;
+                Back_color = 0;
+                if (machine == 2)
+                  Set_palette_RGB_scale(16);
+                else
+                  Set_palette_RGB_scale(3);
+              }
+            }
+            break;
           case IMAGE_MODE_MODE5:
           case IMAGE_MODE_RASTER:
+            memset(Main.palette, 0, sizeof(T_Palette));
+            // setup colors 0,1,2,3 to see something in the thumbnail preview of layer 5
+            Main.palette[1].R = 60;
+            Main.palette[2].B = 60;
+            Main.palette[3].G = 60;
             CPC_set_HW_palette(Main.palette + 0x40);
-            CPC_set_default_BASIC_palette(Main.palette);
-            First_color_in_palette = (Selected_Constraint_Mode >= IMAGE_MODE_MODE5) ? 64 : 0;
+            First_color_in_palette = 64;
+            Fore_color = 0x4b;
+            Back_color = 0x54;
             break;
           case IMAGE_MODE_C64HIRES:
           case IMAGE_MODE_C64MULTI:
           case IMAGE_MODE_C64FLI:
+            memset(Main.palette, 0, sizeof(T_Palette));
             C64_set_palette(Main.palette);
             First_color_in_palette = 0;
+            Fore_color = 1;
+            Back_color = 0;
             break;
           default:
             break;
         }
+        for (i = 0; i < 4; i++)
+          memcpy(Main.palette + 252 + i, Favorite_GUI_color(i), sizeof(T_Components));
         // Refresh palette
         Set_palette(Main.palette);
-        //Compute_optimal_menu_colors(Main.palette);  // I'm not sure this is needed
-        Display_menu_palette();
+        Compute_optimal_menu_colors(Main.palette);
+        Remap_screen_after_menu_colors_change();
+        Redraw_layered_image();
+        Check_menu_mode();
+        Display_all_screen();
+        //Display_menu_palette();
+        Display_menu();
       }
     }
   }
