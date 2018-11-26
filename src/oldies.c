@@ -504,6 +504,18 @@ void CPC_set_HW_palette(T_Components * palette)
   memcpy(palette, CPC_Hw_Palette, sizeof(CPC_Hw_Palette));
 }
 
+int CPC_compare_colors(T_Components * col1, T_Components * col2)
+{
+  byte v1, v2;
+  /** The mapping used in this function is :
+   * - RGB value   [0: 85] => CPC level 0
+   * - RGB value  [86:171] => CPC level 1
+   * - RGB value [172:255] => CPC level 2 */
+  v1 = (col1->R / 86) << 4 | (col1->G / 86) << 2 | (col1->B / 86);
+  v2 = (col2->R / 86) << 4 | (col2->G / 86) << 2 | (col2->B / 86);
+  return v1 == v2;
+}
+
 void CPC_set_default_BASIC_palette(T_Components * palette)
 {
   static const byte basic_colors[] = {
@@ -513,6 +525,10 @@ void CPC_set_default_BASIC_palette(T_Components * palette)
     0x52, 0x59, 0x4a, 0x47
   };
   unsigned int i;
+  /** in the default CPC Basic palette, INKs 14 and 15 are blicking,
+   * so that would be great to include theses in the colorcycling,
+   * but I don't see any way to make theses blinking colors
+   * with the way GrafX2 handles color cycling */
 
   for (i = 0; i < sizeof(basic_colors) / sizeof(byte); i++)
     memcpy(palette + i,

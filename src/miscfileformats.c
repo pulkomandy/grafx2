@@ -4213,7 +4213,7 @@ void Save_SCR(T_IO_Context * context)
     // search for the color in the HW palette (0x40-0x5F)
     byte index = 0x40;
     while ((index < 0x60) &&
-        (0 != memcmp(context->Palette + i, context->Palette + index, sizeof(T_Components))))
+        !CPC_compare_colors(context->Palette + i, context->Palette + index))
       index++;
     if (index >= 0x60)
     {

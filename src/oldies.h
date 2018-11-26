@@ -81,6 +81,17 @@ void CPC_set_HW_palette(T_Components * palette);
 void CPC_set_default_BASIC_palette(T_Components * palette);
 
 /**
+ * compare two RGB colors
+ *
+ * The RGB colors are compared in order as if they were
+ * converted from CPC (27 color palette), as there are several
+ * mapping of the 3 level CPC RGB signals.
+ *
+ * @return true if the RGB colors map to the same CPC color
+ */
+int CPC_compare_colors(T_Components * col1, T_Components * col2);
+
+/**
  * Check AMSDOS header
  *
  * see http://www.cpcwiki.eu/index.php/AMSDOS_Header
