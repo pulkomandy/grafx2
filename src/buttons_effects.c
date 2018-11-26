@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "gfx2log.h"
 #include "brush.h"
 #include "buttons.h"
 #include "engine.h"
@@ -190,17 +191,17 @@ void Button_Constraint_mode(void)
 
   if (Selected_Constraint_Mode == IMAGE_MODE_MODE5 || Selected_Constraint_Mode == IMAGE_MODE_RASTER)
   {
-    /** @todo it would be great to auto-create extra layers */
-    if (Main.backups->Pages->Image_mode != IMAGE_MODE_LAYERED ||
-        Main.backups->Pages->Nb_layers!=5)
-    {
-      Verbose_message("Error!", "Emulation of Amstrad CPC's rasters requires a 5-layer image.");
-      return;
-    }
+    // switch to layer mode if needed
+    if (Main.backups->Pages->Image_mode != IMAGE_MODE_LAYERED)
+      Switch_layer_mode(IMAGE_MODE_LAYERED);
+    // auto-create extra layers
+    while (Main.backups->Pages->Nb_layers < 5)
+      Button_Layer_add();
     for (pixel=0; pixel < Main.image_width*Main.image_height; pixel++)
     {
       if (Main.backups->Pages->Image[4].Pixels[pixel]>3)
       {
+        GFX2_Log(GFX2_INFO, "pixel[%u]=0x%02x\n", pixel, Main.backups->Pages->Image[4].Pixels[pixel]);
         Verbose_message("Error!", "Emulation of Amstrad CPC's rasters needs all pixels of layer 5 to use colors 0-3.");
         return;
       }
@@ -249,7 +250,7 @@ void Button_Constraint_menu(void)
   label = "Constraints";
   summary = "";
   for (i = 0; i < sizeof(modes)/sizeof(modes[0]) ; i++)
-    if (Main.backups->Pages->Image_mode == modes[i].mode)
+    if (Selected_Constraint_Mode == modes[i].mode)
     {
       label = modes[i].label;
       summary = modes[i].summary;
@@ -328,9 +329,6 @@ void Button_Constraint_menu(void)
   {
     if (Selected_Constraint_Mode > IMAGE_MODE_ANIMATION)
     {
-      if (Main.backups->Pages->Image_mode > IMAGE_MODE_ANIMATION)
-        Button_Constraint_mode();  // unactivate current mode
-      Button_Constraint_mode();  // activate selected Mode
       if (set_pic_size)
       {
         switch (Selected_Constraint_Mode)
@@ -363,6 +361,9 @@ void Button_Constraint_menu(void)
             break;
         }
       }
+      if (Main.backups->Pages->Image_mode > IMAGE_MODE_ANIMATION)
+        Button_Constraint_mode();  // unactivate current mode
+      Button_Constraint_mode();  // activate selected Mode
       if (set_grid)
       {
         switch (Selected_Constraint_Mode)
