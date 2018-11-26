@@ -93,7 +93,7 @@ extern void GFX2_LogHexDump(GFX2_Log_priority_T priority, const char * header, c
       GFX2_Log(priority, "   ");
     GFX2_Log(priority, " | ");
     for (i = 0; i < count && i < 16; i++)
-      GFX2_Log(priority, " %c", data[offset+i]>=32 && data[offset+i]<127 ? data[offset+i] : '.');
+      GFX2_Log(priority, "%c", data[offset+i]>=32 && data[offset+i]<127 ? data[offset+i] : '.');
     GFX2_Log(priority, "\n");
     count -= i;
     offset += i;
