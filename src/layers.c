@@ -106,11 +106,23 @@ void Layer_activate(int layer, short side)
 
 void Button_Layer_add(void)
 {
-  int max[] = {MAX_NB_LAYERS, MAX_NB_FRAMES, 5};
+  int max;
   
   Hide_cursor();
 
-  if (Main.backups->Pages->Nb_layers < max[Main.backups->Pages->Image_mode])
+  switch (Main.backups->Pages->Image_mode)
+  {
+    case IMAGE_MODE_LAYERED:
+      max = MAX_NB_LAYERS;
+      break;
+    case IMAGE_MODE_ANIMATION:
+      max = MAX_NB_FRAMES;
+      break;
+    default:
+      max = 5;
+  }
+
+  if (Main.backups->Pages->Nb_layers < max)
   {
     // Backup with unchanged layers
     Backup_layers(LAYER_NONE);
