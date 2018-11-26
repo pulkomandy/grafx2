@@ -558,13 +558,15 @@ int CPC_check_AMSDOS(FILE * file, word * loading_address, unsigned long * file_l
              checksum, data[67] | (data[68] << 8));
     return 0;
   }
-  GFX2_Log(GFX2_DEBUG, "AMSDOS : user=%02X %.8s.%.3s %d %u(%u) bytes, load at $%04X checksum $%04X\n",
+  GFX2_Log(GFX2_DEBUG, "AMSDOS : user=%02X %.8s.%.3s %d %u(%u) bytes, load at $%04X exec $%04X checksum $%04X\n",
            data[0],
-           (char *)(data + 1), (char *)(data + 9), data[18],
+           (char *)(data + 1), (char *)(data + 9), data[18], /* Type*/
            data[24] | (data[25] << 8), data[64] | (data[65] << 8) | (data[66] << 16),
+           data[21] | (data[22] << 8),
            data[26] | (data[27] << 8), checksum);
   if (loading_address)
-    *loading_address = data[26] | (data[27] << 8);
+    *loading_address = data[21] | (data[22] << 8);
+  //  *exec_address = data[26] | (data[27] << 8);
   if (file_length)
     *file_length = data[64] | (data[65] << 8) | (data[66] << 16); // 24bit size
   //  *file_length = data[24] | (data[25] << 8);  // 16bit size
