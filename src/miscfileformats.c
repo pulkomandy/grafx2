@@ -3863,6 +3863,18 @@ void Test_SCR(T_IO_Context * context, FILE * file)
   pal_file = Open_file_read_with_alternate_ext(context, "pal");
   if (pal_file == NULL)
     return;
+  /** @todo the palette data can be hidden in the 48 "empty" bytes
+   * every 2048 bytes of a standard resolution SCR file.
+   * So we should detect the hidden Z80 code and load them.
+   * Load address of file is C000. Z80 code :<br>
+   * <tt>C7D0: 3a d0 d7 cd 1c bd 21 d1 d7 46 48 cd 38 bc af 21 | :.....!..FH.8..!</tt><br>
+   * <tt>C7E0: d1 d7 46 48 f5 e5 cd 32 bc e1 f1 23 3c fe 10 20 | ..FH...2...#<.. </tt><br>
+   * <tt>C7F0: f1 c3 18 bb 00 00 00 00 00 00 00 00 00 00 00 00 | ................</tt><br>
+   * mode and palette :<br>
+   * <tt>D7D0: 00 1a 00 0c 03 0b 01 0d 17 10 02 0f 09 19 06 00 | ................</tt><br>
+   * https://gitlab.com/GrafX2/grafX2/merge_requests/121#note_119964168
+   */
+
 
   pal_size = File_length_file(pal_file);
   if (pal_size == 239+128)
@@ -4299,6 +4311,9 @@ void Test_CM5(T_IO_Context * context, FILE * file)
 
 /**
  * Load Amstrad CPC "Mode 5" picture
+ *
+ * Only support 288x256 resolution as the Mode 5 Viewer app only handles this
+ * single resoltion.
  */
 void Load_CM5(T_IO_Context* context)
 {
@@ -4526,6 +4541,8 @@ void Save_CM5(T_IO_Context* context)
 //   (actually 4 colors + flipping)
 //
 // - The standard CPC formats can also be encapsulated into a PPH file.
+//
+// http://www.pouet.net/prod.php?which=67770#c766959
 */
 void Test_PPH(T_IO_Context * context, FILE * file)
 {
