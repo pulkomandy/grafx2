@@ -2084,7 +2084,7 @@ void Test_NEO(T_IO_Context * context, FILE * file)
 
     // Vérification de la taille
     size=File_length_file(file);
-    if ((size==32128))
+    if (size==32128)
     {
       // Flag word : toujours 0
       if (Read_word_le(file,&resolution))
