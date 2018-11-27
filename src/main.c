@@ -1409,6 +1409,9 @@ int main(int argc,char * argv[])
     return 0;
   }
 
+#ifdef _MSC_VER
+  GFX2_Log(GFX2_DEBUG, "built with _MSC_VER=%d\n", _MSC_VER);
+#endif
   Main_handler();
 
   Program_shutdown();

@@ -38,6 +38,13 @@
 #include "windows.h"
 #include "layers.h"
 
+// I don't have round() in MSVC++ 2010 (_MSC_VER=1600)
+#if defined(_MSC_VER)
+#if _MSC_VER < 1900
+#define round(x) floor(x+0.5)
+#endif
+#endif
+
 static void Set_Pixel_in_layer(word x,word y, byte layer, byte color)
 {
   *((y)*Main.image_width+(x)+Main.backups->Pages->Image[layer].Pixels)=color;
