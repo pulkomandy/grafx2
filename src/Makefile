@@ -198,6 +198,8 @@ ifeq ($(API),sdl2)
     SDLCOPT = $(shell sdl2-config --cflags)
     SDLLOPT = $(shell sdl2-config --libs) $(shell pkg-config --libs SDL2_image)
     SDLLOPT += -Wl,-framework,Cocoa
+    #TTFCOPT = $(shell pkg-config --cflags SDL2_ttf)
+    TTFLOPT = $(shell pkg-config --libs SDL2_ttf)
 endif
 
     # these are for use with macports
@@ -224,6 +226,7 @@ ifdef MACOSX_LION
     LOPT = $(SDLLOPT) $(LUALOPT) -framework libpng14 -lz
 else
     LOPT = $(SDLLOPT) $(LUALOPT)
+    LOPT += $(TTFLOPT)
     LIBPNGCONFIG := $(shell libpng-config)
 ifneq ($(LIBPNGCONFIG), )
     COPT += $(shell libpng-config --cflags)
@@ -246,7 +249,7 @@ ifeq ($(API),sdl)
 endif
     FCLOPT = 
     MACAPPEXE = Grafx2.app/Contents/MacOS/Grafx2
-    NOTTF = 1
+    #NOTTF = 1
   else
   ifeq ($(PLATFORM),AROS) # 3
     #AROS specific
