@@ -429,10 +429,10 @@ void Init_text(void)
 // Informe si texte.c a été compilé avec l'option de support TrueType ou pas.
 int TrueType_is_supported()
 {
-  #ifdef NOTTF
-  return 0;
-  #else
+  #if !defined(NOTTF) || defined(WIN32)
   return 1;
+  #else
+  return 0;
   #endif
 }
 

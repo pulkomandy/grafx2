@@ -55,6 +55,12 @@ screen.h:58: error: conflicting types for 'SetPalette'
 #import <ApplicationServices/ApplicationServices.h>
 #endif
 
+#if defined(USE_SDL) || defined(USE_SDL2)
+#include <SDL_image.h>
+#ifndef NOTTF
+#include <SDL_ttf.h>
+#endif
+#endif
 #ifndef __no_pnglib__
 #include <png.h>
 #endif
@@ -774,22 +780,59 @@ void Button_Stats(int btn)
   unsigned long STRAM=0,TTRAM=0;
   char helpBuf[64]={0};
 #endif
-  
-  Open_window(310,174,"Statistics");
+
+#if defined(USE_SDL) || defined(USE_SDL2)
+// 2 lines more
+#define WIN_HEIGHT 190
+#else
+#define WIN_HEIGHT 174
+#endif
+  Open_window(310,WIN_HEIGHT,"Statistics");
 
   // Dessin de la fenetre ou va s'afficher le texte
-  Window_display_frame_in(8,17,294,132);
-  Window_rectangle(9,18,292,130,MC_Black);
+  Window_display_frame_in(8,17,294,WIN_HEIGHT-42);
+  Window_rectangle(9,18,292,WIN_HEIGHT-44,MC_Black);
 
-  Window_set_normal_button(120,153,70,14,"OK",0,1,KEY_ESC); // 1
+  Window_set_normal_button(120,WIN_HEIGHT-20,70,14,"OK",0,1,KEY_ESC); // 1
+#undef WIN_HEIGHT
 
   y=19; // row for first line
   Print_in_window(10,y,"Program version:",STATS_TITLE_COLOR,MC_Black);
   snprintf(buffer,20,"%s.%s",Program_version, SVN_revision);
   Print_in_window(146,y,buffer,STATS_DATA_COLOR,MC_Black);
   y+=8;
+#if defined(USE_SDL) || defined(USE_SDL2)
+  {
+    SDL_version sdlver;
+    const SDL_version * imgver;
+    SDL_GetVersion(&sdlver);
+    imgver = IMG_Linked_Version();
+    Print_in_window(10,y,"SDL version:",STATS_TITLE_COLOR,MC_Black);
+    snprintf(buffer,20,"%d.%d.%d.%s", sdlver.major, sdlver.minor, sdlver.patch, SDL_GetRevision());
+    Print_in_window(146,y,buffer,STATS_DATA_COLOR,MC_Black);
+    y+=8;
+    if (imgver != NULL)
+    {
+      Print_in_window(10,y,"SDL_image version:",STATS_TITLE_COLOR,MC_Black);
+      snprintf(buffer,20,"%d.%d.%d", imgver->major, imgver->minor, imgver->patch);
+      Print_in_window(146+16,y,buffer,STATS_DATA_COLOR,MC_Black);
+      y+=8;
+    }
+  }
+#endif
   Print_in_window(10,y,"Build options:",STATS_TITLE_COLOR,MC_Black);
-  Print_in_window(146,y,TrueType_is_supported()?"TTF fonts":"no TTF fonts",STATS_DATA_COLOR,MC_Black);
+#if (defined(USE_SDL) || defined(USE_SDL2)) && !defined(NOTTF)
+  {
+    const SDL_version * ttfver = TTF_Linked_Version();
+    if (ttfver != NULL)
+      snprintf(buffer,20,"%s (%d.%d.%d)","TTF fonts",ttfver->major,ttfver->minor,ttfver->patch);
+    else
+      snprintf(buffer,20,"%s",TrueType_is_supported()?"TTF fonts":"no TTF fonts");
+  }
+#else
+  snprintf(buffer,20,"%s",TrueType_is_supported()?"TTF fonts":"no TTF fonts");
+#endif
+  Print_in_window(146,y,buffer,STATS_DATA_COLOR,MC_Black);
   y+=8;
   Print_in_window(10,y,"Lua version:",STATS_TITLE_COLOR,MC_Black);
   Print_in_window_limited(146,y,Lua_version(),10,STATS_DATA_COLOR,MC_Black);
