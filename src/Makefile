@@ -256,7 +256,9 @@ ifneq ($(LIBPNGCONFIG), )
 else
     LOPT += -lpng
 endif
+    ifneq ($(OSX_STATIC), 1)
     LOPT += -lz
+    endif
 endif
     COPT += -DENABLE_FILENAMES_ICONV
     LOPT += -liconv
