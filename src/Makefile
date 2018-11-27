@@ -135,6 +135,8 @@ else
   else
   ifeq ($(PLATFORM),Darwin) # 2
     #Mac OS X specific
+    # to statically link non system libraries
+    OSX_STATIC ?= 1
 
     # Darwin / OS X versions :
     #  6    => 10.2         ppc only
@@ -196,17 +198,33 @@ endif
 endif
 ifeq ($(API),sdl2)
     SDLCOPT = $(shell sdl2-config --cflags)
+    #TTFCOPT = $(shell pkg-config --cflags SDL2_ttf)
+  ifeq ($(OSX_STATIC), 1)
+    SDLLOPT = $(shell sdl2-config --static-libs | sed 's/-lSDL2//' | sed 's/-L[^ ]*//')
+    SDLLIBDIR = $(shell pkg-config --variable=libdir SDL2_image)
+    SDLLOPT += $(SDLLIBDIR)/libSDL2.a
+    # trick to get all dependencies
+    SDLLOPT += $(addsuffix .a, $(shell ../tools/osx_find_dependencies.sh $(SDLLIBDIR)/libSDL2_image.dylib $(SDLLIBDIR)/libSDL2_ttf.dylib | grep -v SDL2 | cut -d'.' -f 1))
+    SDLLOPT += $(SDLLIBDIR)/libSDL2_image.a
+    TTFLOPT =
+    SDLLOPT += $(shell pkg-config --variable=libdir SDL2_ttf)/libSDL2_ttf.a
+  else
     SDLLOPT = $(shell sdl2-config --libs) $(shell pkg-config --libs SDL2_image)
     SDLLOPT += -Wl,-framework,Cocoa
-    #TTFCOPT = $(shell pkg-config --cflags SDL2_ttf)
     TTFLOPT = $(shell pkg-config --libs SDL2_ttf)
+  endif
 endif
 
     # these are for use with macports
     LUAPKG := $(shell for p in lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua51 lua ; do pkg-config --exists $$p && echo $$p && break ; done)
 ifneq ($(LUAPKG), )
-    LUACOPT = $(shell pkg-config $(LUAPKG) --cflags)
-    LUALOPT = $(shell pkg-config $(LUAPKG) --libs)
+    ifeq ($(OSX_STATIC),1)
+      LUACOPT = $(shell pkg-config $(LUAPKG) --cflags | sed 's/-I/-idirafter/')
+      LUALOPT = $(shell pkg-config $(LUAPKG) --variable=libdir)/liblua.a
+    else
+      LUACOPT = $(shell pkg-config $(LUAPKG) --cflags)
+      LUALOPT = $(shell pkg-config $(LUAPKG) --libs)
+    endif
 else
     # these are for use with Mac OS X native frameworks
     LUACOPT = -I$(FWDIR)/Lua.framework/Headers
@@ -226,11 +244,15 @@ ifdef MACOSX_LION
     LOPT = $(SDLLOPT) $(LUALOPT) -framework libpng14 -lz
 else
     LOPT = $(SDLLOPT) $(LUALOPT)
-    LOPT += $(TTFLOPT)
+    ifneq ($(OSX_STATIC), 1)
+      LOPT += $(TTFLOPT)
+    endif
     LIBPNGCONFIG := $(shell libpng-config)
 ifneq ($(LIBPNGCONFIG), )
     COPT += $(shell libpng-config --cflags)
+    ifneq ($(OSX_STATIC), 1)
     LOPT += $(shell libpng-config --ldflags)
+    endif
 else
     LOPT += -lpng
 endif
