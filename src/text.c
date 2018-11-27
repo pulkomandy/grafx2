@@ -360,21 +360,24 @@ void Init_text(void)
 
       int i,number;
       char home_dir[MAXPATHLEN];
-      char *font_path_list[3] = {
+      const char *font_path_list[3] = {
          "/System/Library/Fonts",
          "/Library/Fonts"
       };
-      number = 3;
+      number = 2;
       // Make sure we also search into the user's fonts directory
-      CFURLRef url = (CFURLRef) CFCopyHomeDirectoryURLForUser(NULL);
-      CFURLGetFileSystemRepresentation(url, true, (UInt8 *) home_dir, MAXPATHLEN);
-      strcat(home_dir, "/Library/Fonts");
-      font_path_list[2] = home_dir;
+      //CFURLRef url = (CFURLRef) CFCopyHomeDirectoryURLForUser(NULL);
+      //CFURLGetFileSystemRepresentation(url, true, (UInt8 *) home_dir, MAXPATHLEN);
+      if (getenv("HOME") != NULL)
+      {
+        snprintf(home_dir, sizeof(home_dir), "%s/Library/Fonts", getenv("HOME"));
+        font_path_list[number++] = home_dir;
+      }
 
       for(i=0;i<number;i++)
          For_each_file(*(font_path_list+i),Add_font);
 
-      CFRelease(url);
+      //CFRelease(url);
     #endif
 
   #elif defined(__CAANOO__) || defined(__WIZ__) || defined(__GP2X__)
