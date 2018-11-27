@@ -356,7 +356,7 @@ static void Window_help_follow_link(const char * line)
   buffer[i] = '\0';
   GFX2_Log(GFX2_DEBUG, "WWW link found : \"%s\"\n", buffer);
 #if defined(WIN32)
-  /*HINSTANCE hInst = */ShellExecute(NULL, "open", buffer, NULL, NULL, SW_SHOWNORMAL);
+  /*HINSTANCE hInst = */ShellExecuteA(NULL, "open", buffer, NULL, NULL, SW_SHOWNORMAL);
 #elif defined(__macosx__)
   {
     OSStatus ret;
@@ -803,14 +803,19 @@ void Button_Stats(int btn)
   y+=8;
 #if defined(USE_SDL) || defined(USE_SDL2)
   {
-    SDL_version sdlver;
     const SDL_version * imgver;
-    SDL_GetVersion(&sdlver);
-    imgver = IMG_Linked_Version();
-    Print_in_window(10,y,"SDL version:",STATS_TITLE_COLOR,MC_Black);
+#if defined(USE_SDL2)
+    SDL_version sdlver;
+    SDL_GetVersion(&sdlver);  // linked version : only available with SDL2
     snprintf(buffer,20,"%d.%d.%d.%s", sdlver.major, sdlver.minor, sdlver.patch, SDL_GetRevision());
+#else
+    const SDL_version * sdlver = SDL_Linked_Version();
+    snprintf(buffer,20,"%d.%d.%d", sdlver->major, sdlver->minor, sdlver->patch);
+#endif
+    Print_in_window(10,y,"SDL version:",STATS_TITLE_COLOR,MC_Black);
     Print_in_window(146,y,buffer,STATS_DATA_COLOR,MC_Black);
     y+=8;
+    imgver = IMG_Linked_Version();
     if (imgver != NULL)
     {
       Print_in_window(10,y,"SDL_image version:",STATS_TITLE_COLOR,MC_Black);
