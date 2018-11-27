@@ -181,7 +181,7 @@ endif
     PLATFORMFILES = ../share/grafx2/gfx2.png
     # Where the SDL frameworks are located
     FWDIR = /Library/Frameworks
-    BIN = ../bin/grafx2
+    BIN = ../bin/grafx2-$(API)
 
 ifeq ($(API),sdl)
     SDLCONFIG := $(shell which sdl-config)
@@ -810,7 +810,7 @@ endif
 	cp $(BIN) $(MACAPPEXE)
 	$(STRIP) -x -X -S $(MACAPPEXE)
 	chmod +x $(MACAPPEXE)
-	tar cvzf grafx2-git$(GIT_REVISION)-macosx.tgz --exclude '.git' --exclude '*DS_Store*' Grafx2.app/*
+	#tar cvzf grafx2-git$(GIT_REVISION)-macosx.tgz --exclude '.git' --exclude '*DS_Store*' Grafx2.app/*
 else
 all : $(BIN)
 ifeq ($(ATARICROSS),1)
