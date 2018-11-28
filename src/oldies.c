@@ -447,6 +447,10 @@ void C64_set_palette(T_Components * palette)
   palette[16].R=20;
   palette[16].G=20;
   palette[16].B=20;
+  /// set color "17" as RED to see color clashes
+  palette[17].R=255;
+  palette[17].G=0;
+  palette[17].B=0;
 }
 
 void ZX_Spectrum_set_palette(T_Components * palette)
@@ -460,6 +464,10 @@ void ZX_Spectrum_set_palette(T_Components * palette)
     palette[i].R = ((i & 2) >> 1) * intensity;
     palette[i].B = (i & 1) * intensity;
   }
+  // set color 17 for color clashes
+  palette[17].R = 255;
+  palette[17].G = 127;
+  palette[17].B = 127;
 }
 
 static const T_Components CPC_Hw_Palette[] = {
@@ -710,6 +718,10 @@ void MOTO_set_MO5_palette(T_Components * palette)
     85, 170, 255, 255, 170, 170, 170, 255, 255, 255, 170, 85
   };
   memcpy(palette, mo5palette, 48);
+  // set color 17 for color clashes
+  palette[17].R = 255;
+  palette[17].G = 0;
+  palette[17].B = 85;
 }
 
 void MOTO_set_TO7_palette(T_Components * palette)
@@ -724,4 +736,8 @@ void MOTO_set_TO7_palette(T_Components * palette)
 
   for (i = 0; i < 16; i++)
     MOTO_gamma_correct_MOTO_to_RGB(palette + i, to8default_pal[i]);
+  // set color 17 for color clashes
+  palette[17].R = 255;
+  palette[17].G = 127;
+  palette[17].B = 127;
 }
