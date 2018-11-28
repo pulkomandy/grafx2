@@ -167,6 +167,68 @@ void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_ca
 }
 
 
+/// Block Constraint check
+///
+/// This function count the number of colors in a block and reports errors
+/// by marking the pixel in color 17 in layer 2.
+/// @param block_width block width
+/// @param block_height block height
+/// @param max_colors numbers of colors allowed in a block
+/// @return the number of constraint errors detected
+static int Check_block_constraints(int block_width, int block_height, int max_colors)
+{
+  int x, y, x2, y2;
+  int error_count = 0;
+
+  for (y = 0; y <= Main.image_height - block_height; y += block_height)
+  {
+    for (x = 0; x <= Main.image_width - block_width; x += block_width)
+    {
+      int count = 0;
+      byte c[16];   // colors already used in block
+
+      for (y2 = 0; y2 < block_height; y2++)
+      {
+        for (x2 = 0; x2 < block_width; x2++)
+        {
+          int i;
+          byte col = Main.backups->Pages->Image[0].Pixels[x+x2 + (y+y2)*Main.image_width];
+          if (col > 15) // forbidden color !
+          {
+            if (Main.backups->Pages->Nb_layers < 2)
+              Button_Layer_add(-1);
+            Main.backups->Pages->Image[1].Pixels[x+x2 + (y+y2)*Main.image_width] = 17;
+            error_count++;
+            continue;
+          }
+          // search color in already used ones
+          for (i = 0; i < count; i++)
+          {
+            if (col == c[i])
+              break;
+          }
+          if (i >= count) // not found
+          {
+            if (count >= max_colors)
+            {
+              // constraint error : add color 17 pixel in layer 2
+              GFX2_Log(GFX2_INFO, "Check_block_constraints() constraint error at (%d,%d)\n", x+x2, y+y2);
+              if (Main.backups->Pages->Nb_layers < 2)
+                Button_Layer_add(-1);
+              Main.backups->Pages->Image[1].Pixels[x+x2 + (y+y2)*Main.image_width] = 17;
+              error_count++;
+            }
+            else
+              c[count++] = col;
+          }
+        }
+      }
+    }
+  }
+  return error_count;
+}
+
+
 /// Constaint enforcer/checker
 ///
 /// A call toggles between constraint mode and Layered mode.
@@ -190,8 +252,11 @@ void Button_Constraint_mode(void)
     return;
   }
 
-  if (Selected_Constraint_Mode == IMAGE_MODE_MODE5 || Selected_Constraint_Mode == IMAGE_MODE_RASTER)
+  // now check the constraints on existing pixels
+  switch (Selected_Constraint_Mode)
   {
+  case IMAGE_MODE_MODE5:
+  case IMAGE_MODE_RASTER:
     // switch to layer mode if needed
     if (Main.backups->Pages->Image_mode != IMAGE_MODE_LAYERED)
       Switch_layer_mode(IMAGE_MODE_LAYERED);
@@ -207,6 +272,19 @@ void Button_Constraint_mode(void)
         return;
       }
     }
+    break;
+  case IMAGE_MODE_THOMSON:
+    Check_block_constraints(8, 1, 2);
+    break;
+  case IMAGE_MODE_ZX:       /// @todo check color intensities for ZX spectrum
+  case IMAGE_MODE_C64HIRES:
+    Check_block_constraints(8, 8, 2);
+    break;
+  case IMAGE_MODE_C64MULTI: /// @todo check common background color for C64 Multicolor
+    Check_block_constraints(4, 8, 4);
+    break;
+  default:  // nothing to do.
+    break;
   }
   /// Setting the palette is done in @ref Button_Constraint_menu (8-bit constraint window)
 
