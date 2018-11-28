@@ -171,14 +171,30 @@ void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_ca
 ///
 /// This function count the number of colors in a block and reports errors
 /// by marking the pixel in color 17 in layer 2.
-/// @param block_width block width
-/// @param block_height block height
-/// @param max_colors numbers of colors allowed in a block
+/// @param mode
+/// @return -1 if the mode is invalid
 /// @return the number of constraint errors detected
-static int Check_block_constraints(int block_width, int block_height, int max_colors)
+static int Check_block_constraints(enum IMAGE_MODES mode)
 {
   int x, y, x2, y2;
+  int block_width = 8, block_height = 8, max_colors = 2;  // default values
   int error_count = 0;
+
+  switch (mode)
+  {
+    case IMAGE_MODE_THOMSON:
+      block_height = 1;
+      break;
+    case IMAGE_MODE_ZX:
+    case IMAGE_MODE_C64HIRES:
+      break;
+    case IMAGE_MODE_C64MULTI:
+      block_width = 4;
+      max_colors = 3; // 3 + background color
+      break;
+    default:
+      return -1;  // unsupported mode
+  }
 
   for (y = 0; y <= Main.image_height - block_height; y += block_height)
   {
@@ -201,14 +217,32 @@ static int Check_block_constraints(int block_width, int block_height, int max_co
             error_count++;
             continue;
           }
+          if (mode == IMAGE_MODE_C64MULTI && col == 0)  // Background color
+            continue;
           // search color in already used ones
           for (i = 0; i < count; i++)
           {
             if (col == c[i])
               break;
+            // ZX Spectrum : consider both blacks as the same color
+            if (mode == IMAGE_MODE_ZX && (col & 7) == 0 && (c[i] & 7) == 0)
+              break;
           }
           if (i >= count) // not found
           {
+            // ZX Spectrum : check that both colors have same intensity (except black)
+            if (mode == IMAGE_MODE_ZX && count > 0)
+            {
+              if ((col & 8) != (c[0] & 8) && (col & 7) != 0 && (c[0] & 7) != 0)
+              {
+                GFX2_Log(GFX2_INFO, "Check_block_constraints() intensity error at (%d,%d) color=%d (other color=%d)\n", x+x2, y+y2, col, c[0]);
+                if (Main.backups->Pages->Nb_layers < 2)
+                  Add_layer(Main.backups, 1);
+                Main.backups->Pages->Image[1].Pixels[x+x2 + (y+y2)*Main.image_width] = 17;
+                error_count++;
+                continue;
+              }
+            }
             if (count >= max_colors)
             {
               // constraint error : add color 17 pixel in layer 2
@@ -279,18 +313,8 @@ void Button_Constraint_mode(void)
       }
     }
     break;
-  case IMAGE_MODE_THOMSON:
-    Check_block_constraints(8, 1, 2);
-    break;
-  case IMAGE_MODE_ZX:       /// @todo check color intensities for ZX spectrum
-  case IMAGE_MODE_C64HIRES:
-    Check_block_constraints(8, 8, 2);
-    break;
-  case IMAGE_MODE_C64MULTI: /// @todo check common background color for C64 Multicolor
-    Check_block_constraints(4, 8, 4);
-    break;
-  default:  // nothing to do.
-    break;
+  default:
+    Check_block_constraints(Selected_Constraint_Mode);
   }
   /// Setting the palette is done in @ref Button_Constraint_menu (8-bit constraint window)
 
