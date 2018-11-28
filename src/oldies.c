@@ -533,9 +533,9 @@ void CPC_set_default_BASIC_palette(T_Components * palette)
     0x52, 0x59, 0x4a, 0x47
   };
   unsigned int i;
-  /** in the default CPC Basic palette, INKs 14 and 15 are blicking,
+  /** in the default CPC Basic palette, INKs 14 and 15 are blinking,
    * so that would be great to include theses in the colorcycling,
-   * but I don't see any way to make theses blinking colors
+   * but I don't see any way to make these blinking colors
    * with the way GrafX2 handles color cycling */
 
   for (i = 0; i < sizeof(basic_colors) / sizeof(byte); i++)
