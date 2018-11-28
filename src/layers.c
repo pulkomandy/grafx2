@@ -25,6 +25,7 @@
 #include "const.h"
 #include "struct.h"
 #include "global.h"
+#include "gfx2log.h"
 #include "windows.h"
 #include "engine.h"
 #include "pages.h"
@@ -35,6 +36,7 @@
 #include "readline.h"
 #include "graph.h"
 #include "keycodes.h"
+#include "layers.h"
 
 void Layer_activate(int layer, short side)
 {
@@ -104,25 +106,26 @@ void Layer_activate(int layer, short side)
   Display_cursor();
 }
 
-void Button_Layer_add(void)
+static int Layers_max(void)
 {
-  int max;
-  
-  Hide_cursor();
-
   switch (Main.backups->Pages->Image_mode)
   {
     case IMAGE_MODE_LAYERED:
-      max = MAX_NB_LAYERS;
+      return MAX_NB_LAYERS;
       break;
     case IMAGE_MODE_ANIMATION:
-      max = MAX_NB_FRAMES;
+      return MAX_NB_FRAMES;
       break;
     default:
-      max = 5;
+      return 5;
   }
+}
 
-  if (Main.backups->Pages->Nb_layers < max)
+void Button_Layer_add(int btn)
+{
+  Hide_cursor();
+
+  if (Main.backups->Pages->Nb_layers < Layers_max())
   {
     // Backup with unchanged layers
     Backup_layers(LAYER_NONE);
@@ -137,19 +140,16 @@ void Button_Layer_add(void)
     }
   }
 
-  Unselect_button(BUTTON_LAYER_ADD);
-  Unselect_button(BUTTON_ANIM_ADD_FRAME);
+  Unselect_button(btn);
   Display_cursor();
 }
 
 
-void Button_Layer_duplicate(void)
+void Button_Layer_duplicate(int btn)
 {
-  int max[] = {MAX_NB_LAYERS, MAX_NB_FRAMES, 5};
-  
   Hide_cursor();
 
-  if (Main.backups->Pages->Nb_layers < max[Main.backups->Pages->Image_mode])
+  if (Main.backups->Pages->Nb_layers < Layers_max())
   {
     // Backup with unchanged layers
     Backup_layers(LAYER_NONE);
@@ -161,23 +161,23 @@ void Button_Layer_duplicate(void)
         Main.backups->Pages->Image[Main.current_layer-1].Pixels,
         Main.backups->Pages->Width*Main.backups->Pages->Height);
 
-      if (Main.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION) {
+      if (Main.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+      {
         Update_depth_buffer();
         // I just noticed this might be unneeded, since the new layer
         // is transparent, it shouldn't have any visible effect.
         Display_all_screen();
-	  }
+      }
       Display_layerbar();
       End_of_modification();
     }
   }
 
-  Unselect_button(BUTTON_LAYER_ADD);
-  Unselect_button(BUTTON_ANIM_ADD_FRAME);
+  Unselect_button(btn);
   Display_cursor();
 }
 
-void Button_Layer_remove(void)
+void Button_Layer_remove(int btn)
 {
   Hide_cursor();
 
@@ -195,14 +195,13 @@ void Button_Layer_remove(void)
       End_of_modification();
     }
   }
-  Unselect_button(BUTTON_LAYER_REMOVE);
-  Unselect_button(BUTTON_ANIM_REMOVE_FRAME);
+  Unselect_button(btn);
   Display_cursor();
 }
 
-short Layer_under_mouse(void)
+static int Layer_under_mouse(void)
 {
-  short layer;
+  int layer;
   // Determine which button is clicked according to mouse position
   layer = (Mouse_X/Menu_factor_X - Menu_bars[MENUBAR_LAYERS].Skin_width)
     / Layer_button_width;
@@ -216,26 +215,18 @@ short Layer_under_mouse(void)
   return layer;
 }
 
-void Button_Layer_select(void)
+void Button_Layer_select(int btn)
 {
-  short layer = Layer_under_mouse();
+  int layer = Layer_under_mouse();
+  (void)btn;
   Layer_activate(layer, LEFT_SIDE);
   Mouse_K=0;
 }
 
-void Button_Layer_toggle(void)
+void Button_Layer_toggle(int btn)
 {
-  int layer;
-  // Determine which button is clicked according to mouse position
-  layer = (Mouse_X/Menu_factor_X - Menu_bars[MENUBAR_LAYERS].Skin_width)
-    / Layer_button_width;
-
-  // Safety required because the mouse cursor can have slided outside button.
-  if (layer < 0)
-    layer=0;
-  else if (layer > Main.backups->Pages->Nb_layers-1)
-    layer=Main.backups->Pages->Nb_layers-1;
-  
+  int layer = Layer_under_mouse();
+  (void)btn;
   Layer_activate(layer, RIGHT_SIDE);
   Mouse_K=0;
 }
@@ -254,7 +245,7 @@ static void Draw_transparent_background(byte background)
 }
 
 
-void Button_Layer_menu(void)
+void Button_Layer_menu(int btn)
 {
   byte transparent_color = Main.backups->Pages->Transparent_color;
   byte transparent_background = Main.backups->Pages->Background_transparent;
@@ -286,7 +277,7 @@ void Button_Layer_menu(void)
     
     clicked_button=Window_clicked_button();
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
-      Window_help(BUTTON_LAYER_MENU, NULL);
+      Window_help(btn, NULL);
     switch(clicked_button)
     {
       case 1: // color
@@ -328,12 +319,11 @@ void Button_Layer_menu(void)
       End_of_modification();
     }
   }
-  Unselect_button(BUTTON_LAYER_MENU);
-  Unselect_button(BUTTON_LAYER_MENU2);
+  Unselect_button(btn);
   Display_cursor();
 }
 
-void Button_Layer_set_transparent(void)
+void Button_Layer_set_transparent(int btn)
 {
   Hide_cursor();
 
@@ -347,11 +337,11 @@ void Button_Layer_set_transparent(void)
     End_of_modification();
   }
 
-  Unselect_button(BUTTON_LAYER_COLOR);
+  Unselect_button(btn);
   Display_cursor();
 }
 
-void Button_Layer_get_transparent(void)
+void Button_Layer_get_transparent(int btn)
 {
   Hide_cursor();
 
@@ -360,11 +350,11 @@ void Button_Layer_get_transparent(void)
     Set_back_color(Main.backups->Pages->Transparent_color);
   }
 
-  Unselect_button(BUTTON_LAYER_COLOR);
+  Unselect_button(btn);
   Display_cursor();
 }
 
-void Button_Layer_merge(void)
+void Button_Layer_merge(int btn)
 {
   Hide_cursor();
 
@@ -382,11 +372,11 @@ void Button_Layer_merge(void)
     End_of_modification();
   }
   
-  Unselect_button(BUTTON_LAYER_MERGE);
+  Unselect_button(btn);
   Display_cursor();
 }
 
-void Button_Layer_up(void)
+void Button_Layer_up(int btn)
 {
   Hide_cursor();
 
@@ -421,12 +411,11 @@ void Button_Layer_up(void)
     End_of_modification();
   }
   
-  Unselect_button(BUTTON_LAYER_UP);
-  Unselect_button(BUTTON_ANIM_UP_FRAME);
+  Unselect_button(btn);
   Display_cursor();
 }
 
-void Button_Layer_down(void)
+void Button_Layer_down(int btn)
 {
   Hide_cursor();
   
@@ -461,8 +450,7 @@ void Button_Layer_down(void)
     End_of_modification();
   }
   
-  Unselect_button(BUTTON_LAYER_DOWN);
-  Unselect_button(BUTTON_ANIM_DOWN_FRAME);
+  Unselect_button(btn);
   Display_cursor();
 }
 
@@ -475,7 +463,7 @@ int Interpret_delay(int delay)
     return 100;
   return 30;
 }
-void Button_Anim_time(void)
+void Button_Anim_time(int btn)
 {
   short clicked_button;
   int mode=0;
@@ -591,21 +579,21 @@ void Button_Anim_time(void)
     End_of_modification();
   }
 
-  Unselect_button(BUTTON_ANIM_TIME);
+  Unselect_button(btn);
   Display_cursor();
 }
 
-void Button_Anim_first_frame(void)
+void Button_Anim_first_frame(int btn)
 {
   if (Main.current_layer>0)
     Layer_activate(0,LEFT_SIDE);
 
   Hide_cursor();
-  Unselect_button(BUTTON_ANIM_FIRST_FRAME);
+  Unselect_button(btn);
   Display_cursor();
 }
 
-void Button_Anim_prev_frame(void)
+void Button_Anim_prev_frame(int btn)
 {
   if (Main.backups->Pages->Nb_layers>1)
   {
@@ -615,11 +603,11 @@ void Button_Anim_prev_frame(void)
       Layer_activate(Main.current_layer-1,LEFT_SIDE);
   }
   Hide_cursor();
-  Unselect_button(BUTTON_ANIM_PREV_FRAME);
+  Unselect_button(btn);
   Display_cursor();
 }
 
-void Button_Anim_next_frame(void)
+void Button_Anim_next_frame(int btn)
 {
   if (Main.backups->Pages->Nb_layers>1)
   {
@@ -630,21 +618,21 @@ void Button_Anim_next_frame(void)
   }
 
   Hide_cursor();
-  Unselect_button(BUTTON_ANIM_NEXT_FRAME);
+  Unselect_button(btn);
   Display_cursor();
 }
 
-void Button_Anim_last_frame(void)
+void Button_Anim_last_frame(int btn)
 {
   if (Main.current_layer < (Main.backups->Pages->Nb_layers-1))
     Layer_activate((Main.backups->Pages->Nb_layers-1),LEFT_SIDE);
     
   Hide_cursor();
-  Unselect_button(BUTTON_ANIM_LAST_FRAME);
+  Unselect_button(btn);
   Display_cursor();
 }
 
-void Button_Anim_continuous_next(void)
+void Button_Anim_continuous_next(int btn)
 {
   dword time_start;
   int time_in_current_frame=0;
@@ -675,11 +663,11 @@ void Button_Anim_continuous_next(void)
   } while (Mouse_K);
 
   Hide_cursor();
-  Unselect_button(BUTTON_ANIM_NEXT_FRAME);
+  Unselect_button(btn);
   Display_cursor();
 }
 
-void Button_Anim_continuous_prev(void)
+void Button_Anim_continuous_prev(int btn)
 {
   dword time_start;
   int time_in_current_frame=0;
@@ -710,6 +698,6 @@ void Button_Anim_continuous_prev(void)
   } while (Mouse_K);
 
   Hide_cursor();
-  Unselect_button(BUTTON_ANIM_PREV_FRAME);
+  Unselect_button(btn);
   Display_cursor();
 }

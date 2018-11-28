@@ -45,6 +45,7 @@
 #include "tiles.h"
 #include "oldies.h"
 #include "palette.h"
+#include "layers.h"
 
 //---------- Menu dans lequel on tagge des couleurs (genre Stencil) ----------
 void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_cancel, const char *help_section, word close_shortcut)
@@ -196,7 +197,7 @@ void Button_Constraint_mode(void)
       Switch_layer_mode(IMAGE_MODE_LAYERED);
     // auto-create extra layers
     while (Main.backups->Pages->Nb_layers < 5)
-      Button_Layer_add();
+      Button_Layer_add(-1);
     for (pixel=0; pixel < Main.image_width*Main.image_height; pixel++)
     {
       if (Main.backups->Pages->Image[4].Pixels[pixel]>3)

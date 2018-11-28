@@ -19,6 +19,8 @@
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
+#ifndef LAYERS_H__
+#define LAYERS_H__
 
 void Button_Layer_add(int);
 void Button_Layer_duplicate(int);
@@ -40,5 +42,4 @@ void Button_Anim_last_frame(int);
 void Button_Anim_play(int);
 void Button_Anim_continuous_prev(int);
 void Button_Anim_continuous_next(int);
-
-short Layer_under_mouse(void);
+#endif

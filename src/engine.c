@@ -387,6 +387,8 @@ void Draw_menu_button(byte btn_number,byte pressed)
 ///Deselect a button
 void Unselect_button(int btn_number)
 {
+  if (btn_number < 0 || btn_number >= NB_BUTTONS)
+    return;
   if (Buttons_Pool[btn_number].Pressed)
   {
     // On considère que le bouton est relâché
