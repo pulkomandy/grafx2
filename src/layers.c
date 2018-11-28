@@ -181,6 +181,7 @@ void Button_Layer_remove(int btn)
 {
   Hide_cursor();
 
+  /// @todo forbid to drop layer in CPC MODE5
   if (Main.backups->Pages->Nb_layers > 1)
   {
     // Backup with unchanged layers

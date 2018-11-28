@@ -196,7 +196,7 @@ static int Check_block_constraints(int block_width, int block_height, int max_co
           if (col > 15) // forbidden color !
           {
             if (Main.backups->Pages->Nb_layers < 2)
-              Button_Layer_add(-1);
+              Add_layer(Main.backups, 1);
             Main.backups->Pages->Image[1].Pixels[x+x2 + (y+y2)*Main.image_width] = 17;
             error_count++;
             continue;
@@ -214,7 +214,7 @@ static int Check_block_constraints(int block_width, int block_height, int max_co
               // constraint error : add color 17 pixel in layer 2
               GFX2_Log(GFX2_INFO, "Check_block_constraints() constraint error at (%d,%d)\n", x+x2, y+y2);
               if (Main.backups->Pages->Nb_layers < 2)
-                Button_Layer_add(-1);
+                Add_layer(Main.backups, 1);
               Main.backups->Pages->Image[1].Pixels[x+x2 + (y+y2)*Main.image_width] = 17;
               error_count++;
             }
@@ -225,6 +225,8 @@ static int Check_block_constraints(int block_width, int block_height, int max_co
       }
     }
   }
+  if (error_count > 0)
+    Main.current_layer = 0; // activate layer 1 again
   return error_count;
 }
 
@@ -262,7 +264,11 @@ void Button_Constraint_mode(void)
       Switch_layer_mode(IMAGE_MODE_LAYERED);
     // auto-create extra layers
     while (Main.backups->Pages->Nb_layers < 5)
-      Button_Layer_add(-1);
+      if (Add_layer(Main.backups, Main.backups->Pages->Nb_layers))
+      {
+        Verbose_message("Error!", "Failed to create the 5 layers needed by Emulation of Amstrad CPC's rasters.");
+        return;
+      }
     for (pixel=0; pixel < Main.image_width*Main.image_height; pixel++)
     {
       if (Main.backups->Pages->Image[4].Pixels[pixel]>3)
