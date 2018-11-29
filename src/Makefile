@@ -188,7 +188,17 @@ ifeq ($(API),sdl)
 ifneq ($(SDLCONFIG), )
     # these are for use with macports
     SDLCOPT = $(shell sdl-config --cflags)
+  ifeq ($(OSX_STATIC), 1)
+    SDLLOPT = $(shell sdl-config --static-libs | sed 's/-lSDL //' | sed 's/-lX[^ ]*//g' | sed 's/-L[^ ]*//g')
+    SDLLIBDIR = $(shell pkg-config --variable=libdir SDL_image)
+    #SDLLOPT += $(SDLLIBDIR)/libSDL.a
+    SDLLOPT += $(addsuffix .a, $(shell ../tools/osx_find_dependencies.sh $(SDLLIBDIR)/libSDL_image.dylib $(SDLLIBDIR)/libSDL_ttf.dylib | grep -v SDL | cut -d'.' -f 1))
+    SDLLOPT += $(SDLLIBDIR)/libSDL_image.a
+    TTFLOPT =
+    SDLLOPT += $(shell pkg-config --variable=libdir SDL_ttf)/libSDL_ttf.a
+  else
     SDLLOPT = $(shell sdl-config --libs) $(shell pkg-config --libs SDL_image)
+  endif
 else
     # these are for use with Mac OS X native frameworks
     #-framework SDL_ttf 
