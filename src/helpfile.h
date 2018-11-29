@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2018 Thomas Bernard
     Copyright 2008 Yves Rizoud
     Copyright 2009 Franck Charlet
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
@@ -1936,10 +1937,22 @@ static const T_Help_table helptable_effects[] =
   HELP_TEXT ("")
   HELP_TEXT ("")
   HELP_BOLD ("Block modes")
-  HELP_TEXT ("ZX Spectrum, Thomson MOTO, C64 multicolor,")
-  HELP_TEXT ("C64 HiRes are modes with block constraints.")
-  HELP_TEXT ("Only a limited different colors (generaly 2)")
-  HELP_TEXT ("are allowed in a pixel block.")
+  HELP_TEXT ("ZX Spectrum, Game Boy Color, Thomson MOTO,")
+  HELP_TEXT ("C64 MultiColor, C64 HiRes are modes with")
+  HELP_TEXT ("block constraints. Only a limited count of")
+  HELP_TEXT ("different colors (generaly 2) is allowed in")
+  HELP_TEXT ("a pixel block.")
+  HELP_TEXT ("")
+  HELP_BOLD ("Game Boy Color")
+  HELP_TEXT ("All pixels within a 8x8 block should be in")
+  HELP_TEXT ("same 4 colors palette. There are 8 palettes:")
+  HELP_TEXT ("colors #0-#3, #4-#7, ..., #28-#31.")
+  HELP_TEXT ("Advice: put common colors at the same")
+  HELP_TEXT ("        position within the palettes. eg if")
+  HELP_TEXT ("        you need a black background, set")
+  HELP_TEXT ("        colors #0, #4, #8, etc. to black.")
+  HELP_TEXT ("Color #0 of each palette is transparent for")
+  HELP_TEXT ("Game Boy sprites.")
   HELP_TEXT ("")
   HELP_TEXT ("")
   HELP_BOLD ("Amstrad CPC Mode5")

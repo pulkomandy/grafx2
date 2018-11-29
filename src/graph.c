@@ -3386,6 +3386,31 @@ done:
   }
 }
 
+/// Paint a pixel with GBC constraints
+///
+/// Same 4 color palette for all pixels in a 8x8 block.
+static void Pixel_in_screen_gbc_with_opt_preview(word x,word y,byte color,int preview)
+{
+  word startx = x & ~7;
+  word starty = y & ~7;
+  word x2, y2;
+  byte palette;
+
+  // first set the pixel
+  Pixel_in_screen_layered_with_opt_preview(x,y,color,preview);
+  palette = color & ~3;
+  // force all pixels of the block to the same palette
+  for (y2 = 0; y2 < 8; y2++)
+  {
+    for (x2 = 0; x2 < 8; x2++)
+    {
+      byte col = Read_pixel_from_current_layer(startx+x2, starty+y2);
+      if ((col & ~3) != palette)
+        Pixel_in_screen_layered_with_opt_preview(startx+x2, starty+y2, palette | (col & 3), preview);
+    }
+  }
+}
+
 /// Paint a pixel with C64 MultiColor constraints
 ///
 /// Only 4 colors in a 4x8 block, including the background color
@@ -3558,7 +3583,6 @@ void Update_pixel_renderer(void)
   switch (Main.backups->Pages->Image_mode)
   {
   case IMAGE_MODE_C64FLI: //TODO
-  case IMAGE_MODE_GBC:  // TODO
   case IMAGE_MODE_ANIMATION:
     // direct
     Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_direct_with_opt_preview;
@@ -3574,6 +3598,9 @@ void Update_pixel_renderer(void)
     break;
   case IMAGE_MODE_THOMSON:
     Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_thomson_with_opt_preview;
+    break;
+  case IMAGE_MODE_GBC:
+    Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_gbc_with_opt_preview;
     break;
   case IMAGE_MODE_C64HIRES:
   case IMAGE_MODE_ZX:
