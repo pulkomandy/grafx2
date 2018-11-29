@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2018 Thomas Bernard
     Copyright 2008 Yves Rizoud
     Copyright 2007-2017 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
@@ -366,7 +367,7 @@ void Button_Constraint_menu(void)
       set_grid = modes[i].grid;
       break;
     }
-  dropdown = Window_set_dropdown_button(37, 21, 120, 14, 120, label, 1, 0, 1, RIGHT_SIDE|LEFT_SIDE, 0); // 3
+  dropdown = Window_set_dropdown_button(32, 21, 130, 14, 120, label, 1, 0, 1, RIGHT_SIDE|LEFT_SIDE, 0); // 3
   for (i = 0; i < sizeof(modes)/sizeof(modes[0]) ; i++)
     Window_dropdown_add_item(dropdown, modes[i].mode, modes[i].label);
   Print_in_window(10, 21+18, summary, MC_Dark, MC_Light);
