@@ -868,7 +868,9 @@ ziprelease: release $(SRCARCH)
 	  share/grafx2/gfx2.gif share/icons/grafx2.svg \
 	  $(DOC_FILES:../%=%) $(FONT_FILES:../%=%) $(SRCARCH:../%=%) $(PLATFORMFILES:../%=%)
 ifeq ($(PLATFORM),Darwin)
-	$(ZIP) $(ZIPOPT) -r ../Grafx2.app-$(API)-$(VERSIONTAG).zip Grafx2.app
+	$(ZIP) $(ZIPOPT) -r ../Grafx2.app-$(shell uname -p)-$(API)-$(VERSIONTAG).zip Grafx2.app
+	cd .. && $(ZIP) $(ZIPOPT) Grafx2.app-$(shell uname -p)-$(API)-$(VERSIONTAG).zip \
+	  $(DOC_FILES:../%=%) $(SRCARCH:../%=%)
 endif
 	$(TAR) czf "../grafx2-$(VERSIONTAG)-src.tgz" $(TARTRANSFORM) \
 	  ../src/*.c ../src/*.cpp ../src/*.h ../src/Makefile ../src/Makefile.dep \
