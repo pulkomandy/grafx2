@@ -3365,15 +3365,15 @@ void Remap_screen_after_menu_colors_change(void)
 }
 
 
-static int Diff(int i, int j) {
-	int dr = Main.palette[i].R - Main.palette[j].R;
-	int dg = Main.palette[i].G - Main.palette[j].G;
-	int db = Main.palette[i].B - Main.palette[j].B;
+static int Diff(const T_Components * palette, int i, int j) {
+  int dr = palette[i].R - palette[j].R;
+  int dg = palette[i].G - palette[j].G;
+  int db = palette[i].B - palette[j].B;
 
-	return dr*dr + dg*dg + db*db;
+  return dr*dr + dg*dg + db*db;
 }
 
-static void compute_xor_table()
+static void compute_xor_table(const T_Components * palette)
 {
 	int i;
 	byte found;
@@ -3397,10 +3397,10 @@ static void compute_xor_table()
 			for(i = 0; i < 256; i++)
 			{
 				// diffs before the swap
-				int before = Diff(idx, xor_lut[idx]) + Diff(i, xor_lut[i]);
+				int before = Diff(palette, idx, xor_lut[idx]) + Diff(palette, i, xor_lut[i]);
 
 				// diffs after the swap
-				int after = Diff(idx, xor_lut[i])  + Diff(i, xor_lut[idx]);
+				int after = Diff(palette, idx, xor_lut[i])  + Diff(palette, i, xor_lut[idx]);
 
 				if (after - before > improvement)
 				{
@@ -3426,7 +3426,7 @@ static void compute_xor_table()
 	} while(found);
 }
 
-int Same_color(T_Components * palette, byte c1, byte c2)
+static int Same_color(const T_Components * palette, byte c1, byte c2)
 {
 	if (palette[c1].R==palette[c2].R &&
 			palette[c1].G==palette[c2].G &&
@@ -3435,7 +3435,9 @@ int Same_color(T_Components * palette, byte c1, byte c2)
 	return 0;
 }
 
-void Compute_optimal_menu_colors(T_Components * palette)
+static void Remap_menu_sprites(const T_Components * palette);
+
+void Compute_optimal_menu_colors(const T_Components * palette)
 {
 	int i;
 	byte l[256];
@@ -3498,7 +3500,7 @@ void Compute_optimal_menu_colors(T_Components * palette)
 									MC_Window=MC_Light;
 									MC_Lighter=MC_White;
 									MC_Darker=MC_Dark;
-									Remap_menu_sprites();
+									Remap_menu_sprites(palette);
 									return;
 								}
 							}
@@ -3548,7 +3550,7 @@ void Compute_optimal_menu_colors(T_Components * palette)
                   MC_Window=MC_Light;
                   MC_Lighter=MC_White;
                   MC_Darker=MC_Dark;
-                  Remap_menu_sprites();
+                  Remap_menu_sprites(palette);
                   return;
                 }
               }
@@ -3661,15 +3663,15 @@ void Compute_optimal_menu_colors(T_Components * palette)
   }
   MC_Lighter=MC_White;
 
-  Remap_menu_sprites();
+  Remap_menu_sprites(palette);
 }
 
 /// Remap all menu data when the palette changes or a new skin is loaded
-void Remap_menu_sprites()
+static void Remap_menu_sprites(const T_Components * palette)
 {
   int i, j, k, l;
 
-  compute_xor_table();
+  compute_xor_table(palette);
   if ( (MC_Light!=Old_light)
     || (MC_Dark!=Old_dark)
     || (MC_White!=Old_white)
