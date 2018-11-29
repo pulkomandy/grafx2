@@ -216,7 +216,7 @@ ifeq ($(API),sdl2)
 endif
 
     # these are for use with macports
-    LUAPKG := $(shell for p in lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua51 lua ; do pkg-config --exists $$p && echo $$p && break ; done)
+    LUAPKG := $(shell for p in lua lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua51 ; do pkg-config --exists $$p && echo $$p && break ; done)
 ifneq ($(LUAPKG), )
     ifeq ($(OSX_STATIC),1)
       LUACOPT = $(shell pkg-config $(LUAPKG) --cflags | sed 's/-I/-idirafter/')
