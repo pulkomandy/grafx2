@@ -1,0 +1,235 @@
+--- SDL_image-1.2.12/IMG_xcf.c-orig	2018-12-03 11:36:47.264845000 +0100
++++ SDL_image-1.2.12/IMG_xcf.c	2018-12-03 11:37:34.517796000 +0100
+@@ -143,9 +143,11 @@
+ 
+ typedef struct {
+   char   sign [14];
++  Uint32 file_version;
+   Uint32 width;
+   Uint32 height;
+   Sint32 image_type;
++  Uint32 precision;
+   xcf_prop * properties;
+ 
+   Uint32 * layer_file_offsets;
+@@ -241,6 +243,13 @@
+   return data;
+ }
+ 
++static Uint64 read_offset (SDL_RWops * src, const xcf_header * h) {
++  Uint64 offset;  // starting with version 11, offsets are 64 bits
++  offset = (h->file_version >= 11) ? (Uint64)SDL_ReadBE32 (src) << 32 : 0;
++  offset |= SDL_ReadBE32 (src);
++  return offset;
++}
++
+ 
+ static Uint32 Swap32 (Uint32 v) {
+   return
+@@ -303,10 +312,15 @@
+   h->width       = SDL_ReadBE32 (src);
+   h->height      = SDL_ReadBE32 (src);
+   h->image_type  = SDL_ReadBE32 (src);
++  h->file_version = (h->sign[10] - '0') * 100 + (h->sign[11] - '0') * 10 + (h->sign[12] - '0');
+ #ifdef DEBUG
+-  printf ("XCF signature : %.14s\n", h->sign);
++  printf ("XCF signature : %.14s (version %u)\n", h->sign, h->file_version);
+   printf (" (%u,%u) type=%u\n", h->width, h->height, h->image_type);
+ #endif
++  if (h->file_version >= 4)
++    h->precision = SDL_ReadBE32 (src);
++  else
++    h->precision = 150;
+ 
+   h->properties = NULL;
+   h->compr      = COMPR_NONE;
+@@ -339,7 +353,7 @@
+   free (l);
+ }
+ 
+-static xcf_layer * read_xcf_layer (SDL_RWops * src) {
++static xcf_layer * read_xcf_layer (SDL_RWops * src, const xcf_header * h) {
+   xcf_layer * l;
+   xcf_prop    prop;
+ 
+@@ -349,6 +363,9 @@
+   l->layer_type = SDL_ReadBE32 (src);
+ 
+   l->name = read_string (src);
++#ifdef DEBUG
++  printf ("layer (%d,%d) type=%d '%s'\n", l->width, l->height, l->layer_type, l->name);
++#endif
+ 
+   do {
+     if (!xcf_read_property (src, &prop)) {
+@@ -363,8 +380,8 @@
+     }
+   } while (prop.id != PROP_END);
+ 
+-  l->hierarchy_file_offset = SDL_ReadBE32 (src);
+-  l->layer_mask_offset     = SDL_ReadBE32 (src);
++  l->hierarchy_file_offset = read_offset (src, h);
++  l->layer_mask_offset     = read_offset (src, h);
+ 
+   return l;
+ }
+@@ -374,7 +391,7 @@
+   free (c);
+ }
+ 
+-static xcf_channel * read_xcf_channel (SDL_RWops * src) {
++static xcf_channel * read_xcf_channel (SDL_RWops * src, const xcf_header * h) {
+   xcf_channel * l;
+   xcf_prop    prop;
+ 
+@@ -383,6 +400,9 @@
+   l->height = SDL_ReadBE32 (src);
+ 
+   l->name = read_string (src);
++#ifdef DEBUG
++  printf ("channel (%u,%u) '%s'\n", l->width, l->height, l->name);
++#endif
+ 
+   l->selection = 0;
+   do {
+@@ -410,7 +430,7 @@
+     }
+   } while (prop.id != PROP_END);
+ 
+-  l->hierarchy_file_offset = SDL_ReadBE32 (src);
++  l->hierarchy_file_offset = read_offset (src, h);
+ 
+   return l;
+ }
+@@ -420,7 +440,7 @@
+   free (h);
+ }
+ 
+-static xcf_hierarchy * read_xcf_hierarchy (SDL_RWops * src) {
++static xcf_hierarchy * read_xcf_hierarchy (SDL_RWops * src, const xcf_header * head) {
+   xcf_hierarchy * h;
+   int i;
+ 
+@@ -433,7 +453,7 @@
+   i = 0;
+   do {
+     h->level_file_offsets = (Uint32 *) realloc (h->level_file_offsets, sizeof (Uint32) * (i+1));
+-    h->level_file_offsets [i] = SDL_ReadBE32 (src);
++    h->level_file_offsets [i] = read_offset (src, head);
+   } while (h->level_file_offsets [i++]);
+ 
+   return h;
+@@ -444,7 +464,7 @@
+   free (l);
+ }
+ 
+-static xcf_level * read_xcf_level (SDL_RWops * src) {
++static xcf_level * read_xcf_level (SDL_RWops * src, const xcf_header * h) {
+   xcf_level * l;
+   int i;
+ 
+@@ -456,7 +476,7 @@
+   i = 0;
+   do {
+     l->tile_file_offsets = (Uint32 *) realloc (l->tile_file_offsets, sizeof (Uint32) * (i+1));
+-    l->tile_file_offsets [i] = SDL_ReadBE32 (src);
++    l->tile_file_offsets [i] = read_offset (src, h);
+   } while (l->tile_file_offsets [i++]);
+ 
+   return l;
+@@ -470,7 +490,8 @@
+   unsigned char * load;
+ 
+   load = (unsigned char *) malloc (len); // expect this is okay
+-  SDL_RWread (src, load, len, 1);
++  if (load != NULL)
++    SDL_RWread (src, load, len, 1);
+ 
+   return load;
+ }
+@@ -568,12 +589,12 @@
+   Uint32 *row;
+ 
+   SDL_RWseek (src, layer->hierarchy_file_offset, RW_SEEK_SET);
+-  hierarchy = read_xcf_hierarchy (src);
++  hierarchy = read_xcf_hierarchy (src, head);
+ 
+   level = NULL;
+   for (i = 0; hierarchy->level_file_offsets [i]; i++) {
+     SDL_RWseek (src, hierarchy->level_file_offsets [i], RW_SEEK_SET);
+-    level = read_xcf_level (src);
++    level = read_xcf_level (src, head);
+ 
+     ty = tx = 0;
+     for (j = 0; level->tile_file_offsets [j]; j++) {
+@@ -582,6 +603,8 @@
+       oy = ty+64 > level->height ? level->height % 64 : 64;
+ 
+       if (level->tile_file_offsets [j+1]) {
++        if (level->tile_file_offsets [j+1] <= level->tile_file_offsets [j])
++          break;
+ 	tile = load_tile
+ 	  (src,
+ 	   level->tile_file_offsets [j+1] - level->tile_file_offsets [j],
+@@ -735,7 +758,7 @@
+   head->layer_file_offsets = NULL;
+   offsets = 0;
+ 
+-  while ((offset = SDL_ReadBE32 (src))) {
++  while ((offset = read_offset (src, head))) {
+     head->layer_file_offsets = (Uint32 *) realloc (head->layer_file_offsets, sizeof (Uint32) * (offsets+1));
+     head->layer_file_offsets [offsets] = offset;
+     offsets++;
+@@ -755,20 +778,22 @@
+     SDL_Rect rs, rd;
+     SDL_RWseek (src, head->layer_file_offsets [i-1], RW_SEEK_SET);
+ 
+-    layer = read_xcf_layer (src);
+-    do_layer_surface (lays, src, head, layer, load_tile);
+-    rs.x = 0;
+-    rs.y = 0;
+-    rs.w = layer->width;
+-    rs.h = layer->height;
+-    rd.x = layer->offset_x;
+-    rd.y = layer->offset_y;
+-    rd.w = layer->width;
+-    rd.h = layer->height;
+-
+-    if (layer->visible)
+-      SDL_BlitSurface (lays, &rs, surface, &rd);
+-    free_xcf_layer (layer);
++    layer = read_xcf_layer (src, head);
++    if (layer != NULL) {
++      do_layer_surface (lays, src, head, layer, load_tile);
++      rs.x = 0;
++      rs.y = 0;
++      rs.w = layer->width;
++      rs.h = layer->height;
++      rd.x = layer->offset_x;
++      rd.y = layer->offset_y;
++      rd.w = layer->width;
++      rd.h = layer->height;
++
++      if (layer->visible)
++        SDL_BlitSurface (lays, &rs, surface, &rd);
++      free_xcf_layer (layer);
++    }
+   }
+ 
+   SDL_FreeSurface (lays);
+@@ -778,11 +803,13 @@
+   // read channels
+   channel = NULL;
+   chnls   = 0;
+-  while ((offset = SDL_ReadBE32 (src))) {
++  while ((offset = read_offset (src, head))) {
+     channel = (xcf_channel **) realloc (channel, sizeof (xcf_channel *) * (chnls+1));
+     fp = SDL_RWtell (src);
+     SDL_RWseek (src, offset, RW_SEEK_SET);
+-    channel [chnls++] = (read_xcf_channel (src));
++    channel [chnls] = (read_xcf_channel (src, head));
++    if (channel [chnls] != NULL)
++      chnls++;
+     SDL_RWseek (src, fp, RW_SEEK_SET);    
+   }
+ 

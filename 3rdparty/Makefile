@@ -4,6 +4,9 @@ SDLDEVELPATCH = SDL-1.2.15.patch
 SDLIMAGE = SDL_image-1.2.12
 SDLIMAGEARCH = SDL_image-1.2.12.tar.gz
 SDLIMAGEURL = https://www.libsdl.org/projects/SDL_image/release/$(SDLIMAGEARCH)
+SDLIMAGEPATCHES = SDL_image-1.2.12.XCF_infinite_loop.patch \
+                  SDL_image-1.2.12.XCF_v11_64bits_offsets.patch \
+                  SDL_image_XCF_v11_load_level.patch
 SDLTTF=SDL_ttf-2.0.11
 SDLTTFARCH=$(SDLTTF).tar.gz
 SDLTTFURL=https://www.libsdl.org/projects/SDL_ttf/release/$(SDLTTFARCH)
@@ -151,6 +154,7 @@ endif
 
 $(SDLIMAGE)/.ok:	archives/$(SDLIMAGEARCH)
 	$(TAR) xzf $<
+	cd $(SDLIMAGE) ; for p in $(SDLIMAGEPATCHES) ; do echo "applying $$p" ; patch -p1 < ../$$p ; done
 	touch $@
 
 $(PREFIX)/lib/libSDL_ttf.a:	$(PREFIX)/lib/libfreetype.a

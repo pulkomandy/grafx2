@@ -1,0 +1,53 @@
+--- SDL_image-1.2.12/IMG_xcf.c	2018-12-03 11:28:32.953683000 +0100
++++ SDL_image-1.2.12-me/IMG_xcf.c	2018-12-03 11:32:24.053793000 +0100
+@@ -587,13 +587,17 @@
+   Uint32 * p;
+   int x, y, tx, ty, ox, oy, i, j;
+   Uint32 *row;
++  Uint32 length;
+ 
+   SDL_RWseek (src, layer->hierarchy_file_offset, RW_SEEK_SET);
+   hierarchy = read_xcf_hierarchy (src, head);
+ 
+   level = NULL;
+   for (i = 0; hierarchy->level_file_offsets [i]; i++) {
+-    SDL_RWseek (src, hierarchy->level_file_offsets [i], RW_SEEK_SET);
++    if (SDL_RWseek (src, hierarchy->level_file_offsets [i], RW_SEEK_SET) < 0)
++      break;
++    if (i > 0) // skip level except the 1st one, just like GIMP does
++      continue;
+     level = read_xcf_level (src, head);
+ 
+     ty = tx = 0;
+@@ -601,23 +605,16 @@
+       SDL_RWseek (src, level->tile_file_offsets [j], RW_SEEK_SET);
+       ox = tx+64 > level->width ? level->width % 64 : 64;
+       oy = ty+64 > level->height ? level->height % 64 : 64;
++      length = ox*oy*6;
+ 
+-      if (level->tile_file_offsets [j+1]) {
+-        if (level->tile_file_offsets [j+1] <= level->tile_file_offsets [j])
+-          break;
+-	tile = load_tile
+-	  (src,
+-	   level->tile_file_offsets [j+1] - level->tile_file_offsets [j],
+-	   hierarchy->bpp,
+-	   ox, oy);
+-      }
+-      else {
+-	tile = load_tile
+-	  (src,
+-	   ox*oy*6,
+-	   hierarchy->bpp,
+-	   ox, oy);
++      if (level->tile_file_offsets [j+1] > level->tile_file_offsets [j]) {
++        length = level->tile_file_offsets [j+1] - level->tile_file_offsets [j];
+       }
++      tile = load_tile
++             (src,
++              length,
++              hierarchy->bpp,
++              ox, oy);
+ 
+       p8  = tile;
+       p16 = (Uint16 *) p8;
