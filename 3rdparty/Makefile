@@ -174,6 +174,9 @@ $(PREFIX)/lib/libtiff.a:	$(LIBTIFF)/.ok
 	  --with-jpeg-include-dir=$(PREFIX)/include --with-jpeg-lib-dir=$(PREFIX)/lib
 	cd $(LIBTIFF) && $(MAKE)
 	cd $(LIBTIFF) && $(MAKE) install
+ifdef WIN32CROSS
+	$(CP) $(PREFIX)/bin/libtiff*.dll ../bin
+endif
 
 $(LIBTIFF)/.ok:	archives/$(LIBTIFFARCH)
 	$(TAR) xzf $<

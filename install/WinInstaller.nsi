@@ -9,6 +9,7 @@
 !define FREETYPEDLL libfreetype-6.dll
 !define JPEGDLL     libjpeg-9.dll
 !define PNGDLL      libpng16-16.dll
+!define TIFFDLL     libtiff-5.dll
 
 ;--------------------------------
 ;Include Modern UI
@@ -101,6 +102,7 @@ Section "Grafx2" SecProgram
   File ..\bin\${JPEGDLL}
   File ..\bin\zlib1.dll
   File ..\bin\${PNGDLL}
+  File ..\bin\${TIFFDLL}
   SetOutPath "$INSTDIR\share\grafx2"
   File ..\share\grafx2\gfx2.gif
   File ..\share\grafx2\gfx2def.ini
@@ -197,6 +199,7 @@ Section "un.SecProgram"
   Delete "$INSTDIR\bin\${FREETYPEDLL}"
   Delete "$INSTDIR\bin\zlib1.dll"
   Delete "$INSTDIR\bin\${PNGDLL}"
+  Delete "$INSTDIR\bin\${TIFFDLL}"
   Delete "$INSTDIR\bin\stdout.txt"
   Delete "$INSTDIR\bin\stderr.txt"
   RMDir  "$INSTDIR\bin"
