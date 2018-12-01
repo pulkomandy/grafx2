@@ -110,6 +110,7 @@ ifdef COMSPEC
   PLATFORM = win32
   #some misc files we have to add to the release archive under windows.
   PLATFORMFILES = bin/SDL.dll bin/SDL_image.dll $(wildcard ../bin/libpng*.dll) $(wildcard ../bin/libjpeg*.dll) bin/zlib1.dll $(TTFLIBS)
+  PLATFORMFILES += bin/libtiff-5.dll
   ZIP = zip
 else
 
@@ -475,6 +476,7 @@ endif
       PLATFORMFILES = $(wildcard ../bin/libpng*.dll) $(wildcard ../bin/libjpeg*.dll) bin/zlib1.dll $(TTFLIBS)
       ifeq ($(API),sdl)
       PLATFORMFILES += bin/SDL.dll bin/SDL_image.dll
+      PLATFORMFILES += bin/libtiff-5.dll
       endif
     else
       ifdef GP2XCROSS
