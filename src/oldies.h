@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2018 Thomas Bernard
     Copyright 2008 Adrien Destugues
 
     Grafx2 is free software; you can redistribute it and/or
@@ -222,5 +223,23 @@ void MOTO_set_MO5_palette(T_Components * palette);
  * The 8 first colors are the TO7 palette
  */
 void MOTO_set_TO7_palette(T_Components * palette);
+
+/** @}*/
+
+/** @defgroup apple2 Apple II
+ *
+ * HGR and DHGR modes
+ * @{
+ */
+
+/**
+ * Set the 6 color Apple II HGR palette
+ */
+void HGR_set_palette(T_Components * palette);
+
+/**
+ * Set the 16 color Apple II DHGR palette
+ */
+void DHGR_set_palette(T_Components * palette);
 
 /** @}*/

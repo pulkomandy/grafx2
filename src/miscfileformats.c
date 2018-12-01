@@ -6671,3 +6671,240 @@ error:
     fclose(file);
   File_error = 1;
 }
+
+/////////////////////////////// Apple II Files //////////////////////////////
+
+/**
+ * Test for an Apple II HGR or DHGR raw file
+ */
+void Test_HGR(T_IO_Context * context, FILE * file)
+{
+  long file_size;
+
+  (void)context;
+  File_error = 1;
+
+  file_size = File_length_file(file);
+  if (file_size == 8192)  // HGR
+    File_error = 0;
+  else if(file_size == 16384) // DHGR
+    File_error = 0;
+}
+
+/**
+ * Load HGR (280x192) or DHGR (560x192) Apple II pictures
+ *
+ * Creates 2 layers :
+ * 1. Monochrome
+ * 2. Color
+ */
+void Load_HGR(T_IO_Context * context)
+{
+  unsigned long file_size;
+  FILE * file;
+  byte * vram[2];
+  int bank;
+  int x, y;
+  int is_dhgr = 0;
+
+  file = Open_file_read(context);
+  if (file == NULL)
+  {
+    File_error = 1;
+    return;
+  }
+  file_size = File_length_file(file);
+  if (file_size == 16384)
+    is_dhgr = 1;
+
+  vram[0] = malloc(8192);
+  Read_bytes(file, vram[0], 8192);
+  if (is_dhgr)
+  {
+    vram[1] = malloc(8192);
+    Read_bytes(file, vram[1], 8192);
+  }
+  else
+    vram[1] = NULL;
+  fclose(file);
+
+  if (Config.Clear_palette)
+    memset(context->Palette,0,sizeof(T_Palette));
+  if (is_dhgr)
+  {
+    DHGR_set_palette(context->Palette);
+    Pre_load(context, 560, 192, file_size, FORMAT_HGR, PIXEL_TALL, 4);
+  }
+  else
+  {
+    HGR_set_palette(context->Palette);
+    Pre_load(context, 280, 192, file_size, FORMAT_HGR, PIXEL_SIMPLE, 2);
+  }
+  for (y = 0; y < 192; y++)
+  {
+    byte palette = 0, color = 0;
+    byte previous_palette = 0;  // palette for the previous pixel pair
+    int column, i;
+    int offset = ((y & 7) << 10) + ((y & 070) << 4) + ((y >> 6) * 40);
+    x = 0;
+    for (column = 0; column < 40; column++)
+    for (bank = 0; bank <= is_dhgr; bank++)
+    {
+      byte b = vram[bank][offset+column];
+      if (!is_dhgr)
+        palette = (b & 0x80) ? 4 : 0;
+      else
+        palette = (b & 0x80) ? 0 : 16;
+      for (i = 0; i < 7; i++)
+      {
+        if (context->Type == CONTEXT_MAIN_IMAGE)
+        {
+          // monochrome
+          Set_loading_layer(context, 0);
+          Set_pixel(context, x, y, ((b & 1) * (is_dhgr ? 15 : 3)) + palette);
+          Set_loading_layer(context, 1);
+        }
+        // color
+        color = (color << 1) | (b & 1);
+        if (is_dhgr)
+        {
+          if ((x & 3) == 0)
+            previous_palette = palette; // what is important is the value when the 1st bit was read...
+          /// emulate "chat mauve" DHGR mixed mode.
+          /// see http://boutillon.free.fr/Underground/Anim_Et_Graph/Extasie_Chat_Mauve_Reloaded/Extasie_Chat_Mauve_Reloaded.html
+          if (previous_palette) // BW
+            Set_pixel(context, x, y, ((b & 1) * 15) + palette);
+          else if ((x & 3) == 3)
+          {
+            Set_pixel(context, x - 3, y, (color & 15) + palette);
+            Set_pixel(context, x - 2, y, (color & 15) + palette);
+            Set_pixel(context, x - 1, y, (color & 15) + palette);
+            Set_pixel(context, x, y, (color & 15) + palette);
+          }
+        }
+        else
+        {
+          if (x & 1)
+          {
+            if ((color & 6) == 6) // 2 bits to 1 => force White
+            {
+              Set_pixel(context, x - 2, y, 3 + previous_palette);
+              Set_pixel(context, x - 1, y, 3 + palette);
+            }
+            else
+              Set_pixel(context, x - 1, y, (color & 3) + palette);
+            Set_pixel(context, x, y, (color & 3) + palette);
+            previous_palette = palette;
+          }
+        }
+        b >>= 1;
+        x++;
+      }
+    }
+  }
+  // show hidden data in HOLES
+  for (y = 0; y < 64; y++)
+  for (bank = 0; bank < 1; bank++)
+  {
+    byte b = 0;
+    for (x = 0; x < 8; x++)
+      b |= vram[bank][x + (y << 7) + 120];
+    if (b != 0)
+      GFX2_LogHexDump(GFX2_DEBUG, bank ? "AUX " : "MAIN", vram[bank], (y << 7) + 120, 8);
+  }
+  free(vram[0]);
+  free(vram[1]);
+  File_error = 0;
+}
+
+/**
+ * Save HGR (280x192) or DHGR (560x192) Apple II pictures
+ *
+ * The data saved is the "monochrome" data from layer 1
+ */
+void Save_HGR(T_IO_Context * context)
+{
+  FILE * file;
+  byte * vram[2];
+  int bank;
+  int x, y;
+  int is_dhgr = 0;
+
+  File_error = 1;
+  if (context->Height != 192 || (context->Width != 280 && context->Width != 560))
+  {
+    Warning_message("Picture must be 280x192 (HGR) or 560x192 (DHGR)");
+    return;
+  }
+  if (context->Width == 560)
+    is_dhgr = 1;
+  
+  file = Open_file_write(context);
+  if (file == NULL)
+    return;
+  vram[0] = calloc(8192, 1);
+  if (vram[0] == NULL)
+  {
+    fclose(file);
+    return;
+  }
+  if (is_dhgr)
+  {
+    vram[1] = calloc(8192, 1);
+    if (vram[1] == NULL)
+    {
+      free(vram[0]);
+      fclose(file);
+      return;
+    }
+  }
+  else
+    vram[1] = NULL;
+
+  Set_saving_layer(context, 0); // "monochrome" layer
+  for (y = 0; y < 192; y++)
+  {
+    int i, column = 0;
+    int offset = ((y & 7) << 10) + ((y & 070) << 4) + ((y >> 6) * 40);
+    x = 0;
+    bank = 0;
+    while (x < context->Width)
+    {
+      byte b;
+      if (is_dhgr)
+        b = (Get_pixel(context, x, y) & 16) ? 0 : 0x80;
+      else
+        b = (Get_pixel(context, x, y) & 4) ? 0x80 : 0;
+      for (i = 0; i < 7; i++)
+      {
+        b = b | ((Get_pixel(context, x++, y) & 1) << i);
+      }
+      vram[bank][offset + column] = b;
+      if (is_dhgr)
+      {
+        if (++bank > 1)
+        {
+          bank = 0;
+          column++;
+        }
+      }
+      else
+        column++;
+    }
+  }
+
+  if (Write_bytes(file, vram[0], 8192))
+  {
+    if (is_dhgr)
+    {
+      if (Write_bytes(file, vram[1], 8192))
+        File_error = 0;
+    }
+    else
+      File_error = 0;
+  }
+
+  free(vram[0]);
+  free(vram[1]);
+  fclose(file);
+}

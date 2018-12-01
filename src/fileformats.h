@@ -155,5 +155,10 @@ void Test_MOTO(T_IO_Context *, FILE *);
 void Load_MOTO(T_IO_Context *);
 void Save_MOTO(T_IO_Context *);
 
+// -- Apple II HGR and DHGR pictures ----------------------------------------
+void Test_HGR(T_IO_Context *, FILE *);
+void Load_HGR(T_IO_Context *);
+void Save_HGR(T_IO_Context *);
+
 /// @}
 #endif

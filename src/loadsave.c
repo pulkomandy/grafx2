@@ -91,6 +91,7 @@ const T_Format File_formats[] = {
     "gif;png;bmp;2bp;pcx;pkm;iff;lbm;ilbm;sham;ham;ham6;ham8;acbm;pic;anim;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;"
     "c64;p64;a64;pi;rp;aas;art;dd;iph;ipt;hpc;ocp;koa;koala;fli;bml;cdu;prg;pmg;rpm;"
     "cpc;scr;win;"
+    "hgr;dhgr;"
     "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico;ic2;cur;cm5;pph;info;flc;bin;map"},
   {FORMAT_ALL_PALETTES, "(pal)", NULL, NULL, NULL, 1, 0, 0, "", "kcf;pal;gpl"},
   {FORMAT_ALL_FILES, "(*.*)", NULL, NULL, NULL, 0, 0, 0, "", "*"},
@@ -123,6 +124,7 @@ const T_Format File_formats[] = {
   {FORMAT_INFO," info",Test_INFO,Load_INFO,NULL,     0, 0, 0, "info", "info"},
   {FORMAT_FLI, " flc", Test_FLI, Load_FLI, NULL,     0, 0, 0, "flc", "flc;fli;dat"},
   {FORMAT_MOTO," moto",Test_MOTO,Load_MOTO,Save_MOTO,0, 1, 0, "bin", "bin;map"},
+  {FORMAT_HGR, " hgr", Test_HGR, Load_HGR, Save_HGR, 0, 0, 1, "hgr", "hgr;dhgr;bin"},
   {FORMAT_MISC,"misc.",NULL,     NULL,     NULL,     0, 0, 0, "",    "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff"},
 };
 

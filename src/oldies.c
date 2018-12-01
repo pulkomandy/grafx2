@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2018 Thomas Bernard
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
     Copyright 2007 Adrien Destugues
@@ -747,4 +748,49 @@ void MOTO_set_TO7_palette(T_Components * palette)
   palette[17].R = 255;
   palette[17].G = 127;
   palette[17].B = 127;
+}
+
+void HGR_set_palette(T_Components * palette)
+{
+  static const T_Components hgr_palette[] = {
+    {   0,   0,   0 },  // black
+    {   0, 255,   0 },  // green
+    { 255,   0, 255 },  // purple
+    { 255, 255, 255 },  // white
+    {   0,   0,   0 },  // black
+    { 255,  80,   0 },  // orange
+    {   0, 175, 255 },  // blue
+    { 255, 255, 255 }   // white
+  };
+  memcpy(palette, hgr_palette, sizeof(hgr_palette));
+}
+
+void DHGR_set_palette(T_Components * palette)
+{
+  // Color Palette from the JACE emulator
+  static const T_Components dhgr_palette[] = {
+    {0,0,0},      /* 0 black */
+    {177,0,93},   /* 1 red */
+    {94,86,0},    /* 8 brown */
+    {255,86,0},   /* 9 orange */
+    {0,127,34},   /* 4 dk green */
+    {127,127,127},/* 5 gray */
+    {44,213,0},   /* 12 lt green */
+    {222,213,0},  /* 13 yellow */
+    {32,41,255},  /* 2 dk blue */
+    {210,41,255}, /* 3 purple */
+    {127,127,127},/* 10 grey */
+    {255,127,220},/* 11 pink */
+    {0,168,255},  /* 6 med blue */
+    {160,168,255},/* 7 lt blue */
+    {77,255,161}, /* 14 aqua */
+    {255,255,255} /* 15 white */
+  };
+  memcpy(palette, dhgr_palette, sizeof(dhgr_palette));
+  palette[16].R = 0;
+  palette[16].G = 0;
+  palette[16].B = 0;
+  palette[31].R = 255;
+  palette[31].G = 255;
+  palette[31].B = 255;
 }

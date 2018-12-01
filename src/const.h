@@ -148,6 +148,7 @@ enum FILE_FORMATS
   FORMAT_INFO, ///< Amiga OS icons
   FORMAT_FLI,  ///< Autodesk Animator FLI/FLC
   FORMAT_MOTO, ///< Thomson MO/TO computers pictures
+  FORMAT_HGR,  ///< Apple II HGR and DHGR
   FORMAT_MISC, ///< Must be last of enum: others formats recognized by SDL_image
 };
 
