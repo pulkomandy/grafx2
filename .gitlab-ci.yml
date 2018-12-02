@@ -22,7 +22,7 @@ job_win32:
         - apt-get update -qq && apt-get install -y -qq zip dos2unix
         - apt-get install -y -qq gcc-mingw-w64-i686 g++-mingw-w64-i686 mingw-w64-tools nsis
     script:
-        - "WIN32CROSS=1 make 3rdparty"
+        - "WIN32CROSS=1 make 3rdparty -j3"
         - "WIN32CROSS=1 make -j3"
         - "WIN32CROSS=1 make ziprelease"
         - "WIN32CROSS=1 make win32installer"
