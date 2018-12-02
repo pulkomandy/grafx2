@@ -12,6 +12,7 @@
 /obj
 /bin/grafx2*
 /bin/generatedoc*
+/bin/*.dll
 
 /src/version.c
 /src/*.tgz
@@ -20,6 +21,7 @@
 
 /doc/html
 /doc/doxygen
+/doc/README-*.txt
 
 *.tgz
 *.zip
