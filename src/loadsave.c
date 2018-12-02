@@ -1267,7 +1267,6 @@ void Init_context_preview(T_IO_Context * context, char *file_name, char *file_di
   context->Type = CONTEXT_PREVIEW;
   context->File_name = file_name;
   context->File_directory = file_directory;
-  context->Format = Main.fileformat; // FIXME ?
 }
 
 // Setup for loading/saving an intermediate backup
