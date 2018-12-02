@@ -45,6 +45,10 @@
     #include <sys/mount.h>
 #endif
 
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
+#include <stdlib.h>
+#endif
+
 #if defined(__macosx__)
 #import <CoreFoundation/CoreFoundation.h>
 /* defining __QD__ is a cheat to avoid :
