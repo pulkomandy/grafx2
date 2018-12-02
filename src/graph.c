@@ -3164,7 +3164,7 @@ byte Effect_layer_copy(word x,word y,byte color)
 {
   if (color<Main.backups->Pages->Nb_layers)
   {
-    return *((y)*Main.image_width+(x)+Main.backups->Pages->Image[color].Pixels);
+    return Read_pixel_from_layer(color, x, y);
   }
   return Read_pixel_from_feedback_screen(x,y);
 }
@@ -3207,7 +3207,7 @@ void Redraw_grid(short x, short y, unsigned short w, unsigned short h)
   }
 }
 
-byte Read_pixel_from_current_screen  (word x,word y)
+byte Read_pixel_from_current_screen(word x,word y)
 {
   byte depth;
   byte color;
@@ -3227,7 +3227,7 @@ byte Read_pixel_from_current_screen  (word x,word y)
     return color;
 
   depth = *(Main_visible_image_depth_buffer.Image+x+y*Main.image_width);
-  return *(Main.backups->Pages->Image[depth].Pixels + x+y*Main.image_width);
+  return Read_pixel_from_layer(depth, x, y);
 }
 
 /// Paint a a single pixel in image and optionnaly on screen: as-is.
@@ -3247,7 +3247,7 @@ static void Pixel_in_screen_layered_with_opt_preview(word x,word y,byte color, i
   {
     if (color == Main.backups->Pages->Transparent_color) // transparent color
       // fetch pixel color from the topmost visible layer
-      color=*(Main.backups->Pages->Image[depth].Pixels + x+y*Main.image_width);
+      color = Read_pixel_from_layer(depth, x, y);
 
     *(x+y*Main.image_width+Main_screen)=color;
 
@@ -3490,7 +3490,7 @@ static void Pixel_in_screen_underlay_with_opt_preview(word x,word y,byte color,i
   // Paste in layer
   Pixel_in_current_layer(x, y, color);
   // Search depth
-  depth = *(Main.backups->Pages->Image[4].Pixels + x+y*Main.image_width);
+  depth = Read_pixel_from_layer(4, x, y);
 
   if ( depth == Main.current_layer)
   {
@@ -3520,7 +3520,7 @@ static void Pixel_in_screen_overlay_with_opt_preview(word x,word y,byte color,in
     // search for this color in the 4 defined inks
     for (ink = 0; ink < 4; ink++)
     {
-      if (color == Main.backups->Pages->Image[ink].Pixels[x+y*Main.image_width])
+      if (color == Read_pixel_from_layer(ink, x, y))
         break;
     }
     if (ink >= 4)
@@ -3533,7 +3533,7 @@ static void Pixel_in_screen_overlay_with_opt_preview(word x,word y,byte color,in
   *(Main_visible_image_depth_buffer.Image+x+y*Main.image_width) = ink;
   // Fetch pixel color from the target raster layer
   if (Main.layers_visible & (1 << ink))
-    color=*(Main.backups->Pages->Image[ink].Pixels + x+y*Main.image_width);
+    color = Read_pixel_from_layer(ink, x, y);
   else
     color = ink;
 
@@ -3542,6 +3542,64 @@ static void Pixel_in_screen_overlay_with_opt_preview(word x,word y,byte color,in
 
   if (preview)
     Pixel_preview(x,y,color);
+}
+
+/// Paint a pixel in HGR mode in the monochrome layer
+///
+/// - Layer 1 is the monochrome screen. Pixels are either black or white. 2 different values to reflect high bit
+/// - Layer 2 is the screen seen as color
+static void Pixel_in_screen_hgr_mono_with_opt_preview(word x,word y,byte color,int preview)
+{
+  word column;
+  word x2;
+
+  if (color >= 8)
+    return;
+  if ((color & 3) != 0)
+    color |= 3; // force black or white.
+
+  // put pixel
+  if (color == Read_pixel_from_layer(0, x, y))
+    return; // nothing to do !
+  Pixel_in_layer_with_opt_preview(0, x, y, color, preview);
+  column = x / 7;
+  // update the palette bit of the whole column (byte)
+  for (x2 = column * 7; x2 < column * 7 + 7; x2++)
+  {
+    byte pixel = Read_pixel_from_layer(0, x2, y);
+    if ((pixel & 4) != (color & 4)) // palettes are different
+      Pixel_in_layer_with_opt_preview(0, x2, y, (color & 4) | (pixel & 3), preview);
+  }
+  // update color pixels !
+  for (x2 = (column * 7) & ~1; x2 < column * 7 + 7; x2 += 2)
+  {
+    byte b2, b1, b0;
+    b2 = (x2 > 0) ? Read_pixel_from_layer(0, x2 - 1, y) : 0;
+    b1 = Read_pixel_from_layer(0, x2, y);
+    b0 = Read_pixel_from_layer(0, x2 + 1, y);
+    color = (b1 & 6) | (b0 & 1);
+    if ((b2 & 3) && (b1 & 3))
+    {
+      // two consecutive 1 : force white
+      Pixel_in_layer_with_opt_preview(1, x2 - 1, y, b2 | 3, preview);
+      Pixel_in_layer_with_opt_preview(1, x2, y, color | 3, preview);
+    }
+    else //if (color != Read_pixel_from_layer(1, x2, y)) // depth buffer looks badly initialized, so we need to force putpixel :(
+      Pixel_in_layer_with_opt_preview(1, x2, y, color, preview);
+
+    //if (color != Read_pixel_from_layer(1, x2 + 1, y))
+      Pixel_in_layer_with_opt_preview(1, x2 + 1, y, color, preview);
+  }
+}
+
+/// Paint in the color layer of HGR.
+///
+/// In fact we just write the two monochrome pixels
+static void Pixel_in_screen_hgr_color_with_opt_preview(word x,word y,byte color,int preview)
+{
+  x &= ~1;
+  Pixel_in_screen_hgr_mono_with_opt_preview(x, y, color & 6, preview);      // palette bit(4) + upper bit(2)
+  Pixel_in_screen_hgr_mono_with_opt_preview(x + 1, y, color & 5, preview);  // palette bit(4) + lower bit(1)
 }
 
 // end of constraints group
@@ -3572,10 +3630,22 @@ void Pixel_in_current_layer(word x,word y, byte color)
   Pixel_in_document_current_layer(&Main, x, y, color);
 }
 
+/// put a pixel in a specific layer of Main Page
+void Pixel_in_layer(int layer, word x,word y, byte color)
+{
+  T_Document * doc = &Main;
+  doc->backups->Pages->Image[layer].Pixels[x + y*doc->image_width] = color;
+}
+
 byte Read_pixel_from_current_layer(word x,word y)
 {
-  // return Main.backups->Pages->Image[Main.current_layer].Pixels[x + y*Main.image_width];
-  return *((y)*Main.image_width+(x)+Main.backups->Pages->Image[Main.current_layer].Pixels);
+  return Read_pixel_from_layer(Main.current_layer, x, y);
+}
+
+/// Read a pixel from a specific layer of Main Page
+byte Read_pixel_from_layer(int layer, word x,word y)
+{
+  return Main.backups->Pages->Image[layer].Pixels[x + y*Main.image_width];
 }
 
 void Update_pixel_renderer(void)

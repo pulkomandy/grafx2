@@ -130,8 +130,11 @@ void Redraw_grid(short x, short y, unsigned short w, unsigned short h);
 
 void Pixel_in_spare(word x,word y, byte color);
 void Pixel_in_current_layer(word x,word y, byte color);
+void Pixel_in_layer(int layer, word x,word y, byte color);
 byte Read_pixel_from_current_screen  (word x,word y);
 byte Read_pixel_from_current_layer(word x,word y);
+byte Read_pixel_from_layer(int layer, word x,word y);
+
 
 /// Paint a single pixel in image only.
 #define Pixel_in_current_screen(x,y,c) Pixel_in_current_screen_with_opt_preview(x,y,c,0)
