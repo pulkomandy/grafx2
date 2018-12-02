@@ -16,7 +16,13 @@ INSTALLER = grafx2-$(API)-$(VERSION).win32.exe
 all:	$(INSTALLER)
 
 $(INSTALLER):	WinInstaller.nsi $(SOURCES) $(VERSIONTAG)
+ifdef WIN32CROSS
+	for f in ../doc/*.txt; do unix2dos $$f ; done
+endif
 	$(SED) -e 's/VERSION .*/VERSION $(VERSION)/' -e 's/API .*/API $(API)/' $< | $(MAKENSIS) -
+ifdef WIN32CROSS
+	for f in ../doc/*.txt; do dos2unix $$f ; done
+endif
 
 $(SOURCES): $(wildcard ../src/*.c) $(wildcard ../src/*.h)
 	cd ../src && WIN32CROSS=1 $(MAKE) $(SOURCES)

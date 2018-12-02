@@ -19,7 +19,7 @@ job_linux:
 job_win32:
     stage: build
     before_script:
-        - apt-get update -qq && apt-get install -y -qq zip
+        - apt-get update -qq && apt-get install -y -qq zip dos2unix
         - apt-get install -y -qq gcc-mingw-w64-i686 g++-mingw-w64-i686 mingw-w64-tools nsis
     script:
         - "WIN32CROSS=1 make 3rdparty"

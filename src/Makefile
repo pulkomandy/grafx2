@@ -868,7 +868,14 @@ ziprelease: release $(SRCARCH)
 	cd .. && $(ZIP) $(ZIPOPT) "grafx2-$(API)-$(VERSIONTAG)$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
 	  $(BIN:../%=%) share/grafx2/gfx2def.ini $(SCRIPT_FILES:../%=%) $(SKIN_FILES:../%=%) \
 	  share/grafx2/gfx2.gif share/icons/grafx2.svg \
-	  $(DOC_FILES:../%=%) $(FONT_FILES:../%=%) $(SRCARCH:../%=%) $(PLATFORMFILES:../%=%)
+	  $(FONT_FILES:../%=%) $(SRCARCH:../%=%) $(PLATFORMFILES:../%=%)
+ifdef WIN32CROSS
+	cd .. && $(ZIP) $(ZIPOPT) --to-crlf "grafx2-$(API)-$(VERSIONTAG)$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
+	  $(DOC_FILES:../%=%)
+else
+	cd .. && $(ZIP) $(ZIPOPT) "grafx2-$(API)-$(VERSIONTAG)$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
+	  $(DOC_FILES:../%=%)
+endif
 ifeq ($(PLATFORM),Darwin)
 	$(ZIP) $(ZIPOPT) -r ../Grafx2.app-$(shell uname -p)-$(API)-$(VERSIONTAG).zip Grafx2.app
 	cd .. && $(ZIP) $(ZIPOPT) Grafx2.app-$(shell uname -p)-$(API)-$(VERSIONTAG).zip \

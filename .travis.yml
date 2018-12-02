@@ -18,6 +18,7 @@ addons:
     - libsdl2-ttf-dev
     - liblua5.2-dev
     - nsis
+    - dos2unix
 
 sudo: false
 
