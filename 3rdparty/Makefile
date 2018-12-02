@@ -27,7 +27,8 @@ ZLIBURL=https://www.zlib.net/$(ZLIBARCH)
 FREETYPE=freetype-2.9.1
 FREETYPEARCH=$(FREETYPE).tar.gz
 FREETYPEURL=https://download.savannah.gnu.org/releases/freetype/$(FREETYPEARCH)
-LUA=lua-5.3.5
+LUAVER=5.3.5
+LUA=lua-$(LUAVER)
 LUAARCH=$(LUA).tar.gz
 LUAURL=https://www.lua.org/ftp/$(LUAARCH)
 # https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-0.6.1.tar.gz
@@ -47,7 +48,14 @@ GETURL = $(shell WGET=`which wget` ; if [ "$?" = "0" ] && [ -x "$WGET" ] ; then 
 
 BUILD_CC := $(CC)
 
+# There is no uname under windows, but we can guess we are there with the COMSPEC env.var
+# Windows specific
+ifdef COMSPEC
+WIN32 = 1
+endif
+
 ifdef WIN32CROSS
+WIN32 = 1
 CROSS_CC ?= $(shell which i686-w64-mingw32-gcc || which mingw32-gcc)
 CROSS_AR ?= $(shell which i686-w64-mingw32-ar || which mingw32-ar)
 CROSS_RANLIB ?= $(shell which i686-w64-mingw32-ranlib || which mingw32-ranlib)
@@ -61,6 +69,7 @@ endif
 
 HOST = $(shell $(CC) -dumpmachine)
 #HOST = i686-pc-mingw32
+DATE = $(shell date -R)
 
 .PHONY:	all clean clean_archives clean_all libs libpng libsdl libsdl_image libsdl_ttf libjpeg libtiff zlib freetype lua recoil
 
@@ -87,10 +96,17 @@ freetype:	$(PREFIX)/lib/libfreetype.a
 lua:	$(PREFIX)/lib/liblua.a
 
 $(PREFIX)/lib/liblua.a:	$(LUA)/.ok
-ifdef WIN32CROSS
+ifdef WIN32
 	cd $(LUA) && $(MAKE) PLAT=mingw CC=$(CC) RANLIB=$(RANLIB)
 	cd $(LUA) && $(MAKE) install PLAT=mingw INSTALL_TOP=$(PREFIX) TO_BIN="lua.exe luac.exe"
 	cp -v $(LUA)/src/lua*.dll ../bin
+	echo "The Windows distribution of Grafx2 is linked with Lua v$(LUAVER)" > ../doc/README-lua.txt
+	grep LUA_COPYRIGHT $(LUA)/src/lua.h | cut -d'"' -f 2 >> ../doc/README-lua.txt
+
+	echo "" >> ../doc/README-lua.txt
+	echo "License : http://www.lua.org/license.html" >> ../doc/README-lua.txt
+	# extract license from readme.html
+	awk '/BLOCKQUOTE/{flag=1-flag;next}flag' $(LUA)/doc/readme.html | grep -v '<P>' | tail --lines +2 >> ../doc/README-lua.txt
 endif
 
 $(LUA)/.ok:	archives/$(LUAARCH)
@@ -101,8 +117,14 @@ $(PREFIX)/lib/libSDLmain.a:	archives/$(SDLDEVEL)
 	$(TAR) xzf $<
 	patch -p0 < $(SDLDEVELPATCH)
 	cd SDL-1.2.15 && CROSS_PATH=$(PREFIX) $(MAKE) cross
-ifdef WIN32CROSS
+ifdef WIN32
 	$(CP) $(PREFIX)/bin/SDL.dll ../bin
+	echo "The following file:" > ../doc/README-SDL.txt
+	echo "" >> ../doc/README-SDL.txt
+	echo "	SDL.dll" >> ../doc/README-SDL.txt
+	echo "" >> ../doc/README-SDL.txt
+	echo "is the runtime environment for the SDL library." >> ../doc/README-SDL.txt
+	tail --lines +3 SDL-1.2.15/README-SDL.txt >> ../doc/README-SDL.txt
 endif
 
 $(PREFIX)/lib/libSDL_image.a:	$(PREFIX)/lib/libjpeg.a
@@ -113,8 +135,17 @@ $(PREFIX)/lib/libSDL_image.a:	$(SDLIMAGE)/.ok
 	cd $(SDLIMAGE) && CC="$(CC) $(LDFLAGS)" CPPFLAGS=-I$(PREFIX)/include LDFLAGS="-L$(PREFIX)/lib" LIBPNG_CFLAGS= LIBPNG_LIBS=-lpng ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --host=$(HOST) --disable-webp
 	cd $(SDLIMAGE) && $(MAKE)
 	cd $(SDLIMAGE) && $(MAKE) install
-ifdef WIN32CROSS
+ifdef WIN32
 	$(CP) $(PREFIX)/bin/SDL_image.dll ../bin
+	echo "$(SDLIMAGE)" > ../doc/README-SDL_image.txt
+	echo "" >> ../doc/README-SDL_image.txt
+	echo "dependencies :" >> ../doc/README-SDL_image.txt
+	echo " - $(LIBPNG)" >> ../doc/README-SDL_image.txt
+	echo " - http://www.ijg.org/ JPEG lib $(JPEGVER)" >> ../doc/README-SDL_image.txt
+	echo " - $(LIBTIFF)" >> ../doc/README-SDL_image.txt
+	echo "" >> ../doc/README-SDL_image.txt
+	echo "License :" >> ../doc/README-SDL_image.txt
+	cat $(SDLIMAGE)/COPYING >> ../doc/README-SDL_image.txt
 endif
 
 $(SDLIMAGE)/.ok:	archives/$(SDLIMAGEARCH)
@@ -129,8 +160,15 @@ $(PREFIX)/lib/libSDL_ttf.a:	$(SDLTTF)/.ok
 	  ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --with-freetype-prefix=$(PREFIX) --host=$(HOST)
 	cd $(SDLTTF) && $(MAKE)
 	cd $(SDLTTF) && $(MAKE) install
-ifdef WIN32CROSS
+ifdef WIN32
 	$(CP) $(PREFIX)/bin/SDL_ttf.dll ../bin
+	echo "$(SDLTTF)" > ../doc/README-SDL_ttf.txt
+	echo "" >> ../doc/README-SDL_ttf.txt
+	echo "dependencies :" >> ../doc/README-SDL_ttf.txt
+	echo " - $(FREETYPE)" >> ../doc/README-SDL_ttf.txt
+	echo "" >> ../doc/README-SDL_ttf.txt
+	echo "License :" >> ../doc/README-SDL_ttf.txt
+	cat $(SDLTTF)/COPYING >> ../doc/README-SDL_ttf.txt
 endif
 
 $(SDLTTF)/.ok:	archives/$(SDLTTFARCH)
@@ -145,8 +183,13 @@ $(PREFIX)/lib/libfreetype.a:	$(FREETYPE)/.ok
 	  PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig LDFLAGS="$(LDFLAGS)"
 	cd $(FREETYPE) && $(MAKE)
 	cd $(FREETYPE) && $(MAKE) install
-ifdef WIN32CROSS
+ifdef WIN32
 	$(CP) $(PREFIX)/bin/libfreetype*.dll ../bin
+	echo "$(FREETYPE)" > ../doc/README-freetype.txt
+	echo "" >> ../doc/README-freetype.txt
+	echo "License :" >> ../doc/README-freetype.txt
+	echo "" >> ../doc/README-freetype.txt
+	cat $(FREETYPE)/docs/GPLv2.TXT >> ../doc/README-freetype.txt
 endif
 
 $(FREETYPE)/.ok:	archives/$(FREETYPEARCH)
@@ -157,8 +200,9 @@ $(PREFIX)/lib/libjpeg.a:	$(JPEGDIR)/.ok
 	cd $(JPEGDIR) && CC=$(CC) ./configure --prefix=$(PREFIX) --host=$(HOST)
 	cd $(JPEGDIR) && $(MAKE)
 	cd $(JPEGDIR) && $(MAKE) install
-ifdef WIN32CROSS
+ifdef WIN32
 	$(CP) $(PREFIX)/bin/libjpeg*.dll ../bin
+	$(CP) $(JPEGDIR)/README ../doc/README-jpeg.txt
 endif
 
 $(JPEGDIR)/.ok:	archives/$(JPEGARCH)
@@ -174,8 +218,13 @@ $(PREFIX)/lib/libtiff.a:	$(LIBTIFF)/.ok
 	  --with-jpeg-include-dir=$(PREFIX)/include --with-jpeg-lib-dir=$(PREFIX)/lib
 	cd $(LIBTIFF) && $(MAKE)
 	cd $(LIBTIFF) && $(MAKE) install
-ifdef WIN32CROSS
+ifdef WIN32
 	$(CP) $(PREFIX)/bin/libtiff*.dll ../bin
+	echo "$(LIBTIFF)" > ../doc/README-tiff.txt
+	echo "" >> ../doc/README-tiff.txt
+	echo "License :" >> ../doc/README-tiff.txt
+	echo "" >> ../doc/README-tiff.txt
+	cat $(LIBTIFF)/COPYRIGHT >> ../doc/README-tiff.txt
 endif
 
 $(LIBTIFF)/.ok:	archives/$(LIBTIFFARCH)
@@ -188,8 +237,13 @@ $(PREFIX)/lib/libpng.a:	$(LIBPNG)/.ok
 	cd $(LIBPNG) && CC="$(CC) $(LDFLAGS)" CPPFLAGS=-I$(PREFIX)/include LDFLAGS="-L$(PREFIX)/lib" ./configure --prefix=$(PREFIX) --host=$(HOST) --enable-silent-rules
 	cd $(LIBPNG) && $(MAKE)
 	cd $(LIBPNG) && $(MAKE) install
-ifdef WIN32CROSS
+ifdef WIN32
 	$(CP) $(PREFIX)/bin/libpng*.dll ../bin
+	echo "$(LIBPNG)" > ../doc/README-libpng.txt
+	echo "" >> ../doc/README-libpng.txt
+	echo "License :" >> ../doc/README-libpng.txt
+	echo "" >> ../doc/README-libpng.txt
+	cat $(LIBPNG)/LICENSE >> ../doc/README-libpng.txt
 endif
 
 $(LIBPNG)/.ok:	archives/$(LIBPNGARCH)
@@ -199,8 +253,9 @@ $(LIBPNG)/.ok:	archives/$(LIBPNGARCH)
 $(PREFIX)/lib/libz.a:	$(ZLIB)/.ok
 	cd $(ZLIB) && $(MAKE) -fwin32/Makefile.gcc PREFIX=$(shell echo $(CC) | sed 's/^\(.*\)gcc/\1/') LOC="$(LDFLAGS) $(CFLAGS)"
 	cd $(ZLIB) && INCLUDE_PATH=$(PREFIX)/include LIBRARY_PATH=$(PREFIX)/lib BINARY_PATH=$(PREFIX)/bin $(MAKE) install -fwin32/Makefile.gcc SHARED_MODE=1
-ifdef WIN32CROSS
+ifdef WIN32
 	$(CP) $(PREFIX)/bin/zlib*.dll ../bin
+	$(CP) $(ZLIB)/README ../doc/README-zlib1.txt
 endif
 
 $(ZLIB)/.ok:	archives/$(ZLIBARCH)

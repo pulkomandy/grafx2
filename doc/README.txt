@@ -41,7 +41,11 @@ GrafX2 uses the following libraries that are distributed according to their
 own licenses:
 - SDL: see doc/README-SDL.txt
 - SDL_image: see doc/README-SDL_image.txt
+- IJG JPEG library: see doc/README-jpeg.txt
+- LibTIFF: see doc/README-tiff.txt
+- libpng: see doc/README-libpng.txt
 - SDL_ttf: see doc/README-SDL_ttf.txt
+- FreeType 2: see doc/README-freetype.txt
 - zlib: (on Windows) see doc/README-zlib1.txt
 - Lua: see doc/README-lua.txt
 The font Tuffy.ttf included as a sample in the fonts directory is public domain.
