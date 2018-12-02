@@ -3256,6 +3256,25 @@ static void Pixel_in_screen_layered_with_opt_preview(word x,word y,byte color, i
   }
 }
 
+/// Paint in a specific layer and update optionnaly the screen
+static void Pixel_in_layer_with_opt_preview(int layer, word x,word y,byte color, int preview)
+{
+  byte depth = *(Main_visible_image_depth_buffer.Image+x+y*Main.image_width);
+
+  Pixel_in_layer(layer, x, y, color);
+  // if (depth > layer) => another layer hides this one
+  if (depth <= layer && ((1 << layer) & Main.layers_visible))
+  {
+    if (color == Main.backups->Pages->Transparent_color) // transparent color
+      // fetch pixel color from the topmost visible layer
+      color = Read_pixel_from_layer(depth, x, y);
+
+    Main_screen[x+y*Main.image_width]=color;
+
+    if (preview)
+      Pixel_preview(x,y,color);
+  }
+}
 
 /// @defgroup constraints Special constaints drawing modes
 /// For 8bits machines modes (ZX Spectrum, C64, etc.)
@@ -3657,6 +3676,7 @@ void Update_pixel_renderer(void)
     // direct
     Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_direct_with_opt_preview;
     break;
+  case IMAGE_MODE_DHGR: // TODO
   case IMAGE_MODE_LAYERED:
     // layered
     Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_layered_with_opt_preview;
@@ -3686,6 +3706,14 @@ void Update_pixel_renderer(void)
     else if (Main.current_layer<4 && (Main.layers_visible & (1<<4)))  // underlay
       Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_underlay_with_opt_preview;
     else                              // layered (again, for layers > 4 in MODE5 and RASTER)
+      Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_layered_with_opt_preview;
+    break;
+  case IMAGE_MODE_HGR:
+    if (Main.current_layer == 0)  // monochrome layer
+      Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_hgr_mono_with_opt_preview;
+    else if (Main.current_layer == 1)  // color layer
+      Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_hgr_color_with_opt_preview;
+    else
       Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_layered_with_opt_preview;
     break;
   }

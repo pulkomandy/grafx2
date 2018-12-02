@@ -368,6 +368,8 @@ void Button_Constraint_menu(void)
     {IMAGE_MODE_C64HIRES,"C64 HiRes",     "2 colors per 8x8 block", 1}, // 320x200
     {IMAGE_MODE_C64MULTI,"C64 Multicolor","4 colors per 4x1 block", 1}, // 160x200
     //{IMAGE_MODE_C64FLI,  "C64 FLI",       "improved multicolor   ", 1}, // 160x200
+    {IMAGE_MODE_HGR,     "Apple II HGR",  "6 colors              ", 1},  // 280x192
+    //{IMAGE_MODE_DHGR,    "Apple II DHGR", "16 colors             ", 1},  // 560x192
   };
 
   Open_window(194,95+36,"8-bit constraints");
@@ -483,6 +485,15 @@ void Button_Constraint_menu(void)
             End_of_modification();
             /// @todo enable WIDE pixels when switching to 160x200
             break;
+          case IMAGE_MODE_HGR:
+            Resize_image(280, 192);
+            End_of_modification();
+            break;
+          case IMAGE_MODE_DHGR:
+            Resize_image(560, 192);
+            End_of_modification();
+            /// @todo enable TALL pixels when switching to 560x192
+            break;
           default:
             break;
         }
@@ -508,6 +519,11 @@ void Button_Constraint_menu(void)
           case IMAGE_MODE_RASTER:
           case IMAGE_MODE_THOMSON:
             Snap_width = 8;
+            Snap_height = 999;  // maximum value (3 digits)
+            break;
+          case IMAGE_MODE_HGR:
+          case IMAGE_MODE_DHGR:
+            Snap_width = 7;
             Snap_height = 999;  // maximum value (3 digits)
             break;
           default:
@@ -611,6 +627,20 @@ void Button_Constraint_menu(void)
             C64_set_palette(Main.palette);
             First_color_in_palette = 0;
             Fore_color = 1;
+            Back_color = 0;
+            break;
+          case IMAGE_MODE_HGR:
+            memset(Main.palette, 0, sizeof(T_Palette));
+            HGR_set_palette(Main.palette);
+            First_color_in_palette = 0;
+            Fore_color = 3;
+            Back_color = 0;
+            break;
+          case IMAGE_MODE_DHGR:
+            memset(Main.palette, 0, sizeof(T_Palette));
+            DHGR_set_palette(Main.palette);
+            First_color_in_palette = 0;
+            Fore_color = 15;
             Back_color = 0;
             break;
           default:

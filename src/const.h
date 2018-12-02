@@ -622,6 +622,8 @@ enum IMAGE_MODES
   IMAGE_MODE_C64HIRES,  ///< C64 HiRes
   IMAGE_MODE_C64MULTI,  ///< C64 Multicolor
   IMAGE_MODE_C64FLI,    ///< C64 Flexible Line Interpretation
+  IMAGE_MODE_HGR,       ///< Apple 2 HGR
+  IMAGE_MODE_DHGR,      ///< Apple 2 DHGR
 };
 
 /// Circle / Ellipse Modes
