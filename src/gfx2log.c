@@ -83,18 +83,34 @@ extern void GFX2_LogV(GFX2_Log_priority_T priority, const char * fmt, va_list ap
 
 extern void GFX2_LogHexDump(GFX2_Log_priority_T priority, const char * header, const byte * data, long offset, long count)
 {
+  char line[128];
   long i;
   while (count > 0)
   {
-    GFX2_Log(priority, "%s%06X:", header, offset);
+    int p = 0, r;
+    r = snprintf(line + p, sizeof(line) - p, "%s%06lX:", header, offset);
+    if (r < 0)
+      return;
+    p += r;
     for (i = 0; i < count && i < 16; i++)
-      GFX2_Log(priority, " %02x", data[offset+i]);
-    while(i++ < 16)
-      GFX2_Log(priority, "   ");
-    GFX2_Log(priority, " | ");
+    {
+      r = snprintf(line + p, sizeof(line) - p, " %02x", data[offset+i]);
+      if (r < 0)
+        return;
+      p += r;
+    }
+    if (i < 16)
+    {
+      memset(line + p, ' ', 3 * (16 - i));
+      p += 3 * (16 - i);
+    }
+    line[p++] = ' ';
+    line[p++] = '|';
+    line[p++] = ' ';
     for (i = 0; i < count && i < 16; i++)
-      GFX2_Log(priority, "%c", data[offset+i]>=32 && data[offset+i]<127 ? data[offset+i] : '.');
-    GFX2_Log(priority, "\n");
+      line[p++] = data[offset+i]>=32 && data[offset+i]<127 ? data[offset+i] : '.';
+    line[p++] = '\0';
+    GFX2_Log(priority, "%s\n", line);
     count -= i;
     offset += i;
   }
