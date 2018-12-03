@@ -131,32 +131,32 @@ Section "Grafx2" SecProgram
   File ..\share\grafx2\fonts\PF_Westa_7__.png
 
   ; Register in Add/Remove programs
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
-                 "DisplayName" "GrafX2 (GNU GPL)"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-${API}" \
+                 "DisplayName" "GrafX2-${API} (GNU GPL)"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-${API}" \
                  "Publisher" "GrafX2 Project Team"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
-                 "UninstallString" "$INSTDIR\uninstall.exe"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-${API}" \
+                 "UninstallString" "$INSTDIR\uninstall-${API}.exe"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-${API}" \
                  "InstalledProductName" "GrafX2"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-${API}" \
                  "InstalledLocation" $INSTDIR
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-${API}" \
                  "DisplayIcon" "$INSTDIR\gfx2.ico"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-${API}" \
                  "URLInfoAbout" "http://grafx2.tk"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-${API}" \
                  "DisplayVersion" "${VERSION}"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-${API}" \
                  "NoModify" 1
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL" \
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-${API}" \
                  "NoRepair" 1
 
   ;Store installation folder
   WriteRegStr HKLM "Software\Grafx2" "" $INSTDIR
   
   ;Create uninstaller
-  WriteUninstaller "$INSTDIR\Uninstall.exe"
+  WriteUninstaller "$INSTDIR\Uninstall-${API}.exe"
 
 SectionEnd
 
@@ -210,20 +210,25 @@ Section "un.SecProgram"
   RMDir  "$INSTDIR\share\grafx2\scripts"
   RMDir  "$INSTDIR\share\grafx2"
   RMDir  "$INSTDIR\share"
-  Delete "$INSTDIR\Uninstall.exe"
+  Delete "$INSTDIR\Uninstall-${API}.exe"
   
   MessageBox MB_YESNO|MB_DEFBUTTON2|MB_ICONQUESTION "Do you wish to keep your configuration settings ?" IDYES keepconfig IDNO deleteconfig
   deleteconfig:
-  Delete "$INSTDIR\gfx2.cfg"
+  !if ${API} == "win32"
+    Delete "$INSTDIR\gfx2-win32.cfg"
+    Delete "$APPDATA\Grafx2\gfx2-win32.cfg"
+  !else
+    Delete "$INSTDIR\gfx2.cfg"
+    Delete "$APPDATA\Grafx2\gfx2.cfg"
+  !endif
   Delete "$INSTDIR\gfx2.ini"
-  Delete "$APPDATA\Grafx2\gfx2.cfg"
   Delete "$APPDATA\Grafx2\gfx2.ini"
   RMDir  "$APPDATA\Grafx2"
   keepconfig:
   
   RMDir "$INSTDIR"
 
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-SDL"
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-${API}"
 
   DeleteRegKey /ifempty HKLM "Software\Grafx2"
 
