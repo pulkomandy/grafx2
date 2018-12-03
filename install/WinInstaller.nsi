@@ -108,7 +108,16 @@ Section "Grafx2" SecProgram
   File ..\share\grafx2\gfx2def.ini
   SetOutPath "$INSTDIR\share\grafx2\skins"
   File ..\share\grafx2\skins\*.png
+  # SetOverwrite cannot be skipped by control flow instructions
+  # see https://nsis.sourceforge.io/Docs/Chapter4.html#flags
   SetOutPath "$INSTDIR\share\grafx2\scripts\samples_2.4"
+  IfFileExists "$INSTDIR\share\grafx2\scripts\samples_2.4\*.*" 0 overwritesamples
+  MessageBox MB_YESNO "Do you want to overwrite the scripts\samples_2.4 directory ?" /SD IDYES IDYES overwritesamples
+    SetOverwrite off
+    File /r ..\share\grafx2\scripts\samples_2.4\*.*
+    SetOverwrite on
+    Goto +2
+  overwritesamples:
   File /r ..\share\grafx2\scripts\samples_2.4\*.*
   SetOutPath "$INSTDIR\doc"
   File ..\doc\*.txt
