@@ -50,6 +50,7 @@ TAR = $(shell which tar)
 GETURL = $(shell WGET=`which wget` ; if [ "$?" = "0" ] && [ -x "$WGET" ] ; then echo "$WGET" ; else echo "curl -O -L --max-time 120" ; fi )
 
 BUILD_CC := $(CC)
+STRIP = strip
 
 # There is no uname under windows, but we can guess we are there with the COMSPEC env.var
 # Windows specific
@@ -62,10 +63,12 @@ WIN32 = 1
 CROSS_CC ?= $(shell which i686-w64-mingw32-gcc || which mingw32-gcc)
 CROSS_AR ?= $(shell which i686-w64-mingw32-ar || which mingw32-ar)
 CROSS_RANLIB ?= $(shell which i686-w64-mingw32-ranlib || which mingw32-ranlib)
+CROSS_STRIP ?= $(shell which i686-w64-mingw32-strip || which mingw32-strip)
 CROSS_LDFLAGS += -static-libgcc
 CC = $(CROSS_CC)
 AR = $(CROSS_AR)
 RANLIB = $(CROSS_RANLIB)
+STRIP = $(CROSS_STRIP)
 CFLAGS = $(CROSS_CFLAGS)
 LDFLAGS = $(CROSS_LDFLAGS)
 endif
@@ -102,7 +105,10 @@ $(PREFIX)/lib/liblua.a:	$(LUA)/.ok
 ifdef WIN32
 	cd $(LUA) && $(MAKE) PLAT=mingw CC=$(CC) RANLIB=$(RANLIB)
 	cd $(LUA) && $(MAKE) install PLAT=mingw INSTALL_TOP=$(PREFIX) TO_BIN="lua.exe luac.exe"
-	$(MKDIR) ../bin && $(CP) $(LUA)/src/lua*.dll ../bin
+	$(MKDIR) ../bin && for f in $(LUA)/src/lua*.dll ; do \
+	    $(CP) $$f ../bin ; \
+	    $(STRIP) ../bin/`basename $$f` ; \
+	  done
 	echo "The Windows distribution of Grafx2 is linked with Lua v$(LUAVER)" > ../doc/README-lua.txt
 	grep LUA_COPYRIGHT $(LUA)/src/lua.h | cut -d'"' -f 2 >> ../doc/README-lua.txt
 
@@ -122,7 +128,7 @@ $(PREFIX)/lib/libSDLmain.a:	archives/$(SDLDEVEL)
 	$(MKDIR) $(PREFIX)
 	cd SDL-1.2.15 && CROSS_PATH=$(PREFIX) $(MAKE) cross
 ifdef WIN32
-	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/SDL.dll ../bin
+	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/SDL.dll ../bin && $(STRIP) ../bin/SDL.dll
 	echo "The following file:" > ../doc/README-SDL.txt
 	echo "" >> ../doc/README-SDL.txt
 	echo "	SDL.dll" >> ../doc/README-SDL.txt
@@ -140,7 +146,7 @@ $(PREFIX)/lib/libSDL_image.a:	$(SDLIMAGE)/.ok
 	cd $(SDLIMAGE) && $(MAKE)
 	cd $(SDLIMAGE) && $(MAKE) install
 ifdef WIN32
-	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/SDL_image.dll ../bin
+	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/SDL_image.dll ../bin && $(STRIP) ../bin/SDL_image.dll
 	echo "$(SDLIMAGE)" > ../doc/README-SDL_image.txt
 	echo "" >> ../doc/README-SDL_image.txt
 	echo "dependencies :" >> ../doc/README-SDL_image.txt
@@ -166,7 +172,7 @@ $(PREFIX)/lib/libSDL_ttf.a:	$(SDLTTF)/.ok
 	cd $(SDLTTF) && $(MAKE)
 	cd $(SDLTTF) && $(MAKE) install
 ifdef WIN32
-	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/SDL_ttf.dll ../bin
+	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/SDL_ttf.dll ../bin && $(STRIP) ../bin/SDL_ttf.dll
 	echo "$(SDLTTF)" > ../doc/README-SDL_ttf.txt
 	echo "" >> ../doc/README-SDL_ttf.txt
 	echo "dependencies :" >> ../doc/README-SDL_ttf.txt
@@ -189,7 +195,10 @@ $(PREFIX)/lib/libfreetype.a:	$(FREETYPE)/.ok
 	cd $(FREETYPE) && $(MAKE)
 	cd $(FREETYPE) && $(MAKE) install
 ifdef WIN32
-	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/libfreetype*.dll ../bin
+	$(MKDIR) ../bin && for f in $(PREFIX)/bin/libfreetype*.dll ; do \
+	    $(CP) $$f ../bin ; \
+	    $(STRIP) ../bin/`basename $$f` ; \
+	  done
 	echo "$(FREETYPE)" > ../doc/README-freetype.txt
 	echo "" >> ../doc/README-freetype.txt
 	echo "License :" >> ../doc/README-freetype.txt
@@ -206,7 +215,10 @@ $(PREFIX)/lib/libjpeg.a:	$(JPEGDIR)/.ok
 	cd $(JPEGDIR) && $(MAKE)
 	cd $(JPEGDIR) && $(MAKE) install
 ifdef WIN32
-	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/libjpeg*.dll ../bin
+	$(MKDIR) ../bin && for f in $(PREFIX)/bin/libjpeg*.dll ; do \
+	    $(CP) $$f ../bin ; \
+	    $(STRIP) ../bin/`basename $$f` ; \
+	  done
 	$(CP) $(JPEGDIR)/README ../doc/README-jpeg.txt
 endif
 
@@ -224,7 +236,10 @@ $(PREFIX)/lib/libtiff.a:	$(LIBTIFF)/.ok
 	cd $(LIBTIFF) && $(MAKE)
 	cd $(LIBTIFF) && $(MAKE) install
 ifdef WIN32
-	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/libtiff*.dll ../bin
+	$(MKDIR) ../bin && for f in $(PREFIX)/bin/libtiff*.dll ; do \
+	    $(CP) $$f ../bin ; \
+	    $(STRIP) ../bin/`basename $$f` ; \
+	  done
 	echo "$(LIBTIFF)" > ../doc/README-tiff.txt
 	echo "" >> ../doc/README-tiff.txt
 	echo "License :" >> ../doc/README-tiff.txt
@@ -243,7 +258,10 @@ $(PREFIX)/lib/libpng.a:	$(LIBPNG)/.ok
 	cd $(LIBPNG) && $(MAKE)
 	cd $(LIBPNG) && $(MAKE) install
 ifdef WIN32
-	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/libpng*.dll ../bin
+	$(MKDIR) ../bin && for f in $(PREFIX)/bin/libpng*.dll ; do \
+	    $(CP) $$f ../bin ; \
+	    $(STRIP) ../bin/`basename $$f` ; \
+	  done
 	echo "$(LIBPNG)" > ../doc/README-libpng.txt
 	echo "" >> ../doc/README-libpng.txt
 	echo "License :" >> ../doc/README-libpng.txt
@@ -259,7 +277,10 @@ $(PREFIX)/lib/libz.a:	$(ZLIB)/.ok
 	cd $(ZLIB) && $(MAKE) -fwin32/Makefile.gcc PREFIX=$(shell echo $(CC) | sed 's/^\(.*\)gcc/\1/') LOC="$(LDFLAGS) $(CFLAGS)"
 	cd $(ZLIB) && INCLUDE_PATH=$(PREFIX)/include LIBRARY_PATH=$(PREFIX)/lib BINARY_PATH=$(PREFIX)/bin $(MAKE) install -fwin32/Makefile.gcc SHARED_MODE=1
 ifdef WIN32
-	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/zlib*.dll ../bin
+	$(MKDIR) ../bin && for f in $(PREFIX)/bin/zlib*.dll ; do \
+	    $(CP) $$f ../bin ; \
+	    $(STRIP) ../bin/`basename $$f` ; \
+	  done
 	$(CP) $(ZLIB)/README ../doc/README-zlib1.txt
 endif
 
