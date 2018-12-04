@@ -1989,6 +1989,19 @@ static const T_Help_table helptable_effects[] =
   HELP_TEXT ("lines but with twice as much possible colors")
   HELP_TEXT ("")
   HELP_TEXT ("")
+  HELP_BOLD ("Apple II HGR")
+  HELP_TEXT ("This mode is basically a monochrome 280x192")
+  HELP_TEXT ("mode which can be outputed as 6 colors. The")
+  HELP_TEXT ("colors are formed by 0101 pixel patterns.")
+  HELP_TEXT ("Layer 1 is the monochrome picture.")
+  HELP_TEXT ("Layer 2 is its color view, emulating output")
+  HELP_TEXT (" of a \"Le Chat Mauve\" Apple //c RGB adapter")
+  HELP_TEXT ("When drawing in Layer 2, a pixel pair is")
+  HELP_TEXT ("modified at once.")
+  HELP_TEXT ("The purple/green or blue/orange palette is")
+  HELP_TEXT ("selected for a 7x1 pixel block.")
+  HELP_TEXT ("")
+  HELP_TEXT ("")
 };
 static const T_Help_table helptable_text[] =
 {
