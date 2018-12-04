@@ -6784,18 +6784,35 @@ void Load_HGR(T_IO_Context * context)
         }
         else
         {
-          if (x & 1)
+          /// HGR emulation following the behaviour of a "Le Chat Mauve"
+          /// RVB adapter for the Apple //c.
+          /// Within the bit stream, the color of the middle pixel is :<br>
+          /// <tt>
+          /// 111 \          <br>
+          /// 110  }- white  <br>
+          /// 011 /          <br>
+          /// 010 \ _ color  <br>
+          /// 101 /          <br>
+          /// 000 \          <br>
+          /// 001  }- black  <br>
+          /// 100 /          <br>
+          /// </tt>
+          /// Color depends on the selected palette for the current byte
+          /// and the position of the pixel (odd or even).
+          if ((color & 3) == 3) // 11 => white
           {
-            if ((color & 6) == 6) // 2 bits to 1 => force White
-            {
-              Set_pixel(context, x - 2, y, 3 + previous_palette);
-              Set_pixel(context, x - 1, y, 3 + palette);
-            }
-            else
-              Set_pixel(context, x - 1, y, (color & 3) + palette);
-            Set_pixel(context, x, y, (color & 3) + palette);
-            previous_palette = palette;
+            Set_pixel(context, x - 1, y, 3 + previous_palette);
+            Set_pixel(context, x, y, 3 + palette);
           }
+          else if ((color & 1) == 0) // 0 => black
+            Set_pixel(context, x, y, palette);
+          else // 01 => color
+          {
+            if ((color & 7) == 5) // 101
+              Set_pixel(context, x - 1, y, 2 - (x & 1) + previous_palette);
+            Set_pixel(context, x, y, 2 - (x & 1) + palette);
+          }
+          previous_palette = palette;
         }
         b >>= 1;
         x++;
