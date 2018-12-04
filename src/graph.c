@@ -60,6 +60,10 @@
     #define M_PI 3.141592653589793238462643
 #endif
 
+#ifndef MAX
+#define MAX(a,b) (((a)>(b)) ? (a) : (b))
+#endif
+
 // Generic pixel-drawing function.
 static Func_pixel Pixel_figure;
 
@@ -3563,14 +3567,42 @@ static void Pixel_in_screen_overlay_with_opt_preview(word x,word y,byte color,in
     Pixel_preview(x,y,color);
 }
 
+/// generate color pixels in layer 2 from the monochrome layer 1
+static void Update_color_hgr_pixel(word x, word y, int preview)
+{
+  byte b2, b1, b0, pal;
+
+  // read monochrome pixels
+  b1 = Read_pixel_from_layer(0, x, y);
+  b2 = (x > 0) ? Read_pixel_from_layer(0, x - 1, y) : 0;
+  b0 = (x < Main.image_width - 1) ? Read_pixel_from_layer(0, x + 1, y) : 0;
+  pal = b1 & 4;
+  switch (((b2 & 1) << 2) | ((b1 & 1) << 1) | (b0 & 1))
+  {
+    case 7: // 111
+    case 6: // 110
+    case 3: // 011
+      Pixel_in_layer_with_opt_preview(1, x, y, pal + 3, preview); // white
+      break;
+    case 0: // 000
+    case 1: // 001
+    case 4: // 100
+      Pixel_in_layer_with_opt_preview(1, x, y, pal, preview); // black
+      break;
+    default:  // 010 or 101
+      Pixel_in_layer_with_opt_preview(1, x, y, pal + 1 + ((x & 1) ^ (b1 & 1)), preview); // black
+  }
+}
+
 /// Paint a pixel in HGR mode in the monochrome layer
 ///
 /// - Layer 1 is the monochrome screen. Pixels are either black or white. 2 different values to reflect high bit
 /// - Layer 2 is the screen seen as color
 static void Pixel_in_screen_hgr_mono_with_opt_preview(word x,word y,byte color,int preview)
 {
+  byte oldcolor;
   word column;
-  word x2;
+  int x2;
 
   if (color >= 8)
     return;
@@ -3578,47 +3610,60 @@ static void Pixel_in_screen_hgr_mono_with_opt_preview(word x,word y,byte color,i
     color |= 3; // force black or white.
 
   // put pixel
-  if (color == Read_pixel_from_layer(0, x, y))
+  oldcolor = Read_pixel_from_layer(0, x, y);
+  if (color == oldcolor)
     return; // nothing to do !
   Pixel_in_layer_with_opt_preview(0, x, y, color, preview);
+
+  if ((color & 4) == (oldcolor & 4))
+  { // no palette change
+    if (x > 0)
+      Update_color_hgr_pixel(x - 1, y, preview);
+    Update_color_hgr_pixel(x, y, preview);
+    if (x < Main.image_width - 1)
+      Update_color_hgr_pixel(x + 1, y, preview);
+    return;
+  }
+
   column = x / 7;
   // update the palette bit of the whole column (byte)
   for (x2 = column * 7; x2 < column * 7 + 7; x2++)
   {
     byte pixel = Read_pixel_from_layer(0, x2, y);
-    if ((pixel & 4) != (color & 4)) // palettes are different
-      Pixel_in_layer_with_opt_preview(0, x2, y, (color & 4) | (pixel & 3), preview);
+    Pixel_in_layer_with_opt_preview(0, x2, y, (color & 4) | (pixel & 3), preview);
   }
   // update color pixels !
-  for (x2 = (column * 7) & ~1; x2 < column * 7 + 7; x2 += 2)
+  for (x2 = MAX(0, (column * 7) - 1); x2 < column * 7 + 8; x2++)
   {
-    byte b2, b1, b0;
-    b2 = (x2 > 0) ? Read_pixel_from_layer(0, x2 - 1, y) : 0;
-    b1 = Read_pixel_from_layer(0, x2, y);
-    b0 = Read_pixel_from_layer(0, x2 + 1, y);
-    color = (b1 & 6) | (b0 & 1);
-    if ((b2 & 3) && (b1 & 3))
-    {
-      // two consecutive 1 : force white
-      Pixel_in_layer_with_opt_preview(1, x2 - 1, y, b2 | 3, preview);
-      Pixel_in_layer_with_opt_preview(1, x2, y, color | 3, preview);
-    }
-    else //if (color != Read_pixel_from_layer(1, x2, y)) // depth buffer looks badly initialized, so we need to force putpixel :(
-      Pixel_in_layer_with_opt_preview(1, x2, y, color, preview);
-
-    //if (color != Read_pixel_from_layer(1, x2 + 1, y))
-      Pixel_in_layer_with_opt_preview(1, x2 + 1, y, color, preview);
+    if (x2 >= Main.image_width)
+      break;
+    Update_color_hgr_pixel((word)x2, y, preview);
   }
 }
 
 /// Paint in the color layer of HGR.
 ///
-/// In fact we just write the two monochrome pixels
+/// - For B&W the 1st press change the pixel,
+/// the second one change the other pixel of the pair.
+/// - For colors, change both monochrome pixels
 static void Pixel_in_screen_hgr_color_with_opt_preview(word x,word y,byte color,int preview)
 {
-  x &= ~1;
-  Pixel_in_screen_hgr_mono_with_opt_preview(x, y, color & 6, preview);      // palette bit(4) + upper bit(2)
-  Pixel_in_screen_hgr_mono_with_opt_preview(x + 1, y, color & 5, preview);  // palette bit(4) + lower bit(1)
+  byte oldcolor;
+  switch (color & 3)
+  {
+    case 0: // black
+    case 3: // white
+      oldcolor = Read_pixel_from_layer(0, x, y);
+      if (oldcolor == color)
+        Pixel_in_screen_hgr_mono_with_opt_preview(x ^ 1, y, color, preview);
+      else
+        Pixel_in_screen_hgr_mono_with_opt_preview(x, y, color, preview);
+      break;
+    default:
+      x &= ~1;
+      Pixel_in_screen_hgr_mono_with_opt_preview(x, y, color & 6, preview);      // palette bit(4) + upper bit(2)
+      Pixel_in_screen_hgr_mono_with_opt_preview(x + 1, y, color & 5, preview);  // palette bit(4) + lower bit(1)
+  }
 }
 
 // end of constraints group
