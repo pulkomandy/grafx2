@@ -106,9 +106,9 @@ void Layer_activate(int layer, short side)
   Display_cursor();
 }
 
-static int Layers_max(void)
+int Layers_max(enum IMAGE_MODES mode)
 {
-  switch (Main.backups->Pages->Image_mode)
+  switch (mode)
   {
     case IMAGE_MODE_LAYERED:
       return MAX_NB_LAYERS;
@@ -125,7 +125,7 @@ void Button_Layer_add(int btn)
 {
   Hide_cursor();
 
-  if (Main.backups->Pages->Nb_layers < Layers_max())
+  if (Main.backups->Pages->Nb_layers < Layers_max(Main.backups->Pages->Image_mode))
   {
     // Backup with unchanged layers
     Backup_layers(LAYER_NONE);
@@ -149,7 +149,7 @@ void Button_Layer_duplicate(int btn)
 {
   Hide_cursor();
 
-  if (Main.backups->Pages->Nb_layers < Layers_max())
+  if (Main.backups->Pages->Nb_layers < Layers_max(Main.backups->Pages->Image_mode))
   {
     // Backup with unchanged layers
     Backup_layers(LAYER_NONE);

@@ -35,6 +35,7 @@
 #include "windows.h"
 #include "tiles.h"
 #include "graph.h"
+#include "layers.h"
 
 // -- Layers data
 
@@ -1315,7 +1316,6 @@ void End_of_modification(void)
 /// Add a new layer to latest page of a list. Returns 0 on success.
 byte Add_layer(T_List_of_pages *list, int layer)
 {
-  int max[] = {MAX_NB_LAYERS, MAX_NB_FRAMES, 5};
   T_Page * source_page;
   T_Page * new_page;
   byte * new_image;
@@ -1323,8 +1323,8 @@ byte Add_layer(T_List_of_pages *list, int layer)
   int duration;
   
   source_page = list->Pages;
-  
-  if (list->Pages->Nb_layers >= max[list->Pages->Image_mode]) // MAX_NB_LAYERS
+
+  if (list->Pages->Nb_layers >= Layers_max(list->Pages->Image_mode)) // MAX_NB_LAYERS
     return 1;
    
   // Keep the position reasonable

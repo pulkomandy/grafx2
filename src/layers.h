@@ -22,6 +22,7 @@
 #ifndef LAYERS_H__
 #define LAYERS_H__
 
+int Layers_max(enum IMAGE_MODES mode);
 void Button_Layer_add(int);
 void Button_Layer_duplicate(int);
 void Button_Layer_remove(int);
