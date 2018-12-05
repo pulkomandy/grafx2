@@ -4,8 +4,6 @@
 !define VERSION 2.5.1946
 !define API sdl
 
-!define INSTALLSIZE 10072
-
 !define FREETYPEDLL libfreetype-6.dll
 !define JPEGDLL     libjpeg-9.dll
 !define PNGDLL      libpng16-16.dll
@@ -85,6 +83,13 @@ FunctionEnd
 ;--------------------------------
 ;Installer Sections
 
+Section "Desktop shortcut" SecShortcut
+
+  SetOutPath "$INSTDIR"
+  CreateShortCut "$DESKTOP\Grafx2-${API}.lnk" "$INSTDIR\bin\grafx2-${API}.exe" "" "" "" SW_SHOWNORMAL
+
+SectionEnd
+
 Section "Grafx2" SecProgram
   SectionIn RO
   SetOutPath "$INSTDIR"
@@ -148,21 +153,19 @@ Section "Grafx2" SecProgram
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-${API}" \
                  "NoRepair" 1
   # Set the INSTALLSIZE constant (!defined at the top of this script) so Add/Remove Programs can accurately report the size
+  SectionGetSize ${SecProgram} $0
+  ${If} ${SectionIsSelected} ${SecShortcut}
+    SectionGetSize ${SecShortcut} $1
+    IntOp $0 $0 + $1
+  ${EndIf}
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-${API}" \
-                 "EstimatedSize" ${INSTALLSIZE}
+                 "EstimatedSize" $0
 
   ;Store installation folder
   WriteRegStr HKLM "Software\Grafx2" "" $INSTDIR
   
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall-${API}.exe"
-
-SectionEnd
-
-Section "Desktop shortcut" SecShortcut
-
-  SetOutPath "$INSTDIR"
-  CreateShortCut "$DESKTOP\Grafx2-${API}.lnk" "$INSTDIR\bin\grafx2-${API}.exe" "" "" "" SW_SHOWNORMAL
 
 SectionEnd
 
