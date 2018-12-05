@@ -283,6 +283,75 @@ static int Check_block_constraints(enum IMAGE_MODES mode)
   return error_count;
 }
 
+/// convert a picture to the HGR mode
+///
+/// Recognize monochrome pictures.
+/// Color pictures should use the 8 first colors.
+static void Convert_to_hgr(void)
+{
+  int i;
+  word count, x, y;
+  dword usage[256];
+
+  count = Count_used_colors(usage);
+  if (count <= 1) // blank picture, nothing to do :)
+    return;
+  if (count == 2) // monochrome !
+  {
+    byte bg, fg;
+    i = 0;
+    while (usage[i] == 0 && i < 256)
+      i++;
+    bg = (byte)i;
+    i++;
+    while (usage[i] == 0 && i < 256)
+      i++;
+    fg = (byte)i;
+    GFX2_Log(GFX2_DEBUG, "Convert_to_hgr() monochrome bg=%u fg=%u\n", bg, fg);
+    if (!(bg == 0 && fg == 3) && !(bg == 4 && fg == 7))
+    {
+      // convert to B&W
+      for (y = 0; y < Main.image_height; y++)
+      {
+        for (x = 0; x < Main.image_width; x++)
+        {
+          byte c = Read_pixel_from_layer(0, x, y);
+          Pixel_in_layer(0, x, y, (c == fg) ? 3 : 0);
+        }
+      }
+    }
+  }
+  else
+  {
+    // "convert" color picture to B&W
+    for (y = 0; y < Main.image_height; y++)
+    {
+      for (x = 0; x < Main.image_width; x++)
+      {
+        byte c = Read_pixel_from_layer(0, x, y);
+        switch (c & 3)
+        {
+          case 0: // black
+          case 3: // white
+            Pixel_in_layer(0, x, y, c);
+            break;
+          case 1: // green/orange
+          case 2: // purple/blue
+            Pixel_in_layer(0, x, y, (c & 4) | (((c & 1) ^ (x & 1) ^ 1) * 3));
+        }
+      }
+    }
+  }
+  // update color layer
+  for (y = 0; y < Main.image_height; y++)
+  {
+    for (x = 0; x < Main.image_width; x++)
+    {
+      Update_color_hgr_pixel(x, y, 0);
+    }
+  }
+}
+
 
 /// Constaint enforcer/checker
 ///
@@ -331,6 +400,22 @@ void Button_Constraint_mode(void)
         return;
       }
     }
+    break;
+  case IMAGE_MODE_HGR:
+  case IMAGE_MODE_DHGR:
+    // switch to layer mode if needed
+    if (Main.backups->Pages->Image_mode != IMAGE_MODE_LAYERED)
+      Switch_layer_mode(IMAGE_MODE_LAYERED);
+    // auto-create extra layers
+    while (Main.backups->Pages->Nb_layers < 2)
+      if (Add_layer(Main.backups, Main.backups->Pages->Nb_layers))
+      {
+        Verbose_message("Error!", "Failed to create the 2 layers needed by Emulation of Apple II HGR or DHGR.");
+        return;
+      }
+    if (Selected_Constraint_Mode == IMAGE_MODE_HGR)
+      Convert_to_hgr();
+    /// @todo conversion to DHGR
     break;
   default:
     Check_block_constraints(Selected_Constraint_Mode);

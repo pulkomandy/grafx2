@@ -3568,7 +3568,9 @@ static void Pixel_in_screen_overlay_with_opt_preview(word x,word y,byte color,in
 }
 
 /// generate color pixels in layer 2 from the monochrome layer 1
-static void Update_color_hgr_pixel(word x, word y, int preview)
+///
+/// For Apple II HGR mode ::IMAGE_MODE_HGR
+void Update_color_hgr_pixel(word x, word y, int preview)
 {
   byte b2, b1, b0, pal;
 

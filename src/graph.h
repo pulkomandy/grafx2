@@ -25,6 +25,9 @@
 /// Graphic functions that target the screen and/or image.
 //////////////////////////////////////////////////////////////////////////////
 
+#ifndef GRAPH_H__
+#define GRAPH_H__
+
 void Shade_list_to_lookup_tables(word * list, short step, byte mode, byte * table_inc,
         byte * table_dec
 );
@@ -150,3 +153,6 @@ extern Func_pixel_opt_preview Pixel_in_current_screen_with_opt_preview;
 /// through ::Pixel_in_current_screen_with_opt_preview
 void Update_pixel_renderer(void);
 
+void Update_color_hgr_pixel(word x, word y, int preview);
+
+#endif
