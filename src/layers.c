@@ -179,10 +179,18 @@ void Button_Layer_duplicate(int btn)
 
 void Button_Layer_remove(int btn)
 {
+
   Hide_cursor();
 
-  /// @todo forbid to drop layer in CPC MODE5
-  if (Main.backups->Pages->Nb_layers > 1)
+  /// enforce 5 layers for IMAGE_MODE_MODE5 and IMAGE_MODE_RASTER
+  /// and 2 layers for IMAGE_MODE_HGR and IMAGE_MODE_DHGR.
+  if (!(  (Main.backups->Pages->Image_mode == IMAGE_MODE_MODE5
+        || Main.backups->Pages->Image_mode == IMAGE_MODE_RASTER)
+       && (Main.backups->Pages->Nb_layers <= 5))
+   && !(  (Main.backups->Pages->Image_mode == IMAGE_MODE_HGR
+        || Main.backups->Pages->Image_mode == IMAGE_MODE_DHGR)
+       && (Main.backups->Pages->Nb_layers <= 2))
+   &&  (Main.backups->Pages->Nb_layers > 1) )
   {
     // Backup with unchanged layers
     Backup_layers(LAYER_NONE);
