@@ -134,7 +134,7 @@ Section "Grafx2" SecProgram
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-${API}" \
                  "UninstallString" "$INSTDIR\uninstall-${API}.exe"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-${API}" \
-                 "InstalledProductName" "GrafX2"
+                 "InstalledProductName" "GrafX2-${API}"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-${API}" \
                  "InstalledLocation" $INSTDIR
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-${API}" \
@@ -147,6 +147,9 @@ Section "Grafx2" SecProgram
                  "NoModify" 1
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-${API}" \
                  "NoRepair" 1
+  # Set the INSTALLSIZE constant (!defined at the top of this script) so Add/Remove Programs can accurately report the size
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-${API}" \
+                 "EstimatedSize" ${INSTALLSIZE}
 
   ;Store installation folder
   WriteRegStr HKLM "Software\Grafx2" "" $INSTDIR
@@ -159,7 +162,7 @@ SectionEnd
 Section "Desktop shortcut" SecShortcut
 
   SetOutPath "$INSTDIR"
-  CreateShortCut "$DESKTOP\Grafx2.lnk" "$INSTDIR\bin\grafx2-${API}.exe" "" "" "" SW_SHOWNORMAL
+  CreateShortCut "$DESKTOP\Grafx2-${API}.lnk" "$INSTDIR\bin\grafx2-${API}.exe" "" "" "" SW_SHOWNORMAL
 
 SectionEnd
 
@@ -231,6 +234,6 @@ Section "un.SecProgram"
 SectionEnd
 
 Section "un.SecShortcut"
-  Delete "$DESKTOP\Grafx2.lnk"
+  Delete "$DESKTOP\Grafx2-${API}.lnk"
 SectionEnd
   
