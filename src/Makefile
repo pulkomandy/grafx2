@@ -744,7 +744,7 @@ SCRIPTS_PIC_THOMSON = bayer4_mo5.lua bayer4_to8.lua \
                       lib/bayer.lua lib/color.lua lib/color_reduction.lua \
                       lib/convex_hull.lua lib/ostromoukhov.lua \
                       lib/thomson.lua
-SCRIPT_FILES = $(addprefix ../share/grafx2/scripts/samples_2.4/, \
+SCRIPT_FILES = $(addprefix ../share/grafx2/scripts/samples/, \
                  $(addprefix brush/,$(SCRIPTS_BRUSH)) \
                  $(addprefix demo/,$(SCRIPTS_DEMO)) \
                  $(addprefix demo/brush/,$(SCRIPTS_DEMO_BRUSH)) \
@@ -769,12 +769,11 @@ all : $(MACAPPEXE)
 $(MACAPPEXE) : $(BIN)
 	rm -rf Grafx2.app
 	mkdir -p Grafx2.app Grafx2.app/Contents Grafx2.app/Contents/Frameworks Grafx2.app/Contents/MacOS Grafx2.app/Contents/Resources Grafx2.app/Contents/Resources/scripts
-	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.4
-	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.4/brush
-	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.4/demo
-	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.4/libs
-	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.4/palette
-	mkdir -p Grafx2.app/Contents/Resources/scripts/samples_2.4/picture
+	mkdir -p Grafx2.app/Contents/Resources/scripts/samples/brush
+	mkdir -p Grafx2.app/Contents/Resources/scripts/samples/demo
+	mkdir -p Grafx2.app/Contents/Resources/scripts/samples/libs
+	mkdir -p Grafx2.app/Contents/Resources/scripts/samples/palette
+	mkdir -p Grafx2.app/Contents/Resources/scripts/samples/picture
 	echo 'APPL????' > Grafx2.app/Contents/PkgInfo
 	cp Info.plist Grafx2.app/Contents
 	cp Grafx2.icns Grafx2.app/Contents/Resources
@@ -786,11 +785,11 @@ endif
 	cp -r ../share/grafx2/fonts Grafx2.app/Contents/Resources
 	cp -r ../share/grafx2/skins Grafx2.app/Contents/Resources
 	cp -r ../share/grafx2/gfx2def.ini Grafx2.app/Contents/Resources
-	cp -r ../share/grafx2/scripts/samples_2.4/brush Grafx2.app/Contents/Resources/scripts/samples_2.4
-	cp -r ../share/grafx2/scripts/samples_2.4/demo Grafx2.app/Contents/Resources/scripts/samples_2.4
-	cp -r ../share/grafx2/scripts/samples_2.4/libs Grafx2.app/Contents/Resources/scripts/samples_2.4
-	cp -r ../share/grafx2/scripts/samples_2.4/palette Grafx2.app/Contents/Resources/scripts/samples_2.4
-	cp -r ../share/grafx2/scripts/samples_2.4/picture Grafx2.app/Contents/Resources/scripts/samples_2.4
+	cp -r ../share/grafx2/scripts/samples/brush Grafx2.app/Contents/Resources/scripts/samples
+	cp -r ../share/grafx2/scripts/samples/demo Grafx2.app/Contents/Resources/scripts/samples
+	cp -r ../share/grafx2/scripts/samples/libs Grafx2.app/Contents/Resources/scripts/samples
+	cp -r ../share/grafx2/scripts/samples/palette Grafx2.app/Contents/Resources/scripts/samples
+	cp -r ../share/grafx2/scripts/samples/picture Grafx2.app/Contents/Resources/scripts/samples
 ifdef MACOSX_LION
 	mkdir -p Grafx2.app/Contents/Frameworks/Lua.framework/Versions
 	cp -Rp $(FWDIR)/Lua.framework/Versions/A Grafx2.app/Contents/Frameworks/Lua.framework/Versions
@@ -968,17 +967,6 @@ install : $(BIN)
 	test -d $(DESTDIR)$(datadir)/grafx2/skins || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/skins
 	test -d $(DESTDIR)$(datadir)/grafx2/scripts || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts
 	test -d $(DESTDIR)$(datadir)/grafx2/scripts/libs || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/libs
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4 || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/brush || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/brush
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/demo || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/demo
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/demo/brush || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/demo/brush
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/libs || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/libs
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/palette || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/palette
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture/thomson || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture/thomson
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture/thomson/lib || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture/thomson/lib
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture/others-8bit || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture/others-8bit
-	test -d $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture/others-8bit/lib || $(MKDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture/others-8bit/lib
 	test -d $(DESTDIR)$(datadir)/applications || $(MKDIR) $(DESTDIR)$(datadir)/applications
 	test -d $(DESTDIR)$(datadir)/metainfo || $(MKDIR) $(DESTDIR)$(datadir)/metainfo
 	test -d $(DESTDIR)$(pixmapdir) || $(MKDIR) $(DESTDIR)$(pixmapdir)
@@ -989,7 +977,10 @@ install : $(BIN)
 	$(CP) ../share/grafx2/gfx2.gif $(DESTDIR)$(datadir)/grafx2/
 	$(CP) ../share/grafx2/fonts/* $(DESTDIR)$(datadir)/grafx2/fonts/
 	$(CP) $(SKIN_FILES) $(DESTDIR)$(datadir)/grafx2/skins/
-	for f in $(SCRIPT_FILES:../share/%=%); do cp "../share/$$f" "$(DESTDIR)$(datadir)/$$f" ; done
+	for f in $(SCRIPT_FILES:../share/%=%); do \
+	  test -d $(DESTDIR)$(datadir)/`dirname $$f` || $(MKDIR) $(DESTDIR)$(datadir)/`dirname $$f` ; \
+	  $(CP) "../share/$$f" "$(DESTDIR)$(datadir)/$$f" ; \
+	done
 	# Icon and desktop file for debian
 	$(CP) ../misc/unix/grafx2.desktop $(DESTDIR)$(datadir)/applications/
 	$(CP) ../misc/unix/grafx2.appdata.xml $(DESTDIR)$(datadir)/metainfo/
@@ -1007,13 +998,13 @@ uninstall :
 	$(DELCOMMAND) $(SKIN_FILES:../share%=$(DESTDIR)$(datadir)%)
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/skins),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/skins,)
 	$(DELCOMMAND) $(SCRIPT_FILES:../share%=$(DESTDIR)$(datadir)%)
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/picture,)
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/palette),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/palette,)
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/libs),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/libs,)
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/demo/brush),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/demo/brush,)
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/demo),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/demo,)
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/brush),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4/brush,)
-	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples_2.4,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples/picture),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples/picture,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples/palette),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples/palette,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples/libs),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples/libs,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples/demo/brush),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples/demo/brush,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples/demo),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples/demo,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples/brush),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples/brush,)
+	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/samples),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/samples,)
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts/libs),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts/libs,)
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2/scripts),$(RMDIR) $(DESTDIR)$(datadir)/grafx2/scripts,)
 	$(if $(wildcard $(DESTDIR)$(datadir)/grafx2),$(RMDIR) $(DESTDIR)$(datadir)/grafx2,)

@@ -110,15 +110,15 @@ Section "Grafx2" SecProgram
   File ..\share\grafx2\skins\*.png
   # SetOverwrite cannot be skipped by control flow instructions
   # see https://nsis.sourceforge.io/Docs/Chapter4.html#flags
-  SetOutPath "$INSTDIR\share\grafx2\scripts\samples_2.4"
-  IfFileExists "$INSTDIR\share\grafx2\scripts\samples_2.4\*.*" 0 overwritesamples
-  MessageBox MB_YESNO "Do you want to overwrite the scripts\samples_2.4 directory ?" /SD IDYES IDYES overwritesamples
+  SetOutPath "$INSTDIR\share\grafx2\scripts\samples"
+  IfFileExists "$INSTDIR\share\grafx2\scripts\samples\*.*" 0 overwritesamples
+  MessageBox MB_YESNO "Do you want to overwrite the scripts\samples directory ?" /SD IDYES IDYES overwritesamples
     SetOverwrite off
-    File /r ..\share\grafx2\scripts\samples_2.4\*.*
+    File /r ..\share\grafx2\scripts\samples\*.*
     SetOverwrite on
     Goto +2
   overwritesamples:
-  File /r ..\share\grafx2\scripts\samples_2.4\*.*
+  File /r ..\share\grafx2\scripts\samples\*.*
   SetOutPath "$INSTDIR\doc"
   File ..\doc\*.txt
   SetOutPath "$INSTDIR\share\grafx2\fonts"
@@ -215,7 +215,7 @@ Section "un.SecProgram"
   RMDir /r "$INSTDIR\doc"
   RMDir /r "$INSTDIR\share\grafx2\fonts"
   RMDir /r "$INSTDIR\share\grafx2\skins"
-  RMDir /r "$INSTDIR\share\grafx2\scripts\samples_2.4"
+  RMDir /r "$INSTDIR\share\grafx2\scripts\samples"
   RMDir  "$INSTDIR\share\grafx2\scripts"
   RMDir  "$INSTDIR\share\grafx2"
   RMDir  "$INSTDIR\share"
