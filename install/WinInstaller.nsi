@@ -122,22 +122,9 @@ Section "Grafx2" SecProgram
   SetOutPath "$INSTDIR\doc"
   File ..\doc\*.txt
   SetOutPath "$INSTDIR\share\grafx2\fonts"
-  File ..\share\grafx2\fonts\8pxfont.png
-  File ..\share\grafx2\fonts\Tuffy.ttf
-  File ..\share\grafx2\fonts\PF_Arma_5__.png
-  File ..\share\grafx2\fonts\PF_Easta_7_.png
-  File ..\share\grafx2\fonts\PF_Easta_7__.png
-  File ..\share\grafx2\fonts\PF_Ronda_7__.png
-  File ..\share\grafx2\fonts\PF_Tempesta_5.png
-  File ..\share\grafx2\fonts\PF_Tempesta_5_.png
-  File ..\share\grafx2\fonts\PF_Tempesta_5__.png
-  File ..\share\grafx2\fonts\PF_Tempesta_5___.png
-  File ..\share\grafx2\fonts\PF_Tempesta_7.png
-  File ..\share\grafx2\fonts\PF_Tempesta_7_.png
-  File ..\share\grafx2\fonts\PF_Tempesta_7__.png
-  File ..\share\grafx2\fonts\PF_Tempesta_7___.png
-  File ..\share\grafx2\fonts\PF_Westa_7_.png
-  File ..\share\grafx2\fonts\PF_Westa_7__.png
+  File ..\share\grafx2\fonts\*.png
+  File ..\share\grafx2\fonts\*.ttf
+  File ..\share\grafx2\fonts\*.pcx
 
   ; Register in Add/Remove programs
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Grafx2-${API}" \
