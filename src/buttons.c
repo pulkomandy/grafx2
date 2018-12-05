@@ -4641,7 +4641,7 @@ void Button_Effects(int btn)
   Window_rectangle(C1-1, L1+2, 78, 14, MC_Light);
 
   Window_set_normal_button(C1+1,L1+2,14,14," ",0,1,KEY_f); // 13
-  Print_in_window(28,24,"Feedback",MC_Dark,MC_Light);
+  Print_in_window_underscore(28,24,"Feedback",MC_Dark,MC_Light,1);
 
   Window_set_normal_button(C2, L4, 16,16,"",0,1,Config_Key[SPECIAL_FORMAT_CHECKER_MENU][0]); // 14
   Window_set_normal_button(C3, L3, 16,16,"",0,1,Config_Key[SPECIAL_TILEMAP_MODE][0]); // 15
@@ -4718,6 +4718,9 @@ void Button_Effects(int btn)
           break;
         case 10:
           Window_help(BUTTON_EFFECTS, "TILING");
+          break;
+        case 14:
+          Window_help(BUTTON_EFFECTS, "8 BIT");
           break;
         case 15:
           Window_help(BUTTON_EFFECTS, "TILEMAP");
