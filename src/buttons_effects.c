@@ -214,7 +214,7 @@ static int Check_block_constraints(enum IMAGE_MODES mode)
         for (x2 = 0; x2 < block_width; x2++)
         {
           int i;
-          byte col = Main.backups->Pages->Image[0].Pixels[x+x2 + (y+y2)*Main.image_width];
+          byte col = Read_pixel_from_layer(0, x+x2, y+y2);
           if (mode == IMAGE_MODE_GBC)
           {
             if (count == 0)
@@ -223,7 +223,7 @@ static int Check_block_constraints(enum IMAGE_MODES mode)
             {
               if (Main.backups->Pages->Nb_layers < 2)
                 Add_layer(Main.backups, 1);
-              Main.backups->Pages->Image[1].Pixels[x+x2 + (y+y2)*Main.image_width] = errcol;
+              Pixel_in_layer(1, x+x2, y+y2, errcol);
               error_count++;
             }
             continue;
@@ -232,7 +232,7 @@ static int Check_block_constraints(enum IMAGE_MODES mode)
           {
             if (Main.backups->Pages->Nb_layers < 2)
               Add_layer(Main.backups, 1);
-            Main.backups->Pages->Image[1].Pixels[x+x2 + (y+y2)*Main.image_width] = errcol;
+            Pixel_in_layer(1, x+x2, y+y2, errcol);
             error_count++;
             continue;
           }
@@ -257,7 +257,7 @@ static int Check_block_constraints(enum IMAGE_MODES mode)
                 GFX2_Log(GFX2_INFO, "Check_block_constraints() intensity error at (%d,%d) color=%d (other color=%d)\n", x+x2, y+y2, col, c[0]);
                 if (Main.backups->Pages->Nb_layers < 2)
                   Add_layer(Main.backups, 1);
-                Main.backups->Pages->Image[1].Pixels[x+x2 + (y+y2)*Main.image_width] = errcol;
+                Pixel_in_layer(1, x+x2, y+y2, errcol);
                 error_count++;
                 continue;
               }
@@ -268,7 +268,7 @@ static int Check_block_constraints(enum IMAGE_MODES mode)
               GFX2_Log(GFX2_INFO, "Check_block_constraints() constraint error at (%d,%d)\n", x+x2, y+y2);
               if (Main.backups->Pages->Nb_layers < 2)
                 Add_layer(Main.backups, 1);
-              Main.backups->Pages->Image[1].Pixels[x+x2 + (y+y2)*Main.image_width] = errcol;
+              Pixel_in_layer(1, x+x2, y+y2, errcol);
               error_count++;
             }
             else
