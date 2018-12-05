@@ -718,6 +718,7 @@ SKINS = skin_classic.png skin_modern.png skin_DPaint.png \
 SKIN_FILES = $(addprefix ../share/grafx2/skins/,$(SKINS))
 SKIN_FILES += $(wildcard ../share/grafx2/skins/unicode_*)
 
+SCRIPTS_SAMPLES = codenetsend.lua
 SCRIPTS_BRUSH = ApplyColor.lua Fisheye.lua GrayscaleAvg.lua \
                 GrayscaleDesat.lua Halfsmooth.lua Waves.lua
 SCRIPTS_DEMO = 3DPalette.lua Ellipse.lua FlipPicture.lua \
@@ -745,6 +746,7 @@ SCRIPTS_PIC_THOMSON = bayer4_mo5.lua bayer4_to8.lua \
                       lib/convex_hull.lua lib/ostromoukhov.lua \
                       lib/thomson.lua
 SCRIPT_FILES = $(addprefix ../share/grafx2/scripts/samples/, \
+                 $(SCRIPTS_SAMPLES) \
                  $(addprefix brush/,$(SCRIPTS_BRUSH)) \
                  $(addprefix demo/,$(SCRIPTS_DEMO)) \
                  $(addprefix demo/brush/,$(SCRIPTS_DEMO_BRUSH)) \
