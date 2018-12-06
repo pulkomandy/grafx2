@@ -2002,6 +2002,13 @@ static const T_Help_table helptable_effects[] =
   HELP_TEXT ("selected for a 7x1 pixel block.")
   HELP_TEXT ("")
   HELP_TEXT ("")
+  HELP_BOLD ("Apple II DHGR")
+  HELP_TEXT ("As for HGR, Layer 1 is the monochrome picture")
+  HELP_TEXT ("and Layer 2 is the color view, emulating a")
+  HELP_TEXT ("\"Le Chat Mauve\" Apple //c RGB adapter.")
+  HELP_TEXT ("Color pixels are 4 b&w pixels wide.")
+  HELP_TEXT ("")
+  HELP_TEXT ("")
 };
 static const T_Help_table helptable_text[] =
 {
