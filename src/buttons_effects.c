@@ -352,6 +352,68 @@ static void Convert_to_hgr(void)
   }
 }
 
+/// convert a picture to the DHGR mode
+///
+/// Recognize monochrome pictures.
+static void Convert_to_dhgr(void)
+{
+  int i;
+  word count, x, y;
+  dword usage[256];
+
+  count = Count_used_colors(usage);
+  if (count <= 1) // blank picture, nothing to do :)
+    return;
+  if (count == 2) // monochrome !
+  {
+    byte bg, fg;
+    i = 0;
+    while (usage[i] == 0 && i < 256)
+      i++;
+    bg = (byte)i;
+    i++;
+    while (usage[i] == 0 && i < 256)
+      i++;
+    fg = (byte)i;
+    GFX2_Log(GFX2_DEBUG, "Convert_to_dhgr() monochrome bg=%u fg=%u\n", bg, fg);
+    if (!(bg == 0 && fg == 3) && !(bg == 4 && fg == 7))
+    {
+      // convert to B&W
+      for (y = 0; y < Main.image_height; y++)
+      {
+        for (x = 0; x < Main.image_width; x++)
+        {
+          byte c = Read_pixel_from_layer(0, x, y);
+          Pixel_in_layer(0, x, y, (c == fg) ? 15 : 0);
+        }
+      }
+    }
+  }
+  else
+  {
+    // "convert" color picture to B&W
+    for (y = 0; y < Main.image_height; y++)
+    {
+      for (x = 0; x < Main.image_width; x += 4)
+      {
+        byte c = Read_pixel_from_layer(0, x, y);
+        Pixel_in_layer(0, x, y, c & 0x18);
+        Pixel_in_layer(0, x + 1, y, c & 0x14);
+        Pixel_in_layer(0, x + 2, y, c & 0x12);
+        Pixel_in_layer(0, x + 3, y, c & 0x11);
+      }
+    }
+  }
+  // update color layer
+  for (y = 0; y < Main.image_height; y++)
+  {
+    for (x = 0; x < Main.image_width; x += 4)
+    {
+      Update_color_dhgr_pixel(x, y, 0);
+    }
+  }
+}
+
 
 /// Constaint enforcer/checker
 ///
@@ -415,7 +477,8 @@ void Button_Constraint_mode(void)
       }
     if (Selected_Constraint_Mode == IMAGE_MODE_HGR)
       Convert_to_hgr();
-    /// @todo conversion to DHGR
+    else
+      Convert_to_dhgr();
     break;
   default:
     Check_block_constraints(Selected_Constraint_Mode);
@@ -454,7 +517,7 @@ void Button_Constraint_menu(void)
     {IMAGE_MODE_C64MULTI,"C64 Multicolor","4 colors per 4x1 block", 1}, // 160x200
     //{IMAGE_MODE_C64FLI,  "C64 FLI",       "improved multicolor   ", 1}, // 160x200
     {IMAGE_MODE_HGR,     "Apple II HGR",  "6 colors              ", 1},  // 280x192
-    //{IMAGE_MODE_DHGR,    "Apple II DHGR", "16 colors             ", 1},  // 560x192
+    {IMAGE_MODE_DHGR,    "Apple II DHGR", "\"Le Chat Mauve\" mode3 ", 1},  // 560x192
   };
 
   Open_window(194,95+36,"8-bit constraints");
@@ -607,8 +670,11 @@ void Button_Constraint_menu(void)
             Snap_height = 999;  // maximum value (3 digits)
             break;
           case IMAGE_MODE_HGR:
-          case IMAGE_MODE_DHGR:
             Snap_width = 7;
+            Snap_height = 999;  // maximum value (3 digits)
+            break;
+          case IMAGE_MODE_DHGR:
+            Snap_width = 4;
             Snap_height = 999;  // maximum value (3 digits)
             break;
           default:

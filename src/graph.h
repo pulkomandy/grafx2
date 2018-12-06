@@ -154,5 +154,6 @@ extern Func_pixel_opt_preview Pixel_in_current_screen_with_opt_preview;
 void Update_pixel_renderer(void);
 
 void Update_color_hgr_pixel(word x, word y, int preview);
+void Update_color_dhgr_pixel(word x, word y, int preview);
 
 #endif

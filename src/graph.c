@@ -3668,6 +3668,100 @@ static void Pixel_in_screen_hgr_color_with_opt_preview(word x,word y,byte color,
   }
 }
 
+/// Update the color layer of DHGR according to the monochrome layer
+///
+/// Emulate \"Le Chat Mauve\" mode 3 (mixed mode).
+void Update_color_dhgr_pixel(word x, word y, int preview)
+{
+  byte b3, b2, b1, b0, color;
+
+  x &= ~3;
+  // read monochrome pixels
+  b3 = Read_pixel_from_layer(0, x, y);
+  b2 = Read_pixel_from_layer(0, x + 1, y);
+  b1 = Read_pixel_from_layer(0, x + 2, y);
+  b0 = Read_pixel_from_layer(0, x + 3, y);
+  if (b3 & 16)
+  {
+    // monochrome pixel
+    Pixel_in_layer_with_opt_preview(1, x, y, b3, preview);
+    Pixel_in_layer_with_opt_preview(1, x + 1, y, b2, preview);
+    Pixel_in_layer_with_opt_preview(1, x + 2, y, b1, preview);
+    Pixel_in_layer_with_opt_preview(1, x + 3, y, b0, preview);
+  }
+  else
+  {
+    // color pixel
+    color = (b3 & 8) | (b2 & 4) | (b1 & 2) | (b0 & 1);
+    Pixel_in_layer_with_opt_preview(1, x, y, color, preview);
+    Pixel_in_layer_with_opt_preview(1, x + 1, y, color, preview);
+    Pixel_in_layer_with_opt_preview(1, x + 2, y, color, preview);
+    Pixel_in_layer_with_opt_preview(1, x + 3, y, color, preview);
+  }
+}
+
+
+/// Paint in the monochrome layer of DHGR
+///
+/// also update the color pixels.
+static void Pixel_in_screen_dhgr_mono_with_opt_preview(word x,word y,byte color,int preview)
+{
+  byte oldcolor;
+
+  if (color >= 32)
+    return;
+  if ((color & 15) != 0)
+    color |= 15; // force black or white.
+
+  // put pixel
+  oldcolor = Read_pixel_from_layer(0, x, y);
+  if (color == oldcolor)
+    return; // nothing to do !
+  Pixel_in_layer_with_opt_preview(0, x, y, color, preview);
+  Update_color_dhgr_pixel(x, y, preview);
+
+  // change bit7 if needed.
+  if ((color & 16) != (oldcolor & 16))
+  {
+    int i;
+    x -= (x % 7);
+    for (i = 0; i < 7; i++)
+    {
+      oldcolor = Read_pixel_from_layer(0, x, y);
+      if ((oldcolor & 16) != (color & 16))
+      {
+        Pixel_in_layer_with_opt_preview(0, x, y, (color & 16) | (oldcolor & 15), preview);
+        Update_color_dhgr_pixel(x, y, preview);
+      }
+      x++;
+    }
+  }
+}
+
+/// Paint in the color layer of DHGR
+///
+/// use of color 16-31 forces the cell to be monochrome.
+static void Pixel_in_screen_dhgr_color_with_opt_preview(word x,word y,byte color,int preview)
+{
+  if (color & 16)
+  {
+    // monochrome pixel
+    Pixel_in_screen_dhgr_mono_with_opt_preview(x, y, color, preview);
+    // force monochrome for this cell
+    if ((x & 3) != 0)
+      Pixel_in_screen_dhgr_mono_with_opt_preview(x & ~3, y, Read_pixel_from_layer(0, x & ~3, y) | 16, preview);
+  }
+  else
+  {
+    // color pixel
+    x &= ~3;
+    Pixel_in_screen_dhgr_mono_with_opt_preview(x, y, color & 8, preview); // also set this cell in color mode
+    Pixel_in_screen_dhgr_mono_with_opt_preview(x + 1, y, color & 4, preview);
+    Pixel_in_screen_dhgr_mono_with_opt_preview(x + 2, y, color & 2, preview);
+    Pixel_in_screen_dhgr_mono_with_opt_preview(x + 3, y, color & 1, preview);
+  }
+}
+
 // end of constraints group
 /// @}
 
@@ -3723,7 +3817,6 @@ void Update_pixel_renderer(void)
     // direct
     Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_direct_with_opt_preview;
     break;
-  case IMAGE_MODE_DHGR: // TODO
   case IMAGE_MODE_LAYERED:
     // layered
     Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_layered_with_opt_preview;
@@ -3763,5 +3856,12 @@ void Update_pixel_renderer(void)
     else
       Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_layered_with_opt_preview;
     break;
+  case IMAGE_MODE_DHGR:
+    if (Main.current_layer == 0)  // monochrome layer
+      Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_dhgr_mono_with_opt_preview;
+    else if (Main.current_layer == 1)  // color layer
+      Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_dhgr_color_with_opt_preview;
+    else
+      Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_layered_with_opt_preview;
   }
 }
