@@ -3203,94 +3203,113 @@ static int Save_C64_window(enum c64_format *saveFormat, byte *saveWhat, byte *lo
   return button==1;
 }
 
-int Save_C64_hires(T_IO_Context *context, byte saveWhat, byte loadAddr)
+/// Save a C64 hires picture
+///
+/// c64 hires is 320x200 with only 2 colors per 8x8 block.
+static int Save_C64_hires(T_IO_Context *context, byte saveWhat, byte loadAddr)
 {
-    int cx,cy,x,y,c1,c2=0,i,pixel,bits,pos=0;
-    word numcolors;
-    dword cusage[256];
-    byte screen_ram[1000],bitmap[8000];
-    FILE *file;
+  int i, pos = 0;
+  word cx, cy, x, y;
+  byte screen_ram[1000],bitmap[8000];
+  FILE *file;
 
-    for(x=0;x<1000;x++)screen_ram[x]=1; // init colormem to black/white
-
-    for(cy=0; cy<25; cy++) // Character line, 25 lines
+  for(cy=0; cy<25; cy++) // Character line, 25 lines
+  {
+    for(cx=0; cx<40; cx++) // Character column, 40 columns
     {
-        for(cx=0; cx<40; cx++) // Character column, 40 columns
+      byte fg, bg;  // foreground and background colors for the 8x8 block
+      byte c[2];
+      int count = 0;
+      // first pass : find colors used
+      for(y=0; y<8; y++)
+      {
+        for(x=0; x<8; x++)
         {
-            for(i=0;i<256;i++)
-                cusage[i]=0;
-
-            numcolors=Count_used_colors_area(cusage,cx*8,cy*8,8,8);
-            if (numcolors>2)
-            {
-                Warning_with_format("More than 2 colors\nin 8x8 pixel cell: (%d, %d)\nRect: (%d, %d, %d, %d)", cx, cy, cx * 8, cy * 8, cx * 8 + 7, cy * 8 + 7);
-                // TODO here we should hilite the offending block
-                return 1;
-            }
-            c1 = 0; c2 = 0;
-            for(i=0;i<16;i++)
-            {
-                if(cusage[i])
-                {
-                    c2=i;
-                    break;
-                }
-            }
-            c1=c2+1;
-            for(i=c2;i<16;i++)
-            {
-                if(cusage[i])
-                {
-                  c1=i;
-                }
-            }
-            screen_ram[cx+cy*40]=(c2<<4)|c1;
-
-            for(y=0; y<8; y++)
-            {
-                bits=0;
-                for(x=0; x<8; x++)
-                {
-                    pixel=Get_pixel(context, x+cx*8,y+cy*8);
-                    if(pixel>15)
-                    {
-                        Warning_message("Color above 15 used");
-                        // TODO hilite offending block here too?
-                        // or make it smarter with color allocation?
-                        // However, the palette is fixed to the 16 first colors
-                        return 1;
-                    }
-                    bits=bits<<1;
-                    if (pixel==c2) bits|=1;
-                }
-                bitmap[pos++]=bits;
-            }
+          byte pixel = Get_pixel(context, x+cx*8,y+cy*8);
+          if(pixel>15)
+          {
+            Warning_message("Color above 15 used");
+            // TODO hilite offending block here too?
+            // or make it smarter with color allocation?
+            // However, the palette is fixed to the 16 first colors
+            return 1;
+          }
+          for (i = 0; i < count; i++)
+          {
+            if (c[i] == pixel)
+              break;
+          }
+          if (i >= 2)
+          {
+            Warning_with_format("More than 2 colors\nin 8x8 pixel cell: (%d, %d)\nRect: (%d, %d, %d, %d)", cx, cy, cx * 8, cy * 8, cx * 8 + 7, cy * 8 + 7);
+            // TODO here we should hilite the offending block
+            return 1;
+          }
+          if (i >= count)
+            c[count++] = pixel;
         }
+      }
+
+      if (count == 1)
+      {
+        if (c[0] == 0)  // only black
+          fg = 1; // white
+        else
+          fg = c[0];
+        bg = 0; // black
+      }
+      else
+      {
+        // set lower color index as background
+        if (c[0] < c[1])
+        {
+          fg = c[1];
+          bg = c[0];
+        }
+        else
+        {
+          fg = c[0];
+          bg = c[1];
+        }
+      }
+      screen_ram[cx+cy*40] = (fg<<4) | bg;
+
+      // 2nd pass : store bitmap (0 = background, 1 = foreground)
+      for(y=0; y<8; y++)
+      {
+        byte bits = 0;
+        for(x=0; x<8; x++)
+        {
+          bits <<= 1;
+          if (Get_pixel(context, x+cx*8, y+cy*8) == fg)
+            bits |= 1;
+        }
+        bitmap[pos++] = bits;
+      }
     }
+  }
 
-    file = Open_file_write(context);
+  file = Open_file_write(context);
 
-    if(!file)
-    {
-        Warning_message("File open failed");
-        File_error = 1;
-        return 1;
-    }
+  if(!file)
+  {
+    Warning_message("File open failed");
+    File_error = 1;
+    return 1;
+  }
 
-    setvbuf(file, NULL, _IOFBF, 64*1024);
+  if (loadAddr)
+  {
+    Write_byte(file,0);
+    Write_byte(file,loadAddr);
+  }
+  if (saveWhat==0 || saveWhat==1)
+    Write_bytes(file,bitmap,8000);
+  if (saveWhat==0 || saveWhat==2)
+    Write_bytes(file,screen_ram,1000);
 
-    if (loadAddr)
-    {
-        Write_byte(file,0);
-        Write_byte(file,loadAddr);
-    }
-    if (saveWhat==0 || saveWhat==1)
-        Write_bytes(file,bitmap,8000);
-    if (saveWhat==0 || saveWhat==2)
-        Write_bytes(file,screen_ram,1000);
-
-    fclose(file);
-    return 0;
+  fclose(file);
+  return 0;
 }
 
 #if defined(__GNUC__) && __GNUC__ > 2
