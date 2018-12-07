@@ -2510,28 +2510,31 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
 
   int cx,cy,x,y,c[4];
 
-  // Fill layer 0 with background colors
-  for(y=0; y<200; y++)
+  if (context->Type == CONTEXT_MAIN_IMAGE)
   {
-    byte bg_color = 0;
-    if (background != NULL)
-      bg_color = background[y];
-    for(x=0; x<160; x++)
-      Set_pixel(context, x,y, bg_color);
-  }
-
-  // Fill layer 1 with color ram (1 color per 4x8 block)
-  Set_loading_layer(context, 1);
-  for(cy=0; cy<25; cy++)
-  {
-    for(cx=0; cx<40; cx++)
+    // Fill layer 0 with background colors
+    for(y=0; y<200; y++)
     {
-      c[3]=color_ram[cy*40+cx]&15;
-      for(y=0; y<8; y++)
+      byte bg_color = 0;
+      if (background != NULL)
+        bg_color = background[y];
+      for(x=0; x<160; x++)
+        Set_pixel(context, x,y, bg_color);
+    }
+
+    // Fill layer 1 with color ram (1 color per 4x8 block)
+    Set_loading_layer(context, 1);
+    for(cy=0; cy<25; cy++)
+    {
+      for(cx=0; cx<40; cx++)
       {
-        for(x=0; x<4; x++)
+        c[3]=color_ram[cy*40+cx]&15;
+        for(y=0; y<8; y++)
         {
-          Set_pixel(context, cx*4+(3-x),cy*8+y,c[3]);
+          for(x=0; x<4; x++)
+          {
+            Set_pixel(context, cx*4+x,cy*8+y,c[3]);
+          }
         }
       }
     }
@@ -2562,13 +2565,14 @@ void Load_C64_fli(T_IO_Context *context, byte *bitmap, byte *screen_ram, byte *c
       }
     }
   }
-  // Fill layer 3 with color 16
-  Set_loading_layer(context, 3);
-  for(y=0; y<200; y++)
+  if (context->Type == CONTEXT_MAIN_IMAGE)
   {
-    for(x=0; x<160; x++)
+    // Fill layer 3 with color 16
+    Set_loading_layer(context, 3);
+    for(y=0; y<200; y++)
     {
-      Set_pixel(context, x,y,16);
+      for(x=0; x<160; x++)
+        Set_pixel(context, x,y,16);
     }
   }
 }
