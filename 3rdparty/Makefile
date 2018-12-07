@@ -35,7 +35,7 @@ LUA=lua-$(LUAVER)
 LUAARCH=$(LUA).tar.gz
 LUAURL=https://www.lua.org/ftp/$(LUAARCH)
 # https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-0.6.1.tar.gz
-RECOILVER=4.3.0
+RECOILVER=4.3.1
 RECOIL=recoil-$(RECOILVER)
 RECOILARCH=$(RECOIL).tar.gz
 # https://downloads.sourceforge.net/project/recoil/recoil/4.3.0/recoil-4.3.0.tar.gz

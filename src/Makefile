@@ -68,7 +68,7 @@ endif
 
   CFLAGS_CACHE = $(OBJDIR)/.cflags.cache
 
-  RECOILVER = 4.3.0
+  RECOILVER = 4.3.1
 
 # Video / input API used
   API ?= sdl
