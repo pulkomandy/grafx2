@@ -37,6 +37,14 @@
  */
 int C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background);
 
+/**
+ * FLI Check/enforcer
+ *
+ * Generate Screen RAM, Color RAM and bitmap data from the first 3 layers
+ * and output the result in layer 4.
+ *
+ * @return 0 for success, 2 if the picture is not 4 layers, 1 if the picture dimensions are not 160x200
+ */
 int C64_FLI_enforcer(void);
 
 /**
