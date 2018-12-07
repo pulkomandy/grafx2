@@ -1956,7 +1956,6 @@ int L_SelectLayer(lua_State* L)
       Update_depth_buffer(); // Only need the depth buffer
     }
   }
-  // Todo: mark the layer menu bar as 'needs to be refreshed'
   return 0;
 }
 
@@ -2326,6 +2325,7 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   char buf[MAX_PATH_CHARACTERS];
   int original_image_width=Main.image_width;
   int original_image_height=Main.image_height;
+  int original_current_layer = Main.current_layer;
 
   // Some scripts are slow
   Cursor_shape=CURSOR_SHAPE_HOURGLASS;
@@ -2519,6 +2519,8 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
 
   Hide_cursor();
   Display_all_screen();
+  if (original_current_layer != Main.current_layer)
+    Display_layerbar(); // current layer has changed, buttons need to be updated
   
   // Update tilemap if image size has changed
   if (original_image_width!=Main.image_width
