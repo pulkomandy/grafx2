@@ -1248,7 +1248,7 @@ static void Add_font_or_skin(const char * full_name, const char * fname)
     && (!strcasecmp(fname + namelength - 4,".png")
     || !strcasecmp(fname + namelength - 4,".gif")))
   {
-    Add_element_to_list(&Skin_files_list, fname, Format_filename(fname, 19, 0), 0, ICON_NONE);
+    Add_element_to_list(&Skin_files_list, fname, Format_filename(fname, 19, 0), FSOBJECT_FILE, ICON_NONE);
 
     if (fname[0]=='\0')
       return;
@@ -1256,7 +1256,7 @@ static void Add_font_or_skin(const char * full_name, const char * fname)
   else if (namelength>=10 && !strncasecmp(fname, FONT_PREFIX, strlen(FONT_PREFIX))
     && (!strcasecmp(fname + namelength - 4, ".png")))
   {
-    Add_element_to_list(&Font_files_list, fname, Format_font_filename(fname), 0, ICON_NONE);
+    Add_element_to_list(&Font_files_list, fname, Format_font_filename(fname), FSOBJECT_FILE, ICON_NONE);
 
     if (fname[0]=='\0')
       return;

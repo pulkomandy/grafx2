@@ -38,7 +38,7 @@
 /// @return 1 if the user want to load/save a file
 byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context *context);
 
-T_Fileselector_item * Add_element_to_list(T_Fileselector *list, const char * full_name, const char *short_name, int type, enum ICON_TYPES icon);
+T_Fileselector_item * Add_element_to_list(T_Fileselector *list, const char * full_name, const char *short_name, enum FSOBJECT_TYPE type, enum ICON_TYPES icon);
 
 ///
 /// Formats a display name for a file, directory, or similar name (drive, volume).

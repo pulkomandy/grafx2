@@ -181,7 +181,7 @@ typedef struct T_Dropdown_button
 /// Data for one item (file, directory) in a fileselector.
 typedef struct T_Fileselector_item
 {
-  byte Type;           ///< Type of item: 0 = File, 1 = Directory, 2 = Drive
+  enum FSOBJECT_TYPE Type;    ///< Type of item: 0 = File, 1 = Directory, 2 = Drive
   byte Icon;           ///< One of ::ICON_TYPES, ICON_NONE for none.
 
   struct T_Fileselector_item * Next;    ///< Pointer to next item of the current fileselector.

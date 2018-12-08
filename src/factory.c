@@ -2275,7 +2275,7 @@ static void Add_script(void * pdata, const char *file_name, const word *unicode_
     if (is_hidden && !Config.Show_hidden_files)
       return;
       
-    item = Add_element_to_list(&Scripts_selector, file_name, Format_filename(file_name, NAME_WIDTH+1, 0), 0, ICON_NONE);
+    item = Add_element_to_list(&Scripts_selector, file_name, Format_filename(file_name, NAME_WIDTH+1, 0), FSOBJECT_FILE, ICON_NONE);
     if (item != NULL && unicode_name != NULL)
     {
       item->Unicode_full_name = Unicode_strdup(unicode_name);
@@ -2294,7 +2294,7 @@ static void Add_script(void * pdata, const char *file_name, const word *unicode_
     if (is_hidden && !Config.Show_hidden_directories)
       return;
     
-    item = Add_element_to_list(&Scripts_selector, file_name, Format_filename(file_name, NAME_WIDTH+1, 1), 1, ICON_NONE);
+    item = Add_element_to_list(&Scripts_selector, file_name, Format_filename(file_name, NAME_WIDTH+1, 1), FSOBJECT_DIR, ICON_NONE);
     if (item != NULL && unicode_name != NULL)
     {
       item->Unicode_full_name = Unicode_strdup(unicode_name);
@@ -2638,7 +2638,7 @@ void Reload_scripts_list(void)
   }
   else
   {
-    Add_element_to_list(&Scripts_selector, PARENT_DIR, Format_filename(PARENT_DIR, NAME_WIDTH+1, 1), 1, ICON_NONE);
+    Add_element_to_list(&Scripts_selector, PARENT_DIR, Format_filename(PARENT_DIR, NAME_WIDTH+1, 1), FSOBJECT_DIR, ICON_NONE);
     // Add each found file to the list
     For_each_directory_entry(Config.Scripts_directory, NULL, Add_script);
   }

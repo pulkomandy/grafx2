@@ -169,7 +169,7 @@ static void Recount_files(T_Fileselector *list)
   
   for (item = list->First; item != NULL; item = item->Next)
   {
-    if (item->Type == 0)
+    if (item->Type == FSOBJECT_FILE)
       list->Nb_files ++;
     else
       list->Nb_directories ++;
@@ -382,7 +382,7 @@ char * Format_filename(const char * fname, word max_length, int type)
  * @return a pointer to the newly added item
  * @return NULL in case of error
  */
-T_Fileselector_item * Add_element_to_list(T_Fileselector *list, const char * full_name, const char *short_name, int type, enum ICON_TYPES icon)
+T_Fileselector_item * Add_element_to_list(T_Fileselector *list, const char * full_name, const char *short_name, enum FSOBJECT_TYPE type, enum ICON_TYPES icon)
 {
   // Working element
   T_Fileselector_item * temp_item;
@@ -478,7 +478,7 @@ static void Read_dir_callback(void * pdata, const char *file_name, const word *u
       return;
 
     // Add to list
-    item = Add_element_to_list(p->list, file_name, Format_filename(file_name, 19, 1), 1, ICON_NONE);
+    item = Add_element_to_list(p->list, file_name, Format_filename(file_name, 19, 1), FSOBJECT_DIR, ICON_NONE);
     if (item != NULL && unicode_name != NULL)
     {
       item->Unicode_full_name = Unicode_strdup(unicode_name);
@@ -518,7 +518,7 @@ static void Read_dir_callback(void * pdata, const char *file_name, const word *u
       if (Check_extension(file_name_ext, ext))
       {
         // Add to list
-        item = Add_element_to_list(p->list, file_name, Format_filename(file_name, 19, 0), 0, ICON_NONE);
+        item = Add_element_to_list(p->list, file_name, Format_filename(file_name, 19, 0), FSOBJECT_FILE, ICON_NONE);
         if (item != NULL && unicode_name != NULL)
         {
           item->Unicode_full_name = Unicode_strdup(unicode_name);
@@ -570,7 +570,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
 
 #if defined(__MORPHOS__) || defined(__AROS__) || defined (__amigaos4__) || defined(__amigaos__)
   // Amiga systems: always
-  Add_element_to_list(list, PARENT_DIR, Format_filename(PARENT_DIR,19,1), 1, ICON_NONE);
+  Add_element_to_list(list, PARENT_DIR, Format_filename(PARENT_DIR,19,1), FSOBJECT_DIR, ICON_NONE);
   list->Nb_directories ++;
   
 #elif defined (WIN32)
@@ -588,7 +588,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   }
   else
   {
-    Add_element_to_list(list, PARENT_DIR, Format_filename(PARENT_DIR,19,1), 1, ICON_NONE);
+    Add_element_to_list(list, PARENT_DIR, Format_filename(PARENT_DIR,19,1), FSOBJECT_DIR, ICON_NONE);
     list->Nb_directories ++;
   }
   
@@ -599,14 +599,18 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   
   bFound= false;
   
-  for (item = list->First; (((item != NULL) && (bFound==false))); item = item->Next){
-    if (item->Type == 1){
-      if(strncmp(item->Full_name,PARENT_DIR,(sizeof(char)*2))==0) bFound=true;
+  for (item = list->First; item != NULL; item = item->Next)
+  {
+    if (item->Type == FSOBJECT_DIR && (strncmp(item->Full_name, PARENT_DIR, (sizeof(char)*2))==0) )
+    {
+      bFound=true;
+      break;
     }
   }
   
-  if(!bFound){
-    Add_element_to_list(list,PARENT_DIR,Format_filename(PARENT_DIR,19,1),1,ICON_NONE); // add if not present
+  if(!bFound)
+  {
+    Add_element_to_list(list,PARENT_DIR,Format_filename(PARENT_DIR,19,1),FSOBJECT_DIR,ICON_NONE); // add if not present
     list->Nb_directories ++;  
   }
   
@@ -619,7 +623,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
     // This can happen on some empty network drives.
     // Add a dummy entry because the fileselector doesn't
     // seem to support empty list.
-    Add_element_to_list(list, ".",Format_filename(".",19,1),1,ICON_NONE);
+    Add_element_to_list(list, ".",Format_filename(".",19,1),FSOBJECT_DIR,ICON_NONE);
   }
 
   Recount_files(list);
@@ -677,7 +681,7 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
       {
         bstrtostr( dl->dol_Name, tmp, 254 );
         strcat( tmp, ":" );
-        Add_element_to_list(list, tmp, Format_filename(tmp, name_length, 2), 2, ICON_NONE );
+        Add_element_to_list(list, tmp, Format_filename(tmp, name_length, 2), FSOBJECT_DRIVE, ICON_NONE );
         list->Nb_directories++;
       }
       UnLockDosList( LDF_VOLUMES | LDF_ASSIGNS | LDF_READ );
@@ -721,7 +725,7 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
             break;
         }
         drive_name[0]='A'+bit_index;
-        Add_element_to_list(list, drive_name, Format_filename(drive_name,name_length-1,2), 2, icon);
+        Add_element_to_list(list, drive_name, Format_filename(drive_name,name_length-1,2), FSOBJECT_DRIVE, icon);
         list->Nb_directories++;
         drive_index++;
       }
@@ -735,7 +739,7 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
       if ( (1 << bit_index) & drive_bits )
       {
         drive_name[0]='A'+bit_index;
-        Add_element_to_list(list, drive_name,Format_filename(drive_name,name_length,2),2,ICON_NONE);
+        Add_element_to_list(list, drive_name,Format_filename(drive_name,name_length,2),FSOBJECT_DRIVE,ICON_NONE);
         list->Nb_directories++;
         drive_index++;
       }
@@ -752,11 +756,11 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
     struct mount_entry* next;
 
     char * home_dir = getenv("HOME");
-    Add_element_to_list(list, "/", Format_filename("/",name_length-1,2), 2, ICON_HDD);
+    Add_element_to_list(list, "/", Format_filename("/",name_length-1,2), FSOBJECT_DRIVE, ICON_HDD);
     list->Nb_directories++;
     if(home_dir)
     {
-        Add_element_to_list(list, home_dir, Format_filename(home_dir, name_length, 2), 2, ICON_NONE);
+        Add_element_to_list(list, home_dir, Format_filename(home_dir, name_length, 2), FSOBJECT_DRIVE, ICON_NONE);
         list->Nb_directories++;
     }
 
@@ -787,7 +791,7 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
       if(mount_points_list->me_dummy == 0 && strcmp(mount_points_list->me_mountdir,"/") && strcmp(mount_points_list->me_mountdir,"/home"))
         {
           Add_element_to_list(list, mount_points_list->me_mountdir,
-              Format_filename(mount_points_list->me_mountdir, name_length + (icon==ICON_NONE?0:-1), 2), 2, icon);
+              Format_filename(mount_points_list->me_mountdir, name_length + (icon==ICON_NONE?0:-1), 2), FSOBJECT_DRIVE, icon);
           list->Nb_directories++;
         }
         next = mount_points_list -> me_next;
@@ -855,7 +859,7 @@ void Sort_list_of_files(T_Fileselector *list)
         // non:
 
           // Drives go at the top of the list, and files go after them
-        if ( current_item->Type < next_item->Type )
+        if ( (int)current_item->Type < (int)next_item->Type )
           need_swap=1;
           // If both elements have the same type, compare the file names, if
 		  // current is alphabetically before, we need to swap, unless it is
@@ -1025,7 +1029,7 @@ void Display_file_list(T_Fileselector *list, short offset_first,short selector_o
  * @param unicode_label pointer to a buffer to receive the label (Unicode)
  * @param type NULL or a pointer to receive the type : 0 = file, 1 = directory, 2 = drive.
  */
-static void Get_selected_item(T_Fileselector *list, short offset_first,short selector_offset,char * label,word * unicode_label,int *type)
+static void Get_selected_item(T_Fileselector *list, short offset_first,short selector_offset,char * label,word * unicode_label, enum FSOBJECT_TYPE *type)
 {
   T_Fileselector_item * current_item;
 
@@ -1310,8 +1314,7 @@ void Print_filename_in_fileselector(void)
 }
 
 /// Type of the selected entry in the file selector.
-/// 0 = file, 1 = directory
-static int Selected_type;
+static enum FSOBJECT_TYPE Selected_type;
 
 /// Displays the file list with sliders, etc.
 /// also optionally updates the current file name (Selector_filename)
@@ -1709,7 +1712,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   {
     short pos = Find_file_in_fileselector(&Filelist, context->File_name);
     Highlight_file((pos >= 0) ? pos : 0);
-    Selected_type = (pos >= 0) ? 0 : 1;
+    Selected_type = (pos >= 0) ? FSOBJECT_FILE : FSOBJECT_DIR;
     Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller,0);
 
     // On initialise le nom de fichier à celui en cours et non pas celui sous
@@ -1736,24 +1739,10 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         break;
 
       case  1 : // Load ou Save
-      if(load)
-        {
-          // Determine the type
-          if(File_exists(Selector_filename)) 
-          {
-            Selected_type = 0;
-            if(Directory_exists(Selector_filename)) Selected_type = 1;
-          }
-          else
-          {
-            Selected_type = 1;
-          }
-        }
+      if(load) // Determine the type
+          Selected_type = (File_exists(Selector_filename) && !Directory_exists(Selector_filename)) ? FSOBJECT_FILE : FSOBJECT_DIR;
         else
-        {
-          if(Directory_exists(Selector_filename)) Selected_type = 1;
-          else Selected_type = 0;
-        }
+          Selected_type = Directory_exists(Selector_filename) ? FSOBJECT_DIR : FSOBJECT_FILE;
         has_clicked_ok=1;
         break;
 
@@ -1761,7 +1750,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         break;
 
       case  3 : // Delete
-        if (Filelist.Nb_elements && (*Selector_filename!='.') && Selected_type!=2)
+        if (Filelist.Nb_elements && (*Selector_filename!='.') && Selected_type != FSOBJECT_DRIVE)
         {
           char * message;
           Hide_cursor();
@@ -1956,7 +1945,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         {
           T_Fileselector_item * current_item;
           current_item = Get_item_by_index(&Filelist, Selector->Position + Selector->Offset);
-          if (current_item->Type != 0 && !FILENAME_COMPARE(current_item->Full_name,Selector_filename))
+          if (current_item->Type != FSOBJECT_FILE && !FILENAME_COMPARE(current_item->Full_name,Selector_filename))
           {
             // current name is a highlighted directory
             Selector_filename[0]='\0';
@@ -2039,24 +2028,10 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
               Unicode_char_strlcat(Selector_filename_unicode, ext, sizeof(Selector_filename_unicode)/sizeof(word));
             }
           }
-          if(load)
-          {
-            // Determine the type
-            if(File_exists(Selector_filename))
-            {
-              Selected_type = 0;
-              if(Directory_exists(Selector_filename)) Selected_type = 1;
-            }
-            else
-            {
-              Selected_type = 1;
-            }
-          }
+          if(load) // Determine the type
+            Selected_type = (File_exists(Selector_filename) && !Directory_exists(Selector_filename)) ? FSOBJECT_FILE : FSOBJECT_DIR;
           else
-          {
-            if(Directory_exists(Selector_filename)) Selected_type = 1;
-            else Selected_type = 0;
-          }
+            Selected_type = Directory_exists(Selector_filename) ? FSOBJECT_DIR : FSOBJECT_FILE;
 
           // Now load immediately, but only if the user exited readline by pressing ENTER
           if (Mouse_K == 0) has_clicked_ok = 1;
@@ -2224,7 +2199,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           // On va dans le répertoire parent.
           strcpy(Selector_filename,PARENT_DIR);
           Selector_filename_unicode[0] = 0;
-          Selected_type=1;
+          Selected_type=FSOBJECT_DIR;
           has_clicked_ok=1;
         }
         Key=0;
@@ -2266,7 +2241,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
     {
       //   Si c'est un répertoire, on annule "has_clicked_ok" et on passe
       // dedans.
-      if (Selected_type!=0 || (directory_to_change_to != NULL))
+      if (Selected_type!=FSOBJECT_FILE || (directory_to_change_to != NULL))
       {
         Hide_cursor();
         has_clicked_ok=0;
