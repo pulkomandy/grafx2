@@ -42,7 +42,11 @@
 #ifdef _MSC_VER
 #include <windows.h>
 #endif
+#ifdef MAX_PATH
 #define PATH_MAX MAX_PATH
+#else
+#define PATH_MAX 4096
+#endif
 #endif
 
 #ifndef M_2PI
