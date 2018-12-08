@@ -1136,6 +1136,28 @@ int Init_program(int argc,char * argv[])
         case 0:
           if (Config.Opening_message)
             Button_Message_initial();
+          // Load default palette
+          {
+            FILE * f;
+            Init_context_layered_image(&context, DEFAULTPAL_FILENAME, Config_directory);
+            context.Type = CONTEXT_PALETTE;
+            context.Format = FORMAT_PAL;
+            f = Open_file_read(&context);
+            if (f != NULL)  // silently fail if the file cannot be open
+            {
+              fclose(f);
+              Load_image(&context);
+              if (File_error == 0)
+              {
+                Hide_cursor();
+                Compute_optimal_menu_colors(Main.palette);
+                Display_menu();
+                Display_cursor();
+                memcpy(Spare.palette, Main.palette, sizeof(T_Palette));
+              }
+            }
+            Destroy_context(&context);
+          }
           break;
 
         case 2:

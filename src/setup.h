@@ -122,6 +122,13 @@ void Set_config_directory(const char * program_dir, char * config_dir);
   #define INIDEF_FILENAME "gfx2def.ini"
 #endif
 
+/// Name of the default palette file
+#if defined (__MINT__)
+  #define DEFAULTPAL_FILENAME "DEFAULT.PAL"
+#else
+  #define DEFAULTPAL_FILENAME "default.pal"
+#endif
+
 /// Prefix for filenames of safety backups (main)
 #if defined (__MINT__)
   #define SAFETYBACKUP_PREFIX_A "A"
