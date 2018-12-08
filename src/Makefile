@@ -586,7 +586,9 @@ endif
         # For Linux (GLibc), iconv is built into the C library so no LOPT needed.
         COPT += -DENABLE_FILENAMES_ICONV
         ifneq ($(filter-out NetBSD Linux,$(PLATFORM)),)
-          LOPT += -liconv
+          ifneq ($(DEB_HOST_ARCH_OS), kfreebsd)
+            LOPT += -liconv
+          endif
         endif
 
       endif
