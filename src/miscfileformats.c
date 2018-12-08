@@ -3293,7 +3293,7 @@ int Save_C64_hires(T_IO_Context *context, byte saveWhat, byte loadAddr)
     return 0;
 }
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && __GNUC__ > 2
 /* use GCC built in's */
 #define count_set_bits __builtin_popcount
 #define count_trailing_zeros __builtin_ctz
