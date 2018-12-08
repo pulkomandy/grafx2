@@ -6,4 +6,4 @@ Terminal=false
 Type=Application
 Icon=grafx2
 Categories=Application;Graphics;
-MimeType=image/lbm;image/iff;image/pcx;image/tga;image/gif;image/bmp;
+MimeType=image/lbm;image/iff;image/pcx;image/tga;image/gif;image/bmp;image/x-icon;image/png;
