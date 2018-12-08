@@ -957,10 +957,10 @@ int Init_program(int argc,char * argv[])
   }
   Set_current_skin(Config.Skin_file, gfx);
   // Override colors
-  // Gfx->Default_palette[MC_Black]=Config.Fav_menu_colors[0];
-  // Gfx->Default_palette[MC_Dark] =Config.Fav_menu_colors[1];
-  // Gfx->Default_palette[MC_Light]=Config.Fav_menu_colors[2];
-  // Gfx->Default_palette[MC_White]=Config.Fav_menu_colors[3];
+  Gfx->Default_palette[MC_Black]=Config.Fav_menu_colors[0];
+  Gfx->Default_palette[MC_Dark] =Config.Fav_menu_colors[1];
+  Gfx->Default_palette[MC_Light]=Config.Fav_menu_colors[2];
+  Gfx->Default_palette[MC_White]=Config.Fav_menu_colors[3];
 
   // Even when using the skin's palette, if RGB range is small
   // the colors will be unusable.

@@ -528,6 +528,7 @@ int Load_INI(T_Config * conf)
       return ERROR_INI_MISSING;
     }
   }
+  GFX2_Log(GFX2_DEBUG, "Load_INI() loading %s\n", filename);
   
   if ((return_code=Load_INI_reach_group(file,buffer,"[MOUSE]")))
     goto Erreur_Retour;
