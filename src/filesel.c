@@ -50,6 +50,7 @@
 #include <unistd.h>
 #endif
 #include <ctype.h>
+#include <wctype.h>
 #include <sys/types.h>
 
 #include "const.h"
@@ -1451,7 +1452,11 @@ static void Highlight_file(short index)
 }
 
 
-short Find_filename_match(T_Fileselector *list, char * fname)
+/// Find the item best matching the searched filename
+///
+/// used by quicksearch
+/// @return -1 if not matching name found
+static short Find_filename_match(const T_Fileselector *list, const word * fname)
 {
   short best_match;
   T_Fileselector_item * current_item;
@@ -1468,7 +1473,22 @@ short Find_filename_match(T_Fileselector *list, char * fname)
       || (Config.Find_file_fast==(current_item->Type+1)) )
     {
       // On compare et si c'est mieux, on stocke dans Meilleur_nom
-      for (counter=0; fname[counter]!='\0' && tolower(current_item->Full_name[counter])==tolower(fname[counter]); counter++);
+      if (current_item->Unicode_full_name != NULL)
+      {
+        for (counter = 0; fname[counter] != 0; counter++)
+        {
+          if (towlower(current_item->Unicode_full_name[counter]) != towlower(fname[counter]))
+            break;
+        }
+      }
+      else
+      {
+        for (counter=0; fname[counter] != 0; counter++)
+        {
+          if (tolower(current_item->Full_name[counter] != towlower(fname[counter])))
+            break;
+        }
+      }
       if (counter>matching_letters)
       {
         matching_letters=counter;
@@ -1482,30 +1502,39 @@ short Find_filename_match(T_Fileselector *list, char * fname)
 }
 
 // Quicksearch system
-char  quicksearch_filename[MAX_PATH_CHARACTERS]="";
+#define MAX_QUICKSEARCH_LEN 50
 
+/// Current quicksearch string
+static word quicksearch_filename[MAX_QUICKSEARCH_LEN+1] = { 0 };
+
+/// Reset the current quicksearch string
 void Reset_quicksearch(void)
 {
-  quicksearch_filename[0]='\0';
+  quicksearch_filename[0] = 0;
 }
 
-short Quicksearch(T_Fileselector *selector)
+/// Select the item based on what the user type
+static short Quicksearch(const T_Fileselector *selector)
 {
-  int len;
+  word key;
+  size_t len;
   short most_matching_item;
   
-  // Autre => On se place sur le nom de fichier qui correspond
-  len=strlen(quicksearch_filename);
-  if (Key_ANSI>= ' ' && Key_ANSI < 255 && len<50)
+  // Go to the filename which matches what is typed
+  len = Unicode_strlen(quicksearch_filename);
+  key = Key_UNICODE;
+  if (key == 0)
+    key = Key_ANSI;
+
+  if (key >= ' ' && len < MAX_QUICKSEARCH_LEN)
   {
-    quicksearch_filename[len]=Key_ANSI;
-    quicksearch_filename[len+1]='\0';
-    most_matching_item=Find_filename_match(selector, quicksearch_filename);
+    quicksearch_filename[len] = key;
+    quicksearch_filename[len+1] = 0;
+    most_matching_item = Find_filename_match(selector, quicksearch_filename);
     if ( most_matching_item >= 0 )
-    {
       return most_matching_item;
-    }
-    *quicksearch_filename=0;
+    else
+      Reset_quicksearch();
   }
   return -1;
 }
