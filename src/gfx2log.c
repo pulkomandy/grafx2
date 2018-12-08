@@ -26,6 +26,7 @@
 #include <SDL.h>
 #endif
 #include <stdio.h>
+#include <string.h>
 #include "gfx2log.h"
 
 GFX2_Log_priority_T GFX2_verbosity_level = GFX2_INFO;
