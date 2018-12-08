@@ -1309,8 +1309,9 @@ void Print_filename_in_fileselector(void)
   Update_window_area(82,48,27*8,8);
 }
 
-static int Selected_type; // Utilisé pour mémoriser le type d'entrée choisi
-                        // dans le selecteur de fichier.
+/// Type of the selected entry in the file selector.
+/// 0 = file, 1 = directory
+static int Selected_type;
 
 /// Displays the file list with sliders, etc.
 /// also optionally updates the current file name (Selector_filename)
@@ -1708,6 +1709,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   {
     short pos = Find_file_in_fileselector(&Filelist, context->File_name);
     Highlight_file((pos >= 0) ? pos : 0);
+    Selected_type = (pos >= 0) ? 0 : 1;
     Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller,0);
 
     // On initialise le nom de fichier à celui en cours et non pas celui sous
@@ -1821,30 +1823,34 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         {
           if (temp!=Selector->Offset)
           {
-            // On met à jour le décalage
+            // first click on an item.
+            // update offset
             Selector->Offset=temp;
 
-            // On récupére le nom du schmilblick à "accéder"
+            // get item name and details
             Get_selected_item(&Filelist, Selector->Position,Selector->Offset,Selector_filename,Selector_filename_unicode,&Selected_type);
-            // On affiche le nouveau nom de fichier
+            // display the new filename
             Print_filename_in_fileselector();
-            // On affiche à nouveau la liste
+            // and update list
             Display_file_list(&Filelist, Selector->Position,Selector->Offset);
 
-            // On vient de changer de nom de fichier, donc on doit s'appreter
-            // a rafficher une preview
+            // A new file is selected so a new preview is needed
             New_preview_is_needed=1;
             Reset_quicksearch();
-            
           }
           else
           {
+            // This is the second click on the same item => Double click
+
             //   En sauvegarde, si on a double-clické sur un répertoire, il
             // faut mettre le nom de fichier au nom du répertoire. Sinon, dans
             // certains cas, on risque de sauvegarder avec le nom du fichier
             // actuel au lieu de changer de répertoire.
-            if (Selector->Position+Selector->Offset<Filelist.Nb_directories)
+            if (Selector->Position+Selector->Offset < Filelist.Nb_directories)
+            { // clicked on a directory
+              // retrieve again the item name
               Get_selected_item(&Filelist, Selector->Position,Selector->Offset,Selector_filename,Selector_filename_unicode,&Selected_type);
+            }
 
             has_clicked_ok=1;
             New_preview_is_needed=1;
