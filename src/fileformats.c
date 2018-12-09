@@ -1012,7 +1012,7 @@ void Load_IFF(T_IO_Context * context)
               previous_frame = calloc(line_size * context->Height,1);
               for (y_pos=0; y_pos<context->Height; y_pos++)
               {
-                const byte * pix_p = Main.backups->Pages->Image[Main.current_layer].Pixels + y_pos * Main.backups->Pages->Width;
+                const byte * pix_p = context->Target_address + y_pos * context->Pitch;
                 // Dispatch the pixel into planes
                 for (x_pos=0; x_pos<context->Width; x_pos++)
                 {
@@ -1137,7 +1137,7 @@ void Load_IFF(T_IO_Context * context)
             previous_frame = calloc(line_size * context->Height,1);
             for (y_pos=0; y_pos<context->Height; y_pos++)
             {
-              const byte * pix_p = Main.backups->Pages->Image[Main.current_layer].Pixels + y_pos * Main.backups->Pages->Width;
+              const byte * pix_p = context->Target_address + y_pos * context->Pitch;
               // Dispatch the pixel into planes
               for (x_pos=0; x_pos<context->Width; x_pos++)
               {
@@ -4804,9 +4804,14 @@ void Save_GIF(T_IO_Context * context)
                 temp = LSDB.Backcol;//=context->Transparent_color;
                 for(GIF_pos_Y = 0; GIF_pos_Y < context->Height; GIF_pos_Y++) {
                   for(GIF_pos_X = 0; GIF_pos_X < context->Width; GIF_pos_X++) {
+                    if (GIF_pos_X >= min_X && GIF_pos_X <= max_X && GIF_pos_Y >= min_Y && GIF_pos_Y <= max_Y)
+                      continue; // already in the box
                     // compare Pixel from previous layer or from background depending on disposal method
-                    if(disposal_method == DISPOSAL_METHOD_DO_NOT_DISPOSE)
-                      temp = Main.backups->Pages->Image[current_layer - 1].Pixels[GIF_pos_Y * context->Pitch + GIF_pos_X];
+                    if(disposal_method == DISPOSAL_METHOD_DO_NOT_DISPOSE) {
+                      Set_saving_layer(context, current_layer - 1);
+                      temp = Get_pixel(context, GIF_pos_X, GIF_pos_Y);
+                      Set_saving_layer(context, current_layer);
+                    }
                     if(temp != Get_pixel(context, GIF_pos_X, GIF_pos_Y)) {
                       if(GIF_pos_X < min_X) min_X = GIF_pos_X;
                       if(GIF_pos_X > max_X) max_X = GIF_pos_X;

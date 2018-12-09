@@ -3874,8 +3874,6 @@ void Test_SCR(T_IO_Context * context, FILE * file)
   unsigned long pal_size, file_size;
   byte mode, color_anim_flag;
 
-  (void)file;
-
   File_error = 1;
 
   file_size = File_length_file(file);
