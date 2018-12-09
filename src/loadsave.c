@@ -114,7 +114,7 @@ const T_Format File_formats[] = {
   {FORMAT_KCF, " kcf", Test_KCF, Load_KCF, Save_KCF, 1, 0, 0, "kcf", "kcf"},
   {FORMAT_PAL, " pal", Test_PAL, Load_PAL, Save_PAL, 1, 0, 0, "pal", "pal"},
   {FORMAT_GPL, " gpl", Test_GPL, Load_GPL, Save_GPL, 1, 0, 0, "gpl", "gpl"},
-  {FORMAT_C64, " c64", Test_C64, Load_C64, Save_C64, 0, 1, 0, "c64",
+  {FORMAT_C64, " c64", Test_C64, Load_C64, Save_C64, 0, 1, 1, "c64",
     "c64;p64;a64;pi;rp;aas;art;dd;iph;ipt;hpc;ocp;koa;koala;fli;bml;cdu;prg;pmg;rpm"},
   {FORMAT_SCR, " cpc", Test_SCR, Load_SCR, Save_SCR, 0, 0, 0, "scr", "cpc;scr;win"},
   {FORMAT_CM5, " cm5", Test_CM5, Load_CM5, Save_CM5, 0, 0, 1, "cm5", "cm5"},

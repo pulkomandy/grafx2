@@ -46,12 +46,14 @@
 #endif
 #endif
 
+#if 0
 static void Set_Pixel_in_layer(word x,word y, byte layer, byte color)
 {
   *((y)*Main.image_width+(x)+Main.backups->Pages->Image[layer].Pixels)=color;
 }
+#endif
 
-int C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
+int C64_FLI(T_IO_Context * context, byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
 {
   word used_colors[200][40];
   word block_used_colors[25][40];
@@ -67,9 +69,9 @@ int C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
   const byte no_color=16;
 
   // Prerequisites
-  if (Main.backups->Pages->Nb_layers < 3)
+  if (context->Nb_layers < 3)
     return 1;
-  if (Main.image_width != 160 || Main.image_height != 200)
+  if (context->Width != 160 || context->Height != 200)
     return 2;
  
   memset(used_colors,0,200*40*sizeof(word));
@@ -80,23 +82,25 @@ int C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
   // Initialize these as "unset"
   memset(line_color,no_color,200*sizeof(byte));
   memset(block_color,no_color,25*40*sizeof(byte));
- 
+
   // Examine all 4-pixel blocks to fill used_colors[][]
+  Set_saving_layer(context, 2);
   for (row=0;row<200;row++)
   {
     for (col=0;col<40;col++)
     {
       for (x=0;x<4;x++)
       {
-        byte c=*((row)*Main.image_width+(col*4+x)+Main.backups->Pages->Image[2].Pixels);
+        byte c = Get_pixel(context, col*4+x, row);
         used_colors[row][col] |= 1<<c;
       }
     }
   }
   // Get "mandatory colors" from layer 1
+  Set_saving_layer(context, 0);
   for (row=0;row<200;row++)
   {
-    byte c=*((row)*Main.image_width+0+Main.backups->Pages->Image[0].Pixels);
+    byte c = Get_pixel(context, 0, row);
     if (c<16)
     {
       line_color[row]=c;
@@ -108,11 +112,12 @@ int C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
     }
   }
   // Get "mandatory colors" from layer 2
+  Set_saving_layer(context, 1);
   for (row=0;row<200;row+=8)
   {
     for (col=0;col<40;col++)
     {
-      byte c=*((row)*Main.image_width+(col*4)+Main.backups->Pages->Image[1].Pixels);
+      byte c = Get_pixel(context, col*4, row);
       if (c<16)
       {
         block_color[row/8][col]=c;
@@ -295,7 +300,9 @@ int C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
       }
     }
   }
-  
+
+  // Screen RAMs and Bitmap
+  Set_saving_layer(context, 2);
   for(row=0; row<25; row++)
   {
     for(col=0; col<40; col++)
@@ -324,7 +331,7 @@ int C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
           for(x=0; x<4; x++)
           {
             byte bits;
-            byte c=*((row*8+y)*Main.image_width+(col*4+x)+Main.backups->Pages->Image[2].Pixels);
+            byte c = Get_pixel(context, col*4+x, row*8+y);
            
             if (c==line_color[row*8+y])
               // BG color
@@ -357,6 +364,7 @@ int C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
 
 }
 
+#if 0
 int C64_FLI_enforcer(void)
 {
   byte background[200];
@@ -427,6 +435,7 @@ int C64_FLI_enforcer(void)
     
   return 0;
 }
+#endif
 
 void C64_set_palette(T_Components * palette)
 {

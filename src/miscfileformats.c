@@ -3748,7 +3748,7 @@ int Save_C64_fli(T_IO_Context * context, byte saveWhat, byte loadAddr)
 
   memset(file_buffer,0,sizeof(file_buffer));
 
-  switch(C64_FLI(file_buffer+9474, file_buffer+1282, file_buffer+258, file_buffer+2))
+  switch(C64_FLI(context, file_buffer+9474, file_buffer+1282, file_buffer+258, file_buffer+2))
   {
     case 0: // OK
       break;
@@ -3831,10 +3831,11 @@ void Save_C64(T_IO_Context * context)
     return;
   }
 
+  Set_saving_layer(context, 0);
   switch (saveFormat)
   {
     case F_fli:
-      if (Main.backups->Pages->Nb_layers < 3)
+      if (context->Nb_layers < 3)
         File_error = Save_C64_fli_monolayer(context, saveWhat, loadAddr);
       else
         File_error = Save_C64_fli(context, saveWhat, loadAddr);

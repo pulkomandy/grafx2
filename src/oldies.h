@@ -22,6 +22,8 @@
 ///@file oldies.h
 /// functions relative to old computers (Commodore 64, Thomsons MO/TO, Amstrad CPC, ZX Spectrum, etc.)
 
+#include "loadsave.h"
+
 /** @defgroup c64 Commodore 64
  * Some C64 video mode related functions
  * @{
@@ -29,14 +31,16 @@
 /**
  * Save a 3 layer picture to C64 FLI format
  *
+ * @param context the Save context
  * @param bitmap a 8000 byte buffer to store bitmap data
  * @param screen_ram a 8192 byte buffer to store the 8 screen RAMs
  * @param color_ram a 1000 byte buffer to store the color RAM
  * @param background a 200 byte buffer to store the background colors
  * @return 0 for success, 1 if the picture is less than 3 layers, 2 if the picture dimensions are not 160x200
  */
-int C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background);
+int C64_FLI(T_IO_Context * context, byte *bitmap, byte *screen_ram, byte *color_ram, byte *background);
 
+#if 0
 /**
  * FLI Check/enforcer
  *
@@ -46,6 +50,7 @@ int C64_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background);
  * @return 0 for success, 2 if the picture is not 4 layers, 1 if the picture dimensions are not 160x200
  */
 int C64_FLI_enforcer(void);
+#endif
 
 /**
  * Set the 16 colors Commodore 64 palette
