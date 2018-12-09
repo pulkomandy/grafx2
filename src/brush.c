@@ -122,9 +122,9 @@ void Display_paintbrush(short x,short y,byte color)
     
   if ((Main.backups->Pages->Image_mode == IMAGE_MODE_MODE5
   	|| Main.backups->Pages->Image_mode == IMAGE_MODE_RASTER) && Main.current_layer < 4)
-  {
     goto single_pixel;
-  }
+  if ((Main.backups->Pages->Image_mode == IMAGE_MODE_C64FLI) && Main.current_layer < 2)
+    goto single_pixel;
   switch (Paintbrush_shape)
   {
     case PAINTBRUSH_SHAPE_NONE : // No paintbrush. for colorpicker for example
@@ -285,8 +285,9 @@ void Draw_paintbrush(short x,short y,byte color)
   int position;
   byte old_color;
 
-  if ((Main.backups->Pages->Image_mode == IMAGE_MODE_MODE5
+  if (((Main.backups->Pages->Image_mode == IMAGE_MODE_MODE5
       || Main.backups->Pages->Image_mode == IMAGE_MODE_RASTER) && Main.current_layer < 4)
+     || (Main.backups->Pages->Image_mode == IMAGE_MODE_C64FLI && Main.current_layer < 2))
   {
     // Flood-fill the enclosing area
     if (x<Main.image_width && y<Main.image_height && x>= 0 && y >= 0
@@ -327,7 +328,26 @@ void Draw_paintbrush(short x,short y,byte color)
             height=1;
             break;
         }
-      } else {
+      }
+      else if (Main.backups->Pages->Image_mode == IMAGE_MODE_C64FLI)
+      {
+        if (Main.current_layer == 0)  // background
+        {                             // full line
+          min_x=0;
+          min_y=y;
+          width=Main.image_width;
+          height=1;
+        }
+        else      // Color RAM
+        {         // 4x8 Block
+            min_x=x&~3;
+            min_y=y&~7;
+            width=4;
+            height=8;
+        }
+      }
+      else
+      {
         int prev_x;
         // Raster mode IMAGE_MODE_RASTER
         // No matter what, you can always edit only 1 line at a time here, and you will always

@@ -463,6 +463,19 @@ void Button_Constraint_mode(void)
       }
     }
     break;
+  case IMAGE_MODE_C64FLI:
+    // switch to layer mode if needed
+    if (Main.backups->Pages->Image_mode != IMAGE_MODE_LAYERED)
+      Switch_layer_mode(IMAGE_MODE_LAYERED);
+    // auto-create extra layers
+    while (Main.backups->Pages->Nb_layers < 3)
+      if (Add_layer(Main.backups, Main.backups->Pages->Nb_layers))
+      {
+        Verbose_message("Error!", "Failed to create the 3 layers needed by C64 Flexible Line Interpretation mode.");
+        return;
+      }
+    Main.backups->Pages->Transparent_color = 16;
+    break;
   case IMAGE_MODE_HGR:
   case IMAGE_MODE_DHGR:
     // switch to layer mode if needed
@@ -515,7 +528,7 @@ void Button_Constraint_menu(void)
     {IMAGE_MODE_RASTER,  "Rasters (CPC)", "CPC Rasters           ", 1},
     {IMAGE_MODE_C64HIRES,"C64 HiRes",     "2 colors per 8x8 block", 1}, // 320x200
     {IMAGE_MODE_C64MULTI,"C64 Multicolor","4 colors per 4x1 block", 1}, // 160x200
-    //{IMAGE_MODE_C64FLI,  "C64 FLI",       "improved multicolor   ", 1}, // 160x200
+    {IMAGE_MODE_C64FLI,  "C64 FLI",       "improved multicolor   ", 1}, // 160x200
     {IMAGE_MODE_HGR,     "Apple II HGR",  "6 colors              ", 1},  // 280x192
     {IMAGE_MODE_DHGR,    "Apple II DHGR", "\"Le Chat Mauve\" mode3 ", 1},  // 560x192
   };

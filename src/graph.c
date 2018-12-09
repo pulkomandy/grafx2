@@ -3505,6 +3505,88 @@ static void Pixel_in_screen_c64multi_with_opt_preview(word x,word y,byte color,i
   }
 }
 
+
+/// Paint in the background or Color RAM layer of C64 FLI
+///
+/// Update the bitmap layer pixel if needed
+static void Pixel_in_screen_c64fli_underlay_with_opt_preview(word x,word y,byte color,int preview)
+{
+  byte oldcolor = Read_pixel_from_current_layer(x, y);
+
+  // does it changes the upper layer (3) ?
+  if (oldcolor != Read_pixel_from_layer(Main.current_layer ^ 1, x, y)
+      && oldcolor == Read_pixel_from_layer(2, x, y))
+  {
+    Pixel_in_layer(2, x, y, color);
+    if (((1 << 2) & Main.layers_visible) != 0
+      && (Main_visible_image_depth_buffer.Image[+x+y*Main.image_width] <= 2))
+    {
+      Main_screen[x+y*Main.image_width]=color;
+      if (preview)
+        Pixel_preview(x,y,color);
+    }
+  }
+
+  Pixel_in_screen_layered_with_opt_preview(x, y, color, preview);
+}
+
+/// Paint in the bitmap layer of C64 FLI
+///
+/// enforce C64 FLI mode constraints.
+static void Pixel_in_screen_c64fli_bitmap_with_opt_preview(word x,word y,byte color,int preview)
+{
+  word startx = x & ~3;
+  word x2;
+  byte c[4];
+  byte oldcolor = Read_pixel_from_current_layer(x, y);
+
+  if (oldcolor == color)
+    return; // nothing to do !
+  c[0] = Read_pixel_from_layer(0, x, y);
+  c[1] = c[0];
+  c[2] = c[0];
+  c[3] = Read_pixel_from_layer(1, x, y);
+
+  Pixel_in_screen_layered_with_opt_preview(x,y,color,preview);
+
+  // if the color is the background or the color RAM color,
+  // no clash is possible !
+  if (color == c[0] || color == c[1])
+    return;
+
+  // check the number of color used
+  for (x2 = startx; x2 < startx+4; x2++)
+  {
+    int i;
+    byte col = Read_pixel_from_current_layer(x2, y);
+    // look for the color in the 4 color "palette"
+    for (i = 0; i < 4; i++)
+    {
+      if (col == c[i])
+        break;
+    }
+    if (i >= 4)
+    {
+      if (c[1] == c[0])
+        c[1] = col; // assign 1st color of Screen RAM
+      else if (c[2] == c[0])
+        c[2] = col; // assign 2nd color of Screen RAM
+      else // color clash !
+      {
+        if (oldcolor == c[0] || oldcolor == c[3])
+          oldcolor = c[2];  // pick another one !
+        for (x2 = startx; x2 < startx+4; x2++)
+        {
+          col = Read_pixel_from_current_layer(x2, y);
+          if (col == oldcolor)
+            Pixel_in_screen_layered_with_opt_preview(x2,y,color,preview);
+        }
+        return;
+      }
+    }
+  }
+}
+
 /// Paint a a single pixel in image and optionnaly on screen : in a layer under one that acts as a layer-selector (mode 5).
 static void Pixel_in_screen_underlay_with_opt_preview(word x,word y,byte color,int preview)
 {
@@ -3812,7 +3894,6 @@ void Update_pixel_renderer(void)
 {
   switch (Main.backups->Pages->Image_mode)
   {
-  case IMAGE_MODE_C64FLI: //TODO
   case IMAGE_MODE_ANIMATION:
     // direct
     Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_direct_with_opt_preview;
@@ -3846,6 +3927,14 @@ void Update_pixel_renderer(void)
     else if (Main.current_layer<4 && (Main.layers_visible & (1<<4)))  // underlay
       Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_underlay_with_opt_preview;
     else                              // layered (again, for layers > 4 in MODE5 and RASTER)
+      Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_layered_with_opt_preview;
+    break;
+  case IMAGE_MODE_C64FLI:
+    if (Main.current_layer < 2)
+      Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_c64fli_underlay_with_opt_preview;
+    else if (Main.current_layer == 2)
+      Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_c64fli_bitmap_with_opt_preview;
+    else
       Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_layered_with_opt_preview;
     break;
   case IMAGE_MODE_HGR:
