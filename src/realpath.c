@@ -25,9 +25,9 @@
 // the path. So this implementation is limited, it's really better to
 // use realpath() if your platform has it.
   
-    #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__) || defined(__amigaos__)
+    #if !defined(PATH_MAX)
         // This is a random default value ...
-        #define PATH_MAX 32768
+        #define PATH_MAX 4096
     #endif
   
     static char *sep(char *path)
@@ -123,18 +123,22 @@
         return _fullpath(resolved_path,_path,260);
     }
 #else
-#include <limits.h>
+
 // Use the stdlib function.
     char *Realpath(const char *_path, char *resolved_path)
     {
-		// While linux version of realpath handles the resolved_path being a
-		// null pointer, this is not the case for other platforms (Haiku), nor
-		// specified by the open group in POSIX. So, be safe and allocate
-		// ourselves.
-        if(resolved_path==NULL) // if we called realpath with null as a 2nd arg
-            resolved_path = (char*) malloc( PATH_MAX );
-        return realpath(_path, resolved_path);
+      /// POSIX 2004 states :
+      /// If resolved_name is a null pointer, the behavior of realpath()
+      /// is implementation-defined.
+      ///
+      /// but POSIX 2008 :
+      /// If resolved_name is a null pointer, the generated pathname shall
+      /// be stored as a null-terminated string in a buffer allocated as if
+      /// by a call to malloc().
+      ///
+      /// So we assume all platforms now support passing NULL.
+      /// If you find a platform where this is not the case,
+      /// please add a new implementation with #ifdef's.
+      return realpath(_path, resolved_path);
     }
 #endif
-
-
