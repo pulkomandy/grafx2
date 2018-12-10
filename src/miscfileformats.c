@@ -3093,13 +3093,17 @@ void Load_C64(T_IO_Context * context)
         {
           case F_fli:
             Load_C64_fli(context,bitmap,screen_ram,color_ram,background);
+            Set_image_mode(context, IMAGE_MODE_C64FLI);
             break;
           case F_multi:
             Load_C64_multi(context,bitmap,screen_ram,color_ram,
                            (background==NULL) ? 0 : *background);
+            Set_image_mode(context, IMAGE_MODE_C64MULTI);
             break;
           default:
             Load_C64_hires(context,bitmap,screen_ram);
+            if (loadFormat == F_hires)
+              Set_image_mode(context, IMAGE_MODE_C64HIRES);
         }
 
         free(file_buffer);
@@ -5652,6 +5656,8 @@ void Load_MOTO(T_IO_Context * context)
     }
   }
   Pre_load(context, width, height, file_size, FORMAT_MOTO, ratio, bpp);
+  if (mode == MOTO_MODE_40col)
+    Set_image_mode(context, IMAGE_MODE_THOMSON);
   File_error = 0;
   i = 0;
   for (y = 0; y < height; y++)
@@ -6685,6 +6691,8 @@ void Load_HGR(T_IO_Context * context)
   free(vram[0]);
   free(vram[1]);
   File_error = 0;
+
+  Set_image_mode(context, is_dhgr ? IMAGE_MODE_DHGR : IMAGE_MODE_HGR);
 }
 
 /**

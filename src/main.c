@@ -1186,7 +1186,10 @@ int Init_program(int argc,char * argv[])
 
           // If only one image was loaded, assume the spare has same image type
           if (file_in_command_line==1)
-            Spare.backups->Pages->Image_mode = Main.backups->Pages->Image_mode;
+          {
+            if (Main.backups->Pages->Image_mode <= IMAGE_MODE_ANIMATION)
+              Spare.backups->Pages->Image_mode = Main.backups->Pages->Image_mode;
+          }
 
           Hide_cursor();
           Compute_optimal_menu_colors(Main.palette);

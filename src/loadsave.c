@@ -317,7 +317,12 @@ void Set_image_mode(T_IO_Context *context, enum IMAGE_MODES mode)
   if (context->Type == CONTEXT_MAIN_IMAGE)
   {
     Main.backups->Pages->Image_mode = mode;
+    //Switch_layer_mode(mode);
     Update_screen_targets();
+    if (mode > IMAGE_MODE_ANIMATION)
+      Selected_Constraint_Mode = mode;
+    // update the "FX" button state
+    Draw_menu_button(BUTTON_EFFECTS,Any_effect_active());
   }
 }
 
