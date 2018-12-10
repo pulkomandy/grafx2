@@ -40,6 +40,19 @@
  */
 int C64_FLI(T_IO_Context * context, byte *bitmap, byte *screen_ram, byte *color_ram, byte *background);
 
+/**
+ * Convert a (1 layer) picture to C64 FLI format
+ *
+ * @param bitmap a 8000 byte buffer to store bitmap data
+ * @param screen_ram a 8192 byte buffer to store the 8 screen RAMs
+ * @param color_ram a 1000 byte buffer to store the color RAM
+ * @param background a 200 byte buffer to store the background colors
+ * @param pixels source pixel buffer (at least 160x200)
+ * @param pitch bytes per line of the pixel buffer
+ * @return 0 the number of constraint errors
+ */
+int C64_pixels_to_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background, const byte * pixels, long pitch);
+
 #if 0
 /**
  * FLI Check/enforcer

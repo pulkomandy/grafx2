@@ -3316,37 +3316,6 @@ static int Save_C64_hires(T_IO_Context *context, byte saveWhat, byte loadAddr)
   return 0;
 }
 
-#if defined(__GNUC__) && __GNUC__ > 2
-/* use GCC built in's */
-#define count_set_bits __builtin_popcount
-#define count_trailing_zeros __builtin_ctz
-#else
-/**
- * Count the number of bit sets
- */
-static int count_set_bits(unsigned int value)
-{
-  int count;
-
-  for (count = 0; value != 0; value >>= 1)
-    count += (value & 1);
-  return count;
-}
-
-/**
- * Count the number of low order zero's before the first bit set
- */
-static int count_trailing_zeros(unsigned int value)
-{
-  int count;
-
-  if (value == 0)
-    return -1;
-  for (count = 0; (value & 1) == 0; value >>= 1)
-    count++;
-  return count;
-}
-#endif
 
 /**
  * Save a C64 FLI (Flexible Line Interpretation) picture.
@@ -3369,146 +3338,16 @@ static int count_trailing_zeros(unsigned int value)
 int Save_C64_fli_monolayer(T_IO_Context *context, byte saveWhat, byte loadAddr)
 {
   FILE * file;
-  int bx, by; // 4x8 block coordinates
-  int cx, cy; // coordinates inside block
   byte bitmap[8000],screen_ram[1024*8],color_ram[1024];
   byte background[256];
-  byte pixel;
 
   memset(bitmap, 0, sizeof(bitmap));
   memset(screen_ram, 0, sizeof(screen_ram));
   memset(color_ram, 0, sizeof(color_ram));
   memset(background, 0, sizeof(background));
 
-  for (by = 0; by < 25; by++)
-  {
-    word background_possible[8];
-    word color_ram_possible[40];
-
-    for(cy = 0; cy < 8; cy++)
-      background_possible[cy] = 0xffff;
-    for(bx = 0; bx < 40; bx++)
-      color_ram_possible[bx] = 0xffff;
-
-    // first we try to find the background color of the 8 lines
-    // and the Color RAM (color 11) of the 40 blocks
-    for(cy = 0; cy < 8; cy++)
-    {
-      for(bx = 0; bx < 40; bx++)
-      {
-        word colors_used = 0;
-        int n_color_used;
-        for(cx = 0; cx < 4; cx++)
-        {
-          pixel = Get_pixel(context, bx*4+cx, by*8+cy);
-          // if (pixel > 15) error
-          colors_used |= 1 << pixel;
-        }
-        n_color_used = count_set_bits(colors_used);
-        if (n_color_used == 4)
-        {
-          background_possible[cy] &= colors_used; // The background is among the color used in this 4x1 block
-          color_ram_possible[bx] &= colors_used;       // The color 11 is among the color used in this 4x1 block
-        }
-      }
-    }
-    // Choose background (default is black #0)
-    for(cy = 0; cy < 8; cy++)
-    {
-      int n_possible_backgrounds = count_set_bits(background_possible[cy]);
-      if (n_possible_backgrounds == 0)
-      {
-        //ERROR
-        Warning_with_format("No possible background color for line %d.\n4x1 pixel blocks using 4 different colors must share at least one color.", by*8+cy);
-        return 1;
-      }
-      else
-      {
-        // pick the first one
-        background[by*8+cy] = count_trailing_zeros(background_possible[cy]);
-#ifdef _DEBUG
-        if (background[by*8+cy] != 0)
-          GFX2_Log(GFX2_DEBUG, "  y=%d background_possible=$%04x (count=%d) background color=#%d\n",
-                   by*8+cy, background_possible[cy], n_possible_backgrounds, background[by*8+cy]);
-#endif
-      }
-    }
-    // 2nd pass for color RAM values
-    for(cy = 0; cy < 8; cy++)
-    {
-      for(bx = 0; bx < 40; bx++)
-      {
-        word colors_used = 0;
-        int n_color_used;
-        for(cx = 0; cx < 4; cx++)
-        {
-          pixel = Get_pixel(context, bx*4+cx, by*8+cy);
-          colors_used |= 1 << pixel;
-        }
-        colors_used &= ~(1 << background[by*8+cy]);  // remove background
-        n_color_used = count_set_bits(colors_used);
-        if (n_color_used == 3)
-        {
-          color_ram_possible[bx] &= colors_used;       // The color 11 is among the color used in this 4x1 block
-        }
-      }
-    }
-    // choose the color RAM values (default to #0)
-    for(bx = 0; bx < 40; bx++)
-    {
-      int n_possibles_color11 = count_set_bits(color_ram_possible[bx]);
-      if (n_possibles_color11 == 0)
-      {
-        Warning_with_format("No possible color RAM value for 4x8 block (%d,%d) coordinates (%d,%d)\nThe 8 4x1 blocks must share a color.", bx, by, bx*4, by*8);
-        return 1;
-      }
-      else
-      {
-        color_ram[by*40+bx] = count_trailing_zeros(color_ram_possible[bx]);
-#ifdef _DEBUG
-        if (color_ram[by*40+bx] != 0)
-          GFX2_Log(GFX2_DEBUG, "bx=%d by=%d color_ram_possible=%04x (count=%d) color11=#%d\n",
-                   bx, by, color_ram_possible[bx], n_possibles_color11, color_ram[by*40+bx]);
-#endif
-      }
-    }
-    // Now it is possible to encode Screen RAM and Bitmap
-    for(cy = 0; cy < 8; cy++)
-    {
-      for(bx = 0; bx < 40; bx++)
-      {
-        byte bits = 0;
-        byte c[4];
-        c[0] = background[by*8+cy]; // color 00 = background
-        c[1] = c[0];                // color 01 (defaulting to same as background)
-        c[2] = c[1];                // color 10 (defaulting to same as background)
-        c[3] = color_ram[by*40+bx]; // color 11 = color RAM value
-        for(cx = 0; cx < 4; cx++)
-        {
-          bits <<= 2;
-          pixel = Get_pixel(context, bx*4+cx, by*8+cy);
-          if (pixel == c[0])  // background => color 00
-            continue;
-          if(pixel == c[3])   // color RAM value => color 11
-            bits |= 3;
-          else
-          {
-            if (c[1] == c[0])
-              c[1] = pixel; // set color 01 = upper nibble of screen RAM
-            if (pixel == c[1])
-              bits |= 1;
-            else
-            {
-              c[2] = pixel; // set color 02 = lower nibble of screen RAM
-              bits |= 2;
-            }
-          }
-        }
-        screen_ram[1024*cy + bx + by * 40] = (c[1] << 4) | c[2];
-        bitmap[(by*40 + bx)*8 + cy] = bits;
-      }
-    }
-  }
+  if (C64_pixels_to_FLI(bitmap, screen_ram, color_ram, background, context->Target_address, context->Pitch) > 0)
+    return 1;
 
   file = Open_file_write(context);
 
