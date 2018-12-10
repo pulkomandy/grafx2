@@ -24,6 +24,20 @@
 
 #include "loadsave.h"
 
+/**
+ * identifier for each Image mode
+ *
+ * @return an ASCII label for the mode
+ */
+const char * Constraint_mode_label(enum IMAGE_MODES mode);
+
+/**
+ * Search constraint mode for a label
+ *
+ * @return -1 for unknown mode or one of ::IMAGE_MODES value
+ */
+int Constraint_mode_from_label(const char * label);
+
 /** @defgroup c64 Commodore 64
  * Some C64 video mode related functions
  * @{

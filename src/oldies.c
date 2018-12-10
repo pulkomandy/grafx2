@@ -82,6 +82,50 @@ static int count_trailing_zeros(unsigned int value)
 }
 #endif
 
+static const struct {
+  enum IMAGE_MODES mode;
+  const char * label;
+} image_modes_labels[] = {
+  { IMAGE_MODE_LAYERED,   "LAYERED" },
+  { IMAGE_MODE_ANIMATION, "ANIMATION" },
+  { IMAGE_MODE_ZX,        "ZX_SPECTRUM" },
+  { IMAGE_MODE_GBC,       "GAMEBOYCOLOR" },
+  { IMAGE_MODE_THOMSON,   "THOMSON40COL" },
+  { IMAGE_MODE_EGX,       "CPC_EGX" },
+  { IMAGE_MODE_EGX2,      "CPC_EGX2" },
+  { IMAGE_MODE_MODE5,     "CPC_MODE5" },
+  { IMAGE_MODE_RASTER,    "CPC_RASTER" },
+  { IMAGE_MODE_C64HIRES,  "C64_HIRES" },
+  { IMAGE_MODE_C64MULTI,  "C64_MULTICOLOR" },
+  { IMAGE_MODE_C64FLI,    "C64_FLI" },
+  { IMAGE_MODE_HGR,       "APPLE2_HGR" },
+  { IMAGE_MODE_DHGR,      "APPLE2_DHGR" }
+};
+
+const char * Constraint_mode_label(enum IMAGE_MODES mode)
+{
+  unsigned int i;
+
+  for (i = 0; i < sizeof(image_modes_labels)/sizeof(image_modes_labels[0]); i++)
+  {
+    if (image_modes_labels[i].mode == mode)
+      return image_modes_labels[i].label;
+  }
+  return NULL;
+}
+
+int Constraint_mode_from_label(const char * label)
+{
+  unsigned int i;
+
+  for (i = 0; i < sizeof(image_modes_labels)/sizeof(image_modes_labels[0]); i++)
+  {
+    if (0 == strcmp(image_modes_labels[i].label, label))
+      return (int)image_modes_labels[i].mode;
+  }
+  return -1;
+}
+
 #if 0
 static void Set_Pixel_in_layer(word x,word y, byte layer, byte color)
 {

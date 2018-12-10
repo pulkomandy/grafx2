@@ -89,6 +89,7 @@
 #include "pages.h"
 #include "windows.h" // Best_color()
 #include "fileformats.h"
+#include "oldies.h"
 
 #ifndef __no_pnglib__
 static void Load_PNG_Sub(T_IO_Context * context, FILE * file);
@@ -4011,6 +4012,7 @@ void GIF_new_pixel(T_IO_Context * context, T_GIF_IDB *idb, int is_transparent, b
 
 void Load_GIF(T_IO_Context * context)
 {
+  int image_mode = -1;
   char signature[6];
 
   word * alphabet_stack;     // Pile de décodage d'une chaîne
@@ -4174,6 +4176,7 @@ void Load_GIF(T_IO_Context * context)
                     {
                       char aeb[0x0B];
                       Read_bytes(GIF_file,aeb, 0x0B);
+                      GFX2_Log(GFX2_DEBUG, "GIF extension \"%.11s\"\n", aeb);
                       if (File_error)
                         ;
                       else if (!memcmp(aeb,"NETSCAPE2.0",0x0B))
@@ -4258,6 +4261,20 @@ void Load_GIF(T_IO_Context * context)
                           Read_byte(GIF_file,&size_to_read);
                         if (size_to_read!=0)
                           File_error=1;
+                      }
+                      else if (0 == memcmp(aeb, "GFX2MODE", 8))
+                      {
+                        Read_byte(GIF_file,&size_to_read);
+                        if (size_to_read > 0)
+                        { // read the image mode. We'll set it after having loaded all layers.
+                          char * label = malloc((size_t)size_to_read + 1);
+                          Read_bytes(GIF_file, label, size_to_read);
+                          label[size_to_read] = '\0';
+                          image_mode = Constraint_mode_from_label(label);
+                          GFX2_Log(GFX2_DEBUG, "    mode = %s (%d)\n", label, image_mode);
+                          Read_byte(GIF_file,&size_to_read);
+                          free(label);
+                        }
                       }
                       else
                       {
@@ -4482,6 +4499,10 @@ void Load_GIF(T_IO_Context * context)
           if (!Read_byte(GIF_file,&block_identifier))
           File_error=2;
         }
+
+        // set the mode that have been read previously.
+        if (image_mode > 0)
+          Set_image_mode(context, image_mode);
       } // Le fichier contenait un LSDB
       else
         File_error=1;
@@ -4691,9 +4712,24 @@ void Save_GIF(T_IO_Context * context)
           // LL : 01 to loop
           // SSSS : number of loops
           if (context->Type == CONTEXT_MAIN_IMAGE && Main.backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+          {
             if (context->Nb_layers>1)
               Write_bytes(GIF_file,"\x21\xFF\x0BNETSCAPE2.0\x03\x01\x00\x00\x00",19);
-            
+          }
+          else if (context->Type == CONTEXT_MAIN_IMAGE && Main.backups->Pages->Image_mode > IMAGE_MODE_ANIMATION)
+          {
+            const char * label = Constraint_mode_label(Main.backups->Pages->Image_mode);
+            size_t len = strlen(label);
+            // Write extension for storing IMAGE_MODE
+            Write_byte(GIF_file,0x21);  // Extension Introducer
+            Write_byte(GIF_file,0xff);  // Extension Label
+            Write_byte(GIF_file,  11);  // Block size
+            Write_bytes(GIF_file, "GFX2MODE2.6", 11); // Application Identifier + Appl. Authentication Code
+            Write_byte(GIF_file, (byte)len);    // Block size
+            Write_bytes(GIF_file, label, len);  // Data
+            Write_byte(GIF_file, 0);    // Block terminator
+          }
+
           // Ecriture du commentaire
           if (context->Comment[0])
           {
