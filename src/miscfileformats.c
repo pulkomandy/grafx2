@@ -4221,7 +4221,7 @@ void Load_CM5(T_IO_Context* context)
 
   if (context->Type == CONTEXT_MAIN_IMAGE)
   {
-    Main.backups->Pages->Image_mode = IMAGE_MODE_MODE5;
+    Set_image_mode(context, IMAGE_MODE_MODE5);
 
     // Fill layer with color we just read (Layer 1 - INK 0)
     for(ty=0; ty<context->Height; ty++)
@@ -4944,11 +4944,7 @@ void Load_FLI(T_IO_Context * context)
         if (current_frame == 0)
         {
           Pre_load(context, header.width,header.height,file_size,FORMAT_FLI,PIXEL_SIMPLE,header.depth);
-          if (context->Type == CONTEXT_MAIN_IMAGE)
-          {
-            Main.backups->Pages->Image_mode = IMAGE_MODE_ANIMATION;
-            Update_screen_targets();
-          }
+          Set_image_mode(context, IMAGE_MODE_ANIMATION);
           if (Config.Clear_palette)
             memset(context->Palette,0,sizeof(T_Palette));
         }

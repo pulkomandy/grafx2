@@ -230,6 +230,8 @@ void Set_saving_layer(T_IO_Context *context, int layer);
 void Set_frame_duration(T_IO_Context *context, int duration);
 /// Function to call to get an image's duration for saving
 int Get_frame_duration(T_IO_Context *context);
+/// Function to set a specific image mode
+void Set_image_mode(T_IO_Context *context, enum IMAGE_MODES mode);
 
 // =================================================================
 // What follows here are the definitions of functions and data

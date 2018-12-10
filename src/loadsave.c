@@ -312,6 +312,15 @@ int Get_frame_duration(T_IO_Context *context)
   }
 }
 
+void Set_image_mode(T_IO_Context *context, enum IMAGE_MODES mode)
+{
+  if (context->Type == CONTEXT_MAIN_IMAGE)
+  {
+    Main.backups->Pages->Image_mode = mode;
+    Update_screen_targets();
+  }
+}
+
 ///
 /// Generic allocation and similar stuff, done at beginning of image load,
 /// as soon as size is known.

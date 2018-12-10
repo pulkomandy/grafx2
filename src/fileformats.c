@@ -2007,11 +2007,7 @@ void Load_IFF(T_IO_Context * context)
           context->Background_transparent = header.Mask == 2;
           context->Transparent_color = context->Background_transparent ? header.Transp_col : 0;
 
-          if (context->Type == CONTEXT_MAIN_IMAGE)
-          {
-            Main.backups->Pages->Image_mode = IMAGE_MODE_ANIMATION;
-            Update_screen_targets();
-          }
+          Set_image_mode(context, IMAGE_MODE_ANIMATION);
 
           if (iff_format == FORMAT_LBM)    // "ILBM": InterLeaved BitMap
           {
@@ -2752,11 +2748,7 @@ void Load_INFO(T_IO_Context * context)
                 if (img_index == 1)
                 {
                   Pre_load(context, width, height,file_size,FORMAT_INFO,PIXEL_SIMPLE, bpp);
-                  if (context->Type == CONTEXT_MAIN_IMAGE)
-                  {
-                    Main.backups->Pages->Image_mode = IMAGE_MODE_ANIMATION;
-                    Update_screen_targets();
-                  }
+                  Set_image_mode(context, IMAGE_MODE_ANIMATION);
                   has_NewIcons = 1;
                 }
                 else
@@ -2884,11 +2876,7 @@ void Load_INFO(T_IO_Context * context)
         memcpy(context->Palette, amigaOS2x_pal, sizeof(amigaOS2x_pal));
 
       Pre_load(context, header.Width, header.Height,file_size,FORMAT_INFO,PIXEL_SIMPLE, imgheaders[0].Depth);
-      if (context->Type == CONTEXT_MAIN_IMAGE)
-      {
-        Main.backups->Pages->Image_mode = IMAGE_MODE_ANIMATION;
-        Update_screen_targets();
-      }
+      Set_image_mode(context, IMAGE_MODE_ANIMATION);
       for (img_count = 0; img_count < 2 && buffers[img_count] != NULL; img_count++)
       {
         if (img_count > 0)
@@ -4193,11 +4181,7 @@ void Load_GIF(T_IO_Context * context)
                         is_looping=1;
                         // The well-known Netscape extension.
                         // Load as an animation
-                        if (context->Type == CONTEXT_MAIN_IMAGE)
-                        {
-                          Main.backups->Pages->Image_mode = IMAGE_MODE_ANIMATION;
-                          Update_screen_targets();
-                        }
+                        Set_image_mode(context, IMAGE_MODE_ANIMATION);
                         // Skip sub-block
                         do
                         {
