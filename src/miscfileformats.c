@@ -3115,10 +3115,10 @@ void Load_C64(T_IO_Context * context)
  *
  * @param[in,out] saveFormat one of the C64 mode from @ref c64_format
  * @param[in,out] saveWhat 0=All, 1=Only bitmap, 2=Only Screen RAM, 3=Only color RAM
- * @param[in,out] loadAddr actual load address/0x2000 or 0 for "None"
+ * @param[in,out] loadAddr actual load address or 0 for "None"
  * @return true to proceed, false to abort
  */
-static int Save_C64_window(enum c64_format *saveFormat, byte *saveWhat, byte *loadAddr)
+static int Save_C64_window(enum c64_format *saveFormat, byte *saveWhat, word *loadAddr)
 {
   int button;
   unsigned int i;
@@ -3140,6 +3140,10 @@ static int Save_C64_window(enum c64_format *saveFormat, byte *saveWhat, byte *lo
     "$C000",
     "$E000"
   };
+  // default addresses :
+  //  - FLI Fli Graph 2 (BlackMail) => $3b00
+  //  - multicolor (Koala Painter) => $6000
+  //  - hires (InterPaint) => $4000
 
   Open_window(200,120,"C64 saving settings");
   Window_set_normal_button(110,100,80,15,"Save",1,1,KEY_RETURN); // 1
@@ -3152,7 +3156,7 @@ static int Save_C64_window(enum c64_format *saveFormat, byte *saveWhat, byte *lo
     Window_dropdown_add_item(what,i,what_label[i]);
 
   Print_in_window(113,18,"Address:",MC_Dark,MC_Light);
-  addr = Window_set_dropdown_button(110,28,70,15,70,address_label[*loadAddr/32],1, 0, 1, LEFT_SIDE,0); // 4
+  addr = Window_set_dropdown_button(110,28,70,15,70,address_label[*loadAddr/0x2000],1, 0, 1, LEFT_SIDE,0); // 4
   Window_dropdown_clear_items(addr);
   for (i=0; i<sizeof(address_label)/sizeof(address_label[0]); i++)
     Window_dropdown_add_item(addr,i,address_label[i]);
@@ -3189,8 +3193,8 @@ static int Save_C64_window(enum c64_format *saveFormat, byte *saveWhat, byte *lo
         break;
 
       case 4: // Load addr
-        *loadAddr = Window_attribute2*32;
-        GFX2_Log(GFX2_DEBUG, "Save_C64_Window() : addr=$%02x00 (%d)\n",*loadAddr,Window_attribute2);
+        *loadAddr = Window_attribute2*0x2000;
+        GFX2_Log(GFX2_DEBUG, "Save_C64_Window() : addr=$%04x (%d)\n",*loadAddr,Window_attribute2);
         break;
 
       case 5:
@@ -3210,7 +3214,7 @@ static int Save_C64_window(enum c64_format *saveFormat, byte *saveWhat, byte *lo
 /// Save a C64 hires picture
 ///
 /// c64 hires is 320x200 with only 2 colors per 8x8 block.
-static int Save_C64_hires(T_IO_Context *context, byte saveWhat, byte loadAddr)
+static int Save_C64_hires(T_IO_Context *context, byte saveWhat, word loadAddr)
 {
   int i, pos = 0;
   word cx, cy, x, y;
@@ -3303,10 +3307,8 @@ static int Save_C64_hires(T_IO_Context *context, byte saveWhat, byte loadAddr)
   }
 
   if (loadAddr)
-  {
-    Write_byte(file,0);
-    Write_byte(file,loadAddr);
-  }
+    Write_word_le(file,loadAddr);
+
   if (saveWhat==0 || saveWhat==1)
     Write_bytes(file,bitmap,8000);
   if (saveWhat==0 || saveWhat==2)
@@ -3335,7 +3337,7 @@ static int Save_C64_hires(T_IO_Context *context, byte saveWhat, byte loadAddr)
  * @param saveWhat what part of the data to save
  * @param loadAddr The load address
  */
-int Save_C64_fli_monolayer(T_IO_Context *context, byte saveWhat, byte loadAddr)
+int Save_C64_fli_monolayer(T_IO_Context *context, byte saveWhat, word loadAddr)
 {
   FILE * file;
   byte bitmap[8000],screen_ram[1024*8],color_ram[1024];
@@ -3359,10 +3361,7 @@ int Save_C64_fli_monolayer(T_IO_Context *context, byte saveWhat, byte loadAddr)
   }
 
   if (loadAddr)
-  {
-    Write_byte(file, 0);
-    Write_byte(file, loadAddr);
-  }
+    Write_word_le(file, loadAddr);
 
   if (saveWhat==0)
     Write_bytes(file,background,256);    // Background colors for lines 0-199 (+ 56bytes padding)
@@ -3388,7 +3387,7 @@ int Save_C64_fli_monolayer(T_IO_Context *context, byte saveWhat, byte loadAddr)
  * @param saveWhat what part of the data to save
  * @param loadAddr The load address
  */
-int Save_C64_multi(T_IO_Context *context, byte saveWhat, byte loadAddr)
+int Save_C64_multi(T_IO_Context *context, byte saveWhat, word loadAddr)
 {
     /*
     BITS     COLOR INFORMATION COMES FROM
@@ -3547,10 +3546,7 @@ int Save_C64_multi(T_IO_Context *context, byte saveWhat, byte loadAddr)
   setvbuf(file, NULL, _IOFBF, 64*1024);
 
   if (loadAddr)
-  {
-    Write_byte(file,0);
-    Write_byte(file,loadAddr);
-  }
+    Write_word_le(file,loadAddr);
 
   if (saveWhat==0 || saveWhat==1)
     Write_bytes(file,bitmap,8000);
@@ -3580,7 +3576,7 @@ int Save_C64_multi(T_IO_Context *context, byte saveWhat, byte loadAddr)
  * @param saveWhat what part of the data to save
  * @param loadAddr The load address
  */
-int Save_C64_fli(T_IO_Context * context, byte saveWhat, byte loadAddr)
+int Save_C64_fli(T_IO_Context * context, byte saveWhat, word loadAddr)
 {
   FILE *file;
   byte file_buffer[17474];
@@ -3614,11 +3610,7 @@ int Save_C64_fli(T_IO_Context * context, byte saveWhat, byte loadAddr)
   }
 
   if (loadAddr)
-  {
-    file_buffer[0]=0;
-    file_buffer[1]=loadAddr;
-    Write_bytes(file,file_buffer,2);
-  }
+    Write_word_le(file, loadAddr);
 
   if (saveWhat==0)
     Write_bytes(file,file_buffer+2,256);    // Background colors for lines 0-199 (+ 56bytes padding)
@@ -3649,7 +3641,8 @@ int Save_C64_fli(T_IO_Context * context, byte saveWhat, byte loadAddr)
 void Save_C64(T_IO_Context * context)
 {
   enum c64_format saveFormat = F_invalid;
-  static byte saveWhat=0, loadAddr=0;
+  static byte saveWhat=0;
+  static word loadAddr=0;
 
   if (((context->Width!=320) && (context->Width!=160)) || context->Height!=200)
   {
