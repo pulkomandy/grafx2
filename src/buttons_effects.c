@@ -437,6 +437,11 @@ void Button_Constraint_mode(void)
     Verbose_message("Error!", "Emulation of Amstrad CPC's Mode5 can only be used on an image whose width is a multiple of 48.");
     return;
   }
+  if (Selected_Constraint_Mode == IMAGE_MODE_C64FLI && ((Main.image_width < 160) || (Main.image_height < 200)))
+  {
+    Verbose_message("Error!", "Emulation of Commodore 64 FLI Mode needs a 160x200 sized image.");
+    return;
+  }
 
   // now check the constraints on existing pixels
   switch (Selected_Constraint_Mode)
@@ -467,14 +472,54 @@ void Button_Constraint_mode(void)
     // switch to layer mode if needed
     if (Main.backups->Pages->Image_mode != IMAGE_MODE_LAYERED)
       Switch_layer_mode(IMAGE_MODE_LAYERED);
+    Main.backups->Pages->Transparent_color = 16;
     // auto-create extra layers
     while (Main.backups->Pages->Nb_layers < 3)
-      if (Add_layer(Main.backups, Main.backups->Pages->Nb_layers))
+      if (Add_layer(Main.backups, 0))
       {
         Verbose_message("Error!", "Failed to create the 3 layers needed by C64 Flexible Line Interpretation mode.");
         return;
       }
-    Main.backups->Pages->Transparent_color = 16;
+    {
+      word x, y;
+      byte bitmap[8000],screen_ram[1024*8],color_ram[1024];
+      byte background[200];
+
+      memset(bitmap, 0, sizeof(bitmap));
+      memset(screen_ram, 0, sizeof(screen_ram));
+      memset(color_ram, 0, sizeof(color_ram));
+      memset(background, 0, sizeof(background));
+
+      // give "hints" to the converter
+      for (y = 0; y < 200; y++)
+        background[y] = Read_pixel_from_layer(0, 0, y);
+      for (y = 0; y < 25; y++)
+      {
+        for (x = 0; x < 40; x++)
+          color_ram[x + y*40] = Read_pixel_from_layer(1, x*4, y*8);
+      }
+
+      if (C64_pixels_to_FLI(bitmap, screen_ram, color_ram, background, Main.backups->Pages->Image[2].Pixels, Main.image_width, 1) > 0)
+      {
+        // put errors in layer 4 if not already done
+        if (Main.backups->Pages->Nb_layers < 4)
+        {
+          Add_layer(Main.backups, Main.backups->Pages->Nb_layers);
+          C64_pixels_to_FLI(bitmap, screen_ram, color_ram, background, Main.backups->Pages->Image[2].Pixels, Main.image_width, 1);
+        }
+      }
+
+      // copy background to layer 1
+      // and color RAM to layer 2
+      for (y = 0; y < 200; y++)
+      {
+        for (x = 0; x < 160; x++)
+        {
+          Pixel_in_layer(0, x, y, background[y]);
+          Pixel_in_layer(1, x, y, color_ram[(x >> 2) + (y >> 3)*40]);
+        }
+      }
+    }
     break;
   case IMAGE_MODE_HGR:
   case IMAGE_MODE_DHGR:

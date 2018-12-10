@@ -43,15 +43,22 @@ int C64_FLI(T_IO_Context * context, byte *bitmap, byte *screen_ram, byte *color_
 /**
  * Convert a (1 layer) picture to C64 FLI format
  *
+ * Some "hints" can be put in background and color_ram.
+ * (a color value >= 16 means no hint).
+ *
+ * Errors can be either outputed to the user with Warning messages,
+ * or put in layer 4. The layer 4 has to be created before.
+ *
  * @param bitmap a 8000 byte buffer to store bitmap data
  * @param screen_ram a 8192 byte buffer to store the 8 screen RAMs
  * @param color_ram a 1000 byte buffer to store the color RAM
  * @param background a 200 byte buffer to store the background colors
  * @param pixels source pixel buffer (at least 160x200)
  * @param pitch bytes per line of the pixel buffer
+ * @param errmode error reporting mode 0 = report, 1 = mark in layer 4
  * @return 0 the number of constraint errors
  */
-int C64_pixels_to_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background, const byte * pixels, long pitch);
+int C64_pixels_to_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background, const byte * pixels, long pitch, int errmode);
 
 #if 0
 /**

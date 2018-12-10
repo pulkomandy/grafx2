@@ -3348,7 +3348,10 @@ int Save_C64_fli_monolayer(T_IO_Context *context, byte saveWhat, word loadAddr)
   memset(color_ram, 0, sizeof(color_ram));
   memset(background, 0, sizeof(background));
 
-  if (C64_pixels_to_FLI(bitmap, screen_ram, color_ram, background, context->Target_address, context->Pitch) > 0)
+  memset(color_ram, 0xff, 40*25); // no hint
+  memset(background, 0xff, 200);
+
+  if (C64_pixels_to_FLI(bitmap, screen_ram, color_ram, background, context->Target_address, context->Pitch, 0) > 0)
     return 1;
 
   file = Open_file_write(context);

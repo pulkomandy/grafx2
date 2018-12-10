@@ -38,6 +38,7 @@
 #include "pages.h"
 #include "windows.h"
 #include "layers.h"
+#include "graph.h"
 
 // I don't have round() in MSVC++ 2010 (_MSC_VER=1600)
 #if defined(_MSC_VER)
@@ -399,7 +400,8 @@ int C64_FLI(T_IO_Context * context, byte *bitmap, byte *screen_ram, byte *color_
 
 }
 
-int C64_pixels_to_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background, const byte * pixels, long pitch)
+int C64_pixels_to_FLI(byte *bitmap, byte *screen_ram, byte *color_ram,
+                      byte *background, const byte * pixels, long pitch, int errmode)
 {
   int bx, by; // 4x8 block coordinates
   int cx, cy; // coordinates inside block
@@ -445,13 +447,22 @@ int C64_pixels_to_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *bac
       if (n_possible_backgrounds == 0)
       {
         //ERROR
-        Warning_with_format("No possible background color for line %d.\n4x1 pixel blocks using 4 different colors must share at least one color.", by*8+cy);
-        return 1;
+        if (errmode == 0)
+        {
+          Warning_with_format("No possible background color for line %d.\n4x1 pixel blocks using 4 different colors must share at least one color.", by*8+cy);
+          return 1;
+        }
+        error_count++;
+        GFX2_Log(GFX2_INFO, "C64_pixels_to_FLI() no possible background for line %u. Default to #0.\n",  by*8+cy);
+        // default to background color #0
+        if (background[by*8+cy] >= 16)
+          background[by*8+cy] = 0;
       }
       else
       {
-        // pick the first one
-        background[by*8+cy] = count_trailing_zeros(background_possible[cy]);
+        // if the caller gave us a "hint", check it is "possible"
+        if (background[by*8+cy] >= 16 || (background_possible[cy] & (1 << background[by*8+cy])) == 0)
+          background[by*8+cy] = count_trailing_zeros(background_possible[cy]); // pick the first possible
 #ifdef _DEBUG
         if (background[by*8+cy] != 0)
           GFX2_Log(GFX2_DEBUG, "  y=%d background_possible=$%04x (count=%d) background color=#%d\n",
@@ -488,10 +499,38 @@ int C64_pixels_to_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *bac
       // choose the color RAM values (default to #0)
       if (color_ram_possible[bx] == 0)
       {
-        Warning_with_format("No possible color RAM value for 4x8 block (%d,%d) coordinates (%d,%d)\nThe 8 4x1 blocks must share a color.", bx, by, bx*4, by*8);
-        return 1;
+        if (errmode == 0)
+        {
+          Warning_with_format("No possible color RAM value for 4x8 block (%d,%d) coordinates (%d,%d)\nThe 8 4x1 blocks must share a color.", bx, by, bx*4, by*8);
+          return 1;
+        }
+        else
+        {
+          // Mark errors in Layer 4
+          for(cy = 0; cy < 8; cy++)
+          {
+            word colors_used = 0;
+            for(cx = 0; cx < 4; cx++)
+            {
+              pixel = pixels[bx*4+cx + pitch*(by*8+cy)];
+              if (pixel < 16 && pixel != background[by*8+cy])
+                colors_used |= 1 << pixel;
+            }
+            if (count_set_bits(colors_used) >= 3)
+            {
+              error_count++;
+              GFX2_Log(GFX2_INFO, "C64_pixels_to_FLI() too much colors in block at (%u to %u, %u)\n", bx*4, bx*4+3, by*7+cy);
+              for(cx = 0; cx < 4; cx++)
+              {
+                pixel = pixels[bx*4+cx + pitch*(by*8+cy)];
+                if (pixel < 16 && pixel != background[by*8+cy] && Main.backups->Pages->Nb_layers >= 4)
+                  Pixel_in_layer(3, bx*4+cx, by*8+cy, 17);
+              }
+            }
+          }
+        }
       }
-      else
+      else if (color_ram[by*40+bx] >= 16 || ((1 << color_ram[by*40+bx]) & color_ram_possible[bx]) == 0)
       {
         word possible = color_ram_possible[bx];
         // avoid using same color as background
