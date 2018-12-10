@@ -151,11 +151,8 @@ double Fround(double n, unsigned d);
 int Min(int a,int b);
 int Max(int a,int b);
 
-char* Mode_label(int mode);
+const char* Mode_label(int mode);
 int Convert_videomode_arg(const char *argument);
-
-int Popcount_word(word x);
-int Popcount_dword(dword x);
 
 /// Return a number of milliseconds
 dword GFX2_GetTicks(void);

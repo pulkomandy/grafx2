@@ -168,7 +168,7 @@ int C64_FLI(T_IO_Context * context, byte *bitmap, byte *screen_ram, byte *color_
     memset(usage,0,16*sizeof(dword));
     for (col=0;col<40;col++)
     {
-      used_colors_count[row][col]=Popcount_word(used_colors[row][col]);
+      used_colors_count[row][col] = count_set_bits(used_colors[row][col]);
       // Count which colors are used 3 times
       if (used_colors_count[row][col]==3)
       {
@@ -239,7 +239,7 @@ int C64_FLI(T_IO_Context * context, byte *bitmap, byte *screen_ram, byte *color_
             }
           }
         }
-        if (filter != 0 && Popcount_word(filter) == 1)
+        if (filter != 0 && count_set_bits(filter) == 1)
         {
           // Only one color matched all needs: Use it.
           i=1;
