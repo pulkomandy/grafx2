@@ -880,8 +880,8 @@ else
 	  $(DOC_FILES:../%=%)
 endif
 ifeq ($(PLATFORM),Darwin)
-	$(ZIP) $(ZIPOPT) -r ../Grafx2.app-$(shell uname -p)-$(API)-$(VERSIONTAG).zip Grafx2.app
-	cd .. && $(ZIP) $(ZIPOPT) Grafx2.app-$(shell uname -p)-$(API)-$(VERSIONTAG).zip \
+	$(ZIP) $(ZIPOPT) -r ../Grafx2.app-$(shell uname -m)-$(API)-$(VERSIONTAG).zip Grafx2.app
+	cd .. && $(ZIP) $(ZIPOPT) Grafx2.app-$(shell uname -m)-$(API)-$(VERSIONTAG).zip \
 	  $(DOC_FILES:../%=%) $(SRCARCH:../%=%)
 endif
 	$(TAR) czf "../grafx2-$(VERSIONTAG)-src.tgz" $(TARTRANSFORM) \
