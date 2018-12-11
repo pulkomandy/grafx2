@@ -4293,8 +4293,16 @@ void Load_GIF(T_IO_Context * context)
                           label[size_to_read] = '\0';
                           image_mode = Constraint_mode_from_label(label);
                           GFX2_Log(GFX2_DEBUG, "    mode = %s (%d)\n", label, image_mode);
-                          Read_byte(GIF_file,&size_to_read);
                           free(label);
+                          Read_byte(GIF_file,&size_to_read);
+                          // be future proof, skip following sub-blocks :
+                          while (size_to_read!=0 && !File_error)
+                          {
+                            if (fseek(GIF_file,size_to_read,SEEK_CUR) < 0)
+                              File_error = 1;
+                            if (!Read_byte(GIF_file,&size_to_read))
+                              File_error = 1;
+                          }
                         }
                       }
                       else
@@ -4303,8 +4311,10 @@ void Load_GIF(T_IO_Context * context)
                         Read_byte(GIF_file,&size_to_read);
                         while (size_to_read!=0 && !File_error)
                         {
-                          fseek(GIF_file,size_to_read,SEEK_CUR);
-                          Read_byte(GIF_file,&size_to_read);
+                          if (fseek(GIF_file,size_to_read,SEEK_CUR) < 0)
+                            File_error = 1;
+                          if (!Read_byte(GIF_file,&size_to_read))
+                            File_error = 1;
                         }
                       }
                     }
