@@ -3851,38 +3851,56 @@ void Save_ICO(T_IO_Context * context)
 
 
 //////////////////////////////////// GIF ////////////////////////////////////
-typedef struct
-{
-  word Width;   // Width of the complete image area
-  word Height;  // Height of the complete image area
-  byte Resol;   // Informations about the resolution (and other)
-  byte Backcol; // Proposed background color
-  byte Aspect;  // Informations about aspect ratio (and other)
-} T_GIF_LSDB;   // Logical Screen Descriptor Block
+/**
+ * @defgroup GIF GIF format
+ * Graphics Interchange Format
+ *
+ * The GIF format uses LZW compression and stores indexed color pictures
+ * up to 256 colors. It has the ability to store several pictures in the same
+ * file : GrafX2 takes advantage of this feature for storing layered images
+ * and animations.
+ *
+ * GrafX2 implements GIF89a :
+ * https://www.w3.org/Graphics/GIF/spec-gif89a.txt
+ *
+ * @{
+ */
 
+/// Logical Screen Descriptor Block
 typedef struct
 {
-  word Pos_X;         // X offset where the image should be pasted
-  word Pos_Y;         // Y offset where the image should be pasted
-  word Image_width;   // Width of image
-  word Image_height;  // Height of image
-  byte Indicator;     // Misc image information
-  byte Nb_bits_pixel; // Nb de bits par pixel
-} T_GIF_IDB;          // Image Descriptor Block
+  word Width;   ///< Width of the complete image area
+  word Height;  ///< Height of the complete image area
+  byte Resol;   ///< Informations about the resolution (and other)
+  byte Backcol; ///< Proposed background color
+  byte Aspect;  ///< Informations about aspect ratio. Ratio = (Aspect + 15) / 64
+} T_GIF_LSDB;
 
+/// Image Descriptor Block
 typedef struct
 {
-  byte Block_identifier;  // 0x21
-  byte Function;          // 0xF9
-  byte Block_size;        // 4
-  byte Packed_fields;     // 11100000 : Reserved
-                          // 00011100 : Disposal method
-                          // 00000010 : User input flag
-                          // 00000001 : Transparent flag
-  word Delay_time;        // Time for this frame to stay displayed
-  byte Transparent_color; // Which color index acts as transparent
-  word Block_terminator;  // 0x00
-} T_GIF_GCE;              // Graphic Control Extension
+  word Pos_X;         ///< X offset where the image should be pasted
+  word Pos_Y;         ///< Y offset where the image should be pasted
+  word Image_width;   ///< Width of image
+  word Image_height;  ///< Height of image
+  byte Indicator;     ///< Misc image information
+  byte Nb_bits_pixel; ///< Nb de bits par pixel
+} T_GIF_IDB;
+
+/// Graphic Control Extension
+typedef struct
+{
+  byte Block_identifier;  ///< 0x21
+  byte Function;          ///< 0xF9
+  byte Block_size;        ///< 4
+  byte Packed_fields;     ///< 11100000 : Reserved
+                          ///< 00011100 : Disposal method
+                          ///< 00000010 : User input flag
+                          ///< 00000001 : Transparent flag
+  word Delay_time;        ///< Time for this frame to stay displayed
+  byte Transparent_color; ///< Which color index acts as transparent
+  word Block_terminator;  ///< 0x00
+} T_GIF_GCE;
 
 enum DISPOSAL_METHOD
 {
@@ -3892,8 +3910,9 @@ enum DISPOSAL_METHOD
   DISPOSAL_METHOD_RESTORE_PREVIOUS = 3,
 };
 
-// -- Tester si un fichier est au format GIF --------------------------------
 
+/// @ingroup loadsaveformats GIF
+/// Test if a file is GIF format
 void Test_GIF(T_IO_Context * context, FILE * file)
 {
   char signature[6];
@@ -3903,6 +3922,7 @@ void Test_GIF(T_IO_Context * context, FILE * file)
 
   if (Read_bytes(file,signature,6))
   {
+    /// checks if the signature (6 first bytes) is either GIF87a or GIF89a
     if ((!memcmp(signature,"GIF87a",6))||(!memcmp(signature,"GIF89a",6)))
       File_error=0;
   }
@@ -3911,6 +3931,7 @@ void Test_GIF(T_IO_Context * context, FILE * file)
 
 // -- Lire un fichier au format GIF -----------------------------------------
 
+/// @todo avoid using global variables, define a "GIF context" instead
 // Définition de quelques variables globales au chargement du GIF87a
 word GIF_nb_bits;        // Nb de bits composants un code complet
 word GIF_remainder_bits;      // Nb de bits encore dispos dans GIF_last_byte
@@ -3924,9 +3945,8 @@ word GIF_finished_interlaced_image; // L'image entrelacée est finie de charger
 word GIF_pass;          // index de passe de l'image entrelacée
 FILE *GIF_file;        // L'handle du fichier
 
-// -- Lit le code à GIF_nb_bits suivant --
-
-word GIF_get_next_code(void)
+/// Reads the next code (GIF_nb_bits bits)
+static word GIF_get_next_code(void)
 {
   word nb_bits_to_process=GIF_nb_bits;
   word nb_bits_processed  =0;
@@ -3964,12 +3984,11 @@ word GIF_get_next_code(void)
   return GIF_current_code;
 }
 
-// -- Affiche un nouveau pixel --
-
-void GIF_new_pixel(T_IO_Context * context, T_GIF_IDB *idb, int is_transparent, byte color)
+/// Put a new pixel
+static void GIF_new_pixel(T_IO_Context * context, T_GIF_IDB *idb, int is_transparent, byte color)
 {
   if (!is_transparent || color!=context->Transparent_color)
-  Set_pixel(context, idb->Pos_X+GIF_pos_X, idb->Pos_Y+GIF_pos_Y,color);
+    Set_pixel(context, idb->Pos_X+GIF_pos_X, idb->Pos_Y+GIF_pos_Y,color);
 
   GIF_pos_X++;
 
@@ -4010,6 +4029,8 @@ void GIF_new_pixel(T_IO_Context * context, T_GIF_IDB *idb, int is_transparent, b
 }
 
 
+/// @ingroup loadsaveformats GIF
+/// Load GIF file
 void Load_GIF(T_IO_Context * context)
 {
   int image_mode = -1;
@@ -4531,9 +4552,8 @@ void Load_GIF(T_IO_Context * context)
   int  GIF_stop;         // "On peut arrêter la sauvegarde du fichier"
   byte GIF_buffer[256];   // buffer d'écriture de bloc de données compilées
 
-  // -- Vider le buffer GIF dans le buffer KM --
-
-  void GIF_empty_buffer(void)
+  /// Flush ::GIF_buffer
+  static void GIF_empty_buffer(void)
   {
     word index;
 
@@ -4548,9 +4568,8 @@ void Load_GIF(T_IO_Context * context)
     }
   }
 
-  // -- Ecrit un code à GIF_nb_bits --
-
-  void GIF_set_code(word Code)
+  /// Write a code (GIF_nb_bits bits)
+  static void GIF_set_code(word Code)
   {
     word nb_bits_to_process=GIF_nb_bits;
     word nb_bits_processed  =0;
@@ -4583,9 +4602,8 @@ void Load_GIF(T_IO_Context * context)
   }
 
 
-  // -- Lire le pixel suivant --
-
-  byte GIF_next_pixel(T_IO_Context *context, T_GIF_IDB *idb)
+  /// Read the next pixel
+  static byte GIF_next_pixel(T_IO_Context *context, T_GIF_IDB *idb)
   {
     byte temp;
 
@@ -4602,7 +4620,8 @@ void Load_GIF(T_IO_Context * context)
   }
 
 
-
+/// @ingroup loadsaveformats GIF
+/// Save a GIF file
 void Save_GIF(T_IO_Context * context)
 {
   word * alphabet_prefix;  // Table des préfixes des codes
@@ -4704,13 +4723,18 @@ void Save_GIF(T_IO_Context * context)
         {
           // La palette a été correctement écrite.
 
-          // Ecriture de la transparence
-          //Write_bytes(GIF_file,"\x21\xF9\x04\x01\x00\x00\xNN\x00",8);
-
-          // "Netscape" animation extension
-          //  Write_bytes(GIF_file,"\x21\xFF\x0BNETSCAPE2.0\x03\xLL\xSS\xSS\x00",19);
-          // LL : 01 to loop
-          // SSSS : number of loops
+          /// - "Netscape" animation extension :
+          /// <pre>
+          ///   0x21       Extension Label
+          ///   0xFF       Application Extension Label
+          ///   0x0B       Block Size
+          ///   "NETSCAPE" Application Identifier (8 bytes)
+          ///   "2.0"      Application Authentication Code (3 bytes)
+          ///   0x03       Sub-block Data Size
+          ///   0xLL       01 to loop
+          ///   0xSSSS     (little endian) number of loops, 0 means infinite loop
+          ///   0x00 Block terminator </pre>
+          /// see http://www.vurdalakov.net/misc/gif/netscape-looping-application-extension
           if (context->Type == CONTEXT_MAIN_IMAGE && Main.backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
           {
             if (context->Nb_layers>1)
@@ -4718,16 +4742,30 @@ void Save_GIF(T_IO_Context * context)
           }
           else if (context->Type == CONTEXT_MAIN_IMAGE && Main.backups->Pages->Image_mode > IMAGE_MODE_ANIMATION)
           {
+            /// - GrafX2 extension to store ::IMAGE_MODES :
+            /// <pre>
+            ///   0x21       Extension Label
+            ///   0xFF       Application Extension Label
+            ///   0x0B       Block Size
+            ///   "GFX2MODE" Application Identifier (8 bytes)
+            ///   "2.6"      Application Authentication Code (3 bytes)
+            ///   0xll       Sub-block Data Size
+            ///   string     label
+            ///   0x00 Block terminator </pre>
+            /// @see Constraint_mode_label()
             const char * label = Constraint_mode_label(Main.backups->Pages->Image_mode);
-            size_t len = strlen(label);
-            // Write extension for storing IMAGE_MODE
-            Write_byte(GIF_file,0x21);  // Extension Introducer
-            Write_byte(GIF_file,0xff);  // Extension Label
-            Write_byte(GIF_file,  11);  // Block size
-            Write_bytes(GIF_file, "GFX2MODE2.6", 11); // Application Identifier + Appl. Authentication Code
-            Write_byte(GIF_file, (byte)len);    // Block size
-            Write_bytes(GIF_file, label, len);  // Data
-            Write_byte(GIF_file, 0);    // Block terminator
+            if (label != NULL)
+            {
+              size_t len = strlen(label);
+              // Write extension for storing IMAGE_MODE
+              Write_byte(GIF_file,0x21);  // Extension Introducer
+              Write_byte(GIF_file,0xff);  // Extension Label
+              Write_byte(GIF_file,  11);  // Block size
+              Write_bytes(GIF_file, "GFX2MODE2.6", 11); // Application Identifier + Appl. Authentication Code
+              Write_byte(GIF_file, (byte)len);    // Block size
+              Write_bytes(GIF_file, label, len);  // Data
+              Write_byte(GIF_file, 0);    // Block terminator
+            }
           }
 
           // Ecriture du commentaire
@@ -4737,7 +4775,20 @@ void Save_GIF(T_IO_Context * context)
             Write_byte(GIF_file,strlen(context->Comment));
             Write_bytes(GIF_file,context->Comment,strlen(context->Comment)+1);
           }
-          // Write cycling colors
+          /// - "CRNG" Color cycing extension :
+          /// <pre>
+          ///   0x21       Extension Label
+          ///   0xFF       Application Extension Label
+          ///   0x0B       Block Size
+          ///   "CRNG\0\0\0\0" "CRNG" Application Identifier (8 bytes)
+          ///   "1.0"      Application Authentication Code (3 bytes)
+          ///   0xll       Sub-block Data Size (6 bytes per color cycle)
+          ///   For each color cycle :
+          ///     0xRRRR   (big endian) Rate
+          ///     0xFFFF   (big endian) Flags
+          ///     0xSS     start (lower color index)
+          ///     0xEE     end (higher color index)
+          ///   0x00       Block terminator </pre>
           if (context->Color_cycles)
           {
             int i;
@@ -5050,14 +5101,21 @@ void Save_GIF(T_IO_Context * context)
           // After writing all layers
           if (!File_error)
           {
-            // If requested, write a specific extension for storing
-            // original file path.
-            // This is used by the backup system.
-            // The format is :
-            //   21 FF 0B G  F  X  2  P  A  T  H  00 00 00
-            //   <size of path (byte)> <null-terminated path>
-            //   <size of filename (byte)> <null-terminated filename>
-            //   00
+            /// - If requested, write a specific extension for storing
+            /// original file path.
+            /// This is used by the backup system.
+            /// The format is :
+            /// <pre>
+            ///   0x21       Extension Label
+            ///   0xFF       Application Extension Label
+            ///   0x0B       Block Size
+            ///   "GFX2PATH" "GFX2PATH" Application Identifier (8 bytes)
+            ///   "\0\0\0"   Application Authentication Code (3 bytes)
+            ///   0xll       Sub-block Data Size : path size (including null)
+            ///   "..path.." path (null-terminated)
+            ///   0xll       Sub-block Data Size : filename size (including null)
+            ///   "..file.." file name (null-terminated)
+            ///   0x00       Block terminator </pre>
             if (context->Original_file_name != NULL
              && context->Original_file_directory != NULL)
             {
@@ -5108,6 +5166,7 @@ void Save_GIF(T_IO_Context * context)
 
 }
 
+/* @} */
 
 
 //////////////////////////////////// PCX ////////////////////////////////////
