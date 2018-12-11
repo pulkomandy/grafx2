@@ -6016,7 +6016,9 @@ void Save_XPM(T_IO_Context* context)
 
 #ifndef __no_pnglib__
 
-// -- Tester si un fichier est au format PNG --------------------------------
+/// Test for PNG format
+///
+/// The 8 byte signature at the start of file is tested
 void Test_PNG(T_IO_Context * context, FILE * file)
 {
   byte png_header[8];
@@ -6032,22 +6034,27 @@ void Test_PNG(T_IO_Context * context, FILE * file)
   }
 }
 
-/// Used by a callback in Load_PNG
-T_IO_Context * PNG_current_context;
-
-int PNG_read_unknown_chunk(png_structp ptr, png_unknown_chunkp chunk)
+/// Callback to handle our private chunks
+///
+/// We have one private chunk at the moment :
+/// - "crNg" which is similar to a CRNG chunk in an IFF file
+static int PNG_read_unknown_chunk(png_structp ptr, png_unknown_chunkp chunk)
 {
-  (void)ptr; // unused
+  T_IO_Context * context;
   // png_unknown_chunkp members:
   //    png_byte name[5];
   //    png_byte *data;
   //    png_size_t size;
+
+  context = (T_IO_Context *)png_get_user_chunk_ptr(ptr);
+
+  GFX2_Log(GFX2_DEBUG, "PNG private chunk '%s' :\n", chunk->name);
+  GFX2_LogHexDump(GFX2_DEBUG, "", chunk->data, 0, chunk->size);
   
   if (!strcmp((const char *)chunk->name, "crNg"))
   {
-    // Color animation. Similar to a CRNG chunk in an IFF file.
     unsigned int i;
-    byte *chunk_ptr = chunk->data;
+    const byte *chunk_ptr = chunk->data;
     
     // Should be a multiple of 6
     if (chunk->size % 6)
@@ -6081,12 +6088,12 @@ int PNG_read_unknown_chunk(png_structp ptr, png_unknown_chunkp chunk)
         if (max_col<min_col)
           SWAP_BYTES(min_col,max_col)
         
-          PNG_current_context->Cycle_range[i].Start=min_col;
-          PNG_current_context->Cycle_range[i].End=max_col;
-          PNG_current_context->Cycle_range[i].Inverse=(flags&2)?1:0;
-          PNG_current_context->Cycle_range[i].Speed=(flags&1) ? rate/78 : 0;
+          context->Cycle_range[i].Start=min_col;
+          context->Cycle_range[i].End=max_col;
+          context->Cycle_range[i].Inverse=(flags&2)?1:0;
+          context->Cycle_range[i].Speed=(flags&1) ? rate/78 : 0;
                               
-          PNG_current_context->Color_cycles=i+1;
+          context->Color_cycles=i+1;
       }
     }
   
@@ -6097,7 +6104,7 @@ int PNG_read_unknown_chunk(png_structp ptr, png_unknown_chunkp chunk)
 }
 
 
-// -- Lire un fichier au format PNG -----------------------------------------
+/// Read PNG format file
 static void Load_PNG_Sub(T_IO_Context * context, FILE * file)
 {
   png_structp png_ptr;
@@ -6113,7 +6120,6 @@ static void Load_PNG_Sub(T_IO_Context * context, FILE * file)
     {
       png_byte color_type;
       png_byte bit_depth;
-      png_voidp user_chunk_ptr;
       byte bpp;
 
       // Setup a return point. If a pnglib loading error occurs
@@ -6125,11 +6131,7 @@ static void Load_PNG_Sub(T_IO_Context * context, FILE * file)
         png_set_sig_bytes(png_ptr, 8);
 
         // Hook the handler for unknown chunks
-        user_chunk_ptr = png_get_user_chunk_ptr(png_ptr);
-        png_set_read_user_chunk_fn(png_ptr, user_chunk_ptr, &PNG_read_unknown_chunk);
-        // This is a horrid way to pass parameters, but we don't get
-        // much choice. PNG loader can't be reintrant.
-        PNG_current_context=context;
+        png_set_read_user_chunk_fn(png_ptr, (png_voidp)context, &PNG_read_unknown_chunk);
 
         // Load file information
         png_read_info(png_ptr, info_ptr);
@@ -6414,6 +6416,10 @@ static void Load_PNG_Sub(T_IO_Context * context, FILE * file)
   }
 }
 
+
+/// Read PNG format files
+///
+/// just read/test the header and call Load_PNG_Sub()
 void Load_PNG(T_IO_Context * context)
 {
   FILE *file;
@@ -6441,6 +6447,7 @@ void Load_PNG(T_IO_Context * context)
     File_error=1;
 }
 
+/// Save a PNG file
 void Save_PNG(T_IO_Context * context)
 {
   FILE *file;
