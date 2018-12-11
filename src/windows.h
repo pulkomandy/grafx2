@@ -77,6 +77,7 @@ void Print_filename(void);
 void Print_counter(short x,short y,const char * str,byte text_color,byte background_color);
 
 /** @defgroup dialog Dialog windows
+ * Popups that show or ask an information to the user
  * @{ */
 byte Confirmation_box(const char * message);
 void Warning_message(const char * message);

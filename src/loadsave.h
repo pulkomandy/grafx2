@@ -168,7 +168,7 @@ void Delete_safety_backups(void);
 
 /// Data for an image file format.
 typedef struct {
-  byte Identifier;         ///< Identifier for this format in enum :FILE_FORMATS
+  enum FILE_FORMATS Identifier; ///< Identifier for this format
   const char *Label;       ///< Five-letter label
   Func_IO_Test Test;       ///< Function which tests if the file is of this format
   Func_IO Load;            ///< Function which loads an image of this format

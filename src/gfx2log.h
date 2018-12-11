@@ -26,6 +26,7 @@
 
 /**
  * @defgroup log error and debugging logs
+ * Functions to log error and debugging messages.
  * @{
  */
 

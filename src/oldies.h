@@ -194,6 +194,8 @@ int DECB_Check_binary_file(FILE * f);
 /** @}*/
 
 /** @defgroup moto Thomson MO/TO
+ * Thomson MO/TO computer range
+ *
  * The Thomson MO/TO computer range was based on a Motorola 6809 CPU
  * and equiped with Microsoft Basic called Basic 1.0 for the first
  * versions and then Basic 128 or Basic 512 which included a DOS
