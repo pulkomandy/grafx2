@@ -343,9 +343,6 @@ static const T_Help_table helptable_help[] =
   HELP_LINK ("  Go to last:        %s",   0x100+BUTTON_ANIM_LAST_FRAME)
   HELP_LINK ("  Set duration:      %s",   0x100+BUTTON_ANIM_TIME)
   HELP_TEXT ("")
-  HELP_LINK ("  Format check     : %s",   SPECIAL_FORMAT_CHECKER)
-  HELP_LINK ("  Format check menu: %s",   SPECIAL_FORMAT_CHECKER_MENU)
-  HELP_TEXT ("")
   HELP_TEXT ("")
   HELP_TEXT ("")
 };

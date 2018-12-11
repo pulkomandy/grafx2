@@ -1343,12 +1343,6 @@ void Main_handler(void)
                 Layer_activate((key_index-SPECIAL_LAYER1_TOGGLE)/2, RIGHT_SIDE);
                 action++;
                 break;
-#if 0
-              case SPECIAL_FORMAT_CHECKER:
-                C64_FLI_enforcer();
-                action++;
-                break;
-#endif
 
               case SPECIAL_REPEAT_SCRIPT:
 #ifdef __ENABLE_LUA__

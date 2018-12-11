@@ -74,18 +74,6 @@ int C64_FLI(T_IO_Context * context, byte *bitmap, byte *screen_ram, byte *color_
  */
 int C64_pixels_to_FLI(byte *bitmap, byte *screen_ram, byte *color_ram, byte *background, const byte * pixels, long pitch, int errmode);
 
-#if 0
-/**
- * FLI Check/enforcer
- *
- * Generate Screen RAM, Color RAM and bitmap data from the first 3 layers
- * and output the result in layer 4.
- *
- * @return 0 for success, 2 if the picture is not 4 layers, 1 if the picture dimensions are not 160x200
- */
-int C64_FLI_enforcer(void);
-#endif
-
 /**
  * Set the 16 colors Commodore 64 palette
  */

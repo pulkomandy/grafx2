@@ -126,13 +126,6 @@ int Constraint_mode_from_label(const char * label)
   return -1;
 }
 
-#if 0
-static void Set_Pixel_in_layer(word x,word y, byte layer, byte color)
-{
-  *((y)*Main.image_width+(x)+Main.backups->Pages->Image[layer].Pixels)=color;
-}
-#endif
-
 int C64_FLI(T_IO_Context * context, byte *bitmap, byte *screen_ram, byte *color_ram, byte *background)
 {
   word used_colors[200][40];
@@ -647,79 +640,6 @@ int C64_pixels_to_FLI(byte *bitmap, byte *screen_ram, byte *color_ram,
   return error_count;
 }
 
-
-#if 0
-int C64_FLI_enforcer(void)
-{
-  byte background[200];
-  byte bitmap[8000];
-  byte screen_ram[8192];
-  byte color_ram[1000];
-  
-  int row, col, x, y;
-  byte c[4];
-  
-  // Checks
-  if (Main.image_width != 160 || Main.image_height != 200)
-  {
-    GFX2_Log(GFX2_WARNING, "C64_FLI_enforcer() requires 160x200 image resolution\n");
-    return 1;
-  }
-  if (Main.backups->Pages->Nb_layers != 4) {
-    GFX2_Log(GFX2_WARNING, "C64_FLI_enforcer() requires 4 layers\n");
-    return 2;
-  }
-  
-  Backup_layers(3);
-  
-  memset(bitmap,0,8000);
-  memset(background,0,200);
-  memset(color_ram,0,1000);
-  memset(screen_ram,0,8192);
-  C64_FLI(bitmap, screen_ram, color_ram, background);
-
-  for(row=0; row<25; row++)
-  {
-    for(col=0; col<40; col++)
-    {
-      c[3]=color_ram[row*40+col]&15;
-      for(y=0; y<8; y++)
-      {
-        int pixel=bitmap[row*320+col*8+y];
-        
-        c[0]=background[row*8+y]&15;
-        c[1]=screen_ram[y*1024+row*40+col]>>4;
-        c[2]=screen_ram[y*1024+row*40+col]&15;
-        for(x=0; x<4; x++)
-        {
-          int color=c[(pixel&3)];
-          pixel>>=2;
-          Set_Pixel_in_layer(col*4+(3-x),row*8+y,3,color);
-        }
-      }
-    }
-  }
-  End_of_modification();
-  
-  // Visible feedback:
-  
-  // If the "check" layer was visible, manually update the whole thing
-  if (Main.layers_visible & (1<<3))
-  {
-    Hide_cursor();
-    Redraw_layered_image();
-    Display_all_screen();
-    Display_layerbar();
-    Display_cursor();
-  }  
-  else
-  // Otherwise, simply toggle the layer visiblity
-    Layer_activate(3,RIGHT_SIDE);
-    
-    
-  return 0;
-}
-#endif
 
 void C64_set_palette(T_Components * palette)
 {
