@@ -766,6 +766,7 @@ FONTS = 8pxfont.png Tuffy.ttf PF_Arma_5__.png \
 FONT_FILES = $(addprefix ../share/grafx2/fonts/,$(FONTS))
 
 DOC_FILES = $(wildcard ../doc/*.txt)
+DOC_FILESRTF = ../doc/quickstart.rtf
 
 
 ifeq ($(PLATFORM),Darwin)
@@ -871,7 +872,7 @@ ziprelease: release $(SRCARCH)
 	cd .. && $(ZIP) $(ZIPOPT) "grafx2-$(API)-$(VERSIONTAG)$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
 	  $(BIN:../%=%) share/grafx2/gfx2def.ini $(SCRIPT_FILES:../%=%) $(SKIN_FILES:../%=%) \
 	  share/grafx2/gfx2.gif share/icons/grafx2.svg \
-	  $(FONT_FILES:../%=%) $(SRCARCH:../%=%) $(PLATFORMFILES:../%=%)
+	  $(FONT_FILES:../%=%) $(SRCARCH:../%=%) $(PLATFORMFILES:../%=%) $(DOC_FILESRTF:../%=%)
 ifdef WIN32CROSS
 	cd .. && $(ZIP) $(ZIPOPT) --to-crlf "grafx2-$(API)-$(VERSIONTAG)$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
 	  $(DOC_FILES:../%=%)
@@ -882,7 +883,7 @@ endif
 ifeq ($(PLATFORM),Darwin)
 	$(ZIP) $(ZIPOPT) -r ../Grafx2.app-$(shell uname -m)-$(API)-$(VERSIONTAG).zip Grafx2.app
 	cd .. && $(ZIP) $(ZIPOPT) Grafx2.app-$(shell uname -m)-$(API)-$(VERSIONTAG).zip \
-	  $(DOC_FILES:../%=%) $(SRCARCH:../%=%)
+	  $(DOC_FILES:../%=%) $(DOC_FILESRTF:../%=%) $(SRCARCH:../%=%)
 endif
 	$(TAR) czf "../grafx2-$(VERSIONTAG)-src.tgz" $(TARTRANSFORM) \
 	  ../src/*.c ../src/*.cpp ../src/*.h ../src/Makefile ../src/Makefile.dep \

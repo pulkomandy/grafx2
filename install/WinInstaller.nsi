@@ -127,6 +127,7 @@ Section "Grafx2" SecProgram
   File /r ..\share\grafx2\scripts\samples\*.*
   SetOutPath "$INSTDIR\doc"
   File ..\doc\*.txt
+  File ..\doc\quickstart.rtf
   SetOutPath "$INSTDIR\share\grafx2\fonts"
   File ..\share\grafx2\fonts\*.png
   File ..\share\grafx2\fonts\*.ttf
