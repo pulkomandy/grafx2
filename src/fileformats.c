@@ -3853,6 +3853,7 @@ void Save_ICO(T_IO_Context * context)
 //////////////////////////////////// GIF ////////////////////////////////////
 /**
  * @defgroup GIF GIF format
+ * @ingroup loadsaveformats
  * Graphics Interchange Format
  *
  * The GIF format uses LZW compression and stores indexed color pictures
@@ -3911,7 +3912,6 @@ enum DISPOSAL_METHOD
 };
 
 
-/// @ingroup loadsaveformats GIF
 /// Test if a file is GIF format
 void Test_GIF(T_IO_Context * context, FILE * file)
 {
@@ -4029,7 +4029,6 @@ static void GIF_new_pixel(T_IO_Context * context, T_GIF_IDB *idb, int is_transpa
 }
 
 
-/// @ingroup loadsaveformats GIF
 /// Load GIF file
 void Load_GIF(T_IO_Context * context)
 {
@@ -4630,7 +4629,6 @@ void Load_GIF(T_IO_Context * context)
   }
 
 
-/// @ingroup loadsaveformats GIF
 /// Save a GIF file
 void Save_GIF(T_IO_Context * context)
 {
