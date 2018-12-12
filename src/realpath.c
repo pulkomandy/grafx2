@@ -138,7 +138,7 @@
       ///
       /// So we assume all platforms now support passing NULL.
       /// If you find a platform where this is not the case,
-      /// please add a new implementation with #ifdef's.
+      /// please add a new implementation with ifdef's.
       return realpath(_path, resolved_path);
     }
 #endif
