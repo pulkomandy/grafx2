@@ -242,6 +242,14 @@ void Save_IMG(T_IO_Context * context)
 
 
 //////////////////////////////////// IFF ////////////////////////////////////
+/** @defgroup IFF Interchange File Format
+ * @ingroup loadsaveformats
+ * Interchange File Format (Electronic Arts)
+ *
+ * This is the "native" format of Amiga.
+ * We support ILBM/PBM/ACBM
+ * @{
+ */
 typedef struct
 {
   word  Width;
@@ -274,8 +282,7 @@ typedef struct
   dword bits;
 } T_IFF_AnimHeader;
 
-// -- Tester si un fichier est au format IFF --------------------------------
-
+/// Test if a file is in IFF format
 void Test_IFF(FILE * IFF_file, const char *sub_type)
 {
   char  format[4];
@@ -366,13 +373,10 @@ typedef struct T_IFF_PCHG_Palette {
   T_Components Palette[1];
 } T_IFF_PCHG_Palette;
 
-// Inspired by Allegro: storing a 4-character identifier as a 32bit litteral
-#define ID4(a,b,c,d) ((((a)&255)<<24) | (((b)&255)<<16) | (((c)&255)<<8) | (((d)&255)))
-
 /// Skips the current section in an IFF file.
 /// This function should be called while the file pointer is right
 /// after the 4-character code that identifies the section.
-int IFF_Skip_section(FILE * file)
+static int IFF_Skip_section(FILE * file)
 {
   dword size;
   
@@ -385,8 +389,8 @@ int IFF_Skip_section(FILE * file)
   return 1;
 }
 
-// ------------------------- Attendre une section -------------------------
-byte IFF_Wait_for(FILE * file, const char * expected_section)
+/// Wait for a specific IFF chunk
+static byte IFF_Wait_for(FILE * file, const char * expected_section)
 {
   // Valeur retournée: 1=Section trouvée, 0=Section non trouvée (erreur)
   byte section_read[4];
@@ -413,7 +417,7 @@ byte IFF_Wait_for(FILE * file, const char * expected_section)
 /// @param x_pos           Position of the pixel in graphic line
 /// @param real_line_size  Width of one bitplane in memory, in bytes
 /// @param bitplanes       Number of bitplanes
-dword Get_IFF_color(const byte * buffer, word x_pos, word real_line_size, byte bitplanes)
+static dword Get_IFF_color(const byte * buffer, word x_pos, word real_line_size, byte bitplanes)
 {
   byte shift = 7 - (x_pos & 7);
   int address,masked_bit,plane;
@@ -430,6 +434,7 @@ dword Get_IFF_color(const byte * buffer, word x_pos, word real_line_size, byte b
   return color;
 }
 
+/// chunky to planar
 void Set_IFF_color(byte * buffer, word x_pos, byte color, word real_line_size, byte bitplanes)
 {
   byte shift = 7 - (x_pos & 7);
@@ -444,6 +449,7 @@ void Set_IFF_color(byte * buffer, word x_pos, byte color, word real_line_size, b
 }
 
 // ----------------------- Afficher une ligne ILBM ------------------------
+/// Planar to chunky conversion of a line
 static void Draw_IFF_line(T_IO_Context *context, const byte * buffer, short y_pos, short real_line_size, byte bitplanes)
 {
   short x_pos;
@@ -465,6 +471,7 @@ static void Draw_IFF_line(T_IO_Context *context, const byte * buffer, short y_po
   }
 }
 
+/// decode pixels with palette changes per line (copper list:)
 static void Draw_IFF_line_PCHG(T_IO_Context *context, const byte * buffer, short y_pos, short real_line_size, byte bitplanes, const T_IFF_PCHG_Palette * PCHG_palettes)
 {
   const T_IFF_PCHG_Palette * palette;
@@ -476,7 +483,6 @@ static void Draw_IFF_line_PCHG(T_IO_Context *context, const byte * buffer, short
   while (palette->Next != NULL && palette->Next->StartLine <= y_pos)
     palette = palette->Next;
 
-//printf("%d %p %d\n", y_pos, palette, palette->StartLine);
   for (x_pos=0; x_pos<context->Width; x_pos++)
   {
     dword c = Get_IFF_color(buffer, x_pos,real_line_size, bitplanes);
@@ -484,6 +490,7 @@ static void Draw_IFF_line_PCHG(T_IO_Context *context, const byte * buffer, short
   }
 }
 
+/// Decode a HAM line to 24bits pixels
 static void Draw_IFF_line_HAM(T_IO_Context *context, const byte * buffer, short y_pos, short real_line_size, byte bitplanes, const T_IFF_PCHG_Palette * PCHG_palettes)
 {
   short x_pos;
@@ -552,6 +559,11 @@ static void Draw_IFF_line_HAM(T_IO_Context *context, const byte * buffer, short 
   }
 }
 
+/// Decode PBM data
+///
+/// Supports compressions :
+/// - 0 uncompressed
+/// - 1 compressed
 static void PBM_Decode(T_IO_Context * context, FILE * file, byte compression, word width, word height)
 {
   byte * line_buffer;
@@ -615,6 +627,12 @@ static void PBM_Decode(T_IO_Context * context, FILE * file, byte compression, wo
   }
 }
 
+/// Decode LBM data
+///
+/// Supports packings :
+/// - 0 uncompressed
+/// - 1 packbits (Amiga)
+/// - 2 Vertical RLE (Atari ST)
 static void LBM_Decode(T_IO_Context * context, FILE * file, byte compression, byte Image_HAM,
                        byte stored_bit_planes, byte real_bit_planes, const T_IFF_PCHG_Palette * PCHG_palettes)
 {
@@ -822,6 +840,7 @@ static void LBM_Decode(T_IO_Context * context, FILE * file, byte compression, by
   }
 }
 
+/// Decode RAST chunk (from Atari ST pictures)
 static void RAST_chunk_decode(T_IO_Context * context, FILE * file, dword section_size, T_IFF_PCHG_Palette ** PCHG_palettes)
 {
   int i;
@@ -884,10 +903,11 @@ static void RAST_chunk_decode(T_IO_Context * context, FILE * file, dword section
   }
 }
 
+/// Sets 32 upper colors of EHB palette
 static void IFF_Set_EHB_Palette(T_Components * palette)
 {
-  int i, j;            // 32 colors in the palette.
-  for (i=0; i<32; i++) // The next 32 colors are the same with values divided by 2
+  int i, j;            /// 32 colors in the palette.
+  for (i=0; i<32; i++) /// The next 32 colors are the same with values divided by 2
   {
     j=i+32;
     palette[j].R = palette[i].R>>1;
@@ -896,6 +916,7 @@ static void IFF_Set_EHB_Palette(T_Components * palette)
   }
 }
 
+/// Load IFF picture (PBM/ILBM/ACBM) or animation
 void Load_IFF(T_IO_Context * context)
 {
   FILE * IFF_file;
@@ -2061,7 +2082,7 @@ void Load_IFF(T_IO_Context * context)
   byte IFF_repetition_mode;
 
   // ------------- Ecrire les couleurs que l'on vient de traiter ------------
-  void Transfer_colors(FILE * file)
+  static void Transfer_colors(FILE * file)
   {
     byte index;
 
@@ -2083,7 +2104,7 @@ void Load_IFF(T_IO_Context * context)
     IFF_repetition_mode=0;
   }
 
-  // - Compresion des couleurs encore plus performante que DP2e et que VPIC -
+  // - Compression des couleurs encore plus performante que DP2e et que VPIC -
   void New_color(FILE * file, byte color)
   {
     byte last_color;
@@ -2144,6 +2165,7 @@ void Load_IFF(T_IO_Context * context)
   }
 
 
+/// Save IFF file (LBM or PBM)
 void Save_IFF(T_IO_Context * context)
 {
   FILE * IFF_file;
@@ -2370,6 +2392,7 @@ void Save_IFF(T_IO_Context * context)
     File_error=1;
 }
 
+/** @} */
 
 
 /////////////////////////// .info (Amiga Icons) /////////////////////////////
