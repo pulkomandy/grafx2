@@ -4903,23 +4903,31 @@ void Save_GIF(T_IO_Context * context)
                 // find bounding box of changes for Animated GIFs
                 min_X = min_Y = 0xffff;
                 max_X = max_Y = 0;
-                temp = LSDB.Backcol;//=context->Transparent_color;
                 for(GIF_pos_Y = 0; GIF_pos_Y < context->Height; GIF_pos_Y++) {
                   for(GIF_pos_X = 0; GIF_pos_X < context->Width; GIF_pos_X++) {
                     if (GIF_pos_X >= min_X && GIF_pos_X <= max_X && GIF_pos_Y >= min_Y && GIF_pos_Y <= max_Y)
                       continue; // already in the box
-                    // compare Pixel from previous layer or from background depending on disposal method
-                    if(disposal_method == DISPOSAL_METHOD_DO_NOT_DISPOSE) {
+                    if(disposal_method == DISPOSAL_METHOD_DO_NOT_DISPOSE)
+                    {
+                      // if that pixel has same value in previous layer, no need to save it
                       Set_saving_layer(context, current_layer - 1);
                       temp = Get_pixel(context, GIF_pos_X, GIF_pos_Y);
                       Set_saving_layer(context, current_layer);
+                      if(temp == Get_pixel(context, GIF_pos_X, GIF_pos_Y))
+                        continue;
                     }
-                    if(temp != Get_pixel(context, GIF_pos_X, GIF_pos_Y)) {
-                      if(GIF_pos_X < min_X) min_X = GIF_pos_X;
-                      if(GIF_pos_X > max_X) max_X = GIF_pos_X;
-                      if(GIF_pos_Y < min_Y) min_Y = GIF_pos_Y;
-                      if(GIF_pos_Y > max_Y) max_Y = GIF_pos_Y;
+                    if (disposal_method == DISPOSAL_METHOD_RESTORE_BGCOLOR
+                      || context->Background_transparent
+                      || Main.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
+                    {
+                      // if that pixel is Backcol, no need to save it
+                      if (LSDB.Backcol == Get_pixel(context, GIF_pos_X, GIF_pos_Y))
+                        continue;
                     }
+                    if(GIF_pos_X < min_X) min_X = GIF_pos_X;
+                    if(GIF_pos_X > max_X) max_X = GIF_pos_X;
+                    if(GIF_pos_Y < min_Y) min_Y = GIF_pos_Y;
+                    if(GIF_pos_Y > max_Y) max_Y = GIF_pos_Y;
                   }
                 }
                 if((min_X <= max_X) && (min_Y <= max_Y))
@@ -4949,6 +4957,9 @@ void Save_GIF(T_IO_Context * context)
               while((int)max >= (1 << IDB.Nb_bits_pixel)) {
                 IDB.Nb_bits_pixel++;
               }
+              GFX2_Log(GFX2_DEBUG, "GIF image #%d %ubits (%u,%u) %ux%u\n",
+                       current_layer, IDB.Nb_bits_pixel, IDB.Pos_X, IDB.Pos_Y,
+                       IDB.Image_width, IDB.Image_height);
             
               // On va écrire un block indicateur d'IDB et l'IDB du fichier
               block_identifier=0x2C;
