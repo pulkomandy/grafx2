@@ -2419,66 +2419,127 @@ error:
 /// Save in NeoChrome format
 void Save_NEO(T_IO_Context * context)
 {
-  FILE *file;
+  word resolution = 0;
+  FILE *file = NULL;
   short x_pos,y_pos;
-  byte * buffer;
-  byte * ptr;
+  word color_cycling_range = 0, color_cycling_delay = 0;
+  word display_time = 0;
+  word image_width = 320, image_height = 200;
+  byte buffer[32];
   byte pixels[320];
+  char * ext;
+  int i, j;
 
-  File_error=0;
-  // Ouverture du fichier
-  if ((file=Open_file_write(context)))
+  File_error = 1;
+  file = Open_file_write(context);
+  if (file == NULL)
+    return;
+
+  // flags and resolution
+  if (!Write_word_be(file, 0) || !Write_word_be(file, resolution))
+    goto error;
+
+  // palette
+  PI1_code_palette(context->Palette, buffer);
+  if (!Write_bytes(file, buffer, 16*2))
+    goto error;
+
+  // file name
+  i = 0;
+  j = 0;
+  ext = strrchr(context->File_name, '.');
+  while (j < 8 && ext != (context->File_name + i))
   {
-    setvbuf(file, NULL, _IOFBF, 64*1024);
-
-    // allocation d'un buffer mémoire
-    buffer=(byte *)malloc(32128);
-    // Codage de la résolution
-    buffer[0]=0x00;
-    buffer[1]=0x00;
-    buffer[2]=0x00;
-    buffer[3]=0x00;
-    // Codage de la palette
-    PI1_code_palette(context->Palette, buffer+4);
-    // Codage de l'image
-    ptr=buffer+128;
-    for (y_pos=0;y_pos<200;y_pos++)
-    {
-      // Codage de la ligne
-      memset(pixels,0,320);
-      if (y_pos<context->Height)
-      {
-        for (x_pos=0;(x_pos<320) && (x_pos<context->Width);x_pos++)
-          pixels[x_pos]=Get_pixel(context, x_pos,y_pos);
-      }
-
-      for (x_pos=0;x_pos<(320>>4);x_pos++)
-      {
-        PI1_16p_to_8b(pixels+(x_pos<<4),ptr);
-        ptr+=8;
-      }
-    }
-
-    if (Write_bytes(file,buffer,32128))
-    {
-      fclose(file);
-    }
-    else // Error d'écriture (disque plein ou protégé)
-    {
-      fclose(file);
-      Remove_file(context);
-      File_error=1;
-    }
-    // Libération du buffer mémoire
-    free(buffer);
-    buffer = NULL;
+    byte c = context->File_name[i++];
+    if (c == 0)
+      break;
+    if (c >= 'a' && c <= 'z')
+      c -= 32;
+    if ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || (c == '_'))
+      buffer[j++] = c;
   }
-  else
+  while (j < 8)
+    buffer[j++] = ' ';
+  buffer[j++] = '.';
+  if (ext != NULL)
   {
+    i = 0;
+    while (j < 12)
+    {
+      byte c = ext[i++];
+      if (c == 0)
+        break;
+      if (c >= 'a' && c <= 'z')
+        c -= 32;
+      if ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || (c == '_'))
+        buffer[j++] = c;
+    }
+  }
+  while (j < 12)
+    buffer[j++] = ' ';
+
+  if (!Write_bytes(file, buffer, 12))
+    goto error;
+
+  // Save the 1st valid Color cycling range
+  for (i = 0; i < context->Color_cycles; i++)
+  {
+    if (context->Cycle_range[i].Start < 16 && context->Cycle_range[i].End < 16)
+    {
+      color_cycling_range = 0x8000 | (context->Cycle_range[i].Start << 4) | context->Cycle_range[i].End;
+      if (context->Cycle_range[i].Speed > 0)
+      {
+        color_cycling_delay = 175 / context->Cycle_range[i].Speed;
+        if (color_cycling_delay > 0 && context->Cycle_range[i].Inverse)
+          color_cycling_delay = 256 - color_cycling_delay;
+        color_cycling_delay |= 0x8000;
+      }
+      break;
+    }
+  }
+  if (!Write_word_be(file, color_cycling_range) || !Write_word_be(file, color_cycling_delay) || !Write_word_be(file, display_time))
+    goto error;
+
+  // Save image position and size
+  if (!Write_word_be(file, 0) || !Write_word_be(file, 0)
+      || !Write_word_be(file, image_width) || !Write_word_be(file, image_height))
+    goto error;
+
+  // Fill with 128 bytes header with 0's
+  // a few files have the string "NEO!" at offset 124 (0x7C)
+  for (i = ftell(file); i < 128; i++)
+  {
+    if (!Write_byte(file, 0))
+      goto error;
+  }
+
+  // image coding
+  for (y_pos=0;y_pos<200;y_pos++)
+  {
+    // Codage de la ligne
+    memset(pixels, 0, 320);
+    if (y_pos < context->Height)
+    {
+      for (x_pos = 0; (x_pos < 320) && (x_pos < context->Width); x_pos++)
+        pixels[x_pos] = Get_pixel(context, x_pos, y_pos);
+    }
+
+    for (x_pos=0; x_pos < 320; x_pos += 16)
+    {
+      PI1_16p_to_8b(pixels + x_pos, buffer);
+      if (!Write_bytes(file, buffer, 8))
+        goto error;
+    }
+  }
+
+  fclose(file);
+  File_error = 0;
+  return;
+
+error:
+  if (file != NULL)
     fclose(file);
-    Remove_file(context);
-    File_error=1;
-  }
+  Remove_file(context);
 }
 
 /* @} */
