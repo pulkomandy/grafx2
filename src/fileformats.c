@@ -291,61 +291,64 @@ void Test_IFF(FILE * IFF_file, const char *sub_type)
 
   File_error=1;
 
-    do // Dummy loop, so that all breaks jump to end.
+  if (! Read_bytes(IFF_file,section,4))
+    return;
+  if (memcmp(section,"FORM",4))
+        return;
+
+  if (! Read_dword_be(IFF_file, &dummy))
+    return;
+  //   On aurait pu vérifier que ce long est égal à la taille
+  // du fichier - 8, mais ça aurait interdit de charger des
+  // fichiers tronqués (et déjà que c'est chiant de perdre
+  // une partie du fichier il faut quand même pouvoir en
+  // garder un peu... Sinon, moi je pleure :'( !!! )
+  if (! Read_bytes(IFF_file,format,4))
+    return;
+
+  if (!memcmp(format,"ANIM",4))
+  {
+    dword size;
+
+    // An ANIM header: need to check that it encloses an image
+    do
     {
       if (! Read_bytes(IFF_file,section,4))
-        break;
+        return;
       if (memcmp(section,"FORM",4))
-        break;
-      
-      if (! Read_dword_be(IFF_file, &dummy))
-        break;
-      //   On aurait pu vérifier que ce long est égal à la taille
-      // du fichier - 8, mais ça aurait interdit de charger des
-      // fichiers tronqués (et déjà que c'est chiant de perdre
-      // une partie du fichier il faut quand même pouvoir en
-      // garder un peu... Sinon, moi je pleure :'( !!! )
+        return;
+      if (! Read_dword_be(IFF_file, &size))
+        return;
       if (! Read_bytes(IFF_file,format,4))
-        break;
-        
-      if (!memcmp(format,"ANIM",4))
-      {
-        // An ANIM header: need to check that it encloses an image
-        if (! Read_bytes(IFF_file,section,4))
-          break;
-        if (memcmp(section,"FORM",4))
-          break;
-        if (! Read_dword_be(IFF_file, &dummy))
-          break;
-        if (! Read_bytes(IFF_file,format,4))
-          break;
-      }
-      else if(memcmp(format,"DPST",4) == 0)
-      {
-        if (! Read_bytes(IFF_file,section,4))
-          break;
-        if (memcmp(section, "DPAH", 4) != 0)
-          break;
-        if (! Read_dword_be(IFF_file, &dummy))
-          break;
-        fseek(IFF_file, dummy, SEEK_CUR);
-        if (! Read_bytes(IFF_file,section,4))
-          break;
-        if (memcmp(section,"FORM",4))
-          break;
-        if (! Read_dword_be(IFF_file, &dummy))
-          break;
-        if (! Read_bytes(IFF_file,format,4))
-          break;
-      }
-      if ( memcmp(format,sub_type,4))
-        break;
-      
-      // If we reach this part, file is indeed ILBM/PBM or ANIM
-      File_error=0;
-      
-    } while (0);
-    
+        return;
+      if (fseek(IFF_file, size - 4, SEEK_CUR) < 0)
+        return;
+    }
+    while(0 == memcmp(format, "8SVX", 4));  // skip sound frames
+  }
+  else if(memcmp(format,"DPST",4) == 0)
+  {
+    if (! Read_bytes(IFF_file,section,4))
+      return;
+    if (memcmp(section, "DPAH", 4) != 0)
+      return;
+    if (! Read_dword_be(IFF_file, &dummy))
+      return;
+    fseek(IFF_file, dummy, SEEK_CUR);
+    if (! Read_bytes(IFF_file,section,4))
+      return;
+    if (memcmp(section,"FORM",4))
+      return;
+    if (! Read_dword_be(IFF_file, &dummy))
+      return;
+    if (! Read_bytes(IFF_file,format,4))
+      return;
+  }
+  if ( memcmp(format,sub_type,4))
+    return;
+
+  // If we reach this part, file is indeed ILBM/PBM or ANIM
+  File_error=0;
 }
 
 void Test_PBM(T_IO_Context * context, FILE * f)
@@ -966,8 +969,17 @@ void Load_IFF(T_IO_Context * context)
     {
       // Skip a bit, brother
       Read_bytes(IFF_file,section,4);
-      Read_dword_be(IFF_file,&dummy);
+      Read_dword_be(IFF_file,&section_size);
       Read_bytes(IFF_file,format,4);
+      while (0 == memcmp(format, "8SVX", 4))
+      {
+        GFX2_Log(GFX2_DEBUG, "IFF : skip sound %.4s %u bytes\n", format, section_size);
+        if (fseek(IFF_file, section_size - 4, SEEK_CUR) < 0)
+          break;
+        Read_bytes(IFF_file,section,4);
+        Read_dword_be(IFF_file,&section_size);
+        Read_bytes(IFF_file,format,4);
+      }
     }
     else if(memcmp(format,"DPST",4)==0)
     {
@@ -1002,9 +1014,7 @@ void Load_IFF(T_IO_Context * context)
       iff_format = FORMAT_ACBM;
     else
     {
-      char tmp_msg[60];
-      snprintf(tmp_msg, sizeof(tmp_msg), "Unknown IFF format '%.4s'", format);
-      Warning(tmp_msg);
+      GFX2_Log(GFX2_WARNING, "Unknown IFF format '%.4s'\n", format);
       File_error=1;
     }
     
@@ -1068,6 +1078,12 @@ void Load_IFF(T_IO_Context * context)
             File_error = 1;
             break;
           }
+          GFX2_Log(GFX2_DEBUG, "IFF BMHD : origin (%u,%u) size %ux%u BitPlanes=%u Mask=%u Compression=%u\n",
+                   header.X_org, header.Y_org, header.Width, header.Height,
+                   header.BitPlanes, header.Mask, header.Compression);
+          GFX2_Log(GFX2_DEBUG, "          Transp_col=#%u aspect ratio %u/%u screen size %ux%u\n",
+                   header.Transp_col, header.X_aspect, header.Y_aspect,
+                   header.X_screen, header.Y_screen);
           real_bit_planes = header.BitPlanes;
           stored_bit_planes = header.BitPlanes;
           if (header.Mask==1)
@@ -1196,7 +1212,7 @@ void Load_IFF(T_IO_Context * context)
                 continue;
               if (plane >= real_bit_planes)
               {
-                Warning("too much bitplanes in DLTA data");
+                GFX2_Log(GFX2_WARNING, "IFF : too much bitplanes in DLTA data %u >= %u (frame #%u/%u)\n", plane, real_bit_planes, current_frame + 1, frame_count);
                 break;
               }
               while (current_offset < offsets[plane])
@@ -1372,7 +1388,7 @@ void Load_IFF(T_IO_Context * context)
           }
           else
           {
-            Warning("Unsupported compression type in ILBM DLTA chunk");
+            GFX2_Log(GFX2_INFO, "IFF DLTA : Unsupported compression type %u\n", aheader.operation);
           }
 
           if (File_error == 0)
@@ -1504,9 +1520,10 @@ void Load_IFF(T_IO_Context * context)
             File_error = 1;
             break;
           }
+          GFX2_Log(GFX2_DEBUG, "IFF CMAP : %u colors (header.BitPlanes=%u)\n", nb_colors, header.BitPlanes);
 
           if (current_frame != 0)
-            Warning("One CMAP per frame is not supported");
+            GFX2_Log(GFX2_WARNING, "IFF : One CMAP per frame is not supported (frame #%u/%u)\n", current_frame + 1, frame_count);
           if ((header.BitPlanes==6 && nb_colors==16) || (header.BitPlanes==8 && nb_colors==64))
           {
             Image_HAM=header.BitPlanes;
@@ -1566,6 +1583,7 @@ void Load_IFF(T_IO_Context * context)
             && (Read_byte(IFF_file,&min_col))
             && (Read_byte(IFF_file,&max_col)))
           {
+            GFX2_Log(GFX2_DEBUG, "IFF CRNG : [#%u #%u] rate=%u flags=%04x\n", min_col, max_col, rate, flags);
             if (section_size == 8 && min_col != max_col)
             {
               // Valid cycling range
@@ -1574,7 +1592,7 @@ void Load_IFF(T_IO_Context * context)
 
               if (context->Color_cycles >= 16)
               {
-                Warning("Maximum CRNG number is 16");
+                GFX2_Log(GFX2_INFO, "IFF CRNG : Maximum CRNG number is 16\n");
               }
               else
               {
@@ -2048,11 +2066,17 @@ void Load_IFF(T_IO_Context * context)
         }
         else
         {
-          char tmp_msg[60];
           // skip section
-          snprintf(tmp_msg, sizeof(tmp_msg), "Skip unknown section '%.4s' of %u bytes", section, section_size);
-          Warning(tmp_msg);
-          fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);
+          GFX2_Log(GFX2_INFO, "IFF : Skip unknown section '%.4s' of %u bytes at offset %06X\n", section, section_size, ftell(IFF_file));
+          if (section_size < 256)
+          {
+            byte buffer[256];
+
+            Read_bytes(IFF_file, buffer, (section_size+1)&~1);
+            GFX2_LogHexDump(GFX2_DEBUG, "", buffer, 0, (section_size+1)&~1);
+          }
+          else
+            fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);
         }
       }
     }
