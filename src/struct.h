@@ -268,7 +268,7 @@ typedef struct
   dword Inverse;  ///< Boolean, true if the gradient goes in descending order
   dword Mix;      ///< Amount of randomness to add to the mix (0-255)
   dword Technique;///< Gradient technique: 0 (no pattern) 1 (dithering), or 2 (big dithering)
-  byte  Speed;    ///< Speed of cycling. 0 for disabled, 1-64 otherwise.
+  byte  Speed;    ///< Speed of cycling. 0 for disabled, 1-64 otherwise. 1=>0.2856Hz, 64=>18.28Hz
 } T_Gradient_range;
 
 /// Data for a full set of gradients.

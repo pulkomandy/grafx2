@@ -2274,6 +2274,9 @@ void Load_NEO(T_IO_Context * context)
   word resolution;   // Atari ST resolution
   word width, height;
   byte bpp;
+  word color_cycling_range, color_cycling_delay;
+  word display_time;
+  word image_width, image_height, image_X_pos, image_Y_pos;
   FILE *file;
   word x_pos,y_pos;
   byte * ptr;
@@ -2330,13 +2333,48 @@ void Load_NEO(T_IO_Context * context)
     goto error;
   buffer[12] = '\0';
   GFX2_Log(GFX2_DEBUG, "NEO resolution %u name=\"%s\"\n", resolution, (char *)buffer);
-  if (!Read_bytes(file, buffer, 6))
+  if (!Read_word_be(file, &color_cycling_range)
+     || !Read_word_be(file, &color_cycling_delay)
+     || !Read_word_be(file, &display_time))
     goto error;
-  GFX2_Log(GFX2_DEBUG, "  Color cycling : %02x %02x - %02x %02x. Time to show %02x%02x\n", buffer[0], buffer[1], buffer[2], buffer[3], buffer[4], buffer[5]);
+  GFX2_Log(GFX2_DEBUG, "  Color cycling : %04x %04x. Time to show %u\n", color_cycling_range, color_cycling_delay, display_time);
+  if (color_cycling_range & 0x8000)
+  {
+    context->Cycle_range[context->Color_cycles].Start = (color_cycling_range & 0x00f0) >> 4;
+    context->Cycle_range[context->Color_cycles].End = (color_cycling_range & 0x000f);
+    if (color_cycling_delay & 0x8000)
+    {
+      // color cycling on
+      color_cycling_delay &= 0xff;
+      if (color_cycling_delay & 0x0080)
+      {
+        context->Cycle_range[context->Color_cycles].Inverse = 1;
+        color_cycling_delay = 256 - color_cycling_delay;
+      }
+      else
+        context->Cycle_range[context->Color_cycles].Inverse = 0;
+      // Speed resolution is 0.2856Hz
+      // NEO color_cycling_delay is in 50Hz VBL
+      // Speed = (50/delay) / 0.2856 = 175 / delay
+      if (color_cycling_delay != 0)
+        context->Cycle_range[context->Color_cycles].Speed = 175 / color_cycling_delay;
+      else
+        context->Cycle_range[context->Color_cycles].Speed = 64; // fastest
+      if (context->Cycle_range[context->Color_cycles].Speed > 64)
+        context->Cycle_range[context->Color_cycles].Speed = 64;
+    }
+    else
+      context->Cycle_range[context->Color_cycles].Speed = 0;  // cycling off
+    context->Color_cycles++;
+  }
 
-  if (!Read_bytes(file, buffer, 128-4-32-12-6))
+  if (!Read_word_be(file, &image_X_pos) || !Read_word_be(file, &image_Y_pos)
+      || !Read_word_be(file, &image_width) || !Read_word_be(file, &image_height))
     goto error;
-  GFX2_LogHexDump(GFX2_DEBUG, "NEO ", buffer, 0, 128-4-32-12-6);
+  GFX2_Log(GFX2_DEBUG, "  pos (%u,%u) size %ux%u\n", image_X_pos, image_Y_pos, image_width, image_height);
+  if (!Read_bytes(file, buffer, 128-4-32-12-6-8))
+    goto error;
+  GFX2_LogHexDump(GFX2_DEBUG, "NEO ", buffer, 0, 128-4-32-12-6-8);
 
   // Chargement/décompression de l'image
   for (y_pos=0;y_pos<height;y_pos++)
