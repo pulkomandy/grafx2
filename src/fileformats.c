@@ -1608,6 +1608,89 @@ void Load_IFF(T_IO_Context * context)
           else
             File_error=47;
         }
+        else if (memcmp(section, "DRNG", 4) == 0) // DPaint IV enhanced color cycle chunk
+        {
+          /// @todo DRNG IFF chunk is read, but complex color cycling are not implemented.
+          // see http://amigadev.elowar.com/read/ADCD_2.1/Devices_Manual_guide/node0282.html
+          byte min_col;
+          byte max_col;
+          word rate;
+          word flags;
+          byte ntruecolor;
+          byte nregs;
+          Read_byte(IFF_file, &min_col);
+          Read_byte(IFF_file, &max_col);
+          Read_word_be(IFF_file, &rate);
+          Read_word_be(IFF_file, &flags);
+          Read_byte(IFF_file, &ntruecolor);
+          Read_byte(IFF_file, &nregs);
+          section_size -= 8;
+          GFX2_Log(GFX2_DEBUG, "IFF DRNG : [#%u #%u] rate=%u flags=%04x, %u tc cells, %u reg cells\n", min_col, max_col, rate, flags, ntruecolor, nregs);
+          while (ntruecolor-- > 0 && section_size > 0)
+          {
+            byte cell, r, g, b;
+            Read_byte(IFF_file, &cell);
+            Read_byte(IFF_file, &r);
+            Read_byte(IFF_file, &g);
+            Read_byte(IFF_file, &b);
+            section_size -= 4;
+            GFX2_Log(GFX2_DEBUG, "          #%u #%02X%02X%02X\n", cell, r, g, b);
+          }
+          while (nregs-- > 0 && section_size > 0)
+          {
+            byte cell, index;
+            Read_byte(IFF_file, &cell);
+            Read_byte(IFF_file, &index);
+            section_size -= 2;
+            GFX2_Log(GFX2_DEBUG, "          #%u index %u\n", cell, index);
+          }
+          if (section_size > 0)
+          {
+            GFX2_Log(GFX2_DEBUG, "IFF DRNG : skipping %u bytes\n", section_size);
+            fseek(IFF_file, section_size, SEEK_CUR);
+          }
+        }
+        else if (memcmp(section, "CCRT", 4) == 0) // Color Cycling Range and Timing
+        {
+          // see http://amigadev.elowar.com/read/ADCD_2.1/Devices_Manual_guide/node01BA.html
+          word direction;
+          byte start, end;
+          dword seconds, microseconds;
+          word pad;
+
+          Read_word_be(IFF_file, &direction);
+          Read_byte(IFF_file, &start);
+          Read_byte(IFF_file, &end);
+          Read_dword_be(IFF_file, &seconds);
+          Read_dword_be(IFF_file, &microseconds);
+          Read_word_be(IFF_file, &pad);
+          section_size -= 14;
+          GFX2_Log(GFX2_DEBUG, "IFF CCRT : dir %04x [#%u #%u] delay %u.%06u\n",
+                   direction, start, end, seconds, microseconds);
+          if (context->Color_cycles >= 16)
+          {
+            GFX2_Log(GFX2_INFO, "IFF CCRT : Maximum CRNG number is 16\n");
+          }
+          else if (start != end)
+          {
+            // Speed resolution is 0.2856Hz
+            // Speed = (1000000/delay) / 0.2856 = 3501400 / delay
+
+            context->Cycle_range[context->Color_cycles].Start = start;
+            context->Cycle_range[context->Color_cycles].End = end;
+            if (direction != 0)
+            {
+              context->Cycle_range[context->Color_cycles].Inverse = (~direction >> 15) & 1;
+              context->Cycle_range[context->Color_cycles].Speed = 3501400 / (seconds * 1000000 + microseconds);
+            }
+            else
+            {
+              context->Cycle_range[context->Color_cycles].Speed = 0;
+            }
+
+            context->Color_cycles++;
+          }
+        }
         else if (memcmp(section, "CAMG", 4) == 0) //  	Amiga Viewport Modes
         {
           Read_dword_be(IFF_file, &AmigaViewModes); // HIRES=0x8000 LACE=0x4  HAM=0x800  HALFBRITE=0x80
