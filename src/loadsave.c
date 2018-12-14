@@ -88,7 +88,8 @@ void Load_Recoil_Image(T_IO_Context *);
 // ENUM     Name  TestFunc LoadFunc SaveFunc PalOnly Comment Layers Ext Exts  
 const T_Format File_formats[] = {
   {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, 0, "",
-    "gif;png;bmp;2bp;pcx;pkm;iff;lbm;ilbm;sham;ham;ham6;ham8;acbm;pic;anim;img;sci;scq;scf;scn;sco;pi1;pc1;cel;neo;"
+    "gif;png;bmp;2bp;pcx;pkm;iff;lbm;ilbm;sham;ham;ham6;ham8;acbm;pic;anim;img;sci;scq;scf;scn;sco;cel;"
+    "pi1;pc1;pi2;pc2;pi3;pc3;neo;"
     "c64;p64;a64;pi;rp;aas;art;dd;iph;ipt;hpc;ocp;koa;koala;fli;bml;cdu;prg;pmg;rpm;"
     "cpc;scr;win;"
     "hgr;dhgr;"
@@ -107,8 +108,8 @@ const T_Format File_formats[] = {
   {FORMAT_ACBM," acbm",Test_ACBM,Load_IFF, NULL,     0, 1, 0, "iff", "iff;pic;acbm"},
   {FORMAT_IMG, " img", Test_IMG, Load_IMG, Save_IMG, 0, 0, 0, "img", "img"},
   {FORMAT_SCx, " sc?", Test_SCx, Load_SCx, Save_SCx, 0, 0, 0, "sc?", "sci;scq;scf;scn;sco"},
-  {FORMAT_PI1, " pi1", Test_PI1, Load_PI1, Save_PI1, 0, 0, 0, "pi1", "pi1"},
-  {FORMAT_PC1, " pc1", Test_PC1, Load_PC1, Save_PC1, 0, 0, 0, "pc1", "pc1"},
+  {FORMAT_PI1, " pi1", Test_PI1, Load_PI1, Save_PI1, 0, 0, 0, "pi1", "pi1;pi2;pi3"},
+  {FORMAT_PC1, " pc1", Test_PC1, Load_PC1, Save_PC1, 0, 0, 0, "pc1", "pc1;pc2;pc3"},
   {FORMAT_CEL, " cel", Test_CEL, Load_CEL, Save_CEL, 0, 0, 0, "cel", "cel"},
   {FORMAT_NEO, " neo", Test_NEO, Load_NEO, Save_NEO, 0, 0, 0, "neo", "neo"},
   {FORMAT_KCF, " kcf", Test_KCF, Load_KCF, Save_KCF, 1, 0, 0, "kcf", "kcf"},
