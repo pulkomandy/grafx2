@@ -70,7 +70,7 @@ T_Scroller_button * Window_set_scroller_button(word x_pos, word y_pos,
   word initial_position);
 
 T_Scroller_button * Window_set_horizontal_scroller_button(word x_pos, word y_pos,
-  word height, word nb_elements, word nb_elements_visible,
+  word width, word nb_elements, word nb_elements_visible,
   word initial_position);
 
 T_Special_button * Window_set_special_button(word x_pos, word y_pos,
