@@ -2528,6 +2528,11 @@ void Draw_gradient_preview(short start_x,short start_y,short width,short height,
   Update_rect(start_x,start_y,width*Menu_factor_X,height*Menu_factor_Y);
 }
 
+static void Tag_color_gradient_range(const T_Gradient_range * range)
+{
+  Tag_color_range(range->Start, range->End);
+}
+
 void Button_Gradients(int btn)
 {
   short clicked_button;
@@ -2586,7 +2591,7 @@ void Button_Gradients(int btn)
   Print_in_window(11,112,"Cycling",cycling_mode?MC_Black:MC_Dark,MC_Light);
 
   // On tagge les couleurs qui vont avec
-  Tag_color_range(Main.backups->Pages->Gradients->Range[Current_gradient].Start,Main.backups->Pages->Gradients->Range[Current_gradient].End);
+  Tag_color_gradient_range(&Main.backups->Pages->Gradients->Range[Current_gradient]);
 
   Num2str(Current_gradient+1,str,2);
   Print_in_window(215,100,str,MC_Black,MC_Light);
@@ -2618,7 +2623,7 @@ void Button_Gradients(int btn)
       Print_in_window(215,100,str,MC_Black,MC_Light);
 
       // On tagge les couleurs qui vont avec
-      Tag_color_range(Main.backups->Pages->Gradients->Range[Current_gradient].Start,Main.backups->Pages->Gradients->Range[Current_gradient].End);
+      Tag_color_gradient_range(&Main.backups->Pages->Gradients->Range[Current_gradient]);
 
       // On affiche le sens qui va avec
       Print_in_window(12,23,(Main.backups->Pages->Gradients->Range[Current_gradient].Inverse)?"\033":"\032",MC_Black,MC_Light);
@@ -2670,7 +2675,7 @@ void Button_Gradients(int btn)
             // On met à jour l'intervalle du dégradé
             first_color=last_color=Main.backups->Pages->Gradients->Range[Current_gradient].Start=Main.backups->Pages->Gradients->Range[Current_gradient].End=temp_color;
             // On tagge le bloc
-            Tag_color_range(Main.backups->Pages->Gradients->Range[Current_gradient].Start,Main.backups->Pages->Gradients->Range[Current_gradient].End);
+            Tag_color_gradient_range(&Main.backups->Pages->Gradients->Range[Current_gradient]);
             // Tracé de la preview:
             Draw_gradient_preview(8,128,108,14,Current_gradient);
           }
@@ -2693,7 +2698,7 @@ void Button_Gradients(int btn)
               else
                 Main.backups->Pages->Gradients->Range[Current_gradient].Start=Main.backups->Pages->Gradients->Range[Current_gradient].End=first_color;
               // On tagge le bloc
-              Tag_color_range(Main.backups->Pages->Gradients->Range[Current_gradient].Start,Main.backups->Pages->Gradients->Range[Current_gradient].End);
+              Tag_color_gradient_range(&Main.backups->Pages->Gradients->Range[Current_gradient]);
               // Tracé de la preview:
               Draw_gradient_preview(8,128,108,14,Current_gradient);
               last_color=temp_color;
@@ -2763,7 +2768,7 @@ void Button_Gradients(int btn)
           // On met à jour l'intervalle du dégradé
           first_color=last_color=Main.backups->Pages->Gradients->Range[Current_gradient].Start=Main.backups->Pages->Gradients->Range[Current_gradient].End=temp_color;
           // On tagge le bloc
-          Tag_color_range(Main.backups->Pages->Gradients->Range[Current_gradient].Start,Main.backups->Pages->Gradients->Range[Current_gradient].End);
+          Tag_color_gradient_range(&Main.backups->Pages->Gradients->Range[Current_gradient]);
           // Tracé de la preview:
           Draw_gradient_preview(8,128,108,14,Current_gradient);
           Display_cursor();
