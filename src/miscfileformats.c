@@ -1578,12 +1578,12 @@ static void PI1_load_ranges(T_IO_Context * context, const byte * buffer, int siz
     // Sanity checks
     if (min_col < 256 && max_col < 256 && direction < 3 && (direction == 1 || delay < 128))
     {
-      int speed = 105;
+      int speed = 1;
       if (delay < 128)
         speed = 210/(128-delay);
-      // Grafx2's slider has a limit of 105
-      if (speed>105)
-        speed = 105;
+      // Grafx2's slider has a limit of COLOR_CYCLING_SPEED_MAX
+      if (speed > COLOR_CYCLING_SPEED_MAX)
+        speed = COLOR_CYCLING_SPEED_MAX;
       context->Cycle_range[context->Color_cycles].Start=min_col;
       context->Cycle_range[context->Color_cycles].End=max_col;
       context->Cycle_range[context->Color_cycles].Inverse= (direction==0);
@@ -2359,9 +2359,9 @@ void Load_NEO(T_IO_Context * context)
       if (color_cycling_delay != 0)
         context->Cycle_range[context->Color_cycles].Speed = 175 / color_cycling_delay;
       else
-        context->Cycle_range[context->Color_cycles].Speed = 64; // fastest
-      if (context->Cycle_range[context->Color_cycles].Speed > 64)
-        context->Cycle_range[context->Color_cycles].Speed = 64;
+        context->Cycle_range[context->Color_cycles].Speed = COLOR_CYCLING_SPEED_MAX; // fastest
+      if (context->Cycle_range[context->Color_cycles].Speed > COLOR_CYCLING_SPEED_MAX)
+        context->Cycle_range[context->Color_cycles].Speed = COLOR_CYCLING_SPEED_MAX;
     }
     else
       context->Cycle_range[context->Color_cycles].Speed = 0;  // cycling off

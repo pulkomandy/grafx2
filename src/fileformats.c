@@ -1596,11 +1596,13 @@ void Load_IFF(T_IO_Context * context)
               }
               else
               {
+                word speed;
+
                 context->Cycle_range[context->Color_cycles].Start=min_col;
                 context->Cycle_range[context->Color_cycles].End=max_col;
                 context->Cycle_range[context->Color_cycles].Inverse=(flags&2)?1:0;
-                context->Cycle_range[context->Color_cycles].Speed=(flags&1) ? rate/78 : 0;
-
+                speed = (flags&1) ? rate/78 : 0;
+                context->Cycle_range[context->Color_cycles].Speed = (speed > COLOR_CYCLING_SPEED_MAX) ? COLOR_CYCLING_SPEED_MAX : speed;
                 context->Color_cycles++;
               }
             }
@@ -1680,8 +1682,10 @@ void Load_IFF(T_IO_Context * context)
             context->Cycle_range[context->Color_cycles].End = end;
             if (direction != 0)
             {
+              dword speed;
               context->Cycle_range[context->Color_cycles].Inverse = (~direction >> 15) & 1;
-              context->Cycle_range[context->Color_cycles].Speed = 3501400 / (seconds * 1000000 + microseconds);
+              speed = 3501400 / (seconds * 1000000 + microseconds);
+              context->Cycle_range[context->Color_cycles].Speed = (speed > COLOR_CYCLING_SPEED_MAX) ? COLOR_CYCLING_SPEED_MAX : speed;
             }
             else
             {
@@ -4503,7 +4507,10 @@ void Load_GIF(T_IO_Context * context)
                 && Read_byte(GIF_file,&(IDB.Indicator))
                 && IDB.Image_width && IDB.Image_height)
               {
-    
+                GFX2_Log(GFX2_DEBUG, "GIF Image descriptor %u Pos (%u,%u) %ux%u %s%slocal palette %ubpp\n",
+                         number_LID, IDB.Pos_X, IDB.Pos_Y, IDB.Image_width, IDB.Image_height,
+                         (IDB.Indicator & 0x40) ? "interlaced " : "", (IDB.Indicator & 0x80) ? "" : "no ",
+                         (IDB.Indicator & 7) + 1);
                 // Palette locale dispo = (IDB.Indicator and $80)
                 // Image entrelacée     = (IDB.Indicator and $40)
                 // Ordre de classement  = (IDB.Indicator and $20)

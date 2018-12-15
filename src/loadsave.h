@@ -48,7 +48,7 @@ typedef struct
   byte Start;    ///< First color
   byte End;      ///< Last color
   byte Inverse;  ///< Boolean, true if the gradient goes in descending order
-  byte Speed;    ///< Frequency of cycling, from 1 (slow) to 64 (fast)
+  byte Speed;    ///< Frequency of cycling, from 1 (slow) to COLOR_CYCLING_SPEED_MAX (fast)
 } T_Color_cycle;
 
 typedef struct
