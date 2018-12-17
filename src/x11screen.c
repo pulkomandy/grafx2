@@ -304,8 +304,8 @@ void Flush_update(void)
 
 void Update_status_line(short char_pos, short width)
 {
-  Update_rect((18+char_pos*8)*Menu_factor_X*Pixel_width, Menu_status_Y*Pixel_height,
-              width*8*Menu_factor_X*Pixel_width, 8*Menu_factor_Y*Pixel_height);
+  Update_rect((18+char_pos*8)*Menu_factor_X, Menu_status_Y,
+              width*8*Menu_factor_X, 8*Menu_factor_Y);
 }
 
 void Clear_border(byte color)
