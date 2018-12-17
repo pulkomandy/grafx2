@@ -5197,44 +5197,14 @@ void Save_GIF(T_IO_Context * context)
     
                 if (!File_error)
                 {
-                  // On écrit le code dans le fichier
-                  GIF_set_code(GIF_file, &GIF, GIF_buffer, current_string); // Dernière portion d'image
+                  // Write the last code (before EOF)
+                  GIF_set_code(GIF_file, &GIF, GIF_buffer, current_string);
     
-                  //   Cette dernière portion ne devrait pas poser de problèmes
-                  // du côté GIF_nb_bits puisque pour que GIF_nb_bits change de
-                  // valeur, il faudrait que la table de chaîne soit remplie or
-                  // c'est impossible puisqu'on traite une chaîne qui se trouve
-                  // déjà dans la table, et qu'elle n'a rien d'inédit. Donc on
-                  // ne devrait pas avoir à changer de taille, mais je laisse
-                  // quand même en remarque tout ça, au cas où il subsisterait
-                  // des problèmes dans certains cas exceptionnels.
-                  //
-                  // Note: de toutes façons, ces lignes en commentaires ont étés
-                  //      écrites par copier/coller du temps où la sauvegarde du
-                  //      GIF déconnait. Il y a donc fort à parier qu'elles ne
-                  //      sont pas correctes.
-    
-                  /*
-                  if (current_string==alphabet_max)
-                  {
-                    if (alphabet_max==0xFFF)
-                    {
-                      // On balargue un Clear Code
-                      GIF_set_code(256);
-    
-                      // On réinitialise les données LZW
-                      alphabet_free=258;
-                      GIF_nb_bits  =9;
-                      alphabet_max =511;
-                    }
-                    else
-                    {
-                      GIF_nb_bits++;
-                      alphabet_max=(1<<GIF_nb_bits)-1;
-                    }
-                  }
-                  */
-    
+                  // We think we don't need to update GIF.nb_bits here because
+                  // we are writing a string already in the table,
+                  // but we may be wrong as the table grow for each code...
+                  // So in very rare cases there might be a problem.
+
                   GIF_set_code(GIF_file, &GIF, GIF_buffer, eof);  // 257 for 8bpp    // Code de End d'image
                   if (GIF.remainder_bits!=0)
                   {
@@ -5248,10 +5218,9 @@ void Save_GIF(T_IO_Context * context)
                   // On écrit un \0
                   if (! Write_byte(GIF_file,'\x00'))
                     File_error=1;
-                  
-                  }
+                }
       
-                } // On a pu écrire l'IDB
+              } // On a pu écrire l'IDB
               else
                 File_error=1;
             }
