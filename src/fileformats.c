@@ -4066,17 +4066,17 @@ void Test_GIF(T_IO_Context * context, FILE * file)
 // -- Lire un fichier au format GIF -----------------------------------------
 
 typedef struct {
-  word nb_bits;        // Nb de bits composants un code complet
-  word remainder_bits; // Nb de bits encore dispos dans GIF_last_byte
-  byte remainder_byte; // Nb d'octets avant le prochain bloc de Raster Data
-  word current_code;   // Code traité (qui vient d'être lu en général)
-  byte last_byte;      // Octet de lecture des bits
-  word pos_X;          // Coordonnées d'affichage de l'image
+  word nb_bits;        ///< bits for a code
+  word remainder_bits; ///< available bits in @ref last_byte field
+  byte remainder_byte; ///< Remaining bytes in current block
+  word current_code;   ///< current code (generally the one just read)
+  byte last_byte;      ///< buffer byte for reading bits for codes
+  word pos_X;          ///< Current coordinates
   word pos_Y;
-  word interlaced;     // L'image est entrelacée
-  word finished_interlaced_image; // L'image entrelacée est finie de charger
-  word pass;          // index de passe de l'image entrelacée
-  word stop;
+  word interlaced;     ///< interlaced flag
+  word finished_interlaced_image; ///< interlaced flag finished loading
+  word pass;           ///< current pass in interlaced decoding
+  word stop;           ///< Stop flag (end of picture)
 } T_GIF_context;
 
 
@@ -4698,7 +4698,7 @@ void Load_GIF(T_IO_Context * context)
 
 // -- Sauver un fichier au format GIF ---------------------------------------
 
-/// Flush ::GIF_buffer
+/// Flush the buffer
 static void GIF_empty_buffer(FILE * file, T_GIF_context *gif, byte * GIF_buffer)
 {
   word index;
