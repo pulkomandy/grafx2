@@ -4591,57 +4591,63 @@ void Load_GIF(T_IO_Context * context)
 
                 while ( (GIF_get_next_code(GIF_file, &GIF)!=value_eof) && (!File_error) )
                 {
-                  if (GIF.current_code<=alphabet_free)
+                  if (GIF.current_code > alphabet_free)
                   {
-                    if (GIF.current_code!=value_clr)
-                    {
-                      if (alphabet_free==(byte_read=GIF.current_code))
-                      {
-                        GIF.current_code=old_code;
-                        alphabet_stack[alphabet_stack_pos++]=special_case;
-                      }
-    
-                      while (GIF.current_code>value_clr)
-                      {
-                        alphabet_stack[alphabet_stack_pos++]=alphabet_suffix[GIF.current_code];
-                        GIF.current_code=alphabet_prefix[GIF.current_code];
-                      }
-    
-                      special_case=alphabet_stack[alphabet_stack_pos++]=GIF.current_code;
-    
-                      do
-                        GIF_new_pixel(context, &GIF, &IDB, is_transparent, alphabet_stack[--alphabet_stack_pos]);
-                      while (alphabet_stack_pos!=0);
-    
-                      alphabet_prefix[alphabet_free  ]=old_code;
-                      alphabet_suffix[alphabet_free++]=GIF.current_code;
-                      old_code=byte_read;
-    
-                      if (alphabet_free>alphabet_max)
-                      {
-                        if (GIF.nb_bits<12)
-                          alphabet_max      =((1 << (++GIF.nb_bits))-1);
-                      }
-                    }
-                    else // Code Clear rencontré
-                    {
-                      GIF.nb_bits   = initial_nb_bits + 1;
-                      alphabet_max  = ((1 <<  GIF.nb_bits)-1);
-                      alphabet_free = (1<<initial_nb_bits)+2;
-                      special_case  = GIF_get_next_code(GIF_file, &GIF);
-                      old_code      = GIF.current_code;
-                      GIF_new_pixel(context, &GIF, &IDB, is_transparent, GIF.current_code);
-                    }
-                  }
-                  else
-                  {
+                    GFX2_Log(GFX2_INFO, "Load_GIF() Invalid code %u (should be <=%u)\n", GIF.current_code, alphabet_free);
                     File_error=2;
                     break;
                   }
-                } // Code End-Of-Information ou erreur de fichier rencontré
-                if (File_error==2 && GIF.pos_X==0 && GIF.pos_Y==IDB.Image_height)
+                  else if (GIF.current_code != value_clr)
+                  {
+                    byte_read = GIF.current_code;
+                    if (alphabet_free == GIF.current_code)
+                    {
+                      GIF.current_code=old_code;
+                      alphabet_stack[alphabet_stack_pos++]=special_case;
+                    }
+
+                    while (GIF.current_code>value_clr)
+                    {
+                      alphabet_stack[alphabet_stack_pos++]=alphabet_suffix[GIF.current_code];
+                      GIF.current_code=alphabet_prefix[GIF.current_code];
+                    }
+
+                    special_case=alphabet_stack[alphabet_stack_pos++]=GIF.current_code;
+
+                    do
+                      GIF_new_pixel(context, &GIF, &IDB, is_transparent, alphabet_stack[--alphabet_stack_pos]);
+                    while (alphabet_stack_pos!=0);
+
+                    alphabet_prefix[alphabet_free  ]=old_code;
+                    alphabet_suffix[alphabet_free++]=GIF.current_code;
+                    old_code=byte_read;
+
+                    if (alphabet_free>alphabet_max)
+                    {
+                      if (GIF.nb_bits<12)
+                        alphabet_max      =((1 << (++GIF.nb_bits))-1);
+                    }
+                  }
+                  else // Clear code
+                  {
+                    GIF.nb_bits   = initial_nb_bits + 1;
+                    alphabet_max  = ((1 <<  GIF.nb_bits)-1);
+                    alphabet_free = (1<<initial_nb_bits)+2;
+                    special_case  = GIF_get_next_code(GIF_file, &GIF);
+                    if (GIF.current_code >= value_clr)
+                    {
+                      GFX2_Log(GFX2_INFO, "Load_GIF() Invalide code %u just after clear (=%u)!\n",
+                               GIF.current_code, value_clr);
+                      File_error = 2;
+                      break;
+                    }
+                    old_code      = GIF.current_code;
+                    GIF_new_pixel(context, &GIF, &IDB, is_transparent, GIF.current_code);
+                  }
+                }
+
+                if (File_error == 2 && GIF.pos_X == 0 && GIF.pos_Y == IDB.Image_height)
                   File_error=0;
-                /*Close_lecture();*/
     
                 if (File_error >= 0 && !GIF.stop)
                   File_error=2;
@@ -4666,7 +4672,7 @@ void Load_GIF(T_IO_Context * context)
           }
           // Lecture du code de fonction suivant:
           if (!Read_byte(GIF_file,&block_identifier))
-          File_error=2;
+            File_error=2;
         }
 
         // set the mode that have been read previously.
