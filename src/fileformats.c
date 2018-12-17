@@ -4074,7 +4074,6 @@ typedef struct {
   word pos_X;          ///< Current coordinates
   word pos_Y;
   word interlaced;     ///< interlaced flag
-  word finished_interlaced_image; ///< interlaced flag finished loading
   word pass;           ///< current pass in interlaced decoding
   word stop;           ///< Stop flag (end of picture)
 } T_GIF_context;
@@ -4132,7 +4131,11 @@ static void GIF_new_pixel(T_IO_Context * context, T_GIF_context * gif, T_GIF_IDB
     gif->pos_X=0;
 
     if (!gif->interlaced)
+    {
       gif->pos_Y++;
+      if (gif->pos_Y >= idb->Image_height)
+        gif->stop = 1;
+    }
     else
     {
       switch (gif->pass)
@@ -4155,7 +4158,7 @@ static void GIF_new_pixel(T_IO_Context * context, T_GIF_context * gif, T_GIF_IDB
                  break;
         case 3 : gif->pos_Y=1;
                  break;
-        case 4 : gif->finished_interlaced_image=1;
+        case 4 : gif->stop = 1;
         }
       }
     }
@@ -4510,7 +4513,7 @@ void Load_GIF(T_IO_Context * context)
                 && Read_byte(GIF_file,&(IDB.Indicator))
                 && IDB.Image_width && IDB.Image_height)
               {
-                GFX2_Log(GFX2_DEBUG, "GIF Image descriptor %u Pos (%u,%u) %ux%u %s%slocal palette %ubpp\n",
+                GFX2_Log(GFX2_DEBUG, "GIF Image descriptor %u Pos (%u,%u) %ux%u %s%slocal palette(%ubpp)\n",
                          number_LID, IDB.Pos_X, IDB.Pos_Y, IDB.Image_width, IDB.Image_height,
                          (IDB.Indicator & 0x40) ? "interlaced " : "", (IDB.Indicator & 0x80) ? "" : "no ",
                          (IDB.Indicator & 7) + 1);
@@ -4575,7 +4578,7 @@ void Load_GIF(T_IO_Context * context)
                 /*Init_lecture();*/
     
 
-                GIF.finished_interlaced_image=0;
+                GIF.stop = 0;
     
                 //////////////////////////////////////////// DECOMPRESSION LZW //
     
@@ -4640,11 +4643,7 @@ void Load_GIF(T_IO_Context * context)
                   File_error=0;
                 /*Close_lecture();*/
     
-                if (File_error>=0)
-                if ( /* (GIF_pos_X!=0) || */
-                     ( ( (!GIF.interlaced) && (GIF.pos_Y!=IDB.Image_height) && (GIF.pos_X!=0)) ||
-                       (  (GIF.interlaced) && (!GIF.finished_interlaced_image) )
-                     ) )
+                if (File_error >= 0 && !GIF.stop)
                   File_error=2;
                 
                 // No need to read more than one frame in animation preview mode
