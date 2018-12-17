@@ -378,9 +378,14 @@ static void Window_help_follow_link(const char * line)
   }
 #elif defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
   {
+    int ret;
     char command[80]; // use the xdg-open command to open the url in the default browser
     snprintf(command, sizeof(command), "xdg-open \"%s\"", buffer);
-    system(command);
+    ret = system(command);
+    if (ret < 0)
+      GFX2_Log(GFX2_ERROR, "system('%s') FAILED\n", command);
+    else if (ret == 127)
+      GFX2_Log(GFX2_ERROR, "system() FAILED to execute shell\n");
   }
 #else
   // TODO : HAIKU, MINT, etc.
