@@ -4065,97 +4065,97 @@ void Test_GIF(T_IO_Context * context, FILE * file)
 
 // -- Lire un fichier au format GIF -----------------------------------------
 
-/// @todo avoid using global variables, define a "GIF context" instead
-// Définition de quelques variables globales au chargement du GIF87a
-word GIF_nb_bits;        // Nb de bits composants un code complet
-word GIF_remainder_bits;      // Nb de bits encore dispos dans GIF_last_byte
-byte GIF_remainder_byte;      // Nb d'octets avant le prochain bloc de Raster Data
-word GIF_current_code;    // Code traité (qui vient d'être lu en général)
-byte GIF_last_byte;      // Octet de lecture des bits
-word GIF_pos_X;          // Coordonnées d'affichage de l'image
-word GIF_pos_Y;
-word GIF_interlaced;     // L'image est entrelacée
-word GIF_finished_interlaced_image; // L'image entrelacée est finie de charger
-word GIF_pass;          // index de passe de l'image entrelacée
-FILE *GIF_file;        // L'handle du fichier
+typedef struct {
+  word nb_bits;        // Nb de bits composants un code complet
+  word remainder_bits; // Nb de bits encore dispos dans GIF_last_byte
+  byte remainder_byte; // Nb d'octets avant le prochain bloc de Raster Data
+  word current_code;   // Code traité (qui vient d'être lu en général)
+  byte last_byte;      // Octet de lecture des bits
+  word pos_X;          // Coordonnées d'affichage de l'image
+  word pos_Y;
+  word interlaced;     // L'image est entrelacée
+  word finished_interlaced_image; // L'image entrelacée est finie de charger
+  word pass;          // index de passe de l'image entrelacée
+  word stop;
+} T_GIF_context;
 
-/// Reads the next code (GIF_nb_bits bits)
-static word GIF_get_next_code(void)
+
+/// Reads the next code (GIF.nb_bits bits)
+static word GIF_get_next_code(FILE * GIF_file, T_GIF_context * gif)
 {
-  word nb_bits_to_process=GIF_nb_bits;
-  word nb_bits_processed  =0;
+  word nb_bits_to_process = gif->nb_bits;
+  word nb_bits_processed = 0;
   word current_nb_bits;
 
-  GIF_current_code=0;
+  gif->current_code = 0;
 
   while (nb_bits_to_process)
   {
-    if (GIF_remainder_bits==0) // Il ne reste plus de bits...
+    if (gif->remainder_bits==0) // Il ne reste plus de bits...
     {
       // Lire l'octet suivant:
 
       // Si on a atteint la fin du bloc de Raster Data
-      if (GIF_remainder_byte==0)
+      if (gif->remainder_byte==0)
         // Lire l'octet nous donnant la taille du bloc de Raster Data suivant
-        if(Read_byte(GIF_file, &GIF_remainder_byte)!=1)
+        if(Read_byte(GIF_file, &gif->remainder_byte)!=1)
           File_error=2;
 
-      if(Read_byte(GIF_file,&GIF_last_byte)!=1)
+      if(Read_byte(GIF_file,&gif->last_byte)!=1)
         File_error = 2;
-      GIF_remainder_byte--;
-      GIF_remainder_bits=8;
+      gif->remainder_byte--;
+      gif->remainder_bits=8;
     }
 
-    current_nb_bits=(nb_bits_to_process<=GIF_remainder_bits)?nb_bits_to_process:GIF_remainder_bits;
+    current_nb_bits=(nb_bits_to_process<=gif->remainder_bits)?nb_bits_to_process:gif->remainder_bits;
 
-    GIF_current_code|=(GIF_last_byte & ((1<<current_nb_bits)-1))<<nb_bits_processed;
-    GIF_last_byte>>=current_nb_bits;
-    nb_bits_processed  +=current_nb_bits;
-    nb_bits_to_process-=current_nb_bits;
-    GIF_remainder_bits    -=current_nb_bits;
+    gif->current_code |= (gif->last_byte & ((1<<current_nb_bits)-1))<<nb_bits_processed;
+    gif->last_byte >>= current_nb_bits;
+    nb_bits_processed += current_nb_bits;
+    nb_bits_to_process -= current_nb_bits;
+    gif->remainder_bits -= current_nb_bits;
   }
 
-  return GIF_current_code;
+  return gif->current_code;
 }
 
 /// Put a new pixel
-static void GIF_new_pixel(T_IO_Context * context, T_GIF_IDB *idb, int is_transparent, byte color)
+static void GIF_new_pixel(T_IO_Context * context, T_GIF_context * gif, T_GIF_IDB *idb, int is_transparent, byte color)
 {
   if (!is_transparent || color!=context->Transparent_color)
-    Set_pixel(context, idb->Pos_X+GIF_pos_X, idb->Pos_Y+GIF_pos_Y,color);
+    Set_pixel(context, idb->Pos_X+gif->pos_X, idb->Pos_Y+gif->pos_Y,color);
 
-  GIF_pos_X++;
+  gif->pos_X++;
 
-  if (GIF_pos_X>=idb->Image_width)
+  if (gif->pos_X >= idb->Image_width)
   {
-    GIF_pos_X=0;
+    gif->pos_X=0;
 
-    if (!GIF_interlaced)
-      GIF_pos_Y++;
+    if (!gif->interlaced)
+      gif->pos_Y++;
     else
     {
-      switch (GIF_pass)
+      switch (gif->pass)
       {
-        case 0 : GIF_pos_Y+=8;
+        case 0 :
+        case 1 : gif->pos_Y+=8;
                  break;
-        case 1 : GIF_pos_Y+=8;
+        case 2 : gif->pos_Y+=4;
                  break;
-        case 2 : GIF_pos_Y+=4;
-                 break;
-        default: GIF_pos_Y+=2;
+        default: gif->pos_Y+=2;
       }
 
-      if (GIF_pos_Y>=idb->Image_height)
+      if (gif->pos_Y >= idb->Image_height)
       {
-        switch(++GIF_pass)
+        switch(++(gif->pass))
         {
-        case 1 : GIF_pos_Y=4;
+        case 1 : gif->pos_Y=4;
                  break;
-        case 2 : GIF_pos_Y=2;
+        case 2 : gif->pos_Y=2;
                  break;
-        case 3 : GIF_pos_Y=1;
+        case 3 : gif->pos_Y=1;
                  break;
-        case 4 : GIF_finished_interlaced_image=1;
+        case 4 : gif->finished_interlaced_image=1;
         }
       }
     }
@@ -4166,6 +4166,7 @@ static void GIF_new_pixel(T_IO_Context * context, T_GIF_IDB *idb, int is_transpa
 /// Load GIF file
 void Load_GIF(T_IO_Context * context)
 {
+  FILE *GIF_file;
   int image_mode = -1;
   char signature[6];
 
@@ -4176,6 +4177,7 @@ void Load_GIF(T_IO_Context * context)
   word   alphabet_max;      // Nombre d'entrées possibles dans l'alphabet
   word   alphabet_stack_pos; // Position dans la pile de décodage d'un chaîne
 
+  T_GIF_context GIF;
   T_GIF_LSDB LSDB;
   T_GIF_IDB IDB;
   T_GIF_GCE GCE;
@@ -4314,6 +4316,7 @@ void Load_GIF(T_IO_Context * context)
                       last_delay = GCE.Delay_time;
                       context->Transparent_color= GCE.Transparent_color;
                       is_transparent = GCE.Packed_fields & 1;
+                      GFX2_Log(GFX2_DEBUG, "GIF Graphics Control Extension : transp=%d (color #%u) delay=%ums disposal_method=%d\n", is_transparent, GCE.Transparent_color, 10*GCE.Delay_time, disposal_method);
                       if (number_LID == 0)
                         context->Background_transparent = is_transparent;
                       is_transparent &= is_looping;
@@ -4564,67 +4567,67 @@ void Load_GIF(T_IO_Context * context)
                 value_eof    =(1<<initial_nb_bits)+1;
                 alphabet_free=(1<<initial_nb_bits)+2;
 
-                GIF_nb_bits  =initial_nb_bits + 1;
-                alphabet_max      =((1 <<  GIF_nb_bits)-1);
-                GIF_interlaced    =(IDB.Indicator & 0x40);
-                GIF_pass         =0;
+                GIF.nb_bits  =initial_nb_bits + 1;
+                alphabet_max      =((1 <<  GIF.nb_bits)-1);
+                GIF.interlaced    =(IDB.Indicator & 0x40);
+                GIF.pass         =0;
     
                 /*Init_lecture();*/
     
 
-                GIF_finished_interlaced_image=0;
+                GIF.finished_interlaced_image=0;
     
                 //////////////////////////////////////////// DECOMPRESSION LZW //
     
-                GIF_pos_X=0;
-                GIF_pos_Y=0;
+                GIF.pos_X=0;
+                GIF.pos_Y=0;
                 alphabet_stack_pos=0;
-                GIF_last_byte    =0;
-                GIF_remainder_bits    =0;
-                GIF_remainder_byte    =0;
+                GIF.last_byte    =0;
+                GIF.remainder_bits    =0;
+                GIF.remainder_byte    =0;
 
-                while ( (GIF_get_next_code()!=value_eof) && (!File_error) )
+                while ( (GIF_get_next_code(GIF_file, &GIF)!=value_eof) && (!File_error) )
                 {
-                  if (GIF_current_code<=alphabet_free)
+                  if (GIF.current_code<=alphabet_free)
                   {
-                    if (GIF_current_code!=value_clr)
+                    if (GIF.current_code!=value_clr)
                     {
-                      if (alphabet_free==(byte_read=GIF_current_code))
+                      if (alphabet_free==(byte_read=GIF.current_code))
                       {
-                        GIF_current_code=old_code;
+                        GIF.current_code=old_code;
                         alphabet_stack[alphabet_stack_pos++]=special_case;
                       }
     
-                      while (GIF_current_code>value_clr)
+                      while (GIF.current_code>value_clr)
                       {
-                        alphabet_stack[alphabet_stack_pos++]=alphabet_suffix[GIF_current_code];
-                        GIF_current_code=alphabet_prefix[GIF_current_code];
+                        alphabet_stack[alphabet_stack_pos++]=alphabet_suffix[GIF.current_code];
+                        GIF.current_code=alphabet_prefix[GIF.current_code];
                       }
     
-                      special_case=alphabet_stack[alphabet_stack_pos++]=GIF_current_code;
+                      special_case=alphabet_stack[alphabet_stack_pos++]=GIF.current_code;
     
                       do
-                        GIF_new_pixel(context, &IDB, is_transparent, alphabet_stack[--alphabet_stack_pos]);
+                        GIF_new_pixel(context, &GIF, &IDB, is_transparent, alphabet_stack[--alphabet_stack_pos]);
                       while (alphabet_stack_pos!=0);
     
                       alphabet_prefix[alphabet_free  ]=old_code;
-                      alphabet_suffix[alphabet_free++]=GIF_current_code;
+                      alphabet_suffix[alphabet_free++]=GIF.current_code;
                       old_code=byte_read;
     
                       if (alphabet_free>alphabet_max)
                       {
-                        if (GIF_nb_bits<12)
-                          alphabet_max      =((1 << (++GIF_nb_bits))-1);
+                        if (GIF.nb_bits<12)
+                          alphabet_max      =((1 << (++GIF.nb_bits))-1);
                       }
                     }
                     else // Code Clear rencontré
                     {
-                      GIF_nb_bits       =initial_nb_bits + 1;
-                      alphabet_max      =((1 <<  GIF_nb_bits)-1);
-                      alphabet_free     =(1<<initial_nb_bits)+2;
-                      special_case       =GIF_get_next_code();
-                      old_code       =GIF_current_code;
-                      GIF_new_pixel(context, &IDB, is_transparent, GIF_current_code);
+                      GIF.nb_bits   = initial_nb_bits + 1;
+                      alphabet_max  = ((1 <<  GIF.nb_bits)-1);
+                      alphabet_free = (1<<initial_nb_bits)+2;
+                      special_case  = GIF_get_next_code(GIF_file, &GIF);
+                      old_code      = GIF.current_code;
+                      GIF_new_pixel(context, &GIF, &IDB, is_transparent, GIF.current_code);
                     }
                   }
                   else
@@ -4633,14 +4636,14 @@ void Load_GIF(T_IO_Context * context)
                     break;
                   }
                 } // Code End-Of-Information ou erreur de fichier rencontré
-                if (File_error==2 && GIF_pos_X==0 && GIF_pos_Y==IDB.Image_height)
+                if (File_error==2 && GIF.pos_X==0 && GIF.pos_Y==IDB.Image_height)
                   File_error=0;
                 /*Close_lecture();*/
     
                 if (File_error>=0)
                 if ( /* (GIF_pos_X!=0) || */
-                     ( ( (!GIF_interlaced) && (GIF_pos_Y!=IDB.Image_height) && (GIF_pos_X!=0)) ||
-                       (  (GIF_interlaced) && (!GIF_finished_interlaced_image) )
+                     ( ( (!GIF.interlaced) && (GIF.pos_Y!=IDB.Image_height) && (GIF.pos_X!=0)) ||
+                       (  (GIF.interlaced) && (!GIF.finished_interlaced_image) )
                      ) )
                   File_error=2;
                 
@@ -4695,80 +4698,81 @@ void Load_GIF(T_IO_Context * context)
 
 // -- Sauver un fichier au format GIF ---------------------------------------
 
-  int  GIF_stop;         // "On peut arrêter la sauvegarde du fichier"
-  byte GIF_buffer[256];   // buffer d'écriture de bloc de données compilées
+/// Flush ::GIF_buffer
+static void GIF_empty_buffer(FILE * file, T_GIF_context *gif, byte * GIF_buffer)
+{
+  word index;
 
-  /// Flush ::GIF_buffer
-  static void GIF_empty_buffer(void)
+  if (gif->remainder_byte)
   {
-    word index;
+    GIF_buffer[0] = gif->remainder_byte;
 
-    if (GIF_remainder_byte)
+    for (index = 0; index <= gif->remainder_byte; index++)
+      Write_one_byte(file, GIF_buffer[index]);
+
+    gif->remainder_byte=0;
+  }
+}
+
+/// Write a code (GIF_nb_bits bits)
+static void GIF_set_code(FILE * GIF_file, T_GIF_context * gif, byte * GIF_buffer, word Code)
+{
+  word nb_bits_to_process = gif->nb_bits;
+  word nb_bits_processed  =0;
+  word current_nb_bits;
+
+  while (nb_bits_to_process)
+  {
+    current_nb_bits = (nb_bits_to_process <= (8-gif->remainder_bits)) ?
+                          nb_bits_to_process: (8-gif->remainder_bits);
+
+    gif->last_byte |= (Code & ((1<<current_nb_bits)-1))<<gif->remainder_bits;
+    Code>>=current_nb_bits;
+    gif->remainder_bits    +=current_nb_bits;
+    nb_bits_processed  +=current_nb_bits;
+    nb_bits_to_process-=current_nb_bits;
+
+    if (gif->remainder_bits==8) // Il ne reste plus de bits à coder sur l'octet courant
     {
-      GIF_buffer[0]=GIF_remainder_byte;
+      // Ecrire l'octet à balancer:
+      GIF_buffer[++(gif->remainder_byte)] = gif->last_byte;
 
-      for (index=0;index<=GIF_remainder_byte;index++)
-        Write_one_byte(GIF_file,GIF_buffer[index]);
+      // Si on a atteint la fin du bloc de Raster Data
+      if (gif->remainder_byte==255)
+        // On doit vider le buffer qui est maintenant plein
+        GIF_empty_buffer(GIF_file, gif, GIF_buffer);
 
-      GIF_remainder_byte=0;
+      gif->last_byte=0;
+      gif->remainder_bits=0;
     }
   }
+}
 
-  /// Write a code (GIF_nb_bits bits)
-  static void GIF_set_code(word Code)
+
+/// Read the next pixel
+static byte GIF_next_pixel(T_IO_Context *context, T_GIF_context *gif, T_GIF_IDB *idb)
+{
+  byte temp;
+
+  temp = Get_pixel(context, gif->pos_X, gif->pos_Y);
+
+  if (++gif->pos_X >= (idb->Image_width + idb->Pos_X))
   {
-    word nb_bits_to_process=GIF_nb_bits;
-    word nb_bits_processed  =0;
-    word current_nb_bits;
-
-    while (nb_bits_to_process)
-    {
-      current_nb_bits=(nb_bits_to_process<=(8-GIF_remainder_bits))?nb_bits_to_process:(8-GIF_remainder_bits);
-
-      GIF_last_byte|=(Code & ((1<<current_nb_bits)-1))<<GIF_remainder_bits;
-      Code>>=current_nb_bits;
-      GIF_remainder_bits    +=current_nb_bits;
-      nb_bits_processed  +=current_nb_bits;
-      nb_bits_to_process-=current_nb_bits;
-
-      if (GIF_remainder_bits==8) // Il ne reste plus de bits à coder sur l'octet courant
-      {
-        // Ecrire l'octet à balancer:
-        GIF_buffer[++GIF_remainder_byte]=GIF_last_byte;
-
-        // Si on a atteint la fin du bloc de Raster Data
-        if (GIF_remainder_byte==255)
-          // On doit vider le buffer qui est maintenant plein
-          GIF_empty_buffer();
-
-        GIF_last_byte=0;
-        GIF_remainder_bits=0;
-      }
-    }
+    gif->pos_X = idb->Pos_X;
+    if (++gif->pos_Y >= (idb->Image_height + idb->Pos_Y))
+      gif->stop = 1;
   }
 
-
-  /// Read the next pixel
-  static byte GIF_next_pixel(T_IO_Context *context, T_GIF_IDB *idb)
-  {
-    byte temp;
-
-    temp=Get_pixel(context, GIF_pos_X,GIF_pos_Y);
-
-    if (++GIF_pos_X >= (idb->Image_width + idb->Pos_X))
-    {
-      GIF_pos_X = idb->Pos_X;
-      if (++GIF_pos_Y >= (idb->Image_height + idb->Pos_Y))
-        GIF_stop=1;
-    }
-
-    return temp;
-  }
+  return temp;
+}
 
 
 /// Save a GIF file
 void Save_GIF(T_IO_Context * context)
 {
+  FILE * GIF_file;
+  byte GIF_buffer[256];   // buffer d'écriture de bloc de données compilées
+
   word * alphabet_prefix;  // Table des préfixes des codes
   word * alphabet_suffix;  // Table des suffixes des codes
   word * alphabet_daughter;    // Table des chaînes filles (plus longues)
@@ -4778,6 +4782,7 @@ void Save_GIF(T_IO_Context * context)
   word   start;            // Code précédent (sert au linkage des chaînes)
   int    descend;          // Booléen "On vient de descendre"
 
+  T_GIF_context GIF;
   T_GIF_LSDB LSDB;
   T_GIF_IDB IDB;
 
@@ -5017,17 +5022,17 @@ void Save_GIF(T_IO_Context * context)
                 // find bounding box of changes for Animated GIFs
                 min_X = min_Y = 0xffff;
                 max_X = max_Y = 0;
-                for(GIF_pos_Y = 0; GIF_pos_Y < context->Height; GIF_pos_Y++) {
-                  for(GIF_pos_X = 0; GIF_pos_X < context->Width; GIF_pos_X++) {
-                    if (GIF_pos_X >= min_X && GIF_pos_X <= max_X && GIF_pos_Y >= min_Y && GIF_pos_Y <= max_Y)
+                for(GIF.pos_Y = 0; GIF.pos_Y < context->Height; GIF.pos_Y++) {
+                  for(GIF.pos_X = 0; GIF.pos_X < context->Width; GIF.pos_X++) {
+                    if (GIF.pos_X >= min_X && GIF.pos_X <= max_X && GIF.pos_Y >= min_Y && GIF.pos_Y <= max_Y)
                       continue; // already in the box
                     if(disposal_method == DISPOSAL_METHOD_DO_NOT_DISPOSE)
                     {
                       // if that pixel has same value in previous layer, no need to save it
                       Set_saving_layer(context, current_layer - 1);
-                      temp = Get_pixel(context, GIF_pos_X, GIF_pos_Y);
+                      temp = Get_pixel(context, GIF.pos_X, GIF.pos_Y);
                       Set_saving_layer(context, current_layer);
-                      if(temp == Get_pixel(context, GIF_pos_X, GIF_pos_Y))
+                      if(temp == Get_pixel(context, GIF.pos_X, GIF.pos_Y))
                         continue;
                     }
                     if (disposal_method == DISPOSAL_METHOD_RESTORE_BGCOLOR
@@ -5035,13 +5040,13 @@ void Save_GIF(T_IO_Context * context)
                       || Main.backups->Pages->Image_mode != IMAGE_MODE_ANIMATION)
                     {
                       // if that pixel is Backcol, no need to save it
-                      if (LSDB.Backcol == Get_pixel(context, GIF_pos_X, GIF_pos_Y))
+                      if (LSDB.Backcol == Get_pixel(context, GIF.pos_X, GIF.pos_Y))
                         continue;
                     }
-                    if(GIF_pos_X < min_X) min_X = GIF_pos_X;
-                    if(GIF_pos_X > max_X) max_X = GIF_pos_X;
-                    if(GIF_pos_Y < min_Y) min_Y = GIF_pos_Y;
-                    if(GIF_pos_Y > max_Y) max_Y = GIF_pos_Y;
+                    if(GIF.pos_X < min_X) min_X = GIF.pos_X;
+                    if(GIF.pos_X > max_X) max_X = GIF.pos_X;
+                    if(GIF.pos_Y < min_Y) min_Y = GIF.pos_Y;
+                    if(GIF.pos_Y > max_Y) max_Y = GIF.pos_Y;
                   }
                 }
                 if((min_X <= max_X) && (min_Y <= max_Y))
@@ -5061,9 +5066,9 @@ void Save_GIF(T_IO_Context * context)
 
               // look for the maximum pixel value
               // to decide how many bit per pixel are needed.
-              for(GIF_pos_Y = IDB.Pos_Y; GIF_pos_Y < IDB.Image_height + IDB.Pos_Y; GIF_pos_Y++) {
-                for(GIF_pos_X = IDB.Pos_X; GIF_pos_X < IDB.Image_width + IDB.Pos_X; GIF_pos_X++) {
-                  temp=Get_pixel(context, GIF_pos_X, GIF_pos_Y);
+              for(GIF.pos_Y = IDB.Pos_Y; GIF.pos_Y < IDB.Image_height + IDB.Pos_Y; GIF.pos_Y++) {
+                for(GIF.pos_X = IDB.Pos_X; GIF.pos_X < IDB.Image_width + IDB.Pos_X; GIF.pos_X++) {
+                  temp=Get_pixel(context, GIF.pos_X, GIF.pos_Y);
                   if(temp > max) max = temp;
                 }
               }
@@ -5092,22 +5097,22 @@ void Save_GIF(T_IO_Context * context)
                 //   Le block indicateur d'IDB et l'IDB ont étés correctements
                 // écrits.
     
-                GIF_pos_X=IDB.Pos_X;
-                GIF_pos_Y=IDB.Pos_Y;
-                GIF_last_byte=0;
-                GIF_remainder_bits=0;
-                GIF_remainder_byte=0;
+                GIF.pos_X=IDB.Pos_X;
+                GIF.pos_Y=IDB.Pos_Y;
+                GIF.last_byte=0;
+                GIF.remainder_bits=0;
+                GIF.remainder_byte=0;
     
 #define GIF_INVALID_CODE (65535)
                 index=GIF_INVALID_CODE;
                 File_error=0;
-                GIF_stop=0;
+                GIF.stop=0;
     
                 // Réintialisation de la table:
                 alphabet_free=clear + 2;  // 258 for 8bpp
-                GIF_nb_bits  =IDB.Nb_bits_pixel + 1; // 9 for 8 bpp
+                GIF.nb_bits  =IDB.Nb_bits_pixel + 1; // 9 for 8 bpp
                 alphabet_max =clear+clear-1;  // 511 for 8bpp
-                GIF_set_code(clear);  //256 for 8bpp
+                GIF_set_code(GIF_file, &GIF, GIF_buffer, clear);  //256 for 8bpp
                 for (start=0;start<4096;start++)
                 {
                   alphabet_daughter[start] = GIF_INVALID_CODE;
@@ -5116,12 +5121,12 @@ void Save_GIF(T_IO_Context * context)
     
                 ////////////////////////////////////////////// COMPRESSION LZW //
     
-                start=current_string=GIF_next_pixel(context, &IDB);
+                start=current_string=GIF_next_pixel(context, &GIF, &IDB);
                 descend=1;
     
-                while ((!GIF_stop) && (!File_error))
+                while ((!GIF.stop) && (!File_error))
                 {
-                  current_char=GIF_next_pixel(context, &IDB);
+                  current_char=GIF_next_pixel(context, &GIF, &IDB);
     
                   // look for (current_string,current_char) in the alphabet
                   while ( (index != GIF_INVALID_CODE) &&
@@ -5147,7 +5152,7 @@ void Save_GIF(T_IO_Context * context)
                   {
                     // (current_string,current_char) was not found in the alphabet
                     // so write current_string to the Gif stream
-                    GIF_set_code(current_string);
+                    GIF_set_code(GIF_file, &GIF, GIF_buffer, current_string);
 
                     if(alphabet_free < 4096) {
                       // link current_string and the new one
@@ -5165,9 +5170,9 @@ void Save_GIF(T_IO_Context * context)
                     if (alphabet_free >= 4096)
                     {
                       // clear alphabet
-                      GIF_set_code(clear);    // 256 for 8bpp
+                      GIF_set_code(GIF_file, &GIF, GIF_buffer, clear);    // 256 for 8bpp
                       alphabet_free=clear+2;  // 258 for 8bpp
-                      GIF_nb_bits  =IDB.Nb_bits_pixel + 1;  // 9 for 8bpp
+                      GIF.nb_bits  =IDB.Nb_bits_pixel + 1;  // 9 for 8bpp
                       alphabet_max =clear+clear-1;    // 511 for 8bpp
                       for (start=0;start<4096;start++)
                       {
@@ -5179,8 +5184,8 @@ void Save_GIF(T_IO_Context * context)
                     {
                       // On augmente le nb de bits
     
-                      GIF_nb_bits++;
-                      alphabet_max=(1<<GIF_nb_bits)-1;
+                      GIF.nb_bits++;
+                      alphabet_max = (1<<GIF.nb_bits)-1;
                     }
     
                     // initialize current_string as the string "current_char"
@@ -5193,7 +5198,7 @@ void Save_GIF(T_IO_Context * context)
                 if (!File_error)
                 {
                   // On écrit le code dans le fichier
-                  GIF_set_code(current_string); // Dernière portion d'image
+                  GIF_set_code(GIF_file, &GIF, GIF_buffer, current_string); // Dernière portion d'image
     
                   //   Cette dernière portion ne devrait pas poser de problèmes
                   // du côté GIF_nb_bits puisque pour que GIF_nb_bits change de
@@ -5230,15 +5235,15 @@ void Save_GIF(T_IO_Context * context)
                   }
                   */
     
-                  GIF_set_code(eof);  // 257 for 8bpp    // Code de End d'image
-                  if (GIF_remainder_bits!=0)
+                  GIF_set_code(GIF_file, &GIF, GIF_buffer, eof);  // 257 for 8bpp    // Code de End d'image
+                  if (GIF.remainder_bits!=0)
                   {
                     // Write last byte (this is an incomplete byte)
-                    GIF_buffer[++GIF_remainder_byte]=GIF_last_byte;
-                    GIF_last_byte=0;
-                    GIF_remainder_bits=0;
+                    GIF_buffer[++GIF.remainder_byte]=GIF.last_byte;
+                    GIF.last_byte=0;
+                    GIF.remainder_bits=0;
                   }
-                  GIF_empty_buffer();         // On envoie les dernières données du buffer GIF dans le buffer KM
+                  GIF_empty_buffer(GIF_file, &GIF, GIF_buffer); // On envoie les dernières données du buffer GIF dans le buffer KM
     
                   // On écrit un \0
                   if (! Write_byte(GIF_file,'\x00'))
