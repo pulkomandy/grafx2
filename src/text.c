@@ -292,6 +292,7 @@ static int CALLBACK EnumFontFamCallback(CONST LOGFONTA *lpelf, CONST TEXTMETRICA
   char type[3] = { ' ', ' ', '\0' };
   T_Font * font;
 
+  (void)lParam; // we don't use the custom callback param
   if (FontType & TRUETYPE_FONTTYPE)
     type[0] = type[1] = 'T';
   else if (FontType & RASTER_FONTTYPE)
