@@ -335,6 +335,12 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
   char  str[10];
   byte truecolor;
 
+  if (width < 0 || width > 9999 || height < 0 || height > 9999)
+  {
+    File_error = 1;
+    return;
+  }
+
   if (bpp == 0)
     bpp = 8;  // default to 8bits
   truecolor = (bpp > 8) ? 1 : 0;
