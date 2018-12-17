@@ -28,12 +28,6 @@
     #include <windows.h>
 #endif
 
-// On Debian, this is already implied in dirent.h
-// I don't know which targets need it and what it does. - yr
-#ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE 500
-#endif
-
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>

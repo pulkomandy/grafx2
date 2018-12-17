@@ -47,9 +47,6 @@
     #define MOUNTED_GETMNTENT1
 #endif
 
-#ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE 500
-#endif
 // --- END GRAFX2 CUSTOM CONFIG ---
 
 #include "mountlist.h"
