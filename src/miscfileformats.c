@@ -104,6 +104,7 @@ void Test_PAL(T_IO_Context * context, FILE * file)
   }
 }
 
+/// Test for GPL (Gimp Palette) file format
 void Test_GPL(T_IO_Context * context, FILE * file)
 {
   char buffer[16];
@@ -123,8 +124,7 @@ void Test_GPL(T_IO_Context * context, FILE * file)
   }
 }
 
-// skip the padding before a space-padded field.
-
+/// skip the padding before a space-padded field.
 static int skip_padding(FILE *file, int max_chars)
 {
   byte b;
@@ -142,91 +142,100 @@ static int skip_padding(FILE *file, int max_chars)
   return chars_read;
 }
 
-// -- Load file with format GPL -----------------------------------------
+/// Load GPL (Gimp Palette) file format
 void Load_GPL(T_IO_Context * context)
 {
   FILE *file;
   char buffer[256];
 
-  File_error=0;
+  File_error = 1;
 
-  // Open file
-  if ((file=Open_file_read(context)))
+  file = Open_file_read(context);
+  if (file == NULL)
+    return;
+
+  if (!Read_byte_line(file, buffer, sizeof(buffer)))
+    return;
+
+  if (memcmp(buffer,"GIMP Palette",12) == 0)
   {
+    int i, r, g, b, columns;
+    size_t len;
+    // Name: xxxxx
     if (!Read_byte_line(file, buffer, sizeof(buffer)))
-    {
-      File_error = 1;
       return;
-    }
-
-    if (memcmp(buffer,"GIMP Palette",12) == 0)
+    len = strlen(buffer);
+    while (len > 0)
     {
-      int i, r, g, b, columns;
-      size_t len;
-      // Name: xxxxx
+      len--;
+      if (buffer[len] == '\r' || buffer[len] == '\n')
+        buffer[len] = '\0';
+    }
+    GFX2_Log(GFX2_DEBUG, "GPL %s\n", buffer);
+    if (0 == memcmp(buffer, "Name: ", 6))
+      snprintf(context->Comment, sizeof(context->Comment), "GPL: %s", buffer + 6);
+
+    // Columns: 16
+    if (fscanf(file, "Columns: %d", &columns) != 1)
+      return;
+    Read_byte_line(file, buffer, sizeof(buffer));
+    /// @todo set grafx2 columns setting to match.
+    // #<newline>
+    if (!Read_byte_line(file, buffer, sizeof(buffer)))
+      return;
+
+    for (i = 0; i < 256; i++)
+    {
+      skip_padding(file, 32);
+      if (fscanf(file, "%d", &r) != 1)
+        break;
+      skip_padding(file, 32);
+      if (fscanf(file, "%d", &g) != 1)
+        break;
+      skip_padding(file, 32);
+      if (fscanf(file, "%d\t", &b) != 1)
+        break;
       if (!Read_byte_line(file, buffer, sizeof(buffer)))
+        break;
+      len = strlen(buffer);
+      while (len > 1)
       {
-        File_error = 1;
-        return;
+        len--;
+        if (buffer[len] == '\r' || buffer[len] == '\n')
+          buffer[len] = '\0';
       }
-      // Columns: 16
-      fscanf(file, "Columns: %d", &columns);
-      Read_byte_line(file, buffer, sizeof(buffer));
-      // TODO: set grafx2 columns setting to match.
-      // #<newline>
-      if (!Read_byte_line(file, buffer, sizeof(buffer)))
-      {
-        File_error = 1;
-        return;
-      }
+      /// @todo analyze color names to build shade table
 
-      for (i = 0; i < 256; i++)
-      {
-        skip_padding(file, 32);
-        fscanf(file, "%d", &r);
-        skip_padding(file, 32);
-        fscanf(file, "%d", &g);
-        skip_padding(file, 32);
-        fscanf(file, "%d\t", &b);
-        if (!Read_byte_line(file, buffer, sizeof(buffer)))
-          break;
-        len = strlen(buffer);
-        while (len > 1)
-        {
-          len--;
-          if (buffer[len] == '\r' || buffer[len] == '\n')
-            buffer[len] = '\0';
-        }
-        // TODO: analyze color names to build shade table
-
-        //printf("DBG: %3d: RGB(%3d,%3d,%3d) %s\n", i, r,g,b, buffer);
-        context->Palette[i].R = r;
-        context->Palette[i].G = g;
-        context->Palette[i].B = b;
-      }
-    } else
-      File_error = 2;
-
-    // close the file
-    fclose(file);
+      GFX2_Log(GFX2_DEBUG, "GPL: %3d: RGB(%3d,%3d,%3d) %s\n", i, r,g,b, buffer);
+      context->Palette[i].R = r;
+      context->Palette[i].G = g;
+      context->Palette[i].B = b;
+    }
+    if (i > 0)  // at least one color was read
+      File_error = 0;
   }
   else
-    // Si on n'a pas réussi à ouvrir le fichier, alors il y a eu une erreur
-    File_error=1;
+    File_error = 2;
+
+  // close the file
+  fclose(file);
 }
 
 
+/// Save GPL (Gimp Palette) file format
 void
 Save_GPL (T_IO_Context * context)
 {
   // Gimp is a unix program, so use Unix file endings (LF aka '\n')
   FILE *file;
 
-  File_error=0;
+  file = Open_file_write(context);
 
-  // Open output file
-  if ((file=Open_file_write(context)) != NULL ){
+  if (file != NULL )
+  {
     int i;
+
+    File_error = 0;
     fprintf (file, "GIMP Palette\n");
     fprintf (file, "Name: %s\n", context->File_name);
     // TODO: use actual columns value
