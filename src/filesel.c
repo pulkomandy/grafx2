@@ -1485,7 +1485,7 @@ static short Find_filename_match(const T_Fileselector *list, const word * fname)
       {
         for (counter=0; fname[counter] != 0; counter++)
         {
-          if (tolower(current_item->Full_name[counter] != towlower(fname[counter])))
+          if ((wint_t)tolower(current_item->Full_name[counter]) != towlower(fname[counter]))
             break;
         }
       }
