@@ -298,22 +298,30 @@ void Load_PAL(T_IO_Context * context)
       if (strncmp(buffer,"JASC-PAL",8) == 0)
       {
         int i, n, r, g, b;
-        fscanf(file, "%d",&n);
-        if(n != 100)
+        i = fscanf(file, "%d",&n);
+        if(i != 1 || n != 100)
         {
           File_error = 2;
           fclose(file);
           return;
         }
         // Read color count
-        fscanf(file, "%d",&n);
-        for (i = 0; i < n; i++)
+        if (fscanf(file, "%d",&n) == 1)
         {
-          fscanf(file, "%d %d %d",&r, &g, &b);
-          context->Palette[i].R = r;
-          context->Palette[i].G = g;
-          context->Palette[i].B = b;
+          for (i = 0; i < n; i++)
+          {
+            if (fscanf(file, "%d %d %d",&r, &g, &b) == 3)
+            {
+              context->Palette[i].R = r;
+              context->Palette[i].G = g;
+              context->Palette[i].B = b;
+            }
+            else
+              File_error = 2;
+          }
         }
+        else
+          File_error = 2;
       }
       else if(strncmp(buffer, "RIFF", 4) == 0)
       {
