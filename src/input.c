@@ -82,6 +82,7 @@ int Snap_axis_origin_X;
 int Snap_axis_origin_Y;
 
 char * Drop_file_name = NULL;
+word * Drop_file_name_unicode = NULL;
 
 #if defined(USE_X11) || (defined(SDL_VIDEO_DRIVER_X11) && !defined(NO_X11))
 char * X11_clipboard = NULL;

@@ -697,41 +697,52 @@ void Main_handler(void)
         char* flimit;
         byte old_cursor_shape;
 
-        Upload_infos_page(&Main);
-  
         flimit = Find_last_separator(Drop_file_name);
-        *(flimit++) = '\0';
-  
-        Hide_cursor();
-        old_cursor_shape=Cursor_shape;
-        Cursor_shape=CURSOR_SHAPE_HOURGLASS;
-        Display_cursor();
-        
-        Init_context_layered_image(&context, flimit, Drop_file_name);
-        Load_image(&context);
-        if (File_error!=1)
+        if (flimit != NULL)
         {
-          Compute_limits();
-          Compute_paintbrush_coordinates();
-          Redraw_layered_image();
-          End_of_modification();
-          Main.image_is_modified=0;
-        }
-        Destroy_context(&context);
-        
-        Compute_optimal_menu_colors(Main.palette);
-        Check_menu_mode();
-        Display_menu();
-        if (Config.Display_image_limits)
-          Display_image_limits();
+          *(flimit++) = '\0';
+  
+          Upload_infos_page(&Main);
 
-        Hide_cursor();
-        Cursor_shape=old_cursor_shape;
-        Display_all_screen();
-        Display_cursor();
+          Hide_cursor();
+          old_cursor_shape=Cursor_shape;
+          Cursor_shape=CURSOR_SHAPE_HOURGLASS;
+          Display_cursor();
+        
+          Init_context_layered_image(&context, flimit, Drop_file_name);
+          if (Drop_file_name_unicode != NULL)
+          {
+            context.File_name_unicode = Find_last_separator_unicode(Drop_file_name_unicode);
+            if (context.File_name_unicode != NULL)
+              context.File_name_unicode++;
+          }
+          Load_image(&context);
+          if (File_error!=1)
+          {
+            Compute_limits();
+            Compute_paintbrush_coordinates();
+            Redraw_layered_image();
+            End_of_modification();
+            Main.image_is_modified=0;
+          }
+          Destroy_context(&context);
+        
+          Compute_optimal_menu_colors(Main.palette);
+          Check_menu_mode();
+          Display_menu();
+          if (Config.Display_image_limits)
+            Display_image_limits();
+
+          Hide_cursor();
+          Cursor_shape=old_cursor_shape;
+          Display_all_screen();
+          Display_cursor();
+        }
       }
       free(Drop_file_name);
       Drop_file_name=NULL;
+      free(Drop_file_name_unicode);
+      Drop_file_name_unicode=NULL;
     }
     
     if(Get_input(0))

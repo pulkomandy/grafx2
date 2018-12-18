@@ -31,6 +31,7 @@
 #include "windows.h"
 #include "input.h"
 #include "keyboard.h"
+#include "unicode.h"
 
 extern int user_feedback_required;
 extern word Input_new_mouse_X;
@@ -259,17 +260,20 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
       {
         TCHAR LongDropFileName[MAX_PATH];
         TCHAR ShortDropFileName[MAX_PATH];
-        if (DragQueryFile(hDrop, 0 , LongDropFileName ,(UINT) MAX_PATH)
-           && GetShortPathName(LongDropFileName, ShortDropFileName, MAX_PATH))
+        if (DragQueryFile(hDrop, 0 , LongDropFileName ,(UINT) MAX_PATH))
         {
-          Drop_file_name = (char *)malloc(lstrlen(ShortDropFileName) + 1);
-          if (Drop_file_name != NULL)
+          Drop_file_name_unicode = Unicode_strdup((word *)LongDropFileName);
+          if (GetShortPathName(LongDropFileName, ShortDropFileName, MAX_PATH))
           {
-            int i;
+            Drop_file_name = (char *)malloc(lstrlen(ShortDropFileName) + 1);
+            if (Drop_file_name != NULL)
+            {
+              int i;
 
-            for (i = 0; ShortDropFileName[i] != 0; i++)
-              Drop_file_name[i] = (char)ShortDropFileName[i];
-            Drop_file_name[i] = 0;
+              for (i = 0; ShortDropFileName[i] != 0; i++)
+                Drop_file_name[i] = (char)ShortDropFileName[i];
+              Drop_file_name[i] = 0;
+            }
           }
         }
       }
