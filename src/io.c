@@ -258,7 +258,7 @@ char * Find_last_separator(const char * str)
   const char * position = NULL;
   for (; *str != '\0'; str++)
     if (*str == PATH_SEPARATOR[0]
-#ifdef __WIN32__    
+#if defined(__WIN32__) || defined(WIN32)
      || *str == '/'
 #elif __AROS__
      || *str == ':'
@@ -267,6 +267,22 @@ char * Find_last_separator(const char * str)
       position = str;
   return (char *)position;
 }
+
+word * Find_last_separator_unicode(const word * str)
+{
+  const word * position = NULL;
+  for (; *str != 0; str++)
+    if (*str == (byte)PATH_SEPARATOR[0]
+#if defined(__WIN32__) || defined(WIN32)
+     || *str == '/'
+#elif __AROS__
+     || *str == ':'
+#endif
+     )
+      position = str;
+  return (word *)position;
+}
+
 // Récupère la partie "nom de file seul" d'un chemin
 void Extract_filename(char *dest, const char *source)
 {

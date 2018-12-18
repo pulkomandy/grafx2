@@ -98,6 +98,9 @@ void Extract_path(char *dest, const char *source);
 /// Finds the rightmost path separator in a full filename. Used to separate directory from file.
 char * Find_last_separator(const char * str);
 
+/// Finds the rightmost path separator in a full filename in unicode. Used to separate directory from file.
+word * Find_last_separator_unicode(const word * str);
+
 /// default path separator character
 #if defined(WIN32) || defined(__MINT__)
   #define PATH_SEPARATOR "\\"
