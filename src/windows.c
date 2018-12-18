@@ -1062,6 +1062,7 @@ void Print_coordinates(void)
 
 void Print_filename(void)
 {
+  word display_string[256];
   word max_size;
   word string_size;
 
@@ -1074,47 +1075,46 @@ void Print_filename(void)
 
   // Partial copy of the name
   if (Main.backups->Pages->Filename_unicode[0] != 0)
-  {
-    word display_string[256];
     Unicode_strlcpy(display_string, Main.backups->Pages->Filename_unicode, 256);
-    string_size = Unicode_strlen(display_string);
-    display_string[max_size]=0;
-
-    if (string_size > max_size)
-    {
-      string_size = max_size;
-      display_string[string_size-1]=(byte)ELLIPSIS_CHARACTER;
-    }
-    // Print
-    Print_general_unicode(Screen_width-(string_size<<3)*Menu_factor_X,Menu_status_Y,display_string,MC_Black,MC_Light);
-  }
   else
   {
-    char display_string[256];
 #ifdef ENABLE_FILENAMES_ICONV
     char * input = Main.backups->Pages->Filename;
     size_t inbytesleft = strlen(input);
-    char * output = display_string;
-    size_t outbytesleft = sizeof(display_string)-1;
-    if(cd != (iconv_t)-1 && (ssize_t)iconv(cd, &input, &inbytesleft, &output, &outbytesleft) >= 0)
-      *output = '\0';
+    char * output = (char *)display_string;
+    size_t outbytesleft = sizeof(display_string)-2;
+    if(cd_utf16 != (iconv_t)-1 && (ssize_t)iconv(cd_utf16, &input, &inbytesleft, &output, &outbytesleft) >= 0)
+      output[1] = output[0] = '\0';
     else
 #endif /* ENABLE_FILENAMES_ICONV */
-    {
-      strncpy(display_string, Main.backups->Pages->Filename, sizeof(display_string)-1);
-      display_string[sizeof(display_string)-1] = '\0';
-    }
-    string_size = strlen(display_string);
-    display_string[max_size]='\0';
-
-    if (string_size > max_size)
-    {
-      string_size = max_size;
-      display_string[string_size-1]=ELLIPSIS_CHARACTER;
-    }
-    // Print
-    Print_general(Screen_width-(string_size<<3)*Menu_factor_X,Menu_status_Y,display_string,MC_Black,MC_Light);
+      Unicode_char_strlcpy(display_string, Main.backups->Pages->Filename, 256);
   }
+
+  string_size = Unicode_strlen(display_string);
+
+  if (string_size > max_size)
+  {
+    // check if the begining of the Spare file name is the same
+    if (Spare.backups->Pages->Filename_unicode[0] != 0
+        && 0 == memcmp(display_string, Spare.backups->Pages->Filename_unicode, (max_size - 1) * sizeof(word)))
+    {
+      // display : "...end_of_filename.ext"
+      display_string[0] = (byte)ELLIPSIS_CHARACTER;
+      memmove(display_string + 1,
+              display_string + string_size - max_size + 1,
+              (max_size - 1) * sizeof(word));
+      string_size = max_size;
+    }
+    else
+    {
+      // display : "begin_of_filename..."
+      string_size = max_size;
+      display_string[string_size-1] = (byte)ELLIPSIS_CHARACTER;
+    }
+    display_string[string_size] = 0;
+  }
+  // Print
+  Print_general_unicode(Screen_width-(string_size<<3)*Menu_factor_X,Menu_status_Y,display_string,MC_Black,MC_Light);
 }
 
 // Fonction d'affichage d'une chaine numérique avec une fonte très fine
