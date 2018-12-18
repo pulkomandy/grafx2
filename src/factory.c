@@ -394,6 +394,7 @@ int L_SetPictureSize(lua_State* L)
   {
     // Script has not modified the image/palette yet, so it's not backed up:
     // Make a backup that counts as a new Undo step.
+    Upload_infos_page(&Main);
     Backup_with_new_dimensions(w, h);
   }
   // part of Resize_image() : the pixel copy part.
