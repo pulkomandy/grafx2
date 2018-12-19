@@ -1613,6 +1613,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   char  initial_comment[COMMENT_SIZE+1];
   short window_shortcut;
   const char * directory_to_change_to = NULL;
+  int   load_from_clipboard = 0;
 
   Selector=settings;
 
@@ -1730,7 +1731,14 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
     Window_display_icon_sprite(bookmark_dropdown[temp]->Pos_X+3,bookmark_dropdown[temp]->Pos_Y+2,ICON_STAR);
     Display_bookmark(bookmark_dropdown[temp],temp);
   }
-  
+
+#if defined(WIN32)
+  if (load)
+    Window_set_normal_button(62,180,115,14,"From Clipboard",0,1,MOD_CTRL|KEY_v); // 14
+  else
+    Window_set_normal_button(62,180,115,14,"To Clipboard",0,1,MOD_CTRL|KEY_c); // 14
+#endif
+
   Change_directory(context->File_directory);
   Get_current_directory(Selector->Directory, Selector->Directory_unicode, MAX_PATH_CHARACTERS);
   
@@ -2089,6 +2097,19 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           New_preview_is_needed=1;
           Reset_quicksearch();
           break;
+      case 14:  // From/to clipboard
+          if (load)
+          {
+            // paste from clipboard
+            load_from_clipboard = 1;
+            New_preview_is_needed = 1;
+            Reset_quicksearch();
+          }
+          else
+          {
+            // copy to clipboard
+          }
+          break;
       default:
           if (clicked_button>=10 && clicked_button<10+NB_BOOKMARKS)
           {
@@ -2374,13 +2395,21 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 
     if (Timer_state==1) // Il faut afficher la preview
     {
-      if ( (Selector->Position+Selector->Offset>=Filelist.Nb_directories) && (Filelist.Nb_elements) )
+      if ( load_from_clipboard || ((Selector->Position+Selector->Offset>=Filelist.Nb_directories) && (Filelist.Nb_elements)) )
       {
         T_IO_Context preview_context;
-      
-        Init_context_preview(&preview_context, Selector_filename, Selector->Directory);
-        preview_context.Format = Selector->Format_filter;
-        preview_context.File_name_unicode = Selector_filename_unicode;
+
+        if (load_from_clipboard)
+        {
+          Init_context_preview(&preview_context, NULL, NULL);
+          preview_context.Format = FORMAT_CLIPBOARD;
+        }
+        else
+        {
+          Init_context_preview(&preview_context, Selector_filename, Selector->Directory);
+          preview_context.Format = Selector->Format_filter;
+          preview_context.File_name_unicode = Selector_filename_unicode;
+        }
         Hide_cursor();
         if (context->Type == CONTEXT_PALETTE)
           preview_context.Type = CONTEXT_PREVIEW_PALETTE;
@@ -2390,7 +2419,6 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 
         Update_window_area(0,0,Window_width,Window_height);
         Display_cursor();
-
       }
 
       Timer_state=2; // On arrête le chrono
@@ -2400,12 +2428,21 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 
   if (has_clicked_ok)
   {
-    strcpy(context->File_name, Selector_filename);
-    if (context->File_name_unicode)
-      Unicode_strlcpy(context->File_name_unicode, Selector_filename_unicode, MAX_PATH_CHARACTERS);
-    strcpy(context->File_directory, Selector->Directory);
-    if (!load)
-      context->Format = Selector->Format_filter;
+    if (load_from_clipboard)
+    {
+      strcpy(context->File_name, "CLIPBOARD.GIF");
+      context->File_name_unicode[0] = 0;
+      context->Format = FORMAT_CLIPBOARD;
+    }
+    else
+    {
+      strcpy(context->File_name, Selector_filename);
+      if (context->File_name_unicode)
+        Unicode_strlcpy(context->File_name_unicode, Selector_filename_unicode, MAX_PATH_CHARACTERS);
+      strcpy(context->File_directory, Selector->Directory);
+      if (!load)
+        context->Format = Selector->Format_filter;
+    }
   }
   else
   {

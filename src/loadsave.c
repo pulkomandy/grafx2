@@ -85,6 +85,9 @@ void Load_SDL_Image(T_IO_Context *);
 void Load_Recoil_Image(T_IO_Context *);
 #endif
 
+// clipboard
+static void Load_ClipBoard_Image(T_IO_Context *);
+
 // ENUM     Name  TestFunc LoadFunc SaveFunc PalOnly Comment Layers Ext Exts  
 const T_Format File_formats[] = {
   {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, 0, "",
@@ -578,82 +581,101 @@ void Load_image(T_IO_Context *context)
   // charger le format du fichier:
   File_error=1;
 
-  f = Open_file_read(context);
-  if (f == NULL)
+  if (context->Format == FORMAT_CLIPBOARD)
   {
-    Warning("Cannot open file for reading");
-    Error(0);
-    return;
-  }
-
-  if (context->Format>FORMAT_ALL_FILES)
-  {
-    format = Get_fileformat(context->Format);
-    if (format->Test)
-      format->Test(context, f);
-  }
-
-  if (File_error)
-  {
-    //  Sinon, on va devoir scanner les différents formats qu'on connait pour
-    // savoir à quel format est le fichier:
-    for (index=0; index < Nb_known_formats(); index++)
+    Load_ClipBoard_Image(context);
+    if (File_error != 0)
     {
-      format = Get_fileformat(index);
-      // Loadable format
-      if (format->Test == NULL)
-        continue;
-        
-      fseek(f, 0, SEEK_SET); // rewind
-      // On appelle le testeur du format:
-      format->Test(context, f);
-      // On s'arrête si le fichier est au bon format:
-      if (File_error==0)
-        break;
-    }
-  }
-  fclose(f);
-
-  if (File_error)
-  {
-    context->Format = DEFAULT_FILEFORMAT;
-    // try with recoil
-#ifndef NORECOIL
-    Load_Recoil_Image(context);
-    if (File_error)
-#endif
-#if defined(USE_SDL) || defined(USE_SDL2)
-    {
-      // Last try: with SDL_image
-      Load_SDL_Image(context);
-    }
-
-    if (File_error)
-#endif
-    { 
-      // Sinon, l'appelant sera au courant de l'échec grace à File_error;
-      // et si on s'apprêtait à faire un chargement définitif de l'image (pas
-      // une preview), alors on flash l'utilisateur.
-      //if (Pixel_load_function!=Pixel_load_in_preview)
-      //  Error(0);
+      Error(0);
       return;
     }
   }
   else
-  // Si on a su déterminer avec succès le format du fichier:
   {
-    context->Format = format->Identifier;
-    // On peut charger le fichier:
-    // Dans certains cas il est possible que le chargement plante
-    // après avoir modifié la palette. TODO
-    format->Load(context);
-  }
-
-  if (File_error>0)
-  {
-    GFX2_Log(GFX2_WARNING, "Unable to load file %s (error %d)! format:%s\n", context->File_name, File_error, format->Label);
-    if (context->Type!=CONTEXT_SURFACE)
+    if (context->File_name == NULL || context->File_directory == NULL)
+    {
+      GFX2_Log(GFX2_ERROR, "Load_Image() called with NULL file name or directory\n");
       Error(0);
+      return;
+    }
+
+    f = Open_file_read(context);
+    if (f == NULL)
+    {
+      Warning("Cannot open file for reading");
+      Error(0);
+      return;
+    }
+
+    if (context->Format > FORMAT_ALL_FILES)
+    {
+      format = Get_fileformat(context->Format);
+      if (format->Test)
+        format->Test(context, f);
+    }
+
+    if (File_error)
+    {
+      //  Sinon, on va devoir scanner les différents formats qu'on connait pour
+      // savoir à quel format est le fichier:
+      for (index=0; index < Nb_known_formats(); index++)
+      {
+        format = Get_fileformat(index);
+        // Loadable format
+        if (format->Test == NULL)
+          continue;
+
+        fseek(f, 0, SEEK_SET); // rewind
+        // On appelle le testeur du format:
+        format->Test(context, f);
+        // On s'arrête si le fichier est au bon format:
+        if (File_error==0)
+          break;
+      }
+    }
+    fclose(f);
+
+    if (File_error)
+    {
+      context->Format = DEFAULT_FILEFORMAT;
+      // try with recoil
+#ifndef NORECOIL
+      Load_Recoil_Image(context);
+      if (File_error)
+#endif
+#if defined(USE_SDL) || defined(USE_SDL2)
+      {
+        // Last try: with SDL_image
+        Load_SDL_Image(context);
+      }
+
+      if (File_error)
+#endif
+      {
+        // Sinon, l'appelant sera au courant de l'échec grace à File_error;
+        // et si on s'apprêtait à faire un chargement définitif de l'image (pas
+        // une preview), alors on flash l'utilisateur.
+        //if (Pixel_load_function!=Pixel_load_in_preview)
+        //  Error(0);
+        return;
+      }
+    }
+    else
+    // Si on a su déterminer avec succès le format du fichier:
+    {
+      context->Format = format->Identifier;
+      // On peut charger le fichier:
+      // Dans certains cas il est possible que le chargement plante
+      // après avoir modifié la palette. TODO
+      format->Load(context);
+    }
+
+    if (File_error>0)
+    {
+      GFX2_Log(GFX2_WARNING, "Unable to load file %s (error %d)! format:%s\n", context->File_name, File_error, format->Label);
+      if (context->Type!=CONTEXT_SURFACE)
+        Error(0);
+    }
   }
   
   // Post-load
@@ -1183,6 +1205,162 @@ T_GFX2_Surface * Load_surface(char *full_name, T_Gradient_array *gradients)
   Destroy_context(&context);
 
   return bmp;
+}
+
+
+static void Load_ClipBoard_Image(T_IO_Context * context)
+{
+#ifdef WIN32
+  UINT format;
+  HANDLE clipboard;
+
+  if (!OpenClipboard(GFX2_Get_Window_Handle()))
+  {
+    GFX2_Log(GFX2_ERROR, "Failed to open Clipboard\n");
+    return;
+  }
+
+  format = EnumClipboardFormats(0);
+  while (format != 0)
+  {
+    const char * format_name = NULL;
+    char format_name_buffer[256];
+
+    switch (format)
+    {
+      case CF_TEXT:
+        format_name = "TEXT";
+        break;
+      case CF_OEMTEXT:
+        format_name = "OEMTEXT";
+        break;
+      case CF_UNICODETEXT:
+        format_name = "UNICODE TEXT";
+        break;
+      case CF_DIB:
+        format_name = "DIB (BITMAPINFO)";
+        break;
+      case CF_DIBV5:
+        format_name = "DIBV5 (BITMAPV5HEADER)";
+        break;
+      case CF_BITMAP:
+        format_name = "HBITMAP";
+        break;
+      case CF_METAFILEPICT:
+        format_name = "METAFILEPICT";
+        break;
+      case CF_PALETTE:
+        format_name = "Palette";
+        break;
+      case CF_TIFF:
+        format_name = "TIFF";
+        break;
+      case CF_ENHMETAFILE:
+        format_name = "HENMETAFILE";
+        break;
+      default:
+      if (GetClipboardFormatNameA(format, format_name_buffer, sizeof(format_name_buffer)) <= 0)
+        GFX2_Log(GFX2_WARNING, "Failed to get name for clipboard format %u\n", format);
+      else
+        format_name = format_name_buffer;
+    }
+    if (format_name != NULL)
+      GFX2_Log(GFX2_DEBUG, "Available format %5u \"%s\"\n", format, format_name);
+
+    format = EnumClipboardFormats(format);  // get next format
+  }
+  clipboard = GetClipboardData(CF_DIB);
+  if (clipboard != NULL)
+  {
+    const PBITMAPINFO bmi = (PBITMAPINFO)GlobalLock(clipboard);
+    if (bmi != NULL)
+    {
+      unsigned long width, height;
+      width = bmi->bmiHeader.biWidth;
+      height = (bmi->bmiHeader.biHeight > 0) ? bmi->bmiHeader.biHeight : -bmi->bmiHeader.biHeight;
+
+      GFX2_Log(GFX2_DEBUG, "DIB %ldx%ld planes=%u bpp=%u compression=%u size=%u ClrUsed=%u\n",
+                bmi->bmiHeader.biWidth, bmi->bmiHeader.biHeight,
+                bmi->bmiHeader.biPlanes, bmi->bmiHeader.biBitCount,
+                bmi->bmiHeader.biCompression, bmi->bmiHeader.biSizeImage,
+                bmi->bmiHeader.biClrUsed);
+      if (bmi->bmiHeader.biCompression != BI_RGB)
+        GFX2_Log(GFX2_INFO, "Unsupported DIB compression %u\n", bmi->bmiHeader.biCompression);
+      else if (width > 9999 || height > 9999)
+        GFX2_Log(GFX2_INFO, "Image too big : %lux%lu\n", width, height);
+      else
+      {
+        unsigned i, color_count;
+        const byte * pixels;
+        unsigned int x, y;
+
+        File_error = 0; // have to be set before calling Pre_load()
+        Pre_load(context, width, height, bmi->bmiHeader.biSizeImage, FORMAT_CLIPBOARD, PIXEL_SIMPLE, bmi->bmiHeader.biBitCount);
+
+        color_count = bmi->bmiHeader.biClrUsed;
+        if (bmi->bmiHeader.biBitCount <= 8)
+        { // get palette
+          if (color_count == 0)
+            color_count = 1 << bmi->bmiHeader.biBitCount;
+          for (i = 0; i < color_count; i++)
+          {
+            context->Palette[i].R = bmi->bmiColors[i].rgbRed;
+            context->Palette[i].G = bmi->bmiColors[i].rgbGreen;
+            context->Palette[i].B = bmi->bmiColors[i].rgbBlue;
+          }
+        }
+        pixels = (const byte *)(&bmi->bmiColors[color_count]);
+        switch (bmi->bmiHeader.biBitCount)
+        {
+          case 8:
+            for (y = 0; y < height; y++)
+            {
+              const byte * line;
+              if (bmi->bmiHeader.biHeight > 0)
+                line = pixels + (height - y - 1) * bmi->bmiHeader.biWidth;
+              else
+                line = pixels + y * bmi->bmiHeader.biWidth;
+              for (x = 0; x < width; x++)
+                Set_pixel(context, x, y, line[x]);
+            }
+            break;
+          case 24:
+            for (y = 0; y < height; y++)
+            {
+              const byte * line;
+              if (bmi->bmiHeader.biHeight > 0)
+                line = pixels + (height - y - 1) * bmi->bmiHeader.biWidth * 3;
+              else
+                line = pixels + y * bmi->bmiHeader.biWidth * 3;
+              for (x = 0; x < width; x++)
+                Set_pixel_24b(context, x, y, line[x*3 + 2], line[x*3 + 1], line[x*3]);
+            }
+            break;
+          case 32:
+            for (y = 0; y < height; y++)
+            {
+              const byte * line;
+              if (bmi->bmiHeader.biHeight > 0)
+                line = pixels + (height - y - 1) * bmi->bmiHeader.biWidth * 4;
+              else
+                line = pixels + y * bmi->bmiHeader.biWidth * 4;
+              for (x = 0; x < width; x++)
+                Set_pixel_24b(context, x, y, line[x*4 + 2], line[x*4 + 1], line[x*4]);
+            }
+            break;
+          default:
+            GFX2_Log(GFX2_ERROR, "Loading %ubpp pictures from Clipboard is not implemented yet!\n", bmi->bmiHeader.biBitCount);
+            File_error = 1;
+        }
+      }
+      GlobalUnlock(clipboard);
+    }
+  }
+  CloseClipboard();
+#else
+  GFX2_Log(GFX2_ERROR, "Load_ClipBoard_Image() not implemented on this platform yet\n");
+  File_error = 1;
+#endif
 }
 
 
