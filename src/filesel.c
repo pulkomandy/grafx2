@@ -136,6 +136,9 @@ byte Native_filesel(byte load)
 
 // -- "Standard" fileselector for other platforms
 
+/// true if the preview timer need to be restarted
+static byte New_preview_is_needed;
+
 // -- Fileselector data
 
 static T_Fileselector Filelist;
@@ -143,8 +146,6 @@ static T_Fileselector Filelist;
 /// Selector settings to use, for all functions called by Load_or_save
 static T_Selector_settings * Selector;
 
-/// Name of the current directory
-//static char Selector_directory[1024];
 /// Filename (without directory) of the highlighted file
 static char Selector_filename[256];
 static word Selector_filename_unicode[256];

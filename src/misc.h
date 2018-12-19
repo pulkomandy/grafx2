@@ -128,8 +128,6 @@ GFX2_GLOBAL byte Timer_state; // State du chrono: 0=Attente d'un Xème de second
                               //                 2=Plus de chrono à gerer pour l'instant
 GFX2_GLOBAL dword Timer_delay;     // Nombre de 18.2ème de secondes demandés
 GFX2_GLOBAL dword Timer_start;       // Heure de départ du chrono
-GFX2_GLOBAL byte New_preview_is_needed; // Booléen "Il faut relancer le chrono de preview"
-
 
 #if defined (__MINT__)
 void Atari_Memory_free(unsigned long *stRam,unsigned long *ttRam);
