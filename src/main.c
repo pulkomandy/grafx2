@@ -592,68 +592,6 @@ CT_ASSERT(sizeof(T_Components)==3);
 // when sizeof(T_Palette) is not 768.
 CT_ASSERT(sizeof(T_Palette)==768);
 
-/**
- * Convert a file name to unicode characters
- *
- * @param filename_unicode the output buffer of MAX_PATH_CHARACTERS wide characters
- * @param filename the input file name
- * @param directory the input file directory
- * @return 0 if no conversion has taken place.
- * @return 1 if the unicode filename has been retrieved
- */
-static int Get_Unicode_Filename(word * filename_unicode, const char * filename, const char * directory)
-{
-#if defined(WIN32)
-  int i = 0, j = 0;
-  WCHAR shortPath[MAX_PATH_CHARACTERS];
-  WCHAR longPath[MAX_PATH_CHARACTERS];
-
-  // copy the full path to a wide character buffer :
-  while (directory[0] != '\0')
-    shortPath[i++] = *directory++;
-  if (i > 0 && shortPath[i-1] != '\\')   // add path separator only if it is missing
-    shortPath[i++] = '\\';
-  while (filename[0] != '\0')
-    shortPath[i++] = *filename++;
-  shortPath[i++] = 0;
-  if (GetLongPathNameW(shortPath, longPath, MAX_PATH_CHARACTERS) == 0)
-    return 0;
-  i = 0;
-  while (longPath[j] != 0)
-  {
-    if (longPath[j] == '\\')
-      i = 0;
-    else
-      filename_unicode[i++] = longPath[j];
-    j++;
-  }
-  filename_unicode[i++] = 0;
-  return 1;
-#elif defined(ENABLE_FILENAMES_ICONV)
-  char * input = (char *)filename;
-  size_t inbytesleft = strlen(filename);
-  char * output = (char *)filename_unicode;
-  size_t outbytesleft = (MAX_PATH_CHARACTERS - 1) * 2;
-  (void)directory;  // unused
-  if (cd_utf16 != (iconv_t)-1)
-  {
-    size_t r = iconv(cd_utf16, &input, &inbytesleft, &output, &outbytesleft);
-    if (r != (size_t)-1)
-    {
-      output[0] = '\0';
-      output[1] = '\0';
-      return 1;
-    }
-  }
-  return 0;
-#else
-  (void)filename_unicode;
-  (void)filename;
-  (void)directory;
-  // not implemented
-  return 0;
-#endif
-}
 
 /**
  * Initialize the  program.

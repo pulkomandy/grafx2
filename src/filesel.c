@@ -2326,6 +2326,9 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           Sort_list_of_files(&Filelist);
           // Set the fileselector bar on the directory we're coming from
           pos = Find_file_in_fileselector(&Filelist, previous_directory);
+          strcpy(Selector_filename, previous_directory);
+          if (!Get_Unicode_Filename(Selector_filename_unicode, Selector_filename, "."))
+            Selector_filename_unicode[0] = 0;
           Highlight_file((pos >= 0) ? pos : 0);
           // display the 1st visible files
           Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller,0);
