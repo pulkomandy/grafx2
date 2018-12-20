@@ -1777,7 +1777,9 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         break;
 
       case  1 : // Load ou Save
-      if(load) // Determine the type
+        if (load_from_clipboard)
+          Selected_type = FSOBJECT_FILE;
+        else if(load) // Determine the type
           Selected_type = (File_exists(Selector_filename) && !Directory_exists(Selector_filename)) ? FSOBJECT_FILE : FSOBJECT_DIR;
         else
           Selected_type = Directory_exists(Selector_filename) ? FSOBJECT_DIR : FSOBJECT_FILE;
@@ -1848,6 +1850,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         temp=Compute_click_offset_in_fileselector();
         if (temp>=0)
         {
+          load_from_clipboard = 0;
           if (temp!=Selector->Offset)
           {
             // first click on an item.
@@ -1893,6 +1896,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         Selector->Position=Window_attribute2;
         // On récupére le nom du schmilblick à "accéder"
         Get_selected_item(&Filelist, Selector->Position,Selector->Offset,Selector_filename,Selector_filename_unicode,&Selected_type);
+        load_from_clipboard = 0;
         // On affiche le nouveau nom de fichier
         Print_filename_in_fileselector();
         // On affiche à nouveau la liste
@@ -1912,6 +1916,8 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 
           GFX2_Log(GFX2_DEBUG, "fileselector format changed from %d to %d\n", (int)Selector->Format_filter, (int)Window_attribute2);
           Selector->Format_filter = Window_attribute2;
+          if (load_from_clipboard)
+            break;
           if (!load)
           {
             // In "save" box, if current name is a (possible) filename
@@ -2088,6 +2094,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           Hide_cursor();
           //   Comme on tombe sur un disque qu'on connait pas, on se place en
           // début de liste:
+          load_from_clipboard = 0;
           Selector->Position=0;
           Selector->Offset=0;
           // Affichage des premiers fichiers visibles:
@@ -2104,6 +2111,11 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
             // paste from clipboard
             load_from_clipboard = 1;
             New_preview_is_needed = 1;
+            strcpy(Selector_filename, "* CLIPBOARD *");
+            Selector_filename_unicode[0] = 0;
+            Hide_cursor();
+            Print_filename_in_fileselector();
+            Display_cursor();
             Reset_quicksearch();
           }
           else
@@ -2117,6 +2129,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
             // Bookmark
             char * directory_name;
             
+            load_from_clipboard = 0;
             switch(Window_attribute2)
             {
               case -1: // bouton lui-même: aller au répertoire mémorisé
@@ -2187,6 +2200,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
     {
       case KEY_UNKNOWN : break;
       case KEY_DOWN : // Bas
+        load_from_clipboard = 0;
         Reset_quicksearch();
         Hide_cursor();
         Selector_scroll_down(&Selector->Position,&Selector->Offset);
@@ -2194,6 +2208,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         Key=0;
         break;
       case KEY_UP : // Haut
+        load_from_clipboard = 0;
         Reset_quicksearch();
         Hide_cursor();
         Selector_scroll_up(&Selector->Position,&Selector->Offset);
@@ -2201,6 +2216,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         Key=0;
         break;
       case KEY_PAGEDOWN : // PageDown
+        load_from_clipboard = 0;
         Reset_quicksearch();
         Hide_cursor();
         Selector_page_down(&Selector->Position,&Selector->Offset,9);
@@ -2208,6 +2224,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         Key=0;
         break;
       case KEY_PAGEUP : // PageUp
+        load_from_clipboard = 0;
         Reset_quicksearch();
         Hide_cursor();
         Selector_page_up(&Selector->Position,&Selector->Offset,9);
@@ -2215,6 +2232,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         Key=0;
         break;
       case KEY_END : // End
+        load_from_clipboard = 0;
         Reset_quicksearch();
         Hide_cursor();
         Selector_end(&Selector->Position,&Selector->Offset);
@@ -2222,6 +2240,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         Key=0;
         break;
       case KEY_HOME : // Home
+        load_from_clipboard = 0;
         Reset_quicksearch();
         Hide_cursor();
         Selector_home(&Selector->Position,&Selector->Offset);
@@ -2229,6 +2248,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         Key=0;
         break;
       case KEY_MOUSEWHEELDOWN :
+        load_from_clipboard = 0;
         Reset_quicksearch();
         Hide_cursor();
         Selector_page_down(&Selector->Position,&Selector->Offset,3);
@@ -2236,6 +2256,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         Key=0;
         break;
       case KEY_MOUSEWHEELUP :
+        load_from_clipboard = 0;
         Reset_quicksearch();
         Hide_cursor();
         Selector_page_up(&Selector->Position,&Selector->Offset,3);
@@ -2243,6 +2264,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         Key=0;
         break;
       case KEY_BACKSPACE : // Backspace
+        load_from_clipboard = 0;
         Reset_quicksearch();
         // Si le choix ".." est bien en tête des propositions...
         if (Filelist.Nb_elements && !strcmp(Filelist.First->Full_name,PARENT_DIR))
@@ -2276,6 +2298,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           {
               temp=Selector->Position+Selector->Offset;
               Hide_cursor();
+              load_from_clipboard = 0;
               Highlight_file(selected_item);
               Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller,1);
               Display_cursor();
@@ -2290,10 +2313,11 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 
     if (has_clicked_ok || (directory_to_change_to != NULL))
     {
-      //   Si c'est un répertoire, on annule "has_clicked_ok" et on passe
-      // dedans.
-      if (Selected_type!=FSOBJECT_FILE || (directory_to_change_to != NULL))
+      if (load_from_clipboard)
+        save_or_load_image=1;
+      else if (Selected_type!=FSOBJECT_FILE || (directory_to_change_to != NULL))
       {
+        // it is a directory, change to it
         Hide_cursor();
         has_clicked_ok=0;
 
