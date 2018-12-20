@@ -769,6 +769,38 @@ void Main_handler(void)
         Display_cursor();
         action++;
       }
+      else if (Key == SHORTCUT_PASTE) /// @todo create a SPECIAL_ACTIONS for Copy and Paste ?
+      {
+        // simulate loading of Brush
+        T_IO_Context brush_context;
+        Init_context_brush(&brush_context, NULL, NULL);
+        brush_context.Format = FORMAT_CLIPBOARD;
+        Load_image(&brush_context);
+        if (File_error == 0)
+        {
+          strcpy(Brush_filename, "NO_NAME.GIF");
+          Brush_filename_unicode[0] = 0;
+          Brush_fileformat = FORMAT_GIF;
+
+          Tiling_offset_X=0;
+          Tiling_offset_Y=0;
+
+          Brush_offset_X=(Brush_width>>1);
+          Brush_offset_Y=(Brush_height>>1);
+
+          Select_button(BUTTON_DRAW,LEFT_SIDE);
+          if (Config.Auto_discontinuous)
+          {
+            // On se place en mode Dessin discontinu à la main
+            while (Current_operation!=OPERATION_DISCONTINUOUS_DRAW)
+              Select_button(BUTTON_DRAW,RIGHT_SIDE);
+          }
+          Hide_cursor();
+          // On passe en brosse couleur:
+          Change_paintbrush_shape(PAINTBRUSH_SHAPE_COLOR_BRUSH);
+        }
+        Destroy_context(&brush_context);
+      }
       else if (Key)
       {
         effect_modified = 0;

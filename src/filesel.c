@@ -1735,9 +1735,9 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 
 #if defined(WIN32)
   if (load)
-    Window_set_normal_button(62,180,115,14,"From Clipboard",0,1,MOD_CTRL|KEY_v); // 14
+    Window_set_normal_button(62,180,115,14,"From Clipboard",0,1,SHORTCUT_PASTE); // 14
   else
-    Window_set_normal_button(62,180,115,14,"To Clipboard",0,1,MOD_CTRL|KEY_c); // 14
+    Window_set_normal_button(62,180,115,14,"To Clipboard",0,1,SHORTCUT_COPY); // 14
 #endif
 
   Change_directory(context->File_directory);
