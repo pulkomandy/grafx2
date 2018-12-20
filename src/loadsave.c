@@ -1273,7 +1273,9 @@ static void Load_ClipBoard_Image(T_IO_Context * context)
   if (clipboard != NULL)
   {
     const PBITMAPINFO bmi = (PBITMAPINFO)GlobalLock(clipboard);
-    if (bmi != NULL)
+    if (bmi == NULL)
+      GFX2_Log(GFX2_ERROR, "GlobalLock() failed error 0x%08x\n", GetLastError());
+    else
     {
       unsigned long width, height;
       width = bmi->bmiHeader.biWidth;
@@ -1317,9 +1319,9 @@ static void Load_ClipBoard_Image(T_IO_Context * context)
             {
               const byte * line;
               if (bmi->bmiHeader.biHeight > 0)
-                line = pixels + (height - y - 1) * bmi->bmiHeader.biWidth;
+                line = pixels + (height - y - 1) * ((bmi->bmiHeader.biWidth + 3) & ~3);
               else
-                line = pixels + y * bmi->bmiHeader.biWidth;
+                line = pixels + y * ((bmi->bmiHeader.biWidth + 3) & ~3);
               for (x = 0; x < width; x++)
                 Set_pixel(context, x, y, line[x]);
             }
@@ -1327,11 +1329,11 @@ static void Load_ClipBoard_Image(T_IO_Context * context)
           case 24:
             for (y = 0; y < height; y++)
             {
-              const byte * line;
+              const byte * line = pixels;
               if (bmi->bmiHeader.biHeight > 0)
-                line = pixels + (height - y - 1) * bmi->bmiHeader.biWidth * 3;
+                line += (height - y - 1) * ((bmi->bmiHeader.biWidth * 3 + 3) & ~3);
               else
-                line = pixels + y * bmi->bmiHeader.biWidth * 3;
+                line += y * ((bmi->bmiHeader.biWidth * 3 + 3) & ~3);
               for (x = 0; x < width; x++)
                 Set_pixel_24b(context, x, y, line[x*3 + 2], line[x*3 + 1], line[x*3]);
             }
