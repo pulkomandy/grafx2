@@ -87,6 +87,8 @@ void Load_Recoil_Image(T_IO_Context *);
 
 // clipboard
 static void Load_ClipBoard_Image(T_IO_Context *);
+static void Save_ClipBoard_Image(T_IO_Context *);
+
 
 // ENUM     Name  TestFunc LoadFunc SaveFunc PalOnly Comment Layers Ext Exts  
 const T_Format File_formats[] = {
@@ -1010,13 +1012,14 @@ void Save_image(T_IO_Context *context)
   // On place par défaut File_error à vrai au cas où on ne sache pas
   // sauver le format du fichier: (Est-ce vraiment utile??? Je ne crois pas!)
   File_error=1;
+  format = Get_fileformat(context->Format);
 
   switch (context->Type)
   {
     case CONTEXT_MAIN_IMAGE:
-      if ((!Get_fileformat(context->Format)->Supports_layers)
+      if ((context->Format == FORMAT_CLIPBOARD || !format->Supports_layers)
         && (Main.backups->Pages->Nb_layers > 1)
-        && (!Get_fileformat(context->Format)->Palette_only))
+        && (!format->Palette_only))
       {
         if (Main.backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
         {
@@ -1088,9 +1091,13 @@ void Save_image(T_IO_Context *context)
       break;
   }
 
-  format = Get_fileformat(context->Format);
-  if (format->Save)
-    format->Save(context);
+  if (context->Format == FORMAT_CLIPBOARD)
+    Save_ClipBoard_Image(context);
+  else
+  {
+    if (format->Save)
+      format->Save(context);
+  }
 
   if (File_error)
   {
@@ -1365,6 +1372,70 @@ static void Load_ClipBoard_Image(T_IO_Context * context)
 #endif
 }
 
+static void Save_ClipBoard_Image(T_IO_Context * context)
+{
+#ifdef WIN32
+  if (!OpenClipboard(GFX2_Get_Window_Handle()))
+  {
+    GFX2_Log(GFX2_ERROR, "Failed to open Clipboard\n");
+    return;
+  }
+  if (!EmptyClipboard())
+    GFX2_Log(GFX2_ERROR, "EmptyClipboard() failed error 0x%08x\n", GetLastError());
+  else
+  {
+    int line_width = (context->Width + 3) & ~3;
+    HGLOBAL clipboard = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD) + line_width * context->Height);
+    if (clipboard == NULL)
+      GFX2_Log(GFX2_ERROR, "GlobalAlloc() failed error 0x%08x\n", GetLastError());
+    else
+    {
+      PBITMAPINFO bmi = (PBITMAPINFO)GlobalLock(clipboard);
+      if (bmi == NULL)
+        GFX2_Log(GFX2_ERROR, "GlobalLock() failed error 0x%08x\n", GetLastError());
+      else
+      {
+        byte * pixels;
+        unsigned int i;
+        int x, y;
+
+        bmi->bmiHeader.biSize = sizeof(bmi->bmiHeader);
+        bmi->bmiHeader.biWidth = context->Width;
+        bmi->bmiHeader.biHeight = context->Height;
+        bmi->bmiHeader.biPlanes = 1;
+        bmi->bmiHeader.biBitCount = 8;
+        bmi->bmiHeader.biCompression = BI_RGB;
+        bmi->bmiHeader.biSizeImage = context->Height * line_width;
+        //bmi->bmiHeader.biXPelsPerMeter;
+        //bmi->bmiHeader.biYPelsPerMeter;
+        for (i = 0; i < 256; i++)
+        {
+          bmi->bmiColors[i].rgbRed = context->Palette[i].R;
+          bmi->bmiColors[i].rgbGreen = context->Palette[i].G;
+          bmi->bmiColors[i].rgbBlue = context->Palette[i].B;
+          bmi->bmiColors[i].rgbReserved = 0;
+        }
+        pixels = (byte *)&bmi->bmiColors[256] + bmi->bmiHeader.biSizeImage;
+        for (y = 0; y < context->Height; y++)
+        {
+          pixels -= line_width;
+          for (x = 0; x < context->Width; x++)
+            pixels[x] = Get_pixel(context, x, y);
+        }
+        GlobalUnlock(clipboard);
+        if (SetClipboardData(CF_DIB, clipboard) == NULL)
+          GFX2_Log(GFX2_ERROR, "SetClipboardData() failed error 0x%08x\n", GetLastError());
+        else
+          File_error = 0;
+      }
+    }
+  }
+  CloseClipboard();
+#else
+  GFX2_Log(GFX2_ERROR, "Save_ClipBoard_Image() not implemented on this platform yet\n");
+  File_error = 1;
+#endif
+}
 
 /// Saves an image.
 /// This routine will only be called when all hope is lost, memory thrashed, etc

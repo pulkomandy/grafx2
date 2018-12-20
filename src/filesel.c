@@ -2121,6 +2121,11 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           else
           {
             // copy to clipboard
+            T_IO_Context clipboard_context;
+            memcpy(&clipboard_context, context, sizeof(T_IO_Context));
+            clipboard_context.Format = FORMAT_CLIPBOARD;
+            Save_image(&clipboard_context);
+            clicked_button = 2; // simulate cancel
           }
           break;
       default:
