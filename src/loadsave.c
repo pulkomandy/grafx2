@@ -72,6 +72,8 @@
 #include "filesel.h"
 #include "unicode.h"
 #include "fileformats.h"
+#include "bitcount.h"
+
 
 #if defined(USE_SDL) || defined(USE_SDL2)
 // -- SDL_Image -------------------------------------------------------------
@@ -1293,11 +1295,9 @@ static void Load_ClipBoard_Image(T_IO_Context * context)
                 bmi->bmiHeader.biPlanes, bmi->bmiHeader.biBitCount,
                 bmi->bmiHeader.biCompression, bmi->bmiHeader.biSizeImage,
                 bmi->bmiHeader.biClrUsed);
-      if (bmi->bmiHeader.biCompression != BI_RGB)
-        GFX2_Log(GFX2_INFO, "Unsupported DIB compression %u\n", bmi->bmiHeader.biCompression);
-      else if (width > 9999 || height > 9999)
+      if (width > 9999 || height > 9999)
         GFX2_Log(GFX2_INFO, "Image too big : %lux%lu\n", width, height);
-      else
+      else if (bmi->bmiHeader.biCompression == BI_RGB)
       {
         unsigned i, color_count;
         const byte * pixels;
@@ -1362,6 +1362,64 @@ static void Load_ClipBoard_Image(T_IO_Context * context)
             File_error = 1;
         }
       }
+      else if (bmi->bmiHeader.biCompression == BI_BITFIELDS)
+      {
+        dword r_mask = *((const dword *)&bmi->bmiColors[0]);
+        int r_bits = count_set_bits(r_mask);
+        int r_shift = count_trailing_zeros(r_mask);
+        dword g_mask = *((const dword *)&bmi->bmiColors[1]);
+        int g_bits = count_set_bits(g_mask);
+        int g_shift = count_trailing_zeros(g_mask);
+        dword b_mask = *((const dword *)&bmi->bmiColors[2]);
+        int b_bits = count_set_bits(b_mask);
+        int b_shift = count_trailing_zeros(b_mask);
+        const byte * pixels = (const byte *)&bmi->bmiColors[3];
+        unsigned int bytes_per_pixel = (bmi->bmiHeader.biBitCount + 7) >> 3;
+        int bytes_per_line = (bmi->bmiHeader.biWidth * bytes_per_pixel + 3) & ~3;
+        unsigned int x, y;
+
+        GFX2_Log(GFX2_DEBUG, "RGB%d%d%d, masks : %08x %08x %08x\n", r_bits, g_bits, b_bits, r_mask, g_mask, b_mask);
+
+        File_error = 0; // have to be set before calling Pre_load()
+        Pre_load(context, width, height, bmi->bmiHeader.biSizeImage, FORMAT_CLIPBOARD, PIXEL_SIMPLE, bmi->bmiHeader.biBitCount);
+
+        for (y = 0; y < height; y++)
+        {
+          const byte * ptr;
+          if (bmi->bmiHeader.biHeight > 0)
+            ptr = pixels + (height - y - 1) * bytes_per_line;
+          else
+            ptr = pixels + y * bytes_per_line;
+          for (x = 0; x < width; x++)
+          {
+            dword rgb, r, g, b;
+            switch (bytes_per_pixel)
+            {
+              case 1:
+                rgb = *ptr;
+                break;
+              case 2:
+                rgb = *((const word *)ptr);
+                break;
+              case 3:
+                rgb = ((dword)ptr[2] << 16) | ((dword)ptr[1] << 8) | (dword)ptr[0];
+                break;
+              default:
+                rgb = *((const dword *)ptr);
+            }
+            r = (rgb & r_mask) >> r_shift;
+            r = (r << (8 - r_bits)) | (r >> (2 * r_bits - 8));
+            g = (rgb & g_mask) >> g_shift;
+            g = (g << (8 - g_bits)) | (g >> (2 * g_bits - 8));
+            b = (rgb & b_mask) >> b_shift;
+            b = (b << (8 - b_bits)) | (b >> (2 * b_bits - 8));
+            Set_pixel_24b(context, x, y, r, g, b);
+            ptr += bytes_per_pixel;
+          }
+        }
+      }
+      else
+        GFX2_Log(GFX2_INFO, "Unsupported DIB compression %u\n", bmi->bmiHeader.biCompression);
       GlobalUnlock(clipboard);
     }
   }

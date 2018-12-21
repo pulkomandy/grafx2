@@ -39,6 +39,7 @@
 #include "windows.h"
 #include "layers.h"
 #include "graph.h"
+#include "bitcount.h"
 
 // I don't have round() in MSVC++ 2010 (_MSC_VER=1600)
 #if defined(_MSC_VER)
@@ -47,40 +48,6 @@
 #endif
 #endif
 
-#if defined(__GNUC__) && __GNUC__ > 2
-/* use GCC built in's */
-#define count_set_bits __builtin_popcount
-#define count_trailing_zeros __builtin_ctz
-#else
-/**
- * Count the number of bit sets "Popcount"
- *
- * Based on Wikipedia article for Hamming_weight, it's optimized
- * for cases when zeroes are more frequent.
- */
-static int count_set_bits(unsigned int value)
-{
-  int count;
-
-  for (count = 0; value != 0; count++)
-    value &= value-1;
-  return count;
-}
-
-/**
- * Count the number of low order zero's before the first bit set
- */
-static int count_trailing_zeros(unsigned int value)
-{
-  int count;
-
-  if (value == 0)
-    return -1;
-  for (count = 0; (value & 1) == 0; value >>= 1)
-    count++;
-  return count;
-}
-#endif
 
 static const struct {
   enum IMAGE_MODES mode;

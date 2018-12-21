@@ -89,6 +89,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\bitcount.h" />
     <ClInclude Include="..\..\src\brush.h" />
     <ClInclude Include="..\..\src\buttons.h" />
     <ClInclude Include="..\..\src\colorred.h" />
