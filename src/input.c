@@ -478,15 +478,26 @@ static int Handle_SelectionNotify(const XSelectionEvent* xselection)
     unsigned long count = 0, bytesAfter = 0;
     unsigned char * value = NULL;
 
-    r = XGetWindowProperty(X11_display, X11_window, xselection->property, 0, LONG_MAX,
-        False, xselection->target /* type */, &type, &format,
-        &count, &bytesAfter, &value);
-    if (r == Success && value != NULL)
+    GFX2_Log(GFX2_DEBUG, "xselection: selection=%s property=%s target=%s\n",
+             XGetAtomName(X11_display, xselection->selection),
+             xselection->property == None ? "None" : XGetAtomName(X11_display, xselection->property),
+             XGetAtomName(X11_display, xselection->target));
+    if (xselection->property != None)
     {
-      X11_clipboard = strdup((char *)value);
-      XFree(value);
+      r = XGetWindowProperty(X11_display, X11_window, xselection->property, 0, LONG_MAX,
+          False, xselection->target /* type */, &type, &format,
+          &count, &bytesAfter, &value);
+      if (r == Success && value != NULL)
+      {
+        X11_clipboard = strdup((char *)value);
+        XFree(value);
+      }
+      user_feedback_required = 1;
     }
-    user_feedback_required = 1;
+    else
+    {
+      GFX2_Log(GFX2_INFO, "X11 Selection conversion failed\n");
+    }
   }
   else
   {
