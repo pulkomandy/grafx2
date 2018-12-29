@@ -801,6 +801,27 @@ void Main_handler(void)
         }
         Destroy_context(&brush_context);
       }
+      else if (Key == SHORTCUT_COPY)
+      {
+        if (Paintbrush_shape == PAINTBRUSH_SHAPE_COLOR_BRUSH && Brush != NULL)
+        {
+          // simulate saving of Brush
+          T_IO_Context brush_context;
+          Init_context_brush(&brush_context, NULL, NULL);
+          brush_context.Format = FORMAT_CLIPBOARD;
+          Save_image(&brush_context);
+          Destroy_context(&brush_context);
+        }
+        else
+        {
+          // save whole image to clipboard
+          T_IO_Context image_context;
+          Init_context_layered_image(&image_context, NULL, NULL);
+          image_context.Format = FORMAT_CLIPBOARD;
+          Save_image(&image_context);
+          Destroy_context(&image_context);
+        }
+      }
       else if (Key)
       {
         effect_modified = 0;
