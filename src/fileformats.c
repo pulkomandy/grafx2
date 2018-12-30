@@ -91,10 +91,6 @@
 #include "fileformats.h"
 #include "oldies.h"
 
-#ifndef __no_pnglib__
-static void Load_PNG_Sub(T_IO_Context * context, FILE * file);
-#endif
-
 #ifndef MIN
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #endif
@@ -3769,7 +3765,7 @@ void Load_ICO(T_IO_Context * context)
 #ifndef __no_pnglib__
           if (png_sig_cmp(png_header, 0, 8) == 0)
           {
-            Load_PNG_Sub(context, file);
+            Load_PNG_Sub(context, file, NULL, 0);
           }
 #else
           if (0 == memcmp(png_header, "\x89PNG", 4))
@@ -6239,8 +6235,39 @@ static int PNG_read_unknown_chunk(png_structp ptr, png_unknown_chunkp chunk)
 }
 
 
+struct PNG_memory_buffer {
+  const char * buffer;
+  unsigned long offset;
+  unsigned long size;
+};
+
+/// read from memory buffer
+static void PNG_memory_read(png_structp png_ptr, png_bytep p, png_size_t count)
+{
+  struct PNG_memory_buffer * buffer = (struct PNG_memory_buffer *)png_get_io_ptr(png_ptr);
+  GFX2_Log(GFX2_DEBUG, "PNG_memory_read(%p, %p, %u) (io_ptr=%p)\n", png_ptr, p, count, buffer);
+  if (buffer == NULL || p == NULL)
+    return;
+  if (buffer->offset + count <= buffer->size)
+  {
+    memcpy(p, buffer->buffer + buffer->offset, count);
+    buffer->offset += count;
+  }
+  else
+  {
+    unsigned long available_count = buffer->size - buffer->offset;
+    GFX2_Log(GFX2_DEBUG, "PNG_memory_read(): only %lu bytes available\n", available_count);
+    if (available_count > 0)
+    {
+      memcpy(p, buffer->buffer + buffer->offset, available_count);
+      buffer->offset += available_count;
+    }
+  }
+}
+
+
 /// Read PNG format file
-static void Load_PNG_Sub(T_IO_Context * context, FILE * file)
+void Load_PNG_Sub(T_IO_Context * context, FILE * file, const char * memory_buffer, unsigned long memory_buffer_size)
 {
   png_structp png_ptr;
   png_infop info_ptr = NULL;
@@ -6256,12 +6283,22 @@ static void Load_PNG_Sub(T_IO_Context * context, FILE * file)
       png_byte color_type;
       png_byte bit_depth;
       byte bpp;
+      struct PNG_memory_buffer buffer;
 
       // Setup a return point. If a pnglib loading error occurs
       // in this if(), the else will be executed.
       if (!setjmp(png_jmpbuf(png_ptr)))
       {
-        png_init_io(png_ptr, file);
+        // to read from memory, I need to use png_set_read_fn() instead of calling png_init_io()
+        if (file != NULL)
+          png_init_io(png_ptr, file);
+        else
+        {
+          buffer.buffer = memory_buffer;
+          buffer.offset = 8;  // skip header
+          buffer.size = memory_buffer_size;
+          png_set_read_fn(png_ptr, &buffer, PNG_memory_read);
+        }
         // Inform pnglib we already loaded the header.
         png_set_sig_bytes(png_ptr, 8);
 
@@ -6344,7 +6381,11 @@ static void Load_PNG_Sub(T_IO_Context * context, FILE * file)
                 ratio = PIXEL_TALL;
             }
           }
-          Pre_load(context,png_get_image_width(png_ptr,info_ptr),png_get_image_height(png_ptr,info_ptr),File_length_file(file),FORMAT_PNG,ratio,bpp);
+          Pre_load(context,
+                   png_get_image_width(png_ptr, info_ptr),
+                   png_get_image_height(png_ptr, info_ptr),
+                   file != NULL ? File_length_file(file) : memory_buffer_size,
+                   FORMAT_PNG, ratio, bpp);
 
           if (File_error==0)
           {
@@ -6569,7 +6610,7 @@ void Load_PNG(T_IO_Context * context)
     {
       // Do we recognize a png file signature ?
       if ( !png_sig_cmp(png_header, 0, 8))
-        Load_PNG_Sub(context, file);
+        Load_PNG_Sub(context, file, NULL, 0);
       else
         File_error=1;
     }

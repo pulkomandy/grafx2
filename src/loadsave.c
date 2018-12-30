@@ -46,6 +46,9 @@
 #include <SDL_image.h>
 #include <SDL_endian.h>
 #endif
+#ifndef __no_pnglib__
+#include <png.h>
+#endif
 
 #include "gfx2log.h"
 #include "buttons.h"
@@ -74,6 +77,13 @@
 #include "fileformats.h"
 #include "bitcount.h"
 
+#if defined(USE_X11) || (defined(SDL_VIDEO_DRIVER_X11) && !defined(NO_X11))
+#include "input.h"
+#if defined(USE_X11)
+extern Display * X11_display;
+extern Window X11_window;
+#endif
+#endif
 
 #if defined(USE_SDL) || defined(USE_SDL2)
 // -- SDL_Image -------------------------------------------------------------
@@ -1424,6 +1434,71 @@ static void Load_ClipBoard_Image(T_IO_Context * context)
     }
   }
   CloseClipboard();
+#elif defined(USE_X11) || (defined(SDL_VIDEO_DRIVER_X11) && !defined(NO_X11))
+  int i;
+  Atom selection;
+  Window selection_owner;
+#if defined(SDL_VIDEO_DRIVER_X11)
+  Display * X11_display;
+  Window X11_window;
+  int old_wmevent_state;
+
+  if (!GFX2_Get_X11_Display_Window(&X11_display, &X11_window))
+  {
+    GFX2_Log(GFX2_ERROR, "Failed to get X11 display and window\n");
+    return;
+  }
+  if (X11_display == NULL)
+  {
+#if defined(USE_SDL)
+    char video_driver_name[32];
+    GFX2_Log(GFX2_WARNING, "X11 display is NULL. X11 is needed for Copy/Paste. SDL video driver is currently %s\n", SDL_VideoDriverName(video_driver_name, sizeof(video_driver_name)));
+#endif
+    return;
+  }
+#endif
+
+  selection = XInternAtom(X11_display, "CLIPBOARD", False);
+  selection_owner = XGetSelectionOwner(X11_display, selection);
+  if (selection_owner == None)
+    return;
+#if defined(USE_SDL) || defined(USE_SDL2)
+  old_wmevent_state = SDL_EventState(SDL_SYSWMEVENT, SDL_QUERY);
+  SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);
+#endif
+
+#ifndef __no_pnglib__
+  XConvertSelection(X11_display, selection, XInternAtom(X11_display, "image/png"/*"PIXMAP"*/, False),
+                    XInternAtom(X11_display, "GFX2_CLIP", False), /* Property */
+                    X11_window, CurrentTime);
+  // wait for the event to be received
+  for(i = 0; X11_clipboard == NULL && i < 10; i++)
+  {
+    Get_input(20);
+  }
+#if defined(USE_SDL) || defined(USE_SDL2)
+  SDL_EventState(SDL_SYSWMEVENT, old_wmevent_state);
+#endif
+
+  if (X11_clipboard != NULL)
+  {
+    if (png_sig_cmp((byte *)X11_clipboard, 0, 8) == 0)
+    {
+      File_error = 0;
+      Load_PNG_Sub(context, NULL, X11_clipboard, X11_clipboard_size);
+    }
+    else
+    {
+      GFX2_Log(GFX2_WARNING, "Clipboard content not in PNG format\n");
+    }
+    free(X11_clipboard);
+    X11_clipboard = NULL;
+    X11_clipboard_size = 0;
+  }
+#else
+  GFX2_Log(GFX2_ERROR, "Need PNG support for X11 image copy/paste\n");
+#endif
+
 #else
   GFX2_Log(GFX2_ERROR, "Load_ClipBoard_Image() not implemented on this platform yet\n");
   File_error = 1;

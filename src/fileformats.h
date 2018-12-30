@@ -140,6 +140,7 @@ void Save_ICO(T_IO_Context *);
 void Test_PNG(T_IO_Context *, FILE *);
 void Load_PNG(T_IO_Context *);
 void Save_PNG(T_IO_Context *);
+void Load_PNG_Sub(T_IO_Context * context, FILE * file, const char * memory_buffer, unsigned long memory_buffer_size);
 #endif
 
 // -- INFO (Amiga ICONS) ----------------------------------------------------

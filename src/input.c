@@ -86,6 +86,7 @@ word * Drop_file_name_unicode = NULL;
 
 #if defined(USE_X11) || (defined(SDL_VIDEO_DRIVER_X11) && !defined(NO_X11))
 char * X11_clipboard = NULL;
+unsigned long X11_clipboard_size = 0;
 #endif
 
 // --
@@ -397,6 +398,7 @@ static void Handle_ClientMessage(const XClientMessageEvent * xclient)
   }
   else
   {
+    /// @todo XFree the result of XGetAtomName
     GFX2_Log(GFX2_INFO, "Unhandled ClientMessage message_type=\"%s\"\n", XGetAtomName(X11_display, xclient->message_type));
   }
 }
@@ -478,6 +480,7 @@ static int Handle_SelectionNotify(const XSelectionEvent* xselection)
     unsigned long count = 0, bytesAfter = 0;
     unsigned char * value = NULL;
 
+    /// @todo XFree the result of XGetAtomName
     GFX2_Log(GFX2_DEBUG, "xselection: selection=%s property=%s target=%s\n",
              XGetAtomName(X11_display, xselection->selection),
              xselection->property == None ? "None" : XGetAtomName(X11_display, xselection->property),
@@ -489,9 +492,22 @@ static int Handle_SelectionNotify(const XSelectionEvent* xselection)
           &count, &bytesAfter, &value);
       if (r == Success && value != NULL)
       {
-        X11_clipboard = strdup((char *)value);
+    /// @todo XFree the result of XGetAtomName
+        GFX2_Log(GFX2_DEBUG, "Clipboard value=%p %lu bytes format=%d type=%s\n",
+                 value, count, format, XGetAtomName(X11_display, type));
+        X11_clipboard_size = count;
+        if (xselection->target == XInternAtom(X11_display, "UTF8_STRING", False))
+          X11_clipboard = strdup((char *)value); // Text Clipboard
+        else if (xselection->target == XInternAtom(X11_display, "image/png", False))
+        { // Picture clipboard (PNG)
+          X11_clipboard = malloc(count);
+          if (X11_clipboard != NULL)
+            memcpy(X11_clipboard, value, count);
+        }
         XFree(value);
       }
+      else
+        GFX2_Log(GFX2_INFO, "XGetWindowProperty failed. r=%d value=%p\n", r, value);
       user_feedback_required = 1;
     }
     else
@@ -501,6 +517,7 @@ static int Handle_SelectionNotify(const XSelectionEvent* xselection)
   }
   else
   {
+    /// @todo XFree the result of XGetAtomName
     GFX2_Log(GFX2_INFO, "Unhandled SelectNotify selection=%s\n", XGetAtomName(X11_display, xselection->selection));
   }
   return user_feedback_required;
@@ -1659,6 +1676,7 @@ int Get_input(int sleep_time)
             }
             else
             {
+    /// @todo XFree the result of XGetAtomName
               GFX2_Log(GFX2_INFO, "unrecognized WM event : %s\n", XGetAtomName(X11_display, (Atom)event.xclient.data.l[0]));
             }
           }

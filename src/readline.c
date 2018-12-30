@@ -72,9 +72,6 @@ extern Window X11_window;
 #elif defined(__macosx__)
 const char * get_paste_board(void);
 #endif
-#if defined(USE_X11) || (defined(SDL_VIDEO_DRIVER_X11) && !defined(NO_X11))
-extern char * X11_clipboard;
-#endif
 
 // Virtual keyboard is ON by default on these platforms:
 #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__) || defined(GCWZERO)
@@ -490,6 +487,7 @@ bye:
     {
       char * utf8_str = X11_clipboard;
       X11_clipboard = NULL;
+      X11_clipboard_size = 0;
   #else
   {
     // mac OS without X11

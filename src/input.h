@@ -77,6 +77,14 @@ extern int Snap_axis_origin_Y;
 extern char * Drop_file_name;
 extern word * Drop_file_name_unicode;
 
+#if defined(USE_X11) || (defined(SDL_VIDEO_DRIVER_X11) && !defined(NO_X11))
+///
+/// malloc'ed copy of the X11 clipboard
+extern char * X11_clipboard;
+extern unsigned long X11_clipboard_size;
+#endif
+
+
 #if defined __HAIKU__
 	#define SHORTCUT_COPY (KEY_c|MOD_ALT)
 #elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__) || defined(__macosx__)
