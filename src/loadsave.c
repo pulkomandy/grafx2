@@ -1453,6 +1453,8 @@ static void Load_ClipBoard_Image(T_IO_Context * context)
 #if defined(USE_SDL)
     char video_driver_name[32];
     GFX2_Log(GFX2_WARNING, "X11 display is NULL. X11 is needed for Copy/Paste. SDL video driver is currently %s\n", SDL_VideoDriverName(video_driver_name, sizeof(video_driver_name)));
+#elif defined(USE_SDL2)
+    GFX2_Log(GFX2_WARNING, "X11 display is NULL. X11 is needed for Copy/Paste. SDL video driver is currently %s\n", SDL_GetCurrentVideoDriver());
 #endif
     return;
   }
