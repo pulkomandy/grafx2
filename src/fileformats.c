@@ -6144,6 +6144,14 @@ void Save_XPM(T_IO_Context* context)
 }
 
 //////////////////////////////////// PNG ////////////////////////////////////
+/**
+ * @defgroup PNG PNG format
+ * @ingroup loadsaveformats
+ * Portable Network Graphics
+ *
+ * We make use of libpng : http://www.libpng.org/pub/png/libpng.html
+ * @{
+ */
 
 #ifndef __no_pnglib__
 
@@ -6235,6 +6243,7 @@ static int PNG_read_unknown_chunk(png_structp ptr, png_unknown_chunkp chunk)
 }
 
 
+/// Private structure used in PNG_memory_read() and PNG_memory_write()
 struct PNG_memory_buffer {
   char * buffer;
   unsigned long offset;
@@ -6624,6 +6633,7 @@ void Load_PNG(T_IO_Context * context)
 }
 
 
+/// Write to memory buffer
 static void PNG_memory_write(png_structp png_ptr, png_bytep p, png_size_t count)
 {
   struct PNG_memory_buffer * buffer = (struct PNG_memory_buffer *)png_get_io_ptr(png_ptr);
@@ -6644,12 +6654,19 @@ static void PNG_memory_write(png_structp png_ptr, png_bytep p, png_size_t count)
   buffer->offset += count;
 }
 
+/// do nothing
 static void PNG_memory_flush(png_structp png_ptr)
 {
   struct PNG_memory_buffer * buffer = (struct PNG_memory_buffer *)png_get_io_ptr(png_ptr);
   GFX2_Log(GFX2_DEBUG, "PNG_memory_flush(%p) (io_ptr=%p)\n", png_ptr, buffer);
 }
 
+
+/// Save a PNG to file or memory
+/// @param context the IO context
+/// @param file the FILE to write to or NULL to write to memory
+/// @param buffer will receive a malloc'ed buffer if writting to memory
+/// @param buffer_size will receive the PNG size in memory
 void Save_PNG_Sub(T_IO_Context * context, FILE * file, char * * buffer, unsigned long * buffer_size)
 {
   static png_bytep * Row_pointers = NULL;
@@ -6671,6 +6688,7 @@ void Save_PNG_Sub(T_IO_Context * context, FILE * file, char * * buffer, unsigned
         png_init_io(png_ptr, file);
       else
       {
+        // to write to memory, use png_set_write_fn() instead of calling png_init_io()
         memset(&memory_buffer, 0, sizeof(memory_buffer));
         png_set_write_fn(png_ptr, &memory_buffer, PNG_memory_write, PNG_memory_flush);
       }
@@ -6829,6 +6847,7 @@ void Save_PNG_Sub(T_IO_Context * context, FILE * file, char * * buffer, unsigned
   }
 }
 
+
 /// Save a PNG file
 void Save_PNG(T_IO_Context * context)
 {
@@ -6849,4 +6868,4 @@ void Save_PNG(T_IO_Context * context)
     File_error = 1;
 }
 #endif  // __no_pnglib__
-
+/** @} */
