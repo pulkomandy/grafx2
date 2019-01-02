@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2018 Thomas Bernard
     Copyright 2011 Pawel Góralski
     Copyright 2010 Alexander Filyanov
     Copyright 2009 Petter Lindquist
@@ -143,6 +144,9 @@ const T_Format File_formats[] = {
   {FORMAT_FLI, " flc", Test_FLI, Load_FLI, NULL,     0, 0, 0, "flc", "flc;fli;dat"},
   {FORMAT_MOTO," moto",Test_MOTO,Load_MOTO,Save_MOTO,0, 1, 0, "bin", "bin;map"},
   {FORMAT_HGR, " hgr", Test_HGR, Load_HGR, Save_HGR, 0, 0, 1, "hgr", "hgr;dhgr;bin"},
+#ifndef __no_tifflib__
+  {FORMAT_TIFF," tiff",Test_TIFF,Load_TIFF,Save_TIFF,0, 1, 1, "tif", "tif;tiff"},
+#endif
   {FORMAT_MISC,"misc.",NULL,     NULL,     NULL,     0, 0, 0, "",    "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff"},
 };
 

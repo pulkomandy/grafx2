@@ -461,10 +461,10 @@ endif
       LOPT += -lSDLmain -lSDL $(shell $(CROSS_SDLCONFIG) --libs) -lSDL_image
       endif
       ifeq (,$(CROSS_PKGCONFIG))
-      COPT += -D__no_pnglib__
+      COPT += -D__no_pnglib__ -D__no_tifflib__
       else
       COPT += $(shell PKG_CONFIG_LIBDIR=$(CROSS_PKG_CONFIG_PATH) $(CROSS_PKGCONFIG) --cflags libpng || echo "-D__no_pnglib__" )
-      LOPT += $(shell PKG_CONFIG_LIBDIR=$(CROSS_PKG_CONFIG_PATH) $(CROSS_PKGCONFIG) --libs libpng)
+      LOPT += $(shell PKG_CONFIG_LIBDIR=$(CROSS_PKG_CONFIG_PATH) $(CROSS_PKGCONFIG) --libs libpng libtiff-4)
       endif
       LUALOPT = -llua
       COPT += $(LUACOPT)
@@ -576,7 +576,7 @@ endif
           COPT += -DNO_X11
         endif
         LOPT += $(TTFLOPT)
-        LOPT += $(shell pkg-config --libs libpng)
+        LOPT += $(shell pkg-config --libs libpng libtiff-4)
         LOPT += $(LUALOPT)
         OBJDIR = ../obj/unix
         FCLOPT = -lfontconfig
@@ -705,7 +705,7 @@ OBJS = main.o init.o graph.o $(APIOBJ) misc.o special.o \
        fileformats.o miscfileformats.o libraw2crtc.o \
        brush_ops.o buttons_effects.o layers.o \
        oldies.o tiles.o colorred.o unicode.o gfx2surface.o \
-       gfx2log.o
+       gfx2log.o tifformat.o
 ifndef NORECOIL
 OBJS += loadrecoil.o recoil.o
 endif

@@ -162,5 +162,12 @@ void Test_HGR(T_IO_Context *, FILE *);
 void Load_HGR(T_IO_Context *);
 void Save_HGR(T_IO_Context *);
 
+// -- TIFF ------------------------------------------------------------------
+#ifndef __no_tifflib__
+void Test_TIFF(T_IO_Context *, FILE *);
+void Load_TIFF(T_IO_Context *);
+void Save_TIFF(T_IO_Context *);
+#endif
+
 /// @}
 #endif
