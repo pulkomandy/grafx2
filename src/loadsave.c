@@ -1566,6 +1566,46 @@ static void Save_ClipBoard_Image(T_IO_Context * context)
     }
   }
   CloseClipboard();
+#elif defined(USE_X11) || (defined(SDL_VIDEO_DRIVER_X11) && !defined(NO_X11))
+  Atom selection;
+#if defined(SDL_VIDEO_DRIVER_X11)
+  Display * X11_display;
+  Window X11_window;
+  //int old_wmevent_state;
+
+  if (!GFX2_Get_X11_Display_Window(&X11_display, &X11_window))
+  {
+    GFX2_Log(GFX2_ERROR, "Failed to get X11 display and window\n");
+    return;
+  }
+  if (X11_display == NULL)
+  {
+#if defined(USE_SDL)
+    char video_driver_name[32];
+    GFX2_Log(GFX2_WARNING, "X11 display is NULL. X11 is needed for Copy/Paste. SDL video driver is currently %s\n", SDL_VideoDriverName(video_driver_name, sizeof(video_driver_name)));
+#elif defined(USE_SDL2)
+    GFX2_Log(GFX2_WARNING, "X11 display is NULL. X11 is needed for Copy/Paste. SDL video driver is currently %s\n", SDL_GetCurrentVideoDriver());
+#endif
+    return;
+  }
+#endif
+
+  File_error = 0;
+  if (X11_clipboard != NULL)
+  {
+    free(X11_clipboard);
+    X11_clipboard = NULL;
+    X11_clipboard_size = 0;
+  }
+  Save_PNG_Sub(context, NULL, &X11_clipboard, &X11_clipboard_size);
+  if (!File_error)
+  {
+#if defined(USE_SDL) || defined(USE_SDL2)
+    SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);
+#endif
+    selection = XInternAtom(X11_display, "CLIPBOARD", False);
+    XSetSelectionOwner(X11_display, selection, X11_window, CurrentTime);
+  }
 #else
   GFX2_Log(GFX2_ERROR, "Save_ClipBoard_Image() not implemented on this platform yet\n");
   File_error = 1;

@@ -6236,7 +6236,7 @@ static int PNG_read_unknown_chunk(png_structp ptr, png_unknown_chunkp chunk)
 
 
 struct PNG_memory_buffer {
-  const char * buffer;
+  char * buffer;
   unsigned long offset;
   unsigned long size;
 };
@@ -6294,7 +6294,7 @@ void Load_PNG_Sub(T_IO_Context * context, FILE * file, const char * memory_buffe
           png_init_io(png_ptr, file);
         else
         {
-          buffer.buffer = memory_buffer;
+          buffer.buffer = (char *)memory_buffer;
           buffer.offset = 8;  // skip header
           buffer.size = memory_buffer_size;
           png_set_read_fn(png_ptr, &buffer, PNG_memory_read);
@@ -6623,165 +6623,184 @@ void Load_PNG(T_IO_Context * context)
     File_error=1;
 }
 
-/// Save a PNG file
-void Save_PNG(T_IO_Context * context)
+
+static void PNG_memory_write(png_structp png_ptr, png_bytep p, png_size_t count)
 {
-  FILE *file;
+  struct PNG_memory_buffer * buffer = (struct PNG_memory_buffer *)png_get_io_ptr(png_ptr);
+  GFX2_Log(GFX2_DEBUG, "PNG_memory_write(%p, %p, %u) (io_ptr=%p)\n", png_ptr, p, count, buffer);
+  if (buffer->size < buffer->offset + count)
+  {
+    char * tmp = realloc(buffer->buffer, buffer->offset + count + 1024);
+    if (tmp == NULL)
+    {
+      GFX2_Log(GFX2_ERROR, "PNG_memory_write() Failed to allocate %u bytes of memory\n", buffer->offset + count + 1024);
+      File_error = 1;
+      return;
+    }
+    buffer->buffer = tmp;
+    buffer->size = buffer->offset + count + 1024;
+  }
+  memcpy(buffer->buffer + buffer->offset, p, count);
+  buffer->offset += count;
+}
+
+static void PNG_memory_flush(png_structp png_ptr)
+{
+  struct PNG_memory_buffer * buffer = (struct PNG_memory_buffer *)png_get_io_ptr(png_ptr);
+  GFX2_Log(GFX2_DEBUG, "PNG_memory_flush(%p) (io_ptr=%p)\n", png_ptr, buffer);
+}
+
+void Save_PNG_Sub(T_IO_Context * context, FILE * file, char * * buffer, unsigned long * buffer_size)
+{
+  static png_bytep * Row_pointers = NULL;
   int y;
   byte * pixel_ptr;
   png_structp png_ptr;
   png_infop info_ptr;
   png_unknown_chunk crng_chunk;
   byte cycle_data[16*6]; // Storage for color-cycling data, referenced by crng_chunk
-  static png_bytep * Row_pointers;
-  
-  File_error=0;
-  Row_pointers = NULL;
-  
-  // Ouverture du fichier
-  if ((file=Open_file_write(context)))
-  {
-    setvbuf(file, NULL, _IOFBF, 64*1024);
-    
-    /* initialisation */
-    if ((png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL))
+  struct PNG_memory_buffer memory_buffer;
+
+  /* initialisation */
+  if ((png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL))
       && (info_ptr = png_create_info_struct(png_ptr)))
+  {
+    if (!setjmp(png_jmpbuf(png_ptr)))
     {
-  
-      if (!setjmp(png_jmpbuf(png_ptr)))
-      {    
+      if (file != NULL)
         png_init_io(png_ptr, file);
+      else
+      {
+        memset(&memory_buffer, 0, sizeof(memory_buffer));
+        png_set_write_fn(png_ptr, &memory_buffer, PNG_memory_write, PNG_memory_flush);
+      }
       
-        /* en-tete */
-        if (!setjmp(png_jmpbuf(png_ptr)))
-        {
-          png_set_IHDR(png_ptr, info_ptr, context->Width, context->Height,
+      /* en-tete */
+      if (!setjmp(png_jmpbuf(png_ptr)))
+      {
+        png_set_IHDR(png_ptr, info_ptr, context->Width, context->Height,
             8, PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE,
             PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
 
-          png_set_PLTE(png_ptr, info_ptr, (png_colorp)context->Palette, 256);
+        png_set_PLTE(png_ptr, info_ptr, (png_colorp)context->Palette, 256);
+        {
+          // Commentaires texte PNG
+          // Cette partie est optionnelle
+          png_text text_ptr[2] = {
+#ifdef PNG_iTXt_SUPPORTED
+            {-1, "Software", "Grafx2", 6, 0, NULL, NULL},
+            {-1, "Title", NULL, 0, 0, NULL, NULL}
+#else
+            {-1, "Software", "Grafx2", 6},
+            {-1, "Title", NULL, 0}
+#endif
+          };
+          int nb_text_chunks=1;
+          if (context->Comment[0])
           {
-            // Commentaires texte PNG
-            // Cette partie est optionnelle
-            #ifdef PNG_iTXt_SUPPORTED
-              png_text text_ptr[2] = {
-                {-1, "Software", "Grafx2", 6, 0, NULL, NULL},
-                {-1, "Title", NULL, 0, 0, NULL, NULL}
-            #else
-            png_text text_ptr[2] = {
-              {-1, "Software", "Grafx2", 6},
-              {-1, "Title", NULL, 0}
-            #endif
-            };
-            int nb_text_chunks=1;
-            if (context->Comment[0])
-            {
-              text_ptr[1].text=context->Comment;
-              text_ptr[1].text_length=strlen(context->Comment);
-              nb_text_chunks=2;
-            }
-            png_set_text(png_ptr, info_ptr, text_ptr, nb_text_chunks);
+            text_ptr[1].text=context->Comment;
+            text_ptr[1].text_length=strlen(context->Comment);
+            nb_text_chunks=2;
           }
-          if (context->Background_transparent)
-          {
-            // Transparency
-            byte opacity[256];
-            // Need to fill a segment with '255', up to the transparent color
-            // which will have a 0. This piece of data (1 to 256 bytes)
-            // will be stored in the file.
-            memset(opacity, 255,context->Transparent_color);
-            opacity[context->Transparent_color]=0;
-            png_set_tRNS(png_ptr, info_ptr, opacity, (int)1 + context->Transparent_color,0);
-          }
-          // if using PNG_RESOLUTION_METER, unit is in dot per meter.
-          // 72 DPI = 2835,  600 DPI = 23622
-          // with PNG_RESOLUTION_UNKNOWN, it is arbitrary
-          switch(Pixel_ratio)
-          {
-            case PIXEL_WIDE:
-            case PIXEL_WIDE2:
-              png_set_pHYs(png_ptr, info_ptr, 1, 2, PNG_RESOLUTION_UNKNOWN);
-              break;
-            case PIXEL_TALL:
-            case PIXEL_TALL2:
-              png_set_pHYs(png_ptr, info_ptr, 2, 1, PNG_RESOLUTION_UNKNOWN);
-              break;
-            case PIXEL_TALL3:
-              png_set_pHYs(png_ptr, info_ptr, 4, 3, PNG_RESOLUTION_UNKNOWN);
-              break;
-            default:
-              break;
-          }
-          // Write cycling colors
-          if (context->Color_cycles)
-          {
-            // Save a chunk called 'crNg'
-            // The case is selected by the following rules from PNG standard:
-            // char 1: non-mandatory = lowercase
-            // char 2: private (not standard) = lowercase
-            // char 3: reserved = always uppercase
-            // char 4: can be copied by editors = lowercase
+          png_set_text(png_ptr, info_ptr, text_ptr, nb_text_chunks);
+        }
+        if (context->Background_transparent)
+        {
+          // Transparency
+          byte opacity[256];
+          // Need to fill a segment with '255', up to the transparent color
+          // which will have a 0. This piece of data (1 to 256 bytes)
+          // will be stored in the file.
+          memset(opacity, 255,context->Transparent_color);
+          opacity[context->Transparent_color]=0;
+          png_set_tRNS(png_ptr, info_ptr, opacity, (int)1 + context->Transparent_color,0);
+        }
+        // if using PNG_RESOLUTION_METER, unit is in dot per meter.
+        // 72 DPI = 2835,  600 DPI = 23622
+        // with PNG_RESOLUTION_UNKNOWN, it is arbitrary
+        switch(Pixel_ratio)
+        {
+          case PIXEL_WIDE:
+          case PIXEL_WIDE2:
+            png_set_pHYs(png_ptr, info_ptr, 1, 2, PNG_RESOLUTION_UNKNOWN);
+            break;
+          case PIXEL_TALL:
+          case PIXEL_TALL2:
+            png_set_pHYs(png_ptr, info_ptr, 2, 1, PNG_RESOLUTION_UNKNOWN);
+            break;
+          case PIXEL_TALL3:
+            png_set_pHYs(png_ptr, info_ptr, 4, 3, PNG_RESOLUTION_UNKNOWN);
+            break;
+          default:
+            break;
+        }
+        // Write cycling colors
+        if (context->Color_cycles)
+        {
+          // Save a chunk called 'crNg'
+          // The case is selected by the following rules from PNG standard:
+          // char 1: non-mandatory = lowercase
+          // char 2: private (not standard) = lowercase
+          // char 3: reserved = always uppercase
+          // char 4: can be copied by editors = lowercase
 
-            // First, turn our nice structure into byte array
-            // (just to avoid padding in structures)
+          // First, turn our nice structure into byte array
+          // (just to avoid padding in structures)
             
-            byte *chunk_ptr = cycle_data;
-            int i;
+          byte *chunk_ptr = cycle_data;
+          int i;
             
-            for (i=0; i<context->Color_cycles; i++)
-            {
-              word flags=0;
-              flags|= context->Cycle_range[i].Speed?1:0; // Cycling or not
-              flags|= context->Cycle_range[i].Inverse?2:0; // Inverted
-              
-              // Big end of Rate
-              *(chunk_ptr++) = (context->Cycle_range[i].Speed*78) >> 8;
-              // Low end of Rate
-              *(chunk_ptr++) = (context->Cycle_range[i].Speed*78) & 0xFF;
-              
-              // Big end of Flags
-              *(chunk_ptr++) = (flags) >> 8;
-              // Low end of Flags
-              *(chunk_ptr++) = (flags) & 0xFF;
-              
-              // Min color
-              *(chunk_ptr++) = context->Cycle_range[i].Start;
-              // Max color
-              *(chunk_ptr++) = context->Cycle_range[i].End;
-            }
+          for (i=0; i<context->Color_cycles; i++)
+          {
+            word flags=0;
+            flags|= context->Cycle_range[i].Speed?1:0; // Cycling or not
+            flags|= context->Cycle_range[i].Inverse?2:0; // Inverted
 
-            // Build one unknown_chuck structure        
-            memcpy(crng_chunk.name, "crNg",5);
-            crng_chunk.data=cycle_data;
-            crng_chunk.size=context->Color_cycles*6;
-            crng_chunk.location=PNG_HAVE_PLTE;
-            
-            // Give it to libpng
-            png_set_unknown_chunks(png_ptr, info_ptr, &crng_chunk, 1);
-            // libpng seems to ignore the location I provided earlier.
-            png_set_unknown_chunk_location(png_ptr, info_ptr, 0, PNG_HAVE_PLTE);
+            // Big end of Rate
+            *(chunk_ptr++) = (context->Cycle_range[i].Speed*78) >> 8;
+            // Low end of Rate
+            *(chunk_ptr++) = (context->Cycle_range[i].Speed*78) & 0xFF;
+
+            // Big end of Flags
+            *(chunk_ptr++) = (flags) >> 8;
+            // Low end of Flags
+            *(chunk_ptr++) = (flags) & 0xFF;
+
+            // Min color
+            *(chunk_ptr++) = context->Cycle_range[i].Start;
+            // Max color
+            *(chunk_ptr++) = context->Cycle_range[i].End;
           }
-          
-          
-          png_write_info(png_ptr, info_ptr);
 
-          /* ecriture des pixels de l'image */
-          Row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * context->Height);
-          pixel_ptr = context->Target_address;
-          for (y=0; y<context->Height; y++)
-            Row_pointers[y] = (png_byte*)(pixel_ptr+y*context->Pitch);
+          // Build one unknown_chuck structure
+          memcpy(crng_chunk.name, "crNg",5);
+          crng_chunk.data=cycle_data;
+          crng_chunk.size=context->Color_cycles*6;
+          crng_chunk.location=PNG_HAVE_PLTE;
 
+          // Give it to libpng
+          png_set_unknown_chunks(png_ptr, info_ptr, &crng_chunk, 1);
+          // libpng seems to ignore the location I provided earlier.
+          png_set_unknown_chunk_location(png_ptr, info_ptr, 0, PNG_HAVE_PLTE);
+        }
+
+
+        png_write_info(png_ptr, info_ptr);
+
+        /* ecriture des pixels de l'image */
+        Row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * context->Height);
+        pixel_ptr = context->Target_address;
+        for (y=0; y<context->Height; y++)
+          Row_pointers[y] = (png_byte*)(pixel_ptr+y*context->Pitch);
+
+        if (!setjmp(png_jmpbuf(png_ptr)))
+        {
+          png_write_image(png_ptr, Row_pointers);
+
+          /* cloture png */
           if (!setjmp(png_jmpbuf(png_ptr)))
           {
-            png_write_image(png_ptr, Row_pointers);
-          
-            /* cloture png */
-            if (!setjmp(png_jmpbuf(png_ptr)))
-            {          
-              png_write_end(png_ptr, NULL);
-            }
-            else
-              File_error=1;
+            png_write_end(png_ptr, NULL);
           }
           else
             File_error=1;
@@ -6790,27 +6809,44 @@ void Save_PNG(T_IO_Context * context)
           File_error=1;
       }
       else
-      {
         File_error=1;
-      }
-      png_destroy_write_struct(&png_ptr, &info_ptr);
     }
     else
+    {
       File_error=1;
-    // fermeture du fichier
-    fclose(file);
+    }
+    png_destroy_write_struct(&png_ptr, &info_ptr);
   }
+  else
+    File_error=1;
 
-  //   S'il y a eu une erreur de sauvegarde, on ne va tout de même pas laisser
-  // ce fichier pourri trainait... Ca fait pas propre.
-  if (File_error)
-    Remove_file(context);
-  
   if (Row_pointers)
-  {
     free(Row_pointers);
-    Row_pointers=NULL;
+  if (memory_buffer.buffer)
+  {
+    *buffer = memory_buffer.buffer;
+    *buffer_size = memory_buffer.offset;
   }
+}
+
+/// Save a PNG file
+void Save_PNG(T_IO_Context * context)
+{
+  FILE *file;
+
+  File_error = 0;
+
+  file = Open_file_write(context);
+  if (file != NULL)
+  {
+    Save_PNG_Sub(context, file, NULL, NULL);
+    fclose(file);
+    // remove the file if there was an error
+    if (File_error)
+      Remove_file(context);
+  }
+  else
+    File_error = 1;
 }
 #endif  // __no_pnglib__
 

@@ -38,6 +38,7 @@
 #include <X11/Xlib.h>
 #include <X11/XKBlib.h>
 #include <X11/Xutil.h>
+#include <X11/Xatom.h>
 #endif
 
 #include "gfx2log.h"
@@ -521,6 +522,60 @@ static int Handle_SelectionNotify(const XSelectionEvent* xselection)
     GFX2_Log(GFX2_INFO, "Unhandled SelectNotify selection=%s\n", XGetAtomName(X11_display, xselection->selection));
   }
   return user_feedback_required;
+}
+
+static void Handle_SelectionRequest(const XSelectionRequestEvent* xselectionrequest)
+{
+  XSelectionEvent xselection; 
+  char * target_name;
+  char * property_name;
+  Atom png;
+#if defined(SDL_VIDEO_DRIVER_X11)
+  Display * X11_display;
+  Window X11_window;
+
+  if (!GFX2_Get_X11_Display_Window(&X11_display, &X11_window))
+  {
+    GFX2_Log(GFX2_ERROR, "Failed to get X11 display and window\n");
+    return;
+  }
+#endif
+
+  png = XInternAtom(X11_display, "image/png", False);
+
+  target_name = XGetAtomName(X11_display, xselectionrequest->target);
+  property_name = XGetAtomName(X11_display, xselectionrequest->property);
+  GFX2_Log(GFX2_DEBUG, "Handle_SelectionRequest target=%s property=%s\n", target_name, property_name);
+  XFree(target_name);
+  XFree(property_name);
+
+  xselection.type = SelectionNotify;
+  xselection.requestor = xselectionrequest->requestor;
+  xselection.selection = xselectionrequest->selection;
+  xselection.target = xselectionrequest->target;
+  xselection.property = xselectionrequest->property;
+  xselection.time = xselectionrequest->time;
+
+  if (xselectionrequest->target == XInternAtom(X11_display, "TARGETS", False))
+  {
+    Atom targets[1];
+    targets[0] = png;
+    XChangeProperty(X11_display, xselectionrequest->requestor, xselectionrequest->property,
+                    XA_ATOM, 32, PropModeReplace,
+                    (unsigned char *)targets, 1);
+  }
+  else if (xselectionrequest->target == png)
+  {
+    XChangeProperty(X11_display, xselectionrequest->requestor, xselectionrequest->property,
+                    png, 8, PropModeReplace,
+                    (unsigned char *)X11_clipboard, X11_clipboard_size);
+  }
+  else
+  {
+    xselection.property = None; // refuse
+  }
+
+  XSendEvent(X11_display, xselectionrequest->requestor, True, NoEventMask, (XEvent *)&xselection);
 }
 #endif
 
@@ -1351,6 +1406,18 @@ int Get_input(int sleep_time)
                   if (Handle_SelectionNotify(&(xevent.xselection)))
                     user_feedback_required = 1;
                   break;
+                case SelectionRequest:
+                  Handle_SelectionRequest(&(xevent.xselectionrequest));
+                  break;
+                case SelectionClear:
+                  GFX2_Log(GFX2_DEBUG, "X11 SelectionClear\n");
+                  if (X11_clipboard)
+                  {
+                    free(X11_clipboard);
+                    X11_clipboard_size = 0;
+                  }
+                  SDL_EventState(SDL_SYSWMEVENT, SDL_DISABLE);
+                  break;
                 case ButtonPress:
                 case ButtonRelease:
                 case MotionNotify:
@@ -1686,6 +1753,23 @@ int Get_input(int sleep_time)
         case SelectionNotify:
           if (Handle_SelectionNotify(&event.xselection))
             user_feedback_required = 1;
+          break;
+        case SelectionClear:
+          GFX2_Log(GFX2_DEBUG, "X11 SelectionClear\n");
+          if (X11_clipboard)
+          {
+            free(X11_clipboard);
+            X11_clipboard_size = 0;
+          }
+          break;
+        case SelectionRequest:
+          Handle_SelectionRequest(&event.xselectionrequest);
+          break;
+        case ReparentNotify:
+          GFX2_Log(GFX2_DEBUG, "X11 ReparentNotify\n");
+          break;
+        case MapNotify:
+          GFX2_Log(GFX2_DEBUG, "X11 MapNotify\n");
           break;
         default:
           GFX2_Log(GFX2_INFO, "X11 event.type = %d not handled\n", event.type);
