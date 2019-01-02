@@ -323,9 +323,16 @@ int Move_cursor_with_constraints()
 // WM events management
 
 #if defined(USE_X11) || (defined(SDL_VIDEO_DRIVER_X11) && !defined(NO_X11))
+/**
+ * Drag'n'Drop Protocol for X11 :
+ * https://freedesktop.org/wiki/Specifications/XDND/
+ */
 static int xdnd_version = 5;
 static Window xdnd_source = None;
 
+/**
+ * Handle ClientMessage X11 event used by Drag-and-drop protocol
+ */
 static void Handle_ClientMessage(const XClientMessageEvent * xclient)
 {
 #if defined(SDL_VIDEO_DRIVER_X11)
@@ -399,11 +406,15 @@ static void Handle_ClientMessage(const XClientMessageEvent * xclient)
   }
   else
   {
-    /// @todo XFree the result of XGetAtomName
-    GFX2_Log(GFX2_INFO, "Unhandled ClientMessage message_type=\"%s\"\n", XGetAtomName(X11_display, xclient->message_type));
+    char * message_type_name = XGetAtomName(X11_display, xclient->message_type);
+    GFX2_Log(GFX2_INFO, "Unhandled ClientMessage message_type=\"%s\"\n", message_type_name);
+    XFree(message_type_name);
   }
 }
 
+/**
+ * Handle SelectionNotify X11 event used for Clipboard Pasting and Drag-and-drop protocol
+ */
 static int Handle_SelectionNotify(const XSelectionEvent* xselection)
 {
   int user_feedback_required = 0;
@@ -481,21 +492,27 @@ static int Handle_SelectionNotify(const XSelectionEvent* xselection)
     unsigned long count = 0, bytesAfter = 0;
     unsigned char * value = NULL;
 
-    /// @todo XFree the result of XGetAtomName
-    GFX2_Log(GFX2_DEBUG, "xselection: selection=%s property=%s target=%s\n",
-             XGetAtomName(X11_display, xselection->selection),
-             xselection->property == None ? "None" : XGetAtomName(X11_display, xselection->property),
-             XGetAtomName(X11_display, xselection->target));
     if (xselection->property != None)
     {
+      char * selection_name = XGetAtomName(X11_display, xselection->selection);
+      char * property_name = XGetAtomName(X11_display, xselection->property);
+      char * target_name = XGetAtomName(X11_display, xselection->target);
+
+      GFX2_Log(GFX2_DEBUG, "xselection: selection=%s property=%s target=%s\n",
+               selection_name, property_name, target_name);
+      XFree(selection_name);
+      XFree(property_name);
+      XFree(target_name);
+
       r = XGetWindowProperty(X11_display, X11_window, xselection->property, 0, LONG_MAX,
           False, xselection->target /* type */, &type, &format,
           &count, &bytesAfter, &value);
       if (r == Success && value != NULL)
       {
-    /// @todo XFree the result of XGetAtomName
+        char * type_name = XGetAtomName(X11_display, type);
         GFX2_Log(GFX2_DEBUG, "Clipboard value=%p %lu bytes format=%d type=%s\n",
-                 value, count, format, XGetAtomName(X11_display, type));
+                 value, count, format, type_name);
+        XFree(type_name);
         X11_clipboard_size = count;
         if (xselection->target == XInternAtom(X11_display, "UTF8_STRING", False))
           X11_clipboard = strdup((char *)value); // Text Clipboard
@@ -518,12 +535,16 @@ static int Handle_SelectionNotify(const XSelectionEvent* xselection)
   }
   else
   {
-    /// @todo XFree the result of XGetAtomName
-    GFX2_Log(GFX2_INFO, "Unhandled SelectNotify selection=%s\n", XGetAtomName(X11_display, xselection->selection));
+    char * selection_name = XGetAtomName(X11_display, xselection->selection);
+    GFX2_Log(GFX2_INFO, "Unhandled SelectNotify selection=%s\n", selection_name);
+    XFree(selection_name);
   }
   return user_feedback_required;
 }
 
+/**
+ * Handle SelectionRequest X11 event used for Clipboard copying
+ */
 static void Handle_SelectionRequest(const XSelectionRequestEvent* xselectionrequest)
 {
   XSelectionEvent xselection; 
@@ -559,7 +580,7 @@ static void Handle_SelectionRequest(const XSelectionRequestEvent* xselectionrequ
   if (xselectionrequest->target == XInternAtom(X11_display, "TARGETS", False))
   {
     Atom targets[1];
-    targets[0] = png;
+    targets[0] = png;   // Advertise image/png as the only supported format
     XChangeProperty(X11_display, xselectionrequest->requestor, xselectionrequest->property,
                     XA_ATOM, 32, PropModeReplace,
                     (unsigned char *)targets, 1);
@@ -1743,8 +1764,9 @@ int Get_input(int sleep_time)
             }
             else
             {
-    /// @todo XFree the result of XGetAtomName
-              GFX2_Log(GFX2_INFO, "unrecognized WM event : %s\n", XGetAtomName(X11_display, (Atom)event.xclient.data.l[0]));
+              char * atom_name = XGetAtomName(X11_display, (Atom)event.xclient.data.l[0]);
+              GFX2_Log(GFX2_INFO, "unrecognized WM event : %s\n", atom_name);
+              XFree(atom_name);
             }
           }
           else
