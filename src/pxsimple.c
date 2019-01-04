@@ -265,7 +265,8 @@ void Display_line_on_screen_simple(word x_pos,word y_pos,word width,byte * line)
 /* On affiche toute une ligne de pixels. Utilisé pour les textes. */
 {
   byte* dest = Get_Screen_pixel_ptr(x_pos, y_pos);
-  memcpy(dest, line, width);
+  if (dest != NULL)
+    memcpy(dest, line, width);
 }
 
 void Display_transparent_mono_line_on_screen_simple(

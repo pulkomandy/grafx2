@@ -1114,7 +1114,8 @@ void Print_filename(void)
     display_string[string_size] = 0;
   }
   // Print
-  Print_general_unicode(Screen_width-(string_size<<3)*Menu_factor_X,Menu_status_Y,display_string,MC_Black,MC_Light);
+  if (string_size > 0)
+    Print_general_unicode(Screen_width-(string_size<<3)*Menu_factor_X,Menu_status_Y,display_string,MC_Black,MC_Light);
 }
 
 // Fonction d'affichage d'une chaine numérique avec une fonte très fine
