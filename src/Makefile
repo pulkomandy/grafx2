@@ -268,7 +268,7 @@ else
     LOPT += -lpng
 endif
     ifneq ($(OSX_STATIC), 1)
-    LOPT += -lz
+    LOPT += -lz -ltiff
     endif
 endif
     COPT += -DENABLE_FILENAMES_ICONV
