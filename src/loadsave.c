@@ -88,6 +88,7 @@ extern Window X11_window;
 
 #if defined(__macosx__)
 const void * get_tiff_paste_board(unsigned long * size);
+int set_tiff_paste_board(const void * tiff, unsigned long size);
 #endif
 
 
@@ -1583,6 +1584,18 @@ static void Save_ClipBoard_Image(T_IO_Context * context)
     }
   }
   CloseClipboard();
+#elif defined(__macosx__)
+  void * tiff = NULL;
+  unsigned long size = 0;
+
+  Save_TIFF_to_memory(context, &tiff, &size);
+  if (File_error == 0 && tiff != NULL)
+  {
+    if(!set_tiff_paste_board(tiff, size))
+      File_error = 1;
+  }
+  free(tiff);
+
 #elif defined(USE_X11) || (defined(SDL_VIDEO_DRIVER_X11) && !defined(NO_X11))
   Atom selection;
 #if defined(SDL_VIDEO_DRIVER_X11)

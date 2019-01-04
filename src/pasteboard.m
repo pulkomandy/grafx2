@@ -35,3 +35,17 @@ const void * get_tiff_paste_board(unsigned long * size)
   *size = [data length];
   return [data bytes];
 }
+
+int set_tiff_paste_board(const void * tiff, unsigned long size)
+{
+  if (tiff == NULL || size == 0)
+    return 0;
+  NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+  [pasteboard declareTypes:[NSArray arrayWithObject:NSTIFFPboardType] owner:nil];
+  NSData *data = [[NSData alloc] initWithBytes:tiff length:size];
+  BOOL b = [pasteboard setData:data forType:NSTIFFPboardType];
+  if (!b)
+    NSLog(@"Failed to set data in pasteboard");
+  [data release];
+  return (int)b;
+}

@@ -396,6 +396,7 @@ struct memory_buffer
   char * buffer;
   unsigned long offset;
   unsigned long size;
+  unsigned long alloc_size;
 };
 
 tmsize_t lTIFF_read(thandle_t p, void * data, tmsize_t size)
@@ -409,15 +410,29 @@ tmsize_t lTIFF_read(thandle_t p, void * data, tmsize_t size)
 
 tmsize_t lTIFF_write(thandle_t p, void * data, tmsize_t size)
 {
-  //struct memory_buffer * mbuffer = (struct memory_buffer *)p;
+  struct memory_buffer * mbuffer = (struct memory_buffer *)p;
   GFX2_Log(GFX2_DEBUG, "lTIFF_write(%p, %p, %u)\n", p, data, size);
-  return -1;
+  if (mbuffer->offset + size > mbuffer->alloc_size)
+  {
+    char * tmp = realloc(mbuffer->buffer, mbuffer->offset + size + 1024);
+    if (tmp == NULL)
+    {
+      GFX2_Log(GFX2_ERROR, "lTIFF_write() failed to allocate %u bytes of memory\n", mbuffer->offset + size + 1024);
+      return -1;
+    }
+    mbuffer->buffer = tmp;
+    mbuffer->alloc_size = mbuffer->offset + size + 1024;
+  }
+  memcpy(mbuffer->buffer + mbuffer->offset, data, size);
+  mbuffer->offset += size;
+  if (mbuffer->offset > mbuffer->size)
+    mbuffer->size = mbuffer->offset;
+  return size;
 }
 
 toff_t lTIFF_seek(thandle_t p, toff_t offset, int whence)
 {
   struct memory_buffer * mbuffer = (struct memory_buffer *)p;
-  GFX2_Log(GFX2_DEBUG, "lTIFF_seek(%p, %u, %d)\n", p, offset, whence);
   switch (whence)
   {
     case SEEK_SET:
@@ -432,6 +447,25 @@ toff_t lTIFF_seek(thandle_t p, toff_t offset, int whence)
     default:
       return -1;
   }
+  GFX2_Log(GFX2_DEBUG, "lTIFF_seek(%p, %u, %d) new offset=%u (size=%u)\n",
+           p, offset, whence, mbuffer->offset, mbuffer->size);
+  if (mbuffer->offset > mbuffer->alloc_size)
+  {
+    char * tmp = realloc(mbuffer->buffer, mbuffer->offset + 1024);
+    if (tmp == NULL)
+    {
+      GFX2_Log(GFX2_ERROR, "lTIFF_seek() failed to allocate %u bytes of memory\n", mbuffer->offset + 1024);
+      return -1;
+    }
+    mbuffer->buffer = tmp;
+    mbuffer->alloc_size = mbuffer->offset + 1024;
+  }
+  if (mbuffer->offset > mbuffer->size)
+  {
+    memset(mbuffer->buffer + mbuffer->size, 0, mbuffer->offset - mbuffer->size);
+    GFX2_Log(GFX2_ERROR, "  seeking %d bytes after end of buffer, filling with 0s\n", mbuffer->offset - mbuffer->size);
+    mbuffer->size = mbuffer->offset;
+  }
   return mbuffer->offset;
 }
 
@@ -439,6 +473,7 @@ toff_t lTIFF_seek(thandle_t p, toff_t offset, int whence)
 toff_t lTIFF_size(thandle_t p)
 {
   struct memory_buffer * mbuffer = (struct memory_buffer *)p;
+  GFX2_Log(GFX2_DEBUG, "lTIFF_size(%p) = %u\n", p, mbuffer->size);
   return mbuffer->size;
 }
 
@@ -472,6 +507,7 @@ void Load_TIFF_from_memory(T_IO_Context * context, const void * buffer, unsigned
   memory_buffer.buffer = (char *)buffer;
   memory_buffer.offset = 0;
   memory_buffer.size = size;
+  memory_buffer.alloc_size = 0; // unused for read
 
   TIFF_Init();
   tif = TIFFClientOpen("memory.tiff", "r", &memory_buffer,
@@ -607,6 +643,30 @@ void Save_TIFF_Sub(T_IO_Context * context, TIFF * tif)
     if (!TIFFWriteDirectory(tif))
       return;
     TIFFFlushData(tif);
+  }
+}
+
+/// Save TIFF to memory
+void Save_TIFF_to_memory(T_IO_Context * context, void * * buffer, unsigned long * size)
+{
+  TIFF * tif;
+  struct memory_buffer memory_buffer;
+
+  memory_buffer.buffer = NULL;
+  memory_buffer.offset = 0;
+  memory_buffer.size = 0;
+  memory_buffer.alloc_size = 0;
+
+  TIFF_Init();
+  tif = TIFFClientOpen("memory.tiff", "w", &memory_buffer,
+                       lTIFF_read, lTIFF_write, lTIFF_seek, lTIFF_close,
+                       lTIFF_size, lTIFF_map, lTIFF_unmap);
+  if (tif != NULL)
+  {
+    Save_TIFF_Sub(context, tif);
+    TIFFClose(tif);
+    *buffer = memory_buffer.buffer;
+    *size = memory_buffer.size;
   }
 }
 

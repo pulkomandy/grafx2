@@ -168,6 +168,7 @@ void Test_TIFF(T_IO_Context *, FILE *);
 void Load_TIFF(T_IO_Context *);
 void Save_TIFF(T_IO_Context *);
 void Load_TIFF_from_memory(T_IO_Context *, const void *, unsigned long);
+void Save_TIFF_to_memory(T_IO_Context *, void * *, unsigned long *);
 #endif
 
 /// @}
