@@ -362,6 +362,12 @@ void Load_TIFF_Sub(T_IO_Context * context, TIFF * tif, unsigned long file_size)
 
   for (;;)
   {
+    word subifd_count;
+    uint64 * subifd_array;
+    if (TIFFGetField(tif, TIFFTAG_SUBIFD, &subifd_count, &subifd_array))
+    {
+      GFX2_Log(GFX2_DEBUG, "TIFFTAG_SUBIFD : count = %u\n", subifd_count);
+    }
     Load_TIFF_image(context, tif, spp, bps);
     if (File_error != 0)
       return;
@@ -531,6 +537,8 @@ void Save_TIFF_Sub(T_IO_Context * context, TIFF * tif)
   const word bps = 8;
   const word spp = 1;
   const dword rowsperstrip = 64;
+  const word photometric = PHOTOMETRIC_PALETTE;
+  float xresol = 1.0f, yresol = 1.0f;
 
   snprintf(version, sizeof(version), "GrafX2 %s.%s", Program_version, SVN_revision);
   width = context->Width;
@@ -545,19 +553,34 @@ void Save_TIFF_Sub(T_IO_Context * context, TIFF * tif)
   for (;;)
   {
     GFX2_Log(GFX2_DEBUG, "TIFF save layer #%d\n", layer);
+//TIFFTAG_SUBFILETYPE
     TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, width);
     TIFFSetField(tif, TIFFTAG_IMAGELENGTH, height);
-    TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
     TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, bps);
-    TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, spp);
-    TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
     TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
+    TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, photometric);
+    TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
+    TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, spp);
     //TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG); // not relevant if SAMPLESPERPIXEL == 1
     TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, rowsperstrip);
     if (context->Comment[0] != '\0')
       TIFFSetField(tif, TIFFTAG_IMAGEDESCRIPTION, context->Comment);
     TIFFSetField(tif, TIFFTAG_SOFTWARE, version);
+    TIFFSetField(tif, TIFFTAG_RESOLUTIONUNIT, RESUNIT_NONE);
+    // RESUNIT_NONE : No absolute unit of measurement.
+    // Used for images that may have a non-square aspect ratio,
+    // but no meaningful absolute dimensions.
+    TIFFSetField(tif, TIFFTAG_XRESOLUTION, xresol);
+    TIFFSetField(tif, TIFFTAG_YRESOLUTION, yresol);
     TIFFSetField(tif, TIFFTAG_COLORMAP, colormap.r, colormap.g, colormap.b);
+
+//    TIFFTAG_SUBIFD  // point to thumbnail, etc.
+//    TIFFSetField(tif, TIFFTAG_PAGENUMBER, current_page, page_count);
+    // extensions :
+    // TIFFTAG_IT8BKGCOLORINDICATOR
+    TIFFSetField(tif, TIFFTAG_IT8BKGCOLORVALUE, (word)context->Transparent_color);
+    // TIFFSetField: test.tif: Unknown tag 34026.
+// custom : https://stackoverflow.com/questions/24059421/adding-custom-tags-to-a-tiff-file
 
 #if 0
     for (y = 0; y < height; y++)
