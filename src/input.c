@@ -1356,6 +1356,11 @@ int Get_input(int sleep_time)
               GFX2_Log(GFX2_DEBUG, "SDL_DROPCOMPLETE\n");
               break;
 #endif
+          /// @todo We could do something with finger touch events
+          case SDL_FINGERDOWN:
+          case SDL_FINGERUP:
+          case SDL_FINGERMOTION:
+              break;
 #endif
 
           case SDL_SYSWMEVENT:
