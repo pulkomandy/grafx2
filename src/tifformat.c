@@ -22,8 +22,6 @@
 ///@file tifformat.c
 /// Support of TIFF
 ///
-/// @todo use TIFFSetErrorHandler() and TIFFSetWarningHandler() to
-///       redirect warning/error output to our own functions
 
 #ifndef __no_tifflib__
 
@@ -42,6 +40,37 @@
 
 extern char Program_version[]; // generated in pversion.c
 extern const char SVN_revision[]; // generated in version.c
+
+
+static void TIFF_LogError(const char* module, const char* fmt, va_list ap)
+{
+  char format[256];
+  snprintf(format, sizeof(format), "%s: %s\n", module, fmt);
+  GFX2_LogV(GFX2_ERROR, format, ap);
+}
+
+static void TIFF_LogWarning(const char* module, const char* fmt, va_list ap)
+{
+  char format[256];
+  snprintf(format, sizeof(format), "%s: %s\n", module, fmt);
+  GFX2_LogV(GFX2_WARNING, format, ap);
+}
+
+/// Initialisation for using the TIFF library
+static void TIFF_Init(void)
+{
+  static int init_done = 0;
+
+  if (init_done)
+    return;
+
+  /// use TIFFSetErrorHandler() and TIFFSetWarningHandler() to
+  /// redirect warning/error output to our own functions
+  TIFFSetErrorHandler(TIFF_LogError);
+  TIFFSetWarningHandler(TIFF_LogWarning);
+
+  init_done = 1;
+}
 
 /// test for a valid TIFF
 void Test_TIFF(T_IO_Context * context, FILE * file)
@@ -366,6 +395,7 @@ void Load_TIFF(T_IO_Context * context)
   file = Open_file_read(context);
   if (file != NULL)
   {
+    TIFF_Init();
     tif = TIFFFdOpen(fileno(file), context->File_name, "r");
     if (tif != NULL)
     {
@@ -379,6 +409,7 @@ void Load_TIFF(T_IO_Context * context)
 
   File_error = 1;
   Get_full_filename(filename, context->File_name, context->File_directory);
+  TIFF_Init();
   tif = TIFFOpen(filename, "r");
   if (tif != NULL)
   {
@@ -468,6 +499,7 @@ void Save_TIFF(T_IO_Context * context)
 
   File_error = 1;
 
+  TIFF_Init();
 #if defined(WIN32)
   if (context->File_name_unicode != NULL && context->File_name_unicode[0] != 0)
     tif = TIFFOpenW(context->File_name_unicode, "w");

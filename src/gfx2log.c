@@ -41,15 +41,6 @@ extern void GFX2_Log(GFX2_Log_priority_T priority, const char * fmt, ...)
   va_start(ap, fmt);
   GFX2_LogV(priority, fmt, ap);
   va_end(ap);
-#if defined(_MSC_VER) && defined(_DEBUG)
-  {
-    char message[1024];
-    va_start(ap, fmt);
-    vsnprintf(message, sizeof(message), fmt, ap);
-    va_end(ap);
-    OutputDebugStringA(message);
-  }
-#endif
 }
 
 extern void GFX2_LogV(GFX2_Log_priority_T priority, const char * fmt, va_list ap)
@@ -82,6 +73,13 @@ extern void GFX2_LogV(GFX2_Log_priority_T priority, const char * fmt, va_list ap
   }
 #else
   vfprintf((unsigned)priority >= GFX2_INFO ? stdout : stderr, fmt, ap);
+#endif
+#if defined(_MSC_VER) && defined(_DEBUG)
+  {
+    char message[1024];
+    vsnprintf(message, sizeof(message), fmt, ap);
+    OutputDebugStringA(message);
+  }
 #endif
 }
 
