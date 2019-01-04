@@ -32,6 +32,8 @@
 #define fileno _fileno
 #endif
 #endif
+#include <string.h>
+#include <stdlib.h>
 #include <tiffio.h>
 #include "global.h"
 #include "io.h"
@@ -401,12 +403,12 @@ tmsize_t lTIFF_read(thandle_t p, void * data, tmsize_t size)
 
 tmsize_t lTIFF_write(thandle_t p, void * data, tmsize_t size)
 {
-  struct memory_buffer * mbuffer = (struct memory_buffer *)p;
+  //struct memory_buffer * mbuffer = (struct memory_buffer *)p;
   GFX2_Log(GFX2_DEBUG, "lTIFF_write(%p, %p, %u)\n", p, data, size);
   return -1;
 }
 
-toff_t lTIFF_seek(thandle_t p, toff_t offset, whence)
+toff_t lTIFF_seek(thandle_t p, toff_t offset, int whence)
 {
   struct memory_buffer * mbuffer = (struct memory_buffer *)p;
   GFX2_Log(GFX2_DEBUG, "lTIFF_seek(%p, %u, %d)\n", p, offset, whence);
