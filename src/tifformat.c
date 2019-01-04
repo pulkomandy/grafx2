@@ -27,6 +27,13 @@
 
 #ifndef __no_tifflib__
 
+#ifdef _MSC_VER
+#include <stdio.h>
+#if _MSC_VER < 1900
+#define snprintf _snprintf
+#define fileno _fileno
+#endif
+#endif
 #include <tiffio.h>
 #include "global.h"
 #include "io.h"
@@ -350,8 +357,9 @@ void Load_TIFF_Sub(T_IO_Context * context, TIFF * tif, unsigned long file_size)
 /// Load TIFF from file
 void Load_TIFF(T_IO_Context * context)
 {
-  FILE * file;
   TIFF * tif;
+#if !defined(WIN32)
+  FILE * file;
 
   File_error = 1;
 
@@ -366,6 +374,18 @@ void Load_TIFF(T_IO_Context * context)
     }
     fclose(file);
   }
+#else
+  char filename[MAX_PATH_CHARACTERS]; // filename with full path
+
+  File_error = 1;
+  Get_full_filename(filename, context->File_name, context->File_directory);
+  tif = TIFFOpen(filename, "r");
+  if (tif != NULL)
+  {
+    Load_TIFF_Sub(context, tif, File_length(filename));
+    TIFFClose(tif);
+  }
+#endif
 }
 
 

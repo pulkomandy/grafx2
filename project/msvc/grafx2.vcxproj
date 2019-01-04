@@ -56,7 +56,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>USE_SDL;NOTTF;__ENABLE_LUA__;__no_pnglib__;_CRT_SECURE_NO_WARNINGS;_USE_MATH_DEFINES;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>USE_SDL;NOTTF;__ENABLE_LUA__;__no_pnglib__;__no_tifflib__;_CRT_SECURE_NO_WARNINGS;_USE_MATH_DEFINES;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SDLImageIncDir);$(SDLIncDir);$(LuaIncDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
@@ -75,7 +75,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>USE_SDL;NOTTF;__ENABLE_LUA__;__no_pnglib__;_CRT_SECURE_NO_WARNINGS;_USE_MATH_DEFINES;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>USE_SDL;NOTTF;__ENABLE_LUA__;__no_pnglib__;__no_tifflib__;_CRT_SECURE_NO_WARNINGS;_USE_MATH_DEFINES;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SDLImageIncDir);$(SDLIncDir);$(LuaIncDir);;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
@@ -204,6 +204,7 @@
     <ClCompile Include="..\..\src\shade.c" />
     <ClCompile Include="..\..\src\special.c" />
     <ClCompile Include="..\..\src\text.c" />
+    <ClCompile Include="..\..\src\tifformat.c" />
     <ClCompile Include="..\..\src\tiles.c" />
     <ClCompile Include="..\..\src\transform.c" />
     <ClCompile Include="..\..\src\unicode.c" />
