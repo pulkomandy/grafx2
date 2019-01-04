@@ -2425,6 +2425,8 @@ void Open_popup(word x_pos, word y_pos, word width,word height)
     height = Screen_height/Menu_factor_Y;
   if (y_pos + height*Menu_factor_Y > Screen_height) // fix dropdown that would get bellow the screen
     y_pos = Screen_height - height*Menu_factor_Y;
+  if (y_pos + width*Menu_factor_X > Screen_width)
+    x_pos = Screen_width - width*Menu_factor_X;
 
   Window_width=width;
   Window_height=height;
@@ -2870,27 +2872,36 @@ T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, sh
   short choice_index;
   short selected_index;
   short old_selected_index;
-  short box_height;
+  short box_width, box_height;
+  short x, y;
+  short item_width;
   T_Dropdown_choice *item;
   
   // Taille de l'ombre portée (en plus des dimensions normales)
   #define SHADOW_RIGHT 3
   #define SHADOW_BOTTOM 4
 
-  
+
   // Comptage des items pour calculer la taille
   nb_choices=0;
   for (item=button->First_item; item!=NULL; item=item->Next)
   {
     nb_choices++;
   }
-  box_height=3+nb_choices*8+1;
+  box_height = 3+nb_choices*8+1;
+  box_width = item_width = button->Dropdown_width;
+  if ((box_height+SHADOW_BOTTOM)*Menu_factor_Y >= Screen_height)
+  {
+    // Overflow : split to 2 columns
+    box_width = 2*item_width - 5;
+    box_height = 3+((nb_choices+1)/2)*8+1;
+  }
 
   // Open a new stacked "window" to serve as drawing area.
   Open_popup(
     off_x+(button->Pos_X)*Menu_factor_X,
     off_y+(button->Pos_Y+(button->Bottom_up?-box_height:button->Height))*Menu_factor_Y,
-    button->Dropdown_width+SHADOW_RIGHT,
+    box_width+SHADOW_RIGHT,
     box_height+SHADOW_BOTTOM);
 
   // Dessin de la boite
@@ -2898,13 +2909,13 @@ T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, sh
   // Bord gauche
   Window_rectangle(0,0,1,box_height,MC_Black);
   // Frame fonce et blanc
-  Window_display_frame_out(1,0,button->Dropdown_width-1,box_height);
+  Window_display_frame_out(1,0,box_width-1,box_height);
   // Ombre portée
   if (SHADOW_BOTTOM)
   {
     Window_rectangle(SHADOW_RIGHT,
         box_height,
-        button->Dropdown_width,
+        box_width,
         SHADOW_BOTTOM,
         MC_Black);
     Window_rectangle(0,
@@ -2915,12 +2926,12 @@ T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, sh
   }
   if (SHADOW_RIGHT)
   {
-    Window_rectangle(button->Dropdown_width,
+    Window_rectangle(box_width,
         SHADOW_BOTTOM,
         SHADOW_RIGHT,
         box_height-SHADOW_BOTTOM,
         MC_Black);
-    Window_rectangle(button->Dropdown_width,
+    Window_rectangle(box_width,
         1,
         1,
         SHADOW_BOTTOM,
@@ -2932,7 +2943,9 @@ T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, sh
   {
     old_selected_index = selected_index;
     // Fenêtre grise
-    Window_rectangle(2,1,button->Dropdown_width-3,box_height-2,MC_Light);
+    Window_rectangle(2,1,box_width-3,box_height-2,MC_Light);
+    x = 3;
+    y = 2;
     // Affichage des items
     for(item=button->First_item,choice_index=0; item!=NULL; item=item->Next,choice_index++)
     {
@@ -2942,15 +2955,21 @@ T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, sh
       {
         color_1=MC_White;
         color_2=MC_Dark;
-        Window_rectangle(3,2+choice_index*8,
-        (button->Dropdown_width-5),8,MC_Dark);
+        Window_rectangle(x, y,
+        item_width-5,8,MC_Dark);
       }
       else
       {
         color_1=MC_Black;
         color_2=MC_Light;
       }
-      Print_in_window(3,2+choice_index*8,item->Label,color_1,color_2);
+      Print_in_window(x, y, item->Label,color_1,color_2);
+      y += 8;
+      if ((y+7) >= box_height)
+      {
+        y = 2;
+        x += item_width - 5;
+      }
     }
     Update_window_area(0,0,Window_width,Window_height);
     Display_cursor();
@@ -2960,8 +2979,19 @@ T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, sh
       // Attente
       Get_input(20);
       // Mise à jour du survol
-      selected_index=Window_click_in_rectangle(2,2,button->Dropdown_width-2,box_height-1)?
-        (((Mouse_Y-Window_pos_Y)/Menu_factor_Y-2)>>3) : -1;
+      if (Window_click_in_rectangle(2,2,box_width-2,box_height-3))
+      {
+        selected_index = ((Mouse_Y-Window_pos_Y)/Menu_factor_Y-2) >> 3;
+        if (((Mouse_X-Window_pos_X)/Menu_factor_X-2) > item_width)
+          selected_index += (nb_choices + 1) / 2;
+        if (selected_index != old_selected_index)
+          GFX2_Log(GFX2_DEBUG, "x=%d y=%d index=%d\n",
+                   ((Mouse_X-Window_pos_X)/Menu_factor_X-2),
+                   ((Mouse_Y-Window_pos_Y)/Menu_factor_Y-2),
+                   selected_index);
+      }
+      else
+        selected_index = -1;
 
     } while (Mouse_K && selected_index==old_selected_index);
     
