@@ -25,7 +25,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef BITCOUNT_H__
-#define BITCOINT_H__
+#define BITCOUNT_H__
 
 #if defined(__GNUC__) && __GNUC__ > 2
 /* use GCC built in's */
