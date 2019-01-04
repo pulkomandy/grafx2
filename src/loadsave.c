@@ -86,6 +86,11 @@ extern Window X11_window;
 #endif
 #endif
 
+#if defined(__macosx__)
+const void * get_tiff_paste_board(unsigned long * size);
+#endif
+
+
 #if defined(USE_SDL) || defined(USE_SDL2)
 // -- SDL_Image -------------------------------------------------------------
 // (TGA, BMP, PNM, XPM, XCF, PCX, GIF, JPG, TIF, IFF, PNG, ICO)
@@ -1438,6 +1443,14 @@ static void Load_ClipBoard_Image(T_IO_Context * context)
     }
   }
   CloseClipboard();
+#elif defined(__macosx__)
+  unsigned long size;
+  const void * tiff = get_tiff_paste_board(&size);
+
+  GFX2_Log(GFX2_DEBUG, "TIFF pasteboard : %p (%lu bytes)\n", tiff, size);
+  if (tiff != NULL)
+    Load_TIFF_from_memory(context, tiff, size);
+
 #elif defined(USE_X11) || (defined(SDL_VIDEO_DRIVER_X11) && !defined(NO_X11))
   int i;
   Atom selection;

@@ -167,6 +167,7 @@ void Save_HGR(T_IO_Context *);
 void Test_TIFF(T_IO_Context *, FILE *);
 void Load_TIFF(T_IO_Context *);
 void Save_TIFF(T_IO_Context *);
+void Load_TIFF_from_memory(T_IO_Context *, const void *, unsigned long);
 #endif
 
 /// @}

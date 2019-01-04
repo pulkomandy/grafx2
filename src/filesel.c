@@ -1733,11 +1733,13 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
     Display_bookmark(bookmark_dropdown[temp],temp);
   }
 
-#if defined(WIN32) || defined(USE_X11) || (defined(SDL_VIDEO_DRIVER_X11) && !defined(NO_X11))
+#if defined(WIN32) || defined(__macosx__) || defined(USE_X11) || (defined(SDL_VIDEO_DRIVER_X11) && !defined(NO_X11))
   if (load)
     Window_set_normal_button(62,180,115,14,"From Clipboard",0,1,SHORTCUT_PASTE); // 14
+#if !defined(__macosx__)
   else
     Window_set_normal_button(62,180,115,14,"To Clipboard",0,1,SHORTCUT_COPY); // 14
+#endif
 #endif
 
   Change_directory(context->File_directory);

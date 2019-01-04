@@ -383,6 +383,99 @@ void Load_TIFF_Sub(T_IO_Context * context, TIFF * tif, unsigned long file_size)
   }
 }
 
+struct memory_buffer
+{
+  char * buffer;
+  unsigned long offset;
+  unsigned long size;
+};
+
+tmsize_t lTIFF_read(thandle_t p, void * data, tmsize_t size)
+{
+  struct memory_buffer * mbuffer = (struct memory_buffer *)p;
+  GFX2_Log(GFX2_DEBUG, "lTIFF_read(%p, %p, %u)\n", p, data, size);
+  memcpy(data, mbuffer->buffer + mbuffer->offset, size);
+  mbuffer->offset += size;
+  return size;
+}
+
+tmsize_t lTIFF_write(thandle_t p, void * data, tmsize_t size)
+{
+  struct memory_buffer * mbuffer = (struct memory_buffer *)p;
+  GFX2_Log(GFX2_DEBUG, "lTIFF_write(%p, %p, %u)\n", p, data, size);
+  return -1;
+}
+
+toff_t lTIFF_seek(thandle_t p, toff_t offset, whence)
+{
+  struct memory_buffer * mbuffer = (struct memory_buffer *)p;
+  GFX2_Log(GFX2_DEBUG, "lTIFF_seek(%p, %u, %d)\n", p, offset, whence);
+  switch (whence)
+  {
+    case SEEK_SET:
+      mbuffer->offset = offset;
+      break;
+    case SEEK_CUR:
+      mbuffer->offset += offset;
+      break;
+    case SEEK_END:
+      mbuffer->offset = mbuffer->size - offset;
+      break;
+    default:
+      return -1;
+  }
+  return mbuffer->offset;
+}
+
+
+toff_t lTIFF_size(thandle_t p)
+{
+  struct memory_buffer * mbuffer = (struct memory_buffer *)p;
+  return mbuffer->size;
+}
+
+int lTIFF_close(thandle_t p)
+{
+  (void)p;
+  return 0;
+}
+
+int lTIFF_map(thandle_t p, void ** base, toff_t * size)
+{
+  struct memory_buffer * mbuffer = (struct memory_buffer *)p;
+  GFX2_Log(GFX2_DEBUG, "lTIFF_map(%p, %p, %p)\n", p, base, size);
+  *base = mbuffer->buffer;
+  *size = mbuffer->size;
+  return 1;
+}
+
+void lTIFF_unmap(thandle_t p, void *base, toff_t size)
+{
+  GFX2_Log(GFX2_DEBUG, "lTIFF_unmap(%p, %p, %u)\n", p, base, size);
+  return;
+}
+
+/// Load TIFF from memory
+void Load_TIFF_from_memory(T_IO_Context * context, const void * buffer, unsigned long size)
+{
+  TIFF * tif;
+  struct memory_buffer memory_buffer;
+
+  memory_buffer.buffer = (char *)buffer;
+  memory_buffer.offset = 0;
+  memory_buffer.size = size;
+
+  TIFF_Init();
+  tif = TIFFClientOpen("memory.tiff", "r", &memory_buffer,
+                       lTIFF_read, lTIFF_write, lTIFF_seek, lTIFF_close,
+                       lTIFF_size, lTIFF_map, lTIFF_unmap);
+  if (tif != NULL)
+  {
+    Load_TIFF_Sub(context, tif, size);
+    TIFFClose(tif);
+  }
+}
+
 /// Load TIFF from file
 void Load_TIFF(T_IO_Context * context)
 {
