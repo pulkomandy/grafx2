@@ -68,6 +68,9 @@ screen.h:58: error: conflicting types for 'SetPalette'
 #ifndef __no_pnglib__
 #include <png.h>
 #endif
+#ifndef __no_tifflib__
+#include <tiffio.h>
+#endif
 #ifndef NORECOIL
 #include "recoil.h"
 #endif
@@ -792,9 +795,9 @@ void Button_Stats(int btn)
 
 #if defined(USE_SDL) || defined(USE_SDL2)
 // 2 lines more
-#define WIN_HEIGHT 190
+#define WIN_HEIGHT 190+8
 #else
-#define WIN_HEIGHT 174
+#define WIN_HEIGHT 174+8
 #endif
   Open_window(310,WIN_HEIGHT,"Statistics");
 
@@ -816,6 +819,7 @@ void Button_Stats(int btn)
 #if defined(USE_SDL2)
     SDL_version sdlver;
     SDL_GetVersion(&sdlver);  // linked version : only available with SDL2
+    GFX2_Log(GFX2_DEBUG, "SDL_GetRevision(): %s\n", SDL_GetRevision());
     snprintf(buffer,20,"%d.%d.%d.%s", sdlver.major, sdlver.minor, sdlver.patch, SDL_GetRevision());
 #else
     const SDL_version * sdlver = SDL_Linked_Version();
@@ -856,6 +860,26 @@ void Button_Stats(int btn)
   Print_in_window(146,y,"not linked",STATS_DATA_COLOR,MC_Black);
 #else
   Print_in_window(146,y,png_libpng_ver,STATS_DATA_COLOR,MC_Black);
+#endif
+  y+=8;
+  Print_in_window(10,y,"libtiff:",STATS_TITLE_COLOR,MC_Black);
+#ifdef __no_tifflib__
+  Print_in_window(146,y,"not linked",STATS_DATA_COLOR,MC_Black);
+#else
+  {
+    unsigned int i;
+    const char * tiff_version = TIFFGetVersion();
+
+    GFX2_Log(GFX2_DEBUG, "'%s'\n", tiff_version);
+    for (i = 0; i < sizeof(buffer) - 1; i++)
+    {
+      if (tiff_version[i] < ' ')
+        break;
+      buffer[i] = tiff_version[i];
+    }
+    buffer[i] = '\0';
+    Print_in_window(146-8*8,y,buffer,STATS_DATA_COLOR,MC_Black);
+  }
 #endif
 #ifndef NORECOIL
   y+=8;
