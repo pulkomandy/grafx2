@@ -6,7 +6,7 @@ _/    _/  _/        _/    _/    _/        _/  _/      _/
 
 GrafX2 - The Ultimate 256-color bitmap paint program
 Copyright (C)1996-2001 Sunset Design (G.Dorme & K.Maritaud)
-Copyright (C)2007-2018 the Grafx2 Project Team (A.Destugues & Y.Rizoud)
+Copyright (C)2007-2019 the Grafx2 Project Team (A.Destugues & Y.Rizoud)
 -------------------------------------
 
 === ABOUT ===
@@ -80,6 +80,8 @@ Sends greetings and glops to pouet.net : http://pouet.net/prod.php?which=51865
 === HISTORY ===
 
 Short revision history :
+  * 05/2017  2.5       Support for several new file formats.
+                       CPC, ZX and Thomson constraints modes.
   * 10/2012  2.4       Animation
   * 04/2011  2.3       Further improvements
   * 03/2010  2.2       Layers, Lua scripting
