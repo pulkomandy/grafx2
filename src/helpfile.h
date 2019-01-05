@@ -531,6 +531,7 @@ static const T_Help_table helptable_credits[] =
   HELP_TEXT ("  PNG : W3C")
   HELP_TEXT ("  PPH : Rhino / Batman Group")
   HELP_TEXT ("  SCx : Colorix (?)")
+  HELP_TEXT ("  TIFF : Aldus (now Adobe)")
   HELP_TEXT ("  XPM : C.Nahaboo and D.Dardailler / Bull")
   HELP_TEXT ("")
   HELP_TEXT ("")
