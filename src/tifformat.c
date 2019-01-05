@@ -303,6 +303,7 @@ void Load_TIFF_Sub(T_IO_Context * context, TIFF * tif, unsigned long file_size)
   word bps, spp;
   word photometric = PHOTOMETRIC_RGB;
   char * desc;
+  float xresol, yresol;
 
   TIFFPrintDirectory(tif, stdout, TIFFPRINT_NONE);
   if (!TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width) || !TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height))
@@ -322,6 +323,17 @@ void Load_TIFF_Sub(T_IO_Context * context, TIFF * tif, unsigned long file_size)
     }
   }
   TIFFGetField(tif, TIFFTAG_PHOTOMETRIC, &photometric);
+  if (TIFFGetField(tif, TIFFTAG_XRESOLUTION, &xresol) && TIFFGetField(tif, TIFFTAG_YRESOLUTION, &yresol))
+  {
+    float ratiof = xresol / yresol;
+    if (ratiof > 1.6f)
+      ratio = PIXEL_TALL;
+    else if (ratiof > 1.4f)
+      ratio = PIXEL_TALL3;
+    else if (ratiof < 0.7f)
+      ratio = PIXEL_WIDE;
+  }
+
   File_error = 0;
   Pre_load(context, width, height, file_size, FORMAT_TIFF, ratio, bps * spp);
   if (File_error != 0)
@@ -575,6 +587,24 @@ void Save_TIFF_Sub(T_IO_Context * context, TIFF * tif)
   const dword rowsperstrip = 64;
   const word photometric = PHOTOMETRIC_PALETTE;
   float xresol = 1.0f, yresol = 1.0f;
+
+  switch (context->Ratio)
+  {
+    case PIXEL_WIDE:
+    case PIXEL_WIDE2:
+      yresol = 2.0f;
+      break;
+    case PIXEL_TALL:
+    case PIXEL_TALL2:
+      xresol = 2.0f;
+      break;
+    case PIXEL_TALL3:
+      xresol = 4.0f;
+      yresol = 3.0f;
+      break;
+    default:
+      break;
+  }
 
   snprintf(version, sizeof(version), "GrafX2 %s.%s", Program_version, SVN_revision);
   width = context->Width;
