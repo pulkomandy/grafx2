@@ -40,6 +40,26 @@
 #include "loadsave.h"
 #include "gfx2log.h"
 
+/**
+ * @defgroup TIFF TIFF
+ * @ingroup loadsaveformats
+ * Tagged Image File Format
+ *
+ * Uses libtiff http://www.simplesystems.org/libtiff/
+ *
+ * @{
+ */
+
+/// GrafX2 private TIFF tag : 4 bytes
+///
+/// - bkg/transp color
+/// - background transparent
+/// - image mode
+/// - reserved (0)
+///
+/// This TAG is read only if the Software tag begins with "GrafX2"
+#define TIFFTAG_GRAFX2 65500
+
 extern char Program_version[]; // generated in pversion.c
 extern const char SVN_revision[]; // generated in version.c
 
@@ -58,6 +78,23 @@ static void TIFF_LogWarning(const char* module, const char* fmt, va_list ap)
   GFX2_LogV(GFX2_WARNING, format, ap);
 }
 
+/// old TIFF extender procedure to be recursively called
+static TIFFExtendProc TIFFParentExtender = NULL;
+
+/// Our TIFF Tag Extender procedure
+///
+/// Used to add ::TIFFTAG_GRAFX2 handling
+static void GFX2_TIFFTagExtender(TIFF *tif)
+{
+  static const TIFFFieldInfo gfx2_fields[] = {
+    // 4 bytes
+    {TIFFTAG_GRAFX2, 4, 4, TIFF_BYTE, FIELD_CUSTOM, 1, 0, "GrafX2Private"}
+  };
+  TIFFMergeFieldInfo(tif, gfx2_fields, 1);
+  if (TIFFParentExtender != NULL)
+    (*TIFFParentExtender)(tif);
+}
+
 /// Initialisation for using the TIFF library
 static void TIFF_Init(void)
 {
@@ -70,6 +107,8 @@ static void TIFF_Init(void)
   /// redirect warning/error output to our own functions
   TIFFSetErrorHandler(TIFF_LogError);
   TIFFSetWarningHandler(TIFF_LogWarning);
+  TIFFParentExtender = TIFFSetTagExtender(GFX2_TIFFTagExtender);
+  GFX2_Log(GFX2_DEBUG, "TIFF_Init() TIFFParentExtender=%p\n", TIFFParentExtender);
 
   init_done = 1;
 }
@@ -216,7 +255,6 @@ static void Load_TIFF_image(T_IO_Context * context, TIFF * tif, word spp, word b
         }
       }
       free(buffer);
-      return; // ignore next image for now...
     }
     else
     {
@@ -297,15 +335,19 @@ static void Load_TIFF_image(T_IO_Context * context, TIFF * tif, word spp, word b
 /// Load TIFF
 void Load_TIFF_Sub(T_IO_Context * context, TIFF * tif, unsigned long file_size)
 {
+  enum IMAGE_MODES mode = IMAGE_MODE_LAYERED;
   int layer = 0;
   enum PIXEL_RATIO ratio = PIXEL_SIMPLE;
   dword width, height;
   word bps, spp;
   word photometric = PHOTOMETRIC_RGB;
   char * desc;
+  char * software = NULL;
   float xresol, yresol;
 
+#ifdef _DEBUG
   TIFFPrintDirectory(tif, stdout, TIFFPRINT_NONE);
+#endif
   if (!TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width) || !TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height))
     return;
   if (!TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &bps) || !TIFFGetField(tif, TIFFTAG_SAMPLESPERPIXEL, &spp))
@@ -338,6 +380,23 @@ void Load_TIFF_Sub(T_IO_Context * context, TIFF * tif, unsigned long file_size)
   Pre_load(context, width, height, file_size, FORMAT_TIFF, ratio, bps * spp);
   if (File_error != 0)
     return;
+
+  if (TIFFGetField(tif, TIFFTAG_SOFTWARE, &software))
+  {
+    if (0 == memcmp(software, "GrafX2", 6)) // Check if the file was written by GrafX2
+    {
+      byte * grafx2_private; // bkg/transp color, background transparent, image mode, reserved (0)
+      if (TIFFGetField(tif, TIFFTAG_GRAFX2, &grafx2_private))
+      {
+        GFX2_Log(GFX2_DEBUG, "bkg/transp color #%u, bkg transp %u, mode %u, reserved %u\n",
+                 grafx2_private[0], grafx2_private[1], grafx2_private[2], grafx2_private[3]);
+        context->Transparent_color = grafx2_private[0]; // need to be set after calling Pre_load()
+        context->Background_transparent = grafx2_private[1];
+        mode = grafx2_private[2];
+      }
+    }
+  }
+  Set_image_mode(context, (mode == IMAGE_MODE_ANIMATION) ? mode : IMAGE_MODE_LAYERED);
   if (spp == 1)
   {
     struct {
@@ -399,8 +458,12 @@ void Load_TIFF_Sub(T_IO_Context * context, TIFF * tif, unsigned long file_size)
     if (context->bpp != (spp * bps))
       return;
     Set_loading_layer(context, layer);
+#ifdef _DEBUG
     TIFFPrintDirectory(tif, stdout, TIFFPRINT_NONE);
+#endif
   }
+  if (mode > IMAGE_MODE_ANIMATION)
+    Set_image_mode(context, mode);
 }
 
 struct memory_buffer
@@ -569,6 +632,7 @@ void Load_TIFF(T_IO_Context * context)
 }
 
 
+/// Save (already open) TIFF
 void Save_TIFF_Sub(T_IO_Context * context, TIFF * tif)
 {
   char version[64];
@@ -587,6 +651,11 @@ void Save_TIFF_Sub(T_IO_Context * context, TIFF * tif)
   const dword rowsperstrip = 64;
   const word photometric = PHOTOMETRIC_PALETTE;
   float xresol = 1.0f, yresol = 1.0f;
+  // bkg/transp color, background transparent, image mode, reserved (0)
+  byte grafx2_private[4] = { context->Transparent_color, context->Background_transparent, 0, 0 };
+
+  if (context->Type == CONTEXT_MAIN_IMAGE)
+    grafx2_private[2] = Main.backups->Pages->Image_mode;
 
   switch (context->Ratio)
   {
@@ -642,11 +711,10 @@ void Save_TIFF_Sub(T_IO_Context * context, TIFF * tif)
 
 //    TIFFTAG_SUBIFD  // point to thumbnail, etc.
 //    TIFFSetField(tif, TIFFTAG_PAGENUMBER, current_page, page_count);
+
     // extensions :
-    // TIFFTAG_IT8BKGCOLORINDICATOR
-    TIFFSetField(tif, TIFFTAG_IT8BKGCOLORVALUE, (word)context->Transparent_color);
-    // TIFFSetField: test.tif: Unknown tag 34026.
-// custom : https://stackoverflow.com/questions/24059421/adding-custom-tags-to-a-tiff-file
+    TIFFSetField(tif, TIFFTAG_GRAFX2, grafx2_private);
+
 
 #if 0
     for (y = 0; y < height; y++)
@@ -720,5 +788,7 @@ void Save_TIFF(T_IO_Context * context)
     TIFFClose(tif);
   }
 }
+
+/** @} */
 
 #endif
