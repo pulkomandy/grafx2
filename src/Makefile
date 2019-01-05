@@ -475,9 +475,9 @@ endif
       PLATFORM = win32
       PLATFORMOBJ = winres.o
       PLATFORMFILES = $(wildcard ../bin/libpng*.dll) $(wildcard ../bin/libjpeg*.dll) bin/zlib1.dll $(TTFLIBS)
+      PLATFORMFILES += bin/libtiff-5.dll
       ifeq ($(API),sdl)
       PLATFORMFILES += bin/SDL.dll bin/SDL_image.dll
-      PLATFORMFILES += bin/libtiff-5.dll
       endif
     else
       ifdef GP2XCROSS

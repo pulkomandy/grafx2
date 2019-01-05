@@ -103,11 +103,11 @@ Section "Grafx2" SecProgram
     File ..\bin\SDL.dll
     File ..\bin\SDL_ttf.dll
     File ..\bin\${FREETYPEDLL}
-    File ..\bin\${JPEGDLL}
-    File ..\bin\${TIFFDLL}
   !endif
   File ..\bin\zlib1.dll
   File ..\bin\${PNGDLL}
+  File ..\bin\${JPEGDLL}
+  File ..\bin\${TIFFDLL}
   SetOutPath "$INSTDIR\share\grafx2"
   File ..\share\grafx2\gfx2.gif
   File ..\share\grafx2\gfx2def.ini
