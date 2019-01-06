@@ -90,6 +90,7 @@
 #include "windows.h" // Best_color()
 #include "fileformats.h"
 #include "oldies.h"
+#include "bitcount.h"
 
 #ifndef MIN
 #define MIN(a,b) ((a)<(b)?(a):(b))
@@ -3035,6 +3036,18 @@ void Load_INFO(T_IO_Context * context)
 
 
 //////////////////////////////////// BMP ////////////////////////////////////
+/**
+ * @defgroup BMP Bitmap and icon files
+ * @ingroup loadsaveformats
+ * .BMP/.ICO/.CUR files from OS/2 or Windows
+ *
+ * We support OS/2 files and windows BITMAPINFOHEADER, BITMAPV4HEADER,
+ * BITMAPV5HEADER files.
+ *
+ * .ICO with PNG content are also supported
+ *
+ * @{
+ */
 typedef struct
 {
     byte  Signature[2];   // ='BM' = 0x4D42
@@ -3056,7 +3069,7 @@ typedef struct
     dword Clr_Imprt;
 } T_BMP_Header;
 
-// -- Tester si un fichier est au format BMP --------------------------------
+/// Test for BMP format
 void Test_BMP(T_IO_Context * context, FILE * file)
 {
   T_BMP_Header header;
@@ -3070,6 +3083,7 @@ void Test_BMP(T_IO_Context * context, FILE * file)
       && Read_word_le(file,&(header.Reserved_2))
       && Read_dword_le(file,&(header.Offset))
       && Read_dword_le(file,&(header.Size_2))
+/*
       && Read_dword_le(file,&(header.Width))
       && Read_dword_le(file,(dword *)&(header.Height))
       && Read_word_le(file,&(header.Planes))
@@ -3080,58 +3094,35 @@ void Test_BMP(T_IO_Context * context, FILE * file)
       && Read_dword_le(file,&(header.YPM))
       && Read_dword_le(file,&(header.Nb_Clr))
       && Read_dword_le(file,&(header.Clr_Imprt))
+*/
      )
   {
-    if ( header.Signature[0]=='B' && header.Signature[1]=='M'
-        && (header.Size_2==40 /* WINDOWS */ || header.Size_2==12 /* OS/2 */)
-        && header.Width && header.Height )
+    if (header.Signature[0]=='B' && header.Signature[1]=='M' &&
+        (header.Offset < header.Size_1) && (header.Offset >= 14 + header.Size_2))
     {
-      File_error=0;
+      GFX2_Log(GFX2_DEBUG, "BMP : Size_1=%u Offset=%u Size_2=%u\n",
+               header.Size_1, header.Offset, header.Size_2);
+      if ( header.Size_2==40 /* WINDOWS BITMAPINFOHEADER */
+           || header.Size_2==12 /* OS/2 */
+           || header.Size_2==108 /* Windows BITMAPV4HEADER */
+           || header.Size_2==124 /* Windows BITMAPV5HEADER */ )
+      {
+        File_error=0;
+      }
     }
   }
 }
 
-// Find the 8 important bits in a dword
-static byte Bitmap_mask(dword pixel, dword mask)
+/// extract component value and properly shift it.
+static byte Bitmap_mask(dword pixel, dword mask, int bits, int shift)
 {
-  byte result;
-  int i;
-  int bits_found;
-
-  switch(mask)
-  {
-    // Shortcuts to quickly handle the common 24/32bit cases
-    case 0x000000FF:
-      return (pixel & 0x000000FF);
-    case 0x0000FF00:
-      return (pixel & 0x0000FF00)>>8;
-    case 0x00FF0000:
-      return (pixel & 0x00FF0000)>>16;
-    case 0xFF000000:
-      return (pixel & 0xFF000000)>>24;
-  }
-  // Uncommon : do it bit by bit.
-  bits_found=0;
-  result=0;
-  // Process the mask from low to high bit
-  for (i=0;i<32;i++)
-  {
-    // Found a bit in the mask
-    if (mask & (1<<i))
-    {
-      if (pixel & 1<<i)
-        result |= 1<<bits_found;
-        
-      bits_found++;
-      
-      if (bits_found>=8)
-        return result;
-    }
-  }
-  // Less than 8 bits in the mask: scale the result to 8 bits
-  return result << (8-bits_found);
+  dword value = (pixel & mask) >> shift;
+  if (bits != 8)
+    value = (value << (8 - bits)) | (value >> (2 * bits - 8));
+  return (byte)value;
 }
 
+/// Load the Palette for 1 to 8bpp BMP's
 static void Load_BMP_Palette(T_IO_Context * context, FILE * file, unsigned int nb_colors, int is_rgb24)
 {
   byte  local_palette[256*4]; // R,G,B,0 or RGB
@@ -3157,9 +3148,9 @@ static void Load_BMP_Palette(T_IO_Context * context, FILE * file, unsigned int n
   }
 }
 
-// rows are stored from the top to the bottom (standard for BMP is from bottom to the top)
+/// rows are stored from the top to the bottom (standard for BMP is from bottom to the top)
 #define LOAD_BMP_PIXEL_FLAG_TOP_DOWN     0x01
-// We are decoding the AND-mask plane (transparency) of a .ICO file
+/// We are decoding the AND-mask plane (transparency) of a .ICO file
 #define LOAD_BMP_PIXEL_FLAG_TRANSP_PLANE 0x02
 
 static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int compression, unsigned int nbbits, int flags, const dword * mask)
@@ -3171,11 +3162,29 @@ static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int co
   byte * buffer;
   byte value;
   byte a,b,c=0;
+  int bits[4];
+  int shift[4];
+  int i;
+
+  // compute bit count and shift for masks
+  for (i = 0; i < 4; i++)
+  {
+    if (mask[i] == 0)
+    {
+      bits[i] = 0;
+      shift[i] = 0;
+    }
+    else
+    {
+      bits[i] = count_set_bits(mask[i]);
+      shift[i] = count_trailing_zeros(mask[i]);
+    }
+  }
 
   switch (compression)
   {
-    case 0 : // Pas de compression
-    case 3 :
+    case 0 :  // BI_RGB : No compression
+    case 3 :  // BI_BITFIELDS
       row_size = ((nbbits*context->Width + 31) >> 3) & ~3;
       buffer = malloc(row_size);
       for (y_pos=0; (y_pos < context->Height && !File_error); y_pos++)
@@ -3223,7 +3232,10 @@ static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int co
 #else // default to little endian
                   dword pixel = ((dword *)buffer)[x_pos];
 #endif
-                  Set_pixel_24b(context, x_pos,target_y,Bitmap_mask(pixel,mask[0]),Bitmap_mask(pixel,mask[1]),Bitmap_mask(pixel,mask[2]));
+                  Set_pixel_24b(context, x_pos, target_y,
+                                Bitmap_mask(pixel,mask[0],bits[0],shift[0]),
+                                Bitmap_mask(pixel,mask[1],bits[1],shift[1]),
+                                Bitmap_mask(pixel,mask[2],bits[2],shift[2]));
                 }
                 break;
               case 16:
@@ -3235,7 +3247,10 @@ static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int co
 #else // default to little endian
                   word pixel = ((word *)buffer)[x_pos];
 #endif
-                  Set_pixel_24b(context, x_pos,target_y,Bitmap_mask(pixel,mask[0]),Bitmap_mask(pixel,mask[1]),Bitmap_mask(pixel,mask[2]));
+                  Set_pixel_24b(context, x_pos, target_y,
+                                Bitmap_mask(pixel,mask[0],bits[0],shift[0]),
+                                Bitmap_mask(pixel,mask[1],bits[1],shift[1]),
+                                Bitmap_mask(pixel,mask[2],bits[2],shift[2]));
                 }
                 break;
               default:
@@ -3252,7 +3267,7 @@ static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int co
       buffer = NULL;
       break;
 
-    case 1 : // Compression RLE 8 bits
+    case 1 : // BI_RLE8 Compression
       x_pos=0;
 
       y_pos=context->Height-1;
@@ -3305,7 +3320,7 @@ static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int co
       }
       break;
 
-    case 2 : // Compression RLE 4 bits
+    case 2 : // BI_RLE4 Compression
       x_pos=0;
       y_pos=context->Height-1;
 
@@ -3364,7 +3379,7 @@ static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int co
   }
 }
 
-// -- Charger un fichier au format BMP --------------------------------------
+/// Load BMP file
 void Load_BMP(T_IO_Context * context)
 {
   FILE *file;
@@ -3373,7 +3388,7 @@ void Load_BMP(T_IO_Context * context)
   long  file_size;
   byte  negative_height; // top_down
   byte  true_color = 0;
-  dword mask[3];  // R G B
+  dword mask[4];  // R G B A
 
   File_error=0;
 
@@ -3393,7 +3408,9 @@ void Load_BMP(T_IO_Context * context)
     }
     else
     {
-      if (header.Size_2 == 40 /* WINDOWS */)
+      if (header.Size_2 == 40 /* WINDOWS BITMAPINFOHEADER*/
+          || header.Size_2 == 108 /* Windows BITMAPV4HEADER */
+          || header.Size_2 == 124 /* Windows BITMAPV5HEADER */)
       {
         if (!(Read_dword_le(file,&(header.Width))
          && Read_dword_le(file,(dword *)&(header.Height))
@@ -3406,6 +3423,9 @@ void Load_BMP(T_IO_Context * context)
          && Read_dword_le(file,&(header.Nb_Clr))
          && Read_dword_le(file,&(header.Clr_Imprt))
         )) File_error = 1;
+        else
+          GFX2_Log(GFX2_DEBUG, "Windows BMP %ux%d planes=%u bpp=%u compression=%u\n",
+                   header.Width, header.Height, header.Planes, header.Nb_bits, header.Compression);
       }
       else if (header.Size_2 == 12 /* OS/2 */)
       {
@@ -3415,6 +3435,7 @@ void Load_BMP(T_IO_Context * context)
          && Read_word_le(file,&(header.Planes))
          && Read_word_le(file,&(header.Nb_bits)))
         {
+          GFX2_Log(GFX2_DEBUG, "OS/2 BMP %ux%u planes=%u bpp=%u\n", tmp_width, tmp_height, header.Planes, header.Nb_bits);
           header.Width = tmp_width;
           header.Height = tmp_height;
           header.Compression = 0;
@@ -3479,25 +3500,28 @@ void Load_BMP(T_IO_Context * context)
         mask[1] = 0x0000FF00;
         mask[2] = 0x000000FF;
       }
+      mask[3] = 0;
       if (File_error == 0)
       {
         Pre_load(context, header.Width,header.Height,file_size,FORMAT_BMP,PIXEL_SIMPLE,header.Nb_bits);
         if (File_error==0)
         {
-          if (true_color)
+          if (header.Size_2 >= 108 || (true_color && header.Compression == 3)) // BI_BITFIELDS
           {
-            if (header.Compression == 3) // BI_BITFIELDS
+            if (!Read_dword_le(file,&mask[0]) ||
+                !Read_dword_le(file,&mask[1]) ||
+                !Read_dword_le(file,&mask[2]))
+              File_error=2;
+            if (header.Size_2 >= 108)
             {
-              if (!Read_dword_le(file,&mask[0]) ||
-                  !Read_dword_le(file,&mask[1]) ||
-                  !Read_dword_le(file,&mask[2]))
-                File_error=2;
+              Read_dword_le(file,&mask[3]); // Alpha mask
+              if (header.Size_2 == 124)
+                fseek(file, header.Size_2 - 40 - 16, SEEK_CUR);  // skip extended v4/v5 header fields
             }
+            GFX2_Log(GFX2_DEBUG, "BMP masks : R=%08x G=%08x B=%08x A=%08x\n", mask[0], mask[1], mask[2], mask[3]);
           }
-          else
-          {
+          if (nb_colors > 0)
             Load_BMP_Palette(context, file, nb_colors, header.Size_2 == 12);
-          }
 
           if (File_error==0)
           {
@@ -3520,7 +3544,7 @@ void Load_BMP(T_IO_Context * context)
 }
 
 
-// -- Sauvegarder un fichier au format BMP ----------------------------------
+/// Save BMP file
 void Save_BMP(T_IO_Context * context)
 {
   FILE *file;
@@ -3710,9 +3734,15 @@ void Load_ICO(T_IO_Context * context)
         width = entry->width;
         if (width == 0) width = 256;
         if (width > max_width) max_width = width;
+        // For various reasons, 256x256 icons are all in PNG format,
+        // and Microsoft decided PNG inside ICO should be in 32bit ARGB format...
+        // https://blogs.msdn.microsoft.com/oldnewthing/20101022-00/?p=12473
+        GFX2_Log(GFX2_DEBUG, "%s #%02u %3ux%3u %ucols %ux%ubpp  %u bytes at 0x%06x\n",
+                 (header.Type == 2) ? "CUR" : "ICO",
+                 i, width, entry->height, entry->ncolors, entry->planes, entry->bpp,
+                 entry->bytecount, entry->offset);
       }
       // select the picture with the maximum width and 256 colors or less
-      //printf("max width = %d\n", max_width);
       for (i = 0; i < header.Count; i++)
       {
         if (images[i].width == (max_width & 0xff))
@@ -3751,6 +3781,7 @@ void Load_ICO(T_IO_Context * context)
         byte png_header[8];
 
         entry = images + i;
+        GFX2_Log(GFX2_DEBUG, "Selected icon #%u at offset 0x%06x\n", i, entry->offset);
         fseek(file, entry->offset, SEEK_SET);
 
         // detect PNG icons
@@ -3796,6 +3827,9 @@ void Load_ICO(T_IO_Context * context)
               short real_height;
               word nb_colors = 0;
 
+              GFX2_Log(GFX2_DEBUG, "  BITMAPINFOHEADER %u %dx%d %ux%ubpp comp=%u\n",
+                       bmpheader.Size_2, bmpheader.Width, bmpheader.Height, bmpheader.Planes,
+                       bmpheader.Nb_bits, bmpheader.Compression);
               if (bmpheader.Nb_Clr != 0)
                 nb_colors=bmpheader.Nb_Clr;
               else
@@ -3978,6 +4012,7 @@ void Save_ICO(T_IO_Context * context)
       Remove_file(context);
   }
 }
+/** @} */
 
 
 //////////////////////////////////// GIF ////////////////////////////////////
@@ -6335,6 +6370,7 @@ void Load_PNG_Sub(T_IO_Context * context, FILE * file, const char * memory_buffe
           default:
             bpp = bit_depth;
         }
+        GFX2_Log(GFX2_DEBUG, "PNG type=%u bit_depth=%u : %ubpp\n", color_type, bit_depth, bpp);
 
         // If it's any supported file
         // (Note: As of writing this, this test covers every possible
