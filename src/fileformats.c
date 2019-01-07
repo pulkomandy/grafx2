@@ -3098,12 +3098,15 @@ void Test_BMP(T_IO_Context * context, FILE * file)
      )
   {
     if (header.Signature[0]=='B' && header.Signature[1]=='M' &&
-        (header.Offset < header.Size_1) && (header.Offset >= 14 + header.Size_2))
+        ((header.Size_1 == (header.Size_2 + 14)) || // Size_1 is fixed to 14 + header Size in some OS/2 BMPs
+         (header.Offset < header.Size_1 && header.Offset >= (14 + header.Size_2))))
     {
       GFX2_Log(GFX2_DEBUG, "BMP : Size_1=%u Offset=%u Size_2=%u\n",
                header.Size_1, header.Offset, header.Size_2);
       if ( header.Size_2==40 /* WINDOWS BITMAPINFOHEADER */
            || header.Size_2==12 /* OS/2 */
+           || header.Size_2==64 /* OS/2 v2 */
+           || header.Size_2==16 /* OS/2 v2 - short - */
            || header.Size_2==108 /* Windows BITMAPV4HEADER */
            || header.Size_2==124 /* Windows BITMAPV5HEADER */ )
       {
@@ -3125,22 +3128,24 @@ static byte Bitmap_mask(dword pixel, dword mask, int bits, int shift)
 /// Load the Palette for 1 to 8bpp BMP's
 static void Load_BMP_Palette(T_IO_Context * context, FILE * file, unsigned int nb_colors, int is_rgb24)
 {
-  byte  local_palette[256*4]; // R,G,B,0 or RGB
+  byte local_palette[256*4]; // R,G,B,0 or RGB
   unsigned int i, j;
 
-  if (Read_bytes(file,local_palette,nb_colors*(is_rgb24?3:4)))
+  if (Read_bytes(file, local_palette, MIN(nb_colors, 256) * (is_rgb24?3:4)))
   {
     if (Config.Clear_palette)
       memset(context->Palette,0,sizeof(T_Palette));
 
     // We can now load the new palette
-    for (i=0, j=0; i<nb_colors; i++)
+    for (i = 0, j = 0; i < nb_colors && i < 256; i++)
     {
-      context->Palette[i].B=local_palette[j++];
-      context->Palette[i].G=local_palette[j++];
-      context->Palette[i].R=local_palette[j++];
+      context->Palette[i].B = local_palette[j++];
+      context->Palette[i].G = local_palette[j++];
+      context->Palette[i].R = local_palette[j++];
       if (!is_rgb24) j++;
     }
+    if (nb_colors > 256)  // skip additional entries
+      fseek(file, (nb_colors - 256) * (is_rgb24?3:4), SEEK_CUR);
   }
   else
   {
@@ -3333,7 +3338,7 @@ static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int co
         }
         if (a > 0) // Encoded mode : pixel count = a
         {
-          GFX2_Log(GFX2_DEBUG, "BI_RLE4: %d &%02X\n", a, b);
+          //GFX2_Log(GFX2_DEBUG, "BI_RLE4: %d &%02X\n", a, b);
           for (index = 0; index < a; index++)
             Set_pixel(context, x_pos++, y_pos, ((index & 1) ? b : (b >> 4)) & 0x0f);
         }
@@ -3342,7 +3347,7 @@ static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int co
           // a == 0 : Escape code
           byte c = 0;
 
-          GFX2_Log(GFX2_DEBUG, "BI_RLE4: %d %d\n", a, b);
+          //GFX2_Log(GFX2_DEBUG, "BI_RLE4: %d %d\n", a, b);
           if (b == 1) // end of bitmap
             break;
           switch (b)
@@ -3421,6 +3426,7 @@ void Load_BMP(T_IO_Context * context)
   else
   {
     if (header.Size_2 == 40 /* WINDOWS BITMAPINFOHEADER*/
+        || header.Size_2 == 64 /* OS/2 v2 */
         || header.Size_2 == 108 /* Windows BITMAPV4HEADER */
         || header.Size_2 == 124 /* Windows BITMAPV5HEADER */)
     {
@@ -3437,8 +3443,30 @@ void Load_BMP(T_IO_Context * context)
            ))
         File_error = 1;
       else
-        GFX2_Log(GFX2_DEBUG, "Windows BMP %ux%d planes=%u bpp=%u compression=%u\n",
-            header.Width, header.Height, header.Planes, header.Nb_bits, header.Compression);
+        GFX2_Log(GFX2_DEBUG, "%s BMP %ux%d planes=%u bpp=%u compression=%u %u/%u\n",
+            header.Size_2 == 64 ? "OS/2 v2" : "Windows",
+            header.Width, header.Height, header.Planes, header.Nb_bits, header.Compression,
+            header.XPM, header.YPM);
+    }
+    else if (header.Size_2 == 16) /* OS/2 v2 *short* */
+    {
+      if (!(Read_dword_le(file,&(header.Width))
+            && Read_dword_le(file,(dword *)&(header.Height))
+            && Read_word_le(file,&(header.Planes))
+            && Read_word_le(file,&(header.Nb_bits))
+           ))
+        File_error = 1;
+      else
+      {
+        GFX2_Log(GFX2_DEBUG, "OS/2 v2 BMP %ux%d planes=%u bpp=%u *short header*\n",
+            header.Width, header.Height, header.Planes, header.Nb_bits);
+        header.Compression = 0;
+        header.Size_3 = 0;
+        header.XPM = 0;
+        header.YPM = 0;
+        header.Nb_Clr = 0;
+        header.Clr_Imprt = 0;
+      }
     }
     else if (header.Size_2 == 12 /* OS/2 */)
     {
@@ -3518,9 +3546,21 @@ void Load_BMP(T_IO_Context * context)
     mask[3] = 0;
     if (File_error == 0)
     {
-      Pre_load(context, header.Width, header.Height, file_size, FORMAT_BMP, PIXEL_SIMPLE, header.Nb_bits);
+      enum PIXEL_RATIO ratio = PIXEL_SIMPLE;
+
+      if (header.XPM > 0 && header.YPM > 0)
+      {
+        if (header.XPM * 10 > header.YPM * 15)  // XPM/YPM > 1.5
+          ratio = PIXEL_TALL;
+        else if (header.XPM * 15 < header.YPM * 10) // XPM/YPM < 1/1.5
+          ratio = PIXEL_WIDE;
+      }
+
+      Pre_load(context, header.Width, header.Height, file_size, FORMAT_BMP, ratio, header.Nb_bits);
       if (File_error==0)
       {
+        if (header.Size_2 == 64)
+          fseek(file, header.Size_2 - 40, SEEK_CUR);
         if (header.Size_2 >= 108 || (true_color && header.Compression == 3)) // BI_BITFIELDS
         {
           if (!Read_dword_le(file,&mask[0]) ||
