@@ -3161,7 +3161,7 @@ static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int co
   short y_pos;
   byte * buffer;
   byte value;
-  byte a,b,c=0;
+  byte a,b;
   int bits[4];
   int shift[4];
   int i;
@@ -3321,57 +3321,63 @@ static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int co
       break;
 
     case 2 : // BI_RLE4 Compression
-      x_pos=0;
-      y_pos=context->Height-1;
+      x_pos = 0;
+      y_pos = context->Height-1;
 
-      if(Read_byte(file, &a)!=1 ||  Read_byte(file, &b) != 1)
-        File_error =2;
-      while ( (!File_error) && ((a)||(b!=1)) )
+      while (!File_error)
       {
-        if (a) // Encoded mode (A fois les 1/2 pixels de B)
-          for (index=1; index<=a; index++)
-          {
-            if (index & 1)
-              Set_pixel(context, x_pos,y_pos,b>>4);
-            else
-              Set_pixel(context, x_pos,y_pos,b&0xF);
-            x_pos++;
-          }
-        else   // Absolute mode
+        if(!(Read_byte(file, &a) && Read_byte(file, &b)))
+        {
+          File_error = 2;
+          break;
+        }
+        if (a > 0) // Encoded mode : pixel count = a
+        {
+          GFX2_Log(GFX2_DEBUG, "BI_RLE4: %d &%02X\n", a, b);
+          for (index = 0; index < a; index++)
+            Set_pixel(context, x_pos++, y_pos, ((index & 1) ? b : (b >> 4)) & 0x0f);
+        }
+        else
+        {
+          // a == 0 : Escape code
+          byte c = 0;
+
+          GFX2_Log(GFX2_DEBUG, "BI_RLE4: %d %d\n", a, b);
+          if (b == 1) // end of bitmap
+            break;
           switch (b)
           {
             case 0 : //End of line
-              x_pos=0;
+              x_pos = 0;
               y_pos--;
               break;
-            case 1 : // End of bitmap
-              break;
             case 2 : // Delta
-              if(Read_byte(file, &a)!=1 ||  Read_byte(file, &b)!=1)
+              if(Read_byte(file, &a)!=1 || Read_byte(file, &b)!=1)
                 File_error=2;
-              x_pos+=a;
-              y_pos-=b;
+              x_pos += a;
+              y_pos -= b;
               break;
-            default: // Nouvelle série (B 1/2 pixels bruts)
-              for (index=1; ((index<=b) && (!File_error)); index++,x_pos++)
+            default: // Absolute mode : pixel count = b
+              for (index = 0; index < b && !File_error; index++, x_pos++)
               {
                 if (index&1)
-                {
-                  if(Read_byte(file, &c)!=1) File_error=2;
-                  Set_pixel(context, x_pos,y_pos,c>>4);
-                }
-                else
                   Set_pixel(context, x_pos,y_pos,c&0xF);
+                else
+                {
+                  if (!Read_byte(file, &c))
+                    File_error=2;
+                  else
+                    Set_pixel(context, x_pos,y_pos,c>>4);
+                }
               }
-              //   On lit l'octet rendant le nombre d'octets pair, si
-              // nécessaire. Encore un truc de crétin "made in MS".
-              if ( ((b&3)==1) || ((b&3)==2) )
+              if ((b + 1) & 2)
               {
-                byte dummy;
-                if(Read_byte(file, &dummy)!=1) File_error=2;
+                // read a pad byte to enforce word alignment
+                if (!Read_byte(file, &c))
+                  File_error = 2;
               }
           }
-        if(Read_byte(file, &a)!=1 || Read_byte(file, &b)!=1) File_error=2;
+        }
       }
       break;
     default:
@@ -3390,157 +3396,158 @@ void Load_BMP(T_IO_Context * context)
   byte  true_color = 0;
   dword mask[4];  // R G B A
 
-  File_error=0;
-
-  if ((file=Open_file_read(context)))
+  file = Open_file_read(context);
+  if (file == NULL)
   {
-    file_size=File_length_file(file);
+    File_error = 1;
+    return;
+  }
 
-    if (!(Read_bytes(file,header.Signature,2)
-     && Read_dword_le(file,&(header.Size_1))
-     && Read_word_le(file,&(header.Reserved_1))
-     && Read_word_le(file,&(header.Reserved_2))
-     && Read_dword_le(file,&(header.Offset))
-     && Read_dword_le(file,&(header.Size_2))
-    ))
-    {
-      File_error = 1;
-    }
-    else
-    {
-      if (header.Size_2 == 40 /* WINDOWS BITMAPINFOHEADER*/
-          || header.Size_2 == 108 /* Windows BITMAPV4HEADER */
-          || header.Size_2 == 124 /* Windows BITMAPV5HEADER */)
-      {
-        if (!(Read_dword_le(file,&(header.Width))
-         && Read_dword_le(file,(dword *)&(header.Height))
-         && Read_word_le(file,&(header.Planes))
-         && Read_word_le(file,&(header.Nb_bits))
-         && Read_dword_le(file,&(header.Compression))
-         && Read_dword_le(file,&(header.Size_3))
-         && Read_dword_le(file,&(header.XPM))
-         && Read_dword_le(file,&(header.YPM))
-         && Read_dword_le(file,&(header.Nb_Clr))
-         && Read_dword_le(file,&(header.Clr_Imprt))
-        )) File_error = 1;
-        else
-          GFX2_Log(GFX2_DEBUG, "Windows BMP %ux%d planes=%u bpp=%u compression=%u\n",
-                   header.Width, header.Height, header.Planes, header.Nb_bits, header.Compression);
-      }
-      else if (header.Size_2 == 12 /* OS/2 */)
-      {
-        word tmp_width = 0, tmp_height = 0;
-        if (Read_word_le(file,&tmp_width)
-         && Read_word_le(file,&tmp_height)
-         && Read_word_le(file,&(header.Planes))
-         && Read_word_le(file,&(header.Nb_bits)))
-        {
-          GFX2_Log(GFX2_DEBUG, "OS/2 BMP %ux%u planes=%u bpp=%u\n", tmp_width, tmp_height, header.Planes, header.Nb_bits);
-          header.Width = tmp_width;
-          header.Height = tmp_height;
-          header.Compression = 0;
-          header.Size_3 = 0;
-          header.XPM = 0;
-          header.YPM = 0;
-          header.Nb_Clr = 0;
-          header.Clr_Imprt = 0;
-        }
-        else
-          File_error = 1;
-      }
-      else
-      {
-        Warning("Unknown BMP type");
-        File_error = 2;
-      }
-    }
-    if (File_error == 0)
-    {
-      switch (header.Nb_bits)
-      {
-        case 1 :
-        case 2 :
-        case 4 :
-        case 8 :
-          if (header.Nb_Clr)
-            nb_colors=header.Nb_Clr;
-          else
-            nb_colors=1<<header.Nb_bits;
-          break;
-        case 16:
-        case 24:
-        case 32:
-          true_color = 1;
-          break;
-        default:
-          Warning("Unsupported bit per pixel");
-          File_error = 1;
-      }
-      
-      if (header.Height < 0)
-      {
-        negative_height=1;
-        header.Height = -header.Height;
-      }
-      else
-      {
-        negative_height=0;
-      }
+  File_error = 0;
 
-      // Image 16/24/32 bits
-      if (header.Nb_bits == 16)
-      {
-        mask[0] = 0x00007C00;
-        mask[1] = 0x000003E0;
-        mask[2] = 0x0000001F;
-      }
-      else
-      {
-        mask[0] = 0x00FF0000;
-        mask[1] = 0x0000FF00;
-        mask[2] = 0x000000FF;
-      }
-      mask[3] = 0;
-      if (File_error == 0)
-      {
-        Pre_load(context, header.Width,header.Height,file_size,FORMAT_BMP,PIXEL_SIMPLE,header.Nb_bits);
-        if (File_error==0)
-        {
-          if (header.Size_2 >= 108 || (true_color && header.Compression == 3)) // BI_BITFIELDS
-          {
-            if (!Read_dword_le(file,&mask[0]) ||
-                !Read_dword_le(file,&mask[1]) ||
-                !Read_dword_le(file,&mask[2]))
-              File_error=2;
-            if (header.Size_2 >= 108)
-            {
-              Read_dword_le(file,&mask[3]); // Alpha mask
-              if (header.Size_2 == 124)
-                fseek(file, header.Size_2 - 40 - 16, SEEK_CUR);  // skip extended v4/v5 header fields
-            }
-            GFX2_Log(GFX2_DEBUG, "BMP masks : R=%08x G=%08x B=%08x A=%08x\n", mask[0], mask[1], mask[2], mask[3]);
-          }
-          if (nb_colors > 0)
-            Load_BMP_Palette(context, file, nb_colors, header.Size_2 == 12);
+  file_size = File_length_file(file);
 
-          if (File_error==0)
-          {
-            if (fseek(file, header.Offset, SEEK_SET))
-              File_error=2;
-            else
-              Load_BMP_Pixels(context, file, header.Compression, header.Nb_bits, negative_height ? LOAD_BMP_PIXEL_FLAG_TOP_DOWN : 0, mask);
-          }
-        }
-      }
-    }
-    else
-    {
-      File_error=1;
-    }
-    fclose(file);
+  /* Read header */
+  if (!(Read_bytes(file,header.Signature,2)
+        && Read_dword_le(file,&(header.Size_1))
+        && Read_word_le(file,&(header.Reserved_1))
+        && Read_word_le(file,&(header.Reserved_2))
+        && Read_dword_le(file,&(header.Offset))
+        && Read_dword_le(file,&(header.Size_2))
+       ))
+  {
+    File_error = 1;
   }
   else
-    File_error=1;
+  {
+    if (header.Size_2 == 40 /* WINDOWS BITMAPINFOHEADER*/
+        || header.Size_2 == 108 /* Windows BITMAPV4HEADER */
+        || header.Size_2 == 124 /* Windows BITMAPV5HEADER */)
+    {
+      if (!(Read_dword_le(file,&(header.Width))
+            && Read_dword_le(file,(dword *)&(header.Height))
+            && Read_word_le(file,&(header.Planes))
+            && Read_word_le(file,&(header.Nb_bits))
+            && Read_dword_le(file,&(header.Compression))
+            && Read_dword_le(file,&(header.Size_3))
+            && Read_dword_le(file,&(header.XPM))
+            && Read_dword_le(file,&(header.YPM))
+            && Read_dword_le(file,&(header.Nb_Clr))
+            && Read_dword_le(file,&(header.Clr_Imprt))
+           ))
+        File_error = 1;
+      else
+        GFX2_Log(GFX2_DEBUG, "Windows BMP %ux%d planes=%u bpp=%u compression=%u\n",
+            header.Width, header.Height, header.Planes, header.Nb_bits, header.Compression);
+    }
+    else if (header.Size_2 == 12 /* OS/2 */)
+    {
+      word tmp_width = 0, tmp_height = 0;
+      if (Read_word_le(file,&tmp_width)
+          && Read_word_le(file,&tmp_height)
+          && Read_word_le(file,&(header.Planes))
+          && Read_word_le(file,&(header.Nb_bits)))
+      {
+        GFX2_Log(GFX2_DEBUG, "OS/2 BMP %ux%u planes=%u bpp=%u\n", tmp_width, tmp_height, header.Planes, header.Nb_bits);
+        header.Width = tmp_width;
+        header.Height = tmp_height;
+        header.Compression = 0;
+        header.Size_3 = 0;
+        header.XPM = 0;
+        header.YPM = 0;
+        header.Nb_Clr = 0;
+        header.Clr_Imprt = 0;
+      }
+      else
+        File_error = 1;
+    }
+    else
+    {
+      Warning("Unknown BMP type");
+      File_error = 1;
+    }
+  }
+
+  if (File_error == 0)
+  {
+    /* header was read */
+    switch (header.Nb_bits)
+    {
+      case 1 :
+      case 2 :
+      case 4 :
+      case 8 :
+        if (header.Nb_Clr)
+          nb_colors = header.Nb_Clr;
+        else
+          nb_colors = 1 << header.Nb_bits;
+        break;
+      case 16:
+      case 24:
+      case 32:
+        true_color = 1;
+        break;
+      default:
+        GFX2_Log(GFX2_WARNING, "BMP: Unsupported bit per pixel %u\n", header.Nb_bits);
+        File_error = 1;
+    }
+
+    if (header.Height < 0)
+    {
+      negative_height = 1;
+      header.Height = -header.Height;
+    }
+    else
+    {
+      negative_height = 0;
+    }
+
+    // Image 16/24/32 bits
+    if (header.Nb_bits == 16)
+    {
+      mask[0] = 0x00007C00;
+      mask[1] = 0x000003E0;
+      mask[2] = 0x0000001F;
+    }
+    else
+    {
+      mask[0] = 0x00FF0000;
+      mask[1] = 0x0000FF00;
+      mask[2] = 0x000000FF;
+    }
+    mask[3] = 0;
+    if (File_error == 0)
+    {
+      Pre_load(context, header.Width, header.Height, file_size, FORMAT_BMP, PIXEL_SIMPLE, header.Nb_bits);
+      if (File_error==0)
+      {
+        if (header.Size_2 >= 108 || (true_color && header.Compression == 3)) // BI_BITFIELDS
+        {
+          if (!Read_dword_le(file,&mask[0]) ||
+              !Read_dword_le(file,&mask[1]) ||
+              !Read_dword_le(file,&mask[2]))
+            File_error=2;
+          if (header.Size_2 >= 108)
+          {
+            Read_dword_le(file,&mask[3]); // Alpha mask
+            fseek(file, header.Size_2 - 40 - 16, SEEK_CUR);  // skip extended v4/v5 header fields
+          }
+          GFX2_Log(GFX2_DEBUG, "BMP masks : R=%08x G=%08x B=%08x A=%08x\n", mask[0], mask[1], mask[2], mask[3]);
+        }
+        if (nb_colors > 0)
+          Load_BMP_Palette(context, file, nb_colors, header.Size_2 == 12);
+
+        if (File_error==0)
+        {
+          if (fseek(file, header.Offset, SEEK_SET))
+            File_error=2;
+          else
+            Load_BMP_Pixels(context, file, header.Compression, header.Nb_bits, negative_height ? LOAD_BMP_PIXEL_FLAG_TOP_DOWN : 0, mask);
+        }
+      }
+    }
+  }
+  fclose(file);
 }
 
 
