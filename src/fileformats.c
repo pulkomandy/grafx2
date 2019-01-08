@@ -3120,8 +3120,10 @@ void Test_BMP(T_IO_Context * context, FILE * file)
 static byte Bitmap_mask(dword pixel, dword mask, int bits, int shift)
 {
   dword value = (pixel & mask) >> shift;
-  if (bits != 8)
+  if (bits < 8)
     value = (value << (8 - bits)) | (value >> (2 * bits - 8));
+  else if (bits > 8)
+    value >>= (bits - 8);
   return (byte)value;
 }
 
