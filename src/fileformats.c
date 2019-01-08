@@ -3162,11 +3162,9 @@ static void Load_BMP_Palette(T_IO_Context * context, FILE * file, unsigned int n
 
 static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int compression, unsigned int nbbits, int flags, const dword * mask)
 {
-  unsigned int row_size;
   unsigned int index;
   short x_pos;
   short y_pos;
-  byte * buffer;
   byte value;
   byte a,b;
   int bits[4];
@@ -3192,86 +3190,98 @@ static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int co
   {
     case 0 :  // BI_RGB : No compression
     case 3 :  // BI_BITFIELDS
-      row_size = ((nbbits*context->Width + 31) >> 3) & ~3;
-      buffer = malloc(row_size);
       for (y_pos=0; (y_pos < context->Height && !File_error); y_pos++)
       {
         short target_y;
         target_y = (flags & LOAD_BMP_PIXEL_FLAG_TOP_DOWN) ? y_pos : context->Height-1-y_pos;
 
-        if (Read_bytes(file,buffer,row_size))
+        switch (nbbits)
         {
-          for (x_pos=0; x_pos<context->Width; x_pos++)
-          {
-            switch (nbbits)
+          case 8 :
+            for (x_pos = 0; x_pos < context->Width; x_pos++)
             {
-              case 8 :
-                value = buffer[x_pos];
-                Set_pixel(context, x_pos, target_y, value);
-                break;
-              case 4 :
-                value = (x_pos & 1) ? (buffer[x_pos>>1] & 0xF) : (buffer[x_pos>>1] >> 4);
-                Set_pixel(context, x_pos, target_y, value);
-                break;
-              case 2:
-                value = (buffer[x_pos>>2] >> (((x_pos&3)^3)*2)) & 3;
-                Set_pixel(context, x_pos, target_y, value);
-                break;
-              case 1 :
-                value = ( buffer[x_pos>>3] & (0x80>>(x_pos&7)) ) ? 1 : 0;
-                if (flags & LOAD_BMP_PIXEL_FLAG_TRANSP_PLANE)
-                {
-                  if (value) // transparent pixel !
-                    Set_pixel(context, x_pos, target_y, context->Transparent_color);
-                }
-                else
-                  Set_pixel(context, x_pos, target_y, value);
-                break;
-              case 24:
-                Set_pixel_24b(context, x_pos,target_y,buffer[x_pos*3+2],buffer[x_pos*3+1],buffer[x_pos*3+0]);
-                break;
-              case 32:
-                {
-#if defined(SDL_BYTEORDER) && (SDL_BYTEORDER != SDL_LIL_ENDIAN)
-                  dword pixel = SDL_Swap32(((dword *)buffer)[x_pos]);
-#elif defined(BYTEORDER)
-                  dword pixel = le32toh(((dword *)buffer)[x_pos]);
-#else // default to little endian
-                  dword pixel = ((dword *)buffer)[x_pos];
-#endif
-                  Set_pixel_24b(context, x_pos, target_y,
-                                Bitmap_mask(pixel,mask[0],bits[0],shift[0]),
-                                Bitmap_mask(pixel,mask[1],bits[1],shift[1]),
-                                Bitmap_mask(pixel,mask[2],bits[2],shift[2]));
-                }
-                break;
-              case 16:
-                {
-#if defined(SDL_BYTEORDER) && (SDL_BYTEORDER != SDL_LIL_ENDIAN)
-                  word pixel = SDL_Swap16(((word *)buffer)[x_pos]);
-#elif defined(BYTEORDER)
-                  word pixel = le16toh(((word *)buffer)[x_pos]);
-#else // default to little endian
-                  word pixel = ((word *)buffer)[x_pos];
-#endif
-                  Set_pixel_24b(context, x_pos, target_y,
-                                Bitmap_mask(pixel,mask[0],bits[0],shift[0]),
-                                Bitmap_mask(pixel,mask[1],bits[1],shift[1]),
-                                Bitmap_mask(pixel,mask[2],bits[2],shift[2]));
-                }
-                break;
-              default:
-                value = 0;
+              if (!Read_byte(file, &value))
+                File_error = 2;
+              Set_pixel(context, x_pos, target_y, value);
             }
-          }
+            break;
+          case 4 :
+            for (x_pos = 0; x_pos < context->Width; )
+            {
+              if (!Read_byte(file, &value))
+                File_error = 2;
+              Set_pixel(context, x_pos++, target_y, (value >> 4) & 0x0F);
+              Set_pixel(context, x_pos++, target_y, value & 0x0F);
+            }
+            break;
+          case 2:
+            for (x_pos = 0; x_pos < context->Width; x_pos++)
+            {
+              if ((x_pos & 3) == 0)
+              {
+                if (!Read_byte(file, &value))
+                  File_error = 2;
+              }
+              Set_pixel(context, x_pos, target_y, (value >> 6) & 3);
+              value <<= 2;
+            }
+            break;
+          case 1 :
+            for (x_pos = 0; x_pos < context->Width; x_pos++)
+            {
+              if ((x_pos & 7) == 0)
+              {
+                if (!Read_byte(file, &value))
+                  File_error = 2;
+              }
+              if (flags & LOAD_BMP_PIXEL_FLAG_TRANSP_PLANE)
+              {
+                if (value & 0x80) // transparent pixel !
+                  Set_pixel(context, x_pos, target_y, context->Transparent_color);
+              }
+              else
+                Set_pixel(context, x_pos, target_y, (value >> 7) & 1);
+              value <<= 1;
+            }
+            break;
+          case 24:
+            for (x_pos = 0; x_pos < context->Width; x_pos++)
+            {
+              byte bgr[3];
+              if (!Read_bytes(file, bgr, 3))
+                File_error = 2;
+              Set_pixel_24b(context, x_pos, target_y, bgr[2], bgr[1], bgr[0]);
+            }
+            break;
+          case 32:
+            for (x_pos = 0; x_pos < context->Width; x_pos++)
+            {
+              dword pixel;
+              if (!Read_dword_le(file, &pixel))
+                File_error = 2;
+              Set_pixel_24b(context, x_pos, target_y,
+                            Bitmap_mask(pixel,mask[0],bits[0],shift[0]),
+                            Bitmap_mask(pixel,mask[1],bits[1],shift[1]),
+                            Bitmap_mask(pixel,mask[2],bits[2],shift[2]));
+            }
+            break;
+          case 16:
+            for (x_pos = 0; x_pos < context->Width; x_pos++)
+            {
+              word pixel;
+              if (!Read_word_le(file, &pixel))
+                File_error = 2;
+              Set_pixel_24b(context, x_pos, target_y,
+                            Bitmap_mask(pixel,mask[0],bits[0],shift[0]),
+                            Bitmap_mask(pixel,mask[1],bits[1],shift[1]),
+                            Bitmap_mask(pixel,mask[2],bits[2],shift[2]));
+            }
+            break;
         }
-        else
-        {
-          File_error=2;
-        }
+        // lines are padded to dword sizes
+        if (((context->Width * nbbits + 7) >> 3) & 3)
+          fseek(file, 4 - (((context->Width * nbbits + 7) >> 3) & 3), SEEK_CUR);
       }
-      free(buffer);
-      buffer = NULL;
       break;
 
     case 1 : // BI_RLE8 Compression
