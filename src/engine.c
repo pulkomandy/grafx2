@@ -2943,27 +2943,26 @@ T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, sh
   {
     old_selected_index = selected_index;
     // Fenêtre grise
-    Window_rectangle(2,1,box_width-3,box_height-2,MC_Light);
+    Window_rectangle(2, 1, box_width - 3, box_height - 2, MC_Light);
     x = 3;
     y = 2;
     // Affichage des items
-    for(item=button->First_item,choice_index=0; item!=NULL; item=item->Next,choice_index++)
+    for(item = button->First_item, choice_index = 0; item != NULL; item = item->Next, choice_index++)
     {
       byte color_1;
       byte color_2;
-      if (choice_index==selected_index)
+      if (choice_index == selected_index)
       {
-        color_1=MC_White;
-        color_2=MC_Dark;
-        Window_rectangle(x, y,
-        item_width-5,8,MC_Dark);
+        color_1 = MC_White;
+        color_2 = MC_Dark;
+        Window_rectangle(x, y, item_width - 5, 8, MC_Dark);
       }
       else
       {
-        color_1=MC_Black;
-        color_2=MC_Light;
+        color_1 = MC_Black;
+        color_2 = MC_Light;
       }
-      Print_in_window(x, y, item->Label,color_1,color_2);
+      Print_in_window(x, y, item->Label, color_1, color_2);
       y += 8;
       if ((y+7) >= box_height)
       {
@@ -2971,7 +2970,7 @@ T_Dropdown_choice * Dropdown_activate(T_Dropdown_button *button, short off_x, sh
         x += item_width - 5;
       }
     }
-    Update_window_area(0,0,Window_width,Window_height);
+    Update_window_area(0, 0, Window_width, Window_height);
     Display_cursor();
 
     do 
