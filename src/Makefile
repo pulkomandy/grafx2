@@ -90,6 +90,7 @@ TARTRANSFORM = --strip=1 --transform 's,^,grafx2/,g'
 ifeq (default,$(origin CC))
   CC = gcc
 endif
+PKG_CONFIG ?= pkg-config
 
 # There is no uname under windows, but we can guess we are there with the COMSPEC env.var
 # Windows specific
@@ -191,14 +192,14 @@ ifneq ($(SDLCONFIG), )
     SDLCOPT = $(shell sdl-config --cflags)
   ifeq ($(OSX_STATIC), 1)
     SDLLOPT = $(shell sdl-config --static-libs | sed 's/-lSDL //' | sed 's/-lX[^ ]*//g' | sed 's/-L[^ ]*//g')
-    SDLLIBDIR = $(shell pkg-config --variable=libdir SDL_image)
+    SDLLIBDIR = $(shell $(PKG_CONFIG) --variable=libdir SDL_image)
     #SDLLOPT += $(SDLLIBDIR)/libSDL.a
     SDLLOPT += $(addsuffix .a, $(shell ../tools/osx_find_dependencies.sh $(SDLLIBDIR)/libSDL_image.dylib $(SDLLIBDIR)/libSDL_ttf.dylib | grep -v SDL | cut -d'.' -f 1))
     SDLLOPT += $(SDLLIBDIR)/libSDL_image.a
     TTFLOPT =
-    SDLLOPT += $(shell pkg-config --variable=libdir SDL_ttf)/libSDL_ttf.a
+    SDLLOPT += $(shell $(PKG_CONFIG) --variable=libdir SDL_ttf)/libSDL_ttf.a
   else
-    SDLLOPT = $(shell sdl-config --libs) $(shell pkg-config --libs SDL_image)
+    SDLLOPT = $(shell sdl-config --libs) $(shell $(PKG_CONFIG) --libs SDL_image)
   endif
 else
     # these are for use with Mac OS X native frameworks
@@ -209,32 +210,32 @@ endif
 endif
 ifeq ($(API),sdl2)
     SDLCOPT = $(shell sdl2-config --cflags)
-    #TTFCOPT = $(shell pkg-config --cflags SDL2_ttf)
+    #TTFCOPT = $(shell $(PKG_CONFIG) --cflags SDL2_ttf)
   ifeq ($(OSX_STATIC), 1)
     SDLLOPT = $(shell sdl2-config --static-libs | sed 's/-lSDL2//' | sed 's/-L[^ ]*//')
-    SDLLIBDIR = $(shell pkg-config --variable=libdir SDL2_image)
+    SDLLIBDIR = $(shell $(PKG_CONFIG) --variable=libdir SDL2_image)
     SDLLOPT += $(SDLLIBDIR)/libSDL2.a
     # trick to get all dependencies
     SDLLOPT += $(addsuffix .a, $(shell ../tools/osx_find_dependencies.sh $(SDLLIBDIR)/libSDL2_image.dylib $(SDLLIBDIR)/libSDL2_ttf.dylib | grep -v SDL2 | cut -d'.' -f 1))
     SDLLOPT += $(SDLLIBDIR)/libSDL2_image.a
     TTFLOPT =
-    SDLLOPT += $(shell pkg-config --variable=libdir SDL2_ttf)/libSDL2_ttf.a
+    SDLLOPT += $(shell $(PKG_CONFIG) --variable=libdir SDL2_ttf)/libSDL2_ttf.a
   else
-    SDLLOPT = $(shell sdl2-config --libs) $(shell pkg-config --libs SDL2_image)
+    SDLLOPT = $(shell sdl2-config --libs) $(shell $(PKG_CONFIG) --libs SDL2_image)
     SDLLOPT += -Wl,-framework,Cocoa
-    TTFLOPT = $(shell pkg-config --libs SDL2_ttf)
+    TTFLOPT = $(shell $(PKG_CONFIG) --libs SDL2_ttf)
   endif
 endif
 
     # these are for use with macports
-    LUAPKG := $(shell for p in lua lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua51 ; do pkg-config --exists $$p && echo $$p && break ; done)
+    LUAPKG := $(shell for p in lua lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua51 ; do $(PKG_CONFIG) --exists $$p && echo $$p && break ; done)
 ifneq ($(LUAPKG), )
     ifeq ($(OSX_STATIC),1)
-      LUACOPT = $(shell pkg-config $(LUAPKG) --cflags | sed 's/-I/-idirafter/')
-      LUALOPT = $(shell pkg-config $(LUAPKG) --variable=libdir)/liblua.a
+      LUACOPT = $(shell $(PKG_CONFIG) $(LUAPKG) --cflags | sed 's/-I/-idirafter/')
+      LUALOPT = $(shell $(PKG_CONFIG) $(LUAPKG) --variable=libdir)/liblua.a
     else
-      LUACOPT = $(shell pkg-config $(LUAPKG) --cflags)
-      LUALOPT = $(shell pkg-config $(LUAPKG) --libs)
+      LUACOPT = $(shell $(PKG_CONFIG) $(LUAPKG) --cflags)
+      LUALOPT = $(shell $(PKG_CONFIG) $(LUAPKG) --libs)
     endif
 else
     # these are for use with Mac OS X native frameworks
@@ -343,8 +344,8 @@ endif
       LUALOPT =
     else
       LUAPKG=lua
-      LUACOPT = -D__ENABLE_LUA__ $(shell pkg-config $(LUAPKG) --cflags)
-      LUALOPT = $(shell pkg-config $(LUAPKG) --libs)
+      LUACOPT = -D__ENABLE_LUA__ $(shell $(PKG_CONFIG) $(LUAPKG) --cflags)
+      LUALOPT = $(shell $(PKG_CONFIG) $(LUAPKG) --libs)
     endif
     COPT = -W -Wall -g $(shell sdl-config --cflags) $(TTFCOPT) -I/boot/common/include $(LUACOPT)
     COPT += -DENABLE_FILENAMES_ICONV
@@ -437,9 +438,9 @@ endif
         ifdef WIN32CROSS
           LUACOPT = -I../3rdparty/usr/include
         else
-          LUAPKG := $(shell for p in lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua51 lua ; do pkg-config --exists $$p && echo $$p && break ; done)
-          LUACOPT = $(shell pkg-config $(LUAPKG) --cflags)
-          LUALOPT = $(shell pkg-config $(LUAPKG) --libs)
+          LUAPKG := $(shell for p in lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua51 lua ; do $(PKG_CONFIG) --exists $$p && echo $$p && break ; done)
+          LUACOPT = $(shell $(PKG_CONFIG) $(LUAPKG) --cflags)
+          LUALOPT = $(shell $(PKG_CONFIG) $(LUAPKG) --libs)
         endif
       endif
     endif
@@ -448,7 +449,7 @@ endif
     ifdef WIN32CROSS
       #cross compile a Win32 executable
       CROSS_CC ?= $(shell which i686-w64-mingw32-gcc || which mingw32-gcc)
-      CROSS_PKGCONFIG ?= $(shell which i686-w64-mingw32-pkg-config || which mingw32-pkg-config || which pkg-config)
+      CROSS_PKGCONFIG ?= $(shell which i686-w64-mingw32-pkg-config || which mingw32-pkg-config || which $(PKG_CONFIG))
       CROSS_SDLCONFIG ?= $(shell which ../3rdparty/usr/bin/sdl-config || which /usr/local/cross-tools/i386-mingw32/bin/sdl-config)
       CROSS_PKG_CONFIG_PATH ?= $(shell if [ -d ../3rdparty/usr ] ; then echo "$${PWD}/../3rdparty/usr/lib/pkgconfig" ; fi )
       CC = $(CROSS_CC)
@@ -548,7 +549,7 @@ endif
           COPT += $(shell sdl2-config --cflags)
         endif
         COPT += $(TTFCOPT) $(LUACOPT) $(JOYCOPT) -O$(OPTIM)
-        COPT += $(shell pkg-config --cflags libpng)
+        COPT += $(shell $(PKG_CONFIG) --cflags libpng)
 
         ifneq ($(PLATFORM), FreeBSD)
           COPT += -D_XOPEN_SOURCE=700
@@ -562,22 +563,22 @@ endif
         ifeq ($(API),sdl)
           LOPT += $(shell sdl-config --libs) -lSDL_image
           ifneq ($(NO_X11),1)
-            LOPT += $(shell pkg-config --libs x11)
-            COPT += $(shell pkg-config --cflags x11)
+            LOPT += $(shell $(PKG_CONFIG) --libs x11)
+            COPT += $(shell $(PKG_CONFIG) --cflags x11)
           endif
         endif
         ifeq ($(API),sdl2)
           LOPT += $(shell sdl2-config --libs) -lSDL2_image
           ifneq ($(NO_X11),1)
-            LOPT += $(shell pkg-config --libs x11)
-            COPT += $(shell pkg-config --cflags x11)
+            LOPT += $(shell $(PKG_CONFIG) --libs x11)
+            COPT += $(shell $(PKG_CONFIG) --cflags x11)
           endif
         endif
         ifeq ($(NO_X11),1)
           COPT += -DNO_X11
         endif
         LOPT += $(TTFLOPT)
-        LOPT += $(shell pkg-config --libs libpng libtiff-4)
+        LOPT += $(shell $(PKG_CONFIG) --libs libpng libtiff-4)
         LOPT += $(LUALOPT)
         OBJDIR = ../obj/unix
         FCLOPT = -lfontconfig
