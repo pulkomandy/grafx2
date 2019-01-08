@@ -80,6 +80,12 @@ Sends greetings and glops to pouet.net : http://pouet.net/prod.php?which=51865
 === HISTORY ===
 
 Short revision history :
+  * 01/2019  2.6       SDL2/X11/win32 GDI support in addition to SDL1.2.x
+                       Many more "8bits" computer constraints modes
+                       Support for more C64 pictures formats
+                       Support for Thomson file formats
+                       Open URL when clicking them in oneline help
+                       Brush and picture copy/paste support
   * 05/2017  2.5       Support for several new file formats.
                        CPC, ZX and Thomson constraints modes.
   * 10/2012  2.4       Animation
