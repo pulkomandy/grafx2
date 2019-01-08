@@ -3397,6 +3397,36 @@ static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int co
         }
       }
       break;
+    case 5: // BI_PNG
+      {
+        byte png_header[8];
+        // Load header (8 first bytes)
+        if (!Read_bytes(file,png_header,8))
+          File_error = 1;
+        else
+        {
+          // Do we recognize a png file signature ?
+#ifndef __no_pnglib__
+          if (png_sig_cmp(png_header, 0, 8) == 0)
+          {
+            Load_PNG_Sub(context, file, NULL, 0);
+          }
+#else
+          if (0 == memcmp(png_header, "\x89PNG", 4))
+          {
+            // NO PNG Support
+            Warning("PNG Signature : Compiled without libpng support");
+            File_error = 2;
+          }
+#endif
+          else
+          {
+            GFX2_Log(GFX2_WARNING, "No PNG signature in BI_PNG BMP\n");
+            File_error = 1;
+          }
+        }
+      }
+      break;
     default:
       Warning("Unknown compression type");
   }
@@ -3527,6 +3557,12 @@ void Load_BMP(T_IO_Context * context)
       case 32:
         true_color = 1;
         break;
+      case 0:
+        if (header.Compression == 5)  // Nb_bits is 0 with BI_PNG
+          break;
+#if defined(__GNUC__) && (__GNUC__ >= 7)
+        __attribute__ ((fallthrough));
+#endif
       default:
         GFX2_Log(GFX2_WARNING, "BMP: Unsupported bit per pixel %u\n", header.Nb_bits);
         File_error = 1;
