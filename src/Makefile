@@ -349,7 +349,7 @@ endif
     endif
     COPT = -W -Wall -g $(shell sdl-config --cflags) $(TTFCOPT) -I/boot/common/include $(LUACOPT)
     COPT += -DENABLE_FILENAMES_ICONV
-    LOPT = $(shell sdl-config --libs) -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lfreetype -lbe $(LUALOPT) -liconv
+    LOPT = $(shell sdl-config --libs) -lSDL_image -lpng -ljpeg -lz $(TTFLOPT) -lfreetype -lbe $(LUALOPT) -liconv -ltiff
     #Append the gcc kind to the objdir (gcc2 or gcc4) to avoid conflicts when switching from one to other.
     OBJKIND = $(shell gcc -dumpversion)
     OBJDIR = ../obj/haiku/$(OBJKIND)
