@@ -3048,25 +3048,26 @@ void Load_INFO(T_IO_Context * context)
  *
  * @{
  */
+
+/// BMP file header
 typedef struct
 {
-    byte  Signature[2];   // ='BM' = 0x4D42
-    dword Size_1;    // file size
-    word  Reserved_1; // 0
-    word  Reserved_2; // 0
-    dword Offset; // Offset of bitmap data start
-
-    dword Size_2; // 40
-    dword Width;
-    int32_t Height; // signed: negative means a top-down bitmap (rare)
-    word  Planes; // 1
-    word  Nb_bits; // 1,4,8 ou 24
-    dword Compression;
-    dword Size_3;
-    dword XPM;
-    dword YPM;
-    dword Nb_Clr;
-    dword Clr_Imprt;
+    byte  Signature[2]; ///< ='BM' = 0x4D42
+    dword Size_1;       ///< file size
+    word  Reserved_1;   ///< 0
+    word  Reserved_2;   ///< 0
+    dword Offset;       ///< Offset of bitmap data start
+    dword Size_2;       ///< BITMAPINFOHEADER size
+    dword Width;        ///< Image Width
+    int32_t Height;     ///< Image Height. signed: negative means a top-down bitmap (rare)
+    word  Planes;       ///< Should be 1
+    word  Nb_bits;      ///< Bits per pixel : 1,2,4,8,16,24 or 32
+    dword Compression;  ///< Known values : 0=BI_RGB, 1=BI_RLE8, 2=BI_RLE4, 3=BI_BITFIELDS, 4=BI_JPEG, 5=BI_PNG
+    dword Size_3;       ///< (optional) byte size of bitmap data
+    dword XPM;          ///< (optional) horizontal pixels-per-meter
+    dword YPM;          ///< (optional) vertical pixels-per-meter
+    dword Nb_Clr;       ///< number of color indexes used in the table. 0 for default (1 << Nb_bits)
+    dword Clr_Imprt;    ///< number of color indexes that are required for displaying the bitmap. 0 : all colors are required.
 } T_BMP_Header;
 
 /// Test for BMP format
@@ -3083,18 +3084,6 @@ void Test_BMP(T_IO_Context * context, FILE * file)
       && Read_word_le(file,&(header.Reserved_2))
       && Read_dword_le(file,&(header.Offset))
       && Read_dword_le(file,&(header.Size_2))
-/*
-      && Read_dword_le(file,&(header.Width))
-      && Read_dword_le(file,(dword *)&(header.Height))
-      && Read_word_le(file,&(header.Planes))
-      && Read_word_le(file,&(header.Nb_bits))
-      && Read_dword_le(file,&(header.Compression))
-      && Read_dword_le(file,&(header.Size_3))
-      && Read_dword_le(file,&(header.XPM))
-      && Read_dword_le(file,&(header.YPM))
-      && Read_dword_le(file,&(header.Nb_Clr))
-      && Read_dword_le(file,&(header.Clr_Imprt))
-*/
      )
   {
     if (header.Signature[0]=='B' && header.Signature[1]=='M' &&
