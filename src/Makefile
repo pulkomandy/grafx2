@@ -286,6 +286,7 @@ ifeq ($(API),sdl)
 endif
     FCLOPT = 
     MACAPPEXE = Grafx2.app/Contents/MacOS/Grafx2
+	APPZIPNAME = Grafx2.app-$(shell uname -m | sed 's/Power Macintosh/powerpc/')-$(API)-$(VERSIONTAG).zip
     #NOTTF = 1
   else
   ifeq ($(PLATFORM),AROS) # 3
@@ -883,8 +884,8 @@ else
 	  $(DOC_FILES:../%=%)
 endif
 ifeq ($(PLATFORM),Darwin)
-	$(ZIP) $(ZIPOPT) -r ../Grafx2.app-$(shell uname -m)-$(API)-$(VERSIONTAG).zip Grafx2.app
-	cd .. && $(ZIP) $(ZIPOPT) Grafx2.app-$(shell uname -m)-$(API)-$(VERSIONTAG).zip \
+	$(ZIP) $(ZIPOPT) -r ../$(APPZIPNAME) Grafx2.app
+	cd .. && $(ZIP) $(ZIPOPT) $(APPZIPNAME) \
 	  $(DOC_FILES:../%=%) $(DOC_FILESRTF:../%=%) $(SRCARCH:../%=%)
 endif
 	$(TAR) czf "../grafx2-$(VERSIONTAG)-src.tgz" $(TARTRANSFORM) \
