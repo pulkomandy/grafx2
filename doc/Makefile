@@ -1,4 +1,5 @@
 CP = cp
+SDL ?= libsdl2
 
 all:
 	@echo "nothing to do..."
@@ -6,8 +7,8 @@ all:
 # fetch files from macports
 MACPORTSPATH = $(shell which port | sed 's;/bin/port$$;;' )
 DOCPATH = $(MACPORTSPATH)/share/doc
-PACKAGES = libsdl2 libsdl2_image jpeg tiff webp
-PACKAGSS += libsdl2_ttf freetype
+PACKAGES = $(SDL) $(SDL)_image jpeg tiff webp
+PACKAGES += $(SDL)_ttf freetype
 PACKAGES += libpng zlib lua
 
 READMES = $(PACKAGES:%=README-%.txt)
@@ -46,6 +47,12 @@ README-libpng.txt:	$(DOCPATH)/libpng/LICENSE
 	echo "" >> $@
 	echo "License :" >> $@
 	echo "" >> $@
+	cat $< >> $@
+
+README-freetype.txt:	$(DOCPATH)/freetype/LICENSE.TXT
+	echo "freetype $$(port info --version freetype)" > $@
+	echo "" >> $@
+	echo "License :" >> $@
 	cat $< >> $@
 
 README-%.txt: $(DOCPATH)/%/README
