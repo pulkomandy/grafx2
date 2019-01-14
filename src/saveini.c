@@ -250,8 +250,11 @@ static void Save_INI_set_string(char * dest,const char * source,const char * val
     dest[dest_index++] = ' ';
 
   // Dans la destination, on écrit la valeur:
-  strcpy(dest+dest_index,value);
-  dest_index+=strlen(value);
+  if (value != NULL)
+  {
+    strcpy(dest+dest_index,value);
+    dest_index+=strlen(value);
+  }
 
   // Dans la source, on saute la valeur:
   for (;Save_INI_char_in_value_alphabet(source[source_index]) && (source[source_index]!='\0');source_index++);
