@@ -33,6 +33,7 @@
 #ifndef _MSC_VER
 #include <unistd.h>
 #else
+#define strdup _strdup
 #if _MSC_VER < 1900
 #define snprintf _snprintf
 #endif
@@ -946,10 +947,10 @@ char * Get_current_directory(char * buf, word * * unicode, size_t size)
 #elif defined(WIN32)
   if (buf == NULL)
   {
-    size = (size_t)GetCurrentDirectoryA(0, buf);
+    size = (size_t)GetCurrentDirectoryA(0, NULL);
     if (size == 0)
       return NULL;
-    buf = malloc(size);
+    buf = (char *)malloc(size);
     if (buf == NULL)
     {
       GFX2_Log(GFX2_ERROR, "Failed to allocate %lu bytes.\n", (unsigned long)size);
@@ -958,16 +959,20 @@ char * Get_current_directory(char * buf, word * * unicode, size_t size)
   }
   if (GetCurrentDirectoryA(size, buf) == 0)
     return NULL;
-  if (buf_unicode != NULL)
+  if (unicode != NULL)
   {
-    int i;
-    WCHAR temp[MAX_PATH_CHARACTERS];
-    for (i = 0; i < MAX_PATH_CHARACTERS - 1 && buf[i] != '\0'; i++)
-      temp[i] = buf[i];
-    temp[i] = 0;
-    buf_unicode[0] = 0;
-    GetLongPathNameW(temp, (WCHAR *)buf_unicode, size);
-    //GetCurrentDirectoryW(size, (WCHAR *)buf_unicode);
+    WCHAR * temp = (WCHAR *)malloc(sizeof(WCHAR) * size);
+    if (temp != NULL)
+    {
+      size_t i;
+      for (i = 0; i < size - 1 && buf[i] != '\0'; i++)
+        temp[i] = (WCHAR)buf[i] & 0x00ff;
+      temp[i] = 0;
+      size = GetLongPathNameW(temp, NULL, 0);
+      *unicode = (word *)malloc(size*sizeof(word));
+      GetLongPathNameW(temp, (WCHAR *)*unicode, size);
+      free(temp);
+    }
   }
   return buf;
 #else
