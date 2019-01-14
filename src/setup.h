@@ -31,16 +31,15 @@
 
 ///
 /// Determine which directory contains the executable.
-/// - IN: Main's argv[0], some platforms need it, some don't.
-/// - OUT: Write into program_dir. Trailing / or \ is kept.
+/// @param argv0 Main's argv[0], some platforms need it, some don't.
+/// @return malloc'ed string. Trailing / or \ is kept.
 /// Note : in fact this is only used to check for the datafiles and fonts in this same directory.
-void Set_program_directory(const char * argv0,char * program_dir);
+char * Get_program_directory(const char * argv0);
 
 ///
 /// Determine which directory contains the read-only data.
-/// IN: The directory containing the executable
-/// OUT: Write into data_dir. Trailing / or \ is kept.
-void Set_data_directory(const char * program_dir, char * data_dir);
+/// @return malloc'ed string
+char * Get_data_directory(const char * program_dir);
 
 ///
 /// Determine which directory should store the user's configuration.
@@ -51,19 +50,19 @@ void Set_data_directory(const char * program_dir, char * data_dir);
 /// to create it ($(HOME)/.grafx2, or %APPDATA%\\GrafX2)
 /// If it cannot be created, this function will return the executable's
 /// own directory.
-/// IN: The directory containing the executable
-/// OUT: Write into config_dir. Trailing / or \ is kept.
-void Set_config_directory(const char * program_dir, char * config_dir);
+/// @param program_dir The directory containing the executable
+/// @return malloc'ed string. Trailing / or \ is kept.
+char * Get_config_directory(const char * program_dir);
 
 
-/// Name of the subdirectory containing fonts, under the data directory (::Set_data_directory())
+/// Name of the subdirectory containing fonts, under the data directory (::Get_data_directory())
 #if defined (__MINT__)
   #define FONTS_SUBDIRECTORY "FONTS"
 #else
   #define FONTS_SUBDIRECTORY "fonts"
 #endif
 
-/// Name of the subdirectory containing fonts, under the data directory (::Set_data_directory())
+/// Name of the subdirectory containing fonts, under the data directory (::Get_data_directory())
 #if defined (__MINT__)
   #define SKINS_SUBDIRECTORY "SKINS"
 #else

@@ -612,11 +612,11 @@ GFX2_GLOBAL byte  Airbrush_multi_flow[256];
 /// Boolean, set to true to exit the program.
 GFX2_GLOBAL byte Quitting;
 /// Name of the directory that was current when the program was run.
-GFX2_GLOBAL char Initial_directory[MAX_PATH_CHARACTERS];
+GFX2_GLOBAL char * Initial_directory;
 /// Name of the directory that holds the program's (read-only) data: skins, icon, etc.
-GFX2_GLOBAL char Data_directory[MAX_PATH_CHARACTERS];
+GFX2_GLOBAL char * Data_directory;
 /// Name of the directory where grafx2 reads and writes configuration (gfx2.ini, gfx2.cfg)
-GFX2_GLOBAL char Config_directory[MAX_PATH_CHARACTERS];
+GFX2_GLOBAL char * Config_directory;
 /// Current foreground color for drawing.
 GFX2_GLOBAL byte Fore_color;
 /// Current background color for drawing.

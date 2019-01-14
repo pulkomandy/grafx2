@@ -90,6 +90,8 @@ unsigned long File_length_file(FILE * file);
  * Functions used to manipulate files path and names
  * @{ */
 
+/// Construct full file path
+char * Filepath_append_to_dir(const char * dir, const char * filename);
 /// Extracts the filename part from a full file name.
 void Extract_filename(char *dest, const char *source);
 /// Extracts the directory from a full file name.

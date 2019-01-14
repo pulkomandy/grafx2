@@ -33,7 +33,6 @@
 #ifndef _MSC_VER
 #include <unistd.h>
 #else
-#include <stdio.h>
 #if _MSC_VER < 1900
 #define snprintf _snprintf
 #endif
@@ -67,6 +66,7 @@
 #include "realpath.h"
 #include "unicode.h"
 #include "global.h"
+#include "gfx2log.h"
 
 // Lit un octet
 // Renvoie -1 si OK, 0 en cas d'erreur
@@ -286,6 +286,36 @@ word * Find_last_separator_unicode(const word * str)
      )
       position = str;
   return (word *)position;
+}
+
+char * Filepath_append_to_dir(const char * dir, const char * filename)
+{
+  char * path;
+  size_t len = strlen(dir);
+  if (dir[len-1] == PATH_SEPARATOR[0]
+#if defined(__WIN32__) || defined(WIN32)
+     || dir[len-1] == '/'
+#elif __AROS__
+     || dir[len-1] == ':'
+#endif
+    )
+  {
+    len += strlen(filename) + 1;
+    path = malloc(len);
+    if (path == NULL)
+      return NULL;
+    snprintf(path, len, "%s%s", dir, filename);
+  }
+  else
+  {
+    // need to add a path separator
+    len += strlen(PATH_SEPARATOR) + strlen(filename) + 1;
+    path = malloc(len);
+    if (path == NULL)
+      return NULL;
+    snprintf(path, len, "%s%s%s", dir, PATH_SEPARATOR, filename);
+  }
+  return path;
 }
 
 // Récupère la partie "nom de file seul" d'un chemin

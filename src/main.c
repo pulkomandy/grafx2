@@ -613,7 +613,7 @@ int Init_program(int argc,char * argv[])
   int temp;
   int starting_videomode;
   enum IMAGE_MODES starting_image_mode;
-  static char program_directory[MAX_PATH_CHARACTERS];
+  char * program_directory;
   T_Gui_skin *gfx;
   int file_in_command_line;
   T_Gradient_array initial_gradients;
@@ -654,16 +654,18 @@ int Init_program(int argc,char * argv[])
   Init_list_of_pages(Spare.backups);
 
   // Determine the executable directory
-  Set_program_directory(argv[0],program_directory);
+  program_directory = Get_program_directory(argv[0]);
   // Choose directory for data (read only)
-  Set_data_directory(program_directory,Data_directory);
+  Data_directory = Get_data_directory(program_directory);
   // Choose directory for settings (read/write)
-  Set_config_directory(program_directory,Config_directory);
-// On détermine le répertoire courant:
+  Config_directory = Get_config_directory(program_directory);
+  // Get current directory
   Get_current_directory(Main.selector.Directory,Main.selector.Directory_unicode,MAX_PATH_CHARACTERS);
 
+  free(program_directory);
+
   // On en profite pour le mémoriser dans le répertoire principal:
-  strcpy(Initial_directory,Main.selector.Directory);
+  Initial_directory = strdup(Main.selector.Directory);
 
   // On initialise les données sur le nom de fichier de l'image de brouillon:
   strcpy(Spare.selector.Directory,Main.selector.Directory);
@@ -1187,7 +1189,8 @@ int Init_program(int argc,char * argv[])
   return(1);
 }
 
-#define FREE_POINTER(p) free(p); p = NULL //!< Make free the memory and make sure the pointer is set to NULL
+/// Free the memory and make sure the pointer is set to NULL
+#define FREE_POINTER(p) free(p); p = NULL
 
 /**
  * Program Shutdown.
@@ -1226,8 +1229,7 @@ void Program_shutdown(void)
   Horizontal_line_buffer = NULL;
 
   // On libère le pinceau spécial
-  free(Paintbrush_sprite);
-  Paintbrush_sprite = NULL;
+  FREE_POINTER(Paintbrush_sprite);
 
   // Free Brushes
   FREE_POINTER(Brush);
@@ -1275,6 +1277,10 @@ void Program_shutdown(void)
   }
   else
     Error(ERROR_MISSING_DIRECTORY);
+
+  FREE_POINTER(Initial_directory);
+  FREE_POINTER(Config_directory);
+  FREE_POINTER(Data_directory);
 
   // Free Config
   FREE_POINTER(Config.Skin_file);
