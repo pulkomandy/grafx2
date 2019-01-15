@@ -147,6 +147,8 @@ void Set_data_directory(const char * program_dir, char * data_dir)
       strcat(data_dir,"../share/grafx2/");
     }
 
+  #elif defined(WIN32)
+    strcat(data_dir,"..\\share\\grafx2\\");
   // All other targets, program is in a "bin" subdirectory
   #else
     strcat(data_dir,"../share/grafx2/");
