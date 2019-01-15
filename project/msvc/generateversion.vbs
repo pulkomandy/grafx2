@@ -69,6 +69,12 @@ If Err.Number = 0 Then
 	f.Close
 End If
 
+' add a trailing . if needed
+if Mid(label, len(label), 1) <> "." Then
+    label = label & "."
+End If
+'Wscript.Echo "label=" & label
+
 If NeedWrite Then
 	Set f = FSO.OpenTextFile(versionfile, 2, True) ' 2 = Write
 	f.WriteLine "char SVN_revision[]=" & Chr(34) & revision & Chr(34) & ";"
