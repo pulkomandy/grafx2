@@ -348,15 +348,14 @@ struct {
  *
  * @param argc argument count
  * @param argv argument values
- * @param main_filename pointer to receive 1st file name
- * @param main_directory pointer to receive 1st file directory
- * @param spare_filename pointer to receive 2nd file name
- * @param spare_directory pointer to receive 2nd file directory
+ * @param filenames pointers to receive file names
+ * @param directories pointers to receive file directories
  * @return the number of file to open (0, 1 or 2)
  */
-int Analyze_command_line(int argc, char * argv[], char *main_filename, char *main_directory, char *spare_filename, char *spare_directory)
+int Analyze_command_line(int argc, char * argv[], char * filenames[], char * directories[])
 {
-  char *buffer ;
+  char *buffer;
+  char *filename;
   int index;
   int file_in_command_line;
 
@@ -553,23 +552,23 @@ int Analyze_command_line(int argc, char * argv[], char *main_filename, char *mai
         }
         else if (File_exists(argv[index]))
         {
-          file_in_command_line ++;
           buffer = Realpath(argv[index], NULL);
-
-          if (file_in_command_line == 1)
+          filename = Find_last_separator(buffer);
+          if (filename != NULL)
           {
-            // Separate path from filename
-            Extract_path(main_directory, buffer);
-            Extract_filename(main_filename, buffer);
+            *filename = '\0';
+            filename++;
+            directories[file_in_command_line] = strdup(buffer);
+            filenames[file_in_command_line] = strdup(filename);
           }
           else
           {
-            // Separate path from filename
-            Extract_path(spare_directory, buffer);
-            Extract_filename(spare_filename, buffer);
+            directories[file_in_command_line] = strdup(".");
+            filenames[file_in_command_line] = strdup(buffer);
           }
           free(buffer);
           buffer = NULL;
+          file_in_command_line++;
         }
         else
         {
@@ -618,11 +617,9 @@ int Init_program(int argc,char * argv[])
   T_Gui_skin *gfx;
   int file_in_command_line;
   T_Gradient_array initial_gradients;
-  static char main_filename [MAX_PATH_CHARACTERS];
-  static char main_directory[MAX_PATH_CHARACTERS];
-  static char spare_filename [MAX_PATH_CHARACTERS];
-  static char spare_directory[MAX_PATH_CHARACTERS];
-  static word filename_unicode[MAX_PATH_CHARACTERS];
+  char * filenames[2] = {NULL, NULL};
+  char * directories[2] = {NULL, NULL};
+  word * filename_unicode;
 
   #if defined(__MINT__)
   printf("===============================\n");
@@ -770,7 +767,7 @@ int Init_program(int argc,char * argv[])
   // Analyse command-line as soon as possible.
   // This must come after video mode initialization because
   // a video mode may be requested as a command-line parameter
-  file_in_command_line=Analyze_command_line(argc, argv, main_filename, main_directory, spare_filename, spare_directory);
+  file_in_command_line = Analyze_command_line(argc, argv, filenames, directories);
 
 #if defined(USE_JOYSTICK) && (defined(USE_SDL) || defined(USE_SDL2))
   GFX2_Log(GFX2_DEBUG, "%d joystick(s) attached\n", SDL_NumJoysticks());
@@ -1065,9 +1062,9 @@ int Init_program(int argc,char * argv[])
   // Make sure the load dialog points to the right place when first shown.
   // Done after loading everything else, but before checking for emergency
   // backups
-  if (file_in_command_line > 0)
+  if (file_in_command_line > 0 && directories[0] != NULL)
   {
-    strcpy(Main.selector.Directory, main_directory);
+    strcpy(Main.selector.Directory, directories[0]);
   }
 
   // Test de recuperation de fichiers sauvés
@@ -1136,11 +1133,12 @@ int Init_program(int argc,char * argv[])
 
         case 2:
           // Load this file
-          Init_context_layered_image(&context, spare_filename, spare_directory);
-          if (Get_Unicode_Filename(filename_unicode, spare_filename, spare_directory))
-            context.File_name_unicode = filename_unicode;
+          Init_context_layered_image(&context, filenames[1], directories[1]);
+          filename_unicode = Get_Unicode_Filename(NULL, filenames[1], directories[1]);
+          context.File_name_unicode = filename_unicode;
           Load_image(&context);
           Destroy_context(&context);
+          free(filename_unicode);
           Redraw_layered_image();
           End_of_modification();
 
@@ -1150,11 +1148,12 @@ int Init_program(int argc,char * argv[])
           __attribute__ ((fallthrough));
 #endif
         case 1:
-          Init_context_layered_image(&context, main_filename, main_directory);
-          if (Get_Unicode_Filename(filename_unicode, main_filename, main_directory))
-            context.File_name_unicode = filename_unicode;
+          Init_context_layered_image(&context, filenames[0], directories[0]);
+          filename_unicode = Get_Unicode_Filename(NULL, filenames[0], directories[0]);
+          context.File_name_unicode = filename_unicode;
           Load_image(&context);
           Destroy_context(&context);
+          free(filename_unicode);
           Redraw_layered_image();
           End_of_modification();
 
@@ -1187,6 +1186,11 @@ int Init_program(int argc,char * argv[])
 
   Allow_drag_and_drop(1);
 
+  while (file_in_command_line-- > 0)
+  {
+    free(directories[file_in_command_line]);
+    free(filenames[file_in_command_line]);
+  }
   return(1);
 }
 
