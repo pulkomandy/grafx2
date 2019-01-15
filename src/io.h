@@ -183,6 +183,10 @@ void Release_lock_file(const char *file_directory);
 
 ///
 /// Return the current directory, equivalent to getcwd()
+/// @param buf destination buffer. can be NULL
+/// @param buf_unicode destination buffer for the unicode version of the path
+/// @param size destination buffer size, ignored if buf is NULL
+/// @return NULL for error, buf or a malloc'ed buffer
 char * Get_current_directory(char * buf, word * buf_unicode, size_t size);
 
 ///

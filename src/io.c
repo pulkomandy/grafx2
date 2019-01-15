@@ -886,7 +886,18 @@ char * Get_current_directory(char * buf, word * buf_unicode, size_t size)
 
   return buf;
 #elif defined(WIN32)
-  /// @TODO allocate buf if needed
+  if (buf == NULL)
+  {
+    size = (size_t)GetCurrentDirectoryA(0, buf);
+    if (size == 0)
+      return NULL;
+    buf = malloc(size);
+    if (buf == NULL)
+    {
+      GFX2_Log(GFX2_ERROR, "Failed to allocate %lu bytes.\n", (unsigned long)size);
+      return NULL;
+    }
+  }
   if (GetCurrentDirectoryA(size, buf) == 0)
     return NULL;
   if (buf_unicode != NULL)
@@ -903,6 +914,8 @@ char * Get_current_directory(char * buf, word * buf_unicode, size_t size)
   return buf;
 #else
   char * ret = getcwd(buf, size);
+  if (ret == NULL)
+    GFX2_Log(GFX2_ERROR, "getcwd(%p, %lu) failed !\n", buf, (unsigned long)size);
 #ifdef ENABLE_FILENAMES_ICONV
   if (ret != NULL && buf_unicode != NULL)
   {
