@@ -69,6 +69,7 @@
 #ifndef _MSC_VER
 #include <unistd.h>
 #else
+#define strdup _strdup
 #if _MSC_VER < 1900
 #define snprintf _snprintf
 #endif

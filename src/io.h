@@ -156,7 +156,7 @@ void For_each_directory_entry(const char * directory_name, void * pdata, T_File_
 /// The point is simply to insert a PATH_SEPARATOR when needed.
 void Get_full_filename(char * output_name, const char * file_name, const char * directory_name);
 
-int Get_Unicode_Filename(word * filename_unicode, const char * filename, const char * directory);
+word * Get_Unicode_Filename(word * filename_unicode, const char * filename, const char * directory);
 
 ///
 /// Appends a file or directory name to an existing directory name.

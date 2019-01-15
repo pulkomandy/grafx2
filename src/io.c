@@ -731,19 +731,24 @@ void Get_full_filename(char * output_name, const char * file_name, const char * 
 /**
  * Convert a file name to unicode characters
  *
+ * If the parametter is null, the buffer is malloc'ed
+ *
  * @param filename_unicode the output buffer of MAX_PATH_CHARACTERS wide characters
  * @param filename the input file name
  * @param directory the input file directory
- * @return 0 if no conversion has taken place.
- * @return 1 if the unicode filename has been retrieved
+ * @return NULL if no conversion has taken place.
+ * @return filename_unicode if the unicode filename has been retrieved
  */
-int Get_Unicode_Filename(word * filename_unicode, const char * filename, const char * directory)
+word * Get_Unicode_Filename(word * filename_unicode, const char * filename, const char * directory)
 {
 #if defined(WIN32)
-  int i = 0, j = 0;
-  WCHAR shortPath[MAX_PATH_CHARACTERS];
-  WCHAR longPath[MAX_PATH_CHARACTERS];
+  int i = 0;
+  DWORD len;
+  WCHAR * shortPath;
+  WCHAR * longPath;
+  WCHAR * sep;
 
+  shortPath = (WCHAR *)malloc(sizeof(WCHAR) * (strlen(filename) + strlen(directory) + 2));
   // copy the full path to a wide character buffer :
   while (directory[0] != '\0')
     shortPath[i++] = *directory++;
@@ -752,42 +757,75 @@ int Get_Unicode_Filename(word * filename_unicode, const char * filename, const c
   while (filename[0] != '\0')
     shortPath[i++] = *filename++;
   shortPath[i++] = 0;
-  if (GetLongPathNameW(shortPath, longPath, MAX_PATH_CHARACTERS) == 0)
-    return 0;
-  i = 0;
-  while (longPath[j] != 0)
+  len = GetLongPathNameW(shortPath, NULL, 0);
+  if (len == 0)
   {
-    if (longPath[j] == '\\')
-      i = 0;
-    else
-      filename_unicode[i++] = longPath[j];
-    j++;
+    free(shortPath);
+    return NULL;
   }
-  filename_unicode[i++] = 0;
-  return 1;
+  longPath = (WCHAR *)malloc(len * sizeof(WCHAR));
+  if (GetLongPathNameW(shortPath, longPath, len) == 0)
+  {
+    free(shortPath);
+    return NULL;
+  }
+  free(shortPath);
+  sep = wcsrchr(longPath, '\\');
+  if (sep == NULL)
+  {
+    if (filename_unicode == NULL)
+      return (word *)longPath;
+    memcpy(filename_unicode, longPath, sizeof(word) * len);
+  }
+  else
+  {
+    sep++;
+    len = wcslen(sep) + 1;
+    if (filename_unicode == NULL)
+      filename_unicode = (word *)malloc(sizeof(word) * len);
+    memcpy(filename_unicode, sep, sizeof(word) * len);
+  }
+  free(longPath);
+  return filename_unicode;
 #elif defined(ENABLE_FILENAMES_ICONV)
+  int allocated_memory = 0;
   char * input = (char *)filename;
   size_t inbytesleft = strlen(filename);
-  char * output = (char *)filename_unicode;
-  size_t outbytesleft = (MAX_PATH_CHARACTERS - 1) * 2;
+  char * output;
+  size_t outbytesleft;
+  size_t r;
+
   (void)directory;  // unused
-  if (cd_utf16 != (iconv_t)-1)
+  if (cd_utf16 == (iconv_t)-1)
+    return NULL;
+  if (filename_unicode == NULL)
   {
-    size_t r = iconv(cd_utf16, &input, &inbytesleft, &output, &outbytesleft);
-    if (r != (size_t)-1)
-    {
-      output[0] = '\0';
-      output[1] = '\0';
-      return 1;
-    }
+    filename_unicode = malloc(sizeof(word) * (inbytesleft + 1));
+    if (filename_unicode == NULL)
+      return NULL;
+    allocated_memory = 1;
+    outbytesleft = inbytesleft * 2;
   }
-  return 0;
+  else
+    outbytesleft = (MAX_PATH_CHARACTERS - 1) * 2;
+  output = (char *)filename_unicode;
+
+  r = iconv(cd_utf16, &input, &inbytesleft, &output, &outbytesleft);
+  if (r != (size_t)-1)
+  {
+    output[0] = '\0';
+    output[1] = '\0';
+    return filename_unicode;
+  }
+  if (allocated_memory)
+    free(filename_unicode);
+  return NULL;
 #else
   (void)filename_unicode;
   (void)filename;
   (void)directory;
   // not implemented
-  return 0;
+  return NULL;
 #endif
 }
 
