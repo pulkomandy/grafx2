@@ -993,16 +993,19 @@ int Load_INI(T_Config * conf)
   }
   
   // Optional, Location of last directory used for Lua scripts browsing (>=2.3)
-  conf->Scripts_directory[0]='\0';
+  free(conf->Scripts_directory);
+  conf->Scripts_directory = NULL;
   if (!Load_INI_get_string (file,buffer,"Scripts_directory",value_label, 1))
   {
-    strcpy(conf->Scripts_directory,value_label);
+    if (value_label[0] != '\0')
+      conf->Scripts_directory = strdup(value_label);
   }
-  if (conf->Scripts_directory[0]=='\0')
+  if (conf->Scripts_directory == NULL)
   {
     // Default when empty:
-    Realpath(Data_directory, conf->Scripts_directory);
-    Append_path(conf->Scripts_directory, SCRIPTS_SUBDIRECTORY, NULL);
+    char * path = Realpath(Data_directory, NULL);
+    conf->Scripts_directory = Filepath_append_to_dir(path, SCRIPTS_SUBDIRECTORY);
+    free(path);
   }
   
   conf->Allow_multi_shortcuts=0;

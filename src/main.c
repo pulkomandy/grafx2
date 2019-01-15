@@ -1289,6 +1289,7 @@ void Program_shutdown(void)
   {
     FREE_POINTER(Config.Bookmark_directory[i]);
   }
+  FREE_POINTER(Config.Scripts_directory);
 
   Uninit_text();
 
