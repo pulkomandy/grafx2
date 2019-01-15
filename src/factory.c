@@ -1998,28 +1998,25 @@ int L_Run(lua_State* L)
 {
   const char * script_arg;
   const char * message;
-  char saved_directory[MAX_PATH_CHARACTERS];
-  // these are only needed before running script
-  // (which may call L_Run() again recursively)
-  // so it's safe to make them static to spare a few hundred bytes.
-  static char full_path[MAX_PATH_CHARACTERS];
-  static char path_element[MAX_PATH_CHARACTERS];
+  char * saved_directory;
+  char * full_path;
+  const char * path;
+  char * file_name;
   static int nested_calls = 0;
     
-  int nb_args=lua_gettop(L);
+  int nb_args = lua_gettop(L);
   
   LUA_ARG_LIMIT (1, "run");
   LUA_ARG_STRING(1, "run", script_arg);
-  if (strlen(script_arg)>=MAX_PATH_CHARACTERS)
-    return luaL_error(L, "run: path is too long");
 
   nested_calls++;
   if (nested_calls > 100)
     return luaL_error(L, "run: too many nested calls (100)");
     
   // store the current directory (on the stack)
-  Get_current_directory(saved_directory, NULL, MAX_PATH_CHARACTERS);
+  saved_directory = Get_current_directory(NULL, NULL, 0);
 
+  full_path = strdup(script_arg);
   #if defined (__AROS__)
   // Convert path written on Linux/Windows norms to AROS norms :
   // Each element like ../ and ..\ is replaced by /
@@ -2053,45 +2050,65 @@ int L_Run(lua_State* L)
     // On Linux/Unix, this ensures that scripts written and tested on Windows
     // work similarly.
     char *pos;
-    strcpy(full_path, script_arg);
-    pos=strchr(full_path, '\\');
-    while (pos!=NULL)
-    {
-      *pos='/';
-      pos=strchr(full_path, '\\');
-    }
+    for (pos = strchr(full_path, '\\'); pos != NULL; pos = strchr(pos, '\\'))
+      *pos = '/';
   }
   #endif
-  Extract_path(path_element, full_path);
-  if (path_element[0]!='\0')
+  file_name = Find_last_separator(full_path);
+  if (file_name != NULL)
   {
-    if (!Directory_exists(path_element))
+    path = full_path;
+    *file_name = '\0';
+    file_name++;
+    if (path[0] == '\0')  // the file was in ROOT directory
+      path = PATH_SEPARATOR;
+    if (!Directory_exists(path))
+    {
+      free(saved_directory);
+      free(full_path);
       return luaL_error(L, "run: directory of script doesn't exist");
-    Change_directory(path_element);
+    }
+    Change_directory(path);
   }
-  Extract_filename(path_element, full_path);
-  if (luaL_loadfile(L,path_element) != 0)
+  else
   {
-    nb_args= lua_gettop(L);
+    path = NULL;  // only file name
+    file_name = full_path;
+  }
+
+  if (luaL_loadfile(L, file_name) != 0)
+  {
+    int r;
+    nb_args = lua_gettop(L);
     if (nb_args>0 && (message = lua_tostring(L, nb_args))!=NULL)
-      return luaL_error(L, message);
+      r = luaL_error(L, message);
     else
-      return luaL_error(L, "run: Unknown error loading script %s", path_element);
+      r = luaL_error(L, "run: Unknown error loading script %s", file_name);
+    Change_directory(saved_directory);
+    free(saved_directory);
+    free(full_path);
+    return r;
   }
-  else if (lua_pcall(L, 0, 0, 0) != 0)
+  free(full_path);
+  if (lua_pcall(L, 0, 0, 0) != 0)
   {
-    nb_args= lua_gettop(L);
+    int r;
+    nb_args = lua_gettop(L);
     // We COULD build the call stack, but I think this would be more
     // confusing than helpful.
 
     if (nb_args>0 && (message = lua_tostring(L, nb_args))!=NULL)
-      return luaL_error(L, message);
+      r = luaL_error(L, message);
     else
-      return luaL_error(L, "run: Unknown error running script!");
+      r = luaL_error(L, "run: Unknown error running script!");
+    Change_directory(saved_directory);
+    free(saved_directory);
+    return r;
   }
   nested_calls--;
   // restore directory
   Change_directory(saved_directory);
+  free(saved_directory);
   return 0;
 }
 
@@ -2177,86 +2194,85 @@ void Draw_script_name(word x, word y, word index, byte highlighted)
 void Draw_script_information(T_Fileselector_item * script_item, const char *full_directory)
 {
   FILE *script_file;
+  char * full_name;
   char text_block[3][DESC_WIDTH+1];
   int x, y;
   int i;
-    
+
   // Blank the target area
   Window_rectangle(7, FILESEL_Y + 89, DESC_WIDTH*6+2, 4*8, MC_Black);
 
-  if (script_item && script_item->Full_name && script_item->Full_name[0]!='\0')
+  if (script_item && script_item->Full_name && script_item->Full_name[0] != '\0')
   {
-    char full_name[MAX_PATH_CHARACTERS];
-    strcpy(full_name, full_directory);
-    Append_path(full_name, script_item->Full_name, NULL);
+    full_name = Filepath_append_to_dir(full_directory, script_item->Full_name);
 
-    x=0;
-    y=0;    
+    x = 0;
+    y = 0;
     text_block[0][0] = text_block[1][0] = text_block[2][0] = '\0';
 
-	if (script_item->Type == 0)
-	{
-		// Start reading
-		script_file = fopen(full_name, "r");
-		if (script_file != NULL)
-		{
-			int c;
-			c = fgetc(script_file);
-			while (c != EOF && y<3)
-			{
-				if (c == '\n')
-				{
-					if (x<2)
-						break; // Carriage return without comment: Stopping
-					y++;
-					x=0;
-				}
-				else if (x==0 || x==1)
-				{
-					if (c != '-')
-						break; // Non-comment line was encountered. Stopping.       
-					x++;
-				}
-				else
-				{
-					if (x < DESC_WIDTH+2)
-					{
-						// Adding character
-						text_block[y][x-2] = (c<32 || c>255) ? ' ' : c;
-						text_block[y][x-1] = '\0';
-					}
-					x++;
-				}
-				// Read next
-				c = fgetc(script_file);
-			}
-			fclose(script_file);
-		}
-		Print_help(8, FILESEL_Y + 89   , text_block[0], 'N', 0, 0);
-		Print_help(8, FILESEL_Y + 89+ 8, text_block[1], 'N', 0, 0);
-		Print_help(8, FILESEL_Y + 89+16, text_block[2], 'N', 0, 0);
+    if (script_item->Type == FSOBJECT_FILE)
+    {
+      // Start reading
+      script_file = fopen(full_name, "r");
+      if (script_file != NULL)
+      {
+        int c;
+        c = fgetc(script_file);
+        while (c != EOF && y<3)
+        {
+          if (c == '\n')
+          {
+            if (x<2)
+              break; // Carriage return without comment: Stopping
+            y++;
+            x=0;
+          }
+          else if (x==0 || x==1)
+          {
+            if (c != '-')
+              break; // Non-comment line was encountered. Stopping.
+            x++;
+          }
+          else
+          {
+            if (x < DESC_WIDTH+2)
+            {
+              // Adding character
+              text_block[y][x-2] = (c<32 || c>255) ? ' ' : c;
+              text_block[y][x-1] = '\0';
+            }
+            x++;
+          }
+          // Read next
+          c = fgetc(script_file);
+        }
+        fclose(script_file);
+      }
+      Print_help(8, FILESEL_Y + 89   , text_block[0], 'N', 0, 0);
+      Print_help(8, FILESEL_Y + 89+ 8, text_block[1], 'N', 0, 0);
+      Print_help(8, FILESEL_Y + 89+16, text_block[2], 'N', 0, 0);
 
-		// Display a line with the keyboard shortcut
-		Print_help(8, FILESEL_Y + 89+24, "Key:", 'N', 0, 0);
-		for (i=0; i<10; i++)
-			if (Bound_script[i]!=NULL && !strcmp(Bound_script[i], full_name))
-				break;
+      // Display a line with the keyboard shortcut
+      Print_help(8, FILESEL_Y + 89+24, "Key:", 'N', 0, 0);
+      for (i=0; i<10; i++)
+        if (Bound_script[i]!=NULL && !strcmp(Bound_script[i], full_name))
+          break;
 
-		if (i<10)
-		{
-			const char *shortcut;    
-			shortcut=Keyboard_shortcut_value(SPECIAL_RUN_SCRIPT_1+i);
-			Print_help(8+4*6, FILESEL_Y + 89+24, shortcut, 'K', 0, strlen(shortcut));
-		}
-		else
-		{
-			Print_help(8+4*6, FILESEL_Y + 89+24, "None", 'K', 0, 4);
-		}
-	}
+      if (i<10)
+      {
+        const char *shortcut;
+        shortcut = Keyboard_shortcut_value(SPECIAL_RUN_SCRIPT_1+i);
+        Print_help(8+4*6, FILESEL_Y + 89+24, shortcut, 'K', 0, strlen(shortcut));
+      }
+      else
+      {
+        Print_help(8+4*6, FILESEL_Y + 89+24, "None", 'K', 0, 4);
+      }
+    }
+    free(full_name);
   }
 
   Update_window_area(8, FILESEL_Y + 89, DESC_WIDTH*6+2, 4*8);
-
 }
 
 // Add a script to the list
@@ -2314,7 +2330,7 @@ void Highlight_script(T_Fileselector *selector, T_List_button *list, const char 
   Locate_list_item(list, index);
 }
 
-static char Last_run_script[MAX_PATH_CHARACTERS]="";
+static char * Last_run_script = NULL;
 
 // Before: Cursor hidden
 // After: Cursor shown
@@ -2322,41 +2338,56 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
 {
   lua_State* L;
   const char* message;
-  byte  old_cursor_shape=Cursor_shape;
+  byte  old_cursor_shape = Cursor_shape;
   char buf[MAX_PATH_CHARACTERS];
-  int original_image_width=Main.image_width;
-  int original_image_height=Main.image_height;
+  int original_image_width = Main.image_width;
+  int original_image_height = Main.image_height;
   int original_current_layer = Main.current_layer;
 
   // Some scripts are slow
-  Cursor_shape=CURSOR_SHAPE_HOURGLASS;
+  Cursor_shape = CURSOR_SHAPE_HOURGLASS;
   Display_cursor();
   Flush_update();
   Cursor_is_visible=1;
-  
+
+  free(Last_run_script);
   if (script_subdirectory && script_subdirectory[0]!='\0')
-  {
-    strcpy(Last_run_script, script_subdirectory);
-    Append_path(Last_run_script, script_filename, NULL);
-  }
+    Last_run_script = Filepath_append_to_dir(script_subdirectory, script_filename);
   else
-  {
-    strcpy(Last_run_script, script_filename);
-  }
+    Last_run_script = strdup(script_filename);
   
   // This chdir is for the script's sake. Grafx2 itself will (try to)
   // not rely on what is the system's current directory.
-  Extract_path(buf,Last_run_script);
+  Extract_path(buf, Last_run_script);
   Change_directory(buf);
 
   L = luaL_newstate(); // used to be lua_open() on Lua 5.1, deprecated on 5.2
 
-  strcpy(buf, "LUA_PATH=");
-  strcat(buf, Data_directory);
-  Append_path(buf+9, SCRIPTS_SUBDIRECTORY, NULL);
-  Append_path(buf+9, LUALIB_SUBDIRECTORY, NULL);
-  Append_path(buf+9, "?.lua", NULL);
-  putenv(buf);
+  /// @todo as the value doesn't vary, this should be
+  /// done once at the start of the program
+  strcpy(buf, Data_directory);
+  Append_path(buf, SCRIPTS_SUBDIRECTORY, NULL);
+  Append_path(buf, LUALIB_SUBDIRECTORY, NULL);
+  Append_path(buf, "?.lua", NULL);
+  // SetEnvironmentVariableA() won't work because lua uses getenv()
+#if defined(_MSC_VER)
+  if (_putenv_s("LUA_PATH", buf) < 0)
+    GFX2_Log(GFX2_ERROR, "_putenv_s(\"LUA_PATH\", \"%s\") failed\n", buf);
+#elif defined(WIN32)
+  // Mingw has neither setenv() nor _putenv_s()
+  memmove(buf + 9, buf, strlen(buf) + 1);
+  memcpy(buf, "LUA_PATH=", 9);
+  if (putenv(buf) < 0)
+    GFX2_Log(GFX2_ERROR, "putenv(\"%s\") failed\n", buf);
+#else
+  /* From linux man :
+   * This function makes
+   * copies of the strings pointed to by name and value (by contrast with
+   * putenv(3)).
+   */
+  if (setenv("LUA_PATH", buf, 1) < 0)
+    GFX2_Log(GFX2_ERROR, "setenv(\"LUA_PATH\", \"%s\", 1) failed\n", buf);
+#endif
   
   // Drawing
   lua_register(L,"putbrushpixel",L_PutBrushPixel);
@@ -2473,7 +2504,7 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   {
     memcpy(Brush_backup, Brush, ((long)Brush_height)*Brush_width);
   
-    if (luaL_loadfile(L,Last_run_script) != 0)
+    if (luaL_loadfile(L, Last_run_script) != 0)
     {
       int stack_size;
       stack_size= lua_gettop(L);
@@ -2581,20 +2612,20 @@ void Repeat_script(void)
 void Set_script_shortcut(T_Fileselector_item * script_item, const char *full_directory)
 {
   int i;
-  char full_name[MAX_PATH_CHARACTERS];
+  char * full_name;
   
-  if (script_item && script_item->Full_name && script_item->Full_name[0]!='\0')
+  if (script_item && script_item->Full_name && script_item->Full_name[0] != '\0')
   {
-    strcpy(full_name, full_directory);
-    Append_path(full_name, script_item->Full_name, NULL);
+    full_name = Filepath_append_to_dir(full_directory, script_item->Full_name);
     
     // Find if it already has a shortcut
     for (i=0; i<10; i++)
-      if (Bound_script[i]!=NULL && !strcmp(Bound_script[i], full_name))
+      if (Bound_script[i] != NULL && !strcmp(Bound_script[i], full_name))
         break;
     if (i<10)
     {
       // Existing shortcut
+      free(full_name);
     }
     else
     {
@@ -2602,16 +2633,17 @@ void Set_script_shortcut(T_Fileselector_item * script_item, const char *full_dir
       for (i=0; i<10; i++)
         if (Bound_script[i]==NULL
           || !Has_shortcut(SPECIAL_RUN_SCRIPT_1+i)
-          || !File_exists(full_name))
+          || !File_exists(Bound_script[i]))
           break;
       if (i<10)
       {
         free(Bound_script[i]);
-        Bound_script[i]=strdup(full_name);
+        Bound_script[i] = full_name;
       }
       else
       {
         Warning_message("Already 10 scripts have shortcuts.");
+        free(full_name);
         return;
       }
     }
@@ -2633,7 +2665,7 @@ void Reload_scripts_list(void)
 {
   // Reinitialize the list
   Free_fileselector_list(&Scripts_selector);
-  if (Config.Scripts_directory[0]=='\0')
+  if (Config.Scripts_directory == NULL || Config.Scripts_directory[0]=='\0')
   {
     Read_list_of_drives(&Scripts_selector,NAME_WIDTH+1);
   }
@@ -2725,7 +2757,7 @@ void Button_Brush_Factory(void)
     do
     {
       clicked_button = Window_clicked_button();
-      if (Key==KEY_BACKSPACE && Config.Scripts_directory[0]!='\0')
+      if (Key==KEY_BACKSPACE && Config.Scripts_directory != NULL && Config.Scripts_directory[0]!='\0')
       {
         // Make it select first entry (parent directory)
         scriptlist->List_start=0;
@@ -2782,23 +2814,34 @@ void Button_Brush_Factory(void)
     item = Get_item_by_index(&Scripts_selector,
       scriptlist->List_start + scriptlist->Cursor_position);
     
-    if (item->Type==0) // File
+    if (item->Type == FSOBJECT_FILE)
     {
       strcpy(selected_file, item->Full_name);
       break;
     }
-    else if (item->Type==1 || item->Type==2) // Directory
+    else if (item->Type == FSOBJECT_DIR || item->Type == FSOBJECT_DRIVE)
     {
-      if (item->Type==2)
+      if (item->Type == FSOBJECT_DRIVE)
       {
         // Selecting one drive root
         strcpy(selected_file, PARENT_DIR);
-        strcat(Config.Scripts_directory, item->Full_name);
+        free(Config.Scripts_directory);
+        Config.Scripts_directory = strdup(item->Full_name);
       }
       else
       {
         // Going down one or up by one directory
-        Append_path(Config.Scripts_directory, item->Full_name, selected_file);
+        if (strcmp(item->Full_name, PARENT_DIR) == 0)
+          Append_path(Config.Scripts_directory, item->Full_name, selected_file);
+        else
+        {
+          char * new_dir = Filepath_append_to_dir(Config.Scripts_directory, item->Full_name);
+          if (new_dir != NULL)
+          {
+            free(Config.Scripts_directory);
+            Config.Scripts_directory = new_dir;
+          }
+        }
       }
 
       // No break: going back up to beginning of loop

@@ -870,9 +870,11 @@ void Release_lock_file(const char *file_directory)
   remove(lock_filename);
 }
 
-const char * Get_current_directory(char * buf, word * buf_unicode, size_t size)
+char * Get_current_directory(char * buf, word * buf_unicode, size_t size)
 {
 #if defined(__MINT__)
+  if (buf == NULL)
+    buf = malloc(MAX_PATH_CHARACTERS);
   buf[0] = 'A'+Dgetdrv();
   buf[1] = ':';
   buf[2] = '\\';
@@ -884,6 +886,7 @@ const char * Get_current_directory(char * buf, word * buf_unicode, size_t size)
 
   return buf;
 #elif defined(WIN32)
+  /// @TODO allocate buf if needed
   if (GetCurrentDirectoryA(size, buf) == 0)
     return NULL;
   if (buf_unicode != NULL)
