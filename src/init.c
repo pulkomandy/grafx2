@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2019 Thomas Bernard
     Copyright 2011 Pawel Góralski
     Copyright 2008 Peter Gordon
     Copyright 2008 Yves Rizoud
@@ -656,10 +657,11 @@ static byte Parse_skin(T_GFX2_Surface * gui, T_Gui_skin *gfx)
 T_Gui_skin * Load_graphics(const char * skin_file, T_Gradient_array *gradients)
 {
   T_Gui_skin * gfx;
-  char filename[MAX_PATH_CHARACTERS];
+  char * filename;
+  size_t len;
   T_GFX2_Surface * gui;
 
-  if (skin_file[0] == '\0')
+  if (skin_file == NULL || skin_file[0] == '\0')
   {
     sprintf(Gui_loading_error_message, "Wrong skin file name \"\"\n");
     return NULL;
@@ -668,21 +670,32 @@ T_Gui_skin * Load_graphics(const char * skin_file, T_Gradient_array *gradients)
   gfx = (T_Gui_skin *)malloc(sizeof(T_Gui_skin));
   if (gfx == NULL)
   {
+    GFX2_Log(GFX2_ERROR, "Failed to allocate %lu bytes\n", (unsigned long)sizeof(T_Gui_skin));
     sprintf(Gui_loading_error_message, "Not enough memory to read skin file\n");
     return NULL;
   }
   
   // Read the "skin" file
-  snprintf(filename, sizeof(filename), "%s%s%s%s", Data_directory,SKINS_SUBDIRECTORY, PATH_SEPARATOR, skin_file);
+  len = strlen(Data_directory) + strlen(SKINS_SUBDIRECTORY) + strlen(PATH_SEPARATOR) + strlen(skin_file) + 1;
+  filename = malloc(len);
+  if (filename == NULL)
+  {
+    GFX2_Log(GFX2_ERROR, "Failed to allocate %lu bytes\n", (unsigned long)len);
+    free(gfx);
+    return NULL;
+  }
+  snprintf(filename, len, "%s%s%s%s", Data_directory, SKINS_SUBDIRECTORY, PATH_SEPARATOR, skin_file);
   
-  gui=Load_surface(filename, gradients);
+  gui = Load_surface(filename, gradients);
   if (!gui)
   {
-    sprintf(Gui_loading_error_message, "Unable to load the skin image (missing? not an image file?)\n");
+    sprintf(Gui_loading_error_message, "Unable to load the skin image (missing? not an image file?) : %s\n", filename);
+    free(filename);
     free(gfx);
     gfx = NULL;
     return NULL;
   }
+  free(filename);
   if (Parse_skin(gui, gfx) != 0)
   {
     free(gfx);
@@ -748,24 +761,34 @@ static byte * Parse_font(T_GFX2_Surface * image, int is_main)
 byte * Load_font(const char * font_name, int is_main)
 {
   byte * font = NULL;
-  char filename[MAX_PATH_CHARACTERS];
+  size_t len;
+  char * filename;
   T_GFX2_Surface * image;
 
-  if (font_name[0] == '\0')
+  if (font_name == NULL || font_name[0] == '\0')
   {
     sprintf(Gui_loading_error_message, "Wrong font name \"\"\n");
     return NULL;
   }
 
   // Read the file containing the image
-  snprintf(filename, sizeof(filename), "%s%s%s%s", Data_directory, SKINS_SUBDIRECTORY, PATH_SEPARATOR, font_name);
-  
-  image=Load_surface(filename, NULL);
-  if (!image)
+  len = strlen(Data_directory) + strlen(SKINS_SUBDIRECTORY) + strlen(PATH_SEPARATOR) + strlen(font_name) + 1;
+  filename = malloc(len);
+  if (filename == NULL)
   {
-    sprintf(Gui_loading_error_message, "Unable to load the skin image (missing? not an image file?)\n");
+    GFX2_Log(GFX2_ERROR, "Failed to allocate %lu bytes\n", len);
     return NULL;
   }
+  snprintf(filename, len, "%s%s%s%s", Data_directory, SKINS_SUBDIRECTORY, PATH_SEPARATOR, font_name);
+  
+  image = Load_surface(filename, NULL);
+  if (!image)
+  {
+    sprintf(Gui_loading_error_message, "Unable to load the font image (missing? not an image file?)\n%s\n", filename);
+    free(filename);
+    return NULL;
+  }
+  free(filename);
   font = Parse_font(image, is_main);
   Free_GFX2_Surface(image);
   return font;
@@ -799,10 +822,11 @@ static void Load_Unicode_font(const char * fullname, const char * filename)
 
 void Load_Unicode_fonts(void)
 {
-  char directory[MAX_PATH_CHARACTERS];
+  char * directory;
 
-  snprintf(directory,sizeof(directory), "%s%s", Data_directory, SKINS_SUBDIRECTORY);
+  directory = Filepath_append_to_dir(Data_directory, SKINS_SUBDIRECTORY);
   For_each_file(directory, Load_Unicode_font);
+  free(directory);
 }
 
 // Initialisation des boutons:
@@ -1582,7 +1606,7 @@ void Set_all_video_modes(void)
 int Load_CFG(int reload_all)
 {
   FILE*  Handle;
-  char filename[MAX_PATH_CHARACTERS];
+  char * filename;
   long file_size;
   int  index,index2;
   T_Config_header       cfg_header;
@@ -1591,14 +1615,19 @@ int Load_CFG(int reload_all)
   T_Config_video_mode   cfg_video_mode;
   int key_conversion = 0;
 
-  snprintf(filename, sizeof(filename), "%s%s", Config_directory, CONFIG_FILENAME);
+  filename = Filepath_append_to_dir(Config_directory, CONFIG_FILENAME);
 
   GFX2_Log(GFX2_DEBUG, "Load_CFG() trying to load %s\n", filename);
 
-  if ((Handle=fopen(filename,"rb"))==NULL)
+  Handle = fopen(filename, "rb");
+  if (Handle == NULL)
+  {
+    free(filename);
     return ERROR_CFG_MISSING;
+  }
+  free(filename);
 
-  file_size=File_length_file(Handle);
+  file_size = File_length_file(Handle);
 
   if ( (file_size<7)
     || (!Read_bytes(Handle, &cfg_header.Signature, 3))
@@ -1972,17 +2001,22 @@ int Save_CFG(void)
   int  index;
   int  index2;
   int modes_to_save;
-  char filename[MAX_PATH_CHARACTERS];
+  char * filename;
   T_Config_header cfg_header;
   T_Config_chunk Chunk;
   T_Config_shortcut_info cfg_shortcut_info={0,0,0};
   T_Config_video_mode   cfg_video_mode={0,0,0};
 
-  strcpy(filename,Config_directory);
-  strcat(filename,CONFIG_FILENAME);
+  filename = Filepath_append_to_dir(Config_directory, CONFIG_FILENAME);
 
-  if ((Handle=fopen(filename,"wb"))==NULL)
+  Handle = fopen(filename, "wb");
+  if (Handle == NULL)
+  {
+    GFX2_Log(GFX2_ERROR, "Failed to open %s for Writing\n", filename);
+    free(filename);
     return ERROR_SAVING_CFG;
+  }
+  free(filename);
 
   // Ecriture du header
   memcpy(cfg_header.Signature,"CFG",3);
