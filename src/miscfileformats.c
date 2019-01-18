@@ -5737,25 +5737,32 @@ void Test_MOTO(T_IO_Context * context, FILE * file)
         case 8008:  // 4 colors palette
         case 8032:  // 16 colors palette
           {
-            char filename[MAX_PATH_CHARACTERS];
-            char path[MAX_PATH_CHARACTERS];
+            char * filename;
+            char * path;
             char * ext;
 
             // Check there are both FORME and COULEUR files
-            strncpy(filename, context->File_name, sizeof(filename));
-            filename[sizeof(filename)-1] = '\0';
+            filename = strdup(context->File_name);
             ext = strrchr(filename, '.');
             if (ext == NULL || ext == filename)
+            {
+              free(filename);
               return;
+            }
             if ((ext[-1] | 32) == 'c')
               ext[-1] = (ext[-1] & 32) | 'P';
             else if ((ext[-1] | 32) == 'p')
               ext[-1] = (ext[-1] & 32) | 'C';
             else
+            {
+              free(filename);
               return;
-            Get_full_filename(path, filename, context->File_directory);
+            }
+            path = Filepath_append_to_dir(context->File_directory, filename);
             if (File_exists(path))
               File_error = 0;
+            free(path);
+            free(filename);
           }
           return;
         default:
@@ -6077,8 +6084,8 @@ void Load_MOTO(T_IO_Context * context)
   }
   else
   {
-    char filename[MAX_PATH_CHARACTERS];
-    char path[MAX_PATH_CHARACTERS];
+    char * filename;
+    char * path;
     char * ext;
     int n_colors;
 
@@ -6112,12 +6119,12 @@ void Load_MOTO(T_IO_Context * context)
         width = 640;
         ratio = PIXEL_TALL;
     }
-    strncpy(filename, context->File_name, sizeof(filename));
-    filename[sizeof(filename)-1] = '\0';
+    filename = strdup(context->File_name);
     ext = strrchr(filename, '.');
     if (ext == NULL || ext == filename)
     {
       free(vram_forme);
+      free(filename);
       return;
     }
     if ((ext[-1] | 32) == 'c')
@@ -6139,10 +6146,15 @@ void Load_MOTO(T_IO_Context * context)
     else
     {
       free(vram_forme);
+      free(filename);
       return;
     }
-    Get_full_filename(path, filename, context->File_directory);
+    path = Filepath_append_to_dir(context->File_directory, filename);
     file = fopen(path, "rb");
+    if (file == NULL)
+      GFX2_Log(GFX2_ERROR, "Failed to open %s\n", path);
+    free(path);
+    free(filename);
     if (vram_forme == NULL)
     {
       vram_forme = malloc(file_size);
