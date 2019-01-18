@@ -618,12 +618,16 @@ void For_each_directory_entry(const char * directory_name, void * pdata, T_File_
 {
 #if defined(WIN32)
   WIN32_FIND_DATAW fd;
-  word search_string[MAX_PATH_CHARACTERS];
+  size_t len;
+  word * search_string;
   HANDLE h;
 
-  Unicode_char_strlcpy(search_string, directory_name, MAX_PATH_CHARACTERS);
-  Unicode_char_strlcat(search_string, "\\*", MAX_PATH_CHARACTERS);
+  len = strlen(directory_name) + 3;
+  search_string = (word *)malloc(sizeof(word) * len);
+  Unicode_char_strlcpy(search_string, directory_name, len);
+  Unicode_char_strlcat(search_string, "\\*", len);
   h = FindFirstFileW((WCHAR *)search_string, &fd);
+  free(search_string);
   if (h != INVALID_HANDLE_VALUE)
   {
     do
@@ -653,54 +657,56 @@ void For_each_directory_entry(const char * directory_name, void * pdata, T_File_
 #else
   DIR*  current_directory; // current directory
   struct dirent* entry;    // directory entry struct
-  char full_filename[MAX_PATH_CHARACTERS];
-  word * unicode_filename = NULL;
-  word unicode_buffer[MAX_PATH_CHARACTERS];
-  int filename_position;
 
-  current_directory=opendir(directory_name);
-  if(current_directory == NULL) return;        // Invalid directory
+  current_directory = opendir(directory_name);
+  if(current_directory == NULL)
+    return;        // Invalid directory
 
-  filename_position = strlen(directory_name);
-  memcpy(full_filename, directory_name, filename_position+1);
-#if defined(__AROS__)
-  if (filename_position==0 || (strcmp(full_filename+filename_position-1,PATH_SEPARATOR) && strcmp(full_filename+filename_position-1,":")))
-#else
-  if (filename_position==0 || strcmp(full_filename+filename_position-1,PATH_SEPARATOR))
-#endif
+  while ((entry = readdir(current_directory)) != NULL)
   {
-    strcat(full_filename, PATH_SEPARATOR);
-    filename_position = strlen(full_filename);
-  }
-  while ((entry=readdir(current_directory)))
-  {
-    struct stat Infos_enreg;
+    word * unicode_filename = NULL;
+    char * full_filename;
+    struct stat st;
 #ifdef ENABLE_FILENAMES_ICONV
-    char * input = entry->d_name;
-    size_t inbytesleft = strlen(entry->d_name);
-    char * output = (char *)unicode_buffer;
-    size_t outbytesleft = sizeof(unicode_buffer) - 2;
-    unicode_filename = NULL;
     if (cd_utf16 != (iconv_t)-1)
     {
-      size_t r = iconv(cd_utf16, &input, &inbytesleft, &output, &outbytesleft);
+      char * input = entry->d_name;
+      size_t inbytesleft = strlen(entry->d_name);
+      char * output;
+      size_t outbytesleft;
+      size_t r;
+
+      unicode_filename = malloc(sizeof(word) * (inbytesleft + 1));
+      output = (char *)unicode_filename;
+      outbytesleft = sizeof(word) * inbytesleft;
+      r = iconv(cd_utf16, &input, &inbytesleft, &output, &outbytesleft);
       if (r != (size_t)-1)
       {
         output[0] = '\0';
         output[1] = '\0';
-        unicode_filename = unicode_buffer;
+      }
+      else
+      {
+        free(unicode_filename);
+        unicode_filename = NULL;
       }
     }
 #endif
-    strcpy(&full_filename[filename_position], entry->d_name);
-    stat(full_filename,&Infos_enreg);
-    Callback(
-      pdata,
-      entry->d_name,
-      unicode_filename,
-      S_ISREG(Infos_enreg.st_mode), 
-      S_ISDIR(Infos_enreg.st_mode), 
-      File_is_hidden(entry->d_name, full_filename));
+    full_filename = Filepath_append_to_dir(directory_name, entry->d_name);
+    if (stat(full_filename, &st) < 0)
+      GFX2_Log(GFX2_WARNING, "stat(\"%s\") failed\n", full_filename);
+    else
+    {
+      Callback(
+        pdata,
+        entry->d_name,
+        unicode_filename,
+        S_ISREG(st.st_mode),
+        S_ISDIR(st.st_mode),
+        File_is_hidden(entry->d_name, full_filename));
+    }
+    free(full_filename);
+    free(unicode_filename);
   }
   closedir(current_directory);
 #endif
