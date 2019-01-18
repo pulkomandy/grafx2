@@ -560,56 +560,54 @@ unsigned long File_length_file(FILE * file)
 
 void For_each_file(const char * directory_name, void Callback(const char *, const char *))
 {
-  char full_filename[MAX_PATH_CHARACTERS];
 #if defined(WIN32)
   WIN32_FIND_DATAA fd;
-  char search_string[MAX_PATH_CHARACTERS];
+  char * full_filename;
+  char * search_string;
   HANDLE h;
 
-  if (Realpath(directory_name, full_filename))
-    _snprintf(search_string, sizeof(search_string), "%s\\*", full_filename);
-  else
-    _snprintf(search_string, sizeof(search_string), "%s\\*", directory_name);
+  full_filename = Realpath(directory_name, NULL);
+  search_string = Filepath_append_to_dir((full_filename != NULL) ? full_filename : directory_name, "*");
+  free(full_filename);
   h = FindFirstFileA(search_string, &fd);
+  free(search_string);
   if (h != INVALID_HANDLE_VALUE)
   {
     do
     {
       if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
         continue;
-      _snprintf(full_filename, sizeof(full_filename), "%s\\%s", directory_name, fd.cFileName);
+      full_filename = Filepath_append_to_dir(directory_name, fd.cFileName);
       Callback(full_filename, fd.cFileName);
+      free(full_filename);
     }
     while (FindNextFileA(h, &fd));
     FindClose(h);
   }
 #else
-  // Pour scan de répertoire
-  DIR*  current_directory; //Répertoire courant
-  struct dirent* entry; // Structure de lecture des éléments
-  int filename_position;
-  strcpy(full_filename, directory_name);
-  current_directory=opendir(directory_name);
-  if(current_directory == NULL) return;        // Répertoire invalide ...
-  filename_position = strlen(full_filename);
-#if defined(__AROS__)
-  if (filename_position==0 || (strcmp(full_filename+filename_position-1,PATH_SEPARATOR) && strcmp(full_filename+filename_position-1,":")))
-#else
-  if (filename_position==0 || strcmp(full_filename+filename_position-1,PATH_SEPARATOR))
-#endif
+  // directory traversal
+  DIR*  current_directory;
+  struct dirent* entry; // directory entry
+
+  current_directory = opendir(directory_name);
+  if(current_directory == NULL)
+    return;        // Invalid directory
+  while ((entry = readdir(current_directory)) != NULL)
   {
-    strcat(full_filename, PATH_SEPARATOR);
-    filename_position = strlen(full_filename);
-  }
-  while ((entry=readdir(current_directory)))
-  {
-    struct stat Infos_enreg;
-    strcpy(&full_filename[filename_position], entry->d_name);
-    stat(full_filename,&Infos_enreg);
-    if (S_ISREG(Infos_enreg.st_mode))
+    char * full_filename;
+    struct stat st;
+
+    full_filename = Filepath_append_to_dir(directory_name, entry->d_name);
+    // d_name is the only field you can count on in all POSIX systems.
+    // Also we need to call stat() in order to follow symbolic links
+    if (stat(full_filename, &st) < 0)
+      GFX2_Log(GFX2_WARNING, "stat(\"%s\") failed\n", full_filename);
+    else
     {
-      Callback(full_filename, entry->d_name);
+      if (S_ISREG(st.st_mode))
+        Callback(full_filename, entry->d_name);
     }
+    free(full_filename);
   }
   closedir(current_directory);
 #endif
