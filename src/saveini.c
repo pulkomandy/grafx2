@@ -2,6 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
+    Copyright 2019 Thomas Bernard
     Copyright 2011 Pawel Góralski
     Copyright 2008 Peter Gordon
     Copyright 2008 Yves Rizoud
@@ -425,7 +426,7 @@ static int Save_INI_set_values(FILE * old_file,FILE * new_file,char * buffer,con
  */
 static void Save_INI_flush(FILE * old_file,FILE * new_file,char * buffer)
 {
-  while (fgets(buffer,1024,old_file)!=0)
+  while (fgets(buffer,1024,old_file) != NULL)
     fprintf(new_file,"%s",buffer);
 }
 
@@ -439,50 +440,53 @@ int Save_INI(const T_Config * conf)
   FILE * new_file;
   char * buffer;
   int    values[3];
-  char   filename[MAX_PATH_CHARACTERS];
-  char   temp_filename[MAX_PATH_CHARACTERS];
+  char * filename;
+  char * temp_filename = NULL;
   int    return_code;
-  char   ref_ini_file[MAX_PATH_CHARACTERS];
+  char * ref_ini_file;
   int    ini_file_exists;
   int index;
 
-  // On alloue les zones de mémoire:
-  buffer=(char *)malloc(1024);
-  
-  // On calcule les noms des fichiers qu'on manipule:
-  strcpy(filename,Config_directory);
-  strcat(filename,INI_FILENAME);
+  // Open "clean" INI with defaults from gfx2def.ini
+  ref_ini_file = Filepath_append_to_dir(Data_directory, INIDEF_FILENAME);
+  old_file = fopen(ref_ini_file, "r");
+  if (old_file == 0)
+  {
+    free(ref_ini_file);
+    return ERROR_INI_MISSING;
+  }
+  free(ref_ini_file);
 
-  // On vérifie si le fichier INI existe
+  // Check if the ini file already exists
+  filename = Filepath_append_to_dir(Config_directory, INI_FILENAME);
   if ((ini_file_exists = File_exists(filename)))
   {
-    strcpy(temp_filename,Config_directory);
-    strcat(temp_filename,INISAVE_FILENAME);
-    
+    temp_filename = Filepath_append_to_dir(Config_directory, INISAVE_FILENAME);
+
     // Delete gfx2.$$$
     remove(temp_filename);
     // Rename current config file as gfx2.$$$
-    if (rename(filename,temp_filename)!=0)
+    if (rename(filename, temp_filename) != 0)
     {
-      goto Erreur_ERREUR_SAUVEGARDE_INI;
+      fclose(old_file);
+      free(filename);
+      free(temp_filename);
+      return ERROR_SAVING_INI;
     }
   }
-  // On récupère un fichier INI "propre" à partir de gfx2def.ini
-  strcpy(ref_ini_file,Data_directory);
-  strcat(ref_ini_file,INIDEF_FILENAME);
-  old_file=fopen(ref_ini_file,"rb");
-  if (old_file==0)
+  new_file = fopen(filename, "w");
+  if (new_file == 0)
   {
     fclose(old_file);
-    free(buffer);
-    return ERROR_INI_MISSING;
-  }
-  new_file=fopen(filename,"wb");
-  if (new_file==0)
-  {
-    free(buffer);
+    free(filename);
+    free(temp_filename);
     return ERROR_SAVING_INI;
   }
+  free(filename);
+
+  // Allocate work memory buffer
+  buffer = (char *)malloc(1024);
+
   if ((return_code=Save_INI_reach_group(old_file,new_file,buffer,"[MOUSE]")))
     goto Erreur_Retour;
 
@@ -766,28 +770,34 @@ int Save_INI(const T_Config * conf)
 
   // Insert new values here
   
-  Save_INI_flush(old_file,new_file,buffer);
+  Save_INI_flush(old_file, new_file, buffer);
 
   fclose(new_file);
   fclose(old_file);
 
-  // On efface le fichier temporaire <=> Ancienne version du .INI
-  if (ini_file_exists)
+  // Remove temporary file <=> old version of .INI
+  if (ini_file_exists && temp_filename != NULL)
     remove(temp_filename);
+  free(temp_filename);
   free(buffer);
   return 0;
 
-  // Gestion des erreurs:
+  // Error Handling
 
-  Erreur_Retour:
+Erreur_Retour:
 
-    fclose(new_file);
-    fclose(old_file);
-    free(buffer);
-    return return_code;
+  fclose(new_file);
+  fclose(old_file);
 
-  Erreur_ERREUR_SAUVEGARDE_INI:
-
-    free(buffer);
-    return ERROR_SAVING_INI;
+  if (ini_file_exists && temp_filename != NULL)
+  {
+    // restore old file
+    filename = Filepath_append_to_dir(Config_directory, INI_FILENAME);
+    remove(filename);
+    rename(temp_filename, filename);
+    free(filename);
+  }
+  free(buffer);
+  free(temp_filename);
+  return return_code;
 }
