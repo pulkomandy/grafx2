@@ -2707,7 +2707,6 @@ void Load_INFO(T_IO_Context * context)
   };
   T_INFO_Header header;
   T_INFO_ImageHeader imgheaders[2];
-  char filename[MAX_PATH_CHARACTERS];
   FILE *file;
   long file_size;
   word plane_line_size = 0;
@@ -2719,15 +2718,14 @@ void Load_INFO(T_IO_Context * context)
   byte * buffers[2];
 
   File_error = 0;
-  Get_full_filename(filename, context->File_name, context->File_directory);
 
-  file=fopen(filename, "rb");
+  file = Open_file_read(context);
   if (file == NULL)
   {
     File_error=1;
     return;
   }
-  file_size=File_length_file(file);
+  file_size = File_length_file(file);
   
   if (Read_INFO_Header(file, &header) && header.Magic == 0xe310)
   {
