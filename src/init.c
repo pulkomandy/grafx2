@@ -2276,10 +2276,13 @@ int Save_CFG(void)
     Chunk.Size=0;
     for (i=0; i<10; i++)    
     {
-      if (Bound_script[i]==NULL)
-        Chunk.Size+=1;
-      else
-        Chunk.Size+=strlen(Bound_script[i])+1;
+      Chunk.Size += 1;
+      if (Bound_script[i] != NULL)
+      {
+        size_t len = strlen(Bound_script[i]);
+        if (len < 256)
+          Chunk.Size += (word)len;
+      }
     }
     // Header
     if (!Write_byte(Handle, Chunk.Number) ||
@@ -2290,8 +2293,14 @@ int Save_CFG(void)
     for (i=0; i<10; i++)    
     {
       byte size=0;      
-      if (Bound_script[i]!=NULL)
-        size=strlen(Bound_script[i]);
+      if (Bound_script[i] != NULL)
+      {
+        size_t len = strlen(Bound_script[i]);
+        if (len < 256)
+          size = (byte)len;
+        else
+          GFX2_Log(GFX2_WARNING, "Cannot save script path (%lu > 255 characters)\n", (unsigned long)len);
+      }
         
       if (!Write_byte(Handle, size))
         goto Erreur_sauvegarde_config;
