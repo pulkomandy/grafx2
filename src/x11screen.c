@@ -29,6 +29,7 @@
 #include "screen.h"
 #include "gfx2surface.h"
 #include "loadsave.h"
+#include "io.h"
 #include "gfx2log.h"
 
 Display * X11_display = NULL;
@@ -328,9 +329,11 @@ void Allow_drag_and_drop(int flag)
 
 void Define_icon(void)
 {
-  char icon_path[MAX_PATH_CHARACTERS];
-  snprintf(icon_path, sizeof(icon_path), "%s%s", Data_directory, "gfx2.png"); // 48x48
+  char * icon_path;
+
+  icon_path = Filepath_append_to_dir(Data_directory, "gfx2.png"); // 48x48
   icon = Load_surface(icon_path, NULL);
+  free(icon_path);
 }
 
 void Set_mouse_position(void)
