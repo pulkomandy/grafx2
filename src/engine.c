@@ -786,8 +786,10 @@ void Main_handler(void)
         Load_image(&brush_context);
         if (File_error == 0)
         {
-          strcpy(Brush_filename, "NO_NAME.GIF");
-          Brush_filename_unicode[0] = 0;
+          free(Brush_filename);
+          Brush_filename = strdup("NO_NAME.GIF");
+          free(Brush_filename_unicode);
+          Brush_filename_unicode = NULL;
           Brush_fileformat = FORMAT_GIF;
 
           Tiling_offset_X=0;

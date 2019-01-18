@@ -671,11 +671,11 @@ int Init_program(int argc,char * argv[])
   Main.fileformat=DEFAULT_FILEFORMAT;
   Spare.fileformat    =DEFAULT_FILEFORMAT;
 
-  strcpy(Brush_selector.Directory,Main.selector.Directory);
-  strcpy(Brush_file_directory,Main.selector.Directory);
-  strcpy(Brush_filename       ,"NO_NAME.GIF");
-  Brush_filename_unicode[0] = 0;
-  Brush_fileformat    =DEFAULT_FILEFORMAT;
+  strcpy(Brush_selector.Directory, Main.selector.Directory);
+  Brush_file_directory = strdup(Main.selector.Directory);
+  Brush_filename = strdup("NO_NAME.GIF");
+  Brush_filename_unicode = NULL;
+  Brush_fileformat = DEFAULT_FILEFORMAT;
 
   strcpy(Palette_selector.Directory,Main.selector.Directory);
 
@@ -1240,6 +1240,10 @@ void Program_shutdown(void)
   FREE_POINTER(Brush);
   FREE_POINTER(Smear_brush);
   FREE_POINTER(Brush_original_pixels);
+
+  FREE_POINTER(Brush_file_directory);
+  FREE_POINTER(Brush_filename);
+  FREE_POINTER(Brush_filename_unicode);
 
   // Free all images
   Set_number_of_backups(-1); // even delete the main page

@@ -3188,7 +3188,10 @@ void Load_picture(enum CONTEXT_TYPE type)
     break;
   case CONTEXT_BRUSH:
     strcpy(filename, Brush_filename);
-    Unicode_strlcpy(filename_unicode, Brush_filename_unicode, MAX_PATH_CHARACTERS);
+    if (Brush_filename_unicode != NULL)
+      Unicode_strlcpy(filename_unicode, Brush_filename_unicode, MAX_PATH_CHARACTERS);
+    else
+      filename_unicode[0] = 0;
     strcpy(directory, Brush_file_directory);
     Init_context_brush(&context, filename, directory);
     selector = &Brush_selector;
@@ -3236,9 +3239,15 @@ void Load_picture(enum CONTEXT_TYPE type)
 
     if (type==CONTEXT_BRUSH)
     {
-      strcpy(Brush_filename, context.File_name);
-      Unicode_strlcpy(Brush_filename_unicode, context.File_name_unicode, MAX_PATH_CHARACTERS);
-      strcpy(Brush_file_directory, context.File_directory);
+      free(Brush_filename);
+      Brush_filename = strdup(context.File_name);
+      free(Brush_filename_unicode);
+      if (context.File_name_unicode != NULL && context.File_name_unicode[0] != 0)
+        Brush_filename_unicode = Unicode_strdup(context.File_name_unicode);
+      else
+        Brush_filename_unicode = NULL;
+      free(Brush_file_directory);
+      Brush_file_directory = strdup(context.File_directory);
       Brush_fileformat = context.Format;
 
       Tiling_offset_X=0;
@@ -3502,7 +3511,10 @@ void Save_picture(enum CONTEXT_TYPE type)
   else if (type == CONTEXT_BRUSH)
   {
     strcpy(filename, Brush_filename);
-    Unicode_strlcpy(filename_unicode, Brush_filename_unicode, MAX_PATH_CHARACTERS);
+    if (Brush_filename_unicode != NULL)
+      Unicode_strlcpy(filename_unicode, Brush_filename_unicode, MAX_PATH_CHARACTERS);
+    else
+      filename_unicode[0] = 0;
     strcpy(directory, Brush_file_directory);
     Init_context_brush(&save_context, filename, directory);
     save_context.Format = Brush_fileformat;
@@ -3572,10 +3584,16 @@ void Save_picture(enum CONTEXT_TYPE type)
     }
     if (type == CONTEXT_BRUSH)
     {
-      Brush_fileformat=save_context.Format;
-      strcpy(Brush_filename, save_context.File_name);
-      Unicode_strlcpy(Brush_filename_unicode, save_context.File_name_unicode, MAX_PATH_CHARACTERS);
-      strcpy(Brush_file_directory, save_context.File_directory);
+      Brush_fileformat = save_context.Format;
+      free(Brush_filename);
+      Brush_filename = strdup(save_context.File_name);
+      free(Brush_filename_unicode);
+      if (save_context.File_name_unicode != NULL && save_context.File_name_unicode[0] != 0)
+        Brush_filename_unicode = Unicode_strdup(save_context.File_name_unicode);
+      else
+        Brush_filename_unicode = NULL;
+      free(Brush_file_directory);
+      Brush_file_directory = strdup(save_context.File_directory);
     }
     Hide_cursor();
     Cursor_shape=old_cursor_shape;
