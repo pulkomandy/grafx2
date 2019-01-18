@@ -34,7 +34,6 @@
 Display * X11_display = NULL;
 Window X11_window = 0;
 static XImage * X11_image = NULL;
-static char * image_pixels = NULL;
 static XTextProperty windowName;
 static GC X11_gc = 0;
 static T_GFX2_Surface * screen = NULL;
@@ -171,16 +170,14 @@ void GFX2_Set_mode(int *width, int *height, int fullscreen)
     screen->h = *height;
     XDestroyImage(X11_image);
     X11_image = NULL;
-    image_pixels = NULL;
   }
 
-  if (image_pixels == NULL)
-  {
-    image_pixels = malloc(*height * *width * 4);
-    memset(image_pixels, 64, *height * *width * 4);
-  }
   if (X11_image == NULL)
   {
+    char * image_pixels = NULL;
+
+    image_pixels = malloc(*height * *width * 4);
+    memset(image_pixels, 64, *height * *width * 4);
     X11_image = XCreateImage(X11_display, visual, depth,
                              ZPixmap, 0, image_pixels, *width, *height,
                              32, 0/**width * 4*/);
@@ -264,7 +261,7 @@ void Update_rect(short x, short y, unsigned short width, unsigned short height)
   width *= Pixel_width;
   y *= Pixel_height;
   height *= Pixel_height;
-//printf("Update_rect(%d %d %d %d) %d %d\n", x, y, width, height, screen->w, screen->h);
+  //GFX2_Log(GFX2_DEBUG, "Update_rect(%d %d %d %d) %d %d\n", x, y, width, height, screen->w, screen->h);
   if (y >= screen->h || x >= screen->w) return;
   if (y + height > screen->h)
     height = screen->h - y;
@@ -272,9 +269,9 @@ void Update_rect(short x, short y, unsigned short width, unsigned short height)
     width = screen->w - x;
   for (line = y; line < y + height; line++)
   {
-#if 0
+#if 1
     const byte * src = Get_Screen_pixel_ptr(x, line);
-    byte * dest = image_pixels + line * X11_image->bytes_per_line + x * 4,
+    byte * dest = (byte *)X11_image->data + line * X11_image->bytes_per_line + x * 4;
     i = width;
     do
     {
