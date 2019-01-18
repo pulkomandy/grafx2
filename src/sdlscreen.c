@@ -39,6 +39,8 @@
 #include "sdlscreen.h"
 #include "errors.h"
 #include "misc.h"
+#include "gfx2log.h"
+#include "io.h"
 
 // Update method that does a large number of small rectangles, aiming
 // for a minimum number of total pixels updated.
@@ -731,22 +733,26 @@ void Define_icon(void)
 
   // General version: Load icon from file
   {
-    char icon_path[MAX_PATH_CHARACTERS];
 #if defined(USE_SDL)
     SDL_Surface * icon;
 #endif
-    //sprintf(icon_path, "%s%s", Data_directory, "gfx2.gif"); // 32x32
-    sprintf(icon_path, "%s%s", Data_directory, "gfx2.png"); // 48x48
+    char * icon_path;
+
+    // gfx2.gif : 32x32
+    // gfx2.png : 48x48
+    icon_path = Filepath_append_to_dir(Data_directory, "gfx2.png");
     icon = IMG_Load(icon_path);
-    if (icon != NULL)
+    if (icon == NULL)
+      GFX2_Log(GFX2_WARNING, "Failed to load icon %s\n", icon_path);
+    else
     {
       Uint32 pink;
       pink = SDL_MapRGB(icon->format, 255, 0, 255);
 
       if (icon->format->BitsPerPixel == 8)
       {
-        // NOTE : disable use of color key because of SDL/SDL2
-        // get the transparency information from the .gif and .png
+        // NOTE : disable use of color key because SDL/SDL2
+        // gets the transparency information from the .gif and .png
         // files by itself.
         // 8bit image: use color key
 #if defined(USE_SDL)
@@ -778,6 +784,7 @@ void Define_icon(void)
       SDL_FreeSurface(icon);
 #endif
     }
+    free(icon_path);
   }
 }
 
