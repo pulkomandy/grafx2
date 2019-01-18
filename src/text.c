@@ -314,7 +314,7 @@ static int CALLBACK EnumFontFamCallback(CONST LOGFONTA *lpelf, CONST TEXTMETRICA
 // Initialisation à faire une fois au début du programme
 void Init_text(void)
 {
-  char directory_name[MAX_PATH_CHARACTERS];
+  char * directory_name;
   #ifndef NOTTF
   // Initialisation de TTF
   TTF_Init();
@@ -324,21 +324,24 @@ void Init_text(void)
   font_list_start = NULL;
   Nb_fonts=0;
   // Parcours du répertoire "fonts"
-  snprintf(directory_name, sizeof(directory_name), "%s%s", Data_directory,FONTS_SUBDIRECTORY);
+  directory_name = Filepath_append_to_dir(Data_directory, FONTS_SUBDIRECTORY);
   For_each_file(directory_name, Add_font);
+  free(directory_name);
   // fonts subdirectory in Config_directory
-  snprintf(directory_name, sizeof(directory_name), "%s%s", Config_directory, "/fonts");
+  directory_name = Filepath_append_to_dir(Config_directory, "fonts");
   For_each_file(directory_name, Add_font);
+  free(directory_name);
   
   #if defined(WIN32)
     // Parcours du répertoire systeme windows "fonts"
     #ifndef NOTTF
     {
-      char * WindowsPath=getenv("windir");
+      char * WindowsPath = getenv("windir");
       if (WindowsPath)
       {
-        sprintf(directory_name, "%s\\FONTS", WindowsPath);
+        directory_name = Filepath_append_to_dir(WindowsPath, "FONTS");
         For_each_file(directory_name, Add_font);
+        free(directory_name);
       }
     }
     #else
@@ -360,7 +363,7 @@ void Init_text(void)
 
 
       int i,number;
-      char home_dir[MAXPATHLEN];
+      char * home_dir = NULL;
       const char *font_path_list[3] = {
          "/System/Library/Fonts",
          "/Library/Fonts"
@@ -371,13 +374,14 @@ void Init_text(void)
       //CFURLGetFileSystemRepresentation(url, true, (UInt8 *) home_dir, MAXPATHLEN);
       if (getenv("HOME") != NULL)
       {
-        snprintf(home_dir, sizeof(home_dir), "%s/Library/Fonts", getenv("HOME"));
+        home_dir = Filepath_append_to_dir(getenv("HOME"), "Library/Fonts");
         font_path_list[number++] = home_dir;
       }
 
       for(i=0;i<number;i++)
-         For_each_file(*(font_path_list+i),Add_font);
+         For_each_file(font_path_list[i],Add_font);
 
+      free(home_dir);
       //CFRelease(url);
     #endif
 
@@ -802,4 +806,3 @@ byte *Render_text(const char *str, int font_number, int size, int antialias, int
     return Render_text_SFont(str, font_number, width, height, palette);
   }
 }
-
