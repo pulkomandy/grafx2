@@ -692,8 +692,53 @@ int Handle_mouse_release(SDL_MouseButtonEvent event)
 
 // Keyboard management
 
+/**
+ * check Keys that emulate mouse moves, etc.
+ */
+int Handle_special_key_press(void)
+{
+    if(Is_shortcut(Key,SPECIAL_MOUSE_UP))
+    {
+      Directional_emulated_up=1;
+      return 0;
+    }
+    else if(Is_shortcut(Key,SPECIAL_MOUSE_DOWN))
+    {
+      Directional_emulated_down=1;
+      return 0;
+    }
+    else if(Is_shortcut(Key,SPECIAL_MOUSE_LEFT))
+    {
+      Directional_emulated_left=1;
+      return 0;
+    }
+    else if(Is_shortcut(Key,SPECIAL_MOUSE_RIGHT))
+    {
+      Directional_emulated_right=1;
+      return 0;
+    }
+    else if(Is_shortcut(Key,SPECIAL_CLICK_LEFT) && Keyboard_click_allowed > 0)
+    {
+        Input_new_mouse_K=1;
+        Directional_click=1;
+        return Move_cursor_with_constraints();
+    }
+    else if(Is_shortcut(Key,SPECIAL_CLICK_RIGHT) && Keyboard_click_allowed > 0)
+    {
+        Input_new_mouse_K=2;
+        Directional_click=2;
+        return Move_cursor_with_constraints();
+    }
+    else if(Is_shortcut(Key,SPECIAL_HOLD_PAN))
+    {
+      Pan_shortcut_pressed=1;
+      return 0;
+    }
+    return 0;
+}
+
 #if defined(USE_SDL) || defined(USE_SDL2)
-int Handle_key_press(SDL_KeyboardEvent event)
+static int Handle_key_press(SDL_KeyboardEvent event)
 {
     //Appui sur une touche du clavier
     int modifier;
@@ -753,45 +798,9 @@ int Handle_key_press(SDL_KeyboardEvent event)
     }
     #endif
 
-    if(Is_shortcut(Key,SPECIAL_MOUSE_UP))
-    {
-      Directional_emulated_up=1;
-      return 0;
-    }
-    else if(Is_shortcut(Key,SPECIAL_MOUSE_DOWN))
-    {
-      Directional_emulated_down=1;
-      return 0;
-    }
-    else if(Is_shortcut(Key,SPECIAL_MOUSE_LEFT))
-    {
-      Directional_emulated_left=1;
-      return 0;
-    }
-    else if(Is_shortcut(Key,SPECIAL_MOUSE_RIGHT))
-    {
-      Directional_emulated_right=1;
-      return 0;
-    }
-    else if(Is_shortcut(Key,SPECIAL_CLICK_LEFT) && Keyboard_click_allowed > 0)
-    {
-        Input_new_mouse_K=1;
-        Directional_click=1;
-        return Move_cursor_with_constraints();
-    }
-    else if(Is_shortcut(Key,SPECIAL_CLICK_RIGHT) && Keyboard_click_allowed > 0)
-    {
-        Input_new_mouse_K=2;
-        Directional_click=2;
-        return Move_cursor_with_constraints();
-    }
-    else if(Is_shortcut(Key,SPECIAL_HOLD_PAN))
-    {
-      Pan_shortcut_pressed=1;
-      return 0;
-    }
-    return 0;
+    return Handle_special_key_press();
 }
+#endif
 
 int Release_control(int key_code, int modifier)
 {
@@ -867,7 +876,8 @@ int Release_control(int key_code, int modifier)
 }
 
 
-int Handle_key_release(SDL_KeyboardEvent event)
+#if defined(USE_SDL) || defined(USE_SDL2)
+static int Handle_key_release(SDL_KeyboardEvent event)
 {
     int modifier;
     int released_key = Keysym_to_keycode(event.keysym) & 0x0FFF;
