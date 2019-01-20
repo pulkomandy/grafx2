@@ -6,7 +6,10 @@ SDLIMAGEARCH = SDL_image-1.2.12.tar.gz
 SDLIMAGEURL = https://www.libsdl.org/projects/SDL_image/release/$(SDLIMAGEARCH)
 SDLIMAGEPATCHES = SDL_image-1.2.12.XCF_infinite_loop.patch \
                   SDL_image-1.2.12.XCF_v11_64bits_offsets.patch \
-                  SDL_image_XCF_v11_load_level.patch
+                  SDL_image_XCF_v11_load_level.patch \
+                  SDL_image-1.2.12-png1.6.patch \
+                  SDL_image-1.2.12-png_const_colorp.patch \
+                  SDL_image-1.2.12-png_const_fix.patch
 SDLTTF=SDL_ttf-2.0.11
 SDLTTFARCH=$(SDLTTF).tar.gz
 SDLTTFURL=https://www.libsdl.org/projects/SDL_ttf/release/$(SDLTTFARCH)

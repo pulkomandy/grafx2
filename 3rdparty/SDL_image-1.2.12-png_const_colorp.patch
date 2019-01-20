@@ -1,0 +1,27 @@
+# HG changeset patch
+# User Ozkan Sezer <sezeroz@gmail.com>
+# Date 1539674510 -10800
+# Node ID e7abf44fc35ca01960d2d86184c0587d97bd6363
+# Parent  93d1be43b70a5dab21202d12126c536f7c89cba9
+png_const_colorp isn't used in SDL_image-1.2.x.
+
+diff -r 93d1be43b70a -r e7abf44fc35c IMG_png.c
+--- a/IMG_png.c	Sun Oct 14 17:05:20 2018 +0300
++++ b/IMG_png.c	Tue Oct 16 10:21:50 2018 +0300
+@@ -75,7 +75,6 @@
+ #if (PNG_LIBPNG_VER_MINOR < 5)
+ #define LIBPNG_VERSION_12
+ typedef png_bytep png_const_bytep;
+-typedef png_color *png_const_colorp;
+ #endif
+ #if (PNG_LIBPNG_VER_MINOR < 6)
+ typedef png_structp png_const_structrp;
+@@ -542,7 +541,7 @@
+ 		    palette->colors[i].b = (Uint8)i;
+ 		}
+ 	    } else if (png_num_palette > 0 ) {
+-		palette->ncolors = png_num_palette; 
++		palette->ncolors = png_num_palette;
+ 		for( i=0; i<png_num_palette; ++i ) {
+ 		    palette->colors[i].b = png_palette[i].blue;
+ 		    palette->colors[i].g = png_palette[i].green;
