@@ -57,6 +57,7 @@
 
 
 #include <stdlib.h>
+#include <assert.h>
 #if defined(WIN32)
 #if defined(_MSC_VER)
 #include <stdio.h>
@@ -6798,6 +6799,7 @@ void Save_PNG_Sub(T_IO_Context * context, FILE * file, char * * buffer, unsigned
   byte cycle_data[16*6]; // Storage for color-cycling data, referenced by crng_chunk
   struct PNG_memory_buffer memory_buffer;
 
+  assert((file != NULL) || ((buffer != NULL) && (buffer_size != NULL)));
   memset(&memory_buffer, 0, sizeof(memory_buffer));
   /* initialisation */
   if ((png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL))
