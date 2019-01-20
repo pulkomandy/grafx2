@@ -33,6 +33,9 @@
 #include "keyboard.h"
 #include "unicode.h"
 
+extern int Handle_special_key_press(void);
+extern int Release_control(int key_code, int modifier);
+
 extern int user_feedback_required;
 extern word Input_new_mouse_X;
 extern word Input_new_mouse_Y;
@@ -241,11 +244,13 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
       break;
     default:
       Key = wParam|Get_Key_modifiers();
+      Handle_special_key_press();
       user_feedback_required = 1;
     }
     return 0;
   case WM_SYSKEYUP:
   case WM_KEYUP:
+    Release_control(wParam, Get_Key_modifiers());
     return 0;
   case WM_CHAR:
     Key_ANSI = Key_UNICODE = wParam;
@@ -332,9 +337,7 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
 int Init_Win32(HINSTANCE hInstance, HINSTANCE hPrevInstance)
 {
   WNDCLASS wc;
-	//HINSTANCE hInstance;
-
-	//hInstance = GetModuleHandle(NULL);
+  (void)hPrevInstance;
 
 	wc.style = 0;
 	wc.lpfnWndProc = Win32_WindowProc;
@@ -575,6 +578,7 @@ int SetPalette(const T_Components * colors, int firstcolor, int ncolors)
 
 void Clear_border(byte color)
 {
+  (void)color;
 }
   
 volatile int Allow_colorcycling = 0;
