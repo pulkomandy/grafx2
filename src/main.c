@@ -614,9 +614,7 @@ int Init_program(int argc,char * argv[])
   static char main_directory[MAX_PATH_CHARACTERS];
   static char spare_filename [MAX_PATH_CHARACTERS];
   static char spare_directory[MAX_PATH_CHARACTERS];
-#if defined(ENABLE_FILENAMES_ICONV) || defined(WIN32)
   static word filename_unicode[MAX_PATH_CHARACTERS];
-#endif
 
   #if defined(__MINT__)
   printf("===============================\n");
