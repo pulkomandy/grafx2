@@ -1658,7 +1658,7 @@ int Get_input(int sleep_time)
               mod |= MOD_META;
             //sym = XKeycodeToKeysym(X11_display, event.xkey.keycode, 0);
             sym = XkbKeycodeToKeysym(X11_display, event.xkey.keycode, 0, 0);
-            GFX2_Log(GFX2_DEBUG, "key code = %3d state=0x%08x sym = 0x%04lx %s\tmod=%04x\n",
+            GFX2_Log(GFX2_DEBUG, "key press code = %3d state=0x%08x sym = 0x%04lx %s\tmod=%04x\n",
                      event.xkey.keycode, event.xkey.state, sym, XKeysymToString(sym), mod);
             if (sym == XK_Shift_L || sym == XK_Shift_R ||
                 sym == XK_Control_L || sym == XK_Control_R ||
@@ -1674,7 +1674,8 @@ int Get_input(int sleep_time)
               static XComposeStatus status;
               count = XLookupString(&event.xkey, buffer, sizeof(buffer),
                                     &sym, &status);
-              if (count == 1) {
+              if (count == 1)
+              {
                 Key_ANSI = Key_UNICODE = (word)buffer[0] & 0x00ff;
               }
               else if((sym & 0xf000) != 0xf000)
@@ -1688,7 +1689,26 @@ int Get_input(int sleep_time)
             {
               Key_UNICODE = Key_ANSI = 0;
             }
+            Handle_special_key_press();
             user_feedback_required = 1;
+          }
+          break;
+        case KeyRelease:
+          {
+            KeySym sym;
+
+            if (event.xkey.state & ShiftMask)
+              mod |= MOD_SHIFT;
+            if (event.xkey.state & ControlMask)
+              mod |= MOD_CTRL;
+            if (event.xkey.state & (Mod1Mask | Mod5Mask))
+              mod |= MOD_ALT;
+            if (event.xkey.state & Mod4Mask)
+              mod |= MOD_META;
+            sym = XkbKeycodeToKeysym(X11_display, event.xkey.keycode, 0, 0);
+            GFX2_Log(GFX2_DEBUG, "keyrelease code= %3d state=0x%08x sym = 0x%04lx %s\tmod=%04x\n",
+                     event.xkey.keycode, event.xkey.state, sym, XKeysymToString(sym), mod);
+            Release_control(sym & 0x0fff, mod);
           }
           break;
         case ButtonPress: // left = 1, middle = 2, right = 3, wheelup = 4, wheeldown = 5

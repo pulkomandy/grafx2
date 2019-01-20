@@ -148,7 +148,8 @@ void GFX2_Set_mode(int *width, int *height, int fullscreen)
     }
 
     XSelectInput(X11_display, X11_window,
-                 PointerMotionMask | ButtonPressMask | ButtonReleaseMask | KeyPressMask | ExposureMask | StructureNotifyMask);
+                 PointerMotionMask | ButtonPressMask | ButtonReleaseMask
+                 | KeyPressMask | KeyReleaseMask | ExposureMask | StructureNotifyMask);
 
     wmDelete = XInternAtom(X11_display, "WM_DELETE_WINDOW", True);
     XSetWMProtocols(X11_display, X11_window, &wmDelete, 1);
