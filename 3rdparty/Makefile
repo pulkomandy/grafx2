@@ -50,7 +50,9 @@ PREFIX = $(PWD)/usr
 MKDIR = mkdir -p
 CP = cp -v
 TAR = $(shell which tar)
-GETURL = $(shell WGET=`which wget` ; if [ "$?" = "0" ] && [ -x "$WGET" ] ; then echo "$WGET" ; else echo "curl -O -L --max-time 120" ; fi )
+GETURL = $(shell WGET=`which wget` ; if [ "$$?" = "0" ] && [ -x "$$WGET" ] ; \
+                 then echo "$$WGET" ; \
+                 else echo "curl -O -L --max-time 120" ; fi )
 
 BUILD_CC := $(CC)
 STRIP = strip
