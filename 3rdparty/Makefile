@@ -1,3 +1,5 @@
+API ?= sdl
+
 SDLDEVEL = SDL-devel-1.2.15-mingw32.tar.gz
 SDLDEVELURL = https://www.libsdl.org/release/$(SDLDEVEL)
 SDLDEVELPATCH = SDL-1.2.15.patch
@@ -13,6 +15,18 @@ SDLIMAGEPATCHES = SDL_image-1.2.12.XCF_infinite_loop.patch \
 SDLTTF=SDL_ttf-2.0.11
 SDLTTFARCH=$(SDLTTF).tar.gz
 SDLTTFURL=https://www.libsdl.org/projects/SDL_ttf/release/$(SDLTTFARCH)
+SDL2 = SDL2-2.0.9
+SDL2ARCH = $(SDL2).tar.gz
+SDL2URL = https://www.libsdl.org/release/$(SDL2ARCH)
+SDL2DEVEL = SDL2-devel-2.0.9-mingw.tar.gz
+SDL2DEVELURL = https://www.libsdl.org/release/$(SDL2DEVEL)
+SDL2DEVELPATCH = SDL2-devel.patch
+SDL2IMAGE = SDL2_image-2.0.4
+SDL2IMAGEARCH = $(SDL2IMAGE).tar.gz
+SDL2IMAGEURL = https://www.libsdl.org/projects/SDL_image/release/$(SDL2IMAGEARCH)
+SDL2TTF = SDL2_ttf-2.0.14
+SDL2TTFARCH = $(SDL2TTF).tar.gz
+SDL2TTFURL = https://www.libsdl.org/projects/SDL_ttf/release/$(SDL2TTFARCH)
 LIBPNG = libpng-1.6.36
 LIBPNGARCH = $(LIBPNG).tar.gz
 LIBPNGURL = https://download.sourceforge.net/libpng/$(LIBPNGARCH)
@@ -91,14 +105,26 @@ clean_all:	clean clean_archives
 clean:
 	$(RM) -r usr/ $(LIBPNG) $(ZLIB) $(SDLIMAGE) $(JPEGDIR) $(LIBTIFF)
 	$(RM) -r $(SDLTTF) $(FREETYPE) SDL-1.2.15 $(LUA) $(RECOIL)
+	$(RM) -r $(SDL2) $(SDL2IMAGE) $(SDL2TTF)
 
 clean_archives:
 	$(RM) -r archives
 
+ifeq ($(API), sdl)
 libs:	libpng libsdl libsdl_image libsdl_ttf lua
+else
+ifeq ($(API), sdl2)
+libs:	libpng libsdl2 libsdl2_image libsdl2_ttf lua
+else
+libs:	libpng lua libtiff
+endif
+endif
 libsdl:	$(PREFIX)/lib/libSDLmain.a
 libsdl_image:	$(PREFIX)/lib/libSDL_image.a
 libsdl_ttf:	$(PREFIX)/lib/libSDL_ttf.a
+libsdl2:	$(PREFIX)/lib/libSDL2main.a
+libsdl2_image:	$(PREFIX)/lib/libSDL2_image.a
+libsdl2_ttf:	$(PREFIX)/lib/libSDL2_ttf.a
 libjpeg:	$(PREFIX)/lib/libjpeg.a
 libpng:	$(PREFIX)/lib/libpng.a
 libtiff:	$(PREFIX)/lib/libtiff.a
@@ -127,6 +153,80 @@ $(LUA)/.ok:	archives/$(LUAARCH)
 	$(TAR) xzf $<
 	touch $@
 
+ifdef WIN32
+$(PREFIX)/lib/libSDL2main.a:	archives/$(SDL2DEVEL)
+	$(TAR) xzf $<
+	patch -p0 < $(SDL2DEVELPATCH)
+	$(MKDIR) $(PREFIX)
+	cd $(SDL2) && $(MAKE) install-package arch=i686-w64-mingw32 prefix=$(PREFIX)
+	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/SDL2.dll ../bin && $(STRIP) ../bin/SDL2.dll
+	echo "The following file:" > ../doc/README-SDL2.txt
+	echo "" >> ../doc/README-SDL2.txt
+	echo "	SDL2.dll" >> ../doc/README-SDL2.txt
+	echo "" >> ../doc/README-SDL2.txt
+	echo "is the runtime environment for the SDL library." >> ../doc/README-SDL2.txt
+	tail --lines +3 $(SDL2)/README-SDL.txt >> ../doc/README-SDL2.txt
+else
+$(PREFIX)/lib/libSDL2main.a:	$(SDL2)/.ok
+	$(MKDIR) $(SDL2)/build
+	cd $(SDL2)/build && ../configure --prefix=$(PREFIX) --host=$(HOST) --disable-video-wayland
+	cd $(SDL2)/build && $(MAKE) && $(MAKE) install
+
+$(SDL2)/.ok:	archives/$(SDL2ARCH)
+	$(TAR) xzf $<
+	touch $@
+endif
+
+$(PREFIX)/lib/libSDL2_image.a:	$(PREFIX)/lib/libjpeg.a
+$(PREFIX)/lib/libSDL2_image.a:	$(PREFIX)/lib/libtiff.a
+$(PREFIX)/lib/libSDL2_image.a:	$(PREFIX)/lib/libpng.a
+
+$(PREFIX)/lib/libSDL2_image.a:	$(SDL2IMAGE)/.ok
+	cd $(SDL2IMAGE) && PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig \
+	  CC="$(CC) $(LDFLAGS)" CPPFLAGS=-I$(PREFIX)/include LDFLAGS="-L$(PREFIX)/lib" \
+	  ./configure --prefix=$(PREFIX) --host=$(HOST) --disable-webp --disable-sdltest
+	cd $(SDL2IMAGE) && $(MAKE) && $(MAKE) install
+ifdef WIN32
+	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/SDL2_image.dll ../bin && $(STRIP) ../bin/SDL2_image.dll
+endif
+	echo "$(SDL2IMAGE)" > ../doc/README-SDL2_image.txt
+	echo "" >> ../doc/README-SDL2_image.txt
+	echo "dependencies :" >> ../doc/README-SDL2_image.txt
+	echo " - $(LIBPNG)" >> ../doc/README-SDL2_image.txt
+	echo " - http://www.ijg.org/ JPEG lib $(JPEGVER)" >> ../doc/README-SDL2_image.txt
+	echo " - $(LIBTIFF)" >> ../doc/README-SDL2_image.txt
+	echo "" >> ../doc/README-SDL2_image.txt
+	echo "License :" >> ../doc/README-SDL2_image.txt
+	cat $(SDL2IMAGE)/COPYING.txt | tr -d "\r" >> ../doc/README-SDL2_image.txt
+
+$(SDL2IMAGE)/.ok:	archives/$(SDL2IMAGEARCH)
+	$(TAR) xzf $<
+	touch $@
+
+$(PREFIX)/lib/libSDL2_ttf.a:	$(PREFIX)/lib/libfreetype.a
+
+$(PREFIX)/lib/libSDL2_ttf.a:	$(SDL2TTF)/.ok
+	cd $(SDL2TTF) && PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig \
+	  CC=$(CC) CPPFLAGS=-I$(PREFIX)/include LDFLAGS="-L$(PREFIX)/lib $(LDFLAGS)" \
+	  ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) \
+	  --with-freetype-prefix=$(PREFIX) --host=$(HOST)
+	cd $(SDL2TTF) && $(MAKE)
+	cd $(SDL2TTF) && $(MAKE) install
+ifdef WIN32
+	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/SDL2_ttf.dll ../bin && $(STRIP) ../bin/SDL2_ttf.dll
+endif
+	echo "$(SDL2TTF)" > ../doc/README-SDL2_ttf.txt
+	echo "" >> ../doc/README-SDL2_ttf.txt
+	echo "dependencies :" >> ../doc/README-SDL2_ttf.txt
+	echo " - $(FREETYPE)" >> ../doc/README-SDL2_ttf.txt
+	echo "" >> ../doc/README-SDL2_ttf.txt
+	echo "License :" >> ../doc/README-SDL2_ttf.txt
+	cat $(SDL2TTF)/COPYING.txt | tr -d "\r" >> ../doc/README-SDL2_ttf.txt
+
+$(SDL2TTF)/.ok:	archives/$(SDL2TTFARCH)
+	$(TAR) xzf $<
+	touch $@
+
 $(PREFIX)/lib/libSDLmain.a:	archives/$(SDLDEVEL)
 	$(TAR) xzf $<
 	patch -p0 < $(SDLDEVELPATCH)
@@ -152,6 +252,7 @@ $(PREFIX)/lib/libSDL_image.a:	$(SDLIMAGE)/.ok
 	cd $(SDLIMAGE) && $(MAKE) install
 ifdef WIN32
 	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/SDL_image.dll ../bin && $(STRIP) ../bin/SDL_image.dll
+endif
 	echo "$(SDLIMAGE)" > ../doc/README-SDL_image.txt
 	echo "" >> ../doc/README-SDL_image.txt
 	echo "dependencies :" >> ../doc/README-SDL_image.txt
@@ -161,7 +262,6 @@ ifdef WIN32
 	echo "" >> ../doc/README-SDL_image.txt
 	echo "License :" >> ../doc/README-SDL_image.txt
 	cat $(SDLIMAGE)/COPYING >> ../doc/README-SDL_image.txt
-endif
 
 $(SDLIMAGE)/.ok:	archives/$(SDLIMAGEARCH)
 	$(TAR) xzf $<
@@ -178,6 +278,7 @@ $(PREFIX)/lib/libSDL_ttf.a:	$(SDLTTF)/.ok
 	cd $(SDLTTF) && $(MAKE) install
 ifdef WIN32
 	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/SDL_ttf.dll ../bin && $(STRIP) ../bin/SDL_ttf.dll
+endif
 	echo "$(SDLTTF)" > ../doc/README-SDL_ttf.txt
 	echo "" >> ../doc/README-SDL_ttf.txt
 	echo "dependencies :" >> ../doc/README-SDL_ttf.txt
@@ -185,7 +286,6 @@ ifdef WIN32
 	echo "" >> ../doc/README-SDL_ttf.txt
 	echo "License :" >> ../doc/README-SDL_ttf.txt
 	cat $(SDLTTF)/COPYING >> ../doc/README-SDL_ttf.txt
-endif
 
 $(SDLTTF)/.ok:	archives/$(SDLTTFARCH)
 	$(TAR) xzf $<
@@ -279,15 +379,21 @@ $(LIBPNG)/.ok:	archives/$(LIBPNGARCH)
 	touch $@
 
 $(PREFIX)/lib/libz.a:	$(ZLIB)/.ok
+ifdef WIN32
 	cd $(ZLIB) && $(MAKE) -fwin32/Makefile.gcc PREFIX=$(shell echo $(CC) | sed 's/^\(.*\)gcc/\1/') LOC="$(LDFLAGS) $(CFLAGS)"
 	cd $(ZLIB) && INCLUDE_PATH=$(PREFIX)/include LIBRARY_PATH=$(PREFIX)/lib BINARY_PATH=$(PREFIX)/bin $(MAKE) install -fwin32/Makefile.gcc SHARED_MODE=1
-ifdef WIN32
 	$(MKDIR) ../bin && for f in $(PREFIX)/bin/zlib*.dll ; do \
 	    $(CP) $$f ../bin ; \
 	    $(STRIP) ../bin/`basename $$f` ; \
 	  done
-	$(CP) $(ZLIB)/README ../doc/README-zlib1.txt
+else
+	# configure [--const] [--zprefix] [--prefix=PREFIX]  [--eprefix=EXPREFIX]
+	#  [--static] [--64] [--libdir=LIBDIR] [--sharedlibdir=LIBDIR]
+	#  [--includedir=INCLUDEDIR] [--archs="-arch i386 -arch x86_64"]
+	cd $(ZLIB) && ./configure --prefix=$(PREFIX) && $(MAKE) test
+	cd $(ZLIB) && $(MAKE) install
 endif
+	$(CP) $(ZLIB)/README ../doc/README-zlib1.txt
 
 $(ZLIB)/.ok:	archives/$(ZLIBARCH)
 	$(TAR) xzf $<
@@ -310,6 +416,22 @@ archives/$(SDLIMAGEARCH):
 archives/$(SDLTTFARCH):
 	@$(MKDIR) $(@D)
 	cd $(@D) && $(GETURL) $(SDLTTFURL)
+
+archives/$(SDL2DEVEL):
+	@$(MKDIR) $(@D)
+	cd $(@D) && $(GETURL) $(SDL2DEVELURL)
+
+archives/$(SDL2ARCH):
+	@$(MKDIR) $(@D)
+	cd $(@D) && $(GETURL) $(SDL2URL)
+
+archives/$(SDL2IMAGEARCH):
+	@$(MKDIR) $(@D)
+	cd $(@D) && $(GETURL) $(SDL2IMAGEURL)
+
+archives/$(SDL2TTFARCH):
+	@$(MKDIR) $(@D)
+	cd $(@D) && $(GETURL) $(SDL2TTFURL)
 
 archives/$(LIBPNGARCH):
 	@$(MKDIR) $(@D)
