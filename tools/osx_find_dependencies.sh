@@ -14,7 +14,7 @@ if [ $# -ne 1 ] ; then
 fi
 
 #list=$(otool -L $1 | sed '1d' | grep -v libSystem.B | grep -v /System/Library | grep -v $1 | cut -f 2 | cut -d' ' -f 1)
-list=$(otool -L $1 | sed '1d' | grep -v /usr/lib/lib | grep -v /System/Library | grep -v $1 | cut -f 2 | cut -d' ' -f 1)
+list=$(otool -L $1 | sed '1d' | cut -f 2 | grep -v ^/usr/lib/lib | grep -v ^/System/Library | grep -v $1 | cut -d' ' -f 1)
 
 #echo "$1 => $list" >&2
 
