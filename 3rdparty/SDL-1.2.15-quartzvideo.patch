@@ -1,0 +1,20 @@
+# HG changeset patch
+# User Sam Lantinga <slouken@libsdl.org>
+# Date 1378535730 25200
+# Node ID bbfb41c13a870d2ef487242b3a23d59f8f27f783
+# Parent  e9466ead70e5964b37575649d88602c10e6d01c8
+Better fix for bug 2085 - SDL 1.2.15 fails to build on OSX 10.9 Mavericks, thanks Ozkan!
+
+diff -r e9466ead70e5 -r bbfb41c13a87 src/video/quartz/SDL_QuartzVideo.h
+--- src/video/quartz/SDL_QuartzVideo.h	Thu Sep 05 06:38:57 2013 -0700
++++ src/video/quartz/SDL_QuartzVideo.h	Fri Sep 06 23:35:30 2013 -0700
+@@ -91,7 +91,9 @@
+     CGDirectDisplayID  display;            /* 0 == main display (only support single display) */
+     const void         *mode;              /* current mode of the display */
+     const void         *save_mode;         /* original mode of the display */
++#if (MAC_OS_X_VERSION_MIN_REQUIRED < 1070)
+     CGDirectPaletteRef palette;            /* palette of an 8-bit display */
++#endif
+     NSOpenGLContext    *gl_context;        /* OpenGL rendering context */
+     NSGraphicsContext  *nsgfx_context;     /* Cocoa graphics context */
+     Uint32             width, height, bpp; /* frequently used data about the display */

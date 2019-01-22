@@ -45,7 +45,7 @@ install:
 
 script:
   - 'cd $TRAVIS_BUILD_DIR'
-  - 'if [ "$WIN32CROSS" = "1" ] ; then make 3rdparty -j3 ; fi'
+  - 'if [ "$WIN32CROSS" = "1" ] || [ "$TRAVIS_OS_NAME" = "osx" ] ; then make 3rdparty -j3 ; fi'
   - 'make -j3'
   - 'make ziprelease'
   - 'if [ "$WIN32CROSS" = "1" ] ; then make win32installer ; fi'

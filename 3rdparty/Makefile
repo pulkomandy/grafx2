@@ -1,5 +1,12 @@
 API ?= sdl
 
+PLATFORM = $(shell uname)
+
+SDL = SDL-1.2.15
+SDLARCH = $(SDL).tar.gz
+SDLURL = https://www.libsdl.org/release/$(SDLARCH)
+SDLPATCHES = SDL-1.2.15-patch-src_video_x11_SDL_x11sym.h \
+             SDL-1.2.15-quartzvideo.patch
 SDLDEVEL = SDL-devel-1.2.15-mingw32.tar.gz
 SDLDEVELURL = https://www.libsdl.org/release/$(SDLDEVEL)
 SDLDEVELPATCH = SDL-1.2.15.patch
@@ -229,12 +236,12 @@ $(SDL2TTF)/.ok:	archives/$(SDL2TTFARCH)
 	$(TAR) xzf $<
 	touch $@
 
+ifdef WIN32
 $(PREFIX)/lib/libSDLmain.a:	archives/$(SDLDEVEL)
 	$(TAR) xzf $<
 	patch -p0 < $(SDLDEVELPATCH)
 	$(MKDIR) $(PREFIX)
 	cd SDL-1.2.15 && CROSS_PATH=$(PREFIX) $(MAKE) cross
-ifdef WIN32
 	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/SDL.dll ../bin && $(STRIP) ../bin/SDL.dll
 	echo "The following file:" > ../doc/README-SDL.txt
 	echo "" >> ../doc/README-SDL.txt
@@ -242,6 +249,23 @@ ifdef WIN32
 	echo "" >> ../doc/README-SDL.txt
 	echo "is the runtime environment for the SDL library." >> ../doc/README-SDL.txt
 	tail --lines +3 SDL-1.2.15/README-SDL.txt >> ../doc/README-SDL.txt
+else
+$(PREFIX)/lib/libSDLmain.a:	$(SDL)/.ok
+	cd $(SDL) && ./configure --host=$(HOST) --prefix=$(PREFIX) \
+	  --disable-joystick --disable-audio
+	cd $(SDL) && $(MAKE)
+	cd $(SDL) && $(MAKE) install
+
+$(SDL)/.ok:	archives/$(SDLARCH)
+	$(TAR) xzf $<
+	cd $(SDL) ; for p in $(SDLPATCHES) ; do echo "applying $$p" ; patch -p0 < ../$$p ; done
+	touch $@
+endif
+
+ifndef WIN32
+ifeq ($(PLATFORM), FreeBSD)
+ADDLDFLAGS = -L/usr/local/lib
+endif
 endif
 
 $(PREFIX)/lib/libSDL_image.a:	$(PREFIX)/lib/libjpeg.a
@@ -249,7 +273,9 @@ $(PREFIX)/lib/libSDL_image.a:	$(PREFIX)/lib/libtiff.a
 $(PREFIX)/lib/libSDL_image.a:	$(PREFIX)/lib/libpng.a
 
 $(PREFIX)/lib/libSDL_image.a:	$(SDLIMAGE)/.ok
-	cd $(SDLIMAGE) && CC="$(CC) $(LDFLAGS)" CPPFLAGS=-I$(PREFIX)/include LDFLAGS="-L$(PREFIX)/lib" LIBPNG_CFLAGS= LIBPNG_LIBS=-lpng ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --host=$(HOST) --disable-webp
+	cd $(SDLIMAGE) && CC="$(CC) $(LDFLAGS)" CPPFLAGS=-I$(PREFIX)/include \
+	  LDFLAGS="-L$(PREFIX)/lib $(ADDLDFLAGS)" LIBPNG_CFLAGS= LIBPNG_LIBS=-lpng \
+	  ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --host=$(HOST) --disable-webp
 	cd $(SDLIMAGE) && $(MAKE)
 	cd $(SDLIMAGE) && $(MAKE) install
 ifdef WIN32
@@ -274,7 +300,7 @@ $(PREFIX)/lib/libSDL_ttf.a:	$(PREFIX)/lib/libfreetype.a
 
 $(PREFIX)/lib/libSDL_ttf.a:	$(SDLTTF)/.ok
 	cd $(SDLTTF) && PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig \
-	  CC=$(CC) CPPFLAGS=-I$(PREFIX)/include LDFLAGS="-L$(PREFIX)/lib $(LDFLAGS)" \
+	  CC=$(CC) CPPFLAGS=-I$(PREFIX)/include LDFLAGS="-L$(PREFIX)/lib $(LDFLAGS) $(ADDLDFLAGS)" \
 	  ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --with-freetype-prefix=$(PREFIX) --host=$(HOST)
 	cd $(SDLTTF) && $(MAKE)
 	cd $(SDLTTF) && $(MAKE) install
@@ -406,6 +432,10 @@ recoil:	$(RECOIL)/.ok
 $(RECOIL)/.ok:	archives/$(RECOILARCH)
 	$(TAR) xzf $<
 	touch $@
+
+archives/$(SDLARCH):
+	@$(MKDIR) $(@D)
+	cd $(@D) && $(GETURL) $(SDLURL)
 
 archives/$(SDLDEVEL):
 	@$(MKDIR) $(@D)
