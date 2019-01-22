@@ -22,13 +22,17 @@ job_win32:
         - apt-get update -qq && apt-get install -y -qq zip dos2unix
         - apt-get install -y -qq gcc-mingw-w64-i686 g++-mingw-w64-i686 mingw-w64-tools nsis
     script:
-        - "WIN32CROSS=1 make 3rdparty -j3"
-        - "WIN32CROSS=1 make -j3"
+        - "WIN32CROSS=1 make 3rdparty -j2"
+        - "WIN32CROSS=1 make -j2"
         - "WIN32CROSS=1 make ziprelease"
         - "WIN32CROSS=1 make win32installer"
-        - "WIN32CROSS=1 API=win32 make -j3"
+        - "WIN32CROSS=1 API=win32 make -j2"
         - "WIN32CROSS=1 API=win32 make ziprelease"
         - "WIN32CROSS=1 API=win32 make win32installer"
+        - "WIN32CROSS=1 API=sdl2 make 3rdparty -j2"
+        - "WIN32CROSS=1 API=sdl2 make -j2"
+        - "WIN32CROSS=1 API=sdl2 make ziprelease"
+        - "WIN32CROSS=1 API=sdl2 make win32installer"
     artifacts:
         paths:
             - "*.zip"
