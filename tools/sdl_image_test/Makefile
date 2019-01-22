@@ -18,7 +18,8 @@ ifdef WIN32CROSS
 CC = $(shell which i686-w64-mingw32-gcc || which mingw32-gcc)
 PKGCONFIG_PATH = $(shell if [ -d ../../3rdparty/usr ] ; then echo "PKG_CONFIG_LIBDIR=$${PWD}/../../3rdparty/usr/lib/pkgconfig" ; fi )
 PKGCONFIG = $(PKGCONFIG_PATH) $(shell which i686-w64-mingw32-pkg-config || which mingw32-pkg-config || which pkg-config)
-SDLCONFIG = $(shell which ../../3rdparty/usr/bin/sdl-config || which /usr/local/cross-tools/i386-mingw32/bin/sdl-config)
+SDLCONFIGNAME := $(SDLCONFIG)
+SDLCONFIG = $(shell which ../../3rdparty/usr/bin/$(SDLCONFIGNAME) || which /usr/local/cross-tools/i386-mingw32/bin/$(SDLCONFIGNAME))
 BIN := $(BIN).exe
 else
 PKGCONFIG = pkg-config
@@ -29,7 +30,11 @@ CFLAGS += $(shell $(SDLCONFIG) --cflags)
 LDLIBS = $(shell $(SDLCONFIG) --libs)
 
 ifdef WIN32CROSS
+ifeq ($(API),sdl2)
+LDLIBS += -lSDL2_image
+else
 LDLIBS += -lSDL_image
+endif
 else
 LDLIBS += $(shell $(PKGCONFIG) $(SDLIMAGE) --libs-only-l)
 
