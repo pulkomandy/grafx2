@@ -48,6 +48,7 @@ LIBTIFF = tiff-4.0.10
 LIBTIFFARCH = $(LIBTIFF).tar.gz
 LIBTIFFURL = https://download.osgeo.org/libtiff/$(LIBTIFFARCH)
 LIBTIFFURLALT = https://fossies.org/linux/misc/$(LIBTIFFARCH)
+LIBTIFFPATCHES = tiff-uint64_long_long.patch
 ZLIB=zlib-1.2.11
 ZLIBARCH=$(ZLIB).tar.gz
 ZLIBURL=https://www.zlib.net/$(ZLIBARCH)
@@ -400,6 +401,7 @@ endif
 
 $(LIBTIFF)/.ok:	archives/$(LIBTIFFARCH)
 	$(TAR) xzf $<
+	cd $(LIBTIFF) ; for p in $(LIBTIFFPATCHES) ; do echo "applying $$p" ; patch -p0 < ../$$p ; done
 	touch $@
 	
 $(PREFIX)/lib/libpng.a:	$(PREFIX)/lib/libz.a
