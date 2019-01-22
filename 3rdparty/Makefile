@@ -64,8 +64,10 @@ PREFIX = $(PWD)/usr
 MKDIR = mkdir -p
 CP = cp -v
 TAR = $(shell which tar)
+# you need either wget or curl to download the files
+# wget -nv option is used to avoid messing the output when using "make -j3"
 GETURL = $(shell WGET=`which wget` ; if [ "$$?" = "0" ] && [ -x "$$WGET" ] ; \
-                 then echo "$$WGET" ; \
+                 then echo "$$WGET -nv" ; \
                  else echo "curl -O -L --max-time 120" ; fi )
 
 BUILD_CC := $(CC)
