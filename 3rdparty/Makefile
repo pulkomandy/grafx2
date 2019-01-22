@@ -114,7 +114,7 @@ clean_all:	clean clean_archives
 
 clean:
 	$(RM) -r usr/ $(LIBPNG) $(ZLIB) $(SDLIMAGE) $(JPEGDIR) $(LIBTIFF)
-	$(RM) -r $(SDLTTF) $(FREETYPE) SDL-1.2.15 $(LUA) $(RECOIL)
+	$(RM) -r $(SDLTTF) $(FREETYPE) $(SDL) $(LUA) $(RECOIL)
 	$(RM) -r $(SDL2) $(SDL2IMAGE) $(SDL2TTF)
 
 clean_archives:
@@ -191,9 +191,15 @@ $(PREFIX)/lib/libSDL2main.a:	archives/$(SDL2DEVEL)
 	echo "is the runtime environment for the SDL library." >> ../doc/README-SDL2.txt
 	tail --lines +3 $(SDL2)/README-SDL.txt >> ../doc/README-SDL2.txt
 else
+SDL2DISABLE = --disable-video-wayland --disable-audio
+ifeq ($(PLATFORM), Darwin)
+SDL2DISABLE += --disable-video-x11
+endif
+
 $(PREFIX)/lib/libSDL2main.a:	$(SDL2)/.ok
 	$(MKDIR) $(SDL2)/build
-	cd $(SDL2)/build && ../configure --prefix=$(PREFIX) --host=$(HOST) --disable-video-wayland
+	cd $(SDL2)/build && ../configure --prefix=$(PREFIX) --host=$(HOST) \
+	  $(SDL2DISABLE)
 	cd $(SDL2)/build && $(MAKE) && $(MAKE) install
 
 $(SDL2)/.ok:	archives/$(SDL2ARCH)
@@ -258,18 +264,23 @@ $(PREFIX)/lib/libSDLmain.a:	archives/$(SDLDEVEL)
 	$(TAR) xzf $<
 	patch -p0 < $(SDLDEVELPATCH)
 	$(MKDIR) $(PREFIX)
-	cd SDL-1.2.15 && CROSS_PATH=$(PREFIX) $(MAKE) cross
+	cd $(SDL) && CROSS_PATH=$(PREFIX) $(MAKE) cross
 	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/SDL.dll ../bin && $(STRIP) ../bin/SDL.dll
 	echo "The following file:" > ../doc/README-SDL.txt
 	echo "" >> ../doc/README-SDL.txt
 	echo "	SDL.dll" >> ../doc/README-SDL.txt
 	echo "" >> ../doc/README-SDL.txt
 	echo "is the runtime environment for the SDL library." >> ../doc/README-SDL.txt
-	tail --lines +3 SDL-1.2.15/README-SDL.txt >> ../doc/README-SDL.txt
+	tail --lines +3 $(SDL)/README-SDL.txt >> ../doc/README-SDL.txt
 else
+SDLDISABLE = --disable-joystick --disable-audio
+ifeq ($(PLATFORM), Darwin)
+SDLDISABLE += --disable-video-x11
+endif
+
 $(PREFIX)/lib/libSDLmain.a:	$(SDL)/.ok
 	cd $(SDL) && ./configure --host=$(HOST) --prefix=$(PREFIX) \
-	  --disable-joystick --disable-audio
+	  $(SDLDISABLE)
 	cd $(SDL) && $(MAKE)
 	cd $(SDL) && $(MAKE) install
 
