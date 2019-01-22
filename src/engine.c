@@ -2425,7 +2425,7 @@ void Open_popup(word x_pos, word y_pos, word width,word height)
     height = Screen_height/Menu_factor_Y;
   if (y_pos + height*Menu_factor_Y > Screen_height) // fix dropdown that would get bellow the screen
     y_pos = Screen_height - height*Menu_factor_Y;
-  if (y_pos + width*Menu_factor_X > Screen_width)
+  if (x_pos + width*Menu_factor_X > Screen_width)
     x_pos = Screen_width - width*Menu_factor_X;
 
   Window_width=width;
