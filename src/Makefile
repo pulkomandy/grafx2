@@ -184,14 +184,18 @@ endif
     # Where the SDL frameworks are located
     FWDIR = /Library/Frameworks
     BIN = ../bin/grafx2-$(API)
+    PKG_CONFIG_PATH ?= $(shell if [ -d ../3rdparty/usr/lib/pkgconfig ] ; then echo "$${PWD}/../3rdparty/usr/lib/pkgconfig" ; fi )
+ifneq ($(PKG_CONFIG_PATH), )
+    PKG_CONFIG := PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKG_CONFIG)
+endif
 
 ifeq ($(API),sdl)
-    SDLCONFIG := $(shell which sdl-config)
+    SDLCONFIG := $(shell which ../3rdparty/usr/bin/sdl-config || which sdl-config)
 ifneq ($(SDLCONFIG), )
     # these are for use with macports
-    SDLCOPT = $(shell sdl-config --cflags)
+    SDLCOPT = $(shell $(SDLCONFIG) --cflags)
   ifeq ($(OSX_STATIC), 1)
-    SDLLOPT = $(shell sdl-config --static-libs | sed 's/-lSDL //' | sed 's/-lX[^ ]*//g' | sed 's/-L[^ ]*//g')
+    SDLLOPT = $(shell $(SDLCONFIG) --static-libs | sed 's/-lSDL //' | sed 's/-lX[^ ]*//g' | sed 's/-L[^ ]*//g')
     SDLLIBDIR = $(shell $(PKG_CONFIG) --variable=libdir SDL_image)
     #SDLLOPT += $(SDLLIBDIR)/libSDL.a
     SDLLOPT += $(addsuffix .a, $(shell ../tools/osx_find_dependencies.sh $(SDLLIBDIR)/libSDL_image.dylib $(SDLLIBDIR)/libSDL_ttf.dylib | grep -v SDL | cut -d'.' -f 1))
@@ -199,7 +203,7 @@ ifneq ($(SDLCONFIG), )
     TTFLOPT =
     SDLLOPT += $(shell $(PKG_CONFIG) --variable=libdir SDL_ttf)/libSDL_ttf.a
   else
-    SDLLOPT = $(shell sdl-config --libs) $(shell $(PKG_CONFIG) --libs SDL_image)
+    SDLLOPT = $(shell $(SDLCONFIG) --libs) $(shell $(PKG_CONFIG) --libs SDL_image)
   endif
 else
     # these are for use with Mac OS X native frameworks
@@ -209,10 +213,11 @@ else
 endif
 endif
 ifeq ($(API),sdl2)
-    SDLCOPT = $(shell sdl2-config --cflags)
+    SDL2CONFIG := $(shell which ../3rdparty/usr/bin/sdl2-config || which sdl2-config)
+    SDLCOPT = $(shell $(SDL2CONFIG) --cflags)
     #TTFCOPT = $(shell $(PKG_CONFIG) --cflags SDL2_ttf)
   ifeq ($(OSX_STATIC), 1)
-    SDLLOPT = $(shell sdl2-config --static-libs | sed 's/-lSDL2//' | sed 's/-L[^ ]*//')
+    SDLLOPT = $(shell $(SDL2CONFIG) --static-libs | sed 's/-lSDL2//' | sed 's/-L[^ ]*//')
     SDLLIBDIR = $(shell $(PKG_CONFIG) --variable=libdir SDL2_image)
     SDLLOPT += $(SDLLIBDIR)/libSDL2.a
     # trick to get all dependencies
@@ -221,12 +226,16 @@ ifeq ($(API),sdl2)
     TTFLOPT =
     SDLLOPT += $(shell $(PKG_CONFIG) --variable=libdir SDL2_ttf)/libSDL2_ttf.a
   else
-    SDLLOPT = $(shell sdl2-config --libs) $(shell $(PKG_CONFIG) --libs SDL2_image)
+    SDLLOPT = $(shell $(SDL2CONFIG) --libs) $(shell $(PKG_CONFIG) --libs SDL2_image)
     SDLLOPT += -Wl,-framework,Cocoa
     TTFLOPT = $(shell $(PKG_CONFIG) --libs SDL2_ttf)
   endif
 endif
 
+ifneq ($(shell if [ -f ../3rdparty/usr/lib/liblua.a ] ; then echo "3rdparty"; fi), )
+    LUACOPT = -I../3rdparty/usr/include
+    LUALOPT = ../3rdparty/usr/lib/liblua.a
+else
     # these are for use with macports
     LUAPKG := $(shell for p in lua lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua51 ; do $(PKG_CONFIG) --exists $$p && echo $$p && break ; done)
 ifneq ($(LUAPKG), )
@@ -246,6 +255,7 @@ else
     LUALOPT = -llua 
 endif
 endif
+endif
 
     # these are for everyone
     COPT = -D_DARWIN_C_SOURCE -D__macosx__ -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -std=c99 -g $(LUACOPT) $(SDLCOPT) $(TTFCOPT) -I/usr/include
@@ -259,11 +269,11 @@ else
     ifneq ($(OSX_STATIC), 1)
       LOPT += $(TTFLOPT)
     endif
-    LIBPNGCONFIG := $(shell libpng-config)
+    LIBPNGCONFIG := $(shell which ../3rdparty/usr/bin/libpng-config || which libpng-config)
 ifneq ($(LIBPNGCONFIG), )
-    COPT += $(shell libpng-config --cflags)
+    COPT += $(shell $(LIBPNGCONFIG) --cflags)
     ifneq ($(OSX_STATIC), 1)
-    LOPT += $(shell libpng-config --ldflags)
+    LOPT += $(shell $(LIBPNGCONFIG) --ldflags)
     endif
 else
     LOPT += -lpng
