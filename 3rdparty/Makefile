@@ -189,6 +189,7 @@ endif
 $(PREFIX)/lib/libSDL2_image.a:	$(PREFIX)/lib/libjpeg.a
 $(PREFIX)/lib/libSDL2_image.a:	$(PREFIX)/lib/libtiff.a
 $(PREFIX)/lib/libSDL2_image.a:	$(PREFIX)/lib/libpng.a
+$(PREFIX)/lib/libSDL2_image.a:	$(PREFIX)/lib/libSDL2main.a
 
 $(PREFIX)/lib/libSDL2_image.a:	$(SDL2IMAGE)/.ok
 	cd $(SDL2IMAGE) && PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig \
@@ -213,6 +214,7 @@ $(SDL2IMAGE)/.ok:	archives/$(SDL2IMAGEARCH)
 	touch $@
 
 $(PREFIX)/lib/libSDL2_ttf.a:	$(PREFIX)/lib/libfreetype.a
+$(PREFIX)/lib/libSDL2_ttf.a:	$(PREFIX)/lib/libSDL2main.a
 
 $(PREFIX)/lib/libSDL2_ttf.a:	$(SDL2TTF)/.ok
 	cd $(SDL2TTF) && PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig \
@@ -271,6 +273,7 @@ endif
 $(PREFIX)/lib/libSDL_image.a:	$(PREFIX)/lib/libjpeg.a
 $(PREFIX)/lib/libSDL_image.a:	$(PREFIX)/lib/libtiff.a
 $(PREFIX)/lib/libSDL_image.a:	$(PREFIX)/lib/libpng.a
+$(PREFIX)/lib/libSDL_image.a:	$(PREFIX)/lib/libSDLmain.a
 
 $(PREFIX)/lib/libSDL_image.a:	$(SDLIMAGE)/.ok
 	cd $(SDLIMAGE) && CC="$(CC) $(LDFLAGS)" CPPFLAGS=-I$(PREFIX)/include \
@@ -297,6 +300,7 @@ $(SDLIMAGE)/.ok:	archives/$(SDLIMAGEARCH)
 	touch $@
 
 $(PREFIX)/lib/libSDL_ttf.a:	$(PREFIX)/lib/libfreetype.a
+$(PREFIX)/lib/libSDL_ttf.a:	$(PREFIX)/lib/libSDLmain.a
 
 $(PREFIX)/lib/libSDL_ttf.a:	$(SDLTTF)/.ok
 	cd $(SDLTTF) && PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig \
