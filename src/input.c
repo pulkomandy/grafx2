@@ -1383,16 +1383,16 @@ int Get_input(int sleep_time)
                 {
                   long len;
                   // Query filename length
-                  len = DragQueryFile(hdrop,0 ,NULL ,0);
+                  len = DragQueryFile(hdrop, 0, NULL, 0);
                   if (len)
                   {
-                    Drop_file_name=calloc(len+1,1);
+                    Drop_file_name = calloc(len+1, 1);
                     if (Drop_file_name)
                     {
 #ifdef UNICODE
                       TCHAR LongDropFileName[MAX_PATH];
                       TCHAR ShortDropFileName[MAX_PATH];
-                      if (DragQueryFile(hdrop, 0 , LongDropFileName ,(UINT) MAX_PATH)
+                      if (DragQueryFile(hdrop, 0, LongDropFileName, (UINT)MAX_PATH)
                         && GetShortPathName(LongDropFileName, ShortDropFileName, MAX_PATH))
                       {
                         int i;
@@ -1401,7 +1401,7 @@ int Get_input(int sleep_time)
                         Drop_file_name[i] = 0;
                       }
 #else
-                      if (DragQueryFile(hdrop,0 ,(LPTSTR) Drop_file_name ,(UINT) MAX_PATH))
+                      if (DragQueryFile(hdrop, 0, (LPTSTR)Drop_file_name, (UINT)MAX_PATH))
                       {
                         // Success
                       }
@@ -1409,12 +1409,12 @@ int Get_input(int sleep_time)
                       else
                       {
                         free(Drop_file_name);
-                        // Don't report name copy error
+                        GFX2_Log(GFX2_ERROR, "Failed to get Drag filename\n");
                       }
                     }
                     else
                     {
-                      // Don't report alloc error (for a file name? :/ )
+                      GFX2_Log(GFX2_ERROR, "Failed to allocate %ld bytes\n", len + 1);
                     }
                   }
                   else
