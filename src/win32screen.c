@@ -53,6 +53,7 @@ HWND GFX2_Get_Window_Handle()
   return Win32_hwnd;
 }
 
+/// Blit our "framebuffer" bitmap to the Window.
 static void Win32_Repaint(HWND hwnd)
 {
   PAINTSTRUCT ps;
@@ -62,17 +63,22 @@ static void Win32_Repaint(HWND hwnd)
   RECT rect;
 
   if (!GetUpdateRect(hwnd, &rect, FALSE)) return;
+  //GFX2_Log(GFX2_DEBUG, "Repaint rect : (%d,%d)-(%d,%d)\n", rect.left, rect.top, rect.right, rect.bottom);
   dc = BeginPaint(hwnd, &ps);
   dc2 = CreateCompatibleDC(dc);
   old_bmp = (HBITMAP)SelectObject(dc2, Windows_DIB);
-  BitBlt(dc, 0, 0, Windows_DIB_width, Windows_DIB_height,
-					   dc2, 0, 0,
-					   SRCCOPY);
+  if (!BitBlt(dc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top,
+              dc2, rect.left, rect.top,
+              SRCCOPY))
+    GFX2_Log(GFX2_INFO, "BitBlt(dc, %d, %d, %d, %d, dc2, %d, %d, SRCCOPY) FAILED\n",
+             rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top,
+             rect.left, rect.top);
   SelectObject(dc2, old_bmp);
 	DeleteDC(dc2);
 	EndPaint(hwnd, &ps);
 }
 
+/// WindowProc callback function
 static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
   switch(uMsg)
