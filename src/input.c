@@ -1374,7 +1374,7 @@ int Get_input(int sleep_time)
 #endif
 
           case SDL_SYSWMEVENT:
-#ifdef __WIN32__
+#if defined(USE_SDL) && defined(__WIN32__)
               if(event.syswm.msg->msg  == WM_DROPFILES)
               {
                 int file_count;

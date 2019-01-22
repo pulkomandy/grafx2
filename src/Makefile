@@ -452,6 +452,7 @@ endif
       CROSS_CC ?= $(shell which i686-w64-mingw32-gcc || which mingw32-gcc)
       CROSS_PKGCONFIG ?= $(shell which i686-w64-mingw32-pkg-config || which mingw32-pkg-config || which $(PKG_CONFIG))
       CROSS_SDLCONFIG ?= $(shell which ../3rdparty/usr/bin/sdl-config || which /usr/local/cross-tools/i386-mingw32/bin/sdl-config)
+      CROSS_SDL2CONFIG ?= $(shell which ../3rdparty/usr/bin/sdl2-config || which /usr/local/cross-tools/i386-mingw32/bin/sdl2-config)
       CROSS_PKG_CONFIG_PATH ?= $(shell if [ -d ../3rdparty/usr ] ; then echo "$${PWD}/../3rdparty/usr/lib/pkgconfig" ; fi )
       CC = $(CROSS_CC)
       CROSS_STRIP ?= $(shell which i686-w64-mingw32-strip || which mingw32-strip)
@@ -462,6 +463,10 @@ endif
       ifeq ($(API),sdl)
       COPT += -Dmain=SDL_main $(shell $(CROSS_SDLCONFIG) --cflags)
       LOPT += -lSDLmain -lSDL $(shell $(CROSS_SDLCONFIG) --libs) -lSDL_image
+      endif
+      ifeq ($(API),sdl2)
+      COPT += $(shell $(CROSS_SDL2CONFIG) --cflags)
+      LOPT += $(shell $(CROSS_SDL2CONFIG) --libs) -lSDL2_image
       endif
       ifeq (,$(CROSS_PKGCONFIG))
       COPT += -D__no_pnglib__ -D__no_tifflib__
@@ -480,6 +485,9 @@ endif
       PLATFORMFILES += bin/libtiff-5.dll
       ifeq ($(API),sdl)
       PLATFORMFILES += bin/SDL.dll bin/SDL_image.dll
+      endif
+      ifeq ($(API),sdl2)
+      PLATFORMFILES += bin/SDL2.dll bin/SDL2_image.dll
       endif
     else
       ifdef GP2XCROSS
