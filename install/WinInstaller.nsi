@@ -104,6 +104,12 @@ Section "Grafx2" SecProgram
     File ..\bin\SDL_ttf.dll
     File ..\bin\${FREETYPEDLL}
   !endif
+  !if ${API} == "sdl2"
+    File ..\bin\SDL2_image.dll
+    File ..\bin\SDL2.dll
+    File ..\bin\SDL2_ttf.dll
+    File ..\bin\${FREETYPEDLL}
+  !endif
   File ..\bin\zlib1.dll
   File ..\bin\${PNGDLL}
   File ..\bin\${JPEGDLL}
@@ -221,6 +227,9 @@ Section "un.SecProgram"
   !if ${API} == "win32"
     Delete "$INSTDIR\gfx2-win32.cfg"
     Delete "$APPDATA\Grafx2\gfx2-win32.cfg"
+  !else if ${API} == "sdl2"
+    Delete "$INSTDIR\gfx2-sdl2.cfg"
+    Delete "$APPDATA\Grafx2\gfx2-sdl2.cfg"
   !else
     Delete "$INSTDIR\gfx2.cfg"
     Delete "$APPDATA\Grafx2\gfx2.cfg"
