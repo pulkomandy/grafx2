@@ -156,6 +156,20 @@ ifdef WIN32
 	echo "License : http://www.lua.org/license.html" >> ../doc/README-lua.txt
 	# extract license from readme.html
 	awk '/BLOCKQUOTE/{flag=1-flag;next}flag' $(LUA)/doc/readme.html | grep -v '<P>' | tail --lines +2 >> ../doc/README-lua.txt
+else
+ifeq ($(PLATFORM), FreeBSD)
+	cd $(LUA) && $(MAKE) freebsd install INSTALL_TOP=$(PREFIX)
+else
+ifeq ($(PLATFORM), Darwin)
+	cd $(LUA) && $(MAKE) macosx install INSTALL_TOP=$(PREFIX)
+else
+ifeq ($(PLATFORM), Linux)
+	cd $(LUA) && $(MAKE) linux install INSTALL_TOP=$(PREFIX)
+else
+	cd $(LUA) && $(MAKE) posix install INSTALL_TOP=$(PREFIX)
+endif
+endif
+endif
 endif
 
 $(LUA)/.ok:	archives/$(LUAARCH)
