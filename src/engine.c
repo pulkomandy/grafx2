@@ -592,54 +592,57 @@ void Status_print_palette_color(byte color)
   Print_in_menu(str,0);
 }
 
-void Layer_preview_on(int * preview_is_visible)
+/// activate layer preview
+static void Layer_preview_on(int * preview_is_visible)
 {
   int x,y;
   short layer;
   short layercount = Main.backups->Pages->Nb_layers;
-  static int previewW=0, previewH=0;
+  int previewW, previewH;
 
   if (! *preview_is_visible && layercount>1)
   {
-    previewW = Min(Main.image_width/Menu_factor_X,Layer_button_width);
+    previewW = Min(Main.image_width/Menu_factor_X, Layer_button_width);
     previewH = previewW * Main.image_height / Main.image_width * Menu_factor_X / Menu_factor_Y;
     if (previewH > Screen_height/4)
     {
       previewH = Screen_height/4;
-      previewW = Main.image_width*previewH/Main.image_height*Menu_factor_Y/Menu_factor_X;
+      previewW = Main.image_width * previewH / Main.image_height * Menu_factor_Y / Menu_factor_X;
     }
   
-    Open_popup((Buttons_Pool[BUTTON_LAYER_SELECT].X_offset + 2)*Menu_factor_X,
-    Menu_Y - previewH * Menu_factor_Y, Buttons_Pool[BUTTON_LAYER_SELECT].Width, previewH);
+    Open_popup((Buttons_Pool[BUTTON_LAYER_SELECT].X_offset + 2) * Menu_factor_X,
+               Menu_Y - previewH * Menu_factor_Y,
+               Buttons_Pool[BUTTON_LAYER_SELECT].Width, previewH);
     *preview_is_visible = 1;
   
     // Make the system think the menu is visible (Open_popup hides it)
     // so Button_under_mouse still works
-    Menu_is_visible=Menu_is_visible_before_window;
-    Menu_Y=Menu_Y_before_window;
+    Menu_is_visible = Menu_is_visible_before_window;
+    Menu_Y = Menu_Y_before_window;
 
-	Window_rectangle(0, 0, Window_width, Window_height, MC_Dark);
+    Window_rectangle(0, 0, Window_width, Window_height, MC_Dark);
 
     for(layer = 0; layer < layercount; ++layer)
     {
       int offset;
       // Stop if the window is too small to show the
       // layer button (ex: 320x200 can only display 12 layers)
-      if (layer*Layer_button_width+previewW > Window_width)
+      if (layer * Layer_button_width + previewW > Window_width)
         break;
       
-      offset=(Layer_button_width-previewW)/2;
+      offset = (Layer_button_width - previewW) / 2;
       for (y = 0; y < previewH*Pixel_height*Menu_factor_Y-1; y++)
       for (x = 0; x < previewW*Pixel_width*Menu_factor_X-1; x++)
       {
         int imgx = x * Main.image_width / (previewW*Pixel_width*Menu_factor_X-1);
         int imgy = y * Main.image_height / (previewH*Pixel_height*Menu_factor_Y-1);
         // Use Pixel_simple() in order to get highest resolution
-        Pixel_simple(x+((layer*Layer_button_width+offset)*Menu_factor_X+Window_pos_X)*Pixel_width, y+Window_pos_Y*Pixel_height+1, *(Main.backups->Pages->Image[layer].Pixels
-          + imgx + imgy * Main.image_width));
+        Pixel_simple(x + ((layer*Layer_button_width+offset)*Menu_factor_X + Window_pos_X) * Pixel_width,
+                     y + Window_pos_Y*Pixel_height + 1,
+                     Read_pixel_from_layer(layer, imgx, imgy) );
       }
     }
-    Update_window_area(0,0,Window_width, Window_height);
+    Update_window_area(0, 0, Window_width, Window_height);
   }
 }
 
