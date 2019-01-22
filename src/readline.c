@@ -973,10 +973,17 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
         unicode_text[0] = 0;
       }
 #else
+      /// @todo use MultiByteToWideChar(CP_UTF8, ...) under WIN32
       int j;
-      for (i = 0, j = 0; i < sizeof(Key_Text) && Key_Text[i] != '\0'; i++)
-        if (Key_Text[i] < 128) unicode_text[j++] = Key_Text[i];
-      unicode_text[j++] = 0;
+      for (i = 0, j = 0; i < (int)sizeof(Key_Text) && j < (int)sizeof(unicode_text) && Key_Text[i] != '\0'; i++)
+      {
+        // Only ASCII chars
+        if ((Key_Text[i] & ~127) == 0)
+          unicode_text[j++] = Key_Text[i];
+      }
+      unicode_text[j] = 0;
+      if (i != j)
+        GFX2_Log(GFX2_INFO, "Key_Text[] not fully converted to unicode Key_Text='%s'\n", Key_Text);
 #endif
       for (i = 0; unicode_text[i] != 0 && size < max_size; i++)
       {
