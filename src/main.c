@@ -142,7 +142,7 @@ extern char Program_version[]; // generated in pversion.c
 static int setsize_width;
 static int setsize_height;
 
-#if defined(USE_SDL) || defined(USE_SDL2)
+#if (defined(USE_SDL) || defined(USE_SDL2)) && defined(USE_JOYSTICK)
 /// Pointer to the current joystick controller.
 static SDL_Joystick* Joystick;
 #endif
@@ -728,7 +728,11 @@ int Init_program(int argc,char * argv[])
 
 #if defined(USE_SDL) || defined(USE_SDL2)
   // SDL
-  if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0)
+  if (SDL_Init(SDL_INIT_VIDEO
+#if defined(USE_JOYSTICK)
+               | SDL_INIT_JOYSTICK
+#endif
+              ) < 0)
   {
     // The program can't continue without that anyway
     printf("Couldn't initialize SDL.\n");
@@ -738,7 +742,9 @@ int Init_program(int argc,char * argv[])
 #if defined(USE_SDL2)
   SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_VERBOSE);
 #endif
+#if defined(USE_JOYSTICK)
   Joystick = SDL_JoystickOpen(0);
+#endif
 #endif
 #if defined(USE_SDL)
   SDL_EnableKeyRepeat(250, 32);
