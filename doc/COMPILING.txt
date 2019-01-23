@@ -5,24 +5,46 @@ Grafx2 compilation and installation
 
 * gcc C compiler (other compilers may work, but are not officially supported)
 * GNU make (other similar "make" tools may work, but are not supported)
-* SDL library v1.2
+* SDL library v1.2.x, or v2.0.x
 * SDL_image library
-* libpng (not on MacOSX)
-* FreeType library (optional, for truetype fonts)
+* libpng
+* tiff
 * SDL_ttf library (optional, for truetype fonts)
-* Lua library v5.1 or v5.2 (optional, for Lua scripting)
+* FreeType library (optional, for truetype fonts)
+* Lua library v5.3, (v5.1 or v5.2 are also supported)
+  (optional, for Lua scripting)
+
+Note: on some platforms it is possible to build without SDL :
+  using GDI API under Windows
+  using X11 under Linux/FreeBSD/etc.
+see usage of API= variable below.
 
 Extra requirements for Windows:
 * a POSIX environment: MSYS is fine, maybe Cygwin would work as well.
 * use Mingw C compiler instead of gcc
+* MS Visual Studio project files are also provided in project/msvc/
+  but are not officially supported
 
 Extra requirements for UNIX/X11 (Linux, FreeBSD, ...):
-* pkg-config (optional, for Lua scripting)
-* X11 headers (optional, for truetype fonts)
+* pkg-config
+* Xlib headers
 
 On Debian-based distributions you should be able to get all these files by
-simply running the following command from a terminal :
-  sudo aptitude install gcc make libsdl1.2-dev libsdl-image1.2-dev libsdl-ttf2.0-dev libfreetype6-dev liblua5.1-0-dev lua5.1
+simply running the following commands from a terminal :
+$ sudo apt-get install gcc make libfreetype6-dev liblua5.3-dev libtiff5-dev libpng-dev
+$ sudo apt-get install libsdl1.2-dev libsdl-image1.2-dev libsdl-ttf2.0-dev
+or if you want to use SDL 2.0.x :
+$ sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
+
+On macOS, we suggest to use macports https://www.macports.org/ :
+$ sudo port install lua libpng tiff
+$ sudo port install libsdl libsdl_image libsdl_ttf
+or
+$ sudo port install libsdl2 libsdl2_image libsdl2_ttf
+
+It is also possible to use the Makefile in 3rdparty/ directory to build
+the required lib. This has been developped for win32 cross compilation
+but may work for other platforms.
 
 === Instructions ===
 
@@ -30,8 +52,8 @@ Open a shell/Terminal, enter the directory where you have the project tree, and
 type:
   cd src
   make
-If all goes well, it should build grafx2 (the main program) in the "bin"
-directory. Voil‡.
+If all goes well, it should build grafx2-sdl (the main program) in the "bin"
+directory. Voil√†.
 
 If you don't have FreeType and SDL_ttf, type make NOTTF=1 instead. It will
 build a version without TrueType support : the Text tool will be limited to
@@ -45,6 +67,9 @@ make NOTTF=1 NOLUA=1
 
 
 === Build variants ===
+
+By default GrafX2 is built for SDL 1.2.x. use API=x11 API=sdl2 or API=win32
+to change that.
 
 The default compilation is optimized ( -O ), with debugging symbols for GDB.
 Compile with OPTIM=0 to disable optimizations, if you have some real debugging
@@ -99,10 +124,14 @@ This will only work on an UNIXsystem (Linux or FreeBSD).
 == Windows ==
 
 It is also possible to compile from linux, with this command :
- $ make WIN32CROSS=1
+ $ make WIN32CROSS=1 [API=win32]
 You will need the mingw cross-compiler, and all the librairies listed above.
 Variables CROSS_CC, CROSS_PKGCONFIG and CROSS_SDLCONFIG can be set :
  $ CROSS_CC=mingw32-gcc CROSS_PKGCONFIG=mingw32-pkg-config CROSS_SDLCONFIG=/path/to/ming32/sdl-config WIN32CROSS=1 NOTTF=1 make
+You will probably first need to build dependencies by running
+ $ make WIN32CROSS=1
+from the 3rdparty/ directory.
+
 
 Here is a list of the resources used to build the Windows version:
 
