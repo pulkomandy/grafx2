@@ -215,7 +215,8 @@ $(PREFIX)/lib/libSDL2_image.a:	$(PREFIX)/lib/libSDL2main.a
 $(PREFIX)/lib/libSDL2_image.a:	$(SDL2IMAGE)/.ok
 	cd $(SDL2IMAGE) && PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig \
 	  CC="$(CC) $(LDFLAGS)" CPPFLAGS=-I$(PREFIX)/include LDFLAGS="-L$(PREFIX)/lib" \
-	  ./configure --prefix=$(PREFIX) --host=$(HOST) --disable-webp --disable-sdltest
+	  ./configure --prefix=$(PREFIX) --host=$(HOST) --disable-sdltest \
+	  --disable-webp --disable-jpg-shared --disable-png-shared --disable-tif-shared
 	cd $(SDL2IMAGE) && $(MAKE) && $(MAKE) install
 ifdef WIN32
 	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/SDL2_image.dll ../bin && $(STRIP) ../bin/SDL2_image.dll
@@ -304,7 +305,8 @@ $(PREFIX)/lib/libSDL_image.a:	$(PREFIX)/lib/libSDLmain.a
 $(PREFIX)/lib/libSDL_image.a:	$(SDLIMAGE)/.ok
 	cd $(SDLIMAGE) && CC="$(CC) $(LDFLAGS)" CPPFLAGS=-I$(PREFIX)/include \
 	  LDFLAGS="-L$(PREFIX)/lib $(ADDLDFLAGS)" LIBPNG_CFLAGS= LIBPNG_LIBS=-lpng \
-	  ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --host=$(HOST) --disable-webp
+	  ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --host=$(HOST) \
+	  --disable-webp --disable-jpg-shared --disable-png-shared --disable-tif-shared
 	cd $(SDLIMAGE) && $(MAKE)
 	cd $(SDLIMAGE) && $(MAKE) install
 ifdef WIN32
