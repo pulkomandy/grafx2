@@ -296,13 +296,13 @@ Available options:
       There are 3 hand-drawing modes:
 
         - Continuous hand-drawing: as you move the mouse, the paintbrush is
-          regularily pasted on the picture. This drawing tool allows to change
-          the fore and back colors when being in use.
+          regularly pasted on the picture. This drawing tool allows you to
+          change the fore and back colors when in use.
 
         - Discontinuous hand-drawing: as you move the mouse, the paintbrush is
           pasted on the picture every time a delay is passed (actually, the
-          delay is 1 VBL (vertical blanking)). This drawing tool allows to
-          change the fore and back colors when being in use.
+          delay is 1 VBL (vertical blanking)). This drawing tool allows you to
+          change the fore and back colors when in use.
 
         - Dot by dot hand-drawing: the paintbrush is only pasted at the
           position where you first clicked.
@@ -369,8 +369,8 @@ Available options:
           position of the mouse when you release the mouse button. Then you
           can draw lines from the center to the current mouse position by
           clicking. To stop drawing concentric lines, use the opposite mouse
-          button. This drawing tool allows to change the fore and back colors
-          when being in use.
+          button. This drawing tool allows you to change the fore and back
+          colors when in use.
 
 
     Right click:
@@ -388,7 +388,7 @@ Available options:
     ============>
 
         Selects the spray as the active drawing tool. This drawing tool allows
-      to change the fore and back colors when being in use.
+      you to change the fore and back colors when in use.
 
 
     Right click:
@@ -418,8 +418,8 @@ Available options:
           Actually, this puts a 0 value in the use of each color.
 
         - Init: Allows you to define a value that will be set to the color you
-          click on in the palette if its value is equal to 0. This permits to
-          tag a set of colors more quickly.
+          click on in the palette if its value is equal to 0. This permits you
+          to tag a set of colors more quickly.
 
         - +1,-1,x2,÷2: Modify the values of all the tagged colors (and only
           them).
@@ -456,7 +456,7 @@ Available options:
         Any rule has its exceptions and this one doesn't depart from that.
       Indeed, this tool is the only one to be affected by no effect (except
       Stencil) and to be able to modify non visible parts of the picture.
-        The function of this tool being replacing all the occurences of a
+        The function of this tool being replacing all the occurrences of a
       color in the picture by another, if would have been a shame to limit
       modifications only to the visible part of the picture.
 
@@ -704,8 +704,8 @@ Available options:
         - Distort: *** Not implemented yet ***
 
         - Outline:
-          This option permits to draw the outlines of the brush with the Fore-
-          color.
+          This option permits you to draw the outlines of the brush with the
+          Fore color.
 
         - Nibble:
           This option "nibbles" the outlines of the brush. It's in some way
@@ -777,12 +777,12 @@ Available options:
         sufficient to define the different shades since every 256 colors of
         the palette cannot be present more than once in each table.
 
-        - A window (on the top-right side) permits to visualize the different
-        shades defined in he current table.
+        - A window (on the top-right side) permits you to visualize the
+        different shades defined in he current table.
 
         - Copy: Copy the contents of the table in a buffer.
         (Each time you open this menu, the current table is automatically
-        transfered into this buffer).
+        transferred into this buffer).
 
         - Paste: Copy the contents of the buffer above in the current table.
 
@@ -794,7 +794,7 @@ Available options:
           IF a block of more than one color is selected in the table THEN
             It is deleted and the block defined in the palette is inserted.
           ELSE
-            The block defined in the palette is inserted at the postion just
+            The block defined in the palette is inserted at the position just
             before the selected square.
           END IF
         ELSE
@@ -1019,8 +1019,8 @@ Available options:
   * Transparency mode (Colorize) / Menu:
   --------------------------------------
 
-      This allows to mix the color(s) of the paintbrush with the colors of the
-    picture. It's used to make transparency effects like with watercolors.
+      This allows you to mix the color(s) of the paintbrush with the colors of
+    the picture. It's used to make transparency effects like with watercolors.
 
     Left click:
     ============>
@@ -1219,7 +1219,7 @@ Available options:
     Right click:
     ============>
 
-      Automaticaly switches to the 320x200 MCGA mode.
+      Automatically switches to the 320x200 MCGA mode.
 
 
 
@@ -1749,7 +1749,7 @@ Drawing tips:
     reflexes). Then you'll just have to click a few hundredth of second for
     modifying a color.
 
-    ■ With a wider diameter, it permits to add granularity to a texture,
+    ■ With a wider diameter, it permits you to add granularity to a texture,
     because placing lighter or darker pixels creates some ruggedness.
     Different textures appropriated to this effect are: sand, rock, etc...
     Of course, you'll need a color gradation corresponding to color of the

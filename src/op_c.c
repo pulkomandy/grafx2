@@ -192,12 +192,12 @@ long Perceptual_lightness(T_Components *color)
          19*color->B*19*color->B;
 }
 
-// Handlers for the occurences tables
-// This table is used to count the occurence of an (RGB) pixel value in the
+// Handlers for the occurrences tables
+// This table is used to count the occurrence of an (RGB) pixel value in the
 // source 24bit image. These count are then used by the median cut algorithm to
 // decide which cluster to split.
 
-/// Initialize an occurence table
+/// Initialize an occurrence table
 void OT_init(T_Occurrence_table * t)
 {
   int size;
@@ -206,7 +206,7 @@ void OT_init(T_Occurrence_table * t)
   memset(t->table,0,size); // Set it to 0
 }
 
-/// Allocate an occurence table for given number of bits
+/// Allocate an occurrence table for given number of bits
 T_Occurrence_table * OT_new(int nbb_r,int nbb_g,int nbb_b)
 {
   T_Occurrence_table * n;
@@ -255,7 +255,7 @@ void OT_delete(T_Occurrence_table * t)
 }
 
 
-/// Get number of occurences for a given color
+/// Get number of occurrences for a given color
 int OT_get(T_Occurrence_table * t, byte r, byte g, byte b)
 {
   int index;
@@ -293,7 +293,7 @@ void OT_count_occurrences(T_Occurrence_table* t, T_Bitmap24B image, int size)
 }
 
 
-/// Count the total number of pixels in an occurence table
+/// Count the total number of pixels in an occurrence table
 int OT_count_colors(T_Occurrence_table * t)
 {
   int val; // Computed return value
@@ -341,7 +341,7 @@ void Cluster_pack(T_Cluster * c,const T_Occurrence_table * const to)
 
   // Unoptimized code kept here for documentation purpose because the optimized
   // one is unreadable : run over the whole cluster and find the min and max,
-  // and count the occurences at the same time.
+  // and count the occurrences at the same time.
   /*
   for (r=c->rmin<<to->dec_r;r<=c->rmax<<to->dec_r;r+=1<<to->dec_r)
     for (g=c->vmin<<to->dec_g;g<=c->vmax<<to->dec_g;g+=1<<to->dec_g)
@@ -356,7 +356,7 @@ void Cluster_pack(T_Cluster * c,const T_Occurrence_table * const to)
           else if (g>vmax) vmax=g;
           if (b<bmin) bmin=b;
           else if (b>bmax) bmax=b;
-          c->occurences+=nbocc;
+          c->occurrences+=nbocc;
         }
       }
   */
@@ -866,7 +866,7 @@ int CS_Set(T_Cluster_set * cs,T_Cluster * c)
 
 /// This is the main median cut algorithm and the function actually called to
 /// reduce the palette. We get the number of pixels for each collor in the
-/// occurence table and generate the cluster set from it.
+/// occurrence table and generate the cluster set from it.
 // 1) RGB space is a big box
 // 2) We seek the pixels with extreme values
 // 3) We split the box in 2 parts on its longest axis
@@ -918,7 +918,7 @@ int CS_Generate(T_Cluster_set * cs, const T_Occurrence_table * const to, CT_Tree
       if(CS_Set(cs,&Nouveau1) < 0)
         return -1;
     }
-      
+
     if (Nouveau2.occurences != 0) {
       if(CS_Set(cs,&Nouveau2) < 0)
         return -1;

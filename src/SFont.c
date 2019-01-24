@@ -159,7 +159,7 @@ int SFont_TextWidth(const SFont_Font *Font, const char *text)
 
 int SFont_TextHeight(const SFont_Font* Font, const char *text)
 {
-    // Count occurences of '\n'
+    // Count occurrences of '\n'
     int nb_cr=0;
     while (*text!='\0')
     {

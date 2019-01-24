@@ -212,7 +212,7 @@ void Error_function(int error_code, const char *filename, int line_number, const
   int       index;
   char msg_buffer[512];
 
-  snprintf(msg_buffer, sizeof(msg_buffer), "Error number %d occured in file %s, line %d, function %s.\n", error_code, filename,line_number,function_name);
+  snprintf(msg_buffer, sizeof(msg_buffer), "Error number %d occurred in file %s, line %d, function %s.\n", error_code, filename,line_number,function_name);
   fputs(msg_buffer, stderr);
 #if defined(_MSC_VER) && defined(_DEBUG)
   OutputDebugStringA(msg_buffer);

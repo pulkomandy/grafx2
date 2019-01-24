@@ -249,7 +249,7 @@ void Tilemap_update(void)
     }
     if (ref_tile<tile)
     {
-      // New occurence of a known tile
+      // New occurrence of a known tile
       // Insert at the end. classic doubly-linked-list.
       int last_tile=Main.tilemap[ref_tile].Previous;
       Main.tilemap[tile].Previous=last_tile;
@@ -272,7 +272,7 @@ void Tilemap_update(void)
       }
       if (ref_tile<tile)
       {
-        // New occurence of a known tile
+        // New occurrence of a known tile
         // Insert at the end. classic doubly-linked-list.
         int last_tile=Main.tilemap[ref_tile].Previous;
         Main.tilemap[tile].Previous=last_tile;
@@ -296,7 +296,7 @@ void Tilemap_update(void)
       }
       if (ref_tile<tile)
       {
-        // New occurence of a known tile
+        // New occurrence of a known tile
         // Insert at the end. classic doubly-linked-list.
         int last_tile=Main.tilemap[ref_tile].Previous;
         Main.tilemap[tile].Previous=last_tile;
@@ -320,7 +320,7 @@ void Tilemap_update(void)
       }
       if (ref_tile<tile)
       {
-        // New occurence of a known tile
+        // New occurrence of a known tile
         // Insert at the end. classic doubly-linked-list.
         int last_tile=Main.tilemap[ref_tile].Previous;
         Main.tilemap[tile].Previous=last_tile;

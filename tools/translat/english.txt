@@ -2488,7 +2488,7 @@ nom
 num_palette
 num_text
 numsys
-occurences
+occurrences
 offset
 oh
 options

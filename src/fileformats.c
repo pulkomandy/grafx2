@@ -1834,7 +1834,7 @@ void Load_IFF(T_IO_Context * context)
               bpp = 12;
           }
           else
-            Warning("inconsistant size of BEAM/CTLB chunk, ignoring");
+            Warning("inconsistent size of BEAM/CTLB chunk, ignoring");
           fseek(IFF_file, (section_size+1)&~1, SEEK_CUR);
         }
         else if (memcmp(section, "PCHG", 4) == 0) // Palette CHanGes
@@ -4752,7 +4752,7 @@ void Load_GIF(T_IO_Context * context)
                     special_case  = GIF_get_next_code(GIF_file, &GIF);
                     if (GIF.current_code >= value_clr)
                     {
-                      GFX2_Log(GFX2_INFO, "Load_GIF() Invalide code %u just after clear (=%u)!\n",
+                      GFX2_Log(GFX2_INFO, "Load_GIF() Invalid code %u just after clear (=%u)!\n",
                                GIF.current_code, value_clr);
                       File_error = 2;
                       break;

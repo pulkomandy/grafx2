@@ -2198,7 +2198,7 @@ void Button_Resolution(int btn)
         Video_mode[selected_mode].Fullscreen,
         chosen_pixel))
     {
-      Error(0); // On signale à l'utilisateur que c'est un mode invalide
+      Error(0); // Tell user it is an invalid mode
       Pixel_ratio=PIXEL_SIMPLE;
       Init_mode_video(
         Video_mode[Current_resolution].Width,

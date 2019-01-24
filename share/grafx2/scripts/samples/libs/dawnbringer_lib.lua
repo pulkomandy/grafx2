@@ -1391,7 +1391,7 @@ function db.fixPalette(pal,sortflag) -- Arrange palette & only keep unique color
   newpal[n] = indexpal[ulist[n][1]]
  end
 
- newpal["assigns"] = assign -- Complete list of image color assigns (removed cols will point to 1st occurence)
+ newpal["assigns"] = assign -- Complete list of image color assigns (removed cols will point to 1st occurrence)
  newpal["doubles"] = doubles
  newpal.double_total = dtot
 

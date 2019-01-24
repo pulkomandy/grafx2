@@ -706,7 +706,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   KEY_z|MOD_SHIFT, // Shift + Z
   0},
   {74,
-  "Strech brush",
+  "Stretch brush",
   "Allows you to resize the",
   "user-defined brush.",
   "",
@@ -1094,7 +1094,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   0},
   {112,
   "Center brush attachment point",
-  "Set the attachement of the",
+  "Set the attachment of the",
   "user-defined brush to its center.",
   "",
   true,
@@ -1102,7 +1102,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   0},
   {113,
   "Top-left brush attachment point",
-  "Set the attachement of the",
+  "Set the attachment of the",
   "user-defined brush to its top-left",
   "corner.",
   true,
@@ -1110,7 +1110,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   0},
   {114,
   "Top-right brush attachment point",
-  "Set the attachement of the",
+  "Set the attachment of the",
   "user-defined brush to its top-right",
   "corner.",
   true,
@@ -1118,7 +1118,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   0},
   {115,
   "Bottom-left brush attachment point",
-  "Set the attachement of the",
+  "Set the attachment of the",
   "user-defined brush to its",
   "bottom-left corner.",
   true,
@@ -1126,7 +1126,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   0},
   {116,
   "Bottom-right brush attachment point",
-  "Set the attachement of the",
+  "Set the attachment of the",
   "user-defined brush to its",
   "bottom-right corner.",
   true,
@@ -1965,11 +1965,11 @@ word Ordering[NB_SHORTCUTS]=
   0x100+BUTTON_PAL_RIGHT,           // Scroll palette right
   0x200+BUTTON_PAL_LEFT,            // Scroll palette left faster
   0x200+BUTTON_PAL_RIGHT,           // Scroll palette right faster
-  SPECIAL_CENTER_ATTACHMENT,        // Center brush attachement
-  SPECIAL_TOP_LEFT_ATTACHMENT,      // Top-left brush attachement
-  SPECIAL_TOP_RIGHT_ATTACHMENT,     // Top-right brush attachement
-  SPECIAL_BOTTOM_LEFT_ATTACHMENT,   // Bottom-left brush attachement
-  SPECIAL_BOTTOM_RIGHT_ATTACHMENT,  // Bottom right brush attachement
+  SPECIAL_CENTER_ATTACHMENT,        // Center brush attachment
+  SPECIAL_TOP_LEFT_ATTACHMENT,      // Top-left brush attachment
+  SPECIAL_TOP_RIGHT_ATTACHMENT,     // Top-right brush attachment
+  SPECIAL_BOTTOM_LEFT_ATTACHMENT,   // Bottom-left brush attachment
+  SPECIAL_BOTTOM_RIGHT_ATTACHMENT,  // Bottom right brush attachment
   SPECIAL_NEXT_FORECOLOR,           // Next foreground color
   SPECIAL_PREVIOUS_FORECOLOR,       // Previous foreground color
   SPECIAL_NEXT_BACKCOLOR,           // Next background color
