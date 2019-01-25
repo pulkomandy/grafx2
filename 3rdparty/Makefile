@@ -183,10 +183,6 @@ endif
 endif
 endif
 
-$(LUA)/.ok:	archives/$(LUAARCH)
-	$(TAR) xzf $<
-	touch $@
-
 ifdef WIN32
 $(PREFIX)/lib/libSDL2main.a:	archives/$(SDL2DEVEL)
 	$(TAR) xzf $<
@@ -211,10 +207,6 @@ $(PREFIX)/lib/libSDL2main.a:	$(SDL2)/.ok
 	cd $(SDL2)/build && ../configure --prefix=$(PREFIX) --host=$(HOST) \
 	  $(SDL2DISABLE)
 	cd $(SDL2)/build && $(MAKE) && $(MAKE) install
-
-$(SDL2)/.ok:	archives/$(SDL2ARCH)
-	$(TAR) xzf $<
-	touch $@
 endif
 
 $(PREFIX)/lib/libSDL2_image.a:	$(PREFIX)/lib/libjpeg.a
@@ -242,10 +234,6 @@ endif
 	echo "License :" >> ../doc/README-SDL2_image.txt
 	cat $(SDL2IMAGE)/COPYING.txt | tr -d "\r" >> ../doc/README-SDL2_image.txt
 
-$(SDL2IMAGE)/.ok:	archives/$(SDL2IMAGEARCH)
-	$(TAR) xzf $<
-	touch $@
-
 $(PREFIX)/lib/libSDL2_ttf.a:	$(PREFIX)/lib/libfreetype.a
 $(PREFIX)/lib/libSDL2_ttf.a:	$(PREFIX)/lib/libSDL2main.a
 
@@ -266,10 +254,6 @@ endif
 	echo "" >> ../doc/README-SDL2_ttf.txt
 	echo "License :" >> ../doc/README-SDL2_ttf.txt
 	cat $(SDL2TTF)/COPYING.txt | tr -d "\r" >> ../doc/README-SDL2_ttf.txt
-
-$(SDL2TTF)/.ok:	archives/$(SDL2TTFARCH)
-	$(TAR) xzf $<
-	touch $@
 
 ifdef WIN32
 $(PREFIX)/lib/libSDLmain.a:	archives/$(SDLDEVEL)
@@ -295,11 +279,6 @@ $(PREFIX)/lib/libSDLmain.a:	$(SDL)/.ok
 	  $(SDLDISABLE)
 	cd $(SDL) && $(MAKE)
 	cd $(SDL) && $(MAKE) install
-
-$(SDL)/.ok:	archives/$(SDLARCH)
-	$(TAR) xzf $<
-	cd $(SDL) ; for p in $(SDLPATCHES) ; do echo "applying $$p" ; patch -p0 < ../$$p ; done
-	touch $@
 endif
 
 ifndef WIN32
@@ -334,11 +313,6 @@ endif
 	echo "License :" >> ../doc/README-SDL_image.txt
 	cat $(SDLIMAGE)/COPYING >> ../doc/README-SDL_image.txt
 
-$(SDLIMAGE)/.ok:	archives/$(SDLIMAGEARCH)
-	$(TAR) xzf $<
-	cd $(SDLIMAGE) ; for p in $(SDLIMAGEPATCHES) ; do echo "applying $$p" ; patch -p1 < ../$$p ; done
-	touch $@
-
 $(PREFIX)/lib/libSDL_ttf.a:	$(PREFIX)/lib/libfreetype.a
 $(PREFIX)/lib/libSDL_ttf.a:	$(PREFIX)/lib/libSDLmain.a
 
@@ -358,10 +332,6 @@ endif
 	echo "" >> ../doc/README-SDL_ttf.txt
 	echo "License :" >> ../doc/README-SDL_ttf.txt
 	cat $(SDLTTF)/COPYING >> ../doc/README-SDL_ttf.txt
-
-$(SDLTTF)/.ok:	archives/$(SDLTTFARCH)
-	$(TAR) xzf $<
-	touch $@
 
 $(PREFIX)/lib/libfreetype.a:	$(PREFIX)/lib/libpng.a
 
@@ -383,10 +353,6 @@ ifdef WIN32
 	cat $(FREETYPE)/docs/GPLv2.TXT >> ../doc/README-freetype.txt
 endif
 
-$(FREETYPE)/.ok:	archives/$(FREETYPEARCH)
-	$(TAR) xzf $<
-	touch $@
-
 $(PREFIX)/lib/libjpeg.a:	$(JPEGDIR)/.ok
 	cd $(JPEGDIR) && CC=$(CC) ./configure --prefix=$(PREFIX) --host=$(HOST)
 	cd $(JPEGDIR) && $(MAKE)
@@ -399,6 +365,8 @@ ifdef WIN32
 	$(CP) $(JPEGDIR)/README ../doc/README-jpeg.txt
 endif
 
+# libjpeg archive name and directory name are not the same
+# so the generic rule won't work
 $(JPEGDIR)/.ok:	archives/$(JPEGARCH)
 	$(TAR) xzf $<
 	touch $@
@@ -425,11 +393,12 @@ ifdef WIN32
 	cat $(LIBTIFF)/COPYRIGHT >> ../doc/README-tiff.txt
 endif
 
+# variable names doesn't match directory name, so the generic rule won't work
 $(LIBTIFF)/.ok:	archives/$(LIBTIFFARCH)
 	$(TAR) xzf $<
 	cd $(LIBTIFF) ; for p in $(LIBTIFFPATCHES) ; do echo "applying $$p" ; patch -p0 < ../$$p ; done
 	touch $@
-	
+
 $(PREFIX)/lib/libpng.a:	$(PREFIX)/lib/libz.a
 
 $(PREFIX)/lib/libpng.a:	$(LIBPNG)/.ok
@@ -448,10 +417,6 @@ ifdef WIN32
 	cat $(LIBPNG)/LICENSE >> ../doc/README-libpng.txt
 endif
 
-$(LIBPNG)/.ok:	archives/$(LIBPNGARCH)
-	$(TAR) xzf $<
-	touch $@
-
 $(PREFIX)/lib/libz.a:	$(ZLIB)/.ok
 ifdef WIN32
 	cd $(ZLIB) && $(MAKE) -fwin32/Makefile.gcc PREFIX=$(shell echo $(CC) | sed 's/^\(.*\)gcc/\1/') LOC="$(LDFLAGS) $(CFLAGS)"
@@ -469,16 +434,15 @@ else
 endif
 	$(CP) $(ZLIB)/README ../doc/README-zlib1.txt
 
-$(ZLIB)/.ok:	archives/$(ZLIBARCH)
-	$(TAR) xzf $<
-	touch $@
-
 recoil:	$(RECOIL)/.ok
 
-$(RECOIL)/.ok:	archives/$(RECOILARCH)
+# generic rule to unpack tarball and apply patches
+%/.ok:	archives/%.tar.gz
 	$(TAR) xzf $<
+	cd $(@D) ; for p in $($(shell echo $* | cut -d- -f1 | tr a-z A-Z | tr -d _)PATCHES) ; do echo "applying $$p" ; patch -p1 < ../$$p ; done
 	touch $@
 
+# the few following archive names won't work with the generic rule
 archives/$(SDLDEVEL):
 	@$(MKDIR) $(@D)
 	cd $(@D) && $(GETURL) $(SDLDEVELURL)
@@ -495,6 +459,7 @@ archives/$(LIBTIFFARCH):
 	@$(MKDIR) $(@D)
 	cd $(@D) && ( $(GETURL) $(LIBTIFFURL) || $(GETURL) $(LIBTIFFURLALT) )
 
+# generic rule to download tarballs
 archives/%.tar.gz:
 	@$(MKDIR) $(@D)
 	$(eval URL = $($(shell echo $* | cut -d- -f1 | tr a-z A-Z | tr -d _)URL))

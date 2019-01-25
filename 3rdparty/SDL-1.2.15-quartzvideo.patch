@@ -6,8 +6,8 @@
 Better fix for bug 2085 - SDL 1.2.15 fails to build on OSX 10.9 Mavericks, thanks Ozkan!
 
 diff -r e9466ead70e5 -r bbfb41c13a87 src/video/quartz/SDL_QuartzVideo.h
---- src/video/quartz/SDL_QuartzVideo.h	Thu Sep 05 06:38:57 2013 -0700
-+++ src/video/quartz/SDL_QuartzVideo.h	Fri Sep 06 23:35:30 2013 -0700
+--- a/src/video/quartz/SDL_QuartzVideo.h	Thu Sep 05 06:38:57 2013 -0700
++++ b/src/video/quartz/SDL_QuartzVideo.h	Fri Sep 06 23:35:30 2013 -0700
 @@ -91,7 +91,9 @@
      CGDirectDisplayID  display;            /* 0 == main display (only support single display) */
      const void         *mode;              /* current mode of the display */
