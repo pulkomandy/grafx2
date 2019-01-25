@@ -972,8 +972,17 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
         Warning("Unicode conversion of input text failed");
         unicode_text[0] = 0;
       }
+#elif defined(WIN32)
+      // use MultiByteToWideChar(CP_UTF8, ...) under WIN32
+      // Note :  For UTF-8, dwFlags must be set to either 0 or
+      // MB_ERR_INVALID_CHARS.
+      i = MultiByteToWideChar(CP_UTF8, 0, Key_Text, -1, (LPWSTR)unicode_text, sizeof(unicode_text)/sizeof(word));
+      if (i == 0)
+      {
+        GFX2_Log(GFX2_ERROR, "MultiByteToWideChar(CP_UTF8, \"%s\", ...) failed with error #%u\n", Key_Text, GetLastError());
+        unicode_text[0] = 0;
+      }
 #else
-      /// @todo use MultiByteToWideChar(CP_UTF8, ...) under WIN32
       int j;
       for (i = 0, j = 0; i < (int)sizeof(Key_Text) && j < (int)sizeof(unicode_text) && Key_Text[i] != '\0'; i++)
       {

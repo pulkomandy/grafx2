@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "grafx2-sdl2", "grafx2-sdl2.vcxproj", "{2C23F950-9403-4871-848E-7E98BE9BD565}"
+	ProjectSection(ProjectDependencies) = postProject
+		{056D84A3-08C5-4A2A-A24B-D2E6D00D9552} = {056D84A3-08C5-4A2A-A24B-D2E6D00D9552}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "generateversion", "generateversion.vcxproj", "{056D84A3-08C5-4A2A-A24B-D2E6D00D9552}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2C23F950-9403-4871-848E-7E98BE9BD565}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2C23F950-9403-4871-848E-7E98BE9BD565}.Debug|Win32.Build.0 = Debug|Win32
+		{2C23F950-9403-4871-848E-7E98BE9BD565}.Release|Win32.ActiveCfg = Release|Win32
+		{2C23F950-9403-4871-848E-7E98BE9BD565}.Release|Win32.Build.0 = Release|Win32
+		{056D84A3-08C5-4A2A-A24B-D2E6D00D9552}.Debug|Win32.ActiveCfg = Debug|Win32
+		{056D84A3-08C5-4A2A-A24B-D2E6D00D9552}.Debug|Win32.Build.0 = Debug|Win32
+		{056D84A3-08C5-4A2A-A24B-D2E6D00D9552}.Release|Win32.ActiveCfg = Release|Win32
+		{056D84A3-08C5-4A2A-A24B-D2E6D00D9552}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

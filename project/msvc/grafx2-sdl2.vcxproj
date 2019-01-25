@@ -1,0 +1,217 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{2C23F950-9403-4871-848E-7E98BE9BD565}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>grafx2</RootNamespace>
+    <ProjectName>grafx2-sdl2</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(SolutionDir)\libraries.props" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)..\..\bin\</OutDir>
+    <TargetName>$(ProjectName)$(Configuration)</TargetName>
+    <IntDir>$(Configuration)-sdl2\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)..\..\bin\</OutDir>
+    <IntDir>$(Configuration)-sdl2\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>USE_SDL2;NOTTF;__ENABLE_LUA__;__no_pnglib__;__no_tifflib__;_CRT_SECURE_NO_WARNINGS;_USE_MATH_DEFINES;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SDL2ImageIncDir);$(SDL2IncDir);$(LuaIncDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;lua53.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SDL2LibDir);$(SDL2ImageLibDir);$(LuaLibDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>USE_SDL2;NOTTF;__ENABLE_LUA__;__no_pnglib__;__no_tifflib__;_CRT_SECURE_NO_WARNINGS;_USE_MATH_DEFINES;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SDL2ImageIncDir);$(SDL2IncDir);$(LuaIncDir);;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;lua53.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SDL2LibDir);$(SDL2ImageLibDir);$(LuaLibDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\bitcount.h" />
+    <ClInclude Include="..\..\src\brush.h" />
+    <ClInclude Include="..\..\src\buttons.h" />
+    <ClInclude Include="..\..\src\colorred.h" />
+    <ClInclude Include="..\..\src\const.h" />
+    <ClInclude Include="..\..\src\engine.h" />
+    <ClInclude Include="..\..\src\errors.h" />
+    <ClInclude Include="..\..\src\factory.h" />
+    <ClInclude Include="..\..\src\filesel.h" />
+    <ClInclude Include="..\..\src\gfx2log.h" />
+    <ClInclude Include="..\..\src\gfx2surface.h" />
+    <ClInclude Include="..\..\src\global.h" />
+    <ClInclude Include="..\..\src\graph.h" />
+    <ClInclude Include="..\..\src\haiku.h" />
+    <ClInclude Include="..\..\src\help.h" />
+    <ClInclude Include="..\..\src\helpfile.h" />
+    <ClInclude Include="..\..\src\hotkeys.h" />
+    <ClInclude Include="..\..\src\init.h" />
+    <ClInclude Include="..\..\src\input.h" />
+    <ClInclude Include="..\..\src\io.h" />
+    <ClInclude Include="..\..\src\keyboard.h" />
+    <ClInclude Include="..\..\src\keycodes.h" />
+    <ClInclude Include="..\..\src\layers.h" />
+    <ClInclude Include="..\..\src\libraw2crtc.h" />
+    <ClInclude Include="..\..\src\loadsave.h" />
+    <ClInclude Include="..\..\src\misc.h" />
+    <ClInclude Include="..\..\src\mountlist.h" />
+    <ClInclude Include="..\..\src\oldies.h" />
+    <ClInclude Include="..\..\src\operatio.h" />
+    <ClInclude Include="..\..\src\op_c.h" />
+    <ClInclude Include="..\..\src\pages.h" />
+    <ClInclude Include="..\..\src\palette.h" />
+    <ClInclude Include="..\..\src\pxdouble.h" />
+    <ClInclude Include="..\..\src\pxquad.h" />
+    <ClInclude Include="..\..\src\pxsimple.h" />
+    <ClInclude Include="..\..\src\pxtall.h" />
+    <ClInclude Include="..\..\src\pxtall2.h" />
+    <ClInclude Include="..\..\src\pxtall3.h" />
+    <ClInclude Include="..\..\src\pxtriple.h" />
+    <ClInclude Include="..\..\src\pxwide.h" />
+    <ClInclude Include="..\..\src\pxwide2.h" />
+    <ClInclude Include="..\..\src\readini.h" />
+    <ClInclude Include="..\..\src\readline.h" />
+    <ClInclude Include="..\..\src\realpath.h" />
+    <ClInclude Include="..\..\src\recoil.h" />
+    <ClInclude Include="..\..\src\saveini.h" />
+    <ClInclude Include="..\..\src\SDLMain.h" />
+    <ClInclude Include="..\..\src\sdlscreen.h" />
+    <ClInclude Include="..\..\src\setup.h" />
+    <ClInclude Include="..\..\src\SFont.h" />
+    <ClInclude Include="..\..\src\shade.h" />
+    <ClInclude Include="..\..\src\special.h" />
+    <ClInclude Include="..\..\src\struct.h" />
+    <ClInclude Include="..\..\src\text.h" />
+    <ClInclude Include="..\..\src\tiles.h" />
+    <ClInclude Include="..\..\src\transform.h" />
+    <ClInclude Include="..\..\src\unicode.h" />
+    <ClInclude Include="..\..\src\windows.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\src\gfx2.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\brush.c" />
+    <ClCompile Include="..\..\src\brush_ops.c" />
+    <ClCompile Include="..\..\src\buttons.c" />
+    <ClCompile Include="..\..\src\buttons_effects.c" />
+    <ClCompile Include="..\..\src\colorred.c" />
+    <ClCompile Include="..\..\src\engine.c" />
+    <ClCompile Include="..\..\src\factory.c" />
+    <ClCompile Include="..\..\src\fileformats.c" />
+    <ClCompile Include="..\..\src\filesel.c" />
+    <ClCompile Include="..\..\src\gfx2log.c" />
+    <ClCompile Include="..\..\src\gfx2surface.c" />
+    <ClCompile Include="..\..\src\graph.c" />
+    <ClCompile Include="..\..\src\help.c" />
+    <ClCompile Include="..\..\src\hotkeys.c" />
+    <ClCompile Include="..\..\src\init.c" />
+    <ClCompile Include="..\..\src\input.c" />
+    <ClCompile Include="..\..\src\io.c" />
+    <ClCompile Include="..\..\src\keyboard.c" />
+    <ClCompile Include="..\..\src\layers.c" />
+    <ClCompile Include="..\..\src\libraw2crtc.c" />
+    <ClCompile Include="..\..\src\loadrecoil.c" />
+    <ClCompile Include="..\..\src\loadsave.c" />
+    <ClCompile Include="..\..\src\main.c" />
+    <ClCompile Include="..\..\src\misc.c" />
+    <ClCompile Include="..\..\src\miscfileformats.c" />
+    <ClCompile Include="..\..\src\mountlist.c" />
+    <ClCompile Include="..\..\src\oldies.c" />
+    <ClCompile Include="..\..\src\operatio.c" />
+    <ClCompile Include="..\..\src\op_c.c" />
+    <ClCompile Include="..\..\src\pages.c" />
+    <ClCompile Include="..\..\src\palette.c" />
+    <ClCompile Include="..\..\src\pversion.c" />
+    <ClCompile Include="..\..\src\pxdouble.c" />
+    <ClCompile Include="..\..\src\pxquad.c" />
+    <ClCompile Include="..\..\src\pxsimple.c" />
+    <ClCompile Include="..\..\src\pxtall.c" />
+    <ClCompile Include="..\..\src\pxtall2.c" />
+    <ClCompile Include="..\..\src\pxtall3.c" />
+    <ClCompile Include="..\..\src\pxtriple.c" />
+    <ClCompile Include="..\..\src\pxwide.c" />
+    <ClCompile Include="..\..\src\pxwide2.c" />
+    <ClCompile Include="..\..\src\readini.c" />
+    <ClCompile Include="..\..\src\readline.c" />
+    <ClCompile Include="..\..\src\realpath.c" />
+    <ClCompile Include="..\..\src\recoil.c" />
+    <ClCompile Include="..\..\src\saveini.c" />
+    <ClCompile Include="..\..\src\sdlscreen.c" />
+    <ClCompile Include="..\..\src\setup.c" />
+    <ClCompile Include="..\..\src\SFont.c" />
+    <ClCompile Include="..\..\src\shade.c" />
+    <ClCompile Include="..\..\src\special.c" />
+    <ClCompile Include="..\..\src\text.c" />
+    <ClCompile Include="..\..\src\tifformat.c" />
+    <ClCompile Include="..\..\src\tiles.c" />
+    <ClCompile Include="..\..\src\transform.c" />
+    <ClCompile Include="..\..\src\unicode.c" />
+    <ClCompile Include="..\..\src\version.c" />
+    <ClCompile Include="..\..\src\windows.c" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

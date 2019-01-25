@@ -220,7 +220,7 @@ static void GFX2_UpdateRect(int x, int y, int width, int height)
   SDL_LockTexture(Texture_SDL, &source_rect, (void **)(&pixels), &pitch );
   for (line = 0; line < source_rect.h; line++)
   {
-     memcpy(pixels + line * pitch, RGBcopy->pixels + source_rect.x * 4 + (source_rect.y+line)* RGBcopy->pitch, source_rect.w * 4 );
+     memcpy(pixels + line * pitch, (const byte *)RGBcopy->pixels + source_rect.x * 4 + (source_rect.y+line)* RGBcopy->pitch, source_rect.w * 4 );
   }
   SDL_UnlockTexture(Texture_SDL);
   //SDL_RenderCopy(Renderer_SDL, Texture_SDL, &source_rect, &source_rect);
