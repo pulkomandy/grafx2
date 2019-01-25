@@ -200,8 +200,9 @@ ifneq ($(SDLCONFIG), )
     #SDLLOPT += $(SDLLIBDIR)/libSDL.a
     SDLLOPT += $(addsuffix .a, $(shell ../tools/osx_find_dependencies.sh $(SDLLIBDIR)/libSDL_image.dylib $(SDLLIBDIR)/libSDL_ttf.dylib | grep -v SDL | cut -d'.' -f 1))
     SDLLOPT += $(SDLLIBDIR)/libSDL_image.a
-    TTFLOPT =
-    SDLLOPT += $(shell $(PKG_CONFIG) --variable=libdir SDL_ttf)/libSDL_ttf.a
+    TTFLOPT = $(shell if [ -f ../3rdparty/usr/lib/libfreetype.dylib ] && \
+      otool -L ../3rdparty/usr/lib/libfreetype.dylib | cut -f 2 | grep -q ^/usr/lib/libbz2 ; then echo "-lbz2" ; fi )
+    TTFLOPT += $(shell $(PKG_CONFIG) --variable=libdir SDL_ttf)/libSDL_ttf.a
   else
     SDLLOPT = $(shell $(SDLCONFIG) --libs) $(shell $(PKG_CONFIG) --libs SDL_image)
   endif
@@ -223,8 +224,9 @@ ifeq ($(API),sdl2)
     # trick to get all dependencies
     SDLLOPT += $(addsuffix .a, $(shell ../tools/osx_find_dependencies.sh $(SDLLIBDIR)/libSDL2_image.dylib $(SDLLIBDIR)/libSDL2_ttf.dylib | grep -v SDL2 | cut -d'.' -f 1))
     SDLLOPT += $(SDLLIBDIR)/libSDL2_image.a
-    TTFLOPT =
-    SDLLOPT += $(shell $(PKG_CONFIG) --variable=libdir SDL2_ttf)/libSDL2_ttf.a
+    TTFLOPT = $(shell if [ -f ../3rdparty/usr/lib/libfreetype.dylib ] && \
+      otool -L ../3rdparty/usr/lib/libfreetype.dylib | cut -f 2 | grep -q ^/usr/lib/libbz2 ; then echo "-lbz2" ; fi )
+    TTFLOPT += $(shell $(PKG_CONFIG) --variable=libdir SDL2_ttf)/libSDL2_ttf.a
   else
     SDLLOPT = $(shell $(SDL2CONFIG) --libs) $(shell $(PKG_CONFIG) --libs SDL2_image)
     SDLLOPT += -Wl,-framework,Cocoa
@@ -265,10 +267,7 @@ endif
 ifdef MACOSX_LION
     LOPT = $(SDLLOPT) $(LUALOPT) -framework libpng14 -lz
 else
-    LOPT = $(SDLLOPT) $(LUALOPT)
-    ifneq ($(OSX_STATIC), 1)
-      LOPT += $(TTFLOPT)
-    endif
+    LOPT = $(SDLLOPT) $(LUALOPT) $(TTFLOPT)
     LIBPNGCONFIG := $(shell which ../3rdparty/usr/bin/libpng-config || which libpng-config)
 ifneq ($(LIBPNGCONFIG), )
     COPT += $(shell $(LIBPNGCONFIG) --cflags)
@@ -642,27 +641,21 @@ ifeq ($(NOTTF),1)
     TTFLABEL = -nottf
   endif
 else
- ifneq ($(ATARICROSS),1)
+ ifneq ($(PLATFORM),Darwin)
    TTFCOPT = 
    TTFLOPT =
    ifneq ($(WIN32CROSS),1)
      TTFLOPT += -L$(PREFIX)/lib
    endif
    ifeq ($(API),sdl)
-     TTFLOPT += -lSDL_ttf $(FCLOPT)
+     TTFLOPT += -lSDL_ttf
+     TTFLIBS = bin/SDL_ttf.dll
    else
-     TTFLOPT += -lSDL2_ttf $(FCLOPT)
+     TTFLOPT += -lSDL2_ttf
+     TTFLIBS = bin/SDL2_ttf.dll
    endif
-   TTFLIBS = bin/libfreetype-6.dll bin/SDL_ttf.dll
-   TTFLABEL = 
- else
-   TTFCOPT = 
-   ifeq ($(API),sdl)
-   TTFLOPT = -L$(PREFIX)/lib -lSDL_ttf $(FCLOPT)
-   else
-   TTFLOPT = -L$(PREFIX)/lib -lSDL2_ttf $(FCLOPT)
-   endif
-   TTFLIBS =  
+   TTFLOPT += $(FCLOPT)
+   TTFLIBS += bin/libfreetype-6.dll
    TTFLABEL = 
  endif
 endif
