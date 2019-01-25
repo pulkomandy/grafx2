@@ -1,3 +1,22 @@
+# (c) 2018-2019 Thomas BERNARD
+#
+# Makefile to build GrafX2 library dependencies.
+#
+# Variables :
+# - API : sdl(default), sdl2
+# - WIN32CROSS
+#
+# most useful targets :
+# - download : download .tar.gz files from the WWW
+# - all (default) : download and build...
+# - clean : remove built libraries
+# - clean_archives : remove downloaded .tar.gz files
+#
+# examples :
+# $ make WIN32CROSS=1 API=sdl2
+# $ make download
+# $ make libtiff
+
 API ?= sdl
 
 PLATFORM = $(shell uname)
@@ -11,7 +30,7 @@ SDLDEVEL = SDL-devel-1.2.15-mingw32.tar.gz
 SDLDEVELURL = https://www.libsdl.org/release/$(SDLDEVEL)
 SDLDEVELPATCH = SDL-1.2.15.patch
 SDLIMAGE = SDL_image-1.2.12
-SDLIMAGEARCH = SDL_image-1.2.12.tar.gz
+SDLIMAGEARCH = $(SDLIMAGE).tar.gz
 SDLIMAGEURL = https://www.libsdl.org/projects/SDL_image/release/$(SDLIMAGEARCH)
 SDLIMAGEPATCHES = SDL_image-1.2.12.XCF_infinite_loop.patch \
                   SDL_image-1.2.12.XCF_v11_64bits_offsets.patch \
