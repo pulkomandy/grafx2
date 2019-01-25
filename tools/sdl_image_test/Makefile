@@ -2,27 +2,28 @@ CFLAGS = -Wall -O -g
 
 ifeq ($(API),sdl2)
 # SDL 2.x
-SDLCONFIG = sdl2-config
+SDLCONFIGNAME = sdl2-config
 SDLIMAGE = SDL2_image
 BIN = showimage-sdl2
 CFLAGS += -DUSE_SDL2
 else
 # SDL 1.2.x
-SDLCONFIG = sdl-config
+SDLCONFIGNAME = sdl-config
 SDLIMAGE = SDL_image
 BIN = showimage
 CFLAGS += -DUSE_SDL
 endif
 
+PKGCONFIG_PATH = $(shell if [ -d ../../3rdparty/usr ] ; then echo "PKG_CONFIG_LIBDIR=$${PWD}/../../3rdparty/usr/lib/pkgconfig" ; fi )
+
 ifdef WIN32CROSS
 CC = $(shell which i686-w64-mingw32-gcc || which mingw32-gcc)
-PKGCONFIG_PATH = $(shell if [ -d ../../3rdparty/usr ] ; then echo "PKG_CONFIG_LIBDIR=$${PWD}/../../3rdparty/usr/lib/pkgconfig" ; fi )
 PKGCONFIG = $(PKGCONFIG_PATH) $(shell which i686-w64-mingw32-pkg-config || which mingw32-pkg-config || which pkg-config)
-SDLCONFIGNAME := $(SDLCONFIG)
 SDLCONFIG = $(shell which ../../3rdparty/usr/bin/$(SDLCONFIGNAME) || which /usr/local/cross-tools/i386-mingw32/bin/$(SDLCONFIGNAME))
 BIN := $(BIN).exe
 else
-PKGCONFIG = pkg-config
+PKGCONFIG = $(PKGCONFIG_PATH) pkg-config
+SDLCONFIG = $(shell which ../../3rdparty/usr/bin/$(SDLCONFIGNAME) || which $(SDLCONFIGNAME))
 endif
 
 CFLAGS += $(shell $(SDLCONFIG) --cflags)
