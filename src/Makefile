@@ -1048,4 +1048,7 @@ htmldoc:	$(GENERATEDOCBIN)
 	$(MKDIR) ../doc/html
 	$(GENERATEDOCBIN) ../doc/html
 
+print-%:
+	@echo $* = $($*)
+
 -include Makefile.dep
