@@ -67,6 +67,11 @@ RECOILARCH=$(RECOIL).tar.gz
 RECOILURL=https://downloads.sourceforge.net/project/recoil/recoil/$(RECOILVER)/$(RECOILARCH)
 RECOILURLALT=http://nanard.free.fr/grafx2/$(RECOILARCH)
 
+ARCHIVES = $(addprefix archives/, $(SDLARCH) $(SDLIMAGEARCH) $(SDLTTFARCH) \
+             $(SDL2ARCH) $(SDL2IMAGEARCH) $(SDL2TTFARCH) $(LIBPNGARCH) \
+             $(JPEGARCH) $(LIBTIFFARCH) $(ZLIBARCH) $(FREETYPEARCH) \
+             $(LUAARCH) $(RECOILARCH))
+
 PREFIX = $(PWD)/usr
 
 MKDIR = mkdir -p
@@ -106,7 +111,10 @@ HOST = $(shell $(CC) -dumpmachine)
 #HOST = i686-pc-mingw32
 DATE = $(shell date -R)
 
-.PHONY:	all clean clean_archives clean_all libs libpng libsdl libsdl_image libsdl_ttf libjpeg libtiff zlib freetype lua recoil
+.PHONY:	all clean clean_archives clean_all download libs libpng \
+        libsdl libsdl_image libsdl_ttf \
+        libsdl2 libsdl2_image libsdl2_ttf \
+        libjpeg libtiff zlib freetype lua recoil
 
 all:	libs
 
@@ -119,6 +127,8 @@ clean:
 
 clean_archives:
 	$(RM) -r archives
+
+download:	$(ARCHIVES)
 
 ifeq ($(API), sdl)
 libs:	libpng libsdl libsdl_image libsdl_ttf lua
