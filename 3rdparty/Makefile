@@ -399,7 +399,8 @@ $(PREFIX)/lib/libtiff.a:	$(PREFIX)/lib/libz.a
 $(PREFIX)/lib/libtiff.a:	$(LIBTIFF)/.ok
 	cd $(LIBTIFF) && CC="$(CC) $(LDFLAGS)" ./configure --prefix=$(PREFIX) --host=$(HOST) \
 	  --with-zlib-include-dir=$(PREFIX)/include --with-zlib-lib-dir=$(PREFIX)/lib \
-	  --with-jpeg-include-dir=$(PREFIX)/include --with-jpeg-lib-dir=$(PREFIX)/lib
+	  --with-jpeg-include-dir=$(PREFIX)/include --with-jpeg-lib-dir=$(PREFIX)/lib \
+	  --disable-cxx --disable-webp --disable-lzma --disable-zstd
 	cd $(LIBTIFF) && $(MAKE)
 	cd $(LIBTIFF) && $(MAKE) install
 ifdef WIN32
