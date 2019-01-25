@@ -469,41 +469,13 @@ $(RECOIL)/.ok:	archives/$(RECOILARCH)
 	$(TAR) xzf $<
 	touch $@
 
-archives/$(SDLARCH):
-	@$(MKDIR) $(@D)
-	cd $(@D) && $(GETURL) $(SDLURL)
-
 archives/$(SDLDEVEL):
 	@$(MKDIR) $(@D)
 	cd $(@D) && $(GETURL) $(SDLDEVELURL)
 
-archives/$(SDLIMAGEARCH):
-	@$(MKDIR) $(@D)
-	cd $(@D) && $(GETURL) $(SDLIMAGEURL)
-
-archives/$(SDLTTFARCH):
-	@$(MKDIR) $(@D)
-	cd $(@D) && $(GETURL) $(SDLTTFURL)
-
 archives/$(SDL2DEVEL):
 	@$(MKDIR) $(@D)
 	cd $(@D) && $(GETURL) $(SDL2DEVELURL)
-
-archives/$(SDL2ARCH):
-	@$(MKDIR) $(@D)
-	cd $(@D) && $(GETURL) $(SDL2URL)
-
-archives/$(SDL2IMAGEARCH):
-	@$(MKDIR) $(@D)
-	cd $(@D) && $(GETURL) $(SDL2IMAGEURL)
-
-archives/$(SDL2TTFARCH):
-	@$(MKDIR) $(@D)
-	cd $(@D) && $(GETURL) $(SDL2TTFURL)
-
-archives/$(LIBPNGARCH):
-	@$(MKDIR) $(@D)
-	cd $(@D) && ( $(GETURL) $(LIBPNGURL) || $(GETURL) $(LIBPNGURLALT) )
 
 archives/$(JPEGARCH):
 	@$(MKDIR) $(@D)
@@ -513,18 +485,9 @@ archives/$(LIBTIFFARCH):
 	@$(MKDIR) $(@D)
 	cd $(@D) && ( $(GETURL) $(LIBTIFFURL) || $(GETURL) $(LIBTIFFURLALT) )
 
-archives/$(ZLIBARCH):
+archives/%.tar.gz:
 	@$(MKDIR) $(@D)
-	cd $(@D) && $(GETURL) $(ZLIBURL)
-
-archives/$(FREETYPEARCH):
-	@$(MKDIR) $(@D)
-	cd $(@D) && $(GETURL) $(FREETYPEURL)
-
-archives/$(LUAARCH):
-	@$(MKDIR) $(@D)
-	cd $(@D) && $(GETURL) $(LUAURL)
-
-archives/$(RECOILARCH):
-	@$(MKDIR) $(@D)
-	cd $(@D) && ( $(GETURL) $(RECOILURL) || $(GETURL) $(RECOILURLALT) )
+	$(eval URL = $($(shell echo $* | cut -d- -f1 | tr a-z A-Z | tr -d _)URL))
+	$(eval URLALT = $($(shell echo $* | cut -d- -f1 | tr a-z A-Z)URLALT))
+	@echo "$*: fetching $(URL) (or $(URLALT))"
+	@cd $(@D) && ( $(GETURL) $(URL) || ( [ -n "$(URLALT)" ] && $(GETURL) $(URLALT) ) )
