@@ -76,7 +76,7 @@ TAR = $(shell which tar)
 # wget -nv option is used to avoid messing the output when using "make -j3"
 GETURL = $(shell WGET=`which wget` ; if [ "$$?" = "0" ] && [ -x "$$WGET" ] ; \
                  then echo "$$WGET -nv" ; \
-                 else echo "curl -O -L --max-time 120" ; fi )
+                 else echo 'curl -s -w "%{url_effective} downloaded to %{filename_effective} in %{time_total} seconds\\n" -R -O -L --max-time 120' ; fi )
 
 BUILD_CC := $(CC)
 STRIP = strip
