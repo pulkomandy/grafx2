@@ -290,11 +290,15 @@ $(PREFIX)/lib/libSDLmain.a:	archives/$(SDLDEVEL)
 else
 SDLDISABLE = --disable-joystick --disable-audio
 ifeq ($(PLATFORM), Darwin)
-SDLDISABLE += --disable-video-x11
+SDLDISABLE += --without-x
+# the following trick was stolen from macports
+ifeq ($(shell if [ "`uname -r | cut -f1 -d. `" = "8" ] && [ "`sysctl -n hw.vectorunit`" = "1" ] ; then echo "true" ; fi ), true)
+SDLCFLAGS += -faltivec
+endif
 endif
 
 $(PREFIX)/lib/libSDLmain.a:	$(SDL)/.ok
-	cd $(SDL) && ./configure --host=$(HOST) --prefix=$(PREFIX) \
+	cd $(SDL) && CFLAGS=$(SDLCFLAGS) ./configure --host=$(HOST) --prefix=$(PREFIX) \
 	  $(SDLDISABLE)
 	cd $(SDL) && $(MAKE)
 	cd $(SDL) && $(MAKE) install
