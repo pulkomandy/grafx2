@@ -24,6 +24,7 @@ PLATFORM = $(shell uname)
 SDL = SDL-1.2.15
 SDLARCH = $(SDL).tar.gz
 SDLURL = https://www.libsdl.org/release/$(SDLARCH)
+SDLSHA256 = d6d316a793e5e348155f0dd93b979798933fb98aa1edebcc108829d6474aad00
 SDLPATCHES = SDL-1.2.15-patch-src_video_x11_SDL_x11sym.h \
              SDL-1.2.15-quartzvideo.patch
 SDLDEVEL = SDL-devel-1.2.15-mingw32.tar.gz
@@ -32,6 +33,7 @@ SDLDEVELPATCH = SDL-1.2.15.patch
 SDLIMAGE = SDL_image-1.2.12
 SDLIMAGEARCH = $(SDLIMAGE).tar.gz
 SDLIMAGEURL = https://www.libsdl.org/projects/SDL_image/release/$(SDLIMAGEARCH)
+SDLIMAGESHA256 = 0b90722984561004de84847744d566809dbb9daf732a9e503b91a1b5a84e5699
 SDLIMAGEPATCHES = SDL_image-1.2.12.XCF_infinite_loop.patch \
                   SDL_image-1.2.12.XCF_v11_64bits_offsets.patch \
                   SDL_image_XCF_v11_load_level.patch \
@@ -41,22 +43,27 @@ SDLIMAGEPATCHES = SDL_image-1.2.12.XCF_infinite_loop.patch \
 SDLTTF=SDL_ttf-2.0.11
 SDLTTFARCH=$(SDLTTF).tar.gz
 SDLTTFURL=https://www.libsdl.org/projects/SDL_ttf/release/$(SDLTTFARCH)
+SDLTTFSHA256 = 724cd895ecf4da319a3ef164892b72078bd92632a5d812111261cde248ebcdb7
 SDL2 = SDL2-2.0.9
 SDL2ARCH = $(SDL2).tar.gz
 SDL2URL = https://www.libsdl.org/release/$(SDL2ARCH)
+SDL2SHA256 = 255186dc676ecd0c1dbf10ec8a2cc5d6869b5079d8a38194c2aecdff54b324b1
 SDL2DEVEL = SDL2-devel-2.0.9-mingw.tar.gz
 SDL2DEVELURL = https://www.libsdl.org/release/$(SDL2DEVEL)
 SDL2DEVELPATCH = SDL2-devel.patch
 SDL2IMAGE = SDL2_image-2.0.4
 SDL2IMAGEARCH = $(SDL2IMAGE).tar.gz
 SDL2IMAGEURL = https://www.libsdl.org/projects/SDL_image/release/$(SDL2IMAGEARCH)
+SDL2IMAGESHA256 = e74ec49c2402eb242fbfa16f2f43a19582a74c2eabfbfb873f00d4250038ceac
 SDL2TTF = SDL2_ttf-2.0.14
 SDL2TTFARCH = $(SDL2TTF).tar.gz
 SDL2TTFURL = https://www.libsdl.org/projects/SDL_ttf/release/$(SDL2TTFARCH)
+SDL2TTFSHA256 = 34db5e20bcf64e7071fe9ae25acaa7d72bdc4f11ab3ce59acc768ab62fe39276
 LIBPNG = libpng-1.6.36
 LIBPNGARCH = $(LIBPNG).tar.gz
 LIBPNGURL = https://download.sourceforge.net/libpng/$(LIBPNGARCH)
 LIBPNGURLALT = ftp://ftp-osl.osuosl.org/pub/libpng/src/libpng16/$(LIBPNGARCH)
+LIBPNGSHA256 = ca13c548bde5fb6ff7117cc0bdab38808acb699c0eccb613f0e4697826e1fd7d
 JPEGVER = 9c
 JPEGDIR = jpeg-$(JPEGVER)
 JPEGARCH = jpegsrc.v$(JPEGVER).tar.gz
@@ -68,16 +75,23 @@ LIBTIFFARCH = $(LIBTIFF).tar.gz
 LIBTIFFURL = https://download.osgeo.org/libtiff/$(LIBTIFFARCH)
 LIBTIFFURLALT = https://fossies.org/linux/misc/$(LIBTIFFARCH)
 LIBTIFFPATCHES = tiff-uint64_long_long.patch
-ZLIB=zlib-1.2.11
+ZLIBVER=1.2.11
+ZLIB=zlib-$(ZLIBVER)
 ZLIBARCH=$(ZLIB).tar.gz
 ZLIBURL=https://www.zlib.net/$(ZLIBARCH)
-FREETYPE=freetype-2.9.1
+ZLIBURLALT=http://downloads.sourceforge.net/project/libpng/zlib/$(ZLIBVER)/$(ZLIBARCH)
+ZLIBSHA256=c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1
+FREETYPEVER=2.9.1
+FREETYPE=freetype-$(FREETYPEVER)
 FREETYPEARCH=$(FREETYPE).tar.gz
 FREETYPEURL=https://download.savannah.gnu.org/releases/freetype/$(FREETYPEARCH)
+FREETYPEURLALT=https://sourceforge.net/projects/freetype/files/freetype2/$(FREETYPEVER)/$(FREETYPEARCH)
+FREETYPESHA256=ec391504e55498adceb30baceebd147a6e963f636eb617424bcfc47a169898ce
 LUAVER=5.3.5
 LUA=lua-$(LUAVER)
 LUAARCH=$(LUA).tar.gz
 LUAURL=https://www.lua.org/ftp/$(LUAARCH)
+LUASHA256=0c2eed3f960446e1a3e4b9a1ca2f3ff893b6ce41942cf54d5dd59ab4b3b058ac
 # https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-0.6.1.tar.gz
 RECOILVER=4.3.1
 RECOIL=recoil-$(RECOILVER)
@@ -85,6 +99,7 @@ RECOILARCH=$(RECOIL).tar.gz
 # https://downloads.sourceforge.net/project/recoil/recoil/4.3.0/recoil-4.3.0.tar.gz
 RECOILURL=https://downloads.sourceforge.net/project/recoil/recoil/$(RECOILVER)/$(RECOILARCH)
 RECOILURLALT=http://nanard.free.fr/grafx2/$(RECOILARCH)
+RECOILSHA256=8f64fd21bafa180e6cbac5853ef65453f080385b3c53600af8360e938668e574
 
 ARCHIVES = $(addprefix archives/, $(SDLARCH) $(SDLIMAGEARCH) $(SDLTTFARCH) \
              $(SDL2ARCH) $(SDL2IMAGEARCH) $(SDL2TTFARCH) $(LIBPNGARCH) \
@@ -96,6 +111,12 @@ PREFIX = $(PWD)/usr
 MKDIR = mkdir -p
 CP = cp -v
 TAR = $(shell which tar)
+SHA256CMD = $(shell SHASUM=`which shasum` ; if [ "$$?" = "0" ] && [ -x "$$SHASUM" ] ; \
+                    then echo "($$SHASUM -a 256 | cut -f1 -d' ')" ; \
+                    else OPENSSL=`which openssl` ; if [ "$$?" = "0" ] && [ -x "$$OPENSSL" ] ; \
+                    then echo "($$OPENSSL sha256 -hex | sed 's/^.* //')" ; \
+                    else echo "echo 'WARNING: no sha256 digest tool' >&2 ; echo $(SHA256)" ; \
+                    fi ; fi )
 # you need either wget or curl to download the files
 # wget -nv option is used to avoid messing the output when using "make -j3"
 GETURL = $(shell WGET=`which wget` ; if [ "$$?" = "0" ] && [ -x "$$WGET" ] ; \
@@ -485,7 +506,10 @@ archives/$(LIBTIFFARCH):
 # generic rule to download tarballs
 archives/%.tar.gz:
 	@$(MKDIR) $(@D)
-	$(eval URL = $($(shell echo $* | cut -d- -f1 | tr a-z A-Z | tr -d _)URL))
-	$(eval URLALT = $($(shell echo $* | cut -d- -f1 | tr a-z A-Z)URLALT))
+	$(eval BASE := $(shell echo $* | cut -d- -f1 | tr a-z A-Z | tr -d _))
+	$(eval URL = $($(BASE)URL))
+	$(eval URLALT = $($(BASE)URLALT))
+	$(eval SHA256 = $($(BASE)SHA256))
 	@echo "$*: fetching $(URL) (or $(URLALT))"
 	@cd $(@D) && ( $(GETURL) $(URL) || ( [ -n "$(URLALT)" ] && $(GETURL) $(URLALT) ) )
+	@[ -z "$(SHA256)" ] || [ "`$(SHA256CMD) < $@`" = "$(SHA256)" ] || ( $(RM) $@ && echo "$@ SHA256 mismatch !" && false )
