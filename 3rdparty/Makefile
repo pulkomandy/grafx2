@@ -229,7 +229,7 @@ endif
 	echo "" >> ../doc/README-lua.txt
 	echo "License : http://www.lua.org/license.html" >> ../doc/README-lua.txt
 	# extract license from readme.html
-	awk '/BLOCKQUOTE/{flag=1-flag;next}flag' $(LUA)/doc/readme.html | grep -v '<P>' | tail --lines +2 >> ../doc/README-lua.txt
+	awk '/BLOCKQUOTE/{flag=1-flag;next}flag' $(LUA)/doc/readme.html | grep -v '<P>' | tail -n +2 >> ../doc/README-lua.txt
 
 ifdef WIN32
 $(PREFIX)/lib/libSDL2main.a:	archives/$(SDL2DEVEL)
