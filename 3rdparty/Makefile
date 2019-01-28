@@ -209,12 +209,6 @@ ifdef WIN32
 	    $(STRIP) ../bin/`basename $$f` ; \
 	  done
 	echo "The Windows distribution of Grafx2 is linked with Lua v$(LUAVER)" > ../doc/README-lua.txt
-	grep LUA_COPYRIGHT $(LUA)/src/lua.h | cut -d'"' -f 2 >> ../doc/README-lua.txt
-
-	echo "" >> ../doc/README-lua.txt
-	echo "License : http://www.lua.org/license.html" >> ../doc/README-lua.txt
-	# extract license from readme.html
-	awk '/BLOCKQUOTE/{flag=1-flag;next}flag' $(LUA)/doc/readme.html | grep -v '<P>' | tail --lines +2 >> ../doc/README-lua.txt
 else
 ifeq ($(PLATFORM), FreeBSD)
 	cd $(LUA) && $(MAKE) freebsd install INSTALL_TOP=$(PREFIX)
@@ -229,7 +223,13 @@ else
 endif
 endif
 endif
+	echo "Lua v$(LUAVER)" > ../doc/README-lua.txt
 endif
+	grep LUA_COPYRIGHT $(LUA)/src/lua.h | cut -d'"' -f 2 >> ../doc/README-lua.txt
+	echo "" >> ../doc/README-lua.txt
+	echo "License : http://www.lua.org/license.html" >> ../doc/README-lua.txt
+	# extract license from readme.html
+	awk '/BLOCKQUOTE/{flag=1-flag;next}flag' $(LUA)/doc/readme.html | grep -v '<P>' | tail --lines +2 >> ../doc/README-lua.txt
 
 ifdef WIN32
 $(PREFIX)/lib/libSDL2main.a:	archives/$(SDL2DEVEL)
@@ -255,6 +255,7 @@ $(PREFIX)/lib/libSDL2main.a:	$(SDL2)/.ok
 	cd $(SDL2)/build && ../configure --prefix=$(PREFIX) --host=$(HOST) \
 	  $(SDL2DISABLE)
 	cd $(SDL2)/build && $(MAKE) && $(MAKE) install
+	$(CP) $(SDL2)/README-SDL.txt ../doc/README-SDL2.txt
 endif
 
 $(PREFIX)/lib/libSDL2_image.a:	$(PREFIX)/lib/libjpeg.a
@@ -331,6 +332,7 @@ $(PREFIX)/lib/libSDLmain.a:	$(SDL)/.ok
 	  $(SDLDISABLE)
 	cd $(SDL) && $(MAKE)
 	cd $(SDL) && $(MAKE) install
+	$(CP) $(SDL)/README-SDL.txt ../doc/README-SDL.txt
 endif
 
 ifndef WIN32
@@ -398,12 +400,12 @@ ifdef WIN32
 	    $(CP) $$f ../bin ; \
 	    $(STRIP) ../bin/`basename $$f` ; \
 	  done
+endif
 	echo "$(FREETYPE)" > ../doc/README-freetype.txt
 	echo "" >> ../doc/README-freetype.txt
 	echo "License :" >> ../doc/README-freetype.txt
 	echo "" >> ../doc/README-freetype.txt
 	cat $(FREETYPE)/docs/GPLv2.TXT >> ../doc/README-freetype.txt
-endif
 
 $(PREFIX)/lib/libjpeg.a:	$(JPEGDIR)/.ok
 	cd $(JPEGDIR) && CC=$(CC) ./configure --prefix=$(PREFIX) --host=$(HOST)
@@ -414,8 +416,8 @@ ifdef WIN32
 	    $(CP) $$f ../bin ; \
 	    $(STRIP) ../bin/`basename $$f` ; \
 	  done
-	$(CP) $(JPEGDIR)/README ../doc/README-jpeg.txt
 endif
+	$(CP) $(JPEGDIR)/README ../doc/README-jpeg.txt
 
 # libjpeg archive name and directory name are not the same
 # so the generic rule won't work
@@ -430,6 +432,7 @@ $(PREFIX)/lib/libtiff.a:	$(LIBTIFF)/.ok
 	cd $(LIBTIFF) && CC="$(CC) $(LDFLAGS)" ./configure --prefix=$(PREFIX) --host=$(HOST) \
 	  --with-zlib-include-dir=$(PREFIX)/include --with-zlib-lib-dir=$(PREFIX)/lib \
 	  --with-jpeg-include-dir=$(PREFIX)/include --with-jpeg-lib-dir=$(PREFIX)/lib \
+	  --enable-silent-rules \
 	  --disable-cxx --disable-webp --disable-lzma --disable-zstd
 	cd $(LIBTIFF) && $(MAKE)
 	cd $(LIBTIFF) && $(MAKE) install
@@ -438,12 +441,12 @@ ifdef WIN32
 	    $(CP) $$f ../bin ; \
 	    $(STRIP) ../bin/`basename $$f` ; \
 	  done
+endif
 	echo "$(LIBTIFF)" > ../doc/README-tiff.txt
 	echo "" >> ../doc/README-tiff.txt
 	echo "License :" >> ../doc/README-tiff.txt
 	echo "" >> ../doc/README-tiff.txt
 	cat $(LIBTIFF)/COPYRIGHT >> ../doc/README-tiff.txt
-endif
 
 $(PREFIX)/lib/libpng.a:	$(PREFIX)/lib/libz.a
 
@@ -456,12 +459,12 @@ ifdef WIN32
 	    $(CP) $$f ../bin ; \
 	    $(STRIP) ../bin/`basename $$f` ; \
 	  done
+endif
 	echo "$(LIBPNG)" > ../doc/README-libpng.txt
 	echo "" >> ../doc/README-libpng.txt
 	echo "License :" >> ../doc/README-libpng.txt
 	echo "" >> ../doc/README-libpng.txt
 	cat $(LIBPNG)/LICENSE >> ../doc/README-libpng.txt
-endif
 
 $(PREFIX)/lib/libz.a:	$(ZLIB)/.ok
 ifdef WIN32
@@ -481,6 +484,7 @@ endif
 	$(CP) $(ZLIB)/README ../doc/README-zlib1.txt
 
 recoil:	$(RECOIL)/.ok
+	$(CP) $(RECOIL)/README ../doc/README-recoil.txt
 
 # generic rule to unpack tarball and apply patches
 %/.ok:	archives/%.tar.gz
