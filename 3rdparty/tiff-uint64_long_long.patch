@@ -2,8 +2,8 @@ $NetBSD$
 
 To avoid conflict with Security.framework on OS X, prefer unsigned long long as 64-bit type.
 
---- configure.orig	2015-08-24 22:13:55.000000000 +0000
-+++ configure
+--- a/configure	2015-08-24 22:13:55.000000000 +0000
++++ b/configure
 @@ -17750,11 +17750,7 @@ _ACEOF
  $as_echo_n "checking for unsigned 64-bit type... " >&6; }
  UINT64_T='none'

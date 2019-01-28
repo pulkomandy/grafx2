@@ -75,6 +75,12 @@ LIBTIFFARCH = $(LIBTIFF).tar.gz
 LIBTIFFURL = https://download.osgeo.org/libtiff/$(LIBTIFFARCH)
 LIBTIFFURLALT = https://fossies.org/linux/misc/$(LIBTIFFARCH)
 LIBTIFFPATCHES = tiff-uint64_long_long.patch
+# additionnal variables for the generic rules to work :
+TIFFARCH = $(LIBTIFFARCH)
+TIFFURL = $(LIBTIFFURL)
+TIFFURLALT = $(LIBTIFFURLALT)
+TIFFPATCHES = $(LIBTIFFPATCHES)
+TIFFSHA256 = 2c52d11ccaf767457db0c46795d9c7d1a8d8f76f68b0b800a3dfe45786b996e4
 ZLIBVER=1.2.11
 ZLIB=zlib-$(ZLIBVER)
 ZLIBARCH=$(ZLIB).tar.gz
@@ -437,12 +443,6 @@ ifdef WIN32
 	cat $(LIBTIFF)/COPYRIGHT >> ../doc/README-tiff.txt
 endif
 
-# variable names doesn't match directory name, so the generic rule won't work
-$(LIBTIFF)/.ok:	archives/$(LIBTIFFARCH)
-	$(TAR) xzf $<
-	cd $(LIBTIFF) ; for p in $(LIBTIFFPATCHES) ; do echo "applying $$p" ; patch -p0 < ../$$p ; done
-	touch $@
-
 $(PREFIX)/lib/libpng.a:	$(PREFIX)/lib/libz.a
 
 $(PREFIX)/lib/libpng.a:	$(LIBPNG)/.ok
@@ -498,10 +498,6 @@ archives/$(SDL2DEVEL):
 archives/$(JPEGARCH):
 	@$(MKDIR) $(@D)
 	cd $(@D) && $(GETURL) $(JPEGURL)
-
-archives/$(LIBTIFFARCH):
-	@$(MKDIR) $(@D)
-	cd $(@D) && ( $(GETURL) $(LIBTIFFURL) || $(GETURL) $(LIBTIFFURLALT) )
 
 # generic rule to download tarballs
 archives/%.tar.gz:
