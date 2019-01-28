@@ -30,6 +30,7 @@ SDLPATCHES = SDL-1.2.15-patch-src_video_x11_SDL_x11sym.h \
 SDLDEVEL = SDL-devel-1.2.15-mingw32.tar.gz
 SDLDEVELURL = https://www.libsdl.org/release/$(SDLDEVEL)
 SDLDEVELPATCH = SDL-1.2.15.patch
+SDLDEVELSHA256 = d51eedfe7e07893d6c93a2d761c6ccc91d04b5f68a2ecabdbef83b7a1fef9cde
 SDLIMAGE = SDL_image-1.2.12
 SDLIMAGEARCH = $(SDLIMAGE).tar.gz
 SDLIMAGEURL = https://www.libsdl.org/projects/SDL_image/release/$(SDLIMAGEARCH)
@@ -51,6 +52,7 @@ SDL2SHA256 = 255186dc676ecd0c1dbf10ec8a2cc5d6869b5079d8a38194c2aecdff54b324b1
 SDL2DEVEL = SDL2-devel-2.0.9-mingw.tar.gz
 SDL2DEVELURL = https://www.libsdl.org/release/$(SDL2DEVEL)
 SDL2DEVELPATCH = SDL2-devel.patch
+SDL2DEVELSHA256 = 0f9f00d0f2a9a95dfb5cce929718210c3f85432cc2e9d4abade4adcb7f6bb39d
 SDL2IMAGE = SDL2_image-2.0.4
 SDL2IMAGEARCH = $(SDL2IMAGE).tar.gz
 SDL2IMAGEURL = https://www.libsdl.org/projects/SDL_image/release/$(SDL2IMAGEARCH)
@@ -486,15 +488,7 @@ recoil:	$(RECOIL)/.ok
 	cd $(@D) ; for p in $($(shell echo $* | cut -d- -f1 | tr a-z A-Z | tr -d _)PATCHES) ; do echo "applying $$p" ; patch -p1 < ../$$p ; done
 	touch $@
 
-# the few following archive names won't work with the generic rule
-archives/$(SDLDEVEL):
-	@$(MKDIR) $(@D)
-	cd $(@D) && $(GETURL) $(SDLDEVELURL)
-
-archives/$(SDL2DEVEL):
-	@$(MKDIR) $(@D)
-	cd $(@D) && $(GETURL) $(SDL2DEVELURL)
-
+# the following archive name won't work with the generic rule
 archives/$(JPEGARCH):
 	@$(MKDIR) $(@D)
 	cd $(@D) && $(GETURL) $(JPEGURL)
@@ -502,7 +496,7 @@ archives/$(JPEGARCH):
 # generic rule to download tarballs
 archives/%.tar.gz:
 	@$(MKDIR) $(@D)
-	$(eval BASE := $(shell echo $* | cut -d- -f1 | tr a-z A-Z | tr -d _))
+	$(eval BASE := $(shell echo $* | sed 's/-devel/devel/' | cut -d- -f1 | tr a-z A-Z | tr -d _))
 	$(eval URL = $($(BASE)URL))
 	$(eval URLALT = $($(BASE)URLALT))
 	$(eval SHA256 = $($(BASE)SHA256))
