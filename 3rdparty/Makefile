@@ -390,11 +390,11 @@ endif
 $(PREFIX)/lib/libfreetype.a:	$(PREFIX)/lib/libpng.a
 
 $(PREFIX)/lib/libfreetype.a:	$(FREETYPE)/.ok
-	cd $(FREETYPE) && ./configure --build=$(shell $(BUILD_CC) -dumpmachine) --host=$(HOST) \
+	$(MKDIR) $(FREETYPE)/build
+	cd $(FREETYPE)/build && ../configure --build=$(shell $(BUILD_CC) -dumpmachine) --host=$(HOST) \
 	  --prefix=$(PREFIX) --enable-freetype-config \
 	  PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig LDFLAGS="$(LDFLAGS)"
-	cd $(FREETYPE) && $(MAKE)
-	cd $(FREETYPE) && $(MAKE) install
+	cd $(FREETYPE)/build && $(MAKE) && $(MAKE) install
 ifdef WIN32
 	$(MKDIR) ../bin && for f in $(PREFIX)/bin/libfreetype*.dll ; do \
 	    $(CP) $$f ../bin ; \
