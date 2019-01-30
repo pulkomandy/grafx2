@@ -906,6 +906,7 @@ endif
 	  ../share/grafx2/gfx2def.ini $(SCRIPT_FILES) $(SKIN_FILES) \
 	  ../share/grafx2/gfx2.gif ../share/grafx2/gfx2.png ../share/icons/grafx2.svg \
 	  $(DOC_FILES) $(wildcard ../misc/*/*) $(FONT_FILES)
+	echo "$(VERSIONTAG)" > ../VERSION
 
 $(BIN) : $(OBJ)
 	@test -d ../bin || $(MKDIR) ../bin
