@@ -1,5 +1,6 @@
 stages:
     - build
+    - pages
 
 job_linux:
     stage: build
@@ -15,6 +16,20 @@ job_linux:
         paths:
             - "*.zip"
             - "grafx2*.tgz"
+
+pages:
+    stage: pages
+    script:
+        - "NOLUA=1 API=x11 make htmldoc"
+        - "mkdir -p public/htmldoc && cp doc/html/* public/htmldoc/"
+        - "echo -e '<DOCTYPE html>\n<html><head><title>GrafX2</title></head>\n<body>\n<ul>\n<li><a href=\"doxygen/html/\">doxygen</a></li>\n<li><a href=\"htmldoc/\">htmldoc</a></li>\n</ul>\n</body>\n</html>\n' > public/index.html"
+        - "cd public && tar xzf ../grafx2*doxygen.tgz"
+    artifacts:
+        paths:
+            - public
+    only:
+        - master
+        - gitlab-pages
 
 job_win32:
     stage: build
