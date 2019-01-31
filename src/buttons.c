@@ -178,7 +178,7 @@ void Button_Message_initial(void)
 
   Display_cursor();
 
-  while(!Mouse_K && !Key)
+  while(!Mouse_K && !Key && !Quit_is_required)
     Get_input(20);
   if (Mouse_K)
   {
