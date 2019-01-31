@@ -105,6 +105,11 @@ GFX2_GLOBAL char Key_Text[32];
 
 // Keyboard modifiers
 // (Name conflict with windows.h)
+#ifdef WIN32
+// first include windows.h so it's done and won't overwrite our
+// MOD_SHIFT, etc. afterward
+#include <windows.h>
+#endif
 #ifdef MOD_SHIFT
   #undef MOD_SHIFT
 #endif
