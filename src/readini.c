@@ -833,15 +833,16 @@ int Load_INI(T_Config * conf)
   {
     if (!Load_INI_get_string (file,buffer,"Bookmark_label",value_label, 1))
     {
-      int size=strlen(value_label);
+      int size = strlen(value_label);
       if (size!=0)
       {
-        if (size>8)
+        if (size >= sizeof(conf->Bookmark_label[0]))
         {
-          value_label[7]=ELLIPSIS_CHARACTER;
-          value_label[8]='\0';
+          memcpy(conf->Bookmark_label[index], value_label, sizeof(conf->Bookmark_label[0]) - 1);
+          conf->Bookmark_label[index][sizeof(conf->Bookmark_label[0]) - 1] = '\0';
         }
-        strcpy(conf->Bookmark_label[index],value_label);
+        else
+          memcpy(conf->Bookmark_label[index], value_label, size + 1);
       }
     }
     else

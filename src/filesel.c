@@ -1175,20 +1175,42 @@ static void Display_bookmark(T_Dropdown_button * Button, int bookmark_number)
   if (Config.Bookmark_directory[bookmark_number])
   {
     int label_size;
-    // Libellé
-    Print_in_window_limited(Button->Pos_X+3+10,Button->Pos_Y+2,Config.Bookmark_label[bookmark_number],8,MC_Black,MC_Light);
-    label_size=strlen(Config.Bookmark_label[bookmark_number]);
+    // Label
+#ifdef ENABLE_FILENAMES_ICONV
+    word label[16];
+    char * input = Config.Bookmark_label[bookmark_number];
+    size_t inbytesleft = strlen(Config.Bookmark_label[bookmark_number]);
+    char * output = (char *)label;
+    size_t outbytesleft = sizeof(label) - 2;
+    if (cd_utf16 != (iconv_t)-1 && iconv(cd_utf16, &input, &inbytesleft, &output, &outbytesleft) != (size_t)-1)
+    {
+      output[0] = '\0';
+      output[1] = '\0';
+      Print_in_window_limited_unicode(Button->Pos_X+3+10, Button->Pos_Y+2,
+                                      label, 8, MC_Black, MC_Light);
+      label_size = Unicode_strlen(label);
+    }
+    else
+#endif
+    {
+      // Fallback
+      Print_in_window_limited(Button->Pos_X+3+10, Button->Pos_Y+2,
+                              Config.Bookmark_label[bookmark_number],
+                              8, MC_Black, MC_Light);
+      label_size = strlen(Config.Bookmark_label[bookmark_number]);
+    }
     if (label_size<8)
       Window_rectangle(Button->Pos_X+3+10+label_size*8,Button->Pos_Y+2,(8-label_size)*8,8,MC_Light);
-    // Menu apparait sur clic droit
-    Button->Active_button=RIGHT_SIDE;
+    // the menu is activated with right clic
+    Button->Active_button = RIGHT_SIDE;
   }
   else
   {
-    // Libellé
-    Print_in_window(Button->Pos_X+3+10,Button->Pos_Y+2,"--------",MC_Dark,MC_Light);
-    // Menu apparait sur clic droit ou gauche
-    Button->Active_button=RIGHT_SIDE|LEFT_SIDE;
+    // Label
+    Print_in_window(Button->Pos_X+3+10, Button->Pos_Y+2, "--------",
+                    MC_Dark, MC_Light);
+    // the menu is activated with right or left clic
+    Button->Active_button = RIGHT_SIDE|LEFT_SIDE;
   }
   // item actifs
   Window_dropdown_clear_items(Button);
@@ -2156,36 +2178,29 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
               case 0: // Set
                 free(Config.Bookmark_directory[clicked_button-10]);
                 Config.Bookmark_directory[clicked_button-10] = NULL;
-                Config.Bookmark_label[clicked_button-10][0]='\0';
-                temp=strlen(Selector->Directory);
-                Config.Bookmark_directory[clicked_button-10]=malloc(temp+1);
-                strcpy(Config.Bookmark_directory[clicked_button-10],Selector->Directory);
+                Config.Bookmark_label[clicked_button-10][0] = '\0';
+                Config.Bookmark_directory[clicked_button-10] = strdup(Selector->Directory);
                 
-                directory_name=Find_last_separator(Selector->Directory);
-                if (directory_name && directory_name[1]!='\0')
+                directory_name = Find_last_separator(Selector->Directory);
+                if (directory_name && directory_name[1] != '\0')
                   directory_name++;
                 else
-                  directory_name=Selector->Directory;
-                temp=strlen(directory_name);
-                strncpy(Config.Bookmark_label[clicked_button-10],directory_name,8);
-                if (temp>8)
-                {
-                  Config.Bookmark_label[clicked_button-10][7]=ELLIPSIS_CHARACTER;
-                  Config.Bookmark_label[clicked_button-10][8]='\0';
-                }
+                  directory_name = Selector->Directory;
+                strncpy(Config.Bookmark_label[clicked_button-10], directory_name, sizeof(Config.Bookmark_label[0]) - 1);
+                Config.Bookmark_label[clicked_button-10][sizeof(Config.Bookmark_label[0]) - 1]='\0';
                 Display_bookmark(bookmark_dropdown[clicked_button-10],clicked_button-10);
                 break;
                 
               case 1: // Rename
                 if (Config.Bookmark_directory[clicked_button-10])
                 {
-                  // On enlève les "..." avant l'édition
-                  char bookmark_label[8+1];
+                  char bookmark_label[24];
+                  /// @todo convert label to unicode before editing
                   strcpy(bookmark_label, Config.Bookmark_label[clicked_button-10]);
-                  if (bookmark_label[7]==ELLIPSIS_CHARACTER)
-                    bookmark_label[7]='\0';
-                  if (Readline_ex(bookmark_dropdown[clicked_button-10]->Pos_X+3+10,bookmark_dropdown[clicked_button-10]->Pos_Y+2,bookmark_label,8,8,INPUT_TYPE_STRING,0))
-                    strcpy(Config.Bookmark_label[clicked_button-10],bookmark_label);
+                  if (Readline_ex(bookmark_dropdown[clicked_button-10]->Pos_X+3+10,
+                                  bookmark_dropdown[clicked_button-10]->Pos_Y+2,
+                                  bookmark_label, 8, sizeof(bookmark_label) - 1, INPUT_TYPE_STRING, 0))
+                    strcpy(Config.Bookmark_label[clicked_button-10], bookmark_label);
                   Display_bookmark(bookmark_dropdown[clicked_button-10],clicked_button-10);
                   Display_cursor();
                 }
@@ -2209,18 +2224,13 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
                   Config.Bookmark_directory[clicked_button-10] = NULL;
 
                   Config.Bookmark_directory[clicked_button-10] = strdup(rel_path);
-                  directory_name=Find_last_separator(Selector->Directory);
+                  directory_name = Find_last_separator(Selector->Directory);
                   if (directory_name && directory_name[1]!='\0')
                     directory_name++;
                   else
                     directory_name=Selector->Directory;
-                  temp=strlen(directory_name);
-                  strncpy(Config.Bookmark_label[clicked_button-10],directory_name,8);
-                  if (temp>8)
-                  {
-                    Config.Bookmark_label[clicked_button-10][7]=ELLIPSIS_CHARACTER;
-                    Config.Bookmark_label[clicked_button-10][8]='\0';
-                  }
+                  strncpy(Config.Bookmark_label[clicked_button-10], directory_name, sizeof(Config.Bookmark_label[0]) - 1);
+                  Config.Bookmark_label[clicked_button-10][sizeof(Config.Bookmark_label[0]) - 1] = '\0';
                   Display_bookmark(bookmark_dropdown[clicked_button-10],clicked_button-10);
                 }
                 else
