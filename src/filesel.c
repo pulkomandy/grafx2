@@ -2223,6 +2223,12 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
                   }
                   Display_bookmark(bookmark_dropdown[clicked_button-10],clicked_button-10);
                 }
+                else
+                {
+                  GFX2_Log(GFX2_INFO, "Failed to compute relative path from '%s' to '%s'\n",
+                           Data_directory, Selector->Directory);
+                  Error(0); // red flash
+                }
                 break;
             }
           }
