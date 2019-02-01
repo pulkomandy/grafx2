@@ -949,27 +949,27 @@ ifdef ATARICROSS
 	done
 	$(AT)cd $(TMP) && \
 	  $(ZIP) $(ZIPOPT) -k "$(CURDIR)/../grafx2-$(API)-$(VERSIONTAG)$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
-	    GRAFX2/*.* GRAFX2/FONTS/*.* GRAFX2/SKINS/*.*
+	    GRAFX2/$(notdir $(BIN)) GRAFX2/FONTS/*.* GRAFX2/SKINS/*.*
 	$(AT)cd $(TMP) && \
 	  $(ZIP) $(ZIPOPT) -k --to-crlf -r "$(CURDIR)/../grafx2-$(API)-$(VERSIONTAG)$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
-	    GRAFX2/DOC/ GRAFX2/SCRIPTS/
+	    GRAFX2/gfx2def.ini GRAFX2/DOC/ GRAFX2/SCRIPTS/
 	$(AT)$(RM) -r $(TMP)
 else
 	cd .. && $(ZIP) $(ZIPOPT) "grafx2-$(API)-$(VERSIONTAG)$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
-	  $(BIN:../%=%) share/grafx2/gfx2def.ini $(SCRIPT_FILES:../%=%) $(SKIN_FILES:../%=%) \
+	  $(BIN:../%=%) $(SCRIPT_FILES:../%=%) $(SKIN_FILES:../%=%) \
 	  share/grafx2/gfx2.gif share/icons/grafx2.svg \
 	  $(FONT_FILES:../%=%) $(SRCARCH:../%=%) $(PLATFORMFILES:../%=%) $(DOC_FILESRTF:../%=%)
 ifdef WIN32CROSS
 	cd .. && $(ZIP) $(ZIPOPT) --to-crlf "grafx2-$(API)-$(VERSIONTAG)$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
-	  $(DOC_FILES:../%=%)
+	  $(DOC_FILES:../%=%) share/grafx2/gfx2def.ini
 else
 	cd .. && $(ZIP) $(ZIPOPT) "grafx2-$(API)-$(VERSIONTAG)$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
-	  $(DOC_FILES:../%=%)
+	  $(DOC_FILES:../%=%) share/grafx2/gfx2def.ini
+endif
 ifeq ($(PLATFORM),Darwin)
 	$(ZIP) $(ZIPOPT) -r ../$(APPZIPNAME) Grafx2.app
 	cd .. && $(ZIP) $(ZIPOPT) $(APPZIPNAME) \
 	  $(DOC_FILES:../%=%) $(DOC_FILESRTF:../%=%) $(SRCARCH:../%=%)
-endif
 endif
 endif
 	$(AT)$(TAR) czf "../grafx2-$(VERSIONTAG)-src.tgz" $(TARTRANSFORM) \

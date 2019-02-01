@@ -20,11 +20,11 @@ all:	$(INSTALLER)
 
 $(INSTALLER):	$(NSISCRIPT) $(SOURCES) $(VERSIONTAG)
 ifdef WIN32CROSS
-	for f in ../doc/*.txt; do unix2dos $$f ; done
+	for f in ../doc/*.txt ../share/grafx2/gfx2def.ini ; do unix2dos $$f ; done
 endif
 	$(SED) -e 's/VERSION .*/VERSION $(VERSION)/' -e 's/API .*/API $(API)/' $< | $(MAKENSIS) -
 ifdef WIN32CROSS
-	for f in ../doc/*.txt; do dos2unix $$f ; done
+	for f in ../doc/*.txt ../share/grafx2/gfx2def.ini ; do dos2unix $$f ; done
 endif
 
 $(SOURCES): $(wildcard ../src/*.c) $(wildcard ../src/*.h)
