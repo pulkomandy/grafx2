@@ -540,12 +540,20 @@ void Screen_FillRect(int x, int y, int w, int h, byte color)
 
 void Update_rect(short x, short y, unsigned short width, unsigned short height)
 {
-  RECT rect;
-  rect.left = x * Pixel_width;
-  rect.top = y * Pixel_height;
-  rect.right = (x + width) * Pixel_width;
-  rect.bottom = (y + height) * Pixel_height;
-  InvalidateRect(Win32_hwnd, &rect, FALSE/*TRUE*/);
+  if (width == 0 && height == 0)
+  {
+    // update whole window
+    InvalidateRect(Win32_hwnd, NULL, FALSE/*TRUE*/);
+  }
+  else
+  {
+    RECT rect;
+    rect.left = x * Pixel_width;
+    rect.top = y * Pixel_height;
+    rect.right = (x + width) * Pixel_width;
+    rect.bottom = (y + height) * Pixel_height;
+    InvalidateRect(Win32_hwnd, &rect, FALSE/*TRUE*/);
+  }
 }
 
 void Flush_update(void)
