@@ -246,6 +246,9 @@ static void Save_INI_set_string(char * dest,const char * source,const char * val
   // Pour l'instant, la source et la destination en sont au même point:
   dest_index=source_index;
 
+  if (dest_index > 0 && dest[dest_index - 1] == '=')  // at least one space before value
+    dest[dest_index++] = ' ';
+
   // Dans la destination, on écrit la valeur:
   strcpy(dest+dest_index,value);
   dest_index+=strlen(value);
