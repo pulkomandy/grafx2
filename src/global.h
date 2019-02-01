@@ -104,30 +104,15 @@ GFX2_GLOBAL char Key_Text[32];
 #endif
 
 // Keyboard modifiers
-// (Name conflict with windows.h)
-#ifdef WIN32
-// first include windows.h so it's done and won't overwrite our
-// MOD_SHIFT, etc. afterward
-#include <windows.h>
-#endif
-#ifdef MOD_SHIFT
-  #undef MOD_SHIFT
-#endif
-#ifdef MOD_CTRL
-  #undef MOD_CTRL
-#endif
-#ifdef MOD_ALT
-  #undef MOD_ALT
-#endif
 
 /// Key modifier for SHIFT key. Used as mask in ::Key, for example.
-#define MOD_SHIFT 0x1000
+#define GFX2_MOD_SHIFT 0x1000
 /// Key modifier for CONTROL key. Used as mask in ::Key, for example.
-#define MOD_CTRL  0x2000
+#define GFX2_MOD_CTRL  0x2000
 /// Key modifier for ALT key. Used as mask in ::Key, for example.
-#define MOD_ALT   0x4000
+#define GFX2_MOD_ALT   0x4000
 /// Key modifier for META key. Used as mask in ::Key, for example.
-#define MOD_META  0x8000
+#define GFX2_MOD_META  0x8000
 
 /// Boolean set to true when the OS/window manager requests the application to close. ie: [X] button
 GFX2_GLOBAL byte Quit_is_required;

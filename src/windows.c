@@ -1988,7 +1988,7 @@ void Compute_paintbrush_coordinates(void)
     // Operations that implement it
 #if defined(USE_SDL) || defined(USE_SDL2)
     default:
-      if (Snap_axis==0 && (Get_Key_modifiers() & MOD_SHIFT))
+      if (Snap_axis==0 && (Get_Key_modifiers() & GFX2_MOD_SHIFT))
       {
         // Start "Snap axis" mode
         Snap_axis=1;

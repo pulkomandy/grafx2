@@ -962,7 +962,7 @@ void Rotate_brush_1_5(void)
   // On corrige les coordonnées de la ligne si la touche shift est appuyée...
   cursor_x = Paintbrush_X;
   cursor_y = Paintbrush_Y;
-  if(Get_Key_modifiers() & MOD_SHIFT)
+  if(Get_Key_modifiers() & GFX2_MOD_SHIFT)
     Clamp_coordinates_regular_angle(Brush_rotation_center_X,Brush_rotation_center_Y,&cursor_x,&cursor_y);
 
   if ( (cursor_x!=old_x) || (cursor_y!=old_y) || (prev_state!=2) )
@@ -1033,7 +1033,7 @@ void Rotate_brush_0_5(void)
   // On corrige les coordonnées de la ligne si la touche shift est appuyée...
   cursor_x = Paintbrush_X;
   cursor_y = Paintbrush_Y;
-  if(Get_Key_modifiers() & MOD_SHIFT)
+  if(Get_Key_modifiers() & GFX2_MOD_SHIFT)
     Clamp_coordinates_regular_angle(Brush_rotation_center_X,Brush_rotation_center_Y,&cursor_x,&cursor_y);
 
   if ((cursor_x!=old_x) || (cursor_y!=old_y) || (prev_state!=3))

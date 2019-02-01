@@ -1735,10 +1735,10 @@ void Button_Sieve_menu(void)
   Window_set_normal_button(  8,46,131,14,"Get from brush"   ,1,1,KEY_g); // 6
   Window_set_normal_button(142,46,139,14,"Transfer to brush",1,1,KEY_t); // 7
 
-  Window_set_normal_button(109,114,11,11,"\030",0,1,KEY_UP|MOD_SHIFT); // 8
-  Window_set_normal_button(109,138,11,11,"\031",0,1,KEY_DOWN|MOD_SHIFT); // 9
-  Window_set_normal_button( 97,126,11,11,"\033",0,1,KEY_LEFT|MOD_SHIFT); // 10
-  Window_set_normal_button(121,126,11,11,"\032",0,1,KEY_RIGHT|MOD_SHIFT); // 11
+  Window_set_normal_button(109,114,11,11,"\030",0,1,KEY_UP|GFX2_MOD_SHIFT); // 8
+  Window_set_normal_button(109,138,11,11,"\031",0,1,KEY_DOWN|GFX2_MOD_SHIFT); // 9
+  Window_set_normal_button( 97,126,11,11,"\033",0,1,KEY_LEFT|GFX2_MOD_SHIFT); // 10
+  Window_set_normal_button(121,126,11,11,"\032",0,1,KEY_RIGHT|GFX2_MOD_SHIFT); // 11
   button_bg_color = Window_set_normal_button(109,126,11,11,""    ,0,1,KEY_INSERT); // 12
   Window_rectangle(button_bg_color->Pos_X+2,
         button_bg_color->Pos_Y+2,

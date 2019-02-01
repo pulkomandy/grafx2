@@ -777,18 +777,18 @@ static int Handle_key_press(SDL_KeyboardEvent * event)
     {
       case SDLK_RSHIFT:
       case SDLK_LSHIFT:
-        modifier=MOD_SHIFT;
+        modifier=GFX2_MOD_SHIFT;
         break;
 
       case SDLK_RCTRL:
       case SDLK_LCTRL:
-        modifier=MOD_CTRL;
+        modifier=GFX2_MOD_CTRL;
         break;
 
       case SDLK_RALT:
       case SDLK_LALT:
       case SDLK_MODE:
-        modifier=MOD_ALT;
+        modifier=GFX2_MOD_ALT;
         break;
 
 #if defined(USE_SDL2)
@@ -798,7 +798,7 @@ static int Handle_key_press(SDL_KeyboardEvent * event)
       case SDLK_RMETA:
       case SDLK_LMETA:
 #endif
-        modifier=MOD_META;
+        modifier=GFX2_MOD_META;
         break;
 
       default:
@@ -829,7 +829,7 @@ int Release_control(int key_code, int modifier)
 {
     int need_feedback = 0;
 
-    if (modifier == MOD_SHIFT)
+    if (modifier == GFX2_MOD_SHIFT)
     {
       // Disable "snap axis" mode
       Snap_axis = 0;
@@ -909,24 +909,24 @@ static int Handle_key_release(SDL_KeyboardEvent * event)
     {
       case SDLK_RSHIFT:
       case SDLK_LSHIFT:
-        modifier=MOD_SHIFT;
+        modifier=GFX2_MOD_SHIFT;
         break;
 
       case SDLK_RCTRL:
       case SDLK_LCTRL:
-        modifier=MOD_CTRL;
+        modifier=GFX2_MOD_CTRL;
         break;
 
       case SDLK_RALT:
       case SDLK_LALT:
       case SDLK_MODE:
-        modifier=MOD_ALT;
+        modifier=GFX2_MOD_ALT;
         break;
 
       #ifdef RSUPER_EMULATES_META_MOD
       case SDLK_RSUPER:
         SDL_SetModState(SDL_GetModState() & ~KMOD_META);
-        modifier=MOD_META;
+        modifier=GFX2_MOD_META;
         break;
       #endif
       
@@ -937,7 +937,7 @@ static int Handle_key_release(SDL_KeyboardEvent * event)
       case SDLK_RMETA:
       case SDLK_LMETA:
 #endif
-        modifier=MOD_META;
+        modifier=GFX2_MOD_META;
         break;
 
       default:
@@ -961,7 +961,7 @@ static int Handle_joystick_press(SDL_JoyButtonEvent event)
     if (event.button == Joybutton_control)
     {
       SDL_SetModState(SDL_GetModState() | KMOD_CTRL);
-      if (Config.Swap_buttons == MOD_CTRL && Button_inverter==0)
+      if (Config.Swap_buttons == GFX2_MOD_CTRL && Button_inverter==0)
       {
         Button_inverter=1;
         if (Input_new_mouse_K)
@@ -979,7 +979,7 @@ static int Handle_joystick_press(SDL_JoyButtonEvent event)
 #else
       SDL_SetModState(SDL_GetModState() | (KMOD_ALT|KMOD_GUI));
 #endif
-      if (Config.Swap_buttons == MOD_ALT && Button_inverter==0)
+      if (Config.Swap_buttons == GFX2_MOD_ALT && Button_inverter==0)
       {
         Button_inverter=1;
         if (Input_new_mouse_K)
@@ -1058,12 +1058,12 @@ static int Handle_joystick_release(SDL_JoyButtonEvent event)
     if (event.button == Joybutton_shift)
     {
       SDL_SetModState(SDL_GetModState() & ~KMOD_SHIFT);
-      return Release_control(0,MOD_SHIFT);
+      return Release_control(0,GFX2_MOD_SHIFT);
     }
     if (event.button == Joybutton_control)
     {
       SDL_SetModState(SDL_GetModState() & ~KMOD_CTRL);
-      return Release_control(0,MOD_CTRL);
+      return Release_control(0,GFX2_MOD_CTRL);
     }
     if (event.button == Joybutton_alt)
     {
@@ -1072,7 +1072,7 @@ static int Handle_joystick_release(SDL_JoyButtonEvent event)
 #else
       SDL_SetModState(SDL_GetModState() & ~(KMOD_ALT|KMOD_GUI));
 #endif
-      return Release_control(0,MOD_ALT);
+      return Release_control(0,GFX2_MOD_ALT);
     }
     if (event.button == Joybutton_left_click)
     {
@@ -1697,13 +1697,13 @@ int Get_input(int sleep_time)
             // NumLock = 10         Mod2Mask
             // see "modmap"
             if (event.xkey.state & ShiftMask)
-              mod |= MOD_SHIFT;
+              mod |= GFX2_MOD_SHIFT;
             if (event.xkey.state & ControlMask)
-              mod |= MOD_CTRL;
+              mod |= GFX2_MOD_CTRL;
             if (event.xkey.state & (Mod1Mask | Mod5Mask))
-              mod |= MOD_ALT;
+              mod |= GFX2_MOD_ALT;
             if (event.xkey.state & Mod4Mask)
-              mod |= MOD_META;
+              mod |= GFX2_MOD_META;
             //sym = XKeycodeToKeysym(X11_display, event.xkey.keycode, 0);
             sym = XkbKeycodeToKeysym(X11_display, event.xkey.keycode, 0, 0);
             GFX2_Log(GFX2_DEBUG, "key press code = %3d state=0x%08x sym = 0x%04lx %s\tmod=%04x\n",
@@ -1746,13 +1746,13 @@ int Get_input(int sleep_time)
             KeySym sym;
 
             if (event.xkey.state & ShiftMask)
-              mod |= MOD_SHIFT;
+              mod |= GFX2_MOD_SHIFT;
             if (event.xkey.state & ControlMask)
-              mod |= MOD_CTRL;
+              mod |= GFX2_MOD_CTRL;
             if (event.xkey.state & (Mod1Mask | Mod5Mask))
-              mod |= MOD_ALT;
+              mod |= GFX2_MOD_ALT;
             if (event.xkey.state & Mod4Mask)
-              mod |= MOD_META;
+              mod |= GFX2_MOD_META;
             sym = XkbKeycodeToKeysym(X11_display, event.xkey.keycode, 0, 0);
             GFX2_Log(GFX2_DEBUG, "keyrelease code= %3d state=0x%08x sym = 0x%04lx %s\tmod=%04x\n",
                      event.xkey.keycode, event.xkey.state, sym, XKeysymToString(sym), mod);
@@ -1766,13 +1766,13 @@ int Get_input(int sleep_time)
                        X11_window, None, CurrentTime);
           //printf("Press button = %d state = 0x%08x\n", event.xbutton.button, event.xbutton.state);
           if (event.xkey.state & ShiftMask)
-            mod |= MOD_SHIFT;
+            mod |= GFX2_MOD_SHIFT;
           if (event.xkey.state & ControlMask)
-            mod |= MOD_CTRL;
+            mod |= GFX2_MOD_CTRL;
           if (event.xkey.state & (Mod1Mask | Mod5Mask))
-            mod |= MOD_ALT;
+            mod |= GFX2_MOD_ALT;
           if (event.xkey.state & Mod3Mask)
-            mod |= MOD_META;
+            mod |= GFX2_MOD_META;
           switch(event.xbutton.button)
           {
             case 1:

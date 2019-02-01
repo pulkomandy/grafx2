@@ -339,13 +339,13 @@ word Get_Key_modifiers(void)
   SDLMod mod = SDL_GetModState();
 
     if (mod & KMOD_CTRL )
-      modifiers|=MOD_CTRL;
+      modifiers|=GFX2_MOD_CTRL;
     if (mod & KMOD_SHIFT )
-      modifiers|=MOD_SHIFT;
+      modifiers|=GFX2_MOD_SHIFT;
     if (mod & (KMOD_ALT|KMOD_MODE))
-      modifiers|=MOD_ALT;
+      modifiers|=GFX2_MOD_ALT;
     if (mod & (KMOD_META))
-      modifiers|=MOD_META;
+      modifiers|=GFX2_MOD_META;
 
   return modifiers;
 }
@@ -391,13 +391,13 @@ word Keysym_to_keycode(SDL_Keysym keysym)
 #else
   mod = 0;
   if (keysym.mod & KMOD_CTRL)
-    mod |= MOD_CTRL;
+    mod |= GFX2_MOD_CTRL;
   if (keysym.mod & KMOD_SHIFT )
-    mod |= MOD_SHIFT;
+    mod |= GFX2_MOD_SHIFT;
   if (keysym.mod & (KMOD_ALT|KMOD_MODE))
-    mod |= MOD_ALT;
+    mod |= GFX2_MOD_ALT;
   if (keysym.mod & (KMOD_GUI))
-    mod |= MOD_META;
+    mod |= GFX2_MOD_META;
 #endif
 
   // SDL_GetModState() seems to get the right up-to-date info.
@@ -565,24 +565,24 @@ const char * Key_name(word key)
     return "None";
 
 #ifdef GCWZERO
-  if (key & MOD_CTRL)
+  if (key & GFX2_MOD_CTRL)
     strcat(buffer, "A+");
-  if (key & MOD_ALT)
+  if (key & GFX2_MOD_ALT)
     strcat(buffer, "B+");
-  if (key & MOD_SHIFT)
+  if (key & GFX2_MOD_SHIFT)
     strcat(buffer, "X+");
 #else
-  if (key & MOD_CTRL)
+  if (key & GFX2_MOD_CTRL)
     strcat(buffer, "Ctl+");
-  if (key & MOD_ALT)
+  if (key & GFX2_MOD_ALT)
     strcat(buffer, "Alt+");
-  if (key & MOD_SHIFT)
+  if (key & GFX2_MOD_SHIFT)
     strcat(buffer, "Shift+");
 #endif
-  if (key & MOD_META)
+  if (key & GFX2_MOD_META)
     strcat(buffer, META_KEY_PREFIX);
 
-  key=key & ~(MOD_CTRL|MOD_ALT|MOD_SHIFT|MOD_META);
+  key=key & ~(GFX2_MOD_CTRL|GFX2_MOD_ALT|GFX2_MOD_SHIFT|GFX2_MOD_META);
 
   // 99 is only a sanity check
   if (key>=KEY_JOYBUTTON && key<=KEY_JOYBUTTON+99)
@@ -864,23 +864,23 @@ word Get_Key_modifiers(void)
   word mod = 0;
 #if defined(WIN32)
   if (GetKeyState(VK_SHIFT) & 0x8000)
-    mod |= MOD_SHIFT;
+    mod |= GFX2_MOD_SHIFT;
   // Pressing AltGr is reported by windows as the right Alt together with the Left control keys
   if ((GetKeyState(VK_RMENU) & 0x8000) && (GetKeyState(VK_LCONTROL) & 0x8000))
   {
-    mod |= MOD_ALT; // ALT GR
+    mod |= GFX2_MOD_ALT; // ALT GR
     if (GetKeyState(VK_RCONTROL) & 0x8000)
-      mod |= MOD_CTRL;
+      mod |= GFX2_MOD_CTRL;
   }
   else
   {
     if (GetKeyState(VK_CONTROL) & 0x8000)
-      mod |= MOD_CTRL;
+      mod |= GFX2_MOD_CTRL;
     if (GetKeyState(VK_MENU) & 0x8000)
-      mod |= MOD_ALT;
+      mod |= GFX2_MOD_ALT;
   }
   if ((GetKeyState(VK_LWIN) | GetKeyState(VK_RWIN)) & 0x8000)
-    mod |= MOD_META;
+    mod |= GFX2_MOD_META;
 #endif
   return mod;
 }

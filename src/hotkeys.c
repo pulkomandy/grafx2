@@ -63,9 +63,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   KEY_RIGHT, // DROITE
   0},
 #ifdef GCWZERO
-#define FAST_MOD MOD_CTRL
+#define FAST_MOD GFX2_MOD_CTRL
 #else
-#define FAST_MOD MOD_SHIFT
+#define FAST_MOD GFX2_MOD_SHIFT
 #endif
   {4,
   "Faster scroll up",
@@ -106,7 +106,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "picture pixel by pixel, either in",
   "magnify and normal mode.",
   true,
-  KEY_UP|MOD_ALT, // Alt + Haut
+  KEY_UP|GFX2_MOD_ALT, // Alt + Haut
   0},
   {9,
   "Slower scroll down",
@@ -114,7 +114,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "picture pixel by pixel, either in",
   "magnify and normal mode.",
   true,
-  KEY_DOWN|MOD_ALT, // Alt + Bas
+  KEY_DOWN|GFX2_MOD_ALT, // Alt + Bas
   0},
   {10,
   "Slower scroll left",
@@ -122,7 +122,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "picture pixel by pixel, either in",
   "magnify and normal mode.",
   true,
-  KEY_LEFT|MOD_ALT, // Alt + Gauche
+  KEY_LEFT|GFX2_MOD_ALT, // Alt + Gauche
   0},
   {11,
   "Slower scroll right",
@@ -130,7 +130,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "picture pixel by pixel, either in",
   "magnify and normal mode.",
   true,
-  KEY_RIGHT|MOD_ALT, // Alt + Droite
+  KEY_RIGHT|GFX2_MOD_ALT, // Alt + Droite
   0},
   {12,
   "Move mouse cursor 1 pixel up",
@@ -141,7 +141,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
 #ifdef GCWZERO
   KEY_UNKNOWN,
 #else
-  KEY_UP|MOD_CTRL, // Ctrl + Haut
+  KEY_UP|GFX2_MOD_CTRL, // Ctrl + Haut
 #endif
   0},
   {13,
@@ -153,7 +153,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
 #ifdef GCWZERO
   KEY_UNKNOWN,
 #else
-  KEY_DOWN|MOD_CTRL, // Ctrl + Bas
+  KEY_DOWN|GFX2_MOD_CTRL, // Ctrl + Bas
 #endif
   0},
   {14,
@@ -165,7 +165,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
 #ifdef GCWZERO
   KEY_UNKNOWN,
 #else
-  KEY_LEFT|MOD_CTRL, // Ctrl + Gauche
+  KEY_LEFT|GFX2_MOD_CTRL, // Ctrl + Gauche
 #endif
   0},
   {15,
@@ -177,7 +177,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
 #ifdef GCWZERO
   KEY_UNKNOWN,
 #else
-  KEY_RIGHT|MOD_CTRL, // Ctrl + Droite
+  KEY_RIGHT|GFX2_MOD_CTRL, // Ctrl + Droite
 #endif
   0},
   {16,
@@ -189,7 +189,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
 #ifdef GCWZERO
   KEY_SPACE, // Space
 #else
-  KEY_SPACE|MOD_CTRL, // Ctrl + Space
+  KEY_SPACE|GFX2_MOD_CTRL, // Ctrl + Space
 #endif
   0},
   {17,
@@ -201,7 +201,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
 #ifdef GCWZERO
   KEY_BACKSPACE, // R-shoulderpad
 #else
-  KEY_SPACE|MOD_SHIFT, // Shift + Space
+  KEY_SPACE|GFX2_MOD_SHIFT, // Shift + Space
 #endif
   0},
   {18,
@@ -242,7 +242,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "into a single colored one. All non-",
   "transparent colors are set to FG.",
   true,
-  KEY_F4|MOD_SHIFT, // Shift + F4
+  KEY_F4|GFX2_MOD_SHIFT, // Shift + F4
   0},
   {23,
   "Freehand drawing",
@@ -258,7 +258,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "discontinuous, point by point,",
   "and contour fill",
   true,
-  KEY_d|MOD_SHIFT, // Shift + D
+  KEY_d|GFX2_MOD_SHIFT, // Shift + D
   0},
   {25,
   "Continuous freehand drawing",
@@ -266,7 +266,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "freehand drawing mode.",
   "",
   true,
-  KEY_d|MOD_CTRL, // Ctrl + D
+  KEY_d|GFX2_MOD_CTRL, // Ctrl + D
   0},
   {26,
   "Line",
@@ -282,7 +282,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "This mode can also be called",
   "\"Polyline\".",
   true,
-  KEY_l|MOD_SHIFT, // Shift + L
+  KEY_l|GFX2_MOD_SHIFT, // Shift + L
   0},
   {28,
   "Spray",
@@ -298,7 +298,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "configure the spray flow and size.",
   "",
   true,
-  KEY_a|MOD_SHIFT, // Shift + A
+  KEY_a|GFX2_MOD_SHIFT, // Shift + A
   0},
   {30,
   "Flood-fill",
@@ -314,7 +314,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the clicked color to the fore-color",
   "or the back-color.",
   true,
-  KEY_f|MOD_SHIFT, // Shift + F
+  KEY_f|GFX2_MOD_SHIFT, // Shift + F
   0},
   {31,
   "Bezier's curves",
@@ -330,7 +330,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "want to draw Bezier's curves with",
   "3 or 4 points.",
   true,
-  KEY_i|MOD_SHIFT, // Shift + I
+  KEY_i|GFX2_MOD_SHIFT, // Shift + I
   0},
   {33,
   "Empty rectangle",
@@ -346,7 +346,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "rectangle.",
   "",
   true,
-  KEY_r|MOD_SHIFT, // Shift + R
+  KEY_r|GFX2_MOD_SHIFT, // Shift + R
   0},
   {35,
   "Empty circle",
@@ -362,7 +362,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the brush.",
   "",
   true,
-  KEY_c|MOD_CTRL, // Ctrl + C
+  KEY_c|GFX2_MOD_CTRL, // Ctrl + C
   0},
   {37,
   "Filled circle",
@@ -370,7 +370,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  KEY_c|MOD_SHIFT, // Shift + C
+  KEY_c|GFX2_MOD_SHIFT, // Shift + C
   0},
   {38,
   "Filled ellipse",
@@ -378,7 +378,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  KEY_c|MOD_SHIFT|MOD_CTRL, // Shift + Ctrl + C
+  KEY_c|GFX2_MOD_SHIFT|GFX2_MOD_CTRL, // Shift + Ctrl + C
   0},
   {39,
   "Empty polygon",
@@ -394,7 +394,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "polygon using the brush.",
   "",
   true,
-  KEY_n|MOD_CTRL, // Ctrl + N
+  KEY_n|GFX2_MOD_CTRL, // Ctrl + N
   0},
   {41,
   "Filled polygon",
@@ -402,7 +402,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  KEY_n|MOD_SHIFT, // Shift + N
+  KEY_n|GFX2_MOD_SHIFT, // Shift + N
   0},
   {42,
   "Filled \"polyform\"",
@@ -410,7 +410,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "polygon.",
   "",
   true,
-  KEY_n|MOD_SHIFT|MOD_CTRL, // Shift + Ctrl + N
+  KEY_n|GFX2_MOD_SHIFT|GFX2_MOD_CTRL, // Shift + Ctrl + N
   0},
   {43,
   "Rectangle with gradation",
@@ -418,7 +418,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "a color gradation.",
   "",
   true,
-  KEY_r|MOD_ALT, // Alt + R
+  KEY_r|GFX2_MOD_ALT, // Alt + R
   0},
   {44,
   "Gradation menu",
@@ -426,7 +426,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "color gradations are calculated.",
   "",
   true,
-  KEY_g|MOD_ALT, // Alt + G
+  KEY_g|GFX2_MOD_ALT, // Alt + G
   0},
   {45,
   "Sphere with gradation",
@@ -434,7 +434,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "a color gradation.",
   "",
   true,
-  KEY_c|MOD_ALT, // Alt + C
+  KEY_c|GFX2_MOD_ALT, // Alt + C
   0},
   {46,
   "Ellipse with gradation",
@@ -442,7 +442,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "with a color gradation.",
   "",
   true,
-  KEY_c|MOD_SHIFT|MOD_ALT, // Shift + Alt + C
+  KEY_c|GFX2_MOD_SHIFT|GFX2_MOD_ALT, // Shift + Alt + C
   0},
   {47,
   "Adjust picture",
@@ -458,7 +458,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  KEY_KP5|MOD_SHIFT, // Shift + Kpad5
+  KEY_KP5|GFX2_MOD_SHIFT, // Shift + Kpad5
   0},
   {49,
   "Drawing effects",
@@ -482,7 +482,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  KEY_F5|MOD_SHIFT, // Shift + F5
+  KEY_F5|GFX2_MOD_SHIFT, // Shift + F5
   0},
   {131,
   "Quick-shade mode",
@@ -490,7 +490,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "mode.",
   "",
   true,
-  KEY_F5|MOD_CTRL, // Ctrl + F5
+  KEY_F5|GFX2_MOD_CTRL, // Ctrl + F5
   0},
   {132,
   "Quick-shade menu",
@@ -498,7 +498,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "settings.",
   "",
   true,
-  KEY_F5|MOD_SHIFT|MOD_CTRL, // Shift + Ctrl + F5
+  KEY_F5|GFX2_MOD_SHIFT|GFX2_MOD_CTRL, // Shift + Ctrl + F5
   0},
   {52,
   "Stencil mode",
@@ -514,7 +514,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "settings.",
   "",
   true,
-  KEY_F6|MOD_SHIFT, // Shift + F6
+  KEY_F6|GFX2_MOD_SHIFT, // Shift + F6
   0},
   {54,
   "Mask mode",
@@ -522,7 +522,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  KEY_F6|MOD_ALT, // Alt + F6
+  KEY_F6|GFX2_MOD_ALT, // Alt + F6
   0},
   {55,
   "Mask menu",
@@ -530,7 +530,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  KEY_F6|MOD_SHIFT|MOD_ALT, // Shift + Alt + F6
+  KEY_F6|GFX2_MOD_SHIFT|GFX2_MOD_ALT, // Shift + Alt + F6
   0},
   {56,
   "Grid mode",
@@ -546,7 +546,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the grid used by Grid mode.",
   "",
   true,
-  KEY_g|MOD_SHIFT, // Shift + G
+  KEY_g|GFX2_MOD_SHIFT, // Shift + G
   0},
   {58,
   "Sieve mode",
@@ -554,7 +554,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  KEY_g|MOD_CTRL, // Ctrl + G
+  KEY_g|GFX2_MOD_CTRL, // Ctrl + G
   0},
   {59,
   "Sieve menu",
@@ -562,7 +562,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the sieve.",
   "",
   true,
-  KEY_g|MOD_SHIFT|MOD_CTRL, // Shift + Ctrl + G
+  KEY_g|GFX2_MOD_SHIFT|GFX2_MOD_CTRL, // Shift + Ctrl + G
   0},
   {60,
   "Invert sieve",
@@ -570,7 +570,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "Sieve menu.",
   "",
   true,
-  KEY_g|MOD_CTRL|MOD_ALT, // Ctrl + Alt + G
+  KEY_g|GFX2_MOD_CTRL|GFX2_MOD_ALT, // Ctrl + Alt + G
   0},
   {61,
   "Colorize mode",
@@ -586,7 +586,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "opacity percentage for Colorize",
   "mode.",
   true,
-  KEY_F7|MOD_SHIFT, // Shift + F7
+  KEY_F7|GFX2_MOD_SHIFT, // Shift + F7
   0},
   {63,
   "Smooth mode",
@@ -602,7 +602,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the Smooth matrix.",
   "",
   true,
-  KEY_F8|MOD_SHIFT, // Shift + F8
+  KEY_F8|GFX2_MOD_SHIFT, // Shift + F8
   0},
   {64,
   "Smear mode",
@@ -610,7 +610,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  KEY_F8|MOD_ALT, // Alt + F8
+  KEY_F8|GFX2_MOD_ALT, // Alt + F8
   0},
   {65,
   "Tiling mode",
@@ -618,7 +618,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "mode.",
   "",
   true,
-  KEY_b|MOD_ALT, // Alt + B
+  KEY_b|GFX2_MOD_ALT, // Alt + B
   0},
   {66,
   "Tiling menu",
@@ -626,7 +626,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the origin of the tiling.",
   "",
   true,
-  KEY_b|MOD_SHIFT|MOD_ALT, // Shift + Alt + B
+  KEY_b|GFX2_MOD_SHIFT|GFX2_MOD_ALT, // Shift + Alt + B
   0},
   {206,
   "Tilemap mode",
@@ -652,7 +652,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   true,
   KEY_b, // B
   #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
-  KEY_C|MOD_META // Right-Amiga + C
+  KEY_C|GFX2_MOD_META // Right-Amiga + C
   #else
   0
   #endif
@@ -663,7 +663,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "within a freehand polygon.",
   "",
   true,
-  KEY_b|MOD_CTRL, // Ctrl + B
+  KEY_b|GFX2_MOD_CTRL, // Ctrl + B
   0},
   {69,
   "Get previous brush back",
@@ -671,7 +671,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  KEY_b|MOD_SHIFT, // Shift + B
+  KEY_b|GFX2_MOD_SHIFT, // Shift + B
   0},
   {70,
   "Horizontal brush flipping",
@@ -703,7 +703,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "180\xb0.",
   "",
   true,
-  KEY_z|MOD_SHIFT, // Shift + Z
+  KEY_z|GFX2_MOD_SHIFT, // Shift + Z
   0},
   {74,
   "Stretch brush",
@@ -719,7 +719,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "user-defined brush.",
   "",
   true,
-  KEY_s|MOD_SHIFT, // Shift + S
+  KEY_s|GFX2_MOD_SHIFT, // Shift + S
   0},
   {76,
   "Outline brush",
@@ -735,7 +735,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "user-defined brush.This does the",
   "opposite of the Outline option.",
   true,
-  KEY_o|MOD_SHIFT, // Shift + O
+  KEY_o|GFX2_MOD_SHIFT, // Shift + O
   0},
   {78,
   "Get colors from brush",
@@ -775,7 +775,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "colors.",
   "",
   true,
-  KEY_BACKQUOTE|MOD_SHIFT, // Shift + `~
+  KEY_BACKQUOTE|GFX2_MOD_SHIFT, // Shift + `~
   0},
   {83,
   "Magnifier mode",
@@ -791,7 +791,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "magnifying factor.",
   "",
   true,
-  KEY_m|MOD_SHIFT, // Shift + M
+  KEY_m|GFX2_MOD_SHIFT, // Shift + M
   0},
   {85,
   "Zoom in",
@@ -815,7 +815,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "different effects on the",
   "user-defined brush.",
   true,
-  KEY_b|MOD_CTRL|MOD_ALT, // Ctrl + Alt + B
+  KEY_b|GFX2_MOD_CTRL|GFX2_MOD_ALT, // Ctrl + Alt + B
   0},
   {88,
   "Text",
@@ -839,7 +839,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "mode that should work everywhere:",
   "usually a 640x400 window.",
   false,
-  KEY_RETURN|MOD_SHIFT, // Shift + Enter
+  KEY_RETURN|GFX2_MOD_SHIFT, // Shift + Enter
   0},
   {91,
   "Help and credits",
@@ -859,7 +859,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "useful information.",
   "",
   true,
-  KEY_F1|MOD_SHIFT, // Shift + F1
+  KEY_F1|GFX2_MOD_SHIFT, // Shift + F1
   0},
   {93,
   "Jump to spare page",
@@ -879,7 +879,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  KEY_TAB|MOD_SHIFT, // Shift + Tab
+  KEY_TAB|GFX2_MOD_SHIFT, // Shift + Tab
   0},
   {95,
   "Save picture as...",
@@ -889,7 +889,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   true,
   KEY_F2, // F2
   #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
-  KEY_A|MOD_META // Right-Amiga + A
+  KEY_A|GFX2_MOD_META // Right-Amiga + A
   #else
   0
   #endif
@@ -900,9 +900,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "name you gave it.",
   "",
   true,
-  KEY_F2|MOD_SHIFT, // Shift + F2
+  KEY_F2|GFX2_MOD_SHIFT, // Shift + F2
   #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
-  KEY_S|MOD_META // Right-Amiga + S
+  KEY_S|GFX2_MOD_META // Right-Amiga + S
   #else
   0
   #endif
@@ -915,7 +915,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   true,
   KEY_F3, // F3
   #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
-  KEY_O|MOD_META // Right-Amiga + O
+  KEY_O|GFX2_MOD_META // Right-Amiga + O
   #else
   0
   #endif
@@ -926,7 +926,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "allows you to cancel modifications",
   "made since last saving.",
   true,
-  KEY_F3|MOD_SHIFT, // Shift + F3
+  KEY_F3|GFX2_MOD_SHIFT, // Shift + F3
   0},
   {99,
   "Save brush",
@@ -934,7 +934,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "you to save your current",
   "user-defined brush.",
   true,
-  KEY_F2|MOD_CTRL, // Ctrl + F2
+  KEY_F2|GFX2_MOD_CTRL, // Ctrl + F2
   0},
   {100,
   "Load brush",
@@ -942,7 +942,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "you to load a brush.",
   "",
   true,
-  KEY_F3|MOD_CTRL, // Ctrl + F3
+  KEY_F3|GFX2_MOD_CTRL, // Ctrl + F3
   0},
   {101,
   "Settings",
@@ -950,7 +950,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "modify some parameters of the",
   "program.",
   true,
-  KEY_F10|MOD_SHIFT, // Shift + F10
+  KEY_F10|GFX2_MOD_SHIFT, // Shift + F10
   0},
   {102,
   "Undo (Oops!)",
@@ -965,7 +965,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   #elif defined (__WIZ__)
     (KEY_JOYBUTTON+JOY_BUTTON_L)
   #elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
-  KEY_Z|MOD_META // Right-Amiga + Z
+  KEY_Z|GFX2_MOD_META // Right-Amiga + Z
   #else
   0
   #endif
@@ -977,7 +977,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  KEY_u|MOD_SHIFT, // Shift + U
+  KEY_u|GFX2_MOD_SHIFT, // Shift + U
   // Secondary shortcut is button II on the Caanoo, R on the Wiz, unset on others
   #if defined (__CAANOO__)
     (KEY_JOYBUTTON+JOY_BUTTON_II)
@@ -994,7 +994,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "removes the current page from the",
   "list of \"Undo\" pages.",
   true,
-  KEY_DELETE|MOD_SHIFT, // Shift + Suppr
+  KEY_DELETE|GFX2_MOD_SHIFT, // Shift + Suppr
   0},
   {104,
   "Clear page",
@@ -1014,7 +1014,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "current backcolor.",
   "",
   true,
-  KEY_BACKSPACE|MOD_SHIFT, // Shift + BackSpace
+  KEY_BACKSPACE|GFX2_MOD_SHIFT, // Shift + BackSpace
   0},
   {106,
   "Quit program",
@@ -1029,7 +1029,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   #elif defined (__WIZ__)
     (KEY_JOYBUTTON+JOY_BUTTON_MENU)
   #eif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
-  KEY_Q|MOD_META // Right-Amiga + Q
+  KEY_Q|GFX2_MOD_META // Right-Amiga + Q
   #else
   0
   #endif
@@ -1050,7 +1050,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "define color series and some tagged",
   "colors.",
   true,
-  KEY_p|MOD_SHIFT, // Shift + P
+  KEY_p|GFX2_MOD_SHIFT, // Shift + P
   0},
   {130,
   "Exclude colors menu",
@@ -1058,7 +1058,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "define the colors you don't want to",
   "use in Smooth and Transparency",
   true,
-  KEY_p|MOD_CTRL, // Ctrl + P
+  KEY_p|GFX2_MOD_CTRL, // Ctrl + P
   0},
   {108,
   "Scroll palette to the left",
@@ -1082,7 +1082,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the left, 8 columns by 8 columns.",
   "",
   true,
-  KEY_PAGEUP|MOD_SHIFT, // Shift + PgUp
+  KEY_PAGEUP|GFX2_MOD_SHIFT, // Shift + PgUp
   0},
   {111,
   "Scroll palette to the right faster",
@@ -1090,7 +1090,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the right, 8 columns by 8 columns.",
   "",
   true,
-  KEY_PAGEDOWN|MOD_SHIFT, // Shift + PgDn
+  KEY_PAGEDOWN|GFX2_MOD_SHIFT, // Shift + PgDn
   0},
   {112,
   "Center brush attachment point",
@@ -1098,7 +1098,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "user-defined brush to its center.",
   "",
   true,
-  KEY_KP5|MOD_CTRL, // Ctrl + 5 (pavé numérique)
+  KEY_KP5|GFX2_MOD_CTRL, // Ctrl + 5 (pavé numérique)
   0},
   {113,
   "Top-left brush attachment point",
@@ -1106,7 +1106,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "user-defined brush to its top-left",
   "corner.",
   true,
-  KEY_HOME|MOD_CTRL, // Ctrl + 7
+  KEY_HOME|GFX2_MOD_CTRL, // Ctrl + 7
   0},
   {114,
   "Top-right brush attachment point",
@@ -1114,7 +1114,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "user-defined brush to its top-right",
   "corner.",
   true,
-  KEY_PAGEUP|MOD_CTRL, // Ctrl + 9
+  KEY_PAGEUP|GFX2_MOD_CTRL, // Ctrl + 9
   0},
   {115,
   "Bottom-left brush attachment point",
@@ -1122,7 +1122,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "user-defined brush to its",
   "bottom-left corner.",
   true,
-  KEY_END|MOD_CTRL, // Ctrl + 1
+  KEY_END|GFX2_MOD_CTRL, // Ctrl + 1
   0},
   {116,
   "Bottom-right brush attachment point",
@@ -1130,7 +1130,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "user-defined brush to its",
   "bottom-right corner.",
   true,
-  KEY_PAGEDOWN|MOD_CTRL, // Ctrl + 3
+  KEY_PAGEDOWN|GFX2_MOD_CTRL, // Ctrl + 3
   0},
   {117,
   "Next foreground color",
@@ -1139,7 +1139,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   true,
 #ifdef GCWZERO
-  KEY_RIGHT|MOD_SHIFT,
+  KEY_RIGHT|GFX2_MOD_SHIFT,
 #else
   KEY_RIGHTBRACKET, // ] (0x en AZERTY)
 #endif
@@ -1151,7 +1151,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   true,
 #ifdef GCWZERO
-  KEY_LEFT|MOD_SHIFT,
+  KEY_LEFT|GFX2_MOD_SHIFT,
 #else
   KEY_LEFTBRACKET, // [ (^ en AZERTY)
 #endif
@@ -1163,9 +1163,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   true,
 #ifdef GCWZERO
-  KEY_DOWN|MOD_SHIFT,
+  KEY_DOWN|GFX2_MOD_SHIFT,
 #else
-  KEY_RIGHTBRACKET|MOD_SHIFT, // Shift + ]
+  KEY_RIGHTBRACKET|GFX2_MOD_SHIFT, // Shift + ]
 #endif
   0},
   {120,
@@ -1175,9 +1175,9 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   true,
 #ifdef GCWZERO
-  KEY_UP|MOD_SHIFT,
+  KEY_UP|GFX2_MOD_SHIFT,
 #else
-  KEY_LEFTBRACKET|MOD_SHIFT, // Shift + [
+  KEY_LEFTBRACKET|GFX2_MOD_SHIFT, // Shift + [
 #endif
   0},
   {126,
@@ -1202,7 +1202,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "in the user-defined color series.",
   "",
   true,
-  KEY_EQUALS|MOD_SHIFT, // Shift + "=+"
+  KEY_EQUALS|GFX2_MOD_SHIFT, // Shift + "=+"
   0},
   {129,
   "Previous user-defined backcolor",
@@ -1210,7 +1210,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "previous in the user-defined color",
   "series.",
   true,
-  KEY_MINUS|MOD_SHIFT, // Shift + "-_" (")°" en AZERTY
+  KEY_MINUS|GFX2_MOD_SHIFT, // Shift + "-_" (")°" en AZERTY
   0},
   {121,
   "Shrink paintbrush",
@@ -1234,7 +1234,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "is the same as the 'All off' button",
   "in the Effects screen",
   true,
-  KEY_e|MOD_SHIFT, // Shift-E
+  KEY_e|GFX2_MOD_SHIFT, // Shift-E
   0},
   {135,
   "Transparency 10%",
@@ -1322,7 +1322,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  KEY_1|MOD_CTRL, /* Ctrl + 1 */
+  KEY_1|GFX2_MOD_CTRL, /* Ctrl + 1 */
   0},
   {146,
   "Zoom 2:1",
@@ -1330,7 +1330,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "factor to 2:1",
   "",
   true,
-  KEY_2|MOD_CTRL, /* Ctrl + 2 */
+  KEY_2|GFX2_MOD_CTRL, /* Ctrl + 2 */
   0},
   {147,
   "Zoom 3:1",
@@ -1338,7 +1338,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "factor to 3:1",
   "",
   true,
-  KEY_3|MOD_CTRL, /* Ctrl + 3 */
+  KEY_3|GFX2_MOD_CTRL, /* Ctrl + 3 */
   0},
   {148,
   "Zoom 4:1",
@@ -1346,7 +1346,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "factor to 4:1",
   "",
   true,
-  KEY_4|MOD_CTRL, /* Ctrl + 4 */
+  KEY_4|GFX2_MOD_CTRL, /* Ctrl + 4 */
   0},
   {149,
   "Zoom 5:1",
@@ -1354,7 +1354,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "factor to 5:1",
   "",
   true,
-  KEY_5|MOD_CTRL, /* Ctrl + 5 */
+  KEY_5|GFX2_MOD_CTRL, /* Ctrl + 5 */
   0},
   {150,
   "Zoom 6:1",
@@ -1362,7 +1362,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "factor to 6:1",
   "",
   true,
-  KEY_6|MOD_CTRL, /* Ctrl + 6 */
+  KEY_6|GFX2_MOD_CTRL, /* Ctrl + 6 */
   0},
   {151,
   "Zoom 8:1",
@@ -1370,7 +1370,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "factor to 8:1",
   "",
   true,
-  KEY_7|MOD_CTRL, /* Ctrl + 7 */
+  KEY_7|GFX2_MOD_CTRL, /* Ctrl + 7 */
   0},
   {152,
   "Zoom 10:1",
@@ -1378,7 +1378,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "factor to 10:1",
   "",
   true,
-  KEY_8|MOD_CTRL, /* Ctrl + 8 */
+  KEY_8|GFX2_MOD_CTRL, /* Ctrl + 8 */
   0},
   {153,
   "Zoom 12:1",
@@ -1426,7 +1426,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the magnified view. Grid cells match",
   "the size ",
   true,
-  KEY_g|MOD_SHIFT|MOD_ALT, // Shift + Alt + G,
+  KEY_g|GFX2_MOD_SHIFT|GFX2_MOD_ALT, // Shift + Alt + G,
   0},
   {159,
   "Select layer 1",
@@ -1562,7 +1562,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "active one. The new layer is filled",
   "with transparent color.",
   true,
-  KEY_INSERT|MOD_ALT, // Alt + Insert
+  KEY_INSERT|GFX2_MOD_ALT, // Alt + Insert
   0},
   {209,
   "Duplicate layer",
@@ -1578,7 +1578,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "You can't delete the last",
   "layer.",
   true,
-  KEY_DELETE|MOD_ALT, // Alt + Delete
+  KEY_DELETE|GFX2_MOD_ALT, // Alt + Delete
   0},
   {177,
   "Merge a layer",
@@ -1586,7 +1586,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "the one directly below it.",
   "",
   true,
-  KEY_END|MOD_ALT, // Alt + End
+  KEY_END|GFX2_MOD_ALT, // Alt + End
   0},
   {178,
   "Swap layer (up)",
@@ -1594,7 +1594,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "up the stack. No effect if already",
   "on top.",
   true,
-  KEY_PAGEUP|MOD_ALT, // Alt + PageUp
+  KEY_PAGEUP|GFX2_MOD_ALT, // Alt + PageUp
   0},
   {179,
   "Swap layer (down)",
@@ -1602,7 +1602,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "down the stack. No effect if already",
   "on bottom.",
   true,
-  KEY_PAGEDOWN|MOD_ALT, // Alt + PageDown
+  KEY_PAGEDOWN|GFX2_MOD_ALT, // Alt + PageDown
   0},
   {180,
   "Layers menu",
@@ -1610,7 +1610,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "to layers and image transparency.",
   "",
   true,
-  KEY_HOME|MOD_ALT, // Alt + Home
+  KEY_HOME|GFX2_MOD_ALT, // Alt + Home
   0},
   {181,
   "Brush factory",
@@ -1634,7 +1634,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "by doubling width and height.",
   "",
   true,
-  KEY_h|MOD_SHIFT, // Shift+H
+  KEY_h|GFX2_MOD_SHIFT, // Shift+H
   0},
   {184,
   "Double brush width",
@@ -1642,7 +1642,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "by doubling its width.",
   "",
   true,
-  KEY_x|MOD_SHIFT, // Shift+X
+  KEY_x|GFX2_MOD_SHIFT, // Shift+X
   0},
   {185,
   "Double brush height",
@@ -1650,7 +1650,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "by doubling its height.",
   "",
   true,
-  KEY_y|MOD_SHIFT, // Shift+Y
+  KEY_y|GFX2_MOD_SHIFT, // Shift+Y
   0},
   {186,
   "Halve brush size",
@@ -1746,7 +1746,7 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "cycling, if the current image has",
   "cycling colors. (See gradient menu)",
   true,
-  KEY_BACKQUOTE|MOD_CTRL, // Ctrl + `~
+  KEY_BACKQUOTE|GFX2_MOD_CTRL, // Ctrl + `~
   0},
   {198,
   "Format checker",
@@ -1830,16 +1830,16 @@ T_Key_config ConfigKey[NB_SHORTCUTS] = {
   "",
   "",
   true,
-  KEY_KP_PLUS|MOD_SHIFT, // Shift++
-  KEY_MOUSEWHEELUP|MOD_SHIFT},
+  KEY_KP_PLUS|GFX2_MOD_SHIFT, // Shift++
+  KEY_MOUSEWHEELUP|GFX2_MOD_SHIFT},
   {210,
   "Zoom out more",
   "Increase magnifying factor more.",
   "",
   "",
   true,
-  KEY_KP_MINUS|MOD_SHIFT, // Shift+-
-  KEY_MOUSEWHEELDOWN|MOD_SHIFT},
+  KEY_KP_MINUS|GFX2_MOD_SHIFT, // Shift+-
+  KEY_MOUSEWHEELDOWN|GFX2_MOD_SHIFT},
 };
 
 word Ordering[NB_SHORTCUTS]=

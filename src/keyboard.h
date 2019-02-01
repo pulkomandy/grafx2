@@ -32,10 +32,10 @@
 /// - 0x0000 + SDLK_LAST+3: Mouse wheel down.
 /// - 0x0000 + SDLK_LAST+4+B : Joystick button number "B", starting at B=0.
 /// - 0x0800 + a number between 0 and 0x7FF: The scancode key number, for keys which have no "sym", such as keys from multimedia keyboards, and "fn" and "Thinkpad" key for a laptop.
-/// Add 0x1000 for the Shift modifier MOD_SHIFT
-/// Add 0x2000 for the Control modifier ::MOD_CTRL
-/// Add 0x4000 for the Alt modifier ::MOD_ALT
-/// Add 0x8000 for the "Meta" modifier ::MOD_META (On MacOS X it's the CMD key)
+/// Add 0x1000 for the Shift modifier GFX2_MOD_SHIFT
+/// Add 0x2000 for the Control modifier ::GFX2_MOD_CTRL
+/// Add 0x4000 for the Alt modifier ::GFX2_MOD_ALT
+/// Add 0x8000 for the "Meta" modifier ::GFX2_MOD_META (On MacOS X it's the CMD key)
 //////////////////////////////////////////////////////////////////////////////
 #if defined(USE_SDL)
 #include <SDL.h>
@@ -89,6 +89,6 @@ const char * Key_name(word key);
 
 /*!
   Gets the Key modifiers in our format
-  Returns a combination of ::MOD_SHIFT, ::MOD_ALT, ::MOD_CTRL
+  Returns a combination of ::GFX2_MOD_SHIFT, ::GFX2_MOD_ALT, ::GFX2_MOD_CTRL
 */
 word Get_Key_modifiers(void);

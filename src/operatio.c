@@ -521,7 +521,7 @@ void Line_12_5(void)
   cursor_y = Paintbrush_Y;
 
   // On corrige les coordonnées de la ligne si la touche shift est appuyée...
-  if(Get_Key_modifiers() & MOD_SHIFT)
+  if(Get_Key_modifiers() & GFX2_MOD_SHIFT)
     Clamp_coordinates_regular_angle(start_x,start_y,&cursor_x,&cursor_y);
 
   // On vient de bouger
@@ -3807,7 +3807,7 @@ void Grad_rectangle_12_9(void)
     cursor_x = Paintbrush_X;
     cursor_y = Paintbrush_Y;
     // On corrige les coordonnées de la ligne si la touche shift est appuyée...
-    if(Get_Key_modifiers() & MOD_SHIFT)
+    if(Get_Key_modifiers() & GFX2_MOD_SHIFT)
         Clamp_coordinates_regular_angle(start_x,start_y,&cursor_x,&cursor_y);
 
     if ((cursor_x!=end_x) || (cursor_y!=end_y))

@@ -786,8 +786,8 @@ const T_Lookup Lookup_MouseSpeed[] = {
 
 const T_Lookup Lookup_SwapButtons[] = {
   {"None",0},
-  {"Control",MOD_CTRL},
-  {"Alt",MOD_ALT},
+  {"Control",GFX2_MOD_CTRL},
+  {"Alt",GFX2_MOD_ALT},
   {NULL,-1},
 };
 
@@ -2588,7 +2588,7 @@ void Button_Gradients(int btn)
   Window_set_normal_button(8,20,15,14,
     (Main.backups->Pages->Gradients->Range[Current_gradient].Inverse)?"\033":"\032",0,1,KEY_TAB); // 4
   // Technique
-  Window_set_normal_button(8,90,15,14,"",0,1,KEY_TAB|MOD_SHIFT); // 5
+  Window_set_normal_button(8,90,15,14,"",0,1,KEY_TAB|GFX2_MOD_SHIFT); // 5
   Draw_button_gradient_style(8,90,Main.backups->Pages->Gradients->Range[Current_gradient].Technique);
 
   Window_set_normal_button(178,128+12,51,14,"OK",0,1,KEY_RETURN);     // 6

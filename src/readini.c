@@ -984,10 +984,10 @@ int Load_INI(T_Config * conf)
     switch(values[0])
     {
       case 1:
-        conf->Swap_buttons=MOD_CTRL;
+        conf->Swap_buttons=GFX2_MOD_CTRL;
         break;
       case 2:
-        conf->Swap_buttons=MOD_ALT;
+        conf->Swap_buttons=GFX2_MOD_ALT;
         break;
     }
   }

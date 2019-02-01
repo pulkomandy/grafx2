@@ -718,10 +718,10 @@ int Save_INI(const T_Config * conf)
     
   switch(conf->Swap_buttons)
   {
-      case MOD_CTRL:
+      case GFX2_MOD_CTRL:
         values[0]=1;
         break;
-      case MOD_ALT:
+      case GFX2_MOD_ALT:
         values[0]=2;
         break;
       default:

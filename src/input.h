@@ -85,19 +85,19 @@ extern unsigned long X11_clipboard_size;
 
 
 #if defined __HAIKU__
-	#define SHORTCUT_COPY (KEY_c|MOD_ALT)
+	#define SHORTCUT_COPY (KEY_c|GFX2_MOD_ALT)
 #elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__) || defined(__macosx__)
-	#define SHORTCUT_COPY (KEY_c|MOD_META)
+	#define SHORTCUT_COPY (KEY_c|GFX2_MOD_META)
 #else
-	#define SHORTCUT_COPY (KEY_c|MOD_CTRL)
+	#define SHORTCUT_COPY (KEY_c|GFX2_MOD_CTRL)
 #endif
 
 #if defined __HAIKU__
-	#define SHORTCUT_PASTE (KEY_v|MOD_ALT)
+	#define SHORTCUT_PASTE (KEY_v|GFX2_MOD_ALT)
 #elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__) || defined(__macosx__)
-	#define SHORTCUT_PASTE (KEY_v|MOD_META)
+	#define SHORTCUT_PASTE (KEY_v|GFX2_MOD_META)
 #else
-	#define SHORTCUT_PASTE (KEY_v|MOD_CTRL)
+	#define SHORTCUT_PASTE (KEY_v|GFX2_MOD_CTRL)
 #endif
 
 #endif

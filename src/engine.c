@@ -3289,7 +3289,7 @@ short Window_get_button_shortcut(void)
   T_Normal_button * temp;
   T_Special_button * temp2;
 
-  if (Key & MOD_SHIFT)
+  if (Key & GFX2_MOD_SHIFT)
     Window_attribute1=RIGHT_SIDE;
   else
     Window_attribute1=LEFT_SIDE;
