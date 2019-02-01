@@ -1164,7 +1164,7 @@ void Button_Settings(int btn)
     else if (Is_shortcut(Key,0x100+BUTTON_SETTINGS))
       clicked_button=4;
   }
-  while ( (clicked_button!=4) && (Key!=KEY_RETURN) );
+  while ( (clicked_button!=4) && (Key!=KEY_RETURN) && !Quit_is_required);
 
   // Checks on change
   if (Config.Show_hidden_directories!=selected_config.Show_hidden_directories
@@ -1490,7 +1490,7 @@ void Button_Skins(int btn)
         break;
     }
   }
-  while ( (clicked_button!=1) && (clicked_button !=6) && (Key != KEY_ESCAPE));
+  while ( (clicked_button!=1) && (clicked_button !=6) && (Key != KEY_ESCAPE) && !Quit_is_required);
 
   if(clicked_button == 1)
   {
@@ -1708,7 +1708,7 @@ void Button_Copy_page(int btn)
     else if (Is_shortcut(Key,0x200+BUTTON_PAGE))
       clicked_button=6;
   }
-  while (clicked_button<=0);
+  while (clicked_button<=0 && !Quit_is_required);
 
   Close_window();
   Display_cursor();
@@ -2174,7 +2174,7 @@ void Button_Resolution(int btn)
     }
 
   }
-  while ((clicked_button!=1) && (clicked_button!=2));
+  while ((clicked_button!=1) && (clicked_button!=2) && !Quit_is_required);
 
   Close_window();
 
@@ -2823,7 +2823,7 @@ void Button_Gradients(int btn)
         }
     }
   }
-  while (clicked_button!=6 && clicked_button!=7);
+  while (clicked_button!=6 && clicked_button!=7 && !Quit_is_required);
 
   Close_window();
   // The Grad rect operation uses the same button as Grad menu.
@@ -4042,7 +4042,7 @@ void Button_Brush_FX(int btn)
       clicked_button=1;
     }
   }
-  while (clicked_button<=0);
+  while (clicked_button<=0 && Quit_is_required);
 
   Close_window();
   Unselect_button(btn);
@@ -4500,7 +4500,7 @@ void Button_Airbrush_menu(int btn)
       }
     }
   }
-  while ( (clicked_button!=1) && (clicked_button!=2) );
+  while ( (clicked_button!=1) && (clicked_button!=2) && !Quit_is_required);
 
   Close_window();
 
@@ -4695,7 +4695,7 @@ void Button_Effects(int btn)
 
   do
   {
-    clicked_button=Window_clicked_button();
+    clicked_button = Window_clicked_button();
 
     if (Key==KEY_ESC || Is_shortcut(Key,0x100+BUTTON_EFFECTS))
     {
@@ -4958,9 +4958,9 @@ void Button_Effects(int btn)
         Display_cursor();
     }
   }
-  while (clicked_button!=11);
+  while (clicked_button!=11 && !Quit_is_required);
 
-  if (exit_by_close_button)
+  if (exit_by_close_button || Quit_is_required)
     Close_window();
   else
     Hide_cursor();

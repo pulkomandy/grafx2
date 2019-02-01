@@ -768,7 +768,7 @@ void Window_help(int section, const char *sub_section)
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       clicked_button=1;
   }
-  while ((clicked_button!=1) && (Key!=KEY_RETURN));
+  while ((clicked_button!=1) && (Key!=KEY_RETURN) && !Quit_is_required);
 
   Key=0;
   Close_window();
@@ -1057,7 +1057,7 @@ void Button_Stats(int btn)
     if (Is_shortcut(Key,0x200+BUTTON_HELP))
       clicked_button=1;
   }
-  while ( (clicked_button!=1) && (Key!=KEY_RETURN) );
+  while ( (clicked_button!=1) && (Key!=KEY_RETURN) && !Quit_is_required);
 
   if(Key==KEY_RETURN)Key=0;
 

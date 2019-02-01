@@ -1036,7 +1036,7 @@ int Window_Histogram(unsigned char block_start, unsigned char block_end, dword* 
     if (Key == KEY_ESC)
       clicked_button=1;
 
-  } while( clicked_button < 1);
+  } while( clicked_button < 1 && !Quit_is_required);
   Close_window();
 
   if (clicked_button==2)
@@ -1269,7 +1269,7 @@ void Button_Palette(int btn)
     old_mouse_x=Mouse_X;
     old_mouse_y=Mouse_Y;
     old_mouse_k=Mouse_K;
-    clicked_button=Window_clicked_button();
+    clicked_button = Window_clicked_button();
 
     switch (clicked_button)
     {
@@ -2832,7 +2832,7 @@ void Button_Palette(int btn)
       }
     }
   }
-  while ((clicked_button!=13) && (clicked_button!=14));
+  while ((clicked_button!=13) && (clicked_button!=14) && !Quit_is_required);
 
   if (clicked_button==14)         // Sortie par OK
   {
@@ -2862,7 +2862,7 @@ void Button_Palette(int btn)
 
   Display_cursor();
 
-  if (clicked_button==13)                         // Sortie par CANCEL
+  if (clicked_button==13 || Quit_is_required)  // CANCEL was clicked
   {
     Set_palette(Main.palette);
     if (image_is_backed_up)
@@ -3009,7 +3009,7 @@ void Button_Secondary_palette(int btn)
         break;
     }
   }
-  while (clicked_button!=1 && clicked_button!=2 && clicked_button!=3 && clicked_button!=4);
+  while ((clicked_button <= 0 || clicked_button >= 5) && !Quit_is_required);
 
   // We need to get the sliders positions before closing the window, because they will be freed.
   palette_cols=256-columns_slider->Position;
@@ -3021,7 +3021,7 @@ void Button_Secondary_palette(int btn)
   Unselect_button(BUTTON_PALETTE);
   Display_cursor();
 
-  if (clicked_button==4) // Cancel
+  if (clicked_button==4 || Quit_is_required) // Cancel
     return;
 
   if (palette_vertical != Config.Palette_vertical)
