@@ -954,15 +954,31 @@ void Print_char_in_window(short x_pos, short y_pos, unsigned int c,byte text_col
 ///Draws a char in a window, checking for bounds
 void Print_in_window_limited(short x,short y,const char * str,byte size,byte text_color,byte background_color)
 {
-  char display_string[256];
-  strncpy(display_string, str, size);
-  display_string[size]='\0';
-
   if (strlen(str) > size)
   {
-    display_string[size-1]=ELLIPSIS_CHARACTER;
+    char * display_string = strdup(str);
+    display_string[size-1] = ELLIPSIS_CHARACTER;
+    display_string[size] = '\0';
+    Print_in_window(x, y, display_string, text_color, background_color);
+    free(display_string);
   }
-  Print_in_window(x, y, display_string, text_color, background_color);
+  else
+    Print_in_window(x, y, str, text_color, background_color);
+}
+
+///Draws a char in a window, checking for bounds
+void Print_in_window_limited_unicode(short x, short y, const word * str, byte size, byte text_color, byte background_color)
+{
+  if (Unicode_strlen(str) > size)
+  {
+    word * display_string = Unicode_strdup(str);
+    display_string[size-1] = (byte)ELLIPSIS_CHARACTER;
+    display_string[size] = 0;
+    Print_in_window_unicode(x, y, display_string, text_color, background_color);
+    free(display_string);
+  }
+  else
+    Print_in_window_unicode(x, y, str, text_color, background_color);
 }
 
 /// Draws a string in a window with underscore

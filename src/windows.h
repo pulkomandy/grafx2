@@ -70,6 +70,7 @@ void Print_in_window_underscore(short x,short y,const char * str,byte text_color
 void Print_in_window(short x,short y,const char * str,byte text_color,byte background_color);
 void Print_in_window_unicode(short x,short y,const word * str,byte text_color,byte background_color);
 void Print_in_window_limited(short x,short y,const char * str,byte size,byte text_color,byte background_color);
+void Print_in_window_limited_unicode(short x, short y, const word * str, byte size, byte text_color, byte background_color);
 void Print_char_in_window(short x_pos,short y_pos, unsigned int c,byte text_color,byte background_color);
 void Print_in_menu(const char * str, short position);
 void Print_coordinates(void);
