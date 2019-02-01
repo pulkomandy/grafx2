@@ -966,13 +966,15 @@ const char * Calculate_relative_path(const char * ref_path, const char * path)
     return path;  // no common part found return absolute path
   // count the number of path separators in the reference path
   for (i = last_separator; real_ref_path[i] != '\0'; i++)
-    if (real_ref_path[i] == PATH_SEPARATOR[0])
+  {
+    if (real_ref_path[i] == PATH_SEPARATOR[0] && real_ref_path[i + 1] != '\0')  // do not count the trailing separator
       separator_count++;
+  }
   i = 0;
   // construct the relative path
   while(separator_count-- > 0)
     i += snprintf(rel_path + i, MAX_PATH_CHARACTERS - i, "..%s", PATH_SEPARATOR);
   strncpy(rel_path + i, path + last_separator + 1, MAX_PATH_CHARACTERS - i);
-  rel_path[MAX_PATH_CHARACTERS -1] = '\0';
+  rel_path[MAX_PATH_CHARACTERS - 1] = '\0';
   return rel_path;
 }
