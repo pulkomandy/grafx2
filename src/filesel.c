@@ -691,23 +691,23 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
   }
   #elif defined (WIN32)
   {
-    char drive_name[]="A:\\";
+    char drive_name[32];
     int drive_bits = GetLogicalDrives();
-    int drive_index;
     int bit_index;
-    byte icon;
+    enum ICON_TYPES icon;
     
     // Sous Windows, on a la totale, presque aussi bien que sous DOS:
-    drive_index = 0;
-    for (bit_index=0; bit_index<26 && drive_index<23; bit_index++)
+    for (bit_index=0; bit_index < 26; bit_index++)
     {
       if ( (1 << bit_index) & drive_bits )
       {
         // On a ce lecteur, il faut maintenant déterminer son type "physique".
         // pour profiter des jolies icones de X-man.
-        char drive_path[]="A:\\";
-        // Cette API Windows est étrange, je dois m'y faire...
-        drive_path[0]='A'+bit_index;
+        char drive_path[] = "A:\\";
+        char volume_name[32];
+        char file_system[32];
+
+        drive_path[0] = 'A'+bit_index;
         switch (GetDriveTypeA(drive_path))
         {
           case DRIVE_CDROM:
@@ -722,14 +722,19 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
           case DRIVE_FIXED:
             icon=ICON_HDD;
             break;
+          case DRIVE_RAMDISK:
           default:
             icon=ICON_NETWORK;
             break;
         }
-        drive_name[0]='A'+bit_index;
-        Add_element_to_list(list, drive_name, Format_filename(drive_name,name_length-1,2), FSOBJECT_DRIVE, icon);
+        if (GetVolumeInformationA(drive_path, volume_name, sizeof(volume_name), NULL, NULL, NULL, file_system, sizeof(file_system)))
+          snprintf(drive_name, sizeof(drive_name), "%s %s", drive_path, volume_name);
+        else
+          snprintf(drive_name, sizeof(drive_name), "%s  - empty -", drive_path);
+        Add_element_to_list(list, drive_path,
+                            Format_filename(drive_name, name_length-1, FSOBJECT_DRIVE),
+                            FSOBJECT_DRIVE, icon);
         list->Nb_directories++;
-        drive_index++;
       }
     }
   }
@@ -770,7 +775,7 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
 
     while(mount_points_list != NULL)
     {
-      byte icon = ICON_NONE;
+      enum ICON_TYPES icon = ICON_NONE;
       if (mount_points_list->me_remote)
         icon = ICON_NETWORK;
       else if (strcmp(mount_points_list->me_type, "cd9660") == 0)
