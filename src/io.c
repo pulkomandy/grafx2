@@ -942,8 +942,13 @@ const char * Calculate_relative_path(const char * ref_path, const char * path)
     real_ref_path[MAX_PATH_CHARACTERS-1] = '\0';
   }
 #if defined(WIN32) || defined(__MINT__)
-  if ((real_ref_path[1] == ':') && (real_ref_path[0] | 32) != (path[0] | 32))
-    return NULL;  // path on different volumes, not possible
+  if (real_ref_path[1] == ':' && path[1] == ':')
+  {
+    // use same case for drive letter
+    real_ref_path[0] = (real_ref_path[0] & ~32) | (path[0] & 32);
+    if (real_ref_path[0] != path[0])
+      return NULL;  // path on different volumes, not possible
+  }
 #endif
   // look for common path parts
   for (i = 0; real_ref_path[i] == path[i] && path[i] != '\0'; i++)
