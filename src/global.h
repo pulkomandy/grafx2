@@ -575,10 +575,10 @@ GFX2_GLOBAL enum IMAGE_MODES Selected_Constraint_Mode;
 // -- Magnifier data
 
 #ifdef GLOBAL_VARIABLES
-  word ZOOM_FACTOR[NB_ZOOM_FACTORS]={2,3,4,5,6,8,10,12,14,16,18,20, 24, 28, 32};
+  const byte ZOOM_FACTOR[NB_ZOOM_FACTORS]={2,3,4,5,6,8,10,12,14,16,18,20, 24, 28, 32};
 #else
 /// Successive zoom factors, used by the Magnifier.
-  extern word ZOOM_FACTOR[NB_ZOOM_FACTORS];
+  extern const byte ZOOM_FACTOR[NB_ZOOM_FACTORS];
 #endif
 
 // -- Data for gradients
@@ -699,7 +699,7 @@ GFX2_GLOBAL int Polyfill_number_of_points;
 GFX2_GLOBAL T_Brush_template Brush_container[BRUSH_CONTAINER_COLUMNS*BRUSH_CONTAINER_ROWS];
 
 #ifdef GLOBAL_VARIABLES
-  byte CURSOR_FOR_OPERATION[NB_OPERATIONS]=
+  const byte CURSOR_FOR_OPERATION[NB_OPERATIONS]=
   {
     CURSOR_SHAPE_TARGET            , // Freehand continuous draw
     CURSOR_SHAPE_TARGET            , // Freehand discontinuous draw
@@ -745,7 +745,7 @@ GFX2_GLOBAL T_Brush_template Brush_container[BRUSH_CONTAINER_COLUMNS*BRUSH_CONTA
   };
 #else
   /// ::Cursor_shape to use for each operation.
-  extern byte CURSOR_FOR_OPERATION[NB_OPERATIONS];
+  extern const byte CURSOR_FOR_OPERATION[NB_OPERATIONS];
 #endif
 
 ///
