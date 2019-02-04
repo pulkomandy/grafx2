@@ -960,13 +960,27 @@ const char * Calculate_relative_path(const char * ref_path, const char * path)
       last_separator = i;
 #endif
   }
-  if (real_ref_path[i] == '\0' && path[i] == PATH_SEPARATOR[0])
+  // at this point, all chars from index 0 to i-1 are identical in
+  // real_ref_path and path.
+  // real_ref_path[i] and path[i] are either different, or both '\0'
+  if (real_ref_path[i] == PATH_SEPARATOR[0] && real_ref_path[i + 1] == '\0' && path[i] == '\0')
+      return "."; // path are identical (real_ref_path has additional trailing separator)
+  if (real_ref_path[i] == '\0')
   {
-    snprintf(rel_path, MAX_PATH_CHARACTERS, ".%s", path + i);  // path is under ref_path
-    return rel_path;
+    if (path[i] == '\0')
+      return "."; // path are identical
+    // path is under ref_path
+    if (path[i] == PATH_SEPARATOR[0])
+    {
+      snprintf(rel_path, MAX_PATH_CHARACTERS, ".%s", path + i);
+      return rel_path;
+    }
+    else if (i > 0 && real_ref_path[i - 1] == PATH_SEPARATOR[0])
+    {
+      snprintf(rel_path, MAX_PATH_CHARACTERS, ".%s", path + i - 1);
+      return rel_path;
+    }
   }
-  if (real_ref_path[i] == '\0' && path[i] == '\0')
-    return "."; // path are identical
   if (last_separator <= 0)
     return path;  // no common part found return absolute path
   // count the number of path separators in the reference path
