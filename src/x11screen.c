@@ -330,3 +330,8 @@ void Define_icon(void)
   snprintf(icon_path, sizeof(icon_path), "%s%s", Data_directory, "gfx2.png"); // 48x48
   icon = Load_surface(icon_path, NULL);
 }
+
+void Set_mouse_position(void)
+{
+  /// @todo implement screen capture and set position for x11.
+}

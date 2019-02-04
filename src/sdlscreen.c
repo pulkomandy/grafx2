@@ -778,3 +778,12 @@ void Define_icon(void)
     }
   }
 }
+
+void Set_mouse_position(void)
+{
+#if defined(USE_SDL)
+  SDL_WarpMouse(Mouse_X*Pixel_width, Mouse_Y*Pixel_height);
+#elif defined(USE_SDL2)
+  SDL_WarpMouseInWindow(NULL, Mouse_X*Pixel_width, Mouse_Y*Pixel_height);
+#endif
+}

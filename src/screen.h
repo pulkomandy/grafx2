@@ -83,4 +83,7 @@ int GFX2_Get_X11_Display_Window(Display * * display, Window * window);
 /// Set application icon(s)
 void Define_icon(void);
 
+/// set (system) mouse cursor position
+void Set_mouse_position(void);
+
 #endif // SCREEN_H_INCLUDED

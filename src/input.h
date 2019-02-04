@@ -49,8 +49,6 @@ int Has_shortcut(word function);
 /// Adjust mouse sensitivity (and actual mouse input mode)
 void Adjust_mouse_sensitivity(word fullscreen);
 
-void Set_mouse_position(void);
-
 int Move_cursor_with_constraints(void);
 
 ///

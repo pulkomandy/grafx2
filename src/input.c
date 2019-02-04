@@ -1855,15 +1855,6 @@ void Adjust_mouse_sensitivity(word fullscreen)
   (void)fullscreen;
 }
 
-void Set_mouse_position(void)
-{
-#if defined(USE_SDL)
-    SDL_WarpMouse(Mouse_X*Pixel_width, Mouse_Y*Pixel_height);
-#elif defined(USE_SDL2)
-    //SDL_WarpMouseInWindow(Window_SDL, Mouse_X*Pixel_width, Mouse_Y*Pixel_height);
-#endif
-}
-
 static int Color_cycling(void)
 {
   static byte offset[16];

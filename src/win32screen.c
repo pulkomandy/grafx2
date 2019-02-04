@@ -609,3 +609,17 @@ void Define_icon(void)
   // Do nothing because the icon is set in the window class
   // see Init_Win32()
 }
+
+void Set_mouse_position(void)
+{
+  POINT pt;
+  pt.x = Mouse_X * Pixel_width;
+  pt.y = Mouse_Y * Pixel_height;
+  if (!ClientToScreen(Win32_hwnd, &pt))
+    GFX2_Log(GFX2_WARNING, "ClientToScreen(%08x, %p) failed\n", Win32_hwnd, &pt);
+  else
+  {
+    if (!SetCursorPos(pt.x, pt.y))
+      GFX2_Log(GFX2_WARNING, "SetCursorPos(%ld, %ld) failed\n", pt.x, pt.y);
+  }
+}
