@@ -52,6 +52,7 @@
 #include "struct.h"
 #include "io.h"
 #include "setup.h"
+#include "global.h"
 
 #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
     // This is a random default value ...
@@ -192,7 +193,12 @@ void Set_config_directory(const char * program_dir, char * config_dir)
     strcpy(filename, config_dir);
     strcat(filename, CONFIG_FILENAME);
 
-    if (!File_exists(filename))
+    if (File_exists(filename))
+    {
+      // gfx2.cfg found, this is a portable installation
+      Portable_Installation_Detected = 1;
+    }
+    else
     {
       char *config_parent_dir;
       #if defined(__WIN32__) || defined(WIN32)
@@ -227,6 +233,7 @@ void Set_config_directory(const char * program_dir, char * config_dir)
             config_parent_dir = getenv("HOME");
          }
       #endif
+      Portable_Installation_Detected = 0;
 
       if (config_parent_dir && config_parent_dir[0]!='\0')
       {
@@ -254,6 +261,7 @@ void Set_config_directory(const char * program_dir, char * config_dir)
           {
             // Echec: on se rabat sur le repertoire de l'executable.
             strcpy(config_dir,program_dir);
+            Portable_Installation_Detected = 1;
             #if defined(__macosx__)
               strcat(config_dir, "../");
             #endif

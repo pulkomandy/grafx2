@@ -1221,7 +1221,8 @@ static void Display_bookmark(T_Dropdown_button * Button, int bookmark_number)
   Window_dropdown_clear_items(Button);
   Window_dropdown_add_item(Button,0,"Set");
 #if !(defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__))
-  Window_dropdown_add_item(Button,3,"Set Rel");
+  if (Portable_Installation_Detected)
+    Window_dropdown_add_item(Button,3,"Set Rel");
 #endif
   if (Config.Bookmark_directory[bookmark_number])
   {

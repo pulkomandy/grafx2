@@ -770,6 +770,9 @@ GFX2_GLOBAL signed char File_error;
 /// Current line number when reading/writing gfx2.ini
 GFX2_GLOBAL int Line_number_in_INI_file;
 
+/// Set to true when the .cfg and .ini files are along the executable
+GFX2_GLOBAL byte Portable_Installation_Detected;
+
 // -- For iconv
 
 #ifdef ENABLE_FILENAMES_ICONV
