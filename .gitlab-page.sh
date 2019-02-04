@@ -28,10 +28,16 @@ echo "<li>Sources :" >> ${OUTFILE}
 echo "<a href=\"${CI_PROJECT_URL}/-/jobs/${LINUX_JOB_ID}/artifacts/raw/grafx2-${VERSION}-src.tgz\">grafx2-${VERSION}-src.tgz</a></li>" >> ${OUTFILE}
 echo "<li>Windows installer (win32 API) :" >> ${OUTFILE}
 echo "<a href=\"${CI_PROJECT_URL}/-/jobs/${WIN32_JOB_ID}/artifacts/raw/install/grafx2-win32-${VERSION}.win32.exe\">grafx2-win32-${VERSION}.win32.exe</a></li>" >> ${OUTFILE}
+echo "<li>Windows portable (win32 API) :" >> ${OUTFILE}
+echo "<a href=\"${CI_PROJECT_URL}/-/jobs/${WIN32_JOB_ID}/artifacts/raw/grafx2-win32-${VERSION}-win32.zip\">grafx2-win32-${VERSION}-win32.zip</a></li>" >> ${OUTFILE}
 echo "<li>Windows installer (SDL API) :" >> ${OUTFILE}
 echo "<a href=\"${CI_PROJECT_URL}/-/jobs/${WIN32_JOB_ID}/artifacts/raw/install/grafx2-sdl-${VERSION}.win32.exe\">grafx2-sdl-${VERSION}.win32.exe</a></li>" >> ${OUTFILE}
+echo "<li>Windows portable (SDL API) :" >> ${OUTFILE}
+echo "<a href=\"${CI_PROJECT_URL}/-/jobs/${WIN32_JOB_ID}/artifacts/raw/grafx2-sdl-${VERSION}-win32.zip\">grafx2-sdl-${VERSION}-win32.zip</a></li>" >> ${OUTFILE}
 echo "<li>Windows installer (SDL2 API) :" >> ${OUTFILE}
 echo "<a href=\"${CI_PROJECT_URL}/-/jobs/${WIN32_JOB_ID}/artifacts/raw/install/grafx2-sdl2-${VERSION}.win32.exe\">grafx2-sdl2-${VERSION}.win32.exe</a></li>" >> ${OUTFILE}
+echo "<li>Windows portable (SDL2 API) :" >> ${OUTFILE}
+echo "<a href=\"${CI_PROJECT_URL}/-/jobs/${WIN32_JOB_ID}/artifacts/raw/grafx2-sdl2-${VERSION}-win32.zip\">grafx2-sdl2-${VERSION}-win32.zip</a></li>" >> ${OUTFILE}
 echo "</ul>" >> ${OUTFILE}
 echo "<ul>" >> ${OUTFILE}
 echo "<li><a href=\"http://grafx2.tk/\">Home page</a></li>" >> ${OUTFILE}
