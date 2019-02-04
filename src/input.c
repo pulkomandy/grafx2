@@ -1338,6 +1338,10 @@ int Get_input(int sleep_time)
               memcpy(Key_Text, event.text.text, sizeof(Key_Text));
               user_feedback_required = 1;
               break;
+          case SDL_TEXTEDITING:
+              GFX2_Log(GFX2_DEBUG, "SDL_TEXTEDITING event : start=%d length=%d text='%s'\n",
+                event.edit.start, event.edit.length, event.edit.text);
+              break;
 #endif
 
           // Start of Joystik handling
