@@ -251,7 +251,18 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
     }
     user_feedback_required = 1;
     return 0;
-// WM_MBUTTONDBLCLK
+#if (_WIN32_WINNT >= 0x0600)
+  case WM_MOUSEHWHEEL:
+    {
+      short delta = HIWORD(wParam);
+      if (delta > 0)
+        Key = KEY_MOUSEWHEELRIGHT | Get_Key_modifiers();
+      else
+        Key = KEY_MOUSEWHEELLEFT | Get_Key_modifiers();
+    }
+    user_feedback_required = 1;
+    return 0;
+#endif
   case WM_SYSKEYDOWN: // Sent when ALT is pressed
   case WM_KEYDOWN:  // lParam & 0xffff => repeat count.   (lParam >> 16) & 0x1ff => scancode
     // lParam & 0x20000000 : context : 0 for WM_KEYDOWN; 1 for WM_SYSKEYDOWN if ALT is pressed
