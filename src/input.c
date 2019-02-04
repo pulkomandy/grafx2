@@ -595,24 +595,24 @@ static void Handle_SelectionRequest(const XSelectionRequestEvent* xselectionrequ
 #endif
 
 #if defined(USE_SDL)
-void Handle_window_resize(SDL_ResizeEvent event)
+static void Handle_window_resize(SDL_ResizeEvent * event)
 {
-    Resize_width = event.w;
-    Resize_height = event.h;
+  Resize_width = event->w;
+  Resize_height = event->h;
 }
 #endif
 
 #if defined(USE_SDL) || defined(USE_SDL2)
-void Handle_window_exit(SDL_QuitEvent event)
+static void Handle_window_exit(SDL_QuitEvent * event)
 {
-    (void)event, // unused
+  (void)event; // unused
     
-    Quit_is_required = 1;
+  Quit_is_required = 1;
 }
 
 // Mouse events management
 
-int Handle_mouse_move(SDL_MouseMotionEvent event)
+static int Handle_mouse_move(SDL_MouseMotionEvent * event)
 {
   int mouse_blocked = 0;
   //GFX2_Log(GFX2_DEBUG, "mouse motion (%+d,%+d)\n", event->xrel, event->yrel);
@@ -634,9 +634,9 @@ int Handle_mouse_move(SDL_MouseMotionEvent event)
   return Move_cursor_with_constraints(mouse_blocked);
 }
 
-int Handle_mouse_click(SDL_MouseButtonEvent event)
+static int Handle_mouse_click(SDL_MouseButtonEvent * event)
 {
-    switch(event.button)
+    switch(event->button)
     {
         case SDL_BUTTON_LEFT:
             if (Button_inverter)
@@ -675,9 +675,9 @@ int Handle_mouse_click(SDL_MouseButtonEvent event)
     return Move_cursor_with_constraints(0);
 }
 
-int Handle_mouse_release(SDL_MouseButtonEvent event)
+static int Handle_mouse_release(SDL_MouseButtonEvent * event)
 {
-    switch(event.button)
+    switch(event->button)
     {
         case SDL_BUTTON_LEFT:
             if (Button_inverter)
@@ -746,19 +746,19 @@ int Handle_special_key_press(void)
 }
 
 #if defined(USE_SDL) || defined(USE_SDL2)
-static int Handle_key_press(SDL_KeyboardEvent event)
+static int Handle_key_press(SDL_KeyboardEvent * event)
 {
     //Appui sur une touche du clavier
     int modifier;
   
-    Key = Keysym_to_keycode(event.keysym);
-    Key_ANSI = Keysym_to_ANSI(event.keysym);
+    Key = Keysym_to_keycode(event->keysym);
+    Key_ANSI = Keysym_to_ANSI(event->keysym);
 #if defined(USE_SDL)
-    Key_UNICODE = event.keysym.unicode;
+    Key_UNICODE = event->keysym.unicode;
     if (Key_UNICODE == 0)
 #endif
       Key_UNICODE = Key_ANSI;
-    switch(event.keysym.sym)
+    switch(event->keysym.sym)
     {
       case SDLK_RSHIFT:
       case SDLK_LSHIFT:
@@ -885,12 +885,12 @@ int Release_control(int key_code, int modifier)
 
 
 #if defined(USE_SDL) || defined(USE_SDL2)
-static int Handle_key_release(SDL_KeyboardEvent event)
+static int Handle_key_release(SDL_KeyboardEvent * event)
 {
     int modifier;
-    int released_key = Keysym_to_keycode(event.keysym) & 0x0FFF;
+    int released_key = Keysym_to_keycode(event->keysym) & 0x0FFF;
   
-    switch(event.keysym.sym)
+    switch(event->keysym.sym)
     {
       case SDLK_RSHIFT:
       case SDLK_LSHIFT:
@@ -1261,7 +1261,7 @@ int Get_input(int sleep_time)
               break;
 
           case SDL_VIDEORESIZE:
-              Handle_window_resize(event.resize);
+              Handle_window_resize(&event.resize);
               user_feedback_required = 1;
               break;
 #endif
@@ -1290,21 +1290,21 @@ int Get_input(int sleep_time)
 #endif
 
           case SDL_QUIT:
-              Handle_window_exit(event.quit);
+              Handle_window_exit(&event.quit);
               user_feedback_required = 1;
               break;
 
           case SDL_MOUSEMOTION:
-              user_feedback_required = Handle_mouse_move(event.motion);
+              user_feedback_required = Handle_mouse_move(&event.motion);
               break;
 
           case SDL_MOUSEBUTTONDOWN:
-              Handle_mouse_click(event.button);
+              Handle_mouse_click(&event.button);
               user_feedback_required = 1;
               break;
 
           case SDL_MOUSEBUTTONUP:
-              Handle_mouse_release(event.button);
+              Handle_mouse_release(&event.button);
               user_feedback_required = 1;
               break;
 
@@ -1319,12 +1319,12 @@ int Get_input(int sleep_time)
 #endif
 
           case SDL_KEYDOWN:
-              Handle_key_press(event.key);
+              Handle_key_press(&event.key);
               user_feedback_required = 1;
               break;
 
           case SDL_KEYUP:
-              Handle_key_release(event.key);
+              Handle_key_release(&event.key);
               break;
 
 #if defined(USE_SDL2)
