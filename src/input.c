@@ -1212,13 +1212,17 @@ int Get_input(int sleep_time)
     // This is done in this function because it's called after reading 
     // some user input.
     Flush_update();
+
+    if (Quit_is_required)
+      return 1;
+
     Key_ANSI = 0;
     Key_UNICODE = 0;
     Key = 0;
 #if defined(USE_SDL2)
     memset(Key_Text, 0, sizeof(Key_Text));
 #endif
-    Mouse_moved=0;
+    Mouse_moved = 0;
     Input_new_mouse_X = Mouse_X;
     Input_new_mouse_Y = Mouse_Y;
     Input_new_mouse_K = Mouse_K;
@@ -1601,10 +1605,14 @@ int Get_input(int sleep_time)
     // some user input.
     Flush_update();
 
-	  while (!user_feedback_required && PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-		  TranslateMessage(&msg);
-		  DispatchMessage(&msg);
-	  }
+    if (Quit_is_required)
+      return 1;
+
+    while (!user_feedback_required && PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+    {
+      TranslateMessage(&msg);
+      DispatchMessage(&msg);
+    }
 
     // If the cursor was moved since last update,
     // it was erased, so we need to redraw it (with the preview brush)
@@ -1617,10 +1625,11 @@ int Get_input(int sleep_time)
     if (user_feedback_required)
     {
       // Process the WM_CHAR event that follow WM_KEYDOWN
-      if(PeekMessage(&msg, NULL, WM_CHAR, WM_CHAR, PM_REMOVE)) {
+      if(PeekMessage(&msg, NULL, WM_CHAR, WM_CHAR, PM_REMOVE))
+      {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
-	    }
+      }
       return 1;
     }
     if (sleep_time == 0)
