@@ -49,7 +49,7 @@ int Has_shortcut(word function);
 /// Adjust mouse sensitivity (and actual mouse input mode)
 void Adjust_mouse_sensitivity(word fullscreen);
 
-int Move_cursor_with_constraints(void);
+int Move_cursor_with_constraints(int);
 
 ///
 /// This holds the ID of the GUI control that the mouse

@@ -67,12 +67,6 @@ extern Window X11_window;
 // generic defaults like "Right Amiga+Q = Quit".
 // In case this is annoying for some platforms, disable it.
 
-#if defined(USE_SDL)
-void Handle_window_resize(SDL_ResizeEvent event);
-#endif
-#if defined(USE_SDL) || defined(USE_SDL2)
-void Handle_window_exit(SDL_QuitEvent event);
-#endif
 static int Color_cycling(void);
 
 // public Globals (available as extern)
@@ -228,12 +222,12 @@ int Is_shortcut(word key, word function)
   return 0; 
 }
 
-// Called each time there is a cursor move, either triggered by mouse or keyboard shortcuts
-int Move_cursor_with_constraints()
+/// Called each time there is a cursor move, either triggered by mouse or keyboard shortcuts
+/// @param mouse_blocked Boolean, Set to true if mouse movement was clipped.
+/// @return feedback
+int Move_cursor_with_constraints(int mouse_blocked)
 {
-  int feedback=0;
-  int  mouse_blocked=0; ///< Boolean, Set to true if mouse movement was clipped.
-
+  int feedback = 0;
   
   // Clip mouse to the editing area. There can be a border when using big 
   // pixels, if the SDL screen dimensions are not factors of the pixel size.
@@ -251,7 +245,6 @@ int Move_cursor_with_constraints()
   //menu lorsqu'on est en train de travailler dans l'image
   if (Operation_stack_size != 0)
   {
-        
 
         //Si le curseur ne se trouve plus dans l'image
         if(Menu_Y<=Input_new_mouse_Y)
@@ -281,6 +274,7 @@ int Move_cursor_with_constraints()
             }
         }
   }
+
   if ((Input_new_mouse_X != Mouse_X) ||
     (Input_new_mouse_Y != Mouse_Y) ||
     (Input_new_mouse_K != Mouse_K))
@@ -620,10 +614,24 @@ void Handle_window_exit(SDL_QuitEvent event)
 
 int Handle_mouse_move(SDL_MouseMotionEvent event)
 {
-    Input_new_mouse_X = event.x/Pixel_width;
-    Input_new_mouse_Y = event.y/Pixel_height;
+  int mouse_blocked = 0;
+  //GFX2_Log(GFX2_DEBUG, "mouse motion (%+d,%+d)\n", event->xrel, event->yrel);
+  if (event->x < 0)
+  {
+    mouse_blocked = 1;
+    Input_new_mouse_X = 0;
+  }
+  else
+    Input_new_mouse_X = event->x / Pixel_width;
+  if (event->y < 0)
+  {
+    mouse_blocked = 1;
+    Input_new_mouse_Y = 0;
+  }
+  else
+    Input_new_mouse_Y = event->y / Pixel_height;
 
-    return Move_cursor_with_constraints();
+  return Move_cursor_with_constraints(mouse_blocked);
 }
 
 int Handle_mouse_click(SDL_MouseButtonEvent event)
@@ -664,7 +672,7 @@ int Handle_mouse_click(SDL_MouseButtonEvent event)
         default:
         return 0;
     }
-    return Move_cursor_with_constraints();
+    return Move_cursor_with_constraints(0);
 }
 
 int Handle_mouse_release(SDL_MouseButtonEvent event)
@@ -686,7 +694,7 @@ int Handle_mouse_release(SDL_MouseButtonEvent event)
             break;
     }
     
-    return Move_cursor_with_constraints();
+    return Move_cursor_with_constraints(0);
 }
 #endif
 
@@ -721,13 +729,13 @@ int Handle_special_key_press(void)
     {
         Input_new_mouse_K=1;
         Directional_click=1;
-        return Move_cursor_with_constraints();
+        return Move_cursor_with_constraints(0);
     }
     else if(Is_shortcut(Key,SPECIAL_CLICK_RIGHT) && Keyboard_click_allowed > 0)
     {
         Input_new_mouse_K=2;
         Directional_click=2;
-        return Move_cursor_with_constraints();
+        return Move_cursor_with_constraints(0);
     }
     else if(Is_shortcut(Key,SPECIAL_HOLD_PAN))
     {
@@ -787,7 +795,7 @@ static int Handle_key_press(SDL_KeyboardEvent event)
       if (Input_new_mouse_K)
       {
         Input_new_mouse_K ^= 3; // Flip bits 0 and 1
-        return Move_cursor_with_constraints();
+        return Move_cursor_with_constraints(0);
       }
     }
     #ifdef RSUPER_EMULATES_META_MOD
@@ -818,7 +826,7 @@ int Release_control(int key_code, int modifier)
       if (Input_new_mouse_K)
       {      
         Input_new_mouse_K ^= 3; // Flip bits 0 and 1
-        return Move_cursor_with_constraints();
+        return Move_cursor_with_constraints(0);
       }
     }
 
@@ -849,7 +857,7 @@ int Release_control(int key_code, int modifier)
         {
             Directional_click &= ~1;
             Input_new_mouse_K &= ~1;
-            return Move_cursor_with_constraints() || need_feedback;
+            return Move_cursor_with_constraints(0) || need_feedback;
         }
     }
     if((key_code && key_code == (Config_Key[SPECIAL_CLICK_RIGHT][0]&0x0FFF)) || (Config_Key[SPECIAL_CLICK_RIGHT][0]&modifier) ||
@@ -859,7 +867,7 @@ int Release_control(int key_code, int modifier)
         {
             Directional_click &= ~2;
             Input_new_mouse_K &= ~2;
-            return Move_cursor_with_constraints() || need_feedback;
+            return Move_cursor_with_constraints(0) || need_feedback;
         }
     }
     if((key_code && key_code == (Config_Key[SPECIAL_HOLD_PAN][0]&0x0FFF)) || (Config_Key[SPECIAL_HOLD_PAN][0]&modifier) ||
@@ -944,7 +952,7 @@ static int Handle_joystick_press(SDL_JoyButtonEvent event)
         if (Input_new_mouse_K)
         {
           Input_new_mouse_K ^= 3; // Flip bits 0 and 1
-          return Move_cursor_with_constraints();
+          return Move_cursor_with_constraints(0);
         }
       }
       return 0;
@@ -962,7 +970,7 @@ static int Handle_joystick_press(SDL_JoyButtonEvent event)
         if (Input_new_mouse_K)
         {
           Input_new_mouse_K ^= 3; // Flip bits 0 and 1
-          return Move_cursor_with_constraints();
+          return Move_cursor_with_constraints(0);
         }
       }
       return 0;
@@ -970,12 +978,12 @@ static int Handle_joystick_press(SDL_JoyButtonEvent event)
     if (event.button == Joybutton_left_click)
     {
       Input_new_mouse_K = Button_inverter ? 2 : 1;
-      return Move_cursor_with_constraints();
+      return Move_cursor_with_constraints(0);
     }
     if (event.button == Joybutton_right_click)
     {
       Input_new_mouse_K = Button_inverter ? 1 : 2;
-      return Move_cursor_with_constraints();
+      return Move_cursor_with_constraints(0);
     }
     switch(event.button)
     {
@@ -1027,7 +1035,7 @@ static int Handle_joystick_press(SDL_JoyButtonEvent event)
     Key = (KEY_JOYBUTTON+event.button)|Get_Key_modifiers();
     // TODO: systeme de répétition
     
-    return Move_cursor_with_constraints();
+    return Move_cursor_with_constraints(0);
 }
 
 static int Handle_joystick_release(SDL_JoyButtonEvent event)
@@ -1054,12 +1062,12 @@ static int Handle_joystick_release(SDL_JoyButtonEvent event)
     if (event.button == Joybutton_left_click)
     {
       Input_new_mouse_K &= ~1;
-      return Move_cursor_with_constraints();
+      return Move_cursor_with_constraints(0);
     }
     if (event.button == Joybutton_right_click)
     {
       Input_new_mouse_K &= ~2;
-      return Move_cursor_with_constraints();
+      return Move_cursor_with_constraints(0);
     }
   
     switch(event.button)
@@ -1108,7 +1116,7 @@ static int Handle_joystick_release(SDL_JoyButtonEvent event)
       default:
         break;
     }
-  return Move_cursor_with_constraints();
+  return Move_cursor_with_constraints(0);
 }
 
 static void Handle_joystick_movement(SDL_JoyAxisEvent event)
@@ -1166,7 +1174,7 @@ int Cursor_displace(short delta_x, short delta_y)
     else if (delta_y>0)
       Input_new_mouse_Y = Min(Screen_height-1, y+delta_y);
   }
-  return Move_cursor_with_constraints();
+  return Move_cursor_with_constraints(0);
 }
 
 // This function is the acceleration profile for directional (digital) cursor
@@ -1732,7 +1740,7 @@ int Get_input(int sleep_time)
                 if (Button_inverter)
                   mask ^= 3;
                 Input_new_mouse_K |= mask;
-                user_feedback_required = Move_cursor_with_constraints();
+                user_feedback_required = Move_cursor_with_constraints(0);
               }
               break;
             case 2:
@@ -1759,14 +1767,15 @@ int Get_input(int sleep_time)
             if (Button_inverter)
               mask ^= 3;
             Input_new_mouse_K &= ~mask;
-            user_feedback_required = Move_cursor_with_constraints();
+            user_feedback_required = Move_cursor_with_constraints(0);
           }
           break;
         case MotionNotify:
           //printf("mouse %dx%d\n", event.xmotion.x, event.xmotion.y);
+          /// @todo call Move_cursor_with_constraints(1) when clipping
           Input_new_mouse_X = (event.xmotion.x < 0) ? 0 : event.xmotion.x/Pixel_width;
           Input_new_mouse_Y = (event.xmotion.y < 0) ? 0 : event.xmotion.y/Pixel_height;
-          user_feedback_required = Move_cursor_with_constraints();
+          user_feedback_required = Move_cursor_with_constraints(0);
           break;
         case Expose:
           GFX2_Log(GFX2_DEBUG, "Expose (%d,%d) (%d,%d)\n", event.xexpose.x, event.xexpose.y, event.xexpose.width, event.xexpose.height);

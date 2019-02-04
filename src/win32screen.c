@@ -185,32 +185,47 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
   case WM_NCMOUSEMOVE:  // Mouse move in the non client area of the window
     break;
   case WM_MOUSEMOVE:
-    //Hide_cursor();
-    Input_new_mouse_X = (LOWORD(lParam))/Pixel_width;
-    Input_new_mouse_Y = (HIWORD(lParam))/Pixel_height;
-    //Display_cursor();
-    Move_cursor_with_constraints();
-    user_feedback_required = 1;
+    {
+      int mouse_clip = 0;
+      int x, y;
+      x = GET_X_LPARAM(lParam);
+      y = GET_Y_LPARAM(lParam);
+      if (x < 0)
+      {
+        mouse_clip = 1;
+        Input_new_mouse_X = 0;
+      }
+      else
+        Input_new_mouse_X = x / Pixel_width;
+      if (y < 0)
+      {
+        mouse_clip = 1;
+        Input_new_mouse_Y = 0;
+      }
+      else
+        Input_new_mouse_Y = y / Pixel_height;
+      user_feedback_required = Move_cursor_with_constraints(mouse_clip);
+    }
     return 0;
   case WM_LBUTTONDOWN:
     Input_new_mouse_K |= 1;
-    Move_cursor_with_constraints();
+    Move_cursor_with_constraints(0);
     user_feedback_required = 1;
     return 0;
   case WM_LBUTTONUP:
     Input_new_mouse_K &= ~1;
-    Move_cursor_with_constraints();
+    Move_cursor_with_constraints(0);
     user_feedback_required = 1;
     return 0;
 // WM_LBUTTONDBLCLK
   case WM_RBUTTONDOWN:
     Input_new_mouse_K |= 2;
-    Move_cursor_with_constraints();
+    Move_cursor_with_constraints(0);
     user_feedback_required = 1;
     return 0;
   case WM_RBUTTONUP:
     Input_new_mouse_K &= ~2;
-    Move_cursor_with_constraints();
+    Move_cursor_with_constraints(0);
     user_feedback_required = 1;
     return 0;
 // WM_RBUTTONDBLCLK
