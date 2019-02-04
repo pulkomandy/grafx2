@@ -21,6 +21,7 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 #include <windows.h>
+#include <windowsx.h>
 #include <malloc.h>
 #include <stdio.h>
 #if defined(_MSC_VER) && _MSC_VER < 1900
@@ -208,32 +209,38 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
     }
     return 0;
   case WM_LBUTTONDOWN:
+    SetCapture(hwnd); // capture mouse when the button is pressed
     Input_new_mouse_K |= 1;
     Move_cursor_with_constraints(0);
     user_feedback_required = 1;
     return 0;
   case WM_LBUTTONUP:
+    ReleaseCapture(); // Release mouse when the button is released
     Input_new_mouse_K &= ~1;
     Move_cursor_with_constraints(0);
     user_feedback_required = 1;
     return 0;
 // WM_LBUTTONDBLCLK
   case WM_RBUTTONDOWN:
+    SetCapture(hwnd); // capture mouse when the button is pressed
     Input_new_mouse_K |= 2;
     Move_cursor_with_constraints(0);
     user_feedback_required = 1;
     return 0;
   case WM_RBUTTONUP:
+    ReleaseCapture(); // Release mouse when the button is released
     Input_new_mouse_K &= ~2;
     Move_cursor_with_constraints(0);
     user_feedback_required = 1;
     return 0;
 // WM_RBUTTONDBLCLK
   case WM_MBUTTONDOWN:
-  //case WM_MBUTTONUP:
     Key = KEY_MOUSEMIDDLE|Get_Key_modifiers();
     user_feedback_required = 1;
     return 0;
+  case WM_MBUTTONUP:
+    return 0;
+// WM_MBUTTONDBLCLK
   case WM_MOUSEWHEEL:
     {
       short delta = HIWORD(wParam);

@@ -1299,11 +1299,17 @@ int Get_input(int sleep_time)
               break;
 
           case SDL_MOUSEBUTTONDOWN:
+#ifdef USE_SDL2
+              SDL_CaptureMouse(SDL_TRUE);
+#endif
               Handle_mouse_click(&event.button);
               user_feedback_required = 1;
               break;
 
           case SDL_MOUSEBUTTONUP:
+#ifdef USE_SDL2
+              SDL_CaptureMouse(SDL_FALSE);
+#endif
               Handle_mouse_release(&event.button);
               user_feedback_required = 1;
               break;
