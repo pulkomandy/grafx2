@@ -135,6 +135,7 @@
     <ClInclude Include="..\..\src\realpath.h" />
     <ClInclude Include="..\..\src\recoil.h" />
     <ClInclude Include="..\..\src\saveini.h" />
+    <ClInclude Include="..\..\src\screen.h" />
     <ClInclude Include="..\..\src\SDLMain.h" />
     <ClInclude Include="..\..\src\sdlscreen.h" />
     <ClInclude Include="..\..\src\setup.h" />
