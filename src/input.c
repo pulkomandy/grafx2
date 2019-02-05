@@ -1739,6 +1739,10 @@ int Get_input(int sleep_time)
           }
           break;
         case ButtonPress: // left = 1, middle = 2, right = 3, wheelup = 4, wheeldown = 5
+          XGrabPointer(X11_display, X11_window, True,
+                       PointerMotionMask | ButtonPressMask | ButtonReleaseMask,
+                       GrabModeAsync, GrabModeAsync,
+                       X11_window, None, CurrentTime);
           //printf("Press button = %d state = 0x%08x\n", event.xbutton.button, event.xbutton.state);
           if (event.xkey.state & ShiftMask)
             mod |= MOD_SHIFT;
@@ -1777,6 +1781,7 @@ int Get_input(int sleep_time)
           }
           break;
         case ButtonRelease:
+          XUngrabPointer(X11_display, CurrentTime);
           //printf("Release button = %d\n", event.xbutton.button);
           if(event.xbutton.button == 1 || event.xbutton.button == 3)
           {

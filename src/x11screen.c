@@ -333,5 +333,7 @@ void Define_icon(void)
 
 void Set_mouse_position(void)
 {
-  /// @todo implement screen capture and set position for x11.
+  XWarpPointer(X11_display, None, X11_window,
+               0, 0, 0, 0,
+               Mouse_X * Pixel_width, Mouse_Y * Pixel_height);
 }
