@@ -727,6 +727,7 @@ ifndef NORECOIL
 OBJS += loadrecoil.o recoil.o
 endif
 OBJ = $(addprefix $(OBJDIR)/,$(OBJS))
+DEP = $(patsubst %.o,%.d,$(OBJ))
 
 GENERATEDOCOBJ = $(addprefix $(OBJDIR)/,generatedoc.o hotkeys.o keyboard.o)
 
@@ -787,10 +788,12 @@ DOC_FILESRTF = ../doc/quickstart.rtf
 
 # for silent/verbose building
 ACTUAL_CC := $(CC)
-CC_0 = @echo "$(if $(findstring .o,$@),Compiling $<,Linking $@)" ; $(ACTUAL_CC)
+CC_0 = @echo "$(if $(findstring .o,$@),Compiling $<,$(if $(findstring .d,$@),Building dependencies for $<,Linking $@))" ; $(ACTUAL_CC)
 CC_1 = $(ACTUAL_CC)
 CC = $(CC_$(V))
 
+DEPFLAGS = -MM -MT $(patsubst %.d,%.o,$@) -MT $@
+# -M : with system headers, -MM : without
 
 ifeq ($(PLATFORM),Darwin)
 all : $(MACAPPEXE)
@@ -962,8 +965,11 @@ $(OBJDIR)/%.o : %.m
 	$(if $(wildcard $(OBJDIR)),,$(MKDIR) $(OBJDIR))
 	$(CC) $(COPT) -c $*.m -o $(OBJDIR)/$*.o
 
-depend :
-	$(CC) -MM *.c | sed 's:^[^ ]:$$(OBJDIR)/&:' > Makefile.dep
+depend:	$(DEP)
+
+$(OBJDIR)/%.d :	%.c
+	$(if $(wildcard $(OBJDIR)),,$(MKDIR) $(OBJDIR))
+	$(CC) $(COPT) $(CFLAGS) $(DEPFLAGS) -o $@ $<
 
 # update the gfx2.rc Windows ressource file
 comma := ,
@@ -982,7 +988,7 @@ $(OBJDIR)/haiku.o : haiku.cpp
 	g++ -c haiku.cpp -o $(OBJDIR)/haiku.o $(COPT) -Wno-multichar
 
 clean :
-	$(DELCOMMAND) $(OBJ)
+	$(DELCOMMAND) $(OBJ) $(DEP)
 	$(DELCOMMAND) $(BIN)
 	if [ -d ../3rdparty ] ; then $(DELCOMMAND) recoil.c recoil.h ; fi
 
@@ -1061,4 +1067,6 @@ htmldoc:	$(GENERATEDOCBIN)
 print-%:
 	@echo "$* = $($*)"
 
--include Makefile.dep
+ifneq ($(MAKECMDGOALS),clean)
+-include $(DEP)
+endif
