@@ -1305,6 +1305,8 @@ int Get_input(int sleep_time)
           case SDL_MOUSEBUTTONDOWN:
 #ifdef USE_SDL2
               SDL_CaptureMouse(SDL_TRUE);
+#else
+              SDL_WM_GrabInput(SDL_GRAB_ON);
 #endif
               Handle_mouse_click(&event.button);
               user_feedback_required = 1;
@@ -1313,6 +1315,8 @@ int Get_input(int sleep_time)
           case SDL_MOUSEBUTTONUP:
 #ifdef USE_SDL2
               SDL_CaptureMouse(SDL_FALSE);
+#else
+              SDL_WM_GrabInput(SDL_GRAB_OFF);
 #endif
               Handle_mouse_release(&event.button);
               user_feedback_required = 1;
