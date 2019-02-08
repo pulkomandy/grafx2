@@ -886,7 +886,7 @@ release : $(BIN)
 # .tgz archive with source only files
 SRCARCH = ../src-$(VERSIONTAG).tgz
 
-$(SRCARCH):	$(wildcard *.c) $(wildcard *.cpp) $(wildcard *.h) Makefile Makefile.dep gfx2.ico Grafx2_Prefix.pch $(wildcard *.m) gfx2.rc
+$(SRCARCH):	$(wildcard *.c) $(wildcard *.cpp) $(wildcard *.h) Makefile gfx2.ico Grafx2_Prefix.pch $(wildcard *.m) gfx2.rc
 	cd .. && $(TAR) czf $(SRCARCH:../%=%) $(addprefix src/,$^)
 
 ifeq ($(PLATFORM),Darwin)
@@ -912,7 +912,7 @@ ifeq ($(PLATFORM),Darwin)
 	  $(DOC_FILES:../%=%) $(DOC_FILESRTF:../%=%) $(SRCARCH:../%=%)
 endif
 	$(TAR) czf "../grafx2-$(VERSIONTAG)-src.tgz" $(TARTRANSFORM) \
-	  ../src/*.c ../src/*.cpp ../src/*.h ../src/Makefile ../src/Makefile.dep \
+	  ../src/*.c ../src/*.cpp ../src/*.h ../src/Makefile \
 	  ../src/Grafx2_Prefix.pch ../src/*.m ../src/gfx2.rc ../src/gfx2.ico \
 	  ../src/Grafx2.icns ../src/English.lproj/* ../src/Info.plist \
 	  ../share/grafx2/gfx2def.ini $(SCRIPT_FILES) $(SKIN_FILES) \
