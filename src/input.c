@@ -222,72 +222,111 @@ int Is_shortcut(word key, word function)
   return 0; 
 }
 
-/// Called each time there is a cursor move, either triggered by mouse or keyboard shortcuts
-/// @param mouse_blocked Boolean, Set to true if mouse movement was clipped.
+/// Called each time there is a cursor move, either triggered by mouse
+/// or keyboard shortcuts
+/// @param x new cursor X coordinate
+/// @param y new cursor Y coordinate
 /// @return feedback
-int Move_cursor_with_constraints(int mouse_blocked)
+int Move_cursor_with_constraints(int x, int y)
 {
   int feedback = 0;
-  
+  int mouse_blocked = 0;
+
   // Clip mouse to the editing area. There can be a border when using big 
   // pixels, if the SDL screen dimensions are not factors of the pixel size.
-  if (Input_new_mouse_Y>=Screen_height)
+  if (y >= Screen_height)
   {
-      Input_new_mouse_Y=Screen_height-1;
-      mouse_blocked=1;
+    Input_new_mouse_Y = Screen_height - 1;
+    mouse_blocked = 1;
   }
-  if (Input_new_mouse_X>=Screen_width)
+  else if (y < 0)
   {
-      Input_new_mouse_X=Screen_width-1;
-      mouse_blocked=1;
+    Input_new_mouse_Y = 0;
+    mouse_blocked = 1;
   }
-  //Gestion "avancée" du curseur: interdire la descente du curseur dans le
-  //menu lorsqu'on est en train de travailler dans l'image
+  else
+    Input_new_mouse_Y = y;
+
+  if (x >= Screen_width)
+  {
+    Input_new_mouse_X = Screen_width - 1;
+    mouse_blocked = 1;
+  }
+  else if (x < 0)
+  {
+    Input_new_mouse_X = 0;
+    mouse_blocked = 1;
+  }
+  else
+    Input_new_mouse_X = x;
+
   if (Operation_stack_size != 0)
   {
+    // Forbid to go to the menu area when an operation is
+    // on-going
+    if(Menu_Y <= Input_new_mouse_Y)
+    {
+      // Cursor not in image area anymore
+      mouse_blocked = 1;
+      Input_new_mouse_Y = Menu_Y - 1; // just above the menu
+    }
 
-        //Si le curseur ne se trouve plus dans l'image
-        if(Menu_Y<=Input_new_mouse_Y)
+    if(Main.magnifier_mode)
+    {
+      // Do not cross the unzoomed/zoomed area separator
+      if(!Operation_in_magnifier)
+      {
+        if(Input_new_mouse_X >= Main.separator_position)
         {
-            //On bloque le curseur en fin d'image
-            mouse_blocked=1;
-            Input_new_mouse_Y=Menu_Y-1; //La ligne !!au-dessus!! du menu
+          mouse_blocked = 1;
+          Input_new_mouse_X = Main.separator_position - 1;
         }
-
-        if(Main.magnifier_mode)
+      }
+      else
+      {
+        if(Input_new_mouse_X < Main.X_zoom)
         {
-            if(Operation_in_magnifier==0)
-            {
-                if(Input_new_mouse_X>=Main.separator_position)
-                {
-                    mouse_blocked=1;
-                    Input_new_mouse_X=Main.separator_position-1;
-                }
-            }
-            else
-            {
-                if(Input_new_mouse_X<Main.X_zoom)
-                {
-                    mouse_blocked=1;
-                    Input_new_mouse_X=Main.X_zoom;
-                }
-            }
+          mouse_blocked = 1;
+          Input_new_mouse_X = Main.X_zoom;
         }
+      }
+    }
   }
 
   if ((Input_new_mouse_X != Mouse_X) ||
-    (Input_new_mouse_Y != Mouse_Y) ||
-    (Input_new_mouse_K != Mouse_K))
+    (Input_new_mouse_Y != Mouse_Y))
   {
-    // On every change of mouse state
-    if ((Input_new_mouse_K != Mouse_K))
+    // Hide cursor, because even just a click change needs it
+    if (!Mouse_moved)
     {
-      feedback=1;
-      
-      if (Input_new_mouse_K == 0)
-      {
-        Input_sticky_control = 0;
-      }
+      // Hide cursor (erasing icon and brush on screen
+      // before changing the coordinates.
+      Hide_cursor();
+    }
+    Mouse_moved++;
+    Mouse_X = Input_new_mouse_X;
+    Mouse_Y = Input_new_mouse_Y;
+    
+    if (Mouse_moved > Config.Mouse_merge_movement
+      && !Operation[Current_operation][Mouse_K_unique]
+          [Operation_stack_size].Fast_mouse)
+        feedback=1;
+  }
+  if (mouse_blocked)
+    Set_mouse_position();
+  return feedback;
+}
+
+
+int Handle_mouse_btn_change(void)
+{
+  int feedback = 0;
+
+  if (Input_new_mouse_K != Mouse_K)
+  {
+    if (Input_new_mouse_K == 0)
+    {
+      Input_sticky_control = 0;
     }
     // Hide cursor, because even just a click change needs it
     if (!Mouse_moved)
@@ -297,20 +336,10 @@ int Move_cursor_with_constraints(int mouse_blocked)
       Hide_cursor();
     }
     Mouse_moved++;
-    if (Input_new_mouse_X != Mouse_X || Input_new_mouse_Y != Mouse_Y)
-    {
-      Mouse_X=Input_new_mouse_X;
-      Mouse_Y=Input_new_mouse_Y;
-    }
-    Mouse_K=Input_new_mouse_K;
-    
-    if (Mouse_moved > Config.Mouse_merge_movement
-      && !Operation[Current_operation][Mouse_K_unique]
-          [Operation_stack_size].Fast_mouse)
-        feedback=1;
+    Mouse_K = Input_new_mouse_K;
+
+    feedback = 1;
   }
-  if (mouse_blocked)
-    Set_mouse_position();
   return feedback;
 }
 
@@ -614,87 +643,73 @@ static void Handle_window_exit(SDL_QuitEvent * event)
 
 static int Handle_mouse_move(SDL_MouseMotionEvent * event)
 {
-  int mouse_blocked = 0;
   //GFX2_Log(GFX2_DEBUG, "mouse motion (%+d,%+d)\n", event->xrel, event->yrel);
-  if (event->x < 0)
-  {
-    mouse_blocked = 1;
-    Input_new_mouse_X = 0;
-  }
-  else
-    Input_new_mouse_X = event->x / Pixel_width;
-  if (event->y < 0)
-  {
-    mouse_blocked = 1;
-    Input_new_mouse_Y = 0;
-  }
-  else
-    Input_new_mouse_Y = event->y / Pixel_height;
 
-  return Move_cursor_with_constraints(mouse_blocked);
+  return Move_cursor_with_constraints(event->x / Pixel_width, event->y / Pixel_height);
 }
 
 static int Handle_mouse_click(SDL_MouseButtonEvent * event)
 {
-    switch(event->button)
-    {
-        case SDL_BUTTON_LEFT:
-            if (Button_inverter)
-              Input_new_mouse_K |= 2;
-            else
-              Input_new_mouse_K |= 1;
-            break;
+  switch(event->button)
+  {
+    case SDL_BUTTON_LEFT:
+      if (Button_inverter)
+        Input_new_mouse_K |= 2;
+      else
+        Input_new_mouse_K |= 1;
+      break;
 
-        case SDL_BUTTON_RIGHT:
-            if (Button_inverter)
-              Input_new_mouse_K |= 1;
-            else
-              Input_new_mouse_K |= 2;
-            break;
+    case SDL_BUTTON_RIGHT:
+      if (Button_inverter)
+        Input_new_mouse_K |= 1;
+      else
+        Input_new_mouse_K |= 2;
+      break;
 
-        case SDL_BUTTON_MIDDLE:
-            Key = KEY_MOUSEMIDDLE|Get_Key_modifiers();
-            // TODO: repeat system maybe?
-            return 0;
+    case SDL_BUTTON_MIDDLE:
+      Key = KEY_MOUSEMIDDLE|Get_Key_modifiers();
+      // TODO: repeat system maybe?
+      return 0;
 
-        // In SDL 2.0 the mousewheel is no longer a button.
-        // Look for SDL_MOUSEWHEEL events.
+      // In SDL 2.0 the mousewheel is no longer a button.
+      // Look for SDL_MOUSEWHEEL events.
 #if defined(USE_SDL)
-        case SDL_BUTTON_WHEELUP:
-            Key = KEY_MOUSEWHEELUP|Get_Key_modifiers();
-            return 0;
+    case SDL_BUTTON_WHEELUP:
+      Key = KEY_MOUSEWHEELUP|Get_Key_modifiers();
+      return 0;
 
-        case SDL_BUTTON_WHEELDOWN:
-            Key = KEY_MOUSEWHEELDOWN|Get_Key_modifiers();
-            return 0;
+    case SDL_BUTTON_WHEELDOWN:
+      Key = KEY_MOUSEWHEELDOWN|Get_Key_modifiers();
+      return 0;
 #endif
 
-        default:
-        return 0;
-    }
-    return Move_cursor_with_constraints(0);
+    default:
+      GFX2_Log(GFX2_DEBUG, "Unknown mouse button %d\n", event->button);
+      return 0;
+  }
+  return Handle_mouse_btn_change();
 }
 
 static int Handle_mouse_release(SDL_MouseButtonEvent * event)
 {
-    switch(event->button)
-    {
-        case SDL_BUTTON_LEFT:
-            if (Button_inverter)
-              Input_new_mouse_K &= ~2;
-            else
-              Input_new_mouse_K &= ~1;
-            break;
+  switch(event->button)
+  {
+  case SDL_BUTTON_LEFT:
+    if (Button_inverter)
+      Input_new_mouse_K &= ~2;
+    else
+      Input_new_mouse_K &= ~1;
+    break;
 
-        case SDL_BUTTON_RIGHT:
-            if (Button_inverter)
-              Input_new_mouse_K &= ~1;
-            else
-              Input_new_mouse_K &= ~2;
-            break;
-    }
-    
-    return Move_cursor_with_constraints(0);
+  case SDL_BUTTON_RIGHT:
+    if (Button_inverter)
+      Input_new_mouse_K &= ~1;
+    else
+      Input_new_mouse_K &= ~2;
+    break;
+  }
+
+  return Handle_mouse_btn_change();
 }
 #endif
 
@@ -729,13 +744,13 @@ int Handle_special_key_press(void)
     {
         Input_new_mouse_K=1;
         Directional_click=1;
-        return Move_cursor_with_constraints(0);
+        return Handle_mouse_btn_change();
     }
     else if(Is_shortcut(Key,SPECIAL_CLICK_RIGHT) && Keyboard_click_allowed > 0)
     {
         Input_new_mouse_K=2;
         Directional_click=2;
-        return Move_cursor_with_constraints(0);
+        return Handle_mouse_btn_change();
     }
     else if(Is_shortcut(Key,SPECIAL_HOLD_PAN))
     {
@@ -795,7 +810,7 @@ static int Handle_key_press(SDL_KeyboardEvent * event)
       if (Input_new_mouse_K)
       {
         Input_new_mouse_K ^= 3; // Flip bits 0 and 1
-        return Move_cursor_with_constraints(0);
+        return Handle_mouse_btn_change();
       }
     }
     #ifdef RSUPER_EMULATES_META_MOD
@@ -826,7 +841,7 @@ int Release_control(int key_code, int modifier)
       if (Input_new_mouse_K)
       {      
         Input_new_mouse_K ^= 3; // Flip bits 0 and 1
-        return Move_cursor_with_constraints(0);
+        return Handle_mouse_btn_change();
       }
     }
 
@@ -857,7 +872,7 @@ int Release_control(int key_code, int modifier)
         {
             Directional_click &= ~1;
             Input_new_mouse_K &= ~1;
-            return Move_cursor_with_constraints(0) || need_feedback;
+            return Handle_mouse_btn_change() || need_feedback;
         }
     }
     if((key_code && key_code == (Config_Key[SPECIAL_CLICK_RIGHT][0]&0x0FFF)) || (Config_Key[SPECIAL_CLICK_RIGHT][0]&modifier) ||
@@ -867,7 +882,7 @@ int Release_control(int key_code, int modifier)
         {
             Directional_click &= ~2;
             Input_new_mouse_K &= ~2;
-            return Move_cursor_with_constraints(0) || need_feedback;
+            return Handle_mouse_btn_change() || need_feedback;
         }
     }
     if((key_code && key_code == (Config_Key[SPECIAL_HOLD_PAN][0]&0x0FFF)) || (Config_Key[SPECIAL_HOLD_PAN][0]&modifier) ||
@@ -952,7 +967,7 @@ static int Handle_joystick_press(SDL_JoyButtonEvent event)
         if (Input_new_mouse_K)
         {
           Input_new_mouse_K ^= 3; // Flip bits 0 and 1
-          return Move_cursor_with_constraints(0);
+          return Handle_mouse_btn_change();
         }
       }
       return 0;
@@ -970,7 +985,7 @@ static int Handle_joystick_press(SDL_JoyButtonEvent event)
         if (Input_new_mouse_K)
         {
           Input_new_mouse_K ^= 3; // Flip bits 0 and 1
-          return Move_cursor_with_constraints(0);
+          return Handle_mouse_btn_change();
         }
       }
       return 0;
@@ -978,12 +993,12 @@ static int Handle_joystick_press(SDL_JoyButtonEvent event)
     if (event.button == Joybutton_left_click)
     {
       Input_new_mouse_K = Button_inverter ? 2 : 1;
-      return Move_cursor_with_constraints(0);
+      return Handle_mouse_btn_change();
     }
     if (event.button == Joybutton_right_click)
     {
       Input_new_mouse_K = Button_inverter ? 1 : 2;
-      return Move_cursor_with_constraints(0);
+      return Handle_mouse_btn_change();
     }
     switch(event.button)
     {
@@ -1035,7 +1050,7 @@ static int Handle_joystick_press(SDL_JoyButtonEvent event)
     Key = (KEY_JOYBUTTON+event.button)|Get_Key_modifiers();
     // TODO: systeme de répétition
     
-    return Move_cursor_with_constraints(0);
+    return 1;
 }
 
 static int Handle_joystick_release(SDL_JoyButtonEvent event)
@@ -1062,12 +1077,12 @@ static int Handle_joystick_release(SDL_JoyButtonEvent event)
     if (event.button == Joybutton_left_click)
     {
       Input_new_mouse_K &= ~1;
-      return Move_cursor_with_constraints(0);
+      return Handle_mouse_btn_change();
     }
     if (event.button == Joybutton_right_click)
     {
       Input_new_mouse_K &= ~2;
-      return Move_cursor_with_constraints(0);
+      return Handle_mouse_btn_change();
     }
   
     switch(event.button)
@@ -1116,7 +1131,7 @@ static int Handle_joystick_release(SDL_JoyButtonEvent event)
       default:
         break;
     }
-  return Move_cursor_with_constraints(0);
+  return 1;
 }
 
 static void Handle_joystick_movement(SDL_JoyAxisEvent event)
@@ -1147,34 +1162,34 @@ static void Handle_joystick_movement(SDL_JoyAxisEvent event)
 // Attempts to move the mouse cursor by the given deltas (may be more than 1 pixel at a time)
 int Cursor_displace(short delta_x, short delta_y)
 {
-  short x=Input_new_mouse_X;
-  short y=Input_new_mouse_Y;
+  int x = Input_new_mouse_X;
+  int y = Input_new_mouse_Y;
   
   if(Main.magnifier_mode && Input_new_mouse_Y < Menu_Y && Input_new_mouse_X > Main.separator_position)
   {
     // Cursor in zoomed area
     
     if (delta_x<0)
-      Input_new_mouse_X = Max(Main.separator_position, x-Main.magnifier_factor);
+      x = Max(Main.separator_position, x-Main.magnifier_factor);
     else if (delta_x>0)
-      Input_new_mouse_X = Min(Screen_width-1, x+Main.magnifier_factor);
+      x = Min(Screen_width-1, x+Main.magnifier_factor);
     if (delta_y<0)
-      Input_new_mouse_Y = Max(0, y-Main.magnifier_factor);
+      y = Max(0, y-Main.magnifier_factor);
     else if (delta_y>0)
-      Input_new_mouse_Y = Min(Screen_height-1, y+Main.magnifier_factor);
+      y = Min(Screen_height-1, y+Main.magnifier_factor);
   }
   else
   {
     if (delta_x<0)
-      Input_new_mouse_X = Max(0, x+delta_x);
+      x = Max(0, x+delta_x);
     else if (delta_x>0)
-      Input_new_mouse_X = Min(Screen_width-1, x+delta_x);
+      x = Min(Screen_width-1, x+delta_x);
     if (delta_y<0)
-      Input_new_mouse_Y = Max(0, y+delta_y);
+      y = Max(0, y+delta_y);
     else if (delta_y>0)
-      Input_new_mouse_Y = Min(Screen_height-1, y+delta_y);
+      y = Min(Screen_height-1, y+delta_y);
   }
-  return Move_cursor_with_constraints(0);
+  return Move_cursor_with_constraints(x, y);
 }
 
 // This function is the acceleration profile for directional (digital) cursor
@@ -1767,7 +1782,7 @@ int Get_input(int sleep_time)
                 if (Button_inverter)
                   mask ^= 3;
                 Input_new_mouse_K |= mask;
-                user_feedback_required = Move_cursor_with_constraints(0);
+                user_feedback_required = Handle_mouse_btn_change();
               }
               break;
             case 2:
@@ -1795,15 +1810,12 @@ int Get_input(int sleep_time)
             if (Button_inverter)
               mask ^= 3;
             Input_new_mouse_K &= ~mask;
-            user_feedback_required = Move_cursor_with_constraints(0);
+            user_feedback_required = Handle_mouse_btn_change();
           }
           break;
         case MotionNotify:
           //printf("mouse %dx%d\n", event.xmotion.x, event.xmotion.y);
-          /// @todo call Move_cursor_with_constraints(1) when clipping
-          Input_new_mouse_X = (event.xmotion.x < 0) ? 0 : event.xmotion.x/Pixel_width;
-          Input_new_mouse_Y = (event.xmotion.y < 0) ? 0 : event.xmotion.y/Pixel_height;
-          user_feedback_required = Move_cursor_with_constraints(0);
+          user_feedback_required = Move_cursor_with_constraints(event.xmotion.x / Pixel_width, event.xmotion.y / Pixel_height);
           break;
         case Expose:
           GFX2_Log(GFX2_DEBUG, "Expose (%d,%d) (%d,%d)\n", event.xexpose.x, event.xexpose.y, event.xexpose.width, event.xexpose.height);

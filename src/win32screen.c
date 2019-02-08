@@ -187,50 +187,35 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
     break;
   case WM_MOUSEMOVE:
     {
-      int mouse_clip = 0;
       int x, y;
-      x = GET_X_LPARAM(lParam);
-      y = GET_Y_LPARAM(lParam);
-      if (x < 0)
-      {
-        mouse_clip = 1;
-        Input_new_mouse_X = 0;
-      }
-      else
-        Input_new_mouse_X = x / Pixel_width;
-      if (y < 0)
-      {
-        mouse_clip = 1;
-        Input_new_mouse_Y = 0;
-      }
-      else
-        Input_new_mouse_Y = y / Pixel_height;
-      user_feedback_required = Move_cursor_with_constraints(mouse_clip);
+      x = GET_X_LPARAM(lParam) / Pixel_width;
+      y = GET_Y_LPARAM(lParam) / Pixel_height;
+      user_feedback_required = Move_cursor_with_constraints(x, y);
     }
     return 0;
   case WM_LBUTTONDOWN:
     SetCapture(hwnd); // capture mouse when the button is pressed
     Input_new_mouse_K |= 1;
-    Move_cursor_with_constraints(0);
+    Handle_mouse_btn_change();
     user_feedback_required = 1;
     return 0;
   case WM_LBUTTONUP:
     ReleaseCapture(); // Release mouse when the button is released
     Input_new_mouse_K &= ~1;
-    Move_cursor_with_constraints(0);
+    Handle_mouse_btn_change();
     user_feedback_required = 1;
     return 0;
 // WM_LBUTTONDBLCLK
   case WM_RBUTTONDOWN:
     SetCapture(hwnd); // capture mouse when the button is pressed
     Input_new_mouse_K |= 2;
-    Move_cursor_with_constraints(0);
+    Handle_mouse_btn_change();
     user_feedback_required = 1;
     return 0;
   case WM_RBUTTONUP:
     ReleaseCapture(); // Release mouse when the button is released
     Input_new_mouse_K &= ~2;
-    Move_cursor_with_constraints(0);
+    Handle_mouse_btn_change();
     user_feedback_required = 1;
     return 0;
 // WM_RBUTTONDBLCLK
