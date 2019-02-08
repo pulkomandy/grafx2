@@ -22,6 +22,9 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 
+# make V=1   to enable verbose building
+V ?= 0
+
 # Overridable defaults
   PREFIX ?= /usr/local
   exec_prefix = $(PREFIX)
@@ -782,6 +785,12 @@ FONT_FILES = $(addprefix ../share/grafx2/fonts/,$(FONTS))
 DOC_FILES = $(wildcard ../doc/*.txt)
 DOC_FILESRTF = ../doc/quickstart.rtf
 
+# for silent/verbose building
+ACTUAL_CC := $(CC)
+CC_0 = @echo "$(if $(findstring .o,$@),Compiling $<,Linking $@)" ; $(ACTUAL_CC)
+CC_1 = $(ACTUAL_CC)
+CC = $(CC_$(V))
+
 
 ifeq ($(PLATFORM),Darwin)
 all : $(MACAPPEXE)
@@ -1050,6 +1059,6 @@ htmldoc:	$(GENERATEDOCBIN)
 	$(GENERATEDOCBIN) ../doc/html
 
 print-%:
-	@echo $* = $($*)
+	@echo "$* = $($*)"
 
 -include Makefile.dep
