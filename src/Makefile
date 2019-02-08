@@ -792,7 +792,7 @@ CC_0 = @echo "$(if $(findstring .o,$@),Compiling $<,$(if $(findstring .d,$@),Bui
 CC_1 = $(ACTUAL_CC)
 CC = $(CC_$(V))
 
-DEPFLAGS = -MM -MT $(patsubst %.d,%.o,$@) -MT $@
+DEPFLAGS = -MM -MG -MT $(patsubst %.d,%.o,$@) -MT $@
 # -M : with system headers, -MM : without
 
 ifeq ($(PLATFORM),Darwin)
