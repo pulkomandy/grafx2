@@ -255,6 +255,11 @@ void Update_rect(short x, short y, unsigned short width, unsigned short height)
 {
   int line, i;
   if (screen == NULL || X11_image == NULL) return;
+  if (x == 0 && y == 0 && width == 0 && height == 0)
+  {
+    width = screen->w;
+    height = screen->h;
+  }
   x *= Pixel_width;
   width *= Pixel_width;
   y *= Pixel_height;
