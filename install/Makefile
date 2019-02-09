@@ -12,10 +12,13 @@ VERSION := $(subst wip.,wip,$(LABEL).$(GIT_REVISION))
 
 SOURCES = ../src-$(VERSION).tgz
 INSTALLER = grafx2-$(API)-$(VERSION).win32.exe
+NSISCRIPT = WinInstaller.nsi
+
+.PHONY:	all updateversion
 
 all:	$(INSTALLER)
 
-$(INSTALLER):	WinInstaller.nsi $(SOURCES) $(VERSIONTAG)
+$(INSTALLER):	$(NSISCRIPT) $(SOURCES) $(VERSIONTAG)
 ifdef WIN32CROSS
 	for f in ../doc/*.txt; do unix2dos $$f ; done
 endif
@@ -26,3 +29,7 @@ endif
 
 $(SOURCES): $(wildcard ../src/*.c) $(wildcard ../src/*.h)
 	cd ../src && WIN32CROSS=1 $(MAKE) $(SOURCES)
+
+updateversion:
+	$(SED) -e 's/VERSION .*/VERSION $(VERSION)/' $(NSISCRIPT) > $(NSISCRIPT).tmp
+	if ! diff -q -i $(NSISCRIPT) $(NSISCRIPT).tmp ; then mv $(NSISCRIPT).tmp $(NSISCRIPT) ; else rm $(NSISCRIPT).tmp ; fi

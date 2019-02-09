@@ -1,7 +1,7 @@
 ;NSIS Modern User Interface
 ;Based on the Example Script written by Joost Verburg
 
-!define VERSION 2.6.2472
+!define VERSION 2.7wip2567
 !define API sdl
 
 !define FREETYPEDLL libfreetype-6.dll
