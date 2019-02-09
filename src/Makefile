@@ -807,6 +807,13 @@ CC_0 = @echo "$(if $(findstring .o,$@),Compiling $<,$(if $(findstring .d,$@),Bui
 CC_1 = $(ACTUAL_CC)
 CC = $(CC_$(V))
 
+ifeq ($(V), 1)
+CP += -v
+AT =
+else
+AT = @
+endif
+
 DEPFLAGS = -MM -MG -MT $(patsubst %.d,%.o,$@) -MT $@
 # -M : with system headers, -MM : without
 
@@ -902,7 +909,7 @@ release : $(BIN)
 SRCARCH = ../src-$(VERSIONTAG).tgz
 
 $(SRCARCH):	$(wildcard *.c) $(wildcard *.cpp) $(wildcard *.h) Makefile gfx2.ico Grafx2_Prefix.pch $(wildcard *.m) gfx2.rc
-	cd .. && $(TAR) czf $(SRCARCH:../%=%) $(addprefix src/,$^)
+	$(AT)cd .. && $(TAR) czf $(SRCARCH:../%=%) $(addprefix src/,$^)
 
 ifeq ($(PLATFORM),Darwin)
 ziprelease: $(MACAPPEXE)
@@ -910,6 +917,44 @@ endif
 
 # Create a zip archive ready for upload to the website, including binaries and sourcecode
 ziprelease: release $(SRCARCH)
+ifdef ATARICROSS
+	$(eval TMP := $(shell mktemp -d))
+	$(AT)$(MKDIR) $(TMP)/GRAFX2
+	$(AT)$(CP) $(BIN) ../share/grafx2/gfx2def.ini $(TMP)/GRAFX2
+	$(AT)$(CP) $(SRCARCH) $(TMP)/GRAFX2/SRC$(firstword $(subst -, ,$(GIT_REVISION))).TGZ
+	$(AT)$(MKDIR) $(TMP)/GRAFX2/DOC
+	@for f in $(DOC_FILES) ; do \
+	  n=$$(basename $$f .txt | sed -e 's/COMPILING/COMPILE/' -e 's/README-//' -e 's/SDL_image/SDL_img/' | tr "a-z." "A-Z_") ; \
+	  $(CP) "$$f" "$(TMP)/GRAFX2/DOC/$$n.TXT" ; \
+	done
+	$(AT)$(MKDIR) $(TMP)/GRAFX2/FONTS
+	@for f in $(FONT_FILES) ; do \
+	  n=$$(basename $$f | sed -e 's/PF_\([a-zA-Z]\)[a-zA-Z]*_/PF\1/' | tr "a-z" "A-Z") ; \
+	  $(CP) "$$f" "$(TMP)/GRAFX2/FONTS/$$n" ; \
+	done
+	$(AT)$(MKDIR) $(TMP)/GRAFX2/SKINS
+	@for f in $(SKIN_FILES) ; do \
+	  n=$$(basename $$f | sed -e 's/^\([a-z]\).*_/\1/' | tr "a-z" "A-Z") ; \
+	  $(CP) "$$f" "$(TMP)/GRAFX2/SKINS/$$n" ; \
+	done
+	$(AT)$(MKDIR) $(TMP)/GRAFX2/SCRIPTS
+	@for f in $(SCRIPT_FILES) ; do \
+	  n="$$(basename $$f .lua | sed -e 's/ostro_/ostro/' -e 's/^\(.\{8\}\).*/\1/' | tr 'a-z' 'A-Z').LUA" ; \
+	  d=$$(dirname $$f | sed -e 's#^../share/grafx2/scripts##' | tr "a-z" "A-Z") ; \
+	  $(MKDIR) "$(TMP)/GRAFX2/SCRIPTS$$d" ; \
+	  if [ -f "$(TMP)/GRAFX2/SCRIPTS$$d/$$n" ] ; then \
+	    n=$$(echo $$n | sed -e 's/^\(.\{7\}\)./\1_/') ; \
+	  fi ; \
+	  $(CP) "$$f" "$(TMP)/GRAFX2/SCRIPTS$$d/$$n" ; \
+	done
+	$(AT)cd $(TMP) && \
+	  $(ZIP) $(ZIPOPT) -k "$(CURDIR)/../grafx2-$(API)-$(VERSIONTAG)$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
+	    GRAFX2/*.* GRAFX2/FONTS/*.* GRAFX2/SKINS/*.*
+	$(AT)cd $(TMP) && \
+	  $(ZIP) $(ZIPOPT) -k --to-crlf -r "$(CURDIR)/../grafx2-$(API)-$(VERSIONTAG)$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
+	    GRAFX2/DOC/ GRAFX2/SCRIPTS/
+	$(AT)$(RM) -r $(TMP)
+else
 	cd .. && $(ZIP) $(ZIPOPT) "grafx2-$(API)-$(VERSIONTAG)$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
 	  $(BIN:../%=%) share/grafx2/gfx2def.ini $(SCRIPT_FILES:../%=%) $(SKIN_FILES:../%=%) \
 	  share/grafx2/gfx2.gif share/icons/grafx2.svg \
@@ -920,20 +965,21 @@ ifdef WIN32CROSS
 else
 	cd .. && $(ZIP) $(ZIPOPT) "grafx2-$(API)-$(VERSIONTAG)$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
 	  $(DOC_FILES:../%=%)
-endif
 ifeq ($(PLATFORM),Darwin)
 	$(ZIP) $(ZIPOPT) -r ../$(APPZIPNAME) Grafx2.app
 	cd .. && $(ZIP) $(ZIPOPT) $(APPZIPNAME) \
 	  $(DOC_FILES:../%=%) $(DOC_FILESRTF:../%=%) $(SRCARCH:../%=%)
 endif
-	$(TAR) czf "../grafx2-$(VERSIONTAG)-src.tgz" $(TARTRANSFORM) \
+endif
+endif
+	$(AT)$(TAR) czf "../grafx2-$(VERSIONTAG)-src.tgz" $(TARTRANSFORM) \
 	  ../src/*.c ../src/*.cpp ../src/*.h ../src/Makefile \
 	  ../src/Grafx2_Prefix.pch ../src/*.m ../src/gfx2.rc ../src/gfx2.ico \
 	  ../src/Grafx2.icns ../src/English.lproj/* ../src/Info.plist \
 	  ../share/grafx2/gfx2def.ini $(SCRIPT_FILES) $(SKIN_FILES) \
 	  ../share/grafx2/gfx2.gif ../share/grafx2/gfx2.png ../share/icons/grafx2.svg \
 	  $(DOC_FILES) $(wildcard ../misc/*/*) $(FONT_FILES)
-	echo "$(VERSIONTAG)" > ../VERSION
+	$(AT)echo "$(VERSIONTAG)" > ../VERSION
 
 $(BIN) : $(OBJ)
 	@test -d ../bin || $(MKDIR) ../bin
