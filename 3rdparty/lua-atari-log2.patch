@@ -1,0 +1,11 @@
+--- lua-5.3.5/src/lmathlib.c.orig	2019-02-09 01:48:42.693042000 +0100
++++ lua-5.3.5/src/lmathlib.c	2019-02-09 01:49:09.775053000 +0100
+@@ -183,7 +183,7 @@ static int math_log (lua_State *L) {
+     res = l_mathop(log)(x);
+   else {
+     lua_Number base = luaL_checknumber(L, 2);
+-#if !defined(LUA_USE_C89)
++#if !defined(LUA_USE_C89) && !defined(__atarist__) && !defined(__MINT__)
+     if (base == l_mathop(2.0))
+       res = l_mathop(log2)(x); else
+ #endif

@@ -26,7 +26,8 @@ SDLARCH = $(SDL).tar.gz
 SDLURL = https://www.libsdl.org/release/$(SDLARCH)
 SDLSHA256 = d6d316a793e5e348155f0dd93b979798933fb98aa1edebcc108829d6474aad00
 SDLPATCHES = SDL-1.2.15-patch-src_video_x11_SDL_x11sym.h \
-             SDL-1.2.15-quartzvideo.patch
+             SDL-1.2.15-quartzvideo.patch \
+             SDL-1.2.15-atari-timer.patch
 SDLDEVEL = SDL-devel-1.2.15-mingw32.tar.gz
 SDLDEVELURL = https://www.libsdl.org/release/$(SDLDEVEL)
 SDLDEVELPATCH = SDL-1.2.15.patch
@@ -101,6 +102,7 @@ LUAARCH=$(LUA).tar.gz
 LUAURL=https://www.lua.org/ftp/$(LUAARCH)
 LUAURLALT=https://www.tecgraf.puc-rio.br/lua/mirror/ftp/$(LUAARCH)
 LUASHA256=0c2eed3f960446e1a3e4b9a1ca2f3ff893b6ce41942cf54d5dd59ab4b3b058ac
+LUAPATCHES = lua-atari-log2.patch
 # https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-0.6.1.tar.gz
 RECOILVER=4.3.1
 RECOIL=recoil-$(RECOILVER)
@@ -154,6 +156,20 @@ RANLIB = $(CROSS_RANLIB)
 STRIP = $(CROSS_STRIP)
 CFLAGS = $(CROSS_CFLAGS)
 LDFLAGS = $(CROSS_LDFLAGS)
+endif
+
+ifdef ATARICROSS
+ATARI = 1
+ARCH ?= m68k
+MCPU ?= -m68020-60
+CROSS_CC ?= $(ARCH)-atari-mint-gcc
+CROSS_AR ?= $(ARCH)-atari-mint-ar
+CROSS_RANLIB ?= $(ARCH)-atari-mint-ranlib
+CROSS_STRIP ?= $(ARCH)-atari-mint-strip
+CC = $(CROSS_CC)
+AR = $(CROSS_AR)
+RANLIB = $(CROSS_RANLIB)
+STRIP = $(CROSS_STRIP)
 endif
 
 HOST = $(shell $(CC) -dumpmachine)
@@ -211,6 +227,10 @@ ifdef WIN32
 	  done
 	echo "The Windows distribution of Grafx2 is linked with Lua v$(LUAVER)" > ../doc/README-lua.txt
 else
+ifdef ATARI
+	cd $(LUA) && $(MAKE) PLAT=generic CC=$(CC) RANLIB=$(RANLIB) AR="$(AR) rcs"
+	cd $(LUA) && $(MAKE) install PLAT=generic INSTALL_TOP=$(PREFIX)
+else
 ifeq ($(PLATFORM), FreeBSD)
 	cd $(LUA) && $(MAKE) freebsd install INSTALL_TOP=$(PREFIX)
 else
@@ -221,6 +241,7 @@ ifeq ($(PLATFORM), Linux)
 	cd $(LUA) && $(MAKE) linux install INSTALL_TOP=$(PREFIX)
 else
 	cd $(LUA) && $(MAKE) posix install INSTALL_TOP=$(PREFIX)
+endif
 endif
 endif
 endif
@@ -320,6 +341,9 @@ $(PREFIX)/lib/libSDLmain.a:	archives/$(SDLDEVEL)
 	tail --lines +3 $(SDL)/README-SDL.txt >> ../doc/README-SDL.txt
 else
 SDLDISABLE = --disable-joystick --disable-audio
+ifdef ATARI
+SDLDISABLE += --disable-video-opengl --disable-threads
+endif
 ifeq ($(PLATFORM), Darwin)
 SDLDISABLE += --without-x
 # the following trick was stolen from macports
@@ -333,6 +357,9 @@ $(PREFIX)/lib/libSDLmain.a:	$(SDL)/.ok
 	  $(SDLDISABLE)
 	cd $(SDL) && $(MAKE)
 	cd $(SDL) && $(MAKE) install
+ifdef ATARI
+	$(RM) $(PREFIX)/include/SDL/SDL_opengl.h
+endif
 	$(CP) $(SDL)/README-SDL.txt ../doc/README-SDL.txt
 endif
 
@@ -374,7 +401,11 @@ $(PREFIX)/lib/libSDL_ttf.a:	$(PREFIX)/lib/libSDLmain.a
 $(PREFIX)/lib/libSDL_ttf.a:	$(SDLTTF)/.ok
 	cd $(SDLTTF) && PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig \
 	  CC=$(CC) CPPFLAGS=-I$(PREFIX)/include LDFLAGS="-L$(PREFIX)/lib $(LDFLAGS) $(ADDLDFLAGS)" \
-	  ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --with-freetype-prefix=$(PREFIX) --host=$(HOST)
+	  ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --with-freetype-prefix=$(PREFIX) \
+	  --host=$(HOST)
+ifdef ATARI
+	sed -i.bak 's/-O2/-O0/' $(SDLTTF)/Makefile
+endif
 	cd $(SDLTTF) && $(MAKE)
 	cd $(SDLTTF) && $(MAKE) install
 ifdef WIN32
@@ -479,7 +510,7 @@ else
 	# configure [--const] [--zprefix] [--prefix=PREFIX]  [--eprefix=EXPREFIX]
 	#  [--static] [--64] [--libdir=LIBDIR] [--sharedlibdir=LIBDIR]
 	#  [--includedir=INCLUDEDIR] [--archs="-arch i386 -arch x86_64"]
-	cd $(ZLIB) && ./configure --prefix=$(PREFIX) && $(MAKE) test
+	cd $(ZLIB) && CC=$(CC) AR=$(AR) RANLIB=$(RANLIB) ./configure --prefix=$(PREFIX) && $(MAKE) test
 	cd $(ZLIB) && $(MAKE) install
 endif
 	$(CP) $(ZLIB)/README ../doc/README-zlib1.txt
