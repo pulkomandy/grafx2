@@ -22,6 +22,11 @@ PKGCONFIG = $(PKGCONFIG_PATH) $(shell which i686-w64-mingw32-pkg-config || which
 SDLCONFIG = $(shell which ../../3rdparty/usr/bin/$(SDLCONFIGNAME) || which /usr/local/cross-tools/i386-mingw32/bin/$(SDLCONFIGNAME))
 BIN := $(BIN).exe
 else
+ifdef ATARICROSS
+ARCH ?= m68k
+CC = $(shell which $(ARCH)-atari-mint-gcc)
+BIN := $(BIN).ttp
+endif
 PKGCONFIG = $(PKGCONFIG_PATH) pkg-config
 SDLCONFIG = $(shell which ../../3rdparty/usr/bin/$(SDLCONFIGNAME) || which $(SDLCONFIGNAME))
 endif
@@ -38,6 +43,9 @@ LDLIBS += -lSDL_image
 endif
 else
 LDLIBS += $(shell $(PKGCONFIG) $(SDLIMAGE) --libs-only-l)
+ifdef ATARICROSS
+LDLIBS += -ltiff -ljpeg -lpng -lz -lm
+endif
 
 LDFLAGS = $(shell $(PKGCONFIG) $(SDLIMAGE) --libs-only-L)
 endif
