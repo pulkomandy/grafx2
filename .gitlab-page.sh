@@ -40,7 +40,7 @@ echo "<a href=\"${CI_PROJECT_URL}/-/jobs/${WIN32_JOB_ID}/artifacts/raw/install/g
 echo "<li>Windows portable (SDL2 API) :" >> ${OUTFILE}
 echo "<a href=\"${CI_PROJECT_URL}/-/jobs/${WIN32_JOB_ID}/artifacts/raw/grafx2-sdl2-${VERSION}-win32.zip\">grafx2-sdl2-${VERSION}-win32.zip</a></li>" >> ${OUTFILE}
 echo "<li>Atari (SDL API) :" >> ${OUTFILE}
-echo "<a href=\"${CI_PROJECT_URL}/-/jobs/${ATARI_JOB_ID}/artifacts/raw/grafx2-sdl-${VERSION}-atari-mint.zip\">grafx2-sdl-${VERSION}-atari-mint.zip</a></li>" >> ${OUTFILE}
+echo "<a href=\"${CI_PROJECT_URL}/-/jobs/${ATARI_JOB_ID}/artifacts/raw/grafx2-sdl-${VERSION}-m68k-atari-mint.zip\">grafx2-sdl-${VERSION}-m68k-atari-mint.zip</a></li>" >> ${OUTFILE}
 echo "</ul>" >> ${OUTFILE}
 echo "<ul>" >> ${OUTFILE}
 echo "<li><a href=\"http://grafx2.tk/\">Home page</a></li>" >> ${OUTFILE}
