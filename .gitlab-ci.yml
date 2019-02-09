@@ -57,3 +57,18 @@ job_win32:
             - "*.zip"
             - "install/grafx2*.exe"
             - "WIN32_JOB_ID"
+
+job_atari:
+    stage: build
+    before_script:
+        - apt-get update -qq && apt-get install -y -qq zip dos2unix
+        - "sh ./.install-cross-mint.sh"
+    script:
+        - "ATARICROSS=1 make 3rdparty -j2"
+        - "ATARICROSS=1 make -j2"
+        - "ATARICROSS=1 make ziprelease"
+        - "echo $CI_JOB_ID > ATARI_JOB_ID"
+    artifacts:
+        paths:
+            - "*.zip"
+            - "ATARI_JOB_ID"
