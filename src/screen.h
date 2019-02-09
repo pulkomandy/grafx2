@@ -33,7 +33,10 @@
 #include <windows.h>  // for HWND
 #endif
 #if defined(USE_SDL) || defined(USE_SDL2)
+#include <SDL.h>
+#if defined(SDL_VIDEO_DRIVER_X11)
 #include <SDL_syswm.h> // for Display, Window
+#endif
 #endif
 #if defined(USE_X11)
 #include <X11/Xlib.h> // for Display, Window

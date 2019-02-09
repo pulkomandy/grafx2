@@ -508,7 +508,8 @@ endif
         CC = /opt/open2x/gcc-4.1.1-glibc-2.3.6/bin/arm-open2x-linux-gcc
         BIN = ../bin/grafx2.gpe
         SDLCONFIG = /opt/open2x/gcc-4.1.1-glibc-2.3.6/bin/sdl-config
-        COPT = -W -Wall -Wdeclaration-after-statement -pedantic -std=c99 -static -g -O$(OPTIM)
+        COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -static -g -O$(OPTIM)
+        COPT += -D_XOPEN_SOURCE=500
         COPT += -I/opt/open2x/gcc-4.1.1-glibc-2.3.6/include
         COPT += $(shell $(SDLCONFIG) --cflags)
         COPT += -D__GP2X__ $(TTFCOPT) $(JOYCOPT) $(LUACOPT)
