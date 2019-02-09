@@ -102,7 +102,8 @@ LUAARCH=$(LUA).tar.gz
 LUAURL=https://www.lua.org/ftp/$(LUAARCH)
 LUAURLALT=https://www.tecgraf.puc-rio.br/lua/mirror/ftp/$(LUAARCH)
 LUASHA256=0c2eed3f960446e1a3e4b9a1ca2f3ff893b6ce41942cf54d5dd59ab4b3b058ac
-LUAPATCHES = lua-atari-log2.patch
+LUAPATCHES = lua-atari-log2.patch \
+             lua-atari-inttype.patch
 # https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-0.6.1.tar.gz
 RECOILVER=4.3.1
 RECOIL=recoil-$(RECOILVER)
@@ -510,7 +511,12 @@ else
 	# configure [--const] [--zprefix] [--prefix=PREFIX]  [--eprefix=EXPREFIX]
 	#  [--static] [--64] [--libdir=LIBDIR] [--sharedlibdir=LIBDIR]
 	#  [--includedir=INCLUDEDIR] [--archs="-arch i386 -arch x86_64"]
-	cd $(ZLIB) && CC=$(CC) AR=$(AR) RANLIB=$(RANLIB) ./configure --prefix=$(PREFIX) && $(MAKE) test
+	cd $(ZLIB) && CC=$(CC) AR=$(AR) RANLIB=$(RANLIB) ./configure --prefix=$(PREFIX)
+ifdef ATARICROSS
+	cd $(ZLIB) && $(MAKE)
+else
+	cd $(ZLIB) && $(MAKE) test
+endif
 	cd $(ZLIB) && $(MAKE) install
 endif
 	$(CP) $(ZLIB)/README ../doc/README-zlib1.txt

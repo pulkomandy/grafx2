@@ -560,3 +560,13 @@ diff -r 7f4407040fbd -r 4a9c67d11c9f src/video/gem/SDL_gemevents.c
  		resultat = evnt_multi(
  			MU_MESAG|MU_TIMER|MU_KEYBD,
  			0,0,0,
+--- SDL-1.2.15/configure.orig	2019-02-09 05:22:11.106966000 +0100
++++ SDL-1.2.15/configure	2019-02-09 05:22:35.734516000 +0100
+@@ -30122,7 +30122,6 @@
+ _ACEOF
+ 
+                 SOURCES="$SOURCES $srcdir/src/timer/mint/*.c"
+-                SOURCES="$SOURCES $srcdir/src/timer/mint/*.S"
+             fi
+             have_timers=yes
+         fi
