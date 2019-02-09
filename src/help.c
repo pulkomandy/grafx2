@@ -789,8 +789,8 @@ void Button_Stats(int btn)
   int y;
 #if defined (__MINT__)
   _DISKINFO drvInfo;
-  unsigned long STRAM=0,TTRAM=0;
-  char helpBuf[64]={0};
+  unsigned long STRAM = 0, TTRAM = 0;
+  char helpBuf[3][16];
 #endif
 
 #if defined(USE_SDL) || defined(USE_SDL2)
@@ -899,37 +899,31 @@ void Button_Stats(int btn)
   buffer[0]='\0';
   
   if(STRAM > (100*1024*1024))
-        sprintf(helpBuf,"ST:%u Mb ",(unsigned int)(STRAM/(1024*1024)));
-  else if(freeRam > 100*1024)
-        sprintf(helpBuf,"ST:%u Kb ",(unsigned int)(STRAM/1024));
+    sprintf(helpBuf[0], "ST:%u Mb", (unsigned int)(STRAM/(1024*1024)));
+  else if(STRAM > 100*1024)
+    sprintf(helpBuf[0], "ST:%u Kb", (unsigned int)(STRAM/1024));
   else
-        sprintf(helpBuf,"ST:%u b ",(unsigned int)STRAM);
+    sprintf(helpBuf[0], "ST:%u b", (unsigned int)STRAM);
 
-  strncat(buffer,helpBuf,sizeof(char)*37);
-  
-  if(TTRAM > (100ULL*1024*1024*1024))
-        sprintf(helpBuf,"TT:%u Gb",(unsigned int)(TTRAM/(1024*1024*1024)));
-  else if(TTRAM > (100*1024*1024))
-        sprintf(helpBuf,"TT:%u Mb",(unsigned int)(TTRAM/(1024*1024)));
-  else if(freeRam > 100*1024)
-        sprintf(helpBuf,"TT:%u Kb",(unsigned int)(TTRAM/1024));
+  if(TTRAM > (100*1024*1024))
+    sprintf(helpBuf[1], "TT:%u Mb", (unsigned int)(TTRAM/(1024*1024)));
+  else if(TTRAM > 100*1024)
+    sprintf(helpBuf[1], "TT:%u Kb", (unsigned int)(TTRAM/1024));
   else
-        sprintf(helpBuf,"TT:%u b",(unsigned int)TTRAM);
-
-  strncat(buffer,helpBuf,sizeof(char)*37);
+    sprintf(helpBuf[1], "TT:%u b", (unsigned int)TTRAM);
 
   if(freeRam > (100ULL*1024*1024*1024))
-        sprintf(helpBuf,"(%u Gb)",(unsigned int)(freeRam/(1024*1024*1024)));
+    sprintf(helpBuf[2], "(%u Gb)", (unsigned int)(freeRam/(1024*1024*1024)));
   else if(freeRam > (100*1024*1024))
-        sprintf(helpBuf,"(%u Mb)",(unsigned int)(freeRam/(1024*1024)));
+    sprintf(helpBuf[2], "(%u Mb)", (unsigned int)(freeRam/(1024*1024)));
   else if(freeRam > 100*1024)
-        sprintf(helpBuf,"(%u Kb)",(unsigned int)(freeRam/1024));
+    sprintf(helpBuf[2], "(%u Kb)", (unsigned int)(freeRam/1024));
   else
-        sprintf(helpBuf,"(%u b)",(unsigned int)freeRam);
+    sprintf(helpBuf[2], "(%u b)", (unsigned int)freeRam);
    
-   strncat(buffer,helpBuf,sizeof(char)*37);
+  snprintf(buffer, sizeof(buffer), "%s %s %s", helpBuf[0], helpBuf[1], helpBuf[2]);
  
-   Print_in_window(18,y,buffer,STATS_DATA_COLOR,MC_Black);
+  Print_in_window(18,y,buffer,STATS_DATA_COLOR,MC_Black);
 
 #else
   // Display free RAM (generic)
