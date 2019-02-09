@@ -72,3 +72,19 @@ job_atari:
         paths:
             - "*.zip"
             - "ATARI_JOB_ID"
+
+job_gp2x:
+    stage: build
+    before_script:
+        - dpkg --add-architecture i386
+        - apt-get update -qq && apt-get install -y -qq zip dos2unix
+        - apt-get install -y -qq multiarch-support libc6:i386
+        - "sh ./.install-gp2x-toolchain.sh"
+    script:
+        - "NOLUA=1 GP2XCROSS=1 make -j2 grafx2"
+        - "NOLUA=1 GP2XCROSS=1 make ziprelease"
+        - "echo $CI_JOB_ID > GP2X_JOB_ID"
+    artifacts:
+        paths:
+            - "*.zip"
+            - "GP2X_JOB_ID"

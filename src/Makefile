@@ -504,14 +504,23 @@ endif
     else
       ifdef GP2XCROSS
         #cross compile an exec for the gp2x
-        CC = /opt/open2x/gcc-4.1.1-glibc-2.3.6/arm-open2x-linux/bin/arm-open2x-linux-gcc
+        #CC = /opt/open2x/gcc-4.1.1-glibc-2.3.6/arm-open2x-linux/bin/arm-open2x-linux-gcc
+        CC = /opt/open2x/gcc-4.1.1-glibc-2.3.6/bin/arm-open2x-linux-gcc
         BIN = ../bin/grafx2.gpe
-        COPT = -W -Wall -Wdeclaration-after-statement -pedantic -std=c99 -static -g -O$(OPTIM) -I/opt/open2x/gcc-4.1.1-glibc-2.3.6/include `/opt/open2x/gcc-4.1.1-glibc-2.3.6/bin/sdl-config --cflags` $(TTFCOPT) -D__GP2X__ $(TTFCOPT) $(JOYCOPT) $(LUACOPT)
-        LOPT = -static -lSDL_image `/opt/open2x/gcc-4.1.1-glibc-2.3.6/bin/sdl-config --static-libs` -ljpeg -lpng -lz -lm $(TTFLOPT) $(LUALOPT)
+        SDLCONFIG = /opt/open2x/gcc-4.1.1-glibc-2.3.6/bin/sdl-config
+        COPT = -W -Wall -Wdeclaration-after-statement -pedantic -std=c99 -static -g -O$(OPTIM)
+        COPT += -I/opt/open2x/gcc-4.1.1-glibc-2.3.6/include
+        COPT += $(shell $(SDLCONFIG) --cflags)
+        COPT += -D__GP2X__ $(TTFCOPT) $(JOYCOPT) $(LUACOPT)
+        LOPT = -static
+        LOPT += $(shell $(SDLCONFIG) --static-libs)
+        LOPT += -lSDL_image -ljpeg -lpng -lz
+        LOPT += -lm $(TTFLOPT) $(LUALOPT)
         OBJDIR = ../obj/gp2x
         NOTTF = 1
         PLATFORM = gp2x
-        STRIP = /opt/open2x/gcc-4.1.1-glibc-2.3.6/arm-open2x-linux/bin/arm-open2x-linux-strip
+        #STRIP = /opt/open2x/gcc-4.1.1-glibc-2.3.6/arm-open2x-linux/bin/arm-open2x-linux-strip
+        STRIP = /opt/open2x/gcc-4.1.1-glibc-2.3.6/bin/arm-open2x-linux-strip
         JOYCOPT = -DUSE_JOYSTICK
       else
       ifdef GCWZERO
