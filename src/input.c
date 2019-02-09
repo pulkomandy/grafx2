@@ -1318,9 +1318,10 @@ int Get_input(int sleep_time)
               break;
 
           case SDL_MOUSEBUTTONDOWN:
-#ifdef USE_SDL2
+#if defined(USE_SDL2) && SDL_VERSION_ATLEAST(2, 0, 4)
+              // SDL_CaptureMouse() is available since SDL 2.0.4.
               SDL_CaptureMouse(SDL_TRUE);
-#else
+#elif defined(USE_SDL)
               SDL_WM_GrabInput(SDL_GRAB_ON);
 #endif
               Handle_mouse_click(&event.button);
@@ -1328,9 +1329,10 @@ int Get_input(int sleep_time)
               break;
 
           case SDL_MOUSEBUTTONUP:
-#ifdef USE_SDL2
+#if defined(USE_SDL2) && SDL_VERSION_ATLEAST(2, 0, 4)
+              // SDL_CaptureMouse() is available since SDL 2.0.4.
               SDL_CaptureMouse(SDL_FALSE);
-#else
+#elif defined(USE_SDL)
               SDL_WM_GrabInput(SDL_GRAB_OFF);
 #endif
               Handle_mouse_release(&event.button);
