@@ -592,6 +592,13 @@ CT_ASSERT(sizeof(T_Components)==3);
 // when sizeof(T_Palette) is not 768.
 CT_ASSERT(sizeof(T_Palette)==768);
 
+#if defined(__MINT__)
+static void Exit_handler(void)
+{
+  printf("Press any key to quit.\n");
+  (void)Cnecin();
+}
+#endif
 
 /**
  * Initialize the  program.
@@ -621,6 +628,7 @@ int Init_program(int argc,char * argv[])
   printf(" /|\\ GrafX2 %.19s\n", Program_version);
   printf(" compilation date: %.16s\n", __DATE__);
   printf("===============================\n");
+  atexit(Exit_handler);
   #endif
 
 #ifdef ENABLE_FILENAMES_ICONV
