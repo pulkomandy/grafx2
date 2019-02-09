@@ -54,7 +54,7 @@
 #include "setup.h"
 #include "global.h"
 
-#if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
+#ifndef PATH_MAX
     // This is a random default value ...
     #define PATH_MAX 32768
 #endif
