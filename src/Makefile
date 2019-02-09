@@ -515,7 +515,7 @@ endif
         COPT += -D__GP2X__ $(TTFCOPT) $(JOYCOPT) $(LUACOPT)
         LOPT = -static
         LOPT += $(shell $(SDLCONFIG) --static-libs)
-        LOPT += -lSDL_image -ljpeg -lpng -lz
+        LOPT += -lSDL_image -ltiff -ljpeg -lpng -lz
         LOPT += -lm $(TTFLOPT) $(LUALOPT)
         OBJDIR = ../obj/gp2x
         NOTTF = 1

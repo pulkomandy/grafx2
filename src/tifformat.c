@@ -434,7 +434,11 @@ void Load_TIFF_Sub(T_IO_Context * context, TIFF * tif, unsigned long file_size)
   for (;;)
   {
     word subifd_count;
+#if TIFFLIB_VERSION < 20120101
+    uint32 * subifd_array;
+#else
     uint64 * subifd_array;
+#endif
     if (TIFFGetField(tif, TIFFTAG_SUBIFD, &subifd_count, &subifd_array))
     {
       GFX2_Log(GFX2_DEBUG, "TIFFTAG_SUBIFD : count = %u\n", subifd_count);
@@ -474,7 +478,7 @@ struct memory_buffer
   unsigned long alloc_size;
 };
 
-tmsize_t lTIFF_read(thandle_t p, void * data, tmsize_t size)
+tsize_t lTIFF_read(thandle_t p, void * data, tsize_t size)
 {
   struct memory_buffer * mbuffer = (struct memory_buffer *)p;
   GFX2_Log(GFX2_DEBUG, "lTIFF_read(%p, %p, %u)\n", p, data, size);
@@ -483,7 +487,7 @@ tmsize_t lTIFF_read(thandle_t p, void * data, tmsize_t size)
   return size;
 }
 
-tmsize_t lTIFF_write(thandle_t p, void * data, tmsize_t size)
+tsize_t lTIFF_write(thandle_t p, void * data, tsize_t size)
 {
   struct memory_buffer * mbuffer = (struct memory_buffer *)p;
   GFX2_Log(GFX2_DEBUG, "lTIFF_write(%p, %p, %u)\n", p, data, size);
