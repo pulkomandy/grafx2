@@ -298,7 +298,7 @@ ifeq ($(API),sdl)
 endif
     FCLOPT = 
     MACAPPEXE = Grafx2.app/Contents/MacOS/Grafx2
-	APPZIPNAME = Grafx2.app-$(shell uname -m | sed 's/Power Macintosh/powerpc/')-$(API)-$(VERSIONTAG).zip
+    APPZIPNAME = Grafx2.app-$(shell uname -m | sed 's/Power Macintosh/powerpc/')-$(API)-$(VERSIONTAG).zip
     #NOTTF = 1
   else
   ifeq ($(PLATFORM),AROS) # 3
@@ -555,9 +555,24 @@ endif
         STACK = $(ARCH)-atari-mint-stack
         FIX_FLAGS = $(ARCH)-atari-mint-flags
         FCLOPT = 
-        LIBPNG_CONFIG = $(wildcard $(PREFIX)/bin/libpng12-config $(PREFIX)/bin/libpng14-config $(PREFIX)/bin/libpng16-config)
-        COPT = -W -Wall $(MCPU) -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement -D__MINT__ -ffast-math -O$(OPTIM) -I$(PREFIX)/include `$(LIBPNG_CONFIG) --cflags` `$(PREFIX)/bin/sdl-config --cflags` $(JOYCOPT) $(LUACOPT)
-        LOPT = -static $(MCPU) -lSDL_image `$(PREFIX)/bin/sdl-config --libs` -L$(PREFIX)/lib -ltiff -ljpeg `$(LIBPNG_CONFIG) --libs` -lz -lm $(TTFLOPT) -lfreetype $(LUALOPT) -lm $(LAYERLOPT) -Wl,--stack,8k 
+        #LIBPNG_CONFIG = $(wildcard $(PREFIX)/bin/libpng12-config $(PREFIX)/bin/libpng14-config $(PREFIX)/bin/libpng16-config)
+        LIBPNG_CONFIG ?= $(shell which ../3rdparty/usr/bin/libpng-config)
+        SDLCONFIG ?= $(shell which ../3rdparty/usr/bin/sdl-config)
+        COPT = -W -Wall
+        COPT += $(MCPU) -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement
+        COPT += -D__MINT__ -ffast-math -O$(OPTIM)
+        # -I$(PREFIX)/include
+        COPT += -I../3rdparty/usr/include
+        COPT += $(shell $(LIBPNG_CONFIG) --cflags)
+        COPT += $(shell $(SDLCONFIG) --cflags)
+        COPT += $(JOYCOPT) $(LUACOPT)
+        COPT += $(TTFCOPT)
+        LOPT = -static $(MCPU)
+        LOPT += $(shell $(LIBPNG_CONFIG) --libs)
+        LOPT += -lSDL_image -ltiff -ljpeg
+        LOPT += $(TTFLOPT) -lfreetype $(LUALOPT) -Wl,--stack,8k
+        LOPT += -lz -lm
+        LOPT += $(shell $(SDLCONFIG) --libs)
       else
 
         # Compiles a regular linux executable for the native platform
@@ -648,7 +663,7 @@ else
    TTFCOPT = 
    TTFLOPT =
    ifneq ($(WIN32CROSS),1)
-     TTFLOPT += -L$(PREFIX)/lib
+     #TTFLOPT += -L$(PREFIX)/lib
    endif
    ifeq ($(API),sdl)
      TTFLOPT += -lSDL_ttf

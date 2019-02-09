@@ -36,6 +36,10 @@
 #endif
 #endif
 
+#if defined(__MINT__)
+#define fabsf(x)  __builtin_fabsf(x)
+#endif
+
 #include "windows.h"
 
 #include "engine.h"

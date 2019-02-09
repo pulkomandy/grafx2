@@ -42,10 +42,9 @@
 #include "bitcount.h"
 
 // I don't have round() in MSVC++ 2010 (_MSC_VER=1600)
-#if defined(_MSC_VER)
-#if _MSC_VER < 1900
+// or in mintlib
+#if (defined(_MSC_VER) && (_MSC_VER < 1900)) || defined(__MINT__)
 #define round(x) floor(x+0.5)
-#endif
 #endif
 
 
