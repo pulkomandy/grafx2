@@ -70,6 +70,8 @@
 #include "global.h"
 #include "gfx2log.h"
 #include "gfx2mem.h"
+// for the network browse
+#include "filesel.h"
 
 // Lit un octet
 // Renvoie -1 si OK, 0 en cas d'erreur
@@ -1222,3 +1224,59 @@ char * Calculate_relative_path(const char * ref_path, const char * path)
   }
   return rel_path;
 }
+
+#if defined(WIN32)
+static void Enumerate_Network_R(T_Fileselector *list, LPNETRESOURCEA lpnr)
+{
+  // Mpr.lib
+  HANDLE hEnum;
+  DWORD r;
+  r = WNetOpenEnumA (RESOURCE_GLOBALNET, RESOURCETYPE_DISK, 0, lpnr, &hEnum);
+  if (r == NO_ERROR)
+  {
+    DWORD buffer_size = 16*1024;
+    DWORD count = -1;
+    LPNETRESOURCEA lpnrLocal = (LPNETRESOURCEA) GlobalAlloc(GPTR, buffer_size);
+    do
+    {
+      ZeroMemory(lpnrLocal, buffer_size);
+      r = WNetEnumResourceA(hEnum, &count, lpnrLocal, &buffer_size);
+      if (r == NO_ERROR)
+      {
+        DWORD i;
+        for (i = 0 ; i < count; i++)
+        {
+          GFX2_Log(GFX2_DEBUG, "%08x %08x %08x %s %s %s %s\n",
+            lpnrLocal[i].dwType, lpnrLocal[i].dwDisplayType,
+            lpnrLocal[i].dwUsage,
+            lpnrLocal[i].lpProvider, lpnrLocal[i].lpLocalName,
+            lpnrLocal[i].lpRemoteName, lpnrLocal[i].lpComment);
+          if (lpnrLocal[i].dwUsage & RESOURCEUSAGE_CONTAINER)
+          {
+            Enumerate_Network_R(list, &lpnrLocal[i]);
+          }
+          if (lpnrLocal[i].dwType == RESOURCETYPE_DISK &&
+            lpnrLocal[i].dwDisplayType == RESOURCEDISPLAYTYPE_SHARE)
+          {
+            Add_element_to_list(list, lpnrLocal[i].lpRemoteName,
+                    Format_filename(lpnrLocal[i].lpRemoteName, 19-1, FSOBJECT_DRIVE),
+                    FSOBJECT_DRIVE, ICON_NETWORK);
+            list->Nb_directories++;
+          }
+        }
+      }
+      else
+      {
+      }
+    }
+    while (0);
+    GlobalFree((HGLOBAL) lpnrLocal);
+    WNetCloseEnum(hEnum);
+  }
+}
+
+void Enumerate_Network(T_Fileselector *list)
+{
+  Enumerate_Network_R(list, NULL);
+}
+#endif

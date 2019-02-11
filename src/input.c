@@ -33,6 +33,9 @@
   #include <windows.h>
   #include <shellapi.h>
 #endif
+#if defined(_MSC_VER)
+#define strdup _strdup
+#endif
 
 #ifdef USE_X11
 #include <unistd.h>

@@ -738,6 +738,7 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
         list->Nb_directories++;
       }
     }
+    Enumerate_Network(list);
   }
   #elif defined(__MINT__)
     drive_bits = Drvmap(); //get drive map bitfield
@@ -822,12 +823,29 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
 // Comparison of file names:
 #ifdef WIN32
 // case-insensitive
-  #define FILENAME_COMPARE strcasecmp
-  #define FILENAME_COMPARE_UNICODE wcsicmp
+static int Windows_Path_Compare(const char * s1, const char * s2)
+{
+  // trick to make network shares path (starting with \\)
+  // at the end of the list
+  if (s1[0] == '\\')
+  {
+    if (s2[0] != '\\')
+      return 1;
+  }
+  else
+  {
+    // s1[0] != '\\'
+    if (s2[0] == '\\')
+      return -1;
+  }
+  return strcasecmp(s1, s2);
+}
+#define FILENAME_COMPARE Windows_Path_Compare
+#define FILENAME_COMPARE_UNICODE wcsicmp
 #else
 // case-sensitive
-  #define FILENAME_COMPARE strcmp
-  #define FILENAME_COMPARE_UNICODE Unicode_strcmp
+#define FILENAME_COMPARE strcmp
+#define FILENAME_COMPARE_UNICODE Unicode_strcmp
 #endif
 
 

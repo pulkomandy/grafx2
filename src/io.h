@@ -201,5 +201,9 @@ int Remove_directory(const char * path);
 /// Calculate relative path
 char * Calculate_relative_path(const char * ref_path, const char * path);
 
+#if defined(WIN32)
+void Enumerate_Network(T_Fileselector *list);
+#endif
+
 /** @}*/
 #endif
