@@ -2384,7 +2384,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         if (directory_to_change_to[0] == '.' &&
             (directory_to_change_to[1] == '\0' || directory_to_change_to[1] == '/' || directory_to_change_to[1] == '\\' ||
             (directory_to_change_to[1] == '.' &&
-             (directory_to_change_to[2] == '\0' || directory_to_change_to[2] == '/' || directory_to_change_to[2] == '\\')))) // Relative path
+             (directory_to_change_to[2] == '/' || directory_to_change_to[2] == '\\')))) // Relative path
         {
           GFX2_Log(GFX2_DEBUG, "Relative bookmark \"%s\", Change to \"%s\" first.\n",
                    directory_to_change_to, Data_directory);
