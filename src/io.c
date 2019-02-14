@@ -292,6 +292,8 @@ char * Filepath_append_to_dir(const char * dir, const char * filename)
 {
   char * path;
   size_t len = strlen(dir);
+  if (len == 0) // no directory
+    return strdup(filename);
   if (dir[len-1] == PATH_SEPARATOR[0]
 #if defined(__WIN32__) || defined(WIN32)
      || dir[len-1] == '/'
@@ -713,25 +715,6 @@ void For_each_directory_entry(const char * directory_name, void * pdata, T_File_
 }
 
 
-void Get_full_filename(char * output_name, const char * file_name, const char * directory_name)
-{
-  strcpy(output_name,directory_name);
-  if (output_name[0] != '\0')
-  {
-    // Append a separator at the end of path, if there isn't one already.
-    // This handles the case of directory variables which contain one,
-    // as well as directories like "/" on Unix.
-#if defined(__AROS__)
-    // additional check for ':' to avoid paths like PROGDIR:/unnamed.gif
-    if ((output_name[strlen(output_name)-1]!=PATH_SEPARATOR[0]) && (output_name[strlen(output_name)-1]!=':'))
-#else
-    if (output_name[strlen(output_name)-1]!=PATH_SEPARATOR[0])
-#endif
-        strcat(output_name,PATH_SEPARATOR);
-  }
-  strcat(output_name,file_name);
-}
-
 /**
  * Convert a file name to unicode characters
  *
@@ -840,6 +823,8 @@ HANDLE Lock_file_handle = INVALID_HANDLE_VALUE;
 int Lock_file_handle = -1;
 #endif
 
+#define GFX2_LOCK_FILENAME "gfx2.lck"
+
 byte Create_lock_file(const char *file_directory)
 {
   #if defined (__amigaos__)||(__AROS__)||(__ANDROID__)
@@ -847,14 +832,13 @@ byte Create_lock_file(const char *file_directory)
   #elif defined(__SWITCH__)
     // The switch can only run one application at a time, so we don't do anything special here
   #else
-  char lock_filename[MAX_PATH_CHARACTERS];
+  char * lock_filename;
   
 #ifdef GCWZERO
-  strcpy(lock_filename,"/media/home/.grafx2/");
+  lock_filename = Filepath_append_to_dir("/media/home/.grafx2/", GFX2_LOCK_FILENAME);
 #else
-  strcpy(lock_filename,file_directory);
+  lock_filename = Filepath_append_to_dir(file_directory, GFX2_LOCK_FILENAME);
 #endif
-  strcat(lock_filename,"gfx2.lck");
   
   #ifdef WIN32
   // Windowzy method for creating a lock file
@@ -866,6 +850,7 @@ byte Create_lock_file(const char *file_directory)
     OPEN_ALWAYS,
     FILE_ATTRIBUTE_NORMAL,
     NULL);
+  free(lock_filename);
   if (Lock_file_handle == INVALID_HANDLE_VALUE)
   {
     return -1;
@@ -873,6 +858,7 @@ byte Create_lock_file(const char *file_directory)
   #else
   // Unixy method for lock file
   Lock_file_handle = open(lock_filename,O_WRONLY|O_CREAT,S_IRUSR|S_IWUSR);
+  free(lock_filename);
   if (Lock_file_handle == -1)
   {
     // Usually write-protected media
@@ -891,7 +877,7 @@ byte Create_lock_file(const char *file_directory)
 
 void Release_lock_file(const char *file_directory)
 {
-  char lock_filename[MAX_PATH_CHARACTERS];
+  char * lock_filename;
     
   #ifdef WIN32
   if (Lock_file_handle != INVALID_HANDLE_VALUE)
@@ -907,9 +893,12 @@ void Release_lock_file(const char *file_directory)
   #endif
   
   // Actual deletion
-  strcpy(lock_filename,file_directory);
-  strcat(lock_filename,"gfx2.lck");
-  remove(lock_filename);
+#ifdef GCWZERO
+  lock_filename = Filepath_append_to_dir("/media/home/.grafx2/", GFX2_LOCK_FILENAME);
+#else
+  lock_filename = Filepath_append_to_dir(file_directory, GFX2_LOCK_FILENAME);
+#endif
+  Remove_path(lock_filename);
 }
 
 char * Get_current_directory(char * buf, word * buf_unicode, size_t size)
@@ -1016,28 +1005,30 @@ int Remove_directory(const char * path)
 
 ///
 /// Calculate relative path
-const char * Calculate_relative_path(const char * ref_path, const char * path)
+char * Calculate_relative_path(const char * ref_path, const char * path)
 {
-  char real_ref_path[MAX_PATH_CHARACTERS];
-  static char rel_path[MAX_PATH_CHARACTERS];
+  char * real_ref_path;
+  char * rel_path = NULL;
   int last_separator = -1;
   int i;
   int separator_count = 0;
+  size_t len;
 
   if (ref_path == NULL || path == NULL)
     return NULL;
-  if (Realpath(ref_path, real_ref_path) == NULL)
-  {
-    strncpy(real_ref_path, ref_path, MAX_PATH_CHARACTERS);
-    real_ref_path[MAX_PATH_CHARACTERS-1] = '\0';
-  }
+  real_ref_path = Realpath(ref_path, NULL);
+  if (real_ref_path == NULL)
+    real_ref_path = strdup(ref_path);
 #if defined(WIN32) || defined(__MINT__)
   if (real_ref_path[1] == ':' && path[1] == ':')
   {
     // use same case for drive letter
     real_ref_path[0] = (real_ref_path[0] & ~32) | (path[0] & 32);
     if (real_ref_path[0] != path[0])
+    {
+      free(real_ref_path);
       return NULL;  // path on different volumes, not possible
+    }
   }
 #endif
   // look for common path parts
@@ -1054,36 +1045,54 @@ const char * Calculate_relative_path(const char * ref_path, const char * path)
   // real_ref_path and path.
   // real_ref_path[i] and path[i] are either different, or both '\0'
   if (real_ref_path[i] == PATH_SEPARATOR[0] && real_ref_path[i + 1] == '\0' && path[i] == '\0')
-      return "."; // path are identical (real_ref_path has additional trailing separator)
+  {
+    free(real_ref_path);
+    return strdup("."); // path are identical (real_ref_path has additional trailing separator)
+  }
   if (real_ref_path[i] == '\0')
   {
     if (path[i] == '\0')
-      return "."; // path are identical
+    {
+      free(real_ref_path);
+      return strdup("."); // path are identical
+    }
     // path is under ref_path
     if (path[i] == PATH_SEPARATOR[0])
     {
-      snprintf(rel_path, MAX_PATH_CHARACTERS, ".%s", path + i);
+      free(real_ref_path);
+      len = strlen(path + i) + 1;
+      rel_path = malloc(len + 1);
+      snprintf(rel_path, len, ".%s", path + i);
       return rel_path;
     }
     else if (i > 0 && real_ref_path[i - 1] == PATH_SEPARATOR[0])
     {
-      snprintf(rel_path, MAX_PATH_CHARACTERS, ".%s", path + i - 1);
+      free(real_ref_path);
+      len = strlen(path + i - 1) + 1;
+      rel_path = malloc(len + 1);
+      snprintf(rel_path, len, ".%s", path + i - 1);
       return rel_path;
     }
   }
   if (last_separator <= 0)
-    return path;  // no common part found return absolute path
+  {
+    free(real_ref_path);
+    return strdup(path);  // no common part found return absolute path
+  }
   // count the number of path separators in the reference path
   for (i = last_separator; real_ref_path[i] != '\0'; i++)
   {
     if (real_ref_path[i] == PATH_SEPARATOR[0] && real_ref_path[i + 1] != '\0')  // do not count the trailing separator
       separator_count++;
   }
+  free(real_ref_path);
   i = 0;
   // construct the relative path
+  len = separator_count * (2 + strlen(PATH_SEPARATOR)) + strlen(path + last_separator + 1) + 1;
+  rel_path = malloc(len + 1);
   while(separator_count-- > 0)
-    i += snprintf(rel_path + i, MAX_PATH_CHARACTERS - i, "..%s", PATH_SEPARATOR);
-  strncpy(rel_path + i, path + last_separator + 1, MAX_PATH_CHARACTERS - i);
-  rel_path[MAX_PATH_CHARACTERS - 1] = '\0';
+    i += snprintf(rel_path + i, len + 1 - i, "..%s", PATH_SEPARATOR);
+  strncpy(rel_path + i, path + last_separator + 1, len + 1 - i);
+  rel_path[len] = '\0';
   return rel_path;
 }

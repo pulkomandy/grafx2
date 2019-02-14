@@ -2180,7 +2180,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           {
             // Bookmark
             char * directory_name;
-            const char * rel_path;
+            char * rel_path;
             
             load_from_clipboard = 0;
             switch(Window_attribute2)
@@ -2243,9 +2243,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
                 {
                   // Erase old bookmark
                   free(Config.Bookmark_directory[clicked_button-10]);
-                  Config.Bookmark_directory[clicked_button-10] = NULL;
-
-                  Config.Bookmark_directory[clicked_button-10] = strdup(rel_path);
+                  Config.Bookmark_directory[clicked_button-10] = rel_path;
                   directory_name = Find_last_separator(Selector->Directory);
                   if (directory_name && directory_name[1]!='\0')
                     directory_name++;

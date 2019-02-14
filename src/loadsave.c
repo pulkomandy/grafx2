@@ -1134,31 +1134,29 @@ void Save_image(T_IO_Context *context)
 #if defined(USE_SDL) || defined(USE_SDL2)
 void Load_SDL_Image(T_IO_Context *context)
 {
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
+  char * filename;  // full path
   word x_pos,y_pos;
   // long file_size;
   dword pixel;
   long file_size;
   SDL_Surface * surface;
 
+  filename = Filepath_append_to_dir(context->File_directory, context->File_name);
+  file_size = File_length(filename);
+  File_error = 0;
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
-  File_error=0;
-  
   surface = IMG_Load(filename);
-  
+  free(filename);
+
   if (!surface)
   {
     File_error=1;
     return;
   }
-  
-  file_size=File_length(filename);
-  
+
   if (surface->format->BytesPerPixel == 1)
   {
     // 8bpp image
-    
     Pre_load(context, surface->w, surface->h, file_size ,FORMAT_MISC, PIXEL_SIMPLE, 8);
 
     // Read palette
@@ -1652,7 +1650,7 @@ static void Save_ClipBoard_Image(T_IO_Context * context)
 /// create an unusable image.
 void Emergency_backup(const char *fname, byte *source, int width, int height, T_Palette *palette)
 {
-  char filename[MAX_PATH_CHARACTERS]; // Nom complet du fichier
+  char * filename; // Full path name
   FILE *file;
   short x_pos,y_pos;
   T_IMG_Header IMG_header;
@@ -1660,11 +1658,10 @@ void Emergency_backup(const char *fname, byte *source, int width, int height, T_
   if (width == 0 || height == 0 || source == NULL)
     return;
   
-  strcpy(filename,Config_directory);
-  strcat(filename,fname);
-
-  // Ouverture du fichier
-  file=fopen(filename,"wb");
+  // Open the file
+  filename = Filepath_append_to_dir(Config_directory, fname);
+  file = fopen(filename,"wb");
+  free(filename);
   if (!file)
     return;
 
@@ -2112,7 +2109,7 @@ void Rotate_safety_backups(void)
       Config_directory,
       Main.safety_backup_prefix,
       (dword)(Main.safety_number + 1000000l - Rotation_safety_backup) % (dword)1000000l);
-    remove(deleted_file); // no matter if fail
+    Remove_path(deleted_file); // no matter if fail
     
     // Reset counters
     Main.edits_since_safety_backup=0;
@@ -2181,10 +2178,10 @@ void Delete_safety_backups(void)
 /// For use by Save_XXX() functions
 FILE * Open_file_write(T_IO_Context *context)
 {
-  char filename[MAX_PATH_CHARACTERS]; // filename with full path
+  FILE * f;
+  char * filename; // filename with full path
 #if defined(WIN32)
   WCHAR filename_unicode[MAX_PATH_CHARACTERS];
-  FILE * f;
 
   if (context->File_name_unicode != NULL && context->File_name_unicode[0] != 0)
   {
@@ -2210,15 +2207,18 @@ FILE * Open_file_write(T_IO_Context *context)
     return f;
   }
 #endif
-  Get_full_filename(filename, context->File_name, context->File_directory);
 
-  return fopen(filename, "wb");
+  filename = Filepath_append_to_dir(context->File_directory, context->File_name);
+  f = fopen(filename, "wb");
+  free(filename);
+  return f;
 }
 
 FILE * Open_file_write_with_alternate_ext(T_IO_Context *context, const char * ext)
 {
+  FILE * f;
   char *p;
-  char filename[MAX_PATH_CHARACTERS]; // filename with full path
+  char * filename; // filename with full path
 #if defined(WIN32)
   WCHAR filename_unicode[MAX_PATH_CHARACTERS];
   WCHAR * pw;
@@ -2237,33 +2237,38 @@ FILE * Open_file_write_with_alternate_ext(T_IO_Context *context, const char * ex
     return _wfopen(filename_unicode, L"wb");
   }
 #endif
-  Get_full_filename(filename, context->File_name, context->File_directory);
+  filename = Filepath_append_to_dir(context->File_directory, context->File_name);
+// TODO: fix ! (realloc if not enough space)
   p = strrchr(filename, '.');
   if (p != NULL)
     *p = '\0';
   strcat(filename, ".");
   strcat(filename, ext);
 
-  return fopen(filename, "wb");
+  f = fopen(filename, "wb");
+  free(filename);
+  return f;
 }
 
 /// For use by Load_XXX() and Test_XXX() functions
 FILE * Open_file_read(T_IO_Context *context)
 {
-  char filename[MAX_PATH_CHARACTERS]; // filename with full path
+  FILE * f;
+  char * filename; // filename with full path
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
-
-  return fopen(filename, "rb");
+  filename = Filepath_append_to_dir(context->File_directory, context->File_name);
+  f = fopen(filename, "rb");
+  free(filename);
+  return f;
 }
 
 struct T_Find_alternate_ext_data
 {
   const char * ext;
-  char basename[MAX_PATH_CHARACTERS];
-  word basename_unicode[MAX_PATH_CHARACTERS];
-  char foundname[MAX_PATH_CHARACTERS];
-  word foundname_unicode[MAX_PATH_CHARACTERS];
+  char * basename;
+  word * basename_unicode;
+  char * foundname;
+  word * foundname_unicode;
 };
 
 static void Look_for_alternate_ext(void * pdata, const char * filename, const word * filename_unicode, byte is_file, byte is_directory, byte is_hidden)
@@ -2276,8 +2281,10 @@ static void Look_for_alternate_ext(void * pdata, const char * filename, const wo
   if (!is_file)
     return;
 
-  if (filename_unicode != NULL && params->basename_unicode[0] != 0)
+  if (filename_unicode != NULL && params->basename_unicode != NULL)
   {
+    if (params->foundname_unicode != NULL)
+      return; // We already have found a file
     base_len = Unicode_strlen(params->basename_unicode);
     if (Unicode_strlen(filename_unicode) <= base_len)
       return; // No match.
@@ -2298,11 +2305,14 @@ static void Look_for_alternate_ext(void * pdata, const char * filename, const wo
     if (Unicode_char_strcasecmp(filename_unicode + base_len + 1, params->ext) != 0)
       return; // No match.
     // it is a match !
-    Unicode_strlcpy(params->foundname_unicode, filename_unicode, MAX_PATH_CHARACTERS);
-    strncpy(params->foundname, filename, MAX_PATH_CHARACTERS);
+    free(params->foundname);
+    params->foundname_unicode = Unicode_strdup(filename_unicode);
+    params->foundname = strdup(filename);
   }
   else
   {
+    if (params->foundname != NULL)
+      return; // We already have found a file
     base_len = strlen(params->basename);
     if (filename[base_len] != '.')
       return; // No match.
@@ -2315,52 +2325,70 @@ static void Look_for_alternate_ext(void * pdata, const char * filename, const wo
 #endif
     if (strcasecmp(filename + base_len + 1, params->ext) != 0)
       return; // No match.
-    params->foundname_unicode[0] = 0;
-    strncpy(params->foundname, filename, MAX_PATH_CHARACTERS);
+    params->foundname_unicode = NULL;
+    params->foundname = strdup(filename);
   }
 }
 
 FILE * Open_file_read_with_alternate_ext(T_IO_Context *context, const char * ext)
 {
+  FILE * f = NULL;
   char * p;
   struct T_Find_alternate_ext_data params;
 
   memset(&params, 0, sizeof(params));
   params.ext = ext;
-  strncpy(params.basename, context->File_name, MAX_PATH_CHARACTERS);
+  params.basename = strdup(context->File_name);
+  if (params.basename == NULL)
+  {
+    GFX2_Log(GFX2_ERROR, "Open_file_read_with_alternate_ext() strdup() failed\n");
+    return NULL;
+  }
   p = strrchr(params.basename, '.');
   if (p != NULL)
     *p = '\0';
   if (context->File_name_unicode != NULL)
   {
     size_t i = Unicode_strlen(context->File_name_unicode);
-    memcpy(params.basename_unicode, context->File_name_unicode, (i + 1) * sizeof(word));
-    while (i-- > 0)
-      if (params.basename_unicode[i] == (word)'.')
-      {
-        params.basename_unicode[i] = 0;
-        break;
-      }
+    params.basename_unicode = malloc(sizeof(word) * (i + 1));
+    if (params.basename_unicode == NULL)
+    {
+      GFX2_Log(GFX2_ERROR, "Open_file_read_with_alternate_ext() failed to allocate %lu bytes\n", (unsigned long)(sizeof(word) * (i + 1)));
+    }
+    else
+    {
+      memcpy(params.basename_unicode, context->File_name_unicode, (i + 1) * sizeof(word));
+      while (i-- > 0)
+        if (params.basename_unicode[i] == (word)'.')
+        {
+          params.basename_unicode[i] = 0;
+          break;
+        }
+    }
   }
 
   For_each_directory_entry(context->File_directory, &params, Look_for_alternate_ext);
-  if (params.foundname[0] != '\0')
+  if (params.foundname != NULL)
   {
-    char filename[MAX_PATH_CHARACTERS]; // filename with full path
+    char * filename; // filename with full path
 
-    Get_full_filename(filename, params.foundname, context->File_directory);
-
-    return fopen(filename, "rb");
+    filename = Filepath_append_to_dir(context->File_directory, params.foundname);
+    f = fopen(filename, "rb");
+    free(filename);
   }
-  return NULL;
+  free(params.basename);
+  free(params.basename_unicode);
+  free(params.foundname);
+  free(params.foundname_unicode);
+  return f;
 }
 
 /// For use by Save_XXX() functions
 void Remove_file(T_IO_Context *context)
 {
-  char filename[MAX_PATH_CHARACTERS]; // filename with full path
+  char * filename; // filename with full path
 
-  Get_full_filename(filename, context->File_name, context->File_directory);
-
+  filename = Filepath_append_to_dir(context->File_directory, context->File_name);
   Remove_path(filename);
+  free(filename);
 }

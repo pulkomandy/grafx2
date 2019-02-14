@@ -151,10 +151,6 @@ void For_each_directory_entry(const char * directory_name, void * pdata, T_File_
 
 /** @ingroup filename
  * @{ */
-///
-/// Creates a fully qualified name from a directory and filename.
-/// The point is simply to insert a PATH_SEPARATOR when needed.
-void Get_full_filename(char * output_name, const char * file_name, const char * directory_name);
 
 word * Get_Unicode_Filename(word * filename_unicode, const char * filename, const char * directory);
 
@@ -203,7 +199,7 @@ int Remove_directory(const char * path);
 
 ///
 /// Calculate relative path
-const char * Calculate_relative_path(const char * ref_path, const char * path);
+char * Calculate_relative_path(const char * ref_path, const char * path);
 
 /** @}*/
 #endif

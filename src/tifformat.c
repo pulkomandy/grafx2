@@ -621,10 +621,10 @@ void Load_TIFF(T_IO_Context * context)
     fclose(file);
   }
 #else
-  char filename[MAX_PATH_CHARACTERS]; // filename with full path
+  char * filename; // filename with full path
 
   File_error = 1;
-  Get_full_filename(filename, context->File_name, context->File_directory);
+  filename = Filepath_append_to_dir(context->File_directory, context->File_name);
   TIFF_Init();
   tif = TIFFOpen(filename, "r");
   if (tif != NULL)
@@ -632,6 +632,7 @@ void Load_TIFF(T_IO_Context * context)
     Load_TIFF_Sub(context, tif, File_length(filename));
     TIFFClose(tif);
   }
+  free(filename);
 #endif
 }
 

@@ -604,8 +604,9 @@ void Button_Toggle_all_toolbars(int btn)
 byte Button_Quit_local_function(void)
 {
   short clicked_button;
-  static char  filename[MAX_PATH_CHARACTERS];
   byte  old_cursor_shape;
+  char * filename;
+  int exists;
 
   if (!Main.image_is_modified)
     return 1;
@@ -635,8 +636,10 @@ byte Button_Quit_local_function(void)
   {
     case 1 : return 0; // Rester
     case 2 : // Sauver et enregistrer
-      Get_full_filename(filename, Main.backups->Pages->Filename, Main.backups->Pages->File_directory);
-      if ( (!File_exists(filename)) || Confirmation_box("Erase old file ?") )
+      filename = Filepath_append_to_dir(Main.backups->Pages->File_directory, Main.backups->Pages->Filename);
+      exists = File_exists(filename);
+      free(filename);
+      if ( !exists || Confirmation_box("Erase old file ?") )
       {
         T_IO_Context save_context;
 
@@ -1276,7 +1279,7 @@ void Button_Skins(int btn)
 {
   short clicked_button;
   short temp;
-  char skinsdir[MAX_PATH_CHARACTERS];
+  char * skinsdir;
   T_Dropdown_button * font_dropdown;
   T_Dropdown_button * cursor_dropdown;
   T_List_button * skin_list;
@@ -1303,8 +1306,7 @@ void Button_Skins(int btn)
   Free_fileselector_list(&Skin_files_list);
   Free_fileselector_list(&Font_files_list);
   // Browse the "skins" directory
-  strcpy(skinsdir, Data_directory);
-  strcat(skinsdir, SKINS_SUBDIRECTORY);
+  skinsdir = Filepath_append_to_dir(Data_directory, SKINS_SUBDIRECTORY);
   // Add each found file to the list
   For_each_file(skinsdir, Add_font_or_skin);
   // Sort it
@@ -1384,7 +1386,8 @@ void Button_Skins(int btn)
 
       Hide_cursor();
       // (Re-)load GUI graphics from selected skins
-      strcpy(skinsdir, Get_item_by_index(&Skin_files_list,
+      free(skinsdir);
+      skinsdir = strdup(Get_item_by_index(&Skin_files_list,
         skin_list->List_start + skin_list->Cursor_position)->Full_name);
 
       gfx = Load_graphics(skinsdir, NULL);
@@ -1546,6 +1549,7 @@ void Button_Skins(int btn)
     Draw_menu_button(button,state);
   }
   Display_cursor();
+  free(skinsdir);
 }
 
 
@@ -3454,12 +3458,16 @@ void Button_Reload(int btn)
 
 static void Backup_existing_file(const char * filename)
 {
-  char new_filename[MAX_PATH_CHARACTERS]; // full filename of the backup file
+  char * new_filename; // full filename of the backup file
   char * p;
   int i;
+  size_t len;
 
-  strncpy(new_filename, filename, sizeof(new_filename));
-  new_filename[sizeof(new_filename) - 1] = '\0';
+  if (filename == NULL)
+    return;
+  len = strlen(filename);
+  new_filename = malloc(len + 1 + 4); // spare bytes to concat ".BAK"
+  memcpy(new_filename, filename, len + 1);
   p = Find_last_separator(new_filename);  // pointer to the filename part (after directory)
   if (p == NULL)
     p = new_filename;
@@ -3467,9 +3475,9 @@ static void Backup_existing_file(const char * filename)
     p++;
   i = Position_last_dot(p);
   if (i >= 0)
-    strcpy(p + i + 1, "BAK");
+    memcpy(p + i + 1, "BAK", 4);
   else
-    strcat(p, ".BAK");
+    memcpy(new_filename + len, ".BAK", 5);
 
   File_error=0;
 
@@ -3479,13 +3487,14 @@ static void Backup_existing_file(const char * filename)
   {
     // S'il y avait déjà un fichier Backup, on l'efface
     if ((File_exists(new_filename))
-     && (remove(new_filename)!=0))
+     && (Remove_path(new_filename)!=0))
       File_error=1;
 
     if ((!File_error)
      && (rename(filename,new_filename)!=0))
       File_error=1;
   }
+  free(new_filename);
 }
 
 
@@ -3551,9 +3560,9 @@ void Save_picture(enum CONTEXT_TYPE type)
     confirm=Confirmation_box("Erase old file ?");
     if (confirm && (Config.Backup))
     {
-      char full_filename[MAX_PATH_CHARACTERS];
-      Get_full_filename(full_filename, filename, directory);
+      char * full_filename = Filepath_append_to_dir(directory, filename);
       Backup_existing_file(full_filename);
+      free(full_filename);
       if (File_error)
       {
         confirm=0;
@@ -3616,12 +3625,12 @@ void Button_Save(int btn)
 void Button_Autosave(int btn)
 {
   byte old_cursor_shape;
-  static char filename[MAX_PATH_CHARACTERS];
+  char * filename;
   byte file_already_exists;
 
   (void)btn;
-  Get_full_filename(filename, Main.backups->Pages->Filename, Main.backups->Pages->File_directory);
-  file_already_exists=File_exists(filename);
+  filename = Filepath_append_to_dir(Main.backups->Pages->File_directory, Main.backups->Pages->Filename);
+  file_already_exists = File_exists(filename);
 
   if ( (!file_already_exists) || Confirmation_box("Erase old file ?") )
   {
@@ -3657,6 +3666,7 @@ void Button_Autosave(int btn)
   else
     Hide_cursor();
 
+  free(filename);
   Unselect_button(BUTTON_SAVE);
 
   Display_cursor();
