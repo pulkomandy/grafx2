@@ -574,14 +574,8 @@ typedef struct
   short offset_X;
   /// Y position (in image space) of the pixel to display in the top left corner of screen.
   short offset_Y;
-  /// Name of the directory that holds the image currently edited as page.
-  char  file_directory[MAX_PATH_CHARACTERS];
-  /// Filename (without directory) of the image currently edited as page.
-  char  filename[MAX_PATH_CHARACTERS];
-  /// Filename in unicode
-  word  filename_unicode[MAX_PATH_CHARACTERS];
   /// File format of the image currently edited as page. It's a value of enum ::FILE_FORMATS
-  byte  fileformat;
+  enum FILE_FORMATS fileformat;
   /// File selector settings
   T_Selector_settings selector;
   /// X position (in screen coordinates) of the separator between normal and magnified views.
