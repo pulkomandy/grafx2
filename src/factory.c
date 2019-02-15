@@ -2339,7 +2339,7 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   lua_State* L;
   const char* message;
   byte  old_cursor_shape = Cursor_shape;
-  char buf[MAX_PATH_CHARACTERS];
+  char * path;
   int original_image_width = Main.image_width;
   int original_image_height = Main.image_height;
   int original_current_layer = Main.current_layer;
@@ -2358,36 +2358,39 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   
   // This chdir is for the script's sake. Grafx2 itself will (try to)
   // not rely on what is the system's current directory.
-  Extract_path(buf, Last_run_script);
-  Change_directory(buf);
+  path = Extract_path(NULL, Last_run_script);
+  Change_directory(path);
+  free(path);
 
   L = luaL_newstate(); // used to be lua_open() on Lua 5.1, deprecated on 5.2
 
   /// @todo as the value doesn't vary, this should be
   /// done once at the start of the program
-  strcpy(buf, Data_directory);
-  Append_path(buf, SCRIPTS_SUBDIRECTORY, NULL);
-  Append_path(buf, LUALIB_SUBDIRECTORY, NULL);
-  Append_path(buf, "?.lua", NULL);
+  path = malloc(strlen(Data_directory) + strlen(SCRIPTS_SUBDIRECTORY) + strlen(LUALIB_SUBDIRECTORY) + 5 + 3 * strlen(PATH_SEPARATOR) + 9 + 1);
+  strcpy(path, Data_directory);
+  Append_path(path, SCRIPTS_SUBDIRECTORY, NULL);
+  Append_path(path, LUALIB_SUBDIRECTORY, NULL);
+  Append_path(path, "?.lua", NULL);
   // SetEnvironmentVariableA() won't work because lua uses getenv()
 #if defined(_MSC_VER)
-  if (_putenv_s("LUA_PATH", buf) < 0)
-    GFX2_Log(GFX2_ERROR, "_putenv_s(\"LUA_PATH\", \"%s\") failed\n", buf);
+  if (_putenv_s("LUA_PATH", path) < 0)
+    GFX2_Log(GFX2_ERROR, "_putenv_s(\"LUA_PATH\", \"%s\") failed\n", path);
 #elif defined(WIN32)
   // Mingw has neither setenv() nor _putenv_s()
-  memmove(buf + 9, buf, strlen(buf) + 1);
-  memcpy(buf, "LUA_PATH=", 9);
-  if (putenv(buf) < 0)
-    GFX2_Log(GFX2_ERROR, "putenv(\"%s\") failed\n", buf);
+  memmove(path + 9, path, strlen(path) + 1);
+  memcpy(path, "LUA_PATH=", 9);
+  if (putenv(path) < 0)
+    GFX2_Log(GFX2_ERROR, "putenv(\"%s\") failed\n", path);
 #else
   /* From linux man :
    * This function makes
    * copies of the strings pointed to by name and value (by contrast with
    * putenv(3)).
    */
-  if (setenv("LUA_PATH", buf, 1) < 0)
-    GFX2_Log(GFX2_ERROR, "setenv(\"LUA_PATH\", \"%s\", 1) failed\n", buf);
+  if (setenv("LUA_PATH", path, 1) < 0)
+    GFX2_Log(GFX2_ERROR, "setenv(\"LUA_PATH\", \"%s\", 1) failed\n", path);
 #endif
+  free(path);
   
   // Drawing
   lua_register(L,"putbrushpixel",L_PutBrushPixel);
@@ -2866,6 +2869,7 @@ void Button_Brush_Factory(void)
   {
     Display_cursor();
   }
+  Free_fileselector_list(&Scripts_selector);
 }
 
 #else // NOLUA
