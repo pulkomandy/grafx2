@@ -983,7 +983,7 @@ endif
 
 $(BIN) : $(OBJ)
 	@test -d ../bin || $(MKDIR) ../bin
-	$(CC) $(OBJ) -o $(BIN) $(LOPT) $(LFLAGS)
+	$(CC) $(OBJ) -o $(BIN) $(LOPT) $(LDFLAGS) $(LDLIBS)
 ifeq ($(PLATFORM),Haiku)
 	rc -o $(OBJDIR)/grafx2.rsrc grafx2.rdef
 	xres -o $(BIN) $(OBJDIR)/grafx2.rsrc
@@ -992,7 +992,7 @@ endif
 
 $(GENERATEDOCBIN): $(GENERATEDOCOBJ)
 	@test -d ../bin || $(MKDIR) ../bin
-	$(CC) $(GENERATEDOCOBJ) -o $(GENERATEDOCBIN) $(LOPT) $(LFLAGS)
+	$(CC) $(GENERATEDOCOBJ) -o $(GENERATEDOCBIN) $(LOPT) $(LDFLAGS)
 
 # GIT revision number
 version.c:	$(REVISION_CACHE)
