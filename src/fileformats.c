@@ -3781,7 +3781,7 @@ void Load_ICO(T_IO_Context * context)
   word width, max_width = 0;
   word max_bpp = 0;
   word min_bpp = 0xffff;
-  dword mask[3];  // R G B
+  dword mask[4];  // R G B A
 
   File_error=0;
 
@@ -3939,6 +3939,7 @@ void Load_ICO(T_IO_Context * context)
                 mask[1] = 0x0000FF00;
                 mask[2] = 0x000000FF;
               }
+              mask[3] = 0;
               Pre_load(context, bmpheader.Width,real_height,File_length_file(file),FORMAT_ICO,PIXEL_SIMPLE,bmpheader.Nb_bits);
               if (bmpheader.Nb_bits <= 8)
                 Load_BMP_Palette(context, file, nb_colors, 0);
