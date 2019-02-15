@@ -833,7 +833,7 @@ int Load_INI(T_Config * conf)
   {
     if (!Load_INI_get_string (file,buffer,"Bookmark_label",value_label, 1))
     {
-      int size = strlen(value_label);
+      size_t size = strlen(value_label);
       if (size!=0)
       {
         if (size >= sizeof(conf->Bookmark_label[0]))
@@ -849,7 +849,7 @@ int Load_INI(T_Config * conf)
       break;
     if (!Load_INI_get_string (file,buffer,"Bookmark_directory",value_label, 1))
     {
-      int size=strlen(value_label);
+      size_t size = strlen(value_label);
       if (size!=0)
       {
         conf->Bookmark_directory[index]=(char *)malloc(size+1);
