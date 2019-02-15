@@ -210,10 +210,10 @@ void Update_colors_during_script(void)
 }
 
 /// Paint a pixel in image without updating the screen
-void Pixel_figure_no_screen(short x_pos,short y_pos,byte color)
+static void Pixel_figure_no_screen(word x_pos, word y_pos, byte color)
 {
-  if (x_pos>0 && y_pos >0 && x_pos<Main.image_width && y_pos<Main.image_height)
-    Pixel_in_current_screen(x_pos,y_pos,color);
+  if (x_pos < Main.image_width && y_pos < Main.image_height)
+    Pixel_in_current_screen(x_pos, y_pos, color);
 }
 
 void Backup_if_necessary(lua_State* L, int layer)
@@ -526,7 +526,7 @@ int L_DrawLine(lua_State* L)
   LUA_ARG_NUMBER(4, "drawline", y2, INT_MIN, INT_MAX);
   LUA_ARG_NUMBER(5, "drawline", c,  INT_MIN, INT_MAX);
 
-  Set_Pixel_figure((void (*) (word,word,byte))Pixel_figure_no_screen);
+  Set_Pixel_figure(Pixel_figure_no_screen);
   Draw_line_general(x1, y1, x2, y2, c);
 
   return 0;
@@ -600,7 +600,7 @@ int L_DrawCircle(lua_State* L)
   LUA_ARG_NUMBER(3, "drawcircle", r, INT_MIN, INT_MAX);
   LUA_ARG_NUMBER(4, "drawcircle", c, INT_MIN, INT_MAX);
 
-  Set_Pixel_figure((void (*) (word,word,byte))Pixel_figure_no_screen);
+  Set_Pixel_figure(Pixel_figure_no_screen);
   Draw_empty_circle_general(x1, y1, r*r, c);
 
   return 0;
