@@ -40,6 +40,8 @@ word * Unicode_strdup(const word * str)
   size_t byte_size;
   word * new_str;
 
+  if (str == NULL)
+    return NULL;
   byte_size = Unicode_strlen(str) * 2 + 2;
   new_str = malloc(byte_size);
   if (new_str != NULL)

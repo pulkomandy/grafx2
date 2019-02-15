@@ -116,20 +116,17 @@ char * Get_program_directory(const char * argv0)
     char path[PATH_MAX];
     if (readlink("/proc/self/exe", path, sizeof(path)) >= 0)
     {
-      program_dir = malloc(strlen(path) + 1);
-      Extract_path(program_dir, path);
+      program_dir = Extract_path(NULL, path);
       return program_dir;
     }
   }
-  program_dir = malloc(strlen(argv0) + 1);
-  Extract_path(program_dir, argv0);
+  program_dir = Extract_path(NULL, argv0);
   
   // Others: The part of argv[0] before the executable name.    
   // Keep the last \ or /.
   // On Windows, Mingw32 already provides the full path in all cases.
   #else
-    program_dir = malloc(strlen(argv0) + 1);
-    Extract_path(program_dir, argv0);
+  program_dir = Extract_path(NULL, argv0);
   #endif
   return program_dir;
 }

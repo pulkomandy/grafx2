@@ -1103,7 +1103,7 @@ void Print_filename(void)
     Menu_status_Y,Menu_factor_X*max_size*8,Menu_factor_Y<<3,MC_Light);
 
   // Partial copy of the name
-  if (Main.backups->Pages->Filename_unicode[0] != 0)
+  if (Main.backups->Pages->Filename_unicode != NULL)
     Unicode_strlcpy(display_string, Main.backups->Pages->Filename_unicode, 256);
   else
   {
@@ -1124,7 +1124,7 @@ void Print_filename(void)
   if (string_size > max_size)
   {
     // check if the begining of the Spare file name is the same
-    if (Spare.backups->Pages->Filename_unicode[0] != 0
+    if (Spare.backups->Pages->Filename_unicode != NULL
         && 0 == memcmp(display_string, Spare.backups->Pages->Filename_unicode, (max_size - 1) * sizeof(word)))
     {
       // display : "...end_of_filename.ext"

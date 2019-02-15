@@ -548,8 +548,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
 // correspond au format demandé.
 {
   struct Read_dir_pdata callback_data;
-  const char * current_path = NULL;
-  char curdir[MAX_PATH_CHARACTERS];
+  char * current_path;
 #if defined (__MINT__)
   T_Fileselector_item *item=0;
   bool bFound=false;
@@ -564,7 +563,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   // Après effacement, il ne reste ni fichier ni répertoire dans la liste
 
   // On lit tous les répertoires:
-  current_path = Get_current_directory(curdir, NULL, MAX_PATH_CHARACTERS);
+  current_path = Get_current_directory(NULL, NULL, 0);
 
   For_each_directory_entry(current_path, &callback_data, Read_dir_callback);
   
@@ -619,7 +618,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   
 #endif
 
-  current_path = NULL;
+  free(current_path);
 
   if (list->Nb_files==0 && list->Nb_directories==0)
   {
@@ -1788,7 +1787,9 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 #endif
 
   Change_directory(context->File_directory);
-  Get_current_directory(Selector->Directory, Selector->Directory_unicode, MAX_PATH_CHARACTERS);
+  free(Selector->Directory);
+  free(Selector->Directory_unicode);
+  Selector->Directory = Get_current_directory(NULL, &Selector->Directory_unicode, 0);
   
   // Affichage des premiers fichiers visibles:
   Reload_list_of_files(Selector->Format_filter,file_scroller);
@@ -1802,8 +1803,11 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 
     // On initialise le nom de fichier à celui en cours et non pas celui sous
     // la barre de sélection
-    strcpy(Selector_filename,context->File_name);
-    Unicode_strlcpy(Selector_filename_unicode, context->File_name_unicode, 256);
+    strcpy(Selector_filename, context->File_name);
+    if (context->File_name_unicode != NULL)
+      Unicode_strlcpy(Selector_filename_unicode, context->File_name_unicode, 256);
+    else
+      Selector_filename_unicode[0] = 0;
     // On affiche le nouveau nom de fichier
     Print_filename_in_fileselector();
   }
@@ -2424,7 +2428,9 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
             Extract_filename(previous_directory, Selector->Directory);
           }
 
-          Get_current_directory(Selector->Directory, Selector->Directory_unicode, MAX_PATH_CHARACTERS);
+          free(Selector->Directory);
+          free(Selector->Directory_unicode);
+          Selector->Directory = Get_current_directory(NULL, &Selector->Directory_unicode, 0);
           // read the new directory
           Read_list_of_files(&Filelist, Selector->Format_filter);
           Sort_list_of_files(&Filelist);
@@ -2456,7 +2462,8 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
       }
       else  // Sinon on essaye de charger ou sauver le fichier
       {
-        strcpy(context->File_directory,Selector->Directory);
+        free(context->File_directory);
+        context->File_directory = strdup(Selector->Directory);
         context->Format = Selector->Format_filter;
         save_or_load_image=1;
       }
@@ -2516,7 +2523,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         {
           Init_context_preview(&preview_context, Selector_filename, Selector->Directory);
           preview_context.Format = Selector->Format_filter;
-          preview_context.File_name_unicode = Selector_filename_unicode;
+          preview_context.File_name_unicode = Unicode_strdup(Selector_filename_unicode);
         }
         Hide_cursor();
         if (context->Type == CONTEXT_PALETTE)
@@ -2536,18 +2543,20 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 
   if (has_clicked_ok)
   {
+    free(context->File_name);
+    free(context->File_name_unicode);
     if (load_from_clipboard)
     {
-      strcpy(context->File_name, "CLIPBOARD.GIF");
-      context->File_name_unicode[0] = 0;
+      context->File_name = strdup("CLIPBOARD.GIF");
+      context->File_name_unicode = NULL;
       context->Format = FORMAT_CLIPBOARD;
     }
     else
     {
-      strcpy(context->File_name, Selector_filename);
-      if (context->File_name_unicode)
-        Unicode_strlcpy(context->File_name_unicode, Selector_filename_unicode, MAX_PATH_CHARACTERS);
-      strcpy(context->File_directory, Selector->Directory);
+      context->File_name = strdup(Selector_filename);
+      context->File_name_unicode = Unicode_strdup(Selector_filename_unicode);
+      free(context->File_directory);
+      context->File_directory = strdup(Selector->Directory);
       if (!load)
         context->Format = Selector->Format_filter;
     }

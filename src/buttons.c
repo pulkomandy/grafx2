@@ -3176,35 +3176,23 @@ void Load_picture(enum CONTEXT_TYPE type)
   byte  old_cursor_shape;
   int   new_mode;
   T_IO_Context context;
-  static char filename [MAX_PATH_CHARACTERS];
-  static word filename_unicode[MAX_PATH_CHARACTERS];
-  static char directory[MAX_PATH_CHARACTERS];
+  word * filename_unicode = NULL;
   T_Selector_settings * selector;
 
   switch (type)
   {
   case CONTEXT_MAIN_IMAGE:
-    strcpy(filename, Main.backups->Pages->Filename);
-    Unicode_strlcpy(filename_unicode, Main.backups->Pages->Filename_unicode, MAX_PATH_CHARACTERS);
-    strcpy(directory, Main.backups->Pages->File_directory);
-    Init_context_layered_image(&context, filename, directory);
+    filename_unicode = Main.backups->Pages->Filename_unicode;
+    Init_context_layered_image(&context, Main.backups->Pages->Filename, Main.backups->Pages->File_directory);
     selector = &Main.selector;
     break;
   case CONTEXT_BRUSH:
-    strcpy(filename, Brush_filename);
-    if (Brush_filename_unicode != NULL)
-      Unicode_strlcpy(filename_unicode, Brush_filename_unicode, MAX_PATH_CHARACTERS);
-    else
-      filename_unicode[0] = 0;
-    strcpy(directory, Brush_file_directory);
-    Init_context_brush(&context, filename, directory);
+    filename_unicode = Brush_filename_unicode;
+    Init_context_brush(&context, Brush_filename, Brush_file_directory);
     selector = &Brush_selector;
     break;
   case CONTEXT_PALETTE:
-    strcpy(filename, "");
-    filename_unicode[0] = 0;
-    strcpy(directory, Main.backups->Pages->File_directory);
-    Init_context_layered_image(&context, filename, directory);
+    Init_context_layered_image(&context, "", Main.backups->Pages->File_directory);
     context.Type = CONTEXT_PALETTE;
     context.Format = FORMAT_PAL;
     selector = &Palette_selector;
@@ -3212,8 +3200,8 @@ void Load_picture(enum CONTEXT_TYPE type)
   default:
     return; // DO NOTHING
   }
-  context.File_name_unicode = filename_unicode;
-  confirm=Button_Load_or_Save(selector, 1, &context);
+  context.File_name_unicode = Unicode_strdup(filename_unicode);
+  confirm = Button_Load_or_Save(selector, 1, &context);
 
   if (confirm)
   {
@@ -3244,14 +3232,14 @@ void Load_picture(enum CONTEXT_TYPE type)
     if (type==CONTEXT_BRUSH)
     {
       free(Brush_filename);
-      Brush_filename = strdup(context.File_name);
+      Brush_filename = context.File_name; // "steal" heap string
+      context.File_name = NULL;
       free(Brush_filename_unicode);
-      if (context.File_name_unicode != NULL && context.File_name_unicode[0] != 0)
-        Brush_filename_unicode = Unicode_strdup(context.File_name_unicode);
-      else
-        Brush_filename_unicode = NULL;
+      Brush_filename_unicode = context.File_name_unicode; // "steal" heap string
+      context.File_name_unicode = NULL;
       free(Brush_file_directory);
-      Brush_file_directory = strdup(context.File_directory);
+      Brush_file_directory = context.File_directory;  // "steal" heap string
+      context.File_directory = NULL;
       Brush_fileformat = context.Format;
 
       Tiling_offset_X=0;
@@ -3337,11 +3325,11 @@ void Load_picture(enum CONTEXT_TYPE type)
       }
     }
 
-    Destroy_context(&context);
-
     Display_menu();
     Display_cursor();
   }
+
+  Destroy_context(&context);
 
   Hide_cursor();
   Print_filename();
@@ -3503,47 +3491,41 @@ void Save_picture(enum CONTEXT_TYPE type)
   byte  confirm;
   byte  old_cursor_shape;
   T_IO_Context save_context;
-  static char filename [MAX_PATH_CHARACTERS];
-  static word filename_unicode[MAX_PATH_CHARACTERS];
-  static char directory[MAX_PATH_CHARACTERS];
+  word * filename_unicode = NULL;
   T_Selector_settings * selector;
 
   if (type == CONTEXT_MAIN_IMAGE)
   {
-    strcpy(filename, Main.backups->Pages->Filename);
-    strcpy(directory, Main.backups->Pages->File_directory);
-    Unicode_strlcpy(filename_unicode, Main.backups->Pages->Filename_unicode, MAX_PATH_CHARACTERS);
-    Init_context_layered_image(&save_context, filename, directory);
+    filename_unicode = Main.backups->Pages->Filename_unicode;
+    Init_context_layered_image(&save_context, Main.backups->Pages->Filename, Main.backups->Pages->File_directory);
     save_context.Format = Main.fileformat;
     selector = &Main.selector;
   }
   else if (type == CONTEXT_BRUSH)
   {
-    strcpy(filename, Brush_filename);
-    if (Brush_filename_unicode != NULL)
-      Unicode_strlcpy(filename_unicode, Brush_filename_unicode, MAX_PATH_CHARACTERS);
-    else
-      filename_unicode[0] = 0;
-    strcpy(directory, Brush_file_directory);
-    Init_context_brush(&save_context, filename, directory);
+    filename_unicode = Brush_filename_unicode;
+    Init_context_brush(&save_context, Brush_filename, Brush_file_directory);
     save_context.Format = Brush_fileformat;
     selector = &Brush_selector;
   }
   else if (type == CONTEXT_PALETTE)
   {
+    char* pal_filename;
     char* dotpos;
-    strcpy(filename, Main.backups->Pages->Filename);
+    size_t len = strlen(Main.backups->Pages->Filename);
 
+    pal_filename = malloc(len + 4 + 1); // reserve space for ".pal"
+    memcpy(pal_filename, Main.backups->Pages->Filename, len + 1);
     // Replace extension with PAL
-    dotpos = strrchr(filename, '.');
+    dotpos = strrchr(pal_filename, '.');
     if (dotpos == NULL)
-      dotpos = filename + strlen(filename);
+      dotpos = pal_filename + len;
     strcpy(dotpos, ".pal");
 
-    filename_unicode[0] = 0;
-    strcpy(directory, Main.backups->Pages->File_directory);
-    Init_context_layered_image(&save_context, filename, directory);
+    Init_context_layered_image(&save_context, pal_filename, Main.backups->Pages->File_directory);
     save_context.Type = CONTEXT_PALETTE;
+
+    free(pal_filename);
 
     // Set format to PAL
     save_context.Format = FORMAT_PAL;
@@ -3552,7 +3534,7 @@ void Save_picture(enum CONTEXT_TYPE type)
   else
     return;
 
-  save_context.File_name_unicode = filename_unicode;
+  save_context.File_name_unicode = Unicode_strdup(filename_unicode);
   confirm=Button_Load_or_Save(selector, 0, &save_context);
 
   if (confirm && File_exists(save_context.File_name))
@@ -3560,7 +3542,7 @@ void Save_picture(enum CONTEXT_TYPE type)
     confirm=Confirmation_box("Erase old file ?");
     if (confirm && (Config.Backup))
     {
-      char * full_filename = Filepath_append_to_dir(directory, filename);
+      char * full_filename = Filepath_append_to_dir(save_context.File_directory, save_context.File_name);
       Backup_existing_file(full_filename);
       free(full_filename);
       if (File_error)
@@ -3585,24 +3567,30 @@ void Save_picture(enum CONTEXT_TYPE type)
     format=Get_fileformat(save_context.Format);
     if (!File_error && type == CONTEXT_MAIN_IMAGE && !format->Palette_only && (Main.backups->Pages->Nb_layers==1 || format->Supports_layers))
     {
-      Main.image_is_modified=0;
-      Main.fileformat=save_context.Format;
-      strcpy(Main.backups->Pages->Filename, save_context.File_name);
-      Unicode_strlcpy(Main.backups->Pages->Filename_unicode, save_context.File_name_unicode, MAX_PATH_CHARACTERS);
-      strcpy(Main.backups->Pages->File_directory, save_context.File_directory);
+      Main.image_is_modified = 0;
+      Main.fileformat = save_context.Format;
+      free(Main.backups->Pages->Filename);
+      Main.backups->Pages->Filename = save_context.File_name; // "steal" string from heap
+      save_context.File_name = NULL;
+      free(Main.backups->Pages->Filename_unicode);
+      Main.backups->Pages->Filename_unicode = save_context.File_name_unicode; // "steal" string
+      save_context.File_name_unicode = NULL;
+      free(Main.backups->Pages->File_directory);
+      Main.backups->Pages->File_directory = save_context.File_directory;
+      save_context.File_directory = NULL;
     }
     if (type == CONTEXT_BRUSH)
     {
       Brush_fileformat = save_context.Format;
       free(Brush_filename);
-      Brush_filename = strdup(save_context.File_name);
+      Brush_filename = save_context.File_name;
+      save_context.File_name = NULL;
       free(Brush_filename_unicode);
-      if (save_context.File_name_unicode != NULL && save_context.File_name_unicode[0] != 0)
-        Brush_filename_unicode = Unicode_strdup(save_context.File_name_unicode);
-      else
-        Brush_filename_unicode = NULL;
+      Brush_filename_unicode = save_context.File_name_unicode;
+      save_context.File_name_unicode = NULL;
       free(Brush_file_directory);
-      Brush_file_directory = strdup(save_context.File_directory);
+      Brush_file_directory = save_context.File_directory;
+      save_context.File_directory = NULL;
     }
     Hide_cursor();
     Cursor_shape=old_cursor_shape;

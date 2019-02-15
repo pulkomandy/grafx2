@@ -823,21 +823,22 @@ void Load_image(T_IO_Context *context)
       // Transfer the data to main image.
       if (!format->Palette_only)
       {
+        free(Main.backups->Pages->Filename);
+        free(Main.backups->Pages->File_directory);
+        free(Main.backups->Pages->Filename_unicode);
+        Main.backups->Pages->Filename_unicode = NULL;
         if (context->Original_file_name && context->Original_file_name[0]
           && context->Original_file_directory && context->Original_file_directory[0])
         {
-          strcpy(Main.backups->Pages->Filename,context->Original_file_name);
-          strcpy(Main.backups->Pages->File_directory,context->Original_file_directory);
-          Main.backups->Pages->Filename_unicode[0] = 0;
+          Main.backups->Pages->Filename = strdup(context->Original_file_name);  /// @todo steal buffer !
+          Main.backups->Pages->File_directory = strdup(context->Original_file_directory);
         }
         else
         {
-          strcpy(Main.backups->Pages->Filename,context->File_name);
-          strcpy(Main.backups->Pages->File_directory,context->File_directory);
+          Main.backups->Pages->Filename = strdup(context->File_name);
+          Main.backups->Pages->File_directory = strdup(context->File_directory);
           if (context->File_name_unicode)
-            Unicode_strlcpy(Main.backups->Pages->Filename_unicode, context->File_name_unicode, MAX_PATH_CHARACTERS);
-          else
-            Main.backups->Pages->Filename_unicode[0] = 0;
+            Main.backups->Pages->Filename_unicode = Unicode_strdup(context->File_name_unicode);
         }
         
         // On considère que l'image chargée n'est plus modifiée
@@ -1732,6 +1733,9 @@ void Destroy_context(T_IO_Context *context)
   free(context->Buffer_image_24b);
   free(context->Buffer_image);
   free(context->Preview_bitmap);
+  free(context->File_name);
+  free(context->File_name_unicode);
+  free(context->File_directory);
   memset(context, 0, sizeof(T_IO_Context));
 }
 
@@ -1741,8 +1745,8 @@ void Init_context_preview(T_IO_Context * context, char *file_name, char *file_di
   memset(context, 0, sizeof(T_IO_Context));
   
   context->Type = CONTEXT_PREVIEW;
-  context->File_name = file_name;
-  context->File_directory = file_directory;
+  context->File_name = file_name != NULL ? strdup(file_name) : NULL;
+  context->File_directory = file_directory != NULL ? strdup(file_directory) : NULL;
 }
 
 // Setup for loading/saving an intermediate backup
@@ -1759,8 +1763,8 @@ void Init_context_layered_image(T_IO_Context * context, char *file_name, char *f
   memset(context, 0, sizeof(T_IO_Context));
   
   context->Type = CONTEXT_MAIN_IMAGE;
-  context->File_name = file_name;
-  context->File_directory = file_directory;
+  context->File_name = file_name != NULL ? strdup(file_name) : NULL;
+  context->File_directory = file_directory != NULL ? strdup(file_directory) : NULL;
   context->Format = Main.fileformat;
   memcpy(context->Palette, Main.palette, sizeof(T_Palette));
   context->Width = Main.image_width;
@@ -1799,8 +1803,8 @@ void Init_context_brush(T_IO_Context * context, char *file_name, char *file_dire
   memset(context, 0, sizeof(T_IO_Context));
   
   context->Type = CONTEXT_BRUSH;
-  context->File_name = file_name;
-  context->File_directory = file_directory;
+  context->File_name = file_name != NULL ? strdup(file_name) : NULL;
+  context->File_directory = file_directory != NULL ? strdup(file_directory) : NULL;
   context->Format = Brush_fileformat;
   // Use main screen's palette
   memcpy(context->Palette, Main.palette, sizeof(T_Palette));
@@ -1821,8 +1825,8 @@ void Init_context_surface(T_IO_Context * context, char *file_name, char *file_di
   memset(context, 0, sizeof(T_IO_Context));
   
   context->Type = CONTEXT_SURFACE;
-  context->File_name = file_name;
-  context->File_directory = file_directory;
+  context->File_name = file_name != NULL ? strdup(file_name) : NULL;
+  context->File_directory = file_directory != NULL ? strdup(file_directory) : NULL;
   context->Format = DEFAULT_FILEFORMAT;
   // context->Palette
   // context->Width

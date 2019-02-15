@@ -413,10 +413,10 @@ typedef struct T_Page
 
   char      Comment[COMMENT_SIZE+1]; ///< Comment to store in the image file.
 
-  char      File_directory[MAX_PATH_CHARACTERS];///< Directory that contains the file.
-  char      Filename[MAX_PATH_CHARACTERS];      ///< Filename without directory.
-  word      Filename_unicode[MAX_PATH_CHARACTERS]; ///< Filename without directory.
-  byte      File_format;                        ///< File format, in enum ::FILE_FORMATS
+  char      * File_directory;     ///< Directory that contains the file.
+  char      * Filename;           ///< Filename without directory.
+  word      * Filename_unicode;   ///< Filename without directory.
+  enum FILE_FORMATS File_format;  ///< File format, in enum ::FILE_FORMATS
   struct T_Page *Next; ///< Pointer to the next backup
   struct T_Page *Prev; ///< Pointer to the previous backup
   T_Gradient_array *Gradients; ///< Pointer to the gradients used by the image.
@@ -555,8 +555,8 @@ typedef struct T_Selector_settings
   byte Format_filter; ///< 0 for "*.*", or a value of enum ::FILE_FORMATS
   short Position; ///< Index of the first file/entry to display in list
   short Offset; ///< Position of the "highlight" bar in the file list
-  char  Directory[MAX_PATH_CHARACTERS]; ///< Directory currently browsed
-  word  Directory_unicode[MAX_PATH_CHARACTERS]; ///< Directory currently browsed
+  char  * Directory; ///< Directory currently browsed
+  word  * Directory_unicode; ///< Directory currently browsed
 } T_Selector_settings;
 
 /// structure for Main or Spare page global data

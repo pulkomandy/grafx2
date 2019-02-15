@@ -321,26 +321,52 @@ char * Filepath_append_to_dir(const char * dir, const char * filename)
 }
 
 // Récupère la partie "nom de file seul" d'un chemin
-void Extract_filename(char *dest, const char *source)
+char * Extract_filename(char *dest, const char *source)
 {
   const char * position = Find_last_separator(source);
 
-  if (position)
-    strcpy(dest,position+1);
+  if (dest != NULL)
+  {
+    if (position)
+      strcpy(dest,position+1);
+    else
+      strcpy(dest,source);
+    return dest;
+  }
   else
-    strcpy(dest,source);
+  {
+    if (position)
+      return strdup(position + 1);
+    else
+      return strdup(source);
+  }
 }
-// Récupère la partie "répertoire+/" d'un chemin.
-void Extract_path(char *dest, const char *source)
-{
-  char * position=NULL;
 
-  Realpath(source,dest);
-  position = Find_last_separator(dest);
+// Récupère la partie "répertoire+/" d'un chemin.
+char * Extract_path(char *dest, const char *source)
+{
+  char * position;
+  char * path;
+
+  path = Realpath(source, dest);
+  position = Find_last_separator(path);
   if (position)
-    *(position+1) = '\0';
+    position[1] = '\0';
   else
-    strcat(dest, PATH_SEPARATOR);
+  {
+    if (dest != NULL)
+      strcat(dest, PATH_SEPARATOR);
+    else
+    {
+      char * tmp = realloc(path, strlen(path) + strlen(PATH_SEPARATOR) + 1);
+      if (tmp != NULL)
+      {
+        path = tmp;
+        strcat(path, PATH_SEPARATOR);
+      }
+    }
+  }
+  return path;
 }
 
 ///
@@ -899,9 +925,10 @@ void Release_lock_file(const char *file_directory)
   lock_filename = Filepath_append_to_dir(file_directory, GFX2_LOCK_FILENAME);
 #endif
   Remove_path(lock_filename);
+  free(lock_filename);
 }
 
-char * Get_current_directory(char * buf, word * buf_unicode, size_t size)
+char * Get_current_directory(char * buf, word * * unicode, size_t size)
 {
 #if defined(__MINT__)
   if (buf == NULL)
@@ -912,8 +939,8 @@ char * Get_current_directory(char * buf, word * buf_unicode, size_t size)
   Dgetpath(buf+3,0);
   strcat(buf,PATH_SEPARATOR);
 
-  if (buf_unicode != NULL)
-    buf_unicode[0] = 0; // no unicode support
+  if (unicode != NULL)
+    *unicode = NULL; // no unicode support
 
   return buf;
 #elif defined(WIN32)
@@ -948,25 +975,29 @@ char * Get_current_directory(char * buf, word * buf_unicode, size_t size)
   if (ret == NULL)
     GFX2_Log(GFX2_ERROR, "getcwd(%p, %lu) failed !\n", buf, (unsigned long)size);
 #ifdef ENABLE_FILENAMES_ICONV
-  if (ret != NULL && buf_unicode != NULL)
+  if (ret != NULL && unicode != NULL)
   {
-    char * input = buf;
-    size_t inbytesleft = strlen(buf);
+    char * input = ret;
+    size_t inbytesleft = strlen(ret);
+    word * buf_unicode = malloc((inbytesleft + 1) * 2);
     char * output = (char *)buf_unicode;
-    size_t outbytesleft = 2 * (size - 1);
-    if (cd_utf16 != (iconv_t)-1)
+    size_t outbytesleft = 2 * inbytesleft;
+    if (cd_utf16 != (iconv_t)-1 && buf_unicode != NULL)
     {
       size_t r = iconv(cd_utf16, &input, &inbytesleft, &output, &outbytesleft);
       if (r != (size_t)-1)
       {
         output[0] = '\0';
         output[1] = '\0';
+        *unicode = buf_unicode;
       }
+      else
+        free(buf_unicode);
     }
   }
 #else
-  if (buf_unicode != NULL)
-    buf_unicode[0] = 0; // no unicode support
+  if (unicode != NULL)
+    *unicode = NULL; // no unicode support
 #endif
   return ret;
 #endif

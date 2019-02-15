@@ -36,6 +36,7 @@
 #include "tiles.h"
 #include "graph.h"
 #include "layers.h"
+#include "unicode.h"
 
 // -- Layers data
 
@@ -68,22 +69,22 @@ T_Page * New_page(int nb_layers)
     int i;
     for (i=0; i<nb_layers; i++)
     {
-      page->Image[i].Pixels=NULL;
-      page->Image[i].Duration=100;
+      page->Image[i].Pixels = NULL;
+      page->Image[i].Duration = 100;
     }
     page->Width=0;
     page->Height=0;
     page->Image_mode = IMAGE_MODE_LAYERED;
-    memset(page->Palette,0,sizeof(T_Palette));
-    page->Comment[0]='\0';
-    page->File_directory[0]='\0';
-    page->Filename[0]='\0';
-    page->Filename_unicode[0]=0;
-    page->File_format=DEFAULT_FILEFORMAT;
-    page->Nb_layers=nb_layers;
-    page->Gradients=NULL;
-    page->Transparent_color=0; // Default transparent color
-    page->Background_transparent=0;
+    memset(page->Palette, 0, sizeof(T_Palette));
+    page->Comment[0] = '\0';
+    page->File_directory = NULL;
+    page->Filename = NULL;
+    page->Filename_unicode = NULL;
+    page->File_format = DEFAULT_FILEFORMAT;
+    page->Nb_layers = nb_layers;
+    page->Gradients = NULL;
+    page->Transparent_color = 0; // Default transparent color
+    page->Background_transparent = 0;
     page->Next = page->Prev = NULL;
   }
   return page;
@@ -454,10 +455,16 @@ void Clear_page(T_Page * page)
   // On ne se préoccupe pas de ce que deviens le reste des infos de l'image.
 }
 
-void Copy_S_page(T_Page * dest,T_Page * source)
+void Copy_S_page(T_Page * dest, T_Page * source)
 {
-  *dest=*source;
-  dest->Gradients=NULL;
+  *dest = *source;
+  dest->Gradients = Dup_gradient(source);
+  if (source->File_directory != NULL)
+    dest->File_directory = strdup(source->File_directory);
+  if (source->Filename != NULL)
+    dest->Filename = strdup(source->Filename);
+  if (source->Filename_unicode != NULL)
+    dest->Filename_unicode = Unicode_strdup(source->Filename_unicode);
 }
 
 
@@ -492,7 +499,7 @@ int Allocate_list_of_pages(T_List_of_pages * list)
 
   list->List_size=1;
 
-  page->Gradients=Dup_gradient(NULL);
+  page->Gradients = Dup_gradient(NULL);
   if (!page->Gradients)
     return 0;
   
@@ -592,6 +599,9 @@ void Free_last_page_of_list(T_List_of_pages * list)
         page->Next->Prev = page->Prev;
         page->Prev->Next = page->Next;
         Clear_page(page);
+        free(page->File_directory);
+        free(page->Filename);
+        free(page->Filename_unicode);
         free(page);
         page = NULL;
         list->List_size--;
@@ -773,11 +783,11 @@ int Init_all_backup_lists(enum IMAGE_MODES image_mode, int width, int height)
   // On crée un descripteur de page correspondant à la page principale
   Upload_infos_page(&Main);
   // On y met les infos sur la dimension de démarrage
-  Main.backups->Pages->Width=width;
-  Main.backups->Pages->Height=height;
-  strcpy(Main.backups->Pages->File_directory,Main.selector.Directory);
-  strcpy(Main.backups->Pages->Filename,"NO_NAME.GIF");
-  Main.backups->Pages->Filename_unicode[0] = 0;
+  Main.backups->Pages->Width = width;
+  Main.backups->Pages->Height = height;
+  Main.backups->Pages->File_directory = strdup(Main.selector.Directory);
+  Main.backups->Pages->Filename = strdup("NO_NAME.GIF");
+  Main.backups->Pages->Filename_unicode = NULL;
 
 
   for (i=0; i<Main.backups->Pages->Nb_layers; i++)
@@ -821,9 +831,9 @@ int Init_all_backup_lists(enum IMAGE_MODES image_mode, int width, int height)
   Spare.backups->Pages->Height = height;
   memcpy(Spare.backups->Pages->Palette,Main.palette,sizeof(T_Palette));
   strcpy(Spare.backups->Pages->Comment,"");
-  strcpy(Spare.backups->Pages->File_directory,Main.selector.Directory);
-  strcpy(Spare.backups->Pages->Filename,"NO_NAME2.GIF");
-  Spare.backups->Pages->Filename_unicode[0] = 0;
+  Spare.backups->Pages->File_directory = strdup(Main.selector.Directory);
+  Spare.backups->Pages->Filename = strdup("NO_NAME2.GIF");
+  Spare.backups->Pages->Filename_unicode = NULL;
 
   Spare.backups->Pages->File_format=DEFAULT_FILEFORMAT;
   // Copy this informations in the global Spare_ variables
@@ -872,7 +882,7 @@ int Backup_new_image(int layers,int width,int height)
   new_page->Width=width;
   new_page->Height=height;
   new_page->Transparent_color=0;
-  new_page->Gradients=Dup_gradient(NULL);
+  new_page->Gradients = Dup_gradient(NULL);
   if (!Create_new_page(new_page,Main.backups,LAYER_ALL))
   {
     Error(0);
@@ -913,15 +923,16 @@ int Backup_with_new_dimensions(int width,int height)
   }
   
   // Copy data from previous history step
-  memcpy(Main.backups->Pages->Palette,Main.backups->Pages->Next->Palette,sizeof(T_Palette));
-  strcpy(Main.backups->Pages->Comment,Main.backups->Pages->Next->Comment);
-  Main.backups->Pages->File_format=Main.backups->Pages->Next->File_format;
-  strcpy(Main.backups->Pages->Filename, Main.backups->Pages->Next->Filename);
-  strcpy(Main.backups->Pages->File_directory, Main.backups->Pages->Next->File_directory);
-  Main.backups->Pages->Gradients=Dup_gradient(Main.backups->Pages->Next);
-  Main.backups->Pages->Background_transparent=Main.backups->Pages->Next->Background_transparent;
-  Main.backups->Pages->Transparent_color=Main.backups->Pages->Next->Transparent_color;
-  Main.backups->Pages->Image_mode=Main.backups->Pages->Next->Image_mode;
+  memcpy(Main.backups->Pages->Palette, Main.backups->Pages->Next->Palette, sizeof(T_Palette));
+  strcpy(Main.backups->Pages->Comment ,Main.backups->Pages->Next->Comment);
+  Main.backups->Pages->File_format = Main.backups->Pages->Next->File_format;
+  Main.backups->Pages->Filename = strdup(Main.backups->Pages->Next->Filename);
+  Main.backups->Pages->Filename_unicode = Unicode_strdup(Main.backups->Pages->Next->Filename_unicode);
+  Main.backups->Pages->File_directory = strdup(Main.backups->Pages->Next->File_directory);
+  Main.backups->Pages->Gradients = Dup_gradient(Main.backups->Pages->Next);
+  Main.backups->Pages->Background_transparent = Main.backups->Pages->Next->Background_transparent;
+  Main.backups->Pages->Transparent_color = Main.backups->Pages->Next->Transparent_color;
+  Main.backups->Pages->Image_mode = Main.backups->Pages->Next->Image_mode;
   
   // Fill with transparent color
   for (i=0; i<Main.backups->Pages->Nb_layers;i++)
@@ -1052,7 +1063,6 @@ int Backup_and_resize_the_spare(int width,int height)
   
   // Fill it with a copy of the latest history
   Copy_S_page(new_page,Spare.backups->Pages);
-  new_page->Gradients=Dup_gradient(Spare.backups->Pages);
   
   new_page->Width=width;
   new_page->Height=height;
@@ -1108,7 +1118,6 @@ void Backup_layers(int layer)
   
   // Fill it with a copy of the latest history
   Copy_S_page(new_page,Main.backups->Pages);
-  new_page->Gradients=Dup_gradient(Main.backups->Pages);
   Create_new_page(new_page,Main.backups,layer);
   Download_infos_page_main(new_page);
 
@@ -1168,7 +1177,6 @@ void Backup_the_spare(int layer)
   
   // Fill it with a copy of the latest history
   Copy_S_page(new_page,Spare.backups->Pages);
-  new_page->Gradients=Dup_gradient(Spare.backups->Pages);
   Create_new_page(new_page,Spare.backups,layer);
 
   // Copy the actual pixels from the backup to the latest page

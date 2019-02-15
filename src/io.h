@@ -93,9 +93,9 @@ unsigned long File_length_file(FILE * file);
 /// Construct full file path
 char * Filepath_append_to_dir(const char * dir, const char * filename);
 /// Extracts the filename part from a full file name.
-void Extract_filename(char *dest, const char *source);
+char * Extract_filename(char *dest, const char *source);
 /// Extracts the directory from a full file name.
-void Extract_path(char *dest, const char *source);
+char * Extract_path(char *dest, const char *source);
 
 /// Finds the rightmost path separator in a full filename. Used to separate directory from file.
 char * Find_last_separator(const char * str);
@@ -180,10 +180,10 @@ void Release_lock_file(const char *file_directory);
 ///
 /// Return the current directory, equivalent to getcwd()
 /// @param buf destination buffer. can be NULL
-/// @param buf_unicode destination buffer for the unicode version of the path
+/// @param unicode destination pointer for the unicode version of the path
 /// @param size destination buffer size, ignored if buf is NULL
 /// @return NULL for error, buf or a malloc'ed buffer
-char * Get_current_directory(char * buf, word * buf_unicode, size_t size);
+char * Get_current_directory(char * buf, word ** unicode, size_t size);
 
 ///
 /// Change current directory. return 0 for success, -1 in case of error

@@ -123,9 +123,11 @@
 #include "brush.h"
 #include "palette.h"
 #include "realpath.h"
+#include "unicode.h"
 #include "input.h"
 #include "help.h"
 #include "filesel.h"
+#include "factory.h"
 #if defined(WIN32) && !(defined(USE_SDL) || defined(USE_SDL2))
 #include "win32screen.h"
 #endif
@@ -619,7 +621,6 @@ int Init_program(int argc,char * argv[])
   T_Gradient_array initial_gradients;
   char * filenames[2] = {NULL, NULL};
   char * directories[2] = {NULL, NULL};
-  word * filename_unicode;
 
   #if defined(__MINT__)
   printf("===============================\n");
@@ -658,7 +659,7 @@ int Init_program(int argc,char * argv[])
   // Choose directory for settings (read/write)
   Config_directory = Get_config_directory(program_directory);
   // Get current directory
-  Get_current_directory(Main.selector.Directory,Main.selector.Directory_unicode,MAX_PATH_CHARACTERS);
+  Main.selector.Directory = Get_current_directory(NULL, &Main.selector.Directory_unicode, 0);
 
   free(program_directory);
 
@@ -666,18 +667,21 @@ int Init_program(int argc,char * argv[])
   Initial_directory = strdup(Main.selector.Directory);
 
   // On initialise les données sur le nom de fichier de l'image de brouillon:
-  strcpy(Spare.selector.Directory,Main.selector.Directory);
+  Spare.selector.Directory = strdup(Main.selector.Directory);
+  Spare.selector.Directory_unicode = Unicode_strdup(Main.selector.Directory_unicode);
 
-  Main.fileformat=DEFAULT_FILEFORMAT;
-  Spare.fileformat    =DEFAULT_FILEFORMAT;
+  Main.fileformat  = DEFAULT_FILEFORMAT;
+  Spare.fileformat = DEFAULT_FILEFORMAT;
 
-  strcpy(Brush_selector.Directory, Main.selector.Directory);
+  Brush_selector.Directory = strdup(Main.selector.Directory);
+  Brush_selector.Directory_unicode = Unicode_strdup(Main.selector.Directory_unicode);
   Brush_file_directory = strdup(Main.selector.Directory);
   Brush_filename = strdup("NO_NAME.GIF");
   Brush_filename_unicode = NULL;
   Brush_fileformat = DEFAULT_FILEFORMAT;
 
-  strcpy(Palette_selector.Directory,Main.selector.Directory);
+  Palette_selector.Directory = strdup(Main.selector.Directory);
+  Palette_selector.Directory_unicode = Unicode_strdup(Main.selector.Directory_unicode);
 
   // On initialise ce qu'il faut pour que les fileselects ne plantent pas:
 
@@ -1134,11 +1138,9 @@ int Init_program(int argc,char * argv[])
         case 2:
           // Load this file
           Init_context_layered_image(&context, filenames[1], directories[1]);
-          filename_unicode = Get_Unicode_Filename(NULL, filenames[1], directories[1]);
-          context.File_name_unicode = filename_unicode;
+          context.File_name_unicode = Get_Unicode_Filename(NULL, filenames[1], directories[1]);
           Load_image(&context);
           Destroy_context(&context);
-          free(filename_unicode);
           Redraw_layered_image();
           End_of_modification();
 
@@ -1149,11 +1151,9 @@ int Init_program(int argc,char * argv[])
 #endif
         case 1:
           Init_context_layered_image(&context, filenames[0], directories[0]);
-          filename_unicode = Get_Unicode_Filename(NULL, filenames[0], directories[0]);
-          context.File_name_unicode = filename_unicode;
+          context.File_name_unicode = Get_Unicode_Filename(NULL, filenames[0], directories[0]);
           Load_image(&context);
           Destroy_context(&context);
-          free(filename_unicode);
           Redraw_layered_image();
           End_of_modification();
 
@@ -1291,6 +1291,15 @@ void Program_shutdown(void)
   FREE_POINTER(Config_directory);
   FREE_POINTER(Data_directory);
 
+  FREE_POINTER(Main.selector.Directory);
+  FREE_POINTER(Main.selector.Directory_unicode);
+  FREE_POINTER(Spare.selector.Directory);
+  FREE_POINTER(Spare.selector.Directory_unicode);
+  FREE_POINTER(Brush_selector.Directory);
+  FREE_POINTER(Brush_selector.Directory_unicode);
+  FREE_POINTER(Palette_selector.Directory);
+  FREE_POINTER(Palette_selector.Directory_unicode);
+
   // Free Config
   FREE_POINTER(Config.Skin_file);
   FREE_POINTER(Config.Font_file);
@@ -1299,6 +1308,11 @@ void Program_shutdown(void)
     FREE_POINTER(Config.Bookmark_directory[i]);
   }
   FREE_POINTER(Config.Scripts_directory);
+
+  for (i = 0; i < 10; i++)
+  {
+    FREE_POINTER(Bound_script[i]);
+  }
 
   Uninit_text();
 

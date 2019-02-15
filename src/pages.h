@@ -64,13 +64,6 @@ int Dup_layer_if_shared(T_Page * page, int layer);
 
 void Upload_infos_page(T_Document * doc);
 
-// private
-T_Page * New_page(int nb_layers);
-void Download_infos_page_spare(T_Page * page);
-void Clear_page(T_Page * page);
-void Copy_S_page(T_Page * dest,T_Page * source);
-
-
 
 ///
 /// LISTS OF PAGES
