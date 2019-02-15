@@ -6075,6 +6075,8 @@ void Load_MOTO(T_IO_Context * context)
       }
     }
   }
+  free(vram_forme);
+  free(vram_couleur);
 }
 
 /**
