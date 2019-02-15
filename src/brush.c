@@ -760,15 +760,15 @@ byte Realloc_brush(word new_brush_width, word new_brush_height, byte *new_brush,
 
   // Save or free the old brush pixels
   if (old_brush)
-    *old_brush=Brush_original_pixels;
+    *old_brush = Brush_original_pixels;
   else
-    free(old_brush);
-  Brush_original_pixels=new_brush;
+    free(Brush_original_pixels);
+  Brush_original_pixels = new_brush;
   // Assign new brush
   if (new_brush_remapped)
   {
     free(Brush);
-    Brush=new_brush_remapped;
+    Brush = new_brush_remapped;
   }
   return 0;
 }
