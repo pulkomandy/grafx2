@@ -4042,7 +4042,7 @@ void Button_Brush_FX(int btn)
       clicked_button=1;
     }
   }
-  while (clicked_button<=0 && Quit_is_required);
+  while (clicked_button<=0 && !Quit_is_required);
 
   Close_window();
   Unselect_button(btn);
