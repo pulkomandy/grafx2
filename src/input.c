@@ -536,14 +536,17 @@ static int Handle_SelectionNotify(const XSelectionEvent* xselection)
         GFX2_Log(GFX2_DEBUG, "Clipboard value=%p %lu bytes format=%d type=%s\n",
                  value, count, format, type_name);
         XFree(type_name);
-        X11_clipboard_size = count;
-        if (xselection->target == XInternAtom(X11_display, "UTF8_STRING", False))
-          X11_clipboard = strdup((char *)value); // Text Clipboard
-        else if (xselection->target == XInternAtom(X11_display, "image/png", False))
-        { // Picture clipboard (PNG)
-          X11_clipboard = malloc(count);
-          if (X11_clipboard != NULL)
-            memcpy(X11_clipboard, value, count);
+        if (count > 0)
+        {
+          X11_clipboard_size = count;
+          if (xselection->target == XInternAtom(X11_display, "UTF8_STRING", False))
+            X11_clipboard = strdup((char *)value); // Text Clipboard
+          else if (xselection->target == XInternAtom(X11_display, "image/png", False))
+          { // Picture clipboard (PNG)
+            X11_clipboard = malloc(count);
+            if (X11_clipboard != NULL)
+              memcpy(X11_clipboard, value, count);
+          }
         }
         XFree(value);
       }
