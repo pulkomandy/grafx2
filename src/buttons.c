@@ -3638,6 +3638,7 @@ void Button_Autosave(int btn)
       Display_cursor();
 
       Init_context_layered_image(&save_context, Main.backups->Pages->Filename, Main.backups->Pages->File_directory);
+      save_context.File_name_unicode = Unicode_strdup(Main.backups->Pages->Filename_unicode);
       Save_image(&save_context);
       if (!File_error)
       {
