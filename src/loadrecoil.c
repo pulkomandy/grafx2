@@ -32,6 +32,7 @@
 #include "loadsave.h"
 #include "io.h"
 #include "errors.h"
+#include "unicode.h"
 
 #include "recoil.h"
 
@@ -102,7 +103,7 @@ void Load_Recoil_Image(T_IO_Context *context)
   if (recoil)
   {
 #ifdef WIN32
-    char tempfilename[MAX_PATH_CHARACTERS];
+    char * tempfilename = NULL;
 #endif
     const char * filename = context->File_name;
     *(const RECOILVtbl **)recoil = &vtbl; // set Vtable
@@ -112,8 +113,10 @@ void Load_Recoil_Image(T_IO_Context *context)
       // get the full file extension from the long filename (unicode)
       // RECOIL doesn't recognize file if the "short" extension is passed,
       // ie .DEE instead of .deep
-      int i;
-      for (i = 0; context->File_name_unicode[i] != 0 && i < (int)sizeof(tempfilename) - 1; i++)
+      size_t i;
+      size_t len = Unicode_strlen(context->File_name_unicode);
+      tempfilename = (char *)malloc(len + 1);
+      for (i = 0; i < len; i++)
         tempfilename[i] = (context->File_name_unicode[i] < 256) ? (char)context->File_name_unicode[i] : '_';
       tempfilename[i] = '\0';
       filename = tempfilename;
@@ -205,6 +208,9 @@ void Load_Recoil_Image(T_IO_Context *context)
       }
     }
     RECOIL_Delete(recoil);
+#ifdef WIN32
+    free(tempfilename);
+#endif
   }
   free(file_content);
 }
