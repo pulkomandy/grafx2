@@ -301,12 +301,14 @@ char * Format_filename(const char * fname, word max_length, int type)
   int         pos_last_dot;
 #ifdef ENABLE_FILENAMES_ICONV
   /* convert file name from UTF8 to ANSI */
-  char        converted_fname[MAX_PATH_CHARACTERS];
+  char        * converted_fname = NULL;
   {
     char * input = (char *)fname;
     size_t inbytesleft = strlen(fname);
     char * output = converted_fname;
-    size_t outbytesleft = sizeof(converted_fname)-1;
+    size_t outbytesleft = inbytesleft;
+    converted_fname = malloc(outbytesleft + 1);
+    output = converted_fname;
     if(cd != (iconv_t)-1 && (ssize_t)iconv(cd, &input, &inbytesleft, &output, &outbytesleft) >= 0)
     {
       *output = '\0';
@@ -371,6 +373,9 @@ char * Format_filename(const char * fname, word max_length, int type)
         result[other_cursor]=fname[c];
     }
   }
+#ifdef ENABLE_FILENAMES_ICONV
+  free(converted_fname);
+#endif
   return result;
 }
 
@@ -1431,7 +1436,7 @@ static void Reload_list_of_files(byte filter, T_Scroller_button * button)
 
 void Scroll_fileselector(T_Scroller_button * file_scroller)
 {
-  char old_filename[MAX_PATH_CHARACTERS];
+  char old_filename[256];
 
   strcpy(old_filename,Selector_filename);
 
@@ -1656,8 +1661,8 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   byte  has_clicked_ok=0;// Indique si on a clické sur Load ou Save ou sur
                              //un bouton enclenchant Load ou Save juste après.
   byte  initial_back_color; // preview destroys it (how nice)
-  char  save_filename[MAX_PATH_CHARACTERS];
-  word  save_filename_unicode[MAX_PATH_CHARACTERS];
+  char  save_filename[256];
+  word  save_filename_unicode[256];
   char  initial_comment[COMMENT_SIZE+1];
   short window_shortcut;
   const char * directory_to_change_to = NULL;
@@ -2034,7 +2039,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 
         // Save the filename
         strcpy(save_filename, Selector_filename);
-        Unicode_strlcpy(save_filename_unicode, Selector_filename_unicode, MAX_PATH_CHARACTERS);
+        Unicode_strlcpy(save_filename_unicode, Selector_filename_unicode, 256);
         // Check if the selected entry is a drive/directory :
         // in, this case, clear the filename
         if (Filelist.Nb_elements>0)
@@ -2070,22 +2075,29 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 #endif
         {
 #if defined(WIN32)
-          WCHAR temp_str[MAX_PATH_CHARACTERS];
-          if (GetShortPathNameW((WCHAR *)filename_unicode, temp_str, MAX_PATH_CHARACTERS) == 0)
+          DWORD short_len;
+          short_len = GetShortPathNameW((WCHAR *)filename_unicode, NULL, 0);
+          if (short_len > 0)
+          {
+            WCHAR * temp_str = (WCHAR *)malloc(short_len * sizeof(WCHAR));
+            short_len = GetShortPathNameW((WCHAR *)filename_unicode, temp_str, short_len);
+            if (short_len > 0)
+            {
+              DWORD i;
+              for (i = 0; i < short_len && temp_str[i] != 0; i++)
+                filename_ansi[i] = temp_str[i];
+              filename_ansi[i] = '\0';
+            }
+            free(temp_str);
+          }
+          if (short_len == 0)
           {
             // generate a temporary ansi name
             int i;
-            for (i = 0; i < MAX_PATH_CHARACTERS - 1 && filename_unicode[i] != 0; i++)
+            for (i = 0; i < sizeof(filename_ansi) - 1 && filename_unicode[i] != 0; i++)
             {
               filename_ansi[i] = (filename_unicode[i] < 256) ? (byte)filename_unicode[i] : '_';
             }
-            filename_ansi[i] = '\0';
-          }
-          else
-          {
-            int i;
-            for (i = 0; i < MAX_PATH_CHARACTERS - 1 && temp_str[i] != 0; i++)
-              filename_ansi[i] = temp_str[i];
             filename_ansi[i] = '\0';
           }
 #elif defined(ENABLE_FILENAMES_ICONV)
@@ -2413,7 +2425,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         if (Change_directory(directory_to_change_to) == 0)
         {
           short pos;
-          char  previous_directory[MAX_PATH_CHARACTERS]; // Répertoire d'où l'on vient après un CHDIR
+          char * previous_directory; // Directory when we are coming from
         #if defined (__MINT__)
           static char path[1024]={0};
           char currentDrive='A';
@@ -2422,11 +2434,11 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           // save the previous current directory
           if (strcmp(directory_to_change_to,PARENT_DIR) != 0)
           {
-            strcpy(previous_directory,PARENT_DIR);
+            previous_directory = strdup(PARENT_DIR);
           }
           else
           {
-            Extract_filename(previous_directory, Selector->Directory);
+            previous_directory = Extract_filename(NULL, Selector->Directory);
           }
 
           free(Selector->Directory);
@@ -2438,6 +2450,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           // Set the fileselector bar on the directory we're coming from
           pos = Find_file_in_fileselector(&Filelist, previous_directory);
           strcpy(Selector_filename, previous_directory);
+          free(previous_directory);
           if (!Get_Unicode_Filename(Selector_filename_unicode, Selector_filename, "."))
             Selector_filename_unicode[0] = 0;
           Highlight_file((pos >= 0) ? pos : 0);
@@ -2451,10 +2464,12 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         }
         else
         {
-          char warn_msg[MAX_PATH_CHARACTERS];
+          char * current_dir;
           Display_cursor();
-          snprintf(warn_msg, sizeof(warn_msg), "cannot chdir to \"%s\" !", directory_to_change_to);
-          Warning(warn_msg);
+          GFX2_Log(GFX2_WARNING, "cannot chdir to \"%s\" !", directory_to_change_to);
+          current_dir = Get_current_directory(NULL, NULL, 0);
+          GFX2_Log(GFX2_WARNING, "Current directory is \"%s\"", current_dir);
+          free(current_dir);
           // restore Selector_filename
           strncpy(Selector_filename, save_filename, sizeof(Selector_filename));
           Error(0);
