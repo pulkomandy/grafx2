@@ -2091,7 +2091,6 @@ void Rotate_safety_backups(void)
   dword now;
   T_IO_Context context;
   char file_name[12+1];
-  char deleted_file[MAX_PATH_CHARACTERS];
 
   if (!Safety_backup_active)
     return;
@@ -2107,13 +2106,22 @@ void Rotate_safety_backups(void)
       (Main.edits_since_safety_backup > 1 &&
       now > Main.time_of_safety_backup + Max_interval_for_safety_backup))
   {
-    
+    char * deleted_file;
+    size_t len = strlen(Config_directory) + strlen(BACKUP_FILE_EXTENSION) + 1 + 6 + 1;
+
+    deleted_file = malloc(len);
+    if (deleted_file == NULL)
+    {
+      GFX2_Log(GFX2_ERROR, "Failed to allocate %lu bytes.\n", (unsigned long)len);
+      return;
+    }
     // Clear a previous save (rotating saves)
-    sprintf(deleted_file, "%s%c%6.6d" BACKUP_FILE_EXTENSION,
+    snprintf(deleted_file, len, "%s%c%6.6d" BACKUP_FILE_EXTENSION,
       Config_directory,
       Main.safety_backup_prefix,
       (dword)(Main.safety_number + 1000000l - Rotation_safety_backup) % (dword)1000000l);
     Remove_path(deleted_file); // no matter if fail
+    free(deleted_file);
     
     // Reset counters
     Main.edits_since_safety_backup=0;
@@ -2185,29 +2193,41 @@ FILE * Open_file_write(T_IO_Context *context)
   FILE * f;
   char * filename; // filename with full path
 #if defined(WIN32)
-  WCHAR filename_unicode[MAX_PATH_CHARACTERS];
-
   if (context->File_name_unicode != NULL && context->File_name_unicode[0] != 0)
   {
-    Unicode_char_strlcpy((word *)filename_unicode, context->File_directory, MAX_PATH_CHARACTERS);
-    Unicode_char_strlcat((word *)filename_unicode, PATH_SEPARATOR, MAX_PATH_CHARACTERS);
-    Unicode_strlcat((word *)filename_unicode, context->File_name_unicode, MAX_PATH_CHARACTERS);
+    size_t len;
+    WCHAR * filename_unicode;
+
+    len = strlen(context->File_directory) + strlen(PATH_SEPARATOR)
+        + Unicode_strlen(context->File_name_unicode) + 1;
+    filename_unicode = (WCHAR *)malloc(sizeof(WCHAR) * len);
+
+    Unicode_char_strlcpy((word *)filename_unicode, context->File_directory, len);
+    Unicode_char_strlcat((word *)filename_unicode, PATH_SEPARATOR, len);
+    Unicode_strlcat((word *)filename_unicode, context->File_name_unicode, len);
 
     f = _wfopen(filename_unicode, L"wb");
     if (f != NULL)
     {
       // Now the file has been created, retrieve its short (ASCII) name
-      WCHAR shortpath[MAX_PATH_CHARACTERS];
-      DWORD len = GetShortPathNameW(filename_unicode, shortpath, MAX_PATH_CHARACTERS);
-      if (len > 0 && len < MAX_PATH_CHARACTERS)
+      len = GetShortPathNameW(filename_unicode, NULL, 0);
+      if (len > 0)
       {
-        DWORD start, index;
-        for (start = len; start > 0 && shortpath[start-1] != '\\'; start--);
-        for (index = 0; index < MAX_PATH_CHARACTERS - 1 && index < len - start; index++)
-          context->File_name[index] = shortpath[start + index];
-        context->File_name[index] = '\0';
+        WCHAR * shortpath = (WCHAR *)malloc(sizeof(WCHAR) * len);
+        len = GetShortPathNameW(filename_unicode, shortpath, len);
+        if (len > 0)
+        {
+          DWORD start, index;
+          for (start = len; start > 0 && shortpath[start-1] != '\\'; start--);
+          free(context->File_name);
+          context->File_name = (char *)malloc(len + 1 - start);
+          for (index = 0; index < len - start; index++)
+            context->File_name[index] = shortpath[start + index];
+          context->File_name[index] = '\0';
+        }
       }
     }
+    free(filename_unicode);
     return f;
   }
 #endif
@@ -2224,21 +2244,27 @@ FILE * Open_file_write_with_alternate_ext(T_IO_Context *context, const char * ex
   char *p;
   char * filename; // filename with full path
 #if defined(WIN32)
-  WCHAR filename_unicode[MAX_PATH_CHARACTERS];
-  WCHAR * pw;
-
   if (context->File_name_unicode != NULL && context->File_name_unicode[0] != 0)
   {
-    Unicode_char_strlcpy((word *)filename_unicode, context->File_directory, MAX_PATH_CHARACTERS);
-    Unicode_char_strlcat((word *)filename_unicode, PATH_SEPARATOR, MAX_PATH_CHARACTERS);
-    Unicode_strlcat((word *)filename_unicode, context->File_name_unicode, MAX_PATH_CHARACTERS);
+    size_t len;
+    WCHAR * filename_unicode;
+    WCHAR * pw;
+
+    len = strlen(context->File_directory) + strlen(PATH_SEPARATOR)
+        + Unicode_strlen(context->File_name_unicode) + strlen(ext) + 1 + 1;
+    filename_unicode = (WCHAR *)malloc(len * sizeof(WCHAR));
+    Unicode_char_strlcpy((word *)filename_unicode, context->File_directory, len);
+    Unicode_char_strlcat((word *)filename_unicode, PATH_SEPARATOR, len);
+    Unicode_strlcat((word *)filename_unicode, context->File_name_unicode, len);
     pw = wcschr(filename_unicode, (WCHAR)'.');
     if (pw != NULL)
       *pw = 0;
-    Unicode_char_strlcat((word *)filename_unicode, ".", MAX_PATH_CHARACTERS);
-    Unicode_char_strlcat((word *)filename_unicode, ext, MAX_PATH_CHARACTERS);
+    Unicode_char_strlcat((word *)filename_unicode, ".", len);
+    Unicode_char_strlcat((word *)filename_unicode, ext, len);
 
-    return _wfopen(filename_unicode, L"wb");
+    f = _wfopen(filename_unicode, L"wb");
+    free(filename_unicode);
+    return f;
   }
 #endif
   filename = Filepath_append_to_dir(context->File_directory, context->File_name);
@@ -2296,10 +2322,13 @@ static void Look_for_alternate_ext(void * pdata, const char * filename, const wo
       return; // No match.
 #if defined(WIN32)
     {
-      WCHAR temp_string[MAX_PATH_CHARACTERS];
+      int cmp;
+      WCHAR * temp_string = (WCHAR *)malloc((base_len + 1) * sizeof(WCHAR));
       memcpy(temp_string, filename_unicode, base_len * sizeof(word));
       temp_string[base_len] = 0;
-      if (_wcsicmp((const WCHAR *)params->basename_unicode, temp_string) != 0)
+      cmp = _wcsicmp((const WCHAR *)params->basename_unicode, temp_string);
+      free(temp_string);
+      if (cmp != 0)
         return; // No match.
     }
 #else
