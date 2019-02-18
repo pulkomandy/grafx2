@@ -1248,32 +1248,15 @@ static void Display_bookmark(T_Dropdown_button * Button, int bookmark_number)
 
 //------------------------ Chargements et sauvegardes ------------------------
 
-void Print_current_directory(void)
-//
-// Shows Selector->Directory on 37 chars
-//
+/// Shows Selector->Directory on 37 chars
+static void Print_current_directory(void)
 {
-  char converted_name[MAX_PATH_CHARACTERS];
-  int  length; // length du répertoire courant
-  int  index;   // index de parcours de la chaine complète
-
-  strncpy(converted_name,Selector->Directory,sizeof(converted_name));
-  converted_name[sizeof(converted_name)-1] = '\0';
-#ifdef ENABLE_FILENAMES_ICONV
-  {
-    /* convert file name from UTF8 to ANSI */
-    char * input = Selector->Directory;
-    size_t inbytesleft = strlen(input);
-    char * output = converted_name;
-    size_t outbytesleft = sizeof(converted_name)-1;
-    if(cd != (iconv_t)-1 && (ssize_t)iconv(cd, &input, &inbytesleft, &output, &outbytesleft) >= 0)
-      *output = '\0';
-  }
-#endif /* ENABLE_FILENAMES_ICONV */
+  size_t length; // length du répertoire courant
+  size_t index;  // index de parcours de la chaine complète
 
   Window_rectangle(10,84,37*8,8,MC_Light);
 
-  if (Selector->Directory_unicode[0] != 0)
+  if (Selector->Directory_unicode != NULL && Selector->Directory_unicode[0] != 0)
   {
     length=Unicode_strlen(Selector->Directory_unicode);
     if (length>MAX_DISPLAYABLE_PATH)
@@ -1301,7 +1284,24 @@ void Print_current_directory(void)
   }
   else
   {
-    length=strlen(converted_name);
+    char * converted_name;
+#ifdef ENABLE_FILENAMES_ICONV
+    /* convert file name from UTF8 to ANSI */
+    char * input = Selector->Directory;
+    size_t inbytesleft = strlen(input);
+    char * output;
+    size_t outbytesleft = inbytesleft + 1;
+    converted_name = malloc(outbytesleft);
+    output = converted_name;
+    if(cd != (iconv_t)-1 && (ssize_t)iconv(cd, &input, &inbytesleft, &output, &outbytesleft) >= 0)
+      *output = '\0';
+    else
+      strcpy(converted_name, Selector->Directory);
+#else
+    converted_name = strdup(Selector->Directory);
+#endif /* ENABLE_FILENAMES_ICONV */
+
+    length = strlen(converted_name);
     if (length>MAX_DISPLAYABLE_PATH)
     { // We need to truncate the directory
       char temp_name[MAX_DISPLAYABLE_PATH+1]; // truncated name
@@ -1318,7 +1318,7 @@ void Print_current_directory(void)
             (length-index<=MAX_DISPLAYABLE_PATH-4) )
         {
           // we found the place !
-          strcpy(temp_name+4,converted_name+index);
+          memcpy(temp_name + 4, converted_name + index, length - index + 1);
           break;
         }
 
@@ -1327,8 +1327,9 @@ void Print_current_directory(void)
     }
     else // The string is short enough
       Print_in_window(10,84,converted_name,MC_Black,MC_Light);
+    free(converted_name);
   }
-    
+
   Update_window_area(10,84,37*8,8);
 }
 
