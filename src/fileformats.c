@@ -4473,28 +4473,19 @@ void Load_GIF(T_IO_Context * context)
                       else if (!memcmp(aeb,"GFX2PATH\x00\x00\x00",0x0B))
                       {
                         // Original file path
-                        if (context->Original_file_name && context->Original_file_directory)
+                        Read_byte(GIF_file,&size_to_read);
+                        if (!File_error && size_to_read > 0)
                         {
-                          Read_byte(GIF_file,&size_to_read);
-                          if (!File_error && size_to_read)
+                          free(context->Original_file_directory);
+                          context->Original_file_directory = malloc(size_to_read);
+                          Read_bytes(GIF_file, context->Original_file_directory, size_to_read);
+                          Read_byte(GIF_file, &size_to_read);
+                          if (!File_error && size_to_read > 0)
                           {
-                            Read_bytes(GIF_file,context->Original_file_directory, size_to_read);
-                            Read_byte(GIF_file,&size_to_read);
-                            if (!File_error && size_to_read)
-                            {
-                              Read_bytes(GIF_file,context->Original_file_name, size_to_read);
-                              Read_byte(GIF_file,&size_to_read); // Normally 0
-                            }
-                          }
-                        }
-                        else
-                        {
-                          // Nothing to do, just skip sub-block
-                          Read_byte(GIF_file,&size_to_read);
-                          while (size_to_read!=0 && !File_error)
-                          {
-                            fseek(GIF_file,size_to_read,SEEK_CUR);
-                            Read_byte(GIF_file,&size_to_read);
+                            free(context->Original_file_name);
+                            context->Original_file_name = malloc(size_to_read);
+                            Read_bytes(GIF_file, context->Original_file_name, size_to_read);
+                            Read_byte(GIF_file, &size_to_read); // Normally 0
                           }
                         }
                       }

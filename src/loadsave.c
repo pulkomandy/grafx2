@@ -827,11 +827,13 @@ void Load_image(T_IO_Context *context)
         free(Main.backups->Pages->File_directory);
         free(Main.backups->Pages->Filename_unicode);
         Main.backups->Pages->Filename_unicode = NULL;
-        if (context->Original_file_name && context->Original_file_name[0]
-          && context->Original_file_directory && context->Original_file_directory[0])
+        if (context->Original_file_name != NULL
+          && context->Original_file_directory != NULL)
         {
-          Main.backups->Pages->Filename = strdup(context->Original_file_name);  /// @todo steal buffer !
-          Main.backups->Pages->File_directory = strdup(context->Original_file_directory);
+          Main.backups->Pages->Filename = context->Original_file_name;  // steal buffer !
+          context->Original_file_name = NULL;
+          Main.backups->Pages->File_directory = context->Original_file_directory;  // steal heap buffer
+          context->Original_file_directory = NULL;
         }
         else
         {
@@ -1736,6 +1738,8 @@ void Destroy_context(T_IO_Context *context)
   free(context->File_name);
   free(context->File_name_unicode);
   free(context->File_directory);
+  free(context->Original_file_directory);
+  free(context->Original_file_name);
   memset(context, 0, sizeof(T_IO_Context));
 }
 
@@ -2006,13 +2010,9 @@ byte Process_backups(T_String_list **list)
   {
     // Load this file
     T_IO_Context context;
-    char file_name[MAX_PATH_CHARACTERS]="";
-    char file_directory[MAX_PATH_CHARACTERS]="";
     
     Init_context_backup_image(&context, files_vector[i], Config_directory);
     // Provide buffers to read original location
-    context.Original_file_name = file_name;
-    context.Original_file_directory = file_directory;
     Load_image(&context);
     Main.image_is_modified=1;
     Destroy_context(&context);
@@ -2126,8 +2126,8 @@ void Rotate_safety_backups(void)
     Init_context_backup_image(&context, file_name, Config_directory);
     context.Format=FORMAT_GIF;
     // Provide original file data, to store as a GIF Application Extension
-    context.Original_file_name = Main.backups->Pages->Filename;
-    context.Original_file_directory = Main.backups->Pages->File_directory;
+    context.Original_file_name = strdup(Main.backups->Pages->Filename);
+    context.Original_file_directory = strdup(Main.backups->Pages->File_directory);
     
     Save_image(&context);
     Destroy_context(&context);
