@@ -26,6 +26,9 @@
 #include <stddef.h>
 #include <string.h>
 #include <stdlib.h>
+#ifdef _MSC_VER
+#define strdup _strdup
+#endif
 
 #include "global.h"
 #include "pages.h"

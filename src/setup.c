@@ -212,9 +212,9 @@ char * Get_config_directory(const char * program_dir)
       // On all the remaining targets except OSX, the executable is in ./bin
       config_dir = strdup(program_dir);
     #else
-      len = strlen(program_dir) + 4;
+      len = strlen(program_dir) + 2 + strlen(PATH_SEPARATOR) + 1;
       config_dir = malloc(len);
-      snprintf(config_dir, len, "%s%s", program_dir, "../");
+      snprintf(config_dir, len, "%s%s", program_dir, ".." PATH_SEPARATOR);
     #endif
 
     filename = Filepath_append_to_dir(config_dir, CONFIG_FILENAME);

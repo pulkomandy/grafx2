@@ -85,8 +85,8 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
   switch(uMsg)
   {
   case WM_MOVE:   // Gives the client area coordinates
-    GFX2_Log(GFX2_DEBUG, "WM_MOVE : (%d,%d)\n", LOWORD(lParam), HIWORD(lParam));
-    break;
+    GFX2_Log(GFX2_DEBUG, "WM_MOVE : (%hd,%hd)\n", (short)LOWORD(lParam), (short)HIWORD(lParam));
+    return 0;
   case WM_GETMINMAXINFO: // size or position is about to change
     {
       RECT rect;
@@ -115,10 +115,14 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
     {
       LPWINDOWPOS pos = (LPWINDOWPOS)lParam;
       GFX2_Log(GFX2_DEBUG, "WM_WINDOWPOSCHANGED : (%d,%d) %dx%d flags=%04x after=%x\n", pos->x, pos->y, pos->cx, pos->cy, pos->flags, pos->hwndInsertAfter);
-      if (!Win32_Is_Fullscreen)
+      if (!Win32_Is_Fullscreen && !(pos->flags & SWP_NOMOVE) && !(pos->flags & SWP_NOACTIVATE))
       {
-        Config.Window_pos_x = pos->x;
-        Config.Window_pos_y = pos->y;
+        // Windows NT "Minimizes" windows by sending them to (-32000,-32000)
+        if (!(pos->x == -32000 && pos->y == -32000))
+        {
+          Config.Window_pos_x = pos->x;
+          Config.Window_pos_y = pos->y;
+        }
       }
     }
     break;  // call DefWindowProc() in order to receive the WM_SIZE msg
@@ -150,16 +154,26 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
   case WM_CREATE:
     break;
   case WM_ACTIVATE:
+    GFX2_Log(GFX2_DEBUG, "WM_ACTIVATE : activated=%d minimized=%d Handle %08x\n", (int)LOWORD(wParam), (int)HIWORD(wParam), lParam);
+    break;
+  case WM_ACTIVATEAPP:
+    GFX2_Log(GFX2_DEBUG, "WM_ACTIVATEAPP : activate=%d thread %08x\n", (int)wParam, lParam);
+    break;
+  case WM_SHOWWINDOW: // window is about to be hidden or shown
+    GFX2_Log(GFX2_DEBUG, "WM_SHOWWINDOW : show=%d status=%d\n", (int)wParam, (int)lParam);
     break;
   case WM_SETFOCUS:   // We gained keyboard focus
     break;
   case WM_KILLFOCUS:  // We lost keyboard focus
     break;
   case WM_SIZE:
-    GFX2_Log(GFX2_DEBUG, "WM_SIZE : %dx%d\n", LOWORD(lParam), HIWORD(lParam));
-    Resize_width = LOWORD(lParam);
-    Resize_height = HIWORD(lParam);
-    break;
+    GFX2_Log(GFX2_DEBUG, "WM_SIZE : %dx%d type=%d\n", LOWORD(lParam), HIWORD(lParam), wParam);
+    if (wParam != SIZE_MINIMIZED)
+    {
+      Resize_width = LOWORD(lParam);
+      Resize_height = HIWORD(lParam);
+    }
+    return 0;
   case WM_CLOSE:
     Quit_is_required = 1;
     user_feedback_required = 1;
@@ -277,8 +291,17 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
   case WM_KEYUP:
     Release_control(wParam, Get_Key_modifiers());
     return 0;
+  case WM_SYSCHAR:  // Character key when ALT key is down
+    GFX2_Log(GFX2_DEBUG, "WM_SYSCHAR : '%c' (0x%02x) lParam=%08lx\n", wParam, wParam, lParam);
+    return 0;
   case WM_CHAR:
     Key_ANSI = Key_UNICODE = wParam;
+    return 0;
+  case WM_SYSDEADCHAR:
+    GFX2_Log(GFX2_DEBUG, "WM_SYSDEADCHAR : '%c' (0x%02x) lParam=%08lx\n", wParam, wParam, lParam);
+    return 0;
+  case WM_DEADCHAR:
+    GFX2_Log(GFX2_DEBUG, "WM_DEADCHAR : '%c' (0x%02x) lParam=%08lx\n", wParam, wParam, lParam);
     return 0;
   case WM_DROPFILES:
     {
@@ -353,6 +376,11 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
   case WM_NCMOUSELEAVE: // the cursor leaves the nonclient area of the window
     break;
 #endif /* WINVER >= 0x0500 */
+#if(_WIN32_WINNT >= 0x0600)
+  case WM_DWMNCRENDERINGCHANGED:
+    GFX2_Log(GFX2_DEBUG, "WM_DWMNCRENDERINGCHANGED : enabled=%d\n", (int)wParam);
+    break;
+#endif /* WINVER >= 0x0600 */
   default:
     GFX2_Log(GFX2_INFO, "Win32_WindowProc() unknown Message : 0x%04x wParam=%08x lParam=%08lx\n", uMsg, wParam, lParam);
   }

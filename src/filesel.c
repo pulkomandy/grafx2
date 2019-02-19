@@ -2488,9 +2488,9 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         {
           char * current_dir;
           Display_cursor();
-          GFX2_Log(GFX2_WARNING, "cannot chdir to \"%s\" !", directory_to_change_to);
+          GFX2_Log(GFX2_WARNING, "cannot chdir to \"%s\" !\n", directory_to_change_to);
           current_dir = Get_current_directory(NULL, NULL, 0);
-          GFX2_Log(GFX2_WARNING, "Current directory is \"%s\"", current_dir);
+          GFX2_Log(GFX2_WARNING, "Current directory is \"%s\"\n", current_dir);
           free(current_dir);
           // restore Selector_filename
           free(Selector->filename);
