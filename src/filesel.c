@@ -147,10 +147,6 @@ static T_Fileselector Filelist;
 /// Selector settings to use, for all functions called by Load_or_save
 static T_Selector_settings * Selector;
 
-/// Filename (without directory) of the highlighted file
-static char Selector_filename[256];
-static word Selector_filename_unicode[256];
-
 // Conventions:
 //
 // * Le fileselect modifie le répertoire courant. Ceci permet de n'avoir
@@ -1049,33 +1045,32 @@ void Display_file_list(T_Fileselector *list, short offset_first,short selector_o
 
 /**
  * Get the label of a list item.
+ *
+ * selector->filename and selector->filename_unicode are updated
+ *
  * @param list the file list
- * @param offset_first offset between the 1st visible file and the 1st file in list.
- * @param selector_offset offset between the 1st visible file and the wanted label.
- * @param label pointer to a buffer to receive the label (ANSI)
- * @param unicode_label pointer to a buffer to receive the label (Unicode)
+ * @param selector the current File selector
  * @param type NULL or a pointer to receive the type : 0 = file, 1 = directory, 2 = drive.
  */
-static void Get_selected_item(T_Fileselector *list, short offset_first,short selector_offset,char * label,word * unicode_label, enum FSOBJECT_TYPE *type)
+static void Get_selected_item(T_Fileselector *list, T_Selector_settings * selector, enum FSOBJECT_TYPE *type)
 {
   T_Fileselector_item * current_item;
 
   // On vérifie s'il y a au moins 1 fichier dans la liste:
-  if (list->Nb_elements>0)
+  if (list->Nb_elements > 0)
   {
     // On commence par chercher à pointer sur le premier fichier visible:
     // Ensuite, on saute autant d'éléments que le décalage demandé:
-    current_item = Get_item_by_index(list, offset_first + selector_offset);
+    current_item = Get_item_by_index(list, selector->Position + selector->Offset);
 
     // On recopie la chaîne
-    strcpy(label, current_item->Full_name);
-    if (unicode_label != NULL)
-    {
-      if (current_item->Unicode_full_name)
-        Unicode_strlcpy(unicode_label, current_item->Unicode_full_name, 256);
-      else
-        Unicode_char_strlcpy(unicode_label, current_item->Full_name, 256);
-    }
+    free(selector->filename);
+    selector->filename = strdup(current_item->Full_name);
+    free(selector->filename_unicode);
+    if (current_item->Unicode_full_name)
+      selector->filename_unicode = Unicode_strdup(current_item->Unicode_full_name);
+    else
+      selector->filename_unicode = NULL;
 
     if (type != NULL)
       *type=current_item->Type;
@@ -1344,11 +1339,15 @@ static void Print_current_directory(void)
 void Print_filename_in_fileselector(void)
 {
   char filename[32];
-  strncpy(filename, Selector_filename, sizeof(filename));
+  if (Selector->filename != NULL)
+    strncpy(filename, Selector->filename, sizeof(filename));
+  else
+    filename[0] = '\0';
 #ifdef ENABLE_FILENAMES_ICONV
+  if (Selector->filename != NULL)
   {
-    char * input = (char *)Selector_filename;
-    size_t inbytesleft = strlen(Selector_filename);
+    char * input = (char *)Selector->filename;
+    size_t inbytesleft = strlen(Selector->filename);
     char * output = filename;
     size_t outbytesleft = sizeof(filename)-1;
     if(cd != (iconv_t)-1 && (ssize_t)iconv(cd, &input, &inbytesleft, &output, &outbytesleft) >= 0)
@@ -1356,10 +1355,10 @@ void Print_filename_in_fileselector(void)
   }
 #endif /* ENABLE_FILENAMES_ICONV */
   Window_rectangle(82,48,27*8,8,MC_Light);
-  if (Selector_filename_unicode[0] != 0)
+  if (Selector->filename_unicode != NULL)
   {
     word filename_unicode[32];
-    Unicode_strlcpy(filename_unicode, Selector_filename_unicode, 28); // 28 including the terminating 0
+    Unicode_strlcpy(filename_unicode, Selector->filename_unicode, 28); // 28 including the terminating 0
     Print_in_window_unicode(82,48,filename_unicode,MC_Black,MC_Light);
   }
   else
@@ -1392,7 +1391,7 @@ static void Prepare_and_display_filelist(short Position, short offset, T_Scrolle
   if (setfilename)
   {
     // On récupère le nom du schmilblick à "accéder"
-    Get_selected_item(&Filelist, Position,offset,Selector_filename,Selector_filename_unicode,&Selected_type);
+    Get_selected_item(&Filelist, Selector, &Selected_type);
   }
   // On affiche le nouveau nom de fichier
   Print_filename_in_fileselector();
@@ -1436,9 +1435,7 @@ static void Reload_list_of_files(byte filter, T_Scroller_button * button)
 
 void Scroll_fileselector(T_Scroller_button * file_scroller)
 {
-  char old_filename[256];
-
-  strcpy(old_filename,Selector_filename);
+  char * old_filename = strdup(Selector->filename);
 
   // On regarde si la liste a bougé
   if (file_scroller->Position!=Selector->Position)
@@ -1448,9 +1445,10 @@ void Scroll_fileselector(T_Scroller_button * file_scroller)
     Window_draw_slider(file_scroller);
   }
   // On récupére le nom du schmilblick à "accéder"
-  Get_selected_item(&Filelist, Selector->Position,Selector->Offset,Selector_filename,Selector_filename_unicode,&Selected_type);
-  if (strcmp(old_filename,Selector_filename))
+  Get_selected_item(&Filelist, Selector, &Selected_type);
+  if (strcmp(old_filename, Selector->filename))
     New_preview_is_needed=1;
+  free(old_filename);
 
   // On affiche le nouveau nom de fichier
   Print_filename_in_fileselector();
@@ -1661,8 +1659,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   byte  has_clicked_ok=0;// Indique si on a clické sur Load ou Save ou sur
                              //un bouton enclenchant Load ou Save juste après.
   byte  initial_back_color; // preview destroys it (how nice)
-  char  save_filename[256];
-  word  save_filename_unicode[256];
+  char *save_filename = NULL;
   char  initial_comment[COMMENT_SIZE+1];
   short window_shortcut;
   const char * directory_to_change_to = NULL;
@@ -1809,11 +1806,10 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 
     // On initialise le nom de fichier à celui en cours et non pas celui sous
     // la barre de sélection
-    strcpy(Selector_filename, context->File_name);
-    if (context->File_name_unicode != NULL)
-      Unicode_strlcpy(Selector_filename_unicode, context->File_name_unicode, 256);
-    else
-      Selector_filename_unicode[0] = 0;
+    free(Selector->filename);
+    Selector->filename = strdup(context->File_name);
+    free(Selector->filename_unicode);
+    Selector->filename_unicode = Unicode_strdup(context->File_name_unicode);
     // On affiche le nouveau nom de fichier
     Print_filename_in_fileselector();
   }
@@ -1837,9 +1833,9 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         if (load_from_clipboard)
           Selected_type = FSOBJECT_FILE;
         else if(load) // Determine the type
-          Selected_type = (File_exists(Selector_filename) && !Directory_exists(Selector_filename)) ? FSOBJECT_FILE : FSOBJECT_DIR;
+          Selected_type = (File_exists(Selector->filename) && !Directory_exists(Selector->filename)) ? FSOBJECT_FILE : FSOBJECT_DIR;
         else
-          Selected_type = Directory_exists(Selector_filename) ? FSOBJECT_DIR : FSOBJECT_FILE;
+          Selected_type = Directory_exists(Selector->filename) ? FSOBJECT_DIR : FSOBJECT_FILE;
         has_clicked_ok=1;
         break;
 
@@ -1847,7 +1843,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         break;
 
       case  3 : // Delete
-        if (Filelist.Nb_elements && (*Selector_filename!='.') && Selected_type != FSOBJECT_DRIVE)
+        if (Filelist.Nb_elements && (Selector->filename[0] != '.') && Selected_type != FSOBJECT_DRIVE)
         {
           char * message;
           Hide_cursor();
@@ -1865,10 +1861,10 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
             // Si c'est un fichier
             if (Selector->Position+Selector->Offset>=Filelist.Nb_directories)
               // On efface le fichier (si on peut)
-              temp=(!Remove_path(Selector_filename));
+              temp=(!Remove_path(Selector->filename));
             else // Si c'est un repertoire
               // On efface le repertoire (si on peut)
-              temp=(!Remove_directory(Selector_filename));
+              temp=(!Remove_directory(Selector->filename));
 
             if (temp) // temp indique si l'effacement s'est bien passé
             {
@@ -1915,7 +1911,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
             Selector->Offset=temp;
 
             // get item name and details
-            Get_selected_item(&Filelist, Selector->Position,Selector->Offset,Selector_filename,Selector_filename_unicode,&Selected_type);
+            Get_selected_item(&Filelist, Selector, &Selected_type);
             // display the new filename
             Print_filename_in_fileselector();
             // and update list
@@ -1936,7 +1932,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
             if (Selector->Position+Selector->Offset < Filelist.Nb_directories)
             { // clicked on a directory
               // retrieve again the item name
-              Get_selected_item(&Filelist, Selector->Position,Selector->Offset,Selector_filename,Selector_filename_unicode,&Selected_type);
+              Get_selected_item(&Filelist, Selector, &Selected_type);
             }
 
             has_clicked_ok=1;
@@ -1952,7 +1948,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         Hide_cursor();
         Selector->Position=Window_attribute2;
         // On récupére le nom du schmilblick à "accéder"
-        Get_selected_item(&Filelist, Selector->Position,Selector->Offset,Selector_filename,Selector_filename_unicode,&Selected_type);
+        Get_selected_item(&Filelist, Selector, &Selected_type);
         load_from_clipboard = 0;
         // On affiche le nouveau nom de fichier
         Print_filename_in_fileselector();
@@ -1969,7 +1965,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         {
           int pos_last_dot;
           char* savename = NULL;
-          word Selector_filename_unicode_save[256];
+          word* Selector_filename_unicode_save = NULL;
 
           GFX2_Log(GFX2_DEBUG, "fileselector format changed from %d to %d\n", (int)Selector->Format_filter, (int)Window_attribute2);
           Selector->Format_filter = Window_attribute2;
@@ -1979,22 +1975,22 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           {
             // In "save" box, if current name is a (possible) filename
             // with extension, set it to new format's extension
-            pos_last_dot = Position_last_dot(Selector_filename);
+            pos_last_dot = Position_last_dot(Selector->filename);
             if (Get_fileformat(Selector->Format_filter)->Default_extension[0] != '\0' &&
               pos_last_dot!=-1 &&
-              Selector_filename[pos_last_dot+1]!='\0')
+              Selector->filename[pos_last_dot+1]!='\0')
             {
-              GFX2_Log(GFX2_DEBUG, "extension %s => %s\n", Selector_filename + pos_last_dot + 1, Get_fileformat(Selector->Format_filter)->Default_extension);
-              strcpy(Selector_filename + pos_last_dot + 1,
+              GFX2_Log(GFX2_DEBUG, "extension %s => %s\n", Selector->filename + pos_last_dot + 1, Get_fileformat(Selector->Format_filter)->Default_extension);
+              strcpy(Selector->filename + pos_last_dot + 1,
                 Get_fileformat(Selector->Format_filter)->Default_extension);
-              pos_last_dot = Position_last_dot_unicode(Selector_filename_unicode);
+              pos_last_dot = Position_last_dot_unicode(Selector->filename_unicode);
               if (pos_last_dot != -1)
-                Unicode_char_strlcpy(Selector_filename_unicode + pos_last_dot + 1,
+                Unicode_char_strlcpy(Selector->filename_unicode + pos_last_dot + 1,
                   Get_fileformat(Selector->Format_filter)->Default_extension, 256 - pos_last_dot - 1);
             }
           }
-          savename = (char *)strdup(Selector_filename);
-          memcpy(Selector_filename_unicode_save, Selector_filename_unicode, sizeof(Selector_filename_unicode_save));
+          savename = strdup(Selector->filename);
+          Selector_filename_unicode_save = Unicode_strdup(Selector->filename_unicode);
           // By default, position list at the beginning
           Selector->Position = 0;
           Selector->Offset = 0;
@@ -2003,7 +1999,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           Reload_list_of_files(Selector->Format_filter, file_scroller);
           New_preview_is_needed = 1;
           Reset_quicksearch();
-          if (savename != NULL)
+          if (savename != NULL && savename[0] != '\0')
           {
             // attempt to find the file name in new list
             short pos=Find_file_in_fileselector(&Filelist, savename);
@@ -2016,11 +2012,16 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
             // extension, set it as the proposed file name.
             if (pos >= 0 || !load)
             {
-              strcpy(Selector_filename, savename);
-              memcpy(Selector_filename_unicode, Selector_filename_unicode_save, sizeof(Selector_filename_unicode_save));
+              free(Selector->filename);
+              Selector->filename = strdup(savename);
+              savename = NULL;
+              free(Selector->filename_unicode);
+              Selector->filename_unicode = Unicode_strdup(Selector_filename_unicode_save);
+              Selector_filename_unicode_save = NULL;
             }
-            free(savename);
           }
+          free(savename);
+          free(Selector_filename_unicode_save);
           Print_filename_in_fileselector();
           Display_cursor();
         }
@@ -2036,31 +2037,37 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
       {
         char filename_ansi[256];
         word filename_unicode[256];
+        word * save_filename_unicode = Unicode_strdup(Selector->filename_unicode);
 
-        // Save the filename
-        strcpy(save_filename, Selector_filename);
-        Unicode_strlcpy(save_filename_unicode, Selector_filename_unicode, 256);
+        free(save_filename);
+        save_filename = strdup(Selector->filename);
         // Check if the selected entry is a drive/directory :
         // in, this case, clear the filename
         if (Filelist.Nb_elements>0)
         {
           T_Fileselector_item * current_item;
           current_item = Get_item_by_index(&Filelist, Selector->Position + Selector->Offset);
-          if (current_item->Type != FSOBJECT_FILE && !FILENAME_COMPARE(current_item->Full_name,Selector_filename))
+          if (current_item->Type != FSOBJECT_FILE && !FILENAME_COMPARE(current_item->Full_name, Selector->filename))
           {
             // current name is a highlighted directory
-            Selector_filename[0]='\0';
-            Selector_filename_unicode[0]=0;
+            free(Selector->filename);
+            Selector->filename = NULL;
+            free(Selector->filename_unicode);
+            Selector->filename_unicode = NULL;
           }
         }
-        strncpy(filename_ansi, Selector_filename, sizeof(filename_ansi));
-        if (Selector_filename_unicode[0] == 0 && strlen(Selector_filename) > 0)
-          Unicode_char_strlcpy(filename_unicode, Selector_filename, sizeof(filename_unicode)/sizeof(word));
+        if (Selector->filename != NULL)
+          strncpy(filename_ansi, Selector->filename, sizeof(filename_ansi));
         else
-          Unicode_strlcpy(filename_unicode, Selector_filename_unicode, sizeof(filename_unicode)/sizeof(word));
+          filename_ansi[0] = '\0';
+        filename_unicode[0] = '\0';
+        if (Selector->filename_unicode != NULL && Selector->filename_unicode[0] != 0)
+          Unicode_strlcpy(filename_unicode, Selector->filename_unicode, sizeof(filename_unicode)/sizeof(word));
+        else if (Selector->filename != NULL && strlen(Selector->filename) > 0)
+          Unicode_char_strlcpy(filename_unicode, Selector->filename, sizeof(filename_unicode)/sizeof(word));
 #ifdef ENABLE_FILENAMES_ICONV
         { /* convert from UTF8 to ANSI */
-          char * input = (char *)Selector_filename;
+          char * input = (char *)Selector->filename;
           size_t inbytesleft = strlen(input);
           char * output = filename_ansi;
           size_t outbytesleft = sizeof(filename_ansi)-1;
@@ -2075,8 +2082,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 #endif
         {
 #if defined(WIN32)
-          DWORD short_len;
-          short_len = GetShortPathNameW((WCHAR *)filename_unicode, NULL, 0);
+          DWORD short_len = GetShortPathNameW((WCHAR *)filename_unicode, NULL, 0);
           if (short_len > 0)
           {
             WCHAR * temp_str = (WCHAR *)malloc(short_len * sizeof(WCHAR));
@@ -2104,25 +2110,20 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           /* convert back from UTF16 to UTF8 */
           char * input = (char *)filename_unicode;
           size_t inbytesleft = 2 * Unicode_strlen(filename_unicode);
-          char * output = Selector_filename;
-          size_t outbytesleft = sizeof(Selector_filename)-1;
+          char * output = filename_ansi;
+          size_t outbytesleft = sizeof(filename_ansi)-1;
           if(cd_utf16_inv != (iconv_t)-1 && (ssize_t)iconv(cd_utf16_inv, &input, &inbytesleft, &output, &outbytesleft) >= 0)
             *output = '\0';
-          else
 #endif
-            strncpy(Selector_filename, filename_ansi, sizeof(Selector_filename));
 
-#if defined(WIN32) || defined(ENABLE_FILENAMES_ICONV)
-          Unicode_strlcpy(Selector_filename_unicode, filename_unicode, sizeof(Selector_filename_unicode)/sizeof(word));
-#endif
           //   On regarde s'il faut rajouter une extension. C'est-à-dire s'il
           // n'y a pas de '.' dans le nom du fichier.
-          for(temp=0,dummy=0; ((Selector_filename[temp]) && (!dummy)); temp++)
-            if (Selector_filename[temp]=='.')
+          for(temp=0, dummy=0; ((filename_ansi[temp]) && (!dummy)); temp++)
+            if (filename_ansi[temp]=='.')
               dummy=1;
           if (!dummy)
           {
-            if(!Directory_exists(Selector_filename))
+            if(!Directory_exists(filename_ansi))
             {
               const char * ext = Get_fileformat(Selector->Format_filter)->Default_extension;
               // put default extension
@@ -2130,16 +2131,25 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
               //  something suitable ?)
               if (ext == NULL)
                 ext = "pkm";
-              strcat(Selector_filename, ".");
-              strcat(Selector_filename, ext);
-              Unicode_char_strlcat(Selector_filename_unicode, ".", sizeof(Selector_filename_unicode)/sizeof(word));
-              Unicode_char_strlcat(Selector_filename_unicode, ext, sizeof(Selector_filename_unicode)/sizeof(word));
+              strcat(filename_ansi, ".");
+              strcat(filename_ansi, ext);
+              Unicode_char_strlcat(filename_unicode, ".", sizeof(filename_unicode)/sizeof(word));
+              Unicode_char_strlcat(filename_unicode, ext, sizeof(filename_unicode)/sizeof(word));
             }
           }
+
+          free(Selector->filename);
+          Selector->filename = strdup(filename_ansi);
+          free(Selector->filename_unicode);
+#if defined(WIN32) || defined(ENABLE_FILENAMES_ICONV)
+          Selector->filename_unicode = Unicode_strdup(filename_unicode);
+#else
+          Selector->filename_unicode = NULL;
+#endif
           if(load) // Determine the type
-            Selected_type = (File_exists(Selector_filename) && !Directory_exists(Selector_filename)) ? FSOBJECT_FILE : FSOBJECT_DIR;
+            Selected_type = (File_exists(Selector->filename) && !Directory_exists(Selector->filename)) ? FSOBJECT_FILE : FSOBJECT_DIR;
           else
-            Selected_type = Directory_exists(Selector_filename) ? FSOBJECT_DIR : FSOBJECT_FILE;
+            Selected_type = Directory_exists(Selector->filename) ? FSOBJECT_DIR : FSOBJECT_FILE;
 
           // Now load immediately, but only if the user exited readline by pressing ENTER
           if (Mouse_K == 0) has_clicked_ok = 1;
@@ -2147,9 +2157,15 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         else
         {
           // Restore the old filename
-          strcpy(Selector_filename, save_filename);
-          Unicode_strlcpy(Selector_filename_unicode, save_filename_unicode, sizeof(Selector_filename_unicode)/sizeof(word));
+          free(Selector->filename);
+          Selector->filename = save_filename; // steal buffer
+          save_filename = NULL;
+          free(Selector->filename_unicode);
+          Selector->filename_unicode = save_filename_unicode; // steal buffer
+          save_filename_unicode = NULL;
         }
+        free(save_filename_unicode);
+        save_filename_unicode = NULL;
         Print_filename_in_fileselector();
         Display_cursor();
         break;
@@ -2175,8 +2191,10 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
             // paste from clipboard
             load_from_clipboard = 1;
             New_preview_is_needed = 1;
-            strcpy(Selector_filename, "* CLIPBOARD *");
-            Selector_filename_unicode[0] = 0;
+            free(Selector->filename);
+            Selector->filename = strdup("* CLIPBOARD *");
+            free(Selector->filename_unicode);
+            Selector->filename_unicode = NULL;
             Hide_cursor();
             Print_filename_in_fileselector();
             Display_cursor();
@@ -2207,7 +2225,8 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
                 {
                   GFX2_Log(GFX2_DEBUG,"Go to bookmark %s\n", Config.Bookmark_directory[clicked_button-10]);
                   // backup the currently selected filename
-                  strncpy(save_filename, Selector_filename, sizeof(save_filename));
+                  free(save_filename);
+                  save_filename = strdup(Selector->filename);
                   // simulate a click on the bookmarked directory
                   directory_to_change_to = Config.Bookmark_directory[clicked_button-10];
                   Reset_quicksearch();
@@ -2356,10 +2375,12 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         if (Filelist.Nb_elements && !strcmp(Filelist.First->Full_name,PARENT_DIR))
         {                              
           // On va dans le répertoire parent.
-          strcpy(Selector_filename,PARENT_DIR);
-          Selector_filename_unicode[0] = 0;
-          Selected_type=FSOBJECT_DIR;
-          has_clicked_ok=1;
+          free(Selector->filename);
+          Selector->filename = strdup(PARENT_DIR);
+          free(Selector->filename_unicode);
+          Selector->filename_unicode = NULL;
+          Selected_type = FSOBJECT_DIR;
+          has_clicked_ok = 1;
         }
         Key=0;
         break;
@@ -2408,7 +2429,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         has_clicked_ok=0;
 
         if (directory_to_change_to == NULL)
-          directory_to_change_to = Selector_filename;
+          directory_to_change_to = Selector->filename;
 
         // We must enter the directory
       
@@ -2449,10 +2470,11 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           Sort_list_of_files(&Filelist);
           // Set the fileselector bar on the directory we're coming from
           pos = Find_file_in_fileselector(&Filelist, previous_directory);
-          strcpy(Selector_filename, previous_directory);
-          free(previous_directory);
-          if (!Get_Unicode_Filename(Selector_filename_unicode, Selector_filename, "."))
-            Selector_filename_unicode[0] = 0;
+          free(Selector->filename);
+          Selector->filename = previous_directory;  // Steal heap buffer
+          previous_directory = NULL;
+          free(Selector->filename_unicode);
+          Selector->filename_unicode = Get_Unicode_Filename(NULL, Selector->filename, ".");
           Highlight_file((pos >= 0) ? pos : 0);
           // display the 1st visible files
           Prepare_and_display_filelist(Selector->Position,Selector->Offset,file_scroller,0);
@@ -2471,7 +2493,9 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           GFX2_Log(GFX2_WARNING, "Current directory is \"%s\"", current_dir);
           free(current_dir);
           // restore Selector_filename
-          strncpy(Selector_filename, save_filename, sizeof(Selector_filename));
+          free(Selector->filename);
+          Selector->filename = save_filename; // steal heap buffer
+          save_filename = NULL;
           Error(0);
         }
         directory_to_change_to = NULL;
@@ -2484,6 +2508,8 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         save_or_load_image=1;
       }
     }
+    free(save_filename);
+    save_filename = NULL;
 
     // Gestion du chrono et des previews
     if (New_preview_is_needed)
@@ -2537,9 +2563,9 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         }
         else
         {
-          Init_context_preview(&preview_context, Selector_filename, Selector->Directory);
+          Init_context_preview(&preview_context, Selector->filename, Selector->Directory);
           preview_context.Format = Selector->Format_filter;
-          preview_context.File_name_unicode = Unicode_strdup(Selector_filename_unicode);
+          preview_context.File_name_unicode = Unicode_strdup(Selector->filename_unicode);
         }
         Hide_cursor();
         if (context->Type == CONTEXT_PALETTE)
@@ -2569,8 +2595,8 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
     }
     else
     {
-      context->File_name = strdup(Selector_filename);
-      context->File_name_unicode = Unicode_strdup(Selector_filename_unicode);
+      context->File_name = strdup(Selector->filename);
+      context->File_name_unicode = Unicode_strdup(Selector->filename_unicode);
       free(context->File_directory);
       context->File_directory = strdup(Selector->Directory);
       if (!load)

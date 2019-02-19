@@ -1293,12 +1293,20 @@ void Program_shutdown(void)
 
   FREE_POINTER(Main.selector.Directory);
   FREE_POINTER(Main.selector.Directory_unicode);
+  FREE_POINTER(Main.selector.filename);
+  FREE_POINTER(Main.selector.filename_unicode);
   FREE_POINTER(Spare.selector.Directory);
   FREE_POINTER(Spare.selector.Directory_unicode);
+  FREE_POINTER(Spare.selector.filename);
+  FREE_POINTER(Spare.selector.filename_unicode);
   FREE_POINTER(Brush_selector.Directory);
   FREE_POINTER(Brush_selector.Directory_unicode);
+  FREE_POINTER(Brush_selector.filename);
+  FREE_POINTER(Brush_selector.filename_unicode);
   FREE_POINTER(Palette_selector.Directory);
   FREE_POINTER(Palette_selector.Directory_unicode);
+  FREE_POINTER(Palette_selector.filename);
+  FREE_POINTER(Palette_selector.filename_unicode);
 
   // Free Config
   FREE_POINTER(Config.Skin_file);

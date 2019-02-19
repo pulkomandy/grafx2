@@ -557,6 +557,8 @@ typedef struct T_Selector_settings
   short Offset; ///< Position of the "highlight" bar in the file list
   char  * Directory; ///< Directory currently browsed
   word  * Directory_unicode; ///< Directory currently browsed
+  char  * filename;  ///< Filename (without directory) of the highlighted file
+  word  * filename_unicode; ///< /// Filename (without directory) of the highlighted file
 } T_Selector_settings;
 
 /// structure for Main or Spare page global data
