@@ -53,6 +53,11 @@
 #include "pxsimple.h"
 #include "oldies.h"
 
+#if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
+// We don't want to underline the keyboard shortcuts as there is no keyboard
+#define NO_KEYBOARD
+#endif
+
 
 // we need this as global
 short Old_MX = -1;
@@ -1881,9 +1886,13 @@ void Window_draw_normal_bouton(word x_pos,word y_pos,word width,word height,
   text_y_pos=y_pos+((height-7)>>1);
   Print_in_window(text_x_pos,text_y_pos,title,title_color,MC_Light);
 
+#if !defined(NO_KEYBOARD)
   if (undersc_letter)
     Window_rectangle(text_x_pos+((undersc_letter-1)<<3),
           text_y_pos+8,8,1,MC_Dark);
+#else
+  (void)undersc_letter;
+#endif
 }
 
 

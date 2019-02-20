@@ -61,6 +61,11 @@
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #endif
 
+#if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
+// We don't want to underline the keyboard shortcuts as there is no keyboard
+#define NO_KEYBOARD
+#endif
+
 T_Toolbar_button Buttons_Pool[NB_BUTTONS];
 T_Menu_Bar Menu_bars[MENUBAR_COUNT] =
   {{MENU_WIDTH,  9, 1, 45, {NULL,NULL,NULL},  20, BUTTON_HIDE }, // Status
@@ -994,9 +999,12 @@ void Print_in_window_underscore(short x,short y,const char * str,byte text_color
     Print_char_in_window(x,y,*p++,text_color,background_color);
     x+=8;
   }
-  if (undersc_letter) {
+#if !defined(NO_KEYBOARD)
+  if (undersc_letter)
     Window_rectangle(x_pos+((undersc_letter-1)<<3),y+8,8,1,text_color);
-  }
+#else
+  (void)undersc_letter;
+#endif
   Update_window_area(x_pos,y,x-x_pos,8);
 }
 
