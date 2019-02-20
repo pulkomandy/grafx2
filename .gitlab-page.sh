@@ -7,6 +7,7 @@ VERSION=$(cat VERSION)
 LINUX_JOB_ID=$(cat LINUX_JOB_ID)
 WIN32_JOB_ID=$(cat WIN32_JOB_ID)
 ATARI_JOB_ID=$(cat ATARI_JOB_ID)
+GP2X_JOB_ID=$(cat GP2X_JOB_ID)
 
 # for debug:
 echo "CI_JOB_URL=${CI_JOB_URL}"
@@ -41,8 +42,11 @@ echo "<li>Windows portable (SDL2 API) :" >> ${OUTFILE}
 echo "<a href=\"${CI_PROJECT_URL}/-/jobs/${WIN32_JOB_ID}/artifacts/raw/grafx2-sdl2-${VERSION}-win32.zip\">grafx2-sdl2-${VERSION}-win32.zip</a></li>" >> ${OUTFILE}
 echo "<li>Atari (SDL API) :" >> ${OUTFILE}
 echo "<a href=\"${CI_PROJECT_URL}/-/jobs/${ATARI_JOB_ID}/artifacts/raw/grafx2-sdl-${VERSION}-m68k-atari-mint.zip\">grafx2-sdl-${VERSION}-m68k-atari-mint.zip</a></li>" >> ${OUTFILE}
+echo "<li>GP2X (SDL API) :" >> ${OUTFILE}
+echo "<a href=\"${CI_PROJECT_URL}/-/jobs/${GP2X_JOB_ID}/artifacts/raw/grafx2-sdl-${VERSION}-nottf-gp2x.zip\">grafx2-sdl-${VERSION}-nottf-gp2x.zip</a></li>" >> ${OUTFILE}
 echo "</ul>" >> ${OUTFILE}
 echo "<ul>" >> ${OUTFILE}
+
 echo "<li><a href=\"http://grafx2.tk/\">Home page</a></li>" >> ${OUTFILE}
 echo "<li>Source repository : <a href=\"${CI_PROJECT_URL}\">${CI_PROJECT_URL}</a></li>" >> ${OUTFILE}
 echo "<li>Bug tracker : <a href=\"https://pulkomandy.tk/projects/GrafX2/query\">https://pulkomandy.tk/projects/GrafX2/query</a></li>" >> ${OUTFILE}
