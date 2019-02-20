@@ -973,6 +973,10 @@ int Init_program(int argc,char * argv[])
   Spare.image_width=Screen_width/Pixel_width;
   Spare.image_height=Screen_height/Pixel_height;
 
+  // set the Mouse cursor at the center of the screen
+  Mouse_X = Screen_width / 2;
+  Mouse_Y = Screen_height / 2;
+
   starting_image_mode = Config.Default_mode_layers ?
     IMAGE_MODE_LAYERED : IMAGE_MODE_ANIMATION;
   // Allocation de mémoire pour les différents écrans virtuels (et brosse)
