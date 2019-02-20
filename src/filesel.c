@@ -1462,6 +1462,8 @@ short Find_file_in_fileselector(T_Fileselector *list, const char * fname)
   short  index;
   short  close_match = -1;
 
+  if (fname == NULL)
+    return -1;
   index=0;
   for (item=list->First; item!=NULL; item=item->Next)
   {

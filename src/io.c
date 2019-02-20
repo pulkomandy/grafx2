@@ -262,6 +262,9 @@ int Write_dword_be(FILE *file, dword dw)
 char * Find_last_separator(const char * str)
 {
   const char * position = NULL;
+
+  if (str == NULL)
+    return NULL;
   for (; *str != '\0'; str++)
     if (*str == PATH_SEPARATOR[0]
 #if defined(__WIN32__) || defined(WIN32)
@@ -292,7 +295,7 @@ word * Find_last_separator_unicode(const word * str)
 char * Filepath_append_to_dir(const char * dir, const char * filename)
 {
   char * path;
-  size_t len = strlen(dir);
+  size_t len = dir == NULL ? 0 : strlen(dir);
   if (len == 0) // no directory
     return strdup(filename);
   if (dir[len-1] == PATH_SEPARATOR[0]

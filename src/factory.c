@@ -2685,7 +2685,7 @@ void Reload_scripts_list(void)
 
 void Button_Brush_Factory(void)
 {
-  static char selected_file[MAX_PATH_CHARACTERS]="";
+  static char * selected_file = NULL; // currently selected file in factory file selector
   
   short clicked_button;
   T_List_button* scriptlist;
@@ -2728,11 +2728,12 @@ void Button_Brush_Factory(void)
     
     Window_redraw_list(scriptlist);
     // Display current path:
-    q = strlen(Config.Scripts_directory);
+    q = Config.Scripts_directory == NULL ? 0 : strlen(Config.Scripts_directory);
     if (q<=DESC_WIDTH)
     {
-      strcpy(displayed_path, Config.Scripts_directory);
-      for (; q<DESC_WIDTH; q++)
+      if (q > 0)
+        strcpy(displayed_path, Config.Scripts_directory);
+      for (; q < DESC_WIDTH; q++)
         displayed_path[q]=' ';
       displayed_path[q]='\0';
     }
@@ -2819,7 +2820,8 @@ void Button_Brush_Factory(void)
     
     if (item->Type == FSOBJECT_FILE)
     {
-      strcpy(selected_file, item->Full_name);
+      free(selected_file);
+      selected_file = strdup(item->Full_name);
       break;
     }
     else if (item->Type == FSOBJECT_DIR || item->Type == FSOBJECT_DRIVE)
@@ -2827,7 +2829,8 @@ void Button_Brush_Factory(void)
       if (item->Type == FSOBJECT_DRIVE)
       {
         // Selecting one drive root
-        strcpy(selected_file, PARENT_DIR);
+        free(selected_file);
+        selected_file = strdup(PARENT_DIR);
         free(Config.Scripts_directory);
         Config.Scripts_directory = strdup(item->Full_name);
       }
@@ -2835,7 +2838,26 @@ void Button_Brush_Factory(void)
       {
         // Going down one or up by one directory
         if (strcmp(item->Full_name, PARENT_DIR) == 0)
-          Append_path(Config.Scripts_directory, item->Full_name, selected_file);
+        {
+          char * separator_pos = Find_last_separator(Config.Scripts_directory);
+          if (separator_pos != NULL && separator_pos[1] == '\0')
+          {
+            // remove trailing separator
+            separator_pos[0] = '\0';
+            separator_pos = Find_last_separator(Config.Scripts_directory);
+          }
+          free(selected_file);
+          if (separator_pos == NULL)
+          {
+            selected_file = Config.Scripts_directory; // steal heap buffer
+            Config.Scripts_directory = NULL;
+          }
+          else
+          {
+            selected_file = strdup(separator_pos + 1);
+            separator_pos[0] = '\0';
+          }
+        }
         else
         {
           char * new_dir = Filepath_append_to_dir(Config.Scripts_directory, item->Full_name);
@@ -2861,7 +2883,7 @@ void Button_Brush_Factory(void)
   Close_window();
   Unselect_button(BUTTON_BRUSH_EFFECTS);
 
-  if (clicked_button == 5) // Run the script
+  if (clicked_button == 5 && selected_file != NULL) // Run the script
   {
     Run_script(Config.Scripts_directory, selected_file);
   }
