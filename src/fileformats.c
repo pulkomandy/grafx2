@@ -89,6 +89,7 @@
 #include "io.h"
 #include "pages.h"
 #include "windows.h" // Best_color()
+#include "unicode.h"
 #include "fileformats.h"
 #include "oldies.h"
 #include "bitcount.h"
@@ -5973,26 +5974,34 @@ void Save_PCX(T_IO_Context * context)
 
 
 //////////////////////////////////// SCx ////////////////////////////////////
+/**
+ * @defgroup SCx SCx format
+ * @ingroup loadsaveformats
+ * ColoRix VGA Paint SCx File Format
+ *
+ * file extensions are sci, scq, scf, scn, sco
+ * @{
+ */
+
+/// SCx header data
 typedef struct
 {
-  byte Filler1[4];
-  word Width;
-  word Height;
-  byte PaletteType; // M P RGB PIX  0xAF = VGA
-  byte StorageType; // 00 = Linear (1 byte per pixel) 01,02 Planar 03 text 80 Compressed 40 extension block 20 encrypted
+  byte Filler1[4];  ///< "RIX3"
+  word Width;       ///< Image Width
+  word Height;      ///< Image Height
+  byte PaletteType; ///< M P RGB PIX  0xAF = VGA
+  byte StorageType; ///< 00 = Linear (1 byte per pixel) 01,02 Planar 03 text 80 Compressed 40 extension block 20 encrypted
 } T_SCx_Header;
 
-// -- Tester si un fichier est au format SCx --------------------------------
+/// Test if a file is SCx format
 void Test_SCx(T_IO_Context * context, FILE * file)
 {
-  //byte Signature[3];
   T_SCx_Header SCx_header;
 
   (void)context;
   File_error=1;
 
-  // Ouverture du fichier
-    // Lecture et vérification de la signature
+  // read and check header
   if (Read_bytes(file,SCx_header.Filler1,4)
       && Read_word_le(file, &(SCx_header.Width))
       && Read_word_le(file, &(SCx_header.Height))
@@ -6007,7 +6016,7 @@ void Test_SCx(T_IO_Context * context, FILE * file)
 }
 
 
-// -- Lire un fichier au format SCx -----------------------------------------
+/// Read a SCx file
 void Load_SCx(T_IO_Context * context)
 {
   FILE *file;
@@ -6099,16 +6108,17 @@ void Load_SCx(T_IO_Context * context)
     File_error=1;
 }
 
-// -- Sauver un fichier au format SCx ---------------------------------------
+/// Save a SCx file
 void Save_SCx(T_IO_Context * context)
 {
   FILE *file;
   short x_pos,y_pos;
   T_SCx_Header SCx_header;
-  byte last_char;
- 
-  last_char=strlen(context->File_name)-1;
-  if (context->File_name[last_char]=='?')
+  size_t last_char;
+
+  // replace the '?' in file extension with the right letter
+  last_char = strlen(context->File_name) - 1;
+  if (context->File_name[last_char] == '?')
   {
     if (context->Width<=320)
       context->File_name[last_char]='I';
@@ -6129,17 +6139,27 @@ void Save_SCx(T_IO_Context * context)
         }
       }
     }
+    // makes it same case as the previous character
+    if (last_char > 0)
+      context->File_name[last_char] |= (context->File_name[last_char - 1] & 32);
+    // also fix the unicode file name
+    if (context->File_name_unicode != NULL && context->File_name_unicode[0] != 0)
+    {
+      size_t ulen = Unicode_strlen(context->File_name_unicode);
+      if (ulen > 1)
+        context->File_name_unicode[ulen - 1] = context->File_name[last_char];
+    }
   }
 
-  File_error=0;
 
-  // Ouverture du fichier
-  if ((file=Open_file_write(context)))
+  file = Open_file_write(context);
+
+  if (file != NULL)
   {
     T_Palette palette_64;
     
-    setvbuf(file, NULL, _IOFBF, 64*1024);
-    memcpy(palette_64,context->Palette,sizeof(T_Palette));
+    File_error = 0;
+    memcpy(palette_64, context->Palette, sizeof(T_Palette));
     Palette_256_to_64(palette_64);
     
     memcpy(SCx_header.Filler1,"RIX3",4);
@@ -6148,7 +6168,7 @@ void Save_SCx(T_IO_Context * context)
     SCx_header.PaletteType=0xAF;
     SCx_header.StorageType=0x00;
 
-    if (Write_bytes(file,SCx_header.Filler1,4)
+    if (Write_bytes(file,SCx_header.Filler1, 4)
     && Write_word_le(file, SCx_header.Width)
     && Write_word_le(file, SCx_header.Height)
     && Write_byte(file, SCx_header.PaletteType)
@@ -6158,25 +6178,23 @@ void Save_SCx(T_IO_Context * context)
     {
       for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
         for (x_pos=0; x_pos<context->Width; x_pos++)
-          Write_one_byte(file,Get_pixel(context, x_pos,y_pos));
-
-      fclose(file);
-
-      if (File_error)
-        Remove_file(context);
+          Write_one_byte(file, Get_pixel(context, x_pos, y_pos));
     }
-    else // Error d'écriture (disque plein ou protégé)
+    else
     {
-      fclose(file);
-      Remove_file(context);
-      File_error=1;
+      File_error = 1;
     }
+    fclose(file);
+    if (File_error)
+      Remove_file(context);
   }
   else
   {
     File_error=1;
   }
 }
+
+/** @} */
 
 //////////////////////////////////// XPM ////////////////////////////////////
 void Save_XPM(T_IO_Context* context)
