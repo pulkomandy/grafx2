@@ -750,9 +750,6 @@ int Init_program(int argc,char * argv[])
 #if defined(USE_SDL2)
   SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_VERBOSE);
 #endif
-#if defined(USE_JOYSTICK)
-  Joystick = SDL_JoystickOpen(0);
-#endif
 #endif
 #if defined(USE_SDL)
   SDL_EnableKeyRepeat(250, 32);
@@ -771,6 +768,26 @@ int Init_program(int argc,char * argv[])
   // This must come after video mode initialization because
   // a video mode may be requested as a command-line parameter
   file_in_command_line=Analyze_command_line(argc, argv, main_filename, main_directory, spare_filename, spare_directory);
+
+#if defined(USE_JOYSTICK) && (defined(USE_SDL) || defined(USE_SDL2))
+  GFX2_Log(GFX2_DEBUG, "%d joystick(s) attached\n", SDL_NumJoysticks());
+  if (SDL_NumJoysticks() > 0)
+  {
+    Joystick = SDL_JoystickOpen(0);
+    if (Joystick == NULL)
+    {
+      GFX2_Log(GFX2_ERROR, "Failed to open joystick #0 : %s\n", SDL_GetError());
+    }
+    else
+    {
+      GFX2_Log(GFX2_DEBUG, "Joystick #0 open : \"%s\" %d axes, %d buttons, %d balls, %d hats\n",
+               SDL_JoystickName(Joystick), SDL_JoystickNumAxes(Joystick),
+               SDL_JoystickNumButtons(Joystick), SDL_JoystickNumBalls(Joystick),
+               SDL_JoystickNumHats(Joystick));
+      SDL_JoystickEventState(SDL_ENABLE);
+    }
+  }
+#endif
 
   Pixel_ratio=PIXEL_SIMPLE;
   // On initialise les données sur l'état du programme:
