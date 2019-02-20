@@ -135,7 +135,8 @@ void Set_data_directory(const char * program_dir, char * data_dir)
     strcat(data_dir,"Contents/Resources/");
   // On GP2X, AROS and Android, executable is not in bin/
   #elif defined (__GP2X__) || defined (__gp2x__) || defined (__WIZ__) || defined (__CAANOO__) || defined(GCWZERO) || defined(__AROS__) || defined(__ANDROID__)
-    strcat(data_dir,"share/grafx2/");
+    //strcat(data_dir,"share/grafx2/");
+    strcat(data_dir, "data/");
   //on tos, the same directory is used for everything
   #elif defined (__MINT__)
     strcpy(data_dir, program_dir);

@@ -965,6 +965,20 @@ ifdef ATARICROSS
 	    GRAFX2/gfx2def.ini GRAFX2/DOC/ GRAFX2/SCRIPTS/
 	$(AT)$(RM) -r $(TMP)
 else
+ifdef GP2XCROSS
+	$(eval TMP := $(shell mktemp -d))
+	$(AT)$(MKDIR) $(TMP)/data
+	$(AT)$(CP) $(BIN) $(TMP)
+	$(AT)$(CP) -R ../share/grafx2/* $(TMP)/data
+	cd .. && $(ZIP) $(ZIPOPT) "grafx2-$(API)-$(VERSIONTAG)$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
+	  $(DOC_FILES:../%=%) $(DOC_FILESRTF:../%=%) $(SRCARCH:../%=%)
+	cd $(TMP) && \
+	  $(ZIP) $(ZIPOPT) "$(CURDIR)/../grafx2-$(API)-$(VERSIONTAG)$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
+	  $(BIN:../bin/%=%) $(SCRIPT_FILES:../share/grafx2/%=data/%) \
+	  $(SKIN_FILES:../share/grafx2/%=data/%) $(FONT_FILES:../share/grafx2/%=data/%) \
+	  data/gfx2def.ini
+	$(AT)$(RM) -r $(TMP)
+else
 	cd .. && $(ZIP) $(ZIPOPT) "grafx2-$(API)-$(VERSIONTAG)$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
 	  $(BIN:../%=%) $(SCRIPT_FILES:../%=%) $(SKIN_FILES:../%=%) \
 	  share/grafx2/gfx2.gif share/icons/grafx2.svg \
@@ -980,6 +994,7 @@ ifeq ($(PLATFORM),Darwin)
 	$(ZIP) $(ZIPOPT) -r ../$(APPZIPNAME) Grafx2.app
 	cd .. && $(ZIP) $(ZIPOPT) $(APPZIPNAME) \
 	  $(DOC_FILES:../%=%) $(DOC_FILESRTF:../%=%) $(SRCARCH:../%=%)
+endif
 endif
 endif
 	$(AT)$(TAR) czf "../grafx2-$(VERSIONTAG)-src.tgz" $(TARTRANSFORM) \
