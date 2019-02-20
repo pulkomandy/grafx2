@@ -80,15 +80,17 @@
 #endif
 
 #if defined(WIN32)
-    #include <windows.h>
-    #include <shlwapi.h>
+#include <windows.h>
+#include <shlwapi.h>
+#include <io.h>
+#include <fcntl.h>
 #elif defined (__MINT__)
-    #include <mint/osbind.h>
+#include <mint/osbind.h>
 #elif defined(__macosx__)
-    #import <CoreFoundation/CoreFoundation.h>
-    #import <sys/param.h>
+#import <CoreFoundation/CoreFoundation.h>
+#import <sys/param.h>
 #elif defined(__FreeBSD__)
-    #include <sys/param.h>
+#include <sys/param.h>
 #endif
 
 #if defined(__macosx__)
@@ -985,8 +987,19 @@ int Init_program(int argc,char * argv[])
     }
   }
 
-  // Open a console for debugging...
-  //ActivateConsole();
+  if ((unsigned)GFX2_verbosity_level >= (unsigned)GFX2_DEBUG)
+  {
+    // Open a console for debugging...
+    if (AllocConsole())
+    {
+      HANDLE handle_out = GetStdHandle(STD_OUTPUT_HANDLE);
+      int hCrt = _open_osfhandle((long) handle_out, _O_TEXT);
+      FILE* hf_out = _fdopen(hCrt, "w");
+      setvbuf(hf_out, NULL, _IONBF, 2);
+      *stdout = *hf_out;
+      *stderr = *hf_out;
+    }
+  }
   #endif
 
   Main.image_width=Screen_width/Pixel_width;
