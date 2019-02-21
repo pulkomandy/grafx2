@@ -1094,42 +1094,42 @@ static int Handle_joystick_release(SDL_JoyButtonEvent event)
     {
       #ifdef JOY_BUTTON_UP
       case JOY_BUTTON_UP:
-        Directional_up=1;
+        Directional_up=0;
         break;
       #endif
       #ifdef JOY_BUTTON_UPRIGHT
       case JOY_BUTTON_UPRIGHT:
-        Directional_up_right=1;
+        Directional_up_right=0;
         break;
       #endif
       #ifdef JOY_BUTTON_RIGHT
       case JOY_BUTTON_RIGHT:
-        Directional_right=1;
+        Directional_right=0;
         break;
       #endif
       #ifdef JOY_BUTTON_DOWNRIGHT
       case JOY_BUTTON_DOWNRIGHT:
-        Directional_down_right=1;
+        Directional_down_right=0;
         break;
       #endif
       #ifdef JOY_BUTTON_DOWN
       case JOY_BUTTON_DOWN:
-        Directional_down=1;
+        Directional_down=0;
         break;
       #endif
       #ifdef JOY_BUTTON_DOWNLEFT
       case JOY_BUTTON_DOWNLEFT:
-        Directional_down_left=1;
+        Directional_down_left=0;
         break;
       #endif
       #ifdef JOY_BUTTON_LEFT
       case JOY_BUTTON_LEFT:
-        Directional_left=1;
+        Directional_left=0;
         break;
       #endif
       #ifdef JOY_BUTTON_UPLEFT
       case JOY_BUTTON_UPLEFT:
-        Directional_up_left=1;
+        Directional_up_left=0;
         break;
       #endif
       
