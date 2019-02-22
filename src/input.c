@@ -956,14 +956,14 @@ static int Handle_key_release(SDL_KeyboardEvent * event)
 // Joystick management
 
 #if defined(USE_JOYSTICK) && (defined(USE_SDL) || defined(USE_SDL2))
-static int Handle_joystick_press(SDL_JoyButtonEvent event)
+static int Handle_joystick_press(SDL_JoyButtonEvent * event)
 {
-    if (event.button == Joybutton_shift)
+    if (event->button == Joybutton_shift)
     {
       SDL_SetModState(SDL_GetModState() | KMOD_SHIFT);
       return 0;
     }
-    if (event.button == Joybutton_control)
+    if (event->button == Joybutton_control)
     {
       SDL_SetModState(SDL_GetModState() | KMOD_CTRL);
       if (Config.Swap_buttons == GFX2_MOD_CTRL && Button_inverter==0)
@@ -977,7 +977,7 @@ static int Handle_joystick_press(SDL_JoyButtonEvent event)
       }
       return 0;
     }
-    if (event.button == Joybutton_alt)
+    if (event->button == Joybutton_alt)
     {
 #if defined(USE_SDL)
       SDL_SetModState(SDL_GetModState() | (KMOD_ALT|KMOD_META));
@@ -995,17 +995,17 @@ static int Handle_joystick_press(SDL_JoyButtonEvent event)
       }
       return 0;
     }
-    if (event.button == Joybutton_left_click)
+    if (event->button == Joybutton_left_click)
     {
       Input_new_mouse_K = Button_inverter ? 2 : 1;
       return Handle_mouse_btn_change();
     }
-    if (event.button == Joybutton_right_click)
+    if (event->button == Joybutton_right_click)
     {
       Input_new_mouse_K = Button_inverter ? 1 : 2;
       return Handle_mouse_btn_change();
     }
-    switch(event.button)
+    switch(event->button)
     {
       #ifdef JOY_BUTTON_UP
       case JOY_BUTTON_UP:
@@ -1052,25 +1052,25 @@ static int Handle_joystick_press(SDL_JoyButtonEvent event)
         break;
     }
       
-    Key = (KEY_JOYBUTTON+event.button)|Get_Key_modifiers();
+    Key = (KEY_JOYBUTTON + event->button) | Get_Key_modifiers();
     // TODO: systeme de répétition
     
     return 1;
 }
 
-static int Handle_joystick_release(SDL_JoyButtonEvent event)
+static int Handle_joystick_release(SDL_JoyButtonEvent * event)
 {
-    if (event.button == Joybutton_shift)
+    if (event->button == Joybutton_shift)
     {
       SDL_SetModState(SDL_GetModState() & ~KMOD_SHIFT);
       return Release_control(0,GFX2_MOD_SHIFT);
     }
-    if (event.button == Joybutton_control)
+    if (event->button == Joybutton_control)
     {
       SDL_SetModState(SDL_GetModState() & ~KMOD_CTRL);
       return Release_control(0,GFX2_MOD_CTRL);
     }
-    if (event.button == Joybutton_alt)
+    if (event->button == Joybutton_alt)
     {
 #if defined(USE_SDL)
       SDL_SetModState(SDL_GetModState() & ~(KMOD_ALT|KMOD_META));
@@ -1079,18 +1079,18 @@ static int Handle_joystick_release(SDL_JoyButtonEvent event)
 #endif
       return Release_control(0,GFX2_MOD_ALT);
     }
-    if (event.button == Joybutton_left_click)
+    if (event->button == Joybutton_left_click)
     {
       Input_new_mouse_K &= ~1;
       return Handle_mouse_btn_change();
     }
-    if (event.button == Joybutton_right_click)
+    if (event->button == Joybutton_right_click)
     {
       Input_new_mouse_K &= ~2;
       return Handle_mouse_btn_change();
     }
   
-    switch(event.button)
+    switch(event->button)
     {
       #ifdef JOY_BUTTON_UP
       case JOY_BUTTON_UP:
@@ -1139,28 +1139,24 @@ static int Handle_joystick_release(SDL_JoyButtonEvent event)
   return 1;
 }
 
-static void Handle_joystick_movement(SDL_JoyAxisEvent event)
+static void Handle_joystick_movement(SDL_JoyAxisEvent * event)
 {
-    if (event.axis==JOYSTICK_AXIS_X)
-    {
-      Directional_right=Directional_left=0;
-      if (event.value<-JOYSTICK_THRESHOLD)
-      {
-        Directional_left=1;
-      }
-      else if (event.value>JOYSTICK_THRESHOLD)
-        Directional_right=1;
-    }
-    else if (event.axis==JOYSTICK_AXIS_Y)
-    {
-      Directional_up=Directional_down=0;
-      if (event.value<-JOYSTICK_THRESHOLD)
-      {
-        Directional_up=1;
-      }
-      else if (event.value>JOYSTICK_THRESHOLD)
-        Directional_down=1;
-    }
+  if (event->axis == JOYSTICK_AXIS_X)
+  {
+    Directional_right = Directional_left = 0;
+    if (event->value < -JOYSTICK_THRESHOLD)
+      Directional_left=1;
+    else if (event->value > JOYSTICK_THRESHOLD)
+      Directional_right=1;
+  }
+  else if (event->axis == JOYSTICK_AXIS_Y)
+  {
+    Directional_up = Directional_down = 0;
+    if (event->value < -JOYSTICK_THRESHOLD)
+      Directional_up = 1;
+    else if (event->value > JOYSTICK_THRESHOLD)
+      Directional_down=1;
+  }
 }
 #endif
 
@@ -1378,17 +1374,17 @@ int Get_input(int sleep_time)
           #ifdef USE_JOYSTICK
 
           case SDL_JOYBUTTONUP:
-              Handle_joystick_release(event.jbutton);
+              Handle_joystick_release(&event.jbutton);
               user_feedback_required = 1;
               break;
 
           case SDL_JOYBUTTONDOWN:
-              Handle_joystick_press(event.jbutton);
+              Handle_joystick_press(&event.jbutton);
               user_feedback_required = 1;
               break;
 
           case SDL_JOYAXISMOTION:
-              Handle_joystick_movement(event.jaxis);
+              Handle_joystick_movement(&event.jaxis);
               break;
 
           #endif
