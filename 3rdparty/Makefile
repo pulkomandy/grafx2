@@ -135,6 +135,11 @@ GETURL = $(shell WGET=`which wget` ; if [ "$$?" = "0" ] && [ -x "$$WGET" ] ; \
                  then echo "$$WGET -nv" ; \
                  else echo 'curl -s -w "%{url_effective} downloaded to %{filename_effective} in %{time_total} seconds\\n" -R -O -L --max-time 120' ; fi )
 
+# default to gcc compiler
+ifeq (default,$(origin CC))
+  CC = gcc
+endif
+
 BUILD_CC := $(CC)
 STRIP = strip
 
