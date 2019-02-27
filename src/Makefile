@@ -102,12 +102,29 @@ ifdef COMSPEC
   MKDIR = mkdir -p
   RMDIR = rmdir --ignore-fail-on-non-empty
   CP = cp
-  BIN = ../bin/grafx2.exe
+  BIN = ../bin/grafx2-$(API).exe
   GENERATEDOCBIN = ../bin/generatedoc.exe
-  COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb `sdl-config --cflags` $(TTFCOPT) $(JOYCOPT) $(LUACOPT)
-  LOPT = `sdl-config --libs` -lSDL_image $(TTFLOPT) -lpng -lz $(LUALOPT)
+  COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb
+  COPT += $(LUACOPT)
+  LOPT = $(LUALOPT)
+  ifeq ($(API),sdl)
+  SDLCONFIG ?= $(shell which ../3rdparty/usr/bin/sdl-config || which sdl-config)
+  COPT += $(shell $(SDLCONFIG) --cflags) $(TTFCOPT) $(JOYCOPT)
+  LOPT += $(shell $(SDLCONFIG) --libs) -lSDL_image $(TTFLOPT)
+  endif
+  ifeq ($(API),sdl2)
+  SDLC2ONFIG ?= $(shell which ../3rdparty/usr/bin/sdl2-config || which sdl2-config)
+  COPT += $(shell $(SDL2CONFIG) --cflags) $(TTFCOPT) $(JOYCOPT)
+  LOPT += $(shell $(SDL2CONFIG) --libs) -lSDL2_image $(TTFLOPT)
+  endif
+  ifeq ($(API),win32)
+  COPT += -I../3rdparty/usr/include
+  LOPT += -L../3rdparty/usr/lib
+  endif
+  LOPT += -ltiff
+  LOPT += -lpng -lz
   LUALOPT = -llua
-  OBJDIR = ../obj/win32
+  OBJDIR = ../obj/win32-$(API)
   # Resources (icon)
   WINDRES = windres.exe
   PLATFORMOBJ = winres.o
