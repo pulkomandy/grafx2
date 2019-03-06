@@ -147,6 +147,7 @@ STRIP = strip
 # Windows specific
 ifdef COMSPEC
 WIN32 = 1
+RANLIB = ranlib
 endif
 
 ifdef WIN32CROSS
