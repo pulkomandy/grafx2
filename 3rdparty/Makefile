@@ -406,6 +406,9 @@ $(PREFIX)/lib/libSDL_ttf.a:	$(PREFIX)/lib/libfreetype.a
 $(PREFIX)/lib/libSDL_ttf.a:	$(PREFIX)/lib/libSDLmain.a
 
 $(PREFIX)/lib/libSDL_ttf.a:	$(SDLTTF)/.ok
+ifdef WIN32
+	$(CP) $(PREFIX)/bin/SDL.dll $(SDLTTF)
+endif
 	cd $(SDLTTF) && PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig \
 	  CC=$(CC) CPPFLAGS=-I$(PREFIX)/include LDFLAGS="-L$(PREFIX)/lib $(LDFLAGS) $(ADDLDFLAGS)" \
 	  ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --with-freetype-prefix=$(PREFIX) \
