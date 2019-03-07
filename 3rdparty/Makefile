@@ -126,9 +126,9 @@ MKDIR = mkdir -p
 CP = cp -v
 TAR = $(shell which tar)
 SHA256CMD = $(shell SHASUM=`which shasum` ; if [ "$$?" = "0" ] && [ -x "$$SHASUM" ] ; \
-                    then echo "($$SHASUM -a 256 | cut -f1 -d' ')" ; \
+                    then echo "(\"$$SHASUM\" -a 256 | cut -f1 -d' ')" ; \
                     else OPENSSL=`which openssl` ; if [ "$$?" = "0" ] && [ -x "$$OPENSSL" ] ; \
-                    then echo "($$OPENSSL sha256 -hex | sed 's/^.* //')" ; \
+                    then echo "(\"$$OPENSSL\" sha256 -hex | sed 's/^.* //')" ; \
                     else echo "echo 'WARNING: no sha256 digest tool' >&2 ; echo $(SHA256)" ; \
                     fi ; fi )
 # you need either wget or curl to download the files
