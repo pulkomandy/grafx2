@@ -503,7 +503,9 @@ endif
 $(PREFIX)/lib/libpng.a:	$(PREFIX)/lib/libz.a
 
 $(PREFIX)/lib/libpng.a:	$(LIBPNG)/.ok
-	cd $(LIBPNG) && CC="$(CC) $(LDFLAGS)" CPPFLAGS=-I$(PREFIX)/include LDFLAGS="-L$(PREFIX)/lib" ./configure --prefix=$(PREFIX) --host=$(HOST) --enable-silent-rules
+	cd $(LIBPNG) && CC="$(CC) $(LDFLAGS)" CPPFLAGS="-I$(PREFIX)/include" LDFLAGS="-L$(PREFIX)/lib" \
+	  ./configure --prefix=$(PREFIX) --host=$(HOST) --enable-silent-rules \
+	  --disable-dependency-tracking
 	cd $(LIBPNG) && $(MAKE)
 	cd $(LIBPNG) && $(MAKE) install
 ifdef WIN32
