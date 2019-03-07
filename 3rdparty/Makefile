@@ -183,6 +183,7 @@ endif
 
 HOST = $(shell $(CC) -dumpmachine)
 #HOST = i686-pc-mingw32
+BUILD = $(shell $(BUILD_CC) -dumpmachine)
 DATE = $(shell date -R)
 
 .PHONY:	all clean clean_archives clean_all download libs libpng \
@@ -387,7 +388,8 @@ $(PREFIX)/lib/libSDL_image.a:	$(SDLIMAGE)/.ok
 	$(MKDIR) $(SDLIMAGE)/build
 	cd $(SDLIMAGE)/build && CC="$(CC) $(LDFLAGS)" CPPFLAGS=-I$(PREFIX)/include \
 	  LDFLAGS="-L$(PREFIX)/lib $(ADDLDFLAGS)" \
-	  ../configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --host=$(HOST) \
+	  ../configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) \
+	  --host=$(HOST) --build=$(BUILD) \
 	  --disable-webp --disable-imageio --disable-sdltest \
 	  --disable-jpg-shared --disable-png-shared --disable-tif-shared
 	cd $(SDLIMAGE)/build && $(MAKE)
@@ -436,7 +438,7 @@ $(PREFIX)/lib/libfreetype.a:	$(PREFIX)/lib/libpng.a
 
 $(PREFIX)/lib/libfreetype.a:	$(FREETYPE)/.ok
 	$(MKDIR) $(FREETYPE)/build
-	cd $(FREETYPE)/build && ../configure --build=$(shell $(BUILD_CC) -dumpmachine) --host=$(HOST) \
+	cd $(FREETYPE)/build && ../configure --build=$(BUILD) --host=$(HOST) \
 	  --prefix=$(PREFIX) --enable-freetype-config \
 	  PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig LDFLAGS="$(LDFLAGS)"
 	cd $(FREETYPE)/build && $(MAKE) && $(MAKE) install
@@ -474,7 +476,8 @@ $(PREFIX)/lib/libtiff.a:	$(PREFIX)/lib/libjpeg.a
 $(PREFIX)/lib/libtiff.a:	$(PREFIX)/lib/libz.a
 
 $(PREFIX)/lib/libtiff.a:	$(LIBTIFF)/.ok
-	cd $(LIBTIFF) && CC="$(CC) $(LDFLAGS)" ./configure --prefix=$(PREFIX) --host=$(HOST) \
+	cd $(LIBTIFF) && CC="$(CC) $(LDFLAGS)" ./configure --prefix=$(PREFIX) \
+	  --host=$(HOST) --build=$(BUILD) \
 	  --with-zlib-include-dir=$(PREFIX)/include --with-zlib-lib-dir=$(PREFIX)/lib \
 	  --with-jpeg-include-dir=$(PREFIX)/include --with-jpeg-lib-dir=$(PREFIX)/lib \
 	  --enable-silent-rules \
