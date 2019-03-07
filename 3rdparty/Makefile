@@ -390,12 +390,23 @@ $(PREFIX)/lib/libSDL_image.a:	$(PREFIX)/lib/libSDLmain.a
 
 $(PREFIX)/lib/libSDL_image.a:	$(SDLIMAGE)/.ok
 	$(MKDIR) $(SDLIMAGE)/build
+ifneq ($(LDFLAGS),)
 	cd $(SDLIMAGE)/build && CC="$(CC) $(LDFLAGS)" CPPFLAGS=-I$(PREFIX)/include \
 	  LDFLAGS="-L$(PREFIX)/lib $(ADDLDFLAGS)" \
 	  ../configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) \
 	  --host=$(HOST) --build=$(BUILD) \
 	  --disable-webp --disable-imageio --disable-sdltest \
-	  --disable-jpg-shared --disable-png-shared --disable-tif-shared
+	  --disable-jpg-shared --disable-png-shared --disable-tif-shared \
+	  --disable-dependency-tracking
+else
+	cd $(SDLIMAGE)/build && CPPFLAGS=-I$(PREFIX)/include \
+	  LDFLAGS="-L$(PREFIX)/lib $(ADDLDFLAGS)" \
+	  ../configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) \
+	  --host=$(HOST) --build=$(BUILD) \
+	  --disable-webp --disable-imageio --disable-sdltest \
+	  --disable-jpg-shared --disable-png-shared --disable-tif-shared \
+	  --disable-dependency-tracking
+endif
 	cd $(SDLIMAGE)/build && $(MAKE)
 	cd $(SDLIMAGE)/build && $(MAKE) install
 ifdef WIN32

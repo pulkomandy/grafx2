@@ -1,0 +1,18 @@
+install:
+  - set PATH=C:\msys64\mingw32\bin;C:\msys64\usr\bin;%PATH%
+  - mingw32-make -v
+  - make -v
+
+build_script:
+  - mingw32-make 3rdparty API=win32
+  - mingw32-make API=win32
+  - mingw32-make ziprelease API=win32
+  - mingw32-make 3rdparty
+  - mingw32-make
+  - mingw32-make ziprelease
+
+artifacts:
+  - path: '*.zip'
+    name: GrafX2 portable installation
+  - path: 'install\*.exe'
+    name: GrafX2 installer
