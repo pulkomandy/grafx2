@@ -139,7 +139,12 @@ ifdef COMSPEC
   #some misc files we have to add to the release archive under windows.
   PLATFORMFILES += $(wildcard ../bin/libpng*.dll) $(wildcard ../bin/libjpeg*.dll) bin/zlib1.dll $(TTFLIBS)
   PLATFORMFILES += bin/libtiff-5.dll
+  ifdef APPVEYOR
+  ZIP = 7z
+  ZIPOPT = a
+  else
   ZIP = zip
+  endif
 else
 
 # default for GENERATEDOCBIN
