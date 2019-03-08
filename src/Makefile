@@ -115,15 +115,18 @@ ifdef COMSPEC
   SDLCONFIG ?= $(shell which ../3rdparty/usr/bin/sdl-config || which sdl-config)
   COPT += $(shell $(SDLCONFIG) --cflags) $(TTFCOPT) $(JOYCOPT)
   LOPT += $(shell $(SDLCONFIG) --libs) -lSDL_image $(TTFLOPT)
+  PLATFORMFILES = bin/SDL.dll bin/SDL_image.dll
   endif
   ifeq ($(API),sdl2)
   SDLC2ONFIG ?= $(shell which ../3rdparty/usr/bin/sdl2-config || which sdl2-config)
   COPT += $(shell $(SDL2CONFIG) --cflags) $(TTFCOPT) $(JOYCOPT)
   LOPT += $(shell $(SDL2CONFIG) --libs) -lSDL2_image $(TTFLOPT)
+  PLATFORMFILES = bin/SDL2.dll bin/SDL2_image.dll
   endif
   ifeq ($(API),win32)
-  COPT += -I../3rdparty/usr/include
-  LOPT += -L../3rdparty/usr/lib
+  COPT += -I../3rdparty/usr/include $(TTFCOPT)
+  LOPT += -L../3rdparty/usr/lib -lgdi32 -lcomdlg32
+  PLATFORMFILES =
   endif
   LOPT += -ltiff
   LOPT += -lpng -lz
@@ -134,7 +137,7 @@ ifdef COMSPEC
   PLATFORMOBJ = winres.o
   PLATFORM = win32
   #some misc files we have to add to the release archive under windows.
-  PLATFORMFILES = bin/SDL.dll bin/SDL_image.dll $(wildcard ../bin/libpng*.dll) $(wildcard ../bin/libjpeg*.dll) bin/zlib1.dll $(TTFLIBS)
+  PLATFORMFILES += $(wildcard ../bin/libpng*.dll) $(wildcard ../bin/libjpeg*.dll) bin/zlib1.dll $(TTFLIBS)
   PLATFORMFILES += bin/libtiff-5.dll
   ZIP = zip
 else
