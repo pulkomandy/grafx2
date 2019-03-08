@@ -97,6 +97,10 @@ PKG_CONFIG ?= pkg-config
 
 # There is no uname under windows, but we can guess we are there with the COMSPEC env.var
 # Windows specific
+ifdef ComSpec
+# sometimes, it is ComSpec, sometimes it is COMSPEC
+COMSPEC = $(ComSpec)
+endif
 ifdef COMSPEC
   DELCOMMAND = rm -f
   MKDIR = mkdir -p
