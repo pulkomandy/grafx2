@@ -90,14 +90,12 @@
     #include <sys/param.h>
 #endif
 
-#if !defined(WIN32)
 #if defined(__macosx__)
 #include <machine/endian.h>
 #elif defined(__FreeBSD__)
 #include <sys/endian.h>
-#else
+#elif !defined(WIN32)
 #include <endian.h>
-#endif
 #endif
 
 #include "gfx2log.h"

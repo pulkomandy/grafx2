@@ -2,6 +2,7 @@ install:
   - set PATH=C:\msys64\mingw32\bin;C:\msys64\usr\bin;%PATH%
   - mingw32-make -v
   - make -v
+  - uname
 
 build_script:
   - mingw32-make 3rdparty API=win32
