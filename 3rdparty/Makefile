@@ -41,7 +41,9 @@ SDLIMAGEPATCHES = SDL_image-1.2.12.XCF_infinite_loop.patch \
                   SDL_image_XCF_v11_load_level.patch \
                   SDL_image-1.2.12-png1.6.patch \
                   SDL_image-1.2.12-png_const_colorp.patch \
-                  SDL_image-1.2.12-png_const_fix.patch
+                  SDL_image-1.2.12-png_const_fix.patch \
+                  SDL_image-1.2.12-configure_update.patch \
+                  SDL_image-1.2.12-configure_libpng.patch
 SDLTTF=SDL_ttf-2.0.11
 SDLTTFARCH=$(SDLTTF).tar.gz
 SDLTTFURL=https://www.libsdl.org/projects/SDL_ttf/release/$(SDLTTFARCH)
@@ -382,13 +384,14 @@ $(PREFIX)/lib/libSDL_image.a:	$(PREFIX)/lib/libpng.a
 $(PREFIX)/lib/libSDL_image.a:	$(PREFIX)/lib/libSDLmain.a
 
 $(PREFIX)/lib/libSDL_image.a:	$(SDLIMAGE)/.ok
-	cd $(SDLIMAGE) && CC="$(CC) $(LDFLAGS)" CPPFLAGS=-I$(PREFIX)/include \
-	  LDFLAGS="-L$(PREFIX)/lib $(ADDLDFLAGS)" LIBPNG_CFLAGS= LIBPNG_LIBS=-lpng \
-	  ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --host=$(HOST) \
+	$(MKDIR) $(SDLIMAGE)/build
+	cd $(SDLIMAGE)/build && CC="$(CC) $(LDFLAGS)" CPPFLAGS=-I$(PREFIX)/include \
+	  LDFLAGS="-L$(PREFIX)/lib $(ADDLDFLAGS)" \
+	  ../configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --host=$(HOST) \
 	  --disable-webp --disable-imageio --disable-sdltest \
 	  --disable-jpg-shared --disable-png-shared --disable-tif-shared
-	cd $(SDLIMAGE) && $(MAKE)
-	cd $(SDLIMAGE) && $(MAKE) install
+	cd $(SDLIMAGE)/build && $(MAKE)
+	cd $(SDLIMAGE)/build && $(MAKE) install
 ifdef WIN32
 	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/SDL_image.dll ../bin && $(STRIP) ../bin/SDL_image.dll
 endif

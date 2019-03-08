@@ -1,0 +1,231 @@
+# HG changeset patch
+# User Ozkan Sezer <sezeroz@gmail.com>
+# Date 1539435355 -10800
+#      Sat Oct 13 15:55:55 2018 +0300
+# Branch SDL-1.2
+# Node ID 12758bec1240d03adb85e8960a2bc7598a3c78f4
+# Parent  85d1fcc58846ee8cd50d98de3dc1160faeb5f9ce
+backport fix for linking with libpng installed in a non-standard location
+
+(default 2.0 branch commit: 4088a517f9a5)
+
+diff -r 85d1fcc58846 -r 12758bec1240 configure
+--- a/configure	Sat Oct 13 11:11:02 2018 +0300
++++ b/configure	Sat Oct 13 15:55:55 2018 +0300
+@@ -14084,7 +14084,10 @@
+ 
+ fi
+ if test "x$ac_cv_header_png_h" = x""yes; then
+-  have_png_hdr=yes
++
++            have_png_hdr=yes
++            LIBPNG_CFLAGS=""
++
+ fi
+ 
+ 
+@@ -14154,7 +14157,10 @@
+ { $as_echo "$as_me:$LINENO: result: $ac_cv_lib_png_png_create_read_struct" >&5
+ $as_echo "$ac_cv_lib_png_png_create_read_struct" >&6; }
+ if test "x$ac_cv_lib_png_png_create_read_struct" = x""yes; then
+-  have_png_lib=yes
++
++            have_png_lib=yes
++            LIBPNG_LIBS="-lpng -lz"
++
+ fi
+ 
+ 
+@@ -14287,7 +14293,10 @@
+ 
+ fi
+ if test "x$ac_cv_header_png_h" = x""yes; then
+-  have_png_hdr=yes
++
++            have_png_hdr=yes
++            LIBPNG_CFLAGS=""
++
+ fi
+ 
+ 
+@@ -14357,7 +14366,10 @@
+ { $as_echo "$as_me:$LINENO: result: $ac_cv_lib_png_png_create_read_struct" >&5
+ $as_echo "$ac_cv_lib_png_png_create_read_struct" >&6; }
+ if test "x$ac_cv_lib_png_png_create_read_struct" = x""yes; then
+-  have_png_lib=yes
++
++            have_png_lib=yes
++            LIBPNG_LIBS="-lpng -lz"
++
+ fi
+ 
+ 
+@@ -14367,7 +14379,6 @@
+         { $as_echo "$as_me:$LINENO: result: yes" >&5
+ $as_echo "yes" >&6; }
+ 	        have_png_hdr=yes
+-        CFLAGS="$LIBPNG_CFLAGS $CFLAGS"
+         have_png_lib=yes
+ 
+ fi
+@@ -14825,7 +14836,10 @@
+ 
+ fi
+ if test "x$ac_cv_header_webp_decode_h" = x""yes; then
+-  have_webp_hdr=yes
++
++            have_webp_hdr=yes
++            LIBWEBP_CFLAGS=""
++
+ fi
+ 
+ 
+@@ -14895,7 +14909,10 @@
+ { $as_echo "$as_me:$LINENO: result: $ac_cv_lib_webp_WebPGetDecoderVersion" >&5
+ $as_echo "$ac_cv_lib_webp_WebPGetDecoderVersion" >&6; }
+ if test "x$ac_cv_lib_webp_WebPGetDecoderVersion" = x""yes; then
+-  have_webp_lib=yes
++
++            have_webp_lib=yes
++            LIBWEBP_LIBS="-lwebp"
++
+ fi
+ 
+ 
+@@ -15028,7 +15045,10 @@
+ 
+ fi
+ if test "x$ac_cv_header_webp_decode_h" = x""yes; then
+-  have_webp_hdr=yes
++
++            have_webp_hdr=yes
++            LIBWEBP_CFLAGS=""
++
+ fi
+ 
+ 
+@@ -15098,7 +15118,10 @@
+ { $as_echo "$as_me:$LINENO: result: $ac_cv_lib_webp_WebPGetDecoderVersion" >&5
+ $as_echo "$ac_cv_lib_webp_WebPGetDecoderVersion" >&6; }
+ if test "x$ac_cv_lib_webp_WebPGetDecoderVersion" = x""yes; then
+-  have_webp_lib=yes
++
++            have_webp_lib=yes
++            LIBWEBP_LIBS="-lwebp"
++
+ fi
+ 
+ 
+@@ -15108,7 +15131,6 @@
+         { $as_echo "$as_me:$LINENO: result: yes" >&5
+ $as_echo "yes" >&6; }
+ 	        have_webp_hdr=yes
+-        CFLAGS="$LIBWEBP_CFLAGS $CFLAGS"
+         have_webp_lib=yes
+ 
+ fi
+@@ -15210,6 +15232,7 @@
+ fi
+ 
+ if test x$enable_webp = xyes -a x$have_webp_hdr = xyes -a x$have_webp_lib = xyes; then
++    CFLAGS="$LIBWEBP_CFLAGS $CFLAGS"
+     if test x$enable_webp_shared = xyes && test x$webp_lib != x; then
+         echo "-- dynamic libwebp -> $webp_lib"
+         cat >>confdefs.h <<_ACEOF
+@@ -15217,7 +15240,7 @@
+ _ACEOF
+ 
+     else
+-        IMG_LIBS="-lwebp $IMG_LIBS"
++        IMG_LIBS="$LIBWEBP_LIBS $IMG_LIBS"
+     fi
+ fi
+ 
+@@ -15248,6 +15271,7 @@
+     fi
+ fi
+ if test x$enable_png = xyes -a x$have_png_hdr = xyes -a x$have_png_lib = xyes; then
++    CFLAGS="$LIBPNG_CFLAGS $CFLAGS"
+     if test x$enable_png_shared = xyes && test x$png_lib != x; then
+         echo "-- dynamic libpng -> $png_lib"
+         cat >>confdefs.h <<_ACEOF
+@@ -15255,7 +15279,7 @@
+ _ACEOF
+ 
+     else
+-        IMG_LIBS="-lpng -lz $IMG_LIBS"
++        IMG_LIBS="$LIBPNG_LIBS $IMG_LIBS"
+     fi
+ fi
+ 
+diff -r 85d1fcc58846 -r 12758bec1240 configure.in
+--- a/configure.in	Sat Oct 13 11:11:02 2018 +0300
++++ b/configure.in	Sat Oct 13 15:55:55 2018 +0300
+@@ -194,11 +194,16 @@
+ if test "x$enable_png" = xyes; then
+     PKG_CHECK_MODULES([LIBPNG], [libpng], [dnl
+         have_png_hdr=yes
+-        CFLAGS="$LIBPNG_CFLAGS $CFLAGS"
+         have_png_lib=yes
+       ], [dnl
+-        AC_CHECK_HEADER([png.h], [have_png_hdr=yes])
+-        AC_CHECK_LIB([png], [png_create_read_struct], [have_png_lib=yes], [], [-lz])
++        AC_CHECK_HEADER([png.h], [
++            have_png_hdr=yes
++            LIBPNG_CFLAGS=""
++        ])
++        AC_CHECK_LIB([png], [png_create_read_struct], [
++            have_png_lib=yes
++            LIBPNG_LIBS="-lpng -lz"
++        ], [], [-lz])
+       ])
+     if test x$have_png_hdr = xyes -a x$have_png_lib = xyes; then
+         AC_DEFINE([LOAD_PNG])
+@@ -258,11 +263,16 @@
+ if test x$enable_webp = xyes; then
+     PKG_CHECK_MODULES([LIBWEBP], [libwebp], [dnl
+         have_webp_hdr=yes
+-        CFLAGS="$LIBWEBP_CFLAGS $CFLAGS"
+         have_webp_lib=yes
+       ], [dnl
+-        AC_CHECK_HEADER([webp/decode.h], [have_webp_hdr=yes])
+-        AC_CHECK_LIB([webp], [WebPGetDecoderVersion], [have_webp_lib=yes], [], [-lm])
++        AC_CHECK_HEADER([webp/decode.h], [
++            have_webp_hdr=yes
++            LIBWEBP_CFLAGS=""
++        ])
++        AC_CHECK_LIB([webp], [WebPGetDecoderVersion], [
++            have_webp_lib=yes
++            LIBWEBP_LIBS="-lwebp"
++        ], [], [-lm])
+       ])
+     if test x$have_webp_hdr = xyes -a x$have_webp_lib = xyes; then
+         AC_DEFINE([LOAD_WEBP])
+@@ -330,11 +340,12 @@
+ fi
+ 
+ if test x$enable_webp = xyes -a x$have_webp_hdr = xyes -a x$have_webp_lib = xyes; then
++    CFLAGS="$LIBWEBP_CFLAGS $CFLAGS"
+     if test x$enable_webp_shared = xyes && test x$webp_lib != x; then
+         echo "-- dynamic libwebp -> $webp_lib"
+         AC_DEFINE_UNQUOTED(LOAD_WEBP_DYNAMIC, "$webp_lib")
+     else
+-        IMG_LIBS="-lwebp $IMG_LIBS"
++        IMG_LIBS="$LIBWEBP_LIBS $IMG_LIBS"
+     fi
+ fi
+ 
+@@ -359,11 +370,12 @@
+     fi
+ fi
+ if test x$enable_png = xyes -a x$have_png_hdr = xyes -a x$have_png_lib = xyes; then
++    CFLAGS="$LIBPNG_CFLAGS $CFLAGS"
+     if test x$enable_png_shared = xyes && test x$png_lib != x; then
+         echo "-- dynamic libpng -> $png_lib"
+         AC_DEFINE_UNQUOTED(LOAD_PNG_DYNAMIC, "$png_lib")
+     else
+-        IMG_LIBS="-lpng -lz $IMG_LIBS"
++        IMG_LIBS="$LIBPNG_LIBS $IMG_LIBS"
+     fi
+ fi
+ 
