@@ -3,6 +3,7 @@ install:
   - mingw32-make -v
   - make -v
   - uname
+  - set MSYS=winsymlinks:native
 
 build_script:
   - mingw32-make 3rdparty API=win32
