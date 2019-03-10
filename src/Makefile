@@ -110,7 +110,8 @@ ifdef COMSPEC
   GENERATEDOCBIN = ../bin/generatedoc.exe
   COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb
   COPT += $(LUACOPT)
-  LOPT = $(LUALOPT)
+  LOPT = -mwindows
+  LOPT += $(LUALOPT)
   ifeq ($(API),sdl)
   SDLCONFIG ?= $(shell which ../3rdparty/usr/bin/sdl-config || which sdl-config)
   COPT += $(shell $(SDLCONFIG) --cflags) $(TTFCOPT) $(JOYCOPT)
