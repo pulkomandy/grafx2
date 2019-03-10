@@ -154,6 +154,7 @@ endif
 ifdef COMSPEC
 WIN32 = 1
 RANLIB = ranlib
+LDFLAGS += -static-libgcc
 endif
 
 ifdef WIN32CROSS
