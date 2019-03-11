@@ -397,6 +397,7 @@ $(PREFIX)/lib/libSDL_image.a:	$(SDLIMAGE)/.ok
 ifneq ($(LDFLAGS),)
 	cd $(SDLIMAGE)/build && CC="$(CC) $(LDFLAGS)" CPPFLAGS=-I$(PREFIX)/include \
 	  LDFLAGS="-L$(PREFIX)/lib $(ADDLDFLAGS)" \
+	  PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig \
 	  ../configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) \
 	  --host=$(HOST) --build=$(BUILD) \
 	  --disable-webp --disable-imageio --disable-sdltest \
@@ -405,6 +406,7 @@ ifneq ($(LDFLAGS),)
 else
 	cd $(SDLIMAGE)/build && CPPFLAGS=-I$(PREFIX)/include \
 	  LDFLAGS="-L$(PREFIX)/lib $(ADDLDFLAGS)" \
+	  PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig \
 	  ../configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) \
 	  --host=$(HOST) --build=$(BUILD) \
 	  --disable-webp --disable-imageio --disable-sdltest \
