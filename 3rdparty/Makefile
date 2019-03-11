@@ -391,6 +391,9 @@ $(PREFIX)/lib/libSDL_image.a:	$(PREFIX)/lib/libSDLmain.a
 
 $(PREFIX)/lib/libSDL_image.a:	$(SDLIMAGE)/.ok
 	$(MKDIR) $(SDLIMAGE)/build
+	touch $(SDLIMAGE)/*.m4
+	touch $(SDLIMAGE)/configure
+	touch $(SDLIMAGE)/Makefile.in
 ifneq ($(LDFLAGS),)
 	cd $(SDLIMAGE)/build && CC="$(CC) $(LDFLAGS)" CPPFLAGS=-I$(PREFIX)/include \
 	  LDFLAGS="-L$(PREFIX)/lib $(ADDLDFLAGS)" \
