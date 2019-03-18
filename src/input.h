@@ -77,10 +77,19 @@ extern char * Drop_file_name;
 extern word * Drop_file_name_unicode;
 
 #if defined(USE_X11) || (defined(SDL_VIDEO_DRIVER_X11) && !defined(NO_X11))
+enum X11_CLIPBOARD_TYPES {
+  X11_CLIPBOARD_NONE,
+  X11_CLIPBOARD_UNKNOWN,
+  X11_CLIPBOARD_PNG,
+  X11_CLIPBOARD_TIFF,
+  X11_CLIPBOARD_URILIST,
+  X11_CLIPBOARD_UTF8STRING
+};
 ///
 /// malloc'ed copy of the X11 clipboard
 extern char * X11_clipboard;
 extern unsigned long X11_clipboard_size;
+extern enum X11_CLIPBOARD_TYPES X11_clipboard_type;
 #endif
 
 

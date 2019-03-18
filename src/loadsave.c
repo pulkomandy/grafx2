@@ -1485,18 +1485,27 @@ static void Load_ClipBoard_Image(T_IO_Context * context)
   selection = XInternAtom(X11_display, "CLIPBOARD", False);
   selection_owner = XGetSelectionOwner(X11_display, selection);
   if (selection_owner == None)
+  {
+    GFX2_Log(GFX2_INFO, "No owner for the X11 \"CLIPBOARD\" selection\n");
     return;
+  }
 #if defined(USE_SDL) || defined(USE_SDL2)
+  // Enable processing of X11 events
   old_wmevent_state = SDL_EventState(SDL_SYSWMEVENT, SDL_QUERY);
   SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);
 #endif
 
-#ifndef __no_pnglib__
-  XConvertSelection(X11_display, selection, XInternAtom(X11_display, "image/png"/*"PIXMAP"*/, False),
+  // "TARGETS" is a special content type. The selection owner will
+  // respond with a list of supported type. We will then choose our
+  // prefered type and ask for it.
+  // see Handle_SelectionNotify()
+  // We could ask directly for "image/png" or "image/tiff" but that is
+  // not sure this is supported by the selection owner.
+  XConvertSelection(X11_display, selection, XInternAtom(X11_display, "TARGETS", False),
                     XInternAtom(X11_display, "GFX2_CLIP", False), /* Property */
                     X11_window, CurrentTime);
-  // wait for the event to be received
-  for(i = 0; X11_clipboard == NULL && i < 10; i++)
+  // wait for the event to be received. 500ms maximum
+  for(i = 0; X11_clipboard == NULL && i < 25; i++)
   {
     Get_input(20);
   }
@@ -1504,24 +1513,39 @@ static void Load_ClipBoard_Image(T_IO_Context * context)
   SDL_EventState(SDL_SYSWMEVENT, old_wmevent_state);
 #endif
 
-  if (X11_clipboard != NULL)
+  switch(X11_clipboard_type)
   {
-    if (png_sig_cmp((byte *)X11_clipboard, 0, 8) == 0)
-    {
-      File_error = 0;
-      Load_PNG_Sub(context, NULL, X11_clipboard, X11_clipboard_size);
-    }
-    else
-    {
-      GFX2_Log(GFX2_WARNING, "Clipboard content not in PNG format\n");
-    }
-    free(X11_clipboard);
-    X11_clipboard = NULL;
-    X11_clipboard_size = 0;
-  }
-#else
-  GFX2_Log(GFX2_ERROR, "Need PNG support for X11 image copy/paste\n");
+    case X11_CLIPBOARD_NONE:
+      GFX2_Log(GFX2_INFO, "Unable to retrieve X11 \"CLIPBOARD\" selection in a supported format. X11_clipboard=%p\n", X11_clipboard);
+      break;
+#ifndef __no_pnglib__
+    case X11_CLIPBOARD_PNG:
+      if (png_sig_cmp((byte *)X11_clipboard, 0, 8) == 0)
+      {
+        File_error = 0;
+        Load_PNG_Sub(context, NULL, X11_clipboard, X11_clipboard_size);
+      }
+      else
+        GFX2_Log(GFX2_WARNING, "Failed to load PNG Clipboard\n");
+      break;
 #endif
+#ifndef __no_tifflib__
+    case X11_CLIPBOARD_TIFF:
+      Load_TIFF_from_memory(context, X11_clipboard, X11_clipboard_size);
+      if (File_error != 0)
+        GFX2_Log(GFX2_WARNING, "Failed to load TIFF Clipboard\n");
+      break;
+#endif
+    // TODO
+    case X11_CLIPBOARD_UTF8STRING:
+    case X11_CLIPBOARD_URILIST:
+    default:
+      GFX2_Log(GFX2_WARNING, "Unsupported Clipboard format %d\n", (int)X11_clipboard_type);
+  }
+  free(X11_clipboard);
+  X11_clipboard = NULL;
+  X11_clipboard_size = 0;
+  X11_clipboard_type = X11_CLIPBOARD_NONE;
 
 #else
   GFX2_Log(GFX2_ERROR, "Load_ClipBoard_Image() not implemented on this platform yet\n");

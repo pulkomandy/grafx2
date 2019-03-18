@@ -488,6 +488,7 @@ bye:
       char * utf8_str = X11_clipboard;
       X11_clipboard = NULL;
       X11_clipboard_size = 0;
+      X11_clipboard_type = X11_CLIPBOARD_NONE;
   #else
   {
     // mac OS without X11

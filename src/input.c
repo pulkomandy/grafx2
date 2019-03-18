@@ -88,6 +88,7 @@ word * Drop_file_name_unicode = NULL;
 #if defined(USE_X11) || (defined(SDL_VIDEO_DRIVER_X11) && !defined(NO_X11))
 char * X11_clipboard = NULL;
 unsigned long X11_clipboard_size = 0;
+enum X11_CLIPBOARD_TYPES X11_clipboard_type = X11_CLIPBOARD_NONE;
 #endif
 
 // --
@@ -598,24 +599,86 @@ static int Handle_SelectionNotify(const XSelectionEvent* xselection)
       XFree(target_name);
 
       r = XGetWindowProperty(X11_display, X11_window, xselection->property, 0, LONG_MAX,
-          False, xselection->target /* type */, &type, &format,
+          False, AnyPropertyType/*xselection->target*/ /* type */, &type, &format,
           &count, &bytesAfter, &value);
       if (r == Success && value != NULL)
       {
+#ifndef __no_pnglib__
+        Atom png = XInternAtom(X11_display, "image/png", False);
+#endif
+#ifndef __no_tifflib__
+        Atom tiff = XInternAtom(X11_display, "image/tiff", False);
+#endif
+        Atom urilist = XInternAtom(X11_display, "text/uri-list", False);
+        Atom utf8string = XInternAtom(X11_display, "UTF8_STRING", False);
+        // by order of preference
+        const struct { Atom a; enum X11_CLIPBOARD_TYPES t; } supported[] = {
+#ifndef __no_pnglib__
+          { png, X11_CLIPBOARD_PNG },
+#endif
+#ifndef __no_tifflib__
+          { tiff, X11_CLIPBOARD_TIFF },
+#endif
+          { urilist, X11_CLIPBOARD_URILIST },
+          { utf8string, X11_CLIPBOARD_UTF8STRING },
+          { None, X11_CLIPBOARD_NONE }
+        };
         char * type_name = XGetAtomName(X11_display, type);
         GFX2_Log(GFX2_DEBUG, "Clipboard value=%p %lu bytes format=%d type=%s\n",
                  value, count, format, type_name);
         XFree(type_name);
-        if (count > 0)
+        if (xselection->target == XInternAtom(X11_display, "TARGETS", False))
         {
-          X11_clipboard_size = count;
-          if (xselection->target == XInternAtom(X11_display, "UTF8_STRING", False))
-            X11_clipboard = strdup((char *)value); // Text Clipboard
-          else if (xselection->target == XInternAtom(X11_display, "image/png", False))
-          { // Picture clipboard (PNG)
-            X11_clipboard = malloc(count);
-            if (X11_clipboard != NULL)
-              memcpy(X11_clipboard, value, count);
+          unsigned long i;
+          Atom * atoms = (Atom *)value;
+          Atom prefered = None;
+          for (i = 0; i < count; i++)
+          {
+            int j;
+            char * atom_name = XGetAtomName(X11_display, atoms[i]);
+            GFX2_Log(GFX2_DEBUG, "  %d %s\n", atoms[i], atom_name);
+            XFree(atom_name);
+            if (prefered == None)
+            {
+              for (j = 0; supported[j].a != None; j++)
+              {
+                if (atoms[i] == supported[j].a)
+                {
+                  prefered = atoms[i];
+                  break;
+                }
+              }
+            }
+          }
+          if (prefered != None)
+          {
+            XConvertSelection(X11_display, xselection->selection, prefered,
+                    xselection->property, X11_window, CurrentTime);
+          }
+        }
+        else if (count > 0)
+        {
+          X11_clipboard = malloc(count+1);
+          if (X11_clipboard != NULL)
+          {
+            int i;
+            X11_clipboard_size = count;
+            X11_clipboard_type = X11_CLIPBOARD_UNKNOWN;
+            for (i = 0; supported[i].a != None; i++)
+            {
+              if (supported[i].a == xselection->target)
+              {
+                X11_clipboard_type = supported[i].t;
+                break;
+              }
+            }
+            memcpy(X11_clipboard, value, count);
+            X11_clipboard[count] = '\0';
+          }
+          else
+          {
+            X11_clipboard_type = X11_CLIPBOARD_NONE;
+            X11_clipboard_size = 0;
           }
         }
         XFree(value);
@@ -632,8 +695,13 @@ static int Handle_SelectionNotify(const XSelectionEvent* xselection)
   else
   {
     char * selection_name = XGetAtomName(X11_display, xselection->selection);
-    GFX2_Log(GFX2_INFO, "Unhandled SelectNotify selection=%s\n", selection_name);
+    char * property_name = "None";
+    if (xselection->property != None)
+      XGetAtomName(X11_display, xselection->property);
+    GFX2_Log(GFX2_INFO, "Unhandled SelectNotify selection=%s property=%s\n", selection_name, property_name);
     XFree(selection_name);
+    if (xselection->property != None)
+      XFree(property_name);
   }
   return user_feedback_required;
 }
@@ -1570,7 +1638,9 @@ int Get_input(int sleep_time)
                   if (X11_clipboard)
                   {
                     free(X11_clipboard);
+                    X11_clipboard = NULL;
                     X11_clipboard_size = 0;
+                    X11_clipboard_type = X11_CLIPBOARD_NONE;
                   }
                   SDL_EventState(SDL_SYSWMEVENT, SDL_DISABLE);
                   break;
@@ -1965,7 +2035,9 @@ int Get_input(int sleep_time)
           if (X11_clipboard)
           {
             free(X11_clipboard);
+            X11_clipboard = NULL;
             X11_clipboard_size = 0;
+            X11_clipboard_type = X11_CLIPBOARD_NONE;
           }
           break;
         case SelectionRequest:
