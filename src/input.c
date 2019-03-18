@@ -372,6 +372,7 @@ int Handle_mouse_btn_change(void)
 /**
  * Drag'n'Drop Protocol for X11 :
  * https://freedesktop.org/wiki/Specifications/XDND/
+ * https://www.acc.umu.se/~vatten/XDND.html
  */
 static int xdnd_version = 5;
 static Window xdnd_source = None;
@@ -394,10 +395,56 @@ static void Handle_ClientMessage(const XClientMessageEvent * xclient)
 
   if (xclient->message_type == XInternAtom(X11_display, "XdndEnter", False))
   {
+    // The ClientMessage only has space for three data types,
+    // so if the source supports more than this, the target must
+    // retrieve the property XdndTypeList from the source window
+    // in order to get the list of available types.
+    int i;
     //int list = xclient->data.l[1] & 1;
     xdnd_version = xclient->data.l[1] >> 24;
     xdnd_source = xclient->data.l[0];
-    GFX2_Log(GFX2_DEBUG, "XdndEnter version=%d source=%lu\n", xdnd_version, xdnd_source);
+    GFX2_Log(GFX2_DEBUG, "XdndEnter version=%d source=%lu %s\n",
+             xdnd_version, xdnd_source, (xclient->data.l[1] & 1) ? "XdndTypeList" : "");
+    if (xclient->data.l[1] & 1)
+    {
+      int r;
+      unsigned long count = 0, bytesAfter = 0;
+      unsigned char * value = NULL;
+      Atom type = None;
+      int format = 0;
+
+      r = XGetWindowProperty(X11_display, xdnd_source,
+                             XInternAtom(X11_display, "XdndTypeList", False),
+                             0, LONG_MAX,
+                             False, XA_ATOM, &type, &format, &count,
+                             &bytesAfter, &value);
+      if (r == Success && value != NULL)
+      {
+        Atom * atoms = (Atom *)value;
+        for (i = 0; i < (int)count; i++)
+        {
+          char * atom_string = "None";
+          if (atoms[i] != None)
+            atom_string = XGetAtomName(X11_display, atoms[i]);
+          GFX2_Log(GFX2_DEBUG, "  %lu %s\n", atoms[i], atom_string);
+          if (atoms[i] != None)
+            XFree(atom_string);
+        }
+        XFree(value);
+      }
+    }
+    else
+    {
+      for (i = 2; i < 5; i++)
+      {
+        char * atom_string = "None";
+        if (xclient->data.l[i] != None)
+          atom_string = XGetAtomName(X11_display, xclient->data.l[i]);
+        GFX2_Log(GFX2_DEBUG, "  %lu %s\n", xclient->data.l[i], atom_string);
+        if (xclient->data.l[i] != None)
+          XFree(atom_string);
+      }
+    }
   }
   else if (xclient->message_type == XInternAtom(X11_display, "XdndLeave", False))
   {
