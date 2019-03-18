@@ -120,7 +120,8 @@ ARCHIVES = $(addprefix archives/, $(SDLARCH) $(SDLIMAGEARCH) $(SDLTTFARCH) \
              $(JPEGARCH) $(LIBTIFFARCH) $(ZLIBARCH) $(FREETYPEARCH) \
              $(LUAARCH) $(RECOILARCH))
 
-PREFIX = $(PWD)/usr
+PLATFORMDIR =
+PREFIX = $(PWD)/usr$(PLATFORMDIR)
 
 MKDIR = mkdir -p
 CP = cp -v
@@ -153,12 +154,14 @@ COMSPEC = $(ComSpec)
 endif
 ifdef COMSPEC
 WIN32 = 1
+PLATFORMDIR = -win32
 RANLIB = ranlib
 LDFLAGS += -static-libgcc
 endif
 
 ifdef WIN32CROSS
 WIN32 = 1
+PLATFORMDIR = -win32
 CROSS_CC ?= $(shell which i686-w64-mingw32-gcc || which mingw32-gcc)
 CROSS_AR ?= $(shell which i686-w64-mingw32-ar || which mingw32-ar)
 CROSS_RANLIB ?= $(shell which i686-w64-mingw32-ranlib || which mingw32-ranlib)
@@ -174,6 +177,7 @@ endif
 
 ifdef ATARICROSS
 ATARI = 1
+PLATFORMDIR = -atari
 ARCH ?= m68k
 MCPU ?= -m68020-60
 CROSS_CC ?= $(ARCH)-atari-mint-gcc
@@ -201,7 +205,7 @@ all:	libs
 clean_all:	clean clean_archives
 
 clean:
-	$(RM) -r usr/ $(LIBPNG) $(ZLIB) $(SDLIMAGE) $(JPEGDIR) $(LIBTIFF)
+	$(RM) -r $(PREFIX) $(LIBPNG) $(ZLIB) $(SDLIMAGE) $(JPEGDIR) $(LIBTIFF)
 	$(RM) -r $(SDLTTF) $(FREETYPE) $(SDL) $(LUA) $(RECOIL)
 	$(RM) -r $(SDL2) $(SDL2IMAGE) $(SDL2TTF)
 
@@ -233,8 +237,13 @@ freetype:	$(PREFIX)/lib/libfreetype.a
 lua:	$(PREFIX)/lib/liblua.a
 
 $(PREFIX)/lib/liblua.a:	$(LUA)/.ok
+	cd $(LUA) && $(MAKE) clean
 ifdef WIN32
-	cd $(LUA) && $(MAKE) PLAT=mingw CC=$(CC) RANLIB=$(RANLIB)
+	#cd $(LUA) && $(MAKE) PLAT=mingw CC=$(CC) RANLIB=$(RANLIB)
+	cd $(LUA)/src && $(MAKE) "CC=$(CC)" "LUA_A=lua53.dll" "LUA_T=lua.exe" \
+	"AR=$(CC) -shared -o" "RANLIB=$(STRIP) --strip-unneeded" \
+	"SYSCFLAGS=-DLUA_BUILD_AS_DLL" "SYSLIBS=" "SYSLDFLAGS=-s" lua.exe
+	cd $(LUA)/src && $(MAKE) "CC=$(CC)" "RANLIB=$(RANLIB)" "LUAC_T=luac.exe" luac.exe
 	cd $(LUA) && $(MAKE) install PLAT=mingw INSTALL_TOP=$(PREFIX) TO_BIN="lua.exe luac.exe"
 	$(MKDIR) ../bin && for f in $(LUA)/src/lua*.dll ; do \
 	    $(CP) $$f ../bin ; \
@@ -288,10 +297,10 @@ SDL2DISABLE += --disable-video-x11
 endif
 
 $(PREFIX)/lib/libSDL2main.a:	$(SDL2)/.ok
-	$(MKDIR) $(SDL2)/build
-	cd $(SDL2)/build && ../configure --prefix=$(PREFIX) --host=$(HOST) \
+	$(MKDIR) $(SDL2)/build$(PLATFORMDIR)
+	cd $(SDL2)/build$(PLATFORMDIR) && ../configure --prefix=$(PREFIX) --host=$(HOST) \
 	  $(SDL2DISABLE)
-	cd $(SDL2)/build && $(MAKE) && $(MAKE) install
+	cd $(SDL2)/build$(PLATFORMDIR) && $(MAKE) && $(MAKE) install
 	$(CP) $(SDL2)/README-SDL.txt ../doc/README-SDL2.txt
 endif
 
@@ -301,12 +310,13 @@ $(PREFIX)/lib/libSDL2_image.a:	$(PREFIX)/lib/libpng.a
 $(PREFIX)/lib/libSDL2_image.a:	$(PREFIX)/lib/libSDL2main.a
 
 $(PREFIX)/lib/libSDL2_image.a:	$(SDL2IMAGE)/.ok
-	cd $(SDL2IMAGE) && PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig \
+	$(MKDIR) $(SDL2IMAGE)/build$(PLATFORMDIR)
+	cd $(SDL2IMAGE)/build$(PLATFORMDIR) && PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig \
 	  CC="$(CC) $(LDFLAGS)" CPPFLAGS=-I$(PREFIX)/include LDFLAGS="-L$(PREFIX)/lib" \
-	  ./configure --prefix=$(PREFIX) --host=$(HOST) --disable-sdltest \
+	  ../configure --prefix=$(PREFIX) --host=$(HOST) --disable-sdltest \
 	  --disable-webp --disable-imageio \
 	  --disable-jpg-shared --disable-png-shared --disable-tif-shared
-	cd $(SDL2IMAGE) && $(MAKE) && $(MAKE) install
+	cd $(SDL2IMAGE)/build$(PLATFORMDIR) && $(MAKE) && $(MAKE) install
 ifdef WIN32
 	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/SDL2_image.dll ../bin && $(STRIP) ../bin/SDL2_image.dll
 endif
@@ -324,12 +334,13 @@ $(PREFIX)/lib/libSDL2_ttf.a:	$(PREFIX)/lib/libfreetype.a
 $(PREFIX)/lib/libSDL2_ttf.a:	$(PREFIX)/lib/libSDL2main.a
 
 $(PREFIX)/lib/libSDL2_ttf.a:	$(SDL2TTF)/.ok
-	cd $(SDL2TTF) && PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig \
+	$(MKDIR) $(SDL2TTF)/build$(PLATFORMDIR)
+	cd $(SDL2TTF)/build$(PLATFORMDIR) && PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig \
 	  CC=$(CC) CPPFLAGS=-I$(PREFIX)/include LDFLAGS="-L$(PREFIX)/lib $(LDFLAGS)" \
-	  ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) \
+	  ../configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) \
 	  --with-freetype-prefix=$(PREFIX) --host=$(HOST)
-	cd $(SDL2TTF) && $(MAKE)
-	cd $(SDL2TTF) && $(MAKE) install
+	cd $(SDL2TTF)/build$(PLATFORMDIR) && $(MAKE)
+	cd $(SDL2TTF)/build$(PLATFORMDIR) && $(MAKE) install
 ifdef WIN32
 	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/SDL2_ttf.dll ../bin && $(STRIP) ../bin/SDL2_ttf.dll
 endif
@@ -368,10 +379,12 @@ endif
 endif
 
 $(PREFIX)/lib/libSDLmain.a:	$(SDL)/.ok
-	cd $(SDL) && CFLAGS=$(SDLCFLAGS) ./configure --host=$(HOST) --prefix=$(PREFIX) \
+	$(MKDIR) $(SDL)/build$(PLATFORMDIR)
+	cd $(SDL)/build$(PLATFORMDIR) && CFLAGS=$(SDLCFLAGS) \
+	  ../configure --host=$(HOST) --prefix=$(PREFIX) \
 	  $(SDLDISABLE)
-	cd $(SDL) && $(MAKE)
-	cd $(SDL) && $(MAKE) install
+	cd $(SDL)/build$(PLATFORMDIR) && $(MAKE)
+	cd $(SDL)/build$(PLATFORMDIR) && $(MAKE) install
 ifdef ATARI
 	$(RM) $(PREFIX)/include/SDL/SDL_opengl.h
 endif
@@ -390,12 +403,12 @@ $(PREFIX)/lib/libSDL_image.a:	$(PREFIX)/lib/libpng.a
 $(PREFIX)/lib/libSDL_image.a:	$(PREFIX)/lib/libSDLmain.a
 
 $(PREFIX)/lib/libSDL_image.a:	$(SDLIMAGE)/.ok
-	$(MKDIR) $(SDLIMAGE)/build
+	$(MKDIR) $(SDLIMAGE)/build$(PLATFORMDIR)
 	touch $(SDLIMAGE)/*.m4
 	touch $(SDLIMAGE)/configure
 	touch $(SDLIMAGE)/Makefile.in
 ifneq ($(LDFLAGS),)
-	cd $(SDLIMAGE)/build && CC="$(CC) $(LDFLAGS)" CPPFLAGS=-I$(PREFIX)/include \
+	cd $(SDLIMAGE)/build$(PLATFORMDIR) && CC="$(CC) $(LDFLAGS)" CPPFLAGS=-I$(PREFIX)/include \
 	  LDFLAGS="-L$(PREFIX)/lib $(ADDLDFLAGS)" \
 	  PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig \
 	  ../configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) \
@@ -404,7 +417,7 @@ ifneq ($(LDFLAGS),)
 	  --disable-jpg-shared --disable-png-shared --disable-tif-shared \
 	  --disable-dependency-tracking
 else
-	cd $(SDLIMAGE)/build && CPPFLAGS=-I$(PREFIX)/include \
+	cd $(SDLIMAGE)/build$(PLATFORMDIR) && CPPFLAGS=-I$(PREFIX)/include \
 	  LDFLAGS="-L$(PREFIX)/lib $(ADDLDFLAGS)" \
 	  PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig \
 	  ../configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) \
@@ -413,8 +426,8 @@ else
 	  --disable-jpg-shared --disable-png-shared --disable-tif-shared \
 	  --disable-dependency-tracking
 endif
-	cd $(SDLIMAGE)/build && $(MAKE)
-	cd $(SDLIMAGE)/build && $(MAKE) install
+	cd $(SDLIMAGE)/build$(PLATFORMDIR) && $(MAKE)
+	cd $(SDLIMAGE)/build$(PLATFORMDIR) && $(MAKE) install
 ifdef WIN32
 	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/SDL_image.dll ../bin && $(STRIP) ../bin/SDL_image.dll
 endif
@@ -432,18 +445,19 @@ $(PREFIX)/lib/libSDL_ttf.a:	$(PREFIX)/lib/libfreetype.a
 $(PREFIX)/lib/libSDL_ttf.a:	$(PREFIX)/lib/libSDLmain.a
 
 $(PREFIX)/lib/libSDL_ttf.a:	$(SDLTTF)/.ok
+	$(MKDIR) $(SDLTTF)/build$(PLATFORMDIR)
 ifdef WIN32
-	$(CP) $(PREFIX)/bin/SDL.dll $(SDLTTF)
+	$(CP) $(PREFIX)/bin/SDL.dll $(SDLTTF)/build$(PLATFORMDIR)
 endif
-	cd $(SDLTTF) && PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig \
+	cd $(SDLTTF)/build$(PLATFORMDIR) && PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig \
 	  CC=$(CC) CPPFLAGS=-I$(PREFIX)/include LDFLAGS="-L$(PREFIX)/lib $(LDFLAGS) $(ADDLDFLAGS)" \
-	  ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --with-freetype-prefix=$(PREFIX) \
+	  ../configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --with-freetype-prefix=$(PREFIX) \
 	  --host=$(HOST)
 ifdef ATARI
-	sed -i.bak 's/-O2/-O0/' $(SDLTTF)/Makefile
+	sed -i.bak 's/-O2/-O0/' $(SDLTTF)/build$(PLATFORMDIR)/Makefile
 endif
-	cd $(SDLTTF) && $(MAKE)
-	cd $(SDLTTF) && $(MAKE) install
+	cd $(SDLTTF)/build$(PLATFORMDIR) && $(MAKE)
+	cd $(SDLTTF)/build$(PLATFORMDIR) && $(MAKE) install
 ifdef WIN32
 	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/SDL_ttf.dll ../bin && $(STRIP) ../bin/SDL_ttf.dll
 endif
@@ -458,11 +472,11 @@ endif
 $(PREFIX)/lib/libfreetype.a:	$(PREFIX)/lib/libpng.a
 
 $(PREFIX)/lib/libfreetype.a:	$(FREETYPE)/.ok
-	$(MKDIR) $(FREETYPE)/build
-	cd $(FREETYPE)/build && ../configure --build=$(BUILD) --host=$(HOST) \
+	$(MKDIR) $(FREETYPE)/build$(PLATFORMDIR)
+	cd $(FREETYPE)/build$(PLATFORMDIR) && ../configure --build=$(BUILD) --host=$(HOST) \
 	  --prefix=$(PREFIX) --enable-freetype-config \
 	  PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig LDFLAGS="$(LDFLAGS)"
-	cd $(FREETYPE)/build && $(MAKE) && $(MAKE) install
+	cd $(FREETYPE)/build$(PLATFORMDIR) && $(MAKE) && $(MAKE) install
 ifdef WIN32
 	$(MKDIR) ../bin && for f in $(PREFIX)/bin/libfreetype*.dll ; do \
 	    $(CP) $$f ../bin ; \
@@ -476,9 +490,10 @@ endif
 	cat $(FREETYPE)/docs/GPLv2.TXT >> ../doc/README-freetype.txt
 
 $(PREFIX)/lib/libjpeg.a:	$(JPEGDIR)/.ok
-	cd $(JPEGDIR) && CC=$(CC) ./configure --prefix=$(PREFIX) --host=$(HOST)
-	cd $(JPEGDIR) && $(MAKE)
-	cd $(JPEGDIR) && $(MAKE) install
+	$(MKDIR) $(JPEGDIR)/build$(PLATFORMDIR)
+	cd $(JPEGDIR)/build$(PLATFORMDIR) && CC=$(CC) ../configure --prefix=$(PREFIX) --host=$(HOST)
+	cd $(JPEGDIR)/build$(PLATFORMDIR) && $(MAKE)
+	cd $(JPEGDIR)/build$(PLATFORMDIR) && $(MAKE) install
 ifdef WIN32
 	$(MKDIR) ../bin && for f in $(PREFIX)/bin/libjpeg*.dll ; do \
 	    $(CP) $$f ../bin ; \
@@ -497,14 +512,16 @@ $(PREFIX)/lib/libtiff.a:	$(PREFIX)/lib/libjpeg.a
 $(PREFIX)/lib/libtiff.a:	$(PREFIX)/lib/libz.a
 
 $(PREFIX)/lib/libtiff.a:	$(LIBTIFF)/.ok
-	cd $(LIBTIFF) && CC="$(CC) $(LDFLAGS)" ./configure --prefix=$(PREFIX) \
+	$(MKDIR) $(LIBTIFF)/_build$(PLATFORMDIR)
+	cd $(LIBTIFF)/_build$(PLATFORMDIR) && CC="$(CC) $(LDFLAGS)" \
+	  ../configure --prefix=$(PREFIX) \
 	  --host=$(HOST) --build=$(BUILD) \
 	  --with-zlib-include-dir=$(PREFIX)/include --with-zlib-lib-dir=$(PREFIX)/lib \
 	  --with-jpeg-include-dir=$(PREFIX)/include --with-jpeg-lib-dir=$(PREFIX)/lib \
 	  --enable-silent-rules \
 	  --disable-cxx --disable-webp --disable-lzma --disable-zstd
-	cd $(LIBTIFF) && $(MAKE)
-	cd $(LIBTIFF) && $(MAKE) install
+	cd $(LIBTIFF)/_build$(PLATFORMDIR) && $(MAKE)
+	cd $(LIBTIFF)/_build$(PLATFORMDIR) && $(MAKE) install
 ifdef WIN32
 	$(MKDIR) ../bin && for f in $(PREFIX)/bin/libtiff*.dll ; do \
 	    $(CP) $$f ../bin ; \
@@ -520,11 +537,11 @@ endif
 $(PREFIX)/lib/libpng.a:	$(PREFIX)/lib/libz.a
 
 $(PREFIX)/lib/libpng.a:	$(LIBPNG)/.ok
-	cd $(LIBPNG) && CC="$(CC) $(LDFLAGS)" CPPFLAGS="-I$(PREFIX)/include" LDFLAGS="-L$(PREFIX)/lib" \
-	  ./configure --prefix=$(PREFIX) --host=$(HOST) --enable-silent-rules \
+	$(MKDIR) $(LIBPNG)/build$(PLATFORMDIR)
+	cd $(LIBPNG)/build$(PLATFORMDIR) && CC="$(CC) $(LDFLAGS)" CPPFLAGS="-I$(PREFIX)/include" LDFLAGS="-L$(PREFIX)/lib" \
+	  ../configure --prefix=$(PREFIX) --host=$(HOST) --enable-silent-rules \
 	  --disable-dependency-tracking
-	cd $(LIBPNG) && $(MAKE)
-	cd $(LIBPNG) && $(MAKE) install
+	cd $(LIBPNG)/build$(PLATFORMDIR) && $(MAKE) && $(MAKE) install
 ifdef WIN32
 	$(MKDIR) ../bin && for f in $(PREFIX)/bin/libpng*.dll ; do \
 	    $(CP) $$f ../bin ; \
@@ -540,22 +557,25 @@ endif
 $(PREFIX)/lib/libz.a:	$(ZLIB)/.ok
 ifdef WIN32
 	cd $(ZLIB) && $(MAKE) -fwin32/Makefile.gcc PREFIX=$(shell echo $(CC) | sed 's/^\(.*\)gcc/\1/') LOC="$(LDFLAGS) $(CFLAGS)"
-	cd $(ZLIB) && INCLUDE_PATH=$(PREFIX)/include LIBRARY_PATH=$(PREFIX)/lib BINARY_PATH=$(PREFIX)/bin $(MAKE) install -fwin32/Makefile.gcc SHARED_MODE=1
+	cd $(ZLIB) && INCLUDE_PATH=$(PREFIX)/include LIBRARY_PATH=$(PREFIX)/lib BINARY_PATH=$(PREFIX)/bin \
+	  $(MAKE) install -fwin32/Makefile.gcc SHARED_MODE=1
 	$(MKDIR) ../bin && for f in $(PREFIX)/bin/zlib*.dll ; do \
 	    $(CP) $$f ../bin ; \
 	    $(STRIP) ../bin/`basename $$f` ; \
 	  done
 else
+	$(MKDIR) $(ZLIB)/build$(PLATFORMDIR)
 	# configure [--const] [--zprefix] [--prefix=PREFIX]  [--eprefix=EXPREFIX]
 	#  [--static] [--64] [--libdir=LIBDIR] [--sharedlibdir=LIBDIR]
 	#  [--includedir=INCLUDEDIR] [--archs="-arch i386 -arch x86_64"]
-	cd $(ZLIB) && CC=$(CC) AR=$(AR) RANLIB=$(RANLIB) ./configure --prefix=$(PREFIX)
+	cd $(ZLIB)/build$(PLATFORMDIR) && CC=$(CC) AR=$(AR) RANLIB=$(RANLIB) \
+	  ../configure --prefix=$(PREFIX)
 ifdef ATARICROSS
-	cd $(ZLIB) && $(MAKE)
+	cd $(ZLIB)/build$(PLATFORMDIR) && $(MAKE)
 else
-	cd $(ZLIB) && $(MAKE) test
+	cd $(ZLIB)/build$(PLATFORMDIR) && $(MAKE) test
 endif
-	cd $(ZLIB) && $(MAKE) install
+	cd $(ZLIB)/build$(PLATFORMDIR) && $(MAKE) install
 endif
 	$(CP) $(ZLIB)/README ../doc/README-zlib1.txt
 

@@ -113,20 +113,20 @@ ifdef COMSPEC
   LOPT = -mwindows
   LOPT += $(LUALOPT)
   ifeq ($(API),sdl)
-  SDLCONFIG ?= $(shell which ../3rdparty/usr/bin/sdl-config || which sdl-config)
+  SDLCONFIG ?= $(shell which ../3rdparty/usr-win32/bin/sdl-config || which sdl-config)
   COPT += $(shell $(SDLCONFIG) --cflags) $(TTFCOPT) $(JOYCOPT)
   LOPT += $(shell $(SDLCONFIG) --libs) -lSDL_image $(TTFLOPT)
   PLATFORMFILES = bin/SDL.dll bin/SDL_image.dll
   endif
   ifeq ($(API),sdl2)
-  SDLC2ONFIG ?= $(shell which ../3rdparty/usr/bin/sdl2-config || which sdl2-config)
+  SDLC2ONFIG ?= $(shell which ../3rdparty/usr-win32/bin/sdl2-config || which sdl2-config)
   COPT += $(shell $(SDL2CONFIG) --cflags) $(TTFCOPT) $(JOYCOPT)
   LOPT += $(shell $(SDL2CONFIG) --libs) -lSDL2_image $(TTFLOPT)
   PLATFORMFILES = bin/SDL2.dll bin/SDL2_image.dll
   endif
   ifeq ($(API),win32)
-  COPT += -I../3rdparty/usr/include $(TTFCOPT)
-  LOPT += -L../3rdparty/usr/lib -lgdi32 -lcomdlg32
+  COPT += -I../3rdparty/usr-win32/include $(TTFCOPT)
+  LOPT += -L../3rdparty/usr-win32/lib -lgdi32 -lcomdlg32
   PLATFORMFILES =
   endif
   LOPT += -ltiff
@@ -479,7 +479,7 @@ endif
         LUALOPT =
       else
         ifdef WIN32CROSS
-          LUACOPT = -I../3rdparty/usr/include
+          LUACOPT = -I../3rdparty/usr-win32/include
         else
           LUAPKG := $(shell for p in lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua51 lua ; do $(PKG_CONFIG) --exists $$p && echo $$p && break ; done)
           LUACOPT = $(shell $(PKG_CONFIG) $(LUAPKG) --cflags)
@@ -493,9 +493,9 @@ endif
       #cross compile a Win32 executable
       CROSS_CC ?= $(shell which i686-w64-mingw32-gcc || which mingw32-gcc)
       CROSS_PKGCONFIG ?= $(shell which i686-w64-mingw32-pkg-config || which mingw32-pkg-config || which $(PKG_CONFIG))
-      CROSS_SDLCONFIG ?= $(shell which ../3rdparty/usr/bin/sdl-config || which /usr/local/cross-tools/i386-mingw32/bin/sdl-config)
-      CROSS_SDL2CONFIG ?= $(shell which ../3rdparty/usr/bin/sdl2-config || which /usr/local/cross-tools/i386-mingw32/bin/sdl2-config)
-      CROSS_PKG_CONFIG_PATH ?= $(shell if [ -d ../3rdparty/usr ] ; then echo "$${PWD}/../3rdparty/usr/lib/pkgconfig" ; fi )
+      CROSS_SDLCONFIG ?= $(shell which ../3rdparty/usr-win32/bin/sdl-config || which /usr/local/cross-tools/i386-mingw32/bin/sdl-config)
+      CROSS_SDL2CONFIG ?= $(shell which ../3rdparty/usr-win32/bin/sdl2-config || which /usr/local/cross-tools/i386-mingw32/bin/sdl2-config)
+      CROSS_PKG_CONFIG_PATH ?= $(shell if [ -d ../3rdparty/usr-win32 ] ; then echo "$${PWD}/../3rdparty/usr-win32/lib/pkgconfig" ; fi )
       CC = $(CROSS_CC)
       CROSS_STRIP ?= $(shell which i686-w64-mingw32-strip || which mingw32-strip)
       STRIP = $(CROSS_STRIP)
@@ -596,13 +596,13 @@ endif
         FIX_FLAGS = $(ARCH)-atari-mint-flags
         FCLOPT = 
         #LIBPNG_CONFIG = $(wildcard $(PREFIX)/bin/libpng12-config $(PREFIX)/bin/libpng14-config $(PREFIX)/bin/libpng16-config)
-        LIBPNG_CONFIG ?= $(shell which ../3rdparty/usr/bin/libpng-config)
-        SDLCONFIG ?= $(shell which ../3rdparty/usr/bin/sdl-config)
+        LIBPNG_CONFIG ?= $(shell which ../3rdparty/usr-atari/bin/libpng-config)
+        SDLCONFIG ?= $(shell which ../3rdparty/usr-atari/bin/sdl-config)
         COPT = -W -Wall
         COPT += $(MCPU) -fomit-frame-pointer -std=c99 -Wdeclaration-after-statement
         COPT += -D__MINT__ -ffast-math -O$(OPTIM)
         # -I$(PREFIX)/include
-        COPT += -I../3rdparty/usr/include
+        COPT += -I../3rdparty/usr-atari/include
         COPT += $(shell $(LIBPNG_CONFIG) --cflags)
         COPT += $(shell $(SDLCONFIG) --cflags)
         COPT += $(JOYCOPT) $(LUACOPT)
