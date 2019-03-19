@@ -301,7 +301,7 @@ $(PREFIX)/lib/libSDL2_image.a:	$(PREFIX)/lib/libpng.a
 $(PREFIX)/lib/libSDL2_image.a:	$(PREFIX)/lib/libSDL2main.a
 
 $(PREFIX)/lib/libSDL2_image.a:	$(SDL2IMAGE)/.ok
-	cd $(SDL2IMAGE) && PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig \
+	cd $(SDL2IMAGE) && PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig \
 	  CC="$(CC) $(LDFLAGS)" CPPFLAGS=-I$(PREFIX)/include LDFLAGS="-L$(PREFIX)/lib" \
 	  ./configure --prefix=$(PREFIX) --host=$(HOST) --disable-sdltest \
 	  --disable-webp --disable-imageio \
@@ -324,7 +324,7 @@ $(PREFIX)/lib/libSDL2_ttf.a:	$(PREFIX)/lib/libfreetype.a
 $(PREFIX)/lib/libSDL2_ttf.a:	$(PREFIX)/lib/libSDL2main.a
 
 $(PREFIX)/lib/libSDL2_ttf.a:	$(SDL2TTF)/.ok
-	cd $(SDL2TTF) && PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig \
+	cd $(SDL2TTF) && PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig \
 	  CC=$(CC) CPPFLAGS=-I$(PREFIX)/include LDFLAGS="-L$(PREFIX)/lib $(LDFLAGS)" \
 	  ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) \
 	  --with-freetype-prefix=$(PREFIX) --host=$(HOST)
@@ -435,7 +435,7 @@ $(PREFIX)/lib/libSDL_ttf.a:	$(SDLTTF)/.ok
 ifdef WIN32
 	$(CP) $(PREFIX)/bin/SDL.dll $(SDLTTF)
 endif
-	cd $(SDLTTF) && PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig \
+	cd $(SDLTTF) && PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig \
 	  CC=$(CC) CPPFLAGS=-I$(PREFIX)/include LDFLAGS="-L$(PREFIX)/lib $(LDFLAGS) $(ADDLDFLAGS)" \
 	  ./configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) --with-freetype-prefix=$(PREFIX) \
 	  --host=$(HOST)
