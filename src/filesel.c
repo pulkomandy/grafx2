@@ -42,6 +42,7 @@
 #ifdef _MSC_VER
 #include <stdio.h>
 #define strdup _strdup
+#define wcsicmp _wcsicmp
 #if _MSC_VER < 1900
 #define snprintf _snprintf
 #endif
@@ -822,9 +823,11 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
 #ifdef WIN32
 // case-insensitive
   #define FILENAME_COMPARE strcasecmp
+  #define FILENAME_COMPARE_UNICODE wcsicmp
 #else
 // case-sensitive
   #define FILENAME_COMPARE strcmp
+  #define FILENAME_COMPARE_UNICODE wcscmp
 #endif
 
 
@@ -871,12 +874,25 @@ void Sort_list_of_files(T_Fileselector *list)
           // If both elements have the same type, compare the file names, if
 		  // current is alphabetically before, we need to swap, unless it is
           // parent directory, which should always go first
-        else if ( (current_item->Type==next_item->Type) &&
-                  (((FILENAME_COMPARE(current_item->Full_name,next_item->Full_name)>0) &&
-				  (FILENAME_COMPARE(current_item->Full_name, PARENT_DIR) != 0)) ||
-				   (FILENAME_COMPARE(next_item->Full_name, PARENT_DIR) == 0))
-				  )
-          need_swap=1;
+        else if (current_item->Type == next_item->Type)
+        {
+          if (FILENAME_COMPARE(next_item->Full_name, PARENT_DIR) == 0)
+            need_swap = 1;
+          else if (FILENAME_COMPARE(current_item->Full_name, PARENT_DIR) != 0)
+          {
+            if (current_item->Unicode_full_name != NULL && next_item->Unicode_full_name != NULL)
+            {
+              // compare unicode file names if they are available
+              if (FILENAME_COMPARE_UNICODE(current_item->Unicode_full_name, next_item->Unicode_full_name) > 0)
+                need_swap = 1;
+            }
+            else
+            {
+              if (FILENAME_COMPARE(current_item->Full_name, next_item->Full_name) > 0)
+                need_swap = 1;
+            }
+          }
+        }
 
 
         if (need_swap)
