@@ -784,10 +784,6 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
 #endif
   Hide_cursor();
 
-  // Effacement de la chaîne
-  Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
-  Update_window_area(x_pos,y_pos,visible_size<<3,8);
-
   // Mise à jour des variables se rapportant à la chaîne en fonction de la chaîne initiale
   strcpy(initial_string,str);
   if (str_unicode != NULL)
@@ -824,7 +820,9 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
   
     Display_whole_string(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),display_string,position - offset);
   }
-  Update_window_area(x_pos,y_pos,visible_size<<3,8);
+  Update_rect(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
+    visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
+  
   Flush_update();
   if (Mouse_K)
   {
@@ -842,6 +840,7 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
 
       clicked_button=Window_clicked_button();
       input_char=0;
+      input_key = Key;
 
       if (clicked_button==-1)
         input_key=KEY_RETURN;
@@ -1043,7 +1042,8 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
               size--;
               
               // Effacement de la chaîne
-              Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
+              Screen_FillRect((window_x+(x_pos*Menu_factor_X))*Pixel_width, (window_y+(y_pos*Menu_factor_Y))*Pixel_height,
+                (visible_size*(Menu_factor_X<<3))*Pixel_width, (Menu_factor_Y<<3)*Pixel_height, BACKGROUND_COLOR);
               goto affichage;
             }
       break;
@@ -1052,8 +1052,8 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
             {
               // Effacement de la chaîne
               if (position==size)
-                Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
-              position--;
+                Screen_FillRect((window_x+(x_pos*Menu_factor_X))*Pixel_width, (window_y+(y_pos*Menu_factor_Y))*Pixel_height,
+                  (visible_size*(Menu_factor_X<<3))*Pixel_width, (Menu_factor_Y<<3)*Pixel_height, BACKGROUND_COLOR);              position--;
               if (offset > 0 && (position == 0 || position < (offset + 1)))
                 offset--;
               goto affichage;
@@ -1083,8 +1083,8 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
             {
               // Effacement de la chaîne
               if (position==size)
-                Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
-              position = 0;
+                Screen_FillRect((window_x+(x_pos*Menu_factor_X))*Pixel_width, (window_y+(y_pos*Menu_factor_Y))*Pixel_height,
+                  (visible_size*(Menu_factor_X<<3))*Pixel_width, (Menu_factor_Y<<3)*Pixel_height, BACKGROUND_COLOR);              position = 0;
               offset = 0;
               goto affichage;
             }
@@ -1111,8 +1111,8 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
             Remove_character(str,position);
           size--;
           // Effacement de la chaîne
-          Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
-          goto affichage;
+          Screen_FillRect((window_x+(x_pos*Menu_factor_X))*Pixel_width, (window_y+(y_pos*Menu_factor_Y))*Pixel_height,
+            (visible_size*(Menu_factor_X<<3))*Pixel_width, (Menu_factor_Y<<3)*Pixel_height, BACKGROUND_COLOR);          goto affichage;
         }
         break;
       case  KEY_CLEAR : // Clear
@@ -1121,8 +1121,8 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
           str_unicode[0] = 0;
         position=offset=0;
         // Effacement de la chaîne
-        Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
-        goto affichage;
+        Screen_FillRect((window_x+(x_pos*Menu_factor_X))*Pixel_width, (window_y+(y_pos*Menu_factor_Y))*Pixel_height,
+          (visible_size*(Menu_factor_X<<3))*Pixel_width, (Menu_factor_Y<<3)*Pixel_height, BACKGROUND_COLOR);        goto affichage;
       case KEY_RETURN :
         break;
         
@@ -1138,7 +1138,6 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
         }
         break;
       default :
-#if !defined(USE_SDL2)
         if (size<max_size && input_char != 0)
         {
           // Si la touche était autorisée...
@@ -1173,7 +1172,6 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
             goto affichage;
           } // End du test d'autorisation de touche
         } // End du test de place libre
-#endif
         break;
       
 affichage:
@@ -1220,7 +1218,9 @@ affichage:
   }
 #endif // defined(__ANDROID__)  
   // Effacement de la chaîne
-  Window_rectangle(x_pos,y_pos,visible_size<<3,8,BACKGROUND_COLOR);
+  Screen_FillRect((window_x+(x_pos*Menu_factor_X))*Pixel_width, (window_y+(y_pos*Menu_factor_Y))*Pixel_height,
+    (visible_size*(Menu_factor_X<<3))*Pixel_width, (Menu_factor_Y<<3)*Pixel_height, BACKGROUND_COLOR);
+  
   // On raffiche la chaine correctement
   if (input_type==INPUT_TYPE_INTEGER)
   {
