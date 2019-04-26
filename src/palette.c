@@ -1085,15 +1085,15 @@ void Button_Palette(int btn)
 
   // Coordinates of the block that displays Backcolor
   static const int BGCOLOR_DISPLAY_X = 176;
-  static const int BGCOLOR_DISPLAY_Y = 65;
+  static const int BGCOLOR_DISPLAY_Y = 65 + 14;
   static const int BGCOLOR_DISPLAY_W = 40;
-  static const int BGCOLOR_DISPLAY_H = 96;
+  static const int BGCOLOR_DISPLAY_H = 96 - 14;
 
   // Coordinates of the block that displays Forecolor
   static const int FGCOLOR_DISPLAY_X = 180;
-  static const int FGCOLOR_DISPLAY_Y = 69;
+  static const int FGCOLOR_DISPLAY_Y = 69 + 14;
   static const int FGCOLOR_DISPLAY_W = 32;
-  static const int FGCOLOR_DISPLAY_H = 88;
+  static const int FGCOLOR_DISPLAY_H = 88 - 14;
 
   // Coordinates of the Color#
   static const int COLOR_X = 111;
@@ -1251,6 +1251,8 @@ void Button_Palette(int btn)
 
   Window_set_normal_button( 44,178,35,14,"Load"  ,1,1,KEY_l);  // 26
   Window_set_normal_button( 83,178,35,14,"Save"  ,1,1,KEY_s);  // 27
+
+  Window_set_normal_button( 89+84,L4,39,14,"EHB" ,3,1,KEY_b);  // 28
 
   // Dessin des petits effets spéciaux pour les boutons [+] et [-]
   Draw_thingumajig(BUTTON_PLUS_X-5, BUTTON_PLUS_Y,MC_White,-1);
@@ -2627,6 +2629,16 @@ void Button_Palette(int btn)
 
       case 27: // Save palette
         Save_picture(CONTEXT_PALETTE);
+        break;
+
+      case 28:  // EHB : Amiga Extra Half Bright
+        for (i = 0; i < 32; i++)
+        {
+          working_palette[i+32].R = working_palette[i].R >> 1;
+          working_palette[i+32].G = working_palette[i].G >> 1;
+          working_palette[i+32].B = working_palette[i].B >> 1;
+        }
+        Set_palette(working_palette);
         break;
     }
 
