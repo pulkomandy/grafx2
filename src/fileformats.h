@@ -111,6 +111,10 @@ void Test_C64(T_IO_Context *, FILE *);
 void Load_C64(T_IO_Context *);
 void Save_C64(T_IO_Context *);
 
+// -- GPX (pixcen C64)
+void Test_GPX(T_IO_Context *, FILE *);
+void Load_GPX(T_IO_Context *);
+
 // -- SCR (Amstrad CPC)
 void Test_SCR(T_IO_Context *, FILE *);
 void Load_SCR(T_IO_Context *);

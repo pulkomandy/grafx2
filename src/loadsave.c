@@ -115,6 +115,7 @@ const T_Format File_formats[] = {
     "gif;png;bmp;2bp;pcx;pkm;iff;lbm;ilbm;sham;ham;ham6;ham8;acbm;pic;anim;img;sci;scq;scf;scn;sco;cel;"
     "pi1;pc1;pi2;pc2;pi3;pc3;neo;"
     "c64;p64;a64;pi;rp;aas;art;dd;iph;ipt;hpc;ocp;koa;koala;fli;bml;cdu;prg;pmg;rpm;"
+    "gpx;"
     "cpc;scr;win;"
     "hgr;dhgr;"
     "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico;ic2;cur;cm5;pph;info;flc;bin;map"},
@@ -141,6 +142,7 @@ const T_Format File_formats[] = {
   {FORMAT_GPL, " gpl", Test_GPL, Load_GPL, Save_GPL, 1, 0, 0, "gpl", "gpl"},
   {FORMAT_C64, " c64", Test_C64, Load_C64, Save_C64, 0, 1, 1, "c64",
     "c64;p64;a64;pi;rp;aas;art;dd;iph;ipt;hpc;ocp;koa;koala;fli;bml;cdu;prg;pmg;rpm"},
+  {FORMAT_GPX, " gpx", Test_GPX, Load_GPX, NULL,     0, 0, 0, "gpx", "gpx"},
   {FORMAT_SCR, " cpc", Test_SCR, Load_SCR, Save_SCR, 0, 0, 0, "scr", "cpc;scr;win"},
   {FORMAT_CM5, " cm5", Test_CM5, Load_CM5, Save_CM5, 0, 0, 1, "cm5", "cm5"},
   {FORMAT_PPH, " pph", Test_PPH, Load_PPH, Save_PPH, 0, 0, 1, "pph", "pph"},

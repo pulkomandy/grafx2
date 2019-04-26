@@ -38,6 +38,8 @@
 #endif
 #endif
 
+#include <zlib.h>
+
 #include "engine.h"
 #include "errors.h"
 #include "global.h"
@@ -4033,6 +4035,184 @@ void Save_C64(T_IO_Context * context)
   }
 }
 
+
+/////////////////////////// pixcen *.GPX ///////////////////////////
+void Test_GPX(T_IO_Context * context, FILE * file)
+{
+  byte header[2];
+  (void)context;
+
+  // check for a Zlib compressed stream
+  File_error = 1;
+  if (!Read_bytes(file, header, 2))
+    return;
+  if ((header[0] & 0x0f) != 8)
+    return;
+  if (((header[0] << 8) + header[1]) % 31)
+    return;
+  File_error = 0;
+}
+
+void Load_GPX(T_IO_Context * context)
+{
+  FILE * file;
+  unsigned long file_size;
+  byte * buffer;
+
+  File_error = 1;
+  file = Open_file_read(context);
+  if (file == NULL)
+    return;
+  file_size = File_length_file(file);
+  buffer = malloc(file_size);
+  if (buffer == NULL)
+  {
+    GFX2_Log(GFX2_ERROR, "Failed to allocate %lu bytes.\n", file_size);
+    fclose(file);
+    return;
+  }
+  if (Read_bytes(file, buffer, file_size))
+  {
+    byte * gpx = NULL;
+    unsigned long gpx_size = 0;
+    int r;
+
+    do
+    {
+      free(gpx);
+      gpx_size += 65536;
+      gpx = malloc(gpx_size);
+      if (gpx == NULL)
+      {
+        GFX2_Log(GFX2_ERROR, "Failed to allocate %lu bytes\n", gpx_size);
+        break;
+      }
+      r = uncompress(gpx, &gpx_size, buffer, file_size);
+      if (r != Z_BUF_ERROR && r != Z_OK)
+        GFX2_Log(GFX2_ERROR, "uncompress() failed with error %d: %s\n", r, zError(r));
+    }
+    while (r == Z_BUF_ERROR); // there was not enough room in the output buffer
+    if (r == Z_OK)
+    {
+      byte * p;
+      dword version, mode;
+/*
+ mode :
+0		BITMAP,
+1		MC_BITMAP,
+2		SPRITE,
+3		MC_SPRITE,
+4		CHAR,
+5   MC_CHAR,
+6		UNUSED1,
+7		UNUSED2,
+8		UNRESTRICTED,
+9		W_UNRESTRICTED
+*/
+      GFX2_Log(GFX2_DEBUG, "inflated %lu bytes to %lu\n", file_size, gpx_size);
+#define READU32LE(p) ((p)[0] | (p)[1] << 8 | (p)[2] << 16 | (p)[3] << 24)
+      version = READU32LE(gpx);
+      mode = READU32LE(gpx+4);
+      GFX2_Log(GFX2_DEBUG, "gpx version %u mode %u\n", version, mode);
+      snprintf(context->Comment, COMMENT_SIZE, "pixcen file version %u mode %u", version, mode);
+      if (version >= 4)
+      {
+        dword count;
+        const char * key;
+        word value[256];
+        int xsize = -1;
+        int ysize = -1;
+        int mapsize = -1;
+        int screensize = -1;
+        int colorsize = -1;
+        int backbuffers = -1;
+
+        count = READU32LE(gpx+8);
+        p = gpx + 12;
+        while (count--)
+        {
+          int i = 0;
+          int int_value = 0;
+
+          key = (const char *)p;
+          while (*p++);
+          for (;;)
+          {
+            value[i] = p[0] + (p[1] << 8);
+            p += 2;
+            if (value[i] == 0)
+              break;
+            int_value = int_value * 10 + (value[i] - '0');
+            i++;
+          }
+          GFX2_Log(GFX2_DEBUG, "%s=%d\n", key, int_value);
+          if (0 == strcmp(key, "xsize"))
+            xsize = int_value;
+          else if (0 == strcmp(key, "ysize"))
+            ysize = int_value;
+          else if (0 == strcmp(key, "mapsize"))
+            mapsize = int_value;
+          else if (0 == strcmp(key, "screensize"))
+            screensize = int_value;
+          else if (0 == strcmp(key, "colorsize"))
+            colorsize = int_value;
+          else if (0 == strcmp(key, "backbuffers"))
+            backbuffers = int_value;
+        }
+//buffersize = 64 + (64 + mapsize + screensize + colorsize) * backbuffers;
+        p += 64;  // 64 empty bytes ?
+        File_error = 0;
+        if (mode & 1)
+          context->Ratio = PIXEL_WIDE;
+        else
+          context->Ratio = PIXEL_SIMPLE;
+        Pre_load(context, xsize, ysize, file_size, FORMAT_GPX, context->Ratio, 4); // Do this as soon as you can
+        if (Config.Clear_palette)
+          memset(context->Palette,0, sizeof(T_Palette));
+        C64_set_palette(context->Palette);
+        context->Transparent_color=16;
+
+        //foreach backbuffer
+        if (backbuffers >= 1)
+        {
+          byte border, background;
+          //byte ext0, ext1, ext2;
+          byte * bitmap, * color, * screen;
+
+          //GFX2_LogHexDump(GFX2_DEBUG, "GPX ", p, 0, 64);
+          p += 47;  // Extra bytes
+          //crippled = p;
+          p += 6;
+          //lock = p;
+          p += 6;
+          border = *p++;
+          background = *p++;
+          /*ext0 = *p++;
+          ext1 = *p++;
+          ext2 = *p++;*/
+          p += 3;
+          bitmap = p;
+          p += mapsize;
+          color = p;
+          p += colorsize;
+          screen = p;
+          p += screensize;
+
+          (void)border;
+          Load_C64_multi(context, bitmap, screen, color, background);
+          Set_image_mode(context, (mode & 1) ? IMAGE_MODE_C64MULTI : IMAGE_MODE_C64HIRES);
+        }
+      }
+      else
+      {
+        GFX2_Log(GFX2_ERROR, "GPX file version %d unsupported\n", version);
+      }
+    }
+    free(gpx);
+  }
+  free(buffer);
+  fclose(file);
+}
 
 /**
  * Test for SCR file (Amstrad CPC)
