@@ -827,7 +827,7 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
 #else
 // case-sensitive
   #define FILENAME_COMPARE strcmp
-  #define FILENAME_COMPARE_UNICODE wcscmp
+  #define FILENAME_COMPARE_UNICODE Unicode_strcmp
 #endif
 
 

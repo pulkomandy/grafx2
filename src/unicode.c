@@ -73,6 +73,18 @@ void Unicode_strlcat(word * dst, const word * src, size_t len)
   Unicode_strlcpy(dst + dst_len, src, len - dst_len);
 }
 
+/// Compare two unicode strings
+int Unicode_strcmp(const word * s1, const word * s2)
+{
+  while (*s1 == *s2)
+  {
+    if (*s1 == 0) return 0;
+    s1++;
+    s2++;
+  }
+  return (*s1 > *s2) ? 1 : -1;
+}
+
 /// Compare an unicode string with a regular Latin1 string
 int Unicode_char_strcmp(const word * s1, const char * s2)
 {
