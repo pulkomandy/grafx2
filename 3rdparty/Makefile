@@ -49,6 +49,7 @@ SDLTTFARCH=$(SDLTTF).tar.gz
 SDLTTFURL=https://www.libsdl.org/projects/SDL_ttf/release/$(SDLTTFARCH)
 SDLTTFSHA256 = 724cd895ecf4da319a3ef164892b72078bd92632a5d812111261cde248ebcdb7
 SDL2VER = 2.0.9
+LATESTSDL2VER = $(shell curl -s -S http://www.libsdl.org/ | grep current | grep stable | sed 's/.*version \([0-9.]*\).*/\1/' )
 SDL2 = SDL2-$(SDL2VER)
 SDL2ARCH = $(SDL2).tar.gz
 SDL2URL = https://www.libsdl.org/release/$(SDL2ARCH)
@@ -65,7 +66,6 @@ SDL2TTF = SDL2_ttf-2.0.14
 SDL2TTFARCH = $(SDL2TTF).tar.gz
 SDL2TTFURL = https://www.libsdl.org/projects/SDL_ttf/release/$(SDL2TTFARCH)
 SDL2TTFSHA256 = 34db5e20bcf64e7071fe9ae25acaa7d72bdc4f11ab3ce59acc768ab62fe39276
-LATESTSDL2VER = $(shell curl -s -S http://www.libsdl.org/ | grep current | grep stable | sed 's/.*version \([0-9.]*\).*/\1/' )
 LIBPNGVER = 1.6.37
 LIBPNG = libpng-$(LIBPNGVER)
 LIBPNGARCH = $(LIBPNG).tar.gz
@@ -74,12 +74,15 @@ LIBPNGURLALT = ftp://ftp-osl.osuosl.org/pub/libpng/src/libpng16/$(LIBPNGARCH)
 LIBPNGSHA256 = daeb2620d829575513e35fecc83f0d3791a620b9b93d800b763542ece9390fb4
 LATESTLIBPNGVER = $(shell curl -s -S http://www.libpng.org/pub/png/libpng.html | grep "current public release" | sed 's/.*libpng \([0-9.]*\).*/\1/' )
 JPEGVER = 9c
+LATESTJPEGVER = $(shell curl -s -S http://www.ijg.org/ |grep "current version" | sed 's/.*release \([0-9]*[a-z]\) .*/\1/' )
 JPEGDIR = jpeg-$(JPEGVER)
 JPEGARCH = jpegsrc.v$(JPEGVER).tar.gz
 JPEGURL = http://www.ijg.org/files/$(JPEGARCH)
 # http://www.simplesystems.org/libtiff/
 # https://gitlab.com/libtiff/libtiff
-LIBTIFF = tiff-4.0.10
+LIBTIFFVER = 4.0.10
+LATESTLIBTIFFVER = $(shell curl -s -S http://www.simplesystems.org/libtiff/ |grep -A1 Latest|tail -n1|sed 's/.*>v\([0-9.]*\).*/\1/')
+LIBTIFF = tiff-$(LIBTIFFVER)
 LIBTIFFARCH = $(LIBTIFF).tar.gz
 LIBTIFFURL = https://download.osgeo.org/libtiff/$(LIBTIFFARCH)
 LIBTIFFURLALT = https://fossies.org/linux/misc/$(LIBTIFFARCH)
@@ -91,6 +94,7 @@ TIFFURLALT = $(LIBTIFFURLALT)
 TIFFPATCHES = $(LIBTIFFPATCHES)
 TIFFSHA256 = 2c52d11ccaf767457db0c46795d9c7d1a8d8f76f68b0b800a3dfe45786b996e4
 ZLIBVER=1.2.11
+LATESTZLIBVER = $(shell curl -s -S https://www.zlib.net/ChangeLog.txt |grep "Changes in" |head -n1|sed 's/Changes in \([0-9.]*\).*/\1/')
 ZLIB=zlib-$(ZLIBVER)
 ZLIBARCH=$(ZLIB).tar.gz
 ZLIBURL=https://www.zlib.net/$(ZLIBARCH)
@@ -114,6 +118,7 @@ LUAPATCHES = lua-atari-log2.patch \
 LATESTLUAVER = $(shell curl -s -S https://www.lua.org/download.html | grep -A1 "current release is" | tail -n1 | sed 's/.*lua-\([0-9.]*\)\.tar.*/\1/' )
 # https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-0.6.1.tar.gz
 RECOILVER=4.3.1
+LATESTRECOILVER = $(shell curl -s -S -I https://sourceforge.net/projects/recoil/files/latest/download|grep "location:"|sed 's:.*/\([0-9.]*\)/.*:\1:' )
 RECOIL=recoil-$(RECOILVER)
 RECOILARCH=$(RECOIL).tar.gz
 # https://downloads.sourceforge.net/project/recoil/recoil/4.3.0/recoil-4.3.0.tar.gz
@@ -210,7 +215,8 @@ DATE = $(shell date -R)
 all:	libs
 
 checkversions:	checkversion-libpng checkversion-freetype \
-	checkversion-lua checkversion-sdl2
+	checkversion-lua checkversion-jpeg checkversion-libtiff \
+	checkversion-zlib checkversion-recoil checkversion-sdl2
 
 clean_all:	clean clean_archives
 
