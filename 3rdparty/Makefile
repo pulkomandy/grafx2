@@ -48,7 +48,8 @@ SDLTTF=SDL_ttf-2.0.11
 SDLTTFARCH=$(SDLTTF).tar.gz
 SDLTTFURL=https://www.libsdl.org/projects/SDL_ttf/release/$(SDLTTFARCH)
 SDLTTFSHA256 = 724cd895ecf4da319a3ef164892b72078bd92632a5d812111261cde248ebcdb7
-SDL2 = SDL2-2.0.9
+SDL2VER = 2.0.9
+SDL2 = SDL2-$(SDL2VER)
 SDL2ARCH = $(SDL2).tar.gz
 SDL2URL = https://www.libsdl.org/release/$(SDL2ARCH)
 SDL2SHA256 = 255186dc676ecd0c1dbf10ec8a2cc5d6869b5079d8a38194c2aecdff54b324b1
@@ -64,11 +65,14 @@ SDL2TTF = SDL2_ttf-2.0.14
 SDL2TTFARCH = $(SDL2TTF).tar.gz
 SDL2TTFURL = https://www.libsdl.org/projects/SDL_ttf/release/$(SDL2TTFARCH)
 SDL2TTFSHA256 = 34db5e20bcf64e7071fe9ae25acaa7d72bdc4f11ab3ce59acc768ab62fe39276
-LIBPNG = libpng-1.6.36
+LATESTSDL2VER = $(shell curl -s -S http://www.libsdl.org/ | grep current | grep stable | sed 's/.*version \([0-9.]*\).*/\1/' )
+LIBPNGVER = 1.6.36
+LIBPNG = libpng-$(LIBPNGVER)
 LIBPNGARCH = $(LIBPNG).tar.gz
 LIBPNGURL = https://download.sourceforge.net/libpng/$(LIBPNGARCH)
 LIBPNGURLALT = ftp://ftp-osl.osuosl.org/pub/libpng/src/libpng16/$(LIBPNGARCH)
 LIBPNGSHA256 = ca13c548bde5fb6ff7117cc0bdab38808acb699c0eccb613f0e4697826e1fd7d
+LATESTLIBPNGVER = $(shell curl -s -S http://www.libpng.org/pub/png/libpng.html | grep "current public release" | sed 's/.*libpng \([0-9.]*\).*/\1/' )
 JPEGVER = 9c
 JPEGDIR = jpeg-$(JPEGVER)
 JPEGARCH = jpegsrc.v$(JPEGVER).tar.gz
@@ -98,6 +102,7 @@ FREETYPEARCH=$(FREETYPE).tar.gz
 FREETYPEURL=https://download.savannah.gnu.org/releases/freetype/$(FREETYPEARCH)
 FREETYPEURLALT=https://sourceforge.net/projects/freetype/files/freetype2/$(FREETYPEVER)/$(FREETYPEARCH)
 FREETYPESHA256=955e17244e9b38adb0c98df66abb50467312e6bb70eac07e49ce6bd1a20e809a
+LATESTFREETYPEVER = $(shell curl -s -S -I "https://sourceforge.net/projects/freetype/files/latest/download" |grep location | sed 's:.*/\([0-9.]*\)/.*:\1:' )
 LUAVER=5.3.5
 LUA=lua-$(LUAVER)
 LUAARCH=$(LUA).tar.gz
@@ -106,6 +111,7 @@ LUAURLALT=https://www.tecgraf.puc-rio.br/lua/mirror/ftp/$(LUAARCH)
 LUASHA256=0c2eed3f960446e1a3e4b9a1ca2f3ff893b6ce41942cf54d5dd59ab4b3b058ac
 LUAPATCHES = lua-atari-log2.patch \
              lua-atari-inttype.patch
+LATESTLUAVER = $(shell curl -s -S https://www.lua.org/download.html | grep -A1 "current release is" | tail -n1 | sed 's/.*lua-\([0-9.]*\)\.tar.*/\1/' )
 # https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-0.6.1.tar.gz
 RECOILVER=4.3.1
 RECOIL=recoil-$(RECOILVER)
@@ -198,9 +204,13 @@ DATE = $(shell date -R)
 .PHONY:	all clean clean_archives clean_all download libs libpng \
         libsdl libsdl_image libsdl_ttf \
         libsdl2 libsdl2_image libsdl2_ttf \
-        libjpeg libtiff zlib freetype lua recoil
+        libjpeg libtiff zlib freetype lua recoil \
+        checkversions
 
 all:	libs
+
+checkversions:	checkversion-libpng checkversion-freetype \
+	checkversion-lua checkversion-sdl2
 
 clean_all:	clean clean_archives
 
@@ -603,3 +613,12 @@ archives/%.tar.gz:
 	@echo "$*: fetching $(URL) (or $(URLALT))"
 	@cd $(@D) && ( $(GETURL) $(URL) || ( [ -n "$(URLALT)" ] && $(GETURL) $(URLALT) ) )
 	@[ -z "$(SHA256)" ] || [ "`$(SHA256CMD) < $@`" = "$(SHA256)" ] || ( $(RM) $@ && echo "$@ SHA256 mismatch !" && false )
+
+# generic rule to check package version
+checkversion-%:
+	@echo "checking $* version"
+	$(eval PKG := $(shell echo $* | tr a-z A-Z))
+	$(eval LATEST := $(LATEST$(PKG)VER))
+	@if [ "$($(PKG)VER)" != "$(LATEST)" ] ; \
+	  then echo "$* $($(PKG)VER) is outdated, latest version is $(LATEST)" ; \
+	fi

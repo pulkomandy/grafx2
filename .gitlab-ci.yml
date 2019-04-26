@@ -13,6 +13,8 @@ job_linux:
         - "API=sdl2 make -j3 && API=sdl2 make ziprelease"
         - "make docarchive"
         - "echo $CI_JOB_ID > LINUX_JOB_ID"
+    after_script:
+        - "cd 3rdparty; make checkversions"
     artifacts:
         paths:
             - "*.zip"
