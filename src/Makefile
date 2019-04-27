@@ -635,7 +635,7 @@ endif
           COPT += -D_NETBSD_SOURCE
         endif
 
-        LOPT = -lm
+        LOPT = -lm -lz
         ifeq ($(API),sdl)
           LOPT += $(shell sdl-config --libs) -lSDL_image
           ifneq ($(NO_X11),1)
