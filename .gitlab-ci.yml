@@ -12,8 +12,8 @@ job_linux:
         - "make -j3 && make ziprelease"
         - "API=sdl2 make -j3 && API=sdl2 make ziprelease"
         - "make docarchive"
-        - "echo $CI_JOB_ID > LINUX_JOB_ID"
     after_script:
+        - "echo $CI_JOB_ID > LINUX_JOB_ID"
         - "cd 3rdparty; make checkversions"
     artifacts:
         paths:
@@ -53,6 +53,7 @@ job_win32:
         - "WIN32CROSS=1 API=sdl2 make -j2"
         - "WIN32CROSS=1 API=sdl2 make ziprelease"
         - "WIN32CROSS=1 API=sdl2 make win32installer"
+    after_script:
         - "echo $CI_JOB_ID > WIN32_JOB_ID"
     artifacts:
         paths:
@@ -69,6 +70,7 @@ job_atari:
         - "ATARICROSS=1 make 3rdparty -j2"
         - "ATARICROSS=1 make -j2"
         - "ATARICROSS=1 make ziprelease"
+    after_script:
         - "echo $CI_JOB_ID > ATARI_JOB_ID"
     artifacts:
         paths:
@@ -85,6 +87,7 @@ job_gp2x:
     script:
         - "NOLUA=1 GP2XCROSS=1 make -j2 grafx2"
         - "NOLUA=1 GP2XCROSS=1 make ziprelease"
+    after_script:
         - "echo $CI_JOB_ID > GP2X_JOB_ID"
     artifacts:
         paths:
