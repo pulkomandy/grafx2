@@ -1078,20 +1078,20 @@ void Tag_used_colors(byte color, dword color_usage[])
 
 void Button_Palette(int btn)
 {
-  static const int BUTTON_PLUS_X = 182;
-  static const int BUTTON_PLUS_Y = 163;
-  static const int BUTTON_MINUS_X = 198;
-  static const int BUTTON_MINUS_Y = 163;
+  static const int BUTTON_PLUS_X = 180;
+  static const int BUTTON_PLUS_Y = 79;
+  static const int BUTTON_MINUS_X = 196;
+  static const int BUTTON_MINUS_Y = 79;
 
   // Coordinates of the block that displays Backcolor
-  static const int BGCOLOR_DISPLAY_X = 176;
-  static const int BGCOLOR_DISPLAY_Y = 65 + 14;
+  static const int BGCOLOR_DISPLAY_X = 174;
+  static const int BGCOLOR_DISPLAY_Y = 65 + 14 + 14;
   static const int BGCOLOR_DISPLAY_W = 40;
   static const int BGCOLOR_DISPLAY_H = 96 - 14;
 
   // Coordinates of the block that displays Forecolor
-  static const int FGCOLOR_DISPLAY_X = 180;
-  static const int FGCOLOR_DISPLAY_Y = 69 + 14;
+  static const int FGCOLOR_DISPLAY_X = 178;
+  static const int FGCOLOR_DISPLAY_Y = 69 + 14 + 14;
   static const int FGCOLOR_DISPLAY_W = 32;
   static const int FGCOLOR_DISPLAY_H = 88 - 14;
 
