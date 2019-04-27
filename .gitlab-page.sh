@@ -4,6 +4,7 @@
 
 OUTFILE=public/index.html
 VERSION=$(cat VERSION)
+DATE=$(date -R)
 LINUX_JOB_ID=$(cat LINUX_JOB_ID)
 WIN32_JOB_ID=$(cat WIN32_JOB_ID)
 ATARI_JOB_ID=$(cat ATARI_JOB_ID)
@@ -23,6 +24,7 @@ echo "<html lang=\"en\">" >> ${OUTFILE}
 echo "<head><title>GrafX2</title></head>" >> ${OUTFILE}
 echo "<body>" >> ${OUTFILE}
 echo "<h1>GrafX2 version ${VERSION}</h1>" >> ${OUTFILE}
+echo "<p>build date : ${DATE}</p>" >> ${OUTFILE}
 echo "<ul>" >> ${OUTFILE}
 echo "<li><a href=\"doxygen/html/\">doxygen</a></li>" >> ${OUTFILE}
 echo "<li><a href=\"htmldoc/\">htmldoc</a></li>" >> ${OUTFILE}
