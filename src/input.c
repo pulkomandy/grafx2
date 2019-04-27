@@ -89,32 +89,40 @@ unsigned long X11_clipboard_size = 0;
 // --
 
 // Digital joystick state
-byte Directional_up;
-byte Directional_up_right;
-byte Directional_right;
-byte Directional_down_right;
-byte Directional_down;
-byte Directional_down_left;
-byte Directional_left;
-byte Directional_up_left;
-byte Directional_click;
+#define PAD_MAX_SPEED 3 /// Max speed per pixel when using the gamepad or keyboard directional keys
+static byte Directional_click = 0;
+static byte Digital_joystick_state = 0;
+#define D_JOYSTICK_UP         (1 << 0)
+#define D_JOYSTICK_UP_RIGHT   (1 << 1)
+#define D_JOYSTICK_RIGHT      (1 << 2)
+#define D_JOYSTICK_DOWN_RIGHT (1 << 3)
+#define D_JOYSTICK_DOWN       (1 << 4)
+#define D_JOYSTICK_DOWN_LEFT  (1 << 5)
+#define D_JOYSTICK_LEFT       (1 << 6)
+#define D_JOYSTICK_UP_LEFT    (1 << 7)
 
 // Emulated directional controller.
 // This has a distinct state from Directional_, because some joysticks send
 // "I'm not moving" SDL events when idle, thus stopping the emulated one.
-byte Directional_emulated_up;
-byte Directional_emulated_right;
-byte Directional_emulated_down;
-byte Directional_emulated_left;
+static byte Directional_emulated;
+
+// Analog joystick state (mouse emulation)
+#if defined(USE_JOYSTICK)
+#define STICK_MAX_SPEED 3 // Max speed per pixel using the analog stick
+long Joystick_vertical = 0; // 16.16 fixed point value
+long Joystick_horizontal = 0; // 16.16 fixed point value
+#endif
+
+word Input_new_mouse_X;
+word Input_new_mouse_Y;
+word Input_new_mouse_X_frac;  // fractional part of Input_new_mouse_X
+word Input_new_mouse_Y_frac;  // fractional part of Input_new_mouse_Y
+byte Input_new_mouse_K;
+byte Button_inverter=0; // State of the key that swaps mouse buttons.
 
 long Directional_first_move;
 long Directional_last_move;
 int  Mouse_moved; ///< Boolean, Set to true if any cursor movement occurs.
-
-word Input_new_mouse_X;
-word Input_new_mouse_Y;
-byte Input_new_mouse_K;
-byte Button_inverter=0; // State of the key that swaps mouse buttons.
 
 byte Pan_shortcut_pressed;
 
@@ -308,7 +316,7 @@ int Move_cursor_with_constraints(int x, int y)
     Mouse_moved++;
     Mouse_X = Input_new_mouse_X;
     Mouse_Y = Input_new_mouse_Y;
-    
+
     if (Mouse_moved > Config.Mouse_merge_movement
       && !Operation[Current_operation][Mouse_K_unique]
           [Operation_stack_size].Fast_mouse)
@@ -727,22 +735,22 @@ int Handle_special_key_press(void)
 {
     if(Is_shortcut(Key,SPECIAL_MOUSE_UP))
     {
-      Directional_emulated_up=1;
+      Directional_emulated |= D_JOYSTICK_UP;
       return 0;
     }
     else if(Is_shortcut(Key,SPECIAL_MOUSE_DOWN))
     {
-      Directional_emulated_down=1;
+      Directional_emulated |= D_JOYSTICK_DOWN;
       return 0;
     }
     else if(Is_shortcut(Key,SPECIAL_MOUSE_LEFT))
     {
-      Directional_emulated_left=1;
+      Directional_emulated |= D_JOYSTICK_LEFT;
       return 0;
     }
     else if(Is_shortcut(Key,SPECIAL_MOUSE_RIGHT))
     {
-      Directional_emulated_right=1;
+      Directional_emulated |= D_JOYSTICK_RIGHT;
       return 0;
     }
     else if(Is_shortcut(Key,SPECIAL_CLICK_LEFT) && Keyboard_click_allowed > 0)
@@ -853,22 +861,22 @@ int Release_control(int key_code, int modifier)
     if((key_code && key_code == (Config_Key[SPECIAL_MOUSE_UP][0]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_UP][0]&modifier) ||
       (key_code && key_code == (Config_Key[SPECIAL_MOUSE_UP][1]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_UP][1]&modifier))
     {
-      Directional_emulated_up=0;
+      Directional_emulated &= ~D_JOYSTICK_UP;
     }
     if((key_code && key_code == (Config_Key[SPECIAL_MOUSE_DOWN][0]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_DOWN][0]&modifier) ||
       (key_code && key_code == (Config_Key[SPECIAL_MOUSE_DOWN][1]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_DOWN][1]&modifier))
     {
-      Directional_emulated_down=0;
+      Directional_emulated &= ~D_JOYSTICK_DOWN;
     }
     if((key_code && key_code == (Config_Key[SPECIAL_MOUSE_LEFT][0]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_LEFT][0]&modifier) ||
       (key_code && key_code == (Config_Key[SPECIAL_MOUSE_LEFT][1]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_LEFT][1]&modifier))
     {
-      Directional_emulated_left=0;
+      Directional_emulated &= ~D_JOYSTICK_LEFT;
     }
     if((key_code && key_code == (Config_Key[SPECIAL_MOUSE_RIGHT][0]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_RIGHT][0]&modifier) ||
       (key_code && key_code == (Config_Key[SPECIAL_MOUSE_RIGHT][1]&0x0FFF)) || (Config_Key[SPECIAL_MOUSE_RIGHT][1]&modifier))
     {
-      Directional_emulated_right=0;
+      Directional_emulated &= ~D_JOYSTICK_RIGHT;
     }
     if((key_code && key_code == (Config_Key[SPECIAL_CLICK_LEFT][0]&0x0FFF)) || (Config_Key[SPECIAL_CLICK_LEFT][0]&modifier) ||
       (key_code && key_code == (Config_Key[SPECIAL_CLICK_LEFT][1]&0x0FFF)) || (Config_Key[SPECIAL_CLICK_LEFT][1]&modifier))
@@ -1009,42 +1017,42 @@ static int Handle_joystick_press(SDL_JoyButtonEvent * event)
     {
       #ifdef JOY_BUTTON_UP
       case JOY_BUTTON_UP:
-        Directional_up=1;
+        Digital_joystick_state |= D_JOYSTICK_UP;
         break;
       #endif
       #ifdef JOY_BUTTON_UPRIGHT
       case JOY_BUTTON_UPRIGHT:
-        Directional_up_right=1;
+        Digital_joystick_state |= D_JOYSTICK_UP_RIGHT;
         break;
       #endif
       #ifdef JOY_BUTTON_RIGHT
       case JOY_BUTTON_RIGHT:
-        Directional_right=1;
+        Digital_joystick_state |= D_JOYSTICK_RIGHT;
         break;
       #endif
       #ifdef JOY_BUTTON_DOWNRIGHT
       case JOY_BUTTON_DOWNRIGHT:
-        Directional_down_right=1;
+        Digital_joystick_state |= D_JOYSTICK_DOWN_RIGHT;
         break;
       #endif
       #ifdef JOY_BUTTON_DOWN
       case JOY_BUTTON_DOWN:
-        Directional_down=1;
+        Digital_joystick_state |= D_JOYSTICK_DOWN;
         break;
       #endif
       #ifdef JOY_BUTTON_DOWNLEFT
       case JOY_BUTTON_DOWNLEFT:
-        Directional_down_left=1;
+        Digital_joystick_state |= D_JOYSTICK_DOWN_LEFT;
         break;
       #endif
       #ifdef JOY_BUTTON_LEFT
       case JOY_BUTTON_LEFT:
-        Directional_left=1;
+        Digital_joystick_state |= D_JOYSTICK_LEFT;
         break;
       #endif
       #ifdef JOY_BUTTON_UPLEFT
       case JOY_BUTTON_UPLEFT:
-        Directional_up_left=1;
+        Digital_joystick_state |= D_JOYSTICK_UP_LEFT;
         break;
       #endif
       
@@ -1094,42 +1102,42 @@ static int Handle_joystick_release(SDL_JoyButtonEvent * event)
     {
       #ifdef JOY_BUTTON_UP
       case JOY_BUTTON_UP:
-        Directional_up=0;
+        Digital_joystick_state &= ~D_JOYSTICK_UP;
         break;
       #endif
       #ifdef JOY_BUTTON_UPRIGHT
       case JOY_BUTTON_UPRIGHT:
-        Directional_up_right=0;
+        Digital_joystick_state &= ~D_JOYSTICK_UP_RIGHT;
         break;
       #endif
       #ifdef JOY_BUTTON_RIGHT
       case JOY_BUTTON_RIGHT:
-        Directional_right=0;
+        Digital_joystick_state &= ~D_JOYSTICK_RIGHT;
         break;
       #endif
       #ifdef JOY_BUTTON_DOWNRIGHT
       case JOY_BUTTON_DOWNRIGHT:
-        Directional_down_right=0;
+        Digital_joystick_state &= ~D_JOYSTICK_DOWN_RIGHT;
         break;
       #endif
       #ifdef JOY_BUTTON_DOWN
       case JOY_BUTTON_DOWN:
-        Directional_down=0;
+        Digital_joystick_state &= ~D_JOYSTICK_DOWN;
         break;
       #endif
       #ifdef JOY_BUTTON_DOWNLEFT
       case JOY_BUTTON_DOWNLEFT:
-        Directional_down_left=0;
+        Digital_joystick_state &= ~D_JOYSTICK_DOWN_LEFT;
         break;
       #endif
       #ifdef JOY_BUTTON_LEFT
       case JOY_BUTTON_LEFT:
-        Directional_left=0;
+        Digital_joystick_state &= ~D_JOYSTICK_LEFT;
         break;
       #endif
       #ifdef JOY_BUTTON_UPLEFT
       case JOY_BUTTON_UPLEFT:
-        Directional_up_left=0;
+        Digital_joystick_state &= ~D_JOYSTICK_UP_LEFT;
         break;
       #endif
       
@@ -1143,54 +1151,62 @@ static void Handle_joystick_movement(SDL_JoyAxisEvent * event)
 {
   if (event->axis == JOYSTICK_AXIS_X)
   {
-    Directional_right = Directional_left = 0;
-    if (event->value < -JOYSTICK_THRESHOLD)
-      Directional_left=1;
-    else if (event->value > JOYSTICK_THRESHOLD)
-      Directional_right=1;
+    if (event->value < -JOYSTICK_THRESHOLD || event->value > JOYSTICK_THRESHOLD)
+      Joystick_horizontal = event->value << 1;
+    else
+      Joystick_horizontal = 0;
   }
   else if (event->axis == JOYSTICK_AXIS_Y)
   {
-    Directional_up = Directional_down = 0;
-    if (event->value < -JOYSTICK_THRESHOLD)
-      Directional_up = 1;
-    else if (event->value > JOYSTICK_THRESHOLD)
-      Directional_down=1;
+    if (event->value < -JOYSTICK_THRESHOLD || event->value > JOYSTICK_THRESHOLD)
+      Joystick_vertical = event->value << 1;
+    else
+      Joystick_vertical = 0;
   }
 }
 #endif
 
-// Attempts to move the mouse cursor by the given deltas (may be more than 1 pixel at a time)
-int Cursor_displace(short delta_x, short delta_y)
+/** Attempts to move the mouse cursor by the given deltas
+ * @param step move multiply factor
+ * @param delta_x 16.16 fixed point value
+ * @param delta_y 16.16 fixed point value
+ * @return feedback
+ */
+static int Cursor_displace(int step, long delta_x, long delta_y)
 {
-  int x = Input_new_mouse_X;
-  int y = Input_new_mouse_Y;
-  
+  long x, y;
+
+  x = ((long)Input_new_mouse_X << 16) + Input_new_mouse_X_frac;
+  y = ((long)Input_new_mouse_Y << 16) + Input_new_mouse_Y_frac;
+
   if(Main.magnifier_mode && Input_new_mouse_Y < Menu_Y && Input_new_mouse_X > Main.separator_position)
   {
     // Cursor in zoomed area
-    
-    if (delta_x<0)
-      x = Max(Main.separator_position, x-Main.magnifier_factor);
-    else if (delta_x>0)
-      x = Min(Screen_width-1, x+Main.magnifier_factor);
-    if (delta_y<0)
-      y = Max(0, y-Main.magnifier_factor);
-    else if (delta_y>0)
-      y = Min(Screen_height-1, y+Main.magnifier_factor);
+    x += Main.magnifier_factor * delta_x;
+    if (x < (Main.separator_position << 16))
+      x = Main.separator_position << 16;
+    else if (x > ((Screen_width-1) << 16))
+      x = (Screen_width-1) << 16;
+    y += Main.magnifier_factor * delta_y;
   }
   else
   {
-    if (delta_x<0)
-      x = Max(0, x+delta_x);
-    else if (delta_x>0)
-      x = Min(Screen_width-1, x+delta_x);
-    if (delta_y<0)
-      y = Max(0, y+delta_y);
-    else if (delta_y>0)
-      y = Min(Screen_height-1, y+delta_y);
+    x += delta_x * step;
+    if (x < 0)
+      x = 0;
+    else if (x > ((Screen_width-1) << 16))
+      x = (Screen_width-1) << 16;
+    y += delta_y * step;
   }
-  return Move_cursor_with_constraints(x, y);
+  if (y < 0)
+    y = 0;
+  else if (y > ((Screen_height-1) << 16))
+    y = (Screen_height-1) << 16;
+
+  Input_new_mouse_X_frac = x & 0xffff;
+  Input_new_mouse_Y_frac = y & 0xffff;
+
+  return Move_cursor_with_constraints(x >> 16, y >> 16);
 }
 
 // This function is the acceleration profile for directional (digital) cursor
@@ -1525,12 +1541,12 @@ int Get_input(int sleep_time)
               break;
       }
     }
-    // Directional controller
-    if (!(Directional_up||Directional_up_right||Directional_right||
-      Directional_down_right||Directional_down||Directional_down_left||
-      Directional_left||Directional_up_left||Directional_emulated_up||
-      Directional_emulated_right||Directional_emulated_down||
-      Directional_emulated_left))
+    // Directional and analog controller
+    if (!(Digital_joystick_state||Directional_emulated)
+      #if defined(USE_JOYSTICK)
+      && !(Joystick_vertical != 0 || Joystick_horizontal != 0)
+      #endif
+    )
     {
        Directional_first_move=0;
     }
@@ -1538,7 +1554,9 @@ int Get_input(int sleep_time)
     {
       long time_now;
       int step=0;
-      
+      #if defined(USE_JOYSTICK)
+      int joy_step = 0;
+      #endif
       time_now=GFX2_GetTicks();
       
       if (Directional_first_move==0)
@@ -1556,36 +1574,52 @@ int Get_input(int sleep_time)
           Directional_acceleration(Directional_last_move - Directional_first_move);
         
         // Clip speed at 3 pixel per visible frame.
-        if (step > 3)
-          step=3;
-        
+        if (step > PAD_MAX_SPEED)
+          step = PAD_MAX_SPEED;
+
+        #if defined(USE_JOYSTICK)
+        joy_step =
+          Directional_acceleration(time_now) -
+          Directional_acceleration(Directional_last_move);
+
+        if (joy_step > STICK_MAX_SPEED)
+          joy_step = STICK_MAX_SPEED;
+        #endif
       }
       Directional_last_move = time_now;
+      #if defined(USE_JOYSTICK)
+      // Analog joystick
+      if (Joystick_vertical != 0 || Joystick_horizontal != 0)
+      {
+        Cursor_displace(joy_step, Joystick_horizontal, Joystick_vertical);
+      }
+      #endif
+
       if (step)
       {
+        long delta_x = 0;
+        long delta_y = 0;
         // Directional controller UP
-        if ((Directional_up||Directional_emulated_up||Directional_up_left||Directional_up_right) &&
-           !(Directional_down_right||Directional_down||Directional_emulated_down||Directional_down_left))
-        {
-          Cursor_displace(0, -step);
-        }
-        // Directional controller RIGHT
-        if ((Directional_up_right||Directional_right||Directional_emulated_right||Directional_down_right) &&
-           !(Directional_down_left||Directional_left||Directional_emulated_left||Directional_up_left))
-        {
-          Cursor_displace(step,0);
-        }    
+        if ((Digital_joystick_state & (D_JOYSTICK_UP | D_JOYSTICK_UP_RIGHT | D_JOYSTICK_UP_LEFT))
+            || (Directional_emulated & D_JOYSTICK_UP))
+          delta_y -= 1 << 16;
         // Directional controller DOWN
-        if ((Directional_down_right||Directional_down||Directional_emulated_down||Directional_down_left) &&
-           !(Directional_up_left||Directional_up||Directional_emulated_up||Directional_up_right))
-        {
-          Cursor_displace(0, step);
-        }
+        if ((Digital_joystick_state & (D_JOYSTICK_DOWN | D_JOYSTICK_DOWN_RIGHT | D_JOYSTICK_DOWN_LEFT))
+            || (Directional_emulated & D_JOYSTICK_DOWN))
+          delta_y += 1 << 16;
+
+        // Directional controller RIGHT
+        if ((Digital_joystick_state & (D_JOYSTICK_RIGHT | D_JOYSTICK_UP_RIGHT | D_JOYSTICK_DOWN_RIGHT))
+            || (Directional_emulated & D_JOYSTICK_RIGHT))
+          delta_x += 1 << 16;
         // Directional controller LEFT
-        if ((Directional_down_left||Directional_left||Directional_emulated_left||Directional_up_left) &&
-           !(Directional_up_right||Directional_right||Directional_emulated_right||Directional_down_right))
+        if ((Digital_joystick_state & (D_JOYSTICK_LEFT | D_JOYSTICK_UP_LEFT | D_JOYSTICK_DOWN_LEFT))
+            || (Directional_emulated & D_JOYSTICK_LEFT))
+          delta_x -= 1 << 16;
+
+        if (delta_x != 0 || delta_y != 0)
         {
-          Cursor_displace(-step,0);
+          Cursor_displace(step, delta_x, delta_y);
         }
       }
     }
@@ -1595,8 +1629,11 @@ int Get_input(int sleep_time)
     {
       Compute_paintbrush_coordinates();
       Display_cursor();
-#if defined(USE_SDL2)
-      //GFX2_UpdateScreen();
+#if defined(USE_SDL2) && defined(USE_JOYSTICK)
+      // To achieve mouse smooth movement using a joystick, we update the screen now and return
+      // this is because for mouse coordinate the joystick use floats internally and Mouse_moved become always
+      // true and stop updating the screen until the axis are released.
+      GFX2_UpdateScreen();
 #endif
       return 1;
     }
