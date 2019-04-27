@@ -4198,7 +4198,7 @@ void Load_GPX(T_IO_Context * context)
           screen = p;
           p += screensize;
 
-          (void)border;
+          GFX2_Log(GFX2_DEBUG, "background color #%d, border color #%d\n", (int)background, (int)border);
           Load_C64_multi(context, bitmap, screen, color, background);
           Set_image_mode(context, (mode & 1) ? IMAGE_MODE_C64MULTI : IMAGE_MODE_C64HIRES);
         }
