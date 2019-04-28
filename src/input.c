@@ -156,6 +156,15 @@ byte Pan_shortcut_pressed;
   short Joybutton_left_click= JOY_BUTTON_A;
   short Joybutton_right_click=JOY_BUTTON_B;
 
+#elif defined(__SWITCH__)
+
+  #define JOYSTICK_THRESHOLD  (1024)
+  short Joybutton_shift=      JOY_BUTTON_L;
+  short Joybutton_control=    JOY_BUTTON_R;
+  short Joybutton_alt=        JOY_BUTTON_Y;
+  short Joybutton_left_click= JOY_BUTTON_A;
+  short Joybutton_right_click=JOY_BUTTON_B;
+
 #else // Default : Any joystick on a computer platform
   ///
   /// This is the sensitivity threshold for the directional

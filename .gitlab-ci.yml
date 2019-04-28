@@ -93,3 +93,19 @@ job_gp2x:
         paths:
             - "*.zip"
             - "GP2X_JOB_ID"
+
+job_switch:
+    stage: build
+    before_script:
+        - apt-get update -qq && apt-get install -y -qq zip
+        - "sh ./.install-switch-toolchain.sh"
+        - "source /etc/profile.d/devkit-env.sh"
+    script:
+        - "SWITCH=1 make -j2 grafx2"
+        - "SWITCH=1 make ziprelease"
+    after_script:
+        - "echo $CI_JOB_ID > SWITCH_JOB_ID"
+    artifacts:
+        paths:
+            - "*.zip"
+            - "SWITCH_JOB_ID"

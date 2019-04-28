@@ -717,7 +717,7 @@ void Zoom_a_line(byte* original_line, byte* zoomed_line,
 
 #if defined(WIN32)
 #include <windows.h>
-#elif defined(__macosx__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#elif defined(__macosx__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__SWITCH__)
   #if defined(__OpenBSD__)
   #include <sys/param.h>
   #endif
@@ -785,7 +785,13 @@ unsigned long Memory_free(void)
   return info.freeram*info.mem_unit;
 #else
   // AvailMem is misleading on os4 (os4 caches stuff in memory that you can still allocate)
+#if defined(__SWITCH__)
+  // There is some way to get memory information on switch (see include switch/kernel/svc.h svcGetInfo svcGetSystemInfo)
+  // but the usage is a bit confusing for the first and the later need privilege to be used.
+  // If you come here with a solution, you'r welcome. For now we just return the default value.
+#elif
 #warning "There is missing code there for your platform ! please check and correct :)"
+#endif
   return 10*1024*1024;
 #endif
 }

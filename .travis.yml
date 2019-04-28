@@ -26,6 +26,9 @@ matrix:
     - os: linux
       env: 'WIN32CROSS=1'
     - os: linux
+      env: 'SWITCH=1'
+      sudo: required
+    - os: linux
       env: 'ATARICROSS=1'
       sudo: required
       dist: xenial
@@ -40,6 +43,7 @@ before_install:
 install:
   - 'git fetch --unshallow'
   - 'if [ "$ATARICROSS" = "1" ] ; then sh ./.install-cross-mint.sh ; fi'
+  - 'if [ "$SWITCH" = "1" ] ; then sh ./.install-switch-toolchain.sh ; fi'
 
 script:
   - 'cd $TRAVIS_BUILD_DIR'

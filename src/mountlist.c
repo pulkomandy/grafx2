@@ -43,6 +43,8 @@
     #include <sys/types.h>
 #elif defined(__SKYOS__)||defined(__ANDROID__)
     #warning "Your platform is missing some specific code here ! please check and fix :)"
+#elif defined(__SWITCH__)
+    // Nothing much to do
 #else
     #define MOUNTED_GETMNTENT1
 #endif
@@ -278,6 +280,10 @@ read_file_system_list (bool need_fs_type)
   struct mount_entry *me;
   struct mount_entry **mtail = &mount_list;
   (void)need_fs_type; // may be unused
+
+#if defined(__SWITCH__)
+  (void)me; // unused on switch
+#endif
 
 #ifdef MOUNTED_LISTMNTENT
   {

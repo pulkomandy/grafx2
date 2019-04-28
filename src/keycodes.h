@@ -570,6 +570,20 @@
     #define JOY_BUTTON_JOY           (10)
 
     #define KEY_ESC (KEY_JOYBUTTON+JOY_BUTTON_HOME)
+#elif defined (__SWITCH__)
+/// Button definitions for the Switch
+    #define JOY_BUTTON_UP               (13)
+    #define JOY_BUTTON_DOWN             (15)
+    #define JOY_BUTTON_LEFT             (12)
+    #define JOY_BUTTON_RIGHT            (14)
+    #define JOY_BUTTON_A                (0)
+    #define JOY_BUTTON_X                (2)
+    #define JOY_BUTTON_B                (1)
+    #define JOY_BUTTON_Y                (3)
+    #define JOY_BUTTON_L                (6)
+    #define JOY_BUTTON_R                (7)
+
+    #define KEY_ESC (KEY_JOYBUTTON+JOY_BUTTON_X)
 #else
   ///
   /// This is the key identifier for ESC. When hard-coding keyboard shortcuts

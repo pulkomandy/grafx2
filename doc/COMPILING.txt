@@ -121,6 +121,18 @@ To compile a gp2x executable, type
 	make GP2XCROSS=1
 This will only work on an UNIXsystem (Linux or FreeBSD).
 
+== switch ==
+
+To build for Nintendo Switch, you have to install devkitA64 and the following dependencies using dkp-pacman:
+
+devkit-env libnx switch-tools switch-sdl2 switch-sdl2_ttf switch-sdl2_image switch-zlib
+ switch-bzip2 switch-libpng switch-libjpeg-turbo switch-freetype
+
+see https://devkitpro.org/wiki/devkitPro_pacman
+
+To compile a switch executable, type
+	make SWITCH=1
+
 == Windows ==
 
 It is also possible to compile from linux, with this command :

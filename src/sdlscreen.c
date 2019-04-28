@@ -60,6 +60,8 @@
     #define UPDATE_METHOD     UPDATE_METHOD_FULL_PAGE
   #elif defined(__ANDROID__)
     #define UPDATE_METHOD     UPDATE_METHOD_FULL_PAGE
+  #elif defined(__SWITCH__)
+    #define UPDATE_METHOD     UPDATE_METHOD_CUMULATED
   #else
     #define UPDATE_METHOD     UPDATE_METHOD_CUMULATED
   #endif

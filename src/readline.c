@@ -74,7 +74,7 @@ const char * get_paste_board(void);
 #endif
 
 // Virtual keyboard is ON by default on these platforms:
-#if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__) || defined(GCWZERO)
+#if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__) || defined(GCWZERO) || defined(__SWITCH__)
   #define VIRT_KEY_DEFAULT_ON 1
 #else
   #define VIRT_KEY_DEFAULT_ON 0

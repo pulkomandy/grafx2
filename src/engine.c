@@ -53,7 +53,7 @@
 #include "pxsimple.h"
 #include "oldies.h"
 
-#if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__)
+#if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__) || defined(__SWITCH__)
 // We don't want to underline the keyboard shortcuts as there is no keyboard
 #define NO_KEYBOARD
 #endif

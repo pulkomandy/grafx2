@@ -462,7 +462,7 @@ int Directory_exists(const char * directory)
 /// Check if a file or directory is hidden.
 int File_is_hidden(const char *fname, const char *full_name)
 {
-#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__) || defined(__MINT__)
+#if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__) || defined(__MINT__)|| defined(__SWITCH__)
   // False (unable to determine, or irrelevent for platform)
   (void)fname;//unused
   (void)full_name;//unused
@@ -772,6 +772,8 @@ byte Create_lock_file(const char *file_directory)
 {
   #if defined (__amigaos__)||(__AROS__)||(__ANDROID__)
     #warning "Missing code for your platform, please check and correct!"
+  #elif defined(__SWITCH__)
+    // The switch can only run one application at a time, so we don't do anything special here
   #else
   char lock_filename[MAX_PATH_CHARACTERS];
   

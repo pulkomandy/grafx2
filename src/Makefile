@@ -568,6 +568,27 @@ endif
         STRIP = mipsel-linux-strip
         JOYCOPT = -DUSE_JOYSTICK
       else
+      ifdef SWITCH
+        #cross compile an exec for the switch
+        ifeq ($(strip $(DEVKITPRO)),)
+        $(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/devkitpro")
+        endif
+        include $(DEVKITPRO)/libnx/switch_rules
+        PLATFORM = switch
+        API = sdl2
+        NOLUA = 1
+        OBJDIR = ../obj/switch
+        BIN = ../bin/grafx2
+        CC = $(DEVKITPRO)/devkitA64/bin/aarch64-none-elf-gcc
+        ARCH = -g -march=armv8-a -mtune=cortex-a57 -fPIE -std=c99 -ffast-math -mcpu=cortex-a57+crc+fp+simd
+        COPT = `$(DEVKITPRO)/portlibs/switch/bin/sdl2-config --cflags` `$(DEVKITPRO)/portlibs/switch/bin/freetype-config --cflags`
+        COPT += $(ARCH) -Wall -ffunction-sections -O$(OPTIM)
+        COPT += -D__SWITCH__ -D_XOPEN_SOURCE=500 -DUSE_JOYSTICK -D__no_tifflib__
+        LOPT = -specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(OBJDIR)/$*.map
+        LOPT += -lSDL2_image `$(DEVKITPRO)/portlibs/switch/bin/sdl2-config --libs`
+        LOPT += -lSDL2_ttf `$(DEVKITPRO)/portlibs/switch/bin/freetype-config --libs`
+        LOPT += -ljpeg -lstdc++ -lnx
+      else
       ifdef AROS32CROSS
         #cross compile an AROS 32 bit executable
         BIN = ../GrafX2
@@ -669,6 +690,7 @@ endif
           endif
         endif
 
+      endif
       endif
       endif
       endif
@@ -924,6 +946,13 @@ else
 ifeq ($(PLATFORM),FreeMiNT)  
 	$(STACK) -S 128k $(BIN)
 	$(FIX_FLAGS) -S $(BIN)
+else
+ifeq ($(SWITCH), 1)
+	@nacptool --create "grafX2" "grafX2 team / romain337 (nxbuild)" "$(VERSIONTAG)" $(BIN).nacp
+	@echo built ... $(BIN).nacp
+	@elf2nro $(BIN) $(BIN).nro $(BIN).nacp --icon=../misc/switch/icon.jpg --nacp=$(BIN).nacp
+	@echo built ... $(BIN).nro
+endif
 endif
 endif
 endif
@@ -937,6 +966,13 @@ else
 ifeq ($(PLATFORM),FreeMiNT)  
 	$(STACK) -S 128k $(BIN)
 	$(FIX_FLAGS) -S $(BIN)
+else
+ifeq ($(SWITCH), 1)
+	@nacptool --create "grafX2" "grafX2 team / romain337 (nxbuild)" "$(VERSIONTAG)" $(BIN).nacp
+	@echo built ... $(BIN).nacp
+	@elf2nro $(BIN) $(BIN).nro $(BIN).nacp --icon=../misc/switch/icon.jpg --nacp=$(BIN).nacp
+	@echo built ... $(BIN).nro
+endif
 endif
 endif
 
@@ -944,6 +980,12 @@ endif
 # Make release will strip the executable to make it smaller but non-debugable
 release : $(BIN)
 	$(STRIP) $(BIN)
+ifeq ($(SWITCH), 1)
+		@nacptool --create "grafX2" "grafX2 team / romain337 (nxbuild)" "$(VERSIONTAG)" $(BIN).nacp
+		@echo built ... $(BIN).nacp
+		@elf2nro $(BIN) $(BIN).nro $(BIN).nacp --icon=../misc/switch/icon.jpg --nacp=$(BIN).nacp
+		@echo built ... $(BIN).nro
+endif
 
 # .tgz archive with source only files
 SRCARCH = ../src-$(VERSIONTAG).tgz
@@ -995,6 +1037,19 @@ ifdef ATARICROSS
 	    GRAFX2/gfx2def.ini GRAFX2/DOC/ GRAFX2/SCRIPTS/
 	$(AT)$(RM) -r $(TMP)
 else
+ifdef SWITCH
+	$(eval TMP := $(shell mktemp -d))
+	$(AT)$(MKDIR) $(TMP)/switch/grafx2
+	$(AT)$(CP) $(BIN).nro $(TMP)/switch/grafx2
+	$(AT)$(CP) -R ../share/grafx2/fonts $(TMP)/switch/grafx2
+	$(AT)$(CP) -R ../share/grafx2/skins $(TMP)/switch/grafx2
+	$(AT)$(CP) ../misc/switch/gfx2def.ini $(TMP)/switch/grafx2
+	cd .. && $(ZIP) $(ZIPOPT) "grafx2-$(API)-$(VERSIONTAG)$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
+	  $(DOC_FILES:../%=%) $(DOC_FILESRTF:../%=%) $(SRCARCH:../%=%)
+	cd $(TMP) && \
+	  $(ZIP) $(ZIPOPT) "$(CURDIR)/../grafx2-$(API)-$(VERSIONTAG)$(TTFLABEL)-$(PLATFORM).$(ZIP)" -r ./*
+	$(AT)$(RM) -r $(TMP)
+else
 ifdef GP2XCROSS
 	$(eval TMP := $(shell mktemp -d))
 	$(AT)$(MKDIR) $(TMP)/data
@@ -1024,6 +1079,7 @@ ifeq ($(PLATFORM),Darwin)
 	$(ZIP) $(ZIPOPT) -r ../$(APPZIPNAME) Grafx2.app
 	cd .. && $(ZIP) $(ZIPOPT) $(APPZIPNAME) \
 	  $(DOC_FILES:../%=%) $(DOC_FILESRTF:../%=%) $(SRCARCH:../%=%)
+endif
 endif
 endif
 endif

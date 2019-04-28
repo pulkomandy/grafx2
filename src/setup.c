@@ -140,6 +140,9 @@ void Set_data_directory(const char * program_dir, char * data_dir)
   //on tos, the same directory is used for everything
   #elif defined (__MINT__)
     strcpy(data_dir, program_dir);
+  //on switch, we store everything in the SD card in /switch/grafx2
+  #elif defined(__SWITCH__)
+    strcpy(data_dir,"/switch/grafx2/");
   // Haiku provides us with an API to find it.
   #elif defined(__HAIKU__)
     if (find_path(Set_data_directory, B_FIND_PATH_DATA_DIRECTORY, "grafx2/", data_dir, PATH_MAX) != B_OK)
@@ -180,6 +183,9 @@ void Set_config_directory(const char * program_dir, char * config_dir)
   // For TOS we store everything in the program dir
   #elif defined(__MINT__)
     strcpy(config_dir,program_dir);
+  //on switch, we store everything in the SD card in /switch/grafx2
+  #elif defined(__SWITCH__)
+    strcpy(config_dir,"/switch/grafx2/");
   // For all other platforms, there is some kind of settigns dir to store this.
   #else
     char filename[MAX_PATH_CHARACTERS];

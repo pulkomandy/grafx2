@@ -977,7 +977,9 @@ void Button_Stats(int btn)
 #else
     #define NODISKSPACESUPPORT
     // Free disk space is only for shows. Other platforms can display 0.
+    #if !defined(__SWITCH__)
     #warning "Missing code for your platform !!! Check and correct please :)"
+    #endif
     mem_size=0;
 #endif
 

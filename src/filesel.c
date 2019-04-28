@@ -571,7 +571,7 @@ void Read_list_of_files(T_Fileselector *list, byte selected_format)
   // Now here's OS-specific code to determine if "parent directory" entry
   // should appear.
 
-#if defined(__MORPHOS__) || defined(__AROS__) || defined (__amigaos4__) || defined(__amigaos__)
+#if defined(__MORPHOS__) || defined(__AROS__) || defined (__amigaos4__) || defined(__amigaos__) || defined(__SWITCH__)
   // Amiga systems: always
   Add_element_to_list(list, PARENT_DIR, Format_filename(PARENT_DIR,19,1), FSOBJECT_DIR, ICON_NONE);
   list->Nb_directories ++;

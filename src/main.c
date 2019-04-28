@@ -92,6 +92,8 @@
 
 #if defined(__macosx__)
 #include <machine/endian.h>
+#elif defined(__SWITCH__)
+#include <machine/endian.h>
 #elif defined(__FreeBSD__)
 #include <sys/endian.h>
 #elif !defined(WIN32)

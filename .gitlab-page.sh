@@ -9,6 +9,7 @@ LINUX_JOB_ID=$(cat LINUX_JOB_ID)
 WIN32_JOB_ID=$(cat WIN32_JOB_ID)
 ATARI_JOB_ID=$(cat ATARI_JOB_ID)
 GP2X_JOB_ID=$(cat GP2X_JOB_ID)
+SWITCH_JOB_ID=$(cat SWITCH_JOB_ID)
 
 # for debug:
 echo "CI_JOB_URL=${CI_JOB_URL}"
@@ -46,6 +47,8 @@ echo "<li>Atari (SDL API) :" >> ${OUTFILE}
 echo "<a href=\"${CI_PROJECT_URL}/-/jobs/${ATARI_JOB_ID}/artifacts/raw/grafx2-sdl-${VERSION}-m68k-atari-mint.zip\">grafx2-sdl-${VERSION}-m68k-atari-mint.zip</a></li>" >> ${OUTFILE}
 echo "<li>GP2X (SDL API) :" >> ${OUTFILE}
 echo "<a href=\"${CI_PROJECT_URL}/-/jobs/${GP2X_JOB_ID}/artifacts/raw/grafx2-sdl-${VERSION}-nottf-gp2x.zip\">grafx2-sdl-${VERSION}-nottf-gp2x.zip</a></li>" >> ${OUTFILE}
+echo "<li>Switch (SDL2 API) :" >> ${OUTFILE}
+echo "<a href=\"${CI_PROJECT_URL}/-/jobs/${SWITCH_JOB_ID}/artifacts/raw/grafx2-sdl2-${VERSION}-switch.zip\">grafx2-sdl2-${VERSION}-switch.zip</a></li>" >> ${OUTFILE}
 echo "</ul>" >> ${OUTFILE}
 echo "<ul>" >> ${OUTFILE}
 
