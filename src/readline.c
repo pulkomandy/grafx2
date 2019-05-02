@@ -653,19 +653,28 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
 
   // Si on a commencé à editer par un clic-droit, on vide la chaine.
   if (Mouse_K==RIGHT_SIDE)
+  {
     str[0]='\0';
-  else if (input_type==INPUT_TYPE_INTEGER && str[0]!='\0')
-    snprintf(str,10,"%d",atoi(str)); // On tasse la chaine à gauche
-  else if (input_type==INPUT_TYPE_DECIMAL)
-  {
-    //  Nothing. The caller should have used Sprint_double, with min_positions
-    //  at zero, so there's no spaces on the left and no useless 0s on the right.
+    position = 0;
   }
-  else if (input_type==INPUT_TYPE_HEXA)
+  else
   {
-    //  Nothing. The caller should have initialized a valid hexa number.
+    int int_pos = ((Mouse_X-Window_pos_X)/Menu_factor_X - x_pos) >> 3;
+    position = (int_pos >= 0 && int_pos <= 255) ? (byte)int_pos : 255;
+
+    if (input_type==INPUT_TYPE_INTEGER && str[0]!='\0')
+      snprintf(str,10,"%d",atoi(str)); // align left
+    else if (input_type==INPUT_TYPE_DECIMAL)
+    {
+      //  Nothing. The caller should have used Sprint_double, with min_positions
+      //  at zero, so there's no spaces on the left and no useless 0s on the right.
+    }
+    else if (input_type==INPUT_TYPE_HEXA)
+    {
+      //  Nothing. The caller should have initialized a valid hexa number.
+    }
   }
-  
+
 #if defined(__ANDROID__)
 	SDL_ANDROID_GetScreenKeyboardTextInput(str, max_size);
 	input_key = KEY_RETURN;
@@ -789,9 +798,11 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
   if (str_unicode != NULL)
   {
     size = Unicode_strlen(str_unicode);
-    if (size > 255) size = 255;
+    if (size > 255)
+      size = 255;
     memcpy(initial_string_unicode, str_unicode, 2*(size+1));
-    position  =(byte)((size<max_size) ? size : size-1);
+    if (position >= size)
+      position = (byte)((size<max_size) ? size : size-1);
     if (position-offset>=visible_size)
       offset=position-visible_size+1;
     // copy only part of the string if it is too long
@@ -805,9 +816,11 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
   }
   else
   {
-    size=strlen(str);
-    if (size > 255) size = 255;
-    position = (byte)((size<max_size) ? size : size-1);
+    size = strlen(str);
+    if (size > 255)
+      size = 255;
+    if (position >= size)
+      position = (byte)((size<max_size) ? size : size-1);
     if (position-offset>=visible_size)
       offset=position-visible_size+1;
     // copy only part of the string if it is too long
