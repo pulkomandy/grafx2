@@ -29,10 +29,14 @@
  */
 #include <stdio.h>
 #include <string.h>
+
 #include "global.h"
 #include "hotkeys.h"
 #include "helpfile.h"
 #include "keyboard.h" // for Key_Name()
+#include "windows.h" // for T_Toolbar_button
+
+static T_Toolbar_button Buttons[NB_BUTTONS];
 
 ///
 /// Export the help to HTML files
@@ -50,6 +54,20 @@ int main(int argc,char * argv[])
     }
     path = argv[1];
   }
+
+#define Init_button(btn, tooltip, x_offset, y_offset, width, height, shape, \
+                    left_action, right_action, left_instant, right_instant, \
+                    unselect_action, family) \
+        Buttons[btn].Tooltip = tooltip; \
+        Buttons[btn].X_offset = x_offset; \
+        Buttons[btn].Y_offset = y_offset; \
+        Buttons[btn].Width = width; \
+        Buttons[btn].Height = height; \
+        Buttons[btn].Shape = shape; \
+        Buttons[btn].Family = family;
+  #include "init_buttons.h"
+#undef Init_button
+
   r = Export_help(path);
   if (r < 0)
     return -r;
@@ -96,6 +114,34 @@ static const char * Keyboard_default_shortcut(word shortcut_number)
   }
 }
 
+static void Print_button(FILE * f, int btn)
+{
+  int x_offset, y_offset;
+
+  if (btn < 0 || btn >= NB_BUTTONS)
+    return;
+  if (Buttons[btn].Width <= 1)
+    return;
+  x_offset = Buttons[btn].X_offset;
+  y_offset = Buttons[btn].Y_offset;
+  if (btn <= BUTTON_HIDE) // Status
+    y_offset += 67;
+  else if (btn <= BUTTON_ANIM_PLAY) // Animation
+    y_offset += 53;
+  else if (btn <= BUTTON_LAYER_SELECT) // Layers
+    y_offset += 43;
+  else // Main
+    y_offset += 8;
+
+  fprintf(f, "<div class=\"button\" style=\"background-position: -%dpx -%dpx",
+          x_offset, y_offset);
+  if (Buttons[btn].Width != 16)
+    fprintf(f, "; width: %dpx", Buttons[btn].Width);
+  if (Buttons[btn].Height != 16)
+    fprintf(f, "; height: %dpx", Buttons[btn].Height);
+  fprintf(f, "\"></div>&nbsp;");
+}
+
 ///
 static const char * Export_help_table(FILE * f, unsigned int page)
 {
@@ -115,7 +161,10 @@ static const char * Export_help_table(FILE * f, unsigned int page)
   {
     if (table[index].Line_type == 'T')
     {
-      strncpy(title, table[index].Text, sizeof(title));
+      const char * p = table[index].Text;
+      while (*p == ' ')
+        p++;
+      strncpy(title, p, sizeof(title));
       title[sizeof(title)-1] = '\0';
       while (index + 2 < length && table[index+2].Line_type == 'T')
       {
@@ -159,7 +208,12 @@ static const char * Export_help_table(FILE * f, unsigned int page)
     if (table[index].Line_type == 'S')
       fprintf(f, "<strong>");
     else if (table[index].Line_type == 'T' && !(index > 1 && table[index-2].Line_type == 'T'))
+    {
       fprintf(f, "<h%d>", hlevel);
+
+      if (hlevel == 1 && page >= 4)
+        Print_button(f, page-4);
+    }
 
     if (table[index].Line_type == 'K')
     {
@@ -232,7 +286,11 @@ static const char * Export_help_table(FILE * f, unsigned int page)
       {
         fprintf(f, "</h%d>", hlevel);
         if (hlevel == 1)
+        {
           hlevel++;
+          if (page >= 4 && page < NB_BUTTONS + 4 && Buttons[page-4].Tooltip != NULL)
+            fprintf(f, "\n<em>%s</em>", Buttons[page-4].Tooltip);
+        }
       }
     }
     if (table[index].Line_type != 'T')
@@ -271,6 +329,8 @@ static int Export_help(const char * path)
   fprintf(findex, "</head>\n");
 
   fprintf(findex, "<body>\n");
+  fprintf(findex, "<div class=\"button\" style=\"width: 231px; height: 56px; ");
+  fprintf(findex, "background-position: 0px -336px;\"></div>");
   fprintf(findex, "<ul>\n");
   for (i = 0; i < sizeof(Help_section)/sizeof(Help_section[0]); i++)
   {
@@ -285,8 +345,16 @@ static int Export_help(const char * path)
     }
     //GFX2_Log(GFX2_INFO, "Saving %s\n", filename);
     title = Export_help_table(f, i);
+    // Button = i - 4
     fclose(f);
-    fprintf(findex, "<li><a href=\"grafx2_%02d.html\">%s</a></li>\n", i, title);
+    fprintf(findex, "<li>");
+    fprintf(findex, "<a href=\"grafx2_%02d.html\">", i);
+    if (i >= 4)
+      Print_button(findex, i-4);
+    fprintf(findex, "%s</a>", title);
+    if (i >= 4 && Buttons[i-4].Tooltip != NULL)
+      fprintf(findex, " %s", Buttons[i-4].Tooltip);
+    fprintf(findex, "</li>\n");
   }
   fprintf(findex, "</ul>\n");
   fprintf(findex, "</body>\n");
@@ -299,6 +367,12 @@ static int Export_help(const char * path)
     fprintf(f, ".help {\n");
     fprintf(f, "font-family: %s;\n", "monospace");
     fprintf(f, "white-space: %s;\n", "pre");
+    fprintf(f, "}\n");
+    fprintf(f, "div.button {\n");
+    fprintf(f, "display: inline-block;\n");
+    fprintf(f, "background-image: url(\"skin_classic.png\");\n");
+    fprintf(f, "width: 16px;\n");
+    fprintf(f, "height: 16px;\n");
     fprintf(f, "}\n");
     fclose(f);
   }

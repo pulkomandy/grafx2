@@ -1234,6 +1234,7 @@ doxygen:
 
 htmldoc:	$(GENERATEDOCBIN)
 	$(MKDIR) ../doc/html
+	$(CP) ../share/grafx2/skins/skin_classic.png ../doc/html
 	$(GENERATEDOCBIN) ../doc/html
 
 print-%:
