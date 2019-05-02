@@ -2301,6 +2301,7 @@ void Save_IFF(T_IO_Context * context)
       bit_depth++;
       temp_byte>>=1;
     } while (temp_byte);
+    GFX2_Log(GFX2_DEBUG, "Saving ILBM with bit_depth = %d\n", bit_depth);
   }
   else // FORMAT_PBM
   {
