@@ -45,6 +45,9 @@ install:
   - 'if [ "$ATARICROSS" = "1" ] ; then sh ./.install-cross-mint.sh ; fi'
   - 'if [ "$SWITCH" = "1" ] ; then sh ./.install-switch-toolchain.sh ; fi'
 
+before_script:
+  - 'if [ "$SWITCH" = "1" ] ; then source /etc/profile.d/devkit-env.sh ; fi'
+
 script:
   - 'cd $TRAVIS_BUILD_DIR'
   - 'if [ "$WIN32CROSS" = "1" ] || [ "$TRAVIS_OS_NAME" = "osx" ] || [ "$ATARICROSS" = "1" ] ; then make 3rdparty -j3 ; fi'
