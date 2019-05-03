@@ -345,15 +345,17 @@ static int Export_help(const char * path)
 
   fprintf(findex, "<body>\n");
   fprintf(findex, "<div class=\"skin skin_classic\">\n");
-  fprintf(findex, "<div class=\"skinselector\">\n");
+  fprintf(findex, "<div class=\"skinselector center\">\n");
   fprintf(findex, "Choose your skin :\n");
   for (i = 0; skins[i] != NULL; i++)
   {
     fprintf(findex, "<a href=\"javascript:choose_skin('%s');\">%s</a>\n", skins[i], skins[i]);
   }
   fprintf(findex, "</div>\n");
-  fprintf(findex, "<div class=\"button\" style=\"width: 231px; height: 56px; ");
-  fprintf(findex, "background-position: 0px -336px;\"></div>");
+  fprintf(findex, "<div class=\"button center\" "
+                  "style=\"width: 231px; height: 56px; "
+                  "background-position: 0px -336px; "
+                  "display: block;\"></div>");
   fprintf(findex, "<ul>\n");
   for (i = 0; i < sizeof(Help_section)/sizeof(Help_section[0]); i++)
   {
@@ -388,6 +390,16 @@ static int Export_help(const char * path)
   f = fopen(filename, "w");
   if (f != NULL)
   {
+    fprintf(f, "body {\n");
+    fprintf(f, "font-family: sans-serif;\n");
+    fprintf(f, "color: #222;\n");
+    fprintf(f, "max-width: 40rem;\n");
+    fprintf(f, "margin: auto;\n");
+    fprintf(f, "}\n");
+    fprintf(f, ".center {\n");
+    fprintf(f, "margin: auto;\n");
+    fprintf(f, "text-align: center;\n");
+    fprintf(f, "}\n");
     fprintf(f, ".help {\n");
     fprintf(f, "font-family: %s;\n", "monospace");
     fprintf(f, "white-space: %s;\n", "pre");
