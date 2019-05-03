@@ -38,6 +38,16 @@
 
 static T_Toolbar_button Buttons[NB_BUTTONS];
 
+/// available skins
+const char * const skins[] = {
+  "classic",
+  "modern",
+  "DPaint",
+  "scenish",
+  "Aurora",
+  NULL
+};
+
 ///
 /// Export the help to HTML files
 static int Export_help(const char * path);
@@ -186,6 +196,7 @@ static const char * Export_help_table(FILE * f, unsigned int page)
   fprintf(f, "<title>%s</title>\n", title);
   fprintf(f, "<meta charset=\"ISO8859-1\">\n");
   fprintf(f, "<link rel=\"stylesheet\" href=\"grafx2.css\" />\n");
+  fprintf(f, "<script type=\"text/javascript\" src=\"grafx2.js\"></script>\n");
   fprintf(f, "</head>\n");
 
   fprintf(f, "<body>\n");
@@ -199,7 +210,7 @@ static const char * Export_help_table(FILE * f, unsigned int page)
     fprintf(f, "<a href=\"grafx2_%02d.html\">Next</a>\n", page + 1);
   fprintf(f, "</td></tr></table>");
   fprintf(f, "</div>\n");
-  fprintf(f, "<div class=\"help\">");
+  fprintf(f, "<div class=\"help skin skin_classic\">");
   for (index = 0; index < length; index++)
   {
     if (table[index].Line_type == '-')
@@ -326,9 +337,21 @@ static int Export_help(const char * path)
   fprintf(findex, "<title>GrafX2 Help</title>\n");
   fprintf(findex, "<meta charset=\"ISO8859-1\">\n");
   fprintf(findex, "<link rel=\"stylesheet\" href=\"grafx2.css\" />\n");
+  fprintf(findex, "<noscript>\n"); /* hide the skin selector when JS is disabled */
+  fprintf(findex, "  <style>.skinselector { display: none; }</style>\n");
+  fprintf(findex, "</noscript>\n");
+  fprintf(findex, "<script type=\"text/javascript\" src=\"grafx2.js\"></script>\n");
   fprintf(findex, "</head>\n");
 
   fprintf(findex, "<body>\n");
+  fprintf(findex, "<div class=\"skin skin_classic\">\n");
+  fprintf(findex, "<div class=\"skinselector\">\n");
+  fprintf(findex, "Choose your skin :\n");
+  for (i = 0; skins[i] != NULL; i++)
+  {
+    fprintf(findex, "<a href=\"javascript:choose_skin('%s');\">%s</a>\n", skins[i], skins[i]);
+  }
+  fprintf(findex, "</div>\n");
   fprintf(findex, "<div class=\"button\" style=\"width: 231px; height: 56px; ");
   fprintf(findex, "background-position: 0px -336px;\"></div>");
   fprintf(findex, "<ul>\n");
@@ -357,6 +380,7 @@ static int Export_help(const char * path)
     fprintf(findex, "</li>\n");
   }
   fprintf(findex, "</ul>\n");
+  fprintf(findex, "</div>\n");
   fprintf(findex, "</body>\n");
   fclose(findex);
 
@@ -370,10 +394,60 @@ static int Export_help(const char * path)
     fprintf(f, "}\n");
     fprintf(f, "div.button {\n");
     fprintf(f, "display: inline-block;\n");
-    fprintf(f, "background-image: url(\"skin_classic.png\");\n");
     fprintf(f, "width: 16px;\n");
     fprintf(f, "height: 16px;\n");
     fprintf(f, "}\n");
+    for (i = 0; skins[i] != NULL; i++)
+    {
+      fprintf(f, ".skin_%s .button {\n", skins[i]);
+      fprintf(f, "background-image: url(\"skin_%s.png\");\n", skins[i]);
+      fprintf(f, "}\n");
+    }
+    fprintf(f, "@media print {\n");
+    fprintf(f, " .skinselector {\n");
+    fprintf(f, "  display: none;\n");
+    fprintf(f, " }\n");
+    fprintf(f, " body {\n");
+    fprintf(f, "  -webkit-print-color-adjust: exact; /*Chrome, Safari */\n");
+    fprintf(f, "  color-adjust: exact; /*Firefox*/\n");
+    fprintf(f, " }\n");
+    fprintf(f, "}\n");
+    fclose(f);
+  }
+
+  snprintf(filename, sizeof(filename), "%s/grafx2.js", path);
+  f = fopen(filename, "w");
+  if (f != NULL)
+  {
+    fprintf(f, "function setCookie(cname, cvalue) {\n"
+               "  document.cookie = cname + '=' + cvalue /*+ ';path=/'*/;\n"
+               "}\n");
+    fprintf(f, "function getCookie(cname) {\n"
+               "  var name = cname + '=';\n"
+               "  var ca = decodeURIComponent(document.cookie).split(';');\n"
+               "  for (var i = 0; i < ca.length; i++) {\n"
+               "    var c = ca[i];\n"
+               "    while (c.charAt(0) == ' ') c = c.substring(1);\n"
+               "    if (c.indexOf(name) == 0) {\n"
+               "      return c.substring(name.length);\n"
+               "    }\n"
+               "  }\n"
+               "  return '';\n"
+               "}\n");
+    fprintf(f, "function change_skin(newskin) {\n"
+               "  var elts = document.getElementsByClassName('skin');\n"
+               "  for (var i = 0; i < elts.length; i++) {\n"
+               "    elts[0].className = elts[0].className.replace(/skin_.*/, newskin);\n"
+               "  }\n"
+               "}\n");
+    fprintf(f, "function choose_skin(skin) {\n"
+               "  setCookie('skin', skin);\n"
+               "  change_skin('skin_' + skin);\n"
+               "}\n");
+    fprintf(f, "window.onload = function () {\n"
+               "  var skin = getCookie('skin');\n"
+               "  if (skin != '') choose_skin(skin);\n"
+               "}\n");
     fclose(f);
   }
   return 0;
