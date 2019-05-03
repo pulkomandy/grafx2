@@ -43,6 +43,10 @@
 #include <X11/Xatom.h>
 #endif
 
+#if defined(_MSC_VER)
+#define strdup _strdup
+#endif
+
 #include "gfx2log.h"
 #include "global.h"
 #include "keyboard.h"
