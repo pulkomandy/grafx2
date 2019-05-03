@@ -483,6 +483,10 @@ static const T_Help_table helptable_credits[] =
   HELP_TEXT ("  Franck Charlet (hitchhikr)")
   HELP_TEXT ("  Per Olofsson (MagerValp)")
   HELP_TEXT ("")
+  HELP_BOLD ("           NINTENDO SWITCH PORT")
+  HELP_TEXT ("")
+  HELP_TEXT ("  Romain Graillot")
+  HELP_TEXT ("")
   HELP_TEXT ("")
   HELP_TEXT ("  ... made it work on your favourite toaster")
 
