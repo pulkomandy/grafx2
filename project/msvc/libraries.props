@@ -17,5 +17,7 @@
     <PNGLibDirRelease>..\..\..\..\lpng1634\projects\vstudio\Release Library</PNGLibDirRelease>
     <TIFFIncDir>..\..\..\..\tiff-4.0.10\libtiff</TIFFIncDir>
     <TIFFLibDir>..\..\..\..\tiff-4.0.10\libtiff</TIFFLibDir>
+    <ZLibIncDir>..\..\..\..\zlib-1.2.11</ZLibIncDir>
+    <ZLibLibDir>..\..\..\..\zlib-1.2.11</ZLibLibDir>
   </PropertyGroup>
 </Project>
