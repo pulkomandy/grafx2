@@ -611,13 +611,13 @@ void Load_image(T_IO_Context *context)
   if (context->Format == FORMAT_CLIPBOARD)
   {
     Load_ClipBoard_Image(context);
-    if (File_error != 0)
+    if (File_error != 0 && context->Format == FORMAT_CLIPBOARD)
     {
       Error(0);
       return;
     }
   }
-  else
+  if (context->Format != FORMAT_CLIPBOARD)
   {
     if (context->File_name == NULL || context->File_directory == NULL)
     {
@@ -1536,9 +1536,53 @@ static void Load_ClipBoard_Image(T_IO_Context * context)
         GFX2_Log(GFX2_WARNING, "Failed to load TIFF Clipboard\n");
       break;
 #endif
-    // TODO
     case X11_CLIPBOARD_UTF8STRING:
     case X11_CLIPBOARD_URILIST:
+      {
+        char tmp_path[MAX_PATH_CHARACTERS];
+        char * p;
+        p = strchr(X11_clipboard, '\r');
+        if (p != NULL)
+          *p = '\0';
+        p = strchr(X11_clipboard, '\n');
+        if (p != NULL)
+          *p = '\0';
+        p = X11_clipboard;
+        if (strncmp(p, "file://", 7) == 0)
+        {
+          //int i
+          p += 7;
+          for (i = 0; *p; i++)
+          {
+            // URLdecode
+            if (p[0] == '%' && p[1] && p[2])
+            {
+              p++;
+              tmp_path[i] = ((*p >= 'A' && *p <= 'F') ? *p - 'A' + 10 : *p - '0') << 4;
+              p++;
+              tmp_path[i] += ((*p >= 'A' && *p <= 'F') ? *p - 'A' + 10 : *p - '0');
+            }
+            else
+              tmp_path[i] = *p;
+            p++;
+          }
+          tmp_path[i] = '\0';
+          p = tmp_path;
+        }
+        if (File_exists(p))
+        {
+          free(context->File_name);
+          context->File_name = Extract_filename(NULL, p);
+          free(context->File_directory);
+          context->File_directory = Extract_path(NULL, p);
+          context->Format = DEFAULT_FILEFORMAT;
+        }
+        else
+        {
+          GFX2_Log(GFX2_WARNING, "not a filename : \"%s\"\n", p);
+        }
+      }
+      break;
     default:
       GFX2_Log(GFX2_WARNING, "Unsupported Clipboard format %d\n", (int)X11_clipboard_type);
   }
