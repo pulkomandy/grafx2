@@ -519,6 +519,7 @@ static const T_Help_table helptable_credits[] =
   HELP_TEXT ("  FLI,FLC : Autodesk")
   HELP_TEXT ("  GIF : Compuserve")
   HELP_TEXT ("  GPL : The GIMP")
+  HELP_TEXT ("  GPX : Pixcen (John Hammarberg/CRT)")
   HELP_TEXT ("  IFF : Electronic Arts")
   HELP_TEXT ("  IMG : Bivas (W. Wiedmann?)")
   HELP_TEXT ("  INFO : Commodore")
