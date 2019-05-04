@@ -799,7 +799,7 @@ OBJS = main.o init.o graph.o $(APIOBJ) misc.o special.o \
        fileformats.o miscfileformats.o libraw2crtc.o \
        brush_ops.o buttons_effects.o layers.o \
        oldies.o tiles.o colorred.o unicode.o gfx2surface.o \
-       gfx2log.o tifformat.o
+       gfx2log.o gfx2mem.o tifformat.o
 ifndef NORECOIL
 OBJS += loadrecoil.o recoil.o
 endif
