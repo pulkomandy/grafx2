@@ -30,6 +30,7 @@
 #define strdup _strdup
 #endif
 
+#include "gfx2mem.h"
 #include "global.h"
 #include "pages.h"
 #include "errors.h"
@@ -66,7 +67,7 @@ T_Page * New_page(int nb_layers)
 {
   T_Page * page;
   
-  page = (T_Page *)malloc(sizeof(T_Page)+nb_layers*sizeof(T_Image));
+  page = (T_Page *)GFX2_malloc(sizeof(T_Page)+nb_layers*sizeof(T_Image));
   if (page!=NULL)
   {
     int i;
@@ -107,7 +108,7 @@ T_Page * New_page(int nb_layers)
 /// Allocate a new layer
 byte * New_layer(long pixel_size)
 {
-  short * ptr = malloc(sizeof(short)+pixel_size);
+  short * ptr = GFX2_malloc(sizeof(short)+pixel_size);
   if (ptr==NULL)
     return NULL;
     
@@ -715,7 +716,7 @@ int Update_buffers(int width, int height)
     {
       // Current image
       free(Main.visible_image.Image);
-      Main.visible_image.Image = (byte *)malloc(width * height);
+      Main.visible_image.Image = (byte *)GFX2_malloc(width * height);
       if (Main.visible_image.Image == NULL)
         return 0;
     }
@@ -726,7 +727,7 @@ int Update_buffers(int width, int height)
     {
       // Previous image
       free(Main_visible_image_backup.Image);
-      Main_visible_image_backup.Image = (byte *)malloc(width * height);
+      Main_visible_image_backup.Image = (byte *)GFX2_malloc(width * height);
       if (Main_visible_image_backup.Image == NULL)
         return 0;
     }
@@ -737,7 +738,7 @@ int Update_buffers(int width, int height)
     {      
       // Depth buffer
       free(Main_visible_image_depth_buffer.Image);
-      Main_visible_image_depth_buffer.Image = (byte *)malloc(width * height);
+      Main_visible_image_depth_buffer.Image = (byte *)GFX2_malloc(width * height);
       if (Main_visible_image_depth_buffer.Image == NULL)
         return 0;
     }
@@ -757,7 +758,7 @@ int Update_spare_buffers(int width, int height)
     {
       // Current image
       free(Spare.visible_image.Image);
-      Spare.visible_image.Image = (byte *)malloc(width * height);
+      Spare.visible_image.Image = (byte *)GFX2_malloc(width * height);
       if (Spare.visible_image.Image == NULL)
         return 0;
     }
@@ -1022,7 +1023,7 @@ int Backup_in_place(int width,int height)
     {
       // Current image
       free(Main.visible_image.Image);
-      Main.visible_image.Image = (byte *)malloc(width * height);
+      Main.visible_image.Image = (byte *)GFX2_malloc(width * height);
       if (Main.visible_image.Image == NULL)
         return 0;
     }
@@ -1033,7 +1034,7 @@ int Backup_in_place(int width,int height)
     {      
       // Depth buffer
       free(Main_visible_image_depth_buffer.Image);
-      Main_visible_image_depth_buffer.Image = (byte *)malloc(width * height);
+      Main_visible_image_depth_buffer.Image = (byte *)GFX2_malloc(width * height);
       if (Main_visible_image_depth_buffer.Image == NULL)
         return 0;
     }

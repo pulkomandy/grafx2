@@ -66,6 +66,7 @@ char * Bound_script[10];
 #endif
 
 #include "unicode.h"
+#include "gfx2mem.h"
 
 ///
 /// Number of characters for name in fileselector.
@@ -2366,7 +2367,9 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
 
   /// @todo as the value doesn't vary, this should be
   /// done once at the start of the program
-  path = malloc(strlen(Data_directory) + strlen(SCRIPTS_SUBDIRECTORY) + strlen(LUALIB_SUBDIRECTORY) + 5 + 3 * strlen(PATH_SEPARATOR) + 9 + 1);
+  path = GFX2_malloc(strlen(Data_directory) + strlen(SCRIPTS_SUBDIRECTORY) + strlen(LUALIB_SUBDIRECTORY) + 5 + 3 * strlen(PATH_SEPARATOR) + 9 + 1);
+  if (path == NULL)
+    return;
   strcpy(path, Data_directory);
   Append_path(path, SCRIPTS_SUBDIRECTORY, NULL);
   Append_path(path, LUALIB_SUBDIRECTORY, NULL);
@@ -2495,7 +2498,7 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   Original_fore_color=Fore_color;
 
   // Backup the brush
-  Brush_backup=(byte *)malloc(((long)Brush_height)*Brush_width);
+  Brush_backup=(byte *)GFX2_malloc(((long)Brush_height)*Brush_width);
   Brush_backup_width = Brush_width;
   Brush_backup_height = Brush_height;
   

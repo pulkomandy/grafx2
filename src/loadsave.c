@@ -52,6 +52,7 @@
 #endif
 
 #include "gfx2log.h"
+#include "gfx2mem.h"
 #include "buttons.h"
 #include "const.h"
 #include "errors.h"
@@ -501,7 +502,7 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
       break;
       
     case CONTEXT_BRUSH:
-      context->Buffer_image = (byte *)malloc(width*height);
+      context->Buffer_image = (byte *)GFX2_malloc(width*height);
       if (! context->Buffer_image)
       {
         File_error=3;
@@ -540,8 +541,8 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
       case CONTEXT_BRUSH:
       case CONTEXT_SURFACE:
         // Allocate 24bit buffer
-        context->Buffer_image_24b=
-          (T_Components *)malloc(width*height*sizeof(T_Components));
+        context->Buffer_image_24b =
+          (T_Components *)GFX2_malloc(width*height*sizeof(T_Components));
         if (!context->Buffer_image_24b)
         {
           // Print an error message
@@ -1950,7 +1951,7 @@ static void Add_backup_file(const char * full_name, const char *file_name)
   }
   
   // Add to list (top insertion)
-  elem = (T_String_list *)malloc(sizeof(T_String_list));
+  elem = (T_String_list *)GFX2_malloc(sizeof(T_String_list));
   elem->String=strdup(file_name);
   elem->Next=*list;
   *list=elem;
@@ -1991,7 +1992,8 @@ byte Process_backups(T_String_list **list)
     element = element->Next;
   }
   // Allocate a vector
-  files_vector = (char **)malloc(sizeof(char *) * nb_files);
+  files_vector = (char **)GFX2_malloc(sizeof(char *) * nb_files);
+// TODO
   // Copy from list to vector
   for (i=0;i<nb_files;i++)
   {
@@ -2109,12 +2111,9 @@ void Rotate_safety_backups(void)
     char * deleted_file;
     size_t len = strlen(Config_directory) + strlen(BACKUP_FILE_EXTENSION) + 1 + 6 + 1;
 
-    deleted_file = malloc(len);
+    deleted_file = GFX2_malloc(len);
     if (deleted_file == NULL)
-    {
-      GFX2_Log(GFX2_ERROR, "Failed to allocate %lu bytes.\n", (unsigned long)len);
       return;
-    }
     // Clear a previous save (rotating saves)
     snprintf(deleted_file, len, "%s%c%6.6d" BACKUP_FILE_EXTENSION,
       Config_directory,
@@ -2200,7 +2199,9 @@ FILE * Open_file_write(T_IO_Context *context)
 
     len = strlen(context->File_directory) + strlen(PATH_SEPARATOR)
         + Unicode_strlen(context->File_name_unicode) + 1;
-    filename_unicode = (WCHAR *)malloc(sizeof(WCHAR) * len);
+    filename_unicode = (WCHAR *)GFX2_malloc(sizeof(WCHAR) * len);
+    if (filename_unicode == NULL)
+      return NULL;
 
     Unicode_char_strlcpy((word *)filename_unicode, context->File_directory, len);
     Unicode_char_strlcat((word *)filename_unicode, PATH_SEPARATOR, len);
@@ -2213,17 +2214,23 @@ FILE * Open_file_write(T_IO_Context *context)
       len = GetShortPathNameW(filename_unicode, NULL, 0);
       if (len > 0)
       {
-        WCHAR * shortpath = (WCHAR *)malloc(sizeof(WCHAR) * len);
-        len = GetShortPathNameW(filename_unicode, shortpath, len);
-        if (len > 0)
+        WCHAR * shortpath = (WCHAR *)GFX2_malloc(sizeof(WCHAR) * len);
+        if (shortpath != NULL)
         {
-          DWORD start, index;
-          for (start = len; start > 0 && shortpath[start-1] != '\\'; start--);
-          free(context->File_name);
-          context->File_name = (char *)malloc(len + 1 - start);
-          for (index = 0; index < len - start; index++)
-            context->File_name[index] = shortpath[start + index];
-          context->File_name[index] = '\0';
+          len = GetShortPathNameW(filename_unicode, shortpath, len);
+          if (len > 0)
+          {
+            DWORD start, index;
+            for (start = len; start > 0 && shortpath[start-1] != '\\'; start--);
+            free(context->File_name);
+            context->File_name = (char *)GFX2_malloc(len + 1 - start);
+            if (context->File_name != NULL)
+            {
+              for (index = 0; index < len - start; index++)
+                context->File_name[index] = shortpath[start + index];
+              context->File_name[index] = '\0';
+            }
+          }
         }
       }
     }
@@ -2233,6 +2240,8 @@ FILE * Open_file_write(T_IO_Context *context)
 #endif
 
   filename = Filepath_append_to_dir(context->File_directory, context->File_name);
+  if (filename == NULL)
+    return NULL;
   f = fopen(filename, "wb");
   free(filename);
   return f;
@@ -2252,7 +2261,9 @@ FILE * Open_file_write_with_alternate_ext(T_IO_Context *context, const char * ex
 
     len = strlen(context->File_directory) + strlen(PATH_SEPARATOR)
         + Unicode_strlen(context->File_name_unicode) + strlen(ext) + 1 + 1;
-    filename_unicode = (WCHAR *)malloc(len * sizeof(WCHAR));
+    filename_unicode = (WCHAR *)GFX2_malloc(len * sizeof(WCHAR));
+    if (filename_unicode == NULL)
+      return NULL;
     Unicode_char_strlcpy((word *)filename_unicode, context->File_directory, len);
     Unicode_char_strlcat((word *)filename_unicode, PATH_SEPARATOR, len);
     Unicode_strlcat((word *)filename_unicode, context->File_name_unicode, len);
@@ -2323,7 +2334,9 @@ static void Look_for_alternate_ext(void * pdata, const char * filename, const wo
 #if defined(WIN32)
     {
       int cmp;
-      WCHAR * temp_string = (WCHAR *)malloc((base_len + 1) * sizeof(WCHAR));
+      WCHAR * temp_string = (WCHAR *)GFX2_malloc((base_len + 1) * sizeof(WCHAR));
+      if (temp_string == NULL)
+        return;
       memcpy(temp_string, filename_unicode, base_len * sizeof(word));
       temp_string[base_len] = 0;
       cmp = _wcsicmp((const WCHAR *)params->basename_unicode, temp_string);
@@ -2383,12 +2396,8 @@ FILE * Open_file_read_with_alternate_ext(T_IO_Context *context, const char * ext
   if (context->File_name_unicode != NULL)
   {
     size_t i = Unicode_strlen(context->File_name_unicode);
-    params.basename_unicode = malloc(sizeof(word) * (i + 1));
-    if (params.basename_unicode == NULL)
-    {
-      GFX2_Log(GFX2_ERROR, "Open_file_read_with_alternate_ext() failed to allocate %lu bytes\n", (unsigned long)(sizeof(word) * (i + 1)));
-    }
-    else
+    params.basename_unicode = GFX2_malloc(sizeof(word) * (i + 1));
+    if (params.basename_unicode != NULL)
     {
       memcpy(params.basename_unicode, context->File_name_unicode, (i + 1) * sizeof(word));
       while (i-- > 0)

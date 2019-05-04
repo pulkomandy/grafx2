@@ -104,6 +104,7 @@
 #endif
 
 #include "gfx2log.h"
+#include "gfx2mem.h"
 #include "const.h"
 #include "struct.h"
 #include "global.h"
@@ -649,8 +650,8 @@ int Init_program(int argc,char * argv[])
   // principale et la page de brouillon afin que leurs champs ne soient pas
   // invalide lors des appels aux multiples fonctions manipulées à
   // l'initialisation du programme.
-  Main.backups=(T_List_of_pages *)malloc(sizeof(T_List_of_pages));
-  Spare.backups=(T_List_of_pages *)malloc(sizeof(T_List_of_pages));
+  Main.backups=(T_List_of_pages *)GFX2_malloc(sizeof(T_List_of_pages));
+  Spare.backups=(T_List_of_pages *)GFX2_malloc(sizeof(T_List_of_pages));
   Init_list_of_pages(Main.backups);
   Init_list_of_pages(Spare.backups);
 
@@ -870,7 +871,9 @@ int Init_program(int argc,char * argv[])
   Windows_open=0;
 
   // Paintbrush
-  if (!(Paintbrush_sprite=(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE))) Error(ERROR_MEMORY);
+  Paintbrush_sprite = (byte *)GFX2_malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE);
+  if (!Paintbrush_sprite)
+    Error(ERROR_MEMORY);
 
   // Load preset paintbrushes (uses Paintbrush_ variables)
   Init_paintbrushes();
@@ -959,8 +962,12 @@ int Init_program(int argc,char * argv[])
   Back_color=Best_color_range(0,0,0,Config.Palette_cells_X*Config.Palette_cells_Y);
 
   // Allocation de mémoire pour la brosse
-  if (!(Brush         =(byte *)malloc(   1*   1))) Error(ERROR_MEMORY);
-  if (!(Smear_brush   =(byte *)malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE))) Error(ERROR_MEMORY);
+  Brush = (byte *)GFX2_malloc(1*1);
+  if (!Brush)
+    Error(ERROR_MEMORY);
+  Smear_brush = (byte *)GFX2_malloc(MAX_PAINTBRUSH_SIZE*MAX_PAINTBRUSH_SIZE);
+  if (!Smear_brush)
+    Error(ERROR_MEMORY);
 
 
   starting_videomode=Current_resolution;

@@ -68,6 +68,7 @@
 #include "unicode.h"
 #include "global.h"
 #include "gfx2log.h"
+#include "gfx2mem.h"
 
 // Lit un octet
 // Renvoie -1 si OK, 0 en cas d'erreur
@@ -307,7 +308,7 @@ char * Filepath_append_to_dir(const char * dir, const char * filename)
     )
   {
     len += strlen(filename) + 1;
-    path = malloc(len);
+    path = GFX2_malloc(len);
     if (path == NULL)
       return NULL;
     snprintf(path, len, "%s%s", dir, filename);
@@ -316,7 +317,7 @@ char * Filepath_append_to_dir(const char * dir, const char * filename)
   {
     // need to add a path separator
     len += strlen(PATH_SEPARATOR) + strlen(filename) + 1;
-    path = malloc(len);
+    path = GFX2_malloc(len);
     if (path == NULL)
       return NULL;
     snprintf(path, len, "%s%s%s", dir, PATH_SEPARATOR, filename);
@@ -655,7 +656,9 @@ void For_each_directory_entry(const char * directory_name, void * pdata, T_File_
   HANDLE h;
 
   len = strlen(directory_name) + 3;
-  search_string = (word *)malloc(sizeof(word) * len);
+  search_string = (word *)GFX2_malloc(sizeof(word) * len);
+  if (search_string == NULL)
+    return;
   Unicode_char_strlcpy(search_string, directory_name, len);
   Unicode_char_strlcat(search_string, "\\*", len);
   h = FindFirstFileW((WCHAR *)search_string, &fd);
@@ -708,19 +711,22 @@ void For_each_directory_entry(const char * directory_name, void * pdata, T_File_
       size_t outbytesleft;
       size_t r;
 
-      unicode_filename = malloc(sizeof(word) * (inbytesleft + 1));
-      output = (char *)unicode_filename;
-      outbytesleft = sizeof(word) * inbytesleft;
-      r = iconv(cd_utf16, &input, &inbytesleft, &output, &outbytesleft);
-      if (r != (size_t)-1)
+      unicode_filename = GFX2_malloc(sizeof(word) * (inbytesleft + 1));
+      if (unicode_filename != NULL)
       {
-        output[0] = '\0';
-        output[1] = '\0';
-      }
-      else
-      {
-        free(unicode_filename);
-        unicode_filename = NULL;
+        output = (char *)unicode_filename;
+        outbytesleft = sizeof(word) * inbytesleft;
+        r = iconv(cd_utf16, &input, &inbytesleft, &output, &outbytesleft);
+        if (r != (size_t)-1)
+        {
+          output[0] = '\0';
+          output[1] = '\0';
+        }
+        else
+        {
+          free(unicode_filename);
+          unicode_filename = NULL;
+        }
       }
     }
 #endif
@@ -765,7 +771,9 @@ word * Get_Unicode_Filename(word * filename_unicode, const char * filename, cons
   WCHAR * longPath;
   WCHAR * sep;
 
-  shortPath = (WCHAR *)malloc(sizeof(WCHAR) * (strlen(filename) + strlen(directory) + 2));
+  shortPath = (WCHAR *)GFX2_malloc(sizeof(WCHAR) * (strlen(filename) + strlen(directory) + 2));
+  if (shortPath == NULL)
+    return NULL;
   // copy the full path to a wide character buffer :
   while (directory[0] != '\0')
     shortPath[i++] = *directory++;
@@ -780,8 +788,8 @@ word * Get_Unicode_Filename(word * filename_unicode, const char * filename, cons
     free(shortPath);
     return NULL;
   }
-  longPath = (WCHAR *)malloc(len * sizeof(WCHAR));
-  if (GetLongPathNameW(shortPath, longPath, len) == 0)
+  longPath = (WCHAR *)GFX2_malloc(len * sizeof(WCHAR));
+  if (longPath == NULL || GetLongPathNameW(shortPath, longPath, len) == 0)
   {
     free(shortPath);
     return NULL;
@@ -799,8 +807,9 @@ word * Get_Unicode_Filename(word * filename_unicode, const char * filename, cons
     sep++;
     len = wcslen(sep) + 1;
     if (filename_unicode == NULL)
-      filename_unicode = (word *)malloc(sizeof(word) * len);
-    memcpy(filename_unicode, sep, sizeof(word) * len);
+      filename_unicode = (word *)GFX2_malloc(sizeof(word) * len);
+    if (filename_unicode != NULL)
+      memcpy(filename_unicode, sep, sizeof(word) * len);
   }
   free(longPath);
   return filename_unicode;
@@ -817,7 +826,7 @@ word * Get_Unicode_Filename(word * filename_unicode, const char * filename, cons
     return NULL;
   if (filename_unicode == NULL)
   {
-    filename_unicode = malloc(sizeof(word) * (inbytesleft + 1));
+    filename_unicode = GFX2_malloc(sizeof(word) * (inbytesleft + 1));
     if (filename_unicode == NULL)
       return NULL;
     allocated_memory = 1;
@@ -936,7 +945,11 @@ char * Get_current_directory(char * buf, word * * unicode, size_t size)
 {
 #if defined(__MINT__)
   if (buf == NULL)
-    buf = malloc(MAX_PATH_CHARACTERS);
+  {
+    buf = GFX2_malloc(MAX_PATH_CHARACTERS);
+    if (buf == NULL)
+      return NULL;
+  }
   buf[0] = 'A'+Dgetdrv();
   buf[1] = ':';
   buf[2] = '\\';
@@ -953,18 +966,15 @@ char * Get_current_directory(char * buf, word * * unicode, size_t size)
     size = (size_t)GetCurrentDirectoryA(0, NULL);
     if (size == 0)
       return NULL;
-    buf = (char *)malloc(size);
+    buf = (char *)GFX2_malloc(size);
     if (buf == NULL)
-    {
-      GFX2_Log(GFX2_ERROR, "Failed to allocate %lu bytes.\n", (unsigned long)size);
       return NULL;
-    }
   }
   if (GetCurrentDirectoryA(size, buf) == 0)
     return NULL;
   if (unicode != NULL)
   {
-    WCHAR * temp = (WCHAR *)malloc(sizeof(WCHAR) * size);
+    WCHAR * temp = (WCHAR *)GFX2_malloc(sizeof(WCHAR) * size);
     if (temp != NULL)
     {
       size_t i;
@@ -972,8 +982,9 @@ char * Get_current_directory(char * buf, word * * unicode, size_t size)
         temp[i] = (WCHAR)buf[i] & 0x00ff;
       temp[i] = 0;
       size = GetLongPathNameW(temp, NULL, 0);
-      *unicode = (word *)malloc(size*sizeof(word));
-      GetLongPathNameW(temp, (WCHAR *)*unicode, size);
+      *unicode = (word *)GFX2_malloc(size*sizeof(word));
+      if (*unicode != NULL)
+        GetLongPathNameW(temp, (WCHAR *)*unicode, size);
       free(temp);
     }
   }
@@ -987,7 +998,7 @@ char * Get_current_directory(char * buf, word * * unicode, size_t size)
   {
     char * input = ret;
     size_t inbytesleft = strlen(ret);
-    word * buf_unicode = malloc((inbytesleft + 1) * 2);
+    word * buf_unicode = GFX2_malloc((inbytesleft + 1) * 2);
     char * output = (char *)buf_unicode;
     size_t outbytesleft = 2 * inbytesleft;
     if (cd_utf16 != (iconv_t)-1 && buf_unicode != NULL)
@@ -1100,16 +1111,18 @@ char * Calculate_relative_path(const char * ref_path, const char * path)
     {
       free(real_ref_path);
       len = strlen(path + i) + 1;
-      rel_path = malloc(len + 1);
-      snprintf(rel_path, len, ".%s", path + i);
+      rel_path = GFX2_malloc(len + 1);
+      if (rel_path != NULL)
+        snprintf(rel_path, len, ".%s", path + i);
       return rel_path;
     }
     else if (i > 0 && real_ref_path[i - 1] == PATH_SEPARATOR[0])
     {
       free(real_ref_path);
       len = strlen(path + i - 1) + 1;
-      rel_path = malloc(len + 1);
-      snprintf(rel_path, len, ".%s", path + i - 1);
+      rel_path = GFX2_malloc(len + 1);
+      if (rel_path != NULL)
+        snprintf(rel_path, len, ".%s", path + i - 1);
       return rel_path;
     }
   }
@@ -1128,10 +1141,13 @@ char * Calculate_relative_path(const char * ref_path, const char * path)
   i = 0;
   // construct the relative path
   len = separator_count * (2 + strlen(PATH_SEPARATOR)) + strlen(path + last_separator + 1) + 1;
-  rel_path = malloc(len + 1);
-  while(separator_count-- > 0)
-    i += snprintf(rel_path + i, len + 1 - i, "..%s", PATH_SEPARATOR);
-  strncpy(rel_path + i, path + last_separator + 1, len + 1 - i);
-  rel_path[len] = '\0';
+  rel_path = GFX2_malloc(len + 1);
+  if (rel_path != NULL)
+  {
+    while(separator_count-- > 0)
+      i += snprintf(rel_path + i, len + 1 - i, "..%s", PATH_SEPARATOR);
+    strncpy(rel_path + i, path + last_separator + 1, len + 1 - i);
+    rel_path[len] = '\0';
+  }
   return rel_path;
 }

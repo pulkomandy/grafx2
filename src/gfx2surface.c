@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "gfx2surface.h"
+#include "gfx2mem.h"
 #include "errors.h"
 
 T_GFX2_Surface * New_GFX2_Surface(word width, word height)
@@ -32,10 +33,10 @@ T_GFX2_Surface * New_GFX2_Surface(word width, word height)
   if (size == 0)  // surfaces with no pixels not allowed
     return NULL;
 
-  surface = malloc(sizeof(T_GFX2_Surface));
+  surface = GFX2_malloc(sizeof(T_GFX2_Surface));
   if (surface == NULL)
     return NULL;
-  surface->pixels = malloc(size);
+  surface->pixels = GFX2_malloc(size);
   if(surface->pixels == NULL)
   {
     free(surface);

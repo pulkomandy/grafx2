@@ -67,6 +67,7 @@
 #endif
 #endif
 
+#include "gfx2mem.h"
 #include "buttons.h"
 #include "const.h"
 #include "errors.h"
@@ -667,20 +668,18 @@ T_Gui_skin * Load_graphics(const char * skin_file, T_Gradient_array *gradients)
     return NULL;
   }
 
-  gfx = (T_Gui_skin *)malloc(sizeof(T_Gui_skin));
+  gfx = (T_Gui_skin *)GFX2_malloc(sizeof(T_Gui_skin));
   if (gfx == NULL)
   {
-    GFX2_Log(GFX2_ERROR, "Failed to allocate %lu bytes\n", (unsigned long)sizeof(T_Gui_skin));
     sprintf(Gui_loading_error_message, "Not enough memory to read skin file\n");
     return NULL;
   }
   
   // Read the "skin" file
   len = strlen(Data_directory) + strlen(SKINS_SUBDIRECTORY) + strlen(PATH_SEPARATOR) + strlen(skin_file) + 1;
-  filename = malloc(len);
+  filename = GFX2_malloc(len);
   if (filename == NULL)
   {
-    GFX2_Log(GFX2_ERROR, "Failed to allocate %lu bytes\n", (unsigned long)len);
     free(gfx);
     return NULL;
   }
@@ -728,7 +727,7 @@ static byte * Parse_font(T_GFX2_Surface * image, int is_main)
     sprintf(Gui_loading_error_message, "Error in font file: Image is too small to be a 256-character 8x8 font.\n");
     return NULL;
   }
-  font = (byte *)malloc(8*8*character_count);
+  font = (byte *)GFX2_malloc(8*8*character_count);
   if (font == NULL)
   {
     sprintf(Gui_loading_error_message, "Not enough memory to read font file\n");
@@ -773,12 +772,9 @@ byte * Load_font(const char * font_name, int is_main)
 
   // Read the file containing the image
   len = strlen(Data_directory) + strlen(SKINS_SUBDIRECTORY) + strlen(PATH_SEPARATOR) + strlen(font_name) + 1;
-  filename = malloc(len);
+  filename = GFX2_malloc(len);
   if (filename == NULL)
-  {
-    GFX2_Log(GFX2_ERROR, "Failed to allocate %lu bytes\n", len);
     return NULL;
-  }
   snprintf(filename, len, "%s%s%s%s", Data_directory, SKINS_SUBDIRECTORY, PATH_SEPARATOR, font_name);
   
   image = Load_surface(filename, NULL);
@@ -808,12 +804,15 @@ static void Load_Unicode_font(const char * fullname, const char * filename)
     font = Load_font(filename, 0);
     if (font)
     {
-      ufont = malloc(sizeof(T_Unicode_Font));
-      ufont->FirstChar = first;
-      ufont->LastChar = last;
-      ufont->FontData = font;
-      ufont->Next = Unicode_fonts;
-      Unicode_fonts = ufont;
+      ufont = GFX2_malloc(sizeof(T_Unicode_Font));
+      if (ufont != NULL)
+      {
+        ufont->FirstChar = first;
+        ufont->LastChar = last;
+        ufont->FontData = font;
+        ufont->Next = Unicode_fonts;
+        Unicode_fonts = ufont;
+      }
     }
   }
   else
@@ -1955,8 +1954,8 @@ int Load_CFG(int reload_all)
             if (size!=0)
             {
               // Alloc string
-              Bound_script[current_script]=malloc(size+1);
-              if (Bound_script[current_script]==NULL)
+              Bound_script[current_script] = GFX2_malloc(size+1);
+              if (Bound_script[current_script] == NULL)
                 return ERROR_MEMORY;
               
               // Init and load string

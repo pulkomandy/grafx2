@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "gfx2mem.h"
 #include "unicode.h"
 
 size_t Unicode_strlen(const word * str)
@@ -43,7 +44,7 @@ word * Unicode_strdup(const word * str)
   if (str == NULL)
     return NULL;
   byte_size = Unicode_strlen(str) * 2 + 2;
-  new_str = malloc(byte_size);
+  new_str = GFX2_malloc(byte_size);
   if (new_str != NULL)
     memcpy(new_str, str, byte_size);
   return new_str;
