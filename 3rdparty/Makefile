@@ -58,14 +58,18 @@ SDL2DEVEL = SDL2-devel-2.0.9-mingw.tar.gz
 SDL2DEVELURL = https://www.libsdl.org/release/$(SDL2DEVEL)
 SDL2DEVELPATCH = SDL2-devel.patch
 SDL2DEVELSHA256 = 0f9f00d0f2a9a95dfb5cce929718210c3f85432cc2e9d4abade4adcb7f6bb39d
-SDL2IMAGE = SDL2_image-2.0.4
+SDL2IMAGEVER = 2.0.4
+SDL2IMAGE = SDL2_image-$(SDL2IMAGEVER)
 SDL2IMAGEARCH = $(SDL2IMAGE).tar.gz
 SDL2IMAGEURL = https://www.libsdl.org/projects/SDL_image/release/$(SDL2IMAGEARCH)
 SDL2IMAGESHA256 = e74ec49c2402eb242fbfa16f2f43a19582a74c2eabfbfb873f00d4250038ceac
-SDL2TTF = SDL2_ttf-2.0.14
+LATESTSDL2IMAGEVER = $(shell curl -s -S https://www.libsdl.org/projects/SDL_image/|grep release/|grep .tar.gz |head -n1|sed 's/.*SDL2_image-\([0-9.]*\).tar.gz.*/\1/')
+SDL2TTFVER = 2.0.14
+SDL2TTF = SDL2_ttf-$(SDL2TTFVER)
 SDL2TTFARCH = $(SDL2TTF).tar.gz
 SDL2TTFURL = https://www.libsdl.org/projects/SDL_ttf/release/$(SDL2TTFARCH)
 SDL2TTFSHA256 = 34db5e20bcf64e7071fe9ae25acaa7d72bdc4f11ab3ce59acc768ab62fe39276
+LATESTSDL2TTFVER = $(shell curl -s -S https://www.libsdl.org/projects/SDL_ttf/|grep release/|grep .tar.gz |head -n1|sed 's/.*SDL2_ttf-\([0-9.]*\).tar.gz.*/\1/')
 LIBPNGVER = 1.6.37
 LIBPNG = libpng-$(LIBPNGVER)
 LIBPNGARCH = $(LIBPNG).tar.gz
@@ -216,7 +220,8 @@ all:	libs
 
 checkversions:	checkversion-libpng checkversion-freetype \
 	checkversion-lua checkversion-jpeg checkversion-libtiff \
-	checkversion-zlib checkversion-recoil checkversion-sdl2
+	checkversion-zlib checkversion-recoil \
+	checkversion-sdl2 checkversion-sdl2ttf checkversion-sdl2image
 
 clean_all:	clean clean_archives
 
