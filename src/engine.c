@@ -3748,7 +3748,7 @@ void Remap_UI_in_window_backgrounds(const byte * conversion_table)
         min_x -= Window_stack[i].Pos_X;
         max_x -= Window_stack[i].Pos_X;
         // do the conversion
-        for (x = min_x; x < max_x; x++)
+        for (x = min_x * Pixel_width; x < max_x * Pixel_width; x++)
         {
           p[x] = conversion_table[p[x]];
         }
