@@ -92,6 +92,7 @@
     <ClCompile Include="..\..\src\fileformats.c" />
     <ClCompile Include="..\..\src\filesel.c" />
     <ClCompile Include="..\..\src\gfx2log.c" />
+    <ClCompile Include="..\..\src\gfx2mem.c" />
     <ClCompile Include="..\..\src\gfx2surface.c" />
     <ClCompile Include="..\..\src\graph.c" />
     <ClCompile Include="..\..\src\help.c" />
@@ -153,6 +154,7 @@
     <ClInclude Include="..\..\src\fileformats.h" />
     <ClInclude Include="..\..\src\filesel.h" />
     <ClInclude Include="..\..\src\gfx2log.h" />
+    <ClInclude Include="..\..\src\gfx2mem.h" />
     <ClInclude Include="..\..\src\gfx2surface.h" />
     <ClInclude Include="..\..\src\global.h" />
     <ClInclude Include="..\..\src\graph.h" />
