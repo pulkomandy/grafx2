@@ -2574,6 +2574,42 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           preview_context.Type = CONTEXT_PREVIEW_PALETTE;
 
         Load_image(&preview_context);
+        if (load_from_clipboard && (preview_context.File_directory != NULL))
+        {
+          short pos;
+          Change_directory(preview_context.File_directory);
+          free(Selector->Directory);
+          free(Selector->Directory_unicode);
+          Selector->Directory = Get_current_directory(NULL, &Selector->Directory_unicode, 0);
+          if ((preview_context.Format != FORMAT_CLIPBOARD) &&
+              ((int)Selector->Format_filter > (int)FORMAT_ALL_FILES))
+          {
+            Selector->Format_filter = preview_context.Format;
+            // update dropdown button
+            Print_in_window(68+2, 28+(11-7)/2,
+                Get_fileformat(Selector->Format_filter)->Label,
+                MC_Black,MC_Light);
+          }
+          // read the new directory
+          Read_list_of_files(&Filelist, Selector->Format_filter);
+          Sort_list_of_files(&Filelist);
+
+          if (preview_context.File_name != NULL)
+          {
+            free(Selector->filename);
+            Selector->filename = strdup(preview_context.File_name);
+            free(Selector->filename_unicode);
+            Selector->filename_unicode = Get_Unicode_Filename(NULL, Selector->filename, ".");
+          }
+
+          pos = Find_file_in_fileselector(&Filelist, Selector->filename);
+          Highlight_file((pos >= 0) ? pos : 0);
+          // display the 1st visible files
+          Prepare_and_display_filelist(Selector->Position, Selector->Offset, file_scroller, 0);
+
+          // New directory, so we need to reset the quicksearch
+          Reset_quicksearch();
+        }
         Destroy_context(&preview_context);
 
         Update_window_area(0,0,Window_width,Window_height);
