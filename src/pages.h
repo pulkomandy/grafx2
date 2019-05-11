@@ -58,7 +58,7 @@ byte Add_layer(T_List_of_pages *list, int layer);
 /// Delete a layer from the latest page of a list. Returns 0 on success.
 byte Delete_layer(T_List_of_pages *list, int layer);
 /// Merges the current layer onto the one below it.
-byte Merge_layer();
+byte Merge_layer(void);
 /// Backs up a layer, unless it's already different from previous history step.
 int Dup_layer_if_shared(T_Page * page, int layer);
 

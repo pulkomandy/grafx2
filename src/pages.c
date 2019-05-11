@@ -1482,7 +1482,7 @@ byte Delete_layer(T_List_of_pages *list, int layer)
 
 
 /// Merges the current layer onto the one below it.
-byte Merge_layer()
+byte Merge_layer(void)
 {
   int i;
   for (i=0; i<Main.image_width*Main.image_height; i++)
