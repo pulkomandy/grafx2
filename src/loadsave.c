@@ -1270,6 +1270,14 @@ static void Load_ClipBoard_Image(T_IO_Context * context)
       case CF_UNICODETEXT:
         format_name = "UNICODE TEXT";
         break;
+#if(WINVER >= 0x0400)
+      case CF_LOCALE:
+        format_name = "Locale identifier";
+        break;
+      case CF_HDROP:
+        format_name = "Drop Handle";
+        break;
+#endif
       case CF_DIB:
         format_name = "DIB (BITMAPINFO)";
         break;
@@ -1303,8 +1311,46 @@ static void Load_ClipBoard_Image(T_IO_Context * context)
     format = EnumClipboardFormats(format);  // get next format
   }
   clipboard = GetClipboardData(CF_DIB);
-  if (clipboard != NULL)
+  if (clipboard == NULL)
   {
+    // Try to load the filename
+    UINT filename_type = RegisterClipboardFormatA("FileName");
+    GFX2_Log(GFX2_INFO, "Failed to get Clipboard in DIB (BITMAPINFO) format\n");
+    if (filename_type == 0)
+      GFX2_Log(GFX2_ERROR, "Failed to register \"FileName\" Clipboard format\n");
+    else
+    {
+      clipboard = GetClipboardData(filename_type);
+      if (clipboard == NULL)
+        GFX2_Log(GFX2_INFO, "Failed to get Clipboard in \"FileName\" format\n");
+      else
+      {
+        const char * filename = (const char *)GlobalLock(clipboard);
+        if (filename == NULL)
+          GFX2_Log(GFX2_ERROR, "GlobalLock() failed error 0x%08x\n", GetLastError());
+        else
+        {
+          GFX2_Log(GFX2_DEBUG, "filename from clipboard : \"%s\"\n", filename);
+          if (File_exists(filename))
+          {
+            free(context->File_name);
+            context->File_name = Extract_filename(NULL, filename);
+            free(context->File_directory);
+            context->File_directory = Extract_path(NULL, filename);
+            context->Format = DEFAULT_FILEFORMAT;
+          }
+          else
+          {
+            GFX2_Log(GFX2_WARNING, "file \"%s\" does not exist\n", filename);
+          }
+          GlobalUnlock(clipboard);
+        }
+      }
+    }
+  }
+  else
+  {
+    // Load the DIB (BITMAPINFO)
     const PBITMAPINFO bmi = (PBITMAPINFO)GlobalLock(clipboard);
     if (bmi == NULL)
       GFX2_Log(GFX2_ERROR, "GlobalLock() failed error 0x%08x\n", GetLastError());
