@@ -49,6 +49,7 @@
 #elif defined(__linux__)
   #include <limits.h>
   #include <unistd.h>
+  #include <errno.h>
 #elif defined(__HAIKU__)
   #include <FindDirectory.h>
 #endif
@@ -113,14 +114,20 @@ char * Get_program_directory(const char * argv0)
   #elif defined(__linux__)
   if (argv0[0]!='/')
   {
+    ssize_t path_len;
     char path[PATH_MAX];
-    if (readlink("/proc/self/exe", path, sizeof(path)) >= 0)
+    path_len = readlink("/proc/self/exe", path, sizeof(path));
+    if (path_len >= 0)
     {
+      path[path_len] = '\0';  // add null terminating char
+      GFX2_Log(GFX2_DEBUG, "binary path resolved to : %s\n", path);
       program_dir = Extract_path(NULL, path);
-      return program_dir;
     }
+    else
+      GFX2_Log(GFX2_WARNING, "readlink(%s) failed : %s\n", "/proc/self/exe", strerror(errno));
   }
-  program_dir = Extract_path(NULL, argv0);
+  else
+    program_dir = Extract_path(NULL, argv0);
   
   // Others: The part of argv[0] before the executable name.    
   // Keep the last \ or /.
@@ -283,9 +290,10 @@ char * Get_config_directory(const char * program_dir)
         }
         if (!Directory_exists(config_dir))
         {
-          // Tentative de création
+          // try to create it
           if (Create_ConfigDirectory(config_dir) < 0)
           {
+            GFX2_Log(GFX2_WARNING, "Failed to create directory \"%s\"\n", config_dir);
             // Echec: on se rabat sur le repertoire de l'executable.
             Portable_Installation_Detected = 1;
             free(config_dir);
@@ -297,6 +305,7 @@ char * Get_config_directory(const char * program_dir)
               config_dir = strdup(program_dir);
             #endif
           }
+            GFX2_Log(GFX2_INFO, "\"%s\" directory created.\n", config_dir);
         }
       }
     }
