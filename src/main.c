@@ -661,6 +661,11 @@ int Init_program(int argc,char * argv[])
   // Get current directory
   Main.selector.Directory = Get_current_directory(NULL, &Main.selector.Directory_unicode, 0);
 
+  GFX2_Log(GFX2_DEBUG, "program directory : %s\n", program_directory);
+  GFX2_Log(GFX2_DEBUG, "Data directory : %s\n", Data_directory);
+  GFX2_Log(GFX2_DEBUG, "Config directory : %s\n", Config_directory);
+  GFX2_Log(GFX2_DEBUG, "Initial_directory : %s (unicode : %p)\n",
+           Main.selector.Directory, Main.selector.Directory_unicode);
   free(program_directory);
 
   // On en profite pour le mémoriser dans le répertoire principal:

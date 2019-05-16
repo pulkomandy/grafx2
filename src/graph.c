@@ -302,6 +302,7 @@ int Init_mode_video(int width, int height, int fullscreen, int pix_ratio)
 
 try_again:
 
+  GFX2_Log(GFX2_DEBUG, "Init_mode_video(%d, %d, %d, %d)\n", width, height, fullscreen, pix_ratio);
   switch (pix_ratio)
   {
       default:
