@@ -1182,6 +1182,7 @@ install : $(BIN)
 	$(CP) $(BIN) $(DESTDIR)$(bindir)
 	$(CP) ../share/grafx2/gfx2def.ini $(DESTDIR)$(datadir)/grafx2/
 	$(CP) ../share/grafx2/gfx2.gif $(DESTDIR)$(datadir)/grafx2/
+	$(CP) ../share/grafx2/gfx2.png $(DESTDIR)$(datadir)/grafx2/
 	$(CP) ../share/grafx2/fonts/* $(DESTDIR)$(datadir)/grafx2/fonts/
 	$(CP) $(SKIN_FILES) $(DESTDIR)$(datadir)/grafx2/skins/
 	for f in $(SCRIPT_FILES:../share/%=%); do \
