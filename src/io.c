@@ -354,20 +354,31 @@ char * Extract_path(char *dest, const char *source)
   char * path;
 
   path = Realpath(source, dest);
+  if (path == NULL)
+  {
+    GFX2_Log(GFX2_ERROR, "Realpath(\"%s\", %p) failed !\n", source, dest);
+    return NULL;
+  }
   position = Find_last_separator(path);
   if (position)
     position[1] = '\0';
   else
   {
+    size_t len = strlen(path);
     if (dest != NULL)
-      strcat(dest, PATH_SEPARATOR);
+      strcpy(path + len, PATH_SEPARATOR);
     else
     {
-      char * tmp = realloc(path, strlen(path) + strlen(PATH_SEPARATOR) + 1);
+      char * tmp = realloc(path, len + strlen(PATH_SEPARATOR) + 1);
       if (tmp != NULL)
       {
         path = tmp;
-        strcat(path, PATH_SEPARATOR);
+        strcpy(path + len, PATH_SEPARATOR);
+      }
+      else
+      {
+        GFX2_Log(GFX2_ERROR, "Extract_path(): Failed to realloc %lu bytes\n",
+                 (unsigned long)(len + strlen(PATH_SEPARATOR) + 1));
       }
     }
   }
