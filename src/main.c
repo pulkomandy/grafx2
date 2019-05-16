@@ -355,9 +355,11 @@ struct {
  * @param argv argument values
  * @param filenames pointers to receive file names
  * @param directories pointers to receive file directories
+ * @param videomode_arg pointer to receive the -mode argument
+ * @param pixel_ratio pointer to receive the pixel ratio requested
  * @return the number of file to open (0, 1 or 2)
  */
-int Analyze_command_line(int argc, char * argv[], char * filenames[], char * directories[])
+int Analyze_command_line(int argc, char * argv[], char * filenames[], char * directories[], const char ** videomode_arg, int * pixel_ratio)
 {
   char *buffer;
   char *filename;
@@ -421,18 +423,8 @@ int Analyze_command_line(int argc, char * argv[], char * filenames[], char * dir
         index++;
         if (index<argc)
         {
-          Resolution_in_command_line = 1;
-          Current_resolution = Convert_videomode_arg(argv[index]);
-          if (Current_resolution == -1)
-          {
-            Error(ERROR_COMMAND_LINE);
-            exit(0);
-          }
-          if ((Video_mode[Current_resolution].State & 0x7F) == 3)
-          {
-            Error(ERROR_FORBIDDEN_MODE);
-            exit(0);
-          }
+          // will be processed later, when video is initialized
+          *videomode_arg = argv[index];
         }
         else
         {
@@ -441,28 +433,28 @@ int Analyze_command_line(int argc, char * argv[], char * filenames[], char * dir
         }
         break;
       case CMDPARAM_PIXELRATIO_TALL:
-        Pixel_ratio = PIXEL_TALL;
+        *pixel_ratio = PIXEL_TALL;
         break;
       case CMDPARAM_PIXELRATIO_WIDE:
-        Pixel_ratio = PIXEL_WIDE;
+        *pixel_ratio = PIXEL_WIDE;
         break;
       case CMDPARAM_PIXELRATIO_DOUBLE:
-        Pixel_ratio = PIXEL_DOUBLE;
+        *pixel_ratio = PIXEL_DOUBLE;
         break;
       case CMDPARAM_PIXELRATIO_TRIPLE:
-        Pixel_ratio = PIXEL_TRIPLE;
+        *pixel_ratio = PIXEL_TRIPLE;
         break;
       case CMDPARAM_PIXELRATIO_QUAD:
-        Pixel_ratio = PIXEL_QUAD;
+        *pixel_ratio = PIXEL_QUAD;
         break;
       case CMDPARAM_PIXELRATIO_TALL2:
-        Pixel_ratio = PIXEL_TALL2;
+        *pixel_ratio = PIXEL_TALL2;
         break;
       case CMDPARAM_PIXELRATIO_TALL3:
-        Pixel_ratio = PIXEL_TALL3;
+        *pixel_ratio = PIXEL_TALL3;
         break;
       case CMDPARAM_PIXELRATIO_WIDE2:
-        Pixel_ratio = PIXEL_WIDE2;
+        *pixel_ratio = PIXEL_WIDE2;
         break;
       case CMDPARAM_RGB:
         /* RGB scale */
@@ -624,6 +616,8 @@ int Init_program(int argc,char * argv[])
   T_Gradient_array initial_gradients;
   char * filenames[2] = {NULL, NULL};
   char * directories[2] = {NULL, NULL};
+  const char * videomode = NULL;
+  int cmdline_pixelratio = -1;
 
   #if defined(__MINT__)
   printf("===============================\n");
@@ -645,6 +639,9 @@ int Init_program(int argc,char * argv[])
   cd_utf16_inv = iconv_open(FROMCODE, "UTF-16LE"); // From UTF16 to UTF8
 #endif
 #endif /* ENABLE_FILENAMES_ICONV */
+
+  // Analyse command-line as soon as possible.
+  file_in_command_line = Analyze_command_line(argc, argv, filenames, directories, &videomode, &cmdline_pixelratio);
 
   // On crée dès maintenant les descripteurs des listes de pages pour la page
   // principale et la page de brouillon afin que leurs champs ne soient pas
@@ -770,11 +767,6 @@ int Init_program(int argc,char * argv[])
 
   // Initialize all video modes
   Set_all_video_modes();
-
-  // Analyse command-line as soon as possible.
-  // This must come after video mode initialization because
-  // a video mode may be requested as a command-line parameter
-  file_in_command_line = Analyze_command_line(argc, argv, filenames, directories);
 
 #if defined(USE_JOYSTICK) && (defined(USE_SDL) || defined(USE_SDL2))
   GFX2_Log(GFX2_DEBUG, "%d joystick(s) attached\n", SDL_NumJoysticks());
@@ -969,10 +961,28 @@ int Init_program(int argc,char * argv[])
   if (!Smear_brush)
     Error(ERROR_MEMORY);
 
+  // set videomode according to the command line
+  if (videomode)
+  {
+    Resolution_in_command_line = 1;
+    Current_resolution = Convert_videomode_arg(videomode);
+    if (Current_resolution == -1)
+    {
+      Error(ERROR_COMMAND_LINE);
+      exit(0);
+    }
+    if ((Video_mode[Current_resolution].State & 0x7F) == 3)
+    {
+      Error(ERROR_FORBIDDEN_MODE);
+      exit(0);
+    }
+  }
 
   starting_videomode=Current_resolution;
   Horizontal_line_buffer=NULL;
   Screen_width=Screen_height=Current_resolution=0;
+  if (cmdline_pixelratio >= 0 && cmdline_pixelratio < (int)PIXEL_MAX)
+    Pixel_ratio = cmdline_pixelratio;
 
   Init_mode_video(
     Video_mode[starting_videomode].Width,
