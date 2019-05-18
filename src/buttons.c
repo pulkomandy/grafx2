@@ -621,7 +621,8 @@ byte Button_Quit_local_function(void)
 
   do
   {
-    clicked_button=Window_clicked_button();
+    Quit_is_required = 0; // ignore other QUIT messages from the system
+    clicked_button = Window_clicked_button();
     if (Is_shortcut(Key,0x100+BUTTON_HELP))
       Window_help(BUTTON_QUIT, NULL);
     else if (Is_shortcut(Key,0x100+BUTTON_QUIT))
