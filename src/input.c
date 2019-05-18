@@ -1446,14 +1446,18 @@ int Get_input(int sleep_time)
                         SDL_SetWindowSize(SDL_GetWindowFromID(event.window.windowID), Resize_width, Resize_height);
                       break;
                   case SDL_WINDOWEVENT_CLOSE:
+                      GFX2_Log(GFX2_DEBUG, "SDL_WINDOWEVENT_CLOSE %d\n", event.window.windowID);
                       Quit_is_required = 1;
                       user_feedback_required = 1;
                       break;
+                  default:
+                      GFX2_Log(GFX2_DEBUG, "Unhandled SDL_WINDOWEVENT : %d\n", event.window.event);
               }
               break;
 #endif
 
           case SDL_QUIT:
+              GFX2_Log(GFX2_DEBUG, "SDL_QUIT\n");
               Handle_window_exit(&event.quit);
               user_feedback_required = 1;
               break;
