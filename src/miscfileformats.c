@@ -518,6 +518,8 @@ void Load_PKM(T_IO_Context * context)
                     if ( ! Read_word_le(file,(word *) &Original_screen_X)
                       || !Read_word_le(file,(word *) &Original_screen_Y) )
                       File_error=2;
+                    else
+                      GFX2_Log(GFX2_DEBUG, "PKM original screen %dx%d\n", (int)Original_screen_X, (int)Original_screen_Y);
                   }
                   else
                     File_error=2;
