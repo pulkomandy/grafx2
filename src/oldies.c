@@ -65,7 +65,8 @@ static const struct {
   { IMAGE_MODE_C64MULTI,  "C64_MULTICOLOR" },
   { IMAGE_MODE_C64FLI,    "C64_FLI" },
   { IMAGE_MODE_HGR,       "APPLE2_HGR" },
-  { IMAGE_MODE_DHGR,      "APPLE2_DHGR" }
+  { IMAGE_MODE_DHGR,      "APPLE2_DHGR" },
+  { IMAGE_MODE_MEGADRIVE, "SEGAMEGADRIVE" },
 };
 
 const char * Constraint_mode_label(enum IMAGE_MODES mode)

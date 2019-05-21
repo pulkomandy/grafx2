@@ -631,6 +631,7 @@ enum IMAGE_MODES
   IMAGE_MODE_C64FLI,    ///< C64 Flexible Line Interpretation
   IMAGE_MODE_HGR,       ///< Apple 2 HGR
   IMAGE_MODE_DHGR,      ///< Apple 2 DHGR
+  IMAGE_MODE_MEGADRIVE, ///< Sega Mega Drive / Genesis
 };
 
 /// Circle / Ellipse Modes

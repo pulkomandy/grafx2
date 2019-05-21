@@ -181,6 +181,7 @@ static int Check_block_constraints(enum IMAGE_MODES mode)
   int block_width = 8, block_height = 8, max_colors = 2;  // default values
   int error_count = 0;
   byte errcol = 17;
+  byte pal_mask;
 
   switch (mode)
   {
@@ -198,9 +199,14 @@ static int Check_block_constraints(enum IMAGE_MODES mode)
       max_colors = 4;
       errcol = 33;
       break;
+    case IMAGE_MODE_MEGADRIVE:
+      max_colors = 16;
+      errcol = 65;
+      break;
     default:
       return -1;  // unsupported mode
   }
+  pal_mask = ~(max_colors - 1);
 
   for (y = 0; y <= Main.image_height - block_height; y += block_height)
   {
@@ -215,11 +221,11 @@ static int Check_block_constraints(enum IMAGE_MODES mode)
         {
           int i;
           byte col = Read_pixel_from_layer(0, x+x2, y+y2);
-          if (mode == IMAGE_MODE_GBC)
+          if (mode == IMAGE_MODE_GBC || mode == IMAGE_MODE_MEGADRIVE)
           {
             if (count == 0)
               c[count++] = col;
-            else if ((col & ~3) != (c[0] & ~3))  // compare palettes
+            else if ((col & pal_mask) != (c[0] & pal_mask))  // compare palettes
             {
               if (Main.backups->Pages->Nb_layers < 2)
                 Add_layer(Main.backups, 1);
@@ -566,6 +572,7 @@ void Button_Constraint_menu(void)
   } modes[] = {
     {IMAGE_MODE_ZX,      "ZX Spectrum",   "2 colors per 8x8 block", 1}, // 256x192
     {IMAGE_MODE_GBC,     "Game Boy Color","4 colors per 8x8 block", 1}, // 160x144 to 256x256
+    {IMAGE_MODE_MEGADRIVE,"Sega MegaDrive","16colors per 8x8 block",1}, // 256x224 to 1024x256
     {IMAGE_MODE_THOMSON, "40col (MO/TO)", "2 colors per 8x1 block", 1}, // 320x200
     {IMAGE_MODE_EGX,     "EGX (CPC)",     "Alternate Mode0/Mode1 ", 0}, // 320x200
     {IMAGE_MODE_EGX2,    "EGX2 (CPC)",    "Alternate Mode1/Mode2 ", 0}, // 640x200
@@ -620,7 +627,7 @@ void Button_Constraint_menu(void)
     }
     else if (clicked_button == 3)
     {
-      if (Selected_Constraint_Mode == IMAGE_MODE_GBC)
+      if (Selected_Constraint_Mode == IMAGE_MODE_GBC || Selected_Constraint_Mode == IMAGE_MODE_MEGADRIVE)
         set_palette = 1;  // activate palette back when switching from GBC
       Selected_Constraint_Mode = Window_attribute2;
       for (i = 0; i < sizeof(modes)/sizeof(modes[0]) ; i++)
@@ -632,7 +639,7 @@ void Button_Constraint_menu(void)
           Display_cursor();
           break;
         }
-      if (Selected_Constraint_Mode == IMAGE_MODE_GBC)
+      if (Selected_Constraint_Mode == IMAGE_MODE_GBC || Selected_Constraint_Mode == IMAGE_MODE_MEGADRIVE)
         set_palette = 0;
     }
     else if (clicked_button == 4) // palette
@@ -714,6 +721,7 @@ void Button_Constraint_menu(void)
           case IMAGE_MODE_ZX:
           case IMAGE_MODE_GBC:
           case IMAGE_MODE_C64HIRES:
+          case IMAGE_MODE_MEGADRIVE:
             Snap_width = 8;
             Snap_height = 8;
             break;
@@ -757,6 +765,13 @@ void Button_Constraint_menu(void)
             ZX_Spectrum_set_palette(Main.palette);
             First_color_in_palette = 0;
             Fore_color = 7;
+            Back_color = 0;
+            break;
+          case IMAGE_MODE_MEGADRIVE:  // 64 colors among 512
+            memset(Main.palette + 64, 0, sizeof(T_Components) * (256 - 64));
+            Main.palette[65].R = 255; // for color clashes
+            First_color_in_palette = 0;
+            Fore_color = 15;
             Back_color = 0;
             break;
           case IMAGE_MODE_GBC:  // 32 colors among 32768
