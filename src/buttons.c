@@ -3220,6 +3220,10 @@ void Load_picture(enum CONTEXT_TYPE type)
   // again here
   if (confirm)
   {
+    short old_image_width, old_image_height;
+
+    old_image_width = Main.image_width;
+    old_image_height = Main.image_height;
     old_cursor_shape=Cursor_shape;
     Hide_cursor();
     Cursor_shape=CURSOR_SHAPE_HOURGLASS;
@@ -3279,10 +3283,12 @@ void Load_picture(enum CONTEXT_TYPE type)
     {
       if (type==CONTEXT_MAIN_IMAGE)
       {
-        if (Main.magnifier_mode)
+        if (Main.magnifier_mode &&
+            (Main.image_width > old_image_width || Main.image_height > old_image_height))
         {
-          Pixel_preview=Pixel_preview_normal;
-          Main.magnifier_mode=0;
+          // disable magnifier
+          Pixel_preview = Pixel_preview_normal;
+          Main.magnifier_mode = 0;
           Draw_menu_button(BUTTON_MAGNIFIER,Main.magnifier_mode);
         }
 
@@ -3314,8 +3320,11 @@ void Load_picture(enum CONTEXT_TYPE type)
         }
         else
         {
-          Main.offset_X=0;
-          Main.offset_Y=0;
+          if (Main.image_width > old_image_width || Main.image_height > old_image_height)
+          {
+            Main.offset_X = 0;
+            Main.offset_Y = 0;
+          }
           Compute_limits();
           Compute_paintbrush_coordinates();
         }
