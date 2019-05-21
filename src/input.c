@@ -1450,6 +1450,15 @@ int Get_input(int sleep_time)
                       Quit_is_required = 1;
                       user_feedback_required = 1;
                       break;
+                  case SDL_WINDOWEVENT_MINIMIZED:
+                      GFX2_Log(GFX2_DEBUG, "SDL_WINDOWEVENT_MINIMIZED %d\n", event.window.windowID);
+                      break;
+                  case SDL_WINDOWEVENT_MAXIMIZED:
+                      GFX2_Log(GFX2_DEBUG, "SDL_WINDOWEVENT_MAXIMIZED %d\n", event.window.windowID);
+                      break;
+                  case SDL_WINDOWEVENT_RESTORED:
+                      GFX2_Log(GFX2_DEBUG, "SDL_WINDOWEVENT_RESTORED %d\n", event.window.windowID);
+                      break;
                   default:
                       GFX2_Log(GFX2_DEBUG, "Unhandled SDL_WINDOWEVENT : %d\n", event.window.event);
               }
