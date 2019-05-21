@@ -168,10 +168,16 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
     break;
   case WM_SIZE:
     GFX2_Log(GFX2_DEBUG, "WM_SIZE : %dx%d type=%d\n", LOWORD(lParam), HIWORD(lParam), wParam);
-    if (wParam != SIZE_MINIMIZED)
+    if (wParam == SIZE_MINIMIZED)
+      Window_state = GFX2_WINDOW_MINIMIZED;
+    else
     {
       Resize_width = LOWORD(lParam);
       Resize_height = HIWORD(lParam);
+      if (wParam == SIZE_MAXIMIZED)
+        Window_state = GFX2_WINDOW_MAXIMIZED;
+      else if (wParam == SIZE_RESTORED)
+        Window_state = GFX2_WINDOW_STANDARD;
     }
     return 0;
   case WM_CLOSE:

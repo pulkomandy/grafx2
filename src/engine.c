@@ -685,6 +685,12 @@ void Main_handler(void)
     // Resize requested
     if (Resize_width || Resize_height)
     {
+      if (Window_state == GFX2_WINDOW_STANDARD)
+      {
+        Default_window_width = Resize_width;
+        Default_window_height = Resize_height;
+      }
+
       Hide_cursor();
       Init_mode_video(Resize_width, Resize_height, 0, Pixel_ratio);
       // Reset the variables that indicate a resize was requested.

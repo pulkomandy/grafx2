@@ -215,6 +215,12 @@ GFX2_GLOBAL Func_draw_brush Display_brush;
 GFX2_GLOBAL int   Resize_width;
 /// Requested window height. This is set when the user resizes the window.
 GFX2_GLOBAL int   Resize_height;
+/// Current window state (standard, minimized, maximized)
+GFX2_GLOBAL enum GFX2_WINDOW_STATES Window_state;
+/// Default window width (not maximized)
+GFX2_GLOBAL int   Default_window_width;
+/// Default window height (not maximized)
+GFX2_GLOBAL int   Default_window_height;
 /// Current video mode. Index in ::Video_mode
 GFX2_GLOBAL int   Current_resolution;
 /// After loading an image, this holds the "original screen width", if the file format supported it.

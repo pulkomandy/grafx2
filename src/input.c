@@ -767,6 +767,27 @@ static void Handle_SelectionRequest(const XSelectionRequestEvent* xselectionrequ
 #if defined(USE_SDL)
 static void Handle_window_resize(SDL_ResizeEvent * event)
 {
+#if defined(WIN32)
+  WINDOWPLACEMENT windowplacement;
+  windowplacement.length = sizeof(WINDOWPLACEMENT);
+  if (GetWindowPlacement(GFX2_Get_Window_Handle(), &windowplacement))
+  {
+    switch (windowplacement.showCmd)
+    {
+      case SW_SHOWMAXIMIZED:
+        Window_state = GFX2_WINDOW_MAXIMIZED;
+        GFX2_Log(GFX2_DEBUG, "window is MAXIMIZED\n");
+        break;
+      case SW_SHOWMINIMIZED:
+        Window_state = GFX2_WINDOW_MINIMIZED;
+        GFX2_Log(GFX2_DEBUG, "window is MINIMIZED\n");
+        break;
+      default:
+        Window_state = GFX2_WINDOW_STANDARD;
+        GFX2_Log(GFX2_DEBUG, "window is NORMAL\n");
+    }
+  }
+#endif
   Resize_width = event->w;
   Resize_height = event->h;
 }
@@ -1428,39 +1449,47 @@ int Get_input(int sleep_time)
               Handle_window_resize(&event.resize);
               user_feedback_required = 1;
               break;
+
+          case SDL_VIDEOEXPOSE:
+              GFX2_Log(GFX2_DEBUG, "SDL_VIDEOEXPOSE\n");
+              break;
 #endif
 
 #if defined(USE_SDL2)
           case SDL_WINDOWEVENT:
               switch(event.window.event)
               {
-                  case SDL_WINDOWEVENT_RESIZED: // change by external event (user or window manager)
-                      Resize_width = event.window.data1;
-                      Resize_height = event.window.data2;
-                      // forbid window size < 320x200
-                      if (Resize_width < 320)
-                        Resize_width = 320;
-                      if (Resize_height < 200)
-                        Resize_height = 200;
-                      if (Resize_width != event.window.data1 || Resize_height != event.window.data2)
-                        SDL_SetWindowSize(SDL_GetWindowFromID(event.window.windowID), Resize_width, Resize_height);
-                      break;
-                  case SDL_WINDOWEVENT_CLOSE:
-                      GFX2_Log(GFX2_DEBUG, "SDL_WINDOWEVENT_CLOSE %d\n", event.window.windowID);
-                      Quit_is_required = 1;
-                      user_feedback_required = 1;
-                      break;
-                  case SDL_WINDOWEVENT_MINIMIZED:
-                      GFX2_Log(GFX2_DEBUG, "SDL_WINDOWEVENT_MINIMIZED %d\n", event.window.windowID);
-                      break;
-                  case SDL_WINDOWEVENT_MAXIMIZED:
-                      GFX2_Log(GFX2_DEBUG, "SDL_WINDOWEVENT_MAXIMIZED %d\n", event.window.windowID);
-                      break;
-                  case SDL_WINDOWEVENT_RESTORED:
-                      GFX2_Log(GFX2_DEBUG, "SDL_WINDOWEVENT_RESTORED %d\n", event.window.windowID);
-                      break;
-                  default:
-                      GFX2_Log(GFX2_DEBUG, "Unhandled SDL_WINDOWEVENT : %d\n", event.window.event);
+                case SDL_WINDOWEVENT_RESIZED: // change by external event (user or window manager)
+                  GFX2_Log(GFX2_DEBUG, "SDL_WINDOWEVENT_RESIZED %d %dx%d\n", event.window.windowID, event.window.data1, event.window.data2);
+                  Resize_width = event.window.data1;
+                  Resize_height = event.window.data2;
+                  // forbid window size < 320x200
+                  if (Resize_width < 320)
+                    Resize_width = 320;
+                  if (Resize_height < 200)
+                    Resize_height = 200;
+                  if (Resize_width != event.window.data1 || Resize_height != event.window.data2)
+                    SDL_SetWindowSize(SDL_GetWindowFromID(event.window.windowID), Resize_width, Resize_height);
+                  break;
+                case SDL_WINDOWEVENT_CLOSE:
+                  GFX2_Log(GFX2_DEBUG, "SDL_WINDOWEVENT_CLOSE %d\n", event.window.windowID);
+                  Quit_is_required = 1;
+                  user_feedback_required = 1;
+                  break;
+                case SDL_WINDOWEVENT_MINIMIZED:
+                  GFX2_Log(GFX2_DEBUG, "SDL_WINDOWEVENT_MINIMIZED %d\n", event.window.windowID);
+                  Window_state = GFX2_WINDOW_MINIMIZED;
+                  break;
+                case SDL_WINDOWEVENT_MAXIMIZED:
+                  GFX2_Log(GFX2_DEBUG, "SDL_WINDOWEVENT_MAXIMIZED %d\n", event.window.windowID);
+                  Window_state = GFX2_WINDOW_MAXIMIZED;
+                  break;
+                case SDL_WINDOWEVENT_RESTORED:
+                  GFX2_Log(GFX2_DEBUG, "SDL_WINDOWEVENT_RESTORED %d\n", event.window.windowID);
+                  Window_state = GFX2_WINDOW_STANDARD;
+                  break;
+                default:
+                  GFX2_Log(GFX2_DEBUG, "Unhandled SDL_WINDOWEVENT : %d\n", event.window.event);
               }
               break;
 #endif

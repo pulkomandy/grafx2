@@ -651,8 +651,14 @@ int Save_INI(const T_Config * conf)
   if ((return_code=Save_INI_set_strings (old_file,new_file,buffer,"Default_video_mode",Mode_label(conf->Default_resolution))))
     goto Erreur_Retour;
 
-  values[0]=Video_mode[0].Width;
-  values[1]=Video_mode[0].Height;
+  if (Default_window_width > 0)
+    values[0] = Default_window_width;
+  else
+    values[0] = Video_mode[0].Width;
+  if (Default_window_height > 0)
+    values[1] = Default_window_height;
+  else
+    values[1] = Video_mode[0].Height;
   if ((return_code=Save_INI_set_values (old_file,new_file,buffer,"Default_window_size",2,values,0)))
     goto Erreur_Retour;
 

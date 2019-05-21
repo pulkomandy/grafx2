@@ -1244,16 +1244,15 @@ void Program_shutdown(void)
 
   // Windows only: Recover the window position.
   #if defined(WIN32)
-  #if defined(USE_SDL) || defined(USE_SDL2)
   {
-    RECT r;
-    GetWindowRect(GFX2_Get_Window_Handle(), &r);
-
-    Config.Window_pos_x = r.left;
-    Config.Window_pos_y = r.top;
+    WINDOWPLACEMENT windowplacement;
+    windowplacement.length = sizeof(WINDOWPLACEMENT);
+    if (GetWindowPlacement(GFX2_Get_Window_Handle(), &windowplacement))
+    {
+      Config.Window_pos_x = windowplacement.rcNormalPosition.left;
+      Config.Window_pos_y = windowplacement.rcNormalPosition.top;
+    }
   }
-  #endif
-  // Config.Window_pos_x / Config.Window_pos_y are set in win32screen.c
   #elif !defined(USE_X11)
   // All other targets: irrelevant dimensions.
   // Do not attempt to force them back on next program run.

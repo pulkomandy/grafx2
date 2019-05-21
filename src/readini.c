@@ -792,9 +792,9 @@ int Load_INI(T_Config * conf)
     if (!Load_INI_get_values (file,buffer,"Default_window_size",2,values))
     {
       if ((values[0]>=320))
-        Video_mode[0].Width = values[0];
+        Default_window_width = Video_mode[0].Width = values[0];
       if ((values[1]>=200))
-        Video_mode[0].Height = values[1];
+        Default_window_height = Video_mode[0].Height = values[1];
     }
   }
 
