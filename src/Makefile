@@ -671,6 +671,10 @@ endif
             COPT += $(shell $(PKG_CONFIG) --cflags x11)
           endif
         endif
+        ifeq ($(API),x11)
+          LOPT += $(shell $(PKG_CONFIG) --libs x11)
+          COPT += $(shell $(PKG_CONFIG) --cflags x11)
+        endif
         ifeq ($(NO_X11),1)
           COPT += -DNO_X11
         endif
@@ -771,7 +775,6 @@ endif
 ifeq ($(API),x11)
   APIOBJ = x11screen.o
   COPT += -DUSE_X11
-  LOPT += -lX11
 endif
 
 #To enable Joystick emulation of cursor, make USE_JOYSTICK=1 (for input.o)
