@@ -1699,7 +1699,52 @@ int Get_input(int sleep_time)
                   break;
 #endif
                 case PropertyNotify:
-                  GFX2_Log(GFX2_DEBUG, "SDL_SYSWMEVENT x11 PropertyNotify\n");
+                  {
+                    char * property_name = XGetAtomName(xevent.xproperty.display, xevent.xproperty.atom);
+                    GFX2_Log(GFX2_DEBUG, "SDL_SYSWMEVENT x11 PropertyNotify : %s %s\n",
+                             (xevent.xproperty.state == PropertyNewValue) ? "PropertyNewValue" : "PropertyDelete",
+                             property_name);
+                    XFree(property_name);
+                    if (xevent.xproperty.atom == XInternAtom(xevent.xproperty.display, "_NET_WM_STATE", False))
+                    {
+                      Atom prop_type = None;
+                      int format = 0;
+                      unsigned long n_items, bytes_after_return;
+                      unsigned char * data = NULL;
+                      if (XGetWindowProperty(xevent.xproperty.display, xevent.xproperty.window,
+                                             xevent.xproperty.atom, 0, 0x10000, False, AnyPropertyType,
+                                             &prop_type, &format, &n_items, &bytes_after_return,
+                                             &data) == Success)
+                      {
+                        GFX2_Log(GFX2_DEBUG, "%d format=%d n_items=%lu bytes_after_return=%lu\n",
+                                 prop_type, format, n_items, bytes_after_return);
+                        if (prop_type == XA_ATOM)
+                        {
+                          unsigned long i;
+                          Atom * array = (Atom *)data;
+                          Atom hidden = XInternAtom(xevent.xproperty.display, "_NET_WM_STATE_HIDDEN", False);
+                          Atom max_horz = XInternAtom(xevent.xproperty.display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+                          Atom max_vert = XInternAtom(xevent.xproperty.display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
+                          Window_state = GFX2_WINDOW_STANDARD;
+                          for (i = 0; i < n_items; i++)
+                          {
+                            char * atom_name = XGetAtomName(xevent.xproperty.display, array[i]);
+                            GFX2_Log(GFX2_DEBUG, "  %s\n", atom_name);
+                            XFree(atom_name);
+                            if (array[i] == hidden)
+                              Window_state = GFX2_WINDOW_MINIMIZED;
+                            else if (array[i] == max_horz || array[i] == max_vert)
+                              Window_state = GFX2_WINDOW_MAXIMIZED;
+                          }
+                        }
+                        XFree(data);
+                      }
+                      else
+                      {
+                        GFX2_Log(GFX2_WARNING, "XGetWindowProperty() failed\n");
+                      }
+                    }
+                  }
                   break;
                 default:
                   GFX2_Log(GFX2_DEBUG, "Unhandled SDL_SYSWMEVENT x11 event type=%d\n", xevent.type);
