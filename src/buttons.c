@@ -3107,7 +3107,7 @@ void Button_Brush_monochrome(int btn)
 // -- Fonction renvoyant le mode vidéo le plus adapté à l'image chargée -----
 #define TOLERANCE_X 8
 #define TOLERANCE_Y 4
-int Best_video_mode(void)
+static int Best_video_mode(void)
 {
   short best_width,best_height;
   int best_mode;
@@ -3131,10 +3131,13 @@ int Best_video_mode(void)
     if (Original_screen_Y<200)
       Original_screen_Y=200;
 
-  if ((Original_screen_X>1024) || (Original_screen_Y>768))
+  GFX2_Log(GFX2_DEBUG, "Best_video_mode() looking for %dx%d\n", (int)Original_screen_X, (int)Original_screen_Y);
+
+  if ((Original_screen_X > Video_mode[Nb_video_modes-1].Width) ||
+      (Original_screen_Y > Video_mode[Nb_video_modes-1].Height))
   {
-    Original_screen_X=1024;
-    Original_screen_Y=768;
+    // return the "biggest" video mode
+    return Nb_video_modes-1;
   }
 
   // Maintenant on peut chercher le mode qui correspond le mieux
