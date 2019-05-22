@@ -31,6 +31,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h> // for PATH_MAX (MAX_PATH_CHARACTERS)
 #ifndef _MSC_VER
 #include <unistd.h>
 #else

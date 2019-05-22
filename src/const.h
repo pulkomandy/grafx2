@@ -29,26 +29,6 @@
 #ifndef _CONST_H_
 #define _CONST_H_
 
-#if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__) || defined(__amigaos__)
-  // These platforms don't seem to have PATH_MAX
-  #undef PATH_MAX
-  #define PATH_MAX 260
-#elif defined(__ANDROID__)
-  #include <sys/limits.h> // for PATH_MAX
-#else
-  #include <limits.h> // for PATH_MAX
-#endif
-#ifndef PATH_MAX
-#ifdef _MSC_VER
-#include <windows.h>
-#endif
-#ifdef MAX_PATH
-#define PATH_MAX MAX_PATH
-#else
-#define PATH_MAX 4096
-#endif
-#endif
-
 #ifndef M_2PI
 #define M_2PI 6.28318530717958647692528676656 ///< Hmm, pie...
 #endif

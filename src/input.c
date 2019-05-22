@@ -22,6 +22,7 @@
 */
 
 #include <string.h>
+#include <limits.h>
 #if defined(USE_SDL) || defined(USE_SDL2)
 #include <SDL.h>
 #if (defined(SDL_VIDEO_DRIVER_X11) && !defined(NO_X11)) || defined(__WIN32__)
