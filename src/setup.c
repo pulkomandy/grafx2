@@ -32,7 +32,6 @@
 #if defined(__WIN32__) || defined(WIN32)
   #include <windows.h>
 #ifdef _MSC_VER
-  #include <direct.h>
   #define strdup _strdup
   #if _MSC_VER < 1900
     #define snprintf _snprintf

@@ -24,8 +24,6 @@
 #if defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
     #include <proto/dos.h>
     #include <sys/types.h>
-#elif defined(__WIN32__) || defined(WIN32)
-    #include <windows.h>
 #endif
 
 #include <fcntl.h>
@@ -89,7 +87,6 @@
 #ifndef _MSC_VER
     #include <dirent.h>
 #endif
-    #include <windows.h>
 #else
     #include <dirent.h>
 #endif

@@ -31,8 +31,8 @@
 #elif defined (__MINT__)
     #include <mint/sysbind.h>
 #elif defined(WIN32)
-    #include <windows.h>
-    #include <commdlg.h>
+    //#include <windows.h>  // Native_filesel() is currently disabled
+    //#include <commdlg.h>
 #endif
 
 #include <assert.h>
@@ -87,6 +87,7 @@
 
 // -- Native fileselector for WIN32
 
+#if 0 // Native fileselector is disabled
 // Returns 0 if all ok, something else if failed
 byte Native_filesel(byte load)
 {
@@ -134,7 +135,8 @@ byte Native_filesel(byte load)
 #endif
     return 255; // fail !
 #endif
-}  
+}
+#endif
 
 // -- "Standard" fileselector for other platforms
 
