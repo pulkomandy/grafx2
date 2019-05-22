@@ -1570,7 +1570,7 @@ static void Load_ClipBoard_Image(T_IO_Context * context)
     case X11_CLIPBOARD_UTF8STRING:
     case X11_CLIPBOARD_URILIST:
       {
-        char tmp_path[MAX_PATH_CHARACTERS];
+        char * tmp_path = NULL;
         char * p;
         p = strchr(X11_clipboard, '\r');
         if (p != NULL)
@@ -1581,7 +1581,9 @@ static void Load_ClipBoard_Image(T_IO_Context * context)
         p = X11_clipboard;
         if (strncmp(p, "file://", 7) == 0)
         {
-          //int i
+          tmp_path = GFX2_malloc(strlen(p) + 1);
+          if (tmp_path == NULL)
+            break;
           p += 7;
           for (i = 0; *p; i++)
           {
@@ -1612,6 +1614,7 @@ static void Load_ClipBoard_Image(T_IO_Context * context)
         {
           GFX2_Log(GFX2_WARNING, "not a filename : \"%s\"\n", p);
         }
+        free(tmp_path);
       }
       break;
     default:
