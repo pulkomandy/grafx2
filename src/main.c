@@ -1391,31 +1391,84 @@ int main(int argc,char * argv[])
 #endif
 {
 #if defined(WIN32) && !defined(USE_SDL) && !defined(USE_SDL2)
-  WCHAR ModuleFileName[MAX_PATH];
-  WCHAR TmpArg[MAX_PATH];
-  WCHAR ShortFileName[MAX_PATH];
-  int i, j, k;
+  WCHAR * ModuleFileName = NULL;
+  DWORD ModuleFileNameSize = 64;
+  DWORD Ret;
+  WCHAR * TmpArg = NULL;
+  DWORD TmpArgSize = 0;
+  WCHAR * ShortFileName;
+  DWORD ShortFileNameSize;
+  DWORD i, j, k;
   int inquote = 0;
   int argc = 0;
   char arg_buffer[4096];
   char * argv[64] = {NULL};
 
   Init_Win32(hInstance, hPrevInstance);
-  if (GetModuleFileNameW(NULL, ModuleFileName, MAX_PATH) == 0)
+
+  // GetModuleFileNameW() returns the size argument when the
+  // path is truncated.
+  do
   {
-    MessageBoxA(NULL, "Error initializing program", NULL, MB_OK | MB_ICONERROR);
+    ModuleFileNameSize *= 2;
+    free(ModuleFileName);
+    ModuleFileName = (WCHAR *)malloc(sizeof(WCHAR) * ModuleFileNameSize);
+    if (ModuleFileName == NULL)
+    {
+      MessageBoxA(NULL, "Error initializing program (alloc)", NULL, MB_OK | MB_ICONERROR);
+      return 1;
+    }
+    Ret = GetModuleFileNameW(NULL, ModuleFileName, ModuleFileNameSize);
+    if (Ret == 0)
+    {
+      MessageBoxA(NULL, "Error initializing program\nGetModuleFileName()", NULL, MB_OK | MB_ICONERROR);
+      return 1;
+    }
+  }
+  while (Ret >= ModuleFileNameSize);
+
+  ShortFileNameSize = GetShortPathNameW(ModuleFileName, NULL, 0);
+  if (ShortFileNameSize == 0)
+  {
+    MessageBoxA(NULL, "Error initializing program\nGetShortPathName()", NULL, MB_OK | MB_ICONERROR);
     return 1;
   }
-  GetShortPathNameW(ModuleFileName, ShortFileName, MAX_PATH);
+  ShortFileName = (WCHAR *)malloc(sizeof(WCHAR) * ShortFileNameSize);
+  if (ShortFileName == NULL)
+  {
+    MessageBoxA(NULL, "Error initializing program (alloc)", NULL, MB_OK | MB_ICONERROR);
+    return 1;
+  }
+  if (GetShortPathNameW(ModuleFileName, ShortFileName, ShortFileNameSize) == 0)
+  {
+    MessageBoxA(NULL, "Error initializing program\nGetShortPathName()", NULL, MB_OK | MB_ICONERROR);
+    return 1;
+  }
+  free(ModuleFileName);
+
+  // set argv[0]
   argv[argc++] = arg_buffer;
   for (i = 0; i < (int)sizeof(arg_buffer); )
   {
     arg_buffer[i] = (char)ShortFileName[i];
     if (arg_buffer[i++] == 0) break;
   }
+  free(ShortFileName);
+
+  // set remaining argv[]
   k = 0;
-  for (j = 0; pCmdLine[j] != 0 && k < MAX_PATH - 1; j++)
+  for (j = 0; pCmdLine[j] != 0; j++)
   {
+    if (k >= TmpArgSize)
+    {
+      TmpArgSize = (TmpArgSize == 0) ? 16 : 2 * TmpArgSize;
+      TmpArg = (WCHAR *)realloc(TmpArg, TmpArgSize);
+      if (TmpArg == NULL)
+      {
+        MessageBoxA(NULL, "Error initializing program (realloc)", NULL, MB_OK | MB_ICONERROR);
+        return 1;
+      }
+    }
     if (inquote)
     {
       if (pCmdLine[j] == '"')
@@ -1435,10 +1488,14 @@ int main(int argc,char * argv[])
       { // next argument
         TmpArg[k++] = '\0';
         argv[argc++] = arg_buffer + i;
-        if (GetShortPathNameW(TmpArg, ShortFileName, MAX_PATH) > 0)
+        ShortFileNameSize = GetShortPathNameW(TmpArg, NULL, 0);
+        if (ShortFileNameSize > 0)
         {
+          ShortFileName = (WCHAR *)malloc(sizeof(WCHAR) * ShortFileNameSize);
+          Ret = GetShortPathNameW(TmpArg, ShortFileName, ShortFileNameSize);
           for (k = 0; ShortFileName[k] != 0; k++)
             arg_buffer[i++] = ShortFileName[k];
+          free(ShortFileName);
         }
         else
         {
@@ -1452,14 +1509,19 @@ int main(int argc,char * argv[])
     }
     TmpArg[k++] = pCmdLine[j];
   }
-  TmpArg[k] = '\0';
+  // process the last argument
   if (k > 0)
   {
+    TmpArg[k] = '\0';
     argv[argc++] = arg_buffer + i;
-    if (GetShortPathNameW(TmpArg, ShortFileName, MAX_PATH) > 0)
+    ShortFileNameSize = GetShortPathNameW(TmpArg, NULL, 0);
+    if (ShortFileNameSize > 0)
     {
+      ShortFileName = (WCHAR *)malloc(sizeof(WCHAR) * ShortFileNameSize);
+      Ret = GetShortPathNameW(TmpArg, ShortFileName, ShortFileNameSize);
       for (k = 0; ShortFileName[k] != 0; k++)
         arg_buffer[i++] = ShortFileName[k];
+      free(ShortFileName);
     }
     else
     {
@@ -1469,6 +1531,7 @@ int main(int argc,char * argv[])
     arg_buffer[i++] = 0;
   }
 
+  free(TmpArg);
   // TODO : nCmdShow indicates if the window must be maximized, etc.
 #endif
   if(!Init_program(argc,argv))
