@@ -973,33 +973,68 @@ char * Get_current_directory(char * buf, word * * unicode, size_t size)
 
   return buf;
 #elif defined(WIN32)
+  WCHAR * long_dir, * short_dir;
+  size_t size_long, size_short;
+  size_t i;
+
+  // first get the current directory in unicode
+  size_long = (size_t)GetCurrentDirectoryW(0, NULL);
+  if (size_long == 0)
+  {
+    GFX2_Log(GFX2_ERROR, "GetCurrentDirectoryW(0, NULL) failed !\n");
+    return NULL;
+  }
+  long_dir = (WCHAR *)GFX2_malloc(sizeof(WCHAR) * size_long);
+  if (long_dir == NULL)
+    return NULL;
+  if (GetCurrentDirectoryW(size_long, long_dir) == 0)
+  {
+    GFX2_Log(GFX2_ERROR, "GetCurrentDirectoryW(%u, %p) failed !\n", (unsigned)size_long, long_dir);
+    return NULL;
+  }
+
+  // then convert to "short" path (ie C:\PROGRA~1\...)
+  size_short = (size_t)GetShortPathNameW(long_dir, NULL, 0);
+  if (size_short == 0)
+  {
+    GFX2_Log(GFX2_ERROR, "GetShortPathNameW(%p, NULL, 0) failed !\n", long_dir);
+    free(long_dir);
+    return NULL;
+  }
+  short_dir = (WCHAR *)GFX2_malloc(sizeof(WCHAR) * size_short);
+  if (short_dir == NULL)
+  {
+    free(long_dir);
+    return NULL;
+  }
+  if (GetShortPathNameW(long_dir, short_dir, size_short) == 0)
+  {
+    GFX2_Log(GFX2_ERROR, "GetShortPathNameW(%p, %p, %u) failed !\n", long_dir, short_dir, (unsigned)size_short);
+    free(long_dir);
+    free(short_dir);
+    return NULL;
+  }
+
+  // now copy / return the path
   if (buf == NULL)
   {
-    size = (size_t)GetCurrentDirectoryA(0, NULL);
-    if (size == 0)
-      return NULL;
+    size = size_short;
     buf = (char *)GFX2_malloc(size);
     if (buf == NULL)
-      return NULL;
-  }
-  if (GetCurrentDirectoryA(size, buf) == 0)
-    return NULL;
-  if (unicode != NULL)
-  {
-    WCHAR * temp = (WCHAR *)GFX2_malloc(sizeof(WCHAR) * size);
-    if (temp != NULL)
     {
-      size_t i;
-      for (i = 0; i < size - 1 && buf[i] != '\0'; i++)
-        temp[i] = (WCHAR)buf[i] & 0x00ff;
-      temp[i] = 0;
-      size = GetLongPathNameW(temp, NULL, 0);
-      *unicode = (word *)GFX2_malloc(size*sizeof(word));
-      if (*unicode != NULL)
-        GetLongPathNameW(temp, (WCHAR *)*unicode, size);
-      free(temp);
+      free(long_dir);
+      free(short_dir);
+      return NULL;
     }
   }
+  for (i = 0; i < (size - 1) && short_dir[i]; i++)
+    buf[i] = (char)short_dir[i];
+  buf[i] = '\0';
+  free(short_dir);
+  if (unicode != NULL)
+    *unicode = long_dir;
+  else
+    free(long_dir);
   return buf;
 #else
   char * ret = getcwd(buf, size);
@@ -1036,6 +1071,7 @@ char * Get_current_directory(char * buf, word * * unicode, size_t size)
 
 int Change_directory(const char * path)
 {
+  GFX2_Log(GFX2_DEBUG, "Change_directory(\"%s\")\n", path);
 #if defined(__WIN32__) || defined(WIN32)
   return (SetCurrentDirectoryA(path) ? 0 : -1);
 #else
