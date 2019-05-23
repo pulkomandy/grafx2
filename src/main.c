@@ -1391,9 +1391,9 @@ int main(int argc,char * argv[])
 #endif
 {
 #if defined(WIN32) && !defined(USE_SDL) && !defined(USE_SDL2)
-  TCHAR ModuleFileName[MAX_PATH];
-  TCHAR TmpArg[MAX_PATH];
-  TCHAR ShortFileName[MAX_PATH];
+  WCHAR ModuleFileName[MAX_PATH];
+  WCHAR TmpArg[MAX_PATH];
+  WCHAR ShortFileName[MAX_PATH];
   int i, j, k;
   int inquote = 0;
   int argc = 0;
@@ -1401,12 +1401,12 @@ int main(int argc,char * argv[])
   char * argv[64] = {NULL};
 
   Init_Win32(hInstance, hPrevInstance);
-  if (GetModuleFileName(NULL, ModuleFileName, MAX_PATH) == 0)
+  if (GetModuleFileNameW(NULL, ModuleFileName, MAX_PATH) == 0)
   {
     MessageBoxA(NULL, "Error initializing program", NULL, MB_OK | MB_ICONERROR);
     return 1;
   }
-  GetShortPathName(ModuleFileName, ShortFileName, MAX_PATH);
+  GetShortPathNameW(ModuleFileName, ShortFileName, MAX_PATH);
   argv[argc++] = arg_buffer;
   for (i = 0; i < (int)sizeof(arg_buffer); )
   {
@@ -1435,7 +1435,7 @@ int main(int argc,char * argv[])
       { // next argument
         TmpArg[k++] = '\0';
         argv[argc++] = arg_buffer + i;
-        if (GetShortPathName(TmpArg, ShortFileName, MAX_PATH) > 0)
+        if (GetShortPathNameW(TmpArg, ShortFileName, MAX_PATH) > 0)
         {
           for (k = 0; ShortFileName[k] != 0; k++)
             arg_buffer[i++] = ShortFileName[k];
@@ -1456,7 +1456,7 @@ int main(int argc,char * argv[])
   if (k > 0)
   {
     argv[argc++] = arg_buffer + i;
-    if (GetShortPathName(TmpArg, ShortFileName, MAX_PATH) > 0)
+    if (GetShortPathNameW(TmpArg, ShortFileName, MAX_PATH) > 0)
     {
       for (k = 0; ShortFileName[k] != 0; k++)
         arg_buffer[i++] = ShortFileName[k];
