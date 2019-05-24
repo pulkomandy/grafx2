@@ -1533,6 +1533,7 @@ int main(int argc,char * argv[])
 
   free(TmpArg);
   // TODO : nCmdShow indicates if the window must be maximized, etc.
+  (void)nCmdShow;
 #endif
   if(!Init_program(argc,argv))
   {
@@ -1558,6 +1559,8 @@ int main(int argc,char * argv[])
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR _lpCmdLine, int nCmdShow)
 {
   WCHAR *lpCmdLine = GetCommandLineW();
+  (void)_lpCmdLine;
+
   if (__argc == 1)
   { // avoids GetCommandLineW bug that does not always quote the program name if no arguments
     do { ++lpCmdLine; } while (*lpCmdLine);
