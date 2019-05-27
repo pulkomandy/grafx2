@@ -2628,7 +2628,12 @@ void Button_Palette(int btn)
         break;
 
       case 27: // Save palette
+        // Save the working palette (the one currently being edited)
+        memcpy(backup_palette, Main.palette, sizeof(T_Palette));
+        memcpy(Main.palette, working_palette, sizeof(T_Palette));
         Save_picture(CONTEXT_PALETTE);
+        memcpy(Main.palette, backup_palette, sizeof(T_Palette));
+        need_to_remap=1;
         break;
 
       case 28:  // EHB : Amiga Extra Half Bright
