@@ -5,7 +5,7 @@ endif
 
 .PHONY:	all tools grafx2 ziprelease 3rdparty win32installer \
         doc doxygen docarchive doxygenarchive htmldoc \
-        updateversion
+        updateversion unicodefonts
 
 all:	grafx2 tools
 
@@ -13,8 +13,11 @@ doc:	doxygen
 
 docarchive:	doxygenarchive
 
-grafx2:
+grafx2:	unicodefonts
 	$(OPT)$(MAKE) -C src/
+
+unicodefonts:
+	$(MAKE) -C tools/8x8fonts/
 
 ziprelease: grafx2
 	$(OPT)$(MAKE) -C src/ ziprelease

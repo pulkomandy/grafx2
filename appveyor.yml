@@ -1,4 +1,5 @@
 install:
+  - git submodule update --init --recursive
   - set PATH=C:\msys64\mingw32\bin;C:\msys64\usr\bin;%PATH%
   - mingw32-make -v
   - make -v
@@ -20,3 +21,6 @@ artifacts:
     name: GrafX2 portable installation
   - path: 'install\*.exe'
     name: GrafX2 installer
+
+on_failure:
+  - 'dir /S tools'
