@@ -38,12 +38,14 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <NMakeBuildCommandLine>generateversion.vbs</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>generateversion.vbs</NMakeReBuildCommandLine>
     <NMakeOutput>..\..\src\version.c</NMakeOutput>
     <NMakeCleanCommandLine>del ..\..\src\version.c</NMakeCleanCommandLine>
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <NMakeBuildCommandLine>generateversion.vbs</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>generateversion.vbs</NMakeReBuildCommandLine>
     <NMakeOutput>..\..\src\version.c</NMakeOutput>
     <NMakeCleanCommandLine>del ..\..\src\version.c</NMakeCleanCommandLine>
     <NMakePreprocessorDefinitions>WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
