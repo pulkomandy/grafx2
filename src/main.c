@@ -1462,7 +1462,7 @@ int main(int argc,char * argv[])
     if (k >= TmpArgSize)
     {
       TmpArgSize = (TmpArgSize == 0) ? 16 : 2 * TmpArgSize;
-      TmpArg = (WCHAR *)realloc(TmpArg, TmpArgSize);
+      TmpArg = (WCHAR *)realloc(TmpArg, sizeof(WCHAR) * TmpArgSize);
       if (TmpArg == NULL)
       {
         MessageBoxA(NULL, "Error initializing program (realloc)", NULL, MB_OK | MB_ICONERROR);
