@@ -756,10 +756,29 @@ unsigned long Memory_free(void)
   // ever becomes full and you're still saying there are 10MB free here, the
   // program will crash without saving any picture backup ! You've been warned...
 #if defined(WIN32)
+#if _WIN32_WINNT >= _WIN32_WINNT_WIN2K
+  // GlobalMemoryStatusEx() is supported since Windows 2000
+  MEMORYSTATUSEX mstt;
+  mstt.dwLength = sizeof(mstt);
+  if (GlobalMemoryStatusEx(&mstt))
+  {
+    GFX2_Log(GFX2_DEBUG, "Phys %lu / %luMB, Page %lu / %luMB, Virtual %lu / %luMB\n",
+             (unsigned long)(mstt.ullAvailPhys >> 20), (unsigned long)(mstt.ullTotalPhys >> 20),
+             (unsigned long)(mstt.ullAvailPageFile >> 20), (unsigned long)(mstt.ullTotalPageFile >> 20),
+             (unsigned long)(mstt.ullAvailVirtual >> 20), (unsigned long)(mstt.ullTotalVirtual >> 20));
+    return mstt.ullAvailPhys;
+  }
+  else
+  {
+    GFX2_Log(GFX2_ERROR, "GlobalMemoryStatusEx() failed\n");
+    return 10*1024*1024;
+  }
+#else
   MEMORYSTATUS mstt;
   mstt.dwLength = sizeof(MEMORYSTATUS);
   GlobalMemoryStatus(&mstt);
   return mstt.dwAvailPhys;
+#endif
 #elif defined(__macosx__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
   int mib[2];
   int maxmem;
