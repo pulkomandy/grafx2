@@ -973,44 +973,44 @@ char * Get_current_directory(char * buf, word * * unicode, size_t size)
 
   return buf;
 #elif defined(WIN32)
-  WCHAR * long_dir, * short_dir;
-  size_t size_long, size_short;
+  WCHAR * cur_dir, * short_dir;
+  size_t size_cur, size_short;
   size_t i;
 
   // first get the current directory in unicode
-  size_long = (size_t)GetCurrentDirectoryW(0, NULL);
-  if (size_long == 0)
+  size_cur = (size_t)GetCurrentDirectoryW(0, NULL);
+  if (size_cur == 0)
   {
     GFX2_Log(GFX2_ERROR, "GetCurrentDirectoryW(0, NULL) failed !\n");
     return NULL;
   }
-  long_dir = (WCHAR *)GFX2_malloc(sizeof(WCHAR) * size_long);
-  if (long_dir == NULL)
+  cur_dir = (WCHAR *)GFX2_malloc(sizeof(WCHAR) * size_cur);
+  if (cur_dir == NULL)
     return NULL;
-  if (GetCurrentDirectoryW(size_long, long_dir) == 0)
+  if (GetCurrentDirectoryW(size_cur, cur_dir) == 0)
   {
-    GFX2_Log(GFX2_ERROR, "GetCurrentDirectoryW(%u, %p) failed !\n", (unsigned)size_long, long_dir);
+    GFX2_Log(GFX2_ERROR, "GetCurrentDirectoryW(%u, %p) failed !\n", (unsigned)size_cur, cur_dir);
     return NULL;
   }
 
-  // then convert to "short" path (ie C:\PROGRA~1\...)
-  size_short = (size_t)GetShortPathNameW(long_dir, NULL, 0);
+  // convert to "short" path (ie C:\PROGRA~1\...)
+  size_short = (size_t)GetShortPathNameW(cur_dir, NULL, 0);
   if (size_short == 0)
   {
-    GFX2_Log(GFX2_ERROR, "GetShortPathNameW(%p, NULL, 0) failed !\n", long_dir);
-    free(long_dir);
+    GFX2_Log(GFX2_ERROR, "GetShortPathNameW(%p, NULL, 0) failed !\n", cur_dir);
+    free(cur_dir);
     return NULL;
   }
   short_dir = (WCHAR *)GFX2_malloc(sizeof(WCHAR) * size_short);
   if (short_dir == NULL)
   {
-    free(long_dir);
+    free(cur_dir);
     return NULL;
   }
-  if (GetShortPathNameW(long_dir, short_dir, size_short) == 0)
+  if (GetShortPathNameW(cur_dir, short_dir, size_short) == 0)
   {
-    GFX2_Log(GFX2_ERROR, "GetShortPathNameW(%p, %p, %u) failed !\n", long_dir, short_dir, (unsigned)size_short);
-    free(long_dir);
+    GFX2_Log(GFX2_ERROR, "GetShortPathNameW(%p, %p, %u) failed !\n", cur_dir, short_dir, (unsigned)size_short);
+    free(cur_dir);
     free(short_dir);
     return NULL;
   }
@@ -1022,7 +1022,7 @@ char * Get_current_directory(char * buf, word * * unicode, size_t size)
     buf = (char *)GFX2_malloc(size);
     if (buf == NULL)
     {
-      free(long_dir);
+      free(cur_dir);
       free(short_dir);
       return NULL;
     }
@@ -1031,10 +1031,33 @@ char * Get_current_directory(char * buf, word * * unicode, size_t size)
     buf[i] = (char)short_dir[i];
   buf[i] = '\0';
   free(short_dir);
+
   if (unicode != NULL)
-    *unicode = long_dir;
-  else
-    free(long_dir);
+  {
+    WCHAR * long_dir;
+    size_t size_long;
+
+    *unicode = NULL;
+    // convert to "long" path for display
+    size_long = (size_t)GetLongPathNameW(cur_dir, NULL, 0);
+    if (size_long == 0)
+      GFX2_Log(GFX2_ERROR, "GetLongPathNameW(%p, NULL, 0) failed !\n", cur_dir);
+    else
+    {
+      long_dir = (WCHAR *)GFX2_malloc(sizeof(WCHAR) * size_long);
+      if (long_dir != NULL)
+      {
+        if (GetLongPathNameW(cur_dir, long_dir, size_long) == 0)
+        {
+          GFX2_Log(GFX2_ERROR, "GetLongPathNameW(%p, %p, %u) failed !\n", cur_dir, long_dir, (unsigned)size_long);
+          free(long_dir);
+        }
+        else
+          *unicode = (word *)long_dir;
+      }
+    }
+  }
+  free(cur_dir);
   return buf;
 #else
   char * ret = getcwd(buf, size);
