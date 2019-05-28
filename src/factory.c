@@ -1986,11 +1986,47 @@ int L_FinalizePicture(lua_State* L)
 int L_GetFileName(lua_State* L)
 {
   int nb_args=lua_gettop(L);
-  
+
   LUA_ARG_LIMIT (0, "getfilename");
-  
+
+#if defined(WIN32)
+  if (Main.backups->Pages->Filename_unicode == NULL || Main.backups->Pages->Filename_unicode[0] == 0)
+    lua_pushstring(L, Main.backups->Pages->Filename);
+  else
+  {
+    // convert Filename_unicode to UTF8 (Lua strings are 8bits)
+    size_t unicode_len = Unicode_strlen(Main.backups->Pages->Filename_unicode);
+    int len = WideCharToMultiByte(CP_UTF8, 0, Main.backups->Pages->Filename_unicode, unicode_len, NULL, 0, NULL, NULL);
+    if (len <= 0)
+    {
+      GFX2_Log(GFX2_WARNING, "WideCharToMultiByte() failed\n");
+      lua_pushstring(L, Main.backups->Pages->Filename);
+    }
+    else
+    {
+      char * utf8name = (char *)GFX2_malloc(len);
+      if (utf8name == NULL)
+        lua_pushstring(L, Main.backups->Pages->Filename);
+      else
+      {
+        if (WideCharToMultiByte(CP_UTF8, 0, Main.backups->Pages->Filename_unicode, unicode_len, utf8name, len, NULL, NULL) > 0)
+          lua_pushlstring(L, utf8name, len);
+        else
+        {
+          DWORD error = GetLastError();
+          GFX2_Log(GFX2_WARNING, "WideCharToMultiByte() failed error=%u\n", error);
+          lua_pushstring(L, Main.backups->Pages->Filename);
+        }
+        free(utf8name);
+      }
+    }
+  }
+  // still using the "short name" directory path at the moment
+  lua_pushstring(L, Main.backups->Pages->File_directory);
+#else
   lua_pushstring(L, Main.backups->Pages->Filename);
   lua_pushstring(L, Main.backups->Pages->File_directory);
+#endif
   return 2;
 }
 
