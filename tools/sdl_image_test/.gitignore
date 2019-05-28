@@ -1,4 +1,5 @@
+*.exe
+*.ttp
+*.o
 showimage
-showimage.o
 showimage-sdl2
-showimage-sdl2.o
