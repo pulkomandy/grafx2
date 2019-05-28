@@ -957,9 +957,19 @@ void Button_Stats(int btn)
   y+=8;
 #if defined(__WIN32__) || defined(WIN32)
     {
-      ULARGE_INTEGER tailleU;
-      GetDiskFreeSpaceExA(Main.selector.Directory,&tailleU,NULL,NULL);
-      mem_size = tailleU.QuadPart;
+      ULARGE_INTEGER tailleU, totalbytes, totalfreebytes;
+      if (GetDiskFreeSpaceExA(Main.selector.Directory, &tailleU, &totalbytes, &totalfreebytes))
+      {
+        GFX2_Log(GFX2_DEBUG, "%s: %luMB free for GrafX2 (total %luMB, %luMB free)\n",
+                 Main.selector.Directory, (unsigned long)(tailleU.QuadPart >> 20),
+                 (unsigned long)(totalbytes.QuadPart >> 20), (unsigned long)(totalfreebytes.QuadPart >> 20));
+        mem_size = tailleU.QuadPart;
+      }
+      else
+      {
+        mem_size = 0;
+        GFX2_Log(GFX2_ERROR, "GetDiskFreeSpaceExA() failed\n");
+      }
     }
 #elif defined(__linux__) || defined(__macosx__) || defined(__FreeBSD__) || defined(__SYLLABLE__) || defined(__AROS__) || defined(__OpenBSD__) || defined(__NetBSD__)
     {
