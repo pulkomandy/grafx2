@@ -30,6 +30,6 @@ fi
 cd /
 $SUDO apt-get install "${TMP}/${FILE}" || exit 1
 echo "devkitpro pacman installed"
-yes Y | $SUDO dkp-pacman -S devkitA64 devkit-env libnx switch-tools switch-sdl2 switch-sdl2_ttf switch-sdl2_image switch-zlib switch-bzip2 switch-libpng switch-libjpeg-turbo switch-freetype || exit 1
+yes Y | $SUDO dkp-pacman -S devkitA64 devkit-env libnx switch-tools switch-pkg-config switch-sdl2 switch-sdl2_ttf switch-sdl2_image switch-zlib switch-bzip2 switch-libpng switch-libjpeg-turbo switch-freetype || exit 1
 echo "Switch toolchain and library extracted to /opt/devkitpro.."
 rm -r ${TMP}

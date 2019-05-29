@@ -585,9 +585,10 @@ endif
         COPT += $(ARCH) -Wall -ffunction-sections -O$(OPTIM)
         COPT += -D__SWITCH__ -D_XOPEN_SOURCE=500 -DUSE_JOYSTICK -D__no_tifflib__
         LOPT = -specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(OBJDIR)/$*.map
-        LOPT += -lSDL2_image `$(DEVKITPRO)/portlibs/switch/bin/sdl2-config --libs`
-        LOPT += -lSDL2_ttf `$(DEVKITPRO)/portlibs/switch/bin/freetype-config --libs`
-        LOPT += -ljpeg -lstdc++ -lnx
+        LOPT += `$(DEVKITPRO)/portlibs/switch/bin/sdl2-config --libs`
+        LOPT += `/opt/devkitpro/portlibs/switch/bin/aarch64-none-elf-pkg-config --libs-only-l SDL2_image`
+        LOPT += `/opt/devkitpro/portlibs/switch/bin/aarch64-none-elf-pkg-config --libs-only-l SDL2_ttf`
+        LOPT += -lstdc++ -lnx
       else
       ifdef AROS32CROSS
         #cross compile an AROS 32 bit executable
