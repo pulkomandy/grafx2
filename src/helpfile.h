@@ -2979,9 +2979,11 @@ static const T_Help_table helptable_palette[] =
   HELP_TEXT ("to the capabilities of some specific")
   HELP_TEXT ("computers and consoles, you can choose eg:")
   HELP_TEXT ("   64 : VGA")
-  HELP_TEXT ("   16 : Amiga")
-  HELP_TEXT ("    4 : MSX2")
-  HELP_TEXT ("    2 : Amstrad CPC")
+  HELP_TEXT ("   32 : SNES / GBC / GBA / DS")
+  HELP_TEXT ("   16 : Amiga / STE / Apple IIgs / Game Gear")
+  HELP_TEXT ("    8 : MSX2 / ST / Mega Drive / PC-Engine")
+  HELP_TEXT ("    4 : EGA / Master System")
+  HELP_TEXT ("    3 : Amstrad CPC")
   };
 static const T_Help_table helptable_pal_scroll[] =
 {
