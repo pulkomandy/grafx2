@@ -5313,10 +5313,20 @@ void Save_GIF(T_IO_Context * context)
                   // Write the last code (before EOF)
                   GIF_set_code(GIF_file, &GIF, GIF_buffer, current_string);
     
-                  // We think we don't need to update GIF.nb_bits here because
-                  // we are writing a string already in the table,
-                  // but we may be wrong as the table grow for each code...
-                  // So in very rare cases there might be a problem.
+                  // we need to update alphabet_free / GIF.nb_bits here because
+                  // the decoder will update them after each code,
+                  // so in very rare cases there might be a problem if we
+                  // don't do it.
+                  // see http://pulkomandy.tk/projects/GrafX2/ticket/125
+                  if(alphabet_free < 4096)
+                  {
+                    alphabet_free++;
+                    if ((alphabet_free > alphabet_max+1) && (GIF.nb_bits < 12))
+                    {
+                      GIF.nb_bits++;
+                      alphabet_max = (1 << GIF.nb_bits) - 1;
+                    }
+                  }
 
                   GIF_set_code(GIF_file, &GIF, GIF_buffer, eof);  // 257 for 8bpp    // Code de End d'image
                   if (GIF.remainder_bits!=0)
