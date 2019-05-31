@@ -4207,18 +4207,32 @@ static word GIF_get_next_code(FILE * GIF_file, T_GIF_context * gif)
 
   while (nb_bits_to_process)
   {
-    if (gif->remainder_bits==0) // Il ne reste plus de bits...
+    if (gif->remainder_bits == 0) // Il ne reste plus de bits...
     {
       // Lire l'octet suivant:
 
       // Si on a atteint la fin du bloc de Raster Data
-      if (gif->remainder_byte==0)
+      if (gif->remainder_byte == 0)
+      {
         // Lire l'octet nous donnant la taille du bloc de Raster Data suivant
         if(Read_byte(GIF_file, &gif->remainder_byte)!=1)
+        {
           File_error=2;
-
+          return 0;
+        }
+        if (gif->remainder_byte == 0) // still nothing ? That is the end data block
+        {
+          File_error = 2;
+          GFX2_Log(GFX2_WARNING, "GIF 0 sized data block\n");
+          return gif->current_code;
+        }
+      }
       if(Read_byte(GIF_file,&gif->last_byte)!=1)
+      {
         File_error = 2;
+        GFX2_Log(GFX2_ERROR, "GIF failed to load data byte\n");
+        return 0;
+      }
       gif->remainder_byte--;
       gif->remainder_bits=8;
     }
@@ -4714,13 +4728,19 @@ void Load_GIF(T_IO_Context * context)
                       alphabet_stack[alphabet_stack_pos++]=special_case;
                     }
 
-                    while (GIF.current_code>value_clr)
+                    while (GIF.current_code > value_clr)
                     {
-                      alphabet_stack[alphabet_stack_pos++]=alphabet_suffix[GIF.current_code];
-                      GIF.current_code=alphabet_prefix[GIF.current_code];
+                      if (GIF.current_code >= 4096)
+                      {
+                        GFX2_Log(GFX2_ERROR, "Load_GIF() GIF.current_code = %u >= 4096\n", GIF.current_code);
+                        File_error = 2;
+                        break;
+                      }
+                      alphabet_stack[alphabet_stack_pos++] = alphabet_suffix[GIF.current_code];
+                      GIF.current_code = alphabet_prefix[GIF.current_code];
                     }
 
-                    special_case=alphabet_stack[alphabet_stack_pos++]=GIF.current_code;
+                    special_case = alphabet_stack[alphabet_stack_pos++] = GIF.current_code;
 
                     do
                       GIF_new_pixel(context, &GIF, &IDB, is_transparent, alphabet_stack[--alphabet_stack_pos]);
