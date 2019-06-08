@@ -319,8 +319,6 @@ void Frame_menu_color(byte id)
             Block(start_x + cw / 2, start_y + ch / 2,
               (cw+1) / 2, (ch+1) / 2, MC_Dark);
         }
-
-        Update_rect(start_x,start_y,Menu_palette_cell_width*Menu_factor_X,cell_height*Menu_factor_Y);
       }
       else
       {
@@ -349,9 +347,8 @@ void Frame_menu_color(byte id)
           Block(start_x+index*Menu_factor_X,start_y+end_y*Menu_factor_Y,
                 Menu_factor_X,Menu_factor_Y,
                 ((index+end_y)&1)?color:MC_Black);
-
-        Update_rect(start_x*Menu_factor_X,start_y*Menu_factor_Y,Menu_palette_cell_width*Menu_factor_X,Menu_Y+cell_height*Menu_factor_Y);
       }
+      Update_rect(start_x,start_y,Menu_palette_cell_width*Menu_factor_X,cell_height*Menu_factor_Y);
     }
   }
 }
