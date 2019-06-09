@@ -1694,10 +1694,19 @@ void Load_IFF(T_IO_Context * context)
             context->Color_cycles++;
           }
         }
+        else if (memcmp(section, "DPI ", 4) == 0)
+        {
+          word dpi_x, dpi_y;
+          Read_word_be(IFF_file, &dpi_x);
+          Read_word_be(IFF_file, &dpi_y);
+          section_size -= 4;
+          GFX2_Log(GFX2_DEBUG, "IFF DPI %hu x %hu\n", dpi_x, dpi_y);
+        }
         else if (memcmp(section, "CAMG", 4) == 0) //  	Amiga Viewport Modes
         {
           Read_dword_be(IFF_file, &AmigaViewModes); // HIRES=0x8000 LACE=0x4  HAM=0x800  HALFBRITE=0x80
           section_size -= 4;
+          GFX2_Log(GFX2_DEBUG, "CAMG = $%08x\n", AmigaViewModes);
           if (AmigaViewModes & 0x800 && (header.BitPlanes == 6 || header.BitPlanes == 8))
           {
             Image_HAM = header.BitPlanes;
