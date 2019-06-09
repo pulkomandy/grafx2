@@ -1231,7 +1231,7 @@ uninstall :
 endif
 
 valgrind: $(BIN)
-	valgrind --suppressions=../valgrind.grafx2.suppr --leak-check=full --show-leak-kinds=all --num-callers=20 $(BIN)
+	valgrind --suppressions=../valgrind.grafx2.suppr --leak-check=full --show-leak-kinds=all --num-callers=20 $(BIN) -v
 
 doc:	doxygen
 
