@@ -2296,6 +2296,7 @@ void Save_IFF(T_IO_Context * context)
   int palette_entries;
   byte bit_depth;
   long body_offset = -1;
+  int is_ehb = 0; // Extra half-bright
 
   if (context->Format == FORMAT_LBM)
   {
@@ -2310,13 +2311,26 @@ void Save_IFF(T_IO_Context * context)
       bit_depth++;
       temp_byte>>=1;
     } while (temp_byte);
-    GFX2_Log(GFX2_DEBUG, "Saving ILBM with bit_depth = %d\n", bit_depth);
+    if (bit_depth == 6)
+    {
+      for (i = 0; i < 32; i++)
+      {
+        if (   (context->Palette[i].R >> 5) != (context->Palette[i+32].R >> 4)
+            || (context->Palette[i].G >> 5) != (context->Palette[i+32].G >> 4)
+            || (context->Palette[i].B >> 5) != (context->Palette[i+32].B >> 4))
+          break;
+      }
+      if (i == 32) is_ehb = 1;
+    }
+    GFX2_Log(GFX2_DEBUG, "Saving ILBM with bit_depth = %d %s\n", bit_depth,
+             is_ehb ? "(Extra Half-Bright)" : "");
+    palette_entries = 1 << (bit_depth - is_ehb);
   }
   else // FORMAT_PBM
   {
-    bit_depth=8;
+    bit_depth = 8;
+    palette_entries = 256;
   }
-  palette_entries = 1<<bit_depth;
 
   File_error=0;
   
@@ -2385,6 +2399,22 @@ void Save_IFF(T_IO_Context * context)
     Write_bytes(IFF_file,&header.Y_aspect,1);
     Write_word_be(IFF_file,header.X_screen);
     Write_word_be(IFF_file,header.Y_screen);
+
+    if (context->Format == FORMAT_LBM)
+    {
+      dword ViewMode = 0; // HIRES=0x8000 LACE=0x4  HAM=0x800  HALFBRITE=0x80
+      if (is_ehb) ViewMode |= 0x80;
+      if (context->Width > 400)
+      {
+        ViewMode |= 0x8000;
+        if (context->Width > 800)
+          ViewMode |= 0x20; // Super High-Res
+      }
+      if (context->Height > 300) ViewMode |= 0x4;
+      Write_bytes(IFF_file, "CAMG", 4);
+      Write_dword_be(IFF_file, 4); // Section size
+      Write_dword_be(IFF_file, ViewMode);
+    }
 
     Write_bytes(IFF_file,"CMAP",4);
     Write_dword_be(IFF_file,palette_entries*3);
