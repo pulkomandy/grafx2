@@ -355,7 +355,7 @@ static char* getClipboard(word * * unicode)
           }
         }
         CloseClipboard();
-      }    
+      }
     return dst;
   #elif defined(__AROS__)
 
@@ -634,7 +634,7 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
   word window_x=Window_pos_X;
   word window_y=Window_pos_Y;
   byte offset=0; // index du premier caractère affiché
-  
+
   // Virtual keyboard
   byte use_virtual_keyboard=0;
   static byte caps_lock=0;
@@ -687,19 +687,19 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
     if (input_type == INPUT_TYPE_STRING || input_type == INPUT_TYPE_FILENAME )
     {
       int x,y;
-  
+
       Init_virtual_keyboard(y_pos, 320, 87);
-      
+
       use_virtual_keyboard=1;
-      
+
       // The order is important, see the array
-      
+
       Window_set_normal_button(  7,67,43,15,"Clr", 0,1,KEY_NONE);
       Window_set_normal_button( 51,67,43,15,"Del", 0,1,KEY_NONE);
       Window_set_normal_button( 95,67,43,15,"OK",  0,1,KEY_NONE);
       Window_set_normal_button(139,67,43,15,"Esc", 0,1,KEY_NONE);
       Window_display_frame_in(5,65,179,19);
-  
+
       Window_set_normal_button(193,63,17,19,"0", 0,1,KEY_NONE);
       Window_set_normal_button(193,43,17,19,"1", 0,1,KEY_NONE);
       Window_set_normal_button(211,43,17,19,"2", 0,1,KEY_NONE);
@@ -712,7 +712,7 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
       Window_set_normal_button(229, 3,17,19,"9", 0,1,KEY_NONE);
       Window_set_normal_button(211,63,17,19,".", 0,1,KEY_NONE);
       Window_set_normal_button(229,63,17,19,",", 0,1,KEY_NONE);
-   
+
       Window_set_normal_button(  3, 3,18,19,"Q", 0,1,KEY_NONE);
       Window_set_normal_button( 22, 3,18,19,"W", 0,1,KEY_NONE);
       Window_set_normal_button( 41, 3,18,19,"E", 0,1,KEY_NONE);
@@ -723,7 +723,7 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
       Window_set_normal_button(136, 3,18,19,"I", 0,1,KEY_NONE);
       Window_set_normal_button(155, 3,18,19,"O", 0,1,KEY_NONE);
       Window_set_normal_button(174, 3,18,19,"P", 0,1,KEY_NONE);
-  
+
       Window_set_normal_button( 12,23,18,19,"A", 0,1,KEY_NONE);
       Window_set_normal_button( 31,23,18,19,"S", 0,1,KEY_NONE);
       Window_set_normal_button( 50,23,18,19,"D", 0,1,KEY_NONE);
@@ -733,7 +733,7 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
       Window_set_normal_button(126,23,18,19,"J", 0,1,KEY_NONE);
       Window_set_normal_button(145,23,18,19,"K", 0,1,KEY_NONE);
       Window_set_normal_button(164,23,18,19,"L", 0,1,KEY_NONE);
-      
+
       Window_set_normal_button(  3,43,18,19,caps_lock?"\036":"\037", 0,1,KEY_NONE);
       Window_set_normal_button( 22,43,18,19,"Z", 0,1,KEY_NONE);
       Window_set_normal_button( 41,43,18,19,"X", 0,1,KEY_NONE);
@@ -743,34 +743,34 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
       Window_set_normal_button(117,43,18,19,"N", 0,1,KEY_NONE);
       Window_set_normal_button(136,43,18,19,"M", 0,1,KEY_NONE);
       Window_set_normal_button(155,43,18,19," ", 0,1,KEY_NONE);
-  
+
       for (y=0; y<5; y++)
       {
         for (x=0; x<6; x++)
         {
           char label[2]=" ";
-          label[0]=keymapping[x+y*6+44];        
+          label[0]=keymapping[x+y*6+44];
           Window_set_normal_button(247+x*12, 3+y*16,11,15,label, 0,1,KEY_NONE);
         }
       }
-  
+
       Update_window_area(0,0,Window_width, Window_height);
       Display_cursor();
     }
     else if (input_type == INPUT_TYPE_INTEGER || input_type == INPUT_TYPE_DECIMAL )
     {
       Init_virtual_keyboard(y_pos, 215, 47);
-      
+
       use_virtual_keyboard=1;
-      
+
       // The order is important, see the array
-      
+
       Window_set_normal_button(  7,27,43,15,"Clr", 0,1,KEY_NONE);
       Window_set_normal_button( 51,27,43,15,"Del", 0,1,KEY_NONE);
       Window_set_normal_button( 95,27,43,15,"OK",  0,1,KEY_NONE);
       Window_set_normal_button(139,27,43,15,"Esc", 0,1,KEY_NONE);
       Window_display_frame_in(5,25,179,19);
-  
+
       Window_set_normal_button(174, 3,18,19,"0", 0,1,KEY_NONE);
       Window_set_normal_button(  3, 3,18,19,"1", 0,1,KEY_NONE);
       Window_set_normal_button( 22, 3,18,19,"2", 0,1,KEY_NONE);
@@ -782,7 +782,7 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
       Window_set_normal_button(136, 3,18,19,"8", 0,1,KEY_NONE);
       Window_set_normal_button(155, 3,18,19,"9", 0,1,KEY_NONE);
       Window_set_normal_button(193, 3,18,19,".", 0,1,KEY_NONE);
-  
+
       Update_window_area(0,0,Window_width, Window_height);
       Display_cursor();
     }
@@ -831,12 +831,12 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
       display_string[0]=LEFT_TRIANGLE_CHARACTER;
     if ((size_t)visible_size + offset + 1 < size )
       display_string[visible_size-1]=RIGHT_TRIANGLE_CHARACTER;
-  
+
     Display_whole_string(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),display_string,position - offset);
   }
   Update_rect(window_x+(x_pos*Menu_factor_X),window_y+(y_pos*Menu_factor_Y),
     visible_size*(Menu_factor_X<<3),(Menu_factor_Y<<3));
-  
+
   Flush_update();
   if (Mouse_K)
   {
@@ -956,7 +956,7 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
           Hide_cursor();
           goto affichage;
         }
-        
+
       } while(input_char==0 && input_key == 0
 #if defined(USE_SDL2)
               && Key_Text[0] == '\0'
@@ -1054,7 +1054,7 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
               else
                 Remove_character(str,position);
               size--;
-              
+
               // Effacement de la chaîne
               Screen_FillRect((window_x+(x_pos*Menu_factor_X))*Pixel_width, (window_y+(y_pos*Menu_factor_Y))*Pixel_height,
                 (visible_size*(Menu_factor_X<<3))*Pixel_width, (Menu_factor_Y<<3)*Pixel_height, BACKGROUND_COLOR);
@@ -1115,7 +1115,7 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
       case  KEY_BACKSPACE : // Backspace : combinaison de gauche + suppr
 
         if (position > 0)
-        {       
+        {
           position--;
           if (offset > 0 && (position == 0 || position < (offset + 1)))
             offset--;
@@ -1139,7 +1139,7 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
           (visible_size*(Menu_factor_X<<3))*Pixel_width, (Menu_factor_Y<<3)*Pixel_height, BACKGROUND_COLOR);        goto affichage;
       case KEY_RETURN :
         break;
-        
+
       case KEY_ESC :
         // On restaure la chaine initiale
         strcpy(str,initial_string);
@@ -1193,7 +1193,7 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
           } // End du test d'autorisation de touche
         } // End du test de place libre
         break;
-      
+
 affichage:
         if (str_unicode != NULL)
         {
@@ -1236,11 +1236,11 @@ affichage:
     Mouse_K=old_mouse_k;
     Input_sticky_control=0;
   }
-#endif // defined(__ANDROID__)  
+#endif // defined(__ANDROID__)
   // Effacement de la chaîne
   Screen_FillRect((window_x+(x_pos*Menu_factor_X))*Pixel_width, (window_y+(y_pos*Menu_factor_Y))*Pixel_height,
     (visible_size*(Menu_factor_X<<3))*Pixel_width, (Menu_factor_Y<<3)*Pixel_height, BACKGROUND_COLOR);
-  
+
   // On raffiche la chaine correctement
   if (input_type==INPUT_TYPE_INTEGER)
   {
@@ -1260,7 +1260,7 @@ affichage:
     // Recompute updated size
     size = strlen(str);
     if (size > 255) size = 255;
-    
+
     if (size<=visible_size)
       Print_in_window(x_pos+(((short)visible_size-(short)size)<<3),y_pos,str,TEXT_COLOR,BACKGROUND_COLOR);
     else
@@ -1271,7 +1271,7 @@ affichage:
     Print_in_window_limited(x_pos,y_pos,str,visible_size,TEXT_COLOR,BACKGROUND_COLOR);
   }
   Update_window_area(x_pos,y_pos,visible_size<<3,8);
-  
+
   return (input_key==KEY_RETURN);
 }
 
@@ -1279,7 +1279,7 @@ void Sprint_double(char *str, double value, byte decimal_places, byte min_positi
 {
   int i;
   int length;
-  
+
   sprintf(str,"%.*f",decimal_places, value);
   length=strlen(str);
 
@@ -1290,7 +1290,7 @@ void Sprint_double(char *str, double value, byte decimal_places, byte min_positi
       // Remove extraneous zeroes
       char * decimals = str+i+1;
       int j;
-      
+
       for (j=strlen(decimals)-1; j >= 0 && decimals[j]=='0'; j--)
       {
           decimals[j] = '\0';
@@ -1298,20 +1298,20 @@ void Sprint_double(char *str, double value, byte decimal_places, byte min_positi
       // If all decimals were removed, remove the dot too
       if (str[i+1]=='\0')
         str[i]='\0';
-      
+
       // Update string length
       length=strlen(str);
-      
+
       // Ends the parent loop
-      break; 
+      break;
     }
   }
-  
+
   // Now try add spaces at beginning
   if (length<min_positions)
   {
     int offset = min_positions - length;
-    
+
     // Move the string to the right
     for (i=0; i<=length; i++)
     {
