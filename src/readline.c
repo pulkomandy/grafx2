@@ -1152,7 +1152,13 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
         }
         break;
       default :
+        // SDL2 keystrokes are reported through both Key_Text and
+        // Key_ANSI / Key_UNICODE
+#if defined(USE_SDL2)
+        if (use_virtual_keyboard && size<max_size && input_char != 0)
+#else
         if (size<max_size && input_char != 0)
+#endif
         {
           // Si la touche était autorisée...
           byte is_authorized = Valid_character(input_char, input_type);
