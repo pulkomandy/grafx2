@@ -40,6 +40,8 @@
 #include "palette.h"
 #include "shade.h"
 
+static void Component_unit(int count);
+
 static byte Palette_view_is_RGB = 1; // Indique si on est en HSL ou en RGB
 static float Gamma = 1.0;
 
@@ -67,7 +69,10 @@ int Color_halfstep=0;
 void Set_palette_RGB_scale(int scale)
 {
   if (scale>= 2 && scale <= 256)
+  {
     RGB_scale = scale;
+    Component_unit(RGB_scale);
+  }
 }
 
 int Get_palette_RGB_scale(void)
@@ -108,16 +113,16 @@ byte Round_palette_component(byte comp)
 /// otherwise the rounding will be "down".
 static int Decode_component(int comp)
 {
-  float res = pow((float)comp/Color_max,1/Gamma)*255;
+  double res = pow((double)comp/Color_max, 1.0/Gamma) * 255.0;
   return (int)res;
 }
 
 
 /// Turns a RGB component from 0-255 to 0-(RGB_scale-1) and apply Gamma correction.
-static int Encode_component(int comp)
+int Encode_component(int comp)
 {
-  float res = pow(comp/255.0,Gamma)*Color_max;
-  return ceil(res);
+  double res = pow(comp/255.0, Gamma) * (double)Color_max;
+  return (int)ceil(res);
 }
 
 
@@ -135,7 +140,7 @@ static int Add_encoded(int comp, int offset)
 
 
 // Définir les unités pour les graduations R G B ou H S V
-void Component_unit(int count)
+static void Component_unit(int count)
 {
   Color_count = count;
   Color_max = count-1;

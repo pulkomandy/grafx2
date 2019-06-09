@@ -53,6 +53,7 @@
 #include "io.h"
 #include "pxsimple.h"
 #include "oldies.h"
+#include "palette.h"
 
 #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__) || defined(__SWITCH__)
 // We don't want to underline the keyboard shortcuts as there is no keyboard
@@ -589,7 +590,9 @@ void Status_print_palette_color(byte color)
   
   i = snprintf(str, sizeof(str), "%s%d (%d,%d,%d)",
            Buttons_Pool[BUTTON_CHOOSE_COL].Tooltip, color,
-           Main.palette[color].R,Main.palette[color].G,Main.palette[color].B);
+           Encode_component(Main.palette[color].R),
+           Encode_component(Main.palette[color].G),
+           Encode_component(Main.palette[color].B));
   // Pad spaces
   while(i<24)
     str[i++]=' ';

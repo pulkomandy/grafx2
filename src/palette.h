@@ -41,6 +41,10 @@ void Set_palette_Gamma(int);
 /// Returns the resulting value, in the [0-255] range.
 byte Round_palette_component(byte comp);
 
+/// Turns a RGB component from 0-255 to 0-(RGB_scale-1)
+/// with Gamma correction.
+int Encode_component(int comp);
+
 /*!
   Adds 4 menu colors in the current palette.
   @param color_usage An up-to-date color usage table (byte[256]) (read only)
