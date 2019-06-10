@@ -1379,6 +1379,30 @@ int Directional_acceleration(int msec)
   return 1+(msec-initial_delay+linear_factor)/linear_factor+(msec-initial_delay)*(msec-initial_delay)/accel_factor;
 }
 
+#if defined(USE_X11)
+word X11_key_mod;
+
+static word X11_to_GFX2_Modifiers(unsigned int state)
+{
+  word mod = 0;
+  // right/left window 40 Mod4Mask
+  // left alt = 8         Mod1Mask
+  // right alt = 80       Mod5Mask
+  // NumLock = 10         Mod2Mask
+  // see "modmap"
+  if (state & ShiftMask)
+    mod |= GFX2_MOD_SHIFT;
+  if (state & ControlMask)
+    mod |= GFX2_MOD_CTRL;
+  if (state & (Mod1Mask | Mod5Mask))
+    mod |= GFX2_MOD_ALT;
+  if (state & Mod4Mask)
+    mod |= GFX2_MOD_META;
+  X11_key_mod = mod;
+  return mod;
+}
+#endif
+
 #if defined(WIN32) && !defined(USE_SDL) && !defined(USE_SDL2)
 int user_feedback_required = 0; // Flag qui indique si on doit arrêter de traiter les évènements ou si on peut enchainer
 #endif
@@ -1949,19 +1973,7 @@ int Get_input(int sleep_time)
         case KeyPress:
           {
             KeySym sym;
-            // right/left window 40 Mod4Mask
-            // left alt = 8         Mod1Mask
-            // right alt = 80       Mod5Mask
-            // NumLock = 10         Mod2Mask
-            // see "modmap"
-            if (event.xkey.state & ShiftMask)
-              mod |= GFX2_MOD_SHIFT;
-            if (event.xkey.state & ControlMask)
-              mod |= GFX2_MOD_CTRL;
-            if (event.xkey.state & (Mod1Mask | Mod5Mask))
-              mod |= GFX2_MOD_ALT;
-            if (event.xkey.state & Mod4Mask)
-              mod |= GFX2_MOD_META;
+            mod = X11_to_GFX2_Modifiers(event.xkey.state);
             //sym = XKeycodeToKeysym(X11_display, event.xkey.keycode, 0);
             sym = XkbKeycodeToKeysym(X11_display, event.xkey.keycode, 0, 0);
             GFX2_Log(GFX2_DEBUG, "key press code = %3d state=0x%08x sym = 0x%04lx %s\tmod=%04x\n",
@@ -2003,14 +2015,7 @@ int Get_input(int sleep_time)
           {
             KeySym sym;
 
-            if (event.xkey.state & ShiftMask)
-              mod |= GFX2_MOD_SHIFT;
-            if (event.xkey.state & ControlMask)
-              mod |= GFX2_MOD_CTRL;
-            if (event.xkey.state & (Mod1Mask | Mod5Mask))
-              mod |= GFX2_MOD_ALT;
-            if (event.xkey.state & Mod4Mask)
-              mod |= GFX2_MOD_META;
+            mod = X11_to_GFX2_Modifiers(event.xkey.state);
             sym = XkbKeycodeToKeysym(X11_display, event.xkey.keycode, 0, 0);
             GFX2_Log(GFX2_DEBUG, "keyrelease code= %3d state=0x%08x sym = 0x%04lx %s\tmod=%04x\n",
                      event.xkey.keycode, event.xkey.state, sym, XKeysymToString(sym), mod);
@@ -2023,14 +2028,7 @@ int Get_input(int sleep_time)
                        GrabModeAsync, GrabModeAsync,
                        X11_window, None, CurrentTime);
           //printf("Press button = %d state = 0x%08x\n", event.xbutton.button, event.xbutton.state);
-          if (event.xkey.state & ShiftMask)
-            mod |= GFX2_MOD_SHIFT;
-          if (event.xkey.state & ControlMask)
-            mod |= GFX2_MOD_CTRL;
-          if (event.xkey.state & (Mod1Mask | Mod5Mask))
-            mod |= GFX2_MOD_ALT;
-          if (event.xkey.state & Mod3Mask)
-            mod |= GFX2_MOD_META;
+          mod = X11_to_GFX2_Modifiers(event.xbutton.state);
           switch(event.xbutton.button)
           {
             case 1:
@@ -2061,6 +2059,7 @@ int Get_input(int sleep_time)
           break;
         case ButtonRelease:
           XUngrabPointer(X11_display, CurrentTime);
+          mod = X11_to_GFX2_Modifiers(event.xbutton.state);
           //printf("Release button = %d\n", event.xbutton.button);
           if(event.xbutton.button == 1 || event.xbutton.button == 3)
           {
@@ -2075,6 +2074,7 @@ int Get_input(int sleep_time)
           break;
         case MotionNotify:
           //printf("mouse %dx%d\n", event.xmotion.x, event.xmotion.y);
+          mod = X11_to_GFX2_Modifiers(event.xmotion.state);
           user_feedback_required = Move_cursor_with_constraints(event.xmotion.x / Pixel_width, event.xmotion.y / Pixel_height);
           break;
         case Expose:

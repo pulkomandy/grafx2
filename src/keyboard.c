@@ -29,6 +29,12 @@
 #include "global.h"
 #include "keyboard.h"
 #include "keycodes.h"
+#include "gfx2log.h"
+
+#if defined(USE_X11)
+/// State of modifier keys (shift, CTRL, ALT, etc.)
+extern word X11_key_mod;
+#endif
 
 #if defined(__macosx__)
   // Apple's "command" character is not present in the ANSI table, so we
@@ -331,27 +337,37 @@ word Key_for_scancode(word scancode)
   else
     return Scancode_to_sym[scancode & 0xFF][0];
 }
+#endif
+
+#if defined(USE_SDL) || defined(USE_SDL2)
 
 // Convertit des modificateurs de touches SDL en modificateurs GrafX2
 word Get_Key_modifiers(void)
 {
-  word modifiers=0;
-  SDLMod mod = SDL_GetModState();
+#if defined(USE_SDL)
+  SDLMod mod;
+#else
+  SDL_Keymod mod;
+#endif
+  word modifiers = 0;
+  mod = SDL_GetModState();
 
-    if (mod & KMOD_CTRL )
-      modifiers|=GFX2_MOD_CTRL;
-    if (mod & KMOD_SHIFT )
-      modifiers|=GFX2_MOD_SHIFT;
-    if (mod & (KMOD_ALT|KMOD_MODE))
-      modifiers|=GFX2_MOD_ALT;
+    if (mod & KMOD_CTRL)    // either one of the CTRL keys
+      modifiers |= GFX2_MOD_CTRL;
+    if (mod & KMOD_SHIFT )  // either one of the SHIFT keys
+      modifiers |= GFX2_MOD_SHIFT;
+    if (mod & (KMOD_ALT|KMOD_MODE)) // either ALT or ALTGR key
+      modifiers |= GFX2_MOD_ALT;
+#if defined(USE_SDL)
     if (mod & (KMOD_META))
-      modifiers|=GFX2_MOD_META;
+#else
+    if (mod & (KMOD_GUI))   // right or left Window key
+#endif
+      modifiers |= GFX2_MOD_META;
 
+GFX2_Log(GFX2_DEBUG, "mod=%x => %04x\n", (unsigned)mod, modifiers);
   return modifiers;
 }
-#endif
-
-#if defined(USE_SDL) || defined(USE_SDL2)
 
 #if defined(USE_SDL)
 word Keysym_to_keycode(SDL_keysym keysym)
@@ -850,10 +866,6 @@ word Key_for_scancode(word scancode)
 {
   return scancode;
 }
-word Get_Key_modifiers(void)
-{
-  return 0;
-}
 #else
 word Key_for_scancode(word scancode)
 {
@@ -881,6 +893,10 @@ word Get_Key_modifiers(void)
   }
   if ((GetKeyState(VK_LWIN) | GetKeyState(VK_RWIN)) & 0x8000)
     mod |= GFX2_MOD_META;
+#elif defined(USE_X11)
+  mod = X11_key_mod;
+#else
+  GFX2_Log(GFX2_WARNING, "Get_Key_modifiers() not implemented !\n");
 #endif
   return mod;
 }
