@@ -36,6 +36,10 @@
 #include "keyboard.h" // for Key_Name()
 #include "windows.h" // for T_Toolbar_button
 
+#if defined(USE_X11)
+word X11_key_mod = 0;
+#endif
+
 static T_Toolbar_button Buttons[NB_BUTTONS];
 
 /// available skins

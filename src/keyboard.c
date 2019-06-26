@@ -365,7 +365,6 @@ word Get_Key_modifiers(void)
 #endif
       modifiers |= GFX2_MOD_META;
 
-GFX2_Log(GFX2_DEBUG, "mod=%x => %04x\n", (unsigned)mod, modifiers);
   return modifiers;
 }
 
