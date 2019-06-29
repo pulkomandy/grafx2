@@ -6568,8 +6568,13 @@ void Load_PNG_Sub(T_IO_Context * context, FILE * file, const char * memory_buffe
             while (num_text--)
             {
               int size = COMMENT_SIZE;
-              if (text_ptr[num_text].text_length > 0 && text_ptr[num_text].text_length < COMMENT_SIZE)
-                size = text_ptr[num_text].text_length;
+              size_t length = (text_ptr[num_text].compression >= 1) ? text_ptr[num_text].itxt_length : text_ptr[num_text].text_length;
+              if (length > 0 && length < COMMENT_SIZE)
+                size = (int)length;
+              GFX2_Log(GFX2_DEBUG, "PNG Text %d \"%s\" (%ul bytes): %.*s\n",
+                       text_ptr[num_text].compression, text_ptr[num_text].key,
+                       (unsigned long)length,
+                       (int)MIN(length, 160), text_ptr[num_text].text);
               if (strcmp(text_ptr[num_text].key,"Title") == 0)
               {
                 strncpy(context->Comment, text_ptr[num_text].text, size);
@@ -6591,6 +6596,9 @@ void Load_PNG_Sub(T_IO_Context * context, FILE * file, const char * memory_buffe
             // WIDE or TALL pixels
             if (res_x>0 && res_y>0)
             {
+              GFX2_Log(GFX2_DEBUG, "PNG pHYs unit %d %dx%d\n", unit_type, res_x, res_y);
+              if (unit_type == 1)
+                GFX2_Log(GFX2_DEBUG, "    %dx%d DPI\n", (res_x * 254 + 5000) / 10000, (res_y * 254 + 5000) / 10000);
               if (res_y * 10 > res_x * 12)  // X/Y < 1/1.2
                 ratio = PIXEL_WIDE;
               else if (res_x * 10 > res_y * 12) // X/Y > 1.2
@@ -6681,11 +6689,13 @@ void Load_PNG_Sub(T_IO_Context * context, FILE * file, const char * memory_buffe
             // Transparency (tRNS)
             if (png_get_tRNS(png_ptr, info_ptr, &trans, &num_trans, &trans_values))
             {
+              GFX2_Log(GFX2_DEBUG, "PNG transparency %d %p %p\n", num_trans, trans, trans_values);
               if (color_type == PNG_COLOR_TYPE_PALETTE && trans!=NULL)
               {
                 int i;
                 for (i=0; i<num_trans; i++)
                 {
+                  // Look for the first color with alpha = 0 (full transparency)
                   if (trans[i]==0)
                   {
                     context->Transparent_color = i;
@@ -6710,10 +6720,7 @@ void Load_PNG_Sub(T_IO_Context * context, FILE * file, const char * memory_buffe
               }
             }
 
-            context->Width=png_get_image_width(png_ptr,info_ptr);
-            context->Height=png_get_image_height(png_ptr,info_ptr);
-
-            png_set_interlace_handling(png_ptr);
+            png_set_interlace_handling(png_ptr); // return number of image passes (7 for interlaced images)
             png_read_update_info(png_ptr, info_ptr);
 
             // Allocate row pointers
