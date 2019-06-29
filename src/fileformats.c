@@ -6527,7 +6527,8 @@ void Load_PNG_Sub(T_IO_Context * context, FILE * file, const char * memory_buffe
         switch (color_type)
         {
           case PNG_COLOR_TYPE_GRAY_ALPHA:
-            bpp = bit_depth * 2;
+            //bpp = bit_depth * 2;
+            bpp = bit_depth;  // no more than 8bpp or else we enable true color picture loading
             break;
           case PNG_COLOR_TYPE_RGB:
             bpp = bit_depth * 3;
