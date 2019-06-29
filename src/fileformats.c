@@ -5094,7 +5094,7 @@ void Save_GIF(T_IO_Context * context)
           if (context->Comment[0])
           {
             Write_bytes(GIF_file,"\x21\xFE",2);
-            Write_byte(GIF_file,strlen(context->Comment));
+            Write_byte(GIF_file, (byte)strlen(context->Comment));
             Write_bytes(GIF_file,context->Comment,strlen(context->Comment)+1);
           }
           /// - "CRNG" Color cycing extension :
