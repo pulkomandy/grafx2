@@ -6568,7 +6568,13 @@ void Load_PNG_Sub(T_IO_Context * context, FILE * file, const char * memory_buffe
             while (num_text--)
             {
               int size = COMMENT_SIZE;
+#ifdef PNG_iTXt_SUPPORTED
               size_t length = (text_ptr[num_text].compression >= 1) ? text_ptr[num_text].itxt_length : text_ptr[num_text].text_length;
+#else
+              size_t length = text_ptr[num_text].text_length;
+              if (text_ptr[num_text].compression >= 1)
+                continue; // skip iTXt
+#endif
               if (length > 0 && length < COMMENT_SIZE)
                 size = (int)length;
               GFX2_Log(GFX2_DEBUG, "PNG Text %d \"%s\" (%ul bytes): %.*s\n",
