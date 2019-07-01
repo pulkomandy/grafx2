@@ -6527,8 +6527,8 @@ void Load_PNG_Sub(T_IO_Context * context, FILE * file, const char * memory_buffe
         switch (color_type)
         {
           case PNG_COLOR_TYPE_GRAY_ALPHA:
-            //bpp = bit_depth * 2;
-            bpp = bit_depth;  // no more than 8bpp or else we enable true color picture loading
+            // no more than 8bpp or else we enable true color picture loading
+            bpp = MIN(8, bit_depth * 2);
             break;
           case PNG_COLOR_TYPE_RGB:
             bpp = bit_depth * 3;
@@ -6539,7 +6539,8 @@ void Load_PNG_Sub(T_IO_Context * context, FILE * file, const char * memory_buffe
           case PNG_COLOR_TYPE_PALETTE:
           case PNG_COLOR_TYPE_GRAY:
           default:
-            bpp = bit_depth;
+            // no more than 8bpp or else we enable true color picture loading
+            bpp = MIN(8, bit_depth);
         }
         GFX2_Log(GFX2_DEBUG, "PNG type=%u bit_depth=%u : %ubpp\n", color_type, bit_depth, bpp);
 
@@ -6577,7 +6578,7 @@ void Load_PNG_Sub(T_IO_Context * context, FILE * file, const char * memory_buffe
 #endif
               if (length > 0 && length < COMMENT_SIZE)
                 size = (int)length;
-              GFX2_Log(GFX2_DEBUG, "PNG Text %d \"%s\" (%ul bytes): %.*s\n",
+              GFX2_Log(GFX2_DEBUG, "PNG Text %d \"%s\" (%lu bytes): %.*s\n",
                        text_ptr[num_text].compression, text_ptr[num_text].key,
                        (unsigned long)length,
                        (int)MIN(length, 160), text_ptr[num_text].text);
