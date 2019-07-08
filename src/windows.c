@@ -1987,11 +1987,10 @@ void Compute_paintbrush_coordinates(void)
   {
     // Operations that don't implement it
     case OPERATION_LINE:
-	case OPERATION_ROTATE_BRUSH:
+    case OPERATION_ROTATE_BRUSH:
       Snap_axis=0;
       break;
     // Operations that implement it
-#if defined(USE_SDL) || defined(USE_SDL2)
     default:
       if (Snap_axis==0 && (Get_Key_modifiers() & GFX2_MOD_SHIFT))
       {
@@ -2000,7 +1999,6 @@ void Compute_paintbrush_coordinates(void)
         Snap_axis_origin_X=Paintbrush_X;
         Snap_axis_origin_Y=Paintbrush_Y;
       }
-#endif
   }
 
   if (Snap_axis==1)
