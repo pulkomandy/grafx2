@@ -295,7 +295,25 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
     return 0;
   case WM_SYSKEYUP:
   case WM_KEYUP:
-    Release_control(wParam, Get_Key_modifiers());
+    {
+      int mod = 0;
+      switch (wParam)
+      {
+      case VK_SHIFT:
+        mod = GFX2_MOD_SHIFT;
+        break;
+      case VK_CONTROL:
+        mod = GFX2_MOD_CTRL;
+        break;
+      case VK_MENU: // ALT
+        mod = GFX2_MOD_ALT;
+        break;
+      case VK_LWIN:
+      case VK_RWIN:
+        mod = GFX2_MOD_META;
+      }
+      Release_control(wParam, mod);
+    }
     return 0;
   case WM_SYSCHAR:  // Character key when ALT key is down
     GFX2_Log(GFX2_DEBUG, "WM_SYSCHAR : '%c' (0x%02x) lParam=%08lx\n", wParam, wParam, lParam);
