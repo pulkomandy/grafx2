@@ -85,12 +85,15 @@ char * Get_program_directory(const char * argv0)
   // MacOSX
   #if defined(__macosx__)
     program_dir = malloc(MAXPATHLEN);
-    CFURLRef url = CFBundleCopyBundleURL(CFBundleGetMainBundle());
-    (void)argv0; // unused
-    CFURLGetFileSystemRepresentation(url,true,(UInt8*)program_dir,MAXPATHLEN);
-    CFRelease(url);
-    // Append trailing slash
-    strcat(program_dir    ,"/");
+    if (program_dir != NULL)
+    {
+      CFURLRef url = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+      (void)argv0; // unused
+      CFURLGetFileSystemRepresentation(url,true,(UInt8*)program_dir,MAXPATHLEN);
+      CFRelease(url);
+      // Append trailing slash
+      strcat(program_dir    ,"/");
+    }
   
   // AmigaOS and alike: hard-coded volume name.
   #elif defined(__amigaos4__) || defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)

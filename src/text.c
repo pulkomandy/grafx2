@@ -360,7 +360,7 @@ void Init_text(void)
   #elif defined(__macosx__)
     // Récupération de la liste des fonts avec fontconfig
     #ifndef NOTTF
-
+    {
 
       int i,number;
       char * home_dir = NULL;
@@ -383,6 +383,7 @@ void Init_text(void)
 
       free(home_dir);
       //CFRelease(url);
+    }
     #endif
 
   #elif defined(__CAANOO__) || defined(__WIZ__) || defined(__GP2X__)
