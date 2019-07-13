@@ -57,6 +57,7 @@
 #include "input.h"
 #include "help.h"
 #include "fileformats.h"
+#include "gfx2mem.h"
 
 extern char Program_version[]; // generated in pversion.c
 extern const char SVN_revision[]; // generated in version.c
@@ -1783,7 +1784,7 @@ void Save_PI1(T_IO_Context * context)
     setvbuf(file, NULL, _IOFBF, 64*1024);
 
     // allocation d'un buffer mémoire
-    buffer=(byte *)malloc(32034);
+    buffer = GFX2_malloc(32034);
     // Codage de la résolution
     buffer[0]=0x00;
     buffer[1]=0x00;
@@ -2087,7 +2088,7 @@ void Load_PC1(T_IO_Context * context)
       return;
   }
 
-  bufferdecomp=(byte *)malloc(32000);
+  bufferdecomp = GFX2_malloc(32000);
   if (bufferdecomp == NULL)
   {
     fclose(file);
@@ -2172,8 +2173,8 @@ void Save_PC1(T_IO_Context * context)
     setvbuf(file, NULL, _IOFBF, 64*1024);
 
     // Allocation des buffers mémoire
-    bufferdecomp=(byte *)malloc(32000);
-    buffercomp  =(byte *)malloc(64066);
+    bufferdecomp = GFX2_malloc(32000);
+    buffercomp = GFX2_malloc(64066);
     // Codage de la résolution
     buffercomp[0]=0x80;
     buffercomp[1]=0x00;
@@ -2707,7 +2708,7 @@ void Test_C64(T_IO_Context * context, FILE * file)
       if (load_addr == 0x6000 || load_addr == 0x5c00)
       {
         long unpacked_size;
-        byte * buffer = malloc(file_size);
+        byte * buffer = GFX2_malloc(file_size);
         if (buffer == NULL)
           return;
         fseek(file, SEEK_SET, 0);
@@ -3030,7 +3031,7 @@ static long C64_unpack_amica(byte ** file_buffer, long file_size)
   unpacked_size = C64_unpack_get_length(*file_buffer + 2, file_size - 2, RLE_code, 0);
   GFX2_Log(GFX2_DEBUG, "C64_unpack_amica() unpacked_size=%ld\n", unpacked_size);
    // 2nd pass to unpack
-  unpacked_buffer = malloc(unpacked_size);
+  unpacked_buffer = GFX2_malloc(unpacked_size);
   if (unpacked_buffer == NULL)
     return -1;
   C64_unpack(unpacked_buffer, *file_buffer + 2, file_size - 2, RLE_code, 0);
@@ -3065,7 +3066,7 @@ static long C64_unpack_draz(byte ** file_buffer, long file_size)
   GFX2_Log(GFX2_DEBUG, "C64_unpack_draz() \"%.13s\" RLE code=$%02X RLE data length=%ld unpacked_size=%ld\n",
            *file_buffer + 2, RLE_code, file_size - 16, unpacked_size);
    // 2nd pass to unpack
-  unpacked_buffer = malloc(unpacked_size);
+  unpacked_buffer = GFX2_malloc(unpacked_size);
   if (unpacked_buffer == NULL)
     return -1;
   C64_unpack(unpacked_buffer, *file_buffer + 16, file_size - 16, RLE_code, 0);
@@ -3091,7 +3092,7 @@ static long C64_unpack_doodle(byte ** file_buffer, long file_size)
   unpacked_size = C64_unpack_get_length(*file_buffer + 2, file_size - 2, RLE_code, 1);
   GFX2_Log(GFX2_DEBUG, "C64_unpack_doodle() unpacked_size=%ld\n", unpacked_size);
    // 2nd pass to unpack
-  unpacked_buffer = malloc(unpacked_size);
+  unpacked_buffer = GFX2_malloc(unpacked_size);
   if (unpacked_buffer == NULL)
     return -1;
   C64_unpack(unpacked_buffer, *file_buffer + 2, file_size - 2, RLE_code, 1);
@@ -3133,7 +3134,7 @@ void Load_C64(T_IO_Context * context)
         file_size = File_length_file(file);
 
         // Load entire file in memory
-        file_buffer=(byte *)malloc(file_size);
+        file_buffer = GFX2_malloc(file_size);
         if (!file_buffer)
         {
             File_error = 1;
@@ -3220,7 +3221,7 @@ void Load_C64(T_IO_Context * context)
                 // duplicated between offset      $2002 and $2073
                 bitmap=file_buffer+114+2;         // $0074
                 background=file_buffer+8000+114+2;// $1FB4
-                temp_buffer=malloc(1000);
+                temp_buffer = GFX2_malloc(1000);
                 memset(temp_buffer, file_buffer[3+8000+114+2], 1000); // color RAM Byte
                 color_ram=temp_buffer;
                 //border  byte = file_buffer[4+8000+114+2];
@@ -4067,10 +4068,9 @@ void Load_GPX(T_IO_Context * context)
   if (file == NULL)
     return;
   file_size = File_length_file(file);
-  buffer = malloc(file_size);
+  buffer = GFX2_malloc(file_size);
   if (buffer == NULL)
   {
-    GFX2_Log(GFX2_ERROR, "Failed to allocate %lu bytes.\n", file_size);
     fclose(file);
     return;
   }
@@ -4084,10 +4084,9 @@ void Load_GPX(T_IO_Context * context)
     {
       free(gpx);
       gpx_size += 65536;
-      gpx = malloc(gpx_size);
+      gpx = GFX2_malloc(gpx_size);
       if (gpx == NULL)
       {
-        GFX2_Log(GFX2_ERROR, "Failed to allocate %lu bytes\n", gpx_size);
         break;
       }
       r = uncompress(gpx, &gpx_size, buffer, file_size);
@@ -4424,7 +4423,7 @@ void Load_SCR(T_IO_Context * context)
   }
   fseek(file, -5, SEEK_CUR);
 
-  pixel_data = malloc(16384);
+  pixel_data = GFX2_malloc(16384);
   memset(pixel_data, 0, 16384);
 
   if (0 != memcmp(sig, "MJH", 3) || block_length > 16384)
@@ -5887,8 +5886,8 @@ void Load_MOTO(T_IO_Context * context)
         break;
     }
     GFX2_Log(GFX2_DEBUG, "Map mode &H%02X row=%u line=%u (%dx%d) %d\n", map_mode, col_count, line_count, width, height, columns * height);
-    vram_forme = malloc(columns * height);
-    vram_couleur = malloc(columns * height);
+    vram_forme = GFX2_malloc(columns * height);
+    vram_couleur = GFX2_malloc(columns * height);
     // Check extension (TO-SNAP / PPM / ???)
     if (length > 36)
     {
@@ -6092,7 +6091,7 @@ void Load_MOTO(T_IO_Context * context)
     char * ext;
     int n_colors;
 
-    vram_forme = malloc(file_size);
+    vram_forme = GFX2_malloc(file_size);
     if (vram_forme == NULL)
     {
       fclose(file);
@@ -6160,7 +6159,7 @@ void Load_MOTO(T_IO_Context * context)
     free(filename);
     if (vram_forme == NULL)
     {
-      vram_forme = malloc(file_size);
+      vram_forme = GFX2_malloc(file_size);
       if (vram_forme == NULL)
       {
         free(vram_couleur);
@@ -6171,7 +6170,7 @@ void Load_MOTO(T_IO_Context * context)
     }
     else
     {
-      vram_couleur = malloc(file_size);
+      vram_couleur = GFX2_malloc(file_size);
       if (vram_couleur == NULL)
       {
         free(vram_forme);
@@ -6320,7 +6319,7 @@ static unsigned int MOTO_MAP_pack(byte * packed, const byte * unpacked, unsigned
   src += count;
   return dst;
 #else
-  counts = malloc(sizeof(word) * (unpacked_len + 1));
+  counts = GFX2_malloc(sizeof(word) * (unpacked_len + 1));
   i = 0;
   repeat = (unpacked[0] == unpacked[1]);
   count = 2;
@@ -6612,8 +6611,8 @@ void Save_MOTO(T_IO_Context * context)
     transpose = 0;
   }
 
-  vram_forme = malloc(8192);
-  vram_couleur = malloc(8192);
+  vram_forme = GFX2_malloc(8192);
+  vram_couleur = GFX2_malloc(8192);
   switch (mode)
   {
   case MOTO_MODE_40col:
@@ -6924,8 +6923,8 @@ void Save_MOTO(T_IO_Context * context)
     byte * unpacked_data;
     byte * packed_data;
 
-    unpacked_data = malloc(16*1024);
-    packed_data = malloc(16*1024);
+    unpacked_data = GFX2_malloc(16*1024);
+    packed_data = GFX2_malloc(16*1024);
     if (packed_data == NULL || unpacked_data == NULL)
     {
       GFX2_Log(GFX2_ERROR, "Failed to allocate 2x16kB of memory\n");
@@ -7113,11 +7112,11 @@ void Load_HGR(T_IO_Context * context)
   if (file_size == 16384)
     is_dhgr = 1;
 
-  vram[0] = malloc(8192);
+  vram[0] = GFX2_malloc(8192);
   Read_bytes(file, vram[0], 8192);
   if (is_dhgr)
   {
-    vram[1] = malloc(8192);
+    vram[1] = GFX2_malloc(8192);
     Read_bytes(file, vram[1], 8192);
   }
   else
