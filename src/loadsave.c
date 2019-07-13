@@ -119,6 +119,7 @@ const T_Format File_formats[] = {
     "gpx;"
     "cpc;scr;win;"
     "hgr;dhgr;"
+    "grb;grob;"
     "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico;ic2;cur;cm5;pph;info;flc;bin;map"},
   {FORMAT_ALL_PALETTES, "(pal)", NULL, NULL, NULL, 1, 0, 0, "", "kcf;pal;gpl"},
   {FORMAT_ALL_FILES, "(*.*)", NULL, NULL, NULL, 0, 0, 0, "", "*"},
@@ -156,6 +157,7 @@ const T_Format File_formats[] = {
 #ifndef __no_tifflib__
   {FORMAT_TIFF," tiff",Test_TIFF,Load_TIFF,Save_TIFF,0, 1, 1, "tif", "tif;tiff"},
 #endif
+  {FORMAT_GRB, " grb", Test_GRB, Load_GRB, NULL,     0, 0, 0, "grb", "grb;grob"},
   {FORMAT_MISC,"misc.",NULL,     NULL,     NULL,     0, 0, 0, "",    "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff"},
 };
 

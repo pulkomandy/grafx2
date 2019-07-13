@@ -2,7 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
-    Copyright 2018 Thomas Bernard
+    Copyright 2018-2019 Thomas Bernard
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
     Grafx2 is free software; you can redistribute it and/or
@@ -174,6 +174,10 @@ void Save_TIFF(T_IO_Context *);
 void Load_TIFF_from_memory(T_IO_Context *, const void *, unsigned long);
 void Save_TIFF_to_memory(T_IO_Context *, void * *, unsigned long *);
 #endif
+
+// -- HP-48 Grob ------------------------------------------------------------
+void Test_GRB(T_IO_Context *, FILE *);
+void Load_GRB(T_IO_Context *);
 
 /// @}
 #endif

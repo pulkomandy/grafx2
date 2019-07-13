@@ -2,7 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
-    Copyright 2018 Thomas Bernard
+    Copyright 2018-2019 Thomas Bernard
     Copyright 2011 Pawel Góralski
     Copyright 2009 Petter Lindquist
     Copyright 2008 Yves Rizoud
@@ -2256,10 +2256,10 @@ NeoChrome Format :
 Dali           *.SD0 (ST low resolution)
                *.SD1 (ST medium resolution)
                *.SD2 (ST high resolution)
-        
+
 Files do not seem to have any resolution or bit plane info stored in them. The file
 extension seems to be the only way to determine the contents.
-        
+
 1 long         file id? [always 0]
 16 words       palette
 92 bytes       reserved? [usually 0]
@@ -2404,7 +2404,7 @@ void Load_NEO(T_IO_Context * context)
   {
     if (!Read_bytes(file, buffer, (resolution==2) ? 80 : 160))
       goto error;
-    
+
     ptr = buffer;
     for (x_pos = 0; x_pos < width; )
     {
@@ -7252,7 +7252,7 @@ void Save_HGR(T_IO_Context * context)
   }
   if (context->Width == 560)
     is_dhgr = 1;
-  
+
   file = Open_file_write(context);
   if (file == NULL)
     return;
@@ -7320,5 +7320,142 @@ void Save_HGR(T_IO_Context * context)
 
   free(vram[0]);
   free(vram[1]);
+  fclose(file);
+}
+
+
+///////////////////////////// HP-48 Grob Files ////////////////////////////
+
+/**
+ * HP48 addresses are 20bits (5 nibbles)
+ * offset is in nibble (half byte)
+ */
+static dword Read_HP48Address(const byte * buffer, int offset)
+{
+  dword data = 0;
+  int i = 4;
+  do
+  {
+    byte nibble;
+    nibble = buffer[(offset + i) >> 1];
+    if ((offset + i) & 1)
+      nibble >>= 4;
+    nibble &= 15;
+    data = (data << 4) | nibble;
+  }
+  while (i-- > 0);
+  return data;
+}
+
+/**
+ * Test for a HP-48 Grob file
+ */
+void Test_GRB(T_IO_Context * context, FILE * file)
+{
+  byte buffer[18];
+  unsigned long file_size;
+  dword prologue, size, width, height;
+
+  (void)context;
+  File_error = 1;
+  file_size = File_length_file(file);
+  if (!Read_bytes(file, buffer, 18))
+    return;
+  if(memcmp(buffer, "HPHP48-R", 8) != 0)
+    return;
+  prologue = Read_HP48Address(buffer+8, 0);
+  size = Read_HP48Address(buffer+8, 5);
+  GFX2_Log(GFX2_DEBUG, "HP48 File detected. %lu bytes prologue %05x %u nibbles\n",
+           file_size, prologue, size);
+  if (prologue != 0x02b1e)
+    return;
+  height = Read_HP48Address(buffer+8, 10);
+  width = Read_HP48Address(buffer+8, 15);
+  GFX2_Log(GFX2_DEBUG, " Grob dimensions : %ux%u\n", width, height);
+  if ((file_size - 8) < ((size + 5) / 2))
+    return;
+  if (file_size < (18 + ((width + 7) >> 3) * height))
+    return;
+  File_error = 0;
+}
+
+void Load_GRB(T_IO_Context * context)
+{
+  byte buffer[18];
+  byte * bitplane[4];
+  unsigned long file_size;
+  dword prologue, size, width, height;
+  byte bp, bpp;
+  FILE * file;
+  unsigned x, y;
+
+  File_error = 1;
+  file = Open_file_read(context);
+  if (file == NULL)
+    return;
+  file_size = File_length_file(file);
+  if (!Read_bytes(file, buffer, 18))
+  {
+    fclose(file);
+    return;
+  }
+  prologue = Read_HP48Address(buffer+8, 0);
+  size = Read_HP48Address(buffer+8, 5);
+  height = Read_HP48Address(buffer+8, 10);
+  width = Read_HP48Address(buffer+8, 15);
+  if (height >= 256)
+    bpp = 4;
+  else if (height >= 192)
+    bpp = 3;
+  else if (height >= 128)
+    bpp = 2;
+  else
+    bpp = 1;
+
+  File_error = 0;
+  Pre_load(context, width, height/bpp, file_size, FORMAT_GRB, PIXEL_SIMPLE, bpp);
+  if (File_error == 0)
+  {
+    dword bytes_per_plane = ((width + 7) >> 3) * (height/bpp);
+    dword offset = 0;
+
+    if (Config.Clear_palette)
+      memset(context->Palette, 0, sizeof(T_Palette));
+    for (x = 0; x < ((unsigned)1 << bpp); x++)
+    {
+      context->Palette[x].R = context->Palette[x].G = (x * 255) / ((1 << bpp) - 1);
+      context->Palette[x].B = 127;
+    }
+
+    // Load all bit planes
+    for (bp = 0; bp < bpp; bp++)
+    {
+      bitplane[bp] = GFX2_malloc(bytes_per_plane);
+      if (bitplane[bp])
+      {
+        if (!Read_bytes(file, bitplane[bp], bytes_per_plane))
+          File_error = 1;
+      }
+    }
+    // set pixels
+    for (y = 0; y < (height/bpp) && File_error == 0; y++)
+    {
+      for (x = 0; x < width; x++)
+      {
+        byte b = 0;
+        for (bp = 0; bp < bpp; bp++)
+          b |= ((bitplane[bp][offset] >> (x & 7)) & 1) << bp;
+        // invert because 1 is a black pixel on HP-48 LCD display
+        Set_pixel(context, x, y, b ^ ((1 << bpp) - 1));
+        if ((x & 7) == 7)
+          offset++;
+      }
+      if ((x & 7) != 7)
+        offset++;
+    }
+    // Free bit planes
+    for (bp = 0; bp < bpp; bp++)
+      free(bitplane[bp]);
+  }
   fclose(file);
 }
