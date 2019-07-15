@@ -31,6 +31,7 @@ echo "<li><a href=\"doxygen/html/\">doxygen</a></li>" >> ${OUTFILE}
 echo "<li><a href=\"htmldoc/\">htmldoc</a></li>" >> ${OUTFILE}
 echo "<li>Sources :" >> ${OUTFILE}
 echo "<a href=\"${CI_PROJECT_URL}/-/jobs/${LINUX_JOB_ID}/artifacts/raw/grafx2-${VERSION}-src.tgz\">grafx2-${VERSION}-src.tgz</a></li>" >> ${OUTFILE}
+if [ -n "${WIN32_JOB_ID}" ] ; then
 echo "<li>Windows installer (win32 API) :" >> ${OUTFILE}
 echo "<a href=\"${CI_PROJECT_URL}/-/jobs/${WIN32_JOB_ID}/artifacts/raw/install/grafx2-win32-${VERSION}.win32.exe\">grafx2-win32-${VERSION}.win32.exe</a></li>" >> ${OUTFILE}
 echo "<li>Windows portable (win32 API) :" >> ${OUTFILE}
@@ -43,12 +44,19 @@ echo "<li>Windows installer (SDL2 API) :" >> ${OUTFILE}
 echo "<a href=\"${CI_PROJECT_URL}/-/jobs/${WIN32_JOB_ID}/artifacts/raw/install/grafx2-sdl2-${VERSION}.win32.exe\">grafx2-sdl2-${VERSION}.win32.exe</a></li>" >> ${OUTFILE}
 echo "<li>Windows portable (SDL2 API) :" >> ${OUTFILE}
 echo "<a href=\"${CI_PROJECT_URL}/-/jobs/${WIN32_JOB_ID}/artifacts/raw/grafx2-sdl2-${VERSION}-win32.zip\">grafx2-sdl2-${VERSION}-win32.zip</a></li>" >> ${OUTFILE}
+fi
+if [ -n "${ATARI_JOB_ID}" ] ; then
 echo "<li>Atari (SDL API) :" >> ${OUTFILE}
 echo "<a href=\"${CI_PROJECT_URL}/-/jobs/${ATARI_JOB_ID}/artifacts/raw/grafx2-sdl-${VERSION}-m68k-atari-mint.zip\">grafx2-sdl-${VERSION}-m68k-atari-mint.zip</a></li>" >> ${OUTFILE}
+fi
+if [ -n "${GP2X_JOB_ID}" ] ; then
 echo "<li>GP2X (SDL API) :" >> ${OUTFILE}
 echo "<a href=\"${CI_PROJECT_URL}/-/jobs/${GP2X_JOB_ID}/artifacts/raw/grafx2-sdl-${VERSION}-nottf-gp2x.zip\">grafx2-sdl-${VERSION}-nottf-gp2x.zip</a></li>" >> ${OUTFILE}
+fi
+if [ -n "${SWITCH_JOB_ID}" ] ; then
 echo "<li>Switch (SDL2 API) :" >> ${OUTFILE}
 echo "<a href=\"${CI_PROJECT_URL}/-/jobs/${SWITCH_JOB_ID}/artifacts/raw/grafx2-sdl2-${VERSION}-switch.zip\">grafx2-sdl2-${VERSION}-switch.zip</a></li>" >> ${OUTFILE}
+fi
 echo "</ul>" >> ${OUTFILE}
 echo "<ul>" >> ${OUTFILE}
 
