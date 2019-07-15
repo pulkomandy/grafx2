@@ -64,7 +64,7 @@ job_win32:
             - "install/grafx2*.exe"
             - "WIN32_JOB_ID"
 
-job_atari:
+.job_atari:
     stage: build
     before_script:
         - apt-get update -qq && apt-get install -y -qq zip dos2unix
@@ -97,7 +97,7 @@ job_gp2x:
             - "*.zip"
             - "GP2X_JOB_ID"
 
-job_switch:
+.job_switch:
     stage: build
     before_script:
         - apt-get update -qq && apt-get install -y -qq zip
