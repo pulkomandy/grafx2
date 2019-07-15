@@ -121,14 +121,14 @@ LUAPATCHES = lua-atari-log2.patch \
              lua-atari-inttype.patch
 LATESTLUAVER = $(shell curl -s -S https://www.lua.org/download.html | grep -A1 "current release is" | tail -n1 | sed 's/.*lua-\([0-9.]*\)\.tar.*/\1/' )
 # https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-0.6.1.tar.gz
-RECOILVER=4.3.1
+RECOILVER=4.3.2
 LATESTRECOILVER = $(shell curl -s -S -I https://sourceforge.net/projects/recoil/files/latest/download|grep "location:"|sed 's:.*/\([0-9.]*\)/.*:\1:' )
 RECOIL=recoil-$(RECOILVER)
 RECOILARCH=$(RECOIL).tar.gz
 # https://downloads.sourceforge.net/project/recoil/recoil/4.3.0/recoil-4.3.0.tar.gz
 RECOILURL=https://downloads.sourceforge.net/project/recoil/recoil/$(RECOILVER)/$(RECOILARCH)
 RECOILURLALT=http://nanard.free.fr/grafx2/$(RECOILARCH)
-RECOILSHA256=8f64fd21bafa180e6cbac5853ef65453f080385b3c53600af8360e938668e574
+RECOILSHA256=b9691db9e0d2b6cec23c9dec8628ecf6870f1e9d34ce95513fb4a671d781b19c
 
 ARCHIVES = $(addprefix archives/, $(SDLARCH) $(SDLIMAGEARCH) $(SDLTTFARCH) \
              $(SDL2ARCH) $(SDL2IMAGEARCH) $(SDL2TTFARCH) $(LIBPNGARCH) \
