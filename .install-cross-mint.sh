@@ -49,15 +49,15 @@ EOF
 if echo "$DISTRIB" | grep Ubuntu ; then
 	$SUDO add-apt-repository -y ppa:vriviere/ppa
 else
-	# assume Debian/Stretch (9.x)
+	CODENAME=$(lsb_release -c -s)
 	if [ -z "$SUDO" ] ; then
-		echo "deb http://vincent.riviere.free.fr/apt/ stretch contrib" >> /etc/apt/sources.list
-		echo "deb-src http://vincent.riviere.free.fr/apt/ stretch contrib" >> /etc/apt/sources.list
+		echo "deb http://vincent.riviere.free.fr/apt/ ${CODENAME} contrib" >> /etc/apt/sources.list
+		echo "deb-src http://vincent.riviere.free.fr/apt/ ${CODENAME} contrib" >> /etc/apt/sources.list
 	else
-		echo "deb http://vincent.riviere.free.fr/apt/ stretch contrib" | $SUDO tee -a /etc/apt/sources.list
-		echo "deb-src http://vincent.riviere.free.fr/apt/ stretch contrib" | $SUDO tee -a /etc/apt/sources.list
+		echo "deb http://vincent.riviere.free.fr/apt/ ${CODENAME} contrib" | $SUDO tee -a /etc/apt/sources.list
+		echo "deb-src http://vincent.riviere.free.fr/apt/ ${CODENAME} contrib" | $SUDO tee -a /etc/apt/sources.list
 	fi
 fi
 
-$SUDO apt-get update -ym
-$SUDO apt-get install -ym cross-mint-essential
+$SUDO apt-get update -ym || exit 1
+$SUDO apt-get install -ym cross-mint-essential || exit 1
