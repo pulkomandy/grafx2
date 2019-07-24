@@ -1634,6 +1634,7 @@ static void Load_ClipBoard_Image(T_IO_Context * context)
   X11_clipboard_type = X11_CLIPBOARD_NONE;
 
 #else
+  (void)context;
   GFX2_Log(GFX2_ERROR, "Load_ClipBoard_Image() not implemented on this platform yet\n");
   File_error = 1;
 #endif
@@ -1751,6 +1752,7 @@ static void Save_ClipBoard_Image(T_IO_Context * context)
     XSetSelectionOwner(X11_display, selection, X11_window, CurrentTime);
   }
 #else
+  (void)context;
   GFX2_Log(GFX2_ERROR, "Save_ClipBoard_Image() not implemented on this platform yet\n");
   File_error = 1;
 #endif

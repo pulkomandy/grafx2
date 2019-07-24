@@ -118,6 +118,7 @@ void Test_TIFF(T_IO_Context * context, FILE * file)
 {
   char buffer[4];
 
+  (void)context;
   File_error = 1;
   if (!Read_bytes(file, buffer, 4))
     return;
