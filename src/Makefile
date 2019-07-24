@@ -681,7 +681,8 @@ endif
           COPT += -DNO_X11
         endif
         LOPT += $(TTFLOPT)
-        LOPT += $(shell $(PKG_CONFIG) --libs libpng libtiff-4)
+        LOPT += $(shell $(PKG_CONFIG) --libs libpng `$(PKG_CONFIG) --exists libtiff-4 && echo libtiff-4`)
+        LOPT += $(shell $(PKG_CONFIG) --exists libtiff-4 || echo -ltiff)
         LOPT += $(LUALOPT)
         OBJDIR = ../obj/unix
         FCLOPT = -lfontconfig

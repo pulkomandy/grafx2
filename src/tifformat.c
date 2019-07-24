@@ -435,7 +435,7 @@ void Load_TIFF_Sub(T_IO_Context * context, TIFF * tif, unsigned long file_size)
   for (;;)
   {
     word subifd_count;
-#if TIFFLIB_VERSION < 20120101
+#if TIFFLIB_VERSION <= 20120218
     uint32 * subifd_array;
 #else
     uint64 * subifd_array;
