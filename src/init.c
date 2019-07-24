@@ -96,7 +96,7 @@
 #include "special.h"
 #include "gfx2surface.h"
 
-char Gui_loading_error_message[512];
+char Gui_loading_error_message[256];
 
 // Rechercher la liste et le type des lecteurs de la machine
 

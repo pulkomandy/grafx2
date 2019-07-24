@@ -39,7 +39,7 @@ void Init_paintbrushes(void);
 /// Set application icon(s)
 void Define_icon(void);
 
-extern char Gui_loading_error_message[512];
+extern char Gui_loading_error_message[256];
 
 ///
 /// Loads a 8x8 monochrome font, the kind used in all menus and screens.
