@@ -1426,8 +1426,10 @@ static const byte precision_24b[]=
 // Give this one a 24b source, get back the 256c bitmap and its palette
 int Convert_24b_bitmap_to_256(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette)
 {
+#if !(defined(__GP2X__) || defined(__gp2x__) || defined(__WIZ__) || defined(__CAANOO__))
   CT_Tree* table; // table de conversion
   int                ip;    // index de précision pour la conversion
+#endif
 
   if (Try_Convert_to_256_Without_Loss(dest, source, width, height, palette) == 0)
     return 0;
