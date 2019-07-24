@@ -127,7 +127,26 @@ char * Get_program_directory(const char * argv0)
       program_dir = Extract_path(NULL, path);
     }
     else
+    {
+      char * current_dir, * tmp;
+      size_t len;
+
+      program_dir = NULL;
       GFX2_Log(GFX2_WARNING, "readlink(%s) failed : %s\n", "/proc/self/exe", strerror(errno));
+      current_dir = Get_current_directory(NULL, NULL, 0);
+      if (current_dir != NULL)
+      {
+        len = strlen(current_dir) + strlen(argv0) + 2;
+        tmp = malloc(len);
+        if (tmp != NULL)
+        {
+          snprintf(tmp, len, "%s/%s", current_dir, argv0);
+          program_dir = Extract_path(NULL, tmp);
+          free(tmp);
+        }
+        free(current_dir);
+      }
+    }
   }
   else
     program_dir = Extract_path(NULL, argv0);
