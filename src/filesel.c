@@ -2120,7 +2120,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           {
             // generate a temporary ansi name
             int i;
-            for (i = 0; i < sizeof(filename_ansi) - 1 && filename_unicode[i] != 0; i++)
+            for (i = 0; (i < (int)sizeof(filename_ansi) - 1) && (filename_unicode[i] != 0); i++)
             {
               filename_ansi[i] = (filename_unicode[i] < 256) ? (byte)filename_unicode[i] : '_';
             }
