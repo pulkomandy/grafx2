@@ -48,6 +48,10 @@
 #include "palette.h"
 #include "layers.h"
 
+#ifndef MIN
+#define MIN(a,b) ((a)<(b)?(a):(b))
+#endif
+
 //---------- Menu dans lequel on tagge des couleurs (genre Stencil) ----------
 void Menu_tag_colors(char * window_title, byte * table, byte * mode, byte can_cancel, const char *help_section, word close_shortcut)
 {
@@ -1052,12 +1056,12 @@ void Button_Grid_menu(void)
 
   Print_in_window(11,26, "X:",MC_Dark,MC_Light);
   input_x_button = Window_set_input_button(29,24,3); // 3
-  Num2str(chosen_X,str,3);
+  Num2str(MIN(chosen_X, 999), str, 3);
   Window_input_content(input_x_button,str);
 
   Print_in_window(11,47, "Y:",MC_Dark,MC_Light);
   input_y_button = Window_set_input_button(29,45,3); // 4
-  Num2str(chosen_Y,str,3);
+  Num2str(MIN(chosen_Y, 999), str, 3);
   Window_input_content(input_y_button,str);
 
   Print_in_window(77,26,"dX:",MC_Dark,MC_Light);
@@ -1086,7 +1090,7 @@ void Button_Grid_menu(void)
     switch (clicked_button)
     {
       case 3 :
-        Num2str(chosen_X,str,3);
+        Num2str(MIN(chosen_X, 999), str, 3);
         Readline(31,26,str,3,INPUT_TYPE_INTEGER);
         chosen_X=atoi(str);
         // On corrige les dimensions
@@ -1108,7 +1112,7 @@ void Button_Grid_menu(void)
         Display_cursor();
         break;
       case 4 :
-        Num2str(chosen_Y,str,3);
+        Num2str(MIN(chosen_Y, 999), str, 3);
         Readline(31,47,str,3,INPUT_TYPE_INTEGER);
         chosen_Y=atoi(str);
         // On corrige les dimensions
@@ -1235,7 +1239,7 @@ void Button_Smooth_menu(void)
   word x,y,i,j;
   byte  chosen_matrix[3][3];
   T_Special_button * matrix_input[3][3];
-  char  str[3];
+  char  str[4];
 
   Open_window(142,109,"Smooth");
 

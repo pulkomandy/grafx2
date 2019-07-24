@@ -134,7 +134,7 @@ void Atari_Memory_free(unsigned long *stRam,unsigned long *ttRam);
 #else
 unsigned long Memory_free(void);
 #endif
-#define Num2str(a,b,c) sprintf(b,"%*lu",c,(long)(a))
+#define Num2str(a,b,c) snprintf(b,sizeof(b),"%*lu",(int)c,(unsigned long)(a))
 
 #define Dec2str(a,b,c) sprintf(b,"%.*f",c,(double)(a))
 

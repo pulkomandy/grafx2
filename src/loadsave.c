@@ -400,17 +400,11 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
       if (context->Original_width != 0)
       {
         if (context->Original_width < 10000 && context->Original_height < 10000)
-        {
-          Num2str(context->Original_width,str,4);
-          Num2str(context->Original_height,str+5,4);
-          str[4]='x';
-        }
+          snprintf(str, sizeof(str), "%4hux%4hu", context->Original_width, context->Original_height);
       }
       else if ((width<10000) && (height<10000))
       {
-        Num2str(width,str,4);
-        Num2str(height,str+5,4);
-        str[4]='x';
+        snprintf(str, sizeof(str), "%4hux%4hu", width, height);
       }
       Print_in_window(101,59,str,MC_Black,MC_Light);
       snprintf(str, sizeof(str), "%2dbpp", bpp);

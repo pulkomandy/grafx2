@@ -1179,7 +1179,7 @@ void Fill_general(byte fill_color)
   }
 
   // Affichage d'un point pour une preview en xor
-  void Pixel_figure_preview_xor(short x_pos,short y_pos,byte color)
+  void Pixel_figure_preview_xor(word x_pos,word y_pos,byte color)
   {
     (void)color; // unused
 

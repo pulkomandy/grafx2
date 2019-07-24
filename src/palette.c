@@ -207,9 +207,7 @@ void Set_blue(byte color, short new_color, T_Palette palette)
 void Format_component(byte value, char *str)
 // Formate une chaine de 4 caractères+\0 : "nnn "
 {
-  Num2str(value,str,3);
-  str[3]=' ';
-  str[4]='\0';
+  snprintf(str, 5, "%3u ", (unsigned)value);
 }
 
 void Spread_colors(short start,short end,T_Palette palette)
@@ -1013,11 +1011,11 @@ int Window_Histogram(unsigned char block_start, unsigned char block_end, dword* 
     // When changing hovered color, update the info area
     if (new_hovered_color!=hovered_color)
     {
-      char str[12];
+      char str[20];
 
       hovered_color=new_hovered_color;
       Hide_cursor();
-      if (hovered_color==-1)
+      if (hovered_color < 0)
       {
         Window_rectangle(6+6*8,17,3*8,7,MC_Light);
         Update_window_area(6+6*8,17,3*8,7);
@@ -1413,9 +1411,7 @@ void Button_Palette(int btn)
                   block_end=temp_color;
 
                   // Affichage du n° de la couleur sélectionnée
-                  Num2str(block_start,str  ,3);
-                  Num2str(block_end  ,str+4,3);
-                  str[3]=26; // Flèche vers la droite
+                  snprintf(str, sizeof(str), "%3hu\x1a%3hu", block_start, block_end); // 0x1a : flèche vers la droite
                   Print_in_window(COLOR_X,COLOR_Y,str,MC_Black,MC_Light);
 
                   // Affichage des jauges
@@ -1430,9 +1426,7 @@ void Button_Palette(int btn)
                   block_end=first_color;
 
                   // Affichage du n° de la couleur sélectionnée
-                  Num2str(block_start,str  ,3);
-                  Num2str(block_end  ,str+4,3);
-                  str[3]=26; // Flèche vers la droite
+                  snprintf(str, sizeof(str), "%3hu\x1a%3hu", block_start, block_end); // 0x1a : flèche vers la droite
                   Print_in_window(COLOR_X,COLOR_Y,str,MC_Black,MC_Light);
 
                   // Affichage des jauges
@@ -1844,9 +1838,7 @@ void Button_Palette(int btn)
           if (block_start!=block_end)
           {
             // Cas d'un bloc multi-couleur
-            Num2str(block_start,str  ,3);
-            Num2str(block_end  ,str+4,3);
-            str[3]=26; // Flèche vers la droite
+            snprintf(str, sizeof(str), "%3hu\x1a%3hu", block_start, block_end); // 0x1a : flèche vers la droite
             // Affichage dans le block de visu du bloc (dégradé) en cours
             Display_grad_block_in_window(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,block_start,block_end);
           }
@@ -1899,9 +1891,7 @@ void Button_Palette(int btn)
           if (block_start!=block_end)
           {
             // Cas d'un bloc multi-couleur
-            Num2str(block_start,str  ,3);
-            Num2str(block_end  ,str+4,3);
-            str[3]=26; // Flèche vers la droite
+            snprintf(str, sizeof(str), "%3hu\x1a%3hu", block_start, block_end); // 0x1a : flèche vers la droite
             // Affichage dans le block de visu du bloc (dégradé) en cours
             Display_grad_block_in_window(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,block_start,block_end);
           }
@@ -2908,7 +2898,7 @@ void Button_Secondary_palette(int btn)
   T_Scroller_button * lines_slider;
   T_Scroller_button * rgb_scale_slider;
   T_Scroller_button * gamma_slider;
-  char str[4];
+  char str[8];
   byte palette_vertical = Config.Palette_vertical;
   byte palette_cols, palette_lines;
   word rgb_scale;

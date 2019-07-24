@@ -1855,9 +1855,7 @@ void Display_modes_list(short list_start, short cursor_position)
       else
         text_color=MC_White;
     }
-    Num2str(Video_mode[current_mode].Width,str,4);
-    str[4]=' ';
-    Num2str(Video_mode[current_mode].Height,str+5,4);
+    snprintf(str, sizeof(str), "%4hu %4hu", Video_mode[current_mode].Width, Video_mode[current_mode].Height);
 
     if(Video_mode[current_mode].Fullscreen == 0)
       memcpy(str+9,"   Window          ",20);
@@ -1915,7 +1913,7 @@ void Button_Resolution(int btn)
   short list_start;
   short cursor_position;
   short temp;
-  char  str[5];
+  char  str[8];
   T_Special_button * input_width_button, * input_button_height;
   T_Dropdown_button * pixel_button;
   static const char *pixel_ratio_labels[PIXEL_MAX] ={
@@ -4197,7 +4195,7 @@ void Button_Airbrush(int btn)
 
 void Refresh_airbrush_settings(byte selected_color, byte update_slider)
 {
-  char  str[3];
+  char  str[4];
 
   if (update_slider)
   {

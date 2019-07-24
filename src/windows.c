@@ -608,13 +608,13 @@ void Display_layerbar(void)
   }
   if (Menu_bars[MENUBAR_ANIMATION].Visible)
   {
-    char str[9];
+    char str[24];
     // Rest of horizontal line
     Draw_bar_remainder(MENUBAR_ANIMATION, Menu_bars[MENUBAR_ANIMATION].Skin_width);
     // Frame# background rectangle
     // Block((Menu_bars[MENUBAR_ANIMATION].Skin_width)*Menu_factor_X,(0+Menu_bars[MENUBAR_ANIMATION].Top)*Menu_factor_Y+Menu_Y,8*8*Menu_factor_X,8*Menu_factor_Y,MC_Light);
     // Frame #/#
-    snprintf(str, 8, "%3d/%3d", Main.current_layer+1, Main.backups->Pages->Nb_layers);
+    snprintf(str, sizeof(str), "%3d/%3d", Main.current_layer+1, Main.backups->Pages->Nb_layers);
     Print_general((59)*Menu_factor_X,(Menu_bars[MENUBAR_ANIMATION].Top+3)*Menu_factor_Y+Menu_Y,str,MC_Black,MC_Light);
     Update_rect(
       (59)*Menu_factor_X,
@@ -1077,9 +1077,9 @@ void Print_coordinates(void)
       }
     }
 
-    Num2str((dword)Paintbrush_X,temp,4);
+    Num2str(Paintbrush_X,temp,4);
     Print_in_menu(temp,2);
-    Num2str((dword)Paintbrush_Y,temp,4);
+    Num2str(Paintbrush_Y,temp,4);
     Print_in_menu(temp,11);
   }
 }
