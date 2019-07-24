@@ -4078,7 +4078,7 @@ void Load_GPX(T_IO_Context * context)
   {
     byte * gpx = NULL;
     unsigned long gpx_size = 0;
-    int r;
+    int r = Z_MEM_ERROR;
 
     do
     {
@@ -4086,9 +4086,7 @@ void Load_GPX(T_IO_Context * context)
       gpx_size += 65536;
       gpx = GFX2_malloc(gpx_size);
       if (gpx == NULL)
-      {
         break;
-      }
       r = uncompress(gpx, &gpx_size, buffer, file_size);
       if (r != Z_BUF_ERROR && r != Z_OK)
         GFX2_Log(GFX2_ERROR, "uncompress() failed with error %d: %s\n", r, zError(r));
