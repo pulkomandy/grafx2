@@ -785,7 +785,12 @@ int Init_program(int argc,char * argv[])
     else
     {
       GFX2_Log(GFX2_DEBUG, "Joystick #0 open : \"%s\" %d axes, %d buttons, %d balls, %d hats\n",
-               SDL_JoystickName(Joystick), SDL_JoystickNumAxes(Joystick),
+#if defined(USE_SDL2)
+               SDL_JoystickName(Joystick),
+#else
+               SDL_JoystickName(0),
+#endif
+               SDL_JoystickNumAxes(Joystick),
                SDL_JoystickNumButtons(Joystick), SDL_JoystickNumBalls(Joystick),
                SDL_JoystickNumHats(Joystick));
       SDL_JoystickEventState(SDL_ENABLE);
