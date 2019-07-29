@@ -48,16 +48,16 @@ SDLTTF=SDL_ttf-2.0.11
 SDLTTFARCH=$(SDLTTF).tar.gz
 SDLTTFURL=https://www.libsdl.org/projects/SDL_ttf/release/$(SDLTTFARCH)
 SDLTTFSHA256 = 724cd895ecf4da319a3ef164892b72078bd92632a5d812111261cde248ebcdb7
-SDL2VER = 2.0.9
+SDL2VER = 2.0.10
 LATESTSDL2VER = $(shell curl -s -S http://www.libsdl.org/ | grep current | grep stable | sed 's/.*version \([0-9.]*\).*/\1/' )
 SDL2 = SDL2-$(SDL2VER)
 SDL2ARCH = $(SDL2).tar.gz
 SDL2URL = https://www.libsdl.org/release/$(SDL2ARCH)
-SDL2SHA256 = 255186dc676ecd0c1dbf10ec8a2cc5d6869b5079d8a38194c2aecdff54b324b1
-SDL2DEVEL = SDL2-devel-2.0.9-mingw.tar.gz
+SDL2SHA256 = b4656c13a1f0d0023ae2f4a9cf08ec92fffb464e0f24238337784159b8b91d57
+SDL2DEVEL = SDL2-devel-$(SDL2VER)-mingw.tar.gz
 SDL2DEVELURL = https://www.libsdl.org/release/$(SDL2DEVEL)
 SDL2DEVELPATCH = SDL2-devel.patch
-SDL2DEVELSHA256 = 0f9f00d0f2a9a95dfb5cce929718210c3f85432cc2e9d4abade4adcb7f6bb39d
+SDL2DEVELSHA256 = a90a7cddaec4996f4d7be6d80c57ec69b062e132bffc513965f99217f603274a
 SDL2IMAGEVER = 2.0.5
 SDL2IMAGE = SDL2_image-$(SDL2IMAGEVER)
 SDL2IMAGEARCH = $(SDL2IMAGE).tar.gz
@@ -301,7 +301,7 @@ endif
 ifdef WIN32
 $(PREFIX)/lib/libSDL2main.a:	archives/$(SDL2DEVEL)
 	$(TAR) xzf $<
-	patch -p0 < $(SDL2DEVELPATCH)
+	cd $(SDL2) && patch -p1 < ../$(SDL2DEVELPATCH)
 	$(MKDIR) $(PREFIX)
 	cd $(SDL2) && $(MAKE) install-package arch=i686-w64-mingw32 prefix=$(PREFIX)
 	$(MKDIR) ../bin && $(CP) $(PREFIX)/bin/SDL2.dll ../bin && $(STRIP) ../bin/SDL2.dll
