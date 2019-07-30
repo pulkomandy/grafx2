@@ -587,8 +587,8 @@ endif
         COPT += -D__SWITCH__ -D_XOPEN_SOURCE=500 -DUSE_JOYSTICK -D__no_tifflib__
         LOPT = -specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(OBJDIR)/$*.map
         LOPT += `$(DEVKITPRO)/portlibs/switch/bin/sdl2-config --libs`
-        LOPT += `/opt/devkitpro/portlibs/switch/bin/aarch64-none-elf-pkg-config --libs-only-l SDL2_image`
-        LOPT += `/opt/devkitpro/portlibs/switch/bin/aarch64-none-elf-pkg-config --libs-only-l SDL2_ttf`
+        LOPT += `$(DEVKITPRO)/portlibs/switch/bin/aarch64-none-elf-pkg-config --libs-only-l SDL2_image`
+        LOPT += `$(DEVKITPRO)/portlibs/switch/bin/aarch64-none-elf-pkg-config --libs-only-l SDL2_ttf`
         LOPT += -lstdc++ -lnx
       else
       ifdef AROS32CROSS
