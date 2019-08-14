@@ -1155,6 +1155,8 @@ int L_InputBox(lua_State* L)
 
   while (!close_window)
   {
+    if (Quit_is_required)
+      close_window = CONTROL_CANCEL;
     clicked_button=Window_clicked_button();
     if (clicked_button>0)
     {
@@ -1338,7 +1340,7 @@ int L_SelectBox(lua_State* L)
   do
   {
     clicked_button=Window_clicked_button();
-  } while (clicked_button<1 && Key != KEY_ESC);
+  } while (clicked_button<1 && Key != KEY_ESC && !Quit_is_required);
     
   Close_window();
   Cursor_shape=CURSOR_SHAPE_HOURGLASS;
@@ -2839,8 +2841,10 @@ void Button_Brush_Factory(void)
           break;
       }
       
-    } while (clicked_button != 1 && clicked_button != 5);
-    
+    } while (clicked_button != 1 && clicked_button != 5 && !Quit_is_required);
+
+    if (Quit_is_required)
+      clicked_button = 1;
     // Cancel
     if (clicked_button==1)
       break;

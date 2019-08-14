@@ -2637,7 +2637,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
       Timer_state=2; // On arrête le chrono
     }
   }
-  while ( (!has_clicked_ok) && (clicked_button!=2) );
+  while ( (!has_clicked_ok) && (clicked_button!=2) && !Quit_is_required);
 
   if (has_clicked_ok)
   {

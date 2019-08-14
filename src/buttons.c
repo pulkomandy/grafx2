@@ -5208,12 +5208,14 @@ void Button_Text(int btn)
     }
 
     clicked_button=Window_clicked_button();
+    if (Quit_is_required)
+      clicked_button = 12; // cancel
     if (clicked_button==0)
     {
       if (Is_shortcut(Key,0x100+BUTTON_HELP))
         Window_help(BUTTON_TEXT, NULL);
       else if (Is_shortcut(Key,0x100+BUTTON_TEXT))
-        clicked_button=12;
+        clicked_button = 12;  // cancel
     }
     switch(clicked_button)
     {

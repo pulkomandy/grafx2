@@ -337,7 +337,7 @@ void Button_Transform_menu(int btn)
       break;
     }
   }
-  while (clicked_button<=0 || clicked_button>=8);
+  while ((clicked_button<=0 || clicked_button>=8) && !Quit_is_required);
 
   Close_window();
 
@@ -345,7 +345,7 @@ void Button_Transform_menu(int btn)
   if (Current_operation != OPERATION_SCROLL)
     Unselect_button(btn);
 
-  if (clicked_button != 1) // 1 is Cancel
+  if (clicked_button != 1 && !Quit_is_required) // 1 is Cancel
   {
     short old_width;
     short old_height;
