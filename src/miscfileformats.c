@@ -185,11 +185,25 @@ void Load_GPL(T_IO_Context * context)
     Read_byte_line(file, buffer, sizeof(buffer));
     /// @todo set grafx2 columns setting to match.
     // #<newline>
-    if (!Read_byte_line(file, buffer, sizeof(buffer)))
-      return;
 
     for (i = 0; i < 256; i++)
     {
+      for (;;)
+      {
+        // skip comments
+        int c = getc(file);
+        if (c == '#')
+        {
+          if (!Read_byte_line(file, buffer, sizeof(buffer)))
+            return;
+          GFX2_Log(GFX2_DEBUG, "comment: %s", buffer);
+        }
+        else
+        {
+          fseek(file, -1, SEEK_CUR);
+          break;
+        }
+      }
       skip_padding(file, 32);
       if (fscanf(file, "%d", &r) != 1)
         break;
