@@ -1407,6 +1407,95 @@ static word X11_to_GFX2_Modifiers(unsigned int state)
 int user_feedback_required = 0; // Flag qui indique si on doit arrêter de traiter les évènements ou si on peut enchainer
 #endif
 
+/**
+ * Emulate mouse move with Joystick or specific keys
+ */
+static void Mouse_Emulation()
+{
+  // Directional and analog controller
+  if (!(Digital_joystick_state || Directional_emulated)
+#if defined(USE_JOYSTICK)
+    && !(Joystick_vertical != 0 || Joystick_horizontal != 0)
+#endif
+    )
+  {
+    Directional_first_move = 0;
+  }
+  else
+  {
+    long time_now;
+    int step = 0;
+#if defined(USE_JOYSTICK)
+    int joy_step = 0;
+#endif
+    time_now = GFX2_GetTicks();
+
+    if (Directional_first_move == 0)
+    {
+      Directional_first_move = time_now;
+      step = 1;
+    }
+    else
+    {
+      // Compute how much the cursor has moved since last call.
+      // This tries to make smooth cursor movement
+      // no matter the frequency of calls to Get_input()
+      step =
+        Directional_acceleration(time_now - Directional_first_move) -
+        Directional_acceleration(Directional_last_move - Directional_first_move);
+
+      // Clip speed at 3 pixel per visible frame.
+      if (step > PAD_MAX_SPEED)
+        step = PAD_MAX_SPEED;
+
+#if defined(USE_JOYSTICK)
+      joy_step =
+        Directional_acceleration(time_now) -
+        Directional_acceleration(Directional_last_move);
+
+      if (joy_step > STICK_MAX_SPEED)
+        joy_step = STICK_MAX_SPEED;
+#endif
+    }
+    Directional_last_move = time_now;
+#if defined(USE_JOYSTICK)
+    // Analog joystick
+    if (Joystick_vertical != 0 || Joystick_horizontal != 0)
+    {
+      Cursor_displace(joy_step, Joystick_horizontal, Joystick_vertical);
+    }
+#endif
+
+    if (step)
+    {
+      long delta_x = 0;
+      long delta_y = 0;
+      // Directional controller UP
+      if ((Digital_joystick_state & (D_JOYSTICK_UP | D_JOYSTICK_UP_RIGHT | D_JOYSTICK_UP_LEFT))
+        || (Directional_emulated & D_JOYSTICK_UP))
+        delta_y -= 1 << 16;
+      // Directional controller DOWN
+      if ((Digital_joystick_state & (D_JOYSTICK_DOWN | D_JOYSTICK_DOWN_RIGHT | D_JOYSTICK_DOWN_LEFT))
+        || (Directional_emulated & D_JOYSTICK_DOWN))
+        delta_y += 1 << 16;
+
+      // Directional controller RIGHT
+      if ((Digital_joystick_state & (D_JOYSTICK_RIGHT | D_JOYSTICK_UP_RIGHT | D_JOYSTICK_DOWN_RIGHT))
+        || (Directional_emulated & D_JOYSTICK_RIGHT))
+        delta_x += 1 << 16;
+      // Directional controller LEFT
+      if ((Digital_joystick_state & (D_JOYSTICK_LEFT | D_JOYSTICK_UP_LEFT | D_JOYSTICK_DOWN_LEFT))
+        || (Directional_emulated & D_JOYSTICK_LEFT))
+        delta_x -= 1 << 16;
+
+      if (delta_x != 0 || delta_y != 0)
+      {
+        Cursor_displace(step, delta_x, delta_y);
+      }
+    }
+  }
+}
+
 // Main input handling function
 
 int Get_input(int sleep_time)
@@ -1785,88 +1874,9 @@ int Get_input(int sleep_time)
               break;
       }
     }
-    // Directional and analog controller
-    if (!(Digital_joystick_state||Directional_emulated)
-      #if defined(USE_JOYSTICK)
-      && !(Joystick_vertical != 0 || Joystick_horizontal != 0)
-      #endif
-    )
-    {
-       Directional_first_move=0;
-    }
-    else
-    {
-      long time_now;
-      int step=0;
-      #if defined(USE_JOYSTICK)
-      int joy_step = 0;
-      #endif
-      time_now=GFX2_GetTicks();
-      
-      if (Directional_first_move==0)
-      {
-        Directional_first_move=time_now;
-        step=1;
-      }
-      else
-      {
-        // Compute how much the cursor has moved since last call.
-        // This tries to make smooth cursor movement
-        // no matter the frequency of calls to Get_input()
-        step =
-          Directional_acceleration(time_now - Directional_first_move) -
-          Directional_acceleration(Directional_last_move - Directional_first_move);
-        
-        // Clip speed at 3 pixel per visible frame.
-        if (step > PAD_MAX_SPEED)
-          step = PAD_MAX_SPEED;
 
-        #if defined(USE_JOYSTICK)
-        joy_step =
-          Directional_acceleration(time_now) -
-          Directional_acceleration(Directional_last_move);
+    Mouse_Emulation();
 
-        if (joy_step > STICK_MAX_SPEED)
-          joy_step = STICK_MAX_SPEED;
-        #endif
-      }
-      Directional_last_move = time_now;
-      #if defined(USE_JOYSTICK)
-      // Analog joystick
-      if (Joystick_vertical != 0 || Joystick_horizontal != 0)
-      {
-        Cursor_displace(joy_step, Joystick_horizontal, Joystick_vertical);
-      }
-      #endif
-
-      if (step)
-      {
-        long delta_x = 0;
-        long delta_y = 0;
-        // Directional controller UP
-        if ((Digital_joystick_state & (D_JOYSTICK_UP | D_JOYSTICK_UP_RIGHT | D_JOYSTICK_UP_LEFT))
-            || (Directional_emulated & D_JOYSTICK_UP))
-          delta_y -= 1 << 16;
-        // Directional controller DOWN
-        if ((Digital_joystick_state & (D_JOYSTICK_DOWN | D_JOYSTICK_DOWN_RIGHT | D_JOYSTICK_DOWN_LEFT))
-            || (Directional_emulated & D_JOYSTICK_DOWN))
-          delta_y += 1 << 16;
-
-        // Directional controller RIGHT
-        if ((Digital_joystick_state & (D_JOYSTICK_RIGHT | D_JOYSTICK_UP_RIGHT | D_JOYSTICK_DOWN_RIGHT))
-            || (Directional_emulated & D_JOYSTICK_RIGHT))
-          delta_x += 1 << 16;
-        // Directional controller LEFT
-        if ((Digital_joystick_state & (D_JOYSTICK_LEFT | D_JOYSTICK_UP_LEFT | D_JOYSTICK_DOWN_LEFT))
-            || (Directional_emulated & D_JOYSTICK_LEFT))
-          delta_x -= 1 << 16;
-
-        if (delta_x != 0 || delta_y != 0)
-        {
-          Cursor_displace(step, delta_x, delta_y);
-        }
-      }
-    }
     // If the cursor was moved since last update,
     // it was erased, so we need to redraw it (with the preview brush)
     if (Mouse_moved)
@@ -1916,6 +1926,8 @@ int Get_input(int sleep_time)
       TranslateMessage(&msg);
       DispatchMessage(&msg);
     }
+
+    Mouse_Emulation();
 
     // If the cursor was moved since last update,
     // it was erased, so we need to redraw it (with the preview brush)
@@ -2143,6 +2155,9 @@ int Get_input(int sleep_time)
           GFX2_Log(GFX2_INFO, "X11 event.type = %d not handled\n", event.type);
       }
     }
+
+    Mouse_Emulation();
+
     // If the cursor was moved since last update,
     // it was erased, so we need to redraw it (with the preview brush)
     if (Mouse_moved)
