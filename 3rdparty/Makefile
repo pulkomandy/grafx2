@@ -110,7 +110,7 @@ FREETYPEARCH=$(FREETYPE).tar.gz
 FREETYPEURL=https://download.savannah.gnu.org/releases/freetype/$(FREETYPEARCH)
 FREETYPEURLALT=https://sourceforge.net/projects/freetype/files/freetype2/$(FREETYPEVER)/$(FREETYPEARCH)
 FREETYPESHA256=3a60d391fd579440561bf0e7f31af2222bc610ad6ce4d9d7bd2165bca8669110
-LATESTFREETYPEVER = $(shell curl -s -S -I "https://sourceforge.net/projects/freetype/files/latest/download" |grep location | sed 's:.*/\([0-9.]*\)/.*:\1:' )
+LATESTFREETYPEVER = $(shell curl -s -S -I "https://sourceforge.net/projects/freetype/files/latest/download" |grep -i '^location:' | sed 's:.*/\([0-9.]*\)/.*:\1:' )
 LUAVER=5.3.5
 LUA=lua-$(LUAVER)
 LUAARCH=$(LUA).tar.gz
@@ -122,7 +122,7 @@ LUAPATCHES = lua-atari-log2.patch \
 LATESTLUAVER = $(shell curl -s -S https://www.lua.org/download.html | grep -A1 "current release is" | tail -n1 | sed 's/.*lua-\([0-9.]*\)\.tar.*/\1/' )
 # https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-0.6.1.tar.gz
 RECOILVER=4.3.2
-LATESTRECOILVER = $(shell curl -s -S -I https://sourceforge.net/projects/recoil/files/latest/download|grep "location:"|sed 's:.*/\([0-9.]*\)/.*:\1:' )
+LATESTRECOILVER = $(shell curl -s -S -I https://sourceforge.net/projects/recoil/files/latest/download|grep -i "^location:"|sed 's:.*/\([0-9.]*\)/.*:\1:' )
 RECOIL=recoil-$(RECOILVER)
 RECOILARCH=$(RECOIL).tar.gz
 # https://downloads.sourceforge.net/project/recoil/recoil/4.3.0/recoil-4.3.0.tar.gz
