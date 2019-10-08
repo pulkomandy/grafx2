@@ -1684,6 +1684,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   short window_shortcut;
   const char * directory_to_change_to = NULL;
   int   load_from_clipboard = 0;
+  size_t filename_length = 0;
 
   Selector=settings;
 
@@ -2087,13 +2088,16 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           Unicode_char_strlcpy(filename_unicode, Selector->filename, sizeof(filename_unicode)/sizeof(word));
 #ifdef ENABLE_FILENAMES_ICONV
         // convert from UTF8 to ANSI
-        if (Selector->filename != NULL && strlen(Selector->filename) > 0) {
-          char * input = (char *)Selector->filename;
-          size_t inbytesleft = strlen(input);
-          char * output = filename_ansi;
-          size_t outbytesleft = sizeof(filename_ansi)-1;
-          if(cd != (iconv_t)-1 && (ssize_t)iconv(cd, &input, &inbytesleft, &output, &outbytesleft) >= 0)
-            *output = '\0';
+        if (Selector->filename != NULL) {
+          filename_length = strlen(Selector->filename);
+          if (filename_length > 0) {
+            char * input = (char *)Selector->filename;
+            size_t inbytesleft = filename_length;
+            char * output = filename_ansi;
+            size_t outbytesleft = sizeof(filename_ansi)-1;
+            if(cd != (iconv_t)-1 && (ssize_t)iconv(cd, &input, &inbytesleft, &output, &outbytesleft) >= 0)
+              *output = '\0';
+          }
         }
 #endif /* ENABLE_FILENAMES_ICONV */
 #if defined(WIN32) || defined(ENABLE_FILENAMES_ICONV)
