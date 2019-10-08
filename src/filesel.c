@@ -2086,7 +2086,8 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
         else if (Selector->filename != NULL && strlen(Selector->filename) > 0)
           Unicode_char_strlcpy(filename_unicode, Selector->filename, sizeof(filename_unicode)/sizeof(word));
 #ifdef ENABLE_FILENAMES_ICONV
-        { /* convert from UTF8 to ANSI */
+        // convert from UTF8 to ANSI
+        if (Selector->filename != NULL && strlen(Selector->filename) > 0) {
           char * input = (char *)Selector->filename;
           size_t inbytesleft = strlen(input);
           char * output = filename_ansi;
