@@ -2702,6 +2702,10 @@ void Test_C64(T_IO_Context * context, FILE * file)
       }
       File_error = 0;
       break;
+    case 10608:
+      // $0801 = BASIC programs loading address
+      File_error = 0;
+      break;
     case 17218:
     case 17409:
       // $3c00 => FLI-designer v1.1
@@ -3363,6 +3367,16 @@ void Load_C64(T_IO_Context * context)
                 screen_ram=file_buffer+8275; // length: 1000
                 color_ram=file_buffer+9275; // length: 1000
                 background=file_buffer+10275; // only 1
+                break;
+
+            case 10608: // prg
+                hasLoadAddr=1;
+                loadFormat=F_multi;
+                bitmap = file_buffer + 0x239;
+                // border = bitmap + 8000
+                background = bitmap + 8000 + 1;
+                screen_ram = bitmap + 8000 + 2;
+                color_ram = screen_ram + 1000;
                 break;
 
             case 17472: // FLI (BlackMail)
