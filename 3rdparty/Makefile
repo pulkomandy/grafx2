@@ -23,7 +23,9 @@ PLATFORM = $(shell uname)
 
 SDL = SDL-1.2.15
 SDLARCH = $(SDL).tar.gz
+SDLSIG = $(SDLARCH).sig
 SDLURL = https://www.libsdl.org/release/$(SDLARCH)
+SDLURLSIG = $(SDLURL).sig
 SDLSHA256 = d6d316a793e5e348155f0dd93b979798933fb98aa1edebcc108829d6474aad00
 SDLPATCHES = SDL-1.2.15-patch-src_video_x11_SDL_x11sym.h \
              SDL-1.2.15-quartzvideo.patch \
@@ -54,6 +56,8 @@ LATESTSDL2VER = $(shell curl -s -S http://www.libsdl.org/ | grep current | grep 
 SDL2 = SDL2-$(SDL2VER)
 SDL2ARCH = $(SDL2).tar.gz
 SDL2URL = https://www.libsdl.org/release/$(SDL2ARCH)
+SDL2SIG = $(SDL2ARCH).sig
+SDL2SIGURL = $(SDL2URL).sig
 SDL2SHA256 = 349268f695c02efbc9b9148a70b85e58cefbbf704abd3e91be654db7f1e2c863
 SDL2PATCHES = SDL2-NSOSVersion.patch
 SDL2DEVEL = SDL2-devel-$(SDL2VER)-mingw.tar.gz
@@ -95,7 +99,9 @@ LIBTIFFURLALT = https://fossies.org/linux/misc/$(LIBTIFFARCH)
 LIBTIFFPATCHES = tiff-uint64_long_long.patch
 # additionnal variables for the generic rules to work :
 TIFFARCH = $(LIBTIFFARCH)
+TIFFSIG = $(TIFFARCH).sig
 TIFFURL = $(LIBTIFFURL)
+TIFFSIGURL = $(TIFFURL).sig
 TIFFURLALT = $(LIBTIFFURLALT)
 TIFFPATCHES = $(LIBTIFFPATCHES)
 TIFFSHA256 = eb0484e568ead8fa23b513e9b0041df7e327f4ee2d22db5a533929dfc19633cb
@@ -109,8 +115,10 @@ ZLIBSHA256=c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1
 FREETYPEVER=2.10.4
 FREETYPE=freetype-$(FREETYPEVER)
 FREETYPEARCH=$(FREETYPE).tar.gz
+FREETYPESIG=$(FREETYPEARCH).sig
 FREETYPEURL=https://download.savannah.gnu.org/releases/freetype/$(FREETYPEARCH)
 FREETYPEURLALT=https://sourceforge.net/projects/freetype/files/freetype2/$(FREETYPEVER)/$(FREETYPEARCH)
+FREETYPESIGURL=$(FREETYPEURL).sig
 FREETYPESHA256=5eab795ebb23ac77001cfb68b7d4d50b5d6c7469247b0b01b2c953269f658dac
 LATESTFREETYPEVER = $(shell curl -s -S -I "https://sourceforge.net/projects/freetype/files/latest/download" |grep -i '^location:' | sed 's:.*/\([0-9.]*\)/.*:\1:' )
 LUAVER=5.3.6
@@ -150,6 +158,7 @@ PREFIX = $(PWD)/usr$(PLATFORMDIR)
 MKDIR = mkdir -p
 CP = cp -v
 TAR = $(shell which tar)
+GPG = gpg
 SHA256CMD = $(shell SHASUM=`which shasum 2> /dev/null` ; if [ "$$?" = "0" ] && [ -x "$$SHASUM" ] ; \
                     then echo "(\"$$SHASUM\" -a 256 | cut -f1 -d' ')" ; \
                     else OPENSSL=`which openssl` ; if [ "$$?" = "0" ] && [ -x "$$OPENSSL" ] ; \
@@ -223,7 +232,7 @@ DATE = $(shell date -R)
         libsdl libsdl_image libsdl_ttf \
         libsdl2 libsdl2_image libsdl2_ttf \
         libjpeg libtiff zlib freetype lua recoil \
-        checkversions
+        checkversions importgpgkeys
 
 all:	libs
 
@@ -621,6 +630,12 @@ recoil:	$(RECOIL)/.ok
 	cd $(@D) ; for p in $(REDCODE6502PATCHES) ; do echo "applying $$p" ; patch -p1 < ../$$p ; done
 	touch $@
 
+importgpgkeys:	gpgkeys/imported.ok
+
+gpgkeys/imported.ok:	$(filter-out gpgkeys/imported.ok,$(wildcard gpgkeys/*))
+	$(GPG) --import $^
+	touch $@
+
 # generic rule to unpack tarball and apply patches
 %/.ok:	archives/%.tar.gz
 	$(TAR) xzf $<
@@ -644,8 +659,11 @@ archives/%.tar.gz:
 	$(eval URL = $($(BASE)URL))
 	$(eval URLALT = $($(BASE)URLALT))
 	$(eval SHA256 = $($(BASE)SHA256))
-	@echo "$*: fetching $(URL) (or $(URLALT))"
+	$(eval SIG = $($(BASE)SIG))
+	$(eval SIGURL = $($(BASE)SIGURL))
+	@echo "$*: fetching $(URL) (or $(URLALT)) $(SIG)"
 	@cd $(@D) && ( $(GETURL) $(URL) || ( [ -n "$(URLALT)" ] && $(GETURL) $(URLALT) ) )
+	@[ -z "$(SIGURL)" ] || ( cd $(@D) && $(GETURL) $(SIGURL) && $(GPG) --verify $(SIG) ) || ( $(RM) $@ && false )
 	@[ -z "$(SHA256)" ] || [ "`$(SHA256CMD) < $@`" = "$(SHA256)" ] || ( $(RM) $@ && echo "$@ SHA256 mismatch !" && false )
 
 # generic rule to check package version

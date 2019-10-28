@@ -61,7 +61,7 @@ pages:
 job_win32:
     stage: build
     before_script:
-        - apt-get update -qq && apt-get install -y -qq zip dos2unix
+        - apt-get update -qq && apt-get install -y -qq zip dos2unix gpg
         - apt-get install -y -qq gcc-mingw-w64-i686 g++-mingw-w64-i686 mingw-w64-tools nsis
     script:
         - "WIN32CROSS=1 make 3rdparty -j2 || exit 1"
@@ -86,7 +86,7 @@ job_win32:
 job_atari:
     stage: build
     before_script:
-        - apt-get update -qq && apt-get install -y -qq zip dos2unix lsb-release
+        - apt-get update -qq && apt-get install -y -qq zip dos2unix lsb-release gpg
         - "sh ./.install-cross-mint.sh"
     script:
         - "ATARICROSS=1 make 3rdparty -j2 || exit 1"

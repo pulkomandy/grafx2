@@ -29,6 +29,7 @@ tools:	src/version.c
 	$(MAKE) -C tools/
 
 3rdparty:
+	cd 3rdparty/ && $(OPT)$(MAKE) importgpgkeys
 	cd 3rdparty/ && $(OPT)$(MAKE)
 
 win32installer:
