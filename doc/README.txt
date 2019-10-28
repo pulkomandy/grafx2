@@ -22,7 +22,7 @@ eventually like to draw the oldskool way !
 
 Grafx2 was originally written for the MS-DOS operating system. The authors then 
 released the sourcecode and we've modified it to run on your favorite platform 
-(if we missed it, please tell us !). Check the homepage at
+(if we missed it, please tell us !). Check the homepage at http://grafx2.tk/ or
 http://pulkomandy.tk/projects/GrafX2 for latest news and bugfixed versions.
 
 === HELP ===
@@ -57,6 +57,7 @@ the git repository:
 https://gitlab.com/GrafX2/grafX2.git
 or you can find the latest versions as packed archives:
 http://pulkomandy.tk/projects/GrafX2/downloads
+https://grafx2.gitlab.io/grafX2/
 
 === COMPILING ===
 
