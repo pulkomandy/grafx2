@@ -28,6 +28,11 @@
 ///
 /// TODO : make a test binary and include the tests to the constant-integration
 
+#include <stdio.h>
+#include <string.h>
+#include "../struct.h"
+#include "../gfx2log.h"
+
 /**
  * Tests for MOTO_MAP_pack()
  */

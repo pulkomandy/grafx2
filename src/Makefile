@@ -218,6 +218,7 @@ endif
     # Where the SDL frameworks are located
     FWDIR = /Library/Frameworks
     BIN = ../bin/grafx2-$(API)
+    TESTSBIN = ../bin/tests-$(API)
     PKG_CONFIG_PATH ?= $(shell if [ -d ../3rdparty/usr/lib/pkgconfig ] ; then echo "$${PWD}/../3rdparty/usr/lib/pkgconfig" ; fi )
 ifneq ($(PKG_CONFIG_PATH), )
     PKG_CONFIG := PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKG_CONFIG)
@@ -643,6 +644,7 @@ endif
 
         # Compiles a regular linux executable for the native platform
         BIN = ../bin/grafx2-$(API)
+        TESTSBIN = ../bin/tests-$(API)
         COPT = -W -Wall -Wdeclaration-after-statement -std=c99 -g
         ifeq ($(API),sdl)
           COPT += $(shell sdl-config --cflags)
@@ -794,7 +796,8 @@ endif
 
 ### And now for the real build rules ###
 
-.PHONY : all debug release clean depend force install uninstall valgrind doc doxygen htmldoc
+.PHONY : all debug release clean depend force install uninstall valgrind \
+         doc doxygen htmldoc check
 
 # This is the list of the objects we want to build. Dependancies are built by "make depend" automatically.
 OBJS = main.o init.o graph.o $(APIOBJ) misc.o special.o \
@@ -813,8 +816,19 @@ OBJS = main.o init.o graph.o $(APIOBJ) misc.o special.o \
 ifndef NORECOIL
 OBJS += loadrecoil.o recoil.o
 endif
+
+TESTSOBJS = $(patsubst %.c,%.o,$(wildcard tests/*.c)) \
+            miscfileformats.o oldies.o libraw2crtc.o \
+			loadsavefuncs.o \
+			unicode.o \
+            io.o realpath.o version.o pversion.o \
+			gfx2surface.o \
+            gfx2log.o gfx2mem.o
+
 OBJ = $(addprefix $(OBJDIR)/,$(OBJS))
-DEP = $(patsubst %.o,%.d,$(OBJ))
+TESTSOBJ = $(addprefix $(OBJDIR)/,$(TESTSOBJS))
+
+DEP = $(patsubst %.o,%.d,$(OBJ) $(TESTSOBJ))
 
 GENERATEDOCOBJ = $(addprefix $(OBJDIR)/,generatedoc.o hotkeys.o keyboard.o)
 
@@ -997,6 +1011,9 @@ ifeq ($(SWITCH), 1)
 		@echo built ... $(BIN).nro
 endif
 
+check:	$(TESTSBIN)
+	$(TESTSBIN)
+
 # .tgz archive with source only files
 SRCARCH = ../src-$(VERSIONTAG).tgz
 
@@ -1104,12 +1121,17 @@ endif
 
 $(BIN) : $(OBJ)
 	@test -d ../bin || $(MKDIR) ../bin
-	$(CC) $(OBJ) -o $(BIN) $(LOPT) $(LDFLAGS) $(LDLIBS)
+	$(CC) $(OBJ) -o $@ $(LOPT) $(LDFLAGS) $(LDLIBS)
 ifeq ($(PLATFORM),Haiku)
 	rc -o $(OBJDIR)/grafx2.rsrc grafx2.rdef
 	xres -o $(BIN) $(OBJDIR)/grafx2.rsrc
 	mimeset -f $(BIN)
 endif
+
+$(TESTSBIN):	$(TESTSOBJ)
+	@test -d ../bin || $(MKDIR) ../bin
+	$(CC) $(TESTSOBJ) -o $@ $(LOPT) $(LDFLAGS) $(LDLIBS)
+
 
 $(GENERATEDOCBIN): $(GENERATEDOCOBJ)
 	@test -d ../bin || $(MKDIR) ../bin
@@ -1140,17 +1162,17 @@ endif
 $(OBJ):	$(CFLAGS_CACHE)
 
 $(OBJDIR)/%.o : %.c
-	$(if $(wildcard $(OBJDIR)),,$(MKDIR) $(OBJDIR))
+	@$(MKDIR) -p $(@D)
 	$(CC) $(COPT) $(CFLAGS) -c $*.c -o $(OBJDIR)/$*.o
 
 $(OBJDIR)/%.o : %.m
-	$(if $(wildcard $(OBJDIR)),,$(MKDIR) $(OBJDIR))
+	@$(MKDIR) -p $(@D)
 	$(CC) $(COPT) -c $*.m -o $(OBJDIR)/$*.o
 
 depend:	$(DEP)
 
 $(OBJDIR)/%.d :	%.c
-	$(if $(wildcard $(OBJDIR)),,$(MKDIR) $(OBJDIR))
+	@$(MKDIR) -p $(@D)
 	$(CC) $(COPT) $(CFLAGS) $(DEPFLAGS) -o $@ $<
 
 # update the gfx2.rc Windows ressource file
@@ -1171,7 +1193,8 @@ $(OBJDIR)/haiku.o : haiku.cpp
 
 clean :
 	$(DELCOMMAND) $(OBJ) $(DEP)
-	$(DELCOMMAND) $(BIN)
+	$(DELCOMMAND) $(TESTSOBJ)
+	$(DELCOMMAND) $(BIN) $(TESTSBIN)
 	if [ -d ../3rdparty ] ; then $(DELCOMMAND) recoil.c recoil.h ; fi
 
 ifneq ($(PLATFORM),amiga-vbcc)

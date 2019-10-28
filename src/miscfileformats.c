@@ -6307,7 +6307,7 @@ void Load_MOTO(T_IO_Context * context)
  * - cc xx          : encodes a "repeat run" (cc > 0 : count)
  */
 //#define MOTO_MAP_NOPACKING
-static unsigned int MOTO_MAP_pack(byte * packed, const byte * unpacked, unsigned int unpacked_len)
+unsigned int MOTO_MAP_pack(byte * packed, const byte * unpacked, unsigned int unpacked_len)
 {
   unsigned int src;
   unsigned int dst = 0;
