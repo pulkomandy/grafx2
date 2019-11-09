@@ -91,7 +91,7 @@ JPEGVER = 9d
 LATESTJPEGVER = $(shell curl -s -S http://www.ijg.org/ |grep "current version" | sed 's/.*release \([0-9]*[a-z]\) .*/\1/' )
 JPEGDIR = jpeg-$(JPEGVER)
 JPEGARCH = jpegsrc.v$(JPEGVER).tar.gz
-JPEGURL = http://www.ijg.org/files/$(JPEGARCH)
+JPEGURL = https://www.ijg.org/files/$(JPEGARCH)
 # http://www.simplesystems.org/libtiff/
 # https://gitlab.com/libtiff/libtiff
 LIBTIFFVER = 4.2.0
