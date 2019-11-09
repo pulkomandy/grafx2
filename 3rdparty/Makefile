@@ -141,7 +141,7 @@ PREFIX = $(PWD)/usr$(PLATFORMDIR)
 MKDIR = mkdir -p
 CP = cp -v
 TAR = $(shell which tar)
-SHA256CMD = $(shell SHASUM=`which shasum` ; if [ "$$?" = "0" ] && [ -x "$$SHASUM" ] ; \
+SHA256CMD = $(shell SHASUM=`which shasum 2> /dev/null` ; if [ "$$?" = "0" ] && [ -x "$$SHASUM" ] ; \
                     then echo "(\"$$SHASUM\" -a 256 | cut -f1 -d' ')" ; \
                     else OPENSSL=`which openssl` ; if [ "$$?" = "0" ] && [ -x "$$OPENSSL" ] ; \
                     then echo "(\"$$OPENSSL\" sha256 -hex | sed 's/^.* //')" ; \
