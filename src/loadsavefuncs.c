@@ -27,6 +27,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#ifndef _MSC_VER
+#include <unistd.h>
+#endif
+#if defined(WIN32)
+#include <windows.h>
+#if defined(_MSC_VER)
+#define strdup _strdup
+#if _MSC_VER < 1900
+#define snprintf _snprintf
+#endif
+#endif
+#endif
 #include "struct.h"
 #include "global.h"
 #include "loadsave.h"
