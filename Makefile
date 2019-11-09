@@ -5,13 +5,16 @@ endif
 
 .PHONY:	all tools grafx2 ziprelease 3rdparty win32installer \
         doc doxygen docarchive doxygenarchive htmldoc \
-        updateversion unicodefonts
+        updateversion unicodefonts check
 
 all:	grafx2 tools
 
 doc:	doxygen
 
 docarchive:	doxygenarchive
+
+check:
+	$(OPT)$(MAKE) -C src/ check
 
 grafx2:	unicodefonts
 	$(OPT)$(MAKE) -C src/
