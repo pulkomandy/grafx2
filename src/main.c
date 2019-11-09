@@ -115,6 +115,7 @@
 #include "engine.h"
 #include "pages.h"
 #include "loadsave.h"
+#include "loadsavefuncs.h"
 #include "screen.h"
 #include "errors.h"
 #include "readini.h"

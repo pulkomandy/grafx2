@@ -400,28 +400,6 @@ byte Read_pixel_from_backup_screen (word x,word y)
   return *(Screen_backup + x + Main.image_width * y);
 }
 
-void Palette_256_to_64(T_Palette palette)
-{
-  int i;
-  for(i=0;i<256;i++)
-  {
-    palette[i].R = palette[i].R >> 2;
-    palette[i].G = palette[i].G >> 2;
-    palette[i].B = palette[i].B >> 2;
-  }
-}
-
-void Palette_64_to_256(T_Palette palette)
-{
-  int i;
-  for(i=0;i<256;i++)
-  {
-    palette[i].R = (palette[i].R << 2)|(palette[i].R >> 4);
-    palette[i].G = (palette[i].G << 2)|(palette[i].G >> 4);
-    palette[i].B = (palette[i].B << 2)|(palette[i].B >> 4);
-  }
-}
-
 byte Effect_interpolated_colorize  (word x,word y,byte color)
 {
   // factor_a = 256*(100-Colorize_opacity)/100

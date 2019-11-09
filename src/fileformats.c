@@ -84,6 +84,7 @@
 #include "errors.h"
 #include "global.h"
 #include "loadsave.h"
+#include "loadsavefuncs.h"
 #include "misc.h"
 #include "struct.h"
 #include "io.h"
@@ -5795,8 +5796,6 @@ void Load_PCX(T_IO_Context * context)
                             else
                               File_error=2;
                         }
-                        else
-                          Set_file_error(2);
                       }
                       else
                         buffer[x_pos++]=byte1;

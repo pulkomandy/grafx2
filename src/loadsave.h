@@ -28,9 +28,6 @@
 #define __LOADSAVE_H__
 
 #include <stdio.h>
-#if defined(USE_SDL) || defined(USE_SDL2)
-#include <SDL_image.h>
-#endif
 #include "gfx2surface.h"
 
 enum CONTEXT_TYPE {
@@ -262,26 +259,8 @@ void Pixel_load_in_24b_preview(short x_pos,short y_pos,byte r,byte g,byte b);
 */
 //
 
-void Set_file_error(int value);
-
 /*
 void Init_preview(short width,short height,long size,int format,enum PIXEL_RATIO ratio);
 */
-void Write_one_byte(FILE *file, byte b);
-
-/// For use by Save_XXX() functions
-FILE * Open_file_write(T_IO_Context *context);
-
-/// For use by Load_XXX() and Test_XXX() functions
-FILE * Open_file_read(T_IO_Context *context);
-
-/// For use by Load_XXX() and Test_XXX() functions
-FILE * Open_file_read_with_alternate_ext(T_IO_Context *context, const char * ext);
-
-/// For use by Save_XXX() functions
-void Remove_file(T_IO_Context *context);
-
-/// For use by Save_XXX() functions
-FILE * Open_file_write_with_alternate_ext(T_IO_Context *context, const char * ext);
 
 #endif

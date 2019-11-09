@@ -60,6 +60,7 @@
 #include "keycodes.h"
 #include "io.h"
 #include "loadsave.h"
+#include "loadsavefuncs.h"
 #include "misc.h"
 #include "graph.h"
 #include "op_c.h"
@@ -110,7 +111,7 @@ static void Load_ClipBoard_Image(T_IO_Context *);
 static void Save_ClipBoard_Image(T_IO_Context *);
 
 
-// ENUM     Name  TestFunc LoadFunc SaveFunc PalOnly Comment Layers Ext Exts  
+// ENUM     Name  TestFunc LoadFunc SaveFunc PalOnly Comment Layers Ext Exts
 const T_Format File_formats[] = {
   {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, 0, "",
     "gif;png;bmp;2bp;pcx;pkm;iff;lbm;ilbm;sham;ham;ham6;ham8;acbm;pic;anim;img;sci;scq;scf;scn;sco;cel;"
@@ -173,41 +174,41 @@ void Set_pixel(T_IO_Context *context, short x_pos, short y_pos, byte color)
   // Clipping
   if ((x_pos>=context->Width) || (y_pos>=context->Height))
     return;
-    
+
   switch (context->Type)
   {
     // Chargement des pixels dans l'écran principal
     case CONTEXT_MAIN_IMAGE:
       Pixel_in_current_screen(x_pos,y_pos,color);
       break;
-      
+
     // Chargement des pixels dans la brosse
     case CONTEXT_BRUSH:
       //Pixel_in_brush(x_pos,y_pos,color);
       *(context->Buffer_image + y_pos * context->Pitch + x_pos)=color;
       break;
-      
+
     // Chargement des pixels dans la preview
     case CONTEXT_PREVIEW:
       // Skip pixels of transparent index if :
       // it's a layer above the first one
       if (color == context->Transparent_color && context->Current_layer > 0)
         break;
-      
+
       if (((x_pos % context->Preview_factor_X)==0) && ((y_pos % context->Preview_factor_Y)==0))
       {
         // Tag the color as 'used'
         context->Preview_usage[color]=1;
-        
+
         // Store pixel
-        if (context->Ratio == PIXEL_WIDE && 
+        if (context->Ratio == PIXEL_WIDE &&
           Pixel_ratio != PIXEL_WIDE &&
           Pixel_ratio != PIXEL_WIDE2)
         {
           context->Preview_bitmap[x_pos/context->Preview_factor_X*2 + (y_pos/context->Preview_factor_Y)*PREVIEW_WIDTH*Menu_factor_X]=color;
           context->Preview_bitmap[x_pos/context->Preview_factor_X*2+1 + (y_pos/context->Preview_factor_Y)*PREVIEW_WIDTH*Menu_factor_X]=color;
         }
-        else if (context->Ratio == PIXEL_TALL && 
+        else if (context->Ratio == PIXEL_TALL &&
           Pixel_ratio != PIXEL_TALL &&
           Pixel_ratio != PIXEL_TALL2 &&
           Pixel_ratio != PIXEL_TALL3)
@@ -220,13 +221,13 @@ void Set_pixel(T_IO_Context *context, short x_pos, short y_pos, byte color)
       }
 
       break;
-      
+
     // Load pixels into a Surface
     case CONTEXT_SURFACE:
       if (x_pos>=0 && y_pos>=0 && x_pos<context->Surface->w && y_pos<context->Surface->h)
         Set_GFX2_Surface_pixel(context->Surface, x_pos, y_pos, color);
       break;
-      
+
     case CONTEXT_PALETTE:
     case CONTEXT_PREVIEW_PALETTE:
       break;
@@ -260,15 +261,15 @@ void Fill_canvas(T_IO_Context *context, byte color)
   }
 }
 
-// Chargement des pixels dans le buffer 24b
+/// Chargement des pixels dans le buffer 24b
 void Set_pixel_24b(T_IO_Context *context, short x_pos, short y_pos, byte r, byte g, byte b)
 {
   byte color;
-  
+
   // Clipping
   if (x_pos<0 || y_pos<0 || x_pos>=context->Width || y_pos>=context->Height)
     return;
-        
+
   switch(context->Type)
   {
     case CONTEXT_MAIN_IMAGE:
@@ -276,25 +277,25 @@ void Set_pixel_24b(T_IO_Context *context, short x_pos, short y_pos, byte r, byte
     case CONTEXT_SURFACE:
       {
         int index;
-        
+
         index=(y_pos*context->Width)+x_pos;
         context->Buffer_image_24b[index].R=r;
         context->Buffer_image_24b[index].G=g;
         context->Buffer_image_24b[index].B=b;
       }
       break;
-      
+
     case CONTEXT_PREVIEW:
-      
+
       if (((x_pos % context->Preview_factor_X)==0) && ((y_pos % context->Preview_factor_Y)==0))
       {
         color=((r >> 5) << 5) |
                 ((g >> 5) << 2) |
                 ((b >> 6));
-        
+
         // Tag the color as 'used'
         context->Preview_usage[color]=1;
-        
+
         context->Preview_bitmap[x_pos/context->Preview_factor_X + (y_pos/context->Preview_factor_Y)*PREVIEW_WIDTH*Menu_factor_X]=color;
       }
       break;
@@ -305,8 +306,6 @@ void Set_pixel_24b(T_IO_Context *context, short x_pos, short y_pos, byte r, byte
       break;
   }
 }
-
-
 
 // Création d'une palette fake
 void Set_palette_fake_24b(T_Palette palette)
@@ -384,13 +383,13 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
   context->Nb_layers = 1;
   context->Transparent_color=0;
   context->Background_transparent=0;
-  
+
   switch(context->Type)
   {
     // Preview
     case CONTEXT_PREVIEW:
       // Préparation du chargement d'une preview:
-      
+
       context->Preview_bitmap=calloc(1, PREVIEW_WIDTH*PREVIEW_HEIGHT*Menu_factor_X*Menu_factor_Y);
       if (!context->Preview_bitmap)
         File_error=1;
@@ -409,7 +408,7 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
       Print_in_window(101,59,str,MC_Black,MC_Light);
       snprintf(str, sizeof(str), "%2dbpp", bpp);
       Print_in_window(181,59,str,MC_Black,MC_Light);
-  
+
       // Affichage de la taille du fichier
       if (file_size<1048576)
       {
@@ -428,27 +427,27 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
         memcpy(str,"LARGE!!",8);
       }
       Print_in_window(236,59,str,MC_Black,MC_Light);
-  
+
       // Affichage du vrai format
       Print_in_window( 59,59,Get_fileformat(format)->Label,MC_Black,MC_Light);
 
       // On efface le commentaire précédent
       Window_rectangle(45,70,32*8,8,MC_Light);
-  
+
       // Calcul des données nécessaires à l'affichage de la preview:
-      if (ratio == PIXEL_WIDE && 
+      if (ratio == PIXEL_WIDE &&
           Pixel_ratio != PIXEL_WIDE &&
           Pixel_ratio != PIXEL_WIDE2)
         width*=2;
-      else if (ratio == PIXEL_TALL && 
+      else if (ratio == PIXEL_TALL &&
           Pixel_ratio != PIXEL_TALL &&
           Pixel_ratio != PIXEL_TALL2 &&
           Pixel_ratio != PIXEL_TALL3)
         height*=2;
-      
+
       context->Preview_factor_X=Round_div_max(width,120*Menu_factor_X);
       context->Preview_factor_Y=Round_div_max(height, 80*Menu_factor_Y);
-  
+
       if ( (!Config.Maximize_preview) && (context->Preview_factor_X!=context->Preview_factor_Y) )
       {
         if (context->Preview_factor_X>context->Preview_factor_Y)
@@ -456,19 +455,19 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
         else
           context->Preview_factor_X=context->Preview_factor_Y;
       }
-  
+
       context->Preview_pos_X=Window_pos_X+183*Menu_factor_X;
       context->Preview_pos_Y=Window_pos_Y+ 95*Menu_factor_Y;
-  
+
       // On nettoie la zone où va s'afficher la preview:
       Window_rectangle(183,95,PREVIEW_WIDTH,PREVIEW_HEIGHT,MC_Light);
-      
+
       // Un update pour couvrir les 4 zones: 3 libellés plus le commentaire
       Update_window_area(45,48,256,30);
       // Zone de preview
       Update_window_area(183,95,PREVIEW_WIDTH,PREVIEW_HEIGHT);
       break;
-      
+
     // Other loading
     case CONTEXT_MAIN_IMAGE:
       if (Backup_new_image(1,width,height))
@@ -476,13 +475,13 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
         // La nouvelle page a pu être allouée, elle est pour l'instant pleine
         // de 0s. Elle fait Main_image_width de large.
         // Normalement tout va bien, tout est sous contrôle...
-        
+
         // Load into layer 0, by default.
         context->Nb_layers=1;
         Main.current_layer=0;
         Main.layers_visible=1<<0;
         Set_loading_layer(context,0);
-        
+
         // Remove previous comment, unless we load just a palette
         if (! Get_fileformat(context->Format)->Palette_only)
           context->Comment[0]='\0';
@@ -496,7 +495,7 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
         File_error=1; // 1 => On n'a pas perdu l'image courante
       }
       break;
-      
+
     case CONTEXT_BRUSH:
       context->Buffer_image = (byte *)GFX2_malloc(width*height);
       if (! context->Buffer_image)
@@ -505,9 +504,9 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
         return;
       }
       context->Target_address=context->Buffer_image;
-      
+
       break;
-      
+
     case CONTEXT_SURFACE:
       context->Surface = New_GFX2_Surface(width, height);
       if (! context->Surface)
@@ -527,7 +526,7 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
 
   if (File_error)
     return;
-    
+
   // Extra process for truecolor images
   if (truecolor)
   {
@@ -548,7 +547,7 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
           File_error=1;
         }
         break;
-      
+
       case CONTEXT_PREVIEW:
         // 3:3:2 "True Color" palette will be loaded lated in context->Palette
         // There can be an image palette used to decode the true color picture
@@ -564,29 +563,6 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
 }
 
 /////////////////////////////////////////////////////////////////////////////
-//                    Gestion des lectures et écritures                    //
-/////////////////////////////////////////////////////////////////////////////
-
-void Write_one_byte(FILE *file, byte b)
-{
-  if (! Write_byte(file,b))
-      File_error=1;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
-// -------- Modifier la valeur du code d'erreur d'accès à un fichier --------
-//   On n'est pas obligé d'utiliser cette fonction à chaque fois mais il est
-// important de l'utiliser dans les cas du type:
-//   if (!File_error) *** else File_error=***;
-// En fait, dans le cas où l'on modifie File_error alors qu'elle contient
-// dèjà un code d'erreur.
-void Set_file_error(int value)
-{
-  if (File_error>=0)
-    File_error=value;
-}
-
 
 // -- Charger n'importe connu quel type de fichier d'image (ou palette) -----
 void Load_image(T_IO_Context *context)
@@ -596,7 +572,7 @@ void Load_image(T_IO_Context *context)
   int i;
   byte old_cursor_shape;
   FILE * f;
-  
+
   // Not sure it's the best place...
   context->Color_cycles=0;
 
@@ -700,7 +676,7 @@ void Load_image(T_IO_Context *context)
         Error(0);
     }
   }
-  
+
   // Post-load
 
   if (context->Buffer_image_24b)
@@ -723,7 +699,7 @@ void Load_image(T_IO_Context *context)
           Cursor_shape=old_cursor_shape;
           Display_cursor();
           break;
-          
+
         case CONTEXT_BRUSH:
           // Cas d'un chargement dans la brosse
           old_cursor_shape=Cursor_shape;
@@ -742,7 +718,7 @@ void Load_image(T_IO_Context *context)
           // in this context, context->Buffer_image_24b is not allocated
           // pixels are drawn to context->Preview_bitmap
           break;
-          
+
         case CONTEXT_SURFACE:
           if (Convert_24b_bitmap_to_256(context->Surface->pixels,context->Buffer_image_24b,context->Width,context->Height,context->Palette))
           File_error=1;
@@ -773,13 +749,13 @@ void Load_image(T_IO_Context *context)
         {
           int c;
           T_Components gui_color;
-          
+
           gui_color=*Favorite_GUI_color(gui_index);
           // Try find a very close match (ignore last 2 bits)
           for (c=255; c>=0; c--)
           {
             if ((context->Palette[c].R|3) == (gui_color.R|3)
-             && (context->Palette[c].G|3) == (gui_color.G|3) 
+             && (context->Palette[c].G|3) == (gui_color.G|3)
              && (context->Palette[c].B|3) == (gui_color.B|3) )
              break;
           }
@@ -839,16 +815,16 @@ void Load_image(T_IO_Context *context)
           if (context->File_name_unicode)
             Main.backups->Pages->Filename_unicode = Unicode_strdup(context->File_name_unicode);
         }
-        
+
         // On considère que l'image chargée n'est plus modifiée
         Main.image_is_modified=0;
         // Et on documente la variable Main_fileformat avec la valeur:
         Main.fileformat=format->Identifier;
-  
+
         // already done initially on Backup_with_new_dimensions
         //Main_image_width= context->Width;
         //Main_image_height= context->Height;
-        
+
         if (Main.backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
         {
           Main.current_layer = 0;
@@ -858,11 +834,11 @@ void Load_image(T_IO_Context *context)
           Main.current_layer = context->Nb_layers - 1;
           Main.layers_visible = (2<<Main.current_layer)-1;
         }
-        
+
         // Load the transparency data
         Main.backups->Pages->Transparent_color = context->Transparent_color;
         Main.backups->Pages->Background_transparent = context->Background_transparent;
-  
+
         // Correction des dimensions
         if (Main.image_width<1)
           Main.image_width=1;
@@ -879,7 +855,7 @@ void Load_image(T_IO_Context *context)
           Main.backups->Pages->Gradients->Range[i].Inverse=context->Cycle_range[i].Inverse;
           Main.backups->Pages->Gradients->Range[i].Speed=context->Cycle_range[i].Speed;
         }
-        
+
         // Comment
         strcpy(Main.backups->Pages->Comment, context->Comment);
 
@@ -939,12 +915,12 @@ void Load_image(T_IO_Context *context)
     /*&& !context->Buffer_image_24b*/
     /*&& !Get_fileformat(context->Format)->Palette_only*/)
   {
-  
+
     // Try to adapt the palette to accomodate the GUI.
     int c;
     int count_unused;
     byte unused_color[4];
-    
+
     if (context->Type == CONTEXT_PREVIEW && context->bpp > 8)
       Set_palette_fake_24b(context->Palette);
 
@@ -968,22 +944,22 @@ void Load_image(T_IO_Context *context)
       }
     }
     // All preview display is here
-    
+
     // Update palette and screen first
     Compute_optimal_menu_colors(context->Palette);
     Remap_screen_after_menu_colors_change();
     Set_palette(context->Palette);
-    
+
     // Display palette preview
     if (Get_fileformat(context->Format)->Palette_only
         || context->Type == CONTEXT_PREVIEW_PALETTE)
     {
       short index;
-    
+
       if (context->Type == CONTEXT_PREVIEW || context->Type == CONTEXT_PREVIEW_PALETTE)
         for (index=0; index<256; index++)
           Window_rectangle(183+(index/16)*7,95+(index&15)*5,5,5,index);
-    
+
     }
     // Display normal image
     else if (context->Preview_bitmap)
@@ -992,16 +968,16 @@ void Load_image(T_IO_Context *context)
       int width,height;
       width=context->Width/context->Preview_factor_X;
       height=context->Height/context->Preview_factor_Y;
-      if (context->Ratio == PIXEL_WIDE && 
+      if (context->Ratio == PIXEL_WIDE &&
           Pixel_ratio != PIXEL_WIDE &&
           Pixel_ratio != PIXEL_WIDE2)
         width*=2;
-      else if (context->Ratio == PIXEL_TALL && 
+      else if (context->Ratio == PIXEL_TALL &&
           Pixel_ratio != PIXEL_TALL &&
           Pixel_ratio != PIXEL_TALL2 &&
           Pixel_ratio != PIXEL_TALL3)
         height*=2;
-      
+
       for (y_pos=0; y_pos<height;y_pos++)
         for (x_pos=0; x_pos<width;x_pos++)
         {
@@ -1015,16 +991,16 @@ void Load_image(T_IO_Context *context)
                 context->Preview_pos_Y+y_pos,
                 color);
         }
-    }    
+    }
     // Refresh modified part
     Update_window_area(183,95,PREVIEW_WIDTH,PREVIEW_HEIGHT);
-    
+
     // Preview comment
     Print_in_window(45,70,context->Comment,MC_Black,MC_Light);
     //Update_window_area(45,70,32*8,8);
 
   }
-  
+
 }
 
 
@@ -1032,7 +1008,7 @@ void Load_image(T_IO_Context *context)
 void Save_image(T_IO_Context *context)
 {
   const T_Format *format;
-  
+
   // On place par défaut File_error à vrai au cas où on ne sache pas
   // sauver le format du fichier: (Est-ce vraiment utile??? Je ne crois pas!)
   File_error=1;
@@ -1059,11 +1035,11 @@ void Save_image(T_IO_Context *context)
         else // all other layer-based formats
         {
           int clicked_button;
-          
+
           Open_window(208,100,"Format warning");
           Print_in_window( 8, 20,"This file format doesn't",MC_Black,MC_Light);
           Print_in_window( 8, 30,"support layers.",MC_Black,MC_Light);
-          
+
           Window_set_normal_button(23,44, 162,14,"Save flattened copy",0,1,KEY_NONE); // 1
           Window_set_normal_button(23,62, 162,14,"Save current frame" ,0,1,KEY_NONE); // 2
           Window_set_normal_button(23,80, 162,14,"Cancel"             ,0,1,KEY_ESC);  // 3
@@ -1099,14 +1075,14 @@ void Save_image(T_IO_Context *context)
         }
       }
       break;
-      
+
     case CONTEXT_BRUSH:
       break;
-      
+
     case CONTEXT_PREVIEW:
     case CONTEXT_PREVIEW_PALETTE:
       break;
-      
+
     case CONTEXT_SURFACE:
       break;
 
@@ -1128,7 +1104,7 @@ void Save_image(T_IO_Context *context)
     Error(0);
     return;
   }
-}  
+}
 
 
 #if defined(USE_SDL) || defined(USE_SDL2)
@@ -1164,7 +1140,7 @@ void Load_SDL_Image(T_IO_Context *context)
     {
       Get_SDL_Palette(surface->format->palette, context->Palette);
     }
-    
+
     for (y_pos=0; y_pos<context->Height; y_pos++)
     {
       for (x_pos=0; x_pos<context->Width; x_pos++)
@@ -1180,7 +1156,7 @@ void Load_SDL_Image(T_IO_Context *context)
       // Hi/Trucolor
       Pre_load(context, surface->w, surface->h, file_size ,FORMAT_ALL_IMAGES, PIXEL_SIMPLE, 8 * surface->format->BytesPerPixel);
     }
-    
+
     for (y_pos=0; y_pos<context->Height; y_pos++)
     {
       for (x_pos=0; x_pos<context->Width; x_pos++)
@@ -1189,7 +1165,7 @@ void Load_SDL_Image(T_IO_Context *context)
         Set_pixel_24b(
           context,
           x_pos,
-          y_pos, 
+          y_pos,
           ((pixel & surface->format->Rmask) >> surface->format->Rshift) << surface->format->Rloss,
           ((pixel & surface->format->Gmask) >> surface->format->Gshift) << surface->format->Gloss,
           ((pixel & surface->format->Bmask) >> surface->format->Bshift) << surface->format->Bloss);
@@ -1209,10 +1185,10 @@ T_GFX2_Surface * Load_surface(char *full_name, T_Gradient_array *gradients)
 {
   T_GFX2_Surface * bmp=NULL;
   T_IO_Context context;
-  
+
   Init_context_surface(&context, full_name, "");
   Load_image(&context);
-  
+
   if (context.Surface)
   {
     bmp=context.Surface;
@@ -1220,7 +1196,7 @@ T_GFX2_Surface * Load_surface(char *full_name, T_Gradient_array *gradients)
     if (gradients != NULL)
     {
       int i;
-      
+
       memset(gradients, 0, sizeof(T_Gradient_array));
       for (i=0; i<context.Color_cycles; i++)
       {
@@ -1230,7 +1206,7 @@ T_GFX2_Surface * Load_surface(char *full_name, T_Gradient_array *gradients)
         gradients->Range[i].Speed=context.Cycle_range[i].Speed;
       }
     }
-  } 
+  }
   Destroy_context(&context);
 
   return bmp;
@@ -1773,7 +1749,7 @@ void Emergency_backup(const char *fname, byte *source, int width, int height, T_
 
   if (width == 0 || height == 0 || source == NULL)
     return;
-  
+
   // Open the file
   filename = Filepath_append_to_dir(Config_directory, fname);
   file = fopen(filename,"wb");
@@ -1822,12 +1798,12 @@ const T_Format * Get_fileformat(byte format)
 {
   unsigned int i;
   const T_Format * safe_default = File_formats;
-  
+
   for (i=0; i < Nb_known_formats(); i++)
   {
     if (File_formats[i].Identifier == format)
       return &(File_formats[i]);
-  
+
     if (File_formats[i].Identifier == FORMAT_GIF)
       safe_default=&(File_formats[i]);
   }
@@ -1860,7 +1836,7 @@ void Destroy_context(T_IO_Context *context)
 void Init_context_preview(T_IO_Context * context, char *file_name, char *file_directory)
 {
   memset(context, 0, sizeof(T_IO_Context));
-  
+
   context->Type = CONTEXT_PREVIEW;
   context->File_name = file_name != NULL ? strdup(file_name) : NULL;
   context->File_directory = file_directory != NULL ? strdup(file_directory) : NULL;
@@ -1876,9 +1852,9 @@ void Init_context_backup_image(T_IO_Context * context, char *file_name, char *fi
 void Init_context_layered_image(T_IO_Context * context, char *file_name, char *file_directory)
 {
   int i;
-  
+
   memset(context, 0, sizeof(T_IO_Context));
-  
+
   context->Type = CONTEXT_MAIN_IMAGE;
   context->File_name = file_name != NULL ? strdup(file_name) : NULL;
   context->File_directory = file_directory != NULL ? strdup(file_directory) : NULL;
@@ -1893,7 +1869,7 @@ void Init_context_layered_image(T_IO_Context * context, char *file_name, char *f
   context->Ratio = Pixel_ratio;
   context->Target_address=Main.backups->Pages->Image[0].Pixels;
   context->Pitch=Main.image_width;
-  
+
   // Color cyling ranges:
   for (i=0; i<16; i++)
   {
@@ -1918,7 +1894,7 @@ void Init_context_layered_image(T_IO_Context * context, char *file_name, char *f
 void Init_context_brush(T_IO_Context * context, char *file_name, char *file_directory)
 {
   memset(context, 0, sizeof(T_IO_Context));
-  
+
   context->Type = CONTEXT_BRUSH;
   context->File_name = file_name != NULL ? strdup(file_name) : NULL;
   context->File_directory = file_directory != NULL ? strdup(file_directory) : NULL;
@@ -1940,7 +1916,7 @@ void Init_context_brush(T_IO_Context * context, char *file_name, char *file_dire
 void Init_context_surface(T_IO_Context * context, char *file_name, char *file_directory)
 {
   memset(context, 0, sizeof(T_IO_Context));
-  
+
   context->Type = CONTEXT_SURFACE;
   context->File_name = file_name != NULL ? strdup(file_name) : NULL;
   context->File_directory = file_directory != NULL ? strdup(file_directory) : NULL;
@@ -1956,6 +1932,7 @@ void Init_context_surface(T_IO_Context * context, char *file_name, char *file_di
   //context->Pitch
 
 }
+
 /// Function to call when need to switch layers.
 void Set_saving_layer(T_IO_Context *context, int layer)
 {
@@ -1996,7 +1973,7 @@ void Set_loading_layer(T_IO_Context *context, int layer)
     }
     Main.current_layer = layer;
     context->Target_address=Main.backups->Pages->Image[layer].Pixels;
-    
+
     Update_pixel_renderer();
   }
 }
@@ -2037,9 +2014,9 @@ static void Add_backup_file(const char * full_name, const char *file_name)
   T_String_list * elem;
   int i;
   (void)full_name;
-  
+
   // Only files names of the form a0000000.* and b0000000.* are expected
-  
+
   // Check first character
   if (file_name[0]==Main.safety_backup_prefix)
     list = &Backups_main;
@@ -2049,7 +2026,7 @@ static void Add_backup_file(const char * full_name, const char *file_name)
     // Not a good file
     return;
   }
-  
+
   // Check next characters till file extension
   i = 1;
   while (file_name[i]!='\0' && file_name[i]!='.')
@@ -2061,7 +2038,7 @@ static void Add_backup_file(const char * full_name, const char *file_name)
     }
     i++;
   }
-  
+
   // Add to list (top insertion)
   elem = (T_String_list *)GFX2_malloc(sizeof(T_String_list));
   elem->String=strdup(file_name);
@@ -2110,21 +2087,21 @@ byte Process_backups(T_String_list **list)
   for (i=0;i<nb_files;i++)
   {
     T_String_list *next;
-    
+
     files_vector[i]=(*list)->String;
     next = (*list)->Next;
     free(*list);
     *list = next;
   }
-  
+
   // Sort the vector
   qsort (files_vector, nb_files , sizeof(char **), String_compare);
-  
+
   for (i=0; i < nb_files; i++)
   {
     // Load this file
     T_IO_Context context;
-    
+
     Init_context_backup_image(&context, files_vector[i], Config_directory);
     // Provide buffers to read original location
     Load_image(&context);
@@ -2141,10 +2118,10 @@ byte Process_backups(T_String_list **list)
   }
   free(files_vector);
   files_vector = NULL;
-  
+
   // Restore the maximum number of pages
   Config.Max_undo_pages = backup_max_undo_pages;
-  
+
   return nb_files;
 }
 
@@ -2159,25 +2136,25 @@ int Check_recovery(void)
 {
   int restored_spare;
   int restored_main;
-  
+
   // First check if can write backups
-#if defined (__MINT__) 
+#if defined (__MINT__)
    //TODO: enable file lock under Freemint only
    return 0;
-#else  
+#else
 if (Create_lock_file(Config_directory))
     return -1;
 #endif
 
   Safety_backup_active=1;
-    
+
   Backups_main = NULL;
   Backups_spare = NULL;
   For_each_file(Config_directory, Add_backup_file);
-  
+
   // Do the processing twice: once for possible backups of the main page,
-  // once for possible backups of the spare.  
-  
+  // once for possible backups of the spare.
+
   restored_spare = Process_backups(&Backups_spare);
   if (restored_spare)
   {
@@ -2189,7 +2166,7 @@ if (Create_lock_file(Config_directory))
       Button_Page(BUTTON_PAGE);
   }
   restored_main = Process_backups(&Backups_main);
-  
+
   if (restored_main)
   {
     Main.offset_X=0;
@@ -2208,7 +2185,7 @@ void Rotate_safety_backups(void)
 
   if (!Safety_backup_active)
     return;
-    
+
   now = GFX2_GetTicks();
   // It's time to save if either:
   // - Many edits have taken place
@@ -2233,7 +2210,7 @@ void Rotate_safety_backups(void)
       (dword)(Main.safety_number + 1000000l - Rotation_safety_backup) % (dword)1000000l);
     Remove_path(deleted_file); // no matter if fail
     free(deleted_file);
-    
+
     // Reset counters
     Main.edits_since_safety_backup=0;
     Main.time_of_safety_backup=now;
@@ -2247,10 +2224,10 @@ void Rotate_safety_backups(void)
     // Provide original file data, to store as a GIF Application Extension
     context.Original_file_name = strdup(Main.backups->Pages->Filename);
     context.Original_file_directory = strdup(Main.backups->Pages->File_directory);
-    
+
     Save_image(&context);
     Destroy_context(&context);
-    
+
     Main.safety_number++;
   }
 }
@@ -2263,12 +2240,12 @@ void Delete_safety_backups(void)
 
   if (!Safety_backup_active)
     return;
-  
+
   Backups_main = NULL;
   Backups_spare = NULL;
-  
+
   For_each_file(Config_directory, Add_backup_file);
-  
+
   Change_directory(Config_directory);
   for (element=Backups_main; element!=NULL; element=next)
   {
@@ -2288,261 +2265,12 @@ void Delete_safety_backups(void)
     free(element);
   }
   Backups_spare = NULL;
-  
+
   // Release lock file
-#if defined (__MINT__) 
+#if defined (__MINT__)
   //TODO: release file lock under Freemint only
-#else 
+#else
   Release_lock_file(Config_directory);
 #endif
-  
-}
 
-/// For use by Save_XXX() functions
-FILE * Open_file_write(T_IO_Context *context)
-{
-  FILE * f;
-  char * filename; // filename with full path
-#if defined(WIN32)
-  if (context->File_name_unicode != NULL && context->File_name_unicode[0] != 0)
-  {
-    size_t len;
-    WCHAR * filename_unicode;
-
-    len = strlen(context->File_directory) + strlen(PATH_SEPARATOR)
-        + Unicode_strlen(context->File_name_unicode) + 1;
-    filename_unicode = (WCHAR *)GFX2_malloc(sizeof(WCHAR) * len);
-    if (filename_unicode == NULL)
-      return NULL;
-
-    Unicode_char_strlcpy((word *)filename_unicode, context->File_directory, len);
-    Unicode_char_strlcat((word *)filename_unicode, PATH_SEPARATOR, len);
-    Unicode_strlcat((word *)filename_unicode, context->File_name_unicode, len);
-
-    f = _wfopen(filename_unicode, L"wb");
-    if (f != NULL)
-    {
-      // Now the file has been created, retrieve its short (ASCII) name
-      len = GetShortPathNameW(filename_unicode, NULL, 0);
-      if (len > 0)
-      {
-        WCHAR * shortpath = (WCHAR *)GFX2_malloc(sizeof(WCHAR) * len);
-        if (shortpath != NULL)
-        {
-          len = GetShortPathNameW(filename_unicode, shortpath, len);
-          if (len > 0)
-          {
-            DWORD start, index;
-            for (start = len; start > 0 && shortpath[start-1] != '\\'; start--);
-            free(context->File_name);
-            context->File_name = (char *)GFX2_malloc(len + 1 - start);
-            if (context->File_name != NULL)
-            {
-              for (index = 0; index < len - start; index++)
-                context->File_name[index] = shortpath[start + index];
-              context->File_name[index] = '\0';
-            }
-          }
-        }
-      }
-    }
-    free(filename_unicode);
-    return f;
-  }
-#endif
-
-  filename = Filepath_append_to_dir(context->File_directory, context->File_name);
-  if (filename == NULL)
-    return NULL;
-  f = fopen(filename, "wb");
-  free(filename);
-  return f;
-}
-
-FILE * Open_file_write_with_alternate_ext(T_IO_Context *context, const char * ext)
-{
-  FILE * f;
-  char *p;
-  char * filename; // filename with full path
-#if defined(WIN32)
-  if (context->File_name_unicode != NULL && context->File_name_unicode[0] != 0)
-  {
-    size_t len;
-    WCHAR * filename_unicode;
-    WCHAR * pw;
-
-    len = strlen(context->File_directory) + strlen(PATH_SEPARATOR)
-        + Unicode_strlen(context->File_name_unicode) + strlen(ext) + 1 + 1;
-    filename_unicode = (WCHAR *)GFX2_malloc(len * sizeof(WCHAR));
-    if (filename_unicode == NULL)
-      return NULL;
-    Unicode_char_strlcpy((word *)filename_unicode, context->File_directory, len);
-    Unicode_char_strlcat((word *)filename_unicode, PATH_SEPARATOR, len);
-    Unicode_strlcat((word *)filename_unicode, context->File_name_unicode, len);
-    pw = wcschr(filename_unicode, (WCHAR)'.');
-    if (pw != NULL)
-      *pw = 0;
-    Unicode_char_strlcat((word *)filename_unicode, ".", len);
-    Unicode_char_strlcat((word *)filename_unicode, ext, len);
-
-    f = _wfopen(filename_unicode, L"wb");
-    free(filename_unicode);
-    return f;
-  }
-#endif
-  filename = Filepath_append_to_dir(context->File_directory, context->File_name);
-// TODO: fix ! (realloc if not enough space)
-  p = strrchr(filename, '.');
-  if (p != NULL)
-    *p = '\0';
-  strcat(filename, ".");
-  strcat(filename, ext);
-
-  f = fopen(filename, "wb");
-  free(filename);
-  return f;
-}
-
-/// For use by Load_XXX() and Test_XXX() functions
-FILE * Open_file_read(T_IO_Context *context)
-{
-  FILE * f;
-  char * filename; // filename with full path
-
-  filename = Filepath_append_to_dir(context->File_directory, context->File_name);
-  f = fopen(filename, "rb");
-  free(filename);
-  return f;
-}
-
-struct T_Find_alternate_ext_data
-{
-  const char * ext;
-  char * basename;
-  word * basename_unicode;
-  char * foundname;
-  word * foundname_unicode;
-};
-
-static void Look_for_alternate_ext(void * pdata, const char * filename, const word * filename_unicode, byte is_file, byte is_directory, byte is_hidden)
-{
-  size_t base_len;
-  struct T_Find_alternate_ext_data * params = (struct T_Find_alternate_ext_data *)pdata;
-  (void)is_hidden;
-  (void)is_directory;
-
-  if (!is_file)
-    return;
-
-  if (filename_unicode != NULL && params->basename_unicode != NULL)
-  {
-    if (params->foundname_unicode != NULL)
-      return; // We already have found a file
-    base_len = Unicode_strlen(params->basename_unicode);
-    if (Unicode_strlen(filename_unicode) <= base_len)
-      return; // No match.
-    if (filename_unicode[base_len] != '.')
-      return; // No match.
-#if defined(WIN32)
-    {
-      int cmp;
-      WCHAR * temp_string = (WCHAR *)GFX2_malloc((base_len + 1) * sizeof(WCHAR));
-      if (temp_string == NULL)
-        return;
-      memcpy(temp_string, filename_unicode, base_len * sizeof(word));
-      temp_string[base_len] = 0;
-      cmp = _wcsicmp((const WCHAR *)params->basename_unicode, temp_string);
-      free(temp_string);
-      if (cmp != 0)
-        return; // No match.
-    }
-#else
-    if (memcmp(params->basename_unicode, filename_unicode, base_len * sizeof(word)) != 0)
-      return; // No match.
-#endif
-    if (Unicode_char_strcasecmp(filename_unicode + base_len + 1, params->ext) != 0)
-      return; // No match.
-    // it is a match !
-    free(params->foundname);
-    params->foundname_unicode = Unicode_strdup(filename_unicode);
-    params->foundname = strdup(filename);
-  }
-  else
-  {
-    if (params->foundname != NULL)
-      return; // We already have found a file
-    base_len = strlen(params->basename);
-    if (filename[base_len] != '.')
-      return; // No match.
-#if defined(WIN32)
-    if (_memicmp(params->basename, filename, base_len) != 0)  // Not case sensitive
-      return; // No match.
-#else
-    if (memcmp(params->basename, filename, base_len) != 0)
-      return; // No match.
-#endif
-    if (strcasecmp(filename + base_len + 1, params->ext) != 0)
-      return; // No match.
-    params->foundname_unicode = NULL;
-    params->foundname = strdup(filename);
-  }
-}
-
-FILE * Open_file_read_with_alternate_ext(T_IO_Context *context, const char * ext)
-{
-  FILE * f = NULL;
-  char * p;
-  struct T_Find_alternate_ext_data params;
-
-  memset(&params, 0, sizeof(params));
-  params.ext = ext;
-  params.basename = strdup(context->File_name);
-  if (params.basename == NULL)
-  {
-    GFX2_Log(GFX2_ERROR, "Open_file_read_with_alternate_ext() strdup() failed\n");
-    return NULL;
-  }
-  p = strrchr(params.basename, '.');
-  if (p != NULL)
-    *p = '\0';
-  if (context->File_name_unicode != NULL)
-  {
-    size_t i = Unicode_strlen(context->File_name_unicode);
-    params.basename_unicode = GFX2_malloc(sizeof(word) * (i + 1));
-    if (params.basename_unicode != NULL)
-    {
-      memcpy(params.basename_unicode, context->File_name_unicode, (i + 1) * sizeof(word));
-      while (i-- > 0)
-        if (params.basename_unicode[i] == (word)'.')
-        {
-          params.basename_unicode[i] = 0;
-          break;
-        }
-    }
-  }
-
-  For_each_directory_entry(context->File_directory, &params, Look_for_alternate_ext);
-  if (params.foundname != NULL)
-  {
-    char * filename; // filename with full path
-
-    filename = Filepath_append_to_dir(context->File_directory, params.foundname);
-    f = fopen(filename, "rb");
-    free(filename);
-  }
-  free(params.basename);
-  free(params.basename_unicode);
-  free(params.foundname);
-  free(params.foundname_unicode);
-  return f;
-}
-
-/// For use by Save_XXX() functions
-void Remove_file(T_IO_Context *context)
-{
-  char * filename; // filename with full path
-
-  filename = Filepath_append_to_dir(context->File_directory, context->File_name);
-  Remove_path(filename);
-  free(filename);
 }

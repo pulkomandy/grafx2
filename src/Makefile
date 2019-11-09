@@ -795,13 +795,14 @@ endif
 
 # This is the list of the objects we want to build. Dependancies are built by "make depend" automatically.
 OBJS = main.o init.o graph.o $(APIOBJ) misc.o special.o \
-       buttons.o palette.o help.o operatio.o pages.o loadsave.o \
+       buttons.o palette.o help.o operatio.o pages.o \
        readline.o engine.o filesel.o op_c.o readini.o saveini.o \
        shade.o keyboard.o io.o version.o text.o SFont.o setup.o \
        pxsimple.o pxtall.o pxwide.o pxdouble.o pxtriple.o \
        pxtall2.o pxtall3.o pxwide2.o pxquad.o \
        windows.o brush.o realpath.o mountlist.o input.o hotkeys.o \
        transform.o pversion.o factory.o $(PLATFORMOBJ) \
+	   loadsave.o loadsavefuncs.o \
        fileformats.o miscfileformats.o libraw2crtc.o \
        brush_ops.o buttons_effects.o layers.o \
        oldies.o tiles.o colorred.o unicode.o gfx2surface.o \

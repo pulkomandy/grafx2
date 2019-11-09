@@ -47,8 +47,6 @@ void Wait_end_of_click(void);
 void Set_color(byte color, byte red, byte green, byte blue);
 const T_Components * Get_current_palette(void);
 void Set_palette(T_Palette palette);
-void Palette_256_to_64(T_Palette palette);
-void Palette_64_to_256(T_Palette palette);
 void Clear_current_image(byte color);
 void Clear_current_image_with_stencil(byte color, byte * stencil);
 dword Round_div(dword numerator,dword divisor);

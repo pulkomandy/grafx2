@@ -30,6 +30,7 @@
 #include "struct.h"
 #include "global.h"
 #include "loadsave.h"
+#include "loadsavefuncs.h"
 #include "io.h"
 #include "errors.h"
 #include "unicode.h"

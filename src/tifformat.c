@@ -38,6 +38,7 @@
 #include "global.h"
 #include "io.h"
 #include "loadsave.h"
+#include "loadsavefuncs.h"
 #include "gfx2log.h"
 
 /**

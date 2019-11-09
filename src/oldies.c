@@ -40,6 +40,7 @@
 #include "layers.h"
 #include "graph.h"
 #include "bitcount.h"
+#include "loadsavefuncs.h"
 
 // I don't have round() in MSVC++ 2010 (_MSC_VER=1600)
 // or in mintlib

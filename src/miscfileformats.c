@@ -47,6 +47,7 @@
 #include "io.h"
 #include "libraw2crtc.h"
 #include "loadsave.h"
+#include "loadsavefuncs.h"
 #include "misc.h"
 #include "screen.h"
 #include "struct.h"
