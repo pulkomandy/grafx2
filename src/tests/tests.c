@@ -26,11 +26,11 @@
 ///@file tests.c
 /// Unit tests.
 ///
-/// TODO : make a test binary and include the tests to the constant-integration
 
 #include <stdio.h>
 #include <string.h>
 #include "../struct.h"
+#include "../oldies.h"
 #include "../gfx2log.h"
 
 /**
@@ -82,4 +82,50 @@ int Test_MOTO_MAP_pack(void)
     }
   }
   return 1;  // test OK
+}
+
+int Test_CPC_compare_colors(void)
+{
+  unsigned int r, g, b;
+  T_Components c1, c2;
+  for (r = 0; r < 16; r++)
+  {
+    for (g = 0; g < 16; g++)
+    {
+      for (b = 0; b < 16; b++)
+      {
+        c1.R = r * 0x11;
+        c1.G = g * 0x11;
+        c1.B = b * 0x11;
+        if (!CPC_compare_colors(&c1, &c1))
+          return 0; // same colors should be recognized as identical !!!
+        c2.R = ((r + 6) & 15) * 0x11;
+        c2.G = c1.G;
+        c2.B = c1.B;
+        if (CPC_compare_colors(&c1, &c2))
+        {
+          GFX2_Log(GFX2_ERROR, "#%02x%02x%02x <> #%02x%02x%02x\n",
+                   c1.R, c1.G, c1.B, c2.R, c2.G, c2.B);
+          return 0; // Should be differents !
+        }
+        c2.R = c1.R;
+        c2.G = ((g + 6) & 15) * 0x11;
+        if (CPC_compare_colors(&c1, &c2))
+        {
+          GFX2_Log(GFX2_ERROR, "#%02x%02x%02x <> #%02x%02x%02x\n",
+                   c1.R, c1.G, c1.B, c2.R, c2.G, c2.B);
+          return 0; // Should be differents !
+        }
+        c2.G = c1.G;
+        c2.B = ((b + 6) & 15) * 0x11;
+        if (CPC_compare_colors(&c1, &c2))
+        {
+          GFX2_Log(GFX2_ERROR, "#%02x%02x%02x <> #%02x%02x%02x\n",
+                   c1.R, c1.G, c1.B, c2.R, c2.G, c2.B);
+          return 0; // Should be differents !
+        }
+      }
+    }
+  }
+  return 1; // test OK
 }
