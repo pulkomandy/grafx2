@@ -158,9 +158,14 @@ int Test_Packbits(void)
     "AABBCCDDDDDDD12345@@@54321", // best : -1(ff) 'A' -1(ff) 'B' -1(ff) 'C' -6(fa) 'D' 12(0c) "12345@@@54321" => 22 bytes
                                   //                                            or 04 "12345" -2(fe) '@' 04 "54321"
     "123AA123BBB123CCCC123DDDDD", // best : 07 "123AA123" -2 'B' 02 "123" -3(fd) 'C' 02 "123" -4(fc) 'D' => 23 bytes
+    "12345678123456781234567812345678" // 32
+    "12345678123456781234567812345678" // 64
+    "12345678123456781234567812345678" // 96
+    "123456781234567812345678123456@@" // 128
+    "@@12345678", // best : 125(7d) "123..." -3 '@' 08 "12345678" => 138
     NULL
   };
-  const long best_packed = 7 + 22 + 23;
+  const long best_packed = 7 + 22 + 23 + (138/*+2*/);
   byte buffer[1024];
 
   snprintf(tempfilename, sizeof(tempfilename), "/tmp/gfx2test-packbits-%lx", random());

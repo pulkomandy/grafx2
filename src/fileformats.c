@@ -2247,7 +2247,17 @@ void Load_IFF(T_IO_Context * context)
         second_last_color=IFF_color_list[IFF_list_size-2];
         if (last_color==color)  // On a une répétition de couleur
         {
-          if ( (IFF_repetition_mode) || (second_last_color!=color) )
+          if ( !IFF_repetition_mode && IFF_list_size >= 127)
+          {
+            // mode <> avec 126 octets <> puis 2 identiques
+            IFF_list_size--;
+            Transfer_colors(file);
+            IFF_color_list[0]=color;
+            IFF_color_list[1]=color;
+            IFF_list_size=2;
+            IFF_repetition_mode=1;
+          }
+          else if ( (IFF_repetition_mode) || (second_last_color!=color) )
           // On conserve le mode...
           {
             IFF_color_list[IFF_list_size]=color;
