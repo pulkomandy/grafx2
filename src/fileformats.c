@@ -2208,6 +2208,10 @@ void Load_IFF(T_IO_Context * context)
 
     if (IFF_list_size>0)
     {
+      if (IFF_list_size > 128)
+      {
+        GFX2_Log(GFX2_ERROR, "Transfer_colors() IFF_list_size=%d !\n", IFF_list_size);
+      }
       if (IFF_repetition_mode)
       {
         Write_one_byte(file,257-IFF_list_size);
@@ -2260,10 +2264,9 @@ void Load_IFF(T_IO_Context * context)
           else if ( (IFF_repetition_mode) || (second_last_color!=color) )
           // On conserve le mode...
           {
-            IFF_color_list[IFF_list_size]=color;
-            IFF_list_size++;
             if (IFF_list_size==128)
               Transfer_colors(file);
+            IFF_color_list[IFF_list_size++]=color;
           }
           else // On est en mode <> et on a 3 couleurs qui se suivent
           {
@@ -2280,9 +2283,9 @@ void Load_IFF(T_IO_Context * context)
         {
           if (!IFF_repetition_mode)                 // On conserve le mode...
           {
-            IFF_color_list[IFF_list_size++]=color;
-            if (IFF_list_size==128)
+            if (IFF_list_size == 128)
               Transfer_colors(file);
+            IFF_color_list[IFF_list_size++]=color;
           }
           else                                        // On change de mode...
           {
