@@ -33,6 +33,7 @@
 #include <unistd.h>
 #include "../struct.h"
 #include "../oldies.h"
+#include "../packbits.h"
 #include "../gfx2log.h"
 
 unsigned int MOTO_MAP_pack(byte * packed, const byte * unpacked, unsigned int unpacked_len);
@@ -160,6 +161,7 @@ int Test_Packbits(void)
     NULL
   };
   const long best_packed = 7 + 22 + 23;
+  byte buffer[1024];
 
   snprintf(tempfilename, sizeof(tempfilename), "/tmp/gfx2test-packbits-%lx", random());
   GFX2_Log(GFX2_DEBUG, "tempfile %s\n", tempfilename);
@@ -190,12 +192,29 @@ int Test_Packbits(void)
     return 0;
   }
 
-  // TODO : test unpacking
+  // test unpacking
   f = fopen(tempfilename, "rb");
   if (f == NULL)
   {
     GFX2_Log(GFX2_ERROR, "Failed to open %s for reading\n", tempfilename);
     return 0;
+  }
+  for (i = 0; tests[i]; i++)
+  {
+    size_t len = strlen(tests[i]);
+    memset(buffer, 0x80, len);
+    if (PackBits_unpack_from_file(f, buffer, len) != PACKBITS_UNPACK_OK)
+    {
+      GFX2_Log(GFX2_ERROR, "PackBits_unpack_from_file() failed\n");
+      return 0;
+    }
+    if (memcmp(buffer, tests[i], len) != 0)
+    {
+      GFX2_Log(GFX2_ERROR, "uncompressed stream mismatch !\n");
+      GFX2_LogHexDump(GFX2_ERROR, "original ", (const byte *)tests[i], 0, len);
+      GFX2_LogHexDump(GFX2_ERROR, "unpacked ", buffer, 0, len);
+      return 0;
+    }
   }
   fclose(f);
   unlink(tempfilename);

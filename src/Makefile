@@ -819,7 +819,7 @@ endif
 
 TESTSOBJS = $(patsubst %.c,%.o,$(wildcard tests/*.c)) \
             miscfileformats.o fileformats.o oldies.o libraw2crtc.o \
-			loadsavefuncs.o \
+			loadsavefuncs.o packbits.o \
 			unicode.o \
             io.o realpath.o version.o pversion.o \
 			gfx2surface.o \
