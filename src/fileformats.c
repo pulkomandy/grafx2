@@ -692,7 +692,7 @@ static void LBM_Decode(T_IO_Context * context, FILE * file, byte compression, by
             File_error=22;
             break;
           }
-          // temp_byte > 127  => repeat (256-temp_byte) the next byte
+          // temp_byte > 127  => repeat (257-temp_byte) the next byte
           // temp_byte <= 127 => copy (temp_byte + 1) bytes
           if(temp_byte == 128) // 128 = NOP !
           {
@@ -2202,7 +2202,7 @@ void Load_IFF(T_IO_Context * context)
   byte IFF_repetition_mode;
 
   // ------------- Ecrire les couleurs que l'on vient de traiter ------------
-  static void Transfer_colors(FILE * file)
+  void Transfer_colors(FILE * file)
   {
     byte index;
 
@@ -4467,7 +4467,7 @@ void Load_GIF(T_IO_Context * context)
                     // on jette les autres.
                     if (context->Comment[0]=='\0')
                     {
-                      int nb_char_to_keep=Min(size_to_read,COMMENT_SIZE);
+                      int nb_char_to_keep = MIN(size_to_read, COMMENT_SIZE);
                       
                       Read_bytes(GIF_file,context->Comment,nb_char_to_keep);
                       context->Comment[nb_char_to_keep+1]='\0';

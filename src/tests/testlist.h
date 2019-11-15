@@ -3,4 +3,4 @@
 
 TEST(MOTO_MAP_pack)
 TEST(CPC_compare_colors)
-
+TEST(Packbits)

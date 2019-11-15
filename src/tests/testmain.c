@@ -27,7 +27,9 @@
 /// Unit tests.
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "../struct.h"
 #include "../global.h"
 #include "../gfx2log.h"
@@ -100,6 +102,7 @@ int main(int argc, char * * argv)
   int i, r;
   int fail = 0;
 
+  srandom(time(NULL));
   GFX2_verbosity_level = GFX2_DEBUG;
 
   for (i = 0; tests[i].test_func != 0; i++)

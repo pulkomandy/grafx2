@@ -54,6 +54,21 @@ void Set_pixel(T_IO_Context *context, short x, short y, byte c)
   (void)c;
 }
 
+void Set_pixel_24b(T_IO_Context *context, short x, short y, byte r, byte g, byte b)
+{
+  (void)context;
+  (void)x;
+  (void)y;
+  (void)r;
+  (void)g;
+  (void)b;
+}
+
+void Fill_canvas(T_IO_Context *context, byte color)
+{
+  printf("Fill_canvas(%p, %hhu)\n", context, color);
+}
+
 void Set_saving_layer(T_IO_Context *context, int layer)
 {
   printf("Set_saving_layer(%p, %d)\n", context, layer);
@@ -72,4 +87,10 @@ void Set_image_mode(T_IO_Context *context, enum IMAGE_MODES mode)
 void Set_frame_duration(T_IO_Context *context, int duration)
 {
   printf("Set_frame_duration(%p, %d)\n", context, duration);
+}
+
+int Get_frame_duration(T_IO_Context *context)
+{
+  (void)context;
+  return 0;
 }

@@ -2,7 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
-    Copyright 2018 Thomas Bernard
+    Copyright 2018-2019 Thomas Bernard
     Copyright 2011 Pawel Góralski
     Copyright 2009 Petter Lindquist
     Copyright 2008 Yves Rizoud
@@ -28,10 +28,14 @@
 ///
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "../struct.h"
 #include "../oldies.h"
 #include "../gfx2log.h"
+
+unsigned int MOTO_MAP_pack(byte * packed, const byte * unpacked, unsigned int unpacked_len);
 
 /**
  * Tests for MOTO_MAP_pack()
@@ -84,6 +88,9 @@ int Test_MOTO_MAP_pack(void)
   return 1;  // test OK
 }
 
+/**
+ * Test for Test_CPC_compare_colors()
+ */
 int Test_CPC_compare_colors(void)
 {
   unsigned int r, g, b;
@@ -127,5 +134,70 @@ int Test_CPC_compare_colors(void)
       }
     }
   }
+  return 1; // test OK
+}
+
+extern word IFF_list_size;
+void New_color(FILE * f, byte color);
+void Transfer_colors(FILE * f);
+
+/**
+ * Tests for the packbits compression used in IFF ILBM, etc.
+ * see http://fileformats.archiveteam.org/wiki/PackBits
+ */
+int Test_Packbits(void)
+{
+  char tempfilename[64];
+  FILE * f;
+  int i, j;
+  long unpacked;
+  long packed;
+  static const char * tests[] = {
+    "1234AAAAAAAAAAAAAAAAAAAAA",  // best : 03 "1234" -20(ec) 'A' => 7 bytes
+    "AABBCCDDDDDDD12345@@@54321", // best : -1(ff) 'A' -1(ff) 'B' -1(ff) 'C' -6(fa) 'D' 12(0c) "12345@@@54321" => 22 bytes
+                                  //                                            or 04 "12345" -2(fe) '@' 04 "54321"
+    "123AA123BBB123CCCC123DDDDD", // best : 07 "123AA123" -2 'B' 02 "123" -3(fd) 'C' 02 "123" -4(fc) 'D' => 23 bytes
+    NULL
+  };
+  const long best_packed = 7 + 22 + 23;
+
+  snprintf(tempfilename, sizeof(tempfilename), "/tmp/gfx2test-packbits-%lx", random());
+  GFX2_Log(GFX2_DEBUG, "tempfile %s\n", tempfilename);
+  f = fopen(tempfilename, "wb");
+  if (f == NULL)
+  {
+    GFX2_Log(GFX2_ERROR, "Failed to open %s for writing\n", tempfilename);
+    return 0;
+  }
+
+  // Start encoding
+  IFF_list_size = 0;
+  for (i = 0, unpacked = 0; tests[i]; i++)
+  {
+    for (j = 0; tests[i][j]; j++)
+    {
+      New_color(f, (byte)tests[i][j]);
+      unpacked++;
+    }
+    Transfer_colors(f);
+  }
+  packed = ftell(f);
+  fclose(f);
+  GFX2_Log(GFX2_DEBUG, "Compressed %ld bytes to %ld\n", unpacked, packed);
+  if (packed > best_packed) {
+    GFX2_Log(GFX2_ERROR, "*** Packbits less efficient as expected (%ld > %ld bytes) ***\n",
+             packed, best_packed);
+    return 0;
+  }
+
+  // TODO : test unpacking
+  f = fopen(tempfilename, "rb");
+  if (f == NULL)
+  {
+    GFX2_Log(GFX2_ERROR, "Failed to open %s for reading\n", tempfilename);
+    return 0;
+  }
+  fclose(f);
+  unlink(tempfilename);
   return 1; // test OK
 }
