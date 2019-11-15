@@ -26,34 +26,50 @@
 
 void Pre_load(T_IO_Context *context, short width, short height, long file_size, int format, enum PIXEL_RATIO ratio, byte bpp)
 {
-  printf("Pre_load()\n");
+  printf("Pre_load(%p, %hd, %hd, %ld, %d, %d, %hhu)\n",
+         context, width, height, file_size, format, ratio, bpp);
 }
 
 byte Get_pixel(T_IO_Context *context, short x, short y)
 {
+  (void)context;
+  (void)x;
+  (void)y;
   return 0;
 }
 
 void Pixel_in_layer(int layer, word x, word y, byte color)
 {
+  (void)layer;
+  (void)x;
+  (void)y;
+  (void)color;
 }
 
 void Set_pixel(T_IO_Context *context, short x, short y, byte c)
 {
+  (void)context;
+  (void)x;
+  (void)y;
+  (void)c;
 }
 
 void Set_saving_layer(T_IO_Context *context, int layer)
 {
+  printf("Set_saving_layer(%p, %d)\n", context, layer);
 }
 
 void Set_loading_layer(T_IO_Context *context, int layer)
 {
+  printf("Set_loading_layer(%p, %d)\n", context, layer);
 }
 
 void Set_image_mode(T_IO_Context *context, enum IMAGE_MODES mode)
 {
+  printf("Set_image_mode(%p, %d)\n", context, mode);
 }
 
 void Set_frame_duration(T_IO_Context *context, int duration)
 {
+  printf("Set_frame_duration(%p, %d)\n", context, duration);
 }
