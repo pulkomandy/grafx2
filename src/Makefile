@@ -1012,7 +1012,7 @@ ziprelease: release $(SRCARCH)
 ifdef ATARICROSS
 	$(eval TMP := $(shell mktemp -d))
 	$(AT)$(MKDIR) $(TMP)/GRAFX2
-	$(AT)$(CP) $(BIN) ../share/grafx2/gfx2def.ini $(TMP)/GRAFX2
+	$(AT)$(CP) $(BIN) ../share/grafx2/gfx2def.ini ../share/grafx2/gfx2.png $(TMP)/GRAFX2
 	$(AT)$(CP) $(SRCARCH) $(TMP)/GRAFX2/SRC$(firstword $(subst -, ,$(GIT_REVISION))).TGZ
 	$(AT)$(MKDIR) $(TMP)/GRAFX2/DOC
 	@for f in $(DOC_FILES) ; do \
@@ -1041,7 +1041,7 @@ ifdef ATARICROSS
 	done
 	$(AT)cd $(TMP) && \
 	  $(ZIP) $(ZIPOPT) -k "$(CURDIR)/../grafx2-$(API)-$(VERSIONTAG)$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
-	    GRAFX2/$(notdir $(BIN)) GRAFX2/FONTS/*.* GRAFX2/SKINS/*.*
+	    GRAFX2/$(notdir $(BIN)) GRAFX2/FONTS/*.* GRAFX2/SKINS/*.* GRAFX2/*.png
 	$(AT)cd $(TMP) && \
 	  $(ZIP) $(ZIPOPT) -k --to-crlf -r "$(CURDIR)/../grafx2-$(API)-$(VERSIONTAG)$(TTFLABEL)-$(PLATFORM).$(ZIP)" \
 	    GRAFX2/gfx2def.ini GRAFX2/DOC/ GRAFX2/SCRIPTS/
