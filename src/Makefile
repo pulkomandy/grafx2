@@ -808,7 +808,7 @@ OBJS = main.o init.o graph.o $(APIOBJ) misc.o special.o \
        pxtall2.o pxtall3.o pxwide2.o pxquad.o \
        windows.o brush.o realpath.o mountlist.o input.o hotkeys.o \
        transform.o pversion.o factory.o $(PLATFORMOBJ) \
-	   loadsave.o loadsavefuncs.o \
+       loadsave.o loadsavefuncs.o \
        fileformats.o miscfileformats.o libraw2crtc.o \
        brush_ops.o buttons_effects.o layers.o \
        oldies.o tiles.o colorred.o unicode.o gfx2surface.o \
@@ -819,10 +819,11 @@ endif
 
 TESTSOBJS = $(patsubst %.c,%.o,$(wildcard tests/*.c)) \
             miscfileformats.o fileformats.o oldies.o libraw2crtc.o \
-			loadsavefuncs.o packbits.o \
-			unicode.o \
+            loadsavefuncs.o packbits.o \
+            op_c.o colorred.o \
+            unicode.o \
             io.o realpath.o version.o pversion.o \
-			gfx2surface.o \
+            gfx2surface.o \
             gfx2log.o gfx2mem.o
 
 OBJ = $(addprefix $(OBJDIR)/,$(OBJS))

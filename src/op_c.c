@@ -45,7 +45,9 @@
 // are sorted by length of the diagonal
 //#define GRAFX2_QUANTIZE_CLUSTER_SORT_BY_VOLUME
 
-int Convert_24b_bitmap_to_256_fast(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette);
+#if defined(__GP2X__) || defined(__gp2x__) || defined(__WIZ__) || defined(__CAANOO__)
+static int Convert_24b_bitmap_to_256_fast(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette);
+#endif
 
 /// Convert RGB to HSL.
 /// Both input and output are in the 0..255 range to use in the palette screen
@@ -1471,8 +1473,9 @@ int Convert_24b_bitmap_to_256(T_Bitmap256 dest,T_Bitmap24B source,int width,int 
 
 extern void Set_palette_fake_24b(T_Palette palette);
 
+#if defined(__GP2X__) || defined(__gp2x__) || defined(__WIZ__) || defined(__CAANOO__)
 /// Really small, fast and dirty convertor(just for handhelds)
-int Convert_24b_bitmap_to_256_fast(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette)
+static int Convert_24b_bitmap_to_256_fast(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette)
 {
   int size;
 
@@ -1491,3 +1494,4 @@ int Convert_24b_bitmap_to_256_fast(T_Bitmap256 dest,T_Bitmap24B source,int width
   }
   return 0;
 }
+#endif

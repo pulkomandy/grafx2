@@ -4,3 +4,4 @@
 TEST(MOTO_MAP_pack)
 TEST(CPC_compare_colors)
 TEST(Packbits)
+TEST(Convert_24b_bitmap_to_256)
