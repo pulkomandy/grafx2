@@ -1,3 +1,6 @@
 [submodule "tools/8x8fonts/font8x8"]
 	path = tools/8x8fonts/font8x8
 	url = https://github.com/dhepper/font8x8
+[submodule "tests/pic-samples"]
+	path = tests/pic-samples
+	url = https://gitlab.com/GrafX2/pic-samples.git
