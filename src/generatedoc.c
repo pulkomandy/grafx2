@@ -428,6 +428,10 @@ static int Export_help(const char * path)
     fprintf(f, "  color-adjust: exact; /*Firefox*/\n");
     fprintf(f, " }\n");
     fprintf(f, "}\n");
+    fprintf(f, "@viewport {\n");
+    fprintf(f, "  width: device-width;\n");
+    fprintf(f, "  zoom: 1;\n");
+    fprintf(f, "}\n");
     fclose(f);
   }
 
