@@ -22,7 +22,10 @@ echo "CI_PROJECT_PATH_SLUG=${CI_PROJECT_PATH_SLUG}"
 
 echo "<!DOCTYPE html>" > ${OUTFILE}
 echo "<html lang=\"en\">" >> ${OUTFILE}
-echo "<head><title>GrafX2</title></head>" >> ${OUTFILE}
+echo "<head>" >> ${OUTFILE}
+echo "<title>GrafX2</title>" >> ${OUTFILE}
+echo "<link href=\"gfx2.css\" rel=\"stylesheet\" type=\"text/css\">" >> ${OUTFILE}
+echo "</head>" >> ${OUTFILE}
 echo "<body>" >> ${OUTFILE}
 echo "<h1>GrafX2 version ${VERSION}</h1>" >> ${OUTFILE}
 echo "<p>build date : ${DATE}</p>" >> ${OUTFILE}

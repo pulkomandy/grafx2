@@ -1,0 +1,23 @@
+/* see https://blog.koley.in/baserock/ */
+body {
+  font-family: sans-serif;
+  color: #222; /*black;*/
+  background: #eee;
+  line-height: 1.5;
+  max-width: 40rem;
+  padding: 2rem;
+  margin: auto;
+}
+img { border: 0 }
+h1, h2, h3, h4, h5, h6, b, strong {
+  color:  #111;
+}
+h2 { text-align: center; }
+p.linkmenu { text-align: center; }
+td {
+  font-size: smaller;
+}
+@viewport {
+width: device-width; /* largeur du viewport */
+zoom: 1; /* zoom initial 1.0 (et clin d'oeil aux fans d'IE6/7) */
+}
