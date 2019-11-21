@@ -27,9 +27,12 @@
 /// Unit tests for picture format loaders/savers
 ///
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "../global.h"
 #include "../fileformats.h"
 #include "../gfx2log.h"
+#include "../gfx2mem.h"
 
 #define TESTFMT(fmt, sample) { # fmt, Test_ ## fmt, sample },
 static const struct {
@@ -48,7 +51,9 @@ static const struct {
   TESTFMT(ICO, "ico/gitlab_favicon.ico")
   TESTFMT(C64, "c64/multicolor/ARKANOID.KOA")
   TESTFMT(GPX, "c64/pixcen/Cyberbird.gpx")
-  //TESTFMT(SCR, "CPC_SCR/DANCEOFF.SCR")
+  TESTFMT(SCR, "CPC_SCR/DANCEOFF.SCR")
+  TESTFMT(CM5, "cpcmode5/spidey.cm5")
+  TESTFMT(PPH, "pph/BF.PPH")
   TESTFMT(MOTO,"thomson/exocet-alientis.map")
   TESTFMT(HGR, "apple2/hgr/pop-swordfight.hgr")
   TESTFMT(ACBM,"iff/ACBM/Jupiter_alt.pic")
@@ -66,12 +71,41 @@ static const struct {
   { NULL, NULL, NULL}
 };
 
+/**
+ * Set the context File_directory and File_name
+ */
+static void context_set_file_path(T_IO_Context * context, const char * filepath)
+{
+  char * p = strrchr(filepath, '/');
+
+  if (context->File_name)
+    free(context->File_name);
+  if (context->File_directory)
+    free(context->File_directory);
+
+  if (p != NULL)
+  {
+    size_t dirlen = p - filepath;
+    context->File_name = strdup(p + 1);
+    context->File_directory = GFX2_malloc(dirlen + 1);
+    memcpy(context->File_directory, filepath, dirlen);
+    context->File_directory[dirlen] = '\0';
+  }
+  else
+  {
+    context->File_name = strdup(filepath);
+    context->File_directory = strdup(".");
+  }
+}
+
 int Test_Formats(void)
 {
+  T_IO_Context context;
   char path[256];
   FILE * f;
   int i, j;
 
+  memset(&context, 0, sizeof(context));
   for (i = 0; formats[i].name != NULL; i++)
   {
     GFX2_Log(GFX2_DEBUG, "Testing format %s\n", formats[i].name);
@@ -83,8 +117,9 @@ int Test_Formats(void)
       GFX2_Log(GFX2_ERROR, "error opening %s\n", path);
       return 0;
     }
+    context_set_file_path(&context, path);
     File_error = 1;
-    formats[i].Test(NULL, f);
+    formats[i].Test(&context, f);
     fclose(f);
     if (File_error != 0)
     {
@@ -96,6 +131,9 @@ int Test_Formats(void)
     {
       if (j == i)
         continue;
+      // skip Test_HGR(*.SCR) because Test_HGR() only tests for file size
+      if (strcmp(formats[i].name, "HGR") == 0 && strcmp(formats[j].name, "SCR") == 0)
+        continue;
       snprintf(path, sizeof(path), "../tests/pic-samples/%s", formats[j].sample);
       f = fopen(path, "rb");
       if (f == NULL)
@@ -103,8 +141,9 @@ int Test_Formats(void)
         GFX2_Log(GFX2_ERROR, "error opening %s\n", path);
         return 0;
       }
+      context_set_file_path(&context, path);
       File_error = 1;
-      formats[i].Test(NULL, f);
+      formats[i].Test(&context, f);
       fclose(f);
       if (File_error == 0)
       {
@@ -113,5 +152,8 @@ int Test_Formats(void)
       }
     }
   }
+  //Destroy_context(&context);
+  free(context.File_name);
+  free(context.File_directory);
   return 1;   // OK
 }

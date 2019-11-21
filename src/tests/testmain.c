@@ -78,8 +78,12 @@ static const struct {
   { NULL, NULL}
 };
 
+/**
+ * Initializations for test program
+ */
 void init(void)
 {
+  srandom(time(NULL));
 #ifdef ENABLE_FILENAMES_ICONV
   // iconv is used to convert filenames
   cd = iconv_open(TOCODE, FROMCODE);  // From UTF8 to ANSI
@@ -102,8 +106,8 @@ int main(int argc, char * * argv)
   int i, r;
   int fail = 0;
 
-  srandom(time(NULL));
   GFX2_verbosity_level = GFX2_DEBUG;
+  init();
 
   for (i = 0; tests[i].test_func != 0; i++)
   {
