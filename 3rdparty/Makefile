@@ -129,6 +129,12 @@ RECOILARCH=$(RECOIL).tar.gz
 RECOILURL=https://downloads.sourceforge.net/project/recoil/recoil/$(RECOILVER)/$(RECOILARCH)
 RECOILURLALT=http://nanard.free.fr/grafx2/$(RECOILARCH)
 RECOILSHA256=b9691db9e0d2b6cec23c9dec8628ecf6870f1e9d34ce95513fb4a671d781b19c
+#https://github.com/redcode/6502/releases/download/v0.1/6502-v0.1.tar.xz
+REDCODE6502=6502-v0.1
+REDCODE6502ARCH=6502-v0.1.tar.xz
+REDCODE6502URL=https://github.com/redcode/6502/releases/download/v0.1/$(REDCODE6502ARCH)
+REDCODE6502SHA256=bba50f327163d40b1014f5affc8042137f37b200dae50a4f0fe56b5769b3940f
+REDCODE6502PATCHES = 6502-illegal-opcode.patch
 
 ARCHIVES = $(addprefix archives/, $(SDLARCH) $(SDLIMAGEARCH) $(SDLTTFARCH) \
              $(SDL2ARCH) $(SDL2IMAGEARCH) $(SDL2TTFARCH) $(LIBPNGARCH) \
@@ -604,16 +610,29 @@ endif
 recoil:	$(RECOIL)/.ok
 	$(CP) $(RECOIL)/README ../doc/README-recoil.txt
 
+6502:	6502/.ok
+	$(CP) 6502/README ../doc/README-6502.txt
+
+6502/.ok:	archives/$(REDCODE6502ARCH)
+	$(TAR) xJf $<
+	cd $(@D) ; for p in $(REDCODE6502PATCHES) ; do echo "applying $$p" ; patch -p1 < ../$$p ; done
+	touch $@
+
 # generic rule to unpack tarball and apply patches
 %/.ok:	archives/%.tar.gz
 	$(TAR) xzf $<
 	cd $(@D) ; for p in $($(shell echo $* | cut -d- -f1 | tr a-z A-Z | tr -d _)PATCHES) ; do echo "applying $$p" ; patch -p1 < ../$$p ; done
 	touch $@
 
-# the following archive name won't work with the generic rule
+# the following archive names won't work with the generic rule
 archives/$(JPEGARCH):
 	@$(MKDIR) $(@D)
 	cd $(@D) && $(GETURL) $(JPEGURL)
+
+archives/$(REDCODE6502ARCH):
+	@$(MKDIR) $(@D)
+	cd $(@D) && $(GETURL) $(REDCODE6502URL)
+	@[ "`$(SHA256CMD) < $@`" = "$(REDCODE6502SHA256)" ] || ( $(RM) $@ && echo "$@ SHA256 mismatch !" && false )
 
 # generic rule to download tarballs
 archives/%.tar.gz:

@@ -1,0 +1,26 @@
+commit 800f1f7b0393d61fb03aad776e79e8f801014512
+Author: Thomas Bernard <miniupnp@free.fr>
+Date:   Sat Nov 23 16:32:04 2019 +0100
+
+    silent "unused parameter" warning
+    
+    6502.c:379:53: warning: unused parameter 'object' [-Wunused-parameter]
+      379 | #define INSTRUCTION(name) static zuint8 name(M6502 *object)
+          |                                              ~~~~~~~^~~~~~
+    6502.c:766:1: note: in expansion of macro 'INSTRUCTION'
+      766 | INSTRUCTION(illegal) {return 2;}
+          | ^~~~~~~~~~~
+
+diff --git a/sources/6502.c b/sources/6502.c
+index 9a95cf0..6b8f8d5 100644
+--- a/sources/6502.c
++++ b/sources/6502.c
+@@ -763,7 +763,7 @@ INSTRUCTION(brk)
+ 	}
+ 
+ 
+-INSTRUCTION(illegal) {return 2;}
++INSTRUCTION(illegal) {(void)object;	return 2;}
+ 
+ 
+ /* MARK: - Instruction Function Table */

@@ -1160,6 +1160,17 @@ $(OBJDIR)/loadrecoil.o:	recoil.c recoil.h
 	if [ -d ../3rdparty ] ; then $(MAKE) -C ../3rdparty recoil ; fi
 endif
 
+6502.h:	6502.c
+
+6502.c:	../3rdparty/6502/sources/6502.c
+	$(CP) $< $@
+	$(CP) ../3rdparty/6502/API/emulation/CPU/6502.h 6502.h
+
+../3rdparty/6502/sources/6502.c:
+	if [ -d ../3rdparty ] ; then $(MAKE) -C ../3rdparty 6502 ; fi
+
+$(OBJDIR)/6502.o:	CFLAGS += -DCPU_6502_STATIC -DCPU_6502_USE_LOCAL_HEADER -DCPU_6502_DEPENDENCIES_H=\"6502types.h\"
+
 $(OBJ):	$(CFLAGS_CACHE)
 
 $(OBJDIR)/%.o : %.c
