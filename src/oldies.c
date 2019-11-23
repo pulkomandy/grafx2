@@ -744,6 +744,8 @@ int CPC_check_AMSDOS(FILE * file, word * loading_address, unsigned long * file_l
     return 0;
   for (i = 1; i <= 11; i++) // check filename and extension
   {
+    if (data[i] >= 0x10 && data[i] <= 0x19) // sometimes digits are stored as 0x10 to 0x19
+      continue;
     if (data[i] < ' ' || data[i] >= 0x7F)
       return 0;
   }
@@ -754,6 +756,11 @@ int CPC_check_AMSDOS(FILE * file, word * loading_address, unsigned long * file_l
     GFX2_Log(GFX2_INFO, "AMSDOS header checksum mismatch %04X != %04X\n",
              checksum, data[67] | (data[68] << 8));
     return 0;
+  }
+  for (i = 1; i <= 11; i++) // check filename and extension
+  {
+    if (data[i] >= 0x10 && data[i] <= 0x19) // sometimes digits are stored as 0x10 to 0x19
+      data[i] += 0x20;
   }
   GFX2_Log(GFX2_DEBUG, "AMSDOS : user=%02X %.8s.%.3s %d %u(%u) bytes, load at $%04X exec $%04X checksum $%04X\n",
            data[0],
