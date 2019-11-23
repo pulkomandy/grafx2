@@ -53,6 +53,7 @@
 #include "struct.h"
 #include "windows.h"
 #include "oldies.h"
+#include "c64load.h"
 #include "pages.h"
 #include "keycodes.h"
 #include "input.h"
@@ -2724,7 +2725,19 @@ void Test_C64(T_IO_Context * context, FILE * file)
       File_error = 0;
       break;
     default: // then we don't know for now.
-      if (load_addr == 0x6000 || load_addr == 0x5c00)
+      if (load_addr == 0x801)
+      {
+        // 6502 emulators :
+        // https://github.com/redcode/6502
+        // http://rubbermallet.org/fake6502.c
+        // https://github.com/jamestn/cpu6502
+        // https://github.com/dennis-chen/6502-Emu
+        // https://github.com/DavidBuchanan314/6502-emu
+        // basic program
+        if (C64_isBinaryProgram(file) != 0)
+          File_error = 0;
+      }
+      else if (load_addr == 0x6000 || load_addr == 0x5c00)
       {
         long unpacked_size;
         byte * buffer = GFX2_malloc(file_size);
@@ -3134,17 +3147,20 @@ static long C64_unpack_doodle(byte ** file_buffer, long file_size)
  */
 void Load_C64(T_IO_Context * context)
 {
+    int prg_loaded = 0;
     FILE* file;
     long file_size;
     byte hasLoadAddr=0;
     word load_addr;
     enum c64_format loadFormat = F_invalid;
+    struct c64state c64;
 
     byte *file_buffer;
     byte *bitmap, *screen_ram, *color_ram=NULL, *background=NULL; // Only pointers to existing data
     byte *temp_buffer = NULL;
     word width, height=200;
 
+    memset(&c64, 0, sizeof(c64));
     file = Open_file_read(context);
 
     if (file)
@@ -3167,21 +3183,50 @@ void Load_C64(T_IO_Context * context)
             fclose(file);
             return;
         }
-        fclose(file);
 
         // get load address (valid only if hasLoadAddr = 1)
         load_addr = file_buffer[0] | (file_buffer[1] << 8);
 
-        // Unpack if needed
-        if (memcmp(file_buffer + 2, "DRAZPAINT", 9) == 0)
-          file_size = C64_unpack_draz(&file_buffer, file_size);
-        else if(load_addr == 0x4000 && file_buffer[file_size-2] == 0xC2 && file_buffer[file_size-1] == 0)
-          file_size = C64_unpack_amica(&file_buffer, file_size);
-        else if (file_size < 8000 && (load_addr == 0x6000 || load_addr == 0x5c00))
-          file_size = C64_unpack_doodle(&file_buffer, file_size);
-
-        switch (file_size)
+        if (load_addr == 0x801)
         {
+          word start_addr = C64_isBinaryProgram(file);
+          if (start_addr != 0)
+          {
+            prg_loaded = C64_LoadPrg(&c64, file_buffer, file_size, start_addr);
+            if (prg_loaded)
+            {
+              background = c64.ram + 0xd021;
+              if (c64.vicmode & C64_VICMODE_FLI)
+              {
+                loadFormat = F_fli;
+                background = c64.backgrounds;
+              }
+              else if (c64.vicmode & C64_VICMODE_MULTI)
+                loadFormat = F_multi;
+              else
+                loadFormat = F_hires;
+
+              hasLoadAddr = 1;
+              bitmap = c64.ram + c64.bitmap;
+              screen_ram = c64.ram + c64.screen;
+              color_ram = c64.ram + 0xd800;
+            }
+          }
+        }
+        fclose(file);
+
+        if (!prg_loaded)
+        {
+          // Unpack if needed
+          if (memcmp(file_buffer + 2, "DRAZPAINT", 9) == 0)
+            file_size = C64_unpack_draz(&file_buffer, file_size);
+          else if(load_addr == 0x4000 && file_buffer[file_size-2] == 0xC2 && file_buffer[file_size-1] == 0)
+            file_size = C64_unpack_amica(&file_buffer, file_size);
+          else if (file_size < 8000 && (load_addr == 0x6000 || load_addr == 0x5c00))
+            file_size = C64_unpack_doodle(&file_buffer, file_size);
+
+          switch (file_size)
+          {
             case 8000: // raw bitmap
                 hasLoadAddr=0;
                 loadFormat=F_bitmap;
@@ -3431,6 +3476,7 @@ void Load_C64(T_IO_Context * context)
                 File_error = 1;
                 free(file_buffer);
                 return;
+          }
         }
 
         if (loadFormat == F_invalid)
@@ -3484,6 +3530,8 @@ void Load_C64(T_IO_Context * context)
         free(file_buffer);
         if (temp_buffer)
           free(temp_buffer);
+        if (c64.ram)
+          free(c64.ram);
     }
     else
         File_error = 1;
