@@ -376,6 +376,7 @@ endif
 ifdef WIN32
 $(PREFIX)/lib/libSDLmain.a:	archives/$(SDLDEVEL)
 	$(TAR) xzf $<
+	find $(SDL) -name \._\* -exec rm -v {} \;
 	patch -p0 < $(SDLDEVELPATCH)
 	$(MKDIR) $(PREFIX)
 	cd $(SDL) && CROSS_PATH=$(PREFIX) $(MAKE) cross
