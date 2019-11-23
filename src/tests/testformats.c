@@ -40,7 +40,7 @@ static const struct {
   Func_IO_Test Test;
   const char * sample;
 } formats[] = {
-  TESTFMT(PKM, "EVILNUN.PKM")
+  TESTFMT(PKM, "pkm/EVILNUN.PKM")
   TESTFMT(GIF, "gif/2b_horse.gif")
   TESTFMT(PCX, "pcx/lena.pcx")
   TESTFMT(NEO, "atari_st/ATARIART.NEO")
@@ -51,9 +51,10 @@ static const struct {
   TESTFMT(ICO, "ico/gitlab_favicon.ico")
   TESTFMT(C64, "c64/multicolor/ARKANOID.KOA")
   TESTFMT(GPX, "c64/pixcen/Cyberbird.gpx")
-  TESTFMT(SCR, "CPC_SCR/DANCEOFF.SCR")
-  TESTFMT(CM5, "cpcmode5/spidey.cm5")
-  TESTFMT(PPH, "pph/BF.PPH")
+  TESTFMT(SCR, "cpc/scr/DANCEOFF.SCR")
+  TESTFMT(CM5, "cpc/mode5/spidey.cm5")
+  TESTFMT(PPH, "cpc/pph/BF.PPH")
+  TESTFMT(GOS, "cpc/iMPdraw_GFX/SONIC.GO1")
   TESTFMT(MOTO,"thomson/exocet-alientis.map")
   TESTFMT(HGR, "apple2/hgr/pop-swordfight.hgr")
   TESTFMT(ACBM,"iff/ACBM/Jupiter_alt.pic")
