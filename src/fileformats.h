@@ -130,6 +130,10 @@ void Test_PPH(T_IO_Context *, FILE *);
 void Load_PPH(T_IO_Context *);
 void Save_PPH(T_IO_Context *);
 
+// -- Graphos (Amstrad CPC)
+void Test_GOS(T_IO_Context *, FILE *);
+void Load_GOS(T_IO_Context *);
+
 // -- XPM (X PixMap)
 // Loading is done through SDL_Image
 void Save_XPM(T_IO_Context*);

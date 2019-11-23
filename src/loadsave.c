@@ -118,10 +118,10 @@ const T_Format File_formats[] = {
     "pi1;pc1;pi2;pc2;pi3;pc3;neo;"
     "c64;p64;a64;pi;rp;aas;art;dd;iph;ipt;hpc;ocp;koa;koala;fli;bml;cdu;prg;pmg;rpm;"
     "gpx;"
-    "cpc;scr;win;"
+    "cpc;scr;win;pph,cm5;go1;"
     "hgr;dhgr;"
     "grb;grob;"
-    "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico;ic2;cur;cm5;pph;info;flc;bin;map"},
+    "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico;ic2;cur;info;flc;bin;map"},
   {FORMAT_ALL_PALETTES, "(pal)", NULL, NULL, NULL, 1, 0, 0, "", "kcf;pal;gpl"},
   {FORMAT_ALL_FILES, "(*.*)", NULL, NULL, NULL, 0, 0, 0, "", "*"},
   {FORMAT_GIF, " gif", Test_GIF, Load_GIF, Save_GIF, 0, 1, 1, "gif", "gif"},
@@ -149,6 +149,7 @@ const T_Format File_formats[] = {
   {FORMAT_SCR, " cpc", Test_SCR, Load_SCR, Save_SCR, 0, 0, 0, "scr", "cpc;scr;win"},
   {FORMAT_CM5, " cm5", Test_CM5, Load_CM5, Save_CM5, 0, 0, 1, "cm5", "cm5"},
   {FORMAT_PPH, " pph", Test_PPH, Load_PPH, Save_PPH, 0, 0, 1, "pph", "pph"},
+  {FORMAT_GOS, " go1", Test_GOS, Load_GOS, NULL    , 0, 0, 0, "go1", "go1"},
   {FORMAT_XPM, " xpm", NULL,     NULL,     Save_XPM, 0, 0, 0, "xpm", "xpm"},
   {FORMAT_ICO, " ico", Test_ICO, Load_ICO, Save_ICO, 0, 0, 0, "ico", "ico;ic2;cur"},
   {FORMAT_INFO," info",Test_INFO,Load_INFO,NULL,     0, 0, 0, "info", "info"},

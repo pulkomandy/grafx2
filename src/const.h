@@ -147,7 +147,8 @@ enum FILE_FORMATS
   FORMAT_GPL,  ///< Gimp palette
   FORMAT_SCR,  ///< Amstrad CPC
   FORMAT_CM5,  ///< Amstrad CPC Mode 5
-  FORMAT_PPH,  ///< Amastad CPC Perfect Pix
+  FORMAT_PPH,  ///< Amstrad CPC Perfect Pix
+  FORMAT_GOS,  ///< Amstrad Plus Graphos
   FORMAT_XPM,  ///< X PixMap
   FORMAT_ICO,  ///< Windows icons
   FORMAT_INFO, ///< Amiga OS icons
