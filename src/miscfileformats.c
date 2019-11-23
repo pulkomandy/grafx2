@@ -4695,11 +4695,13 @@ void Save_SCR(T_IO_Context * context)
 void Test_GOS(T_IO_Context * context, FILE * file)
 {
   FILE *file_oddeve;
-  unsigned long file_size;
-  file_size = File_length_file(file);
-  if (file_size != 16512) {
-	  File_error = 1;
-	  return;
+  unsigned long file_size = 0;
+
+  if (!CPC_check_AMSDOS(file, NULL, &file_size))
+    file_size = File_length_file(file);
+  if (file_size != 16384) {
+    File_error = 1;
+    return;
   }
 
   file_oddeve = Open_file_read_with_alternate_ext(context, "GO2");
@@ -4707,9 +4709,10 @@ void Test_GOS(T_IO_Context * context, FILE * file)
 	  File_error = 2;
 	  return;
   }
-  file_size = File_length_file(file_oddeve);
+  if (!CPC_check_AMSDOS(file_oddeve, NULL, &file_size))
+    file_size = File_length_file(file_oddeve);
   fclose(file_oddeve);
-  if (file_size != 16512) {
+  if (file_size != 16384) {
 	  File_error = 3;
 	  return;
   }
@@ -4719,9 +4722,10 @@ void Test_GOS(T_IO_Context * context, FILE * file)
 	  File_error = 4;
 	  return;
   }
-  file_size = File_length_file(file_oddeve);
+  if (!CPC_check_AMSDOS(file_oddeve, NULL, &file_size))
+    file_size = File_length_file(file_oddeve);
   fclose(file_oddeve);
-  if (file_size != 160) {
+  if (file_size != 32) {
 	  File_error = 5;
 	  return;
   }
@@ -4730,10 +4734,13 @@ void Test_GOS(T_IO_Context * context, FILE * file)
 }
 
 
+/**
+ * Load GO1/GO2/KIT - Amstrad CPC Plus Graphos
+ */
 void Load_GOS(T_IO_Context* context)
 {
   FILE *file;
-  long file_size;
+  unsigned long file_size;
   int i;
   int x, y;
   byte * pixel_data;
@@ -4744,11 +4751,10 @@ void Load_GOS(T_IO_Context* context)
       return;
   }
 
-  file_size=File_length_file(file);
-
-  if (CPC_check_AMSDOS(file, NULL, NULL)) {
+  if (CPC_check_AMSDOS(file, NULL, &file_size))
     fseek(file, 128, SEEK_SET); // right after AMSDOS header
-  }
+  else
+    file_size = File_length_file(file);
 
   context->Ratio = PIXEL_WIDE;
   Pre_load(context, 192, 272, file_size, FORMAT_GOS, context->Ratio, 0);
@@ -4758,7 +4764,7 @@ void Load_GOS(T_IO_Context* context)
   // load pixels
   pixel_data = GFX2_malloc(16384);
   memset(pixel_data, 0, 16384);
-  Read_bytes(file, pixel_data, file_size);
+  Read_bytes(file, pixel_data, 16384);
 
   i = 0;
   for (y = 0; y < 168; y++) {
@@ -4782,10 +4788,10 @@ void Load_GOS(T_IO_Context* context)
 
   // load pixels from GO2
   file = Open_file_read_with_alternate_ext(context, "GO2");
-  if (CPC_check_AMSDOS(file, NULL, NULL)) {
+  if (CPC_check_AMSDOS(file, NULL, &file_size))
     fseek(file, 128, SEEK_SET); // right after AMSDOS header
-  }
-  Read_bytes(file, pixel_data, file_size);
+
+  Read_bytes(file, pixel_data, 16384);
   i = 0;
   for (y = 168; y < 272; y++) {
 	  x = 0;
@@ -4812,23 +4818,25 @@ void Load_GOS(T_IO_Context* context)
   }
 
   if (Config.Clear_palette)
-	  memset(context->Palette,0,sizeof(T_Palette));
+    memset(context->Palette,0,sizeof(T_Palette));
 
-  for (i = 0; i < 16; i++) {
-	uint16_t word;
-	if (!Read_word_be(file, &word)) {
-		fclose(file);
-		File_error = 2;
-		return;
-	}
+  File_error = 0;
 
-	context->Palette[i].R = ((word >>  8) & 0xF) * 0x11;
-	context->Palette[i].G = ((word >>  0) & 0xF) * 0x11;
-	context->Palette[i].B = ((word >> 12) & 0xF) * 0x11;
+  for (i = 0; i < 16; i++)
+  {
+    uint16_t word;
+    if (!Read_word_le(file, &word))
+    {
+      File_error = 2;
+      return;
+    }
+
+    context->Palette[i].R = ((word >>  4) & 0xF) * 0x11;
+    context->Palette[i].G = ((word >>  8) & 0xF) * 0x11;
+    context->Palette[i].B = ((word >>  0) & 0xF) * 0x11;
   }
 
   fclose(file);
-  File_error = 0;
 }
 
 /**
