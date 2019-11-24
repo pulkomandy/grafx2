@@ -71,7 +71,7 @@ endif
 
   CFLAGS_CACHE = $(OBJDIR)/.cflags.cache
 
-  RECOILVER = 4.3.2
+  RECOILVER = 5.0.0
 
 # Video / input API used
   API ?= sdl
@@ -1158,6 +1158,8 @@ $(OBJDIR)/loadrecoil.o:	recoil.c recoil.h
 
 ../3rdparty/recoil-$(RECOILVER)/recoil.c:
 	if [ -d ../3rdparty ] ; then $(MAKE) -C ../3rdparty recoil ; fi
+
+$(OBJDIR)/recoil.o:	CFLAGS += -Wno-declaration-after-statement -Wno-unused-parameter
 endif
 
 6502.h:	6502.c
