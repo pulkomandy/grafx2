@@ -48,7 +48,7 @@ struct c64state {
 };
 
 word C64_isBinaryProgram(FILE * f);
-int C64_LoadPrg(struct c64state * c64, const byte * prg, long prg_size, word start);
+int C64_LoadPrg(struct c64state * c64, FILE * file, word start);
 
 #endif
 

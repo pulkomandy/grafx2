@@ -141,6 +141,7 @@ enum FILE_FORMATS
   FORMAT_CEL,  ///< Atari ST Cyber Paint Cell
   FORMAT_NEO,  ///< Atari ST NeoChrome
   FORMAT_C64,  ///< Several C64 formats : Koala, FLI, BML, etc.
+  FORMAT_PRG,  ///< C64 autoload picture
   FORMAT_GPX,  ///< pixcen C64 format : .gpx
   FORMAT_KCF,  ///< KiSS Color File
   FORMAT_PAL,  ///< raw 6bit palette or Jasc Paint Shop Pro palette

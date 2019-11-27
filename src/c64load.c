@@ -154,15 +154,15 @@ static void C64_mem_write(void *context, word address, byte value)
   c64->ram[address] = value;
 }
 
-int C64_LoadPrg(struct c64state * c64, const byte * prg, long prg_size, word start)
+int C64_LoadPrg(struct c64state * c64, FILE * file, word start)
 {
   M6502 cpu;
   zusize cycles = 0;
   zusize next_rasterline = 63;
   int i, count = 0;
   byte screen_min = 255;
+  int prg_size;
 
-  GFX2_Log(GFX2_DEBUG, "C64_LoadPrg(%p, %ld, $%04x)\n", prg, prg_size, start);
   if (c64->ram == NULL)
   {
     c64->ram = GFX2_malloc(65536);
@@ -170,6 +170,10 @@ int C64_LoadPrg(struct c64state * c64, const byte * prg, long prg_size, word sta
       return 0;
   }
   memset(c64->ram, 0, 65536);
+  prg_size = fread(c64->ram + 0x801, 1, 38911, file);
+  GFX2_Log(GFX2_DEBUG, "C64_LoadPrg(%d, $%04x)\n", prg_size, start);
+  if (prg_size < 0)
+    return 0;
   c64->ram[0x00] = 0x2F;
   c64->ram[0x01] = 0x37;
   c64->ram[0x2B] = 0x01;
@@ -199,7 +203,6 @@ int C64_LoadPrg(struct c64state * c64, const byte * prg, long prg_size, word sta
   c64->ram[0xd02d] = 0xF7;
   c64->ram[0xd02e] = 0xFC;
   c64->ram[0xdd00] = 0x97;
-  memcpy(c64->ram + 0x801, prg + 2, prg_size - 2);
   c64->cpu = &cpu;
 
   memset(&cpu, 0, sizeof(cpu));

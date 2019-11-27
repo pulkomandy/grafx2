@@ -2725,19 +2725,7 @@ void Test_C64(T_IO_Context * context, FILE * file)
       File_error = 0;
       break;
     default: // then we don't know for now.
-      if (load_addr == 0x801)
-      {
-        // 6502 emulators :
-        // https://github.com/redcode/6502
-        // http://rubbermallet.org/fake6502.c
-        // https://github.com/jamestn/cpu6502
-        // https://github.com/dennis-chen/6502-Emu
-        // https://github.com/DavidBuchanan314/6502-emu
-        // basic program
-        if (C64_isBinaryProgram(file) != 0)
-          File_error = 0;
-      }
-      else if (load_addr == 0x6000 || load_addr == 0x5c00)
+      if (load_addr == 0x6000 || load_addr == 0x5c00)
       {
         long unpacked_size;
         byte * buffer = GFX2_malloc(file_size);
@@ -2758,6 +2746,34 @@ void Test_C64(T_IO_Context * context, FILE * file)
         }
       }
   }
+}
+
+/**
+ * Test for a C64 auto-load machine language program
+ * which could be a picture
+ */
+void Test_PRG(T_IO_Context * context, FILE * file)
+{
+  unsigned long file_size;
+  word load_addr;
+  (void)context;
+
+  file_size = File_length_file(file);
+  if (file_size > (38911 + 2))  // maximum length of PRG loaded at $0801
+    return;
+  if (!Read_word_le(file, &load_addr))
+    return;
+  if (load_addr != 0x0801)
+    return;
+  // 6502 emulators :
+  // https://github.com/redcode/6502
+  // http://rubbermallet.org/fake6502.c
+  // https://github.com/jamestn/cpu6502
+  // https://github.com/dennis-chen/6502-Emu
+  // https://github.com/DavidBuchanan314/6502-emu
+  // basic program
+  if (C64_isBinaryProgram(file) != 0)
+    File_error = 0;
 }
 
 /**
@@ -3147,20 +3163,17 @@ static long C64_unpack_doodle(byte ** file_buffer, long file_size)
  */
 void Load_C64(T_IO_Context * context)
 {
-    int prg_loaded = 0;
     FILE* file;
     long file_size;
     byte hasLoadAddr=0;
     word load_addr;
     enum c64_format loadFormat = F_invalid;
-    struct c64state c64;
 
     byte *file_buffer;
     byte *bitmap, *screen_ram, *color_ram=NULL, *background=NULL; // Only pointers to existing data
     byte *temp_buffer = NULL;
     word width, height=200;
 
-    memset(&c64, 0, sizeof(c64));
     file = Open_file_read(context);
 
     if (file)
@@ -3183,50 +3196,21 @@ void Load_C64(T_IO_Context * context)
             fclose(file);
             return;
         }
+        fclose(file);
 
         // get load address (valid only if hasLoadAddr = 1)
         load_addr = file_buffer[0] | (file_buffer[1] << 8);
 
-        if (load_addr == 0x801)
+        // Unpack if needed
+        if (memcmp(file_buffer + 2, "DRAZPAINT", 9) == 0)
+          file_size = C64_unpack_draz(&file_buffer, file_size);
+        else if(load_addr == 0x4000 && file_buffer[file_size-2] == 0xC2 && file_buffer[file_size-1] == 0)
+          file_size = C64_unpack_amica(&file_buffer, file_size);
+        else if (file_size < 8000 && (load_addr == 0x6000 || load_addr == 0x5c00))
+          file_size = C64_unpack_doodle(&file_buffer, file_size);
+
+        switch (file_size)
         {
-          word start_addr = C64_isBinaryProgram(file);
-          if (start_addr != 0)
-          {
-            prg_loaded = C64_LoadPrg(&c64, file_buffer, file_size, start_addr);
-            if (prg_loaded)
-            {
-              background = c64.ram + 0xd021;
-              if (c64.vicmode & C64_VICMODE_FLI)
-              {
-                loadFormat = F_fli;
-                background = c64.backgrounds;
-              }
-              else if (c64.vicmode & C64_VICMODE_MULTI)
-                loadFormat = F_multi;
-              else
-                loadFormat = F_hires;
-
-              hasLoadAddr = 1;
-              bitmap = c64.ram + c64.bitmap;
-              screen_ram = c64.ram + c64.screen;
-              color_ram = c64.ram + 0xd800;
-            }
-          }
-        }
-        fclose(file);
-
-        if (!prg_loaded)
-        {
-          // Unpack if needed
-          if (memcmp(file_buffer + 2, "DRAZPAINT", 9) == 0)
-            file_size = C64_unpack_draz(&file_buffer, file_size);
-          else if(load_addr == 0x4000 && file_buffer[file_size-2] == 0xC2 && file_buffer[file_size-1] == 0)
-            file_size = C64_unpack_amica(&file_buffer, file_size);
-          else if (file_size < 8000 && (load_addr == 0x6000 || load_addr == 0x5c00))
-            file_size = C64_unpack_doodle(&file_buffer, file_size);
-
-          switch (file_size)
-          {
             case 8000: // raw bitmap
                 hasLoadAddr=0;
                 loadFormat=F_bitmap;
@@ -3476,7 +3460,6 @@ void Load_C64(T_IO_Context * context)
                 File_error = 1;
                 free(file_buffer);
                 return;
-          }
         }
 
         if (loadFormat == F_invalid)
@@ -3530,11 +3513,88 @@ void Load_C64(T_IO_Context * context)
         free(file_buffer);
         if (temp_buffer)
           free(temp_buffer);
-        if (c64.ram)
-          free(c64.ram);
     }
     else
         File_error = 1;
+}
+
+/**
+ * Load C64 autoload pictures
+ *
+ * @param context the IO context
+ */
+void Load_PRG(T_IO_Context * context)
+{
+  FILE* file;
+  unsigned long file_size;
+  struct c64state c64;
+  enum c64_format loadFormat = F_invalid;
+  word load_addr;
+  word width, height = 200;
+
+  memset(&c64, 0, sizeof(c64));
+
+  File_error = 1;
+  file = Open_file_read(context);
+  if (file == NULL)
+    return;
+  file_size = File_length_file(file);
+  if (!Read_word_le(file, &load_addr))
+    return;
+  if (load_addr == 0x801)
+  {
+    word start_addr = C64_isBinaryProgram(file);
+    if (start_addr == 0)
+      return;
+    if (fseek(file, 2, SEEK_SET) < 0)
+      return;
+    if (C64_LoadPrg(&c64, file, start_addr))
+    {
+      File_error = 0;
+      if (c64.vicmode & C64_VICMODE_FLI)
+        loadFormat = F_fli;
+      else if (c64.vicmode & C64_VICMODE_MULTI)
+        loadFormat = F_multi;
+      else
+        loadFormat = F_hires;
+
+      if (loadFormat == F_fli || loadFormat == F_multi)
+      {
+        context->Ratio = PIXEL_WIDE;
+        width = 160;
+      }
+      else
+      {
+        context->Ratio = PIXEL_SIMPLE;
+        width = 320;
+      }
+
+      Pre_load(context, width, height, file_size, FORMAT_PRG, context->Ratio, 4); // Do this as soon as you can
+
+      if (Config.Clear_palette)
+        memset(context->Palette, 0, sizeof(T_Palette));
+      C64_set_palette(context->Palette);
+      context->Transparent_color = 16;
+
+      switch(loadFormat)
+      {
+        case F_fli:
+          Load_C64_fli(context, c64.ram + c64.bitmap, c64.ram + c64.screen, c64.ram + 0xd800, c64.backgrounds);
+          Set_image_mode(context, IMAGE_MODE_C64FLI);
+          break;
+        case F_multi:
+          Load_C64_multi(context, c64.ram + c64.bitmap, c64.ram + c64.screen, c64.ram + 0xd800, c64.ram[0xd021]);
+          Set_image_mode(context, IMAGE_MODE_C64MULTI);
+          break;
+        default:
+          Load_C64_hires(context, c64.ram + c64.bitmap, c64.ram + c64.screen);
+          if (loadFormat == F_hires)
+            Set_image_mode(context, IMAGE_MODE_C64HIRES);
+      }
+    }
+    if (c64.ram != NULL)
+      free(c64.ram);
+  }
 }
 
 /**

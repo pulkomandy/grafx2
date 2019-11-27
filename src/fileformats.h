@@ -111,6 +111,9 @@ void Test_C64(T_IO_Context *, FILE *);
 void Load_C64(T_IO_Context *);
 void Save_C64(T_IO_Context *);
 
+void Test_PRG(T_IO_Context *, FILE *);
+void Load_PRG(T_IO_Context *);
+
 // -- GPX (pixcen C64)
 void Test_GPX(T_IO_Context *, FILE *);
 void Load_GPX(T_IO_Context *);
