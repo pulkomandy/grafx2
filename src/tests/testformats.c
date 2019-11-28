@@ -50,6 +50,7 @@ static const struct {
   TESTFMT(BMP, "bmp/test16bf565.bmp")
   TESTFMT(ICO, "ico/gitlab_favicon.ico")
   TESTFMT(C64, "c64/multicolor/ARKANOID.KOA")
+  TESTFMT(PRG, "c64/multicolor/speedball2_loading_jonegg.prg")
   TESTFMT(GPX, "c64/pixcen/Cyberbird.gpx")
   TESTFMT(SCR, "cpc/scr/DANCEOFF.SCR")
   TESTFMT(CM5, "cpc/mode5/spidey.cm5")
