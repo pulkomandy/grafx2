@@ -34,10 +34,11 @@
 #include "../gfx2log.h"
 #include "../gfx2mem.h"
 
-#define TESTFMT(fmt, sample) { # fmt, Test_ ## fmt, sample },
+#define TESTFMT(fmt, sample) { # fmt, Test_ ## fmt, Load_ ## fmt, sample },
 static const struct {
   const char * name;
   Func_IO_Test Test;
+  Func_IO Load;
   const char * sample;
 } formats[] = {
   TESTFMT(PKM, "pkm/EVILNUN.PKM")
@@ -58,9 +59,9 @@ static const struct {
   TESTFMT(GOS, "cpc/iMPdraw_GFX/SONIC.GO1")
   TESTFMT(MOTO,"thomson/exocet-alientis.map")
   TESTFMT(HGR, "apple2/hgr/pop-swordfight.hgr")
-  TESTFMT(ACBM,"iff/ACBM/Jupiter_alt.pic")
-  TESTFMT(LBM, "iff/Danny_SkyTravellers_ANNO.iff")
-  TESTFMT(PBM, "iff/pbm/FC.LBM")
+  {"ACBM",Test_ACBM,Load_IFF, "iff/ACBM/Jupiter_alt.pic"},
+  {"LBM", Test_LBM, Load_IFF, "iff/Danny_SkyTravellers_ANNO.iff"},
+  {"PBM", Test_PBM, Load_IFF, "iff/pbm/FC.LBM"},
   TESTFMT(INFO,"amiga_icons/4colors/Utilities/Calculator.info")
 #ifndef __no_pnglib__
   TESTFMT(PNG, "png/happy-birthday-guys.png")
@@ -70,7 +71,7 @@ static const struct {
 #endif
   TESTFMT(GPL, "palette-mariage_115.gpl")
   TESTFMT(PAL, "pal/dp4_256.pal")
-  { NULL, NULL, NULL}
+  { NULL, NULL, NULL, NULL}
 };
 
 /**
@@ -100,6 +101,9 @@ static void context_set_file_path(T_IO_Context * context, const char * filepath)
   }
 }
 
+/**
+ * test the Test_* functions
+ */
 int Test_Formats(void)
 {
   T_IO_Context context;
@@ -110,7 +114,7 @@ int Test_Formats(void)
   memset(&context, 0, sizeof(context));
   for (i = 0; formats[i].name != NULL; i++)
   {
-    GFX2_Log(GFX2_DEBUG, "Testing format %s\n", formats[i].name);
+    GFX2_Log(GFX2_DEBUG, "Testing format %s (Test)\n", formats[i].name);
     // first check that the right sample is recognized
     snprintf(path, sizeof(path), "../tests/pic-samples/%s", formats[i].sample);
     f = fopen(path, "rb");
@@ -158,4 +162,34 @@ int Test_Formats(void)
   free(context.File_name);
   free(context.File_directory);
   return 1;   // OK
+}
+
+/**
+ * test the Load_* functions
+ */
+int Test_Load(void)
+{
+  T_IO_Context context;
+  char path[256];
+  int i;
+
+  memset(&context, 0, sizeof(context));
+  for (i = 0; formats[i].name != NULL; i++)
+  {
+    GFX2_Log(GFX2_DEBUG, "Testing format %s (Load)\n", formats[i].name);
+    // first check that the right sample is recognized
+    snprintf(path, sizeof(path), "../tests/pic-samples/%s", formats[i].sample);
+    context_set_file_path(&context, path);
+    File_error = 0;
+    formats[i].Load(&context);
+    if (File_error != 0)
+    {
+      GFX2_Log(GFX2_ERROR, "Load_%s failed for file %s\n", formats[i].name, formats[i].sample);
+      return 0;
+    }
+  }
+  //Destroy_context(&context);
+  free(context.File_name);
+  free(context.File_directory);
+  return 1; // OK
 }

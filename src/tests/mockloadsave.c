@@ -28,6 +28,8 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
 {
   printf("Pre_load(%p, %hd, %hd, %ld, %d, %d, %hhu)\n",
          context, width, height, file_size, format, ratio, bpp);
+  context->Width = width;
+  context->Height = height;
 }
 
 byte Get_pixel(T_IO_Context *context, short x, short y)
@@ -76,7 +78,7 @@ void Set_saving_layer(T_IO_Context *context, int layer)
 
 void Set_loading_layer(T_IO_Context *context, int layer)
 {
-  printf("Set_loading_layer(%p, %d)\n", context, layer);
+  //printf("Set_loading_layer(%p, %d)\n", context, layer);
 }
 
 void Set_image_mode(T_IO_Context *context, enum IMAGE_MODES mode)
