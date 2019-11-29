@@ -5768,7 +5768,7 @@ void Load_FLI(T_IO_Context * context)
         else
         {
           Set_loading_layer(context, current_frame);
-          if (context->Type == CONTEXT_MAIN_IMAGE && Main.backups->Pages->Image_mode == IMAGE_MODE_ANIMATION)
+          if (context->Type == CONTEXT_MAIN_IMAGE && Get_image_mode(context) == IMAGE_MODE_ANIMATION)
           {
             // Copy the content of previous frame
             memcpy(

@@ -360,6 +360,11 @@ void Set_image_mode(T_IO_Context *context, enum IMAGE_MODES mode)
   }
 }
 
+enum IMAGE_MODES Get_image_mode(T_IO_Context *context)
+{
+  return Main.backups->Pages->Image_mode;
+}
+
 ///
 /// Generic allocation and similar stuff, done at beginning of image load,
 /// as soon as size is known.

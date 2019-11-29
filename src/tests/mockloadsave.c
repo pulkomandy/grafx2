@@ -84,6 +84,11 @@ void Set_image_mode(T_IO_Context *context, enum IMAGE_MODES mode)
   printf("Set_image_mode(%p, %d)\n", context, mode);
 }
 
+enum IMAGE_MODES Get_image_mode(T_IO_Context *context)
+{
+  return -1;
+}
+
 void Set_frame_duration(T_IO_Context *context, int duration)
 {
   printf("Set_frame_duration(%p, %d)\n", context, duration);

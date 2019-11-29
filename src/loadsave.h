@@ -229,6 +229,8 @@ void Set_frame_duration(T_IO_Context *context, int duration);
 int Get_frame_duration(T_IO_Context *context);
 /// Function to set a specific image mode
 void Set_image_mode(T_IO_Context *context, enum IMAGE_MODES mode);
+/// get the current image mode
+enum IMAGE_MODES Get_image_mode(T_IO_Context *context);
 
 // =================================================================
 // What follows here are the definitions of functions and data
