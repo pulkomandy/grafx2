@@ -4475,12 +4475,15 @@ void Load_SCR(T_IO_Context * context)
     // temporary 32k buffer before actually decoding it.
   FILE * pal_file, * file;
   unsigned long real_file_size, file_size, amsdos_file_size = 0;
+  word addr;
+  word load_address = 0x4000; // default for OCP Art studio
+  word display_start = 0x4000;
   byte mode, color_anim_flag, color_anim_delay;
   byte pal_data[236]; // 12 palettes of 16+1 colors + 16 excluded inks + 16 protected inks
   word width, height = 200;
   byte bpp;
   enum PIXEL_RATIO ratio;
-  byte * pixel_data;
+  byte * cpc_ram;
   word x, y;
   int i;
   byte sig[3];
@@ -4488,69 +4491,39 @@ void Load_SCR(T_IO_Context * context)
   word win_width, win_height;
   int is_win = 0;
   int columns = 80;
+  int cpc_plus = 0;
+  const byte * cpc_plus_pal = NULL;
 
   File_error = 1;
-  // requires the PAL file
+  // requires the PAL file for OCP Art studio files
   pal_file = Open_file_read_with_alternate_ext(context, "pal");
-  if (pal_file == NULL)
-    return;
-  file_size = File_length_file(pal_file);
-  if (file_size == 239+128)
+  if (pal_file != NULL)
   {
-    if (!CPC_check_AMSDOS(pal_file, NULL, NULL))
+    file_size = File_length_file(pal_file);
+    if (CPC_check_AMSDOS(pal_file, NULL, &file_size))
+      fseek(pal_file, 128, SEEK_SET); // right after AMSDOS header
+    else
+      fseek(pal_file, 0, SEEK_SET);
+    if (!Read_byte(pal_file, &mode) || !Read_byte(pal_file, &color_anim_flag)
+          || !Read_byte(pal_file, &color_anim_delay) || !Read_bytes(pal_file, pal_data, 236))
     {
+      GFX2_Log(GFX2_WARNING, "Load_SCR() failed to load .PAL file\n");
       fclose(pal_file);
       return;
     }
-    fseek(pal_file, 128, SEEK_SET); // right after AMSDOS header
-  }
-  if (!Read_byte(pal_file, &mode) || !Read_byte(pal_file, &color_anim_flag)
-      || !Read_byte(pal_file, &color_anim_delay) || !Read_bytes(pal_file, pal_data, 236))
-  {
-    GFX2_Log(GFX2_WARNING, "Load_SCR() failed to load .PAL file\n");
     fclose(pal_file);
-    return;
+    GFX2_Log(GFX2_DEBUG, "Load_SCR() mode=%d color animation flag=%02X delay=%u\n",
+             mode, color_anim_flag, color_anim_delay);
   }
-  fclose(pal_file);
-  GFX2_Log(GFX2_DEBUG, "Load_SCR() mode=%d color animation flag=%02X delay=%u\n",
-           mode, color_anim_flag, color_anim_delay);
-  switch (mode)
-  {
-    case 0:
-      width = 160;
-      bpp = 4;
-      ratio = PIXEL_WIDE;
-      break;
-    case 1:
-      width = 320;
-      bpp = 2;
-      ratio = PIXEL_SIMPLE;
-      break;
-    case 2:
-      width = 640;
-      bpp = 1;
-      ratio = PIXEL_TALL;
-      break;
-    default:
-      return; // unsupported
-  }
-
-  if (Config.Clear_palette)
-    memset(context->Palette,0,sizeof(T_Palette));
-  // Setup the palette (amstrad hardware palette)
-  CPC_set_HW_palette(context->Palette + 0x40);
-
-  // Set the palette for this picture
-  for (i = 0; i < 16; i++)
-    context->Palette[i] = context->Palette[pal_data[12*i]];
 
   file = Open_file_read(context);
   if (file == NULL)
     return;
   file_size = File_length_file(file);
   real_file_size = file_size;
-  if (CPC_check_AMSDOS(file, NULL, &amsdos_file_size))
+  if (CPC_check_AMSDOS(file, &load_address, &amsdos_file_size))
   {
+    display_start = load_address;
     if (file_size < (amsdos_file_size + 128))
     {
       GFX2_Log(GFX2_ERROR, "Load_SCR() mismatch in file size. AMSDOS file size %lu, should be %lu\n", amsdos_file_size, file_size - 128);
@@ -4565,12 +4538,6 @@ void Load_SCR(T_IO_Context * context)
   else
     fseek(file, 0, SEEK_SET);
 
-  if (file_size > 16384)  // we don't support bigger files yet
-  {
-    fclose(file);
-    return;
-  }
-
   if (!Read_bytes(file, sig, 3) || !Read_word_le(file, &block_length))
   {
     fclose(file);
@@ -4578,13 +4545,13 @@ void Load_SCR(T_IO_Context * context)
   }
   fseek(file, -5, SEEK_CUR);
 
-  pixel_data = GFX2_malloc(16384);
-  memset(pixel_data, 0, 16384);
+  cpc_ram = GFX2_malloc(64*1024);
+  memset(cpc_ram, 0, 64*1024);
 
   if (0 != memcmp(sig, "MJH", 3) || block_length > 16384)
   {
     // raw data
-    Read_bytes(file, pixel_data, file_size);
+    Read_bytes(file, cpc_ram + load_address, file_size);
     i = file_size;
   }
   else
@@ -4613,14 +4580,14 @@ void Load_SCR(T_IO_Context * context)
           file_size -= 2;
           do
           {
-            pixel_data[i++] = value;
+            cpc_ram[load_address + i++] = value;
             block_length--;
           }
           while(--repeat != 0);
         }
         else
         {
-          pixel_data[i++] = code;
+          cpc_ram[load_address + i++] = code;
           block_length--;
         }
       }
@@ -4633,8 +4600,8 @@ void Load_SCR(T_IO_Context * context)
 
   if (i > 5)
   {
-    win_width = pixel_data[i-4] + (pixel_data[i-3] << 8);  // in bits
-    win_height = pixel_data[i-2];
+    win_width = cpc_ram[load_address + i - 4] + (cpc_ram[load_address + i - 3] << 8);  // in bits
+    win_height = cpc_ram[load_address + i - 2];
     if (((win_width + 7) >> 3) * win_height + 5 == i) // that's a WIN file !
     {
       width = win_width >> (2 - mode);
@@ -4643,36 +4610,177 @@ void Load_SCR(T_IO_Context * context)
       columns = (win_width + 7) >> 3;
       GFX2_Log(GFX2_DEBUG, ".WIN file detected len=%d (%d,%d) %dcols %02X %02X %02X %02X %02X\n",
           i, width, height, columns,
-          pixel_data[i-5], pixel_data[i-4], pixel_data[i-3],
-          pixel_data[i-2], pixel_data[i-1]);
+          cpc_ram[load_address + i - 5], cpc_ram[load_address + i - 4], cpc_ram[load_address + i - 3],
+          cpc_ram[load_address + i - 2], cpc_ram[load_address + i - 1]);
     }
     else
     {
-      ///@todo guess the picture size, or ask the user
       GFX2_Log(GFX2_DEBUG, ".SCR file. Data length %d\n", i);
-      // i <= 16384 && i >= 16336 => Standard resolution
-      if (i <= 16384 && i >= 16336)
+      if (load_address == 0x170)
+      {
+        // fichier iMPdraw v2
+        // http://orgams.wikidot.com/le-format-impdraw-v2
+        GFX2_Log(GFX2_DEBUG, "Detected \"%s\"\n", cpc_ram + load_address + 6);
+        mode = cpc_ram[load_address + 0x14] - 0x0e;
+        cpc_plus = cpc_ram[load_address + 0x3c];
+        GFX2_Log(GFX2_DEBUG, "Mode %d CPC %d\n", (int)mode, (int)cpc_plus);
+        for (addr = load_address + 0x1d; cpc_ram[addr] < 16; addr += 2)
+        {
+          GFX2_Log(GFX2_DEBUG, " R%d = &H%02x = %d\n", cpc_ram[addr], cpc_ram[addr+1], cpc_ram[addr+1]);
+          // see http://www.cpcwiki.eu/index.php/CRTC#The_6845_Registers
+          switch(cpc_ram[addr])
+          {
+            case 1:
+              columns = cpc_ram[addr+1] * 2;
+              break;
+            case 6:
+              height = cpc_ram[addr+1] * 8;
+              break;
+            case 12:
+              display_start = ((cpc_ram[addr+1] & 0x30) << 10) | ((cpc_ram[addr+1] & 0x03) << 9);
+              GFX2_Log(GFX2_DEBUG, "  display_start &H%04X\n", display_start);
+           }
+        }
+        snprintf(context->Comment, COMMENT_SIZE, "%s mode %d %s",
+                 cpc_ram + load_address + 7, mode, cpc_plus ? "CPC+" : "");
+        if (cpc_plus)
+        {
+          // palette at 0x801 (mode at 0x800 ?)
+          GFX2_LogHexDump(GFX2_DEBUG, "", cpc_ram, 0x800, 0x21);
+          cpc_plus_pal = cpc_ram + 0x801;
+        }
+        else
+        {
+          // palette at 0x7f00
+          GFX2_LogHexDump(GFX2_DEBUG, "", cpc_ram, 0x7f00, 16);
+        }
+      }
+      else if (load_address == 0x200)
       {
         int j;
-        // Standard resolution files have the 200 lines stored in block
-        // of 25 lines of 80 bytes = 2000 bytes every 2048 bytes.
-        // so there are 48 bytes unused every 2048 bytes...
-        for (j = 0; j < i; j += 2048)
-          GFX2_LogHexDump(GFX2_DEBUG, "SCR ", pixel_data, j+2000, 48);
+        static const byte CPC_Firmware_Colors[] = {
+          0x54, 0x44, 0x55, 0x5c, 0x58, 0x5d, 0x4c, 0x45, 0x4d,
+          0x56, 0x46, 0x57, 0x5e, 0x40, 0x5f, 0x4e, 0x47, 0x4f,
+          0x52, 0x42, 0x53, 0x5a, 0x59, 0x5b, 0x4a, 0x43, 0x4b };
+        GFX2_LogHexDump(GFX2_DEBUG, "", cpc_ram, 0x800, 0x100);
+        GFX2_LogHexDump(GFX2_DEBUG, "", cpc_ram, 0x8000, 0x100);
+        mode = cpc_ram[0x800];
+        for (j = 0; j < 16; j++)
+          pal_data[12*j] = CPC_Firmware_Colors[cpc_ram[0x801 + j]];
+        addr = 0x847;
+        if (cpc_ram[0x80bb] == 1)
+          addr = 0x80bb;
+        for (; cpc_ram[addr] > 0 && cpc_ram[addr] < 16; addr += 2)
+        {
+          GFX2_Log(GFX2_DEBUG, " R%d = &H%02x = %d\n", cpc_ram[addr], cpc_ram[addr+1], cpc_ram[addr+1]);
+          // see http://www.cpcwiki.eu/index.php/CRTC#The_6845_Registers
+          switch(cpc_ram[addr])
+          {
+            case 1:
+              columns = cpc_ram[addr+1] * 2;
+              break;
+            case 6:
+              height = cpc_ram[addr+1] * 8;
+              break;
+            case 12:
+              display_start = (display_start & 0x00ff) | ((cpc_ram[addr+1] & 0x30) << 10) | ((cpc_ram[addr+1] & 0x03) << 9);
+              break;
+            case 13:
+              display_start = (display_start & 0xff00) | cpc_ram[addr+1];
+           }
+         }
+      }
+      if (i >= 30000)
+      {
+        height = 272; columns = 96;
       }
     }
   }
 
+  switch (mode)
+  {
+    case 0:
+      width = columns * 2;
+      bpp = 4;
+      ratio = PIXEL_WIDE;
+      break;
+    case 1:
+      width = columns * 4;
+      bpp = 2;
+      ratio = PIXEL_SIMPLE;
+      break;
+    case 2:
+      width = columns * 8;
+      bpp = 1;
+      ratio = PIXEL_TALL;
+      break;
+    default:
+      return; // unsupported
+  }
+
+  if (Config.Clear_palette)
+    memset(context->Palette,0,sizeof(T_Palette));
+  // Setup the palette (amstrad hardware palette)
+  CPC_set_HW_palette(context->Palette + 0x40);
+
+  // Set the palette for this picture
+  if (cpc_plus_pal)
+  {
+    for (i = 0; i < 16; i++)
+    {
+      context->Palette[i].G = cpc_plus_pal[i*2 + 1] * 0x11;
+      context->Palette[i].R = (cpc_plus_pal[i*2] >> 4) * 0x11;
+      context->Palette[i].B = (cpc_plus_pal[i*2] & 15) * 0x11;
+    }
+  }
+  else
+  {
+    for (i = 0; i < 16; i++)
+      context->Palette[i] = context->Palette[pal_data[12*i]];
+  }
+
+  File_error = 0;
   Pre_load(context, width, height, real_file_size, FORMAT_SCR, ratio, bpp);
 
+  if (!is_win)
+  {
+    // Standard resolution files have the 200 lines stored in block
+    // of 25 lines of 80 bytes = 2000 bytes every 2048 bytes.
+    // so there are 48 bytes unused every 2048 bytes...
+    for (y = 0; y < 8; y++)
+    {
+      addr = display_start + 0x800 * y;
+      if (y > 0 && (display_start & 0x7ff))
+        GFX2_LogHexDump(GFX2_DEBUG, "SCR1 ", cpc_ram,
+                        addr & 0xf800, display_start & 0x7ff);
+      addr += (height >> 3) * columns;
+      if ((height >> 3) * columns + (display_start & 0x7ff) <= 0x800)
+        GFX2_LogHexDump(GFX2_DEBUG, "SCR2 ", cpc_ram,
+                        addr, 0x800 - ((height >> 3) * columns + (display_start & 0x7ff)));
+       else
+         GFX2_LogHexDump(GFX2_DEBUG, "SCR2 ", cpc_ram,
+                        addr + 0x4000, 0x1000 - ((height >> 3) * columns + (display_start & 0x7ff)));
+
+    }
+    //for (j = 0; j < i; j += 2048)
+    //  GFX2_LogHexDump(GFX2_DEBUG, "SCR ", cpc_ram, load_address + j + 2000, 48);
+  }
+
+  GFX2_Log(GFX2_DEBUG, "  display_start &H%04X\n", display_start);
   for (y = 0; y < height; y++)
   {
     const byte * line;
 
     if (is_win)
-      line = pixel_data + y * columns;
+      addr = display_start + y * columns;
     else
-      line = pixel_data + ((y & 7) << 11) + ((y >> 3) * columns);
+    {
+      addr = display_start + ((y >> 3) * columns);
+      addr = (addr & 0xC7FF) | ((addr & 0x800) << 3);
+      addr += (y & 7) << 11;
+    }
+    //GFX2_Log(GFX2_DEBUG, "line#%d &H%04X\n", y, addr);
+    line = cpc_ram + addr;
     x = 0;
     for (i = 0; i < columns; i++)
     {
@@ -4701,9 +4809,7 @@ void Load_SCR(T_IO_Context * context)
     }
   }
 
-  free(pixel_data);
-
-  File_error = 0;
+  free(cpc_ram);
 }
 
 /**
