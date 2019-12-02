@@ -4367,14 +4367,36 @@ void Load_GPX(T_IO_Context * context)
  */
 void Test_SCR(T_IO_Context * context, FILE * file)
 {
+  // http://orgams.wikidot.com/le-format-impdraw-v2
+  // http://orgams.wikidot.com/les-fichiers-win-compatibles-ocp-art-studio
   FILE * pal_file;
   unsigned long pal_size, file_size;
   byte mode, color_anim_flag;
+  word loading_address = 0;
 
   File_error = 1;
 
-  file_size = File_length_file(file);
-  if (file_size > 16384+128)
+  if (CPC_check_AMSDOS(file, &loading_address, &file_size))
+  {
+    if (loading_address == 0x170) // iMPdraw v2
+    {
+      byte buffer[0x90];
+      fseek(file, 128, SEEK_SET); // right after AMSDOS header
+      Read_bytes(file, buffer, 0x90);
+      GFX2_LogHexDump(GFX2_DEBUG, "", buffer, 0, 0x90);
+      File_error = 0;
+      return;
+    }
+    else if ((loading_address == 0x200 || loading_address == 0xc000) && file_size > 16000)
+    {
+      File_error = 0;
+      return;
+    }
+  }
+  else
+    file_size = File_length_file(file);
+
+  if (file_size > 16384*2)
     return;
 
   // requires the PAL file
@@ -4394,17 +4416,15 @@ void Test_SCR(T_IO_Context * context, FILE * file)
    */
 
 
-  pal_size = File_length_file(pal_file);
-  if (pal_size == 239+128)
-  {
-    if (!CPC_check_AMSDOS(pal_file, NULL, NULL))
-    {
-      fclose(pal_file);
-      return;
-    }
+  if (CPC_check_AMSDOS(pal_file, NULL, &pal_size))
     fseek(pal_file, 128, SEEK_SET); // right after AMSDOS header
+  else
+  {
+    pal_size = File_length_file(pal_file);
+    fseek(pal_file, 0, SEEK_SET);
   }
-  else if (pal_size != 239)
+
+  if (pal_size != 239)
   {
     fclose(pal_file);
     return;
