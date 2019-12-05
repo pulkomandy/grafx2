@@ -4651,8 +4651,11 @@ void Load_SCR(T_IO_Context * context)
         }
         else
         {
+          int j;
           // palette at 0x7f00
           GFX2_LogHexDump(GFX2_DEBUG, "", cpc_ram, 0x7f00, 16);
+          for (j = 0; j < 16; j++)
+            pal_data[12*j] = cpc_ram[0x7f00 + j];
         }
       }
       else if (load_address == 0x200)
