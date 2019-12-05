@@ -27,4 +27,7 @@ void * GFX2_malloc_and_log(size_t size, const char * file, unsigned line);
 /// malloc() memory and log in case of error
 #define GFX2_malloc(size) GFX2_malloc_and_log((size), __FILE__, __LINE__)
 
+/// checks if a memory zone is filled with the same byte value
+int GFX2_is_mem_filled_with(const void * p, unsigned char b, size_t len);
+
 #endif

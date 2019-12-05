@@ -4662,8 +4662,6 @@ void Load_SCR(T_IO_Context * context)
           0x54, 0x44, 0x55, 0x5c, 0x58, 0x5d, 0x4c, 0x45, 0x4d,
           0x56, 0x46, 0x57, 0x5e, 0x40, 0x5f, 0x4e, 0x47, 0x4f,
           0x52, 0x42, 0x53, 0x5a, 0x59, 0x5b, 0x4a, 0x43, 0x4b };
-        GFX2_LogHexDump(GFX2_DEBUG, "", cpc_ram, 0x800, 0x100);
-        GFX2_LogHexDump(GFX2_DEBUG, "", cpc_ram, 0x8000, 0x100);
         mode = cpc_ram[0x800];
         for (j = 0; j < 16; j++)
           pal_data[12*j] = CPC_Firmware_Colors[cpc_ram[0x801 + j]];
@@ -4751,16 +4749,27 @@ void Load_SCR(T_IO_Context * context)
     {
       addr = display_start + 0x800 * y;
       if (y > 0 && (display_start & 0x7ff))
-        GFX2_LogHexDump(GFX2_DEBUG, "SCR1 ", cpc_ram,
-                        addr & 0xf800, display_start & 0x7ff);
+      {
+        if (!GFX2_is_mem_filled_with(cpc_ram + (addr & 0xf800), 0, display_start & 0x7ff))
+          GFX2_LogHexDump(GFX2_DEBUG, "SCR1 ", cpc_ram,
+                          addr & 0xf800, display_start & 0x7ff);
+      }
       addr += (height >> 3) * columns;
-      if ((height >> 3) * columns + (display_start & 0x7ff) <= 0x800)
-        GFX2_LogHexDump(GFX2_DEBUG, "SCR2 ", cpc_ram,
-                        addr, 0x800 - ((height >> 3) * columns + (display_start & 0x7ff)));
-       else
-         GFX2_LogHexDump(GFX2_DEBUG, "SCR2 ", cpc_ram,
-                        addr + 0x4000, 0x1000 - ((height >> 3) * columns + (display_start & 0x7ff)));
-
+      block_length = (height >> 3) * columns + (display_start & 0x7ff);
+      if (block_length <= 0x800)
+      {
+        block_length = 0x800 - block_length;
+        if (!GFX2_is_mem_filled_with(cpc_ram + addr, 0, block_length))
+          GFX2_LogHexDump(GFX2_DEBUG, "SCR2 ", cpc_ram,
+                          addr, block_length);
+      }
+      else
+      {
+        block_length = 0x1000 - block_length;
+        if (!GFX2_is_mem_filled_with(cpc_ram + addr + 0x4000, 0, block_length))
+          GFX2_LogHexDump(GFX2_DEBUG, "SCR2 ", cpc_ram,
+                          addr + 0x4000, block_length);
+      }
     }
     //for (j = 0; j < i; j += 2048)
     //  GFX2_LogHexDump(GFX2_DEBUG, "SCR ", cpc_ram, load_address + j + 2000, 48);

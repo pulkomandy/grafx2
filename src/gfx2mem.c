@@ -30,3 +30,14 @@ void * GFX2_malloc_and_log(size_t size, const char * file, unsigned line)
              file, line, (unsigned long)size);
   return p;
 }
+
+int GFX2_is_mem_filled_with(const void * p, unsigned char b, size_t len)
+{
+  const unsigned char * pp = (const unsigned char *)p;
+  while (len-- > 0)
+  {
+    if (*pp++ != b)
+      return 0;
+  }
+  return 1;
+}
