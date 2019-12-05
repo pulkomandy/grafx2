@@ -4660,6 +4660,48 @@ void Load_SCR(T_IO_Context * context)
       }
       else if (load_address == 0x200)
       {
+        /* from HARLEY.SCR :
+        0800  00 = mode
+        0801-0810 palette (Firmware colors)
+        0811  21 47 08      LD HL,0847  ; OVERSCAN_REG_VALUES
+        0814  cd 36 08      CALL 0836 ; LOAD_CRTC_REGS
+        0817  3a 00 08      LD A,(0800) ; MODE
+        081a  cd 1c bd      CALL BD1C ; Set screen mode
+        081d  21 01 08      LD HL,0801  ; PALETTE
+        0820  af            XOR A
+            LOOP:
+        0821  4e            LD C,(HL)
+        0822  41            LD B,C
+        0823  f5            PUSH AF
+        0824  e5            PUSH HL
+        0825  cd 32 bc      CALL BC32   ; SET ink A to color B,C
+        0828  e1            POP HL
+        0829  f1            POP AF
+        082a  23            INC HL
+        082b  3c            INC A
+        082c  fe 10         CMP 10
+        082e  20 f1         JR NZ,0821  ; LOOP
+        0830  cd 18 bb      CALL BB18 ; Wait key press
+        0833  21 55 08      LD HL,0855  ; STANDARD_REG_VALUES
+            LOAD_CRTC_REGS:
+        0836  01 00 bc      LD BC,BC00
+            LOOP_CRTC:
+        0839  7e            LD A,(HL)
+        083a  a7            AND A
+        083b  c8            RET Z
+        083c  ed 79         OUT (C),A
+        083e  04            INC B
+        083f  23            INC HL
+        0840  7e            LD A,(HL)
+        0841  ed 79         OUT (C),A
+        0843  23            INC HL
+        0844  05            DEC B
+        0845  18 f2         JR 0839 ; LOOP_CRTC
+            OVERSCAN_REG_VALUES:
+        0847  01 30  02 32  06 22  07 23  0c 0d  0d 00  00 00
+            STANDARD_REG_VALUES:
+        0855  01 28  02 2e  06 19  07 1e  0c 30  00 00
+        */
         int j;
         static const byte CPC_Firmware_Colors[] = {
           0x54, 0x44, 0x55, 0x5c, 0x58, 0x5d, 0x4c, 0x45, 0x4d,
