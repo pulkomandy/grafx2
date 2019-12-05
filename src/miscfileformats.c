@@ -4994,15 +4994,15 @@ void Test_GOS(T_IO_Context * context, FILE * file)
 
   file_oddeve = Open_file_read_with_alternate_ext(context, "GO2");
   if (file_oddeve == NULL) {
-	  File_error = 2;
-	  return;
+    File_error = 2;
+    return;
   }
   if (!CPC_check_AMSDOS(file_oddeve, NULL, &file_size))
     file_size = File_length_file(file_oddeve);
   fclose(file_oddeve);
   if (file_size < 16383 || file_size > 16384) {
-	  File_error = 3;
-	  return;
+    File_error = 3;
+    return;
   }
 
   File_error = 0;
@@ -5043,20 +5043,20 @@ void Load_GOS(T_IO_Context* context)
 
   i = 0;
   for (y = 0; y < 168; y++) {
-	  x = 0;
-	  while (x < 192) {
-		  byte pixels = pixel_data[i];
-          Set_pixel(context, x++, y, (pixels & 0x80) >> 7 | (pixels & 0x08) >> 2 | (pixels & 0x20) >> 3 | (pixels & 0x02) << 2);
-          Set_pixel(context, x++, y, (pixels & 0x40) >> 6 | (pixels & 0x04) >> 1 | (pixels & 0x10) >> 2 | (pixels & 0x01) << 3);
-		  i++;
-	  }
+    x = 0;
+    while (x < 192) {
+      byte pixels = pixel_data[i];
+      Set_pixel(context, x++, y, (pixels & 0x80) >> 7 | (pixels & 0x08) >> 2 | (pixels & 0x20) >> 3 | (pixels & 0x02) << 2);
+      Set_pixel(context, x++, y, (pixels & 0x40) >> 6 | (pixels & 0x04) >> 1 | (pixels & 0x10) >> 2 | (pixels & 0x01) << 3);
+      i++;
+    }
 
-	  i += 0x800;
-	  if (i > 0x3FFF) {
-		i -= 0x4000;
-	  } else {
-		i -= 192 / 2;
-	  }
+    i += 0x800;
+    if (i > 0x3FFF) {
+      i -= 0x4000;
+    } else {
+      i -= 192 / 2;
+    }
   }
 
   fclose(file);
@@ -5069,32 +5069,34 @@ void Load_GOS(T_IO_Context* context)
   Read_bytes(file, pixel_data, file_size);
   i = 0;
   for (y = 168; y < 272; y++) {
-	  x = 0;
-	  while (x < 192) {
-		  byte pixels = pixel_data[i];
-          Set_pixel(context, x++, y, (pixels & 0x80) >> 7 | (pixels & 0x08) >> 2 | (pixels & 0x20) >> 3 | (pixels & 0x02) << 2);
-          Set_pixel(context, x++, y, (pixels & 0x40) >> 6 | (pixels & 0x04) >> 1 | (pixels & 0x10) >> 2 | (pixels & 0x01) << 3);
-		  i++;
-	  }
+    x = 0;
+    while (x < 192) {
+      byte pixels = pixel_data[i];
+      Set_pixel(context, x++, y, (pixels & 0x80) >> 7 | (pixels & 0x08) >> 2 | (pixels & 0x20) >> 3 | (pixels & 0x02) << 2);
+      Set_pixel(context, x++, y, (pixels & 0x40) >> 6 | (pixels & 0x04) >> 1 | (pixels & 0x10) >> 2 | (pixels & 0x01) << 3);
+      i++;
+    }
 
-	  i += 0x800;
-	  if (i > 0x3FFF) {
-		i -= 0x4000;
-	  } else {
-		i -= 192 / 2;
-	  }
+    i += 0x800;
+    if (i > 0x3FFF) {
+      i -= 0x4000;
+    } else {
+      i -= 192 / 2;
+    }
   }
 
   fclose(file);
 
   file = Open_file_read_with_alternate_ext(context, "KIT");
   if (file == NULL) {
-	// There is no palette, but that's fine, we can still load the pixels
-	return;
+    // There is no palette, but that's fine, we can still load the pixels
+    return;
   }
 
-  if (CPC_check_AMSDOS(file, NULL, NULL)) {
+  if (CPC_check_AMSDOS(file, NULL, &file_size)) {
     fseek(file, 128, SEEK_SET); // right after AMSDOS header
+  } else {
+    file_size = File_length_file(file);
   }
 
   if (Config.Clear_palette)
@@ -5102,18 +5104,36 @@ void Load_GOS(T_IO_Context* context)
 
   File_error = 0;
 
-  for (i = 0; i < 16; i++)
+  if (file_size == 32)
   {
-    uint16_t word;
-    if (!Read_word_le(file, &word))
+    for (i = 0; i < 16; i++)
     {
-      File_error = 2;
-      return;
-    }
+      uint16_t word;
+      if (!Read_word_le(file, &word))
+      {
+        File_error = 2;
+        return;
+      }
 
-    context->Palette[i].R = ((word >>  4) & 0xF) * 0x11;
-    context->Palette[i].G = ((word >>  8) & 0xF) * 0x11;
-    context->Palette[i].B = ((word >>  0) & 0xF) * 0x11;
+      context->Palette[i].R = ((word >>  4) & 0xF) * 0x11;
+      context->Palette[i].G = ((word >>  8) & 0xF) * 0x11;
+      context->Palette[i].B = ((word >>  0) & 0xF) * 0x11;
+    }
+  }
+  else
+  {
+    // Setup the palette (amstrad hardware palette)
+    CPC_set_HW_palette(context->Palette + 0x40);
+    for (i = 0; i < 16; i++)
+    {
+      byte ink;
+      if (!Read_byte(file, &ink))
+      {
+        File_error = 2;
+        return;
+      }
+      context->Palette[i] = context->Palette[ink];
+    }
   }
 
   fclose(file);
