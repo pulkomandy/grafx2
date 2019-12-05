@@ -87,36 +87,62 @@ extern void GFX2_LogHexDump(GFX2_Log_priority_T priority, const char * header, c
 {
   char line[128];
   long i;
+  int previous_allzero_count = 0;
   while (count > 0)
   {
     int p = 0, r;
-    r = snprintf(line + p, sizeof(line) - p, "%s%06lX:", header, offset);
-    if (r < 0)
-      return;
-    p += r;
+    int allzero = 1;
     for (i = 0; i < count && i < 16; i++)
     {
-      r = snprintf(line + p, sizeof(line) - p, " %02x", data[offset+i]);
+      if (data[offset+i] != 0)
+      {
+        allzero = 0;
+        break;
+      }
+    }
+    if (previous_allzero_count && allzero)
+    {
+      // prints a single "*" for multiple line of 00's
+      if (previous_allzero_count == 1)
+        GFX2_Log(priority, "*\n");
+    }
+    else
+    {
+      r = snprintf(line + p, sizeof(line) - p, "%s%06lX:", header, offset);
       if (r < 0)
         return;
       p += r;
-      if (i == 7)
-        line[p++] = ' ';
+      for (i = 0; i < count && i < 16; i++)
+      {
+        r = snprintf(line + p, sizeof(line) - p, " %02x", data[offset+i]);
+        if (r < 0)
+          return;
+        p += r;
+        if (i == 7)
+          line[p++] = ' ';
+      }
+      if (i < 16)
+      {
+        if (i < 7)
+          line[p++] = ' ';
+        memset(line + p, ' ', 3 * (16 - i));
+        p += 3 * (16 - i);
+      }
+      line[p++] = ' ';
+      line[p++] = '|';
+      for (i = 0; i < count && i < 16; i++)
+        line[p++] = data[offset+i]>=32 && data[offset+i]<127 ? data[offset+i] : '.';
+      line[p++] = '\0';
+      GFX2_Log(priority, "%s\n", line);
     }
-    if (i < 16)
-    {
-      if (i < 7)
-        line[p++] = ' ';
-      memset(line + p, ' ', 3 * (16 - i));
-      p += 3 * (16 - i);
-    }
-    line[p++] = ' ';
-    line[p++] = '|';
-    for (i = 0; i < count && i < 16; i++)
-      line[p++] = data[offset+i]>=32 && data[offset+i]<127 ? data[offset+i] : '.';
-    line[p++] = '\0';
-    GFX2_Log(priority, "%s\n", line);
+    if (allzero)
+      previous_allzero_count++;
+    else
+      previous_allzero_count = 0;
     count -= i;
     offset += i;
   }
+  // print the ending offset if there was "*"
+  if (previous_allzero_count > 1)
+    GFX2_Log(priority, "%s%06lX\n", header, offset);
 }
