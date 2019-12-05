@@ -100,15 +100,18 @@ extern void GFX2_LogHexDump(GFX2_Log_priority_T priority, const char * header, c
       if (r < 0)
         return;
       p += r;
+      if (i == 7)
+        line[p++] = ' ';
     }
     if (i < 16)
     {
+      if (i < 7)
+        line[p++] = ' ';
       memset(line + p, ' ', 3 * (16 - i));
       p += 3 * (16 - i);
     }
     line[p++] = ' ';
     line[p++] = '|';
-    line[p++] = ' ';
     for (i = 0; i < count && i < 16; i++)
       line[p++] = data[offset+i]>=32 && data[offset+i]<127 ? data[offset+i] : '.';
     line[p++] = '\0';
