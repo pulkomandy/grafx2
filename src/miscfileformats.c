@@ -4807,7 +4807,7 @@ void Test_GOS(T_IO_Context * context, FILE * file)
 
   if (!CPC_check_AMSDOS(file, NULL, &file_size))
     file_size = File_length_file(file);
-  if (file_size != 16384) {
+  if (file_size < 16383 || file_size > 16384) {
     File_error = 1;
     return;
   }
@@ -4820,21 +4820,8 @@ void Test_GOS(T_IO_Context * context, FILE * file)
   if (!CPC_check_AMSDOS(file_oddeve, NULL, &file_size))
     file_size = File_length_file(file_oddeve);
   fclose(file_oddeve);
-  if (file_size != 16384) {
+  if (file_size < 16383 || file_size > 16384) {
 	  File_error = 3;
-	  return;
-  }
-
-  file_oddeve = Open_file_read_with_alternate_ext(context, "KIT");
-  if (file_oddeve == NULL) {
-	  File_error = 4;
-	  return;
-  }
-  if (!CPC_check_AMSDOS(file_oddeve, NULL, &file_size))
-    file_size = File_length_file(file_oddeve);
-  fclose(file_oddeve);
-  if (file_size != 32) {
-	  File_error = 5;
 	  return;
   }
 
@@ -4872,7 +4859,7 @@ void Load_GOS(T_IO_Context* context)
   // load pixels
   pixel_data = GFX2_malloc(16384);
   memset(pixel_data, 0, 16384);
-  Read_bytes(file, pixel_data, 16384);
+  Read_bytes(file, pixel_data, file_size);
 
   i = 0;
   for (y = 0; y < 168; y++) {
@@ -4899,7 +4886,7 @@ void Load_GOS(T_IO_Context* context)
   if (CPC_check_AMSDOS(file, NULL, &file_size))
     fseek(file, 128, SEEK_SET); // right after AMSDOS header
 
-  Read_bytes(file, pixel_data, 16384);
+  Read_bytes(file, pixel_data, file_size);
   i = 0;
   for (y = 168; y < 272; y++) {
 	  x = 0;
@@ -4921,6 +4908,11 @@ void Load_GOS(T_IO_Context* context)
   fclose(file);
 
   file = Open_file_read_with_alternate_ext(context, "KIT");
+  if (file == NULL) {
+	// There is no palette, but that's fine, we can still load the pixels
+	return;
+  }
+
   if (CPC_check_AMSDOS(file, NULL, NULL)) {
     fseek(file, 128, SEEK_SET); // right after AMSDOS header
   }
