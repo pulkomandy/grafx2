@@ -362,7 +362,9 @@ void Set_image_mode(T_IO_Context *context, enum IMAGE_MODES mode)
 
 enum IMAGE_MODES Get_image_mode(T_IO_Context *context)
 {
-  return Main.backups->Pages->Image_mode;
+  if (context->Type == CONTEXT_MAIN_IMAGE)
+    return Main.backups->Pages->Image_mode;
+  return IMAGE_MODE_LAYERED;
 }
 
 ///
