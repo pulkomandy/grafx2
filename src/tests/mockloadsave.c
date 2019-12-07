@@ -22,7 +22,10 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "../loadsave.h"
+#include "../global.h"
+#include "../gfx2log.h"
 
 void Pre_load(T_IO_Context *context, short width, short height, long file_size, int format, enum PIXEL_RATIO ratio, byte bpp)
 {
@@ -30,13 +33,24 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
          context, width, height, file_size, format, ratio, bpp);
   context->Width = width;
   context->Height = height;
+  if (bpp > 8) {
+    fprintf(stderr, "Truecolor not supported yet\n");
+    File_error = 1;
+  }
+  if (context->Type == CONTEXT_SURFACE)
+  {
+    if (context->Surface)
+      Free_GFX2_Surface(context->Surface);
+    context->Surface = New_GFX2_Surface(width, height);
+    if (context->Surface == NULL)
+      File_error = 1;
+  }
 }
 
 byte Get_pixel(T_IO_Context *context, short x, short y)
 {
-  (void)context;
-  (void)x;
-  (void)y;
+  if (context->Type == CONTEXT_SURFACE)
+    return Get_GFX2_Surface_pixel(context->Surface, x, y);
   return 0;
 }
 
@@ -50,10 +64,20 @@ void Pixel_in_layer(int layer, word x, word y, byte color)
 
 void Set_pixel(T_IO_Context *context, short x, short y, byte c)
 {
-  (void)context;
-  (void)x;
-  (void)y;
-  (void)c;
+  if (context->Type == CONTEXT_SURFACE)
+  {
+    if (context->Surface == NULL)
+    {
+      GFX2_Log(GFX2_ERROR, "Set_pixel() : no Surface allocated\n");
+      File_error = 1;
+    }
+    if ((x < 0) || (x >= context->Surface->w) || (y < 0) || (y >= context->Surface->h))
+    {
+      GFX2_Log(GFX2_WARNING, "Set_pixel() : position %(%hd,%hd) is outside of the image\n", x, y);
+      return;
+    }
+    Set_GFX2_Surface_pixel(context->Surface, x, y, c);
+  }
 }
 
 void Set_pixel_24b(T_IO_Context *context, short x, short y, byte r, byte g, byte b)
