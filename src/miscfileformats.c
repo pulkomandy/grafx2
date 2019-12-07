@@ -60,6 +60,7 @@
 #include "help.h"
 #include "fileformats.h"
 #include "gfx2mem.h"
+#include "gfx2log.h"
 
 //////////////////////////////////// PAL ////////////////////////////////////
 //
@@ -4787,7 +4788,7 @@ void Load_FLI(T_IO_Context * context)
     fseek(file, 12, SEEK_SET);
   }
   else if (file_size != header.size)
-    Warning("Load_FLI(): file size mismatch in header");
+    GFX2_Log(GFX2_WARNING, "Load_FLI(): file size mismatch in header %lu != %u\n", file_size, header.size);
 
   if (header.speed == 0)
   {
@@ -5041,7 +5042,7 @@ void Load_FLI(T_IO_Context * context)
                 }
                 else
                 {
-                  Warning("Unsupported opcode");
+                  GFX2_Log(GFX2_WARNING, "Unsupported opcode %04x\n", opcode);
                   File_error = 2;
                   break;
                 }
@@ -5055,7 +5056,7 @@ void Load_FLI(T_IO_Context * context)
         }
         break;
       default:  // skip
-        Warning("Load_FLI(): unrecognized chunk");
+        GFX2_Log(GFX2_WARNING, "Load_FLI(): unrecognized chunk %04x\n", chunk_type);
     }
     if (chunk_size > 0 && header.size != 12)
     {
