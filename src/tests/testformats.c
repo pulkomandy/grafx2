@@ -36,10 +36,11 @@
 #include "../gfx2mem.h"
 
 // Load/Save
-#define TESTFMT(fmt, sample) { # fmt, Test_ ## fmt, Load_ ## fmt, Save_ ## fmt, sample },
+#define TESTFMT(fmt, sample) { FORMAT_ ## fmt, # fmt, Test_ ## fmt, Load_ ## fmt, Save_ ## fmt, sample },
 // Load only
-#define TESTFMTL(fmt, sample) { # fmt, Test_ ## fmt, Load_ ## fmt, NULL, sample },
+#define TESTFMTL(fmt, sample) { FORMAT_ ## fmt, # fmt, Test_ ## fmt, Load_ ## fmt, NULL, sample },
 static const struct {
+  enum FILE_FORMATS format;
   const char * name;
   Func_IO_Test Test;
   Func_IO Load;
@@ -64,9 +65,9 @@ static const struct {
   TESTFMTL(GOS, "cpc/iMPdraw_GFX/SONIC.GO1")
   TESTFMTL(MOTO,"thomson/exocet-alientis.map")  // Format with limitations
   TESTFMTL(HGR, "apple2/hgr/pop-swordfight.hgr")  // Format with limitations
-  {"ACBM",Test_ACBM,Load_IFF, NULL, "iff/ACBM/Jupiter_alt.pic"},
-  {"LBM", Test_LBM, Load_IFF, Save_IFF, "iff/Danny_SkyTravellers_ANNO.iff"},
-  {"PBM", Test_PBM, Load_IFF, Save_IFF, "iff/pbm/FC.LBM"},
+  {FORMAT_ACBM, "ACBM",Test_ACBM,Load_IFF, NULL, "iff/ACBM/Jupiter_alt.pic"},
+  {FORMAT_LBM, "LBM", Test_LBM, Load_IFF, Save_IFF, "iff/Danny_SkyTravellers_ANNO.iff"},
+  {FORMAT_PBM, "PBM", Test_PBM, Load_IFF, Save_IFF, "iff/pbm/FC.LBM"},
   TESTFMTL(INFO,"amiga_icons/4colors/Utilities/Calculator.info")
 #ifndef __no_pnglib__
   TESTFMT(PNG, "png/happy-birthday-guys.png")
@@ -76,7 +77,7 @@ static const struct {
 #endif
   TESTFMTL(GPL, "palette-mariage_115.gpl") //PALETTE
   TESTFMTL(PAL, "pal/dp4_256.pal") // PALETTE
-  { NULL, NULL, NULL, NULL, NULL}
+  { FORMAT_ALL_IMAGES, NULL, NULL, NULL, NULL, NULL}
 };
 
 /**
@@ -247,10 +248,12 @@ int Test_Save(void)
     GFX2_Log(GFX2_DEBUG, "Testing format %s (Save)\n", formats[i].name);
     snprintf(path, sizeof(path), "%s/%s.%s", tmpdir, "test", formats[i].name);
     context_set_file_path(&context, path);
+
     // save the reference picture
     context.Surface = testpic256;
     context.Target_address = testpic256->pixels;
     context.Pitch = testpic256->w;
+    context.Format = formats[i].format;
     File_error = 0;
     formats[i].Save(&context);
     context.Surface = NULL;
@@ -261,6 +264,25 @@ int Test_Save(void)
     }
     else
     {
+      FILE * f;
+      // Test the saved file
+      f = fopen(path, "rb");
+      if (f == NULL)
+      {
+        GFX2_Log(GFX2_ERROR, "error opening %s\n", path);
+        ok = 0;
+      }
+      else
+      {
+        File_error = 1;
+        formats[i].Test(&context, f);
+        fclose(f);
+        if (File_error != 0)
+        {
+          GFX2_Log(GFX2_ERROR, "Test_%s failed for file %s\n", formats[i].name, path);
+          ok = 0;
+        }
+      }
       // load the saved file
       formats[i].Load(&context);
       if (File_error != 0 || context.Surface == NULL)
