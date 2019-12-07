@@ -28,6 +28,9 @@
 /// Saving and loading of PNG file format
 
 #ifndef __no_pnglib__
+#ifdef __MINT__
+#undef _GNU_SOURCE
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
