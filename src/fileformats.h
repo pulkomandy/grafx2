@@ -101,6 +101,11 @@ void Test_PC1(T_IO_Context *, FILE *);
 void Load_PC1(T_IO_Context *);
 void Save_PC1(T_IO_Context *);
 
+// -- Tiny Stuff ------------------------------------------------------------
+void Test_TNY(T_IO_Context *, FILE *);
+void Load_TNY(T_IO_Context *);
+void Save_TNY(T_IO_Context *);
+
 // -- NEO -------------------------------------------------------------------
 void Test_NEO(T_IO_Context *, FILE *);
 void Load_NEO(T_IO_Context *);

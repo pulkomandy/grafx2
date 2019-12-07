@@ -50,6 +50,7 @@
  * - PI1 : Degas
  * - PC1 : Degas elite compressed
  * - NEO : Neochrome
+ * - TNY : Tiny Stuff / Tiny View
  *
  * @{
  */
@@ -1162,6 +1163,231 @@ error:
   if (file != NULL)
     fclose(file);
   Remove_file(context);
+}
+
+void Test_TNY(T_IO_Context * context, FILE * file)
+{
+  unsigned long file_size;
+  unsigned long theorical_size;
+  byte res;  // 0 = Low, 1 = midres, 2 = hires. +3 for color cycling
+  word control_bytes;
+  word data_words;
+  (void)context;
+
+  File_error = 1;
+  file_size = File_length_file(file);
+  if (file_size > 32044)
+    return;
+  if (!Read_byte(file, &res))
+    return;
+  if (res >= 6)
+    return;
+  if (res >= 3)
+  {
+    if (fseek(file, 4, SEEK_CUR) < 0)  // skip color cycling info
+      return;
+    theorical_size = 41;
+  }
+  else
+    theorical_size = 37;
+  if (fseek(file, 16*2, SEEK_CUR) < 0) // skip palette
+    return;
+  if (!Read_word_be(file, &control_bytes) || !Read_word_be(file, &data_words))
+    return;
+  theorical_size += control_bytes + data_words * 2;
+  if (theorical_size <= file_size && file_size < theorical_size + 512)
+  {
+    GFX2_Log(GFX2_DEBUG, "TNY res=%d %hu control bytes, %hu data words\n",
+             (int)res, control_bytes, data_words);
+    File_error = 0;
+  }
+}
+
+void Load_TNY(T_IO_Context * context)
+{
+  FILE * file;
+  byte res;  // 0 = Low, 1 = midres, 2 = hires. +3 for color cycling
+  word control_bytes;
+  byte * control;
+  word data_words;
+  byte * data;
+  byte buffer[32000 + 2];
+
+  File_error = 1;
+  file = Open_file_read(context);
+  if (file == NULL)
+    return;
+  if (Read_byte(file, &res) && (res < 6))
+  {
+    enum PIXEL_RATIO ratio = PIXEL_SIMPLE;
+    word width = 640, height = 200;
+    byte bpp;
+    byte cycling_range = 0;
+    byte cycling_speed = 0;
+    word duration = 0;
+
+    switch (res)
+    {
+      case 0:
+      case 3:
+        width = 320;
+        bpp = 4;
+        break;
+      case 1:
+      case 4:
+        bpp = 2;
+        ratio = PIXEL_TALL;
+        break;
+      case 2:
+      case 5:
+        bpp = 1;
+        height = 400;
+        break;
+    }
+    if (res >= 3)
+    {
+      if(   !Read_byte(file, &cycling_range)
+         || !Read_byte(file, &cycling_speed)
+         || !Read_word_be(file, &duration))
+      {
+        fclose(file);
+        return;
+      }
+      GFX2_Log(GFX2_DEBUG, "TNY Color Cycling : %02x speed=%02x duration=%d\n",
+               cycling_range, cycling_speed, duration);
+    }
+    // Read palette
+    if (   !Read_bytes(file, buffer, 32)
+        || !Read_word_be(file, &control_bytes)
+        || !Read_word_be(file, &data_words))
+    {
+      fclose(file);
+      return;
+    }
+    control = GFX2_malloc(control_bytes);
+    data = GFX2_malloc(data_words * 2);
+    if (control == NULL || data == NULL)
+    {
+      fclose(file);
+      return;
+    }
+    if (   Read_bytes(file, control, control_bytes)
+        && Read_bytes(file, data, data_words * 2))
+    {
+      byte cb;
+      word cc, count;
+      int src, dst;
+      int line;
+
+      File_error = 0;
+      Pre_load(context, width, height, File_length_file(file), FORMAT_TNY, ratio, bpp);
+      // Set palette
+      if (Config.Clear_palette)
+        memset(context->Palette, 0, sizeof(T_Palette));
+      PI1_decode_palette(buffer, context->Palette);
+      if (res >= 3)
+      {
+        context->Cycle_range[context->Color_cycles].Start = (cycling_range & 0xf0) >> 4;
+        context->Cycle_range[context->Color_cycles].End = (cycling_range & 0x0f);
+        if (cycling_speed & 0x80)
+        {
+          context->Cycle_range[context->Color_cycles].Inverse = 1;
+          cycling_speed = 256 - cycling_speed;
+        }
+        else
+          context->Cycle_range[context->Color_cycles].Inverse = 0;
+        context->Cycle_range[context->Color_cycles].Speed = 175 / cycling_speed;
+        context->Color_cycles++;
+      }
+      for (cc = 0, src = 0, dst = 0; cc < control_bytes && dst < 32000; )
+      {
+        cb = control[cc++];
+        if (cb & 0x80)
+        {
+          // copy
+          do {
+            buffer[dst++] = data[src++];
+            buffer[dst++] = data[src++];
+          } while(++cb != 0);
+        }
+        else switch(cb)
+        {
+          case 0: // repeat (word count)
+            count = control[cc++] << 8;
+            count += control[cc++];
+            while (count-- > 0)
+            {
+              buffer[dst++] = data[src];
+              buffer[dst++] = data[src+1];
+            }
+            src += 2;
+            break;
+          case 1: // copy (word count)
+            count = control[cc++] << 8;
+            count += control[cc++];
+            memcpy(buffer+dst, data+src, count * 2);
+            dst += count * 2;
+            src += count * 2;
+            break;
+          default: // repeat next data word
+            while(cb-- > 0)
+            {
+              buffer[dst++] = data[src];
+              buffer[dst++] = data[src+1];
+            }
+            src += 2;
+        }
+      }
+      GFX2_Log(GFX2_DEBUG, "    %d %d ; %d %d ; %d\n", cc, control_bytes, src, data_words * 2, dst);
+      /**
+       * Tiny stuff packs the ST RAM in 4 planes of 8000 bytes
+       * Data is organized by column in each plane
+       * Warning : this is the same organization for all 3 ST Video modes
+       */
+      for (line = 0; line < 200; line++)
+      {
+        int col;
+        for (col = 0; col < 20; col++)
+        {
+          byte planar[8];
+          byte pixels[16];
+          src = (line + col * 200) * 2;
+          for (dst = 0; dst < 8;)
+          {
+            planar[dst++] = buffer[src];
+            planar[dst++] = buffer[src+1];
+            src += 8000;
+          }
+          switch(res)
+          {
+            case 0:
+            case 3:
+              PI1_8b_to_16p(planar, pixels);
+              for (dst = 0 ; dst < 16; dst++)
+                Set_pixel(context, col * 16 + dst, line, pixels[dst]);
+              break;
+            case 1:
+            case 4:
+              PI2_8b_to_16p(planar, pixels);
+              for (dst = 0 ; dst < 16; dst++)
+                Set_pixel(context, col * 32 + dst, line, pixels[dst]);
+              PI2_8b_to_16p(planar + 4, pixels);
+              for (dst = 0 ; dst < 16; dst++)
+                Set_pixel(context, col * 32 + 16 + dst, line, pixels[dst]);
+              break;
+            case 2:
+            case 5:
+              for (dst = 0 ; dst < 64; dst++)
+                Set_pixel(context, (col % 10) * 64 + dst, line * 2 + (col / 10),
+                          (planar[(dst >> 3)] >> (7 - (dst & 7))) & 1);
+          }
+        }
+      }
+    }
+    free(control);
+    free(data);
+  }
+  fclose(file);
 }
 
 /* @} */
