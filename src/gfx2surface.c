@@ -59,7 +59,7 @@ byte Get_GFX2_Surface_pixel(const T_GFX2_Surface * surface, int x, int y)
   if (surface == NULL) return 0;
   if (x<0 || x>=surface->w || y<0 || y>=surface->h)
   {
-    Warning("Get_GFX2_Surface_pixel() out of bound access");
+    GFX2_Log(GFX2_WARNING, "Get_GFX2_Surface_pixel() out of bound access (%d,%d)\n", x, y);
     return 0;
   }
   return surface->pixels[x + surface->w * y];
