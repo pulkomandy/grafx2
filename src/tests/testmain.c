@@ -105,6 +105,8 @@ int main(int argc, char * * argv)
 {
   int i, r;
   int fail = 0;
+  (void)argc;
+  (void)argv;
 
   GFX2_verbosity_level = GFX2_DEBUG;
   init();

@@ -7895,6 +7895,8 @@ void Load_GRB(T_IO_Context * context)
   else
     bpp = 1;
 
+  GFX2_Log(GFX2_DEBUG, "HP48: %05X size=%u %ux%u\n", prologue, size, width, height);
+
   File_error = 0;
   Pre_load(context, width, height/bpp, file_size, FORMAT_GRB, PIXEL_SIMPLE, bpp);
   if (File_error == 0)

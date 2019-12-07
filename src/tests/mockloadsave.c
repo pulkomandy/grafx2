@@ -102,6 +102,8 @@ void Set_saving_layer(T_IO_Context *context, int layer)
 
 void Set_loading_layer(T_IO_Context *context, int layer)
 {
+  (void)context;
+  (void)layer;
   //printf("Set_loading_layer(%p, %d)\n", context, layer);
 }
 
@@ -112,6 +114,7 @@ void Set_image_mode(T_IO_Context *context, enum IMAGE_MODES mode)
 
 enum IMAGE_MODES Get_image_mode(T_IO_Context *context)
 {
+  (void)context;
   return -1;
 }
 

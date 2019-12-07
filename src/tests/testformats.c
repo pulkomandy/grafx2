@@ -214,7 +214,7 @@ int Test_Save(void)
 {
   T_IO_Context context;
   char path[256];
-  char tmpdir[256];
+  char tmpdir[40];
   int i;
   int ok = 0;
   T_GFX2_Surface * testpic256 = NULL;
