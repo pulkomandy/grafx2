@@ -2236,24 +2236,24 @@ void Load_IFF(T_IO_Context * context)
 
     switch (IFF_list_size)
     {
-      case 0 : // Première couleur
+      case 0 : // First color
         IFF_color_list[0]=color;
         IFF_list_size=1;
         break;
-      case 1 : // Deuxième couleur
+      case 1 : // second color
         last_color=IFF_color_list[0];
         IFF_repetition_mode=(last_color==color);
         IFF_color_list[1]=color;
         IFF_list_size=2;
         break;
-      default: // Couleurs suivantes
+      default: // next colors
         last_color      =IFF_color_list[IFF_list_size-1];
         second_last_color=IFF_color_list[IFF_list_size-2];
-        if (last_color==color)  // On a une répétition de couleur
+        if (last_color == color)  // repeat detected
         {
           if ( !IFF_repetition_mode && IFF_list_size >= 127)
           {
-            // mode <> avec 126 octets <> puis 2 identiques
+            // diff mode with 126 bytes then 2 identical bytes
             IFF_list_size--;
             Transfer_colors(file);
             IFF_color_list[0]=color;
@@ -2262,14 +2262,15 @@ void Load_IFF(T_IO_Context * context)
             IFF_repetition_mode=1;
           }
           else if ( (IFF_repetition_mode) || (second_last_color!=color) )
-          // On conserve le mode...
           {
+            // same mode is kept
             if (IFF_list_size==128)
               Transfer_colors(file);
             IFF_color_list[IFF_list_size++]=color;
           }
-          else // On est en mode <> et on a 3 couleurs qui se suivent
+          else
           {
+            // diff mode and 3 identical bytes
             IFF_list_size-=2;
             Transfer_colors(file);
             IFF_color_list[0]=color;
@@ -2279,15 +2280,15 @@ void Load_IFF(T_IO_Context * context)
             IFF_repetition_mode=1;
           }
         }
-        else // La couleur n'est pas la même que la précédente
+        else // the color is different from the previous one
         {
-          if (!IFF_repetition_mode)                 // On conserve le mode...
+          if (!IFF_repetition_mode)                 // keep mode
           {
             if (IFF_list_size == 128)
               Transfer_colors(file);
             IFF_color_list[IFF_list_size++]=color;
           }
-          else                                        // On change de mode...
+          else                                        // change mode
           {
             Transfer_colors(file);
             IFF_color_list[IFF_list_size]=color;
