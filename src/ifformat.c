@@ -36,6 +36,14 @@
 #include "gfx2mem.h"
 #include "gfx2log.h"
 
+#if defined(WIN32)
+#if defined(_MSC_VER)
+#define WIN32_BSWAP32 _byteswap_ulong
+#else
+#define WIN32_BSWAP32 __builtin_bswap32
+#endif
+#endif
+
 //////////////////////////////////// IFF ////////////////////////////////////
 /** @defgroup IFF Interchange File Format
  * @ingroup loadsaveformats

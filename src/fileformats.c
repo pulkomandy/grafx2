@@ -34,15 +34,10 @@
 #endif
 
 #include <stdlib.h>
-#if defined(WIN32)
 #if defined(_MSC_VER)
 #include <stdio.h>
 #if _MSC_VER < 1900
 #define snprintf _snprintf
-#endif
-#define WIN32_BSWAP32 _byteswap_ulong
-#else
-#define WIN32_BSWAP32 __builtin_bswap32
 #endif
 #endif
 
