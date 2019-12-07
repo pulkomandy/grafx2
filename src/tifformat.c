@@ -779,6 +779,9 @@ void Save_TIFF_to_memory(T_IO_Context * context, void * * buffer, unsigned long 
 void Save_TIFF(T_IO_Context * context)
 {
   TIFF * tif;
+  char * filename; // filename with full path
+
+  filename = Filepath_append_to_dir(context->File_directory, context->File_name);
 
   File_error = 1;
 
@@ -788,12 +791,13 @@ void Save_TIFF(T_IO_Context * context)
     tif = TIFFOpenW(context->File_name_unicode, "w");
   else
 #endif
-    tif = TIFFOpen(context->File_name, "w");
+    tif = TIFFOpen(filename, "w");
   if (tif != NULL)
   {
     Save_TIFF_Sub(context, tif);
     TIFFClose(tif);
   }
+  free(filename);
 }
 
 /** @} */
