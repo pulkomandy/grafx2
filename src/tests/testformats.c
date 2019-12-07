@@ -233,6 +233,7 @@ int Test_Save(void)
   }
   testpic256 = context.Surface;
   context.Surface = NULL;
+  memcpy(testpic256->palette, context.Palette, sizeof(T_Palette));
   snprintf(tmpdir, sizeof(tmpdir), "/tmp/grafx2-test.XXXXXX");
   if (mkdtemp(tmpdir) == NULL)
   {
@@ -253,6 +254,7 @@ int Test_Save(void)
     context.Surface = testpic256;
     context.Target_address = testpic256->pixels;
     context.Pitch = testpic256->w;
+    memcpy(context.Palette, testpic256->palette, sizeof(T_Palette));
     context.Format = formats[i].format;
     File_error = 0;
     formats[i].Save(&context);
@@ -283,6 +285,7 @@ int Test_Save(void)
           ok = 0;
         }
       }
+      memset(context.Palette, -1, sizeof(T_Palette));
       // load the saved file
       formats[i].Load(&context);
       if (File_error != 0 || context.Surface == NULL)
@@ -302,6 +305,11 @@ int Test_Save(void)
         else if (0 != memcmp(context.Surface->pixels, testpic256->pixels, testpic256->w * testpic256->h))
         {
           GFX2_Log(GFX2_ERROR, "Save%s/Load_%s: Pixels mismatch\n", formats[i].name, formats[i].name);
+          ok = 0;
+        }
+        else if (0 != memcmp(context.Palette, testpic256->palette, sizeof(T_Palette)))
+        {
+          GFX2_Log(GFX2_ERROR, "Save%s/Load_%s: Palette mismatch\n", formats[i].name, formats[i].name);
           ok = 0;
         }
         else
