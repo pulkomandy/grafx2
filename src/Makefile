@@ -810,6 +810,7 @@ OBJS = main.o init.o graph.o $(APIOBJ) misc.o special.o \
        transform.o pversion.o factory.o $(PLATFORMOBJ) \
        loadsave.o loadsavefuncs.o \
        pngformat.o motoformats.o stformats.o c64formats.o cpcformats.o \
+       ifformat.o \
        fileformats.o miscfileformats.o libraw2crtc.o \
        brush_ops.o buttons_effects.o layers.o \
        oldies.o tiles.o colorred.o unicode.o gfx2surface.o \
@@ -822,6 +823,7 @@ TESTSOBJS = $(patsubst %.c,%.o,$(wildcard tests/*.c)) \
             miscfileformats.o fileformats.o oldies.o libraw2crtc.o \
             loadsavefuncs.o packbits.o tifformat.o c64load.o 6502.o \
             pngformat.o motoformats.o stformats.o c64formats.o cpcformats.o \
+            ifformat.o \
             op_c.o colorred.o \
             unicode.o \
             io.o realpath.o version.o pversion.o \
