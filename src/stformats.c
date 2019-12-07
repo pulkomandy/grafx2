@@ -1,0 +1,1167 @@
+/* vim:expandtab:ts=2 sw=2:
+*/
+/*  Grafx2 - The Ultimate 256-color bitmap paint program
+
+    Copyright 2018-2019 Thomas Bernard
+    Copyright 2011 Pawel Góralski
+    Copyright 2009 Petter Lindquist
+    Copyright 2008 Yves Rizoud
+    Copyright 2008 Franck Charlet
+    Copyright 2007-2011 Adrien Destugues
+    Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
+
+    Grafx2 is free software; you can redistribute it and/or
+    modify it under the terms of the GNU General Public License
+    as published by the Free Software Foundation; version 2
+    of the License.
+
+    Grafx2 is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Grafx2; if not, see <http://www.gnu.org/licenses/>
+*/
+
+///@file stformats.c
+/// Formats for the Atari ST line of machines
+
+#include <stdlib.h>
+#include <string.h>
+#include "fileformats.h"
+#include "loadsavefuncs.h"
+#include "io.h"
+#include "misc.h"
+#include "gfx2log.h"
+#include "gfx2mem.h"
+
+/**
+ * @defgroup atarist Atari ST picture formats
+ * @ingroup loadsaveformats
+ *
+ * Support for Atari ST picture formats. The Atari ST has
+ * 3 video modes :
+ * - low res : 320x200 16 colors
+ * - med res : 640x200 4 colors
+ * - high res : 640x400 monochrome
+ *
+ * Supported formats :
+ * - PI1 : Degas
+ * - PC1 : Degas elite compressed
+ * - NEO : Neochrome
+ *
+ * @{
+ */
+//////////////////////////////////// PI1 ////////////////////////////////////
+
+//// DECODAGE d'une partie d'IMAGE ////
+
+void PI1_8b_to_16p(const byte * src,byte * dest)
+{
+  int  i;           // index du pixel à calculer
+  word byte_mask;      // Masque de decodage
+  word w0,w1,w2,w3; // Les 4 words bien ordonnés de la source
+
+  byte_mask=0x8000;
+  w0=(((word)src[0])<<8) | src[1];
+  w1=(((word)src[2])<<8) | src[3];
+  w2=(((word)src[4])<<8) | src[5];
+  w3=(((word)src[6])<<8) | src[7];
+  for (i=0;i<16;i++)
+  {
+    // Pour décoder le pixel n°i, il faut traiter les 4 words sur leur bit
+    // correspondant à celui du masque
+
+    dest[i]=((w0 & byte_mask)?0x01:0x00) |
+           ((w1 & byte_mask)?0x02:0x00) |
+           ((w2 & byte_mask)?0x04:0x00) |
+           ((w3 & byte_mask)?0x08:0x00);
+    byte_mask>>=1;
+  }
+}
+
+void PI2_8b_to_16p(const byte * src,byte * dest)
+{
+  int  i;           // index du pixel à calculer
+  word mask;      // Masque de decodage
+  word w0,w1;
+
+  w0=(((word)src[0])<<8) | src[1];
+  w1=(((word)src[2])<<8) | src[3];
+  mask=0x8000;
+  for (i = 0; i < 16; i++)
+  {
+    dest[i] = ((w0 & mask) ? 0x01 : 0) | ((w1 & mask) ? 0x02 : 0);
+    mask >>= 1;
+  }
+}
+
+//// CODAGE d'une partie d'IMAGE ////
+
+void PI1_16p_to_8b(byte * src,byte * dest)
+{
+  int  i;           // index du pixel à calculer
+  word byte_mask;      // Masque de codage
+  word w0,w1,w2,w3; // Les 4 words bien ordonnés de la destination
+
+  byte_mask=0x8000;
+  w0=w1=w2=w3=0;
+  for (i=0;i<16;i++)
+  {
+    // Pour coder le pixel n°i, il faut modifier les 4 words sur leur bit
+    // correspondant à celui du masque
+
+    w0|=(src[i] & 0x01)?byte_mask:0x00;
+    w1|=(src[i] & 0x02)?byte_mask:0x00;
+    w2|=(src[i] & 0x04)?byte_mask:0x00;
+    w3|=(src[i] & 0x08)?byte_mask:0x00;
+    byte_mask>>=1;
+  }
+  dest[0]=w0 >> 8;
+  dest[1]=w0 & 0x00FF;
+  dest[2]=w1 >> 8;
+  dest[3]=w1 & 0x00FF;
+  dest[4]=w2 >> 8;
+  dest[5]=w2 & 0x00FF;
+  dest[6]=w3 >> 8;
+  dest[7]=w3 & 0x00FF;
+}
+
+//// DECODAGE de la PALETTE ////
+
+static void PI1_decode_palette(const byte * src, T_Components * palette)
+{
+  int i;  // Numéro de la couleur traitée
+  word w; // Word contenant le code
+
+  // Schéma d'un word =
+  //
+  //    Low        High
+  // VVVV RRRR | 0000 BBBB
+  // 0321 0321 |      0321
+
+  for (i=0;i<16;i++)
+  {
+    w = (word)src[0] << 8 | (word)src[1];
+    src += 2;
+
+    palette[i].R = (((w & 0x0700)>>7) | ((w & 0x0800) >> 11)) * 0x11 ;
+    palette[i].G = (((w & 0x0070)>>3) | ((w & 0x0080) >> 7)) * 0x11 ;
+    palette[i].B = (((w & 0x0007)<<1) | ((w & 0x0008) >> 3)) * 0x11 ;
+  }
+}
+
+//// CODAGE de la PALETTE ////
+
+void PI1_code_palette(const T_Components * palette, byte * dest)
+{
+  int i;  // Numéro de la couleur traitée
+  word w; // Word contenant le code
+
+  // Schéma d'un word =
+  //
+  // Low        High
+  // VVVV RRRR | 0000 BBBB
+  // 0321 0321 |      0321
+
+  for (i=0;i<16;i++)
+  {
+    w  = ((word)(palette[i].R & 0xe0) << 3) | ((word)(palette[i].R & 0x10) << 7);
+    w |= ((word)(palette[i].G & 0xe0) >> 1) | ((word)(palette[i].G & 0x10) << 3);
+    w |= ((word)(palette[i].B & 0xe0) >> 5) | ((word)(palette[i].B & 0x10) >> 1);
+
+    *dest++ = (w >> 8);
+    *dest++ = (w & 0xff);
+  }
+}
+
+/// Load color cycling data from a PI1 or PC1 image (Degas Elite format)
+static void PI1_load_ranges(T_IO_Context * context, const byte * buffer, int size)
+{
+  int range;
+
+  if (buffer==NULL || size<32)
+    return;
+
+  for (range=0; range < 4; range ++)
+  {
+    word min_col, max_col, direction, delay;
+
+    min_col   = (buffer[size - 32 + range*2 +  0] << 8) | buffer[size - 32 + range*2 +  1];
+    max_col   = (buffer[size - 32 + range*2 +  8] << 8) | buffer[size - 32 + range*2 +  9];
+    direction = (buffer[size - 32 + range*2 + 16] << 8) | buffer[size - 32 + range*2 + 17];
+    delay     = (buffer[size - 32 + range*2 + 24] << 8) | buffer[size - 32 + range*2 + 25];
+
+    if (max_col < min_col)
+      SWAP_WORDS(min_col,max_col)
+
+    GFX2_Log(GFX2_DEBUG, "Degas Color cycling : [#%d:#%d] direction=%d delay=%d\n", min_col, max_col, direction, delay);
+    // Sanity checks
+    if (min_col < 256 && max_col < 256 && direction < 3 && (direction == 1 || delay < 128))
+    {
+      int speed = 1;
+      if (delay < 128)
+        speed = 210/(128-delay);
+      // Grafx2's slider has a limit of COLOR_CYCLING_SPEED_MAX
+      if (speed > COLOR_CYCLING_SPEED_MAX)
+        speed = COLOR_CYCLING_SPEED_MAX;
+      context->Cycle_range[context->Color_cycles].Start=min_col;
+      context->Cycle_range[context->Color_cycles].End=max_col;
+      context->Cycle_range[context->Color_cycles].Inverse= (direction==0);
+      context->Cycle_range[context->Color_cycles].Speed=direction == 1 ? 0 : speed;
+      context->Color_cycles++;
+    }
+  }
+}
+
+/// Saves color ranges from a PI1 or PC1 image (Degas Elite format)
+void PI1_save_ranges(T_IO_Context * context, byte * buffer, int size)
+{
+  // empty by default
+  memset(buffer+size - 32, 0, 32);
+  if (context->Color_cycles)
+  {
+    int i; // index in context->Cycle_range[] : < context->Color_cycles
+    int saved_range; // index in resulting buffer : < 4
+
+    for (i=0, saved_range=0; i<context->Color_cycles && saved_range<4; i++)
+    {
+      if (context->Cycle_range[i].Start < 16 && context->Cycle_range[i].End < 16)
+      {
+        int speed;
+        if (context->Cycle_range[i].Speed == 0)
+          speed = 0;
+        else if (context->Cycle_range[i].Speed == 1)
+          // has to "round" manually to closest valid number for this format
+          speed = 1;
+        else
+          speed = 128 - 210 / context->Cycle_range[i].Speed;
+
+        buffer[size - 32 + saved_range*2 +  1] = context->Cycle_range[i].Start;
+        buffer[size - 32 + saved_range*2 +  9] = context->Cycle_range[i].End;
+        buffer[size - 32 + saved_range*2 + 17] = (context->Cycle_range[i].Speed == 0) ? 1 : (context->Cycle_range[i].Inverse ? 0 : 2);
+        buffer[size - 32 + saved_range*2 + 25] = speed;
+
+        saved_range ++;
+      }
+    }
+  }
+}
+
+/// Test for Degas file format
+void Test_PI1(T_IO_Context * context, FILE * file)
+{
+  unsigned long size;              // Taille du fichier
+  word resolution;                 // Résolution de l'image
+
+  (void)context;
+  File_error=1;
+
+  if (!Read_word_be(file,&resolution))
+    return;
+
+  size = File_length_file(file);
+  if ((size==32034) || (size==32066)) // size check
+  {
+    if (resolution < 3)
+      File_error=0;
+  }
+}
+
+
+/// Load Degas file format
+void Load_PI1(T_IO_Context * context)
+{
+  enum PIXEL_RATIO ratio = PIXEL_SIMPLE;
+  word resolution;
+  word width, height;
+  FILE *file;
+  word x_pos,y_pos;
+  byte buffer[160];
+  byte * ptr;
+  byte pixels[320];
+  byte bpp;
+
+  File_error = 1;
+  file = Open_file_read(context);
+  if (file == NULL)
+    return;
+
+  if (!Read_word_be(file, &resolution))
+    return;
+  GFX2_Log(GFX2_DEBUG, "Degas UnCompressed. Resolution = %04x\n", resolution);
+  // Read palette
+  if (!Read_bytes(file, buffer, 32))
+  {
+    fclose(file);
+    return;
+  }
+  if (Config.Clear_palette)
+    memset(context->Palette,0,sizeof(T_Palette));
+  PI1_decode_palette(buffer, context->Palette);
+
+  switch (resolution)
+  {
+    case 0:  // Low Res
+      width = 320;
+      height = 200;
+      bpp = 4;
+      break;
+    case 1:  // Med Res
+      width = 640;
+      height = 200;
+      bpp = 2;
+      ratio = PIXEL_TALL;
+      break;
+    case 2:  // High Res
+      width = 640;
+      height = 400;
+      bpp = 1;
+      break;
+    default:
+      fclose(file);
+      return;
+  }
+  Pre_load(context, width, height, File_length_file(file),FORMAT_PI1,ratio, bpp);
+
+  for (y_pos=0;y_pos<height;y_pos++)
+  {
+    if (!Read_bytes(file, buffer, (resolution == 2) ? 80 : 160))
+    {
+      fclose(file);
+      return;
+    }
+    ptr = buffer;
+    for (x_pos=0; x_pos < width;)
+    {
+      int i;
+      switch (resolution)
+      {
+        case 0:
+          PI1_8b_to_16p(ptr, pixels);
+          ptr += 8;
+          break;
+        case 1:
+          PI2_8b_to_16p(ptr, pixels);
+          ptr += 4;
+          break;
+        case 2:
+          for (i = 0; i < 8; i++)
+            pixels[i] = (ptr[0] & (0x80 >> i)) ? 1 : 0;
+          for (; i < 16; i++)
+            pixels[i] = (ptr[1] & (0x80 >> (i - 8))) ? 1 : 0;
+          ptr += 2;
+      }
+      for (i = 0; i < 16; i++)
+        Set_pixel(context, x_pos++, y_pos, pixels[i]);
+    }
+  }
+  // load color cycling information
+  if (Read_bytes(file, buffer, 32))
+  {
+    PI1_load_ranges(context, buffer, 32);
+  }
+  fclose(file);
+  File_error = 0;
+}
+
+
+// -- Sauver un fichier au format PI1 ---------------------------------------
+void Save_PI1(T_IO_Context * context)
+{
+  FILE *file;
+  short x_pos,y_pos;
+  byte * buffer;
+  byte * ptr;
+  byte pixels[320];
+
+  File_error=0;
+  // Ouverture du fichier
+  if ((file=Open_file_write(context)))
+  {
+    setvbuf(file, NULL, _IOFBF, 64*1024);
+
+    // allocation d'un buffer mémoire
+    buffer = GFX2_malloc(32034);
+    // Codage de la résolution
+    buffer[0]=0x00;
+    buffer[1]=0x00;
+    // Codage de la palette
+    PI1_code_palette(context->Palette, buffer+2);
+    // Codage de l'image
+    ptr=buffer+34;
+    for (y_pos=0;y_pos<200;y_pos++)
+    {
+      // Codage de la ligne
+      memset(pixels,0,320);
+      if (y_pos<context->Height)
+      {
+        for (x_pos=0;(x_pos<320) && (x_pos<context->Width);x_pos++)
+          pixels[x_pos]=Get_pixel(context, x_pos,y_pos);
+      }
+
+      for (x_pos=0;x_pos<(320>>4);x_pos++)
+      {
+        PI1_16p_to_8b(pixels+(x_pos<<4),ptr);
+        ptr+=8;
+      }
+    }
+
+    if (Write_bytes(file,buffer,32034))
+    {
+      if (context->Color_cycles)
+      {
+        PI1_save_ranges(context, buffer, 32);
+        if (!Write_bytes(file,buffer,32))
+          File_error=1;
+      }
+      fclose(file);
+    }
+    else // Error d'écriture (disque plein ou protégé)
+    {
+      fclose(file);
+      Remove_file(context);
+      File_error=1;
+    }
+    // Libération du buffer mémoire
+    free(buffer);
+    buffer = NULL;
+  }
+  else
+  {
+    fclose(file);
+    Remove_file(context);
+    File_error=1;
+  }
+}
+
+
+//////////////////////////////////// PC1 ////////////////////////////////////
+
+/// uncompress degas elite compressed stream (PACKBITS)
+/// @return 1 for success
+/// @return 0 for failure
+static int PC1_uncompress_packbits_file(FILE *f, byte * dest)
+{
+  int id = 0;
+  unsigned count;
+  byte code, value;
+
+  while (id < 32000)
+  {
+    if (!Read_byte(f, &code))
+      return 0;
+
+    if (code & 0x80)
+    {
+      /// Code is negative :
+      /// Repeat (1-code) times next byte
+      count = 257 - code;
+      if (id + count > 32000)
+        return 0;
+      if (!Read_byte(f, &value))
+        return 0;
+      while (count-- > 0)
+        dest[id++] = value;
+    }
+    else
+    {
+      /// Code is positive :
+      /// Copy (code+1) bytes
+      count = code + 1;
+      if (id + count > 32000)
+        return 0;
+      if (!Read_bytes(f, dest + id, count))
+        return 0;
+      id += count;
+    }
+  }
+  return 1;
+}
+
+//// COMPRESSION d'un buffer selon la méthode PACKBITS ////
+
+static void PC1_compress_packbits(byte * src,byte * dest,int source_size,int * dest_size)
+{
+
+  *dest_size = 0;
+  while (source_size > 0)
+  {
+    int is = 0; // index dans la source
+    int id = 0; // index dans la destination
+    int ir; // index de   la répétition
+    int n;  // Taille des séquences
+    int repet; // "Il y a répétition"
+
+    while(is<40)
+    {
+      // On recherche le 1er endroit où il y a répétition d'au moins 3 valeurs
+      // identiques
+
+      repet=0;
+      for (ir=is;ir<40-2;ir++)
+      {
+        if ((src[ir]==src[ir+1]) && (src[ir+1]==src[ir+2]))
+        {
+          repet=1;
+          break;
+        }
+      }
+
+      // On code la partie sans répétitions
+      if (!repet || ir!=is)
+      {
+        n=(ir-is)+1;
+        dest[id++]=n-1;
+        for (;n>0;n--)
+          dest[id++]=src[is++];
+      }
+
+      // On code la partie sans répétitions
+      if (repet)
+      {
+        // On compte la quantité de fois qu'il faut répéter la valeur
+        for (ir+=3;ir<40;ir++)
+        {
+          if (src[ir]!=src[is])
+            break;
+        }
+        n=(ir-is);
+        dest[id++]=257-n;
+        dest[id++]=src[is];
+        is=ir;
+      }
+    }
+    // On renseigne la taille du buffer compressé
+    *dest_size+=id;
+    // Move for next 40-byte block
+    src += 40;
+    dest += id;
+    source_size -= 40;
+  }
+}
+
+//// DECODAGE d'une partie d'IMAGE ////
+
+// Transformation de 4 plans de bits en 1 ligne de pixels
+
+static void PC1_4bp_to_1line(byte * src0,byte * src1,byte * src2,byte * src3,byte * dest)
+{
+  int  i,j;         // Compteurs
+  int  ip;          // index du pixel à calculer
+  byte byte_mask;      // Masque de decodage
+  byte b0,b1,b2,b3; // Les 4 octets des plans bits sources
+
+  ip=0;
+  // Pour chacun des 40 octets des plans de bits
+  for (i=0;i<40;i++)
+  {
+    b0=src0[i];
+    b1=src1[i];
+    b2=src2[i];
+    b3=src3[i];
+    // Pour chacun des 8 bits des octets
+    byte_mask=0x80;
+    for (j=0;j<8;j++)
+    {
+      dest[ip++]=((b0 & byte_mask)?0x01:0x00) |
+                ((b1 & byte_mask)?0x02:0x00) |
+                ((b2 & byte_mask)?0x04:0x00) |
+                ((b3 & byte_mask)?0x08:0x00);
+      byte_mask>>=1;
+    }
+  }
+}
+
+//// CODAGE d'une partie d'IMAGE ////
+
+// Transformation d'1 ligne de pixels en 4 plans de bits
+
+static void PC1_1line_to_4bp(byte * src,byte * dst0,byte * dst1,byte * dst2,byte * dst3)
+{
+  int  i,j;         // Compteurs
+  int  ip;          // index du pixel à calculer
+  byte byte_mask;      // Masque de decodage
+  byte b0,b1,b2,b3; // Les 4 octets des plans bits sources
+
+  ip=0;
+  // Pour chacun des 40 octets des plans de bits
+  for (i=0;i<40;i++)
+  {
+    // Pour chacun des 8 bits des octets
+    byte_mask=0x80;
+    b0=b1=b2=b3=0;
+    for (j=0;j<8;j++)
+    {
+      b0|=(src[ip] & 0x01)?byte_mask:0x00;
+      b1|=(src[ip] & 0x02)?byte_mask:0x00;
+      b2|=(src[ip] & 0x04)?byte_mask:0x00;
+      b3|=(src[ip] & 0x08)?byte_mask:0x00;
+      ip++;
+      byte_mask>>=1;
+    }
+    dst0[i]=b0;
+    dst1[i]=b1;
+    dst2[i]=b2;
+    dst3[i]=b3;
+  }
+}
+
+
+/// Test for Degas Elite Compressed format
+void Test_PC1(T_IO_Context * context, FILE * file)
+{
+  int  size;              // Taille du fichier
+  word resolution;        // Résolution de l'image
+
+  (void)context;
+  File_error=1;
+
+  size = File_length_file(file);
+  if (!Read_word_be(file,&resolution))
+    return;
+
+  if ((size <= 32066) && (resolution & 0x8000))
+  {
+    if ((resolution & 0x7fff) < 3)
+      File_error=0;
+  }
+}
+
+
+/// Load Degas Elite compressed files
+void Load_PC1(T_IO_Context * context)
+{
+  enum PIXEL_RATIO ratio = PIXEL_SIMPLE;
+  unsigned long size;
+  word width, height;
+  byte bpp;
+  FILE *file;
+  word x_pos,y_pos;
+  byte buffer[32];
+  byte * bufferdecomp;
+  byte * ptr;
+  byte pixels[640];
+  word resolution;
+
+  File_error = 1;
+  file = Open_file_read(context);
+  if (file == NULL)
+    return;
+  size = File_length_file(file);
+
+  if (!Read_word_be(file, &resolution))
+    return;
+  GFX2_Log(GFX2_DEBUG, "Degas Elite Compressed. Resolution = %04x\n", resolution);
+  // Read palette
+  if (!Read_bytes(file, buffer, 32))
+  {
+    fclose(file);
+    return;
+  }
+  if (Config.Clear_palette)
+    memset(context->Palette,0,sizeof(T_Palette));
+  PI1_decode_palette(buffer, context->Palette);
+
+  switch (resolution)
+  {
+    case 0x8000:  // Low Res
+      width = 320;
+      height = 200;
+      bpp = 4;
+      break;
+    case 0x8001:  // Med Res
+      width = 640;
+      height = 200;
+      bpp = 2;
+      ratio = PIXEL_TALL;
+      break;
+    case 0x8002:  // High Res
+      width = 640;
+      height = 400;
+      bpp = 1;
+      break;
+    default:
+      fclose(file);
+      return;
+  }
+
+  bufferdecomp = GFX2_malloc(32000);
+  if (bufferdecomp == NULL)
+  {
+    fclose(file);
+    return;
+  }
+
+  // Initialisation de la preview
+  Pre_load(context, width, height, size, FORMAT_PC1, ratio, bpp);
+
+  //PC1_uncompress_packbits(buffercomp, bufferdecomp);
+  if (!PC1_uncompress_packbits_file(file, bufferdecomp))
+  {
+    GFX2_Log(GFX2_INFO, "PC1_uncompress_packbits_file() failed\n");
+    free(bufferdecomp);
+    fclose(file);
+    return;
+  }
+
+  // Décodage de l'image
+  ptr=bufferdecomp;
+  for (y_pos = 0; y_pos < height; y_pos++)
+  {
+    // Décodage de la scanline
+    switch (resolution)
+    {
+      case 0x8000:  // Low Res
+        PC1_4bp_to_1line(ptr,ptr+40,ptr+80,ptr+120,pixels);
+        ptr+=160;
+        break;
+      case 0x8001:  // Med Res
+        x_pos = 0;
+        while (x_pos < width)
+        {
+          int i;
+          for (i = 7; i >= 0; i--, x_pos++)
+            pixels[x_pos] =  ((ptr[0] >> i) & 1)
+                            | (((ptr[80] >> i) << 1) & 2);
+          ptr++;
+        }
+        ptr += 80;
+        break;
+      case 0x8002:  // High Res
+        x_pos = 0;
+        while (x_pos < width)
+        {
+          int i;
+          for (i = 7; i >= 0; i--)
+            pixels[x_pos++] = (*ptr >> i) & 1;
+          ptr++;
+        }
+    }
+    for (x_pos=0;x_pos<width;x_pos++)
+      Set_pixel(context, x_pos, y_pos, pixels[x_pos]);
+  }
+  // Try to load color cycling information
+  GFX2_Log(GFX2_DEBUG, "remaining bytes = %ld\n", size - ftell(file));
+  if (Read_bytes(file, buffer, 32))
+  {
+    PI1_load_ranges(context, buffer, 32);
+  }
+  free(bufferdecomp);
+  fclose(file);
+  File_error = 0;
+}
+
+
+// -- Sauver un fichier au format PC1 ---------------------------------------
+void Save_PC1(T_IO_Context * context)
+{
+  FILE *file;
+  int   size;
+  short x_pos,y_pos;
+  byte * buffercomp;
+  byte * bufferdecomp;
+  byte * ptr;
+  byte pixels[320];
+
+  File_error=0;
+  // Ouverture du fichier
+  if ((file=Open_file_write(context)))
+  {
+    setvbuf(file, NULL, _IOFBF, 64*1024);
+
+    // Allocation des buffers mémoire
+    bufferdecomp = GFX2_malloc(32000);
+    buffercomp = GFX2_malloc(64066);
+    // Codage de la résolution
+    buffercomp[0]=0x80;
+    buffercomp[1]=0x00;
+    // Codage de la palette
+    PI1_code_palette(context->Palette, buffercomp+2);
+    // Codage de l'image
+    ptr=bufferdecomp;
+    for (y_pos=0;y_pos<200;y_pos++)
+    {
+      // Codage de la ligne
+      memset(pixels,0,320);
+      if (y_pos<context->Height)
+      {
+        for (x_pos=0;(x_pos<320) && (x_pos<context->Width);x_pos++)
+          pixels[x_pos]=Get_pixel(context, x_pos,y_pos);
+      }
+
+      // Encodage de la scanline
+      PC1_1line_to_4bp(pixels,ptr,ptr+40,ptr+80,ptr+120);
+      ptr+=160;
+    }
+
+    // Compression du buffer
+    PC1_compress_packbits(bufferdecomp,buffercomp+34,32000,&size);
+    size += 34;
+    size += 32;
+    PI1_save_ranges(context, buffercomp,size);
+
+    if (Write_bytes(file,buffercomp,size))
+    {
+      fclose(file);
+    }
+    else // Error d'écriture (disque plein ou protégé)
+    {
+      fclose(file);
+      Remove_file(context);
+      File_error=1;
+    }
+    // Libération des buffers mémoire
+    free(bufferdecomp);
+    free(buffercomp);
+    buffercomp = bufferdecomp = NULL;
+  }
+  else
+  {
+    fclose(file);
+    Remove_file(context);
+    File_error=1;
+  }
+}
+
+
+//////////////////////////////////// NEO ////////////////////////////////////
+/**
+NeoChrome Format :
+<pre>
+1 word          flag word [always 0]
+1 word          resolution [0 = low res, 1 = medium res, 2 = high res]
+16 words        palette
+12 bytes        filename [usually "        .   "]
+1 word          color animation limits.  High bit (bit 15) set if color
+                animation data is valid.  Low byte contains color animation
+                limits (4 most significant bits are left/lower limit,
+                4 least significant bits are right/upper limit).
+1 word          color animation speed and direction.  High bit (bit 15) set
+                if animation is on.  Low order byte is # vblanks per step.
+                If negative, scroll is left (decreasing).  Number of vblanks
+                between cycles is |x| - 1
+1 word          # of color steps (as defined in previous word) to display
+                picture before going to the next.  (For use in slide shows)
+1 word          image X offset [unused, always 0]
+1 word          image Y offset [unused, always 0]
+1 word          image width [unused, always 320]
+1 word          image height [unused, always 200]
+33 words        reserved for future expansion
+32000 bytes     pixel data
+</pre>
+
+Dali           *.SD0 (ST low resolution)
+               *.SD1 (ST medium resolution)
+               *.SD2 (ST high resolution)
+
+Files do not seem to have any resolution or bit plane info stored in them. The file
+extension seems to be the only way to determine the contents.
+
+1 long         file id? [always 0]
+16 words       palette
+92 bytes       reserved? [usually 0]
+*/
+void Test_NEO(T_IO_Context * context, FILE * file)
+{
+  word flag;
+  word resolution;   // Atari ST resolution
+
+  (void)context;
+  File_error=1;
+
+  if (File_length_file(file) != 32128)
+    return;
+
+  if (!Read_word_be(file,&flag))
+    return;
+  // Flag word : always 0
+  if (flag != 0)
+    return;
+
+  if (!Read_word_be(file,&resolution))
+    return;
+  // 0 = STlow, 1 = STmed, 2 = SThigh
+  if (resolution==0 || resolution==1 || resolution==2)
+    File_error = 0;
+}
+
+
+/// Load Neochrome file format
+void Load_NEO(T_IO_Context * context)
+{
+  enum PIXEL_RATIO ratio = PIXEL_SIMPLE;
+  word flag;
+  word resolution;   // Atari ST resolution
+  word width, height;
+  byte bpp;
+  word color_cycling_range, color_cycling_delay;
+  word display_time;
+  word image_width, image_height, image_X_pos, image_Y_pos;
+  FILE *file;
+  word x_pos,y_pos;
+  byte * ptr;
+  byte buffer[160];
+  byte pixels[16];
+
+  File_error = 1;
+  file = Open_file_read(context);
+  if (file == NULL)
+    return;
+
+  if (!Read_word_be(file,&flag))
+    goto error;
+  // Flag word : always 0
+  if (flag != 0)
+    goto error;
+
+  if (!Read_word_be(file,&resolution))
+    goto error;
+
+  switch (resolution)
+  {
+  case 0:
+    width = 320;
+    height = 200;
+    bpp = 4;
+    break;
+  case 1:
+    width = 640;
+    height = 200;
+    bpp = 2;
+    ratio = PIXEL_TALL;
+    break;
+  case 2:
+    width = 640;
+    height = 400;
+    bpp = 1;
+    break;
+  default:
+    goto error;
+  }
+
+  Pre_load(context, width, height, File_length_file(file), FORMAT_NEO, ratio, bpp);
+
+  if (!Read_bytes(file,buffer,32))
+    goto error;
+
+  // Initialisation de la palette
+  if (Config.Clear_palette)
+    memset(context->Palette, 0, sizeof(T_Palette));
+  PI1_decode_palette(buffer, context->Palette);
+
+  if (!Read_bytes(file, buffer, 12))
+    goto error;
+  buffer[12] = '\0';
+  GFX2_Log(GFX2_DEBUG, "NEO resolution %u name=\"%s\"\n", resolution, (char *)buffer);
+  if (!Read_word_be(file, &color_cycling_range)
+     || !Read_word_be(file, &color_cycling_delay)
+     || !Read_word_be(file, &display_time))
+    goto error;
+  GFX2_Log(GFX2_DEBUG, "  Color cycling : %04x %04x. Time to show %u\n", color_cycling_range, color_cycling_delay, display_time);
+  if (color_cycling_range & 0x8000)
+  {
+    context->Cycle_range[context->Color_cycles].Start = (color_cycling_range & 0x00f0) >> 4;
+    context->Cycle_range[context->Color_cycles].End = (color_cycling_range & 0x000f);
+    if (color_cycling_delay & 0x8000)
+    {
+      // color cycling on
+      color_cycling_delay &= 0xff;
+      if (color_cycling_delay & 0x0080)
+      {
+        context->Cycle_range[context->Color_cycles].Inverse = 1;
+        color_cycling_delay = 256 - color_cycling_delay;
+      }
+      else
+        context->Cycle_range[context->Color_cycles].Inverse = 0;
+      // Speed resolution is 0.2856Hz
+      // NEO color_cycling_delay is in 50Hz VBL
+      // Speed = (50/delay) / 0.2856 = 175 / delay
+      if (color_cycling_delay != 0)
+        context->Cycle_range[context->Color_cycles].Speed = 175 / color_cycling_delay;
+      else
+        context->Cycle_range[context->Color_cycles].Speed = COLOR_CYCLING_SPEED_MAX; // fastest
+      if (context->Cycle_range[context->Color_cycles].Speed > COLOR_CYCLING_SPEED_MAX)
+        context->Cycle_range[context->Color_cycles].Speed = COLOR_CYCLING_SPEED_MAX;
+    }
+    else
+      context->Cycle_range[context->Color_cycles].Speed = 0;  // cycling off
+    context->Color_cycles++;
+  }
+
+  if (!Read_word_be(file, &image_X_pos) || !Read_word_be(file, &image_Y_pos)
+      || !Read_word_be(file, &image_width) || !Read_word_be(file, &image_height))
+    goto error;
+  GFX2_Log(GFX2_DEBUG, "  pos (%u,%u) size %ux%u\n", image_X_pos, image_Y_pos, image_width, image_height);
+  if (!Read_bytes(file, buffer, 128-4-32-12-6-8))
+    goto error;
+  GFX2_LogHexDump(GFX2_DEBUG, "NEO ", buffer, 0, 128-4-32-12-6-8);
+
+  // Chargement/décompression de l'image
+  for (y_pos=0;y_pos<height;y_pos++)
+  {
+    if (!Read_bytes(file, buffer, (resolution==2) ? 80 : 160))
+      goto error;
+
+    ptr = buffer;
+    for (x_pos = 0; x_pos < width; )
+    {
+      int i;
+      switch (resolution)
+      {
+        case 0:
+          PI1_8b_to_16p(ptr, pixels);
+          ptr += 8;
+          break;
+        case 1:
+          PI2_8b_to_16p(ptr, pixels);
+          ptr += 4;
+          break;
+        case 2:
+          for (i = 0; i < 8; i++)
+            pixels[i] = (ptr[0] & (0x80 >> i)) ? 1 : 0;
+          for (; i < 16; i++)
+            pixels[i] = (ptr[1] & (0x80 >> (i - 8))) ? 1 : 0;
+          ptr += 2;
+          break;
+        default:
+          goto error;
+      }
+      for (i = 0; i < 16; i++)
+        Set_pixel(context, x_pos++, y_pos, pixels[i]);
+    }
+  }
+  File_error = 0; // everything was ok
+
+error:
+  fclose(file);
+}
+
+/// Save in NeoChrome format
+void Save_NEO(T_IO_Context * context)
+{
+  word resolution = 0;
+  FILE *file = NULL;
+  short x_pos,y_pos;
+  word color_cycling_range = 0, color_cycling_delay = 0;
+  word display_time = 0;
+  word image_width = 320, image_height = 200;
+  byte buffer[32];
+  byte pixels[320];
+  char * ext;
+  int i, j;
+
+  File_error = 1;
+  file = Open_file_write(context);
+  if (file == NULL)
+    return;
+
+  // flags and resolution
+  if (!Write_word_be(file, 0) || !Write_word_be(file, resolution))
+    goto error;
+
+  // palette
+  PI1_code_palette(context->Palette, buffer);
+  if (!Write_bytes(file, buffer, 16*2))
+    goto error;
+
+  // file name
+  i = 0;
+  j = 0;
+  ext = strrchr(context->File_name, '.');
+  while (j < 8 && ext != (context->File_name + i))
+  {
+    byte c = context->File_name[i++];
+    if (c == 0)
+      break;
+    if (c >= 'a' && c <= 'z')
+      c -= 32;
+    if ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || (c == '_'))
+      buffer[j++] = c;
+  }
+  while (j < 8)
+    buffer[j++] = ' ';
+  buffer[j++] = '.';
+  if (ext != NULL)
+  {
+    i = 0;
+    while (j < 12)
+    {
+      byte c = ext[i++];
+      if (c == 0)
+        break;
+      if (c >= 'a' && c <= 'z')
+        c -= 32;
+      if ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || (c == '_'))
+        buffer[j++] = c;
+    }
+  }
+  while (j < 12)
+    buffer[j++] = ' ';
+
+  if (!Write_bytes(file, buffer, 12))
+    goto error;
+
+  // Save the 1st valid Color cycling range
+  for (i = 0; i < context->Color_cycles; i++)
+  {
+    if (context->Cycle_range[i].Start < 16 && context->Cycle_range[i].End < 16)
+    {
+      color_cycling_range = 0x8000 | (context->Cycle_range[i].Start << 4) | context->Cycle_range[i].End;
+      if (context->Cycle_range[i].Speed > 0)
+      {
+        color_cycling_delay = 175 / context->Cycle_range[i].Speed;
+        if (color_cycling_delay > 0 && context->Cycle_range[i].Inverse)
+          color_cycling_delay = 256 - color_cycling_delay;
+        color_cycling_delay |= 0x8000;
+      }
+      break;
+    }
+  }
+  if (!Write_word_be(file, color_cycling_range) || !Write_word_be(file, color_cycling_delay) || !Write_word_be(file, display_time))
+    goto error;
+
+  // Save image position and size
+  if (!Write_word_be(file, 0) || !Write_word_be(file, 0)
+      || !Write_word_be(file, image_width) || !Write_word_be(file, image_height))
+    goto error;
+
+  // Fill with 128 bytes header with 0's
+  // a few files have the string "NEO!" at offset 124 (0x7C)
+  for (i = ftell(file); i < 128; i++)
+  {
+    if (!Write_byte(file, 0))
+      goto error;
+  }
+
+  // image coding
+  for (y_pos=0;y_pos<200;y_pos++)
+  {
+    // Codage de la ligne
+    memset(pixels, 0, 320);
+    if (y_pos < context->Height)
+    {
+      for (x_pos = 0; (x_pos < 320) && (x_pos < context->Width); x_pos++)
+        pixels[x_pos] = Get_pixel(context, x_pos, y_pos);
+    }
+
+    for (x_pos=0; x_pos < 320; x_pos += 16)
+    {
+      PI1_16p_to_8b(pixels + x_pos, buffer);
+      if (!Write_bytes(file, buffer, 8))
+        goto error;
+    }
+  }
+
+  fclose(file);
+  File_error = 0;
+  return;
+
+error:
+  if (file != NULL)
+    fclose(file);
+  Remove_file(context);
+}
+
+/* @} */
