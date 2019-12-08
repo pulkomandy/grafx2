@@ -1,5 +1,6 @@
 archives/
 usr/
+usr-*/
 SDL-*/
 SDL_image*/
 SDL_ttf-*/
@@ -13,3 +14,4 @@ zlib-*/
 freetype-*/
 lua-*/
 recoil-*/
+6502/
