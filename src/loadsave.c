@@ -138,7 +138,7 @@ const T_Format File_formats[] = {
   {FORMAT_SCx, " sc?", Test_SCx, Load_SCx, Save_SCx, 0, 0, 0, "sc?", "sci;scq;scf;scn;sco"},
   {FORMAT_PI1, " pi1", Test_PI1, Load_PI1, Save_PI1, 0, 0, 0, "pi1", "pi1;pi2;pi3"},
   {FORMAT_PC1, " pc1", Test_PC1, Load_PC1, Save_PC1, 0, 0, 0, "pc1", "pc1;pc2;pc3"},
-  {FORMAT_TNY, " tny", Test_TNY, Load_TNY, NULL,     0, 0, 0, "tny", "tny;tn1;tn2;tn3;tn4"},
+  {FORMAT_TNY, " tny", Test_TNY, Load_TNY, Save_TNY, 0, 0, 0, "tny", "tny;tn1;tn2;tn3;tn4"},
   {FORMAT_CEL, " cel", Test_CEL, Load_CEL, Save_CEL, 0, 0, 0, "cel", "cel"},
   {FORMAT_NEO, " neo", Test_NEO, Load_NEO, Save_NEO, 0, 0, 0, "neo", "neo"},
   {FORMAT_KCF, " kcf", Test_KCF, Load_KCF, Save_KCF, 1, 0, 0, "kcf", "kcf"},

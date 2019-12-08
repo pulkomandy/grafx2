@@ -1390,4 +1390,128 @@ void Load_TNY(T_IO_Context * context)
   fclose(file);
 }
 
+void Save_TNY(T_IO_Context * context)
+{
+  byte res = 0;
+  FILE * file;
+  byte buffer[32000];
+  byte control[16000];
+  byte data[32000];
+  word cc = 0, dc = 0;  // control count, data count
+  int line, dst, src;
+
+  File_error = 1;
+  file = Open_file_write(context);
+  if (file == NULL)
+    return;
+
+  // TODO : detect color cycling
+  if (!Write_byte(file, res)) // resolution +3 with color cycling
+    goto error;
+
+  // palette
+  PI1_code_palette(context->Palette, buffer);
+  if (!Write_bytes(file, buffer, 16*2))
+    goto error;
+
+  /**
+   * fill the buffer with the special Tiny Stuff organization
+   * @see Load_TNY
+   */
+  for (line = 0; line < 200; line++)
+  {
+    int col;
+    for (col = 0; col < 20; col++)
+    {
+      byte planar[8];
+
+      // Low res
+      PI1_16p_to_8b(context->Target_address + line * context->Pitch + col*16, planar);
+      dst = (line + col * 200) * 2;
+      for (src = 0; src < 8;)
+      {
+        buffer[dst] = planar[src++];
+        buffer[dst+1] = planar[src++];
+        dst += 8000;
+      }
+    }
+  }
+
+#define WORDS_EQU(p1, p2) (((p1)[0] == (p2)[0]) && ((p1)[1] == (p2)[1]))
+
+  // now the compression
+  for (src = 0; src < 32000; )
+  {
+    word count;
+
+    // count repeat
+    count = 0;
+    while ((src + count * 2) < 32000 && WORDS_EQU(buffer + src, buffer + src + count * 2))
+      count++;
+    if (count > 127)
+    {
+      GFX2_Log(GFX2_DEBUG, "%5d REPEAT %d %02x%02x\n", src, count, buffer[src+1], buffer[src]);
+      control[cc++] = 0;  // repeat word
+      control[cc++] = count >> 8;
+      control[cc++] = count & 0xff;
+      data[dc * 2] = buffer[src];
+      data[dc * 2 + 1] = buffer[src+1];
+      dc++;
+      src += count * 2;
+      count = 1;
+    }
+    else if (count > 1)
+    {
+      // TODO: merge a repeat count of 2 between 2 copy count ?
+      GFX2_Log(GFX2_DEBUG, "%5d REPEAT %d %02x%02x\n", src, count, buffer[src+1], buffer[src]);
+      control[cc++] = (byte)count;
+      data[dc * 2] = buffer[src];
+      data[dc * 2 + 1] = buffer[src+1];
+      dc++;
+      src += count * 2;
+      count = 1;
+    }
+    if (src >= 32000)
+      break;
+    // count copy
+    while ((src + count * 2) < 32000 && !WORDS_EQU(buffer + src + (count - 1) * 2, buffer + src + count * 2))
+      count++;
+
+    if ((src + count * 2) < 32000)
+      count--;
+    if (count > 128)
+    {
+      GFX2_Log(GFX2_DEBUG, "%5d COPY  %d %02x%02x %02x%02x...\n",
+               src, count, buffer[src+1], buffer[src], buffer[src+3], buffer[src+2]);
+      control[cc++] = 1;  // copy word
+      control[cc++] = count >> 8;
+      control[cc++] = count & 0xff;
+      memcpy(data + dc * 2, buffer + src, count * 2);
+      dc += count;
+      src += count * 2;
+    }
+    else if (count > 0)
+    {
+      GFX2_Log(GFX2_DEBUG, "%5d COPY  %d %02x%02x ...\n",
+               src, count, buffer[src+1], buffer[src]);
+      control[cc++] = (byte)(256 - count);  // copy byte
+      memcpy(data + dc * 2, buffer + src, count * 2);
+      dc += count;
+      src += count * 2;
+    }
+  }
+
+  if (!Write_word_be(file, cc) || !Write_word_be(file, dc))
+    goto error;
+  if (!Write_bytes(file, control, cc) || !Write_bytes(file, data, dc * 2))
+    goto error;
+  fclose(file);
+  File_error = 0;
+  return;
+error:
+  if (file != NULL)
+    fclose(file);
+  Remove_file(context);
+}
+
 /* @} */
