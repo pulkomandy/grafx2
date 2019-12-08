@@ -53,6 +53,7 @@ static const struct {
   TESTFMTL(NEO, "atari_st/ATARIART.NEO")       // Format with limitations
   TESTFMTL(PC1, "atari_st/eunmiisa.pc1")       // Format with limitations
   TESTFMTL(PI1, "atari_st/evolutn.pi1")
+  TESTFMTL(TNY, "atari_st/rose.tny")
   TESTFMTL(FLI, "autodesk_FLI_FLC/2noppaa.fli")
   TESTFMT(BMP, "bmp/test8.bmp")
   TESTFMTL(ICO, "ico/punzip.ico")               // Format with limitations
