@@ -35,14 +35,14 @@
 #include "../gfx2log.h"
 #include "../gfx2mem.h"
 
-// Load_IFF/Save_IFF does for both LBM et PBM
+// Load_IFF/Save_IFF does for both LBM and PBM (and Load_IFF also loads ACBM format)
 #define Load_ACBM Load_IFF
 #define Load_LBM Load_IFF
 #define Load_PBM Load_IFF
 #define Save_LBM Save_IFF
 #define Save_PBM Save_IFF
 
-// 16 colors 320x200 format
+// 16 colors 320x200 format. For testing Atari ST formats.
 #define FLAG_16C 1
 
 // Load/Save
