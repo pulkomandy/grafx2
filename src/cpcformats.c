@@ -773,6 +773,7 @@ void Load_GOS(T_IO_Context* context)
   }
 
   fclose(file);
+  free(pixel_data);
 
   file = Open_file_read_with_alternate_ext(context, "KIT");
   if (file == NULL) {
