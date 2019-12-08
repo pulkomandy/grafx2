@@ -1450,7 +1450,7 @@ void Save_TNY(T_IO_Context * context)
       count++;
     if (count > 127)
     {
-      GFX2_Log(GFX2_DEBUG, "%5d REPEAT %d %02x%02x\n", src, count, buffer[src+1], buffer[src]);
+      //GFX2_Log(GFX2_DEBUG, "%5d REPEAT %d %02x%02x\n", src, count, buffer[src+1], buffer[src]);
       control[cc++] = 0;  // repeat word
       control[cc++] = count >> 8;
       control[cc++] = count & 0xff;
@@ -1463,7 +1463,7 @@ void Save_TNY(T_IO_Context * context)
     else if (count > 1)
     {
       // TODO: merge a repeat count of 2 between 2 copy count ?
-      GFX2_Log(GFX2_DEBUG, "%5d REPEAT %d %02x%02x\n", src, count, buffer[src+1], buffer[src]);
+      //GFX2_Log(GFX2_DEBUG, "%5d REPEAT %d %02x%02x\n", src, count, buffer[src+1], buffer[src]);
       control[cc++] = (byte)count;
       data[dc * 2] = buffer[src];
       data[dc * 2 + 1] = buffer[src+1];
@@ -1481,8 +1481,8 @@ void Save_TNY(T_IO_Context * context)
       count--;
     if (count > 128)
     {
-      GFX2_Log(GFX2_DEBUG, "%5d COPY  %d %02x%02x %02x%02x...\n",
-               src, count, buffer[src+1], buffer[src], buffer[src+3], buffer[src+2]);
+      //GFX2_Log(GFX2_DEBUG, "%5d COPY  %d %02x%02x %02x%02x...\n",
+      //         src, count, buffer[src+1], buffer[src], buffer[src+3], buffer[src+2]);
       control[cc++] = 1;  // copy word
       control[cc++] = count >> 8;
       control[cc++] = count & 0xff;
@@ -1492,8 +1492,8 @@ void Save_TNY(T_IO_Context * context)
     }
     else if (count > 0)
     {
-      GFX2_Log(GFX2_DEBUG, "%5d COPY  %d %02x%02x ...\n",
-               src, count, buffer[src+1], buffer[src]);
+      //GFX2_Log(GFX2_DEBUG, "%5d COPY  %d %02x%02x ...\n",
+      //         src, count, buffer[src+1], buffer[src]);
       control[cc++] = (byte)(256 - count);  // copy byte
       memcpy(data + dc * 2, buffer + src, count * 2);
       dc += count;
