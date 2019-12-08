@@ -1221,7 +1221,7 @@ void Load_TNY(T_IO_Context * context)
   {
     enum PIXEL_RATIO ratio = PIXEL_SIMPLE;
     word width = 640, height = 200;
-    byte bpp;
+    byte bpp = 4;
     byte cycling_range = 0;
     byte cycling_speed = 0;
     word duration = 0;
@@ -1231,7 +1231,6 @@ void Load_TNY(T_IO_Context * context)
       case 0:
       case 3:
         width = 320;
-        bpp = 4;
         break;
       case 1:
       case 4:
