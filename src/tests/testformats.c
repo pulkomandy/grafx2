@@ -35,6 +35,13 @@
 #include "../gfx2log.h"
 #include "../gfx2mem.h"
 
+// Load_IFF/Save_IFF does for both LBM et PBM
+#define Load_ACBM Load_IFF
+#define Load_LBM Load_IFF
+#define Load_PBM Load_IFF
+#define Save_LBM Save_IFF
+#define Save_PBM Save_IFF
+
 // 16 colors 320x200 format
 #define FLAG_16C 1
 
@@ -71,9 +78,9 @@ static const struct {
   TESTFMTL(GOS, "cpc/iMPdraw_GFX/SONIC.GO1")
   TESTFMTL(MOTO,"thomson/exocet-alientis.map")  // Format with limitations
   TESTFMTL(HGR, "apple2/hgr/pop-swordfight.hgr")  // Format with limitations
-  {FORMAT_ACBM, "ACBM",Test_ACBM,Load_IFF, NULL, 0, "iff/ACBM/Jupiter_alt.pic"},
-  {FORMAT_LBM, "LBM", Test_LBM, Load_IFF, Save_IFF, 0, "iff/Danny_SkyTravellers_ANNO.iff"},
-  {FORMAT_PBM, "PBM", Test_PBM, Load_IFF, Save_IFF, 0, "iff/pbm/FC.LBM"},
+  TESTFMTL(ACBM, "iff/ACBM/Jupiter_alt.pic")
+  TESTFMT(LBM, "iff/Danny_SkyTravellers_ANNO.iff")
+  TESTFMT(PBM, "iff/pbm/FC.LBM")
   TESTFMTL(INFO,"amiga_icons/4colors/Utilities/Calculator.info")
 #ifndef __no_pnglib__
   TESTFMT(PNG, "png/happy-birthday-guys.png")
