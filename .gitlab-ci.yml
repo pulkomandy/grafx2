@@ -2,8 +2,17 @@ variables:
     GIT_SUBMODULE_STRATEGY: normal
 
 stages:
+    - test
     - build
     - pages
+
+job_test:
+    stage: test
+    before_script:
+        - apt-get update -qq
+        - apt-get install -y -qq libsdl1.2-dev libpng-dev libsdl-ttf2.0-dev libsdl-image1.2-dev liblua5.2-dev
+    script:
+        - "CFLAGS=-fsanitize=address LDFLAGS=-fsanitize=address OPTIM=0 make check || exit 1"
 
 job_linux:
     stage: build
@@ -13,7 +22,6 @@ job_linux:
         - apt-get install -y -qq libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev doxygen graphviz
     script:
         - "make -j3 || exit 1"
-        - "make check || exit 1"
         - "make ziprelease || exit 1"
         - "API=sdl2 make -j3 && API=sdl2 make ziprelease || exit 1"
         - "make docarchive || exit 1"
