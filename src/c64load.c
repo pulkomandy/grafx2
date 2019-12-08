@@ -41,6 +41,8 @@
 #define CPU_6502_USE_LOCAL_HEADER
 #include "6502.h"
 
+#define MAX_IO_ACCESS_MSG_COUNT 10
+
 /**
  * Check if it is a machine langage program with a BASIC
  * startup line (eg. 10 SYS2061)
@@ -96,23 +98,37 @@ word C64_isBinaryProgram(FILE * f)
 
 static byte C64_mem_read(void *context, word address)
 {
-  if ((((struct c64state *)context)->ram[1] & 2) && address >= 0xe000)
+  struct c64state * c64 = (struct c64state *)context;
+  if ((c64->ram[1] & 2) && address >= 0xe000)
   {
     GFX2_Log(GFX2_WARNING, "** ROM ** read($%04x)\n", address);
     if (address == 0xffe4)
-      ((struct c64state *)context)->keyjoyread++;
+      c64->keyjoyread++;
     return 0x60;  // RTS
   }
     
-  if ((((struct c64state *)context)->ram[1] & 4) &&
+  if ((c64->ram[1] & 4) &&
       (address >= 0xd000) && (address < 0xe000))
   {
-    GFX2_Log(GFX2_DEBUG, "** IO ** read($%04x)  $%02x\n",
-             address, ((struct c64state *)context)->ram[address]);
+    if ((address & 0xff00) == 0xd000)
+    {
+      if (c64->ioaccess[address - 0xd000] < MAX_IO_ACCESS_MSG_COUNT)
+      {
+        GFX2_Log(GFX2_DEBUG, "** IO ** read($%04x)  $%02x\n",
+                 address, c64->ram[address]);
+        if (++c64->ioaccess[address - 0xd000] == MAX_IO_ACCESS_MSG_COUNT)
+          GFX2_Log(GFX2_DEBUG, " stopping debug log on $%04x\n", address);
+      }
+    }
+    else
+    {
+      GFX2_Log(GFX2_DEBUG, "** IO ** read($%04x)  $%02x\n",
+               address, c64->ram[address]);
+    }
     if ((address & 0xfffe) == 0xdc00)
-      ((struct c64state *)context)->keyjoyread++;
+      c64->keyjoyread++;
   }
-  return ((struct c64state *)context)->ram[address];
+  return c64->ram[address];
 }
 
 static void C64_mem_write(void *context, word address, byte value)
@@ -121,7 +137,19 @@ static void C64_mem_write(void *context, word address, byte value)
   if ((address >= 0xd000 && address < 0xd800) ||
       (address >= 0xdc00 && address < 0xe000))
   {
-    GFX2_Log(GFX2_DEBUG, "** IO ** write($%04x, $%02x)\n", address, value);
+    if ((address & 0xff00) == 0xd000)
+    {
+      if (c64->ioaccess[address - 0xd000] < MAX_IO_ACCESS_MSG_COUNT)
+      {
+        GFX2_Log(GFX2_DEBUG, "** IO ** write($%04x, $%02x)\n", address, value);
+        if (++c64->ioaccess[address - 0xd000] == MAX_IO_ACCESS_MSG_COUNT)
+          GFX2_Log(GFX2_DEBUG, " stopping debug log on $%04x\n", address);
+      }
+    }
+    else
+    {
+      GFX2_Log(GFX2_DEBUG, "** IO ** write($%04x, $%02x)\n", address, value);
+    }
     switch (address)
     {
       case 0xd011:

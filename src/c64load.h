@@ -45,6 +45,7 @@ struct c64state {
   byte fliscreens[8];
   byte backgrounds[200];
   byte vicmode;
+  byte ioaccess[256];
 };
 
 word C64_isBinaryProgram(FILE * f);
