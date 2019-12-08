@@ -35,25 +35,30 @@
 #include "../gfx2log.h"
 #include "../gfx2mem.h"
 
+// 16 colors 320x200 format
+#define FLAG_16C 1
+
 // Load/Save
-#define TESTFMT(fmt, sample) { FORMAT_ ## fmt, # fmt, Test_ ## fmt, Load_ ## fmt, Save_ ## fmt, sample },
+#define TESTFMTF(fmt, sample, flags) { FORMAT_ ## fmt, # fmt, Test_ ## fmt, Load_ ## fmt, Save_ ## fmt, flags, sample },
+#define TESTFMT(fmt, sample) TESTFMTF(fmt, sample, 0)
 // Load only
-#define TESTFMTL(fmt, sample) { FORMAT_ ## fmt, # fmt, Test_ ## fmt, Load_ ## fmt, NULL, sample },
+#define TESTFMTL(fmt, sample) { FORMAT_ ## fmt, # fmt, Test_ ## fmt, Load_ ## fmt, NULL, 0, sample },
 static const struct {
   enum FILE_FORMATS format;
   const char * name;
   Func_IO_Test Test;
   Func_IO Load;
   Func_IO Save;
+  int flags;
   const char * sample;
 } formats[] = {
   TESTFMT(PKM, "pkm/EVILNUN.PKM")
   TESTFMT(GIF, "gif/2b_horse.gif")
   TESTFMT(PCX, "pcx/lena2.pcx")
-  TESTFMTL(NEO, "atari_st/ATARIART.NEO")       // Format with limitations
-  TESTFMTL(PC1, "atari_st/eunmiisa.pc1")       // Format with limitations
-  TESTFMTL(PI1, "atari_st/evolutn.pi1")
-  TESTFMTL(TNY, "atari_st/rose.tny")
+  TESTFMTF(NEO, "atari_st/ATARIART.NEO", FLAG_16C)
+  TESTFMTF(PC1, "atari_st/eunmiisa.pc1", FLAG_16C)
+  TESTFMTF(PI1, "atari_st/evolutn.pi1", FLAG_16C)
+  TESTFMTF(TNY, "atari_st/rose.tny", FLAG_16C)
   TESTFMTL(FLI, "autodesk_FLI_FLC/2noppaa.fli")
   TESTFMT(BMP, "bmp/test8.bmp")
   TESTFMTL(ICO, "ico/punzip.ico")               // Format with limitations
@@ -66,9 +71,9 @@ static const struct {
   TESTFMTL(GOS, "cpc/iMPdraw_GFX/SONIC.GO1")
   TESTFMTL(MOTO,"thomson/exocet-alientis.map")  // Format with limitations
   TESTFMTL(HGR, "apple2/hgr/pop-swordfight.hgr")  // Format with limitations
-  {FORMAT_ACBM, "ACBM",Test_ACBM,Load_IFF, NULL, "iff/ACBM/Jupiter_alt.pic"},
-  {FORMAT_LBM, "LBM", Test_LBM, Load_IFF, Save_IFF, "iff/Danny_SkyTravellers_ANNO.iff"},
-  {FORMAT_PBM, "PBM", Test_PBM, Load_IFF, Save_IFF, "iff/pbm/FC.LBM"},
+  {FORMAT_ACBM, "ACBM",Test_ACBM,Load_IFF, NULL, 0, "iff/ACBM/Jupiter_alt.pic"},
+  {FORMAT_LBM, "LBM", Test_LBM, Load_IFF, Save_IFF, 0, "iff/Danny_SkyTravellers_ANNO.iff"},
+  {FORMAT_PBM, "PBM", Test_PBM, Load_IFF, Save_IFF, 0, "iff/pbm/FC.LBM"},
   TESTFMTL(INFO,"amiga_icons/4colors/Utilities/Calculator.info")
 #ifndef __no_pnglib__
   TESTFMT(PNG, "png/happy-birthday-guys.png")
@@ -78,7 +83,7 @@ static const struct {
 #endif
   TESTFMTL(GPL, "palette-mariage_115.gpl") //PALETTE
   TESTFMTL(PAL, "pal/dp4_256.pal") // PALETTE
-  { FORMAT_ALL_IMAGES, NULL, NULL, NULL, NULL, NULL}
+  { FORMAT_ALL_IMAGES, NULL, NULL, NULL, NULL, 0, NULL}
 };
 
 /**
@@ -219,6 +224,7 @@ int Test_Save(void)
   int i;
   int ok = 0;
   T_GFX2_Surface * testpic256 = NULL;
+  T_GFX2_Surface * testpic16 = NULL;
 
   memset(&context, 0, sizeof(context));
   context.Type = CONTEXT_SURFACE;
@@ -229,12 +235,24 @@ int Test_Save(void)
   Load_PKM(&context);
   if (File_error != 0)
   {
-    fprintf(stderr, "Failed to load reference picture\n");
+    fprintf(stderr, "Failed to load reference 256 colors picture\n");
     goto ret;
   }
   testpic256 = context.Surface;
   context.Surface = NULL;
   memcpy(testpic256->palette, context.Palette, sizeof(T_Palette));
+  // Load borregas.gif
+  context_set_file_path(&context, "../tests/pic-samples/gif/borregas.gif");
+  Load_GIF(&context);
+  if (File_error != 0)
+  {
+    fprintf(stderr, "Failed to load reference 16 colors picture\n");
+    goto ret;
+  }
+  testpic16 = context.Surface;
+  context.Surface = NULL;
+  memcpy(testpic16->palette, context.Palette, sizeof(T_Palette));
+
   snprintf(tmpdir, sizeof(tmpdir), "/tmp/grafx2-test.XXXXXX");
   if (mkdtemp(tmpdir) == NULL)
   {
@@ -252,10 +270,12 @@ int Test_Save(void)
     context_set_file_path(&context, path);
 
     // save the reference picture
-    context.Surface = testpic256;
-    context.Target_address = testpic256->pixels;
-    context.Pitch = testpic256->w;
-    memcpy(context.Palette, testpic256->palette, sizeof(T_Palette));
+    context.Surface = (formats[i].flags & FLAG_16C) ? testpic16 : testpic256;
+    context.Target_address = context.Surface->pixels;
+    context.Pitch = context.Surface->w;
+    context.Width = context.Surface->w;
+    context.Height = context.Surface->h;
+    memcpy(context.Palette, context.Surface->palette, sizeof(T_Palette));
     context.Format = formats[i].format;
     File_error = 0;
     formats[i].Save(&context);
@@ -296,19 +316,20 @@ int Test_Save(void)
       }
       else
       {
+        T_GFX2_Surface * ref = (formats[i].flags & FLAG_16C) ? testpic16 : testpic256;
         // compare with the reference picture
-        if (context.Surface->w != testpic256->w || context.Surface->h != testpic256->h)
+        if (context.Surface->w != ref->w || context.Surface->h != ref->h)
         {
           GFX2_Log(GFX2_ERROR, "Saved %hux%hu, reloaded %hux%hu from %s\n",
-                   testpic256->w, testpic256->h, context.Surface->w, context.Surface->h, path);
+                   ref->w, ref->h, context.Surface->w, context.Surface->h, path);
           ok = 0;
         }
-        else if (0 != memcmp(context.Surface->pixels, testpic256->pixels, testpic256->w * testpic256->h))
+        else if (0 != memcmp(context.Surface->pixels, ref->pixels, ref->w * ref->h))
         {
           GFX2_Log(GFX2_ERROR, "Save%s/Load_%s: Pixels mismatch\n", formats[i].name, formats[i].name);
           ok = 0;
         }
-        else if (0 != memcmp(context.Palette, testpic256->palette, sizeof(T_Palette)))
+        else if (0 != memcmp(context.Palette, ref->palette, (formats[i].flags & FLAG_16C) ? 16 * sizeof(T_Components) : sizeof(T_Palette)))
         {
           GFX2_Log(GFX2_ERROR, "Save%s/Load_%s: Palette mismatch\n", formats[i].name, formats[i].name);
           ok = 0;
@@ -326,6 +347,8 @@ int Test_Save(void)
   if (rmdir(tmpdir) < 0)
     perror("rmdir");
 ret:
+  if (testpic16)
+    Free_GFX2_Surface(testpic16);
   if (testpic256)
     Free_GFX2_Surface(testpic256);
   free(context.File_name);
