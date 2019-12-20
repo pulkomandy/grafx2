@@ -733,7 +733,7 @@ void CPC_set_default_BASIC_palette(T_Components * palette)
            sizeof(T_Components));
 }
 
-int CPC_check_AMSDOS(FILE * file, word * loading_address, unsigned long * file_length)
+int CPC_check_AMSDOS(FILE * file, word * loading_address, word * exec_address, unsigned long * file_length)
 {
   int i;
   byte data[128];
@@ -751,7 +751,9 @@ int CPC_check_AMSDOS(FILE * file, word * loading_address, unsigned long * file_l
   fseek(file, 0, SEEK_SET);
   for (i = 1; i <= 11; i++) // check filename and extension
   {
-    if (data[i] >= 0x10 && data[i] <= 0x19) // sometimes digits are stored as 0x10 to 0x19
+    // sometimes digits are stored as 0x10 to 0x19 and '#' as 0x03
+    // I suppose it is bad lowercase to uppercase conversion from a tool
+    if ((data[i] >= 0x10 && data[i] <= 0x19) || (data[i] == 0x03) || (data[i] == 0x0B))
       continue;
     if (data[i] < ' ' || data[i] >= 0x7F) {
       GFX2_Log(GFX2_DEBUG, "Not an AMSDOS file: name is invalid\n");
@@ -768,7 +770,8 @@ int CPC_check_AMSDOS(FILE * file, word * loading_address, unsigned long * file_l
   }
   for (i = 1; i <= 11; i++) // check filename and extension
   {
-    if (data[i] >= 0x10 && data[i] <= 0x19) // sometimes digits are stored as 0x10 to 0x19
+    // sometimes digits are stored as 0x10 to 0x19
+    if (data[i] >= 0x01 && data[i] <= 0x19)
       data[i] += 0x20;
   }
   GFX2_Log(GFX2_DEBUG, "AMSDOS : user=%02X %.8s.%.3s %d %u(%u) bytes, load at $%04X exec $%04X checksum $%04X\n",
@@ -779,7 +782,8 @@ int CPC_check_AMSDOS(FILE * file, word * loading_address, unsigned long * file_l
            data[26] | (data[27] << 8), checksum);
   if (loading_address)
     *loading_address = data[21] | (data[22] << 8);
-  //  *exec_address = data[26] | (data[27] << 8);
+  if (exec_address)
+    *exec_address = data[26] | (data[27] << 8);
   if (file_length)
     *file_length = data[64] | (data[65] << 8) | (data[66] << 16); // 24bit size
   //  *file_length = data[24] | (data[25] << 8);  // 16bit size

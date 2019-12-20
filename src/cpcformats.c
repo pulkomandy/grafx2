@@ -67,10 +67,11 @@ void Test_SCR(T_IO_Context * context, FILE * file)
   unsigned long pal_size, file_size;
   byte mode, color_anim_flag;
   word loading_address = 0;
+  word exec_address = 0;
 
   File_error = 1;
 
-  if (CPC_check_AMSDOS(file, &loading_address, &file_size))
+  if (CPC_check_AMSDOS(file, &loading_address, &exec_address, &file_size))
   {
     if (loading_address == 0x170) // iMPdraw v2
     {
@@ -110,7 +111,7 @@ void Test_SCR(T_IO_Context * context, FILE * file)
    */
 
 
-  if (CPC_check_AMSDOS(pal_file, NULL, &pal_size))
+  if (CPC_check_AMSDOS(pal_file, NULL, NULL, &pal_size))
     fseek(pal_file, 128, SEEK_SET); // right after AMSDOS header
   else
   {
@@ -170,6 +171,7 @@ void Load_SCR(T_IO_Context * context)
   unsigned long real_file_size, file_size, amsdos_file_size = 0;
   word addr;
   word load_address = 0x4000; // default for OCP Art studio
+  word exec_address = 0;
   word display_start = 0x4000;
   byte mode, color_anim_flag, color_anim_delay;
   byte pal_data[236]; // 12 palettes of 16+1 colors + 16 excluded inks + 16 protected inks
@@ -193,7 +195,7 @@ void Load_SCR(T_IO_Context * context)
   if (pal_file != NULL)
   {
     file_size = File_length_file(pal_file);
-    if (CPC_check_AMSDOS(pal_file, NULL, &file_size))
+    if (CPC_check_AMSDOS(pal_file, NULL, NULL, &file_size))
       fseek(pal_file, 128, SEEK_SET); // right after AMSDOS header
     else
       fseek(pal_file, 0, SEEK_SET);
@@ -214,7 +216,7 @@ void Load_SCR(T_IO_Context * context)
     return;
   file_size = File_length_file(file);
   real_file_size = file_size;
-  if (CPC_check_AMSDOS(file, &load_address, &amsdos_file_size))
+  if (CPC_check_AMSDOS(file, &load_address, &exec_address, &amsdos_file_size))
   {
     display_start = load_address;
     if (file_size < (amsdos_file_size + 128))
@@ -677,7 +679,7 @@ void Test_GOS(T_IO_Context * context, FILE * file)
   FILE *file_oddeve;
   unsigned long file_size = 0;
 
-  if (!CPC_check_AMSDOS(file, NULL, &file_size))
+  if (!CPC_check_AMSDOS(file, NULL, NULL, &file_size))
     file_size = File_length_file(file);
   if (file_size < 16383 || file_size > 16384) {
     File_error = 1;
@@ -689,7 +691,7 @@ void Test_GOS(T_IO_Context * context, FILE * file)
     File_error = 2;
     return;
   }
-  if (!CPC_check_AMSDOS(file_oddeve, NULL, &file_size))
+  if (!CPC_check_AMSDOS(file_oddeve, NULL, NULL, &file_size))
     file_size = File_length_file(file_oddeve);
   fclose(file_oddeve);
   if (file_size < 16383 || file_size > 16384) {
@@ -718,7 +720,7 @@ void Load_GOS(T_IO_Context* context)
       return;
   }
 
-  if (CPC_check_AMSDOS(file, NULL, &file_size))
+  if (CPC_check_AMSDOS(file, NULL, NULL, &file_size))
     fseek(file, 128, SEEK_SET); // right after AMSDOS header
   else
     file_size = File_length_file(file);
@@ -752,7 +754,7 @@ void Load_GOS(T_IO_Context* context)
 
   // load pixels from GO2
   file = Open_file_read_with_alternate_ext(context, "GO2");
-  if (CPC_check_AMSDOS(file, NULL, &file_size))
+  if (CPC_check_AMSDOS(file, NULL, NULL, &file_size))
     fseek(file, 128, SEEK_SET); // right after AMSDOS header
 
   Read_bytes(file, pixel_data, file_size);
@@ -790,7 +792,7 @@ void Load_GOS(T_IO_Context* context)
     return;
   }
 
-  if (CPC_check_AMSDOS(file, NULL, &file_size)) {
+  if (CPC_check_AMSDOS(file, NULL, NULL, &file_size)) {
     fseek(file, 128, SEEK_SET); // right after AMSDOS header
   } else {
     file_size = File_length_file(file);

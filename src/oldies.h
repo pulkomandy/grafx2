@@ -138,7 +138,7 @@ int CPC_compare_colors(T_Components * col1, T_Components * col2);
  * @return 0 if the file does not contain a valid AMSDOS header
  * @return 1 if it does.
  */
-int CPC_check_AMSDOS(FILE * file, word * loading_address, unsigned long * file_length);
+int CPC_check_AMSDOS(FILE * file, word * loading_address, word * exec_address, unsigned long * file_length);
 
 /** @}*/
 
