@@ -513,25 +513,22 @@ void Load_SCR(T_IO_Context * context)
     //  GFX2_LogHexDump(GFX2_DEBUG, "SCR ", cpc_ram, load_address + j + 2000, 48);
   }
 
-  GFX2_Log(GFX2_DEBUG, "  display_start &H%04X\n", display_start);
+  GFX2_Log(GFX2_DEBUG, "  display_start &H%04X  columns=%u\n", display_start, columns);
   for (y = 0; y < height; y++)
   {
-    const byte * line;
-
-    if (is_win)
-      addr = display_start + y * columns;
-    else
-    {
-      addr = display_start + ((y >> 3) * columns);
-      addr = (addr & 0xC7FF) | ((addr & 0x800) << 3);
-      addr += (y & 7) << 11;
-    }
-    //GFX2_Log(GFX2_DEBUG, "line#%d &H%04X\n", y, addr);
-    line = cpc_ram + addr;
     x = 0;
     for (i = 0; i < columns; i++)
     {
-      byte pixels = line[i];
+      byte pixels;
+      if (is_win)
+        addr = display_start + y * columns + i;
+      else
+      {
+        addr = display_start + ((y >> 3) * columns) + i;
+        addr = (addr & 0xC7FF) + ((addr & 0x800) << 3);
+        addr += (y & 7) << 11;
+      }
+      pixels = cpc_ram[addr];
       switch (mode)
       {
         case 0:
@@ -621,6 +618,7 @@ void Save_SCR(T_IO_Context * context)
     if (index >= 0x60)
     {
       GFX2_Log(GFX2_WARNING, "Save_SCR() color #%i not found in CPC HW palette.\n", i);
+      // TODO : set CPC Plus flag
       index = 0x54 - i; // default
     }
     for (j = 0; j < 12; j++)  // write the same color for the 12 frames
