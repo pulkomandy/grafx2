@@ -354,12 +354,29 @@ int Test_Save(void)
         else if (!(formats[i].flags & FLAG_CPCO) && 0 != memcmp(context.Palette, ref->palette, (formats[i].flags & FLAG_16C) ? 16 * sizeof(T_Components) : sizeof(T_Palette)))
         {
           GFX2_Log(GFX2_ERROR, "Save_%s/Load_%s: Palette mismatch\n", formats[i].name, formats[i].name);
+          GFX2_LogHexDump(GFX2_ERROR, "ref  ", (const byte *)ref->palette, 0, 48);
+          GFX2_LogHexDump(GFX2_ERROR, "load ", (const byte *)context.Palette, 0, 48);
           ok = 0;
         }
         else
         {
           if (unlink(path) < 0)
             perror("unlink");
+          if (formats[i].format == FORMAT_SCR)
+          {
+            snprintf(path, sizeof(path), "%s/%s.%s", tmpdir, "test", "pal");
+            if (unlink(path) < 0)
+              perror("unlink");
+          }
+          else if (formats[i].format == FORMAT_GOS)
+          {
+            snprintf(path, sizeof(path), "%s/%s.%s", tmpdir, "test", "GO2");
+            if (unlink(path) < 0)
+              perror("unlink");
+            snprintf(path, sizeof(path), "%s/%s.%s", tmpdir, "test", "KIT");
+            if (unlink(path) < 0)
+              perror("unlink");
+          }
         }
         Free_GFX2_Surface(context.Surface);
         context.Surface = NULL;
