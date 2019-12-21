@@ -741,7 +741,11 @@ int CPC_check_AMSDOS(FILE * file, word * loading_address, unsigned long * file_l
 
   fseek(file, 0, SEEK_SET);
   if (!Read_bytes(file, data, 128))
+  {
+    // Rewind the file so it can be read normally
+    fseek(file, 0, SEEK_SET);
     return 0;
+  }
 
   // Rewind the file so it can be read normally
   fseek(file, 0, SEEK_SET);
