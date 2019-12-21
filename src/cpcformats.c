@@ -725,10 +725,7 @@ void Load_GOS(T_IO_Context* context)
   else
     file_size = File_length_file(file);
 
-  context->Ratio = PIXEL_WIDE;
-  Pre_load(context, 192, 272, file_size, FORMAT_GOS, context->Ratio, 0);
-  context->Width = 192;
-  context->Height = 272;
+  Pre_load(context, 192, 272, file_size, FORMAT_GOS, PIXEL_WIDE, 0);
 
   // load pixels
   pixel_data = GFX2_malloc(16384);
