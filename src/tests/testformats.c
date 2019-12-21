@@ -44,6 +44,8 @@
 
 // 16 colors 320x200 format. For testing Atari ST formats.
 #define FLAG_16C 1
+// 16 color 192x272 format. CPC overscan
+#define FLAG_CPCO 2
 
 // Load/Save
 #define TESTFMTF(fmt, sample, flags) { FORMAT_ ## fmt, # fmt, Test_ ## fmt, Load_ ## fmt, Save_ ## fmt, flags, sample },
@@ -72,10 +74,10 @@ static const struct {
   TESTFMTL(C64, "c64/multicolor/ARKANOID.KOA")  // Format with limitations
   TESTFMTL(PRG, "c64/multicolor/speedball2_loading_jonegg.prg")
   TESTFMTL(GPX, "c64/pixcen/Cyberbird.gpx")
-  TESTFMTL(SCR, "cpc/scr/DANCEOFF.SCR")         // Format with limitations
+  TESTFMTF(SCR, "cpc/scr/DANCEOFF.SCR", FLAG_CPCO)
   TESTFMTL(CM5, "cpc/mode5/spidey.cm5")         // Format with limitations
   TESTFMTL(PPH, "cpc/pph/BF.PPH")               // Format with limitations
-  TESTFMTL(GOS, "cpc/iMPdraw_GFX/SONIC.GO1")
+  TESTFMTF(GOS, "cpc/iMPdraw_GFX/SONIC.GO1", FLAG_CPCO)
   TESTFMTL(MOTO,"thomson/exocet-alientis.map")  // Format with limitations
   TESTFMTL(HGR, "apple2/hgr/pop-swordfight.hgr")  // Format with limitations
   TESTFMTL(ACBM, "iff/ACBM/Jupiter_alt.pic")
@@ -232,6 +234,7 @@ int Test_Save(void)
   int ok = 0;
   T_GFX2_Surface * testpic256 = NULL;
   T_GFX2_Surface * testpic16 = NULL;
+  T_GFX2_Surface * testpiccpco = NULL;
 
   memset(&context, 0, sizeof(context));
   context.Type = CONTEXT_SURFACE;
@@ -259,6 +262,17 @@ int Test_Save(void)
   testpic16 = context.Surface;
   context.Surface = NULL;
   memcpy(testpic16->palette, context.Palette, sizeof(T_Palette));
+  // Load POULPE.GO1/GO2 etc.
+  context_set_file_path(&context, "../tests/pic-samples/cpc/iMPdraw_GFX/POULPE.GO1");
+  Load_GOS(&context);
+  if (File_error != 0)
+  {
+    fprintf(stderr, "Failed to load reference CPC overscan mode 0 picture\n");
+    goto ret;
+  }
+  testpiccpco = context.Surface;
+  context.Surface = NULL;
+  memcpy(testpiccpco->palette, context.Palette, sizeof(T_Palette));
 
   snprintf(tmpdir, sizeof(tmpdir), "/tmp/grafx2-test.XXXXXX");
   if (mkdtemp(tmpdir) == NULL)
@@ -277,11 +291,12 @@ int Test_Save(void)
     context_set_file_path(&context, path);
 
     // save the reference picture
-    context.Surface = (formats[i].flags & FLAG_16C) ? testpic16 : testpic256;
+    context.Surface = (formats[i].flags & FLAG_16C) ? testpic16 : (formats[i].flags & FLAG_CPCO) ? testpiccpco : testpic256;
     context.Target_address = context.Surface->pixels;
     context.Pitch = context.Surface->w;
     context.Width = context.Surface->w;
     context.Height = context.Surface->h;
+    context.Ratio = (formats[i].flags & FLAG_CPCO) ? PIXEL_WIDE : PIXEL_SIMPLE;
     memcpy(context.Palette, context.Surface->palette, sizeof(T_Palette));
     context.Format = formats[i].format;
     File_error = 0;
@@ -323,7 +338,7 @@ int Test_Save(void)
       }
       else
       {
-        T_GFX2_Surface * ref = (formats[i].flags & FLAG_16C) ? testpic16 : testpic256;
+        T_GFX2_Surface * ref = (formats[i].flags & FLAG_16C) ? testpic16 : (formats[i].flags & FLAG_CPCO) ? testpiccpco : testpic256;
         // compare with the reference picture
         if (context.Surface->w != ref->w || context.Surface->h != ref->h)
         {
@@ -333,12 +348,12 @@ int Test_Save(void)
         }
         else if (0 != memcmp(context.Surface->pixels, ref->pixels, ref->w * ref->h))
         {
-          GFX2_Log(GFX2_ERROR, "Save%s/Load_%s: Pixels mismatch\n", formats[i].name, formats[i].name);
+          GFX2_Log(GFX2_ERROR, "Save_%s/Load_%s: Pixels mismatch\n", formats[i].name, formats[i].name);
           ok = 0;
         }
-        else if (0 != memcmp(context.Palette, ref->palette, (formats[i].flags & FLAG_16C) ? 16 * sizeof(T_Components) : sizeof(T_Palette)))
+        else if (!(formats[i].flags & FLAG_CPCO) && 0 != memcmp(context.Palette, ref->palette, (formats[i].flags & FLAG_16C) ? 16 * sizeof(T_Components) : sizeof(T_Palette)))
         {
-          GFX2_Log(GFX2_ERROR, "Save%s/Load_%s: Palette mismatch\n", formats[i].name, formats[i].name);
+          GFX2_Log(GFX2_ERROR, "Save_%s/Load_%s: Palette mismatch\n", formats[i].name, formats[i].name);
           ok = 0;
         }
         else
@@ -358,6 +373,8 @@ ret:
     Free_GFX2_Surface(testpic16);
   if (testpic256)
     Free_GFX2_Surface(testpic256);
+  if (testpiccpco)
+    Free_GFX2_Surface(testpiccpco);
   free(context.File_name);
   free(context.File_directory);
   return ok;

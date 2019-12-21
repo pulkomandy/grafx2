@@ -44,14 +44,19 @@ void Pre_load(T_IO_Context *context, short width, short height, long file_size, 
     context->Surface = New_GFX2_Surface(width, height);
     if (context->Surface == NULL)
       File_error = 1;
+    else
+    {
+      context->Target_address = context->Surface->pixels;
+      context->Pitch = context->Surface->w;
+    }
   }
 }
 
 byte Get_pixel(T_IO_Context *context, short x, short y)
 {
-  if (context->Type == CONTEXT_SURFACE)
-    return Get_GFX2_Surface_pixel(context->Surface, x, y);
-  return 0;
+  if (x < 0 || x >= context->Width || y < 0 || y >= context->Height)
+    return 0;
+  return context->Target_address[y*context->Pitch + x];
 }
 
 void Pixel_in_layer(int layer, word x, word y, byte color)

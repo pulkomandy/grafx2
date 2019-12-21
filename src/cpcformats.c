@@ -584,7 +584,7 @@ void Save_SCR(T_IO_Context * context)
   FILE* file;
 
 
-  switch(Pixel_ratio)
+  switch(context->Ratio)
   {
     case PIXEL_WIDE:
     case PIXEL_WIDE2:
