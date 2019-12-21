@@ -37,7 +37,7 @@ static unsigned short addrCalc(unsigned char vcc, unsigned char rcc, unsigned ch
   return addr;
 }
 
-unsigned char mode0interlace(T_IO_Context * context, unsigned char x, unsigned char y)
+unsigned char mode0interlace(T_IO_Context * context, int x, int y)
 {
   // bit7 bit6 bit5 bit4 bit3 bit2 bit1 bit0
   // p0b0 p1b0 p0b2 p1b2 p0b1 p1b1 p0b3 p1b3
@@ -46,7 +46,7 @@ unsigned char mode0interlace(T_IO_Context * context, unsigned char x, unsigned c
        | mode0pixel[Get_pixel(context,x*2+1,y) & 0xf];
 }
 
-unsigned char mode1interlace(T_IO_Context * context, unsigned char x, unsigned char y)
+unsigned char mode1interlace(T_IO_Context * context, int x, int y)
 {
   unsigned char mode1pixel[] = {0, 16, 1, 17};
   return mode1pixel[Get_pixel(context,x*4,y) & 3] << 3
@@ -55,18 +55,19 @@ unsigned char mode1interlace(T_IO_Context * context, unsigned char x, unsigned c
        | mode1pixel[Get_pixel(context,x*4+3,y) & 3];
 }
 
-unsigned char mode2interlace(T_IO_Context * context, unsigned char x, unsigned char y)
+unsigned char mode2interlace(T_IO_Context * context, int x, int y)
 {
   unsigned char out = 0;
   int i;
-  for(i = 0; i < 8; i++) out += ((Get_pixel(context,x*8+7-i,y)&1) << i);
+  for(i = 0; i < 8; i++)
+    out += ((Get_pixel(context,x*8+7-i,y)&1) << i);
   return out;
 }
 
-unsigned char mode3interlace(T_IO_Context * context, unsigned char x, unsigned char y)
+unsigned char mode3interlace(T_IO_Context * context, int x, int y)
 {
   unsigned char mode3pixel[] = {0, 16, 1, 17};
-  return mode3pixel[Get_pixel(context, x,y) & 3] << 3 | mode3pixel[Get_pixel(context,x+1,y) & 3] << 2;
+  return mode3pixel[Get_pixel(context, x, y) & 3] << 3 | mode3pixel[Get_pixel(context, x+1, y) & 3] << 2;
 }
 
 ///@ingroup cpc
@@ -79,7 +80,7 @@ unsigned char *raw2crtc(T_IO_Context *context, unsigned char mode, unsigned char
   unsigned char minAddrIsDefined = 0;
   unsigned short maxAddr = 0;
 
-  int i, y,x;
+  int i, y, x;
   unsigned char r6;
   unsigned char vcc;  // vertical character count
   unsigned char rcc;  // raster count (line within character)
@@ -89,7 +90,7 @@ unsigned char *raw2crtc(T_IO_Context *context, unsigned char mode, unsigned char
   int width = context->Width;
   int height = context->Height;
 
-  unsigned char (*ptrMode)(T_IO_Context * context, unsigned char x, unsigned char y);
+  unsigned char (*ptrMode)(T_IO_Context * context, int x, int y);
 
   switch(mode)
   {
@@ -141,21 +142,23 @@ unsigned char *raw2crtc(T_IO_Context *context, unsigned char mode, unsigned char
 
   r6 = height/(r9+1);
 
-  GFX2_Log(GFX2_DEBUG, "raw2crtc() r1=%u r6=%u\n", *r1, r6);
+  GFX2_Log(GFX2_DEBUG, "raw2crtc() r1=%u r6=%u r9=%u\n", *r1, r6, r9);
 
   for(vcc = 0; vcc < r6; vcc++)
   {
     for(rcc = 0; rcc <= r9; rcc++)
     {
+      y = vcc*(r9+1) + rcc;
+      if (vcc > 32)
+        GFX2_Log(GFX2_DEBUG, "vcc=%u rcc=%u y=%d\n", vcc, rcc, y);
       for(hcc = 0; hcc < *r1; hcc++)
       {
         for(cclk = 0; cclk < 2; cclk++)
         {
           unsigned short addr;
           x = (hcc << 1 | cclk);
-          y = vcc*(r9+1) + rcc;
           addr = addrCalc(vcc, rcc, hcc, cclk, *r1, r12, r13);
-          tmpBuffer[addr] = (*ptrMode)(context,x,y);
+          tmpBuffer[addr] = (*ptrMode)(context, x, y);
           allocationBuffer[addr] += 1;
         }
       }
@@ -164,11 +167,11 @@ unsigned char *raw2crtc(T_IO_Context *context, unsigned char mode, unsigned char
 
   for(i = 0; i < 0x10000; i++)
   {
-    if(*(allocationBuffer + i) > 1)
+    if(allocationBuffer[i] > 1)
     {
       fprintf(stderr, "WARNING : Multiple writes to memory address 0x%04X\n",i);
     }
-    if(*(allocationBuffer + i) > 0)
+    if(allocationBuffer[i] > 0)
     {
       maxAddr = i;
       if(minAddrIsDefined == 0)
