@@ -15,6 +15,7 @@
 #include "struct.h"
 #include "loadsave.h"
 #include "gfx2log.h"
+#include "gfx2mem.h"
 
 /* 6845 registers :
  * R1 : Horizontal Displayed : number of character displayed per line (4, 8 or 16 pixels depending on mode)
@@ -120,23 +121,21 @@ unsigned char *raw2crtc(T_IO_Context *context, unsigned char mode, unsigned char
     }
     default:
     {
-      exit(4);
+      GFX2_Log(GFX2_ERROR, "raw2crtc() mode %d incorrect\n", (int)mode);
+      return NULL;
     }
   }
 
-  tmpBuffer = (unsigned char*)malloc(0x10000);
+  tmpBuffer = (unsigned char*)GFX2_malloc(0x10000);
   if (tmpBuffer == NULL)
-  {
-    fprintf(stderr, "failed to allocate tmpBuffer\n");
-    exit(4);
-  }
+    return NULL;
   memset(tmpBuffer, 0, 0x10000);
 
-  allocationBuffer = (unsigned char*)malloc(0x10000);
+  allocationBuffer = (unsigned char*)GFX2_malloc(0x10000);
   if(allocationBuffer == NULL)
   {
-    fprintf(stderr, "failed to allocate allocationBuffer\n");
-    exit(4);
+    free(tmpBuffer);
+    return NULL;
   }
   memset(allocationBuffer, 0, 0x10000);
 
@@ -149,8 +148,6 @@ unsigned char *raw2crtc(T_IO_Context *context, unsigned char mode, unsigned char
     for(rcc = 0; rcc <= r9; rcc++)
     {
       y = vcc*(r9+1) + rcc;
-      if (vcc > 32)
-        GFX2_Log(GFX2_DEBUG, "vcc=%u rcc=%u y=%d\n", vcc, rcc, y);
       for(hcc = 0; hcc < *r1; hcc++)
       {
         for(cclk = 0; cclk < 2; cclk++)
@@ -185,14 +182,9 @@ unsigned char *raw2crtc(T_IO_Context *context, unsigned char mode, unsigned char
   GFX2_Log(GFX2_DEBUG, "raw2crtc() minaddr=%x maxaddr=%x\n", minAddr, maxAddr);
   *outSize = (maxAddr + 1) - minAddr;
 
-  outBuffer = (unsigned char*)malloc((*outSize));
-  if (outBuffer == NULL)
-  {
-    fprintf(stderr, "failed to allocate outBuffer");
-    exit(4);
-  }
-
-  memcpy(outBuffer, tmpBuffer + minAddr, *outSize);
+  outBuffer = (unsigned char*)GFX2_malloc((*outSize));
+  if (outBuffer != NULL)
+    memcpy(outBuffer, tmpBuffer + minAddr, *outSize);
 
   free(tmpBuffer);
   tmpBuffer = NULL;
