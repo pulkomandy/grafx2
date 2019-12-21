@@ -87,6 +87,11 @@ void Test_SCR(T_IO_Context * context, FILE * file)
       File_error = 0;
       return;
     }
+    else if (loading_address == 0x0040 && exec_address == 0x8000)
+    {
+      File_error = 0;
+      return;
+    }
   }
   else
     file_size = File_length_file(file);
@@ -310,6 +315,10 @@ void Load_SCR(T_IO_Context * context)
     }
     else
     {
+      static const byte CPC_Firmware_Colors[] = {
+        0x54, 0x44, 0x55, 0x5c, 0x58, 0x5d, 0x4c, 0x45, 0x4d,
+        0x56, 0x46, 0x57, 0x5e, 0x40, 0x5f, 0x4e, 0x47, 0x4f,
+        0x52, 0x42, 0x53, 0x5a, 0x59, 0x5b, 0x4a, 0x43, 0x4b };
       GFX2_Log(GFX2_DEBUG, ".SCR file. Data length %d\n", i);
       if (load_address == 0x170)
       {
@@ -398,10 +407,6 @@ void Load_SCR(T_IO_Context * context)
         0855  01 28  02 2e  06 19  07 1e  0c 30  00 00
         */
         int j;
-        static const byte CPC_Firmware_Colors[] = {
-          0x54, 0x44, 0x55, 0x5c, 0x58, 0x5d, 0x4c, 0x45, 0x4d,
-          0x56, 0x46, 0x57, 0x5e, 0x40, 0x5f, 0x4e, 0x47, 0x4f,
-          0x52, 0x42, 0x53, 0x5a, 0x59, 0x5b, 0x4a, 0x43, 0x4b };
         mode = cpc_ram[0x800];
         for (j = 0; j < 16; j++)
           pal_data[12*j] = CPC_Firmware_Colors[cpc_ram[0x801 + j]];
@@ -421,12 +426,60 @@ void Load_SCR(T_IO_Context * context)
               height = cpc_ram[addr+1] * 8;
               break;
             case 12:
-              display_start = (display_start & 0x00ff) | ((cpc_ram[addr+1] & 0x30) << 10) | ((cpc_ram[addr+1] & 0x03) << 9);
+              display_start = (display_start & 0x01ff) | ((cpc_ram[addr+1] & 0x30) << 10) | ((cpc_ram[addr+1] & 0x03) << 9);
               break;
             case 13:
-              display_start = (display_start & 0xff00) | cpc_ram[addr+1];
+              display_start = (display_start & 0xfe00) | (cpc_ram[addr+1] << 1);
            }
          }
+      }
+      else if (load_address == 0xC000)
+      {
+        mode = cpc_ram[0xD7D0];
+        if ((mode & 0xc0) == 0x80)
+        {
+          // value sent to gate array :
+          // bits 7 & 6 = function :
+          //              10 => select mode, ROM conf and interrupt control
+          //              bit 4 : interrupt control
+          //              bit 3 : disable upper ROM (C000 = Basic)
+          //              bit 2 : disable lower ROM (0000 = Firmware)
+          //              bits 1&0 : screen mode
+          mode &= 3;
+          cpc_plus_pal = cpc_ram + 0xD7D1;
+        }
+        else
+        {
+          int j;
+          for (j = 0; j < 16; j++)
+            pal_data[12*j] = CPC_Firmware_Colors[cpc_ram[0xD7D1 + j]];
+        }
+      }
+      else if (load_address == 0x0040 && exec_address == 0x8000)
+      {
+        mode = cpc_ram[0x8008] & 3;
+        memset(cpc_ram, cpc_ram[0x40], 0x40);
+        for (addr = 0x8094; cpc_ram[addr] < 16 && cpc_ram[addr] != 0; addr += 2)
+        {
+          GFX2_Log(GFX2_DEBUG, " R%d = &H%02x = %d\n", cpc_ram[addr], cpc_ram[addr+1], cpc_ram[addr+1]);
+          // see http://www.cpcwiki.eu/index.php/CRTC#The_6845_Registers
+          switch(cpc_ram[addr])
+          {
+            case 1:
+              columns = cpc_ram[addr+1] * 2;
+              break;
+            case 6:
+              height = cpc_ram[addr+1] * 8;
+              break;
+            case 12:
+              display_start = (display_start & 0x01ff) | ((cpc_ram[addr+1] & 0x30) << 10) | ((cpc_ram[addr+1] & 0x03) << 9);
+              break;
+            case 13:
+              display_start = (display_start & 0xfe00) | (cpc_ram[addr+1] << 1);
+           }
+        }
+        GFX2_Log(GFX2_DEBUG, "  display_start &H%04X\n", display_start);
+        cpc_plus_pal = cpc_ram + 0x80a0;
       }
       if (i >= 30000)
       {
