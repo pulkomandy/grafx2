@@ -853,17 +853,22 @@ void Save_GOS(T_IO_Context* context)
   context->Height = 168; // Convert the first half
 
   // convert and save page 1
-  output = raw2crtc(context, 0, 7, &outsize, &r1, 0, 0);
   file = Open_file_write(context);
   if (file == NULL)
     return;
+  output = raw2crtc(context, 0, 7, &outsize, &r1, 0, 0);
   File_error = 0;
   if (!Write_bytes(file, output, outsize))
     File_error = 1;
   // Pad to expected size
-  // TODO: pad with 0s ?
-  if (!Write_bytes(file, output, 16384 - outsize))
-    File_error = 1;
+  GFX2_Log(GFX2_DEBUG, "written %lu bytes, padding to 16384\n", outsize);
+  if (outsize >= 8192)
+  {
+    memset(output, 0, 16384 - outsize);
+    if (!Write_bytes(file, output, 16384 - outsize))
+      File_error = 1;
+  }
+  free(output);
   fclose(file);
   if (File_error)
     return;
@@ -872,19 +877,25 @@ void Save_GOS(T_IO_Context* context)
   // Advance context to second half of picture
   context->Target_address += context->Pitch * 168;
   context->Height = 104;
-  output = raw2crtc(context, 0, 7, &outsize, &r1, 0, 0);
   file = Open_file_write_with_alternate_ext(context, "GO2");
   if (file == NULL)
   {
     File_error = 1;
     return;
   }
+  output = raw2crtc(context, 0, 7, &outsize, &r1, 0, 0);
   File_error = 0;
   if (!Write_bytes(file, output, outsize))
     File_error = 1;
   // Pad to expected size
-  if (!Write_bytes(file, output, 16384 - outsize))
-    File_error = 1;
+  GFX2_Log(GFX2_DEBUG, "written %lu bytes, padding to 16384\n", outsize);
+  if (outsize >= 8192)
+  {
+    memset(output, 0, 16384 - outsize);
+    if (!Write_bytes(file, output, 16384 - outsize))
+      File_error = 1;
+  }
+  free(output);
   fclose(file);
   if (File_error)
     return;
