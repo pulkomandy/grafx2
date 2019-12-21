@@ -742,12 +742,17 @@ int CPC_check_AMSDOS(FILE * file, word * loading_address, unsigned long * file_l
   fseek(file, 0, SEEK_SET);
   if (!Read_bytes(file, data, 128))
     return 0;
+
+  // Rewind the file so it can be read normally
+  fseek(file, 0, SEEK_SET);
   for (i = 1; i <= 11; i++) // check filename and extension
   {
     if (data[i] >= 0x10 && data[i] <= 0x19) // sometimes digits are stored as 0x10 to 0x19
       continue;
-    if (data[i] < ' ' || data[i] >= 0x7F)
+    if (data[i] < ' ' || data[i] >= 0x7F) {
+      GFX2_Log(GFX2_DEBUG, "Not an AMSDOS file: name is invalid\n");
       return 0;
+	}
   }
   for (i = 0; i < 67; i++)
     checksum += (word)data[i];

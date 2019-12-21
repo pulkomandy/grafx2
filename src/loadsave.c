@@ -151,7 +151,7 @@ const T_Format File_formats[] = {
   {FORMAT_SCR, " cpc", Test_SCR, Load_SCR, Save_SCR, 0, 0, 0, "scr", "cpc;scr;win"},
   {FORMAT_CM5, " cm5", Test_CM5, Load_CM5, Save_CM5, 0, 0, 1, "cm5", "cm5"},
   {FORMAT_PPH, " pph", Test_PPH, Load_PPH, Save_PPH, 0, 0, 1, "pph", "pph"},
-  {FORMAT_GOS, " go1", Test_GOS, Load_GOS, NULL    , 0, 0, 0, "go1", "go1"},
+  {FORMAT_GOS, " go1", Test_GOS, Load_GOS, Save_GOS, 0, 0, 0, "go1", "go1"},
   {FORMAT_XPM, " xpm", NULL,     NULL,     Save_XPM, 0, 0, 0, "xpm", "xpm"},
   {FORMAT_ICO, " ico", Test_ICO, Load_ICO, Save_ICO, 0, 0, 0, "ico", "ico;ic2;cur"},
   {FORMAT_INFO," info",Test_INFO,Load_INFO,NULL,     0, 0, 0, "info", "info"},

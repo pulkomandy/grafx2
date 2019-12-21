@@ -7,7 +7,7 @@
     Copyright 2009 Petter Lindquist
     Copyright 2008 Yves Rizoud
     Copyright 2008 Franck Charlet
-    Copyright 2007-2011 Adrien Destugues
+    Copyright 2007-2019 Adrien Destugues
     Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
 
     Grafx2 is free software; you can redistribute it and/or
@@ -41,16 +41,23 @@
 /**
  * Test for SCR file (Amstrad CPC)
  *
- * SCR file format is from "Advanced OCP Art Studio" :
+ * SCR file format is originally from "Advanced OCP Art Studio" :
  * http://www.cpcwiki.eu/index.php/Format:Advanced_OCP_Art_Studio_File_Formats
  *
  * .WIN "window" format is also supported.
  *
- * For now we check the presence of a valid PAL file.
- * If the PAL file is not there the pixel data may still be valid.
- * The file size depends on the screen resolution.
- * An AMSDOS header would be a good indication but in some cases it may not
- * be there.
+ * SCR files are normally just a dump of the 16K of video memory. So they are
+ * essentially 16 kilobytes of pixel data without any header. To make things
+ * more fun, there is an optional compression. This all makes detection a bit
+ * fuzzy. However there are various things we can still check:
+ *
+ * - Presence of a valid PAL file. If the PAL file is not there the pixel data
+ *   may still be valid. The PAL file size depends on the screen mode (number
+ *   of colors).
+ * - An AMSDOS header is a good indication but in some cases it may not
+ *   be there.
+ * - Some tools embed the palette and mode (and usually some kind of loader
+ *   code) in the SCR file, we can also detect these.
  */
 void Test_SCR(T_IO_Context * context, FILE * file)
 {
@@ -131,14 +138,13 @@ void Test_SCR(T_IO_Context * context, FILE * file)
 /**
  * Load Advanced OCP Art Studio files (Amstrad CPC)
  *
- * Only standard resolution files (Mode 0 160x200, mode 1 320x200 and
- * mode 2 640x200) are supported. The .PAL file presence is required.
+ * Standard resolution files (Mode 0 160x200, mode 1 320x200 and
+ * mode 2 640x200) are supported. The .PAL file is loaded if available.
  * "MJH" RLE packing is supported.
+ * Embedded CRTC registers and palette data from various tools is also
+ * supported.
  *
- * .WIN "window" format is also supported.
- *
- * @todo Ask user for screen size (or register values) in order to support
- * non standard resolutions.
+ * .WIN "window" format is also loaded here and allows different picture sizes.
  */
 void Load_SCR(T_IO_Context * context)
 {
@@ -665,7 +671,8 @@ void Save_SCR(T_IO_Context * context)
  * .KIT hold the palette in "Kit4096" format. There are 16 colors each stored
  * as 12 bit RGB in RB0G order.
  * .GO1 and GO2 hold each half of the picture (top and bottom)
- * The file always cover the whole display of the Plus (196*272 or so)
+ * The file always cover the whole display of the Plus (192*272 mode 0 pixels)
+ * Only mode 0 is possible.
  */
 void Test_GOS(T_IO_Context * context, FILE * file)
 {
@@ -778,6 +785,13 @@ void Load_GOS(T_IO_Context* context)
   file = Open_file_read_with_alternate_ext(context, "KIT");
   if (file == NULL) {
     // There is no palette, but that's fine, we can still load the pixels
+	// Setup a default grayscale palette
+    for (i = 0; i < 16; i++)
+    {
+      context->Palette[i].R = i * 0x11;
+      context->Palette[i].G = i * 0x11;
+      context->Palette[i].B = i * 0x11;
+	}
     return;
   }
 
@@ -826,6 +840,52 @@ void Load_GOS(T_IO_Context* context)
 
   fclose(file);
 }
+
+
+void Save_GOS(T_IO_Context* context)
+{
+	FILE* file;
+	unsigned char* output;
+	unsigned long outsize = 0;
+	unsigned char r1 = 0;
+
+	// TODO save KIT file for color palette
+
+	// TODO check picture dimensions (GOS is a fixed resolution format)
+	// For now, force the size
+	context->Width = 192;
+	context->Height = 168; // Convert the first half
+
+	// convert and save page 1
+	output = raw2crtc(context, 0, 7, &outsize, &r1, 0, 0);
+	file = Open_file_write(context);
+	if (file == NULL)
+		return;
+    File_error = 0;
+    if (!Write_bytes(file, output, outsize))
+      File_error = 1;
+	// Pad to expected size
+    if (!Write_bytes(file, output, 16384 - outsize))
+      File_error = 1;
+	fclose(file);
+
+	// convert and save page 2
+	// Advance context to second half of picture
+	context->Target_address += context->Pitch * 168;
+	context->Height = 104;
+	output = raw2crtc(context, 0, 7, &outsize, &r1, 0, 0);
+	file = Open_file_write_with_alternate_ext(context, "GO2");
+	if (file == NULL)
+		return;
+    File_error = 0;
+    if (!Write_bytes(file, output, outsize))
+      File_error = 1;
+	// Pad to expected size
+    if (!Write_bytes(file, output, 16384 - outsize))
+      File_error = 1;
+	fclose(file);
+}
+
 
 /**
  * Test for CM5 - Amstrad CPC "Mode 5" picture

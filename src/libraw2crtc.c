@@ -179,6 +179,7 @@ unsigned char *raw2crtc(T_IO_Context *context, unsigned char mode, unsigned char
     }
   }
 
+  GFX2_Log(GFX2_DEBUG, "raw2crtc() minaddr=%x maxaddr=%x\n", minAddr, maxAddr);
   *outSize = (maxAddr + 1) - minAddr;
 
   outBuffer = (unsigned char*)malloc((*outSize));
