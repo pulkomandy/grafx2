@@ -782,13 +782,13 @@ void Load_GOS(T_IO_Context* context)
   file = Open_file_read_with_alternate_ext(context, "KIT");
   if (file == NULL) {
     // There is no palette, but that's fine, we can still load the pixels
-	// Setup a default grayscale palette
+    // Setup a default grayscale palette
     for (i = 0; i < 16; i++)
     {
       context->Palette[i].R = i * 0x11;
       context->Palette[i].G = i * 0x11;
       context->Palette[i].B = i * 0x11;
-	}
+    }
     return;
   }
 
@@ -811,7 +811,7 @@ void Load_GOS(T_IO_Context* context)
       if (!Read_word_le(file, &word))
       {
         File_error = 2;
-        return;
+        break;
       }
 
       context->Palette[i].R = ((word >>  4) & 0xF) * 0x11;
@@ -829,7 +829,7 @@ void Load_GOS(T_IO_Context* context)
       if (!Read_byte(file, &ink))
       {
         File_error = 2;
-        return;
+        break;
       }
       context->Palette[i] = context->Palette[ink];
     }
@@ -841,46 +841,65 @@ void Load_GOS(T_IO_Context* context)
 
 void Save_GOS(T_IO_Context* context)
 {
-	FILE* file;
-	unsigned char* output;
-	unsigned long outsize = 0;
-	unsigned char r1 = 0;
+  FILE* file;
+  int i;
+  unsigned char* output;
+  unsigned long outsize = 0;
+  unsigned char r1 = 0;
 
-	// TODO save KIT file for color palette
+  // TODO check picture dimensions (GOS is a fixed resolution format)
+  // For now, force the size
+  context->Width = 192;
+  context->Height = 168; // Convert the first half
 
-	// TODO check picture dimensions (GOS is a fixed resolution format)
-	// For now, force the size
-	context->Width = 192;
-	context->Height = 168; // Convert the first half
+  // convert and save page 1
+  output = raw2crtc(context, 0, 7, &outsize, &r1, 0, 0);
+  file = Open_file_write(context);
+  if (file == NULL)
+    return;
+  File_error = 0;
+  if (!Write_bytes(file, output, outsize))
+    File_error = 1;
+  // Pad to expected size
+  // TODO: pad with 0s ?
+  if (!Write_bytes(file, output, 16384 - outsize))
+    File_error = 1;
+  fclose(file);
+  if (File_error)
+    return;
 
-	// convert and save page 1
-	output = raw2crtc(context, 0, 7, &outsize, &r1, 0, 0);
-	file = Open_file_write(context);
-	if (file == NULL)
-		return;
-    File_error = 0;
-    if (!Write_bytes(file, output, outsize))
-      File_error = 1;
-	// Pad to expected size
-    if (!Write_bytes(file, output, 16384 - outsize))
-      File_error = 1;
-	fclose(file);
+  // convert and save page 2
+  // Advance context to second half of picture
+  context->Target_address += context->Pitch * 168;
+  context->Height = 104;
+  output = raw2crtc(context, 0, 7, &outsize, &r1, 0, 0);
+  file = Open_file_write_with_alternate_ext(context, "GO2");
+  if (file == NULL)
+  {
+    File_error = 1;
+    return;
+  }
+  File_error = 0;
+  if (!Write_bytes(file, output, outsize))
+    File_error = 1;
+  // Pad to expected size
+  if (!Write_bytes(file, output, 16384 - outsize))
+    File_error = 1;
+  fclose(file);
+  if (File_error)
+    return;
 
-	// convert and save page 2
-	// Advance context to second half of picture
-	context->Target_address += context->Pitch * 168;
-	context->Height = 104;
-	output = raw2crtc(context, 0, 7, &outsize, &r1, 0, 0);
-	file = Open_file_write_with_alternate_ext(context, "GO2");
-	if (file == NULL)
-		return;
-    File_error = 0;
-    if (!Write_bytes(file, output, outsize))
-      File_error = 1;
-	// Pad to expected size
-    if (!Write_bytes(file, output, 16384 - outsize))
-      File_error = 1;
-	fclose(file);
+  file = Open_file_write_with_alternate_ext(context, "KIT");
+  for (i = 0; i < 16 && File_error == 0; i++)
+  {
+    uint16_t word;
+    word = (context->Palette[i].R & 0xF0)
+           | ((context->Palette[i].G & 0xF0) << 4)
+           | (context->Palette[i].B >> 4);
+    if (!Write_word_le(file, word))
+      File_error = 2;
+  }
+  fclose(file);
 }
 
 
