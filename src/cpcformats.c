@@ -315,10 +315,6 @@ void Load_SCR(T_IO_Context * context)
     }
     else
     {
-      static const byte CPC_Firmware_Colors[] = {
-        0x54, 0x44, 0x55, 0x5c, 0x58, 0x5d, 0x4c, 0x45, 0x4d,
-        0x56, 0x46, 0x57, 0x5e, 0x40, 0x5f, 0x4e, 0x47, 0x4f,
-        0x52, 0x42, 0x53, 0x5a, 0x59, 0x5b, 0x4a, 0x43, 0x4b };
       GFX2_Log(GFX2_DEBUG, ".SCR file. Data length %d\n", i);
       if (load_address == 0x170)
       {
@@ -409,7 +405,7 @@ void Load_SCR(T_IO_Context * context)
         int j;
         mode = cpc_ram[0x800];
         for (j = 0; j < 16; j++)
-          pal_data[12*j] = CPC_Firmware_Colors[cpc_ram[0x801 + j]];
+          pal_data[12*j] = CPC_Firmware_to_Hardware_color(cpc_ram[0x801 + j]);
         addr = 0x847;
         if (cpc_ram[0x80bb] == 1)
           addr = 0x80bb;
@@ -452,7 +448,7 @@ void Load_SCR(T_IO_Context * context)
         {
           int j;
           for (j = 0; j < 16; j++)
-            pal_data[12*j] = CPC_Firmware_Colors[cpc_ram[0xD7D1 + j]];
+            pal_data[12*j] = CPC_Firmware_to_Hardware_color(cpc_ram[0xD7D1 + j]);
         }
       }
       else if (load_address == 0x0040 && exec_address == 0x8000)

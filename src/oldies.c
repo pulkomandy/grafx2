@@ -696,6 +696,17 @@ static const T_Components CPC_Hw_Palette[] = {
   {0x6E, 0x7B, 0xF6}
 };
 
+/**
+ * The CPC firmware palette is ordered by luminosity
+ * see http://www.cpcwiki.eu/index.php/CPC_Palette
+ */
+static const byte CPC_Firmware_Colors[] = {
+  0x54, 0x44, 0x55, 0x5c, 0x58, 0x5d, 0x4c, 0x45, 0x4d,
+  0x56, 0x46, 0x57, 0x5e, 0x40, 0x5f, 0x4e, 0x47, 0x4f,
+  0x52, 0x42, 0x53, 0x5a, 0x59, 0x5b, 0x4a, 0x43, 0x4b
+};
+
+
 void CPC_set_HW_palette(T_Components * palette)
 {
   memcpy(palette, CPC_Hw_Palette, sizeof(CPC_Hw_Palette));
@@ -731,6 +742,13 @@ void CPC_set_default_BASIC_palette(T_Components * palette)
     memcpy(palette + i,
            CPC_Hw_Palette + basic_colors[i] - 0x40,
            sizeof(T_Components));
+}
+
+byte CPC_Firmware_to_Hardware_color(byte fw_color)
+{
+  if (fw_color <= 26)
+    return CPC_Firmware_Colors[fw_color];
+  return 0;
 }
 
 int CPC_check_AMSDOS(FILE * file, word * loading_address, word * exec_address, unsigned long * file_length)

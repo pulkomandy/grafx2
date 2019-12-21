@@ -128,6 +128,13 @@ void CPC_set_default_BASIC_palette(T_Components * palette);
 int CPC_compare_colors(T_Components * col1, T_Components * col2);
 
 /**
+ * Convert CPC firmware color to hardware color (Gate Array)
+ * @param fw_color a CPC Firmware color index (from 0 to 26)
+ * @return a CPC Hardware color (from 0x40 to 0x5f)
+ */
+byte CPC_Firmware_to_Hardware_color(byte fw_color);
+
+/**
  * Check AMSDOS header
  *
  * see http://www.cpcwiki.eu/index.php/AMSDOS_Header
