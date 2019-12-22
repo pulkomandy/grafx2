@@ -118,7 +118,7 @@ const T_Format File_formats[] = {
     "pi1;pc1;pi2;pc2;pi3;pc3;neo;tny;tn1;tn2;tn3;tn4;"
     "c64;p64;a64;pi;rp;aas;art;dd;iph;ipt;hpc;ocp;koa;koala;fli;bml;cdu;prg;pmg;rpm;"
     "gpx;"
-    "cpc;scr;win;pph,cm5;go1;"
+    "cpc;scr;win;pph;cm5;go1;"
     "hgr;dhgr;"
     "grb;grob;"
     "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico;ic2;cur;info;flc;bin;map"},

@@ -1105,11 +1105,12 @@ void Test_CM5(T_IO_Context * context, FILE * file)
 {
   // check cm5 file size == 2049 bytes
   FILE *file_gfx;
-  long file_size;
+  unsigned long file_size;
 
   File_error = 1;
 
-  file_size = File_length_file(file);
+  if (!CPC_check_AMSDOS(file, NULL, NULL, &file_size))
+    file_size = File_length_file(file);
   if (file_size != 2049)
     return;
 
@@ -1117,7 +1118,8 @@ void Test_CM5(T_IO_Context * context, FILE * file)
   file_gfx = Open_file_read_with_alternate_ext(context, "gfx");
   if (file_gfx == NULL)
     return;
-  file_size = File_length_file(file_gfx);
+  if (!CPC_check_AMSDOS(file_gfx, NULL, NULL, &file_size))
+    file_size = File_length_file(file_gfx);
   fclose(file_gfx);
   if (file_size != 18432)
     return;
@@ -1155,7 +1157,7 @@ void Load_CM5(T_IO_Context* context)
       return;
   }
 
-  Pre_load(context, 48*6, 256, 2049, FORMAT_CM5, PIXEL_SIMPLE, 0);
+  Pre_load(context, 48*6, 256, 2049, FORMAT_CM5, PIXEL_SIMPLE, 5);
 
   if (Config.Clear_palette)
   {
@@ -1171,6 +1173,8 @@ void Load_CM5(T_IO_Context* context)
 
   First_color_in_palette = 64;
 
+  if (CPC_check_AMSDOS(file, NULL, NULL, NULL))
+    fseek(file, 128, SEEK_SET); // seek after AMSDOS header
   if (!Read_byte(file, &ink0))
     File_error = 2;
 
@@ -1190,8 +1194,13 @@ void Load_CM5(T_IO_Context* context)
         Set_pixel(context, tx, ty, ink0);
   }
 
-  while(Read_byte(file, &value))
+  for (line = 0; line < 256; )
   {
+    if (!Read_byte(file, &value))
+    {
+      File_error = 1;
+      break;
+    }
     switch(mod)
     {
       case 0:
@@ -1233,6 +1242,8 @@ void Load_CM5(T_IO_Context* context)
     File_error = 1;
     return;
   }
+  if (CPC_check_AMSDOS(file, NULL, NULL, NULL))
+    fseek(file, 128, SEEK_SET); // seek after AMSDOS header
   Set_loading_layer(context, 4);
 
   if (context->Type == CONTEXT_PREVIEW)
@@ -1300,7 +1311,6 @@ void Save_CM5(T_IO_Context* context)
     File_error = 1;
     return;
   }
-  setvbuf(file, NULL, _IOFBF, 64*1024);
 
   // Write layer 0
   Set_saving_layer(context, 0);
@@ -1326,7 +1336,6 @@ void Save_CM5(T_IO_Context* context)
     File_error = 2;
     return;
   }
-  setvbuf(file, NULL, _IOFBF, 64*1024);
 
   Set_saving_layer(context, 4);
 
