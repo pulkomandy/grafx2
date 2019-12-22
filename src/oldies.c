@@ -27,6 +27,7 @@
 #endif
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
 #include <math.h>
 #include "struct.h"
 #include "oldies.h"
@@ -724,6 +725,23 @@ int CPC_compare_colors(T_Components * col1, T_Components * col2)
   return v1 == v2;
 }
 
+int CPC_is_CPC_old_color(T_Components * col)
+{
+  if (15 < col->R && col->R < 0x60)
+    return 0;
+  if (0x82 < col->R && col->R < 0xf0)
+    return 0;
+  if (15 < col->G && col->G < 0x60)
+    return 0;
+  if (0x82 < col->G && col->G < 0xf0)
+    return 0;
+  if (15 < col->B && col->B < 0x60)
+    return 0;
+  if (0x82 < col->B && col->B < 0xf0)
+    return 0;
+  return 1;
+}
+
 void CPC_set_default_BASIC_palette(T_Components * palette)
 {
   static const byte basic_colors[] = {
@@ -806,6 +824,43 @@ int CPC_check_AMSDOS(FILE * file, word * loading_address, word * exec_address, u
     *file_length = data[64] | (data[65] << 8) | (data[66] << 16); // 24bit size
   //  *file_length = data[24] | (data[25] << 8);  // 16bit size
   return 1;
+}
+
+int CPC_write_AMSDOS_header(FILE * file, const char * filename, const char * ext, byte type, word load_address, word exec_address, word file_length)
+{
+  int i;
+  word checksum = 0;
+  byte header[128];
+
+  memset(header, 0, sizeof(header));
+  memset(header + 1, ' ', 11);
+  for (i = 0 ; i < 8; i++)
+  {
+    if (filename[i] == '\0' || filename[i] == '.')
+      break;
+    header[1+i] = (byte)toupper(filename[i]);
+  }
+  for (i = 0 ; i < 3; i++)
+  {
+    if (ext[i] == '\0' || ext[i] == '.')
+      break;
+    header[9+i] = (byte)toupper(ext[i]);
+  }
+  header[18] = type;
+  header[21] = load_address & 0xff;
+  header[22] = load_address >> 8;
+  header[24] = file_length & 0xff;
+  header[25] = file_length >> 8;
+  header[26] = exec_address & 0xff;
+  header[27] = exec_address >> 8;
+  header[64] = file_length & 0xff;
+  header[65] = file_length >> 8;
+  for (i = 0; i < 67; i++)
+    checksum += (word)header[i];
+  header[67] = checksum & 0xff;
+  header[68] = checksum >> 8;
+  GFX2_LogHexDump(GFX2_DEBUG, "AMSDOS ", header, 0, sizeof(header));
+  return Write_bytes(file, header, sizeof(header));
 }
 
 int DECB_Check_binary_file(FILE * f)

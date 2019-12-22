@@ -110,6 +110,11 @@ void ZX_Spectrum_set_palette(T_Components * palette);
 void CPC_set_HW_palette(T_Components * palette);
 
 /**
+ * Check if the color is likely to be a CPC RGB tri level color
+ */
+int CPC_is_CPC_old_color(T_Components * col);
+
+/**
  * Set 16 color default Amstrad CPC BASIC palette
  *
  * @note INK 14 and 15 are blinking on the real hardware.
@@ -146,6 +151,11 @@ byte CPC_Firmware_to_Hardware_color(byte fw_color);
  * @return 1 if it does.
  */
 int CPC_check_AMSDOS(FILE * file, word * loading_address, word * exec_address, unsigned long * file_length);
+
+/**
+ * Write AMSDOS header
+ */
+int CPC_write_AMSDOS_header(FILE * file, const char * filename, const char * ext, byte type, word load_address, word save_address, word file_length);
 
 /** @}*/
 

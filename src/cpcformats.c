@@ -29,6 +29,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "global.h"
 #include "fileformats.h"
 #include "io.h"
@@ -607,6 +608,9 @@ void Load_SCR(T_IO_Context * context)
   free(cpc_ram);
 }
 
+#include "impdraw_loader.h"
+#include "cpc_scr_simple_loader.h"
+
 /**
  * Save Amstrad SCR file
  *
@@ -633,32 +637,43 @@ void Save_SCR(T_IO_Context * context)
   unsigned char r1 = 0;
   int cpc_mode;
   FILE* file;
-
+  int cpc_plus_pal = 0;
+  unsigned short load_address = 0xC000;
+  unsigned short exec_address = 0xC7D0;
+  int overscan;
+  byte cpc_hw_pal[16];
+  byte r12 = 0x0C | 0x30;
+  byte r13 = 0;
 
   switch(context->Ratio)
   {
     case PIXEL_WIDE:
     case PIXEL_WIDE2:
       cpc_mode = 0;
+      overscan = (context->Width * context->Height) > (16384 * 2);
       break;
     case PIXEL_TALL:
     case PIXEL_TALL2:
     case PIXEL_TALL3:
       cpc_mode = 2;
+      overscan = (context->Width * context->Height) > (16384 * 8);
       break;
     default:
       cpc_mode = 1;
+      overscan = (context->Width * context->Height) > (16384 * 4);
       break;
   }
-
-  file = Open_file_write_with_alternate_ext(context, "pal");
-  if (file == NULL)
-    return;
-  if (!Write_byte(file, cpc_mode) || !Write_byte(file, 0) || !Write_byte(file, 0))
+  if (overscan)
   {
-    fclose(file);
-    return;
+    // format iMP v2
+    load_address = 0x170;
+    // picture at 0x200
+    r12 = 0x0C | (0x200 >> 9);
+    r13 = (0x200 >> 1) & 0xff;
+    exec_address = 0; // BASIC program !
   }
+
+  CPC_set_HW_palette(context->Palette + 0x40);
   for (i = 0; i < 16; i++)
   {
     // search for the color in the HW palette (0x40-0x5F)
@@ -669,12 +684,28 @@ void Save_SCR(T_IO_Context * context)
     if (index >= 0x60)
     {
       GFX2_Log(GFX2_WARNING, "Save_SCR() color #%i not found in CPC HW palette.\n", i);
-      // TODO : set CPC Plus flag
+      cpc_plus_pal = 1;
       index = 0x54 - i; // default
     }
+    cpc_hw_pal[i] = index;
+    if (!CPC_is_CPC_old_color(context->Palette + i))
+      cpc_plus_pal = 1;
+  }
+
+  file = Open_file_write_with_alternate_ext(context, "pal");
+  if (file == NULL)
+    return;
+  CPC_write_AMSDOS_header(file, context->File_name, "pal", 2, 0x8809, 0x8809, 239);
+  if (!Write_byte(file, cpc_mode) || !Write_byte(file, 0) || !Write_byte(file, 0))
+  {
+    fclose(file);
+    return;
+  }
+  for (i = 0; i < 16; i++)
+  {
     for (j = 0; j < 12; j++)  // write the same color for the 12 frames
     {
-      Write_byte(file, index);
+      Write_byte(file, cpc_hw_pal[i]);
     }
   }
   // border
@@ -694,7 +725,7 @@ void Save_SCR(T_IO_Context * context)
   }
   fclose(file);
 
-  output = raw2crtc(context, cpc_mode, 7, &outsize, &r1, 0x0C, 0);
+  output = raw2crtc(context, cpc_mode, 7, &outsize, &r1, r12, r13);
   GFX2_Log(GFX2_DEBUG, "Save_SCR() output=%p outsize=%lu r1=$%02X\n", output, outsize, r1);
 
   if (output == NULL)
@@ -706,9 +737,80 @@ void Save_SCR(T_IO_Context * context)
   else
   {
     File_error = 0;
+    CPC_write_AMSDOS_header(file, context->File_name, "SCR", overscan ? 0 : 2, load_address, exec_address, overscan ? 32400 : outsize);
+    if (overscan)
+    {
+      // write iMPdraw loader
+      byte buffer[0x90];
+      memcpy(buffer, impdraw_loader, 0x90);
+      buffer[0x184 - 0x170] = 0x0e + cpc_mode;
+      buffer[0x18e - 0x170] = r1;
+      //buffer[0x190 - 0x170] = // R2 ?
+      buffer[0x192 - 0x170] = context->Height / 8;  // r6
+      //buffer[0x194 - 0x170] = // r7 ?
+      buffer[0x196 - 0x170] = r12;
+      buffer[0x198 - 0x170] = r13;
+      buffer[0x1ac - 0x170] = cpc_plus_pal;
+      if (!Write_bytes(file, buffer, 0x90))
+        File_error = 1;
+      output = realloc(output, 32400 - 0x90);
+      memset(output + outsize, 0, 32400 - 0x90 - outsize);
+      outsize = 32400 - 0x90;
+      memcpy(output + 0x7F00 - 0x200, cpc_hw_pal, 16);
+      for (i = 0; i < 16; i++)
+      {
+        output[0x601 + i*2] = (context->Palette[i].R & 0xf0) | (context->Palette[i].B >> 4);
+        output[0x602 + i*2] = context->Palette[i].G >> 4;
+      }
+    }
+    else
+    {
+      memcpy(output + exec_address - load_address, cpc_scr_simple_loader, sizeof(cpc_scr_simple_loader));
+      output[0xd7d0 - load_address] = cpc_mode;
+      //memcpy(output + 0xd7d1 - load_address, cpc_hw_pal, 16);
+      for (i = 0; i < 16; i++)
+      {
+        output[0xd7d1 - load_address + i] = (context->Palette[i].G / 86) * 9 + (context->Palette[i].R / 86) * 3 + (context->Palette[i].B / 86);
+      }
+    }
     if (!Write_bytes(file, output, outsize))
       File_error = 1;
     fclose(file);
+    if (!overscan)
+    {
+      file = Open_file_write_with_alternate_ext(context, "BAS");
+      if (file != NULL)
+      {
+        byte buffer[128];
+        memset(buffer, 0, sizeof(buffer));
+        buffer[2] = 10;  // basic line number
+        buffer[4] = 0xad; // MODE
+        buffer[5] = ' ';
+        buffer[6] = 0x0e + cpc_mode;
+        buffer[7] = 0x01; // :
+        buffer[8] = 0xa8; // LOAD
+        buffer[9] = '"';
+        for (i = 0; i < 8; i++)
+        {
+          if (context->File_name[i] == '\0' || context->File_name[i] == '.')
+            break;
+          buffer[10+i] = (byte)toupper(context->File_name[i]);
+        }
+        memcpy(buffer + 10 + i, ".SCR\"", 5);
+        i += 15;
+        buffer[i++] = 0x01; // :
+        buffer[i++] = 0x83; // CALL
+        buffer[i++] = 0x1c; // &
+        buffer[i++] = 0xd0;
+        buffer[i++] = 0xc7;
+        buffer[i++] = 0x00;
+        buffer[0] = (byte)i; // length of line data
+        CPC_write_AMSDOS_header(file, context->File_name, "BAS", 0, 0x170, 0, i + 2);
+        if (!Write_bytes(file, buffer, 128))
+          File_error = 1;
+        fclose(file);
+      }
+    }
   }
   free (output);
 }
