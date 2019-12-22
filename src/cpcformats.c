@@ -1185,7 +1185,8 @@ void Test_CM5(T_IO_Context * context, FILE * file)
  *
  * Only support 288x256 resolution as the Mode 5 Viewer app only handles this
  * single resolution.
- * see https://www.cpc-power.com/index.php?page=detail&num=12905
+ * @see https://www.cpc-power.com/index.php?page=detail&num=12905
+ * @see https://github.com/cpcsdk/cpctools/blob/master/resources/mode5_viewer/fx_mode5.s
  */
 void Load_CM5(T_IO_Context* context)
 {
