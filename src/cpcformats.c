@@ -241,6 +241,10 @@ void Load_SCR(T_IO_Context * context)
     GFX2_Log(GFX2_DEBUG, "Load_SCR() mode=%d color animation flag=%02X delay=%u\n",
              mode, color_anim_flag, color_anim_delay);
   }
+  else
+  {
+    memset(pal_data, 0, sizeof(pal_data));
+  }
 
   file = Open_file_read(context);
   if (file == NULL)
@@ -552,8 +556,46 @@ void Load_SCR(T_IO_Context * context)
   }
   else
   {
-    for (i = 0; i < 16; i++)
-      context->Palette[i] = context->Palette[pal_data[12*i]];
+    int ocp_plus_palette = 1;
+    for (i = 0; i < 16 && ocp_plus_palette; i++)
+    {
+      byte inkr, inkb, inkg;
+      int j;
+      // OCP+ palettes use the 3 first slots and have the 9 remaining set to 0
+      for (j = 3; j < 12; j++)
+      {
+        if (pal_data[12*i+j] != 0)
+        {
+          ocp_plus_palette = 0;
+          break;
+        }
+      }
+      inkr = (context->Palette[pal_data[12*i]].G / 86) * 9 + (context->Palette[pal_data[12*i]].R / 86) * 3 + (context->Palette[pal_data[12*i]].B / 86);
+      inkb = (context->Palette[pal_data[12*i+1]].G / 86) * 9 + (context->Palette[pal_data[12*i+1]].R / 86) * 3 + (context->Palette[pal_data[12*i+1]].B / 86);
+      inkg = (context->Palette[pal_data[12*i+2]].G / 86) * 9 + (context->Palette[pal_data[12*i+2]].R / 86) * 3 + (context->Palette[pal_data[12*i+2]].B / 86);
+      if (inkg < 11 || inkb < 11 || inkg < 11)
+          ocp_plus_palette = 0;
+    }
+    if (ocp_plus_palette)
+    {
+      GFX2_Log(GFX2_DEBUG, "OCP+ Palette detected\n");
+      for (i = 0; i < 16; i++)
+      {
+        byte inkr, inkb, inkg;
+        inkr = (context->Palette[pal_data[12*i]].G / 86) * 9 + (context->Palette[pal_data[12*i]].R / 86) * 3 + (context->Palette[pal_data[12*i]].B / 86);
+        inkb = (context->Palette[pal_data[12*i+1]].G / 86) * 9 + (context->Palette[pal_data[12*i+1]].R / 86) * 3 + (context->Palette[pal_data[12*i+1]].B / 86);
+        inkg = (context->Palette[pal_data[12*i+2]].G / 86) * 9 + (context->Palette[pal_data[12*i+2]].R / 86) * 3 + (context->Palette[pal_data[12*i+2]].B / 86);
+        context->Palette[i].R = (26 - inkr) * 0x11;
+        context->Palette[i].G = (26 - inkg) * 0x11;
+        context->Palette[i].B = (26 - inkb) * 0x11;
+      }
+    }
+    else
+    {
+      // Standard OCP palette
+      for (i = 0; i < 16; i++)
+        context->Palette[i] = context->Palette[pal_data[12*i]];
+    }
   }
 
   File_error = 0;
