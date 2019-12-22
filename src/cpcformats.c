@@ -573,7 +573,7 @@ void Load_SCR(T_IO_Context * context)
       inkr = (context->Palette[pal_data[12*i]].G / 86) * 9 + (context->Palette[pal_data[12*i]].R / 86) * 3 + (context->Palette[pal_data[12*i]].B / 86);
       inkb = (context->Palette[pal_data[12*i+1]].G / 86) * 9 + (context->Palette[pal_data[12*i+1]].R / 86) * 3 + (context->Palette[pal_data[12*i+1]].B / 86);
       inkg = (context->Palette[pal_data[12*i+2]].G / 86) * 9 + (context->Palette[pal_data[12*i+2]].R / 86) * 3 + (context->Palette[pal_data[12*i+2]].B / 86);
-      if (inkg < 11 || inkb < 11 || inkg < 11)
+      if (inkr < 11 || inkb < 11 || inkg < 11)
           ocp_plus_palette = 0;
     }
     if (ocp_plus_palette)
