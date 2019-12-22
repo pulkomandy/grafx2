@@ -102,7 +102,13 @@ void Test_SCR(T_IO_Context * context, FILE * file)
       File_error = 0;
       return;
     }
-    else if ((loading_address == 0x200 || loading_address == 0xc000) && file_size > 16000)
+    else if (loading_address == 0x200 && exec_address == 0x811 && file_size > 16000)
+    {
+      // convimgcpc
+      File_error = 0;
+      return;
+    }
+    else if (loading_address == 0xc000 && file_size > 16000)
     {
       File_error = 0;
       return;
@@ -253,6 +259,8 @@ void Load_SCR(T_IO_Context * context)
     else if (file_size > (amsdos_file_size + 128))
       GFX2_Log(GFX2_INFO, "Load_SCR() %lu extra bytes at end of file\n", file_size - 128 - amsdos_file_size);
     fseek(file, 128, SEEK_SET); // right after AMSDOS header
+    snprintf(context->Comment, COMMENT_SIZE, "AMSDOS load@ &%04X exec@ &%04X",
+             load_address, exec_address);
     file_size = amsdos_file_size;
   }
   else
@@ -378,7 +386,7 @@ void Load_SCR(T_IO_Context * context)
             pal_data[12*j] = cpc_ram[0x7f00 + j];
         }
       }
-      else if (load_address == 0x200)
+      else if (load_address == 0x200 && exec_address == 0x811)
       {
         /* from HARLEY.SCR :
         0800  00 = mode
@@ -446,10 +454,11 @@ void Load_SCR(T_IO_Context * context)
               break;
             case 13:
               display_start = (display_start & 0xfe00) | (cpc_ram[addr+1] << 1);
-           }
-         }
+          }
+        }
+        snprintf(context->Comment, COMMENT_SIZE, "ConvImgCPC mode %d", mode);
       }
-      else if (load_address == 0xC000)
+      else if (load_address == 0xC000 && cpc_ram[0xc7d0] != 0)
       {
         mode = cpc_ram[0xD7D0];
         if ((mode & 0xc0) == 0x80)
@@ -470,6 +479,7 @@ void Load_SCR(T_IO_Context * context)
           for (j = 0; j < 16; j++)
             pal_data[12*j] = CPC_Firmware_to_Hardware_color(cpc_ram[0xD7D1 + j]);
         }
+        snprintf(context->Comment, COMMENT_SIZE, "loader@ &%04X mode %d %s", exec_address, mode, cpc_plus_pal ? "CPC+" : "");
       }
       else if (load_address == 0x0040 && exec_address == 0x8000)
       {
