@@ -2357,6 +2357,19 @@ static const T_Help_table helptable_save[] =
   HELP_TEXT ("  1 background color common to the line,")
   HELP_TEXT ("  1 color common for the 4x8 block and")
   HELP_TEXT ("  2 specific colors.")
+  HELP_TEXT ("")
+  HELP_TEXT ("")
+  HELP_TITLE("AMSTRAD CPC FORMATS")
+  HELP_TEXT ("GrafX2 supports saving in various formats :")
+  HELP_TEXT ("- GraphOS (GO1/GO2/KIT) format only supports")
+  HELP_TEXT ("  mode 0 192x272 16 CPC+ colors pictures")
+  HELP_TEXT ("- cpc (.SCR) saver detects mode from pixel")
+  HELP_TEXT ("  ratio. \"Autoloading\" files are produced")
+  HELP_TEXT ("  using iMPdraw v2 format for overscan or")
+  HELP_TEXT ("  maintaining OCP compatibility for std res.")
+  HELP_TEXT ("- CM5 are specific 5 layer 288x256 pics for")
+  HELP_TEXT ("  the \"Mode 5 Viewer\" software by SYX.")
+//HELP_TEXT ("0----5----0----5----0----5----0----5----0--X")
 };
 static const T_Help_table helptable_load[] =
 {

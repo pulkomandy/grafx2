@@ -40,6 +40,25 @@
 #include "gfx2log.h"
 
 /**
+ * @defgroup cpcformats Amstrad CPC/CPC+ picture formats
+ * @ingroup loadsaveformats
+ *
+ * Support for Amstrad CPC/CPC+ picture formats. The Amstrad CPC has
+ * 3 video modes :
+ * - mode 0 : 160x200 16 colors
+ * - mode 1 : 320x200 4 colors
+ * - mode 2 : 640x200 2 colors
+ *
+ * Supported formats :
+ * - GO1/GO2 : GraphOS
+ * - SCR : OCP Art Studio / iMPdraw v2 / etc.
+ * - CM5 : Mode 5 Viewer
+ * - PPH : Perfect Pix
+ *
+ * @{
+ */
+
+/**
  * Test for SCR file (Amstrad CPC)
  *
  * SCR file format is originally from "Advanced OCP Art Studio" :
@@ -619,58 +638,64 @@ void Load_SCR(T_IO_Context * context)
  * - wide pixels are mode 0
  * - tall pixels are mode 2
  *
- * Mode and palette are stored in a .PAL file.
+ * Mode and palette are stored in a .PAL file for compatibility
+ * with OCP Art studio.
  *
  * The picture color index should be 0-15,
  * The CPC Hardware palette is expected to be set (indexes 64 to 95)
  *
- * @todo Add possibility to set R9, R12, R13 values
+ * If the picture is using overscan (more than 16384 bytes)
+ * we produce a iMPdraw v2 format autoloading file.
+ * see http://orgams.wikidot.com/le-format-impdraw-v2
+ *
+ * If the picture is not using overscan (standard resolutions,
+ * < 16384 screen buffer) a BASIC loader is saved.
+ *
+ * @todo Add possibility to set R9 value
  * @todo Add OCP packing support
- * @todo Add possibility to include AMSDOS header, with proper loading
- *       address guessed from r12/r13 values.
  */
 void Save_SCR(T_IO_Context * context)
 {
   int i, j;
   unsigned char* output;
   unsigned long outsize = 0;
-  unsigned char r1 = 0;
+  unsigned char r1 = 0; // Horizontal Displayed. Standard value is 40 (=80 bytes)
   int cpc_mode;
   FILE* file;
   int cpc_plus_pal = 0;
-  unsigned short load_address = 0xC000;
+  unsigned short load_address = 0xC000; // Standard CPC screen address
   unsigned short exec_address = 0xC7D0;
   int overscan;
   byte cpc_hw_pal[16];
-  byte r12 = 0x0C | 0x30;
+  byte r12 = 0x0C | 0x30; // set Display Start Address at C000
   byte r13 = 0;
 
   switch(context->Ratio)
   {
     case PIXEL_WIDE:
     case PIXEL_WIDE2:
-      cpc_mode = 0;
+      cpc_mode = 0; // 16 colors, 2 pixels per byte
       overscan = (context->Width * context->Height) > (16384 * 2);
       break;
     case PIXEL_TALL:
     case PIXEL_TALL2:
     case PIXEL_TALL3:
-      cpc_mode = 2;
+      cpc_mode = 2; // 2 colors, 8 pixels per byte
       overscan = (context->Width * context->Height) > (16384 * 8);
       break;
     default:
-      cpc_mode = 1;
+      cpc_mode = 1; // 4 colors, 4 pixels per byte
       overscan = (context->Width * context->Height) > (16384 * 4);
       break;
   }
   if (overscan)
   {
     // format iMP v2
-    load_address = 0x170;
+    load_address = 0x170; // BASIC program at 0x170
     // picture at 0x200
     r12 = 0x0C | (0x200 >> 9);
     r13 = (0x200 >> 1) & 0xff;
-    exec_address = 0; // BASIC program !
+    exec_address = 0; // BASIC program
   }
 
   CPC_set_HW_palette(context->Palette + 0x40);
@@ -1105,7 +1130,8 @@ void Test_CM5(T_IO_Context * context, FILE * file)
  * Load Amstrad CPC "Mode 5" picture
  *
  * Only support 288x256 resolution as the Mode 5 Viewer app only handles this
- * single resoltion.
+ * single resolution.
+ * see https://www.cpc-power.com/index.php?page=detail&num=12905
  */
 void Load_CM5(T_IO_Context* context)
 {
@@ -1247,18 +1273,27 @@ void Load_CM5(T_IO_Context* context)
 
 }
 
-
+/**
+ * Save a CPC Mode 5 picture.
+ * Resolution is fixed to 288x256.
+ * The pictures uses 5 layers. 4 for defining the "inks"
+ * the 5th to select one of the 4 inks.
+ *
+ * - Layer 1 : 1 color Only
+ * - Layer 2 and 3 : 1 color/line
+ * - Layer 4 : 1 color / 48x1 block
+ * - Layer 5 : CPC mode 2 288x256 picture.
+ *
+ * The .CM5 file contains the inks from layers 1-4,
+ * the .GFX file contains the pixel data in linear fashion
+ * @todo Check picture has 5 layers
+ * @todo Check the constraints on the layers
+ * @see https://www.cpc-power.com/index.php?page=detail&num=12905
+ */
 void Save_CM5(T_IO_Context* context)
 {
   FILE* file;
   int tx, ty;
-
-  // TODO: Check picture has 5 layers
-  // TODO: Check the constraints on the layers
-  // Layer 1 : 1 color Only
-  // Layer 2 and 3 : 1 color/line
-  // Layer 4 : 1 color / 48x1 block
-  // TODO: handle filesize
 
   if (!(file = Open_file_write(context)))
   {
@@ -1320,22 +1355,23 @@ void Save_CM5(T_IO_Context* context)
 }
 
 
-/* Amstrad CPC 'PPH' for Perfect Pix.
-// This is a format designed by Rhino.
-// There are 3 modes:
-// - Mode 'R': 1:1 pixels, 16 colors from the CPC 27 color palette.
-//   (this is implemented on CPC as two pictures with wide pixels, the "odd" one
-//   being shifted half a pixel to the right), and flipping)
-// - Mode 'B0': wide pixels, up to 126 out of 378 colors.
-//   (this is implemented as two pictures with wide pixels, sharing the same 16
-//   color palette, and flipping)
-// - Mode 'B1': 1:1 pixels, 1 fixed color, up to 34 palettes of 9 colors
-//   (actually 4 colors + flipping)
-//
-// - The standard CPC formats can also be encapsulated into a PPH file.
-//
-// http://www.pouet.net/prod.php?which=67770#c766959
-*/
+/**
+ * Amstrad CPC 'PPH' for Perfect Pix.
+ * This is a format designed by Rhino.
+ * There are 3 modes:
+ * - Mode 'R': 1:1 pixels, 16 colors from the CPC 27 color palette.
+ *   (this is implemented on CPC as two pictures with wide pixels, the "odd" one
+ *   being shifted half a pixel to the right), and flipping)
+ * - Mode 'B0': wide pixels, up to 126 out of 378 colors.
+ *   (this is implemented as two pictures with wide pixels, sharing the same 16
+ *   color palette, and flipping)
+ * - Mode 'B1': 1:1 pixels, 1 fixed color, up to 34 palettes of 9 colors
+ *   (actually 4 colors + flipping)
+ *
+ * - The standard CPC formats can also be encapsulated into a PPH file.
+ *
+ * @see http://www.pouet.net/prod.php?which=67770#c766959
+ */
 void Test_PPH(T_IO_Context * context, FILE * file)
 {
   FILE *file_oddeve;
@@ -1697,6 +1733,9 @@ void Load_PPH(T_IO_Context* context)
   File_error = 0;
 }
 
+/**
+ * Not yet implemented
+ */
 void Save_PPH(T_IO_Context* context)
 {
   (void)context; // unused
@@ -1713,3 +1752,5 @@ void Save_PPH(T_IO_Context* context)
     // R: use 16 used colors (or 16 first?)
     // B1: find the 16 colors used in a line? Or assume they are in-order already?
 }
+
+/* @} */
