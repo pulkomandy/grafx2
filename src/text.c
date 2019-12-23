@@ -92,7 +92,6 @@ typedef struct T_Font
  * Head of the font linked list
  */
 T_Font * font_list_start;
-int Nb_fonts;
 
 // Inspiré par Allegro
 #define EXTID(a,b,c) ((((a)&255)<<16) | (((b)&255)<<8) | (((c)&255)))
@@ -116,7 +115,6 @@ static void Insert_font(T_Font * font)
   {
     // Premiere (liste vide)
     font_list_start = font;
-    Nb_fonts++;
   }
   else
   {
@@ -134,7 +132,6 @@ static void Insert_font(T_Font * font)
       // Avant la premiere
       font->Next=font_list_start;
       font_list_start=font;
-      Nb_fonts++;
     }
     else
     {
@@ -152,7 +149,6 @@ static void Insert_font(T_Font * font)
       }
       font->Next=searched_font->Next;
       searched_font->Next=font;
-      Nb_fonts++;
     }
   }
 }
@@ -248,36 +244,37 @@ static void Add_font(const char *name, const char * font_name)
 
 
 // Trouve le nom d'une fonte par son numéro
-char * Font_name(int index)
+const char * Font_name(int index)
 {
   T_Font *font = font_list_start;
-  if (index<0 ||index>=Nb_fonts)
+  if (index < 0 || font == NULL)
     return "";
   while (index--)
+  {
     font = font->Next;
+    if (font == NULL)
+      return "";
+  }
   return font->Name;
 }
 
 
 // Trouve le libellé d'affichage d'une fonte par son numéro
 // Renvoie un pointeur sur un buffer statique de 20 caracteres.
-char * Font_label(int index)
+const char * Font_label(int index)
 {
-  T_Font *font;
-  static char label[20];
+  T_Font *font = font_list_start;
   
-  strcpy(label, "                   ");
-  
-  // Recherche de la fonte
   font = font_list_start;
-  if (index<0 ||index>=Nb_fonts)
-    return label;
+  if (index < 0 || font == NULL)
+    return "                   ";
   while (index--)
+  {
     font = font->Next;
-  
-  // Libellé
-  strcpy(label, font->Label);
-  return label;
+    if (font == NULL)
+      return "                   ";
+  }
+  return font->Label;
 }
 
 
@@ -285,11 +282,28 @@ char * Font_label(int index)
 int TrueType_font(int index)
 {
   T_Font *font = font_list_start;
-  if (index<0 ||index>=Nb_fonts)
+  if (index < 0 || font == NULL)
     return 0;
   while (index--)
+  {
     font = font->Next;
+    if (font == NULL)
+      return 0;
+  }
   return font->Is_truetype;
+}
+
+int Font_count(void)
+{
+  T_Font *font = font_list_start;
+  int count = 0;
+
+  while (font != NULL)
+  {
+    count++;
+    font = font->Next;
+  }
+  return count;
 }
 
 #if defined(WIN32) && defined(NOTTF)
@@ -328,7 +342,6 @@ void Init_text(void)
   
   // Initialisation des fontes
   font_list_start = NULL;
-  Nb_fonts=0;
   // Parcours du répertoire "fonts"
   directory_name = Filepath_append_to_dir(Data_directory, FONTS_SUBDIRECTORY);
   For_each_file(directory_name, Add_font);
@@ -793,11 +806,15 @@ byte *Render_text(const char *str, int font_number, int size, int antialias, int
   #endif
   
   // Verification type de la fonte
-  if (font_number<0 ||font_number>=Nb_fonts)
+  if (font_number < 0 || font == NULL)
     return NULL;
     
   while (index--)
+  {
     font = font->Next;
+    if (font == NULL)
+      return NULL;
+  }
   if (font->Is_truetype)
   {
   #if !defined(NOTTF)

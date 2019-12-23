@@ -5056,7 +5056,7 @@ void Button_Text(int btn)
   Print_in_window_underscore(206,89,"Italic", MC_Dark, MC_Light,1);
 
   // Scroller des fontes
-  font_scroller = Window_set_scroller_button(165,35,NB_FONTS*8,Nb_fonts,NB_FONTS,list_start); // 5
+  font_scroller = Window_set_scroller_button(165,35,NB_FONTS*8,Font_count(),NB_FONTS,list_start); // 5
   // Liste des fontes disponibles
   font_list_button = Window_set_special_button(8,35,152,NB_FONTS*8,0); // 6
   Window_display_frame_in(7, 33, 154, NB_FONTS*8+4);

@@ -48,12 +48,11 @@ void Add_font(const char *name);
 byte *Render_text(const char *str, int font_number, int size, int antialias, int bold, int italic, int *width, int *height, T_Palette palette);
 
 /// Finds a label to display for a font declared with ::Add_font().
-char * Font_label(int index);
+const char * Font_label(int index);
 /// Finds the filename of a font declared with ::Add_font().
-char * Font_name(int index);
+const char * Font_name(int index);
 /// Returns true if the font of this number is TrueType, false if it's a SFont bitmap.
 int TrueType_font(int index);
 ///
-/// Number of fonts declared with a series of ::Add_font(). This is public for
-/// convenience, but functionaly it is read-only.
-extern int Nb_fonts;
+/// Number of fonts declared with a series of ::Add_font()
+int Font_count(void);
