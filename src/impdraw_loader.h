@@ -2,9 +2,9 @@
  */
 /**
  * Amstrad CPC Loader for overscan picture.
- * Locomotive BASIC + Z80 Code
- * (c) Ast/iMP4CT
- * https://amstradplus.forumforever.com/t462-iMPdraw-v2-0.htm?start=45
+ * Locomotive BASIC + Z80 Code.
+ * @author Ast/iMP4CT
+ * @see https://amstradplus.forumforever.com/t462-iMPdraw-v2-0.htm?start=45
  */
 static const unsigned char impdraw_loader[] = {
   0x0e, 0x00, 0x0a, 0x00, 0x01, 0xc0, 0x20, 0x69, // starts at &0170

@@ -1,7 +1,10 @@
 /* vim:expandtab:ts=2 sw=2:
  */
 /**
- * author : unknown
+ * CPC Z80 code to be put in a "gap" of an image (at address &C7D0).
+ * Sets the screen mode (from &D7D0), then sets the border and the palette
+ * (Firmware colors) at &D7D1
+ * @author unknown
  */
 static const unsigned char cpc_scr_simple_loader[] = {
  0x3a, 0xd0, 0xd7,  // C7D0 LD A,(D7D0)
