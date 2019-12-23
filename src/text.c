@@ -73,6 +73,9 @@
 #include "loadsave.h"
 #include "SFont.h"
 
+/**
+ * Element of the font linked list
+ */
 typedef struct T_Font
 {
   char * Name;
@@ -84,7 +87,10 @@ typedef struct T_Font
   struct T_Font * Next;
   struct T_Font * Previous;
 } T_Font;
-// Liste chainée des polices de texte
+
+/**
+ * Head of the font linked list
+ */
 T_Font * font_list_start;
 int Nb_fonts;
 

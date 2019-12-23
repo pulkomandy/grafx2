@@ -542,10 +542,13 @@ typedef struct {
 
 } T_Paintbrush;
 
+/**
+ * Element of a circular linked list in the tile map
+ */
 typedef struct
 {
-  int Previous;
-  int Next;
+  int Previous; ///< Previous similar tile in the linked list
+  int Next;     ///< Next similar tile in the linked list
   byte Flipped; ///< 0:no, 1:horizontally, 2:vertically, 3:both
 } T_Tile;
 
