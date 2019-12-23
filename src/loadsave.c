@@ -1191,7 +1191,7 @@ void Load_SDL_Image(T_IO_Context *context)
 /// Load an arbitrary Surface.
 /// @param full_name Full (absolute) path of the file to load.
 /// @param gradients Pass the address of a target T_Gradient_array if you want the gradients, NULL otherwise
-T_GFX2_Surface * Load_surface(char *full_name, T_Gradient_array *gradients)
+T_GFX2_Surface * Load_surface(const char *full_name, T_Gradient_array *gradients)
 {
   T_GFX2_Surface * bmp=NULL;
   T_IO_Context context;
@@ -1843,7 +1843,7 @@ void Destroy_context(T_IO_Context *context)
 }
 
 /// Setup for loading a preview in fileselector
-void Init_context_preview(T_IO_Context * context, char *file_name, char *file_directory)
+void Init_context_preview(T_IO_Context * context, const char *file_name, const char *file_directory)
 {
   memset(context, 0, sizeof(T_IO_Context));
 
@@ -1853,13 +1853,13 @@ void Init_context_preview(T_IO_Context * context, char *file_name, char *file_di
 }
 
 // Setup for loading/saving an intermediate backup
-void Init_context_backup_image(T_IO_Context * context, char *file_name, char *file_directory)
+void Init_context_backup_image(T_IO_Context * context, const char *file_name, const char *file_directory)
 {
   Init_context_layered_image(context, file_name, file_directory);
 }
 
 /// Setup for loading/saving the current main image
-void Init_context_layered_image(T_IO_Context * context, char *file_name, char *file_directory)
+void Init_context_layered_image(T_IO_Context * context, const char *file_name, const char *file_directory)
 {
   int i;
 
@@ -1901,7 +1901,7 @@ void Init_context_layered_image(T_IO_Context * context, char *file_name, char *f
 //}
 
 /// Setup for loading/saving the user's brush
-void Init_context_brush(T_IO_Context * context, char *file_name, char *file_directory)
+void Init_context_brush(T_IO_Context * context, const char *file_name, const char *file_directory)
 {
   memset(context, 0, sizeof(T_IO_Context));
 
@@ -1923,7 +1923,7 @@ void Init_context_brush(T_IO_Context * context, char *file_name, char *file_dire
 }
 
 // Setup for loading an image into a new GFX2 surface.
-void Init_context_surface(T_IO_Context * context, char *file_name, char *file_directory)
+void Init_context_surface(T_IO_Context * context, const char *file_name, const char *file_directory)
 {
   memset(context, 0, sizeof(T_IO_Context));
 

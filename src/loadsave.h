@@ -126,19 +126,19 @@ void Pixel_load_in_brush (word x_pos, word y_pos, byte color);
 */
 
 // Setup for loading a preview in fileselector
-void Init_context_preview(T_IO_Context * context, char *file_name, char *file_directory);
+void Init_context_preview(T_IO_Context * context, const char *file_name, const char *file_directory);
 // Setup for loading/saving the current main image
-void Init_context_layered_image(T_IO_Context * context, char *file_name, char *file_directory);
+void Init_context_layered_image(T_IO_Context * context, const char *file_name, const char *file_directory);
 // Setup for loading/saving an intermediate backup
-void Init_context_backup_image(T_IO_Context * context, char *file_name, char *file_directory);
+void Init_context_backup_image(T_IO_Context * context, const char *file_name, const char *file_directory);
 // Setup for loading/saving the flattened version of current main image
-void Init_context_flat_image(T_IO_Context * context, char *file_name, char *file_directory);
+void Init_context_flat_image(T_IO_Context * context, const char *file_name, const char *file_directory);
 // Setup for loading/saving the user's brush
-void Init_context_brush(T_IO_Context * context, char *file_name, char *file_directory);
+void Init_context_brush(T_IO_Context * context, const char *file_name, const char *file_directory);
 // Setup for saving an arbitrary undo/redo step, from either the main or spare page. 
 void Init_context_history_step(T_IO_Context * context, T_Page *page);
 // Setup for loading an image into a new GFX2 surface.
-void Init_context_surface(T_IO_Context * context, char *file_name, char *file_directory);
+void Init_context_surface(T_IO_Context * context, const char *file_name, const char *file_directory);
 
 // Cleans up resources (currently: the 24bit buffer) 
 void Destroy_context(T_IO_Context *context);
@@ -191,7 +191,7 @@ void Image_emergency_backup(void);
 ///
 /// Load an arbitrary GFX2_Surface.
 /// @param gradients Pass the address of a target T_Gradient_array if you want the gradients, NULL otherwise
-T_GFX2_Surface * Load_surface(char *full_name, T_Gradient_array *gradients);
+T_GFX2_Surface * Load_surface(const char *full_name, T_Gradient_array *gradients);
 
 
 /*
