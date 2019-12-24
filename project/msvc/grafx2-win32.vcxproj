@@ -82,11 +82,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\6502.c">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CPU_6502_STATIC;CPU_6502_USE_LOCAL_HEADER;CPU_6502_DEPENDENCIES_H="6502types.h";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CPU_6502_STATIC;CPU_6502_USE_LOCAL_HEADER;CPU_6502_DEPENDENCIES_H="6502types.h";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
     <ClCompile Include="..\..\src\brush.c" />
     <ClCompile Include="..\..\src\brush_ops.c" />
     <ClCompile Include="..\..\src\buttons.c" />
     <ClCompile Include="..\..\src\buttons_effects.c" />
+    <ClCompile Include="..\..\src\c64formats.c" />
+    <ClCompile Include="..\..\src\c64load.c" />
     <ClCompile Include="..\..\src\colorred.c" />
+    <ClCompile Include="..\..\src\cpcformats.c" />
     <ClCompile Include="..\..\src\engine.c" />
     <ClCompile Include="..\..\src\factory.c" />
     <ClCompile Include="..\..\src\fileformats.c" />
@@ -97,6 +104,7 @@
     <ClCompile Include="..\..\src\graph.c" />
     <ClCompile Include="..\..\src\help.c" />
     <ClCompile Include="..\..\src\hotkeys.c" />
+    <ClCompile Include="..\..\src\ifformat.c" />
     <ClCompile Include="..\..\src\init.c" />
     <ClCompile Include="..\..\src\input.c" />
     <ClCompile Include="..\..\src\io.c" />
@@ -105,15 +113,20 @@
     <ClCompile Include="..\..\src\libraw2crtc.c" />
     <ClCompile Include="..\..\src\loadrecoil.c" />
     <ClCompile Include="..\..\src\loadsave.c" />
+    <ClCompile Include="..\..\src\loadsavefuncs.c" />
     <ClCompile Include="..\..\src\main.c" />
     <ClCompile Include="..\..\src\misc.c" />
     <ClCompile Include="..\..\src\miscfileformats.c" />
+    <ClCompile Include="..\..\src\motoformats.c" />
     <ClCompile Include="..\..\src\mountlist.c" />
+    <ClCompile Include="..\..\src\msxformats.c" />
     <ClCompile Include="..\..\src\oldies.c" />
     <ClCompile Include="..\..\src\operatio.c" />
     <ClCompile Include="..\..\src\op_c.c" />
+    <ClCompile Include="..\..\src\packbits.c" />
     <ClCompile Include="..\..\src\pages.c" />
     <ClCompile Include="..\..\src\palette.c" />
+    <ClCompile Include="..\..\src\pngformat.c" />
     <ClCompile Include="..\..\src\pversion.c" />
     <ClCompile Include="..\..\src\pxdouble.c" />
     <ClCompile Include="..\..\src\pxquad.c" />
@@ -133,6 +146,7 @@
     <ClCompile Include="..\..\src\SFont.c" />
     <ClCompile Include="..\..\src\shade.c" />
     <ClCompile Include="..\..\src\special.c" />
+    <ClCompile Include="..\..\src\stformats.c" />
     <ClCompile Include="..\..\src\text.c" />
     <ClCompile Include="..\..\src\tifformat.c" />
     <ClCompile Include="..\..\src\tiles.c" />
@@ -143,9 +157,13 @@
     <ClCompile Include="..\..\src\windows.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\6502.h" />
+    <ClInclude Include="..\..\src\6502types.h" />
     <ClInclude Include="..\..\src\bitcount.h" />
     <ClInclude Include="..\..\src\brush.h" />
     <ClInclude Include="..\..\src\buttons.h" />
+    <ClInclude Include="..\..\src\c64load.h" />
+    <ClInclude Include="..\..\src\c64picview_inc.h" />
     <ClInclude Include="..\..\src\colorred.h" />
     <ClInclude Include="..\..\src\const.h" />
     <ClInclude Include="..\..\src\engine.h" />
@@ -170,11 +188,13 @@
     <ClInclude Include="..\..\src\layers.h" />
     <ClInclude Include="..\..\src\libraw2crtc.h" />
     <ClInclude Include="..\..\src\loadsave.h" />
+    <ClInclude Include="..\..\src\loadsavefuncs.h" />
     <ClInclude Include="..\..\src\misc.h" />
     <ClInclude Include="..\..\src\mountlist.h" />
     <ClInclude Include="..\..\src\oldies.h" />
     <ClInclude Include="..\..\src\operatio.h" />
     <ClInclude Include="..\..\src\op_c.h" />
+    <ClInclude Include="..\..\src\packbits.h" />
     <ClInclude Include="..\..\src\pages.h" />
     <ClInclude Include="..\..\src\palette.h" />
     <ClInclude Include="..\..\src\pxdouble.h" />
