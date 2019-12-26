@@ -41,6 +41,13 @@ typedef byte * T_Bitmap256;
 
 ///////////////////////////////////////// Définition d'une table d'occurences
 
+/**
+ * Occurence table.
+ *
+ * This table is used to count the occurrence of an (RGB) pixel value in the
+ * source 24bit image. These count are then used by the median cut algorithm to
+ * decide which cluster to split.
+ */
 typedef struct
 {
   int nbb_r; // Nb de bits de précision sur les rouges
@@ -66,23 +73,26 @@ typedef struct
 
 ///////////////////////////////////////// Définition d'un ensemble de couleur
 
+/**
+ * informations used while median-cutting.
+ */
 struct S_Cluster_CutData
 {
-  // informations used while median-cutting
-  int volume; // volume of narrow covering (without margins where there are no pixels)
-  int sqdiag; // square of diagonal length (without margins)
+  int volume; ///< volume of narrow covering (without margins where there are no pixels)
+  int sqdiag; ///< square of diagonal length (without margins)
  
-  // Widest component : 0 red, 1 green, 2 blue
+  /// Widest component : 0 red, 1 green, 2 blue
   byte plus_large;
-  
 };
 
+/**
+ * information used while color reducing
+ */
 struct S_Cluster_PalData
 {
-  //  information used while color reducing	
-  byte r,g,b;      // color synthétisant l'ensemble
-  byte h;          // Chrominance
-  byte l;          // Luminosité
+  byte r,g,b;      ///< color synthétisant l'ensemble
+  byte h;          ///< Hue / Chrominance
+  byte l;          ///< Luminosity / Luminosité
 };
 
 union U_Cluster_Data
@@ -91,6 +101,9 @@ union U_Cluster_Data
 	struct S_Cluster_PalData pal;
 };
 
+/**
+ * Color cluster
+ */
 typedef struct S_Cluster
 {
   struct S_Cluster* next;
@@ -113,6 +126,9 @@ typedef struct S_Cluster
 
 //////////////////////////////////////// Définition d'un ensemble de clusters
 
+/**
+ * Cluster set
+ */
 typedef struct
 {
   int       nb;
@@ -124,6 +140,9 @@ typedef struct
 
 ///////////////////////////////////////////////////// Définition d'un dégradé
 
+/**
+ * Gradient
+ */
 typedef struct
 {
   int   nb_colors; // Nombre de couleurs dans le dégradé
@@ -193,12 +212,5 @@ T_Gradient_set * GS_New(T_Cluster_set * cs);
 void GS_Delete(T_Gradient_set * ds);
 void GS_Generate(T_Gradient_set * ds,T_Cluster_set * cs);
 
-
-
-// Convertie avec le plus de précision possible une image 24b en 256c
-// Renvoie s'il y a eu une erreur ou pas..
 int Convert_24b_bitmap_to_256(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette);
-
-
-
 #endif

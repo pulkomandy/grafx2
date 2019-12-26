@@ -1238,7 +1238,7 @@ int Modified_value(int value,int modif)
 }
 
 
-/// Convert a 24b image to 256 colors (with a given palette and conversion table)
+/// Convert a 24b image to 256 colors (with a given palette and conversion table).
 /// This destroys the 24b picture !
 /// Uses floyd steinberg dithering.
 void Convert_24b_bitmap_to_256_Floyd_Steinberg(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette,CT_Tree* tc)
@@ -1425,7 +1425,15 @@ static const byte precision_24b[]=
  3,3,2};
 
 
-// Give this one a 24b source, get back the 256c bitmap and its palette
+/**
+ * Converts a 24 bit picture to 256 color (color reduction)
+ * @param[out] dest The converted 8bpp picture
+ * @param[in] source the 24bpp picture
+ * @param[in] width the width of the picture
+ * @param[in] height the height of the picture
+ * @param[out] palette the palette of the converted 8bpp picture
+ * @return 0 for OK, 1 for error
+ */
 int Convert_24b_bitmap_to_256(T_Bitmap256 dest,T_Bitmap24B source,int width,int height,T_Components * palette)
 {
 #if !(defined(__GP2X__) || defined(__gp2x__) || defined(__WIZ__) || defined(__CAANOO__))
