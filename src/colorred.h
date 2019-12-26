@@ -16,24 +16,27 @@
 
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
-
-********************************************************************************
-
-    24bit RGB to 8bit indexed functions
 */
 
 #include "struct.h"
 
-/* Octree for mapping RGB to color. A bit slower than a plain conversion table in theory,
+/**
+ * @file colorred.h
+ * 24bit RGB to 8bit indexed functions
+ *
+ * Octree for mapping RGB to color. A bit slower than a plain conversion table in theory,
 but :
-  * Faster than running a search in the palette
-  * Takes less memory than the huge conversion table
-  * No loss of precision
-*/
+ * Faster than running a search in the palette
+ * Takes less memory than the huge conversion table
+ * No loss of precision
+ */
 
 #ifndef __COLORRED_H
 #define __COLORRED_H
 
+/**
+ * Color Tree node
+ */
 typedef struct CT_Node_s
 {
 	// min
@@ -62,6 +65,9 @@ typedef struct CT_Node_s
 	word children[2];
 } CT_Node;
 
+/**
+ * Color Tree
+ */
 typedef struct ColorTree_S {
 	short nodecount;
 	CT_Node nodes[511];

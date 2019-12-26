@@ -47,6 +47,9 @@ void CT_Print(CT_Node* node)
 }
 */
 
+/**
+ * insert a node in the color tree
+ */
 void CT_set(CT_Tree* colorTree, byte Rmin, byte Gmin, byte Bmin,
 	byte Rmax, byte Gmax, byte Bmax, byte index)
 {
@@ -102,10 +105,13 @@ void CT_set(CT_Tree* colorTree, byte Rmin, byte Gmin, byte Bmin,
   ++colorTree->nodecount;
 }
 
+/**
+ * find the leaf that also contains (rgb)
+ *
+ * pre condition: node contains (rgb)
+ */
 byte CT_get(CT_Tree* tree, byte r, byte g, byte b)
 {	
-	// pre condition: node contains (rgb)
-	// find the leaf that also contains (rgb)
 	
 	CT_Node* node = &tree->nodes[0];
 	
