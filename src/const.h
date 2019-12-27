@@ -159,6 +159,7 @@ enum FILE_FORMATS
   FORMAT_HGR,  ///< Apple II HGR and DHGR
   FORMAT_TIFF, ///< Tagged Image File Format
   FORMAT_GRB,  ///< HP-48 Grob
+  FORMAT_MSX,  ///< MSX formats
   FORMAT_MISC, ///< Must be last of enum: others formats recognized by SDL_image (or recoil)
   FORMAT_CLIPBOARD  ///< To load/save from/to Clipboard
 };
