@@ -1068,3 +1068,29 @@ void DHGR_set_palette(T_Components * palette)
   palette[31].G = 255;
   palette[31].B = 255;
 }
+
+void MSX_set_palette(T_Components * palette)
+{
+  static const T_Components MSX_palette[] = {
+    {0, 0, 0},
+    {32,219,32},
+    {109,255,109},
+    {32,32,255},
+    {48,109,255},
+    {182,32,32},
+    {73,219,255},
+    {255,32,32},
+    {255,109,109},
+    {219,219,32},
+    {219,219,146},
+    {32,146,32},
+    {219,73,182},
+    {182,182,182},
+    {255,255,255}
+  };
+  memcpy(palette + 1, MSX_palette, sizeof(MSX_palette));
+  // set color 0 (transparent) to a dark gray
+  palette[0].R = 32;
+  palette[0].G = 32;
+  palette[0].B = 32;
+}

@@ -33,6 +33,7 @@
 #include "loadsavefuncs.h"
 #include "io.h"
 #include "misc.h"
+#include "oldies.h"
 #include "gfx2log.h"
 #include "gfx2mem.h"
 
@@ -129,7 +130,9 @@ void Load_MSX(T_IO_Context * context)
   fclose(file);
 
   File_error = 0;
-  // TODO: load MSX palette
+  if (Config.Clear_palette)
+    memset(context->Palette, 0, sizeof(T_Palette));
+  MSX_set_palette(context->Palette);
   context->Transparent_color = 0; // Set color 0 as transparent
   Pre_load(context, 256, 192, file_size, FORMAT_MSX, PIXEL_SIMPLE, 4);
   for (row = 0; row < 24; row++)

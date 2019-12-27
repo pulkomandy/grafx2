@@ -19,6 +19,9 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 
+#ifndef OLDIES_H_DEFINED
+#define OLDIES_H_DEFINED
+
 ///@file oldies.h
 /// functions relative to old computers (Commodore 64, Thomsons MO/TO, Amstrad CPC, ZX Spectrum, etc.)
 
@@ -297,3 +300,10 @@ void HGR_set_palette(T_Components * palette);
 void DHGR_set_palette(T_Components * palette);
 
 /** @}*/
+
+/**
+ * Set the 15 color MSX palette
+ */
+void MSX_set_palette(T_Components * palette);
+
+#endif
