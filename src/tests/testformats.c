@@ -80,6 +80,7 @@ static const struct {
   TESTFMTF(GOS, "cpc/iMPdraw_GFX/SONIC.GO1", FLAG_CPCO)
   TESTFMTL(MOTO,"thomson/exocet-alientis.map")  // Format with limitations
   TESTFMTL(HGR, "apple2/hgr/pop-swordfight.hgr")  // Format with limitations
+  TESTFMTL(MSX, "msx/GAN1.SC2")
   TESTFMTL(ACBM, "iff/ACBM/Jupiter_alt.pic")
   TESTFMT(LBM, "iff/Danny_SkyTravellers_ANNO.iff")
   TESTFMT(PBM, "iff/pbm/FC.LBM")
