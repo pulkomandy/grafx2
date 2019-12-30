@@ -534,6 +534,7 @@ static const T_Help_table helptable_credits[] =
   HELP_TEXT ("  KOA : Koala Technologies")
   HELP_TEXT ("  NEO : Atari Corporation")
   HELP_TEXT ("  MOTO : Microsoft Corporation")
+  HELP_TEXT ("  MSX .SC2 : Microsoft Corporation")
   HELP_TEXT ("  PAL : ermmh... nobody (?)")
   HELP_TEXT ("  PCX : Z-Soft")
   HELP_TEXT ("  PI1,PC1 : Degas Elite")
