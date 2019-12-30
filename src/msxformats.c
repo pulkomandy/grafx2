@@ -191,8 +191,15 @@ void Load_MSX(T_IO_Context * context)
 }
 
 /**
- * Save .SC2 file
+ * Save MSX .SC2 file
  *
+ * Uses the BSAVE/BLOAD file format.
+ * equivalent to BSAVE "FILE.SC2",&H0,&H37FF,S
+ *
+ * The MSX pictures are 256x192 pixels with a 15 colors fixed palette.
+ * Color #0 is transparent.
+ * @see https://www.msx.org/wiki/BSAVE
+ * @see https://lospec.com/palette-list/msx
  * @todo save sprites
  */
 void Save_MSX(T_IO_Context * context)
