@@ -190,4 +190,73 @@ void Load_MSX(T_IO_Context * context)
   }
 }
 
+/**
+ * Save .SC2 file
+ *
+ * @todo save sprites
+ */
+void Save_MSX(T_IO_Context * context)
+{
+  FILE * file;
+  byte vram[16*1024];
+  word addr;
+  int sprite;
+  int row, col;
+
+  File_error = 1;
+  memset(vram, 0, sizeof(vram));
+  // fill name table
+  for (addr = 0x1800; addr < 0x1b00; addr++)
+    vram[addr] = addr & 0xff;
+  // set sprite attributes
+  for (sprite = 0; sprite < 32; sprite++)
+  {
+    vram[0x1B00 + sprite * 4] = 208;  // y_pos : 208=disable
+    //vram[0x1B00 + sprite * 4 + 1]; x_pos
+    //vram[0x1B00 + sprite * 4 + 2]; pattern
+    //vram[0x1B00 + sprite * 4 + 3]; color
+  }
+  // build pattern and color table
+  for (row = 0; row < 24; row++)
+  {
+    for (col = 0; col < 32; col++)
+    {
+      int x, y;
+      byte pattern = (row << 5) + col;
+      addr = ((row & 0x18) << 8) + (pattern << 3);
+      for (y = 0; y < 8; y++, addr++)
+      {
+        byte c0 = 0xff, c1 = 0xff;
+        byte bits = 0;
+        for (x = 0; x < 8; x++)
+        {
+          byte c = Get_pixel(context, (col << 3) + x, (row << 3) + y);
+          bits <<= 1;
+          if (c0 == 0xff)
+            c0 = c;
+          else if (c != c0)
+          {
+            if (c1 == 0xff)
+              c1 = c;
+            else if (c != c1)
+            {
+              GFX2_Log(GFX2_WARNING, "Color clash at (%d,%d) #%d (c0=#%d, c1=#%d)\n", (col << 3) + x, (row << 3) + y, c, c0, c1);
+            }
+            bits++;
+          }
+        }
+        vram[addr] = bits;
+        vram[0x2000 + addr] = (c0 & 0x0f) | (c1 << 4);
+      }
+    }
+  }
+  file = Open_file_write(context);
+  if (file == NULL)
+    return;
+  if (Write_byte(file, 0xfe) && Write_word_le(file, 0)
+      && Write_word_le(file, 0x37FF) && Write_word_le(file, 0)
+      && Write_bytes(file, vram, 0x3800))
+    File_error = 0;
+  fclose(file);
+}
 /* @} */

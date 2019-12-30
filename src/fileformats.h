@@ -195,6 +195,7 @@ void Load_GRB(T_IO_Context *);
 // -- MSX -------------------------------------------------------------------
 void Test_MSX(T_IO_Context *, FILE *);
 void Load_MSX(T_IO_Context *);
+void Save_MSX(T_IO_Context *);
 
 /// @}
 #endif
