@@ -37,6 +37,7 @@ void Warning_with_format(const char *template, ...)
   va_start(arg_ptr, template);
   vprintf(template, arg_ptr);
   va_end(arg_ptr);
+  putchar('\n');
 }
 
 void Error_function(int error_code, const char *filename, int line_number, const char *function_name)
@@ -93,7 +94,8 @@ T_Normal_button * Window_set_normal_button(word x_pos, word y_pos,
 
 short Window_clicked_button(void)
 {
-  return 0;
+  // return 1, which is often the OK button
+  return 1;
 }
 
 int Is_shortcut(word key, word function)

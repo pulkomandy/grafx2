@@ -1333,6 +1333,152 @@ int Save_C64_fli_monolayer(T_IO_Context *context, byte saveWhat, word loadAddr)
 }
 
 /**
+ * Encode a picture in the C64 Multicolor bitmap format.
+ *
+ * 8000 bytes bitmap, 1000 bytes screen RAM and 1000 bytes color RAM :
+ *
+ * BITS   COLOR INFORMATION COMES FROM
+ * 00     Background color #0 (screen color)
+ * 01     Upper 4 bits of Screen RAM
+ * 10     Lower 4 bits of Screen RAM
+ * 11     Color RAM nybble (nybble = 1/2 byte = 4 bits)
+ */
+static int Encode_C64_multicolor(T_IO_Context * context, byte * bitmap, byte * screen_ram, byte * color_ram, byte * background)
+{
+  int cx, cy, x, y;
+  int c[4] = {0,0,0,0};
+  int color, lut[16], bits, pixel, pos=0;
+  int cand,n,used;
+  word cols, candidates = 0, invalids = 0;
+
+  // Detect the background color the image should be using. It's the one that's
+  // used on all tiles having 4 colors.
+  for(y = 0; y < 200; y += 8)
+  {
+    for (x = 0; x < 160; x += 4)
+    {
+      cols = 0;
+
+      // Compute the usage count of each color in the tile
+      for (cy = 0; cy < 8; cy++)
+        for (cx = 0; cx < 4; cx++)
+        {
+          pixel = Get_pixel(context, x+cx,y+cy);
+          if(pixel > 15)
+          {
+            Warning_message("Color above 15 used");
+            // TODO hilite as in hires, you should stay to
+            // the fixed 16 color palette
+            return 1;
+          }
+          cols |= (1 << pixel);
+        }
+
+      cand = 0;
+      used = 0;
+      // Count the number of used colors in the tile
+      for (n = 0; n<16; n++)
+      {
+        if (cols & (1 << n))
+          used++;
+      }
+
+      if (used > 3)
+      {
+        GFX2_Log(GFX2_DEBUG, "(%3d,%3d) used=%d cols=%04x\n", x, y, used,(unsigned)cols);
+        // This is a tile that uses the background color (and 3 others)
+
+        // Try to guess which color is most likely the background one
+        for (n = 0; n<16; n++)
+        {
+          if ((cols & (1 << n)) && !((candidates | invalids) & (1 << n))) {
+            // This color is used in this tile but
+            // was not used in any other tile yet,
+            // so it could be the background one.
+            candidates |= 1 << n;
+          }
+
+          if ((cols & (1 << n)) == 0 ) {
+            // This color isn't used at all in this tile:
+            // Can't be the global background
+            invalids |= 1 << n;
+            candidates &= ~(1 << n);
+          }
+
+          if (candidates & (1 << n)) {
+            // We have a candidate, mark it as such
+            cand++;
+          }
+        }
+
+        // After checking the constraints for this tile, do we have
+        // candidate background colors left ?
+        if (cand==0)
+        {
+          Warning_message("No possible global background color");
+          return 1;
+        }
+      }
+    }
+  }
+
+	// Now just pick the first valid candidate
+	for (n = 0; n<16; n++)
+	{
+		if (candidates & (1 << n)) {
+			*background = n;
+			break;
+		}
+	}
+  GFX2_Log(GFX2_DEBUG, "Save_C64_multi() background=%d ($%x) candidates=%x invalid=%x\n",
+           (int)*background, (int)*background, (unsigned)candidates, (unsigned)invalids);
+
+
+  // Now that we know which color is the background, we can encode the cells
+  for(cy=0; cy<25; cy++)
+  {
+    for(cx=0; cx<40; cx++)
+    {
+      memset(lut, 0xff, sizeof(lut));
+      c[0] = *background;
+      lut[*background] = 0;
+      color = 1;
+
+      for(y=0;y<8;y++)
+      {
+        bits=0;
+        for(x=0;x<4;x++)
+        {
+          pixel = Get_pixel(context, cx*4+x, cy*8+y);
+          if (lut[pixel] < 0)
+          {
+            if (color < 4)
+            {
+              c[color] = pixel;
+              lut[pixel] = color;
+              color++;
+            }
+            else
+            {
+              Warning_with_format("More than 4 colors\nin 4x8 pixel cell: (%d, %d)\nRect: (%d, %d, %d, %d)", cx, cy, cx * 4, cy * 8, cx * 4 + 3, cy * 8 + 7);
+              // TODO hilite offending block
+              return 1;
+            }
+          }
+          bits = (bits << 2) | lut[pixel];
+        }
+        bitmap[pos++]=bits;
+      }
+
+      // add to screen_ram and color_ram
+      screen_ram[cx+cy*40] = (c[1] << 4) | c[2];
+      color_ram[cx+cy*40] = c[3];
+    }
+  }
+  return 0;
+}
+
+/**
  * Save a C64 multicolor picture
  *
  * @param context the IO context
@@ -1341,161 +1487,23 @@ int Save_C64_fli_monolayer(T_IO_Context *context, byte saveWhat, word loadAddr)
  */
 int Save_C64_multi(T_IO_Context *context, byte saveWhat, word loadAddr)
 {
-    /*
-    BITS     COLOR INFORMATION COMES FROM
-    00     Background color #0 (screen color)
-    01     Upper 4 bits of Screen RAM
-    10     Lower 4 bits of Screen RAM
-    11     Color RAM nybble (nybble = 1/2 byte = 4 bits)
-    */
+  FILE *file;
+  byte background = 0;
+  // FIXME allocating this on the stack is not a good idea. On some platforms
+  // the stack has a rather small size...
+  byte bitmap[8000], screen_ram[1000], color_ram[1000];
 
-    int cx,cy,x,y,c[4]={0,0,0,0},color,lut[16],bits,pixel,pos=0;
-    int cand,n,used;
-    word cols, candidates = 0, invalids = 0;
-
-    // FIXME allocating this on the stack is not a good idea. On some platforms
-    // the stack has a rather small size...
-    byte bitmap[8000],screen_ram[1000],color_ram[1000];
-
-    word numcolors;
-    dword cusage[256];
-    byte i,background=0;
-    FILE *file;
-
-    // Detect the background color the image should be using. It's the one that's
-    // used on all tiles having 4 colors.
-    for(y=0;y<200;y=y+8)
-    {
-        for (x = 0; x<160; x=x+4)
-        {
-            cols = 0;
-
-            // Compute the usage count of each color in the tile
-            for (cy=0;cy<8;cy++)
-            for (cx=0;cx<4;cx++)
-            {
-              pixel=Get_pixel(context, x+cx,y+cy);
-              if(pixel>15)
-              {
-                Warning_message("Color above 15 used");
-                // TODO hilite as in hires, you should stay to
-                // the fixed 16 color palette
-                return 1;
-              }
-              cols |= (1 << pixel);
-            }
-
-            cand = 0;
-            used = 0;
-            // Count the number of used colors in the tile
-            for (n = 0; n<16; n++)
-            {
-                if (cols & (1 << n))
-                    used++;
-            }
-
-            if (used>3)
-            {
-                GFX2_Log(GFX2_DEBUG, "(%3d,%3d) used=%d cols=%04x\n", x, y, used,(unsigned)cols);
-                // This is a tile that uses the background color (and 3 others)
-
-                // Try to guess which color is most likely the background one
-                for (n = 0; n<16; n++)
-                {
-                    if ((cols & (1 << n)) && !((candidates | invalids) & (1 << n))) {
-                        // This color is used in this tile but
-                        // was not used in any other tile yet,
-                        // so it could be the background one.
-                        candidates |= 1 << n;
-                    }
-
-                    if ((cols & (1 << n)) == 0 ) {
-                        // This color isn't used at all in this tile:
-                        // Can't be the global background
-                        invalids |= 1 << n;
-                        candidates &= ~(1 << n);
-                    }
-
-                    if (candidates & (1 << n)) {
-                        // We have a candidate, mark it as such
-                        cand++;
-                    }
-                }
-
-                // After checking the constraints for this tile, do we have
-                // candidate background colors left ?
-                if (cand==0)
-                {
-                    Warning_message("No possible global background color");
-                    return 1;
-                }
-            }
-        }
-    }
-
-	// Now just pick the first valid candidate
-	for (n = 0; n<16; n++)
-	{
-		if (candidates & (1 << n)) {
-			background = n;
-			break;
-		}
-	}
-  GFX2_Log(GFX2_DEBUG, "Save_C64_multi() background=%d ($%x) candidates=%x invalid=%x\n",
-           (int)background, (int)background, (unsigned)candidates, (unsigned)invalids);
-
-
-  // Now that we know which color is the background, we can encode the cells
-  for(cy=0; cy<25; cy++)
-  {
-    for(cx=0; cx<40; cx++)
-    {
-      numcolors=Count_used_colors_area(cusage,cx*4,cy*8,4,8);
-      if(numcolors>4)
-      {
-        Warning_with_format("More than 4 colors\nin 4x8 pixel cell: (%d, %d)\nRect: (%d, %d, %d, %d)", cx, cy, cx * 4, cy * 8, cx * 4 + 3, cy * 8 + 7);
-        // TODO hilite offending block
-        return 1;
-      }
-      color=1;
-      c[0]=background;
-      for(i=0; i<16; i++)
-      {
-        lut[i]=0;
-        if(cusage[i] && (i!=background))
-        {
-          lut[i]=color;
-          c[color]=i;
-          color++;
-        }
-      }
-      // add to screen_ram and color_ram
-      screen_ram[cx+cy*40]=c[1]<<4|c[2];
-      color_ram[cx+cy*40]=c[3];
-
-      for(y=0;y<8;y++)
-      {
-        bits=0;
-        for(x=0;x<4;x++)
-        {
-          pixel = Get_pixel(context, cx*4+x,cy*8+y);
-          bits = (bits << 2) | lut[pixel];
-        }
-        bitmap[pos++]=bits;
-      }
-    }
-  }
+  File_error = Encode_C64_multicolor(context, bitmap, screen_ram, color_ram, &background);
+  if (File_error != 0)
+    return File_error;
 
   file = Open_file_write(context);
-
-  if(!file)
+  if (file == NULL)
   {
     Warning_message("File open failed");
     File_error = 2;
     return 2;
   }
-
-  setvbuf(file, NULL, _IOFBF, 64*1024);
 
   if (loadAddr)
     Write_word_le(file,loadAddr);

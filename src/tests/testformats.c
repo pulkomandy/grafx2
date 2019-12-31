@@ -397,3 +397,92 @@ ret:
   free(context.File_directory);
   return ok;
 }
+
+int Test_C64_Formats(void)
+{
+  int ok = 0;
+  T_IO_Context context;
+  char path[256];
+  T_GFX2_Surface * testpicmulti = NULL;
+
+  memset(&context, 0, sizeof(context));
+  context.Type = CONTEXT_SURFACE;
+  context.Nb_layers = 1;
+  // Load EVILNUN.PKM
+  context_set_file_path(&context, "../tests/pic-samples/c64/multicolor/STILLIFE.rpm");
+  File_error = 0;
+  Load_C64(&context);
+  if (File_error != 0)
+  {
+    fprintf(stderr, "Failed to load reference multicolors picture\n");
+    goto ret;
+  }
+  testpicmulti = context.Surface;
+  context.Surface = NULL;
+
+  snprintf(path, sizeof(path), "/tmp/%s", "test.c64");
+  context_set_file_path(&context, path);
+
+  // save the reference picture
+  context.Surface = testpicmulti;
+  context.Target_address = context.Surface->pixels;
+  context.Pitch = context.Surface->w;
+  context.Width = context.Surface->w;
+  context.Height = context.Surface->h;
+  context.Ratio = PIXEL_WIDE;
+  memcpy(context.Palette, context.Surface->palette, sizeof(T_Palette));
+  context.Format = FORMAT_C64;
+  File_error = 0;
+  Save_C64(&context);
+  context.Surface = NULL;
+  if (File_error != 0)
+  {
+    GFX2_Log(GFX2_ERROR, "Save_C64 failed.\n");
+    ok = 0;
+  }
+  else
+  {
+    FILE * f;
+    // Test the saved file
+    f = fopen("/tmp/test.c64", "rb");
+    if (f == NULL)
+    {
+      GFX2_Log(GFX2_ERROR, "error opening %s\n", path);
+      ok = 0;
+    }
+    else
+    {
+      File_error = 1;
+      Test_C64(&context, f);
+      fclose(f);
+      if (File_error != 0)
+      {
+        GFX2_Log(GFX2_ERROR, "Test_C64 failed for file %s\n", path);
+        ok = 0;
+      }
+    }
+    memset(context.Palette, -1, sizeof(T_Palette));
+    // load the saved file
+    Load_C64(&context);
+    if (File_error != 0 || context.Surface == NULL)
+    {
+      GFX2_Log(GFX2_ERROR, "Load_C64 failed for file %s\n", path);
+      ok = 0;
+    }
+    else
+    {
+      ok = 1;
+      if (memcmp(testpicmulti->pixels, context.Surface->pixels, 160*200) != 0)
+      {
+        GFX2_Log(GFX2_ERROR, "Save_C64/Load_C64: Pixels mismatch\n");
+        ok = 0;
+      }
+    }
+  }
+ret:
+  if (testpicmulti)
+    Free_GFX2_Surface(testpicmulti);
+  free(context.File_name);
+  free(context.File_directory);
+  return ok;
+}
