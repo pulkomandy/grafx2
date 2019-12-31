@@ -98,6 +98,10 @@ void init(void)
 #endif /* ENABLE_FILENAMES_ICONV */
 }
 
+#define ESC_GREEN "\033[32m"
+#define ESC_RED   "\033[31m"
+#define ESC_RESET "\033[0m"
+
 /**
  * Test program entry point
  */
@@ -116,21 +120,21 @@ int main(int argc, char * * argv)
     printf("Testing %s :\n", tests[i].test_name);
     r = tests[i].test_func();
     if (r)
-      printf("OK\n");
+      printf(ESC_GREEN "OK" ESC_RESET "\n");
     else {
-      printf("FAILED\n");
+      printf(ESC_RED "FAILED" ESC_RESET "\n");
       fail++;
     }
   }
 
   if (fail == 0)
   {
-    printf("All tests succesfull\n");
+    printf(ESC_GREEN "All tests succesfull" ESC_RESET "\n");
     return 0;
   }
   else
   {
-    printf("%d tests failed\n", fail);
+    printf(ESC_RED "%d tests failed" ESC_RESET "\n", fail);
     return 1;
   }
 }
