@@ -102,13 +102,20 @@ static byte C64_mem_read(void *context, word address)
   if ((c64->ram[1] & 2) && address >= 0xe000)
   {
     GFX2_Log(GFX2_WARNING, "** ROM ** read($%04x)\n", address);
+    // $FFE4 GETIN
+    // make it return 0 (an Z=1) like if no key is pressed
     if (address == 0xffe4)
+    {
       c64->keyjoyread++;
+      return 0xA9;  // LDA #$xx
+    }
+    if (address == 0xffe5)
+      return 0x00;  // 2nd byte of LDA #$00
     return 0x60;  // RTS
   }
     
   if ((c64->ram[1] & 4) &&
-      (address >= 0xd000) && (address < 0xe000))
+      (((address >= 0xd000) && (address < 0xd800)) || ((address >= 0xdc00) && (address < 0xe000))))
   {
     if ((address & 0xff00) == 0xd000)
     {
