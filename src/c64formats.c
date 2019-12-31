@@ -1646,6 +1646,104 @@ void Save_C64(T_IO_Context * context)
   }
 }
 
+#include "c64picview_inc.h"
+
+/**
+ * Pack a stream of nibbles (ignore the high 4 bits) to a file.
+ * This is designed to pack the color RAM data for VIC-II, as
+ * the color RAM is only 4 bits.
+ *
+ * The output format is a stream of bytes of the following format :
+ * CD  C = (16 - count), D = DATA (4bits)
+ */
+static int C64_color_ram_pack(FILE * f, const byte * data, int count)
+{
+  byte previous = 0;
+  int repeat_count = 0;
+  while (count-- > 0)
+  {
+    if (repeat_count == 0)
+    {
+      previous = *data & 0x0f;
+      repeat_count = 1;
+    }
+    else if ((*data & 0x0f) == previous)
+    {
+      repeat_count++;
+      if (repeat_count >= 16)
+      {
+        if (!Write_byte(f, previous))
+          return 0;
+        repeat_count = 0;
+      }
+    }
+    else
+    {
+      if (!Write_byte(f, ((16 - repeat_count) << 4) | previous))
+        return 0;
+      previous = *data & 0x0f;
+      repeat_count = 1;
+    }
+    data++;
+  }
+  if (repeat_count > 0)
+  {
+    if (!Write_byte(f, ((16 - repeat_count) << 4) | previous))
+      return 0;
+  }
+  return 1;
+}
+
+/**
+ * Save autoloading C64 picture
+ *
+ * @todo handle more modes than multicolor
+ */
+void Save_PRG(T_IO_Context * context)
+{
+  FILE *file;
+  byte background = 0;
+  byte bitmap[8000], screen_ram[1000], color_ram[1000];
+  enum c64_format saveFormat = F_invalid;
+
+  if (((context->Width != 320) && (context->Width != 160)) || context->Height != 200)
+  {
+    Warning_message("must be 320x200 or 160x200");
+    File_error = 1;
+    return;
+  }
+
+  saveFormat = (context->Width == 320) ? F_hires : F_multi;
+  File_error = 1;
+  Set_saving_layer(context, 0);
+  File_error = Encode_C64_multicolor(context, bitmap, screen_ram, color_ram, &background);
+  if (File_error == 0)
+  {
+    file = Open_file_write(context);
+    if (file == NULL)
+    {
+      File_error = 2;
+      return;
+    }
+    if (!Write_bytes(file, picview_prg, sizeof(picview_prg)))
+      File_error = 2;
+    Write_byte(file, 0x30); // Mode : Bitmap + Multicolor
+    // TODO : use packbits
+    Write_byte(file, 0x10); // bitmap / no packing
+    Write_bytes(file, bitmap, 8000);
+    Write_byte(file, 0x20); // screen RAM / no packing
+    Write_bytes(file, screen_ram, 1000);
+    //Write_byte(file, 0x30); // color RAM / no packing
+    //Write_bytes(file, color_ram, 1000);
+    Write_byte(file, 0x32); // color RAM / special color RAM packing
+    C64_color_ram_pack(file, color_ram, 1000);
+    Write_byte(file, 0x42); // border/background/etc. / color ram RLE packing
+    Write_byte(file, background | 0x10);
+    Write_byte(file, 0); // end of file
+    fclose(file);
+  }
+}
+
 
 /////////////////////////// pixcen *.GPX ///////////////////////////
 void Test_GPX(T_IO_Context * context, FILE * file)

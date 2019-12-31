@@ -74,7 +74,7 @@ static const struct {
   TESTFMT(BMP, "bmp/test8.bmp")
   TESTFMTL(ICO, "ico/punzip.ico")               // Format with limitations
   TESTFMTF(C64, "c64/multicolor/ARKANOID.KOA", FLAG_C64)
-  TESTFMTL(PRG, "c64/multicolor/speedball2_loading_jonegg.prg")
+  TESTFMTF(PRG, "c64/multicolor/speedball2_loading_jonegg.prg", FLAG_C64)
   TESTFMTL(GPX, "c64/pixcen/Cyberbird.gpx")
   TESTFMTF(SCR, "cpc/scr/DANCEOFF.SCR", FLAG_CPCO)
   TESTFMTL(CM5, "cpc/mode5/spidey.cm5")         // Format with limitations
