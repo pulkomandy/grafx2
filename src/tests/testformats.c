@@ -46,6 +46,8 @@
 #define FLAG_16C 1
 // 16 color 192x272 format. CPC overscan
 #define FLAG_CPCO 2
+// Commodore 64 format
+#define FLAG_C64 4
 
 // Load/Save
 #define TESTFMTF(fmt, sample, flags) { FORMAT_ ## fmt, # fmt, Test_ ## fmt, Load_ ## fmt, Save_ ## fmt, flags, sample },
@@ -71,7 +73,7 @@ static const struct {
   TESTFMTL(FLI, "autodesk_FLI_FLC/2noppaa.fli")
   TESTFMT(BMP, "bmp/test8.bmp")
   TESTFMTL(ICO, "ico/punzip.ico")               // Format with limitations
-  TESTFMTL(C64, "c64/multicolor/ARKANOID.KOA")  // Format with limitations
+  TESTFMTF(C64, "c64/multicolor/ARKANOID.KOA", FLAG_C64)
   TESTFMTL(PRG, "c64/multicolor/speedball2_loading_jonegg.prg")
   TESTFMTL(GPX, "c64/pixcen/Cyberbird.gpx")
   TESTFMTF(SCR, "cpc/scr/DANCEOFF.SCR", FLAG_CPCO)
@@ -287,6 +289,8 @@ int Test_Save(void)
   {
     if (formats[i].Save == NULL)
       continue;
+    if (formats[i].flags & FLAG_C64)
+      continue;
     GFX2_Log(GFX2_DEBUG, "Testing format %s (Save)\n", formats[i].name);
     snprintf(path, sizeof(path), "%s/%s.%s", tmpdir, "test", formats[i].name);
     context_set_file_path(&context, path);
@@ -400,6 +404,7 @@ ret:
 
 int Test_C64_Formats(void)
 {
+  int i;
   int ok = 0;
   T_IO_Context context;
   char path[256];
@@ -408,7 +413,7 @@ int Test_C64_Formats(void)
   memset(&context, 0, sizeof(context));
   context.Type = CONTEXT_SURFACE;
   context.Nb_layers = 1;
-  // Load EVILNUN.PKM
+  // Load a multicolor picture
   context_set_file_path(&context, "../tests/pic-samples/c64/multicolor/STILLIFE.rpm");
   File_error = 0;
   Load_C64(&context);
@@ -420,62 +425,70 @@ int Test_C64_Formats(void)
   testpicmulti = context.Surface;
   context.Surface = NULL;
 
-  snprintf(path, sizeof(path), "/tmp/%s", "test.c64");
-  context_set_file_path(&context, path);
+  ok = 1;
+  for (i = 0; ok && formats[i].name != NULL; i++)
+  {
+    if (formats[i].Save == NULL)
+      continue;
+    if (!(formats[i].flags & FLAG_C64))
+      continue;
+    GFX2_Log(GFX2_DEBUG, "Testing format %s (Save)\n", formats[i].name);
+    snprintf(path, sizeof(path), "/tmp/%s.%s", "test", formats[i].name);
+    context_set_file_path(&context, path);
 
-  // save the reference picture
-  context.Surface = testpicmulti;
-  context.Target_address = context.Surface->pixels;
-  context.Pitch = context.Surface->w;
-  context.Width = context.Surface->w;
-  context.Height = context.Surface->h;
-  context.Ratio = PIXEL_WIDE;
-  memcpy(context.Palette, context.Surface->palette, sizeof(T_Palette));
-  context.Format = FORMAT_C64;
-  File_error = 0;
-  Save_C64(&context);
-  context.Surface = NULL;
-  if (File_error != 0)
-  {
-    GFX2_Log(GFX2_ERROR, "Save_C64 failed.\n");
-    ok = 0;
-  }
-  else
-  {
-    FILE * f;
-    // Test the saved file
-    f = fopen("/tmp/test.c64", "rb");
-    if (f == NULL)
+    // save the reference picture
+    context.Surface = testpicmulti;
+    context.Target_address = context.Surface->pixels;
+    context.Pitch = context.Surface->w;
+    context.Width = context.Surface->w;
+    context.Height = context.Surface->h;
+    context.Ratio = PIXEL_WIDE;
+    memcpy(context.Palette, context.Surface->palette, sizeof(T_Palette));
+    context.Format = formats[i].format;
+    File_error = 0;
+    formats[i].Save(&context);
+    context.Surface = NULL;
+    if (File_error != 0)
     {
-      GFX2_Log(GFX2_ERROR, "error opening %s\n", path);
+      GFX2_Log(GFX2_ERROR, "Save_%s failed.\n", formats[i].name);
       ok = 0;
     }
     else
     {
-      File_error = 1;
-      Test_C64(&context, f);
-      fclose(f);
-      if (File_error != 0)
+      FILE * f;
+      // Test the saved file
+      f = fopen(path, "rb");
+      if (f == NULL)
       {
-        GFX2_Log(GFX2_ERROR, "Test_C64 failed for file %s\n", path);
+        GFX2_Log(GFX2_ERROR, "error opening %s\n", path);
         ok = 0;
       }
-    }
-    memset(context.Palette, -1, sizeof(T_Palette));
-    // load the saved file
-    Load_C64(&context);
-    if (File_error != 0 || context.Surface == NULL)
-    {
-      GFX2_Log(GFX2_ERROR, "Load_C64 failed for file %s\n", path);
-      ok = 0;
-    }
-    else
-    {
-      ok = 1;
-      if (memcmp(testpicmulti->pixels, context.Surface->pixels, 160*200) != 0)
+      else
       {
-        GFX2_Log(GFX2_ERROR, "Save_C64/Load_C64: Pixels mismatch\n");
+        File_error = 1;
+        formats[i].Test(&context, f);
+        fclose(f);
+        if (File_error != 0)
+        {
+          GFX2_Log(GFX2_ERROR, "Test_%s failed for file %s\n", formats[i].name, path);
+          ok = 0;
+        }
+      }
+      memset(context.Palette, -1, sizeof(T_Palette));
+      // load the saved file
+      formats[i].Load(&context);
+      if (File_error != 0 || context.Surface == NULL)
+      {
+        GFX2_Log(GFX2_ERROR, "Load_%s failed for file %s\n", formats[i].name, path);
         ok = 0;
+      }
+      else
+      {
+        if (memcmp(testpicmulti->pixels, context.Surface->pixels, 160*200) != 0)
+        {
+          GFX2_Log(GFX2_ERROR, "Save_%s/Load_%s: Pixels mismatch\n", formats[i].name, formats[i].name);
+          ok = 0;
+        }
       }
     }
   }
