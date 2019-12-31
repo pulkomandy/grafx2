@@ -131,7 +131,7 @@ colorrestore:
 	; special color RAM compression (only low nibble matters)
 	; high nibble is count
 colordepack:
-	dex
+	;dex
 colordepacklp:
 	jsr readbyte
 colordepacklp2:
@@ -141,7 +141,7 @@ colordepacklp2:
 	dex
 	bpl +
 	rts
-*	cld
+*	clc
 	adc #$10
 	bcs colordepacklp
 	bcc colordepacklp2
