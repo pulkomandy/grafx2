@@ -489,6 +489,8 @@ int Test_C64_Formats(void)
           GFX2_Log(GFX2_ERROR, "Save_%s/Load_%s: Pixels mismatch\n", formats[i].name, formats[i].name);
           ok = 0;
         }
+        Free_GFX2_Surface(context.Surface);
+        context.Surface = NULL;
       }
     }
   }
