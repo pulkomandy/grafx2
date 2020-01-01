@@ -42,6 +42,7 @@
 #include "oldies.h"
 #include "c64load.h"
 #include "keycodes.h"
+#include "packbits.h"
 #include "gfx2mem.h"
 #include "gfx2log.h"
 
@@ -1655,11 +1656,14 @@ void Save_C64(T_IO_Context * context)
  *
  * The output format is a stream of bytes of the following format :
  * CD  C = (16 - count), D = DATA (4bits)
+ *
+ * @return the output stream size, -1 for error
  */
 static int C64_color_ram_pack(FILE * f, const byte * data, int count)
 {
   byte previous = 0;
   int repeat_count = 0;
+  int output_count = 0;
   while (count-- > 0)
   {
     if (repeat_count == 0)
@@ -1674,6 +1678,7 @@ static int C64_color_ram_pack(FILE * f, const byte * data, int count)
       {
         if (!Write_byte(f, previous))
           return 0;
+        output_count++;
         repeat_count = 0;
       }
     }
@@ -1681,6 +1686,7 @@ static int C64_color_ram_pack(FILE * f, const byte * data, int count)
     {
       if (!Write_byte(f, ((16 - repeat_count) << 4) | previous))
         return 0;
+      output_count++;
       previous = *data & 0x0f;
       repeat_count = 1;
     }
@@ -1689,9 +1695,10 @@ static int C64_color_ram_pack(FILE * f, const byte * data, int count)
   if (repeat_count > 0)
   {
     if (!Write_byte(f, ((16 - repeat_count) << 4) | previous))
-      return 0;
+      return -1;
+    output_count++;
   }
-  return 1;
+  return output_count;
 }
 
 /**
@@ -1701,7 +1708,6 @@ static int C64_color_ram_pack(FILE * f, const byte * data, int count)
  */
 void Save_PRG(T_IO_Context * context)
 {
-  FILE *file;
   byte background = 0;
   byte bitmap[8000], screen_ram[1000], color_ram[1000];
   enum c64_format saveFormat = F_invalid;
@@ -1719,6 +1725,9 @@ void Save_PRG(T_IO_Context * context)
   File_error = Encode_C64_multicolor(context, bitmap, screen_ram, color_ram, &background);
   if (File_error == 0)
   {
+    FILE *file;
+    int n;
+
     file = Open_file_write(context);
     if (file == NULL)
     {
@@ -1728,15 +1737,40 @@ void Save_PRG(T_IO_Context * context)
     if (!Write_bytes(file, picview_prg, sizeof(picview_prg)))
       File_error = 2;
     Write_byte(file, 0x30); // Mode : Bitmap + Multicolor
-    // TODO : use packbits
-    Write_byte(file, 0x10); // bitmap / no packing
-    Write_bytes(file, bitmap, 8000);
-    Write_byte(file, 0x20); // screen RAM / no packing
-    Write_bytes(file, screen_ram, 1000);
+    n = PackBits_pack_buffer(NULL, bitmap, 8000);
+    GFX2_Log(GFX2_DEBUG, "PackBits of bitmap : 8000 => %d bytes\n", n + 1);
+    if (n >= 0 && n < 7999)
+    {
+      Write_byte(file, 0x11); // bitmap / packbits
+      PackBits_pack_buffer(file, bitmap, 8000);
+      Write_byte(file, 0x80); // end of packbits stream marker
+    }
+    else
+    {
+      // packing was not efficient
+      Write_byte(file, 0x10); // bitmap / no packing
+      Write_bytes(file, bitmap, 8000);
+    }
+    n = PackBits_pack_buffer(NULL, screen_ram, 1000);
+    GFX2_Log(GFX2_DEBUG, "PackBits of screen RAM : 1000 => %d bytes\n", n + 1);
+    if (n >= 0 && n < 999)
+    {
+      Write_byte(file, 0x21); // screen RAM / packbits
+      PackBits_pack_buffer(file, screen_ram, 1000);
+      Write_byte(file, 0x80); // end of packbits stream marker
+    }
+    else
+    {
+      Write_byte(file, 0x20); // screen RAM / no packing
+      Write_bytes(file, screen_ram, 1000);
+    }
     //Write_byte(file, 0x30); // color RAM / no packing
     //Write_bytes(file, color_ram, 1000);
     Write_byte(file, 0x32); // color RAM / special color RAM packing
-    C64_color_ram_pack(file, color_ram, 1000);
+    n = C64_color_ram_pack(file, color_ram, 1000);
+    if (n < 0)
+      File_error = 1;
+    GFX2_Log(GFX2_DEBUG, "custom packing of color RAM : 1000 => %d bytes\n", n);
     Write_byte(file, 0x42); // border/background/etc. / color ram RLE packing
     Write_byte(file, background | 0x10);
     Write_byte(file, 0); // end of file
