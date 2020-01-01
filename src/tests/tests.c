@@ -138,10 +138,6 @@ int Test_CPC_compare_colors(void)
   return 1; // test OK
 }
 
-extern word IFF_list_size;
-void New_color(FILE * f, byte color);
-void Transfer_colors(FILE * f);
-
 /**
  * Tests for the packbits compression used in IFF ILBM, etc.
  * see http://fileformats.archiveteam.org/wiki/PackBits
@@ -177,6 +173,7 @@ int Test_Packbits(void)
   };
   const long best_packed = 7 + 22 + 23 + 131 + (138/*+2*/) + (139/*+1*/);
   byte buffer[1024];
+  T_PackBits_data pb_data;
 
   snprintf(tempfilename, sizeof(tempfilename), "/tmp/gfx2test-packbits-%lx", random());
   GFX2_Log(GFX2_DEBUG, "tempfile %s\n", tempfilename);
@@ -188,15 +185,23 @@ int Test_Packbits(void)
   }
 
   // Start encoding
-  IFF_list_size = 0;
+  PackBits_pack_init(&pb_data, f);
   for (i = 0, unpacked = 0; tests[i]; i++)
   {
     for (j = 0; tests[i][j]; j++)
     {
-      New_color(f, (byte)tests[i][j]);
+      if (PackBits_pack_add(&pb_data, (byte)tests[i][j]) < 0)
+      {
+        GFX2_Log(GFX2_ERROR, "PackBits_pack_add() failed\n");
+        return 0;
+      }
       unpacked++;
     }
-    Transfer_colors(f);
+    if (PackBits_pack_flush(&pb_data) < 0)
+    {
+      GFX2_Log(GFX2_ERROR, "PackBits_pack_flush() failed\n");
+      return 0;
+    }
   }
   packed = ftell(f);
   fclose(f);

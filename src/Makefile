@@ -810,7 +810,7 @@ OBJS = main.o init.o graph.o $(APIOBJ) misc.o special.o \
        transform.o pversion.o factory.o $(PLATFORMOBJ) \
        loadsave.o loadsavefuncs.o \
        pngformat.o motoformats.o stformats.o c64formats.o cpcformats.o \
-       ifformat.o msxformats.o \
+       ifformat.o msxformats.o packbits.o \
        fileformats.o miscfileformats.o libraw2crtc.o \
        brush_ops.o buttons_effects.o layers.o \
        oldies.o tiles.o colorred.o unicode.o gfx2surface.o \

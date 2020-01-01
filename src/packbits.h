@@ -38,4 +38,36 @@
  */
 int PackBits_unpack_from_file(FILE * f, byte * dest, unsigned int count);
 
+/**
+ * Data used by the PackBits packer
+ */
+typedef struct {
+  FILE * f;
+  int output_count;
+  byte list_size;
+  byte repetition_mode;
+  byte list[129];
+} T_PackBits_data;
+
+/**
+ * init before packing
+ *
+ * @param data storage for packbits data
+ * @param f FILE output or NULL (for no output)
+ */
+void PackBits_pack_init(T_PackBits_data * data, FILE * f);
+
+/**
+ * Add a byte to the packbits stream
+ * @return -1 for error, 0 if OK
+ */
+int PackBits_pack_add(T_PackBits_data * data, byte b);
+
+/**
+ * Flush the packed data to the file
+ *
+ * @return -1 for error, or the size of the packed stream so far
+ */
+int PackBits_pack_flush(T_PackBits_data * data);
+
 #endif

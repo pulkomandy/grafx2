@@ -33,6 +33,7 @@
 #include "loadsavefuncs.h"
 #include "io.h"
 #include "misc.h"
+#include "packbits.h"
 #include "gfx2mem.h"
 #include "gfx2log.h"
 
@@ -2000,108 +2001,6 @@ void Load_IFF(T_IO_Context * context)
 
 // -- Sauver un fichier au format IFF ---------------------------------------
 
-  byte IFF_color_list[129];
-  word IFF_list_size;
-  byte IFF_repetition_mode;
-
-  // ------------- Ecrire les couleurs que l'on vient de traiter ------------
-  void Transfer_colors(FILE * file)
-  {
-    byte index;
-
-    if (IFF_list_size>0)
-    {
-      if (IFF_list_size > 128)
-      {
-        GFX2_Log(GFX2_ERROR, "Transfer_colors() IFF_list_size=%d !\n", IFF_list_size);
-      }
-      if (IFF_repetition_mode)
-      {
-        Write_one_byte(file,257-IFF_list_size);
-        Write_one_byte(file,IFF_color_list[0]);
-      }
-      else
-      {
-        Write_one_byte(file,IFF_list_size-1);
-        for (index=0; index<IFF_list_size; index++)
-          Write_one_byte(file,IFF_color_list[index]);
-      }
-    }
-    IFF_list_size=0;
-    IFF_repetition_mode=0;
-  }
-
-  // - Compression des couleurs encore plus performante que DP2e et que VPIC -
-  void New_color(FILE * file, byte color)
-  {
-    byte last_color;
-    byte second_last_color;
-
-    switch (IFF_list_size)
-    {
-      case 0 : // First color
-        IFF_color_list[0]=color;
-        IFF_list_size=1;
-        break;
-      case 1 : // second color
-        last_color=IFF_color_list[0];
-        IFF_repetition_mode=(last_color==color);
-        IFF_color_list[1]=color;
-        IFF_list_size=2;
-        break;
-      default: // next colors
-        last_color      =IFF_color_list[IFF_list_size-1];
-        second_last_color=IFF_color_list[IFF_list_size-2];
-        if (last_color == color)  // repeat detected
-        {
-          if ( !IFF_repetition_mode && IFF_list_size >= 127)
-          {
-            // diff mode with 126 bytes then 2 identical bytes
-            IFF_list_size--;
-            Transfer_colors(file);
-            IFF_color_list[0]=color;
-            IFF_color_list[1]=color;
-            IFF_list_size=2;
-            IFF_repetition_mode=1;
-          }
-          else if ( (IFF_repetition_mode) || (second_last_color!=color) )
-          {
-            // same mode is kept
-            if (IFF_list_size==128)
-              Transfer_colors(file);
-            IFF_color_list[IFF_list_size++]=color;
-          }
-          else
-          {
-            // diff mode and 3 identical bytes
-            IFF_list_size-=2;
-            Transfer_colors(file);
-            IFF_color_list[0]=color;
-            IFF_color_list[1]=color;
-            IFF_color_list[2]=color;
-            IFF_list_size=3;
-            IFF_repetition_mode=1;
-          }
-        }
-        else // the color is different from the previous one
-        {
-          if (!IFF_repetition_mode)                 // keep mode
-          {
-            if (IFF_list_size == 128)
-              Transfer_colors(file);
-            IFF_color_list[IFF_list_size++]=color;
-          }
-          else                                        // change mode
-          {
-            Transfer_colors(file);
-            IFF_color_list[IFF_list_size]=color;
-            IFF_list_size++;
-          }
-        }
-    }
-  }
-
-
 /// Save IFF file (LBM or PBM)
 void Save_IFF(T_IO_Context * context)
 {
@@ -2277,6 +2176,7 @@ void Save_IFF(T_IO_Context * context)
       short line_size; // Size of line in bytes
       short plane_line_size;  // Size of line in bytes for 1 plane
       short real_line_size; // Size of line in pixels
+      T_PackBits_data pb_data;
       
       // Calcul de la taille d'une ligne ILBM (pour les images ayant des dimensions exotiques)
       real_line_size = (context->Width+15) & ~15;
@@ -2285,7 +2185,7 @@ void Save_IFF(T_IO_Context * context)
       buffer=(byte *)malloc(line_size);
       
       // Start encoding
-      IFF_list_size=0;
+      PackBits_pack_init(&pb_data, IFF_file);
       for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
       {
         // Dispatch the pixel into planes
@@ -2305,33 +2205,51 @@ void Save_IFF(T_IO_Context * context)
           for (plane=0; plane<header.BitPlanes; plane++)
           {
             for (x_pos=0; x_pos<plane_width && !File_error; x_pos++)
-              New_color(IFF_file, buffer[x_pos+plane*plane_width]);
+            {
+              if (PackBits_pack_add(&pb_data, buffer[x_pos+plane*plane_width]) < 0)
+                File_error = 1;
+            }
 
             if (!File_error)
-              Transfer_colors(IFF_file);
+            {
+              if (PackBits_pack_flush(&pb_data) < 0)
+                File_error = 1;
+            }
           }
         }
         else
         {
-          Write_bytes(IFF_file,buffer,line_size);
+          // No compression
+          if (!Write_bytes(IFF_file, buffer, line_size))
+            File_error = 1;
         }
       }
       free(buffer);
     }
     else // PBM = chunky 8bpp
     {
-      IFF_list_size=0;
-  
+      T_PackBits_data pb_data;
+
+      PackBits_pack_init(&pb_data, IFF_file);
       for (y_pos=0; ((y_pos<context->Height) && (!File_error)); y_pos++)
       {
         for (x_pos=0; ((x_pos<context->Width) && (!File_error)); x_pos++)
-          New_color(IFF_file, Get_pixel(context, x_pos,y_pos));
+        {
+          if (PackBits_pack_add(&pb_data, Get_pixel(context, x_pos, y_pos)) < 0)
+            File_error = 1;
+        }
   
-        if (context->Width&1) // odd width fix
-          New_color(IFF_file, 0);
+        if (context->Width & 1) // odd width fix
+        {
+          if (PackBits_pack_add(&pb_data, Get_pixel(context, context->Width - 1, y_pos)) < 0)
+            File_error = 1;
+        }
           
         if (!File_error)
-          Transfer_colors(IFF_file);
+        {
+          if (PackBits_pack_flush(&pb_data) < 0)
+            File_error = 1;
+        }
       }
     }
     // Now update FORM and BODY size
