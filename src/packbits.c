@@ -180,3 +180,16 @@ int PackBits_pack_flush(T_PackBits_data * data)
   }
   return data->output_count;
 }
+
+int PackBits_pack_buffer(FILE * f, const byte * buffer, size_t size)
+{
+  T_PackBits_data pb_data;
+
+  PackBits_pack_init(&pb_data, f);
+  while (size-- > 0)
+  {
+    if (PackBits_pack_add(&pb_data, *buffer++))
+      return -1;
+  }
+  return PackBits_pack_flush(&pb_data);
+}
