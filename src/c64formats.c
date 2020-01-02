@@ -1161,15 +1161,17 @@ static int Save_C64_window(enum c64_format *saveFormat, byte *saveWhat, word *lo
   return button==1;
 }
 
-/// Save a C64 hires picture
-///
-/// c64 hires is 320x200 with only 2 colors per 8x8 block.
-static int Save_C64_hires(T_IO_Context *context, byte saveWhat, word loadAddr)
+
+/**
+ * Encode a C64 HiRes Bitmap picture.
+ * 320x200 pixels, with only 2 different colors per 8x8 block.
+ *
+ * 8000 bytes bitmap, 1000 bytes screen RAM
+ */
+static int Encode_C64_hires(T_IO_Context * context, byte * bitmap, byte * screen_ram)
 {
   int i, pos = 0;
   word cx, cy, x, y;
-  byte screen_ram[1000],bitmap[8000];
-  FILE *file;
 
   for(cy=0; cy<25; cy++) // Character line, 25 lines
   {
@@ -1246,7 +1248,21 @@ static int Save_C64_hires(T_IO_Context *context, byte saveWhat, word loadAddr)
       }
     }
   }
+  return 0;
+}
 
+/// Save a C64 hires picture
+///
+/// c64 hires is 320x200 with only 2 colors per 8x8 block.
+static int Save_C64_hires(T_IO_Context *context, byte saveWhat, word loadAddr)
+{
+  byte screen_ram[1000],bitmap[8000];
+  FILE *file;
+  int ret;
+
+  ret = Encode_C64_hires(context, bitmap, screen_ram);
+  if (ret != 0)
+    return ret;
   file = Open_file_write(context);
 
   if(!file)
@@ -1722,7 +1738,17 @@ void Save_PRG(T_IO_Context * context)
   saveFormat = (context->Width == 320) ? F_hires : F_multi;
   File_error = 1;
   Set_saving_layer(context, 0);
-  File_error = Encode_C64_multicolor(context, bitmap, screen_ram, color_ram, &background);
+  switch (saveFormat)
+  {
+    case F_hires:
+      File_error = Encode_C64_hires(context, bitmap, screen_ram);
+      break;
+    case F_multi:
+      File_error = Encode_C64_multicolor(context, bitmap, screen_ram, color_ram, &background);
+      break;
+    default:
+      GFX2_Log(GFX2_ERROR, "Save_PRG(): format %d not handled (yet?)\n", saveFormat);
+  }
   if (File_error == 0)
   {
     FILE *file;
@@ -1736,7 +1762,7 @@ void Save_PRG(T_IO_Context * context)
     }
     if (!Write_bytes(file, picview_prg, sizeof(picview_prg)))
       File_error = 2;
-    Write_byte(file, 0x30); // Mode : Bitmap + Multicolor
+    Write_byte(file, saveFormat == F_multi ? 0x30 : 0x20); // Mode : 0x40 Extended bg, 0x20 Bitmap, 0x10 Multicolor
     n = PackBits_pack_buffer(NULL, bitmap, 8000);
     GFX2_Log(GFX2_DEBUG, "PackBits of bitmap : 8000 => %d bytes\n", n + 1);
     if (n >= 0 && n < 7999)
@@ -1764,15 +1790,19 @@ void Save_PRG(T_IO_Context * context)
       Write_byte(file, 0x20); // screen RAM / no packing
       Write_bytes(file, screen_ram, 1000);
     }
-    //Write_byte(file, 0x30); // color RAM / no packing
-    //Write_bytes(file, color_ram, 1000);
-    Write_byte(file, 0x32); // color RAM / special color RAM packing
-    n = C64_color_ram_pack(file, color_ram, 1000);
-    if (n < 0)
-      File_error = 1;
-    GFX2_Log(GFX2_DEBUG, "custom packing of color RAM : 1000 => %d bytes\n", n);
-    Write_byte(file, 0x42); // border/background/etc. / color ram RLE packing
-    Write_byte(file, background | 0x10);
+    if (saveFormat == F_multi)
+    {
+      //Write_byte(file, 0x30); // color RAM / no packing
+      //Write_bytes(file, color_ram, 1000);
+      Write_byte(file, 0x32); // color RAM / special color RAM packing
+      n = C64_color_ram_pack(file, color_ram, 1000);
+      if (n < 0)
+        File_error = 1;
+      GFX2_Log(GFX2_DEBUG, "custom packing of color RAM : 1000 => %d bytes\n", n);
+
+      Write_byte(file, 0x42); // border/background/etc. / color ram RLE packing
+      Write_byte(file, background | 0x10);
+    }
     Write_byte(file, 0); // end of file
     fclose(file);
   }

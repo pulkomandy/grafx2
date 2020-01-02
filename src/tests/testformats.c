@@ -404,11 +404,12 @@ ret:
 
 int Test_C64_Formats(void)
 {
-  int i;
+  int i, j;
   int ok = 0;
   T_IO_Context context;
   char path[256];
   T_GFX2_Surface * testpicmulti = NULL;
+  T_GFX2_Surface * testpichires = NULL;
 
   memset(&context, 0, sizeof(context));
   context.Type = CONTEXT_SURFACE;
@@ -424,6 +425,16 @@ int Test_C64_Formats(void)
   }
   testpicmulti = context.Surface;
   context.Surface = NULL;
+  // Load a hires picture
+  context_set_file_path(&context, "../tests/pic-samples/c64/hires/midear.dd");
+  Load_C64(&context);
+  if (File_error != 0)
+  {
+    fprintf(stderr, "Failed to load reference hires picture\n");
+    goto ret;
+  }
+  testpichires = context.Surface;
+  context.Surface = NULL;
 
   ok = 1;
   for (i = 0; ok && formats[i].name != NULL; i++)
@@ -433,70 +444,86 @@ int Test_C64_Formats(void)
     if (!(formats[i].flags & FLAG_C64))
       continue;
     GFX2_Log(GFX2_DEBUG, "Testing format %s (Save)\n", formats[i].name);
-    snprintf(path, sizeof(path), "/tmp/%s.%s", "test", formats[i].name);
-    context_set_file_path(&context, path);
+    for (j = 0; j < 2; j++)
+    {
+      T_GFX2_Surface * ref;
 
-    // save the reference picture
-    context.Surface = testpicmulti;
-    context.Target_address = context.Surface->pixels;
-    context.Pitch = context.Surface->w;
-    context.Width = context.Surface->w;
-    context.Height = context.Surface->h;
-    context.Ratio = PIXEL_WIDE;
-    memcpy(context.Palette, context.Surface->palette, sizeof(T_Palette));
-    context.Format = formats[i].format;
-    File_error = 0;
-    formats[i].Save(&context);
-    context.Surface = NULL;
-    if (File_error != 0)
-    {
-      GFX2_Log(GFX2_ERROR, "Save_%s failed.\n", formats[i].name);
-      ok = 0;
-    }
-    else
-    {
-      FILE * f;
-      // Test the saved file
-      f = fopen(path, "rb");
-      if (f == NULL)
+      if (j == 0)
       {
-        GFX2_Log(GFX2_ERROR, "error opening %s\n", path);
+        ref = testpicmulti;
+        context.Ratio = PIXEL_WIDE;
+      }
+      else
+      {
+        ref = testpichires;
+        context.Ratio = PIXEL_SIMPLE;
+      }
+      snprintf(path, sizeof(path), "/tmp/%s-%d.%s", "test", j, formats[i].name);
+      context_set_file_path(&context, path);
+
+      // save the reference picture
+      context.Surface = ref;
+      context.Target_address = context.Surface->pixels;
+      context.Pitch = context.Surface->w;
+      context.Width = context.Surface->w;
+      context.Height = context.Surface->h;
+      memcpy(context.Palette, context.Surface->palette, sizeof(T_Palette));
+      context.Format = formats[i].format;
+      File_error = 0;
+      formats[i].Save(&context);
+      context.Surface = NULL;
+      if (File_error != 0)
+      {
+        GFX2_Log(GFX2_ERROR, "Save_%s failed.\n", formats[i].name);
         ok = 0;
       }
       else
       {
-        File_error = 1;
-        formats[i].Test(&context, f);
-        fclose(f);
-        if (File_error != 0)
+        FILE * f;
+        // Test the saved file
+        f = fopen(path, "rb");
+        if (f == NULL)
         {
-          GFX2_Log(GFX2_ERROR, "Test_%s failed for file %s\n", formats[i].name, path);
+          GFX2_Log(GFX2_ERROR, "error opening %s\n", path);
           ok = 0;
         }
-      }
-      memset(context.Palette, -1, sizeof(T_Palette));
-      // load the saved file
-      formats[i].Load(&context);
-      if (File_error != 0 || context.Surface == NULL)
-      {
-        GFX2_Log(GFX2_ERROR, "Load_%s failed for file %s\n", formats[i].name, path);
-        ok = 0;
-      }
-      else
-      {
-        if (memcmp(testpicmulti->pixels, context.Surface->pixels, 160*200) != 0)
+        else
         {
-          GFX2_Log(GFX2_ERROR, "Save_%s/Load_%s: Pixels mismatch\n", formats[i].name, formats[i].name);
+          File_error = 1;
+          formats[i].Test(&context, f);
+          fclose(f);
+          if (File_error != 0)
+          {
+            GFX2_Log(GFX2_ERROR, "Test_%s failed for file %s\n", formats[i].name, path);
+            ok = 0;
+          }
+        }
+        memset(context.Palette, -1, sizeof(T_Palette));
+        // load the saved file
+        formats[i].Load(&context);
+        if (File_error != 0 || context.Surface == NULL)
+        {
+          GFX2_Log(GFX2_ERROR, "Load_%s failed for file %s\n", formats[i].name, path);
           ok = 0;
         }
-        Free_GFX2_Surface(context.Surface);
-        context.Surface = NULL;
+        else
+        {
+          if (memcmp(ref->pixels, context.Surface->pixels, ref->w * ref->h) != 0)
+          {
+            GFX2_Log(GFX2_ERROR, "Save_%s/Load_%s: Pixels mismatch\n", formats[i].name, formats[i].name);
+            ok = 0;
+          }
+          Free_GFX2_Surface(context.Surface);
+          context.Surface = NULL;
+        }
       }
     }
   }
 ret:
   if (testpicmulti)
     Free_GFX2_Surface(testpicmulti);
+  if (testpichires)
+    Free_GFX2_Surface(testpichires);
   free(context.File_name);
   free(context.File_directory);
   return ok;
