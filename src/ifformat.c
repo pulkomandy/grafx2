@@ -45,6 +45,13 @@
 #endif
 #endif
 
+#ifdef __APPLE__
+#include <libkern/OSByteOrder.h>
+#ifndef be32toh
+#define be32toh(x) OSSwapBigToHostInt32(x)
+#endif
+#endif
+
 //////////////////////////////////// IFF ////////////////////////////////////
 /** @defgroup IFF Interchange File Format
  * @ingroup loadsaveformats
