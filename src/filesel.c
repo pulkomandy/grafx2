@@ -31,7 +31,7 @@
 #elif defined (__MINT__)
     #include <mint/sysbind.h>
 #elif defined(WIN32)
-    //#include <windows.h>  // Native_filesel() is currently disabled
+    #include <windows.h>  // Native_filesel() is currently disabled
     //#include <commdlg.h>
 #endif
 

@@ -29,9 +29,6 @@
 #ifndef SCREEN_H_INCLUDED
 #define SCREEN_H_INCLUDED
 
-#ifdef WIN32
-#include <windows.h>  // for HWND
-#endif
 #if defined(USE_SDL) || defined(USE_SDL2)
 #include <SDL.h>
 #if defined(SDL_VIDEO_DRIVER_X11)
@@ -76,7 +73,10 @@ void GFX2_UpdateScreen(void);
 #endif
 
 #if defined(WIN32)
-HWND GFX2_Get_Window_Handle(void);
+/**
+ * @return a HWND (casted to void *)
+ */
+void * GFX2_Get_Window_Handle(void);
 #endif
 
 #if defined(USE_X11) || defined(SDL_VIDEO_DRIVER_X11)

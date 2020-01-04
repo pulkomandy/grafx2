@@ -534,7 +534,7 @@ void Clear_border(byte color)
 }
 
 #ifdef WIN32
-HWND GFX2_Get_Window_Handle(void)
+void * GFX2_Get_Window_Handle(void)
 {
   SDL_SysWMinfo wminfo;
 

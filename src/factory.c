@@ -61,6 +61,9 @@ char * Bound_script[10];
 #include <limits.h> //for INT_MIN
 #include <string.h> // strncpy()
 #include <stdlib.h> // for atof()
+#if defined(WIN32)
+#include <windows.h>
+#endif
 #if defined(_MSC_VER)
 #define strdup _strdup
 #define putenv _putenv

@@ -49,7 +49,7 @@ static int Windows_DIB_height = 0;
 static HWND Win32_hwnd = NULL;
 static int Win32_Is_Fullscreen = 0;
 
-HWND GFX2_Get_Window_Handle()
+void * GFX2_Get_Window_Handle()
 {
   return Win32_hwnd;
 }

@@ -50,8 +50,8 @@
 #if defined(USE_SDL)
 #include <SDL_byteorder.h>
 #endif
-#if defined(WIN32)
-  #include <windows.h> // GetLogicalDrives(), GetDriveType(), DRIVE_*
+#if defined(WIN32) && !defined(USE_SDL) && !defined(USE_SDL2)
+#include <windows.h>
 #endif
 #if defined (__MINT__)
   #include <mint/osbind.h>
