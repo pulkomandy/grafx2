@@ -812,6 +812,11 @@ void Button_Stats(int btn)
   y=19; // row for first line
   Print_in_window(10,y,"Program version:",STATS_TITLE_COLOR,MC_Black);
   snprintf(buffer,20,"%s.%s",Program_version, SVN_revision);
+#ifdef WIN32
+#if !defined(_MSC_VER) || _MSC_VER < 1900
+  buffer[20-1] = '\0';
+#endif
+#endif
   Print_in_window(146,y,buffer,STATS_DATA_COLOR,MC_Black);
   y+=8;
 #if defined(USE_SDL) || defined(USE_SDL2)
