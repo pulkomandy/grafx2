@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <time.h>
 #include "../struct.h"
 #include "../global.h"
@@ -68,6 +69,8 @@ byte Windows_open;
 
 dword Key;
 
+char tmpdir[40];
+
 static const struct {
   int (*test_func)(void);
   const char * test_name;
@@ -81,7 +84,7 @@ static const struct {
 /**
  * Initializations for test program
  */
-void init(void)
+int init(void)
 {
   srandom(time(NULL));
 #ifdef ENABLE_FILENAMES_ICONV
@@ -96,6 +99,29 @@ void init(void)
   cd_utf16_inv = iconv_open(FROMCODE, "UTF-16LE"); // From UTF16 to UTF8
 #endif
 #endif /* ENABLE_FILENAMES_ICONV */
+  snprintf(tmpdir, sizeof(tmpdir), "/tmp/grafx2-test.XXXXXX");
+  if (mkdtemp(tmpdir) == NULL)
+  {
+    perror("mkdtemp");
+    return -1;
+  }
+  printf("temp dir : %s\n", tmpdir);
+  return 0;
+}
+
+/**
+ * Releases resources
+ */
+void finish(void)
+{
+#ifdef ENABLE_FILENAMES_ICONV
+  iconv_close(cd);
+  iconv_close(cd_inv);
+  iconv_close(cd_utf16);
+  iconv_close(cd_utf16_inv);
+#endif /* ENABLE_FILENAMES_ICONV */
+  if (rmdir(tmpdir) < 0)
+    fprintf(stderr, "Failed to rmdir(\"%s\"): %s\n", tmpdir, strerror(errno));
 }
 
 #define ESC_GREEN "\033[32m"
@@ -113,7 +139,11 @@ int main(int argc, char * * argv)
   (void)argv;
 
   GFX2_verbosity_level = GFX2_DEBUG;
-  init();
+  if (init() < 0)
+  {
+    fprintf(stderr, "Failed to init.\n");
+    return 1;
+  }
 
   for (i = 0; tests[i].test_func != 0; i++)
   {
@@ -126,6 +156,8 @@ int main(int argc, char * * argv)
       fail++;
     }
   }
+
+  finish();
 
   if (fail == 0)
   {

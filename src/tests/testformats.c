@@ -34,6 +34,7 @@
 #include "../fileformats.h"
 #include "../gfx2log.h"
 #include "../gfx2mem.h"
+#include "tests.h"
 
 // Load_IFF/Save_IFF does for both LBM and PBM (and Load_IFF also loads ACBM format)
 #define Load_ACBM Load_IFF
@@ -232,7 +233,6 @@ int Test_Save(void)
 {
   T_IO_Context context;
   char path[256];
-  char tmpdir[40];
   int i;
   int ok = 0;
   T_GFX2_Surface * testpic256 = NULL;
@@ -277,13 +277,6 @@ int Test_Save(void)
   context.Surface = NULL;
   memcpy(testpiccpco->palette, context.Palette, sizeof(T_Palette));
 
-  snprintf(tmpdir, sizeof(tmpdir), "/tmp/grafx2-test.XXXXXX");
-  if (mkdtemp(tmpdir) == NULL)
-  {
-    perror("mkdtemp");
-    goto ret;
-  }
-  printf("temp dir : %s\n", tmpdir);
   ok = 1;
   for (i = 0; ok && formats[i].name != NULL; i++)
   {
@@ -388,8 +381,6 @@ int Test_Save(void)
       }
     }
   }
-  if (rmdir(tmpdir) < 0)
-    perror("rmdir");
 ret:
   if (testpic16)
     Free_GFX2_Surface(testpic16);
@@ -458,7 +449,7 @@ int Test_C64_Formats(void)
         ref = testpichires;
         context.Ratio = PIXEL_SIMPLE;
       }
-      snprintf(path, sizeof(path), "/tmp/%s-%d.%s", "test", j, formats[i].name);
+      snprintf(path, sizeof(path), "%s/%s-%d.%s", tmpdir, "test", j, formats[i].name);
       context_set_file_path(&context, path);
 
       // save the reference picture
@@ -512,6 +503,11 @@ int Test_C64_Formats(void)
           {
             GFX2_Log(GFX2_ERROR, "Save_%s/Load_%s: Pixels mismatch\n", formats[i].name, formats[i].name);
             ok = 0;
+          }
+          else
+          {
+            if (unlink(path) < 0)
+              perror("unlink");
           }
           Free_GFX2_Surface(context.Surface);
           context.Surface = NULL;

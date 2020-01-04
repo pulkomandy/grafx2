@@ -26,4 +26,9 @@
 #include "testlist.h"
 #undef TEST
 
+/**
+ * path to directory where tests can write files
+ */
+extern char tmpdir[];
+
 #endif
