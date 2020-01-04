@@ -952,7 +952,6 @@ void Rotate_brush_1_5(void)
   short old_y;
   short prev_state;
   double angle;
-  int dx,dy;
   short cursor_x,cursor_y;
 
   Operation_pop(&prev_state);
@@ -972,9 +971,12 @@ void Rotate_brush_1_5(void)
       angle=0.0;
     else
     {
-      dx=cursor_x-Brush_rotation_center_X;
-      dy=cursor_y-Brush_rotation_center_Y;
-      angle=M_2PI-atan2((double)dy,(double)dx);
+      // Angle from 0 to 2 PI
+      int dx = cursor_x - Brush_rotation_center_X;
+      int dy = cursor_y - Brush_rotation_center_Y;
+      angle = 0.0 - atan2((double)dy, (double)dx);
+      if (angle < 0.0)
+        angle += M_2PI;
     }
 
     if (Menu_is_visible)
@@ -1022,7 +1024,6 @@ void Rotate_brush_0_5(void)
   byte  angle_change;
   short prev_state;
   double angle=0.0;
-  int dx,dy;
   short cursor_x, cursor_y;
 
 
@@ -1044,9 +1045,12 @@ void Rotate_brush_0_5(void)
       angle=0.0;
     else
     {
-      dx=cursor_x-Brush_rotation_center_X;
-      dy=cursor_y-Brush_rotation_center_Y;
-      angle=M_2PI-atan2((double)dy, (double)dx);
+      // Angle from 0 to 2 PI
+      int dx = cursor_x - Brush_rotation_center_X;
+      int dy = cursor_y - Brush_rotation_center_Y;
+      angle = 0.0 - atan2((double)dy, (double)dx);
+      if (angle < 0.0)
+        angle += M_2PI;
     }
 
     if (Menu_is_visible)
