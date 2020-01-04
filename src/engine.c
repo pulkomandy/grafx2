@@ -54,6 +54,7 @@
 #include "pxsimple.h"
 #include "oldies.h"
 #include "palette.h"
+#include "unicode.h"
 
 #if defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__) || defined(__SWITCH__)
 // We don't want to underline the keyboard shortcuts as there is no keyboard
@@ -730,9 +731,11 @@ void Main_handler(void)
           Init_context_layered_image(&context, flimit, Drop_file_name);
           if (Drop_file_name_unicode != NULL)
           {
-            context.File_name_unicode = Find_last_separator_unicode(Drop_file_name_unicode);
-            if (context.File_name_unicode != NULL)
-              context.File_name_unicode++;
+            word * file_name_unicode = Find_last_separator_unicode(Drop_file_name_unicode);
+            if (file_name_unicode != NULL)
+              context.File_name_unicode = Unicode_strdup(file_name_unicode + 1);
+            else
+              context.File_name_unicode = Unicode_strdup(Drop_file_name_unicode);
           }
           Load_image(&context);
           if (File_error!=1)
