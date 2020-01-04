@@ -60,5 +60,5 @@ script:
   - 'if [ "$TRAVIS_OS_NAME" = "osx" ] ; then otool -L ${PWD}/3rdparty/usr/lib/libSDL_image-1.2.0.dylib ; echo "--" ; tools/osx_find_dependencies.sh ${PWD}/3rdparty/usr/lib/libSDL_image.dylib ; fi'
   - 'if [ "$WIN32CROSS" = "1" ] ; then API=win32 make ziprelease ; elif [ "$ATARICROSS" = "" ] ; then API=sdl2 make ziprelease ; fi'
   - 'if [ "$WIN32CROSS" = "1" ] ; then API=win32 make win32installer ; fi'
-  - 'if [ "$WIN32CROSS" = "" ] && [ "$ATARICROSS" = "" ] && [ "$SWITCH" = "" ] ; then API=x11 make -j3 ; API=x11 make ziprelease ; fi'
+  - 'if [ "$TRAVIS_OS_NAME" != "osx" ] && [ "$WIN32CROSS" = "" ] && [ "$ATARICROSS" = "" ] && [ "$SWITCH" = "" ] ; then API=x11 make -j3 ; API=x11 make ziprelease ; fi'
   - 'if [ "$TRAVIS_OS_NAME" = "osx" ]; then otool -L bin/grafx2* ; fi'
