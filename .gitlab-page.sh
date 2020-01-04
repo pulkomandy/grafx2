@@ -25,6 +25,7 @@ echo "<html lang=\"en\">" >> ${OUTFILE}
 echo "<head>" >> ${OUTFILE}
 echo "<title>GrafX2</title>" >> ${OUTFILE}
 echo "<link href=\"gfx2.css\" rel=\"stylesheet\" type=\"text/css\">" >> ${OUTFILE}
+echo "<link href=\"gfx2.png\" rel=\"icon\" type=\"image/png\">" >> ${OUTFILE}
 echo "</head>" >> ${OUTFILE}
 echo "<body>" >> ${OUTFILE}
 echo "<h1>GrafX2 version ${VERSION}</h1>" >> ${OUTFILE}

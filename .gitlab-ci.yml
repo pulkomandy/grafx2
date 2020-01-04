@@ -40,6 +40,7 @@ pages:
     script:
         - "NOLUA=1 API=x11 make htmldoc"
         - "mkdir -p public/htmldoc && cp doc/html/* public/htmldoc/"
+        - "cp share/grafx2/gfx2.png public/"
         - "./.gitlab-page.sh"
         - "cd public && tar xzf ../grafx2*doxygen.tgz"
     artifacts:
