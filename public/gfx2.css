@@ -8,6 +8,11 @@ body {
   padding: 2rem;
   margin: auto;
 }
+@media (max-width: 800px) {
+  body {
+    padding: 0.5rem;
+  }
+}
 img { border: 0 }
 h1, h2, h3, h4, h5, h6, b, strong {
   color:  #111;
