@@ -31,6 +31,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
+#include <errno.h>
 #include "../struct.h"
 #include "../global.h"
 #include "../gfx2log.h"
