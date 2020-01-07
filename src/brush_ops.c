@@ -947,7 +947,7 @@ void Rotate_brush_1_5(void)
 // Souris effacée: Non
 //
 {
-  char  str[4];
+  char  str[8];
   short old_x;
   short old_y;
   short prev_state;
@@ -973,18 +973,16 @@ void Rotate_brush_1_5(void)
     {
       // Angle from 0 to 2 PI
       int dx = cursor_x - Brush_rotation_center_X;
-      int dy = cursor_y - Brush_rotation_center_Y;
-      angle = 0.0 - atan2((double)dy, (double)dx);
-      if (angle < 0.0)
-        angle += M_2PI;
+      int dy = -(cursor_y - Brush_rotation_center_Y);
+      angle = atan2((double)dy, (double)dx);
     }
 
     if (Menu_is_visible)
     {
       if (Config.Coords_rel)
       {
-        Num2str((int)(angle*180.0/M_PI),str,3);
-        Print_in_menu(str,7);
+        snprintf(str, sizeof(str), "%4d", (int)(angle*180.0/M_PI));
+        Print_in_menu(str, 6);
       }
       else
         Print_coordinates();
@@ -1016,7 +1014,7 @@ void Rotate_brush_0_5(void)
 // Souris effacée: Non
 //
 {
-  char  str[4];
+  char  str[8];
   short old_x;
   short old_y;
   short computed_x=0;
@@ -1047,18 +1045,16 @@ void Rotate_brush_0_5(void)
     {
       // Angle from 0 to 2 PI
       int dx = cursor_x - Brush_rotation_center_X;
-      int dy = cursor_y - Brush_rotation_center_Y;
-      angle = 0.0 - atan2((double)dy, (double)dx);
-      if (angle < 0.0)
-        angle += M_2PI;
+      int dy = -(cursor_y - Brush_rotation_center_Y);
+      angle = atan2((double)dy, (double)dx);
     }
 
     if (Menu_is_visible)
     {
       if (Config.Coords_rel)
       {
-        Num2str(Round(angle*180.0/M_PI),str,3);
-        Print_in_menu(str,7);
+        snprintf(str, sizeof(str), "%4d", (int)(angle*180.0/M_PI));
+        Print_in_menu(str, 6);
       }
       else
         Print_coordinates();
@@ -1075,14 +1071,14 @@ void Rotate_brush_0_5(void)
     computed_y=Brush_rotation_center_Y;
     switch (Key_ANSI)
     {
-      case '6': angle=      0.0; computed_x++;               break;
-      case '9': angle=M_PI*0.25; computed_x++; computed_y--; break;
-      case '8': angle=M_PI*0.5 ;               computed_y--; break;
-      case '7': angle=M_PI*0.75; computed_x--; computed_y--; break;
-      case '4': angle=M_PI     ; computed_x--;               break;
-      case '1': angle=M_PI*1.25; computed_x--; computed_y++; break;
-      case '2': angle=M_PI*1.5 ;               computed_y++; break;
-      case '3': angle=M_PI*1.75; computed_x++; computed_y++; break;
+      case '6': angle =       0.0; computed_x++;               break;
+      case '9': angle = M_PI*0.25; computed_x++; computed_y--; break;
+      case '8': angle = M_PI*0.5 ;               computed_y--; break;
+      case '7': angle = M_PI*0.75; computed_x--; computed_y--; break;
+      case '4': angle = M_PI     ; computed_x--;               break;
+      case '1': angle =-M_PI*0.75; computed_x--; computed_y++; break;
+      case '2': angle =-M_PI*0.5 ;               computed_y++; break;
+      case '3': angle =-M_PI*0.25; computed_x++; computed_y++; break;
       default :
         angle_change=0;
     }
