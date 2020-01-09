@@ -637,6 +637,7 @@ enum IMAGE_MODES
   IMAGE_MODE_HGR,       ///< Apple 2 HGR
   IMAGE_MODE_DHGR,      ///< Apple 2 DHGR
   IMAGE_MODE_MEGADRIVE, ///< Sega Mega Drive / Genesis
+  IMAGE_MODE_TMS9918G2, ///< TMS9918 Mode 2 (MSX, ColecoVision, SC-3000, etc.)
 };
 
 /// Circle / Ellipse Modes

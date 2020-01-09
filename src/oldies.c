@@ -69,6 +69,7 @@ static const struct {
   { IMAGE_MODE_HGR,       "APPLE2_HGR" },
   { IMAGE_MODE_DHGR,      "APPLE2_DHGR" },
   { IMAGE_MODE_MEGADRIVE, "SEGAMEGADRIVE" },
+  { IMAGE_MODE_TMS9918G2, "TMS9918_G2" },
 };
 
 const char * Constraint_mode_label(enum IMAGE_MODES mode)

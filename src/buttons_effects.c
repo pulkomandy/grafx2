@@ -189,6 +189,7 @@ static int Check_block_constraints(enum IMAGE_MODES mode)
 
   switch (mode)
   {
+    case IMAGE_MODE_TMS9918G2:
     case IMAGE_MODE_THOMSON:
       block_height = 1;
       break;
@@ -278,7 +279,13 @@ static int Check_block_constraints(enum IMAGE_MODES mode)
               GFX2_Log(GFX2_INFO, "Check_block_constraints() constraint error at (%d,%d)\n", x+x2, y+y2);
               if (Main.backups->Pages->Nb_layers < 2)
                 Add_layer(Main.backups, 1);
-              Pixel_in_layer(1, x+x2, y+y2, errcol);
+              if (mode == IMAGE_MODE_TMS9918G2)
+              {
+                Pixel_in_layer(1, x+x2, y+y2, col); // put color in sprite layer
+                Pixel_in_layer(0, x+x2, y+y2, c[0]); // put other color in picture layer
+              }
+              else
+                Pixel_in_layer(1, x+x2, y+y2, errcol);
               error_count++;
             }
             else
@@ -548,6 +555,13 @@ void Button_Constraint_mode(void)
     else
       Convert_to_dhgr();
     break;
+  case IMAGE_MODE_TMS9918G2:
+    // switch to layer mode if needed
+    if (Main.backups->Pages->Image_mode != IMAGE_MODE_LAYERED)
+      Switch_layer_mode(IMAGE_MODE_LAYERED);
+    Main.backups->Pages->Transparent_color = 0;
+    Check_block_constraints(Selected_Constraint_Mode);
+    break;
   default:
     Check_block_constraints(Selected_Constraint_Mode);
   }
@@ -587,6 +601,7 @@ void Button_Constraint_menu(void)
     {IMAGE_MODE_C64FLI,  "C64 FLI",       "improved multicolor   ", 1}, // 160x200
     {IMAGE_MODE_HGR,     "Apple II HGR",  "6 colors              ", 1},  // 280x192
     {IMAGE_MODE_DHGR,    "Apple II DHGR", "\"Le Chat Mauve\" mode3 ", 1},  // 560x192
+    {IMAGE_MODE_TMS9918G2,"TMS9918 Mode 2","MSX Screen2, etc.    ", 1},  // 256x192
   };
 
   Open_window(194,95+36,"8-bit constraints");
@@ -711,6 +726,10 @@ void Button_Constraint_menu(void)
             End_of_modification();
             /// @todo enable TALL pixels when switching to 560x192
             break;
+          case IMAGE_MODE_TMS9918G2:
+            Resize_image(256, 192);
+            End_of_modification();
+            break;
           default:
             break;
         }
@@ -736,6 +755,7 @@ void Button_Constraint_menu(void)
             break;
           case IMAGE_MODE_RASTER:
           case IMAGE_MODE_THOMSON:
+          case IMAGE_MODE_TMS9918G2:
             Snap_width = 8;
             Snap_height = 999;  // maximum value (3 digits)
             break;
@@ -870,6 +890,13 @@ void Button_Constraint_menu(void)
             First_color_in_palette = 0;
             Fore_color = 15;
             Back_color = 0;
+            break;
+          case IMAGE_MODE_TMS9918G2:
+            memset(Main.palette, 0, sizeof(T_Palette));
+            MSX_set_palette(Main.palette);
+            First_color_in_palette = 0;
+            Fore_color = 15;  // White
+            Back_color = 1;   // Black
             break;
           default:
             break;

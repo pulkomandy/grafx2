@@ -3308,6 +3308,7 @@ static void Pixel_in_screen_egx_with_opt_preview(word x,word y,byte color,int pr
 }
 
 /// Paint a pixel in 40col Thomson MO/TO mode
+/// or TMS9918 Graphics 2
 ///
 /// Only 2 colors in a 8x1 pixel block
 static void Pixel_in_screen_thomson_with_opt_preview(word x,word y,byte color,int preview)
@@ -3918,6 +3919,7 @@ void Update_pixel_renderer(void)
     Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_egx_with_opt_preview;
     break;
   case IMAGE_MODE_THOMSON:
+  case IMAGE_MODE_TMS9918G2:
     Pixel_in_current_screen_with_opt_preview = Pixel_in_screen_thomson_with_opt_preview;
     break;
   case IMAGE_MODE_GBC:
