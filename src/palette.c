@@ -1411,7 +1411,7 @@ void Button_Palette(int btn)
                   block_end=temp_color;
 
                   // Affichage du n° de la couleur sélectionnée
-                  snprintf(str, sizeof(str), "%3hu\x1a%3hu", block_start, block_end); // 0x1a : flèche vers la droite
+                  snprintf(str, sizeof(str), "%3hu\x1a%3hu", (word)block_start, (word)block_end); // 0x1a : flèche vers la droite
                   Print_in_window(COLOR_X,COLOR_Y,str,MC_Black,MC_Light);
 
                   // Affichage des jauges
@@ -1426,7 +1426,7 @@ void Button_Palette(int btn)
                   block_end=first_color;
 
                   // Affichage du n° de la couleur sélectionnée
-                  snprintf(str, sizeof(str), "%3hu\x1a%3hu", block_start, block_end); // 0x1a : flèche vers la droite
+                  snprintf(str, sizeof(str), "%3hu\x1a%3hu", (word)block_start, (word)block_end); // 0x1a : flèche vers la droite
                   Print_in_window(COLOR_X,COLOR_Y,str,MC_Black,MC_Light);
 
                   // Affichage des jauges
@@ -1838,7 +1838,7 @@ void Button_Palette(int btn)
           if (block_start!=block_end)
           {
             // Cas d'un bloc multi-couleur
-            snprintf(str, sizeof(str), "%3hu\x1a%3hu", block_start, block_end); // 0x1a : flèche vers la droite
+            snprintf(str, sizeof(str), "%3hu\x1a%3hu", (word)block_start, (word)block_end); // 0x1a : flèche vers la droite
             // Affichage dans le block de visu du bloc (dégradé) en cours
             Display_grad_block_in_window(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,block_start,block_end);
           }
@@ -1891,7 +1891,7 @@ void Button_Palette(int btn)
           if (block_start!=block_end)
           {
             // Cas d'un bloc multi-couleur
-            snprintf(str, sizeof(str), "%3hu\x1a%3hu", block_start, block_end); // 0x1a : flèche vers la droite
+            snprintf(str, sizeof(str), "%3hu\x1a%3hu", (word)block_start, (word)block_end); // 0x1a : flèche vers la droite
             // Affichage dans le block de visu du bloc (dégradé) en cours
             Display_grad_block_in_window(FGCOLOR_DISPLAY_X,FGCOLOR_DISPLAY_Y,FGCOLOR_DISPLAY_W,FGCOLOR_DISPLAY_H,block_start,block_end);
           }
