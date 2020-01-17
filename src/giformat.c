@@ -774,16 +774,14 @@ void Load_GIF(T_IO_Context * context)
 /// Flush the buffer
 static void GIF_empty_buffer(FILE * file, T_GIF_context *gif, byte * GIF_buffer)
 {
-  word index;
-
   if (gif->remainder_byte)
   {
     GIF_buffer[0] = gif->remainder_byte;
 
-    for (index = 0; index <= gif->remainder_byte; index++)
-      Write_one_byte(file, GIF_buffer[index]);
+    if (!Write_bytes(file, GIF_buffer, (size_t)gif->remainder_byte + 1))
+      File_error = 1;
 
-    gif->remainder_byte=0;
+    gif->remainder_byte = 0;
   }
 }
 
@@ -875,8 +873,6 @@ void Save_GIF(T_IO_Context * context)
 
   if ((GIF_file=Open_file_write(context)))
   {
-    setvbuf(GIF_file, NULL, _IOFBF, 64*1024);
-
     // On écrit la signature du fichier
     if (Write_bytes(GIF_file,"GIF89a",6))
     {
