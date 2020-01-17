@@ -128,9 +128,6 @@ void Load_IMG(T_IO_Context * context)
       {
         memcpy(context->Palette,IMG_header.Palette,sizeof(T_Palette));
 
-        context->Width=IMG_header.Width;
-        context->Height=IMG_header.Height;
-
         for (y_pos=0;(y_pos<context->Height) && (!File_error);y_pos++)
         {
           if (Read_bytes(file,buffer,context->Width))
@@ -3292,14 +3289,14 @@ void Load_PCX(T_IO_Context * context)
         Read_word_le(file,&(PCX_header.Screen_Y)) &&
         Read_bytes(file,&(PCX_header.Filler),54) )
     {
-      
-      context->Width=PCX_header.X_max-PCX_header.X_min+1;
-      context->Height=PCX_header.Y_max-PCX_header.Y_min+1;
+      Pre_load(context,
+               PCX_header.X_max - PCX_header.X_min + 1,
+               PCX_header.Y_max - PCX_header.Y_min + 1,
+               file_size, FORMAT_PCX, PIXEL_SIMPLE,
+               PCX_header.Plane * PCX_header.Depth);
 
-      Original_screen_X=PCX_header.Screen_X;
-      Original_screen_Y=PCX_header.Screen_Y;
-
-      Pre_load(context, context->Width, context->Height, file_size, FORMAT_PCX, PIXEL_SIMPLE, PCX_header.Plane * PCX_header.Depth);
+      Original_screen_X = PCX_header.Screen_X;
+      Original_screen_Y = PCX_header.Screen_Y;
 
       if (!(PCX_header.Plane==3 && PCX_header.Depth==8))
       {

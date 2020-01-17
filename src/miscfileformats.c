@@ -574,8 +574,6 @@ void Load_PKM(T_IO_Context * context)
         if (File_error==0)
         {
 
-          context->Width=header.Width;
-          context->Height=header.Height;
           image_size=(dword)(context->Width*context->Height);
           // Palette lue en 64
           memcpy(context->Palette,header.Palette,sizeof(T_Palette));
@@ -945,13 +943,12 @@ void Load_CEL(T_IO_Context * context)
         && ( (((header1.Width+1)>>1)*header1.Height)==(file_size-header_size) ) )
       {
         // Chargement d'un fichier CEL sans signature (vieux fichiers)
-        context->Width=header1.Width;
-        context->Height=header1.Height;
-        Original_screen_X=context->Width;
-        Original_screen_Y=context->Height;
-        Pre_load(context, context->Width,context->Height,file_size,FORMAT_CEL,PIXEL_SIMPLE,0);
+        Pre_load(context, header1.Width, header1.Height,
+                 file_size, FORMAT_CEL, PIXEL_SIMPLE, 0);
         if (File_error==0)
         {
+          Original_screen_X = context->Width;
+          Original_screen_Y = context->Height;
           // Chargement de l'image
           /*Init_lecture();*/
           for (y_pos=0;((y_pos<context->Height) && (!File_error));y_pos++)
@@ -984,13 +981,14 @@ void Load_CEL(T_IO_Context * context)
         {
           // Chargement d'un fichier CEL avec signature (nouveaux fichiers)
 
-          context->Width=header2.Width+header2.X_offset;
-          context->Height=header2.Height+header2.Y_offset;
-          Original_screen_X=context->Width;
-          Original_screen_Y=context->Height;
-          Pre_load(context, context->Width,context->Height,file_size,FORMAT_CEL,PIXEL_SIMPLE,0);
+          Pre_load(context,
+                   header2.Width + header2.X_offset,
+                   header2.Height + header2.Y_offset,
+                   file_size, FORMAT_CEL, PIXEL_SIMPLE, 0);
           if (File_error==0)
           {
+            Original_screen_X = context->Width;
+            Original_screen_Y = context->Height;
             // Chargement de l'image
             /*Init_lecture();*/
 

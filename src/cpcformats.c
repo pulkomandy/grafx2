@@ -1618,9 +1618,6 @@ void Load_PPH(T_IO_Context* context)
 
   Pre_load(context, width, height, file_size, FORMAT_PPH, context->Ratio, 0);
 
-  context->Width = width;
-  context->Height = height;
-
   // First of all, detect the mode
   // 0, 1, 2 > Load as with SCR files?
   // R(3)    > Load as single layer, square pixels, 16 colors
