@@ -84,7 +84,7 @@ JPEGARCH = jpegsrc.v$(JPEGVER).tar.gz
 JPEGURL = http://www.ijg.org/files/$(JPEGARCH)
 # http://www.simplesystems.org/libtiff/
 # https://gitlab.com/libtiff/libtiff
-LIBTIFFVER = 4.0.10
+LIBTIFFVER = 4.1.0
 LATESTLIBTIFFVER = $(shell curl -s -S http://www.simplesystems.org/libtiff/ |grep -A1 Latest|tail -n1|sed 's/.*>v\([0-9.]*\).*/\1/')
 LIBTIFF = tiff-$(LIBTIFFVER)
 LIBTIFFARCH = $(LIBTIFF).tar.gz
@@ -96,7 +96,7 @@ TIFFARCH = $(LIBTIFFARCH)
 TIFFURL = $(LIBTIFFURL)
 TIFFURLALT = $(LIBTIFFURLALT)
 TIFFPATCHES = $(LIBTIFFPATCHES)
-TIFFSHA256 = 2c52d11ccaf767457db0c46795d9c7d1a8d8f76f68b0b800a3dfe45786b996e4
+TIFFSHA256 = 5d29f32517dadb6dbcd1255ea5bbc93a2b54b94fbf83653b4d65c7d6775b8634
 ZLIBVER=1.2.11
 LATESTZLIBVER = $(shell curl -s -S https://www.zlib.net/ChangeLog.txt |grep "Changes in" |head -n1|sed 's/Changes in \([0-9.]*\).*/\1/')
 ZLIB=zlib-$(ZLIBVER)
