@@ -138,6 +138,7 @@ enum FILE_FORMATS
   FORMAT_SCx,  ///< ColoRIX
   FORMAT_PI1,  ///< Atari ST Degas
   FORMAT_PC1,  ///< Atari ST Degas Elite
+  FORMAT_CA1,  ///< Atari ST CrackArt
   FORMAT_CEL,  ///< Atari ST Cyber Paint Cell
   FORMAT_NEO,  ///< Atari ST NeoChrome
   FORMAT_TNY,  ///< Atari ST Tiny Stuff

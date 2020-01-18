@@ -70,6 +70,7 @@ static const struct {
   TESTFMTF(NEO, "atari_st/ATARIART.NEO", FLAG_16C)
   TESTFMTF(PC1, "atari_st/eunmiisa.pc1", FLAG_16C)
   TESTFMTF(PI1, "atari_st/evolutn.pi1", FLAG_16C)
+  TESTFMTF(CA1, "atari_st/GIANTS.CA1", FLAG_16C)
   TESTFMTF(TNY, "atari_st/rose.tny", FLAG_16C)
   TESTFMTL(FLI, "autodesk_FLI_FLC/2noppaa.fli")
   TESTFMT(BMP, "bmp/test8.bmp")

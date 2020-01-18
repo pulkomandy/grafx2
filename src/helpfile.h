@@ -520,6 +520,7 @@ static const T_Help_table helptable_credits[] =
   HELP_TITLE(" FILE FORMATS CREDITS")
   HELP_TEXT ("")
   HELP_TEXT ("  BMP,ICO : Microsoft")
+  HELP_TEXT ("  CA1 : Crack Art (Jaybee and Roy)")
   HELP_TEXT ("  CEL,KCF : K.O.S. (KISekae Set system)")
   HELP_TEXT ("  CM5 : SyX")
   HELP_TEXT ("  EGX : Targhan & Supersly / Cargosoft")

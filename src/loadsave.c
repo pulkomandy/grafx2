@@ -115,7 +115,7 @@ static void Save_ClipBoard_Image(T_IO_Context *);
 const T_Format File_formats[] = {
   {FORMAT_ALL_IMAGES, "(all)", NULL, NULL, NULL, 0, 0, 0, "",
     "gif;png;bmp;2bp;pcx;pkm;iff;lbm;ilbm;sham;ham;ham6;ham8;acbm;pic;anim;img;sci;scq;scf;scn;sco;cel;"
-    "pi1;pc1;pi2;pc2;pi3;pc3;neo;tny;tn1;tn2;tn3;tn4;"
+    "pi1;pc1;pi2;pc2;pi3;pc3;neo;tny;tn1;tn2;tn3;tn4;ca1;ca2;ca3;"
     "c64;p64;a64;pi;rp;aas;art;dd;iph;ipt;hpc;ocp;koa;koala;fli;bml;cdu;prg;pmg;rpm;"
     "gpx;"
     "cpc;scr;win;pph;cm5;go1;"
@@ -139,6 +139,7 @@ const T_Format File_formats[] = {
   {FORMAT_SCx, " sc?", Test_SCx, Load_SCx, Save_SCx, 0, 0, 0, "sc?", "sci;scq;scf;scn;sco"},
   {FORMAT_PI1, " pi1", Test_PI1, Load_PI1, Save_PI1, 0, 0, 0, "pi1", "pi1;pi2;pi3"},
   {FORMAT_PC1, " pc1", Test_PC1, Load_PC1, Save_PC1, 0, 0, 0, "pc1", "pc1;pc2;pc3"},
+  {FORMAT_CA1, " ca1", Test_CA1, Load_CA1, Save_CA1, 0, 0, 0, "ca1", "ca1;ca2;ca3"},
   {FORMAT_TNY, " tny", Test_TNY, Load_TNY, Save_TNY, 0, 0, 0, "tny", "tny;tn1;tn2;tn3;tn4"},
   {FORMAT_CEL, " cel", Test_CEL, Load_CEL, Save_CEL, 0, 0, 0, "cel", "cel"},
   {FORMAT_NEO, " neo", Test_NEO, Load_NEO, Save_NEO, 0, 0, 0, "neo", "neo"},

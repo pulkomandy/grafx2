@@ -100,7 +100,7 @@ void PI2_8b_to_16p(const byte * src,byte * dest)
 
 //// CODAGE d'une partie d'IMAGE ////
 
-void PI1_16p_to_8b(byte * src,byte * dest)
+void PI1_16p_to_8b(const byte * src, byte * dest)
 {
   int  i;           // index du pixel à calculer
   word byte_mask;      // Masque de codage
@@ -1511,6 +1511,423 @@ error:
   if (file != NULL)
     fclose(file);
   Remove_file(context);
+}
+
+/**
+ * test for CrackArt format.
+ *
+ * Test that the files starts with the "CA" signature,
+ * then 1 byte for the compressed flag (0 or 1),
+ * then 1 byte for the resolution (0=low, 1=med, 2=high)
+ */
+void Test_CA1(T_IO_Context * context, FILE * file)
+{
+  byte header[4];
+
+  (void)context;
+  File_error = 1;
+  if (!Read_bytes(file, header, 4))
+    return;
+  if (header[0] == 'C' && header[1] == 'A')
+  {
+    if ((header[2] & 0xfe) == 0 && (header[3] < 3))
+      File_error = 0;
+  }
+}
+
+void Load_CA1(T_IO_Context * context)
+{
+  FILE * file;
+  byte sig[2];
+  byte compressed;
+  byte res;
+  byte * buffer;
+
+  File_error = 1;
+  buffer = GFX2_malloc(32000);
+  if (buffer == NULL)
+    return;
+  file = Open_file_read(context);
+  if (file == NULL)
+  {
+    free(buffer);
+    return;
+  }
+  if (Read_bytes(file, sig, 2) && Read_byte(file, &compressed)
+      && Read_byte(file, &res))
+  {
+    unsigned long file_size;
+    short width = 640, height = 200;
+    enum PIXEL_RATIO ratio = PIXEL_SIMPLE;
+    byte bpp = 4;
+
+    file_size = File_length_file(file);
+    GFX2_Log(GFX2_DEBUG, "Signature : '%c%c' %s res=%d\n",
+             sig[0], sig[1], compressed ? "compressed" : "", res);
+    switch (res)
+    {
+      case 0:
+        width = 320;
+        break;
+      case 1:
+        ratio = PIXEL_TALL;
+        bpp = 2;
+        break;
+      case 2:
+        height = 400;
+        bpp = 1;
+    }
+    File_error = 0;
+
+    Pre_load(context, width, height, file_size, FORMAT_CA1, ratio, bpp);
+    if (File_error == 0)
+    {
+      if (Config.Clear_palette)
+        memset(context->Palette,0,sizeof(T_Palette));
+      memset(buffer, 0, 32);
+      if (res == 2)
+      {
+        // black & white
+        buffer[0] = 0xff;
+        buffer[1] = 0xff;
+      }
+      else
+      {
+        if (!Read_bytes(file, buffer, 1 << (bpp + 1)))
+          File_error = 1;
+      }
+      PI1_decode_palette(buffer, context->Palette);
+      if (compressed)
+      {
+        byte escape, delta;
+        word offset;
+
+        if (!(Read_byte(file, &escape) && Read_byte(file, &delta) && Read_word_be(file, &offset)))
+          File_error = 1;
+        else if(offset != 0)
+        {
+          int i = 0, c = 0;
+
+          GFX2_Log(GFX2_DEBUG, "  escape=%02X delta=%02X offset=%hu\n", escape, delta, offset);
+          memset(buffer, delta, 32000);
+          while (c < 32000 && File_error == 0)
+          {
+            byte cmd, data;
+            word repeat;
+
+            repeat = 0;
+            data = delta;
+            if (!Read_byte(file, &cmd))
+              File_error = 1;
+            if (cmd == escape)
+            {
+              if (!Read_byte(file, &cmd))
+                File_error = 1;
+              if (cmd == 0)
+              {
+                // byte count repeat
+                if (!Read_byte(file, &cmd) || !Read_byte(file, &data))
+                  File_error = 1;
+                repeat = cmd;
+                GFX2_Log(GFX2_DEBUG, "byte count repeat : 0x%02x,0x%02x,%hu,0x%02x\n", escape, 0, repeat, data);
+              }
+              else if (cmd == 1)
+              {
+                // word count repeat
+                if (!Read_word_be(file, &repeat) || !Read_byte(file, &data))
+                  File_error = 1;
+                GFX2_Log(GFX2_DEBUG, "word count repeat : 0x%02x,0x%02x,%hu,0x%02x\n", escape, cmd, repeat, data);
+              }
+              else if (cmd == 2)
+              {
+                if (!Read_byte(file, &cmd))
+                  File_error = 1;
+                else if (cmd == 0)
+                {
+                  // ESC,02,00 => STOP code
+                  GFX2_Log(GFX2_DEBUG, "STOP : 0x%02x,0x02,%02x\n", escape, cmd);
+                  break;
+                }
+                else
+                {
+                  // ESC,02,a,b => repeat (a << 8 + b + 1) x byte "delta"
+                  repeat = cmd << 8;
+                  if (!Read_byte(file, &cmd))
+                    File_error = 1;
+                  repeat += cmd;
+                  GFX2_Log(GFX2_DEBUG, "delta repeat : 0x%02x,%hu\n", escape, repeat);
+                }
+              }
+              else if (cmd == escape)
+              {
+                // ESC,ESC => 1 x byte "ESC"
+                data = cmd;
+              }
+              else
+              {
+                // ESC,a,b => repeat (a + 1) x byte b
+                repeat = cmd;
+                if (!Read_byte(file, &data))
+                  File_error = 1;
+              }
+            }
+            else
+            {
+              data = cmd;
+            }
+            // output bytes
+            do
+            {
+              buffer[i] = data;
+              i += offset;
+              c++;
+              if (i >= 32000)
+                i -= (32000 - 1);
+            }
+            while (repeat-- > 0);
+          }
+          GFX2_Log(GFX2_DEBUG, "finished : i=%d c=%d\n", i, c);
+        }
+      }
+      else
+      {
+        // not compressed
+        if (!Read_bytes(file, buffer, 32000))
+          File_error = 1;
+      }
+      if (File_error == 0)
+      {
+        int line;
+        const byte * ptr = buffer;
+        int ncols;
+
+        ncols = (res == 0) ? 20 : 40;
+
+        for (line = 0; line < height; line++)
+        {
+          byte pixels[16];
+          int col, x;
+
+          for (col = 0; col < ncols; col++)
+          {
+            switch (res)
+            {
+              case 0:
+                PI1_8b_to_16p(ptr, pixels);
+                ptr += 8;
+                for (x = 0; x < 16; x++)
+                  Set_pixel(context, col * 16 + x, line, pixels[x]);
+                break;
+              case 1:
+                PI2_8b_to_16p(ptr, pixels);
+                ptr += 4;
+                for (x = 0; x < 16; x++)
+                  Set_pixel(context, col * 16 + x, line, pixels[x]);
+                break;
+              case 2:
+                for (x = 0 ; x < 16; x++)
+                  Set_pixel(context, col * 16 + x, line, (ptr[(x >> 3)] >> (7 - (x & 7))) & 1);
+                ptr += 2;
+            }
+          }
+        }
+      }
+    }
+  }
+  fclose(file);
+  free(buffer);
+}
+
+/**
+ * Save a 320x200 16c picture in CrackArt format
+ *
+ * @todo support medium and high resolution
+ */
+void Save_CA1(T_IO_Context * context)
+{
+  FILE * file;
+  byte * buffer;
+  byte res = 0;   // 0 = low, 1 = med, 2 = high
+  byte compressed = 1;  // 0 or 1
+  int height = 200;
+
+  File_error = 1;
+  buffer = GFX2_malloc(32000);
+  if (buffer == NULL)
+    return;
+  file = Open_file_write(context);
+  if (file == NULL)
+  {
+    free(buffer);
+    return;
+  }
+  if (Write_bytes(file, "CA", 2) && Write_byte(file, compressed) && Write_byte(file, res))
+  {
+    PI1_code_palette(context->Palette, buffer);
+    if (Write_bytes(file, buffer, 32))
+    {
+      int line;
+      byte * ptr = buffer;
+
+      for (line = 0; line < height; line++)
+      {
+        byte pixels[16];
+        int col, x;
+
+        for (col = 0; col < 20; col++)
+        {
+          for (x = 0; x < 16; x++)
+            pixels[x] = Get_pixel(context, col * 16 + x, line);
+          PI1_16p_to_8b(pixels, ptr);
+          ptr += 8;
+        }
+      }
+
+      if (compressed)
+      {
+        word freq[256];
+        word max, min;
+        byte max_index, min_index;
+        byte escape;
+        word offset;
+        int i;
+
+        memset(freq, 0, sizeof(freq));
+        for (i = 0; i < 32000; i++)
+          freq[buffer[i]]++;
+        min = 65535;
+        min_index = 0;
+        max = 0;
+        max_index = 0;
+        for (i = 0; i < 256; i++)
+        {
+          if (freq[i] <= min && i > 2)
+          {
+            min = freq[i];
+            min_index = (byte)i;
+          }
+          if (freq[i] > max)
+          {
+            max = freq[i];
+            max_index = (byte)i;
+          }
+        }
+        GFX2_Log(GFX2_DEBUG, " 0x%02X (%hu times)   0x%02X (%hu times)\n", min_index, min, max_index, max);
+        escape = min_index;
+        offset = 160; // 80 in high res
+        if (Write_byte(file, escape) && Write_byte(file, max_index) && Write_word_be(file, offset))
+        {
+          int c = 1;
+          byte current;
+          word count = 0;
+          File_error = 0;
+          i = offset;
+          current = buffer[0];
+          while (c < 32000 && File_error == 0)
+          {
+            if (buffer[i] == current)
+              count++;
+            else
+            {
+              if (count < 3)
+              {
+                // Litteral
+                do
+                {
+                  if (!Write_byte(file, current))
+                    File_error = 1;
+                  if (current == escape)
+                    Write_byte(file, current);
+                }
+                while (count-- && File_error == 0);
+              }
+              else
+              {
+                GFX2_Log(GFX2_DEBUG, "byte %02X x %hu\n", current, count);
+                if (count < 256)
+                {
+                  // ESC,a,b => repeat (a + 1) x byte b
+                  // with a > 2
+                  if (!(Write_byte(file, escape)
+                     && Write_byte(file, count)
+                     && Write_byte(file, current)))
+                    File_error = 1;
+                }
+                else if (current == max_index)
+                {
+                  // ESC,02,word count => repeat (count + 1) x byte "delta"
+                  if (!(Write_byte(file, escape)
+                     && Write_byte(file, 2)
+                     && Write_word_be(file, count)))
+                    File_error = 1;
+                }
+                else
+                {
+                  // ESC,01,word count,data
+                  if (!(Write_byte(file, escape)
+                     && Write_byte(file, 1)
+                     && Write_word_be(file, count)
+                     && Write_byte(file, current)))
+                    File_error = 1;
+                }
+              }
+              current = buffer[i];
+              count = 0;
+            }
+            i += offset;
+            c++;
+            if (i >= 32000)
+              i -= (32000 - 1);
+          }
+          GFX2_Log(GFX2_DEBUG, "end: byte %02X x %hu\n", current, count);
+          if (count < 3)
+          {
+            do
+            {
+              Write_byte(file, current);
+              if (current == escape)
+                Write_byte(file, current);
+            }
+            while (count--);
+          }
+          else if (current == max_index)
+          {
+            // STOP code
+            if (!(Write_byte(file, escape)
+               && Write_byte(file, 2)
+               && Write_byte(file, 0)))
+              File_error = 1;
+          }
+          else if (count < 256)
+          {
+            // ESC,a,b => repeat (a + 1) x byte b
+            // with a > 2
+            if (!(Write_byte(file, escape)
+               && Write_byte(file, count)
+               && Write_byte(file, current)))
+              File_error = 1;
+          }
+          else
+          {
+            // ESC,01,word count,data
+            if (!(Write_byte(file, escape)
+               && Write_byte(file, 1)
+               && Write_word_be(file, count)
+               && Write_byte(file, current)))
+              File_error = 1;
+          }
+        }
+      }
+      else
+      {
+        // uncompressed
+        if (Write_bytes(file, buffer, 32000))
+          File_error = 0;
+      }
+    }
+  }
+  fclose(file);
+  free(buffer);
 }
 
 /* @} */
