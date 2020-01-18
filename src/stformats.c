@@ -35,6 +35,7 @@
 #include "misc.h"
 #include "gfx2log.h"
 #include "gfx2mem.h"
+#include "packbits.h"
 
 /**
  * @defgroup atarist Atari ST picture formats
@@ -442,47 +443,6 @@ void Save_PI1(T_IO_Context * context)
 
 //////////////////////////////////// PC1 ////////////////////////////////////
 
-/// uncompress degas elite compressed stream (PACKBITS)
-/// @return 1 for success
-/// @return 0 for failure
-static int PC1_uncompress_packbits_file(FILE *f, byte * dest)
-{
-  int id = 0;
-  unsigned count;
-  byte code, value;
-
-  while (id < 32000)
-  {
-    if (!Read_byte(f, &code))
-      return 0;
-
-    if (code & 0x80)
-    {
-      /// Code is negative :
-      /// Repeat (1-code) times next byte
-      count = 257 - code;
-      if (id + count > 32000)
-        return 0;
-      if (!Read_byte(f, &value))
-        return 0;
-      while (count-- > 0)
-        dest[id++] = value;
-    }
-    else
-    {
-      /// Code is positive :
-      /// Copy (code+1) bytes
-      count = code + 1;
-      if (id + count > 32000)
-        return 0;
-      if (!Read_bytes(f, dest + id, count))
-        return 0;
-      id += count;
-    }
-  }
-  return 1;
-}
-
 //// COMPRESSION d'un buffer selon la méthode PACKBITS ////
 
 static void PC1_compress_packbits(byte * src,byte * dest,int source_size,int * dest_size)
@@ -700,10 +660,9 @@ void Load_PC1(T_IO_Context * context)
   // Initialisation de la preview
   Pre_load(context, width, height, size, FORMAT_PC1, ratio, bpp);
 
-  //PC1_uncompress_packbits(buffercomp, bufferdecomp);
-  if (!PC1_uncompress_packbits_file(file, bufferdecomp))
+  if (PackBits_unpack_from_file(file, bufferdecomp, 32000) != PACKBITS_UNPACK_OK)
   {
-    GFX2_Log(GFX2_INFO, "PC1_uncompress_packbits_file() failed\n");
+    GFX2_Log(GFX2_INFO, "PackBits_unpack_from_file() failed\n");
     free(bufferdecomp);
     fclose(file);
     return;
