@@ -443,68 +443,6 @@ void Save_PI1(T_IO_Context * context)
 
 //////////////////////////////////// PC1 ////////////////////////////////////
 
-//// COMPRESSION d'un buffer selon la méthode PACKBITS ////
-
-static void PC1_compress_packbits(byte * src,byte * dest,int source_size,int * dest_size)
-{
-
-  *dest_size = 0;
-  while (source_size > 0)
-  {
-    int is = 0; // index dans la source
-    int id = 0; // index dans la destination
-    int ir; // index de   la répétition
-    int n;  // Taille des séquences
-    int repet; // "Il y a répétition"
-
-    while(is<40)
-    {
-      // On recherche le 1er endroit où il y a répétition d'au moins 3 valeurs
-      // identiques
-
-      repet=0;
-      for (ir=is;ir<40-2;ir++)
-      {
-        if ((src[ir]==src[ir+1]) && (src[ir+1]==src[ir+2]))
-        {
-          repet=1;
-          break;
-        }
-      }
-
-      // On code la partie sans répétitions
-      if (!repet || ir!=is)
-      {
-        n=(ir-is)+1;
-        dest[id++]=n-1;
-        for (;n>0;n--)
-          dest[id++]=src[is++];
-      }
-
-      // On code la partie sans répétitions
-      if (repet)
-      {
-        // On compte la quantité de fois qu'il faut répéter la valeur
-        for (ir+=3;ir<40;ir++)
-        {
-          if (src[ir]!=src[is])
-            break;
-        }
-        n=(ir-is);
-        dest[id++]=257-n;
-        dest[id++]=src[is];
-        is=ir;
-      }
-    }
-    // On renseigne la taille du buffer compressé
-    *dest_size+=id;
-    // Move for next 40-byte block
-    src += 40;
-    dest += id;
-    source_size -= 40;
-  }
-}
-
 //// DECODAGE d'une partie d'IMAGE ////
 
 // Transformation de 4 plans de bits en 1 ligne de pixels
@@ -724,9 +662,8 @@ void Load_PC1(T_IO_Context * context)
 void Save_PC1(T_IO_Context * context)
 {
   FILE *file;
-  int   size;
   short x_pos,y_pos;
-  byte * buffercomp;
+  byte buffer[32];;
   byte * bufferdecomp;
   byte * ptr;
   byte pixels[320];
@@ -737,12 +674,14 @@ void Save_PC1(T_IO_Context * context)
   {
     // Allocation des buffers mémoire
     bufferdecomp = GFX2_malloc(32000);
-    buffercomp = GFX2_malloc(64066);
     // Codage de la résolution
-    buffercomp[0]=0x80;
-    buffercomp[1]=0x00;
+    if (!Write_word_be(file, 0x8000))
+      File_error = 1;
     // Codage de la palette
-    PI1_code_palette(context->Palette, buffercomp+2);
+    PI1_code_palette(context->Palette, buffer);
+    if (!Write_bytes(file, buffer, 32))
+      File_error = 1;
+
     // Codage de l'image
     ptr=bufferdecomp;
     for (y_pos=0;y_pos<200;y_pos++)
@@ -761,12 +700,12 @@ void Save_PC1(T_IO_Context * context)
     }
 
     // Compression du buffer
-    PC1_compress_packbits(bufferdecomp,buffercomp+34,32000,&size);
-    size += 34;
-    size += 32;
-    PI1_save_ranges(context, buffercomp,size);
+    if (PackBits_pack_buffer(file, bufferdecomp, 32000) < 0)
+      File_error = 1;
 
-    if (Write_bytes(file,buffercomp,size))
+    PI1_save_ranges(context, buffer, 32);
+
+    if (Write_bytes(file, buffer, 32))
     {
       fclose(file);
     }
@@ -778,8 +717,7 @@ void Save_PC1(T_IO_Context * context)
     }
     // Libération des buffers mémoire
     free(bufferdecomp);
-    free(buffercomp);
-    buffercomp = bufferdecomp = NULL;
+    bufferdecomp = NULL;
   }
   else
   {
