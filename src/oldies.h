@@ -149,6 +149,7 @@ byte CPC_Firmware_to_Hardware_color(byte fw_color);
  *
  * @param[in] file an open file
  * @param[out] loading_address the loading address from the header
+ * @param[out] exec_address the execution address from the header
  * @param[out] file_length the file length written in the header
  * @return 0 if the file does not contain a valid AMSDOS header
  * @return 1 if it does.

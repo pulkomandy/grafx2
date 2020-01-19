@@ -73,6 +73,8 @@ int PackBits_pack_flush(T_PackBits_data * data);
 /**
  * Pack a full buffer to FILE
  * @param f FILE output or NULL (for no output)
+ * @param buffer input buffer
+ * @param size byte size of input buffer
  * @return -1 for error, or the size of the packed stream so far
  */
 int PackBits_pack_buffer(FILE * f, const byte * buffer, size_t size);

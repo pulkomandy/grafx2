@@ -24,7 +24,7 @@
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
 
-///@file giformats.c
+///@file giformat.c
 /// Saving and loading GIF
 
 #include <stdlib.h>
