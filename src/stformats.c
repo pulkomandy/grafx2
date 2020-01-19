@@ -59,7 +59,14 @@
 
 //// DECODAGE d'une partie d'IMAGE ////
 
-void PI1_8b_to_16p(const byte * src,byte * dest)
+/**
+ * 4bpp Planar to chunky conversion.
+ *
+ * Reads 16 pixels from 4 words with Atari ST low resolution layout.
+ * @param src 8 bytes Atari ST screen memory
+ * @param dest 16 bytes buffer
+ */
+static void PI1_8b_to_16p(const byte * src, byte * dest)
 {
   int  i;           // index du pixel à calculer
   word byte_mask;      // Masque de decodage
@@ -83,7 +90,14 @@ void PI1_8b_to_16p(const byte * src,byte * dest)
   }
 }
 
-void PI2_8b_to_16p(const byte * src,byte * dest)
+/**
+ * 2bpp Planar to chunky conversion.
+ *
+ * Reads 16 pixels from 2 words with Atari ST medium resolution layout.
+ * @param src 4 bytes Atari ST screen memory
+ * @param dest 16 bytes buffer
+ */
+static void PI2_4b_to_16p(const byte * src, byte * dest)
 {
   int  i;           // index du pixel à calculer
   word mask;      // Masque de decodage
@@ -99,9 +113,14 @@ void PI2_8b_to_16p(const byte * src,byte * dest)
   }
 }
 
-//// CODAGE d'une partie d'IMAGE ////
-
-void PI1_16p_to_8b(const byte * src, byte * dest)
+/**
+ * Chunky to 4bpp planar conversion.
+ *
+ * For ST Low resolution.
+ * @param src 16 bytes buffer
+ * @param dest 8 bytes (4 words in Atari ST memory screen layout)
+ */
+static void PI1_16p_to_8b(const byte * src, byte * dest)
 {
   int  i;           // index du pixel à calculer
   word byte_mask;      // Masque de codage
@@ -130,8 +149,12 @@ void PI1_16p_to_8b(const byte * src, byte * dest)
   dest[7]=w3 & 0x00FF;
 }
 
-//// DECODAGE de la PALETTE ////
-
+/**
+ * Decode the 16 colors Atari ST(E) palette
+ *
+ * @param src 32 bytes Atari ST(E) palette
+ * @param palette GrafX2 palette structure
+ */
 static void PI1_decode_palette(const byte * src, T_Components * palette)
 {
   int i;  // Numéro de la couleur traitée
@@ -154,8 +177,12 @@ static void PI1_decode_palette(const byte * src, T_Components * palette)
   }
 }
 
-//// CODAGE de la PALETTE ////
-
+/**
+ * Code a 16 colors Atari ST(E) palette.
+ *
+ * @param palette GrafX2 palette structure
+ * @param dest 32 bytes buffer
+ */
 void PI1_code_palette(const T_Components * palette, byte * dest)
 {
   int i;  // Numéro de la couleur traitée
@@ -345,7 +372,7 @@ void Load_PI1(T_IO_Context * context)
           ptr += 8;
           break;
         case 1:
-          PI2_8b_to_16p(ptr, pixels);
+          PI2_4b_to_16p(ptr, pixels);
           ptr += 4;
           break;
         case 2:
@@ -443,11 +470,18 @@ void Save_PI1(T_IO_Context * context)
 
 //////////////////////////////////// PC1 ////////////////////////////////////
 
-//// DECODAGE d'une partie d'IMAGE ////
-
-// Transformation de 4 plans de bits en 1 ligne de pixels
-
-static void PC1_4bp_to_1line(byte * src0,byte * src1,byte * src2,byte * src3,byte * dest)
+/**
+ * 4bpp planar to chunky conversion.
+ * Converts 1 line (320 pixels) at a time.
+ *
+ * @param src0 40 bytes for plane 0
+ * @param src1 40 bytes for plane 1
+ * @param src2 40 bytes for plane 2
+ * @param src3 40 bytes for plane 3
+ * @param dest 320 bytes destination buffer
+ */
+static void PC1_4bp_to_1line(const byte * src0, const byte * src1,
+                             const byte * src2, const byte * src3, byte * dest)
 {
   int  i,j;         // Compteurs
   int  ip;          // index du pixel à calculer
@@ -475,11 +509,20 @@ static void PC1_4bp_to_1line(byte * src0,byte * src1,byte * src2,byte * src3,byt
   }
 }
 
-//// CODAGE d'une partie d'IMAGE ////
-
 // Transformation d'1 ligne de pixels en 4 plans de bits
 
-static void PC1_1line_to_4bp(byte * src,byte * dst0,byte * dst1,byte * dst2,byte * dst3)
+/**
+ * Convert 1 line of 320 pixel from chunky to 4bpp planar.
+ *
+ * @param src 320 bytes buffer
+ * @param dst0 40 bytes buffer for plane 0
+ * @param dst1 40 bytes buffer for plane 1
+ * @param dst2 40 bytes buffer for plane 2
+ * @param dst3 40 bytes buffer for plane 3
+ */
+static void PC1_1line_to_4bp(const byte * src,
+                             byte * dst0, byte * dst1,
+                             byte * dst2, byte * dst3)
 {
   int  i,j;         // Compteurs
   int  ip;          // index du pixel à calculer
@@ -917,7 +960,7 @@ void Load_NEO(T_IO_Context * context)
           ptr += 8;
           break;
         case 1:
-          PI2_8b_to_16p(ptr, pixels);
+          PI2_4b_to_16p(ptr, pixels);
           ptr += 4;
           break;
         case 2:
@@ -1272,10 +1315,10 @@ void Load_TNY(T_IO_Context * context)
               break;
             case 1:
             case 4:
-              PI2_8b_to_16p(planar, pixels);
+              PI2_4b_to_16p(planar, pixels);
               for (dst = 0 ; dst < 16; dst++)
                 Set_pixel(context, col * 32 + dst, line, pixels[dst]);
-              PI2_8b_to_16p(planar + 4, pixels);
+              PI2_4b_to_16p(planar + 4, pixels);
               for (dst = 0 ; dst < 16; dst++)
                 Set_pixel(context, col * 32 + 16 + dst, line, pixels[dst]);
               break;
@@ -1629,7 +1672,7 @@ void Load_CA1(T_IO_Context * context)
                   Set_pixel(context, col * 16 + x, line, pixels[x]);
                 break;
               case 1:
-                PI2_8b_to_16p(ptr, pixels);
+                PI2_4b_to_16p(ptr, pixels);
                 ptr += 4;
                 for (x = 0; x < 16; x++)
                   Set_pixel(context, col * 16 + x, line, pixels[x]);
@@ -1651,6 +1694,7 @@ void Load_CA1(T_IO_Context * context)
 /**
  * Save a 320x200 16c picture in CrackArt format
  *
+ * @see http://www.atari-wiki.com/index.php/CrackArt_file_format
  * @todo support medium and high resolution
  */
 void Save_CA1(T_IO_Context * context)
