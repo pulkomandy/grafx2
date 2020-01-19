@@ -706,7 +706,7 @@ void Save_PC1(T_IO_Context * context)
 {
   FILE *file;
   short x_pos,y_pos;
-  byte buffer[32];;
+  byte buffer[32];
   byte * bufferdecomp;
   byte * ptr;
   byte pixels[320];
