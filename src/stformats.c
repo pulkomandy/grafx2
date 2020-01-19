@@ -368,7 +368,11 @@ void Load_PI1(T_IO_Context * context)
 }
 
 
-// -- Sauver un fichier au format PI1 ---------------------------------------
+/**
+ * Save a PI1 Degas uncompressed picture
+ *
+ * @todo Support medium and high resolution
+ */
 void Save_PI1(T_IO_Context * context)
 {
   FILE *file;
@@ -381,8 +385,6 @@ void Save_PI1(T_IO_Context * context)
   // Ouverture du fichier
   if ((file=Open_file_write(context)))
   {
-    setvbuf(file, NULL, _IOFBF, 64*1024);
-
     // allocation d'un buffer mémoire
     buffer = GFX2_malloc(32034);
     // Codage de la résolution
@@ -755,7 +757,11 @@ void Load_PC1(T_IO_Context * context)
 }
 
 
-// -- Sauver un fichier au format PC1 ---------------------------------------
+/**
+ * Save a Degas Elite compressed picture
+ *
+ * @todo support medium and high resolution
+  */
 void Save_PC1(T_IO_Context * context)
 {
   FILE *file;
@@ -770,8 +776,6 @@ void Save_PC1(T_IO_Context * context)
   // Ouverture du fichier
   if ((file=Open_file_write(context)))
   {
-    setvbuf(file, NULL, _IOFBF, 64*1024);
-
     // Allocation des buffers mémoire
     bufferdecomp = GFX2_malloc(32000);
     buffercomp = GFX2_malloc(64066);
@@ -1039,7 +1043,11 @@ error:
   fclose(file);
 }
 
-/// Save in NeoChrome format
+/**
+ * Save in NeoChrome format
+ *
+ * @todo support medium and high resolution
+ */
 void Save_NEO(T_IO_Context * context)
 {
   word resolution = 0;
@@ -1389,6 +1397,11 @@ void Load_TNY(T_IO_Context * context)
   fclose(file);
 }
 
+/**
+ * Save in Tiny compressed format.
+ *
+ * @todo support medium and high resolution
+ */
 void Save_TNY(T_IO_Context * context)
 {
   byte res = 0;
