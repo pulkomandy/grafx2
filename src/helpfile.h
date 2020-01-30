@@ -60,12 +60,12 @@ static const T_Help_table helptable_about[] =
   HELP_TEXT ("")
   HELP_TEXT ("")
   HELP_TITLE("        GRAFX 2       ")
-  HELP_BOLD ("              \"Pixels not Dead!\"")
+  HELP_BOLD ("             \"8-bits are alive !\"")
   HELP_BOLD ("  THE ULTIMATE MULTI-RESOLUTION GFX EDITOR")
   HELP_TEXT ("")
   HELP_TEXT ("               http://grafx2.tk")
   HELP_TEXT ("")
-  HELP_TEXT ("Copyright 2007-2019, the Grafx2 project team")
+  HELP_TEXT ("Copyright 2007-2020, the Grafx2 project team")
   HELP_TEXT ("          1996-2001, SUNSET DESIGN")
 };
 static const T_Help_table helptable_licence[] =
