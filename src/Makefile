@@ -921,9 +921,7 @@ $(MACAPPEXE) : $(BIN)
 	echo 'APPL????' > Grafx2.app/Contents/PkgInfo
 	cp Info.plist Grafx2.app/Contents
 	cp Grafx2.icns Grafx2.app/Contents/Resources
-ifeq ($(API),x11)
 	cp ../share/grafx2/gfx2.png Grafx2.app/Contents/Resources
-endif
 	mkdir -p Grafx2.app/Contents/Resources/English.lproj
 	iconv -f UTF-16BE English.lproj/InfoPlist.strings | sed -e 's/Grafx2 version [.0-9]*/Grafx2 version $(VERSIONTAG)/' | iconv -t UTF-16BE > Grafx2.app/Contents/Resources/English.lproj/InfoPlist.strings
 	cp -r ../share/grafx2/fonts Grafx2.app/Contents/Resources
