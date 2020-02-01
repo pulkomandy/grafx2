@@ -1169,8 +1169,8 @@ endif
 6502.h:	6502.c
 
 6502.c:	../3rdparty/6502/sources/6502.c
-	$(CP) $< $@
-	$(CP) ../3rdparty/6502/API/emulation/CPU/6502.h 6502.h
+	if [ -f $< ] ; then $(CP) $< $@ ; fi
+	if [ -f ../3rdparty/6502/API/emulation/CPU/6502.h ] ; then $(CP) ../3rdparty/6502/API/emulation/CPU/6502.h 6502.h ; fi
 
 ../3rdparty/6502/sources/6502.c:
 	if [ -d ../3rdparty ] ; then $(MAKE) -C ../3rdparty 6502 ; fi
