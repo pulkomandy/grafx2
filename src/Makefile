@@ -1020,7 +1020,8 @@ check:	$(TESTSBIN)
 # .tgz archive with source only files
 SRCARCH = ../src-$(VERSIONTAG).tgz
 
-$(SRCARCH):	$(wildcard *.c) $(wildcard *.cpp) $(wildcard *.h) Makefile gfx2.ico Grafx2_Prefix.pch $(wildcard *.m) gfx2.rc
+$(SRCARCH):	$(wildcard *.c) $(wildcard *.cpp) $(wildcard *.h) Makefile \
+	gfx2.ico Grafx2_Prefix.pch $(wildcard *.m) gfx2.rc grafx2.rdef
 	$(AT)cd .. && $(TAR) czf $(SRCARCH:../%=%) $(addprefix src/,$^)
 
 ifeq ($(PLATFORM),Darwin)
@@ -1116,6 +1117,7 @@ endif
 	$(AT)$(TAR) czf "../grafx2-$(VERSIONTAG)-src.tgz" $(TARTRANSFORM) \
 	  ../src/*.c ../src/*.cpp ../src/*.h ../src/Makefile \
 	  ../src/Grafx2_Prefix.pch ../src/*.m ../src/gfx2.rc ../src/gfx2.ico \
+	  ../src/grafx2.rdef \
 	  ../src/Grafx2.icns ../src/English.lproj/* ../src/Info.plist \
 	  ../share/grafx2/gfx2def.ini $(SCRIPT_FILES) $(SKIN_FILES) \
 	  ../share/grafx2/gfx2.gif ../share/grafx2/gfx2.png ../share/icons/grafx2.svg \
@@ -1199,6 +1201,13 @@ comma := ,
 gfx2.rc: gfx2.ico $(REVISION_CACHE) $(LABEL_CACHE)
 	sed -e 's/\(VERSION [ ]*\)\(.*\)/\1$(subst .,$(comma),$(subst wip,,$(LABEL))),0,$(firstword $(subst -, ,$(GIT_REVISION)))/' \
 	    -e 's/\(Version", "\)\(.*\)"/\1$(subst wip.,wip,$(LABEL).$(GIT_REVISION))"/' $@ > $@.tmp
+	if ! diff -q -i $@ $@.tmp ; then mv $@.tmp $@ ; else rm $@.tmp ; fi
+
+# update the grafx2.rdef Haiku description file
+grafx2.rdef:	$(REVISION_CACHE) $(LABEL_CACHE)
+	sed -e 's/\(middle.*=[ ]*\)\([0-9]*\)/\1$(shell echo $(subst wip, ,$(LABEL)) | cut -d. -f 2)/' \
+	    -e 's/\(minor.*=[ ]*\)\([0-9]*\)/\1$(firstword $(subst -, ,$(GIT_REVISION)))/' \
+	    -e 's/\(variety.*=[ ]*\)\([A-Z0-9_]*\)/\1$(if $(findstring wip,$(LABEL)),B_APPV_BETA,B_APPV_FINAL)/' $@ > $@.tmp
 	if ! diff -q -i $@ $@.tmp ; then mv $@.tmp $@ ; else rm $@.tmp ; fi
 
 # Link the icons to the program under windows
