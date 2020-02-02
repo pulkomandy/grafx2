@@ -163,6 +163,11 @@ char * Get_program_directory(const char * argv0)
   #else
   program_dir = Extract_path(NULL, argv0);
   #endif
+  if (program_dir == NULL)
+  {
+    GFX2_Log(GFX2_WARNING, "Failed to detect program directory, using current directory\n");
+    program_dir = strdup("." PATH_SEPARATOR);
+  }
   return program_dir;
 }
 
