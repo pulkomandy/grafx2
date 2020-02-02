@@ -26,3 +26,8 @@
 *.tgz
 *.zip
 /install/*.exe
+/VERSION
+
+/tools/8x8fonts/.fonts.generated
+/share/grafx2/skins/unicode_0390-03C9.png
+/share/grafx2/skins/unicode_3040-309F.png
