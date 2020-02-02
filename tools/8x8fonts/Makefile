@@ -39,5 +39,8 @@ $(BIN):	generate_png_fonts.o
 	$(MKDIR) $(BINDIR)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LOADLIBES) $(LDLIBS)
 
-$(FONTPATHS):	$(BIN)
+$(FONTPATHS):	.fonts.generated
+
+.fonts.generated:	$(BIN)
 	$(BIN) $(FONTDIR)
+	touch $@
