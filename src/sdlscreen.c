@@ -469,7 +469,7 @@ void Get_SDL_Palette(const SDL_Palette * sdl_palette, T_Palette palette)
 
 }
 
-int SetPalette(const T_Components * colors, int firstcolor, int ncolors)
+int GFX2_SetPalette(const T_Components * colors, int firstcolor, int ncolors)
 {
   int i;
   SDL_Color PaletteSDL[256];

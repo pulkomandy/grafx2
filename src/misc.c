@@ -168,8 +168,6 @@ word Count_used_colors_area(dword* usage, word start_x, word start_y,
 // It is not always Main_palette ! (for example during a preview)
 // external code must not modify this array but use Set_palette() / Set_color()
 // Get_current_palette() offers a READ-ONLY access.
-// TODO : Color cycling code use directly SDL_SetPalette() we should check
-//        wether it should call Set_palette() instead.
 static T_Palette Current_palette;
 
 const T_Components * Get_current_palette(void)
@@ -188,7 +186,7 @@ void Set_palette(T_Palette palette)
     palette[i].G = Round_palette_component(palette[i].G);
     palette[i].B = Round_palette_component(palette[i].B);
   }
-  SetPalette(palette,0,256);
+  GFX2_SetPalette(palette, 0, 256);
 }
 
 void Set_color(byte color, byte red, byte green, byte blue)
@@ -196,7 +194,7 @@ void Set_color(byte color, byte red, byte green, byte blue)
   Current_palette[color].R = red;
   Current_palette[color].G = green;
   Current_palette[color].B = blue;
-  SetPalette(Current_palette + color, color, 1);
+  GFX2_SetPalette(Current_palette + color, color, 1);
 }
 
 void Wait_end_of_click(void)

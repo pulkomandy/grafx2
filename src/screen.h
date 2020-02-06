@@ -58,7 +58,7 @@ void Update_rect(short x, short y, unsigned short width, unsigned short height);
 void Flush_update(void);
 void Update_status_line(short char_pos, short width);
 
-int SetPalette(const T_Components * colors, int firstcolor, int ncolors);
+int GFX2_SetPalette(const T_Components * colors, int firstcolor, int ncolors);
 
 ///
 /// Clears the parts of screen that are outside of the editing area.

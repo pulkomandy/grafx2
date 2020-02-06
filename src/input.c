@@ -2241,7 +2241,7 @@ static int Color_cycling(void)
         }
       }
     }
-    SetPalette(palette, 0, 256);
+    GFX2_SetPalette(palette, 0, 256);
   }
   return 0;
 }

@@ -240,7 +240,7 @@ void Screen_FillRect(int x, int y, int w, int h, byte color)
   }
 }
 
-int SetPalette(const T_Components * colors, int firstcolor, int ncolors)
+int GFX2_SetPalette(const T_Components * colors, int firstcolor, int ncolors)
 {
   if (screen == NULL) return 0;
   memcpy(screen->palette + firstcolor, colors, ncolors * sizeof(T_Components));

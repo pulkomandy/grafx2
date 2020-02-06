@@ -636,7 +636,7 @@ void Update_status_line(short char_pos, short width)
               width*8*Menu_factor_X, 8*Menu_factor_Y);
 }
 
-int SetPalette(const T_Components * colors, int firstcolor, int ncolors)
+int GFX2_SetPalette(const T_Components * colors, int firstcolor, int ncolors)
 {
   int i;
   RGBQUAD rgb[256];

@@ -54,11 +54,6 @@
 
 #if defined(__macosx__)
 #import <CoreFoundation/CoreFoundation.h>
-/* defining __QD__ is a cheat to avoid :
-screen.h:58: error: conflicting types for 'SetPalette'
-/System/Library/Frameworks/ApplicationServices.framework/Frameworks/QD.framework/Headers/Palettes.h:150: error: previous declaration of 'SetPalette' was here
-*/
-#define __QD__
 #import <ApplicationServices/ApplicationServices.h>
 #endif
 
