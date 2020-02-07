@@ -1,6 +1,10 @@
 /* list of tests
  * TEST(function_to_test) */
 
+TEST(Read_Write_byte)
+TEST(Read_Write_word)
+TEST(Read_Write_dword)
+
 TEST(MOTO_MAP_pack)
 TEST(CPC_compare_colors)
 TEST(Packbits)
