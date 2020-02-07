@@ -36,6 +36,11 @@
 #include "../packbits.h"
 #include "../gfx2log.h"
 
+// random()/srandom() not available with mingw32
+#if defined(WIN32)
+#define random (long)rand
+#endif
+
 unsigned int MOTO_MAP_pack(byte * packed, const byte * unpacked, unsigned int unpacked_len);
 
 /**

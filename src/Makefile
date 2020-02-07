@@ -107,6 +107,7 @@ ifdef COMSPEC
   RMDIR = rmdir --ignore-fail-on-non-empty
   CP = cp
   BIN = ../bin/grafx2-$(API).exe
+  TESTSBIN = ../bin/tests-$(API).exe
   GENERATEDOCBIN = ../bin/generatedoc.exe
   COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb
   COPT += $(LUACOPT)
@@ -502,6 +503,7 @@ endif
       CROSS_STRIP ?= $(shell which i686-w64-mingw32-strip || which mingw32-strip)
       STRIP = $(CROSS_STRIP)
       BIN = ../bin/grafx2-$(API).exe
+      TESTSBIN = ../bin/tests-$(API).exe
       COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb $(TTFCOPT)
       LOPT = -mwindows -lmingw32 -lshlwapi -lmpr $(TTFLOPT)
       ifeq ($(API),sdl)

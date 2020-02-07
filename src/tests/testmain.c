@@ -37,6 +37,28 @@
 #include "../gfx2log.h"
 #include "tests.h"
 
+// random()/srandom() not available with mingw32
+#if defined(WIN32)
+#define srandom srand
+#endif
+
+
+// mkdtemp() not available with mingw32
+#if defined(WIN32)
+#define mkdtemp my_mkdtemp
+
+char * my_mkdtemp(char *template)
+{
+  char * p = strstr(template, "XXXXXX");
+  if (p == NULL)
+    return NULL;
+  snprintf(p, 7, "%06x", rand());
+  if (!CreateDirectoryA(template, NULL))
+    return NULL;
+  return template;
+}
+#endif
+
 #ifdef ENABLE_FILENAMES_ICONV
 iconv_t cd;             // FROMCODE => TOCODE
 iconv_t cd_inv;         // TOCODE => FROMCODE
