@@ -650,7 +650,10 @@ checkversion-%:
 	@echo "checking $* version"
 	$(eval PKG := $(shell echo $* | tr a-z A-Z))
 	$(eval LATEST := $(LATEST$(PKG)VER))
-	@if [ -z "$(LATEST)" ] ; then echo "failed to retrieve latest version of $*" ; \
-	elif [ "$($(PKG)VER)" != "$(LATEST)" ] ; \
-	  then echo "$* $($(PKG)VER) is outdated, latest version is $(LATEST)" ; \
+	@if [ -z "$(LATEST)" ] ; then \
+	  echo "failed to retrieve latest version of $*" ; \
+	  touch check-version-failed ; \
+	elif [ "$($(PKG)VER)" != "$(LATEST)" ] ; then \
+	  echo "$* $($(PKG)VER) is outdated, latest version is $(LATEST)" ; \
+	  touch check-version-failed ; \
 	fi
