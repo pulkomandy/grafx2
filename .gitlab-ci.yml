@@ -6,7 +6,7 @@ stages:
     - build
     - pages
 
-job_test:
+tests:
     stage: test
     before_script:
         - apt-get update -qq
