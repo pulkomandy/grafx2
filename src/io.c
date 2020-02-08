@@ -71,7 +71,7 @@
 #include "gfx2log.h"
 #include "gfx2mem.h"
 // for the network browse
-#include "filesel.h"
+#include "fileseltools.h"
 
 // Lit un octet
 // Renvoie -1 si OK, 0 en cas d'erreur

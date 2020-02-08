@@ -804,7 +804,8 @@ endif
 # This is the list of the objects we want to build. Dependancies are built by "make depend" automatically.
 OBJS = main.o init.o graph.o $(APIOBJ) misc.o special.o \
        buttons.o palette.o help.o operatio.o pages.o \
-       readline.o engine.o filesel.o op_c.o readini.o saveini.o \
+       readline.o engine.o filesel.o fileseltools.o \
+       op_c.o readini.o saveini.o \
        shade.o keyboard.o io.o version.o text.o SFont.o setup.o \
        pxsimple.o pxtall.o pxwide.o pxdouble.o pxtriple.o \
        pxtall2.o pxtall3.o pxwide2.o pxquad.o \
@@ -827,7 +828,7 @@ TESTSOBJS = $(patsubst %.c,%.o,$(wildcard tests/*.c)) \
             pngformat.o motoformats.o stformats.o c64formats.o cpcformats.o \
             ifformat.o msxformats.o giformat.o \
             op_c.o colorred.o \
-            unicode.o \
+            unicode.o fileseltools.o \
             io.o realpath.o version.o pversion.o \
             gfx2surface.o \
             gfx2log.o gfx2mem.o

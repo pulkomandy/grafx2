@@ -38,26 +38,6 @@
 /// @return 1 if the user want to load/save a file
 byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context *context);
 
-T_Fileselector_item * Add_element_to_list(T_Fileselector *list, const char * full_name, const char *short_name, enum FSOBJECT_TYPE type, enum ICON_TYPES icon);
-
-///
-/// Formats a display name for a file, directory, or similar name (drive, volume).
-/// @param fname full file name from the file system
-/// @param max_length numbers of characters to display
-/// @param type 0 for file, 1 for directory, 2 for drive
-/// @return a pointer to a single static buffer of maximum 40 characters
-///         including the '\\0'.
-char * Format_filename(const char * fname, word max_length, int type);
-
-///
-/// Formats a display name for a file, directory, or similar name (drive, volume).
-/// @param fname full file name from the file system
-/// @param max_length numbers of characters to display
-/// @param type 0 for file, 1 for directory, 2 for drive
-/// @return a pointer to a single static buffer of maximum 40 wide characters
-///         including the '\\0'.
-word * Format_filename_unicode(const word * fname, word max_length, int type);
-
 void Free_fileselector_list(T_Fileselector *list);
 
 void Sort_list_of_files(T_Fileselector *list);

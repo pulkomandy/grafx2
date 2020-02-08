@@ -55,6 +55,7 @@
 #include "engine.h"
 #include "readline.h"
 #include "filesel.h"
+#include "fileseltools.h"
 #include "loadsave.h"
 #include "init.h"
 #include "buttons.h"

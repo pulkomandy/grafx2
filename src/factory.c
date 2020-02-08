@@ -31,6 +31,7 @@
 #include "engine.h"
 #include "errors.h"
 #include "filesel.h" // Get_item_by_index
+#include "fileseltools.h"
 #include "global.h"
 #include "graph.h"
 #include "io.h"     // find_last_separator
