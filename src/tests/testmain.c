@@ -32,6 +32,9 @@
 #include <unistd.h>
 #include <time.h>
 #include <errno.h>
+#if defined(WIN32)
+#include <windows.h>
+#endif
 #include "../struct.h"
 #include "../global.h"
 #include "../gfx2log.h"

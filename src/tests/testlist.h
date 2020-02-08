@@ -4,6 +4,7 @@
 TEST(Read_Write_byte)
 TEST(Read_Write_word)
 TEST(Read_Write_dword)
+TEST(Read_Write_bytes)
 
 TEST(MOTO_MAP_pack)
 TEST(CPC_compare_colors)

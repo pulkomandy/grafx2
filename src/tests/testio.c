@@ -27,10 +27,18 @@
 /// Unit tests.
 ///
 
+#include <stdlib.h>
+#include <string.h>
 #include "tests.h"
 #include "../struct.h"
 #include "../io.h"
+#include "../gfx2mem.h"
 #include "../gfx2log.h"
+
+// random()/srandom() not available with mingw32
+#if defined(WIN32)
+#define random (long)rand
+#endif
 
 int Test_Read_Write_byte(void)
 {
@@ -38,7 +46,7 @@ int Test_Read_Write_byte(void)
   FILE * f;
   byte b = 0;
 
-  snprintf(path, sizeof(path), "%s%stmp.bin", tmpdir, PATH_SEPARATOR);
+  snprintf(path, sizeof(path), "%s%sbyte.bin", tmpdir, PATH_SEPARATOR);
   f = fopen(path, "w+b");
   if (f == NULL)
   {
@@ -76,7 +84,7 @@ int Test_Read_Write_word(void)
   word w1 = 0, w2 = 0;
   byte b = 0;
 
-  snprintf(path, sizeof(path), "%s%stmp.bin", tmpdir, PATH_SEPARATOR);
+  snprintf(path, sizeof(path), "%s%sword.bin", tmpdir, PATH_SEPARATOR);
   f = fopen(path, "w+b");
   if (f == NULL)
   {
@@ -107,6 +115,7 @@ int Test_Read_Write_word(void)
   Remove_path(path);
   return 1;
 }
+
 int Test_Read_Write_dword(void)
 {
   char path[256];
@@ -114,7 +123,7 @@ int Test_Read_Write_dword(void)
   dword dw1 = 0, dw2 = 0;
   byte b = 0;
 
-  snprintf(path, sizeof(path), "%s%stmp.bin", tmpdir, PATH_SEPARATOR);
+  snprintf(path, sizeof(path), "%s%sdword.bin", tmpdir, PATH_SEPARATOR);
   f = fopen(path, "w+b");
   if (f == NULL)
   {
@@ -145,4 +154,70 @@ int Test_Read_Write_dword(void)
   Remove_path(path);
   return 1;
 }
+int Test_Read_Write_bytes(void)
+{
+  char path[256];
+  FILE * f;
+  unsigned long len;
+  byte * buffer;
+  byte b;
 
+  snprintf(path, sizeof(path), "%s%sbytes.bin", tmpdir, PATH_SEPARATOR);
+  f = fopen(path, "w+b");
+  if (f == NULL)
+  {
+    GFX2_Log(GFX2_ERROR, "error opening %s\n", path);
+    return 0;
+  }
+  b = (byte)random();
+  len = 1000 + (random() & 0x3ff);
+  buffer = GFX2_malloc(len);
+  if (buffer == NULL)
+  {
+    fclose(f);
+    return 0;
+  }
+  memset(buffer, b, len);
+  GFX2_Log(GFX2_DEBUG, "Writing %lu bytes 0x%02x\n", len, (int)b);
+  // write bytes
+  if (!Write_bytes(f, buffer, len))
+  {
+    GFX2_Log(GFX2_ERROR, "error writing\n");
+    free(buffer);
+    fclose(f);
+    return 0;
+  }
+  rewind(f);
+  memset(buffer, 0, len);
+  if (!Read_bytes(f, buffer, len))
+  {
+    GFX2_Log(GFX2_ERROR, "error reading\n");
+    free(buffer);
+    fclose(f);
+    return 0;
+  }
+  if (!GFX2_is_mem_filled_with(buffer, b, len))
+  {
+    GFX2_Log(GFX2_ERROR, "byte values mismatch\n");
+    free(buffer);
+    fclose(f);
+    return 0;
+  }
+  free(buffer);
+  if (File_length_file(f) != len)
+  {
+    GFX2_Log(GFX2_ERROR, "File_length_file() returned %lu (should be %lu)\n",
+             File_length_file(f), len);
+    fclose(f);
+    return 0;
+  }
+  fclose(f);
+  if (File_length(path) != len)
+  {
+    GFX2_Log(GFX2_ERROR, "File_length() returned %lu (should be %lu)\n",
+             File_length(path), len);
+    return 0;
+  }
+  Remove_path(path);
+  return 1;
+}
