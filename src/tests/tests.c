@@ -31,9 +31,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include "tests.h"
 #include "../struct.h"
 #include "../oldies.h"
 #include "../packbits.h"
+#include "../io.h"
 #include "../gfx2log.h"
 
 // random()/srandom() not available with mingw32
@@ -180,7 +182,7 @@ int Test_Packbits(void)
   byte buffer[1024];
   T_PackBits_data pb_data;
 
-  snprintf(tempfilename, sizeof(tempfilename), "/tmp/gfx2test-packbits-%lx", random());
+  snprintf(tempfilename, sizeof(tempfilename), "%s%sgfx2test-packbits-%lx", tmpdir, PATH_SEPARATOR, random());
   GFX2_Log(GFX2_DEBUG, "tempfile %s\n", tempfilename);
   f = fopen(tempfilename, "wb");
   if (f == NULL)

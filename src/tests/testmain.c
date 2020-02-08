@@ -37,6 +37,7 @@
 #endif
 #include "../struct.h"
 #include "../global.h"
+#include "../io.h"
 #include "../gfx2log.h"
 #include "tests.h"
 
@@ -95,7 +96,7 @@ byte Windows_open;
 
 dword Key;
 
-char tmpdir[40];
+char tmpdir[256];
 
 static const struct {
   int (*test_func)(void);
@@ -112,6 +113,9 @@ static const struct {
  */
 int init(void)
 {
+#ifdef WIN32
+  char temp[256];
+#endif
   srandom(time(NULL));
 #ifdef ENABLE_FILENAMES_ICONV
   // iconv is used to convert filenames
@@ -125,7 +129,12 @@ int init(void)
   cd_utf16_inv = iconv_open(FROMCODE, "UTF-16LE"); // From UTF16 to UTF8
 #endif
 #endif /* ENABLE_FILENAMES_ICONV */
-  snprintf(tmpdir, sizeof(tmpdir), "/tmp/grafx2-test.XXXXXX");
+#ifdef WIN32
+  GetTempPathA(sizeof(temp), temp);
+  snprintf(tmpdir, sizeof(tmpdir), "%s%sgrafx2-test.XXXXXX", temp, PATH_SEPARATOR);
+#else
+  snprintf(tmpdir, sizeof(tmpdir), "%s%sgrafx2-test.XXXXXX", "/tmp", PATH_SEPARATOR);
+#endif
   if (mkdtemp(tmpdir) == NULL)
   {
     perror("mkdtemp");
