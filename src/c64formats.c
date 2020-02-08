@@ -105,6 +105,8 @@ void Test_C64(T_IO_Context * context, FILE * file)
       if (!Read_word_le(file, &load_addr))
         return;
   }
+  if (load_addr < 0x0400) // No PRG could load to Zeropage or processor stack
+    return;
   GFX2_Log(GFX2_DEBUG, "Test_C64() file_size=%ld LoadAddr=$%04X\n", file_size, load_addr);
   if (!Read_bytes(file, header, sizeof(header)))
     return;

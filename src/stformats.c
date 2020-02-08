@@ -1797,7 +1797,7 @@ void Save_CA1(T_IO_Context * context)
               }
               else
               {
-                GFX2_Log(GFX2_DEBUG, "byte %02X x %hu\n", current, count);
+                //GFX2_Log(GFX2_DEBUG, "byte %02X x %hu\n", current, count);
                 if (count < 256)
                 {
                   // ESC,a,b => repeat (a + 1) x byte b
