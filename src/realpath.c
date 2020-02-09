@@ -11,6 +11,10 @@
 #include <limits.h>
 #endif
 
+#if defined(__APPLE__) && (MAC_OS_X_VERSION_MIN_REQUIRED < 1060)
+#include "gfx2mem.h"
+#endif
+
 #if defined(__AROS__) || defined(__BEOS__) || defined(__MORPHOS__) || defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__) || defined(__amigaos__) || defined(__SWITCH__)
 // These platforms don't have realpath().
 // We use the following implementation, found in:
@@ -135,6 +139,15 @@
       /// So we assume all platforms now support passing NULL.
       /// If you find a platform where this is not the case,
       /// please add a new implementation with ifdef's.
+#if defined(__APPLE__) && (MAC_OS_X_VERSION_MIN_REQUIRED < 1060)
+      // realpath() accept NULL as 2nd argument since OSX 10.6
+      if (resolved_path == NULL)
+      {
+        resolved_path = GFX2_malloc(PATH_MAX);
+        if (resolved_path == NULL)
+          return NULL;
+      }
+#endif
       return realpath(_path, resolved_path);
     }
 #endif
