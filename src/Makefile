@@ -245,6 +245,7 @@ ifneq ($(SDLCONFIG), )
     TTFLOPT += $(shell $(PKG_CONFIG) --variable=libdir SDL_ttf)/libSDL_ttf.a
   else
     SDLLOPT = $(shell $(SDLCONFIG) --libs) $(shell $(PKG_CONFIG) --libs SDL_image)
+    TTFLOPT = $(shell $(PKG_CONFIG) --libs SDL_ttf)
   endif
 else
     # these are for use with Mac OS X native frameworks
