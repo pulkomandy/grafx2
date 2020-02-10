@@ -22,6 +22,10 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 
+# custom which function that takes 2 arguments to work around "which" commands
+# that do not return FALSE (OS X 10.4).   Usage : $(call which,arg1,arg2)
+which = $(shell P=`which "$(1)"` ; if [ "$$?" = "0" ] && [ -x "$$P" ]; then echo "$$P" ; else which "$(2)" ; fi)
+
 # make V=1   to enable verbose building
 V ?= 0
 
@@ -226,7 +230,7 @@ ifneq ($(PKG_CONFIG_PATH), )
 endif
 
 ifeq ($(API),sdl)
-    SDLCONFIG := $(shell which ../3rdparty/usr/bin/sdl-config || which sdl-config)
+    SDLCONFIG := $(call which,../3rdparty/usr/bin/sdl-config,sdl-config)
 ifneq ($(SDLCONFIG), )
     # these are for use with macports
     SDLCOPT = $(shell $(SDLCONFIG) --cflags)
@@ -304,7 +308,7 @@ ifdef MACOSX_LION
     LOPT = $(SDLLOPT) $(LUALOPT) -framework libpng14 -lz
 else
     LOPT = $(SDLLOPT) $(LUALOPT) $(TTFLOPT)
-    LIBPNGCONFIG := $(shell which ../3rdparty/usr/bin/libpng-config || which libpng-config)
+    LIBPNGCONFIG := $(call which,../3rdparty/usr/bin/libpng-config,libpng-config)
 ifneq ($(LIBPNGCONFIG), )
     COPT += $(shell $(LIBPNGCONFIG) --cflags)
     ifneq ($(OSX_STATIC), 1)
