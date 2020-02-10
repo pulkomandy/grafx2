@@ -31,9 +31,11 @@
 #if defined(_MSC_VER) && _MSC_VER < 1900
 	#define snprintf _snprintf
 #endif
-#elif defined(__macosx__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
+#elif defined(__macosx__) || defined(__FreeBSD__) || defined(__OpenBSD__)
     #include <sys/param.h>
     #include <sys/mount.h>
+#elif defined(__NetBSD__)
+    #include <sys/statvfs.h>
 #elif defined (__linux__) || defined(__SYLLABLE__)
     #include <sys/vfs.h>
 #elif defined (__HAIKU__)
@@ -976,10 +978,16 @@ void Button_Stats(int btn)
         GFX2_Log(GFX2_ERROR, "GetDiskFreeSpaceExA() failed\n");
       }
     }
-#elif defined(__linux__) || defined(__macosx__) || defined(__FreeBSD__) || defined(__SYLLABLE__) || defined(__AROS__) || defined(__OpenBSD__) || defined(__NetBSD__)
+#elif defined(__linux__) || defined(__macosx__) || defined(__FreeBSD__) || defined(__SYLLABLE__) || defined(__AROS__) || defined(__OpenBSD__)
     {
       struct statfs disk_info;
       statfs(Main.selector.Directory,&disk_info);
+      mem_size=(qword) disk_info.f_bfree * (qword) disk_info.f_bsize;
+    }
+#elif defined(__NetBSD__)
+    {
+      struct statvfs disk_info;
+      statvfs(Main.selector.Directory,&disk_info);
       mem_size=(qword) disk_info.f_bfree * (qword) disk_info.f_bsize;
     }
 #elif defined(__HAIKU__)
