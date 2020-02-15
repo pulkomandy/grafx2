@@ -32,6 +32,7 @@
 #include "tests.h"
 #include "../struct.h"
 #include "../io.h"
+#include "../realpath.h"
 #include "../gfx2mem.h"
 #include "../gfx2log.h"
 
@@ -154,6 +155,7 @@ int Test_Read_Write_dword(void)
   Remove_path(path);
   return 1;
 }
+
 int Test_Read_Write_bytes(void)
 {
   char path[256];
@@ -219,5 +221,20 @@ int Test_Read_Write_bytes(void)
     return 0;
   }
   Remove_path(path);
+  return 1;
+}
+
+int Test_Realpath(void)
+{
+  char * path;
+
+  path = Realpath(tmpdir, NULL);
+  if (path == NULL)
+  {
+    GFX2_Log(GFX2_ERROR, "Realpath(\"%s\") returned NULL\n", tmpdir);
+    return 0;
+  }
+  GFX2_Log(GFX2_DEBUG, "Realpath(\"%s\") returned \"%s\"\n", tmpdir, path);
+  free(path);
   return 1;
 }
