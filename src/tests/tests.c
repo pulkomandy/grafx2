@@ -151,7 +151,7 @@ int Test_CPC_compare_colors(void)
  */
 int Test_Packbits(void)
 {
-  char tempfilename[64];
+  char tempfilename[256];
   FILE * f;
   int i, j;
   long unpacked;
