@@ -134,8 +134,9 @@ void finish(void)
  */
 int main(int argc, char * * argv)
 {
-  int i, r;
+  int i;
   int fail = 0;
+  int r[sizeof(tests) / sizeof(tests[0])];
   (void)argc;
   (void)argv;
 
@@ -149,8 +150,8 @@ int main(int argc, char * * argv)
   for (i = 0; tests[i].test_func != 0; i++)
   {
     printf("Testing %s :\n", tests[i].test_name);
-    r = tests[i].test_func();
-    if (r)
+    r[i] = tests[i].test_func();
+    if (r[i])
       printf(ESC_GREEN "OK" ESC_RESET "\n");
     else {
       printf(ESC_RED "FAILED" ESC_RESET "\n");
@@ -167,7 +168,15 @@ int main(int argc, char * * argv)
   }
   else
   {
-    printf(ESC_RED "%d tests failed" ESC_RESET "\n", fail);
+    printf(ESC_RED "%d tests failed :\n  ", fail);
+    for (i = 0; tests[i].test_func != 0; i++)
+    {
+      if (!r[i])
+      {
+        printf("%s ", tests[i].test_name);
+      }
+    }
+    puts(ESC_RESET);  /* puts writes an additional newline character */
     return 1;
   }
 }
