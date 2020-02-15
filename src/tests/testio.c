@@ -224,6 +224,86 @@ int Test_Read_Write_bytes(void)
   return 1;
 }
 
+/**
+ * data structure for For_each_directory_entry() callback
+ */
+struct dir_callback_data
+{
+  char * filename;
+  int result;
+};
+
+/**
+ * callback for For_each_directory_entry()
+ */
+static void directory_callback(void * pdata, const char * filename, const word * unicode_filename, byte is_file, byte is_directory, byte is_hidden)
+{
+  struct dir_callback_data * data = (struct dir_callback_data *)pdata;
+
+  GFX2_Log(GFX2_DEBUG, "%-13s %c%c%c  %p\n", filename,
+           is_file ? 'f' : '-',
+           is_directory ? 'd' : '-',
+           is_hidden ? 'h' : '-',
+           unicode_filename);
+  if (0 == strcmp(filename, data->filename) && is_file && !is_directory)
+    data->result = 1;
+}
+
+int Test_File_exists(void)
+{
+  struct dir_callback_data data;
+  char path[256];
+  FILE * f;
+
+  if (!Directory_exists(tmpdir))
+  {
+    GFX2_Log(GFX2_ERROR, "Directory_exists(\"%s\") FALSE\n", tmpdir);
+    return 0;
+  }
+  snprintf(path, sizeof(path), "%s%sX%07x.tmp", tmpdir, PATH_SEPARATOR, (unsigned)(random() & 0x0fffffff));
+  if (File_exists(path))
+  {
+    GFX2_Log(GFX2_ERROR, "File_exists(\"%s\") TRUE before creation\n", path);
+    return 0;
+  }
+  f = fopen(path, "w");
+  if (f == NULL)
+  {
+    GFX2_Log(GFX2_ERROR, "fopen(\"%s\", \"wb\") FAILED\n", path);
+    return 0;
+  }
+  fputs("test\n", f);
+  fclose(f);
+  if (!File_exists(path))
+  {
+    GFX2_Log(GFX2_ERROR, "File_exists(\"%s\") FALSE after create\n", path);
+    return 0;
+  }
+  data.result = 0;
+  data.filename = Extract_filename(NULL, path);
+  if (data.filename == NULL)
+  {
+    GFX2_Log(GFX2_ERROR, "Extract_filename(NULL, \"%s\") FAILED\n", path);
+    return 0;
+  }
+  GFX2_Log(GFX2_DEBUG, "Listing directory with For_each_directory_entry(\"%s\"):\n", tmpdir);
+  For_each_directory_entry(tmpdir, &data, directory_callback);
+  if (!data.result)
+  {
+    GFX2_Log(GFX2_ERROR, "Failed to find file \"%s\" in directory \"%s\"\n", data.filename, tmpdir);
+    free(data.filename);
+    return 0;
+  }
+  free(data.filename);
+  Remove_path(path);
+  if (File_exists(path))
+  {
+    GFX2_Log(GFX2_ERROR, "File_exists(\"%s\") TRUE after Remove\n", path);
+    return 0;
+  }
+  return 1;
+}
+
 int Test_Realpath(void)
 {
   char * path;
