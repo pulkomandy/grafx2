@@ -32,6 +32,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <errno.h>
+#include <sys/time.h>
 #if defined(WIN32)
 #include <windows.h>
 #endif
@@ -212,26 +213,42 @@ int main(int argc, char * * argv)
   fprintf(xml, "<testsuite name=\"GrafX2\" tests=\"%lu\">\n", TEST_COUNT);
   for (i = 0; i < (int)TEST_COUNT; i++)
   {
-    fprintf(xml, "  <testcase name=\"%s\" classname=\"%s\">\n", tests[i].test_name, "GrafX2");
     if (fail_early && fail > 0)
+    {
+      fprintf(xml, "  <testcase name=\"%s\" classname=\"%s\">\n", tests[i].test_name, "GrafX2");
       fprintf(xml, "    <skipped />\n");
+    }
     else
     {
+      long t;
+      struct timeval t0, t1;
       printf("Testing %s :\n", tests[i].test_name);
       errmsg[0] = '\0';
+      gettimeofday(&t0, NULL);
       r[i] = tests[i].test_func(errmsg);
+      gettimeofday(&t1, NULL);
+      t = t1.tv_sec - t0.tv_sec;
+      if ((t1.tv_usec - t0.tv_usec) > 500000)
+        t++;
+      else if ((t1.tv_usec - t0.tv_usec) < -500000)
+        t--;
+      fprintf(xml, "  <testcase name=\"%s\" classname=\"%s\" time=\"%ld\"",
+              tests[i].test_name, "GrafX2", t);
       if (r[i])
+      {
+        fprintf(xml, " />\n");
         printf(ESC_GREEN "OK" ESC_RESET "\n");
+      }
       else
       {
         fprintf(stderr, ESC_RED "%s" ESC_RESET "\n", errmsg);
         printf(ESC_RED "FAILED" ESC_RESET "\n");
         fail++;
-        fprintf(xml, "    <failure message='%s'><!-- failure details --></failure>\n",
+        fprintf(xml, ">\n    <failure message='%s'><!-- failure details --></failure>\n",
                 errmsg);
+        fprintf(xml, "  </testcase>\n");
       }
     }
-    fprintf(xml, "  </testcase>\n");
   }
   fprintf(xml, "</testsuite>\n");
   fclose(xml);
