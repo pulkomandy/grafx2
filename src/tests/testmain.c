@@ -105,8 +105,8 @@ static const struct {
 #define TEST(func) { Test_ ## func, # func },
 #include "testlist.h"
 #undef TEST
-  { NULL, NULL}
 };
+#define TEST_COUNT (sizeof(tests) / sizeof(tests[0]))
 
 /**
  * Initializations for test program
@@ -170,9 +170,29 @@ int main(int argc, char * * argv)
 {
   int i;
   int fail = 0;
-  int r[sizeof(tests) / sizeof(tests[0])];
-  (void)argc;
-  (void)argv;
+  int r[TEST_COUNT];
+  int fail_early = 0;
+  const char * xml_path = "test-report.xml";
+  FILE * xml; // see https://llg.cubic.org/docs/junit/
+
+  for (i = 1; i < argc; i++)
+  {
+    if (strcmp(argv[i], "--help") == 0)
+    {
+      printf("Usage:  %s [--fail-early] [--xml <report.xml>]\n", argv[0]);
+      printf("default path for xml report is \"%s\"\n", xml_path);
+      return 0;
+    }
+    else if (strcmp(argv[i], "--fail-early") == 0)
+      fail_early = 1;
+    else if ((i < (argc - 1)) && strcmp(argv[i], "--xml") == 0)
+      xml_path = argv[++i];
+    else
+    {
+      fprintf(stderr, "Unrecognized option \"%s\"\n", argv[i]);
+      return 1;
+    }
+  }
 
   GFX2_verbosity_level = GFX2_DEBUG;
   if (init() < 0)
@@ -181,17 +201,30 @@ int main(int argc, char * * argv)
     return 1;
   }
 
-  for (i = 0; tests[i].test_func != 0; i++)
+  xml = fopen(xml_path, "w");
+  if (xml == NULL)
+  {
+    fprintf(stderr, "Failed to open %s for writing\n", xml_path);
+    return 1;
+  }
+  fprintf(xml, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+  fprintf(xml, "<testsuite name=\"GrafX2\" tests=\"%lu\">\n", TEST_COUNT);
+  for (i = 0; i < (int)TEST_COUNT && !(fail_early && fail > 0) ; i++)
   {
     printf("Testing %s :\n", tests[i].test_name);
+    fprintf(xml, "  <testcase name=\"%s\" classname=\"%s\">\n", tests[i].test_name, "GrafX2");
     r[i] = tests[i].test_func();
     if (r[i])
       printf(ESC_GREEN "OK" ESC_RESET "\n");
     else {
       printf(ESC_RED "FAILED" ESC_RESET "\n");
       fail++;
+      fprintf(xml, "    <failure message=\"test failure\">failure details</failure>\n");
     }
+    fprintf(xml, "  </testcase>\n");
   }
+  fprintf(xml, "</testsuite>\n");
+  fclose(xml);
 
   finish();
 
@@ -200,10 +233,10 @@ int main(int argc, char * * argv)
     printf(ESC_GREEN "All tests succesfull" ESC_RESET "\n");
     return 0;
   }
-  else
+  else if (!fail_early)
   {
     printf(ESC_RED "%d tests failed :\n  ", fail);
-    for (i = 0; tests[i].test_func != 0; i++)
+    for (i = 0; i < (int)TEST_COUNT; i++)
     {
       if (!r[i])
       {
@@ -211,6 +244,6 @@ int main(int argc, char * * argv)
       }
     }
     puts(ESC_RESET);  /* puts writes an additional newline character */
-    return 1;
   }
+  return 1;
 }

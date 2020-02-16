@@ -13,6 +13,9 @@ tests:
         - apt-get install -y -qq libsdl1.2-dev libpng-dev libsdl-ttf2.0-dev libsdl-image1.2-dev liblua5.3-dev
     script:
         - "CFLAGS=-fsanitize=address LDFLAGS=-fsanitize=address OPTIM=0 make check || exit 1"
+    artifacts:
+        reports:
+            junit: test-report.xml
 
 checkversions:
     stage: test

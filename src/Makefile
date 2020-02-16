@@ -1023,7 +1023,7 @@ ifeq ($(SWITCH), 1)
 endif
 
 check:	$(TESTSBIN)
-	$(TESTSBIN)
+	$(TESTSBIN) --xml ../test-report.xml
 
 # .tgz archive with source only files
 SRCARCH = ../src-$(VERSIONTAG).tgz
