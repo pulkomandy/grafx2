@@ -130,7 +130,7 @@ static void context_set_file_path(T_IO_Context * context, const char * filepath)
 /**
  * test the Test_* functions
  */
-int Test_Formats(void)
+int Test_Formats(char * errmsg)
 {
   T_IO_Context context;
   char path[256];
@@ -146,7 +146,7 @@ int Test_Formats(void)
     f = fopen(path, "rb");
     if (f == NULL)
     {
-      GFX2_Log(GFX2_ERROR, "error opening %s\n", path);
+      snprintf(errmsg, ERRMSG_LENGTH, "error opening %s", path);
       return 0;
     }
     context_set_file_path(&context, path);
@@ -155,7 +155,7 @@ int Test_Formats(void)
     fclose(f);
     if (File_error != 0)
     {
-      GFX2_Log(GFX2_ERROR, "Test_%s failed for file %s\n", formats[i].name, formats[i].sample);
+      snprintf(errmsg, ERRMSG_LENGTH, "Test_%s failed for file %s", formats[i].name, formats[i].sample);
       return 0;
     }
     // now check that all other samples are not recognized
@@ -170,7 +170,7 @@ int Test_Formats(void)
       f = fopen(path, "rb");
       if (f == NULL)
       {
-        GFX2_Log(GFX2_ERROR, "error opening %s\n", path);
+        snprintf(errmsg, ERRMSG_LENGTH, "error opening %s", path);
         return 0;
       }
       context_set_file_path(&context, path);
@@ -179,7 +179,7 @@ int Test_Formats(void)
       fclose(f);
       if (File_error == 0)
       {
-        GFX2_Log(GFX2_ERROR, "Test_%s failed for file %s\n", formats[i].name, formats[j].sample);
+        snprintf(errmsg, ERRMSG_LENGTH, "Test_%s failed for file %s", formats[i].name, formats[j].sample);
         return 0;
       }
     }
@@ -193,7 +193,7 @@ int Test_Formats(void)
 /**
  * test the Load_* functions
  */
-int Test_Load(void)
+int Test_Load(char * errmsg)
 {
   T_IO_Context context;
   char path[256];
@@ -211,7 +211,7 @@ int Test_Load(void)
     formats[i].Load(&context);
     if (File_error != 0)
     {
-      GFX2_Log(GFX2_ERROR, "Load_%s failed for file %s\n", formats[i].name, formats[i].sample);
+      snprintf(errmsg, ERRMSG_LENGTH, "Load_%s failed for file %s", formats[i].name, formats[i].sample);
       return 0;
     }
     if (context.Surface)
@@ -230,7 +230,7 @@ int Test_Load(void)
 /**
  * Test the Save_* functions
  */
-int Test_Save(void)
+int Test_Save(char * errmsg)
 {
   T_IO_Context context;
   char path[256];
@@ -394,7 +394,7 @@ ret:
   return ok;
 }
 
-int Test_C64_Formats(void)
+int Test_C64_Formats(char * errmsg)
 {
   int i, j;
   int ok = 0;

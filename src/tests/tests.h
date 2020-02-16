@@ -22,7 +22,9 @@
 #ifndef TESTS_H_INCLUDED
 #define TESTS_H_INCLUDED
 
-#define TEST(func) int Test_ ## func (void);
+#define ERRMSG_LENGTH (256)
+
+#define TEST(func) int Test_ ## func (char *);
 #include "testlist.h"
 #undef TEST
 

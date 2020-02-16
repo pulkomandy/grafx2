@@ -99,7 +99,7 @@ dword Key;
 char tmpdir[256];
 
 static const struct {
-  int (*test_func)(void);
+  int (*test_func)(char * errmsg);
   const char * test_name;
 } tests[] = {
 #define TEST(func) { Test_ ## func, # func },
@@ -174,6 +174,7 @@ int main(int argc, char * * argv)
   int fail_early = 0;
   const char * xml_path = "test-report.xml";
   FILE * xml; // see https://llg.cubic.org/docs/junit/
+  char errmsg[ERRMSG_LENGTH];
 
   for (i = 1; i < argc; i++)
   {
@@ -209,17 +210,26 @@ int main(int argc, char * * argv)
   }
   fprintf(xml, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
   fprintf(xml, "<testsuite name=\"GrafX2\" tests=\"%lu\">\n", TEST_COUNT);
-  for (i = 0; i < (int)TEST_COUNT && !(fail_early && fail > 0) ; i++)
+  for (i = 0; i < (int)TEST_COUNT; i++)
   {
-    printf("Testing %s :\n", tests[i].test_name);
     fprintf(xml, "  <testcase name=\"%s\" classname=\"%s\">\n", tests[i].test_name, "GrafX2");
-    r[i] = tests[i].test_func();
-    if (r[i])
-      printf(ESC_GREEN "OK" ESC_RESET "\n");
-    else {
-      printf(ESC_RED "FAILED" ESC_RESET "\n");
-      fail++;
-      fprintf(xml, "    <failure message=\"test failure\">failure details</failure>\n");
+    if (fail_early && fail > 0)
+      fprintf(xml, "    <skipped />\n");
+    else
+    {
+      printf("Testing %s :\n", tests[i].test_name);
+      errmsg[0] = '\0';
+      r[i] = tests[i].test_func(errmsg);
+      if (r[i])
+        printf(ESC_GREEN "OK" ESC_RESET "\n");
+      else
+      {
+        fprintf(stderr, ESC_RED "%s" ESC_RESET "\n", errmsg);
+        printf(ESC_RED "FAILED" ESC_RESET "\n");
+        fail++;
+        fprintf(xml, "    <failure message='%s'><!-- failure details --></failure>\n",
+                errmsg);
+      }
     }
     fprintf(xml, "  </testcase>\n");
   }

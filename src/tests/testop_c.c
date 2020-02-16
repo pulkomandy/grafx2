@@ -28,10 +28,11 @@
 ///
 #include <stdio.h>
 #include <string.h>
+#include "tests.h"
 #include "../op_c.h"
 #include "../gfx2log.h"
 
-int Test_Convert_24b_bitmap_to_256(void)
+int Test_Convert_24b_bitmap_to_256(char * msg)
 {
   T_Palette palette;
   byte dest[256];

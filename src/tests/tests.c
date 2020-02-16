@@ -48,7 +48,7 @@ unsigned int MOTO_MAP_pack(byte * packed, const byte * unpacked, unsigned int un
 /**
  * Tests for MOTO_MAP_pack()
  */
-int Test_MOTO_MAP_pack(void)
+int Test_MOTO_MAP_pack(char * errmsg)
 {
   unsigned int i, j;
   byte buffer[1024];
@@ -89,7 +89,8 @@ int Test_MOTO_MAP_pack(void)
     }
     if (unpacked_len != original_len || 0 != memcmp(tests[i], buffer2, original_len))
     {
-      GFX2_Log(GFX2_ERROR, "*** %u %s != %u %s ***\n", original_len, tests[i], unpacked_len, buffer2);
+      snprintf(errmsg, ERRMSG_LENGTH, "(un)pack error : %u %s != %u %s",
+               original_len, tests[i], unpacked_len, buffer2);
       return 0;  // test failed
     }
   }
@@ -99,7 +100,7 @@ int Test_MOTO_MAP_pack(void)
 /**
  * Test for Test_CPC_compare_colors()
  */
-int Test_CPC_compare_colors(void)
+int Test_CPC_compare_colors(char * errmsg)
 {
   unsigned int r, g, b;
   T_Components c1, c2;
@@ -113,13 +114,16 @@ int Test_CPC_compare_colors(void)
         c1.G = g * 0x11;
         c1.B = b * 0x11;
         if (!CPC_compare_colors(&c1, &c1))
-          return 0; // same colors should be recognized as identical !!!
+        {
+          snprintf(errmsg, ERRMSG_LENGTH, "same colors should be recognized as identical");
+          return 0;
+        }
         c2.R = ((r + 6) & 15) * 0x11;
         c2.G = c1.G;
         c2.B = c1.B;
         if (CPC_compare_colors(&c1, &c2))
         {
-          GFX2_Log(GFX2_ERROR, "#%02x%02x%02x <> #%02x%02x%02x\n",
+          snprintf(errmsg, ERRMSG_LENGTH, "#%02x%02x%02x <> #%02x%02x%02x",
                    c1.R, c1.G, c1.B, c2.R, c2.G, c2.B);
           return 0; // Should be differents !
         }
@@ -127,7 +131,7 @@ int Test_CPC_compare_colors(void)
         c2.G = ((g + 6) & 15) * 0x11;
         if (CPC_compare_colors(&c1, &c2))
         {
-          GFX2_Log(GFX2_ERROR, "#%02x%02x%02x <> #%02x%02x%02x\n",
+          snprintf(errmsg, ERRMSG_LENGTH, "#%02x%02x%02x <> #%02x%02x%02x",
                    c1.R, c1.G, c1.B, c2.R, c2.G, c2.B);
           return 0; // Should be differents !
         }
@@ -135,7 +139,7 @@ int Test_CPC_compare_colors(void)
         c2.B = ((b + 6) & 15) * 0x11;
         if (CPC_compare_colors(&c1, &c2))
         {
-          GFX2_Log(GFX2_ERROR, "#%02x%02x%02x <> #%02x%02x%02x\n",
+          snprintf(errmsg, ERRMSG_LENGTH, "#%02x%02x%02x <> #%02x%02x%02x",
                    c1.R, c1.G, c1.B, c2.R, c2.G, c2.B);
           return 0; // Should be differents !
         }
@@ -149,7 +153,7 @@ int Test_CPC_compare_colors(void)
  * Tests for the packbits compression used in IFF ILBM, etc.
  * see http://fileformats.archiveteam.org/wiki/PackBits
  */
-int Test_Packbits(void)
+int Test_Packbits(char * errmsg)
 {
   char tempfilename[256];
   FILE * f;
@@ -187,7 +191,7 @@ int Test_Packbits(void)
   f = fopen(tempfilename, "wb");
   if (f == NULL)
   {
-    GFX2_Log(GFX2_ERROR, "Failed to open %s for writing\n", tempfilename);
+    snprintf(errmsg, ERRMSG_LENGTH, "Failed to open %s for writing", tempfilename);
     return 0;
   }
 
@@ -199,14 +203,14 @@ int Test_Packbits(void)
     {
       if (PackBits_pack_add(&pb_data, (byte)tests[i][j]) < 0)
       {
-        GFX2_Log(GFX2_ERROR, "PackBits_pack_add() failed\n");
+        snprintf(errmsg, ERRMSG_LENGTH, "PackBits_pack_add() failed");
         return 0;
       }
       unpacked++;
     }
     if (PackBits_pack_flush(&pb_data) < 0)
     {
-      GFX2_Log(GFX2_ERROR, "PackBits_pack_flush() failed\n");
+      snprintf(errmsg, ERRMSG_LENGTH, "PackBits_pack_flush() failed");
       return 0;
     }
   }
@@ -214,7 +218,7 @@ int Test_Packbits(void)
   fclose(f);
   GFX2_Log(GFX2_DEBUG, "Compressed %ld bytes to %ld\n", unpacked, packed);
   if (packed > best_packed) {
-    GFX2_Log(GFX2_ERROR, "*** Packbits less efficient as expected (%ld > %ld bytes) ***\n",
+    snprintf(errmsg, ERRMSG_LENGTH, "Packbits less efficient than expected (%ld > %ld bytes)",
              packed, best_packed);
     return 0;
   }
@@ -223,7 +227,7 @@ int Test_Packbits(void)
   f = fopen(tempfilename, "rb");
   if (f == NULL)
   {
-    GFX2_Log(GFX2_ERROR, "Failed to open %s for reading\n", tempfilename);
+    snprintf(errmsg, ERRMSG_LENGTH, "Failed to open %s for reading", tempfilename);
     return 0;
   }
   for (i = 0; tests[i]; i++)
@@ -232,7 +236,7 @@ int Test_Packbits(void)
     memset(buffer, 0x80, len);
     if (PackBits_unpack_from_file(f, buffer, len) != PACKBITS_UNPACK_OK)
     {
-      GFX2_Log(GFX2_ERROR, "PackBits_unpack_from_file() failed\n");
+      snprintf(errmsg, ERRMSG_LENGTH, "PackBits_unpack_from_file() failed");
       return 0;
     }
     if (memcmp(buffer, tests[i], len) != 0)
@@ -240,6 +244,7 @@ int Test_Packbits(void)
       GFX2_Log(GFX2_ERROR, "uncompressed stream mismatch !\n");
       GFX2_LogHexDump(GFX2_ERROR, "original ", (const byte *)tests[i], 0, len);
       GFX2_LogHexDump(GFX2_ERROR, "unpacked ", buffer, 0, len);
+      snprintf(errmsg, ERRMSG_LENGTH, "uncompressed stream mismatch");
       return 0;
     }
   }

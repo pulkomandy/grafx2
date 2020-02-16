@@ -41,7 +41,7 @@
 #define random (long)rand
 #endif
 
-int Test_Read_Write_byte(void)
+int Test_Read_Write_byte(char * errmsg)
 {
   char path[256];
   FILE * f;
@@ -51,25 +51,25 @@ int Test_Read_Write_byte(void)
   f = fopen(path, "w+b");
   if (f == NULL)
   {
-    GFX2_Log(GFX2_ERROR, "error opening %s\n", path);
+    snprintf(errmsg, ERRMSG_LENGTH, "error opening %s", path);
     return 0;
   }
   if (!Write_byte(f, 42))
   {
-    GFX2_Log(GFX2_ERROR, "error writing\n");
+    snprintf(errmsg, ERRMSG_LENGTH, "error writing");
     fclose(f);
     return 0;
   }
   rewind(f);
   if (!Read_byte(f, &b))
   {
-    GFX2_Log(GFX2_ERROR, "error reading\n");
+    snprintf(errmsg, ERRMSG_LENGTH, "error reading");
     fclose(f);
     return 0;
   }
   if (b != 42)
   {
-    GFX2_Log(GFX2_ERROR, "Byte value mismatch\n");
+    snprintf(errmsg, ERRMSG_LENGTH, "Byte value mismatch 0x%02x != 0x%02x", b, 42);
     fclose(f);
     return 0;
   }
@@ -78,7 +78,7 @@ int Test_Read_Write_byte(void)
   return 1;
 }
 
-int Test_Read_Write_word(void)
+int Test_Read_Write_word(char * errmsg)
 {
   char path[256];
   FILE * f;
@@ -89,26 +89,26 @@ int Test_Read_Write_word(void)
   f = fopen(path, "w+b");
   if (f == NULL)
   {
-    GFX2_Log(GFX2_ERROR, "error opening %s\n", path);
+    snprintf(errmsg, ERRMSG_LENGTH, "error opening %s", path);
     return 0;
   }
   // write bytes 12 34 56 78 90
   if (!Write_word_le(f, 0x3412) || !Write_word_be(f, 0x5678) || !Write_byte(f, 0x90))
   {
-    GFX2_Log(GFX2_ERROR, "error writing\n");
+    snprintf(errmsg, ERRMSG_LENGTH, "error writing");
     fclose(f);
     return 0;
   }
   rewind(f);
   if (!Read_byte(f, &b) || !Read_word_be(f, &w1) || !Read_word_le(f, &w2))
   {
-    GFX2_Log(GFX2_ERROR, "error reading\n");
+    snprintf(errmsg, ERRMSG_LENGTH, "error reading");
     fclose(f);
     return 0;
   }
   if ((b != 0x12) || (w1 != 0x3456) || (w2 != 0x9078))
   {
-    GFX2_Log(GFX2_ERROR, "word values mismatch\n");
+    snprintf(errmsg, ERRMSG_LENGTH, "word values mismatch b=0x%02x w1=0x%04x w2=0x%04x", b, w1, w2);
     fclose(f);
     return 0;
   }
@@ -117,7 +117,7 @@ int Test_Read_Write_word(void)
   return 1;
 }
 
-int Test_Read_Write_dword(void)
+int Test_Read_Write_dword(char * errmsg)
 {
   char path[256];
   FILE * f;
@@ -128,26 +128,26 @@ int Test_Read_Write_dword(void)
   f = fopen(path, "w+b");
   if (f == NULL)
   {
-    GFX2_Log(GFX2_ERROR, "error opening %s\n", path);
+    snprintf(errmsg, ERRMSG_LENGTH, "error opening %s", path);
     return 0;
   }
   // write bytes 01 02 03 04 05 06 07 08 09
   if (!Write_dword_le(f, 0x04030201) || !Write_dword_be(f, 0x05060708) || !Write_byte(f, 9))
   {
-    GFX2_Log(GFX2_ERROR, "error writing\n");
+    snprintf(errmsg, ERRMSG_LENGTH, "error writing");
     fclose(f);
     return 0;
   }
   rewind(f);
   if (!Read_byte(f, &b) || !Read_dword_be(f, &dw1) || !Read_dword_le(f, &dw2))
   {
-    GFX2_Log(GFX2_ERROR, "error reading\n");
+    snprintf(errmsg, ERRMSG_LENGTH, "error reading");
     fclose(f);
     return 0;
   }
   if ((b != 0x1) || (dw1 != 0x02030405) || (dw2 != 0x09080706))
   {
-    GFX2_Log(GFX2_ERROR, "word values mismatch\n");
+    snprintf(errmsg, ERRMSG_LENGTH, "word values mismatch");
     fclose(f);
     return 0;
   }
@@ -156,7 +156,7 @@ int Test_Read_Write_dword(void)
   return 1;
 }
 
-int Test_Read_Write_bytes(void)
+int Test_Read_Write_bytes(char * errmsg)
 {
   char path[256];
   FILE * f;
@@ -168,7 +168,7 @@ int Test_Read_Write_bytes(void)
   f = fopen(path, "w+b");
   if (f == NULL)
   {
-    GFX2_Log(GFX2_ERROR, "error opening %s\n", path);
+    snprintf(errmsg, ERRMSG_LENGTH, "error opening %s", path);
     return 0;
   }
   b = (byte)random();
@@ -184,7 +184,7 @@ int Test_Read_Write_bytes(void)
   // write bytes
   if (!Write_bytes(f, buffer, len))
   {
-    GFX2_Log(GFX2_ERROR, "error writing\n");
+    snprintf(errmsg, ERRMSG_LENGTH, "error writing");
     free(buffer);
     fclose(f);
     return 0;
@@ -193,14 +193,14 @@ int Test_Read_Write_bytes(void)
   memset(buffer, 0, len);
   if (!Read_bytes(f, buffer, len))
   {
-    GFX2_Log(GFX2_ERROR, "error reading\n");
+    snprintf(errmsg, ERRMSG_LENGTH, "error reading");
     free(buffer);
     fclose(f);
     return 0;
   }
   if (!GFX2_is_mem_filled_with(buffer, b, len))
   {
-    GFX2_Log(GFX2_ERROR, "byte values mismatch\n");
+    snprintf(errmsg, ERRMSG_LENGTH, "byte values mismatch");
     free(buffer);
     fclose(f);
     return 0;
@@ -208,7 +208,7 @@ int Test_Read_Write_bytes(void)
   free(buffer);
   if (File_length_file(f) != len)
   {
-    GFX2_Log(GFX2_ERROR, "File_length_file() returned %lu (should be %lu)\n",
+    snprintf(errmsg, ERRMSG_LENGTH, "File_length_file() returned %lu (should be %lu)",
              File_length_file(f), len);
     fclose(f);
     return 0;
@@ -216,7 +216,7 @@ int Test_Read_Write_bytes(void)
   fclose(f);
   if (File_length(path) != len)
   {
-    GFX2_Log(GFX2_ERROR, "File_length() returned %lu (should be %lu)\n",
+    snprintf(errmsg, ERRMSG_LENGTH, "File_length() returned %lu (should be %lu)",
              File_length(path), len);
     return 0;
   }
@@ -249,7 +249,7 @@ static void directory_callback(void * pdata, const char * filename, const word *
     data->result = 1;
 }
 
-int Test_File_exists(void)
+int Test_File_exists(char * errmsg)
 {
   struct dir_callback_data data;
   char path[256];
@@ -257,40 +257,40 @@ int Test_File_exists(void)
 
   if (!Directory_exists(tmpdir))
   {
-    GFX2_Log(GFX2_ERROR, "Directory_exists(\"%s\") FALSE\n", tmpdir);
+    snprintf(errmsg, ERRMSG_LENGTH, "Directory_exists(\"%s\") FALSE", tmpdir);
     return 0;
   }
   snprintf(path, sizeof(path), "%s%sX%07x.tmp", tmpdir, PATH_SEPARATOR, (unsigned)(random() & 0x0fffffff));
   if (File_exists(path))
   {
-    GFX2_Log(GFX2_ERROR, "File_exists(\"%s\") TRUE before creation\n", path);
+    snprintf(errmsg, ERRMSG_LENGTH, "File_exists(\"%s\") TRUE before creation", path);
     return 0;
   }
   f = fopen(path, "w");
   if (f == NULL)
   {
-    GFX2_Log(GFX2_ERROR, "fopen(\"%s\", \"wb\") FAILED\n", path);
+    snprintf(errmsg, ERRMSG_LENGTH, "fopen(\"%s\", \"wb\") FAILED", path);
     return 0;
   }
   fputs("test\n", f);
   fclose(f);
   if (!File_exists(path))
   {
-    GFX2_Log(GFX2_ERROR, "File_exists(\"%s\") FALSE after create\n", path);
+    snprintf(errmsg, ERRMSG_LENGTH, "File_exists(\"%s\") FALSE after create", path);
     return 0;
   }
   data.result = 0;
   data.filename = Extract_filename(NULL, path);
   if (data.filename == NULL)
   {
-    GFX2_Log(GFX2_ERROR, "Extract_filename(NULL, \"%s\") FAILED\n", path);
+    snprintf(errmsg, ERRMSG_LENGTH, "Extract_filename(NULL, \"%s\") FAILED", path);
     return 0;
   }
   GFX2_Log(GFX2_DEBUG, "Listing directory with For_each_directory_entry(\"%s\"):\n", tmpdir);
   For_each_directory_entry(tmpdir, &data, directory_callback);
   if (!data.result)
   {
-    GFX2_Log(GFX2_ERROR, "Failed to find file \"%s\" in directory \"%s\"\n", data.filename, tmpdir);
+    snprintf(errmsg, ERRMSG_LENGTH, "Failed to find file \"%s\" in directory \"%s\"", data.filename, tmpdir);
     free(data.filename);
     return 0;
   }
@@ -298,20 +298,20 @@ int Test_File_exists(void)
   Remove_path(path);
   if (File_exists(path))
   {
-    GFX2_Log(GFX2_ERROR, "File_exists(\"%s\") TRUE after Remove\n", path);
+    snprintf(errmsg, ERRMSG_LENGTH, "File_exists(\"%s\") TRUE after Remove", path);
     return 0;
   }
   return 1;
 }
 
-int Test_Realpath(void)
+int Test_Realpath(char * errmsg)
 {
   char * path;
 
   path = Realpath(tmpdir, NULL);
   if (path == NULL)
   {
-    GFX2_Log(GFX2_ERROR, "Realpath(\"%s\") returned NULL\n", tmpdir);
+    snprintf(errmsg, ERRMSG_LENGTH, "Realpath(\"%s\") returned NULL", tmpdir);
     return 0;
   }
   GFX2_Log(GFX2_DEBUG, "Realpath(\"%s\") returned \"%s\"\n", tmpdir, path);
