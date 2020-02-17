@@ -249,7 +249,7 @@ int Test_Save(char * errmsg)
   Load_PKM(&context);
   if (File_error != 0)
   {
-    fprintf(stderr, "Failed to load reference 256 colors picture\n");
+    snprintf(errmsg, ERRMSG_LENGTH, "Failed to load reference 256 colors picture");
     goto ret;
   }
   testpic256 = context.Surface;
@@ -260,7 +260,7 @@ int Test_Save(char * errmsg)
   Load_GIF(&context);
   if (File_error != 0)
   {
-    fprintf(stderr, "Failed to load reference 16 colors picture\n");
+    snprintf(errmsg, ERRMSG_LENGTH, "Failed to load reference 16 colors picture");
     goto ret;
   }
   testpic16 = context.Surface;
@@ -271,7 +271,7 @@ int Test_Save(char * errmsg)
   Load_GOS(&context);
   if (File_error != 0)
   {
-    fprintf(stderr, "Failed to load reference CPC overscan mode 0 picture\n");
+    snprintf(errmsg, ERRMSG_LENGTH, "Failed to load reference CPC overscan mode 0 picture");
     goto ret;
   }
   testpiccpco = context.Surface;
@@ -412,7 +412,7 @@ int Test_C64_Formats(char * errmsg)
   Load_C64(&context);
   if (File_error != 0)
   {
-    fprintf(stderr, "Failed to load reference multicolors picture\n");
+    snprintf(errmsg, ERRMSG_LENGTH, "Failed to load reference multicolor picture");
     goto ret;
   }
   testpicmulti = context.Surface;
@@ -422,7 +422,7 @@ int Test_C64_Formats(char * errmsg)
   Load_C64(&context);
   if (File_error != 0)
   {
-    fprintf(stderr, "Failed to load reference hires picture\n");
+    snprintf(errmsg, ERRMSG_LENGTH, "Failed to load reference hires picture");
     goto ret;
   }
   testpichires = context.Surface;
