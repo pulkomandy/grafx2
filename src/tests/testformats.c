@@ -303,7 +303,7 @@ int Test_Save(char * errmsg)
     context.Surface = NULL;
     if (File_error != 0)
     {
-      GFX2_Log(GFX2_ERROR, "Save_%s failed.\n", formats[i].name);
+      snprintf(errmsg, ERRMSG_LENGTH, "Save_%s failed.", formats[i].name);
       ok = 0;
     }
     else
@@ -313,7 +313,7 @@ int Test_Save(char * errmsg)
       f = fopen(path, "rb");
       if (f == NULL)
       {
-        GFX2_Log(GFX2_ERROR, "error opening %s\n", path);
+        snprintf(errmsg, ERRMSG_LENGTH, "error opening %s", path);
         ok = 0;
       }
       else
@@ -323,7 +323,7 @@ int Test_Save(char * errmsg)
         fclose(f);
         if (File_error != 0)
         {
-          GFX2_Log(GFX2_ERROR, "Test_%s failed for file %s\n", formats[i].name, path);
+          snprintf(errmsg, ERRMSG_LENGTH, "Test_%s failed for file %s", formats[i].name, path);
           ok = 0;
         }
       }
@@ -332,7 +332,7 @@ int Test_Save(char * errmsg)
       formats[i].Load(&context);
       if (File_error != 0 || context.Surface == NULL)
       {
-        GFX2_Log(GFX2_ERROR, "Load_%s failed for file %s\n", formats[i].name, path);
+        snprintf(errmsg, ERRMSG_LENGTH, "Load_%s failed for file %s", formats[i].name, path);
         ok = 0;
       }
       else
@@ -341,13 +341,13 @@ int Test_Save(char * errmsg)
         // compare with the reference picture
         if (context.Surface->w != ref->w || context.Surface->h != ref->h)
         {
-          GFX2_Log(GFX2_ERROR, "Saved %hux%hu, reloaded %hux%hu from %s\n",
+          snprintf(errmsg, ERRMSG_LENGTH, "Saved %hux%hu, reloaded %hux%hu from %s",
                    ref->w, ref->h, context.Surface->w, context.Surface->h, path);
           ok = 0;
         }
         else if (0 != memcmp(context.Surface->pixels, ref->pixels, ref->w * ref->h))
         {
-          GFX2_Log(GFX2_ERROR, "Save_%s/Load_%s: Pixels mismatch\n", formats[i].name, formats[i].name);
+          snprintf(errmsg, ERRMSG_LENGTH, "Save_%s/Load_%s: Pixels mismatch", formats[i].name, formats[i].name);
           ok = 0;
         }
         else if (!(formats[i].flags & FLAG_CPCO) && 0 != memcmp(context.Palette, ref->palette, (formats[i].flags & FLAG_16C) ? 16 * sizeof(T_Components) : sizeof(T_Palette)))
@@ -355,6 +355,7 @@ int Test_Save(char * errmsg)
           GFX2_Log(GFX2_ERROR, "Save_%s/Load_%s: Palette mismatch\n", formats[i].name, formats[i].name);
           GFX2_LogHexDump(GFX2_ERROR, "ref  ", (const byte *)ref->palette, 0, 48);
           GFX2_LogHexDump(GFX2_ERROR, "load ", (const byte *)context.Palette, 0, 48);
+          snprintf(errmsg, ERRMSG_LENGTH, "Save_%s/Load_%s: Palette mismatch", formats[i].name, formats[i].name);
           ok = 0;
         }
         else
@@ -466,7 +467,7 @@ int Test_C64_Formats(char * errmsg)
       context.Surface = NULL;
       if (File_error != 0)
       {
-        GFX2_Log(GFX2_ERROR, "Save_%s failed.\n", formats[i].name);
+        snprintf(errmsg, ERRMSG_LENGTH, "Save_%s failed.", formats[i].name);
         ok = 0;
       }
       else
@@ -476,7 +477,7 @@ int Test_C64_Formats(char * errmsg)
         f = fopen(path, "rb");
         if (f == NULL)
         {
-          GFX2_Log(GFX2_ERROR, "error opening %s\n", path);
+          snprintf(errmsg, ERRMSG_LENGTH, "error opening %s", path);
           ok = 0;
         }
         else
@@ -486,7 +487,7 @@ int Test_C64_Formats(char * errmsg)
           fclose(f);
           if (File_error != 0)
           {
-            GFX2_Log(GFX2_ERROR, "Test_%s failed for file %s\n", formats[i].name, path);
+            snprintf(errmsg, ERRMSG_LENGTH, "Test_%s failed for file %s", formats[i].name, path);
             ok = 0;
           }
         }
@@ -495,14 +496,14 @@ int Test_C64_Formats(char * errmsg)
         formats[i].Load(&context);
         if (File_error != 0 || context.Surface == NULL)
         {
-          GFX2_Log(GFX2_ERROR, "Load_%s failed for file %s\n", formats[i].name, path);
+          snprintf(errmsg, ERRMSG_LENGTH, "Load_%s failed for file %s", formats[i].name, path);
           ok = 0;
         }
         else
         {
           if (memcmp(ref->pixels, context.Surface->pixels, ref->w * ref->h) != 0)
           {
-            GFX2_Log(GFX2_ERROR, "Save_%s/Load_%s: Pixels mismatch\n", formats[i].name, formats[i].name);
+            snprintf(errmsg, ERRMSG_LENGTH, "Save_%s/Load_%s: Pixels mismatch", formats[i].name, formats[i].name);
             ok = 0;
           }
           else
