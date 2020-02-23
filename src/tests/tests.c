@@ -123,7 +123,7 @@ int Test_CPC_compare_colors(char * errmsg)
         c2.B = c1.B;
         if (CPC_compare_colors(&c1, &c2))
         {
-          snprintf(errmsg, ERRMSG_LENGTH, "#%02x%02x%02x <> #%02x%02x%02x",
+          snprintf(errmsg, ERRMSG_LENGTH, "#%02x%02x%02x != #%02x%02x%02x",
                    c1.R, c1.G, c1.B, c2.R, c2.G, c2.B);
           return 0; // Should be differents !
         }
@@ -131,7 +131,7 @@ int Test_CPC_compare_colors(char * errmsg)
         c2.G = ((g + 6) & 15) * 0x11;
         if (CPC_compare_colors(&c1, &c2))
         {
-          snprintf(errmsg, ERRMSG_LENGTH, "#%02x%02x%02x <> #%02x%02x%02x",
+          snprintf(errmsg, ERRMSG_LENGTH, "#%02x%02x%02x != #%02x%02x%02x",
                    c1.R, c1.G, c1.B, c2.R, c2.G, c2.B);
           return 0; // Should be differents !
         }
@@ -139,7 +139,7 @@ int Test_CPC_compare_colors(char * errmsg)
         c2.B = ((b + 6) & 15) * 0x11;
         if (CPC_compare_colors(&c1, &c2))
         {
-          snprintf(errmsg, ERRMSG_LENGTH, "#%02x%02x%02x <> #%02x%02x%02x",
+          snprintf(errmsg, ERRMSG_LENGTH, "#%02x%02x%02x != #%02x%02x%02x",
                    c1.R, c1.G, c1.B, c2.R, c2.G, c2.B);
           return 0; // Should be differents !
         }
