@@ -116,6 +116,7 @@ int init(void)
 {
 #ifdef WIN32
   char temp[256];
+  DWORD len;
 #endif
   srandom(time(NULL));
 #ifdef ENABLE_FILENAMES_ICONV
@@ -131,8 +132,9 @@ int init(void)
 #endif
 #endif /* ENABLE_FILENAMES_ICONV */
 #ifdef WIN32
-  GetTempPathA(sizeof(temp), temp);
-  snprintf(tmpdir, sizeof(tmpdir), "%s%sgrafx2-test.XXXXXX", temp, PATH_SEPARATOR);
+  len = GetTempPathA(sizeof(temp), temp);
+  snprintf(tmpdir, sizeof(tmpdir), "%s%sgrafx2-test.XXXXXX",
+           temp, temp[len-1] == PATH_SEPARATOR[0] ? "" : PATH_SEPARATOR);
 #else
   snprintf(tmpdir, sizeof(tmpdir), "%s%sgrafx2-test.XXXXXX", "/tmp", PATH_SEPARATOR);
 #endif
