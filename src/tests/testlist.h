@@ -7,6 +7,7 @@ TEST(Read_Write_dword)
 TEST(Read_Write_bytes)
 TEST(Realpath)
 TEST(File_exists)
+TEST(Calculate_relative_path)
 
 TEST(MOTO_MAP_pack)
 TEST(CPC_compare_colors)

@@ -318,3 +318,41 @@ int Test_Realpath(char * errmsg)
   free(path);
   return 1;
 }
+
+int Test_Calculate_relative_path(char * errmsg)
+{
+  char path[256];
+  char * rel;
+
+  snprintf(path, sizeof(path), "%s%ssubdir", tmpdir, PATH_SEPARATOR);
+  GFX2_Log(GFX2_DEBUG, "path : %s\n", path);
+  rel = Calculate_relative_path(tmpdir, path);
+  if (rel == NULL)
+  {
+    snprintf(errmsg, ERRMSG_LENGTH, "Calculate_relative_path() returned NULL");
+    return 0;
+  }
+  GFX2_Log(GFX2_DEBUG, "%s\n", rel);
+  if (0 != strcmp(rel, "." PATH_SEPARATOR "subdir"))
+  {
+    snprintf(errmsg, ERRMSG_LENGTH, "Calculate_relative_path() returned %s", rel);
+    free(rel);
+    return 0;
+  }
+  free(rel);
+  rel = Calculate_relative_path(path, tmpdir);
+  if (rel == NULL)
+  {
+    snprintf(errmsg, ERRMSG_LENGTH, "Calculate_relative_path() returned NULL");
+    return 0;
+  }
+  GFX2_Log(GFX2_DEBUG, "%s\n", rel);
+  if (0 != strncmp(rel, ".." PATH_SEPARATOR ".." PATH_SEPARATOR, 6))
+  {
+    snprintf(errmsg, ERRMSG_LENGTH, "Calculate_relative_path() returned %s", rel);
+    free(rel);
+    return 0;
+  }
+  free(rel);
+  return 1;
+}
