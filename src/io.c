@@ -1186,7 +1186,7 @@ char * Calculate_relative_path(const char * ref_path, const char * path)
       len = strlen(path + i) + 1;
       rel_path = GFX2_malloc(len + 1);
       if (rel_path != NULL)
-        snprintf(rel_path, len, ".%s", path + i);
+        snprintf(rel_path, len + 1, ".%s", path + i);
       return rel_path;
     }
     else if (i > 0 && real_ref_path[i - 1] == PATH_SEPARATOR[0])
@@ -1195,7 +1195,7 @@ char * Calculate_relative_path(const char * ref_path, const char * path)
       len = strlen(path + i - 1) + 1;
       rel_path = GFX2_malloc(len + 1);
       if (rel_path != NULL)
-        snprintf(rel_path, len, ".%s", path + i - 1);
+        snprintf(rel_path, len + 1, ".%s", path + i - 1);
       return rel_path;
     }
   }
