@@ -1809,10 +1809,13 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
               GFX2_Log(GFX2_DEBUG, "extension %s => %s\n", Selector->filename + pos_last_dot + 1, Get_fileformat(Selector->Format_filter)->Default_extension);
               strcpy(Selector->filename + pos_last_dot + 1,
                 Get_fileformat(Selector->Format_filter)->Default_extension);
-              pos_last_dot = Position_last_dot_unicode(Selector->filename_unicode);
-              if (pos_last_dot != -1)
-                Unicode_char_strlcpy(Selector->filename_unicode + pos_last_dot + 1,
-                  Get_fileformat(Selector->Format_filter)->Default_extension, 256 - pos_last_dot - 1);
+              if (Selector->filename_unicode != NULL)
+              {
+                pos_last_dot = Position_last_dot_unicode(Selector->filename_unicode);
+                if (pos_last_dot != -1)
+                  Unicode_char_strlcpy(Selector->filename_unicode + pos_last_dot + 1,
+                    Get_fileformat(Selector->Format_filter)->Default_extension, 256 - pos_last_dot - 1);
+              }
             }
           }
           savename = strdup(Selector->filename);
