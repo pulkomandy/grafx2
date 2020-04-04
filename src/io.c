@@ -1131,6 +1131,7 @@ int Remove_directory(const char * path)
 char * Calculate_relative_path(const char * ref_path, const char * path)
 {
   char * real_ref_path;
+  char * real_path;
   char * rel_path = NULL;
   int last_separator = -1;
   int i;
@@ -1142,67 +1143,75 @@ char * Calculate_relative_path(const char * ref_path, const char * path)
   real_ref_path = Realpath(ref_path, NULL);
   if (real_ref_path == NULL)
     real_ref_path = strdup(ref_path);
+  real_path = Realpath(path, NULL);
+  if (real_path == NULL)
+    real_path = strdup(path);
 #if defined(WIN32) || defined(__MINT__)
-  if (real_ref_path[1] == ':' && path[1] == ':')
+  if (real_ref_path[1] == ':' && real_path[1] == ':')
   {
     // use same case for drive letter
-    real_ref_path[0] = (real_ref_path[0] & ~32) | (path[0] & 32);
-    if (real_ref_path[0] != path[0])
+    real_ref_path[0] = (real_ref_path[0] & ~32) | (real_path[0] & 32);
+    if (real_ref_path[0] != real_path[0])
     {
       free(real_ref_path);
+      free(real_path);
       return NULL;  // path on different volumes, not possible
     }
   }
 #endif
   // look for common path parts
-  for (i = 0; real_ref_path[i] == path[i] && path[i] != '\0'; i++)
+  for (i = 0; real_ref_path[i] == real_path[i] && real_path[i] != '\0'; i++)
   {
-    if (path[i] == PATH_SEPARATOR[0])
+    if (real_path[i] == PATH_SEPARATOR[0])
       last_separator = i;
 #if defined(WIN32)
-    else if(path[i] == '/')
+    else if(real_path[i] == '/')
       last_separator = i;
 #endif
   }
   // at this point, all chars from index 0 to i-1 are identical in
   // real_ref_path and path.
   // real_ref_path[i] and path[i] are either different, or both '\0'
-  if (real_ref_path[i] == PATH_SEPARATOR[0] && real_ref_path[i + 1] == '\0' && path[i] == '\0')
+  if (real_ref_path[i] == PATH_SEPARATOR[0] && real_ref_path[i + 1] == '\0' && real_path[i] == '\0')
   {
     free(real_ref_path);
+    free(real_path);
     return strdup("."); // path are identical (real_ref_path has additional trailing separator)
   }
   if (real_ref_path[i] == '\0')
   {
-    if (path[i] == '\0')
+    if (real_path[i] == '\0')
     {
       free(real_ref_path);
+      free(real_path);
       return strdup("."); // path are identical
     }
     // path is under ref_path
-    if (path[i] == PATH_SEPARATOR[0])
+    if (real_path[i] == PATH_SEPARATOR[0])
     {
       free(real_ref_path);
-      len = strlen(path + i) + 1;
+      len = strlen(real_path + i) + 1;
       rel_path = GFX2_malloc(len + 1);
       if (rel_path != NULL)
-        snprintf(rel_path, len + 1, ".%s", path + i);
+        snprintf(rel_path, len + 1, ".%s", real_path + i);
+      free(real_path);
       return rel_path;
     }
     else if (i > 0 && real_ref_path[i - 1] == PATH_SEPARATOR[0])
     {
       free(real_ref_path);
-      len = strlen(path + i - 1) + 1;
+      len = strlen(real_path + i - 1) + 1;
       rel_path = GFX2_malloc(len + 1);
       if (rel_path != NULL)
-        snprintf(rel_path, len + 1, ".%s", path + i - 1);
+        snprintf(rel_path, len + 1, ".%s", real_path + i - 1);
+      free(real_path);
       return rel_path;
     }
   }
   if (last_separator <= 0)
   {
     free(real_ref_path);
-    return strdup(path);  // no common part found return absolute path
+    return real_path;  // no common part found return absolute path
   }
   // count the number of path separators in the reference path
   for (i = last_separator; real_ref_path[i] != '\0'; i++)
@@ -1213,15 +1222,16 @@ char * Calculate_relative_path(const char * ref_path, const char * path)
   free(real_ref_path);
   i = 0;
   // construct the relative path
-  len = separator_count * (2 + strlen(PATH_SEPARATOR)) + strlen(path + last_separator + 1) + 1;
+  len = separator_count * (2 + strlen(PATH_SEPARATOR)) + strlen(real_path + last_separator + 1) + 1;
   rel_path = GFX2_malloc(len + 1);
   if (rel_path != NULL)
   {
     while(separator_count-- > 0)
       i += snprintf(rel_path + i, len + 1 - i, "..%s", PATH_SEPARATOR);
-    strncpy(rel_path + i, path + last_separator + 1, len + 1 - i);
+    strncpy(rel_path + i, real_path + last_separator + 1, len + 1 - i);
     rel_path[len] = '\0';
   }
+  free(real_path);
   return rel_path;
 }
 
