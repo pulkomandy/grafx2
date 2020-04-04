@@ -323,6 +323,7 @@ int Test_Calculate_relative_path(char * errmsg)
 {
   char path[256];
   char * rel;
+  const char * expected;
 
   snprintf(path, sizeof(path), "%s%ssubdir", tmpdir, PATH_SEPARATOR);
   GFX2_Log(GFX2_DEBUG, "path : %s\n", path);
@@ -333,9 +334,12 @@ int Test_Calculate_relative_path(char * errmsg)
     return 0;
   }
   GFX2_Log(GFX2_DEBUG, "%s\n", rel);
-  if (0 != strcmp(rel, "." PATH_SEPARATOR "subdir"))
+  expected = "." PATH_SEPARATOR "subdir";
+  if (0 != strcmp(rel, expected))
   {
-    snprintf(errmsg, ERRMSG_LENGTH, "Calculate_relative_path() returned %s", rel);
+    snprintf(errmsg, ERRMSG_LENGTH,
+             "Calculate_relative_path() returned %s (%s expected)",
+             rel, expected);
     free(rel);
     return 0;
   }
@@ -347,9 +351,12 @@ int Test_Calculate_relative_path(char * errmsg)
     return 0;
   }
   GFX2_Log(GFX2_DEBUG, "%s\n", rel);
-  if (0 != strncmp(rel, ".." PATH_SEPARATOR ".." PATH_SEPARATOR, 6))
+  expected = ".." PATH_SEPARATOR ".." PATH_SEPARATOR;
+  if (0 != strncmp(rel, expected, strlen(expected)))
   {
-    snprintf(errmsg, ERRMSG_LENGTH, "Calculate_relative_path() returned %s", rel);
+    snprintf(errmsg, ERRMSG_LENGTH,
+             "Calculate_relative_path() returned %s (should start with %s)",
+             rel, expected);
     free(rel);
     return 0;
   }
