@@ -113,7 +113,7 @@ ifdef COMSPEC
   BIN = ../bin/grafx2-$(API).exe
   TESTSBIN = ../bin/tests-$(API).exe
   GENERATEDOCBIN = ../bin/generatedoc.exe
-  COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb
+  COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb -DWINVER=0x0500
   COPT += $(LUACOPT)
   LOPT = -mwindows
   LOPT += $(LUALOPT)
@@ -509,7 +509,7 @@ endif
       STRIP = $(CROSS_STRIP)
       BIN = ../bin/grafx2-$(API).exe
       TESTSBIN = ../bin/tests-$(API).exe
-      COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb $(TTFCOPT)
+      COPT = -W -Wall -Wdeclaration-after-statement -O$(OPTIM) -g -ggdb $(TTFCOPT) -DWINVER=0x0500
       LOPT = -mwindows -lmingw32 -lshlwapi -lmpr $(TTFLOPT)
       ifeq ($(API),sdl)
       COPT += -Dmain=SDL_main $(shell $(CROSS_SDLCONFIG) --cflags)
@@ -1171,7 +1171,7 @@ $(OBJDIR)/loadrecoil.o:	recoil.c recoil.h
 ../3rdparty/recoil-$(RECOILVER)/recoil.c:
 	if [ -d ../3rdparty ] ; then $(MAKE) -C ../3rdparty recoil ; fi
 
-$(OBJDIR)/recoil.o:	CFLAGS += -Wno-declaration-after-statement -Wno-unused-parameter
+$(OBJDIR)/recoil.o:	CFLAGS += -Wno-declaration-after-statement -Wno-unused-parameter -std=gnu99
 endif
 
 6502.h:	6502.c
