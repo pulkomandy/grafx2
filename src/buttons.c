@@ -49,6 +49,7 @@
 #include "struct.h"
 #include "global.h"
 #include "misc.h"
+#include "osdep.h"
 #include "graph.h"
 #include "engine.h"
 #include "readline.h"

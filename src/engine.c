@@ -36,6 +36,7 @@
 #include "global.h"
 #include "graph.h"
 #include "misc.h"
+#include "osdep.h"
 #include "special.h"
 #include "buttons.h"
 #include "operatio.h"

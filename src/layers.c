@@ -33,6 +33,7 @@
 #include "input.h"
 #include "help.h"
 #include "misc.h"
+#include "osdep.h"
 #include "readline.h"
 #include "graph.h"
 #include "keycodes.h"

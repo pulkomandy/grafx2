@@ -150,7 +150,4 @@ int Max(int a,int b);
 const char* Mode_label(int mode);
 int Convert_videomode_arg(const char *argument);
 
-/// Return a number of milliseconds
-dword GFX2_GetTicks(void);
-
 #endif

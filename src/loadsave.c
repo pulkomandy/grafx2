@@ -62,6 +62,7 @@
 #include "loadsave.h"
 #include "loadsavefuncs.h"
 #include "misc.h"
+#include "osdep.h"
 #include "graph.h"
 #include "op_c.h"
 #include "pages.h"

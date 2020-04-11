@@ -36,6 +36,7 @@
 #include "graph.h"
 #include "io.h"     // find_last_separator
 #include "misc.h"
+#include "osdep.h"
 #include "pages.h"  // Backup()
 #include "readline.h"
 #include "screen.h"

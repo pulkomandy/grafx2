@@ -39,6 +39,7 @@
 #include "screen.h"
 #include "graph.h"
 #include "misc.h"
+#include "osdep.h"
 #include "pxsimple.h"
 #include "pxtall.h"
 #include "pxwide.h"

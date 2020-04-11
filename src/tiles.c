@@ -30,6 +30,7 @@
 #include "windows.h"
 #include "input.h"
 #include "misc.h"
+#include "osdep.h"
 #include "tiles.h"
 
 // These helpers are only needed internally at the moment

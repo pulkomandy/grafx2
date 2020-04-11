@@ -807,7 +807,7 @@ endif
          doc doxygen htmldoc check
 
 # This is the list of the objects we want to build. Dependancies are built by "make depend" automatically.
-OBJS = main.o init.o graph.o $(APIOBJ) misc.o special.o \
+OBJS = main.o init.o graph.o $(APIOBJ) misc.o osdep.o special.o \
        buttons.o palette.o help.o operatio.o pages.o \
        readline.o engine.o filesel.o fileseltools.o \
        op_c.o readini.o saveini.o \

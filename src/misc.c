@@ -28,19 +28,13 @@
 #endif
 #include <stdlib.h>
 #include <math.h>
-#if !defined(USE_SDL) && !defined(USE_SDL2)
-#if defined(WIN32)
-#include <windows.h>
-#else
-#include <sys/time.h>
-#endif
-#endif
 #include "struct.h"
 #include "global.h"
 #include "errors.h"
 #include "buttons.h"
 #include "engine.h"
 #include "misc.h"
+#include "osdep.h"
 #include "keyboard.h"
 #include "screen.h"
 #include "windows.h"
@@ -864,18 +858,3 @@ int Convert_videomode_arg(const char *argument)
 
   return -1;
 }
-
-dword GFX2_GetTicks(void)
-{
-#if defined(USE_SDL) || defined(USE_SDL2)
-  return SDL_GetTicks();
-#elif defined(WIN32)
-  return GetTickCount();
-#else
-  struct timeval tv;
-  if (gettimeofday(&tv, NULL) < 0)
-    return 0;
-  return tv.tv_sec * 1000 + tv.tv_usec / 1000;
-#endif
-}
-

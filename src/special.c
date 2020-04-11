@@ -29,6 +29,7 @@
 #include "special.h"
 #include "pages.h"
 #include "misc.h"
+#include "osdep.h"
 #include "buttons.h"
 
 

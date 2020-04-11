@@ -58,6 +58,7 @@
 #include "windows.h"
 #include "errors.h"
 #include "misc.h"
+#include "osdep.h"
 #include "buttons.h"
 #include "input.h"
 #include "loadsave.h"
