@@ -136,6 +136,12 @@ int File_exists(const char * fname);
 /// Returns true if a directory passed as a parameter exists in the current directory.
 int  Directory_exists(const char * directory);
 
+/**
+ * Creates a directory
+ * @return 0 on success, -1 on error
+ */
+int Directory_create(const char * directory);
+
 /// Check if a file or directory is hidden. Full name (with directories) is optional.
 int File_is_hidden(const char *fname, const char *full_name);
 

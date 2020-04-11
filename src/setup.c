@@ -28,16 +28,13 @@
 #include <string.h>
 #include <stdlib.h>
 #include <sys/types.h>
-#include <sys/stat.h>
-#if defined(__WIN32__) || defined(WIN32)
-  #include <windows.h>
 #ifdef _MSC_VER
   #define strdup _strdup
   #if _MSC_VER < 1900
     #define snprintf _snprintf
   #endif
 #endif
-#elif defined(__macosx__)
+#if defined(__macosx__)
   #import <CoreFoundation/CoreFoundation.h>
   #import <sys/param.h>
 #elif defined(__FreeBSD__)
@@ -64,15 +61,6 @@
     // This is a random default value ...
     #define PATH_MAX 32768
 #endif
-
-int Create_ConfigDirectory(const char * config_dir)
-{
-  #if defined(__WIN32__) || defined(WIN32)
-    return CreateDirectoryA(config_dir, NULL) ? 0 : -1;
-  #else
-    return mkdir(config_dir,S_IRUSR|S_IWUSR|S_IXUSR);
-  #endif
-}
 
 // Determine which directory contains the executable.
 // IN: Main's argv[0], some platforms need it, some don't.
@@ -323,7 +311,7 @@ char * Get_config_directory(const char * program_dir)
         if (!Directory_exists(config_dir))
         {
           // try to create it
-          if (Create_ConfigDirectory(config_dir) < 0)
+          if (Directory_create(config_dir) < 0)
           {
             GFX2_Log(GFX2_WARNING, "Failed to create directory \"%s\"\n", config_dir);
             // Echec: on se rabat sur le repertoire de l'executable.

@@ -537,6 +537,15 @@ int Directory_exists(const char * directory)
 #endif
 }
 
+int Directory_create(const char * directory)
+{
+  #if defined(__WIN32__) || defined(WIN32)
+    return CreateDirectoryA(directory, NULL) ? 0 : -1;
+  #else
+    return mkdir(directory, S_IRUSR|S_IWUSR|S_IXUSR);
+  #endif
+}
+
 /// Check if a file or directory is hidden.
 int File_is_hidden(const char *fname, const char *full_name)
 {
