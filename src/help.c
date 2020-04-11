@@ -77,6 +77,7 @@
 #include "struct.h"
 #include "global.h"
 #include "misc.h"
+#include "osdep.h"
 #include "engine.h"
 #include "helpfile.h"
 #include "help.h"

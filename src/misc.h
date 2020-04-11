@@ -127,11 +127,6 @@ GFX2_GLOBAL byte Timer_state; // State du chrono: 0=Attente d'un Xème de second
 GFX2_GLOBAL dword Timer_delay;     // Nombre de 18.2ème de secondes demandés
 GFX2_GLOBAL dword Timer_start;       // Heure de départ du chrono
 
-#if defined (__MINT__)
-void Atari_Memory_free(unsigned long *stRam,unsigned long *ttRam);
-#else
-unsigned long Memory_free(void);
-#endif
 #define Num2str(a,b,c) snprintf(b,sizeof(b),"%*lu",(int)c,(unsigned long)(a))
 
 #define Dec2str(a,b,c) sprintf(b,"%.*f",c,(double)(a))

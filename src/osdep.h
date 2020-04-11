@@ -33,4 +33,13 @@
 /// Return a number of milliseconds
 dword GFX2_GetTicks(void);
 
+#if defined (__MINT__)
+void Atari_Memory_free(unsigned long *stRam, unsigned long *ttRam);
+#else
+/**
+ * @return the number of RAM bytes available
+ */
+unsigned long Memory_free(void);
+#endif
+
 #endif

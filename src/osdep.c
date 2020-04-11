@@ -33,6 +33,7 @@
 #endif
 
 #include "struct.h"
+#include "gfx2log.h"
 
 dword GFX2_GetTicks(void)
 {
@@ -48,3 +49,101 @@ dword GFX2_GetTicks(void)
 #endif
 }
 
+#if defined(__macosx__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__SWITCH__)
+  #if defined(__OpenBSD__)
+  #include <sys/param.h>
+  #endif
+  #include <sys/types.h>
+  #include <sys/sysctl.h>
+#elif defined(__BEOS__) || defined(__HAIKU__)
+  #include <kernel/OS.h>
+#elif defined(__AROS__) || defined(__amigaos4__) || defined(__MORPHOS__) || defined(__amigaos__)
+  #include <proto/exec.h>
+#elif defined(__MINT__)
+  #include <mint/osbind.h>
+  #include <mint/sysbind.h>
+#elif defined(__SKYOS__)
+  #include <skyos/sysinfo.h>
+#elif !defined(WIN32)
+  #include <sys/sysinfo.h> // sysinfo() for free RAM
+#endif
+
+#if defined (__MINT__)
+// atari have two kinds of memory
+// standard and fast ram
+void Atari_Memory_free(unsigned long *stRam, unsigned long *ttRam){
+  *stRam = Mxalloc(-1L, 0);
+  *ttRam = Mxalloc(-1L, 1);
+}
+#else
+// Indique quelle est la mémoire disponible
+unsigned long Memory_free(void)
+{
+  // Memory is no longer relevant. If there is ANY problem or doubt here,
+  // you can simply return 10*1024*1024 (10Mb), to make the "Pages"something
+  // memory allocation functions happy.
+
+  // However, it is still a good idea to make a proper function if you can...
+  // If Grafx2 thinks the memory is full, weird things may happen. And if memory
+  // ever becomes full and you're still saying there are 10MB free here, the
+  // program will crash without saving any picture backup ! You've been warned...
+#if defined(WIN32)
+#if _WIN32_WINNT >= _WIN32_WINNT_WIN2K
+  // GlobalMemoryStatusEx() is supported since Windows 2000
+  MEMORYSTATUSEX mstt;
+  mstt.dwLength = sizeof(mstt);
+  if (GlobalMemoryStatusEx(&mstt))
+  {
+    GFX2_Log(GFX2_DEBUG, "Phys %lu / %luMB, Page %lu / %luMB, Virtual %lu / %luMB\n",
+             (unsigned long)(mstt.ullAvailPhys >> 20), (unsigned long)(mstt.ullTotalPhys >> 20),
+             (unsigned long)(mstt.ullAvailPageFile >> 20), (unsigned long)(mstt.ullTotalPageFile >> 20),
+             (unsigned long)(mstt.ullAvailVirtual >> 20), (unsigned long)(mstt.ullTotalVirtual >> 20));
+    return mstt.ullAvailPhys;
+  }
+  else
+  {
+    GFX2_Log(GFX2_ERROR, "GlobalMemoryStatusEx() failed\n");
+    return 10*1024*1024;
+  }
+#else
+  MEMORYSTATUS mstt;
+  mstt.dwLength = sizeof(MEMORYSTATUS);
+  GlobalMemoryStatus(&mstt);
+  return mstt.dwAvailPhys;
+#endif
+#elif defined(__macosx__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+  int mib[2];
+  int maxmem;
+  size_t len;
+
+  mib[0] = CTL_HW;
+  mib[1] = HW_USERMEM;
+  len = sizeof(maxmem);
+  sysctl(mib,2,&maxmem,&len,NULL,0);
+  return maxmem;
+#elif defined(__HAIKU__) || defined(__BEOS__)
+  int pages;
+  system_info systemInfo;
+  get_system_info(&systemInfo);
+
+  pages = systemInfo.max_pages - systemInfo.used_pages;
+  return pages * B_PAGE_SIZE;
+#elif defined(__AROS__) || defined(__MORPHOS__) || defined(__amigaos__)
+  return AvailMem(MEMF_ANY);
+#elif defined(__linux__)
+  struct sysinfo info;
+  sysinfo(&info);
+  return info.freeram*info.mem_unit;
+#else
+  // AvailMem is misleading on os4 (os4 caches stuff in memory that you can still allocate)
+#if defined(__SWITCH__)
+  // There is some way to get memory information on switch (see include switch/kernel/svc.h svcGetInfo svcGetSystemInfo)
+  // but the usage is a bit confusing for the first and the later need privilege to be used.
+  // If you come here with a solution, you'r welcome. For now we just return the default value.
+#elif
+#warning "There is missing code there for your platform ! please check and correct :)"
+#endif
+  return 10*1024*1024;
+#endif
+}
+#endif
