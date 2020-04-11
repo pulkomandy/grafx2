@@ -49,6 +49,43 @@ dword GFX2_GetTicks(void)
 #endif
 }
 
+void GFX2_OpenURL(const char * buffer, unsigned int len)
+{
+#if defined(WIN32)
+  (void)len;
+  /*HINSTANCE hInst = */ShellExecuteA(NULL, "open", buffer, NULL, NULL, SW_SHOWNORMAL);
+#elif defined(__macosx__)
+  OSStatus ret;
+
+  CFURLRef url = CFURLCreateWithBytes (
+      NULL,                   // allocator
+      (UInt8*)buffer,         // URLBytes
+      len,                    // length
+      kCFStringEncodingASCII, // encoding
+      NULL                    // baseURL
+    );
+  ret = LSOpenCFURLRef(url,0);
+  if (ret != noErr)
+    GFX2_Log(GFX2_ERROR, "LSOpenCFURLRef() returned %d\n", ret);
+  CFRelease(url);
+#elif defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
+  int ret;
+  char command[256]; // use the xdg-open command to open the url in the default browser
+  (void)len;
+
+  snprintf(command, sizeof(command), "xdg-open \"%s\"", buffer);
+  ret = system(command);
+  if (ret < 0)
+    GFX2_Log(GFX2_ERROR, "system('%s') FAILED\n", command);
+  else if (ret == 127)
+    GFX2_Log(GFX2_ERROR, "system() FAILED to execute shell\n");
+#else
+  // TODO : HAIKU, MINT, etc.
+  (void)len; (void)buffer;
+  GFX2_Log(GFX2_WARNING, "URL open not supported yet on this system.\n");
+#endif
+}
+
 #if defined(__macosx__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__SWITCH__)
   #if defined(__OpenBSD__)
   #include <sys/param.h>

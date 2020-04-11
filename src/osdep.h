@@ -33,6 +33,13 @@
 /// Return a number of milliseconds
 dword GFX2_GetTicks(void);
 
+/**
+ * Open an URL in the system default browser
+ * @param url URL (ascii)
+ * @param len URL length in bytes
+ */
+void GFX2_OpenURL(const char * url, unsigned int len);
+
 #if defined (__MINT__)
 void Atari_Memory_free(unsigned long *stRam, unsigned long *ttRam);
 #else
