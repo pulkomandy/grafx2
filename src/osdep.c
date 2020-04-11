@@ -24,12 +24,38 @@
 */
 #if defined(USE_SDL) || defined(USE_SDL2)
 #include <SDL.h>
-#else
-#if defined(WIN32)
-#include <windows.h>
-#else
+#elif !defined(WIN32)
 #include <sys/time.h>
 #endif
+
+#if defined(WIN32)
+#include <windows.h>
+#endif
+
+#if defined(__macosx__) || defined(__FreeBSD__) || defined(__OpenBSD__)
+    #include <sys/param.h>
+    #include <sys/mount.h>
+#elif defined(__NetBSD__)
+    #include <sys/statvfs.h>
+#elif defined (__linux__) || defined(__SYLLABLE__)
+    #include <sys/vfs.h>
+#elif defined (__HAIKU__)
+	#include "haiku.h"
+#elif defined (__MINT__)
+    #include <mint/sysbind.h>
+    #include <mint/osbind.h>
+    #include <mint/ostruct.h>
+#elif defined(__AROS__)
+    #include <sys/mount.h>
+#endif
+
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
+#include <stdlib.h>
+#endif
+
+#if defined(__macosx__)
+#import <CoreFoundation/CoreFoundation.h>
+#import <ApplicationServices/ApplicationServices.h>
 #endif
 
 #include "struct.h"
@@ -83,6 +109,49 @@ void GFX2_OpenURL(const char * buffer, unsigned int len)
   // TODO : HAIKU, MINT, etc.
   (void)len; (void)buffer;
   GFX2_Log(GFX2_WARNING, "URL open not supported yet on this system.\n");
+#endif
+}
+
+qword GFX2_DiskFreeSpace(const char * path)
+{
+#if defined(__WIN32__) || defined(WIN32)
+  ULARGE_INTEGER tailleU, totalbytes, totalfreebytes;
+  if (GetDiskFreeSpaceExA(path, &tailleU, &totalbytes, &totalfreebytes))
+  {
+    GFX2_Log(GFX2_DEBUG, "%s: %luMB free for GrafX2 (total %luMB, %luMB free)\n",
+             path, (unsigned long)(tailleU.QuadPart >> 20),
+             (unsigned long)(totalbytes.QuadPart >> 20), (unsigned long)(totalfreebytes.QuadPart >> 20));
+    return tailleU.QuadPart;
+  }
+  else
+  {
+    GFX2_Log(GFX2_ERROR, "GetDiskFreeSpaceExA() failed\n");
+    return 0;
+  }
+#elif defined(__linux__) || defined(__macosx__) || defined(__FreeBSD__) || defined(__SYLLABLE__) || defined(__AROS__) || defined(__OpenBSD__)
+  struct statfs disk_info;
+  statfs(path ,&disk_info);
+  return (qword) disk_info.f_bfree * (qword) disk_info.f_bsize;
+#elif defined(__NetBSD__)
+  struct statvfs disk_info;
+  statvfs(path, &disk_info);
+  return (qword) disk_info.f_bfree * (qword) disk_info.f_bsize;
+#elif defined(__HAIKU__)
+  return haiku_get_free_space(path);
+#elif defined (__MINT__)
+  _DISKINFO drvInfo;
+
+  Dfree(&drvInfo, 0);
+  //number of free clusters*sectors per cluster*bytes per sector;
+  // reports current drive
+  return drvInfo.b_free*drvInfo.b_clsiz*drvInfo.b_secsiz;
+#else
+  #define NODISKSPACESUPPORT
+  // Free disk space is only for shows. Other platforms can display 0.
+  #if !defined(__SWITCH__)
+  #warning "Missing code for your platform !!! Check and correct please :)"
+  #endif
+  return 0;
 #endif
 }
 

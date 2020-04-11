@@ -40,6 +40,11 @@ dword GFX2_GetTicks(void);
  */
 void GFX2_OpenURL(const char * url, unsigned int len);
 
+/**
+ * Disk free space
+ */
+qword GFX2_DiskFreeSpace(const char * path);
+
 #if defined (__MINT__)
 void Atari_Memory_free(unsigned long *stRam, unsigned long *ttRam);
 #else

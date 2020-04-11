@@ -26,35 +26,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#if defined(__WIN32__) || defined(WIN32)
-    #include <windows.h>
 #if defined(_MSC_VER) && _MSC_VER < 1900
 	#define snprintf _snprintf
-#endif
-#elif defined(__macosx__) || defined(__FreeBSD__) || defined(__OpenBSD__)
-    #include <sys/param.h>
-    #include <sys/mount.h>
-#elif defined(__NetBSD__)
-    #include <sys/statvfs.h>
-#elif defined (__linux__) || defined(__SYLLABLE__)
-    #include <sys/vfs.h>
-#elif defined (__HAIKU__)
-	#include "haiku.h"
-#elif defined (__MINT__)
-    #include <mint/sysbind.h>
-    #include <mint/osbind.h>
-    #include <mint/ostruct.h>
-#elif defined(__AROS__)
-    #include <sys/mount.h>
-#endif
-
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
-#include <stdlib.h>
-#endif
-
-#if defined(__macosx__)
-#import <CoreFoundation/CoreFoundation.h>
-#import <ApplicationServices/ApplicationServices.h>
 #endif
 
 #if defined(USE_SDL) || defined(USE_SDL2)
@@ -756,7 +729,6 @@ void Button_Stats(int btn)
   qword mem_size = 0;
   int y;
 #if defined (__MINT__)
-  _DISKINFO drvInfo;
   unsigned long STRAM = 0, TTRAM = 0;
   char helpBuf[3][16];
 #endif
@@ -927,50 +899,8 @@ void Button_Stats(int btn)
   Print_in_window(162,y,buffer,STATS_DATA_COLOR,MC_Black);
   
   y+=8;
-#if defined(__WIN32__) || defined(WIN32)
-    {
-      ULARGE_INTEGER tailleU, totalbytes, totalfreebytes;
-      if (GetDiskFreeSpaceExA(Main.selector.Directory, &tailleU, &totalbytes, &totalfreebytes))
-      {
-        GFX2_Log(GFX2_DEBUG, "%s: %luMB free for GrafX2 (total %luMB, %luMB free)\n",
-                 Main.selector.Directory, (unsigned long)(tailleU.QuadPart >> 20),
-                 (unsigned long)(totalbytes.QuadPart >> 20), (unsigned long)(totalfreebytes.QuadPart >> 20));
-        mem_size = tailleU.QuadPart;
-      }
-      else
-      {
-        mem_size = 0;
-        GFX2_Log(GFX2_ERROR, "GetDiskFreeSpaceExA() failed\n");
-      }
-    }
-#elif defined(__linux__) || defined(__macosx__) || defined(__FreeBSD__) || defined(__SYLLABLE__) || defined(__AROS__) || defined(__OpenBSD__)
-    {
-      struct statfs disk_info;
-      statfs(Main.selector.Directory,&disk_info);
-      mem_size=(qword) disk_info.f_bfree * (qword) disk_info.f_bsize;
-    }
-#elif defined(__NetBSD__)
-    {
-      struct statvfs disk_info;
-      statvfs(Main.selector.Directory,&disk_info);
-      mem_size=(qword) disk_info.f_bfree * (qword) disk_info.f_bsize;
-    }
-#elif defined(__HAIKU__)
-   mem_size = haiku_get_free_space(Main.selector.Directory);
-#elif defined (__MINT__)
-   mem_size=0;
-   Dfree(&drvInfo,0);
-   //number of free clusters*sectors per cluster*bytes per sector;
-   // reports current drive
-   mem_size=drvInfo.b_free*drvInfo.b_clsiz*drvInfo.b_secsiz;
-#else
-    #define NODISKSPACESUPPORT
-    // Free disk space is only for shows. Other platforms can display 0.
-    #if !defined(__SWITCH__)
-    #warning "Missing code for your platform !!! Check and correct please :)"
-    #endif
-    mem_size=0;
-#endif
+
+  mem_size = GFX2_DiskFreeSpace(Main.selector.Directory);
 
   // Display free space
   if (mem_size != 0)
