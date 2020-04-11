@@ -124,7 +124,7 @@ ifdef COMSPEC
   PLATFORMFILES = bin/SDL.dll bin/SDL_image.dll
   endif
   ifeq ($(API),sdl2)
-  SDLC2ONFIG ?= $(shell which ../3rdparty/usr-win32/bin/sdl2-config || which sdl2-config)
+  SDL2CONFIG ?= $(shell which ../3rdparty/usr-win32/bin/sdl2-config || which sdl2-config)
   COPT += $(shell $(SDL2CONFIG) --cflags) $(TTFCOPT) $(JOYCOPT)
   LOPT += $(shell $(SDL2CONFIG) --libs) -lSDL2_image $(TTFLOPT)
   PLATFORMFILES = bin/SDL2.dll bin/SDL2_image.dll
