@@ -22,9 +22,6 @@
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
-#if defined(WIN32)
-#define _WIN32_WINNT 0x0500
-#endif
 #include <string.h>
 #ifndef _MSC_VER
 #include <strings.h>
