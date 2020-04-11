@@ -89,4 +89,9 @@ void Define_icon(void);
 /// set (system) mouse cursor position
 void Set_mouse_position(void);
 
+/**
+ * Get Screen dimensions
+ */
+int GFX2_GetScreenSize(int * width, int * height);
+
 #endif // SCREEN_H_INCLUDED

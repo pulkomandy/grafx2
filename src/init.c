@@ -50,9 +50,6 @@
 #if defined(USE_SDL)
 #include <SDL_byteorder.h>
 #endif
-#if defined(WIN32) && !defined(USE_SDL) && !defined(USE_SDL2)
-#include <windows.h>
-#endif
 #if defined (__MINT__)
   #include <mint/osbind.h>
 #endif
@@ -1585,9 +1582,9 @@ void Set_all_video_modes(void)
   }
 #elif defined(WIN32)
   {
-    int width = GetSystemMetrics(SM_CXSCREEN);
-    int height = GetSystemMetrics(SM_CYSCREEN);
-    if (width > 0 && height > 0)
+    int width = 0;
+    int height = 0;
+    if (GFX2_GetScreenSize(&width, &height))
     {
       Video_mode[Nb_video_modes].Width      = width;
       Video_mode[Nb_video_modes].Height     = height;

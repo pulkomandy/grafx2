@@ -693,3 +693,14 @@ void Set_mouse_position(void)
       GFX2_Log(GFX2_WARNING, "SetCursorPos(%ld, %ld) failed\n", pt.x, pt.y);
   }
 }
+
+int GFX2_GetScreenSize(int * width, int * height)
+{
+  if (width == NULL || height == NULL)
+    return 0;
+
+  *width = GetSystemMetrics(SM_CXSCREEN);
+  *height = GetSystemMetrics(SM_CYSCREEN);
+
+  return (*width > 0 && *height > 0);
+}
