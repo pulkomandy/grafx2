@@ -22,6 +22,11 @@
     You should have received a copy of the GNU General Public License
     along with Grafx2; if not, see <http://www.gnu.org/licenses/>
 */
+//////////////////////////////////////////////////////////////////////////////
+///@file osdep.c
+/// OS Dependend code
+//////////////////////////////////////////////////////////////////////////////
+
 #if defined(USE_SDL) || defined(USE_SDL2)
 #include <SDL.h>
 #elif !defined(WIN32)
@@ -59,7 +64,9 @@
 #endif
 
 #include "struct.h"
+#include "unicode.h"
 #include "gfx2log.h"
+#include "gfx2mem.h"
 
 dword GFX2_GetTicks(void)
 {
@@ -251,5 +258,41 @@ unsigned long Memory_free(void)
 #endif
   return 10*1024*1024;
 #endif
+}
+#endif
+
+#if defined(WIN32)
+/**
+ * Converts an unicode string to UTF8
+ * @param str the unicode string
+ * @param utf8len pointer to receive the utf8 string length (excluding null terminator)
+ * @return malloc'ed UTF8 string
+ */
+char * Unicode_to_utf8(const word * str, size_t * utf8len)
+{
+  size_t unicode_len = Unicode_strlen(str);
+  int len = WideCharToMultiByte(CP_UTF8, 0, str, unicode_len, NULL, 0, NULL, NULL);
+  if (len <= 0)
+  {
+    GFX2_Log(GFX2_WARNING, "WideCharToMultiByte() failed\n");
+    return NULL;
+  }
+  else
+  {
+    char * utf8 = (char *)GFX2_malloc(len+1);
+    if (utf8 == NULL)
+      return NULL;
+    if (WideCharToMultiByte(CP_UTF8, 0, str, unicode_len, utf8, len, NULL, NULL) <= 0)
+    {
+      DWORD error = GetLastError();
+      GFX2_Log(GFX2_WARNING, "WideCharToMultiByte() failed error=%u\n", error);
+      free(utf8);
+      return NULL;
+    }
+    if (utf8len != NULL)
+      *utf8len = (size_t)len;
+    utf8[len] = '\0';
+    return utf8;
+  }
 }
 #endif

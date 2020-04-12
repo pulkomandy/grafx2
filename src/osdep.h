@@ -54,4 +54,8 @@ void Atari_Memory_free(unsigned long *stRam, unsigned long *ttRam);
 unsigned long Memory_free(void);
 #endif
 
+#if defined(WIN32)
+char * Unicode_to_utf8(const word * str, size_t * utf8len);
+#endif
+
 #endif

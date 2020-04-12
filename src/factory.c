@@ -62,9 +62,6 @@ char * Bound_script[10];
 #include <limits.h> //for INT_MIN
 #include <string.h> // strncpy()
 #include <stdlib.h> // for atof()
-#if defined(WIN32)
-#include <windows.h>
-#endif
 #if defined(_MSC_VER)
 #define strdup _strdup
 #define putenv _putenv
@@ -2002,30 +1999,16 @@ int L_GetFileName(lua_State* L)
   else
   {
     // convert Filename_unicode to UTF8 (Lua strings are 8bits)
-    size_t unicode_len = Unicode_strlen(Main.backups->Pages->Filename_unicode);
-    int len = WideCharToMultiByte(CP_UTF8, 0, Main.backups->Pages->Filename_unicode, unicode_len, NULL, 0, NULL, NULL);
-    if (len <= 0)
+    size_t len = 0;
+    char * utf8name = Unicode_to_utf8(Main.backups->Pages->Filename_unicode, &len);
+    if (utf8name == NULL)
     {
-      GFX2_Log(GFX2_WARNING, "WideCharToMultiByte() failed\n");
       lua_pushstring(L, Main.backups->Pages->Filename);
     }
     else
     {
-      char * utf8name = (char *)GFX2_malloc(len);
-      if (utf8name == NULL)
-        lua_pushstring(L, Main.backups->Pages->Filename);
-      else
-      {
-        if (WideCharToMultiByte(CP_UTF8, 0, Main.backups->Pages->Filename_unicode, unicode_len, utf8name, len, NULL, NULL) > 0)
-          lua_pushlstring(L, utf8name, len);
-        else
-        {
-          DWORD error = GetLastError();
-          GFX2_Log(GFX2_WARNING, "WideCharToMultiByte() failed error=%u\n", error);
-          lua_pushstring(L, Main.backups->Pages->Filename);
-        }
-        free(utf8name);
-      }
+      lua_pushlstring(L, utf8name, len);
+      free(utf8name);
     }
   }
   // still using the "short name" directory path at the moment
