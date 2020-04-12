@@ -205,13 +205,6 @@ void Display_syntax(void)
 }
 
 // ---------------------------- Sortie impromptue ----------------------------
-void Warning_function(const char *message, const char *filename, int line_number, const char *function_name)
-{
-  GFX2_Log(GFX2_WARNING, "Warning in file %s, line %d, function %s : %s\n", filename, line_number, function_name, message);
-}
-
-
-// ---------------------------- Sortie impromptue ----------------------------
 void Error_function(int error_code, const char *filename, int line_number, const char *function_name)
 {
   T_Palette temp_palette;

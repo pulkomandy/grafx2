@@ -83,7 +83,7 @@ byte Get_Screen_pixel(int x, int y)
 {
   if (y < 0 || x < 0 || y >= Screen_SDL->h || x >= Screen_SDL->w)
   {
-    Warning("Get_Screen_pixel() coordinates out of bound");
+    GFX2_Log(GFX2_WARNING, "Get_Screen_pixel() coordinates out of bound\n");
     return 0;
   }
   return ((byte *)Screen_SDL->pixels)[x + y*(Screen_SDL->pitch)];
@@ -93,7 +93,7 @@ void Set_Screen_pixel(int x, int y, byte value)
 {
   if (y < 0 || x < 0 || y >= Screen_SDL->h || x >= Screen_SDL->w)
   {
-    Warning("Set_Screen_pixel() coordinates out of bound");
+    GFX2_Log(GFX2_WARNING, "Set_Screen_pixel() coordinates out of bound\n");
     return;
   }
   ((byte *)Screen_SDL->pixels)[x + y*(Screen_SDL->pitch)] = value;

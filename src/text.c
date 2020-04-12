@@ -748,7 +748,7 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   text_surface = New_GFX2_Surface(*width, *height);
   if (text_surface == NULL)
   {
-    Warning("Failed to allocate text surface");
+    GFX2_Log(GFX2_WARNING, "Failed to allocate text surface\n");
     SFont_FreeFont(font);
     return NULL;
   }

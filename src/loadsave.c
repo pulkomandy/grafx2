@@ -615,7 +615,7 @@ void Load_image(T_IO_Context *context)
     f = Open_file_read(context);
     if (f == NULL)
     {
-      Warning("Cannot open file for reading");
+      GFX2_Log(GFX2_WARNING, "Cannot open file for reading\n");
       Error(0);
       return;
     }

@@ -367,7 +367,7 @@ static byte * Decode_NewIcons(const byte * p, int bits, unsigned int * len)
       value = value - 0x51;
     else
     {
-      Warning("Invalid value");
+      GFX2_Log(GFX2_WARNING, "Decode_NewIcons(): Invalid value 0x%02x\n", value);
       break;
     }
     current_byte = (current_byte << 7) | value;
@@ -571,7 +571,7 @@ void Load_INFO(T_IO_Context * context)
                           palette_color_count++;
                         }
                         else
-                          Warning("Too much colors in new icons");
+                          GFX2_Log(GFX2_WARNING, "Too much colors in new icons\n");
                       }
                       palette_conv[i] = (byte)j;
                     }
@@ -629,7 +629,7 @@ void Load_INFO(T_IO_Context * context)
                           palette_color_count++;
                         }
                         else
-                          Warning("Too much colors in new icons");
+                          GFX2_Log(GFX2_WARNING, "Too much colors in new icons\n");
                       }
                       palette_conv[i+palette_continues] = (byte)j;
                     }
@@ -1109,7 +1109,7 @@ static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int co
           if (0 == memcmp(png_header, "\x89PNG", 4))
           {
             // NO PNG Support
-            Warning("PNG Signature : Compiled without libpng support");
+            GFX2_Log(GFX2_WARNING, "PNG Signature : Compiled without libpng support\n");
             File_error = 2;
           }
 #endif
@@ -1122,7 +1122,7 @@ static void Load_BMP_Pixels(T_IO_Context * context, FILE * file, unsigned int co
       }
       break;
     default:
-      Warning("Unknown compression type");
+      GFX2_Log(GFX2_WARNING, "BMP: Unknown compression type %d\n", compression);
   }
 }
 
@@ -1227,7 +1227,7 @@ void Load_BMP(T_IO_Context * context)
     }
     else
     {
-      Warning("Unknown BMP type");
+      GFX2_Log(GFX2_WARNING, "Unknown BMP type Size_2=%u\n", header.Size_2);
       File_error = 1;
     }
   }
@@ -1629,7 +1629,7 @@ void Load_ICO(T_IO_Context * context)
               // check that real_height == entry->height
               if (real_height != entry->height)
               {
-                Warning("Load_ICO() : real_height != entry->height");
+                GFX2_Log(GFX2_WARNING, "Load_ICO() : real_height(%hd) != entry->height(%hd)\n", real_height, entry->height);
               }
 
               // Image 16/24/32 bits
@@ -1694,7 +1694,7 @@ void Save_ICO(T_IO_Context * context)
   if (context->Width > 256 || context->Height > 256)
   {
     File_error=1;
-    Warning(".ICO files can handle images up to 256x256");
+    GFX2_Log(GFX2_WARNING, ".ICO files can handle images up to 256x256\n");
     return;
   }
 
@@ -2446,7 +2446,7 @@ void Load_SCx(T_IO_Context * context)
       {
         if (SCx_header.StorageType == 0x80)
         {
-          Warning("Compressed SCx files are not supported");
+          GFX2_Log(GFX2_WARNING, "Compressed SCx files are not supported\n");
           File_error = 2;
         }
         else

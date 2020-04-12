@@ -70,7 +70,7 @@ void Set_GFX2_Surface_pixel(T_GFX2_Surface * surface, int x, int y, byte value)
   if (surface == NULL) return;
   if (x<0 || x>=surface->w || y<0 || y>=surface->h)
   {
-    Warning("Set_GFX2_Surface_pixel() out of bound access");
+    GFX2_Log(GFX2_WARNING, "Set_GFX2_Surface_pixel() out of bound access (%d,%d)\n", x, y);
     return;
   }
   surface->pixels[x + surface->w * y] = value;

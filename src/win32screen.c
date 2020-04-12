@@ -427,7 +427,7 @@ int Init_Win32(HINSTANCE hInstance, HINSTANCE hPrevInstance)
 	wc.lpszMenuName = NULL;
 	wc.lpszClassName = TEXT("grafx2");
 	if (!RegisterClass(&wc)) {
-		Warning("RegisterClass failed\n");
+		GFX2_Log(GFX2_WARNING, "RegisterClass failed\n");
     Error(ERROR_INIT);
 		return 0;
 	}
@@ -457,7 +457,7 @@ static int Video_AllocateDib(int width, int height)
 	dc = GetDC(NULL);
 	Windows_DIB = CreateDIBSection(dc, bi, DIB_RGB_COLORS, &Windows_Screen, NULL, 0);
 	if (Windows_DIB == NULL) {
-		Warning("CreateDIBSection failed");
+		GFX2_Log(GFX2_WARNING, "CreateDIBSection failed\n");
 		return -1;
 	}
 	ReleaseDC(NULL, dc);

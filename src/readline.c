@@ -705,7 +705,7 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
       }
       else
       {
-        Warning("Unicode conversion of input text failed");
+        GFX2_Log(GFX2_WARNING, "Unicode conversion of input text failed\n");
         unicode_text[0] = 0;
       }
 #elif defined(WIN32)

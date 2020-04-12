@@ -34,6 +34,8 @@
 #include "io.h"
 #include "errors.h"
 #include "unicode.h"
+#include "gfx2mem.h"
+#include "gfx2log.h"
 
 #include "recoil.h"
 
@@ -82,17 +84,16 @@ void Load_Recoil_Image(T_IO_Context *context)
     File_error = 1;
     return;
   }
-  file_content = malloc(file_length);
+  file_content = GFX2_malloc(file_length);
   if (file_content == NULL)
   {
-    Warning("Memory allocation error");
     fclose(f);
     File_error = 1;
     return;
   }
   if (!Read_bytes(f, file_content, file_length))
   {
-    Warning("Read error");
+    GFX2_Log(GFX2_WARNING, "Load_Recoil_Image(): Read error on file\n");
     fclose(f);
     free(file_content);
     File_error = 1;
@@ -116,7 +117,7 @@ void Load_Recoil_Image(T_IO_Context *context)
       // ie .DEE instead of .deep
       size_t i;
       size_t len = Unicode_strlen(context->File_name_unicode);
-      tempfilename = (char *)malloc(len + 1);
+      tempfilename = (char *)GFX2_malloc(len + 1);
       for (i = 0; i < len; i++)
         tempfilename[i] = (context->File_name_unicode[i] < 256) ? (char)context->File_name_unicode[i] : '_';
       tempfilename[i] = '\0';
@@ -143,10 +144,9 @@ void Load_Recoil_Image(T_IO_Context *context)
         ratio = PIXEL_WIDE;
       else if(x_ratio == 1 && y_ratio > 1)
         ratio = PIXEL_TALL;
-      pixels = malloc(width * height);
+      pixels = GFX2_malloc(width * height);
       if (pixels == NULL)
       {
-        Warning("Memory allocation error");
         File_error = 1;
       }
       else
