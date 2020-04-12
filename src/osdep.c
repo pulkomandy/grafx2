@@ -311,6 +311,22 @@ char * Unicode_to_utf8(const word * str, size_t * utf8len)
     return utf8;
   }
 }
+
+/**
+ * UTF8 to Unicode (16bits per character).
+ * use MultiByteToWideChar(CP_UTF8, ...) under WIN32.
+ * Note :  For UTF-8, dwFlags must be set to either 0 or MB_ERR_INVALID_CHARS.
+ */
+void Unicode_from_utf8(const char * utf8, word * unicode, size_t unicodelen)
+{
+  int r = MultiByteToWideChar(CP_UTF8, 0, utf8, -1, (LPWSTR)unicode, unicodelen);
+  if (r == 0)
+  {
+    GFX2_Log(GFX2_ERROR, "MultiByteToWideChar(CP_UTF8, \"%s\", ...) failed with error #%u\n", utf8, GetLastError());
+    unicode[0] = 0;
+  }
+}
+
 #endif
 
 /**

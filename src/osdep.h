@@ -56,6 +56,7 @@ unsigned long Memory_free(void);
 
 #if defined(WIN32)
 char * Unicode_to_utf8(const word * str, size_t * utf8len);
+void Unicode_from_utf8(const char * utf8, word * unicode, size_t unicodelen);
 
 void GFX2_GetShortPathName(char * shortname, size_t shortname_len, const word * longname);
 #endif
