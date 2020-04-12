@@ -574,3 +574,33 @@ bye:
   return NULL;
   #endif
 }
+
+#if defined(WIN32)
+void GFX2_GetShortPathName(char * shortname, size_t shortname_len, const word * longname)
+{
+  DWORD short_len = GetShortPathNameW((WCHAR *)longname, NULL, 0);
+  if (short_len > 0)
+  {
+    WCHAR * temp_str = (WCHAR *)GFX2_malloc(short_len * sizeof(WCHAR));
+    short_len = GetShortPathNameW((WCHAR *)longname, temp_str, short_len);
+    if (short_len > 0)
+    {
+      DWORD i;
+      for (i = 0; i < short_len && temp_str[i] != 0; i++)
+        shortname[i] = temp_str[i];
+      shortname[i] = '\0';
+    }
+    free(temp_str);
+  }
+  if (short_len == 0)
+  {
+    // generate a temporary ansi name
+    int i;
+    for (i = 0; (i < (int)shortname_len - 1) && (longname[i] != 0); i++)
+    {
+      shortname[i] = (longname[i] < 256) ? (byte)longname[i] : '_';
+    }
+    shortname[i] = '\0';
+  }
+}
+#endif

@@ -58,6 +58,7 @@
 #include "struct.h"
 #include "global.h"
 #include "misc.h"
+#include "osdep.h"
 #include "errors.h"
 #include "io.h"
 #include "windows.h"
@@ -1917,30 +1918,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
 #endif
         {
 #if defined(WIN32)
-          DWORD short_len = GetShortPathNameW((WCHAR *)filename_unicode, NULL, 0);
-          if (short_len > 0)
-          {
-            WCHAR * temp_str = (WCHAR *)malloc(short_len * sizeof(WCHAR));
-            short_len = GetShortPathNameW((WCHAR *)filename_unicode, temp_str, short_len);
-            if (short_len > 0)
-            {
-              DWORD i;
-              for (i = 0; i < short_len && temp_str[i] != 0; i++)
-                filename_ansi[i] = temp_str[i];
-              filename_ansi[i] = '\0';
-            }
-            free(temp_str);
-          }
-          if (short_len == 0)
-          {
-            // generate a temporary ansi name
-            int i;
-            for (i = 0; (i < (int)sizeof(filename_ansi) - 1) && (filename_unicode[i] != 0); i++)
-            {
-              filename_ansi[i] = (filename_unicode[i] < 256) ? (byte)filename_unicode[i] : '_';
-            }
-            filename_ansi[i] = '\0';
-          }
+          GFX2_GetShortPathName(filename_ansi, sizeof(filename_ansi), filename_unicode);
 #elif defined(ENABLE_FILENAMES_ICONV)
           /* convert back from UTF16 to UTF8 */
           char * input = (char *)filename_unicode;
