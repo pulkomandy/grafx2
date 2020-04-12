@@ -34,6 +34,7 @@
 #include "struct.h"
 #include "global.h"
 #include "misc.h"
+#include "osdep.h"
 #include "errors.h"
 #include "const.h"
 #include "screen.h"
@@ -44,15 +45,6 @@
 #include "unicode.h"
 #include "keycodes.h"
 
-#ifdef WIN32
-#include <windows.h>
-
-#elif defined __HAIKU__
-#include "haiku.h"
-#elif defined(__AROS__)
-#include <proto/iffparse.h>
-#include <datatypes/textclass.h>
-#endif
 #if defined(__ANDROID__)
 #include <SDL_screenkeyboard.h>
 #endif
@@ -63,14 +55,6 @@
 #if _MSC_VER < 1900
 #define snprintf _snprintf
 #endif
-#endif
-
-#if defined(USE_X11)
-#include <X11/Xlib.h>
-extern Display * X11_display;
-extern Window X11_window;
-#elif defined(__macosx__)
-const char * get_paste_board(void);
 #endif
 
 // Virtual keyboard is ON by default on these platforms:
@@ -316,267 +300,6 @@ void Init_virtual_keyboard(word y_pos, word keyboard_width, word keyboard_height
   {
     Window_rectangle(Window_width-2,2,2,Window_height-2, MC_Black);
   }
-}
-
-
-//! Get clipboard text content.
-//! Inspired from http://www.libsdl.org/projects/scrap/
-//! @param unicode NULL for pure ANSI working, or a pointer to get Unicode text data
-//! that should be free()'d by the caller
-//! @return a ANSI C string that should be free()'d by the caller
-static char* getClipboard(word * * unicode)
-{
-#ifdef WIN32
-    char* dst = NULL;
-    if (OpenClipboard(GFX2_Get_Window_Handle()))
-      {
-        HANDLE hMem;
-        if ( IsClipboardFormatAvailable(CF_TEXT) )
-        {
-          char *src;
-
-          hMem = GetClipboardData(CF_TEXT);
-          if ( hMem != NULL )
-          {
-            src = (char *)GlobalLock(hMem);
-            dst = strdup(src);
-            GlobalUnlock(hMem);
-          }
-        }
-        if (unicode != NULL && IsClipboardFormatAvailable(CF_UNICODETEXT) )
-        {
-          word * src;
-          hMem = GetClipboardData(CF_UNICODETEXT);
-          if ( hMem != NULL )
-          {
-            src = (word *)GlobalLock(hMem);
-            *unicode = Unicode_strdup(src);
-            GlobalUnlock(hMem);
-          }
-        }
-        CloseClipboard();
-      }
-    return dst;
-  #elif defined(__AROS__)
-
-    struct IFFHandle *iff = NULL;
-    struct ContextNode *cn;
-    long error=0, unitnumber=0;
-    char *dst = NULL;
-
-    if (!(iff = AllocIFF ()))
-    {
-      goto bye;
-    }
-
-    if (!(iff->iff_Stream = (IPTR) OpenClipboard (unitnumber)))
-    {
-      goto bye;
-    }
-
-    InitIFFasClip (iff);
-
-    if ((error = OpenIFF (iff, IFFF_READ)) != 0)
-    {
-      goto bye;
-    }
-
-    if ((error = StopChunk(iff, ID_FTXT, ID_CHRS)) != 0)
-    {
-      goto bye;
-    }
-
-    while(1)
-    {
-      error = ParseIFF(iff,IFFPARSE_SCAN);
-      if (error) break; // we're reading only the 1st chunk
-
-      cn = CurrentChunk(iff);
-
-      if (cn && (cn->cn_Type == ID_FTXT) && (cn->cn_ID == ID_CHRS))
-      {
-        if ((dst = malloc(cn->cn_Size + 1)) != NULL)
-        {
-          dst[0] = '\0';
-          if ((ReadChunkBytes(iff,dst,cn->cn_Size)) > 0)
-          {
-            dst[cn->cn_Size] = '\0';
-          }
-        }
-      }
-    }
-
-bye:
-    if (iff)
-    {
-      CloseIFF (iff);
-
-      if (iff->iff_Stream)
-        CloseClipboard ((struct ClipboardHandle *)iff->iff_Stream);
-      FreeIFF (iff);
-    }
-
-    return dst;
-
-  #elif defined __HAIKU__
-  if (unicode)
-    *unicode = NULL;
-  return haiku_get_clipboard();
-  #elif defined(USE_X11) || defined(__macosx__) || defined(USE_SDL2) || (defined(USE_SDL) && defined(SDL_VIDEO_DRIVER_X11) && !defined(NO_X11))
-  if (unicode)
-    *unicode = NULL;
-    #if defined(USE_SDL2)
-  if (!SDL_HasClipboardText())
-  {
-    return NULL;
-  }
-  else
-  {
-    char * utf8_str = SDL_GetClipboardText();
-    if (utf8_str != NULL)
-    {
-    #elif defined(USE_X11) || (defined(USE_SDL) && defined(SDL_VIDEO_DRIVER_X11) && !defined(NO_X11))
-  {
-    int i;
-    Atom selection;
-    Window selection_owner;
-#if defined(SDL_VIDEO_DRIVER_X11)
-    Display * X11_display;
-    Window X11_window;
-    int old_wmevent_state;
-
-    if (!GFX2_Get_X11_Display_Window(&X11_display, &X11_window))
-    {
-      GFX2_Log(GFX2_ERROR, "Failed to get X11 display and window\n");
-      return NULL;
-    }
-    if (X11_display == NULL)
-    {
-      char video_driver_name[32];
-      GFX2_Log(GFX2_WARNING, "X11 display is NULL. X11 is needed for Copy/Paste. SDL video driver is currently %s\n", SDL_VideoDriverName(video_driver_name, sizeof(video_driver_name)));
-      return NULL;
-    }
-#endif
-    selection = XInternAtom(X11_display, "CLIPBOARD", False);
-    selection_owner = XGetSelectionOwner(X11_display, selection);
-
-    if (selection_owner == None)
-    {
-      selection = XInternAtom(X11_display, "PRIMARY", False);
-      selection_owner = XGetSelectionOwner(X11_display, selection);
-    }
-    if (selection_owner == None)
-      return NULL;
-#if defined(USE_SDL)
-    old_wmevent_state = SDL_EventState(SDL_SYSWMEVENT, SDL_QUERY);
-    SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);
-#endif
-
-    XConvertSelection(X11_display, selection, XInternAtom(X11_display, "UTF8_STRING", False),
-                      XInternAtom(X11_display, "GFX2_CLIP", False), /* Property */
-                      X11_window, CurrentTime);
-    // wait for the event to be received
-    for(i = 0; X11_clipboard == NULL && i < 10; i++)
-    {
-      Get_input(20);
-    }
-#if defined(USE_SDL)
-    SDL_EventState(SDL_SYSWMEVENT, old_wmevent_state);
-#endif
-    if (X11_clipboard != NULL)
-    {
-      char * utf8_str = X11_clipboard;
-      X11_clipboard = NULL;
-      X11_clipboard_size = 0;
-      X11_clipboard_type = X11_CLIPBOARD_NONE;
-  #else
-  {
-    // mac OS without X11
-    const char * utf8_str = get_paste_board();
-    if (utf8_str != NULL)
-    {
-  #endif
-      // UTF8 -> UTF16 and UTF8 -> ANSI conversions
-#if defined(ENABLE_FILENAMES_ICONV)
-      if (unicode != NULL)
-      {
-        char * input = (char *)utf8_str;
-        size_t inbytesleft = strlen(utf8_str);
-        char * output;
-        size_t outbytesleft;
-        size_t r;
-        *unicode = (word *)malloc(2 * inbytesleft + 2);
-        if (*unicode != NULL)
-        {
-          output = (char *)*unicode;
-          outbytesleft = 2 * inbytesleft;
-          r = iconv(cd_utf16, &input, &inbytesleft, &output, &outbytesleft);
-          if (r != (size_t)-1)
-          {
-            output[1] = output[0] = '\0';
-          }
-          else
-          {
-            Warning("Unicode conversion of clipboard text failed");
-            free(*unicode);
-            *unicode = NULL;
-          }
-        }
-      }
-      {
-        char * ansi_str;
-        char * input = (char *)utf8_str;
-        size_t inbytesleft = strlen(utf8_str);
-        char * output;
-        size_t outbytesleft;
-        size_t r;
-        ansi_str = (char *)malloc(inbytesleft + 1);
-        if (ansi_str != NULL)
-        {
-          output = ansi_str;
-          outbytesleft = inbytesleft;
-          r = iconv(cd, &input, &inbytesleft, &output, &outbytesleft);
-          if (r != (size_t)-1)
-          {
-            *output = '\0';
-#if defined(USE_X11)
-            free(utf8_str);
-#elif defined(USE_SDL2)
-            SDL_free(utf8_str);
-#endif
-            return ansi_str;
-          }
-          else
-          {
-            Warning("ANSI conversion of clipboard text failed");
-            free(ansi_str);
-          }
-        }
-      }
-#endif
-      // we can get there if the charset conversions failed
-      // return the uf8_string, that's better than nothing
-#if defined(USE_X11)
-      return utf8_str;
-#elif defined(USE_SDL2)
-      {
-        char * return_str = strdup(utf8_str);
-        SDL_free(utf8_str);
-        return return_str;
-      }
-#else
-      // mac OS without X11
-      return strdup(utf8_str);
-#endif
-    }
-  }
-  return NULL;
-  #else
-  // Not implemented (no standard) on Linux systems. Maybe someday...
-  if (unicode)
-    *unicode = NULL;
-  return NULL;
-  #endif
 }
 
 
@@ -905,7 +628,7 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
           if (str_unicode != NULL)
           {
             word * data_unicode = NULL;
-            char * data = getClipboard(&data_unicode);
+            char * data = GFX2_GetTextClipboard(&data_unicode);
             if (data_unicode != NULL)
             {
               // ignore ANSI data, use Unicode
@@ -926,7 +649,7 @@ byte Readline_ex_unicode(word x_pos, word y_pos, char * str, word * str_unicode,
           }
           else
           {
-            char* data = getClipboard(NULL);
+            char* data = GFX2_GetTextClipboard(NULL);
             if (data == NULL)
               continue; // No clipboard data
             Cleanup_string(data, input_type);

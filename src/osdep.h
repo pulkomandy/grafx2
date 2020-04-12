@@ -58,4 +58,6 @@ unsigned long Memory_free(void);
 char * Unicode_to_utf8(const word * str, size_t * utf8len);
 #endif
 
+char* GFX2_GetTextClipboard(word * * unicode);
+
 #endif
