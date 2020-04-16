@@ -685,7 +685,7 @@ void Define_icon(void)
       break;
 
     // Set it
-		SetClassLongPtr(GFX2_Get_Window_Handle(), GCL_HICONSM, (LONG_PTR)hicon);
+		SetClassLongPtr(GFX2_Get_Window_Handle(), GCLP_HICONSM, (LONG_PTR)hicon);
 
 
     //
@@ -721,7 +721,7 @@ void Define_icon(void)
       break;
 
     // Set it
-		SetClassLongPtr(GFX2_Get_Window_Handle(), GCL_HICON, (LONG_PTR)hicon);
+		SetClassLongPtr(GFX2_Get_Window_Handle(), GCLP_HICON, (LONG_PTR)hicon);
 
 
 		// Success
