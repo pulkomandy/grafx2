@@ -27,6 +27,7 @@
  * @file generatedoc.c
  * HTML doc generator
  */
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -232,7 +233,7 @@ static const char * Export_help_table(FILE * f, unsigned int page)
 
     if (table[index].Line_type == 'K')
     {
-      char keytmp[64];
+      char keytmp[90];
       snprintf(keytmp, sizeof(keytmp), "<em>%s</em>", Keyboard_default_shortcut(table[index].Line_parameter));
       fprintf(f, table[index].Text, keytmp);
     }
@@ -324,15 +325,24 @@ static int Export_help(const char * path)
 {
   FILE * f;
   FILE * findex;
-  char filename[MAX_PATH_CHARACTERS];
+  char * filename;
+  size_t filename_size;
   unsigned int i;
 
-  snprintf(filename, sizeof(filename), "%s/index.html", path);
+  filename_size = strlen(path) + 64;
+  filename = malloc(filename_size);
+  if (filename == NULL)
+  {
+    fprintf(stderr, "Failed to allocate %lu bytes\n", (unsigned long)filename_size);
+    return -1;
+  }
+  snprintf(filename, filename_size, "%s/index.html", path);
   //GFX2_Log(GFX2_INFO, "Creating %s\n", filename);
   findex = fopen(filename, "w");
   if (findex == NULL)
   {
     fprintf(stderr, "Cannot save index HTML file %s\n", filename);
+    free(filename);
     return -1;
   }
   fprintf(findex, "<!DOCTYPE html>\n");
@@ -364,12 +374,13 @@ static int Export_help(const char * path)
   for (i = 0; i < sizeof(Help_section)/sizeof(Help_section[0]); i++)
   {
     const char * title;
-    snprintf(filename, sizeof(filename), "%s/grafx2_%02d.html", path, i);
+    snprintf(filename, filename_size, "%s/grafx2_%02d.html", path, i);
     f = fopen(filename, "w");
     if (f == NULL)
     {
       fprintf(stderr, "Cannot save HTML file %s\n", filename);
       fclose(findex);
+      free(filename);
       return -1;
     }
     //GFX2_Log(GFX2_INFO, "Saving %s\n", filename);
@@ -390,7 +401,7 @@ static int Export_help(const char * path)
   fprintf(findex, "</body>\n");
   fclose(findex);
 
-  snprintf(filename, sizeof(filename), "%s/grafx2.css", path);
+  snprintf(filename, filename_size, "%s/grafx2.css", path);
   f = fopen(filename, "w");
   if (f != NULL)
   {
@@ -435,7 +446,7 @@ static int Export_help(const char * path)
     fclose(f);
   }
 
-  snprintf(filename, sizeof(filename), "%s/grafx2.js", path);
+  snprintf(filename, filename_size, "%s/grafx2.js", path);
   f = fopen(filename, "w");
   if (f != NULL)
   {
@@ -470,5 +481,6 @@ static int Export_help(const char * path)
                "}\n");
     fclose(f);
   }
+  free(filename);
   return 0;
 }
