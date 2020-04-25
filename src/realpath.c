@@ -69,7 +69,7 @@
         
         if (chdir(path)) {
             if (errno == ENOTDIR) {
-                #if defined(WIN32) || defined(__MORPHOS__) || defined(__amigaos__) || defined(__SWITCH__)
+                #if defined(__MORPHOS__) || defined(__amigaos__) || defined(__SWITCH__)
                     // No symbolic links and no readlink()
                     l = -1;
                 #else

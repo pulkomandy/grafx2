@@ -1,4 +1,10 @@
 ; vim:ts=8 sw=8:
+;  Grafx2 - The Ultimate 256-color bitmap paint program
+;
+;	Copyright owned by various GrafX2 authors, see COPYRIGHT.txt for details.
+;
+; This code is embedded in C64 images saved by GrafX2, it can be distributed
+; and modified without any restrictions.
 .word $0801
 .org  $0801
 	.word next, 1911	; next basic line and line number

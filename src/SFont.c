@@ -4,6 +4,7 @@
     Copyright (C) 2003 Karl Bartel
 
     GrafX2 Modification
+    Copyright (c) 2011 Yves Rizoud
     Copyright (c) 2018 Thomas Bernard
 
     License: GPL or LGPL (at your choice)
@@ -27,6 +28,13 @@
     12307 Berlin
     GERMANY
     karlb@gmx.net
+*/
+
+/* This file is based on SFont 2.03 was modified for GrafX2:
+  - SDL2 support
+  - Automatic space width detection
+  - Handling of missing lowercase characters
+  - Multiline support
 */
 
 #include <assert.h>

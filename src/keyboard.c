@@ -2,10 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
-    Copyright 2010 Alexander Filyanov
-    Copyright 2009 Franck Charlet
-    Copyright 2008 Yves Rizoud
-    Copyright 1996-2001 Sunset Design (Guillaume Dorme & Karl Maritaud)
+	Copyright owned by various GrafX2 authors, see COPYRIGHT.txt for details.
 
     Grafx2 is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
