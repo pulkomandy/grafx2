@@ -47,10 +47,12 @@
  * https://pulkomandy.tk/projects/GrafX2.
  *
  * This Doxygen documentation is browsable on
- * https://pulkomandy.tk/projects/GrafX2/doxygen/ (updated nightly).
+ * https://pulkomandy.tk/projects/GrafX2/doxygen/ (updated nightly) or
+ * https://grafx2.gitlab.io/grafX2/doxygen/html/
  *
  * The inline help is also available here :
- * http://pulkomandy.tk/GrafX2/
+ * http://pulkomandy.tk/GrafX2/ or
+ * https://grafx2.gitlab.io/grafX2/htmldoc/
  */
 /// declare global variables in main.c
 #define GLOBAL_VARIABLES
