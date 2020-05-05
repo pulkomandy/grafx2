@@ -51,8 +51,8 @@ unsigned int MOTO_MAP_pack(byte * packed, const byte * unpacked, unsigned int un
 int Test_MOTO_MAP_pack(char * errmsg)
 {
   unsigned int i, j;
-  byte buffer[1024];
-  byte buffer2[1024];
+  byte buffer[256];
+  byte buffer2[256];
   unsigned int packed_len, unpacked_len, original_len;
   static const char * tests[] = {
     "12345AAAAAAA@",    // best : 00 05 "12345" 07 'A' 01 '@' : 11
