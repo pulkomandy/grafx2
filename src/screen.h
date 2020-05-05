@@ -102,6 +102,10 @@ int GFX2_GetScreenSize(int * width, int * height);
 #define GFX2_MB_INFO    MB_OK
 #define GFX2_MB_ERROR   (MB_OK|MB_ICONERROR)
 #define GFX2_MB_WARNING (MB_OK|MB_ICONWARNING)
+#elif defined(__macosx__)
+#define GFX2_MB_INFO    (unsigned)kCFUserNotificationPlainAlertLevel
+#define GFX2_MB_ERROR   (unsigned)kCFUserNotificationStopAlertLevel
+#define GFX2_MB_WARNING (unsigned)kCFUserNotificationCautionAlertLevel
 #else
 #define GFX2_MB_INFO    1
 #define GFX2_MB_ERROR   2

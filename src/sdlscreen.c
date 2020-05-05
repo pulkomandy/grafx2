@@ -34,6 +34,9 @@
 #ifndef __GP2X__
     #include <SDL_syswm.h>
 #endif
+#if defined(__macosx__)
+#import <CoreFoundation/CoreFoundation.h>
+#endif
 
 #include "global.h"
 #include "sdlscreen.h"
@@ -803,6 +806,20 @@ int GFX2_MessageBox(const char * text, const char * caption, unsigned int type)
   return SDL_ShowSimpleMessageBox(type, caption, text, Window_SDL);
 #elif defined(WIN32)
   return MessageBoxA(GFX2_Get_Window_Handle(), text, caption, type);
-#endif
+#elif defined(__macosx__)
 // TODO : display for MacOS : http://blog.jorgearimany.com/2010/05/messagebox-from-windows-to-mac.html
+  int r;
+  CFOptionFlags result;
+  CFStringRef text_ref = CFStringCreateWithCString(NULL, text, strlen(text));
+  CFStringRef caption_ref = CFStringCreateWithCString(NULL, caption, strlen(text));
+  r = CFUserNotificationDisplayAlert(0, (CFOptionFlags)type,
+                                 NULL, NULL, NULL,
+                                 caption_ref, text_ref,
+                                 NULL, NULL, NULL, &result);
+  CFRelease(text_ref);
+  CFRelease(caption_ref);
+  return (r == 0);
+#else
+  return 0;
+#endif
 }
