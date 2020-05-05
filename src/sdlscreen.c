@@ -796,3 +796,13 @@ void Set_mouse_position(void)
   SDL_WarpMouseInWindow(NULL, Mouse_X*Pixel_width, Mouse_Y*Pixel_height);
 #endif
 }
+
+int GFX2_MessageBox(const char * text, const char * caption, unsigned int type)
+{
+#if defined(USE_SDL2)
+  return SDL_ShowSimpleMessageBox(type, caption, text, Window_SDL);
+#elif defined(WIN32)
+  return MessageBoxA(GFX2_Get_Window_Handle(), text, caption, type);
+#endif
+// TODO : display for MacOS : http://blog.jorgearimany.com/2010/05/messagebox-from-windows-to-mac.html
+}

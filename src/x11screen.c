@@ -342,3 +342,123 @@ void Set_mouse_position(void)
                0, 0, 0, 0,
                Mouse_X * Pixel_width, Mouse_Y * Pixel_height);
 }
+
+int GFX2_MessageBox(const char * text, const char * caption, unsigned int type)
+{
+  const char * p;
+  const char * lf;
+  int line_count = 0;
+  int s;
+  Window win, parent;
+  GC gc;
+  int quit = 0;
+  Atom wmDelete, atoms[2];
+  char * atom_name;
+
+  if (X11_display == NULL)
+    X11_display = XOpenDisplay(NULL);// NULL is equivalent to getenv("DISPLAY")
+  if (X11_display == NULL)
+  {
+    GFX2_Log(GFX2_ERROR, "X11: cannot open display\n");
+    return 0;
+  }
+  for (p = text; p != NULL; p = strchr(p, '\n'))
+  {
+    p++;
+    line_count++;
+  }
+  GFX2_Log(GFX2_DEBUG, "GFX2_MessageBox() text line_count = %d\n", line_count);
+  s = DefaultScreen(X11_display);
+  parent = X11_window ? X11_window : RootWindow(X11_display, s);
+  win = XCreateSimpleWindow(X11_display, parent, 0, 0, 480, line_count * 16, 1,
+                            BlackPixel(X11_display, s), WhitePixel(X11_display, s));
+  {
+    XSizeHints * hints = XAllocSizeHints();
+    hints->min_width = hints->max_width = 480;
+    hints->min_height = hints->max_height = line_count * 16;
+    hints->flags = PMinSize | PMaxSize;
+    XSetWMNormalHints(X11_display, win, hints);
+    XFree(hints);
+  }
+  gc = XCreateGC(X11_display, win, 0, NULL);
+  XSelectInput(X11_display, win, ExposureMask | ButtonPressMask | ButtonReleaseMask | KeyPressMask | KeyReleaseMask);
+  wmDelete = XInternAtom(X11_display, "WM_DELETE_WINDOW", True);
+  XSetWMProtocols(X11_display, win, &wmDelete, 1);
+  atoms[0] = XInternAtom(X11_display, "_NET_WM_WINDOW_TYPE_DIALOG", False);
+  XChangeProperty(X11_display, win, XInternAtom(X11_display, "_NET_WM_WINDOW_TYPE", False), XA_ATOM, 32, PropModeReplace, (unsigned char *)atoms, 1);
+  atoms[0] = XInternAtom(X11_display, "_NET_WM_ACTION_MOVE", False);
+  atoms[1] = XInternAtom(X11_display, "_NET_WM_ACTION_CLOSE", False);
+  XChangeProperty(X11_display, win, XInternAtom(X11_display, "_NET_WM_ALLOWED_ACTIONS", False), XA_ATOM, 32, PropModeReplace, (unsigned char *)atoms, 2);
+  XMapWindow(X11_display, win);
+  XStoreName(X11_display, win, caption);
+  XFlush(X11_display);
+
+  while (!quit)
+  {
+    XEvent e;
+    XNextEvent(X11_display, &e);
+    switch (e.type)
+    {
+      case KeyPress:
+      case ButtonPress:
+        break;
+      case KeyRelease:
+        {
+          KeySym sym;
+          sym = XkbKeycodeToKeysym(X11_display, e.xkey.keycode, 0, 0);
+          GFX2_Log(GFX2_DEBUG, "keyrelease code= %3d state=0x%08x sym = 0x%04lx %s\n",
+                     e.xkey.keycode, e.xkey.state, sym, XKeysymToString(sym));
+          if (sym == XK_Escape)
+            quit = 1;
+        }
+        break;
+      case ButtonRelease:
+        quit = 1;
+        break;
+      case Expose:
+        {
+          int len;
+          int y = 16;
+          // print text
+          for (p = text; p != NULL; p = lf)
+          {
+            int x = 0;
+            while (*p == '\t')
+            {
+              p++;
+              x += 32;
+            }
+            lf = strchr(p, '\n');
+            if (lf == NULL)
+              len = (int)strlen(p);
+            else
+            {
+              len = (int)(lf - p);
+              lf++;
+            }
+            XDrawString(X11_display, win, gc, x, y, p, len);
+            y += 16;
+          }
+        }
+        break;
+      case ClientMessage:
+        atom_name = XGetAtomName(X11_display, e.xclient.message_type);
+        GFX2_Log(GFX2_DEBUG, "ClientMessage type %s\n", atom_name);
+        XFree(atom_name);
+        if (e.xclient.message_type == XInternAtom(X11_display, "WM_PROTOCOLS", False))
+        {
+          atom_name = XGetAtomName(X11_display, (Atom)e.xclient.data.l[0]);
+          GFX2_Log(GFX2_DEBUG, "  l[0] = %s\n", atom_name);
+          XFree(atom_name);
+          if ((Atom)e.xclient.data.l[0] == wmDelete)
+            quit = 1;
+        }
+        break;
+      default:
+        GFX2_Log(GFX2_DEBUG, "X11 event type %d\n", e.type);
+    }
+  }
+  XFreeGC(X11_display, gc);
+  XDestroyWindow(X11_display, win);
+  return 1;
+}

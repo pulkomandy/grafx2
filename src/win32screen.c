@@ -704,3 +704,8 @@ int GFX2_GetScreenSize(int * width, int * height)
 
   return (*width > 0 && *height > 0);
 }
+
+int GFX2_MessageBox(const char * text, const char * caption, unsigned int type)
+{
+  return MessageBoxA(GFX2_Get_Window_Handle(), text, caption, type);
+}

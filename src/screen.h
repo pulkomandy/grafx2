@@ -94,4 +94,23 @@ void Set_mouse_position(void);
  */
 int GFX2_GetScreenSize(int * width, int * height);
 
+#if defined(USE_SDL2)
+#define GFX2_MB_INFO    SDL_MESSAGEBOX_INFORMATION
+#define GFX2_MB_ERROR   SDL_MESSAGEBOX_ERROR
+#define GFX2_MB_WARNING SDL_MESSAGEBOX_WARNING
+#elif defined(WIN32)
+#define GFX2_MB_INFO    MB_OK
+#define GFX2_MB_ERROR   (MB_OK|MB_ICONERROR)
+#define GFX2_MB_WARNING (MB_OK|MB_ICONWARNING)
+#else
+#define GFX2_MB_INFO    1
+#define GFX2_MB_ERROR   2
+#define GFX2_MB_WARNING 3
+#endif
+
+/**
+ * Display a modal message
+ */
+int GFX2_MessageBox(const char * text, const char * caption, unsigned int type);
+
 #endif // SCREEN_H_INCLUDED

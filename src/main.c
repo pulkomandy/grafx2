@@ -200,10 +200,8 @@ void Display_syntax(void)
   }
   fputs(modes, stdout);
 
-#if defined(WIN32)
-  MessageBoxA(GFX2_Get_Window_Handle(), syntax, "GrafX2", MB_OK);
-  MessageBoxA(GFX2_Get_Window_Handle(), modes, "GrafX2", MB_OK);
-#endif
+  GFX2_MessageBox(syntax, "GrafX2", GFX2_MB_INFO);
+  GFX2_MessageBox(modes, "GrafX2", GFX2_MB_INFO);
 }
 
 // ---------------------------- Sortie impromptue ----------------------------
@@ -281,12 +279,10 @@ void Error_function(int error_code, const char *filename, int line_number, const
     if(msg != NULL)
     {
       fputs(msg, stderr);
-#if defined(WIN32)
-#if defined(_DEBUG)
+#if defined(WIN32) && defined(_DEBUG)
       OutputDebugStringA(msg);
 #endif
-      MessageBoxA(GFX2_Get_Window_Handle(), msg, "GrafX2 error", MB_OK | MB_ICONERROR);
-#endif
+      GFX2_MessageBox(msg, "GrafX2 error", GFX2_MB_ERROR);
     }
 
     if (error_code == ERROR_COMMAND_LINE)
