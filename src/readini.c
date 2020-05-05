@@ -38,6 +38,8 @@
 #include "realpath.h"
 #include "io.h"
 #include "windows.h"
+#include "gfx2log.h"
+#include "gfx2mem.h"
 
 
 /**
@@ -501,30 +503,27 @@ int Load_INI(T_Config * conf)
   conf->Stylus_mode = 0;
 #endif
 
+  // allocate buffer
+  buffer = (char *)GFX2_malloc(1024);
 
-  // On alloue les zones de mémoire:
-  buffer=(char *)malloc(1024);
-  filename=(char *)malloc(256);
-
-  // On calcule le nom du fichier qu'on manipule:
-  strcpy(filename,Config_directory);
-  strcat(filename,INI_FILENAME);
-
-  file=fopen(filename,"r");
-  if (file==0)
+  filename = Filepath_append_to_dir(Config_directory, INI_FILENAME);
+  file = fopen(filename, "r");
+  if (file == NULL)
   {
+    free(filename);
     // Si le fichier ini est absent on le relit depuis gfx2def.ini
-    strcpy(filename,Data_directory);
-    strcat(filename,INIDEF_FILENAME);
-    file=fopen(filename,"r");
-    if (file == 0)
+    filename = Filepath_append_to_dir(Data_directory, INIDEF_FILENAME);
+    file = fopen(filename, "r");
+    if (file == NULL)
     {
+      GFX2_Log(GFX2_ERROR, "Load_INI() cannot open %s\n", filename);
       free(filename);
       free(buffer);
       return ERROR_INI_MISSING;
     }
   }
   GFX2_Log(GFX2_DEBUG, "Load_INI() loading %s\n", filename);
+  free(filename);
   
   if ((return_code=Load_INI_reach_group(file,buffer,"[MOUSE]")))
     goto Erreur_Retour;
@@ -1062,7 +1061,6 @@ int Load_INI(T_Config * conf)
 
   fclose(file);
 
-  free(filename);
   free(buffer);
   return 0;
 
@@ -1070,14 +1068,12 @@ int Load_INI(T_Config * conf)
 
   Erreur_Retour:
     fclose(file);
-    free(filename);
     free(buffer);
     return return_code;
 
   Erreur_ERREUR_INI_CORROMPU:
 
     fclose(file);
-    free(filename);
     free(buffer);
     return ERROR_INI_CORRUPTED;
 }
