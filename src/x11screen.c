@@ -26,6 +26,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
+#include <X11/XKBlib.h>
 #include "screen.h"
 #include "gfx2surface.h"
 #include "loadsave.h"
@@ -355,6 +356,7 @@ int GFX2_MessageBox(const char * text, const char * caption, unsigned int type)
   Atom wmDelete, atoms[2];
   char * atom_name;
 
+  (void)type;
   if (X11_display == NULL)
     X11_display = XOpenDisplay(NULL);// NULL is equivalent to getenv("DISPLAY")
   if (X11_display == NULL)
