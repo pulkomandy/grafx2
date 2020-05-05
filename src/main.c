@@ -264,9 +264,10 @@ void Error_function(int error_code, const char *filename, int line_number, const
                                        break;
       case ERROR_MISSING_DIRECTORY : msg = "Error: Directory you ran the program from not found!\n";
                                        break;
-      case ERROR_INI_CORRUPTED       : snprintf(msg_buffer, sizeof(msg_buffer), "Error: File gfx2.ini is corrupt!\n"
+      case ERROR_INI_CORRUPTED       : snprintf(msg_buffer, sizeof(msg_buffer), "Error: File %s%s is corrupt!\n"
                                                 "It contains bad values at line %d.\n"
                                                 "You can re-generate it by deleting the file and running GrafX2 again.\n",
+                                                Config_directory, INI_FILENAME,
                                                 Line_number_in_INI_file);
                                        msg = msg_buffer;
                                        break;
