@@ -99,7 +99,7 @@ int GFX2_GetScreenSize(int * width, int * height);
 #define GFX2_MB_ERROR   SDL_MESSAGEBOX_ERROR
 #define GFX2_MB_WARNING SDL_MESSAGEBOX_WARNING
 #elif defined(WIN32)
-#define GFX2_MB_INFO    MB_OK
+#define GFX2_MB_INFO    (MB_OK|MB_ICONINFORMATION)
 #define GFX2_MB_ERROR   (MB_OK|MB_ICONERROR)
 #define GFX2_MB_WARNING (MB_OK|MB_ICONWARNING)
 #elif defined(__macosx__)
