@@ -114,6 +114,11 @@ int GFX2_GetScreenSize(int * width, int * height);
 
 /**
  * Display a modal message
+ *
+ * @param text body of the modal message
+ * @param caption title of the message
+ * @param type one of GFX2_MB_INFO, GFX2_MB_ERROR, GFX2_MB_WARNING
+ * @return 0 for error
  */
 int GFX2_MessageBox(const char * text, const char * caption, unsigned int type);
 

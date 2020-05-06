@@ -803,7 +803,16 @@ void Set_mouse_position(void)
 int GFX2_MessageBox(const char * text, const char * caption, unsigned int type)
 {
 #if defined(USE_SDL2)
-  return SDL_ShowSimpleMessageBox(type, caption, text, Window_SDL);
+  // SDL_ShowSimpleMessageBox() returns 0 on success
+  if (SDL_ShowSimpleMessageBox(type, caption, text, Window_SDL) == 0)
+  {
+    return 1;
+  }
+  else
+  {
+    GFX2_Log(GFX2_ERROR, "SDL_ShowSimpleMessageBox() failed : %s\n", SDL_GetError());
+    return 0;
+  }
 #elif defined(WIN32)
   return MessageBoxA(GFX2_Get_Window_Handle(), text, caption, type);
 #elif defined(__macosx__)
@@ -817,6 +826,7 @@ int GFX2_MessageBox(const char * text, const char * caption, unsigned int type)
                                  NULL, NULL, NULL, &result);
   CFRelease(text_ref);
   CFRelease(caption_ref);
+  // CFUserNotificationDisplayAlert() returns 0 on success
   return (r == 0);
 #else
   return 0;
