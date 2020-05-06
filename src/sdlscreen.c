@@ -807,7 +807,6 @@ int GFX2_MessageBox(const char * text, const char * caption, unsigned int type)
 #elif defined(WIN32)
   return MessageBoxA(GFX2_Get_Window_Handle(), text, caption, type);
 #elif defined(__macosx__)
-// TODO : display for MacOS : http://blog.jorgearimany.com/2010/05/messagebox-from-windows-to-mac.html
   int r;
   CFOptionFlags result;
   CFStringRef text_ref = CFStringCreateWithCString(NULL, text, strlen(text));
