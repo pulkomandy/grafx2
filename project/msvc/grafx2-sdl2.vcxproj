@@ -130,6 +130,7 @@
     <ClInclude Include="..\..\src\oldies.h" />
     <ClInclude Include="..\..\src\operatio.h" />
     <ClInclude Include="..\..\src\op_c.h" />
+    <ClInclude Include="..\..\src\osdep.h" />
     <ClInclude Include="..\..\src\packbits.h" />
     <ClInclude Include="..\..\src\pages.h" />
     <ClInclude Include="..\..\src\palette.h" />
@@ -208,6 +209,7 @@
     <ClCompile Include="..\..\src\oldies.c" />
     <ClCompile Include="..\..\src\operatio.c" />
     <ClCompile Include="..\..\src\op_c.c" />
+    <ClCompile Include="..\..\src\osdep.c" />
     <ClCompile Include="..\..\src\packbits.c" />
     <ClCompile Include="..\..\src\pages.c" />
     <ClCompile Include="..\..\src\palette.c" />
