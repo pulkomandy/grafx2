@@ -77,6 +77,10 @@ const char * get_paste_board(void);
 #include <string.h>
 #endif
 
+#ifdef _MSC_VER
+#define strdup _strdup
+#endif
+
 #include "struct.h"
 #include "input.h"
 #include "screen.h"
