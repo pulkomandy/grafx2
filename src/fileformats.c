@@ -1591,7 +1591,7 @@ void Load_ICO(T_IO_Context * context)
           if (0 == memcmp(png_header, "\x89PNG", 4))
           {
             // NO PNG Support
-            Warning("PNG Signature : Compiled without libpng support");
+            GFX2_Log(GFX2_WARNING, "PNG Signature : Compiled without libpng support\n");
             File_error = 2;
           }
 #endif
