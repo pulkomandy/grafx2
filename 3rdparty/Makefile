@@ -104,12 +104,12 @@ ZLIBARCH=$(ZLIB).tar.gz
 ZLIBURL=https://www.zlib.net/$(ZLIBARCH)
 ZLIBURLALT=http://downloads.sourceforge.net/project/libpng/zlib/$(ZLIBVER)/$(ZLIBARCH)
 ZLIBSHA256=c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1
-FREETYPEVER=2.10.1
+FREETYPEVER=2.10.2
 FREETYPE=freetype-$(FREETYPEVER)
 FREETYPEARCH=$(FREETYPE).tar.gz
 FREETYPEURL=https://download.savannah.gnu.org/releases/freetype/$(FREETYPEARCH)
 FREETYPEURLALT=https://sourceforge.net/projects/freetype/files/freetype2/$(FREETYPEVER)/$(FREETYPEARCH)
-FREETYPESHA256=3a60d391fd579440561bf0e7f31af2222bc610ad6ce4d9d7bd2165bca8669110
+FREETYPESHA256=e09aa914e4f7a5d723ac381420949c55c0b90b15744adce5d1406046022186ab
 LATESTFREETYPEVER = $(shell curl -s -S -I "https://sourceforge.net/projects/freetype/files/latest/download" |grep -i '^location:' | sed 's:.*/\([0-9.]*\)/.*:\1:' )
 LUAVER=5.3.5
 LUA=lua-$(LUAVER)
@@ -121,14 +121,14 @@ LUAPATCHES = lua-atari-log2.patch \
              lua-atari-inttype.patch
 LATESTLUAVER = $(shell curl -s -S https://www.lua.org/download.html | grep -A1 "current release is" | tail -n1 | sed 's/.*lua-\([0-9.]*\)\.tar.*/\1/' )
 # https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-0.6.1.tar.gz
-RECOILVER=5.0.0
+RECOILVER=5.0.1
 LATESTRECOILVER = $(shell curl -s -S -I https://sourceforge.net/projects/recoil/files/latest/download|grep -i "^location:"|sed 's:.*/\([0-9.]*\)/.*:\1:' )
 RECOIL=recoil-$(RECOILVER)
 RECOILARCH=$(RECOIL).tar.gz
 # https://downloads.sourceforge.net/project/recoil/recoil/4.3.0/recoil-4.3.0.tar.gz
 RECOILURL=https://downloads.sourceforge.net/project/recoil/recoil/$(RECOILVER)/$(RECOILARCH)
 RECOILURLALT=http://nanard.free.fr/grafx2/$(RECOILARCH)
-RECOILSHA256=caa60b380c7e0a762d62459bc9ca31d16b22b0f85c972e6315e3744ae1f2ffb5
+RECOILSHA256=899d6c81a58cf6528ca254504d006d522dd580aad196c3ae5d79832827de8906
 #https://github.com/redcode/6502/releases/download/v0.1/6502-v0.1.tar.xz
 REDCODE6502=6502-v0.1
 REDCODE6502ARCH=6502-v0.1.tar.xz
