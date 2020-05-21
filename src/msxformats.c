@@ -266,4 +266,4 @@ void Save_MSX(T_IO_Context * context)
     File_error = 0;
   fclose(file);
 }
-/* @} */
+/** @} */

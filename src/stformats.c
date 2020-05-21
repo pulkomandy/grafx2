@@ -1884,4 +1884,4 @@ void Save_CA1(T_IO_Context * context)
   free(buffer);
 }
 
-/* @} */
+/** @} */

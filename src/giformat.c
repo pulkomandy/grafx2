@@ -1375,4 +1375,4 @@ void Save_GIF(T_IO_Context * context)
 
 }
 
-/* @} */
+/** @} */

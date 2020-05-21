@@ -189,7 +189,8 @@ extern const T_Format File_formats[];
 void Image_emergency_backup(void);
 
 ///
-/// Load an arbitrary GFX2_Surface.
+/// Load an arbitrary Surface.
+/// @param full_name Full (absolute) path of the file to load.
 /// @param gradients Pass the address of a target T_Gradient_array if you want the gradients, NULL otherwise
 T_GFX2_Surface * Load_surface(const char *full_name, T_Gradient_array *gradients);
 
