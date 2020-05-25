@@ -133,3 +133,8 @@ int Get_frame_duration(T_IO_Context *context)
   (void)context;
   return 0;
 }
+
+int Get_palette_RGB_scale(void)
+{
+  return 256;
+}
