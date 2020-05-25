@@ -33,6 +33,7 @@
 #include "loadsavefuncs.h"
 #include "io.h"
 #include "misc.h"
+#include "palette.h"
 #include "gfx2log.h"
 #include "gfx2mem.h"
 #include "packbits.h"
@@ -187,7 +188,10 @@ void PI1_code_palette(const T_Components * palette, byte * dest)
 {
   int i;  // Numéro de la couleur traitée
   word w; // Word contenant le code
+  int plain_ST_colors = Get_palette_RGB_scale() == 8;
 
+  GFX2_Log(GFX2_DEBUG, "encoding ST%s palette (%d bits per component)\n",
+           plain_ST_colors ? "" : "e", plain_ST_colors ? 3 : 4);
   // Schéma d'un word =
   //
   // Low        High
@@ -196,10 +200,16 @@ void PI1_code_palette(const T_Components * palette, byte * dest)
 
   for (i=0;i<16;i++)
   {
-    w  = ((word)(palette[i].R & 0xe0) << 3) | ((word)(palette[i].R & 0x10) << 7);
-    w |= ((word)(palette[i].G & 0xe0) >> 1) | ((word)(palette[i].G & 0x10) << 3);
-    w |= ((word)(palette[i].B & 0xe0) >> 5) | ((word)(palette[i].B & 0x10) >> 1);
-
+    w  = ((word)(palette[i].R & 0xe0) << 3);
+    w |= ((word)(palette[i].G & 0xe0) >> 1);
+    w |= ((word)(palette[i].B & 0xe0) >> 5);
+    if (!plain_ST_colors)
+    {
+      // add the STe specific bit
+      w |= ((word)(palette[i].R & 0x10) << 7);
+      w |= ((word)(palette[i].G & 0x10) << 3);
+      w |= ((word)(palette[i].B & 0x10) >> 1);
+    }
     *dest++ = (w >> 8);
     *dest++ = (w & 0xff);
   }
