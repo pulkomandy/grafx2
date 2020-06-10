@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
   <id type="desktop">grafx2.desktop</id>
-  <metadata_licence>CC-0</metadata_licence>
-  <project_license>GPL-2.0 and CeCILL-2</project_license>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-2.0 and CECILL-2.0</project_license>
   <name>GrafX2</name>
   <summary>A bitmap paint program specialized in 256 color drawing</summary>
 
