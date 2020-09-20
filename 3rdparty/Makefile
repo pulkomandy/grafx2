@@ -1,9 +1,9 @@
-# (c) 2018-2019 Thomas BERNARD
+# (c) 2018-2020 Thomas BERNARD
 #
 # Makefile to build GrafX2 library dependencies.
 #
 # Variables :
-# - API : sdl(default), sdl2
+# - API : sdl(default), sdl2, win32
 # - WIN32CROSS
 #
 # most useful targets :
@@ -121,14 +121,14 @@ LUAPATCHES = lua-atari-log2.patch \
              lua-atari-inttype.patch
 LATESTLUAVER = $(shell curl -s -S https://www.lua.org/download.html | grep -A1 "current release is" | tail -n1 | sed 's/.*lua-\([0-9.]*\)\.tar.*/\1/' )
 # https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-0.6.1.tar.gz
-RECOILVER=5.0.1
+RECOILVER=5.1.0
 LATESTRECOILVER = $(shell curl -s -S -I https://sourceforge.net/projects/recoil/files/latest/download|grep -i "^location:"|sed 's:.*/\([0-9.]*\)/.*:\1:' )
 RECOIL=recoil-$(RECOILVER)
 RECOILARCH=$(RECOIL).tar.gz
 # https://downloads.sourceforge.net/project/recoil/recoil/4.3.0/recoil-4.3.0.tar.gz
 RECOILURL=https://downloads.sourceforge.net/project/recoil/recoil/$(RECOILVER)/$(RECOILARCH)
 RECOILURLALT=http://nanard.free.fr/grafx2/$(RECOILARCH)
-RECOILSHA256=899d6c81a58cf6528ca254504d006d522dd580aad196c3ae5d79832827de8906
+RECOILSHA256=9ce71400e343cb0f9ec40dbad407b7a70af02eedfc3ebce0817db2ade2c52fb3
 #https://github.com/redcode/6502/releases/download/v0.1/6502-v0.1.tar.xz
 REDCODE6502=6502-v0.1
 REDCODE6502ARCH=6502-v0.1.tar.xz
