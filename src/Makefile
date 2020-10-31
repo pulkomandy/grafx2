@@ -75,7 +75,7 @@ endif
 
   CFLAGS_CACHE = $(OBJDIR)/.cflags.cache
 
-  RECOILVER = 5.1.1
+  RECOILVER := $(shell grep RECOILVER= ../3rdparty/Makefile | sed 's/RECOILVER= *//')
 
 # Video / input API used
   API ?= sdl
