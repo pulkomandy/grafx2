@@ -120,6 +120,7 @@ LUASHA256=fc5fd69bb8736323f026672b1b7235da613d7177e72558893a0bdcd320466d60
 LUAPATCHES = lua-atari-log2.patch \
              lua-atari-inttype.patch
 LATESTLUAVER = $(shell curl -s -S https://www.lua.org/download.html | grep -A1 "current release is" | tail -n1 | sed 's/.*lua-\([0-9.]*\)\.tar.*/\1/' )
+LATESTLUA53VER = $(shell curl -s -S https://www.lua.org/versions.html |grep 5[.]3[.] | head -n 1 | sed 's/.*\(5[0-9.]*\).*/\1/' )
 # https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-0.6.1.tar.gz
 RECOILVER=5.1.1
 LATESTRECOILVER = $(shell curl -s -S -I https://sourceforge.net/projects/recoil/files/latest/download|grep -i "^location:"|sed 's:.*/\([0-9.]*\)/.*:\1:' )
@@ -655,5 +656,9 @@ checkversion-%:
 	  touch check-version-failed ; \
 	elif [ "$($(PKG)VER)" != "$(LATEST)" ] ; then \
 	  echo "$* $($(PKG)VER) is outdated, latest version is $(LATEST)" ; \
-	  touch check-version-failed ; \
+	  if [ "$*" = "lua" ] && [ "$($(PKG)VER)" = "$(LATESTLUA53VER)" ] ; then \
+	    echo "But it is the last lua 5.3 release." ; \
+	  else \
+	    touch check-version-failed ; \
+	  fi ; \
 	fi
