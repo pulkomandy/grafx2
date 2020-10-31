@@ -121,14 +121,14 @@ LUAPATCHES = lua-atari-log2.patch \
              lua-atari-inttype.patch
 LATESTLUAVER = $(shell curl -s -S https://www.lua.org/download.html | grep -A1 "current release is" | tail -n1 | sed 's/.*lua-\([0-9.]*\)\.tar.*/\1/' )
 # https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-0.6.1.tar.gz
-RECOILVER=5.1.0
+RECOILVER=5.1.1
 LATESTRECOILVER = $(shell curl -s -S -I https://sourceforge.net/projects/recoil/files/latest/download|grep -i "^location:"|sed 's:.*/\([0-9.]*\)/.*:\1:' )
 RECOIL=recoil-$(RECOILVER)
 RECOILARCH=$(RECOIL).tar.gz
 # https://downloads.sourceforge.net/project/recoil/recoil/4.3.0/recoil-4.3.0.tar.gz
 RECOILURL=https://downloads.sourceforge.net/project/recoil/recoil/$(RECOILVER)/$(RECOILARCH)
 RECOILURLALT=http://nanard.free.fr/grafx2/$(RECOILARCH)
-RECOILSHA256=9ce71400e343cb0f9ec40dbad407b7a70af02eedfc3ebce0817db2ade2c52fb3
+RECOILSHA256=13ad32d669c73393114da2cc2d1c1af4880fbebcfcc807ca96fc20b181d50db5
 #https://github.com/redcode/6502/releases/download/v0.1/6502-v0.1.tar.xz
 REDCODE6502=6502-v0.1
 REDCODE6502ARCH=6502-v0.1.tar.xz
