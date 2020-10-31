@@ -111,12 +111,12 @@ FREETYPEURL=https://download.savannah.gnu.org/releases/freetype/$(FREETYPEARCH)
 FREETYPEURLALT=https://sourceforge.net/projects/freetype/files/freetype2/$(FREETYPEVER)/$(FREETYPEARCH)
 FREETYPESHA256=5eab795ebb23ac77001cfb68b7d4d50b5d6c7469247b0b01b2c953269f658dac
 LATESTFREETYPEVER = $(shell curl -s -S -I "https://sourceforge.net/projects/freetype/files/latest/download" |grep -i '^location:' | sed 's:.*/\([0-9.]*\)/.*:\1:' )
-LUAVER=5.3.5
+LUAVER=5.3.6
 LUA=lua-$(LUAVER)
 LUAARCH=$(LUA).tar.gz
 LUAURL=https://www.lua.org/ftp/$(LUAARCH)
 LUAURLALT=https://www.tecgraf.puc-rio.br/lua/mirror/ftp/$(LUAARCH)
-LUASHA256=0c2eed3f960446e1a3e4b9a1ca2f3ff893b6ce41942cf54d5dd59ab4b3b058ac
+LUASHA256=fc5fd69bb8736323f026672b1b7235da613d7177e72558893a0bdcd320466d60
 LUAPATCHES = lua-atari-log2.patch \
              lua-atari-inttype.patch
 LATESTLUAVER = $(shell curl -s -S https://www.lua.org/download.html | grep -A1 "current release is" | tail -n1 | sed 's/.*lua-\([0-9.]*\)\.tar.*/\1/' )
