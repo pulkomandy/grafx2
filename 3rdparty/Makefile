@@ -38,6 +38,7 @@ SDLIMAGEURL = https://www.libsdl.org/projects/SDL_image/release/$(SDLIMAGEARCH)
 SDLIMAGESHA256 = 0b90722984561004de84847744d566809dbb9daf732a9e503b91a1b5a84e5699
 SDLIMAGEPATCHES = SDL_image-1.2.12.XCF_infinite_loop.patch \
                   SDL_image-1.2.12.XCF_v11_64bits_offsets.patch \
+                  SDL_image-1.2.12.XCF-fixversion.patch \
                   SDL_image_XCF_v11_load_level.patch \
                   SDL_image-1.2.12-png1.6.patch \
                   SDL_image-1.2.12-png_const_colorp.patch \
