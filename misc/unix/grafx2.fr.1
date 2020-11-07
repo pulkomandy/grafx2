@@ -1,0 +1,80 @@
+.TH GRAFX2 1 "April 14, 2011"
+.SH NAME
+grafx2 \- programme ultime de dessin bitmap 256 couleurs
+.SH SYNOPSIS
+.B grafx2
+.RI [ options ] " fichiers" ...
+.br
+.SH DESCRIPTION
+Cette page de manuel documente succinctement la commande
+.B grafx2\fP.
+.PP
+\fBgrafx2\fP est un programme de dessin bitmap vous permettant d'utiliser
+plus de 60 r\['e]solutions, dont la plupart des r\['e]solutions Amiga :
+320x200, 320x256, 320x512, 640x256, 640x512, etc...
+si votre carte graphique les conna\[^i]t.
+
+Ce programme est d\['e]di\['e] \[`a] tous ceux qui savent ce qu'est un pixel.
+Son interface graphique n'est pas tr\[`e]s diff\['e]rente des fameux Deluxe Paint
+et Brillance, donc vous ne serez pas d\['e]pays\['e]s si vous connaissez l'une
+de ces applications.
+Mais si vous n'\[^e]tes pas coutumier de l'art du dessin avec 256 couleurs ou
+moins, cela risque d'\[^e]tre plus difficile pour vous, mais vous devriez lui
+laisser au moins une chance (voire plusieurs, car toutes ses capacit\['e]s ne
+seront pas visibles tout de suite).
+
+.SH OPTIONS
+Ci-dessous un r\['e]sum\['e] des options.
+Elles peuvent \[^e]tre pr\['e]fix\['e]es par / - ou --.
+.TP
+.B -?, -h, -help
+Montre le r\['e]sum\['e] des options.
+.TP
+.B -wide
+Pour \['e]muler une mode vid\['e]o \[`a] pixels larges (2 x 1).
+.TP
+.B -tall
+Pour \['e]muler une mode vid\['e]o \[`a] pixels hauts (1 x 2).
+.TP
+.B -double
+Pour \['e]muler une mode vid\['e]o \[`a] pixels doubles (2 x 2).
+.TP
+.B -wide2
+Pour \['e]muler une mode vid\['e]o \[`a] pixels larges doubles 4 x 2).
+.TP
+.B -tall2
+Pour \['e]muler une mode vid\['e]o \[`a] pixels hauts doubles (2 x 4).
+.TP
+.B -triple
+Pour \['e]muler une mode vid\['e]o \[`a] pixels triples (3 x 3).
+.TP
+.B -quadruple
+Pour \['e]muler une mode vid\['e]o \[`a] pixels quadruples (4 x 4).
+.TP
+.B -rgb <n>
+Pour r\['e]duire la pr\['e]cision RVB de 256 \[`a] n niveaux.
+.TP
+.B -skin <filename>
+Utiliser un fichier diff\['e]rent pour les graphismes du menu.
+.TP
+.B -mode <videomode>
+Pour utiliser un mode vid\['e]o parmi ceux list\['e]s par l'option -help.
+.SH FILES
+La configuration utilisateur est stock\['e]e dans ~/.grafx2/gfx2.ini.
+Ce fichier est pr\['e]vu pour \[^e]tre \['e]ditable par l'utilisateur et permettre
+des ajustements de nombreux aspects du programme.
+.SH ENVIRONMENT
+Puisque grafx2 utilise la biblioth\[`e]que SDL pour les graphismes et l'entr\['e]e utilisateur, vous pouvez contr\[^o]ler une partie de son comportement \[`a] l'aide de variables d'environment d\['e]crites sur :
+http://www.libsdl.org/cgi/docwiki.cgi/Environment_variables
+.SH SEE ALSO
+.BR gimp (1),
+.BR imagemagick (1).
+.br
+.SH AUTHOR
+grafx2 a \['e]t\['e] \['e]crit par Adrien Destugues, Yves Rizoud, Peter Gordon, Markus
+Weiss, Rusback, Franck Charlet, Luc Schrijvers, Karl Maritaud, Guillaume
+Dorme, and Karl Bartel.
+.PP
+Cette page de manuel a \['e]t\['e] \['e]crite pas G\[:u]rkan Myczko <gurkan@phys.ethz.ch>,
+pour le projet Debian (et peut \[^e]tre utilis\['e]e par d'autres), et a \['e]t\['e] traduite
+par Fran\[,c]ois Revol <revol@free.fr>.
