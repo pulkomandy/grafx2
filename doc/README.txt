@@ -6,7 +6,8 @@ _/    _/  _/        _/    _/    _/        _/  _/      _/
 
 GrafX2 - The Ultimate 256-color bitmap paint program
 Copyright (C)1996-2001 Sunset Design (G.Dorme & K.Maritaud)
-Copyright (C)2007-2020 the Grafx2 Project Team (A.Destugues & Y.Rizoud)
+Copyright (C)2007-2020 the Grafx2 Project Team (A.Destugues & Y.Rizoud
+                                                & T.Bernard)
 -------------------------------------
 
 === ABOUT ===
@@ -128,4 +129,4 @@ the program, here is a list of things you can do:
 * Send us your nice drawings, we'll put them in our online gallery
 
 Enjoy Pixelling with GrafX2,
-PulkoMandy & Yves, the great GrafX2 Project Team.- 
+PulkoMandy & Yves & Thomas, the great GrafX2 Project Team.-
