@@ -123,8 +123,8 @@ the program, here is a list of things you can do:
 * Register as an user at https://www.ohloh.net/p/grafx2 to improve our Karma
 * Port GrafX2 to your favourite platform
 * Report bugs or ask for features you miss (you'll get credited in the 
-		helpscreen !)
-* Make all your friends use GrafX2
+  helpscreen !)
+* Make all your friends use GrafX2 : write howto's, spread online courses, etc.
 * Send us your nice drawings, we'll put them in our online gallery
 
 Enjoy Pixelling with GrafX2,
