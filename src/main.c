@@ -1251,7 +1251,7 @@ void Program_shutdown(void)
       Config.Window_pos_y = windowplacement.rcNormalPosition.top;
     }
   }
-  #elif !defined(USE_X11)
+  #elif !defined(USE_X11) && !defined(USE_SDL2)
   // All other targets: irrelevant dimensions.
   // Do not attempt to force them back on next program run.
     Config.Window_pos_x = 9999;

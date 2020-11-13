@@ -1608,6 +1608,18 @@ int Get_input(int sleep_time)
                   break;
                 case SDL_WINDOWEVENT_MOVED:
                   GFX2_Log(GFX2_DEBUG, "SDL_WINDOWEVENT_MOVED %d (%d, %d)\n", event.window.windowID, event.window.data1, event.window.data2);
+                  Config.Window_pos_x = event.window.data1;
+                  Config.Window_pos_y = event.window.data2;
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+                  {
+                    // correct position by taking window decoration into account
+                    int offset_x, offset_y;
+                    if (SDL_GetWindowBordersSize(SDL_GetWindowFromID(event.window.windowID), &offset_y, &offset_x, NULL, NULL) == 0) {
+                      Config.Window_pos_x -= offset_x;
+                      Config.Window_pos_y -= offset_y;
+                    }
+                  }
+#endif
                   break;
                 case SDL_WINDOWEVENT_ENTER:
                   GFX2_Log(GFX2_DEBUG, "SDL_WINDOWEVENT_ENTER %d\n", event.window.windowID);

@@ -153,7 +153,9 @@ void GFX2_Set_mode(int *width, int *height, int fullscreen)
   // SDL2
   if (Window_SDL == NULL)
   {
-    Window_SDL = SDL_CreateWindow("GrafX2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+    Window_SDL = SDL_CreateWindow("GrafX2",
+                                  Config.Window_pos_x != 9999 ? Config.Window_pos_x : (int)SDL_WINDOWPOS_UNDEFINED,
+                                  Config.Window_pos_y != 9999 ? Config.Window_pos_y : (int)SDL_WINDOWPOS_UNDEFINED,
                                   *width, *height, (fullscreen?SDL_WINDOW_FULLSCREEN:SDL_WINDOW_RESIZABLE));
     SDL_SetWindowIcon(Window_SDL, icon);
     Renderer_SDL = SDL_CreateRenderer(Window_SDL, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
