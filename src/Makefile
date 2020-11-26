@@ -260,14 +260,14 @@ ifeq ($(API),sdl2)
     #TTFCOPT = $(shell $(PKG_CONFIG) --cflags SDL2_ttf)
   ifeq ($(OSX_STATIC), 1)
     SDLLOPT = $(shell $(SDL2CONFIG) --static-libs | sed 's/-lSDL2//' | sed 's/-L[^ ]*//')
-    SDLLIBDIR = $(shell $(PKG_CONFIG) --variable=libdir SDL2_image)
+    SDLLIBDIR = $(shell $(PKG_CONFIG) --variable=libdir SDL2_image || echo "../3rdparty/usr/lib")
     SDLLOPT += $(SDLLIBDIR)/libSDL2.a
     # trick to get all dependencies
     SDLLOPT += $(addsuffix .a, $(shell ../tools/osx_find_dependencies.sh $(SDLLIBDIR)/libSDL2_image.dylib $(SDLLIBDIR)/libSDL2_ttf.dylib | grep -v SDL2 | cut -d'.' -f 1))
     SDLLOPT += $(SDLLIBDIR)/libSDL2_image.a
     TTFLOPT = $(shell if [ -f ../3rdparty/usr/lib/libfreetype.dylib ] && \
       otool -L ../3rdparty/usr/lib/libfreetype.dylib | cut -f 2 | grep -q ^/usr/lib/libbz2 ; then echo "-lbz2" ; fi )
-    TTFLOPT += $(shell $(PKG_CONFIG) --variable=libdir SDL2_ttf)/libSDL2_ttf.a
+    TTFLOPT += $(shell $(PKG_CONFIG) --variable=libdir SDL2_ttf || echo "../3rdparty/usr/lib")/libSDL2_ttf.a
   else
     SDLLOPT = $(shell $(SDL2CONFIG) --libs) $(shell $(PKG_CONFIG) --libs SDL2_image)
     SDLLOPT += -Wl,-framework,Cocoa
