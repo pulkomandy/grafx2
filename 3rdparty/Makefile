@@ -367,7 +367,7 @@ $(PREFIX)/lib/libSDL2_ttf.a:	$(SDL2TTF)/.ok
 	cd $(SDL2TTF)/build$(PLATFORMDIR) && PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig \
 	  CC=$(CC) CPPFLAGS=-I$(PREFIX)/include LDFLAGS="-L$(PREFIX)/lib $(LDFLAGS)" \
 	  ../configure --prefix=$(PREFIX) --with-sdl-prefix=$(PREFIX) \
-	  --with-freetype-prefix=$(PREFIX) --host=$(HOST)
+	  --with-freetype-prefix=$(PREFIX) --with-ft-prefix=$(PREFIX) --host=$(HOST)
 	cd $(SDL2TTF)/build$(PLATFORMDIR) && $(MAKE)
 	cd $(SDL2TTF)/build$(PLATFORMDIR) && $(MAKE) install
 ifdef WIN32
