@@ -29,7 +29,11 @@ const void * get_tiff_paste_board(unsigned long * size)
 {
   NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
   NSLog(@"types in pasteboard : %@", [pasteboard types]);
+#if defined(MAC_OS_X_VERSION_10_14) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_14)
+  NSData *data = [pasteboard dataForType:NSPasteboardTypeTIFF];
+#else
   NSData *data = [pasteboard dataForType:NSTIFFPboardType];
+#endif
   if (data == nil)
     return NULL;
   *size = [data length];
@@ -41,9 +45,14 @@ int set_tiff_paste_board(const void * tiff, unsigned long size)
   if (tiff == NULL || size == 0)
     return 0;
   NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
-  [pasteboard declareTypes:[NSArray arrayWithObject:NSTIFFPboardType] owner:nil];
   NSData *data = [[NSData alloc] initWithBytes:tiff length:size];
+#if defined(MAC_OS_X_VERSION_10_14) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_14)
+  [pasteboard declareTypes:[NSArray arrayWithObject:NSPasteboardTypeTIFF] owner:nil];
+  BOOL b = [pasteboard setData:data forType:NSPasteboardTypeTIFF];
+#else
+  [pasteboard declareTypes:[NSArray arrayWithObject:NSTIFFPboardType] owner:nil];
   BOOL b = [pasteboard setData:data forType:NSTIFFPboardType];
+#endif
   if (!b)
     NSLog(@"Failed to set data in pasteboard");
   [data release];
