@@ -13,6 +13,9 @@ FILEFLAGS       VS_FF_DEBUG
 #else
 FILEFLAGS       0
 #endif
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_APP
+FILESUBTYPE     VFT2_UNKNOWN
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
@@ -30,6 +33,7 @@ BEGIN
   END
   BLOCK "VarFileInfo"
   BEGIN
+    /* English language (0x409), Windows ANSI codepage (1252) */
     VALUE "Translation", 0x409, 1252
   END
 END
