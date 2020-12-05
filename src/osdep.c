@@ -599,7 +599,11 @@ bye:
 void GFX2_GetShortPathName(char * shortname, size_t shortname_len, const word * longname)
 {
   DWORD short_len = GetShortPathNameW((WCHAR *)longname, NULL, 0);
-  if (short_len > 0)
+  if (short_len == 0)
+  {
+    GFX2_Log(GFX2_ERROR, "GetShortPathNameW(%p, NULL, 0) failed !\n", longname);
+  }
+  else
   {
     WCHAR * temp_str = (WCHAR *)GFX2_malloc(short_len * sizeof(WCHAR));
     short_len = GetShortPathNameW((WCHAR *)longname, temp_str, short_len);
@@ -609,6 +613,10 @@ void GFX2_GetShortPathName(char * shortname, size_t shortname_len, const word * 
       for (i = 0; i < short_len && temp_str[i] != 0; i++)
         shortname[i] = temp_str[i];
       shortname[i] = '\0';
+    }
+    else
+    {
+      GFX2_Log(GFX2_ERROR, "GetShortPathNameW(%p, %p, %u) failed !\n", longname, temp_str, short_len);
     }
     free(temp_str);
   }
@@ -621,6 +629,7 @@ void GFX2_GetShortPathName(char * shortname, size_t shortname_len, const word * 
       shortname[i] = (longname[i] < 256) ? (byte)longname[i] : '_';
     }
     shortname[i] = '\0';
+    GFX2_Log(GFX2_WARNING, "Generated a temporary ansi name : %s\n", shortname);
   }
 }
 #endif

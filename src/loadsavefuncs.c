@@ -93,7 +93,15 @@ FILE * Open_file_write(T_IO_Context *context)
               context->File_name[index] = '\0';
             }
           }
+          else
+          {
+            GFX2_Log(GFX2_ERROR, "GetShortPathNameW(%p, %p, %u) failed !\n", filename_unicode, shortpath, len);
+          }
         }
+      }
+      else
+      {
+        GFX2_Log(GFX2_ERROR, "GetShortPathNameW(%p, NULL, 0) failed !\n", filename_unicode);
       }
     }
     free(filename_unicode);

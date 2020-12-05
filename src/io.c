@@ -809,12 +809,20 @@ word * Get_Unicode_Filename(word * filename_unicode, const char * filename, cons
   len = GetLongPathNameW(shortPath, NULL, 0);
   if (len == 0)
   {
+    GFX2_Log(GFX2_ERROR, "GetLongPathNameW(%s\\%s, NULL, 0) returned 0\n", directory, filename);
     free(shortPath);
     return NULL;
   }
   longPath = (WCHAR *)GFX2_malloc(len * sizeof(WCHAR));
-  if (longPath == NULL || GetLongPathNameW(shortPath, longPath, len) == 0)
+  if (longPath == NULL)
   {
+    free(shortPath);
+    return NULL;
+  }
+  if (GetLongPathNameW(shortPath, longPath, len) == 0)
+  {
+    GFX2_Log(GFX2_ERROR, "GetLongPathNameW(%s\\%s, %p, %u) returned 0\n", directory, filename, longPath, len);
+    free(longPath);
     free(shortPath);
     return NULL;
   }
