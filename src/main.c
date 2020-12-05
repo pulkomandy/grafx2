@@ -1540,7 +1540,8 @@ int main(int argc,char * argv[])
   }
 
 #ifdef _MSC_VER
-  GFX2_Log(GFX2_DEBUG, "built with _MSC_VER=%d   Windows ANSI Code Page=%u\n", _MSC_VER, GetACP());
+  GFX2_Log(GFX2_DEBUG, "built with _MSC_VER=%d   Windows ANSI Code Page=%u OEM Code Page=%u\n", _MSC_VER, GetACP(), GetOEMCP());
+  GFX2_Log(GFX2_DEBUG, "AreFileApisANSI() : %s\n", AreFileApisANSI() ? "ANSI" : "OEM");
 #endif
   Main_handler();
 
