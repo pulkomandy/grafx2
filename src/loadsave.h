@@ -55,9 +55,9 @@ typedef struct
   
   // File properties
   
-  char * File_name;
-  word * File_name_unicode;
-  char * File_directory;
+  char * File_name;         ///< File name in UTF-8 (or short ASCII file nmae under win32)
+  word * File_name_unicode; ///< Wide character version of the filename
+  char * File_directory;    ///< Directory. If NULL File_name should be the full path name
   byte Format;
   
   // Image properties
@@ -190,9 +190,10 @@ void Image_emergency_backup(void);
 
 ///
 /// Load an arbitrary Surface.
-/// @param full_name Full (absolute) path of the file to load.
+/// @param filename file to load.
+/// @param directory path of the file to load. if NULL, filename have to be a full path name
 /// @param gradients Pass the address of a target T_Gradient_array if you want the gradients, NULL otherwise
-T_GFX2_Surface * Load_surface(const char *full_name, T_Gradient_array *gradients);
+T_GFX2_Surface * Load_surface(const char *filename, const char *directory, T_Gradient_array *gradients);
 
 
 /*

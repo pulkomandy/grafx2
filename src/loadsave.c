@@ -605,9 +605,9 @@ void Load_image(T_IO_Context *context)
   }
   if (context->Format != FORMAT_CLIPBOARD)
   {
-    if (context->File_name == NULL || context->File_directory == NULL)
+    if (context->File_name == NULL)
     {
-      GFX2_Log(GFX2_ERROR, "Load_Image() called with NULL file name or directory\n");
+      GFX2_Log(GFX2_ERROR, "Load_Image() called with NULL file name\n");
       Error(0);
       return;
     }
@@ -1192,12 +1192,12 @@ void Load_SDL_Image(T_IO_Context *context)
 #endif
 
 
-T_GFX2_Surface * Load_surface(const char *full_name, T_Gradient_array *gradients)
+T_GFX2_Surface * Load_surface(const char *filename, const char * directory, T_Gradient_array *gradients)
 {
   T_GFX2_Surface * bmp=NULL;
   T_IO_Context context;
 
-  Init_context_surface(&context, full_name, "");
+  Init_context_surface(&context, filename, directory);
   Load_image(&context);
 
   if (context.Surface)

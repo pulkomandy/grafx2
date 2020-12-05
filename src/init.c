@@ -655,7 +655,7 @@ static byte Parse_skin(T_GFX2_Surface * gui, T_Gui_skin *gfx)
 T_Gui_skin * Load_graphics(const char * skin_file, T_Gradient_array *gradients)
 {
   T_Gui_skin * gfx;
-  char * filename;
+  char * directory;
   size_t len;
   T_GFX2_Surface * gui;
 
@@ -673,25 +673,25 @@ T_Gui_skin * Load_graphics(const char * skin_file, T_Gradient_array *gradients)
   }
   
   // Read the "skin" file
-  len = strlen(Data_directory) + strlen(SKINS_SUBDIRECTORY) + strlen(PATH_SEPARATOR) + strlen(skin_file) + 1;
-  filename = GFX2_malloc(len);
-  if (filename == NULL)
+  len = strlen(Data_directory) + strlen(SKINS_SUBDIRECTORY) + 1;
+  directory = GFX2_malloc(len);
+  if (directory == NULL)
   {
     free(gfx);
     return NULL;
   }
-  snprintf(filename, len, "%s%s%s%s", Data_directory, SKINS_SUBDIRECTORY, PATH_SEPARATOR, skin_file);
+  snprintf(directory, len, "%s%s", Data_directory, SKINS_SUBDIRECTORY);
   
-  gui = Load_surface(filename, gradients);
+  gui = Load_surface(skin_file, directory, gradients);
   if (!gui)
   {
-    sprintf(Gui_loading_error_message, "Unable to load the skin image (missing? not an image file?) : %s\n", filename);
-    free(filename);
+    sprintf(Gui_loading_error_message, "Unable to load the skin image (missing? not an image file?) : %s in %s\n", skin_file, directory);
+    free(directory);
     free(gfx);
     gfx = NULL;
     return NULL;
   }
-  free(filename);
+  free(directory);
   if (Parse_skin(gui, gfx) != 0)
   {
     free(gfx);
@@ -758,7 +758,7 @@ byte * Load_font(const char * font_name, int is_main)
 {
   byte * font = NULL;
   size_t len;
-  char * filename;
+  char * directory;
   T_GFX2_Surface * image;
 
   if (font_name == NULL || font_name[0] == '\0')
@@ -768,20 +768,20 @@ byte * Load_font(const char * font_name, int is_main)
   }
 
   // Read the file containing the image
-  len = strlen(Data_directory) + strlen(SKINS_SUBDIRECTORY) + strlen(PATH_SEPARATOR) + strlen(font_name) + 1;
-  filename = GFX2_malloc(len);
-  if (filename == NULL)
+  len = strlen(Data_directory) + strlen(SKINS_SUBDIRECTORY) + 1;
+  directory = GFX2_malloc(len);
+  if (directory == NULL)
     return NULL;
-  snprintf(filename, len, "%s%s%s%s", Data_directory, SKINS_SUBDIRECTORY, PATH_SEPARATOR, font_name);
+  snprintf(directory, len, "%s%s", Data_directory, SKINS_SUBDIRECTORY);
   
-  image = Load_surface(filename, NULL);
+  image = Load_surface(font_name, directory, NULL);
   if (!image)
   {
-    sprintf(Gui_loading_error_message, "Unable to load the font image (missing? not an image file?)\n%s\n", filename);
-    free(filename);
+    sprintf(Gui_loading_error_message, "Unable to load the font image (missing? not an image file?)\n%s in %s\n", font_name, directory);
+    free(directory);
     return NULL;
   }
-  free(filename);
+  free(directory);
   font = Parse_font(image, is_main);
   Free_GFX2_Surface(image);
   return font;

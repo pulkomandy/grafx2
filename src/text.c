@@ -726,7 +726,7 @@ byte *Render_text_SFont(const char *str, int font_number, int *width, int *heigh
   byte * new_brush = NULL;
 
   // Chargement de la fonte
-  font_surface = Load_surface(Font_name(font_number), NULL);
+  font_surface = Load_surface(Font_name(font_number), NULL, NULL);
   if (!font_surface)
   {
     Verbose_message("Warning", "Error loading font");
