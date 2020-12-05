@@ -1,7 +1,7 @@
-#ifdef _MSC_VER
-#include <VerRsrc.h>
+#ifdef __MINGW32__
+#include <winver.h>
 #else
-#define VS_FF_DEBUG 0x00000001L
+#include <verrsrc.h>
 #endif
 
 1 VERSIONINFO
