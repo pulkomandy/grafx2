@@ -27,6 +27,8 @@
 #if defined(_MSC_VER) && _MSC_VER < 1900
 	#define snprintf _snprintf
 #endif
+#include "gfx2mem.h"
+#include "gfx2log.h"
 #include "screen.h"
 #include "errors.h"
 #include "windows.h"
@@ -329,27 +331,56 @@ static LRESULT CALLBACK Win32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
     return 0;
   case WM_DROPFILES:
     {
-      int file_count;
+      UINT file_count;
       HDROP hDrop = (HDROP)wParam;
 
-      file_count = DragQueryFile(hDrop, (UINT)-1, NULL , 0);
-      if (file_count > 0)
+      file_count = DragQueryFileW(hDrop, (UINT)-1, NULL, 0);
+      if (file_count == 0)
+        GFX2_Log(GFX2_WARNING, "WM_DROPFILES but 0 files\n");
+      else
       {
-        TCHAR LongDropFileName[MAX_PATH];
-        TCHAR ShortDropFileName[MAX_PATH];
-        if (DragQueryFile(hDrop, 0 , LongDropFileName ,(UINT) MAX_PATH))
-        {
-          Drop_file_name_unicode = Unicode_strdup((word *)LongDropFileName);
-          if (GetShortPathName(LongDropFileName, ShortDropFileName, MAX_PATH))
-          {
-            Drop_file_name = (char *)malloc(lstrlen(ShortDropFileName) + 1);
-            if (Drop_file_name != NULL)
-            {
-              int i;
+        UINT longLen;
 
-              for (i = 0; ShortDropFileName[i] != 0; i++)
-                Drop_file_name[i] = (char)ShortDropFileName[i];
-              Drop_file_name[i] = 0;
+        GFX2_Log(GFX2_DEBUG, "WM_DROPFILES %u files\n", file_count);
+        longLen = DragQueryFileW(hDrop, 0, NULL, 0);
+        if (longLen == 0)
+          GFX2_Log(GFX2_ERROR, "DragQueryFileW(%x, 0, NULL, 0) failed\n", hDrop);
+        else
+        {
+          Drop_file_name_unicode = GFX2_malloc(++longLen * sizeof(word)); // increment for NULL terminator
+          if (Drop_file_name_unicode != NULL)
+          {
+            if (DragQueryFileW(hDrop, 0, Drop_file_name_unicode, longLen) == 0)
+              GFX2_Log(GFX2_ERROR, "DragQueryFileW(%x, 0, %p, %u) failed\n", hDrop, Drop_file_name_unicode, longLen);
+            else
+            {
+              // get the short path name
+              UINT shortLen = GetShortPathNameW(Drop_file_name_unicode, NULL, 0);
+              if (shortLen == 0)
+                GFX2_Log(GFX2_ERROR, "GetShortPathNameW(%p, NULL, 0) failed\n", Drop_file_name_unicode);
+              else
+              {
+                WCHAR * ShortDropFileNameW = GFX2_malloc(shortLen * sizeof(WCHAR));
+                if (ShortDropFileNameW != NULL)
+                {
+                  if (GetShortPathNameW(Drop_file_name_unicode, ShortDropFileNameW, shortLen) == 0)
+                    GFX2_Log(GFX2_ERROR, "GetShortPathNameW(%p, %p, %u) failed\n", Drop_file_name_unicode, ShortDropFileNameW, shortLen);
+                  else
+                  {
+                    // convert to ANSI/ASCII
+                    Drop_file_name = (char *)GFX2_malloc(shortLen);
+                    if (Drop_file_name != NULL)
+                    {
+                      int i;
+
+                      for (i = 0; ShortDropFileNameW[i] != 0; i++)
+                        Drop_file_name[i] = (char)ShortDropFileNameW[i];
+                      Drop_file_name[i] = 0;
+                    }
+                  }
+                  free(ShortDropFileNameW);
+                }
+              }
             }
           }
         }
