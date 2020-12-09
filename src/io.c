@@ -687,32 +687,45 @@ void For_each_directory_entry(const char * directory_name, void * pdata, T_File_
   Unicode_char_strlcat(search_string, "\\*", len);
   h = FindFirstFileW((WCHAR *)search_string, &fd);
   free(search_string);
-  if (h != INVALID_HANDLE_VALUE)
+  if (h == INVALID_HANDLE_VALUE)
   {
-    do
-    {
-      int i;
-      char short_filename[16];
-      if (fd.cAlternateFileName[0] != 0)
-        for (i = 0; fd.cAlternateFileName[i] != 0 && i < (int)sizeof(short_filename) - 1; i++)
-          short_filename[i] = (char)fd.cAlternateFileName[i];
-      else  // normal name is short !
-        for (i = 0; fd.cFileName[i] != 0 && i < (int)sizeof(short_filename) - 1; i++)
-          short_filename[i] = (char)fd.cFileName[i];
-      short_filename[i] = '\0';
-      Callback(
-        pdata,
-        short_filename,
-        (const word *)fd.cFileName,
-        (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? 0 : 1,
-        (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? 1 : 0,
-        (fd.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) ? 1 : 0
-        );
-    }
-    while (FindNextFileW(h, &fd));
-
-    FindClose(h);
+    GFX2_Log(GFX2_ERROR, "FindFirstFileW failed in %s\n", directory_name);
+    return;
   }
+  do
+  {
+    int i;
+    char * short_filename;
+    const WCHAR * src;
+
+    src = (fd.cAlternateFileName[0] != 0) ? fd.cAlternateFileName : fd.cFileName;
+    short_filename = GFX2_malloc(lstrlenW(src) + 1);
+    if (short_filename == NULL)
+      continue;
+    for (i = 0; src[i] != 0; i++)
+    {
+      if (src[i] >= 256)
+      {
+        GFX2_Log(GFX2_WARNING, "Non latin1 character in translation : \\u%04x\n", (int)src[i]);
+        short_filename[i] = '?';
+      }
+      else
+        short_filename[i] = (char)src[i];
+    }
+    short_filename[i] = '\0';
+    Callback(
+      pdata,
+      short_filename,
+      (const word *)fd.cFileName,
+      (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? 0 : 1,
+      (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? 1 : 0,
+      (fd.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) ? 1 : 0
+      );
+    free(short_filename);
+  }
+  while (FindNextFileW(h, &fd));
+
+  FindClose(h);
 #else
   DIR*  current_directory; // current directory
   struct dirent* entry;    // directory entry struct
