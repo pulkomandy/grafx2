@@ -55,6 +55,7 @@ SDL2 = SDL2-$(SDL2VER)
 SDL2ARCH = $(SDL2).tar.gz
 SDL2URL = https://www.libsdl.org/release/$(SDL2ARCH)
 SDL2SHA256 = 349268f695c02efbc9b9148a70b85e58cefbbf704abd3e91be654db7f1e2c863
+SDL2PATCHES = SDL2-NSOSVersion.patch
 SDL2DEVEL = SDL2-devel-$(SDL2VER)-mingw.tar.gz
 SDL2DEVELURL = https://www.libsdl.org/release/$(SDL2DEVEL)
 SDL2DEVELPATCH = SDL2-devel.patch
