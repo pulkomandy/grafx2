@@ -79,6 +79,7 @@ static const struct {
   TESTFMTF(PRG, "c64/multicolor/speedball2_loading_jonegg.prg", FLAG_C64)
   TESTFMTL(GPX, "c64/pixcen/Cyberbird.gpx")
   TESTFMTF(SCR, "cpc/scr/DANCEOFF.SCR", FLAG_CPCO)
+  TESTFMTL(SCR, "cpc/scr/packed/CAPTAINA.SCR")  // Packed file
   TESTFMTL(CM5, "cpc/mode5/spidey.cm5")         // Format with limitations
   TESTFMTL(PPH, "cpc/pph/BF.PPH")               // Format with limitations
   TESTFMTF(GOS, "cpc/iMPdraw_GFX/SONIC.GO1", FLAG_CPCO)
