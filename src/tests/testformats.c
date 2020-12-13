@@ -161,10 +161,10 @@ int Test_Formats(char * errmsg)
     // now check that all other samples are not recognized
     for (j = 0; formats[j].name != NULL; j++)
     {
-      if (j == i)
+      if (formats[j].format == formats[i].format)
         continue;
       // skip Test_HGR(*.SCR) because Test_HGR() only tests for file size
-      if (strcmp(formats[i].name, "HGR") == 0 && strcmp(formats[j].name, "SCR") == 0)
+      if (formats[i].format == FORMAT_HGR && formats[j].format == FORMAT_SCR)
         continue;
       snprintf(path, sizeof(path), "../tests/pic-samples/%s", formats[j].sample);
       f = fopen(path, "rb");
