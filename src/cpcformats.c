@@ -118,6 +118,25 @@ void Test_SCR(T_IO_Context * context, FILE * file)
       File_error = 0;
       return;
     }
+    else if (loading_address == 0xc000 || loading_address == 0x0200)
+    {
+      byte buffer[4];
+      fseek(file, 128, SEEK_SET); // right after AMSDOS header
+      Read_bytes(file, buffer, 4);
+      // ConvImgCPC "LZW" packed pictures. Signatures :
+      // PKSL -> 320x200 STD
+      // PKS3 -> 320x200 Mode 3
+      // PKSP -> 320x200 PLUS
+      // PKVL -> Overscan STD
+      // PKVP -> Overscan PLUS
+      if (buffer[0] == 'P' && buffer[1] == 'K'
+          && (buffer[2] == 'S' || buffer[2] == 'V')
+          && (buffer[3] == 'L' || buffer[3] == 'P'))
+      {
+        File_error = 0;
+        return;
+      }
+    }
   }
   else
     file_size = File_length_file(file);
@@ -168,6 +187,104 @@ void Test_SCR(T_IO_Context * context, FILE * file)
 }
 
 /**
+ * Unpack LZ streams from CPCconvImg v0.x (Demoniak/iMPACT!)
+ * @param dst destination buffer
+ * @param file input
+ * @return unpacked length or -1 for error
+ */
+static int Depack_CPC_LZW(byte * dst, FILE * file)
+{
+  int bitcount = 0;
+  byte control_byte = 0;
+  int count = 0;
+
+  for (;;)
+  {
+    if (bitcount == 0)
+    {
+      if (!Read_byte(file, &control_byte))
+        return -1;
+      bitcount = 8;
+    }
+
+    if (!(control_byte & 1))
+    {
+      if (!Read_byte(file, &dst[count++]))
+        return -1;
+    }
+    else
+    {
+      byte code, code2;
+      word delta;
+      word len;
+      if (!Read_byte(file, &code))
+        return -1;
+      if (code == 0)
+      {
+        return count; // EOF
+      }
+      if (code & 0x80)
+      {
+        // 1LLL DDDD DDDD DDDD
+        if (!Read_byte(file, &code2))
+          return -1;
+        len = 3 + ((code >> 4) & 7);
+        delta = ((word)(code & 15) << 8) + (word)code2 + 1;
+      }
+      else if (code & 0x40)
+      {
+        // 01DD DDDD
+        len = 2;
+        delta = (code & 0x3f) + 1;
+      }
+      else if (code & 0x20)
+      {
+        // 001L LLLL DDDD DDDD
+        len = 2 + (code & 31);
+        if (!Read_byte(file, &code2))
+          return -1;
+        delta = (word)code2 + 1;
+      }
+      else if (code & 0x10)
+      {
+        // 0001 DDDD DDDD DDDD LLLL LLLL
+        if (!Read_byte(file, &code2))
+          return -1;
+        delta = ((word)(code & 15) << 8) + (word)code2 + 1;
+        if (!Read_byte(file, &code2))
+          return -1;
+        len = (word)code2 + 1;
+      }
+      else if (code == 0x0f)
+      {
+        // 0000 1111 LDLD LDLD
+        if (!Read_byte(file, &code2))
+          return -1;
+        delta = len = (word)code2 + 1;
+      }
+      else if (code > 1)
+      {
+        // 0000 LDLD   1 < len = delta < 15
+        delta = len = (word)code;
+      }
+      else
+      {
+        // 0000 0001
+        delta = len = 256;
+      }
+      while (len--)
+      {
+        dst[count] = dst[count - delta];
+        count++;
+      }
+    }
+    bitcount--;
+    control_byte >>= 1;
+  }
+}
+
+
+/**
  * Load Advanced OCP Art Studio files (Amstrad CPC)
  *
  * Standard resolution files (Mode 0 160x200, mode 1 320x200 and
@@ -215,6 +332,7 @@ void Load_SCR(T_IO_Context * context)
   byte sig[3];
   word block_length;
   word win_width, win_height;
+  int linear = 0;
   int is_win = 0;
   int columns = 80;
   int cpc_plus = 0;
@@ -280,7 +398,72 @@ void Load_SCR(T_IO_Context * context)
   cpc_ram = GFX2_malloc(64*1024);
   memset(cpc_ram, 0, 64*1024);
 
-  if (0 != memcmp(sig, "MJH", 3) || block_length > 16384)
+  if (0 == memcmp(sig, "PKV", 3))
+  {
+    // PKVL / PKVP => Overscan
+    fseek(file, 4, SEEK_CUR);
+    i = Depack_CPC_LZW(cpc_ram + load_address, file);
+    if (i < 0)
+    {
+      File_error = 1;
+      fclose(file);
+      free(cpc_ram);
+      return;
+    }
+    GFX2_Log(GFX2_DEBUG, "%c%c%c%c count=%d\n", sig[0], sig[1], sig[2], block_length & 255, i);
+    cpc_plus = (block_length & 255) == 'P';
+    if (cpc_plus)
+      cpc_plus_pal = cpc_ram + 0x801;
+    else
+    {
+      int j;
+      for (j = 0; j < 16; j++)
+        pal_data[12*j] = CPC_Firmware_to_Hardware_color(cpc_ram[0x801 + j]);
+    }
+    context->Comment[COMMENT_SIZE-2] = ' ';
+    context->Comment[COMMENT_SIZE-1] = 'P';
+    context->Comment[COMMENT_SIZE] = '\0';
+  }
+  else if (0 == memcmp(sig, "PKS", 3))
+  {
+    // PKSL = CPC "old"
+    // PKSP = CPC +
+    fseek(file, 4 + 1, SEEK_CUR);
+    cpc_plus = (block_length & 255) == 'P';
+    if (!Read_bytes(file, cpc_ram, cpc_plus ? 32 : 16))
+    {
+      File_error = 1;
+      fclose(file);
+      free(cpc_ram);
+      return;
+    }
+    if (!cpc_plus)
+    {
+      for (i = 0; i < 16; i++)
+        pal_data[12*i] = CPC_Firmware_to_Hardware_color(cpc_ram[i]);
+    }
+    else
+      cpc_plus_pal = cpc_ram;
+    i = Depack_CPC_LZW(cpc_ram + load_address, file);
+    if (i < 0)
+    {
+      File_error = 1;
+      fclose(file);
+      free(cpc_ram);
+      return;
+    }
+    mode = block_length >> 8;
+    GFX2_Log(GFX2_DEBUG, "%c%c%c%c mode %d count=%d\n", sig[0], sig[1], sig[2], block_length & 255, mode, i);
+    linear = 1;
+    display_start = load_address;
+    i = 0;
+    height = 200;
+    columns = 80;
+    context->Comment[COMMENT_SIZE-2] = ' ';
+    context->Comment[COMMENT_SIZE-1] = 'P';
+    context->Comment[COMMENT_SIZE] = '\0';
+  }
+  else if (0 != memcmp(sig, "MJH", 3) || block_length > 16384)
   {
     // raw data
     Read_bytes(file, cpc_ram + load_address, file_size);
@@ -601,7 +784,7 @@ void Load_SCR(T_IO_Context * context)
   File_error = 0;
   Pre_load(context, width, height, real_file_size, FORMAT_SCR, ratio, bpp);
 
-  if (!is_win)
+  if (!is_win && !linear)
   {
     // Standard resolution files have the 200 lines stored in block
     // of 25 lines of 80 bytes = 2000 bytes every 2048 bytes.
@@ -645,6 +828,8 @@ void Load_SCR(T_IO_Context * context)
       byte pixels;
       if (is_win)
         addr = display_start + y * columns + i;
+      else if (linear)
+        addr = display_start + y + i * height;
       else
       {
         addr = display_start + ((y >> 3) * columns) + i;
