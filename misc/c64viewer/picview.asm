@@ -1,14 +1,33 @@
 ; vim:ts=8 sw=8:
 ;  Grafx2 - The Ultimate 256-color bitmap paint program
 ;
-;	Copyright owned by various GrafX2 authors, see COPYRIGHT.txt for details.
+; Copyright owned by various GrafX2 authors, see COPYRIGHT.txt for details.
 ;
 ; This code is embedded in C64 images saved by GrafX2, it can be distributed
 ; and modified without any restrictions.
+;
+; Designed to be built with The Ophis Assembler :
+; https://michaelcmartin.github.io/Ophis/
+; C64 picture unpacker and viewer.
+; - Supports all VIC-II modes, character or bitmap based.
+; - Supports raw data, RLE packing and specific color RAM RLE packing
+;
+; Memory map :
+; $0002       Low byte of count
+; $00FC-$00FD Data pointer
+; $0801-$080C Basic program : trampoline code
+; $080D-$xxxx 6502 machine language code
+; $xxxx-$xxxx (packed) picture data
+; $C000-$C3E8 Screen RAM               \
+; $C3F0-$C3FF VIC-II $D020-$D02E backup )- Upper RAM area
+; $C400-$C7FF Color RAM backup         /
+; $D000-$D02E VIC-II registers (writes from $D020 to $D02E)
+; $D800-$DBFF Color RAM
+; $E000-$FF40 Bitmap (behind KERNAL ROM)
 .word $0801
 .org  $0801
 	.word next, 1911	; next basic line and line number
-	.byte $9e,"2061",0	; SYS2061 
+	.byte $9e,"2061",0	; SYS2061
 next:	.word 0			; end of basic program
 
 	; $fb $fc $fd $fe => unused
