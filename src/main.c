@@ -1101,7 +1101,8 @@ int Init_program(int argc,char * argv[])
   // backups
   if (file_in_command_line > 0 && directories[0] != NULL)
   {
-    strcpy(Main.selector.Directory, directories[0]);
+    free(Main.selector.Directory);
+    Main.selector.Directory = strdup(directories[0]);
   }
 
   // Test de recuperation de fichiers sauvés
