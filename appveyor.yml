@@ -8,7 +8,7 @@ install:
 
 build_script:
   - appveyor AddCompilationMessage "Building 3rd party libraries"
-  - mingw32-make 3rdparty API=win32
+  - bash -c "mingw32-make 3rdparty API=win32 ; gpgconf --kill all"
   - appveyor AddCompilationMessage "Tests"
   - mingw32-make -C src/ check API=win32
   - curl -F 'file=@test-report.xml' "https://ci.appveyor.com/api/testresults/junit/%APPVEYOR_JOB_ID%"
