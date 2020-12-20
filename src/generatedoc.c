@@ -193,7 +193,7 @@ static const char * Export_help_table(FILE * f, unsigned int page)
   fprintf(f, "<html lang=\"en\">\n");
   fprintf(f, "<head>\n");
   fprintf(f, "<title>%s</title>\n", title);
-  fprintf(f, "<meta charset=\"ISO8859-1\">\n");
+  fprintf(f, "<meta charset=\"ISO-8859-1\">\n");
   fprintf(f, "<link rel=\"stylesheet\" href=\"grafx2.css\" />\n");
   fprintf(f, "<script type=\"text/javascript\" src=\"grafx2.js\"></script>\n");
   fprintf(f, "</head>\n");
@@ -343,7 +343,7 @@ static int Export_help(const char * path)
   fprintf(findex, "<html lang=\"en\">\n");
   fprintf(findex, "<head>\n");
   fprintf(findex, "<title>GrafX2 Help</title>\n");
-  fprintf(findex, "<meta charset=\"ISO8859-1\">\n");
+  fprintf(findex, "<meta charset=\"ISO-8859-1\">\n");
   fprintf(findex, "<link rel=\"stylesheet\" href=\"grafx2.css\" />\n");
   fprintf(findex, "<noscript>\n"); /* hide the skin selector when JS is disabled */
   fprintf(findex, "  <style>.skinselector { display: none; }</style>\n");
