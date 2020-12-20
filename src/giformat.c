@@ -831,6 +831,14 @@ static byte GIF_next_pixel(T_IO_Context *context, T_GIF_context *gif, T_GIF_IDB 
   return temp;
 }
 
+struct gif_alphabet {
+  word prefix[4096];    // code prefix array
+  word suffix[4096];    // code suffix array
+  word daughter[4096];  // daughter strings array (greater length)
+  word sister[4096];    // sister strings array (same length)
+  word free;            // first free slot in the alphabet
+  word max;             // maximum number of entry in the alphabet
+};
 
 /// Save a GIF file
 void Save_GIF(T_IO_Context * context)
@@ -838,12 +846,7 @@ void Save_GIF(T_IO_Context * context)
   FILE * GIF_file;
   byte GIF_buffer[256];   // buffer d'écriture de bloc de données compilées
 
-  word * alphabet_prefix;  // Table des préfixes des codes
-  word * alphabet_suffix;  // Table des suffixes des codes
-  word * alphabet_daughter;    // Table des chaînes filles (plus longues)
-  word * alphabet_sister;    // Table des chaînes soeurs (même longueur)
-  word   alphabet_free;     // Position libre dans l'alphabet
-  word   alphabet_max;      // Nombre d'entrées possibles dans l'alphabet
+  struct gif_alphabet * alphabet;
   word   start;            // Code précédent (sert au linkage des chaînes)
   int    descend;          // Booléen "On vient de descendre"
 
@@ -873,10 +876,13 @@ void Save_GIF(T_IO_Context * context)
       // La signature du fichier a été correctement écrite.
 
       // Allocation de mémoire pour les tables
-      alphabet_prefix = (word *)GFX2_malloc(4096*sizeof(word));
-      alphabet_suffix = (word *)GFX2_malloc(4096*sizeof(word));
-      alphabet_daughter = (word *)GFX2_malloc(4096*sizeof(word));
-      alphabet_sister = (word *)GFX2_malloc(4096*sizeof(word));
+      alphabet = (struct gif_alphabet *)GFX2_malloc(sizeof(struct gif_alphabet));
+      if (alphabet == NULL)
+      {
+        File_error = 1;
+        fclose(GIF_file);
+        return;
+      }
 
       // On initialise le LSDB du fichier
       if (Config.Screen_size_in_GIF && Screen_width >= context->Width && Screen_height >= context->Height)
@@ -1173,14 +1179,14 @@ void Save_GIF(T_IO_Context * context)
                 GIF.stop=0;
 
                 // Réintialisation de la table:
-                alphabet_free=clear + 2;  // 258 for 8bpp
-                GIF.nb_bits  =IDB.Nb_bits_pixel + 1; // 9 for 8 bpp
-                alphabet_max =clear+clear-1;  // 511 for 8bpp
+                alphabet->free = clear + 2;  // 258 for 8bpp
+                GIF.nb_bits = IDB.Nb_bits_pixel + 1; // 9 for 8 bpp
+                alphabet->max = clear+clear-1;  // 511 for 8bpp
                 GIF_set_code(GIF_file, &GIF, GIF_buffer, clear);  //256 for 8bpp
-                for (start=0;start<4096;start++)
+                for (start=0; start<4096; start++)
                 {
-                  alphabet_daughter[start] = GIF_INVALID_CODE;
-                  alphabet_sister[start] = GIF_INVALID_CODE;
+                  alphabet->daughter[start] = GIF_INVALID_CODE;
+                  alphabet->sister[start] = GIF_INVALID_CODE;
                 }
 
                 ////////////////////////////////////////////// COMPRESSION LZW //
@@ -1194,12 +1200,12 @@ void Save_GIF(T_IO_Context * context)
 
                   // look for (current_string,current_char) in the alphabet
                   while ( (index != GIF_INVALID_CODE) &&
-                          ( (current_string!=alphabet_prefix[index]) ||
-                            (current_char      !=alphabet_suffix[index]) ) )
+                          ( (current_string != alphabet->prefix[index]) ||
+                            (current_char   != alphabet->suffix[index]) ) )
                   {
-                    descend=0;
-                    start=index;
-                    index=alphabet_sister[index];
+                    descend = 0;
+                    start = index;
+                    index = alphabet->sister[index];
                   }
 
                   if (index != GIF_INVALID_CODE)
@@ -1208,9 +1214,9 @@ void Save_GIF(T_IO_Context * context)
                     // We have found (current_string,current_char) in the alphabet
                     // at the index position. So go on and prepare for then next character
 
-                    descend=1;
-                    start=current_string=index;
-                    index=alphabet_daughter[index];
+                    descend = 1;
+                    start = current_string = index;
+                    index = alphabet->daughter[index];
                   }
                   else
                   {
@@ -1218,44 +1224,44 @@ void Save_GIF(T_IO_Context * context)
                     // so write current_string to the Gif stream
                     GIF_set_code(GIF_file, &GIF, GIF_buffer, current_string);
 
-                    if(alphabet_free < 4096) {
+                    if(alphabet->free < 4096) {
                       // link current_string and the new one
                       if (descend)
-                        alphabet_daughter[start]=alphabet_free;
+                        alphabet->daughter[start] = alphabet->free;
                       else
-                        alphabet_sister[start]=alphabet_free;
+                        alphabet->sister[start] = alphabet->free;
 
                       // add (current_string,current_char) to the alphabet
-                      alphabet_prefix[alphabet_free]=current_string;
-                      alphabet_suffix[alphabet_free]=current_char;
-                      alphabet_free++;
+                      alphabet->prefix[alphabet->free] = current_string;
+                      alphabet->suffix[alphabet->free] = current_char;
+                      alphabet->free++;
                     }
 
-                    if (alphabet_free >= 4096)
+                    if (alphabet->free >= 4096)
                     {
                       // clear alphabet
                       GIF_set_code(GIF_file, &GIF, GIF_buffer, clear);    // 256 for 8bpp
-                      alphabet_free=clear+2;  // 258 for 8bpp
-                      GIF.nb_bits  =IDB.Nb_bits_pixel + 1;  // 9 for 8bpp
-                      alphabet_max =clear+clear-1;    // 511 for 8bpp
+                      alphabet->free=clear+2;  // 258 for 8bpp
+                      GIF.nb_bits = IDB.Nb_bits_pixel + 1;  // 9 for 8bpp
+                      alphabet->max = clear+clear-1;    // 511 for 8bpp
                       for (start=0;start<4096;start++)
                       {
-                        alphabet_daughter[start] = GIF_INVALID_CODE;
-                        alphabet_sister[start] = GIF_INVALID_CODE;
+                        alphabet->daughter[start] = GIF_INVALID_CODE;
+                        alphabet->sister[start] = GIF_INVALID_CODE;
                       }
                     }
-                    else if (alphabet_free>alphabet_max+1)
+                    else if (alphabet->free > (alphabet->max + 1))
                     {
                       // On augmente le nb de bits
 
                       GIF.nb_bits++;
-                      alphabet_max = (1<<GIF.nb_bits)-1;
+                      alphabet->max = (1<<GIF.nb_bits)-1;
                     }
 
                     // initialize current_string as the string "current_char"
-                    index=alphabet_daughter[current_char];
-                    start=current_string=current_char;
-                    descend=1;
+                    index = alphabet->daughter[current_char];
+                    start = current_string = current_char;
+                    descend = 1;
                   }
                 }
 
@@ -1264,18 +1270,18 @@ void Save_GIF(T_IO_Context * context)
                   // Write the last code (before EOF)
                   GIF_set_code(GIF_file, &GIF, GIF_buffer, current_string);
 
-                  // we need to update alphabet_free / GIF.nb_bits here because
+                  // we need to update alphabet->free / GIF.nb_bits here because
                   // the decoder will update them after each code,
                   // so in very rare cases there might be a problem if we
                   // don't do it.
                   // see http://pulkomandy.tk/projects/GrafX2/ticket/125
-                  if(alphabet_free < 4096)
+                  if(alphabet->free < 4096)
                   {
-                    alphabet_free++;
-                    if ((alphabet_free > alphabet_max+1) && (GIF.nb_bits < 12))
+                    alphabet->free++;
+                    if ((alphabet->free > alphabet->max+1) && (GIF.nb_bits < 12))
                     {
                       GIF.nb_bits++;
-                      alphabet_max = (1 << GIF.nb_bits) - 1;
+                      alphabet->max = (1 << GIF.nb_bits) - 1;
                     }
                   }
 
@@ -1351,10 +1357,7 @@ void Save_GIF(T_IO_Context * context)
         File_error=1;
 
       // Libération de la mémoire utilisée par les tables
-      free(alphabet_sister);
-      free(alphabet_daughter);
-      free(alphabet_suffix);
-      free(alphabet_prefix);
+      free(alphabet);
 
     } // On a pu écrire la signature du fichier
     else
