@@ -148,6 +148,10 @@ void Test_GOS(T_IO_Context *, FILE *);
 void Load_GOS(T_IO_Context *);
 void Save_GOS(T_IO_Context *);
 
+// -- SGX (SymbOS)
+void Test_SGX(T_IO_Context *, FILE *);
+void Load_SGX(T_IO_Context *);
+
 // -- XPM (X PixMap)
 // Loading is done through SDL_Image
 void Save_XPM(T_IO_Context*);

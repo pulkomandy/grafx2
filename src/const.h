@@ -129,6 +129,7 @@ enum FILE_FORMATS
   FORMAT_CM5,  ///< Amstrad CPC Mode 5
   FORMAT_PPH,  ///< Amstrad CPC Perfect Pix
   FORMAT_GOS,  ///< Amstrad Plus Graphos
+  FORMAT_SGX,  ///< SymbOS graphic files
   FORMAT_XPM,  ///< X PixMap
   FORMAT_ICO,  ///< Windows icons
   FORMAT_INFO, ///< Amiga OS icons

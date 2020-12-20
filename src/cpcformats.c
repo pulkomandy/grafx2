@@ -33,6 +33,10 @@
 #include "gfx2mem.h"
 #include "gfx2log.h"
 
+#ifndef MAX
+#define MAX(a,b) (((a)>(b)) ? (a) : (b))
+#endif
+
 /**
  * @defgroup cpcformats Amstrad CPC/CPC+ picture formats
  * @ingroup loadsaveformats
@@ -48,9 +52,228 @@
  * - SCR : OCP Art Studio / iMPdraw v2 / etc.
  * - CM5 : Mode 5 Viewer
  * - PPH : Perfect Pix
+ * - SGX : SymbOS graphic files
  *
  * @{
  */
+
+/**
+ * Test for SGX file (SymbOS)
+ *
+ * http://www.cpcwiki.eu/index.php/Format:SGX_(SymbOS_graphic_files)
+ */
+void Test_SGX(T_IO_Context * context, FILE * file)
+{
+  byte header[8];
+  (void)context;
+
+  if (Read_bytes(file, header, 8))
+  {
+    unsigned long file_size = File_length_file(file);
+    if (header[0] > 0 && header[0] < 64
+        && ((header[1] + 3) >> 2) == header[0]
+        && file_size >= (3 + (unsigned long)header[0] * (unsigned long)header[2]))
+    {
+      // Simple 4 colour graphic
+      File_error = 0;
+    }
+    else if (header[0] == 64 && (header[1] == 0 || header[1] == 5))
+    {
+      // extended
+      word byte_width = header[2] | ((word)header[3] << 8);
+      word pixel_width = header[4] | ((word)header[5] << 8);
+      word height = header[6] | ((word)header[7] << 8);
+      if (height == 0 || byte_width == 0 || byte_width > 255) return;
+      if (header[1] == 0 && byte_width != ((pixel_width + 3) >> 2)) return;
+      if (header[1] == 5 && byte_width != ((pixel_width + 1) >> 1)) return;
+      File_error = 0;
+    }
+  }
+}
+
+static void Set_SGX_Palette(T_IO_Context * context)
+{
+  static const byte sgx_palette[] = {
+    0xff, 0xff, 0x80, // 0
+    0x00, 0x00, 0x00,
+    0xff, 0x80, 0x00,
+    0x80, 0x00, 0x00,
+    0x00, 0xff, 0xff, // 4
+    0x00, 0x00, 0x80,
+    0x80, 0x80, 0xff,
+    0x80, 0x00, 0xff,
+    0xff, 0xff, 0xff, // 8
+    0x00, 0x80, 0x00,
+    0x00, 0xff, 0x00,
+    0xff, 0x00, 0xff,
+    0xff, 0xff, 0x00, // 12
+    0x80, 0x80, 0x80,
+    0xff, 0x80, 0x80,
+    0xff, 0x00, 0x00
+  };
+  if (Config.Clear_palette)
+    memset(context->Palette,0,sizeof(T_Palette));
+  memcpy(context->Palette, sgx_palette, sizeof(sgx_palette));
+}
+
+/**
+ * Structure for current information about loading SGX file
+ */
+struct sgx_data {
+  T_IO_Context * context;
+  FILE * file;
+  unsigned long file_size;
+  word width, height;
+  byte ncolors;
+};
+
+/**
+ * Callback function for Read_SGX()
+ */
+typedef int (*Read_SGX_Callback)(struct sgx_data *, word, word, word, word, word, byte);
+
+/**
+ * Read a SGX file structure.
+ *
+ * @return 0 for error
+ */
+static int Read_SGX(struct sgx_data * data, Read_SGX_Callback cb)
+{
+  word posx = 0;
+  word posy = 0;
+  byte b;
+
+  data->width = 0;
+  data->height = 0;
+  while (Read_byte(data->file, &b))
+  {
+    if (b == 0)
+    {
+      // EOF
+      GFX2_Log(GFX2_DEBUG, "SGX EOF\n");
+      return 1;
+    }
+    else if (b == 255)
+    {
+      GFX2_Log(GFX2_DEBUG, "SGX LF\n");
+      // skip 2 bytes
+      if (!(Read_byte(data->file, &b) && Read_byte(data->file, &b)))
+        return 0;
+      posx = 0;
+      posy = data->height;
+    }
+    else if (b < 64)
+    {
+      byte byte_width, width, height;
+      byte_width = b;
+      if (!(Read_byte(data->file, &width) && Read_byte(data->file, &height)))
+        return 0;
+      GFX2_Log(GFX2_DEBUG, "SGX Simple 4c : %dx%d\n", (int)width, (int)height);
+      if (!cb(data, posx, posy, width, height, byte_width, 4))
+        return 0;
+      posx += width;
+      data->width = MAX(data->width, posx);
+      data->height = MAX(data->height, posy + height);
+      if (data->ncolors == 0)
+        data->ncolors = 4;
+    }
+    else if (b == 64)
+    {
+      byte type;
+      word byte_width, width, height;
+      if (!(Read_byte(data->file, &type) && Read_word_le(data->file, &byte_width)
+            && Read_word_le(data->file, &width) && Read_word_le(data->file, &height)))
+        return 0;
+      GFX2_Log(GFX2_DEBUG, "SGX Extended %dc : %dx%d\n", type == 0 ? 4 : 16, (int)width, (int)height);
+      if (!cb(data, posx, posy, width, height, byte_width, type == 0 ? 4 : 16))
+        return 0;
+      posx += width;
+      data->width = MAX(data->width, posx);
+      data->height = MAX(data->height, posy + height);
+      data->ncolors = MAX(data->ncolors, type == 0 ? 4 : 16);
+    }
+    else
+    {
+      GFX2_Log(GFX2_WARNING, "SGX : unrecognized chunk. Byte 0x%02x at offset 0x%06x\n", b, ftell(data->file) - 1);
+    }
+  }
+  return 1; // it is OK if the file does finish with a EOF mark
+}
+
+/**
+ * Only skip bytes
+ */
+int SGX_Get_dimensions(struct sgx_data * data, word posx, word posy, word width, word height, word byte_width, byte ncolors)
+{
+  (void)posx;
+  (void)posy;
+  (void)width;
+  (void)ncolors;
+  if (fseek(data->file, (long)byte_width * height, SEEK_CUR) < 0)
+    return 0;
+  return 1;
+}
+
+/**
+ * Set the pixels
+ * @return 0 in case of error
+ */
+int SGX_Load_Picture(struct sgx_data * data, word posx, word posy, word width, word height, word byte_width, byte ncolors)
+{
+  word y;
+
+  for (y = posy; y < (posy + height); y++)
+  {
+    word i, x;
+    for (i = 0, x = posx; i < byte_width; i++)
+    {
+      byte b;
+      if (!Read_byte(data->file, &b))
+        return 0;
+      if (ncolors == 4)
+      {
+        do {
+          // upper nibble is 4 lower color bits, lower nibble is 4 upper color bits
+          Set_pixel(data->context, x++, y, (b & 0x80) >> 7 | (b & 0x08) >> 2);
+          b <<= 1;
+        }
+        while (((x ^ posx) & 3) && (x < (posx + width)));
+      }
+      else
+      {
+        Set_pixel(data->context, x++, y, b >> 4);
+        if (x < (posx + width))
+          Set_pixel(data->context, x++, y, b & 0x0f);
+      }
+    }
+  }
+  return 1;
+}
+
+void Load_SGX(T_IO_Context * context)
+{
+  struct sgx_data data = { context, NULL, 0, 0, 0, 0 };
+
+  File_error = 1;
+  data.file = Open_file_read(context);
+  if (data.file == NULL) return;
+  data.file_size = File_length_file(data.file);
+  if (Read_SGX(&data, SGX_Get_dimensions))
+  {
+    GFX2_Log(GFX2_DEBUG, "SGX total dimensions : %ux%u, %d colors\n",
+             (unsigned)data.width, (unsigned)data.height, (int)data.ncolors);
+    File_error = 0;
+    Pre_load(context, data.width, data.height, data.file_size, FORMAT_SGX, PIXEL_SIMPLE, data.ncolors == 16 ? 4 : 2);
+    if (File_error == 0)
+    {
+      if (fseek(data.file, 0, SEEK_SET) < 0 || !Read_SGX(&data, SGX_Load_Picture))
+        File_error = 1;
+      else
+        Set_SGX_Palette(context);
+    }
+  }
+  fclose(data.file);
+}
 
 /**
  * Test for SCR file (Amstrad CPC)

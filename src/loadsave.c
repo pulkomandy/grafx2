@@ -112,7 +112,7 @@ const T_Format File_formats[] = {
     "pi1;pc1;pi2;pc2;pi3;pc3;neo;tny;tn1;tn2;tn3;tn4;ca1;ca2;ca3;"
     "c64;p64;a64;pi;rp;aas;art;dd;iph;ipt;hpc;ocp;koa;koala;fli;bml;cdu;prg;pmg;rpm;"
     "gpx;"
-    "cpc;scr;win;pph;cm5;go1;"
+    "cpc;scr;win;pph;cm5;go1;sgx;"
     "hgr;dhgr;"
     "grb;grob;"
     "sc2;"
@@ -148,6 +148,7 @@ const T_Format File_formats[] = {
   {FORMAT_CM5, " cm5", Test_CM5, Load_CM5, Save_CM5, 0, 0, 1, "cm5", "cm5"},
   {FORMAT_PPH, " pph", Test_PPH, Load_PPH, Save_PPH, 0, 0, 1, "pph", "pph"},
   {FORMAT_GOS, " go1", Test_GOS, Load_GOS, Save_GOS, 0, 0, 0, "go1", "go1"},
+  {FORMAT_SGX, " sgx", Test_SGX, Load_SGX, NULL,     0, 0, 1, "sgx", "sgx"},
   {FORMAT_XPM, " xpm", NULL,     NULL,     Save_XPM, 0, 0, 0, "xpm", "xpm"},
   {FORMAT_ICO, " ico", Test_ICO, Load_ICO, Save_ICO, 0, 0, 0, "ico", "ico;ic2;cur"},
   {FORMAT_INFO," info",Test_INFO,Load_INFO,NULL,     0, 0, 0, "info", "info"},
