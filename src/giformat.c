@@ -879,8 +879,9 @@ void Save_GIF(T_IO_Context * context)
       alphabet_sister = (word *)GFX2_malloc(4096*sizeof(word));
 
       // On initialise le LSDB du fichier
-      if (Config.Screen_size_in_GIF)
+      if (Config.Screen_size_in_GIF && Screen_width >= context->Width && Screen_height >= context->Height)
       {
+        // Canvas bigger than the image
         LSDB.Width=Screen_width;
         LSDB.Height=Screen_height;
       }
