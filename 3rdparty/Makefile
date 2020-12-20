@@ -26,7 +26,6 @@ SDLARCH = $(SDL).tar.gz
 SDLSIG = $(SDLARCH).sig
 SDLURL = https://www.libsdl.org/release/$(SDLARCH)
 SDLSIGURL = $(SDLURL).sig
-SDLSHA256 = d6d316a793e5e348155f0dd93b979798933fb98aa1edebcc108829d6474aad00
 SDLPATCHES = SDL-1.2.15-patch-src_video_x11_SDL_x11sym.h \
              SDL-1.2.15-quartzvideo.patch \
              SDL-1.2.15-atari-timer.patch
@@ -58,7 +57,6 @@ SDL2ARCH = $(SDL2).tar.gz
 SDL2URL = https://www.libsdl.org/release/$(SDL2ARCH)
 SDL2SIG = $(SDL2ARCH).sig
 SDL2SIGURL = $(SDL2URL).sig
-SDL2SHA256 = 349268f695c02efbc9b9148a70b85e58cefbbf704abd3e91be654db7f1e2c863
 SDL2PATCHES = SDL2-NSOSVersion.patch
 SDL2DEVEL = SDL2-devel-$(SDL2VER)-mingw.tar.gz
 SDL2DEVELURL = https://www.libsdl.org/release/$(SDL2DEVEL)
@@ -70,7 +68,6 @@ SDL2IMAGEARCH = $(SDL2IMAGE).tar.gz
 SDL2IMAGESIG = $(SDL2IMAGEARCH).sig
 SDL2IMAGEURL = https://www.libsdl.org/projects/SDL_image/release/$(SDL2IMAGEARCH)
 SDL2IMAGESIGURL = $(SDL2IMAGEURL).sig
-SDL2IMAGESHA256 = bdd5f6e026682f7d7e1be0b6051b209da2f402a2dd8bd1c4bd9c25ad263108d0
 LATESTSDL2IMAGEVER = $(shell curl -s -S https://www.libsdl.org/projects/SDL_image/|grep release/|grep .tar.gz |head -n1|sed 's/.*SDL2_image-\([0-9.]*\).tar.gz.*/\1/')
 SDL2TTFVER = 2.0.15
 SDL2TTF = SDL2_ttf-$(SDL2TTFVER)
@@ -78,7 +75,6 @@ SDL2TTFARCH = $(SDL2TTF).tar.gz
 SDL2TTFSIG = $(SDL2TTFARCH).sig
 SDL2TTFURL = https://www.libsdl.org/projects/SDL_ttf/release/$(SDL2TTFARCH)
 SDL2TTFSIGURL = $(SDL2TTFURL).sig
-SDL2TTFSHA256 = a9eceb1ad88c1f1545cd7bd28e7cbc0b2c14191d40238f531a15b01b1b22cd33
 LATESTSDL2TTFVER = $(shell curl -s -S https://www.libsdl.org/projects/SDL_ttf/|grep release/|grep .tar.gz |head -n1|sed 's/.*SDL2_ttf-\([0-9.]*\).tar.gz.*/\1/')
 LIBPNGVER = 1.6.37
 LIBPNG = libpng-$(LIBPNGVER)
@@ -108,7 +104,6 @@ TIFFURL = $(LIBTIFFURL)
 TIFFSIGURL = $(TIFFURL).sig
 TIFFURLALT = $(LIBTIFFURLALT)
 TIFFPATCHES = $(LIBTIFFPATCHES)
-TIFFSHA256 = eb0484e568ead8fa23b513e9b0041df7e327f4ee2d22db5a533929dfc19633cb
 ZLIBVER=1.2.11
 LATESTZLIBVER = $(shell curl -s -S https://www.zlib.net/ChangeLog.txt |grep "Changes in" |head -n1|sed 's/Changes in \([0-9.]*\).*/\1/')
 ZLIB=zlib-$(ZLIBVER)
@@ -117,7 +112,6 @@ ZLIBSIG=$(ZLIBARCH).asc
 ZLIBURL=https://www.zlib.net/$(ZLIBARCH)
 ZLIBSIGURL=$(ZLIBURL).asc
 ZLIBURLALT=http://downloads.sourceforge.net/project/libpng/zlib/$(ZLIBVER)/$(ZLIBARCH)
-ZLIBSHA256=c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1
 FREETYPEVER=2.10.4
 FREETYPE=freetype-$(FREETYPEVER)
 FREETYPEARCH=$(FREETYPE).tar.gz
@@ -125,7 +119,6 @@ FREETYPESIG=$(FREETYPEARCH).sig
 FREETYPEURL=https://download.savannah.gnu.org/releases/freetype/$(FREETYPEARCH)
 FREETYPEURLALT=https://sourceforge.net/projects/freetype/files/freetype2/$(FREETYPEVER)/$(FREETYPEARCH)
 FREETYPESIGURL=$(FREETYPEURL).sig
-FREETYPESHA256=5eab795ebb23ac77001cfb68b7d4d50b5d6c7469247b0b01b2c953269f658dac
 LATESTFREETYPEVER = $(shell curl -s -S -I "https://sourceforge.net/projects/freetype/files/latest/download" |grep -i '^location:' | sed 's:.*/\([0-9.]*\)/.*:\1:' )
 LUAVER=5.3.6
 LUA=lua-$(LUAVER)
@@ -667,6 +660,7 @@ archives/%.tar.gz:
 	$(eval SHA256 = $($(BASE)SHA256))
 	$(eval SIG = $($(BASE)SIG))
 	$(eval SIGURL = $($(BASE)SIGURL))
+	@if [ -z "$(SIGURL)" ] && [ -z "$(SHA256)" ] ; then echo "Need either signature or hash to check the archive $@" ; false ; fi
 	@echo "$*: fetching $(URL) (or $(URLALT)) $(SIG)"
 	@cd $(@D) && ( $(GETURL) $(URL) || ( [ -n "$(URLALT)" ] && $(GETURL) $(URLALT) ) )
 	@[ -z "$(SIGURL)" ] || ( cd $(@D) && $(GETURL) $(SIGURL) && $(GPG) --verify $(SIG) ) || ( $(RM) $@ && false )
