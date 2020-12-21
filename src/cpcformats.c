@@ -30,9 +30,14 @@
 #include "loadsavefuncs.h"
 #include "libraw2crtc.h"
 #include "oldies.h"
+#include "windows.h"
+#include "misc.h"
 #include "gfx2mem.h"
 #include "gfx2log.h"
 
+#ifndef MIN
+#define MIN(a,b) (((a)<(b)) ? (a) : (b))
+#endif
 #ifndef MAX
 #define MAX(a,b) (((a)>(b)) ? (a) : (b))
 #endif
@@ -273,6 +278,126 @@ void Load_SGX(T_IO_Context * context)
     }
   }
   fclose(data.file);
+}
+
+/**
+ * Write SGX file format as specified here :
+ * http://www.cpcwiki.eu/index.php/Format:SGX_(SymbOS_graphic_files)
+ *
+ * We are using only simple chunks for 4 colors pictures.
+ * Chunk dimentions are limited to the ones of simple chunks (252x255),
+ * we could go up to 508x65535 with extended chunks.
+ *
+ * @return 0 for error
+ */
+static int Save_SGX_Sub(T_IO_Context * context, FILE * file, word n_colors)
+{
+  word posy = 0;
+
+  while (posy < context->Height)
+  {
+    word posx = 0;
+    word height = MIN(context->Height - posy, 255);
+    if (posy != 0)
+    {
+      // Write Line Feed
+      if (!Write_byte(file, 255)
+          || !Write_byte(file, 255) || !Write_byte(file, 255))
+        return 0;
+    }
+    while (posx < context->Width)
+    {
+      word width = MIN(context->Width - posx, 252);
+      GFX2_Log(GFX2_DEBUG, "Save_SGX : (%hu,%hu) %hux%hu %huc\n",
+               posx, posy, width, height, n_colors);
+      if (n_colors == 4)
+      {
+        word y;
+        byte byte_width = (width + 3) >> 2;
+        if (!Write_byte(file, byte_width)
+            || !Write_byte(file, (byte)width) || !Write_byte(file, (byte)height))
+          return 0;
+        for (y = 0; y < height; y++)
+        {
+          byte i;
+          word x;
+          for (i = 0, x = 0; i < byte_width; i++)
+          {
+            byte b = 0;
+            do
+            {
+              byte c = Get_pixel(context, posx + x++, posy + y);
+              b <<= 1;
+              b |= (c & 1) << 4;
+              b |= (c & 2) >> 1;
+            } while (x & 3);
+            if (!Write_byte(file, b))
+              return 0;
+          }
+        }
+      }
+      else
+      {
+        word y;
+        word byte_width = (width + 1) >> 1;
+        if (!Write_byte(file, 64) || !Write_byte(file, 5)
+            || !Write_word_le(file, byte_width) || !Write_word_le(file, width) || !Write_word_le(file, height))
+          return 0;
+        for (y = 0; y < height; y++)
+        {
+          word i, x;
+          for (i = 0, x = 0; i < byte_width; i++)
+          {
+            byte b = Get_pixel(context, posx + x++, posy + y) << 4;
+            b |= Get_pixel(context, posx + x++, posy + y) & 0x0f;
+            if (!Write_byte(file, b))
+              return 0;
+          }
+        }
+      }
+      posx += width;
+    }
+    posy += height;
+  }
+  // Write EOF marker
+  for (posy = 0; posy < 3; posy++)
+    Write_byte(file, 0);
+  return 1;
+}
+
+void Save_SGX(T_IO_Context * context)
+{
+  FILE * file;
+  dword color_usage[256];
+  word n_colors;
+  int i;
+
+  File_error =  1;
+  n_colors = Count_used_colors(color_usage);
+  for (i = 16; i < 256; i++)
+  {
+    if (color_usage[i] != 0)
+    {
+      Warning_message("SGX format is limited to 16 colors");
+      return;
+    }
+  }
+  // 4 colors mode if sufficient, otherwise 16 colors
+  n_colors = 4;
+  for (i = 4; i < 16; i++)
+  {
+    if (color_usage[i] != 0)
+    {
+      n_colors = 16;
+      break;
+    }
+  }
+  file = Open_file_write(context);
+  if (file == NULL)
+    return;
+  if (Save_SGX_Sub(context, file, n_colors))
+    File_error = 0;
+  fclose(file);
 }
 
 /**
