@@ -90,7 +90,7 @@ JPEGARCH = jpegsrc.v$(JPEGVER).tar.gz
 JPEGURL = https://www.ijg.org/files/$(JPEGARCH)
 # http://www.simplesystems.org/libtiff/
 # https://gitlab.com/libtiff/libtiff
-LIBTIFFVER = 4.2.0
+LIBTIFFVER = $(LATESTLIBTIFFVER)
 LATESTLIBTIFFVER = $(shell curl -s -S http://www.simplesystems.org/libtiff/ |grep -A1 Latest|tail -n1|sed 's/.*>v\([0-9.]*\).*/\1/')
 LIBTIFF = tiff-$(LIBTIFFVER)
 LIBTIFFARCH = $(LIBTIFF).tar.gz
@@ -104,7 +104,7 @@ TIFFURL = $(LIBTIFFURL)
 TIFFSIGURL = $(TIFFURL).sig
 TIFFURLALT = $(LIBTIFFURLALT)
 TIFFPATCHES = $(LIBTIFFPATCHES)
-ZLIBVER=1.2.11
+ZLIBVER=$(LATESTZLIBVER)
 LATESTZLIBVER = $(shell curl -s -S https://www.zlib.net/ChangeLog.txt |grep "Changes in" |head -n1|sed 's/Changes in \([0-9.]*\).*/\1/')
 ZLIB=zlib-$(ZLIBVER)
 ZLIBARCH=$(ZLIB).tar.gz
@@ -112,7 +112,7 @@ ZLIBSIG=$(ZLIBARCH).asc
 ZLIBURL=https://www.zlib.net/$(ZLIBARCH)
 ZLIBSIGURL=$(ZLIBURL).asc
 ZLIBURLALT=http://downloads.sourceforge.net/project/libpng/zlib/$(ZLIBVER)/$(ZLIBARCH)
-FREETYPEVER=2.10.4
+FREETYPEVER=$(LATESTFREETYPEVER)
 FREETYPE=freetype-$(FREETYPEVER)
 FREETYPEARCH=$(FREETYPE).tar.gz
 FREETYPESIG=$(FREETYPEARCH).sig
