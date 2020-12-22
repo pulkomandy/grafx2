@@ -83,6 +83,7 @@ static const struct {
   TESTFMTL(CM5, "cpc/mode5/spidey.cm5")         // Format with limitations
   TESTFMTL(PPH, "cpc/pph/BF.PPH")               // Format with limitations
   TESTFMTF(GOS, "cpc/iMPdraw_GFX/SONIC.GO1", FLAG_CPCO)
+  TESTFMTF(SGX, "cpc/sgx/SYMBOS.SGX", FLAG_CPCO)
   TESTFMTL(MOTO,"thomson/exocet-alientis.map")  // Format with limitations
   TESTFMTL(HGR, "apple2/hgr/pop-swordfight.hgr")  // Format with limitations
   TESTFMTL(MSX, "msx/GAN1.SC2")
