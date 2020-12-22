@@ -51,6 +51,9 @@ const char * const skins[] = {
 /// Export the help to HTML files
 static int Export_help(const char * path);
 
+/// Convert from latin1 to utf-8
+static int fputs_utf8(const char * str, size_t len, FILE * f);
+
 int main(int argc,char * argv[])
 {
   int r;
@@ -193,7 +196,7 @@ static const char * Export_help_table(FILE * f, unsigned int page)
   fprintf(f, "<html lang=\"en\">\n");
   fprintf(f, "<head>\n");
   fprintf(f, "<title>%s</title>\n", title);
-  fprintf(f, "<meta charset=\"ISO-8859-1\">\n");
+  fprintf(f, "<meta charset=\"utf-8\">\n");
   fprintf(f, "<link rel=\"stylesheet\" href=\"grafx2.css\" />\n");
   fprintf(f, "<script type=\"text/javascript\" src=\"grafx2.js\"></script>\n");
   fprintf(f, "</head>\n");
@@ -253,9 +256,10 @@ static const char * Export_help_table(FILE * f, unsigned int page)
           if (link_end == NULL)
             link_end = link + strlen(link);
         }
-        fprintf(f, "%.*s", (int)(link - table[index].Text), table[index].Text);
-        fprintf(f, "<a href=\"%s%.*s\">%.*s</a>%s", prefix,
-                (int)(link_end - link), link, (int)(link_end - link), link, link_end);
+        fputs_utf8(table[index].Text, (size_t)(link - table[index].Text), f);
+        fprintf(f, "<a href=\"%s%.*s\">%.*s</a>", prefix,
+                (int)(link_end - link), link, (int)(link_end - link), link);
+        fputs_utf8(link_end, (size_t)-1, f);
       }
       else
       {
@@ -263,16 +267,19 @@ static const char * Export_help_table(FILE * f, unsigned int page)
         const char * text = table[index].Text;
         while (text[0] != '\0')
         {
-          size_t i = strcspn(text, "<>");
+          size_t i = strcspn(text, "<>&");
           if (text[i] == '\0')
           { // no character to escape
-            fprintf(f, "%s", text);
+            fputs_utf8(text, (size_t)-1, f);
             break;
           }
           if (i > 0)
-            fprintf(f, "%.*s", (int)i, text);
+            fputs_utf8(text, (size_t)i, f);
           switch(text[i])
           {
+            case '&':
+              fprintf(f, "&amp;");
+              break;
             case '<':
               fprintf(f, "&lt;");
               break;
@@ -343,7 +350,7 @@ static int Export_help(const char * path)
   fprintf(findex, "<html lang=\"en\">\n");
   fprintf(findex, "<head>\n");
   fprintf(findex, "<title>GrafX2 Help</title>\n");
-  fprintf(findex, "<meta charset=\"ISO-8859-1\">\n");
+  fprintf(findex, "<meta charset=\"utf-8\">\n");
   fprintf(findex, "<link rel=\"stylesheet\" href=\"grafx2.css\" />\n");
   fprintf(findex, "<noscript>\n"); /* hide the skin selector when JS is disabled */
   fprintf(findex, "  <style>.skinselector { display: none; }</style>\n");
@@ -476,5 +483,27 @@ static int Export_help(const char * path)
     fclose(f);
   }
   free(filename);
+  return 0;
+}
+
+static int fputs_utf8(const char * str, size_t len, FILE * f)
+{
+  size_t index;
+
+  for(index = 0; index < len && str[index] != '\0'; index++)
+  {
+    if (str[index] & 0x80)
+    {
+      if (putc(0xc0 | ((str[index] >> 6) & 0x03), f) == EOF)
+        return EOF;
+      if (putc(0x80 | (str[index] & 0x3f), f) == EOF)
+        return EOF;
+    }
+    else
+    {
+      if (putc(str[index], f) == EOF)
+        return EOF;
+    }
+  }
   return 0;
 }
