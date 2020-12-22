@@ -45,4 +45,6 @@ FILE * Open_file_write_with_alternate_ext(T_IO_Context *context, const char * ex
 void Palette_256_to_64(T_Palette palette);
 void Palette_64_to_256(T_Palette palette);
 
+word Current_layer_count_used_colors(T_IO_Context *context, dword *usage);
+
 #endif

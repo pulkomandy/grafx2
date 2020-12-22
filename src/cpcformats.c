@@ -373,7 +373,7 @@ void Save_SGX(T_IO_Context * context)
   int i;
 
   File_error =  1;
-  n_colors = Count_used_colors(color_usage);
+  n_colors = Current_layer_count_used_colors(context, color_usage);
   for (i = 16; i < 256; i++)
   {
     if (color_usage[i] != 0)

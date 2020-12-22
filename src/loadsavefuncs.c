@@ -324,3 +324,27 @@ void Palette_64_to_256(T_Palette palette)
     palette[i].B = (palette[i].B << 2)|(palette[i].B >> 4);
   }
 }
+
+word Current_layer_count_used_colors(T_IO_Context *context, dword *usage)
+{
+  dword nb_colors = 0;
+  int i;
+  word x, y;
+
+  for (i = 0; i < 256; i++) usage[i] = 0;
+
+  for (y = 0; y < context->Height; y++)
+  {
+    for (x = 0; x < context->Width; x++)
+      usage[Get_pixel(context, x, y)]++;
+  }
+
+  // count the total number of unique used colors
+  for (i = 0; i < 256; i++)
+  {
+    if (usage[i] != 0)
+      nb_colors++;
+  }
+
+  return nb_colors;
+}
