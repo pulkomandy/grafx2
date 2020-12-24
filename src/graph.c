@@ -2513,6 +2513,16 @@ void Draw_grad_inscribed_ellipse(short x1, short y1, short x2, short y2, short s
   if (Gradient_total_range==0)
     Gradient_total_range=1;
 
+  // Apply limits to final dimensions to draw.
+  if (left < Limit_left)
+    left = Limit_left;
+  if (top < Limit_top)
+    top = Limit_top;
+  if (right > Limit_right)
+    right = Limit_right;
+  if (bottom > Limit_bottom)
+    bottom = Limit_bottom;
+
   for (y_pos = top; y_pos <= bottom; y_pos++)
   {
     long dbl_y = 2*y_pos - dbl_center_y;
