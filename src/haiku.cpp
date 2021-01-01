@@ -2,7 +2,7 @@
 */
 /*  Grafx2 - The Ultimate 256-color bitmap paint program
 
-    Copyright 2007 Adrien Destugues
+    Copyright 2007-2021 Adrien Destugues
 
     Grafx2 is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -26,8 +26,10 @@
 #ifdef __HAIKU__
 #include <Clipboard.h>
 #include <Entry.h>
+#include <image.h>
 #include <Volume.h>
 
+#include <stdio.h>
 #include <string.h>
 
 #include "haiku.h"
@@ -56,5 +58,17 @@ char* haiku_get_clipboard()
 		return strdup(value);
 	}
 	return NULL;
+}
+
+const char* haiku_get_app_path()
+{
+	static image_info info;
+	static int32 cookie = 0;
+
+	if (cookie == 0) do {
+		get_next_image_info(B_CURRENT_TEAM, &cookie, &info);
+	} while (info.type != B_APP_IMAGE);
+
+	return info.name;
 }
 #endif

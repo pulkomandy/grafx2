@@ -137,6 +137,8 @@ char * Get_program_directory(const char * argv0)
   }
   else
     program_dir = Extract_path(NULL, argv0);
+  #elif defined(__HAIKU__)
+  program_dir = Extract_path(NULL, haiku_get_app_path());
   
   // Others: The part of argv[0] before the executable name.    
   // Keep the last \ or /.

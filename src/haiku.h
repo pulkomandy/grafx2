@@ -31,6 +31,7 @@ extern "C" {
 #endif
 qword haiku_get_free_space(char* path);
 char* haiku_get_clipboard();
+const char* haiku_get_app_path();
 #ifdef __cplusplus
 }
 #endif
