@@ -5,9 +5,27 @@ as well as a list of files with different ownership or license.
 6502.{c,h}
 ===========
 
-Copyright 1999-2018 Manuel Sainz de Baranda y Goñi.
+MOS 6502 CPU Emulator v0.1
+Copyright (C) 1999-2021 Manuel Sainz de Baranda y Goñi.
 
-GNU GPL version 3.
+Special RELICENSE granted to GrafX2 (http://pulkomandy.tk/projects/GrafX2)
+
+    As an exception to the terms of the GNU General Public License, either
+    version 3 of the License, or any later version, permission is granted
+    to the GrafX2 project to use, include and modify the sources of the 6502
+    library without prejudice or detriment to the terms of the GNU General
+    Public License v2, under wich that program is released.
+
+    In this particular case, the source code of the 6502 library, if included as
+    an internal part of the GrafX2 application, can be distributed under the
+    terms of the GNU General Public License version 2.
+
+    This relicense is only valid for the current version of 6502 library (v0.1),
+    and granted to the GrafX2 project since it is distributed under the terms
+    of the GNU General Public License version 2 but not later versions, which is
+    not compatible with the GNU General Public License version 3 or later.
+
+Manuel Sainz de Baranda y Goñi, 2021-01-23
 
 6502types.h
 ===========
