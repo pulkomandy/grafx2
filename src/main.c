@@ -536,7 +536,7 @@ int Analyze_command_line(int argc, char * argv[], char * filenames[], char * dir
         }
         else if (File_exists(argv[index]))
         {
-          buffer = Realpath(argv[index], NULL);
+          buffer = Realpath(argv[index]);
           filename = Find_last_separator(buffer);
           if (filename != NULL)
           {

@@ -308,7 +308,7 @@ int Test_Realpath(char * errmsg)
 {
   char * path;
 
-  path = Realpath(tmpdir, NULL);
+  path = Realpath(tmpdir);
   if (path == NULL)
   {
     snprintf(errmsg, ERRMSG_LENGTH, "Realpath(\"%s\") returned NULL", tmpdir);

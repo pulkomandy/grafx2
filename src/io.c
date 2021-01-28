@@ -342,7 +342,7 @@ char * Extract_path(const char *source)
   char * position;
   char * path;
 
-  path = Realpath(source, NULL);
+  path = Realpath(source);
   if (path == NULL)
   {
     GFX2_Log(GFX2_ERROR, "Realpath(\"%s\") failed !\n", source);
@@ -603,7 +603,7 @@ void For_each_file(const char * directory_name, void Callback(const char *, cons
   char * search_string;
   HANDLE h;
 
-  full_filename = Realpath(directory_name, NULL);
+  full_filename = Realpath(directory_name);
   search_string = Filepath_append_to_dir((full_filename != NULL) ? full_filename : directory_name, "*");
   free(full_filename);
   h = FindFirstFileA(search_string, &fd);
@@ -1151,10 +1151,10 @@ char * Calculate_relative_path(const char * ref_path, const char * path)
 
   if (ref_path == NULL || path == NULL)
     return NULL;
-  real_ref_path = Realpath(ref_path, NULL);
+  real_ref_path = Realpath(ref_path);
   if (real_ref_path == NULL)
     real_ref_path = strdup(ref_path);
-  real_path = Realpath(path, NULL);
+  real_path = Realpath(path);
   if (real_path == NULL)
     real_path = strdup(path);
 #if defined(WIN32) || defined(__MINT__)

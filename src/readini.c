@@ -998,7 +998,7 @@ int Load_INI(T_Config * conf)
   if (conf->Scripts_directory == NULL)
   {
     // Default when empty:
-    char * path = Realpath(Data_directory, NULL);
+    char * path = Realpath(Data_directory);
     conf->Scripts_directory = Filepath_append_to_dir(path, SCRIPTS_SUBDIRECTORY);
     free(path);
   }

@@ -74,11 +74,6 @@ Copyright (C) 1991, 1992, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
 
 GNU GPL version 2 or later.
 
-realpath.c
-==========
-
-Portions from GeekGadgets for Amiga. Copyright and license unknown.
-
 recoil.{c,h}
 ============
 

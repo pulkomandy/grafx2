@@ -31,6 +31,6 @@
 /// @param _path         Input path
 /// @param resolved_path Output path, allocated by caller
 /// @return              (points to resolved_path)
-char *Realpath(const char *_path, char *resolved_path);
+char *Realpath(const char *_path);
 
 #endif
