@@ -90,9 +90,9 @@ unsigned long File_length_file(FILE * file);
 /// Construct full file path
 char * Filepath_append_to_dir(const char * dir, const char * filename);
 /// Extracts the filename part from a full file name.
-char * Extract_filename(char *dest, const char *source);
+char * Extract_filename(const char *source);
 /// Extracts the directory from a full file name.
-char * Extract_path(char *dest, const char *source);
+char * Extract_path(const char *source);
 
 /// Finds the rightmost path separator in a full filename. Used to separate directory from file.
 char * Find_last_separator(const char * str);

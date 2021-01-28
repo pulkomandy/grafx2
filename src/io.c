@@ -326,37 +326,26 @@ char * Filepath_append_to_dir(const char * dir, const char * filename)
 }
 
 // Récupère la partie "nom de file seul" d'un chemin
-char * Extract_filename(char *dest, const char *source)
+char * Extract_filename(const char *source)
 {
   const char * position = Find_last_separator(source);
 
-  if (dest != NULL)
-  {
-    if (position)
-      strcpy(dest,position+1);
-    else
-      strcpy(dest,source);
-    return dest;
-  }
+  if (position)
+    return strdup(position + 1);
   else
-  {
-    if (position)
-      return strdup(position + 1);
-    else
-      return strdup(source);
-  }
+    return strdup(source);
 }
 
 // Récupère la partie "répertoire+/" d'un chemin.
-char * Extract_path(char *dest, const char *source)
+char * Extract_path(const char *source)
 {
   char * position;
   char * path;
 
-  path = Realpath(source, dest);
+  path = Realpath(source, NULL);
   if (path == NULL)
   {
-    GFX2_Log(GFX2_ERROR, "Realpath(\"%s\", %p) failed !\n", source, dest);
+    GFX2_Log(GFX2_ERROR, "Realpath(\"%s\") failed !\n", source);
     return NULL;
   }
   position = Find_last_separator(path);
@@ -365,21 +354,16 @@ char * Extract_path(char *dest, const char *source)
   else
   {
     size_t len = strlen(path);
-    if (dest != NULL)
+    char * tmp = realloc(path, len + strlen(PATH_SEPARATOR) + 1);
+    if (tmp != NULL)
+    {
+      path = tmp;
       strcpy(path + len, PATH_SEPARATOR);
+    }
     else
     {
-      char * tmp = realloc(path, len + strlen(PATH_SEPARATOR) + 1);
-      if (tmp != NULL)
-      {
-        path = tmp;
-        strcpy(path + len, PATH_SEPARATOR);
-      }
-      else
-      {
-        GFX2_Log(GFX2_ERROR, "Extract_path(): Failed to realloc %lu bytes\n",
-                 (unsigned long)(len + strlen(PATH_SEPARATOR) + 1));
-      }
+      GFX2_Log(GFX2_ERROR, "Extract_path(): Failed to realloc %lu bytes\n",
+               (unsigned long)(len + strlen(PATH_SEPARATOR) + 1));
     }
   }
   return path;

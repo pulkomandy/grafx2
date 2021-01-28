@@ -2385,7 +2385,7 @@ void Run_script(const char *script_subdirectory, const char *script_filename)
   
   // This chdir is for the script's sake. Grafx2 itself will (try to)
   // not rely on what is the system's current directory.
-  path = Extract_path(NULL, Last_run_script);
+  path = Extract_path(Last_run_script);
   Change_directory(path);
   free(path);
 

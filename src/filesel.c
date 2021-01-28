@@ -2265,7 +2265,7 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
           }
           else
           {
-            previous_directory = Extract_filename(NULL, Selector->Directory);
+            previous_directory = Extract_filename(Selector->Directory);
           }
 
           free(Selector->Directory);

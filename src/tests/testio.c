@@ -280,10 +280,10 @@ int Test_File_exists(char * errmsg)
     return 0;
   }
   data.result = 0;
-  data.filename = Extract_filename(NULL, path);
+  data.filename = Extract_filename(path);
   if (data.filename == NULL)
   {
-    snprintf(errmsg, ERRMSG_LENGTH, "Extract_filename(NULL, \"%s\") FAILED", path);
+    snprintf(errmsg, ERRMSG_LENGTH, "Extract_filename(\"%s\") FAILED", path);
     return 0;
   }
   GFX2_Log(GFX2_DEBUG, "Listing directory with For_each_directory_entry(\"%s\"):\n", tmpdir);

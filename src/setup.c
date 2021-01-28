@@ -111,7 +111,7 @@ char * Get_program_directory(const char * argv0)
     {
       path[path_len] = '\0';  // add null terminating char
       GFX2_Log(GFX2_DEBUG, "binary path resolved to : %s\n", path);
-      program_dir = Extract_path(NULL, path);
+      program_dir = Extract_path(path);
     }
     else
     {
@@ -128,7 +128,7 @@ char * Get_program_directory(const char * argv0)
         if (tmp != NULL)
         {
           snprintf(tmp, len, "%s/%s", current_dir, argv0);
-          program_dir = Extract_path(NULL, tmp);
+          program_dir = Extract_path(tmp);
           free(tmp);
         }
         free(current_dir);
@@ -136,15 +136,15 @@ char * Get_program_directory(const char * argv0)
     }
   }
   else
-    program_dir = Extract_path(NULL, argv0);
+    program_dir = Extract_path(argv0);
   #elif defined(__HAIKU__)
-  program_dir = Extract_path(NULL, haiku_get_app_path());
+  program_dir = Extract_path(haiku_get_app_path());
   
   // Others: The part of argv[0] before the executable name.    
   // Keep the last \ or /.
   // On Windows, Mingw32 already provides the full path in all cases.
   #else
-  program_dir = Extract_path(NULL, argv0);
+  program_dir = Extract_path(argv0);
   #endif
   if (program_dir == NULL)
   {

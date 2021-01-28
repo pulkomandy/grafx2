@@ -1311,9 +1311,9 @@ static void Load_ClipBoard_Image(T_IO_Context * context)
           if (File_exists(filename))
           {
             free(context->File_name);
-            context->File_name = Extract_filename(NULL, filename);
+            context->File_name = Extract_filename(filename);
             free(context->File_directory);
-            context->File_directory = Extract_path(NULL, filename);
+            context->File_directory = Extract_path(filename);
             context->Format = DEFAULT_FILEFORMAT;
           }
           else
@@ -1597,9 +1597,9 @@ static void Load_ClipBoard_Image(T_IO_Context * context)
         if (File_exists(p))
         {
           free(context->File_name);
-          context->File_name = Extract_filename(NULL, p);
+          context->File_name = Extract_filename(p);
           free(context->File_directory);
-          context->File_directory = Extract_path(NULL, p);
+          context->File_directory = Extract_path(p);
           context->Format = DEFAULT_FILEFORMAT;
         }
         else
