@@ -306,8 +306,11 @@ int Test_File_exists(char * errmsg)
 
 int Test_Realpath(char * errmsg)
 {
+  char filepath[256];
   char * path;
+  FILE * f;
 
+  // Directory test
   path = Realpath(tmpdir);
   if (path == NULL)
   {
@@ -315,6 +318,25 @@ int Test_Realpath(char * errmsg)
     return 0;
   }
   GFX2_Log(GFX2_DEBUG, "Realpath(\"%s\") returned \"%s\"\n", tmpdir, path);
+  free(path);
+
+  // File test
+  snprintf(filepath, sizeof(filepath), "%s/tempfile.txt", tmpdir);
+  f = fopen(filepath, "w");
+  if (f == NULL) {
+    snprintf(errmsg, ERRMSG_LENGTH, "Failed to create \"%s\"", filepath);
+    return 0;
+  }
+  fputs("TEST\n", f);
+  fclose(f);
+  path = Realpath(filepath);
+  Remove_path(filepath);
+  if (path == NULL)
+  {
+    snprintf(errmsg, ERRMSG_LENGTH, "Realpath(\"%s\") returned NULL", filepath);
+    return 0;
+  }
+  GFX2_Log(GFX2_DEBUG, "Realpath(\"%s\") returned \"%s\"\n", filepath, path);
   free(path);
   return 1;
 }

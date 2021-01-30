@@ -16,10 +16,67 @@
 #endif
 
 #if defined(__AROS__) || defined(__BEOS__) || defined(__MORPHOS__) || defined(__GP2X__) || defined(__WIZ__) || defined(__CAANOO__) || defined(__amigaos__) || defined(__SWITCH__)
+
+#include "io.h"
+#include "gfx2log.h"
+#include "gfx2mem.h"
 // These platforms don't have realpath().
+// Our custom implementation uses chdir() and relies on
+// errno == ENOTDIR when trying to change directory to a file
 char *Realpath(const char *_path)
 {
-  return strdup(_path);
+  char * rpath = NULL;
+  char * current_dir_save;
+
+  // backup current directory
+  current_dir_save = Get_current_directory(NULL, NULL, 0);
+  if (current_dir_save == NULL) {
+    // error
+    return NULL;
+  }
+
+  if (chdir(_path) < 0) {
+    if (errno == ENOTDIR) {
+      const char * position;
+      const char * filename;
+      char * directory;
+      position = Find_last_separator(_path);
+      if (position != NULL) {
+        size_t dirlen = position - _path;
+        filename = position + 1;
+        directory = GFX2_malloc(dirlen);
+        if (directory != NULL) {
+          memcpy(directory, _path, dirlen);
+          directory[dirlen] = '\0';
+          GFX2_Log(GFX2_DEBUG, "Directory : \"%s\", filename : \"%s\"\n", directory, filename);
+          if (chdir(directory) == 0) {
+            char * dirpart = Get_current_directory(NULL, NULL, 0);
+            if (dirpart != NULL) {
+              size_t len = strlen(dirpart) + strlen(filename) + 2;
+              rpath = GFX2_malloc(len);
+              if (rpath != NULL) {
+                snprintf(rpath, len, "%s%s%s", dirpart, PATH_SEPARATOR, filename);
+              }
+              free(dirpart);
+            }
+          } else {
+            GFX2_Log(GFX2_ERROR, "chdir(\"%s\") : %s\n", directory, strerror(errno));
+          }
+          free(directory);
+        }
+      }
+    } else {
+      GFX2_Log(GFX2_ERROR, "chdir(\"%s\") : %s\n", _path, strerror(errno));
+    }
+  } else {
+    // _path is a directory
+    rpath = Get_current_directory(NULL, NULL, 0);
+  }
+
+  // "restore" current directory
+  chdir(current_dir_save);
+  free(current_dir_save);
+  return rpath;
 }
             
 #elif defined(__WIN32__) || defined(WIN32)

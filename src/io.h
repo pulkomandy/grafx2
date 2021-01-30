@@ -37,6 +37,7 @@
 #define IO_H__
 
 #include <stdio.h>
+#include "struct.h"
 
 
 /** @defgroup io File input/output
