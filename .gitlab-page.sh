@@ -1,5 +1,5 @@
 #!/bin/sh
-# (c) 2019-2020 Thomas Bernard
+# (c) 2019-2021 Thomas Bernard
 #
 
 OUTFILE=public/index.html
@@ -70,7 +70,7 @@ echo "<li>Bug tracker : <a href=\"https://pulkomandy.tk/projects/GrafX2/query\">
 echo "<li>Open Hub : <a href=\"https://www.openhub.net/p/grafx2\">https://www.openhub.net/p/grafx2</a></li>" >> ${OUTFILE}
 echo "</ul>" >> ${OUTFILE}
 echo "<p>Copyright (C)1996-2001 Sunset Design (G.Dorme & K.Maritaud)<br>" >> ${OUTFILE}
-echo "Copyright (C)2007-2020 the Grafx2 Project Team (A.Destugues & Y.Rizoud & T.Bernard)</p>" >> ${OUTFILE}
+echo "Copyright (C)2007-2021 the Grafx2 Project Team (A.Destugues & Y.Rizoud & T.Bernard)</p>" >> ${OUTFILE}
 echo "</body>" >> ${OUTFILE}
 echo "</html>" >> ${OUTFILE}
 
