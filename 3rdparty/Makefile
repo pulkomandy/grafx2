@@ -646,11 +646,13 @@ gpgkeys/imported.ok:	$(filter-out gpgkeys/imported.ok,$(wildcard gpgkeys/*))
 archives/$(JPEGARCH):
 	@$(MKDIR) $(@D)
 	cd $(@D) && $(GETURL) $(JPEGURL)
+	@echo $(JPEGURL) > JPEG.source
 
 archives/$(REDCODE6502ARCH):
 	@$(MKDIR) $(@D)
 	cd $(@D) && $(GETURL) $(REDCODE6502URL)
 	@[ "`$(SHA256CMD) < $@`" = "$(REDCODE6502SHA256)" ] || ( $(RM) $@ && echo "$@ SHA256 mismatch !" && false )
+	@echo $(REDCODE6502URL) > 6502.source
 
 # generic rule to download tarballs
 archives/%.tar.gz:
@@ -666,6 +668,7 @@ archives/%.tar.gz:
 	@cd $(@D) && ( $(GETURL) $(URL) || ( [ -n "$(URLALT)" ] && $(GETURL) $(URLALT) ) )
 	@[ -z "$(SIGURL)" ] || ( cd $(@D) && $(GETURL) $(SIGURL) && $(GPG) --verify $(SIG) ) || ( $(RM) $@ && false )
 	@[ -z "$(SHA256)" ] || [ "`$(SHA256CMD) < $@`" = "$(SHA256)" ] || ( $(RM) $@ && echo "$@ SHA256 mismatch !" && false )
+	@echo $(URL) > $(BASE).source
 
 # generic rule to check package version
 checkversion-%:
