@@ -29,8 +29,7 @@
 ///
 /// Makes an absolute filename, resolving symbolic links etc.
 /// @param _path         Input path
-/// @param resolved_path Output path, allocated by caller
-/// @return              (points to resolved_path)
+/// @return              real path, to be free()'d
 char *Realpath(const char *_path);
 
 #endif
