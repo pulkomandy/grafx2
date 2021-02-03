@@ -44,6 +44,7 @@ const char * const skins[] = {
   "DPaint",
   "scenish",
   "Aurora",
+  "chrisfx",
   NULL
 };
 
