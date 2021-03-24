@@ -34,7 +34,7 @@ resource app_signature "application/x-vnd.GrafX2";
 resource app_version {
 	major  = 2,
 	middle = 8,
-	minor  = 2979,
+	minor  = 3091,
 
 	variety = B_APPV_BETA,
 	internal = 0,

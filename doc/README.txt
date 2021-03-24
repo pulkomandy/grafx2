@@ -6,7 +6,7 @@ _/    _/  _/        _/    _/    _/        _/  _/      _/
 
 GrafX2 - The Ultimate 256-color bitmap paint program
 Copyright (C)1996-2001 Sunset Design (G.Dorme & K.Maritaud)
-Copyright (C)2007-2020 the Grafx2 Project Team (A.Destugues & Y.Rizoud
+Copyright (C)2007-2021 the Grafx2 Project Team (A.Destugues & Y.Rizoud
                                                 & T.Bernard)
 -------------------------------------
 
@@ -82,6 +82,8 @@ Sends greetings and glops to pouet.net : http://pouet.net/prod.php?which=51865
 === HISTORY ===
 
 Short revision history :
+  * ??/2021  2.8       Fix several crashes
+                       More Amstrad CPC file formats support
   * 02/2020  2.7       Relative directory bookmarks
                        Many more 8bits/16bits computer formats supported
                        Joystick and mouse control rework
@@ -102,7 +104,7 @@ Short revision history :
   * 09/2009  2.1       GUI improvements and some new features.
   * 06/2009  2.0       Completed the features planned by Sunset Design.
   * 04/2009  2.0b99.0% Many new features and critical fixes.
-  * 01/2009  2.0b98.0% Now running Linux, Windows, Mac OS X, BeOS, Haiku,
+  * 01/2009  2.0b98.0% Now running on Linux, Windows, Mac OS X, BeOS, Haiku,
                        AmigaOS 3.x and 4, MorphOS, SkyOS and gp2x.
   * 10/2008  2.0b97.0% Our first public beta release.
   * 07/2008            Our first public alpha release, Windows and Linux only
@@ -121,7 +123,6 @@ new features and bugfixes in each numbered version.
 
 We enjoy programming GrafX2, we hope you will enjoy drawing with it. If you like
 the program, here is a list of things you can do:
-* Register as an user at https://www.ohloh.net/p/grafx2 to improve our Karma
 * Port GrafX2 to your favourite platform
 * Report bugs or ask for features you miss (you'll get credited in the 
   helpscreen !)

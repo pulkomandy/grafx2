@@ -119,7 +119,7 @@ Copyright 2018 Jordan Christiansen
 Copyright 2018 Alex Myczko
 Copyright 2018 Alexander Wilms
 Copyright 2018 Philip Linde
-Copyright 2017-2020 Thomas Bernard
+Copyright 2017-2021 Thomas Bernard
 Copyright 2015-2018 Adrian Castravete
 Copyright 2014 Sergii Pylypenko
 Copyright 2012 Matthias Ruster (mazzearos)
