@@ -43,6 +43,7 @@
   #include <errno.h>
 #elif defined(__HAIKU__)
   #include <FindDirectory.h>
+  #include "haiku.h"
 #endif
 
 #include "struct.h"

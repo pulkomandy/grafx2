@@ -63,12 +63,13 @@ char* haiku_get_clipboard()
 const char* haiku_get_app_path()
 {
 	static image_info info;
-	static int32 cookie = 0;
+	int32 cookie = 0;
 
-	if (cookie == 0) do {
-		get_next_image_info(B_CURRENT_TEAM, &cookie, &info);
-	} while (info.type != B_APP_IMAGE);
+	while (get_next_image_info(B_CURRENT_TEAM, &cookie, &info) == B_OK) {
+		if (info.type == B_APP_IMAGE)
+			return info.name;
+	}
 
-	return info.name;
+	return NULL;
 }
 #endif
