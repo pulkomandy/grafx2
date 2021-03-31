@@ -739,14 +739,14 @@ void Save_TIFF_Sub(T_IO_Context * context, TIFF * tif)
 
     if (layer >= context->Nb_layers)
     {
-      TIFFFlushData(tif);
+      //TIFFFlushData(tif);
       File_error = 0; // everything was fine
       return;
     }
     Set_saving_layer(context, layer);
     if (!TIFFWriteDirectory(tif))
       return;
-    TIFFFlushData(tif);
+    //TIFFFlushData(tif);
   }
 }
 
