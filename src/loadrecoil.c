@@ -130,7 +130,6 @@ void Load_Recoil_Image(T_IO_Context *context)
       int original_width, original_height;
       int x, y;
       int x_ratio, y_ratio;
-      byte * pixels;
       const int *palette;
       enum PIXEL_RATIO ratio = PIXEL_SIMPLE;
 
@@ -144,68 +143,60 @@ void Load_Recoil_Image(T_IO_Context *context)
         ratio = PIXEL_WIDE;
       else if(x_ratio == 1 && y_ratio > 1)
         ratio = PIXEL_TALL;
-      pixels = GFX2_malloc(width * height);
-      if (pixels == NULL)
+      // try to convert to 8bpp image
+      File_error = 0;
+      palette = RECOIL_ToPalette(recoil);
+      if (palette == NULL)
       {
-        File_error = 1;
+        // 24bits
+        const int * tc_pixels;
+
+        Pre_load(context, original_width, original_height, file_length, FORMAT_MISC, ratio, 24);
+        tc_pixels = RECOIL_GetPixels(recoil);
+        for (y = 0; y < original_height; y++)
+        {
+          for (x = 0; x < original_width; x++)
+          {
+            Set_pixel_24b(context, x, y, *tc_pixels >> 16, *tc_pixels >> 8, *tc_pixels);
+            tc_pixels += x_ratio;
+          }
+          tc_pixels += width * (y_ratio - 1);
+        }
       }
       else
       {
-        // try to convert to 8bpp image
-        File_error = 0;
-        palette = RECOIL_ToPalette(recoil, pixels);
-        if (palette == NULL)
-        {
-          // 24bits
-          const int * tc_pixels;
+        // 8bits
+        int i;
+        int bpp;
+        int ncolors = RECOIL_GetColors(recoil);
+        const uint8_t * pixels = RECOIL_GetIndexes(recoil);
+        const byte * p = pixels;
 
-          Pre_load(context, original_width, original_height, file_length, FORMAT_MISC, ratio, 24);
-          tc_pixels = RECOIL_GetPixels(recoil);
-          for (y = 0; y < original_height; y++)
-          {
-            for (x = 0; x < original_width; x++)
-            {
-              Set_pixel_24b(context, x, y, *tc_pixels >> 16, *tc_pixels >> 8, *tc_pixels);
-              tc_pixels += x_ratio;
-            }
-            tc_pixels += width * (y_ratio - 1);
-          }
-        }
-        else
+        bpp = 8;
+        while (ncolors <= (1 << (bpp - 1)))
+          bpp--;
+        if (Config.Clear_palette)
+          memset(context->Palette,0,sizeof(T_Palette));
+        for (i = 0; i < ncolors; i++)
         {
-          // 8bits
-          int i;
-          int bpp;
-          int ncolors = RECOIL_GetColors(recoil);
-          const byte * p = pixels;
-
-          bpp = 8;
-          while (ncolors <= (1 << (bpp - 1)))
-            bpp--;
-          if (Config.Clear_palette)
-            memset(context->Palette,0,sizeof(T_Palette));
-          for (i = 0; i < ncolors; i++)
-          {
-            context->Palette[i].R = (byte)(palette[i] >> 16);
-            context->Palette[i].G = (byte)(palette[i] >> 8);
-            context->Palette[i].B = (byte)(palette[i]);
-          }
-          Pre_load(context, original_width, original_height, file_length, FORMAT_MISC, ratio, bpp);
-          for (y = 0; y < original_height; y++)
-          {
-            for (x = 0; x < original_width; x++)
-            {
-              Set_pixel(context, x, y, *p);
-              p += x_ratio;
-            }
-            p += width * (y_ratio - 1);
-          }
+          context->Palette[i].R = (byte)(palette[i] >> 16);
+          context->Palette[i].G = (byte)(palette[i] >> 8);
+          context->Palette[i].B = (byte)(palette[i]);
         }
-        free(pixels);
-        if (!File_error)
+        Pre_load(context, original_width, original_height, file_length, FORMAT_MISC, ratio, bpp);
+        for (y = 0; y < original_height; y++)
         {
-          snprintf(context->Comment, COMMENT_SIZE + 1, "RECOIL: %s %d colors", RECOIL_GetPlatform(recoil), RECOIL_GetColors(recoil));
+          for (x = 0; x < original_width; x++)
+          {
+            Set_pixel(context, x, y, *p);
+            p += x_ratio;
+          }
+          p += width * (y_ratio - 1);
         }
+      }
+      if (!File_error)
+      {
+        snprintf(context->Comment, COMMENT_SIZE + 1, "RECOIL: %s %d colors", RECOIL_GetPlatform(recoil), RECOIL_GetColors(recoil));
       }
     }
     RECOIL_Delete(recoil);
