@@ -684,6 +684,7 @@ void Save_TIFF_Sub(T_IO_Context * context, TIFF * tif)
   snprintf(version, sizeof(version), "GrafX2 %s.%s", Program_version, SVN_revision);
   width = context->Width;
   height = context->Height;
+  // Convert the palette from 8 bits per component to 16 bits per compenent
   for (i = 0; i < 256; i++)
   {
     colormap.r[i] = 0x101 * context->Palette[i].R;
@@ -731,7 +732,12 @@ void Save_TIFF_Sub(T_IO_Context * context, TIFF * tif)
 #else
     for (y = 0, strip = 0; y < height; y += rowsperstrip, strip++)
     {
-      if (TIFFWriteEncodedStrip(tif, strip, context->Target_address + y*context->Pitch, rowsperstrip * context->Pitch) < 0)
+      tsize_t size; // bytes to write
+      if (y + rowsperstrip > height)
+        size = (height - y) * context->Pitch;
+      else
+        size = rowsperstrip * context->Pitch;
+      if (TIFFWriteEncodedStrip(tif, strip, context->Target_address + y * context->Pitch, size) < 0)
         return;
     }
 #endif
