@@ -11,6 +11,8 @@
 *.lua text
 *.nsi text
 *.ini text
+# RTF files produced by LibreOffice on FreeBSD/linux have LF line endings
+*.rtf diff=astextplain
 
 # Declare files that will always have CRLF line endings on checkout.
 *.sln text eol=crlf
@@ -18,7 +20,6 @@
 *.vbs text eol=crlf
 *.vcxproj text eol=crlf
 *.vcxproj.filters text eol=crlf
-*.rtf text eol=crlf
 
 # Denote all files that are truly binary and should not be modified.
 *.png binary
