@@ -225,8 +225,12 @@ void Load_2GS(T_IO_Context * context)
     goto error;
   for (y = 0; y < height; y++)
   {
-    word linebytes;
-    byte linemode;
+    word linebytes; /* packed bytes for this scanline */
+    byte linemode;  /* Scanline Control Byte :  rif0pppp
+                                                |||   |_ palette index
+                                                |||_____ fill mode 0/1
+                                                ||______ interrupt enabled 0/1
+                                                |_______ 0 : 320px, 1 : 640px  */
     word x;
     T_Components linepal[16];
     if (multipalcount > y)
