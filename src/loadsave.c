@@ -114,6 +114,7 @@ const T_Format File_formats[] = {
     "gpx;"
     "cpc;scr;win;pph;cm5;go1;sgx;"
     "hgr;dhgr;"
+    "shr;gs;iigs;32k;"
     "grb;grob;"
     "sc2;"
     "tga;pnm;xpm;xcf;jpg;jpeg;tif;tiff;ico;ic2;cur;info;flc;bin;map"},
@@ -156,6 +157,7 @@ const T_Format File_formats[] = {
   {FORMAT_MOTO," moto",Test_MOTO,Load_MOTO,Save_MOTO,0, 1, 0, "bin", "bin;map"},
   {FORMAT_MSX, " msx", Test_MSX, Load_MSX, Save_MSX, 0, 0, 0, "sc2", "sc2"},
   {FORMAT_HGR, " hgr", Test_HGR, Load_HGR, Save_HGR, 0, 0, 1, "hgr", "hgr;dhgr;bin"},
+  {FORMAT_2GS, " 2gs", Test_2GS, Load_2GS, NULL,     0, 0, 0, "shr", "shr;gs;iigs;32k"},
 #ifndef __no_tifflib__
   {FORMAT_TIFF," tiff",Test_TIFF,Load_TIFF,Save_TIFF,0, 1, 1, "tif", "tif;tiff"},
 #endif

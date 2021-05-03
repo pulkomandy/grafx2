@@ -207,5 +207,10 @@ void Test_MSX(T_IO_Context *, FILE *);
 void Load_MSX(T_IO_Context *);
 void Save_MSX(T_IO_Context *);
 
+// -- Apple II GS -----------------------------------------------------------
+void Test_2GS(T_IO_Context *, FILE *);
+void Load_2GS(T_IO_Context *);
+void Save_2GS(T_IO_Context *);
+
 /// @}
 #endif

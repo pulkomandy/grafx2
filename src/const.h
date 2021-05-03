@@ -136,6 +136,7 @@ enum FILE_FORMATS
   FORMAT_FLI,  ///< Autodesk Animator FLI/FLC
   FORMAT_MOTO, ///< Thomson MO/TO computers pictures
   FORMAT_HGR,  ///< Apple II HGR and DHGR
+  FORMAT_2GS,  ///< Apple II GS format
   FORMAT_TIFF, ///< Tagged Image File Format
   FORMAT_GRB,  ///< HP-48 Grob
   FORMAT_MSX,  ///< MSX formats

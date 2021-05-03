@@ -82,6 +82,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\2gsformats.c" />
     <ClCompile Include="..\..\src\6502.c">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CPU_6502_STATIC;CPU_6502_USE_LOCAL_HEADER;CPU_6502_DEPENDENCIES_H="6502types.h";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CPU_6502_STATIC;CPU_6502_USE_LOCAL_HEADER;CPU_6502_DEPENDENCIES_H="6502types.h";%(PreprocessorDefinitions)</PreprocessorDefinitions>
