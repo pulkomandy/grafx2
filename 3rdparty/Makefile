@@ -95,12 +95,17 @@ JPEGURL = https://www.ijg.org/files/$(JPEGARCH)
 # http://www.simplesystems.org/libtiff/
 # https://gitlab.com/libtiff/libtiff
 LIBTIFFVER = $(LATESTLIBTIFFVER)
-LATESTLIBTIFFVER = $(shell curl -s -S http://www.simplesystems.org/libtiff/ |grep -A1 Latest|tail -n1|sed 's/.*>v\([0-9.]*\).*/\1/')
+LATESTLIBTIFFVER := $(shell curl -s -S http://www.simplesystems.org/libtiff/ |grep -A1 Latest|tail -n1|sed 's/.*>v\([0-9.]*\).*/\1/')
 LIBTIFF = tiff-$(LIBTIFFVER)
 LIBTIFFARCH = $(LIBTIFF).tar.gz
 LIBTIFFURL = https://download.osgeo.org/libtiff/$(LIBTIFFARCH)
 LIBTIFFURLALT = https://fossies.org/linux/misc/$(LIBTIFFARCH)
+LIBTIFFVERMAJOR = $(shell echo $(LIBTIFFVER) | cut -d. -f1)
+LIBTIFFVERMINOR = $(shell echo $(LIBTIFFVER) | cut -d. -f2)
+ifeq ($(shell if [ $(LIBTIFFVERMAJOR) -lt 4 ] || [ \( $(LIBTIFFVERMAJOR) -eq 4 \) -a \( $(LIBTIFFVERMINOR) -lt 3 \) ] ; then echo true ; fi),true)
+# this patch is needed up to version 4.2.0
 LIBTIFFPATCHES = tiff-uint64_long_long.patch
+endif
 # additionnal variables for the generic rules to work :
 TIFFARCH = $(LIBTIFFARCH)
 TIFFSIG = $(TIFFARCH).sig
