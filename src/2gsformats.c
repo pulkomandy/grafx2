@@ -194,7 +194,7 @@ void Load_2GS(T_IO_Context * context)
         if (p)
         {
           fread(p, 1, len, file);
-          GFX2_LogHexDump(GFX2_DEBUG, "", p, 0 /*offset + 4 + 13*/, (long)len);
+          GFX2_LogHexDump(GFX2_DEBUG, "", (byte *)p, 0 /*offset + 4 + 13*/, (long)len);
         }
       }
       else if (c == 8 && 0 == memcmp(p, "MULTIPAL", 8))
@@ -264,6 +264,9 @@ void Load_2GS(T_IO_Context * context)
         break;
       case 3: // byte packed x 4
         count <<= 2;
+#if defined(__GNUC__) && (__GNUC__ >= 7)
+        __attribute__ ((fallthrough));
+#endif
       case 1: // byte packed
         if (!Read_byte(file, &pixel))
           goto error;
