@@ -494,7 +494,7 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
   #elif defined (WIN32)
   {
     char drive_name[32];
-    int drive_bits = GetLogicalDrives();
+    DWORD drive_bits = GetLogicalDrives();
     int bit_index;
     enum ICON_TYPES icon;
     
@@ -530,7 +530,10 @@ void Read_list_of_drives(T_Fileselector *list, byte name_length)
             break;
         }
         if (GetVolumeInformationA(drive_path, volume_name, sizeof(volume_name), NULL, NULL, NULL, file_system, sizeof(file_system)))
+        {
           snprintf(drive_name, sizeof(drive_name), "%s %s", drive_path, volume_name);
+          GFX2_Log(GFX2_DEBUG, "%s \"%s\" %s\n", drive_path, volume_name, file_system);
+        }
         else
           snprintf(drive_name, sizeof(drive_name), "%s  - empty -", drive_path);
         Add_element_to_list(list, drive_path,
@@ -1485,7 +1488,9 @@ byte Button_Load_or_Save(T_Selector_settings *settings, byte load, T_IO_Context 
   short window_shortcut;
   const char * directory_to_change_to = NULL;
   int   load_from_clipboard = 0;
+#ifdef ENABLE_FILENAMES_ICONV
   size_t filename_length = 0;
+#endif
 
   Selector=settings;
 
