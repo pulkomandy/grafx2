@@ -5,7 +5,7 @@ are hosted on [Trac](http://pulkomandy.tk/projects/GrafX2).
 Drive your browser there for a lot of useful information on GrafX2 development,
 internals, and roadmap.
 
-You can also join the #grafx2 channel on Freenode for more direct interaction
+You can also join the #grafx2 channel on Libera chat for more direct interaction
 with other developers.
 
 GrafX2 is distributed under the GPL license, version 2 (with some files under
